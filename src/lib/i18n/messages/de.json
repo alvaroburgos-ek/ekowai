@@ -77,6 +77,10 @@
     "resubmitForReview": "Erneut einreichen",
     "submitting": "Wird eingereicht …",
     "submitted": "Eingereicht",
+    "blockedLabel": "Erst Verstöße beheben",
+    "violationsBlock": "Verstöße verhindern Einreichung",
+    "blockGeneric": "Compliance-Gate verhindert Einreichung",
+    "decisionsHint": "offene Entscheidungen vorm Einreichen treffen",
     "submitError": {
       "blocking_violation": "Blockierender Verstoß — bitte erst beheben.",
       "open_decisions": "Es gibt noch offene Entscheidungen.",

@@ -77,6 +77,10 @@
     "resubmitForReview": "Resubmit for review",
     "submitting": "Submitting …",
     "submitted": "Submitted",
+    "blockedLabel": "Resolve violations first",
+    "violationsBlock": "violations block submission",
+    "blockGeneric": "Compliance gate blocks submission",
+    "decisionsHint": "open decisions to record before submitting",
     "submitError": {
       "blocking_violation": "Blocking violation — please resolve first.",
       "open_decisions": "There are open decisions to record.",
