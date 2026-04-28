@@ -25,7 +25,12 @@
     "create": "Create project",
     "noProjects": "No projects yet. Create your first one.",
     "calculations": "Calculations",
-    "newCalc": "New calculation"
+    "newCalc": "New calculation",
+    "archiveLink": "Archive",
+    "archiveTitle": "Archived projects",
+    "archiveEmpty": "Archive is empty.",
+    "backToActive": "Back to active",
+    "restore": "Restore"
   },
   "calc": {
     "newCalc": "New calculation",

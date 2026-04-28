@@ -25,7 +25,12 @@
     "create": "Projekt erstellen",
     "noProjects": "Noch keine Projekte. Erstellen Sie das erste.",
     "calculations": "Berechnungen",
-    "newCalc": "Neue Berechnung"
+    "newCalc": "Neue Berechnung",
+    "archiveLink": "Archiv",
+    "archiveTitle": "Archivierte Projekte",
+    "archiveEmpty": "Noch nichts im Archiv.",
+    "backToActive": "Zurück zur Übersicht",
+    "restore": "Wiederherstellen"
   },
   "calc": {
     "newCalc": "Neue Berechnung",

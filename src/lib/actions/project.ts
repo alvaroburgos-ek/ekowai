@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -100,4 +100,27 @@ export async function archiveProject(id: string, locale: 'de' | 'en'): Promise<v
     .where(eq(projects.id, id));
   revalidatePath(`/${locale}/projects`);
   redirect(`/${locale}/projects`);
+}
+
+export async function unarchiveProject(id: string, locale: 'de' | 'en'): Promise<void> {
+  await db.update(projects)
+    .set({ archivedAt: null })
+    .where(eq(projects.id, id));
+  revalidatePath(`/${locale}/projects`);
+  revalidatePath(`/${locale}/projects/archive`);
+  redirect(`/${locale}/projects/${id}`);
+}
+
+export async function listArchivedProjectsForUser(userId: string) {
+  const memberships = await db
+    .select()
+    .from(orgMembers)
+    .where(eq(orgMembers.userId, userId));
+  if (memberships.length === 0) return [];
+
+  return db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.orgId, memberships[0].orgId), isNotNull(projects.archivedAt)))
+    .orderBy(desc(projects.archivedAt));
 }

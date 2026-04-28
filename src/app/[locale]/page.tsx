@@ -26,11 +26,21 @@ export default async function Landing({
     <div className="min-h-screen flex flex-col">
       {/* Slim public masthead */}
       <header className="border-b border-hairline bg-paper/80 backdrop-blur-sm sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between gap-6">
-          <Link href={`/${locale}`} className="flex items-baseline gap-3 text-ink">
-            <span className="text-xl font-semibold tracking-tight">EKOWAI</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext border border-hairline px-1.5 py-0.5">
-              Wizard · MVP-1
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+          <Link href={`/${locale}`} className="flex items-center gap-3 text-ink">
+            <Image
+              src="/images/brand/logo-ekowai.png"
+              alt="EKOWAI"
+              width={40}
+              height={40}
+              priority
+              className="object-contain"
+            />
+            <span className="flex flex-col leading-none">
+              <span className="text-lg font-semibold tracking-tight">EKOWAI</span>
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-subtext mt-0.5">
+                Wizard · MVP-1
+              </span>
             </span>
           </Link>
           <nav className="flex items-center gap-7 text-sm text-ink-2">

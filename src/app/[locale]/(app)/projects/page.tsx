@@ -33,9 +33,16 @@ export default async function ProjectsPage({
             {String(items.length).padStart(2, '0')} {items.length === 1 ? 'Eintrag' : 'Einträge'}
           </p>
         </div>
-        <Link href={`/${locale}/projects/new`}>
-          <Button>+ {t('newProject')}</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/${locale}/projects/archive`}>
+            <Button variant="ghost" size="sm">
+              {t('archiveLink')}
+            </Button>
+          </Link>
+          <Link href={`/${locale}/projects/new`}>
+            <Button>+ {t('newProject')}</Button>
+          </Link>
+        </div>
       </header>
 
       {items.length === 0 ? (
