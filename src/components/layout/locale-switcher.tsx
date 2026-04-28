@@ -13,7 +13,7 @@ export function LocaleSwitcher({ current }: { current: 'de' | 'en' }) {
         const newPath = pathname.replace(/^\/(de|en)/, `/${newLocale}`);
         router.push(newPath);
       }}
-      className="text-sm border rounded px-2 py-1"
+      className="text-sm border border-slate-300 rounded px-2 py-1 bg-white text-slate-700"
     >
       {locales.map((l) => (
         <option key={l} value={l}>{l.toUpperCase()}</option>

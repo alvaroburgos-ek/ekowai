@@ -23,7 +23,7 @@ export default async function ProjectsPage({
         </Link>
       </div>
       {items.length === 0 ? (
-        <p className="text-slate-500">{t('noProjects')}</p>
+        <p className="text-slate-600">{t('noProjects')}</p>
       ) : (
         <ul className="space-y-2">
           {items.map((p) => (
@@ -32,7 +32,7 @@ export default async function ProjectsPage({
                 {p.name}
               </Link>
               {p.clientName && (
-                <p className="text-sm text-slate-500">{p.clientName}</p>
+                <p className="text-sm text-slate-600">{p.clientName}</p>
               )}
             </li>
           ))}

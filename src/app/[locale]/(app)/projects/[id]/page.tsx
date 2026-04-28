@@ -38,11 +38,11 @@ export default async function ProjectDetailPage({
       </div>
       {project.clientName && <p>{t('client')}: {project.clientName}</p>}
       {project.location && <p>{t('location')}: {project.location}</p>}
-      <p className="text-slate-500 text-sm">
+      <p className="text-slate-600 text-sm">
         Erstellt: {project.createdAt.toLocaleDateString(localeTyped)}
       </p>
       <div className="border-t pt-6">
-        <p className="text-slate-500">
+        <p className="text-slate-600">
           Berechnungen kommen in MVP-1 Plan 2 (Calculator).
         </p>
       </div>

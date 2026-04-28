@@ -41,14 +41,14 @@ export default async function OrgPage({
       <div>
         <h2 className="text-lg font-medium mb-3">{t('members')}</h2>
         {members.length === 0 ? (
-          <p className="text-slate-500">{t('noMembers')}</p>
+          <p className="text-slate-600">{t('noMembers')}</p>
         ) : (
           <ul className="space-y-2">
             {members.map((m) => (
               <li key={m.userId} className="border rounded p-3 flex items-center justify-between">
                 <div>
                   <div className="font-medium">{m.fullName || m.email}</div>
-                  <div className="text-sm text-slate-500">{m.email}</div>
+                  <div className="text-sm text-slate-600">{m.email}</div>
                 </div>
                 <span className="text-sm text-slate-600 uppercase">{m.role}</span>
               </li>
