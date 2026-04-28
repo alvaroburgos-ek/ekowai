@@ -8,6 +8,8 @@ export const env = createEnv({
     DEV_AUTOLOGIN_EMAIL: z.string().email().optional(),
     BYPASS_AUTH: z.enum(['1', 'true']).optional(),
     BYPASS_AUTH_USER_ID: z.string().uuid().optional(),
+    GROQ_API_KEY: z.string().min(1).optional(),
+    DEEPSEEK_API_KEY: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
@@ -20,6 +22,8 @@ export const env = createEnv({
     DEV_AUTOLOGIN_EMAIL: process.env.DEV_AUTOLOGIN_EMAIL,
     BYPASS_AUTH: process.env.BYPASS_AUTH,
     BYPASS_AUTH_USER_ID: process.env.BYPASS_AUTH_USER_ID,
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
+    DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

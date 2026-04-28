@@ -8,6 +8,7 @@ import { ResultsPanel } from './results-panel';
 import { ComplianceBadge } from './compliance-badge';
 import { OfflineBadge } from './offline-badge';
 import { SaveStatus } from './save-status';
+import { RationaleBox } from './rationale-box';
 
 export function CalculatorShell(props: {
   locale: 'de' | 'en';
@@ -17,6 +18,8 @@ export function CalculatorShell(props: {
   worksheet: Worksheet;
   initialInputs: InputValues;
   lastSavedAt: string;
+  initialDraft: string | null;
+  initialFinal: string | null;
 }) {
   const init = useCalculatorStore((s) => s.init);
 
@@ -56,6 +59,12 @@ export function CalculatorShell(props: {
         )}
         {resultSection && <ResultsPanel locale={props.locale} section={resultSection} />}
       </div>
+
+      <RationaleBox
+        initialDraft={props.initialDraft}
+        initialFinal={props.initialFinal}
+        locale={props.locale}
+      />
     </div>
   );
 }

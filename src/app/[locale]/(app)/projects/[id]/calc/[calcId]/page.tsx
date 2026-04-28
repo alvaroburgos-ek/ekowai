@@ -30,6 +30,8 @@ export default async function CalcPage({
       worksheet={worksheet}
       initialInputs={(calc.inputs ?? {}) as Record<string, number | string | boolean | null>}
       lastSavedAt={calc.updatedAt.toISOString()}
+      initialDraft={calc.rationaleDraft}
+      initialFinal={calc.rationale}
     />
   );
 }
