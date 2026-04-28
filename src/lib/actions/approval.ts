@@ -125,12 +125,15 @@ async function reviewAction(
   return { ok: true };
 }
 
-export const approveCalculation = (input: { calcId: string; comment?: string }) =>
-  reviewAction('approved', input);
-export const rejectCalculation = (input: { calcId: string; comment?: string }) =>
-  reviewAction('rejected', input);
-export const requestChanges = (input: { calcId: string; comment?: string }) =>
-  reviewAction('changes_requested', input);
+export async function approveCalculation(input: { calcId: string; comment?: string }) {
+  return reviewAction('approved', input);
+}
+export async function rejectCalculation(input: { calcId: string; comment?: string }) {
+  return reviewAction('rejected', input);
+}
+export async function requestChanges(input: { calcId: string; comment?: string }) {
+  return reviewAction('changes_requested', input);
+}
 
 export async function listInbox() {
   const user = await requireUser();
