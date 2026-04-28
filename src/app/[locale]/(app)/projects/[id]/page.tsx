@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { archiveProject } from '@/lib/actions/project';
+import { CalculationsList } from '@/components/calculator/calculations-list';
 
 export default async function ProjectDetailPage({
   params,
@@ -41,10 +42,14 @@ export default async function ProjectDetailPage({
       <p className="text-slate-600 text-sm">
         Erstellt: {project.createdAt.toLocaleDateString(localeTyped)}
       </p>
-      <div className="border-t pt-6">
-        <p className="text-slate-600">
-          Berechnungen kommen in MVP-1 Plan 2 (Calculator).
-        </p>
+      <div className="border-t pt-6 space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium text-slate-900">{t('calculations')}</h2>
+          <Link href={`/${localeTyped}/projects/${id}/calc/new`}>
+            <Button variant="ghost">{t('newCalc')}</Button>
+          </Link>
+        </div>
+        <CalculationsList projectId={id} locale={localeTyped} />
       </div>
     </Card>
   );

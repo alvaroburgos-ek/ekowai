@@ -22,7 +22,33 @@
     "client": "Auftraggeber",
     "location": "Standort",
     "create": "Projekt erstellen",
-    "noProjects": "Noch keine Projekte. Erstellen Sie das erste."
+    "noProjects": "Noch keine Projekte. Erstellen Sie das erste.",
+    "calculations": "Berechnungen",
+    "newCalc": "Neue Berechnung"
+  },
+  "calc": {
+    "newCalc": "Neue Berechnung",
+    "createCalc": "Berechnung erstellen",
+    "calcName": "Bezeichnung",
+    "worksheet": "Arbeitsblatt",
+    "noCalcs": "Noch keine Berechnungen.",
+    "rationale": "Erläuterung",
+    "draftWithAI": "KI-Entwurf",
+    "drafting": "Wird verfasst …",
+    "save": "Speichern",
+    "saving": "Wird gespeichert …",
+    "saved": "Gespeichert",
+    "savedAt": "Gespeichert um",
+    "unsaved": "Nicht gespeichert",
+    "saveError": "Fehler beim Speichern",
+    "offline": "Offline",
+    "offlineQueued": "Offline — wird synchronisiert",
+    "compliance": {
+      "compliant": "Regelkonform",
+      "warning": "Warnung",
+      "blocking_violation": "Blockierender Verstoß",
+      "unknown": "Unbekannt"
+    }
   },
   "errors": {
     "generic": "Ein Fehler ist aufgetreten — bitte erneut versuchen.",

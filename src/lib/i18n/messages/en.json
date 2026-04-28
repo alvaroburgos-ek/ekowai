@@ -22,7 +22,33 @@
     "client": "Client",
     "location": "Location",
     "create": "Create project",
-    "noProjects": "No projects yet. Create your first one."
+    "noProjects": "No projects yet. Create your first one.",
+    "calculations": "Calculations",
+    "newCalc": "New calculation"
+  },
+  "calc": {
+    "newCalc": "New calculation",
+    "createCalc": "Create calculation",
+    "calcName": "Name",
+    "worksheet": "Worksheet",
+    "noCalcs": "No calculations yet.",
+    "rationale": "Rationale",
+    "draftWithAI": "Draft with AI",
+    "drafting": "Drafting …",
+    "save": "Save",
+    "saving": "Saving …",
+    "saved": "Saved",
+    "savedAt": "Saved at",
+    "unsaved": "Unsaved",
+    "saveError": "Save failed",
+    "offline": "Offline",
+    "offlineQueued": "Offline — will sync",
+    "compliance": {
+      "compliant": "Compliant",
+      "warning": "Warning",
+      "blocking_violation": "Blocking violation",
+      "unknown": "Unknown"
+    }
   },
   "errors": {
     "generic": "Something went wrong — please try again.",
