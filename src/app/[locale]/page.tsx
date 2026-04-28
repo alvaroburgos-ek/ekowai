@@ -6,6 +6,7 @@ export default async function Home({
   params: Promise<{ locale: 'de' | 'en' }>;
 }) {
   const { locale } = await params;
-  // Until Task 14, send everyone to login. Authed users will be redirected to projects by middleware/verify flow later.
-  redirect(`/${locale}/login`);
+  // Send everyone to /projects. The (app) layout's auth check kicks unauthenticated
+  // users to /login (or to /api/dev/login when DEV_AUTOLOGIN_EMAIL is set).
+  redirect(`/${locale}/projects`);
 }
