@@ -33,6 +33,18 @@ interface ComplianceCheck {
   conditional: string;
 }
 
+interface SymbolEntry {
+  id: string; // Sanitized id, e.g. 'A_EW', 'V_EW', 'EW_BSB5'
+  rawSymbol: string; // Original LaTeX-ish string
+  germanName: string;
+  englishName: string;
+  unit: string;
+  firstAppearance: string;
+  equations: string;
+  defaultValue: string;
+  rangeConstraint: string;
+}
+
 function stripMd(s: string): string {
   // Strip markdown bold (**), backslash-escapes (\\, \\.), LaTeX-ish frags
   return s
@@ -117,6 +129,74 @@ function parseComplianceChecks(md: string): ComplianceCheck[] {
   return checks;
 }
 
+function sanitizeSymbolId(raw: string): string {
+  // raw like "A_{EW}" or "EW_{BSB,5}" → strip LaTeX, keep word chars + _
+  return raw
+    .replace(/\\\{|\\\}/g, '')
+    .replace(/[\\{}$]/g, '')
+    .replace(/[^A-Za-z0-9_,]/g, '_')
+    .replace(/[,_]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function parseSymbols(md: string): SymbolEntry[] {
+  const startRe = /\*\*\\#\\# Prompt 9/;
+  const promptStart = md.search(startRe);
+  if (promptStart === -1) return [];
+  const tail = md.slice(promptStart);
+  const endRe = /\n\*\*\\#\\# Prompt 10/;
+  const endMatch = tail.search(endRe);
+  const block = endMatch !== -1 ? tail.slice(0, endMatch) : tail;
+
+  const symbols: SymbolEntry[] = [];
+  // Each entry begins with `**N\. $...$**` followed by 8 numbered fields.
+  const split = block.split(/^\*\*\\?\d+\\?\.\s+\$/m).slice(1);
+
+  for (const raw of split) {
+    const lines = raw.split('\n').map((l) => l.trim());
+    const titleLine = lines[0] ?? '';
+    // Strip trailing closing $ and any markdown
+    const symbolMatch = titleLine.match(/^([^$]+)\$/);
+    if (!symbolMatch) continue;
+    const rawSymbol = symbolMatch[1].trim().replace(/\\\\/g, '\\');
+    const id = sanitizeSymbolId(rawSymbol);
+    if (!id) continue;
+
+    const fields: Record<string, string> = {};
+    let currentKey = '';
+    let buf: string[] = [];
+    const flush = () => {
+      if (currentKey) fields[currentKey] = stripMd(buf.join(' '));
+      buf = [];
+    };
+    for (const line of lines.slice(1)) {
+      const headerMatch = line.match(/^[*]*\s*\\?(\d+)\\?\.\s+\*?\*?(.+)$/);
+      if (headerMatch) {
+        flush();
+        currentKey = headerMatch[1];
+        buf = [headerMatch[2]];
+      } else if (line) {
+        buf.push(line);
+      }
+    }
+    flush();
+
+    symbols.push({
+      id,
+      rawSymbol,
+      germanName: fields['2'] ?? '',
+      englishName: fields['3'] ?? '',
+      unit: fields['4'] ?? '',
+      firstAppearance: fields['5'] ?? '',
+      equations: fields['6'] ?? '',
+      defaultValue: fields['7'] ?? '',
+      rangeConstraint: fields['8'] ?? '',
+    });
+  }
+
+  return symbols;
+}
+
 function main() {
   if (!existsSync(SOURCE)) {
     console.error(`Brief not found: ${SOURCE}`);
@@ -124,24 +204,28 @@ function main() {
   }
   const md = readFileSync(SOURCE, 'utf-8');
   const checks = parseComplianceChecks(md);
+  const symbols = parseSymbols(md);
 
   const out = {
     standard: STANDARD,
     source: SOURCE,
     extractedAt: new Date().toISOString(),
     complianceChecks: checks,
+    symbols,
   };
 
   if (!existsSync(TARGET_DIR)) mkdirSync(TARGET_DIR, { recursive: true });
   writeFileSync(TARGET, JSON.stringify(out, null, 2) + '\n', 'utf-8');
 
   console.log(
-    `Parsed ${checks.length} compliance checks from ${SOURCE}\n` +
+    `Parsed ${checks.length} compliance checks + ${symbols.length} symbols from ${SOURCE}\n` +
       `→ ${TARGET}`,
   );
-  for (const c of checks) {
-    console.log(`  ${c.sectionRefs.join(' ')} :: ${c.name.slice(0, 60)}`);
+  console.log('  --- Symbols ---');
+  for (const s of symbols.slice(0, 10)) {
+    console.log(`  ${s.id.padEnd(15)} :: ${s.germanName.slice(0, 70)}`);
   }
+  if (symbols.length > 10) console.log(`  ... +${symbols.length - 10} more`);
 }
 
 main();

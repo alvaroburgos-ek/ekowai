@@ -1,7 +1,7 @@
 {
   "standard": "DWA-A-201",
   "source": "C:\\EKOWAI-Agent\\standards\\DWA-A-201\\source\\regulation_brief.md",
-  "extractedAt": "2026-04-28T21:39:08.200Z",
+  "extractedAt": "2026-04-28T21:55:41.394Z",
   "complianceChecks": [
     {
       "name": "General System Size Applicability",
@@ -139,6 +139,206 @@
       "failOutcome": "If FAILS: The sludge contains macro-plastics and is prohibited from being spread on agricultural land.",
       "iterationHint": "Iteration loop: Must change the screen to a finer mesh or change the disposal route (e.g., incineration).",
       "conditional": "Mandatory/Conditional: Conditional (Applies only if no screen was installed at the raw wastewater inlet AND the sludge is destined for agriculture)."
+    }
+  ],
+  "symbols": [
+    {
+      "id": "A_EW",
+      "rawSymbol": "A\\_{EW}",
+      "germanName": "German name: spezifische Teichoberfläche pro Einwohnerwert",
+      "englishName": "English name: Specific pond surface area per population equivalent",
+      "unit": "Unit: m^2/E",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: ≥ 10 (unaerated ponds), ≥ 8 (with upstream settlement pond), ≥ 15 (for partial nitrification).",
+      "rangeConstraint": "Range constraint: Minimum bounds as listed above."
+    },
+    {
+      "id": "A_EW_Mi",
+      "rawSymbol": "A\\_{EW,Mi}",
+      "germanName": "German name: spezifischer Teichoberflächenzuschlag pro Einwohnerwert für die Mischwasserbehandlung",
+      "englishName": "English name: Specific pond surface area surcharge per population equivalent for combined stormwater treatment",
+      "unit": "Unit: m^2/E",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: Zuschlag 5.",
+      "rangeConstraint": "Range constraint: Exact surcharge value."
+    },
+    {
+      "id": "A_E_Mi",
+      "rawSymbol": "A\\_{E,Mi}",
+      "germanName": "German name: Gebiet mit Mischwasserkanalisation",
+      "englishName": "English name: Catchment area with combined sewer system",
+      "unit": "Unit: None",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "B_A_BSB",
+      "rawSymbol": "B\\_{A,BSB}",
+      "germanName": "German name: BSB\\_5-Flächenbelastung",
+      "englishName": "English name: BOD\\_5 surface loading rate",
+      "unit": "Unit: g/(m^2 · d)",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: B\\_A \\= B\\_R · h (Inline Table 7).",
+      "defaultValue": "Default/mandated value: None explicitly defined.",
+      "rangeConstraint": "Range constraint: Derived from volumetric loading and depth."
+    },
+    {
+      "id": "B_R_BSB",
+      "rawSymbol": "B\\_{R,BSB}",
+      "germanName": "German name: BSB\\_5-Raumbelastung",
+      "englishName": "English name: BOD\\_5 volumetric loading rate",
+      "unit": "Unit: g/(m^3 · d)",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: B\\_A \\= B\\_R · h (Inline Table 7).",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: ≤ 25 g/(m^3 · d) for aerated ponds."
+    },
+    {
+      "id": "EW_BSB_5",
+      "rawSymbol": "EW\\_{BSB,5}",
+      "germanName": "German name: Einwohnerwert (EW=EZ+EGW), bezogen auf den BSB\\_5",
+      "englishName": "English name: Population equivalent based on BOD\\_5",
+      "unit": "Unit: E",
+      "firstAppearance": "First appearance: § 1, Page 6",
+      "equations": "Which equations use it: EW=EZ+EGW (Inline definition).",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: General standard applicability is limited to ≤ 5000 E. Unaerated ponds are generally recommended for \\< 1000 E."
+    },
+    {
+      "id": "h",
+      "rawSymbol": "h",
+      "germanName": "German name: Wassertiefe",
+      "englishName": "English name: Water depth",
+      "unit": "Unit: m",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: B\\_A \\= B\\_R · h (Inline Table 7).",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: ≥ 1,5 (Settlement ponds), \\sim 1,0 (Unaerated), 1,5 bis 3,5 (Aerated), ≥ 1,2 (Secondary settlement), 1 bis 2 (Polishing ponds)."
+    },
+    {
+      "id": "k_f",
+      "rawSymbol": "k\\_f",
+      "germanName": "German name: organischer Anteil des Trockenrückstandes",
+      "englishName": "English name: Organic fraction of dry residue",
+      "unit": "Unit: %",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "OV_C_BSB",
+      "rawSymbol": "OV\\_{C,BSB}",
+      "germanName": "German name: Sauerstoffverbrauch für Kohlenstoffelimination, bezogen auf BSB\\_5",
+      "englishName": "English name: Oxygen consumption for carbon elimination, relative to BOD\\_5",
+      "unit": "Unit: kg/kg",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: ≥ 1,5 (for aerated ponds).",
+      "rangeConstraint": "Range constraint: Minimum value threshold."
+    },
+    {
+      "id": "Q_Dr",
+      "rawSymbol": "Q\\_{Dr}",
+      "germanName": "German name: Drosselabfluss",
+      "englishName": "English name: Throttled flow / discharge",
+      "unit": "Unit: l/s",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "Q_ges",
+      "rawSymbol": "Q\\_{ges}",
+      "germanName": "German name: gesamter Abfluss",
+      "englishName": "English name: Total flow / discharge",
+      "unit": "Unit: l/s",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "Q_krit",
+      "rawSymbol": "Q\\_{krit}",
+      "germanName": "German name: kritischer Mischwasserabfluss",
+      "englishName": "English name: Critical combined stormwater flow",
+      "unit": "Unit: l/s",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "Q_M",
+      "rawSymbol": "Q\\_M",
+      "germanName": "German name: Trennbauwerk",
+      "englishName": "English name: Separation structure",
+      "unit": "Unit: None",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "t_R",
+      "rawSymbol": "t\\_R",
+      "germanName": "German name: Trockenrückstand",
+      "englishName": "English name: Dry residue",
+      "unit": "Unit: %",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: Expected to reach \\sim 40% in settling ponds with combined sewers."
+    },
+    {
+      "id": "t_R_M",
+      "rawSymbol": "t\\_{R,M}",
+      "germanName": "German name: Durchflusszeit bei Mischwasserzufluss",
+      "englishName": "English name: Retention time during combined stormwater inflow",
+      "unit": "Unit: h",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: t\\_{R,M} \\= V\\_{erf.} / Q\\_M ≥ 0,5 h (Inline formula, § 5.1).",
+      "defaultValue": "Default/mandated value: ≥ 0,5 h",
+      "rangeConstraint": "Range constraint: Minimum lower limit."
+    },
+    {
+      "id": "V_erf",
+      "rawSymbol": "V\\_{erf.}",
+      "germanName": "German name: erforderliches Volumen",
+      "englishName": "English name: Required volume",
+      "unit": "Unit: m^3",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: t\\_{R,M} \\= V\\_{erf.} / Q\\_M ≥ 0,5 h (Inline formula, § 5.1).",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: None"
+    },
+    {
+      "id": "V_EW",
+      "rawSymbol": "V\\_{EW}",
+      "germanName": "German name: Teichvolumen pro Einwohnerwert",
+      "englishName": "English name: Pond volume per population equivalent",
+      "unit": "Unit: m^3/E",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: ≥ 0,5 (for settlement ponds).",
+      "rangeConstraint": "Range constraint: Minimum bound."
+    },
+    {
+      "id": "P_R",
+      "rawSymbol": "P\\_R",
+      "germanName": "German name: Leistungsdichte, installierte Leistung der Umwälz- oder Belüftungseinrichtung, bezogen auf das Teichvolumen",
+      "englishName": "English name: Power density, installed power of the circulation or aeration equipment, relative to the pond volume",
+      "unit": "Unit: W/m^3",
+      "firstAppearance": "First appearance: § 2, Page 7",
+      "equations": "Which equations use it: None",
+      "defaultValue": "Default/mandated value: None",
+      "rangeConstraint": "Range constraint: Range must be 1 bis 3 W/m^3 (for aerated ponds). \\---"
     }
   ]
 }
