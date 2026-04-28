@@ -10,6 +10,7 @@ export const env = createEnv({
     BYPASS_AUTH_USER_ID: z.string().uuid().optional(),
     GROQ_API_KEY: z.string().min(1).optional(),
     DEEPSEEK_API_KEY: z.string().min(1).optional(),
+    KIMI_API_KEY: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
@@ -24,6 +25,7 @@ export const env = createEnv({
     BYPASS_AUTH_USER_ID: process.env.BYPASS_AUTH_USER_ID,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
+    KIMI_API_KEY: process.env.KIMI_API_KEY,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

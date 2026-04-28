@@ -16,7 +16,7 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  if (!env.GROQ_API_KEY && !env.DEEPSEEK_API_KEY) {
+  if (!env.DEEPSEEK_API_KEY && !env.KIMI_API_KEY) {
     return NextResponse.json(
       { error: 'llm_not_configured', message: 'No LLM provider configured.' },
       { status: 503 },
