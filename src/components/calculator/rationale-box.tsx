@@ -56,30 +56,40 @@ export function RationaleBox({
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-6 space-y-3">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-lg font-semibold text-slate-900">{t('rationale')}</h2>
+    <section className="border border-hairline bg-paper">
+      <header className="border-b border-hairline px-5 py-3 flex items-baseline justify-between flex-wrap gap-3">
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext mb-0.5">
+            Erläuterungstext
+          </div>
+          <h2 className="text-lg font-semibold text-ink tracking-tight">{t('rationale')}</h2>
+        </div>
         <div className="flex gap-2">
-          <Button variant="ghost" disabled={drafting} onClick={draft}>
+          <Button variant="ghost" size="sm" disabled={drafting} onClick={draft}>
             {drafting ? t('drafting') : t('draftWithAI')}
           </Button>
-          <Button disabled={saving} onClick={save}>
+          <Button size="sm" disabled={saving} onClick={save}>
             {saving ? t('saving') : t('save')}
           </Button>
         </div>
+      </header>
+      <div className="px-5 py-5 space-y-3">
+        {draftError && (
+          <p className="font-mono text-[11px] text-error">⚠ {draftError}</p>
+        )}
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={8}
+          placeholder="Ihre Begründung — oder lassen Sie KI einen Entwurf vorschlagen."
+          className="block w-full rounded-none border-0 border-l-2 border-hairline focus:border-accent bg-paper-2/30 p-4 text-sm text-ink leading-relaxed focus:outline-none focus:ring-0 resize-y font-body"
+        />
+        {savedAt && (
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-success">
+            ● {t('savedAt')} {new Date(savedAt).toLocaleTimeString(locale)}
+          </p>
+        )}
       </div>
-      {draftError && <p className="text-xs text-red-700">{draftError}</p>}
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={8}
-        className="block w-full rounded-md border border-slate-300 bg-white p-3 text-sm text-slate-700"
-      />
-      {savedAt && (
-        <p className="text-xs text-slate-600">
-          {t('savedAt')} {new Date(savedAt).toLocaleTimeString(locale)}
-        </p>
-      )}
     </section>
   );
 }

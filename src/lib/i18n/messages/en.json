@@ -130,6 +130,65 @@
     "message": "This application uses technical cookies for authentication. By using it you agree.",
     "accept": "OK"
   },
+  "landing": {
+    "nav": {
+      "about": "Imprint",
+      "signIn": "Sign in"
+    },
+    "hero": {
+      "tag": "Sizing assistant · DWA-A-201 · v3.2",
+      "title": {
+        "line1": "Sewage plants.",
+        "line2": "Sized.",
+        "emphasis": "Defensible."
+      },
+      "lede": "A tool for planning engineers — deterministic computation, citation-anchored references, AI-drafted rationale text, multi-stage approval workflow.",
+      "cta": "Sign in",
+      "ctaMeta": "EU hosting · GDPR-compliant",
+      "caption": "Industrial park · Frankfurt site"
+    },
+    "values": {
+      "tag": "Three principles",
+      "deterministic": {
+        "title": "Deterministic.",
+        "body": "Pure TypeScript engine. Same inputs — same results. No hidden magic, no API roulette."
+      },
+      "citations": {
+        "title": "Citation-anchored.",
+        "body": "Every value, threshold, and cross-reference traces to the regulation. Even the AI rationale draft only cites what you've recorded."
+      },
+      "workflow": {
+        "title": "Approval-ready.",
+        "body": "Decisions are captured, compliance violations block submission server-side, reviewers approve or reject with comments."
+      }
+    },
+    "domain": {
+      "tag": "Water management & sustainable infrastructure",
+      "title": "Sizing the systems the city of tomorrow runs on.",
+      "body": "EKOWAI focuses on sizing tools for sewage plants, stormwater systems, floating wetlands, and urban water infrastructure. The Wizard is the first sizing assistant — more worksheets ship iteratively."
+    },
+    "coverage": {
+      "tag": "Coverage · MVP-1 status",
+      "title": "Which regulations we cover.",
+      "body": "MVP-1 fully covers DWA-A-201 worksheet A201-08 (aeration tank sizing). Cross-references to DWA-A-131, A-202 and M-153 render as text-only pointers; sizing for those worksheets is scheduled for subsequent releases.",
+      "rows": {
+        "a201_08": "Aeration tank — sizing variant 1",
+        "a201_more": "Other A-201 worksheets (A201-01 … A201-12)",
+        "a131": "Sizing of single-stage activated-sludge plants",
+        "a202": "Phosphorus elimination — chemical processes"
+      },
+      "status": {
+        "live": "Live",
+        "planned": "In preparation"
+      }
+    },
+    "cta": {
+      "tag": "Section 99 · Access",
+      "title": "Ready to document your next sizing cleanly?",
+      "body": "Sign in with magic-link, set up your organization, create your first project — and start sizing.",
+      "button": "Sign in now"
+    }
+  },
   "org": {
     "title": "Organization",
     "members": "Members",
@@ -141,6 +200,8 @@
     "roleViewer": "Viewer",
     "inviteSubmit": "Send invite",
     "inviteSent": "Invite sent — the user will receive a link shortly.",
-    "noMembers": "No other members yet."
+    "noMembers": "No other members yet.",
+    "memberSingular": "member",
+    "memberPlural": "members"
   }
 }

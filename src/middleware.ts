@@ -20,7 +20,8 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute =
     pathname.includes('/login') || pathname.includes('/verify');
   const isLegalRoute = pathname.includes('/legal/');
-  const isPublicRoute = pathname === '/' || isAuthRoute || isLegalRoute;
+  const isLocaleRoot = /^\/(de|en)\/?$/.test(pathname);
+  const isPublicRoute = pathname === '/' || isAuthRoute || isLegalRoute || isLocaleRoot;
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();

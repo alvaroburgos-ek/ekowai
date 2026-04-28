@@ -130,6 +130,65 @@
     "message": "Diese Anwendung verwendet technische Cookies für die Authentifizierung. Mit der Nutzung stimmen Sie zu.",
     "accept": "OK"
   },
+  "landing": {
+    "nav": {
+      "about": "Impressum",
+      "signIn": "Anmelden"
+    },
+    "hero": {
+      "tag": "Bemessungsassistent · DWA-A-201 · v3.2",
+      "title": {
+        "line1": "Kläranlagen.",
+        "line2": "Bemessen.",
+        "emphasis": "Nachvollziehbar."
+      },
+      "lede": "Ein Werkzeug für Planungsingenieur:innen — deterministische Berechnung, §-genaue Zitate, KI-gestützter Erläuterungstext, mehrstufiger Freigabeworkflow.",
+      "cta": "Anmelden",
+      "ctaMeta": "EU-Hosting · DSGVO-konform",
+      "caption": "Industriepark · Anlage Frankfurt"
+    },
+    "values": {
+      "tag": "Drei Prinzipien",
+      "deterministic": {
+        "title": "Deterministisch.",
+        "body": "Reine TypeScript-Engine. Gleiche Eingaben — gleiche Ergebnisse. Keine versteckte Magie, keine API-Roulette."
+      },
+      "citations": {
+        "title": "§-genau.",
+        "body": "Jeder Wert, jeder Schwellwert, jeder Querverweis ist im Regelwerk verankert. Auch der KI-Entwurf zitiert nur, was Sie dokumentiert haben."
+      },
+      "workflow": {
+        "title": "Freigabefähig.",
+        "body": "Entscheidungen werden festgehalten, Compliance-Verstöße blockieren die Einreichung serverseitig, Reviewer prüfen mit Kommentar."
+      }
+    },
+    "domain": {
+      "tag": "Wasserwirtschaft & nachhaltige Infrastruktur",
+      "title": "Bemessen, was die Stadt von morgen tragen muss.",
+      "body": "EKOWAI fokussiert auf Bemessungswerkzeuge für Kläranlagen, Regenwassersysteme, Floating-Wetlands und urbane Wasserinfrastruktur. Der Wizard ist der erste Bemessungsassistent — weitere Arbeitsblätter folgen iterativ."
+    },
+    "coverage": {
+      "tag": "Abdeckung · Stand MVP-1",
+      "title": "Welche Regelwerke wir abdecken.",
+      "body": "MVP-1 deckt das DWA-A-201-Arbeitsblatt A201-08 (Bemessung Belebungsbecken) vollständig ab. Querverweise auf DWA-A-131, A-202 und M-153 erscheinen als Hinweis-Pointer; Bemessung dieser Arbeitsblätter ist für nachfolgende Releases vorgesehen.",
+      "rows": {
+        "a201_08": "Belebungsbecken — Bemessung Variante 1",
+        "a201_more": "Weitere A-201-Arbeitsblätter (A201-01 … A201-12)",
+        "a131": "Bemessung von einstufigen Belebungsanlagen",
+        "a202": "Phosphorelimination — chemische Verfahren"
+      },
+      "status": {
+        "live": "Verfügbar",
+        "planned": "In Vorbereitung"
+      }
+    },
+    "cta": {
+      "tag": "Sektion 99 · Zugang",
+      "title": "Bereit, Ihre nächste Bemessung sauber zu dokumentieren?",
+      "body": "Anmeldung per Magic-Link, danach Org anlegen, ersten Auftrag erfassen — und mit der Bemessung beginnen.",
+      "button": "Jetzt anmelden"
+    }
+  },
   "org": {
     "title": "Organisation",
     "members": "Mitglieder",
@@ -141,6 +200,8 @@
     "roleViewer": "Betrachter",
     "inviteSubmit": "Einladung senden",
     "inviteSent": "Einladung versandt — der Benutzer erhält in Kürze einen Link.",
-    "noMembers": "Noch keine weiteren Mitglieder."
+    "noMembers": "Noch keine weiteren Mitglieder.",
+    "memberSingular": "Mitglied",
+    "memberPlural": "Mitglieder"
   }
 }

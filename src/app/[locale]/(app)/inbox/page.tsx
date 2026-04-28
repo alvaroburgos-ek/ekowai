@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui/card';
 import { listInbox } from '@/lib/actions/approval';
 
 export default async function InboxPage({
@@ -13,30 +12,52 @@ export default async function InboxPage({
   const items = await listInbox();
 
   return (
-    <Card className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold text-slate-900">{t('inboxTitle')}</h1>
+    <article className="space-y-10">
+      <header className="border-b border-hairline pb-8">
+        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
+          Sektion 03 · Zur Prüfung
+        </div>
+        <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight text-ink">
+          {t('inboxTitle')}
+        </h1>
+        <p className="mt-3 font-mono text-[11px] tabular-nums text-subtext">
+          {String(items.length).padStart(2, '0')}{' '}
+          {items.length === 1 ? 'Eintrag' : 'Einträge'}
+        </p>
+      </header>
+
       {items.length === 0 ? (
-        <p className="text-sm text-slate-600">{t('inboxEmpty')}</p>
+        <div className="border border-dashed border-hairline-strong p-12 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-subtext mb-3">
+            ⌬ Eingang leer
+          </p>
+          <p className="text-xl font-semibold text-ink-2 tracking-tight">{t('inboxEmpty')}</p>
+        </div>
       ) : (
-        <ul className="space-y-2">
-          {items.map((c) => (
-            <li
-              key={c.id}
-              className="rounded border border-slate-200 p-3 hover:bg-slate-50"
-            >
+        <ul className="divide-y divide-hairline border-y border-hairline">
+          {items.map((c, i) => (
+            <li key={c.id} className="group">
               <Link
                 href={`/${locale}/projects/${c.projectId}/calc/${c.id}`}
-                className="font-medium text-slate-900"
+                className="grid grid-cols-12 gap-4 px-2 py-4 items-baseline hover:bg-paper-2/50 transition-colors"
               >
-                {c.name}
+                <span className="col-span-1 font-mono text-[11px] tabular-nums text-subtext">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="col-span-6 text-base font-semibold text-ink group-hover:text-accent-2 transition-colors tracking-tight">
+                  {c.name}
+                </span>
+                <span className="col-span-3 font-mono text-[11px] uppercase tracking-[0.15em] text-subtext">
+                  {c.regulationCode} · {c.worksheetId}
+                </span>
+                <span className="col-span-2 font-mono text-[10px] uppercase tracking-[0.2em] text-right text-accent-2">
+                  ● In Prüfung
+                </span>
               </Link>
-              <div className="text-xs text-slate-600">
-                {c.regulationCode} {c.regulationVersion} · {c.worksheetId}
-              </div>
             </li>
           ))}
         </ul>
       )}
-    </Card>
+    </article>
   );
 }
