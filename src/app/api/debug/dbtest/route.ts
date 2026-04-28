@@ -20,13 +20,18 @@ export async function GET() {
       result,
     });
   } catch (e) {
+    const err = e as Error & { code?: string; cause?: Error & { message?: string; hint?: string; detail?: string; routine?: string } };
     return NextResponse.json(
       {
         ok: false,
         url: safeUrl,
-        error: e instanceof Error ? e.message : String(e),
-        code: (e as { code?: string }).code,
-        cause: (e as { cause?: unknown }).cause,
+        message: err.message,
+        code: err.code,
+        causeMessage: err.cause?.message,
+        causeDetail: err.cause?.detail,
+        causeHint: err.cause?.hint,
+        causeRoutine: err.cause?.routine,
+        causeFull: err.cause,
       },
       { status: 500 },
     );
