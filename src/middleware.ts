@@ -25,6 +25,19 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     const localeMatch = pathname.match(/^\/(de|en)/);
     const locale = localeMatch?.[1] ?? defaultLocale;
+
+    // Dev escape hatch: if DEV_AUTOLOGIN_EMAIL is set and we're not in production,
+    // bounce through /api/dev/login instead of /login. Lets engineers + reviewers
+    // open any deep link without facing the broken magic-link flow.
+    const autoEmail = process.env.DEV_AUTOLOGIN_EMAIL;
+    if (autoEmail && process.env.NODE_ENV !== 'production') {
+      const target = new URL(`${url.origin}/api/dev/login`);
+      target.searchParams.set('email', autoEmail);
+      target.searchParams.set('locale', locale);
+      target.searchParams.set('next', pathname + url.search);
+      return NextResponse.redirect(target);
+    }
+
     url.pathname = `/${locale}/login`;
     return NextResponse.redirect(url);
   }
@@ -33,5 +46,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api|auth).*)'],
 };

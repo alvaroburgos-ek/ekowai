@@ -26,7 +26,10 @@
   },
   "errors": {
     "generic": "Ein Fehler ist aufgetreten — bitte erneut versuchen.",
-    "noPermission": "Keine Berechtigung."
+    "noPermission": "Keine Berechtigung.",
+    "otp_expired": "Der Magic-Link ist abgelaufen oder wurde bereits verwendet. Manche E-Mail-Anbieter (z. B. Outlook/Defender) öffnen den Link automatisch zur Sicherheitsprüfung und „verbrauchen“ ihn dadurch. Bitte fordern Sie einen neuen Link an und öffnen Sie ihn in einem privaten Fenster.",
+    "access_denied": "Anmeldung abgelehnt. Bitte fordern Sie einen neuen Magic-Link an.",
+    "auth_callback": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
   },
   "org": {
     "title": "Organisation",

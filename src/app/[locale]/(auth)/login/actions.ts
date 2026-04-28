@@ -19,15 +19,24 @@ export async function requestMagicLink(formData: FormData) {
   }
 
   const supabase = await createClient();
+  const redirectTo = `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/${parsed.data.locale}/verify`;
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: {
-      emailRedirectTo: `${env.NEXT_PUBLIC_APP_URL}/${parsed.data.locale}/verify`,
-    },
+    options: { emailRedirectTo: redirectTo },
   });
 
   if (error) {
-    return { ok: false, error: 'send_failed' as const };
+    console.error('[requestMagicLink] supabase error', {
+      message: error.message,
+      status: error.status,
+      code: (error as { code?: string }).code,
+      redirectTo,
+    });
+    return {
+      ok: false,
+      error: 'send_failed' as const,
+      message: error.message,
+    };
   }
   return { ok: true } as const;
 }

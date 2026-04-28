@@ -26,7 +26,10 @@
   },
   "errors": {
     "generic": "Something went wrong — please try again.",
-    "noPermission": "No permission."
+    "noPermission": "No permission.",
+    "otp_expired": "The magic link has expired or was already used. Some email providers (e.g. Outlook/Defender) auto-open links for safety scanning, which consumes the one-time token. Please request a new link and open it in a private window.",
+    "access_denied": "Sign-in denied. Please request a new magic link.",
+    "auth_callback": "Sign-in failed. Please try again."
   },
   "org": {
     "title": "Organization",
