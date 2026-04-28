@@ -7,7 +7,24 @@
   "titleEn": "Catchment Area and Sewer System",
   "sourceCitation": "§1",
   "status": "preview",
-  "inputs": [],
+  "inputs": [
+    {
+      "id": "EZ",
+      "type": "number",
+      "labelDe": "Einwohnerzahl",
+      "labelEn": "Einwohnerzahl",
+      "unit": "E",
+      "citation": "§2"
+    },
+    {
+      "id": "EGW",
+      "type": "number",
+      "labelDe": "Einwohnergleichwert",
+      "labelEn": "Einwohnergleichwert",
+      "unit": "E",
+      "citation": "§2"
+    }
+  ],
   "computed": [
     {
       "id": "EW",
@@ -31,6 +48,15 @@
   ],
   "thresholds": [],
   "sections": [
+    {
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
+      "fields": [
+        "EZ",
+        "EGW"
+      ]
+    },
     {
       "id": "results",
       "titleDe": "Berechnete Werte",

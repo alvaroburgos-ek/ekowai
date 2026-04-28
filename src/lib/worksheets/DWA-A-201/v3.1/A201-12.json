@@ -16,6 +16,22 @@
       "unit": "h",
       "citation": "§5.1",
       "helpDe": "Used in Formula F-01: V_erf ≥ Q_M · t_R,M."
+    },
+    {
+      "id": "Q_M",
+      "type": "number",
+      "labelDe": "Mischwasserabfluss zur Kläranlage",
+      "labelEn": "Mischwasserabfluss zur Kläranlage",
+      "unit": "m³/h oder l/s",
+      "citation": "§5.1"
+    },
+    {
+      "id": "t_R_M",
+      "type": "number",
+      "labelDe": "Durchflusszeit bei Mischwasserzufluss",
+      "labelEn": "Durchflusszeit bei Mischwasserzufluss",
+      "unit": "h",
+      "citation": "§5.1"
     }
   ],
   "computed": [
@@ -59,7 +75,9 @@
       "titleDe": "Bemessungsgrößen & Schwellwerte",
       "titleEn": "Design parameters & thresholds",
       "fields": [
-        "T_33"
+        "T_33",
+        "Q_M",
+        "t_R_M"
       ]
     },
     {

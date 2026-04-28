@@ -264,6 +264,42 @@ function transformWorksheet(
     const parsed = tryParseFormula(f.expression);
     if (!parsed) continue; // skip if parser couldn't handle it
     if (seenInputIds.has(parsed.lhsId)) continue; // would collide with a threshold-input
+
+    // Walk the parsed expression and ensure every `ref` has either an
+    // existing input or computed field. If not, emit an input stub —
+    // otherwise the engine reports 'unresolved reference' at runtime.
+    const collectRefs = (e: ExprAst): string[] =>
+      e.kind === 'ref'
+        ? [e.id]
+        : e.kind === 'op'
+          ? [...collectRefs(e.lhs), ...collectRefs(e.rhs)]
+          : [];
+
+    for (const refId of collectRefs(parsed.rhs)) {
+      if (seenInputIds.has(refId)) continue;
+      // Look up a label from the formula's variables map; key may be the
+      // raw form (with commas/dots) → sanitize for matching.
+      const labelEntry = Object.entries(f.variables).find(
+        ([k]) => sanitizeId(k) === refId,
+      );
+      const label = labelEntry ? labelEntry[1] : refId;
+      // Try to extract the unit from the variable description, e.g.
+      // "Einwohnerzahl (E)" → unit "E".
+      const unitMatch = label.match(/\(([^)]+)\)\s*$/);
+      const unit = unitMatch ? unitMatch[1] : undefined;
+      const cleanLabel = label.replace(/\s*\([^)]+\)\s*$/, '').trim() || refId;
+
+      inputs.push({
+        id: refId,
+        type: 'number',
+        labelDe: cleanLabel,
+        labelEn: cleanLabel,
+        unit,
+        citation: f.section_ref,
+      });
+      seenInputIds.add(refId);
+    }
+
     computed.push({
       id: parsed.lhsId,
       labelDe: f.name,

@@ -34,6 +34,21 @@
       "unit": "kg/kg",
       "citation": "§5.4, §7",
       "helpDe": "Sauerstoffverbrauch für Kohlenstoffelimination."
+    },
+    {
+      "id": "B_R",
+      "type": "number",
+      "labelDe": "BSB5-Raumbelastung (g/(m³·d))",
+      "labelEn": "BSB5-Raumbelastung (g/(m³·d))",
+      "citation": "§7 (Zusammenstellung, inline in Tabelle)"
+    },
+    {
+      "id": "h",
+      "type": "number",
+      "labelDe": "Wassertiefe",
+      "labelEn": "Wassertiefe",
+      "unit": "m",
+      "citation": "§7 (Zusammenstellung, inline in Tabelle)"
     }
   ],
   "computed": [
@@ -103,7 +118,9 @@
       "fields": [
         "T_11",
         "T_12",
-        "T_13"
+        "T_13",
+        "B_R",
+        "h"
       ]
     },
     {
