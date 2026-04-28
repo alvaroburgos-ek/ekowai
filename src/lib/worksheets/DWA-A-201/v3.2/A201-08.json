@@ -145,5 +145,26 @@
       "titleEn": "Results",
       "fields": ["BSB5_load_kgd", "tank_volume_m3", "BSB5_outlet_mgL"]
     }
+  ],
+  "decisionPoints": [
+    {
+      "id": "A201-08-DP1",
+      "labelDe": "Verfahrenswahl",
+      "labelEn": "Process variant",
+      "promptDe": "Welches Verfahren soll für diese Bemessung angesetzt werden?",
+      "promptEn": "Which process variant applies to this design?",
+      "citation": "§A 6.5.3",
+      "options": [
+        { "value": "A", "labelDe": "Verfahren A — vorgeschaltete Denitrifikation", "labelEn": "Variant A — pre-anoxic denitrification" },
+        { "value": "B", "labelDe": "Verfahren B — simultane Denitrifikation",      "labelEn": "Variant B — simultaneous denitrification" },
+        { "value": "C", "labelDe": "Verfahren C — alternierender Betrieb",         "labelEn": "Variant C — alternating operation" }
+      ],
+      "triggerWhen": {
+        "kind": "cmp",
+        "op": ">",
+        "lhs": { "kind": "ref", "id": "BSB5_load_kgd" },
+        "rhs": { "kind": "lit", "value": 100 }
+      }
+    }
   ]
 }

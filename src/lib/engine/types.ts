@@ -49,6 +49,23 @@ export interface ComputedField {
   precision?: number;
 }
 
+export interface DecisionOption {
+  value: string;
+  labelDe: string;
+  labelEn: string;
+}
+
+export interface DecisionPoint {
+  id: string;
+  labelDe: string;
+  labelEn: string;
+  promptDe: string;
+  promptEn: string;
+  citation: string;
+  options: DecisionOption[];
+  triggerWhen?: ExpressionAst;
+}
+
 export interface ComplianceThreshold {
   id: string;
   ref: string;
@@ -78,6 +95,7 @@ export interface Worksheet {
   computed: ComputedField[];
   thresholds: ComplianceThreshold[];
   sections: WorksheetSection[];
+  decisionPoints: DecisionPoint[];
 }
 
 export type FieldValue = number | string | boolean | null;

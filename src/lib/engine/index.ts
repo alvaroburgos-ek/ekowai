@@ -19,8 +19,11 @@ export type {
   FieldValue,
   FieldType,
   SelectOption,
+  DecisionPoint,
+  DecisionOption,
 } from './types';
 export { parseWorksheet, WorksheetSchema } from './schema';
+export { openDecisionPoints, evalCondition } from './decisions';
 
 export function compute(
   worksheet: Worksheet,

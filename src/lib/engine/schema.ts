@@ -75,6 +75,23 @@ const ComplianceThresholdSchema = z.object({
   citation: z.string(),
 });
 
+const DecisionOptionSchema = z.object({
+  value: z.string(),
+  labelDe: z.string(),
+  labelEn: z.string(),
+});
+
+const DecisionPointSchema = z.object({
+  id: z.string(),
+  labelDe: z.string(),
+  labelEn: z.string(),
+  promptDe: z.string(),
+  promptEn: z.string(),
+  citation: z.string(),
+  options: z.array(DecisionOptionSchema).min(2),
+  triggerWhen: ExpressionAstSchema.optional(),
+});
+
 const SectionSchema = z.object({
   id: z.string(),
   titleDe: z.string(),
@@ -94,6 +111,7 @@ export const WorksheetSchema = z.object({
   computed: z.array(ComputedFieldSchema),
   thresholds: z.array(ComplianceThresholdSchema),
   sections: z.array(SectionSchema).min(1),
+  decisionPoints: z.array(DecisionPointSchema).default([]),
 }) satisfies z.ZodType<Worksheet>;
 
 export function parseWorksheet(json: unknown): Worksheet {
