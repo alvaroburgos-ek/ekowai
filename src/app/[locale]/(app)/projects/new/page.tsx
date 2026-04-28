@@ -2,32 +2,62 @@ import { getTranslations } from 'next-intl/server';
 import { createProject } from '@/lib/actions/project';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 
 export default async function NewProjectPage({
   params,
-}: { params: Promise<{ locale: 'de' | 'en' }> }) {
+}: {
+  params: Promise<{ locale: 'de' | 'en' }>;
+}) {
   const { locale } = await params;
   const t = await getTranslations('projects');
   return (
-    <Card className="p-8 max-w-xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-6">{t('newProject')}</h1>
-      <form action={createProject} className="space-y-4">
+    <section className="max-w-2xl mx-auto space-y-10">
+      <header className="border-b border-hairline pb-6">
+        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
+          Sektion 01 · Neuer Eintrag
+        </div>
+        <h1
+          className="font-display text-4xl text-ink"
+          style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}
+        >
+          {t('newProject')}
+        </h1>
+      </header>
+      <form action={createProject} className="space-y-8">
         <input type="hidden" name="locale" value={locale} />
-        <label className="block">
-          <span className="text-sm">{t('name')}</span>
-          <Input name="name" required minLength={2} />
-        </label>
-        <label className="block">
-          <span className="text-sm">{t('client')}</span>
+        <Field label={t('name')} required>
+          <Input name="name" required minLength={2} autoFocus />
+        </Field>
+        <Field label={t('client')}>
           <Input name="clientName" />
-        </label>
-        <label className="block">
-          <span className="text-sm">{t('location')}</span>
+        </Field>
+        <Field label={t('location')}>
           <Input name="location" />
-        </label>
-        <Button type="submit">{t('create')}</Button>
+        </Field>
+        <div className="border-t border-hairline pt-6 flex justify-end">
+          <Button type="submit">{t('create')}</Button>
+        </div>
       </form>
-    </Card>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="grid grid-cols-12 gap-4 items-baseline">
+      <span className="col-span-3 font-mono text-[10px] uppercase tracking-[0.2em] text-subtext pt-2">
+        {label}
+        {required && <span className="text-accent ml-1">*</span>}
+      </span>
+      <div className="col-span-9">{children}</div>
+    </label>
   );
 }

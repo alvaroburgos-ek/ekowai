@@ -49,5 +49,9 @@ export function SaveStatus({ locale }: { locale: 'de' | 'en' }) {
   else if (status === 'error') label = t('saveError');
   else if (status === 'dirty') label = t('unsaved');
 
-  return label ? <span className="text-xs text-slate-600">{label}</span> : null;
+  return label ? (
+    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext">
+      {label}
+    </span>
+  ) : null;
 }

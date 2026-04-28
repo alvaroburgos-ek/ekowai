@@ -8,64 +8,65 @@ export function InputField({ field, locale }: { field: FieldDef; locale: 'de' | 
   const setField = useCalculatorStore((s) => s.setField);
   const label = locale === 'de' ? field.labelDe : field.labelEn;
 
-  if (field.type === 'select') {
-    return (
-      <label className="block">
-        <span className="text-sm text-slate-700">
-          {label}
-          {field.unit && <span className="text-slate-500"> ({field.unit})</span>}
-        </span>
-        <select
-          value={typeof value === 'string' ? value : ''}
-          onChange={(e) => setField(field.id, e.target.value)}
-          className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm text-slate-700"
-        >
-          <option value="">—</option>
-          {field.options?.map((o) => (
-            <option key={o.value} value={o.value}>
-              {locale === 'de' ? o.labelDe : o.labelEn}
-            </option>
-          ))}
-        </select>
-        <span className="text-xs text-slate-500">{field.citation}</span>
-      </label>
-    );
-  }
-
-  if (field.type === 'boolean') {
-    return (
-      <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input
-          type="checkbox"
-          checked={value === true}
-          onChange={(e) => setField(field.id, e.target.checked)}
-        />
-        {label}
-        <span className="ml-auto text-xs text-slate-500">{field.citation}</span>
-      </label>
-    );
-  }
-
   return (
-    <label className="block">
-      <span className="text-sm text-slate-700">
-        {label}
-        {field.unit && <span className="text-slate-500"> ({field.unit})</span>}
-      </span>
-      <input
-        type={field.type === 'number' ? 'number' : 'text'}
-        value={value === null || value === undefined ? '' : String(value)}
-        onChange={(e) => {
-          const raw = e.target.value;
-          if (field.type === 'number') {
-            setField(field.id, raw === '' ? null : Number(raw));
-          } else {
-            setField(field.id, raw);
-          }
-        }}
-        className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm text-slate-700"
-      />
-      <span className="text-xs text-slate-500">{field.citation}</span>
-    </label>
+    <div className="grid grid-cols-12 gap-4 items-baseline">
+      {/* Left: label + citation */}
+      <div className="col-span-5 space-y-1">
+        <label htmlFor={field.id} className="font-display text-[15px] text-ink leading-tight block">
+          {label}
+        </label>
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext block">
+          {field.citation}
+          {field.unit && (
+            <>
+              <span className="mx-1.5 text-hairline-strong">/</span>
+              <span className="text-ink-2">{field.unit}</span>
+            </>
+          )}
+        </span>
+      </div>
+
+      {/* Right: input */}
+      <div className="col-span-7">
+        {field.type === 'select' ? (
+          <select
+            id={field.id}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(e) => setField(field.id, e.target.value)}
+            className="block w-full rounded-none border-0 border-b border-hairline-strong bg-transparent px-1 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0 font-body"
+          >
+            <option value="">—</option>
+            {field.options?.map((o) => (
+              <option key={o.value} value={o.value}>
+                {locale === 'de' ? o.labelDe : o.labelEn}
+              </option>
+            ))}
+          </select>
+        ) : field.type === 'boolean' ? (
+          <input
+            id={field.id}
+            type="checkbox"
+            checked={value === true}
+            onChange={(e) => setField(field.id, e.target.checked)}
+            className="h-4 w-4 accent-accent-2"
+          />
+        ) : (
+          <input
+            id={field.id}
+            type={field.type === 'number' ? 'number' : 'text'}
+            value={value === null || value === undefined ? '' : String(value)}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (field.type === 'number') {
+                setField(field.id, raw === '' ? null : Number(raw));
+              } else {
+                setField(field.id, raw);
+              }
+            }}
+            className="block w-full rounded-none border-0 border-b border-hairline-strong bg-transparent px-1 py-2 text-base text-ink font-mono tabular-nums focus:border-accent focus:outline-none focus:ring-0"
+          />
+        )}
+      </div>
+    </div>
   );
 }

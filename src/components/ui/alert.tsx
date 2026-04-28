@@ -9,10 +9,10 @@ export function Alert({
     <div
       role="alert"
       className={cn(
-        'rounded-md border p-3 text-sm',
-        variant === 'info' && 'border-slate-200 bg-slate-50 text-slate-700',
-        variant === 'success' && 'border-emerald-200 bg-emerald-50 text-emerald-800',
-        variant === 'error' && 'border-red-200 bg-red-50 text-red-800',
+        'border-l-2 px-4 py-3 text-sm leading-relaxed bg-paper-2/60',
+        variant === 'info' && 'border-accent text-ink-2',
+        variant === 'success' && 'border-success text-success bg-success-soft/40',
+        variant === 'error' && 'border-error text-error bg-error-soft/50',
         className,
       )}
       {...rest}

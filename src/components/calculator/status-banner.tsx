@@ -12,19 +12,24 @@ export function StatusBanner({
   const t = useTranslations('approval');
   if (status === 'draft') return null;
 
-  const tone =
+  const toneCls =
     status === 'approved'
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+      ? 'border-success bg-success-soft/40 text-success'
       : status === 'rejected'
-        ? 'border-red-200 bg-red-50 text-red-900'
+        ? 'border-error bg-error-soft/40 text-error'
         : status === 'changes_requested'
-          ? 'border-amber-200 bg-amber-50 text-amber-900'
-          : 'border-sky-200 bg-sky-50 text-sky-900';
+          ? 'border-warning bg-warning-soft/40 text-warning'
+          : 'border-accent bg-accent-soft/30 text-accent-2';
 
   return (
-    <div className={`rounded-lg border p-3 text-sm ${tone}`} role="status">
-      <p className="font-medium">{t(`status.${status}`)}</p>
-      {lastApprovalComment && <p className="mt-1 text-xs">{lastApprovalComment}</p>}
+    <div className={`border-l-2 px-5 py-4 ${toneCls}`} role="status">
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] mb-1">
+        Status
+      </p>
+      <p className="font-display text-xl">{t(`status.${status}`)}</p>
+      {lastApprovalComment && (
+        <p className="mt-2 text-sm font-body italic opacity-80">{lastApprovalComment}</p>
+      )}
     </div>
   );
 }

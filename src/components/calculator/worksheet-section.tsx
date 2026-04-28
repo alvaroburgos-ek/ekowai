@@ -20,13 +20,20 @@ export function WorksheetSection({
   const inputDefs = new Map(worksheet.inputs.map((f) => [f.id, f]));
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-6 space-y-4">
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-      {section.fields.map((id) => {
-        const f = inputDefs.get(id);
-        if (!f || !editable) return null;
-        return <InputField key={id} field={f} locale={locale} />;
-      })}
+    <section className="border border-hairline bg-paper-2/30">
+      <header className="border-b border-hairline px-5 py-3 flex items-baseline justify-between">
+        <h2 className="font-display text-lg text-ink">{title}</h2>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext">
+          {section.fields.length} Felder
+        </span>
+      </header>
+      <div className="px-5 py-5 space-y-5">
+        {section.fields.map((id) => {
+          const f = inputDefs.get(id);
+          if (!f || !editable) return null;
+          return <InputField key={id} field={f} locale={locale} />;
+        })}
+      </div>
     </section>
   );
 }

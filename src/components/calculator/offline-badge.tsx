@@ -18,6 +18,8 @@ export function OfflineBadge() {
   }, []);
   if (online) return null;
   return (
-    <span className="text-xs px-2 py-1 rounded bg-amber-100 text-amber-800">{t('offline')}</span>
+    <span className="font-mono text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 border border-warning text-warning">
+      {t('offline')}
+    </span>
   );
 }

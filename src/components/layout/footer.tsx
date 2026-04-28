@@ -4,17 +4,22 @@ import { getTranslations } from 'next-intl/server';
 export async function Footer({ locale }: { locale: 'de' | 'en' }) {
   const t = await getTranslations('footer');
   return (
-    <footer className="border-t border-slate-200 bg-white mt-12">
-      <div className="max-w-5xl mx-auto p-6 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600">
-        <p>© {new Date().getFullYear()} EKOWAI · MVP-1</p>
-        <nav className="flex gap-4">
-          <Link href={`/${locale}/legal/impressum`} className="hover:text-slate-900">
+    <footer className="border-t border-hairline mt-20">
+      <div className="max-w-6xl mx-auto px-6 py-8 flex flex-wrap items-baseline justify-between gap-6">
+        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
+          © {new Date().getFullYear()} · EKOWAI · Bemessung nach DWA-A-201
+        </div>
+        <nav className="flex flex-wrap gap-6 text-xs font-body text-subtext">
+          <Link href={`/${locale}/legal/impressum`} className="hover:text-ink transition-colors">
             {t('impressum')}
           </Link>
-          <Link href={`/${locale}/legal/datenschutz`} className="hover:text-slate-900">
+          <Link
+            href={`/${locale}/legal/datenschutz`}
+            className="hover:text-ink transition-colors"
+          >
             {t('datenschutz')}
           </Link>
-          <Link href={`/${locale}/legal/agb`} className="hover:text-slate-900">
+          <Link href={`/${locale}/legal/agb`} className="hover:text-ink transition-colors">
             {t('agb')}
           </Link>
         </nav>

@@ -1,20 +1,107 @@
 @import 'tailwindcss';
 
+/*
+ * EKOWAI Wizard — Engineering Editorial design tokens.
+ * Mineral palette: paper, ink, teal accent. No gradients. Hairline rules over cards.
+ */
+
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --muted: #475569;
+  --paper: #f8f5ee;
+  --paper-2: #f1ece1;
+  --ink: #0d1418;
+  --ink-2: #2a3338;
+  --subtext: #5f6a72;
+  --hairline: #d4cfc4;
+  --hairline-strong: #b8b1a2;
+
+  --accent: #2f6f63;
+  --accent-2: #1f4f47;
+  --accent-soft: #d5e3df;
+
+  --warning: #8a5a2b;
+  --warning-soft: #ecdfc8;
+  --error: #7c2d2d;
+  --error-soft: #ecd5cf;
+  --success: #2d5f4d;
+  --success-soft: #d3e3d8;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-subtext: var(--subtext);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-error: var(--error);
+  --color-error-soft: var(--error-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+
+  --font-display: var(--font-display), 'Fraunces', Georgia, serif;
+  --font-body: var(--font-body), 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: var(--font-mono), 'IBM Plex Mono', 'JetBrains Mono', monospace;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+@layer base {
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-feature-settings: 'ss02', 'cv01', 'cv11';
+    /* Subtle warm-paper grain so backgrounds aren't flat */
+    background-image:
+      radial-gradient(1200px 600px at 20% -10%, rgba(47, 111, 99, 0.04), transparent 60%),
+      radial-gradient(900px 500px at 110% 110%, rgba(13, 20, 24, 0.03), transparent 60%);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+
+  h1 {
+    font-variation-settings: 'opsz' 144, 'SOFT' 30;
+    letter-spacing: -0.025em;
+  }
+
+  /* Tabular figures for engineering numbers */
+  .num, dd, .results-value, [data-num] {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  .citation {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--subtext);
+    text-transform: uppercase;
+  }
+
+  /* Hairline divider — used liberally instead of card shadows */
+  .rule {
+    border-color: var(--hairline);
+  }
+
+  /* Selection */
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--accent-2);
+  }
 }

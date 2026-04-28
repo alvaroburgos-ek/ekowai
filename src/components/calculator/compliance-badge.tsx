@@ -11,20 +11,21 @@ export function ComplianceBadge({ locale }: { locale: 'de' | 'en' }) {
   const status = result.compliance.status;
   const tone =
     status === 'compliant'
-      ? 'bg-emerald-100 text-emerald-800'
+      ? 'text-success border-success'
       : status === 'warning'
-        ? 'bg-amber-100 text-amber-800'
+        ? 'text-warning border-warning'
         : status === 'blocking_violation'
-          ? 'bg-red-100 text-red-800'
-          : 'bg-slate-100 text-slate-700';
+          ? 'text-error border-error'
+          : 'text-subtext border-hairline-strong';
 
   return (
     <span
-      className={`text-xs px-2 py-1 rounded ${tone}`}
+      className={`inline-flex items-center gap-2 px-2.5 py-1 border font-mono text-[10px] uppercase tracking-[0.2em] ${tone}`}
       title={result.compliance.violations
         .map((v) => (locale === 'de' ? v.messageDe : v.messageEn))
         .join('\n')}
     >
+      <span className="size-1.5 rounded-full bg-current" aria-hidden />
       {t(status)}
     </span>
   );
