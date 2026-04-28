@@ -6,6 +6,7 @@
   "titleDe": "Bemessung Belebungsbecken — Variante 1",
   "titleEn": "Aeration tank sizing — variant 1",
   "sourceCitation": "§A 6.5",
+  "status": "preview",
   "inputs": [
     {
       "id": "Q_DW_m3d",

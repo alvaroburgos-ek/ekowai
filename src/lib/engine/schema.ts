@@ -107,6 +107,7 @@ export const WorksheetSchema = z.object({
   titleDe: z.string(),
   titleEn: z.string(),
   sourceCitation: z.string(),
+  status: z.enum(['verified', 'preview']).default('preview'),
   inputs: z.array(InputFieldSchema),
   computed: z.array(ComputedFieldSchema),
   thresholds: z.array(ComplianceThresholdSchema),

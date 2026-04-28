@@ -15,6 +15,7 @@ const ws = (decisionPoints: DecisionPoint[]): Worksheet => ({
   thresholds: [],
   sections: [{ id: 's', titleDe: '', titleEn: '', fields: [] }],
   decisionPoints,
+  status: 'preview',
 });
 
 const dp = (overrides: Partial<DecisionPoint> = {}): DecisionPoint => ({

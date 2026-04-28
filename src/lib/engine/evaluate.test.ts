@@ -21,6 +21,7 @@ const tinyWorksheet = (computed: { id: string; expression: ExpressionAst }[]): W
   thresholds: [],
   sections: [{ id: 's', titleDe: '', titleEn: '', fields: ['a'] }],
   decisionPoints: [],
+  status: 'preview',
 });
 
 describe('evaluate', () => {

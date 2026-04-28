@@ -83,6 +83,8 @@ export interface WorksheetSection {
   fields: string[];
 }
 
+export type WorksheetStatus = 'verified' | 'preview';
+
 export interface Worksheet {
   contractVersion: WorksheetVersion;
   regulation: string;
@@ -91,6 +93,15 @@ export interface Worksheet {
   titleDe: string;
   titleEn: string;
   sourceCitation: string;
+  /**
+   * 'verified' — content has been canonically validated against the regulation
+   *              (typically by the EKOWAI-Agent Python extractor + a domain
+   *              engineer's review).
+   * 'preview'  — hand-authored or extractor-output that has NOT yet been
+   *              validated. UI shows a "Vorschau" tag; engineers should
+   *              treat results as advisory.
+   */
+  status: WorksheetStatus;
   inputs: InputField[];
   computed: ComputedField[];
   thresholds: ComplianceThreshold[];

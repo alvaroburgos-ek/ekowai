@@ -55,11 +55,18 @@ export function CalculatorShell(props: {
     <article className="space-y-10">
       <header className="border-b border-hairline pb-8 space-y-5">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
-            {props.worksheet.regulation} · {props.worksheet.regulationVersion} ·{' '}
-            Arbeitsblatt {props.worksheet.id}
-            <span className="mx-2 text-hairline-strong">/</span>
-            {props.worksheet.sourceCitation}
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext flex items-baseline gap-2 flex-wrap">
+            <span>
+              {props.worksheet.regulation} · {props.worksheet.regulationVersion} ·{' '}
+              Arbeitsblatt {props.worksheet.id}
+              <span className="mx-2 text-hairline-strong">/</span>
+              {props.worksheet.sourceCitation}
+            </span>
+            {props.worksheet.status === 'preview' && (
+              <span className="px-1.5 py-0.5 border border-warning text-warning">
+                Vorschau
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <ComplianceBadge locale={props.locale} />
@@ -68,6 +75,21 @@ export function CalculatorShell(props: {
             {props.status === 'draft' && <SubmitButton calcId={props.calcId} />}
           </div>
         </div>
+        {props.worksheet.status === 'preview' && (
+          <div
+            role="note"
+            className="border-l-2 border-warning bg-warning-soft/40 px-4 py-3"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] mb-0.5 text-warning">
+              Vorschau-Arbeitsblatt
+            </p>
+            <p className="text-sm text-ink-2 leading-relaxed">
+              Die Schwellwerte und Berechnungsformeln dieses Arbeitsblatts sind noch
+              nicht kanonisch gegen DWA-A-201 v3.2 validiert. Ergebnisse sind beratend;
+              finale Bemessung nach Validierung der Worksheet-JSON aus dem EKOWAI-Agent (IB-7).
+            </p>
+          </div>
+        )}
         <div>
           <h1 className="text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-[1.05] mb-2">
             {props.name}

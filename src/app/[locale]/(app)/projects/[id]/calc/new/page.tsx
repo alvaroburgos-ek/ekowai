@@ -28,18 +28,25 @@ export default async function NewCalcPage({
           <select
             name="worksheetId"
             required
-            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+            className="block w-full rounded-none border-0 border-b border-hairline-strong bg-transparent px-1 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
             defaultValue=""
           >
             <option value="" disabled>
               —
             </option>
-            {ALL_WORKSHEETS.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.id} — {locale === 'de' ? w.titleDe : w.titleEn}
-              </option>
-            ))}
+            {ALL_WORKSHEETS.map((w) => {
+              const previewMark = w.status === 'preview' ? ' [Vorschau]' : '';
+              return (
+                <option key={w.id} value={w.id}>
+                  {w.id} — {locale === 'de' ? w.titleDe : w.titleEn}
+                  {previewMark}
+                </option>
+              );
+            })}
           </select>
+          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtext">
+            Vorschau-Arbeitsblätter sind inhaltlich noch nicht regelwerksvalidiert.
+          </span>
         </label>
         <Button type="submit">{t('createCalc')}</Button>
       </form>

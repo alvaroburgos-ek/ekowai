@@ -15,6 +15,7 @@ const ws = (thresholds: Worksheet['thresholds']): Worksheet => ({
   thresholds,
   sections: [{ id: 's', titleDe: '', titleEn: '', fields: [] }],
   decisionPoints: [],
+  status: 'preview',
 });
 
 describe('evaluateCompliance', () => {
