@@ -74,6 +74,7 @@
   },
   "approval": {
     "submitForReview": "Submit for review",
+    "resubmitForReview": "Resubmit for review",
     "submitting": "Submitting …",
     "submitted": "Submitted",
     "submitError": {

@@ -6,7 +6,13 @@ import { useCalculatorStore } from '@/lib/state/calculator-store';
 import { submitForReview } from '@/lib/actions/approval';
 import { Button } from '@/components/ui/button';
 
-export function SubmitButton({ calcId }: { calcId: string }) {
+export function SubmitButton({
+  calcId,
+  resubmit = false,
+}: {
+  calcId: string;
+  resubmit?: boolean;
+}) {
   const t = useTranslations('approval');
   const result = useCalculatorStore((s) => s.result);
   const [pending, startTransition] = useTransition();
@@ -19,8 +25,11 @@ export function SubmitButton({ calcId }: { calcId: string }) {
     setError(null);
     startTransition(async () => {
       const r = await submitForReview({ calcId });
-      if (r.ok) setSuccess(true);
-      else setError(t(`submitError.${r.error}`));
+      if (r.ok) {
+        setSuccess(true);
+        // Reload so the StatusBanner reflects the new 'submitted' state.
+        if (typeof window !== 'undefined') window.location.reload();
+      } else setError(t(`submitError.${r.error}`));
     });
   }
 
@@ -28,10 +37,16 @@ export function SubmitButton({ calcId }: { calcId: string }) {
     return <span className="text-xs text-emerald-700">{t('submitted')}</span>;
   }
 
+  const label = pending
+    ? t('submitting')
+    : resubmit
+      ? t('resubmitForReview')
+      : t('submitForReview');
+
   return (
     <div className="flex flex-col items-end gap-1">
       <Button onClick={submit} disabled={pending || blocking}>
-        {pending ? t('submitting') : t('submitForReview')}
+        {label}
       </Button>
       {error && <p className="text-xs text-red-700">{error}</p>}
     </div>

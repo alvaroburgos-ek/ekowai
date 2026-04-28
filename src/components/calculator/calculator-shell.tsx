@@ -72,7 +72,9 @@ export function CalculatorShell(props: {
             <ComplianceBadge locale={props.locale} />
             <OfflineBadge />
             <SaveStatus locale={props.locale} />
-            {props.status === 'draft' && <SubmitButton calcId={props.calcId} />}
+            {(props.status === 'draft' || props.status === 'changes_requested') && (
+              <SubmitButton calcId={props.calcId} resubmit={props.status === 'changes_requested'} />
+            )}
           </div>
         </div>
         {props.worksheet.status === 'preview' && (

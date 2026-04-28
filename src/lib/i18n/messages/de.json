@@ -74,6 +74,7 @@
   },
   "approval": {
     "submitForReview": "Zur Prüfung einreichen",
+    "resubmitForReview": "Erneut einreichen",
     "submitting": "Wird eingereicht …",
     "submitted": "Eingereicht",
     "submitError": {
