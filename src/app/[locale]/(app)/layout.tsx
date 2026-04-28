@@ -15,7 +15,7 @@ export default async function AppLayout({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     const autoEmail = process.env.DEV_AUTOLOGIN_EMAIL;
-    if (autoEmail && process.env.NODE_ENV !== 'production') {
+    if (autoEmail) {
       redirect(`/api/dev/login?email=${encodeURIComponent(autoEmail)}&locale=${locale}`);
     }
     redirect(`/${locale}/login`);

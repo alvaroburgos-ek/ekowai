@@ -26,11 +26,12 @@ export async function middleware(request: NextRequest) {
     const localeMatch = pathname.match(/^\/(de|en)/);
     const locale = localeMatch?.[1] ?? defaultLocale;
 
-    // Dev escape hatch: if DEV_AUTOLOGIN_EMAIL is set and we're not in production,
-    // bounce through /api/dev/login instead of /login. Lets engineers + reviewers
-    // open any deep link without facing the broken magic-link flow.
+    // Dev escape hatch: if DEV_AUTOLOGIN_EMAIL is set, bounce through
+    // /api/dev/login instead of /login. Lets engineers + reviewers open any
+    // deep link without facing the magic-link flow. Set on preview/test
+    // deployments only; real production must NOT set this var.
     const autoEmail = process.env.DEV_AUTOLOGIN_EMAIL;
-    if (autoEmail && process.env.NODE_ENV !== 'production') {
+    if (autoEmail) {
       const target = new URL(`${url.origin}/api/dev/login`);
       target.searchParams.set('email', autoEmail);
       target.searchParams.set('locale', locale);

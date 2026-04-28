@@ -8,10 +8,13 @@ import { env } from '@/env';
 // Uses admin API to mint a magic-link token, then verifies it server-side
 // so session cookies are set directly. No round-trip through Supabase's
 // verify endpoint, no rate limit.
-// Hard-gated; refuses to run in production.
+//
+// Gated on DEV_AUTOLOGIN_EMAIL being set. Real production deployments must
+// NOT set this var. Preview/test deployments that intentionally want a
+// no-auth tester URL set the var to a fixed dev account email.
 export async function GET(request: NextRequest) {
-  if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'disabled in production' }, { status: 404 });
+  if (!process.env.DEV_AUTOLOGIN_EMAIL) {
+    return NextResponse.json({ error: 'dev login disabled' }, { status: 404 });
   }
 
   const { searchParams } = new URL(request.url);
