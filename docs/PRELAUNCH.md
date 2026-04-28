@@ -1,24 +1,53 @@
-# Pre-launch checklist (Plan 4)
+# Pre-launch checklist
 
 Items the agent can't do for you. Run through before sharing the URL with paying customers.
 
-## Auth & email
+## Resend — email setup (covers two flows)
 
-- [ ] **Custom SMTP in Supabase** (~10 min). Free-tier Supabase limits magic-link
-      emails to ~2/hour project-wide. Configure your own SMTP so this stops biting:
-      Supabase Dashboard → Authentication → SMTP Settings → enter Resend credentials
-      (free tier 3k/mo at https://resend.com).
+The same Resend API key powers both:
 
-- [ ] **Allowed Redirect URLs** in Supabase → Authentication → URL Configuration:
-      add `https://app.ekowai.de/auth/callback`, `https://*.vercel.app/auth/callback`,
-      `http://localhost:3000/auth/callback`.
+### A. Magic-link auth + invite emails (via Supabase SMTP)
 
-- [ ] **Remove `DEV_AUTOLOGIN_EMAIL` env var** from Vercel production scope.
-      The `/api/dev/login` endpoint and the autologin redirect both gate on this var;
-      removing it disables the backdoor and re-enables real magic-link auth.
-      ```
-      vercel env rm DEV_AUTOLOGIN_EMAIL production
-      ```
+Supabase calls Resend's SMTP relay; no app code needed.
+
+1. **Get the Resend API key** from https://resend.com/api-keys.
+2. (Recommended) **Verify your domain** in Resend → Domains. Add the DKIM/SPF/DMARC records they show at your DNS registrar. Until verified, you can only send `from` `onboarding@resend.dev`.
+3. **Configure Supabase**: Dashboard → Authentication → SMTP Settings → "Enable Custom SMTP":
+   - Host: `smtp.resend.com`
+   - Port: `465` (SSL) or `587` (STARTTLS)
+   - Username: `resend`
+   - Password: `<your Resend API key>`
+   - Sender name: `EKOWAI Wizard`
+   - Sender email: `noreply@app.ekowai.de` (or `onboarding@resend.dev` if domain not yet verified)
+4. **Save**. Supabase sends a test email; if it arrives, you're done.
+5. **After it works** in production, **remove `DEV_AUTOLOGIN_EMAIL`** from Vercel:
+   ```
+   vercel env rm DEV_AUTOLOGIN_EMAIL production
+   vercel deploy --prod --yes
+   ```
+   The dev backdoor is now off; magic-link auth is the real flow.
+
+### B. App-side transactional emails (via Resend SDK)
+
+Approval-status notifications: when a calculation is submitted/approved/rejected/changes-requested, the affected users get an email. Wired into `submitForReview` / `approveCalculation` / `rejectCalculation` / `requestChanges` in `src/lib/actions/approval.ts`.
+
+1. **Set Vercel env vars**:
+   ```
+   vercel env add RESEND_API_KEY production --value "<your-key>" --yes
+   vercel env add RESEND_FROM_EMAIL production --value "noreply@app.ekowai.de" --yes
+   ```
+   If domain not yet verified, leave `RESEND_FROM_EMAIL` unset — it defaults to `onboarding@resend.dev`.
+2. **Redeploy**: `vercel deploy --prod --yes`.
+3. **Test**: submit a calc for review → reviewers in your org receive an email with a link to the calculation. Approve it → the calc creator receives a confirmation email.
+
+If `RESEND_API_KEY` is unset, the app silently no-ops the notification path and never blocks an approval-state transition on missing email config.
+
+## Allowed Redirect URLs
+
+In Supabase → Authentication → URL Configuration → "Redirect URLs", add:
+- `https://app.ekowai.de/auth/callback`
+- `https://*.vercel.app/auth/callback`
+- `http://localhost:3000/auth/callback`
 
 ## Legal
 

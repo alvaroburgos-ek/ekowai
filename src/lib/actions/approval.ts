@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import {
@@ -9,10 +9,18 @@ import {
   calculations,
   decisions,
   orgMembers,
+  profiles,
   projects,
 } from '@/lib/db/schema';
 import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.2';
 import { compute, openDecisionPoints } from '@/lib/engine';
+import { sendEmail } from '@/lib/email/client';
+import {
+  submittedTemplate,
+  approvedTemplate,
+  changesRequestedTemplate,
+} from '@/lib/email/templates';
+import { env } from '@/env';
 
 const submitSchema = z.object({ calcId: z.string().uuid() });
 const reviewSchema = z.object({
@@ -38,6 +46,30 @@ async function userOrgForCalc(calcId: string, userId: string): Promise<string | 
     .where(and(eq(calculations.id, calcId), eq(orgMembers.userId, userId)))
     .limit(1);
   return row?.orgId ?? null;
+}
+
+function calcUrl(calcId: string, projectId: string, locale: 'de' | 'en') {
+  return `${env.NEXT_PUBLIC_APP_URL}/${locale}/projects/${projectId}/calc/${calcId}`;
+}
+
+async function reviewerEmailsForOrg(orgId: string, excludeUserId: string): Promise<string[]> {
+  const rows = await db
+    .select({ email: profiles.email })
+    .from(orgMembers)
+    .innerJoin(profiles, eq(profiles.id, orgMembers.userId))
+    .where(
+      and(
+        eq(orgMembers.orgId, orgId),
+        inArray(orgMembers.role, ['owner', 'admin', 'engineer']),
+      ),
+    );
+  return rows.map((r) => r.email).filter((e) => !!e);
+  void excludeUserId;
+}
+
+async function profileForUser(userId: string) {
+  const [p] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
+  return p;
 }
 
 export async function submitForReview(input: {
@@ -90,6 +122,17 @@ export async function submitForReview(input: {
     reviewerId: null,
   });
 
+  // Notify all reviewers (other engineers/admins/owners) in the org.
+  const recipients = await reviewerEmailsForOrg(orgId, user.id);
+  if (recipients.length > 0) {
+    const tpl = submittedTemplate({
+      calcName: calc.name,
+      calcUrl: calcUrl(calc.id, calc.projectId, 'de'),
+      locale: 'de',
+    });
+    void sendEmail({ to: recipients, ...tpl });
+  }
+
   return { ok: true };
 }
 
@@ -121,6 +164,24 @@ async function reviewAction(
     reviewerId: user.id,
     comment: parsed.comment ?? null,
   });
+
+  // Notify the calc creator.
+  const creator = await profileForUser(calc.createdBy);
+  const reviewer = await profileForUser(user.id);
+  if (creator?.email) {
+    const inputs = {
+      calcName: calc.name,
+      calcUrl: calcUrl(calc.id, calc.projectId, 'de'),
+      reviewerName: reviewer?.fullName ?? reviewer?.email ?? null,
+      comment: parsed.comment ?? null,
+      locale: 'de' as const,
+    };
+    const tpl =
+      action === 'approved'
+        ? approvedTemplate(inputs)
+        : changesRequestedTemplate({ ...inputs, rejected: action === 'rejected' });
+    void sendEmail({ to: creator.email, ...tpl });
+  }
 
   return { ok: true };
 }
