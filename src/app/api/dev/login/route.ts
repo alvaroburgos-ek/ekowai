@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { defaultLocale } from '@/lib/i18n/config';
-import { env } from '@/env';
 
 // Dev-only: signs in a user without sending email.
 // Uses admin API to mint a magic-link token, then verifies it server-side
@@ -17,7 +16,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'dev login disabled' }, { status: 404 });
   }
 
-  const { searchParams } = new URL(request.url);
+  const requestUrl = new URL(request.url);
+  const origin = requestUrl.origin;
+  const searchParams = requestUrl.searchParams;
   const email = searchParams.get('email') ?? process.env.DEV_AUTOLOGIN_EMAIL;
   const locale = searchParams.get('locale') ?? defaultLocale;
   const next = searchParams.get('next');
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     type: 'magiclink',
     email,
     options: {
-      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/${locale}/verify`,
+      redirectTo: `${origin}/${locale}/verify`,
     },
   });
 
@@ -62,5 +63,5 @@ export async function GET(request: NextRequest) {
   }
 
   const target = next && next.startsWith('/') ? next : `/${locale}/verify`;
-  return NextResponse.redirect(`${env.NEXT_PUBLIC_APP_URL}${target}`);
+  return NextResponse.redirect(`${origin}${target}`);
 }
