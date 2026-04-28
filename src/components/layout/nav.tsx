@@ -14,6 +14,9 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
           <Link href={`/${locale}/projects`} className="hover:text-slate-900">
             {t('projects')}
           </Link>
+          <Link href={`/${locale}/inbox`} className="hover:text-slate-900">
+            {t('inbox')}
+          </Link>
           <Link href={`/${locale}/org`} className="hover:text-slate-900">
             {t('org')}
           </Link>

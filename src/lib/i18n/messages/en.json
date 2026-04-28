@@ -13,6 +13,7 @@
   "nav": {
     "projects": "Projects",
     "org": "Organization",
+    "inbox": "Inbox",
     "logout": "Sign out"
   },
   "projects": {
@@ -56,6 +57,50 @@
     "otp_expired": "The magic link has expired or was already used. Some email providers (e.g. Outlook/Defender) auto-open links for safety scanning, which consumes the one-time token. Please request a new link and open it in a private window.",
     "access_denied": "Sign-in denied. Please request a new magic link.",
     "auth_callback": "Sign-in failed. Please try again."
+  },
+  "decisions": {
+    "openTitle": "Open decisions",
+    "decide": "Decide",
+    "rationale": "Rationale (optional)",
+    "save": "Save",
+    "saving": "Saving …",
+    "cancel": "Cancel",
+    "chooseRequired": "Please choose an option."
+  },
+  "approval": {
+    "submitForReview": "Submit for review",
+    "submitting": "Submitting …",
+    "submitted": "Submitted",
+    "submitError": {
+      "blocking_violation": "Blocking violation — please resolve first.",
+      "open_decisions": "There are open decisions to record.",
+      "no_permission": "No permission.",
+      "not_found": "Calculation not found."
+    },
+    "reviewTitle": "Review",
+    "approve": "Approve",
+    "reject": "Reject",
+    "requestChanges": "Request changes",
+    "commentPlaceholder": "Comment (required for reject / request changes)",
+    "reviewError": {
+      "comment_required": "Comment required.",
+      "not_in_review": "Not in review.",
+      "no_permission": "No permission.",
+      "not_found": "Calculation not found."
+    },
+    "status": {
+      "submitted": "In review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "changes_requested": "Changes requested"
+    },
+    "inboxTitle": "Inbox — Pending review",
+    "inboxEmpty": "No pending reviews."
+  },
+  "xref": {
+    "title": "Cross-references",
+    "triggeredBy": "triggered by",
+    "textOnlyNotice": "Note: no wizard support in MVP-1 — please review separately."
   },
   "org": {
     "title": "Organization",

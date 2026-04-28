@@ -13,6 +13,7 @@
   "nav": {
     "projects": "Projekte",
     "org": "Organisation",
+    "inbox": "Eingang",
     "logout": "Abmelden"
   },
   "projects": {
@@ -56,6 +57,50 @@
     "otp_expired": "Der Magic-Link ist abgelaufen oder wurde bereits verwendet. Manche E-Mail-Anbieter (z. B. Outlook/Defender) öffnen den Link automatisch zur Sicherheitsprüfung und „verbrauchen“ ihn dadurch. Bitte fordern Sie einen neuen Link an und öffnen Sie ihn in einem privaten Fenster.",
     "access_denied": "Anmeldung abgelehnt. Bitte fordern Sie einen neuen Magic-Link an.",
     "auth_callback": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "decisions": {
+    "openTitle": "Offene Entscheidungen",
+    "decide": "Entscheidung treffen",
+    "rationale": "Begründung (optional)",
+    "save": "Speichern",
+    "saving": "Wird gespeichert …",
+    "cancel": "Abbrechen",
+    "chooseRequired": "Bitte eine Option wählen."
+  },
+  "approval": {
+    "submitForReview": "Zur Prüfung einreichen",
+    "submitting": "Wird eingereicht …",
+    "submitted": "Eingereicht",
+    "submitError": {
+      "blocking_violation": "Blockierender Verstoß — bitte erst beheben.",
+      "open_decisions": "Es gibt noch offene Entscheidungen.",
+      "no_permission": "Keine Berechtigung.",
+      "not_found": "Berechnung nicht gefunden."
+    },
+    "reviewTitle": "Prüfung",
+    "approve": "Freigeben",
+    "reject": "Ablehnen",
+    "requestChanges": "Änderungen erbitten",
+    "commentPlaceholder": "Kommentar (Pflicht bei Ablehnung / Änderungen)",
+    "reviewError": {
+      "comment_required": "Kommentar erforderlich.",
+      "not_in_review": "Nicht im Review-Status.",
+      "no_permission": "Keine Berechtigung.",
+      "not_found": "Berechnung nicht gefunden."
+    },
+    "status": {
+      "submitted": "In Prüfung",
+      "approved": "Freigegeben",
+      "rejected": "Abgelehnt",
+      "changes_requested": "Änderungen erbeten"
+    },
+    "inboxTitle": "Eingang — Zur Prüfung",
+    "inboxEmpty": "Keine ausstehenden Prüfungen."
+  },
+  "xref": {
+    "title": "Querverweise",
+    "triggeredBy": "ausgelöst durch",
+    "textOnlyNotice": "Hinweis: keine Wizard-Unterstützung in MVP-1 — bitte separat prüfen."
   },
   "org": {
     "title": "Organisation",

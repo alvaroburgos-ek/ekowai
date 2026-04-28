@@ -9,6 +9,17 @@ import { ComplianceBadge } from './compliance-badge';
 import { OfflineBadge } from './offline-badge';
 import { SaveStatus } from './save-status';
 import { RationaleBox } from './rationale-box';
+import { DecisionBanner } from './decision-banner';
+import { StatusBanner } from './status-banner';
+import { SubmitButton } from './submit-button';
+import { ApprovalActions } from './approval-actions';
+import { CrossReferencePanel, type CrossReference } from './cross-reference-panel';
+
+interface RecordedDecision {
+  decisionPointId: string;
+  choice: string;
+  rationale: string | null;
+}
 
 export function CalculatorShell(props: {
   locale: 'de' | 'en';
@@ -20,6 +31,11 @@ export function CalculatorShell(props: {
   lastSavedAt: string;
   initialDraft: string | null;
   initialFinal: string | null;
+  initialDecisions: RecordedDecision[];
+  status: 'draft' | 'submitted' | 'approved' | 'rejected' | 'changes_requested';
+  lastApprovalComment: string | null;
+  canReview: boolean;
+  crossRefs: CrossReference[];
 }) {
   const init = useCalculatorStore((s) => s.init);
 
@@ -46,12 +62,17 @@ export function CalculatorShell(props: {
             {props.worksheet.sourceCitation}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <ComplianceBadge locale={props.locale} />
           <OfflineBadge />
           <SaveStatus locale={props.locale} />
+          {props.status === 'draft' && <SubmitButton calcId={props.calcId} />}
         </div>
       </header>
+
+      <StatusBanner status={props.status} lastApprovalComment={props.lastApprovalComment} />
+
+      <DecisionBanner locale={props.locale} initialDecisions={props.initialDecisions} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {inputSection && (
@@ -65,6 +86,12 @@ export function CalculatorShell(props: {
         initialFinal={props.initialFinal}
         locale={props.locale}
       />
+
+      <CrossReferencePanel crossRefs={props.crossRefs} />
+
+      {props.canReview && props.status === 'submitted' && (
+        <ApprovalActions calcId={props.calcId} />
+      )}
     </div>
   );
 }
