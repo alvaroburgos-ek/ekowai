@@ -69,13 +69,10 @@ export function CalculatorShell(props: {
           </div>
         </div>
         <div>
-          <h1
-            className="font-display text-4xl lg:text-5xl text-ink leading-[1.05] mb-2"
-            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}
-          >
+          <h1 className="text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-[1.05] mb-2">
             {props.name}
           </h1>
-          <p className="font-display text-lg text-ink-2 italic">
+          <p className="text-lg text-ink-2 italic">
             {props.locale === 'de' ? props.worksheet.titleDe : props.worksheet.titleEn}
           </p>
         </div>

@@ -34,15 +34,12 @@ export default function LoginPage() {
           <span className="mx-2 text-hairline-strong">/</span>
           Bemessungsassistent
         </div>
-        <h1
-          className="font-display text-5xl lg:text-7xl leading-[0.95] text-ink"
-          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 50' }}
-        >
+        <h1 className="text-5xl lg:text-7xl font-semibold leading-[0.95] text-ink tracking-tight">
           Kläranlagen-
           <br />
           Bemessung,
           <br />
-          <span className="italic text-accent-2">präzise.</span>
+          <span className="italic font-medium text-accent-2">präzise.</span>
         </h1>
         <div className="border-t border-hairline pt-6 max-w-lg space-y-4">
           <p className="text-base text-ink-2 leading-relaxed">

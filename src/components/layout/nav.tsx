@@ -11,9 +11,7 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
           href={`/${locale}/projects`}
           className="group flex items-baseline gap-3 text-ink"
         >
-          <span className="font-display text-xl tracking-tight" style={{ fontVariationSettings: '"opsz" 32, "SOFT" 30' }}>
-            EKOWAI
-          </span>
+          <span className="text-xl font-semibold tracking-tight">EKOWAI</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext border border-hairline px-1.5 py-0.5">
             Wizard · MVP-1
           </span>

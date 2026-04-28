@@ -34,10 +34,7 @@ export default async function ProjectDetailPage({
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
               Projekt · {project.id.slice(0, 8)}
             </div>
-            <h1
-              className="font-display text-4xl lg:text-5xl text-ink leading-tight"
-              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 40' }}
-            >
+            <h1 className="text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-tight">
               {project.name}
             </h1>
           </div>

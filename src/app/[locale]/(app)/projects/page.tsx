@@ -26,10 +26,7 @@ export default async function ProjectsPage({
           <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
             Sektion 01 · Übersicht
           </div>
-          <h1
-            className="font-display text-4xl lg:text-5xl text-ink"
-            style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}
-          >
+          <h1 className="text-4xl lg:text-5xl font-semibold text-ink tracking-tight">
             {t('title')}
           </h1>
           <p className="mt-3 font-mono text-[11px] text-subtext tabular-nums">

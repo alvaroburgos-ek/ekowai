@@ -16,12 +16,7 @@ export default async function NewProjectPage({
         <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
           Sektion 01 · Neuer Eintrag
         </div>
-        <h1
-          className="font-display text-4xl text-ink"
-          style={{ fontVariationSettings: '"opsz" 96, "SOFT" 30' }}
-        >
-          {t('newProject')}
-        </h1>
+        <h1 className="text-4xl font-semibold text-ink tracking-tight">{t('newProject')}</h1>
       </header>
       <form action={createProject} className="space-y-8">
         <input type="hidden" name="locale" value={locale} />
