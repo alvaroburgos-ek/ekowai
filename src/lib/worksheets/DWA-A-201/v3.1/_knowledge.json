@@ -1,0 +1,144 @@
+{
+  "standard": "DWA-A-201",
+  "source": "C:\\EKOWAI-Agent\\standards\\DWA-A-201\\source\\regulation_brief.md",
+  "extractedAt": "2026-04-28T21:39:08.200Z",
+  "complianceChecks": [
+    {
+      "name": "General System Size Applicability",
+      "sectionRefs": [
+        "§1"
+      ],
+      "whatChecked": "What value is being checked: The population equivalent (EW\\_{BSB5}) connected to the system.",
+      "criterion": "Exact threshold or criterion: ≤ 5000 E (Size Class 2).",
+      "passOutcome": "If PASSES: The system falls within the regulatory scope of this specific DWA-A 201 standard.",
+      "failOutcome": "If FAILS: The standard no longer applies for biological sizing, meaning more stringent regulations or different technological approaches for larger facilities must be used (except for *Schönungsteiche* which are open-ended).",
+      "iterationHint": "Iteration loop: Re-evaluate the catchment area or split the treatment streams.",
+      "conditional": "Mandatory/Conditional: Mandatory for all primary treatment ponds."
+    },
+    {
+      "name": "General Construction Geometries",
+      "sectionRefs": [
+        "§5.1"
+      ],
+      "whatChecked": "What value is being checked: Pond geometry (slope incline, length-to-width ratio, and minimum depth/freeboard).",
+      "criterion": "Exact threshold or criterion: * Böschungsneigung (Slope): ≤ 1:2 for natural soil, ≤ 1:3 for clay seals. * Length to width: ≥ 3:1. * Tiefe (Depth) for settling zone: ≥ 1,5 m. * Freibord (Freeboard): 0,3 m.",
+      "passOutcome": "If PASSES: Geometry is accepted as structurally stable and hydraulically sound.",
+      "failOutcome": "If FAILS: Must be redesigned to avoid short-circuiting flows or slope collapses.",
+      "iterationHint": "Iteration loop: Adjust the length, width, or depth parameters in the design layout.",
+      "conditional": "Mandatory/Conditional: Mandatory for all pond projects."
+    },
+    {
+      "name": "Soil Permeability / Need for Artificial Sealing (Wasserdichtheit)",
+      "sectionRefs": [
+        "§5.8"
+      ],
+      "whatChecked": "What value is being checked: Soil permeability coefficient (k\\_f) in the lowest 0.3 m of the soil profile.",
+      "criterion": "Exact threshold or criterion: * General ponds: k\\_f \\< 10^{-8} m/s allows natural soil. * Polishing ponds (Schönungsteiche): k\\_f \\< 10^{-7} m/s allows natural soil.",
+      "passOutcome": "If PASSES (permeability is lower than the threshold): The natural soil acts as the seal. No artificial liner is required.",
+      "failOutcome": "If FAILS (permeability is ≥ 10^{-8} m/s or soil is fractured): Artificial sealing is mandatory. Must install plastic sheets (≥ 3 mm and UV-resistant), concrete, asphalt, bentonite, or a ≥ 30 cm thick compacted clay/bentonite layer (≥ 95% Proctor density),.",
+      "iterationHint": "Iteration loop: If a soft artificial seal is required, the designer must check if desludging vehicles can still enter (or switch to floating pumps).",
+      "conditional": "Mandatory/Conditional: Mandatory check for all projects."
+    },
+    {
+      "name": "Primary Settlement Ponds (Absetzteiche) Sizing",
+      "sectionRefs": [
+        "§5.2",
+        "§7"
+      ],
+      "whatChecked": "What value is being checked: Specific volume (V\\_{EW}), retention time (t\\_R), and maximum flow velocity.",
+      "criterion": "Exact threshold or criterion: * V\\_{EW} ≥ 0,5 m^3/E (includes 0,15 m^3/E for sludge). * t\\_R ≥ 1 d (at dry weather flow). * Velocity at the outlet baffle ≤ 0,05 m/s.",
+      "passOutcome": "If PASSES: Pond sizing is sufficient for sludge digestion (cold digestion) and settling.",
+      "failOutcome": "If FAILS: The pond is undersized; poor settling or sludge washout will occur.",
+      "iterationHint": "Iteration loop: Increase the physical volume/area of the pond in the design phase.",
+      "conditional": "Mandatory/Conditional: Conditional (Only if Absetzteiche are used)."
+    },
+    {
+      "name": "Unaerated Ponds (Unbelüftete Teiche) Sizing",
+      "sectionRefs": [
+        "§5.3",
+        "§7"
+      ],
+      "whatChecked": "What value is being checked: Specific surface area (A\\_{EW}).",
+      "criterion": "Exact threshold or criterion: * Baseline: ≥ 10 m^2/E * With upstream settlement: ≥ 8 m^2/E * Treating stormwater without upstream relief: add + 5 m^2/E * For partial nitrification: ≥ 15 m^2/E * Depth: \\sim 1,0 m",
+      "passOutcome": "If PASSES: Design area is sufficient for natural oxygen transfer and biological treatment.",
+      "failOutcome": "If FAILS: Redesign required to increase the pond footprint.",
+      "iterationHint": "Iteration loop: Expand the land footprint of the pond.",
+      "conditional": "Mandatory/Conditional: Conditional (Only if unaerated ponds are used)."
+    },
+    {
+      "name": "Aerated Ponds (Belüftete Teiche) Sizing",
+      "sectionRefs": [
+        "§5.4",
+        "§7"
+      ],
+      "whatChecked": "What value is being checked: Volumetric loading rate (B\\_{R,BSB}), retention time (t\\_R), oxygen supply, and power density (P\\_R).",
+      "criterion": "Exact threshold or criterion: * Volumetric loading: ≤ 25 g/(m^3· d) * Minimum retention time: t\\_R ≥ 5 d * Oxygen transfer: OV\\_{C,BSB} ≥ 1,5 kg O\\_2 / kg BSB\\_5 * Power density: P\\_R \\= 1 bis 3 W/m^3",
+      "passOutcome": "If PASSES: Volume and aeration capacity are sufficient.",
+      "failOutcome": "If FAILS: Risk of anaerobic conditions and odor. Pond volume or aerator size must be increased.",
+      "iterationHint": "Iteration loop: Adjust the pond volume or select stronger aeration equipment.",
+      "conditional": "Mandatory/Conditional: Conditional (Only if aerated ponds are used)."
+    },
+    {
+      "name": "Secondary Clarifiers (Nachklärteiche) Sizing",
+      "sectionRefs": [
+        "§5.5",
+        "§7"
+      ],
+      "whatChecked": "What value is being checked: Retention time (t\\_R), depth, and surface area.",
+      "criterion": "Exact threshold or criterion: * t\\_R ≥ 1 d calculated at Maximaldurchfluss (peak mixed inflow). * Minimum depth: ≥ 1,2 m. * Minimum area: 20 m^2.",
+      "passOutcome": "If PASSES: Settling capacity is sufficient even during rain events.",
+      "failOutcome": "If FAILS: Pond volume must be increased.",
+      "iterationHint": "Iteration loop: Increase depth or footprint.",
+      "conditional": "Mandatory/Conditional: Conditional (Only if Nachklärteiche are used)."
+    },
+    {
+      "name": "Operational Desludging Trigger (Unbelüftete Teiche)",
+      "sectionRefs": [
+        "§8.3"
+      ],
+      "whatChecked": "What value is being checked: Sludge accumulation height.",
+      "criterion": "Exact threshold or criterion: Sludge height reaches 1/4 of the original water depth.",
+      "passOutcome": "If PASSES (below 1/4): Normal pond operation continues.",
+      "failOutcome": "If FAILS (at or exceeds 1/4): Mandatory desludging is triggered to prevent performance loss.",
+      "iterationHint": "Iteration loop: Sludge is physically pumped/removed, resetting the volume, and operation resumes.",
+      "conditional": "Mandatory/Conditional: Conditional (Unaerated ponds)."
+    },
+    {
+      "name": "Operational Desludging Trigger (Belüftete Teiche)",
+      "sectionRefs": [
+        "§8.4"
+      ],
+      "whatChecked": "What value is being checked: Remaining active water volume (and corresponding retention time).",
+      "criterion": "Exact threshold or criterion: Sludge accumulation causes the effective retention time to drop to \\< 5 days per basin.",
+      "passOutcome": "If PASSES (retention time ≥ 5 days): Normal operation continues.",
+      "failOutcome": "If FAILS (retention time drops below threshold): Mandatory desludging is triggered.",
+      "iterationHint": "Iteration loop: Sludge is removed, restoring the 5-day minimum volume.",
+      "conditional": "Mandatory/Conditional: Conditional (Aerated ponds)."
+    },
+    {
+      "name": "Operational Water Depth Clearance Over Sludge",
+      "sectionRefs": [
+        "§8.2",
+        "§8.5"
+      ],
+      "whatChecked": "What value is being checked: The minimum clear water depth resting directly above the sludge layer.",
+      "criterion": "Exact threshold or criterion: * ≥ 1,0 m for Absetzteiche (Settling ponds). * ≥ 0,9 m for Nachklärteiche (Secondary clarifiers).",
+      "passOutcome": "If PASSES: Settling functions correctly without washout.",
+      "failOutcome": "If FAILS: Sludge is too high; triggers immediate desludging.",
+      "iterationHint": "Iteration loop: Sludge removal.",
+      "conditional": "Mandatory/Conditional: Conditional (Settling and secondary ponds)."
+    },
+    {
+      "name": "Sludge Screen Requirement for Land Application",
+      "sectionRefs": [
+        "§8.8"
+      ],
+      "whatChecked": "What value is being checked: The physical gap size (Stababstand) of the mechanical screen used during sludge extraction.",
+      "criterion": "Exact threshold or criterion: Stababstand ≤ 10 mm.",
+      "passOutcome": "If PASSES: The sludge is cleared of plastics/hygiene articles and is legally permissible for agricultural utilization.",
+      "failOutcome": "If FAILS: The sludge contains macro-plastics and is prohibited from being spread on agricultural land.",
+      "iterationHint": "Iteration loop: Must change the screen to a finer mesh or change the disposal route (e.g., incineration).",
+      "conditional": "Mandatory/Conditional: Conditional (Applies only if no screen was installed at the raw wastewater inlet AND the sludge is destined for agriculture)."
+    }
+  ]
+}

@@ -149,7 +149,8 @@
       "severity": "blocking",
       "messageDe": "A_EW — unbelüftet, Baseline: Regelwert ≥ 10 m2/E (§5.3, §7).",
       "messageEn": "A_EW — unbelüftet, Baseline: regulation value ≥ 10 m2/E (§5.3, §7).",
-      "citation": "§5.3, §7"
+      "citation": "§5.3, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-07",
@@ -161,7 +162,8 @@
       "severity": "blocking",
       "messageDe": "A_EW — unbelüftet, mit Absetzteich: Regelwert ≥ 8 m2/E (§5.3, §7).",
       "messageEn": "A_EW — unbelüftet, mit Absetzteich: regulation value ≥ 8 m2/E (§5.3, §7).",
-      "citation": "§5.3, §7"
+      "citation": "§5.3, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-08",
@@ -173,7 +175,8 @@
       "severity": "blocking",
       "messageDe": "A_EW,Mi — Mischwasser-Zuschlag: Regelwert = 5 m2/E (§5.3, §6, §7).",
       "messageEn": "A_EW,Mi — Mischwasser-Zuschlag: regulation value = 5 m2/E (§5.3, §6, §7).",
-      "citation": "§5.3, §6, §7"
+      "citation": "§5.3, §6, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-09",
@@ -185,7 +188,8 @@
       "severity": "blocking",
       "messageDe": "A_EW — unbelüftet, Teilnitrifikation: Regelwert ≥ 15 m2/E (§5.3, §7).",
       "messageEn": "A_EW — unbelüftet, Teilnitrifikation: regulation value ≥ 15 m2/E (§5.3, §7).",
-      "citation": "§5.3, §7"
+      "citation": "§5.3, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-35",

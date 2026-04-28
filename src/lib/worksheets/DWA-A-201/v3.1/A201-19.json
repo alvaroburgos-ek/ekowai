@@ -127,7 +127,8 @@
       "severity": "blocking",
       "messageDe": "Stababstand Rechen — im Schlammstrom: Regelwert ≤ 10 mm (§8.8 (verweist auf DIN EN 12255-3)).",
       "messageEn": "Stababstand Rechen — im Schlammstrom: regulation value ≤ 10 mm (§8.8 (verweist auf DIN EN 12255-3)).",
-      "citation": "§8.8 (verweist auf DIN EN 12255-3)"
+      "citation": "§8.8 (verweist auf DIN EN 12255-3)",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The sludge contains macro-plastics and is prohibited from being spread on agricultural land. · Maßnahme: Iteration loop: Must change the screen to a finer mesh or change the disposal route (e.g., incineration)."
     },
     {
       "id": "T-43",
@@ -139,7 +140,8 @@
       "severity": "blocking",
       "messageDe": "Schlammanfall — Absetzteich (§7 Zusammenstellung): Regelwert = 130 l/(E·a) (§7).",
       "messageEn": "Schlammanfall — Absetzteich (§7 Zusammenstellung): regulation value = 130 l/(E·a) (§7).",
-      "citation": "§7"
+      "citation": "§7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-44",
@@ -151,7 +153,8 @@
       "severity": "blocking",
       "messageDe": "Schlammanfall — Unbelüftete/Belüftete Teiche mit vorgeschaltetem Absetzteich (§7): Regelwert = 70 l/(E·a) (§7).",
       "messageEn": "Schlammanfall — Unbelüftete/Belüftete Teiche mit vorgeschaltetem Absetzteich (§7): regulation value = 70 l/(E·a) (§7).",
-      "citation": "§7"
+      "citation": "§7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-45",
@@ -163,7 +166,8 @@
       "severity": "blocking",
       "messageDe": "Schlammanfall — Unbelüftete/Belüftete Teiche ohne Absetzteich (§7): Regelwert = 200 l/(E·a) (§7).",
       "messageEn": "Schlammanfall — Unbelüftete/Belüftete Teiche ohne Absetzteich (§7): regulation value = 200 l/(E·a) (§7).",
-      "citation": "§7"
+      "citation": "§7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-46",
@@ -175,7 +179,8 @@
       "severity": "blocking",
       "messageDe": "Schlammanfall — Schönungsteich (§7): Regelwert = 5 l/(E·a) (§7).",
       "messageEn": "Schlammanfall — Schönungsteich (§7): regulation value = 5 l/(E·a) (§7).",
-      "citation": "§7"
+      "citation": "§7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     }
   ],
   "sections": [

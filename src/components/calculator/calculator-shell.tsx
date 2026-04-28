@@ -14,6 +14,7 @@ import { StatusBanner } from './status-banner';
 import { SubmitButton } from './submit-button';
 import { ApprovalActions } from './approval-actions';
 import { CrossReferencePanel, type CrossReference } from './cross-reference-panel';
+import { ComplianceSummary } from './compliance-summary';
 
 interface RecordedDecision {
   decisionPointId: string;
@@ -124,6 +125,8 @@ export function CalculatorShell(props: {
       <StatusBanner status={props.status} lastApprovalComment={props.lastApprovalComment} />
 
       <DecisionBanner locale={props.locale} initialDecisions={props.initialDecisions} />
+
+      <ComplianceSummary locale={props.locale} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {inputSection && (

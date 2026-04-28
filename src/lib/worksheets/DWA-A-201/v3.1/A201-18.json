@@ -72,7 +72,8 @@
       "severity": "blocking",
       "messageDe": "Mindestwassertiefe über Schlamm — Absetzteich (Betrieb): Regelwert ≥ 1 m (§8.2).",
       "messageEn": "Mindestwassertiefe über Schlamm — Absetzteich (Betrieb): regulation value ≥ 1 m (§8.2).",
-      "citation": "§8.2"
+      "citation": "§8.2",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: Sludge is too high; triggers immediate desludging. · Maßnahme: Iteration loop: Sludge removal."
     }
   ],
   "sections": [

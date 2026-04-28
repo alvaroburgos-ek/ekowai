@@ -154,7 +154,8 @@
       "severity": "blocking",
       "messageDe": "B_R,BSB — belüfteter Teich: Regelwert ≤ 25 g/(m3·d) (§5.4, §7).",
       "messageEn": "B_R,BSB — belüfteter Teich: regulation value ≤ 25 g/(m3·d) (§5.4, §7).",
-      "citation": "§5.4, §7"
+      "citation": "§5.4, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-12",
@@ -166,7 +167,8 @@
       "severity": "blocking",
       "messageDe": "t_R Trockenwetter — belüfteter Teich: Regelwert ≥ 5 d (§5.4, §7).",
       "messageEn": "t_R Trockenwetter — belüfteter Teich: regulation value ≥ 5 d (§5.4, §7).",
-      "citation": "§5.4, §7"
+      "citation": "§5.4, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-13",
@@ -178,7 +180,8 @@
       "severity": "blocking",
       "messageDe": "OV_C,BSB — belüfteter Teich: Regelwert ≥ 1.5 kg/kg (§5.4, §7).",
       "messageEn": "OV_C,BSB — belüfteter Teich: regulation value ≥ 1.5 kg/kg (§5.4, §7).",
-      "citation": "§5.4, §7"
+      "citation": "§5.4, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     }
   ],
   "sections": [

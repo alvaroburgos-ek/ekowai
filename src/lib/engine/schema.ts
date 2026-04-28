@@ -79,6 +79,7 @@ const ComplianceThresholdSchema = z.object({
   messageDe: z.string(),
   messageEn: z.string(),
   citation: z.string(),
+  iterationHint: z.string().optional(),
 });
 
 const DecisionOptionSchema = z.object({

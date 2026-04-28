@@ -70,7 +70,8 @@
       "severity": "blocking",
       "messageDe": "EW_BSB5 Obergrenze — Anwendungsbereich: Regelwert ≤ 5000 E (§1).",
       "messageEn": "EW_BSB5 Obergrenze — Anwendungsbereich: regulation value ≤ 5000 E (§1).",
-      "citation": "§1"
+      "citation": "§1",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The standard no longer applies for biological sizing, meaning more stringent regulations or different technological approaches for larger facilities must be used (except for *Schönungsteiche* which are open-ended). · Maßnahme: Iteration loop: Re-evaluate the catchment area or split the treatment streams."
     }
   ],
   "sections": [

@@ -108,6 +108,15 @@
     "triggeredBy": "triggered by",
     "textOnlyNotice": "Note: no wizard support in MVP-1 — please review separately."
   },
+  "compliance": {
+    "header": "At a glance",
+    "title": "What to do",
+    "violated": "violated",
+    "open": "open",
+    "compliant": "compliant",
+    "compliantList": "show compliant thresholds",
+    "needsValue": "enter a value"
+  },
   "footer": {
     "impressum": "Imprint",
     "datenschutz": "Privacy",

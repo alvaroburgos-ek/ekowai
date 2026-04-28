@@ -109,7 +109,8 @@
       "severity": "blocking",
       "messageDe": "t_R bei Maximaldurchfluss — Nachklärteich: Regelwert ≥ 1 d (§5.5, §7).",
       "messageEn": "t_R bei Maximaldurchfluss — Nachklärteich: regulation value ≥ 1 d (§5.5, §7).",
-      "citation": "§5.5, §7"
+      "citation": "§5.5, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-17",
@@ -121,7 +122,8 @@
       "severity": "blocking",
       "messageDe": "Mindesttiefe — Nachklärteich: Regelwert ≥ 1.2 m (§5.5, §7).",
       "messageEn": "Mindesttiefe — Nachklärteich: regulation value ≥ 1.2 m (§5.5, §7).",
-      "citation": "§5.5, §7"
+      "citation": "§5.5, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-18",
@@ -133,7 +135,8 @@
       "severity": "blocking",
       "messageDe": "Mindestfläche — Nachklärteich: Regelwert ≥ 20 m2 (§5.5, §7).",
       "messageEn": "Mindestfläche — Nachklärteich: regulation value ≥ 20 m2 (§5.5, §7).",
-      "citation": "§5.5, §7"
+      "citation": "§5.5, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-19",
@@ -145,7 +148,8 @@
       "severity": "blocking",
       "messageDe": "Mindestwassertiefe über Schlammspiegel — Nachklärteich (Betrieb): Regelwert ≥ 0.9 m (§8.5).",
       "messageEn": "Mindestwassertiefe über Schlammspiegel — Nachklärteich (Betrieb): regulation value ≥ 0.9 m (§8.5).",
-      "citation": "§8.5"
+      "citation": "§8.5",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: Sludge is too high; triggers immediate desludging. · Maßnahme: Iteration loop: Sludge removal."
     }
   ],
   "sections": [

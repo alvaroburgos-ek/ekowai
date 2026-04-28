@@ -129,6 +129,18 @@ interface WizardThreshold {
   messageDe: string;
   messageEn: string;
   citation: string;
+  iterationHint?: string;
+}
+
+interface KnowledgeCheck {
+  name: string;
+  sectionRefs: string[];
+  whatChecked: string;
+  criterion: string;
+  passOutcome: string;
+  failOutcome: string;
+  iterationHint: string;
+  conditional: string;
 }
 interface WizardComputed {
   id: string;
@@ -218,11 +230,29 @@ function tryParseFormula(expression: string): { lhsId: string; rhs: ExprAst } | 
   };
 }
 
+function findIterationHint(
+  threshold: EkowaiThreshold,
+  knowledge: KnowledgeCheck[],
+): string | undefined {
+  if (knowledge.length === 0) return undefined;
+  const tRefs = threshold.section_ref.split(/[,\s]+/).filter((r) => r.startsWith('§'));
+  for (const check of knowledge) {
+    if (check.sectionRefs.some((r) => tRefs.includes(r))) {
+      const parts: string[] = [];
+      if (check.failOutcome) parts.push(`Wirkung bei Verstoß: ${check.failOutcome}`);
+      if (check.iterationHint) parts.push(`Maßnahme: ${check.iterationHint}`);
+      return parts.join(' · ') || undefined;
+    }
+  }
+  return undefined;
+}
+
 function transformWorksheet(
   wsRaw: EkowaiWorksheet,
   mapping: EkowaiMapping,
   thresholdRegister: EkowaiThreshold[],
   formulas: EkowaiFormula[],
+  knowledge: KnowledgeCheck[],
 ): Wizard {
   const wsId = wsRaw.worksheet_id;
   const sectionRefs = wsRaw.section_refs ?? [];
@@ -268,6 +298,7 @@ function transformWorksheet(
         op === 'gte' ? '≥' : op === 'lte' ? '≤' : '='
       } ${t.value}${t.unit ? ' ' + t.unit : ''} (${t.section_ref}).`,
       citation: t.section_ref,
+      iterationHint: findIterationHint(t, knowledge),
     });
   }
 
@@ -464,6 +495,11 @@ async function main() {
     join(SOURCE_DIR, 'mapping', 'formulas.json'),
   );
 
+  const knowledgePath = join(TARGET_DIR, '_knowledge.json');
+  const knowledge: KnowledgeCheck[] = existsSync(knowledgePath)
+    ? readJSON<{ complianceChecks: KnowledgeCheck[] }>(knowledgePath).complianceChecks
+    : [];
+
   const wsDir = join(SOURCE_DIR, 'worksheets', 'json');
   const wsFiles = readdirSync(wsDir)
     .filter((f) => /^A201-\d+\.json$/.test(f))
@@ -480,6 +516,7 @@ async function main() {
       mapping,
       equationRegister.threshold_register.thresholds,
       formulasRaw.formulas,
+      knowledge,
     );
     const out = join(TARGET_DIR, basename(f));
     writeFileSync(out, JSON.stringify(wizard, null, 2) + '\n', 'utf-8');

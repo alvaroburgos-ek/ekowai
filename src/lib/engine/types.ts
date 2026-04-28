@@ -88,6 +88,12 @@ export interface ComplianceThreshold {
   messageDe: string;
   messageEn: string;
   citation: string;
+  /**
+   * Action prompt shown when the threshold is violated — pulled from the
+   * regulation brief's "Iteration loop" / "If FAILS" entries.
+   * Tells the engineer what to adjust to comply.
+   */
+  iterationHint?: string;
 }
 
 export interface WorksheetSection {

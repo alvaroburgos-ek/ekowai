@@ -166,7 +166,8 @@
       "severity": "blocking",
       "messageDe": "t_R,M — Grobstoffentnahme: Regelwert = 0.5 h (§5.1).",
       "messageEn": "t_R,M — Grobstoffentnahme: regulation value = 0.5 h (§5.1).",
-      "citation": "§5.1"
+      "citation": "§5.1",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: Must be redesigned to avoid short-circuiting flows or slope collapses. · Maßnahme: Iteration loop: Adjust the length, width, or depth parameters in the design layout."
     }
   ],
   "sections": [

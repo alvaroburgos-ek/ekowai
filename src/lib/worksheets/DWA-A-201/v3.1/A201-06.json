@@ -155,7 +155,8 @@
       "severity": "blocking",
       "messageDe": "V_EW für Absetzteiche: Regelwert ≥ 0.5 m3/E (§5.2, §7).",
       "messageEn": "V_EW für Absetzteiche: regulation value ≥ 0.5 m3/E (§5.2, §7).",
-      "citation": "§5.2, §7"
+      "citation": "§5.2, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-02",
@@ -167,7 +168,8 @@
       "severity": "blocking",
       "messageDe": "Schlammraum im Absetzteich: Regelwert = 0.15 m3/E (§5.2).",
       "messageEn": "Schlammraum im Absetzteich: regulation value = 0.15 m3/E (§5.2).",
-      "citation": "§5.2"
+      "citation": "§5.2",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-03",
@@ -179,7 +181,8 @@
       "severity": "blocking",
       "messageDe": "t_R Trockenwetter — Absetzteich: Regelwert ≥ 1 d (§5.2, §7).",
       "messageEn": "t_R Trockenwetter — Absetzteich: regulation value ≥ 1 d (§5.2, §7).",
-      "citation": "§5.2, §7"
+      "citation": "§5.2, §7",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-04",
@@ -191,7 +194,8 @@
       "severity": "blocking",
       "messageDe": "Fließgeschwindigkeit am Ablauf Absetzteich: Regelwert ≤ 0.05 m/s (§5.2).",
       "messageEn": "Fließgeschwindigkeit am Ablauf Absetzteich: regulation value ≤ 0.05 m/s (§5.2).",
-      "citation": "§5.2"
+      "citation": "§5.2",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-05",
@@ -203,7 +207,8 @@
       "severity": "blocking",
       "messageDe": "Schlammanfall ausgefault pro Einwohner: Regelwert = 0.3 l/(E·d) (§5.2).",
       "messageEn": "Schlammanfall ausgefault pro Einwohner: regulation value = 0.3 l/(E·d) (§5.2).",
-      "citation": "§5.2"
+      "citation": "§5.2",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: The pond is undersized; poor settling or sludge washout will occur. · Maßnahme: Iteration loop: Increase the physical volume/area of the pond in the design phase."
     },
     {
       "id": "T-30",
@@ -215,7 +220,8 @@
       "severity": "blocking",
       "messageDe": "Tiefe für Absetz- und Schlammzone: Regelwert ≥ 1.5 m (§5.1).",
       "messageEn": "Tiefe für Absetz- und Schlammzone: regulation value ≥ 1.5 m (§5.1).",
-      "citation": "§5.1"
+      "citation": "§5.1",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS: Must be redesigned to avoid short-circuiting flows or slope collapses. · Maßnahme: Iteration loop: Adjust the length, width, or depth parameters in the design layout."
     }
   ],
   "sections": [

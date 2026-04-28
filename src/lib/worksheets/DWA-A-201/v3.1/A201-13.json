@@ -98,7 +98,8 @@
       "severity": "blocking",
       "messageDe": "k_f — allgemeine Teiche: Regelwert ≤ 1e-8 m/s (§5.8).",
       "messageEn": "k_f — allgemeine Teiche: regulation value ≤ 1e-8 m/s (§5.8).",
-      "citation": "§5.8"
+      "citation": "§5.8",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS (permeability is ≥ 10^{-8} m/s or soil is fractured): Artificial sealing is mandatory. Must install plastic sheets (≥ 3 mm and UV-resistant), concrete, asphalt, bentonite, or a ≥ 30 cm thick compacted clay/bentonite layer (≥ 95% Proctor density),. · Maßnahme: Iteration loop: If a soft artificial seal is required, the designer must check if desludging vehicles can still enter (or switch to floating pumps)."
     },
     {
       "id": "T-23",
@@ -110,7 +111,8 @@
       "severity": "blocking",
       "messageDe": "k_f — Schönungsteiche: Regelwert ≤ 1e-7 m/s (§5.8).",
       "messageEn": "k_f — Schönungsteiche: regulation value ≤ 1e-7 m/s (§5.8).",
-      "citation": "§5.8"
+      "citation": "§5.8",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS (permeability is ≥ 10^{-8} m/s or soil is fractured): Artificial sealing is mandatory. Must install plastic sheets (≥ 3 mm and UV-resistant), concrete, asphalt, bentonite, or a ≥ 30 cm thick compacted clay/bentonite layer (≥ 95% Proctor density),. · Maßnahme: Iteration loop: If a soft artificial seal is required, the designer must check if desludging vehicles can still enter (or switch to floating pumps)."
     },
     {
       "id": "T-24",
@@ -122,7 +124,8 @@
       "severity": "blocking",
       "messageDe": "Kunststoffbahn Stärke: Regelwert ≥ 3 mm (§5.8).",
       "messageEn": "Kunststoffbahn Stärke: regulation value ≥ 3 mm (§5.8).",
-      "citation": "§5.8"
+      "citation": "§5.8",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS (permeability is ≥ 10^{-8} m/s or soil is fractured): Artificial sealing is mandatory. Must install plastic sheets (≥ 3 mm and UV-resistant), concrete, asphalt, bentonite, or a ≥ 30 cm thick compacted clay/bentonite layer (≥ 95% Proctor density),. · Maßnahme: Iteration loop: If a soft artificial seal is required, the designer must check if desludging vehicles can still enter (or switch to floating pumps)."
     },
     {
       "id": "T-25",
@@ -134,7 +137,8 @@
       "severity": "blocking",
       "messageDe": "Proctordichte — bindige Deckschicht: Regelwert ≥ 95 % (§5.8).",
       "messageEn": "Proctordichte — bindige Deckschicht: regulation value ≥ 95 % (§5.8).",
-      "citation": "§5.8"
+      "citation": "§5.8",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS (permeability is ≥ 10^{-8} m/s or soil is fractured): Artificial sealing is mandatory. Must install plastic sheets (≥ 3 mm and UV-resistant), concrete, asphalt, bentonite, or a ≥ 30 cm thick compacted clay/bentonite layer (≥ 95% Proctor density),. · Maßnahme: Iteration loop: If a soft artificial seal is required, the designer must check if desludging vehicles can still enter (or switch to floating pumps)."
     },
     {
       "id": "T-26",
@@ -146,7 +150,8 @@
       "severity": "blocking",
       "messageDe": "Bentonit Einbringtiefe: Regelwert ≥ 30 cm (§5.8).",
       "messageEn": "Bentonit Einbringtiefe: regulation value ≥ 30 cm (§5.8).",
-      "citation": "§5.8"
+      "citation": "§5.8",
+      "iterationHint": "Wirkung bei Verstoß: If FAILS (permeability is ≥ 10^{-8} m/s or soil is fractured): Artificial sealing is mandatory. Must install plastic sheets (≥ 3 mm and UV-resistant), concrete, asphalt, bentonite, or a ≥ 30 cm thick compacted clay/bentonite layer (≥ 95% Proctor density),. · Maßnahme: Iteration loop: If a soft artificial seal is required, the designer must check if desludging vehicles can still enter (or switch to floating pumps)."
     }
   ],
   "sections": [

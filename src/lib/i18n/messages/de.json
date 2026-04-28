@@ -108,6 +108,15 @@
     "triggeredBy": "ausgelöst durch",
     "textOnlyNotice": "Hinweis: keine Wizard-Unterstützung in MVP-1 — bitte separat prüfen."
   },
+  "compliance": {
+    "header": "Auf einen Blick",
+    "title": "Was zu tun ist",
+    "violated": "verletzt",
+    "open": "offen",
+    "compliant": "regelkonform",
+    "compliantList": "regelkonforme Schwellwerte anzeigen",
+    "needsValue": "Wert eintragen"
+  },
   "footer": {
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",
