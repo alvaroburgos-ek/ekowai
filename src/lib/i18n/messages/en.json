@@ -1,0 +1,31 @@
+{
+  "auth": {
+    "signIn": "Sign in",
+    "email": "Email",
+    "magicLinkSent": "Magic link sent — please check your inbox.",
+    "magicLinkButton": "Send magic link",
+    "verifying": "Verifying ...",
+    "linkExpired": "This link has expired — please request a new one.",
+    "createOrgPrompt": "Create your organization",
+    "orgName": "Organization name",
+    "orgCreate": "Create organization"
+  },
+  "nav": {
+    "projects": "Projects",
+    "org": "Organization",
+    "logout": "Sign out"
+  },
+  "projects": {
+    "title": "Projects",
+    "newProject": "New project",
+    "name": "Project name",
+    "client": "Client",
+    "location": "Location",
+    "create": "Create project",
+    "noProjects": "No projects yet. Create your first one."
+  },
+  "errors": {
+    "generic": "Something went wrong — please try again.",
+    "noPermission": "No permission."
+  }
+}

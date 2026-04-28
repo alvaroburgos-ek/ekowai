@@ -1,0 +1,31 @@
+{
+  "auth": {
+    "signIn": "Anmelden",
+    "email": "E-Mail",
+    "magicLinkSent": "Magic Link wurde versandt — bitte prüfen Sie Ihr Postfach.",
+    "magicLinkButton": "Magic Link senden",
+    "verifying": "Wird verifiziert ...",
+    "linkExpired": "Dieser Link ist abgelaufen — bitte fordern Sie einen neuen an.",
+    "createOrgPrompt": "Erstellen Sie Ihre Organisation",
+    "orgName": "Name der Organisation",
+    "orgCreate": "Organisation erstellen"
+  },
+  "nav": {
+    "projects": "Projekte",
+    "org": "Organisation",
+    "logout": "Abmelden"
+  },
+  "projects": {
+    "title": "Projekte",
+    "newProject": "Neues Projekt",
+    "name": "Projektname",
+    "client": "Auftraggeber",
+    "location": "Standort",
+    "create": "Projekt erstellen",
+    "noProjects": "Noch keine Projekte. Erstellen Sie das erste."
+  },
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten — bitte erneut versuchen.",
+    "noPermission": "Keine Berechtigung."
+  }
+}
