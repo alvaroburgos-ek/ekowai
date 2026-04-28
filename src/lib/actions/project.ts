@@ -61,3 +61,43 @@ export async function listProjectsForUser(userId: string) {
     .where(and(eq(projects.orgId, memberships[0].orgId), isNull(projects.archivedAt)))
     .orderBy(projects.createdAt);
 }
+
+const updateSchema = createSchema.extend({
+  id: z.string().uuid(),
+});
+
+export async function updateProject(formData: FormData): Promise<void> {
+  const parsed = updateSchema.safeParse({
+    id: formData.get('id'),
+    name: formData.get('name'),
+    clientName: formData.get('clientName') || undefined,
+    location: formData.get('location') || undefined,
+    locale: formData.get('locale'),
+  });
+  if (!parsed.success) redirect('/');
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/');
+
+  await db.update(projects)
+    .set({
+      name: parsed.data.name,
+      clientName: parsed.data.clientName,
+      location: parsed.data.location,
+      updatedAt: new Date(),
+    })
+    .where(eq(projects.id, parsed.data.id));
+  // RLS policy on UPDATE enforces engineer-and-above
+
+  revalidatePath(`/${parsed.data.locale}/projects/${parsed.data.id}`);
+  redirect(`/${parsed.data.locale}/projects/${parsed.data.id}`);
+}
+
+export async function archiveProject(id: string, locale: 'de' | 'en'): Promise<void> {
+  await db.update(projects)
+    .set({ archivedAt: new Date() })
+    .where(eq(projects.id, id));
+  revalidatePath(`/${locale}/projects`);
+  redirect(`/${locale}/projects`);
+}
