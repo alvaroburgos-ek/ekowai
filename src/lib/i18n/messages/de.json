@@ -117,6 +117,32 @@
     "compliantList": "regelkonforme Schwellwerte anzeigen",
     "needsValue": "Wert eintragen"
   },
+  "result": {
+    "header": "Bemessungsergebnis",
+    "title": "Ergebnisse",
+    "live": "Live",
+    "statusLabel": "Status",
+    "computedTitle": "Berechnete Werte",
+    "verifiedTitle": "Geprüfte Parameter",
+    "enteredTitle": "Eingetragene Werte",
+    "noValue": "—",
+    "pass": "regelkonform",
+    "fail": "verletzt",
+    "open": "offen",
+    "total": "geprüft",
+    "big": {
+      "compliant": "Regelkonform",
+      "warning": "Warnung",
+      "violation": "Verstoß",
+      "unknown": "Unbekannt"
+    },
+    "status": {
+      "compliant": "Regelkonform",
+      "warning": "Warnung",
+      "blocking_violation": "Verstoß",
+      "unknown": "Unbekannt"
+    }
+  },
   "footer": {
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",

@@ -117,6 +117,32 @@
     "compliantList": "show compliant thresholds",
     "needsValue": "enter a value"
   },
+  "result": {
+    "header": "Sizing result",
+    "title": "Results",
+    "live": "Live",
+    "statusLabel": "Status",
+    "computedTitle": "Computed values",
+    "verifiedTitle": "Verified parameters",
+    "enteredTitle": "Entered values",
+    "noValue": "—",
+    "pass": "compliant",
+    "fail": "violated",
+    "open": "open",
+    "total": "total",
+    "big": {
+      "compliant": "Compliant",
+      "warning": "Warning",
+      "violation": "Violation",
+      "unknown": "Unknown"
+    },
+    "status": {
+      "compliant": "Compliant",
+      "warning": "Warning",
+      "blocking_violation": "Violation",
+      "unknown": "Unknown"
+    }
+  },
   "footer": {
     "impressum": "Imprint",
     "datenschutz": "Privacy",
