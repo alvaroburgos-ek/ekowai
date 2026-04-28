@@ -1,9 +1,17 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import type { User } from '@supabase/supabase-js';
 import { env } from '@/env';
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+
+  // BYPASS_AUTH: skip Supabase entirely, hand back a stub user so the
+  // root middleware's auth-redirect treats the request as authenticated.
+  // Test deployments only — never set in real production.
+  if (env.BYPASS_AUTH && env.BYPASS_AUTH_USER_ID) {
+    return { response, user: makeStubUser(env.BYPASS_AUTH_USER_ID) };
+  }
 
   const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
@@ -32,4 +40,16 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   return { response, user };
+}
+
+function makeStubUser(id: string): User {
+  return {
+    id,
+    aud: 'authenticated',
+    role: 'authenticated',
+    email: 'bypass@dev.local',
+    app_metadata: { provider: 'bypass' },
+    user_metadata: {},
+    created_at: new Date(0).toISOString(),
+  } as User;
 }
