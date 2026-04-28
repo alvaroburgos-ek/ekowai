@@ -27,5 +27,18 @@
   "errors": {
     "generic": "Ein Fehler ist aufgetreten — bitte erneut versuchen.",
     "noPermission": "Keine Berechtigung."
+  },
+  "org": {
+    "title": "Organisation",
+    "members": "Mitglieder",
+    "invite": "Einladen",
+    "inviteEmail": "E-Mail-Adresse",
+    "inviteRole": "Rolle",
+    "roleAdmin": "Admin",
+    "roleEngineer": "Ingenieur",
+    "roleViewer": "Betrachter",
+    "inviteSubmit": "Einladung senden",
+    "inviteSent": "Einladung versandt — der Benutzer erhält in Kürze einen Link.",
+    "noMembers": "Noch keine weiteren Mitglieder."
   }
 }

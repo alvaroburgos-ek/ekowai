@@ -27,5 +27,18 @@
   "errors": {
     "generic": "Something went wrong — please try again.",
     "noPermission": "No permission."
+  },
+  "org": {
+    "title": "Organization",
+    "members": "Members",
+    "invite": "Invite",
+    "inviteEmail": "Email address",
+    "inviteRole": "Role",
+    "roleAdmin": "Admin",
+    "roleEngineer": "Engineer",
+    "roleViewer": "Viewer",
+    "inviteSubmit": "Send invite",
+    "inviteSent": "Invite sent — the user will receive a link shortly.",
+    "noMembers": "No other members yet."
   }
 }
