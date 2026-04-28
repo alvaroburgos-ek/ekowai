@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { evaluate } from './evaluate';
-import { A201_08 } from '@/lib/worksheets/DWA-A-201/v3.2';
-import type { Worksheet, InputValues, ExpressionAst } from './types';
+import type { Worksheet, ExpressionAst } from './types';
 
 const tinyWorksheet = (computed: { id: string; expression: ExpressionAst }[]): Worksheet => ({
   contractVersion: '1.0',
@@ -211,16 +210,4 @@ describe('evaluate', () => {
     expect(evaluate(w, { a: false }).computed.x).toBe(0);
   });
 
-  it('end-to-end: A201-08 with realistic inputs', () => {
-    const inputs: InputValues = {
-      Q_DW_m3d: 5000,
-      BSB5_in_mgL: 300,
-      T_C: 12,
-      treatment_class: 'N',
-    };
-    const r = evaluate(A201_08, inputs);
-    expect(r.errors).toEqual([]);
-    expect(r.computed.BSB5_load_kgd).toBe(1500);
-    expect(r.computed.tank_volume_m3).toBe(6000);
-  });
 });

@@ -12,7 +12,7 @@ import {
   profiles,
   projects,
 } from '@/lib/db/schema';
-import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.2';
+import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { compute, openDecisionPoints } from '@/lib/engine';
 import { sendEmail } from '@/lib/email/client';
 import {

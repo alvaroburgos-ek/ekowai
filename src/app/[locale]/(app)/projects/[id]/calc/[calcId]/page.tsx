@@ -8,7 +8,7 @@ import {
 } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
-import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.2';
+import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { CalculatorShell } from '@/components/calculator/calculator-shell';
 import { createClient } from '@/lib/supabase/server';
 import type { ExpressionAst } from '@/lib/engine';

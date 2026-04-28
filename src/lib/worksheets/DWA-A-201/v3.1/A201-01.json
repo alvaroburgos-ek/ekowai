@@ -1,0 +1,32 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-01",
+  "titleDe": "Projektregistrierung",
+  "titleEn": "Project Registration",
+  "sourceCitation": "§1",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "note",
+      "type": "text",
+      "labelDe": "Anmerkungen",
+      "labelEn": "Notes",
+      "citation": "§1"
+    }
+  ],
+  "computed": [],
+  "thresholds": [],
+  "sections": [
+    {
+      "id": "meta",
+      "titleDe": "Hinweise",
+      "titleEn": "Notes",
+      "fields": [
+        "note"
+      ]
+    }
+  ],
+  "decisionPoints": []
+}

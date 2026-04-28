@@ -1,0 +1,156 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-19",
+  "titleDe": "Entschlammungsplan (Planungsunterlagen)",
+  "titleEn": "Desludging Plan (Planning Documents)",
+  "sourceCitation": "§8.8",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "T_39",
+      "type": "number",
+      "labelDe": "Stababstand Rechen — im Schlammstrom",
+      "labelEn": "Stababstand Rechen — im Schlammstrom",
+      "unit": "mm",
+      "citation": "§8.8 (verweist auf DIN EN 12255-3)",
+      "helpDe": "Bei landwirtschaftlicher Verwertung des Schlammes."
+    },
+    {
+      "id": "T_43",
+      "type": "number",
+      "labelDe": "Schlammanfall — Absetzteich (§7 Zusammenstellung)",
+      "labelEn": "Schlammanfall — Absetzteich (§7 Zusammenstellung)",
+      "unit": "l/(E·a)",
+      "citation": "§7",
+      "helpDe": "Gross Schlammanfall für Planungsunterlagen (§8.8). Distinct from T-05 (0,3 l/(E·d) = ausgefaulter Schlamm per §5.2)."
+    },
+    {
+      "id": "T_44",
+      "type": "number",
+      "labelDe": "Schlammanfall — Unbelüftete/Belüftete Teiche mit vorgeschaltetem Absetzteich (§7)",
+      "labelEn": "Schlammanfall — Unbelüftete/Belüftete Teiche mit vorgeschaltetem Absetzteich (§7)",
+      "unit": "l/(E·a)",
+      "citation": "§7",
+      "helpDe": "Gross Schlammanfall für Planungsunterlagen (§8.8)."
+    },
+    {
+      "id": "T_45",
+      "type": "number",
+      "labelDe": "Schlammanfall — Unbelüftete/Belüftete Teiche ohne Absetzteich (§7)",
+      "labelEn": "Schlammanfall — Unbelüftete/Belüftete Teiche ohne Absetzteich (§7)",
+      "unit": "l/(E·a)",
+      "citation": "§7",
+      "helpDe": "Gross Schlammanfall für Planungsunterlagen (§8.8). Higher than T-44 because no upstream sediment removal."
+    },
+    {
+      "id": "T_46",
+      "type": "number",
+      "labelDe": "Schlammanfall — Schönungsteich (§7)",
+      "labelEn": "Schlammanfall — Schönungsteich (§7)",
+      "unit": "l/(E·a)",
+      "citation": "§7",
+      "helpDe": "Gross Schlammanfall für Planungsunterlagen (§8.8). Value applies whether upstream Absetzteich present or not."
+    }
+  ],
+  "computed": [],
+  "thresholds": [
+    {
+      "id": "T-39",
+      "ref": "T_39",
+      "rule": {
+        "kind": "lte",
+        "value": 10
+      },
+      "severity": "blocking",
+      "messageDe": "Stababstand Rechen — im Schlammstrom: Regelwert ≤ 10 mm (§8.8 (verweist auf DIN EN 12255-3)).",
+      "messageEn": "Stababstand Rechen — im Schlammstrom: regulation value ≤ 10 mm (§8.8 (verweist auf DIN EN 12255-3)).",
+      "citation": "§8.8 (verweist auf DIN EN 12255-3)"
+    },
+    {
+      "id": "T-43",
+      "ref": "T_43",
+      "rule": {
+        "kind": "eq",
+        "value": 130
+      },
+      "severity": "blocking",
+      "messageDe": "Schlammanfall — Absetzteich (§7 Zusammenstellung): Regelwert = 130 l/(E·a) (§7).",
+      "messageEn": "Schlammanfall — Absetzteich (§7 Zusammenstellung): regulation value = 130 l/(E·a) (§7).",
+      "citation": "§7"
+    },
+    {
+      "id": "T-44",
+      "ref": "T_44",
+      "rule": {
+        "kind": "eq",
+        "value": 70
+      },
+      "severity": "blocking",
+      "messageDe": "Schlammanfall — Unbelüftete/Belüftete Teiche mit vorgeschaltetem Absetzteich (§7): Regelwert = 70 l/(E·a) (§7).",
+      "messageEn": "Schlammanfall — Unbelüftete/Belüftete Teiche mit vorgeschaltetem Absetzteich (§7): regulation value = 70 l/(E·a) (§7).",
+      "citation": "§7"
+    },
+    {
+      "id": "T-45",
+      "ref": "T_45",
+      "rule": {
+        "kind": "eq",
+        "value": 200
+      },
+      "severity": "blocking",
+      "messageDe": "Schlammanfall — Unbelüftete/Belüftete Teiche ohne Absetzteich (§7): Regelwert = 200 l/(E·a) (§7).",
+      "messageEn": "Schlammanfall — Unbelüftete/Belüftete Teiche ohne Absetzteich (§7): regulation value = 200 l/(E·a) (§7).",
+      "citation": "§7"
+    },
+    {
+      "id": "T-46",
+      "ref": "T_46",
+      "rule": {
+        "kind": "eq",
+        "value": 5
+      },
+      "severity": "blocking",
+      "messageDe": "Schlammanfall — Schönungsteich (§7): Regelwert = 5 l/(E·a) (§7).",
+      "messageEn": "Schlammanfall — Schönungsteich (§7): regulation value = 5 l/(E·a) (§7).",
+      "citation": "§7"
+    }
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
+      "fields": [
+        "T_39",
+        "T_43",
+        "T_44",
+        "T_45",
+        "T_46"
+      ]
+    }
+  ],
+  "decisionPoints": [
+    {
+      "id": "A201-19-DP-5",
+      "labelDe": "Desludging Method",
+      "labelEn": "Desludging Method",
+      "promptDe": "Entschlammung method selection.",
+      "promptEn": "Entschlammung method selection.",
+      "citation": "§8.8",
+      "options": [
+        {
+          "value": "Teichentleerung",
+          "labelDe": "Teichentleerung",
+          "labelEn": "Teichentleerung"
+        },
+        {
+          "value": "Absaugen_unter_Wasser",
+          "labelDe": "Absaugen_unter_Wasser",
+          "labelEn": "Absaugen_unter_Wasser"
+        }
+      ]
+    }
+  ]
+}

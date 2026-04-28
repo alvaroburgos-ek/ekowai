@@ -1,0 +1,47 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-02",
+  "titleDe": "Anwendungsbereich und Ausschlusskriterien",
+  "titleEn": "Scope of Application and Exclusion Criteria",
+  "sourceCitation": "§1",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "T_34",
+      "type": "number",
+      "labelDe": "EW_BSB5 Obergrenze — Anwendungsbereich",
+      "labelEn": "EW_BSB5 Obergrenze — Anwendungsbereich",
+      "unit": "E",
+      "citation": "§1",
+      "helpDe": "Größenklasse 2 gemäß Anhang 1 AbwV. Ausnahme: Schönungsteiche sind nicht begrenzt."
+    }
+  ],
+  "computed": [],
+  "thresholds": [
+    {
+      "id": "T-34",
+      "ref": "T_34",
+      "rule": {
+        "kind": "lte",
+        "value": 5000
+      },
+      "severity": "blocking",
+      "messageDe": "EW_BSB5 Obergrenze — Anwendungsbereich: Regelwert ≤ 5000 E (§1).",
+      "messageEn": "EW_BSB5 Obergrenze — Anwendungsbereich: regulation value ≤ 5000 E (§1).",
+      "citation": "§1"
+    }
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
+      "fields": [
+        "T_34"
+      ]
+    }
+  ],
+  "decisionPoints": []
+}

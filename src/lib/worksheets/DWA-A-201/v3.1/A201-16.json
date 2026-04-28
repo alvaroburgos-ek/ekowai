@@ -1,0 +1,58 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-16",
+  "titleDe": "Mischwasserbehandlung — Fall III (gesamtes Mischwasser unvermindert)",
+  "titleEn": "Combined Sewer Treatment — Case III (full combined flow unthrottled)",
+  "sourceCitation": "§6",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "note",
+      "type": "text",
+      "labelDe": "Anmerkungen",
+      "labelEn": "Notes",
+      "citation": "§6"
+    }
+  ],
+  "computed": [],
+  "thresholds": [],
+  "sections": [
+    {
+      "id": "meta",
+      "titleDe": "Hinweise",
+      "titleEn": "Notes",
+      "fields": [
+        "note"
+      ]
+    }
+  ],
+  "decisionPoints": [
+    {
+      "id": "A201-16-DP-3a",
+      "labelDe": "Fall III Sub-variant",
+      "labelEn": "Fall III Sub-variant",
+      "promptDe": "Fall III sub-variant — fires only when DP-3 = Fall_III_unvermindert.",
+      "promptEn": "Fall III sub-variant — fires only when DP-3 = Fall_III_unvermindert.",
+      "citation": "§6",
+      "options": [
+        {
+          "value": "a_Qmax_alle_Teiche",
+          "labelDe": "a_Qmax_alle_Teiche",
+          "labelEn": "a_Qmax_alle_Teiche"
+        },
+        {
+          "value": "b_RUE_BU_abschlag_Gewaesser",
+          "labelDe": "b_RUE_BU_abschlag_Gewaesser",
+          "labelEn": "b_RUE_BU_abschlag_Gewaesser"
+        },
+        {
+          "value": "c_abschlag_nachfolgende_Teiche",
+          "labelDe": "c_abschlag_nachfolgende_Teiche",
+          "labelEn": "c_abschlag_nachfolgende_Teiche"
+        }
+      ]
+    }
+  ]
+}

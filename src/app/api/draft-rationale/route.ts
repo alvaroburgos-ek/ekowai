@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { calculations, orgMembers } from '@/lib/db/schema';
-import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.2';
+import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { compute } from '@/lib/engine';
 import { draftRationale } from '@/lib/llm/client';
 import { checkRateLimit } from '@/lib/llm/rate-limit';

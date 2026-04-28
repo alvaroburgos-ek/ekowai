@@ -1,0 +1,70 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-04",
+  "titleDe": "Einzugsgebiet und Entwässerungssystem",
+  "titleEn": "Catchment Area and Sewer System",
+  "sourceCitation": "§1",
+  "status": "preview",
+  "inputs": [],
+  "computed": [
+    {
+      "id": "EW",
+      "labelDe": "Einwohnerwert — Definition",
+      "labelEn": "Einwohnerwert — Definition",
+      "citation": "§2",
+      "expression": {
+        "kind": "op",
+        "op": "+",
+        "lhs": {
+          "kind": "ref",
+          "id": "EZ"
+        },
+        "rhs": {
+          "kind": "ref",
+          "id": "EGW"
+        }
+      },
+      "precision": 2
+    }
+  ],
+  "thresholds": [],
+  "sections": [
+    {
+      "id": "results",
+      "titleDe": "Berechnete Werte",
+      "titleEn": "Computed values",
+      "fields": [
+        "EW"
+      ]
+    }
+  ],
+  "decisionPoints": [
+    {
+      "id": "A201-04-DP-3",
+      "labelDe": "Mischwasser Topology Case",
+      "labelEn": "Mischwasser Topology Case",
+      "promptDe": "Mischwasser topology case (conditional on Mischkanalisation). Topology choice fires at A201-04 via sewer_system field → activates exactly one of A201-14/15/16. Fall III sub-variant (a/b/c) is a sub-decision DP-3a owned by A201-16.",
+      "promptEn": "Mischwasser topology case (conditional on Mischkanalisation). Topology choice fires at A201-04 via sewer_system field → activates exactly one of A201-14/15/16. Fall III sub-variant (a/b/c) is a sub-decision DP-3a owned by A201-16.",
+      "citation": "§6",
+      "options": [
+        {
+          "value": "Fall_I_RUE",
+          "labelDe": "Fall_I_RUE",
+          "labelEn": "Fall_I_RUE"
+        },
+        {
+          "value": "Fall_II_RUEB",
+          "labelDe": "Fall_II_RUEB",
+          "labelEn": "Fall_II_RUEB"
+        },
+        {
+          "value": "Fall_III_unvermindert",
+          "labelDe": "Fall_III_unvermindert",
+          "labelEn": "Fall_III_unvermindert"
+        }
+      ]
+    }
+  ]
+}

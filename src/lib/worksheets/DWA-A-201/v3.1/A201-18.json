@@ -1,0 +1,47 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-18",
+  "titleDe": "Betriebsplan Teiche",
+  "titleEn": "Pond Operation Plan",
+  "sourceCitation": "§8.1",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "T_37",
+      "type": "number",
+      "labelDe": "Mindestwassertiefe über Schlamm — Absetzteich (Betrieb)",
+      "labelEn": "Mindestwassertiefe über Schlamm — Absetzteich (Betrieb)",
+      "unit": "m",
+      "citation": "§8.2",
+      "helpDe": "Per DIN EN 12255-5; operational threshold."
+    }
+  ],
+  "computed": [],
+  "thresholds": [
+    {
+      "id": "T-37",
+      "ref": "T_37",
+      "rule": {
+        "kind": "gte",
+        "value": 1
+      },
+      "severity": "blocking",
+      "messageDe": "Mindestwassertiefe über Schlamm — Absetzteich (Betrieb): Regelwert ≥ 1 m (§8.2).",
+      "messageEn": "Mindestwassertiefe über Schlamm — Absetzteich (Betrieb): regulation value ≥ 1 m (§8.2).",
+      "citation": "§8.2"
+    }
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
+      "fields": [
+        "T_37"
+      ]
+    }
+  ],
+  "decisionPoints": []
+}

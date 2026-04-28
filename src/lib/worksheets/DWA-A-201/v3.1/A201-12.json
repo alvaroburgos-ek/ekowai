@@ -1,0 +1,96 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-12",
+  "titleDe": "Allgemeine Baugrundsätze",
+  "titleEn": "General Construction Principles",
+  "sourceCitation": "§5.1",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "T_33",
+      "type": "number",
+      "labelDe": "t_R,M — Grobstoffentnahme",
+      "labelEn": "t_R,M — Grobstoffentnahme",
+      "unit": "h",
+      "citation": "§5.1",
+      "helpDe": "Used in Formula F-01: V_erf ≥ Q_M · t_R,M."
+    }
+  ],
+  "computed": [
+    {
+      "id": "V_erf",
+      "labelDe": "Grobstoffentnahme Volumen (erforderlich)",
+      "labelEn": "Grobstoffentnahme Volumen (erforderlich)",
+      "citation": "§5.1",
+      "expression": {
+        "kind": "op",
+        "op": "*",
+        "lhs": {
+          "kind": "ref",
+          "id": "Q_M"
+        },
+        "rhs": {
+          "kind": "ref",
+          "id": "t_R_M"
+        }
+      },
+      "precision": 2
+    }
+  ],
+  "thresholds": [
+    {
+      "id": "T-33",
+      "ref": "T_33",
+      "rule": {
+        "kind": "eq",
+        "value": 0.5
+      },
+      "severity": "blocking",
+      "messageDe": "t_R,M — Grobstoffentnahme: Regelwert = 0.5 h (§5.1).",
+      "messageEn": "t_R,M — Grobstoffentnahme: regulation value = 0.5 h (§5.1).",
+      "citation": "§5.1"
+    }
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
+      "fields": [
+        "T_33"
+      ]
+    },
+    {
+      "id": "results",
+      "titleDe": "Berechnete Werte",
+      "titleEn": "Computed values",
+      "fields": [
+        "V_erf"
+      ]
+    }
+  ],
+  "decisionPoints": [
+    {
+      "id": "A201-12-DP-2",
+      "labelDe": "Rechen Placement",
+      "labelEn": "Rechen Placement",
+      "promptDe": "Rechen location: inflow vs. sludge stream at desludging.",
+      "promptEn": "Rechen location: inflow vs. sludge stream at desludging.",
+      "citation": "§5.1, §8.8",
+      "options": [
+        {
+          "value": "rechen_im_zulauf",
+          "labelDe": "rechen_im_zulauf",
+          "labelEn": "rechen_im_zulauf"
+        },
+        {
+          "value": "rechen_im_schlammstrom",
+          "labelDe": "rechen_im_schlammstrom",
+          "labelEn": "rechen_im_schlammstrom"
+        }
+      ]
+    }
+  ]
+}

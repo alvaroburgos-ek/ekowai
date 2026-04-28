@@ -1,0 +1,73 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-05",
+  "titleDe": "Auswahl Teichsystem (DP-1)",
+  "titleEn": "Pond System Selection (DP-1)",
+  "sourceCitation": "§3",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "note",
+      "type": "text",
+      "labelDe": "Anmerkungen",
+      "labelEn": "Notes",
+      "citation": "§3"
+    }
+  ],
+  "computed": [],
+  "thresholds": [],
+  "sections": [
+    {
+      "id": "meta",
+      "titleDe": "Hinweise",
+      "titleEn": "Notes",
+      "fields": [
+        "note"
+      ]
+    }
+  ],
+  "decisionPoints": [
+    {
+      "id": "A201-05-DP-1",
+      "labelDe": "Pond System Selection",
+      "labelEn": "Pond System Selection",
+      "promptDe": "Selection of pond system type (multi-select allowed for treatment trains).",
+      "promptEn": "Selection of pond system type (multi-select allowed for treatment trains).",
+      "citation": "§3, §4",
+      "options": [
+        {
+          "value": "absetzteich",
+          "labelDe": "absetzteich",
+          "labelEn": "absetzteich"
+        },
+        {
+          "value": "unbeluefteter_teich",
+          "labelDe": "unbeluefteter_teich",
+          "labelEn": "unbeluefteter_teich"
+        },
+        {
+          "value": "belueftet_teich",
+          "labelDe": "belueftet_teich",
+          "labelEn": "belueftet_teich"
+        },
+        {
+          "value": "nachklaerteich",
+          "labelDe": "nachklaerteich",
+          "labelEn": "nachklaerteich"
+        },
+        {
+          "value": "kombination_biofilm",
+          "labelDe": "kombination_biofilm",
+          "labelEn": "kombination_biofilm"
+        },
+        {
+          "value": "schoenungsteich",
+          "labelDe": "schoenungsteich",
+          "labelEn": "schoenungsteich"
+        }
+      ]
+    }
+  ]
+}

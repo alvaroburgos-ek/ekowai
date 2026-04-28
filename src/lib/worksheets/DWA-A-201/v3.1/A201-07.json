@@ -1,0 +1,135 @@
+{
+  "contractVersion": "1.0",
+  "regulation": "DWA-A-201",
+  "regulationVersion": "v3.1",
+  "id": "A201-07",
+  "titleDe": "Unbelüftete Abwasserteiche — Bemessung",
+  "titleEn": "Unaerated Wastewater Ponds — Dimensioning",
+  "sourceCitation": "§5.3",
+  "status": "preview",
+  "inputs": [
+    {
+      "id": "T_06",
+      "type": "number",
+      "labelDe": "A_EW — unbelüftet, Baseline",
+      "labelEn": "A_EW — unbelüftet, Baseline",
+      "unit": "m2/E",
+      "citation": "§5.3, §7",
+      "helpDe": "Ohne vorgeschalteten Absetzteich."
+    },
+    {
+      "id": "T_07",
+      "type": "number",
+      "labelDe": "A_EW — unbelüftet, mit Absetzteich",
+      "labelEn": "A_EW — unbelüftet, mit Absetzteich",
+      "unit": "m2/E",
+      "citation": "§5.3, §7",
+      "helpDe": "Reduziert gegenüber Baseline (T-06) bei Vorschaltung eines Absetzteichs."
+    },
+    {
+      "id": "T_08",
+      "type": "number",
+      "labelDe": "A_EW,Mi — Mischwasser-Zuschlag",
+      "labelEn": "A_EW,Mi — Mischwasser-Zuschlag",
+      "unit": "m2/E",
+      "citation": "§5.3, §6, §7",
+      "helpDe": "Zuschlag auf T-06 oder T-07 bei Mitbehandlung von Regenwasser (Fall III Sub-variant a)."
+    },
+    {
+      "id": "T_09",
+      "type": "number",
+      "labelDe": "A_EW — unbelüftet, Teilnitrifikation",
+      "labelEn": "A_EW — unbelüftet, Teilnitrifikation",
+      "unit": "m2/E",
+      "citation": "§5.3, §7",
+      "helpDe": "Für teilweise Nitrifikation im Sommer."
+    },
+    {
+      "id": "T_35",
+      "type": "number",
+      "labelDe": "EW_BSB5,60 typischer Bereich — unbelüftet",
+      "labelEn": "EW_BSB5,60 typischer Bereich — unbelüftet",
+      "unit": "E",
+      "citation": "§3, §4.2",
+      "helpDe": "Typischer Anwendungsbereich, nicht strikt bindend ('in der Regel')."
+    }
+  ],
+  "computed": [],
+  "thresholds": [
+    {
+      "id": "T-06",
+      "ref": "T_06",
+      "rule": {
+        "kind": "gte",
+        "value": 10
+      },
+      "severity": "blocking",
+      "messageDe": "A_EW — unbelüftet, Baseline: Regelwert ≥ 10 m2/E (§5.3, §7).",
+      "messageEn": "A_EW — unbelüftet, Baseline: regulation value ≥ 10 m2/E (§5.3, §7).",
+      "citation": "§5.3, §7"
+    },
+    {
+      "id": "T-07",
+      "ref": "T_07",
+      "rule": {
+        "kind": "gte",
+        "value": 8
+      },
+      "severity": "blocking",
+      "messageDe": "A_EW — unbelüftet, mit Absetzteich: Regelwert ≥ 8 m2/E (§5.3, §7).",
+      "messageEn": "A_EW — unbelüftet, mit Absetzteich: regulation value ≥ 8 m2/E (§5.3, §7).",
+      "citation": "§5.3, §7"
+    },
+    {
+      "id": "T-08",
+      "ref": "T_08",
+      "rule": {
+        "kind": "eq",
+        "value": 5
+      },
+      "severity": "blocking",
+      "messageDe": "A_EW,Mi — Mischwasser-Zuschlag: Regelwert = 5 m2/E (§5.3, §6, §7).",
+      "messageEn": "A_EW,Mi — Mischwasser-Zuschlag: regulation value = 5 m2/E (§5.3, §6, §7).",
+      "citation": "§5.3, §6, §7"
+    },
+    {
+      "id": "T-09",
+      "ref": "T_09",
+      "rule": {
+        "kind": "gte",
+        "value": 15
+      },
+      "severity": "blocking",
+      "messageDe": "A_EW — unbelüftet, Teilnitrifikation: Regelwert ≥ 15 m2/E (§5.3, §7).",
+      "messageEn": "A_EW — unbelüftet, Teilnitrifikation: regulation value ≥ 15 m2/E (§5.3, §7).",
+      "citation": "§5.3, §7"
+    },
+    {
+      "id": "T-35",
+      "ref": "T_35",
+      "rule": {
+        "kind": "lte",
+        "value": 1000
+      },
+      "severity": "warning",
+      "messageDe": "EW_BSB5,60 typischer Bereich — unbelüftet: Regelwert ≤ 1000 E (§3, §4.2).",
+      "messageEn": "EW_BSB5,60 typischer Bereich — unbelüftet: regulation value ≤ 1000 E (§3, §4.2).",
+      "citation": "§3, §4.2"
+    }
+  ],
+  "sections": [
+    {
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
+      "fields": [
+        "T_06",
+        "T_07",
+        "T_08",
+        "T_09",
+        "T_35"
+      ]
+    }
+  ],
+  "decisionPoints": []
+}

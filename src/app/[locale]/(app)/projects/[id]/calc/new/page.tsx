@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.2';
+import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { createCalculation } from '@/lib/actions/calculation';
 
 export default async function NewCalcPage({
