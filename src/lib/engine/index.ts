@@ -1,0 +1,41 @@
+import type { Worksheet, InputValues, EvaluationResult } from './types';
+import { validate } from './validate';
+import { evaluate } from './evaluate';
+import { evaluateCompliance } from './compliance';
+
+export { evaluate, validate, evaluateCompliance };
+export type {
+  Worksheet,
+  WorksheetSection,
+  InputField,
+  ComputedField,
+  ComplianceThreshold,
+  ComplianceViolation,
+  ComplianceStatus,
+  ExpressionAst,
+  InputValues,
+  ComputedValues,
+  EvaluationResult,
+  FieldValue,
+  FieldType,
+  SelectOption,
+} from './types';
+export { parseWorksheet, WorksheetSchema } from './schema';
+
+export function compute(
+  worksheet: Worksheet,
+  inputs: InputValues,
+): EvaluationResult & {
+  validationErrors: Record<string, string>;
+} {
+  const { errors: validationErrors } = validate(worksheet, inputs);
+  const { computed, errors: evalErrors } = evaluate(worksheet, inputs);
+  const compliance = evaluateCompliance(worksheet, computed, inputs);
+
+  return {
+    computed,
+    compliance,
+    errors: evalErrors,
+    validationErrors,
+  };
+}
