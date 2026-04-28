@@ -11,11 +11,14 @@ export const env = createEnv({
     GROQ_API_KEY: z.string().min(1).optional(),
     DEEPSEEK_API_KEY: z.string().min(1).optional(),
     KIMI_API_KEY: z.string().min(1).optional(),
+    SENTRY_DSN: z.string().url().optional(),
+    LEGAL_REVIEWED: z.enum(['1', 'true']).optional(),
   },
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
     NEXT_PUBLIC_APP_URL: z.string().url(),
+    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   },
   runtimeEnv: {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -26,9 +29,12 @@ export const env = createEnv({
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
     KIMI_API_KEY: process.env.KIMI_API_KEY,
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    LEGAL_REVIEWED: process.env.LEGAL_REVIEWED,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },
 });
 

@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { Analytics } from '@vercel/analytics/next';
 import { locales, type Locale } from '@/lib/i18n/config';
+import { ConsentBanner } from '@/components/consent-banner';
 import '../globals.css';
 
 export const metadata: Metadata = { title: 'EKOWAI Wizard' };
@@ -23,7 +25,9 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          <ConsentBanner />
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

@@ -15,15 +15,18 @@
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
     "test:rls": "vitest run --project rls",
-    "i18n:check": "tsx scripts/check-i18n-coverage.ts"
+    "i18n:check": "tsx scripts/check-i18n-coverage.ts",
+    "prelaunch:check": "tsx scripts/check-prod-readiness.ts"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^2.0.29",
     "@ai-sdk/groq": "^3.0.35",
     "@ai-sdk/openai-compatible": "^2.0.41",
+    "@sentry/nextjs": "^10.50.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
     "@t3-oss/env-nextjs": "^0.13.11",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^6.0.168",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",

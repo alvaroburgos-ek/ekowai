@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Nav } from '@/components/layout/nav';
+import { Footer } from '@/components/layout/footer';
 import type { Locale } from '@/lib/i18n/config';
 
 export default async function AppLayout({
@@ -22,9 +23,10 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Nav locale={locale as Locale} />
-      <main className="max-w-5xl mx-auto p-6">{children}</main>
+      <main className="flex-1 max-w-5xl mx-auto p-6 w-full">{children}</main>
+      <Footer locale={locale as Locale} />
     </div>
   );
 }

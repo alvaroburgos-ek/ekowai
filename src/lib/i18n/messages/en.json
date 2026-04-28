@@ -102,6 +102,34 @@
     "triggeredBy": "triggered by",
     "textOnlyNotice": "Note: no wizard support in MVP-1 — please review separately."
   },
+  "footer": {
+    "impressum": "Imprint",
+    "datenschutz": "Privacy",
+    "agb": "Terms"
+  },
+  "legal": {
+    "draftBanner": "Draft — this page has not been legally reviewed yet. Please coordinate with your legal team before use.",
+    "impressum": {
+      "title": "Imprint",
+      "companyName": "[Company name to be added]",
+      "address": "[Address to be added]",
+      "contact": "[Contact to be added]",
+      "represented": "[Representatives to be added]",
+      "taxId": "[VAT-ID to be added]"
+    },
+    "datenschutz": {
+      "title": "Privacy Policy",
+      "intro": "[to be drafted by lawyer]"
+    },
+    "agb": {
+      "title": "Terms and Conditions",
+      "intro": "[to be drafted by lawyer]"
+    }
+  },
+  "consent": {
+    "message": "This application uses technical cookies for authentication. By using it you agree.",
+    "accept": "OK"
+  },
   "org": {
     "title": "Organization",
     "members": "Members",

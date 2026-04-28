@@ -51,6 +51,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
+      - run: pnpm prelaunch:check
       - run: pnpm build
 
   # RLS tests deferred: Tasks 9-10 of the foundation plan never landed

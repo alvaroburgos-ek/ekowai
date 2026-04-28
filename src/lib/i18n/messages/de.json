@@ -102,6 +102,34 @@
     "triggeredBy": "ausgelöst durch",
     "textOnlyNotice": "Hinweis: keine Wizard-Unterstützung in MVP-1 — bitte separat prüfen."
   },
+  "footer": {
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz",
+    "agb": "AGB"
+  },
+  "legal": {
+    "draftBanner": "Entwurf — diese Seite ist noch nicht anwaltlich geprüft. Bitte vor Verwendung mit Ihrer Rechtsabteilung abstimmen.",
+    "impressum": {
+      "title": "Impressum",
+      "companyName": "[Firmenname zu ergänzen]",
+      "address": "[Anschrift zu ergänzen]",
+      "contact": "[Kontakt zu ergänzen]",
+      "represented": "[Vertretungsberechtigte zu ergänzen]",
+      "taxId": "[USt-IdNr. zu ergänzen]"
+    },
+    "datenschutz": {
+      "title": "Datenschutzerklärung",
+      "intro": "[zu ergänzen vom Anwalt]"
+    },
+    "agb": {
+      "title": "Allgemeine Geschäftsbedingungen",
+      "intro": "[zu ergänzen vom Anwalt]"
+    }
+  },
+  "consent": {
+    "message": "Diese Anwendung verwendet technische Cookies für die Authentifizierung. Mit der Nutzung stimmen Sie zu.",
+    "accept": "OK"
+  },
   "org": {
     "title": "Organisation",
     "members": "Mitglieder",
