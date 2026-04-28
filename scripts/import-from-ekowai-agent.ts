@@ -70,11 +70,24 @@ interface EkowaiEquationRegister {
   threshold_register: { thresholds: EkowaiThreshold[] };
 }
 
+interface EkowaiInputsFrom {
+  worksheet: string;
+  parameters: string[];
+  blocking?: boolean;
+}
+
+interface EkowaiOutputsTo {
+  worksheet: string;
+  parameters: string[];
+}
+
 interface EkowaiWorksheet {
   worksheet_id: string;
   title: { de: string; en: string };
   archetype?: string;
   section_refs?: { ref: string; title_de: string; title_en: string }[];
+  inputs_from?: EkowaiInputsFrom[];
+  outputs_to?: EkowaiOutputsTo[];
 }
 
 // Wizard contract types are duplicated minimally here so this script doesn't
@@ -106,6 +119,7 @@ interface WizardInputField {
   helpDe?: string;
   options?: { value: string; labelDe: string; labelEn: string }[];
   defaultValue?: number | string | boolean;
+  derivedFrom?: { worksheetId: string; parameter: string };
 }
 interface WizardThreshold {
   id: string;
@@ -308,6 +322,57 @@ function transformWorksheet(
       expression: parsed.rhs,
       precision: 2,
     });
+  }
+
+  // ---- Output-publishing inputs (from outputs_to declarations) ----
+  // The engineer enters values here; downstream worksheets pick them up
+  // as derivedFrom inputs.
+  const allPublished = new Set<string>();
+  for (const link of wsRaw.outputs_to ?? []) {
+    for (const param of link.parameters) {
+      allPublished.add(param);
+    }
+  }
+  for (const param of allPublished) {
+    const fieldId = sanitizeId(param);
+    if (seenInputIds.has(fieldId)) continue;
+    const unitMatch = param.match(/\[([^\]]+)\]\s*$/);
+    const unit = unitMatch ? unitMatch[1] : undefined;
+    const cleanLabel = param.replace(/\s*\[[^\]]+\]\s*$/, '').trim() || param;
+    inputs.push({
+      id: fieldId,
+      type: 'number',
+      labelDe: cleanLabel,
+      labelEn: cleanLabel,
+      unit,
+      citation: sectionRefs[0]?.ref ?? '§1',
+    });
+    seenInputIds.add(fieldId);
+  }
+
+  // ---- Derived inputs (from inputs_from declarations) ----
+  // These show up as read-only fields in the wizard, pre-filled at calc-load
+  // time from the matching upstream calc within the same project.
+  for (const link of wsRaw.inputs_from ?? []) {
+    for (const param of link.parameters) {
+      const fieldId = sanitizeId(param);
+      if (seenInputIds.has(fieldId)) continue;
+      // Strip unit/notation in brackets from the param for label, e.g.
+      // "V_EW [m³/E]" → label "V_EW", unit "m³/E".
+      const unitMatch = param.match(/\[([^\]]+)\]\s*$/);
+      const unit = unitMatch ? unitMatch[1] : undefined;
+      const cleanLabel = param.replace(/\s*\[[^\]]+\]\s*$/, '').trim() || param;
+      inputs.push({
+        id: fieldId,
+        type: 'number',
+        labelDe: cleanLabel,
+        labelEn: cleanLabel,
+        unit,
+        citation: sectionRefs[0]?.ref ?? '§1',
+        derivedFrom: { worksheetId: link.worksheet, parameter: param },
+      });
+      seenInputIds.add(fieldId);
+    }
   }
 
   // ---- Decision points where this is the owner ----

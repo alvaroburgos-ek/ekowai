@@ -41,6 +41,60 @@
       "unit": "m",
       "citation": "§8.5",
       "helpDe": "Operational threshold from §8.5."
+    },
+    {
+      "id": "t_R_bei_Maximaldurchfluss",
+      "type": "number",
+      "labelDe": "t_R_bei_Maximaldurchfluss",
+      "labelEn": "t_R_bei_Maximaldurchfluss",
+      "citation": "§5.5"
+    },
+    {
+      "id": "Mindesttiefe",
+      "type": "number",
+      "labelDe": "Mindesttiefe",
+      "labelEn": "Mindesttiefe",
+      "citation": "§5.5"
+    },
+    {
+      "id": "Mindestfl_che",
+      "type": "number",
+      "labelDe": "Mindestfläche",
+      "labelEn": "Mindestfläche",
+      "citation": "§5.5"
+    },
+    {
+      "id": "pond_system_selection",
+      "type": "number",
+      "labelDe": "pond_system_selection",
+      "labelEn": "pond_system_selection",
+      "citation": "§5.5",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "pond_system_selection"
+      }
+    },
+    {
+      "id": "bel_ftete_teiche_active",
+      "type": "number",
+      "labelDe": "belüftete_teiche_active",
+      "labelEn": "belüftete_teiche_active",
+      "citation": "§5.5",
+      "derivedFrom": {
+        "worksheetId": "A201-08",
+        "parameter": "belüftete_teiche_active"
+      }
+    },
+    {
+      "id": "biofilmreaktor_active",
+      "type": "number",
+      "labelDe": "biofilmreaktor_active",
+      "labelEn": "biofilmreaktor_active",
+      "citation": "§5.5",
+      "derivedFrom": {
+        "worksheetId": "A201-10",
+        "parameter": "biofilmreaktor_active"
+      }
     }
   ],
   "computed": [],
@@ -103,7 +157,13 @@
         "T_16",
         "T_17",
         "T_18",
-        "T_19"
+        "T_19",
+        "t_R_bei_Maximaldurchfluss",
+        "Mindesttiefe",
+        "Mindestfl_che",
+        "pond_system_selection",
+        "bel_ftete_teiche_active",
+        "biofilmreaktor_active"
       ]
     }
   ],

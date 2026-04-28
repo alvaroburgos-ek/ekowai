@@ -9,6 +9,11 @@ export type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'offline' | 'er
 
 type ComputeResult = ReturnType<typeof compute>;
 
+export interface DerivedSource {
+  worksheetId: string;
+  calcName: string;
+}
+
 interface CalculatorState {
   calcId: string | null;
   worksheet: Worksheet | null;
@@ -16,14 +21,17 @@ interface CalculatorState {
   result: ComputeResult | null;
   saveStatus: SaveStatus;
   lastSavedAt: string | null;
+  derivedSources: Record<string, DerivedSource>;
 
   init(args: {
     calcId: string;
     worksheet: Worksheet;
     inputs: InputValues;
     lastSavedAt: string | null;
+    derivedSources?: Record<string, DerivedSource>;
   }): void;
   setField(id: string, value: number | string | boolean | null): void;
+  isDerived(id: string): boolean;
   markSaving(): void;
   markSaved(at: string): void;
   markOffline(): void;
@@ -37,19 +45,35 @@ export const useCalculatorStore = create<CalculatorState>((set, get) => ({
   result: null,
   saveStatus: 'idle',
   lastSavedAt: null,
+  derivedSources: {},
 
-  init({ calcId, worksheet, inputs, lastSavedAt }) {
+  init({ calcId, worksheet, inputs, lastSavedAt, derivedSources }) {
     const result = compute(worksheet, inputs);
-    set({ calcId, worksheet, inputs, result, saveStatus: 'idle', lastSavedAt });
+    set({
+      calcId,
+      worksheet,
+      inputs,
+      result,
+      saveStatus: 'idle',
+      lastSavedAt,
+      derivedSources: derivedSources ?? {},
+    });
   },
 
   setField(id, value) {
-    const { worksheet, calcId } = get();
+    const { worksheet, calcId, derivedSources } = get();
     if (!worksheet || !calcId) return;
+    // Refuse client-side edits on derived fields. The value is owned by
+    // the upstream calc; the engineer must change it there.
+    if (derivedSources[id]) return;
     const inputs = { ...get().inputs, [id]: value };
     const result = compute(worksheet, inputs);
     saveLocal(calcId, inputs);
     set({ inputs, result, saveStatus: 'dirty' });
+  },
+
+  isDerived(id) {
+    return !!get().derivedSources[id];
   },
 
   markSaving: () => set({ saveStatus: 'saving' }),

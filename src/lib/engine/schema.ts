@@ -7,6 +7,11 @@ const SelectOptionSchema = z.object({
   labelEn: z.string(),
 });
 
+const DerivedFromSchema = z.object({
+  worksheetId: z.string(),
+  parameter: z.string(),
+});
+
 const InputFieldSchema = z.object({
   id: z.string().regex(/^[A-Za-z][A-Za-z0-9_]*$/),
   type: z.enum(['number', 'select', 'text', 'boolean']),
@@ -20,6 +25,7 @@ const InputFieldSchema = z.object({
   max: z.number().optional(),
   options: z.array(SelectOptionSchema).optional(),
   defaultValue: z.union([z.number(), z.string(), z.boolean()]).optional(),
+  derivedFrom: DerivedFromSchema.optional(),
 });
 
 const ExpressionAstSchema: z.ZodType<ExpressionAst> = z.lazy(() =>

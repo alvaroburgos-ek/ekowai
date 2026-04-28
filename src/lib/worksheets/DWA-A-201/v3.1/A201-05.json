@@ -9,22 +9,51 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "pond_system_selection",
+      "type": "number",
+      "labelDe": "pond_system_selection",
+      "labelEn": "pond_system_selection",
       "citation": "§3"
+    },
+    {
+      "id": "nitrification_required",
+      "type": "number",
+      "labelDe": "nitrification_required",
+      "labelEn": "nitrification_required",
+      "citation": "§3"
+    },
+    {
+      "id": "saisonbetrieb",
+      "type": "number",
+      "labelDe": "saisonbetrieb",
+      "labelEn": "saisonbetrieb",
+      "citation": "§3"
+    },
+    {
+      "id": "EW__E_",
+      "type": "number",
+      "labelDe": "EW",
+      "labelEn": "EW",
+      "unit": "E",
+      "citation": "§3",
+      "derivedFrom": {
+        "worksheetId": "A201-04",
+        "parameter": "EW [E]"
+      }
     }
   ],
   "computed": [],
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "pond_system_selection",
+        "nitrification_required",
+        "saisonbetrieb",
+        "EW__E_"
       ]
     }
   ],

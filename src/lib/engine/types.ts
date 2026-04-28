@@ -11,6 +11,13 @@ export interface SelectOption {
   labelEn: string;
 }
 
+export interface DerivedFrom {
+  /** Upstream worksheet ID (e.g. 'A201-04'). */
+  worksheetId: string;
+  /** Parameter name as declared in the EKOWAI inputs_from / outputs_to map. */
+  parameter: string;
+}
+
 export interface InputField {
   id: string;
   type: FieldType;
@@ -24,6 +31,13 @@ export interface InputField {
   max?: number;
   options?: SelectOption[];
   defaultValue?: number | string | boolean;
+  /**
+   * If set, this field's value is sourced from another worksheet's calc in
+   * the same project. UI renders read-only with a source annotation; engine
+   * receives the resolved value at save time. Falls back to free input if
+   * no upstream calc exists.
+   */
+  derivedFrom?: DerivedFrom;
 }
 
 export type ExpressionAst =

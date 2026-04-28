@@ -52,6 +52,67 @@
       "unit": "l/(E·a)",
       "citation": "§7",
       "helpDe": "Gross Schlammanfall für Planungsunterlagen (§8.8). Value applies whether upstream Absetzteich present or not."
+    },
+    {
+      "id": "Entschlammungsverfahren",
+      "type": "number",
+      "labelDe": "Entschlammungsverfahren",
+      "labelEn": "Entschlammungsverfahren",
+      "citation": "§8.8"
+    },
+    {
+      "id": "Entschlammungszeitr_ume",
+      "type": "number",
+      "labelDe": "Entschlammungszeiträume",
+      "labelEn": "Entschlammungszeiträume",
+      "citation": "§8.8"
+    },
+    {
+      "id": "Schlammmenge",
+      "type": "number",
+      "labelDe": "Schlammmenge",
+      "labelEn": "Schlammmenge",
+      "citation": "§8.8"
+    },
+    {
+      "id": "Verwertungsweg",
+      "type": "number",
+      "labelDe": "Verwertungsweg",
+      "labelEn": "Verwertungsweg",
+      "citation": "§8.8"
+    },
+    {
+      "id": "Schlammanfall",
+      "type": "number",
+      "labelDe": "Schlammanfall",
+      "labelEn": "Schlammanfall",
+      "citation": "§8.8",
+      "derivedFrom": {
+        "worksheetId": "A201-17",
+        "parameter": "Schlammanfall"
+      }
+    },
+    {
+      "id": "R_umungsintervalle",
+      "type": "number",
+      "labelDe": "Räumungsintervalle",
+      "labelEn": "Räumungsintervalle",
+      "citation": "§8.8",
+      "derivedFrom": {
+        "worksheetId": "A201-17",
+        "parameter": "Räumungsintervalle"
+      }
+    },
+    {
+      "id": "Teichtyp",
+      "type": "number",
+      "labelDe": "Teichtyp",
+      "labelEn": "Teichtyp",
+      "citation": "§8.8",
+      "derivedFrom": {
+        "worksheetId": "A201-17",
+        "parameter": "Teichtyp"
+      }
     }
   ],
   "computed": [],
@@ -127,7 +188,14 @@
         "T_43",
         "T_44",
         "T_45",
-        "T_46"
+        "T_46",
+        "Entschlammungsverfahren",
+        "Entschlammungszeitr_ume",
+        "Schlammmenge",
+        "Verwertungsweg",
+        "Schlammanfall",
+        "R_umungsintervalle",
+        "Teichtyp"
       ]
     }
   ],

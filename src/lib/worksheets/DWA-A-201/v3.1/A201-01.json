@@ -9,10 +9,38 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "Project_Identifier",
+      "type": "number",
+      "labelDe": "Project Identifier",
+      "labelEn": "Project Identifier",
+      "citation": "§1"
+    },
+    {
+      "id": "Project_Location",
+      "type": "number",
+      "labelDe": "Project Location",
+      "labelEn": "Project Location",
+      "citation": "§1"
+    },
+    {
+      "id": "Authored_By",
+      "type": "number",
+      "labelDe": "Authored By",
+      "labelEn": "Authored By",
+      "citation": "§1"
+    },
+    {
+      "id": "Wastewater_Type",
+      "type": "number",
+      "labelDe": "Wastewater Type",
+      "labelEn": "Wastewater Type",
+      "citation": "§1"
+    },
+    {
+      "id": "Size_Class_Indicator",
+      "type": "number",
+      "labelDe": "Size Class Indicator",
+      "labelEn": "Size Class Indicator",
       "citation": "§1"
     }
   ],
@@ -20,11 +48,15 @@
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "Project_Identifier",
+        "Project_Location",
+        "Authored_By",
+        "Wastewater_Type",
+        "Size_Class_Indicator"
       ]
     }
   ],

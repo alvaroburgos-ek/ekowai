@@ -9,22 +9,26 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
-      "citation": "§1"
+      "id": "overall_status",
+      "type": "number",
+      "labelDe": "overall_status",
+      "labelEn": "overall_status",
+      "citation": "§1",
+      "derivedFrom": {
+        "worksheetId": "A201-21",
+        "parameter": "overall_status"
+      }
     }
   ],
   "computed": [],
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "overall_status"
       ]
     }
   ],

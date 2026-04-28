@@ -9,22 +9,335 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "Compiled_Design_Values_for_Operation",
+      "type": "number",
+      "labelDe": "Compiled Design Values for Operation",
+      "labelEn": "Compiled Design Values for Operation",
       "citation": "§7"
+    },
+    {
+      "id": "Total_Sludge_Volume__m__",
+      "type": "number",
+      "labelDe": "Total Sludge Volume",
+      "labelEn": "Total Sludge Volume",
+      "unit": "m³",
+      "citation": "§7"
+    },
+    {
+      "id": "Desludging_Intervals__a_",
+      "type": "number",
+      "labelDe": "Desludging Intervals",
+      "labelEn": "Desludging Intervals",
+      "unit": "a",
+      "citation": "§7"
+    },
+    {
+      "id": "Effluent_Quality_Parameters",
+      "type": "number",
+      "labelDe": "Effluent Quality Parameters",
+      "labelEn": "Effluent Quality Parameters",
+      "citation": "§7"
+    },
+    {
+      "id": "Design_Compliance_Data",
+      "type": "number",
+      "labelDe": "Design Compliance Data",
+      "labelEn": "Design Compliance Data",
+      "citation": "§7"
+    },
+    {
+      "id": "V_EW__m__E_",
+      "type": "number",
+      "labelDe": "V_EW",
+      "labelEn": "V_EW",
+      "unit": "m³/E",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "V_EW [m³/E]"
+      }
+    },
+    {
+      "id": "t_R__d_",
+      "type": "number",
+      "labelDe": "t_R",
+      "labelEn": "t_R",
+      "unit": "d",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "t_R [d]"
+      }
+    },
+    {
+      "id": "k_f__m_s_",
+      "type": "number",
+      "labelDe": "k_f",
+      "labelEn": "k_f",
+      "unit": "m/s",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "k_f [m/s]"
+      }
+    },
+    {
+      "id": "Schlammanfall__l__E_a__",
+      "type": "number",
+      "labelDe": "Schlammanfall",
+      "labelEn": "Schlammanfall",
+      "unit": "l/(E·a)",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "Schlammanfall [l/(E·a)]"
+      }
+    },
+    {
+      "id": "Verminderung_der_organischen_Verschmutzung____",
+      "type": "number",
+      "labelDe": "Verminderung der organischen Verschmutzung",
+      "labelEn": "Verminderung der organischen Verschmutzung",
+      "unit": "%",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "Verminderung der organischen Verschmutzung [%]"
+      }
+    },
+    {
+      "id": "A_EW__m__E_",
+      "type": "number",
+      "labelDe": "A_EW",
+      "labelEn": "A_EW",
+      "unit": "m²/E",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-07",
+        "parameter": "A_EW [m²/E]"
+      }
+    },
+    {
+      "id": "A_EW_Mi__m__E_",
+      "type": "number",
+      "labelDe": "A_EW,Mi",
+      "labelEn": "A_EW,Mi",
+      "unit": "m²/E",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-07",
+        "parameter": "A_EW,Mi [m²/E]"
+      }
+    },
+    {
+      "id": "tiefe__m_",
+      "type": "number",
+      "labelDe": "tiefe",
+      "labelEn": "tiefe",
+      "unit": "m",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-07",
+        "parameter": "tiefe [m]"
+      }
+    },
+    {
+      "id": "B_R_BSB__g__m__d__",
+      "type": "number",
+      "labelDe": "B_R,BSB",
+      "labelEn": "B_R,BSB",
+      "unit": "g/(m³·d)",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-08",
+        "parameter": "B_R,BSB [g/(m³·d)]"
+      }
+    },
+    {
+      "id": "OV_C_BSB__kg_kg_",
+      "type": "number",
+      "labelDe": "OV_C,BSB",
+      "labelEn": "OV_C,BSB",
+      "unit": "kg/kg",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-08",
+        "parameter": "OV_C,BSB [kg/kg]"
+      }
+    },
+    {
+      "id": "P_R__W_m__",
+      "type": "number",
+      "labelDe": "P_R",
+      "labelEn": "P_R",
+      "unit": "W/m³",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-08",
+        "parameter": "P_R [W/m³]"
+      }
+    },
+    {
+      "id": "mindesttiefe__m_",
+      "type": "number",
+      "labelDe": "mindesttiefe",
+      "labelEn": "mindesttiefe",
+      "unit": "m",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-09",
+        "parameter": "mindesttiefe [m]"
+      }
+    },
+    {
+      "id": "mindestfl_che__m__",
+      "type": "number",
+      "labelDe": "mindestfläche",
+      "labelEn": "mindestfläche",
+      "unit": "m²",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-09",
+        "parameter": "mindestfläche [m²]"
+      }
+    },
+    {
+      "id": "Biofilmreaktor_Kombination_design_values",
+      "type": "number",
+      "labelDe": "Biofilmreaktor-Kombination design values",
+      "labelEn": "Biofilmreaktor-Kombination design values",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-10",
+        "parameter": "Biofilmreaktor-Kombination design values"
+      }
+    },
+    {
+      "id": "B_schungsneigung",
+      "type": "number",
+      "labelDe": "Böschungsneigung",
+      "labelEn": "Böschungsneigung",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-12",
+        "parameter": "Böschungsneigung"
+      }
+    },
+    {
+      "id": "Freibord__m_",
+      "type": "number",
+      "labelDe": "Freibord",
+      "labelEn": "Freibord",
+      "unit": "m",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-12",
+        "parameter": "Freibord [m]"
+      }
+    },
+    {
+      "id": "L_B_Verh_ltnis",
+      "type": "number",
+      "labelDe": "L:B Verhältnis",
+      "labelEn": "L:B Verhältnis",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-12",
+        "parameter": "L:B Verhältnis"
+      }
+    },
+    {
+      "id": "t_R_M__h_",
+      "type": "number",
+      "labelDe": "t_R,M",
+      "labelEn": "t_R,M",
+      "unit": "h",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-12",
+        "parameter": "t_R,M [h]"
+      }
+    },
+    {
+      "id": "Dichtungsma_nahmen",
+      "type": "number",
+      "labelDe": "Dichtungsmaßnahmen",
+      "labelEn": "Dichtungsmaßnahmen",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-13",
+        "parameter": "Dichtungsmaßnahmen"
+      }
+    },
+    {
+      "id": "Mischwasserbehandlung_Fall_I_parameters",
+      "type": "number",
+      "labelDe": "Mischwasserbehandlung Fall I parameters",
+      "labelEn": "Mischwasserbehandlung Fall I parameters",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-14",
+        "parameter": "Mischwasserbehandlung Fall I parameters"
+      }
+    },
+    {
+      "id": "Mischwasserbehandlung_Fall_II_parameters",
+      "type": "number",
+      "labelDe": "Mischwasserbehandlung Fall II parameters",
+      "labelEn": "Mischwasserbehandlung Fall II parameters",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-15",
+        "parameter": "Mischwasserbehandlung Fall II parameters"
+      }
+    },
+    {
+      "id": "Mischwasserbehandlung_Fall_III_parameters",
+      "type": "number",
+      "labelDe": "Mischwasserbehandlung Fall III parameters",
+      "labelEn": "Mischwasserbehandlung Fall III parameters",
+      "citation": "§7",
+      "derivedFrom": {
+        "worksheetId": "A201-16",
+        "parameter": "Mischwasserbehandlung Fall III parameters"
+      }
     }
   ],
   "computed": [],
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "Compiled_Design_Values_for_Operation",
+        "Total_Sludge_Volume__m__",
+        "Desludging_Intervals__a_",
+        "Effluent_Quality_Parameters",
+        "Design_Compliance_Data",
+        "V_EW__m__E_",
+        "t_R__d_",
+        "k_f__m_s_",
+        "Schlammanfall__l__E_a__",
+        "Verminderung_der_organischen_Verschmutzung____",
+        "A_EW__m__E_",
+        "A_EW_Mi__m__E_",
+        "tiefe__m_",
+        "B_R_BSB__g__m__d__",
+        "OV_C_BSB__kg_kg_",
+        "P_R__W_m__",
+        "mindesttiefe__m_",
+        "mindestfl_che__m__",
+        "Biofilmreaktor_Kombination_design_values",
+        "B_schungsneigung",
+        "Freibord__m_",
+        "L_B_Verh_ltnis",
+        "t_R_M__h_",
+        "Dichtungsma_nahmen",
+        "Mischwasserbehandlung_Fall_I_parameters",
+        "Mischwasserbehandlung_Fall_II_parameters",
+        "Mischwasserbehandlung_Fall_III_parameters"
       ]
     }
   ],

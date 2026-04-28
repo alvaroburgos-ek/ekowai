@@ -9,22 +9,86 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "schoenungsteich_volume",
+      "type": "number",
+      "labelDe": "schoenungsteich_volume",
+      "labelEn": "schoenungsteich_volume",
       "citation": "§5.7"
+    },
+    {
+      "id": "schoenungsteich_area",
+      "type": "number",
+      "labelDe": "schoenungsteich_area",
+      "labelEn": "schoenungsteich_area",
+      "citation": "§5.7"
+    },
+    {
+      "id": "schoenungsteich_depth",
+      "type": "number",
+      "labelDe": "schoenungsteich_depth",
+      "labelEn": "schoenungsteich_depth",
+      "citation": "§5.7"
+    },
+    {
+      "id": "schoenungsteich_retention_time",
+      "type": "number",
+      "labelDe": "schoenungsteich_retention_time",
+      "labelEn": "schoenungsteich_retention_time",
+      "citation": "§5.7"
+    },
+    {
+      "id": "schoenungsteich_sludge_production",
+      "type": "number",
+      "labelDe": "schoenungsteich_sludge_production",
+      "labelEn": "schoenungsteich_sludge_production",
+      "citation": "§5.7"
+    },
+    {
+      "id": "CC_07_status",
+      "type": "number",
+      "labelDe": "CC-07_status",
+      "labelEn": "CC-07_status",
+      "citation": "§5.7"
+    },
+    {
+      "id": "pond_system_selection",
+      "type": "number",
+      "labelDe": "pond_system_selection",
+      "labelEn": "pond_system_selection",
+      "citation": "§5.7",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "pond_system_selection"
+      }
+    },
+    {
+      "id": "EW_BSB5",
+      "type": "number",
+      "labelDe": "EW_BSB5",
+      "labelEn": "EW_BSB5",
+      "citation": "§5.7",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "EW_BSB5"
+      }
     }
   ],
   "computed": [],
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "schoenungsteich_volume",
+        "schoenungsteich_area",
+        "schoenungsteich_depth",
+        "schoenungsteich_retention_time",
+        "schoenungsteich_sludge_production",
+        "CC_07_status",
+        "pond_system_selection",
+        "EW_BSB5"
       ]
     }
   ],

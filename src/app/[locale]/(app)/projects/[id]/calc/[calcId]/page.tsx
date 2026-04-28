@@ -55,6 +55,44 @@ export default async function CalcPage({
   const member = memberships.find((m) => m.orgId === calc.orgId);
   const canReview = !!member && ['owner', 'admin', 'engineer'].includes(member.role);
 
+  // ---- Derived-input pre-fill: pull values from sibling calcs in this project ----
+  const derivedFields = worksheet.inputs.filter((i) => i.derivedFrom);
+  const upstreamWsIds = Array.from(
+    new Set(derivedFields.map((i) => i.derivedFrom!.worksheetId)),
+  );
+  const siblingCalcs =
+    upstreamWsIds.length > 0
+      ? await db
+          .select()
+          .from(calculations)
+          .where(eq(calculations.projectId, calc.projectId))
+      : [];
+  const siblingByWorksheet = new Map(
+    siblingCalcs
+      .filter((s) => upstreamWsIds.includes(s.worksheetId))
+      .map((s) => [s.worksheetId, s]),
+  );
+  const derivedValues: Record<string, number | string | boolean | null> = {};
+  const derivedSources: Record<string, { worksheetId: string; calcName: string }> = {};
+  for (const f of derivedFields) {
+    const upstream = siblingByWorksheet.get(f.derivedFrom!.worksheetId);
+    if (!upstream) continue;
+    // Look up the parameter's value in the upstream calc.
+    // Match by sanitized field id (the transformer uses the same mapping
+    // upstream and downstream).
+    const upstreamInputs = (upstream.inputs ?? {}) as Record<string, unknown>;
+    const upstreamResults = (upstream.results ?? {}) as Record<string, unknown>;
+    const v = upstreamInputs[f.id] ?? upstreamResults[f.id];
+    if (v === undefined || v === null) continue;
+    if (typeof v === 'number' || typeof v === 'string' || typeof v === 'boolean') {
+      derivedValues[f.id] = v;
+      derivedSources[f.id] = {
+        worksheetId: upstream.worksheetId,
+        calcName: upstream.name,
+      };
+    }
+  }
+
   const xrefs = await db
     .select()
     .from(crossReferences)
@@ -82,6 +120,8 @@ export default async function CalcPage({
       name={calc.name}
       worksheet={worksheet}
       initialInputs={(calc.inputs ?? {}) as Record<string, number | string | boolean | null>}
+      derivedValues={derivedValues}
+      derivedSources={derivedSources}
       lastSavedAt={calc.updatedAt.toISOString()}
       initialDraft={calc.rationaleDraft}
       initialFinal={calc.rationale}

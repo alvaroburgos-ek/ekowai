@@ -52,6 +52,38 @@
       "unit": "cm",
       "citation": "§5.8",
       "helpDe": "Bodenverbesserung mit Bentonit."
+    },
+    {
+      "id": "artificial_seal_required",
+      "type": "number",
+      "labelDe": "artificial_seal_required",
+      "labelEn": "artificial_seal_required",
+      "citation": "§5.8"
+    },
+    {
+      "id": "seal_type",
+      "type": "number",
+      "labelDe": "seal_type",
+      "labelEn": "seal_type",
+      "citation": "§5.8"
+    },
+    {
+      "id": "permeability_test_log",
+      "type": "number",
+      "labelDe": "permeability_test_log",
+      "labelEn": "permeability_test_log",
+      "citation": "§5.8"
+    },
+    {
+      "id": "selected_pond_type",
+      "type": "number",
+      "labelDe": "selected_pond_type",
+      "labelEn": "selected_pond_type",
+      "citation": "§5.8",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "selected_pond_type"
+      }
     }
   ],
   "computed": [],
@@ -127,7 +159,11 @@
         "T_23",
         "T_24",
         "T_25",
-        "T_26"
+        "T_26",
+        "artificial_seal_required",
+        "seal_type",
+        "permeability_test_log",
+        "selected_pond_type"
       ]
     }
   ],

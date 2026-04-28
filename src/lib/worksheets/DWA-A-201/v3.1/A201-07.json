@@ -52,6 +52,89 @@
       "unit": "E",
       "citation": "§3, §4.2",
       "helpDe": "Typischer Anwendungsbereich, nicht strikt bindend ('in der Regel')."
+    },
+    {
+      "id": "selected_A_EW",
+      "type": "number",
+      "labelDe": "selected_A_EW",
+      "labelEn": "selected_A_EW",
+      "citation": "§5.3"
+    },
+    {
+      "id": "pond_depth_h",
+      "type": "number",
+      "labelDe": "pond_depth_h",
+      "labelEn": "pond_depth_h",
+      "citation": "§5.3"
+    },
+    {
+      "id": "pond_series_count",
+      "type": "number",
+      "labelDe": "pond_series_count",
+      "labelEn": "pond_series_count",
+      "citation": "§5.3"
+    },
+    {
+      "id": "schlammanfall_unbelueftet",
+      "type": "number",
+      "labelDe": "schlammanfall_unbelueftet",
+      "labelEn": "schlammanfall_unbelueftet",
+      "citation": "§5.3"
+    },
+    {
+      "id": "pond_system_selection",
+      "type": "number",
+      "labelDe": "pond_system_selection",
+      "labelEn": "pond_system_selection",
+      "citation": "§5.3",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "pond_system_selection"
+      }
+    },
+    {
+      "id": "nitrification_required",
+      "type": "number",
+      "labelDe": "nitrification_required",
+      "labelEn": "nitrification_required",
+      "citation": "§5.3",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "nitrification_required"
+      }
+    },
+    {
+      "id": "EW_BSB5_60",
+      "type": "number",
+      "labelDe": "EW_BSB5_60",
+      "labelEn": "EW_BSB5_60",
+      "citation": "§5.3",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "EW_BSB5_60"
+      }
+    },
+    {
+      "id": "absetzteich_present",
+      "type": "number",
+      "labelDe": "absetzteich_present",
+      "labelEn": "absetzteich_present",
+      "citation": "§5.3",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "absetzteich_present"
+      }
+    },
+    {
+      "id": "mischwasser_treatment_case",
+      "type": "number",
+      "labelDe": "mischwasser_treatment_case",
+      "labelEn": "mischwasser_treatment_case",
+      "citation": "§5.3",
+      "derivedFrom": {
+        "worksheetId": "A201-16",
+        "parameter": "mischwasser_treatment_case"
+      }
     }
   ],
   "computed": [],
@@ -127,7 +210,16 @@
         "T_07",
         "T_08",
         "T_09",
-        "T_35"
+        "T_35",
+        "selected_A_EW",
+        "pond_depth_h",
+        "pond_series_count",
+        "schlammanfall_unbelueftet",
+        "pond_system_selection",
+        "nitrification_required",
+        "EW_BSB5_60",
+        "absetzteich_present",
+        "mischwasser_treatment_case"
       ]
     }
   ],

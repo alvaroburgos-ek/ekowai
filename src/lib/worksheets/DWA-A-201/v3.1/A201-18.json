@@ -16,6 +16,48 @@
       "unit": "m",
       "citation": "§8.2",
       "helpDe": "Per DIN EN 12255-5; operational threshold."
+    },
+    {
+      "id": "Betriebsplan_Dokumentiert",
+      "type": "number",
+      "labelDe": "Betriebsplan Dokumentiert",
+      "labelEn": "Betriebsplan Dokumentiert",
+      "citation": "§8.1"
+    },
+    {
+      "id": "Wartung",
+      "type": "number",
+      "labelDe": "Wartung",
+      "labelEn": "Wartung",
+      "citation": "§8.1"
+    },
+    {
+      "id": "Instandsetzung",
+      "type": "number",
+      "labelDe": "Instandsetzung",
+      "labelEn": "Instandsetzung",
+      "citation": "§8.1"
+    },
+    {
+      "id": "Inspektion",
+      "type": "number",
+      "labelDe": "Inspektion",
+      "labelEn": "Inspektion",
+      "citation": "§8.1"
+    },
+    {
+      "id": "Wassertiefe__ber_Schlammspiegel",
+      "type": "number",
+      "labelDe": "Wassertiefe über Schlammspiegel",
+      "labelEn": "Wassertiefe über Schlammspiegel",
+      "citation": "§8.1"
+    },
+    {
+      "id": "Schlammh_he_R_um_Grenze_erreicht",
+      "type": "number",
+      "labelDe": "Schlammhöhe Räum-Grenze erreicht",
+      "labelEn": "Schlammhöhe Räum-Grenze erreicht",
+      "citation": "§8.1"
     }
   ],
   "computed": [],
@@ -39,7 +81,13 @@
       "titleDe": "Bemessungsgrößen & Schwellwerte",
       "titleEn": "Design parameters & thresholds",
       "fields": [
-        "T_37"
+        "T_37",
+        "Betriebsplan_Dokumentiert",
+        "Wartung",
+        "Instandsetzung",
+        "Inspektion",
+        "Wassertiefe__ber_Schlammspiegel",
+        "Schlammh_he_R_um_Grenze_erreicht"
       ]
     }
   ],

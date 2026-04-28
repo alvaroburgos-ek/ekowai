@@ -9,22 +9,70 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "Q_krit",
+      "type": "number",
+      "labelDe": "Q_krit",
+      "labelEn": "Q_krit",
       "citation": "§6"
+    },
+    {
+      "id": "TB_vorhanden",
+      "type": "number",
+      "labelDe": "TB_vorhanden",
+      "labelEn": "TB_vorhanden",
+      "citation": "§6"
+    },
+    {
+      "id": "Drosselung_Teich1",
+      "type": "number",
+      "labelDe": "Drosselung_Teich1",
+      "labelEn": "Drosselung_Teich1",
+      "citation": "§6"
+    },
+    {
+      "id": "Nachweis_ATV_A128",
+      "type": "number",
+      "labelDe": "Nachweis_ATV_A128",
+      "labelEn": "Nachweis_ATV_A128",
+      "citation": "§6"
+    },
+    {
+      "id": "sewer_system",
+      "type": "number",
+      "labelDe": "sewer_system",
+      "labelEn": "sewer_system",
+      "citation": "§6",
+      "derivedFrom": {
+        "worksheetId": "A201-04",
+        "parameter": "sewer_system"
+      }
+    },
+    {
+      "id": "DP_3",
+      "type": "number",
+      "labelDe": "DP-3",
+      "labelEn": "DP-3",
+      "citation": "§6",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "DP-3"
+      }
     }
   ],
   "computed": [],
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "Q_krit",
+        "TB_vorhanden",
+        "Drosselung_Teich1",
+        "Nachweis_ATV_A128",
+        "sewer_system",
+        "DP_3"
       ]
     }
   ],

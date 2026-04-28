@@ -21,6 +21,11 @@ interface RecordedDecision {
   rationale: string | null;
 }
 
+interface DerivedSource {
+  worksheetId: string;
+  calcName: string;
+}
+
 export function CalculatorShell(props: {
   locale: 'de' | 'en';
   calcId: string;
@@ -28,6 +33,8 @@ export function CalculatorShell(props: {
   name: string;
   worksheet: Worksheet;
   initialInputs: InputValues;
+  derivedValues: Record<string, number | string | boolean | null>;
+  derivedSources: Record<string, DerivedSource>;
   lastSavedAt: string;
   initialDraft: string | null;
   initialFinal: string | null;
@@ -40,13 +47,25 @@ export function CalculatorShell(props: {
   const init = useCalculatorStore((s) => s.init);
 
   useEffect(() => {
+    // Derived values take precedence over saved inputs — engineer can't
+    // freeze a stale upstream value.
+    const merged: InputValues = { ...props.initialInputs, ...props.derivedValues };
     init({
       calcId: props.calcId,
       worksheet: props.worksheet,
-      inputs: props.initialInputs,
+      inputs: merged,
       lastSavedAt: props.lastSavedAt,
+      derivedSources: props.derivedSources,
     });
-  }, [init, props.calcId, props.worksheet, props.initialInputs, props.lastSavedAt]);
+  }, [
+    init,
+    props.calcId,
+    props.worksheet,
+    props.initialInputs,
+    props.derivedValues,
+    props.derivedSources,
+    props.lastSavedAt,
+  ]);
 
   const inputSection = props.worksheet.sections.find((s) => s.id === 'inputs');
   const resultSection = props.worksheet.sections.find((s) => s.id !== 'inputs');

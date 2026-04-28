@@ -60,6 +60,87 @@
       "labelEn": "Tiefe für Absetz- und Schlammzone",
       "unit": "m",
       "citation": "§5.1"
+    },
+    {
+      "id": "V_EW__m__E_",
+      "type": "number",
+      "labelDe": "V_EW",
+      "labelEn": "V_EW",
+      "unit": "m³/E",
+      "citation": "§5.2"
+    },
+    {
+      "id": "t_R_Trockenwetter__d_",
+      "type": "number",
+      "labelDe": "t_R Trockenwetter",
+      "labelEn": "t_R Trockenwetter",
+      "unit": "d",
+      "citation": "§5.2"
+    },
+    {
+      "id": "Schlammanfall_ausgefaulter__l__E_a__",
+      "type": "number",
+      "labelDe": "Schlammanfall ausgefaulter",
+      "labelEn": "Schlammanfall ausgefaulter",
+      "unit": "l/(E·a)",
+      "citation": "§5.2"
+    },
+    {
+      "id": "Tiefe__Absetz__und_Schlammzone___m_",
+      "type": "number",
+      "labelDe": "Tiefe (Absetz- und Schlammzone)",
+      "labelEn": "Tiefe (Absetz- und Schlammzone)",
+      "unit": "m",
+      "citation": "§5.2"
+    },
+    {
+      "id": "EW_BSB5",
+      "type": "number",
+      "labelDe": "EW_BSB5",
+      "labelEn": "EW_BSB5",
+      "citation": "§5.2"
+    },
+    {
+      "id": "V_sludge_share__m__E_",
+      "type": "number",
+      "labelDe": "V_sludge_share",
+      "labelEn": "V_sludge_share",
+      "unit": "m³/E",
+      "citation": "§5.2"
+    },
+    {
+      "id": "Flie_geschwindigkeit_am_Ablauf__m_s_",
+      "type": "number",
+      "labelDe": "Fließgeschwindigkeit am Ablauf",
+      "labelEn": "Fließgeschwindigkeit am Ablauf",
+      "unit": "m/s",
+      "citation": "§5.2"
+    },
+    {
+      "id": "Anzahl_paralleler_Teiche",
+      "type": "number",
+      "labelDe": "Anzahl paralleler Teiche",
+      "labelEn": "Anzahl paralleler Teiche",
+      "citation": "§5.2"
+    },
+    {
+      "id": "Verminderung_der_organischen_Verschmutzung____",
+      "type": "number",
+      "labelDe": "Verminderung der organischen Verschmutzung",
+      "labelEn": "Verminderung der organischen Verschmutzung",
+      "unit": "%",
+      "citation": "§5.2"
+    },
+    {
+      "id": "Selected_Pond_System",
+      "type": "number",
+      "labelDe": "Selected Pond System",
+      "labelEn": "Selected Pond System",
+      "citation": "§5.2",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "Selected Pond System"
+      }
     }
   ],
   "computed": [],
@@ -148,7 +229,17 @@
         "T_03",
         "T_04",
         "T_05",
-        "T_30"
+        "T_30",
+        "V_EW__m__E_",
+        "t_R_Trockenwetter__d_",
+        "Schlammanfall_ausgefaulter__l__E_a__",
+        "Tiefe__Absetz__und_Schlammzone___m_",
+        "EW_BSB5",
+        "V_sludge_share__m__E_",
+        "Flie_geschwindigkeit_am_Ablauf__m_s_",
+        "Anzahl_paralleler_Teiche",
+        "Verminderung_der_organischen_Verschmutzung____",
+        "Selected_Pond_System"
       ]
     }
   ],

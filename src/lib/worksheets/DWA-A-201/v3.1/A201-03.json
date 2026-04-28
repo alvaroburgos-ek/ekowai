@@ -9,10 +9,51 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "Abwasseranfall__tats_chlich___m__d_",
+      "type": "number",
+      "labelDe": "Abwasseranfall (tatsächlich)",
+      "labelEn": "Abwasseranfall (tatsächlich)",
+      "unit": "m³/d",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Schmutzfracht_BSB5__tats_chlich___kg_d_",
+      "type": "number",
+      "labelDe": "Schmutzfracht BSB5 (tatsächlich)",
+      "labelEn": "Schmutzfracht BSB5 (tatsächlich)",
+      "unit": "kg/d",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Fremdwasseranteil__m__d_",
+      "type": "number",
+      "labelDe": "Fremdwasseranteil",
+      "labelEn": "Fremdwasseranteil",
+      "unit": "m³/d",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Gewerbeabwasser_Zufluss__m__d_",
+      "type": "number",
+      "labelDe": "Gewerbeabwasser Zufluss",
+      "labelEn": "Gewerbeabwasser Zufluss",
+      "unit": "m³/d",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Gewerbeabwasser_Schmutzfracht__kg_d_",
+      "type": "number",
+      "labelDe": "Gewerbeabwasser Schmutzfracht",
+      "labelEn": "Gewerbeabwasser Schmutzfracht",
+      "unit": "kg/d",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Zukunftszuschlag____",
+      "type": "number",
+      "labelDe": "Zukunftszuschlag",
+      "labelEn": "Zukunftszuschlag",
+      "unit": "%",
       "citation": "§5.1"
     }
   ],
@@ -20,11 +61,16 @@
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "Abwasseranfall__tats_chlich___m__d_",
+        "Schmutzfracht_BSB5__tats_chlich___kg_d_",
+        "Fremdwasseranteil__m__d_",
+        "Gewerbeabwasser_Zufluss__m__d_",
+        "Gewerbeabwasser_Schmutzfracht__kg_d_",
+        "Zukunftszuschlag____"
       ]
     }
   ],

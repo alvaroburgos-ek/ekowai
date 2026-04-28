@@ -9,22 +9,50 @@
   "status": "preview",
   "inputs": [
     {
-      "id": "note",
-      "type": "text",
-      "labelDe": "Anmerkungen",
-      "labelEn": "Notes",
+      "id": "BSB5_measurement_method",
+      "type": "number",
+      "labelDe": "BSB5 measurement method",
+      "labelEn": "BSB5 measurement method",
       "citation": "§8.9"
+    },
+    {
+      "id": "CSB_measurement_method",
+      "type": "number",
+      "labelDe": "CSB measurement method",
+      "labelEn": "CSB measurement method",
+      "citation": "§8.9"
+    },
+    {
+      "id": "AbwV_Anhang_1_compliance_status",
+      "type": "number",
+      "labelDe": "AbwV Anhang 1 compliance status",
+      "labelEn": "AbwV Anhang 1 compliance status",
+      "citation": "§8.9"
+    },
+    {
+      "id": "Design_compilation_data_for_effluent_verification",
+      "type": "number",
+      "labelDe": "Design compilation data for effluent verification",
+      "labelEn": "Design compilation data for effluent verification",
+      "citation": "§8.9",
+      "derivedFrom": {
+        "worksheetId": "A201-17",
+        "parameter": "Design compilation data for effluent verification"
+      }
     }
   ],
   "computed": [],
   "thresholds": [],
   "sections": [
     {
-      "id": "meta",
-      "titleDe": "Hinweise",
-      "titleEn": "Notes",
+      "id": "inputs",
+      "titleDe": "Bemessungsgrößen & Schwellwerte",
+      "titleEn": "Design parameters & thresholds",
       "fields": [
-        "note"
+        "BSB5_measurement_method",
+        "CSB_measurement_method",
+        "AbwV_Anhang_1_compliance_status",
+        "Design_compilation_data_for_effluent_verification"
       ]
     }
   ],

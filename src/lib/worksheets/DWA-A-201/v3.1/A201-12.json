@@ -32,6 +32,106 @@
       "labelEn": "Durchflusszeit bei Mischwasserzufluss",
       "unit": "h",
       "citation": "§5.1"
+    },
+    {
+      "id": "B_schungsneigung__gewachsener_Boden___ratio_",
+      "type": "number",
+      "labelDe": "Böschungsneigung (gewachsener Boden)",
+      "labelEn": "Böschungsneigung (gewachsener Boden)",
+      "unit": "ratio",
+      "citation": "§5.1"
+    },
+    {
+      "id": "B_schungsneigung__bei_Tondichtung___ratio_",
+      "type": "number",
+      "labelDe": "Böschungsneigung (bei Tondichtung)",
+      "labelEn": "Böschungsneigung (bei Tondichtung)",
+      "unit": "ratio",
+      "citation": "§5.1"
+    },
+    {
+      "id": "L_B_Verh_ltnis_an_der_Oberfl_che__ratio_",
+      "type": "number",
+      "labelDe": "L:B Verhältnis an der Oberfläche",
+      "labelEn": "L:B Verhältnis an der Oberfläche",
+      "unit": "ratio",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Rampe_Neigung__ratio_",
+      "type": "number",
+      "labelDe": "Rampe Neigung",
+      "labelEn": "Rampe Neigung",
+      "unit": "ratio",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Tiefe_f_r_Absetz__und_Schlammzone__m_",
+      "type": "number",
+      "labelDe": "Tiefe für Absetz- und Schlammzone",
+      "labelEn": "Tiefe für Absetz- und Schlammzone",
+      "unit": "m",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Freibord__m_",
+      "type": "number",
+      "labelDe": "Freibord",
+      "labelEn": "Freibord",
+      "unit": "m",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Grobstoffentnahme_vorhanden",
+      "type": "number",
+      "labelDe": "Grobstoffentnahme vorhanden",
+      "labelEn": "Grobstoffentnahme vorhanden",
+      "citation": "§5.1"
+    },
+    {
+      "id": "V_erf_f_r_Grobstoffentnahme__m__",
+      "type": "number",
+      "labelDe": "V_erf für Grobstoffentnahme",
+      "labelEn": "V_erf für Grobstoffentnahme",
+      "unit": "m³",
+      "citation": "§5.1"
+    },
+    {
+      "id": "t_R_M_f_r_Grobstoffentnahme__h_",
+      "type": "number",
+      "labelDe": "t_R,M für Grobstoffentnahme",
+      "labelEn": "t_R,M für Grobstoffentnahme",
+      "unit": "h",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Rechen_im_Zulauf",
+      "type": "number",
+      "labelDe": "Rechen im Zulauf",
+      "labelEn": "Rechen im Zulauf",
+      "citation": "§5.1"
+    },
+    {
+      "id": "DIN_19559_Messung_compliance",
+      "type": "number",
+      "labelDe": "DIN 19559 Messung compliance",
+      "labelEn": "DIN 19559 Messung compliance",
+      "citation": "§5.1"
+    },
+    {
+      "id": "Witterungsschutz_f_r_Rechen",
+      "type": "number",
+      "labelDe": "Witterungsschutz für Rechen",
+      "labelEn": "Witterungsschutz für Rechen",
+      "citation": "§5.1"
+    },
+    {
+      "id": "B_schungsneigung__bei_Kunststoffdichtung___ratio_",
+      "type": "number",
+      "labelDe": "Böschungsneigung (bei Kunststoffdichtung)",
+      "labelEn": "Böschungsneigung (bei Kunststoffdichtung)",
+      "unit": "ratio",
+      "citation": "§5.1"
     }
   ],
   "computed": [
@@ -77,7 +177,20 @@
       "fields": [
         "T_33",
         "Q_M",
-        "t_R_M"
+        "t_R_M",
+        "B_schungsneigung__gewachsener_Boden___ratio_",
+        "B_schungsneigung__bei_Tondichtung___ratio_",
+        "L_B_Verh_ltnis_an_der_Oberfl_che__ratio_",
+        "Rampe_Neigung__ratio_",
+        "Tiefe_f_r_Absetz__und_Schlammzone__m_",
+        "Freibord__m_",
+        "Grobstoffentnahme_vorhanden",
+        "V_erf_f_r_Grobstoffentnahme__m__",
+        "t_R_M_f_r_Grobstoffentnahme__h_",
+        "Rechen_im_Zulauf",
+        "DIN_19559_Messung_compliance",
+        "Witterungsschutz_f_r_Rechen",
+        "B_schungsneigung__bei_Kunststoffdichtung___ratio_"
       ]
     },
     {

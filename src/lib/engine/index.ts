@@ -22,6 +22,7 @@ export type {
   DecisionPoint,
   DecisionOption,
   WorksheetStatus,
+  DerivedFrom,
 } from './types';
 export { parseWorksheet, WorksheetSchema } from './schema';
 export { openDecisionPoints, evalCondition } from './decisions';

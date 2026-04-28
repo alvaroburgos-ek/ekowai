@@ -49,6 +49,77 @@
       "labelEn": "Wassertiefe",
       "unit": "m",
       "citation": "§7 (Zusammenstellung, inline in Tabelle)"
+    },
+    {
+      "id": "B_R_BSB__g__m3_d__",
+      "type": "number",
+      "labelDe": "B_R_BSB",
+      "labelEn": "B_R_BSB",
+      "unit": "g/(m3·d)",
+      "citation": "§5.4"
+    },
+    {
+      "id": "t_R_dry_weather__d_",
+      "type": "number",
+      "labelDe": "t_R_dry_weather",
+      "labelEn": "t_R_dry_weather",
+      "unit": "d",
+      "citation": "§5.4"
+    },
+    {
+      "id": "h_depth__m_",
+      "type": "number",
+      "labelDe": "h_depth",
+      "labelEn": "h_depth",
+      "unit": "m",
+      "citation": "§5.4"
+    },
+    {
+      "id": "OV_C_BSB__kg_kg_",
+      "type": "number",
+      "labelDe": "OV_C_BSB",
+      "labelEn": "OV_C_BSB",
+      "unit": "kg/kg",
+      "citation": "§5.4"
+    },
+    {
+      "id": "P_R_power_density__W_m3_",
+      "type": "number",
+      "labelDe": "P_R_power_density",
+      "labelEn": "P_R_power_density",
+      "unit": "W/m3",
+      "citation": "§5.4"
+    },
+    {
+      "id": "B_A_BSB_derived__g__m2_d__",
+      "type": "number",
+      "labelDe": "B_A_BSB_derived",
+      "labelEn": "B_A_BSB_derived",
+      "unit": "g/(m2·d)",
+      "citation": "§5.4"
+    },
+    {
+      "id": "pond_system_selection",
+      "type": "number",
+      "labelDe": "pond_system_selection",
+      "labelEn": "pond_system_selection",
+      "citation": "§5.4",
+      "derivedFrom": {
+        "worksheetId": "A201-05",
+        "parameter": "pond_system_selection"
+      }
+    },
+    {
+      "id": "V_EW__m3_E_",
+      "type": "number",
+      "labelDe": "V_EW",
+      "labelEn": "V_EW",
+      "unit": "m3/E",
+      "citation": "§5.4",
+      "derivedFrom": {
+        "worksheetId": "A201-06",
+        "parameter": "V_EW [m3/E]"
+      }
     }
   ],
   "computed": [
@@ -120,7 +191,15 @@
         "T_12",
         "T_13",
         "B_R",
-        "h"
+        "h",
+        "B_R_BSB__g__m3_d__",
+        "t_R_dry_weather__d_",
+        "h_depth__m_",
+        "OV_C_BSB__kg_kg_",
+        "P_R_power_density__W_m3_",
+        "B_A_BSB_derived__g__m2_d__",
+        "pond_system_selection",
+        "V_EW__m3_E_"
       ]
     },
     {

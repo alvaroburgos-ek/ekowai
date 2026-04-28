@@ -23,6 +23,34 @@
       "labelEn": "Einwohnergleichwert",
       "unit": "E",
       "citation": "§2"
+    },
+    {
+      "id": "EW",
+      "type": "number",
+      "labelDe": "EW",
+      "labelEn": "EW",
+      "citation": "§1"
+    },
+    {
+      "id": "sewer_system",
+      "type": "number",
+      "labelDe": "sewer_system",
+      "labelEn": "sewer_system",
+      "citation": "§1"
+    },
+    {
+      "id": "A_E_Mi",
+      "type": "number",
+      "labelDe": "A_E,Mi",
+      "labelEn": "A_E,Mi",
+      "citation": "§1"
+    },
+    {
+      "id": "EW_BSB5",
+      "type": "number",
+      "labelDe": "EW_BSB5",
+      "labelEn": "EW_BSB5",
+      "citation": "§1"
     }
   ],
   "computed": [
@@ -54,7 +82,11 @@
       "titleEn": "Design parameters & thresholds",
       "fields": [
         "EZ",
-        "EGW"
+        "EGW",
+        "EW",
+        "sewer_system",
+        "A_E_Mi",
+        "EW_BSB5"
       ]
     },
     {
