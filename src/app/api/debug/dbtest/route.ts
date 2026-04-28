@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import postgres from 'postgres';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // Temporary debug endpoint — remove once production DB connection is healthy.
 // Tries multiple Supabase pooler regions to find the right one.
@@ -42,5 +43,16 @@ export async function GET() {
   }
 
   const success = results.find((r) => r.ok);
-  return NextResponse.json({ success: success ?? null, all: results });
+
+  // Also test Supabase REST (HTTPS) — bypasses pooler entirely
+  let restTest: { ok: boolean; error?: string; users?: number };
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.auth.admin.listUsers({ perPage: 1 });
+    restTest = error ? { ok: false, error: error.message } : { ok: true, users: data.users.length };
+  } catch (e) {
+    restTest = { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+
+  return NextResponse.json({ success: success ?? null, restTest, all: results });
 }
