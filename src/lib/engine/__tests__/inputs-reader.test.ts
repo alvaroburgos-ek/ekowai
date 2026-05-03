@@ -41,6 +41,10 @@ describe('normalizeInputs', () => {
   it('returns an empty record for empty input', () => {
     expect(normalizeInputs({})).toEqual({});
   });
+
+  it('treats null as a bare value (FieldValue includes null)', () => {
+    expect(normalizeInputs({ X: null })).toEqual({ X: { value: null } });
+  });
 });
 
 describe('getInputValue', () => {
@@ -50,6 +54,7 @@ describe('getInputValue', () => {
     expect(getInputValue({ value: 1800, source: { label: 'x' } })).toBe(1800);
     expect(getInputValue(true)).toBe(true);
     expect(getInputValue('text')).toBe('text');
+    expect(getInputValue(null)).toBeNull();
   });
 });
 
@@ -58,6 +63,7 @@ describe('getInputSource', () => {
     expect(getInputSource(1800)).toBeUndefined();
     expect(getInputSource(true)).toBeUndefined();
     expect(getInputSource('text')).toBeUndefined();
+    expect(getInputSource(null)).toBeUndefined();
   });
   it('returns the source for object form', () => {
     const src = { docId: 'd' };
@@ -76,5 +82,9 @@ describe('inputsToValues', () => {
       T: { value: true },
     });
     expect(out).toEqual({ EW: 1800, EZ: 60, T: true });
+  });
+
+  it('preserves null values', () => {
+    expect(inputsToValues({ X: null })).toEqual({ X: null });
   });
 });
