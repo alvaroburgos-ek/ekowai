@@ -3,6 +3,7 @@ import {
   uuid,
   text,
   timestamp,
+  date,
   jsonb,
   numeric,
   boolean,
@@ -255,7 +256,7 @@ export const projectDocuments = pgTable(
     kind: text('kind').notNull(),
     title: text('title').notNull(),
     citationLabel: text('citation_label').notNull(),
-    issuedAt: timestamp('issued_at', { mode: 'date' }),
+    issuedAt: date('issued_at', { mode: 'date' }),
     filePath: text('file_path').notNull(),
     fileSize: numeric('file_size').notNull(),
     mimeType: text('mime_type').notNull(),
@@ -281,7 +282,7 @@ export const reportArchives = pgTable(
       .references(() => calculations.id, { onDelete: 'cascade' }),
     approvalId: uuid('approval_id')
       .notNull()
-      .references(() => approvals.id),
+      .references(() => approvals.id, { onDelete: 'restrict' }),
     orgId: uuid('org_id').notNull(),
     filePath: text('file_path').notNull(),
     sha256: text('sha256').notNull(),
