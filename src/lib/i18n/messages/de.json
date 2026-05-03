@@ -248,5 +248,35 @@
     "noMembers": "Noch keine weiteren Mitglieder.",
     "memberSingular": "Mitglied",
     "memberPlural": "Mitglieder"
+  },
+  "documents": {
+    "title": "Projektdokumente",
+    "upload": "Hochladen",
+    "kind": "Art",
+    "kindOptions": {
+      "lab_analysis": "Laboranalyse",
+      "authority_decision": "Behördenbescheid",
+      "soil_report": "Bodengutachten",
+      "hydrology": "Hydrologie",
+      "correspondence": "Korrespondenz",
+      "other": "Sonstiges"
+    },
+    "titleLabel": "Titel",
+    "citationLabel": "Zitierform",
+    "issuedAt": "Ausgabedatum",
+    "file": "Datei",
+    "submit": "Speichern",
+    "empty": "Noch keine Dokumente. Lade das erste hoch.",
+    "delete": "Löschen",
+    "confirmDelete": "Dokument wirklich löschen?",
+    "errors": {
+      "no_file": "Keine Datei ausgewählt",
+      "too_large": "Datei zu groß (max 25 MB)",
+      "invalid_input": "Eingaben unvollständig",
+      "project_not_found": "Projekt nicht gefunden",
+      "storage_failed": "Speicherfehler — bitte erneut versuchen",
+      "forbidden": "Zugriff verweigert",
+      "not_found": "Dokument nicht gefunden"
+    }
   }
 }

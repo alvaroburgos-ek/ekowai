@@ -248,5 +248,35 @@
     "noMembers": "No other members yet.",
     "memberSingular": "member",
     "memberPlural": "members"
+  },
+  "documents": {
+    "title": "Project documents",
+    "upload": "Upload",
+    "kind": "Kind",
+    "kindOptions": {
+      "lab_analysis": "Lab analysis",
+      "authority_decision": "Authority decision",
+      "soil_report": "Soil report",
+      "hydrology": "Hydrology",
+      "correspondence": "Correspondence",
+      "other": "Other"
+    },
+    "titleLabel": "Title",
+    "citationLabel": "Citation label",
+    "issuedAt": "Issue date",
+    "file": "File",
+    "submit": "Save",
+    "empty": "No documents yet. Upload the first one.",
+    "delete": "Delete",
+    "confirmDelete": "Really delete this document?",
+    "errors": {
+      "no_file": "No file selected",
+      "too_large": "File too large (max 25 MB)",
+      "invalid_input": "Incomplete input",
+      "project_not_found": "Project not found",
+      "storage_failed": "Storage error — please retry",
+      "forbidden": "Access denied",
+      "not_found": "Document not found"
+    }
   }
 }
