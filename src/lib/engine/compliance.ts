@@ -1,16 +1,22 @@
 import type {
   Worksheet,
   ComputedValues,
-  InputValues,
   ComplianceStatus,
   ComplianceViolation,
+  FieldValue,
 } from './types';
+import { normalizeInputs, type InputRaw } from './inputs-reader';
 
 export function evaluateCompliance(
   worksheet: Worksheet,
   computed: ComputedValues,
-  inputs: InputValues,
+  inputs: Record<string, unknown>,
 ): { status: ComplianceStatus; violations: ComplianceViolation[] } {
+  // Tolerant input: accept bare values (legacy) or {value, source} cells (Plan 6).
+  const cells = normalizeInputs(inputs as Record<string, InputRaw>);
+  const values: Record<string, FieldValue> = {};
+  for (const [k, c] of Object.entries(cells)) values[k] = c.value;
+
   const violations: ComplianceViolation[] = [];
   let unknown = false;
 
@@ -18,8 +24,8 @@ export function evaluateCompliance(
     const observed =
       typeof computed[t.ref] === 'number'
         ? computed[t.ref]
-        : typeof inputs[t.ref] === 'number'
-          ? (inputs[t.ref] as number)
+        : typeof values[t.ref] === 'number'
+          ? (values[t.ref] as number)
           : undefined;
 
     if (observed === undefined || Number.isNaN(observed)) {

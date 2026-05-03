@@ -42,6 +42,7 @@ async function loadCalcWithMembership(calcId: string, userId: string) {
       projectId: calculations.projectId,
       orgId: calculations.orgId,
       inputs: calculations.inputs,
+      status: calculations.status,
     })
     .from(calculations)
     .innerJoin(orgMembers, eq(orgMembers.orgId, calculations.orgId))
@@ -57,6 +58,9 @@ export async function attachSource(args: z.infer<typeof AttachInput>) {
 
   const calc = await loadCalcWithMembership(parsed.data.calcId, user.id);
   if (!calc) return { ok: false as const, error: 'calc_not_found' };
+  if (calc.status === 'approved') {
+    return { ok: false as const, error: 'calc_locked' };
+  }
 
   // For docId source, verify the doc belongs to the same project
   if ('docId' in parsed.data.source) {
@@ -100,6 +104,9 @@ export async function detachSource(args: z.infer<typeof DetachInput>) {
 
   const calc = await loadCalcWithMembership(parsed.data.calcId, user.id);
   if (!calc) return { ok: false as const, error: 'calc_not_found' };
+  if (calc.status === 'approved') {
+    return { ok: false as const, error: 'calc_locked' };
+  }
 
   const cells = normalizeInputs(calc.inputs as Record<string, any>);
   const cell = cells[parsed.data.symbol];

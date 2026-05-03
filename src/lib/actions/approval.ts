@@ -14,6 +14,7 @@ import {
 } from '@/lib/db/schema';
 import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { compute, openDecisionPoints } from '@/lib/engine';
+import { inputsToValues, type InputRaw } from '@/lib/engine/inputs-reader';
 import { sendEmail } from '@/lib/email/client';
 import {
   submittedTemplate,
@@ -99,8 +100,13 @@ export async function submitForReview(input: {
   const worksheet = ALL_WORKSHEETS.find((w) => w.id === calc.worksheetId);
   if (!worksheet) return { ok: false, error: 'not_found' };
 
-  const inputs = (calc.inputs ?? {}) as Record<string, number | string | boolean | null>;
-  const result = compute(worksheet, inputs);
+  // Calc.inputs may be in mixed-cell shape (Plan 6) or bare-value (legacy).
+  // Extract bare values explicitly for the engine; `compute` is also
+  // shape-tolerant, but being explicit here makes the data flow obvious.
+  const values = inputsToValues(
+    (calc.inputs ?? {}) as Record<string, InputRaw>,
+  );
+  const result = compute(worksheet, values);
 
   if (result.compliance.status === 'blocking_violation') {
     return { ok: false, error: 'blocking_violation' };
@@ -112,7 +118,7 @@ export async function submitForReview(input: {
     .where(eq(decisions.calculationId, calc.id));
   const open = openDecisionPoints(
     worksheet,
-    inputs,
+    values,
     result.computed,
     new Set(recorded.map((r) => r.id)),
   );

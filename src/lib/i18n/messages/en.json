@@ -261,7 +261,8 @@
       "calc_not_found": "Calculation not found",
       "doc_not_in_project": "Document does not belong to this project",
       "symbol_not_found": "Input field not found",
-      "invalid_input": "Invalid input"
+      "invalid_input": "Invalid input",
+      "calc_locked": "Calculation is approved — sources cannot be changed"
     }
   },
   "documents": {

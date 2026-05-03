@@ -1,5 +1,6 @@
 export function fmtDe(v: unknown): string {
   if (typeof v === 'number') {
+    if (Number.isNaN(v)) return '—';
     if (Number.isInteger(v)) return v.toLocaleString('de-DE');
     return v.toLocaleString('de-DE', {
       minimumFractionDigits: 2,

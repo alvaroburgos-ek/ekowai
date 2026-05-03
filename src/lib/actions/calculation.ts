@@ -8,6 +8,12 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { compute } from '@/lib/engine';
+import {
+  normalizeInputs,
+  type InputCell,
+  type InputRaw,
+} from '@/lib/engine/inputs-reader';
+import type { FieldValue } from '@/lib/engine/types';
 
 const createSchema = z.object({
   projectId: z.string().uuid(),
@@ -111,7 +117,23 @@ export async function saveCalculation(input: {
   const worksheet = findWorksheet(calc.worksheetId);
   if (!worksheet) return { ok: false, error: 'unknown_worksheet' };
 
-  const result = compute(worksheet, parsed.inputs);
+  // Merge incoming bare-value record onto existing cells, preserving any
+  // attached `source` per key. Without this merge, every autosave would
+  // strip citations attached via attachSource.
+  const existingCells = normalizeInputs(
+    (calc.inputs ?? {}) as Record<string, InputRaw>,
+  );
+  const mergedCells: Record<string, InputCell> = { ...existingCells };
+  for (const [k, v] of Object.entries(parsed.inputs)) {
+    const existing = mergedCells[k];
+    if (existing?.source) {
+      mergedCells[k] = { value: v as FieldValue, source: existing.source };
+    } else {
+      mergedCells[k] = { value: v as FieldValue };
+    }
+  }
+
+  const result = compute(worksheet, mergedCells);
   if (Object.keys(result.validationErrors).length > 0) {
     return { ok: false, error: 'validation_failed' };
   }
@@ -120,7 +142,7 @@ export async function saveCalculation(input: {
     .update(calculations)
     .set({
       name: parsed.name ?? calc.name,
-      inputs: parsed.inputs,
+      inputs: mergedCells,
       results: result.computed,
       complianceStatus: result.compliance.status,
       complianceViolations: result.compliance.violations,

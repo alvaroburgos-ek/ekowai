@@ -261,7 +261,8 @@
       "calc_not_found": "Berechnung nicht gefunden",
       "doc_not_in_project": "Dokument gehört nicht zum Projekt",
       "symbol_not_found": "Eingabefeld nicht gefunden",
-      "invalid_input": "Eingabe ungültig"
+      "invalid_input": "Eingabe ungültig",
+      "calc_locked": "Berechnung ist freigegeben — Quellen können nicht geändert werden"
     }
   },
   "documents": {

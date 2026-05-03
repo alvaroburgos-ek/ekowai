@@ -65,6 +65,9 @@ export async function loadReportData(calcId: string) {
           .select()
           .from(projectDocuments)
           .where(inArray(projectDocuments.id, docIds))
+          // Stable appendix lettering: order by upload time (primary) and
+          // id (tiebreaker) so re-renders never shuffle the appendix index.
+          .orderBy(asc(projectDocuments.uploadedAt), asc(projectDocuments.id))
       : [];
 
   // Worksheet — today only DWA-A-201; Plan 8 will generalize

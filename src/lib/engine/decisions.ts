@@ -2,10 +2,10 @@ import type {
   Worksheet,
   DecisionPoint,
   ExpressionAst,
-  InputValues,
   ComputedValues,
   FieldValue,
 } from './types';
+import { normalizeInputs, type InputRaw } from './inputs-reader';
 
 function asNumber(v: FieldValue): number {
   if (typeof v === 'number') return v;
@@ -81,12 +81,17 @@ export function evalCondition(
 
 export function openDecisionPoints(
   worksheet: Worksheet,
-  inputs: InputValues,
+  inputs: Record<string, unknown>,
   computed: ComputedValues,
   recordedDecisionIds: Set<string>,
 ): DecisionPoint[] {
+  // Tolerant input: accept bare values (legacy) or {value, source} cells (Plan 6).
+  const cells = normalizeInputs(inputs as Record<string, InputRaw>);
+  const values: Record<string, FieldValue> = {};
+  for (const [k, c] of Object.entries(cells)) values[k] = c.value;
+
   const open: DecisionPoint[] = [];
-  const merged: Record<string, FieldValue> = { ...inputs, ...computed };
+  const merged: Record<string, FieldValue> = { ...values, ...computed };
   for (const dp of worksheet.decisionPoints) {
     if (recordedDecisionIds.has(dp.id)) continue;
     if (dp.triggerWhen !== undefined) {
