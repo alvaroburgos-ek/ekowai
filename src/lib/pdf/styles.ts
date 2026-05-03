@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
   page: {
     backgroundColor: colors.paper,
     color: colors.ink,
-    fontFamily: 'Inter',
+    fontFamily: 'Helvetica',
     fontSize: 10,
     padding: 56,
     lineHeight: 1.4,
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   meta: {
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'Courier',
     fontSize: 8,
     color: colors.subtext,
     textTransform: 'uppercase',
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
     marginVertical: 6,
   },
   num: {
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'Courier',
   },
   row: {
     flexDirection: 'row',
@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
   },
   cellSym: {
     width: 70,
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'Courier',
     fontSize: 9,
   },
   cellDesc: {
@@ -64,17 +64,17 @@ export const styles = StyleSheet.create({
   },
   cellVal: {
     width: 80,
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'Courier',
     textAlign: 'right',
   },
   cellUnit: {
     width: 40,
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'Courier',
     color: colors.subtext,
   },
   cellSrc: {
     width: 80,
-    fontFamily: 'JetBrainsMono',
+    fontFamily: 'Courier',
     fontSize: 8,
     color: colors.accent,
   },

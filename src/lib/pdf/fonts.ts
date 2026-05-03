@@ -1,73 +1,21 @@
 import 'server-only';
-import { Font } from '@react-pdf/renderer';
-import path from 'node:path';
-
-let registered = false;
 
 /**
- * Register Inter + JetBrainsMono with @react-pdf/renderer.
+ * Font registration entry point.
  *
- * Note: @fontsource v5 ships only WOFF/WOFF2 (no TTF). fontkit 2.x
- * (vendored by @react-pdf/font) parses WOFF natively, so we point
- * directly at the .woff files in node_modules. We avoid WOFF2 because
- * it needs brotli decompression which is not always available in
- * serverless environments.
+ * Currently a no-op — we use the PDF spec built-in fonts Helvetica (sans)
+ * and Courier (mono). They render on every PDF reader without external
+ * font files and avoid the fontkit/WOFF parsing edge case (RangeError on
+ * certain glyphs) we hit while trying to register @fontsource Inter.
+ *
+ * To re-introduce custom fonts later, register them here with
+ * `Font.register(...)`. @fontsource v5 ships WOFF only; if Font.register
+ * fails, prefer downloading TTF assets directly into public/fonts/ and
+ * registering those.
  */
 export function ensureFonts(): void {
-  if (registered) return;
-
-  const fontSourceRoot = path.join(
-    process.cwd(),
-    'node_modules',
-    '@fontsource',
-  );
-
-  Font.register({
-    family: 'Inter',
-    fonts: [
-      {
-        src: path.join(
-          fontSourceRoot,
-          'inter',
-          'files',
-          'inter-latin-400-normal.woff',
-        ),
-        fontWeight: 'normal',
-      },
-      {
-        src: path.join(
-          fontSourceRoot,
-          'inter',
-          'files',
-          'inter-latin-500-normal.woff',
-        ),
-        fontWeight: 'medium',
-      },
-      {
-        src: path.join(
-          fontSourceRoot,
-          'inter',
-          'files',
-          'inter-latin-600-normal.woff',
-        ),
-        fontWeight: 'semibold',
-      },
-    ],
-  });
-
-  Font.register({
-    family: 'JetBrainsMono',
-    src: path.join(
-      fontSourceRoot,
-      'jetbrains-mono',
-      'files',
-      'jetbrains-mono-latin-400-normal.woff',
-    ),
-  });
-
-  // Disable hyphenation — engineering reports don't hyphenate
-  // compound German words well.
-  Font.registerHyphenationCallback((word) => [word]);
-
-  registered = true;
+  // intentionally empty
 }
+
+// Keep @fontsource/inter and @fontsource/jetbrains-mono as deps so the
+// regression path is one Font.register call away when we revisit fonts.

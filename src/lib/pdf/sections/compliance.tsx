@@ -18,10 +18,10 @@ export function Compliance({ data }: { data: ReportData }) {
       {worksheet.thresholds.map((t) => {
         const violation = violMap.get(t.id);
         const status = !violation
-          ? '✓'
+          ? 'OK'
           : violation.severity === 'blocking'
-            ? '✗'
-            : '⌬';
+            ? 'FAIL'
+            : 'WARN';
         const chip = !violation
           ? styles.chipOk
           : violation.severity === 'blocking'
