@@ -102,6 +102,14 @@ export function CalculatorShell(props: {
             <ComplianceBadge locale={props.locale} />
             <OfflineBadge />
             <SaveStatus locale={props.locale} />
+            <a
+              href={`/api/calculations/${props.calcId}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-accent underline"
+            >
+              Bericht herunterladen
+            </a>
             {(props.status === 'draft' || props.status === 'changes_requested') && (
               <SubmitButton calcId={props.calcId} resubmit={props.status === 'changes_requested'} />
             )}
