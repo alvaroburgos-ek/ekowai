@@ -6,6 +6,7 @@ import {
   date,
   jsonb,
   numeric,
+  bigint,
   boolean,
   pgEnum,
   primaryKey,
@@ -258,7 +259,7 @@ export const projectDocuments = pgTable(
     citationLabel: text('citation_label').notNull(),
     issuedAt: date('issued_at', { mode: 'date' }),
     filePath: text('file_path').notNull(),
-    fileSize: numeric('file_size').notNull(),
+    fileSize: bigint('file_size', { mode: 'number' }).notNull(),
     mimeType: text('mime_type').notNull(),
     sha256: text('sha256').notNull(),
     uploadedBy: uuid('uploaded_by')
@@ -283,7 +284,9 @@ export const reportArchives = pgTable(
     approvalId: uuid('approval_id')
       .notNull()
       .references(() => approvals.id, { onDelete: 'restrict' }),
-    orgId: uuid('org_id').notNull(),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
     filePath: text('file_path').notNull(),
     sha256: text('sha256').notNull(),
     generatedAt: timestamp('generated_at', { withTimezone: true }).notNull().defaultNow(),
