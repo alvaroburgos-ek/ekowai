@@ -19,6 +19,10 @@ export async function createClient() {
   // BYPASS_AUTH: skip cookies() entirely so this works in non-request
   // contexts (vitest tests, scripts). Stubs auth.getUser to return a fake
   // user matching BYPASS_AUTH_USER_ID. Test deployments only.
+  // NOTE: bypass mode returns a non-SSR client. Real auth flows
+  // (signInWithOtp, exchangeCodeForSession, signOut, ...) will not write
+  // session cookies under bypass — only auth checks via getUser() work.
+  // env.ts hard-throws if BYPASS_AUTH is set with VERCEL_ENV=production.
   if (env.BYPASS_AUTH && env.BYPASS_AUTH_USER_ID) {
     const client = createSupabaseClient(
       env.NEXT_PUBLIC_SUPABASE_URL,

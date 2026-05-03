@@ -66,14 +66,22 @@ export async function uploadDocument(formData: FormData) {
 
   const documentId = crypto.randomUUID();
   const bytes = Buffer.from(await file.arrayBuffer());
-  const { filePath, sha256 } = await uploadProjectDocument({
-    orgId: proj.orgId,
-    projectId: proj.id,
-    documentId,
-    fileName: file.name,
-    bytes,
-    mimeType: file.type,
-  });
+  let filePath: string;
+  let sha256: string;
+  try {
+    const result = await uploadProjectDocument({
+      orgId: proj.orgId,
+      projectId: proj.id,
+      documentId,
+      fileName: file.name,
+      bytes,
+      mimeType: file.type,
+    });
+    filePath = result.filePath;
+    sha256 = result.sha256;
+  } catch {
+    return { ok: false as const, error: 'storage_failed' };
+  }
 
   await db.insert(projectDocuments).values({
     id: documentId,
@@ -107,7 +115,11 @@ export async function deleteDocument(documentId: string) {
     .limit(1);
   if (!member) return { ok: false as const, error: 'forbidden' };
 
-  await deleteProjectDocument(doc.filePath);
+  try {
+    await deleteProjectDocument(doc.filePath);
+  } catch {
+    return { ok: false as const, error: 'storage_failed' };
+  }
   await db.delete(projectDocuments).where(eq(projectDocuments.id, documentId));
   revalidatePath(`/projects/${doc.projectId}/documents`);
   return { ok: true as const };
