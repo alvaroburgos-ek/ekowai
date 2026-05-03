@@ -2,10 +2,11 @@ import Link from 'next/link';
 import { eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
-import { orgMembers } from '@/lib/db/schema';
+import { orgMembers, orgs } from '@/lib/db/schema';
 import { listOrgMembers } from '@/lib/actions/org';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
+import { LetterheadForm } from '@/components/org/letterhead-form';
 
 export default async function OrgPage({
   params,
@@ -27,6 +28,9 @@ export default async function OrgPage({
     .where(eq(orgMembers.userId, user.id))
     .limit(1);
   if (!membership) return null;
+
+  const [org] = await db.select().from(orgs).where(eq(orgs.id, membership.orgId)).limit(1);
+  if (!org) return null;
 
   const members = await listOrgMembers(membership.orgId);
   const canInvite = membership.role === 'owner' || membership.role === 'admin';
@@ -88,6 +92,25 @@ export default async function OrgPage({
           </ul>
         )}
       </section>
+
+      {canInvite && (
+        <section className="space-y-5 border-t border-hairline pt-8">
+          <LetterheadForm
+            org={{
+              id: org.id,
+              logoUrl: org.logoUrl,
+              addressLine1: org.addressLine1,
+              addressLine2: org.addressLine2,
+              postalCode: org.postalCode,
+              city: org.city,
+              phone: org.phone,
+              email: org.email,
+              website: org.website,
+              vatId: org.vatId,
+            }}
+          />
+        </section>
+      )}
     </article>
   );
 }
