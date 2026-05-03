@@ -249,6 +249,21 @@
     "memberSingular": "Mitglied",
     "memberPlural": "Mitglieder"
   },
+  "citations": {
+    "title": "Quelle anhängen für",
+    "fromDoc": "Aus Dokument",
+    "asText": "Als Text",
+    "noDocs": "Keine Dokumente in diesem Projekt. Lade zuerst Dokumente hoch.",
+    "labelPlaceholder": "z. B. IfSL Mainz, 2026-03-12",
+    "save": "Speichern",
+    "removeSource": "Quelle entfernen",
+    "errors": {
+      "calc_not_found": "Berechnung nicht gefunden",
+      "doc_not_in_project": "Dokument gehört nicht zum Projekt",
+      "symbol_not_found": "Eingabefeld nicht gefunden",
+      "invalid_input": "Eingabe ungültig"
+    }
+  },
   "documents": {
     "title": "Projektdokumente",
     "upload": "Hochladen",

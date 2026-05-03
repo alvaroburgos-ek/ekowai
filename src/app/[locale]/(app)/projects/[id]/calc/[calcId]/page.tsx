@@ -12,6 +12,12 @@ import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { CalculatorShell } from '@/components/calculator/calculator-shell';
 import { createClient } from '@/lib/supabase/server';
 import type { ExpressionAst } from '@/lib/engine';
+import { listProjectDocuments } from '@/lib/db/queries/documents';
+import {
+  normalizeInputs,
+  inputsToValues,
+  type InputSource,
+} from '@/lib/engine/inputs-reader';
 
 export default async function CalcPage({
   params,
@@ -93,6 +99,16 @@ export default async function CalcPage({
     }
   }
 
+  const docs = await listProjectDocuments(calc.projectId);
+
+  // Extract sources from the mixed-shape inputs blob
+  const cells = normalizeInputs(calc.inputs as Record<string, any>);
+  const inputSources: Record<string, InputSource | undefined> = {};
+  for (const [k, c] of Object.entries(cells)) {
+    if (c.source) inputSources[k] = c.source;
+  }
+  const initialInputsBare = inputsToValues(calc.inputs as Record<string, any>);
+
   const xrefs = await db
     .select()
     .from(crossReferences)
@@ -119,9 +135,11 @@ export default async function CalcPage({
       projectId={id}
       name={calc.name}
       worksheet={worksheet}
-      initialInputs={(calc.inputs ?? {}) as Record<string, number | string | boolean | null>}
+      initialInputs={initialInputsBare as Record<string, number | string | boolean | null>}
       derivedValues={derivedValues}
       derivedSources={derivedSources}
+      inputSources={inputSources}
+      docs={docs}
       lastSavedAt={calc.updatedAt.toISOString()}
       initialDraft={calc.rationaleDraft}
       initialFinal={calc.rationale}

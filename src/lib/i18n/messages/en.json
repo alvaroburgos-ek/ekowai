@@ -249,6 +249,21 @@
     "memberSingular": "member",
     "memberPlural": "members"
   },
+  "citations": {
+    "title": "Attach source for",
+    "fromDoc": "From document",
+    "asText": "As text",
+    "noDocs": "No documents in this project. Upload one first.",
+    "labelPlaceholder": "e.g. IfSL Mainz, 2026-03-12",
+    "save": "Save",
+    "removeSource": "Remove source",
+    "errors": {
+      "calc_not_found": "Calculation not found",
+      "doc_not_in_project": "Document does not belong to this project",
+      "symbol_not_found": "Input field not found",
+      "invalid_input": "Invalid input"
+    }
+  },
   "documents": {
     "title": "Project documents",
     "upload": "Upload",

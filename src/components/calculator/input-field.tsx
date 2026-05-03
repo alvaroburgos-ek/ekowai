@@ -1,15 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 import type { InputField as FieldDef } from '@/lib/engine';
+import { SourceBadge } from '@/components/documents/source-badge';
+import { CitationPicker } from '@/components/documents/citation-picker';
 
 export function InputField({ field, locale }: { field: FieldDef; locale: 'de' | 'en' }) {
   const value = useCalculatorStore((s) => s.inputs[field.id]);
   const setField = useCalculatorStore((s) => s.setField);
   const derivedSource = useCalculatorStore((s) => s.derivedSources[field.id]);
+  const calcId = useCalculatorStore((s) => s.calcId);
+  const inputSource = useCalculatorStore((s) => s.inputSources[field.id]);
+  const docs = useCalculatorStore((s) => s.docs);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   const label = locale === 'de' ? field.labelDe : field.labelEn;
   const isDerived = !!field.derivedFrom;
   const derivedReady = !!derivedSource;
+
+  const sourceDoc =
+    inputSource && 'docId' in inputSource
+      ? docs.find((d) => d.id === inputSource.docId)
+      : undefined;
 
   const derivedAnnotation = field.derivedFrom ? (
     <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-2">
@@ -39,8 +52,8 @@ export function InputField({ field, locale }: { field: FieldDef; locale: 'de' | 
         {derivedAnnotation}
       </div>
 
-      {/* Right: input */}
-      <div className="col-span-7">
+      {/* Right: input + source badge */}
+      <div className="col-span-7 space-y-1.5">
         {field.type === 'select' ? (
           <select
             id={field.id}
@@ -87,7 +100,26 @@ export function InputField({ field, locale }: { field: FieldDef; locale: 'de' | 
             }`}
           />
         )}
+        {calcId && !isDerived && (
+          <div>
+            <SourceBadge
+              source={inputSource}
+              docTitle={sourceDoc?.title}
+              onClick={() => setPickerOpen(true)}
+            />
+          </div>
+        )}
       </div>
+
+      {calcId && (
+        <CitationPicker
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          calcId={calcId}
+          symbol={field.id}
+          docs={docs}
+        />
+      )}
     </div>
   );
 }
