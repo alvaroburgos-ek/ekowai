@@ -21,6 +21,9 @@ import {
   changesRequestedTemplate,
 } from '@/lib/email/templates';
 import { env } from '@/env';
+import { buildReport } from '@/lib/pdf/build-report';
+import { uploadReportArchive } from '@/lib/storage/report-archives';
+import { reportArchives } from '@/lib/db/schema';
 
 const submitSchema = z.object({ calcId: z.string().uuid() });
 const reviewSchema = z.object({
@@ -157,13 +160,42 @@ async function reviewAction(
   if (!calc) return { ok: false, error: 'not_found' };
   if (calc.status !== 'submitted') return { ok: false, error: 'not_in_review' };
 
-  await db.insert(approvals).values({
-    calculationId: calc.id,
-    orgId,
-    action,
-    reviewerId: user.id,
-    comment: parsed.comment ?? null,
-  });
+  const [approval] = await db
+    .insert(approvals)
+    .values({
+      calculationId: calc.id,
+      orgId,
+      action,
+      reviewerId: user.id,
+      comment: parsed.comment ?? null,
+    })
+    .returning();
+
+  // Fire-and-forget archive: render PDF + upload + insert archive row.
+  // Failure is logged, never blocks approval.
+  if (action === 'approved' && approval) {
+    void (async () => {
+      try {
+        const buf = await buildReport(calc.id);
+        const { filePath, sha256 } = await uploadReportArchive({
+          orgId: calc.orgId,
+          calcId: calc.id,
+          approvalId: approval.id,
+          bytes: buf,
+        });
+        await db.insert(reportArchives).values({
+          calculationId: calc.id,
+          approvalId: approval.id,
+          orgId: calc.orgId,
+          filePath,
+          sha256,
+          generatedBy: user.id,
+        });
+      } catch (e) {
+        console.error('[archive] failed for calc', calc.id, e);
+      }
+    })();
+  }
 
   // Notify the calc creator.
   const creator = await profileForUser(calc.createdBy);
