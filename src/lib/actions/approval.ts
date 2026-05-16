@@ -99,6 +99,10 @@ export async function submitForReview(input: {
   const inputs = (calc.inputs ?? {}) as Record<string, number | string | boolean | null>;
   const result = compute(worksheet, inputs);
 
+  if (Object.keys(result.validationErrors).length > 0) {
+    return { ok: false, error: 'blocking_violation' };
+  }
+
   if (result.compliance.status === 'blocking_violation') {
     return { ok: false, error: 'blocking_violation' };
   }
