@@ -8,6 +8,13 @@
       "when": 1777380335053,
       "tag": "0000_purple_triathlon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778969260171,
+      "tag": "0001_lovely_cassandra_nova",
+      "breakpoints": true
     }
   ]
 }

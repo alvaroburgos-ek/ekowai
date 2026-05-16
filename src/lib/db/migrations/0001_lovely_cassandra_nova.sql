@@ -1,0 +1,1 @@
+CREATE INDEX "calc_status_idx" ON "calculations" USING btree ("status");
