@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 export function SubmitButton({
   calcId,
   resubmit = false,
+  recordedDecisionIds = new Set<string>(),
 }: {
   calcId: string;
   resubmit?: boolean;
+  recordedDecisionIds?: Set<string>;
 }) {
   const t = useTranslations('approval');
   const router = useRouter();
@@ -27,7 +29,6 @@ export function SubmitButton({
   const violations = result?.compliance.violations ?? [];
 
   // Open decision points (best effort — server-side check is authoritative)
-  const recordedDecisionIds = new Set<string>(); // we don't have store of recorded; assume server validates
   const openDecisions =
     worksheet && result
       ? worksheet.decisionPoints.filter((dp) => {

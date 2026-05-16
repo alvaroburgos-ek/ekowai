@@ -68,6 +68,8 @@ export function CalculatorShell(props: {
     props.lastSavedAt,
   ]);
 
+  const recordedIds = new Set(props.initialDecisions.map((d) => d.decisionPointId));
+
   const inputSection = props.worksheet.sections.find((s) => s.id === 'inputs');
   const resultSection = props.worksheet.sections.find((s) => s.id !== 'inputs');
 
@@ -93,7 +95,7 @@ export function CalculatorShell(props: {
             <OfflineBadge />
             <SaveStatus locale={props.locale} />
             {(props.status === 'draft' || props.status === 'changes_requested') && (
-              <SubmitButton calcId={props.calcId} resubmit={props.status === 'changes_requested'} />
+              <SubmitButton calcId={props.calcId} resubmit={props.status === 'changes_requested'} recordedDecisionIds={recordedIds} />
             )}
           </div>
         </div>
