@@ -9,6 +9,8 @@ import type {
 
 type Scope = { values: Record<string, FieldValue>; errors: string[]; currentId: string };
 
+const COND_EPSILON = 1e-10;
+
 function asNumber(v: FieldValue): number {
   if (typeof v === 'number') return v;
   if (typeof v === 'boolean') return v ? 1 : 0;
@@ -62,7 +64,7 @@ function evalExpr(expr: ExpressionAst, scope: Scope): number {
     }
     // eslint-disable-next-line no-fallthrough
     case 'cond':
-      return evalExpr(expr.if, scope) !== 0
+      return Math.abs(evalExpr(expr.if, scope)) > COND_EPSILON
         ? evalExpr(expr.then, scope)
         : evalExpr(expr.else, scope);
     case 'cmp': {
