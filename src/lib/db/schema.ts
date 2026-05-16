@@ -126,6 +126,7 @@ export const calculations = pgTable(
     projectIdx: index('calc_project_idx').on(t.projectId),
     orgIdx: index('calc_org_idx').on(t.orgId),
     regIdx: index('calc_regulation_idx').on(t.regulationCode, t.regulationVersion),
+    statusIdx: index('calc_status_idx').on(t.status),
   }),
 );
 
