@@ -65,7 +65,12 @@ export default async function CalcPage({
       ? await db
           .select()
           .from(calculations)
-          .where(eq(calculations.projectId, calc.projectId))
+          .where(
+            and(
+              eq(calculations.projectId, calc.projectId),
+              eq(calculations.status, 'approved'),
+            )
+          )
       : [];
   const siblingByWorksheet = new Map(
     siblingCalcs
