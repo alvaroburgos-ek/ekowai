@@ -200,5 +200,9 @@ export async function listInbox() {
   const user = await requireUser();
   const memberships = await db.select().from(orgMembers).where(eq(orgMembers.userId, user.id));
   if (memberships.length === 0) return [];
-  return db.select().from(calculations).where(eq(calculations.status, 'submitted'));
+  const orgIds = memberships.map((m) => m.orgId);
+  return db
+    .select()
+    .from(calculations)
+    .where(and(eq(calculations.status, 'submitted'), inArray(calculations.orgId, orgIds)));
 }
