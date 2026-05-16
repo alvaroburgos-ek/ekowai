@@ -122,6 +122,8 @@ export async function submitForReview(input: {
     reviewerId: null,
   });
 
+  await db.update(calculations).set({ status: 'submitted' }).where(eq(calculations.id, calc.id));
+
   // Notify all reviewers (other engineers/admins/owners) in the org.
   const recipients = await reviewerEmailsForOrg(orgId, user.id);
   if (recipients.length > 0) {
@@ -164,6 +166,8 @@ async function reviewAction(
     reviewerId: user.id,
     comment: parsed.comment ?? null,
   });
+
+  await db.update(calculations).set({ status: action }).where(eq(calculations.id, calc.id));
 
   // Notify the calc creator.
   const creator = await profileForUser(calc.createdBy);
