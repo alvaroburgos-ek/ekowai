@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
-import { calculations, orgMembers, projects } from '@/lib/db/schema';
+import { calculations, calculationHistory, orgMembers, projects } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -115,6 +115,15 @@ export async function saveCalculation(input: {
   if (Object.keys(result.validationErrors).length > 0) {
     return { ok: false, error: 'validation_failed' };
   }
+
+  // Snapshot the current state before overwriting
+  await db.insert(calculationHistory).values({
+    calculationId: calc.id,
+    inputs: calc.inputs as Record<string, number | string | boolean | null>,
+    results: calc.results as Record<string, number | string | boolean | null>,
+    rationale: calc.rationale ?? null,
+    changedBy: user.id,
+  });
 
   await db
     .update(calculations)
