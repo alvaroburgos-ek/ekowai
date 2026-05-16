@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 import { submitForReview } from '@/lib/actions/approval';
@@ -14,6 +15,7 @@ export function SubmitButton({
   resubmit?: boolean;
 }) {
   const t = useTranslations('approval');
+  const router = useRouter();
   const result = useCalculatorStore((s) => s.result);
   const worksheet = useCalculatorStore((s) => s.worksheet);
   const inputs = useCalculatorStore((s) => s.inputs);
@@ -45,7 +47,7 @@ export function SubmitButton({
       const r = await submitForReview({ calcId });
       if (r.ok) {
         setSuccess(true);
-        if (typeof window !== 'undefined') window.location.reload();
+        router.refresh();
       } else {
         setError(t(`submitError.${r.error}`) || r.error);
       }
