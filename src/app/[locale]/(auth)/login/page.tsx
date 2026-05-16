@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { requestMagicLink } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,15 @@ export default function LoginPage() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 min-h-[calc(100vh-12rem)] items-center">
       {/* Left column — editorial hero */}
       <section className="lg:col-span-7 space-y-8">
+        <Image
+          src="/images/brand/logo-ekowai.svg"
+          alt="EKOWAI"
+          width={140}
+          height={40}
+          unoptimized
+          priority
+          className="object-contain"
+        />
         <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext">
           DWA-A-201 · v3.2
           <span className="mx-2 text-hairline-strong">/</span>

@@ -35,11 +35,12 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
           className="group flex items-center gap-3 text-ink"
         >
           <Image
-            src="/images/brand/logo-ekowai.png"
+            src="/images/brand/icon-ekowai.svg"
             alt="EKOWAI"
             width={36}
             height={36}
             priority
+            unoptimized
             className="object-contain"
           />
           <span className="flex flex-col leading-none">

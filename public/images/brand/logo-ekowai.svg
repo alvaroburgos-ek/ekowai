@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" fill="none" role="img" aria-label="ekowai">
+  <defs>
+    <linearGradient id="drop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D061"/>
+      <stop offset="100%" stop-color="#009EE9"/>
+    </linearGradient>
+  </defs>
+  <!-- Water droplet shape -->
+  <path d="M26 2C26 2 10 18 10 30C10 39.941 17.059 48 26 48C34.941 48 42 39.941 42 30C42 18 26 2 26 2Z"
+        fill="url(#drop-grad)"/>
+  <!-- Leaf accent at top of droplet -->
+  <path d="M26 10C26 10 30 14 30 17C30 17 27 16 26 14C25 16 22 17 22 17C22 14 26 10 26 10Z"
+        fill="white" opacity="0.9"/>
+  <!-- Stylized lowercase "e" inside droplet -->
+  <path d="M19 31C19 27.134 22.134 24 26 24C29.866 24 33 27.134 33 31C33 31.552 32.552 32 32 32H20C20 34.761 22.686 37 26 37C27.657 37 29.157 36.418 30.243 35.457L31.757 36.957C30.257 38.249 28.222 39 26 39C21.582 39 18 35.418 18 31H19ZM20.17 30H31.83C31.401 27.752 28.879 26 26 26C23.121 26 20.599 27.752 20.17 30Z"
+        fill="white"/>
+  <!-- Wordmark "ekowai" -->
+  <text x="50" y="36" font-family="Poppins, sans-serif" font-size="22" font-weight="300" fill="#1a2a1e" letter-spacing="0.5">ekowai</text>
+</svg>
