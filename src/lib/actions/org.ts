@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient as createSupabaseClient } from '@/lib/supabase/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { env } from '@/env';
 import { db } from '@/lib/db';
 import { orgMembers, profiles } from '@/lib/db/schema';
@@ -9,18 +9,14 @@ import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { sendEmail } from '@/lib/email/client';
+import { inviteTemplate } from '@/lib/email/templates';
 
 const inviteSchema = z.object({
   email: z.string().email(),
   role: z.enum(['admin', 'engineer', 'viewer']),
   locale: z.enum(['de', 'en']),
 });
-
-function adminClient() {
-  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
 
 export async function inviteMember(formData: FormData): Promise<void> {
   const parsed = inviteSchema.safeParse({
@@ -44,18 +40,31 @@ export async function inviteMember(formData: FormData): Promise<void> {
     redirect(`/${parsed.data.locale}/org`);
   }
 
-  // Use admin client to invite via Supabase Auth (sends magic-link email)
-  const admin = adminClient();
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(parsed.data.email, {
-    redirectTo: `${env.NEXT_PUBLIC_APP_URL}/${parsed.data.locale}/verify`,
+  // Generate invite link via admin client — does NOT send email, returns action_link
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: 'invite',
+    email: parsed.data.email,
+    options: {
+      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/${parsed.data.locale}/verify`,
+    },
   });
   if (error || !data.user) redirect(`/${parsed.data.locale}/org`);
 
-  // Add membership row in pending state (role assigned now; activates on first sign-in)
-  await db.insert(orgMembers).values({
-    orgId: membership.orgId,
-    userId: data.user.id,
-    role: parsed.data.role,
+  // Upsert membership row — handles re-invite of an already-invited user gracefully
+  await db
+    .insert(orgMembers)
+    .values({ orgId: membership.orgId, userId: data.user.id, role: parsed.data.role })
+    .onConflictDoUpdate({
+      target: [orgMembers.orgId, orgMembers.userId],
+      set: { role: parsed.data.role },
+    });
+
+  // Send branded invite email via Resend (graceful no-op if RESEND_API_KEY not set)
+  // Must await before redirect() — redirect() throws and aborts execution immediately
+  await sendEmail({
+    to: parsed.data.email,
+    ...inviteTemplate({ inviteUrl: data.properties.action_link, locale: parsed.data.locale }),
   });
 
   revalidatePath(`/${parsed.data.locale}/org`);

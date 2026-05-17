@@ -11,6 +11,7 @@ export const env = createEnv({
     GROQ_API_KEY: z.string().min(1).optional(),
     DEEPSEEK_API_KEY: z.string().min(1).optional(),
     KIMI_API_KEY: z.string().min(1).optional(),
+    MOCK_LLM: z.enum(['1', 'true']).optional(),
     SENTRY_DSN: z.string().url().optional(),
     LEGAL_REVIEWED: z.enum(['1', 'true']).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
@@ -21,6 +22,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
     NEXT_PUBLIC_APP_URL: z.string().url(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+    NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED: z.enum(['1', 'true']).optional(),
   },
   runtimeEnv: {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -31,6 +33,7 @@ export const env = createEnv({
     GROQ_API_KEY: process.env.GROQ_API_KEY,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
     KIMI_API_KEY: process.env.KIMI_API_KEY,
+    MOCK_LLM: process.env.MOCK_LLM,
     SENTRY_DSN: process.env.SENTRY_DSN,
     LEGAL_REVIEWED: process.env.LEGAL_REVIEWED,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
@@ -39,6 +42,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED,
   },
 });
 

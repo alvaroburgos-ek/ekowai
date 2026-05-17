@@ -1,9 +1,11 @@
 import 'server-only';
+import { env } from '@/env';
 
 const FOOTER_DE = `\n\n—\nEKOWAI Wizard · Bemessungsassistent für DWA-A-201\nDiese Nachricht wurde automatisch versandt. Antworten an diese Adresse werden nicht gelesen.`;
 const FOOTER_EN = `\n\n—\nEKOWAI Wizard · DWA-A-201 sizing assistant\nThis message was sent automatically. Replies to this address are not read.`;
 
 function shell(title: string, lede: string, ctaLabel: string, ctaUrl: string, locale: 'de' | 'en'): string {
+  const logoUrl = `${env.NEXT_PUBLIC_APP_URL}/images/brand/logo-ekowai.svg`;
   return `<!doctype html>
 <html lang="${locale}">
 <head>
@@ -14,9 +16,7 @@ function shell(title: string, lede: string, ctaLabel: string, ctaUrl: string, lo
 <body style="margin:0;padding:24px;background:#f8f5ee;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#0d1418;">
   <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #d4cfc4;">
     <div style="border-bottom:1px solid #d4cfc4;padding:18px 24px;">
-      <span style="font-family:ui-monospace,SF Mono,Menlo,Consolas,monospace;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:#5f6a72;">
-        EKOWAI · Wizard
-      </span>
+      <img src="${logoUrl}" alt="EKOWAI" width="120" height="35" style="display:block;border:0;" />
     </div>
     <div style="padding:32px 24px;">
       <h1 style="margin:0 0 12px 0;font-size:24px;font-weight:600;letter-spacing:-0.02em;color:#0d1418;">${title}</h1>
@@ -90,6 +90,34 @@ export function approvedTemplate(input: ApprovalEmailInput): { subject: string; 
   return {
     subject: t.subject,
     html: shell(t.title, t.lede, t.cta, input.calcUrl, input.locale),
+    text,
+  };
+}
+
+export interface InviteEmailInput {
+  inviteUrl: string;
+  locale: 'de' | 'en';
+}
+
+export function inviteTemplate(input: InviteEmailInput): { subject: string; html: string; text: string } {
+  const t =
+    input.locale === 'de'
+      ? {
+          subject: 'Einladung zum EKOWAI Wizard',
+          title: 'Sie wurden eingeladen.',
+          lede: 'Sie haben eine Einladung zum EKOWAI Wizard erhalten — dem Bemessungsassistenten für DWA-A-201. Klicken Sie auf den Button, um Ihr Konto zu aktivieren und loszulegen.',
+          cta: 'Einladung annehmen',
+        }
+      : {
+          subject: 'Invitation to EKOWAI Wizard',
+          title: 'You have been invited.',
+          lede: 'You have received an invitation to EKOWAI Wizard — the sizing assistant for DWA-A-201. Click the button to activate your account and get started.',
+          cta: 'Accept invitation',
+        };
+  const text = `${t.title}\n\n${t.lede}\n\n${t.cta}: ${input.inviteUrl}${input.locale === 'de' ? FOOTER_DE : FOOTER_EN}`;
+  return {
+    subject: t.subject,
+    html: shell(t.title, t.lede, t.cta, input.inviteUrl, input.locale),
     text,
   };
 }

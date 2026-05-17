@@ -14,13 +14,13 @@ export default async function InboxPage({
   return (
     <article className="space-y-10">
       <header className="border-b border-hairline pb-8">
-        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
           Sektion 03 · Zur Prüfung
         </div>
-        <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight text-ink">
+        <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
           {t('inboxTitle')}
         </h1>
-        <p className="mt-3 font-mono text-[11px] tabular-nums text-subtext">
+        <p className="mt-3 text-[11px] tabular-nums text-subtext">
           {String(items.length).padStart(2, '0')}{' '}
           {items.length === 1 ? 'Eintrag' : 'Einträge'}
         </p>
@@ -28,7 +28,7 @@ export default async function InboxPage({
 
       {items.length === 0 ? (
         <div className="border border-dashed border-hairline-strong p-12 text-center">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-subtext mb-3">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-subtext mb-3">
             ⌬ Eingang leer
           </p>
           <p className="text-xl font-semibold text-ink-2 tracking-tight">{t('inboxEmpty')}</p>
@@ -41,16 +41,16 @@ export default async function InboxPage({
                 href={`/${locale}/projects/${c.projectId}/calc/${c.id}`}
                 className="grid grid-cols-12 gap-4 px-2 py-4 items-baseline hover:bg-paper-2/50 transition-colors"
               >
-                <span className="col-span-1 font-mono text-[11px] tabular-nums text-subtext">
+                <span className="col-span-1 text-[11px] tabular-nums text-subtext">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="col-span-6 text-base font-semibold text-ink group-hover:text-accent-2 transition-colors tracking-tight">
                   {c.name}
                 </span>
-                <span className="col-span-3 font-mono text-[11px] uppercase tracking-[0.15em] text-subtext">
+                <span className="col-span-3 text-[11px] uppercase tracking-[0.15em] text-subtext">
                   {c.regulationCode} · {c.worksheetId}
                 </span>
-                <span className="col-span-2 font-mono text-[10px] uppercase tracking-[0.2em] text-right text-accent-2">
+                <span className="col-span-2 text-[10px] uppercase tracking-[0.2em] text-right text-accent-2">
                   ● In Prüfung
                 </span>
               </Link>

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
-import { orgMembers } from '@/lib/db/schema';
+import { orgMembers, profiles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -54,6 +54,9 @@ export default async function VerifyPage({
     .where(eq(orgMembers.userId, user.id));
 
   if (memberships.length > 0) {
+    // Check if the user has set their name — if not, send to profile setup first
+    const [profile] = await db.select().from(profiles).where(eq(profiles.id, user.id)).limit(1);
+    if (!profile?.fullName) redirect(`/${locale}/profile-setup`);
     redirect(`/${locale}/projects`);
   }
 

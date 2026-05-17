@@ -8,7 +8,14 @@
     "linkExpired": "Dieser Link ist abgelaufen — bitte fordern Sie einen neuen an.",
     "createOrgPrompt": "Erstellen Sie Ihre Organisation",
     "orgName": "Name der Organisation",
-    "orgCreate": "Organisation erstellen"
+    "orgCreate": "Organisation erstellen",
+    "googleButton": "Mit Google anmelden",
+    "profileSetupStep": "Schritt 02 · Profil",
+    "profileSetupTitle": "Wie heißen Sie?",
+    "profileSetupLede": "Ihr Name erscheint in Freigabe-Benachrichtigungen und im Prüfprotokoll.",
+    "fullName": "Vollständiger Name",
+    "fullNamePlaceholder": "Dipl.-Ing. Max Mustermann",
+    "profileSave": "Weiter zu meinen Projekten"
   },
   "nav": {
     "projects": "Projekte",

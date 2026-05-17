@@ -22,13 +22,10 @@ export function StatusBanner({
           : 'border-accent bg-accent-soft/30 text-accent-2';
 
   return (
-    <div className={`border-l-2 px-5 py-4 ${toneCls}`} role="status">
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] mb-1">
-        Status
-      </p>
-      <p className="font-display text-xl">{t(`status.${status}`)}</p>
+    <div className={`rounded-md px-5 py-4 ${toneCls}`} role="status">
+      <p className="font-display text-lg font-semibold">{t(`status.${status}`)}</p>
       {lastApprovalComment && (
-        <p className="mt-2 text-sm font-body italic opacity-80">{lastApprovalComment}</p>
+        <p className="mt-1.5 text-sm opacity-80">{lastApprovalComment}</p>
       )}
     </div>
   );

@@ -11,16 +11,16 @@ export function ComplianceBadge({ locale }: { locale: 'de' | 'en' }) {
   const status = result.compliance.status;
   const tone =
     status === 'compliant'
-      ? 'text-success border-success'
+      ? 'text-success bg-success-soft/60'
       : status === 'warning'
-        ? 'text-warning border-warning'
+        ? 'text-warning bg-warning-soft/60'
         : status === 'blocking_violation'
-          ? 'text-error border-error'
-          : 'text-subtext border-hairline-strong';
+          ? 'text-error bg-error-soft/60'
+          : 'text-subtext bg-paper-2';
 
   return (
     <span
-      className={`inline-flex items-center gap-2 px-2.5 py-1 border font-mono text-[10px] uppercase tracking-[0.2em] ${tone}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${tone}`}
       title={result.compliance.violations
         .map((v) => (locale === 'de' ? v.messageDe : v.messageEn))
         .join('\n')}

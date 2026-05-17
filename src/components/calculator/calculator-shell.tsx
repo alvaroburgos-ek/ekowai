@@ -77,7 +77,7 @@ export function CalculatorShell(props: {
     <article className="space-y-10">
       <header className="border-b border-hairline pb-8 space-y-5">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext flex items-baseline gap-2 flex-wrap">
+          <div className="text-xs text-subtext flex items-baseline gap-2 flex-wrap">
             <span>
               {props.worksheet.regulation} · {props.worksheet.regulationVersion} ·{' '}
               Arbeitsblatt {props.worksheet.id}
@@ -85,7 +85,7 @@ export function CalculatorShell(props: {
               {props.worksheet.sourceCitation}
             </span>
             {props.worksheet.status === 'preview' && (
-              <span className="px-1.5 py-0.5 border border-warning text-warning">
+              <span className="px-2.5 py-1 rounded-full text-xs font-medium text-warning bg-warning-soft/60">
                 Vorschau
               </span>
             )}
@@ -104,7 +104,7 @@ export function CalculatorShell(props: {
             role="note"
             className="border-l-2 border-warning bg-warning-soft/40 px-4 py-3"
           >
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] mb-0.5 text-warning">
+            <p className="text-[10px] uppercase tracking-[0.2em] mb-0.5 text-warning">
               Vorschau-Arbeitsblatt
             </p>
             <p className="text-sm text-ink-2 leading-relaxed">
@@ -115,7 +115,7 @@ export function CalculatorShell(props: {
           </div>
         )}
         <div>
-          <h1 className="text-4xl lg:text-5xl font-semibold text-ink tracking-tight leading-[1.05] mb-2">
+          <h1 className="text-2xl lg:text-3xl font-semibold text-ink tracking-tight mb-2">
             {props.name}
           </h1>
           <p className="text-lg text-ink-2 italic">
@@ -130,14 +130,14 @@ export function CalculatorShell(props: {
 
       <ComplianceSummary locale={props.locale} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {inputSection && (
-          <div className="lg:col-span-5">
+          <div>
             <WorksheetSection locale={props.locale} section={inputSection} editable />
           </div>
         )}
         {resultSection && (
-          <div className="lg:col-span-7">
+          <div>
             <ResultsPanel locale={props.locale} section={resultSection} />
           </div>
         )}

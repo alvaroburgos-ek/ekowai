@@ -59,7 +59,7 @@ export function RationaleBox({
     <section className="border border-hairline bg-paper">
       <header className="border-b border-hairline px-5 py-3 flex items-baseline justify-between flex-wrap gap-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext mb-0.5">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-subtext mb-0.5">
             Erläuterungstext
           </div>
           <h2 className="text-lg font-semibold text-ink tracking-tight">{t('rationale')}</h2>
@@ -75,7 +75,7 @@ export function RationaleBox({
       </header>
       <div className="px-5 py-5 space-y-3">
         {draftError && (
-          <p className="font-mono text-[11px] text-error">⚠ {draftError}</p>
+          <p className="text-[11px] text-error">⚠ {draftError}</p>
         )}
         <textarea
           value={text}
@@ -85,7 +85,7 @@ export function RationaleBox({
           className="block w-full rounded-none border-0 border-l-2 border-hairline focus:border-accent bg-paper-2/30 p-4 text-sm text-ink leading-relaxed focus:outline-none focus:ring-0 resize-y font-body"
         />
         {savedAt && (
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-success">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-success">
             ● {t('savedAt')} {new Date(savedAt).toLocaleTimeString(locale)}
           </p>
         )}

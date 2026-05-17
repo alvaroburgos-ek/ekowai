@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { requestMagicLink } from './actions';
+import { requestMagicLink, signInWithGoogle } from './actions';
+import { env } from '@/env';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
@@ -39,7 +40,7 @@ export default function LoginPage() {
           priority
           className="object-contain"
         />
-        <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-subtext">
           DWA-A-201 · v3.2
           <span className="mx-2 text-hairline-strong">/</span>
           Bemessungsassistent
@@ -56,7 +57,7 @@ export default function LoginPage() {
             Ein Werkzeug für Planungsingenieur:innen — deterministische Berechnung,
             §-genaue Zitate, anwaltlich nachvollziehbare Entscheidungsdokumentation.
           </p>
-          <ul className="font-mono text-[11px] uppercase tracking-[0.18em] text-subtext space-y-1.5">
+          <ul className="text-[11px] uppercase tracking-[0.18em] text-subtext space-y-1.5">
             <li>— Bemessung nach DWA-A-201, Arbeitsblatt A201-08</li>
             <li>— KI-gestützter Erläuterungstext, vom Ingenieur kuratiert</li>
             <li>— Querverweise auf DWA-A-131, A-202, M-153</li>
@@ -79,7 +80,7 @@ export default function LoginPage() {
           <span aria-hidden className="absolute -bottom-px -right-px h-4 w-px bg-ink" />
 
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
               Sektion 01
             </div>
             <h2 className="font-display text-2xl text-ink">{t('signIn')}</h2>
@@ -105,7 +106,7 @@ export default function LoginPage() {
           >
             <input type="hidden" name="locale" value={locale} />
             <label className="block">
-              <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
                 {t('email')}
               </span>
               <Input
@@ -128,6 +129,30 @@ export default function LoginPage() {
               <div>{tErr('generic')}</div>
               {state.message && <div className="mt-1 text-xs opacity-75">{state.message}</div>}
             </Alert>
+          )}
+
+          {env.NEXT_PUBLIC_GOOGLE_OAUTH_ENABLED && (
+            <>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-hairline" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-subtext">
+                  {locale === 'de' ? 'oder' : 'or'}
+                </span>
+                <div className="flex-1 h-px bg-hairline" />
+              </div>
+              <form action={signInWithGoogle}>
+                <input type="hidden" name="locale" value={locale} />
+                <Button type="submit" variant="outline" className="w-full flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/>
+                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/>
+                    <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"/>
+                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z"/>
+                  </svg>
+                  {t('googleButton')}
+                </Button>
+              </form>
+            </>
           )}
         </div>
       </section>

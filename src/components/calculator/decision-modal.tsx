@@ -61,18 +61,18 @@ export function DecisionModal({
         <span aria-hidden className="absolute -bottom-px -right-px h-4 w-px bg-ink" />
 
         <header className="border-b border-hairline px-6 py-5">
-          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-1.5">
+          <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-1.5">
             Entscheidungspunkt · {dp.id}
           </div>
           <h2 className="text-xl font-semibold text-ink tracking-tight">{label}</h2>
           <p className="mt-2 text-sm text-ink-2 leading-relaxed">{prompt}</p>
-          <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-subtext">
+          <div className="mt-2 text-[10px] uppercase tracking-[0.2em] text-subtext">
             {dp.citation}
           </div>
         </header>
 
         <fieldset className="px-6 py-5 space-y-1">
-          <legend className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext mb-3">
+          <legend className="text-[10px] uppercase tracking-[0.2em] text-subtext mb-3">
             Optionen
           </legend>
           <div className="divide-y divide-hairline border-y border-hairline">
@@ -94,7 +94,7 @@ export function DecisionModal({
                     className="mt-1 accent-accent-2"
                   />
                   <div>
-                    <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-subtext mb-0.5">
+                    <div className="text-[11px] uppercase tracking-[0.2em] text-subtext mb-0.5">
                       Variante {o.value}
                     </div>
                     <span className="text-sm text-ink leading-snug">
@@ -108,7 +108,7 @@ export function DecisionModal({
         </fieldset>
 
         <div className="px-6 pb-5 space-y-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext block">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-subtext block">
             {t('rationale')}
           </span>
           <textarea
@@ -120,7 +120,7 @@ export function DecisionModal({
         </div>
 
         {error && (
-          <p className="px-6 pb-3 font-mono text-[11px] text-error">⚠ {error}</p>
+          <p className="px-6 pb-3 text-[11px] text-error">⚠ {error}</p>
         )}
 
         <footer className="border-t border-hairline px-6 py-4 flex justify-end gap-2">

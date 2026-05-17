@@ -25,7 +25,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <Nav locale={locale as Locale} />
-      <main className="flex-1 max-w-5xl mx-auto p-6 w-full">{children}</main>
+      <main className="flex-1 max-w-6xl mx-auto px-6 pt-12 pb-24 w-full">{children}</main>
       <Footer locale={locale as Locale} />
     </div>
   );

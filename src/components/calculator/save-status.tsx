@@ -49,8 +49,10 @@ export function SaveStatus({ locale }: { locale: 'de' | 'en' }) {
   else if (status === 'error') label = t('saveError');
   else if (status === 'dirty') label = t('unsaved');
 
+  const errorTone = status === 'error' ? 'text-error' : 'text-subtext';
+
   return label ? (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext">
+    <span className={`text-xs ${errorTone}`}>
       {label}
     </span>
   ) : null;

@@ -57,8 +57,9 @@ export function SubmitButton({
 
   if (success) {
     return (
-      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-success">
-        ● {t('submitted')}
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-success bg-success-soft/60">
+        <span className="size-1.5 rounded-full bg-current" aria-hidden />
+        {t('submitted')}
       </span>
     );
   }
@@ -70,9 +71,9 @@ export function SubmitButton({
         <Button disabled variant="outline">
           {t('blockedLabel')}
         </Button>
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-error tabular-nums max-w-[18rem] text-right leading-relaxed">
+        <p className="text-xs text-error tabular-nums max-w-[18rem] text-right leading-relaxed">
           {violationCount > 0
-            ? `${String(violationCount).padStart(2, '0')} ${t('violationsBlock')}`
+            ? `${violationCount} ${t('violationsBlock')}`
             : t('blockGeneric')}
         </p>
       </div>
@@ -91,13 +92,13 @@ export function SubmitButton({
         {label}
       </Button>
       {error && (
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-error max-w-[18rem] text-right leading-relaxed">
+        <p className="text-xs text-error max-w-[18rem] text-right leading-relaxed">
           {error}
         </p>
       )}
       {!error && openDecisions > 0 && (
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-warning tabular-nums">
-          {String(openDecisions).padStart(2, '0')} {t('decisionsHint')}
+        <p className="text-xs text-warning tabular-nums">
+          {openDecisions} {t('decisionsHint')}
         </p>
       )}
     </div>

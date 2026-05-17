@@ -6,7 +6,7 @@ export function LocaleSwitcher({ current }: { current: 'de' | 'en' }) {
   const pathname = usePathname();
   const router = useRouter();
   return (
-    <div className="flex items-center gap-1 font-mono text-[11px] tracking-[0.2em]">
+    <div className="flex items-center gap-1 text-[11px] tracking-[0.2em]">
       {locales.map((l, i) => (
         <span key={l} className="flex items-center">
           <button

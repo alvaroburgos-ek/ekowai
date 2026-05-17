@@ -18,7 +18,9 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isAuthRoute =
-    pathname.includes('/login') || pathname.includes('/verify');
+    pathname.includes('/login') ||
+    pathname.includes('/verify') ||
+    pathname.includes('/profile-setup');
   const isLegalRoute = pathname.includes('/legal/');
   const isLocaleRoot = /^\/(de|en)\/?$/.test(pathname);
   const isPublicRoute = pathname === '/' || isAuthRoute || isLegalRoute || isLocaleRoot;
@@ -49,5 +51,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api|auth).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|images|icons|fonts|api|auth).*)'],
 };

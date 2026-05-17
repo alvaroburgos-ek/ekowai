@@ -36,10 +36,10 @@ export default async function OrgPage({
       <header className="border-b border-hairline pb-8">
         <div className="flex items-end justify-between gap-6">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
               Organisation · {membership.orgId.slice(0, 8)}
             </div>
-            <h1 className="text-4xl lg:text-5xl font-semibold tracking-tight text-ink">
+            <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
               {t('title')}
             </h1>
           </div>
@@ -54,7 +54,7 @@ export default async function OrgPage({
       <section className="space-y-5">
         <div className="flex items-end justify-between border-b border-hairline pb-3">
           <h2 className="text-2xl font-semibold text-ink">{t('members')}</h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext tabular-nums">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-subtext tabular-nums">
             {String(members.length).padStart(2, '0')} ·{' '}
             {members.length === 1 ? t('memberSingular') : t('memberPlural')}
           </span>
@@ -62,7 +62,7 @@ export default async function OrgPage({
 
         {members.length === 0 ? (
           <div className="border border-dashed border-hairline-strong p-12 text-center">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-subtext">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-subtext">
               {t('noMembers')}
             </p>
           </div>
@@ -73,14 +73,14 @@ export default async function OrgPage({
                 key={m.userId}
                 className="grid grid-cols-12 gap-4 px-2 py-4 items-baseline"
               >
-                <span className="col-span-1 font-mono text-[11px] tabular-nums text-subtext">
+                <span className="col-span-1 text-[11px] tabular-nums text-subtext">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="col-span-5 text-base text-ink">
                   {m.fullName || m.email}
                 </span>
                 <span className="col-span-4 text-sm text-subtext truncate">{m.email}</span>
-                <span className="col-span-2 font-mono text-[10px] uppercase tracking-[0.2em] text-right text-ink-2">
+                <span className="col-span-2 text-[10px] uppercase tracking-[0.2em] text-right text-ink-2">
                   {m.role}
                 </span>
               </li>

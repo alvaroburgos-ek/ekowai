@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { calculations, orgMembers } from '@/lib/db/schema';
 import { LocaleSwitcher } from './locale-switcher';
+import { NavLinks } from './nav-links';
 
 async function pendingReviewCount(): Promise<number> {
   const supabase = await createClient();
@@ -28,55 +29,28 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
   const pending = await pendingReviewCount();
 
   return (
-    <header className="border-b border-hairline bg-paper/80 backdrop-blur-sm sticky top-0 z-30">
+    <header className="border-b border-hairline bg-paper/95 backdrop-blur-md sticky top-0 z-30 shadow-[0_1px_12px_0_rgba(26,42,30,0.06)]">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-        <Link
-          href={`/${locale}/projects`}
-          className="group flex items-center gap-3 text-ink"
-        >
+        <Link href={`/${locale}/projects`} className="group flex items-center">
           <Image
-            src="/images/brand/icon-ekowai.svg"
+            src="/images/brand/logo-ekowai.svg"
             alt="EKOWAI"
-            width={36}
-            height={36}
+            width={110}
+            height={32}
             priority
             unoptimized
             className="object-contain"
           />
-          <span className="flex flex-col leading-none">
-            <span className="text-lg font-semibold tracking-tight">EKOWAI</span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-subtext mt-0.5">
-              Wizard · MVP-1
-            </span>
-          </span>
         </Link>
-        <nav className="flex items-center gap-7 text-sm font-body text-ink-2">
-          <Link
-            href={`/${locale}/projects`}
-            className="hover:text-ink underline-offset-[6px] decoration-hairline-strong hover:decoration-accent decoration-1 hover:underline transition-colors"
-          >
-            {t('projects')}
-          </Link>
-          <Link
-            href={`/${locale}/inbox`}
-            className="relative hover:text-ink underline-offset-[6px] decoration-hairline-strong hover:decoration-accent decoration-1 hover:underline transition-colors"
-          >
-            {t('inbox')}
-            {pending > 0 && (
-              <span
-                aria-label={`${pending} pending`}
-                className="absolute -top-2 -right-4 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-accent-2 text-paper font-mono text-[10px] tabular-nums rounded-full"
-              >
-                {pending}
-              </span>
-            )}
-          </Link>
-          <Link
-            href={`/${locale}/org`}
-            className="hover:text-ink underline-offset-[6px] decoration-hairline-strong hover:decoration-accent decoration-1 hover:underline transition-colors"
-          >
-            {t('org')}
-          </Link>
+        <nav className="flex items-center gap-7 font-body">
+          <NavLinks
+            locale={locale}
+            links={[
+              { href: `/${locale}/projects`, label: t('projects') },
+              { href: `/${locale}/inbox`, label: t('inbox'), badge: pending },
+              { href: `/${locale}/org`, label: t('org') },
+            ]}
+          />
           <span className="h-4 w-px bg-hairline" aria-hidden />
           <LocaleSwitcher current={locale} />
           <form action="/api/auth/logout" method="post">

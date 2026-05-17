@@ -133,14 +133,15 @@ export function ResultsPanel({
 
       {/* Top meta strip */}
       <div className="px-6 pt-5 pb-2 flex items-baseline justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
+        <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
           {t('header')} · {worksheet.id}
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext flex items-center gap-1.5">
+        <span className="text-[10px] uppercase tracking-[0.18em] text-subtext flex items-center gap-1.5">
           <span
             aria-hidden
-            className="inline-block size-1.5 rounded-full bg-current"
+            className="inline-block size-1.5 rounded-full"
             style={{
+              background: 'var(--eko-gradient)',
               animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite',
             }}
           />
@@ -150,17 +151,17 @@ export function ResultsPanel({
 
       {/* Status as headline */}
       <div className={`mx-6 my-2 px-5 py-5 border ${statusBgTone}`}>
-        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
           {t('statusLabel')}
         </div>
-        <div className={`text-3xl lg:text-4xl font-semibold tracking-tight leading-none ${statusTone}`}>
+        <div className={`text-2xl font-semibold tracking-tight leading-none ${statusTone}`}>
           {statusBig}
         </div>
 
         {/* Pictogram strip — every check at a glance */}
         {totalChecks > 0 && (
           <div className="mt-4 space-y-1.5">
-            <div className="flex flex-wrap gap-1 font-mono text-base leading-none">
+            <div className="flex flex-wrap gap-1 text-base leading-none">
               {checkedRows.map((r) => (
                 <span
                   key={r.id}
@@ -177,7 +178,7 @@ export function ResultsPanel({
                 </span>
               ))}
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext tabular-nums flex gap-3">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-subtext tabular-nums flex gap-3">
               <span className="text-success">
                 {String(passCount).padStart(2, '0')} {t('pass')}
               </span>
@@ -203,10 +204,10 @@ export function ResultsPanel({
       {computedItems.length > 0 && (
         <div className="border-t border-hairline mt-4">
           <div className="px-6 pt-4 pb-1 flex items-baseline justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
               {t('computedTitle')}
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums text-subtext">
+            <span className="text-[10px] uppercase tracking-[0.18em] tabular-nums text-subtext">
               {computedItems.length}
             </span>
           </div>
@@ -216,24 +217,24 @@ export function ResultsPanel({
                 key={c.id}
                 className="grid grid-cols-12 gap-3 px-6 py-3 items-baseline hover:bg-paper-2/30 transition-colors"
               >
-                <span className="col-span-1 font-mono text-[11px] tabular-nums text-subtext">
+                <span className="col-span-1 text-[11px] tabular-nums text-subtext">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div className="col-span-6">
                   <div className="text-sm text-ink">{c.label}</div>
-                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5">
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5">
                     {c.citation}
                   </div>
                 </div>
                 <div className="col-span-5 text-right">
                   <span
-                    className="font-mono tabular-nums text-3xl text-ink leading-none"
+                    className="tabular-nums text-xl text-ink leading-none"
                     data-num
                   >
                     {formatNum(c.value, c.precision)}
                   </span>
                   {c.unit && (
-                    <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext mt-1">
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-1">
                       {c.unit}
                     </div>
                   )}
@@ -248,10 +249,10 @@ export function ResultsPanel({
       {sortedChecks.length > 0 && (
         <div className="border-t border-hairline">
           <div className="px-6 pt-4 pb-1 flex items-baseline justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
               {t('verifiedTitle')}
             </span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums text-subtext">
+            <span className="text-[10px] uppercase tracking-[0.18em] tabular-nums text-subtext">
               {String(sortedChecks.length).padStart(2, '0')}
             </span>
           </div>
@@ -276,35 +277,35 @@ export function ResultsPanel({
                   className={`grid grid-cols-12 gap-3 px-6 py-3 items-baseline ${bgTone}`}
                 >
                   <span
-                    className={`col-span-1 font-mono text-base text-center leading-none ${tone}`}
+                    className={`col-span-1 text-base text-center leading-none ${tone}`}
                   >
                     {mark}
                   </span>
                   <div className="col-span-6">
                     <div className="text-sm text-ink leading-snug">{r.fieldLabel}</div>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5">
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5">
                       {r.citation}
                     </div>
                   </div>
                   <div className="col-span-5 text-right">
                     {r.observed !== null ? (
                       <div>
-                        <span className="font-mono tabular-nums text-base text-ink">
+                        <span className="tabular-nums text-base text-ink">
                           {formatNum(r.observed)}
                         </span>
                         {r.fieldUnit && (
-                          <span className="ml-1 font-mono text-[10px] text-subtext">
+                          <span className="ml-1 text-[10px] text-subtext">
                             {r.fieldUnit}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <div className="font-mono text-[10px] text-subtext uppercase tracking-[0.18em]">
+                      <div className="text-[10px] text-subtext uppercase tracking-[0.18em]">
                         {t('noValue')}
                       </div>
                     )}
                     <div
-                      className={`font-mono text-[10px] tabular-nums mt-0.5 ${
+                      className={`text-[10px] tabular-nums mt-0.5 ${
                         r.state === 'fail' ? 'text-error' : 'text-subtext'
                       }`}
                     >
@@ -322,7 +323,7 @@ export function ResultsPanel({
       {/* Inputs-only fallback (no thresholds + no computed) */}
       {sortedChecks.length === 0 && computedItems.length === 0 && (
         <div className="border-t border-hairline">
-          <div className="px-6 pt-4 pb-1 font-mono text-[10px] uppercase tracking-[0.25em] text-subtext">
+          <div className="px-6 pt-4 pb-1 text-[10px] uppercase tracking-[0.25em] text-subtext">
             {t('enteredTitle')}
           </div>
           <ul className="divide-y divide-hairline">
@@ -335,27 +336,27 @@ export function ResultsPanel({
                   key={f.id}
                   className="grid grid-cols-12 gap-3 px-6 py-3 items-baseline"
                 >
-                  <span className="col-span-1 font-mono text-[11px] tabular-nums text-subtext">
+                  <span className="col-span-1 text-[11px] tabular-nums text-subtext">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="col-span-7">
                     <div className="text-sm text-ink leading-snug">
                       {locale === 'de' ? f.labelDe : f.labelEn}
                     </div>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5">
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5">
                       {f.citation}
                     </div>
                   </div>
                   <div className="col-span-4 text-right">
                     {empty ? (
-                      <span className="font-mono text-[10px] text-subtext uppercase tracking-[0.18em]">
+                      <span className="text-[10px] text-subtext uppercase tracking-[0.18em]">
                         {t('noValue')}
                       </span>
                     ) : (
-                      <span className="font-mono tabular-nums text-sm text-ink">
+                      <span className="tabular-nums text-sm text-ink">
                         {isNum ? formatNum(v as number) : String(v)}
                         {f.unit && (
-                          <span className="ml-1 font-mono text-[10px] text-subtext">
+                          <span className="ml-1 text-[10px] text-subtext">
                             {f.unit}
                           </span>
                         )}
@@ -373,7 +374,7 @@ export function ResultsPanel({
       {result.errors.length > 0 && (
         <div className="border-t-2 border-error bg-error-soft/30 px-6 py-3">
           {result.errors.map((e) => (
-            <p key={e} className="font-mono text-[11px] text-error">
+            <p key={e} className="text-[11px] text-error">
               ⚠ {e}
             </p>
           ))}

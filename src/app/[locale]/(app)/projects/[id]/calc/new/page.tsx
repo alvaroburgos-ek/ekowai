@@ -1,9 +1,9 @@
 import { getTranslations } from 'next-intl/server';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { createCalculation } from '@/lib/actions/calculation';
+import { WorksheetPicker } from '@/components/calculator/worksheet-picker';
 
 export default async function NewCalcPage({
   params,
@@ -13,43 +13,63 @@ export default async function NewCalcPage({
   const { locale, id } = await params;
   const t = await getTranslations('calc');
 
+  const worksheets = ALL_WORKSHEETS.map((w) => ({
+    id: w.id,
+    titleDe: w.titleDe,
+    titleEn: w.titleEn,
+    status: w.status,
+  }));
+
   return (
-    <Card className="p-8 max-w-xl mx-auto">
-      <h1 className="text-2xl font-semibold text-slate-900 mb-6">{t('newCalc')}</h1>
-      <form action={createCalculation} className="space-y-4">
+    <section className="space-y-10">
+      <header className="border-b border-hairline pb-8 mb-2">
+        <div className="text-[11px] uppercase tracking-[0.25em] text-subtext mb-3">
+          Sektion 01 · Neue Berechnung
+        </div>
+        <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
+          {t('newCalc')}
+        </h1>
+      </header>
+
+      <form action={createCalculation} className="space-y-10">
         <input type="hidden" name="projectId" value={id} />
         <input type="hidden" name="locale" value={locale} />
-        <label className="block">
-          <span className="text-sm text-slate-700">{t('calcName')}</span>
-          <Input name="name" required minLength={1} />
-        </label>
-        <label className="block">
-          <span className="text-sm text-slate-700">{t('worksheet')}</span>
-          <select
-            name="worksheetId"
-            required
-            className="block w-full rounded-none border-0 border-b border-hairline-strong bg-transparent px-1 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
-            defaultValue=""
-          >
-            <option value="" disabled>
-              —
-            </option>
-            {ALL_WORKSHEETS.map((w) => {
-              const previewMark = w.status === 'preview' ? ' [Vorschau]' : '';
-              return (
-                <option key={w.id} value={w.id}>
-                  {w.id} — {locale === 'de' ? w.titleDe : w.titleEn}
-                  {previewMark}
-                </option>
-              );
-            })}
-          </select>
-          <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.18em] text-subtext">
-            Vorschau-Arbeitsblätter sind inhaltlich noch nicht regelwerksvalidiert.
-          </span>
-        </label>
-        <Button type="submit">{t('createCalc')}</Button>
+
+        <Field label={t('calcName')} required>
+          <Input name="name" required minLength={1} autoFocus />
+        </Field>
+
+        <div className="space-y-3">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-subtext">
+            {t('worksheet')}
+          </div>
+          <WorksheetPicker worksheets={worksheets} locale={locale} />
+        </div>
+
+        <div className="border-t border-hairline pt-6 flex justify-end">
+          <Button type="submit">{t('createCalc')}</Button>
+        </div>
       </form>
-    </Card>
+    </section>
+  );
+}
+
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="grid grid-cols-12 gap-4 items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
+      <span className="col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
+        {label}
+        {required && <span className="text-accent ml-1">*</span>}
+      </span>
+      <div className="col-span-9">{children}</div>
+    </label>
   );
 }

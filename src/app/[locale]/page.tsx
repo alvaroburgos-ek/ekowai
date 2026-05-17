@@ -27,21 +27,16 @@ export default async function Landing({
       {/* Slim public masthead */}
       <header className="border-b border-hairline bg-paper/80 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-          <Link href={`/${locale}`} className="flex items-center gap-3 text-ink">
+          <Link href={`/${locale}`} className="flex items-center">
             <Image
-              src="/images/brand/logo-ekowai.png"
+              src="/images/brand/logo-ekowai.svg"
               alt="EKOWAI"
-              width={40}
-              height={40}
+              width={110}
+              height={32}
               priority
+              unoptimized
               className="object-contain"
             />
-            <span className="flex flex-col leading-none">
-              <span className="text-lg font-semibold tracking-tight">EKOWAI</span>
-              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-subtext mt-0.5">
-                Wizard · MVP-1
-              </span>
-            </span>
           </Link>
           <nav className="flex items-center gap-7 text-sm text-ink-2">
             <Link
@@ -61,7 +56,7 @@ export default async function Landing({
         {/* Hero */}
         <section className="relative max-w-6xl mx-auto px-6 pt-16 pb-24 lg:pt-24 lg:pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-6 space-y-8 relative z-10">
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext">
+            <div className="text-[11px] uppercase tracking-[0.25em] text-subtext">
               {t('hero.tag')}
             </div>
             <h1 className="text-5xl lg:text-7xl font-semibold leading-[0.95] text-ink tracking-tight">
@@ -76,7 +71,7 @@ export default async function Landing({
               <Link href={`/${locale}/login`}>
                 <Button>{t('hero.cta')}</Button>
               </Link>
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-subtext">
+              <span className="text-[11px] uppercase tracking-[0.2em] text-subtext">
                 {t('hero.ctaMeta')}
               </span>
             </div>
@@ -101,7 +96,7 @@ export default async function Landing({
               <span aria-hidden className="absolute -bottom-px -right-px w-4 h-px bg-ink" />
               <span aria-hidden className="absolute -bottom-px -right-px h-4 w-px bg-ink" />
               {/* Caption strip */}
-              <div className="absolute bottom-0 inset-x-0 bg-ink/85 backdrop-blur-sm text-paper px-4 py-3 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.2em]">
+              <div className="absolute bottom-0 inset-x-0 bg-ink/85 backdrop-blur-sm text-paper px-4 py-3 flex items-baseline justify-between text-[10px] uppercase tracking-[0.2em]">
                 <span>Fig. 01</span>
                 <span className="opacity-70">{t('hero.caption')}</span>
               </div>
@@ -112,7 +107,7 @@ export default async function Landing({
         {/* Value props — three columns */}
         <section className="border-y border-hairline bg-paper-2/30">
           <div className="max-w-6xl mx-auto px-6 py-16 lg:py-20">
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext mb-10">
+            <div className="text-[11px] uppercase tracking-[0.25em] text-subtext mb-10">
               {t('values.tag')}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16">
@@ -139,7 +134,7 @@ export default async function Landing({
         <section className="max-w-6xl mx-auto px-6 py-20 lg:py-28">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end mb-12">
             <div className="lg:col-span-7 space-y-4">
-              <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext">
+              <div className="text-[11px] uppercase tracking-[0.25em] text-subtext">
                 {t('domain.tag')}
               </div>
               <h2 className="text-3xl lg:text-5xl font-semibold tracking-tight text-ink leading-[1.05]">
@@ -163,7 +158,7 @@ export default async function Landing({
           <div className="max-w-6xl mx-auto px-6 py-16 lg:py-20">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-10">
               <div className="lg:col-span-4 space-y-2">
-                <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext">
+                <div className="text-[11px] uppercase tracking-[0.25em] text-subtext">
                   {t('coverage.tag')}
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
@@ -214,7 +209,7 @@ export default async function Landing({
         {/* Final CTA */}
         <section className="border-t border-hairline bg-paper-2/40">
           <div className="max-w-4xl mx-auto px-6 py-20 lg:py-28 text-center space-y-8">
-            <div className="font-mono text-[11px] uppercase tracking-[0.25em] text-subtext">
+            <div className="text-[11px] uppercase tracking-[0.25em] text-subtext">
               {t('cta.tag')}
             </div>
             <h2 className="text-4xl lg:text-6xl font-semibold tracking-tight text-ink leading-[1.05]">
@@ -238,7 +233,7 @@ export default async function Landing({
 function ValueProp({ num, title, body }: { num: string; title: string; body: string }) {
   return (
     <div className="space-y-3">
-      <div className="font-mono text-xs tabular-nums text-subtext border-b border-hairline pb-2">
+      <div className="text-xs tabular-nums text-subtext border-b border-hairline pb-2">
         {num}
       </div>
       <h3 className="text-xl font-semibold text-ink tracking-tight">{title}</h3>
@@ -257,7 +252,7 @@ function Tile({ src, caption, num }: { src: string; caption: string; num: string
         sizes="(min-width: 1024px) 25vw, 50vw"
         className="object-cover group-hover:scale-105 transition-transform duration-700"
       />
-      <div className="absolute bottom-0 inset-x-0 bg-ink/80 text-paper px-3 py-2 flex items-baseline justify-between font-mono text-[9px] uppercase tracking-[0.2em]">
+      <div className="absolute bottom-0 inset-x-0 bg-ink/80 text-paper px-3 py-2 flex items-baseline justify-between text-[9px] uppercase tracking-[0.2em]">
         <span>Fig. {num}</span>
         <span className="opacity-70">{caption}</span>
       </div>
@@ -282,16 +277,16 @@ function CoverageRow({
 }) {
   return (
     <li className="grid grid-cols-12 gap-4 px-2 py-4 items-baseline">
-      <span className="col-span-2 font-mono text-[11px] uppercase tracking-[0.18em] text-subtext">
+      <span className="col-span-2 text-[11px] uppercase tracking-[0.18em] text-subtext">
         {code}
       </span>
-      <span className="col-span-1 font-mono text-[11px] tabular-nums text-subtext">
+      <span className="col-span-1 text-[11px] tabular-nums text-subtext">
         {version}
       </span>
-      <span className="col-span-2 font-mono text-[11px] text-subtext">{worksheet}</span>
+      <span className="col-span-2 text-[11px] text-subtext">{worksheet}</span>
       <span className="col-span-5 text-base text-ink">{title}</span>
       <span
-        className={`col-span-2 font-mono text-[10px] uppercase tracking-[0.2em] text-right ${
+        className={`col-span-2 text-[10px] uppercase tracking-[0.2em] text-right ${
           status === 'live' ? 'text-success' : 'text-subtext'
         }`}
       >

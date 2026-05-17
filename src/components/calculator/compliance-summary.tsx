@@ -61,14 +61,14 @@ export function ComplianceSummary({ locale }: { locale: 'de' | 'en' }) {
     <section className="border border-hairline bg-paper">
       <header className="border-b border-hairline px-5 py-3 flex items-baseline justify-between">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext mb-0.5">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-subtext mb-0.5">
             {t('header')}
           </div>
           <h2 className="text-lg font-semibold tracking-tight text-ink">
             {t('title')}
           </h2>
         </div>
-        <div className="flex gap-3 font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums">
+        <div className="flex gap-3 text-[10px] uppercase tracking-[0.18em] tabular-nums">
           {violated.length > 0 && (
             <span className="text-error">
               ✗ {String(violated.length).padStart(2, '0')} {t('violated')}
@@ -94,7 +94,7 @@ export function ComplianceSummary({ locale }: { locale: 'de' | 'en' }) {
                 <p className="text-base font-semibold text-error">
                   ✗ {locale === 'de' ? iss.threshold.messageDe : iss.threshold.messageEn}
                 </p>
-                <span className="font-mono text-xs tabular-nums text-error">
+                <span className="text-xs tabular-nums text-error">
                   {iss.observed?.toFixed(2)} {ruleSymbol(iss.threshold.rule.kind)}{' '}
                   {iss.threshold.rule.value}
                 </span>
@@ -123,7 +123,7 @@ export function ComplianceSummary({ locale }: { locale: 'de' | 'en' }) {
                   {locale === 'de' ? iss.threshold.messageDe : iss.threshold.messageEn}
                 </span>
               </p>
-              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-subtext">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-subtext">
                 {t('needsValue')} · {iss.threshold.ref}
               </span>
             </li>
@@ -134,7 +134,7 @@ export function ComplianceSummary({ locale }: { locale: 'de' | 'en' }) {
       {/* Satisfied — collapsed by default into a calm strip */}
       {satisfied.length > 0 && (
         <details className="border-t border-hairline">
-          <summary className="cursor-pointer px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-success hover:bg-success-soft/30 transition-colors">
+          <summary className="cursor-pointer px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-success hover:bg-success-soft/30 transition-colors">
             {String(satisfied.length).padStart(2, '0')} {t('compliantList')}
           </summary>
           <ul className="divide-y divide-hairline border-t border-hairline">
@@ -147,7 +147,7 @@ export function ComplianceSummary({ locale }: { locale: 'de' | 'en' }) {
                   <span className="text-success mr-2">✓</span>
                   {locale === 'de' ? iss.threshold.messageDe : iss.threshold.messageEn}
                 </span>
-                <span className="font-mono text-[11px] tabular-nums text-success">
+                <span className="text-[11px] tabular-nums text-success">
                   {iss.observed?.toFixed(2)}
                 </span>
               </li>

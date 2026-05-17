@@ -15,8 +15,16 @@ const schema = z.object({
   locale: z.enum(['de', 'en']),
 });
 
+const MOCK_RATIONALE_TEXT =
+  'Die Bemessung des Regenüberlaufbeckens erfolgte gemäß DWA-A-201. ' +
+  'Auf Basis der ermittelten Einzugsgebietsfläche und des maßgebenden Bemessungsregens wurde das ' +
+  'erforderliche Beckenvolumen berechnet. Die gewählte Beckengeometrie gewährleistet eine ausreichende ' +
+  'hydraulische Leistungsfähigkeit sowie die Einhaltung der zulässigen Entlastungshäufigkeit. ' +
+  'Sämtliche Eingangswerte wurden dem Entwurfsstand entnommen und sind in den Anlagen dokumentiert. ' +
+  '\n\n[Dieser Text wurde im Mock-Modus (MOCK_LLM=1) generiert und enthält keine echten KI-Inhalte.]';
+
 export async function POST(request: NextRequest) {
-  if (!env.DEEPSEEK_API_KEY && !env.KIMI_API_KEY) {
+  if (!env.MOCK_LLM && !env.DEEPSEEK_API_KEY && !env.KIMI_API_KEY) {
     return NextResponse.json(
       { error: 'llm_not_configured', message: 'No LLM provider configured.' },
       { status: 503 },
@@ -69,6 +77,14 @@ export async function POST(request: NextRequest) {
     worksheet,
     (calc.inputs ?? {}) as Record<string, number | string | boolean | null>,
   );
+
+  if (env.MOCK_LLM) {
+    await db
+      .update(calculations)
+      .set({ rationaleDraft: MOCK_RATIONALE_TEXT, updatedAt: new Date() })
+      .where(eq(calculations.id, calc.id));
+    return NextResponse.json({ text: MOCK_RATIONALE_TEXT, provider: 'mock' });
+  }
 
   try {
     const { text, provider } = await draftRationale({

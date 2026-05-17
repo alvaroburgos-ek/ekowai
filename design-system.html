@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EKOWAI — Corporate Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ──────────────────────────────────────────────────────────────── */
+:root {
+  --paper:           #f8f5ee;
+  --paper-2:         #f1ece1;
+  --ink:             #0d1418;
+  --ink-2:           #2a3338;
+  --subtext:         #5f6a72;
+  --hairline:        #d4cfc4;
+  --hairline-strong: #b8b1a2;
+
+  --accent:          #1a7a4a;
+  --accent-2:        #125c38;
+  --accent-soft:     #d0ead8;
+
+  --warning:         #8a5a2b;
+  --warning-soft:    #ecdfc8;
+  --error:           #7c2d2d;
+  --error-soft:      #ecd5cf;
+  --success:         #1a7a4a;
+  --success-soft:    #d0ead8;
+
+  --eko-green:       #00D061;
+  --eko-blue:        #009EE9;
+
+  --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --font-body:    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* ─── BASE ────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent-soft); color: var(--accent-2); }
+
+/* ─── LAYOUT ──────────────────────────────────────────────────────────────── */
+.ds-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 32px 120px;
+}
+
+.ds-section {
+  margin-top: 80px;
+  padding-top: 40px;
+  border-top: 1px solid var(--hairline);
+}
+
+.ds-section + .ds-section { border-top: 1px solid var(--hairline); }
+
+.ds-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.ds-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.ds-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.ds-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ds-stack { display: flex; flex-direction: column; gap: 12px; }
+.ds-col { display: flex; flex-direction: column; gap: 24px; }
+
+/* ─── TYPOGRAPHY ──────────────────────────────────────────────────────────── */
+.ds-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  margin-bottom: 8px;
+}
+
+.ds-section-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 32px;
+}
+
+.ds-subsection {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 16px;
+  margin-top: 40px;
+}
+
+.ds-description {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  max-width: 600px;
+  margin-bottom: 24px;
+}
+
+/* ─── HEADER ──────────────────────────────────────────────────────────────── */
+.ds-header {
+  padding: 64px 0 48px;
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.ds-header-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  line-height: 2;
+  text-align: right;
+}
+
+/* ─── LOGO SECTION ────────────────────────────────────────────────────────── */
+.brand-logo-display {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 40px;
+  background: var(--paper-2);
+  border: 1px solid var(--hairline);
+}
+
+.brand-logo-dark {
+  background: var(--ink);
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+/* ─── COLOR SWATCHES ──────────────────────────────────────────────────────── */
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.swatch-color {
+  height: 56px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.swatch-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  line-height: 1.5;
+}
+
+.swatch-name { color: var(--ink); font-size: 10px; font-weight: 500; }
+
+/* ─── GRADIENT SWATCH ────────────────────────────────────────────────────── */
+.swatch-gradient {
+  height: 56px;
+  background: linear-gradient(135deg, var(--eko-green), var(--eko-blue));
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ─── TYPOGRAPHY SPECIMENS ────────────────────────────────────────────────── */
+.type-specimen {
+  padding: 24px;
+  border: 1px solid var(--hairline);
+  background: white;
+}
+
+.type-specimen + .type-specimen { margin-top: 2px; }
+
+.type-specimen-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hairline-strong);
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ─── COMPONENT CANVAS ────────────────────────────────────────────────────── */
+.canvas {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  padding: 32px;
+  position: relative;
+}
+
+.canvas-dark {
+  background: var(--ink);
+  border: 1px solid var(--ink-2);
+  padding: 32px;
+}
+
+.canvas-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--hairline-strong);
+  display: block;
+  margin-bottom: 16px;
+}
+
+/* ─── BUTTON COMPONENTS ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 10px 20px;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+}
+
+.btn-primary:hover { background: var(--ink-2); border-color: var(--ink-2); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.btn-outline:hover { background: var(--ink); color: var(--paper); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid transparent;
+}
+
+.btn-ghost:hover { background: var(--paper-2); color: var(--ink); }
+
+.btn-sm { font-size: 12px; padding: 6px 12px; }
+
+.btn:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ─── INPUT ───────────────────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--subtext);
+}
+
+.input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--hairline-strong);
+  padding: 8px 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+  border-radius: 0;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder { color: color-mix(in srgb, var(--subtext) 60%, transparent); }
+.input:focus { border-bottom-color: var(--accent); }
+
+/* ─── CARD ────────────────────────────────────────────────────────────────── */
+.card {
+  border: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--paper-2) 40%, transparent);
+  padding: 24px;
+  position: relative;
+}
+
+.card-ticks::before,
+.card-ticks::after {
+  content: '';
+  position: absolute;
+}
+
+/* Corner tick helper */
+.tick { position: absolute; background: var(--ink); }
+.tick-tl-h { top: -1px; left: -1px; width: 16px; height: 1px; }
+.tick-tl-v { top: -1px; left: -1px; width: 1px; height: 16px; }
+.tick-tr-h { top: -1px; right: -1px; width: 16px; height: 1px; }
+.tick-tr-v { top: -1px; right: -1px; width: 1px; height: 16px; }
+.tick-bl-h { bottom: -1px; left: -1px; width: 16px; height: 1px; }
+.tick-bl-v { bottom: -1px; left: -1px; width: 1px; height: 16px; }
+.tick-br-h { bottom: -1px; right: -1px; width: 16px; height: 1px; }
+.tick-br-v { bottom: -1px; right: -1px; width: 1px; height: 16px; }
+
+/* ─── ALERT ───────────────────────────────────────────────────────────────── */
+.alert {
+  border-left: 2px solid;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  background: color-mix(in srgb, var(--paper-2) 60%, transparent);
+}
+
+.alert-info    { border-color: var(--accent);   color: var(--ink-2); }
+.alert-success { border-color: var(--success);  color: var(--success);  background: color-mix(in srgb, var(--success-soft) 40%, transparent); }
+.alert-warning { border-color: var(--warning);  color: var(--warning);  background: color-mix(in srgb, var(--warning-soft) 40%, transparent); }
+.alert-error   { border-color: var(--error);    color: var(--error);    background: color-mix(in srgb, var(--error-soft) 50%, transparent); }
+
+/* ─── BADGE ───────────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border: 1px solid;
+  border-radius: 0;
+}
+
+.badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge-compliant { color: var(--success);  border-color: var(--success); }
+.badge-warning   { color: var(--warning);  border-color: var(--warning); }
+.badge-error     { color: var(--error);    border-color: var(--error); }
+.badge-neutral   { color: var(--subtext);  border-color: var(--hairline-strong); }
+
+/* ─── NAV EXAMPLE ─────────────────────────────────────────────────────────── */
+.nav-example {
+  border-bottom: 1px solid var(--hairline);
+  background: color-mix(in srgb, var(--paper) 80%, transparent);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--ink-2);
+  transition: color 0.15s;
+}
+
+.nav-link:hover { color: var(--ink); }
+.nav-link.active { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 6px; text-decoration-thickness: 1px; }
+
+.nav-divider { width: 1px; height: 16px; background: var(--hairline); }
+
+.nav-logout {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.nav-logout:hover { color: var(--ink); }
+
+/* ─── LANDING GRADIENT EXAMPLE ────────────────────────────────────────────── */
+.landing-hero-example {
+  background: var(--paper);
+  background-image:
+    radial-gradient(800px 400px at 20% -10%, rgba(0, 208, 97, 0.06), transparent 60%),
+    radial-gradient(600px 400px at 110% 110%, rgba(0, 158, 233, 0.04), transparent 60%);
+  padding: 48px 40px;
+  border: 1px solid var(--hairline);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  margin-bottom: 24px;
+}
+
+.landing-title {
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.landing-title em { font-style: italic; font-weight: 400; color: var(--accent-2); }
+
+.landing-gradient-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--eko-green), var(--eko-blue));
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 0;
+}
+
+/* ─── RULE BOXES ──────────────────────────────────────────────────────────── */
+.rule-box {
+  border: 1px solid var(--hairline);
+  padding: 20px 24px;
+}
+
+.rule-box-header {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rule-icon { font-size: 14px; }
+
+.rule-allow .rule-box-header { color: var(--success); }
+.rule-deny  .rule-box-header { color: var(--error); }
+.rule-allow { border-color: var(--success); background: color-mix(in srgb, var(--success-soft) 30%, transparent); }
+.rule-deny  { border-color: var(--error);   background: color-mix(in srgb, var(--error-soft) 30%, transparent); }
+
+.rule-list {
+  list-style: none;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 2;
+}
+
+.rule-list li::before { content: '— '; color: var(--hairline-strong); }
+
+/* ─── CODE ────────────────────────────────────────────────────────────────── */
+.code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 20px 24px;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.code-inline {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--paper-2);
+  color: var(--ink);
+  padding: 2px 6px;
+  border: 1px solid var(--hairline);
+}
+
+/* ─── TOC ─────────────────────────────────────────────────────────────────── */
+.toc {
+  border: 1px solid var(--hairline);
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 32px;
+  margin-top: 40px;
+}
+
+.toc a {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.15s;
+}
+
+.toc a:hover { color: var(--accent); }
+.toc-num { color: var(--hairline-strong); }
+
+/* ─── DIVIDER ─────────────────────────────────────────────────────────────── */
+hr.ds-hr { border: 0; border-top: 1px solid var(--hairline); margin: 40px 0; }
+
+/* ─── SPACING TABLE ───────────────────────────────────────────────────────── */
+.spacing-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 13px;
+}
+
+.spacing-bar {
+  background: var(--accent-soft);
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.spacing-label { font-family: var(--font-mono); font-size: 11px; color: var(--subtext); min-width: 60px; }
+.spacing-value { color: var(--ink); min-width: 40px; }
+.spacing-use   { color: var(--ink-2); font-size: 12px; }
+
+/* ─── TABLE ───────────────────────────────────────────────────────────────── */
+table.ds-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.ds-table th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hairline-strong);
+}
+
+table.ds-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink-2);
+  vertical-align: top;
+}
+
+table.ds-table td:first-child { color: var(--ink); font-family: var(--font-mono); font-size: 12px; }
+
+/* ─── PILL ────────────────────────────────────────────────────────────────── */
+.context-pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid;
+  border-radius: 0;
+}
+
+.pill-app      { color: var(--ink);     border-color: var(--ink); }
+.pill-landing  { color: var(--accent);  border-color: var(--accent); }
+.pill-both     { color: var(--subtext); border-color: var(--hairline-strong); }
+</style>
+</head>
+<body>
+
+<div class="ds-page">
+
+  <!-- ── HEADER ──────────────────────────────────────────────────────────── -->
+  <header class="ds-header">
+    <div>
+      <div class="ds-eyebrow">Corporate Design System</div>
+      <div style="font-family:var(--font-display);font-size:36px;font-weight:600;letter-spacing:-0.025em;color:var(--ink);">
+        EKOWAI Wizard
+      </div>
+    </div>
+    <div class="ds-header-meta">
+      Version 1.0<br>
+      Stand 2026-05-17<br>
+      DWA-A-201 · Bemessungsassistent
+    </div>
+  </header>
+
+  <!-- ── TOC ─────────────────────────────────────────────────────────────── -->
+  <div style="margin-top:40px;">
+    <div class="ds-eyebrow">Inhalt</div>
+    <nav class="toc">
+      <a href="#brand"><span class="toc-num">01</span> Marke &amp; Logo</a>
+      <a href="#colors"><span class="toc-num">02</span> Farben</a>
+      <a href="#typography"><span class="toc-num">03</span> Typografie</a>
+      <a href="#spacing"><span class="toc-num">04</span> Abstände</a>
+      <a href="#components"><span class="toc-num">05</span> Komponenten</a>
+      <a href="#contexts"><span class="toc-num">06</span> Anwendungskontexte</a>
+      <a href="#rules"><span class="toc-num">07</span> Regeln &amp; Do/Don't</a>
+      <a href="#tokens"><span class="toc-num">08</span> Token-Referenz</a>
+    </nav>
+  </div>
+
+  <!-- ── 01 BRAND ────────────────────────────────────────────────────────── -->
+  <section class="ds-section" id="brand">
+    <div class="ds-eyebrow">Sektion 01</div>
+    <h2 class="ds-section-title">Marke &amp; Logo</h2>
+
+    <p class="ds-description">
+      Das ekowai-Logo besteht aus zwei Teilen: dem Tropfen-Icon (Gradient, symbolisiert Wasser und Kreislauf)
+      und dem Wortmarken-Schriftzug „ekowai" in Poppins Light. Beide Elemente dürfen nur in den
+      genehmigten Kombinationen und Farben eingesetzt werden.
+    </p>
+
+    <div class="ds-subsection">Logo auf hellem Hintergrund</div>
+    <div class="brand-logo-display">
+      <!-- Full logo SVG inline -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" fill="none" width="180" height="52" role="img" aria-label="ekowai">
+        <defs>
+          <linearGradient id="drop-grad-a" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00D061"/>
+            <stop offset="100%" stop-color="#009EE9"/>
+          </linearGradient>
+        </defs>
+        <path d="M26 2C26 2 10 18 10 30C10 39.941 17.059 48 26 48C34.941 48 42 39.941 42 30C42 18 26 2 26 2Z" fill="url(#drop-grad-a)"/>
+        <path d="M26 10C26 10 30 14 30 17C30 17 27 16 26 14C25 16 22 17 22 17C22 14 26 10 26 10Z" fill="white" opacity="0.9"/>
+        <path d="M19 31C19 27.134 22.134 24 26 24C29.866 24 33 27.134 33 31C33 31.552 32.552 32 32 32H20C20 34.761 22.686 37 26 37C27.657 37 29.157 36.418 30.243 35.457L31.757 36.957C30.257 38.249 28.222 39 26 39C21.582 39 18 35.418 18 31H19ZM20.17 30H31.83C31.401 27.752 28.879 26 26 26C23.121 26 20.599 27.752 20.17 30Z" fill="white"/>
+        <text x="50" y="36" font-family="Poppins, sans-serif" font-size="22" font-weight="300" fill="#1a2a1e" letter-spacing="0.5">ekowai</text>
+      </svg>
+
+      <!-- Icon only -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" fill="none" width="40" height="40" role="img" aria-label="ekowai icon">
+        <defs>
+          <linearGradient id="drop-grad-b" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00D061"/>
+            <stop offset="100%" stop-color="#009EE9"/>
+          </linearGradient>
+        </defs>
+        <path d="M26 2C26 2 10 18 10 30C10 39.941 17.059 48 26 48C34.941 48 42 39.941 42 30C42 18 26 2 26 2Z" fill="url(#drop-grad-b)"/>
+        <path d="M26 10C26 10 30 14 30 17C30 17 27 16 26 14C25 16 22 17 22 17C22 14 26 10 26 10Z" fill="white" opacity="0.9"/>
+        <path d="M19 31C19 27.134 22.134 24 26 24C29.866 24 33 27.134 33 31C33 31.552 32.552 32 32 32H20C20 34.761 22.686 37 26 37C27.657 37 29.157 36.418 30.243 35.457L31.757 36.957C30.257 38.249 28.222 39 26 39C21.582 39 18 35.418 18 31H19ZM20.17 30H31.83C31.401 27.752 28.879 26 26 26C23.121 26 20.599 27.752 20.17 30Z" fill="white"/>
+      </svg>
+
+      <div style="font-size:13px;color:var(--subtext);">
+        <div style="margin-bottom:8px;">← Wortmarke  ·  Icon →</div>
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--hairline-strong);">Mindestgröße Wortmarke: 80px Breite</div>
+      </div>
+    </div>
+
+    <div class="ds-subsection" style="margin-top:24px;">Logo auf dunklem Hintergrund</div>
+    <div class="brand-logo-dark">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" fill="none" width="180" height="52">
+        <defs>
+          <linearGradient id="drop-grad-c" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00D061"/>
+            <stop offset="100%" stop-color="#009EE9"/>
+          </linearGradient>
+        </defs>
+        <path d="M26 2C26 2 10 18 10 30C10 39.941 17.059 48 26 48C34.941 48 42 39.941 42 30C42 18 26 2 26 2Z" fill="url(#drop-grad-c)"/>
+        <path d="M26 10C26 10 30 14 30 17C30 17 27 16 26 14C25 16 22 17 22 17C22 14 26 10 26 10Z" fill="white" opacity="0.9"/>
+        <path d="M19 31C19 27.134 22.134 24 26 24C29.866 24 33 27.134 33 31C33 31.552 32.552 32 32 32H20C20 34.761 22.686 37 26 37C27.657 37 29.157 36.418 30.243 35.457L31.757 36.957C30.257 38.249 28.222 39 26 39C21.582 39 18 35.418 18 31H19ZM20.17 30H31.83C31.401 27.752 28.879 26 26 26C23.121 26 20.599 27.752 20.17 30Z" fill="white"/>
+        <text x="50" y="36" font-family="Poppins, sans-serif" font-size="22" font-weight="300" fill="#f8f5ee" letter-spacing="0.5">ekowai</text>
+      </svg>
+      <div style="font-size:13px;color:#5f6a72;font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;">Wortmarke auf --ink (#0d1418)</div>
+    </div>
+
+    <div class="ds-subsection">Marken-Gradient</div>
+    <p class="ds-description">Der Gradient ist die visuelle Signatur von ekowai und darf ausschließlich für das Logo-Icon, illustrative Elemente auf der Landing Page und Marketing-Material verwendet werden. <strong>In der App (nach dem Login) wird der Gradient nicht eingesetzt.</strong></p>
+    <div class="ds-grid-2">
+      <div>
+        <div class="swatch-gradient" style="height:80px;"></div>
+        <div class="swatch-label" style="margin-top:8px;">
+          <span class="swatch-name">Eko Gradient</span><br>
+          #00D061 → #009EE9 · 135°
+        </div>
+      </div>
+      <div style="background:var(--paper-2);border:1px solid var(--hairline);padding:20px;">
+        <div class="ds-eyebrow" style="margin-bottom:12px;">Verwendung</div>
+        <ul style="font-size:13px;color:var(--ink-2);line-height:2;list-style:none;">
+          <li style="color:var(--success);">✓ Logo-Tropfen</li>
+          <li style="color:var(--success);">✓ Landing Page Hero-Elemente</li>
+          <li style="color:var(--success);">✓ Marketing / Präsentationen</li>
+          <li style="color:var(--error);">✗ Buttons in der App</li>
+          <li style="color:var(--error);">✗ Hintergründe in der App</li>
+          <li style="color:var(--error);">✗ Text-Gradienten</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 02 FARBEN ────────────────────────────────────────────────────────── -->
+  <section class="ds-section" id="colors">
+    <div class="ds-eyebrow">Sektion 02</div>
+    <h2 class="ds-section-title">Farben</h2>
+
+    <div class="ds-subsection">Hintergrund &amp; Oberflächen</div>
+    <div class="ds-grid-4">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#f8f5ee;"></div>
+        <div class="swatch-label"><span class="swatch-name">Paper</span><br>#f8f5ee<br>Primärer Hintergrund</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#f1ece1;"></div>
+        <div class="swatch-label"><span class="swatch-name">Paper 2</span><br>#f1ece1<br>Karten, sekundäre Flächen</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#d4cfc4;"></div>
+        <div class="swatch-label"><span class="swatch-name">Hairline</span><br>#d4cfc4<br>Standard-Rahmen</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#b8b1a2;"></div>
+        <div class="swatch-label"><span class="swatch-name">Hairline Strong</span><br>#b8b1a2<br>Verstärkte Linien, Input</div>
+      </div>
+    </div>
+
+    <div class="ds-subsection">Text</div>
+    <div class="ds-grid-4">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0d1418;"></div>
+        <div class="swatch-label"><span class="swatch-name">Ink</span><br>#0d1418<br>Überschriften, primärer Text</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#2a3338;"></div>
+        <div class="swatch-label"><span class="swatch-name">Ink 2</span><br>#2a3338<br>Fließtext</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#5f6a72;"></div>
+        <div class="swatch-label"><span class="swatch-name">Subtext</span><br>#5f6a72<br>Labels, Metadaten, Captions</div>
+      </div>
+    </div>
+
+    <div class="ds-subsection">Akzentfarbe</div>
+    <p class="ds-description">Die Akzentfarbe ist ein gedämpftes, funktionales Grün. Es ist <em>nicht</em> der Marken-Gradient — es ist eine stabile, zugängliche Farbe für interaktive Elemente, Status-Indikatoren und Links.</p>
+    <div class="ds-grid-4">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1a7a4a;"></div>
+        <div class="swatch-label"><span class="swatch-name">Accent</span><br>#1a7a4a<br>Primäre Aktion, Focus-Ring</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#125c38;"></div>
+        <div class="swatch-label"><span class="swatch-name">Accent 2</span><br>#125c38<br>Hover, dunkler Akzent</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#d0ead8;"></div>
+        <div class="swatch-label"><span class="swatch-name">Accent Soft</span><br>#d0ead8<br>Hintergrund, Selection</div>
+      </div>
+    </div>
+
+    <div class="ds-subsection">Semantische Farben</div>
+    <div class="ds-grid-3">
+      <div class="swatch">
+        <div style="display:flex;gap:4px;">
+          <div class="swatch-color" style="background:#1a7a4a;flex:1;"></div>
+          <div class="swatch-color" style="background:#d0ead8;flex:1;"></div>
+        </div>
+        <div class="swatch-label"><span class="swatch-name">Erfolg / Regelkonform</span><br>#1a7a4a · #d0ead8</div>
+      </div>
+      <div class="swatch">
+        <div style="display:flex;gap:4px;">
+          <div class="swatch-color" style="background:#8a5a2b;flex:1;"></div>
+          <div class="swatch-color" style="background:#ecdfc8;flex:1;"></div>
+        </div>
+        <div class="swatch-label"><span class="swatch-name">Warnung</span><br>#8a5a2b · #ecdfc8</div>
+      </div>
+      <div class="swatch">
+        <div style="display:flex;gap:4px;">
+          <div class="swatch-color" style="background:#7c2d2d;flex:1;"></div>
+          <div class="swatch-color" style="background:#ecd5cf;flex:1;"></div>
+        </div>
+        <div class="swatch-label"><span class="swatch-name">Fehler / Verstoß</span><br>#7c2d2d · #ecd5cf</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 03 TYPOGRAFIE ────────────────────────────────────────────────────── -->
+  <section class="ds-section" id="typography">
+    <div class="ds-eyebrow">Sektion 03</div>
+    <h2 class="ds-section-title">Typografie</h2>
+
+    <div class="ds-grid-2" style="margin-bottom:32px;">
+      <div style="border:1px solid var(--hairline);padding:24px;">
+        <div class="ds-eyebrow" style="margin-bottom:16px;">Display · Poppins</div>
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:600;letter-spacing:-0.025em;color:var(--ink);line-height:1.1;">Kläranlagen-<br>Bemessung.</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--hairline-strong);margin-top:16px;letter-spacing:0.15em;text-transform:uppercase;">Poppins 600 · −0.025em</div>
+      </div>
+      <div style="border:1px solid var(--hairline);padding:24px;">
+        <div class="ds-eyebrow" style="margin-bottom:16px;">Mono · System Mono</div>
+        <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--subtext);line-height:2.2;">
+          DWA-A-201 · V3.2<br>
+          SEKTION 01 · EINGABE<br>
+          REGELKONFORM
+        </div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--hairline-strong);margin-top:16px;letter-spacing:0.15em;text-transform:uppercase;">SF Mono / Menlo / Consolas · 0.25em</div>
+      </div>
+    </div>
+
+    <div class="ds-subsection">Schrifthierarchie</div>
+
+    <div class="type-specimen">
+      <span class="type-specimen-label">H1 · Display · 60–72px · Weight 600 · LS −0.025em</span>
+      <div style="font-family:var(--font-display);font-size:60px;font-weight:600;letter-spacing:-0.025em;line-height:0.95;color:var(--ink);">Bemessung.</div>
+    </div>
+    <div class="type-specimen">
+      <span class="type-specimen-label">H2 · Display · 36px · Weight 600 · LS −0.02em</span>
+      <div style="font-family:var(--font-display);font-size:36px;font-weight:600;letter-spacing:-0.02em;color:var(--ink);">Belebungsbecken</div>
+    </div>
+    <div class="type-specimen">
+      <span class="type-specimen-label">H3 · Display · 24px · Weight 600 · LS −0.015em</span>
+      <div style="font-family:var(--font-display);font-size:24px;font-weight:600;letter-spacing:-0.015em;color:var(--ink);">Bemessungsergebnis</div>
+    </div>
+    <div class="type-specimen">
+      <span class="type-specimen-label">Body · System Sans · 15px · LS 0 · LH 1.6</span>
+      <div style="font-size:15px;line-height:1.6;color:var(--ink-2);max-width:520px;">Ein Werkzeug für Planungsingenieur:innen — deterministische Berechnung, §-genaue Zitate, anwaltlich nachvollziehbare Entscheidungsdokumentation.</div>
+    </div>
+    <div class="type-specimen">
+      <span class="type-specimen-label">Label · Mono · 10px · LS 0.25em · Uppercase</span>
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--subtext);">Sektion 01 · Eingabe · DWA-A-201</div>
+    </div>
+    <div class="type-specimen">
+      <span class="type-specimen-label">Caption · Mono · 9px · LS 0.15em · Uppercase</span>
+      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--hairline-strong);">Gespeichert um 14:32 · v3.1.2</div>
+    </div>
+    <div class="type-specimen">
+      <span class="type-specimen-label">Tabellarische Zahlen · Mono · Tabular Nums</span>
+      <div style="font-family:var(--font-mono);font-size:18px;font-variant-numeric:tabular-nums lining-nums;color:var(--ink);letter-spacing:0.02em;">1.234,56 m³/d · 99,7 % · ≥ 2,0 m</div>
+    </div>
+
+    <div class="ds-subsection" style="margin-top:40px;">Kursiv-Akzent (nur Landing Page)</div>
+    <p class="ds-description">Kursive Überschriften-Akzente sind der Landing Page vorbehalten und verleihen dem Hero-Bereich eine editorielle Note. In der App: niemals kursiv für Überschriften.</p>
+    <div style="font-family:var(--font-display);font-size:52px;font-weight:600;letter-spacing:-0.03em;line-height:0.95;color:var(--ink);">Kläranlagen, <em style="font-style:italic;font-weight:400;color:var(--accent-2);">präzise.</em></div>
+  </section>
+
+  <!-- ── 04 ABSTÄNDE ──────────────────────────────────────────────────────── -->
+  <section class="ds-section" id="spacing">
+    <div class="ds-eyebrow">Sektion 04</div>
+    <h2 class="ds-section-title">Abstände</h2>
+    <p class="ds-description">Das Spacing-System basiert auf Tailwind CSS v4 (4px-Raster). Folgende Stufen werden konsistent verwendet:</p>
+
+    <div>
+      <div class="spacing-row">
+        <div class="spacing-label">4px · 1</div>
+        <div class="spacing-bar" style="width:4px;"></div>
+        <div class="spacing-use">Interne Komponenten-Abstände, Icon-Gap</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">8px · 2</div>
+        <div class="spacing-bar" style="width:8px;"></div>
+        <div class="spacing-use">Enge Abstände zwischen verwandten Elementen</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">12px · 3</div>
+        <div class="spacing-bar" style="width:12px;"></div>
+        <div class="spacing-use">Label → Wert, Badge-Innenabstand</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">16px · 4</div>
+        <div class="spacing-bar" style="width:16px;"></div>
+        <div class="spacing-use">Formularfelder, Alert-Padding</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">24px · 6</div>
+        <div class="spacing-bar" style="width:24px;"></div>
+        <div class="spacing-use">Karten-Padding, primäre Content-Gaps</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">32px · 8</div>
+        <div class="spacing-bar" style="width:32px;"></div>
+        <div class="spacing-use">Seiten-Padding mobil, größere Karten</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">40px · 10</div>
+        <div class="spacing-bar" style="width:40px;"></div>
+        <div class="spacing-use">Sektion-Innenabstand, Login-Form</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">48px · 12</div>
+        <div class="spacing-bar" style="width:48px;"></div>
+        <div class="spacing-use">Größere Layouts, Hero-Abstände</div>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-label">80px · 20</div>
+        <div class="spacing-bar" style="width:80px;"></div>
+        <div class="spacing-use">Sektion-Trennungen auf Landing Page</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 05 KOMPONENTEN ───────────────────────────────────────────────────── -->
+  <section class="ds-section" id="components">
+    <div class="ds-eyebrow">Sektion 05</div>
+    <h2 class="ds-section-title">Komponenten</h2>
+
+    <!-- NAVIGATION -->
+    <div class="ds-subsection">Navigation</div>
+    <p class="ds-description">Die App-Navigation ist sticky, mit 80% Hintergrundopazität und Blur. Das Logo als Wortmarke (SVG) links, Navigation-Links rechts. Keine Icon-Navigation.</p>
+    <div class="nav-example">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" fill="none" width="110" height="32">
+        <defs>
+          <linearGradient id="drop-grad-nav" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00D061"/>
+            <stop offset="100%" stop-color="#009EE9"/>
+          </linearGradient>
+        </defs>
+        <path d="M26 2C26 2 10 18 10 30C10 39.941 17.059 48 26 48C34.941 48 42 39.941 42 30C42 18 26 2 26 2Z" fill="url(#drop-grad-nav)"/>
+        <path d="M26 10C26 10 30 14 30 17C30 17 27 16 26 14C25 16 22 17 22 17C22 14 26 10 26 10Z" fill="white" opacity="0.9"/>
+        <path d="M19 31C19 27.134 22.134 24 26 24C29.866 24 33 27.134 33 31C33 31.552 32.552 32 32 32H20C20 34.761 22.686 37 26 37C27.657 37 29.157 36.418 30.243 35.457L31.757 36.957C30.257 38.249 28.222 39 26 39C21.582 39 18 35.418 18 31H19ZM20.17 30H31.83C31.401 27.752 28.879 26 26 26C23.121 26 20.599 27.752 20.17 30Z" fill="white"/>
+        <text x="50" y="36" font-family="Poppins, sans-serif" font-size="22" font-weight="300" fill="#1a2a1e" letter-spacing="0.5">ekowai</text>
+      </svg>
+      <nav class="nav-links">
+        <a class="nav-link active" href="#">Projekte</a>
+        <a class="nav-link" href="#">Eingang</a>
+        <a class="nav-link" href="#">Organisation</a>
+        <div class="nav-divider"></div>
+        <button class="nav-logout">Abmelden</button>
+      </nav>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="ds-subsection">Buttons</div>
+    <p class="ds-description">Keine border-radius — alle Buttons haben scharfe Ecken. Drei Varianten: Primary (gefüllt), Outline (Rahmen), Ghost (transparent). Kein Gradient auf Buttons.</p>
+    <div class="canvas">
+      <div class="canvas-label">Varianten</div>
+      <div class="ds-row">
+        <button class="btn btn-primary">Speichern</button>
+        <button class="btn btn-outline">Entwurf</button>
+        <button class="btn btn-ghost">Abbrechen</button>
+        <button class="btn btn-primary" disabled>Gesperrt</button>
+      </div>
+    </div>
+    <div class="canvas" style="margin-top:2px;">
+      <div class="canvas-label">Größen</div>
+      <div class="ds-row">
+        <button class="btn btn-primary">Standard (md)</button>
+        <button class="btn btn-primary btn-sm">Klein (sm)</button>
+        <button class="btn btn-outline btn-sm">Aktion →</button>
+      </div>
+    </div>
+    <div class="canvas-dark" style="margin-top:2px;">
+      <div class="canvas-label" style="color:#5f6a72;">Auf dunklem Hintergrund</div>
+      <div class="ds-row">
+        <button class="btn" style="background:var(--paper);color:var(--ink);border:1px solid var(--paper);">Speichern</button>
+        <button class="btn" style="background:transparent;color:var(--paper);border:1px solid var(--paper);">Entwurf</button>
+      </div>
+    </div>
+
+    <!-- INPUTS -->
+    <div class="ds-subsection">Eingabefelder</div>
+    <p class="ds-description">Nur unterer Rahmen, kein Box-Border. Transparenter Hintergrund. Focus-State: unterer Rahmen wird zur Akzentfarbe.</p>
+    <div class="canvas">
+      <div class="canvas-label">Input-Feld</div>
+      <div style="max-width:360px;" class="ds-stack">
+        <div class="field">
+          <label class="field-label">E-Mail-Adresse</label>
+          <input class="input" type="email" placeholder="ingenieur@bueromustermann.de">
+        </div>
+        <div class="field">
+          <label class="field-label">Projektbezeichnung</label>
+          <input class="input" type="text" placeholder="KA Musterhausen · Ausbau 2026">
+        </div>
+        <div class="field">
+          <label class="field-label">Gesperrt</label>
+          <input class="input" type="text" value="Schreibgeschützt" disabled style="opacity:0.5;cursor:not-allowed;">
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="ds-subsection">Karten</div>
+    <p class="ds-description">Karten haben keinen Schatten — stattdessen einen 1px Hairline-Rahmen. Ecken-Ticks (Engineering-Drawing-Stil) sind optional und signalisieren interaktive oder fokussierte Formularbereiche.</p>
+    <div class="ds-grid-2">
+      <div>
+        <div class="canvas-label">Standard-Karte</div>
+        <div class="card">
+          <div class="ds-eyebrow">A201-08</div>
+          <div style="font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px;">Belebungsbecken</div>
+          <div style="font-size:13px;color:var(--ink-2);">V_BB = 1.247 m³ · Freigegeben 14.03.2026</div>
+        </div>
+      </div>
+      <div>
+        <div class="canvas-label">Karte mit Corner Ticks (Formular)</div>
+        <div class="card" style="position:relative;">
+          <span class="tick tick-tl-h"></span><span class="tick tick-tl-v"></span>
+          <span class="tick tick-tr-h"></span><span class="tick tick-tr-v"></span>
+          <span class="tick tick-bl-h"></span><span class="tick tick-bl-v"></span>
+          <span class="tick tick-br-h"></span><span class="tick tick-br-v"></span>
+          <div class="ds-eyebrow">Sektion 01 · Anmelden</div>
+          <div class="field" style="margin-top:16px;">
+            <label class="field-label">E-Mail</label>
+            <input class="input" type="email" placeholder="name@büro.de">
+          </div>
+          <button class="btn btn-primary" style="margin-top:20px;width:100%;">Magic Link senden</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="ds-subsection">Hinweise &amp; Status-Meldungen</div>
+    <div class="ds-stack">
+      <div class="alert alert-info">Berechnung wurde zur Prüfung eingereicht — der Reviewer erhält eine Benachrichtigung.</div>
+      <div class="alert alert-success">Freigabe erteilt. Die Berechnung ist jetzt archiviert.</div>
+      <div class="alert alert-warning">Warnung: EW liegt 15 % über dem Planungshorizont-Wert.</div>
+      <div class="alert alert-error">Blockierender Verstoß — V_BB unterschreitet den Mindestwert gemäß DWA-A-201 §4.2.</div>
+    </div>
+
+    <!-- BADGES -->
+    <div class="ds-subsection">Badges &amp; Status-Indikatoren</div>
+    <div class="ds-row">
+      <div class="badge badge-compliant"><span class="badge-dot"></span> Regelkonform</div>
+      <div class="badge badge-warning"><span class="badge-dot"></span> Warnung</div>
+      <div class="badge badge-error"><span class="badge-dot"></span> Verstoß</div>
+      <div class="badge badge-neutral">In Prüfung</div>
+      <div class="badge badge-neutral">Entwurf</div>
+    </div>
+  </section>
+
+  <!-- ── 06 ANWENDUNGSKONTEXTE ────────────────────────────────────────────── -->
+  <section class="ds-section" id="contexts">
+    <div class="ds-eyebrow">Sektion 06</div>
+    <h2 class="ds-section-title">Anwendungskontexte</h2>
+    <p class="ds-description">Das Design System gilt für zwei klar getrennte Kontexte, die unterschiedliche visuelle Regeln haben.</p>
+
+    <div class="ds-grid-2">
+      <!-- LANDING PAGE -->
+      <div>
+        <div class="ds-subsection" style="margin-top:0;display:flex;align-items:center;gap:10px;">
+          Landing Page
+          <span class="context-pill pill-landing">Öffentlich</span>
+        </div>
+        <p class="ds-description" style="font-size:13px;">Der erste Eindruck. Darf editoriell, visuell eindrucksvoll und atmosphärisch sein. Zielgruppe: Entscheider und Ingenieure, die das Tool noch nicht kennen.</p>
+        <div class="landing-hero-example">
+          <div class="landing-tag">DWA-A-201 · v3.2 · Bemessungsassistent</div>
+          <div class="landing-title">Kläranlagen,<br><em>präzise.</em></div>
+          <div style="margin-bottom:20px;">
+            <span class="landing-gradient-pill">Jetzt anmelden</span>
+          </div>
+          <div style="font-size:12px;font-family:var(--font-mono);color:var(--hairline-strong);letter-spacing:0.1em;text-transform:uppercase;">← Erlaubt: radiale Farbverläufe im Hintergrund, kursive Akzente</div>
+        </div>
+      </div>
+
+      <!-- APP -->
+      <div>
+        <div class="ds-subsection" style="margin-top:0;display:flex;align-items:center;gap:10px;">
+          Applikation
+          <span class="context-pill pill-app">Nach Login</span>
+        </div>
+        <p class="ds-description" style="font-size:13px;">Das Werkzeug. Muss konzentriertes Arbeiten ermöglichen — Ingenieure verbringen Stunden hier. Keine visuellen Ablenkungen, maximale Klarheit.</p>
+        <div style="border:1px solid var(--hairline);background:var(--paper);">
+          <div class="nav-example" style="padding:12px 20px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" fill="none" width="88" height="26">
+              <defs>
+                <linearGradient id="drop-grad-ctx" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#00D061"/>
+                  <stop offset="100%" stop-color="#009EE9"/>
+                </linearGradient>
+              </defs>
+              <path d="M26 2C26 2 10 18 10 30C10 39.941 17.059 48 26 48C34.941 48 42 39.941 42 30C42 18 26 2 26 2Z" fill="url(#drop-grad-ctx)"/>
+              <path d="M26 10C26 10 30 14 30 17C30 17 27 16 26 14C25 16 22 17 22 17C22 14 26 10 26 10Z" fill="white" opacity="0.9"/>
+              <path d="M19 31C19 27.134 22.134 24 26 24C29.866 24 33 27.134 33 31C33 31.552 32.552 32 32 32H20C20 34.761 22.686 37 26 37C27.657 37 29.157 36.418 30.243 35.457L31.757 36.957C30.257 38.249 28.222 39 26 39C21.582 39 18 35.418 18 31H19ZM20.17 30H31.83C31.401 27.752 28.879 26 26 26C23.121 26 20.599 27.752 20.17 30Z" fill="white"/>
+              <text x="50" y="36" font-family="Poppins, sans-serif" font-size="22" font-weight="300" fill="#1a2a1e" letter-spacing="0.5">ekowai</text>
+            </svg>
+            <div class="nav-links" style="font-size:13px;">
+              <a class="nav-link active" href="#">Projekte</a>
+              <a class="nav-link" href="#">Eingang</a>
+            </div>
+          </div>
+          <div style="padding:20px;border-top:1px solid var(--hairline);">
+            <div class="ds-eyebrow" style="margin-bottom:12px;">KA Musterhausen</div>
+            <div class="card" style="padding:16px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--subtext);margin-bottom:4px;">A201-08</div>
+                  <div style="font-size:15px;font-weight:500;color:var(--ink);">Belebungsbecken</div>
+                </div>
+                <div class="badge badge-compliant" style="font-size:9px;"><span class="badge-dot"></span> OK</div>
+              </div>
+            </div>
+            <div style="font-size:11px;font-family:var(--font-mono);color:var(--hairline-strong);margin-top:12px;letter-spacing:0.1em;text-transform:uppercase;">← Kein Gradient, keine Dekoration, nur Inhalt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 07 REGELN ────────────────────────────────────────────────────────── -->
+  <section class="ds-section" id="rules">
+    <div class="ds-eyebrow">Sektion 07</div>
+    <h2 class="ds-section-title">Regeln &amp; Do / Don't</h2>
+
+    <div class="ds-subsection">App — Was ist erlaubt</div>
+    <div class="ds-grid-2">
+      <div class="rule-box rule-allow">
+        <div class="rule-box-header"><span class="rule-icon">✓</span> Erlaubt in der App</div>
+        <ul class="rule-list">
+          <li>Hairline-Rahmen (1px, <code class="code-inline">--hairline</code>)</li>
+          <li>Monospace-Labels für alle Metadaten</li>
+          <li>Dezentes Hintergrund-Grain (body level, sehr subtil)</li>
+          <li>Paper / Paper-2 als Hintergrundfarben</li>
+          <li>Akzentfarbe <code class="code-inline">--accent</code> für interaktive Elemente</li>
+          <li>Logo-Tropfen mit Gradient (nur im Logo)</li>
+          <li>Scharfe Ecken (border-radius: 0)</li>
+          <li>Corner-Ticks bei Formular-Karten</li>
+          <li>Tabellarische Zahlen (Tabular Nums)</li>
+          <li>Semantische Farben für Status (Erfolg/Warnung/Fehler)</li>
+        </ul>
+      </div>
+      <div class="rule-box rule-deny">
+        <div class="rule-box-header"><span class="rule-icon">✗</span> Verboten in der App</div>
+        <ul class="rule-list">
+          <li>Farbverläufe (außer im Logo-Icon)</li>
+          <li>Box-Shadows / Drop-Shadows</li>
+          <li>Abgerundete Ecken (border-radius &gt; 0)</li>
+          <li>Kursive Überschriften</li>
+          <li>Animationen außer transition-colors / transition-all für Hover</li>
+          <li>Gradient-Text / Clip-Path-Effekte</li>
+          <li>Hintergrundbilder oder Texturen</li>
+          <li>Große atmosphärische Farbflächen</li>
+          <li>Backdrop-Blur in Content-Bereichen (nur Nav)</li>
+          <li>Bunte Buttons (außer semantische Zustände)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ds-subsection">Landing Page — Zusätzlich erlaubt</div>
+    <div class="rule-box rule-allow" style="max-width:480px;">
+      <div class="rule-box-header"><span class="rule-icon">✓</span> Nur Landing Page</div>
+      <ul class="rule-list">
+        <li>Radiale Hintergrund-Gradienten (sehr subtil, max. 6% Opazität)</li>
+        <li>Kursive Überschriften-Akzente (sparsam, 1× pro Sektion)</li>
+        <li>Großes Hero-Layout mit visueller Gewichtung</li>
+        <li>Editorielle Listenelemente (— Monospace-Bullets)</li>
+        <li>CTA-Buttons mit Gradient-Fill (Eko-Green → Eko-Blue)</li>
+      </ul>
+    </div>
+
+    <div class="ds-subsection">Typografie-Regeln</div>
+    <table class="ds-table">
+      <thead>
+        <tr>
+          <th>Anwendungsfall</th>
+          <th>Schriftart</th>
+          <th>Gewicht</th>
+          <th>Kontext</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Seitentitel, große Überschriften</td>
+          <td>Poppins (Display)</td>
+          <td>600</td>
+          <td><span class="context-pill pill-both">Beide</span></td>
+        </tr>
+        <tr>
+          <td>Unterüberschriften, Karten-Titel</td>
+          <td>Poppins (Display)</td>
+          <td>500–600</td>
+          <td><span class="context-pill pill-both">Beide</span></td>
+        </tr>
+        <tr>
+          <td>Fließtext, Beschreibungen</td>
+          <td>System Sans</td>
+          <td>400</td>
+          <td><span class="context-pill pill-both">Beide</span></td>
+        </tr>
+        <tr>
+          <td>Formular-Labels, Eyebrows</td>
+          <td>Mono</td>
+          <td>400</td>
+          <td><span class="context-pill pill-both">Beide</span></td>
+        </tr>
+        <tr>
+          <td>Berechnungswerte, Zahlen</td>
+          <td>Mono + Tabular Nums</td>
+          <td>400</td>
+          <td><span class="context-pill pill-app">App</span></td>
+        </tr>
+        <tr>
+          <td>Kursiver Akzent in Hero</td>
+          <td>Poppins Italic</td>
+          <td>400</td>
+          <td><span class="context-pill pill-landing">Landing</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── 08 TOKEN REFERENZ ────────────────────────────────────────────────── -->
+  <section class="ds-section" id="tokens">
+    <div class="ds-eyebrow">Sektion 08</div>
+    <h2 class="ds-section-title">Token-Referenz</h2>
+    <p class="ds-description">Alle Tokens sind als CSS Custom Properties in <code class="code-inline">src/app/globals.css</code> definiert und über Tailwind-Klassen verfügbar.</p>
+
+    <div class="code">/* src/app/globals.css — @theme */
+
+/* Hintergründe */
+--paper:           #f8f5ee   /* bg-paper      */
+--paper-2:         #f1ece1   /* bg-paper-2    */
+
+/* Text */
+--ink:             #0d1418   /* text-ink      */
+--ink-2:           #2a3338   /* text-ink-2    */
+--subtext:         #5f6a72   /* text-subtext  */
+
+/* Linien */
+--hairline:        #d4cfc4   /* border-hairline        */
+--hairline-strong: #b8b1a2   /* border-hairline-strong */
+
+/* Akzent */
+--accent:          #1a7a4a   /* text-accent   / bg-accent   / border-accent   */
+--accent-2:        #125c38   /* text-accent-2 / bg-accent-2 / border-accent-2 */
+--accent-soft:     #d0ead8   /* bg-accent-soft */
+
+/* Semantisch */
+--warning:         #8a5a2b   --warning-soft: #ecdfc8
+--error:           #7c2d2d   --error-soft:   #ecd5cf
+--success:         #1a7a4a   --success-soft: #d0ead8
+
+/* Marken-Gradient (nur Logo + Landing) */
+--eko-green:       #00D061
+--eko-blue:        #009EE9
+
+/* Schriften */
+--font-display:   'Poppins', ui-sans-serif, system-ui, sans-serif
+--font-body:       ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif
+--font-mono:       ui-monospace, 'SF Mono', Menlo, Consolas, monospace</div>
+
+    <div style="margin-top:24px;padding:20px 24px;border:1px solid var(--hairline);background:var(--paper-2);display:flex;align-items:center;gap:12px;">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);">Hinweis</div>
+      <div style="font-size:13px;color:var(--ink-2);">Tailwind v4 — kein <code class="code-inline">tailwind.config.ts</code>. Alle Tokens werden direkt im <code class="code-inline">@theme</code>-Block in globals.css als CSS Custom Properties registriert.</div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ───────────────────────────────────────────────────────────── -->
+  <footer style="margin-top:80px;padding:40px 0;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--subtext);">
+      EKOWAI Wizard · Corporate Design System · v1.0
+    </div>
+    <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--hairline-strong);">
+      Intern · Nicht zur Veröffentlichung
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

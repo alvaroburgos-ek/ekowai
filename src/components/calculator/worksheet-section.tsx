@@ -23,7 +23,7 @@ export function WorksheetSection({
     <section className="border border-hairline bg-paper-2/30">
       <header className="border-b border-hairline px-5 py-3 flex items-baseline justify-between">
         <h2 className="font-display text-lg text-ink">{title}</h2>
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-subtext">
           {section.fields.length} Felder
         </span>
       </header>

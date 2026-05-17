@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { env } from '@/env';
 import { z } from 'zod';
+import { redirect } from 'next/navigation';
 
 const schema = z.object({
   email: z.string().email(),
@@ -39,4 +40,19 @@ export async function requestMagicLink(formData: FormData) {
     };
   }
   return { ok: true } as const;
+}
+
+const googleSchema = z.object({ locale: z.enum(['de', 'en']) });
+
+export async function signInWithGoogle(formData: FormData): Promise<never> {
+  const { locale } = googleSchema.parse({ locale: formData.get('locale') ?? 'de' });
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/${locale}/verify`,
+    },
+  });
+  if (error || !data.url) redirect(`/${locale}/login?error=auth_callback`);
+  redirect(data.url);
 }
