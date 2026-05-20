@@ -1,18 +1,31 @@
 import 'server-only';
+import { db } from '@/lib/db';
+import {
+  reportArchives,
+  worksheetInstances,
+  worksheetTemplates,
+  profiles,
+} from '@/lib/db/schema';
+import { eq, desc } from 'drizzle-orm';
 
-/**
- * PLAN 6 REATTACHMENT PENDING.
- *
- * report_archives schema was modified in Plan 1 (dropped approval_id,
- * added approval_event_id + worksheet_instance_id). Plan 6 implements
- * the new queries.
- */
-
-export async function listReportArchivesForProject(
-  _projectId: string,
-): Promise<Array<unknown>> {
-  return [];
+export async function listReportArchivesForProject(projectId: string) {
+  // report_archives has no projectId column — join through worksheet_instances
+  return db
+    .select({
+      id: reportArchives.id,
+      generatedAt: reportArchives.generatedAt,
+      filePath: reportArchives.filePath,
+      worksheetCode: worksheetTemplates.code,
+      worksheetTitleDe: worksheetTemplates.titleDe,
+      generatedByName: profiles.fullName,
+    })
+    .from(reportArchives)
+    .leftJoin(worksheetInstances, eq(worksheetInstances.id, reportArchives.worksheetInstanceId))
+    .leftJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .leftJoin(profiles, eq(profiles.id, reportArchives.generatedBy))
+    .where(eq(worksheetInstances.projectId, projectId))
+    .orderBy(desc(reportArchives.generatedAt));
 }
 
-// Legacy name used by reports-history.tsx — alias for compile compat.
+// Legacy alias for compile compat
 export const listProjectArchives = listReportArchivesForProject;
