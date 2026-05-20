@@ -14,6 +14,7 @@ import {
 } from '@/lib/db/schema';
 import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { compute, openDecisionPoints } from '@/lib/engine';
+import { inputsToValues, type InputRaw } from '@/lib/engine/inputs-reader';
 import { sendEmail } from '@/lib/email/client';
 import {
   submittedTemplate,
@@ -21,6 +22,9 @@ import {
   changesRequestedTemplate,
 } from '@/lib/email/templates';
 import { env } from '@/env';
+import { buildReport } from '@/lib/pdf/build-report';
+import { uploadReportArchive } from '@/lib/storage/report-archives';
+import { reportArchives } from '@/lib/db/schema';
 
 const submitSchema = z.object({ calcId: z.string().uuid() });
 const reviewSchema = z.object({
@@ -96,8 +100,13 @@ export async function submitForReview(input: {
   const worksheet = ALL_WORKSHEETS.find((w) => w.id === calc.worksheetId);
   if (!worksheet) return { ok: false, error: 'not_found' };
 
-  const inputs = (calc.inputs ?? {}) as Record<string, number | string | boolean | null>;
-  const result = compute(worksheet, inputs);
+  // Calc.inputs may be in mixed-cell shape (Plan 6) or bare-value (legacy).
+  // Extract bare values explicitly for the engine; `compute` is also
+  // shape-tolerant, but being explicit here makes the data flow obvious.
+  const values = inputsToValues(
+    (calc.inputs ?? {}) as Record<string, InputRaw>,
+  );
+  const result = compute(worksheet, values);
 
   if (Object.keys(result.validationErrors).length > 0) {
     return { ok: false, error: 'blocking_violation' };
@@ -113,7 +122,7 @@ export async function submitForReview(input: {
     .where(eq(decisions.calculationId, calc.id));
   const open = openDecisionPoints(
     worksheet,
-    inputs,
+    values,
     result.computed,
     new Set(recorded.map((r) => r.id)),
   );
@@ -163,13 +172,42 @@ async function reviewAction(
   if (!calc) return { ok: false, error: 'not_found' };
   if (calc.status !== 'submitted') return { ok: false, error: 'not_in_review' };
 
-  await db.insert(approvals).values({
-    calculationId: calc.id,
-    orgId,
-    action,
-    reviewerId: user.id,
-    comment: parsed.comment ?? null,
-  });
+  const [approval] = await db
+    .insert(approvals)
+    .values({
+      calculationId: calc.id,
+      orgId,
+      action,
+      reviewerId: user.id,
+      comment: parsed.comment ?? null,
+    })
+    .returning();
+
+  // Fire-and-forget archive: render PDF + upload + insert archive row.
+  // Failure is logged, never blocks approval.
+  if (action === 'approved' && approval) {
+    void (async () => {
+      try {
+        const buf = await buildReport(calc.id);
+        const { filePath, sha256 } = await uploadReportArchive({
+          orgId: calc.orgId,
+          calcId: calc.id,
+          approvalId: approval.id,
+          bytes: buf,
+        });
+        await db.insert(reportArchives).values({
+          calculationId: calc.id,
+          approvalId: approval.id,
+          orgId: calc.orgId,
+          filePath,
+          sha256,
+          generatedBy: user.id,
+        });
+      } catch (e) {
+        console.error('[archive] failed for calc', calc.id, e);
+      }
+    })();
+  }
 
   await db.update(calculations).set({ status: action }).where(eq(calculations.id, calc.id));
 

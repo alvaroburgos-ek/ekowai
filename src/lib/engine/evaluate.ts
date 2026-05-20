@@ -1,11 +1,11 @@
 import type {
   Worksheet,
-  InputValues,
   ComputedValues,
   EvaluationResult,
   ExpressionAst,
   FieldValue,
 } from './types';
+import { normalizeInputs, type InputRaw } from './inputs-reader';
 
 type Scope = { values: Record<string, FieldValue>; errors: string[]; currentId: string };
 
@@ -96,9 +96,17 @@ function evalExpr(expr: ExpressionAst, scope: Scope): number {
   }
 }
 
-export function evaluate(worksheet: Worksheet, inputs: InputValues): EvaluationResult {
+export function evaluate(
+  worksheet: Worksheet,
+  inputs: Record<string, unknown>,
+): EvaluationResult {
+  // Tolerant input: accept bare values (legacy) or {value, source} cells (Plan 6).
+  const cells = normalizeInputs(inputs as Record<string, InputRaw>);
+  const values: Record<string, FieldValue> = {};
+  for (const [k, c] of Object.entries(cells)) values[k] = c.value;
+
   const scope: Scope = {
-    values: { ...inputs },
+    values: { ...values },
     errors: [],
     currentId: '',
   };

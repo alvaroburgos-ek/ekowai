@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { calculations, orgMembers } from '@/lib/db/schema';
 import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
 import { compute } from '@/lib/engine';
+import { inputsToValues, type InputRaw } from '@/lib/engine/inputs-reader';
 import { draftRationale } from '@/lib/llm/client';
 import { checkRateLimit } from '@/lib/llm/rate-limit';
 import { env } from '@/env';
@@ -73,10 +74,12 @@ export async function POST(request: NextRequest) {
   const worksheet = ALL_WORKSHEETS.find((w) => w.id === calc.worksheetId);
   if (!worksheet) return NextResponse.json({ error: 'unknown_worksheet' }, { status: 500 });
 
-  const result = compute(
-    worksheet,
-    (calc.inputs ?? {}) as Record<string, number | string | boolean | null>,
+  // Calc.inputs may be in mixed-cell shape (Plan 6); extract bare values
+  // for the engine and the LLM (which formats them as JSON).
+  const values = inputsToValues(
+    (calc.inputs ?? {}) as Record<string, InputRaw>,
   );
+  const result = compute(worksheet, values);
 
   if (env.MOCK_LLM) {
     await db
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
       worksheetId: worksheet.id,
       regulation: worksheet.regulation,
       regulationVersion: worksheet.regulationVersion,
-      inputs: (calc.inputs ?? {}) as Record<string, number | string | boolean | null>,
+      inputs: values,
       computed: result.computed,
       locale: body.data.locale,
     });

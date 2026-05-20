@@ -1,4 +1,4 @@
-import type { Worksheet, InputValues, EvaluationResult } from './types';
+import type { Worksheet, EvaluationResult } from './types';
 import { validate } from './validate';
 import { evaluate } from './evaluate';
 import { evaluateCompliance } from './compliance';
@@ -29,7 +29,7 @@ export { openDecisionPoints, evalCondition } from './decisions';
 
 export function compute(
   worksheet: Worksheet,
-  inputs: InputValues,
+  inputs: Record<string, unknown>,
 ): EvaluationResult & {
   validationErrors: Record<string, string>;
 } {

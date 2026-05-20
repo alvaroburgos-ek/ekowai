@@ -3,6 +3,10 @@
 import { useEffect } from 'react';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 import type { Worksheet, InputValues } from '@/lib/engine';
+import type { InputSource } from '@/lib/engine/inputs-reader';
+import type { projectDocuments } from '@/lib/db/schema';
+
+type Doc = typeof projectDocuments.$inferSelect;
 import { WorksheetSection } from './worksheet-section';
 import { ResultsPanel } from './results-panel';
 import { ComplianceBadge } from './compliance-badge';
@@ -36,6 +40,8 @@ export function CalculatorShell(props: {
   initialInputs: InputValues;
   derivedValues: Record<string, number | string | boolean | null>;
   derivedSources: Record<string, DerivedSource>;
+  inputSources: Record<string, InputSource | undefined>;
+  docs: Doc[];
   lastSavedAt: string;
   initialDraft: string | null;
   initialFinal: string | null;
@@ -57,6 +63,8 @@ export function CalculatorShell(props: {
       inputs: merged,
       lastSavedAt: props.lastSavedAt,
       derivedSources: props.derivedSources,
+      inputSources: props.inputSources,
+      docs: props.docs,
     });
   }, [
     init,
@@ -65,6 +73,8 @@ export function CalculatorShell(props: {
     props.initialInputs,
     props.derivedValues,
     props.derivedSources,
+    props.inputSources,
+    props.docs,
     props.lastSavedAt,
   ]);
 
@@ -94,6 +104,14 @@ export function CalculatorShell(props: {
             <ComplianceBadge locale={props.locale} />
             <OfflineBadge />
             <SaveStatus locale={props.locale} />
+            <a
+              href={`/api/calculations/${props.calcId}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-accent underline"
+            >
+              Bericht herunterladen
+            </a>
             {(props.status === 'draft' || props.status === 'changes_requested') && (
               <SubmitButton calcId={props.calcId} resubmit={props.status === 'changes_requested'} recordedDecisionIds={recordedIds} />
             )}

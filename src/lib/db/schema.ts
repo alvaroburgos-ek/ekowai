@@ -3,8 +3,10 @@ import {
   uuid,
   text,
   timestamp,
+  date,
   jsonb,
   numeric,
+  bigint,
   boolean,
   pgEnum,
   primaryKey,
@@ -52,6 +54,16 @@ export const orgs = pgTable('orgs', {
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   country: text('country').notNull().default('DE'),
+  // Letterhead fields (Plan 6)
+  logoUrl: text('logo_url'),
+  addressLine1: text('address_line1'),
+  addressLine2: text('address_line2'),
+  postalCode: text('postal_code'),
+  city: text('city'),
+  phone: text('phone'),
+  email: text('email'),
+  website: text('website'),
+  vatId: text('vat_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -229,5 +241,63 @@ export const calculationMetrics = pgTable(
   },
   (t) => ({
     orgIdx: index('metrics_org_idx').on(t.orgId),
+  }),
+);
+
+// Project documents (Plan 6 — uploaded source documents for citations)
+export const projectDocuments = pgTable(
+  'project_documents',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    kind: text('kind').notNull(),
+    title: text('title').notNull(),
+    citationLabel: text('citation_label').notNull(),
+    issuedAt: date('issued_at', { mode: 'date' }),
+    filePath: text('file_path').notNull(),
+    fileSize: bigint('file_size', { mode: 'number' }).notNull(),
+    mimeType: text('mime_type').notNull(),
+    sha256: text('sha256').notNull(),
+    uploadedBy: uuid('uploaded_by')
+      .notNull()
+      .references(() => profiles.id),
+    uploadedAt: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('project_documents_project_idx').on(t.projectId),
+    orgIdx: index('project_documents_org_idx').on(t.orgId),
+  }),
+);
+
+// Report archives (Plan 6 — frozen PDFs of approved calculations)
+export const reportArchives = pgTable(
+  'report_archives',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    calculationId: uuid('calculation_id')
+      .notNull()
+      .references(() => calculations.id, { onDelete: 'cascade' }),
+    approvalId: uuid('approval_id')
+      .notNull()
+      .references(() => approvals.id, { onDelete: 'restrict' }),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id),
+    filePath: text('file_path').notNull(),
+    sha256: text('sha256').notNull(),
+    generatedAt: timestamp('generated_at', { withTimezone: true }).notNull().defaultNow(),
+    generatedBy: uuid('generated_by')
+      .notNull()
+      .references(() => profiles.id),
+  },
+  (t) => ({
+    calcIdx: index('report_archives_calc_idx').on(t.calculationId),
+    orgIdx: index('report_archives_org_idx').on(t.orgId),
+    uniq: unique('report_archives_calc_approval_unique').on(t.calculationId, t.approvalId),
   }),
 );

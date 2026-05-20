@@ -255,5 +255,51 @@
     "noMembers": "Noch keine weiteren Mitglieder.",
     "memberSingular": "Mitglied",
     "memberPlural": "Mitglieder"
+  },
+  "citations": {
+    "title": "Quelle anhängen für",
+    "fromDoc": "Aus Dokument",
+    "asText": "Als Text",
+    "noDocs": "Keine Dokumente in diesem Projekt. Lade zuerst Dokumente hoch.",
+    "labelPlaceholder": "z. B. IfSL Mainz, 2026-03-12",
+    "save": "Speichern",
+    "removeSource": "Quelle entfernen",
+    "errors": {
+      "calc_not_found": "Berechnung nicht gefunden",
+      "doc_not_in_project": "Dokument gehört nicht zum Projekt",
+      "symbol_not_found": "Eingabefeld nicht gefunden",
+      "invalid_input": "Eingabe ungültig",
+      "calc_locked": "Berechnung ist freigegeben — Quellen können nicht geändert werden"
+    }
+  },
+  "documents": {
+    "title": "Projektdokumente",
+    "upload": "Hochladen",
+    "kind": "Art",
+    "kindOptions": {
+      "lab_analysis": "Laboranalyse",
+      "authority_decision": "Behördenbescheid",
+      "soil_report": "Bodengutachten",
+      "hydrology": "Hydrologie",
+      "correspondence": "Korrespondenz",
+      "other": "Sonstiges"
+    },
+    "titleLabel": "Titel",
+    "citationLabel": "Zitierform",
+    "issuedAt": "Ausgabedatum",
+    "file": "Datei",
+    "submit": "Speichern",
+    "empty": "Noch keine Dokumente. Lade das erste hoch.",
+    "delete": "Löschen",
+    "confirmDelete": "Dokument wirklich löschen?",
+    "errors": {
+      "no_file": "Keine Datei ausgewählt",
+      "too_large": "Datei zu groß (max 25 MB)",
+      "invalid_input": "Eingaben unvollständig",
+      "project_not_found": "Projekt nicht gefunden",
+      "storage_failed": "Speicherfehler — bitte erneut versuchen",
+      "forbidden": "Zugriff verweigert",
+      "not_found": "Dokument nicht gefunden"
+    }
   }
 }

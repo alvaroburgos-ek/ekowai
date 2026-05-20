@@ -1,14 +1,23 @@
-import type { Worksheet, InputValues } from './types';
+import type { Worksheet, FieldValue } from './types';
+import { normalizeInputs, type InputRaw } from './inputs-reader';
 
 export interface ValidationResult {
   errors: Record<string, string>;
 }
 
-export function validate(worksheet: Worksheet, inputs: InputValues): ValidationResult {
+export function validate(
+  worksheet: Worksheet,
+  inputs: Record<string, unknown>,
+): ValidationResult {
+  // Tolerant input: accept bare values (legacy) or {value, source} cells (Plan 6).
+  const cells = normalizeInputs(inputs as Record<string, InputRaw>);
+  const values: Record<string, FieldValue> = {};
+  for (const [k, c] of Object.entries(cells)) values[k] = c.value;
+
   const errors: Record<string, string> = {};
 
   for (const f of worksheet.inputs) {
-    const v = inputs[f.id];
+    const v = values[f.id];
     if (v === undefined || v === null || v === '') {
       if (f.defaultValue === undefined) {
         errors[f.id] = 'required';

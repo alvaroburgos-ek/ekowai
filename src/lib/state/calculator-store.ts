@@ -3,7 +3,11 @@
 import { create } from 'zustand';
 import type { InputValues, Worksheet } from '@/lib/engine';
 import { compute } from '@/lib/engine';
+import type { InputSource } from '@/lib/engine/inputs-reader';
+import type { projectDocuments } from '@/lib/db/schema';
 import { saveLocal, clearLocal } from './persistence';
+
+type Doc = typeof projectDocuments.$inferSelect;
 
 export type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'offline' | 'error';
 
@@ -22,6 +26,8 @@ interface CalculatorState {
   saveStatus: SaveStatus;
   lastSavedAt: string | null;
   derivedSources: Record<string, DerivedSource>;
+  inputSources: Record<string, InputSource | undefined>;
+  docs: Doc[];
 
   init(args: {
     calcId: string;
@@ -29,6 +35,8 @@ interface CalculatorState {
     inputs: InputValues;
     lastSavedAt: string | null;
     derivedSources?: Record<string, DerivedSource>;
+    inputSources?: Record<string, InputSource | undefined>;
+    docs?: Doc[];
   }): void;
   setField(id: string, value: number | string | boolean | null): void;
   isDerived(id: string): boolean;
@@ -46,8 +54,10 @@ export const useCalculatorStore = create<CalculatorState>((set, get) => ({
   saveStatus: 'idle',
   lastSavedAt: null,
   derivedSources: {},
+  inputSources: {},
+  docs: [],
 
-  init({ calcId, worksheet, inputs, lastSavedAt, derivedSources }) {
+  init({ calcId, worksheet, inputs, lastSavedAt, derivedSources, inputSources, docs }) {
     const result = compute(worksheet, inputs);
     set({
       calcId,
@@ -57,6 +67,8 @@ export const useCalculatorStore = create<CalculatorState>((set, get) => ({
       saveStatus: 'idle',
       lastSavedAt,
       derivedSources: derivedSources ?? {},
+      inputSources: inputSources ?? {},
+      docs: docs ?? [],
     });
   },
 

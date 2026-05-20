@@ -1,16 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 import type { InputField as FieldDef } from '@/lib/engine';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { SourceBadge } from '@/components/documents/source-badge';
+import { CitationPicker } from '@/components/documents/citation-picker';
 
 export function InputField({ field, locale }: { field: FieldDef; locale: 'de' | 'en' }) {
   const value = useCalculatorStore((s) => s.inputs[field.id]);
   const setField = useCalculatorStore((s) => s.setField);
   const derivedSource = useCalculatorStore((s) => s.derivedSources[field.id]);
+  const calcId = useCalculatorStore((s) => s.calcId);
+  const inputSource = useCalculatorStore((s) => s.inputSources[field.id]);
+  const docs = useCalculatorStore((s) => s.docs);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   const label = locale === 'de' ? field.labelDe : field.labelEn;
   const isDerived = !!field.derivedFrom;
   const derivedReady = !!derivedSource;
+
+  const sourceDoc =
+    inputSource && 'docId' in inputSource
+      ? docs.find((d) => d.id === inputSource.docId)
+      : undefined;
 
   return (
     <div className="space-y-1.5">
@@ -72,6 +85,26 @@ export function InputField({ field, locale }: { field: FieldDef; locale: 'de' | 
           className={`block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink tabular-nums focus:border-accent focus:outline-none focus:ring-0 transition-colors ${
             isDerived ? 'cursor-not-allowed bg-paper-2/40 text-subtext' : ''
           }`}
+        />
+      )}
+
+      {/* Source badge — citation trigger */}
+      {calcId && !isDerived && (
+        <SourceBadge
+          source={inputSource}
+          docTitle={sourceDoc?.title}
+          onClick={() => setPickerOpen(true)}
+        />
+      )}
+
+      {/* Citation picker modal */}
+      {calcId && (
+        <CitationPicker
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          calcId={calcId}
+          symbol={field.id}
+          docs={docs}
         />
       )}
     </div>

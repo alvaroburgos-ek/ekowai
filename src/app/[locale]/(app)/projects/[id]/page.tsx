@@ -62,6 +62,24 @@ export default async function ProjectDetailPage({
         </dl>
       </header>
 
+      <nav className="flex gap-6 border-b border-hairline -mt-6 pb-3">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] py-1 border-b-2 border-ink -mb-[14px]">
+          Übersicht
+        </span>
+        <Link
+          href={`/${localeTyped}/projects/${id}/documents`}
+          className="font-mono text-[10px] uppercase tracking-[0.2em] py-1 text-subtext hover:text-ink"
+        >
+          Dokumente
+        </Link>
+        <Link
+          href={`/${localeTyped}/projects/${id}/reports`}
+          className="font-mono text-[10px] uppercase tracking-[0.2em] py-1 text-subtext hover:text-ink"
+        >
+          Berichtsverlauf
+        </Link>
+      </nav>
+
       {/* Calculations section */}
       <section className="space-y-6">
         <div className="flex items-end justify-between border-b border-hairline pb-4">
