@@ -320,6 +320,22 @@
     "equations": "Equations for this worksheet",
     "alreadyEnteredIn": "Already entered in {worksheets}: {value}",
     "applyHint": "Apply",
-    "jsonPhase2": "Multi-line input — Phase 2"
+    "jsonPhase2": "Multi-line input — Phase 2",
+    "statusDraft": "Draft",
+    "statusSubmitted": "In review",
+    "statusApproved": "Approved",
+    "statusFinal": "Final",
+    "statusDeactivated": "Deactivated",
+    "transitionSubmit": "Submit for review",
+    "transitionApprove": "Approve",
+    "transitionReject": "Reject",
+    "transitionFinalize": "Finalize",
+    "transitionReopen": "Reopen",
+    "transitionCommentLabel": "Comment (required — permanently stored in the audit log):",
+    "transitionCancel": "Cancel",
+    "transitionProcessing": "Processing...",
+    "auditTitle": "Audit log",
+    "auditEmpty": "No actions recorded for this project yet.",
+    "auditViewLink": "View audit log"
   }
 }
