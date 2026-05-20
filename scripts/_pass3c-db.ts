@@ -1,6 +1,6 @@
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { sql, eq, inArray } from 'drizzle-orm';
+import { sql, eq, inArray, and } from 'drizzle-orm';
 import * as schema from '../src/lib/db/schema';
 import type {
   ParsedWorkbook,
@@ -39,8 +39,16 @@ function parseList(v: string | null): string[] | null {
     .filter((s) => s.length > 0);
 }
 
-function groupEnumValues(rows: EnumValueRow[]): Map<string, unknown[]> {
-  const map = new Map<string, unknown[]>();
+type EnumValuePayload = {
+  value: string;
+  label_de: string | null;
+  label_en: string | null;
+  order_index: number;
+  regulation_reference: string | null;
+};
+
+function groupEnumValues(rows: EnumValueRow[]): Map<string, EnumValuePayload[]> {
+  const map = new Map<string, EnumValuePayload[]>();
   for (const r of rows) {
     const arr = map.get(r.enum_name) ?? [];
     arr.push({
@@ -53,7 +61,7 @@ function groupEnumValues(rows: EnumValueRow[]): Map<string, unknown[]> {
     map.set(r.enum_name, arr);
   }
   for (const arr of map.values()) {
-    (arr as { order_index: number }[]).sort((a, b) => a.order_index - b.order_index);
+    arr.sort((a, b) => a.order_index - b.order_index);
   }
   return map;
 }
@@ -100,6 +108,28 @@ export async function importWorkbook(
         .returning({ id: standards.id });
       const standardId = stdRow[0].id;
 
+      // I4: warn about DB field symbols that are no longer in the xlsx for this standard
+      const existingFieldSymbols = await tx
+        .select({ symbol: fields.symbol, worksheetCode: worksheetTemplates.code })
+        .from(fields)
+        .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+        .where(eq(worksheetTemplates.standardId, standardId));
+      const xlsxFieldKeys = new Set(
+        parsed.fields.map((f) => `${f.origin_worksheet}|${f.symbol}`),
+      );
+      const orphans = existingFieldSymbols.filter(
+        (r) => !xlsxFieldKeys.has(`${r.worksheetCode}|${r.symbol}`),
+      );
+      if (orphans.length > 0) {
+        console.warn(
+          `⚠ ${orphans.length} field(s) exist in DB but not in xlsx — possible rename or removal. They remain in DB:`,
+        );
+        for (const o of orphans.slice(0, 10)) {
+          console.warn(`    ${o.worksheetCode} · ${o.symbol}`);
+        }
+        if (orphans.length > 10) console.warn(`    ... and ${orphans.length - 10} more`);
+      }
+
       // ---- 2. Worksheet templates ----
       const tmplValues = parsed.worksheets.map((w) => ({
         standardId,
@@ -127,6 +157,32 @@ export async function importWorkbook(
         })
         .returning({ id: worksheetTemplates.id, code: worksheetTemplates.code });
       const tmplByCode = new Map(insertedTemplates.map((t) => [t.code, t.id]));
+
+      // I5: warn about worksheet codes that collide with other standards (cross-standard)
+      const collisions = await tx
+        .select({
+          code: worksheetTemplates.code,
+          otherStandardCode: standards.code,
+        })
+        .from(worksheetTemplates)
+        .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
+        .where(
+          and(
+            inArray(
+              worksheetTemplates.code,
+              parsed.worksheets.map((w) => w.worksheet_code),
+            ),
+            sql`${standards.id} <> ${standardId}`,
+          ),
+        );
+      if (collisions.length > 0) {
+        console.warn(
+          `ℹ ${collisions.length} worksheet code(s) also exist in other standards (Phase 2: cross-standard field_bindings):`,
+        );
+        for (const c of collisions.slice(0, 10)) {
+          console.warn(`    ${c.code} (also in ${c.otherStandardCode})`);
+        }
+      }
 
       // ---- 3a. Sections, pass 1 (no parent_section_id) ----
       // Sections have no unique constraint on (worksheet_template_id, code),

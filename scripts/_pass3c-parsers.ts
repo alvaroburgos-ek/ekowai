@@ -28,6 +28,7 @@ function cellValue(cell: ExcelJS.Cell): unknown {
 function readSheet(
   wb: ExcelJS.Workbook,
   name: string,
+  sentinels: string[] = [],
 ): Record<string, unknown>[] {
   const ws = wb.getWorksheet(name);
   if (!ws) throw new Error(`Sheet not found: ${name}`);
@@ -36,6 +37,9 @@ function readSheet(
   // distinct strings (not a merged/repeated banner). This handles Pass3c workbooks where
   // some sheets (e.g. Compliance_Requirements) have a title banner in rows 1–3 before the
   // actual column headers on row 4.
+  // Additionally, if sentinels are provided, the header row must contain all of them —
+  // this prevents a title banner that happens to have 2+ distinct strings from being
+  // misidentified as the header.
   let headerRowIdx = 1;
   let headers: string[] = [];
   for (let probe = 1; probe <= 6; probe++) {
@@ -47,13 +51,21 @@ function readSheet(
     if (probeHeaders.length < 2) continue;
     // A valid header row has all distinct values (banners repeat the same merged value)
     const unique = new Set(probeHeaders.filter(Boolean));
-    if (unique.size === probeHeaders.filter(Boolean).length) {
+    const hasAllSentinels = sentinels.every((s) => probeHeaders.includes(s));
+    if (hasAllSentinels && unique.size === probeHeaders.filter(Boolean).length) {
       headerRowIdx = probe;
       headers = probeHeaders;
       break;
     }
   }
-  if (headers.length === 0) throw new Error(`Sheet ${name} has no header row`);
+  if (headers.length === 0) {
+    if (sentinels.length > 0) {
+      throw new Error(
+        `Sheet ${name} has no header row containing sentinels ${sentinels.join(', ')}`,
+      );
+    }
+    throw new Error(`Sheet ${name} has no header row`);
+  }
 
   const rows: Record<string, unknown>[] = [];
   for (let r = headerRowIdx + 1; r <= ws.rowCount; r++) {
@@ -179,8 +191,10 @@ function parseEquations(rows: Record<string, unknown>[]): EquationRow[] {
   return rows
     .filter((r) => !isPlaceholderEquation(r))
     .map((r) => {
-      // Pass3c workbooks may have comma-separated used_in_worksheet (e.g. "A138-13, A138-25").
-      // We take the first value; the equation is stored once, on the primary worksheet.
+      // Pass3c equations can list multiple consumer worksheets ("A138-13, A138-25").
+      // We attach the equation to the first worksheet only — the DB FK is single-valued.
+      // TODO(plan-3): if the evaluator needs to surface an equation on all consumer
+      // worksheets, introduce equation_worksheet_bindings junction table.
       const rawWorksheet = asString(r.used_in_worksheet) ?? '';
       const used_in_worksheet = rawWorksheet.includes(',')
         ? rawWorksheet.split(',')[0].trim()
@@ -220,34 +234,28 @@ function parseComplianceRequirements(
   }));
 }
 
-/** Read a Pass3c xlsx file from disk and return a fully-parsed workbook. */
-export async function parseWorkbook(path: string): Promise<ParsedWorkbook> {
-  const wb = new ExcelJS.Workbook();
-  await wb.xlsx.readFile(path);
+function parseWorkbookFromWb(wb: ExcelJS.Workbook): ParsedWorkbook {
   return {
-    standard: parseStandard(readSheet(wb, 'Standards')),
-    worksheets: parseWorksheets(readSheet(wb, 'Worksheets')),
-    sections: parseSections(readSheet(wb, 'Sections')),
-    fields: parseFields(readSheet(wb, 'Fields')),
-    enumValues: parseEnumValues(readSheet(wb, 'Enum_Values')),
-    equations: parseEquations(readSheet(wb, 'Equations')),
+    standard: parseStandard(readSheet(wb, 'Standards', ['standard_code'])),
+    worksheets: parseWorksheets(readSheet(wb, 'Worksheets', ['worksheet_code', 'standard_code'])),
+    sections: parseSections(readSheet(wb, 'Sections', ['worksheet_code', 'section_code'])),
+    fields: parseFields(readSheet(wb, 'Fields', ['symbol', 'data_type'])),
+    enumValues: parseEnumValues(readSheet(wb, 'Enum_Values', ['enum_name', 'value'])),
+    equations: parseEquations(readSheet(wb, 'Equations', ['equation_number', 'formula'])),
     complianceRequirements: parseComplianceRequirements(
-      readSheet(wb, 'Compliance_Requirements'),
+      readSheet(wb, 'Compliance_Requirements', ['requirement_code', 'evaluation_expression']),
     ),
   };
 }
 
+/** Read a Pass3c xlsx file from disk and return a fully-parsed workbook. */
+export async function parseWorkbook(path: string): Promise<ParsedWorkbook> {
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(path);
+  return parseWorkbookFromWb(wb);
+}
+
 /** Parse an in-memory exceljs Workbook (for tests). */
 export function parseWorkbookSync(wb: ExcelJS.Workbook): ParsedWorkbook {
-  return {
-    standard: parseStandard(readSheet(wb, 'Standards')),
-    worksheets: parseWorksheets(readSheet(wb, 'Worksheets')),
-    sections: parseSections(readSheet(wb, 'Sections')),
-    fields: parseFields(readSheet(wb, 'Fields')),
-    enumValues: parseEnumValues(readSheet(wb, 'Enum_Values')),
-    equations: parseEquations(readSheet(wb, 'Equations')),
-    complianceRequirements: parseComplianceRequirements(
-      readSheet(wb, 'Compliance_Requirements'),
-    ),
-  };
+  return parseWorkbookFromWb(wb);
 }

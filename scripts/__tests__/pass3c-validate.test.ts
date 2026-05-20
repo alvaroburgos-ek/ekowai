@@ -75,11 +75,13 @@ describe('Pass3c validator', () => {
     expect(errs.some((e) => e.message.includes('parent_section_code'))).toBe(true);
   });
 
-  it('flags enum field without enum_values', () => {
+  it('does not block import when enum field has no matching enum_values (soft data gap)', () => {
     const p = valid();
     p.fields[0].data_type = 'enum';
     const errs = validateWorkbook(p);
-    expect(errs.some((e) => e.message.includes('no rows in Enum_Values'))).toBe(true);
+    // Enum-name mismatch is a data-quality gap, not a blocker — the importer
+    // logs a warning at write time and stores the field with enum_values = null.
+    expect(errs.filter((e) => e.message.includes('no rows in Enum_Values'))).toEqual([]);
   });
 
   it('flags Equation whose used_in_worksheet is unknown', () => {

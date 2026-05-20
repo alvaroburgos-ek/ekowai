@@ -107,4 +107,46 @@ describe('Pass3c parsers', () => {
     const r = parseWorkbookSync(wb);
     expect(r.standard.standard_code).toBe('DWA-A-138-1');
   });
+
+  it('readSheet skips a title banner row and finds the real header (sentinel-driven)', () => {
+    const wb = new ExcelJS.Workbook();
+
+    // Standards sheet — normal
+    const std = wb.addWorksheet('Standards');
+    std.addRow(['standard_code', 'title_de', 'title_en', 'issuer', 'edition', 'domain', 'status', 'notes']);
+    std.addRow(['DWA-A-138-1', 'Versickerung Teil 1', null, 'DWA', 'Oktober 2024', null, null, null]);
+
+    // Worksheets — normal
+    const ws = wb.addWorksheet('Worksheets');
+    ws.addRow(['worksheet_code','standard_code','title_de','title_en','phase','archetype','section_refs','equation_refs','order_index','description','verification_status']);
+    ws.addRow(['A138-01','DWA-A-138-1','Projektregistrierung',null,1,'registration',null,null,1,null,null]);
+
+    // Sections — normal
+    const sec = wb.addWorksheet('Sections');
+    sec.addRow(['worksheet_code','section_code','parent_section_code','title','order_index','purpose','verification_status']);
+    sec.addRow(['A138-01','A',null,'Section A',1,null,null]);
+
+    // Fields — normal
+    const f = wb.addWorksheet('Fields');
+    f.addRow(['symbol','label_de','label_en','unit','data_type','kind','origin_worksheet','origin_section','consumer_worksheets','equation_refs','required','validation_rules','regulation_reference','description','verification_status','notes']);
+    f.addRow(['project_number','Projektnummer',null,null,'text',null,'A138-01','A',null,null,'yes',null,null,null,null,null]);
+
+    // Enum_Values — normal
+    const ev = wb.addWorksheet('Enum_Values');
+    ev.addRow(['enum_name','value','label_de','label_en','order_index','regulation_reference','notes']);
+
+    // Equations — normal
+    const eq = wb.addWorksheet('Equations');
+    eq.addRow(['equation_number','standard_code','description_de','description_en','formula','input_symbols','output_symbol','regulation_reference','used_in_worksheet','verification_status','notes']);
+
+    // Compliance_Requirements — has a title banner on rows 1–2 before the real header
+    const cr = wb.addWorksheet('Compliance_Requirements');
+    cr.addRow(['DWA-A 138-1 — ATOMIC VALIDATION RULES']);   // banner row 1
+    cr.addRow(['Some descriptive text', 'another bit']);    // banner row 2 (2 distinct values but no sentinels)
+    cr.addRow(['requirement_code','standard_code','title','description','evaluation_type','required_field_symbols','evaluation_expression','pass_condition','regulation_reference','phase','order_index','verification_status']);
+    cr.addRow(['R-1','DWA-A-138-1','T','D','field_value','x','x == 1','TRUE','§1',1,1,'verified']);
+
+    const r = parseWorkbookSync(wb);
+    expect(r.complianceRequirements[0].requirement_code).toBe('R-1');
+  });
 });
