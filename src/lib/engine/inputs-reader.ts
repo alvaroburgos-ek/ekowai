@@ -1,23 +1,40 @@
-/**
- * PLAN 6 REATTACHMENT PENDING.
- *
- * Originally read inputs + citation sources from calculations.inputs JSONB.
- * Plan 6 retargets to project_parameters rows (one per field_id, with
- * citation_source as a sibling column).
- */
+import 'server-only';
+import { db } from '@/lib/db';
+import { projectParameters } from '@/lib/db/schema';
+import { and, eq, inArray } from 'drizzle-orm';
 
-export type FieldValue =
-  | number
-  | string
-  | boolean
-  | null
-  | { value: unknown; source?: { docId: string; page?: number; note?: string } };
+export type InputSource = { docId: string; page?: number; note?: string };
 
-// Legacy type used by source-badge.tsx — kept for compile compat.
-export type InputSource = { docId: string; page?: number } | { label: string };
+export type FieldValue = {
+  value: unknown;
+  source?: InputSource;
+};
 
 export async function readInputsWithSources(
-  _calcId: string,
+  projectId: string,
+  fieldIds: string[],
 ): Promise<Record<string, FieldValue>> {
-  throw new Error('Inputs reader pending Plan 6 reattachment to new schema');
+  if (fieldIds.length === 0) return {};
+
+  const rows = await db
+    .select()
+    .from(projectParameters)
+    .where(
+      and(
+        eq(projectParameters.projectId, projectId),
+        inArray(projectParameters.fieldId, fieldIds),
+      ),
+    );
+
+  const out: Record<string, FieldValue> = {};
+  for (const r of rows) {
+    const value =
+      r.valueNumber ?? r.valueText ?? r.valueEnum ?? r.valueDate ?? r.valueBoolean ?? r.valueJson;
+    const source =
+      r.citationSource && typeof r.citationSource === 'object'
+        ? (r.citationSource as InputSource)
+        : undefined;
+    out[r.fieldId] = { value, source };
+  }
+  return out;
 }
