@@ -87,7 +87,7 @@ export type ComplianceRow = {
   description: string | null;
   evaluation_type: string | null;
   required_field_symbols: string | null;
-  evaluation_expression: string;
+  evaluation_expression: string | null;  // null for field_presence type (uses required_field_symbols)
   pass_condition: string | null;
   regulation_reference: string | null;
   phase: number | null;

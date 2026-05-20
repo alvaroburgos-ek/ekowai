@@ -132,6 +132,14 @@ export async function importWorkbook(
       // Sections have no unique constraint on (worksheet_template_id, code),
       // so we wipe sections for this standard's worksheets and reinsert.
       const tmplIds = Array.from(tmplByCode.values());
+      // Clear section_id on fields that reference these worksheets' sections before deleting,
+      // otherwise the FK constraint (fields.section_id → worksheet_sections.id) blocks the delete.
+      if (tmplIds.length > 0) {
+        await tx
+          .update(fields)
+          .set({ sectionId: null })
+          .where(inArray(fields.worksheetTemplateId, tmplIds));
+      }
       await tx.delete(worksheetSections).where(inArray(worksheetSections.worksheetTemplateId, tmplIds));
 
       const sectionValues = parsed.sections.map((s) => ({
@@ -258,11 +266,27 @@ export async function importWorkbook(
           ? parsed.worksheets.find((w) => w.phase === cr.phase)
           : undefined;
         const targetWorksheet = matchingByPhase ?? firstPhase1;
+        // For field_presence type CRs the xlsx may omit evaluation_expression.
+        // Build a synthetic condition from required_field_symbols so the notNull DB column is satisfied.
+        let condition = cr.evaluation_expression;
+        if (!condition) {
+          if (cr.required_field_symbols) {
+            // e.g. "k_f, permeability_test_method" → "k_f IS NOT NULL AND permeability_test_method IS NOT NULL"
+            condition = cr.required_field_symbols
+              .split(/[,;]/)
+              .map((s) => s.trim())
+              .filter((s) => s.length > 0)
+              .map((s) => `${s} IS NOT NULL`)
+              .join(' AND ');
+          } else {
+            condition = 'TRUE';
+          }
+        }
         return {
           worksheetTemplateId: tmplByCode.get(targetWorksheet.worksheet_code)!,
           code: cr.requirement_code,
           titleDe: cr.title,
-          condition: cr.evaluation_expression,
+          condition,
           description: cr.description,
           clauseReference: cr.regulation_reference,
           severity: 'block' as const,

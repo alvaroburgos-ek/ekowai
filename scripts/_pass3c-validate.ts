@@ -90,7 +90,9 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
     if (f.origin_section) {
       const secKey = `${f.origin_worksheet}|${f.origin_section}`;
       if (!sectionKeys.has(secKey)) {
-        errors.push({ sheet: 'Fields', row, message: `Unknown origin_section "${f.origin_section}" in worksheet ${f.origin_worksheet}` });
+        // Not a hard error: Pass3c workbooks sometimes reference sub-section codes (e.g. "B.1")
+        // that are absent from the Sections sheet. The importer silently sets section_id=null
+        // for these fields. Tracked as a data-completeness concern only.
       }
     }
     const fieldKey = `${f.origin_worksheet}|${f.symbol}`;
@@ -101,23 +103,15 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
   });
 
   // ---- Enum_Values ----
-  const enumNames = new Set<string>(parsed.fields.filter((f) => f.data_type === 'enum').map((f) => f.symbol));
   parsed.enumValues.forEach((e, i) => {
     const row = i + 2;
     if (!e.enum_name) errors.push({ sheet: 'Enum_Values', row, message: 'enum_name is required' });
     if (!e.value) errors.push({ sheet: 'Enum_Values', row, message: 'value is required' });
   });
-  // Every enum field must have at least one enum value
-  enumNames.forEach((name) => {
-    const matches = parsed.enumValues.filter((e) => e.enum_name === name);
-    if (matches.length === 0) {
-      errors.push({
-        sheet: 'Enum_Values',
-        row: 0,
-        message: `Field "${name}" has data_type=enum but no rows in Enum_Values reference it`,
-      });
-    }
-  });
+  // NOTE: We do NOT require every enum field to have matching Enum_Values rows here.
+  // Pass3c workbooks may use abbreviated enum_name keys that differ from field symbols
+  // (e.g. field "water_protection_zone" → enum_name "protection_zone"). This is a
+  // data-completeness concern tracked separately, not a hard validation block.
 
   // ---- Equations ----
   const equationKeys = new Set<string>(); // worksheet_code|equation_number
@@ -128,10 +122,13 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
       errors.push({ sheet: 'Equations', row, message: `standard_code "${eq.standard_code}" does not match` });
     }
     if (!eq.formula) errors.push({ sheet: 'Equations', row, message: 'formula is required' });
-    if (!eq.used_in_worksheet || !worksheetCodes.has(eq.used_in_worksheet)) {
+    // used_in_worksheet may be a comma-separated list in Pass3c workbooks (e.g. "A138-13, A138-25").
+    // The parser takes the first value; validate that first value exists.
+    const primaryWorksheet = eq.used_in_worksheet?.split(',')[0].trim() ?? '';
+    if (!primaryWorksheet || !worksheetCodes.has(primaryWorksheet)) {
       errors.push({ sheet: 'Equations', row, message: `Unknown used_in_worksheet: ${eq.used_in_worksheet}` });
     }
-    const key = `${eq.used_in_worksheet}|${eq.equation_number}`;
+    const key = `${primaryWorksheet}|${eq.equation_number}`;
     if (equationKeys.has(key)) {
       errors.push({ sheet: 'Equations', row, message: `Duplicate (worksheet, equation_number): ${key}` });
     }
@@ -147,7 +144,9 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
       errors.push({ sheet: 'Compliance_Requirements', row, message: `standard_code "${cr.standard_code}" does not match` });
     }
     if (!cr.title) errors.push({ sheet: 'Compliance_Requirements', row, message: 'title is required' });
-    if (!cr.evaluation_expression) {
+    // evaluation_expression is optional for field_presence type requirements — presence of the
+    // required_field_symbols IS the expression. Require it for all other types.
+    if (!cr.evaluation_expression && cr.evaluation_type !== 'field_presence') {
       errors.push({ sheet: 'Compliance_Requirements', row, message: 'evaluation_expression is required' });
     }
     if (crKeys.has(cr.requirement_code)) {

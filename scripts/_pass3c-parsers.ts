@@ -31,15 +31,32 @@ function readSheet(
 ): Record<string, unknown>[] {
   const ws = wb.getWorksheet(name);
   if (!ws) throw new Error(`Sheet not found: ${name}`);
-  const headerRow = ws.getRow(1);
-  const headers: string[] = [];
-  headerRow.eachCell({ includeEmpty: false }, (cell, col) => {
-    headers[col - 1] = String(cell.value ?? '').trim();
-  });
+
+  // Auto-detect header row: scan rows 1–6 for the first row where all cell values are
+  // distinct strings (not a merged/repeated banner). This handles Pass3c workbooks where
+  // some sheets (e.g. Compliance_Requirements) have a title banner in rows 1–3 before the
+  // actual column headers on row 4.
+  let headerRowIdx = 1;
+  let headers: string[] = [];
+  for (let probe = 1; probe <= 6; probe++) {
+    const probeRow = ws.getRow(probe);
+    const probeHeaders: string[] = [];
+    probeRow.eachCell({ includeEmpty: false }, (cell, col) => {
+      probeHeaders[col - 1] = String(cell.value ?? '').trim();
+    });
+    if (probeHeaders.length < 2) continue;
+    // A valid header row has all distinct values (banners repeat the same merged value)
+    const unique = new Set(probeHeaders.filter(Boolean));
+    if (unique.size === probeHeaders.filter(Boolean).length) {
+      headerRowIdx = probe;
+      headers = probeHeaders;
+      break;
+    }
+  }
   if (headers.length === 0) throw new Error(`Sheet ${name} has no header row`);
 
   const rows: Record<string, unknown>[] = [];
-  for (let r = 2; r <= ws.rowCount; r++) {
+  for (let r = headerRowIdx + 1; r <= ws.rowCount; r++) {
     const row = ws.getRow(r);
     const obj: Record<string, unknown> = {};
     let nonEmpty = false;
@@ -143,20 +160,45 @@ function parseEnumValues(rows: Record<string, unknown>[]): EnumValueRow[] {
   }));
 }
 
+/** Values that indicate a placeholder / "no equations" row in the Equations sheet. */
+const PLACEHOLDER_VALUES = new Set(['—', 'n/a', 'N/A', '(none)', 'none', '']);
+
+function isPlaceholderEquation(r: Record<string, unknown>): boolean {
+  // Skip rows that are intentional placeholder rows (used when a standard has no equations).
+  const eqNum = asString(r.equation_number) ?? '';
+  const formula = asString(r.formula) ?? '';
+  const worksheet = asString(r.used_in_worksheet) ?? '';
+  return (
+    PLACEHOLDER_VALUES.has(eqNum) ||
+    PLACEHOLDER_VALUES.has(formula) ||
+    PLACEHOLDER_VALUES.has(worksheet)
+  );
+}
+
 function parseEquations(rows: Record<string, unknown>[]): EquationRow[] {
-  return rows.map((r) => ({
-    equation_number: asString(r.equation_number) ?? '',
-    standard_code: asString(r.standard_code) ?? '',
-    description_de: asString(r.description_de),
-    description_en: asString(r.description_en),
-    formula: asString(r.formula) ?? '',
-    input_symbols: asString(r.input_symbols),
-    output_symbol: asString(r.output_symbol),
-    regulation_reference: asString(r.regulation_reference),
-    used_in_worksheet: asString(r.used_in_worksheet) ?? '',
-    verification_status: asString(r.verification_status),
-    notes: asString(r.notes),
-  }));
+  return rows
+    .filter((r) => !isPlaceholderEquation(r))
+    .map((r) => {
+      // Pass3c workbooks may have comma-separated used_in_worksheet (e.g. "A138-13, A138-25").
+      // We take the first value; the equation is stored once, on the primary worksheet.
+      const rawWorksheet = asString(r.used_in_worksheet) ?? '';
+      const used_in_worksheet = rawWorksheet.includes(',')
+        ? rawWorksheet.split(',')[0].trim()
+        : rawWorksheet;
+      return {
+        equation_number: asString(r.equation_number) ?? '',
+        standard_code: asString(r.standard_code) ?? '',
+        description_de: asString(r.description_de),
+        description_en: asString(r.description_en),
+        formula: asString(r.formula) ?? '',
+        input_symbols: asString(r.input_symbols),
+        output_symbol: asString(r.output_symbol),
+        regulation_reference: asString(r.regulation_reference),
+        used_in_worksheet,
+        verification_status: asString(r.verification_status),
+        notes: asString(r.notes),
+      };
+    });
 }
 
 function parseComplianceRequirements(
@@ -169,7 +211,7 @@ function parseComplianceRequirements(
     description: asString(r.description),
     evaluation_type: asString(r.evaluation_type),
     required_field_symbols: asString(r.required_field_symbols),
-    evaluation_expression: asString(r.evaluation_expression) ?? '',
+    evaluation_expression: asString(r.evaluation_expression),  // may be null for field_presence type
     pass_condition: asString(r.pass_condition),
     regulation_reference: asString(r.regulation_reference),
     phase: asInt(r.phase),
