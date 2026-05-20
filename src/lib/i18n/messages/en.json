@@ -301,5 +301,25 @@
       "forbidden": "Access denied",
       "not_found": "Document not found"
     }
+  },
+  "worksheets": {
+    "manageStandards": "Manage standards",
+    "activeStandards": "Active standards",
+    "noStandards": "No standards activated yet.",
+    "addStandard": "Add standard",
+    "noneAvailable": "All available standards are already active.",
+    "remove": "Remove",
+    "removeReasonPrompt": "Reason for removal?",
+    "submitForReview": "Submit for review",
+    "approvalPhase2": "Approval state machine: Plan 4",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "saveError": "Save failed",
+    "compliance": "Compliance requirements",
+    "complianceNote": "Phase 2: pass/fail evaluation. Phase 1: listed only.",
+    "equations": "Equations for this worksheet",
+    "alreadyEnteredIn": "Already entered in {worksheets}: {value}",
+    "applyHint": "Apply",
+    "jsonPhase2": "Multi-line input — Phase 2"
   }
 }

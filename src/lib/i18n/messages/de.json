@@ -301,5 +301,25 @@
       "forbidden": "Zugriff verweigert",
       "not_found": "Dokument nicht gefunden"
     }
+  },
+  "worksheets": {
+    "manageStandards": "Regelwerke verwalten",
+    "activeStandards": "Aktive Regelwerke",
+    "noStandards": "Noch keine Regelwerke aktiviert.",
+    "addStandard": "Regelwerk hinzufügen",
+    "noneAvailable": "Alle verfügbaren Regelwerke sind bereits aktiv.",
+    "remove": "Entfernen",
+    "removeReasonPrompt": "Grund für die Entfernung?",
+    "submitForReview": "Zur Prüfung einreichen",
+    "approvalPhase2": "Approval-State-Machine: Plan 4",
+    "saving": "Speichert...",
+    "saved": "Gespeichert",
+    "saveError": "Speichern fehlgeschlagen",
+    "compliance": "Compliance-Anforderungen",
+    "complianceNote": "Phase 2: Pass/Fail-Auswertung. Phase 1: nur gelistet.",
+    "equations": "Gleichungen dieses Arbeitsblatts",
+    "alreadyEnteredIn": "Bereits in {worksheets}: {value}",
+    "applyHint": "Übernehmen",
+    "jsonPhase2": "Mehrzeilige Eingabe — Phase 2"
   }
 }
