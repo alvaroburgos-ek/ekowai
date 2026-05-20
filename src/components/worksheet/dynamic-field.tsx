@@ -24,15 +24,15 @@ type FieldDef = {
 type Props = {
   field: FieldDef;
   locale: 'de' | 'en';
+  projectId: string;
   sameSymbolHints?: Array<{ worksheetCode: string; value: unknown }>;
-  docs: Array<{ id: string; title: string }>;
+  docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
-export function DynamicField({ field, locale, sameSymbolHints, docs }: Props) {
+export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const source = useWorksheetStore((s) => s.sources[field.id] ?? null);
   const setField = useWorksheetStore((s) => s.setField);
-  const instanceId = useWorksheetStore((s) => s.instanceId);
   const [pickerOpen, setPickerOpen] = useState(false);
   const inputId = useId();
 
@@ -83,18 +83,14 @@ export function DynamicField({ field, locale, sameSymbolHints, docs }: Props) {
         docTitle={sourceDoc?.title}
         onClick={() => setPickerOpen(true)}
       />
-      {/* CitationPicker.calcId requires string — only mount when instanceId is available.
-          Plan 5 will retarget calcId to project_parameter_id; for now instanceId acts as
-          a stand-in so the picker can attach sources. */}
-      {instanceId && (
-        <CitationPicker
-          open={pickerOpen}
-          onClose={() => setPickerOpen(false)}
-          calcId={instanceId}
-          symbol={field.symbol}
-          docs={[]}
-        />
-      )}
+      <CitationPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        projectId={projectId}
+        fieldId={field.id}
+        symbol={field.symbol}
+        docs={docs}
+      />
     </div>
   );
 }

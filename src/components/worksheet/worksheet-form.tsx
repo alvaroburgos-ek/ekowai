@@ -27,6 +27,7 @@ type FieldValue =
 
 type Props = {
   locale: 'de' | 'en';
+  projectId: string;
   worksheet: {
     template: { code: string; titleDe: string; titleEn: string | null };
   };
@@ -39,12 +40,14 @@ type Props = {
   equations: Parameters<typeof EquationsBlock>[0]['equations'];
   complianceRequirements: Parameters<typeof ComplianceBlock>[0]['requirements'];
   initialValues: Record<string, FieldValue>;
+  initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
   sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>>;
-  docs: Array<{ id: string; title: string }>;
+  docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
 export function WorksheetForm({
   locale,
+  projectId,
   worksheet,
   instance,
   sections,
@@ -52,6 +55,7 @@ export function WorksheetForm({
   equations,
   complianceRequirements,
   initialValues,
+  initialSources,
   sameSymbolValuesBySymbol,
   docs,
 }: Props) {
@@ -63,12 +67,8 @@ export function WorksheetForm({
 
   // Initialize the store ONCE per instance change
   useEffect(() => {
-    init(
-      instance.id,
-      initialValues,
-      {} /* TODO Plan 5: hydrate from project_parameters.citation_source */,
-    );
-  }, [init, instance.id, initialValues]);
+    init(instance.id, initialValues, initialSources);
+  }, [init, instance.id, initialValues, initialSources]);
 
   // Debounced auto-save
   useEffect(() => {
@@ -107,6 +107,7 @@ export function WorksheetForm({
         key={f.id}
         field={f}
         locale={locale}
+        projectId={projectId}
         sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
         docs={docs}
       />

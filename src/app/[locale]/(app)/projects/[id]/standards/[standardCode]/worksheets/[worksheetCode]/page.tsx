@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { projects, worksheetTemplates, worksheetInstances } from '@/lib/db/schema';
+import { projects, worksheetTemplates, worksheetInstances, projectDocuments } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import {
   loadWorksheet,
@@ -8,6 +8,7 @@ import {
   loadProjectParameters,
   loadSameSymbolValues,
 } from '@/lib/db/queries/worksheet';
+import { readInputsWithSources } from '@/lib/engine/inputs-reader';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
 
@@ -85,6 +86,24 @@ export default async function WorksheetPage({
   const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>> = {};
   for (const [symbol, arr] of sameSymbol) sameSymbolValuesBySymbol[symbol] = arr;
 
+  // Load project documents for citation picker
+  const docs = await db
+    .select({
+      id: projectDocuments.id,
+      title: projectDocuments.title,
+      citationLabel: projectDocuments.citationLabel,
+    })
+    .from(projectDocuments)
+    .where(eq(projectDocuments.projectId, projectId));
+
+  // Load existing citation sources from project_parameters
+  const fieldIds = ws.fields.map((f) => f.id);
+  const inputsWithSources = await readInputsWithSources(projectId, fieldIds);
+  const initialSources: Record<string, { docId: string; page?: number; note?: string } | null> = {};
+  for (const f of ws.fields) {
+    initialSources[f.id] = inputsWithSources[f.id]?.source ?? null;
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-12">
       <aside>
@@ -99,6 +118,7 @@ export default async function WorksheetPage({
       <main>
         <WorksheetForm
           locale={localeTyped}
+          projectId={projectId}
           worksheet={{ template: ws.template }}
           instance={{ id: instance.id, status: instance.status as 'draft' | 'submitted_for_review' | 'engineer_approved' | 'final' | 'deactivated' }}
           sections={ws.sections.map((s) => ({
@@ -128,8 +148,9 @@ export default async function WorksheetPage({
             severity: c.severity,
           }))}
           initialValues={initialValues as never}
+          initialSources={initialSources}
           sameSymbolValuesBySymbol={sameSymbolValuesBySymbol}
-          docs={[] /* TODO Plan 5: load project_documents */}
+          docs={docs}
         />
       </main>
     </div>
