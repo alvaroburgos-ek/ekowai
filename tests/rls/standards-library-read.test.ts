@@ -4,7 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 
 describe('standards library RLS — read-only for authenticated', () => {
   const e1 = `rls-std-${Date.now()}@test.local`;
-  afterAll(async () => cleanup([e1]));
+  const e2 = `rls-std-ins-${Date.now()}@test.local`;
+  afterAll(async () => cleanup([e1, e2]));
 
   it('authenticated user can SELECT from standards', async () => {
     const u = await makeUser(e1);
@@ -27,7 +28,7 @@ describe('standards library RLS — read-only for authenticated', () => {
   });
 
   it('authenticated user cannot INSERT into standards', async () => {
-    const u = await makeUser(`rls-std-ins-${Date.now()}@test.local`);
+    const u = await makeUser(e2);
 
     const { error } = await u.client.from('standards').insert({
       code: `BAD-${Date.now()}`,

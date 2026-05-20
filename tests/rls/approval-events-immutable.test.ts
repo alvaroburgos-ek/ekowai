@@ -3,7 +3,8 @@ import { admin, makeUser, makeOrg, cleanup } from './helpers';
 
 describe('approval_events RLS — INSERT+SELECT only, no UPDATE, no DELETE', () => {
   const e1 = `rls-appe-${Date.now()}@test.local`;
-  afterAll(async () => cleanup([e1]));
+  const e2 = `rls-appe-empty-${Date.now()}@test.local`;
+  afterAll(async () => cleanup([e1, e2]));
 
   it('UPDATE on approval_events is rejected even by service role due to missing policy (anon path)', async () => {
     const u = await makeUser(e1);
@@ -70,7 +71,7 @@ describe('approval_events RLS — INSERT+SELECT only, no UPDATE, no DELETE', () 
   });
 
   it('INSERT with empty comment is rejected by CHECK constraint', async () => {
-    const u = await makeUser(`rls-appe-empty-${Date.now()}@test.local`);
+    const u = await makeUser(e2);
     const ad = admin();
     const orgId = await makeOrg(u.client, u.id, 'Beta No-Comment');
     const { data: proj } = await ad
