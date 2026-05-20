@@ -1,49 +1,20 @@
-import type { FieldValue } from './types';
-
-export type InputSource = { docId: string; page?: number } | { label: string };
-
-export type InputCell = { value: FieldValue; source?: InputSource };
-
-export type InputRaw = FieldValue | InputCell;
-
-export function isCellShape(raw: InputRaw): raw is InputCell {
-  return (
-    typeof raw === 'object' &&
-    raw !== null &&
-    !Array.isArray(raw) &&
-    'value' in raw
-  );
-}
-
-export function getInputValue(raw: InputRaw): FieldValue {
-  return isCellShape(raw) ? raw.value : raw;
-}
-
-export function getInputSource(raw: InputRaw): InputSource | undefined {
-  return isCellShape(raw) ? raw.source : undefined;
-}
-
-export function normalizeInputs(
-  inputs: Record<string, InputRaw>,
-): Record<string, InputCell> {
-  const out: Record<string, InputCell> = {};
-  for (const [k, v] of Object.entries(inputs)) {
-    out[k] = isCellShape(v) ? v : { value: v };
-  }
-  return out;
-}
-
 /**
- * Extracts just the values from an inputs record (mixed shape) into the
- * shape `evaluate(...)` expects: `Record<string, FieldValue>`. Use this
- * at the boundary right before calling the engine.
+ * PLAN 6 REATTACHMENT PENDING.
+ *
+ * Originally read inputs + citation sources from calculations.inputs JSONB.
+ * Plan 6 retargets to project_parameters rows (one per field_id, with
+ * citation_source as a sibling column).
  */
-export function inputsToValues(
-  inputs: Record<string, InputRaw>,
-): Record<string, FieldValue> {
-  const out: Record<string, FieldValue> = {};
-  for (const [k, v] of Object.entries(inputs)) {
-    out[k] = isCellShape(v) ? v.value : v;
-  }
-  return out;
+
+export type FieldValue =
+  | number
+  | string
+  | boolean
+  | null
+  | { value: unknown; source?: { docId: string; page?: number; note?: string } };
+
+export async function readInputsWithSources(
+  _calcId: string,
+): Promise<Record<string, FieldValue>> {
+  throw new Error('Inputs reader pending Plan 6 reattachment to new schema');
 }

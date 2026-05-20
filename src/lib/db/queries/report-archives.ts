@@ -1,15 +1,15 @@
-import { db } from '@/lib/db';
-import { reportArchives, calculations } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import 'server-only';
 
-export async function listProjectArchives(projectId: string) {
-  return db
-    .select({
-      archive: reportArchives,
-      calc: calculations,
-    })
-    .from(reportArchives)
-    .innerJoin(calculations, eq(calculations.id, reportArchives.calculationId))
-    .where(eq(calculations.projectId, projectId))
-    .orderBy(desc(reportArchives.generatedAt));
+/**
+ * PLAN 6 REATTACHMENT PENDING.
+ *
+ * report_archives schema was modified in Plan 1 (dropped approval_id,
+ * added approval_event_id + worksheet_instance_id). Plan 6 implements
+ * the new queries.
+ */
+
+export async function listReportArchivesForProject(
+  _projectId: string,
+): Promise<Array<unknown>> {
+  return [];
 }
