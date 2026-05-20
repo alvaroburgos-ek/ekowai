@@ -143,7 +143,7 @@ export function WorksheetForm({
 
       <EquationsBlock equations={equations} />
       <ComplianceBlock requirements={complianceRequirements} />
-      <ApprovalBar status={instance.status} />
+      <ApprovalBar instanceId={instance.id} status={instance.status} locale={locale} />
     </article>
   );
 }
