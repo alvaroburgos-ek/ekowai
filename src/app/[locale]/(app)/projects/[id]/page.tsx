@@ -87,6 +87,15 @@ export default async function ProjectDetailPage({
           <Button variant="ghost">Regelwerke verwalten →</Button>
         </Link>
       </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+          Auditprotokoll
+        </h2>
+        <Link href={`/${localeTyped}/projects/${id}/audit`}>
+          <Button variant="ghost">Auditprotokoll ansehen →</Button>
+        </Link>
+      </section>
     </article>
   );
 }
