@@ -13,6 +13,9 @@ export type FieldValue =
   | null
   | { value: unknown; source?: { docId: string; page?: number; note?: string } };
 
+// Legacy type used by source-badge.tsx — kept for compile compat.
+export type InputSource = { docId: string; page?: number } | { label: string };
+
 export async function readInputsWithSources(
   _calcId: string,
 ): Promise<Record<string, FieldValue>> {

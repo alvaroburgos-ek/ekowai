@@ -1,61 +1,18 @@
 import 'server-only';
-import { renderToBuffer, Document } from '@react-pdf/renderer';
-import { PDFDocument } from 'pdf-lib';
-import { ReportDocument } from './document';
-import { AppendixDivider } from './sections/appendix-divider';
-import { loadReportData } from './load-data';
-import { ensureFonts } from './fonts';
-import { downloadProjectDocument } from '@/lib/storage/documents';
-import type { projectDocuments } from '@/lib/db/schema';
 
-type Doc = typeof projectDocuments.$inferSelect;
+/**
+ * PLAN 6 REATTACHMENT PENDING.
+ *
+ * buildReport previously loaded data from the calculations table (dropped
+ * in Plan 1) and rendered the PDF document with that data. Plan 6
+ * rebuilds this against worksheet_instances + project_parameters +
+ * approval_events.
+ *
+ * Until then this stub throws at runtime so the type import chain
+ * (document.tsx, sections/*) doesn't need to compile against a moving
+ * ReportData type.
+ */
 
-function DividerOnly({ doc, letter }: { doc: Doc; letter: string }) {
-  return (
-    <Document>
-      <AppendixDivider doc={doc} letter={letter} />
-    </Document>
-  );
-}
-
-export async function buildReport(calcId: string): Promise<Buffer> {
-  ensureFonts();
-  const data = await loadReportData(calcId);
-
-  const bodyBuf = await renderToBuffer(<ReportDocument data={data} />);
-  if (data.citedDocs.length === 0) {
-    return bodyBuf;
-  }
-
-  // Merge body + per-appendix divider + per-appendix attached PDF (if PDF mime).
-  const merged = await PDFDocument.create();
-  const body = await PDFDocument.load(bodyBuf);
-  const bodyPages = await merged.copyPages(body, body.getPageIndices());
-  bodyPages.forEach((p) => merged.addPage(p));
-
-  for (let i = 0; i < data.citedDocs.length; i++) {
-    const doc = data.citedDocs[i];
-    const letter = String.fromCharCode(65 + i);
-
-    const dividerBuf = await renderToBuffer(<DividerOnly doc={doc} letter={letter} />);
-    const divider = await PDFDocument.load(dividerBuf);
-    const [dividerPage] = await merged.copyPages(divider, [0]);
-    merged.addPage(dividerPage);
-
-    if (doc.mimeType === 'application/pdf') {
-      try {
-        const attachBytes = await downloadProjectDocument(doc.filePath);
-        const attach = await PDFDocument.load(attachBytes, {
-          ignoreEncryption: true,
-        });
-        const pages = await merged.copyPages(attach, attach.getPageIndices());
-        pages.forEach((p) => merged.addPage(p));
-      } catch {
-        // soft-fail: divider remains, missing-attachment is footnoted there
-      }
-    }
-  }
-
-  const out = await merged.save();
-  return Buffer.from(out);
+export async function buildReport(_calcId: string): Promise<Buffer> {
+  throw new Error('PDF generation pending Plan 6 reattachment to new schema');
 }

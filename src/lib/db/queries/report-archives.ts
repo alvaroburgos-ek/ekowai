@@ -13,3 +13,6 @@ export async function listReportArchivesForProject(
 ): Promise<Array<unknown>> {
   return [];
 }
+
+// Legacy name used by reports-history.tsx — alias for compile compat.
+export const listProjectArchives = listReportArchivesForProject;

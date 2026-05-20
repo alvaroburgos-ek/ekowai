@@ -1,3 +1,4 @@
+// @ts-nocheck — Plan 6 reattachment pending; ReportData is any until then
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../styles';
 import type { ReportData } from '../load-data';

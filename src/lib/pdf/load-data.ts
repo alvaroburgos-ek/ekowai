@@ -11,13 +11,8 @@
  * returns — they don't reference dropped tables directly.
  */
 
-export type ReportData = {
-  // Plan 6 fills in the real shape — for now keep an empty placeholder
-  // so build-report.tsx still typechecks.
-  project: { id: string; name: string };
-  parameters: Array<unknown>;
-  approvals: Array<unknown>;
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ReportData = any;
 
 export async function loadCalculationData(_calcId: string): Promise<ReportData> {
   throw new Error('PDF generation pending Plan 6 reattachment to new schema');
