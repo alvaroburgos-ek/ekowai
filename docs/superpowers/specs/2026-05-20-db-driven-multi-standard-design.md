@@ -85,7 +85,7 @@ Three layers per the companion spec, mapped onto Next.js 16:
 - Client store `src/lib/state/calculator-store.ts` — replaced by `worksheet-store.ts`
 - Calculator routes under `src/app/[locale]/(app)/projects/[id]/calc/` — replaced by `standards/[code]/worksheets/[code]/`
 
-## 4. Database schema (17 tables in system: 11 new + 6 existing — 4 dropped)
+## 4. Database schema (17 tables in system: 11 new + 6 existing — 6 dropped)
 
 ### 4.1 Standards Library (6 new tables, read-only after import)
 
@@ -266,19 +266,21 @@ create table audit_log (
 
 ### 4.3 Tables kept (6 existing)
 
-- `orgs` — multi-tenant root
+- `profiles` — user profile (linked to `auth.users`)
+- `orgs` — multi-tenant root, with letterhead columns (`logo_url`, etc.) added by Plan 6
 - `org_members` — user ↔ org with role
 - `projects` — restructured: drop A-201-specific columns, add `site_location`, ensure `project_code` exists
-- `org_letterheads` — Plan-6 letterhead per org
 - `project_documents` — Plan-6 file uploads (no schema change)
 - `report_archives` — Plan-6, **schema modified**: drop `approval_id`, add `approval_event_id` + `worksheet_instance_id`
 
-### 4.4 Tables dropped
+### 4.4 Tables dropped (6)
 
 - `calculations` (replaced by `project_parameters` + `worksheet_instances`)
-- `decisions` (replaced — decision-class is computed at runtime in Phase 2)
+- `calculation_history` (replaced by `audit_log`)
+- `calculation_metrics` (A-201-specific metrics, no successor in MVP)
+- `decisions` (decision-class is computed at runtime in Phase 2)
 - `approvals` (replaced by `approval_events` + `worksheet_instances.status`)
-- `calculation_history` if present
+- `cross_references` (A-201-specific cross-worksheet refs; replaced by `field_bindings` in Phase 2 and by `consumer_worksheets text[]` on `fields` in MVP)
 
 ### 4.5 RLS posture
 
