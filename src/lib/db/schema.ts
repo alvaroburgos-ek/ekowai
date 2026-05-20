@@ -196,6 +196,7 @@ export const complianceRequirements = pgTable(
     titleDe: text('title_de').notNull(),
     titleEn: text('title_en'),
     condition: text('condition').notNull(),
+    description: text('description'),
     clauseReference: text('clause_reference'),
     severity: text('severity').notNull(),
   },
