@@ -1,30 +1,33 @@
 import { Document, Page } from '@react-pdf/renderer';
 import { styles } from './styles';
-import { Cover } from './sections/cover';
-import { Grundlagen } from './sections/grundlagen';
-import { Inputs } from './sections/inputs';
-import { Computed } from './sections/computed';
-import { Compliance } from './sections/compliance';
-import { Decisions } from './sections/decisions';
-import { Approvals } from './sections/approvals';
-import { Watermark } from './sections/watermark';
+import { CoverSection } from './sections/cover';
+import { GrundlagenSection } from './sections/grundlagen';
+import { InputsSection } from './sections/inputs';
+import { ApprovalsSection } from './sections/approvals';
 import { Footer } from './sections/footer';
+import { Watermark } from './sections/watermark';
+import { AppendixDivider } from './sections/appendix-divider';
 import type { ReportData } from './load-data';
 
 export function ReportDocument({ data }: { data: ReportData }) {
-  const draft = data.calc.status !== 'approved';
+  const isPreview = data.approvals.length === 0 || !data.approvals.some((a) => a.toStatus === 'final');
   return (
-    <Document>
+    <Document title={`${data.project.projectCode ?? 'Projekt'} — Bericht`}>
       <Page size="A4" style={styles.page}>
-        {draft && <Watermark />}
-        <Cover data={data} />
-        <Grundlagen data={data} />
-        <Inputs data={data} />
-        <Computed data={data} />
-        <Compliance data={data} />
-        <Decisions data={data} />
-        <Approvals data={data} />
-        <Footer data={data} draft={draft} />
+        <CoverSection project={data.project} />
+        <Footer projectCode={data.project.projectCode} />
+        {isPreview && <Watermark text="VORSCHAU — nicht freigegeben" />}
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <GrundlagenSection standards={data.standards} />
+        <InputsSection worksheets={data.worksheets} />
+        <Footer projectCode={data.project.projectCode} />
+        {isPreview && <Watermark text="VORSCHAU — nicht freigegeben" />}
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <AppendixDivider title="Anhang · Auditprotokoll" />
+        <ApprovalsSection approvals={data.approvals} />
+        <Footer projectCode={data.project.projectCode} />
       </Page>
     </Document>
   );

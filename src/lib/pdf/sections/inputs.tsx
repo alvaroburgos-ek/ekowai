@@ -1,37 +1,35 @@
-// @ts-nocheck — Plan 6 reattachment pending; ReportData is any until then
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../styles';
 import type { ReportData } from '../load-data';
-import { fmtDe } from '../format';
 
-export function Inputs({ data }: { data: ReportData }) {
-  const { worksheet, cells, citedDocs } = data;
-  const docIndex = Object.fromEntries(
-    citedDocs.map((d, i) => [d.id, String.fromCharCode(65 + i)]),
-  );
+export function InputsSection({ worksheets }: { worksheets: ReportData['worksheets'] }) {
+  const populated = worksheets.filter((w) => w.parameters.some((p) => p.value != null));
   return (
-    <View>
-      <Text style={styles.h2}>Eingangswerte</Text>
-      <View style={styles.rule} />
-      {worksheet.inputs.map((inp) => {
-        const cell = cells[inp.id];
-        const v = cell?.value;
-        const src = cell?.source;
-        const srcLabel = src
-          ? 'docId' in src
-            ? `Anh. ${docIndex[src.docId] ?? '?'}`
-            : src.label
-          : '—';
-        return (
-          <View key={inp.id} style={styles.row}>
-            <Text style={styles.cellSym}>{inp.id}</Text>
-            <Text style={styles.cellDesc}>{inp.labelDe}</Text>
-            <Text style={styles.cellVal}>{fmtDe(v)}</Text>
-            <Text style={styles.cellUnit}>{inp.unit ?? ''}</Text>
-            <Text style={styles.cellSrc}>{srcLabel}</Text>
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Eingaben</Text>
+      {populated.length === 0 ? (
+        <Text style={styles.note}>Noch keine Werte eingetragen.</Text>
+      ) : (
+        populated.map((w) => (
+          <View key={w.instanceId} style={styles.worksheetGroup}>
+            <Text style={styles.worksheetTitle}>
+              {w.code} · {w.titleDe}
+            </Text>
+            {w.parameters
+              .filter((p) => p.value != null)
+              .map((p) => (
+                <View key={p.symbol} style={styles.row}>
+                  <Text style={styles.symbolCell}>{p.symbol}</Text>
+                  <Text style={styles.labelCell}>{p.labelDe}</Text>
+                  <Text style={styles.valueCell}>
+                    {p.value}
+                    {p.unit && ` ${p.unit}`}
+                  </Text>
+                </View>
+              ))}
           </View>
-        );
-      })}
+        ))
+      )}
     </View>
   );
 }

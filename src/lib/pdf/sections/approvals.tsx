@@ -1,43 +1,28 @@
-// @ts-nocheck — Plan 6 reattachment pending; ReportData is any until then
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../styles';
 import type { ReportData } from '../load-data';
 
-export function Approvals({ data }: { data: ReportData }) {
-  if (data.approvals.length === 0) return null;
+export function ApprovalsSection({ approvals }: { approvals: ReportData['approvals'] }) {
   return (
-    <View>
-      <Text style={styles.h2}>Freigabe-Verlauf</Text>
-      <View style={styles.rule} />
-      {data.approvals.map((a) => {
-        const actor = a.reviewerId ? data.actors[a.reviewerId] : null;
-        const when =
-          a.decidedAt instanceof Date
-            ? a.decidedAt
-            : new Date(a.decidedAt as any);
-        return (
-          <View key={a.id} wrap={false} style={{ marginBottom: 4 }}>
-            <View style={styles.row}>
-              <Text style={[styles.cellSym, { width: 100 }]}>
-                {a.action.toUpperCase()}
-              </Text>
-              <Text style={styles.cellDesc}>
-                {actor?.fullName ?? actor?.email ?? '—'}
-              </Text>
-              <Text style={[styles.cellSrc, { width: 110 }]}>
-                {when.toLocaleDateString('de-DE')}{' '}
-                {when.toLocaleTimeString('de-DE', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Text>
-            </View>
-            {a.comment && (
-              <Text style={{ marginLeft: 108, fontSize: 9 }}>{a.comment}</Text>
-            )}
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Auditprotokoll · Freigaben</Text>
+      {approvals.length === 0 ? (
+        <Text style={styles.note}>Noch keine Freigaben.</Text>
+      ) : (
+        approvals.map((a, i) => (
+          <View key={i} style={styles.row}>
+            <Text style={styles.dateCell}>
+              {new Date(a.occurredAt).toLocaleString('de-DE')}
+            </Text>
+            <Text style={styles.codeCell}>{a.worksheetCode}</Text>
+            <Text style={styles.eventCell}>
+              {a.fromStatus} → {a.toStatus}
+            </Text>
+            <Text style={styles.actorCell}>{a.actorName ?? '—'}</Text>
+            <Text style={styles.commentCell}>„{a.comment}"</Text>
           </View>
-        );
-      })}
+        ))
+      )}
     </View>
   );
 }
