@@ -4,6 +4,8 @@ import {
   worksheetInstances,
   approvalEvents,
   auditLog,
+  reportArchives,
+  projects,
 } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
@@ -51,6 +53,17 @@ export async function transitionWorksheet(
     };
   }
 
+  // Look up orgId from projects (worksheetInstances has no orgId column)
+  let orgId: string | null = null;
+  if (input.eventType === 'finalize') {
+    const [projRow] = await db
+      .select({ orgId: projects.orgId })
+      .from(projects)
+      .where(eq(projects.id, instance.projectId))
+      .limit(1);
+    orgId = projRow?.orgId ?? null;
+  }
+
   try {
     await db.transaction(async (tx) => {
       await tx
@@ -82,6 +95,25 @@ export async function transitionWorksheet(
           comment,
         },
       });
+
+      // Archive a PDF snapshot record when an engineer finalizes a worksheet.
+      // The actual PDF is generated on-demand by /api/projects/[id]/report/pdf;
+      // persisting to Storage is Phase 2. The row here acts as the artifact pointer.
+      // calculationId is a NOT NULL legacy column (calculations table was dropped);
+      // filePath + sha256 are NOT NULL — placeholder values until Phase 2.
+      if (input.eventType === 'finalize' && orgId) {
+        await tx.insert(reportArchives).values({
+          // Legacy NOT NULL column; calculations table is dropped, no real FK
+          calculationId: '00000000-0000-0000-0000-000000000000',
+          worksheetInstanceId: input.instanceId,
+          approvalEventId: null,
+          orgId,
+          // File creation deferred to Phase 2 (Storage upload)
+          filePath: 'pending',
+          sha256: 'pending',
+          generatedBy: userId,
+        });
+      }
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
