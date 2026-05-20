@@ -1,8 +1,13 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { config as loadEnv } from 'dotenv';
 
-const URL = process.env.CI_SUPABASE_URL!;
-const ANON = process.env.CI_SUPABASE_ANON_KEY!;
-const SERVICE = process.env.CI_SUPABASE_SERVICE_ROLE_KEY!;
+// Allow either CI_SUPABASE_* (set in CI) or the runtime NEXT_PUBLIC_SUPABASE_*
+// + SUPABASE_SERVICE_ROLE_KEY (in local .env.local) so RLS tests can run on a
+// developer machine without a separate CI project.
+loadEnv({ path: '.env.local' });
+const URL = process.env.CI_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const ANON = process.env.CI_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const SERVICE = process.env.CI_SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export const admin = () =>
   createClient(URL, SERVICE, { auth: { autoRefreshToken: false, persistSession: false } });
