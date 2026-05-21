@@ -84,17 +84,38 @@ export async function detachCitation(input: {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
+  const userId = auth.user.id;
 
   try {
-    await db
-      .update(projectParameters)
-      .set({ citationSource: null })
-      .where(
-        and(
+    await db.transaction(async (tx) => {
+      // Capture the previous citation_source for audit (best-effort)
+      const [prev] = await tx
+        .select({ citationSource: projectParameters.citationSource })
+        .from(projectParameters)
+        .where(and(
           eq(projectParameters.projectId, input.projectId),
           eq(projectParameters.fieldId, input.fieldId),
-        ),
-      );
+        ))
+        .limit(1);
+
+      await tx
+        .update(projectParameters)
+        .set({ citationSource: null })
+        .where(and(
+          eq(projectParameters.projectId, input.projectId),
+          eq(projectParameters.fieldId, input.fieldId),
+        ));
+
+      await tx.insert(auditLog).values({
+        actorId: userId,
+        actorRole: 'engineer',
+        projectId: input.projectId,
+        tableName: 'project_parameters',
+        recordId: input.fieldId,
+        action: 'update',
+        changes: { citation_detached: prev?.citationSource ?? null },
+      });
+    });
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' };
