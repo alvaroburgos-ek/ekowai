@@ -125,10 +125,14 @@ export function WorksheetForm({
           {worksheet.template.code}
         </div>
         <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
-        <div className="mt-2 text-xs text-subtext">
-          {saveStatus === 'saving' && 'Speichert...'}
-          {saveStatus === 'saved' && 'Gespeichert'}
-          {saveStatus === 'error' && 'Speichern fehlgeschlagen'}
+        <div className="mt-2 text-xs">
+          {saveStatus === 'saving' && <span className="text-accent-2">● Speichert…</span>}
+          {saveStatus === 'saved' && <span className="text-success">✓ Gespeichert</span>}
+          {saveStatus === 'error' && (
+            <span className="text-error bg-error/10 px-2 py-0.5 rounded">
+              ✗ Speichern fehlgeschlagen
+            </span>
+          )}
         </div>
       </header>
 
