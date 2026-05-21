@@ -75,12 +75,23 @@ export async function loadWorksheet(standardCode: string, worksheetCode: string)
   };
 }
 
-/** Ensure a worksheet_instance exists for (project, template). Lazy-create as 'draft'. */
+/** Ensure a worksheet_instance exists for (project, template). Lazy-create as 'draft'.
+ * Race-safe: uses INSERT … ON CONFLICT DO NOTHING to avoid duplicate-key errors
+ * when two requests arrive simultaneously. */
 export async function ensureWorksheetInstance(
   projectId: string,
   templateId: string,
 ) {
-  const existing = await db
+  const inserted = await db
+    .insert(worksheetInstances)
+    .values({ projectId, worksheetTemplateId: templateId })
+    .onConflictDoNothing()
+    .returning();
+
+  if (inserted.length > 0) return inserted[0];
+
+  // Row already existed — fetch it
+  const [existing] = await db
     .select()
     .from(worksheetInstances)
     .where(
@@ -90,14 +101,7 @@ export async function ensureWorksheetInstance(
       ),
     )
     .limit(1);
-
-  if (existing.length > 0) return existing[0];
-
-  const [created] = await db
-    .insert(worksheetInstances)
-    .values({ projectId, worksheetTemplateId: templateId })
-    .returning();
-  return created;
+  return existing;
 }
 
 /** Load project_parameters for the given field IDs in one query. */
