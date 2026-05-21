@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { attachCitation, detachCitation } from '@/lib/actions/citations';
 import { Button } from '@/components/ui/button';
+import { useFocusTrap } from '@/lib/hooks/use-focus-trap';
+
 type Doc = {
   id: string;
   title: string;
@@ -33,6 +35,16 @@ export function CitationPicker({
   const [tab, setTab] = useState<'doc' | 'label'>('doc');
   const [label, setLabel] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const containerRef = useFocusTrap(open);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -76,6 +88,10 @@ export function CitationPicker({
 
   return (
     <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="citation-picker-title"
       className="fixed inset-0 bg-ink/50 grid place-items-center z-50"
       onClick={onClose}
     >
@@ -84,7 +100,7 @@ export function CitationPicker({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-baseline">
-          <h2 className="text-lg">
+          <h2 id="citation-picker-title" className="text-lg">
             {t('title')} <span className="font-mono text-sm">{symbol}</span>
           </h2>
           <button
