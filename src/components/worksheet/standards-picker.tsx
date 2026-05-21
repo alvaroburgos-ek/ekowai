@@ -1,5 +1,6 @@
 'use client';
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { addStandardToProject, removeStandardFromProject } from '@/lib/actions/project-standards';
 
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function StandardsPicker({ projectId, available, active }: Props) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selectedToAdd, setSelectedToAdd] = useState<string>('');
 
@@ -28,7 +30,7 @@ export function StandardsPicker({ projectId, available, active }: Props) {
     startTransition(async () => {
       await addStandardToProject(projectId, selectedToAdd);
       setSelectedToAdd('');
-      window.location.reload();
+      router.refresh();
     });
   };
 
@@ -37,7 +39,7 @@ export function StandardsPicker({ projectId, available, active }: Props) {
     if (!reason || !reason.trim()) return;
     startTransition(async () => {
       await removeStandardFromProject(projectId, standardId, reason);
-      window.location.reload();
+      router.refresh();
     });
   };
 
