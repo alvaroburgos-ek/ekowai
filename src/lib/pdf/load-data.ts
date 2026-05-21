@@ -122,14 +122,30 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
     .from(fields)
     .where(inArray(fields.worksheetTemplateId, templateIds));
 
-  const params = templateIds.length === 0 ? [] : await db
+  // Fix 2: scope params query to only the fields we actually need (no orphans)
+  // Fix 7: group fields by templateId once (O(n)) instead of filtering per instance (O(n*m))
+  const allFieldIds = allFields.map((f) => f.id);
+  const params = allFieldIds.length === 0 ? [] : await db
     .select()
     .from(projectParameters)
-    .where(eq(projectParameters.projectId, projectId));
+    .where(
+      and(
+        eq(projectParameters.projectId, projectId),
+        inArray(projectParameters.fieldId, allFieldIds),
+      ),
+    );
   const paramsByFieldId = new Map(params.map((p) => [p.fieldId, p]));
 
+  // Pre-group fields by templateId for O(1) lookup per instance
+  const fieldsByTemplateId = new Map<string, typeof allFields>();
+  for (const f of allFields) {
+    const arr = fieldsByTemplateId.get(f.worksheetTemplateId) ?? [];
+    arr.push(f);
+    fieldsByTemplateId.set(f.worksheetTemplateId, arr);
+  }
+
   const worksheets = instances.map((inst) => {
-    const tmplFields = allFields.filter((f) => f.worksheetTemplateId === inst.templateId);
+    const tmplFields = fieldsByTemplateId.get(inst.templateId) ?? [];
     const parameters = tmplFields.map((f) => {
       const p = paramsByFieldId.get(f.id);
       const value = !p
