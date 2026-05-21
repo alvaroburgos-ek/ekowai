@@ -6,7 +6,7 @@ import {
   fields,
   auditLog,
 } from '@/lib/db/schema';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 
 type FieldValue =
@@ -72,110 +72,144 @@ export async function saveWorksheet(
   const existingById = new Map(existing.map((p) => [p.fieldId, p]));
 
   const warnings: string[] = [];
-  let savedCount = 0;
 
-  await db.transaction(async (tx) => {
-    for (const fieldId of fieldIds) {
-      const expectedType = dataTypeById.get(fieldId);
-      const incoming = input.values[fieldId];
-      if (!expectedType) {
-        warnings.push(`Field ${fieldId} not found — skipped`);
-        continue;
-      }
-      if (expectedType !== incoming.type) {
-        warnings.push(
-          `Field ${fieldId} expected ${expectedType} but got ${incoming.type} — skipped`,
-        );
-        continue;
-      }
+  // Build batched arrays — validated rows only
+  type ParameterRow = {
+    projectId: string;
+    fieldId: string;
+    sourceWorksheetInstanceId: string;
+    sourceType: string;
+    enteredBy: string;
+    valueNumber: string | null;
+    valueText: string | null;
+    valueEnum: string | null;
+    valueDate: string | null;
+    valueBoolean: boolean | null;
+    valueJson: unknown;
+  };
+  type AuditRow = {
+    actorId: string;
+    actorRole: string;
+    projectId: string;
+    tableName: string;
+    recordId: string;
+    action: string;
+    changes: object;
+  };
 
-      const valueColumns: {
-        valueNumber: string | null;
-        valueText: string | null;
-        valueEnum: string | null;
-        valueDate: string | null;
-        valueBoolean: boolean | null;
-        valueJson: unknown;
-      } = {
-        valueNumber: null,
-        valueText: null,
-        valueEnum: null,
-        valueDate: null,
-        valueBoolean: null,
-        valueJson: null,
-      };
-      switch (incoming.type) {
-        case 'number':
-          valueColumns.valueNumber = incoming.value == null ? null : String(incoming.value);
-          break;
-        case 'text':
-          valueColumns.valueText = incoming.value;
-          break;
-        case 'enum':
-          valueColumns.valueEnum = incoming.value;
-          break;
-        case 'date':
-          valueColumns.valueDate = incoming.value;
-          break;
-        case 'boolean':
-          valueColumns.valueBoolean = incoming.value;
-          break;
-        case 'json':
-          valueColumns.valueJson = incoming.value;
-          break;
-      }
+  const parameterValues: ParameterRow[] = [];
+  const auditValues: AuditRow[] = [];
 
-      const prev = existingById.get(fieldId);
-      const action = prev ? 'update' : 'insert';
+  for (const fieldId of fieldIds) {
+    const expectedType = dataTypeById.get(fieldId);
+    const incoming = input.values[fieldId];
+    if (!expectedType) {
+      warnings.push(`Field ${fieldId} not found — skipped`);
+      continue;
+    }
+    if (expectedType !== incoming.type) {
+      warnings.push(
+        `Field ${fieldId} expected ${expectedType} but got ${incoming.type} — skipped`,
+      );
+      continue;
+    }
 
+    const valueColumns: {
+      valueNumber: string | null;
+      valueText: string | null;
+      valueEnum: string | null;
+      valueDate: string | null;
+      valueBoolean: boolean | null;
+      valueJson: unknown;
+    } = {
+      valueNumber: null,
+      valueText: null,
+      valueEnum: null,
+      valueDate: null,
+      valueBoolean: null,
+      valueJson: null,
+    };
+    switch (incoming.type) {
+      case 'number':
+        valueColumns.valueNumber = incoming.value == null ? null : String(incoming.value);
+        break;
+      case 'text':
+        valueColumns.valueText = incoming.value;
+        break;
+      case 'enum':
+        valueColumns.valueEnum = incoming.value;
+        break;
+      case 'date':
+        valueColumns.valueDate = incoming.value;
+        break;
+      case 'boolean':
+        valueColumns.valueBoolean = incoming.value;
+        break;
+      case 'json':
+        valueColumns.valueJson = incoming.value;
+        break;
+    }
+
+    const prev = existingById.get(fieldId);
+    const action = prev ? 'update' : 'insert';
+
+    parameterValues.push({
+      projectId: instance.projectId,
+      fieldId,
+      sourceWorksheetInstanceId: instance.id,
+      sourceType: 'entered',
+      enteredBy: userId,
+      ...valueColumns,
+    });
+
+    auditValues.push({
+      actorId: userId,
+      actorRole: 'engineer',
+      projectId: instance.projectId,
+      tableName: 'project_parameters',
+      recordId: fieldId,
+      action,
+      changes: {
+        fieldId,
+        before: prev ? extractValue(prev, expectedType) : null,
+        after: incoming.value,
+      },
+    });
+  }
+
+  const savedCount = parameterValues.length;
+
+  if (savedCount > 0) {
+    await db.transaction(async (tx) => {
+      // ONE batched upsert for all parameter rows
       await tx
         .insert(projectParameters)
-        .values({
-          projectId: instance.projectId,
-          fieldId,
-          sourceWorksheetInstanceId: instance.id,
-          sourceType: 'entered',
-          enteredBy: userId,
-          ...valueColumns,
-        })
+        .values(parameterValues)
         .onConflictDoUpdate({
           target: [projectParameters.projectId, projectParameters.fieldId],
           set: {
-            valueNumber: valueColumns.valueNumber,
-            valueText: valueColumns.valueText,
-            valueEnum: valueColumns.valueEnum,
-            valueDate: valueColumns.valueDate,
-            valueBoolean: valueColumns.valueBoolean,
-            valueJson: valueColumns.valueJson,
-            sourceType: 'entered',
-            sourceWorksheetInstanceId: instance.id,
-            enteredBy: userId,
+            valueNumber: sql`excluded.value_number`,
+            valueText: sql`excluded.value_text`,
+            valueEnum: sql`excluded.value_enum`,
+            valueDate: sql`excluded.value_date`,
+            valueBoolean: sql`excluded.value_boolean`,
+            valueJson: sql`excluded.value_json`,
+            sourceType: sql`excluded.source_type`,
+            sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
+            enteredBy: sql`excluded.entered_by`,
             enteredAt: new Date(),
           },
         });
 
-      await tx.insert(auditLog).values({
-        actorId: userId,
-        actorRole: 'engineer',
-        projectId: instance.projectId,
-        tableName: 'project_parameters',
-        recordId: fieldId,
-        action,
-        changes: {
-          fieldId,
-          before: prev ? extractValue(prev, expectedType) : null,
-          after: incoming.value,
-        },
-      });
+      // ONE batched insert for all audit rows
+      await tx.insert(auditLog).values(auditValues);
 
-      savedCount++;
-    }
-
-    await tx
-      .update(worksheetInstances)
-      .set({ updatedAt: new Date() })
-      .where(eq(worksheetInstances.id, instance.id));
-  });
+      await tx
+        .update(worksheetInstances)
+        .set({ updatedAt: new Date() })
+        .where(eq(worksheetInstances.id, instance.id));
+    });
+  }
 
   return { ok: true, saved: savedCount, warnings };
 }
