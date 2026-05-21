@@ -8,7 +8,6 @@ import {
   loadProjectParameters,
   loadSameSymbolValues,
 } from '@/lib/db/queries/worksheet';
-import { readInputsWithSources } from '@/lib/engine/inputs-reader';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
 
@@ -27,34 +26,48 @@ export default async function WorksheetPage({
   const ws = await loadWorksheet(standardCode, worksheetCode);
   if (!ws) notFound();
 
-  const instance = await ensureWorksheetInstance(projectId, ws.template.id);
-  const parameters = await loadProjectParameters(projectId, ws.fields.map((f) => f.id));
-  const sameSymbol = await loadSameSymbolValues(
-    projectId,
-    ws.template.standard.id,
-    ws.template.id,
-    ws.fields.map((f) => f.symbol),
-  );
+  const fieldIds = ws.fields.map((f) => f.id);
+  const fieldSymbols = ws.fields.map((f) => f.symbol);
 
-  // All worksheets of this standard for sidebar
-  const sidebarWorksheets = await db
-    .select({
-      code: worksheetTemplates.code,
-      titleDe: worksheetTemplates.titleDe,
-      phase: worksheetTemplates.phase,
-      archetype: worksheetTemplates.archetype,
-      status: worksheetInstances.status,
-    })
-    .from(worksheetTemplates)
-    .leftJoin(
-      worksheetInstances,
-      and(
-        eq(worksheetInstances.worksheetTemplateId, worksheetTemplates.id),
-        eq(worksheetInstances.projectId, projectId),
-      ),
-    )
-    .where(eq(worksheetTemplates.standardId, ws.template.standard.id))
-    .orderBy(worksheetTemplates.orderIndex);
+  // Parallelise all queries that depend on ws.template.id but not on each other
+  const [instance, parameters, sameSymbol, sidebarWorksheets, docs] = await Promise.all([
+    ensureWorksheetInstance(projectId, ws.template.id),
+    loadProjectParameters(projectId, fieldIds),
+    loadSameSymbolValues(
+      projectId,
+      ws.template.standard.id,
+      ws.template.id,
+      fieldSymbols,
+    ),
+    // All worksheets of this standard for sidebar
+    db
+      .select({
+        code: worksheetTemplates.code,
+        titleDe: worksheetTemplates.titleDe,
+        phase: worksheetTemplates.phase,
+        archetype: worksheetTemplates.archetype,
+        status: worksheetInstances.status,
+      })
+      .from(worksheetTemplates)
+      .leftJoin(
+        worksheetInstances,
+        and(
+          eq(worksheetInstances.worksheetTemplateId, worksheetTemplates.id),
+          eq(worksheetInstances.projectId, projectId),
+        ),
+      )
+      .where(eq(worksheetTemplates.standardId, ws.template.standard.id))
+      .orderBy(worksheetTemplates.orderIndex),
+    // Project documents for citation picker
+    db
+      .select({
+        id: projectDocuments.id,
+        title: projectDocuments.title,
+        citationLabel: projectDocuments.citationLabel,
+      })
+      .from(projectDocuments)
+      .where(eq(projectDocuments.projectId, projectId)),
+  ]);
 
   // Convert parameters → initialValues for the store
   const initialValues: Record<string, unknown> = {};
@@ -86,22 +99,12 @@ export default async function WorksheetPage({
   const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>> = {};
   for (const [symbol, arr] of sameSymbol) sameSymbolValuesBySymbol[symbol] = arr;
 
-  // Load project documents for citation picker
-  const docs = await db
-    .select({
-      id: projectDocuments.id,
-      title: projectDocuments.title,
-      citationLabel: projectDocuments.citationLabel,
-    })
-    .from(projectDocuments)
-    .where(eq(projectDocuments.projectId, projectId));
-
-  // Load existing citation sources from project_parameters
-  const fieldIds = ws.fields.map((f) => f.id);
-  const inputsWithSources = await readInputsWithSources(projectId, fieldIds);
+  // Fix 4: extract citation sources directly from already-loaded parameters Map
+  // (avoids the redundant readInputsWithSources round-trip to the same rows)
   const initialSources: Record<string, { docId: string; page?: number; note?: string } | null> = {};
   for (const f of ws.fields) {
-    initialSources[f.id] = inputsWithSources[f.id]?.source ?? null;
+    const p = parameters.get(f.id);
+    initialSources[f.id] = (p?.citationSource as { docId: string; page?: number; note?: string } | null) ?? null;
   }
 
   return (
