@@ -41,6 +41,8 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
   const badgeSource = source ? { docId: source.docId } : undefined;
   const sourceDoc = source ? docs.find((d) => d.id === source.docId) : undefined;
 
+  const required = field.isRequired || undefined;
+
   return (
     <div className="space-y-1.5" data-symbol={field.symbol}>
       {/* Label + clause + unit */}
@@ -59,7 +61,129 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
       </div>
 
       {/* Input control by data_type */}
-      {renderInput(field, value, inputId, setField)}
+      {field.dataType === 'number' && (() => {
+        const v = value?.type === 'number' ? value.value : null;
+        return (
+          <input
+            id={inputId}
+            type="number"
+            inputMode="decimal"
+            value={v == null ? '' : v}
+            required={field.isRequired}
+            aria-required={required}
+            onChange={(e) => {
+              const raw = e.target.value;
+              setField(field.id, {
+                type: 'number',
+                value: raw === '' ? null : Number(raw),
+              });
+            }}
+            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink tabular-nums focus:border-accent focus:outline-none focus:ring-0"
+          />
+        );
+      })()}
+
+      {field.dataType === 'text' && (() => {
+        const v = value?.type === 'text' ? value.value : null;
+        const maxLength = field.validationRules?.maxLength;
+        const useTextarea = (maxLength ?? 0) > 200;
+        return useTextarea ? (
+          <textarea
+            id={inputId}
+            value={v ?? ''}
+            required={field.isRequired}
+            aria-required={required}
+            onChange={(e) => setField(field.id, { type: 'text', value: e.target.value || null })}
+            rows={4}
+            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+          />
+        ) : (
+          <input
+            id={inputId}
+            type="text"
+            value={v ?? ''}
+            required={field.isRequired}
+            aria-required={required}
+            onChange={(e) => setField(field.id, { type: 'text', value: e.target.value || null })}
+            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+          />
+        );
+      })()}
+
+      {field.dataType === 'enum' && (() => {
+        const v = value?.type === 'enum' ? value.value : null;
+        const options = field.enumValues ?? [];
+        if (options.length <= 4) {
+          return (
+            <div role="radiogroup" aria-labelledby={inputId} aria-required={required}>
+              <SegmentedControl
+                value={v ?? options[0]?.value ?? ''}
+                onChange={(val) => setField(field.id, { type: 'enum', value: val })}
+                options={options.map((o) => ({
+                  value: o.value,
+                  label: o.label_de ?? o.label_en ?? o.value,
+                }))}
+              />
+            </div>
+          );
+        }
+        return (
+          <select
+            id={inputId}
+            value={v ?? ''}
+            required={field.isRequired}
+            onChange={(e) => setField(field.id, { type: 'enum', value: e.target.value || null })}
+            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+          >
+            <option value="">—</option>
+            {options.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label_de ?? o.label_en ?? o.value}
+              </option>
+            ))}
+          </select>
+        );
+      })()}
+
+      {field.dataType === 'date' && (() => {
+        const v = value?.type === 'date' ? value.value : null;
+        return (
+          <input
+            id={inputId}
+            type="date"
+            value={v ?? ''}
+            required={field.isRequired}
+            aria-required={required}
+            onChange={(e) => setField(field.id, { type: 'date', value: e.target.value || null })}
+            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+          />
+        );
+      })()}
+
+      {field.dataType === 'boolean' && (() => {
+        const v = value?.type === 'boolean' ? value.value : null;
+        return (
+          <div role="radiogroup" aria-labelledby={inputId} aria-required={required}>
+            <SegmentedControl
+              value={v === true ? 'true' : v === false ? 'false' : ''}
+              onChange={(val) => setField(field.id, { type: 'boolean', value: val === 'true' })}
+              options={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+          </div>
+        );
+      })()}
+
+      {field.dataType === 'json' && (
+        <div
+          aria-disabled="true"
+          className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic"
+        >
+          Mehrzeilige Eingabe — Phase 2
+        </div>
+      )}
 
       {/* Same-symbol hint (cross-worksheet) */}
       {sameSymbolHints && sameSymbolHints.length > 0 && (
@@ -93,124 +217,6 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
       />
     </div>
   );
-}
-
-function renderInput(
-  field: FieldDef,
-  current: ReturnType<typeof useWorksheetStore.getState>['values'][string] | undefined,
-  inputId: string,
-  _setField: unknown,
-) {
-  // _setField is unused — we call getState().setField directly so the store's
-  // FieldValue discriminated union resolves correctly at call sites.
-  const setFieldReal = useWorksheetStore.getState().setField;
-
-  switch (field.dataType) {
-    case 'number': {
-      const v = current?.type === 'number' ? current.value : null;
-      return (
-        <input
-          id={inputId}
-          type="number"
-          inputMode="decimal"
-          value={v == null ? '' : v}
-          onChange={(e) => {
-            const raw = e.target.value;
-            setFieldReal(field.id, {
-              type: 'number',
-              value: raw === '' ? null : Number(raw),
-            });
-          }}
-          className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink tabular-nums focus:border-accent focus:outline-none focus:ring-0"
-        />
-      );
-    }
-    case 'text': {
-      const v = current?.type === 'text' ? current.value : null;
-      const maxLength = field.validationRules?.maxLength;
-      const useTextarea = (maxLength ?? 0) > 200;
-      return useTextarea ? (
-        <textarea
-          id={inputId}
-          value={v ?? ''}
-          onChange={(e) => setFieldReal(field.id, { type: 'text', value: e.target.value || null })}
-          rows={4}
-          className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
-        />
-      ) : (
-        <input
-          id={inputId}
-          type="text"
-          value={v ?? ''}
-          onChange={(e) => setFieldReal(field.id, { type: 'text', value: e.target.value || null })}
-          className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
-        />
-      );
-    }
-    case 'enum': {
-      const v = current?.type === 'enum' ? current.value : null;
-      const options = field.enumValues ?? [];
-      if (options.length <= 4) {
-        return (
-          <SegmentedControl
-            value={v ?? options[0]?.value ?? ''}
-            onChange={(val) => setFieldReal(field.id, { type: 'enum', value: val })}
-            options={options.map((o) => ({
-              value: o.value,
-              label: o.label_de ?? o.label_en ?? o.value,
-            }))}
-          />
-        );
-      }
-      return (
-        <select
-          id={inputId}
-          value={v ?? ''}
-          onChange={(e) => setFieldReal(field.id, { type: 'enum', value: e.target.value || null })}
-          className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
-        >
-          <option value="">—</option>
-          {options.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label_de ?? o.label_en ?? o.value}
-            </option>
-          ))}
-        </select>
-      );
-    }
-    case 'date': {
-      const v = current?.type === 'date' ? current.value : null;
-      return (
-        <input
-          id={inputId}
-          type="date"
-          value={v ?? ''}
-          onChange={(e) => setFieldReal(field.id, { type: 'date', value: e.target.value || null })}
-          className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
-        />
-      );
-    }
-    case 'boolean': {
-      const v = current?.type === 'boolean' ? current.value : null;
-      return (
-        <SegmentedControl
-          value={v === true ? 'true' : v === false ? 'false' : ''}
-          onChange={(val) => setFieldReal(field.id, { type: 'boolean', value: val === 'true' })}
-          options={[
-            { value: 'true', label: 'Ja' },
-            { value: 'false', label: 'Nein' },
-          ]}
-        />
-      );
-    }
-    case 'json': {
-      return (
-        <div className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic">
-          Mehrzeilige Eingabe — Phase 2
-        </div>
-      );
-    }
-  }
 }
 
 function copyFirstHint(
