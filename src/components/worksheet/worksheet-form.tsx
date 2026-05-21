@@ -65,10 +65,14 @@ export function WorksheetForm({
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Initialize the store ONCE per instance change
+  // Initialize the store ONCE per instance change.
+  // We intentionally omit initialValues/initialSources from the dependency array —
+  // they are new object references on every router.refresh() but contain the same
+  // data, and re-running init would wipe unsaved in-flight edits.
   useEffect(() => {
-    init(instance.id, initialValues, initialSources);
-  }, [init, instance.id, initialValues, initialSources]);
+    init(instance.id, initialValues as Record<string, FieldValue>, initialSources as Record<string, { docId: string; page?: number; note?: string } | null>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [init, instance.id]);
 
   // Debounced auto-save
   useEffect(() => {
