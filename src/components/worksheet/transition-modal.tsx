@@ -90,6 +90,9 @@ export function TransitionModal({
           <Button
             onClick={handleSubmit}
             disabled={pending || !comment.trim()}
+            className={destructive
+              ? "border border-error text-error hover:bg-error/10 bg-transparent"
+              : ""}
             variant={destructive ? 'ghost' : 'primary'}
           >
             {pending ? 'Verarbeite...' : actionLabel}

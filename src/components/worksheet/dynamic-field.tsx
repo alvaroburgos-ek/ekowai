@@ -49,7 +49,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
       <div>
         <label htmlFor={inputId} className="text-sm font-medium text-ink leading-snug block">
           {label}
-          {field.isRequired && <span className="ml-1 text-accent-2">*</span>}
+          {field.isRequired && field.dataType !== 'json' && <span className="ml-1 text-accent-2">*</span>}
         </label>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5 flex items-baseline gap-1.5 flex-wrap">
           {field.clauseReference && <span>{field.clauseReference}</span>}
@@ -179,7 +179,8 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
       {field.dataType === 'json' && (
         <div
           aria-disabled="true"
-          className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic"
+          className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic cursor-not-allowed"
+          title="Mehrzeilige Eingabe — Phase 2"
         >
           Mehrzeilige Eingabe — Phase 2
         </div>
@@ -193,7 +194,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
           {sameSymbolHints.map((h) => String(h.value)).join(', ')}{' '}
           <button
             type="button"
-            className="underline text-accent-2"
+            className="text-xs text-accent-2 px-1.5 py-0.5 rounded hover:bg-accent-2/10 transition-colors"
             onClick={() => copyFirstHint(field, sameSymbolHints[0].value)}
           >
             Übernehmen

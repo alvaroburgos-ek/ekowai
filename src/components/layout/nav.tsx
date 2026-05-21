@@ -3,22 +3,39 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { LocaleSwitcher } from './locale-switcher';
 import { NavLinks } from './nav-links';
+import { db } from '@/lib/db';
+import { worksheetInstances, projects, orgMembers } from '@/lib/db/schema';
+import { eq, and, inArray, count } from 'drizzle-orm';
+import { createClient } from '@/lib/supabase/server';
 
-/**
- * PLAN 6 REATTACHMENT PENDING.
- * Previously counted calculations.status = 'submitted' rows.
- * Plan 6 will count worksheet_instances pending approval_events.
- */
-async function pendingReviewCount(): Promise<number> {
-  return 0;
+async function getPendingReviewCount(): Promise<number> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return 0;
+
+  const memberships = await db
+    .select({ orgId: orgMembers.orgId })
+    .from(orgMembers)
+    .where(eq(orgMembers.userId, auth.user.id));
+  if (memberships.length === 0) return 0;
+
+  const [row] = await db
+    .select({ n: count() })
+    .from(worksheetInstances)
+    .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
+    .where(and(
+      inArray(projects.orgId, memberships.map(m => m.orgId)),
+      eq(worksheetInstances.status, 'submitted_for_review'),
+    ));
+  return Number(row?.n ?? 0);
 }
 
 export async function Nav({ locale }: { locale: 'de' | 'en' }) {
   const t = await getTranslations('nav');
-  const pending = await pendingReviewCount();
+  const pending = await getPendingReviewCount();
 
   return (
-    <header className="border-b border-hairline bg-paper/95 backdrop-blur-md sticky top-0 z-30 shadow-[0_1px_12px_0_rgba(26,42,30,0.06)]">
+    <header className="border-b border-hairline bg-paper/95 backdrop-blur-md sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
         <Link href={`/${locale}/projects`} className="group flex items-center">
           <Image
