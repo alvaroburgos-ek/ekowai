@@ -22,7 +22,7 @@ export function SourceBadge({
       </button>
     );
   }
-  const label = 'docId' in source ? docTitle ?? 'Dokument' : source.label;
+  const label = docTitle ?? source.note ?? 'Dokument';
   return (
     <button
       type="button"

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { archiveProject } from '@/lib/actions/project';
-import { CalculationsList } from '@/components/calculator/calculations-list';
 
 export default async function ProjectDetailPage({
   params,
@@ -80,20 +79,22 @@ export default async function ProjectDetailPage({
         </Link>
       </nav>
 
-      {/* Calculations section */}
-      <section className="space-y-6">
-        <div className="flex items-end justify-between border-b border-hairline pb-4">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.25em] text-subtext mb-2">
-              Sektion 02
-            </div>
-            <h2 className="font-display text-xl font-semibold text-ink tracking-tight">{t('calculations')}</h2>
-          </div>
-          <Link href={`/${localeTyped}/projects/${id}/calc/new`}>
-            <Button size="sm">+ {t('newCalc')}</Button>
-          </Link>
-        </div>
-        <CalculationsList projectId={id} locale={localeTyped} />
+      <section className="space-y-3">
+        <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+          Regelwerke + Arbeitsblätter
+        </h2>
+        <Link href={`/${localeTyped}/projects/${id}/standards`}>
+          <Button variant="ghost">Regelwerke verwalten →</Button>
+        </Link>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+          Auditprotokoll
+        </h2>
+        <Link href={`/${localeTyped}/projects/${id}/audit`}>
+          <Button variant="ghost">Auditprotokoll ansehen →</Button>
+        </Link>
       </section>
     </article>
   );

@@ -1,27 +1,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { eq } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
-import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db';
-import { calculations, orgMembers } from '@/lib/db/schema';
 import { LocaleSwitcher } from './locale-switcher';
 import { NavLinks } from './nav-links';
 
+/**
+ * PLAN 6 REATTACHMENT PENDING.
+ * Previously counted calculations.status = 'submitted' rows.
+ * Plan 6 will count worksheet_instances pending approval_events.
+ */
 async function pendingReviewCount(): Promise<number> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return 0;
-  const memberships = await db.select().from(orgMembers).where(eq(orgMembers.userId, user.id));
-  if (memberships.length === 0) return 0;
-  const items = await db
-    .select({ id: calculations.id })
-    .from(calculations)
-    .where(eq(calculations.status, 'submitted'));
-  // RLS already scopes to orgs the user belongs to.
-  return items.length;
+  return 0;
 }
 
 export async function Nav({ locale }: { locale: 'de' | 'en' }) {

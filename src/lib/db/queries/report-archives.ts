@@ -1,15 +1,31 @@
+import 'server-only';
 import { db } from '@/lib/db';
-import { reportArchives, calculations } from '@/lib/db/schema';
+import {
+  reportArchives,
+  worksheetInstances,
+  worksheetTemplates,
+  profiles,
+} from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
-export async function listProjectArchives(projectId: string) {
+export async function listReportArchivesForProject(projectId: string) {
+  // report_archives has no projectId column — join through worksheet_instances
   return db
     .select({
-      archive: reportArchives,
-      calc: calculations,
+      id: reportArchives.id,
+      generatedAt: reportArchives.generatedAt,
+      filePath: reportArchives.filePath,
+      worksheetCode: worksheetTemplates.code,
+      worksheetTitleDe: worksheetTemplates.titleDe,
+      generatedByName: profiles.fullName,
     })
     .from(reportArchives)
-    .innerJoin(calculations, eq(calculations.id, reportArchives.calculationId))
-    .where(eq(calculations.projectId, projectId))
+    .leftJoin(worksheetInstances, eq(worksheetInstances.id, reportArchives.worksheetInstanceId))
+    .leftJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .leftJoin(profiles, eq(profiles.id, reportArchives.generatedBy))
+    .where(eq(worksheetInstances.projectId, projectId))
     .orderBy(desc(reportArchives.generatedAt));
 }
+
+// Legacy alias for compile compat
+export const listProjectArchives = listReportArchivesForProject;

@@ -1,15 +1,73 @@
+import { db } from '@/lib/db';
+import {
+  worksheetInstances,
+  worksheetTemplates,
+  standards,
+  projects,
+  orgMembers,
+  approvalEvents,
+} from '@/lib/db/schema';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
-import { listInbox } from '@/lib/actions/approval';
+import { StatusPill } from '@/components/worksheet/status-pill';
+import type { WorksheetStatus } from '@/lib/state-machine';
 
 export default async function InboxPage({
   params,
 }: {
-  params: Promise<{ locale: 'de' | 'en' }>;
+  params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations('approval');
-  const items = await listInbox();
+  const localeTyped = locale === 'en' ? 'en' : 'de';
+
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect(`/${localeTyped}/login`);
+
+  const orgs = await db
+    .select({ orgId: orgMembers.orgId })
+    .from(orgMembers)
+    .where(eq(orgMembers.userId, auth.user.id));
+  const orgIds = orgs.map((o) => o.orgId);
+
+  const pending =
+    orgIds.length === 0
+      ? []
+      : await db
+          .select({
+            instanceId: worksheetInstances.id,
+            status: worksheetInstances.status,
+            updatedAt: worksheetInstances.updatedAt,
+            worksheetCode: worksheetTemplates.code,
+            worksheetTitle: worksheetTemplates.titleDe,
+            standardCode: standards.code,
+            projectId: projects.id,
+            projectName: projects.name,
+            projectCode: projects.projectCode,
+            latestComment: sql<string | null>`(
+              SELECT comment FROM approval_events
+              WHERE worksheet_instance_id = ${worksheetInstances.id}
+              ORDER BY occurred_at DESC LIMIT 1
+            )`.as('latest_comment'),
+            latestActorAt: sql<Date | null>`(
+              SELECT occurred_at FROM approval_events
+              WHERE worksheet_instance_id = ${worksheetInstances.id}
+              ORDER BY occurred_at DESC LIMIT 1
+            )`.as('latest_actor_at'),
+          })
+          .from(worksheetInstances)
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+          .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
+          .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
+          .where(
+            and(
+              inArray(projects.orgId, orgIds),
+              eq(worksheetInstances.status, 'submitted_for_review'),
+            ),
+          )
+          .orderBy(desc(worksheetInstances.updatedAt));
 
   return (
     <article className="space-y-10">
@@ -18,42 +76,50 @@ export default async function InboxPage({
           Sektion 03 · Zur Prüfung
         </div>
         <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
-          {t('inboxTitle')}
+          Eingang
         </h1>
-        <p className="mt-3 text-[11px] tabular-nums text-subtext">
-          {String(items.length).padStart(2, '0')}{' '}
-          {items.length === 1 ? 'Eintrag' : 'Einträge'}
-        </p>
+        <div className="mt-3 text-xs text-subtext">
+          {pending.length === 0
+            ? 'Keine Arbeitsblätter zur Prüfung eingereicht.'
+            : `${pending.length} Arbeitsblatt${pending.length === 1 ? '' : 'e'} zur Prüfung eingereicht.`}
+        </div>
       </header>
 
-      {items.length === 0 ? (
-        <div className="border border-dashed border-hairline-strong p-12 text-center">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-subtext mb-3">
-            ⌬ Eingang leer
+      {pending.length === 0 ? (
+        <div className="border border-dashed border-hairline p-12 text-center">
+          <p className="text-sm text-subtext italic">
+            Wenn Engineers Arbeitsblätter zur internen Prüfung einreichen, erscheinen sie hier.
           </p>
-          <p className="text-xl font-semibold text-ink-2 tracking-tight">{t('inboxEmpty')}</p>
         </div>
       ) : (
-        <ul className="divide-y divide-hairline border-y border-hairline">
-          {items.map((c, i) => (
-            <li key={c.id} className="group">
+        <ul className="divide-y divide-hairline">
+          {pending.map((p) => (
+            <li key={p.instanceId} className="py-4">
               <Link
-                href={`/${locale}/projects/${c.projectId}/calc/${c.id}`}
-                className="grid grid-cols-12 gap-4 px-2 py-4 items-baseline hover:bg-paper-2/50 transition-colors"
+                href={`/${localeTyped}/projects/${p.projectId}/standards/${p.standardCode}/worksheets/${p.worksheetCode}`}
+                className="flex items-baseline gap-4 hover:bg-paper-2/40 -mx-3 px-3 py-2 rounded-md transition-colors"
               >
-                <span className="col-span-1 text-[11px] tabular-nums text-subtext">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span className="col-span-6 text-base font-semibold text-ink group-hover:text-accent-2 transition-colors tracking-tight">
-                  {c.name}
-                </span>
-                <span className="col-span-3 text-[11px] uppercase tracking-[0.15em] text-subtext">
-                  {c.regulationCode} · {c.worksheetId}
-                </span>
-                <span className="col-span-2 text-[10px] uppercase tracking-[0.2em] text-right text-accent-2">
-                  ● In Prüfung
-                </span>
+                <div className="w-40 text-[10px] uppercase tracking-[0.2em] text-subtext">
+                  {p.projectCode ?? p.projectName.slice(0, 24)}
+                </div>
+                <div className="w-32 text-xs font-mono text-subtext">
+                  {p.standardCode} · {p.worksheetCode}
+                </div>
+                <div className="flex-1 text-sm font-medium text-ink">
+                  {p.worksheetTitle}
+                </div>
+                <StatusPill status={p.status as WorksheetStatus} />
+                <div className="w-24 text-[10px] text-subtext text-right tabular-nums">
+                  {p.latestActorAt
+                    ? new Date(p.latestActorAt).toLocaleDateString('de-DE')
+                    : ''}
+                </div>
               </Link>
+              {p.latestComment && (
+                <div className="ml-44 mt-1 text-xs text-subtext italic">
+                  „{p.latestComment}"
+                </div>
+              )}
             </li>
           ))}
         </ul>

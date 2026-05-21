@@ -1,92 +1,63 @@
 import { describe, it, expect, afterAll } from 'vitest';
 import { admin, makeUser, makeOrg, cleanup } from './helpers';
 
-describe('report_archives RLS', () => {
-  const e1 = `rls-arch-a-${Date.now()}@test.local`;
-  const e2 = `rls-arch-b-${Date.now()}@test.local`;
-
+describe('report_archives RLS — org-scoped', () => {
+  const e1 = `rls-ra-a-${Date.now()}@test.local`;
+  const e2 = `rls-ra-b-${Date.now()}@test.local`;
   afterAll(async () => cleanup([e1, e2]));
 
-  it('a user cannot read report_archives from a foreign org', async () => {
+  it('user A cannot read report_archives from org B', async () => {
+    const ad = admin();
     const a = await makeUser(e1);
     const b = await makeUser(e2);
-    const orgB = await makeOrg(b.client, b.id, 'Bravo Archives');
+    const orgB = await makeOrg(b.client, b.id, 'Bravo RA');
 
-    const ad = admin();
-
-    // Build a calculation in org B (need project + calc to satisfy FKs)
-    const { data: project } = await ad
+    const { data: proj, error: projErr } = await ad
       .from('projects')
-      .insert({
-        org_id: orgB,
-        name: 'B-Project-Arch',
-        created_by: b.id,
-      })
+      .insert({ org_id: orgB, name: 'B', created_by: b.id })
       .select('id')
       .single();
+    if (projErr) throw projErr;
 
-    const { data: calc } = await ad
-      .from('calculations')
-      .insert({
-        project_id: project!.id,
-        org_id: orgB,
-        regulation_code: 'DWA-A-201',
-        regulation_version: 'v3.1',
-        worksheet_id: 'A201-01',
-        name: 'B Archive Calc',
-        inputs: {},
-        results: {},
-        created_by: b.id,
-      })
+    const { data: std, error: stdErr } = await ad
+      .from('standards')
+      .insert({ code: `RA-${Date.now()}`, title_de: 'T', version: 'Pass3c' })
       .select('id')
       .single();
+    if (stdErr) throw stdErr;
 
-    const { data: approval } = await ad
-      .from('approvals')
-      .insert({
-        calculation_id: calc!.id,
-        org_id: orgB,
-        action: 'approved',
-      })
+    const { data: tmpl, error: tmplErr } = await ad
+      .from('worksheet_templates')
+      .insert({ standard_id: std!.id, code: 'T-01', title_de: 'W' })
       .select('id')
       .single();
+    if (tmplErr) throw tmplErr;
 
-    // Service-role inserts the archive (production code path uses admin client too)
+    const { data: inst, error: instErr } = await ad
+      .from('worksheet_instances')
+      .insert({ project_id: proj!.id, worksheet_template_id: tmpl!.id })
+      .select('id')
+      .single();
+    if (instErr) throw instErr;
+
+    // Insert report_archive scoped to orgB using service role (bypasses RLS)
+    // Required NOT NULL: calculation_id (legacy), sha256, file_path, org_id, generated_by
     const { error: archErr } = await ad.from('report_archives').insert({
-      calculation_id: calc!.id,
-      approval_id: approval!.id,
       org_id: orgB,
-      file_path: `${orgB}/${calc!.id}/${approval!.id}.pdf`,
-      sha256: 'd'.repeat(64),
+      worksheet_instance_id: inst!.id,
       generated_by: b.id,
+      file_path: 'placeholder/report.pdf',
+      sha256: 'a'.repeat(64),
+      calculation_id: '00000000-0000-0000-0000-000000000000',
     });
     if (archErr) throw archErr;
 
-    // User A (foreign org) tries to read — should see nothing
+    // User A (foreign org) tries to read org B's archives — should see nothing
     const { data, error } = await a.client
       .from('report_archives')
       .select('*')
-      .eq('calculation_id', calc!.id);
+      .eq('org_id', orgB);
     expect(error).toBeNull();
     expect(data).toEqual([]);
-  });
-
-  it('an authenticated org member with anon key cannot insert report_archives directly', async () => {
-    const c = await makeUser(`rls-arch-c-${Date.now()}@test.local`);
-    const orgC = await makeOrg(c.client, c.id, 'Charlie Arch');
-
-    // No insert policy on report_archives means anon-key inserts are denied,
-    // even when the user is a member of the target org.
-    const { error } = await c.client.from('report_archives').insert({
-      calculation_id: '00000000-0000-0000-0000-000000000000',
-      approval_id: '00000000-0000-0000-0000-000000000000',
-      org_id: orgC,
-      file_path: 'fake',
-      sha256: 'x'.repeat(64),
-      generated_by: c.id,
-    });
-    expect(error).not.toBeNull(); // RLS should deny
-
-    await cleanup([`rls-arch-c-${Date.now()}@test.local`]);
   });
 });

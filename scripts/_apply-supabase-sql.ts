@@ -8,7 +8,7 @@ const files = process.argv.slice(2);
 if (files.length === 0) throw new Error('Usage: tsx _apply-supabase-sql.ts <file.sql> [...]');
 
 async function main() {
-  const sql = postgres(url!, { prepare: false });
+  const sql = postgres(url!, { prepare: false, max: 1 });
   try {
     for (const f of files) {
       console.log(`Applying ${f}...`);

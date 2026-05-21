@@ -7,7 +7,9 @@ import {
   jsonb,
   numeric,
   bigint,
+  bigserial,
   boolean,
+  integer,
   pgEnum,
   primaryKey,
   unique,
@@ -23,20 +25,8 @@ export const memberRoleEnum = pgEnum('member_role', [
   'viewer',
 ]);
 
-export const calcStatusEnum = pgEnum('calc_status', [
-  'draft',
-  'submitted',
-  'approved',
-  'rejected',
-  'changes_requested',
-]);
-
-export const complianceStatusEnum = pgEnum('compliance_status', [
-  'compliant',
-  'warning',
-  'blocking_violation',
-  'unknown',
-]);
+// Note: calc_status and compliance_status enums still exist in DB for now
+// (they are not used by any new tables but were not dropped in the migration)
 
 // === Tables ===
 
@@ -94,6 +84,8 @@ export const projects = pgTable(
     name: text('name').notNull(),
     clientName: text('client_name'),
     location: text('location'),
+    siteLocation: text('site_location'),
+    projectCode: text('project_code'),
     projectType: text('project_type'),
     createdBy: uuid('created_by')
       .notNull()
@@ -107,142 +99,199 @@ export const projects = pgTable(
   }),
 );
 
-export const calculations = pgTable(
-  'calculations',
+// =============================================================================
+// STANDARDS LIBRARY (6 tables, read-only after import)
+// =============================================================================
+export const standards = pgTable('standards', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  code: text('code').notNull().unique(),
+  titleDe: text('title_de').notNull(),
+  titleEn: text('title_en'),
+  version: text('version').notNull(),
+  issuedYear: integer('issued_year'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const worksheetTemplates = pgTable(
+  'worksheet_templates',
   {
-    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    projectId: uuid('project_id')
+    id: uuid('id').primaryKey().defaultRandom(),
+    standardId: uuid('standard_id').notNull().references(() => standards.id, { onDelete: 'cascade' }),
+    code: text('code').notNull(),
+    titleDe: text('title_de').notNull(),
+    titleEn: text('title_en'),
+    phase: integer('phase'),
+    archetype: text('archetype'),
+    orderIndex: integer('order_index').notNull().default(0),
+    description: text('description'),
+  },
+  (t) => ({ uniqStandardCode: unique().on(t.standardId, t.code) }),
+);
+
+export const worksheetSections = pgTable('worksheet_sections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  worksheetTemplateId: uuid('worksheet_template_id')
+    .notNull()
+    .references(() => worksheetTemplates.id, { onDelete: 'cascade' }),
+  parentSectionId: uuid('parent_section_id'),
+  code: text('code'),
+  titleDe: text('title_de').notNull(),
+  titleEn: text('title_en'),
+  orderIndex: integer('order_index').notNull().default(0),
+});
+
+export const fields = pgTable(
+  'fields',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    worksheetTemplateId: uuid('worksheet_template_id')
       .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
-    orgId: uuid('org_id')
+      .references(() => worksheetTemplates.id, { onDelete: 'cascade' }),
+    sectionId: uuid('section_id').references(() => worksheetSections.id),
+    symbol: text('symbol').notNull(),
+    labelDe: text('label_de').notNull(),
+    labelEn: text('label_en'),
+    dataType: text('data_type').notNull(),
+    unit: text('unit'),
+    isRequired: boolean('is_required').notNull().default(false),
+    enumValues: jsonb('enum_values'),
+    validationRules: jsonb('validation_rules'),
+    clauseReference: text('clause_reference'),
+    description: text('description'),
+    consumerWorksheets: text('consumer_worksheets').array(),
+    orderIndex: integer('order_index').notNull().default(0),
+    verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+  },
+  (t) => ({ uniqWorksheetSymbol: unique().on(t.worksheetTemplateId, t.symbol) }),
+);
+
+export const equations = pgTable(
+  'equations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    worksheetTemplateId: uuid('worksheet_template_id')
       .notNull()
-      .references(() => orgs.id), // denorm for RLS perf
-    regulationCode: text('regulation_code').notNull(),
-    regulationVersion: text('regulation_version').notNull(),
-    worksheetId: text('worksheet_id').notNull(),
-    name: text('name').notNull(),
-    inputs: jsonb('inputs').notNull(),
-    results: jsonb('results').notNull(),
-    rationale: text('rationale'),
-    rationaleDraft: text('rationale_draft'),
-    status: calcStatusEnum('status').notNull().default('draft'),
-    complianceStatus: complianceStatusEnum('compliance_status').notNull().default('unknown'),
-    complianceViolations: jsonb('compliance_violations'),
-    createdBy: uuid('created_by')
+      .references(() => worksheetTemplates.id, { onDelete: 'cascade' }),
+    equationNumber: text('equation_number').notNull(),
+    formula: text('formula').notNull(),
+    formulaLatex: text('formula_latex'),
+    inputSymbols: text('input_symbols').array(),
+    outputSymbol: text('output_symbol'),
+    outputUnit: text('output_unit'),
+    clauseReference: text('clause_reference'),
+    description: text('description'),
+    verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+  },
+  (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
+);
+
+export const complianceRequirements = pgTable(
+  'compliance_requirements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    worksheetTemplateId: uuid('worksheet_template_id')
       .notNull()
-      .references(() => profiles.id),
+      .references(() => worksheetTemplates.id, { onDelete: 'cascade' }),
+    code: text('code').notNull(),
+    titleDe: text('title_de').notNull(),
+    titleEn: text('title_en'),
+    condition: text('condition').notNull(),
+    description: text('description'),
+    clauseReference: text('clause_reference'),
+    severity: text('severity').notNull(),
+  },
+  (t) => ({ uniqWorksheetCr: unique().on(t.worksheetTemplateId, t.code) }),
+);
+
+// =============================================================================
+// PROJECT WORKFLOW (5 tables)
+// =============================================================================
+export const projectStandards = pgTable(
+  'project_standards',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    standardId: uuid('standard_id').notNull().references(() => standards.id),
+    status: text('status').notNull().default('active'),
+    addedAt: timestamp('added_at', { withTimezone: true }).notNull().defaultNow(),
+    // addedBy/removedBy reference auth.users directly in DB, no Drizzle FK needed
+    addedBy: uuid('added_by'),
+    removedAt: timestamp('removed_at', { withTimezone: true }),
+    removedBy: uuid('removed_by'),
+    removalReason: text('removal_reason'),
+  },
+  (t) => ({ uniqProjectStd: unique().on(t.projectId, t.standardId) }),
+);
+
+export const worksheetInstances = pgTable(
+  'worksheet_instances',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    worksheetTemplateId: uuid('worksheet_template_id')
+      .notNull()
+      .references(() => worksheetTemplates.id),
+    status: text('status').notNull().default('draft'),
+    isStale: boolean('is_stale').notNull().default(false),
+    stalenessReason: text('staleness_reason'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => ({
-    projectIdx: index('calc_project_idx').on(t.projectId),
-    orgIdx: index('calc_org_idx').on(t.orgId),
-    regIdx: index('calc_regulation_idx').on(t.regulationCode, t.regulationVersion),
-    statusIdx: index('calc_status_idx').on(t.status),
-  }),
+  (t) => ({ uniqProjectTmpl: unique().on(t.projectId, t.worksheetTemplateId) }),
 );
 
-export const calculationHistory = pgTable('calculation_history', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  calculationId: uuid('calculation_id')
+export const projectParameters = pgTable(
+  'project_parameters',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    fieldId: uuid('field_id').notNull().references(() => fields.id),
+    sourceWorksheetInstanceId: uuid('source_worksheet_instance_id').references(() => worksheetInstances.id),
+    valueNumber: numeric('value_number'),
+    valueText: text('value_text'),
+    valueEnum: text('value_enum'),
+    valueDate: date('value_date'),
+    valueBoolean: boolean('value_boolean'),
+    valueJson: jsonb('value_json'),
+    sourceType: text('source_type').notNull().default('entered'),
+    citationSource: jsonb('citation_source'),
+    // enteredBy references auth.users directly in DB, kept as plain uuid here
+    enteredBy: uuid('entered_by').notNull(),
+    enteredAt: timestamp('entered_at', { withTimezone: true }).notNull().defaultNow(),
+    isStale: boolean('is_stale').notNull().default(false),
+  },
+  (t) => ({ uniqProjectField: unique().on(t.projectId, t.fieldId) }),
+);
+
+export const approvalEvents = pgTable('approval_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  worksheetInstanceId: uuid('worksheet_instance_id')
     .notNull()
-    .references(() => calculations.id, { onDelete: 'cascade' }),
-  inputs: jsonb('inputs').notNull(),
-  results: jsonb('results').notNull(),
-  rationale: text('rationale'),
-  changedBy: uuid('changed_by')
-    .notNull()
-    .references(() => profiles.id),
-  changedAt: timestamp('changed_at', { withTimezone: true }).notNull().defaultNow(),
+    .references(() => worksheetInstances.id, { onDelete: 'restrict' }),
+  eventType: text('event_type').notNull(),
+  fromStatus: text('from_status').notNull(),
+  toStatus: text('to_status').notNull(),
+  // actorId references auth.users directly in DB
+  actorId: uuid('actor_id').notNull(),
+  actorRole: text('actor_role').notNull(),
+  comment: text('comment').notNull(),
+  occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-// Decisions (Plan 3 will use this; table created in Plan 1 to avoid migration churn)
-export const decisions = pgTable(
-  'decisions',
-  {
-    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    calculationId: uuid('calculation_id')
-      .notNull()
-      .references(() => calculations.id, { onDelete: 'cascade' }),
-    orgId: uuid('org_id').notNull(),
-    decisionPointId: text('decision_point_id').notNull(),
-    choice: text('choice').notNull(),
-    rationale: text('rationale'),
-    rationaleDraft: text('rationale_draft'),
-    madeBy: uuid('made_by')
-      .notNull()
-      .references(() => profiles.id),
-    madeAt: timestamp('made_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => ({
-    calcIdx: index('decisions_calc_idx').on(t.calculationId),
-    uniq: unique('decisions_calc_dp_unique').on(t.calculationId, t.decisionPointId),
-  }),
-);
-
-// Approvals (Plan 3 will use this)
-export const approvals = pgTable(
-  'approvals',
-  {
-    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    calculationId: uuid('calculation_id')
-      .notNull()
-      .references(() => calculations.id, { onDelete: 'cascade' }),
-    orgId: uuid('org_id').notNull(),
-    reviewerId: uuid('reviewer_id').references(() => profiles.id),
-    action: text('action').notNull(), // 'submitted'|'approved'|'rejected'|'changes_requested'
-    comment: text('comment'),
-    decidedAt: timestamp('decided_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => ({
-    calcIdx: index('approvals_calc_idx').on(t.calculationId),
-  }),
-);
-
-// Cross-references (regulation metadata, public read)
-export const crossReferences = pgTable(
-  'cross_references',
-  {
-    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    sourceRegulation: text('source_regulation').notNull(),
-    sourceVersion: text('source_version').notNull(),
-    sourceSection: text('source_section').notNull(),
-    triggerCondition: jsonb('trigger_condition').notNull(),
-    targetRegulation: text('target_regulation').notNull(),
-    targetSection: text('target_section').notNull(),
-    rationale: text('rationale').notNull(),
-    wizardSupported: boolean('wizard_supported').notNull().default(false),
-  },
-  (t) => ({
-    uniq: unique('xref_unique').on(
-      t.sourceRegulation,
-      t.sourceVersion,
-      t.sourceSection,
-      t.targetRegulation,
-      t.targetSection,
-    ),
-  }),
-);
-
-// Calculation metrics (MVP-2 dashboard populates; created here to avoid migration churn)
-export const calculationMetrics = pgTable(
-  'calculation_metrics',
-  {
-    calculationId: uuid('calculation_id')
-      .primaryKey()
-      .references(() => calculations.id, { onDelete: 'cascade' }),
-    orgId: uuid('org_id').notNull(),
-    peDesigned: numeric('pe_designed'),
-    capacityM3D: numeric('capacity_m3_d'),
-    co2KgYear: numeric('co2_kg_year'),
-    energyKwhYear: numeric('energy_kwh_year'),
-    metricVersion: text('metric_version').notNull(),
-    computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => ({
-    orgIdx: index('metrics_org_idx').on(t.orgId),
-  }),
-);
+export const auditLog = pgTable('audit_log', {
+  // DB uses bigserial; mode 'bigint' matches DB introspection
+  id: bigserial('id', { mode: 'bigint' }).primaryKey(),
+  occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
+  // actorId references auth.users directly in DB
+  actorId: uuid('actor_id'),
+  actorRole: text('actor_role'),
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'restrict' }),
+  orgId: uuid('org_id').references(() => orgs.id, { onDelete: 'restrict' }),
+  tableName: text('table_name').notNull(),
+  recordId: uuid('record_id'),
+  action: text('action').notNull(),
+  changes: jsonb('changes').notNull(),
+});
 
 // Project documents (Plan 6 — uploaded source documents for citations)
 export const projectDocuments = pgTable(
@@ -274,17 +323,15 @@ export const projectDocuments = pgTable(
   }),
 );
 
-// Report archives (Plan 6 — frozen PDFs of approved calculations)
+// Report archives (frozen PDFs of approved worksheet instances)
+// Note: calculationId column still exists in DB for now (migration kept it)
 export const reportArchives = pgTable(
   'report_archives',
   {
     id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    calculationId: uuid('calculation_id')
-      .notNull()
-      .references(() => calculations.id, { onDelete: 'cascade' }),
-    approvalId: uuid('approval_id')
-      .notNull()
-      .references(() => approvals.id, { onDelete: 'restrict' }),
+    calculationId: uuid('calculation_id').notNull(), // legacy; kept in DB, no FK (calculations table dropped)
+    approvalEventId: uuid('approval_event_id').references(() => approvalEvents.id, { onDelete: 'restrict' }),
+    worksheetInstanceId: uuid('worksheet_instance_id').references(() => worksheetInstances.id, { onDelete: 'restrict' }),
     orgId: uuid('org_id')
       .notNull()
       .references(() => orgs.id),
@@ -296,8 +343,6 @@ export const reportArchives = pgTable(
       .references(() => profiles.id),
   },
   (t) => ({
-    calcIdx: index('report_archives_calc_idx').on(t.calculationId),
     orgIdx: index('report_archives_org_idx').on(t.orgId),
-    uniq: unique('report_archives_calc_approval_unique').on(t.calculationId, t.approvalId),
   }),
 );

@@ -22,7 +22,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.{ts,tsx}'],
           environment: 'happy-dom',
           setupFiles: ['./src/test-setup.ts'],
           globals: true,

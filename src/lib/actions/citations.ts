@@ -1,124 +1,106 @@
 'use server';
-
-import { z } from 'zod';
 import { db } from '@/lib/db';
-import {
-  calculations,
-  projectDocuments,
-  orgMembers,
-} from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { projectParameters, auditLog } from '@/lib/db/schema';
+import { and, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
-import { normalizeInputs } from '@/lib/engine/inputs-reader';
-import { revalidatePath } from 'next/cache';
 
-async function requireUser() {
+export type CitationSource = {
+  docId: string;
+  page?: number;
+  note?: string;
+};
+
+export async function attachCitation(input: {
+  projectId: string;
+  fieldId: string;
+  source: CitationSource;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error('unauthorized');
-  return user;
-}
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { ok: false, error: 'Not authenticated' };
+  const userId = auth.user.id;
 
-const SourceInput = z.union([
-  z.object({
-    docId: z.string().uuid(),
-    page: z.number().int().positive().optional(),
-  }),
-  z.object({ label: z.string().min(1).max(200) }),
-]);
+  const citationSource = {
+    docId: input.source.docId,
+    page: input.source.page ?? null,
+    note: input.source.note ?? null,
+    attachedBy: userId,
+    attachedAt: new Date().toISOString(),
+  };
 
-const AttachInput = z.object({
-  calcId: z.string().uuid(),
-  symbol: z.string().min(1),
-  source: SourceInput,
-});
+  try {
+    await db.transaction(async (tx) => {
+      const existing = await tx
+        .select()
+        .from(projectParameters)
+        .where(
+          and(
+            eq(projectParameters.projectId, input.projectId),
+            eq(projectParameters.fieldId, input.fieldId),
+          ),
+        )
+        .limit(1);
 
-async function loadCalcWithMembership(calcId: string, userId: string) {
-  const [row] = await db
-    .select({
-      id: calculations.id,
-      projectId: calculations.projectId,
-      orgId: calculations.orgId,
-      inputs: calculations.inputs,
-      status: calculations.status,
-    })
-    .from(calculations)
-    .innerJoin(orgMembers, eq(orgMembers.orgId, calculations.orgId))
-    .where(and(eq(calculations.id, calcId), eq(orgMembers.userId, userId)))
-    .limit(1);
-  return row ?? null;
-}
+      if (existing.length === 0) {
+        await tx.insert(projectParameters).values({
+          projectId: input.projectId,
+          fieldId: input.fieldId,
+          sourceType: 'entered',
+          citationSource,
+          enteredBy: userId,
+        });
+      } else {
+        await tx
+          .update(projectParameters)
+          .set({ citationSource, enteredBy: userId, enteredAt: new Date() })
+          .where(
+            and(
+              eq(projectParameters.projectId, input.projectId),
+              eq(projectParameters.fieldId, input.fieldId),
+            ),
+          );
+      }
 
-export async function attachSource(args: z.infer<typeof AttachInput>) {
-  const user = await requireUser();
-  const parsed = AttachInput.safeParse(args);
-  if (!parsed.success) return { ok: false as const, error: 'invalid_input' };
-
-  const calc = await loadCalcWithMembership(parsed.data.calcId, user.id);
-  if (!calc) return { ok: false as const, error: 'calc_not_found' };
-  if (calc.status === 'approved') {
-    return { ok: false as const, error: 'calc_locked' };
+      await tx.insert(auditLog).values({
+        actorId: userId,
+        actorRole: 'engineer',
+        projectId: input.projectId,
+        tableName: 'project_parameters',
+        recordId: input.fieldId,
+        action: 'update',
+        changes: { citation_attached: citationSource },
+      });
+    });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' };
   }
+}
 
-  // For docId source, verify the doc belongs to the same project
-  if ('docId' in parsed.data.source) {
-    const [doc] = await db
-      .select({ id: projectDocuments.id })
-      .from(projectDocuments)
+export async function detachCitation(input: {
+  projectId: string;
+  fieldId: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { ok: false, error: 'Not authenticated' };
+
+  try {
+    await db
+      .update(projectParameters)
+      .set({ citationSource: null })
       .where(
         and(
-          eq(projectDocuments.id, parsed.data.source.docId),
-          eq(projectDocuments.projectId, calc.projectId),
+          eq(projectParameters.projectId, input.projectId),
+          eq(projectParameters.fieldId, input.fieldId),
         ),
-      )
-      .limit(1);
-    if (!doc) return { ok: false as const, error: 'doc_not_in_project' };
+      );
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unknown error' };
   }
-
-  const cells = normalizeInputs(calc.inputs as Record<string, any>);
-  const cell = cells[parsed.data.symbol];
-  if (!cell) return { ok: false as const, error: 'symbol_not_found' };
-
-  cells[parsed.data.symbol] = { value: cell.value, source: parsed.data.source };
-
-  await db
-    .update(calculations)
-    .set({ inputs: cells, updatedAt: new Date() })
-    .where(eq(calculations.id, parsed.data.calcId));
-
-  revalidatePath(`/projects/${calc.projectId}/calc/${calc.id}`);
-  return { ok: true as const };
 }
 
-const DetachInput = z.object({
-  calcId: z.string().uuid(),
-  symbol: z.string().min(1),
-});
-
-export async function detachSource(args: z.infer<typeof DetachInput>) {
-  const user = await requireUser();
-  const parsed = DetachInput.safeParse(args);
-  if (!parsed.success) return { ok: false as const, error: 'invalid_input' };
-
-  const calc = await loadCalcWithMembership(parsed.data.calcId, user.id);
-  if (!calc) return { ok: false as const, error: 'calc_not_found' };
-  if (calc.status === 'approved') {
-    return { ok: false as const, error: 'calc_locked' };
-  }
-
-  const cells = normalizeInputs(calc.inputs as Record<string, any>);
-  const cell = cells[parsed.data.symbol];
-  if (!cell) return { ok: false as const, error: 'symbol_not_found' };
-
-  cells[parsed.data.symbol] = { value: cell.value };
-
-  await db
-    .update(calculations)
-    .set({ inputs: cells, updatedAt: new Date() })
-    .where(eq(calculations.id, parsed.data.calcId));
-
-  revalidatePath(`/projects/${calc.projectId}/calc/${calc.id}`);
-  return { ok: true as const };
-}
+// Legacy aliases — kept for any older call sites
+export const attachSource = attachCitation;
+export const detachSource = detachCitation;

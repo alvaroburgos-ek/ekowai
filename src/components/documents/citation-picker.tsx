@@ -3,22 +3,27 @@
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { attachSource, detachSource } from '@/lib/actions/citations';
+import { attachCitation, detachCitation } from '@/lib/actions/citations';
 import { Button } from '@/components/ui/button';
-import type { projectDocuments } from '@/lib/db/schema';
-
-type Doc = typeof projectDocuments.$inferSelect;
+type Doc = {
+  id: string;
+  title: string;
+  citationLabel: string;
+};
 
 export function CitationPicker({
   open,
   onClose,
-  calcId,
+  projectId,
+  fieldId,
   symbol,
   docs,
 }: {
   open: boolean;
   onClose: () => void;
-  calcId: string;
+  projectId: string;
+  fieldId: string;
+  /** Displayed in the modal header for context — still useful even though we key by fieldId */
   symbol: string;
   docs: Doc[];
 }) {
@@ -39,28 +44,31 @@ export function CitationPicker({
   function pickDoc(docId: string) {
     setError(null);
     start(async () => {
-      const r = await attachSource({ calcId, symbol, source: { docId } });
+      const r = await attachCitation({ projectId, fieldId, source: { docId } });
       if (!r.ok) setError(t(`errors.${r.error}` as any) || r.error);
       else complete();
     });
   }
+
   function pickLabel() {
     if (!label.trim()) return;
     setError(null);
+    // Store free-text label as a pseudo-docId so citation_source stays typed
     start(async () => {
-      const r = await attachSource({
-        calcId,
-        symbol,
-        source: { label: label.trim() },
+      const r = await attachCitation({
+        projectId,
+        fieldId,
+        source: { docId: `label:${label.trim()}`, note: label.trim() },
       });
       if (!r.ok) setError(t(`errors.${r.error}` as any) || r.error);
       else complete();
     });
   }
+
   function detach() {
     setError(null);
     start(async () => {
-      const r = await detachSource({ calcId, symbol });
+      const r = await detachCitation({ projectId, fieldId });
       if (!r.ok) setError(t(`errors.${r.error}` as any) || r.error);
       else complete();
     });

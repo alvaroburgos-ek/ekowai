@@ -1,56 +1,49 @@
-import { listProjectArchives } from '@/lib/db/queries/report-archives';
-import { getArchiveSignedUrl } from '@/lib/storage/report-archives';
+type Entry = {
+  id: string;
+  generatedAt: Date;
+  filePath: string;
+  worksheetCode: string | null;
+  worksheetTitleDe: string | null;
+  generatedByName: string | null;
+};
 
-export async function ReportsHistory({ projectId }: { projectId: string }) {
-  const rows = await listProjectArchives(projectId);
-  if (rows.length === 0) {
+export function ReportsHistory({
+  entries,
+  projectId,
+}: {
+  entries: Entry[];
+  projectId: string;
+}) {
+  if (entries.length === 0) {
     return (
-      <p className="font-mono text-[11px] text-subtext py-4">
-        Noch keine archivierten Berichte. Berichte werden bei Freigabe
-        automatisch erstellt.
+      <p className="font-mono text-[11px] text-subtext py-4 italic">
+        Noch keine archivierten Berichte. Berichte werden bei Freigabe automatisch erstellt.
       </p>
     );
   }
-
-  // Resolve signed URLs in parallel
-  const items = await Promise.all(
-    rows.map(async (r) => ({
-      ...r,
-      url: await getArchiveSignedUrl(r.archive.filePath).catch(() => null),
-    })),
-  );
-
   return (
     <ul className="divide-y divide-hairline">
-      {items.map((r) => (
-        <li
-          key={r.archive.id}
-          className="py-3 flex items-baseline justify-between gap-4"
-        >
-          <div>
-            <div className="font-medium">{r.calc.name}</div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext">
-              {r.calc.worksheetId} ·{' '}
-              {r.archive.generatedAt.toLocaleDateString('de-DE')}
+      {entries.map((e) => (
+        <li key={e.id} className="py-3 flex items-center gap-4 text-sm">
+          <div className="w-36 text-xs text-subtext tabular-nums font-mono">
+            {e.generatedAt.toLocaleString('de-DE')}
+          </div>
+          <div className="flex-1">
+            <div className="font-medium text-ink">
+              {e.worksheetCode ?? '—'} · {e.worksheetTitleDe ?? 'Bericht'}
             </div>
-            <div className="font-mono text-[10px] text-subtext tabular-nums">
-              SHA-256 {r.archive.sha256.slice(0, 16)}…
+            <div className="text-xs text-subtext">
+              durch {e.generatedByName ?? '—'}
             </div>
           </div>
-          {r.url ? (
-            <a
-              href={r.url}
-              target="_blank"
-              rel="noreferrer"
-              className="font-mono text-[10px] uppercase tracking-[0.2em] underline hover:text-accent"
-            >
-              Öffnen
-            </a>
-          ) : (
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-error">
-              Nicht verfügbar
-            </span>
-          )}
+          <a
+            href={`/api/projects/${projectId}/report/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-accent underline"
+          >
+            PDF öffnen
+          </a>
         </li>
       ))}
     </ul>

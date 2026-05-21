@@ -1,104 +1,211 @@
 import 'server-only';
 import { db } from '@/lib/db';
 import {
-  calculations,
   projects,
   orgs,
-  decisions,
-  approvals,
-  projectDocuments,
+  standards,
+  projectStandards,
+  worksheetTemplates,
+  worksheetInstances,
+  fields,
+  projectParameters,
+  approvalEvents,
   profiles,
 } from '@/lib/db/schema';
-import { eq, inArray, asc } from 'drizzle-orm';
-import { ALL_WORKSHEETS } from '@/lib/worksheets/DWA-A-201/v3.1';
-import { compute } from '@/lib/engine';
-import {
-  normalizeInputs,
-  inputsToValues,
-} from '@/lib/engine/inputs-reader';
+import { and, eq, inArray, desc } from 'drizzle-orm';
 
-export type ReportData = Awaited<ReturnType<typeof loadReportData>>;
+export type ReportData = {
+  project: {
+    id: string;
+    name: string;
+    projectCode: string | null;
+    siteLocation: string | null;
+    createdAt: string;
+    org: { id: string; name: string; logoUrl: string | null } | null;
+  };
+  standards: Array<{
+    id: string;
+    code: string;
+    titleDe: string;
+    version: string;
+    activeSince: string;
+  }>;
+  worksheets: Array<{
+    instanceId: string;
+    code: string;
+    titleDe: string;
+    status: string;
+    standardCode: string;
+    parameters: Array<{
+      symbol: string;
+      labelDe: string;
+      unit: string | null;
+      dataType: string;
+      value: string | null;
+      sourceType: string;
+      enteredAt: string;
+    }>;
+  }>;
+  approvals: Array<{
+    occurredAt: string;
+    worksheetCode: string;
+    eventType: string;
+    fromStatus: string;
+    toStatus: string;
+    actorName: string | null;
+    comment: string;
+  }>;
+};
 
-export async function loadReportData(calcId: string) {
-  const [calc] = await db
-    .select()
-    .from(calculations)
-    .where(eq(calculations.id, calcId))
-    .limit(1);
-  if (!calc) throw new Error('calc_not_found');
-
-  const [project] = await db
-    .select()
+export async function loadProjectReportData(projectId: string): Promise<ReportData> {
+  const [proj] = await db
+    .select({
+      id: projects.id,
+      name: projects.name,
+      projectCode: projects.projectCode,
+      siteLocation: projects.siteLocation,
+      createdAt: projects.createdAt,
+      org: {
+        id: orgs.id,
+        name: orgs.name,
+        logoUrl: orgs.logoUrl,
+      },
+    })
     .from(projects)
-    .where(eq(projects.id, calc.projectId))
+    .leftJoin(orgs, eq(orgs.id, projects.orgId))
+    .where(eq(projects.id, projectId))
     .limit(1);
-  if (!project) throw new Error('project_not_found');
+  if (!proj) throw new Error(`Project ${projectId} not found`);
 
-  const [org] = await db.select().from(orgs).where(eq(orgs.id, calc.orgId)).limit(1);
-  if (!org) throw new Error('org_not_found');
+  const stds = await db
+    .select({
+      id: standards.id,
+      code: standards.code,
+      titleDe: standards.titleDe,
+      version: standards.version,
+      activeSince: projectStandards.addedAt,
+    })
+    .from(projectStandards)
+    .innerJoin(standards, eq(standards.id, projectStandards.standardId))
+    .where(
+      and(
+        eq(projectStandards.projectId, projectId),
+        eq(projectStandards.status, 'active'),
+      ),
+    )
+    .orderBy(standards.code);
 
-  const decisionRows = await db
+  const instances = await db
+    .select({
+      instanceId: worksheetInstances.id,
+      code: worksheetTemplates.code,
+      titleDe: worksheetTemplates.titleDe,
+      status: worksheetInstances.status,
+      standardCode: standards.code,
+      templateId: worksheetTemplates.id,
+    })
+    .from(worksheetInstances)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
+    .where(eq(worksheetInstances.projectId, projectId));
+
+  const templateIds = instances.map((i) => i.templateId);
+  const allFields = templateIds.length === 0 ? [] : await db
+    .select({
+      id: fields.id,
+      worksheetTemplateId: fields.worksheetTemplateId,
+      symbol: fields.symbol,
+      labelDe: fields.labelDe,
+      unit: fields.unit,
+      dataType: fields.dataType,
+    })
+    .from(fields)
+    .where(inArray(fields.worksheetTemplateId, templateIds));
+
+  const params = templateIds.length === 0 ? [] : await db
     .select()
-    .from(decisions)
-    .where(eq(decisions.calculationId, calcId))
-    .orderBy(asc(decisions.madeAt));
+    .from(projectParameters)
+    .where(eq(projectParameters.projectId, projectId));
+  const paramsByFieldId = new Map(params.map((p) => [p.fieldId, p]));
+
+  const worksheets = instances.map((inst) => {
+    const tmplFields = allFields.filter((f) => f.worksheetTemplateId === inst.templateId);
+    const parameters = tmplFields.map((f) => {
+      const p = paramsByFieldId.get(f.id);
+      const value = !p
+        ? null
+        : f.dataType === 'number' ? (p.valueNumber == null ? null : String(p.valueNumber))
+        : f.dataType === 'text' ? p.valueText
+        : f.dataType === 'enum' ? p.valueEnum
+        : f.dataType === 'date' ? p.valueDate
+        : f.dataType === 'boolean' ? (p.valueBoolean == null ? null : (p.valueBoolean ? 'Ja' : 'Nein'))
+        : p.valueJson == null ? null : JSON.stringify(p.valueJson);
+      return {
+        symbol: f.symbol,
+        labelDe: f.labelDe,
+        unit: f.unit,
+        dataType: f.dataType,
+        value,
+        sourceType: p?.sourceType ?? 'entered',
+        enteredAt: p?.enteredAt.toISOString() ?? '',
+      };
+    });
+    return {
+      instanceId: inst.instanceId,
+      code: inst.code,
+      titleDe: inst.titleDe,
+      status: inst.status,
+      standardCode: inst.standardCode,
+      parameters,
+    };
+  });
 
   const approvalRows = await db
-    .select()
-    .from(approvals)
-    .where(eq(approvals.calculationId, calcId))
-    .orderBy(asc(approvals.decidedAt));
-
-  const cells = normalizeInputs(calc.inputs as Record<string, any>);
-
-  // Collect distinct docIds referenced by any cited input
-  const docIds = Array.from(
-    new Set(
-      Object.values(cells)
-        .map((c) => (c.source && 'docId' in c.source ? c.source.docId : null))
-        .filter((x): x is string => !!x),
-    ),
-  );
-  const citedDocs =
-    docIds.length > 0
-      ? await db
-          .select()
-          .from(projectDocuments)
-          .where(inArray(projectDocuments.id, docIds))
-          // Stable appendix lettering: order by upload time (primary) and
-          // id (tiebreaker) so re-renders never shuffle the appendix index.
-          .orderBy(asc(projectDocuments.uploadedAt), asc(projectDocuments.id))
-      : [];
-
-  // Worksheet — today only DWA-A-201; Plan 8 will generalize
-  const worksheet = ALL_WORKSHEETS.find((w) => w.id === calc.worksheetId);
-  if (!worksheet) throw new Error('worksheet_not_found');
-
-  // Recompute on read so the report always reflects current values
-  const values = inputsToValues(calc.inputs as Record<string, any>);
-  const result = compute(worksheet, values);
-
-  // Resolve actor profiles
-  const userIds = new Set<string>([calc.createdBy]);
-  for (const d of decisionRows) userIds.add(d.madeBy);
-  for (const a of approvalRows) if (a.reviewerId) userIds.add(a.reviewerId);
-
-  const actorRows =
-    userIds.size > 0
-      ? await db.select().from(profiles).where(inArray(profiles.id, [...userIds]))
-      : [];
-  const actors = Object.fromEntries(actorRows.map((p) => [p.id, p]));
+    .select({
+      occurredAt: approvalEvents.occurredAt,
+      eventType: approvalEvents.eventType,
+      fromStatus: approvalEvents.fromStatus,
+      toStatus: approvalEvents.toStatus,
+      comment: approvalEvents.comment,
+      worksheetCode: worksheetTemplates.code,
+      actorName: profiles.fullName,
+    })
+    .from(approvalEvents)
+    .innerJoin(worksheetInstances, eq(worksheetInstances.id, approvalEvents.worksheetInstanceId))
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .leftJoin(profiles, eq(profiles.id, approvalEvents.actorId))
+    .where(eq(worksheetInstances.projectId, projectId))
+    .orderBy(desc(approvalEvents.occurredAt));
 
   return {
-    calc,
-    project,
-    org,
-    decisions: decisionRows,
-    approvals: approvalRows,
-    citedDocs,
-    cells,
-    result,
-    worksheet,
-    actors,
+    project: {
+      id: proj.id,
+      name: proj.name,
+      projectCode: proj.projectCode,
+      siteLocation: proj.siteLocation,
+      createdAt: proj.createdAt.toISOString(),
+      org: proj.org && proj.org.id ? (proj.org as { id: string; name: string; logoUrl: string | null }) : null,
+    },
+    standards: stds.map((s) => ({
+      id: s.id,
+      code: s.code,
+      titleDe: s.titleDe,
+      version: s.version,
+      activeSince: s.activeSince.toISOString(),
+    })),
+    worksheets,
+    approvals: approvalRows.map((a) => ({
+      occurredAt: a.occurredAt.toISOString(),
+      worksheetCode: a.worksheetCode,
+      eventType: a.eventType,
+      fromStatus: a.fromStatus,
+      toStatus: a.toStatus,
+      actorName: a.actorName ?? null,
+      comment: a.comment,
+    })),
   };
+}
+
+export async function loadCalculationData(_calcId: string): Promise<ReportData> {
+  throw new Error('loadCalculationData is no longer supported — use loadProjectReportData');
 }
