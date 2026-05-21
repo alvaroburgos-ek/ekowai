@@ -1,5 +1,13 @@
 import Link from 'next/link';
 
+const STATUS_DOT: Record<string, string> = {
+  draft: 'bg-ink/20',
+  submitted_for_review: 'bg-accent-2',
+  engineer_approved: 'bg-success',
+  final: 'bg-accent',
+  deactivated: 'bg-ink/10',
+};
+
 type WorksheetEntry = {
   code: string;
   titleDe: string;
@@ -56,6 +64,10 @@ export function WorksheetListSidebar({
                         : 'text-subtext hover:text-ink hover:bg-paper-2/50'
                     }`}
                   >
+                    <span
+                      className={`inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle ${STATUS_DOT[w.status ?? 'draft']}`}
+                      aria-label={`Status: ${w.status ?? 'draft'}`}
+                    />
                     <span className="font-mono text-[11px] mr-2">{w.code}</span>
                     {w.titleDe}
                   </Link>
