@@ -3,6 +3,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { addStandardToProject, removeStandardFromProject } from '@/lib/actions/project-standards';
+import { useFocusTrap } from '@/lib/hooks/use-focus-trap';
 
 type Standard = {
   id: string;
@@ -17,10 +18,16 @@ type Props = {
   active: Array<{ projectStandardId: string; standard: Standard }>;
 };
 
+type RemoveModalState = { standardId: string; standardCode: string } | null;
+
 export function StandardsPicker({ projectId, available, active }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selectedToAdd, setSelectedToAdd] = useState<string>('');
+  const [removeModal, setRemoveModal] = useState<RemoveModalState>(null);
+  const [reason, setReason] = useState('');
+
+  const modalContainerRef = useFocusTrap(removeModal !== null);
 
   const activeIds = new Set(active.map((a) => a.standard.id));
   const addable = available.filter((s) => !activeIds.has(s.id));
@@ -34,11 +41,17 @@ export function StandardsPicker({ projectId, available, active }: Props) {
     });
   };
 
-  const handleRemove = (standardId: string) => {
-    const reason = window.prompt('Grund für die Entfernung?');
-    if (!reason || !reason.trim()) return;
+  const handleRemove = (standardId: string, standardCode: string) => {
+    setRemoveModal({ standardId, standardCode });
+    setReason('');
+  };
+
+  const confirmRemove = () => {
+    if (!removeModal || !reason.trim()) return;
     startTransition(async () => {
-      await removeStandardFromProject(projectId, standardId, reason);
+      await removeStandardFromProject(projectId, removeModal.standardId, reason);
+      setRemoveModal(null);
+      setReason('');
       router.refresh();
     });
   };
@@ -68,7 +81,7 @@ export function StandardsPicker({ projectId, available, active }: Props) {
                   variant="ghost"
                   size="sm"
                   disabled={pending}
-                  onClick={() => handleRemove(a.standard.id)}
+                  onClick={() => handleRemove(a.standard.id, a.standard.code)}
                 >
                   Entfernen
                 </Button>
@@ -106,6 +119,40 @@ export function StandardsPicker({ projectId, available, active }: Props) {
           </div>
         )}
       </section>
+
+      {removeModal && (
+        <div
+          ref={modalContainerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remove-std-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm"
+        >
+          <div className="w-full max-w-lg rounded-lg bg-paper border border-hairline-strong p-6 space-y-4">
+            <h2 id="remove-std-title" className="text-lg font-semibold text-ink">
+              Regelwerk entfernen: {removeModal.standardCode}
+            </h2>
+            <p className="text-sm text-subtext">
+              Begründung (Pflicht — wird permanent im Auditprotokoll gespeichert):
+            </p>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setRemoveModal(null)} disabled={pending}>
+                Abbrechen
+              </Button>
+              <Button onClick={confirmRemove} disabled={pending || !reason.trim()}>
+                Entfernen
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
