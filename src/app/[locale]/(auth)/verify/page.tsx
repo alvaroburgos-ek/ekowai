@@ -11,35 +11,15 @@ import { createFirstOrg } from './actions';
 
 export default async function VerifyPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: 'de' | 'en' }>;
-  searchParams: Promise<{ token_hash?: string; type?: string }>;
 }) {
   const { locale } = await params;
-  const { token_hash, type } = await searchParams;
   const t = await getTranslations('auth');
 
   const supabase = await createClient();
 
-  // Step A: if token_hash present, verify it (first-time clicking magic link)
-  if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({
-      type: type as 'email',
-      token_hash,
-    });
-    if (error) {
-      return (
-        <Card className="p-8">
-          <p className="text-red-700">{t('linkExpired')}</p>
-        </Card>
-      );
-    }
-    // Strip query params and re-render to fall through to org check
-    redirect(`/${locale}/verify`);
-  }
-
-  // Step B: confirm session
+  // Step A: confirm session
   const {
     data: { user },
   } = await supabase.auth.getUser();
