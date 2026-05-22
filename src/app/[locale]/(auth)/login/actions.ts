@@ -42,6 +42,42 @@ export async function requestMagicLink(formData: FormData) {
   return { ok: true } as const;
 }
 
+const passwordSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(200),
+  locale: z.enum(['de', 'en']),
+});
+
+export async function signInWithPassword(formData: FormData): Promise<
+  | { ok: true }
+  | { ok: false; error: 'invalid_credentials' | 'invalid_input' | 'send_failed'; message?: string }
+> {
+  const parsed = passwordSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+    locale: formData.get('locale'),
+  });
+  if (!parsed.success) return { ok: false, error: 'invalid_input' };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  if (error) {
+    // Don't leak whether email exists — return generic invalid_credentials
+    if (error.status === 400 || error.message.toLowerCase().includes('invalid')) {
+      return { ok: false, error: 'invalid_credentials' };
+    }
+    return { ok: false, error: 'send_failed', message: error.message };
+  }
+
+  // The action does NOT redirect — the client-side will router.push to /verify
+  // once the cookie is set. Returning ok=true is enough; the session cookie is
+  // now set by Supabase's SSR helper.
+  return { ok: true };
+}
+
 const googleSchema = z.object({ locale: z.enum(['de', 'en']) });
 
 export async function signInWithGoogle(formData: FormData): Promise<never> {
