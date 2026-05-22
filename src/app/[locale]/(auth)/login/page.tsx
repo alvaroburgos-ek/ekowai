@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { requestMagicLink, signInWithGoogle } from './actions';
+import { requestMagicLink, signInWithGoogle, signInWithPassword } from './actions';
 import { env } from '@/env';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,11 +16,16 @@ export default function LoginPage() {
   const t = useTranslations('auth');
   const tErr = useTranslations('errors');
   const locale = useLocale();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<{ ok: boolean; error?: string; message?: string } | null>(
-    null,
-  );
+  const [showMagicLink, setShowMagicLink] = useState(false);
+  const [state, setState] = useState<{
+    ok: boolean;
+    mode?: 'password' | 'magic-link';
+    error?: string;
+    message?: string;
+  } | null>(null);
 
   const urlError = searchParams.get('error');
   const urlErrorDesc = searchParams.get('error_description');
@@ -95,38 +100,107 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          <form
-            action={(formData) => {
-              startTransition(async () => {
-                const result = await requestMagicLink(formData);
-                setState(result);
-              });
-            }}
-            className="space-y-6"
-          >
-            <input type="hidden" name="locale" value={locale} />
-            <label className="block">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
-                {t('email')}
-              </span>
-              <Input
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                placeholder="ingenieur@bueromustermann.de"
-                className="mt-2"
-              />
-            </label>
-            <Button type="submit" disabled={pending} className="w-full">
-              {t('magicLinkButton')}
-            </Button>
-          </form>
+          {!showMagicLink ? (
+            <form
+              action={(formData) => {
+                startTransition(async () => {
+                  const result = await signInWithPassword(formData);
+                  if (result.ok) {
+                    router.push(`/${locale}/verify`);
+                  } else {
+                    setState({ ok: false, mode: 'password', error: result.error, message: result.message });
+                  }
+                });
+              }}
+              className="space-y-4"
+            >
+              <input type="hidden" name="locale" value={locale} />
+              <label className="block">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
+                  {t('email')}
+                </span>
+                <Input
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="ingenieur@bueromustermann.de"
+                  className="mt-2"
+                />
+              </label>
+              <label className="block">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
+                  {t('password')}
+                </span>
+                <Input
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  minLength={8}
+                  className="mt-2"
+                />
+              </label>
+              <Button type="submit" disabled={pending} className="w-full">
+                {t('signInButton')}
+              </Button>
+              <button
+                type="button"
+                onClick={() => { setState(null); setShowMagicLink(true); }}
+                className="block text-xs text-subtext hover:text-ink transition-colors"
+              >
+                {t('forgotPassword')}
+              </button>
+            </form>
+          ) : (
+            <form
+              action={(formData) => {
+                startTransition(async () => {
+                  const result = await requestMagicLink(formData);
+                  setState({ ...result, mode: 'magic-link' });
+                });
+              }}
+              className="space-y-4"
+            >
+              <input type="hidden" name="locale" value={locale} />
+              <label className="block">
+                <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
+                  {t('email')}
+                </span>
+                <Input
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="ingenieur@bueromustermann.de"
+                  className="mt-2"
+                />
+              </label>
+              <Button type="submit" disabled={pending} className="w-full">
+                {t('magicLinkButton')}
+              </Button>
+              <button
+                type="button"
+                onClick={() => { setState(null); setShowMagicLink(false); }}
+                className="block text-xs text-subtext hover:text-ink transition-colors"
+              >
+                {t('backToPassword')}
+              </button>
+            </form>
+          )}
 
-          {state?.ok && <Alert variant="success">{t('magicLinkSent')}</Alert>}
+          {state?.ok && state.mode === 'magic-link' && (
+            <Alert variant="success">{t('magicLinkSent')}</Alert>
+          )}
           {state && !state.ok && (
             <Alert variant="error">
-              <div>{tErr('generic')}</div>
+              <div>
+                {state.error === 'invalid_credentials'
+                  ? tErr('invalid_credentials')
+                  : state.error === 'invalid_input'
+                  ? tErr('invalid_input')
+                  : tErr('generic')}
+              </div>
               {state.message && <div className="mt-1 text-xs opacity-75">{state.message}</div>}
             </Alert>
           )}
