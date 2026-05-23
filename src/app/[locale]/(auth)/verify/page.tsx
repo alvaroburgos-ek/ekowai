@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
-import { orgMembers, profiles, orgs } from '@/lib/db/schema';
+import { orgMembers, profiles, projects } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -11,7 +11,9 @@ import { createFirstOrg } from './actions';
 import { env } from '@/env';
 
 /** Auto-join the EKOWAI org for whitelisted emails on first login.
- * Idempotent. Single-tenant assumption: joins the oldest existing org. */
+ * Idempotent. Finds the org by the pilot project PLT-HS-01 (seeded by
+ * scripts/seed-pilot-project.ts), which is reliably the real EKOWAI org —
+ * unlike "oldest org by created_at" which can pick up RLS-test residue. */
 async function maybeAutoJoinEkowaiOrg(
   userId: string,
   userEmail: string | null | undefined,
@@ -23,14 +25,19 @@ async function maybeAutoJoinEkowaiOrg(
     .filter((s) => s.length > 0);
   if (!allowlist.includes(userEmail.toLowerCase())) return;
 
-  // Single-tenant bootstrap: join the oldest org. If there's no org yet,
-  // let the normal create-org form handle it.
-  const [oldest] = await db.select({ id: orgs.id }).from(orgs).orderBy(orgs.createdAt).limit(1);
-  if (!oldest) return;
+  // Robust org lookup: the pilot project PLT-HS-01 sits inside the real
+  // EKOWAI org. If it doesn't exist yet (pre-seed), let the normal
+  // create-org form handle it.
+  const [pilot] = await db
+    .select({ orgId: projects.orgId })
+    .from(projects)
+    .where(eq(projects.projectCode, 'PLT-HS-01'))
+    .limit(1);
+  if (!pilot?.orgId) return;
 
   await db
     .insert(orgMembers)
-    .values({ orgId: oldest.id, userId, role: 'owner' })
+    .values({ orgId: pilot.orgId, userId, role: 'owner' })
     .onConflictDoNothing();
 }
 
