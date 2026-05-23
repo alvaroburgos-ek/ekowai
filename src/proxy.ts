@@ -9,7 +9,7 @@ const intlMiddleware = createIntlMiddleware({
   localePrefix: 'always',
 });
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // First: locale routing (rewrites/redirects to ensure /de or /en prefix)
   const intlResponse = intlMiddleware(request);
 
