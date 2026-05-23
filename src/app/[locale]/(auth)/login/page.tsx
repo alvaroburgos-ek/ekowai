@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { requestMagicLink, signInWithGoogle } from './actions';
+import { signInWithGoogle, signInWithPassword } from './actions';
 import { env } from '@/env';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,11 +16,13 @@ export default function LoginPage() {
   const t = useTranslations('auth');
   const tErr = useTranslations('errors');
   const locale = useLocale();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
-  const [state, setState] = useState<{ ok: boolean; error?: string; message?: string } | null>(
-    null,
-  );
+  const [state, setState] = useState<{
+    error?: string;
+    message?: string;
+  } | null>(null);
 
   const urlError = searchParams.get('error');
   const urlErrorDesc = searchParams.get('error_description');
@@ -98,11 +100,15 @@ export default function LoginPage() {
           <form
             action={(formData) => {
               startTransition(async () => {
-                const result = await requestMagicLink(formData);
-                setState(result);
+                const result = await signInWithPassword(formData);
+                if (result.ok) {
+                  router.push(`/${locale}/verify`);
+                } else {
+                  setState({ error: result.error, message: result.message });
+                }
               });
             }}
-            className="space-y-6"
+            className="space-y-4"
           >
             <input type="hidden" name="locale" value={locale} />
             <label className="block">
@@ -118,15 +124,33 @@ export default function LoginPage() {
                 className="mt-2"
               />
             </label>
+            <label className="block">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-subtext">
+                {t('password')}
+              </span>
+              <Input
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                minLength={8}
+                className="mt-2"
+              />
+            </label>
             <Button type="submit" disabled={pending} className="w-full">
-              {t('magicLinkButton')}
+              {t('signInButton')}
             </Button>
           </form>
 
-          {state?.ok && <Alert variant="success">{t('magicLinkSent')}</Alert>}
-          {state && !state.ok && (
+          {state && (
             <Alert variant="error">
-              <div>{tErr('generic')}</div>
+              <div>
+                {state.error === 'invalid_credentials'
+                  ? tErr('invalid_credentials')
+                  : state.error === 'invalid_input'
+                  ? tErr('invalid_input')
+                  : tErr('generic')}
+              </div>
               {state.message && <div className="mt-1 text-xs opacity-75">{state.message}</div>}
             </Alert>
           )}

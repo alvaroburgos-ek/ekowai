@@ -5,41 +5,36 @@ import { env } from '@/env';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 
-const schema = z.object({
+const passwordSchema = z.object({
   email: z.string().email(),
+  password: z.string().min(8).max(200),
   locale: z.enum(['de', 'en']),
 });
 
-export async function requestMagicLink(formData: FormData) {
-  const parsed = schema.safeParse({
+export async function signInWithPassword(formData: FormData): Promise<
+  | { ok: true }
+  | { ok: false; error: 'invalid_credentials' | 'invalid_input' | 'send_failed'; message?: string }
+> {
+  const parsed = passwordSchema.safeParse({
     email: formData.get('email'),
+    password: formData.get('password'),
     locale: formData.get('locale'),
   });
-  if (!parsed.success) {
-    return { ok: false, error: 'invalid_email' as const };
-  }
+  if (!parsed.success) return { ok: false, error: 'invalid_input' };
 
   const supabase = await createClient();
-  const redirectTo = `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/${parsed.data.locale}/verify`;
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
-    options: { emailRedirectTo: redirectTo },
+    password: parsed.data.password,
   });
-
   if (error) {
-    console.error('[requestMagicLink] supabase error', {
-      message: error.message,
-      status: error.status,
-      code: (error as { code?: string }).code,
-      redirectTo,
-    });
-    return {
-      ok: false,
-      error: 'send_failed' as const,
-      message: error.message,
-    };
+    if (error.status === 400 || error.message.toLowerCase().includes('invalid')) {
+      return { ok: false, error: 'invalid_credentials' };
+    }
+    return { ok: false, error: 'send_failed', message: error.message };
   }
-  return { ok: true } as const;
+
+  return { ok: true };
 }
 
 const googleSchema = z.object({ locale: z.enum(['de', 'en']) });

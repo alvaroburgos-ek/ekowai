@@ -27,47 +27,49 @@ export async function loadProjectAuditTimeline(
   projectId: string,
   limit = 100,
 ): Promise<AuditEntry[]> {
-  const approvals = await db
-    .select({
-      occurredAt: approvalEvents.occurredAt,
-      actorId: approvalEvents.actorId,
-      actorRole: approvalEvents.actorRole,
-      eventType: approvalEvents.eventType,
-      fromStatus: approvalEvents.fromStatus,
-      toStatus: approvalEvents.toStatus,
-      comment: approvalEvents.comment,
-      worksheetCode: worksheetTemplates.code,
-      actorName: profiles.fullName,
-    })
-    .from(approvalEvents)
-    .innerJoin(
-      worksheetInstances,
-      eq(worksheetInstances.id, approvalEvents.worksheetInstanceId),
-    )
-    .innerJoin(
-      worksheetTemplates,
-      eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId),
-    )
-    .leftJoin(profiles, eq(profiles.id, approvalEvents.actorId))
-    .where(eq(worksheetInstances.projectId, projectId))
-    .orderBy(desc(approvalEvents.occurredAt))
-    .limit(limit);
-
-  const audits = await db
-    .select({
-      occurredAt: auditLog.occurredAt,
-      actorId: auditLog.actorId,
-      actorRole: auditLog.actorRole,
-      tableName: auditLog.tableName,
-      action: auditLog.action,
-      changes: auditLog.changes,
-      actorName: profiles.fullName,
-    })
-    .from(auditLog)
-    .leftJoin(profiles, eq(profiles.id, auditLog.actorId))
-    .where(eq(auditLog.projectId, projectId))
-    .orderBy(desc(auditLog.occurredAt))
-    .limit(limit);
+  // Both queries are independent — run in parallel
+  const [approvals, audits] = await Promise.all([
+    db
+      .select({
+        occurredAt: approvalEvents.occurredAt,
+        actorId: approvalEvents.actorId,
+        actorRole: approvalEvents.actorRole,
+        eventType: approvalEvents.eventType,
+        fromStatus: approvalEvents.fromStatus,
+        toStatus: approvalEvents.toStatus,
+        comment: approvalEvents.comment,
+        worksheetCode: worksheetTemplates.code,
+        actorName: profiles.fullName,
+      })
+      .from(approvalEvents)
+      .innerJoin(
+        worksheetInstances,
+        eq(worksheetInstances.id, approvalEvents.worksheetInstanceId),
+      )
+      .innerJoin(
+        worksheetTemplates,
+        eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId),
+      )
+      .leftJoin(profiles, eq(profiles.id, approvalEvents.actorId))
+      .where(eq(worksheetInstances.projectId, projectId))
+      .orderBy(desc(approvalEvents.occurredAt))
+      .limit(limit),
+    db
+      .select({
+        occurredAt: auditLog.occurredAt,
+        actorId: auditLog.actorId,
+        actorRole: auditLog.actorRole,
+        tableName: auditLog.tableName,
+        action: auditLog.action,
+        changes: auditLog.changes,
+        actorName: profiles.fullName,
+      })
+      .from(auditLog)
+      .leftJoin(profiles, eq(profiles.id, auditLog.actorId))
+      .where(eq(auditLog.projectId, projectId))
+      .orderBy(desc(auditLog.occurredAt))
+      .limit(limit),
+  ]);
 
   // Resolve field symbols for audit_log rows that target project_parameters
   const fieldIds = new Set<string>();

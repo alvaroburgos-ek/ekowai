@@ -16,6 +16,8 @@ export const env = createEnv({
     LEGAL_REVIEWED: z.enum(['1', 'true']).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
     RESEND_FROM_EMAIL: z.string().email().default('onboarding@resend.dev'),
+    /** Comma-separated list of emails that auto-join the EKOWAI org as `owner` on first login. */
+    EKOWAI_AUTO_JOIN_OWNERS: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
@@ -38,6 +40,7 @@ export const env = createEnv({
     LEGAL_REVIEWED: process.env.LEGAL_REVIEWED,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+    EKOWAI_AUTO_JOIN_OWNERS: process.env.EKOWAI_AUTO_JOIN_OWNERS,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
@@ -58,5 +61,21 @@ if (
     'BYPASS_AUTH is set in Vercel production. Remove BYPASS_AUTH and ' +
       'BYPASS_AUTH_USER_ID from the production environment — this flag is ' +
       'for preview/test deployments only.',
+  );
+}
+
+// Hard guard: DEV_AUTOLOGIN_EMAIL bypasses the magic-link/password flow and
+// auto-mints a session as the configured user for ANY request hitting a
+// protected route (see src/middleware.ts:38). Allowed on preview/test, must
+// not be set in Vercel production. Same pattern as BYPASS_AUTH above.
+if (
+  typeof window === 'undefined' &&
+  env.DEV_AUTOLOGIN_EMAIL &&
+  process.env.VERCEL_ENV === 'production'
+) {
+  throw new Error(
+    'DEV_AUTOLOGIN_EMAIL is set in Vercel production. Remove it from the ' +
+      'production environment — this var bypasses authentication and is for ' +
+      'preview/test deployments only.',
   );
 }

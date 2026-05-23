@@ -65,10 +65,14 @@ export function WorksheetForm({
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Initialize the store ONCE per instance change
+  // Initialize the store ONCE per instance change.
+  // We intentionally omit initialValues/initialSources from the dependency array —
+  // they are new object references on every router.refresh() but contain the same
+  // data, and re-running init would wipe unsaved in-flight edits.
   useEffect(() => {
-    init(instance.id, initialValues, initialSources);
-  }, [init, instance.id, initialValues, initialSources]);
+    init(instance.id, initialValues as Record<string, FieldValue>, initialSources as Record<string, { docId: string; page?: number; note?: string } | null>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [init, instance.id]);
 
   // Debounced auto-save
   useEffect(() => {
@@ -121,10 +125,14 @@ export function WorksheetForm({
           {worksheet.template.code}
         </div>
         <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
-        <div className="mt-2 text-xs text-subtext">
-          {saveStatus === 'saving' && 'Speichert...'}
-          {saveStatus === 'saved' && 'Gespeichert'}
-          {saveStatus === 'error' && 'Speichern fehlgeschlagen'}
+        <div className="mt-2 text-xs">
+          {saveStatus === 'saving' && <span className="text-accent-2">● Speichert…</span>}
+          {saveStatus === 'saved' && <span className="text-success">✓ Gespeichert</span>}
+          {saveStatus === 'error' && (
+            <span className="text-error bg-error/10 px-2 py-0.5 rounded">
+              ✗ Speichern fehlgeschlagen
+            </span>
+          )}
         </div>
       </header>
 

@@ -28,15 +28,15 @@ export default async function DocumentsPage({
   return (
     <article className="space-y-8">
       <header className="border-b border-hairline pb-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-1">
-          Projekt · {project.id.slice(0, 8)}
+        <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-1">
+          Projekt · <span className="font-mono">{project.id.slice(0, 8)}</span>
         </div>
         <h1 className="text-3xl font-semibold text-ink tracking-tight">
           {project.name}
         </h1>
         <Link
           href={`/${locale}/projects/${id}`}
-          className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink mt-1 inline-block"
+          className="text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink mt-1 inline-block"
         >
           ← Zurück zum Projekt
         </Link>
@@ -45,7 +45,7 @@ export default async function DocumentsPage({
       <section className="grid gap-6 max-w-3xl">
         <div className="flex items-baseline justify-between border-b border-hairline pb-2">
           <h2 className="text-2xl">{t('title')}</h2>
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext tabular-nums">
+          <span className="text-[10px] uppercase tracking-[0.18em] text-subtext tabular-nums">
             {String(docs.length).padStart(2, '0')}
           </span>
         </div>

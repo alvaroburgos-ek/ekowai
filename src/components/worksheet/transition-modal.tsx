@@ -1,9 +1,10 @@
 'use client';
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { transitionWorksheet } from '@/lib/actions/worksheet-transition';
 import { useRouter } from 'next/navigation';
 import type { TransitionEvent } from '@/lib/state-machine';
+import { useFocusTrap } from '@/lib/hooks/use-focus-trap';
 
 type Props = {
   open: boolean;
@@ -26,6 +27,16 @@ export function TransitionModal({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const containerRef = useFocusTrap(open);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -48,9 +59,17 @@ export function TransitionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm">
+    <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="transition-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm"
+    >
       <div className="w-full max-w-lg rounded-lg bg-paper border border-hairline-strong p-6 space-y-4 shadow-lg">
-        <h2 className="text-lg font-semibold text-ink">{actionLabel}</h2>
+        <h2 id="transition-modal-title" className="text-lg font-semibold text-ink">
+          {actionLabel}
+        </h2>
         <p className="text-sm text-subtext">
           Kommentar (Pflicht — wird permanent im Auditprotokoll gespeichert):
         </p>
@@ -71,6 +90,9 @@ export function TransitionModal({
           <Button
             onClick={handleSubmit}
             disabled={pending || !comment.trim()}
+            className={destructive
+              ? "border border-error text-error hover:bg-error/10 bg-transparent"
+              : ""}
             variant={destructive ? 'ghost' : 'primary'}
           >
             {pending ? 'Verarbeite...' : actionLabel}

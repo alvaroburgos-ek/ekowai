@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
-import { orgMembers, profiles } from '@/lib/db/schema';
+import { orgMembers, profiles, orgs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
@@ -8,44 +8,53 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createFirstOrg } from './actions';
+import { env } from '@/env';
+
+/** Auto-join the EKOWAI org for whitelisted emails on first login.
+ * Idempotent. Single-tenant assumption: joins the oldest existing org. */
+async function maybeAutoJoinEkowaiOrg(
+  userId: string,
+  userEmail: string | null | undefined,
+): Promise<void> {
+  if (!userEmail) return;
+  const allowlist = (env.EKOWAI_AUTO_JOIN_OWNERS ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0);
+  if (!allowlist.includes(userEmail.toLowerCase())) return;
+
+  // Single-tenant bootstrap: join the oldest org. If there's no org yet,
+  // let the normal create-org form handle it.
+  const [oldest] = await db.select({ id: orgs.id }).from(orgs).orderBy(orgs.createdAt).limit(1);
+  if (!oldest) return;
+
+  await db
+    .insert(orgMembers)
+    .values({ orgId: oldest.id, userId, role: 'owner' })
+    .onConflictDoNothing();
+}
 
 export default async function VerifyPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: 'de' | 'en' }>;
-  searchParams: Promise<{ token_hash?: string; type?: string }>;
 }) {
   const { locale } = await params;
-  const { token_hash, type } = await searchParams;
   const t = await getTranslations('auth');
 
   const supabase = await createClient();
 
-  // Step A: if token_hash present, verify it (first-time clicking magic link)
-  if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({
-      type: type as 'email',
-      token_hash,
-    });
-    if (error) {
-      return (
-        <Card className="p-8">
-          <p className="text-red-700">{t('linkExpired')}</p>
-        </Card>
-      );
-    }
-    // Strip query params and re-render to fall through to org check
-    redirect(`/${locale}/verify`);
-  }
-
-  // Step B: confirm session
+  // Step A: confirm session
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
     redirect(`/${locale}/login`);
   }
+
+  // Step B: auto-join the EKOWAI org if the user's email is on the owner
+  // allowlist. Idempotent — does nothing if the user is already a member.
+  await maybeAutoJoinEkowaiOrg(user.id, user.email);
 
   // Step C: check if user has an org. If yes → projects. If no → org-create form.
   const memberships = await db

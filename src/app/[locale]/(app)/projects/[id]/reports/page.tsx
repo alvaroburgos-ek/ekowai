@@ -25,8 +25,8 @@ export default async function ReportsPage({
   return (
     <article className="space-y-8">
       <header className="border-b border-hairline pb-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-subtext mb-1">
-          Projekt · {project.id.slice(0, 8)}
+        <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-1">
+          Projekt · <span className="font-mono">{project.id.slice(0, 8)}</span>
         </div>
         <h1 className="text-3xl font-semibold text-ink tracking-tight">
           {project.name}
@@ -34,7 +34,7 @@ export default async function ReportsPage({
         <div className="mt-2 flex items-center gap-4">
           <Link
             href={`/${locale}/projects/${id}`}
-            className="font-mono text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink inline-block"
+            className="text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink inline-block"
           >
             ← Zurück zum Projekt
           </Link>
@@ -42,7 +42,7 @@ export default async function ReportsPage({
             href={`/api/projects/${id}/report/pdf`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-[10px] uppercase tracking-[0.2em] text-accent underline"
+            className="text-[10px] uppercase tracking-[0.2em] text-accent underline"
           >
             Aktuellen Bericht öffnen (Live-PDF)
           </a>

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { buildProjectReport } from '@/lib/pdf/build-report';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
 export async function GET(
   _req: Request,
   context: { params: Promise<{ id: string }> },
