@@ -199,8 +199,33 @@ export const complianceRequirements = pgTable(
     description: text('description'),
     clauseReference: text('clause_reference'),
     severity: text('severity').notNull(),
+    /** Short hint shown alongside the requirement — fallback when no structured
+     * suggestion rows exist. */
+    suggestion: text('suggestion'),
   },
   (t) => ({ uniqWorksheetCr: unique().on(t.worksheetTemplateId, t.code) }),
+);
+
+export const complianceSuggestions = pgTable(
+  'compliance_suggestions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    requirementId: uuid('requirement_id')
+      .notNull()
+      .references(() => complianceRequirements.id, { onDelete: 'cascade' }),
+    /** alternative_worksheet | alternative_standard | upstream_treatment | design_change */
+    suggestionType: text('suggestion_type').notNull(),
+    targetStandardCode: text('target_standard_code'),
+    targetWorksheetCode: text('target_worksheet_code'),
+    suggestionDe: text('suggestion_de').notNull(),
+    suggestionEn: text('suggestion_en'),
+    /** Optional gating condition — only show this suggestion when it matches the
+     * current field values (parsed with the same evaluator that drives
+     * pass/fail badges). Null = always show on REQ fail. */
+    condition: text('condition'),
+    orderIndex: integer('order_index').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
 );
 
 // =============================================================================

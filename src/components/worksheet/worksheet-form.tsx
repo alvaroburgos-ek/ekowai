@@ -1,12 +1,42 @@
 'use client';
 import { useEffect, useMemo, useRef } from 'react';
-import { useWorksheetStore } from '@/lib/state/worksheet-store';
+import { useWorksheetStore, type SaveStatus } from '@/lib/state/worksheet-store';
 import { saveWorksheet } from '@/lib/actions/worksheet';
 import { DynamicField } from './dynamic-field';
 import { SectionGroup } from './section-group';
 import { EquationsBlock } from './equations-block';
 import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
+
+function SaveIndicator({ status }: { status: SaveStatus }) {
+  if (status === 'idle') return null;
+  if (status === 'saving') {
+    return (
+      <span className="text-xs text-subtext inline-flex items-center gap-1.5">
+        <span
+          aria-hidden="true"
+          className="inline-block w-3 h-3 rounded-full border border-subtext border-t-transparent animate-spin"
+        />
+        Wird gespeichert…
+      </span>
+    );
+  }
+  if (status === 'saved') {
+    return (
+      <span
+        className="text-xs text-success inline-flex items-center gap-1"
+        style={{ animation: 'fadeOut 3s ease-out forwards' }}
+      >
+        Gespeichert ✓
+      </span>
+    );
+  }
+  return (
+    <span className="text-xs text-error bg-error/10 px-2 py-0.5 rounded">
+      ✗ Speichern fehlgeschlagen
+    </span>
+  );
+}
 
 // WorksheetForm needs sectionId + orderIndex on top of what DynamicField requires.
 type FieldDef = Parameters<typeof DynamicField>[0]['field'] & {
@@ -39,6 +69,7 @@ type Props = {
   fields: FieldDef[];
   equations: Parameters<typeof EquationsBlock>[0]['equations'];
   complianceRequirements: Parameters<typeof ComplianceBlock>[0]['requirements'];
+  complianceSuggestions: Parameters<typeof ComplianceBlock>[0]['suggestions'];
   initialValues: Record<string, FieldValue>;
   initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
   initialCitations: Record<string, Array<{ id: string; docId: string; page: number | null; note: string | null }>>;
@@ -58,6 +89,7 @@ export function WorksheetForm({
   fields,
   equations,
   complianceRequirements,
+  complianceSuggestions,
   initialValues,
   initialSources,
   initialCitations,
@@ -202,15 +234,9 @@ export function WorksheetForm({
         <div className="text-[10px] uppercase tracking-[0.2em] text-subtext mb-2">
           {worksheet.template.code}
         </div>
-        <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
-        <div className="mt-2 text-xs">
-          {saveStatus === 'saving' && <span className="text-accent-2">● Speichert…</span>}
-          {saveStatus === 'saved' && <span className="text-success">✓ Gespeichert</span>}
-          {saveStatus === 'error' && (
-            <span className="text-error bg-error/10 px-2 py-0.5 rounded">
-              ✗ Speichern fehlgeschlagen
-            </span>
-          )}
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
+          <SaveIndicator status={saveStatus} />
         </div>
       </header>
 
@@ -231,8 +257,10 @@ export function WorksheetForm({
       <EquationsBlock equations={equations} />
       <ComplianceBlock
         requirements={complianceRequirements}
+        suggestions={complianceSuggestions}
         fields={fields.map((f) => ({ id: f.id, symbol: f.symbol }))}
         locale={locale}
+        projectId={projectId}
       />
       <ApprovalBar instanceId={instance.id} status={instance.status} locale={locale} />
     </article>

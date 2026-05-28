@@ -130,6 +130,12 @@
     animation: fade-up 0.3s ease both;
   }
 
+  @keyframes fadeOut {
+    0% { opacity: 1; }
+    66% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
   /* Gradient focus line on inputs */
   .input-wrap {
     position: relative;

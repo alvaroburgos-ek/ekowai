@@ -92,10 +92,10 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
         lastSavedAt: new Date().toISOString(),
         pendingFieldIds: new Set(),
       });
-      // Auto-clear 'saved' after 2s
+      // Auto-clear 'saved' after 3s
       setTimeout(() => {
         if (get().saveStatus === 'saved') set({ saveStatus: 'idle' });
-      }, 2000);
+      }, 3000);
     } else {
       set({ saveStatus: 'error' });
     }
