@@ -5,6 +5,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { instantiateWorksheetInstancesForStandard } from '@/lib/db/queries/worksheet';
 import { revalidatePath } from 'next/cache';
+import { RECOMMENDED_LAYERS, type Layer } from '@/lib/types/project-layers';
 
 export async function addStandardToProject(
   projectId: string,
@@ -52,15 +53,6 @@ export async function addStandardToProject(
 
   return { ok: true, instantiated };
 }
-
-export type Layer = 'management' | 'cost' | 'technical';
-
-/** Codes that the recommended structure assigns to each layer when applied. */
-export const RECOMMENDED_LAYERS: Record<Layer, string[]> = {
-  management: ['DWA-M-820-1', 'DWA-M-820-2', 'DWA-M-820-3'],
-  cost: ['DIN-276'],
-  technical: [], // every other standard the engineer adds
-};
 
 /** Update layer + stage_order for one (project, standard). */
 export async function setProjectStandardLayer(
