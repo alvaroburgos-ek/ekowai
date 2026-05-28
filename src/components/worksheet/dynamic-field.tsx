@@ -27,9 +27,11 @@ type Props = {
   projectId: string;
   sameSymbolHints?: Array<{ worksheetCode: string; value: unknown }>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
+  /** True if this field is the output of an equation (auto-computed sub-total or total). */
+  isComputed?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }: Props) {
+export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const source = useWorksheetStore((s) => s.sources[field.id] ?? null);
   const setField = useWorksheetStore((s) => s.setField);
@@ -42,18 +44,31 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
   const sourceDoc = source ? docs.find((d) => d.id === source.docId) : undefined;
 
   const required = field.isRequired || undefined;
+  const isSubTotal = field.symbol.endsWith('_total');
+  const isCurrency = field.unit === 'EUR';
 
   return (
-    <div className="space-y-1.5" data-symbol={field.symbol}>
+    <div
+      className={
+        isSubTotal
+          ? 'space-y-1.5 border-t border-hairline-strong pt-3 mt-2 -mx-2 px-2 pb-2 rounded bg-paper-2/40'
+          : 'space-y-1.5'
+      }
+      data-symbol={field.symbol}
+    >
       {/* Label + clause + unit */}
       <div>
-        <label htmlFor={inputId} className="text-sm font-medium text-ink leading-snug block">
+        <label
+          htmlFor={inputId}
+          className={`text-sm ${isSubTotal ? 'font-semibold' : 'font-medium'} text-ink leading-snug block`}
+        >
+          {isSubTotal && <span className="mr-1.5">Σ</span>}
           {label}
           {field.isRequired && field.dataType !== 'json' && <span className="ml-1 text-accent-2">*</span>}
         </label>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5 flex items-baseline gap-1.5 flex-wrap">
           {field.clauseReference && <span>{field.clauseReference}</span>}
-          {field.unit && <span className="text-ink-2">{field.unit}</span>}
+          {field.unit && !isCurrency && <span className="text-ink-2">{field.unit}</span>}
           {field.verificationStatus !== 'engineer_verified' && (
             <span className="text-accent-2">imported_unverified</span>
           )}
@@ -63,7 +78,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
       {/* Input control by data_type */}
       {field.dataType === 'number' && (() => {
         const v = value?.type === 'number' ? value.value : null;
-        return (
+        const inputEl = (
           <input
             id={inputId}
             type="number"
@@ -71,15 +86,32 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs }
             value={v == null ? '' : v}
             required={field.isRequired}
             aria-required={required}
+            readOnly={isComputed}
+            tabIndex={isComputed ? -1 : undefined}
+            aria-readonly={isComputed || undefined}
             onChange={(e) => {
+              if (isComputed) return;
               const raw = e.target.value;
               setField(field.id, {
                 type: 'number',
                 value: raw === '' ? null : Number(raw),
               });
             }}
-            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink tabular-nums focus:border-accent focus:outline-none focus:ring-0"
+            className={`block w-full rounded-md border border-hairline-strong py-2 text-sm tabular-nums focus:outline-none focus:ring-0 ${isCurrency ? 'pl-8 pr-3' : 'px-3'} ${isComputed ? 'bg-paper-2 text-ink font-semibold cursor-default focus:border-hairline-strong' : 'bg-transparent text-ink focus:border-accent'}`}
           />
+        );
+        return isCurrency ? (
+          <div className="relative">
+            <span
+              aria-hidden="true"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-subtext pointer-events-none select-none"
+            >
+              €
+            </span>
+            {inputEl}
+          </div>
+        ) : (
+          inputEl
         );
       })()}
 
