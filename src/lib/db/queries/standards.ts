@@ -37,17 +37,23 @@ export async function listProjectStandards(projectId: string) {
     );
 }
 
+export type ProjectStandardLayer = 'management' | 'cost' | 'technical';
+
 export type ProjectStandardWithWorksheets = {
   standard: {
     id: string;
     code: string;
     titleDe: string;
+    titleEn: string | null;
     version: string;
   };
+  layer: ProjectStandardLayer | null;
+  stageOrder: number | null;
   worksheets: Array<{
     templateId: string;
     code: string;
     titleDe: string;
+    titleEn: string | null;
     phase: number | null;
     archetype: string | null;
     orderIndex: number;
@@ -65,10 +71,14 @@ export async function listProjectStandardsWithWorksheets(
       standardId: standards.id,
       standardCode: standards.code,
       standardTitleDe: standards.titleDe,
+      standardTitleEn: standards.titleEn,
       standardVersion: standards.version,
+      layer: projectStandards.layer,
+      stageOrder: projectStandards.stageOrder,
       templateId: worksheetTemplates.id,
       templateCode: worksheetTemplates.code,
       templateTitleDe: worksheetTemplates.titleDe,
+      templateTitleEn: worksheetTemplates.titleEn,
       templatePhase: worksheetTemplates.phase,
       templateArchetype: worksheetTemplates.archetype,
       templateOrderIndex: worksheetTemplates.orderIndex,
@@ -110,8 +120,11 @@ export async function listProjectStandardsWithWorksheets(
           id: r.standardId,
           code: r.standardCode,
           titleDe: r.standardTitleDe,
+          titleEn: r.standardTitleEn,
           version: r.standardVersion,
         },
+        layer: r.layer as ProjectStandardLayer | null,
+        stageOrder: r.stageOrder,
         worksheets: [],
       };
       grouped.set(r.standardId, group);
@@ -120,6 +133,7 @@ export async function listProjectStandardsWithWorksheets(
       templateId: r.templateId,
       code: r.templateCode,
       titleDe: r.templateTitleDe,
+      titleEn: r.templateTitleEn,
       phase: r.templatePhase,
       archetype: r.templateArchetype,
       orderIndex: r.templateOrderIndex,

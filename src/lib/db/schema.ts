@@ -244,6 +244,13 @@ export const projectStandards = pgTable(
     removedAt: timestamp('removed_at', { withTimezone: true }),
     removedBy: uuid('removed_by'),
     removalReason: text('removal_reason'),
+    /** Manual sequencing within the project. Earlier stage_order = upstream
+     * in the treatment train (e.g. infiltration before treatment). Null means
+     * unsequenced. */
+    stageOrder: integer('stage_order'),
+    /** Project layer this standard belongs to. Drives the grouping on the
+     * project overview page: management → cost → technical. */
+    layer: text('layer'),
   },
   (t) => ({ uniqProjectStd: unique().on(t.projectId, t.standardId) }),
 );
