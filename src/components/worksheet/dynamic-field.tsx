@@ -29,9 +29,12 @@ type Props = {
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
   isComputed?: boolean;
+  /** Worksheet code that this value was inherited from (no local saved value).
+   * When set, the field renders a small "← [code]" hint below the label. */
+  inheritedFrom?: string;
 };
 
-export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false }: Props) {
+export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const source = useWorksheetStore((s) => s.sources[field.id] ?? null);
   const setField = useWorksheetStore((s) => s.setField);
@@ -71,6 +74,14 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
           {field.unit && !isCurrency && <span className="text-ink-2">{field.unit}</span>}
           {field.verificationStatus !== 'engineer_verified' && (
             <span className="text-accent-2">imported_unverified</span>
+          )}
+          {inheritedFrom && (
+            <span
+              className="text-subtext normal-case tracking-normal"
+              title={`Wert aus ${inheritedFrom} übernommen — überschreiben durch Eingabe`}
+            >
+              ← {inheritedFrom}
+            </span>
           )}
         </div>
       </div>
@@ -218,8 +229,12 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
         </div>
       )}
 
-      {/* Same-symbol hint (cross-worksheet) */}
-      {sameSymbolHints && sameSymbolHints.length > 0 && (
+      {/* Same-symbol hint (cross-worksheet) — only shown when the value was
+          NOT auto-inherited (i.e. engineer has their own local value). When
+          inherited, the small "← code" badge above already communicates the
+          source, and the value already matches upstream, so the Übernehmen
+          button would be a no-op. */}
+      {!inheritedFrom && sameSymbolHints && sameSymbolHints.length > 0 && (
         <div className="text-xs text-subtext">
           Bereits in {sameSymbolHints.map((h) => h.worksheetCode).join(', ')}:
           {' '}

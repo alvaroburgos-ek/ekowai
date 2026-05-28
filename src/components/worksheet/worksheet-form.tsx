@@ -42,6 +42,9 @@ type Props = {
   initialValues: Record<string, FieldValue>;
   initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
   sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>>;
+  /** symbol → worksheet code from which the initial value was inherited (no
+   * local saved value existed). Used to render the "← [code]" hint. */
+  inheritedFromBySymbol: Record<string, string>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
@@ -57,6 +60,7 @@ export function WorksheetForm({
   initialValues,
   initialSources,
   sameSymbolValuesBySymbol,
+  inheritedFromBySymbol,
   docs,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
@@ -178,6 +182,7 @@ export function WorksheetForm({
         locale={locale}
         projectId={projectId}
         sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
+        inheritedFrom={inheritedFromBySymbol[f.symbol]}
         docs={docs}
         isComputed={computedSymbols.has(f.symbol)}
       />
