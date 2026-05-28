@@ -34,7 +34,7 @@ export function UploadDialog({
     startTransition(async () => {
       const r = await uploadDocument(fd);
       if (!r.ok) {
-        setError(t(`errors.${r.error}` as any));
+        setError(t(`errors.${r.error}` as Parameters<typeof t>[0]));
       } else {
         form.reset();
         onDone?.();
@@ -69,7 +69,7 @@ export function UploadDialog({
         >
           {KINDS.map((k) => (
             <option key={k} value={k}>
-              {t(`kindOptions.${k}` as any)}
+              {t(`kindOptions.${k}` as Parameters<typeof t>[0])}
             </option>
           ))}
         </select>

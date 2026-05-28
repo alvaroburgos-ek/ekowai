@@ -117,7 +117,7 @@ export default async function InboxPage({
               </Link>
               {p.latestComment && (
                 <div className="ml-44 mt-1 text-xs text-subtext italic">
-                  „{p.latestComment}"
+                  „{p.latestComment}“
                 </div>
               )}
             </li>

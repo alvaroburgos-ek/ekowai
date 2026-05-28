@@ -1,21 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 
 const STORAGE_KEY = 'ekowai.consent.v1';
 
+const listeners = new Set<() => void>();
+const subscribe = (callback: () => void) => {
+  listeners.add(callback);
+  return () => {
+    listeners.delete(callback);
+  };
+};
+const getSnapshot = () => window.localStorage.getItem(STORAGE_KEY) === 'accepted';
+// SSR: assume accepted so the banner doesn't flash on first paint
+const getServerSnapshot = () => true;
+
 export function ConsentBanner() {
   const t = useTranslations('consent');
-  const [show, setShow] = useState(false);
+  const accepted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!window.localStorage.getItem(STORAGE_KEY)) setShow(true);
-  }, []);
-
-  if (!show) return null;
+  if (accepted) return null;
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-2xl rounded-lg border border-slate-200 bg-white p-4 shadow-lg space-y-2">
@@ -24,7 +30,7 @@ export function ConsentBanner() {
         <Button
           onClick={() => {
             window.localStorage.setItem(STORAGE_KEY, 'accepted');
-            setShow(false);
+            listeners.forEach((l) => l());
           }}
         >
           {t('accept')}
