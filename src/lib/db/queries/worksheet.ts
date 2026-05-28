@@ -144,6 +144,10 @@ export type SameSymbolEntry = {
   /** Stage order of the source standard within the project. Lower = upstream;
    * null = unsequenced. Drives inheritance priority. */
   sourceStageOrder: number | null;
+  /** True if the source standard sits on the ancestor chain (parent, grand-
+   * parent, …) of the current standard — used for hierarchical inheritance
+   * (series, parallel, sub-standard all inherit from their parent). */
+  isFromAncestor: boolean;
 };
 
 /** For each field symbol on this worksheet, find values already entered for
@@ -152,10 +156,13 @@ export type SameSymbolEntry = {
  * the engineer hasn't yet entered for this worksheet.
  *
  * Entries are sorted so the caller can pick `[0]` for inheritance:
- *   1. Source standard's `stage_order` ascending (NULL last) — output from
+ *   1. Source standard is on the current standard's parent chain — parent
+ *      values always win, satisfying the series / parallel / sub-standard
+ *      "inherit from parent" rule.
+ *   2. Source standard's `stage_order` ascending (NULL last) — output from
  *      an earlier stage wins, matching the user's stage-N → stage-N+1
  *      parameter-flow expectation.
- *   2. Most-recently entered first (fallback within a stage). */
+ *   3. Most-recently entered first (fallback within a stage). */
 export async function loadSameSymbolValues(
   projectId: string,
   currentTemplateId: string,
@@ -189,6 +196,17 @@ export async function loadSameSymbolValues(
   if (otherFields.length === 0) return new Map();
 
   const otherFieldIds = otherFields.map((f) => f.fieldId);
+
+  // Look up the current worksheet's standardId so we can walk the ancestor
+  // chain on project_standards (parent_standard_id refs project_standards.id,
+  // not standards.id, so we resolve via the project_standards row).
+  const [currentWs] = await db
+    .select({ standardId: worksheetTemplates.standardId })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.id, currentTemplateId))
+    .limit(1);
+  const currentStandardId = currentWs?.standardId ?? null;
+
   const [params, projStds] = await Promise.all([
     db
       .select()
@@ -201,8 +219,10 @@ export async function loadSameSymbolValues(
       ),
     db
       .select({
+        id: projectStandards.id,
         standardId: projectStandards.standardId,
         stageOrder: projectStandards.stageOrder,
+        parentStandardId: projectStandards.parentStandardId,
       })
       .from(projectStandards)
       .where(
@@ -213,6 +233,24 @@ export async function loadSameSymbolValues(
       ),
   ]);
   const stageByStandardId = new Map(projStds.map((p) => [p.standardId, p.stageOrder]));
+
+  // Build the ancestor set of the current standard. Walk parent_standard_id
+  // (which points at another project_standards row) up to the root.
+  const psById = new Map(projStds.map((p) => [p.id, p]));
+  const psByStandardId = new Map(projStds.map((p) => [p.standardId, p]));
+  const ancestorStandardIds = new Set<string>();
+  if (currentStandardId) {
+    const currentPs = psByStandardId.get(currentStandardId);
+    let cursor = currentPs?.parentStandardId ?? null;
+    const seen = new Set<string>();
+    while (cursor && !seen.has(cursor)) {
+      seen.add(cursor);
+      const node = psById.get(cursor);
+      if (!node) break;
+      ancestorStandardIds.add(node.standardId);
+      cursor = node.parentStandardId;
+    }
+  }
 
   const fieldById = new Map(otherFields.map((f) => [f.fieldId, f]));
   const out = new Map<string, SameSymbolEntry[]>();
@@ -229,12 +267,15 @@ export async function loadSameSymbolValues(
       dataType: meta.dataType,
       updatedAt: p.enteredAt,
       sourceStageOrder: stageByStandardId.get(meta.sourceStandardId) ?? null,
+      isFromAncestor: ancestorStandardIds.has(meta.sourceStandardId),
     });
     out.set(meta.symbol, arr);
   }
-  // Sort each bucket: earliest stage first, then most-recently entered.
+  // Sort each bucket: ancestor chain first, then earliest stage, then most-
+  // recently entered.
   for (const arr of out.values()) {
     arr.sort((a, b) => {
+      if (a.isFromAncestor !== b.isFromAncestor) return a.isFromAncestor ? -1 : 1;
       const aStage = a.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
       const bStage = b.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
       if (aStage !== bStage) return aStage - bStage;

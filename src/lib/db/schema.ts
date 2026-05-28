@@ -251,6 +251,15 @@ export const projectStandards = pgTable(
     /** Project layer this standard belongs to. Drives the grouping on the
      * project overview page: management → cost → technical. */
     layer: text('layer'),
+    /** Hierarchical relationships within the technical train. Null = root
+     * standard. Self-referencing FK on project_standards.id.
+     *   - series      : downstream step from parent (parent feeds this)
+     *   - parallel    : alternative approach at parent's stage (engineer
+     *                   picks one or compares all)
+     *   - sub_standard: scoped inside parent's process (e.g. FLL-TP-RHIZOM
+     *                   inside FLL-Naturteich) */
+    parentStandardId: uuid('parent_standard_id'),
+    relationType: text('relation_type'),
   },
   (t) => ({ uniqProjectStd: unique().on(t.projectId, t.standardId) }),
 );

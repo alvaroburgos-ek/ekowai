@@ -39,7 +39,11 @@ export async function listProjectStandards(projectId: string) {
 
 export type ProjectStandardLayer = 'management' | 'cost' | 'technical';
 
+export type ProjectStandardRelationType = 'series' | 'parallel' | 'sub_standard';
+
 export type ProjectStandardWithWorksheets = {
+  /** project_standards.id — used for parent/child wiring. */
+  projectStandardId: string;
   standard: {
     id: string;
     code: string;
@@ -49,6 +53,8 @@ export type ProjectStandardWithWorksheets = {
   };
   layer: ProjectStandardLayer | null;
   stageOrder: number | null;
+  parentStandardId: string | null;
+  relationType: ProjectStandardRelationType | null;
   worksheets: Array<{
     templateId: string;
     code: string;
@@ -68,6 +74,7 @@ export async function listProjectStandardsWithWorksheets(
 ): Promise<ProjectStandardWithWorksheets[]> {
   const rows = await db
     .select({
+      projectStandardId: projectStandards.id,
       standardId: standards.id,
       standardCode: standards.code,
       standardTitleDe: standards.titleDe,
@@ -75,6 +82,8 @@ export async function listProjectStandardsWithWorksheets(
       standardVersion: standards.version,
       layer: projectStandards.layer,
       stageOrder: projectStandards.stageOrder,
+      parentStandardId: projectStandards.parentStandardId,
+      relationType: projectStandards.relationType,
       templateId: worksheetTemplates.id,
       templateCode: worksheetTemplates.code,
       templateTitleDe: worksheetTemplates.titleDe,
@@ -116,6 +125,7 @@ export async function listProjectStandardsWithWorksheets(
     let group = grouped.get(r.standardId);
     if (!group) {
       group = {
+        projectStandardId: r.projectStandardId,
         standard: {
           id: r.standardId,
           code: r.standardCode,
@@ -125,6 +135,8 @@ export async function listProjectStandardsWithWorksheets(
         },
         layer: r.layer as ProjectStandardLayer | null,
         stageOrder: r.stageOrder,
+        parentStandardId: r.parentStandardId,
+        relationType: r.relationType as ProjectStandardRelationType | null,
         worksheets: [],
       };
       grouped.set(r.standardId, group);
