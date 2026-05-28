@@ -26,7 +26,7 @@ export function DocumentList({ docs }: { docs: Doc[] }) {
     startTransition(async () => {
       const r = await deleteDocument(id);
       if (!r.ok) {
-        setError(t(`errors.${r.error}` as any));
+        setError(t(`errors.${r.error}` as Parameters<typeof t>[0]));
       } else {
         router.refresh();
       }
@@ -44,7 +44,7 @@ export function DocumentList({ docs }: { docs: Doc[] }) {
             <div className="grid gap-0.5 min-w-0">
               <div className="font-medium truncate">{d.title}</div>
               <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-subtext">
-                {t(`kindOptions.${d.kind}` as any)} · {d.citationLabel}
+                {t(`kindOptions.${d.kind}` as Parameters<typeof t>[0])} · {d.citationLabel}
               </div>
               <div className="font-mono text-[10px] text-subtext tabular-nums">
                 {(Number(d.fileSize) / 1024).toFixed(0)} KB · {d.sha256.slice(0, 12)}…

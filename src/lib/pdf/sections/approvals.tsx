@@ -19,7 +19,7 @@ export function ApprovalsSection({ approvals }: { approvals: ReportData['approva
               {a.fromStatus} → {a.toStatus}
             </Text>
             <Text style={styles.actorCell}>{a.actorName ?? '—'}</Text>
-            <Text style={styles.commentCell}>„{a.comment}"</Text>
+            <Text style={styles.commentCell}>„{a.comment}“</Text>
           </View>
         ))
       )}

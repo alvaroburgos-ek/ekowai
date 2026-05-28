@@ -57,7 +57,7 @@ export function CitationPicker({
     setError(null);
     start(async () => {
       const r = await attachCitation({ projectId, fieldId, source: { docId } });
-      if (!r.ok) setError(t(`errors.${r.error}` as any) || r.error);
+      if (!r.ok) setError(t(`errors.${r.error}` as Parameters<typeof t>[0]) || r.error);
       else complete();
     });
   }
@@ -72,7 +72,7 @@ export function CitationPicker({
         fieldId,
         source: { docId: `label:${label.trim()}`, note: label.trim() },
       });
-      if (!r.ok) setError(t(`errors.${r.error}` as any) || r.error);
+      if (!r.ok) setError(t(`errors.${r.error}` as Parameters<typeof t>[0]) || r.error);
       else complete();
     });
   }
@@ -81,7 +81,7 @@ export function CitationPicker({
     setError(null);
     start(async () => {
       const r = await detachCitation({ projectId, fieldId });
-      if (!r.ok) setError(t(`errors.${r.error}` as any) || r.error);
+      if (!r.ok) setError(t(`errors.${r.error}` as Parameters<typeof t>[0]) || r.error);
       else complete();
     });
   }
