@@ -217,7 +217,10 @@ export function WorksheetForm({
       ))}
 
       <EquationsBlock equations={equations} />
-      <ComplianceBlock requirements={complianceRequirements} />
+      <ComplianceBlock
+        requirements={complianceRequirements}
+        fields={fields.map((f) => ({ id: f.id, symbol: f.symbol }))}
+      />
       <ApprovalBar instanceId={instance.id} status={instance.status} locale={locale} />
     </article>
   );
