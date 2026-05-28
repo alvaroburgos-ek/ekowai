@@ -23,8 +23,28 @@ export default defineConfig({
         test: {
           name: 'unit',
           include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.{ts,tsx}'],
+          // DB-backed integration tests live under `integration` project — they need
+          // a real Postgres and would fail with ECONNREFUSED in the unit CI job.
+          exclude: [
+            'src/lib/actions/__tests__/worksheet.test.ts',
+            'src/lib/actions/__tests__/documents.test.ts',
+            'src/lib/db/__tests__/documents-schema.test.ts',
+          ],
           environment: 'happy-dom',
           setupFiles: ['./src/test-setup.ts'],
+          globals: true,
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'integration',
+          include: [
+            'src/lib/actions/__tests__/worksheet.test.ts',
+            'src/lib/actions/__tests__/documents.test.ts',
+            'src/lib/db/__tests__/documents-schema.test.ts',
+          ],
+          environment: 'node',
           globals: true,
         },
       },
