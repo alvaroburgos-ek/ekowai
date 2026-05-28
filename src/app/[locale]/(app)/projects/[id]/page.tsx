@@ -7,23 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { archiveProject } from '@/lib/actions/project';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
-import type { WorksheetStatus } from '@/lib/state-machine';
-
-const STATUS_DOT: Record<WorksheetStatus, string> = {
-  draft: 'bg-ink/20',
-  submitted_for_review: 'bg-accent-2',
-  engineer_approved: 'bg-success',
-  final: 'bg-accent',
-  deactivated: 'bg-ink/10',
-};
-
-const STATUS_LABEL: Record<WorksheetStatus, string> = {
-  draft: 'Entwurf',
-  submitted_for_review: 'In Prüfung',
-  engineer_approved: 'Genehmigt',
-  final: 'Final',
-  deactivated: 'Deaktiviert',
-};
+import { ProjectStandardsLayers } from '@/components/worksheet/project-standards-layers';
 
 export default async function ProjectDetailPage({
   params,
@@ -112,62 +96,17 @@ export default async function ProjectDetailPage({
           </Link>
         </div>
 
-        {standardsWithWs.length === 0 ? (
+        <ProjectStandardsLayers
+          projectId={id}
+          locale={localeTyped}
+          standards={standardsWithWs}
+        />
+        {standardsWithWs.length === 0 && (
           <div className="border border-hairline rounded-md p-8 text-center space-y-4">
             <p className="text-sm text-subtext">Noch keine Regelwerke aktiviert.</p>
             <Link href={`/${localeTyped}/projects/${id}/standards`}>
               <Button>Erstes Regelwerk hinzufügen</Button>
             </Link>
-          </div>
-        ) : (
-          <div className="space-y-10">
-            {standardsWithWs.map((s) => {
-              const total = s.worksheets.length;
-              const done = s.worksheets.filter(
-                (w) => w.status === 'engineer_approved' || w.status === 'final',
-              ).length;
-              return (
-                <div key={s.standard.id} className="space-y-3">
-                  <div className="flex items-baseline justify-between border-b border-hairline pb-2">
-                    <div>
-                      <h3 className="text-sm font-medium text-ink">{s.standard.code}</h3>
-                      <p className="text-xs text-subtext">
-                        {s.standard.titleDe} · {s.standard.version}
-                      </p>
-                    </div>
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-subtext tabular-nums">
-                      {done} / {total} fertig
-                    </span>
-                  </div>
-                  <ul className="space-y-0.5">
-                    {s.worksheets.map((w) => {
-                      const status: WorksheetStatus = w.status ?? 'draft';
-                      return (
-                        <li key={w.templateId}>
-                          <Link
-                            href={`/${localeTyped}/projects/${id}/standards/${s.standard.code}/worksheets/${w.code}`}
-                            className="grid grid-cols-[12px_28px_88px_1fr_auto] items-center gap-3 px-2 py-1.5 text-sm rounded hover:bg-paper-2/50"
-                          >
-                            <span
-                              className={`inline-block w-2 h-2 rounded-full ${STATUS_DOT[status]}`}
-                              aria-label={`Status: ${STATUS_LABEL[status]}`}
-                            />
-                            <span className="text-[10px] text-subtext tabular-nums">
-                              {w.phase != null ? `P${w.phase}` : '—'}
-                            </span>
-                            <span className="text-xs text-subtext tracking-wide">{w.code}</span>
-                            <span className="text-ink truncate">{w.titleDe}</span>
-                            <span className="text-[10px] text-subtext">
-                              {STATUS_LABEL[status]}
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              );
-            })}
           </div>
         )}
       </section>

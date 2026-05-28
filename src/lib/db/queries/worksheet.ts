@@ -10,6 +10,7 @@ import {
   complianceSuggestions,
   worksheetInstances,
   projectParameters,
+  projectStandards,
   projects,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
@@ -140,6 +141,9 @@ export type SameSymbolEntry = {
   value: unknown;
   dataType: string;
   updatedAt: Date | null;
+  /** Stage order of the source standard within the project. Lower = upstream;
+   * null = unsequenced. Drives inheritance priority. */
+  sourceStageOrder: number | null;
 };
 
 /** For each field symbol on this worksheet, find values already entered for
@@ -147,8 +151,11 @@ export type SameSymbolEntry = {
  * to drive the "← [worksheet]" inheritance hint and to pre-populate fields
  * the engineer hasn't yet entered for this worksheet.
  *
- * Entries are sorted most-recently-updated first, so callers that pick the
- * first entry (`[0]`) inherit from the freshest source. */
+ * Entries are sorted so the caller can pick `[0]` for inheritance:
+ *   1. Source standard's `stage_order` ascending (NULL last) — output from
+ *      an earlier stage wins, matching the user's stage-N → stage-N+1
+ *      parameter-flow expectation.
+ *   2. Most-recently entered first (fallback within a stage). */
 export async function loadSameSymbolValues(
   projectId: string,
   currentTemplateId: string,
@@ -156,12 +163,16 @@ export async function loadSameSymbolValues(
 ): Promise<Map<string, SameSymbolEntry[]>> {
   if (symbols.length === 0) return new Map();
   // All OTHER fields in the project with matching symbols (any standard).
+  // Join project_standards so we know the source standard's stage_order
+  // within the project (null for standards not on the project — they're
+  // filtered out by the project_parameters join in the next step).
   const otherFields = await db
     .select({
       fieldId: fields.id,
       symbol: fields.symbol,
       dataType: fields.dataType,
       worksheetCode: worksheetTemplates.code,
+      sourceStandardId: worksheetTemplates.standardId,
     })
     .from(fields)
     .innerJoin(
@@ -178,15 +189,30 @@ export async function loadSameSymbolValues(
   if (otherFields.length === 0) return new Map();
 
   const otherFieldIds = otherFields.map((f) => f.fieldId);
-  const params = await db
-    .select()
-    .from(projectParameters)
-    .where(
-      and(
-        eq(projectParameters.projectId, projectId),
-        inArray(projectParameters.fieldId, otherFieldIds),
+  const [params, projStds] = await Promise.all([
+    db
+      .select()
+      .from(projectParameters)
+      .where(
+        and(
+          eq(projectParameters.projectId, projectId),
+          inArray(projectParameters.fieldId, otherFieldIds),
+        ),
       ),
-    );
+    db
+      .select({
+        standardId: projectStandards.standardId,
+        stageOrder: projectStandards.stageOrder,
+      })
+      .from(projectStandards)
+      .where(
+        and(
+          eq(projectStandards.projectId, projectId),
+          eq(projectStandards.status, 'active'),
+        ),
+      ),
+  ]);
+  const stageByStandardId = new Map(projStds.map((p) => [p.standardId, p.stageOrder]));
 
   const fieldById = new Map(otherFields.map((f) => [f.fieldId, f]));
   const out = new Map<string, SameSymbolEntry[]>();
@@ -202,12 +228,16 @@ export async function loadSameSymbolValues(
       value,
       dataType: meta.dataType,
       updatedAt: p.enteredAt,
+      sourceStageOrder: stageByStandardId.get(meta.sourceStandardId) ?? null,
     });
     out.set(meta.symbol, arr);
   }
-  // Sort each bucket: most recently entered first → caller picks [0] for inheritance
+  // Sort each bucket: earliest stage first, then most-recently entered.
   for (const arr of out.values()) {
     arr.sort((a, b) => {
+      const aStage = a.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
+      const bStage = b.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
+      if (aStage !== bStage) return aStage - bStage;
       const at = a.updatedAt?.getTime() ?? 0;
       const bt = b.updatedAt?.getTime() ?? 0;
       return bt - at;
