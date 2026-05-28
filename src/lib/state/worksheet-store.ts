@@ -12,12 +12,25 @@ type FieldValue =
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
+export type Citation = {
+  id: string;
+  docId: string;
+  page: number | null;
+  note: string | null;
+};
+
 type WorksheetStore = {
   instanceId: string | null;
   /** field_id → value */
   values: Record<string, FieldValue>;
-  /** field_id → citation payload | null */
+  /** field_id → citation payload | null (legacy single-citation accessor; new
+   * code should read `citations` instead). Kept so older subscribers don't
+   * crash during the migration window. */
   sources: Record<string, { docId: string; page?: number; note?: string } | null>;
+  /** field_id → list of citations attached to that field. Initial seed comes
+   * from the server; user actions (addCitation/removeCitation) update the DB
+   * directly and a router refresh re-seeds. */
+  citations: Record<string, Citation[]>;
   saveStatus: SaveStatus;
   lastSavedAt: string | null;
   pendingFieldIds: Set<string>;
@@ -25,6 +38,7 @@ type WorksheetStore = {
     instanceId: string,
     initialValues: Record<string, FieldValue>,
     initialSources: Record<string, { docId: string; page?: number; note?: string } | null>,
+    initialCitations: Record<string, Citation[]>,
   ) => void;
   setField: (fieldId: string, value: FieldValue) => void;
   setSource: (
@@ -38,15 +52,17 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
   instanceId: null,
   values: {},
   sources: {},
+  citations: {},
   saveStatus: 'idle',
   lastSavedAt: null,
   pendingFieldIds: new Set(),
 
-  init: (instanceId, initialValues, initialSources) =>
+  init: (instanceId, initialValues, initialSources, initialCitations) =>
     set({
       instanceId,
       values: initialValues,
       sources: initialSources,
+      citations: initialCitations,
       saveStatus: 'idle',
       pendingFieldIds: new Set(),
     }),

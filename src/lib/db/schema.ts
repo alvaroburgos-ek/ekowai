@@ -254,7 +254,14 @@ export const projectParameters = pgTable(
     valueBoolean: boolean('value_boolean'),
     valueJson: jsonb('value_json'),
     sourceType: text('source_type').notNull().default('entered'),
+    /** Legacy single-citation column. New writes go to citationSources; the
+     * single column is kept only so older rows don't lose data until a follow-up
+     * migration drops it. */
     citationSource: jsonb('citation_source'),
+    /** Array of citation objects: { id, docId, page?, note?, attachedBy, attachedAt }.
+     * docId may be a real project_documents.id or the synthetic prefix
+     * `label:<text>` for plain-text citations. */
+    citationSources: jsonb('citation_sources').notNull().default(sql`'[]'::jsonb`),
     // enteredBy references auth.users directly in DB, kept as plain uuid here
     enteredBy: uuid('entered_by').notNull(),
     enteredAt: timestamp('entered_at', { withTimezone: true }).notNull().defaultNow(),
