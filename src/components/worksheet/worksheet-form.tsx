@@ -61,6 +61,8 @@ export function WorksheetForm({
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
+  const setField = useWorksheetStore((s) => s.setField);
+  const values = useWorksheetStore((s) => s.values);
   const saveStatus = useWorksheetStore((s) => s.saveStatus);
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,6 +87,69 @@ export function WorksheetForm({
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
   }, [pendingFieldIds, flush]);
+
+  // Equations sorted by equation_number — generator emits sub-totals before
+  // grand totals (e.g. KG3-01…KG3-09 → KG3-10), so a single forward pass
+  // computes everything in dependency order.
+  const sortedEquations = useMemo(
+    () => [...equations].sort((a, b) => (a.equationNumber ?? '').localeCompare(b.equationNumber ?? '')),
+    [equations],
+  );
+
+  const fieldBySymbol = useMemo(() => {
+    const m = new Map<string, FieldDef>();
+    for (const f of fields) m.set(f.symbol, f);
+    return m;
+  }, [fields]);
+
+  const computedSymbols = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of sortedEquations) {
+      const out = e.outputSymbol;
+      if (out && fieldBySymbol.has(out)) set.add(out);
+    }
+    return set;
+  }, [sortedEquations, fieldBySymbol]);
+
+  // Auto-compute derived fields whenever any value changes. Only writes when
+  // the result differs from the current store value — otherwise the effect
+  // would loop. Sums are over input_symbols; non-numeric or null inputs are
+  // treated as 0.
+  useEffect(() => {
+    const numBySymbol: Record<string, number> = {};
+    for (const f of fields) {
+      const v = values[f.id];
+      if (v?.type === 'number' && v.value != null && Number.isFinite(v.value)) {
+        numBySymbol[f.symbol] = v.value;
+      }
+    }
+    for (const eq of sortedEquations) {
+      const outSym = eq.outputSymbol;
+      if (!outSym) continue;
+      const outField = fieldBySymbol.get(outSym);
+      if (!outField) continue;
+      const inputs = eq.inputSymbols ?? [];
+      // Only emit a value when at least one input is present — otherwise the
+      // derived field stays null so empty worksheets don't get a wave of "= 0"
+      // writes on first render.
+      let sum = 0;
+      let hasInput = false;
+      for (const s of inputs) {
+        const n = numBySymbol[s];
+        if (n !== undefined) {
+          sum += n;
+          hasInput = true;
+        }
+      }
+      const computed = hasInput ? sum : null;
+      if (computed !== null) numBySymbol[outSym] = computed;
+      const current = values[outField.id];
+      const currentNum = current?.type === 'number' ? current.value : null;
+      if (currentNum !== computed) {
+        setField(outField.id, { type: 'number', value: computed });
+      }
+    }
+  }, [values, fields, sortedEquations, fieldBySymbol, setField]);
 
   const fieldsBySectionId = useMemo(() => {
     const map = new Map<string | null, FieldDef[]>();
@@ -114,6 +179,7 @@ export function WorksheetForm({
         projectId={projectId}
         sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
         docs={docs}
+        isComputed={computedSymbols.has(f.symbol)}
       />
     ));
   };
