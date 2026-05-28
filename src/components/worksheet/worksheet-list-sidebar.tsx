@@ -11,6 +11,7 @@ const STATUS_DOT: Record<string, string> = {
 type WorksheetEntry = {
   code: string;
   titleDe: string;
+  titleEn: string | null;
   phase: number | null;
   archetype: string | null;
   status: 'draft' | 'submitted_for_review' | 'engineer_approved' | 'final' | 'deactivated' | null;
@@ -69,7 +70,7 @@ export function WorksheetListSidebar({
                       aria-label={`Status: ${w.status ?? 'draft'}`}
                     />
                     <span className="font-mono text-[11px] mr-2">{w.code}</span>
-                    {w.titleDe}
+                    {locale === 'de' ? w.titleDe : w.titleEn ?? w.titleDe}
                   </Link>
                 </li>
               );

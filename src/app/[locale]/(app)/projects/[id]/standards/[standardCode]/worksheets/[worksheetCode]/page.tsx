@@ -44,6 +44,7 @@ export default async function WorksheetPage({
       .select({
         code: worksheetTemplates.code,
         titleDe: worksheetTemplates.titleDe,
+        titleEn: worksheetTemplates.titleEn,
         phase: worksheetTemplates.phase,
         archetype: worksheetTemplates.archetype,
         status: worksheetInstances.status,
@@ -146,7 +147,9 @@ export default async function WorksheetPage({
             verificationStatus: e.verificationStatus,
           }))}
           complianceRequirements={ws.complianceRequirements.map((c) => ({
-            id: c.id, code: c.code, titleDe: c.titleDe, condition: c.condition,
+            id: c.id, code: c.code,
+            titleDe: c.titleDe, titleEn: c.titleEn,
+            condition: c.condition,
             description: c.description, clauseReference: c.clauseReference,
             severity: c.severity,
           }))}

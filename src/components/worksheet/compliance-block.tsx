@@ -7,6 +7,7 @@ type ComplianceReq = {
   id: string;
   code: string;
   titleDe: string;
+  titleEn: string | null;
   condition: string;
   description: string | null;
   clauseReference: string | null;
@@ -19,9 +20,10 @@ type Props = {
   requirements: ComplianceReq[];
   /** field id → symbol map for the current worksheet — used to read store values. */
   fields: FieldRef[];
+  locale: 'de' | 'en';
 };
 
-export function ComplianceBlock({ requirements, fields }: Props) {
+export function ComplianceBlock({ requirements, fields, locale }: Props) {
   const values = useWorksheetStore((s) => s.values);
 
   const lookup = useMemo(() => {
@@ -80,7 +82,9 @@ export function ComplianceBlock({ requirements, fields }: Props) {
               <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
                 {cr.code}
               </span>
-              <span className="font-medium">{cr.titleDe}</span>
+              <span className="font-medium">
+                {locale === 'de' ? cr.titleDe : cr.titleEn ?? cr.titleDe}
+              </span>
             </div>
             {cr.description && (
               <p className="text-xs text-subtext ml-[140px]">{cr.description}</p>

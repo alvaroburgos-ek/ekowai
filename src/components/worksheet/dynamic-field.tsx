@@ -153,7 +153,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
                 onChange={(val) => setField(field.id, { type: 'enum', value: val })}
                 options={options.map((o) => ({
                   value: o.value,
-                  label: o.label_de ?? o.label_en ?? o.value,
+                  label: pickEnumLabel(o, locale),
                 }))}
               />
             </div>
@@ -170,7 +170,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
             <option value="">—</option>
             {options.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label_de ?? o.label_en ?? o.value}
+                {pickEnumLabel(o, locale)}
               </option>
             ))}
           </select>
@@ -250,6 +250,14 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
       />
     </div>
   );
+}
+
+function pickEnumLabel(
+  o: { value: string; label_de: string | null; label_en: string | null },
+  locale: 'de' | 'en',
+): string {
+  if (locale === 'de') return o.label_de ?? o.label_en ?? o.value;
+  return o.label_en ?? o.label_de ?? o.value;
 }
 
 function copyFirstHint(
