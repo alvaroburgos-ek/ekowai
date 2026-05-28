@@ -7,6 +7,7 @@ import {
   fields,
   equations,
   complianceRequirements,
+  complianceSuggestions,
   worksheetInstances,
   projectParameters,
   projects,
@@ -66,12 +67,24 @@ export async function loadWorksheet(standardCode: string, worksheetCode: string)
       .where(eq(complianceRequirements.worksheetTemplateId, template.id)),
   ]);
 
+  // Pull suggestion rows for the loaded REQs in a follow-up batch. Keyed by
+  // requirement_id so the renderer can group them under the failing REQ.
+  let suggestionList: Array<typeof complianceSuggestions.$inferSelect> = [];
+  if (crList.length > 0) {
+    suggestionList = await db
+      .select()
+      .from(complianceSuggestions)
+      .where(inArray(complianceSuggestions.requirementId, crList.map((c) => c.id)))
+      .orderBy(complianceSuggestions.orderIndex);
+  }
+
   return {
     template: { ...template, standard },
     sections: secList,
     fields: fieldList,
     equations: eqList,
     complianceRequirements: crList,
+    complianceSuggestions: suggestionList,
   };
 }
 

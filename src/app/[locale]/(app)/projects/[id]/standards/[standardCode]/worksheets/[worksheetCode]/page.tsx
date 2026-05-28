@@ -195,6 +195,17 @@ export default async function WorksheetPage({
             condition: c.condition,
             description: c.description, clauseReference: c.clauseReference,
             severity: c.severity,
+            suggestion: c.suggestion,
+          }))}
+          complianceSuggestions={ws.complianceSuggestions.map((s) => ({
+            id: s.id,
+            requirementId: s.requirementId,
+            suggestionType: s.suggestionType as 'alternative_worksheet' | 'alternative_standard' | 'upstream_treatment' | 'design_change',
+            targetStandardCode: s.targetStandardCode,
+            targetWorksheetCode: s.targetWorksheetCode,
+            suggestionDe: s.suggestionDe,
+            suggestionEn: s.suggestionEn,
+            condition: s.condition,
           }))}
           initialValues={initialValues as never}
           initialSources={initialSources}

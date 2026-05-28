@@ -1,6 +1,6 @@
 'use server';
 import { db } from '@/lib/db';
-import { projectStandards, auditLog } from '@/lib/db/schema';
+import { projectStandards, standards, auditLog } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { instantiateWorksheetInstancesForStandard } from '@/lib/db/queries/worksheet';
@@ -50,6 +50,22 @@ export async function addStandardToProject(
   });
 
   return { ok: true, instantiated };
+}
+
+/** Resolve a standard by code and add it to the project. Used by the
+ * compliance-suggestion UI when the engineer accepts a suggested alternative
+ * standard (e.g. switching from DWA-A-138-1 to DWA-A-178). */
+export async function addStandardByCodeToProject(
+  projectId: string,
+  standardCode: string,
+): Promise<{ ok: true; instantiated: number } | { ok: false; error: string }> {
+  const [std] = await db
+    .select({ id: standards.id })
+    .from(standards)
+    .where(eq(standards.code, standardCode))
+    .limit(1);
+  if (!std) return { ok: false, error: 'standard_not_found' };
+  return addStandardToProject(projectId, std.id);
 }
 
 export async function removeStandardFromProject(
