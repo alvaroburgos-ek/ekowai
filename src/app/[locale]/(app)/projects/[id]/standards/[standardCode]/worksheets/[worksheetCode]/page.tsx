@@ -33,12 +33,7 @@ export default async function WorksheetPage({
   const [instance, parameters, sameSymbol, sidebarWorksheets, docs] = await Promise.all([
     ensureWorksheetInstance(projectId, ws.template.id),
     loadProjectParameters(projectId, fieldIds),
-    loadSameSymbolValues(
-      projectId,
-      ws.template.standard.id,
-      ws.template.id,
-      fieldSymbols,
-    ),
+    loadSameSymbolValues(projectId, ws.template.id, fieldSymbols),
     // All worksheets of this standard for sidebar
     db
       .select({
@@ -70,35 +65,73 @@ export default async function WorksheetPage({
       .where(eq(projectDocuments.projectId, projectId)),
   ]);
 
-  // Convert parameters → initialValues for the store
+  // Convert parameters → initialValues for the store. Fields without a local
+  // saved value fall back to a same-symbol value from another worksheet (the
+  // most-recently-updated wins) — engineer can still override by typing.
   const initialValues: Record<string, unknown> = {};
+  const inheritedFromBySymbol: Record<string, string> = {};
   for (const f of ws.fields) {
     const p = parameters.get(f.id);
-    if (!p) continue;
+    if (p) {
+      switch (f.dataType) {
+        case 'number':
+          initialValues[f.id] = { type: 'number', value: p.valueNumber == null ? null : Number(p.valueNumber) };
+          break;
+        case 'text':
+          initialValues[f.id] = { type: 'text', value: p.valueText };
+          break;
+        case 'enum':
+          initialValues[f.id] = { type: 'enum', value: p.valueEnum };
+          break;
+        case 'date':
+          initialValues[f.id] = { type: 'date', value: p.valueDate };
+          break;
+        case 'boolean':
+          initialValues[f.id] = { type: 'boolean', value: p.valueBoolean };
+          break;
+        case 'json':
+          initialValues[f.id] = { type: 'json', value: p.valueJson };
+          break;
+      }
+      continue;
+    }
+    // No local param — try to inherit from another worksheet.
+    const upstream = sameSymbol.get(f.symbol)?.[0];
+    if (!upstream) continue;
+    const v = upstream.value;
+    let coerced: { type: string; value: unknown } | null = null;
     switch (f.dataType) {
-      case 'number':
-        initialValues[f.id] = { type: 'number', value: p.valueNumber == null ? null : Number(p.valueNumber) };
+      case 'number': {
+        const n = typeof v === 'number' ? v : Number(v as string);
+        if (Number.isFinite(n)) coerced = { type: 'number', value: n };
         break;
+      }
       case 'text':
-        initialValues[f.id] = { type: 'text', value: p.valueText };
+        if (typeof v === 'string' || typeof v === 'number') coerced = { type: 'text', value: String(v) };
         break;
       case 'enum':
-        initialValues[f.id] = { type: 'enum', value: p.valueEnum };
+        if (typeof v === 'string') coerced = { type: 'enum', value: v };
         break;
       case 'date':
-        initialValues[f.id] = { type: 'date', value: p.valueDate };
+        if (typeof v === 'string') coerced = { type: 'date', value: v };
         break;
       case 'boolean':
-        initialValues[f.id] = { type: 'boolean', value: p.valueBoolean };
+        if (typeof v === 'boolean') coerced = { type: 'boolean', value: v };
         break;
       case 'json':
-        initialValues[f.id] = { type: 'json', value: p.valueJson };
+        coerced = { type: 'json', value: v };
         break;
+    }
+    if (coerced) {
+      initialValues[f.id] = coerced;
+      inheritedFromBySymbol[f.symbol] = upstream.worksheetCode;
     }
   }
 
   const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>> = {};
-  for (const [symbol, arr] of sameSymbol) sameSymbolValuesBySymbol[symbol] = arr;
+  for (const [symbol, arr] of sameSymbol) {
+    sameSymbolValuesBySymbol[symbol] = arr.map(({ worksheetCode, value }) => ({ worksheetCode, value }));
+  }
 
   // Fix 4: extract citation sources directly from already-loaded parameters Map
   // (avoids the redundant readInputsWithSources round-trip to the same rows)
@@ -156,6 +189,7 @@ export default async function WorksheetPage({
           initialValues={initialValues as never}
           initialSources={initialSources}
           sameSymbolValuesBySymbol={sameSymbolValuesBySymbol}
+          inheritedFromBySymbol={inheritedFromBySymbol}
           docs={docs}
         />
       </main>

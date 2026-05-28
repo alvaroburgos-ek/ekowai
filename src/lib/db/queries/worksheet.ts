@@ -122,17 +122,27 @@ export async function loadProjectParameters(
   return new Map(rows.map((r) => [r.fieldId, r]));
 }
 
-/** For each field symbol on this worksheet, find values already entered elsewhere
- * for the same symbol within the same standard, so the renderer can show
- * "already entered in worksheet X" hints. */
+export type SameSymbolEntry = {
+  worksheetCode: string;
+  value: unknown;
+  dataType: string;
+  updatedAt: Date | null;
+};
+
+/** For each field symbol on this worksheet, find values already entered for
+ * the same symbol elsewhere **in the same project** (any standard). Used both
+ * to drive the "← [worksheet]" inheritance hint and to pre-populate fields
+ * the engineer hasn't yet entered for this worksheet.
+ *
+ * Entries are sorted most-recently-updated first, so callers that pick the
+ * first entry (`[0]`) inherit from the freshest source. */
 export async function loadSameSymbolValues(
   projectId: string,
-  standardId: string,
   currentTemplateId: string,
   symbols: string[],
-): Promise<Map<string, Array<{ worksheetCode: string; value: unknown }>>> {
+): Promise<Map<string, SameSymbolEntry[]>> {
   if (symbols.length === 0) return new Map();
-  // Find OTHER fields in the same standard with matching symbols
+  // All OTHER fields in the project with matching symbols (any standard).
   const otherFields = await db
     .select({
       fieldId: fields.id,
@@ -147,7 +157,6 @@ export async function loadSameSymbolValues(
     )
     .where(
       and(
-        eq(worksheetTemplates.standardId, standardId),
         inArray(fields.symbol, symbols),
         sql`${fields.worksheetTemplateId} <> ${currentTemplateId}`,
       ),
@@ -166,9 +175,8 @@ export async function loadSameSymbolValues(
       ),
     );
 
-  // Build symbol → [{worksheetCode, value}] map
   const fieldById = new Map(otherFields.map((f) => [f.fieldId, f]));
-  const out = new Map<string, Array<{ worksheetCode: string; value: unknown }>>();
+  const out = new Map<string, SameSymbolEntry[]>();
   for (const p of params) {
     const meta = fieldById.get(p.fieldId);
     if (!meta) continue;
@@ -176,8 +184,21 @@ export async function loadSameSymbolValues(
       p.valueNumber ?? p.valueText ?? p.valueEnum ?? p.valueDate ?? p.valueBoolean ?? p.valueJson;
     if (value == null) continue;
     const arr = out.get(meta.symbol) ?? [];
-    arr.push({ worksheetCode: meta.worksheetCode, value });
+    arr.push({
+      worksheetCode: meta.worksheetCode,
+      value,
+      dataType: meta.dataType,
+      updatedAt: p.enteredAt,
+    });
     out.set(meta.symbol, arr);
+  }
+  // Sort each bucket: most recently entered first → caller picks [0] for inheritance
+  for (const arr of out.values()) {
+    arr.sort((a, b) => {
+      const at = a.updatedAt?.getTime() ?? 0;
+      const bt = b.updatedAt?.getTime() ?? 0;
+      return bt - at;
+    });
   }
   return out;
 }
