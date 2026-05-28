@@ -5,7 +5,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { instantiateWorksheetInstancesForStandard } from '@/lib/db/queries/worksheet';
 import { revalidatePath } from 'next/cache';
-import { RECOMMENDED_LAYERS, type Layer } from '@/lib/types/project-layers';
+import { RECOMMENDED_LAYERS, type Layer, type RelationType } from '@/lib/types/project-layers';
 
 export async function addStandardToProject(
   projectId: string,
@@ -54,6 +54,62 @@ export async function addStandardToProject(
   return { ok: true, instantiated };
 }
 
+/** Set parent_standard_id + relation_type on a project_standards row.
+ * Pass parentProjectStandardId === null + relationType === null to make
+ * the row a root.
+ *
+ * Cycle guard: walks up the would-be parent chain and rejects if the
+ * target row appears as an ancestor of the new parent. */
+export async function setProjectStandardRelation(
+  projectId: string,
+  /** project_standards.id of the row to mutate. */
+  projectStandardId: string,
+  parentProjectStandardId: string | null,
+  relationType: RelationType | null,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { ok: false, error: 'Not authenticated' };
+
+  // Self-loop guard
+  if (parentProjectStandardId === projectStandardId) {
+    return { ok: false, error: 'self_loop' };
+  }
+
+  if (parentProjectStandardId) {
+    // Walk up the candidate parent's chain. If we encounter the target row,
+    // setting this parent would create a cycle.
+    let cursor: string | null = parentProjectStandardId;
+    const seen = new Set<string>();
+    while (cursor) {
+      if (cursor === projectStandardId) return { ok: false, error: 'cycle' };
+      if (seen.has(cursor)) return { ok: false, error: 'cycle' };
+      seen.add(cursor);
+      const [next] = await db
+        .select({ parentStandardId: projectStandards.parentStandardId })
+        .from(projectStandards)
+        .where(eq(projectStandards.id, cursor))
+        .limit(1);
+      cursor = next?.parentStandardId ?? null;
+    }
+  }
+
+  await db
+    .update(projectStandards)
+    .set({
+      parentStandardId: parentProjectStandardId,
+      relationType: parentProjectStandardId ? relationType : null,
+    })
+    .where(
+      and(
+        eq(projectStandards.id, projectStandardId),
+        eq(projectStandards.projectId, projectId),
+      ),
+    );
+  revalidatePath('/[locale]/projects/[id]', 'page');
+  return { ok: true };
+}
+
 /** Update layer + stage_order for one (project, standard). */
 export async function setProjectStandardLayer(
   projectId: string,
@@ -73,7 +129,7 @@ export async function setProjectStandardLayer(
         eq(projectStandards.standardId, standardId),
       ),
     );
-  revalidatePath(`/projects/${projectId}`);
+  revalidatePath('/[locale]/projects/[id]', 'page');
   return { ok: true };
 }
 
@@ -102,7 +158,10 @@ export async function moveProjectStandard(
       .limit(1);
     if (!target) throw new Error('not_found');
 
-    // All siblings in the same layer (including the target)
+    // Reorder among true siblings — same layer AND same parent_standard_id.
+    // For roots the parent filter is "IS NULL"; for children it's the parent
+    // id. This way a sub-standard never slots between two root standards
+    // when the engineer clicks ↑↓ on a root.
     const siblings = await tx
       .select()
       .from(projectStandards)
@@ -113,6 +172,9 @@ export async function moveProjectStandard(
           target.layer
             ? eq(projectStandards.layer, target.layer)
             : sql`${projectStandards.layer} IS NULL`,
+          target.parentStandardId
+            ? eq(projectStandards.parentStandardId, target.parentStandardId)
+            : sql`${projectStandards.parentStandardId} IS NULL`,
         ),
       )
       .orderBy(
@@ -146,7 +208,7 @@ export async function moveProjectStandard(
       .where(eq(projectStandards.id, neighbour.id));
   });
 
-  revalidatePath(`/projects/${projectId}`);
+  revalidatePath('/[locale]/projects/[id]', 'page');
   return { ok: true };
 }
 
@@ -206,7 +268,7 @@ export async function applyRecommendedStructure(
     }
   }
 
-  revalidatePath(`/projects/${projectId}`);
+  revalidatePath('/[locale]/projects/[id]', 'page');
   return { ok: true, added };
 }
 
