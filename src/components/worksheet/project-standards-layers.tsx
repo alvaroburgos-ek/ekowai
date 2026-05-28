@@ -7,8 +7,8 @@ import {
   setProjectStandardLayer,
   moveProjectStandard,
   applyRecommendedStructure,
-  type Layer,
 } from '@/lib/actions/project-standards';
+import type { Layer } from '@/lib/types/project-layers';
 import type { WorksheetStatus } from '@/lib/state-machine';
 
 type Worksheet = {
