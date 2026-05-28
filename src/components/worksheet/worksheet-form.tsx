@@ -220,6 +220,7 @@ export function WorksheetForm({
       <ComplianceBlock
         requirements={complianceRequirements}
         fields={fields.map((f) => ({ id: f.id, symbol: f.symbol }))}
+        locale={locale}
       />
       <ApprovalBar instanceId={instance.id} status={instance.status} locale={locale} />
     </article>

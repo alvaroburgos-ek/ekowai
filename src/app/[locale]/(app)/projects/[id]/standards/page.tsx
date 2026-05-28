@@ -11,6 +11,7 @@ export default async function ProjectStandardsPage({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { id, locale } = await params;
+  const localeTyped = locale === 'en' ? 'en' : 'de';
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
   if (!project) notFound();
 
@@ -31,8 +32,9 @@ export default async function ProjectStandardsPage({
       </header>
       <StandardsPicker
         projectId={id}
+        locale={localeTyped}
         available={available.map((s) => ({
-          id: s.id, code: s.code, titleDe: s.titleDe, version: s.version,
+          id: s.id, code: s.code, titleDe: s.titleDe, titleEn: s.titleEn, version: s.version,
         }))}
         active={active.map((a) => ({
           projectStandardId: a.projectStandardId,
@@ -40,6 +42,7 @@ export default async function ProjectStandardsPage({
             id: a.standard.id,
             code: a.standard.code,
             titleDe: a.standard.titleDe,
+            titleEn: a.standard.titleEn,
             version: a.standard.version,
           },
         }))}

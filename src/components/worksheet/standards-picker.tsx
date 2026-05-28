@@ -9,6 +9,7 @@ type Standard = {
   id: string;
   code: string;
   titleDe: string;
+  titleEn: string | null;
   version: string;
 };
 
@@ -16,11 +17,17 @@ type Props = {
   projectId: string;
   available: Standard[];
   active: Array<{ projectStandardId: string; standard: Standard }>;
+  locale: 'de' | 'en';
 };
+
+function pickTitle(s: Standard, locale: 'de' | 'en'): string {
+  if (locale === 'de') return s.titleDe;
+  return s.titleEn ?? s.titleDe;
+}
 
 type RemoveModalState = { standardId: string; standardCode: string } | null;
 
-export function StandardsPicker({ projectId, available, active }: Props) {
+export function StandardsPicker({ projectId, available, active, locale }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [selectedToAdd, setSelectedToAdd] = useState<string>('');
@@ -74,7 +81,7 @@ export function StandardsPicker({ projectId, available, active }: Props) {
                 <div>
                   <div className="text-sm font-medium text-ink">{a.standard.code}</div>
                   <div className="text-xs text-subtext">
-                    {a.standard.titleDe} · {a.standard.version}
+                    {pickTitle(a.standard, locale)} · {a.standard.version}
                   </div>
                 </div>
                 <Button
@@ -109,7 +116,7 @@ export function StandardsPicker({ projectId, available, active }: Props) {
               <option value="">— Auswählen —</option>
               {addable.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.code} · {s.titleDe}
+                  {s.code} · {pickTitle(s, locale)}
                 </option>
               ))}
             </select>
