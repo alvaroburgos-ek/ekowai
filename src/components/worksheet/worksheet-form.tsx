@@ -41,6 +41,7 @@ type Props = {
   complianceRequirements: Parameters<typeof ComplianceBlock>[0]['requirements'];
   initialValues: Record<string, FieldValue>;
   initialSources: Record<string, { docId: string; page?: number; note?: string } | null>;
+  initialCitations: Record<string, Array<{ id: string; docId: string; page: number | null; note: string | null }>>;
   sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>>;
   /** symbol → worksheet code from which the initial value was inherited (no
    * local saved value existed). Used to render the "← [code]" hint. */
@@ -59,6 +60,7 @@ export function WorksheetForm({
   complianceRequirements,
   initialValues,
   initialSources,
+  initialCitations,
   sameSymbolValuesBySymbol,
   inheritedFromBySymbol,
   docs,
@@ -76,7 +78,12 @@ export function WorksheetForm({
   // they are new object references on every router.refresh() but contain the same
   // data, and re-running init would wipe unsaved in-flight edits.
   useEffect(() => {
-    init(instance.id, initialValues as Record<string, FieldValue>, initialSources as Record<string, { docId: string; page?: number; note?: string } | null>);
+    init(
+      instance.id,
+      initialValues as Record<string, FieldValue>,
+      initialSources as Record<string, { docId: string; page?: number; note?: string } | null>,
+      initialCitations,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [init, instance.id]);
 

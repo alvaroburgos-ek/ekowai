@@ -133,6 +133,16 @@ export default async function WorksheetPage({
     sameSymbolValuesBySymbol[symbol] = arr.map(({ worksheetCode, value }) => ({ worksheetCode, value }));
   }
 
+  // Build citations map: field_id → Citation[] (from project_parameters.citation_sources)
+  type Citation = { id: string; docId: string; page: number | null; note: string | null };
+  const initialCitations: Record<string, Citation[]> = {};
+  for (const f of ws.fields) {
+    const p = parameters.get(f.id);
+    if (!p) continue;
+    const arr = (p.citationSources as Citation[] | null) ?? [];
+    if (arr.length > 0) initialCitations[f.id] = arr;
+  }
+
   // Fix 4: extract citation sources directly from already-loaded parameters Map
   // (avoids the redundant readInputsWithSources round-trip to the same rows)
   const initialSources: Record<string, { docId: string; page?: number; note?: string } | null> = {};
@@ -188,6 +198,7 @@ export default async function WorksheetPage({
           }))}
           initialValues={initialValues as never}
           initialSources={initialSources}
+          initialCitations={initialCitations}
           sameSymbolValuesBySymbol={sameSymbolValuesBySymbol}
           inheritedFromBySymbol={inheritedFromBySymbol}
           docs={docs}

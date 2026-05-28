@@ -1,9 +1,9 @@
 'use client';
-import { useState, useId } from 'react';
+import { useState, useId, useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { SourceBadge } from '@/components/documents/source-badge';
 import { CitationPicker } from '@/components/documents/citation-picker';
+import { CitationChips } from '@/components/documents/citation-chips';
 
 type FieldDef = {
   id: string;
@@ -36,15 +36,17 @@ type Props = {
 
 export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
-  const source = useWorksheetStore((s) => s.sources[field.id] ?? null);
+  const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
   const [pickerOpen, setPickerOpen] = useState(false);
   const inputId = useId();
 
   const label = locale === 'de' ? field.labelDe : field.labelEn ?? field.labelDe;
-  // SourceBadge expects InputSource ({ docId } | { label }) — adapt from our store shape
-  const badgeSource = source ? { docId: source.docId } : undefined;
-  const sourceDoc = source ? docs.find((d) => d.id === source.docId) : undefined;
+  const docLookup = useMemo(() => {
+    const m: Record<string, { title: string; citationLabel: string }> = {};
+    for (const d of docs) m[d.id] = { title: d.title, citationLabel: d.citationLabel };
+    return m;
+  }, [docs]);
 
   const required = field.isRequired || undefined;
   const isSubTotal = field.symbol.endsWith('_total');
@@ -249,11 +251,13 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
         </div>
       )}
 
-      {/* Source badge */}
-      <SourceBadge
-        source={badgeSource}
-        docTitle={sourceDoc?.title}
-        onClick={() => setPickerOpen(true)}
+      {/* Citation chips (0…n) */}
+      <CitationChips
+        citations={citations}
+        docs={docLookup}
+        projectId={projectId}
+        fieldId={field.id}
+        onAdd={() => setPickerOpen(true)}
       />
       <CitationPicker
         open={pickerOpen}
