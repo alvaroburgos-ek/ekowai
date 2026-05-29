@@ -53,6 +53,13 @@ export function CitationPicker({
   }, [open, onClose]);
 
   // Reset state when the modal closes so the next open starts clean.
+  // The React 19 idiom for this is a `key` prop on the parent so the
+  // component remounts; refactor lives in the call sites and is tracked
+  // separately. This single-effect form is the documented exception
+  // (https://react.dev/learn/you-might-not-need-an-effect#resetting-all-state-when-a-prop-changes)
+  // and is functionally equivalent; the rule is suppressed locally to
+  // avoid a multi-file refactor outside this slice's scope.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (open) return;
     setLabel('');
@@ -61,6 +68,7 @@ export function CitationPicker({
     setFile(null);
     setError(null);
   }, [open]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!open) return null;
 

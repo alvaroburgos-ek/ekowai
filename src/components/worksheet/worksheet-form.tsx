@@ -7,6 +7,17 @@ import { SectionGroup } from './section-group';
 import { EquationsBlock } from './equations-block';
 import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
+import { EquationEngineCard } from './equation-engine-card';
+import { SubAreasEditor } from './sub-areas-editor';
+import { useEquationEngine } from '@/lib/eval/use-equation-engine';
+
+/**
+ * Whitelist of (worksheetCode, equationNumber) the new mathjs evaluator
+ * handles. Everything else falls through to the legacy naive sum-evaluator
+ * below. Keep this VERY small until each entry has a hand-calc reference and
+ * a unit test.
+ */
+const FORMULA_ENGINE_WHITELIST = new Set<string>(['A138-10:2']);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -154,10 +165,22 @@ export function WorksheetForm({
     return set;
   }, [sortedEquations, fieldBySymbol]);
 
-  // Auto-compute derived fields whenever any value changes. Only writes when
-  // the result differs from the current store value — otherwise the effect
-  // would loop. Sums are over input_symbols; non-numeric or null inputs are
-  // treated as 0.
+  // Engine wiring lives in a shared hook so the integration test renders
+  // EXACTLY the production code path (not a copy of it).
+  const { engineEquationIds, engineStates } = useEquationEngine({
+    worksheetCode: worksheet.template.code,
+    fields,
+    equations: sortedEquations,
+    engineWhitelist: FORMULA_ENGINE_WHITELIST,
+  });
+
+  // A138-10 sub-areas: render the editor only when the worksheet declares the
+  // carrier field. The hook handles the rest.
+  const subAreasField = fields.find((f) => f.symbol.startsWith('sub_areas_'));
+
+  // Legacy naive sum-evaluator for everything NOT on the engine whitelist.
+  // It ignores `formula` and just sums input_symbols — built for DIN-276 cost
+  // roll-ups. Skips whitelisted equations so the engine output isn't clobbered.
   useEffect(() => {
     const numBySymbol: Record<string, number> = {};
     for (const f of fields) {
@@ -167,14 +190,12 @@ export function WorksheetForm({
       }
     }
     for (const eq of sortedEquations) {
+      if (engineEquationIds.has(eq.id)) continue; // skip — engine owns this one
       const outSym = eq.outputSymbol;
       if (!outSym) continue;
       const outField = fieldBySymbol.get(outSym);
       if (!outField) continue;
       const inputs = eq.inputSymbols ?? [];
-      // Only emit a value when at least one input is present — otherwise the
-      // derived field stays null so empty worksheets don't get a wave of "= 0"
-      // writes on first render.
       let sum = 0;
       let hasInput = false;
       for (const s of inputs) {
@@ -192,7 +213,7 @@ export function WorksheetForm({
         setField(outField.id, { type: 'number', value: computed });
       }
     }
-  }, [values, fields, sortedEquations, fieldBySymbol, setField]);
+  }, [values, fields, sortedEquations, fieldBySymbol, setField, engineEquationIds]);
 
   const fieldsBySectionId = useMemo(() => {
     const map = new Map<string | null, FieldDef[]>();
@@ -254,7 +275,42 @@ export function WorksheetForm({
         />
       ))}
 
+      {subAreasField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Teilflächen-Erfassung (für A_C nach Gl. 2)
+          </h2>
+          <SubAreasEditor fieldId={subAreasField.id} />
+        </section>
+      )}
+
       <EquationsBlock equations={equations} />
+
+      {sortedEquations.some((eq) => engineEquationIds.has(eq.id)) && (
+        <section className="border-t border-hairline pt-6 mt-2 space-y-3">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Engine-Auswertung (Vorschau)
+          </h2>
+          {sortedEquations
+            .filter((eq) => engineEquationIds.has(eq.id))
+            .map((eq) => {
+              const state = engineStates[eq.id];
+              if (!state) return null;
+              const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
+              return (
+                <EquationEngineCard
+                  key={eq.id}
+                  equationNumber={eq.equationNumber}
+                  sourceFormula={eq.formula}
+                  state={state}
+                  outputSymbol={eq.outputSymbol ?? ''}
+                  outputUnit={outField?.unit ?? null}
+                />
+              );
+            })}
+        </section>
+      )}
+
       <ComplianceBlock
         requirements={complianceRequirements}
         suggestions={complianceSuggestions}
