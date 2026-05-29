@@ -21,7 +21,12 @@ import { useEffect, useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { rewriteRules } from './rewrites';
-import type { SubAreasCarrier } from './aggregators';
+import type { SubAreasCarrier, KostraCarrier, Gl8Scalars } from './aggregators';
+
+/** Equation ids the engine has aggregator paths for. Used to decide which
+ * carriers to plumb in. */
+const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 
 type FieldMeta = {
   id: string;
@@ -87,6 +92,46 @@ export function useEquationEngine({
     return raw as SubAreasCarrier;
   }, [values, subAreasField]);
 
+  // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
+  // table. The field lives on A138-04 in production; cross-worksheet
+  // propagation is what surfaces it onto A138-13. For now the engine just
+  // looks up the symbol in whatever fields the caller passes.
+  const kostraField = useMemo(
+    () => fields.find((f) => f.symbol === 'r_D_n_table'),
+    [fields],
+  );
+  const kostraCarrier = useMemo<KostraCarrier | null>(() => {
+    if (!kostraField) return null;
+    const v = values[kostraField.id];
+    if (v?.type !== 'json') return null;
+    const raw = v.value as { rows?: unknown } | null | undefined;
+    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+    return raw as KostraCarrier;
+  }, [values, kostraField]);
+
+  // Gl. 8 scalar inputs. Resolved from whichever field carries each symbol
+  // (in production these flow via same-symbol inheritance from upstream
+  // worksheets). Null when missing.
+  const gl8Scalars = useMemo<Gl8Scalars | null>(() => {
+    const pick = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      if (v?.type !== 'number' || v.value == null || !Number.isFinite(v.value)) {
+        return null;
+      }
+      return v.value;
+    };
+    return {
+      A_C: pick('A_C'),
+      A_VA: pick('A_VA'),
+      Q_S: pick('Q_S'),
+      Q_Dr: pick('Q_Dr'),
+      f_Z: pick('f_Z'),
+      f_A: pick('f_A'),
+    };
+  }, [values, fieldBySymbol]);
+
   const engineStates = useMemo<Record<string, EvalState>>(() => {
     const next: Record<string, EvalState> = {};
     for (const eq of equations) {
@@ -110,6 +155,18 @@ export function useEquationEngine({
         expectedUnits[sym] = f?.unit ?? null;
       }
 
+      // Build the aggregator context specific to this equation id.
+      let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
+      if (eq.id === A138_10_GL2_ID) {
+        aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
+      } else if (eq.id === A138_13_GL8_ID) {
+        aggregator = {
+          kostraTable: kostraCarrier,
+          gl8Scalars,
+          kostraUnit: kostraField?.unit ?? null,
+        };
+      }
+
       next[eq.id] = evaluateFormula({
         equationId: eq.id,
         formula: eq.formula,
@@ -117,11 +174,20 @@ export function useEquationEngine({
         outputSymbol: eq.outputSymbol ?? '',
         expectedUnits,
         inputs: evalInputs,
-        aggregator: subAreasCarrier ? { subAreas: subAreasCarrier } : undefined,
+        aggregator,
       });
     }
     return next;
-  }, [values, equations, fieldBySymbol, engineEquationIds, subAreasCarrier]);
+  }, [
+    values,
+    equations,
+    fieldBySymbol,
+    engineEquationIds,
+    subAreasCarrier,
+    kostraCarrier,
+    kostraField,
+    gl8Scalars,
+  ]);
 
   // Write computed value back into the output field, clear it otherwise.
   useEffect(() => {
