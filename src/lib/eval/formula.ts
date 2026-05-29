@@ -20,9 +20,10 @@
 // Small in-tree arithmetic expression evaluator. Avoids the Turbopack-vs-
 // mathjs/expr-eval browser-bundle friction and keeps the engine's behavior
 // fully auditable in this repo. Function calls (e.g. SUM(...)) throw —
-// such formulas need a rewrite rule before they can be evaluated.
+// such formulas need a rewrite rule OR a registered aggregator.
 import { evalExpression } from './arithmetic';
 import { rewriteRules } from './rewrites';
+import { aggregators, type AggregatorContext } from './aggregators';
 
 export type EvalInputValue = {
   /** the symbol the formula is expecting (already remapped if a rewrite applies) */
@@ -78,8 +79,13 @@ export type EvalRequest = {
    * keys are the post-rewrite symbol names (the names that appear in the RHS
    * actually evaluated). */
   expectedUnits?: Record<string, string | null>;
-  /** resolved values, keyed by the post-rewrite symbol name */
+  /** resolved values, keyed by the post-rewrite symbol name. Only relevant
+   * for the arithmetic path; the aggregator path reads `aggregator`. */
   inputs: EvalInputValue[];
+  /** Carrier data for the aggregator path. When the registered aggregator
+   * for this equationId needs structured input (e.g. a sub-area array), the
+   * caller passes it here. */
+  aggregator?: AggregatorContext;
 };
 
 /** Strip the LHS `OUT =` if present so mathjs sees only the RHS expression. */
@@ -98,6 +104,15 @@ function rhs(formula: string): string {
  * loud unless a rewrite is registered.
  */
 export function evaluateFormula(req: EvalRequest): EvalState {
+  // 0. Aggregator path — if a structured aggregator is registered for this
+  // equation id, it handles the whole evaluation. The arithmetic path below
+  // is bypassed entirely because the source formula uses array-over-i
+  // notation that can only be evaluated against carrier data.
+  const aggregator = aggregators[req.equationId];
+  if (aggregator) {
+    return aggregator.run(req);
+  }
+
   // 1. Apply rewrite if registered for this equation id.
   const rewrite = rewriteRules[req.equationId];
   const formulaInUse = rewrite ? rewrite.to : req.formula;

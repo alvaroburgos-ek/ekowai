@@ -23,17 +23,14 @@
  */
 import type { Rewrite } from './formula';
 
-export const rewriteRules: Record<string, Rewrite> = {
-  // DWA-A 138-1 · A138-10 · Gl. (2) · §5.3.3.5
-  '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': {
-    from: 'A_C = SUM(A_E_b_a_i * C_i) + SUM(A_E_nb_a_i * C_i)',
-    to: 'A_E_b_a_total * C_m + A_E_nb_a_total * C_m',
-    remap: {
-      A_E_b_a_i: 'A_E_b_a_total',
-      A_E_nb_a_i: 'A_E_nb_a_total',
-      C_i: 'C_m',
-    },
-    reason:
-      'Wizard erfasst Summe der Teilflächen (A_E_b_a_total / A_E_nb_a_total) und mittleren Abflussbeiwert C_m statt einzelner Sub-Areale. Substitution exakt nur wenn C_m der flächengewichtete Mittelwert über ALLE Sub-Areale ist (paved + unpaved, gemäß Tab. 9-Verfahren). Engineer muss diese Annahme prüfen.',
-  },
-};
+/**
+ * Rewrite registry — empty by default.
+ *
+ * Iteration-1 (2026-05-29) entry for A138-10 Gl. 2 (`SUM(...) + SUM(...)`
+ * collapsed to `A_E_b_a_total · C_m + A_E_nb_a_total · C_m`) is RETIRED.
+ * Gl. 2 is now evaluated directly per sub-area in the engine — see the
+ * `aggregator` path in `formula.ts`, gated on equation id, no rewrite
+ * required. The mechanism stays in place for future cases where a
+ * formula genuinely needs a string-level substitution.
+ */
+export const rewriteRules: Record<string, Rewrite> = {};

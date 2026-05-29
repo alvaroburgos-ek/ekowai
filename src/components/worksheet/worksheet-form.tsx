@@ -8,8 +8,10 @@ import { EquationsBlock } from './equations-block';
 import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
 import { EquationEngineCard } from './equation-engine-card';
+import { SubAreasEditor } from './sub-areas-editor';
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
+import type { SubAreasCarrier } from '@/lib/eval/aggregators';
 
 /**
  * Whitelist of (worksheetCode, equationNumber) the new mathjs evaluator
@@ -176,6 +178,18 @@ export function WorksheetForm({
     return ids;
   }, [sortedEquations, worksheet.template.code]);
 
+  // A138-10 Gl. 2: the sub-areas carrier lives in the field with
+  // symbol 'sub_areas_A138_10' as data_type=json. Read it from the store.
+  const subAreasField = fieldBySymbol.get('sub_areas_A138_10');
+  const subAreasCarrier = useMemo<SubAreasCarrier | null>(() => {
+    if (!subAreasField) return null;
+    const v = values[subAreasField.id];
+    if (v?.type !== 'json') return null;
+    const raw = v.value as { rows?: unknown } | null | undefined;
+    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+    return raw as SubAreasCarrier;
+  }, [values, subAreasField]);
+
   // Resolve eval state for each whitelisted equation. Pure derivation from
   // values + fields, so a memo (not an effect) is the right primitive — it
   // re-computes on dependency change without scheduling an extra render.
@@ -184,8 +198,9 @@ export function WorksheetForm({
     for (const eq of sortedEquations) {
       if (!engineEquationIds.has(eq.id)) continue;
 
-      // Determine the symbols the engine actually needs (after rewrite remap)
+      // Determine the symbols the engine needs (after any rewrite remap)
       // and collect their resolved values + units from the wizard's fields.
+      // The aggregator path (e.g. A138-10 Gl. 2) skips symbol resolution.
       const rewrite = rewriteRules[eq.id];
       const neededSymbols = rewrite
         ? Object.values(rewrite.remap)
@@ -211,10 +226,13 @@ export function WorksheetForm({
         outputSymbol: eq.outputSymbol ?? '',
         expectedUnits,
         inputs: evalInputs,
+        aggregator: subAreasCarrier
+          ? { subAreas: subAreasCarrier }
+          : undefined,
       });
     }
     return next;
-  }, [values, sortedEquations, fieldBySymbol, engineEquationIds]);
+  }, [values, sortedEquations, fieldBySymbol, engineEquationIds, subAreasCarrier]);
 
   // For whitelisted equations: write the computed value into the output field
   // (so it lands in project_parameters via the normal save path). For non-
@@ -333,6 +351,15 @@ export function WorksheetForm({
           locale={locale}
         />
       ))}
+
+      {subAreasField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Teilflächen-Erfassung (für A_C nach Gl. 2)
+          </h2>
+          <SubAreasEditor fieldId={subAreasField.id} />
+        </section>
+      )}
 
       <EquationsBlock equations={equations} />
 
