@@ -118,6 +118,52 @@ export async function ensureWorksheetInstance(
   return existing;
 }
 
+/**
+ * Cross-worksheet inheritance: load all "consumed" fields from OTHER worksheet
+ * templates in the same standard whose `consumer_worksheets` array declares
+ * the current worksheet as a consumer.
+ *
+ * The producing worksheet's field IS the value carrier — there is exactly one
+ * project_parameters row per (project_id, field_id). A downstream worksheet
+ * that consumes a symbol reads that same row, so saving on the origin
+ * propagates immediately.
+ *
+ * Pile-2-deactivated rows (`active=false`) are excluded — they're hidden
+ * from the form everywhere.
+ *
+ * Returns the origin field rows annotated with the producing worksheet code,
+ * so the UI can render an attribution badge ("← A138-10").
+ */
+export type InheritedField = typeof fields.$inferSelect & {
+  originWorksheetCode: string;
+};
+
+export async function loadInheritedFields(
+  currentTemplateId: string,
+  currentStandardId: string,
+  currentWorksheetCode: string,
+): Promise<InheritedField[]> {
+  const rows = await db
+    .select({
+      field: fields,
+      originCode: worksheetTemplates.code,
+    })
+    .from(fields)
+    .innerJoin(
+      worksheetTemplates,
+      eq(worksheetTemplates.id, fields.worksheetTemplateId),
+    )
+    .where(
+      and(
+        eq(worksheetTemplates.standardId, currentStandardId),
+        sql`${currentWorksheetCode} = ANY(${fields.consumerWorksheets})`,
+        sql`${fields.worksheetTemplateId} <> ${currentTemplateId}`,
+        eq(fields.active, true),
+      ),
+    );
+  return rows.map((r) => ({ ...r.field, originWorksheetCode: r.originCode }));
+}
+
 /** Load project_parameters for the given field IDs in one query. */
 export async function loadProjectParameters(
   projectId: string,
