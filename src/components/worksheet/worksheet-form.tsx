@@ -9,9 +9,7 @@ import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
 import { EquationEngineCard } from './equation-engine-card';
 import { SubAreasEditor } from './sub-areas-editor';
-import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
-import { rewriteRules } from '@/lib/eval/rewrites';
-import type { SubAreasCarrier } from '@/lib/eval/aggregators';
+import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 
 /**
  * Whitelist of (worksheetCode, equationNumber) the new mathjs evaluator
@@ -167,93 +165,18 @@ export function WorksheetForm({
     return set;
   }, [sortedEquations, fieldBySymbol]);
 
-  // Equations the new mathjs engine handles for THIS worksheet. Everything
-  // else stays on the legacy naive sum-evaluator below.
-  const engineEquationIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const eq of sortedEquations) {
-      const key = `${worksheet.template.code}:${eq.equationNumber}`;
-      if (FORMULA_ENGINE_WHITELIST.has(key)) ids.add(eq.id);
-    }
-    return ids;
-  }, [sortedEquations, worksheet.template.code]);
+  // Engine wiring lives in a shared hook so the integration test renders
+  // EXACTLY the production code path (not a copy of it).
+  const { engineEquationIds, engineStates } = useEquationEngine({
+    worksheetCode: worksheet.template.code,
+    fields,
+    equations: sortedEquations,
+    engineWhitelist: FORMULA_ENGINE_WHITELIST,
+  });
 
-  // A138-10 Gl. 2: the sub-areas carrier lives in the field with
-  // symbol 'sub_areas_A138_10' as data_type=json. Read it from the store.
-  const subAreasField = fieldBySymbol.get('sub_areas_A138_10');
-  const subAreasCarrier = useMemo<SubAreasCarrier | null>(() => {
-    if (!subAreasField) return null;
-    const v = values[subAreasField.id];
-    if (v?.type !== 'json') return null;
-    const raw = v.value as { rows?: unknown } | null | undefined;
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as SubAreasCarrier;
-  }, [values, subAreasField]);
-
-  // Resolve eval state for each whitelisted equation. Pure derivation from
-  // values + fields, so a memo (not an effect) is the right primitive — it
-  // re-computes on dependency change without scheduling an extra render.
-  const engineStates = useMemo<Record<string, EvalState>>(() => {
-    const next: Record<string, EvalState> = {};
-    for (const eq of sortedEquations) {
-      if (!engineEquationIds.has(eq.id)) continue;
-
-      // Determine the symbols the engine needs (after any rewrite remap)
-      // and collect their resolved values + units from the wizard's fields.
-      // The aggregator path (e.g. A138-10 Gl. 2) skips symbol resolution.
-      const rewrite = rewriteRules[eq.id];
-      const neededSymbols = rewrite
-        ? Object.values(rewrite.remap)
-        : eq.inputSymbols ?? [];
-
-      const evalInputs = neededSymbols.map((sym) => {
-        const f = fieldBySymbol.get(sym);
-        const v = f ? values[f.id] : undefined;
-        const num = v?.type === 'number' ? v.value : null;
-        return { symbol: sym, value: num, unit: f?.unit ?? null };
-      });
-
-      const expectedUnits: Record<string, string | null> = {};
-      for (const sym of neededSymbols) {
-        const f = fieldBySymbol.get(sym);
-        expectedUnits[sym] = f?.unit ?? null;
-      }
-
-      next[eq.id] = evaluateFormula({
-        equationId: eq.id,
-        formula: eq.formula,
-        inputSymbols: eq.inputSymbols ?? [],
-        outputSymbol: eq.outputSymbol ?? '',
-        expectedUnits,
-        inputs: evalInputs,
-        aggregator: subAreasCarrier
-          ? { subAreas: subAreasCarrier }
-          : undefined,
-      });
-    }
-    return next;
-  }, [values, sortedEquations, fieldBySymbol, engineEquationIds, subAreasCarrier]);
-
-  // For whitelisted equations: write the computed value into the output field
-  // (so it lands in project_parameters via the normal save path). For non-
-  // computed states, REVERT any auto-computed value back to null so the UI
-  // never carries a stale number when the engine says manual_required/error.
-  useEffect(() => {
-    for (const eq of sortedEquations) {
-      if (!engineEquationIds.has(eq.id)) continue;
-      const outSym = eq.outputSymbol;
-      if (!outSym) continue;
-      const outField = fieldBySymbol.get(outSym);
-      if (!outField) continue;
-      const state = engineStates[eq.id];
-      const current = values[outField.id];
-      const currentNum = current?.type === 'number' ? current.value : null;
-      const desired = state?.kind === 'computed' ? state.value : null;
-      if (currentNum !== desired) {
-        setField(outField.id, { type: 'number', value: desired });
-      }
-    }
-  }, [engineStates, engineEquationIds, sortedEquations, fieldBySymbol, values, setField]);
+  // A138-10 sub-areas: render the editor only when the worksheet declares the
+  // carrier field. The hook handles the rest.
+  const subAreasField = fields.find((f) => f.symbol.startsWith('sub_areas_'));
 
   // Legacy naive sum-evaluator for everything NOT on the engine whitelist.
   // It ignores `formula` and just sums input_symbols — built for DIN-276 cost
