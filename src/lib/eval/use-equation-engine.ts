@@ -22,6 +22,8 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { rewriteRules } from './rewrites';
 import type { SubAreasCarrier, KostraCarrier, Gl8Scalars } from './aggregators';
+import { equationProfiles } from './equation-profiles';
+import { normalizeSymbols } from './normalize-formula';
 
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
@@ -68,7 +70,10 @@ function consumedSymbolsFor(eq: EquationMeta): string[] {
     // Gl. 8 reads scalars from inherited fields + the KOSTRA carrier.
     return ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A', 'r_D_n_table'];
   }
-  return eq.inputSymbols ?? [];
+  // For the §6.x.y batch (arithmetic + Gl. 11 balance), the formula's
+  // input_symbols list is the truth — normalised so a stored alias still
+  // collides correctly with the ambiguity map.
+  return normalizeSymbols(eq.inputSymbols ?? []);
 }
 
 export function useEquationEngine({
@@ -185,12 +190,23 @@ export function useEquationEngine({
       }
 
       const rewrite = rewriteRules[eq.id];
+      const profile = equationProfiles[eq.id];
+      // Source-formatting quirks (`r_D(n)`) get normalised here so the
+      // hook's symbol lookups match what the parser will see.
       const neededSymbols = rewrite
         ? Object.values(rewrite.remap)
-        : eq.inputSymbols ?? [];
+        : normalizeSymbols(eq.inputSymbols ?? []);
+
+      // Per-equation symbol aliases let a worksheet point a formula symbol
+      // at a different stored field — e.g. Gl. 12 on A138-16 reads
+      // `r_D_n_used` for the `r_D_n` formula symbol. The alias affects field
+      // lookup but NOT the substituted-map key the engineer sees (so the
+      // engine card still surfaces `r_D_n` rather than the local alias).
+      const aliasFor = (sym: string): string =>
+        profile?.symbolAliases?.[sym] ?? sym;
 
       const evalInputs = neededSymbols.map((sym) => {
-        const f = fieldBySymbol.get(sym);
+        const f = fieldBySymbol.get(aliasFor(sym));
         const v = f ? values[f.id] : undefined;
         const num = v?.type === 'number' ? v.value : null;
         return { symbol: sym, value: num, unit: f?.unit ?? null };
@@ -198,7 +214,7 @@ export function useEquationEngine({
 
       const expectedUnits: Record<string, string | null> = {};
       for (const sym of neededSymbols) {
-        const f = fieldBySymbol.get(sym);
+        const f = fieldBySymbol.get(aliasFor(sym));
         expectedUnits[sym] = f?.unit ?? null;
       }
 

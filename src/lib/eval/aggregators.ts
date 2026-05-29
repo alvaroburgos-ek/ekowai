@@ -277,9 +277,85 @@ const a138_13_gl8: Aggregator = {
   },
 };
 
+/**
+ * A138-16 Gl. (11) — Flächenversickerung Wasserbilanz (§6.2.2).
+ *
+ *   (A_C + A_S) · r_D(n) · 10⁻⁷ = A_S · k_i
+ *
+ * This is the source's identity that Gl. (12) is derived from. The DB
+ * row's output_symbol is "(balance)" — it's a check, not a producing
+ * equation. The aggregator:
+ *   - reads A_C, A_S, r_D_n, k_i scalar inputs from the form fields,
+ *   - computes LHS = (A_C + A_S) · r_D_n · 10⁻⁷,
+ *   - computes RHS = A_S · k_i,
+ *   - returns `computed` with value = LHS − RHS when |residual| is small
+ *     relative to max(|LHS|, |RHS|, ε), else `manual_required`.
+ *
+ * Tolerance: relative 1 % (engineering rounding plus small data-entry
+ * imprecision). Anything bigger means the engineer's A_S choice doesn't
+ * satisfy the source's balance.
+ */
+const BALANCE_TOL_REL = 0.01;
+const GL11_INPUT_SYMBOLS = ['A_C', 'A_S', 'r_D_n', 'k_i'] as const;
+
+const a138_16_gl11_balance: Aggregator = {
+  run: (req) => {
+    const inputs = new Map(req.inputs.map((i) => [i.symbol, i]));
+    const missing: string[] = [];
+    const vals: Record<string, number> = {};
+    for (const sym of GL11_INPUT_SYMBOLS) {
+      const found = inputs.get(sym);
+      if (!found || found.value === null || !Number.isFinite(found.value)) {
+        missing.push(sym);
+        continue;
+      }
+      vals[sym] = found.value;
+    }
+    if (missing.length > 0) {
+      return {
+        kind: 'manual_required',
+        reason: `Fehlende Eingaben für Bilanzprüfung: ${missing.join(', ')}.`,
+        missing,
+      };
+    }
+
+    const { A_C, A_S, r_D_n, k_i } = vals;
+    const LHS = (A_C + A_S) * r_D_n * 1e-7;
+    const RHS = A_S * k_i;
+    const residual = LHS - RHS;
+    const scale = Math.max(Math.abs(LHS), Math.abs(RHS), 1e-12);
+    const relErr = Math.abs(residual) / scale;
+
+    const substituted: Record<string, number> = {
+      'LHS = (A_C + A_S) · r_D(n) · 10⁻⁷': LHS,
+      'RHS = A_S · k_i': RHS,
+      'Residuum LHS − RHS': residual,
+      'rel. Abweichung': relErr,
+    };
+
+    if (relErr > BALANCE_TOL_REL) {
+      return {
+        kind: 'manual_required',
+        reason: `Bilanz weicht zu stark ab (rel. Abweichung ${(relErr * 100).toFixed(2)} % > 1 %). LHS = ${LHS.toExponential(4)}, RHS = ${RHS.toExponential(4)}. A_S muss aus Gl. (12) bestimmt werden.`,
+        unitConflicts: undefined,
+      };
+    }
+
+    return {
+      kind: 'computed',
+      value: residual,
+      substituted,
+      formulaEvaluated:
+        '(A_C + A_S) · r_D(n) · 10⁻⁷  −  A_S · k_i   (Residuum, soll ≈ 0)',
+    };
+  },
+};
+
 export const aggregators: Record<string, Aggregator> = {
   // DWA-A 138-1 · A138-10 · Gl. (2)
   '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_gl2,
   // DWA-A 138-1 · A138-13 · Gl. (8)
   '69f31e6e-a755-4246-af10-ae46668b5c86': a138_13_gl8,
+  // DWA-A 138-1 · A138-16 · Gl. (11) Bilanz-Check
+  '3b3b2cf6-da4f-43b2-a302-b7c38768d3ff': a138_16_gl11_balance,
 };

@@ -21,8 +21,16 @@ import { visibleFields } from './visible-fields';
  */
 const FORMULA_ENGINE_WHITELIST = new Set<string>([
   'A138-10:2',
-  'A138-18:21',
   'A138-13:8',
+  'A138-18:21',
+  // §6.x.y batch
+  'A138-12:4',
+  'A138-12:7',
+  'A138-16:11',
+  'A138-16:12',
+  'A138-17:16',
+  'A138-18:17',
+  'A138-18:18',
 ]);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
