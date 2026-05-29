@@ -31,12 +31,18 @@ export default async function WorksheetPage({
   // Pull inherited fields from upstream worksheets in the same standard that
   // declared this worksheet as a consumer (via fields.consumer_worksheets).
   // Merge order: own fields first, then inherited (own wins on symbol collision).
+  // Ambiguous symbols (>1 inherited producer for the same symbol) are
+  // recorded in mergeResult.ambiguousSymbols — the engine reads that map and
+  // emits manual_required for any equation that consumes such a symbol,
+  // rather than silently picking a producer.
   const inheritedRaw = await loadInheritedFields(
     ws.template.id,
     ws.template.standard.id,
     worksheetCode,
   );
-  const mergedFields = mergeInheritedFields(ws.fields, inheritedRaw);
+  const mergeResult = mergeInheritedFields(ws.fields, inheritedRaw);
+  const mergedFields = mergeResult.fields;
+  const ambiguousSymbols = mergeResult.ambiguousSymbols;
 
   const fieldIds = mergedFields.map((f) => f.id);
   const fieldSymbols = mergedFields.map((f) => f.symbol);
@@ -226,6 +232,7 @@ export default async function WorksheetPage({
           initialCitations={initialCitations}
           sameSymbolValuesBySymbol={sameSymbolValuesBySymbol}
           inheritedFromBySymbol={inheritedFromBySymbol}
+          ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
           docs={docs}
         />
       </main>

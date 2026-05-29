@@ -87,7 +87,13 @@ const HEINSBERG_KOSTRA: KostraCarrier = {
 };
 
 // ---- Harness -------------------------------------------------------------
-function Harness({ fields }: { fields: Field[] }) {
+function Harness({
+  fields,
+  ambiguousSymbols,
+}: {
+  fields: Field[];
+  ambiguousSymbols?: Record<string, string[]>;
+}) {
   // Strip the `inheritedFromWorksheet` flag if present — the hook signature
   // only needs { id, symbol, unit }.
   const memoFields = useMemo(() => fields, [fields]);
@@ -96,6 +102,7 @@ function Harness({ fields }: { fields: Field[] }) {
     fields: memoFields,
     equations: EQUATIONS,
     engineWhitelist: new Set<string>(['A138-13:8']),
+    ambiguousSymbols,
   });
   const state = engineStates[A138_13_GL8_EQ_ID];
   if (!state) return null;
@@ -131,7 +138,7 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
   beforeEach(() => initStore());
 
   it('merge contract: own fields are kept, inherited fields appended with attribution', () => {
-    const merged = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
+    const { fields: merged } = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
     // Own fields preserved (no attribution)
     expect(merged.find((f) => f.symbol === 'V_VA')?.inheritedFromWorksheet).toBeUndefined();
     expect(merged.find((f) => f.symbol === 'q_S_AC')?.inheritedFromWorksheet).toBeUndefined();
@@ -151,15 +158,20 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
       ...A138_13_OWN_FIELDS,
       { id: 'a13.f_Z_local', symbol: 'f_Z', unit: null, active: true },
     ];
-    const merged = mergeInheritedFields(ownWithCollision, INHERITED_ROWS);
+    const { fields: merged, ambiguousSymbols } = mergeInheritedFields(
+      ownWithCollision,
+      INHERITED_ROWS,
+    );
     const f_Z = merged.filter((f) => f.symbol === 'f_Z');
     expect(f_Z).toHaveLength(1);
     expect(f_Z[0].id).toBe('a13.f_Z_local');
     expect(f_Z[0].inheritedFromWorksheet).toBeUndefined();
+    // Own-field override resolves any would-be ambiguity → not flagged
+    expect(ambiguousSymbols.has('f_Z')).toBe(false);
   });
 
   it('end-to-end: values entered on origin worksheets flow → A138-13 Gl. 8 computes 18.684 at D=30', () => {
-    const merged = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
+    const { fields: merged } = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
     render(<Harness fields={merged} />);
 
     // Simulate "engineer saves values on origin worksheets" — project_parameters
@@ -187,7 +199,7 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
   });
 
   it('negative: missing upstream value (no Q_S on A138-12) → manual_required, no number', () => {
-    const merged = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
+    const { fields: merged } = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
     const { rerender } = render(<Harness fields={merged} />);
 
     setNumber('a08.f_Z', 1.2);
@@ -215,7 +227,7 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
     const tweaked: InheritedFieldShape<Field>[] = INHERITED_ROWS.map((r) =>
       r.symbol === 'r_D_n_table' ? { ...r, unit: 'mm/h' } : r,
     );
-    const merged = mergeInheritedFields(A138_13_OWN_FIELDS, tweaked);
+    const { fields: merged } = mergeInheritedFields(A138_13_OWN_FIELDS, tweaked);
     render(<Harness fields={merged} />);
 
     setNumber('a08.f_Z', 1.2);
@@ -235,5 +247,100 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
         .some((li) => /^r_D\(n\):\s*erwartet l\/\(s·ha\), geliefert mm\/h/.test(li.textContent ?? '')),
     ).toBe(true);
     expect(within(card).queryByText(/V_VA\s*=\s*\d/)).not.toBeInTheDocument();
+  });
+
+  // ---- Ambiguity guard ---------------------------------------------------
+
+  it('merge contract: two inherited producers for the same symbol → ambiguousSymbols populated, both dropped from fields', () => {
+    // Construct a synthetic collision: a second worksheet (A138-ROGUE) also
+    // produces Q_S. mergeInheritedFields must NOT silently keep either.
+    const withCollision: InheritedFieldShape<Field>[] = [
+      ...INHERITED_ROWS,
+      {
+        id: 'rogue.Q_S',
+        symbol: 'Q_S',
+        unit: 'l/s',
+        active: true,
+        originWorksheetCode: 'A138-ROGUE',
+      },
+    ];
+    const { fields: merged, ambiguousSymbols } = mergeInheritedFields(
+      A138_13_OWN_FIELDS,
+      withCollision,
+    );
+    expect(ambiguousSymbols.get('Q_S')).toEqual(['A138-12', 'A138-ROGUE']);
+    // Neither producer's field row appears in the merged list
+    expect(merged.find((f) => f.symbol === 'Q_S')).toBeUndefined();
+    // Other inherited rows still resolve unambiguously
+    expect(merged.find((f) => f.symbol === 'A_C')?.inheritedFromWorksheet).toBe(
+      'A138-10',
+    );
+  });
+
+  it('two active fields produce Q_S → consuming Gl. 8 goes manual_required ("mehrdeutige Quelle für Q_S"), NO V_VA number', () => {
+    const withCollision: InheritedFieldShape<Field>[] = [
+      ...INHERITED_ROWS,
+      {
+        id: 'rogue.Q_S',
+        symbol: 'Q_S',
+        unit: 'l/s',
+        active: true,
+        originWorksheetCode: 'A138-ROGUE',
+      },
+    ];
+    const { fields: merged, ambiguousSymbols } = mergeInheritedFields(
+      A138_13_OWN_FIELDS,
+      withCollision,
+    );
+    const ambiguous = Object.fromEntries(ambiguousSymbols);
+    render(<Harness fields={merged} ambiguousSymbols={ambiguous} />);
+
+    // Even with every value the engine would otherwise need, ambiguity wins.
+    setNumber('a08.f_Z', 1.2);
+    setNumber('a08.f_A', 1.0);
+    setNumber('a10.A_C', 1000);
+    setNumber('a10.A_VA', 50);
+    // Both Q_S field ids set just to remove any doubt that we're not picking
+    // a value silently — the engine MUST refuse regardless.
+    setNumber('a12.Q_S', 5);
+    setNumber('rogue.Q_S', 7);
+    setNumber('a20.Q_Dr', 0);
+    setJson('a04.r_D_n_table', HEINSBERG_KOSTRA);
+
+    const card = screen.getByTestId('engine-card-gl-8');
+    expect(card).toHaveAttribute('data-engine-state', 'manual_required');
+    expect(
+      within(card).getByText(/mehrdeutige Quelle für Q_S/),
+    ).toBeInTheDocument();
+    expect(within(card).getByText(/A138-12.*A138-ROGUE/)).toBeInTheDocument();
+    // No V_VA number rendered — neither 18.684 (from A138-12 Q_S) nor 17.244
+    // (from A138-ROGUE Q_S=7). Engine refused to pick.
+    expect(within(card).queryByText(/V_VA\s*=\s*\d/)).not.toBeInTheDocument();
+  });
+
+  it('regression guard: single producer (the actual A138-13 case) still computes 18.684 — ambiguity guard is opt-in', () => {
+    const { fields: merged, ambiguousSymbols } = mergeInheritedFields(
+      A138_13_OWN_FIELDS,
+      INHERITED_ROWS,
+    );
+    expect(ambiguousSymbols.size).toBe(0);
+    render(
+      <Harness
+        fields={merged}
+        ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
+      />,
+    );
+
+    setNumber('a08.f_Z', 1.2);
+    setNumber('a08.f_A', 1.0);
+    setNumber('a10.A_C', 1000);
+    setNumber('a10.A_VA', 50);
+    setNumber('a12.Q_S', 5);
+    setNumber('a20.Q_Dr', 0);
+    setJson('a04.r_D_n_table', HEINSBERG_KOSTRA);
+
+    const card = screen.getByTestId('engine-card-gl-8');
+    expect(card).toHaveAttribute('data-engine-state', 'computed');
+    expect(within(card).getByText(/V_VA = 18,684 m³/)).toBeInTheDocument();
   });
 });

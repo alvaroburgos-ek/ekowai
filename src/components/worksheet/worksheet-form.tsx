@@ -102,6 +102,10 @@ type Props = {
   /** symbol → worksheet code from which the initial value was inherited (no
    * local saved value existed). Used to render the "← [code]" hint. */
   inheritedFromBySymbol: Record<string, string>;
+  /** symbol → list of producing worksheet codes when an inherited symbol is
+   * ambiguous (>1 active producing field for the same symbol). The engine
+   * returns manual_required for any equation consuming an ambiguous symbol. */
+  ambiguousSymbols?: Record<string, string[]>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
@@ -120,6 +124,7 @@ export function WorksheetForm({
   initialCitations,
   sameSymbolValuesBySymbol,
   inheritedFromBySymbol,
+  ambiguousSymbols,
   docs,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
@@ -186,6 +191,7 @@ export function WorksheetForm({
     fields,
     equations: sortedEquations,
     engineWhitelist: FORMULA_ENGINE_WHITELIST,
+    ambiguousSymbols,
   });
 
   // A138-10 sub-areas: render the editor only when the worksheet declares the
