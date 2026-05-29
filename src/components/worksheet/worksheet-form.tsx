@@ -17,7 +17,7 @@ import { useEquationEngine } from '@/lib/eval/use-equation-engine';
  * below. Keep this VERY small until each entry has a hand-calc reference and
  * a unit test.
  */
-const FORMULA_ENGINE_WHITELIST = new Set<string>(['A138-10:2']);
+const FORMULA_ENGINE_WHITELIST = new Set<string>(['A138-10:2', 'A138-18:21']);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
