@@ -10,6 +10,7 @@ import { ApprovalBar } from './approval-bar';
 import { EquationEngineCard } from './equation-engine-card';
 import { SubAreasEditor } from './sub-areas-editor';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
+import { visibleFields } from './visible-fields';
 
 /**
  * Whitelist of (worksheetCode, equationNumber) the new mathjs evaluator
@@ -49,10 +50,13 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
   );
 }
 
-// WorksheetForm needs sectionId + orderIndex on top of what DynamicField requires.
+// WorksheetForm needs sectionId + orderIndex + active on top of what
+// DynamicField requires. `active=false` fields are hidden from rendering
+// but kept in the store/queries so saved values aren't lost.
 type FieldDef = Parameters<typeof DynamicField>[0]['field'] & {
   sectionId: string | null;
   orderIndex: number;
+  active: boolean;
 };
 
 type Section = Parameters<typeof SectionGroup>[0]['section'];
@@ -215,9 +219,14 @@ export function WorksheetForm({
     }
   }, [values, fields, sortedEquations, fieldBySymbol, setField, engineEquationIds]);
 
+  // Hide deprecated fields from rendering. visibleFields(...) filters
+  // `active=false` rows out of the section-grouped render path — the engine
+  // (useEquationEngine) still receives the unfiltered `fields` so any
+  // equation that references a deprecated symbol surfaces as manual_required
+  // rather than silently mis-summing.
   const fieldsBySectionId = useMemo(() => {
     const map = new Map<string | null, FieldDef[]>();
-    for (const f of fields) {
+    for (const f of visibleFields(fields)) {
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);

@@ -182,6 +182,7 @@ export default async function WorksheetPage({
             clauseReference: f.clauseReference,
             verificationStatus: f.verificationStatus,
             orderIndex: f.orderIndex,
+            active: f.active,
           })) as never}
           equations={ws.equations.map((e) => ({
             id: e.id, equationNumber: e.equationNumber, formula: e.formula,
