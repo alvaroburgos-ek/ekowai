@@ -7,7 +7,9 @@ import {
   ensureWorksheetInstance,
   loadProjectParameters,
   loadSameSymbolValues,
+  loadInheritedFields,
 } from '@/lib/db/queries/worksheet';
+import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
 
@@ -26,8 +28,18 @@ export default async function WorksheetPage({
   const ws = await loadWorksheet(standardCode, worksheetCode);
   if (!ws) notFound();
 
-  const fieldIds = ws.fields.map((f) => f.id);
-  const fieldSymbols = ws.fields.map((f) => f.symbol);
+  // Pull inherited fields from upstream worksheets in the same standard that
+  // declared this worksheet as a consumer (via fields.consumer_worksheets).
+  // Merge order: own fields first, then inherited (own wins on symbol collision).
+  const inheritedRaw = await loadInheritedFields(
+    ws.template.id,
+    ws.template.standard.id,
+    worksheetCode,
+  );
+  const mergedFields = mergeInheritedFields(ws.fields, inheritedRaw);
+
+  const fieldIds = mergedFields.map((f) => f.id);
+  const fieldSymbols = mergedFields.map((f) => f.symbol);
 
   // Parallelise all queries that depend on ws.template.id but not on each other
   const [instance, parameters, sameSymbol, sidebarWorksheets, docs] = await Promise.all([
@@ -70,7 +82,7 @@ export default async function WorksheetPage({
   // most-recently-updated wins) — engineer can still override by typing.
   const initialValues: Record<string, unknown> = {};
   const inheritedFromBySymbol: Record<string, string> = {};
-  for (const f of ws.fields) {
+  for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (p) {
       switch (f.dataType) {
@@ -136,7 +148,7 @@ export default async function WorksheetPage({
   // Build citations map: field_id → Citation[] (from project_parameters.citation_sources)
   type Citation = { id: string; docId: string; page: number | null; note: string | null };
   const initialCitations: Record<string, Citation[]> = {};
-  for (const f of ws.fields) {
+  for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (!p) continue;
     const arr = (p.citationSources as Citation[] | null) ?? [];
@@ -146,7 +158,7 @@ export default async function WorksheetPage({
   // Fix 4: extract citation sources directly from already-loaded parameters Map
   // (avoids the redundant readInputsWithSources round-trip to the same rows)
   const initialSources: Record<string, { docId: string; page?: number; note?: string } | null> = {};
-  for (const f of ws.fields) {
+  for (const f of mergedFields) {
     const p = parameters.get(f.id);
     initialSources[f.id] = (p?.citationSource as { docId: string; page?: number; note?: string } | null) ?? null;
   }
@@ -172,7 +184,7 @@ export default async function WorksheetPage({
             id: s.id, code: s.code, titleDe: s.titleDe, titleEn: s.titleEn,
             orderIndex: s.orderIndex, parentSectionId: s.parentSectionId,
           }))}
-          fields={ws.fields.map((f) => ({
+          fields={mergedFields.map((f) => ({
             id: f.id, sectionId: f.sectionId, symbol: f.symbol,
             labelDe: f.labelDe, labelEn: f.labelEn, unit: f.unit,
             dataType: f.dataType as 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json',
@@ -183,6 +195,7 @@ export default async function WorksheetPage({
             verificationStatus: f.verificationStatus,
             orderIndex: f.orderIndex,
             active: f.active,
+            inheritedFromWorksheet: f.inheritedFromWorksheet,
           })) as never}
           equations={ws.equations.map((e) => ({
             id: e.id, equationNumber: e.equationNumber, formula: e.formula,

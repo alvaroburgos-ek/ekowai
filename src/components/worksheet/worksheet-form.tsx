@@ -58,10 +58,15 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
 // WorksheetForm needs sectionId + orderIndex + active on top of what
 // DynamicField requires. `active=false` fields are hidden from rendering
 // but kept in the store/queries so saved values aren't lost.
+// `inheritedFromWorksheet` set ⇒ this field belongs to an upstream worksheet
+// that declared the current worksheet a consumer; we show it in a separate
+// "Vorgelagerte Werte" panel and feed it to the engine, but don't render
+// an editable input here (engineer edits on the origin worksheet).
 type FieldDef = Parameters<typeof DynamicField>[0]['field'] & {
   sectionId: string | null;
   orderIndex: number;
   active: boolean;
+  inheritedFromWorksheet?: string;
 };
 
 type Section = Parameters<typeof SectionGroup>[0]['section'];
@@ -227,14 +232,15 @@ export function WorksheetForm({
     }
   }, [values, fields, sortedEquations, fieldBySymbol, setField, engineEquationIds]);
 
-  // Hide deprecated fields from rendering. visibleFields(...) filters
-  // `active=false` rows out of the section-grouped render path — the engine
-  // (useEquationEngine) still receives the unfiltered `fields` so any
-  // equation that references a deprecated symbol surfaces as manual_required
-  // rather than silently mis-summing.
+  // Hide deprecated AND inherited fields from rendering. visibleFields(...)
+  // strips `active=false` rows; the additional filter strips inherited rows
+  // (they show in a separate read-only panel since the engineer edits them
+  // on the origin worksheet). The engine sees the unfiltered `fields` so
+  // every consumed symbol is resolved.
   const fieldsBySectionId = useMemo(() => {
     const map = new Map<string | null, FieldDef[]>();
     for (const f of visibleFields(fields)) {
+      if (f.inheritedFromWorksheet) continue;
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
@@ -245,6 +251,13 @@ export function WorksheetForm({
     }
     return map;
   }, [fields]);
+
+  // The inherited-values panel content. Built once from `fields` + the
+  // store's resolved values.
+  const inheritedFieldsForPanel = useMemo(
+    () => fields.filter((f) => f.inheritedFromWorksheet && f.active),
+    [fields],
+  );
 
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.get(null) ?? [];
@@ -277,6 +290,53 @@ export function WorksheetForm({
           <SaveIndicator status={saveStatus} />
         </div>
       </header>
+
+      {inheritedFieldsForPanel.length > 0 && (
+        <section
+          className="border border-hairline rounded p-4 space-y-2"
+          data-testid="inherited-values-panel"
+        >
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Vorgelagerte Werte (aus anderen Arbeitsblättern)
+          </h2>
+          <p className="text-[11px] text-subtext">
+            Diese Werte stammen aus vorgelagerten Arbeitsblättern desselben
+            Projekts. Zum Bearbeiten das angegebene Arbeitsblatt öffnen.
+          </p>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+            {inheritedFieldsForPanel.map((f) => {
+              const v = values[f.id];
+              const display =
+                v?.type === 'number' && v.value != null && Number.isFinite(v.value)
+                  ? new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v.value)
+                  : v?.type === 'json' && v.value && typeof v.value === 'object'
+                  ? '(Tabelle)'
+                  : '—';
+              const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
+              return (
+                <li
+                  key={f.id}
+                  data-symbol={f.symbol}
+                  data-inherited-from={f.inheritedFromWorksheet}
+                  className="border-b border-hairline last:border-b-0 py-1 flex items-baseline justify-between gap-2"
+                >
+                  <div>
+                    <div className="text-ink">
+                      <code className="font-mono text-xs mr-2">{f.symbol}</code>
+                      {label}
+                    </div>
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-subtext">
+                      ← {f.inheritedFromWorksheet}
+                      {f.unit && <span className="ml-2 text-ink-2">{f.unit}</span>}
+                    </div>
+                  </div>
+                  <div className="font-mono tabular-nums text-ink">{display}</div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {orphanFields.length > 0 && (
         <section className="space-y-4">{renderField(null)}</section>
