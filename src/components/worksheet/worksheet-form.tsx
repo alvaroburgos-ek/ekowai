@@ -21,8 +21,21 @@ import { visibleFields } from './visible-fields';
  */
 const FORMULA_ENGINE_WHITELIST = new Set<string>([
   'A138-10:2',
-  'A138-18:21',
   'A138-13:8',
+  'A138-18:21',
+  // §6.x.y batch
+  'A138-12:4',
+  'A138-12:7',
+  'A138-16:11',
+  'A138-16:12',
+  'A138-17:16',
+  'A138-18:17',
+  // 'A138-18:18' — DELIBERATELY NOT WIRED. The DB formula omits the ×10³
+  // factor that Gl. (4) has for the same physical quantity Q_S (l/s with
+  // m, m², m/s inputs), so the literal evaluation returns m³/s — a 1000×
+  // magnitude trap. The profile + notes + _eval-reference-Gl18.md remain
+  // in place documenting the open question; the engine renders no result
+  // on the form (manual_required) rather than a wrong-magnitude number.
 ]);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
@@ -102,6 +115,10 @@ type Props = {
   /** symbol → worksheet code from which the initial value was inherited (no
    * local saved value existed). Used to render the "← [code]" hint. */
   inheritedFromBySymbol: Record<string, string>;
+  /** symbol → list of producing worksheet codes when an inherited symbol is
+   * ambiguous (>1 active producing field for the same symbol). The engine
+   * returns manual_required for any equation consuming an ambiguous symbol. */
+  ambiguousSymbols?: Record<string, string[]>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
@@ -120,6 +137,7 @@ export function WorksheetForm({
   initialCitations,
   sameSymbolValuesBySymbol,
   inheritedFromBySymbol,
+  ambiguousSymbols,
   docs,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
@@ -186,6 +204,7 @@ export function WorksheetForm({
     fields,
     equations: sortedEquations,
     engineWhitelist: FORMULA_ENGINE_WHITELIST,
+    ambiguousSymbols,
   });
 
   // A138-10 sub-areas: render the editor only when the worksheet declares the

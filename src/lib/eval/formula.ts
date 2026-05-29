@@ -25,6 +25,7 @@ import { evalExpression } from './arithmetic';
 import { rewriteRules } from './rewrites';
 import { aggregators, type AggregatorContext } from './aggregators';
 import { equationProfiles } from './equation-profiles';
+import { normalizeFormula, normalizeSymbols } from './normalize-formula';
 
 export type EvalInputValue = {
   /** the symbol the formula is expecting (already remapped if a rewrite applies) */
@@ -117,9 +118,12 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   // 1. Apply rewrite if registered for this equation id.
   const rewrite = rewriteRules[req.equationId];
   const formulaInUse = rewrite ? rewrite.to : req.formula;
+  // Normalise the formula's input-symbol list (source-formatting quirks like
+  // `r_D(n)` → `r_D_n`) so callers can pass the raw DB list verbatim and the
+  // evaluator's lookups still match what the parsed expression sees.
   const symbolsNeeded = rewrite
     ? Object.values(rewrite.remap)
-    : req.inputSymbols;
+    : normalizeSymbols(req.inputSymbols);
 
   // The equation profile holds source-context expected units and any
   // numeric constants the formula refers to by name (e.g. `pi`). It is the
@@ -177,8 +181,10 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     };
   }
 
-  // 3. Evaluate the RHS via mathjs.
-  const expression = rhs(formulaInUse);
+  // 3. Evaluate the RHS via the in-tree arithmetic engine. Pre-normalise
+  // source-formatting quirks like `r_D(n)` → `r_D_n` so the parser doesn't
+  // mistake them for unsupported function calls.
+  const expression = normalizeFormula(rhs(formulaInUse));
   if (!expression) {
     return { kind: 'error', message: 'Konnte RHS nicht extrahieren.' };
   }

@@ -22,6 +22,8 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { rewriteRules } from './rewrites';
 import type { SubAreasCarrier, KostraCarrier, Gl8Scalars } from './aggregators';
+import { equationProfiles } from './equation-profiles';
+import { normalizeSymbols } from './normalize-formula';
 
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
@@ -48,13 +50,38 @@ type Args = {
   equations: EquationMeta[];
   /** Set of "WORKSHEETCODE:EQNUM" strings the engine is wired for. */
   engineWhitelist: ReadonlySet<string>;
+  /** symbol → list of producing worksheet codes when a consumed symbol is
+   * ambiguous. Comes from mergeInheritedFields. Any equation whose consumed
+   * symbol list intersects this map returns manual_required immediately. */
+  ambiguousSymbols?: Record<string, string[]>;
 };
+
+/**
+ * Symbols the equation consumes from the data store. For aggregator-handled
+ * equations the formula's input_symbols list does NOT cover everything
+ * (Gl. 2 / Gl. 8 read carriers + scalars that aren't in the formula string),
+ * so we widen the set for those ids.
+ */
+function consumedSymbolsFor(eq: EquationMeta): string[] {
+  if (eq.id === A138_10_GL2_ID) {
+    return [...(eq.inputSymbols ?? []), 'sub_areas_A138_10'];
+  }
+  if (eq.id === A138_13_GL8_ID) {
+    // Gl. 8 reads scalars from inherited fields + the KOSTRA carrier.
+    return ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A', 'r_D_n_table'];
+  }
+  // For the §6.x.y batch (arithmetic + Gl. 11 balance), the formula's
+  // input_symbols list is the truth — normalised so a stored alias still
+  // collides correctly with the ambiguity map.
+  return normalizeSymbols(eq.inputSymbols ?? []);
+}
 
 export function useEquationEngine({
   worksheetCode,
   fields,
   equations,
   engineWhitelist,
+  ambiguousSymbols,
 }: Args): {
   engineEquationIds: Set<string>;
   engineStates: Record<string, EvalState>;
@@ -137,13 +164,49 @@ export function useEquationEngine({
     for (const eq of equations) {
       if (!engineEquationIds.has(eq.id)) continue;
 
+      // Ambiguity guard: if any consumed symbol resolves to >1 active
+      // producing field within the standard, refuse to compute — the engine
+      // cannot pick a producer silently. Surface BEFORE delegating to the
+      // aggregator or arithmetic path so the badge reads correctly.
+      if (ambiguousSymbols) {
+        const consumed = consumedSymbolsFor(eq);
+        const conflicts: Array<{ symbol: string; origins: string[] }> = [];
+        for (const sym of consumed) {
+          const origins = ambiguousSymbols[sym];
+          if (origins && origins.length > 1) {
+            conflicts.push({ symbol: sym, origins });
+          }
+        }
+        if (conflicts.length > 0) {
+          const reasonParts = conflicts.map(
+            (c) => `mehrdeutige Quelle für ${c.symbol} (${c.origins.join(', ')})`,
+          );
+          next[eq.id] = {
+            kind: 'manual_required',
+            reason: reasonParts.join(' · '),
+          };
+          continue;
+        }
+      }
+
       const rewrite = rewriteRules[eq.id];
+      const profile = equationProfiles[eq.id];
+      // Source-formatting quirks (`r_D(n)`) get normalised here so the
+      // hook's symbol lookups match what the parser will see.
       const neededSymbols = rewrite
         ? Object.values(rewrite.remap)
-        : eq.inputSymbols ?? [];
+        : normalizeSymbols(eq.inputSymbols ?? []);
+
+      // Per-equation symbol aliases let a worksheet point a formula symbol
+      // at a different stored field — e.g. Gl. 12 on A138-16 reads
+      // `r_D_n_used` for the `r_D_n` formula symbol. The alias affects field
+      // lookup but NOT the substituted-map key the engineer sees (so the
+      // engine card still surfaces `r_D_n` rather than the local alias).
+      const aliasFor = (sym: string): string =>
+        profile?.symbolAliases?.[sym] ?? sym;
 
       const evalInputs = neededSymbols.map((sym) => {
-        const f = fieldBySymbol.get(sym);
+        const f = fieldBySymbol.get(aliasFor(sym));
         const v = f ? values[f.id] : undefined;
         const num = v?.type === 'number' ? v.value : null;
         return { symbol: sym, value: num, unit: f?.unit ?? null };
@@ -151,7 +214,7 @@ export function useEquationEngine({
 
       const expectedUnits: Record<string, string | null> = {};
       for (const sym of neededSymbols) {
-        const f = fieldBySymbol.get(sym);
+        const f = fieldBySymbol.get(aliasFor(sym));
         expectedUnits[sym] = f?.unit ?? null;
       }
 
@@ -187,6 +250,7 @@ export function useEquationEngine({
     kostraCarrier,
     kostraField,
     gl8Scalars,
+    ambiguousSymbols,
   ]);
 
   // Write computed value back into the output field, clear it otherwise.
