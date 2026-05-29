@@ -25,9 +25,38 @@ export type SubAreasCarrier = {
   rows: SubArea[];
 };
 
+export type KostraRow = {
+  id: string;
+  label?: string | null;
+  D_min: number | null;
+  r_D_n: number | null;
+};
+
+export type KostraCarrier = {
+  rows: KostraRow[];
+};
+
+export type Gl8Scalars = {
+  A_C: number | null;
+  A_VA: number | null;
+  Q_S: number | null;
+  Q_Dr: number | null;
+  f_Z: number | null;
+  f_A: number | null;
+};
+
 export type AggregatorContext = {
   /** Carrier data for the sub-areas aggregator (A138-10 Gl. 2). */
   subAreas?: SubAreasCarrier | null;
+  /** Carrier data for the KOSTRA-table aggregator (A138-13 Gl. 8). */
+  kostraTable?: KostraCarrier | null;
+  /** Scalar inputs the Gl. 8 aggregator reads in addition to the table.
+   * These come from upstream worksheets via the project's same-symbol
+   * inheritance (A_C from A138-10, Q_S from A138-12, f_Z from A138-08…). */
+  gl8Scalars?: Gl8Scalars | null;
+  /** Engineer-reported unit on the table column (read from the
+   * r_D_n_table field's `unit`). Drives the per-row unit guard. */
+  kostraUnit?: string | null;
 };
 
 type Aggregator = {
@@ -103,7 +132,154 @@ const a138_10_gl2: Aggregator = {
   },
 };
 
+/**
+ * A138-13 Gl. 8 — V_VA = (Q_zu − Q_S − Q_Dr) · D · 60 · f_Z · f_A · 10⁻³
+ *
+ * Iterates the KOSTRA-table rows. Q_zu is fixed by Gl. (3):
+ *   Q_zu(D) = r_D(n) · (A_C + A_VA) · 10⁻⁴
+ * so each row substitutes both `D` and `r_D` into the combined form:
+ *   V_VA(D) = (r_D·(A_C+A_VA)·10⁻⁴ − Q_S − Q_Dr) · D · 60 · f_Z · f_A · 10⁻³
+ *
+ * Returns the MAXIMUM V_VA across rows AND surfaces the governing D in
+ * the substituted map so the engineer sees which duration governs.
+ *
+ * Strict three-state contract:
+ *   - All 6 scalars present + ≥1 complete table row + matching unit → computed
+ *   - Empty/incomplete row → manual_required naming the row
+ *   - Missing scalar → manual_required naming the symbol
+ *   - Table column unit ≠ 'l/(s·ha)' → manual_required (the silent-error
+ *     trap; the formula's `10⁻⁴` factor is calibrated to that unit)
+ */
+const KOSTRA_EXPECTED_UNIT = 'l/(s·ha)';
+const GL8_SCALAR_SYMBOLS = ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A'] as const;
+
+function isScalarReady(scalars: Gl8Scalars | null | undefined): scalars is Gl8Scalars {
+  if (!scalars) return false;
+  return GL8_SCALAR_SYMBOLS.every((k) => {
+    const v = scalars[k];
+    return typeof v === 'number' && Number.isFinite(v);
+  });
+}
+
+function isKostraRowComplete(r: KostraRow): boolean {
+  return (
+    typeof r.D_min === 'number' &&
+    Number.isFinite(r.D_min) &&
+    r.D_min > 0 &&
+    typeof r.r_D_n === 'number' &&
+    Number.isFinite(r.r_D_n)
+  );
+}
+
+function kostraRowLabel(r: KostraRow, idx: number): string {
+  if (r.label && r.label.trim()) return r.label.trim();
+  if (typeof r.D_min === 'number' && Number.isFinite(r.D_min)) {
+    return `D = ${r.D_min} min`;
+  }
+  return `Zeile ${idx + 1}`;
+}
+
+const a138_13_gl8: Aggregator = {
+  run: (req) => {
+    const ctx = req.aggregator ?? {};
+    const carrier = ctx.kostraTable;
+    const scalars = ctx.gl8Scalars;
+    const unit = ctx.kostraUnit;
+
+    // 1. Scalars first — a missing scalar masks everything else.
+    if (!isScalarReady(scalars)) {
+      const missing = GL8_SCALAR_SYMBOLS.filter((k) => {
+        const v = scalars?.[k];
+        return !(typeof v === 'number' && Number.isFinite(v));
+      });
+      return {
+        kind: 'manual_required',
+        reason: `Fehlende Skalar-Eingaben: ${missing.join(', ')}. Werte werden aus den vorgelagerten Arbeitsblättern (A138-08, A138-10, A138-12) erwartet.`,
+        missing: [...missing],
+      };
+    }
+
+    // 2. Carrier must exist with ≥1 row.
+    if (!carrier || !Array.isArray(carrier.rows) || carrier.rows.length === 0) {
+      return {
+        kind: 'manual_required',
+        reason:
+          'Keine KOSTRA-Tabelle erfasst. Bitte mindestens eine Dauerstufe D mit zugehöriger Regenspende r_D(n) eingeben.',
+      };
+    }
+
+    // 3. Unit guard — the silent-error trap.
+    if (unit != null && unit !== '' && unit !== KOSTRA_EXPECTED_UNIT) {
+      return {
+        kind: 'manual_required',
+        reason: `Einheiten-Konflikt für r_D(n): erwartet "${KOSTRA_EXPECTED_UNIT}", Tabelle liefert "${unit}". Gl. (8) ist auf l/(s·ha) kalibriert.`,
+        unitConflicts: [{ symbol: 'r_D(n)', expected: KOSTRA_EXPECTED_UNIT, actual: unit }],
+      };
+    }
+
+    // 4. Per-row completeness.
+    const incomplete = carrier.rows
+      .map((r, i) => ({ r, i, ok: isKostraRowComplete(r) }))
+      .filter((x) => !x.ok);
+    if (incomplete.length > 0) {
+      const which = incomplete.map((x) => kostraRowLabel(x.r, x.i)).join(', ');
+      return {
+        kind: 'manual_required',
+        reason: `Unvollständige KOSTRA-Zeilen: ${which}. Pro Zeile müssen D und r_D(n) gesetzt sein.`,
+      };
+    }
+
+    // 5. Iterate. Compute V_VA per row, keep the maximum.
+    // After isScalarReady() above, every Gl8Scalars entry is a finite number,
+    // but TS can't carry that through destructuring — pin them as numbers.
+    const A_C = scalars.A_C as number;
+    const A_VA = scalars.A_VA as number;
+    const Q_S = scalars.Q_S as number;
+    const Q_Dr = scalars.Q_Dr as number;
+    const f_Z = scalars.f_Z as number;
+    const f_A = scalars.f_A as number;
+    const substituted: Record<string, number> = {};
+    let maxV: number | null = null;
+    let governingD: number | null = null;
+    for (let i = 0; i < carrier.rows.length; i++) {
+      const row = carrier.rows[i];
+      const D = row.D_min as number;
+      const r_D = row.r_D_n as number;
+      const Q_zu = r_D * (A_C + A_VA) * 1e-4;
+      const V = (Q_zu - Q_S - Q_Dr) * D * 60 * f_Z * f_A * 1e-3;
+      const key = `${kostraRowLabel(row, i)} (r_D=${r_D})`;
+      substituted[key] = V;
+      if (maxV === null || V > maxV) {
+        maxV = V;
+        governingD = D;
+      }
+    }
+
+    if (maxV === null || governingD === null) {
+      // Shouldn't happen — incomplete rows are filtered above — but
+      // belt-and-braces: never return a bare number that hides a problem.
+      return {
+        kind: 'manual_required',
+        reason: 'Keine vollständige Tabellenzeile auswertbar.',
+      };
+    }
+
+    substituted['MAX V_VA (m³)'] = maxV;
+    substituted['Maßgebende Dauerstufe D (min)'] = governingD;
+
+    return {
+      kind: 'computed',
+      value: maxV,
+      substituted,
+      formulaEvaluated:
+        'V_VA = max_D [ (r_D(n)·(A_C+A_VA)·10⁻⁴ − Q_S − Q_Dr) · D · 60 · f_Z · f_A · 10⁻³ ]',
+    };
+  },
+};
+
 export const aggregators: Record<string, Aggregator> = {
   // DWA-A 138-1 · A138-10 · Gl. (2)
   '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_gl2,
+  // DWA-A 138-1 · A138-13 · Gl. (8)
+  '69f31e6e-a755-4246-af10-ae46668b5c86': a138_13_gl8,
 };

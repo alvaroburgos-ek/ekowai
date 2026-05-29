@@ -9,6 +9,7 @@ import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
 import { EquationEngineCard } from './equation-engine-card';
 import { SubAreasEditor } from './sub-areas-editor';
+import { KostraTableEditor } from './kostra-table-editor';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { visibleFields } from './visible-fields';
 
@@ -18,7 +19,11 @@ import { visibleFields } from './visible-fields';
  * below. Keep this VERY small until each entry has a hand-calc reference and
  * a unit test.
  */
-const FORMULA_ENGINE_WHITELIST = new Set<string>(['A138-10:2', 'A138-18:21']);
+const FORMULA_ENGINE_WHITELIST = new Set<string>([
+  'A138-10:2',
+  'A138-18:21',
+  'A138-13:8',
+]);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -181,6 +186,9 @@ export function WorksheetForm({
   // A138-10 sub-areas: render the editor only when the worksheet declares the
   // carrier field. The hook handles the rest.
   const subAreasField = fields.find((f) => f.symbol.startsWith('sub_areas_'));
+  // A138-04 KOSTRA table: same pattern. The carrier field has symbol
+  // `r_D_n_table` and data_type='json'; the engine reads it from the store.
+  const kostraField = fields.find((f) => f.symbol === 'r_D_n_table');
 
   // Legacy naive sum-evaluator for everything NOT on the engine whitelist.
   // It ignores `formula` and just sums input_symbols — built for DIN-276 cost
@@ -290,6 +298,15 @@ export function WorksheetForm({
             Teilflächen-Erfassung (für A_C nach Gl. 2)
           </h2>
           <SubAreasEditor fieldId={subAreasField.id} />
+        </section>
+      )}
+
+      {kostraField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            KOSTRA-Tabelle (für V_VA nach Gl. 8)
+          </h2>
+          <KostraTableEditor fieldId={kostraField.id} />
         </section>
       )}
 
