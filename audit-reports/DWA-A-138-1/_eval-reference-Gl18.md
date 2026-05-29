@@ -1,5 +1,7 @@
 # Eval-Reference — DWA-A 138-1, A138-18, Gl. 18 (Q_S Rigole)
 
+> **DECISION 2026-05-29:** Gl. 18 is **not in `FORMULA_ENGINE_WHITELIST`** until the 1000× discrepancy documented below is resolved. On the worksheet form the engine returns no numeric result (manual_required). The evaluator profile, this reference file, and the unit test all stay in place to keep the open question visible. The evaluator-direct unit test still proves what the literal formula returns.
+
 `Q_S = ((b_R + h_R) · L_R + b_R · h_R) · k_i` — Versickerungsleistung Rigole, §6.4.2.
 
 | Input | Value | Unit |
