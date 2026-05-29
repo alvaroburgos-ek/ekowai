@@ -24,6 +24,7 @@
 import { evalExpression } from './arithmetic';
 import { rewriteRules } from './rewrites';
 import { aggregators, type AggregatorContext } from './aggregators';
+import { equationProfiles } from './equation-profiles';
 
 export type EvalInputValue = {
   /** the symbol the formula is expecting (already remapped if a rewrite applies) */
@@ -120,6 +121,13 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     ? Object.values(rewrite.remap)
     : req.inputSymbols;
 
+  // The equation profile holds source-context expected units and any
+  // numeric constants the formula refers to by name (e.g. `pi`). It is the
+  // authoritative source of truth for what units the equation expects —
+  // the caller's expectedUnits (drawn from `fields.unit`) only applies
+  // when no profile is registered.
+  const profile = equationProfiles[req.equationId];
+
   // 2. Resolve each needed symbol from the supplied inputs.
   const substituted: Record<string, number> = {};
   const missing: string[] = [];
@@ -132,7 +140,14 @@ export function evaluateFormula(req: EvalRequest): EvalState {
       missing.push(sym);
       continue;
     }
-    const expected = req.expectedUnits?.[sym] ?? null;
+    // Profile expected unit wins over caller-supplied expected unit. This
+    // lets the engine catch a drift between a field's stored unit and the
+    // equation's dimensional expectations (e.g. d_i stored as 'mm' on a
+    // field when §6.4.2 specifies 'm').
+    const expected =
+      profile?.expectedUnits?.[sym] !== undefined
+        ? profile.expectedUnits[sym]
+        : req.expectedUnits?.[sym] ?? null;
     if (
       expected != null &&
       expected !== '' &&
@@ -168,8 +183,16 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     return { kind: 'error', message: 'Konnte RHS nicht extrahieren.' };
   }
 
+  // Constants (e.g. `pi`) are injected into the scope alongside the resolved
+  // input values. They are NOT recorded as substituted inputs in the
+  // returned state — the engineer-facing UI surfaces variable substitutions,
+  // not language-level constants.
+  const scope: Record<string, number> = profile?.constants
+    ? { ...substituted, ...profile.constants }
+    : substituted;
+
   try {
-    const result = evalExpression(expression, substituted);
+    const result = evalExpression(expression, scope);
     return {
       kind: 'computed',
       value: result,

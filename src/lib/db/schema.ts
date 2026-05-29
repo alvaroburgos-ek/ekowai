@@ -161,6 +161,10 @@ export const fields = pgTable(
     consumerWorksheets: text('consumer_worksheets').array(),
     orderIndex: integer('order_index').notNull().default(0),
     verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+    /** Soft-deactivation marker. Set false by the Pile-2 deprecation pass for
+     * fields that have no source basis and no code consumer; their rows are
+     * retained for audit trail but the worksheet form filters them out. */
+    active: boolean('active').notNull().default(true),
   },
   (t) => ({ uniqWorksheetSymbol: unique().on(t.worksheetTemplateId, t.symbol) }),
 );
