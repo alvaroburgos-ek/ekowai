@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { createProject } from '@/lib/actions/project';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SiteProfileFields } from '@/components/projects/site-profile-fields';
 
 export default async function NewProjectPage({
   params,
@@ -18,17 +19,28 @@ export default async function NewProjectPage({
         </div>
         <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">{t('newProject')}</h1>
       </header>
-      <form action={createProject} className="max-w-2xl space-y-8">
+      <form action={createProject} className="max-w-2xl space-y-10">
         <input type="hidden" name="locale" value={locale} />
-        <Field label={t('name')} required>
-          <Input name="name" required minLength={2} autoFocus />
-        </Field>
-        <Field label={t('client')}>
-          <Input name="clientName" />
-        </Field>
-        <Field label={t('location')}>
-          <Input name="location" />
-        </Field>
+        <section className="space-y-4">
+          <h2 className="text-[11px] uppercase tracking-[0.22em] text-subtext">
+            Basisdaten
+          </h2>
+          <Field label={t('name')} required>
+            <Input name="name" required minLength={2} autoFocus />
+          </Field>
+          <Field label={t('client')}>
+            <Input name="clientName" />
+          </Field>
+          <Field label={t('location')}>
+            <Input name="location" />
+          </Field>
+        </section>
+        <section className="border-t border-hairline pt-8">
+          <h2 className="text-[11px] uppercase tracking-[0.22em] text-subtext mb-6">
+            Standortprofil (optional)
+          </h2>
+          <SiteProfileFields />
+        </section>
         <div className="border-t border-hairline pt-6 flex justify-end">
           <Button type="submit">{t('create')}</Button>
         </div>

@@ -63,7 +63,7 @@ export default async function ProjectsPage({
             <Link
               key={p.id}
               href={`/${locale}/projects/${p.id}`}
-              className="list-item group relative flex flex-col gap-3 p-5 border border-hairline rounded-md bg-paper hover:border-hairline-strong hover:bg-paper-2/40 transition-all"
+              className="fade-up-item group relative flex flex-col gap-3 p-5 border border-hairline rounded-md bg-paper hover:border-hairline-strong hover:bg-paper-2/40 transition-all"
               style={{ animationDelay: `${i * 60}ms` }}
             >
               <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-l-md opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'var(--eko-gradient)' }} />

@@ -119,6 +119,11 @@ type Props = {
    * ambiguous (>1 active producing field for the same symbol). The engine
    * returns manual_required for any equation consuming an ambiguous symbol. */
   ambiguousSymbols?: Record<string, string[]>;
+  /** field_id → source of the initial value when it came from a render-only
+   * pre-fill (norm default or project site profile). Lets the field display
+   * a small "Norm-Default" / "Projekt-Standort" badge until the engineer
+   * touches the value. */
+  prefillSourceByFieldId?: Record<string, 'standard_default' | 'site_profile'>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
@@ -138,6 +143,7 @@ export function WorksheetForm({
   sameSymbolValuesBySymbol,
   inheritedFromBySymbol,
   ambiguousSymbols,
+  prefillSourceByFieldId,
   docs,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
@@ -206,6 +212,46 @@ export function WorksheetForm({
     engineWhitelist: FORMULA_ENGINE_WHITELIST,
     ambiguousSymbols,
   });
+
+  // Pre-build inline engine cards keyed by output field id. Each DynamicField
+  // renders the matching card directly below its input so inputs and verdict
+  // stay together. Equations whose outputSymbol does NOT map to a visible
+  // field fall through to the bottom-section fallback below.
+  const engineCardsByOutputFieldId = useMemo(() => {
+    const map = new Map<string, React.ReactNode>();
+    for (const eq of sortedEquations) {
+      if (!engineEquationIds.has(eq.id)) continue;
+      const state = engineStates[eq.id];
+      if (!state) continue;
+      const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
+      if (!outField) continue;
+      map.set(
+        outField.id,
+        <div className="mt-3">
+          <EquationEngineCard
+            equationNumber={eq.equationNumber}
+            sourceFormula={eq.formula}
+            state={state}
+            outputSymbol={eq.outputSymbol ?? ''}
+            outputUnit={outField.unit ?? null}
+          />
+        </div>,
+      );
+    }
+    return map;
+  }, [sortedEquations, engineEquationIds, engineStates, fieldBySymbol]);
+
+  // Engine equations whose outputSymbol has NO visible field — keep these in
+  // the legacy bottom section so the engineer still sees the verdict.
+  const orphanEngineEquations = useMemo(
+    () =>
+      sortedEquations.filter((eq) => {
+        if (!engineEquationIds.has(eq.id)) return false;
+        const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
+        return !outField;
+      }),
+    [sortedEquations, engineEquationIds, fieldBySymbol],
+  );
 
   // A138-10 sub-areas: render the editor only when the worksheet declares the
   // carrier field. The hook handles the rest.
@@ -294,6 +340,8 @@ export function WorksheetForm({
         inheritedFrom={inheritedFromBySymbol[f.symbol]}
         docs={docs}
         isComputed={computedSymbols.has(f.symbol)}
+        prefillSource={prefillSourceByFieldId?.[f.id]}
+        inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
       />
     ));
   };
@@ -391,28 +439,25 @@ export function WorksheetForm({
 
       <EquationsBlock equations={equations} />
 
-      {sortedEquations.some((eq) => engineEquationIds.has(eq.id)) && (
+      {orphanEngineEquations.length > 0 && (
         <section className="border-t border-hairline pt-6 mt-2 space-y-3">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Engine-Auswertung (Vorschau)
+            Engine-Auswertung (kein Zielfeld)
           </h2>
-          {sortedEquations
-            .filter((eq) => engineEquationIds.has(eq.id))
-            .map((eq) => {
-              const state = engineStates[eq.id];
-              if (!state) return null;
-              const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
-              return (
-                <EquationEngineCard
-                  key={eq.id}
-                  equationNumber={eq.equationNumber}
-                  sourceFormula={eq.formula}
-                  state={state}
-                  outputSymbol={eq.outputSymbol ?? ''}
-                  outputUnit={outField?.unit ?? null}
-                />
-              );
-            })}
+          {orphanEngineEquations.map((eq) => {
+            const state = engineStates[eq.id];
+            if (!state) return null;
+            return (
+              <EquationEngineCard
+                key={eq.id}
+                equationNumber={eq.equationNumber}
+                sourceFormula={eq.formula}
+                state={state}
+                outputSymbol={eq.outputSymbol ?? ''}
+                outputUnit={null}
+              />
+            );
+          })}
         </section>
       )}
 

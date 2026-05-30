@@ -45,5 +45,9 @@ next-env.d.ts
 .env*.local
 coverage/
 playwright-report/
-.vercel
 
+# internal asset sources (high-res originals, Figma exports, etc.) — not served, not deployed
+/assets/
+
+# per-user Claude Code overrides (not shared)
+.claude/settings.local.json

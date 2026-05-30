@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { projects, worksheetTemplates, worksheetInstances, projectDocuments } from '@/lib/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import {
   loadWorksheet,
   ensureWorksheetInstance,
@@ -12,6 +12,7 @@ import {
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
+import { resolveFromSiteProfile } from '@/lib/site-profile/symbol-map';
 
 export default async function WorksheetPage({
   params,
@@ -48,13 +49,14 @@ export default async function WorksheetPage({
   const fieldSymbols = mergedFields.map((f) => f.symbol);
 
   // Parallelise all queries that depend on ws.template.id but not on each other
-  const [instance, parameters, sameSymbol, sidebarWorksheets, docs] = await Promise.all([
+  const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts] = await Promise.all([
     ensureWorksheetInstance(projectId, ws.template.id),
     loadProjectParameters(projectId, fieldIds),
     loadSameSymbolValues(projectId, ws.template.id, fieldSymbols),
     // All worksheets of this standard for sidebar
     db
       .select({
+        id: worksheetTemplates.id,
         code: worksheetTemplates.code,
         titleDe: worksheetTemplates.titleDe,
         titleEn: worksheetTemplates.titleEn,
@@ -81,13 +83,48 @@ export default async function WorksheetPage({
       })
       .from(projectDocuments)
       .where(eq(projectDocuments.projectId, projectId)),
+    // Per-worksheet required-field totals and filled-count for the sidebar.
+    // Single SQL avoids round-tripping fields-per-template through Drizzle.
+    db.execute<{
+      worksheet_template_id: string;
+      total_required: number;
+      filled_required: number;
+    }>(sql`
+      SELECT
+        wt.id AS worksheet_template_id,
+        COUNT(*) FILTER (WHERE f.is_required AND f.active)::int AS total_required,
+        COUNT(*) FILTER (
+          WHERE f.is_required AND f.active
+          AND (
+            pp.value_number  IS NOT NULL OR
+            pp.value_text    IS NOT NULL OR
+            pp.value_enum    IS NOT NULL OR
+            pp.value_date    IS NOT NULL OR
+            pp.value_boolean IS NOT NULL OR
+            pp.value_json    IS NOT NULL
+          )
+        )::int AS filled_required
+      FROM worksheet_templates wt
+      LEFT JOIN fields f ON f.worksheet_template_id = wt.id
+      LEFT JOIN project_parameters pp
+        ON pp.field_id = f.id AND pp.project_id = ${projectId}
+      WHERE wt.standard_id = ${ws.template.standard.id}
+      GROUP BY wt.id
+    `),
   ]);
 
-  // Convert parameters → initialValues for the store. Fields without a local
-  // saved value fall back to a same-symbol value from another worksheet (the
-  // most-recently-updated wins) — engineer can still override by typing.
+  // Convert parameters → initialValues for the store. Resolution order
+  // (first hit wins; engineer can always override by typing):
+  //   1. Local project_parameters row (engineer's own value).
+  //   2. Upstream same-symbol value from another worksheet — but ONLY when
+  //      the upstream values are unambiguous (single entry, or all equal).
+  //      This is the Item-3 refinement: blindly picking [0] when multiple
+  //      worksheets disagree silently picks one, hiding the conflict.
+  //   3. Project-level site profile (projects.site_profile) via the symbol map.
+  //   4. Standard-recommended default_value on the field row.
   const initialValues: Record<string, unknown> = {};
   const inheritedFromBySymbol: Record<string, string> = {};
+  const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile'> = {};
   for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (p) {
@@ -113,37 +150,48 @@ export default async function WorksheetPage({
       }
       continue;
     }
-    // No local param — try to inherit from another worksheet.
-    const upstream = sameSymbol.get(f.symbol)?.[0];
-    if (!upstream) continue;
-    const v = upstream.value;
-    let coerced: { type: string; value: unknown } | null = null;
-    switch (f.dataType) {
-      case 'number': {
-        const n = typeof v === 'number' ? v : Number(v as string);
-        if (Number.isFinite(n)) coerced = { type: 'number', value: n };
-        break;
+
+    // 2. Try same-symbol upstream — unambiguous only.
+    const upstreams = sameSymbol.get(f.symbol);
+    if (upstreams && upstreams.length > 0) {
+      const ambiguous = upstreams.length > 1 && !upstreams.every((u) => sameSymbolValueEqual(u.value, upstreams[0].value));
+      if (!ambiguous) {
+        const upstream = upstreams[0];
+        const coerced = coerceSameSymbolValue(f.dataType, upstream.value);
+        if (coerced) {
+          initialValues[f.id] = coerced;
+          inheritedFromBySymbol[f.symbol] = upstream.worksheetCode;
+          continue;
+        }
       }
-      case 'text':
-        if (typeof v === 'string' || typeof v === 'number') coerced = { type: 'text', value: String(v) };
-        break;
-      case 'enum':
-        if (typeof v === 'string') coerced = { type: 'enum', value: v };
-        break;
-      case 'date':
-        if (typeof v === 'string') coerced = { type: 'date', value: v };
-        break;
-      case 'boolean':
-        if (typeof v === 'boolean') coerced = { type: 'boolean', value: v };
-        break;
-      case 'json':
-        coerced = { type: 'json', value: v };
-        break;
     }
-    if (coerced) {
-      initialValues[f.id] = coerced;
-      inheritedFromBySymbol[f.symbol] = upstream.worksheetCode;
+
+    // 3. Site profile — resolved via the symbol map; coerced inside the helper.
+    const site = resolveFromSiteProfile(project.siteProfile, f.symbol);
+    if (site && site.value != null && site.type === f.dataType) {
+      initialValues[f.id] = { type: site.type, value: site.value };
+      prefillSourceByFieldId[f.id] = 'site_profile';
+      continue;
     }
+
+    // 4. Field's standard-recommended default_value.
+    const dv = f.defaultValue as { type?: string; value?: unknown } | null | undefined;
+    if (dv && dv.type === f.dataType && dv.value != null) {
+      initialValues[f.id] = { type: dv.type, value: dv.value };
+      prefillSourceByFieldId[f.id] = 'standard_default';
+    }
+  }
+
+  const countsByTemplateId = new Map<string, { total_required: number; filled_required: number }>();
+  // db.execute returns either Array or { rows: Array }; cover both shapes.
+  type FcRow = { worksheet_template_id: string; total_required: number; filled_required: number };
+  const fcRaw = fieldCounts as { rows?: FcRow[] } | FcRow[];
+  const fcRows: FcRow[] = Array.isArray(fcRaw) ? fcRaw : fcRaw.rows ?? [];
+  for (const r of fcRows) {
+    countsByTemplateId.set(r.worksheet_template_id, {
+      total_required: Number(r.total_required),
+      filled_required: Number(r.filled_required),
+    });
   }
 
   const sameSymbolValuesBySymbol: Record<string, Array<{ worksheetCode: string; value: unknown }>> = {};
@@ -175,7 +223,15 @@ export default async function WorksheetPage({
         <WorksheetListSidebar
           projectId={projectId}
           standardCode={standardCode}
-          worksheets={sidebarWorksheets.map((w) => ({ ...w, status: (w.status ?? null) as 'draft' | 'submitted_for_review' | 'engineer_approved' | 'final' | 'deactivated' | null }))}
+          worksheets={sidebarWorksheets.map((w) => {
+            const counts = countsByTemplateId.get(w.id);
+            return {
+              ...w,
+              status: (w.status ?? null) as 'draft' | 'submitted_for_review' | 'engineer_approved' | 'final' | 'deactivated' | null,
+              totalRequired: counts?.total_required ?? 0,
+              filledRequired: counts?.filled_required ?? 0,
+            };
+          })}
           locale={localeTyped}
           activeWorksheetCode={worksheetCode}
         />
@@ -198,6 +254,7 @@ export default async function WorksheetPage({
             enumValues: f.enumValues as Array<{ value: string; label_de: string | null; label_en: string | null }> | null,
             validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; raw?: string } | null,
             clauseReference: f.clauseReference,
+            description: f.description,
             verificationStatus: f.verificationStatus,
             orderIndex: f.orderIndex,
             active: f.active,
@@ -233,9 +290,51 @@ export default async function WorksheetPage({
           sameSymbolValuesBySymbol={sameSymbolValuesBySymbol}
           inheritedFromBySymbol={inheritedFromBySymbol}
           ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
+          prefillSourceByFieldId={prefillSourceByFieldId}
           docs={docs}
         />
       </main>
     </div>
   );
+}
+
+/** True when two same-symbol values agree (loose number equality, exact for
+ * the other types). Used to decide whether auto-fill is unambiguous. */
+function sameSymbolValueEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (typeof a === 'number' && typeof b === 'number') {
+    return Math.abs(a - b) < 1e-9;
+  }
+  // Numeric strings from `numeric` columns come through as strings — compare
+  // by Number when both coerce cleanly.
+  const na = typeof a === 'string' ? Number(a) : NaN;
+  const nb = typeof b === 'string' ? Number(b) : NaN;
+  if (Number.isFinite(na) && Number.isFinite(nb)) return Math.abs(na - nb) < 1e-9;
+  return false;
+}
+
+function coerceSameSymbolValue(
+  dataType: string,
+  v: unknown,
+): { type: 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json'; value: unknown } | null {
+  switch (dataType) {
+    case 'number': {
+      const n = typeof v === 'number' ? v : Number(v as string);
+      return Number.isFinite(n) ? { type: 'number', value: n } : null;
+    }
+    case 'text':
+      return typeof v === 'string' || typeof v === 'number'
+        ? { type: 'text', value: String(v) }
+        : null;
+    case 'enum':
+      return typeof v === 'string' ? { type: 'enum', value: v } : null;
+    case 'date':
+      return typeof v === 'string' ? { type: 'date', value: v } : null;
+    case 'boolean':
+      return typeof v === 'boolean' ? { type: 'boolean', value: v } : null;
+    case 'json':
+      return { type: 'json', value: v };
+    default:
+      return null;
+  }
 }
