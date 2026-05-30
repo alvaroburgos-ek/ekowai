@@ -19,6 +19,7 @@ type FieldDef = {
   validationRules: { min?: number; max?: number; maxLength?: number; raw?: string } | null;
   clauseReference: string | null;
   verificationStatus: string;
+  description: string | null;
 };
 
 type Props = {
@@ -32,9 +33,15 @@ type Props = {
   /** Worksheet code that this value was inherited from (no local saved value).
    * When set, the field renders a small "← [code]" hint below the label. */
   inheritedFrom?: string;
+  /** Source of the initial value if not yet user-touched. Drives the small
+   * badge that tells the engineer where the pre-fill came from. */
+  prefillSource?: 'standard_default' | 'site_profile';
+  /** Optional engine card rendered directly below this field when this is an
+   * equation's output symbol — keeps inputs and verdict in one place. */
+  inlineEngineCard?: React.ReactNode;
 };
 
-export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom }: Props) {
+export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, inlineEngineCard }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -51,6 +58,12 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
   const required = field.isRequired || undefined;
   const isSubTotal = field.symbol.endsWith('_total');
   const isCurrency = field.unit === 'EUR';
+  const min = field.validationRules?.min;
+  const max = field.validationRules?.max;
+  const hasRange = typeof min === 'number' || typeof max === 'number';
+  const rangeHintDe = hasRange
+    ? `Bereich: ${typeof min === 'number' ? formatHintNumber(min) : '−∞'} – ${typeof max === 'number' ? formatHintNumber(max) : '∞'}${field.unit ? ` ${field.unit}` : ''}`
+    : null;
 
   return (
     <div
@@ -75,7 +88,12 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
           {field.clauseReference && <span>{field.clauseReference}</span>}
           {field.unit && !isCurrency && <span className="text-ink-2">{field.unit}</span>}
           {field.verificationStatus !== 'engineer_verified' && (
-            <span className="text-accent-2">imported_unverified</span>
+            <span
+              className="text-accent-2 normal-case tracking-normal"
+              title={verificationStatusTitle(field.verificationStatus)}
+            >
+              {verificationStatusLabel(field.verificationStatus)}
+            </span>
           )}
           {inheritedFrom && (
             <span
@@ -85,7 +103,29 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
               ← {inheritedFrom}
             </span>
           )}
+          {prefillSource === 'standard_default' && (
+            <span
+              className="text-accent normal-case tracking-normal"
+              title="Norm-Default — bestätigen oder überschreiben"
+            >
+              Norm-Default
+            </span>
+          )}
+          {prefillSource === 'site_profile' && (
+            <span
+              className="text-accent normal-case tracking-normal"
+              title="Aus Projekt-Standortprofil — bestätigen oder überschreiben"
+            >
+              Projekt-Standort
+            </span>
+          )}
         </div>
+        {field.description && (
+          <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>
+        )}
+        {rangeHintDe && (
+          <p className="text-[11px] text-subtext mt-0.5 tabular-nums">{rangeHintDe}</p>
+        )}
       </div>
 
       {/* Input control by data_type */}
@@ -102,6 +142,8 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
             readOnly={isComputed}
             tabIndex={isComputed ? -1 : undefined}
             aria-readonly={isComputed || undefined}
+            min={typeof min === 'number' ? min : undefined}
+            max={typeof max === 'number' ? max : undefined}
             onChange={(e) => {
               if (isComputed) return;
               const raw = e.target.value;
@@ -267,8 +309,48 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
         symbol={field.symbol}
         docs={docs}
       />
+
+      {inlineEngineCard}
     </div>
   );
+}
+
+const VERIFICATION_LABELS_DE: Record<string, { short: string; title: string }> = {
+  imported_unverified: {
+    short: 'Quelle ungeprüft',
+    title: 'Aus Pass3c-Workbook importiert, noch nicht gegen die Norm geprüft.',
+  },
+  engineer_verified: {
+    short: 'Ingenieur bestätigt',
+    title: 'Von einem Ingenieur gegen die Quellnorm bestätigt.',
+  },
+  verified_against_standard: {
+    short: 'Quelle bestätigt',
+    title: 'Inhalt wurde gegen die Quellnorm verifiziert (Pile-Audit).',
+  },
+  needs_engineer_review: {
+    short: 'Engineer-Review nötig',
+    title: 'Quellebenenfrage offen — Ingenieur muss prüfen.',
+  },
+  inferred_from_worksheet: {
+    short: 'Wizard-intern',
+    title: 'Aus Wizard-Logik abgeleitet, nicht direkt in der Norm.',
+  },
+};
+
+function verificationStatusLabel(status: string): string {
+  return VERIFICATION_LABELS_DE[status]?.short ?? status;
+}
+
+function verificationStatusTitle(status: string): string {
+  return VERIFICATION_LABELS_DE[status]?.title ?? status;
+}
+
+function formatHintNumber(n: number): string {
+  if (Math.abs(n) !== 0 && (Math.abs(n) < 0.01 || Math.abs(n) >= 100000)) {
+    return n.toExponential(0);
+  }
+  return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(n);
 }
 
 function pickEnumLabel(

@@ -7,6 +7,7 @@ import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { readSiteProfileFromFormData } from '@/lib/site-profile/form-helpers';
 
 const createSchema = z.object({
   name: z.string().min(2).max(200),
@@ -36,11 +37,13 @@ export async function createProject(formData: FormData): Promise<void> {
     .limit(1);
   if (!membership) redirect(`/${parsed.data.locale}/verify`);
 
+  const siteProfile = readSiteProfileFromFormData(formData);
   const [project] = await db.insert(projects).values({
     orgId: membership.orgId,
     name: parsed.data.name,
     clientName: parsed.data.clientName,
     location: parsed.data.location,
+    siteProfile: Object.keys(siteProfile).length > 0 ? siteProfile : null,
     createdBy: user.id,
   }).returning({ id: projects.id });
 
@@ -80,11 +83,13 @@ export async function updateProject(formData: FormData): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/');
 
+  const siteProfile = readSiteProfileFromFormData(formData);
   await db.update(projects)
     .set({
       name: parsed.data.name,
       clientName: parsed.data.clientName,
       location: parsed.data.location,
+      siteProfile: Object.keys(siteProfile).length > 0 ? siteProfile : null,
       updatedAt: new Date(),
     })
     .where(eq(projects.id, parsed.data.id));

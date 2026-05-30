@@ -15,6 +15,10 @@ type WorksheetEntry = {
   phase: number | null;
   archetype: string | null;
   status: 'draft' | 'submitted_for_review' | 'engineer_approved' | 'final' | 'deactivated' | null;
+  /** Number of required, active fields on this worksheet template. */
+  totalRequired: number;
+  /** Number of required fields with a non-null value in the current project. */
+  filledRequired: number;
 };
 
 type Props = {
@@ -55,6 +59,7 @@ export function WorksheetListSidebar({
           <ul className="space-y-1">
             {byPhase.get(phase)?.map((w) => {
               const isActive = w.code === activeWorksheetCode;
+              const isComplete = w.totalRequired > 0 && w.filledRequired >= w.totalRequired;
               return (
                 <li key={w.code}>
                   <Link
@@ -65,12 +70,24 @@ export function WorksheetListSidebar({
                         : 'text-subtext hover:text-ink hover:bg-paper-2/50'
                     }`}
                   >
-                    <span
-                      className={`inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle ${STATUS_DOT[w.status ?? 'draft']}`}
-                      aria-label={`Status: ${w.status ?? 'draft'}`}
-                    />
-                    <span className="font-mono text-[11px] mr-2">{w.code}</span>
-                    {locale === 'de' ? w.titleDe : w.titleEn ?? w.titleDe}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${STATUS_DOT[w.status ?? 'draft']}`}
+                        aria-label={`Status: ${w.status ?? 'draft'}`}
+                      />
+                      <span className="font-mono text-[11px] shrink-0">{w.code}</span>
+                      <span className="truncate flex-1">
+                        {locale === 'de' ? w.titleDe : w.titleEn ?? w.titleDe}
+                      </span>
+                      {w.totalRequired > 0 && (
+                        <span
+                          className={`tabular-nums text-[10px] shrink-0 ${isComplete ? 'text-success' : 'text-subtext'}`}
+                          title={`${w.filledRequired} von ${w.totalRequired} Pflichtfeldern befüllt`}
+                        >
+                          {w.filledRequired}/{w.totalRequired}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 </li>
               );

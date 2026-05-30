@@ -87,6 +87,11 @@ export const projects = pgTable(
     siteLocation: text('site_location'),
     projectCode: text('project_code'),
     projectType: text('project_type'),
+    /** Project-level site profile (Bundesland, Gemeinde, lat/lon, KOSTRA cell,
+     * soil, k_f, mhgw, planner, …). Maps to worksheet field symbols via
+     * SITE_PROFILE_SYMBOL_MAP. Stored as plain JSON object — see
+     * src/lib/site-profile/symbol-map.ts. */
+    siteProfile: jsonb('site_profile'),
     createdBy: uuid('created_by')
       .notNull()
       .references(() => profiles.id),
@@ -165,6 +170,10 @@ export const fields = pgTable(
      * fields that have no source basis and no code consumer; their rows are
      * retained for audit trail but the worksheet form filters them out. */
     active: boolean('active').notNull().default(true),
+    /** Norm-recommended default value, shape `{ type, value }`. Resolved as a
+     * fallback at render time when no project_parameters row and no
+     * site_profile match exists. Never overwritten by user input. */
+    defaultValue: jsonb('default_value'),
   },
   (t) => ({ uniqWorksheetSymbol: unique().on(t.worksheetTemplateId, t.symbol) }),
 );
