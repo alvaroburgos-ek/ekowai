@@ -1,4 +1,5 @@
 'use client';
+import { ClauseChip } from '@/components/norm-text/clause-chip';
 
 type Equation = {
   id: string;
@@ -28,7 +29,9 @@ export function EquationsBlock({ equations }: { equations: Equation[] }) {
               <code className="font-mono text-sm text-ink">{eq.formula}</code>
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[68px] flex gap-3">
-              {eq.clauseReference && <span>{eq.clauseReference}</span>}
+              {eq.clauseReference && (
+                <ClauseChip clauseReference={eq.clauseReference} />
+              )}
               {eq.verificationStatus !== 'engineer_verified' && (
                 <span className="text-accent-2">imported_unverified</span>
               )}

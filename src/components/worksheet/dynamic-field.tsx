@@ -4,6 +4,7 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
+import { ClauseChip } from '@/components/norm-text/clause-chip';
 
 type FieldDef = {
   id: string;
@@ -85,7 +86,9 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
           {field.isRequired && field.dataType !== 'json' && <span className="ml-1 text-accent-2">*</span>}
         </label>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5 flex items-baseline gap-1.5 flex-wrap">
-          {field.clauseReference && <span>{field.clauseReference}</span>}
+          {field.clauseReference && (
+            <ClauseChip clauseReference={field.clauseReference} />
+          )}
           {field.unit && !isCurrency && <span className="text-ink-2">{field.unit}</span>}
           {field.verificationStatus !== 'engineer_verified' && (
             <span
