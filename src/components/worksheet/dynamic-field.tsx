@@ -1,5 +1,6 @@
 'use client';
 import { useState, useId, useMemo } from 'react';
+import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { CitationPicker } from '@/components/documents/citation-picker';
@@ -26,6 +27,9 @@ type Props = {
   field: FieldDef;
   locale: 'de' | 'en';
   projectId: string;
+  /** Standard code (e.g. "DWA-A-138-1"). Needed to build the deep-link URL on
+   * the inheritance badge so the engineer can jump to the source worksheet. */
+  standardCode: string;
   sameSymbolHints?: Array<{ worksheetCode: string; value: unknown }>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
@@ -36,15 +40,27 @@ type Props = {
   /** Source of the initial value if not yet user-touched. Drives the small
    * badge that tells the engineer where the pre-fill came from. */
   prefillSource?: 'standard_default' | 'site_profile';
+  /** Site-profile JSON key that supplied the pre-fill (when prefillSource ===
+   * 'site_profile'). Shown in the tooltip so the engineer can find the source
+   * entry in the project's Standortprofil. */
+  siteProfileKey?: string;
   /** Optional engine card rendered directly below this field when this is an
    * equation's output symbol — keeps inputs and verdict in one place. */
   inlineEngineCard?: React.ReactNode;
 };
 
-export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, inlineEngineCard }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
+  // The prefill badges (Norm-Default / Projekt-Standort / ← {WS}) describe the
+  // ORIGIN of the rendered value. Once the engineer touches the field, the
+  // value in the store is theirs — keeping the badge visible would be a lie
+  // until the next save. `pendingFieldIds` tracks unsaved edits; we hide the
+  // provenance hint as soon as the field appears in it. After save+refresh
+  // the field falls through to Tier 1 (local param) and the prop disappears
+  // entirely.
+  const isDirty = useWorksheetStore((s) => s.pendingFieldIds.has(field.id));
   const [pickerOpen, setPickerOpen] = useState(false);
   const inputId = useId();
 
@@ -95,26 +111,27 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
               {verificationStatusLabel(field.verificationStatus)}
             </span>
           )}
-          {inheritedFrom && (
-            <span
-              className="text-subtext normal-case tracking-normal"
-              title={`Wert aus ${inheritedFrom} übernommen — überschreiben durch Eingabe`}
+          {inheritedFrom && !isDirty && (
+            <Link
+              href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${inheritedFrom}`}
+              className="text-subtext normal-case tracking-normal hover:text-accent transition-colors underline-offset-2 hover:underline"
+              title={buildInheritedTooltip(field, value, inheritedFrom)}
             >
               ← {inheritedFrom}
-            </span>
+            </Link>
           )}
-          {prefillSource === 'standard_default' && (
+          {prefillSource === 'standard_default' && !isDirty && (
             <span
               className="text-accent normal-case tracking-normal"
-              title="Norm-Default — bestätigen oder überschreiben"
+              title={buildPrefillTooltip('standard_default', field, value)}
             >
               Norm-Default
             </span>
           )}
-          {prefillSource === 'site_profile' && (
+          {prefillSource === 'site_profile' && !isDirty && (
             <span
               className="text-accent normal-case tracking-normal"
-              title="Aus Projekt-Standortprofil — bestätigen oder überschreiben"
+              title={buildPrefillTooltip('site_profile', field, value, siteProfileKey)}
             >
               Projekt-Standort
             </span>
@@ -351,6 +368,56 @@ function formatHintNumber(n: number): string {
     return n.toExponential(0);
   }
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(n);
+}
+
+type StoreValue =
+  | { type: 'number'; value: number | null }
+  | { type: 'text'; value: string | null }
+  | { type: 'enum'; value: string | null }
+  | { type: 'date'; value: string | null }
+  | { type: 'boolean'; value: boolean | null }
+  | { type: 'json'; value: unknown }
+  | undefined;
+
+function formatProvenanceValue(value: StoreValue, unit: string | null): string {
+  if (!value) return '—';
+  switch (value.type) {
+    case 'number':
+      if (value.value == null) return '—';
+      return `${formatHintNumber(value.value)}${unit ? ` ${unit}` : ''}`;
+    case 'text':
+    case 'enum':
+    case 'date':
+      return value.value ?? '—';
+    case 'boolean':
+      if (value.value == null) return '—';
+      return value.value ? 'Ja' : 'Nein';
+    case 'json':
+      return '(Tabelle)';
+  }
+}
+
+function buildInheritedTooltip(
+  field: { symbol: string; unit: string | null },
+  value: StoreValue,
+  fromWorksheetCode: string,
+): string {
+  const formatted = formatProvenanceValue(value, field.unit);
+  return `${field.symbol} = ${formatted} aus ${fromWorksheetCode} — klicken zum Springen, oder überschreiben durch Eingabe`;
+}
+
+function buildPrefillTooltip(
+  source: 'standard_default' | 'site_profile',
+  field: { symbol: string; unit: string | null },
+  value: StoreValue,
+  siteProfileKey?: string,
+): string {
+  const formatted = formatProvenanceValue(value, field.unit);
+  if (source === 'standard_default') {
+    return `${field.symbol} = ${formatted} — Norm-Default. Bestätigen oder überschreiben.`;
+  }
+  const keyPart = siteProfileKey ? ` (Schlüssel: ${siteProfileKey})` : '';
+  return `${field.symbol} = ${formatted} aus Projekt-Standortprofil${keyPart} — bestätigen oder überschreiben.`;
 }
 
 function pickEnumLabel(

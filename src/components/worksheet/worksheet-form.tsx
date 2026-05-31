@@ -124,6 +124,13 @@ type Props = {
    * a small "Norm-Default" / "Projekt-Standort" badge until the engineer
    * touches the value. */
   prefillSourceByFieldId?: Record<string, 'standard_default' | 'site_profile'>;
+  /** field_id → site-profile JSON key that supplied the pre-fill. Only set
+   * for fields where prefillSourceByFieldId is 'site_profile'. Shown in the
+   * field's tooltip so the engineer can find the source entry. */
+  siteProfileKeyByFieldId?: Record<string, string>;
+  /** Standard code (e.g. "DWA-A-138-1"). Forwarded to DynamicField so the
+   * inheritance badge can deep-link back to the source worksheet. */
+  standardCode: string;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
 };
 
@@ -144,6 +151,8 @@ export function WorksheetForm({
   inheritedFromBySymbol,
   ambiguousSymbols,
   prefillSourceByFieldId,
+  siteProfileKeyByFieldId,
+  standardCode,
   docs,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
@@ -336,11 +345,13 @@ export function WorksheetForm({
         field={f}
         locale={locale}
         projectId={projectId}
+        standardCode={standardCode}
         sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
         inheritedFrom={inheritedFromBySymbol[f.symbol]}
         docs={docs}
         isComputed={computedSymbols.has(f.symbol)}
         prefillSource={prefillSourceByFieldId?.[f.id]}
+        siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
         inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
       />
     ));
