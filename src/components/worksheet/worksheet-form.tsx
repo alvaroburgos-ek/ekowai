@@ -8,6 +8,10 @@ import { EquationsBlock } from './equations-block';
 import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
 import { EquationEngineCard } from './equation-engine-card';
+import {
+  ManualOverridePill,
+  useManualOverride,
+} from './manual-override-pill';
 import { SubAreasEditor } from './sub-areas-editor';
 import { KostraTableEditor } from './kostra-table-editor';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
@@ -213,6 +217,16 @@ export function WorksheetForm({
     ambiguousSymbols,
   });
 
+  // Symbol → unit lookup for the engine-card drill-down "Eingaben im Detail".
+  // Source of truth is the worksheet's own + inherited field list — same
+  // source the engine reads expectedUnits from. Built once here so the
+  // engine-card factories below stay light.
+  const unitBySymbol = useMemo(() => {
+    const m: Record<string, string | null> = {};
+    for (const f of fields) m[f.symbol] = f.unit ?? null;
+    return m;
+  }, [fields]);
+
   // Pre-build inline engine cards keyed by output field id. Each DynamicField
   // renders the matching card directly below its input so inputs and verdict
   // stay together. Equations whose outputSymbol does NOT map to a visible
@@ -234,9 +248,43 @@ export function WorksheetForm({
             state={state}
             outputSymbol={eq.outputSymbol ?? ''}
             outputUnit={outField.unit ?? null}
+            unitBySymbol={unitBySymbol}
+            inheritedFromBySymbol={inheritedFromBySymbol}
           />
         </div>,
       );
+    }
+    return map;
+  }, [
+    sortedEquations,
+    engineEquationIds,
+    engineStates,
+    fieldBySymbol,
+    unitBySymbol,
+    inheritedFromBySymbol,
+  ]);
+
+  // Override-pill metadata keyed by output field id. The pill itself is a
+  // separate component (rendered via `OverridePillForField` below) because it
+  // reads the engineer's typed value from the store via a hook — invoking a
+  // hook per output field can't happen inside `useMemo`. Here we only carry
+  // the static side: which equation, which output symbol, the engine's value.
+  const overrideMetaByOutputFieldId = useMemo(() => {
+    const map = new Map<
+      string,
+      { equationNumber: string; outputSymbol: string; computedValue: number }
+    >();
+    for (const eq of sortedEquations) {
+      if (!engineEquationIds.has(eq.id)) continue;
+      const state = engineStates[eq.id];
+      if (state?.kind !== 'computed') continue;
+      const outField = eq.outputSymbol ? fieldBySymbol.get(eq.outputSymbol) : undefined;
+      if (!outField) continue;
+      map.set(outField.id, {
+        equationNumber: eq.equationNumber,
+        outputSymbol: eq.outputSymbol ?? '',
+        computedValue: state.value,
+      });
     }
     return map;
   }, [sortedEquations, engineEquationIds, engineStates, fieldBySymbol]);
@@ -330,20 +378,34 @@ export function WorksheetForm({
 
   const renderField = (sectionId: string | null) => {
     const fs = fieldsBySectionId.get(sectionId) ?? [];
-    return fs.map((f) => (
-      <DynamicField
-        key={f.id}
-        field={f}
-        locale={locale}
-        projectId={projectId}
-        sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
-        inheritedFrom={inheritedFromBySymbol[f.symbol]}
-        docs={docs}
-        isComputed={computedSymbols.has(f.symbol)}
-        prefillSource={prefillSourceByFieldId?.[f.id]}
-        inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
-      />
-    ));
+    return fs.map((f) => {
+      const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
+      return (
+        <DynamicField
+          key={f.id}
+          field={f}
+          locale={locale}
+          projectId={projectId}
+          sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
+          inheritedFrom={inheritedFromBySymbol[f.symbol]}
+          docs={docs}
+          isComputed={computedSymbols.has(f.symbol)}
+          prefillSource={prefillSourceByFieldId?.[f.id]}
+          inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
+          overridePill={
+            overrideMeta ? (
+              <OverridePillForField
+                fieldId={f.id}
+                projectId={projectId}
+                equationNumber={overrideMeta.equationNumber}
+                outputSymbol={overrideMeta.outputSymbol}
+                computedValue={overrideMeta.computedValue}
+              />
+            ) : undefined
+          }
+        />
+      );
+    });
   };
 
   return (
@@ -470,5 +532,42 @@ export function WorksheetForm({
       />
       <ApprovalBar instanceId={instance.id} status={instance.status} locale={locale} />
     </article>
+  );
+}
+
+/**
+ * Per-field wrapper that runs the override-detection hook and renders the
+ * pill ONLY when the engineer's stored value diverges from the engine's
+ * computed verdict. Lives here (not in equation-engine-card) so the
+ * detection runs once per output field — invoking a hook inside the
+ * `engineCardsByOutputFieldId` useMemo would violate the rules of hooks.
+ */
+function OverridePillForField({
+  fieldId,
+  projectId,
+  equationNumber,
+  outputSymbol,
+  computedValue,
+}: {
+  fieldId: string;
+  projectId: string;
+  equationNumber: string;
+  outputSymbol: string;
+  computedValue: number;
+}) {
+  const { isOverridden, manualValue } = useManualOverride({
+    fieldId,
+    computedValue,
+  });
+  if (!isOverridden || manualValue === null) return null;
+  return (
+    <ManualOverridePill
+      fieldId={fieldId}
+      projectId={projectId}
+      equationNumber={equationNumber}
+      outputSymbol={outputSymbol}
+      computedValue={computedValue}
+      manualValue={manualValue}
+    />
   );
 }

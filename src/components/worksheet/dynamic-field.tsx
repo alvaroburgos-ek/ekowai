@@ -39,9 +39,13 @@ type Props = {
   /** Optional engine card rendered directly below this field when this is an
    * equation's output symbol — keeps inputs and verdict in one place. */
   inlineEngineCard?: React.ReactNode;
+  /** Optional pill rendered next to the field label — surfaces e.g. a
+   * "Manueller Override" affordance when the engineer's typed value diverges
+   * from the engine's computed verdict. */
+  overridePill?: React.ReactNode;
 };
 
-export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, inlineEngineCard }: Props) {
+export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, inlineEngineCard, overridePill }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -119,6 +123,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
               Projekt-Standort
             </span>
           )}
+          {overridePill}
         </div>
         {field.description && (
           <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>
