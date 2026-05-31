@@ -1,5 +1,7 @@
 'use client';
 
+import { KatexFormula } from '@/components/math/katex-formula';
+
 type Equation = {
   id: string;
   equationNumber: string;
@@ -25,7 +27,10 @@ export function EquationsBlock({ equations }: { equations: Equation[] }) {
               <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
                 Gl. {eq.equationNumber}
               </span>
-              <code className="font-mono text-sm text-ink">{eq.formula}</code>
+              <KatexFormula
+                source={eq.formula}
+                className="text-sm text-ink overflow-x-auto"
+              />
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[68px] flex gap-3">
               {eq.clauseReference && <span>{eq.clauseReference}</span>}

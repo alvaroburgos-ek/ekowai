@@ -1,6 +1,7 @@
 'use client';
 
 import type { EvalState } from '@/lib/eval/formula';
+import { KatexFormula } from '@/components/math/katex-formula';
 
 type Props = {
   equationNumber: string;
@@ -60,14 +61,19 @@ export function EquationEngineCard({
       </header>
 
       <div className="text-[11px] uppercase tracking-[0.18em] text-subtext">Quelle (DB)</div>
-      <code className="block font-mono text-xs text-ink break-all">{sourceFormula}</code>
+      <KatexFormula
+        source={sourceFormula}
+        displayMode
+        className="block text-ink overflow-x-auto"
+      />
 
       {isComputed && state.rewrite && (
         <>
           <div className="text-[11px] uppercase tracking-[0.18em] text-subtext">Engine-Substitution</div>
-          <code className="block font-mono text-xs text-ink break-all">
-            → {state.formulaEvaluated}
-          </code>
+          <div className="flex items-center gap-2 text-ink overflow-x-auto">
+            <span aria-hidden="true">→</span>
+            <KatexFormula source={state.formulaEvaluated} />
+          </div>
           <p className="text-xs text-subtext">{state.rewrite.reason}</p>
         </>
       )}
