@@ -384,6 +384,48 @@ export const projectDocuments = pgTable(
   }),
 );
 
+// Calculation snapshots (frozen captures of parameters + equation outputs +
+// compliance results at submit/approve transitions). Supports the calculation
+// diff viewer that engineers use during the review/approval workflow.
+//
+// JSONB shapes (kept off-schema so they can evolve without a migration):
+//   parameters:         { [fieldId]: { type, value, unit, citationSources } }
+//   equation_outputs:   { [equationNumber]: { kind: 'computed'|'manual_required'|'error',
+//                                             value?: number, formula?: string,
+//                                             substituted?: Record<string, number>,
+//                                             manualRequiredReason?: string } }
+//   compliance_results: { [requirementId]: 'pass' | 'fail' | 'open' }
+export const calculationSnapshots = pgTable(
+  'calculation_snapshots',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    worksheetInstanceId: uuid('worksheet_instance_id')
+      .notNull()
+      .references(() => worksheetInstances.id, { onDelete: 'cascade' }),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    takenAt: timestamp('taken_at', { withTimezone: true }).notNull().defaultNow(),
+    // References auth.users(id) directly in DB, kept FK-less in Drizzle to
+    // match the project's pattern for actor columns.
+    takenByUserId: uuid('taken_by_user_id'),
+    trigger: text('trigger').notNull(),
+    parameters: jsonb('parameters').notNull(),
+    equationOutputs: jsonb('equation_outputs').notNull(),
+    complianceResults: jsonb('compliance_results').notNull(),
+  },
+  (t) => ({
+    instanceIdx: index('calculation_snapshots_instance_taken_idx').on(
+      t.worksheetInstanceId,
+      t.takenAt,
+    ),
+    projectIdx: index('calculation_snapshots_project_taken_idx').on(
+      t.projectId,
+      t.takenAt,
+    ),
+  }),
+);
+
 // Report archives (frozen PDFs of approved worksheet instances)
 // Note: calculationId column still exists in DB for now (migration kept it)
 export const reportArchives = pgTable(

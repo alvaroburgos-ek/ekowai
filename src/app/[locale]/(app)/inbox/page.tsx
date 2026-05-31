@@ -6,6 +6,7 @@ import {
   projects,
   orgMembers,
   approvalEvents,
+  calculationSnapshots,
 } from '@/lib/db/schema';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
@@ -56,6 +57,13 @@ export default async function InboxPage({
               WHERE worksheet_instance_id = ${worksheetInstances.id}
               ORDER BY occurred_at DESC LIMIT 1
             )`.as('latest_actor_at'),
+            // Per-row snapshot count — drives the "Diff" link rendered next
+            // to each pending instance. A single correlated subquery keeps
+            // the inbox query a single round-trip.
+            snapshotCount: sql<number>`(
+              SELECT COUNT(*)::int FROM ${calculationSnapshots}
+              WHERE ${calculationSnapshots.worksheetInstanceId} = ${worksheetInstances.id}
+            )`.as('snapshot_count'),
           })
           .from(worksheetInstances)
           .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
@@ -115,11 +123,22 @@ export default async function InboxPage({
                     : ''}
                 </div>
               </Link>
-              {p.latestComment && (
-                <div className="ml-44 mt-1 text-xs text-subtext italic">
-                  „{p.latestComment}“
-                </div>
-              )}
+              <div className="ml-44 mt-1 flex items-baseline gap-3">
+                {p.latestComment && (
+                  <div className="text-xs text-subtext italic">
+                    „{p.latestComment}“
+                  </div>
+                )}
+                {Number(p.snapshotCount) >= 1 && (
+                  <Link
+                    href={`/${localeTyped}/projects/${p.projectId}/standards/${p.standardCode}/worksheets/${p.worksheetCode}/diff`}
+                    className="text-xs text-accent hover:underline"
+                    data-testid="inbox-diff-link"
+                  >
+                    Diff
+                  </Link>
+                )}
+              </div>
             </li>
           ))}
         </ul>

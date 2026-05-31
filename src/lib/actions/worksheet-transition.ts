@@ -14,6 +14,7 @@ import {
   type WorksheetStatus,
   type TransitionEvent,
 } from '@/lib/state-machine';
+import { captureSnapshot, type SnapshotTrigger } from '@/lib/snapshots/capture';
 
 export type TransitionInput = {
   instanceId: string;
@@ -64,8 +65,38 @@ export async function transitionWorksheet(
     orgId = projRow?.orgId ?? null;
   }
 
+  // Map the state-machine event to the snapshot trigger. Submit captures the
+  // engineer's submitted state; approve captures the reviewer's approved state.
+  // Other events (reject, finalize, reopen) do NOT create snapshots — the
+  // engineer-facing diff cares about "what was submitted" vs "what was last
+  // approved", not the intermediate transitions.
+  const snapshotTrigger: SnapshotTrigger | null =
+    input.eventType === 'submit'
+      ? 'submit_for_review'
+      : input.eventType === 'engineer_approve'
+        ? 'approve'
+        : null;
+
   try {
     await db.transaction(async (tx) => {
+      // Capture the snapshot BEFORE the status flip so that:
+      //   - on `submit`, the snapshot reflects the parameters at the moment
+      //     the engineer hit "submit" (status still draft).
+      //   - on `engineer_approve`, the snapshot freezes the approved version
+      //     before the status moves to engineer_approved.
+      // Capture failure aborts the whole transition (the transaction rolls
+      // back), which is intentional: an unreproducible-later state is worse
+      // than a failed submit the engineer can retry.
+      let snapshotId: string | null = null;
+      if (snapshotTrigger) {
+        snapshotId = await captureSnapshot({
+          worksheetInstanceId: input.instanceId,
+          takenByUserId: userId,
+          trigger: snapshotTrigger,
+          txDb: tx,
+        });
+      }
+
       await tx
         .update(worksheetInstances)
         .set({ status: toStatus, updatedAt: new Date() })
@@ -93,6 +124,9 @@ export async function transitionWorksheet(
           from: fromStatus,
           to: toStatus,
           comment,
+          // Cross-reference the snapshot id in audit_log so a reviewer can
+          // navigate from the audit timeline directly to the diff view.
+          ...(snapshotId ? { snapshotId } : {}),
         },
       });
 
