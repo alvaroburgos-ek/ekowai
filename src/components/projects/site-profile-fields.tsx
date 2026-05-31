@@ -9,6 +9,10 @@ const ADDRESS_GROUP_KEYS = new Set([
   'site_bundesland',
   'site_lat',
   'site_lon',
+  // KOSTRA cell is auto-derived from lat/lon by AddressFieldsGroup and
+  // rendered as the 6th controlled input there, so it has to be excluded
+  // from the fallback renderer below.
+  'kostra_grid_cell',
 ]);
 
 type Props = {
