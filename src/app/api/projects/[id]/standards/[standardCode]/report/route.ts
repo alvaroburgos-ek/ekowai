@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { buildStandardReport } from '@/lib/pdf/build-standard-report';
+import { createClient } from '@/lib/supabase/server';
+import { db } from '@/lib/db';
+import { projects, orgMembers } from '@/lib/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 /**
  * GET /api/projects/:id/standards/:standardCode/report
@@ -12,9 +16,8 @@ import { buildStandardReport } from '@/lib/pdf/build-standard-report';
  * route-segment naming — the response Content-Disposition supplies the
  * file extension to download dialogs.
  *
- * The route is force-dynamic because the underlying data may change
- * between renders. RLS at the DB layer enforces access — an unauthorised
- * user gets an empty project lookup → 404.
+ * Access is enforced at the route level: `db` runs as postgres and bypasses
+ * RLS, so we verify the caller's org-membership on the project here.
  */
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -24,6 +27,19 @@ export async function GET(
   context: { params: Promise<{ id: string; standardCode: string }> },
 ): Promise<NextResponse> {
   const { id, standardCode } = await context.params;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
+  const [row] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, id), eq(orgMembers.userId, user.id)))
+    .limit(1);
+  if (!row) return NextResponse.json({ error: 'not_found' }, { status: 404 });
+
   try {
     const buffer = await buildStandardReport(id, standardCode);
     const safeCode = standardCode.replace(/[^a-zA-Z0-9_-]/g, '_');

@@ -1,8 +1,9 @@
 'use client';
 
-import { Fragment, useMemo, useTransition } from 'react';
+import { Fragment, useMemo, useOptimistic, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FileDown, AlertCircle } from 'lucide-react';
 import {
   setProjectStandardLayer,
   moveProjectStandard,
@@ -11,6 +12,7 @@ import {
 } from '@/lib/actions/project-standards';
 import type { Layer, RelationType } from '@/lib/types/project-layers';
 import type { WorksheetStatus } from '@/lib/state-machine';
+import { Select } from '@/components/ui/select';
 
 type Worksheet = {
   templateId: string;
@@ -71,9 +73,38 @@ const LAYER_LABEL_DE: Record<Layer, string> = {
 
 const LAYER_ORDER: Layer[] = ['management', 'cost', 'technical'];
 
+type OptimisticPatch =
+  | { kind: 'layer'; standardId: string; layer: Layer | null }
+  | {
+      kind: 'relation';
+      projectStandardId: string;
+      parentStandardId: string | null;
+      relationType: RelationType | null;
+    };
+
+function applyPatch(state: StandardEntry[], patch: OptimisticPatch): StandardEntry[] {
+  switch (patch.kind) {
+    case 'layer':
+      return state.map((s) =>
+        s.standard.id === patch.standardId ? { ...s, layer: patch.layer } : s,
+      );
+    case 'relation':
+      return state.map((s) =>
+        s.projectStandardId === patch.projectStandardId
+          ? { ...s, parentStandardId: patch.parentStandardId, relationType: patch.relationType }
+          : s,
+      );
+  }
+}
+
 export function ProjectStandardsLayers({ projectId, locale, standards }: Props) {
   const router = useRouter();
   const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [optimisticStandards, applyOptimistic] = useOptimistic<
+    StandardEntry[],
+    OptimisticPatch
+  >(standards, applyPatch);
 
   // Sort all standards by stageOrder asc (NULL last) for stable ordering downstream.
   const sortedAll = useMemo(() => {
@@ -83,8 +114,8 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
       if (ao !== bo) return ao - bo;
       return a.standard.code.localeCompare(b.standard.code);
     };
-    return [...standards].sort(cmp);
-  }, [standards]);
+    return [...optimisticStandards].sort(cmp);
+  }, [optimisticStandards]);
 
   const byLayer = useMemo(() => {
     const m = new Map<Layer | 'unassigned', StandardEntry[]>();
@@ -108,13 +139,24 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
 
   function move(standardId: string, direction: 'up' | 'down') {
     start(async () => {
-      await moveProjectStandard(projectId, standardId, direction);
+      const result = await moveProjectStandard(projectId, standardId, direction);
+      if (!result.ok) {
+        setError(`Verschieben fehlgeschlagen: ${result.error}`);
+        return;
+      }
+      setError(null);
       router.refresh();
     });
   }
   function setLayer(standardId: string, layer: Layer | null) {
     start(async () => {
-      await setProjectStandardLayer(projectId, standardId, layer);
+      applyOptimistic({ kind: 'layer', standardId, layer });
+      const result = await setProjectStandardLayer(projectId, standardId, layer);
+      if (!result.ok) {
+        setError(`Layer-Wechsel fehlgeschlagen: ${result.error}`);
+        return;
+      }
+      setError(null);
       router.refresh();
     });
   }
@@ -124,29 +166,61 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
     relationType: RelationType | null,
   ) {
     start(async () => {
-      await setProjectStandardRelation(
+      applyOptimistic({
+        kind: 'relation',
+        projectStandardId,
+        parentStandardId: parentProjectStandardId,
+        relationType,
+      });
+      const result = await setProjectStandardRelation(
         projectId,
         projectStandardId,
         parentProjectStandardId,
         relationType,
       );
+      if (!result.ok) {
+        setError(`Beziehung speichern fehlgeschlagen: ${result.error}`);
+        return;
+      }
+      setError(null);
       router.refresh();
     });
   }
   function applyRecommended() {
     start(async () => {
-      await applyRecommendedStructure(projectId);
+      const result = await applyRecommendedStructure(projectId);
+      if (!result.ok) {
+        setError(`Empfohlene Struktur anwenden fehlgeschlagen: ${result.error}`);
+        return;
+      }
+      setError(null);
       router.refresh();
     });
   }
 
-  const hasAnyLayered = standards.some((s) => s.layer !== null);
+  const hasAnyLayered = optimisticStandards.some((s) => s.layer !== null);
 
   return (
     <div className="space-y-10">
-      {(!hasAnyLayered || standards.length === 0) && (
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-xl border border-error/30 bg-error-soft px-4 py-3 text-sm text-error"
+        >
+          <AlertCircle className="size-4 mt-0.5 shrink-0" aria-hidden />
+          <div className="flex-1">{error}</div>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="text-xs uppercase tracking-[0.18em] hover:underline"
+          >
+            Schließen
+          </button>
+        </div>
+      )}
+      {(!hasAnyLayered || optimisticStandards.length === 0) && (
         <RecommendationPanel
-          standards={standards}
+          standards={optimisticStandards}
           onApply={applyRecommended}
           pending={pending}
         />
@@ -588,18 +662,20 @@ function StandardBox({
               ↓
             </button>
           </div>
-          <select
+          <Select
+            size="sm"
+            inline
             value={s.layer ?? ''}
             onChange={(e) => onLayerChange((e.target.value || null) as Layer | null)}
             disabled={pending}
-            className="text-[10px] uppercase tracking-[0.18em] border border-hairline bg-transparent rounded px-1.5 py-1"
             aria-label="Layer wählen"
+            className="uppercase tracking-[0.14em]"
           >
             <option value="">— Layer —</option>
             <option value="management">Management</option>
             <option value="cost">Kosten</option>
             <option value="technical">Technisch</option>
-          </select>
+          </Select>
         </div>
       </div>
 
@@ -617,9 +693,10 @@ function StandardBox({
           href={`/api/projects/${projectId}/standards/${s.standard.code}/report`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[10px] uppercase tracking-[0.2em] text-accent hover:text-ink underline"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
         >
-          Bericht als PDF →
+          <FileDown className="size-3.5" aria-hidden />
+          Bericht als PDF
         </a>
       </div>
 
@@ -668,7 +745,9 @@ function HierarchyControls({
   return (
     <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-subtext flex-wrap">
       <span>Beziehung:</span>
-      <select
+      <Select
+        size="sm"
+        inline
         value={currentParent}
         onChange={(e) => {
           const v = e.target.value || null;
@@ -676,7 +755,6 @@ function HierarchyControls({
         }}
         disabled={pending}
         aria-label="Eltern-Standard wählen"
-        className="border border-hairline bg-transparent rounded px-1.5 py-1"
       >
         <option value="">— Root —</option>
         {parentOptions.map((p) => (
@@ -684,19 +762,20 @@ function HierarchyControls({
             {p.code}
           </option>
         ))}
-      </select>
+      </Select>
       {s.parentStandardId && (
-        <select
+        <Select
+          size="sm"
+          inline
           value={currentRel}
           onChange={(e) => onRelationChange(s.parentStandardId, e.target.value as RelationType)}
           disabled={pending}
           aria-label="Beziehungs-Typ"
-          className="border border-hairline bg-transparent rounded px-1.5 py-1"
         >
           <option value="series">In Reihe</option>
           <option value="parallel">Parallel</option>
           <option value="sub_standard">Sub-Standard</option>
-        </select>
+        </Select>
       )}
     </div>
   );

@@ -6,8 +6,9 @@ import {
   auditLog,
   reportArchives,
   projects,
+  orgMembers,
 } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import {
   nextStatus,
@@ -37,13 +38,31 @@ export async function transitionWorksheet(
   const comment = input.comment.trim();
   if (!comment) return { ok: false, error: 'Kommentar erforderlich' };
 
-  // Load instance via RLS (returns nothing if not org member)
+  // Load instance + verify caller is a member of the owning project's org.
+  // `db` runs as postgres and bypasses RLS, so the join is the real check.
+  // We resolve orgId here for every transition so the audit_log insert and
+  // report_archives insert can pass it explicitly, instead of depending on
+  // the audit_log fill-org-id trigger.
   const [instance] = await db
-    .select()
+    .select({
+      id: worksheetInstances.id,
+      projectId: worksheetInstances.projectId,
+      status: worksheetInstances.status,
+      orgId: projects.orgId,
+    })
     .from(worksheetInstances)
-    .where(eq(worksheetInstances.id, input.instanceId))
+    .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(
+      and(
+        eq(worksheetInstances.id, input.instanceId),
+        eq(orgMembers.userId, userId),
+      ),
+    )
     .limit(1);
   if (!instance) return { ok: false, error: 'Worksheet nicht gefunden' };
+
+  const orgId = instance.orgId;
 
   const fromStatus = instance.status as WorksheetStatus;
   const toStatus = nextStatus(fromStatus, input.eventType);
@@ -52,17 +71,6 @@ export async function transitionWorksheet(
       ok: false,
       error: `Übergang ${input.eventType} aus Status ${fromStatus} nicht erlaubt`,
     };
-  }
-
-  // Look up orgId from projects (worksheetInstances has no orgId column)
-  let orgId: string | null = null;
-  if (input.eventType === 'finalize') {
-    const [projRow] = await db
-      .select({ orgId: projects.orgId })
-      .from(projects)
-      .where(eq(projects.id, instance.projectId))
-      .limit(1);
-    orgId = projRow?.orgId ?? null;
   }
 
   // Map the state-machine event to the snapshot trigger. Submit captures the
@@ -116,6 +124,7 @@ export async function transitionWorksheet(
         actorId: userId,
         actorRole: 'engineer',
         projectId: instance.projectId,
+        orgId,
         tableName: 'worksheet_instances',
         recordId: input.instanceId,
         action: 'transition',

@@ -1,6 +1,6 @@
 'use server';
 import { db } from '@/lib/db';
-import { projectParameters, auditLog } from '@/lib/db/schema';
+import { projectParameters, auditLog, projects, orgMembers } from '@/lib/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 
@@ -26,6 +26,16 @@ async function requireUser() {
   return auth.user.id;
 }
 
+async function assertProjectMember(userId: string, projectId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, projectId), eq(orgMembers.userId, userId)))
+    .limit(1);
+  return !!row;
+}
+
 /** Append a citation to a field's citation_sources array. Creates the
  * project_parameters row if it doesn't exist yet. Returns the new id. */
 export async function addCitation(input: {
@@ -39,6 +49,7 @@ export async function addCitation(input: {
   } catch {
     return { ok: false, error: 'Not authenticated' };
   }
+  if (!(await assertProjectMember(userId, input.projectId))) return { ok: false, error: 'project_not_found' };
 
   const citation: StoredCitation = {
     id: crypto.randomUUID(),
@@ -114,6 +125,7 @@ export async function removeCitation(input: {
   } catch {
     return { ok: false, error: 'Not authenticated' };
   }
+  if (!(await assertProjectMember(userId, input.projectId))) return { ok: false, error: 'project_not_found' };
 
   try {
     await db.transaction(async (tx) => {
@@ -164,6 +176,7 @@ export async function attachCitation(input: {
   } catch {
     return { ok: false, error: 'Not authenticated' };
   }
+  if (!(await assertProjectMember(userId, input.projectId))) return { ok: false, error: 'project_not_found' };
 
   const citation: StoredCitation = {
     id: crypto.randomUUID(),
@@ -238,6 +251,7 @@ export async function detachCitation(input: {
   } catch {
     return { ok: false, error: 'Not authenticated' };
   }
+  if (!(await assertProjectMember(userId, input.projectId))) return { ok: false, error: 'project_not_found' };
 
   try {
     await db.transaction(async (tx) => {

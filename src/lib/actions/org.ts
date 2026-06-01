@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { env } from '@/env';
 import { db } from '@/lib/db';
 import { orgMembers, profiles } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -72,6 +72,19 @@ export async function inviteMember(formData: FormData): Promise<void> {
 }
 
 export async function listOrgMembers(orgId: string) {
+  // Verify the caller is a member of the org before returning member PII.
+  // `db` bypasses RLS so this guard is the real access control.
+  const supabase = await createSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const [callerMembership] = await db
+    .select({ orgId: orgMembers.orgId })
+    .from(orgMembers)
+    .where(and(eq(orgMembers.orgId, orgId), eq(orgMembers.userId, user.id)))
+    .limit(1);
+  if (!callerMembership) return [];
+
   return db
     .select({
       userId: orgMembers.userId,

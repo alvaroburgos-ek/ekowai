@@ -12,6 +12,7 @@ import {
   projectParameters,
   projectStandards,
   projects,
+  orgMembers,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 
@@ -353,17 +354,17 @@ export async function instantiateWorksheetInstancesForStandard(
   return templates.length;
 }
 
-/** Confirm the user has access to this project (org member). Returns true/false. */
+/** Confirm the user is a member of the org that owns this project.
+ *  `db` runs as postgres and bypasses RLS, so the join is the real check. */
 export async function userHasProjectAccess(
   projectId: string,
   userId: string,
 ): Promise<boolean> {
-  // RLS handles this at query time, but we double-check explicitly so server
-  // actions can fail loud instead of returning empty result silently.
   const rows = await db
     .select({ id: projects.id })
     .from(projects)
-    .where(eq(projects.id, projectId))
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, projectId), eq(orgMembers.userId, userId)))
     .limit(1);
   return rows.length === 1;
 }

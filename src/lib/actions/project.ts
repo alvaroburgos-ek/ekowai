@@ -69,6 +69,16 @@ const updateSchema = createSchema.extend({
   id: z.string().uuid(),
 });
 
+async function assertProjectMember(userId: string, projectId: string): Promise<void> {
+  const [row] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, projectId), eq(orgMembers.userId, userId)))
+    .limit(1);
+  if (!row) redirect('/');
+}
+
 export async function updateProject(formData: FormData): Promise<void> {
   const parsed = updateSchema.safeParse({
     id: formData.get('id'),
@@ -83,6 +93,8 @@ export async function updateProject(formData: FormData): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/');
 
+  await assertProjectMember(user.id, parsed.data.id);
+
   const siteProfile = readSiteProfileFromFormData(formData);
   await db.update(projects)
     .set({
@@ -93,13 +105,17 @@ export async function updateProject(formData: FormData): Promise<void> {
       updatedAt: new Date(),
     })
     .where(eq(projects.id, parsed.data.id));
-  // RLS policy on UPDATE enforces engineer-and-above
 
   revalidatePath(`/${parsed.data.locale}/projects/${parsed.data.id}`);
   redirect(`/${parsed.data.locale}/projects/${parsed.data.id}`);
 }
 
 export async function archiveProject(id: string, locale: 'de' | 'en'): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/');
+  await assertProjectMember(user.id, id);
+
   await db.update(projects)
     .set({ archivedAt: new Date() })
     .where(eq(projects.id, id));
@@ -108,6 +124,11 @@ export async function archiveProject(id: string, locale: 'de' | 'en'): Promise<v
 }
 
 export async function unarchiveProject(id: string, locale: 'de' | 'en'): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/');
+  await assertProjectMember(user.id, id);
+
   await db.update(projects)
     .set({ archivedAt: null })
     .where(eq(projects.id, id));

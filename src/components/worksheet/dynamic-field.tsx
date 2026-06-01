@@ -3,6 +3,7 @@ import { useState, useId, useMemo } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { Select } from '@/components/ui/select';
 import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
@@ -257,12 +258,11 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           );
         }
         return (
-          <select
+          <Select
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
             onChange={(e) => setField(field.id, { type: 'enum', value: e.target.value || null })}
-            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
           >
             <option value="">—</option>
             {options.map((o) => (
@@ -270,7 +270,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 {pickEnumLabel(o, locale)}
               </option>
             ))}
-          </select>
+          </Select>
         );
       })()}
 

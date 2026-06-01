@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
 import { uploadDocument } from '@/lib/actions/documents';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 
 const KINDS = [
   'lab_analysis',
@@ -62,17 +63,13 @@ export function UploadDialog({
         <span className="font-mono text-[10px] uppercase tracking-[0.18em]">
           {t('kind')}
         </span>
-        <select
-          name="kind"
-          required
-          className="border border-hairline px-2 py-1 bg-transparent"
-        >
+        <Select name="kind" required>
           {KINDS.map((k) => (
             <option key={k} value={k}>
               {t(`kindOptions.${k}` as Parameters<typeof t>[0])}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
       <label className="grid gap-1">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em]">

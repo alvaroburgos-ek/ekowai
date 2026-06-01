@@ -51,3 +51,7 @@ playwright-report/
 
 # per-user Claude Code overrides (not shared)
 .claude/settings.local.json
+.claude/worktrees/
+
+# local Vercel project-link backup (when re-linking to a different team/project)
+.vercel.bak-mainteam/

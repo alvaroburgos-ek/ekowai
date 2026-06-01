@@ -19,17 +19,17 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const origin = requestUrl.origin;
   const searchParams = requestUrl.searchParams;
-  const email = searchParams.get('email') ?? process.env.DEV_AUTOLOGIN_EMAIL;
+  // Always use the env-configured email. Ignoring any ?email= query param
+  // prevents arbitrary impersonation of org owners or platform engineers
+  // by anyone who can reach a preview URL.
+  const email = process.env.DEV_AUTOLOGIN_EMAIL;
   const locale = searchParams.get('locale') ?? defaultLocale;
   const next = searchParams.get('next');
 
   if (!email) {
     return NextResponse.json(
-      {
-        error: 'missing email',
-        usage: '/api/dev/login?email=you@example.com&locale=de[&next=/de/projects]',
-      },
-      { status: 400 },
+      { error: 'missing DEV_AUTOLOGIN_EMAIL env var' },
+      { status: 500 },
     );
   }
 

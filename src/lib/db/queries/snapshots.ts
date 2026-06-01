@@ -1,7 +1,7 @@
 import 'server-only';
 import { db } from '@/lib/db';
 import { calculationSnapshots } from '@/lib/db/schema';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import type {
   SnapshotPayload,
   SnapshotTrigger,
@@ -99,11 +99,11 @@ export async function resolveDefaultDiffPair(
 export async function countSnapshotsForInstance(
   worksheetInstanceId: string,
 ): Promise<number> {
-  const rows = await db
-    .select({ id: calculationSnapshots.id })
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
     .from(calculationSnapshots)
     .where(eq(calculationSnapshots.worksheetInstanceId, worksheetInstanceId));
-  return rows.length;
+  return row?.count ?? 0;
 }
 
 /** All snapshots for an instance with a specific trigger. */

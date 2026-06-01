@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import type { SubArea, SubAreasCarrier } from '@/lib/eval/aggregators';
+import { Select } from '@/components/ui/select';
 
 type Props = {
   fieldId: string;
@@ -136,18 +137,19 @@ export function SubAreasEditor({ fieldId }: Props) {
                       />
                     </td>
                     <td className="py-1.5 pr-2">
-                      <select
+                      <Select
+                        size="sm"
+                        inline
                         value={r.kind}
                         onChange={(e) =>
                           updateRow(r.id, {
                             kind: e.target.value === 'unpaved' ? 'unpaved' : 'paved',
                           })
                         }
-                        className="rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none"
                       >
                         <option value="paved">befestigt</option>
                         <option value="unpaved">unversiegelt</option>
-                      </select>
+                      </Select>
                     </td>
                     <td className="py-1.5 pr-2">
                       <input
