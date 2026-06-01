@@ -4,15 +4,20 @@ A short, living register of decisions deferred during the engine-wiring slices. 
 
 ---
 
-## 1. Gl. (18) Q_S Rigole — un-whitelisted, pending source check
+## 1. Gl. (18) Q_S Rigole — RESOLVED (Pile-6, 2026-05-29)
+
+- **Closed:** 2026-05-29 (Pile-6 + batch-4 PR). Source decision branch 1: standard genuinely uses m³/s for Gl. 18 (source §6.4.2 L1778 verbatim quote `"Die Versickerungsleistung Q_S (in m³/s) der Rigole ergibt sich nach GL. (18) zu"`). Pile-6 SQL (`_pile6-A138-18-Q_S-field.sql`) adds the Q_S field on A138-18 with unit `m³/s`. Gl. 18 is now whitelisted; unit guards proved end-to-end in `src/lib/eval/__tests__/formula-Gl18-Q_S.test.ts`. Cross-worksheet ambiguity between Gl. (4) (l/s, A138-12) and Gl. (18) (m³/s, A138-18) is caught by `mergeInheritedFields` + per-input unit guard, no longer silent.
+
+<details><summary>Original entry (historical)</summary>
 
 - **Where:** A138-18, Gl. (18) — `Q_S = ((b_R + h_R) · L_R + b_R · h_R) · k_i` (§6.4.2 per DB row).
-- **Status:** **NOT in `FORMULA_ENGINE_WHITELIST`** (removed in PR #22 commit `cfe35a4`). Evaluator profile, hand-calc reference, and unit test all retained so the open question stays visible.
 - **The discrepancy:** the DB formula omits the `×10³` factor that Gl. (4) on A138-12 has for the same physical quantity Q_S (l/s with k_i in m/s and area in m²). Literal evaluation of Gl. (18) with (m, m, m, m/s) inputs returns **m³/s**, but the wizard's `Q_S` field is labelled **l/s** — a **1000× magnitude trap** for engineers comparing Q_S across worksheets.
 - **Resolution required:** open `Guidelines knowledge markdown/DWA-A_138-1_WD (5).md` at §6.4.2 and decide one of:
-  1. **The standard genuinely omits ×10³ here** — Q_S Rigole is intended in m³/s (Gl. 18 is dimensionally "leakage rate", not the same Q_S as Gl. 4). Then: the wizard's Q_S field unit on A138-18 (and any downstream consumer such as A138-13 Gl. 8 Q_S input) is mis-labelled; fix the unit label and re-wire Gl. 18.
-  2. **Transcription dropped the factor** — Pass3c re-import patched out the `·10³`. Then: correct the DB formula via a Pass3c re-import + signed-off audit, and re-wire.
-- **Engineer:** the value the engine surfaces today is what the DB formula literally says — fail-loud, never silent. The form shows no numeric result for Gl. 18 (`manual_required`) rather than a wrong-magnitude one.
+  1. **The standard genuinely omits ×10³ here** — Q_S Rigole is intended in m³/s. ✅ This branch was confirmed by source quote.
+  2. **Transcription dropped the factor** — ruled out.
+- **Engineer:** the value the engine surfaces today is what the DB formula literally says — fail-loud, never silent.
+
+</details>
 
 ## 2. Gl. (16) A_S,m Mulde — independently confirm 68.824 m²
 
@@ -22,15 +27,17 @@ A short, living register of decisions deferred during the engine-wiring slices. 
 - **If confirmed:** close this item with a one-line entry citing the source span (line range).
 - **If different:** the formula transcription is suspect — same Pass3c re-import path as item 1 above.
 
-## 3. Gl. (10) V_Rück flood-check — parked, needs flood-sub-area carrier
+## 3. Gl. (10) V_Rück flood-check — RESOLVED (Pile-5 + batch-4, 2026-05-29)
+
+- **Closed:** 2026-05-29. Pile-5 SQL (`_pile5-schema.sql`) adds the flood-event sub-area carrier `sub_areas_A138_26` on A138-26 with per-row `c_S`. Batch-4 PR wires the Gl. 10 aggregator (Gl. 2 pattern, with own carrier + 4-stage fail-loud guards: scalars / carrier / unit / per-row). Hand-calc reference in `_eval-reference-Gl10.md` reproduced to ±0.001 m³ in `formula-Gl10.test.ts` (14 cases). Engine cannot silently fall back to design-event C.
+
+<details><summary>Original entry (historical)</summary>
 
 - **Where:** A138-26, Gl. (10) — `V_Rueck = ((r_D(T_n_Ue) · (SUM(A_E_b_a · C_S) + A_VA) / 10000) − (Q_S + Q_Dr)) · D · 60 / 1000 − V_VA ≥ 0` (§5.3.4 per DB row).
-- **Status:** **NOT in `FORMULA_ENGINE_WHITELIST`** (deliberately deferred in the batch-2/batch-3 wiring).
-- **Why parked:** the SUM-over-sub-areas requires a sub-area carrier with per-row **flood-event runoff coefficient `C_S`** (per Tab. 9 flood column). The existing `sub_areas_A138_10` carrier only holds the normal-design `C`, not the flood-event `C_S`. Wiring Gl. 10 needs either:
-  1. **Schema extension** — add a `c_S` column to the existing sub-area carrier rows AND populate it (one Pile-style schema pass).
-  2. **New flood-specific carrier** — add `sub_areas_A138_26` as a separate JSON carrier on A138-26 with the same `kind`/`area_m2` structure plus `c_S`.
-- **Resolution required:** decide the schema path, apply additively (no destructive migration), then write a Gl. 10 aggregator analogous to the Gl. 2 sub-area aggregator. Engine returns `computed` with V_Rück value; engineer reads the sign (V_Rück > 0 → extra flood retention needed).
-- **Why fail-loud now matters:** Gl. 10 is the **flood compliance gate**. Computing it wrong (e.g. silently using design-event `C` instead of flood-event `C_S`) would understate the required retention. Park is the safe default.
+- **Why parked:** the SUM-over-sub-areas required a sub-area carrier with per-row **flood-event runoff coefficient `C_S`**. ✅ Pile-5 added a dedicated `sub_areas_A138_26` carrier (separate from design-C `sub_areas_A138_10`), so the engine cannot silently use design-event C.
+- **Why fail-loud matters:** Gl. 10 is the **flood compliance gate**. Computing it wrong would understate retention. Now: per-row C_S + r_D(T_n,Ü) unit guard + scalar guard all enforced.
+
+</details>
 
 ## 4. Squash-merge caveat — safety commits can be silently dropped
 

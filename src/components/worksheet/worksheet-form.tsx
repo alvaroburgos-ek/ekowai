@@ -30,12 +30,13 @@ const FORMULA_ENGINE_WHITELIST = new Set<string>([
   'A138-16:12',
   'A138-17:16',
   'A138-18:17',
-  // 'A138-18:18' — DELIBERATELY NOT WIRED. The DB formula omits the ×10³
-  // factor that Gl. (4) has for the same physical quantity Q_S (l/s with
-  // m, m², m/s inputs), so the literal evaluation returns m³/s — a 1000×
-  // magnitude trap. The profile + notes + _eval-reference-Gl18.md remain
-  // in place documenting the open question; the engine renders no result
-  // on the form (manual_required) rather than a wrong-magnitude number.
+  'A138-18:18', // Q_S Rigole — wired after source-quote resolution (Pile-6 SQL
+                // adds Q_S field with unit m³/s on A138-18). Source §6.4.2
+                // L1778 verbatim: "Q_S (in m³/s)…" — the standard genuinely
+                // omits the ×10³ factor that Gl. (4) has. Engineer sees the
+                // computed value in m³/s, never silently mis-labelled as l/s.
+                // Ambiguity guard catches any downstream consumer that pulls
+                // both Gl. 4 (l/s) and Gl. 18 (m³/s) into the same scope.
 
   // Batch-2: Mulde + Rigole Speichervolumen (Gl. 14, 15, 19, 20, 22, 23)
   'A138-17:14', // V_M required (primary)
@@ -64,9 +65,11 @@ const FORMULA_ENGINE_WHITELIST = new Set<string>([
   'A138-21:39', // erf_k_f_FS minimum
   'A138-21:40', // h_S filter form (displayOnly)
   'A138-22:41', // V_VA Becken
-  // 'A138-26:10' — PARKED. Gl. (10) V_Rück (flood check) uses SUM over flood-
-  // sub-areas with flood-event runoff coefficient C_S. Requires a sub-areas
-  // carrier with per-row C_S, which doesn't exist on A138-26 yet. Tracked
+  'A138-26:10', // V_Rück flood-check (Pile-5 — carrier sub_areas_A138_26 added)
+  // PRIOR PARK NOTE (Pile-5 closed): Gl. (10) V_Rück required a flood-sub-area
+  // carrier with per-row C_S. Added in Pile-5 (audit-reports/.../_pile5-schema.sql)
+  // and the aggregator reads it. Engineer adds flood rows on A138-26; engine
+  // returns V_Rück value. Tracked
   // in _OPEN-ITEMS.md.
 ]);
 

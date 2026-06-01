@@ -45,6 +45,33 @@ export type Gl8Scalars = {
   f_A: number | null;
 };
 
+/** Flood-event sub-area row. Same shape as SubArea but uses C_S (flood-event
+ * runoff coefficient per Tab. 9) instead of design-event C. Kept as a separate
+ * type so the engine cannot silently use design-C for flood calcs. */
+export type FloodSubArea = {
+  id: string;
+  label?: string | null;
+  kind: 'paved' | 'unpaved';
+  area_m2: number | null;
+  c_S: number | null;
+};
+
+export type FloodSubAreasCarrier = {
+  rows: FloodSubArea[];
+};
+
+/** Scalars Gl. 10 reads in addition to the flood-sub-area carrier. Origin
+ *  worksheets in production: A_VA← A138-10, Q_S← A138-12, Q_Dr← A138-20,
+ *  D← A138-04, V_VA← A138-13, r_D_T_n_Ue← A138-26 (own field `r_D_30`). */
+export type Gl10Scalars = {
+  A_VA: number | null;
+  Q_S: number | null;
+  Q_Dr: number | null;
+  D: number | null;
+  V_VA: number | null;
+  r_D_T_n_Ue: number | null;
+};
+
 export type AggregatorContext = {
   /** Carrier data for the sub-areas aggregator (A138-10 Gl. 2). */
   subAreas?: SubAreasCarrier | null;
@@ -57,6 +84,10 @@ export type AggregatorContext = {
   /** Engineer-reported unit on the table column (read from the
    * r_D_n_table field's `unit`). Drives the per-row unit guard. */
   kostraUnit?: string | null;
+  /** Carrier data for the flood-check aggregator (A138-26 Gl. 10). */
+  floodSubAreas?: FloodSubAreasCarrier | null;
+  /** Scalar inputs Gl. 10 reads in addition to its sub-area carrier. */
+  gl10Scalars?: Gl10Scalars | null;
 };
 
 type Aggregator = {
@@ -424,6 +455,139 @@ const a138_21_gl38_condition = makeConditionAggregator(
   'positiv = Filterleistung ≥ Schacht-Versickerungsleistung',
 );
 
+/**
+ * A138-26 Gl. (10) — V_Rück flood-check (§5.3.4)
+ *
+ *   V_Rück = ((r_D(T_n,Ü) · (Σ(A_E,b,a · C_S) + A_VA) / 10000)
+ *            − (Q_S + Q_Dr)) · D · 60 / 1000  −  V_VA   ≥ 0
+ *
+ * Aggregator reads the flood-sub-area carrier (per-row area + flood-event
+ * C_S — strictly different from the design-event C in the Gl. 2 carrier)
+ * plus 6 scalars. Returns `computed` with V_Rück value: positive →
+ * additional flood retention required; ≤ 0 → flood check passes.
+ *
+ * Fail-loud rules:
+ *  - Missing scalar → manual_required naming it.
+ *  - Carrier empty / no rows → manual_required (engineer must declare the
+ *    flood sub-areas explicitly; cannot silently fall back to design-C
+ *    from sub_areas_A138_10).
+ *  - Incomplete row (area or c_S missing) → manual_required naming it.
+ *  - Unit on r_D_30 field ≠ l/(s·ha) → manual_required.
+ */
+const GL10_SCALAR_SYMBOLS = [
+  'A_VA', 'Q_S', 'Q_Dr', 'D', 'V_VA', 'r_D_T_n_Ue',
+] as const;
+const GL10_R_D_EXPECTED_UNIT = 'l/(s·ha)';
+
+function isFloodRowComplete(r: FloodSubArea): boolean {
+  return (
+    typeof r.area_m2 === 'number' &&
+    Number.isFinite(r.area_m2) &&
+    typeof r.c_S === 'number' &&
+    Number.isFinite(r.c_S)
+  );
+}
+
+function floodRowLabel(r: FloodSubArea, idx: number): string {
+  return r.label && r.label.trim() ? r.label.trim() : `Zeile ${idx + 1}`;
+}
+
+const a138_26_gl10: Aggregator = {
+  run: (req) => {
+    const ctx = req.aggregator ?? {};
+    const carrier = ctx.floodSubAreas;
+    const scalars = ctx.gl10Scalars;
+    const rD_unit = ctx.kostraUnit; // re-used for r_D_30 unit guard
+
+    // 1. Scalars first.
+    if (
+      !scalars ||
+      !GL10_SCALAR_SYMBOLS.every(
+        (k) => typeof scalars[k] === 'number' && Number.isFinite(scalars[k] as number),
+      )
+    ) {
+      const missing = GL10_SCALAR_SYMBOLS.filter(
+        (k) => !(typeof scalars?.[k] === 'number' && Number.isFinite(scalars[k] as number)),
+      );
+      return {
+        kind: 'manual_required',
+        reason: `Fehlende Skalar-Eingaben für Gl. (10) Flood-Check: ${missing.join(', ')}.`,
+        missing: [...missing],
+      };
+    }
+
+    // 2. Carrier.
+    if (!carrier || !Array.isArray(carrier.rows) || carrier.rows.length === 0) {
+      return {
+        kind: 'manual_required',
+        reason:
+          'Keine Flut-Teilflächen erfasst. Mindestens eine Zeile mit Fläche und Flood-Abflussbeiwert C_S (per Tab. 9 Flood-Spalte) eingeben.',
+      };
+    }
+
+    // 3. r_D unit guard (the silent-error trap — Gl. 10 calibrated on l/(s·ha)).
+    if (rD_unit != null && rD_unit !== '' && rD_unit !== GL10_R_D_EXPECTED_UNIT) {
+      return {
+        kind: 'manual_required',
+        reason: `Einheiten-Konflikt für r_D(T_n,Ü): erwartet "${GL10_R_D_EXPECTED_UNIT}", geliefert "${rD_unit}".`,
+        unitConflicts: [
+          { symbol: 'r_D(T_n,Ü)', expected: GL10_R_D_EXPECTED_UNIT, actual: rD_unit },
+        ],
+      };
+    }
+
+    // 4. Per-row completeness.
+    const incomplete = carrier.rows
+      .map((r, i) => ({ r, i, ok: isFloodRowComplete(r) }))
+      .filter((x) => !x.ok);
+    if (incomplete.length > 0) {
+      const which = incomplete.map((x) => floodRowLabel(x.r, x.i)).join(', ');
+      return {
+        kind: 'manual_required',
+        reason: `Unvollständige Flut-Zeilen: ${which}. Pro Zeile sind area_m2 und C_S Pflicht.`,
+      };
+    }
+
+    // 5. Compute.
+    const A_VA = scalars.A_VA as number;
+    const Q_S = scalars.Q_S as number;
+    const Q_Dr = scalars.Q_Dr as number;
+    const D = scalars.D as number;
+    const V_VA = scalars.V_VA as number;
+    const r_D = scalars.r_D_T_n_Ue as number;
+
+    const substituted: Record<string, number> = {};
+    let sum_A_C_S = 0;
+    for (let i = 0; i < carrier.rows.length; i++) {
+      const row = carrier.rows[i];
+      const contribution = (row.area_m2 as number) * (row.c_S as number);
+      sum_A_C_S += contribution;
+      substituted[`${floodRowLabel(row, i)} (${row.area_m2} · C_S=${row.c_S})`] =
+        contribution;
+    }
+    substituted['Σ A_E,b,a · C_S (m²)'] = sum_A_C_S;
+
+    const inflow_l_per_s = (r_D * (sum_A_C_S + A_VA)) / 10000; // l/s
+    const net_l_per_s = inflow_l_per_s - (Q_S + Q_Dr); // l/s
+    const inflow_volume_m3 = (net_l_per_s * D * 60) / 1000; // m³
+    const V_Rueck = inflow_volume_m3 - V_VA; // m³
+
+    substituted['Zufluss r_D·(Σ+A_VA)/10⁴ (l/s)'] = inflow_l_per_s;
+    substituted['Netto (l/s)'] = net_l_per_s;
+    substituted['Flutvolumen (m³)'] = inflow_volume_m3;
+    substituted['V_VA (m³)'] = V_VA;
+    substituted['V_Rück = Volumen − V_VA (m³)'] = V_Rueck;
+
+    return {
+      kind: 'computed',
+      value: V_Rueck,
+      substituted,
+      formulaEvaluated:
+        'V_Rück = ((r_D(T_n,Ü)·(Σ(A_E,b,a·C_S)+A_VA)/10000) − (Q_S+Q_Dr))·D·60/1000  −  V_VA   (≥ 0 = Flutnachweis bestanden)',
+    };
+  },
+};
+
 export const aggregators: Record<string, Aggregator> = {
   // DWA-A 138-1 · A138-10 · Gl. (2)
   '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_gl2,
@@ -435,4 +599,6 @@ export const aggregators: Record<string, Aggregator> = {
   '86cdef5c-4199-4de6-ad0d-e2248b0834c9': a138_18_gl25_condition,
   // DWA-A 138-1 · A138-21 · Gl. (38) ≥-condition
   '19f36c1e-9b20-43cd-8b09-6040e81598c2': a138_21_gl38_condition,
+  // DWA-A 138-1 · A138-26 · Gl. (10) V_Rück flood-check
+  '8e3c7e22-e3c7-449a-b267-928332c89306': a138_26_gl10,
 };

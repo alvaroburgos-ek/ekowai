@@ -21,7 +21,13 @@ import { useEffect, useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { rewriteRules } from './rewrites';
-import type { SubAreasCarrier, KostraCarrier, Gl8Scalars } from './aggregators';
+import type {
+  SubAreasCarrier,
+  KostraCarrier,
+  Gl8Scalars,
+  FloodSubAreasCarrier,
+  Gl10Scalars,
+} from './aggregators';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 
@@ -29,6 +35,7 @@ import { normalizeSymbols } from './normalize-formula';
  * carriers to plumb in. */
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
+const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
 type FieldMeta = {
   id: string;
@@ -69,6 +76,10 @@ function consumedSymbolsFor(eq: EquationMeta): string[] {
   if (eq.id === A138_13_GL8_ID) {
     // Gl. 8 reads scalars from inherited fields + the KOSTRA carrier.
     return ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A', 'r_D_n_table'];
+  }
+  if (eq.id === A138_26_GL10_ID) {
+    // Gl. 10 reads scalars from inherited fields + the flood carrier.
+    return ['A_VA', 'Q_S', 'Q_Dr', 'D', 'V_VA', 'r_D_30', 'sub_areas_A138_26'];
   }
   // For the §6.x.y batch (arithmetic + Gl. 11 balance), the formula's
   // input_symbols list is the truth — normalised so a stored alias still
@@ -159,6 +170,51 @@ export function useEquationEngine({
     };
   }, [values, fieldBySymbol]);
 
+  // Flood-sub-area carrier (Gl. 10): the `sub_areas_A138_26` field on A138-26
+  // holds the per-row flood-event sub-areas (strictly different from
+  // sub_areas_A138_10's design-event C).
+  const floodCarrierField = useMemo(
+    () => fields.find((f) => f.symbol === 'sub_areas_A138_26'),
+    [fields],
+  );
+  const floodCarrier = useMemo<FloodSubAreasCarrier | null>(() => {
+    if (!floodCarrierField) return null;
+    const v = values[floodCarrierField.id];
+    if (v?.type !== 'json') return null;
+    const raw = v.value as { rows?: unknown } | null | undefined;
+    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+    return raw as FloodSubAreasCarrier;
+  }, [values, floodCarrierField]);
+
+  // Gl. 10 scalars. Origin worksheets in production: A_VA← A138-10,
+  // Q_S← A138-12, Q_Dr← A138-20, D← A138-04, V_VA← A138-13, r_D_T_n_Ue
+  // reads the A138-26 own field `r_D_30` (flood-event intensity).
+  const gl10Scalars = useMemo<Gl10Scalars | null>(() => {
+    const pick = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      if (v?.type !== 'number' || v.value == null || !Number.isFinite(v.value)) {
+        return null;
+      }
+      return v.value;
+    };
+    return {
+      A_VA: pick('A_VA'),
+      Q_S: pick('Q_S'),
+      Q_Dr: pick('Q_Dr'),
+      D: pick('D_min') ?? pick('D'),
+      V_VA: pick('V_VA'),
+      r_D_T_n_Ue: pick('r_D_30'),
+    };
+  }, [values, fieldBySymbol]);
+
+  // Unit on the r_D_30 field — feeds the Gl. 10 unit-guard.
+  const r_D_30_field = useMemo(
+    () => fields.find((f) => f.symbol === 'r_D_30'),
+    [fields],
+  );
+
   const engineStates = useMemo<Record<string, EvalState>>(() => {
     const next: Record<string, EvalState> = {};
     for (const eq of equations) {
@@ -228,6 +284,14 @@ export function useEquationEngine({
           gl8Scalars,
           kostraUnit: kostraField?.unit ?? null,
         };
+      } else if (eq.id === A138_26_GL10_ID) {
+        aggregator = {
+          floodSubAreas: floodCarrier,
+          gl10Scalars,
+          // re-use kostraUnit slot for the r_D_30 unit guard (the
+          // aggregator reads ctx.kostraUnit)
+          kostraUnit: r_D_30_field?.unit ?? null,
+        };
       }
 
       next[eq.id] = evaluateFormula({
@@ -250,6 +314,9 @@ export function useEquationEngine({
     kostraCarrier,
     kostraField,
     gl8Scalars,
+    floodCarrier,
+    gl10Scalars,
+    r_D_30_field,
     ambiguousSymbols,
   ]);
 

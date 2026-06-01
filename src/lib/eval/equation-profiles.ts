@@ -153,7 +153,7 @@ export const equationProfiles: Record<string, EquationProfile> = {
       k_i: 'm/s',
     },
     notes:
-      '§6.4.2 Gl. (18): Q_S Rigole. ACHTUNG: die DB-Formel hat KEINEN ×10³-Faktor, anders als Gl. (4). Bei Einheiten m, m, m, m/s liefert sie m³/s — die zugehörige Wizard-Einheit l/s ist dann numerisch falsch um Faktor 1000. Engineer-Audit bitte.',
+      '§6.4.2 Gl. (18): Q_S Rigole. Source L1778 verbatim "Q_S (in m³/s)" — die DB-Formel lässt den ×10³-Faktor (anders als Gl. (4)) weg, weil das Output dimensional m³/s ist. Pile-6 SQL fügt das Q_S-Feld auf A138-18 mit Einheit m³/s hinzu. Ambiguity-Guard fängt jede stille Vermischung mit dem l/s-Q_S aus Gl. (4) ab.',
   },
 
   // ====================================================================
@@ -366,5 +366,15 @@ export const equationProfiles: Record<string, EquationProfile> = {
       k_i: 'm/s', Q_Dr: 'l/s', D: 'min', f_Z: null, f_A: null,
     },
     notes: '§6.8.2 Gl. (41): Becken-Speichervolumen. Schreibt V_VA auf A138-22 (separates Feld vs Gl. 8 V_VA auf A138-13).',
+  },
+
+  // A138-26 · Gl. (10) V_Rück flood-check · §5.3.4
+  '8e3c7e22-e3c7-449a-b267-928332c89306': {
+    expectedUnits: {
+      // The aggregator handles its own per-row + per-scalar checks; this
+      // profile carries documentation only. Output "(condition)" is not a
+      // field, so no write-back fires.
+    },
+    notes: '§5.3.4 Gl. (10): Flood-check V_Rück. Aggregator-Pfad mit eigenem Carrier sub_areas_A138_26 + 6 Skalaren (A_VA, Q_S, Q_Dr, D, V_VA, r_D(T_n,Ü)). Positive V_Rück = zusätzliche Flutspeicherung erforderlich; ≤ 0 = Flutnachweis bestanden.',
   },
 };
