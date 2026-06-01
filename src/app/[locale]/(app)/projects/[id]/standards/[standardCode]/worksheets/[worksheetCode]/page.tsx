@@ -12,6 +12,7 @@ import {
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
+import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile } from '@/lib/site-profile/symbol-map';
 
 export default async function WorksheetPage({
@@ -218,6 +219,7 @@ export default async function WorksheetPage({
   }
 
   return (
+    <NormTextProvider standardCode={standardCode}>
     <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-12">
       <aside>
         <WorksheetListSidebar
@@ -295,6 +297,7 @@ export default async function WorksheetPage({
         />
       </main>
     </div>
+    </NormTextProvider>
   );
 }
 
