@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from './status-pill';
 import { TransitionModal } from './transition-modal';
@@ -13,9 +14,22 @@ type Props = {
   instanceId: string;
   status: WorksheetStatus;
   locale: 'de' | 'en';
+  /** Number of calculation snapshots that exist for this instance. When ≥1
+   * we render an "Änderungen seit letzter Version" link to the diff page,
+   * so reviewers can see what changed before approving. */
+  priorSnapshotCount?: number;
+  /** Where to link the "Änderungen seit letzter Version" affordance. Only
+   * rendered when priorSnapshotCount ≥ 1. */
+  diffHref?: string;
 };
 
-export function ApprovalBar({ instanceId, status, locale }: Props) {
+export function ApprovalBar({
+  instanceId,
+  status,
+  locale,
+  priorSnapshotCount = 0,
+  diffHref,
+}: Props) {
   const actions = userActionsFor(status);
   const [modal, setModal] = useState<null | {
     event: Exclude<TransitionEvent, 'deactivate' | 'reactivate'>;
@@ -28,6 +42,20 @@ export function ApprovalBar({ instanceId, status, locale }: Props) {
       <div className="flex items-center gap-3">
         <div className="text-[10px] uppercase tracking-[0.2em] text-subtext">Status</div>
         <StatusPill status={status} />
+      </div>
+
+      <div className="flex items-center gap-3">
+        {priorSnapshotCount >= 1 && diffHref && (
+          <Link
+            href={diffHref}
+            className="text-xs text-accent hover:underline"
+            data-testid="approval-bar-diff-link"
+          >
+            {locale === 'de'
+              ? 'Änderungen seit letzter Version'
+              : 'Changes since last version'}
+          </Link>
+        )}
       </div>
 
       <div className="flex gap-2">

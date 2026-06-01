@@ -9,6 +9,7 @@ import {
   loadSameSymbolValues,
   loadInheritedFields,
 } from '@/lib/db/queries/worksheet';
+import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
@@ -113,6 +114,11 @@ export default async function WorksheetPage({
       GROUP BY wt.id
     `),
   ]);
+
+  // Count prior snapshots — drives the "Änderungen seit letzter Version"
+  // affordance in the approval bar. Single COUNT-ish query is cheap and the
+  // index on (worksheet_instance_id, taken_at) keeps it O(log n).
+  const priorSnapshotCount = await countSnapshotsForInstance(instance.id);
 
   // Convert parameters → initialValues for the store. Resolution order
   // (first hit wins; engineer can always override by typing):
@@ -299,6 +305,8 @@ export default async function WorksheetPage({
           siteProfileKeyByFieldId={siteProfileKeyByFieldId}
           standardCode={standardCode}
           docs={docs}
+          priorSnapshotCount={priorSnapshotCount}
+          diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
         />
       </main>
     </div>

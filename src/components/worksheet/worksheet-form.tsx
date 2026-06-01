@@ -15,32 +15,8 @@ import {
 import { SubAreasEditor } from './sub-areas-editor';
 import { KostraTableEditor } from './kostra-table-editor';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
+import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
-
-/**
- * Whitelist of (worksheetCode, equationNumber) the new mathjs evaluator
- * handles. Everything else falls through to the legacy naive sum-evaluator
- * below. Keep this VERY small until each entry has a hand-calc reference and
- * a unit test.
- */
-const FORMULA_ENGINE_WHITELIST = new Set<string>([
-  'A138-10:2',
-  'A138-13:8',
-  'A138-18:21',
-  // §6.x.y batch
-  'A138-12:4',
-  'A138-12:7',
-  'A138-16:11',
-  'A138-16:12',
-  'A138-17:16',
-  'A138-18:17',
-  // 'A138-18:18' — DELIBERATELY NOT WIRED. The DB formula omits the ×10³
-  // factor that Gl. (4) has for the same physical quantity Q_S (l/s with
-  // m, m², m/s inputs), so the literal evaluation returns m³/s — a 1000×
-  // magnitude trap. The profile + notes + _eval-reference-Gl18.md remain
-  // in place documenting the open question; the engine renders no result
-  // on the form (manual_required) rather than a wrong-magnitude number.
-]);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -136,6 +112,12 @@ type Props = {
    * inheritance badge can deep-link back to the source worksheet. */
   standardCode: string;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
+  /** Number of calculation snapshots that exist for this instance — drives
+   * the "Änderungen seit letzter Version" affordance in the approval bar. */
+  priorSnapshotCount?: number;
+  /** Pre-built href to the diff page; passed through to ApprovalBar so the
+   * client doesn't need to know the route shape. */
+  diffHref?: string;
 };
 
 export function WorksheetForm({
@@ -158,6 +140,8 @@ export function WorksheetForm({
   siteProfileKeyByFieldId,
   standardCode,
   docs,
+  priorSnapshotCount,
+  diffHref,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
@@ -541,7 +525,13 @@ export function WorksheetForm({
         locale={locale}
         projectId={projectId}
       />
-      <ApprovalBar instanceId={instance.id} status={instance.status} locale={locale} />
+      <ApprovalBar
+        instanceId={instance.id}
+        status={instance.status}
+        locale={locale}
+        priorSnapshotCount={priorSnapshotCount ?? 0}
+        diffHref={diffHref}
+      />
     </article>
   );
 }
