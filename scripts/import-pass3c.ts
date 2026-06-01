@@ -57,6 +57,8 @@ async function main(): Promise<void> {
       fields: parsed.fields.length,
       equations: parsed.equations.length,
       complianceRequirements: parsed.complianceRequirements.length,
+      revertedFields: 0,
+      revertedEquations: 0,
     };
     printCounts(counts, parsed.standard.standard_code);
     return;
@@ -77,6 +79,12 @@ function printCounts(counts: ImportCounts, code: string): void {
   console.log(`  Fields:                   ${counts.fields}`);
   console.log(`  Equations:                ${counts.equations}`);
   console.log(`  Compliance requirements:  ${counts.complianceRequirements}`);
+  if (counts.revertedFields > 0 || counts.revertedEquations > 0) {
+    console.log('');
+    console.log(`  Re-import policy: content drifted on already-verified rows`);
+    console.log(`    Fields reset to imported_unverified:    ${counts.revertedFields}`);
+    console.log(`    Equations reset to imported_unverified: ${counts.revertedEquations}`);
+  }
 }
 
 main().catch((err) => {

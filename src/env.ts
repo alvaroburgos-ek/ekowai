@@ -18,6 +18,11 @@ export const env = createEnv({
     RESEND_FROM_EMAIL: z.string().email().default('onboarding@resend.dev'),
     /** Comma-separated list of emails that auto-join the EKOWAI org as `owner` on first login. */
     EKOWAI_AUTO_JOIN_OWNERS: z.string().optional(),
+    /** Comma-separated allowlist of emails permitted to verify worksheet
+     * templates (flip imported_unverified → engineer_verified) and upload new
+     * Pass3c workbooks. Templates are global across orgs, so verification is
+     * a platform-level role, not an org-level one. */
+    PLATFORM_ENGINEER_EMAILS: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
@@ -41,6 +46,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
     EKOWAI_AUTO_JOIN_OWNERS: process.env.EKOWAI_AUTO_JOIN_OWNERS,
+    PLATFORM_ENGINEER_EMAILS: process.env.PLATFORM_ENGINEER_EMAILS,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

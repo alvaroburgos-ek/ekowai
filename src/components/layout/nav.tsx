@@ -7,6 +7,7 @@ import { db } from '@/lib/db';
 import { worksheetInstances, projects, orgMembers } from '@/lib/db/schema';
 import { eq, and, inArray, count } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { isPlatformEngineer } from '@/lib/auth/platform-engineer';
 
 async function getPendingReviewCount(): Promise<number> {
   const supabase = await createClient();
@@ -34,6 +35,18 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
   const t = await getTranslations('nav');
   const pending = await getPendingReviewCount();
 
+  // Platform-engineer link — only shown to users on PLATFORM_ENGINEER_EMAILS.
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const showLibrary = isPlatformEngineer(user);
+
+  const links = [
+    { href: `/${locale}/projects`, label: t('projects') },
+    { href: `/${locale}/inbox`, label: t('inbox'), badge: pending },
+    ...(showLibrary ? [{ href: `/${locale}/standards`, label: 'Bibliothek' }] : []),
+    { href: `/${locale}/org`, label: t('org') },
+  ];
+
   return (
     <header className="border-b border-hairline bg-paper/95 backdrop-blur-md sticky top-0 z-30">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
@@ -49,14 +62,7 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
           />
         </Link>
         <nav className="flex items-center gap-7 font-body">
-          <NavLinks
-            locale={locale}
-            links={[
-              { href: `/${locale}/projects`, label: t('projects') },
-              { href: `/${locale}/inbox`, label: t('inbox'), badge: pending },
-              { href: `/${locale}/org`, label: t('org') },
-            ]}
-          />
+          <NavLinks locale={locale} links={links} />
           <span className="h-4 w-px bg-hairline" aria-hidden />
           <LocaleSwitcher current={locale} />
           <form action="/api/auth/logout" method="post">

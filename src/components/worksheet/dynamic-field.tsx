@@ -6,6 +6,7 @@ import { SegmentedControl } from '@/components/ui/segmented-control';
 import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
+import { VerifyButton } from './verify-button';
 
 type FieldDef = {
   id: string;
@@ -22,6 +23,9 @@ type FieldDef = {
   clauseReference: string | null;
   verificationStatus: string;
   description: string | null;
+  verifiedByLabel?: string | null;
+  verifiedAt?: string | null;
+  verificationNote?: string | null;
 };
 
 type Props = {
@@ -52,9 +56,12 @@ type Props = {
    * "Manueller Override" affordance when the engineer's typed value diverges
    * from the engine's computed verdict. */
   overridePill?: React.ReactNode;
+  /** True when the current viewer is on the platform-engineer allowlist.
+   * Gates the "Bestätigen" button next to the verification chip. */
+  isPlatformEngineer?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -117,6 +124,16 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             >
               {verificationStatusLabel(field.verificationStatus)}
             </span>
+          )}
+          {isPlatformEngineer && (
+            <VerifyButton
+              target="field"
+              id={field.id}
+              status={field.verificationStatus}
+              verifiedByLabel={field.verifiedByLabel}
+              verifiedAt={field.verifiedAt}
+              verificationNote={field.verificationNote}
+            />
           )}
           {inheritedFrom && !isDirty && (
             <Link

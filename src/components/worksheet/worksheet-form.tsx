@@ -118,6 +118,9 @@ type Props = {
   /** Pre-built href to the diff page; passed through to ApprovalBar so the
    * client doesn't need to know the route shape. */
   diffHref?: string;
+  /** True when the current viewer is on the platform-engineer allowlist.
+   * Gates the "Bestätigen" buttons on every field/equation. */
+  isPlatformEngineer?: boolean;
 };
 
 export function WorksheetForm({
@@ -142,6 +145,7 @@ export function WorksheetForm({
   docs,
   priorSnapshotCount,
   diffHref,
+  isPlatformEngineer = false,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
@@ -398,6 +402,7 @@ export function WorksheetForm({
               />
             ) : undefined
           }
+          isPlatformEngineer={isPlatformEngineer}
         />
       );
     });
@@ -494,7 +499,7 @@ export function WorksheetForm({
         </section>
       )}
 
-      <EquationsBlock equations={equations} />
+      <EquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} />
 
       {orphanEngineEquations.length > 0 && (
         <section className="border-t border-hairline pt-6 mt-2 space-y-3">

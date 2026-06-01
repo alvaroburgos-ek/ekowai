@@ -254,9 +254,14 @@ export function useEquationEngine({
   ]);
 
   // Write computed value back into the output field, clear it otherwise.
+  // Skip equations marked `displayOnly` — alternative-form / sizing-aid
+  // equations whose output_symbol collides with a primary writer or an
+  // engineer-entered iteration variable. The card still renders their
+  // value; only the store/project_parameters write is suppressed.
   useEffect(() => {
     for (const eq of equations) {
       if (!engineEquationIds.has(eq.id)) continue;
+      if (equationProfiles[eq.id]?.displayOnly) continue;
       const outSym = eq.outputSymbol;
       if (!outSym) continue;
       const outField = fieldBySymbol.get(outSym);

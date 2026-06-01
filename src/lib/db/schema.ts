@@ -166,6 +166,12 @@ export const fields = pgTable(
     consumerWorksheets: text('consumer_worksheets').array(),
     orderIndex: integer('order_index').notNull().default(0),
     verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+    /** Audit columns: who flipped the field to engineer_verified, when, and an
+     * optional short note. Nullable — populated by the verifyField server
+     * action (src/lib/actions/verification.ts). */
+    verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    verificationNote: text('verification_note'),
     /** Soft-deactivation marker. Set false by the Pile-2 deprecation pass for
      * fields that have no source basis and no code consumer; their rows are
      * retained for audit trail but the worksheet form filters them out. */
@@ -194,6 +200,10 @@ export const equations = pgTable(
     clauseReference: text('clause_reference'),
     description: text('description'),
     verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+    /** Audit columns — see fields.verifiedByUserId. */
+    verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    verificationNote: text('verification_note'),
   },
   (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
 );

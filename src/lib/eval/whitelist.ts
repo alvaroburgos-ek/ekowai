@@ -30,4 +30,12 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   // magnitude trap. The profile + notes + _eval-reference-Gl18.md remain
   // in place documenting the open question; the engine renders no result
   // on the form (manual_required) rather than a wrong-magnitude number.
+
+  // Batch-2: Mulde + Rigole Speichervolumen
+  'A138-17:14', // V_M required (primary write)
+  'A138-17:15', // V_M geometric (displayOnly)
+  'A138-18:19', // V_R required (primary write)
+  'A138-18:20', // V_R geometric (displayOnly)
+  'A138-18:22', // s_R thin-wall alternative (displayOnly; Gl. 21 owns the field)
+  'A138-18:23', // L_R required (displayOnly; engineer enters L_R as iteration var)
 ]);
