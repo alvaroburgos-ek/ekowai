@@ -32,6 +32,14 @@ export type EquationProfile = {
    * the formula symbol, so the engineer sees what the formula says.
    */
   symbolAliases?: Record<string, string>;
+  /**
+   * When true, the engine card renders the computed value for engineer
+   * review but the hook does NOT write it back to the output field. Used
+   * for equations whose output_symbol collides with another (already
+   * primary-writing) equation, or whose output would clobber an
+   * engineer-entered iteration variable.
+   */
+  displayOnly?: boolean;
 };
 
 export const equationProfiles: Record<string, EquationProfile> = {
@@ -146,5 +154,217 @@ export const equationProfiles: Record<string, EquationProfile> = {
     },
     notes:
       '§6.4.2 Gl. (18): Q_S Rigole. ACHTUNG: die DB-Formel hat KEINEN ×10³-Faktor, anders als Gl. (4). Bei Einheiten m, m, m, m/s liefert sie m³/s — die zugehörige Wizard-Einheit l/s ist dann numerisch falsch um Faktor 1000. Engineer-Audit bitte.',
+  },
+
+  // ====================================================================
+  // Batch-2: Mulde + Rigole Speichervolumen — Gl. 14, 15, 19, 20, 22, 23
+  // Sibling-unit check: V_M, V_R, s_R, L_R all match their existing field
+  // units (m³, m³, –, m). Gl. 14/19 own the field write-back; Gl. 15/20/22/23
+  // are display-only.
+  // ====================================================================
+
+  // A138-17 · Gl. (14) · §6.3.2 — V_M required
+  'bfe6e59a-015f-4c95-b717-8599f80cb68a': {
+    expectedUnits: {
+      A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)',
+      A_S_m: 'm²', k_i: 'm/s', D: 'min', f_Z: null,
+    },
+    notes: '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen.',
+  },
+
+  // A138-17 · Gl. (15) · §6.3.2 — V_M geometric
+  '44fd56a8-b473-441a-be21-297d9f501226': {
+    expectedUnits: { A_S_m: 'm²', h_M: 'm' },
+    displayOnly: true,
+    notes: '§6.3.2 Gl. (15): geometrisches Muldenvolumen. displayOnly — Gl. (14) primär.',
+  },
+
+  // A138-18 · Gl. (19) · §6.4.2 — V_R required
+  '58c0c298-ca72-4bb6-ab05-0b298114523e': {
+    expectedUnits: {
+      A_C: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm', L_R: 'm',
+      k_i: 'm/s', Q_Dr: 'l/s', D: 'min', f_Z: null,
+    },
+    notes: '§6.4.2 Gl. (19): erforderliches Rigolenspeichervolumen. Embedded ((b+h)·L+b·h)·k_i ist hier dimensional m³/s — intern konsistent (nicht die Gl. (18)-Standalone-Falle).',
+  },
+
+  // A138-18 · Gl. (20) · §6.4.2 — V_R geometric
+  'b8e74a4b-64cc-4b81-b306-b2e01e759f5e': {
+    expectedUnits: { b_R: 'm', h_R: 'm', L_R: 'm', s_R: null },
+    displayOnly: true,
+    notes: '§6.4.2 Gl. (20): geometrisches Rigolenvolumen V_R = b·h·L·s_R. displayOnly.',
+  },
+
+  // A138-18 · Gl. (22) · §6.4.2 — s_R thin-wall alternative
+  '20c31318-7401-4f89-a27b-bc3cf8723548': {
+    expectedUnits: { s_F: null, b_R: 'm', h_R: 'm', az: null, d: 'm' },
+    constants: { pi: Math.PI },
+    symbolAliases: { d: 'd_i' },
+    displayOnly: true,
+    notes: '§6.4.2 Gl. (22): s_R für dünnwandige Versickerrohre (d ≈ d_i ≈ d_a). Algebraisch identisch zu Gl. (21). displayOnly — Gl. (21) primär.',
+  },
+
+  // A138-18 · Gl. (23) · §6.4.2 — L_R required
+  '927aa5ab-3aa9-486e-a05d-f91847e8d31e': {
+    expectedUnits: {
+      A_C: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm', k_i: 'm/s',
+      Q_Dr: 'l/s', s_R: null, D: 'min', f_Z: null,
+    },
+    displayOnly: true,
+    notes: '§6.4.2 Gl. (23): erforderliche Rigolen-Länge. displayOnly — Engineer trägt L_R als Iterationsgröße ein.',
+  },
+
+  // ====================================================================
+  // Batch-3: §6.4.2 (Rigole rest) + §6.5.2 (MRE) + §6.6.2 (MRS) +
+  //          §6.7.2 (Schacht) + §6.8.2 (Becken)
+  // Gl. 10 (V_Rück, §5.3.4) parked — needs sub-area carrier with flood C_S.
+  // ====================================================================
+
+  // A138-18 · Gl. (24) · §6.4.2 — q_VS Versickerrohr Wasseraustritt
+  'f17ba5d8-601e-4de1-8e59-d6b0a69e21a6': {
+    expectedUnits: { az_SOE: '1/m', A_SOE: 'cm²' },
+    notes: '§6.4.2 Gl. (24): spezifischer Wasseraustritt des Versickerrohrs. q_VS in l/(s·m) mit az_SOE in 1/m und A_SOE in cm².',
+  },
+
+  // A138-18 · Gl. (25) · §6.4.2 — condition L_VS · q_VS ≥ r_5(n) · A_C · 10⁻⁴
+  '86cdef5c-4199-4de6-ad0d-e2248b0834c9': {
+    expectedUnits: { L_VS: 'm', q_VS: 'l/(s·m)', r_5_n: 'l/(s·ha)', A_C: 'm²' },
+    notes: '§6.4.2 Gl. (25): hydraulische Leistung Vollsickerrohr — Bedingung. Computed-Value = LHS − RHS (slack); positiv = Bedingung erfüllt.',
+  },
+
+  // A138-19 · Gl. (26) · §6.5.2 — V_MR = V_M + V_R
+  '32b85bf3-7b59-4abe-ac98-62f4fb15007b': {
+    expectedUnits: { V_M: 'm³', V_R: 'm³' },
+    displayOnly: true,
+    notes: '§6.5.2 Gl. (26): V_MR Identität. displayOnly — Gl. (28) ist die primäre Bemessungsgleichung.',
+  },
+
+  // A138-19 · Gl. (27) · §6.5.2 — V_R = V_MR − V_M
+  '150baf9a-0e7c-4a6c-9ce1-890ca7f491df': {
+    expectedUnits: { V_MR: 'm³', V_M: 'm³' },
+    displayOnly: true,
+    notes: '§6.5.2 Gl. (27): Umkehrung von Gl. (26). displayOnly — V_R wird primär durch Gl. (19) berechnet.',
+  },
+
+  // A138-19 · Gl. (28) · §6.5.2 — V_MR required (MRE Bemessung)
+  '570a63ed-08c4-4324-9ee7-0408816bba3f': {
+    expectedUnits: {
+      A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm', L_R: 'm',
+      k_i: 'm/s', D: 'min', f_Z: null,
+    },
+    notes: '§6.5.2 Gl. (28): erforderliches MRE-Volumen. Schreibt V_MR (primär).',
+  },
+
+  // A138-19 · Gl. (29) · §6.5.2 — L_R required (MRE)
+  'bc11db1c-c935-40c7-87fb-6b35c6f1b1b0': {
+    expectedUnits: {
+      A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm',
+      k_i: 'm/s', V_M: 'm³', s_R: null, D: 'min', f_Z: null,
+    },
+    displayOnly: true,
+    notes: '§6.5.2 Gl. (29): erforderliche L_R für MRE. displayOnly — L_R ist Engineer-Iterationsgröße.',
+  },
+
+  // A138-20 · Gl. (30) · §6.5.2/§6.6.2 — V_MUE Muldenüberlauf-Volumen
+  '947db98f-6ad1-482c-ae15-e9d0963d1abe': {
+    expectedUnits: {
+      A_C: 'm²', A_VA: 'm²', r_D_n_R: 'l/(s·ha)',
+      A_S_m: 'm²', k_i: 'm/s', D: 'min', f_Z: null, V_M: 'm³',
+    },
+    symbolAliases: {
+      // After normalize-formula, `r_D(n_R)` becomes `r_D_n_R`. Alias it
+      // to the generic A138-10 `r_D_n` field via inheritance.
+      r_D_n_R: 'r_D_n',
+    },
+    notes: '§6.5.2/§6.6.2 Gl. (30): Muldenüberlauf-Volumen. r_D(n_R) ist die Regenspende für die Rigolen-Bemessungshäufigkeit.',
+  },
+
+  // A138-20 · Gl. (31) · §6.5.2/§6.6.2 — Q_MUE Muldenüberlauf-Abfluss
+  '71af6131-12d3-4294-b192-256878ce7ecf': {
+    expectedUnits: { A_C: 'm²', r_MUE: 'l/(s·ha)', A_VA: 'm²', k_i: 'm/s' },
+    notes: '§6.5.2/§6.6.2 Gl. (31): Muldenüberlauf-Abfluss in l/s. A_C·10⁻⁴ konvertiert m²→ha, ·1000 konvertiert m³/s→l/s im A_VA-Term.',
+  },
+
+  // A138-20 · Gl. (32) · §6.6.2 — L_R MRS
+  '904f2f36-9b62-4960-ba21-d77e6e0d89a4': {
+    expectedUnits: {
+      A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm',
+      k_i: 'm/s', V_M: 'm³', Q_Dr: 'l/s', s_R: null, D: 'min', f_Z: null,
+    },
+    displayOnly: true,
+    notes: '§6.6.2 Gl. (32): L_R für MRS (Mulde-Rigolen-System mit Drossel). displayOnly.',
+  },
+
+  // A138-20 · Gl. (33) · §6.6.2 — Q_Dr mean
+  '9357f6ea-65c6-4cad-a90e-17ec33461246': {
+    expectedUnits: { Q_Dr_min: 'l/s', Q_Dr_max: 'l/s' },
+    notes: '§6.6.2 Gl. (33): mittlerer Drosselabfluss = (Q_Dr,min + Q_Dr,max)/2.',
+  },
+
+  // A138-21 · Gl. (34) · §6.7.2 — A_S Schacht (Mantel + Sohle)
+  '059d3751-b942-41ec-bc7f-4f0343353eb6': {
+    expectedUnits: { d_a: 'm', h_S: 'm' },
+    constants: { pi: Math.PI },
+    notes: '§6.7.2 Gl. (34): Versickerungsfläche Schacht = π·d_a²/4 + π·d_a·h_S/2 (Sohle + Mantel).',
+  },
+
+  // A138-21 · Gl. (35) · §6.7.2 — V_S required
+  'bfaf30f2-26e6-4373-9642-23429805afa2': {
+    expectedUnits: {
+      A_C: 'm²', r_D_n: 'l/(s·ha)', A_S: 'm²', k_i: 'm/s', D: 'min', f_Z: null,
+    },
+    notes: '§6.7.2 Gl. (35): erforderliches Schachtvolumen V_S.',
+  },
+
+  // A138-21 · Gl. (36) · §6.7.2 — V_S geometric (π·d_i²/4·h_S)
+  '36f70dae-ec78-4fc5-b5c9-83b138339ffa': {
+    expectedUnits: { d_i: 'm', h_S: 'm' },
+    constants: { pi: Math.PI },
+    displayOnly: true,
+    notes: '§6.7.2 Gl. (36): geometrisches Schachtvolumen. displayOnly — Gl. (35) primär.',
+  },
+
+  // A138-21 · Gl. (37) · §6.7.2 — h_S required
+  'aba53568-97f3-4054-b613-1b1413cb36fd': {
+    expectedUnits: {
+      A_C: 'm²', r_D_n: 'l/(s·ha)', d_a: 'm', d_i: 'm', k_i: 'm/s',
+      D: 'min', f_Z: null,
+    },
+    constants: { pi: Math.PI },
+    notes: '§6.7.2 Gl. (37): erforderlicher Bemessungseinstau h_S. Schreibt h_S (primär).',
+  },
+
+  // A138-21 · Gl. (38) · §6.7.2 — condition A_S_FS · k_f_FS ≥ A_S_Schacht · k_i
+  '19f36c1e-9b20-43cd-8b09-6040e81598c2': {
+    expectedUnits: {
+      A_S_FS: 'm²', k_f_FS: 'm/s', A_S_Schacht: 'm²', k_i: 'm/s',
+    },
+    notes: '§6.7.2 Gl. (38): Filterschicht ausreichend durchlässig. Computed = LHS − RHS (Filterleistung-Slack).',
+  },
+
+  // A138-21 · Gl. (39) · §6.7.2 — erf_k_f_FS minimum
+  'a3d078ba-3386-4feb-a302-ab22dc2d1fc8': {
+    expectedUnits: { d_a: 'm', h_S: 'm', d_i: 'm', k_i: 'm/s' },
+    notes: '§6.7.2 Gl. (39): minimale erforderliche Filterdurchlässigkeit. Output erf_k_f_FS in m/s.',
+  },
+
+  // A138-21 · Gl. (40) · §6.7.2 — h_S filter form
+  '2c491f26-2b35-4dc6-8af0-c185173af0c6': {
+    expectedUnits: {
+      A_C: 'm²', r_D_n: 'l/(s·ha)', d_i: 'm', k_f_FS: 'm/s',
+      D: 'min', f_Z: null,
+    },
+    constants: { pi: Math.PI },
+    displayOnly: true,
+    notes: '§6.7.2 Gl. (40): alternative h_S-Berechnung (Filterschicht limitierend). displayOnly — Gl. (37) primär.',
+  },
+
+  // A138-22 · Gl. (41) · §6.8.2 — V_VA Becken
+  '433f7700-90cb-410d-8103-7b72f53db8fa': {
+    expectedUnits: {
+      A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', A_S_m: 'm²',
+      k_i: 'm/s', Q_Dr: 'l/s', D: 'min', f_Z: null, f_A: null,
+    },
+    notes: '§6.8.2 Gl. (41): Becken-Speichervolumen. Schreibt V_VA auf A138-22 (separates Feld vs Gl. 8 V_VA auf A138-13).',
   },
 };

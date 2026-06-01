@@ -22,7 +22,17 @@ A short, living register of decisions deferred during the engine-wiring slices. 
 - **If confirmed:** close this item with a one-line entry citing the source span (line range).
 - **If different:** the formula transcription is suspect — same Pass3c re-import path as item 1 above.
 
-## 3. Squash-merge caveat — safety commits can be silently dropped
+## 3. Gl. (10) V_Rück flood-check — parked, needs flood-sub-area carrier
+
+- **Where:** A138-26, Gl. (10) — `V_Rueck = ((r_D(T_n_Ue) · (SUM(A_E_b_a · C_S) + A_VA) / 10000) − (Q_S + Q_Dr)) · D · 60 / 1000 − V_VA ≥ 0` (§5.3.4 per DB row).
+- **Status:** **NOT in `FORMULA_ENGINE_WHITELIST`** (deliberately deferred in the batch-2/batch-3 wiring).
+- **Why parked:** the SUM-over-sub-areas requires a sub-area carrier with per-row **flood-event runoff coefficient `C_S`** (per Tab. 9 flood column). The existing `sub_areas_A138_10` carrier only holds the normal-design `C`, not the flood-event `C_S`. Wiring Gl. 10 needs either:
+  1. **Schema extension** — add a `c_S` column to the existing sub-area carrier rows AND populate it (one Pile-style schema pass).
+  2. **New flood-specific carrier** — add `sub_areas_A138_26` as a separate JSON carrier on A138-26 with the same `kind`/`area_m2` structure plus `c_S`.
+- **Resolution required:** decide the schema path, apply additively (no destructive migration), then write a Gl. 10 aggregator analogous to the Gl. 2 sub-area aggregator. Engine returns `computed` with V_Rück value; engineer reads the sign (V_Rück > 0 → extra flood retention needed).
+- **Why fail-loud now matters:** Gl. 10 is the **flood compliance gate**. Computing it wrong (e.g. silently using design-event `C` instead of flood-event `C_S`) would understate the required retention. Park is the safe default.
+
+## 4. Squash-merge caveat — safety commits can be silently dropped
 
 - **Observed:** PR #21's squash-merge to main (commit `415bd7b`) silently dropped commit `a4ed2ba` (the runtime ambiguity guard on `mergeInheritedFields`). The squash subject only mentioned the headline inheritance work; the second commit's content was not in the merged tree even though it was in the branch when the merge fired.
 - **Recovery:** PR #22 (`483c001`) re-introduced the ambiguity guard as part of its diff, with an explicit note in the commit body so the squash doesn't drop it again. Verified post-merge: the guard's code AND its 3 tests are present on main and pass.
