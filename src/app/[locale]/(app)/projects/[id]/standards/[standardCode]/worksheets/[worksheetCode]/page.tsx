@@ -13,7 +13,7 @@ import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
-import { resolveFromSiteProfile } from '@/lib/site-profile/symbol-map';
+import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
 
 export default async function WorksheetPage({
   params,
@@ -126,6 +126,7 @@ export default async function WorksheetPage({
   const initialValues: Record<string, unknown> = {};
   const inheritedFromBySymbol: Record<string, string> = {};
   const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile'> = {};
+  const siteProfileKeyByFieldId: Record<string, string> = {};
   for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (p) {
@@ -172,6 +173,8 @@ export default async function WorksheetPage({
     if (site && site.value != null && site.type === f.dataType) {
       initialValues[f.id] = { type: site.type, value: site.value };
       prefillSourceByFieldId[f.id] = 'site_profile';
+      const entry = SITE_PROFILE_BY_SYMBOL.get(f.symbol);
+      if (entry) siteProfileKeyByFieldId[f.id] = entry.key;
       continue;
     }
 
@@ -293,6 +296,8 @@ export default async function WorksheetPage({
           inheritedFromBySymbol={inheritedFromBySymbol}
           ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
           prefillSourceByFieldId={prefillSourceByFieldId}
+          siteProfileKeyByFieldId={siteProfileKeyByFieldId}
+          standardCode={standardCode}
           docs={docs}
         />
       </main>
