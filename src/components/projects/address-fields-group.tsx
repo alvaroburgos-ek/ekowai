@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { searchPhoton, photonLabel, resolveFromPhoton, type PhotonFeature } from '@/lib/site-profile/photon';
 import { siteProfileFieldName, readSiteProfileValue } from '@/lib/site-profile/form-helpers';
 import { SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
+import { latLonStringsToKostraCell } from '@/lib/site-profile/kostra';
 
 type State = {
   address: string;
@@ -11,6 +12,14 @@ type State = {
   bundesland: string;
   lat: string;
   lon: string;
+  kostra: string;
+  /**
+   * The last KOSTRA value the auto-lookup wrote into `kostra`. When `kostra`
+   * still matches this string the user hasn't manually changed it, so a fresh
+   * lat/lon is allowed to re-derive and overwrite it. When the user types
+   * something else they "own" the field and the auto-lookup stops touching it.
+   */
+  kostraAuto: string;
 };
 
 const DEBOUNCE_MS = 280;
@@ -25,17 +34,40 @@ const DEBOUNCE_MS = 280;
  * stay possible (industrial sites without proper street addresses,
  * boundary corrections, …).
  *
- * The five inputs keep their original `name="site_profile.<key>"`, so
+ * In addition the lat/lon are mapped to a `kostra_grid_cell` via the
+ * KOSTRA-DWD-2020 grid (see `src/lib/site-profile/kostra.ts`). The KOSTRA
+ * field renders as a sixth controlled input that the engineer can override.
+ *
+ * The six inputs keep their original `name="site_profile.<key>"`, so
  * `readSiteProfileFromFormData` on the server picks them up unchanged.
  */
 export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
-  const [state, setState] = useState<State>(() => ({
-    address: readSiteProfileValue(initial, 'site_address'),
-    municipality: readSiteProfileValue(initial, 'site_municipality'),
-    bundesland: readSiteProfileValue(initial, 'site_bundesland'),
-    lat: readSiteProfileValue(initial, 'site_lat'),
-    lon: readSiteProfileValue(initial, 'site_lon'),
-  }));
+  const [state, setState] = useState<State>(() => {
+    const lat = readSiteProfileValue(initial, 'site_lat');
+    const lon = readSiteProfileValue(initial, 'site_lon');
+    const savedKostra = readSiteProfileValue(initial, 'kostra_grid_cell');
+    // Initial mount: if lat/lon are present but kostra_grid_cell is empty,
+    // auto-fill it. If a value is already saved we leave it alone (engineer
+    // override survives). This makes the lookup idempotent across reloads.
+    let kostra = savedKostra;
+    let kostraAuto = savedKostra;
+    if (!savedKostra && lat && lon) {
+      const r = latLonStringsToKostraCell(lat, lon);
+      if (r) {
+        kostra = r.cellId;
+        kostraAuto = r.cellId;
+      }
+    }
+    return {
+      address: readSiteProfileValue(initial, 'site_address'),
+      municipality: readSiteProfileValue(initial, 'site_municipality'),
+      bundesland: readSiteProfileValue(initial, 'site_bundesland'),
+      lat,
+      lon,
+      kostra,
+      kostraAuto,
+    };
+  });
 
   const [query, setQuery] = useState(state.address);
   const [results, setResults] = useState<PhotonFeature[]>([]);
@@ -86,18 +118,47 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
 
+  /**
+   * Apply a Photon suggestion to all six fields atomically. Lat/lon come from
+   * the Photon geometry; the KOSTRA cell is computed from those lat/lon. If
+   * the lookup returns null (outside the 15 989-cell BELEG mask — e.g. point
+   * in Switzerland) we clear the auto-filled value and show the inline hint;
+   * a previous engineer-typed value is preserved (the user "owns" the field).
+   */
   function applyFeature(f: PhotonFeature) {
     const r = resolveFromPhoton(f);
-    setState({
-      address: r.address,
-      municipality: r.municipality,
-      bundesland: r.bundesland,
-      lat: r.lat.toFixed(6),
-      lon: r.lon.toFixed(6),
+    const latStr = r.lat.toFixed(6);
+    const lonStr = r.lon.toFixed(6);
+    setState((s) => {
+      const userOwned = s.kostra !== '' && s.kostra !== s.kostraAuto;
+      const lookup = latLonStringsToKostraCell(latStr, lonStr);
+      const nextKostra = userOwned ? s.kostra : (lookup?.cellId ?? '');
+      const nextKostraAuto = userOwned ? s.kostraAuto : (lookup?.cellId ?? '');
+      return {
+        address: r.address,
+        municipality: r.municipality,
+        bundesland: r.bundesland,
+        lat: latStr,
+        lon: lonStr,
+        kostra: nextKostra,
+        kostraAuto: nextKostraAuto,
+      };
     });
     setQuery(r.address);
     setOpen(false);
     setResults([]);
+  }
+
+  /**
+   * Manual lat/lon edits also trigger the KOSTRA auto-lookup, but ONLY if the
+   * current KOSTRA value is still the auto-filled one (or empty). When the
+   * user typed something custom into the KOSTRA box we leave it alone.
+   */
+  function setLat(v: string) {
+    setState((s) => recomputeKostra({ ...s, lat: v }));
+  }
+  function setLon(v: string) {
+    setState((s) => recomputeKostra({ ...s, lon: v }));
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -116,6 +177,15 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
       setOpen(false);
     }
   }
+
+  // Did the auto-lookup decide the point is outside KOSTRA coverage? We show
+  // an inline hint in that case so the engineer types the cell ID manually
+  // rather than getting silently wrong r_D(n) downstream.
+  const outsideCoverage =
+    state.lat !== '' &&
+    state.lon !== '' &&
+    state.kostra === '' &&
+    latLonStringsToKostraCell(state.lat, state.lon) === null;
 
   return (
     <div className="space-y-4">
@@ -179,7 +249,7 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
           <span>
             {loading
               ? 'Suche …'
-              : 'Auswahl füllt Adresse, Gemeinde, Bundesland und Geo-Koordinaten automatisch.'}
+              : 'Auswahl füllt Adresse, Gemeinde, Bundesland, Geo-Koordinaten und KOSTRA-Rasterzelle automatisch.'}
           </span>
           <a
             href="https://photon.komoot.io"
@@ -192,29 +262,55 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
         </div>
       </div>
 
-      {/* The five derived fields — controlled, manually editable. */}
+      {/* The six derived fields — controlled, manually editable. */}
       <ControlledField symbol="site_address" value={state.address}
         onChange={(v) => setState((s) => ({ ...s, address: v }))} />
       <ControlledField symbol="site_municipality" value={state.municipality}
         onChange={(v) => setState((s) => ({ ...s, municipality: v }))} />
       <ControlledField symbol="site_bundesland" value={state.bundesland}
         onChange={(v) => setState((s) => ({ ...s, bundesland: v }))} />
-      <ControlledField symbol="site_lat" value={state.lat}
-        onChange={(v) => setState((s) => ({ ...s, lat: v }))} />
-      <ControlledField symbol="site_lon" value={state.lon}
-        onChange={(v) => setState((s) => ({ ...s, lon: v }))} />
+      <ControlledField symbol="site_lat" value={state.lat} onChange={setLat} />
+      <ControlledField symbol="site_lon" value={state.lon} onChange={setLon} />
+      <ControlledField
+        symbol="kostra_grid_cell"
+        value={state.kostra}
+        onChange={(v) =>
+          setState((s) => ({ ...s, kostra: v }))
+        }
+        extraHint={
+          outsideCoverage
+            ? 'Außerhalb der KOSTRA-Abdeckung — manuell eintragen.'
+            : undefined
+        }
+      />
     </div>
   );
+}
+
+/**
+ * Update `kostra` to track a new lat/lon. Only overwrites the kostra field
+ * when it is empty or still equal to the last auto-filled value — i.e. the
+ * user has not manually overridden it. When the lookup returns null
+ * (outside coverage) we clear the auto value so the inline hint shows.
+ */
+function recomputeKostra(s: State): State {
+  const userOwned = s.kostra !== '' && s.kostra !== s.kostraAuto;
+  if (userOwned) return s;
+  const r = latLonStringsToKostraCell(s.lat, s.lon);
+  const next = r?.cellId ?? '';
+  return { ...s, kostra: next, kostraAuto: next };
 }
 
 function ControlledField({
   symbol,
   value,
   onChange,
+  extraHint,
 }: {
   symbol: string;
   value: string;
   onChange: (v: string) => void;
+  extraHint?: string;
 }) {
   const entry = SITE_PROFILE_BY_SYMBOL.get(symbol);
   if (!entry) return null;
@@ -234,6 +330,9 @@ function ControlledField({
           onChange={(e) => onChange(e.target.value)}
         />
         {entry.hintDe && <span className="block text-[11px] text-subtext">{entry.hintDe}</span>}
+        {extraHint && (
+          <span className="block text-[11px] text-warning">{extraHint}</span>
+        )}
       </span>
     </label>
   );
