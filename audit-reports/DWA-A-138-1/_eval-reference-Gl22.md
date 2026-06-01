@@ -13,15 +13,15 @@ Speicherkoeffizient der Rigole für dünnwandige Versickerrohre (d_a ≈ d_i ≈
 | d (aliased → d_i) | 0.184 | m | A138-18 (`d_i` field; engineer responsible for d_a ≈ d_i) |
 
 ```
-(π · d² / 4)                 = π · 0.184² / 4              = 0.026 613
+(π · d² / 4)                 = π · 0.184² / 4              = 0.026 590
 ((1/s_F) − 1)                = (1/0.30) − 1                = 2.333 333
-az · 0.026 613 · 2.333 333   = 1 · 0.062 094                = 0.062 094
-b_R · h_R + 0.062 094        = 1 + 0.062 094               = 1.062 094
+az · 0.026 590 · 2.333 333   = 1 · 0.062 044                = 0.062 044
+b_R · h_R + 0.062 044        = 1 + 0.062 044               = 1.062 044
 s_F / (b_R · h_R)            = 0.30 / 1                    = 0.300 000
-× 1.062 094                  = 0.30 · 1.062 094            = 0.318 628
+× 1.062 044                  = 0.30 · 1.062 044            = 0.318 613
 ```
 
-**Reference s_R = 0.318 628** (precision ±0.000 1; with these inputs, identical to Gl. (21) using d_a = d_i = 0.184).
+**Reference s_R = 0.318 613** (precision ±0.000 1; with these inputs, identical to Gl. (21) using d_a = d_i = 0.184).
 
 ### Unit guard
 s_F, az dimensionless; b_R, h_R, d in m. Mismatch → manual_required (and the d_i source field is m per the §6.4.2 L1831 override).
