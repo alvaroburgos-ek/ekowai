@@ -28,6 +28,7 @@ export default defineConfig({
           exclude: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
+            'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/db/__tests__/documents-schema.test.ts',
           ],
           environment: 'happy-dom',
@@ -42,6 +43,7 @@ export default defineConfig({
           include: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
+            'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/db/__tests__/documents-schema.test.ts',
           ],
           environment: 'node',
