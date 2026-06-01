@@ -2,8 +2,9 @@ import { type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { eq, inArray } from 'drizzle-orm';
 import * as schema from '../src/lib/db/schema';
 import type { ParsedWorkbook } from './_pass3c-types';
+import { groupEnumValues } from './_pass3c-db';
 
-const { standards, worksheetTemplates, fields, equations, complianceRequirements } = schema;
+const { standards, worksheetTemplates, worksheetSections, fields, equations, complianceRequirements } = schema;
 
 type DbLike = PostgresJsDatabase<typeof schema>;
 
@@ -146,15 +147,39 @@ export async function computeImportDiff(
   }
 
   const wsIds = Array.from(wsByCode.values());
+  // Pull the existing field rows together with their section CODE (via left
+  // join on worksheet_sections). The section UUID is unstable across
+  // imports because sections get wiped+re-inserted; the CODE is what we
+  // compare against incoming.origin_section.
   const existingFields = wsIds.length === 0 ? [] : await db
-    .select()
+    .select({
+      worksheetTemplateId: fields.worksheetTemplateId,
+      sectionCode: worksheetSections.code,
+      symbol: fields.symbol,
+      labelDe: fields.labelDe,
+      labelEn: fields.labelEn,
+      dataType: fields.dataType,
+      unit: fields.unit,
+      isRequired: fields.isRequired,
+      enumValues: fields.enumValues,
+      validationRules: fields.validationRules,
+      clauseReference: fields.clauseReference,
+      description: fields.description,
+      consumerWorksheets: fields.consumerWorksheets,
+      verificationStatus: fields.verificationStatus,
+    })
     .from(fields)
+    .leftJoin(worksheetSections, eq(worksheetSections.id, fields.sectionId))
     .where(inArray(fields.worksheetTemplateId, wsIds));
   const existingFieldByKey = new Map<string, typeof existingFields[number]>();
   for (const f of existingFields) {
     const wsCode = [...wsByCode.entries()].find(([, id]) => id === f.worksheetTemplateId)?.[0];
     if (wsCode) existingFieldByKey.set(`${wsCode}|${f.symbol}`, f);
   }
+
+  // Group incoming enum_values once so each enum-typed field can compare
+  // its enum payload in O(1) inside the per-field loop.
+  const incomingEnumGroups = groupEnumValues(parsed.enumValues);
 
   const fieldDetails: FieldChange[] = [];
   let fAdded = 0, fChanged = 0, fUnchanged = 0, fReset = 0;
@@ -174,6 +199,7 @@ export async function computeImportDiff(
       continue;
     }
     const changed: string[] = [];
+    if (existing.sectionCode !== (incoming.origin_section ?? null)) changed.push('section');
     if (existing.labelDe !== incoming.label_de) changed.push('labelDe');
     if (existing.labelEn !== incoming.label_en) changed.push('labelEn');
     if (existing.dataType !== incoming.data_type) changed.push('dataType');
@@ -181,15 +207,18 @@ export async function computeImportDiff(
     if (existing.isRequired !== parseRequired(incoming.required)) changed.push('isRequired');
     if (existing.clauseReference !== incoming.regulation_reference) changed.push('clauseReference');
     if (existing.description !== incoming.description) changed.push('description');
-    // validationRules and enumValues need value-level comparison
-    const newVal = incoming.validation_rules ? { raw: incoming.validation_rules } : null;
-    if (!jsonEqual(existing.validationRules, newVal)) changed.push('validationRules');
+    const newValRules = incoming.validation_rules ? { raw: incoming.validation_rules } : null;
+    if (!jsonEqual(existing.validationRules, newValRules)) changed.push('validationRules');
     if (!jsonEqual(existing.consumerWorksheets, parseList(incoming.consumer_worksheets))) {
       changed.push('consumerWorksheets');
     }
-    // enumValues: compared by re-running the same grouping logic would be
-    // costly here; defer to import-time check. For preview we mark "may
-    // change" when datatype is enum.
+    // enumValues: compare using the same grouping the importer uses, so
+    // the preview never under-reports a reset that the import will
+    // actually apply. Only matters for enum-typed fields.
+    if (incoming.data_type === 'enum') {
+      const newEnum = incomingEnumGroups.get(incoming.symbol) ?? null;
+      if (!jsonEqual(existing.enumValues, newEnum)) changed.push('enumValues');
+    }
 
     if (changed.length === 0) {
       fUnchanged += 1;

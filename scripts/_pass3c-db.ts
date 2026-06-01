@@ -49,7 +49,7 @@ function parseList(v: string | null): string[] | null {
     .filter((s) => s.length > 0);
 }
 
-type EnumValuePayload = {
+export type EnumValuePayload = {
   value: string;
   label_de: string | null;
   label_en: string | null;
@@ -57,7 +57,7 @@ type EnumValuePayload = {
   regulation_reference: string | null;
 };
 
-function groupEnumValues(rows: EnumValueRow[]): Map<string, EnumValuePayload[]> {
+export function groupEnumValues(rows: EnumValueRow[]): Map<string, EnumValuePayload[]> {
   const map = new Map<string, EnumValuePayload[]>();
   for (const r of rows) {
     const arr = map.get(r.enum_name) ?? [];

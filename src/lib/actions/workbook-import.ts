@@ -79,6 +79,9 @@ export async function executeWorkbookImport(formData: FormData): Promise<Execute
   if (!(file instanceof File)) {
     return { ok: false, error: 'Keine Datei übermittelt' };
   }
+  if (!file.name.toLowerCase().endsWith('.xlsx')) {
+    return { ok: false, error: 'Bitte eine .xlsx-Datei hochladen' };
+  }
 
   let wb: ExcelJS.Workbook;
   try {
