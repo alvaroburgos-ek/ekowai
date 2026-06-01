@@ -51,6 +51,14 @@ export function WorksheetListSidebar({
 
   return (
     <nav className="space-y-6 sticky top-6">
+      <a
+        href={`/api/projects/${projectId}/standards/${standardCode}/report`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[10px] uppercase tracking-[0.2em] text-accent hover:text-ink underline"
+      >
+        Bericht als PDF →
+      </a>
       {phases.map((phase) => (
         <div key={String(phase)} className="space-y-2">
           <div className="text-[10px] uppercase tracking-[0.25em] text-subtext">

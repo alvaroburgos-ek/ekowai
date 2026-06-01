@@ -612,6 +612,17 @@ function StandardBox({
         />
       )}
 
+      <div className="flex justify-end">
+        <a
+          href={`/api/projects/${projectId}/standards/${s.standard.code}/report`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] uppercase tracking-[0.2em] text-accent hover:text-ink underline"
+        >
+          Bericht als PDF →
+        </a>
+      </div>
+
       <ul className="space-y-0.5 max-h-48 overflow-y-auto">
         {s.worksheets.map((w) => {
           const status: WorksheetStatus = w.status ?? 'draft';
