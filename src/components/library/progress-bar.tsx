@@ -12,10 +12,10 @@ export function VerificationProgressBar({
   const pct = total === 0 ? 0 : Math.round((verified / total) * 100);
   return (
     <div className="inline-flex items-center gap-2 min-w-[140px]">
-      <div className="flex-1 h-1 bg-paper-2 border border-hairline rounded-sm overflow-hidden">
+      <div className="flex-1 h-1.5 bg-paper-2 rounded-full overflow-hidden">
         <div
-          className="h-full bg-success"
-          style={{ width: `${pct}%` }}
+          className="h-full rounded-full transition-all"
+          style={{ width: `${pct}%`, background: 'var(--eko-gradient)' }}
         />
       </div>
       <span className="text-[11px] font-mono tabular-nums text-ink-2 shrink-0">

@@ -1,37 +1,44 @@
 @import 'tailwindcss';
 
 /*
- * EKOWAI Wizard — Engineering Editorial design tokens.
- * Mineral palette with ekowai brand green accent. Hairline rules over cards.
- * Font: Poppins (loaded via next/font) for headings; system sans for body.
+ * EKOWAI Wizard — friendlier engineering UI.
+ * Soft rounded cards over a warm paper backdrop. Hairlines kept light and
+ * used only for structure. Lucide icons accompany most labels.
+ * Font: Poppins (next/font) for headings; system sans for body.
  */
 
 :root {
-  --paper: #ffffff;
-  --paper-2: #f5f7f5;
+  --paper: #fbfcfb;
+  --paper-2: #f1f5f2;
+  --paper-3: #e7eee9;
   --ink: #1a2a1e;
   --ink-2: #2d4030;
-  --subtext: #5a7060;
-  --hairline: #d8e8dc;
-  --hairline-strong: #b8cebe;
+  --subtext: #6a7d70;
+  --hairline: #e4ece6;
+  --hairline-strong: #cdd9d0;
 
   /* Primary interactive accent — logo blue */
   --accent: #009EE9;
   --accent-2: #0077b3;
-  --accent-soft: #d0edf8;
+  --accent-soft: #e1f2fb;
 
   --warning: #8a5a2b;
-  --warning-soft: #ecdfc8;
+  --warning-soft: #f5eadb;
   --error: #7c2d2d;
-  --error-soft: #ecd5cf;
+  --error-soft: #f3dcd6;
   --success: #1a7a4a;
-  --success-soft: #d0ead8;
+  --success-soft: #dcefe1;
 
   /* EKOWAI brand palette */
   --eko-green: #00D061;
   --eko-blue: #009EE9;
   --eko-blue-dark: #0077b3;
   --eko-gradient: linear-gradient(135deg, #00D061 0%, #009EE9 100%);
+  --eko-gradient-soft: linear-gradient(135deg, rgba(0, 208, 97, 0.10) 0%, rgba(0, 158, 233, 0.10) 100%);
+
+  /* Card shadow — soft, single layer */
+  --shadow-card: 0 1px 2px rgba(26, 42, 30, 0.04), 0 4px 14px rgba(26, 42, 30, 0.05);
+  --shadow-card-hover: 0 2px 4px rgba(26, 42, 30, 0.06), 0 10px 24px rgba(0, 158, 233, 0.10);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -43,6 +50,7 @@
 
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-subtext: var(--subtext);
@@ -73,11 +81,19 @@
 @layer base {
   body {
     background:
-      radial-gradient(ellipse 1000px 700px at 90% -5%, rgba(0, 208, 97, 0.10) 0%, transparent 60%),
-      radial-gradient(ellipse 700px 600px at -10% 100%, rgba(0, 158, 233, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 1200px 800px at 85% -10%, rgba(0, 208, 97, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 900px 700px at -10% 110%, rgba(0, 158, 233, 0.09) 0%, transparent 55%),
       var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
+  }
+
+  /* Soft card shadow utility — softer than Tailwind defaults */
+  .shadow-soft {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-soft-hover:hover {
+    box-shadow: var(--shadow-card-hover);
   }
 
   h1, h2, h3, h4 {

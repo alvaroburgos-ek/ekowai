@@ -44,24 +44,23 @@ export function SegmentedControl({
   return (
     <div
       className={cn(
-        'inline-flex rounded-md overflow-hidden border border-hairline-strong',
+        'inline-flex rounded-full bg-paper-2 p-1 border border-hairline',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}
     >
       {name && <input type="hidden" name={name} value={selected} readOnly />}
-      {options.map((opt, i) => (
+      {options.map((opt) => (
         <button
           key={opt.value}
           type="button"
           onClick={() => pick(opt.value)}
           aria-pressed={selected === opt.value}
           className={cn(
-            'px-3 py-2 text-sm font-medium transition-colors',
-            i > 0 && 'border-l border-hairline-strong',
+            'px-4 py-1.5 text-sm font-medium rounded-full transition-all',
             selected === opt.value
-              ? 'bg-ink text-paper'
-              : 'bg-transparent text-ink-2 hover:bg-paper-2 hover:text-ink',
+              ? 'bg-paper text-ink shadow-soft'
+              : 'bg-transparent text-subtext hover:text-ink',
           )}
         >
           {opt.label}
