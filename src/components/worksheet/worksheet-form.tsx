@@ -36,6 +36,38 @@ const FORMULA_ENGINE_WHITELIST = new Set<string>([
   // magnitude trap. The profile + notes + _eval-reference-Gl18.md remain
   // in place documenting the open question; the engine renders no result
   // on the form (manual_required) rather than a wrong-magnitude number.
+
+  // Batch-2: Mulde + Rigole Speichervolumen (Gl. 14, 15, 19, 20, 22, 23)
+  'A138-17:14', // V_M required (primary)
+  'A138-17:15', // V_M geometric (displayOnly)
+  'A138-18:19', // V_R required (primary)
+  'A138-18:20', // V_R geometric (displayOnly)
+  'A138-18:22', // s_R thin-wall (displayOnly)
+  'A138-18:23', // L_R required (displayOnly)
+
+  // Batch-3: §6.4.2 Rigole rest + §6.5.2 MRE + §6.6.2 MRS + §6.7.2 Schacht + §6.8.2 Becken
+  'A138-18:24', // q_VS Versickerrohr Wasseraustritt
+  'A138-18:25', // condition L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴
+  'A138-19:26', // V_MR = V_M + V_R (displayOnly)
+  'A138-19:27', // V_R = V_MR − V_M (displayOnly)
+  'A138-19:28', // V_MR required MRE (primary)
+  'A138-19:29', // L_R required MRE (displayOnly)
+  'A138-20:30', // V_MUE Muldenüberlauf-Volumen
+  'A138-20:31', // Q_MUE Muldenüberlauf-Abfluss
+  'A138-20:32', // L_R MRS (displayOnly)
+  'A138-20:33', // Q_Dr mean
+  'A138-21:34', // A_S Schacht
+  'A138-21:35', // V_S required (primary)
+  'A138-21:36', // V_S geometric (displayOnly)
+  'A138-21:37', // h_S required (primary)
+  'A138-21:38', // condition Filterleistung
+  'A138-21:39', // erf_k_f_FS minimum
+  'A138-21:40', // h_S filter form (displayOnly)
+  'A138-22:41', // V_VA Becken
+  // 'A138-26:10' — PARKED. Gl. (10) V_Rück (flood check) uses SUM over flood-
+  // sub-areas with flood-event runoff coefficient C_S. Requires a sub-areas
+  // carrier with per-row C_S, which doesn't exist on A138-26 yet. Tracked
+  // in _OPEN-ITEMS.md.
 ]);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {

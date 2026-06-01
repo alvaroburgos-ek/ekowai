@@ -90,11 +90,15 @@ export type EvalRequest = {
   aggregator?: AggregatorContext;
 };
 
-/** Strip the LHS `OUT =` if present so mathjs sees only the RHS expression. */
+/** Strip the LHS up to the first comparison operator so the parser sees
+ * only the RHS expression. Handles `=`, `>=`, `<=`, `>`, `<` — equations
+ * of the form `<lhs> ≥ <rhs>` are interpreted as "the engine returns the
+ * RHS value", which is exactly the minimum (≥) or maximum (≤) the engineer
+ * must satisfy. */
 function rhs(formula: string): string {
   // collapse newlines to spaces so a single-line regex covers multi-line input
   const flat = formula.replace(/\s+/g, ' ');
-  const m = flat.match(/^\s*[A-Za-z_][\w()]*\s*=\s*(.+)\s*$/);
+  const m = flat.match(/^\s*[A-Za-z_][\w()]*\s*(?:>=|<=|=|>|<)\s*(.+)\s*$/);
   return (m ? m[1] : flat).trim();
 }
 

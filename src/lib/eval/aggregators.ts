@@ -351,6 +351,79 @@ const a138_16_gl11_balance: Aggregator = {
   },
 };
 
+/**
+ * Generic ≥-condition aggregator: computes LHS and RHS from the given input
+ * map (after symbol normalisation by the engine) and returns the slack
+ * (LHS − RHS). Positive slack → condition holds; negative → fails. Result
+ * is `computed` so the engineer sees the numeric margin. Missing inputs →
+ * manual_required.
+ */
+function makeConditionAggregator(
+  lhsLabel: string,
+  rhsLabel: string,
+  inputSymbols: readonly string[],
+  evalLhs: (vals: Record<string, number>) => number,
+  evalRhs: (vals: Record<string, number>) => number,
+  notesOnReason: string,
+): Aggregator {
+  return {
+    run: (req) => {
+      const inputs = new Map(req.inputs.map((i) => [i.symbol, i]));
+      const missing: string[] = [];
+      const vals: Record<string, number> = {};
+      for (const sym of inputSymbols) {
+        const found = inputs.get(sym);
+        if (!found || found.value === null || !Number.isFinite(found.value)) {
+          missing.push(sym);
+          continue;
+        }
+        vals[sym] = found.value;
+      }
+      if (missing.length > 0) {
+        return {
+          kind: 'manual_required',
+          reason: `Fehlende Eingaben für Bedingungsprüfung: ${missing.join(', ')}.`,
+          missing,
+        };
+      }
+      const LHS = evalLhs(vals);
+      const RHS = evalRhs(vals);
+      const slack = LHS - RHS;
+      const substituted: Record<string, number> = {
+        [lhsLabel]: LHS,
+        [rhsLabel]: RHS,
+        'Slack LHS − RHS': slack,
+      };
+      return {
+        kind: 'computed',
+        value: slack,
+        substituted,
+        formulaEvaluated: `${lhsLabel}  −  ${rhsLabel}   (${notesOnReason})`,
+      };
+    },
+  };
+}
+
+// A138-18 · Gl. (25) · §6.4.2 — L_VS · q_VS ≥ r_5(n) · A_C · 10⁻⁴
+const a138_18_gl25_condition = makeConditionAggregator(
+  'L_VS · q_VS',
+  'r_5(n) · A_C · 10⁻⁴',
+  ['L_VS', 'q_VS', 'r_5_n', 'A_C'] as const,
+  (v) => v.L_VS * v.q_VS,
+  (v) => v.r_5_n * v.A_C * 1e-4,
+  'positiv = hydraulische Leistung der Vollsickerrohre ausreichend',
+);
+
+// A138-21 · Gl. (38) · §6.7.2 — A_S,FS · k_f,FS ≥ A_S,Schacht · k_i
+const a138_21_gl38_condition = makeConditionAggregator(
+  'A_S,FS · k_f,FS',
+  'A_S,Schacht · k_i',
+  ['A_S_FS', 'k_f_FS', 'A_S_Schacht', 'k_i'] as const,
+  (v) => v.A_S_FS * v.k_f_FS,
+  (v) => v.A_S_Schacht * v.k_i,
+  'positiv = Filterleistung ≥ Schacht-Versickerungsleistung',
+);
+
 export const aggregators: Record<string, Aggregator> = {
   // DWA-A 138-1 · A138-10 · Gl. (2)
   '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_gl2,
@@ -358,4 +431,8 @@ export const aggregators: Record<string, Aggregator> = {
   '69f31e6e-a755-4246-af10-ae46668b5c86': a138_13_gl8,
   // DWA-A 138-1 · A138-16 · Gl. (11) Bilanz-Check
   '3b3b2cf6-da4f-43b2-a302-b7c38768d3ff': a138_16_gl11_balance,
+  // DWA-A 138-1 · A138-18 · Gl. (25) ≥-condition
+  '86cdef5c-4199-4de6-ad0d-e2248b0834c9': a138_18_gl25_condition,
+  // DWA-A 138-1 · A138-21 · Gl. (38) ≥-condition
+  '19f36c1e-9b20-43cd-8b09-6040e81598c2': a138_21_gl38_condition,
 };
