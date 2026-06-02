@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { env } from '@/env';
 import { db } from '@/lib/db';
 import { orgMembers, profiles } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -16,6 +16,7 @@ const inviteSchema = z.object({
   email: z.string().email(),
   role: z.enum(['admin', 'engineer', 'viewer']),
   locale: z.enum(['de', 'en']),
+  orgId: z.string().uuid(),
 });
 
 export async function inviteMember(formData: FormData): Promise<void> {
@@ -23,6 +24,7 @@ export async function inviteMember(formData: FormData): Promise<void> {
     email: formData.get('email'),
     role: formData.get('role'),
     locale: formData.get('locale'),
+    orgId: formData.get('orgId'),
   });
   if (!parsed.success) redirect('/');
 
@@ -30,11 +32,16 @@ export async function inviteMember(formData: FormData): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/');
 
-  // Verify caller is owner/admin in their org
+  // Verify caller is owner/admin of the SPECIFIC org named in the form.
+  // Previously this picked an arbitrary first membership, which on a
+  // multi-org user could let an admin in org A invite someone into org B
+  // where the caller is only a viewer.
   const [membership] = await db
     .select()
     .from(orgMembers)
-    .where(eq(orgMembers.userId, user.id))
+    .where(
+      and(eq(orgMembers.userId, user.id), eq(orgMembers.orgId, parsed.data.orgId)),
+    )
     .limit(1);
   if (!membership || !['owner', 'admin'].includes(membership.role)) {
     redirect(`/${parsed.data.locale}/org`);
@@ -72,6 +79,19 @@ export async function inviteMember(formData: FormData): Promise<void> {
 }
 
 export async function listOrgMembers(orgId: string) {
+  // Verify the caller is a member of the org before returning member PII.
+  // `db` bypasses RLS so this guard is the real access control.
+  const supabase = await createSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const [callerMembership] = await db
+    .select({ orgId: orgMembers.orgId })
+    .from(orgMembers)
+    .where(and(eq(orgMembers.orgId, orgId), eq(orgMembers.userId, user.id)))
+    .limit(1);
+  if (!callerMembership) return [];
+
   return db
     .select({
       userId: orgMembers.userId,

@@ -212,10 +212,20 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Formel-Auswertung fehlgeschlagen';
-    // An unknown-symbol error from the arithmetic evaluator means the formula
-    // references something the rewrite layer didn't supply — treat it as
-    // manual_required, not error, so the engineer sees a useful badge.
-    if (/Unbekanntes Symbol|Funktionsaufruf/.test(msg)) {
+    // Engineer-recoverable conditions (the formula is sound, the inputs land
+    // it in an undefined-numeric corner) become manual_required so the
+    // engineer sees an actionable badge instead of a red "error" pill:
+    //   - Unbekanntes Symbol / Funktionsaufruf : rewrite layer didn't supply
+    //     a referenced symbol
+    //   - Division durch Null                  : a denominator hit 0 — likely
+    //     a missing or placeholder input value
+    //   - Nicht-endliches Ergebnis             : 0^(neg), (-x)^fractional,
+    //     and similar pow/log domain edges
+    if (
+      /Unbekanntes Symbol|Funktionsaufruf|Division durch Null|Nicht-endliches Ergebnis/.test(
+        msg,
+      )
+    ) {
       return {
         kind: 'manual_required',
         reason: msg,

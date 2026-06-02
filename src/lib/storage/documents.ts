@@ -4,6 +4,20 @@ import crypto from 'node:crypto';
 
 const BUCKET = 'project-documents';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Structural validation for path components. Even though all current
+ *  callers receive these IDs from Drizzle / Supabase auth (which already
+ *  produces UUIDs), the admin client bypasses RLS and the filepath ends up
+ *  in the bucket as-is — a caller injecting `../../other-org/...` would
+ *  escape the org partition. Refusing non-UUID inputs at this boundary
+ *  closes that surface deterministically. */
+function assertUuid(label: string, v: string): void {
+  if (!UUID_RE.test(v)) {
+    throw new Error(`storage_invalid_${label}: ${v.slice(0, 64)}`);
+  }
+}
+
 export async function uploadProjectDocument(args: {
   orgId: string;
   projectId: string;
@@ -12,6 +26,9 @@ export async function uploadProjectDocument(args: {
   bytes: Buffer;
   mimeType: string;
 }): Promise<{ filePath: string; sha256: string }> {
+  assertUuid('orgId', args.orgId);
+  assertUuid('projectId', args.projectId);
+  assertUuid('documentId', args.documentId);
   const safe = args.fileName.replace(/[^A-Za-z0-9._-]/g, '_');
   const filePath = `${args.orgId}/${args.projectId}/${args.documentId}-${safe}`;
   const sha256 = crypto.createHash('sha256').update(args.bytes).digest('hex');

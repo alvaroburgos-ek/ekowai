@@ -6,14 +6,16 @@ import {
   auditLog,
   reportArchives,
   projects,
+  orgMembers,
 } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import {
   nextStatus,
   type WorksheetStatus,
   type TransitionEvent,
 } from '@/lib/state-machine';
+import { captureSnapshot, type SnapshotTrigger } from '@/lib/snapshots/capture';
 
 export type TransitionInput = {
   instanceId: string;
@@ -36,13 +38,31 @@ export async function transitionWorksheet(
   const comment = input.comment.trim();
   if (!comment) return { ok: false, error: 'Kommentar erforderlich' };
 
-  // Load instance via RLS (returns nothing if not org member)
+  // Load instance + verify caller is a member of the owning project's org.
+  // `db` runs as postgres and bypasses RLS, so the join is the real check.
+  // We resolve orgId here for every transition so the audit_log insert and
+  // report_archives insert can pass it explicitly, instead of depending on
+  // the audit_log fill-org-id trigger.
   const [instance] = await db
-    .select()
+    .select({
+      id: worksheetInstances.id,
+      projectId: worksheetInstances.projectId,
+      status: worksheetInstances.status,
+      orgId: projects.orgId,
+    })
     .from(worksheetInstances)
-    .where(eq(worksheetInstances.id, input.instanceId))
+    .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(
+      and(
+        eq(worksheetInstances.id, input.instanceId),
+        eq(orgMembers.userId, userId),
+      ),
+    )
     .limit(1);
   if (!instance) return { ok: false, error: 'Worksheet nicht gefunden' };
+
+  const orgId = instance.orgId;
 
   const fromStatus = instance.status as WorksheetStatus;
   const toStatus = nextStatus(fromStatus, input.eventType);
@@ -53,23 +73,59 @@ export async function transitionWorksheet(
     };
   }
 
-  // Look up orgId from projects (worksheetInstances has no orgId column)
-  let orgId: string | null = null;
-  if (input.eventType === 'finalize') {
-    const [projRow] = await db
-      .select({ orgId: projects.orgId })
-      .from(projects)
-      .where(eq(projects.id, instance.projectId))
-      .limit(1);
-    orgId = projRow?.orgId ?? null;
-  }
+  // Map the state-machine event to the snapshot trigger. Submit captures the
+  // engineer's submitted state; approve captures the reviewer's approved state.
+  // Other events (reject, finalize, reopen) do NOT create snapshots — the
+  // engineer-facing diff cares about "what was submitted" vs "what was last
+  // approved", not the intermediate transitions.
+  const snapshotTrigger: SnapshotTrigger | null =
+    input.eventType === 'submit'
+      ? 'submit_for_review'
+      : input.eventType === 'engineer_approve'
+        ? 'approve'
+        : null;
 
   try {
     await db.transaction(async (tx) => {
-      await tx
+      // Capture the snapshot BEFORE the status flip so that:
+      //   - on `submit`, the snapshot reflects the parameters at the moment
+      //     the engineer hit "submit" (status still draft).
+      //   - on `engineer_approve`, the snapshot freezes the approved version
+      //     before the status moves to engineer_approved.
+      // Capture failure aborts the whole transition (the transaction rolls
+      // back), which is intentional: an unreproducible-later state is worse
+      // than a failed submit the engineer can retry.
+      let snapshotId: string | null = null;
+      if (snapshotTrigger) {
+        snapshotId = await captureSnapshot({
+          worksheetInstanceId: input.instanceId,
+          takenByUserId: userId,
+          trigger: snapshotTrigger,
+          txDb: tx,
+        });
+      }
+
+      // Compare-and-set on status: two reviewers can race the same approval
+      // out of submitted_for_review. The fromStatus we read on line 67 is from
+      // the SELECT BEFORE the transaction; another transition committed in
+      // the meantime would otherwise produce two approval_events from the
+      // same fromStatus. Restricting the UPDATE to (id, status=fromStatus)
+      // makes the second writer's update affect zero rows; we abort the tx.
+      const updated = await tx
         .update(worksheetInstances)
         .set({ status: toStatus, updatedAt: new Date() })
-        .where(eq(worksheetInstances.id, input.instanceId));
+        .where(
+          and(
+            eq(worksheetInstances.id, input.instanceId),
+            eq(worksheetInstances.status, fromStatus),
+          ),
+        )
+        .returning({ id: worksheetInstances.id });
+      if (updated.length === 0) {
+        throw new Error(
+          `Worksheet wurde parallel von einem anderen Bearbeiter aus Status ${fromStatus} bewegt. Bitte neu laden.`,
+        );
+      }
 
       await tx.insert(approvalEvents).values({
         worksheetInstanceId: input.instanceId,
@@ -85,6 +141,7 @@ export async function transitionWorksheet(
         actorId: userId,
         actorRole: 'engineer',
         projectId: instance.projectId,
+        orgId,
         tableName: 'worksheet_instances',
         recordId: input.instanceId,
         action: 'transition',
@@ -93,6 +150,9 @@ export async function transitionWorksheet(
           from: fromStatus,
           to: toStatus,
           comment,
+          // Cross-reference the snapshot id in audit_log so a reviewer can
+          // navigate from the audit timeline directly to the diff view.
+          ...(snapshotId ? { snapshotId } : {}),
         },
       });
 

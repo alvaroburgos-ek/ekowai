@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { FileDown } from 'lucide-react';
 
 const STATUS_DOT: Record<string, string> = {
   draft: 'bg-ink/20',
@@ -51,6 +52,15 @@ export function WorksheetListSidebar({
 
   return (
     <nav className="space-y-6 sticky top-6">
+      <a
+        href={`/api/projects/${projectId}/standards/${standardCode}/report`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+      >
+        <FileDown className="size-3.5" aria-hidden />
+        Bericht als PDF
+      </a>
       {phases.map((phase) => (
         <div key={String(phase)} className="space-y-2">
           <div className="text-[10px] uppercase tracking-[0.25em] text-subtext">

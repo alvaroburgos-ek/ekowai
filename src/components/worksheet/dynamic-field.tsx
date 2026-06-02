@@ -1,9 +1,13 @@
 'use client';
 import { useState, useId, useMemo } from 'react';
+import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { SegmentedControl } from '@/components/ui/segmented-control';
+import { Select } from '@/components/ui/select';
 import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
+import { ClauseChip } from '@/components/norm-text/clause-chip';
+import { VerifyButton } from './verify-button';
 
 type FieldDef = {
   id: string;
@@ -20,12 +24,18 @@ type FieldDef = {
   clauseReference: string | null;
   verificationStatus: string;
   description: string | null;
+  verifiedByLabel?: string | null;
+  verifiedAt?: string | null;
+  verificationNote?: string | null;
 };
 
 type Props = {
   field: FieldDef;
   locale: 'de' | 'en';
   projectId: string;
+  /** Standard code (e.g. "DWA-A-138-1"). Needed to build the deep-link URL on
+   * the inheritance badge so the engineer can jump to the source worksheet. */
+  standardCode: string;
   sameSymbolHints?: Array<{ worksheetCode: string; value: unknown }>;
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
@@ -36,15 +46,34 @@ type Props = {
   /** Source of the initial value if not yet user-touched. Drives the small
    * badge that tells the engineer where the pre-fill came from. */
   prefillSource?: 'standard_default' | 'site_profile';
+  /** Site-profile JSON key that supplied the pre-fill (when prefillSource ===
+   * 'site_profile'). Shown in the tooltip so the engineer can find the source
+   * entry in the project's Standortprofil. */
+  siteProfileKey?: string;
   /** Optional engine card rendered directly below this field when this is an
    * equation's output symbol — keeps inputs and verdict in one place. */
   inlineEngineCard?: React.ReactNode;
+  /** Optional pill rendered next to the field label — surfaces e.g. a
+   * "Manueller Override" affordance when the engineer's typed value diverges
+   * from the engine's computed verdict. */
+  overridePill?: React.ReactNode;
+  /** True when the current viewer is on the platform-engineer allowlist.
+   * Gates the "Bestätigen" button next to the verification chip. */
+  isPlatformEngineer?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, inlineEngineCard }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
+  // The prefill badges (Norm-Default / Projekt-Standort / ← {WS}) describe the
+  // ORIGIN of the rendered value. Once the engineer touches the field, the
+  // value in the store is theirs — keeping the badge visible would be a lie
+  // until the next save. `pendingFieldIds` tracks unsaved edits; we hide the
+  // provenance hint as soon as the field appears in it. After save+refresh
+  // the field falls through to Tier 1 (local param) and the prop disappears
+  // entirely.
+  const isDirty = useWorksheetStore((s) => s.pendingFieldIds.has(field.id));
   const [pickerOpen, setPickerOpen] = useState(false);
   const inputId = useId();
 
@@ -77,6 +106,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
       {/* Label + clause + unit */}
       <div>
         <label
+          id={`${inputId}-label`}
           htmlFor={inputId}
           className={`text-sm ${isSubTotal ? 'font-semibold' : 'font-medium'} text-ink leading-snug block`}
         >
@@ -85,7 +115,9 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
           {field.isRequired && field.dataType !== 'json' && <span className="ml-1 text-accent-2">*</span>}
         </label>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5 flex items-baseline gap-1.5 flex-wrap">
-          {field.clauseReference && <span>{field.clauseReference}</span>}
+          {field.clauseReference && (
+            <ClauseChip clauseReference={field.clauseReference} />
+          )}
           {field.unit && !isCurrency && <span className="text-ink-2">{field.unit}</span>}
           {field.verificationStatus !== 'engineer_verified' && (
             <span
@@ -95,30 +127,42 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
               {verificationStatusLabel(field.verificationStatus)}
             </span>
           )}
-          {inheritedFrom && (
-            <span
-              className="text-subtext normal-case tracking-normal"
-              title={`Wert aus ${inheritedFrom} übernommen — überschreiben durch Eingabe`}
+          {isPlatformEngineer && (
+            <VerifyButton
+              target="field"
+              id={field.id}
+              status={field.verificationStatus}
+              verifiedByLabel={field.verifiedByLabel}
+              verifiedAt={field.verifiedAt}
+              verificationNote={field.verificationNote}
+            />
+          )}
+          {inheritedFrom && !isDirty && (
+            <Link
+              href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${inheritedFrom}`}
+              className="text-subtext normal-case tracking-normal hover:text-accent transition-colors underline-offset-2 hover:underline"
+              title={buildInheritedTooltip(field, value, inheritedFrom)}
             >
               ← {inheritedFrom}
-            </span>
+            </Link>
           )}
-          {prefillSource === 'standard_default' && (
+          {prefillSource === 'standard_default' && !isDirty && (
             <span
               className="text-accent normal-case tracking-normal"
-              title="Norm-Default — bestätigen oder überschreiben"
+              title={buildPrefillTooltip('standard_default', field, value)}
             >
               Norm-Default
             </span>
           )}
-          {prefillSource === 'site_profile' && (
+          {prefillSource === 'site_profile' && !isDirty && (
             <span
               className="text-accent normal-case tracking-normal"
-              title="Aus Projekt-Standortprofil — bestätigen oder überschreiben"
+              title={buildPrefillTooltip('site_profile', field, value, siteProfileKey)}
             >
               Projekt-Standort
             </span>
           )}
+          {overridePill}
         </div>
         {field.description && (
           <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>
@@ -202,7 +246,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
         const options = field.enumValues ?? [];
         if (options.length <= 4) {
           return (
-            <div role="radiogroup" aria-labelledby={inputId} aria-required={required}>
+            <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
               <SegmentedControl
                 value={v ?? options[0]?.value ?? ''}
                 onChange={(val) => setField(field.id, { type: 'enum', value: val })}
@@ -215,12 +259,11 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
           );
         }
         return (
-          <select
+          <Select
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
             onChange={(e) => setField(field.id, { type: 'enum', value: e.target.value || null })}
-            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
           >
             <option value="">—</option>
             {options.map((o) => (
@@ -228,7 +271,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
                 {pickEnumLabel(o, locale)}
               </option>
             ))}
-          </select>
+          </Select>
         );
       })()}
 
@@ -250,7 +293,7 @@ export function DynamicField({ field, locale, projectId, sameSymbolHints, docs, 
       {field.dataType === 'boolean' && (() => {
         const v = value?.type === 'boolean' ? value.value : null;
         return (
-          <div role="radiogroup" aria-labelledby={inputId} aria-required={required}>
+          <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
             <SegmentedControl
               value={v === true ? 'true' : v === false ? 'false' : ''}
               onChange={(val) => setField(field.id, { type: 'boolean', value: val === 'true' })}
@@ -353,6 +396,56 @@ function formatHintNumber(n: number): string {
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(n);
 }
 
+type StoreValue =
+  | { type: 'number'; value: number | null }
+  | { type: 'text'; value: string | null }
+  | { type: 'enum'; value: string | null }
+  | { type: 'date'; value: string | null }
+  | { type: 'boolean'; value: boolean | null }
+  | { type: 'json'; value: unknown }
+  | undefined;
+
+function formatProvenanceValue(value: StoreValue, unit: string | null): string {
+  if (!value) return '—';
+  switch (value.type) {
+    case 'number':
+      if (value.value == null) return '—';
+      return `${formatHintNumber(value.value)}${unit ? ` ${unit}` : ''}`;
+    case 'text':
+    case 'enum':
+    case 'date':
+      return value.value ?? '—';
+    case 'boolean':
+      if (value.value == null) return '—';
+      return value.value ? 'Ja' : 'Nein';
+    case 'json':
+      return '(Tabelle)';
+  }
+}
+
+function buildInheritedTooltip(
+  field: { symbol: string; unit: string | null },
+  value: StoreValue,
+  fromWorksheetCode: string,
+): string {
+  const formatted = formatProvenanceValue(value, field.unit);
+  return `${field.symbol} = ${formatted} aus ${fromWorksheetCode} — klicken zum Springen, oder überschreiben durch Eingabe`;
+}
+
+function buildPrefillTooltip(
+  source: 'standard_default' | 'site_profile',
+  field: { symbol: string; unit: string | null },
+  value: StoreValue,
+  siteProfileKey?: string,
+): string {
+  const formatted = formatProvenanceValue(value, field.unit);
+  if (source === 'standard_default') {
+    return `${field.symbol} = ${formatted} — Norm-Default. Bestätigen oder überschreiben.`;
+  }
+  const keyPart = siteProfileKey ? ` (Schlüssel: ${siteProfileKey})` : '';
+  return `${field.symbol} = ${formatted} aus Projekt-Standortprofil${keyPart} — bestätigen oder überschreiben.`;
+}
+
 function pickEnumLabel(
   o: { value: string; label_de: string | null; label_en: string | null },
   locale: 'de' | 'en',
@@ -380,7 +473,16 @@ function copyFirstHint(
       setFieldReal(field.id, { type: 'date', value: value == null ? null : String(value) });
       break;
     case 'boolean':
-      setFieldReal(field.id, { type: 'boolean', value: Boolean(value) });
+      // Boolean(value) treats the string "false" as truthy; explicitly parse
+      // string-encoded booleans (sameSymbolHints may carry them through the
+      // jsonb round-trip) so the copied value matches what the engineer saw
+      // on the originating worksheet.
+      setFieldReal(field.id, {
+        type: 'boolean',
+        value:
+          value === true ||
+          (typeof value === 'string' && value.toLowerCase() === 'true'),
+      });
       break;
     case 'json':
       setFieldReal(field.id, { type: 'json', value });

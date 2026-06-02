@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
-import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
+import { eq, and, inArray, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -60,14 +60,27 @@ export async function listProjectsForUser(userId: string) {
     .where(eq(orgMembers.userId, userId));
   if (memberships.length === 0) return [];
 
-  return db.select().from(projects)
-    .where(and(eq(projects.orgId, memberships[0].orgId), isNull(projects.archivedAt)))
+  const orgIds = memberships.map((m) => m.orgId);
+  return db
+    .select()
+    .from(projects)
+    .where(and(inArray(projects.orgId, orgIds), isNull(projects.archivedAt)))
     .orderBy(projects.createdAt);
 }
 
 const updateSchema = createSchema.extend({
   id: z.string().uuid(),
 });
+
+async function assertProjectMember(userId: string, projectId: string): Promise<void> {
+  const [row] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, projectId), eq(orgMembers.userId, userId)))
+    .limit(1);
+  if (!row) redirect('/');
+}
 
 export async function updateProject(formData: FormData): Promise<void> {
   const parsed = updateSchema.safeParse({
@@ -83,6 +96,8 @@ export async function updateProject(formData: FormData): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/');
 
+  await assertProjectMember(user.id, parsed.data.id);
+
   const siteProfile = readSiteProfileFromFormData(formData);
   await db.update(projects)
     .set({
@@ -93,13 +108,17 @@ export async function updateProject(formData: FormData): Promise<void> {
       updatedAt: new Date(),
     })
     .where(eq(projects.id, parsed.data.id));
-  // RLS policy on UPDATE enforces engineer-and-above
 
   revalidatePath(`/${parsed.data.locale}/projects/${parsed.data.id}`);
   redirect(`/${parsed.data.locale}/projects/${parsed.data.id}`);
 }
 
 export async function archiveProject(id: string, locale: 'de' | 'en'): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/');
+  await assertProjectMember(user.id, id);
+
   await db.update(projects)
     .set({ archivedAt: new Date() })
     .where(eq(projects.id, id));
@@ -108,6 +127,11 @@ export async function archiveProject(id: string, locale: 'de' | 'en'): Promise<v
 }
 
 export async function unarchiveProject(id: string, locale: 'de' | 'en'): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/');
+  await assertProjectMember(user.id, id);
+
   await db.update(projects)
     .set({ archivedAt: null })
     .where(eq(projects.id, id));
@@ -123,9 +147,10 @@ export async function listArchivedProjectsForUser(userId: string) {
     .where(eq(orgMembers.userId, userId));
   if (memberships.length === 0) return [];
 
+  const orgIds = memberships.map((m) => m.orgId);
   return db
     .select()
     .from(projects)
-    .where(and(eq(projects.orgId, memberships[0].orgId), isNotNull(projects.archivedAt)))
+    .where(and(inArray(projects.orgId, orgIds), isNotNull(projects.archivedAt)))
     .orderBy(desc(projects.archivedAt));
 }

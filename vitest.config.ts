@@ -28,7 +28,9 @@ export default defineConfig({
           exclude: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
+            'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/db/__tests__/documents-schema.test.ts',
+            'src/lib/db/__tests__/calculation-snapshots-schema.test.ts',
           ],
           environment: 'happy-dom',
           setupFiles: ['./src/test-setup.ts'],
@@ -42,7 +44,9 @@ export default defineConfig({
           include: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
+            'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/db/__tests__/documents-schema.test.ts',
+            'src/lib/db/__tests__/calculation-snapshots-schema.test.ts',
           ],
           environment: 'node',
           globals: true,

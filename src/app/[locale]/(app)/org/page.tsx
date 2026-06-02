@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { eq } from 'drizzle-orm';
+import { Building2, UserPlus, Users, Mail, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { orgMembers, orgs } from '@/lib/db/schema';
@@ -36,55 +37,67 @@ export default async function OrgPage({
   const canInvite = membership.role === 'owner' || membership.role === 'admin';
 
   return (
-    <article className="space-y-12">
-      <header className="border-b border-hairline pb-8">
-        <div className="flex items-end justify-between gap-6">
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
-              Organisation · {membership.orgId.slice(0, 8)}
-            </div>
-            <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
-              {t('title')}
-            </h1>
+    <article className="space-y-10">
+      <header className="flex items-start justify-between gap-6 flex-wrap">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-xs text-subtext">
+            <Building2 className="size-4" aria-hidden />
+            <span>Organisation · {membership.orgId.slice(0, 8)}</span>
           </div>
-          {canInvite && (
-            <Link href={`/${locale}/org/invite`}>
-              <Button>+ {t('invite')}</Button>
-            </Link>
-          )}
+          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
+            {t('title')}
+          </h1>
         </div>
+        {canInvite && (
+          <Link href={`/${locale}/org/invite`}>
+            <Button>
+              <UserPlus aria-hidden />
+              {t('invite')}
+            </Button>
+          </Link>
+        )}
       </header>
 
-      <section className="space-y-5">
-        <div className="flex items-end justify-between border-b border-hairline pb-3">
-          <h2 className="text-2xl font-semibold text-ink">{t('members')}</h2>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-subtext tabular-nums">
-            {String(members.length).padStart(2, '0')} ·{' '}
-            {members.length === 1 ? t('memberSingular') : t('memberPlural')}
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-4">
+          <div className="inline-flex items-center gap-2">
+            <Users className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">{t('members')}</h2>
+          </div>
+          <span className="text-xs text-subtext tabular-nums">
+            {members.length} {members.length === 1 ? t('memberSingular') : t('memberPlural')}
           </span>
         </div>
 
         {members.length === 0 ? (
-          <div className="border border-dashed border-hairline-strong p-12 text-center">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-subtext">
-              {t('noMembers')}
-            </p>
+          <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-12 text-center">
+            <p className="text-sm text-subtext">{t('noMembers')}</p>
           </div>
         ) : (
-          <ul className="divide-y divide-hairline border-y border-hairline">
-            {members.map((m, i) => (
+          <ul className="rounded-2xl border border-hairline bg-paper shadow-soft divide-y divide-hairline overflow-hidden">
+            {members.map((m) => (
               <li
                 key={m.userId}
-                className="grid grid-cols-12 gap-4 px-2 py-4 items-baseline"
+                className="flex items-center gap-4 px-4 py-3.5 hover:bg-paper-2/50 transition-colors"
               >
-                <span className="col-span-1 text-[11px] tabular-nums text-subtext">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span className="col-span-5 text-base text-ink">
-                  {m.fullName || m.email}
-                </span>
-                <span className="col-span-4 text-sm text-subtext truncate">{m.email}</span>
-                <span className="col-span-2 text-[10px] uppercase tracking-[0.2em] text-right text-ink-2">
+                <div
+                  className="inline-flex items-center justify-center size-9 rounded-full shrink-0 text-sm font-semibold text-accent-2"
+                  style={{ background: 'var(--eko-gradient-soft)' }}
+                  aria-hidden
+                >
+                  {(m.fullName || m.email).charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-ink truncate">
+                    {m.fullName || m.email}
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-xs text-subtext truncate">
+                    <Mail className="size-3.5 shrink-0" aria-hidden />
+                    <span className="truncate">{m.email}</span>
+                  </div>
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-paper-2 text-[11px] font-medium text-ink-2 shrink-0">
+                  <ShieldCheck className="size-3" aria-hidden />
                   {m.role}
                 </span>
               </li>
@@ -94,7 +107,7 @@ export default async function OrgPage({
       </section>
 
       {canInvite && (
-        <section className="space-y-5 border-t border-hairline pt-8">
+        <section className="pt-2">
           <LetterheadForm
             org={{
               id: org.id,

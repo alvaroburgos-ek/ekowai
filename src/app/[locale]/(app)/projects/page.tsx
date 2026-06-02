@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Archive, Plus, FolderKanban, MapPin, Building2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { listProjectsForUser } from '@/lib/actions/project';
 import { getTranslations } from 'next-intl/server';
@@ -19,41 +20,48 @@ export default async function ProjectsPage({
   const items = user ? await listProjectsForUser(user.id) : [];
 
   return (
-    <section className="space-y-10">
-      {/* Editorial header */}
-      <header className="border-b border-hairline pb-8 mb-2">
-        <div className="flex items-end justify-between gap-6">
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.25em] text-subtext mb-3">
-              Sektion 01 · Übersicht
-            </div>
-            <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
-              {t('title')}
-            </h1>
-            <p className="mt-4 text-[11px] text-subtext tabular-nums">
-              {String(items.length).padStart(2, '0')} {items.length === 1 ? 'Eintrag' : 'Einträge'}
-            </p>
+    <section className="space-y-8">
+      <header className="flex items-start justify-between gap-6 flex-wrap">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 text-xs text-subtext">
+            <FolderKanban className="size-4" aria-hidden />
+            <span>{items.length} {items.length === 1 ? 'Projekt' : 'Projekte'}</span>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Link href={`/${locale}/projects/archive`}>
-              <Button variant="ghost" size="sm">
-                {t('archiveLink')}
-              </Button>
-            </Link>
-            <Link href={`/${locale}/projects/new`}>
-              <Button>+ {t('newProject')}</Button>
-            </Link>
-          </div>
+          <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
+            {t('title')}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link href={`/${locale}/projects/archive`}>
+            <Button variant="ghost" size="sm">
+              <Archive aria-hidden />
+              {t('archiveLink')}
+            </Button>
+          </Link>
+          <Link href={`/${locale}/projects/new`}>
+            <Button>
+              <Plus aria-hidden />
+              {t('newProject')}
+            </Button>
+          </Link>
         </div>
       </header>
 
       {items.length === 0 ? (
-        <div className="py-20 text-center space-y-5">
-          <div className="text-5xl font-light text-hairline-strong select-none">○</div>
-          <div>
-            <p className="text-sm text-ink-2 mb-4">{t('noProjects')}</p>
+        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 py-16 px-6 text-center space-y-5">
+          <div
+            className="mx-auto inline-flex items-center justify-center size-14 rounded-full"
+            style={{ background: 'var(--eko-gradient-soft)' }}
+          >
+            <FolderKanban className="size-7 text-accent-2" aria-hidden />
+          </div>
+          <div className="space-y-3">
+            <p className="text-sm text-ink-2">{t('noProjects')}</p>
             <Link href={`/${locale}/projects/new`}>
-              <Button size="sm">+ {t('newProject')}</Button>
+              <Button size="sm">
+                <Plus aria-hidden />
+                {t('newProject')}
+              </Button>
             </Link>
           </div>
         </div>
@@ -63,24 +71,37 @@ export default async function ProjectsPage({
             <Link
               key={p.id}
               href={`/${locale}/projects/${p.id}`}
-              className="fade-up-item group relative flex flex-col gap-3 p-5 border border-hairline rounded-md bg-paper hover:border-hairline-strong hover:bg-paper-2/40 transition-all"
+              className="fade-up-item group relative flex flex-col gap-3 p-5 rounded-2xl border border-hairline bg-paper shadow-soft shadow-soft-hover hover:-translate-y-0.5 transition-all"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className="absolute left-0 top-0 bottom-0 w-[2px] rounded-l-md opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'var(--eko-gradient)' }} />
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-[10px] tabular-nums text-subtext">
-                  {String(i + 1).padStart(3, '0')}
+              <div className="flex items-start justify-between gap-3">
+                <div
+                  className="inline-flex items-center justify-center size-10 rounded-xl shrink-0"
+                  style={{ background: 'var(--eko-gradient-soft)' }}
+                >
+                  <FolderKanban className="size-5 text-accent-2" aria-hidden />
+                </div>
+                <span className="text-[10px] tabular-nums text-subtext mt-1">
+                  #{String(i + 1).padStart(3, '0')}
                 </span>
-                {p.location && (
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-subtext/70 truncate max-w-[80px]">
-                    {p.location}
-                  </span>
-                )}
               </div>
               <div className="text-base font-semibold text-ink group-hover:text-accent-2 transition-colors leading-snug flex-1">
                 {p.name}
               </div>
-              <div className="text-xs text-subtext truncate">{p.clientName ?? '—'}</div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtext">
+                {p.clientName && (
+                  <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
+                    <Building2 className="size-3.5 shrink-0" aria-hidden />
+                    <span className="truncate">{p.clientName}</span>
+                  </span>
+                )}
+                {p.location && (
+                  <span className="inline-flex items-center gap-1.5 min-w-0 truncate">
+                    <MapPin className="size-3.5 shrink-0" aria-hidden />
+                    <span className="truncate">{p.location}</span>
+                  </span>
+                )}
+              </div>
             </Link>
           ))}
         </div>

@@ -35,9 +35,11 @@ export type EquationProfile = {
   /**
    * When true, the engine card renders the computed value for engineer
    * review but the hook does NOT write it back to the output field. Used
-   * for equations whose output_symbol collides with another (already
-   * primary-writing) equation, or whose output would clobber an
-   * engineer-entered iteration variable.
+   * for "required" or alternative-form equations whose output_symbol
+   * collides with another equation's primary write-back, or whose output
+   * would overwrite an engineer-entered iteration variable (e.g. Gl. 23
+   * L_R — the engineer types L_R; the equation displays the required L_R
+   * as a sizing aid but does not clobber the input).
    */
   displayOnly?: boolean;
 };
@@ -376,5 +378,94 @@ export const equationProfiles: Record<string, EquationProfile> = {
       // field, so no write-back fires.
     },
     notes: '§5.3.4 Gl. (10): Flood-check V_Rück. Aggregator-Pfad mit eigenem Carrier sub_areas_A138_26 + 6 Skalaren (A_VA, Q_S, Q_Dr, D, V_VA, r_D(T_n,Ü)). Positive V_Rück = zusätzliche Flutspeicherung erforderlich; ≤ 0 = Flutnachweis bestanden.',
+  },
+
+  // ====================================================================
+  // Batch-2: Mulde + Rigole Speichervolumen — Gl. 14, 15, 19, 20, 22, 23
+  // Sibling-unit check (against current main): V_M, V_R, s_R, L_R all
+  // match their existing field units (m³, m³, –, m). Gl. 14/19 are the
+  // SOURCE's design equations and own the field write-back. Gl. 15/20/22/23
+  // are display-only (alternative form or sizing aid) to avoid clobber.
+  // ====================================================================
+
+  // A138-17 · Gl. (14) · §6.3.2 — V_M required
+  'bfe6e59a-015f-4c95-b717-8599f80cb68a': {
+    expectedUnits: {
+      A_C: 'm²',
+      A_VA: 'm²',
+      r_D_n: 'l/(s·ha)',
+      A_S_m: 'm²',
+      k_i: 'm/s',
+      D: 'min',
+      f_Z: null,
+    },
+    notes:
+      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. Schreibt V_M (primärer Design-Wert).',
+  },
+
+  // A138-17 · Gl. (15) · §6.3.2 — V_M geometric
+  '44fd56a8-b473-441a-be21-297d9f501226': {
+    expectedUnits: { A_S_m: 'm²', h_M: 'm' },
+    displayOnly: true,
+    notes:
+      '§6.3.2 Gl. (15): geometrisches Muldenvolumen V_M = A_S,m · h_M. displayOnly — Gl. (14) ist primärer Schreiber.',
+  },
+
+  // A138-18 · Gl. (19) · §6.4.2 — V_R required
+  '58c0c298-ca72-4bb6-ab05-0b298114523e': {
+    expectedUnits: {
+      A_C: 'm²',
+      r_D_n: 'l/(s·ha)',
+      b_R: 'm',
+      h_R: 'm',
+      L_R: 'm',
+      k_i: 'm/s',
+      Q_Dr: 'l/s',
+      D: 'min',
+      f_Z: null,
+    },
+    notes:
+      '§6.4.2 Gl. (19): erforderliches Rigolenspeichervolumen. Schreibt V_R (primär). Das eingebettete ((b+h)·L+b·h)·k_i ist hier dimensional m³/s — intern konsistent (anders als die Gl. (18)-Standalone-Falle).',
+  },
+
+  // A138-18 · Gl. (20) · §6.4.2 — V_R geometric
+  'b8e74a4b-64cc-4b81-b306-b2e01e759f5e': {
+    expectedUnits: { b_R: 'm', h_R: 'm', L_R: 'm', s_R: null },
+    displayOnly: true,
+    notes:
+      '§6.4.2 Gl. (20): geometrisches Rigolenvolumen V_R = b·h·L·s_R. displayOnly — Gl. (19) ist primär.',
+  },
+
+  // A138-18 · Gl. (22) · §6.4.2 — s_R thin-wall alternative
+  '20c31318-7401-4f89-a27b-bc3cf8723548': {
+    expectedUnits: { s_F: null, b_R: 'm', h_R: 'm', az: null, d: 'm' },
+    constants: { pi: Math.PI },
+    symbolAliases: {
+      // No separate `d` field on A138-18; the thin-wall approximation reads
+      // the inner diameter `d_i`. Engineer is responsible for using Gl. (22)
+      // only when d_i ≈ d_a (thin plastic pipes).
+      d: 'd_i',
+    },
+    displayOnly: true,
+    notes:
+      '§6.4.2 Gl. (22): s_R für dünnwandige Versickerrohre (d ≈ d_i ≈ d_a). Algebraisch identisch zu Gl. (21) wenn d_a = d_i. displayOnly — Gl. (21) ist primär.',
+  },
+
+  // A138-18 · Gl. (23) · §6.4.2 — L_R required
+  '927aa5ab-3aa9-486e-a05d-f91847e8d31e': {
+    expectedUnits: {
+      A_C: 'm²',
+      r_D_n: 'l/(s·ha)',
+      b_R: 'm',
+      h_R: 'm',
+      k_i: 'm/s',
+      Q_Dr: 'l/s',
+      s_R: null,
+      D: 'min',
+      f_Z: null,
+    },
+    displayOnly: true,
+    notes:
+      '§6.4.2 Gl. (23): erforderliche Rigolen-Länge L_R. displayOnly — der Engineer trägt L_R als Iterationsgröße ein.',
   },
 };

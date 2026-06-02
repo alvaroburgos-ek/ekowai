@@ -1,6 +1,19 @@
 import { SITE_PROFILE_ENTRIES, type SiteProfileEntry } from '@/lib/site-profile/symbol-map';
 import { siteProfileFieldName, readSiteProfileValue } from '@/lib/site-profile/form-helpers';
 import { Input } from '@/components/ui/input';
+import { AddressFieldsGroup } from './address-fields-group';
+
+const ADDRESS_GROUP_KEYS = new Set([
+  'site_address',
+  'site_municipality',
+  'site_bundesland',
+  'site_lat',
+  'site_lon',
+  // KOSTRA cell is auto-derived from lat/lon by AddressFieldsGroup and
+  // rendered as the 6th controlled input there, so it has to be excluded
+  // from the fallback renderer below.
+  'kostra_grid_cell',
+]);
 
 type Props = {
   /** Existing project.site_profile (JSONB) — null/undefined for the create form. */
@@ -42,20 +55,25 @@ export function SiteProfileFields({ initial }: Props) {
         Vorbefüllte Felder erscheinen mit Hinweis &bdquo;Projekt-Standort&ldquo; und
         sind im Arbeitsblatt jederzeit überschreibbar.
       </p>
-      {groups.map((g) => (
-        <fieldset key={g.titleDe} className="space-y-4">
-          <legend className="text-[11px] uppercase tracking-[0.22em] text-subtext">
-            {g.titleDe}
-          </legend>
-          <div className="space-y-4">
-            {g.keys.map((k) => {
-              const entry = entryByKey.get(k);
-              if (!entry) return null;
-              return <SiteProfileInput key={k} entry={entry} initial={initial} />;
-            })}
-          </div>
-        </fieldset>
-      ))}
+      {groups.map((g) => {
+        const addressKeys = g.keys.filter((k) => ADDRESS_GROUP_KEYS.has(k));
+        const restKeys = g.keys.filter((k) => !ADDRESS_GROUP_KEYS.has(k));
+        return (
+          <fieldset key={g.titleDe} className="space-y-4">
+            <legend className="text-[11px] uppercase tracking-[0.22em] text-subtext">
+              {g.titleDe}
+            </legend>
+            <div className="space-y-4">
+              {addressKeys.length > 0 && <AddressFieldsGroup initial={initial} />}
+              {restKeys.map((k) => {
+                const entry = entryByKey.get(k);
+                if (!entry) return null;
+                return <SiteProfileInput key={k} entry={entry} initial={initial} />;
+              })}
+            </div>
+          </fieldset>
+        );
+      })}
     </div>
   );
 }

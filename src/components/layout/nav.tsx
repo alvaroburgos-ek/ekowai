@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
+import { LogOut } from 'lucide-react';
 import { LocaleSwitcher } from './locale-switcher';
 import { NavLinks } from './nav-links';
 import { db } from '@/lib/db';
 import { worksheetInstances, projects, orgMembers } from '@/lib/db/schema';
 import { eq, and, inArray, count } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { isPlatformEngineer } from '@/lib/auth/platform-engineer';
 
 async function getPendingReviewCount(): Promise<number> {
   const supabase = await createClient();
@@ -34,8 +36,20 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
   const t = await getTranslations('nav');
   const pending = await getPendingReviewCount();
 
+  // Platform-engineer link — only shown to users on PLATFORM_ENGINEER_EMAILS.
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const showLibrary = isPlatformEngineer(user);
+
+  const links = [
+    { href: `/${locale}/projects`, label: t('projects'), iconKey: 'projects' },
+    { href: `/${locale}/inbox`, label: t('inbox'), badge: pending, iconKey: 'inbox' },
+    ...(showLibrary ? [{ href: `/${locale}/standards`, label: 'Bibliothek', iconKey: 'standards' }] : []),
+    { href: `/${locale}/org`, label: t('org'), iconKey: 'org' },
+  ];
+
   return (
-    <header className="border-b border-hairline bg-paper/95 backdrop-blur-md sticky top-0 z-30">
+    <header className="sticky top-0 z-30 bg-paper/80 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
         <Link href={`/${locale}/projects`} className="group flex items-center">
           <Image
@@ -48,23 +62,18 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
             className="object-contain"
           />
         </Link>
-        <nav className="flex items-center gap-7 font-body">
-          <NavLinks
-            locale={locale}
-            links={[
-              { href: `/${locale}/projects`, label: t('projects') },
-              { href: `/${locale}/inbox`, label: t('inbox'), badge: pending },
-              { href: `/${locale}/org`, label: t('org') },
-            ]}
-          />
-          <span className="h-4 w-px bg-hairline" aria-hidden />
+        <nav className="flex items-center gap-2 font-body">
+          <NavLinks locale={locale} links={links} />
+          <span className="mx-2 h-5 w-px bg-hairline" aria-hidden />
           <LocaleSwitcher current={locale} />
           <form action="/api/auth/logout" method="post">
             <button
               type="submit"
-              className="text-subtext hover:text-ink text-xs uppercase tracking-[0.15em] transition-colors"
+              title={t('logout')}
+              aria-label={t('logout')}
+              className="inline-flex items-center justify-center rounded-full p-2 text-subtext hover:bg-paper-2 hover:text-ink transition-colors"
             >
-              {t('logout')}
+              <LogOut className="size-4" aria-hidden />
             </button>
           </form>
         </nav>

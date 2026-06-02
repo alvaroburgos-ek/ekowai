@@ -22,13 +22,14 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
+          // Mutate cookies in place on the single response instance. The
+          // previous version rebuilt `response` on every setAll call, which
+          // dropped cookies set by an earlier call when @supabase/ssr writes
+          // chunked session cookies (.0/.1) across multiple setAll batches.
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            response.cookies.set(name, value, options);
+          });
         },
       },
     },

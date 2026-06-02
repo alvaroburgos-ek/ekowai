@@ -1,14 +1,14 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Editorial card — hairline border, no shadow. Bg is paper-2 (warmer) so it
- * subtly lifts off the paper background without the SaaS shadow look.
+ * Friendly card — rounded corners, soft shadow, no harsh hairlines.
+ * Background is a faint paper tone so it lifts gently off the page.
  */
 export function Card({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        'rounded-none border border-hairline bg-paper-2/40 backdrop-blur-[1px]',
+        'rounded-2xl border border-hairline bg-paper shadow-soft transition-shadow',
         className,
       )}
       {...rest}

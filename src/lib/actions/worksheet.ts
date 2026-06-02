@@ -5,6 +5,8 @@ import {
   projectParameters,
   fields,
   auditLog,
+  projects,
+  orgMembers,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
@@ -27,7 +29,8 @@ export type SaveWorksheetResult =
   | { ok: false; error: string };
 
 /** Save user-entered values for a worksheet instance.
- * - Auth: user must be member of the owning org (enforced by RLS).
+ * - Auth: user must be a member of the owning project's org. Verified by an
+ *   app-level join — `db` uses the postgres role and bypasses RLS.
  * - For each changed field: UPSERT project_parameters + INSERT audit_log.
  * - All in one transaction.
  */
@@ -39,11 +42,23 @@ export async function saveWorksheet(
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
   const userId = auth.user.id;
 
-  // Load instance + verify access via RLS (returns nothing if not org member)
+  // Load instance + verify the caller is a member of the owning project's org
   const [instance] = await db
-    .select()
+    .select({
+      id: worksheetInstances.id,
+      projectId: worksheetInstances.projectId,
+      worksheetTemplateId: worksheetInstances.worksheetTemplateId,
+      status: worksheetInstances.status,
+    })
     .from(worksheetInstances)
-    .where(eq(worksheetInstances.id, input.instanceId))
+    .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(
+      and(
+        eq(worksheetInstances.id, input.instanceId),
+        eq(orgMembers.userId, userId),
+      ),
+    )
     .limit(1);
   if (!instance) return { ok: false, error: 'Worksheet not found or no access' };
 
@@ -52,11 +67,18 @@ export async function saveWorksheet(
     return { ok: true, saved: 0, warnings: [] };
   }
 
-  // Load field metadata to verify data_type alignment
+  // Load field metadata — restrict to fields belonging to this instance's
+  // worksheet template so callers cannot write values for fields of a
+  // different template within the same project.
   const fieldMetas = await db
     .select({ id: fields.id, dataType: fields.dataType })
     .from(fields)
-    .where(inArray(fields.id, fieldIds));
+    .where(
+      and(
+        inArray(fields.id, fieldIds),
+        eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+      ),
+    );
   const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
 
   // Load existing parameters for diff

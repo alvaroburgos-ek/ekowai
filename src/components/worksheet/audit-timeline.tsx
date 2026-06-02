@@ -21,8 +21,8 @@ export function AuditTimeline({ entries }: { entries: AuditEntry[] }) {
 
   return (
     <ol className="divide-y divide-hairline">
-      {entries.map((e, i) => (
-        <li key={i} className="py-3 grid grid-cols-1 sm:grid-cols-[7rem_7rem_1fr] gap-x-3 gap-y-1 text-sm">
+      {entries.map((e) => (
+        <li key={e.id} className="py-3 grid grid-cols-1 sm:grid-cols-[7rem_7rem_1fr] gap-x-3 gap-y-1 text-sm">
           <div className="text-xs text-subtext tabular-nums">{formatDate(e.occurredAt)}</div>
           <div className="text-xs text-subtext">{e.actorName ?? (e.actorRole ?? 'system')}</div>
           <div className="space-y-0.5">

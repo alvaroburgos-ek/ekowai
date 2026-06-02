@@ -1,11 +1,30 @@
 'use server';
 import { db } from '@/lib/db';
-import { projectStandards, standards, auditLog } from '@/lib/db/schema';
+import { projectStandards, standards, auditLog, projects, orgMembers } from '@/lib/db/schema';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { instantiateWorksheetInstancesForStandard } from '@/lib/db/queries/worksheet';
 import { revalidatePath } from 'next/cache';
 import { RECOMMENDED_LAYERS, type Layer, type RelationType } from '@/lib/types/project-layers';
+import { isPlatformEngineer } from '@/lib/auth/platform-engineer';
+import type { User } from '@supabase/supabase-js';
+
+/** Allow if the user is a platform engineer OR a member of the project's org.
+ * Platform engineers manage the standards library and need to be able to
+ * arrange standards on any project's overview without being added to the org. */
+async function assertProjectAccess(
+  user: User,
+  projectId: string,
+): Promise<boolean> {
+  if (isPlatformEngineer(user)) return true;
+  const [row] = await db
+    .select({ id: projects.id })
+    .from(projects)
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, projectId), eq(orgMembers.userId, user.id)))
+    .limit(1);
+  return !!row;
+}
 
 export async function addStandardToProject(
   projectId: string,
@@ -15,6 +34,7 @@ export async function addStandardToProject(
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
   const userId = auth.user.id;
+  if (!(await assertProjectAccess(auth.user, projectId))) return { ok: false, error: 'project_not_found' };
 
   // INSERT … ON CONFLICT DO UPDATE for re-activation of a previously-removed standard
   const [row] = await db
@@ -70,6 +90,7 @@ export async function setProjectStandardRelation(
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
+  if (!(await assertProjectAccess(auth.user, projectId))) return { ok: false, error: 'project_not_found' };
 
   // Self-loop guard
   if (parentProjectStandardId === projectStandardId) {
@@ -119,6 +140,7 @@ export async function setProjectStandardLayer(
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
+  if (!(await assertProjectAccess(auth.user, projectId))) return { ok: false, error: 'project_not_found' };
 
   await db
     .update(projectStandards)
@@ -144,6 +166,7 @@ export async function moveProjectStandard(
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
+  if (!(await assertProjectAccess(auth.user, projectId))) return { ok: false, error: 'project_not_found' };
 
   await db.transaction(async (tx) => {
     const [target] = await tx
@@ -222,6 +245,7 @@ export async function applyRecommendedStructure(
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
+  if (!(await assertProjectAccess(auth.user, projectId))) return { ok: false, error: 'project_not_found' };
 
   let added = 0;
 
@@ -297,6 +321,7 @@ export async function removeStandardFromProject(
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
   const userId = auth.user.id;
+  if (!(await assertProjectAccess(auth.user, projectId))) return { ok: false, error: 'project_not_found' };
 
   const trimmed = reason.trim();
   if (!trimmed) return { ok: false, error: 'Removal reason required' };

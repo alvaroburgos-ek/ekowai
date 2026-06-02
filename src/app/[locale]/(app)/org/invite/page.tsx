@@ -1,5 +1,10 @@
+import { redirect } from 'next/navigation';
+import { eq } from 'drizzle-orm';
 import { getTranslations } from 'next-intl/server';
 import { inviteMember } from '@/lib/actions/org';
+import { createClient } from '@/lib/supabase/server';
+import { db } from '@/lib/db';
+import { orgMembers } from '@/lib/db/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SegmentedControl } from '@/components/ui/segmented-control';
@@ -12,6 +17,24 @@ export default async function InvitePage({
   const { locale } = await params;
   const t = await getTranslations('org');
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/${locale}/login`);
+
+  // Resolve the caller's current org so we can stamp it into the form. The
+  // action also re-verifies role membership against this orgId.
+  const [membership] = await db
+    .select({ orgId: orgMembers.orgId, role: orgMembers.role })
+    .from(orgMembers)
+    .where(eq(orgMembers.userId, user.id))
+    .limit(1);
+  if (!membership) redirect(`/${locale}/org`);
+  if (membership.role !== 'owner' && membership.role !== 'admin') {
+    redirect(`/${locale}/org`);
+  }
+
   return (
     <section className="max-w-2xl mx-auto space-y-10">
       <header className="border-b border-hairline pb-6">
@@ -23,6 +46,7 @@ export default async function InvitePage({
 
       <form action={inviteMember} className="space-y-8">
         <input type="hidden" name="locale" value={locale} />
+        <input type="hidden" name="orgId" value={membership.orgId} />
         <Field label={t('inviteEmail')} required>
           <Input name="email" type="email" required autoComplete="email" autoFocus />
         </Field>

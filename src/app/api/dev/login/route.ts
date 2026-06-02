@@ -1,35 +1,43 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
-import { defaultLocale } from '@/lib/i18n/config';
+import { defaultLocale, locales } from '@/lib/i18n/config';
+import { env } from '@/env';
+
+// Local-path allowlist for the `next` param. Must start with /de/ or /en/
+// and the next char must not be / or \ (blocks `//attacker.tld`).
+const SAFE_NEXT_RE = /^\/(de|en)\/[^/\\]/;
 
 // Dev-only: signs in a user without sending email.
 // Uses admin API to mint a magic-link token, then verifies it server-side
 // so session cookies are set directly. No round-trip through Supabase's
 // verify endpoint, no rate limit.
 //
-// Gated on DEV_AUTOLOGIN_EMAIL being set. Real production deployments must
-// NOT set this var. Preview/test deployments that intentionally want a
-// no-auth tester URL set the var to a fixed dev account email.
+// Gated on DEV_AUTOLOGIN_EMAIL being set AND VERCEL_ENV != production. Real
+// production deployments must NOT set this var; the env.ts boot guard +
+// this runtime guard form defense in depth.
 export async function GET(request: NextRequest) {
-  if (!process.env.DEV_AUTOLOGIN_EMAIL) {
+  if (!env.DEV_AUTOLOGIN_EMAIL || process.env.VERCEL_ENV === 'production') {
     return NextResponse.json({ error: 'dev login disabled' }, { status: 404 });
   }
 
   const requestUrl = new URL(request.url);
   const origin = requestUrl.origin;
   const searchParams = requestUrl.searchParams;
-  const email = searchParams.get('email') ?? process.env.DEV_AUTOLOGIN_EMAIL;
-  const locale = searchParams.get('locale') ?? defaultLocale;
+  // Always use the env-configured email. Ignoring any ?email= query param
+  // prevents arbitrary impersonation of org owners or platform engineers
+  // by anyone who can reach a preview URL.
+  const email = env.DEV_AUTOLOGIN_EMAIL;
+  const rawLocale = searchParams.get('locale') ?? defaultLocale;
+  const locale = (locales as readonly string[]).includes(rawLocale)
+    ? rawLocale
+    : defaultLocale;
   const next = searchParams.get('next');
 
   if (!email) {
     return NextResponse.json(
-      {
-        error: 'missing email',
-        usage: '/api/dev/login?email=you@example.com&locale=de[&next=/de/projects]',
-      },
-      { status: 400 },
+      { error: 'missing DEV_AUTOLOGIN_EMAIL env var' },
+      { status: 500 },
     );
   }
 
@@ -62,6 +70,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const target = next && next.startsWith('/') ? next : `/${locale}/verify`;
+  const target = next && SAFE_NEXT_RE.test(next) ? next : `/${locale}/verify`;
   return NextResponse.redirect(`${origin}${target}`);
 }

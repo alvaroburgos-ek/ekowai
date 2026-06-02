@@ -5,12 +5,13 @@ import {
   standards,
   projects,
   orgMembers,
-  approvalEvents,
+  calculationSnapshots,
 } from '@/lib/db/schema';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Inbox, MessageSquare, GitCompare, FileText, Calendar } from 'lucide-react';
 import { StatusPill } from '@/components/worksheet/status-pill';
 import type { WorksheetStatus } from '@/lib/state-machine';
 
@@ -56,6 +57,13 @@ export default async function InboxPage({
               WHERE worksheet_instance_id = ${worksheetInstances.id}
               ORDER BY occurred_at DESC LIMIT 1
             )`.as('latest_actor_at'),
+            // Per-row snapshot count — drives the "Diff" link rendered next
+            // to each pending instance. A single correlated subquery keeps
+            // the inbox query a single round-trip.
+            snapshotCount: sql<number>`(
+              SELECT COUNT(*)::int FROM ${calculationSnapshots}
+              WHERE ${calculationSnapshots.worksheetInstanceId} = ${worksheetInstances.id}
+            )`.as('snapshot_count'),
           })
           .from(worksheetInstances)
           .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
@@ -70,54 +78,94 @@ export default async function InboxPage({
           .orderBy(desc(worksheetInstances.updatedAt));
 
   return (
-    <article className="space-y-10">
-      <header className="border-b border-hairline pb-8">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
-          Sektion 03 · Zur Prüfung
+    <article className="space-y-8">
+      <header className="space-y-2">
+        <div className="inline-flex items-center gap-2 text-xs text-subtext">
+          <Inbox className="size-4" aria-hidden />
+          <span>
+            {pending.length === 0
+              ? 'Keine Einreichungen'
+              : `${pending.length} ${pending.length === 1 ? 'Einreichung' : 'Einreichungen'}`}
+          </span>
         </div>
         <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
           Eingang
         </h1>
-        <div className="mt-3 text-xs text-subtext">
+        <p className="text-sm text-subtext">
           {pending.length === 0
             ? 'Keine Arbeitsblätter zur Prüfung eingereicht.'
-            : `${pending.length} Arbeitsblatt${pending.length === 1 ? '' : 'e'} zur Prüfung eingereicht.`}
-        </div>
+            : 'Diese Arbeitsblätter warten auf deine Prüfung.'}
+        </p>
       </header>
 
       {pending.length === 0 ? (
-        <div className="border border-dashed border-hairline p-12 text-center">
-          <p className="text-sm text-subtext italic">
+        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-12 text-center space-y-4">
+          <div
+            className="mx-auto inline-flex items-center justify-center size-14 rounded-full"
+            style={{ background: 'var(--eko-gradient-soft)' }}
+          >
+            <Inbox className="size-7 text-accent-2" aria-hidden />
+          </div>
+          <p className="text-sm text-subtext">
             Wenn Engineers Arbeitsblätter zur internen Prüfung einreichen, erscheinen sie hier.
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-hairline">
+        <ul className="space-y-3">
           {pending.map((p) => (
-            <li key={p.instanceId} className="py-4">
+            <li
+              key={p.instanceId}
+              className="group rounded-2xl border border-hairline bg-paper shadow-soft shadow-soft-hover transition-all"
+            >
               <Link
                 href={`/${localeTyped}/projects/${p.projectId}/standards/${p.standardCode}/worksheets/${p.worksheetCode}`}
-                className="flex items-baseline gap-4 hover:bg-paper-2/40 -mx-3 px-3 py-2 rounded-md transition-colors"
+                className="flex items-center gap-4 p-4"
               >
-                <div className="w-40 text-[10px] uppercase tracking-[0.2em] text-subtext">
-                  {p.projectCode ?? p.projectName.slice(0, 24)}
+                <div
+                  className="inline-flex items-center justify-center size-10 rounded-xl shrink-0"
+                  style={{ background: 'var(--eko-gradient-soft)' }}
+                >
+                  <FileText className="size-5 text-accent-2" aria-hidden />
                 </div>
-                <div className="w-32 text-xs font-mono text-subtext">
-                  {p.standardCode} · {p.worksheetCode}
-                </div>
-                <div className="flex-1 text-sm font-medium text-ink">
-                  {p.worksheetTitle}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
+                    <span className="text-sm font-semibold text-ink group-hover:text-accent-2 transition-colors">
+                      {p.worksheetTitle}
+                    </span>
+                    <span className="text-xs font-mono text-subtext">
+                      {p.standardCode} · {p.worksheetCode}
+                    </span>
+                  </div>
+                  <div className="text-xs text-subtext truncate">
+                    {p.projectCode ?? p.projectName.slice(0, 32)}
+                  </div>
                 </div>
                 <StatusPill status={p.status as WorksheetStatus} />
-                <div className="w-24 text-[10px] text-subtext text-right tabular-nums">
-                  {p.latestActorAt
-                    ? new Date(p.latestActorAt).toLocaleDateString('de-DE')
-                    : ''}
-                </div>
+                {p.latestActorAt && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-subtext tabular-nums shrink-0">
+                    <Calendar className="size-3.5" aria-hidden />
+                    {new Date(p.latestActorAt).toLocaleDateString('de-DE')}
+                  </span>
+                )}
               </Link>
-              {p.latestComment && (
-                <div className="ml-44 mt-1 text-xs text-subtext italic">
-                  „{p.latestComment}“
+              {(p.latestComment || Number(p.snapshotCount) >= 1) && (
+                <div className="border-t border-hairline px-4 py-3 flex flex-wrap items-center gap-4 bg-paper-2/40 rounded-b-2xl">
+                  {p.latestComment && (
+                    <div className="flex items-start gap-2 text-xs text-subtext italic min-w-0 flex-1">
+                      <MessageSquare className="size-3.5 mt-0.5 shrink-0" aria-hidden />
+                      <span className="truncate">„{p.latestComment}"</span>
+                    </div>
+                  )}
+                  {Number(p.snapshotCount) >= 1 && (
+                    <Link
+                      href={`/${localeTyped}/projects/${p.projectId}/standards/${p.standardCode}/worksheets/${p.worksheetCode}/diff`}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 shrink-0"
+                      data-testid="inbox-diff-link"
+                    >
+                      <GitCompare className="size-3.5" aria-hidden />
+                      Diff
+                    </Link>
+                  )}
                 </div>
               )}
             </li>

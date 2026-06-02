@@ -2,6 +2,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
 import { addStandardToProject, removeStandardFromProject } from '@/lib/actions/project-standards';
 import { useFocusTrap } from '@/lib/hooks/use-focus-trap';
 
@@ -107,19 +108,20 @@ export function StandardsPicker({ projectId, available, active, locale }: Props)
             Alle verfügbaren Regelwerke sind bereits aktiv.
           </p>
         ) : (
-          <div className="flex gap-2">
-            <select
-              value={selectedToAdd}
-              onChange={(e) => setSelectedToAdd(e.target.value)}
-              className="flex-1 rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none"
-            >
-              <option value="">— Auswählen —</option>
-              {addable.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.code} · {pickTitle(s, locale)}
-                </option>
-              ))}
-            </select>
+          <div className="flex gap-2 items-stretch">
+            <div className="flex-1">
+              <Select
+                value={selectedToAdd}
+                onChange={(e) => setSelectedToAdd(e.target.value)}
+              >
+                <option value="">— Auswählen —</option>
+                {addable.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.code} · {pickTitle(s, locale)}
+                  </option>
+                ))}
+              </Select>
+            </div>
             <Button onClick={handleAdd} disabled={pending || !selectedToAdd}>
               Hinzufügen
             </Button>

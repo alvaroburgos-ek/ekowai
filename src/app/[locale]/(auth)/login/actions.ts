@@ -4,6 +4,23 @@ import { createClient } from '@/lib/supabase/server';
 import { env } from '@/env';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+
+/** Build the OAuth callback origin from the actual request, with the static
+ * NEXT_PUBLIC_APP_URL as fallback. The request-derived origin is essential on
+ * Vercel preview deploys where every push produces a new preview URL — using
+ * the static env var would send Supabase back to a stale URL. */
+async function callbackOrigin(): Promise<string> {
+  const h = await headers();
+  const forwardedProto = h.get('x-forwarded-proto');
+  const forwardedHost = h.get('x-forwarded-host');
+  const host = forwardedHost ?? h.get('host');
+  if (host) {
+    const proto = forwardedProto ?? (host.startsWith('localhost') ? 'http' : 'https');
+    return `${proto}://${host}`;
+  }
+  return env.NEXT_PUBLIC_APP_URL;
+}
 
 const passwordSchema = z.object({
   email: z.string().email(),
@@ -42,10 +59,11 @@ const googleSchema = z.object({ locale: z.enum(['de', 'en']) });
 export async function signInWithGoogle(formData: FormData): Promise<never> {
   const { locale } = googleSchema.parse({ locale: formData.get('locale') ?? 'de' });
   const supabase = await createClient();
+  const origin = await callbackOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/${locale}/verify`,
+      redirectTo: `${origin}/auth/callback?next=/${locale}/verify`,
     },
   });
   if (error || !data.url) redirect(`/${locale}/login?error=auth_callback`);

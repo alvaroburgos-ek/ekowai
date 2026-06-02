@@ -166,6 +166,12 @@ export const fields = pgTable(
     consumerWorksheets: text('consumer_worksheets').array(),
     orderIndex: integer('order_index').notNull().default(0),
     verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+    /** Audit columns: who flipped the field to engineer_verified, when, and an
+     * optional short note. Nullable — populated by the verifyField server
+     * action (src/lib/actions/verification.ts). */
+    verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    verificationNote: text('verification_note'),
     /** Soft-deactivation marker. Set false by the Pile-2 deprecation pass for
      * fields that have no source basis and no code consumer; their rows are
      * retained for audit trail but the worksheet form filters them out. */
@@ -194,6 +200,10 @@ export const equations = pgTable(
     clauseReference: text('clause_reference'),
     description: text('description'),
     verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+    /** Audit columns — see fields.verifiedByUserId. */
+    verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    verificationNote: text('verification_note'),
   },
   (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
 );
@@ -386,6 +396,48 @@ export const projectDocuments = pgTable(
   (t) => ({
     projectIdx: index('project_documents_project_idx').on(t.projectId),
     orgIdx: index('project_documents_org_idx').on(t.orgId),
+  }),
+);
+
+// Calculation snapshots (frozen captures of parameters + equation outputs +
+// compliance results at submit/approve transitions). Supports the calculation
+// diff viewer that engineers use during the review/approval workflow.
+//
+// JSONB shapes (kept off-schema so they can evolve without a migration):
+//   parameters:         { [fieldId]: { type, value, unit, citationSources } }
+//   equation_outputs:   { [equationNumber]: { kind: 'computed'|'manual_required'|'error',
+//                                             value?: number, formula?: string,
+//                                             substituted?: Record<string, number>,
+//                                             manualRequiredReason?: string } }
+//   compliance_results: { [requirementId]: 'pass' | 'fail' | 'open' }
+export const calculationSnapshots = pgTable(
+  'calculation_snapshots',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    worksheetInstanceId: uuid('worksheet_instance_id')
+      .notNull()
+      .references(() => worksheetInstances.id, { onDelete: 'cascade' }),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    takenAt: timestamp('taken_at', { withTimezone: true }).notNull().defaultNow(),
+    // References auth.users(id) directly in DB, kept FK-less in Drizzle to
+    // match the project's pattern for actor columns.
+    takenByUserId: uuid('taken_by_user_id'),
+    trigger: text('trigger').notNull(),
+    parameters: jsonb('parameters').notNull(),
+    equationOutputs: jsonb('equation_outputs').notNull(),
+    complianceResults: jsonb('compliance_results').notNull(),
+  },
+  (t) => ({
+    instanceIdx: index('calculation_snapshots_instance_taken_idx').on(
+      t.worksheetInstanceId,
+      t.takenAt,
+    ),
+    projectIdx: index('calculation_snapshots_project_taken_idx').on(
+      t.projectId,
+      t.takenAt,
+    ),
   }),
 );
 

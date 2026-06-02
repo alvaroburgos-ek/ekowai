@@ -11,6 +11,10 @@ import {
 import { eq, desc, inArray } from 'drizzle-orm';
 
 export type AuditEntry = {
+  /** Stable identifier composed of `${source}-${rowId}`. Used as React key
+   *  so the list survives sort/filter changes without DOM reuse on the
+   *  wrong row. */
+  id: string;
   source: 'approval' | 'audit';
   occurredAt: string;
   actorName: string | null;
@@ -31,6 +35,7 @@ export async function loadProjectAuditTimeline(
   const [approvals, audits] = await Promise.all([
     db
       .select({
+        id: approvalEvents.id,
         occurredAt: approvalEvents.occurredAt,
         actorId: approvalEvents.actorId,
         actorRole: approvalEvents.actorRole,
@@ -56,6 +61,7 @@ export async function loadProjectAuditTimeline(
       .limit(limit),
     db
       .select({
+        id: auditLog.id,
         occurredAt: auditLog.occurredAt,
         actorId: auditLog.actorId,
         actorRole: auditLog.actorRole,
@@ -92,6 +98,7 @@ export async function loadProjectAuditTimeline(
 
   for (const a of approvals) {
     entries.push({
+      id: `approval-${a.id}`,
       source: 'approval',
       occurredAt: a.occurredAt.toISOString(),
       actorName: a.actorName ?? null,
@@ -114,6 +121,7 @@ export async function loadProjectAuditTimeline(
       detail = `${c.eventType ?? a.action}: ${c.from} → ${c.to}`;
     }
     entries.push({
+      id: `audit-${a.id}`,
       source: 'audit',
       occurredAt: a.occurredAt.toISOString(),
       actorName: a.actorName ?? null,

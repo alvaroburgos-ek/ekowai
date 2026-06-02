@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { projects, worksheetTemplates, worksheetInstances, projectDocuments } from '@/lib/db/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { projects, worksheetTemplates, worksheetInstances, projectDocuments, profiles } from '@/lib/db/schema';
+import { and, eq, inArray, sql } from 'drizzle-orm';
+import { currentUserIsPlatformEngineer } from '@/lib/auth/platform-engineer';
 import {
   loadWorksheet,
   ensureWorksheetInstance,
@@ -9,10 +10,12 @@ import {
   loadSameSymbolValues,
   loadInheritedFields,
 } from '@/lib/db/queries/worksheet';
+import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
-import { resolveFromSiteProfile } from '@/lib/site-profile/symbol-map';
+import { NormTextProvider } from '@/components/norm-text/norm-text-context';
+import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
 
 export default async function WorksheetPage({
   params,
@@ -113,6 +116,34 @@ export default async function WorksheetPage({
     `),
   ]);
 
+  // Count prior snapshots — drives the "Änderungen seit letzter Version"
+  // affordance in the approval bar. Single COUNT-ish query is cheap and the
+  // index on (worksheet_instance_id, taken_at) keeps it O(log n).
+  const priorSnapshotCount = await countSnapshotsForInstance(instance.id);
+
+  // Platform-engineer gating + verifier-label resolution. We batch-load the
+  // profile emails of all distinct verifiers touched by this worksheet's
+  // fields + equations so the chip can render "bestätigt von X" without
+  // round-tripping per row.
+  const isPlatformEngineer = await currentUserIsPlatformEngineer();
+  const verifierIds = new Set<string>();
+  for (const f of mergedFields) {
+    if ('verifiedByUserId' in f && f.verifiedByUserId) verifierIds.add(f.verifiedByUserId as string);
+  }
+  for (const e of ws.equations) {
+    if (e.verifiedByUserId) verifierIds.add(e.verifiedByUserId);
+  }
+  const verifierLabels = new Map<string, string>();
+  if (verifierIds.size > 0) {
+    const rows = await db
+      .select({ id: profiles.id, email: profiles.email, fullName: profiles.fullName })
+      .from(profiles)
+      .where(inArray(profiles.id, Array.from(verifierIds)));
+    for (const r of rows) {
+      verifierLabels.set(r.id, r.fullName ?? r.email);
+    }
+  }
+
   // Convert parameters → initialValues for the store. Resolution order
   // (first hit wins; engineer can always override by typing):
   //   1. Local project_parameters row (engineer's own value).
@@ -125,6 +156,7 @@ export default async function WorksheetPage({
   const initialValues: Record<string, unknown> = {};
   const inheritedFromBySymbol: Record<string, string> = {};
   const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile'> = {};
+  const siteProfileKeyByFieldId: Record<string, string> = {};
   for (const f of mergedFields) {
     const p = parameters.get(f.id);
     if (p) {
@@ -171,6 +203,8 @@ export default async function WorksheetPage({
     if (site && site.value != null && site.type === f.dataType) {
       initialValues[f.id] = { type: site.type, value: site.value };
       prefillSourceByFieldId[f.id] = 'site_profile';
+      const entry = SITE_PROFILE_BY_SYMBOL.get(f.symbol);
+      if (entry) siteProfileKeyByFieldId[f.id] = entry.key;
       continue;
     }
 
@@ -218,6 +252,7 @@ export default async function WorksheetPage({
   }
 
   return (
+    <NormTextProvider standardCode={standardCode}>
     <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-12">
       <aside>
         <WorksheetListSidebar
@@ -246,25 +281,36 @@ export default async function WorksheetPage({
             id: s.id, code: s.code, titleDe: s.titleDe, titleEn: s.titleEn,
             orderIndex: s.orderIndex, parentSectionId: s.parentSectionId,
           }))}
-          fields={mergedFields.map((f) => ({
-            id: f.id, sectionId: f.sectionId, symbol: f.symbol,
-            labelDe: f.labelDe, labelEn: f.labelEn, unit: f.unit,
-            dataType: f.dataType as 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json',
-            isRequired: f.isRequired,
-            enumValues: f.enumValues as Array<{ value: string; label_de: string | null; label_en: string | null }> | null,
-            validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; raw?: string } | null,
-            clauseReference: f.clauseReference,
-            description: f.description,
-            verificationStatus: f.verificationStatus,
-            orderIndex: f.orderIndex,
-            active: f.active,
-            inheritedFromWorksheet: f.inheritedFromWorksheet,
-          })) as never}
+          fields={mergedFields.map((f) => {
+            const verifiedByUserId = (f as typeof f & { verifiedByUserId?: string | null }).verifiedByUserId ?? null;
+            const verifiedAt = (f as typeof f & { verifiedAt?: Date | null }).verifiedAt ?? null;
+            const verificationNote = (f as typeof f & { verificationNote?: string | null }).verificationNote ?? null;
+            return {
+              id: f.id, sectionId: f.sectionId, symbol: f.symbol,
+              labelDe: f.labelDe, labelEn: f.labelEn, unit: f.unit,
+              dataType: f.dataType as 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json',
+              isRequired: f.isRequired,
+              enumValues: f.enumValues as Array<{ value: string; label_de: string | null; label_en: string | null }> | null,
+              validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; raw?: string } | null,
+              clauseReference: f.clauseReference,
+              description: f.description,
+              verificationStatus: f.verificationStatus,
+              orderIndex: f.orderIndex,
+              active: f.active,
+              inheritedFromWorksheet: f.inheritedFromWorksheet,
+              verifiedByLabel: verifiedByUserId ? verifierLabels.get(verifiedByUserId) ?? null : null,
+              verifiedAt: verifiedAt ? verifiedAt.toISOString() : null,
+              verificationNote,
+            };
+          }) as never}
           equations={ws.equations.map((e) => ({
             id: e.id, equationNumber: e.equationNumber, formula: e.formula,
             inputSymbols: e.inputSymbols, outputSymbol: e.outputSymbol,
             clauseReference: e.clauseReference, description: e.description,
             verificationStatus: e.verificationStatus,
+            verifiedByLabel: e.verifiedByUserId ? verifierLabels.get(e.verifiedByUserId) ?? null : null,
+            verifiedAt: e.verifiedAt ? e.verifiedAt.toISOString() : null,
+            verificationNote: e.verificationNote,
           }))}
           complianceRequirements={ws.complianceRequirements.map((c) => ({
             id: c.id, code: c.code,
@@ -291,10 +337,16 @@ export default async function WorksheetPage({
           inheritedFromBySymbol={inheritedFromBySymbol}
           ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
           prefillSourceByFieldId={prefillSourceByFieldId}
+          siteProfileKeyByFieldId={siteProfileKeyByFieldId}
+          standardCode={standardCode}
           docs={docs}
+          priorSnapshotCount={priorSnapshotCount}
+          diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
+          isPlatformEngineer={isPlatformEngineer}
         />
       </main>
     </div>
+    </NormTextProvider>
   );
 }
 

@@ -1,6 +1,13 @@
 'use server';
 import { db } from '@/lib/db';
-import { projectParameters, auditLog } from '@/lib/db/schema';
+import {
+  projectParameters,
+  auditLog,
+  projects,
+  orgMembers,
+  fields,
+  worksheetInstances,
+} from '@/lib/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 
@@ -26,6 +33,43 @@ async function requireUser() {
   return auth.user.id;
 }
 
+/** Resolves orgId iff caller is a member of the project's org. Replaces the
+ *  prior boolean-returning helper so callers can stamp orgId into audit_log
+ *  without depending on the fill-trigger. Returns null on access denial. */
+async function resolveProjectOrgId(
+  userId: string,
+  projectId: string,
+): Promise<string | null> {
+  const [row] = await db
+    .select({ orgId: projects.orgId })
+    .from(projects)
+    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .where(and(eq(projects.id, projectId), eq(orgMembers.userId, userId)))
+    .limit(1);
+  return row?.orgId ?? null;
+}
+
+/** Returns true iff `fieldId` belongs to a worksheet template the project has
+ *  instantiated. Blocks IDOR where a member writes citation_sources for a
+ *  field from an unrelated standard. */
+async function assertFieldInProject(
+  fieldId: string,
+  projectId: string,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ id: fields.id })
+    .from(fields)
+    .innerJoin(
+      worksheetInstances,
+      eq(worksheetInstances.worksheetTemplateId, fields.worksheetTemplateId),
+    )
+    .where(
+      and(eq(fields.id, fieldId), eq(worksheetInstances.projectId, projectId)),
+    )
+    .limit(1);
+  return !!row;
+}
+
 /** Append a citation to a field's citation_sources array. Creates the
  * project_parameters row if it doesn't exist yet. Returns the new id. */
 export async function addCitation(input: {
@@ -38,6 +82,11 @@ export async function addCitation(input: {
     userId = await requireUser();
   } catch {
     return { ok: false, error: 'Not authenticated' };
+  }
+  const orgId = await resolveProjectOrgId(userId, input.projectId);
+  if (!orgId) return { ok: false, error: 'project_not_found' };
+  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
+    return { ok: false, error: 'field_not_in_project' };
   }
 
   const citation: StoredCitation = {
@@ -90,6 +139,7 @@ export async function addCitation(input: {
         actorId: userId,
         actorRole: 'engineer',
         projectId: input.projectId,
+        orgId,
         tableName: 'project_parameters',
         recordId: input.fieldId,
         action: 'update',
@@ -113,6 +163,11 @@ export async function removeCitation(input: {
     userId = await requireUser();
   } catch {
     return { ok: false, error: 'Not authenticated' };
+  }
+  const orgId = await resolveProjectOrgId(userId, input.projectId);
+  if (!orgId) return { ok: false, error: 'project_not_found' };
+  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
+    return { ok: false, error: 'field_not_in_project' };
   }
 
   try {
@@ -138,6 +193,7 @@ export async function removeCitation(input: {
         actorId: userId,
         actorRole: 'engineer',
         projectId: input.projectId,
+        orgId,
         tableName: 'project_parameters',
         recordId: input.fieldId,
         action: 'update',
@@ -163,6 +219,11 @@ export async function attachCitation(input: {
     userId = await requireUser();
   } catch {
     return { ok: false, error: 'Not authenticated' };
+  }
+  const orgId = await resolveProjectOrgId(userId, input.projectId);
+  if (!orgId) return { ok: false, error: 'project_not_found' };
+  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
+    return { ok: false, error: 'field_not_in_project' };
   }
 
   const citation: StoredCitation = {
@@ -215,6 +276,7 @@ export async function attachCitation(input: {
         actorId: userId,
         actorRole: 'engineer',
         projectId: input.projectId,
+        orgId,
         tableName: 'project_parameters',
         recordId: input.fieldId,
         action: 'update',
@@ -238,6 +300,11 @@ export async function detachCitation(input: {
   } catch {
     return { ok: false, error: 'Not authenticated' };
   }
+  const orgId = await resolveProjectOrgId(userId, input.projectId);
+  if (!orgId) return { ok: false, error: 'project_not_found' };
+  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
+    return { ok: false, error: 'field_not_in_project' };
+  }
 
   try {
     await db.transaction(async (tx) => {
@@ -255,6 +322,7 @@ export async function detachCitation(input: {
         actorId: userId,
         actorRole: 'engineer',
         projectId: input.projectId,
+        orgId,
         tableName: 'project_parameters',
         recordId: input.fieldId,
         action: 'update',

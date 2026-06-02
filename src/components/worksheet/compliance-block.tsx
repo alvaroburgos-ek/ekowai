@@ -6,6 +6,7 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
+import { ClauseChip } from '@/components/norm-text/clause-chip';
 
 type ComplianceReq = {
   id: string;
@@ -170,7 +171,9 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
               )}
               <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[140px] flex gap-3 flex-wrap">
                 <code>{cr.condition}</code>
-                {cr.clauseReference && <span>{cr.clauseReference}</span>}
+                {cr.clauseReference && (
+                  <ClauseChip clauseReference={cr.clauseReference} />
+                )}
                 {result.kind === 'pending' && result.missingSymbols.length > 0 && (
                   <span className="text-subtext">
                     fehlend: {result.missingSymbols.join(', ')}
