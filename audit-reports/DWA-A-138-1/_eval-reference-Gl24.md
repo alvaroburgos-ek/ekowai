@@ -1,5 +1,8 @@
 # Gl. 24 (A138-18) — q_VS specific outflow of perforated infiltration pipe
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `q_VS = 0.1 · az_SOE · A_SOE · 10⁻¹` — §6.4.2.
 
 | Input | Value | Unit |

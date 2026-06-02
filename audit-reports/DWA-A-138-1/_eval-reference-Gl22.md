@@ -1,30 +1,25 @@
-# Eval-Reference — DWA-A 138-1, A138-18, Gl. 22 (s_R, thin-wall alternative)
+# Gl. 22 (A138-18) — s_R thin-wall (displayOnly)
 
-`s_R = (s_F / (b_R · h_R)) · (b_R · h_R + az · (π · d² / 4) · ((1 / s_F) − 1))` — §6.4.2.
 
-Speicherkoeffizient der Rigole für dünnwandige Versickerrohre (d_a ≈ d_i ≈ d). **Algebraisch identisch** zu Gl. (21) mit d_a = d_i. **displayOnly** — Gl. (21) ist primärer Schreiber für s_R.
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
 
-| Input | Value | Unit | Origin |
-|---|---:|---|---|
-| s_F | 0.30 | – | A138-18 |
-| b_R | 1.0 | m | A138-18 |
-| h_R | 1.0 | m | A138-18 |
-| az | 1 | – | A138-18 |
-| d (aliased → d_i) | 0.184 | m | A138-18 (`d_i` field; engineer responsible for d_a ≈ d_i) |
+`s_R = (s_F / (b·h)) · (b·h + az · (π·d²/4) · ((1/s_F) − 1))` — §6.4.2.
+
+Thin-wall alternative to Gl. 21 (d_a ≈ d_i ≈ d). Algebraically identical to Gl. 21 when d_a = d_i.
+
+| Input | Value | Unit |
+|---|---:|---|
+| s_F | 0.30 | – |
+| b_R, h_R | 1.0, 1.0 | m |
+| az | 1 | – |
+| d → d_i (alias) | 0.184 | m |
 
 ```
-(π · d² / 4)                 = π · 0.184² / 4              = 0.026 590
-((1/s_F) − 1)                = (1/0.30) − 1                = 2.333 333
-az · 0.026 590 · 2.333 333   = 1 · 0.062 044                = 0.062 044
-b_R · h_R + 0.062 044        = 1 + 0.062 044               = 1.062 044
-s_F / (b_R · h_R)            = 0.30 / 1                    = 0.300 000
-× 1.062 044                  = 0.30 · 1.062 044            = 0.318 613
+(π·d²/4)          = π·0.033856/4 = 0.026 590
+(1/s_F − 1)       = 3.333 − 1   = 2.333 333
+az · 0.026 590 · 2.333 333       = 0.062 044
+b·h + 0.062 044                  = 1.062 044
+× s_F/(b·h) (0.30)               = 0.318 613
 ```
 
-**Reference s_R = 0.318 613** (precision ±0.000 1; with these inputs, identical to Gl. (21) using d_a = d_i = 0.184).
-
-### Unit guard
-s_F, az dimensionless; b_R, h_R, d in m. Mismatch → manual_required (and the d_i source field is m per the §6.4.2 L1831 override).
-
-### Sibling-unit check
-Output s_R **dimensionless** — same field as Gl. (21). `displayOnly` keeps Gl. (21) as the primary writer. The symbolAlias `d → d_i` maps the formula's single-diameter parameter to the wizard's inner-diameter field; engineer using Gl. (22) accepts the thin-wall assumption.
+**Ref s_R = 0.318 613.** Sibling: dimensionless, same field as Gl. 21. displayOnly — Gl. 21 primär.

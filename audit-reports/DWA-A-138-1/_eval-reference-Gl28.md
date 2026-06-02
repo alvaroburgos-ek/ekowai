@@ -1,5 +1,8 @@
 # Gl. 28 (A138-19) — V_MR required (MRE Bemessung)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `V_MR = ((A_C + A_VA) · 10⁻⁷ · r_D(n) − ((b_R + h_R) · L_R + b_R · h_R) · k_i) · D · 60 · f_Z` — §6.5.2.
 
 | Input | Value | Unit |

@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-10, Gl. 2 (A_C)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 > **Iteration 2 (2026-05-29):** The mean-C_m rewrite from iteration 1 is retired in this iteration. The engine now computes Σ(A_i · C_i) directly over per-sub-area rows. The mixed-coefficients case below is the acceptance gate the old rewrite would FAIL. Iteration-1 case retained at the bottom for historical reference only.
 
 **Purpose:** Hand-calculated reference for the formula evaluator. The wizard's engine is correct only if it reproduces these numbers to the stated precision.

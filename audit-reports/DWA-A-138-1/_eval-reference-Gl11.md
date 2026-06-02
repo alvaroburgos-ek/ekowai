@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-16, Gl. 11 (Bilanz-Check)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `(A_C + A_S) · r_D(n) · 10⁻⁷ = A_S · k_i` — Wasserbilanz §6.2.2.
 
 This is the source's identity from which Gl. (12) is derived. The engine wires it as a **balance-check aggregator**, not a producing equation: it verifies that the engineer's A_S choice satisfies the source's identity within ±1 % relative tolerance.

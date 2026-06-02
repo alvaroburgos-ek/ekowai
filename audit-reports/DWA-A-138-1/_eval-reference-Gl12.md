@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-16, Gl. 12 (A_S Flächenversickerung)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `A_S = A_C / (k_i · 10⁷ / r_D(n) − 1)` — erforderliche Versickerungsfläche §6.2.2.
 
 | Input | Value | Unit |
