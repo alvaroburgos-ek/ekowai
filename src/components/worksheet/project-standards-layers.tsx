@@ -3,7 +3,7 @@
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, ChevronUp, ChevronDown, FileDown } from 'lucide-react';
+import { AlertCircle, Check, ChevronUp, ChevronDown, FileDown } from 'lucide-react';
 import {
   setProjectStandardLayer,
   moveProjectStandard,
@@ -431,12 +431,13 @@ function SidebarItem({
       onClick={() => onSelect(entry.projectStandardId)}
       aria-current={selected ? 'true' : undefined}
       className={cn(
-        'w-full text-left flex items-center gap-2 px-4 py-2 text-sm transition-colors',
-        'hover:bg-paper-2/50',
-        selected && 'bg-accent/10 text-ink',
-        !selected && 'text-ink',
+        'group w-full text-left flex items-center gap-2 pr-3 py-2 text-sm transition-colors relative',
+        'border-l-2',
+        selected
+          ? 'bg-accent/15 text-ink border-accent font-medium'
+          : 'text-ink border-transparent hover:bg-paper-2/50 hover:border-hairline',
       )}
-      style={{ paddingLeft: `${1 + depth * 0.85}rem` }}
+      style={{ paddingLeft: `${0.75 + depth * 0.85}rem` }}
     >
       {depth > 0 && (
         <span aria-hidden="true" className="text-subtext text-xs leading-none -ml-1">
@@ -446,7 +447,7 @@ function SidebarItem({
       <ProgressRing pct={pct} size={16} />
       <span className="flex-1 min-w-0">
         <span className="flex items-baseline gap-1.5">
-          <span className="font-medium truncate">{entry.standard.code}</span>
+          <span className="truncate">{entry.standard.code}</span>
           {stageBadge && (
             <span className="text-[9px] uppercase tracking-[0.18em] text-subtext shrink-0">
               {stageBadge}
@@ -465,6 +466,9 @@ function SidebarItem({
           </span>
         )}
       </span>
+      {selected && (
+        <Check className="size-4 text-accent shrink-0" aria-label="ausgewählt" />
+      )}
     </button>
   );
 }
