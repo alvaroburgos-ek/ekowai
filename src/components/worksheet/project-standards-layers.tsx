@@ -1,9 +1,9 @@
 'use client';
 
-import { Fragment, useMemo, useOptimistic, useState, useTransition } from 'react';
+import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FileDown, AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronUp, ChevronDown, FileDown } from 'lucide-react';
 import {
   setProjectStandardLayer,
   moveProjectStandard,
@@ -13,6 +13,7 @@ import {
 import type { Layer, RelationType } from '@/lib/types/project-layers';
 import type { WorksheetStatus } from '@/lib/state-machine';
 import { Select } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 
 type Worksheet = {
   templateId: string;
@@ -57,6 +58,14 @@ const STATUS_DOT: Record<WorksheetStatus, string> = {
   deactivated: 'bg-ink/10',
 };
 
+const STATUS_BAR: Record<WorksheetStatus, string> = {
+  draft: 'bg-ink/15',
+  submitted_for_review: 'bg-accent-2',
+  engineer_approved: 'bg-success',
+  final: 'bg-accent',
+  deactivated: 'bg-ink/10',
+};
+
 const STATUS_LABEL: Record<WorksheetStatus, string> = {
   draft: 'Entwurf',
   submitted_for_review: 'In Prüfung',
@@ -72,6 +81,14 @@ const LAYER_LABEL_DE: Record<Layer, string> = {
 };
 
 const LAYER_ORDER: Layer[] = ['management', 'cost', 'technical'];
+
+const RELATION_LABEL: Record<RelationType, string> = {
+  series: 'in Reihe',
+  parallel: 'parallel',
+  sub_standard: 'Sub-Standard',
+};
+
+const DONE_STATUSES: WorksheetStatus[] = ['engineer_approved', 'final'];
 
 type OptimisticPatch =
   | { kind: 'layer'; standardId: string; layer: Layer | null }
@@ -97,6 +114,51 @@ function applyPatch(state: StandardEntry[], patch: OptimisticPatch): StandardEnt
   }
 }
 
+type FlatRow = {
+  entry: StandardEntry;
+  depth: number;
+  stageBadge: string | null;
+  /** Index of this entry among its root siblings in the same layer (for ↑↓). */
+  rootIndex: number | null;
+  /** Total number of root siblings in the layer (for ↑↓ disable). */
+  rootSiblings: number | null;
+};
+
+/**
+ * Flatten the standards-tree for a given layer into a depth-aware list.
+ * Roots first (ordered by stageOrder); each root recurses into series/parallel/sub_standard
+ * children. Standards whose parent is outside the layer are treated as roots.
+ */
+function flattenLayer(entries: StandardEntry[]): FlatRow[] {
+  if (entries.length === 0) return [];
+  const idsInLayer = new Set(entries.map((s) => s.projectStandardId));
+  const roots = entries.filter(
+    (s) => !s.parentStandardId || !idsInLayer.has(s.parentStandardId),
+  );
+  const rows: FlatRow[] = [];
+
+  function walk(node: StandardEntry, depth: number, stageBadge: string | null) {
+    rows.push({
+      entry: node,
+      depth,
+      stageBadge,
+      rootIndex: depth === 0 ? roots.indexOf(node) : null,
+      rootSiblings: depth === 0 ? roots.length : null,
+    });
+    const children = entries.filter((s) => s.parentStandardId === node.projectStandardId);
+    // Render order: series → parallel → sub_standard (matches old TechnicalTrain).
+    const ordered = [
+      ...children.filter((c) => c.relationType === 'series'),
+      ...children.filter((c) => c.relationType === 'parallel'),
+      ...children.filter((c) => c.relationType === 'sub_standard'),
+    ];
+    for (const c of ordered) walk(c, depth + 1, null);
+  }
+
+  roots.forEach((r, i) => walk(r, 0, `Stage ${i + 1}`));
+  return rows;
+}
+
 export function ProjectStandardsLayers({ projectId, locale, standards }: Props) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -106,7 +168,6 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
     OptimisticPatch
   >(standards, applyPatch);
 
-  // Sort all standards by stageOrder asc (NULL last) for stable ordering downstream.
   const sortedAll = useMemo(() => {
     const cmp = (a: StandardEntry, b: StandardEntry) => {
       const ao = a.stageOrder ?? Number.MAX_SAFE_INTEGER;
@@ -127,6 +188,35 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
     }
     return m;
   }, [sortedAll]);
+
+  const rowsByLayer = useMemo(() => {
+    const m = new Map<Layer | 'unassigned', FlatRow[]>();
+    for (const key of [...LAYER_ORDER, 'unassigned' as const]) {
+      m.set(key, flattenLayer(byLayer.get(key) ?? []));
+    }
+    return m;
+  }, [byLayer]);
+
+  const allRows = useMemo(() => {
+    return [
+      ...(rowsByLayer.get('management') ?? []),
+      ...(rowsByLayer.get('cost') ?? []),
+      ...(rowsByLayer.get('technical') ?? []),
+      ...(rowsByLayer.get('unassigned') ?? []),
+    ];
+  }, [rowsByLayer]);
+
+  const [selectedId, setSelectedId] = useState<string | null>(
+    allRows[0]?.entry.projectStandardId ?? null,
+  );
+
+  // Keep selection valid if standards list changes.
+  const effectiveSelectedId =
+    selectedId && allRows.some((r) => r.entry.projectStandardId === selectedId)
+      ? selectedId
+      : (allRows[0]?.entry.projectStandardId ?? null);
+
+  const selectedRow = allRows.find((r) => r.entry.projectStandardId === effectiveSelectedId);
 
   function pickTitle(s: StandardEntry['standard']): string {
     if (locale === 'de') return s.titleDe;
@@ -201,7 +291,7 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
   const hasAnyLayered = optimisticStandards.some((s) => s.layer !== null);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {error && (
         <div
           role="alert"
@@ -218,6 +308,7 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
           </button>
         </div>
       )}
+
       {(!hasAnyLayered || optimisticStandards.length === 0) && (
         <RecommendationPanel
           standards={optimisticStandards}
@@ -226,7 +317,7 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
         />
       )}
       {hasAnyLayered && (
-        <div className="flex items-baseline justify-end -mb-4">
+        <div className="flex items-baseline justify-end">
           <button
             type="button"
             onClick={applyRecommended}
@@ -238,341 +329,31 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
         </div>
       )}
 
-      {LAYER_ORDER.map((layer) => {
-        const entries = byLayer.get(layer) ?? [];
-        if (entries.length === 0) return null;
-        return (
-          <section key={layer} className="space-y-4">
-            <h3 className="text-[10px] uppercase tracking-[0.25em] text-subtext border-b border-hairline pb-2">
-              Layer {LAYER_ORDER.indexOf(layer) + 1} · {LAYER_LABEL_DE[layer]}
-            </h3>
-            {layer === 'technical' ? (
-              <TechnicalTrain
-                entries={entries}
-                allInLayer={entries}
-                projectId={projectId}
-                locale={locale}
-                pickTitle={pickTitle}
-                pickWsTitle={pickWsTitle}
-                move={move}
-                setLayer={setLayer}
-                setRelation={setRelation}
-                pending={pending}
-              />
-            ) : (
-              <FlatLayer
-                entries={entries}
-                projectId={projectId}
-                locale={locale}
-                pickTitle={pickTitle}
-                pickWsTitle={pickWsTitle}
-                move={move}
-                setLayer={setLayer}
-                pending={pending}
-              />
-            )}
-          </section>
-        );
-      })}
-
-      {(byLayer.get('unassigned') ?? []).length > 0 && (
-        <section className="space-y-4">
-          <h3 className="text-[10px] uppercase tracking-[0.25em] text-subtext border-b border-hairline pb-2">
-            Ohne Zuordnung
-          </h3>
-          <FlatLayer
-            entries={byLayer.get('unassigned') ?? []}
-            projectId={projectId}
-            locale={locale}
-            pickTitle={pickTitle}
-            pickWsTitle={pickWsTitle}
-            move={move}
-            setLayer={setLayer}
-            pending={pending}
+      {allRows.length > 0 && (
+        <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-6 items-start">
+          <StandardSidebar
+            rowsByLayer={rowsByLayer}
+            selectedId={effectiveSelectedId}
+            onSelect={setSelectedId}
           />
-        </section>
-      )}
-    </div>
-  );
-}
-
-/* ============================================================================
- * Flat layer (management / cost / unassigned) — no parent/relation controls.
- * ========================================================================== */
-function FlatLayer({
-  entries,
-  projectId,
-  locale,
-  pickTitle,
-  pickWsTitle,
-  move,
-  setLayer,
-  pending,
-}: {
-  entries: StandardEntry[];
-  projectId: string;
-  locale: 'de' | 'en';
-  pickTitle: (s: StandardEntry['standard']) => string;
-  pickWsTitle: (w: Worksheet) => string;
-  move: (standardId: string, direction: 'up' | 'down') => void;
-  setLayer: (standardId: string, layer: Layer | null) => void;
-  pending: boolean;
-}) {
-  return (
-    <div className="space-y-3">
-      {entries.map((s, idx) => (
-        <StandardBox
-          key={s.projectStandardId}
-          s={s}
-          projectId={projectId}
-          locale={locale}
-          pickTitle={pickTitle}
-          pickWsTitle={pickWsTitle}
-          stageBadge={null}
-          onMoveUp={() => move(s.standard.id, 'up')}
-          onMoveDown={() => move(s.standard.id, 'down')}
-          canMoveUp={idx > 0}
-          canMoveDown={idx < entries.length - 1}
-          onLayerChange={(l) => setLayer(s.standard.id, l)}
-          parentOptions={[]}
-          onRelationChange={() => {}}
-          showHierarchyControls={false}
-          pending={pending}
-        />
-      ))}
-    </div>
-  );
-}
-
-/* ============================================================================
- * Technical train — boxes + arrows + ODER + sub-standard indent.
- * ========================================================================== */
-function TechnicalTrain({
-  entries,
-  allInLayer,
-  projectId,
-  locale,
-  pickTitle,
-  pickWsTitle,
-  move,
-  setLayer,
-  setRelation,
-  pending,
-}: {
-  entries: StandardEntry[];
-  allInLayer: StandardEntry[];
-  projectId: string;
-  locale: 'de' | 'en';
-  pickTitle: (s: StandardEntry['standard']) => string;
-  pickWsTitle: (w: Worksheet) => string;
-  move: (standardId: string, direction: 'up' | 'down') => void;
-  setLayer: (standardId: string, layer: Layer | null) => void;
-  setRelation: (
-    projectStandardId: string,
-    parentProjectStandardId: string | null,
-    relationType: RelationType | null,
-  ) => void;
-  pending: boolean;
-}) {
-  // Roots = entries with no parent OR whose parent isn't in this layer.
-  const idsInLayer = new Set(allInLayer.map((s) => s.projectStandardId));
-  const roots = entries.filter(
-    (s) => !s.parentStandardId || !idsInLayer.has(s.parentStandardId),
-  );
-
-  // Stage badge: use position among roots (1, 2, 3 …) — engineers reorder this with ↑↓.
-  const rootStage = new Map<string, number>();
-  roots.forEach((r, i) => rootStage.set(r.projectStandardId, i + 1));
-
-  return (
-    <div className="space-y-6">
-      {roots.map((root, idx) => (
-        <div key={root.projectStandardId}>
-          {idx > 0 && (
-            <div aria-hidden="true" className="ml-10 mb-3 text-accent-2 text-2xl leading-none">
-              ↓
-            </div>
-          )}
-          <TrainNode
-            node={root}
-            allInLayer={allInLayer}
-            projectId={projectId}
-            locale={locale}
-            pickTitle={pickTitle}
-            pickWsTitle={pickWsTitle}
-            stageBadge={`Stage ${rootStage.get(root.projectStandardId)}`}
-            move={move}
-            setLayer={setLayer}
-            setRelation={setRelation}
-            canMoveUp={idx > 0}
-            canMoveDown={idx < roots.length - 1}
-            pending={pending}
-            depth={0}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function TrainNode({
-  node,
-  allInLayer,
-  projectId,
-  locale,
-  pickTitle,
-  pickWsTitle,
-  stageBadge,
-  move,
-  setLayer,
-  setRelation,
-  canMoveUp,
-  canMoveDown,
-  pending,
-  depth,
-}: {
-  node: StandardEntry;
-  allInLayer: StandardEntry[];
-  projectId: string;
-  locale: 'de' | 'en';
-  pickTitle: (s: StandardEntry['standard']) => string;
-  pickWsTitle: (w: Worksheet) => string;
-  stageBadge: string | null;
-  move: (standardId: string, direction: 'up' | 'down') => void;
-  setLayer: (standardId: string, layer: Layer | null) => void;
-  setRelation: (
-    projectStandardId: string,
-    parentProjectStandardId: string | null,
-    relationType: RelationType | null,
-  ) => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
-  pending: boolean;
-  depth: number;
-}) {
-  const children = allInLayer.filter(
-    (s) => s.parentStandardId === node.projectStandardId,
-  );
-  const seriesKids = children.filter((c) => c.relationType === 'series');
-  const parallelKids = children.filter((c) => c.relationType === 'parallel');
-  const subKids = children.filter((c) => c.relationType === 'sub_standard');
-
-  // Parent options: all OTHER entries in the layer (so engineer can re-parent).
-  const parentOptions = allInLayer
-    .filter((s) => s.projectStandardId !== node.projectStandardId)
-    .map((s) => ({
-      projectStandardId: s.projectStandardId,
-      code: s.standard.code,
-    }));
-
-  return (
-    <div className={depth > 0 ? 'ml-8 border-l-2 border-hairline pl-4' : ''}>
-      <StandardBox
-        s={node}
-        projectId={projectId}
-        locale={locale}
-        pickTitle={pickTitle}
-        pickWsTitle={pickWsTitle}
-        stageBadge={stageBadge}
-        onMoveUp={() => move(node.standard.id, 'up')}
-        onMoveDown={() => move(node.standard.id, 'down')}
-        canMoveUp={canMoveUp}
-        canMoveDown={canMoveDown}
-        onLayerChange={(l) => setLayer(node.standard.id, l)}
-        parentOptions={parentOptions}
-        onRelationChange={(parentPSId, rel) => setRelation(node.projectStandardId, parentPSId, rel)}
-        showHierarchyControls={true}
-        pending={pending}
-      />
-
-      {/* sub-standards: indented under parent */}
-      {subKids.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {subKids.map((c) => (
-            <TrainNode
-              key={c.projectStandardId}
-              node={c}
-              allInLayer={allInLayer}
+          {selectedRow ? (
+            <StandardDetail
+              row={selectedRow}
+              allEntriesInLayer={byLayer.get(selectedRow.entry.layer ?? 'unassigned') ?? []}
               projectId={projectId}
               locale={locale}
               pickTitle={pickTitle}
               pickWsTitle={pickWsTitle}
-              stageBadge={null}
               move={move}
               setLayer={setLayer}
               setRelation={setRelation}
-              canMoveUp={false}
-              canMoveDown={false}
               pending={pending}
-              depth={depth + 1}
             />
-          ))}
-        </div>
-      )}
-
-      {/* parallel siblings: side-by-side with ODER */}
-      {parallelKids.length > 0 && (
-        <div className="mt-4">
-          <div aria-hidden="true" className="ml-10 mb-2 text-subtext text-2xl leading-none">↓</div>
-          <div className="flex items-stretch gap-4 flex-wrap">
-            {parallelKids.map((c, i) => (
-              <Fragment key={c.projectStandardId}>
-                {i > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="self-center text-[10px] uppercase tracking-[0.25em] text-subtext"
-                  >
-                    ODER
-                  </span>
-                )}
-                <div className="flex-1 min-w-[16rem]">
-                  <TrainNode
-                    node={c}
-                    allInLayer={allInLayer}
-                    projectId={projectId}
-                    locale={locale}
-                    pickTitle={pickTitle}
-                    pickWsTitle={pickWsTitle}
-                    stageBadge={null}
-                    move={move}
-                    setLayer={setLayer}
-                    setRelation={setRelation}
-                    canMoveUp={false}
-                    canMoveDown={false}
-                    pending={pending}
-                    depth={depth}
-                  />
-                </div>
-              </Fragment>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* series children: chained below with ↓ */}
-      {seriesKids.length > 0 && (
-        <div className="mt-4 space-y-4">
-          {seriesKids.map((c) => (
-            <div key={c.projectStandardId}>
-              <div aria-hidden="true" className="ml-10 mb-3 text-accent-2 text-2xl leading-none">↓</div>
-              <TrainNode
-                node={c}
-                allInLayer={allInLayer}
-                projectId={projectId}
-                locale={locale}
-                pickTitle={pickTitle}
-                pickWsTitle={pickWsTitle}
-                stageBadge={null}
-                move={move}
-                setLayer={setLayer}
-                setRelation={setRelation}
-                canMoveUp={false}
-                canMoveDown={false}
-                pending={pending}
-                depth={depth}
-              />
+          ) : (
+            <div className="border border-hairline rounded-md p-8 text-sm text-subtext text-center">
+              Wähle links einen Standard.
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
@@ -580,117 +361,245 @@ function TrainNode({
 }
 
 /* ============================================================================
- * Standard box — used by both flat and tree renders.
+ * Left sidebar — grouped by layer, hierarchy via indentation + relation label.
  * ========================================================================== */
-function StandardBox({
-  s,
+function StandardSidebar({
+  rowsByLayer,
+  selectedId,
+  onSelect,
+}: {
+  rowsByLayer: Map<Layer | 'unassigned', FlatRow[]>;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  const sections: Array<{ key: Layer | 'unassigned'; label: string; rows: FlatRow[] }> = [];
+  for (const layer of LAYER_ORDER) {
+    const rows = rowsByLayer.get(layer) ?? [];
+    if (rows.length > 0) {
+      sections.push({ key: layer, label: LAYER_LABEL_DE[layer], rows });
+    }
+  }
+  const unassigned = rowsByLayer.get('unassigned') ?? [];
+  if (unassigned.length > 0) {
+    sections.push({ key: 'unassigned', label: 'Ohne Zuordnung', rows: unassigned });
+  }
+
+  return (
+    <nav className="border border-hairline rounded-md bg-paper sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+      {sections.map((section, sIdx) => (
+        <div key={section.key} className={sIdx > 0 ? 'border-t border-hairline' : ''}>
+          <h3 className="px-4 pt-3 pb-2 text-[10px] uppercase tracking-[0.25em] text-subtext">
+            {section.label}
+          </h3>
+          <ul className="pb-2">
+            {section.rows.map((row) => (
+              <li key={row.entry.projectStandardId}>
+                <SidebarItem
+                  row={row}
+                  selected={row.entry.projectStandardId === selectedId}
+                  onSelect={onSelect}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+function SidebarItem({
+  row,
+  selected,
+  onSelect,
+}: {
+  row: FlatRow;
+  selected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const { entry, depth, stageBadge } = row;
+  const total = entry.worksheets.length;
+  const done = entry.worksheets.filter(
+    (w) => w.status && DONE_STATUSES.includes(w.status),
+  ).length;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const relLabel = entry.relationType ? RELATION_LABEL[entry.relationType] : null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(entry.projectStandardId)}
+      aria-current={selected ? 'true' : undefined}
+      className={cn(
+        'w-full text-left flex items-center gap-2 px-4 py-2 text-sm transition-colors',
+        'hover:bg-paper-2/50',
+        selected && 'bg-accent/10 text-ink',
+        !selected && 'text-ink',
+      )}
+      style={{ paddingLeft: `${1 + depth * 0.85}rem` }}
+    >
+      {depth > 0 && (
+        <span aria-hidden="true" className="text-subtext text-xs leading-none -ml-1">
+          ↳
+        </span>
+      )}
+      <ProgressRing pct={pct} size={16} />
+      <span className="flex-1 min-w-0">
+        <span className="flex items-baseline gap-1.5">
+          <span className="font-medium truncate">{entry.standard.code}</span>
+          {stageBadge && (
+            <span className="text-[9px] uppercase tracking-[0.18em] text-subtext shrink-0">
+              {stageBadge}
+            </span>
+          )}
+        </span>
+        {(relLabel || total > 0) && (
+          <span className="text-[10px] text-subtext flex items-baseline gap-1.5">
+            {relLabel && <span className="uppercase tracking-[0.16em]">{relLabel}</span>}
+            {relLabel && total > 0 && <span aria-hidden>·</span>}
+            {total > 0 && (
+              <span className="tabular-nums">
+                {done}/{total}
+              </span>
+            )}
+          </span>
+        )}
+      </span>
+    </button>
+  );
+}
+
+function ProgressRing({ pct, size }: { pct: number; size: number }) {
+  const r = (size - 2) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (pct / 100) * c;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      aria-hidden
+      className="shrink-0"
+    >
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        className="stroke-hairline"
+        strokeWidth={1.5}
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        className={pct === 100 ? 'stroke-success' : 'stroke-accent'}
+        strokeWidth={1.5}
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+    </svg>
+  );
+}
+
+/* ============================================================================
+ * Right detail panel — prominent progress, dezent config, full worksheets list.
+ * ========================================================================== */
+function StandardDetail({
+  row,
+  allEntriesInLayer,
   projectId,
   locale,
   pickTitle,
   pickWsTitle,
-  stageBadge,
-  onMoveUp,
-  onMoveDown,
-  canMoveUp,
-  canMoveDown,
-  onLayerChange,
-  parentOptions,
-  onRelationChange,
-  showHierarchyControls,
+  move,
+  setLayer,
+  setRelation,
   pending,
 }: {
-  s: StandardEntry;
+  row: FlatRow;
+  allEntriesInLayer: StandardEntry[];
   projectId: string;
   locale: 'de' | 'en';
   pickTitle: (s: StandardEntry['standard']) => string;
   pickWsTitle: (w: Worksheet) => string;
-  stageBadge: string | null;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
-  onLayerChange: (l: Layer | null) => void;
-  parentOptions: Array<{ projectStandardId: string; code: string }>;
-  onRelationChange: (parentPSId: string | null, rel: RelationType | null) => void;
-  showHierarchyControls: boolean;
+  move: (standardId: string, direction: 'up' | 'down') => void;
+  setLayer: (standardId: string, layer: Layer | null) => void;
+  setRelation: (
+    projectStandardId: string,
+    parentProjectStandardId: string | null,
+    relationType: RelationType | null,
+  ) => void;
   pending: boolean;
 }) {
-  const total = s.worksheets.length;
-  const done = s.worksheets.filter(
-    (w) => w.status === 'engineer_approved' || w.status === 'final',
-  ).length;
+  const { entry, stageBadge, rootIndex, rootSiblings } = row;
+  const total = entry.worksheets.length;
+  const statusCounts = useMemo(() => {
+    const c: Record<WorksheetStatus, number> = {
+      draft: 0,
+      submitted_for_review: 0,
+      engineer_approved: 0,
+      final: 0,
+      deactivated: 0,
+    };
+    for (const w of entry.worksheets) {
+      const s = (w.status ?? 'draft') as WorksheetStatus;
+      c[s] = (c[s] ?? 0) + 1;
+    }
+    return c;
+  }, [entry.worksheets]);
+  const done = statusCounts.engineer_approved + statusCounts.final;
+
+  const canMoveUp = rootIndex != null && rootIndex > 0;
+  const canMoveDown = rootIndex != null && rootSiblings != null && rootIndex < rootSiblings - 1;
+
+  const parentOptions = allEntriesInLayer
+    .filter((s) => s.projectStandardId !== entry.projectStandardId)
+    .map((s) => ({ projectStandardId: s.projectStandardId, code: s.standard.code }));
 
   return (
-    <div className="border border-hairline rounded-md p-4 bg-paper space-y-3">
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
-        <div className="flex items-baseline gap-3 min-w-0">
+    <article className="border border-hairline rounded-md bg-paper">
+      <header className="px-6 py-5 border-b border-hairline space-y-1">
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h2 className="text-lg font-medium text-ink">{entry.standard.code}</h2>
           {stageBadge && (
-            <span className="text-[10px] uppercase tracking-[0.18em] bg-accent/10 text-accent px-1.5 py-0.5 rounded shrink-0">
+            <span className="text-[10px] uppercase tracking-[0.2em] bg-accent/10 text-accent px-2 py-0.5 rounded">
               {stageBadge}
             </span>
           )}
-          <div className="min-w-0">
-            <h4 className="text-sm font-medium text-ink truncate">{s.standard.code}</h4>
-            <p className="text-xs text-subtext truncate">
-              {pickTitle(s.standard)} · {s.standard.version}
-            </p>
-          </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <span className="text-[10px] uppercase tracking-[0.18em] text-subtext tabular-nums">
-            {done} / {total} fertig
-          </span>
-          <div className="flex border border-hairline rounded">
-            <button
-              type="button"
-              onClick={onMoveUp}
-              disabled={!canMoveUp || pending}
-              aria-label="Stage nach oben"
-              title="Stage nach oben"
-              className="px-2 py-1 text-[12px] leading-none hover:bg-paper-2 disabled:opacity-30 disabled:hover:bg-transparent"
-            >
-              ↑
-            </button>
-            <button
-              type="button"
-              onClick={onMoveDown}
-              disabled={!canMoveDown || pending}
-              aria-label="Stage nach unten"
-              title="Stage nach unten"
-              className="px-2 py-1 text-[12px] leading-none hover:bg-paper-2 disabled:opacity-30 disabled:hover:bg-transparent border-l border-hairline"
-            >
-              ↓
-            </button>
-          </div>
-          <Select
-            size="sm"
-            inline
-            value={s.layer ?? ''}
-            onChange={(e) => onLayerChange((e.target.value || null) as Layer | null)}
-            disabled={pending}
-            aria-label="Layer wählen"
-            className="uppercase tracking-[0.14em]"
-          >
-            <option value="">— Layer —</option>
-            <option value="management">Management</option>
-            <option value="cost">Kosten</option>
-            <option value="technical">Technisch</option>
-          </Select>
-        </div>
-      </div>
+        <p className="text-sm text-subtext">
+          {pickTitle(entry.standard)} · {entry.standard.version}
+        </p>
+      </header>
 
-      {showHierarchyControls && (
-        <HierarchyControls
-          s={s}
-          parentOptions={parentOptions}
-          onRelationChange={onRelationChange}
-          pending={pending}
-        />
-      )}
+      <ProgressDisplay total={total} done={done} statusCounts={statusCounts} />
 
-      <div className="flex justify-end">
+      <ConfigSection
+        entry={entry}
+        parentOptions={parentOptions}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        onMoveUp={() => move(entry.standard.id, 'up')}
+        onMoveDown={() => move(entry.standard.id, 'down')}
+        onLayerChange={(l) => setLayer(entry.standard.id, l)}
+        onRelationChange={(parentPSId, rel) => setRelation(entry.projectStandardId, parentPSId, rel)}
+        pending={pending}
+      />
+
+      <WorksheetList
+        entry={entry}
+        projectId={projectId}
+        locale={locale}
+        pickWsTitle={pickWsTitle}
+      />
+
+      <div className="px-6 py-4 border-t border-hairline flex justify-end">
         <a
-          href={`/api/projects/${projectId}/standards/${s.standard.code}/report`}
+          href={`/api/projects/${projectId}/standards/${entry.standard.code}/report`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
@@ -699,18 +608,227 @@ function StandardBox({
           Bericht als PDF
         </a>
       </div>
+    </article>
+  );
+}
 
-      <ul className="space-y-0.5 max-h-48 overflow-y-auto">
-        {s.worksheets.map((w) => {
+function ProgressDisplay({
+  total,
+  done,
+  statusCounts,
+}: {
+  total: number;
+  done: number;
+  statusCounts: Record<WorksheetStatus, number>;
+}) {
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const segments = (
+    [
+      { status: 'final', count: statusCounts.final },
+      { status: 'engineer_approved', count: statusCounts.engineer_approved },
+      { status: 'submitted_for_review', count: statusCounts.submitted_for_review },
+      { status: 'draft', count: statusCounts.draft },
+      { status: 'deactivated', count: statusCounts.deactivated },
+    ] satisfies Array<{ status: WorksheetStatus; count: number }>
+  ).filter((s) => s.count > 0);
+
+  return (
+    <section className="px-6 py-5 border-b border-hairline">
+      <div className="flex items-baseline justify-between mb-3">
+        <span className="text-[11px] uppercase tracking-[0.22em] text-subtext">Fortschritt</span>
+        <span className="text-sm text-ink tabular-nums">
+          <span className="font-medium">{done}</span>
+          <span className="text-subtext"> / {total} fertig</span>
+          {total > 0 && <span className="text-subtext"> · {pct}%</span>}
+        </span>
+      </div>
+      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-hairline">
+        {total === 0 ? null : (
+          segments.map((seg) => (
+            <span
+              key={seg.status}
+              className={cn(STATUS_BAR[seg.status])}
+              style={{ width: `${(seg.count / total) * 100}%` }}
+              title={`${STATUS_LABEL[seg.status]}: ${seg.count}`}
+              aria-label={`${STATUS_LABEL[seg.status]}: ${seg.count}`}
+            />
+          ))
+        )}
+      </div>
+      {segments.length > 0 && (
+        <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-subtext">
+          {segments.map((seg) => (
+            <li key={seg.status} className="flex items-center gap-1.5">
+              <span
+                aria-hidden
+                className={cn('inline-block w-2 h-2 rounded-full', STATUS_DOT[seg.status])}
+              />
+              <span>
+                {STATUS_LABEL[seg.status]}
+                <span className="tabular-nums text-ink ml-1">{seg.count}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function ConfigSection({
+  entry,
+  parentOptions,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onLayerChange,
+  onRelationChange,
+  pending,
+}: {
+  entry: StandardEntry;
+  parentOptions: Array<{ projectStandardId: string; code: string }>;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onLayerChange: (l: Layer | null) => void;
+  onRelationChange: (parentPSId: string | null, rel: RelationType | null) => void;
+  pending: boolean;
+}) {
+  const currentParent = entry.parentStandardId ?? '';
+  const currentRel = entry.relationType ?? 'series';
+
+  return (
+    <section className="px-6 py-4 border-b border-hairline">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] uppercase tracking-[0.22em] text-subtext">Konfiguration</span>
+        {(canMoveUp || canMoveDown) && (
+          <div className="flex border border-hairline rounded">
+            <button
+              type="button"
+              onClick={onMoveUp}
+              disabled={!canMoveUp || pending}
+              aria-label="Stage nach oben"
+              title="Stage nach oben"
+              className="px-2 py-1 leading-none hover:bg-paper-2 disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <ChevronUp className="size-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={onMoveDown}
+              disabled={!canMoveDown || pending}
+              aria-label="Stage nach unten"
+              title="Stage nach unten"
+              className="px-2 py-1 leading-none hover:bg-paper-2 disabled:opacity-30 disabled:hover:bg-transparent border-l border-hairline"
+            >
+              <ChevronDown className="size-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <dl className="grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-4 gap-y-2.5 items-center text-xs">
+        <dt className="text-subtext uppercase tracking-[0.16em] text-[10px]">Layer</dt>
+        <dd>
+          <Select
+            size="sm"
+            inline
+            value={entry.layer ?? ''}
+            onChange={(e) => onLayerChange((e.target.value || null) as Layer | null)}
+            disabled={pending}
+            aria-label="Layer wählen"
+          >
+            <option value="">— Layer —</option>
+            <option value="management">Management</option>
+            <option value="cost">Kosten</option>
+            <option value="technical">Technisch</option>
+          </Select>
+        </dd>
+
+        <dt className="text-subtext uppercase tracking-[0.16em] text-[10px]">Eltern-Standard</dt>
+        <dd className="flex items-center gap-2 flex-wrap">
+          <Select
+            size="sm"
+            inline
+            value={currentParent}
+            onChange={(e) => {
+              const v = e.target.value || null;
+              onRelationChange(v, v ? (currentRel as RelationType) : null);
+            }}
+            disabled={pending}
+            aria-label="Eltern-Standard wählen"
+          >
+            <option value="">— keiner (Root) —</option>
+            {parentOptions.map((p) => (
+              <option key={p.projectStandardId} value={p.projectStandardId}>
+                {p.code}
+              </option>
+            ))}
+          </Select>
+          {entry.parentStandardId && (
+            <Select
+              size="sm"
+              inline
+              value={currentRel}
+              onChange={(e) =>
+                onRelationChange(entry.parentStandardId, e.target.value as RelationType)
+              }
+              disabled={pending}
+              aria-label="Beziehungs-Typ"
+            >
+              <option value="series">In Reihe</option>
+              <option value="parallel">Parallel</option>
+              <option value="sub_standard">Sub-Standard</option>
+            </Select>
+          )}
+        </dd>
+      </dl>
+    </section>
+  );
+}
+
+function WorksheetList({
+  entry,
+  projectId,
+  locale,
+  pickWsTitle,
+}: {
+  entry: StandardEntry;
+  projectId: string;
+  locale: 'de' | 'en';
+  pickWsTitle: (w: Worksheet) => string;
+}) {
+  if (entry.worksheets.length === 0) {
+    return (
+      <section className="px-6 py-5 text-sm text-subtext">
+        Keine Worksheets in diesem Standard.
+      </section>
+    );
+  }
+
+  return (
+    <section className="px-6 py-4">
+      <div className="flex items-baseline justify-between mb-3">
+        <span className="text-[11px] uppercase tracking-[0.22em] text-subtext">
+          Worksheets
+        </span>
+        <span className="text-[11px] text-subtext tabular-nums">
+          {entry.worksheets.length}
+        </span>
+      </div>
+      <ul className="space-y-0.5">
+        {entry.worksheets.map((w) => {
           const status: WorksheetStatus = w.status ?? 'draft';
           return (
             <li key={w.templateId}>
               <Link
-                href={`/${locale}/projects/${projectId}/standards/${s.standard.code}/worksheets/${w.code}`}
+                href={`/${locale}/projects/${projectId}/standards/${entry.standard.code}/worksheets/${w.code}`}
                 className="grid grid-cols-[12px_28px_88px_1fr_auto] items-center gap-3 px-2 py-1.5 text-sm rounded hover:bg-paper-2/50"
               >
                 <span
-                  className={`inline-block w-2 h-2 rounded-full ${STATUS_DOT[status]}`}
+                  className={cn('inline-block w-2 h-2 rounded-full', STATUS_DOT[status])}
                   aria-label={`Status: ${STATUS_LABEL[status]}`}
                 />
                 <span className="text-[10px] text-subtext tabular-nums">
@@ -724,60 +842,7 @@ function StandardBox({
           );
         })}
       </ul>
-    </div>
-  );
-}
-
-function HierarchyControls({
-  s,
-  parentOptions,
-  onRelationChange,
-  pending,
-}: {
-  s: StandardEntry;
-  parentOptions: Array<{ projectStandardId: string; code: string }>;
-  onRelationChange: (parentPSId: string | null, rel: RelationType | null) => void;
-  pending: boolean;
-}) {
-  const currentParent = s.parentStandardId ?? '';
-  const currentRel = s.relationType ?? 'series';
-
-  return (
-    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-subtext flex-wrap">
-      <span>Beziehung:</span>
-      <Select
-        size="sm"
-        inline
-        value={currentParent}
-        onChange={(e) => {
-          const v = e.target.value || null;
-          onRelationChange(v, v ? (currentRel as RelationType) : null);
-        }}
-        disabled={pending}
-        aria-label="Eltern-Standard wählen"
-      >
-        <option value="">— Root —</option>
-        {parentOptions.map((p) => (
-          <option key={p.projectStandardId} value={p.projectStandardId}>
-            {p.code}
-          </option>
-        ))}
-      </Select>
-      {s.parentStandardId && (
-        <Select
-          size="sm"
-          inline
-          value={currentRel}
-          onChange={(e) => onRelationChange(s.parentStandardId, e.target.value as RelationType)}
-          disabled={pending}
-          aria-label="Beziehungs-Typ"
-        >
-          <option value="series">In Reihe</option>
-          <option value="parallel">Parallel</option>
-          <option value="sub_standard">Sub-Standard</option>
-        </Select>
-      )}
-    </div>
+    </section>
   );
 }
 
@@ -794,7 +859,9 @@ function RecommendationPanel({
   pending: boolean;
 }) {
   const presentCodes = new Set(standards.map((s) => s.standard.code));
-  const missingMgmt = ['DWA-M-820-1', 'DWA-M-820-2', 'DWA-M-820-3'].filter((c) => !presentCodes.has(c));
+  const missingMgmt = ['DWA-M-820-1', 'DWA-M-820-2', 'DWA-M-820-3'].filter(
+    (c) => !presentCodes.has(c),
+  );
   const missingCost = ['DIN-276'].filter((c) => !presentCodes.has(c));
 
   return (
@@ -824,9 +891,7 @@ function RecommendationPanel({
           <dt className="text-[10px] uppercase tracking-[0.18em] text-subtext mb-1">
             Layer 3 · Technische Bemessung
           </dt>
-          <dd className="text-ink">
-            Behandlungs-Train (Engineer-Auswahl)
-          </dd>
+          <dd className="text-ink">Behandlungs-Train (Engineer-Auswahl)</dd>
         </div>
       </dl>
       <div className="flex items-center gap-4 flex-wrap pt-1">
