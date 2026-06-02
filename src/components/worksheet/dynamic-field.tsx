@@ -106,6 +106,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {/* Label + clause + unit */}
       <div>
         <label
+          id={`${inputId}-label`}
           htmlFor={inputId}
           className={`text-sm ${isSubTotal ? 'font-semibold' : 'font-medium'} text-ink leading-snug block`}
         >
@@ -245,7 +246,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         const options = field.enumValues ?? [];
         if (options.length <= 4) {
           return (
-            <div role="radiogroup" aria-labelledby={inputId} aria-required={required}>
+            <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
               <SegmentedControl
                 value={v ?? options[0]?.value ?? ''}
                 onChange={(val) => setField(field.id, { type: 'enum', value: val })}
@@ -292,7 +293,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {field.dataType === 'boolean' && (() => {
         const v = value?.type === 'boolean' ? value.value : null;
         return (
-          <div role="radiogroup" aria-labelledby={inputId} aria-required={required}>
+          <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
             <SegmentedControl
               value={v === true ? 'true' : v === false ? 'false' : ''}
               onChange={(val) => setField(field.id, { type: 'boolean', value: val === 'true' })}
@@ -472,7 +473,16 @@ function copyFirstHint(
       setFieldReal(field.id, { type: 'date', value: value == null ? null : String(value) });
       break;
     case 'boolean':
-      setFieldReal(field.id, { type: 'boolean', value: Boolean(value) });
+      // Boolean(value) treats the string "false" as truthy; explicitly parse
+      // string-encoded booleans (sameSymbolHints may carry them through the
+      // jsonb round-trip) so the copied value matches what the engineer saw
+      // on the originating worksheet.
+      setFieldReal(field.id, {
+        type: 'boolean',
+        value:
+          value === true ||
+          (typeof value === 'string' && value.toLowerCase() === 'true'),
+      });
       break;
     case 'json':
       setFieldReal(field.id, { type: 'json', value });

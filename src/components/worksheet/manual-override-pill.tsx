@@ -8,6 +8,13 @@ import { useFocusTrap } from '@/lib/hooks/use-focus-trap';
 
 const MIN_REASON_LENGTH = 10;
 
+// Module-scoped Map of fieldId → most-recently-saved reason. Lives outside
+// the component so the "✓ Override begründet" confirmation survives parent
+// re-renders (which would otherwise remount the pill and wipe its local
+// `savedReason` state every time `isOverridden` flips back through false).
+// Reset on full page refresh — the source of truth lives in audit_log.
+const savedReasons = new Map<string, string>();
+
 type Props = {
   /** project_parameters.field_id of the output field (the equation's
    * outputSymbol). Required for the audit_log write. */
@@ -49,7 +56,12 @@ export function ManualOverridePill({
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [savedReason, setSavedReason] = useState<string | null>(null);
+  // Seed from the module-scoped map so a remount (parent re-render that
+  // briefly flips isOverridden) recovers the prior confirmation instead of
+  // showing the "Begründen" affordance again.
+  const [savedReason, setSavedReason] = useState<string | null>(
+    () => savedReasons.get(fieldId) ?? null,
+  );
   const dialogRef = useFocusTrap(open);
 
   useEffect(() => {
@@ -76,6 +88,7 @@ export function ManualOverridePill({
         reason: trimmed,
       });
       if (result.ok) {
+        savedReasons.set(fieldId, trimmed);
         setSavedReason(trimmed);
         setOpen(false);
         setReason('');
