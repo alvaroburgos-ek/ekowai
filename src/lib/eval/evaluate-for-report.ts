@@ -1,0 +1,300 @@
+/**
+ * Server-side evaluator used by the PDF report-generation path.
+ *
+ * Mirrors the runtime form's `useEquationEngine` + `compliance-block`
+ * logic but as pure functions that operate on already-loaded data
+ * (no React, no zustand store, no DB calls). The same evaluator
+ * primitives drive both paths: `evaluateFormula` (arithmetic engine +
+ * aggregators) and `evaluateCondition` (compliance DSL parser).
+ *
+ * SCOPE: equation results for every whitelisted equation
+ * (`FORMULA_ENGINE_WHITELIST`) and compliance results for every
+ * compliance row, both keyed for the per-worksheet report renderer.
+ */
+import { evaluateFormula, type EvalState } from './formula';
+import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
+import { equationProfiles } from './equation-profiles';
+import { rewriteRules } from './rewrites';
+import { normalizeSymbols } from './normalize-formula';
+import { FORMULA_ENGINE_WHITELIST, whitelistKey } from './engine-whitelist';
+import type {
+  SubAreasCarrier,
+  KostraCarrier,
+  FloodSubAreasCarrier,
+  Gl8Scalars,
+  Gl10Scalars,
+} from './aggregators';
+
+const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
+const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
+
+export type ReportField = {
+  id: string;
+  symbol: string;
+  unit: string | null;
+  dataType: string;
+};
+
+export type ReportParameter = {
+  fieldId: string;
+  valueNumber: number | null;
+  valueText: string | null;
+  valueEnum: string | null;
+  valueBoolean: boolean | null;
+  valueDate: string | null;
+  valueJson: unknown | null;
+};
+
+export type ReportEquation = {
+  id: string;
+  equationNumber: string;
+  formula: string;
+  inputSymbols: string[] | null;
+  outputSymbol: string | null;
+  outputUnit: string | null;
+};
+
+export type ReportComplianceRow = {
+  id: string;
+  code: string;
+  titleDe: string;
+  condition: string;
+  severity: string;
+  description: string | null;
+  requiresAttestation: boolean;
+};
+
+export type EquationReportResult = {
+  equationId: string;
+  equationNumber: string;
+  worksheetCode: string;
+  formula: string;
+  outputSymbol: string | null;
+  outputUnit: string | null;
+  state: EvalState;
+};
+
+export type ComplianceReportResult = {
+  code: string;
+  worksheetCode: string;
+  titleDe: string;
+  condition: string;
+  severity: string;
+  description: string | null;
+  requiresAttestation: boolean;
+  result: EvalResult;
+};
+
+/** Build a symbol→typed-value map from a worksheet's fields + project parameters. */
+function buildValueMap(
+  fields: ReportField[],
+  parameters: ReportParameter[],
+): {
+  numByField: Map<string, number | null>;
+  fieldBySymbol: Map<string, ReportField>;
+  bySymbol: Map<string, number | string | boolean | null>;
+  jsonBySymbol: Map<string, unknown>;
+} {
+  const fieldById = new Map(fields.map((f) => [f.id, f]));
+  const fieldBySymbol = new Map<string, ReportField>();
+  for (const f of fields) fieldBySymbol.set(f.symbol, f);
+
+  const numByField = new Map<string, number | null>();
+  const bySymbol = new Map<string, number | string | boolean | null>();
+  const jsonBySymbol = new Map<string, unknown>();
+
+  for (const p of parameters) {
+    const f = fieldById.get(p.fieldId);
+    if (!f) continue;
+    switch (f.dataType) {
+      case 'number':
+        numByField.set(p.fieldId, p.valueNumber);
+        if (p.valueNumber != null) bySymbol.set(f.symbol, p.valueNumber);
+        break;
+      case 'text':
+        if (p.valueText != null) bySymbol.set(f.symbol, p.valueText);
+        break;
+      case 'enum':
+        if (p.valueEnum != null) bySymbol.set(f.symbol, p.valueEnum);
+        break;
+      case 'boolean':
+        if (p.valueBoolean != null) bySymbol.set(f.symbol, p.valueBoolean);
+        break;
+      case 'date':
+        if (p.valueDate != null) bySymbol.set(f.symbol, p.valueDate);
+        break;
+      case 'json':
+        if (p.valueJson != null) jsonBySymbol.set(f.symbol, p.valueJson);
+        break;
+    }
+  }
+  return { numByField, fieldBySymbol, bySymbol, jsonBySymbol };
+}
+
+/**
+ * Evaluate every whitelisted equation on a worksheet against the
+ * loaded fields + project parameters. Returns per-equation results.
+ */
+export function evaluateWorksheetEquations(
+  worksheetCode: string,
+  equations: ReportEquation[],
+  fields: ReportField[],
+  parameters: ReportParameter[],
+): EquationReportResult[] {
+  const { numByField, fieldBySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
+
+  // Aggregator context — built once per worksheet, reused per equation.
+  const subAreasJson = jsonBySymbol.get('sub_areas_A138_10') as { rows?: unknown } | undefined;
+  const subAreasCarrier: SubAreasCarrier | null = subAreasJson && Array.isArray(subAreasJson.rows)
+    ? (subAreasJson as SubAreasCarrier)
+    : null;
+
+  const kostraJson = jsonBySymbol.get('r_D_n_table') as { rows?: unknown } | undefined;
+  const kostraCarrier: KostraCarrier | null = kostraJson && Array.isArray(kostraJson.rows)
+    ? (kostraJson as KostraCarrier)
+    : null;
+  const kostraField = fieldBySymbol.get('r_D_n_table');
+
+  const floodJson = jsonBySymbol.get('sub_areas_A138_26') as { rows?: unknown } | undefined;
+  const floodCarrier: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)
+    ? (floodJson as FloodSubAreasCarrier)
+    : null;
+
+  const r_D_30_field = fieldBySymbol.get('r_D_30');
+
+  const pickNum = (sym: string): number | null => {
+    const f = fieldBySymbol.get(sym);
+    if (!f) return null;
+    return numByField.get(f.id) ?? null;
+  };
+  const pickBool = (sym: string): boolean | null => {
+    const f = fieldBySymbol.get(sym);
+    if (!f) return null;
+    // booleans aren't tracked in numByField; pull from parameters directly
+    const p = parameters.find((x) => x.fieldId === f.id);
+    return p?.valueBoolean ?? null;
+  };
+
+  const gl8Scalars: Gl8Scalars = {
+    A_C: pickNum('A_C'),
+    A_VA: pickNum('A_VA'),
+    Q_S: pickNum('Q_S'),
+    Q_Dr: pickNum('Q_Dr'),
+    f_Z: pickNum('f_Z'),
+    f_A: pickNum('f_A'),
+    V_Zisterne: pickNum('V_Zisterne'),
+    zisterne_zwangsentleerung: pickBool('zisterne_zwangsentleerung'),
+  };
+  const gl10Scalars: Gl10Scalars = {
+    A_VA: pickNum('A_VA'),
+    Q_S: pickNum('Q_S'),
+    Q_Dr: pickNum('Q_Dr'),
+    D: pickNum('D_min') ?? pickNum('D'),
+    V_VA: pickNum('V_VA'),
+    r_D_T_n_Ue: pickNum('r_D_30'),
+  };
+
+  const out: EquationReportResult[] = [];
+  for (const eq of equations) {
+    const key = whitelistKey(worksheetCode, eq.equationNumber);
+    if (!FORMULA_ENGINE_WHITELIST.has(key)) continue;
+
+    const rewrite = rewriteRules[eq.id];
+    const profile = equationProfiles[eq.id];
+    const neededSymbols = rewrite
+      ? Object.values(rewrite.remap)
+      : normalizeSymbols(eq.inputSymbols ?? []);
+
+    const aliasFor = (sym: string): string => profile?.symbolAliases?.[sym] ?? sym;
+
+    const evalInputs = neededSymbols.map((sym) => {
+      const f = fieldBySymbol.get(aliasFor(sym));
+      const num = f ? (numByField.get(f.id) ?? null) : null;
+      return { symbol: sym, value: num, unit: f?.unit ?? null };
+    });
+
+    const expectedUnits: Record<string, string | null> = {};
+    for (const sym of neededSymbols) {
+      const f = fieldBySymbol.get(aliasFor(sym));
+      expectedUnits[sym] = f?.unit ?? null;
+    }
+
+    let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
+    if (eq.id === A138_10_GL2_ID) {
+      aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
+    } else if (eq.id === A138_13_GL8_ID) {
+      aggregator = {
+        kostraTable: kostraCarrier,
+        gl8Scalars,
+        kostraUnit: kostraField?.unit ?? null,
+      };
+    } else if (eq.id === A138_26_GL10_ID) {
+      aggregator = {
+        floodSubAreas: floodCarrier,
+        gl10Scalars,
+        kostraUnit: r_D_30_field?.unit ?? null,
+      };
+    }
+
+    const state = evaluateFormula({
+      equationId: eq.id,
+      formula: eq.formula,
+      inputSymbols: eq.inputSymbols ?? [],
+      outputSymbol: eq.outputSymbol ?? '',
+      expectedUnits,
+      inputs: evalInputs,
+      aggregator,
+    });
+
+    out.push({
+      equationId: eq.id,
+      equationNumber: eq.equationNumber,
+      worksheetCode,
+      formula: eq.formula,
+      outputSymbol: eq.outputSymbol,
+      outputUnit: eq.outputUnit,
+      state,
+    });
+  }
+  return out;
+}
+
+/**
+ * Evaluate every compliance condition on a worksheet against the loaded
+ * project parameters + the engine's computed outputs (so a condition can
+ * reference an engine-produced value like V_VA).
+ */
+export function evaluateWorksheetCompliance(
+  worksheetCode: string,
+  rows: ReportComplianceRow[],
+  fields: ReportField[],
+  parameters: ReportParameter[],
+  engineResults: EquationReportResult[],
+): ComplianceReportResult[] {
+  const { bySymbol } = buildValueMap(fields, parameters);
+
+  // Overlay computed engine outputs onto the symbol lookup so conditions
+  // can read e.g. `V_VA` even when the engineer hasn't manually entered it.
+  for (const r of engineResults) {
+    if (r.state.kind === 'computed' && r.outputSymbol) {
+      bySymbol.set(r.outputSymbol, r.state.value);
+    }
+  }
+
+  const lookup = (sym: string) => bySymbol.get(sym) ?? undefined;
+
+  return rows.map((row) => {
+    const result = evaluateCondition(row.condition, lookup);
+    return {
+      code: row.code,
+      worksheetCode,
+      titleDe: row.titleDe,
+      condition: row.condition,
+      severity: row.severity,
+      description: row.description,
+      requiresAttestation: row.requiresAttestation,
+      result,
+    };
+  });
+}

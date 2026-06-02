@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
+import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
 
 type ComplianceReq = {
@@ -89,9 +90,25 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
         if (r.cr.severity === 'warn') acc.failWarn++;
         else acc.failBlock++;
       }
+      // Split manual into attestation (engineer sign-off) vs broken
+      // (parse failure — rule needs a fix). Engineer needs the split
+      // to know which way to act.
+      if (r.result.kind === 'manual') {
+        if (isAttestationCondition(r.cr.condition)) acc.attestation++;
+        else acc.broken++;
+      }
       return acc;
     },
-    { pass: 0, fail: 0, pending: 0, manual: 0, failBlock: 0, failWarn: 0 },
+    {
+      pass: 0,
+      fail: 0,
+      pending: 0,
+      manual: 0,
+      failBlock: 0,
+      failWarn: 0,
+      attestation: 0,
+      broken: 0,
+    },
   );
 
   return (
@@ -113,7 +130,16 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
             </span>
           )}
           {counts.pending > 0 && <span className="text-subtext">○ {counts.pending}</span>}
-          {counts.manual > 0 && <span className="text-subtext">? {counts.manual}</span>}
+          {counts.attestation > 0 && (
+            <span className="text-accent" title="Ingenieur-Bestätigung ausstehend">
+              § {counts.attestation} sign-off
+            </span>
+          )}
+          {counts.broken > 0 && (
+            <span className="text-subtext" title="Bedingung nicht auswertbar">
+              ! {counts.broken} broken
+            </span>
+          )}
         </div>
       </div>
       <ul className="space-y-3">
@@ -127,7 +153,11 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
           return (
             <li key={cr.id} className="text-sm text-ink space-y-1">
               <div className="flex items-baseline gap-3">
-                <StatusBadge result={result} severity={cr.severity} />
+                <StatusBadge
+                  result={result}
+                  severity={cr.severity}
+                  requiresAttestation={isAttestationCondition(cr.condition)}
+                />
                 <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
                   {cr.code}
                 </span>
@@ -257,7 +287,15 @@ const TYPE_LABELS: Record<
   design_change: { de: 'Designänderung', en: 'Design change' },
 };
 
-function StatusBadge({ result, severity }: { result: EvalResult; severity?: string }) {
+function StatusBadge({
+  result,
+  severity,
+  requiresAttestation,
+}: {
+  result: EvalResult;
+  severity?: string;
+  requiresAttestation?: boolean;
+}) {
   switch (result.kind) {
     case 'pass':
       return (
@@ -297,13 +335,29 @@ function StatusBadge({ result, severity }: { result: EvalResult; severity?: stri
         </span>
       );
     case 'manual':
+      // Manual condition: either an intentional engineer-attestation gate
+      // (engineer-verified, verify Gl. X) OR a broken rule (parse failure).
+      // The two need distinct affordances — attestation reads "I need to
+      // sign off"; broken reads "the rule needs an engineer ticket". A
+      // shared "?" badge collapses them into ambiguity.
+      if (requiresAttestation) {
+        return (
+          <span
+            aria-label="Ingenieur-Bestätigung ausstehend"
+            title="Ingenieur-Bestätigung ausstehend — manuelle Prüfung erforderlich"
+            className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-accent/10 text-accent text-xs font-semibold shrink-0"
+          >
+            §
+          </span>
+        );
+      }
       return (
         <span
-          aria-label="Manuell prüfen"
-          title="Manuell prüfen"
+          aria-label="Bedingung nicht auswertbar"
+          title="Bedingung nicht auswertbar — Regel reparieren"
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
         >
-          ?
+          !
         </span>
       );
   }

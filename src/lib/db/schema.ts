@@ -215,6 +215,11 @@ export const complianceRequirements = pgTable(
     /** Short hint shown alongside the requirement — fallback when no structured
      * suggestion rows exist. */
     suggestion: text('suggestion'),
+    // requires_attestation column is added by Pile-11 SQL (reviewable, not
+    // applied by this PR). The application reads requires-attestation from
+    // a pattern match on `condition` until the SQL is applied AND the
+    // engineer has populated the column. See `isAttestationCondition` in
+    // src/lib/eval/attestation.ts.
   },
   (t) => ({ uniqWorksheetCr: unique().on(t.worksheetTemplateId, t.code) }),
 );
