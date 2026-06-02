@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-13, Gl. 8 (V_VA — master sizing)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 **Purpose:** Hand-calculated reference for the master sizing equation. V_VA is iterated across the KOSTRA duration table; the engine is correct only if it returns the **same maximum V_VA** AND **names the same governing D** as the hand calc.
 
 ## Equation row in DB

@@ -1,5 +1,8 @@
 # Gl. 30 (A138-20) — V_MUE Muldenüberlauf-Volumen
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `V_MUE = ((A_C + A_VA) · r_D(n_R) · 10⁻⁷ − A_S,m · k_i) · D · 60 · f_Z − V_M` — §6.5.2 / §6.6.2.
 
 Volumen, das über den Muldenüberlauf in die Rigole abgegeben wird (= ges. Bedarf abzgl. tatsächlicher Mulde).

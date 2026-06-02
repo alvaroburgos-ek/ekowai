@@ -1,5 +1,8 @@
 # Gl. 38 (A138-21) — ≥-condition: Filterleistung ≥ Schacht-Versickerungsleistung
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `A_S,FS · k_f,FS ≥ A_S,Schacht · k_i` — §6.7.2.
 
 Condition aggregator: computed = LHS − RHS (slack).
