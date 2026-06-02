@@ -83,9 +83,15 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
   const counts = results.reduce(
     (acc, r) => {
       acc[r.result.kind]++;
+      // Separate failing blockers from failing warnings so the engineer sees
+      // gate-relevant fails distinctly from advisory ones.
+      if (r.result.kind === 'fail') {
+        if (r.cr.severity === 'warn') acc.failWarn++;
+        else acc.failBlock++;
+      }
       return acc;
     },
-    { pass: 0, fail: 0, pending: 0, manual: 0 },
+    { pass: 0, fail: 0, pending: 0, manual: 0, failBlock: 0, failWarn: 0 },
   );
 
   return (
@@ -96,7 +102,16 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
         </h2>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext flex gap-3">
           {counts.pass > 0 && <span className="text-success">✓ {counts.pass}</span>}
-          {counts.fail > 0 && <span className="text-error">✗ {counts.fail}</span>}
+          {counts.failBlock > 0 && (
+            <span className="text-error" title="Blockierende Verstöße">
+              ✗ {counts.failBlock} block
+            </span>
+          )}
+          {counts.failWarn > 0 && (
+            <span className="text-warning" title="Empfehlungs-Verstöße">
+              ⚠ {counts.failWarn} warn
+            </span>
+          )}
           {counts.pending > 0 && <span className="text-subtext">○ {counts.pending}</span>}
           {counts.manual > 0 && <span className="text-subtext">? {counts.manual}</span>}
         </div>
@@ -112,7 +127,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
           return (
             <li key={cr.id} className="text-sm text-ink space-y-1">
               <div className="flex items-baseline gap-3">
-                <StatusBadge result={result} />
+                <StatusBadge result={result} severity={cr.severity} />
                 <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
                   {cr.code}
                 </span>
@@ -242,7 +257,7 @@ const TYPE_LABELS: Record<
   design_change: { de: 'Designänderung', en: 'Design change' },
 };
 
-function StatusBadge({ result }: { result: EvalResult }) {
+function StatusBadge({ result, severity }: { result: EvalResult; severity?: string }) {
   switch (result.kind) {
     case 'pass':
       return (
@@ -254,16 +269,23 @@ function StatusBadge({ result }: { result: EvalResult }) {
           ✓
         </span>
       );
-    case 'fail':
+    case 'fail': {
+      // Distinguish a failing block-severity rule (gate-blocking) from a
+      // failing warn-severity rule (advisory). The compliance row's severity
+      // drives the badge — block stays red ✗, warn switches to a yellow ⚠.
+      const isWarn = severity === 'warn';
       return (
         <span
-          aria-label="Nicht erfüllt"
-          title="Nicht erfüllt"
-          className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-error/10 text-error text-xs font-semibold shrink-0"
+          aria-label={isWarn ? 'Empfehlung nicht erfüllt' : 'Nicht erfüllt'}
+          title={isWarn ? 'Empfehlung nicht erfüllt (warn)' : 'Nicht erfüllt (block)'}
+          className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-semibold shrink-0 ${
+            isWarn ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
+          }`}
         >
-          ✗
+          {isWarn ? '⚠' : '✗'}
         </span>
       );
+    }
     case 'pending':
       return (
         <span
