@@ -43,6 +43,15 @@ export type Gl8Scalars = {
   Q_Dr: number | null;
   f_Z: number | null;
   f_A: number | null;
+  /** Cistern volume (m³) the engineer reports on A138-13. Pile-8. Credited
+   * toward V_VA only when `zisterne_zwangsentleerung === true` per §6.1
+   * L1596. Optional — older projects without cistern entries leave it null
+   * and the aggregator falls through to its pre-Pile-8 behaviour. */
+  V_Zisterne?: number | null;
+  /** Whether the cistern has Zwangsentleerung (forced emptying). §6.1 L1596
+   * gate: cistern volume may count toward retention only if true. Optional;
+   * null / undefined behaves like false (no credit). */
+  zisterne_zwangsentleerung?: boolean | null;
 };
 
 /** Flood-event sub-area row. Same shape as SubArea but uses C_S (flood-event
@@ -295,15 +304,48 @@ const a138_13_gl8: Aggregator = {
       };
     }
 
-    substituted['MAX V_VA (m³)'] = maxV;
+    substituted['MAX V_VA brutto (m³)'] = maxV;
     substituted['Maßgebende Dauerstufe D (min)'] = governingD;
+
+    // 6. §6.1 L1596 cistern-credit branch (Pile-8).
+    // Cistern volume may reduce V_VA only when Zwangsentleerung is
+    // present. Without it the source forbids crediting — the cistern
+    // volume must NOT lower the required infiltration storage.
+    // Backwards-compatible: missing V_Zisterne or missing flag → no
+    // credit, behaviour identical to pre-Pile-8.
+    const V_Zisterne_raw = scalars.V_Zisterne;
+    const hasCisternVolume =
+      typeof V_Zisterne_raw === 'number' &&
+      Number.isFinite(V_Zisterne_raw) &&
+      V_Zisterne_raw > 0;
+    const zwangsentleerung = scalars.zisterne_zwangsentleerung === true;
+    let V_VA_net = maxV;
+    if (hasCisternVolume) {
+      // Expose the engineer's reported volume regardless of whether it gets
+      // credited — keeps the audit trail visible in the substituted map.
+      substituted['V_Zisterne (m³, gemeldet)'] = V_Zisterne_raw as number;
+      if (zwangsentleerung) {
+        const credit = V_Zisterne_raw as number;
+        V_VA_net = Math.max(0, maxV - credit);
+        substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✓)'] = -credit;
+      } else {
+        // Flag false or missing → §6.1 prohibits crediting.
+        substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✗)'] = 0;
+      }
+    }
+    substituted['V_VA netto (m³)'] = V_VA_net;
 
     return {
       kind: 'computed',
-      value: maxV,
+      value: V_VA_net,
       substituted,
       formulaEvaluated:
-        'V_VA = max_D [ (r_D(n)·(A_C+A_VA)·10⁻⁴ − Q_S − Q_Dr) · D · 60 · f_Z · f_A · 10⁻³ ]',
+        'V_VA = max_D [ (r_D(n)·(A_C+A_VA)·10⁻⁴ − Q_S − Q_Dr) · D · 60 · f_Z · f_A · 10⁻³ ]'
+        + (hasCisternVolume
+          ? (zwangsentleerung
+            ? '   −  V_Zisterne   (§6.1 L1596: Zwangsentleerung vorhanden)'
+            : '   (V_Zisterne nicht angerechnet — §6.1 L1596)')
+          : ''),
     };
   },
 };

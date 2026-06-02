@@ -143,8 +143,10 @@ describe('A138-13 Gl. 8 — rendered integration', () => {
     expect(
       within(card).getByText(/Maßgebende Dauerstufe D \(min\) = 30/),
     ).toBeInTheDocument();
-    // MAX V_VA also explicit
-    expect(within(card).getByText(/MAX V_VA \(m³\) = 18,684/)).toBeInTheDocument();
+    // MAX V_VA brutto + V_VA netto both explicit (post-Pile-8 cistern path
+    // emits brutto/netto rows; netto == brutto when no cistern credited).
+    expect(within(card).getByText(/MAX V_VA brutto \(m³\) = 18,684/)).toBeInTheDocument();
+    expect(within(card).getByText(/V_VA netto \(m³\) = 18,684/)).toBeInTheDocument();
 
     // The store carries the max V_VA value too — production wiring works.
     expect(getStoredVVA()).toBeCloseTo(18.684, 3);
