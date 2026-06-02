@@ -3,6 +3,8 @@ import { styles } from './styles';
 import { CoverSection } from './sections/cover';
 import { GrundlagenSection } from './sections/grundlagen';
 import { InputsSection } from './sections/inputs';
+import { ComputedSection } from './sections/computed';
+import { ComplianceSection } from './sections/compliance';
 import { ApprovalsSection } from './sections/approvals';
 import { Footer } from './sections/footer';
 import { Watermark } from './sections/watermark';
@@ -21,6 +23,12 @@ export function ReportDocument({ data }: { data: ReportData }) {
       <Page size="A4" style={styles.page}>
         <GrundlagenSection standards={data.standards} />
         <InputsSection worksheets={data.worksheets} />
+        <Footer projectCode={data.project.projectCode} />
+        {isPreview && <Watermark text="VORSCHAU — nicht freigegeben" />}
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <ComputedSection worksheets={data.worksheets} />
+        <ComplianceSection worksheets={data.worksheets} />
         <Footer projectCode={data.project.projectCode} />
         {isPreview && <Watermark text="VORSCHAU — nicht freigegeben" />}
       </Page>

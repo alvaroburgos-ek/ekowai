@@ -11,8 +11,17 @@ import {
   projectParameters,
   approvalEvents,
   profiles,
+  equations,
+  complianceRequirements,
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
+import {
+  evaluateWorksheetEquations,
+  evaluateWorksheetCompliance,
+  type EquationReportResult,
+  type ComplianceReportResult,
+} from '@/lib/eval/evaluate-for-report';
+import { isAttestationCondition } from '@/lib/eval/attestation';
 
 export type ReportData = {
   project: {
@@ -45,6 +54,12 @@ export type ReportData = {
       sourceType: string;
       enteredAt: string;
     }>;
+    /** Per-equation engine results, populated for every entry the
+     * production `FORMULA_ENGINE_WHITELIST` references on this worksheet. */
+    equations: EquationReportResult[];
+    /** Per-row compliance results, parseable conditions evaluated against
+     * project parameters + engine outputs. */
+    compliance: ComplianceReportResult[];
   }>;
   approvals: Array<{
     occurredAt: string;
@@ -122,6 +137,46 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
     .from(fields)
     .where(inArray(fields.worksheetTemplateId, templateIds));
 
+  // Equations + compliance per template, batched in one query each.
+  const allEquations = templateIds.length === 0 ? [] : await db
+    .select({
+      id: equations.id,
+      worksheetTemplateId: equations.worksheetTemplateId,
+      equationNumber: equations.equationNumber,
+      formula: equations.formula,
+      inputSymbols: equations.inputSymbols,
+      outputSymbol: equations.outputSymbol,
+      outputUnit: equations.outputUnit,
+    })
+    .from(equations)
+    .where(inArray(equations.worksheetTemplateId, templateIds));
+
+  const allCompliance = templateIds.length === 0 ? [] : await db
+    .select({
+      id: complianceRequirements.id,
+      worksheetTemplateId: complianceRequirements.worksheetTemplateId,
+      code: complianceRequirements.code,
+      titleDe: complianceRequirements.titleDe,
+      condition: complianceRequirements.condition,
+      severity: complianceRequirements.severity,
+      description: complianceRequirements.description,
+    })
+    .from(complianceRequirements)
+    .where(inArray(complianceRequirements.worksheetTemplateId, templateIds));
+
+  const equationsByTemplateId = new Map<string, typeof allEquations>();
+  for (const e of allEquations) {
+    const arr = equationsByTemplateId.get(e.worksheetTemplateId) ?? [];
+    arr.push(e);
+    equationsByTemplateId.set(e.worksheetTemplateId, arr);
+  }
+  const complianceByTemplateId = new Map<string, typeof allCompliance>();
+  for (const c of allCompliance) {
+    const arr = complianceByTemplateId.get(c.worksheetTemplateId) ?? [];
+    arr.push(c);
+    complianceByTemplateId.set(c.worksheetTemplateId, arr);
+  }
+
   // Fix 2: scope params query to only the fields we actually need (no orphans)
   // Fix 7: group fields by templateId once (O(n)) instead of filtering per instance (O(n*m))
   const allFieldIds = allFields.map((f) => f.id);
@@ -166,6 +221,58 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
         enteredAt: p?.enteredAt.toISOString() ?? '',
       };
     });
+
+    // Server-side evaluation: same evaluator primitives the form uses.
+    const tmplEquations = equationsByTemplateId.get(inst.templateId) ?? [];
+    const tmplCompliance = complianceByTemplateId.get(inst.templateId) ?? [];
+    const tmplParameters = tmplFields
+      .map((f) => paramsByFieldId.get(f.id))
+      .filter((p): p is NonNullable<typeof p> => p != null)
+      .map((p) => ({
+        fieldId: p.fieldId,
+        // valueNumber is stored as Postgres numeric → drizzle returns string.
+        // Parse here so the evaluator's `pickNum` sees a number.
+        valueNumber: p.valueNumber == null ? null : Number(p.valueNumber),
+        valueText: p.valueText,
+        valueEnum: p.valueEnum,
+        valueBoolean: p.valueBoolean,
+        valueDate: p.valueDate,
+        valueJson: p.valueJson,
+      }));
+
+    const equationResults = evaluateWorksheetEquations(
+      inst.code,
+      tmplEquations.map((e) => ({
+        id: e.id,
+        equationNumber: e.equationNumber,
+        formula: e.formula,
+        inputSymbols: e.inputSymbols,
+        outputSymbol: e.outputSymbol,
+        outputUnit: e.outputUnit,
+      })),
+      tmplFields,
+      tmplParameters,
+    );
+
+    const complianceResults = evaluateWorksheetCompliance(
+      inst.code,
+      tmplCompliance.map((c) => ({
+        id: c.id,
+        code: c.code,
+        titleDe: c.titleDe,
+        condition: c.condition,
+        severity: c.severity,
+        description: c.description,
+        // Until Pile-11 SQL is applied AND populated, derive from condition
+        // string pattern. Code path will prefer the DB column once available
+        // (see attestation.ts and the Pile-11 SQL comment).
+        requiresAttestation: isAttestationCondition(c.condition),
+      })),
+      tmplFields,
+      tmplParameters,
+      equationResults,
+    );
+
     return {
       instanceId: inst.instanceId,
       code: inst.code,
@@ -173,6 +280,8 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       status: inst.status,
       standardCode: inst.standardCode,
       parameters,
+      equations: equationResults,
+      compliance: complianceResults,
     };
   });
 
