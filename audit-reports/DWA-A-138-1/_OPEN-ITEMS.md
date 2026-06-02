@@ -39,6 +39,16 @@ A short, living register of decisions deferred during the engine-wiring slices. 
 
 </details>
 
+## 5. §6.1 L1596 — Zisterne via Simulationsmodell (deliberate scope deferral)
+
+- **Where:** A138-13 Gl. 8 V_VA cistern-credit branch (Pile-8, PR #28).
+- **Source clause (verbatim, §6.1 L1596):** *"Speicherräume können für eine Rückhaltung des Niederschlagswassers rechnerisch nur angesetzt werden, wenn sie ein zwangsentleertes Teilvolumen aufweisen **oder mithilfe von geeigneten Simulationsmodellen, die unter anderem den Ausfall von Entnahmen/Nutzungen (zum Beispiel in Urlaubszeiten) unregelmäßig und zufallsgesteuert abbilden, nachgewiesen wurden.**"*
+- **What's implemented (PR #28):** the Zwangsentleerung branch — `V_Zisterne` is credited toward V_VA only when the boolean `zisterne_zwangsentleerung == true`.
+- **What's NOT implemented:** the second creditable condition — proof via a simulation model that captures stochastic Entnahme/Nutzungs-Ausfall (e.g. Urlaubszeiten). The wizard currently has no carrier for a simulation attestation or its parameters, and the V_VA aggregator has no second `OR` branch that recognises it. Engineers who rely on simulation-based proof today must either (a) flip `zisterne_zwangsentleerung` to true with an external Nachweis, or (b) skip the cistern credit and engineer the headroom manually.
+- **Why deferred:** simulation-model integration is materially larger than the Zwangsentleerung gate. It needs (i) a simulation-attestation field (boolean + reference document), (ii) a parameter-validation step (the source requires the simulation to capture *unregelmäßige zufallsgesteuerte* Nutzungs-Ausfälle — not a one-line property), and (iii) probably an own audit rubric. Out of scope for the engine-wiring slices through Pile-8.
+- **Risk if left unaddressed:** an engineer using a legitimate simulation-based Nachweis cannot record it in the wizard. They will likely set `zisterne_zwangsentleerung = true` as a workaround, which is informationally wrong even if numerically equivalent. This is a **tracked, deliberate gap** — not silent.
+- **When to revisit:** as part of a Phase-3 cistern slice, or when a real project first needs the simulation path. Re-open this item with a scope proposal at that point.
+
 ## 4. Squash-merge caveat — safety commits can be silently dropped
 
 - **Observed:** PR #21's squash-merge to main (commit `415bd7b`) silently dropped commit `a4ed2ba` (the runtime ambiguity guard on `mergeInheritedFields`). The squash subject only mentioned the headline inheritance work; the second commit's content was not in the merged tree even though it was in the branch when the merge fired.
