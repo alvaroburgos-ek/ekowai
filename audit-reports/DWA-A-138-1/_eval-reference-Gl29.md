@@ -1,5 +1,8 @@
 # Gl. 29 (A138-19) — L_R required for MRE (displayOnly)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `L_R = ((A_C + A_VA)·10⁻⁷·r_D(n) − b·h·k_i − V_M/(D·60·f_Z)) / (b·h·s_R/(D·60·f_Z) + (b+h)·k_i)` — §6.5.2.
 
 Like Gl. 23 but uses (A_C + A_VA) and subtracts V_M/(D·60·f_Z) — the Mulde already provides some storage; the Rigole length only needs to cover the rest.

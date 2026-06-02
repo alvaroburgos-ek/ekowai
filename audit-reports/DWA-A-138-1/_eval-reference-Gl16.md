@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-17, Gl. 16 (A_S,m Mulde)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `A_S,m = (A_C · 10⁻⁷ · r_D(n)) / (h_M / (D · 60 · f_Z) + k_i)` — Muldenversickerung, §6.3.2.
 
 | Input | Value | Unit |

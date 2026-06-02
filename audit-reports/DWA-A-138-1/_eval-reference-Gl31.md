@@ -1,5 +1,8 @@
 # Gl. 31 (A138-20) — Q_MUE Muldenüberlauf-Abfluss
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `Q_MUE = A_C · 10⁻⁴ · r_MUE − A_VA · k_i · 1000` — §6.5.2 / §6.6.2.
 
 | Input | Value | Unit |

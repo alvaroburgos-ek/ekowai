@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-18, Gl. 21 (s_R)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 **Purpose:** Hand-calculated reference for the Rigole storage-coefficient formula. The engine is correct only if it reproduces this number to the stated precision.
 
 ## Equation row in DB

@@ -19,11 +19,12 @@ A short, living register of decisions deferred during the engine-wiring slices. 
 
 </details>
 
-## 2. Gl. (16) A_S,m Mulde — independently confirm 68.824 m²
+## 2. Gl. (16) A_S,m Mulde — independently confirm the Heinsberg-fixture output 68.824 m²
 
+- **Framing:** 68.824 m² is the engine's output for the **Heinsberg-like reference inputs** in `_eval-reference-Gl16.md`. It is NOT a normative constant of DWA-A 138-1 — for different project inputs the value changes. The open item is "is the formula transcription correct, so that the engine reproduces the source-derived hand-calc *for those specific reference inputs*?"
 - **Where:** A138-17, Gl. (16) — `A_S,m = (A_C · 10⁻⁷ · r_D(n)) / (h_M / (D · 60 · f_Z) + k_i)` (§6.3.2 per DB row).
 - **Status:** wired (PR #22). Engine reproduces the hand-calc to 12 decimal places — but **both derive from the same source** (the hand calc in `_eval-reference-Gl16.md` was computed alongside the formula transcription, then asserted in the unit test). Engine is *self-consistent*, not independently verified.
-- **Resolution required:** read §6.3.2 in the source markdown, walk through Gl. (16) by hand with the same Heinsberg-like inputs (A_C=1000 m², r_D(n)=130 l/(s·ha), h_M=0.30 m, D=30 min, f_Z=1.2, k_i=5×10⁻⁵ m/s), and confirm A_S,m = **68.824 m²** is the source-correct value. The compound-fraction denominator is the part to check carefully: `h_M / (D·60·f_Z)` should evaluate to `0.30 / 2160 ≈ 1.389×10⁻⁴`, summing with `k_i` to `≈ 1.889×10⁻⁴`, with numerator `1000·10⁻⁷·130 = 0.013` giving `0.013 / 1.889×10⁻⁴ ≈ 68.824`.
+- **Resolution required:** read §6.3.2 in the source markdown, walk through Gl. (16) by hand with the same Heinsberg-like inputs (A_C=1000 m², r_D(n)=130 l/(s·ha), h_M=0.30 m, D=30 min, f_Z=1.2, k_i=5×10⁻⁵ m/s), and confirm A_S,m = **68.824 m²** is the formula-correct value **for those specific inputs**. The compound-fraction denominator is the part to check carefully: `h_M / (D·60·f_Z)` should evaluate to `0.30 / 2160 ≈ 1.389×10⁻⁴`, summing with `k_i` to `≈ 1.889×10⁻⁴`, with numerator `1000·10⁻⁷·130 = 0.013` giving `0.013 / 1.889×10⁻⁴ ≈ 68.824`.
 - **If confirmed:** close this item with a one-line entry citing the source span (line range).
 - **If different:** the formula transcription is suspect — same Pass3c re-import path as item 1 above.
 

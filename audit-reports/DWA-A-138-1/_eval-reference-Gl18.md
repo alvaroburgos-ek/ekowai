@@ -1,5 +1,8 @@
 # Eval-Reference — DWA-A 138-1, A138-18, Gl. 18 (Q_S Rigole)
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 > **RESOLVED 2026-05-29 (Pile-6):** Source §6.4.2 L1778 reads verbatim:
 > *"Die Versickerungsleistung Q_S (in m³/s) der Rigole ergibt sich nach
 > GL. (18) zu:"* — the standard genuinely uses m³/s here (unlike Gl. (4) on

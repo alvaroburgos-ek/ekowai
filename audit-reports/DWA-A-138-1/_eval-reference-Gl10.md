@@ -1,5 +1,8 @@
 # Gl. 10 (A138-26) — V_Rück flood-check
 
+
+> **NOTE — fixture-output framing.** The numeric output shown below (e.g. V_VA = … m³) is the engine's output for the **specific example inputs in this file** (a Heinsberg-like reference fixture). It is **NOT** a normative constant of DWA-A 138-1. The standard defines only the formula; the number changes when the engineer enters different project inputs.
+
 `V_Rück = ((r_D(T_n,Ü) · (SUM(A_E,b,a · C_S) + A_VA) / 10000) − (Q_S + Q_Dr)) · D · 60 / 1000  −  V_VA   ≥ 0` — §5.3.4.
 
 Aggregator path with **its own carrier** `sub_areas_A138_26` (additive schema from Pile-5) and the flood-event runoff coefficient `C_S` per row. **Strictly different** from `sub_areas_A138_10` because C_S ≠ C (Tab. 9 flood vs design event); the engine refuses to silently fall back, so the design-event carrier cannot be used here.

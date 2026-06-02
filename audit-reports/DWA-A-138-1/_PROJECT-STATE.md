@@ -28,8 +28,13 @@ All SQL is in `_pile{2,3,4}-applied.sql` / `_pile{2,3,4}-schema.sql` / `_pile{2,
 
 `FORMULA_ENGINE_WHITELIST` in `src/components/worksheet/worksheet-form.tsx`.
 
-| # | WS | Gl. | What it computes | Path | Hand calc |
+| # | WS | Gl. | What it computes | Path | Hand-calc fixture output |
 |---|---|---|---|---|---|
+<!-- "Hand-calc fixture output" column: the number is what the engine returns
+     for the specific reference inputs in the linked _eval-reference-Gl*.md
+     file (Heinsberg-like fixture). NOT a normative constant of the standard —
+     real projects produce different numbers. -->
+
 | 1 | A138-10 | **2** | A_C = Σ(A_E,b,a,i · C_i) + Σ(A_E,nb,a,i · C_i) | aggregator over `sub_areas_A138_10` JSON carrier | `_eval-reference-Gl2.md` → 690 m² |
 | 2 | A138-12 | **4** | Q_S = k_i · A_S · 10³ | arithmetic | `_eval-reference-Gl4.md` → 5.000 l/s |
 | 3 | A138-12 | **7** | A_S,m = (A_S,min + A_S,max) / 2 | arithmetic | `_eval-reference-Gl7.md` → 100.000 m² |
