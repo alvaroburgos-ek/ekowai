@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
-import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
+import { eq, and, inArray, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -60,8 +60,11 @@ export async function listProjectsForUser(userId: string) {
     .where(eq(orgMembers.userId, userId));
   if (memberships.length === 0) return [];
 
-  return db.select().from(projects)
-    .where(and(eq(projects.orgId, memberships[0].orgId), isNull(projects.archivedAt)))
+  const orgIds = memberships.map((m) => m.orgId);
+  return db
+    .select()
+    .from(projects)
+    .where(and(inArray(projects.orgId, orgIds), isNull(projects.archivedAt)))
     .orderBy(projects.createdAt);
 }
 
@@ -144,9 +147,10 @@ export async function listArchivedProjectsForUser(userId: string) {
     .where(eq(orgMembers.userId, userId));
   if (memberships.length === 0) return [];
 
+  const orgIds = memberships.map((m) => m.orgId);
   return db
     .select()
     .from(projects)
-    .where(and(eq(projects.orgId, memberships[0].orgId), isNotNull(projects.archivedAt)))
+    .where(and(inArray(projects.orgId, orgIds), isNotNull(projects.archivedAt)))
     .orderBy(desc(projects.archivedAt));
 }

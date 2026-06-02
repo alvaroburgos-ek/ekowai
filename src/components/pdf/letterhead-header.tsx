@@ -1,6 +1,22 @@
 import { View, Text, Image } from '@react-pdf/renderer';
 import { styles } from './styles';
 import type { ReportLetterhead } from '@/lib/pdf/load-standard-report';
+import { env } from '@/env';
+
+/** Logo URLs must be https AND originate from the project's Supabase
+ *  storage host. Without this allowlist an org admin could set logoUrl to
+ *  any third-party URL — every PDF render then makes server-side fetches to
+ *  attacker-controlled hosts (SSRF + DoS via slow responses). */
+function isAllowedLogoUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== 'https:') return false;
+    const allowedOrigin = new URL(env.NEXT_PUBLIC_SUPABASE_URL).origin;
+    return u.origin === allowedOrigin;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Letterhead band fixed to every page (top 28pt → 84pt content padding).
@@ -45,9 +61,9 @@ export function LetterheadHeader({ letterhead }: { letterhead: ReportLetterhead 
         ))}
       </View>
       <View style={styles.letterheadRight}>
-        {/* Logo rendered only when http(s) URL — @react-pdf rejects relative
-            paths in server renders. */}
-        {letterhead.logoUrl && /^https?:\/\//.test(letterhead.logoUrl) ? (
+        {/* Logo: https-only AND from our Supabase storage host. Anything
+            else is silently dropped to block SSRF/DoS during PDF render. */}
+        {letterhead.logoUrl && isAllowedLogoUrl(letterhead.logoUrl) ? (
           <Image src={letterhead.logoUrl} style={styles.letterheadLogo} />
         ) : null}
         {contactLines.map((line, i) => (

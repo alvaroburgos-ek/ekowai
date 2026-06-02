@@ -2,7 +2,13 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { auditLog, projects, orgMembers } from '@/lib/db/schema';
+import {
+  auditLog,
+  projects,
+  orgMembers,
+  fields,
+  worksheetInstances,
+} from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 
@@ -66,6 +72,24 @@ export async function recordManualOverride(
     .where(and(eq(projects.id, projectId), eq(orgMembers.userId, user.id)))
     .limit(1);
   if (!proj) return { ok: false, error: 'project_not_found' };
+
+  // Field-belongs-to-project check: the fieldId must live in a worksheet
+  // template that this project has instantiated. Without this, an engineer
+  // could plant a manual_override audit row referencing a field from any
+  // standard not actually used in their project — corrupting the report
+  // timeline with phantom overrides.
+  const [fieldMembership] = await db
+    .select({ id: fields.id })
+    .from(fields)
+    .innerJoin(
+      worksheetInstances,
+      eq(worksheetInstances.worksheetTemplateId, fields.worksheetTemplateId),
+    )
+    .where(
+      and(eq(fields.id, fieldId), eq(worksheetInstances.projectId, projectId)),
+    )
+    .limit(1);
+  if (!fieldMembership) return { ok: false, error: 'field_not_in_project' };
 
   await db.insert(auditLog).values({
     actorId: user.id,

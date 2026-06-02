@@ -34,10 +34,13 @@ export async function GET(
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `inline; filename="report-${id.slice(0, 8)}.pdf"`,
+        // PDFs contain full project data — block intermediary + browser
+        // caches so a logged-out reload or shared proxy never replays them.
+        'Cache-Control': 'no-store, max-age=0',
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('[report-pdf] generation failed', err);
+    return NextResponse.json({ error: 'report_failed' }, { status: 500 });
   }
 }

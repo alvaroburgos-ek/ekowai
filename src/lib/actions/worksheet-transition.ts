@@ -105,10 +105,27 @@ export async function transitionWorksheet(
         });
       }
 
-      await tx
+      // Compare-and-set on status: two reviewers can race the same approval
+      // out of submitted_for_review. The fromStatus we read on line 67 is from
+      // the SELECT BEFORE the transaction; another transition committed in
+      // the meantime would otherwise produce two approval_events from the
+      // same fromStatus. Restricting the UPDATE to (id, status=fromStatus)
+      // makes the second writer's update affect zero rows; we abort the tx.
+      const updated = await tx
         .update(worksheetInstances)
         .set({ status: toStatus, updatedAt: new Date() })
-        .where(eq(worksheetInstances.id, input.instanceId));
+        .where(
+          and(
+            eq(worksheetInstances.id, input.instanceId),
+            eq(worksheetInstances.status, fromStatus),
+          ),
+        )
+        .returning({ id: worksheetInstances.id });
+      if (updated.length === 0) {
+        throw new Error(
+          `Worksheet wurde parallel von einem anderen Bearbeiter aus Status ${fromStatus} bewegt. Bitte neu laden.`,
+        );
+      }
 
       await tx.insert(approvalEvents).values({
         worksheetInstanceId: input.instanceId,
