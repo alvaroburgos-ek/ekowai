@@ -75,6 +75,7 @@ async function loadCaptureInputs(args: {
   equations: EquationRow[];
   complianceRequirements: ComplianceRow[];
   parameters: ParameterRow[];
+  ambiguousSymbols: Map<string, string[]>;
 } | null> {
   const dbi = args.txDb ?? db;
 
@@ -137,6 +138,7 @@ async function loadCaptureInputs(args: {
     equations: eqList,
     complianceRequirements: crList,
     parameters: paramRows,
+    ambiguousSymbols: merged.ambiguousSymbols,
   };
 }
 
@@ -169,6 +171,7 @@ export async function captureSnapshot(args: {
     complianceRequirements: inputs.complianceRequirements,
     parameters: inputs.parameters,
     worksheetCode: inputs.worksheetCode,
+    ambiguousSymbols: inputs.ambiguousSymbols,
   });
 
   const dbi = args.txDb ?? db;

@@ -157,8 +157,13 @@ export function buildSnapshotPayload(args: {
   complianceRequirements: ComplianceRow[];
   parameters: ParameterRow[];
   worksheetCode: string;
+  /** Symbol → producing-worksheet-codes when an inherited symbol has >1
+   *  producer. Mirrors the live hook's ambiguity guard so the snapshot
+   *  doesn't silently pick a winner and label it `computed`. */
+  ambiguousSymbols?: Map<string, string[]>;
 }): SnapshotPayload {
   const { fields: fieldList, equations: equationList, complianceRequirements: crList } = args;
+  const ambiguousSymbols = args.ambiguousSymbols ?? new Map<string, string[]>();
   const paramByFieldId = new Map(args.parameters.map((p) => [p.fieldId, p]));
   const fieldBySymbol = new Map(fieldList.map((f) => [f.symbol, f]));
 
@@ -209,13 +214,21 @@ export function buildSnapshotPayload(args: {
     return raw as KostraCarrier;
   })();
 
+  // Gl8 scalar resolution: null out any symbol with >1 producer so the
+  // aggregator sees missing-input and produces manual_required instead of
+  // silently picking one source.
+  const gl8Pick = (sym: string): number | null => {
+    const origins = ambiguousSymbols.get(sym);
+    if (origins && origins.length > 1) return null;
+    return numberBySymbol(sym);
+  };
   const gl8Scalars: Gl8Scalars = {
-    A_C: numberBySymbol('A_C'),
-    A_VA: numberBySymbol('A_VA'),
-    Q_S: numberBySymbol('Q_S'),
-    Q_Dr: numberBySymbol('Q_Dr'),
-    f_Z: numberBySymbol('f_Z'),
-    f_A: numberBySymbol('f_A'),
+    A_C: gl8Pick('A_C'),
+    A_VA: gl8Pick('A_VA'),
+    Q_S: gl8Pick('Q_S'),
+    Q_Dr: gl8Pick('Q_Dr'),
+    f_Z: gl8Pick('f_Z'),
+    f_A: gl8Pick('f_A'),
   };
 
   const equationOutputs: Record<string, SnapshotEquationOutput> = {};
@@ -238,6 +251,28 @@ export function buildSnapshotPayload(args: {
 
     const aliasFor = (sym: string): string =>
       profile?.symbolAliases?.[sym] ?? sym;
+
+    // Ambiguity guard — parity with the live engine hook. When a consumed
+    // symbol has >1 producing worksheet the snapshot must NOT silently pick
+    // a winner. Emit manual_required with the symbol named, so the diff
+    // viewer mirrors what the engineer saw on the form.
+    const conflicts: Array<{ symbol: string; origins: string[] }> = [];
+    for (const sym of neededSymbols) {
+      const origins = ambiguousSymbols.get(aliasFor(sym));
+      if (origins && origins.length > 1) {
+        conflicts.push({ symbol: sym, origins });
+      }
+    }
+    if (conflicts.length > 0) {
+      const reason = conflicts
+        .map((c) => `mehrdeutige Quelle für ${c.symbol} (${c.origins.join(', ')})`)
+        .join(' · ');
+      equationOutputs[eq.equationNumber] = toSnapshotOutput(
+        { kind: 'manual_required', reason },
+        eq.formula,
+      );
+      continue;
+    }
 
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));
