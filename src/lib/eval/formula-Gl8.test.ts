@@ -66,7 +66,8 @@ describe('A138-13 Gl. 8 — V_VA over KOSTRA', () => {
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
     expect(r.value).toBeCloseTo(18.684, 3);
-    expect(r.substituted['MAX V_VA (m³)']).toBeCloseTo(18.684, 3);
+    expect(r.substituted['MAX V_VA brutto (m³)']).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_VA netto (m³)']).toBeCloseTo(18.684, 3);
     expect(r.substituted['Maßgebende Dauerstufe D (min)']).toBe(30);
   });
 
@@ -74,8 +75,9 @@ describe('A138-13 Gl. 8 — V_VA over KOSTRA', () => {
     const r = evaluateFormula(req());
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    // 6 row entries + 'MAX V_VA' + 'Maßgebende Dauerstufe D' = 8 keys
-    expect(Object.keys(r.substituted)).toHaveLength(8);
+    // 6 row entries + 'MAX V_VA brutto' + 'Maßgebende Dauerstufe D' + 'V_VA netto' = 9 keys
+    // (no cistern fields entered → no Zisternen-Anrechnung rows).
+    expect(Object.keys(r.substituted)).toHaveLength(9);
     // Per-row magnitudes against the hand calc (precision 0.001)
     const byD: Record<number, number> = {};
     for (const [k, v] of Object.entries(r.substituted)) {
@@ -167,5 +169,136 @@ describe('A138-13 Gl. 8 — V_VA over KOSTRA', () => {
     expect(r.kind).toBe('manual_required');
     if (r.kind !== 'manual_required') return;
     expect(r.missing).toEqual(['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A']);
+  });
+});
+
+/**
+ * Pile-8 — Zisternen-Anrechenbarkeit §6.1 L1596.
+ *
+ * Source quote (verbatim, §6.1 L1596): "Speicherräume können für eine
+ * Rückhaltung des Niederschlagswassers rechnerisch nur angesetzt werden,
+ * wenn sie ein zwangsentleertes Teilvolumen aufweisen …"
+ *
+ * Contract: V_Zisterne reduces V_VA only when zisterne_zwangsentleerung
+ * === true. Otherwise V_VA is left unchanged (= brutto). Backwards-
+ * compatible: missing/null cistern fields leave the engine's pre-Pile-8
+ * behaviour unchanged.
+ *
+ * V_VA_brutto = 18.684 m³ for the default scalars + KOSTRA table.
+ */
+describe('Gl. 8 cistern crediting (Pile-8, §6.1 L1596)', () => {
+  it('CREDITED — zwangsentleerung=true, V_Zisterne=5 → V_VA reduced to 13.684 m³', () => {
+    const r = evaluateFormula(
+      req({
+        gl8Scalars: { V_Zisterne: 5, zisterne_zwangsentleerung: true },
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(18.684 - 5, 3);
+    expect(r.substituted['MAX V_VA brutto (m³)']).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_VA netto (m³)']).toBeCloseTo(13.684, 3);
+    expect(r.substituted['V_Zisterne (m³, gemeldet)']).toBe(5);
+    expect(
+      r.substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✓)'],
+    ).toBe(-5);
+    // The notice in the formulaEvaluated string makes the credit visible
+    // in the audit trail.
+    expect(r.formulaEvaluated).toMatch(/V_Zisterne.*Zwangsentleerung vorhanden/);
+  });
+
+  it('NOT CREDITED — zwangsentleerung=false, V_Zisterne=5 → V_VA unchanged at 18.684 m³', () => {
+    const r = evaluateFormula(
+      req({
+        gl8Scalars: { V_Zisterne: 5, zisterne_zwangsentleerung: false },
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(18.684, 3);
+    expect(r.substituted['MAX V_VA brutto (m³)']).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_VA netto (m³)']).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_Zisterne (m³, gemeldet)']).toBe(5);
+    // The exclusion is explicit in the substituted map so the engineer
+    // sees that the cistern was reported but not credited per §6.1.
+    expect(
+      r.substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✗)'],
+    ).toBe(0);
+    expect(r.formulaEvaluated).toMatch(/V_Zisterne nicht angerechnet/);
+  });
+
+  it('NOT CREDITED — zwangsentleerung=null/missing, V_Zisterne=5 → treated as false', () => {
+    const r = evaluateFormula(
+      req({
+        gl8Scalars: { V_Zisterne: 5, zisterne_zwangsentleerung: null },
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(18.684, 3);
+    expect(
+      r.substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✗)'],
+    ).toBe(0);
+  });
+
+  it('CLAMP — credit > brutto V_VA → V_VA clamped at 0 (cistern over-covers retention)', () => {
+    const r = evaluateFormula(
+      req({
+        gl8Scalars: { V_Zisterne: 30, zisterne_zwangsentleerung: true },
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    // 18.684 − 30 = −11.316 → clamped to 0
+    expect(r.value).toBe(0);
+    expect(r.substituted['MAX V_VA brutto (m³)']).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_VA netto (m³)']).toBe(0);
+    expect(
+      r.substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✓)'],
+    ).toBe(-30);
+  });
+
+  it('BACKWARDS-COMPAT — no cistern fields entered → identical to pre-Pile-8 output', () => {
+    const r = evaluateFormula(req());
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_VA netto (m³)']).toBeCloseTo(18.684, 3);
+    // No cistern-related keys when V_Zisterne is null.
+    expect(r.substituted['V_Zisterne (m³, gemeldet)']).toBeUndefined();
+    expect(
+      r.substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✓)'],
+    ).toBeUndefined();
+    expect(
+      r.substituted['Zisternen-Anrechnung (m³, Zwangsentleerung ✗)'],
+    ).toBeUndefined();
+    // formulaEvaluated falls back to the pre-Pile-8 string with no
+    // cistern annotation.
+    expect(r.formulaEvaluated).not.toMatch(/V_Zisterne/);
+  });
+
+  it('IGNORED — V_Zisterne = 0 (engineer reports zero) → no credit even when flag is true', () => {
+    // A zero cistern volume has no effect either way — same as not entering it.
+    const r = evaluateFormula(
+      req({
+        gl8Scalars: { V_Zisterne: 0, zisterne_zwangsentleerung: true },
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_Zisterne (m³, gemeldet)']).toBeUndefined();
+  });
+
+  it('IGNORED — V_Zisterne = NaN/Infinity → no credit, no entry in substituted', () => {
+    const r = evaluateFormula(
+      req({
+        gl8Scalars: { V_Zisterne: Infinity, zisterne_zwangsentleerung: true },
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(18.684, 3);
+    expect(r.substituted['V_Zisterne (m³, gemeldet)']).toBeUndefined();
   });
 });

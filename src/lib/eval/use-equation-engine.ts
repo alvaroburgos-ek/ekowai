@@ -150,6 +150,9 @@ export function useEquationEngine({
   // Gl. 8 scalar inputs. Resolved from whichever field carries each symbol
   // (in production these flow via same-symbol inheritance from upstream
   // worksheets). Null when missing.
+  // V_Zisterne + zisterne_zwangsentleerung (Pile-8) gate the §6.1 L1596
+  // cistern-credit branch. Both are optional: missing → no credit, identical
+  // to pre-Pile-8 behaviour.
   const gl8Scalars = useMemo<Gl8Scalars | null>(() => {
     const pick = (sym: string): number | null => {
       const f = fieldBySymbol.get(sym);
@@ -160,6 +163,13 @@ export function useEquationEngine({
       }
       return v.value;
     };
+    const pickBool = (sym: string): boolean | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      if (v?.type !== 'boolean') return null;
+      return v.value;
+    };
     return {
       A_C: pick('A_C'),
       A_VA: pick('A_VA'),
@@ -167,6 +177,8 @@ export function useEquationEngine({
       Q_Dr: pick('Q_Dr'),
       f_Z: pick('f_Z'),
       f_A: pick('f_A'),
+      V_Zisterne: pick('V_Zisterne'),
+      zisterne_zwangsentleerung: pickBool('zisterne_zwangsentleerung'),
     };
   }, [values, fieldBySymbol]);
 
