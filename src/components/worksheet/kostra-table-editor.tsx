@@ -1,8 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useWorksheetStore } from '@/lib/state/worksheet-store';
-import type { KostraRow, KostraCarrier } from '@/lib/eval/aggregators';
+import type { KostraRow } from '@/lib/eval/aggregators';
+import { useJsonTableCarrier, freshRowId } from './use-json-table-carrier';
 
 type Props = {
   fieldId: string;
@@ -10,81 +9,50 @@ type Props = {
 
 const KOSTRA_DEFAULT_DURATIONS = [5, 10, 15, 30, 60, 120];
 
-function emptyCarrier(): KostraCarrier {
-  return { rows: [] };
-}
-
 function newRow(D?: number): KostraRow {
   return {
-    id:
-      typeof crypto !== 'undefined' && 'randomUUID' in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    id: freshRowId(),
     label: '',
     D_min: typeof D === 'number' ? D : null,
     r_D_n: null,
   };
 }
 
-function readCarrier(value: unknown): KostraCarrier {
-  if (!value || typeof value !== 'object') return emptyCarrier();
-  const v = value as { rows?: unknown };
-  if (!Array.isArray(v.rows)) return emptyCarrier();
-  const rows: KostraRow[] = [];
-  for (const raw of v.rows) {
-    if (!raw || typeof raw !== 'object') continue;
-    const r = raw as Partial<KostraRow>;
-    rows.push({
-      id: typeof r.id === 'string' && r.id.length > 0 ? r.id : newRow().id,
-      label: typeof r.label === 'string' ? r.label : '',
-      D_min:
-        typeof r.D_min === 'number' && Number.isFinite(r.D_min) ? r.D_min : null,
-      r_D_n:
-        typeof r.r_D_n === 'number' && Number.isFinite(r.r_D_n) ? r.r_D_n : null,
-    });
-  }
-  return { rows };
+function readRow(raw: unknown): KostraRow | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Partial<KostraRow>;
+  return {
+    id: typeof r.id === 'string' && r.id.length > 0 ? r.id : freshRowId(),
+    label: typeof r.label === 'string' ? r.label : '',
+    D_min:
+      typeof r.D_min === 'number' && Number.isFinite(r.D_min) ? r.D_min : null,
+    r_D_n:
+      typeof r.r_D_n === 'number' && Number.isFinite(r.r_D_n) ? r.r_D_n : null,
+  };
 }
 
 export function KostraTableEditor({ fieldId }: Props) {
-  const raw = useWorksheetStore((s) => s.values[fieldId]);
-  const setField = useWorksheetStore((s) => s.setField);
-  const carrier = useMemo(
-    () => readCarrier(raw?.type === 'json' ? raw.value : undefined),
-    [raw],
-  );
-
-  function write(next: KostraCarrier) {
-    setField(fieldId, { type: 'json', value: next });
-  }
-
-  function addRow(D?: number) {
-    write({ rows: [...carrier.rows, newRow(D)] });
-  }
+  const { rows, addRow, updateRow, removeRow } = useJsonTableCarrier<KostraRow>({
+    fieldId,
+    newRow: () => newRow(),
+    readRow,
+  });
 
   function seedDefaults() {
     const usedD = new Set(
-      carrier.rows.map((r) => r.D_min).filter((d): d is number => d != null),
+      rows.map((r) => r.D_min).filter((d): d is number => d != null),
     );
-    const toAdd = KOSTRA_DEFAULT_DURATIONS.filter((d) => !usedD.has(d)).map((d) =>
-      newRow(d),
-    );
-    write({ rows: [...carrier.rows, ...toAdd] });
+    for (const d of KOSTRA_DEFAULT_DURATIONS) {
+      if (!usedD.has(d)) addRow({ D_min: d });
+    }
   }
 
-  function updateRow(id: string, patch: Partial<KostraRow>) {
-    write({
-      rows: carrier.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)),
-    });
-  }
-
-  function removeRow(id: string) {
-    write({ rows: carrier.rows.filter((r) => r.id !== id) });
-  }
-
-  const complete = carrier.rows.filter(
+  const complete = rows.filter(
     (r) => r.D_min != null && r.r_D_n != null,
   ).length;
+  const seedDisabled = KOSTRA_DEFAULT_DURATIONS.every((d) =>
+    rows.some((r) => r.D_min === d),
+  );
 
   return (
     <div className="space-y-3" data-testid="kostra-table-editor">
@@ -102,9 +70,7 @@ export function KostraTableEditor({ fieldId }: Props) {
             type="button"
             onClick={seedDefaults}
             className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
-            disabled={KOSTRA_DEFAULT_DURATIONS.every((d) =>
-              carrier.rows.some((r) => r.D_min === d),
-            )}
+            disabled={seedDisabled}
           >
             Standard-Dauerstufen einfügen
           </button>
@@ -118,7 +84,7 @@ export function KostraTableEditor({ fieldId }: Props) {
         </div>
       </div>
 
-      {carrier.rows.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="text-xs text-subtext italic">
           Keine KOSTRA-Daten erfasst. Fügen Sie Dauerstufen mit zugehöriger
           Regenspende r_D(n) ein.
@@ -137,7 +103,7 @@ export function KostraTableEditor({ fieldId }: Props) {
               </tr>
             </thead>
             <tbody>
-              {carrier.rows.map((r) => (
+              {rows.map((r) => (
                 <tr key={r.id} className="border-t border-hairline">
                   <td className="py-1.5 pr-2">
                     <input
@@ -193,7 +159,7 @@ export function KostraTableEditor({ fieldId }: Props) {
             <tfoot className="text-[11px] text-subtext">
               <tr className="border-t border-hairline-strong">
                 <td colSpan={4} className="pt-2 text-right">
-                  {complete}/{carrier.rows.length} Zeilen vollständig
+                  {complete}/{rows.length} Zeilen vollständig
                 </td>
               </tr>
             </tfoot>
