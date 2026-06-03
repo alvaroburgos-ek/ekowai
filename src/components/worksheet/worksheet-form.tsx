@@ -149,6 +149,7 @@ export function WorksheetForm({
   isPlatformEngineer = false,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
+  const mergeServerValues = useWorksheetStore((s) => s.mergeServerValues);
   const flush = useWorksheetStore((s) => s.flush);
   const setField = useWorksheetStore((s) => s.setField);
   const values = useWorksheetStore((s) => s.values);
@@ -159,7 +160,10 @@ export function WorksheetForm({
   // Initialize the store ONCE per instance change.
   // We intentionally omit initialValues/initialSources from the dependency array —
   // they are new object references on every router.refresh() but contain the same
-  // data, and re-running init would wipe unsaved in-flight edits.
+  // data, and re-running init would wipe unsaved in-flight edits. Cross-worksheet
+  // updates (an inherited symbol changed on a sibling worksheet, then the user
+  // navigates back here) flow through the merge effect below instead, which
+  // preserves pendingFieldIds.
   useEffect(() => {
     init(
       instance.id,
@@ -169,6 +173,20 @@ export function WorksheetForm({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [init, instance.id]);
+
+  // Merge fresh server props into the store WITHOUT clobbering in-flight edits.
+  // Fires whenever the props change (parent re-renders, soft-nav back, etc.).
+  // The store action skips any field id in `pendingFieldIds` and bails out
+  // early when no value actually changed, so the effect is safe to re-run on
+  // every render. The first render's merge is a no-op because init (above)
+  // already seeded matching values.
+  useEffect(() => {
+    mergeServerValues({
+      values: initialValues as Record<string, FieldValue>,
+      sources: initialSources as Record<string, { docId: string; page?: number; note?: string } | null>,
+      citations: initialCitations,
+    });
+  }, [mergeServerValues, initialValues, initialSources, initialCitations]);
 
   // Debounced auto-save
   useEffect(() => {
