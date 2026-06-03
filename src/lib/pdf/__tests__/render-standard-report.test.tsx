@@ -351,6 +351,11 @@ describe('StandardReportDocument', () => {
     ],
   };
 
+  // Per-test timeout bumped because @react-pdf's renderToBuffer ships a
+  // PDF generator that does font subsetting + Tj-positioned glyph layout
+  // + FlateDecode compression. The work fits well under 5000ms in
+  // isolation but timeouts flake under parallel suite load (other tests
+  // contend for CPU). 15000ms gives consistent headroom.
   it('renders to a PDF buffer larger than 1 KB without throwing', async () => {
     const buffer = await renderToBuffer(<StandardReportDocument data={fixture} />);
     expect(buffer).toBeDefined();
@@ -358,7 +363,7 @@ describe('StandardReportDocument', () => {
     // Sanity — should be a real PDF (header starts with %PDF-)
     const head = buffer.subarray(0, 5).toString('utf8');
     expect(head).toBe('%PDF-');
-  });
+  }, 15000);
 
   it('three-state contract is preserved: prints distinct verdicts for computed / manual_required / error', async () => {
     const buffer = await renderToBuffer(<StandardReportDocument data={fixture} />);

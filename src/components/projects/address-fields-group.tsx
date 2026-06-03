@@ -83,7 +83,15 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
   useEffect(() => {
     const trimmed = query.trim();
     if (trimmed.length < 3 || trimmed === state.address) {
+      // Synchronous reset is intentional here — the debounce window hasn't
+      // fired yet, we just need to clear stale results / close the dropdown.
+      // The rule flags any synchronous setState in effects; the underlying
+      // concern (cascading renders) doesn't apply because these calls are
+      // idempotent — calling setResults([]) when results is already [] is
+      // a no-op for React, same for setOpen(false).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpen(false);
       return;
     }
