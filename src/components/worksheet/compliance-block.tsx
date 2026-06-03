@@ -56,7 +56,15 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
         case 'enum': symbolToValue.set(f.symbol, v.value); break;
         case 'date': symbolToValue.set(f.symbol, v.value); break;
         case 'boolean': symbolToValue.set(f.symbol, v.value); break;
-        case 'json': /* skip */ break;
+        case 'json':
+          // JSON carriers: existence checks (IS NOT NULL / IS NOT EMPTY) need
+          // to see "present" when the carrier has any content, but arithmetic
+          // comparators must not silently pass. A non-numeric string sentinel
+          // satisfies both — `evaluate.ts` `exists` reads it as present, and
+          // `compare` / `in` degrade to false because the sentinel doesn't
+          // numerify and doesn't equal any literal.
+          if (v.value != null) symbolToValue.set(f.symbol, '__present__');
+          break;
       }
     }
     return (sym: string) => {

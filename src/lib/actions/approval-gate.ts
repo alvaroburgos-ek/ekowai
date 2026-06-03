@@ -114,7 +114,15 @@ export async function checkApprovalGate(
       case 'date':
         if (p.valueDate != null) bySymbol.set(f.symbol, p.valueDate);
         break;
-      // 'json' deliberately skipped — DSL doesn't read JSON carriers.
+      case 'json':
+        // JSON carriers (multi-row tables) can't participate in arithmetic
+        // comparisons, but presence checks (`IS NOT NULL` / `IS NOT EMPTY`)
+        // ARE well-defined. Map presence to a non-numeric sentinel: existence
+        // nodes treat it as "present"; `compare`/`in` nodes degrade safely
+        // (sentinel is non-numeric, so `toNumber` → null and any '>=','<='
+        // etc. against a literal returns false rather than passing silently).
+        if (p.valueJson != null) bySymbol.set(f.symbol, '__present__');
+        break;
     }
   }
   const lookup = (s: string): Val | undefined => bySymbol.get(s);

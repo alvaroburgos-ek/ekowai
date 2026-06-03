@@ -106,4 +106,60 @@ describe('evaluateCondition', () => {
     expect(evaluateCondition(cond, lookup({ a: 0, b: 0, c: 2 })).kind).toBe('fail');
     expect(evaluateCondition(cond, lookup({ a: 1, b: 0, c: 0 })).kind).toBe('fail');
   });
+
+  // The lookup builders (compliance-block.tsx + approval-gate.ts) emit the
+  // sentinel '__present__' for json-carrier fields whose value is non-null.
+  // The contract: presence checks pass; arithmetic / membership against
+  // literals fails — never silently passes. These tests pin that contract
+  // at the evaluator boundary so the lookup-builder change can't drift.
+  describe('json-carrier presence sentinel', () => {
+    it('IS NOT NULL passes when the sentinel is set for the symbol', () => {
+      expect(
+        evaluateCondition('r_D_n_table IS NOT NULL', lookup({ r_D_n_table: '__present__' })).kind,
+      ).toBe('pass');
+    });
+    it('IS NOT NULL fails when the lookup omits the symbol', () => {
+      expect(
+        evaluateCondition('r_D_n_table IS NOT NULL', lookup({})).kind,
+      ).toBe('fail');
+    });
+    it('IS NOT EMPTY also passes with the sentinel (same exists node)', () => {
+      expect(
+        evaluateCondition('r_D_n_table IS NOT EMPTY', lookup({ r_D_n_table: '__present__' })).kind,
+      ).toBe('pass');
+    });
+    it('compound condition mixing sentinel + scalar resolves correctly', () => {
+      const cond = 'r_D_n_table IS NOT NULL AND kostra_grid_cell IS NOT NULL';
+      expect(
+        evaluateCondition(cond, lookup({ r_D_n_table: '__present__', kostra_grid_cell: 137089 })).kind,
+      ).toBe('pass');
+      expect(
+        evaluateCondition(cond, lookup({ r_D_n_table: '__present__' })).kind,
+      ).toBe('fail');
+      expect(
+        evaluateCondition(cond, lookup({ kostra_grid_cell: 137089 })).kind,
+      ).toBe('fail');
+    });
+    it('arithmetic comparison against the sentinel does NOT pass silently', () => {
+      // `__present__` is not numeric. `toNumber` returns null. The
+      // comparison branch returns false for any numeric op, so the
+      // evaluator's `compare` node yields 'false' → kind 'fail'.
+      expect(
+        evaluateCondition('r_D_n_table >= 1', lookup({ r_D_n_table: '__present__' })).kind,
+      ).toBe('fail');
+      expect(
+        evaluateCondition('r_D_n_table > 0', lookup({ r_D_n_table: '__present__' })).kind,
+      ).toBe('fail');
+    });
+    it('membership IN { … } against literals does NOT match the sentinel', () => {
+      // The sentinel value '__present__' is not in any plausible enum
+      // literal set the engineer would write; ensure IN fails.
+      expect(
+        evaluateCondition(
+          'r_D_n_table IN {a, b, c}',
+          lookup({ r_D_n_table: '__present__' }),
+        ).kind,
+      ).toBe('fail');
+    });
+  });
 });
