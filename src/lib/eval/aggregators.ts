@@ -12,6 +12,7 @@
  * bare number that hides a problem.
  */
 import type { EvalRequest, EvalState } from './formula';
+import { SURFACE_TYPE_PROFILES, type SurfaceInventoryCarrier, type SurfaceInventoryRow } from './surface-types';
 
 export type SubArea = {
   id: string;
@@ -97,6 +98,12 @@ export type AggregatorContext = {
   floodSubAreas?: FloodSubAreasCarrier | null;
   /** Scalar inputs Gl. 10 reads in addition to its sub-area carrier. */
   gl10Scalars?: Gl10Scalars | null;
+  /** Carrier data for the A138-07 preliminary surface inventory. Feeds the
+   *  A_C_preliminary aggregator (Gl. 2 over §5.3.3.5 inventory rows).
+   *  A138-10's final Gl. 2 continues to read its own sub_areas_A138_10
+   *  carrier in this branch; the inventory consolidation lives in a
+   *  separate, reversible migration. */
+  surfaceInventory?: SurfaceInventoryCarrier | null;
 };
 
 type Aggregator = {
@@ -630,7 +637,97 @@ const a138_26_gl10: Aggregator = {
   },
 };
 
+/**
+ * A138-07 · Gl. (2) PRELIMINARY · §5.3.3.5
+ *   A_C_preliminary = Σ (A_E,i · C_i)   over the surface_inventory rows
+ *
+ * This is the PRELIMINARY A_C used to size the flood-check trigger and
+ * the early-design loop. The FORMAL A138-10 Gl. 2 keeps its own
+ * sub_areas_A138_10 carrier in this branch; the consolidation onto one
+ * inventory (Option A of the A138-07↔A138-10 design) lives in a separate,
+ * reversible migration. Until that migration runs, the two A_C values
+ * live independently — A_C_preliminary on A138-07, A_C on A138-10 — and
+ * the engineer can compare them.
+ *
+ * Three-state contract:
+ *   - No rows → manual_required
+ *   - Any row missing area_m2 or c_i → manual_required, name the row
+ *   - Otherwise → computed with substituted map (per-row contribution +
+ *     paved/unpaved subtotals via SURFACE_TYPE_PROFILES.paved)
+ *
+ * c_s is intentionally NOT consumed here; it lives in the same row so
+ * the engineer captures it during the same Tab. 9 lookup, but it feeds
+ * Gl. 10 on A138-26 via the consumer-worksheets inheritance — never
+ * the design-event Gl. 2 on A138-07.
+ */
+function isSurfaceRowComplete(r: SurfaceInventoryRow): boolean {
+  return (
+    typeof r.area_m2 === 'number' &&
+    Number.isFinite(r.area_m2) &&
+    typeof r.c_i === 'number' &&
+    Number.isFinite(r.c_i)
+  );
+}
+
+function surfaceRowLabel(r: SurfaceInventoryRow, idx: number): string {
+  if (r.label && r.label.trim()) return r.label.trim();
+  const typeLabel = SURFACE_TYPE_PROFILES[r.surface_type]?.labelDe ?? r.surface_type;
+  return `Zeile ${idx + 1} (${typeLabel})`;
+}
+
+const a138_07_gl2_prelim: Aggregator = {
+  run: (req) => {
+    const carrier = req.aggregator?.surfaceInventory;
+    if (!carrier || !Array.isArray(carrier.rows) || carrier.rows.length === 0) {
+      return {
+        kind: 'manual_required',
+        reason:
+          'Kein Flächenverzeichnis erfasst. Mindestens eine Zeile mit Fläche und Abflussbeiwert C_i je Oberfläche eingeben.',
+      };
+    }
+    const incomplete = carrier.rows
+      .map((r, i) => ({ r, i, ok: isSurfaceRowComplete(r) }))
+      .filter((x) => !x.ok);
+    if (incomplete.length > 0) {
+      const which = incomplete.map((x) => surfaceRowLabel(x.r, x.i)).join(', ');
+      return {
+        kind: 'manual_required',
+        reason: `Unvollständige Flächenverzeichnis-Zeilen: ${which}. Fläche A und Abflussbeiwert C_i sind je Zeile Pflicht.`,
+      };
+    }
+
+    let paved = 0;
+    let unpaved = 0;
+    const substituted: Record<string, number> = {};
+    for (let i = 0; i < carrier.rows.length; i++) {
+      const row = carrier.rows[i];
+      const contribution = (row.area_m2 as number) * (row.c_i as number);
+      const profile = SURFACE_TYPE_PROFILES[row.surface_type];
+      if (profile?.paved) paved += contribution;
+      else unpaved += contribution;
+      const key = `${surfaceRowLabel(row, i)} (${row.area_m2} · ${row.c_i})`;
+      substituted[key] = contribution;
+    }
+    substituted['Σ befestigt'] = paved;
+    substituted['Σ unbefestigt'] = unpaved;
+    const total = paved + unpaved;
+    return {
+      kind: 'computed',
+      value: total,
+      substituted,
+      formulaEvaluated:
+        'A_C_preliminary = Σ_i (A_E,i · C_i)   (Tab. 9 paved + unpaved)',
+    };
+  },
+};
+
 export const aggregators: Record<string, Aggregator> = {
+  // DWA-A 138-1 · A138-07 · Gl. (2) preliminary — surface_inventory sum.
+  // Equation id is the UUID assigned by the SQL pile that introduces the
+  // row in `equations`. The aggregator is keyed by this id so the engine
+  // picks it up via use-equation-engine.ts without a code change at the
+  // time the pile runs.
+  'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0': a138_07_gl2_prelim,
   // DWA-A 138-1 · A138-10 · Gl. (2)
   '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_gl2,
   // DWA-A 138-1 · A138-13 · Gl. (8)

@@ -14,6 +14,10 @@
  * here — this file only holds the gate).
  */
 export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
+  // A138-07 preliminary Gl. 2 — sums the surface_inventory rows into
+  // A_C_preliminary. Independent of A138-10's final Gl. 2 in this branch;
+  // the consolidation runs as a separate, reversible migration.
+  'A138-07:2',
   'A138-10:2',
   'A138-13:8',
   'A138-18:21',

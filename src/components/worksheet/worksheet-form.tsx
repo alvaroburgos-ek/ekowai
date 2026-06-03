@@ -221,6 +221,17 @@ export function WorksheetForm({
       const out = e.outputSymbol;
       if (out && fieldBySymbol.has(out)) set.add(out);
     }
+    // flood_check_trigger is a derived boolean on A138-07 — derivation
+    // happens in a useEffect below, not via the engine — but the field
+    // still needs to render as read-only. Add it to computedSymbols
+    // when its source (A_C_preliminary) is also on this worksheet so
+    // the DynamicField boolean branch suppresses engineer override.
+    if (
+      fieldBySymbol.has('flood_check_trigger') &&
+      fieldBySymbol.has('A_C_preliminary')
+    ) {
+      set.add('flood_check_trigger');
+    }
     return set;
   }, [sortedEquations, fieldBySymbol]);
 
@@ -363,6 +374,27 @@ export function WorksheetForm({
       }
     }
   }, [values, fields, sortedEquations, fieldBySymbol, setField, engineEquationIds]);
+
+  // A138-07 flood_check_trigger derivation. Boolean = (A_C_preliminary > 800).
+  // Lives outside the engine because the engine's writeback path only handles
+  // number outputs (`{ type: 'number', value }`) — wiring a boolean output
+  // would require a second writeback variant. Until then, this small per-worksheet
+  // effect mirrors the engine's idempotency contract: only writes when the
+  // derived boolean differs from the current store value, otherwise no-op.
+  useEffect(() => {
+    const triggerField = fieldBySymbol.get('flood_check_trigger');
+    const sourceField = fieldBySymbol.get('A_C_preliminary');
+    if (!triggerField || !sourceField) return;
+    const src = values[sourceField.id];
+    const A_C = src?.type === 'number' ? src.value : null;
+    const desired: boolean | null =
+      A_C == null || !Number.isFinite(A_C) ? null : A_C > 800;
+    const cur = values[triggerField.id];
+    const curBool = cur?.type === 'boolean' ? cur.value : null;
+    if (curBool !== desired) {
+      setField(triggerField.id, { type: 'boolean', value: desired });
+    }
+  }, [values, fieldBySymbol, setField]);
 
   // Hide deprecated AND inherited fields from rendering. visibleFields(...)
   // strips `active=false` rows; the additional filter strips inherited rows

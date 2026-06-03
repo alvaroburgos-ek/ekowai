@@ -24,7 +24,9 @@ import type {
   Gl8Scalars,
   Gl10Scalars,
 } from './aggregators';
+import type { SurfaceInventoryCarrier } from './surface-types';
 
+const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
@@ -125,7 +127,15 @@ function buildValueMap(
         if (p.valueDate != null) bySymbol.set(f.symbol, p.valueDate);
         break;
       case 'json':
-        if (p.valueJson != null) jsonBySymbol.set(f.symbol, p.valueJson);
+        if (p.valueJson != null) {
+          jsonBySymbol.set(f.symbol, p.valueJson);
+          // F2 sentinel: existence checks (`IS NOT NULL` / `IS NOT EMPTY`)
+          // against json carriers in the compliance DSL need to see the
+          // symbol as present. Arithmetic comparators against the sentinel
+          // fail loudly (sentinel is non-numeric) — same contract as
+          // approval-gate.ts and compliance-block.tsx.
+          bySymbol.set(f.symbol, '__present__');
+        }
         break;
     }
   }
@@ -149,6 +159,14 @@ export function evaluateWorksheetEquations(
   const subAreasCarrier: SubAreasCarrier | null = subAreasJson && Array.isArray(subAreasJson.rows)
     ? (subAreasJson as SubAreasCarrier)
     : null;
+
+  const surfaceInventoryJson = jsonBySymbol.get('surface_inventory') as
+    | { rows?: unknown }
+    | undefined;
+  const surfaceInventoryCarrier: SurfaceInventoryCarrier | null =
+    surfaceInventoryJson && Array.isArray(surfaceInventoryJson.rows)
+      ? (surfaceInventoryJson as SurfaceInventoryCarrier)
+      : null;
 
   const kostraJson = jsonBySymbol.get('r_D_n_table') as { rows?: unknown } | undefined;
   const kostraCarrier: KostraCarrier | null = kostraJson && Array.isArray(kostraJson.rows)
@@ -221,7 +239,11 @@ export function evaluateWorksheetEquations(
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (eq.id === A138_10_GL2_ID) {
+    if (eq.id === A138_07_GL2_PRELIM_ID) {
+      aggregator = surfaceInventoryCarrier
+        ? { surfaceInventory: surfaceInventoryCarrier }
+        : undefined;
+    } else if (eq.id === A138_10_GL2_ID) {
       aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {

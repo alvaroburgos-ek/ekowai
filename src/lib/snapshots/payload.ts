@@ -17,6 +17,7 @@ import type {
   KostraCarrier,
   Gl8Scalars,
 } from '@/lib/eval/aggregators';
+import type { SurfaceInventoryCarrier } from '@/lib/eval/surface-types';
 // Type-only schema imports — keeps this module free of any runtime `db`
 // dependency so unit tests can call buildSnapshotPayload without env vars.
 import type {
@@ -27,6 +28,7 @@ import type {
 } from '@/lib/db/schema';
 
 // Mirror the aggregator-id constants from use-equation-engine.ts.
+const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 
@@ -204,6 +206,16 @@ export function buildSnapshotPayload(args: {
     return raw as SubAreasCarrier;
   })();
 
+  const surfaceInventoryField = fieldList.find((f) => f.symbol === 'surface_inventory');
+  const surfaceInventoryCarrier: SurfaceInventoryCarrier | null = (() => {
+    if (!surfaceInventoryField) return null;
+    const p = paramByFieldId.get(surfaceInventoryField.id);
+    if (!p || p.valueJson == null) return { rows: [] };
+    const raw = p.valueJson as { rows?: unknown };
+    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+    return raw as SurfaceInventoryCarrier;
+  })();
+
   const kostraField = fieldList.find((f) => f.symbol === 'r_D_n_table');
   const kostraCarrier: KostraCarrier | null = (() => {
     if (!kostraField) return null;
@@ -288,7 +300,11 @@ export function buildSnapshotPayload(args: {
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (eq.id === A138_10_GL2_ID) {
+    if (eq.id === A138_07_GL2_PRELIM_ID) {
+      aggregator = surfaceInventoryCarrier
+        ? { surfaceInventory: surfaceInventoryCarrier }
+        : undefined;
+    } else if (eq.id === A138_10_GL2_ID) {
       aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
@@ -321,9 +337,12 @@ export function buildSnapshotPayload(args: {
     if (!p) return undefined;
     const v = readValue(p, f.dataType);
     if (!v) return undefined;
-    // json values are not comparable in compliance conditions — treat as
-    // "missing" so the verdict comes out as `open`, never silently `pass`.
-    if (v.type === 'json') return undefined;
+    // F2: existence checks (IS NOT NULL / IS NOT EMPTY) need to see the
+    // symbol as present for json carriers; arithmetic against the
+    // non-numeric sentinel still degrades to fail (toNumber returns null).
+    // Same contract as compliance-block.tsx + approval-gate.ts +
+    // evaluate-for-report.ts.
+    if (v.type === 'json') return '__present__';
     return v.value as number | string | boolean | null;
   };
 

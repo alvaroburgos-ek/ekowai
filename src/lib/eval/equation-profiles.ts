@@ -45,6 +45,17 @@ export type EquationProfile = {
 };
 
 export const equationProfiles: Record<string, EquationProfile> = {
+  // DWA-A 138-1 · A138-07 · Gl. (2) preliminary · §5.3.3.5 (surface inventory sum)
+  'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0': {
+    expectedUnits: {
+      // The aggregator owns the row-level unit reasoning (m² for area,
+      // dimensionless for c_i). No scalar inputs feed this equation
+      // from the formula's input_symbols list.
+    },
+    notes:
+      '§5.3.3.5 Gl. (2) PRELIMINARY: A_C_preliminary = Σ (A_E,i · C_i) über das Flächenverzeichnis (Tab. 9). Aggregator-Pfad mit Carrier `surface_inventory`. Separater Carrier von A138-10\'s `sub_areas_A138_10` — die Konsolidierung läuft als eigene Migration.',
+  },
+
   // DWA-A 138-1 · A138-18 · Gl. (21) · §6.4.2 (Rigole, lokaler Override über Tab. 2)
   '069c2b02-8883-48a4-82ce-b21c9ef1fff8': {
     expectedUnits: {

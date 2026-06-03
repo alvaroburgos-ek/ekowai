@@ -28,11 +28,13 @@ import type {
   FloodSubAreasCarrier,
   Gl10Scalars,
 } from './aggregators';
+import type { SurfaceInventoryCarrier } from './surface-types';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
+const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
@@ -70,6 +72,10 @@ type Args = {
  * so we widen the set for those ids.
  */
 function consumedSymbolsFor(eq: EquationMeta): string[] {
+  if (eq.id === A138_07_GL2_PRELIM_ID) {
+    // Preliminary Gl. 2 reads only the inventory carrier — no scalar inputs.
+    return ['surface_inventory'];
+  }
   if (eq.id === A138_10_GL2_ID) {
     return [...(eq.inputSymbols ?? []), 'sub_areas_A138_10'];
   }
@@ -129,6 +135,23 @@ export function useEquationEngine({
     if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
     return raw as SubAreasCarrier;
   }, [values, subAreasField]);
+
+  // Surface-inventory carrier (A138-07 prelim Gl. 2): the engineer fills
+  // this on A138-07 and the consumer-worksheets list ([A138-10, A138-15,
+  // A138-26]) propagates it onward. Reads the same field id the
+  // SurfaceInventoryEditor writes through `useJsonTableCarrier`.
+  const surfaceInventoryField = useMemo(
+    () => fields.find((f) => f.symbol === 'surface_inventory'),
+    [fields],
+  );
+  const surfaceInventoryCarrier = useMemo<SurfaceInventoryCarrier | null>(() => {
+    if (!surfaceInventoryField) return null;
+    const v = values[surfaceInventoryField.id];
+    if (v?.type !== 'json') return null;
+    const raw = v.value as { rows?: unknown } | null | undefined;
+    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+    return raw as SurfaceInventoryCarrier;
+  }, [values, surfaceInventoryField]);
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
   // table. The field lives on A138-04 in production; cross-worksheet
@@ -288,7 +311,11 @@ export function useEquationEngine({
 
       // Build the aggregator context specific to this equation id.
       let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-      if (eq.id === A138_10_GL2_ID) {
+      if (eq.id === A138_07_GL2_PRELIM_ID) {
+        aggregator = surfaceInventoryCarrier
+          ? { surfaceInventory: surfaceInventoryCarrier }
+          : undefined;
+      } else if (eq.id === A138_10_GL2_ID) {
         aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
       } else if (eq.id === A138_13_GL8_ID) {
         aggregator = {
@@ -323,6 +350,7 @@ export function useEquationEngine({
     fieldBySymbol,
     engineEquationIds,
     subAreasCarrier,
+    surfaceInventoryCarrier,
     kostraCarrier,
     kostraField,
     gl8Scalars,

@@ -296,12 +296,25 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
             <SegmentedControl
               value={v === true ? 'true' : v === false ? 'false' : ''}
-              onChange={(val) => setField(field.id, { type: 'boolean', value: val === 'true' })}
+              // `isComputed` also applies to derived booleans (e.g.
+              // A138-07's flood_check_trigger, derived from A_C_preliminary
+              // > 800). Suppress onChange so the engineer can't override
+              // a derived value the next render will overwrite anyway.
+              onChange={
+                isComputed
+                  ? undefined
+                  : (val) => setField(field.id, { type: 'boolean', value: val === 'true' })
+              }
               options={[
                 { value: 'true', label: 'Ja' },
                 { value: 'false', label: 'Nein' },
               ]}
             />
+            {isComputed && (
+              <p className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-1">
+                Abgeleitet — kein direktes Editieren.
+              </p>
+            )}
           </div>
         );
       })()}
