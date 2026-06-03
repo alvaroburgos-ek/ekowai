@@ -16,6 +16,7 @@ import {
   type TransitionEvent,
 } from '@/lib/state-machine';
 import { captureSnapshot, type SnapshotTrigger } from '@/lib/snapshots/capture';
+import { checkApprovalGate, formatApprovalGateError } from './approval-gate';
 
 export type TransitionInput = {
   instanceId: string;
@@ -71,6 +72,17 @@ export async function transitionWorksheet(
       ok: false,
       error: `Übergang ${input.eventType} aus Status ${fromStatus} nicht erlaubt`,
     };
+  }
+
+  // Engineer-approve gate: refuse the transition if any block-severity
+  // compliance condition currently returns `fail` or any active
+  // is_required field has no value. Runs BEFORE snapshot capture so a
+  // refused approval doesn't leave a half-finished snapshot.
+  if (input.eventType === 'engineer_approve') {
+    const gate = await checkApprovalGate(input.instanceId);
+    if (!gate.ok) {
+      return { ok: false, error: formatApprovalGateError(gate) };
+    }
   }
 
   // Map the state-machine event to the snapshot trigger. Submit captures the

@@ -86,6 +86,7 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         field={{ ...FIELD_BASE, enumValues: POPULATED_ENUM }}
         locale="en"
         projectId="fixture-project"
+        standardCode="DWA-A-138-1"
         docs={[]}
       />,
     );
@@ -100,6 +101,7 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         field={{ ...FIELD_BASE, enumValues: POPULATED_ENUM }}
         locale="de"
         projectId="fixture-project"
+        standardCode="DWA-A-138-1"
         docs={[]}
       />,
     );
@@ -115,6 +117,7 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         field={{ ...FIELD_BASE, enumValues: POPULATED_ENUM }}
         locale="en"
         projectId="fixture-project"
+        standardCode="DWA-A-138-1"
         docs={[]}
       />,
     );
@@ -132,6 +135,7 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         field={{ ...FIELD_BASE, enumValues: POPULATED_ENUM }}
         locale="en"
         projectId="fixture-project"
+        standardCode="DWA-A-138-1"
         docs={[]}
       />,
     );
@@ -151,6 +155,7 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         field={{ ...FIELD_BASE, enumValues: null }}
         locale="en"
         projectId="fixture-project"
+        standardCode="DWA-A-138-1"
         docs={[]}
       />,
     );
@@ -170,6 +175,7 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         field={{ ...FIELD_BASE, enumValues: null }}
         locale="en"
         projectId="fixture-project"
+        standardCode="DWA-A-138-1"
         docs={[]}
       />,
     );
