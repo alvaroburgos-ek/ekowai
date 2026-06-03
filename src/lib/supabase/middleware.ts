@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { env } from '@/env';
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   // BYPASS_AUTH: skip Supabase entirely, hand back a stub user so the
   // root middleware's auth-redirect treats the request as authenticated.

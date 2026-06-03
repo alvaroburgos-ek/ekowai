@@ -137,6 +137,10 @@ describe('A138-10 Gl. 2 — wiring integration', () => {
     expect(getStoredAC()).toBeNull();
   });
 
+  // Per-test timeout bumped because this test does 4 addRows + 4 fillRows
+  // (each fillRow types into 4 inputs). The default 5000ms is enough in
+  // isolation but flaky under parallel suite load. 15000ms gives consistent
+  // headroom without masking real regressions.
   it('(a) Case B (mixed C, four rows) — displayed A_C = 690 m², green/computed state', async () => {
     const user = userEvent.setup();
     render(<Harness />);
@@ -161,7 +165,7 @@ describe('A138-10 Gl. 2 — wiring integration', () => {
 
     // The store now carries A_C = 690 — wired write-back happened
     expect(getStoredAC()).toBe(690);
-  });
+  }, 15000);
 
   it('(b) Clearing one row\'s coefficient → manual_required, no number, no stale 690', async () => {
     const user = userEvent.setup();

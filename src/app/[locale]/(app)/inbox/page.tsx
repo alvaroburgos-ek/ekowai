@@ -153,7 +153,7 @@ export default async function InboxPage({
                   {p.latestComment && (
                     <div className="flex items-start gap-2 text-xs text-subtext italic min-w-0 flex-1">
                       <MessageSquare className="size-3.5 mt-0.5 shrink-0" aria-hidden />
-                      <span className="truncate">„{p.latestComment}"</span>
+                      <span className="truncate">„{p.latestComment}&quot;</span>
                     </div>
                   )}
                   {Number(p.snapshotCount) >= 1 && (
