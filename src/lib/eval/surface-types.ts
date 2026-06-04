@@ -153,3 +153,34 @@ export type SurfaceInventoryRow = {
 export type SurfaceInventoryCarrier = {
   rows: SurfaceInventoryRow[];
 };
+
+export type SurfaceInventorySummary = {
+  /** Σ over paved rows of area·C_i (reduced area). */
+  sealed: number;
+  /** Σ over unpaved rows of area·C_i (reduced area). */
+  unsealed: number;
+  /** Σ of raw row areas (denominator for C_m, per §5.3.3.5). */
+  area: number;
+  /** A_C = sealed + unsealed. */
+  ac: number;
+};
+
+/**
+ * Single source for every surface-inventory sum (A138-07 A_C_preliminary and
+ * A138-10 ΣSealed/ΣUnsealed/C_m). Assumes rows are COMPLETE (area_m2 + c_i
+ * finite) — callers must run the three-state completeness gate first.
+ */
+export function summarizeSurfaceInventory(rows: SurfaceInventoryRow[]): SurfaceInventorySummary {
+  let sealed = 0;
+  let unsealed = 0;
+  let area = 0;
+  for (const r of rows) {
+    const a = r.area_m2 as number;
+    const c = r.c_i as number;
+    const contribution = a * c;
+    if (SURFACE_TYPE_PROFILES[r.surface_type]?.paved) sealed += contribution;
+    else unsealed += contribution;
+    area += a;
+  }
+  return { sealed, unsealed, area, ac: sealed + unsealed };
+}
