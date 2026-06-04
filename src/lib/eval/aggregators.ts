@@ -12,7 +12,7 @@
  * bare number that hides a problem.
  */
 import type { EvalRequest, EvalState } from './formula';
-import { SURFACE_TYPE_PROFILES, type SurfaceInventoryCarrier, type SurfaceInventoryRow } from './surface-types';
+import { SURFACE_TYPE_PROFILES, summarizeSurfaceInventory, type SurfaceInventoryCarrier, type SurfaceInventoryRow } from './surface-types';
 
 export type SubArea = {
   id: string;
@@ -696,24 +696,18 @@ const a138_07_gl2_prelim: Aggregator = {
       };
     }
 
-    let paved = 0;
-    let unpaved = 0;
     const substituted: Record<string, number> = {};
     for (let i = 0; i < carrier.rows.length; i++) {
       const row = carrier.rows[i];
       const contribution = (row.area_m2 as number) * (row.c_i as number);
-      const profile = SURFACE_TYPE_PROFILES[row.surface_type];
-      if (profile?.paved) paved += contribution;
-      else unpaved += contribution;
-      const key = `${surfaceRowLabel(row, i)} (${row.area_m2} · ${row.c_i})`;
-      substituted[key] = contribution;
+      substituted[`${surfaceRowLabel(row, i)} (${row.area_m2} · ${row.c_i})`] = contribution;
     }
-    substituted['Σ befestigt'] = paved;
-    substituted['Σ unbefestigt'] = unpaved;
-    const total = paved + unpaved;
+    const s = summarizeSurfaceInventory(carrier.rows);
+    substituted['Σ befestigt'] = s.sealed;
+    substituted['Σ unbefestigt'] = s.unsealed;
     return {
       kind: 'computed',
-      value: total,
+      value: s.ac,
       substituted,
       formulaEvaluated:
         'A_C_preliminary = Σ_i (A_E,i · C_i)   (Tab. 9 paved + unpaved)',
