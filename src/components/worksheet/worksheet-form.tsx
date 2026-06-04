@@ -18,6 +18,7 @@ import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
+import { formatInheritedValue } from '@/lib/worksheet/format-inherited-value';
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -455,13 +456,7 @@ export function WorksheetForm({
           </p>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
             {inheritedFieldsForPanel.map((f) => {
-              const v = values[f.id];
-              const display =
-                v?.type === 'number' && v.value != null && Number.isFinite(v.value)
-                  ? new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v.value)
-                  : v?.type === 'json' && v.value && typeof v.value === 'object'
-                  ? '(Tabelle)'
-                  : '—';
+              const display = formatInheritedValue(values[f.id], f.unit);
               const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
               return (
                 <li
