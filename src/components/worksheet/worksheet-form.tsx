@@ -467,6 +467,9 @@ export function WorksheetForm({
       <header className="border-b border-hairline pb-6">
         <div className="text-[10px] uppercase tracking-[0.2em] text-subtext mb-2">
           {worksheet.template.code}
+          <span className="ml-3 px-1.5 py-0.5 rounded bg-accent/15 text-accent normal-case tracking-normal">
+            build: a138-07-singlesrc · deploy1
+          </span>
         </div>
         <div className="flex items-baseline gap-3 flex-wrap">
           <h1 className="text-2xl font-semibold text-ink tracking-tight">{title}</h1>
