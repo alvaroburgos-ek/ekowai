@@ -9,6 +9,7 @@ import { worksheetInstances, projects, orgMembers } from '@/lib/db/schema';
 import { eq, and, inArray, count } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { isPlatformEngineer } from '@/lib/auth/platform-engineer';
+import { loadNewLeadsCount } from '@/lib/db/queries/leads';
 
 async function getPendingReviewCount(): Promise<number> {
   const supabase = await createClient();
@@ -40,10 +41,12 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const showLibrary = isPlatformEngineer(user);
+  const newLeads = showLibrary ? await loadNewLeadsCount() : 0;
 
   const links = [
     { href: `/${locale}/projects`, label: t('projects'), iconKey: 'projects' },
     { href: `/${locale}/inbox`, label: t('inbox'), badge: pending, iconKey: 'inbox' },
+    ...(showLibrary ? [{ href: `/${locale}/leads`, label: t('leads'), badge: newLeads, iconKey: 'leads' }] : []),
     ...(showLibrary ? [{ href: `/${locale}/standards`, label: 'Bibliothek', iconKey: 'standards' }] : []),
     { href: `/${locale}/org`, label: t('org'), iconKey: 'org' },
   ];

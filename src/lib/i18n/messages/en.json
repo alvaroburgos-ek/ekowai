@@ -20,6 +20,7 @@
     "projects": "Projects",
     "org": "Organization",
     "inbox": "Inbox",
+    "leads": "Leads",
     "logout": "Sign out"
   },
   "projects": {
@@ -37,6 +38,85 @@
     "archiveEmpty": "Archive is empty.",
     "backToActive": "Back to active",
     "restore": "Restore"
+  },
+  "leads": {
+    "eyebrow": "Sales",
+    "title": "Leads",
+    "subtitle": "Inbound enquiries from the landing page. Claim, contact and convert them into a project.",
+    "filter": {
+      "new": "New",
+      "contacted": "Contacted",
+      "converted": "Converted",
+      "archived": "Archived",
+      "all": "All"
+    },
+    "empty": {
+      "new": "No new leads. As soon as someone submits the contact form, the enquiry shows up here.",
+      "contacted": "No contacted leads.",
+      "converted": "No leads converted into a project yet.",
+      "archived": "Nothing archived.",
+      "all": "No leads received yet."
+    },
+    "col": {
+      "contact": "Contact",
+      "topic": "Topic",
+      "standard": "Standard",
+      "received": "Received",
+      "status": "Status",
+      "owner": "Owner",
+      "actions": "Actions"
+    },
+    "status": {
+      "new": "New",
+      "contacted": "Contacted",
+      "converted": "Converted",
+      "archived": "Archived"
+    },
+    "unclaimed": "Unassigned",
+    "you": "You",
+    "via": "via",
+    "noMessage": "No message left.",
+    "messageLabel": "Message",
+    "action": {
+      "claim": "Claim",
+      "unclaim": "Release",
+      "contacted": "Contacted",
+      "convert": "Convert to project",
+      "archive": "Archive",
+      "reopen": "Reopen",
+      "email": "Send email",
+      "openProject": "Open project",
+      "details": "Details"
+    },
+    "convert": {
+      "title": "Convert lead into project",
+      "lede": "Create a project from this enquiry. Fields are prefilled from the lead — adjust them before creating.",
+      "projectName": "Project name",
+      "client": "Client",
+      "location": "Location",
+      "standardHint": "Standard {code} will be attached to the project automatically.",
+      "submit": "Create project",
+      "submitting": "Creating …",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "claimed": "Lead claimed.",
+      "unclaimed": "Assignment cleared.",
+      "contacted": "Marked as contacted.",
+      "archived": "Lead archived.",
+      "reopened": "Lead reopened.",
+      "converted": "Project created.",
+      "convertedWithStandard": "Project created and standard {code} attached.",
+      "convertedStandardMissing": "Project created. Standard {code} not found in the library — please attach it manually."
+    },
+    "errors": {
+      "invalid_input": "Please provide a project name of at least 2 characters.",
+      "lead_not_found": "Lead not found.",
+      "already_converted": "This lead has already been converted.",
+      "no_org": "No organization found for your account.",
+      "not_authorized": "Not authorized.",
+      "generic": "Something went wrong — please try again."
+    }
   },
   "calc": {
     "newCalc": "New calculation",

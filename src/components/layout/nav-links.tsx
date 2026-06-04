@@ -7,6 +7,7 @@ import {
   Inbox,
   Library,
   Building2,
+  UserRoundPlus,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 const ICONS: Record<string, LucideIcon> = {
   projects: FolderKanban,
   inbox: Inbox,
+  leads: UserRoundPlus,
   standards: Library,
   org: Building2,
 };
