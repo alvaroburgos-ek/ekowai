@@ -5,9 +5,12 @@ import {
   complianceRequirements,
   projectParameters,
   worksheetInstances,
+  worksheetTemplates,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition } from '@/lib/compliance/evaluate';
+import { loadInheritedFields } from '@/lib/db/queries/worksheet';
+import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -19,83 +22,76 @@ export type ApprovalGateResult = {
   missingRequiredFields: Array<{ symbol: string; labelDe: string }>;
 };
 
+/** Minimal field shape the gate evaluator needs (own or inherited). */
+export type GateField = {
+  id: string;
+  symbol: string;
+  labelDe: string;
+  dataType: string;
+  isRequired: boolean;
+};
+
+/** An inherited field carries the producing worksheet's code for attribution.
+ * It keeps the ORIGIN field's `id` — the id its project_parameters row is
+ * keyed by — so its saved value resolves with no extra plumbing. */
+export type GateInheritedField = GateField & { originWorksheetCode: string };
+
+/** Saved-parameter shape the gate reads. Mirrors the value columns on
+ * project_parameters; extra columns on a real row are ignored. */
+export type GateParam = {
+  fieldId: string;
+  valueNumber?: number | string | null;
+  valueText?: string | null;
+  valueEnum?: string | null;
+  valueDate?: string | Date | null;
+  valueBoolean?: boolean | null;
+  valueJson?: unknown;
+};
+
+export type GateBlockRequirement = { code: string; titleDe: string; condition: string };
+
 /**
- * Re-validate a worksheet instance against its compliance + required-field
- * invariants. Used as the gate on the `engineer_approve` state-machine
- * transition: the transition is refused when this returns ok=false.
+ * Pure gate evaluation — the SINGLE place that decides which symbols the gate
+ * can see and replays each block-severity condition against them.
  *
- * SCOPE — the gate refuses approval when EITHER:
- *   1. Any block-severity compliance condition currently returns `fail`
- *      (parses to a definite negative verdict given the saved values).
- *   2. Any active is_required field on the worksheet has no saved value
- *      (no project_parameters row, or row with all value columns null).
+ * Visibility = the worksheet's OWN fields PLUS fields inherited from upstream
+ * consumer-worksheets, merged via `mergeInheritedFields` (own wins on symbol
+ * collision; an inherited-vs-inherited collision is dropped → fail-loud). This
+ * is the same merge the worksheet page/panel use, so the gate and the panel
+ * resolve the same symbol set instead of diverging.
  *
- * Manual / pending / attestation conditions do NOT block approval — they
- * are by design awaiting the engineer's sign-off (which IS this
- * transition). Only definite-fail block-severity rules block.
+ * Note (shared-resolution): the panel evaluates client-side against the
+ * worksheet-store values while this runs server-side against
+ * project_parameters, so they remain two evaluators. What is now unified is
+ * the *visibility* rule (own + inherited via `mergeInheritedFields`) and the
+ * presence-sentinel handling for json carriers. A fuller convergence — one
+ * lookup builder both call — is possible but out of scope here; keeping the
+ * merge as the single source of truth for "what can this worksheet see"
+ * prevents the own-only-vs-inherited class of divergence from recurring.
  *
- * The check runs at the worksheet-instance level: it loads the instance's
- * template fields + compliance rows + the project's parameter values for
- * those fields, then replays each via the same evaluateCondition the
- * form + PDF paths use. No new evaluator semantics.
+ * SCOPE — refuses approval when EITHER:
+ *   1. Any block-severity condition evaluates to a definite `fail`.
+ *   2. Any of the worksheet's OWN active is_required fields has no saved value.
+ *      (Required-ness of an inherited field is the origin worksheet's gate
+ *      concern, not this one's, so it is not re-checked here.)
  */
-export async function checkApprovalGate(
-  instanceId: string,
-): Promise<ApprovalGateResult> {
-  // Resolve the worksheet template + project from the instance.
-  const [instance] = await db
-    .select({
-      projectId: worksheetInstances.projectId,
-      worksheetTemplateId: worksheetInstances.worksheetTemplateId,
-    })
-    .from(worksheetInstances)
-    .where(eq(worksheetInstances.id, instanceId))
-    .limit(1);
-  if (!instance) {
-    return {
-      ok: false,
-      failingBlockConditions: [],
-      missingRequiredFields: [{ symbol: '__instance__', labelDe: 'Worksheet not found' }],
-    };
-  }
+export function resolveApprovalGate(
+  ownFields: GateField[],
+  inheritedFields: GateInheritedField[],
+  params: GateParam[],
+  blockRequirements: GateBlockRequirement[],
+): ApprovalGateResult {
+  // Single visibility resolution: own + inherited, own wins, ambiguous dropped.
+  const { fields: mergedFields } = mergeInheritedFields(ownFields, inheritedFields);
 
-  // Load the template's active fields + the project's saved parameters
-  // for those fields. The required-field list is built from the template;
-  // the lookup map is built from the parameter values.
-  const tmplFields = await db
-    .select({
-      id: fields.id,
-      symbol: fields.symbol,
-      labelDe: fields.labelDe,
-      dataType: fields.dataType,
-      isRequired: fields.isRequired,
-    })
-    .from(fields)
-    .where(
-      and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)),
-    );
-
-  const fieldIds = tmplFields.map((f) => f.id);
-  const params = fieldIds.length === 0
-    ? []
-    : await db
-      .select()
-      .from(projectParameters)
-      .where(
-        and(
-          eq(projectParameters.projectId, instance.projectId),
-          inArray(projectParameters.fieldId, fieldIds),
-        ),
-      );
   const paramByFieldId = new Map(params.map((p) => [p.fieldId, p]));
 
-  // Build the symbol → value lookup the same way the form's
-  // ComplianceBlock does. JSON values are skipped because the
-  // condition DSL doesn't read structured carriers (they drive
-  // aggregators, which are a separate path).
+  // Build the symbol → value lookup over the FULL resolved field set, the same
+  // way the form's ComplianceBlock does (json carriers map to a presence
+  // sentinel: existence checks pass; arithmetic against a literal fails loud).
   type Val = number | string | boolean | null;
   const bySymbol = new Map<string, Val>();
-  for (const f of tmplFields) {
+  for (const f of mergedFields) {
     const p = paramByFieldId.get(f.id);
     if (!p) continue;
     switch (f.dataType) {
@@ -112,26 +108,18 @@ export async function checkApprovalGate(
         if (p.valueBoolean != null) bySymbol.set(f.symbol, p.valueBoolean);
         break;
       case 'date':
-        if (p.valueDate != null) bySymbol.set(f.symbol, p.valueDate);
+        if (p.valueDate != null) bySymbol.set(f.symbol, p.valueDate as unknown as Val);
         break;
       case 'json':
-        // JSON carriers (multi-row tables) can't participate in arithmetic
-        // comparisons, but presence checks (`IS NOT NULL` / `IS NOT EMPTY`)
-        // ARE well-defined. Map presence to a non-numeric sentinel: existence
-        // nodes treat it as "present"; `compare`/`in` nodes degrade safely
-        // (sentinel is non-numeric, so `toNumber` → null and any '>=','<='
-        // etc. against a literal returns false rather than passing silently).
         if (p.valueJson != null) bySymbol.set(f.symbol, '__present__');
         break;
     }
   }
   const lookup = (s: string): Val | undefined => bySymbol.get(s);
 
-  // Missing required-field check: a field with is_required=true must
-  // have a non-null value of its declared type. JSON fields are
-  // satisfied when valueJson is non-null.
-  const missingRequiredFields: Array<{ symbol: string; labelDe: string }> = [];
-  for (const f of tmplFields) {
+  // Missing required-field check — OWN fields only.
+  const missingRequiredFields: ApprovalGateResult['missingRequiredFields'] = [];
+  for (const f of ownFields) {
     if (!f.isRequired) continue;
     const p = paramByFieldId.get(f.id);
     let hasValue = false;
@@ -148,16 +136,107 @@ export async function checkApprovalGate(
     if (!hasValue) missingRequiredFields.push({ symbol: f.symbol, labelDe: f.labelDe });
   }
 
-  // Block-severity compliance check. Only conditions that evaluate to a
-  // definite `fail` block; `pass`, `pending`, `manual` (attestation or
-  // broken rule) do NOT block. The "missing required" check above
-  // already catches `pending` for required inputs.
-  const rows = await db
+  // Block-severity compliance check. Only definite `fail` blocks; pass /
+  // pending / manual do not.
+  const failingBlockConditions: ApprovalGateResult['failingBlockConditions'] = [];
+  for (const r of blockRequirements) {
+    const result = evaluateCondition(r.condition, lookup);
+    if (result.kind === 'fail') {
+      failingBlockConditions.push({ code: r.code, titleDe: r.titleDe, condition: r.condition });
+    }
+  }
+
+  const ok = failingBlockConditions.length === 0 && missingRequiredFields.length === 0;
+  return { ok, failingBlockConditions, missingRequiredFields };
+}
+
+/**
+ * Re-validate a worksheet instance against its compliance + required-field
+ * invariants. Used as the gate on the `engineer_approve` state-machine
+ * transition: the transition is refused when this returns ok=false.
+ *
+ * Loads the instance's own active fields, the fields inherited from upstream
+ * consumer-worksheets (via `loadInheritedFields` — the same path the worksheet
+ * page uses), the project's saved parameters for that combined field set, and
+ * the block-severity compliance rows, then delegates to `resolveApprovalGate`.
+ */
+export async function checkApprovalGate(
+  instanceId: string,
+): Promise<ApprovalGateResult> {
+  // Resolve the instance + its template's code/standard (needed to look up
+  // inherited fields the same way the worksheet page does).
+  const [instance] = await db
+    .select({
+      projectId: worksheetInstances.projectId,
+      worksheetTemplateId: worksheetInstances.worksheetTemplateId,
+      worksheetCode: worksheetTemplates.code,
+      standardId: worksheetTemplates.standardId,
+    })
+    .from(worksheetInstances)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .where(eq(worksheetInstances.id, instanceId))
+    .limit(1);
+  if (!instance) {
+    return {
+      ok: false,
+      failingBlockConditions: [],
+      missingRequiredFields: [{ symbol: '__instance__', labelDe: 'Worksheet not found' }],
+    };
+  }
+
+  // Own active fields.
+  const ownFields = await db
+    .select({
+      id: fields.id,
+      symbol: fields.symbol,
+      labelDe: fields.labelDe,
+      dataType: fields.dataType,
+      isRequired: fields.isRequired,
+    })
+    .from(fields)
+    .where(
+      and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)),
+    );
+
+  // Inherited fields from upstream worksheets that declared this one as a
+  // consumer — same resolution the worksheet page/panel use. Each keeps the
+  // origin field's id, so its saved value is read from the origin's row.
+  const inheritedRaw = await loadInheritedFields(
+    instance.worksheetTemplateId,
+    instance.standardId,
+    instance.worksheetCode,
+  );
+  const inheritedFields: GateInheritedField[] = inheritedRaw.map((f) => ({
+    id: f.id,
+    symbol: f.symbol,
+    labelDe: f.labelDe,
+    dataType: f.dataType,
+    isRequired: f.isRequired,
+    originWorksheetCode: f.originWorksheetCode,
+  }));
+
+  // Saved parameters for the combined (own + inherited) field set.
+  const fieldIds = Array.from(
+    new Set([...ownFields.map((f) => f.id), ...inheritedFields.map((f) => f.id)]),
+  );
+  const params = fieldIds.length === 0
+    ? []
+    : await db
+      .select()
+      .from(projectParameters)
+      .where(
+        and(
+          eq(projectParameters.projectId, instance.projectId),
+          inArray(projectParameters.fieldId, fieldIds),
+        ),
+      );
+
+  // Block-severity compliance rows for this worksheet.
+  const blockRequirements = await db
     .select({
       code: complianceRequirements.code,
       titleDe: complianceRequirements.titleDe,
       condition: complianceRequirements.condition,
-      severity: complianceRequirements.severity,
     })
     .from(complianceRequirements)
     .where(
@@ -167,20 +246,7 @@ export async function checkApprovalGate(
       ),
     );
 
-  const failingBlockConditions: ApprovalGateResult['failingBlockConditions'] = [];
-  for (const r of rows) {
-    const result = evaluateCondition(r.condition, lookup);
-    if (result.kind === 'fail') {
-      failingBlockConditions.push({
-        code: r.code,
-        titleDe: r.titleDe,
-        condition: r.condition,
-      });
-    }
-  }
-
-  const ok = failingBlockConditions.length === 0 && missingRequiredFields.length === 0;
-  return { ok, failingBlockConditions, missingRequiredFields };
+  return resolveApprovalGate(ownFields, inheritedFields, params, blockRequirements);
 }
 
 /** Format the gate result as a single error string for transition refusal. */
