@@ -23,6 +23,7 @@ describe('formatApprovalGateError', () => {
       missingRequiredFields: [
         { symbol: 'project_type', labelDe: 'Projekttyp' },
       ],
+      deviatedConditions: [],
     };
     const msg = formatApprovalGateError(r);
     expect(msg).toMatch(/Genehmigung abgelehnt/);
@@ -39,6 +40,7 @@ describe('formatApprovalGateError', () => {
         { code: 'A138-REQ-COV-02', titleDe: 'Brunnen-Verbot', condition: 'direct_gw_injection == false' },
       ],
       missingRequiredFields: [],
+      deviatedConditions: [],
     };
     const msg = formatApprovalGateError(r);
     expect(msg).toMatch(/Blockierende Compliance-Verstöße/);
@@ -52,6 +54,7 @@ describe('formatApprovalGateError', () => {
       missingRequiredFields: [
         { symbol: 'belastungskategorie', labelDe: 'Belastungskategorie (BK)' },
       ],
+      deviatedConditions: [],
     };
     const msg = formatApprovalGateError(r);
     expect(msg).toMatch(/Pflichteingaben fehlen/);
@@ -69,6 +72,7 @@ describe('formatApprovalGateError', () => {
         { symbol: 'project_type', labelDe: 'Projekttyp' },
         { symbol: 'water_protection_zone', labelDe: 'Wasserschutzzone' },
       ],
+      deviatedConditions: [],
     };
     const msg = formatApprovalGateError(r);
     for (const c of ['A138-REQ-01', 'A138-REQ-04', 'project_type', 'water_protection_zone']) {

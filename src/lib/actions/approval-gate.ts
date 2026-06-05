@@ -20,6 +20,7 @@ export type ApprovalGateResult = {
   ok: boolean;
   failingBlockConditions: Array<{ code: string; titleDe: string; condition: string }>;
   missingRequiredFields: Array<{ symbol: string; labelDe: string }>;
+  deviatedConditions: Array<{ code: string; titleDe: string; deviationId: string }>;
 };
 
 /** Minimal field shape the gate evaluator needs (own or inherited). */
@@ -147,7 +148,7 @@ export function resolveApprovalGate(
   }
 
   const ok = failingBlockConditions.length === 0 && missingRequiredFields.length === 0;
-  return { ok, failingBlockConditions, missingRequiredFields };
+  return { ok, failingBlockConditions, missingRequiredFields, deviatedConditions: [] };
 }
 
 /**
@@ -181,6 +182,7 @@ export async function checkApprovalGate(
       ok: false,
       failingBlockConditions: [],
       missingRequiredFields: [{ symbol: '__instance__', labelDe: 'Worksheet not found' }],
+      deviatedConditions: [],
     };
   }
 
@@ -247,6 +249,27 @@ export async function checkApprovalGate(
     );
 
   return resolveApprovalGate(ownFields, inheritedFields, params, blockRequirements);
+}
+
+export type ActiveDeviationRef = { requirementCode: string; deviationId: string };
+
+/** Pure: subtract deviated requirements from the failing set. A failing block
+ * condition whose code has an active deviation moves into `deviatedConditions`
+ * and no longer blocks. Missing-required-field arm is untouched. */
+export function applyDeviations(
+  result: Omit<ApprovalGateResult, 'deviatedConditions' | 'ok'> & { ok?: boolean },
+  deviations: ActiveDeviationRef[],
+): ApprovalGateResult {
+  const byCode = new Map(deviations.map((d) => [d.requirementCode, d.deviationId]));
+  const failing: ApprovalGateResult['failingBlockConditions'] = [];
+  const deviated: ApprovalGateResult['deviatedConditions'] = [];
+  for (const c of result.failingBlockConditions) {
+    const id = byCode.get(c.code);
+    if (id) deviated.push({ code: c.code, titleDe: c.titleDe, deviationId: id });
+    else failing.push(c);
+  }
+  const ok = failing.length === 0 && result.missingRequiredFields.length === 0;
+  return { ok, failingBlockConditions: failing, deviatedConditions: deviated, missingRequiredFields: result.missingRequiredFields };
 }
 
 /** Format the gate result as a single error string for transition refusal. */
