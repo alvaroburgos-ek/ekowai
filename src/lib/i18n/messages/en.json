@@ -1,6 +1,9 @@
 {
   "auth": {
     "signIn": "Sign in",
+    "tagline": "Sizing assistant · DWA-A-201 · v3.2",
+    "lede": "Sign in to continue your sizing work.",
+    "marketing": "More about EKOWAI Engineering",
     "email": "Email",
     "password": "Password",
     "signInButton": "Sign in",

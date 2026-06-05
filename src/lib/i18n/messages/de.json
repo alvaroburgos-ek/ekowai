@@ -1,6 +1,9 @@
 {
   "auth": {
     "signIn": "Anmelden",
+    "tagline": "Bemessungsassistent · DWA-A-201 · v3.2",
+    "lede": "Melden Sie sich an, um Ihre Bemessungen fortzusetzen.",
+    "marketing": "Mehr über EKOWAI Engineering",
     "email": "E-Mail",
     "password": "Passwort",
     "signInButton": "Anmelden",
