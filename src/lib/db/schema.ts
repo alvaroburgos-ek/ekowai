@@ -464,3 +464,43 @@ export const reportArchives = pgTable(
     orgIdx: index('report_archives_org_idx').on(t.orgId),
   }),
 );
+
+// =============================================================================
+// LEADS (inbound contact-form submissions from ekowai-landing-page)
+// =============================================================================
+// Anonymous form submissions land here via the landing-page server action using
+// the Supabase anon key. RLS allows anon INSERT only; engineers see/claim/
+// convert leads from the wizard's /leads admin route.
+export const leads = pgTable(
+  'leads',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    name: text('name').notNull(),
+    email: text('email').notNull(),
+    company: text('company'),
+    phone: text('phone'),
+    topic: text('topic').notNull(),
+    message: text('message'),
+    locale: text('locale').notNull().default('de'),
+    /** Code of the standard the lead came in for (deep-link from
+     * /wissen/normen/[code] on the landing page). Nullable — generic
+     * /kontakt submissions have no standard context. No FK to standards(code)
+     * because that table is not managed by Drizzle migrations; validated at
+     * the app layer. */
+    standardCode: text('standard_code'),
+    /** Origin marker — 'landing' for now; may grow to 'partner-form' etc. */
+    source: text('source').notNull().default('landing'),
+    /** Page path the form was submitted from, for attribution. */
+    sourcePath: text('source_path'),
+    /** new | contacted | converted | archived */
+    status: text('status').notNull().default('new'),
+    claimedByUserId: uuid('claimed_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    claimedAt: timestamp('claimed_at', { withTimezone: true }),
+    convertedToProjectId: uuid('converted_to_project_id').references(() => projects.id, { onDelete: 'set null' }),
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
+  },
+  (t) => ({
+    statusCreatedIdx: index('leads_status_created_idx').on(t.status, t.createdAt),
+  }),
+);

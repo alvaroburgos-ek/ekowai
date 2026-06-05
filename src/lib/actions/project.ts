@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { readSiteProfileFromFormData } from '@/lib/site-profile/form-helpers';
+import { createProjectForOrg } from '@/lib/projects/create-project';
 
 const createSchema = z.object({
   name: z.string().min(2).max(200),
@@ -38,14 +39,14 @@ export async function createProject(formData: FormData): Promise<void> {
   if (!membership) redirect(`/${parsed.data.locale}/verify`);
 
   const siteProfile = readSiteProfileFromFormData(formData);
-  const [project] = await db.insert(projects).values({
+  const project = await createProjectForOrg({
     orgId: membership.orgId,
+    createdBy: user.id,
     name: parsed.data.name,
     clientName: parsed.data.clientName,
     location: parsed.data.location,
-    siteProfile: Object.keys(siteProfile).length > 0 ? siteProfile : null,
-    createdBy: user.id,
-  }).returning({ id: projects.id });
+    siteProfile,
+  });
 
   revalidatePath(`/${parsed.data.locale}/projects`);
   redirect(`/${parsed.data.locale}/projects/${project.id}`);
