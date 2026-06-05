@@ -504,3 +504,27 @@ export const leads = pgTable(
     statusCreatedIdx: index('leads_status_created_idx').on(t.status, t.createdAt),
   }),
 );
+
+// =============================================================================
+// DOCUMENTED DEVIATIONS (project-level compliance exceptions)
+// =============================================================================
+export const complianceDeviations = pgTable(
+  'compliance_deviations',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    requirementId: uuid('requirement_id').notNull().references(() => complianceRequirements.id, { onDelete: 'restrict' }),
+    worksheetInstanceId: uuid('worksheet_instance_id').references(() => worksheetInstances.id, { onDelete: 'set null' }),
+    justification: text('justification').notNull(),
+    basisCitations: jsonb('basis_citations').notNull().default(sql`'[]'::jsonb`),
+    authorityRef: text('authority_ref'),
+    status: text('status').notNull().default('active'),
+    createdBy: uuid('created_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: uuid('updated_by'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    withdrawnBy: uuid('withdrawn_by'),
+    withdrawnAt: timestamp('withdrawn_at', { withTimezone: true }),
+  },
+  (t) => ({ projectIdx: index('compliance_deviations_project_idx').on(t.projectId) }),
+);
