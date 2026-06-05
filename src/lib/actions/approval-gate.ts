@@ -11,6 +11,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition } from '@/lib/compliance/evaluate';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
+import { loadActiveDeviations } from '@/lib/db/queries/deviations';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -248,7 +249,9 @@ export async function checkApprovalGate(
       ),
     );
 
-  return resolveApprovalGate(ownFields, inheritedFields, params, blockRequirements);
+  const pure = resolveApprovalGate(ownFields, inheritedFields, params, blockRequirements);
+  const deviations = await loadActiveDeviations(instance.projectId);
+  return applyDeviations(pure, deviations.map((d) => ({ requirementCode: d.requirementCode, deviationId: d.id })));
 }
 
 export type ActiveDeviationRef = { requirementCode: string; deviationId: string };
