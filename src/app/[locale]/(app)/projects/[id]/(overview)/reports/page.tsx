@@ -13,7 +13,7 @@ export default async function ReportsPage({
 
   return (
     <section className="space-y-6 max-w-3xl">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
         <div className="inline-flex items-center gap-2">
           <History className="size-5 text-accent-2" aria-hidden />
           <h2 className="text-xl font-semibold text-ink">Berichtsverlauf</h2>

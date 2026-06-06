@@ -20,18 +20,18 @@ export default async function ProjectOverviewPage({
   const standardsWithWs = await listProjectStandardsWithWorksheets(id);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <section className="space-y-4">
-        <div className="flex items-end justify-between gap-4">
-          <div className="inline-flex items-center gap-2">
-            <BookMarked className="size-5 text-accent-2" aria-hidden />
-            <h2 className="text-xl font-semibold text-ink">
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+          <div className="inline-flex items-center gap-2 min-w-0">
+            <BookMarked className="size-5 text-accent-2 shrink-0" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink break-words">
               Regelwerke + Arbeitsblätter
             </h2>
           </div>
           <Link
             href={`/${localeTyped}/projects/${id}/standards`}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-subtext hover:text-accent-2 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-subtext hover:text-accent-2 transition-colors shrink-0"
           >
             Regelwerke verwalten
             <ArrowRight className="size-3.5" aria-hidden />

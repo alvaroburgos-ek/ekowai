@@ -136,7 +136,7 @@ export function CitationPicker({
       onClick={onClose}
     >
       <div
-        className="bg-paper border border-hairline-strong p-6 max-w-md w-full grid gap-4 mx-4"
+        className="bg-paper border border-hairline-strong p-5 sm:p-6 max-w-md w-full grid gap-4 mx-4 max-h-[85dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-baseline">
@@ -152,7 +152,7 @@ export function CitationPicker({
           </button>
         </div>
 
-        <div className="flex gap-3 border-b border-hairline">
+        <div className="flex gap-3 border-b border-hairline overflow-x-auto scrollbar-hide">
           <TabButton active={tab === 'doc'} onClick={() => setTab('doc')}>
             {t('fromDoc')}
           </TabButton>
@@ -176,7 +176,7 @@ export function CitationPicker({
                 disabled={pending}
                 className="text-left border border-hairline p-2 hover:border-ink disabled:opacity-50"
               >
-                <div className="font-medium">{d.title}</div>
+                <div className="font-medium break-words">{d.title}</div>
                 <div className="text-[10px] uppercase tracking-[0.18em] text-subtext">
                   {d.citationLabel}
                 </div>
@@ -210,7 +210,7 @@ export function CitationPicker({
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg,.tiff,.docx,.xlsx"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="text-sm"
+                className="text-sm w-full max-w-full"
               />
             </label>
             <label className="grid gap-1">
@@ -266,7 +266,7 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`pb-2 text-[10px] uppercase tracking-[0.2em] ${
+      className={`pb-2 text-[10px] uppercase tracking-[0.2em] whitespace-nowrap shrink-0 ${
         active ? 'border-b-2 border-ink' : 'text-subtext'
       }`}
     >

@@ -27,21 +27,21 @@ export default async function ProjectsPage({
             <FolderKanban className="size-4" aria-hidden />
             <span>{items.length} {items.length === 1 ? 'Projekt' : 'Projekte'}</span>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
             {t('title')}
           </h1>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Link href={`/${locale}/projects/archive`}>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" aria-label={t('archiveLink')}>
               <Archive aria-hidden />
-              {t('archiveLink')}
+              <span className="hidden sm:inline">{t('archiveLink')}</span>
             </Button>
           </Link>
           <Link href={`/${locale}/projects/new`}>
-            <Button>
+            <Button aria-label={t('newProject')}>
               <Plus aria-hidden />
-              {t('newProject')}
+              <span className="hidden sm:inline">{t('newProject')}</span>
             </Button>
           </Link>
         </div>
@@ -85,7 +85,7 @@ export default async function ProjectsPage({
                   #{String(i + 1).padStart(3, '0')}
                 </span>
               </div>
-              <div className="text-base font-semibold text-ink group-hover:text-accent-2 transition-colors leading-snug flex-1">
+              <div className="text-base font-semibold text-ink group-hover:text-accent-2 transition-colors leading-snug flex-1 break-words min-w-0">
                 {p.name}
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtext">

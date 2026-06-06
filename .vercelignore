@@ -1,0 +1,9 @@
+# Dev-only tooling and scratch dirs — not needed for the Vercel build.
+# (.claude/.agents contain broken dev symlinks that break the uploader.)
+.claude
+.agents
+.tmp-din276-sql
+.tmp-din276-subsections
+.tmp-p3c-sql
+audit-reports
+design-system.html

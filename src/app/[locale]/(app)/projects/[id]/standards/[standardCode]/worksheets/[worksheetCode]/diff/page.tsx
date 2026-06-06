@@ -150,13 +150,13 @@ export default async function DiffPage({
       />
 
       {!pair ? (
-        <div className="border border-dashed border-hairline p-12 text-center">
+        <div className="border border-dashed border-hairline p-6 sm:p-12 text-center">
           <p className="text-sm text-subtext italic">
             Noch keine Snapshots vorhanden. Beim ersten Einreichen wird ein Snapshot erfasst.
           </p>
         </div>
       ) : pair.from.id === pair.to.id ? (
-        <div className="border border-dashed border-hairline p-12 text-center">
+        <div className="border border-dashed border-hairline p-6 sm:p-12 text-center">
           <p className="text-sm text-subtext italic">
             Erster Snapshot — kein Vergleich verfügbar bis zur nächsten Version.
           </p>
@@ -208,19 +208,19 @@ function Header({
   projectId: string;
 }) {
   return (
-    <header className="border-b border-hairline pb-8">
+    <header className="border-b border-hairline pb-6 sm:pb-8">
       <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
         Sektion 04 · Änderungen
       </div>
-      <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
         Berechnungs-Diff
       </h1>
       <div className="mt-3 text-xs text-subtext space-y-1">
-        <div>
+        <div className="break-words">
           <span className="font-mono mr-2">{projectCode ?? '—'}</span>
           {projectName}
         </div>
-        <div>
+        <div className="break-words">
           <span className="font-mono mr-2">
             {standardCode} · {worksheetCode}
           </span>

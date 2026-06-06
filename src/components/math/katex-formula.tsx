@@ -3,6 +3,7 @@
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import { formulaToLatex } from '@/lib/math/formula-to-latex';
 
 type Props = {
@@ -58,7 +59,9 @@ export function KatexFormula({
 
   return (
     <span
-      className={className}
+      // Wide formulas scroll inside this inline container instead of forcing a
+      // horizontal scrollbar on the whole page.
+      className={cn('inline-block max-w-full overflow-x-auto align-middle scrollbar-hide', className)}
       // KaTeX output is trusted — it comes from our own library invocation
       // against a sanitised conversion of a DB string that is itself
       // ASCII-normalised by the Pass3c importer.

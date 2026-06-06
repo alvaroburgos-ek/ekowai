@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { LogOut } from 'lucide-react';
 import { LocaleSwitcher } from './locale-switcher';
 import { NavLinks } from './nav-links';
+import { MobileNav } from './mobile-nav';
 import { db } from '@/lib/db';
 import { worksheetInstances, projects, orgMembers } from '@/lib/db/schema';
 import { eq, and, inArray, count } from 'drizzle-orm';
@@ -53,8 +54,8 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
 
   return (
     <header className="sticky top-0 z-30 bg-paper/80 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
-        <Link href={`/${locale}/projects`} className="group flex items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+        <Link href={`/${locale}/projects`} className="group flex items-center shrink-0">
           <Image
             src="/images/brand/logo-ekowai.svg"
             alt="EKOWAI"
@@ -62,10 +63,12 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
             height={32}
             priority
             unoptimized
-            className="object-contain"
+            className="object-contain h-7 w-auto"
           />
         </Link>
-        <nav className="flex items-center gap-2 font-body">
+
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-2 font-body">
           <NavLinks locale={locale} links={links} />
           <span className="mx-2 h-5 w-px bg-hairline" aria-hidden />
           <LocaleSwitcher current={locale} />
@@ -80,6 +83,9 @@ export async function Nav({ locale }: { locale: 'de' | 'en' }) {
             </button>
           </form>
         </nav>
+
+        {/* Mobile nav (hamburger + drawer) */}
+        <MobileNav locale={locale} links={links} logoutLabel={t('logout')} />
       </div>
     </header>
   );

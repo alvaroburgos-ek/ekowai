@@ -24,11 +24,11 @@ export function AuditTimeline({ entries }: { entries: AuditEntry[] }) {
       {entries.map((e) => (
         <li key={e.id} className="py-3 grid grid-cols-1 sm:grid-cols-[7rem_7rem_1fr] gap-x-3 gap-y-1 text-sm">
           <div className="text-xs text-subtext tabular-nums">{formatDate(e.occurredAt)}</div>
-          <div className="text-xs text-subtext">{e.actorName ?? (e.actorRole ?? 'system')}</div>
-          <div className="space-y-0.5">
-            <div className="text-xs uppercase tracking-[0.18em] text-subtext flex gap-2">
+          <div className="text-xs text-subtext break-words">{e.actorName ?? (e.actorRole ?? 'system')}</div>
+          <div className="space-y-0.5 min-w-0">
+            <div className="text-xs uppercase tracking-[0.18em] text-subtext flex flex-wrap items-center gap-x-2 gap-y-1">
               <span
-                className={`inline-block px-2 py-0.5 rounded ${
+                className={`inline-block px-2 py-0.5 rounded break-words ${
                   e.source === 'approval'
                     ? 'bg-accent-2/10 text-accent-2'
                     : 'bg-paper-2 text-ink-2'
@@ -36,10 +36,10 @@ export function AuditTimeline({ entries }: { entries: AuditEntry[] }) {
               >
                 {e.action ?? '—'}
               </span>
-              {e.worksheetCode && <span>· {e.worksheetCode}</span>}
-              {e.tableName && <span>· {e.tableName}</span>}
+              {e.worksheetCode && <span className="break-words">· {e.worksheetCode}</span>}
+              {e.tableName && <span className="break-words">· {e.tableName}</span>}
             </div>
-            <div className="text-sm text-ink">{e.detail}</div>
+            <div className="text-sm text-ink break-words">{e.detail}</div>
           </div>
         </li>
       ))}

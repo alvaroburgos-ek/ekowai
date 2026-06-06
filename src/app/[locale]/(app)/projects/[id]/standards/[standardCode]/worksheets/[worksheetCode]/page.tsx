@@ -14,6 +14,7 @@ import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
+import { BackLink } from '@/components/ui/back-link';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
 import { resolveFromSiteProfile, SITE_PROFILE_BY_SYMBOL } from '@/lib/site-profile/symbol-map';
 
@@ -253,7 +254,15 @@ export default async function WorksheetPage({
 
   return (
     <NormTextProvider standardCode={standardCode}>
-    <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-12">
+    <div className="space-y-6">
+    {/* The project standard route only redirects to the first worksheet, so
+        "back" goes to the project overview (which lists the standard and its
+        worksheets); the sidebar handles navigation within the standard. */}
+    <BackLink
+      href={`/${locale}/projects/${id}`}
+      label="Zurück zur Projektübersicht"
+    />
+    <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6 lg:gap-12">
       <aside>
         <WorksheetListSidebar
           projectId={projectId}
@@ -345,6 +354,7 @@ export default async function WorksheetPage({
           isPlatformEngineer={isPlatformEngineer}
         />
       </main>
+    </div>
     </div>
     </NormTextProvider>
   );

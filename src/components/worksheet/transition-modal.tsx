@@ -64,9 +64,9 @@ export function TransitionModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="transition-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4"
     >
-      <div className="w-full max-w-lg rounded-lg bg-paper border border-hairline-strong p-6 space-y-4 shadow-lg">
+      <div className="w-full max-w-lg max-h-[85dvh] overflow-y-auto rounded-lg bg-paper border border-hairline-strong p-5 sm:p-6 space-y-4 shadow-lg">
         <h2 id="transition-modal-title" className="text-lg font-semibold text-ink">
           {actionLabel}
         </h2>

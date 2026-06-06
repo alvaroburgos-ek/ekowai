@@ -17,7 +17,7 @@ export default async function NewProjectPage({
         <div className="text-[11px] uppercase tracking-[0.25em] text-subtext mb-3">
           Sektion 01 · Neuer Eintrag
         </div>
-        <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">{t('newProject')}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink tracking-tight">{t('newProject')}</h1>
       </header>
       <form action={createProject} className="max-w-2xl space-y-10">
         <input type="hidden" name="locale" value={locale} />
@@ -59,12 +59,12 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="grid grid-cols-12 gap-4 items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
-      <span className="col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
+    <label className="grid grid-cols-1 sm:grid-cols-12 gap-1.5 sm:gap-4 sm:items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
+      <span className="sm:col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
         {label}
         {required && <span className="text-accent ml-1">*</span>}
       </span>
-      <div className="col-span-9">{children}</div>
+      <div className="sm:col-span-9 min-w-0">{children}</div>
     </label>
   );
 }

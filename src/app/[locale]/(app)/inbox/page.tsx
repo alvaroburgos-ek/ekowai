@@ -88,7 +88,7 @@ export default async function InboxPage({
               : `${pending.length} ${pending.length === 1 ? 'Einreichung' : 'Einreichungen'}`}
           </span>
         </div>
-        <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
           Eingang
         </h1>
         <p className="text-sm text-subtext">
@@ -99,7 +99,7 @@ export default async function InboxPage({
       </header>
 
       {pending.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-12 text-center space-y-4">
+        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-8 sm:p-12 text-center space-y-4">
           <div
             className="mx-auto inline-flex items-center justify-center size-14 rounded-full"
             style={{ background: 'var(--eko-gradient-soft)' }}
@@ -119,7 +119,7 @@ export default async function InboxPage({
             >
               <Link
                 href={`/${localeTyped}/projects/${p.projectId}/standards/${p.standardCode}/worksheets/${p.worksheetCode}`}
-                className="flex items-center gap-4 p-4"
+                className="flex items-center gap-3 sm:gap-4 p-4"
               >
                 <div
                   className="inline-flex items-center justify-center size-10 rounded-xl shrink-0"

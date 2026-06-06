@@ -7,6 +7,7 @@ import { updateProject } from '@/lib/actions/project';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { BackLink } from '@/components/ui/back-link';
 import { SiteProfileFields } from '@/components/projects/site-profile-fields';
 
 export default async function EditProjectPage({
@@ -20,8 +21,9 @@ export default async function EditProjectPage({
   if (!project) notFound();
 
   return (
-    <Card className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-6">{project.name}</h1>
+    <Card className="p-5 sm:p-8 max-w-2xl mx-auto">
+      <BackLink href={`/${locale}/projects/${id}`} label="Zurück zum Projekt" />
+      <h1 className="text-2xl font-semibold mb-6 mt-4 break-words">{project.name}</h1>
       <form action={updateProject} className="space-y-10">
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="locale" value={localeTyped} />

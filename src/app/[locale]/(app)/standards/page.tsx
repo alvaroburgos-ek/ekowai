@@ -21,13 +21,13 @@ export default async function StandardsLibraryPage({
 
   return (
     <div className="space-y-8">
-      <header className="flex items-start justify-between gap-6 flex-wrap">
-        <div className="space-y-2 max-w-2xl">
+      <header className="flex items-start justify-between gap-4 sm:gap-6 flex-wrap">
+        <div className="space-y-2 max-w-2xl min-w-0">
           <div className="inline-flex items-center gap-2 text-xs text-subtext">
             <Library className="size-4" aria-hidden />
             <span>Bibliothek</span>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
             Standards-Bibliothek
           </h1>
           <p className="text-sm text-subtext">
@@ -43,7 +43,7 @@ export default async function StandardsLibraryPage({
       </header>
 
       {standards.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-12 text-center space-y-4">
+        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-8 sm:p-12 text-center space-y-4">
           <div
             className="mx-auto inline-flex items-center justify-center size-14 rounded-full"
             style={{ background: 'var(--eko-gradient-soft)' }}
@@ -56,7 +56,8 @@ export default async function StandardsLibraryPage({
         </div>
       ) : (
         <div className="rounded-2xl border border-hairline bg-paper shadow-soft overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="text-xs text-subtext bg-paper-2/60">
                 <th className="text-left font-medium py-3 px-4">Standard</th>
@@ -106,6 +107,7 @@ export default async function StandardsLibraryPage({
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

@@ -21,7 +21,7 @@ export function Alert({
       {...rest}
     >
       <Icon className="size-4 mt-0.5 shrink-0" aria-hidden />
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="min-w-0 flex-1 break-words">{children}</div>
     </div>
   );
 }

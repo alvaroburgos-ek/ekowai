@@ -1,6 +1,6 @@
 export default function WorksheetLoading() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-12 animate-pulse">
+    <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6 lg:gap-12 animate-pulse">
       <aside className="space-y-6">
         <div className="h-3 w-24 bg-paper-2 rounded" />
         <div className="space-y-2">

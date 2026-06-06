@@ -37,14 +37,14 @@ export default async function OrgPage({
   const canInvite = membership.role === 'owner' || membership.role === 'admin';
 
   return (
-    <article className="space-y-10">
-      <header className="flex items-start justify-between gap-6 flex-wrap">
-        <div className="space-y-2">
+    <article className="space-y-8 sm:space-y-10">
+      <header className="flex items-start justify-between gap-4 sm:gap-6 flex-wrap">
+        <div className="space-y-2 min-w-0">
           <div className="inline-flex items-center gap-2 text-xs text-subtext">
             <Building2 className="size-4" aria-hidden />
             <span>Organisation · {membership.orgId.slice(0, 8)}</span>
           </div>
-          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-ink">
             {t('title')}
           </h1>
         </div>
@@ -70,7 +70,7 @@ export default async function OrgPage({
         </div>
 
         {members.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-12 text-center">
+          <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-8 sm:p-12 text-center">
             <p className="text-sm text-subtext">{t('noMembers')}</p>
           </div>
         ) : (

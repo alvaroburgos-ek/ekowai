@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { profiles } from '@/lib/db/schema';
@@ -10,6 +9,7 @@ import { LibraryEquationRow } from '@/components/library/library-equation-row';
 import { BulkVerifyFieldsButton } from '@/components/library/bulk-verify-button';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
+import { BackLink } from '@/components/ui/back-link';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,17 +80,13 @@ export default async function LibraryWorksheetPage({
   return (
     <NormTextProvider standardCode={code}>
       <div className="space-y-8">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-subtext">
-          <Link href={`/${locale}/standards`} className="hover:text-accent">Bibliothek</Link>
-          <span>›</span>
-          <Link href={`/${locale}/standards/${code}`} className="hover:text-accent">{code}</Link>
-        </div>
+        <BackLink href={`/${locale}/standards/${code}`} label="Zurück zum Regelwerk" />
 
         <header className="border-b border-hairline pb-6 space-y-3">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-subtext">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-subtext break-words">
             {ws.template.code}
           </div>
-          <h1 className="text-2xl font-semibold text-ink tracking-tight">{ws.template.titleDe}</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-ink tracking-tight break-words">{ws.template.titleDe}</h1>
           {ws.template.description && (
             <p className="text-sm text-subtext max-w-2xl">{ws.template.description}</p>
           )}
@@ -189,9 +185,9 @@ export default async function LibraryWorksheetPage({
                       {cr.severity}
                     </span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.18em] text-subtext flex flex-wrap gap-2">
+                  <div className="text-[10px] uppercase tracking-[0.18em] text-subtext flex flex-wrap gap-2 min-w-0">
                     {cr.clauseReference && <ClauseChip clauseReference={cr.clauseReference} />}
-                    <code className="font-mono normal-case tracking-normal text-ink-2">{cr.condition}</code>
+                    <code className="font-mono normal-case tracking-normal text-ink-2 break-words min-w-0">{cr.condition}</code>
                   </div>
                   {cr.description && (
                     <p className="text-xs text-subtext">{cr.description}</p>

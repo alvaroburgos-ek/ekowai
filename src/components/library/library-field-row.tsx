@@ -56,7 +56,7 @@ export function LibraryFieldRow({ field }: { field: LibraryFieldRowData }) {
           </span>
         )}
         {field.defaultValue?.value != null && (
-          <span className="normal-case tracking-normal text-ink-2">
+          <span className="normal-case tracking-normal text-ink-2 break-words min-w-0">
             Default: <code className="font-mono">{JSON.stringify(field.defaultValue.value)}</code>
           </span>
         )}
@@ -65,7 +65,7 @@ export function LibraryFieldRow({ field }: { field: LibraryFieldRowData }) {
         )}
       </div>
       {field.enumValues && field.enumValues.length > 0 && (
-        <div className="text-[11px] text-subtext mt-1">
+        <div className="text-[11px] text-subtext mt-1 break-words">
           Werte: {field.enumValues.map((e) => e.value).join(', ')}
         </div>
       )}

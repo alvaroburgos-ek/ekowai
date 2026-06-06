@@ -34,7 +34,7 @@ export function LibraryEquationRow({ eq }: { eq: LibraryEquationRowData }) {
           verificationNote={eq.verificationNote}
         />
       </div>
-      <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[68px] flex flex-wrap gap-3 items-baseline">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-subtext sm:ml-[68px] flex flex-wrap gap-3 items-baseline min-w-0">
         {eq.clauseReference && <ClauseChip clauseReference={eq.clauseReference} />}
         {eq.outputSymbol && (
           <span className="normal-case tracking-normal text-ink-2">
@@ -52,7 +52,7 @@ export function LibraryEquationRow({ eq }: { eq: LibraryEquationRowData }) {
         )}
       </div>
       {eq.description && (
-        <p className="text-xs text-subtext ml-[68px]">{eq.description}</p>
+        <p className="text-xs text-subtext sm:ml-[68px] break-words">{eq.description}</p>
       )}
     </li>
   );

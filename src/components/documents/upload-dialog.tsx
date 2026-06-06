@@ -57,6 +57,7 @@ export function UploadDialog({
           name="file"
           required
           accept=".pdf,.png,.jpg,.jpeg,.tiff,.docx,.xlsx"
+          className="text-sm w-full max-w-full"
         />
       </label>
       <label className="grid gap-1">

@@ -43,13 +43,13 @@ export default async function LeadsPage({
           <UserRoundPlus className="size-4" aria-hidden />
           <span>{t('eyebrow')}</span>
         </div>
-        <h1 className="text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
           {t('title')}
         </h1>
         <p className="text-sm text-subtext">{t('subtitle')}</p>
       </header>
 
-      <nav className="flex flex-wrap items-center gap-2" aria-label={t('title')}>
+      <nav className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap" aria-label={t('title')}>
         {FILTERS.map((f) => {
           const active = f === filter;
           const n = counts[f];
@@ -58,7 +58,7 @@ export default async function LeadsPage({
               key={f}
               href={`/${locale}/leads?status=${f}`}
               className={cn(
-                'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all',
+                'inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all',
                 active
                   ? 'bg-paper-2 text-ink shadow-soft'
                   : 'text-ink-2 hover:bg-paper-2/60 hover:text-ink',
@@ -79,7 +79,7 @@ export default async function LeadsPage({
       </nav>
 
       {rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-12 text-center space-y-4">
+        <div className="rounded-2xl border border-dashed border-hairline-strong bg-paper-2/40 p-8 sm:p-12 text-center space-y-4">
           <div
             className="mx-auto inline-flex items-center justify-center size-14 rounded-full"
             style={{ background: 'var(--eko-gradient-soft)' }}
@@ -90,7 +90,8 @@ export default async function LeadsPage({
         </div>
       ) : (
         <div className="rounded-2xl border border-hairline bg-paper shadow-soft overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[860px] text-sm">
             <thead>
               <tr className="text-xs text-subtext bg-paper-2/60">
                 <th className="text-left font-medium py-3 px-4">{t('col.contact')}</th>
@@ -131,6 +132,7 @@ export default async function LeadsPage({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
