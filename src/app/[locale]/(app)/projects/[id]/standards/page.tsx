@@ -4,6 +4,7 @@ import { projects } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { listProjectStandards, listStandards } from '@/lib/db/queries/standards';
 import { StandardsPicker } from '@/components/worksheet/standards-picker';
+import { BackLink } from '@/components/ui/back-link';
 
 export default async function ProjectStandardsPage({
   params,
@@ -21,12 +22,13 @@ export default async function ProjectStandardsPage({
   ]);
 
   return (
-    <article className="space-y-8 max-w-3xl">
+    <article className="space-y-6 sm:space-y-8 max-w-3xl">
+      <BackLink href={`/${locale}/projects/${id}`} label="Zurück zur Projektübersicht" />
       <header className="border-b border-hairline pb-6">
         <div className="text-[10px] uppercase tracking-[0.2em] text-subtext mb-2">
           Projekt {project.id.slice(0, 8)}
         </div>
-        <h1 className="text-2xl font-semibold text-ink tracking-tight">
+        <h1 className="text-xl sm:text-2xl font-semibold text-ink tracking-tight break-words">
           Regelwerke · {project.name}
         </h1>
       </header>

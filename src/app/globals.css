@@ -79,13 +79,30 @@
 }
 
 @layer base {
+  html {
+    /* Never allow a stray wide element to scroll the whole page sideways on
+     * mobile. Individual scroll regions opt back in with overflow-x-auto. */
+    overflow-x: hidden;
+  }
+
   body {
+    overflow-x: hidden;
     background:
       radial-gradient(ellipse 1200px 800px at 85% -10%, rgba(0, 208, 97, 0.12) 0%, transparent 55%),
       radial-gradient(ellipse 900px 700px at -10% 110%, rgba(0, 158, 233, 0.09) 0%, transparent 55%),
       var(--paper);
     color: var(--ink);
     font-family: var(--font-sans);
+  }
+
+  /* Hide scrollbars on horizontally-scrollable strips (mobile tab bars,
+   * overflow tables) while keeping them scrollable. */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* Soft card shadow utility — softer than Tailwind defaults */
@@ -170,5 +187,52 @@
   }
   .input-wrap:focus-within::after {
     transform: scaleX(1);
+  }
+
+  /* ── Login brand-panel animation ───────────────────────────────────────
+   * Slow-drifting aurora blobs + a parallax engineering grid behind the
+   * sign-in form. Pure CSS, GPU-friendly (transform/opacity only). */
+  @keyframes aurora-drift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    33%  { transform: translate3d(6%, -8%, 0) scale(1.15); }
+    66%  { transform: translate3d(-7%, 5%, 0) scale(0.92); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+  }
+  @keyframes aurora-drift-2 {
+    0%   { transform: translate3d(0, 0, 0) scale(1.05); }
+    50%  { transform: translate3d(-9%, 9%, 0) scale(0.9); }
+    100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  }
+  @keyframes grid-pan {
+    from { background-position: 0 0; }
+    to   { background-position: 44px 44px; }
+  }
+  @keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  @keyframes ring-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes sheen {
+    0%   { transform: translateX(-120%) skewX(-12deg); opacity: 0; }
+    25%  { opacity: 0.5; }
+    100% { transform: translateX(220%) skewX(-12deg); opacity: 0; }
+  }
+
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(40px);
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-blob,
+    .login-grid,
+    [class*='animate-'] {
+      animation: none !important;
+    }
   }
 }

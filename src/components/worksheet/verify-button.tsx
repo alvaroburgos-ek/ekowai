@@ -72,7 +72,7 @@ export function VerifyButton({
 
   if (isVerified) {
     return (
-      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-subtext normal-case tracking-normal">
+      <span className="inline-flex items-center gap-2 flex-wrap text-[10px] uppercase tracking-[0.18em] text-subtext normal-case tracking-normal">
         <span className="text-success">
           ✓ bestätigt
           {verifiedByLabel ? ` von ${verifiedByLabel}` : ''}
@@ -100,7 +100,7 @@ export function VerifyButton({
 
   if (noteOpen) {
     return (
-      <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
+      <span className="inline-flex items-center gap-1.5 flex-wrap normal-case tracking-normal">
         <input
           type="text"
           autoFocus
@@ -108,7 +108,7 @@ export function VerifyButton({
           onChange={(e) => setNote(e.target.value)}
           placeholder="Optionale Notiz (z.B. §5.4 Tab. B.1)"
           maxLength={500}
-          className="text-xs px-1.5 py-0.5 border border-hairline rounded bg-paper text-ink w-64 focus:outline-none focus:border-accent"
+          className="text-xs px-1.5 py-0.5 border border-hairline rounded bg-paper text-ink w-full sm:w-64 focus:outline-none focus:border-accent"
           onKeyDown={(e) => {
             if (e.key === 'Enter') runVerify();
             if (e.key === 'Escape') {

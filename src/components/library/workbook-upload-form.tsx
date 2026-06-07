@@ -122,10 +122,10 @@ export function WorkbookUploadForm({ locale }: { locale: 'de' | 'en' }) {
       <div className="space-y-6">
         <div className="border border-hairline rounded p-5 space-y-4">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <h2 className="text-lg font-semibold text-ink">
+            <h2 className="text-lg font-semibold text-ink min-w-0 break-words">
               Vorschau: {preview.filename}
             </h2>
-            <span className="text-[11px] uppercase tracking-[0.18em] text-subtext">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-subtext shrink-0">
               {diff.standardExists ? 'Re-Import' : 'Neuer Standard'}
             </span>
           </div>
@@ -264,7 +264,7 @@ export function WorkbookUploadForm({ locale }: { locale: 'de' | 'en' }) {
   return (
     <div className="space-y-4">
       <label
-        className={`block border-2 border-dashed rounded p-12 text-center cursor-pointer transition-colors ${pending ? 'border-hairline bg-paper-2/50' : 'border-hairline hover:border-accent hover:bg-paper-2/30'}`}
+        className={`block border-2 border-dashed rounded p-8 sm:p-12 text-center cursor-pointer transition-colors ${pending ? 'border-hairline bg-paper-2/50' : 'border-hairline hover:border-accent hover:bg-paper-2/30'}`}
       >
         <input
           type="file"

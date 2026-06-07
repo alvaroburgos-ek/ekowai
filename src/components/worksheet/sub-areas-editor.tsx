@@ -109,8 +109,8 @@ export function SubAreasEditor({ fieldId }: Props) {
           Keine Teilflächen erfasst. Fügen Sie pro Sub-Areal eine Zeile mit Fläche und Abflussbeiwert (Tab. 9) hinzu.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[34rem] text-sm">
             <thead className="text-[10px] uppercase tracking-[0.18em] text-subtext">
               <tr>
                 <th className="text-left font-normal pb-1 pr-2">Bezeichnung</th>

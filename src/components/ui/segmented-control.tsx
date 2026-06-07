@@ -44,7 +44,10 @@ export function SegmentedControl({
   return (
     <div
       className={cn(
-        'inline-flex rounded-full bg-paper-2 p-1 border border-hairline',
+        // Many segments can exceed a narrow phone width — allow horizontal
+        // scroll inside the pill rather than overflowing the page. On desktop
+        // the control already fits, so this is visually identical there.
+        'inline-flex max-w-full overflow-x-auto scrollbar-hide rounded-full bg-paper-2 p-1 border border-hairline',
         disabled && 'opacity-50 pointer-events-none',
         className,
       )}
@@ -57,7 +60,7 @@ export function SegmentedControl({
           onClick={() => pick(opt.value)}
           aria-pressed={selected === opt.value}
           className={cn(
-            'px-4 py-1.5 text-sm font-medium rounded-full transition-all',
+            'shrink-0 whitespace-nowrap px-4 py-1.5 text-sm font-medium rounded-full transition-all',
             selected === opt.value
               ? 'bg-paper text-ink shadow-soft'
               : 'bg-transparent text-subtext hover:text-ink',

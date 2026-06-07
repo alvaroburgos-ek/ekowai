@@ -33,7 +33,7 @@ export function Select({
           'appearance-none border border-hairline-strong bg-paper text-ink font-body',
           'focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-soft transition-all',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          inline ? 'inline-block w-auto' : 'block w-full',
+          inline ? 'inline-block w-auto max-w-full' : 'block w-full',
           SIZE_CLASSES[size],
           className,
         )}

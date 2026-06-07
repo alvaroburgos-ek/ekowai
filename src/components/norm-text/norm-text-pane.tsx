@@ -126,9 +126,9 @@ function NormTextPaneContent({
 
   return (
     <>
-      <header className="flex items-baseline justify-between gap-4 px-6 py-4 border-b border-hairline">
+      <header className="flex items-baseline justify-between gap-4 px-4 py-4 sm:px-6 border-b border-hairline">
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-[0.25em] text-subtext">
+          <div className="text-[10px] uppercase tracking-[0.25em] text-subtext break-words">
             {standardCode} · {clauseReference}
           </div>
           <h2
@@ -150,7 +150,7 @@ function NormTextPaneContent({
           ✕
         </button>
       </header>
-      <div className="flex-1 overflow-y-auto px-6 py-5">
+      <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
         {state.kind === 'loading' && (
           <p className="text-sm text-subtext italic">Wird geladen…</p>
         )}
@@ -170,7 +170,7 @@ function NormTextPaneContent({
           <NormMarkdown markdown={state.result.markdown} />
         )}
         {state.kind === 'loaded' && state.result.found && state.result.sourceFile && (
-          <footer className="mt-8 pt-4 border-t border-hairline text-[10px] uppercase tracking-[0.18em] text-subtext">
+          <footer className="mt-8 pt-4 border-t border-hairline text-[10px] uppercase tracking-[0.18em] text-subtext break-words">
             Quelle: data/norm-text/{state.result.sourceFile}
           </footer>
         )}
@@ -231,7 +231,7 @@ function NotFoundView({
  */
 function NormMarkdown({ markdown }: { markdown: string }) {
   return (
-    <div className="norm-text prose prose-sm max-w-none text-sm text-ink leading-relaxed space-y-3">
+    <div className="norm-text prose prose-sm max-w-none text-sm text-ink leading-relaxed space-y-3 break-words">
       <ReactMarkdown
         components={{
           // Tables in the LaTeX source come through as raw `\begin{tabular}`
@@ -240,12 +240,19 @@ function NormMarkdown({ markdown }: { markdown: string }) {
           // / `\begin{equation*}` blocks as preformatted text so the engineer
           // sees the literal source.
           p: ({ children, ...props }) => (
-            <p {...props} className="text-sm text-ink leading-relaxed">
+            <p {...props} className="text-sm text-ink leading-relaxed break-words">
               {children}
             </p>
           ),
+          // Wide preformatted blocks (LaTeX tabular / equation source) scroll
+          // horizontally inside the pane instead of forcing page overflow.
+          pre: ({ children, ...props }) => (
+            <pre {...props} className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+              {children}
+            </pre>
+          ),
           code: ({ children, ...props }) => (
-            <code {...props} className="font-mono text-xs bg-paper-2 px-1 py-0.5 rounded">
+            <code {...props} className="font-mono text-xs bg-paper-2 px-1 py-0.5 rounded break-words">
               {children}
             </code>
           ),

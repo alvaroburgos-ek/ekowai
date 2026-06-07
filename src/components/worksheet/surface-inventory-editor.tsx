@@ -145,8 +145,8 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
           Keine Flächen erfasst. Pro Oberflächentyp eine Zeile mit Fläche und Abflussbeiwerten C_i (Bemessungsregen) und C_s (Flutereignis) eingeben.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[40rem] text-sm">
             <thead className="text-[10px] uppercase tracking-[0.18em] text-subtext">
               <tr>
                 <th className="text-left font-normal pb-1 pr-2">Bezeichnung</th>

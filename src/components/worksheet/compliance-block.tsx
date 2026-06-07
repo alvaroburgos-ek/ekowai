@@ -153,7 +153,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
           });
           return (
             <li key={cr.id} className="text-sm text-ink space-y-1">
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-baseline gap-3 flex-wrap">
                 <StatusBadge
                   result={result}
                   severity={cr.severity}
@@ -162,15 +162,15 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                 <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
                   {cr.code}
                 </span>
-                <span className="font-medium">
+                <span className="font-medium min-w-0 break-words">
                   {locale === 'de' ? cr.titleDe : cr.titleEn ?? cr.titleDe}
                 </span>
               </div>
               {cr.description && (
-                <p className="text-xs text-subtext ml-[140px]">{cr.description}</p>
+                <p className="text-xs text-subtext ml-8 sm:ml-[140px]">{cr.description}</p>
               )}
-              <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[140px] flex gap-3 flex-wrap">
-                <code>{cr.condition}</code>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-8 sm:ml-[140px] flex gap-3 flex-wrap">
+                <code className="break-all">{cr.condition}</code>
                 {cr.clauseReference && (
                   <ClauseChip clauseReference={cr.clauseReference} />
                 )}
@@ -181,7 +181,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                 )}
               </div>
               {result.kind === 'fail' && filteredSuggestions.length > 0 && (
-                <div className="ml-[140px] mt-2 space-y-2">
+                <div className="ml-8 sm:ml-[140px] mt-2 space-y-2">
                   {filteredSuggestions.map((s) => (
                     <SuggestionCard
                       key={s.id}
@@ -193,7 +193,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                 </div>
               )}
               {result.kind === 'fail' && filteredSuggestions.length === 0 && cr.suggestion && (
-                <p className="ml-[140px] mt-2 text-xs text-subtext italic">{cr.suggestion}</p>
+                <p className="ml-8 sm:ml-[140px] mt-2 text-xs text-subtext italic">{cr.suggestion}</p>
               )}
             </li>
           );

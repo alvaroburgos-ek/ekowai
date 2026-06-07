@@ -298,7 +298,7 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
           className="flex items-start gap-3 rounded-xl border border-error/30 bg-error-soft px-4 py-3 text-sm text-error"
         >
           <AlertCircle className="size-4 mt-0.5 shrink-0" aria-hidden />
-          <div className="flex-1">{error}</div>
+          <div className="flex-1 min-w-0 break-words">{error}</div>
           <button
             type="button"
             onClick={() => setError(null)}
@@ -330,7 +330,7 @@ export function ProjectStandardsLayers({ projectId, locale, standards }: Props) 
       )}
 
       {allRows.length > 0 && (
-        <div className="grid grid-cols-[minmax(14rem,18rem)_1fr] gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(14rem,18rem)_1fr] gap-6 items-start">
           <StandardSidebar
             rowsByLayer={rowsByLayer}
             selectedId={effectiveSelectedId}
@@ -385,7 +385,7 @@ function StandardSidebar({
   }
 
   return (
-    <nav className="border border-hairline rounded-md bg-paper sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+    <nav className="border border-hairline rounded-md bg-paper lg:sticky lg:top-4 max-h-[24rem] lg:max-h-[calc(100vh-2rem)] overflow-y-auto">
       {sections.map((section, sIdx) => (
         <div key={section.key} className={sIdx > 0 ? 'border-t border-hairline' : ''}>
           <h3 className="px-4 pt-3 pb-2 text-[10px] uppercase tracking-[0.25em] text-subtext">
@@ -566,16 +566,16 @@ function StandardDetail({
 
   return (
     <article className="border border-hairline rounded-md bg-paper">
-      <header className="px-6 py-5 border-b border-hairline space-y-1">
+      <header className="px-4 sm:px-6 py-5 border-b border-hairline space-y-1">
         <div className="flex items-baseline gap-3 flex-wrap">
-          <h2 className="text-lg font-medium text-ink">{entry.standard.code}</h2>
+          <h2 className="text-lg font-medium text-ink break-words min-w-0">{entry.standard.code}</h2>
           {stageBadge && (
             <span className="text-[10px] uppercase tracking-[0.2em] bg-accent/10 text-accent px-2 py-0.5 rounded">
               {stageBadge}
             </span>
           )}
         </div>
-        <p className="text-sm text-subtext">
+        <p className="text-sm text-subtext break-words">
           {pickTitle(entry.standard)} · {entry.standard.version}
         </p>
       </header>
@@ -601,7 +601,7 @@ function StandardDetail({
         pickWsTitle={pickWsTitle}
       />
 
-      <div className="px-6 py-4 border-t border-hairline flex justify-end">
+      <div className="px-4 sm:px-6 py-4 border-t border-hairline flex justify-end">
         <a
           href={`/api/projects/${projectId}/standards/${entry.standard.code}/report`}
           target="_blank"
@@ -637,8 +637,8 @@ function ProgressDisplay({
   ).filter((s) => s.count > 0);
 
   return (
-    <section className="px-6 py-5 border-b border-hairline">
-      <div className="flex items-baseline justify-between mb-3">
+    <section className="px-4 sm:px-6 py-5 border-b border-hairline">
+      <div className="flex items-baseline justify-between gap-2 mb-3">
         <span className="text-[11px] uppercase tracking-[0.22em] text-subtext">Fortschritt</span>
         <span className="text-sm text-ink tabular-nums">
           <span className="font-medium">{done}</span>
@@ -704,8 +704,8 @@ function ConfigSection({
   const currentRel = entry.relationType ?? 'series';
 
   return (
-    <section className="px-6 py-4 border-b border-hairline">
-      <div className="flex items-center justify-between mb-3">
+    <section className="px-4 sm:px-6 py-4 border-b border-hairline">
+      <div className="flex items-center justify-between gap-2 mb-3">
         <span className="text-[11px] uppercase tracking-[0.22em] text-subtext">Konfiguration</span>
         {(canMoveUp || canMoveDown) && (
           <div className="flex border border-hairline rounded">
@@ -806,15 +806,15 @@ function WorksheetList({
 }) {
   if (entry.worksheets.length === 0) {
     return (
-      <section className="px-6 py-5 text-sm text-subtext">
+      <section className="px-4 sm:px-6 py-5 text-sm text-subtext">
         Keine Worksheets in diesem Standard.
       </section>
     );
   }
 
   return (
-    <section className="px-6 py-4">
-      <div className="flex items-baseline justify-between mb-3">
+    <section className="px-4 sm:px-6 py-4">
+      <div className="flex items-baseline justify-between gap-2 mb-3">
         <span className="text-[11px] uppercase tracking-[0.22em] text-subtext">
           Worksheets
         </span>
@@ -829,7 +829,7 @@ function WorksheetList({
             <li key={w.templateId}>
               <Link
                 href={`/${locale}/projects/${projectId}/standards/${entry.standard.code}/worksheets/${w.code}`}
-                className="grid grid-cols-[12px_28px_88px_1fr_auto] items-center gap-3 px-2 py-1.5 text-sm rounded hover:bg-paper-2/50"
+                className="grid grid-cols-[12px_28px_72px_1fr_auto] sm:grid-cols-[12px_28px_88px_1fr_auto] items-center gap-2 sm:gap-3 px-2 py-1.5 text-sm rounded hover:bg-paper-2/50"
               >
                 <span
                   className={cn('inline-block w-2 h-2 rounded-full', STATUS_DOT[status])}
@@ -838,9 +838,9 @@ function WorksheetList({
                 <span className="text-[10px] text-subtext tabular-nums">
                   {w.phase != null ? `P${w.phase}` : '—'}
                 </span>
-                <span className="text-xs text-subtext tracking-wide">{w.code}</span>
-                <span className="text-ink truncate">{pickWsTitle(w)}</span>
-                <span className="text-[10px] text-subtext">{STATUS_LABEL[status]}</span>
+                <span className="text-xs text-subtext tracking-wide truncate">{w.code}</span>
+                <span className="text-ink truncate min-w-0">{pickWsTitle(w)}</span>
+                <span className="hidden sm:inline text-[10px] text-subtext">{STATUS_LABEL[status]}</span>
               </Link>
             </li>
           );

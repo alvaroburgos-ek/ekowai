@@ -82,12 +82,12 @@ function SiteProfileInput({ entry, initial }: { entry: SiteProfileEntry; initial
   const name = siteProfileFieldName(entry);
   const defaultValue = readSiteProfileValue(initial, entry.key);
   return (
-    <label className="grid grid-cols-12 gap-4 items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
-      <span className="col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
+    <label className="grid grid-cols-1 sm:grid-cols-12 gap-1.5 sm:gap-4 sm:items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
+      <span className="sm:col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
         {entry.labelDe}
         {entry.unit && <span className="ml-1 text-ink-2 normal-case tracking-normal">({entry.unit})</span>}
       </span>
-      <span className="col-span-9 space-y-1">
+      <span className="sm:col-span-9 min-w-0 space-y-1">
         <Input
           name={name}
           type={entry.type === 'number' ? 'number' : 'text'}

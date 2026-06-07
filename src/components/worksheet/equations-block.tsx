@@ -40,7 +40,7 @@ export function EquationsBlock({
               </span>
               <KatexFormula
                 source={eq.formula}
-                className="text-sm text-ink overflow-x-auto"
+                className="text-sm text-ink overflow-x-auto min-w-0"
               />
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[68px] flex flex-wrap gap-3 items-baseline">

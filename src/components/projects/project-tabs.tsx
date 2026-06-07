@@ -17,25 +17,27 @@ export function ProjectTabs({ locale, projectId }: { locale: 'de' | 'en'; projec
   ];
 
   return (
-    <nav className="flex gap-1 p-1 rounded-full bg-paper-2 border border-hairline w-fit">
-      {tabs.map(({ href, label, icon: Icon, matchExact }) => {
-        const isActive = matchExact ? pathname === href : pathname.startsWith(href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all',
-              isActive
-                ? 'bg-paper text-ink shadow-soft'
-                : 'text-subtext hover:text-ink hover:bg-paper/60',
-            )}
-          >
-            <Icon className="size-3.5" aria-hidden />
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+      <nav className="flex gap-1 p-1 rounded-full bg-paper-2 border border-hairline w-max sm:w-fit">
+        {tabs.map(({ href, label, icon: Icon, matchExact }) => {
+          const isActive = matchExact ? pathname === href : pathname.startsWith(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all whitespace-nowrap',
+                isActive
+                  ? 'bg-paper text-ink shadow-soft'
+                  : 'text-subtext hover:text-ink hover:bg-paper/60',
+              )}
+            >
+              <Icon className="size-3.5" aria-hidden />
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

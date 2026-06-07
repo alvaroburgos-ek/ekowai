@@ -77,18 +77,20 @@ export default async function VerifyPage({
   }
 
   return (
-    <Card className="p-8 space-y-6">
-      <h1 className="text-xl font-semibold">{t('createOrgPrompt')}</h1>
-      <form action={createFirstOrg} className="space-y-4">
-        <input type="hidden" name="locale" value={locale} />
-        <label className="block">
-          <span className="text-sm">{t('orgName')}</span>
-          <Input name="name" required minLength={2} maxLength={100} autoFocus />
-        </label>
-        <Button type="submit" className="w-full">
-          {t('orgCreate')}
-        </Button>
-      </form>
-    </Card>
+    <div className="min-h-[100dvh] flex items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md p-6 sm:p-8 space-y-6">
+        <h1 className="text-xl font-semibold">{t('createOrgPrompt')}</h1>
+        <form action={createFirstOrg} className="space-y-4">
+          <input type="hidden" name="locale" value={locale} />
+          <label className="block">
+            <span className="text-sm">{t('orgName')}</span>
+            <Input name="name" required minLength={2} maxLength={100} autoFocus className="mt-2" />
+          </label>
+          <Button type="submit" className="w-full">
+            {t('orgCreate')}
+          </Button>
+        </form>
+      </Card>
+    </div>
   );
 }

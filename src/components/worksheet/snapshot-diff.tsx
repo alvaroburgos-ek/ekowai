@@ -121,7 +121,7 @@ export function SnapshotDiffView({
     <div className="space-y-10">
       {/* Summary banner */}
       <section
-        className="border border-hairline-strong p-5 bg-paper-2/40 space-y-2"
+        className="border border-hairline-strong p-4 sm:p-5 bg-paper-2/40 space-y-2"
         data-testid="diff-summary"
       >
         <div className="text-[10px] uppercase tracking-[0.25em] text-subtext">
@@ -151,15 +151,15 @@ export function SnapshotDiffView({
             {diff.summary.complianceFlipped === 1 ? '' : 'en'} mit geändertem Verdikt.
           </p>
         )}
-        <div className="flex items-center justify-between pt-1">
-          <div className="text-xs text-subtext">
+        <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+          <div className="text-xs text-subtext min-w-0 break-words">
             <span className="font-mono mr-2">FROM</span>
             {fromLabel}
             <span className="mx-2">→</span>
             <span className="font-mono mr-2">TO</span>
             {toLabel}
           </div>
-          <label className="text-xs text-subtext flex items-center gap-2 cursor-pointer">
+          <label className="text-xs text-subtext flex items-center gap-2 cursor-pointer shrink-0">
             <input
               type="checkbox"
               checked={showUnchanged}
@@ -180,7 +180,8 @@ export function SnapshotDiffView({
         {visibleParameters.length === 0 ? (
           <p className="text-sm text-subtext italic">Keine Änderungen.</p>
         ) : (
-          <table className="w-full text-sm border-collapse" data-testid="diff-parameters-table">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[28rem] text-sm border-collapse" data-testid="diff-parameters-table">
             <thead className="text-xs uppercase tracking-[0.18em] text-subtext">
               <tr className="border-b border-hairline">
                 <th className="text-left py-2 pr-3 font-normal">Feld</th>
@@ -228,6 +229,7 @@ export function SnapshotDiffView({
               })}
             </tbody>
           </table>
+          </div>
         )}
       </section>
 
@@ -239,7 +241,8 @@ export function SnapshotDiffView({
         {visibleEquations.length === 0 ? (
           <p className="text-sm text-subtext italic">Keine Änderungen.</p>
         ) : (
-          <table className="w-full text-sm border-collapse" data-testid="diff-equations-table">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[28rem] text-sm border-collapse" data-testid="diff-equations-table">
             <thead className="text-xs uppercase tracking-[0.18em] text-subtext">
               <tr className="border-b border-hairline">
                 <th className="text-left py-2 pr-3 font-normal">Gleichung</th>
@@ -290,6 +293,7 @@ export function SnapshotDiffView({
               })}
             </tbody>
           </table>
+          </div>
         )}
       </section>
 
@@ -301,7 +305,8 @@ export function SnapshotDiffView({
         {visibleCompliance.length === 0 ? (
           <p className="text-sm text-subtext italic">Keine Änderungen.</p>
         ) : (
-          <table className="w-full text-sm border-collapse" data-testid="diff-compliance-table">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[28rem] text-sm border-collapse" data-testid="diff-compliance-table">
             <thead className="text-xs uppercase tracking-[0.18em] text-subtext">
               <tr className="border-b border-hairline">
                 <th className="text-left py-2 pr-3 font-normal">Anforderung</th>
@@ -343,6 +348,7 @@ export function SnapshotDiffView({
               })}
             </tbody>
           </table>
+          </div>
         )}
       </section>
     </div>

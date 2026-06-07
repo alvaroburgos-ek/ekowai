@@ -15,6 +15,13 @@
       "when": 1778969260171,
       "tag": "0001_lovely_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780880000000,
+      "tag": "0002_inbound_leads",
+      "breakpoints": true
     }
   ]
 }

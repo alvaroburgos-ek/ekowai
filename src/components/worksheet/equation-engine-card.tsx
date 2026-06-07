@@ -56,7 +56,7 @@ export function EquationEngineCard({
     <section
       data-testid={`engine-card-gl-${equationNumber}`}
       data-engine-state={state.kind}
-      className={`rounded border p-4 space-y-3 text-sm ${
+      className={`rounded border p-3 sm:p-4 space-y-3 text-sm ${
         isComputed
           ? 'border-success/30 bg-success/5'
           : 'border-error/40 bg-error/5'
@@ -147,6 +147,7 @@ export function EquationEngineCard({
                 <div className="text-[11px] uppercase tracking-[0.18em] text-subtext pt-1">
                   Eingaben im Detail
                 </div>
+                <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-subtext">
@@ -187,6 +188,7 @@ export function EquationEngineCard({
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </div>

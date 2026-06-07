@@ -253,8 +253,8 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
             </ul>
           )}
         </div>
-        <div className="text-[10px] text-subtext flex justify-between">
-          <span>
+        <div className="text-[10px] text-subtext flex flex-wrap gap-x-3 gap-y-1 justify-between">
+          <span className="min-w-0">
             {loading
               ? 'Suche …'
               : 'Auswahl füllt Adresse, Gemeinde, Bundesland, Geo-Koordinaten und KOSTRA-Rasterzelle automatisch.'}
@@ -263,7 +263,7 @@ export function AddressFieldsGroup({ initial }: { initial?: unknown }) {
             href="https://photon.komoot.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline-offset-2 hover:underline"
+            className="underline-offset-2 hover:underline whitespace-nowrap"
           >
             Powered by Photon / OpenStreetMap
           </a>
@@ -323,12 +323,12 @@ function ControlledField({
   const entry = SITE_PROFILE_BY_SYMBOL.get(symbol);
   if (!entry) return null;
   return (
-    <label className="grid grid-cols-12 gap-4 items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
-      <span className="col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
+    <label className="grid grid-cols-1 sm:grid-cols-12 gap-1.5 sm:gap-4 sm:items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
+      <span className="sm:col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
         {entry.labelDe}
         {entry.unit && <span className="ml-1 text-ink-2 normal-case tracking-normal">({entry.unit})</span>}
       </span>
-      <span className="col-span-9 space-y-1">
+      <span className="sm:col-span-9 min-w-0 space-y-1">
         <Input
           name={siteProfileFieldName(entry)}
           type={entry.type === 'number' ? 'number' : 'text'}

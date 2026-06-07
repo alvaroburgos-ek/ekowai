@@ -28,8 +28,8 @@ export default async function ProfileSetupPage({
   if (profile?.fullName) redirect(`/${locale}/projects`);
 
   return (
-    <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center">
-      <Card className="w-full max-w-md p-8 space-y-6 relative">
+    <div className="min-h-[100dvh] flex items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md p-6 sm:p-8 space-y-6 relative">
         {/* Corner ticks */}
         <span aria-hidden className="absolute -top-px -left-px w-4 h-px bg-ink" />
         <span aria-hidden className="absolute -top-px -left-px h-4 w-px bg-ink" />

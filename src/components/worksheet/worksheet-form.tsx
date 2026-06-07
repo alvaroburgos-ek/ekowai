@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useEffect, useMemo, useRef } from 'react';
 import { useWorksheetStore, type SaveStatus } from '@/lib/state/worksheet-store';
 import { saveWorksheet } from '@/lib/actions/worksheet';
@@ -372,6 +373,25 @@ export function WorksheetForm({
     [fields],
   );
 
+  // Sections worth rendering: those holding at least one visible field
+  // directly, plus every ancestor on the path up to such a section. DWA
+  // worksheets carry many scaffold sections (Output Transfer Table, Notes &
+  // Assumptions, Approval, Workflow Connection …) that collect nothing in this
+  // form — we hide those empty headers instead of listing blank sections.
+  const visibleSectionIds = useMemo(() => {
+    const parentBySection = new Map(sections.map((s) => [s.id, s.parentSectionId]));
+    const result = new Set<string>();
+    for (const [sid, arr] of fieldsBySectionId) {
+      if (!sid || arr.length === 0) continue;
+      let cur: string | null = sid;
+      while (cur && !result.has(cur)) {
+        result.add(cur);
+        cur = parentBySection.get(cur) ?? null;
+      }
+    }
+    return result;
+  }, [fieldsBySectionId, sections]);
+
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
@@ -452,17 +472,25 @@ export function WorksheetForm({
                   data-inherited-from={f.inheritedFromWorksheet}
                   className="border-b border-hairline last:border-b-0 py-1 flex items-baseline justify-between gap-2"
                 >
-                  <div>
-                    <div className="text-ink">
+                  <div className="min-w-0">
+                    <div className="text-ink break-words">
                       <code className="font-mono text-xs mr-2">{f.symbol}</code>
                       {label}
                     </div>
                     <div className="text-[10px] uppercase tracking-[0.18em] text-subtext">
-                      ← {f.inheritedFromWorksheet}
+                      {f.inheritedFromWorksheet ? (
+                        <Link
+                          href={`/${locale}/projects/${projectId}/standards/${standardCode}/worksheets/${f.inheritedFromWorksheet}`}
+                          className="hover:text-accent transition-colors underline-offset-2 hover:underline"
+                          title={`Arbeitsblatt ${f.inheritedFromWorksheet} öffnen`}
+                        >
+                          ← {f.inheritedFromWorksheet}
+                        </Link>
+                      ) : null}
                       {f.unit && <span className="ml-2 text-ink-2">{f.unit}</span>}
                     </div>
                   </div>
-                  <div className="font-mono tabular-nums text-ink">{display}</div>
+                  <div className="font-mono tabular-nums text-ink shrink-0">{display}</div>
                 </li>
               );
             })}
@@ -474,15 +502,18 @@ export function WorksheetForm({
         <section className="space-y-4">{renderField(null)}</section>
       )}
 
-      {topSections.map((s) => (
-        <SectionGroup
-          key={s.id}
-          section={s}
-          allSections={sections}
-          renderField={renderField}
-          locale={locale}
-        />
-      ))}
+      {topSections
+        .filter((s) => visibleSectionIds.has(s.id))
+        .map((s) => (
+          <SectionGroup
+            key={s.id}
+            section={s}
+            allSections={sections}
+            visibleSectionIds={visibleSectionIds}
+            renderField={renderField}
+            locale={locale}
+          />
+        ))}
 
       {subAreasField && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">

@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { currentUserIsPlatformEngineer } from '@/lib/auth/platform-engineer';
 import { loadWorksheetsProgress } from '@/lib/db/queries/library';
 import { VerificationProgressBar } from '@/components/library/progress-bar';
+import { BackLink } from '@/components/ui/back-link';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,20 +32,13 @@ export default async function StandardDetailPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <Link
-          href={`/${locale}/standards`}
-          className="text-[11px] uppercase tracking-[0.18em] text-subtext hover:text-accent transition-colors"
-        >
-          ← Bibliothek
-        </Link>
-      </div>
+      <BackLink href={`/${locale}/standards`} label="Zurück zur Bibliothek" />
 
       <header className="border-b border-hairline pb-6 space-y-3">
-        <div className="text-[10px] uppercase tracking-[0.2em] text-subtext">
+        <div className="text-[10px] uppercase tracking-[0.2em] text-subtext break-words">
           {standard.code} · v{standard.version}
         </div>
-        <h1 className="text-2xl font-semibold text-ink tracking-tight">{standard.titleDe}</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-ink tracking-tight break-words">{standard.titleDe}</h1>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-[0.18em] text-subtext">Felder</span>
@@ -69,8 +63,8 @@ export default async function StandardDetailPage({
               >
                 <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="font-mono text-xs text-subtext shrink-0">{w.code}</span>
-                  <span className="font-medium text-ink flex-1 min-w-0">{w.titleDe}</span>
-                  <div className="flex items-center gap-4 shrink-0">
+                  <span className="font-medium text-ink flex-1 min-w-0 break-words">{w.titleDe}</span>
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1">
                     {w.fieldTotal > 0 && (
                       <VerificationProgressBar verified={w.fieldVerified} total={w.fieldTotal} label="F" />
                     )}

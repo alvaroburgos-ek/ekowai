@@ -36,12 +36,12 @@ export default async function InvitePage({
   }
 
   return (
-    <section className="max-w-2xl mx-auto space-y-10">
+    <section className="max-w-2xl mx-auto space-y-8 sm:space-y-10">
       <header className="border-b border-hairline pb-6">
         <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
           Organisation · Einladung
         </div>
-        <h1 className="text-3xl font-semibold tracking-tight text-ink">{t('invite')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">{t('invite')}</h1>
       </header>
 
       <form action={inviteMember} className="space-y-8">
@@ -79,12 +79,12 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="grid grid-cols-12 gap-4 items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
-      <span className="col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
+    <label className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 sm:items-baseline rounded-md px-3 py-2 -mx-3 has-[:focus-within]:bg-paper-2/50 transition-colors">
+      <span className="sm:col-span-3 text-[10px] uppercase tracking-[0.2em] text-subtext">
         {label}
         {required && <span className="text-accent ml-1">*</span>}
       </span>
-      <div className="col-span-9">{children}</div>
+      <div className="sm:col-span-9">{children}</div>
     </label>
   );
 }

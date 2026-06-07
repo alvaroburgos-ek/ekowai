@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { Check } from 'lucide-react';
 import { signInWithGoogle, signInWithPassword } from './actions';
 import { env } from '@/env';
 import { Button } from '@/components/ui/button';
@@ -30,62 +31,43 @@ export default function LoginPage() {
     urlError && KNOWN_ERROR_KEYS.has(urlError) ? urlError : urlError ? 'generic' : null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 min-h-[calc(100vh-12rem)] items-center">
-      {/* Left column — editorial hero */}
-      <section className="lg:col-span-7 space-y-8">
-        <Image
-          src="/images/brand/logo-ekowai.svg"
-          alt="EKOWAI"
-          width={140}
-          height={40}
-          unoptimized
-          priority
-          className="object-contain"
+    <div className="relative flex min-h-[100dvh] w-full overflow-hidden lg:grid lg:grid-cols-[1.05fr_1fr]">
+      {/* ───────────────────────── LEFT — animated brand panel (desktop) ── */}
+      <BrandPanel
+        tagline={t('tagline')}
+        brandLine={t('brandLine')}
+        features={[t('feature1'), t('feature2'), t('feature3')]}
+      />
+
+      {/* ───────────────────────── RIGHT — sign-in form ──────────────────── */}
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-y-auto px-6 py-10 sm:px-10">
+        {/* Soft brand glow behind the form on small screens */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 left-1/2 -z-0 size-72 -translate-x-1/2 rounded-full opacity-60 blur-3xl lg:hidden"
+          style={{ background: 'var(--eko-gradient-soft)' }}
         />
-        <div className="text-[11px] uppercase tracking-[0.25em] text-subtext">
-          DWA-A-201 · v3.2
-          <span className="mx-2 text-hairline-strong">/</span>
-          Bemessungsassistent
-        </div>
-        <h1 className="text-5xl lg:text-7xl font-semibold leading-[0.95] text-ink tracking-tight">
-          Kläranlagen-
-          <br />
-          Bemessung,
-          <br />
-          <span className="italic font-medium text-accent-2">präzise.</span>
-        </h1>
-        <div className="border-t border-hairline pt-6 max-w-lg space-y-4">
-          <p className="text-base text-ink-2 leading-relaxed">
-            Ein Werkzeug für Planungsingenieur:innen — deterministische Berechnung,
-            §-genaue Zitate, anwaltlich nachvollziehbare Entscheidungsdokumentation.
-          </p>
-          <ul className="text-[11px] uppercase tracking-[0.18em] text-subtext space-y-1.5">
-            <li>— Bemessung nach DWA-A-201, Arbeitsblatt A201-08</li>
-            <li>— KI-gestützter Erläuterungstext, vom Ingenieur kuratiert</li>
-            <li>— Querverweise auf DWA-A-131, A-202, M-153</li>
-            <li>— Mehrbenutzer-Freigabeworkflow</li>
-          </ul>
-        </div>
-      </section>
 
-      {/* Right column — login form */}
-      <section className="lg:col-span-5">
-        <div className="border border-hairline bg-paper-2/30 p-8 lg:p-10 space-y-8 relative">
-          {/* Corner ticks for engineering-drawing feel */}
-          <span aria-hidden className="absolute -top-px -left-px w-4 h-px bg-ink" />
-          <span aria-hidden className="absolute -top-px -left-px h-4 w-px bg-ink" />
-          <span aria-hidden className="absolute -top-px -right-px w-4 h-px bg-ink" />
-          <span aria-hidden className="absolute -top-px -right-px h-4 w-px bg-ink" />
-          <span aria-hidden className="absolute -bottom-px -left-px w-4 h-px bg-ink" />
-          <span aria-hidden className="absolute -bottom-px -left-px h-4 w-px bg-ink" />
-          <span aria-hidden className="absolute -bottom-px -right-px w-4 h-px bg-ink" />
-          <span aria-hidden className="absolute -bottom-px -right-px h-4 w-px bg-ink" />
-
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-subtext mb-2">
-              Sektion 01
+        <div className="relative z-10 w-full max-w-sm space-y-7">
+          <div className="space-y-4">
+            <Image
+              src="/images/brand/logo-ekowai.svg"
+              alt="EKOWAI"
+              width={124}
+              height={36}
+              unoptimized
+              priority
+              className="h-9 w-auto object-contain"
+            />
+            <div className="text-[10px] uppercase tracking-[0.25em] text-subtext">
+              {t('tagline')}
             </div>
-            <h2 className="font-display text-2xl text-ink">{t('signIn')}</h2>
+            <div className="space-y-1.5">
+              <h1 className="font-display text-2xl sm:text-3xl text-ink tracking-tight">
+                {t('signIn')}
+              </h1>
+              <p className="text-sm text-ink-2 leading-relaxed">{t('lede')}</p>
+            </div>
           </div>
 
           {errorMessageKey && (
@@ -178,8 +160,184 @@ export default function LoginPage() {
               </form>
             </>
           )}
+
+          <div className="border-t border-hairline pt-4">
+            <a
+              href="https://ekowai-engineering.de"
+              className="text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink transition-colors"
+            >
+              {t('marketing')}
+            </a>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
+  );
+}
+
+/**
+ * Decorative sign-in side panel — drifting aurora, a parallax engineering
+ * grid, and the EKOWAI droplet inside two slow-spinning rings. Desktop only;
+ * pure CSS, transform/opacity-driven, and disabled under reduced-motion.
+ */
+function BrandPanel({
+  tagline,
+  brandLine,
+  features,
+}: {
+  tagline: string;
+  brandLine: string;
+  features: string[];
+}) {
+  return (
+    <aside className="relative hidden flex-col justify-between overflow-hidden bg-[#0a130e] p-12 text-white lg:flex xl:p-16">
+      {/* Aurora blobs */}
+      <div
+        className="aurora-blob"
+        style={{
+          top: '-12%',
+          left: '-10%',
+          width: '60%',
+          height: '60%',
+          background: 'radial-gradient(circle, rgba(0,208,97,0.55), transparent 65%)',
+          animation: 'aurora-drift 16s ease-in-out infinite',
+        }}
+        aria-hidden
+      />
+      <div
+        className="aurora-blob"
+        style={{
+          bottom: '-18%',
+          right: '-12%',
+          width: '65%',
+          height: '65%',
+          background: 'radial-gradient(circle, rgba(0,158,233,0.5), transparent 65%)',
+          animation: 'aurora-drift-2 20s ease-in-out infinite',
+        }}
+        aria-hidden
+      />
+      <div
+        className="aurora-blob"
+        style={{
+          top: '35%',
+          left: '40%',
+          width: '40%',
+          height: '40%',
+          background: 'radial-gradient(circle, rgba(0,208,97,0.25), transparent 70%)',
+          animation: 'aurora-drift 24s ease-in-out infinite reverse',
+        }}
+        aria-hidden
+      />
+
+      {/* Engineering grid */}
+      <div
+        className="login-grid pointer-events-none absolute inset-0 opacity-[0.18]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+          backgroundSize: '44px 44px',
+          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 40%, #000 30%, transparent 75%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 80% 80% at 50% 40%, #000 30%, transparent 75%)',
+          animation: 'grid-pan 9s linear infinite',
+        }}
+        aria-hidden
+      />
+
+      {/* Vignette + sheen */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(0,0,0,0.4))' }}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 left-0 w-1/3"
+        style={{
+          background: 'linear-gradient(90deg, rgba(255,255,255,0.12), transparent)',
+          animation: 'sheen 7s ease-in-out infinite',
+        }}
+        aria-hidden
+      />
+
+      {/* Top — wordmark */}
+      <div className="relative z-10 flex items-center gap-3">
+        <Image
+          src="/images/brand/icon-ekowai.svg"
+          alt=""
+          width={28}
+          height={28}
+          unoptimized
+          className="size-7"
+          aria-hidden
+        />
+        <span className="font-display text-lg font-semibold tracking-tight">EKOWAI</span>
+      </div>
+
+      {/* Center — ringed mark + statement */}
+      <div className="relative z-10 my-auto py-10">
+        {/* Scrim to keep the statement legible over the moving aurora */}
+        <div
+          className="pointer-events-none absolute -inset-x-8 -inset-y-4 -z-10"
+          style={{
+            background:
+              'radial-gradient(ellipse 75% 65% at 30% 60%, rgba(5,12,8,0.72), transparent 75%)',
+          }}
+          aria-hidden
+        />
+        <div className="relative mb-10 size-44">
+          <span
+            className="absolute inset-0 rounded-full border border-dashed border-white/20"
+            style={{ animation: 'ring-spin 28s linear infinite' }}
+            aria-hidden
+          />
+          <span
+            className="absolute inset-5 rounded-full border border-white/10"
+            style={{ animation: 'ring-spin 20s linear infinite reverse' }}
+            aria-hidden
+          />
+          <span
+            className="absolute inset-0 rounded-full"
+            style={{ boxShadow: '0 0 80px 8px rgba(0,208,97,0.25)' }}
+            aria-hidden
+          />
+          <div
+            className="absolute inset-0 grid place-items-center"
+            style={{ animation: 'float-y 6s ease-in-out infinite' }}
+          >
+            <Image
+              src="/images/brand/icon-ekowai.svg"
+              alt=""
+              width={84}
+              height={84}
+              unoptimized
+              className="size-20 drop-shadow-[0_8px_24px_rgba(0,158,233,0.45)]"
+              aria-hidden
+            />
+          </div>
+        </div>
+
+        <div className="text-[10px] uppercase tracking-[0.32em] text-white/70 [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]">
+          {tagline}
+        </div>
+        <h2 className="mt-4 max-w-md font-display text-3xl font-semibold leading-tight tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.65)] xl:text-4xl">
+          {brandLine}
+        </h2>
+      </div>
+
+      {/* Bottom — feature checklist */}
+      <ul className="relative z-10 space-y-2.5">
+        {features.map((f) => (
+          <li key={f} className="flex items-center gap-3 text-sm text-white/80">
+            <span
+              className="grid size-5 shrink-0 place-items-center rounded-full"
+              style={{ background: 'var(--eko-gradient)' }}
+            >
+              <Check className="size-3 text-white" aria-hidden />
+            </span>
+            {f}
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }

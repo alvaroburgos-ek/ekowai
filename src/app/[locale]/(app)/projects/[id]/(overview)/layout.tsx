@@ -37,33 +37,33 @@ export default async function OverviewLayout({
 
   return (
     <article className="space-y-8">
-      <header className="rounded-2xl border border-hairline bg-paper shadow-soft p-6 lg:p-8 space-y-6">
-        <div className="flex items-start justify-between gap-6 flex-wrap">
-          <div className="flex items-start gap-4 min-w-0">
+      <header className="rounded-2xl border border-hairline bg-paper shadow-soft p-5 sm:p-6 lg:p-8 space-y-6">
+        <div className="flex items-start justify-between gap-4 sm:gap-6 flex-wrap">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0">
             <div
-              className="inline-flex items-center justify-center size-12 rounded-2xl shrink-0"
+              className="inline-flex items-center justify-center size-10 sm:size-12 rounded-2xl shrink-0"
               style={{ background: 'var(--eko-gradient-soft)' }}
             >
               <FolderKanban className="size-6 text-accent-2" aria-hidden />
             </div>
             <div className="min-w-0">
               <div className="text-xs text-subtext">Projekt · {project.id.slice(0, 8)}</div>
-              <h1 className="mt-1 text-3xl lg:text-4xl font-semibold text-ink tracking-tight">
+              <h1 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-semibold text-ink tracking-tight break-words">
                 {project.name}
               </h1>
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
             <Link href={`/${localeTyped}/projects/${id}/edit`}>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" aria-label="Bearbeiten">
                 <Pencil aria-hidden />
-                Bearbeiten
+                <span className="hidden sm:inline">Bearbeiten</span>
               </Button>
             </Link>
             <form action={archiveAction}>
-              <Button type="submit" variant="ghost" size="sm">
+              <Button type="submit" variant="ghost" size="sm" aria-label="Archivieren">
                 <Archive aria-hidden />
-                Archivieren
+                <span className="hidden sm:inline">Archivieren</span>
               </Button>
             </form>
           </div>

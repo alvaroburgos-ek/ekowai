@@ -133,9 +133,9 @@ export function ManualOverridePill({
           role="dialog"
           aria-modal="true"
           aria-labelledby="override-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm p-4"
         >
-          <div className="w-full max-w-lg space-y-4 rounded-lg border border-hairline-strong bg-paper p-6 shadow-lg">
+          <div className="w-full max-w-lg max-h-[85dvh] overflow-y-auto space-y-4 rounded-lg border border-hairline-strong bg-paper p-5 sm:p-6 shadow-lg">
             <h2
               id="override-modal-title"
               className="text-lg font-semibold text-ink"

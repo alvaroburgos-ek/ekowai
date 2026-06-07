@@ -51,7 +51,7 @@ export function WorksheetListSidebar({
   });
 
   return (
-    <nav className="space-y-6 sticky top-6">
+    <nav className="space-y-4 sm:space-y-6 lg:sticky lg:top-6">
       <a
         href={`/api/projects/${projectId}/standards/${standardCode}/report`}
         target="_blank"

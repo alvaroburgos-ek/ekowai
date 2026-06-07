@@ -27,7 +27,7 @@ export function ClauseChip({ clauseReference, className }: Props) {
 
   if (!clauseReference) return null;
 
-  const base = 'inline-block';
+  const base = 'inline-block max-w-full break-words';
   const linkClasses =
     'text-accent hover:text-ink hover:underline underline-offset-2 cursor-pointer transition-colors focus:outline-none focus:ring-1 focus:ring-accent rounded-sm';
   const staticClasses = '';
