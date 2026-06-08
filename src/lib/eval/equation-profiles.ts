@@ -56,6 +56,45 @@ export const equationProfiles: Record<string, EquationProfile> = {
       '§5.3.3.5 Gl. (2) PRELIMINARY: A_C_preliminary = Σ (A_E,i · C_i) über das Flächenverzeichnis (Tab. 9). Aggregator-Pfad mit Carrier `surface_inventory`. Separater Carrier von A138-10\'s `sub_areas_A138_10` — die Konsolidierung läuft als eigene Migration.',
   },
 
+  // ====================================================================
+  // pile-14 · A138-10 · §5.3.3.5 — inventory-derived recompute-from-carrier
+  // The aggregators own all row-level unit reasoning (m² Fläche,
+  // dimensionsloses c_i), wie bei A138-07 Gl. (2) prelim / A138-26 Gl. (10);
+  // daher expectedUnits leer. ΣSealed/ΣUnsealed/C_m sind read-only Anzeigen.
+  // A_C (1a48af79) rechnet aus demselben Carrier, schreibt aber A_C zurück.
+  // ====================================================================
+
+  // A138-10 · Gl. (2a) ΣSealed · §5.3.3.5
+  'd1a38110-0000-0000-0000-000000000001': {
+    expectedUnits: {},
+    displayOnly: true,
+    notes:
+      '§5.3.3.5 ΣSealed/ΣUnsealed/C_m — abgeleitet aus dem Flächenverzeichnis A138-07, read-only (displayOnly), kein Write-back. ΣSealed = Σ(A_E,i·C_i) der befestigten Flächen.',
+  },
+
+  // A138-10 · Gl. (2b) ΣUnsealed · §5.3.3.5
+  'd1a38110-0000-0000-0000-000000000002': {
+    expectedUnits: {},
+    displayOnly: true,
+    notes:
+      '§5.3.3.5 ΣSealed/ΣUnsealed/C_m — abgeleitet aus dem Flächenverzeichnis A138-07, read-only (displayOnly), kein Write-back. ΣUnsealed = Σ(A_E,i·C_i) der unbefestigten Flächen.',
+  },
+
+  // A138-10 · Gl. (2c) C_m mittlerer Abflussbeiwert · §5.3.3.5
+  'd1a38110-0000-0000-0000-000000000003': {
+    expectedUnits: {},
+    displayOnly: true,
+    notes:
+      '§5.3.3.5 ΣSealed/ΣUnsealed/C_m — abgeleitet aus dem Flächenverzeichnis A138-07, read-only (displayOnly), kein Write-back. C_m = A_C / Σ Fläche (mittlerer Abflussbeiwert).',
+  },
+
+  // A138-10 · Gl. (2) A_C · §5.3.3.5 — recompute-from-carrier, schreibt zurück
+  '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': {
+    expectedUnits: {},
+    notes:
+      '§5.3.3.5 Gl. (2): A_C = Σ(A_E,i·C_i) aus Flächenverzeichnis A138-07 (Einzelquelle, recompute-from-carrier). Schreibt A_C zurück.',
+  },
+
   // DWA-A 138-1 · A138-18 · Gl. (21) · §6.4.2 (Rigole, lokaler Override über Tab. 2)
   '069c2b02-8883-48a4-82ce-b21c9ef1fff8': {
     expectedUnits: {
