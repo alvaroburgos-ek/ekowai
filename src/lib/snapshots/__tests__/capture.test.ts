@@ -5,7 +5,7 @@
  * transitionWorksheet.
  */
 import { describe, it, expect } from 'vitest';
-import { buildSnapshotPayload } from '../payload';
+import { buildSnapshotPayload, type SnapshotDeviation } from '../payload';
 
 type FieldRow = Parameters<typeof buildSnapshotPayload>[0]['fields'][number];
 type EquationRow = Parameters<typeof buildSnapshotPayload>[0]['equations'][number];
@@ -179,6 +179,55 @@ describe('buildSnapshotPayload', () => {
     });
     expect(payload.complianceResults['req-PASS']).toBe('pass');
     expect(payload.complianceResults['req-FAIL']).toBe('fail');
+  });
+
+  it('includes active deviations in the payload when passed (approve path)', () => {
+    const deviation: SnapshotDeviation = {
+      id: 'dev-001',
+      requirementId: 'req-abc',
+      requirementCode: 'A138-10/4.3.1',
+      justification: 'Alternativnachweis nach DIN EN 1610 §8.2 akzeptiert',
+      basisCitations: [{ docId: 'gutachten-2026-04', page: '12' }],
+      authorityRef: 'Behörde Musterstadt',
+    };
+
+    const payload = buildSnapshotPayload({
+      fields: [],
+      equations: [],
+      complianceRequirements: [],
+      parameters: [],
+      worksheetCode: 'A138-10',
+      deviations: [deviation],
+    });
+
+    expect(payload.deviations).toBeDefined();
+    expect(payload.deviations).toHaveLength(1);
+    expect(payload.deviations![0]).toEqual(deviation);
+  });
+
+  it('omits deviations key when not passed (submit/manual path)', () => {
+    const payload = buildSnapshotPayload({
+      fields: [],
+      equations: [],
+      complianceRequirements: [],
+      parameters: [],
+      worksheetCode: 'A138-10',
+      // no deviations arg
+    });
+    expect(payload.deviations).toBeUndefined();
+  });
+
+  it('stores an empty deviations array when project has no active deviations', () => {
+    const payload = buildSnapshotPayload({
+      fields: [],
+      equations: [],
+      complianceRequirements: [],
+      parameters: [],
+      worksheetCode: 'A138-10',
+      deviations: [],
+    });
+    expect(payload.deviations).toBeDefined();
+    expect(payload.deviations).toHaveLength(0);
   });
 
   it('returns three-state shape for equation outputs', () => {

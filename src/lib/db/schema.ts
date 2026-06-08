@@ -428,6 +428,11 @@ export const calculationSnapshots = pgTable(
     parameters: jsonb('parameters').notNull(),
     equationOutputs: jsonb('equation_outputs').notNull(),
     complianceResults: jsonb('compliance_results').notNull(),
+    // Frozen active deviations at approval time. Only populated on `approve`
+    // trigger snapshots; null on submit_for_review / manual snapshots.
+    // Shape: Array<{ id, requirementId, requirementCode, justification,
+    //                basisCitations, authorityRef }>
+    deviations: jsonb('deviations'),
   },
   (t) => ({
     instanceIdx: index('calculation_snapshots_instance_taken_idx').on(

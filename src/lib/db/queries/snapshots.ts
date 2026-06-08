@@ -18,6 +18,14 @@ export type SnapshotRow = {
 };
 
 function rowToSnapshot(r: typeof calculationSnapshots.$inferSelect): SnapshotRow {
+  const payload: SnapshotPayload = {
+    parameters: r.parameters as SnapshotPayload['parameters'],
+    equationOutputs: r.equationOutputs as SnapshotPayload['equationOutputs'],
+    complianceResults: r.complianceResults as SnapshotPayload['complianceResults'],
+  };
+  if (r.deviations != null) {
+    payload.deviations = r.deviations as SnapshotPayload['deviations'];
+  }
   return {
     id: r.id,
     worksheetInstanceId: r.worksheetInstanceId,
@@ -25,11 +33,7 @@ function rowToSnapshot(r: typeof calculationSnapshots.$inferSelect): SnapshotRow
     takenAt: r.takenAt,
     takenByUserId: r.takenByUserId,
     trigger: r.trigger as SnapshotTrigger,
-    payload: {
-      parameters: r.parameters as SnapshotPayload['parameters'],
-      equationOutputs: r.equationOutputs as SnapshotPayload['equationOutputs'],
-      complianceResults: r.complianceResults as SnapshotPayload['complianceResults'],
-    },
+    payload,
   };
 }
 

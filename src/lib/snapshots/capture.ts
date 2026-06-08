@@ -40,6 +40,7 @@ import {
 import { and, eq, inArray } from 'drizzle-orm';
 import { loadInheritedFields } from '@/lib/db/queries/worksheet';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
+import { loadActiveDeviations } from '@/lib/db/queries/deviations';
 import {
   buildSnapshotPayload,
   type FieldRow,
@@ -56,6 +57,7 @@ export type {
   SnapshotComplianceVerdict,
   SnapshotPayload,
   SnapshotTrigger,
+  SnapshotDeviation,
 } from './payload';
 export { buildSnapshotPayload } from './payload';
 
@@ -165,6 +167,13 @@ export async function captureSnapshot(args: {
   });
   if (!inputs) return null;
 
+  // On approve, freeze the project's currently-active documented deviations
+  // into the snapshot so a stamped record can reproduce which deviations applied.
+  const deviations =
+    args.trigger === 'approve'
+      ? await loadActiveDeviations(inputs.projectId)
+      : undefined;
+
   const payload = buildSnapshotPayload({
     fields: inputs.fields,
     equations: inputs.equations,
@@ -172,6 +181,7 @@ export async function captureSnapshot(args: {
     parameters: inputs.parameters,
     worksheetCode: inputs.worksheetCode,
     ambiguousSymbols: inputs.ambiguousSymbols,
+    deviations,
   });
 
   const dbi = args.txDb ?? db;
@@ -185,6 +195,7 @@ export async function captureSnapshot(args: {
       parameters: payload.parameters,
       equationOutputs: payload.equationOutputs,
       complianceResults: payload.complianceResults,
+      deviations: payload.deviations ?? null,
     })
     .returning({ id: calculationSnapshots.id });
   return row?.id ?? null;

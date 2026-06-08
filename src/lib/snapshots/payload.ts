@@ -65,10 +65,23 @@ export type SnapshotEquationOutput =
 
 export type SnapshotComplianceVerdict = 'pass' | 'fail' | 'open';
 
+/** One active documented deviation frozen into the approval snapshot. */
+export type SnapshotDeviation = {
+  id: string;
+  requirementId: string;
+  requirementCode: string;
+  justification: string;
+  basisCitations: unknown;
+  authorityRef: string | null;
+};
+
 export type SnapshotPayload = {
   parameters: Record<string, SnapshotParameterValue>;
   equationOutputs: Record<string, SnapshotEquationOutput>;
   complianceResults: Record<string, SnapshotComplianceVerdict>;
+  /** Active documented deviations at approval time. Only present on `approve`
+   *  trigger snapshots. Undefined on submit/manual snapshots. */
+  deviations?: SnapshotDeviation[];
 };
 
 export type SnapshotTrigger = 'submit_for_review' | 'approve' | 'manual';
@@ -163,6 +176,9 @@ export function buildSnapshotPayload(args: {
    *  producer. Mirrors the live hook's ambiguity guard so the snapshot
    *  doesn't silently pick a winner and label it `computed`. */
   ambiguousSymbols?: Map<string, string[]>;
+  /** Active documented deviations to freeze into the payload. Only passed
+   *  on `approve` trigger captures. */
+  deviations?: SnapshotDeviation[];
 }): SnapshotPayload {
   const { fields: fieldList, equations: equationList, complianceRequirements: crList } = args;
   const ambiguousSymbols = args.ambiguousSymbols ?? new Map<string, string[]>();
@@ -363,5 +379,9 @@ export function buildSnapshotPayload(args: {
     }
   }
 
-  return { parameters, equationOutputs, complianceResults };
+  const result: SnapshotPayload = { parameters, equationOutputs, complianceResults };
+  if (args.deviations !== undefined) {
+    result.deviations = args.deviations;
+  }
+  return result;
 }
