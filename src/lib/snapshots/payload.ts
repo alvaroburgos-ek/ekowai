@@ -13,7 +13,6 @@ import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
 import type {
-  SubAreasCarrier,
   KostraCarrier,
   Gl8Scalars,
 } from '@/lib/eval/aggregators';
@@ -29,7 +28,10 @@ import type {
 
 // Mirror the aggregator-id constants from use-equation-engine.ts.
 const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+// A138-10 A_C — flat passthrough A_C = A_C_preliminary (Pile-14), not an aggregator.
+const A138_10_SIGMA_SEALED_ID = 'd1a38110-0000-0000-0000-000000000001';
+const A138_10_SIGMA_UNSEALED_ID = 'd1a38110-0000-0000-0000-000000000002';
+const A138_10_C_M_ID = 'd1a38110-0000-0000-0000-000000000003';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 
 /** Stored JSONB shape — keep in lockstep with `calculation_snapshots` table comments. */
@@ -212,16 +214,6 @@ export function buildSnapshotPayload(args: {
   // Carriers for aggregator-driven equations. The JSON value's shape is
   // checked at the aggregator boundary — if the carrier is malformed, the
   // aggregator reports manual_required and the snapshot captures that.
-  const subAreasField = fieldList.find((f) => f.symbol.startsWith('sub_areas_'));
-  const subAreasCarrier: SubAreasCarrier | null = (() => {
-    if (!subAreasField) return null;
-    const p = paramByFieldId.get(subAreasField.id);
-    if (!p || p.valueJson == null) return { rows: [] };
-    const raw = p.valueJson as { rows?: unknown };
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as SubAreasCarrier;
-  })();
-
   const surfaceInventoryField = fieldList.find((f) => f.symbol === 'surface_inventory');
   const surfaceInventoryCarrier: SurfaceInventoryCarrier | null = (() => {
     if (!surfaceInventoryField) return null;
@@ -316,12 +308,17 @@ export function buildSnapshotPayload(args: {
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (eq.id === A138_07_GL2_PRELIM_ID) {
+    if (
+      eq.id === A138_07_GL2_PRELIM_ID ||
+      eq.id === A138_10_SIGMA_SEALED_ID ||
+      eq.id === A138_10_SIGMA_UNSEALED_ID ||
+      eq.id === A138_10_C_M_ID
+    ) {
+      // A138-10 A_C is a flat passthrough (no aggregator) — handled by the
+      // arithmetic path below.
       aggregator = surfaceInventoryCarrier
         ? { surfaceInventory: surfaceInventoryCarrier }
         : undefined;
-    } else if (eq.id === A138_10_GL2_ID) {
-      aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
         kostraTable: kostraCarrier,

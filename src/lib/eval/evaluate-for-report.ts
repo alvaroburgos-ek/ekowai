@@ -18,7 +18,6 @@ import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { FORMULA_ENGINE_WHITELIST, whitelistKey } from './engine-whitelist';
 import type {
-  SubAreasCarrier,
   KostraCarrier,
   FloodSubAreasCarrier,
   Gl8Scalars,
@@ -27,7 +26,10 @@ import type {
 import type { SurfaceInventoryCarrier } from './surface-types';
 
 const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+// A138-10 A_C — flat passthrough A_C = A_C_preliminary (Pile-14), not an aggregator.
+const A138_10_SIGMA_SEALED_ID = 'd1a38110-0000-0000-0000-000000000001';
+const A138_10_SIGMA_UNSEALED_ID = 'd1a38110-0000-0000-0000-000000000002';
+const A138_10_C_M_ID = 'd1a38110-0000-0000-0000-000000000003';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
@@ -155,11 +157,6 @@ export function evaluateWorksheetEquations(
   const { numByField, fieldBySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
 
   // Aggregator context — built once per worksheet, reused per equation.
-  const subAreasJson = jsonBySymbol.get('sub_areas_A138_10') as { rows?: unknown } | undefined;
-  const subAreasCarrier: SubAreasCarrier | null = subAreasJson && Array.isArray(subAreasJson.rows)
-    ? (subAreasJson as SubAreasCarrier)
-    : null;
-
   const surfaceInventoryJson = jsonBySymbol.get('surface_inventory') as
     | { rows?: unknown }
     | undefined;
@@ -239,12 +236,17 @@ export function evaluateWorksheetEquations(
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (eq.id === A138_07_GL2_PRELIM_ID) {
+    if (
+      eq.id === A138_07_GL2_PRELIM_ID ||
+      eq.id === A138_10_SIGMA_SEALED_ID ||
+      eq.id === A138_10_SIGMA_UNSEALED_ID ||
+      eq.id === A138_10_C_M_ID
+    ) {
+      // A138-10 A_C is a flat passthrough (no aggregator) — handled by the
+      // arithmetic path below.
       aggregator = surfaceInventoryCarrier
         ? { surfaceInventory: surfaceInventoryCarrier }
         : undefined;
-    } else if (eq.id === A138_10_GL2_ID) {
-      aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
         kostraTable: kostraCarrier,

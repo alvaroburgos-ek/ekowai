@@ -1,102 +1,38 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateFormula, type EvalRequest } from './formula';
-import type { SubArea } from './aggregators';
+import { evaluateFormula } from './formula';
 
+// Pile-14: A138-10's A_C is now a FLAT passthrough `A_C = A_C_preliminary`
+// evaluated by the arithmetic engine — the local sub_areas_A138_10 recompute
+// aggregator (`a138_10_gl2`) has been retired. The single-source split lives
+// in the surface_inventory-backed ΣSealed/ΣUnsealed/C_m aggregators (see
+// __tests__/formula-A138-10-inventory.test.ts).
 const a138_10_gl2_id = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 
-function gl2Req(rows: SubArea[]): EvalRequest {
-  return {
-    equationId: a138_10_gl2_id,
-    formula: 'A_C = SUM(A_E_b_a_i * C_i) + SUM(A_E_nb_a_i * C_i)',
-    inputSymbols: ['A_E_b_a_i', 'A_E_nb_a_i', 'C_i'],
-    outputSymbol: 'A_C',
-    inputs: [],
-    aggregator: { subAreas: { rows } },
-  };
-}
-
-describe('evaluateFormula — A138-10 Gl. 2 (iteration 2: per-sub-area)', () => {
-  it('uniform C — reproduces hand calc 510 m²', () => {
-    const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Carpark A', kind: 'paved', area_m2: 300, c: 0.85 },
-        { id: '2', label: 'Carpark B', kind: 'paved', area_m2: 200, c: 0.85 },
-        { id: '3', label: 'Verge', kind: 'unpaved', area_m2: 100, c: 0.85 },
-      ]),
-    );
-    expect(r.kind).toBe('computed');
-    if (r.kind !== 'computed') return;
-    expect(r.value).toBeCloseTo(510, 6);
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(425, 6);
-    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(85, 6);
-  });
-
-  it('mixed C — reproduces hand calc 690 m² (the acceptance gate)', () => {
-    const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Steildach', kind: 'paved', area_m2: 400, c: 0.9 },
-        { id: '2', label: 'Pflaster Hof', kind: 'paved', area_m2: 300, c: 0.8 },
-        { id: '3', label: 'Kies 5-10 %', kind: 'paved', area_m2: 100, c: 0.5 },
-        { id: '4', label: 'Rasen', kind: 'unpaved', area_m2: 200, c: 0.2 },
-      ]),
-    );
-    expect(r.kind).toBe('computed');
-    if (r.kind !== 'computed') return;
-    expect(r.value).toBeCloseTo(690, 6);
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(650, 6);
-    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(40, 6);
-    // The four per-row contributions must each appear in the substituted map.
-    const contribKeys = Object.keys(r.substituted).filter((k) => k.includes('·'));
-    expect(contribKeys).toHaveLength(4);
-  });
-
-  it('mixed C — differs from naive total · 0.733 ≈ 733', () => {
-    const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Steildach', kind: 'paved', area_m2: 400, c: 0.9 },
-        { id: '2', label: 'Pflaster', kind: 'paved', area_m2: 300, c: 0.8 },
-        { id: '3', label: 'Kies', kind: 'paved', area_m2: 100, c: 0.5 },
-        { id: '4', label: 'Rasen', kind: 'unpaved', area_m2: 200, c: 0.2 },
-      ]),
-    );
-    expect(r.kind).toBe('computed');
-    if (r.kind !== 'computed') return;
-    const totalsTimesArithmeticMean = 1000 * ((0.9 + 0.8 + 0.5) / 3);
-    expect(Math.abs(r.value - totalsTimesArithmeticMean)).toBeGreaterThan(40);
-    expect(r.value).toBeLessThan(totalsTimesArithmeticMean); // 690 < 733
-  });
-
-  it('manual_required when a row is missing its coefficient — NEVER a partial sum', () => {
-    const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Steildach', kind: 'paved', area_m2: 400, c: 0.9 },
-        { id: '2', label: 'Pflaster', kind: 'paved', area_m2: 300, c: null },
-        { id: '3', label: 'Rasen', kind: 'unpaved', area_m2: 200, c: 0.2 },
-      ]),
-    );
-    expect(r.kind).toBe('manual_required');
-    if (r.kind !== 'manual_required') return;
-    expect(r.reason).toMatch(/Pflaster/);
-    // Critical: must NOT carry a `value` field
-    expect((r as { value?: number }).value).toBeUndefined();
-  });
-
-  it('manual_required when carrier is empty', () => {
-    const r = evaluateFormula(gl2Req([]));
-    expect(r.kind).toBe('manual_required');
-    if (r.kind !== 'manual_required') return;
-    expect(r.reason).toMatch(/mindestens eine Zeile/);
-  });
-
-  it('manual_required when no carrier is supplied at all', () => {
+describe('evaluateFormula — A138-10 A_C flat passthrough (Pile-14)', () => {
+  it('A_C = A_C_preliminary — passes the upstream value straight through', () => {
     const r = evaluateFormula({
       equationId: a138_10_gl2_id,
-      formula: 'A_C = SUM(A_E_b_a_i * C_i) + SUM(A_E_nb_a_i * C_i)',
-      inputSymbols: ['A_E_b_a_i', 'A_E_nb_a_i', 'C_i'],
+      formula: 'A_C = A_C_preliminary',
+      inputSymbols: ['A_C_preliminary'],
+      outputSymbol: 'A_C',
+      inputs: [{ symbol: 'A_C_preliminary', value: 4826.43, unit: 'm²' }],
+    });
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(4826.43, 6);
+  });
+
+  it('manual_required when A_C_preliminary is missing — NOT an aggregator anymore', () => {
+    const r = evaluateFormula({
+      equationId: a138_10_gl2_id,
+      formula: 'A_C = A_C_preliminary',
+      inputSymbols: ['A_C_preliminary'],
       outputSymbol: 'A_C',
       inputs: [],
     });
     expect(r.kind).toBe('manual_required');
+    if (r.kind !== 'manual_required') return;
+    expect(r.missing).toEqual(['A_C_preliminary']);
   });
 });
 

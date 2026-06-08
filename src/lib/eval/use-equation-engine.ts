@@ -22,7 +22,6 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateFormula, type EvalState } from './formula';
 import { rewriteRules } from './rewrites';
 import type {
-  SubAreasCarrier,
   KostraCarrier,
   Gl8Scalars,
   FloodSubAreasCarrier,
@@ -35,7 +34,14 @@ import { normalizeSymbols } from './normalize-formula';
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
 const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
+// A138-10's A_C — now a FLAT passthrough `A_C = A_C_preliminary` (Pile-14).
+// No longer an aggregator; consumes the scalar A_C_preliminary.
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+// A138-10 surface_inventory-derived aggregators (Pile-14). Read the same
+// inventory carrier that A138-07's preliminary Gl. 2 reads.
+const A138_10_SIGMA_SEALED_ID = 'd1a38110-0000-0000-0000-000000000001';
+const A138_10_SIGMA_UNSEALED_ID = 'd1a38110-0000-0000-0000-000000000002';
+const A138_10_C_M_ID = 'd1a38110-0000-0000-0000-000000000003';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
@@ -72,12 +78,20 @@ type Args = {
  * so we widen the set for those ids.
  */
 function consumedSymbolsFor(eq: EquationMeta): string[] {
-  if (eq.id === A138_07_GL2_PRELIM_ID) {
-    // Preliminary Gl. 2 reads only the inventory carrier — no scalar inputs.
+  if (
+    eq.id === A138_07_GL2_PRELIM_ID ||
+    eq.id === A138_10_SIGMA_SEALED_ID ||
+    eq.id === A138_10_SIGMA_UNSEALED_ID ||
+    eq.id === A138_10_C_M_ID
+  ) {
+    // Inventory-backed aggregators read only the surface_inventory carrier —
+    // no scalar inputs.
     return ['surface_inventory'];
   }
   if (eq.id === A138_10_GL2_ID) {
-    return [...(eq.inputSymbols ?? []), 'sub_areas_A138_10'];
+    // Flat passthrough A_C = A_C_preliminary (Pile-14). The local
+    // sub_areas_A138_10 recompute is retired.
+    return ['A_C_preliminary'];
   }
   if (eq.id === A138_13_GL8_ID) {
     // Gl. 8 reads scalars from inherited fields + the KOSTRA carrier.
@@ -120,21 +134,6 @@ export function useEquationEngine({
     }
     return ids;
   }, [equations, worksheetCode, engineWhitelist]);
-
-  // Sub-areas carrier: whichever field on this worksheet has symbol starting
-  // with `sub_areas_` is treated as the json carrier for the aggregator path.
-  const subAreasField = useMemo(
-    () => fields.find((f) => f.symbol.startsWith('sub_areas_')),
-    [fields],
-  );
-  const subAreasCarrier = useMemo<SubAreasCarrier | null>(() => {
-    if (!subAreasField) return null;
-    const v = values[subAreasField.id];
-    if (v?.type !== 'json') return null;
-    const raw = v.value as { rows?: unknown } | null | undefined;
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as SubAreasCarrier;
-  }, [values, subAreasField]);
 
   // Surface-inventory carrier (A138-07 prelim Gl. 2): the engineer fills
   // this on A138-07 and the consumer-worksheets list ([A138-10, A138-15,
@@ -311,12 +310,17 @@ export function useEquationEngine({
 
       // Build the aggregator context specific to this equation id.
       let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-      if (eq.id === A138_07_GL2_PRELIM_ID) {
+      if (
+        eq.id === A138_07_GL2_PRELIM_ID ||
+        eq.id === A138_10_SIGMA_SEALED_ID ||
+        eq.id === A138_10_SIGMA_UNSEALED_ID ||
+        eq.id === A138_10_C_M_ID
+      ) {
+        // A138-10's A_C is NOT here — it's a flat arithmetic passthrough
+        // (A_C = A_C_preliminary) handled by the no-aggregator path below.
         aggregator = surfaceInventoryCarrier
           ? { surfaceInventory: surfaceInventoryCarrier }
           : undefined;
-      } else if (eq.id === A138_10_GL2_ID) {
-        aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
       } else if (eq.id === A138_13_GL8_ID) {
         aggregator = {
           kostraTable: kostraCarrier,
@@ -349,7 +353,6 @@ export function useEquationEngine({
     equations,
     fieldBySymbol,
     engineEquationIds,
-    subAreasCarrier,
     surfaceInventoryCarrier,
     kostraCarrier,
     kostraField,
