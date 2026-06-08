@@ -123,6 +123,8 @@ type Props = {
   /** True when the current viewer is on the platform-engineer allowlist.
    * Gates the "Bestätigen" buttons on every field/equation. */
   isPlatformEngineer?: boolean;
+  /** Active deviations keyed by requirement code — passed through to ComplianceBlock. */
+  activeDeviationsByReqCode?: Record<string, { id: string; justification: string }>;
 };
 
 export function WorksheetForm({
@@ -148,6 +150,7 @@ export function WorksheetForm({
   priorSnapshotCount,
   diffHref,
   isPlatformEngineer = false,
+  activeDeviationsByReqCode = {},
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const mergeServerValues = useWorksheetStore((s) => s.mergeServerValues);
@@ -589,6 +592,9 @@ export function WorksheetForm({
         fields={fields.map((f) => ({ id: f.id, symbol: f.symbol }))}
         locale={locale}
         projectId={projectId}
+        instanceId={instance.id}
+        activeDeviationsByReqCode={activeDeviationsByReqCode}
+        docs={docs}
       />
       <ApprovalBar
         instanceId={instance.id}
