@@ -356,4 +356,55 @@ describe('assembleStandardReport', () => {
     expect(kfField.valueSource).toBe('site_profile');
     expect(kfField.value).toBe('0.00001');
   });
+
+  it('deviation: requirement with active deviation carries resolved deviation fields, deviation: null for others', () => {
+    const input = baseInput();
+    input.deviations = [
+      {
+        requirementCode: 'REQ-1',
+        justification: 'Standortspezifische Ausnahmeregelung gemäß Wasserbehörde',
+        basisCitations: [
+          { id: 'c-dev-1', docId: 'doc-buek50', page: 7, note: null },
+          { id: 'c-dev-2', docId: 'label:Behördenbescheid 2025-09', page: null, note: 'Az. 12/345' },
+        ],
+        authorityRef: 'Wasserbehörde Erlangen-Höchstadt',
+      },
+    ];
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    const req = ws12.compliance.find((c) => c.code === 'REQ-1')!;
+
+    // Deviation present and fields populated.
+    expect(req.deviation).not.toBeNull();
+    expect(req.deviation!.justification).toBe('Standortspezifische Ausnahmeregelung gemäß Wasserbehörde');
+    expect(req.deviation!.authorityRef).toBe('Wasserbehörde Erlangen-Höchstadt');
+
+    // First citation resolved via docById (uses the document's citationLabel).
+    expect(req.deviation!.basisCitationLabels).toHaveLength(2);
+    expect(req.deviation!.basisCitationLabels[0].label).toBe('[BÜK50:42]');
+    expect(req.deviation!.basisCitationLabels[0].page).toBe(7);
+    // Second citation is a label: reference.
+    expect(req.deviation!.basisCitationLabels[1].label).toBe('Behördenbescheid 2025-09');
+    expect(req.deviation!.basisCitationLabels[1].note).toBe('Az. 12/345');
+
+    // Underlying result is still evaluated (pass) — the deviation is an overlay.
+    expect(req.result.kind).toBe('pass');
+  });
+
+  it('deviation: requirements without a matching deviation get deviation: null', () => {
+    const input = baseInput();
+    input.deviations = [
+      {
+        requirementCode: 'REQ-DOES-NOT-EXIST',
+        justification: 'irrelevant',
+        basisCitations: [],
+        authorityRef: null,
+      },
+    ];
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    for (const c of ws12.compliance) {
+      expect(c.deviation).toBeNull();
+    }
+  });
 });

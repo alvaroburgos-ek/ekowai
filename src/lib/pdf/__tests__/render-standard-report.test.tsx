@@ -252,6 +252,7 @@ describe('StandardReportDocument', () => {
             severity: 'blocking',
             clauseReference: '§5.3.3',
             result: { kind: 'pass' },
+            deviation: null,
           },
           {
             id: 'req-12-b',
@@ -261,6 +262,7 @@ describe('StandardReportDocument', () => {
             severity: 'warning',
             clauseReference: '§5.3.3.6',
             result: { kind: 'pending', missingSymbols: ['A_S_min'] },
+            deviation: null,
           },
         ],
       },
@@ -311,6 +313,7 @@ describe('StandardReportDocument', () => {
             severity: 'blocking',
             clauseReference: '§6.2.2',
             result: { kind: 'manual' },
+            deviation: null,
           },
         ],
       },
@@ -407,4 +410,46 @@ describe('StandardReportDocument', () => {
     // The audit reason is a load-bearing audit guarantee
     expect(text).toMatch(/Bohrprotokoll/);
   });
+
+  it('documented deviation renders a DISTINCT third frame with label, justification, citation and authority', async () => {
+    // Clone fixture and inject one deviated requirement.
+    const deviatedFixture: StandardReportData = {
+      ...fixture,
+      worksheets: fixture.worksheets.map((ws, wi) => {
+        if (wi !== 0) return ws;
+        return {
+          ...ws,
+          compliance: ws.compliance.map((c, ci) => {
+            if (ci !== 0) return c;
+            return {
+              ...c,
+              deviation: {
+                justification: 'Ausnahmegenehmigung wegen Standortbedingungen',
+                basisCitationLabels: [
+                  { label: '[BÜK50:42]', page: 7, note: null },
+                  { label: 'Behördenbescheid 2025-09', page: null, note: 'Az. 12/345' },
+                ],
+                authorityRef: 'Wasserbehörde Erlangen-Höchstadt',
+              },
+            };
+          }),
+        };
+      }),
+    };
+
+    const buffer = await renderToBuffer(<StandardReportDocument data={deviatedFixture} />);
+    const text = extractAllText(buffer);
+
+    // The third-state label MUST appear in the PDF.
+    expect(text).toMatch(/Erf.llt mit dokumentierter Abweichung/i);
+
+    // Justification text must be present.
+    expect(text).toMatch(/Ausnahmegenehmigung/);
+
+    // Citation label must appear.
+    expect(text).toMatch(/BÜK50/);
+
+    // Authority reference must appear.
+    expect(text).toMatch(/Wasserbeh/);
+  }, 15000);
 });

@@ -113,6 +113,44 @@ function sourceMarkerFor(field: ReportField): string | null {
 }
 
 function ComplianceRow({ req }: { req: ReportCompliance }) {
+  // A requirement with an active documented deviation renders as a distinct
+  // amber third state — regardless of the underlying pass/fail evaluation.
+  // This is the "Erfüllt mit dokumentierter Abweichung" affordance.
+  if (req.deviation) {
+    const dev = req.deviation;
+    const citationLabels = dev.basisCitationLabels
+      .map((c) => {
+        const parts: string[] = [c.label];
+        if (c.page != null) parts.push(`S.${c.page}`);
+        if (c.note) parts.push(c.note);
+        return parts.join(' ');
+      })
+      .join(', ');
+    return (
+      <View style={styles.complianceDeviationCard}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={styles.complianceCode}>{req.code}</Text>
+          <Text style={styles.complianceDeviationLabel}>
+            Erfüllt mit dokumentierter Abweichung
+          </Text>
+        </View>
+        <Text style={styles.complianceTitle}>
+          {req.titleDe}
+          {req.clauseReference ? (
+            <Text style={{ color: colors.subtext }}> · {req.clauseReference}</Text>
+          ) : null}
+        </Text>
+        <Text style={styles.complianceDeviationText}>{dev.justification}</Text>
+        {citationLabels ? (
+          <Text style={styles.complianceDeviationMeta}>Belege: {citationLabels}</Text>
+        ) : null}
+        {dev.authorityRef ? (
+          <Text style={styles.complianceDeviationMeta}>Behörde: {dev.authorityRef}</Text>
+        ) : null}
+      </View>
+    );
+  }
+
   const { label, style } = badgeFor(req);
   return (
     <View style={styles.complianceRow} wrap={false}>

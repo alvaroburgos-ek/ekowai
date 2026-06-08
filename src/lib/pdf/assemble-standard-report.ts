@@ -73,6 +73,20 @@ export type ReportEquation = {
   evalState: EvalState | null;
 };
 
+/** A resolved citation label derived from a deviation's basisCitations entry. */
+export type ReportDeviationCitation = {
+  label: string;
+  page: number | null;
+  note: string | null;
+};
+
+/** Active documented deviation attached to a compliance requirement. */
+export type ReportDeviation = {
+  justification: string;
+  basisCitationLabels: ReportDeviationCitation[];
+  authorityRef: string | null;
+};
+
 export type ReportCompliance = {
   id: string;
   code: string;
@@ -81,6 +95,8 @@ export type ReportCompliance = {
   severity: string;
   clauseReference: string | null;
   result: ComplianceEval;
+  /** Present when there is an active documented deviation for this requirement. */
+  deviation: ReportDeviation | null;
 };
 
 export type ReportWorksheet = {
@@ -289,6 +305,14 @@ export type AssemblerAuditRow = {
   actorName: string | null;
 };
 
+export type AssemblerDeviation = {
+  requirementCode: string;
+  justification: string;
+  /** JSONB array of stored citation entries ({ id?, docId, page?, note? }). */
+  basisCitations: unknown;
+  authorityRef: string | null;
+};
+
 export type AssemblerInput = {
   project: AssemblerProject;
   org: AssemblerOrg | null;
@@ -303,6 +327,12 @@ export type AssemblerInput = {
   documents: AssemblerDocument[];
   approvals: AssemblerApprovalRow[];
   audits: AssemblerAuditRow[];
+  /**
+   * Active documented deviations for the project, keyed by requirement code.
+   * Loaded by the production path via `loadActiveDeviations`; omitted (defaults
+   * to empty) in test fixtures that don't need deviation coverage.
+   */
+  deviations?: AssemblerDeviation[];
   /** Clock for `generatedAt`. Defaults to Date.now(). */
   now?: Date;
 };
@@ -345,8 +375,15 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
     documents,
     approvals,
     audits,
+    deviations = [],
     now = new Date(),
   } = input;
+
+  // Build a keyed lookup: requirementCode → AssemblerDeviation for O(1) per-req access.
+  const deviationByCode = new Map<string, AssemblerDeviation>();
+  for (const d of deviations) {
+    deviationByCode.set(d.requirementCode, d);
+  }
 
   const instanceByTemplateId = new Map(instances.map((i) => [i.worksheetTemplateId, i]));
   const paramByFieldId = new Map(parameters.map((p) => [p.fieldId, p]));
@@ -566,6 +603,42 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           if (!r || r.value == null) return undefined;
           return r.value as number | string | boolean;
         });
+
+        // Resolve the active deviation for this requirement (if any), resolving
+        // basisCitations to human-readable labels using the same docById map that
+        // the field citation resolution uses above.
+        const rawDev = deviationByCode.get(c.code) ?? null;
+        let deviation: ReportDeviation | null = null;
+        if (rawDev) {
+          const basisCitationLabels: ReportDeviationCitation[] = [];
+          const rawCitations = Array.isArray(rawDev.basisCitations) ? rawDev.basisCitations : [];
+          for (const entry of rawCitations) {
+            if (!entry || typeof entry !== 'object') continue;
+            const stored = entry as StoredCitation;
+            const docId = stored.docId;
+            if (!docId) continue;
+            if (docId.startsWith('label:')) {
+              basisCitationLabels.push({
+                label: docId.slice('label:'.length),
+                page: stored.page ?? null,
+                note: stored.note ?? null,
+              });
+            } else {
+              const doc = docById.get(docId);
+              basisCitationLabels.push({
+                label: doc ? doc.citationLabel : '?',
+                page: stored.page ?? null,
+                note: stored.note ?? null,
+              });
+            }
+          }
+          deviation = {
+            justification: rawDev.justification,
+            basisCitationLabels,
+            authorityRef: rawDev.authorityRef,
+          };
+        }
+
         return {
           id: c.id,
           code: c.code,
@@ -574,6 +647,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           severity: c.severity,
           clauseReference: c.clauseReference,
           result,
+          deviation,
         };
       });
 

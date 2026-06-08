@@ -18,6 +18,7 @@ import {
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
 import { assembleStandardReport, type StandardReportData } from './assemble-standard-report';
+import { loadActiveDeviations } from '@/lib/db/queries/deviations';
 
 export type {
   StandardReportData,
@@ -159,7 +160,10 @@ export async function loadStandardReportData(
     .from(projectDocuments)
     .where(eq(projectDocuments.projectId, projectId));
 
-  // 8. Audit excerpt (last 25 events scoped to this project + standard).
+  // 8. Active deviations for the project (for PDF third-state rendering).
+  const activeDeviations = await loadActiveDeviations(projectId);
+
+  // 9. Audit excerpt (last 25 events scoped to this project + standard).
   const approvalRows = await db
     .select({
       occurredAt: approvalEvents.occurredAt,
@@ -239,6 +243,12 @@ export async function loadStandardReportData(
     documents: allDocs,
     approvals: approvalRows,
     audits: auditRows,
+    deviations: activeDeviations.map((d) => ({
+      requirementCode: d.requirementCode,
+      justification: d.justification,
+      basisCitations: d.basisCitations,
+      authorityRef: d.authorityRef,
+    })),
     now: new Date(),
   });
 }

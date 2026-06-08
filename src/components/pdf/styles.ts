@@ -33,6 +33,10 @@ export const colors = {
   error: '#7c2d2d',
   errorBg: '#f5e6e6',
   errorBorder: '#d4a5a5',
+  // Documented-deviation amber (distinct from green pass / red fail).
+  deviation: '#7a4f00',
+  deviationBg: '#fdf3e0',
+  deviationBorder: '#e8c070',
 };
 
 export const styles = StyleSheet.create({
@@ -213,6 +217,20 @@ export const styles = StyleSheet.create({
     borderColor: colors.errorBorder,
     backgroundColor: colors.errorBg,
   },
+  // Documented deviation — AMBER frame. Distinct from green pass and red fail.
+  // An authority reviewer can spot these at a glance and verify the deviation
+  // is properly justified and backed by a documented basis.
+  engineCardDeviation: {
+    borderColor: colors.deviationBorder,
+    backgroundColor: colors.deviationBg,
+  },
+  engineVerdictDeviation: {
+    fontSize: 8,
+    color: colors.deviation,
+    fontFamily: 'Helvetica-Bold',
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1.2,
+  },
   engineHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -287,6 +305,35 @@ export const styles = StyleSheet.create({
   complianceBadgePass: { color: colors.success },
   complianceBadgeFail: { color: colors.error },
   complianceBadgeOpen: { color: colors.warning },
+  complianceBadgeDeviation: { color: colors.deviation },
+  complianceDeviationCard: {
+    marginTop: 3,
+    marginBottom: 3,
+    padding: 6,
+    borderWidth: 0.75,
+    borderRadius: 2,
+    borderColor: colors.deviationBorder,
+    backgroundColor: colors.deviationBg,
+  },
+  complianceDeviationLabel: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    color: colors.deviation,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1.2,
+    marginBottom: 2,
+  },
+  complianceDeviationText: {
+    fontSize: 8.5,
+    color: colors.ink2,
+    marginTop: 1,
+  },
+  complianceDeviationMeta: {
+    fontSize: 8,
+    color: colors.subtext,
+    fontFamily: 'Courier',
+    marginTop: 2,
+  },
   // ============ Site profile ============
   siteRow: {
     flexDirection: 'row',
