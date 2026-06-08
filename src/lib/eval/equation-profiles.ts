@@ -95,6 +95,24 @@ export const equationProfiles: Record<string, EquationProfile> = {
       '§5.3.3.5 Gl. (2): A_C = Σ(A_E,i·C_i) aus Flächenverzeichnis A138-07 (Einzelquelle, recompute-from-carrier). Schreibt A_C zurück.',
   },
 
+  // A138-10 · Gl. (3) Q_zu · §5.3.3.5 — three-state, engine-evaluated
+  'b39dda00-9a90-46cc-a045-543047ec6498': {
+    expectedUnits: {
+      r_D_n: 'l/(s·ha)',
+      A_C: 'm²',
+      A_VA: 'm²',
+    },
+    symbolAliases: {
+      // The formula symbol `r_D(n)` normalises to `r_D_n`; on A138-10 the
+      // stored field carries the same symbol `r_D_n`, so the alias is the
+      // identity (mirrors A138-17 Gl. 16's `r_D_n` → `r_D_n`). A_C and A_VA
+      // map straight through.
+      r_D_n: 'r_D_n',
+    },
+    notes:
+      '§5.3.3.5 Gl. (3) Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴; war fälschlich vom Legacy-Summierer als A_C ausgegeben; jetzt Engine-evaluiert, three-state.',
+  },
+
   // DWA-A 138-1 · A138-18 · Gl. (21) · §6.4.2 (Rigole, lokaler Override über Tab. 2)
   '069c2b02-8883-48a4-82ce-b21c9ef1fff8': {
     expectedUnits: {

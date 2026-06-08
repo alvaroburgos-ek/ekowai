@@ -23,6 +23,10 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   'A138-10:2a', // ΣSealed
   'A138-10:2b', // ΣUnsealed
   'A138-10:2c', // C_m
+  // Q_zu Gl. 3, three-state — was mis-summed by the legacy evaluator
+  // (returned A_C as an l/s flow). Now engine-evaluated; UNSET until both
+  // r_D(n) and A_VA exist.
+  'A138-10:3',
   'A138-13:8',
   'A138-18:21',
 
