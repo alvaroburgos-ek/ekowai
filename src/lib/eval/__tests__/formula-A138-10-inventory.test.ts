@@ -10,13 +10,21 @@ import { summarizeSurfaceInventory, type SurfaceInventoryCarrier } from '../surf
  * exposes three read-only aggregators that read the SAME carrier the A138-07
  * preliminary Gl. 2 reads (consumer-linked onto A138-10):
  *
+ *   A_C       = summarizeSurfaceInventory(rows).ac   (eq 1a48af79)
  *   ΣSealed   = summarizeSurfaceInventory(rows).sealed
  *   ΣUnsealed = summarizeSurfaceInventory(rows).unsealed
  *   C_m       = ac / area   (mean runoff coefficient, §5.3.3.5)
  *
- * All three run the same three-state completeness gate as a138_07_gl2_prelim.
+ * All four run the same three-state completeness gate as a138_07_gl2_prelim.
+ *
+ * A_C recomputes from the carrier (NOT a flat passthrough of the
+ * A_C_preliminary scalar): the scalar is never written back to
+ * project_parameters, so a passthrough would resolve to null on A138-10.
+ * Recomputing from the inherited carrier guarantees A_C == A_C_preliminary
+ * by construction (identical input + identical helper).
  */
 
+const A_C_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const SIGMA_SEALED_ID = 'd1a38110-0000-0000-0000-000000000001';
 const SIGMA_UNSEALED_ID = 'd1a38110-0000-0000-0000-000000000002';
 const C_M_ID = 'd1a38110-0000-0000-0000-000000000003';
@@ -53,6 +61,47 @@ const EXPECTED_SEALED = 540;
 const EXPECTED_UNSEALED = 100;
 const EXPECTED_AC = 640;
 const EXPECTED_C_M = 0.64;
+
+describe('A138-10 A_C aggregator (eq 1a48af79, recompute from carrier)', () => {
+  it('manual_required when no carrier is plumbed in', () => {
+    expect(call(A_C_ID, null).kind).toBe('manual_required');
+  });
+  it('manual_required when the carrier has no rows', () => {
+    const r = call(A_C_ID, { rows: [] });
+    expect(r.kind).toBe('manual_required');
+    if (r.kind === 'manual_required') expect(r.reason).toMatch(/mindestens eine Zeile/i);
+  });
+  it('manual_required naming the incomplete row (missing area_m2)', () => {
+    const r = call(A_C_ID, {
+      rows: [{ id: 'r1', label: 'Hauptdach', surface_type: 'dach', area_m2: null, c_i: 0.9, c_s: 1.0 }],
+    });
+    expect(r.kind).toBe('manual_required');
+    if (r.kind === 'manual_required') expect(r.reason).toMatch(/Hauptdach/);
+  });
+  it('manual_required naming the incomplete row (missing c_i)', () => {
+    const r = call(A_C_ID, {
+      rows: [{ id: 'r1', label: 'Hauptdach', surface_type: 'dach', area_m2: 400, c_i: null, c_s: 1.0 }],
+    });
+    expect(r.kind).toBe('manual_required');
+    if (r.kind === 'manual_required') expect(r.reason).toMatch(/Hauptdach/);
+  });
+  it('computes A_C = 640 for the mixed inventory (= summarize().ac)', () => {
+    const r = call(A_C_ID, MIXED);
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') {
+      expect(r.value).toBeCloseTo(EXPECTED_AC, 6);
+      expect(r.value).toBeCloseTo(summarizeSurfaceInventory(MIXED.rows).ac, 6);
+    }
+  });
+  it('exposes the paved/unpaved subtotals in the substituted map', () => {
+    const r = call(A_C_ID, MIXED);
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') {
+      expect(r.substituted?.['Σ befestigt']).toBeCloseTo(EXPECTED_SEALED, 6);
+      expect(r.substituted?.['Σ unbefestigt']).toBeCloseTo(EXPECTED_UNSEALED, 6);
+    }
+  });
+});
 
 describe('A138-10 ΣSealed aggregator', () => {
   it('manual_required when no carrier is plumbed in', () => {
@@ -156,6 +205,33 @@ describe('Pile-14 no-divergence invariant', () => {
     expect(prelim.kind).toBe('computed');
     if (sealed.kind === 'computed' && unsealed.kind === 'computed' && prelim.kind === 'computed') {
       expect(sealed.value + unsealed.value).toBeCloseTo(prelim.value, 6);
+      expect(sealed.value + unsealed.value).toBeCloseTo(EXPECTED_AC, 6);
+    }
+  });
+
+  it('A_C (1a48af79) === A_C_preliminary (b3f8c2e0) === ΣSealed + ΣUnsealed === 640', () => {
+    // Triple equality by construction: same carrier, same helper. This is the
+    // whole point of recomputing A_C on A138-10 from the inherited carrier
+    // instead of passing through the (never-materialised) A_C_preliminary
+    // scalar.
+    const ac = call(A_C_ID, MIXED);
+    const prelim = call(A138_07_GL2_PRELIM_ID, MIXED);
+    const sealed = call(SIGMA_SEALED_ID, MIXED);
+    const unsealed = call(SIGMA_UNSEALED_ID, MIXED);
+    expect(ac.kind).toBe('computed');
+    expect(prelim.kind).toBe('computed');
+    expect(sealed.kind).toBe('computed');
+    expect(unsealed.kind).toBe('computed');
+    if (
+      ac.kind === 'computed' &&
+      prelim.kind === 'computed' &&
+      sealed.kind === 'computed' &&
+      unsealed.kind === 'computed'
+    ) {
+      expect(ac.value).toBeCloseTo(prelim.value, 6);
+      expect(ac.value).toBeCloseTo(sealed.value + unsealed.value, 6);
+      expect(ac.value).toBeCloseTo(EXPECTED_AC, 6);
+      expect(prelim.value).toBeCloseTo(EXPECTED_AC, 6);
       expect(sealed.value + unsealed.value).toBeCloseTo(EXPECTED_AC, 6);
     }
   });

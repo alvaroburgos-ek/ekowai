@@ -34,9 +34,11 @@ import { normalizeSymbols } from './normalize-formula';
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
 const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-// A138-10's A_C — now a FLAT passthrough `A_C = A_C_preliminary` (Pile-14).
-// No longer an aggregator; consumes the scalar A_C_preliminary.
-const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+// A138-10's A_C — recomputed from the inherited surface_inventory carrier
+// (Pile-14, single-source). An aggregator again: reads the SAME carrier
+// A138-07's A_C_preliminary reads, NOT the (never-materialised)
+// A_C_preliminary scalar.
+const A138_10_AC_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 // A138-10 surface_inventory-derived aggregators (Pile-14). Read the same
 // inventory carrier that A138-07's preliminary Gl. 2 reads.
 const A138_10_SIGMA_SEALED_ID = 'd1a38110-0000-0000-0000-000000000001';
@@ -80,18 +82,15 @@ type Args = {
 function consumedSymbolsFor(eq: EquationMeta): string[] {
   if (
     eq.id === A138_07_GL2_PRELIM_ID ||
+    eq.id === A138_10_AC_ID ||
     eq.id === A138_10_SIGMA_SEALED_ID ||
     eq.id === A138_10_SIGMA_UNSEALED_ID ||
     eq.id === A138_10_C_M_ID
   ) {
     // Inventory-backed aggregators read only the surface_inventory carrier —
-    // no scalar inputs.
+    // no scalar inputs. A138-10's A_C (1a48af79) recomputes from the same
+    // carrier (Pile-14), not the A_C_preliminary scalar.
     return ['surface_inventory'];
-  }
-  if (eq.id === A138_10_GL2_ID) {
-    // Flat passthrough A_C = A_C_preliminary (Pile-14). The local
-    // sub_areas_A138_10 recompute is retired.
-    return ['A_C_preliminary'];
   }
   if (eq.id === A138_13_GL8_ID) {
     // Gl. 8 reads scalars from inherited fields + the KOSTRA carrier.
@@ -312,12 +311,13 @@ export function useEquationEngine({
       let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
       if (
         eq.id === A138_07_GL2_PRELIM_ID ||
+        eq.id === A138_10_AC_ID ||
         eq.id === A138_10_SIGMA_SEALED_ID ||
         eq.id === A138_10_SIGMA_UNSEALED_ID ||
         eq.id === A138_10_C_M_ID
       ) {
-        // A138-10's A_C is NOT here — it's a flat arithmetic passthrough
-        // (A_C = A_C_preliminary) handled by the no-aggregator path below.
+        // A138-10's A_C (1a48af79) recomputes from the SAME inherited
+        // surface_inventory carrier as A138-07's A_C_preliminary (Pile-14).
         aggregator = surfaceInventoryCarrier
           ? { surfaceInventory: surfaceInventoryCarrier }
           : undefined;

@@ -98,9 +98,10 @@ export type AggregatorContext = {
   gl10Scalars?: Gl10Scalars | null;
   /** Carrier data for the surface inventory (§5.3.3.5). The SINGLE SOURCE for
    *  every reduced-area sum: feeds A138-07's A_C_preliminary aggregator AND
-   *  A138-10's ΣSealed/ΣUnsealed/C_m aggregators (Pile-14, consumer-linked
-   *  onto A138-10). A138-10's A_C is a flat passthrough of A_C_preliminary —
-   *  the local sub_areas_A138_10 recompute has been retired. */
+   *  A138-10's A_C + ΣSealed/ΣUnsealed/C_m aggregators (Pile-14, consumer-linked
+   *  onto A138-10). A138-10's A_C recomputes from this same carrier (same
+   *  helper) — NOT a passthrough of the A_C_preliminary scalar — so the two
+   *  agree by construction. The local sub_areas_A138_10 recompute is retired. */
   surfaceInventory?: SurfaceInventoryCarrier | null;
 };
 
@@ -633,31 +634,63 @@ function surfaceInventoryGate(
   return null;
 }
 
-const a138_07_gl2_prelim: Aggregator = {
-  run: (req) => {
-    const carrier = req.aggregator?.surfaceInventory;
-    const gated = surfaceInventoryGate(carrier);
-    if (gated) return gated;
-    // After the gate, carrier + rows are present and complete.
-    const rows = (carrier as SurfaceInventoryCarrier).rows;
+/**
+ * Shared body for the A_C = Σ(A_E,i · C_i) sum over the surface_inventory
+ * carrier. Used by BOTH:
+ *   - A138-07 `A_C_preliminary` (eq b3f8c2e0)
+ *   - A138-10 `A_C`             (eq 1a48af79, Pile-14 single-source)
+ *
+ * A138-10's A_C recomputes from the SAME inherited carrier + helper rather
+ * than passing through the A_C_preliminary scalar (the engine never writes
+ * computed outputs back to project_parameters, so that scalar is null on
+ * A138-10). Identical input + identical function ⇒ A_C == A_C_preliminary by
+ * construction — no divergence. Only the `formulaEvaluated` label differs.
+ */
+function runSurfaceInventoryAc(req: EvalRequest, formulaEvaluated: string): EvalState {
+  const carrier = req.aggregator?.surfaceInventory;
+  const gated = surfaceInventoryGate(carrier);
+  if (gated) return gated;
+  // After the gate, carrier + rows are present and complete.
+  const rows = (carrier as SurfaceInventoryCarrier).rows;
 
-    const substituted: Record<string, number> = {};
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const contribution = (row.area_m2 as number) * (row.c_i as number);
-      substituted[`${surfaceRowLabel(row, i)} (${row.area_m2} · ${row.c_i})`] = contribution;
-    }
-    const s = summarizeSurfaceInventory(rows);
-    substituted['Σ befestigt'] = s.sealed;
-    substituted['Σ unbefestigt'] = s.unsealed;
-    return {
-      kind: 'computed',
-      value: s.ac,
-      substituted,
-      formulaEvaluated:
-        'A_C_preliminary = Σ_i (A_E,i · C_i)   (Tab. 9 paved + unpaved)',
-    };
-  },
+  const substituted: Record<string, number> = {};
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const contribution = (row.area_m2 as number) * (row.c_i as number);
+    substituted[`${surfaceRowLabel(row, i)} (${row.area_m2} · ${row.c_i})`] = contribution;
+  }
+  const s = summarizeSurfaceInventory(rows);
+  substituted['Σ befestigt'] = s.sealed;
+  substituted['Σ unbefestigt'] = s.unsealed;
+  return {
+    kind: 'computed',
+    value: s.ac,
+    substituted,
+    formulaEvaluated,
+  };
+}
+
+const a138_07_gl2_prelim: Aggregator = {
+  run: (req) =>
+    runSurfaceInventoryAc(
+      req,
+      'A_C_preliminary = Σ_i (A_E,i · C_i)   (Tab. 9 paved + unpaved)',
+    ),
+};
+
+/**
+ * A138-10 · Gl. 2 · A_C (Pile-14, eq 1a48af79). Single-source: recomputes
+ * A_C from the inherited surface_inventory carrier — same rows, same helper
+ * a138_07_gl2_prelim uses — so A_C == A_C_preliminary == ΣSealed+ΣUnsealed by
+ * construction. NOT a flat passthrough of the A_C_preliminary scalar (which
+ * is never materialised in project_parameters and would resolve to null).
+ */
+const a138_10_ac: Aggregator = {
+  run: (req) =>
+    runSurfaceInventoryAc(
+      req,
+      'A_C = Σ_i (A_E,i · C_i)  (aus Flächenverzeichnis A138-07, Einzelquelle)',
+    ),
 };
 
 /**
@@ -666,9 +699,9 @@ const a138_07_gl2_prelim: Aggregator = {
  * The single-source model: A138-10 reads the SAME `surface_inventory` carrier
  * that A138-07's preliminary Gl. 2 reads (consumer-linked onto A138-10). The
  * legacy local A138-10 Gl. 2 (`sub_areas_A138_10` recompute) is retired — its
- * A_C is now a flat passthrough `A_C = A_C_preliminary` handled by the normal
- * arithmetic engine. These three aggregators expose the split + the mean
- * runoff coefficient, all derived from the one carrier via
+ * A_C now recomputes from this carrier via the shared runSurfaceInventoryAc
+ * body (a138_10_ac, eq 1a48af79). These three aggregators expose the split +
+ * the mean runoff coefficient, all derived from the one carrier via
  * summarizeSurfaceInventory — never re-deriving sums.
  *
  * Each runs the shared surfaceInventoryGate (same three-state contract as
@@ -755,10 +788,14 @@ export const aggregators: Record<string, Aggregator> = {
   // picks it up via use-equation-engine.ts without a code change at the
   // time the pile runs.
   'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0': a138_07_gl2_prelim,
+  // DWA-A 138-1 · A138-10 · Gl. 2 — A_C recomputed from the inherited
+  // surface_inventory carrier (Pile-14, single-source model). Keyed to the
+  // same shared body as a138_07_gl2_prelim so A_C == A_C_preliminary by
+  // construction. NOT a flat passthrough (the A_C_preliminary scalar is never
+  // materialised in project_parameters → would resolve to null on A138-10).
+  '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_ac,
   // DWA-A 138-1 · A138-10 — surface_inventory-derived split + mean coefficient
-  // (Pile-14, single-source model). A138-10's A_C itself is now a FLAT
-  // passthrough `A_C = A_C_preliminary` evaluated by the arithmetic engine —
-  // it is intentionally NOT in this registry (no aggregator).
+  // (Pile-14, single-source model). Same carrier, same helper as A_C above.
   'd1a38110-0000-0000-0000-000000000001': a138_10_sigma_sealed,
   'd1a38110-0000-0000-0000-000000000002': a138_10_sigma_unsealed,
   'd1a38110-0000-0000-0000-000000000003': a138_10_c_m,

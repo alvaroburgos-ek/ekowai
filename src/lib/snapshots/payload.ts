@@ -28,7 +28,10 @@ import type {
 
 // Mirror the aggregator-id constants from use-equation-engine.ts.
 const A138_07_GL2_PRELIM_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-// A138-10 A_C — flat passthrough A_C = A_C_preliminary (Pile-14), not an aggregator.
+// A138-10 A_C — recomputed from the inherited surface_inventory carrier
+// (Pile-14, single-source). Aggregator keyed to the same shared body as
+// A138-07's A_C_preliminary; NOT a passthrough of the A_C_preliminary scalar.
+const A138_10_AC_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_10_SIGMA_SEALED_ID = 'd1a38110-0000-0000-0000-000000000001';
 const A138_10_SIGMA_UNSEALED_ID = 'd1a38110-0000-0000-0000-000000000002';
 const A138_10_C_M_ID = 'd1a38110-0000-0000-0000-000000000003';
@@ -310,12 +313,13 @@ export function buildSnapshotPayload(args: {
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
     if (
       eq.id === A138_07_GL2_PRELIM_ID ||
+      eq.id === A138_10_AC_ID ||
       eq.id === A138_10_SIGMA_SEALED_ID ||
       eq.id === A138_10_SIGMA_UNSEALED_ID ||
       eq.id === A138_10_C_M_ID
     ) {
-      // A138-10 A_C is a flat passthrough (no aggregator) — handled by the
-      // arithmetic path below.
+      // A138-10's A_C (1a48af79) recomputes from the SAME inherited
+      // surface_inventory carrier as A138-07's A_C_preliminary (Pile-14).
       aggregator = surfaceInventoryCarrier
         ? { surfaceInventory: surfaceInventoryCarrier }
         : undefined;
