@@ -7,6 +7,7 @@ import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
+import { DeviationForm } from './deviation-form';
 
 type ComplianceReq = {
   id: string;
@@ -33,6 +34,8 @@ export type ComplianceSuggestion = {
 
 type FieldRef = { id: string; symbol: string };
 
+type Doc = { id: string; title: string; citationLabel: string };
+
 type Props = {
   requirements: ComplianceReq[];
   suggestions: ComplianceSuggestion[];
@@ -40,9 +43,16 @@ type Props = {
   fields: FieldRef[];
   locale: 'de' | 'en';
   projectId: string;
+  /** The worksheet instance id — passed through to the deviation form. */
+  instanceId: string;
+  /** Active deviations keyed by requirement code. When present for a block-severity
+   *  failing requirement, the deviation badge is rendered instead of the fail badge. */
+  activeDeviationsByReqCode: Record<string, { id: string; justification: string }>;
+  /** Project documents — forwarded to the inline DeviationForm for the citation picker. */
+  docs: Doc[];
 };
 
-export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId }: Props) {
+export function ComplianceBlock({ requirements, suggestions, fields, locale, projectId, instanceId: _instanceId, activeDeviationsByReqCode, docs }: Props) {
   const values = useWorksheetStore((s) => s.values);
 
   const lookup = useMemo(() => {
@@ -159,55 +169,143 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
             const r = evaluateCondition(s.condition, lookup);
             return r.kind === 'pass';
           });
+          const activeDeviation = cr.severity === 'block'
+            ? activeDeviationsByReqCode[cr.code] ?? null
+            : null;
+          const showDeviationBadge = activeDeviation !== null;
+          const showDeviateButton =
+            cr.severity === 'block' && !showDeviationBadge && result.kind !== 'pass';
           return (
-            <li key={cr.id} className="text-sm text-ink space-y-1">
-              <div className="flex items-baseline gap-3">
-                <StatusBadge
-                  result={result}
-                  severity={cr.severity}
-                  requiresAttestation={isAttestationCondition(cr.condition)}
-                />
-                <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
-                  {cr.code}
-                </span>
-                <span className="font-medium">
-                  {locale === 'de' ? cr.titleDe : cr.titleEn ?? cr.titleDe}
-                </span>
-              </div>
-              {cr.description && (
-                <p className="text-xs text-subtext ml-[140px]">{cr.description}</p>
-              )}
-              <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[140px] flex gap-3 flex-wrap">
-                <code>{cr.condition}</code>
-                {cr.clauseReference && (
-                  <ClauseChip clauseReference={cr.clauseReference} />
-                )}
-                {result.kind === 'pending' && result.missingSymbols.length > 0 && (
-                  <span className="text-subtext">
-                    fehlend: {result.missingSymbols.join(', ')}
-                  </span>
-                )}
-              </div>
-              {result.kind === 'fail' && filteredSuggestions.length > 0 && (
-                <div className="ml-[140px] mt-2 space-y-2">
-                  {filteredSuggestions.map((s) => (
-                    <SuggestionCard
-                      key={s.id}
-                      suggestion={s}
-                      locale={locale}
-                      projectId={projectId}
-                    />
-                  ))}
-                </div>
-              )}
-              {result.kind === 'fail' && filteredSuggestions.length === 0 && cr.suggestion && (
-                <p className="ml-[140px] mt-2 text-xs text-subtext italic">{cr.suggestion}</p>
-              )}
-            </li>
+            <RequirementRow
+              key={cr.id}
+              cr={cr}
+              result={result}
+              filteredSuggestions={filteredSuggestions}
+              locale={locale}
+              projectId={projectId}
+              activeDeviation={activeDeviation}
+              showDeviationBadge={showDeviationBadge}
+              showDeviateButton={showDeviateButton}
+              docs={docs}
+            />
           );
         })}
       </ul>
     </section>
+  );
+}
+
+function RequirementRow({
+  cr,
+  result,
+  filteredSuggestions,
+  locale,
+  projectId,
+  activeDeviation,
+  showDeviationBadge,
+  showDeviateButton,
+  docs,
+}: {
+  cr: ComplianceReq;
+  result: EvalResult;
+  filteredSuggestions: ComplianceSuggestion[];
+  locale: 'de' | 'en';
+  projectId: string;
+  activeDeviation: { id: string; justification: string } | null;
+  showDeviationBadge: boolean;
+  showDeviateButton: boolean;
+  docs: Array<{ id: string; title: string; citationLabel: string }>;
+}) {
+  const [formOpen, setFormOpen] = useState(false);
+
+  return (
+    <li className="text-sm text-ink space-y-1">
+      <div className="flex items-baseline gap-3">
+        {showDeviationBadge ? (
+          <DeviationBadge />
+        ) : (
+          <StatusBadge
+            result={result}
+            severity={cr.severity}
+            requiresAttestation={isAttestationCondition(cr.condition)}
+          />
+        )}
+        <span className="text-[11px] uppercase tracking-[0.2em] text-subtext shrink-0">
+          {cr.code}
+        </span>
+        <span className="font-medium">
+          {locale === 'de' ? cr.titleDe : cr.titleEn ?? cr.titleDe}
+        </span>
+        {showDeviationBadge && (
+          <button
+            type="button"
+            onClick={() => setFormOpen((o) => !o)}
+            className="text-[10px] uppercase tracking-[0.18em] text-accent hover:text-ink underline ml-1"
+          >
+            {formOpen ? 'Schließen' : 'Bearbeiten / Zurückziehen'}
+          </button>
+        )}
+        {showDeviateButton && (
+          <button
+            type="button"
+            onClick={() => setFormOpen((o) => !o)}
+            className="text-[10px] uppercase tracking-[0.18em] text-accent hover:text-ink underline ml-1"
+          >
+            {formOpen ? 'Schließen' : 'Abweichung dokumentieren'}
+          </button>
+        )}
+      </div>
+      {cr.description && (
+        <p className="text-xs text-subtext ml-[140px]">{cr.description}</p>
+      )}
+      <div className="text-[10px] uppercase tracking-[0.18em] text-subtext ml-[140px] flex gap-3 flex-wrap">
+        <code>{cr.condition}</code>
+        {cr.clauseReference && (
+          <ClauseChip clauseReference={cr.clauseReference} />
+        )}
+        {result.kind === 'pending' && result.missingSymbols.length > 0 && (
+          <span className="text-subtext">
+            fehlend: {result.missingSymbols.join(', ')}
+          </span>
+        )}
+      </div>
+      {formOpen && (
+        <DeviationForm
+          projectId={projectId}
+          requirementId={cr.id}
+          requirementCode={cr.code}
+          docs={docs}
+          existing={activeDeviation ? { justification: activeDeviation.justification } : undefined}
+        />
+      )}
+      {!formOpen && result.kind === 'fail' && !showDeviationBadge && filteredSuggestions.length > 0 && (
+        <div className="ml-[140px] mt-2 space-y-2">
+          {filteredSuggestions.map((s) => (
+            <SuggestionCard
+              key={s.id}
+              suggestion={s}
+              locale={locale}
+              projectId={projectId}
+            />
+          ))}
+        </div>
+      )}
+      {!formOpen && result.kind === 'fail' && !showDeviationBadge && filteredSuggestions.length === 0 && cr.suggestion && (
+        <p className="ml-[140px] mt-2 text-xs text-subtext italic">{cr.suggestion}</p>
+      )}
+    </li>
+  );
+}
+
+function DeviationBadge() {
+  return (
+    <span
+      aria-label="Erfüllt mit dokumentierter Abweichung"
+      title="Erfüllt mit dokumentierter Abweichung"
+      className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-accent/15 text-accent text-xs font-semibold shrink-0"
+    >
+      ≈
+    </span>
   );
 }
 

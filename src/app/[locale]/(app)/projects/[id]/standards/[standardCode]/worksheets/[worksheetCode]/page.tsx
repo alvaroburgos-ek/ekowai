@@ -11,6 +11,7 @@ import {
   loadInheritedFields,
 } from '@/lib/db/queries/worksheet';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
+import { loadActiveDeviations } from '@/lib/db/queries/deviations';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
@@ -52,7 +53,7 @@ export default async function WorksheetPage({
   const fieldSymbols = mergedFields.map((f) => f.symbol);
 
   // Parallelise all queries that depend on ws.template.id but not on each other
-  const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts] = await Promise.all([
+  const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts, activeDeviations] = await Promise.all([
     ensureWorksheetInstance(projectId, ws.template.id),
     loadProjectParameters(projectId, fieldIds),
     loadSameSymbolValues(projectId, ws.template.id, fieldSymbols),
@@ -114,6 +115,9 @@ export default async function WorksheetPage({
       WHERE wt.standard_id = ${ws.template.standard.id}
       GROUP BY wt.id
     `),
+    // Active deviations for the project — used in the Compliance panel to
+    // render the deviation badge and the pre-filled edit/withdraw form.
+    loadActiveDeviations(projectId),
   ]);
 
   // Count prior snapshots — drives the "Änderungen seit letzter Version"
@@ -251,6 +255,12 @@ export default async function WorksheetPage({
     initialSources[f.id] = (p?.citationSource as { docId: string; page?: number; note?: string } | null) ?? null;
   }
 
+  // Build a lookup keyed by requirement code for O(1) access in ComplianceBlock.
+  const activeDeviationsByReqCode: Record<string, { id: string; justification: string }> = {};
+  for (const d of activeDeviations) {
+    activeDeviationsByReqCode[d.requirementCode] = { id: d.id, justification: d.justification };
+  }
+
   return (
     <NormTextProvider standardCode={standardCode}>
     <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-12">
@@ -343,6 +353,7 @@ export default async function WorksheetPage({
           priorSnapshotCount={priorSnapshotCount}
           diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
           isPlatformEngineer={isPlatformEngineer}
+          activeDeviationsByReqCode={activeDeviationsByReqCode}
         />
       </main>
     </div>
