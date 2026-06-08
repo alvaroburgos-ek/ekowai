@@ -16,6 +16,13 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   // Original wiring — batch-0/1
   // ====================================================================
   'A138-10:2',
+  // pile-14: read-only, inventory-derived ΣSealed / ΣUnsealed / C_m recomputed
+  // from the inherited `surface_inventory` carrier (A138-07 Flächenverzeichnis).
+  // displayOnly in equation-profiles — no write-back. Report path (this file)
+  // must mirror whitelist.ts so the PDF computes the same set as the form.
+  'A138-10:2a', // ΣSealed
+  'A138-10:2b', // ΣUnsealed
+  'A138-10:2c', // C_m
   'A138-13:8',
   'A138-18:21',
 
