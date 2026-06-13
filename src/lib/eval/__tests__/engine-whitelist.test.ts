@@ -67,6 +67,18 @@ describe('FORMULA_ENGINE_WHITELIST single-source-of-truth', () => {
     expect(FORMULA_ENGINE_WHITELIST.size).toBeGreaterThanOrEqual(28);
   });
 
+  it('includes pile-14 A138-10 inventory-derived keys (form-vs-PDF parity)', () => {
+    // The report path (evaluate-for-report.ts) reads THIS engine whitelist,
+    // while the form/snapshot path reads src/lib/eval/whitelist.ts. The
+    // pile-14 read-only equations (ΣSealed / ΣUnsealed / C_m) plus the
+    // existing A_C (A138-10:2) must be present here too, or the PDF report
+    // would silently skip equations the form computes.
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-10:2')).toBe(true); // A_C
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-10:2a')).toBe(true); // ΣSealed
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-10:2b')).toBe(true); // ΣUnsealed
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-10:2c')).toBe(true); // C_m
+  });
+
   it('every ad-hoc per-test whitelist key is present in the production whitelist', () => {
     const adHoc = collectAdHocWhitelistKeys();
     expect(adHoc.length).toBeGreaterThan(0); // sanity — tests exist

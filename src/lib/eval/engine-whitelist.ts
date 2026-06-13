@@ -15,7 +15,24 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   // ====================================================================
   // Original wiring — batch-0/1
   // ====================================================================
+  // A138-07 preliminary Gl. 2 — sums the surface_inventory rows into
+  // A_C_preliminary. Mirrors whitelist.ts so the server-side evaluator (report
+  // + derived-output materialisation) computes the same value the form does;
+  // without this the A_C_preliminary scalar is never materialised and its
+  // downstream consumer (A138-10) inherits a null row.
+  'A138-07:2',
   'A138-10:2',
+  // pile-14: read-only, inventory-derived ΣSealed / ΣUnsealed / C_m recomputed
+  // from the inherited `surface_inventory` carrier (A138-07 Flächenverzeichnis).
+  // displayOnly in equation-profiles — no write-back. Report path (this file)
+  // must mirror whitelist.ts so the PDF computes the same set as the form.
+  'A138-10:2a', // ΣSealed
+  'A138-10:2b', // ΣUnsealed
+  'A138-10:2c', // C_m
+  // Q_zu Gl. 3, three-state — was mis-summed by the legacy evaluator
+  // (returned A_C as an l/s flow). Now engine-evaluated; UNSET until both
+  // r_D(n) and A_VA exist.
+  'A138-10:3',
   'A138-13:8',
   'A138-18:21',
 
