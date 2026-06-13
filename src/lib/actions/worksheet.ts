@@ -246,85 +246,31 @@ export async function saveWorksheet(
     // §C1 — deterministically materialise engine-derived outputs so a produced
     // scalar (A_C, A_C_preliminary, Q_zu, …) always has a real
     // project_parameters row for downstream consumers to inherit, instead of
-    // depending on the fragile client write-back happening to fire. Runs after
-    // the input save commits (so it reads the fresh values) and BEFORE the
-    // approval-gate check below (so the gate sees the materialised values).
-    // Isolated so a materialisation error can't roll back the engineer's save.
+    // depending on the fragile client write-back happening to fire.
+    //
+    // Cascade: saving a producer also re-materialises its transitive consumer
+    // worksheet instances in the same project, so a scalar that flows by
+    // inheritance settles without the engineer having to re-open every
+    // consumer. Each touched instance is re-gated (an approved consumer whose
+    // derived value now breaks a block-condition is auto-reopened). Runs after
+    // the input save commits and is fully isolated — any error here is captured
+    // as a warning and can't roll back the engineer's save.
     try {
-      const derivedWarning = await persistDerivedOutputs(
+      const cascadeWarnings = await cascadeMaterializeDerived(
         {
           id: instance.id,
           projectId: instance.projectId,
           worksheetTemplateId: instance.worksheetTemplateId,
+          status: instance.status,
         },
         userId,
       );
-      if (derivedWarning) warnings.push(derivedWarning);
+      warnings.push(...cascadeWarnings);
     } catch (e) {
       warnings.push(
         'Derived-output materialisation failed: ' +
           (e instanceof Error ? e.message : String(e)),
       );
-    }
-
-    // Post-approval revalidation hook. When a save mutates parameters on
-    // an already-approved worksheet AND the new values cause any
-    // block-severity compliance condition to fail, demote the worksheet
-    // back to draft so the approval cannot ship over a fresh violation.
-    // Uses the existing `reopen` event (engineer_approved → draft is
-    // already legal); actor_role='system' distinguishes it from manual
-    // engineer reopens. Runs OUTSIDE the save transaction so any error
-    // here can't roll back the parameter write the engineer expects to
-    // have succeeded.
-    if (instance.status === 'engineer_approved') {
-      const gate = await checkApprovalGate(instance.id);
-      if (gate.failingBlockConditions.length > 0) {
-        const failingCodes = gate.failingBlockConditions
-          .map((c) => c.code)
-          .join(', ');
-        const reopenComment =
-          `Auto-reopen: block-severity compliance now failing on changed fields (${failingCodes}).`;
-        await db.transaction(async (tx) => {
-          const updated = await tx
-            .update(worksheetInstances)
-            .set({ status: 'draft', updatedAt: new Date() })
-            .where(
-              and(
-                eq(worksheetInstances.id, instance.id),
-                eq(worksheetInstances.status, 'engineer_approved'),
-              ),
-            )
-            .returning({ id: worksheetInstances.id });
-          // If another writer already demoted/finalized in the meantime,
-          // updated[] is empty — skip the event/audit rows (the state
-          // has already moved past engineer_approved).
-          if (updated.length === 0) return;
-
-          await tx.insert(approvalEvents).values({
-            worksheetInstanceId: instance.id,
-            eventType: 'reopen',
-            fromStatus: 'engineer_approved',
-            toStatus: 'draft',
-            actorId: userId,
-            actorRole: 'system',
-            comment: reopenComment,
-          });
-
-          await tx.insert(auditLog).values({
-            actorId: userId,
-            actorRole: 'system',
-            projectId: instance.projectId,
-            tableName: 'worksheet_instances',
-            recordId: instance.id,
-            action: 'auto_reopen',
-            changes: {
-              reason: 'post_approval_compliance_break',
-              failingBlockConditions: gate.failingBlockConditions.map((c) => c.code),
-            },
-          });
-        });
-        warnings.push(reopenComment);
-      }
     }
   }
 
@@ -467,6 +413,156 @@ async function persistDerivedOutputs(
   });
 
   return null;
+}
+
+/**
+ * Reopen an approved worksheet whose (possibly just-materialised) values now
+ * fail a block-severity compliance condition. No-op unless it is currently
+ * engineer_approved and a block condition fails. Returns a warning, else null.
+ * Extracted so both the saved worksheet and cascaded consumers re-gate
+ * identically.
+ */
+async function reopenIfComplianceBroken(
+  inst: { id: string; projectId: string; status: string },
+  userId: string,
+): Promise<string | null> {
+  if (inst.status !== 'engineer_approved') return null;
+  const gate = await checkApprovalGate(inst.id);
+  if (gate.failingBlockConditions.length === 0) return null;
+  const failingCodes = gate.failingBlockConditions.map((c) => c.code).join(', ');
+  const reopenComment = `Auto-reopen: block-severity compliance now failing on changed fields (${failingCodes}).`;
+  await db.transaction(async (tx) => {
+    const updated = await tx
+      .update(worksheetInstances)
+      .set({ status: 'draft', updatedAt: new Date() })
+      .where(
+        and(
+          eq(worksheetInstances.id, inst.id),
+          eq(worksheetInstances.status, 'engineer_approved'),
+        ),
+      )
+      .returning({ id: worksheetInstances.id });
+    // If another writer already demoted/finalized in the meantime, skip.
+    if (updated.length === 0) return;
+    await tx.insert(approvalEvents).values({
+      worksheetInstanceId: inst.id,
+      eventType: 'reopen',
+      fromStatus: 'engineer_approved',
+      toStatus: 'draft',
+      actorId: userId,
+      actorRole: 'system',
+      comment: reopenComment,
+    });
+    await tx.insert(auditLog).values({
+      actorId: userId,
+      actorRole: 'system',
+      projectId: inst.projectId,
+      tableName: 'worksheet_instances',
+      recordId: inst.id,
+      action: 'auto_reopen',
+      changes: {
+        reason: 'post_approval_compliance_break',
+        failingBlockConditions: gate.failingBlockConditions.map((c) => c.code),
+      },
+    });
+  });
+  return reopenComment;
+}
+
+/**
+ * Worksheet instances in the same project that consume a symbol this worksheet
+ * produces — resolved from the producer's own fields' `consumer_worksheets`
+ * within the same standard.
+ */
+async function loadConsumerInstances(
+  projectId: string,
+  producerTemplateId: string,
+): Promise<Array<{ id: string; projectId: string; worksheetTemplateId: string; status: string }>> {
+  const producerFields = await db
+    .select({ consumers: fields.consumerWorksheets })
+    .from(fields)
+    .where(and(eq(fields.worksheetTemplateId, producerTemplateId), eq(fields.active, true)));
+  const codes = [...new Set(producerFields.flatMap((f) => f.consumers ?? []).filter(Boolean))];
+  if (codes.length === 0) return [];
+
+  const [tmpl] = await db
+    .select({ standardId: worksheetTemplates.standardId })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.id, producerTemplateId))
+    .limit(1);
+  if (!tmpl) return [];
+
+  return db
+    .select({
+      id: worksheetInstances.id,
+      projectId: worksheetInstances.projectId,
+      worksheetTemplateId: worksheetInstances.worksheetTemplateId,
+      status: worksheetInstances.status,
+    })
+    .from(worksheetInstances)
+    .innerJoin(
+      worksheetTemplates,
+      eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId),
+    )
+    .where(
+      and(
+        eq(worksheetInstances.projectId, projectId),
+        eq(worksheetTemplates.standardId, tmpl.standardId),
+        inArray(worksheetTemplates.code, codes),
+      ),
+    );
+}
+
+/**
+ * Materialise derived outputs for `root` and its transitive consumer instances
+ * in the same project, so a single-source scalar settles by inheritance
+ * without the engineer re-opening every consumer. Each touched instance is
+ * re-gated (an approved consumer whose derived value now breaks a block
+ * condition is auto-reopened). Bounded by a visited set + a hard cap so a
+ * pathological consumer graph can't run unbounded.
+ */
+async function cascadeMaterializeDerived(
+  root: { id: string; projectId: string; worksheetTemplateId: string; status: string },
+  userId: string,
+): Promise<string[]> {
+  const warnings: string[] = [];
+  const visited = new Set<string>();
+  const queue: Array<{ id: string; projectId: string; worksheetTemplateId: string; status: string }> = [root];
+  const CAP = 60;
+  let processed = 0;
+
+  while (queue.length > 0 && processed < CAP) {
+    const inst = queue.shift()!;
+    if (visited.has(inst.id)) continue;
+    visited.add(inst.id);
+    processed++;
+
+    try {
+      const w = await persistDerivedOutputs(
+        { id: inst.id, projectId: inst.projectId, worksheetTemplateId: inst.worksheetTemplateId },
+        userId,
+      );
+      if (w) warnings.push(w);
+    } catch (e) {
+      warnings.push(
+        `Materialisation failed for ${inst.id}: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+
+    const reopenW = await reopenIfComplianceBroken(inst, userId);
+    if (reopenW) warnings.push(reopenW);
+
+    const consumers = await loadConsumerInstances(inst.projectId, inst.worksheetTemplateId);
+    for (const c of consumers) {
+      if (!visited.has(c.id)) queue.push(c);
+    }
+  }
+  if (processed >= CAP) {
+    warnings.push(
+      `Derived-output cascade hit the ${CAP}-worksheet cap — some consumers may not be refreshed.`,
+    );
+  }
+  return warnings;
 }
 
 function extractValue(
