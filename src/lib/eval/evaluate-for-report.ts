@@ -326,3 +326,89 @@ export function evaluateWorksheetCompliance(
     };
   });
 }
+
+/**
+ * §C1 — deterministically compute the engine-derived OWN-field values for a
+ * worksheet so `saveWorksheet` can persist them (source_type='derived').
+ *
+ * The runtime form persists a derived scalar only as a fragile side-effect of
+ * the producing worksheet being open with every input present at save time;
+ * when it is not, the project_parameters row is null/absent and every
+ * downstream consumer that inherits the scalar reads null. This recomputes the
+ * outputs from the saved + inherited values so the row is always materialised.
+ *
+ *   - Only OWN number fields that are the output of a whitelisted,
+ *     non-`displayOnly` equation are materialised. `displayOnly` outputs
+ *     collide with a primary writer or an engineer-entered iteration variable,
+ *     so they are excluded — the SAME rule the client write-back applies.
+ *   - A bounded fixpoint overlays each pass's derived values back into the
+ *     parameter set, so an intra-worksheet chain resolves (e.g. Gl. 3 Q_zu
+ *     reads the Gl. 2 A_C this same save derives). Converges in 1–2 passes for
+ *     the 138 worksheets; capped at equations.length + 1.
+ *   - A whitelisted output that cannot be computed yields `null`, clearing any
+ *     stale derived value rather than leaving a misleading number downstream.
+ */
+export function materializeDerivedOutputs(
+  worksheetCode: string,
+  equations: ReportEquation[],
+  fields: ReportField[],
+  parameters: ReportParameter[],
+  ownNumberFieldIds: ReadonlySet<string>,
+): Array<{ fieldId: string; valueNumber: number | null }> {
+  // symbol → own number field (the only valid materialisation targets)
+  const ownNumberFieldBySymbol = new Map<string, ReportField>();
+  for (const f of fields) {
+    if (ownNumberFieldIds.has(f.id) && f.dataType === 'number') {
+      ownNumberFieldBySymbol.set(f.symbol, f);
+    }
+  }
+  if (ownNumberFieldBySymbol.size === 0) return [];
+
+  // Working parameter set we overlay derived results onto between passes.
+  const paramByField = new Map<string, ReportParameter>();
+  for (const p of parameters) paramByField.set(p.fieldId, p);
+
+  const overlay = (fieldId: string, valueNumber: number | null) =>
+    paramByField.set(fieldId, {
+      fieldId,
+      valueNumber,
+      valueText: null,
+      valueEnum: null,
+      valueBoolean: null,
+      valueDate: null,
+      valueJson: null,
+    });
+
+  const derived = new Map<string, number | null>();
+  const maxPasses = equations.length + 1;
+  for (let pass = 0; pass < maxPasses; pass++) {
+    const results = evaluateWorksheetEquations(
+      worksheetCode,
+      equations,
+      fields,
+      [...paramByField.values()],
+    );
+    let changed = false;
+    for (const r of results) {
+      if (!r.outputSymbol) continue;
+      if (equationProfiles[r.equationId]?.displayOnly) continue;
+      const outField = ownNumberFieldBySymbol.get(r.outputSymbol);
+      if (!outField) continue;
+      const nextVal = r.state.kind === 'computed' ? r.state.value : null;
+      const prevVal = derived.has(outField.id)
+        ? (derived.get(outField.id) ?? null)
+        : (paramByField.get(outField.id)?.valueNumber ?? null);
+      if (prevVal !== nextVal) {
+        changed = true;
+        overlay(outField.id, nextVal);
+      }
+      derived.set(outField.id, nextVal);
+    }
+    if (!changed) break;
+  }
+
+  return [...derived.entries()].map(([fieldId, valueNumber]) => ({
+    fieldId,
+    valueNumber,
+  }));
+}

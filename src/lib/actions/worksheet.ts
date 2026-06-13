@@ -2,8 +2,10 @@
 import { db } from '@/lib/db';
 import {
   worksheetInstances,
+  worksheetTemplates,
   projectParameters,
   fields,
+  equations,
   auditLog,
   approvalEvents,
   projects,
@@ -12,6 +14,13 @@ import {
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { checkApprovalGate } from './approval-gate';
+import { loadInheritedFields, loadProjectParameters } from '@/lib/db/queries/worksheet';
+import {
+  materializeDerivedOutputs,
+  type ReportEquation,
+  type ReportField,
+  type ReportParameter,
+} from '@/lib/eval/evaluate-for-report';
 
 type FieldValue =
   | { type: 'number'; value: number | null }
@@ -234,6 +243,30 @@ export async function saveWorksheet(
         .where(eq(worksheetInstances.id, instance.id));
     });
 
+    // §C1 — deterministically materialise engine-derived outputs so a produced
+    // scalar (A_C, A_C_preliminary, Q_zu, …) always has a real
+    // project_parameters row for downstream consumers to inherit, instead of
+    // depending on the fragile client write-back happening to fire. Runs after
+    // the input save commits (so it reads the fresh values) and BEFORE the
+    // approval-gate check below (so the gate sees the materialised values).
+    // Isolated so a materialisation error can't roll back the engineer's save.
+    try {
+      const derivedWarning = await persistDerivedOutputs(
+        {
+          id: instance.id,
+          projectId: instance.projectId,
+          worksheetTemplateId: instance.worksheetTemplateId,
+        },
+        userId,
+      );
+      if (derivedWarning) warnings.push(derivedWarning);
+    } catch (e) {
+      warnings.push(
+        'Derived-output materialisation failed: ' +
+          (e instanceof Error ? e.message : String(e)),
+      );
+    }
+
     // Post-approval revalidation hook. When a save mutates parameters on
     // an already-approved worksheet AND the new values cause any
     // block-severity compliance condition to fail, demote the worksheet
@@ -296,6 +329,144 @@ export async function saveWorksheet(
   }
 
   return { ok: true, saved: savedCount, warnings };
+}
+
+/**
+ * §C1 — recompute and persist the worksheet's engine-derived OWN number
+ * outputs (source_type='derived') from its saved + inherited values, so the
+ * single-source scalars are durable for downstream inheritance. Pure compute
+ * lives in `materializeDerivedOutputs`; this only loads inputs and UPSERTs the
+ * results that actually changed. Returns a warning string, or null on success.
+ */
+async function persistDerivedOutputs(
+  instance: { id: string; projectId: string; worksheetTemplateId: string },
+  userId: string,
+): Promise<string | null> {
+  const [tmpl] = await db
+    .select({
+      code: worksheetTemplates.code,
+      standardId: worksheetTemplates.standardId,
+    })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.id, instance.worksheetTemplateId))
+    .limit(1);
+  if (!tmpl) return null;
+
+  const [ownFields, eqRows, inherited] = await Promise.all([
+    db
+      .select({
+        id: fields.id,
+        symbol: fields.symbol,
+        unit: fields.unit,
+        dataType: fields.dataType,
+      })
+      .from(fields)
+      .where(
+        and(
+          eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+          eq(fields.active, true),
+        ),
+      ),
+    db
+      .select()
+      .from(equations)
+      .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId)),
+    loadInheritedFields(instance.worksheetTemplateId, tmpl.standardId, tmpl.code),
+  ]);
+
+  const ownNumberFieldIds = new Set(
+    ownFields.filter((f) => f.dataType === 'number').map((f) => f.id),
+  );
+  if (ownNumberFieldIds.size === 0 || eqRows.length === 0) return null;
+
+  const reportFields: ReportField[] = [
+    ...ownFields.map((f) => ({ id: f.id, symbol: f.symbol, unit: f.unit, dataType: f.dataType })),
+    ...inherited.map((f) => ({ id: f.id, symbol: f.symbol, unit: f.unit, dataType: f.dataType })),
+  ];
+  const reportEquations: ReportEquation[] = eqRows.map((e) => ({
+    id: e.id,
+    equationNumber: e.equationNumber,
+    formula: e.formula,
+    inputSymbols: e.inputSymbols,
+    outputSymbol: e.outputSymbol,
+    outputUnit: e.outputUnit,
+  }));
+
+  const allFieldIds = reportFields.map((f) => f.id);
+  const paramMap = await loadProjectParameters(instance.projectId, allFieldIds);
+  const reportParams: ReportParameter[] = [...paramMap.values()].map((p) => ({
+    fieldId: p.fieldId,
+    // value_number is stored as a numeric (string in the driver) — the pure
+    // evaluator works on real numbers.
+    valueNumber: p.valueNumber == null ? null : Number(p.valueNumber),
+    valueText: p.valueText,
+    valueEnum: p.valueEnum,
+    valueBoolean: p.valueBoolean,
+    valueDate: p.valueDate,
+    valueJson: p.valueJson,
+  }));
+
+  const derived = materializeDerivedOutputs(
+    tmpl.code,
+    reportEquations,
+    reportFields,
+    reportParams,
+    ownNumberFieldIds,
+  );
+  if (derived.length === 0) return null;
+
+  // Only write rows whose value actually changes, or whose source must flip to
+  // 'derived' (e.g. a row the client wrote back as 'entered').
+  const toWrite = derived.filter((d) => {
+    const cur = paramMap.get(d.fieldId);
+    const curNum = cur?.valueNumber == null ? null : Number(cur.valueNumber);
+    return curNum !== d.valueNumber || (cur != null && cur.sourceType !== 'derived');
+  });
+  if (toWrite.length === 0) return null;
+
+  await db.transaction(async (tx) => {
+    await tx
+      .insert(projectParameters)
+      .values(
+        toWrite.map((d) => ({
+          projectId: instance.projectId,
+          fieldId: d.fieldId,
+          sourceWorksheetInstanceId: instance.id,
+          sourceType: 'derived',
+          enteredBy: userId,
+          valueNumber: d.valueNumber == null ? null : String(d.valueNumber),
+          valueText: null,
+          valueEnum: null,
+          valueDate: null,
+          valueBoolean: null,
+          valueJson: null,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [projectParameters.projectId, projectParameters.fieldId],
+        set: {
+          valueNumber: sql`excluded.value_number`,
+          sourceType: sql`excluded.source_type`,
+          sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
+          enteredBy: sql`excluded.entered_by`,
+          enteredAt: new Date(),
+        },
+      });
+
+    await tx.insert(auditLog).values(
+      toWrite.map((d) => ({
+        actorId: userId,
+        actorRole: 'system',
+        projectId: instance.projectId,
+        tableName: 'project_parameters',
+        recordId: d.fieldId,
+        action: 'derive',
+        changes: { fieldId: d.fieldId, derivedValue: d.valueNumber },
+      })),
+    );
+  });
+
+  return null;
 }
 
 function extractValue(
