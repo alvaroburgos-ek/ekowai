@@ -412,8 +412,10 @@ async function persistDerivedOutputs(
         projectId: instance.projectId,
         tableName: 'project_parameters',
         recordId: d.fieldId,
-        action: 'derive',
-        changes: { fieldId: d.fieldId, derivedValue: d.valueNumber },
+        // audit_log.action CHECK allows only insert/update/delete/transition;
+        // the derived nature is conveyed by actor_role='system' + changes.derived.
+        action: paramMap.has(d.fieldId) ? 'update' : 'insert',
+        changes: { fieldId: d.fieldId, derived: true, derivedValue: d.valueNumber },
       })),
     );
   });
@@ -465,9 +467,11 @@ async function reopenIfComplianceBroken(
       projectId: inst.projectId,
       tableName: 'worksheet_instances',
       recordId: inst.id,
-      action: 'auto_reopen',
+      // a reopen is a status transition; audit_log.action CHECK allows only
+      // insert/update/delete/transition (the prior 'auto_reopen' violated it).
+      action: 'transition',
       changes: {
-        reason: 'post_approval_compliance_break',
+        reason: 'auto_reopen_post_approval_compliance_break',
         failingBlockConditions: gate.failingBlockConditions.map((c) => c.code),
       },
     });

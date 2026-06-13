@@ -219,8 +219,9 @@ async function main() {
             projectId: inst.projectId,
             tableName: 'project_parameters',
             recordId: d.fieldId,
-            action: 'derive_backfill',
-            changes: { fieldId: d.fieldId, derivedValue: d.valueNumber },
+            // audit_log.action CHECK allows only insert/update/delete/transition.
+            action: existingByField.has(d.fieldId) ? 'update' : 'insert',
+            changes: { fieldId: d.fieldId, derived: true, backfill: true, derivedValue: d.valueNumber },
           })),
         );
       });
