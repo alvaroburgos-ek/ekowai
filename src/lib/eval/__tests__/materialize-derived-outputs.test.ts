@@ -140,4 +140,22 @@ describe('materializeDerivedOutputs — A138-10 fixpoint (A_C → Q_zu)', () => 
     expect(out.find((o) => o.fieldId === 'f.rdn')).toBeUndefined();
     expect(out.find((o) => o.fieldId === 'f.inv')).toBeUndefined();
   });
+
+  // Regression for the real prod row (project 3e50aed1): A_C present as an
+  // entered scalar with NO surface_inventory carrier. The fixpoint must NOT
+  // overlay its not-computable (null) A_C over that input — Q_zu still derives
+  // from the existing A_C — and A_C is reported null so the caller can protect
+  // the entered row from being cleared.
+  it('does not destroy an entered A_C when no carrier is present; Q_zu still derives from it', () => {
+    // A_C=2070 entered, A_VA=100, r_D_n=200, NO carrier → Q_zu = 200*(2070+100)*1e-4 = 43.4
+    const params = [num('f.ac', 2070), num('f.ava', 100), num('f.rdn', 200)];
+    const out = materializeDerivedOutputs('A138-10', equations, fields, params, own);
+
+    const ac = out.find((o) => o.fieldId === 'f.ac');
+    const qzu = out.find((o) => o.fieldId === 'f.qzu');
+    // A_C can't be recomputed (no carrier) → reported null (caller protects the
+    // entered row); crucially the input was NOT wiped mid-computation:
+    expect(ac?.valueNumber ?? null).toBeNull();
+    expect(qzu?.valueNumber).toBeCloseTo(43.4, 6);
+  });
 });

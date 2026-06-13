@@ -23,9 +23,10 @@
  *   pnpm tsx scripts/backfill-derived-outputs.ts --apply    # write
  *   pnpm tsx scripts/backfill-derived-outputs.ts --apply --project <uuid>
  */
-import 'dotenv/config';
+import { config as loadEnv } from 'dotenv';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import { and, eq, inArray, sql } from 'drizzle-orm';
-import { db } from '../src/lib/db';
 import {
   fields,
   equations,
@@ -41,6 +42,18 @@ import {
   type ReportField,
   type ReportParameter,
 } from '../src/lib/eval/evaluate-for-report';
+
+// Self-contained DB client (mirrors src/lib/db) so the script doesn't pull the
+// Next-only `@/env` validation at import time and works under plain tsx.
+loadEnv({ path: '.env.local' });
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL is not set in .env.local');
+  process.exit(1);
+}
+const db = drizzle(postgres(DATABASE_URL, { prepare: false }), {
+  schema: { fields, equations, worksheetTemplates, worksheetInstances, projectParameters, projects, auditLog },
+});
 
 const APPLY = process.argv.includes('--apply');
 const projectFlagIdx = process.argv.indexOf('--project');
@@ -141,6 +154,11 @@ async function main() {
     const toWrite = derived.filter((d) => {
       const cur = existingByField.get(d.fieldId);
       const curNum = cur?.valueNumber == null ? null : Number(cur.valueNumber);
+      // not computable → only clear a row WE derived; never null out an
+      // engineer-entered / manual value.
+      if (d.valueNumber === null) {
+        return cur != null && cur.sourceType === 'derived' && curNum !== null;
+      }
       return curNum !== d.valueNumber || (cur != null && cur.sourceType !== 'derived');
     });
     if (toWrite.length === 0) continue;

@@ -394,15 +394,23 @@ export function materializeDerivedOutputs(
       if (equationProfiles[r.equationId]?.displayOnly) continue;
       const outField = ownNumberFieldBySymbol.get(r.outputSymbol);
       if (!outField) continue;
-      const nextVal = r.state.kind === 'computed' ? r.state.value : null;
-      const prevVal = derived.has(outField.id)
-        ? (derived.get(outField.id) ?? null)
-        : (paramByField.get(outField.id)?.valueNumber ?? null);
-      if (prevVal !== nextVal) {
-        changed = true;
-        overlay(outField.id, nextVal);
+      if (r.state.kind === 'computed') {
+        const nextVal = r.state.value;
+        const prevOverlay = paramByField.get(outField.id)?.valueNumber ?? null;
+        if (prevOverlay !== nextVal) {
+          changed = true;
+          overlay(outField.id, nextVal);
+        }
+        derived.set(outField.id, nextVal);
+      } else if (!derived.has(outField.id)) {
+        // Not computable (yet). Report null so the CALLER can clear a stale
+        // value it previously *derived* — but do NOT overlay null over an
+        // existing input value: a dependent equation in a later pass must still
+        // see it (e.g. Q_zu reading an engineer-entered A_C when no surface
+        // inventory carrier is present). Overlaying null here would wrongly
+        // cascade "missing" into every dependent.
+        derived.set(outField.id, null);
       }
-      derived.set(outField.id, nextVal);
     }
     if (!changed) break;
   }

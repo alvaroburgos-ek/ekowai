@@ -361,11 +361,17 @@ async function persistDerivedOutputs(
   );
   if (derived.length === 0) return null;
 
-  // Only write rows whose value actually changes, or whose source must flip to
-  // 'derived' (e.g. a row the client wrote back as 'entered').
+  // Decide what to write:
+  //   - computed value → write if it changed, or to flip a client-written
+  //     'entered' row to 'derived'.
+  //   - not computable (null) → ONLY clear a row we previously derived
+  //     ourselves; never null out an engineer-entered / manual value.
   const toWrite = derived.filter((d) => {
     const cur = paramMap.get(d.fieldId);
     const curNum = cur?.valueNumber == null ? null : Number(cur.valueNumber);
+    if (d.valueNumber === null) {
+      return cur != null && cur.sourceType === 'derived' && curNum !== null;
+    }
     return curNum !== d.valueNumber || (cur != null && cur.sourceType !== 'derived');
   });
   if (toWrite.length === 0) return null;
