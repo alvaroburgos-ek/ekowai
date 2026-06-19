@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Nav } from '@/components/layout/nav';
 import { Footer } from '@/components/layout/footer';
 import type { Locale } from '@/lib/i18n/config';
+import { getMembership } from '@/lib/auth/membership';
 
 export default async function AppLayout({
   children,
@@ -20,6 +21,12 @@ export default async function AppLayout({
       redirect(`/api/dev/login?email=${encodeURIComponent(autoEmail)}&locale=${locale}`);
     }
     redirect(`/${locale}/login`);
+  }
+
+  // External participants (client/designer) never see the staff app.
+  const membership = await getMembership(user.id);
+  if (membership?.kind === 'external') {
+    redirect(`/${locale}/portal`);
   }
 
   return (
