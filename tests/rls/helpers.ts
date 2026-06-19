@@ -56,3 +56,19 @@ export async function makeOrg(
   if (memErr) throw memErr;
   return org.id;
 }
+
+export async function makeExternal(
+  projectId: string,
+  userId: string,
+  role: 'client' | 'designer',
+  invitedBy: string,
+): Promise<void> {
+  const a = admin();
+  const { error } = await a.from('project_members').insert({
+    project_id: projectId,
+    user_id: userId,
+    role,
+    invited_by: invitedBy,
+  });
+  if (error) throw error;
+}
