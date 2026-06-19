@@ -2,20 +2,22 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { admin, makeUser, makeOrg, makeExternal, cleanup } from './helpers';
 
 const ts = Date.now();
-const staffEmail = `rls-ext-staff-${ts}@test.local`;
-const clientEmail = `rls-ext-client-${ts}@test.local`;
-const designerEmail = `rls-ext-designer-${ts}@test.local`;
-const client2Email = `rls-ext-client2-${ts}@test.local`;
-const selfEmail = `rls-ext-self-${ts}@test.local`;
+// Each created auth user gets a unique email; reusing one email across tests
+// (delete+recreate) races against auth's eventual consistency.
+const createdEmails: string[] = [];
+
+async function newUser(tag: string) {
+  const email = `rls-ext-${tag}-${ts}-${createdEmails.length}@test.local`;
+  createdEmails.push(email);
+  return makeUser(email);
+}
 
 describe('external roles (client/designer) — IP boundary RLS', () => {
-  afterAll(async () =>
-    cleanup([staffEmail, clientEmail, designerEmail, client2Email, selfEmail]),
-  );
+  afterAll(async () => cleanup(createdEmails));
 
   async function seedProjectWithLibrary() {
     const ad = admin();
-    const staff = await makeUser(staffEmail);
+    const staff = await newUser('staff');
     const org = await makeOrg(staff.client, staff.id, 'IP Boundary Org');
     const { data: proj } = await ad
       .from('projects')
@@ -24,7 +26,7 @@ describe('external roles (client/designer) — IP boundary RLS', () => {
       .single();
     const { data: std } = await ad
       .from('standards')
-      .insert({ code: `IP-${ts}`, title_de: 'T', version: 'Pass3c' })
+      .insert({ code: `IP-${ts}-${createdEmails.length}`, title_de: 'T', version: 'Pass3c' })
       .select('id')
       .single();
     const { data: tmpl } = await ad
@@ -60,7 +62,7 @@ describe('external roles (client/designer) — IP boundary RLS', () => {
 
   it('client cannot read fields or equations; staff still can', async () => {
     const { staff, projectId } = await seedProjectWithLibrary();
-    const client = await makeUser(clientEmail);
+    const client = await newUser('client');
     await makeExternal(projectId, client.id, 'client', staff.id);
 
     const cf = await client.client.from('fields').select('id');
@@ -74,7 +76,7 @@ describe('external roles (client/designer) — IP boundary RLS', () => {
 
   it('client cannot read project_parameters directly (curated path only)', async () => {
     const { staff, projectId } = await seedProjectWithLibrary();
-    const client = await makeUser(client2Email);
+    const client = await newUser('client');
     await makeExternal(projectId, client.id, 'client', staff.id);
     const pp = await client.client.from('project_parameters').select('id');
     expect(pp.data ?? []).toHaveLength(0);
@@ -82,7 +84,7 @@ describe('external roles (client/designer) — IP boundary RLS', () => {
 
   it('designer cannot read worksheet_instances or project_parameters', async () => {
     const { staff, projectId } = await seedProjectWithLibrary();
-    const designer = await makeUser(designerEmail);
+    const designer = await newUser('designer');
     await makeExternal(projectId, designer.id, 'designer', staff.id);
     const wi = await designer.client.from('worksheet_instances').select('id');
     expect(wi.data ?? []).toHaveLength(0);
@@ -92,7 +94,7 @@ describe('external roles (client/designer) — IP boundary RLS', () => {
 
   it('external reads only its own project_members row', async () => {
     const { staff, projectId } = await seedProjectWithLibrary();
-    const client = await makeUser(selfEmail);
+    const client = await newUser('self');
     await makeExternal(projectId, client.id, 'client', staff.id);
     const own = await client.client.from('project_members').select('user_id');
     expect((own.data ?? []).every((r) => r.user_id === client.id)).toBe(true);
