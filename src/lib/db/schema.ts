@@ -23,6 +23,8 @@ export const memberRoleEnum = pgEnum('member_role', [
   'admin',
   'engineer',
   'viewer',
+  'client',
+  'designer',
 ]);
 
 // Note: calc_status and compliance_status enums still exist in DB for now
@@ -71,6 +73,32 @@ export const orgMembers = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.orgId, t.userId] }),
+  }),
+);
+
+// Project-scoped membership for EXTERNAL participants (client/designer).
+// Internal staff (owner/admin/engineer/viewer) live in org_members; the DB
+// CHECK constraint keeps this table to external roles only. "Staff = has an
+// org_members row; external = has only a project_members row" is the basis of
+// every per-role RLS decision (see supabase/migrations/20260619120100).
+export const projectMembers = pgTable(
+  'project_members',
+  {
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => profiles.id, { onDelete: 'cascade' }),
+    role: memberRoleEnum('role').notNull(),
+    invitedBy: uuid('invited_by')
+      .notNull()
+      .references(() => profiles.id),
+    invitedAt: timestamp('invited_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.projectId, t.userId] }),
+    userIdx: index('project_members_user_idx').on(t.userId),
   }),
 );
 
