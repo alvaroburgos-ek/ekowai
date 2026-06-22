@@ -162,12 +162,24 @@ A DB view `standard_verification_rollup`, the single source for any "verified %"
   (`fields`/`equations`/`compliance_requirements` through `worksheet_templates`; the rest by
   `standard_id`).
 
+**Two gauge scopes (decided 2026-06-22).** Because `regulation_tables` and `master_per_type`
+are scoped to the **standard**, not to a worksheet, a six-table gauge is only meaningful at
+standard level. Therefore:
+- **In-worksheet gauge** = the worksheet-scoped tables only: `fields`, `equations`,
+  `validation_rules`, `compliance_requirements`.
+- **Standard-level badge / "Definition of Done"** = all six tables.
+
+The view exposes per-table rows so both scopes derive from the same source; the worksheet gauge
+simply sums the four worksheet-scoped tables for that worksheet, and the standard badge sums all
+six for the standard.
+
 ### Component F — Wire the app to the canonical computation
 
 - `src/lib/db/queries/library.ts`: replace the `engineer_verified`, fields+equations-only
-  rollup with reads from `standard_verification_rollup`, so the standard-level and
-  worksheet-level gauges reflect all six tables and all real verifications. Numbers will drop
-  versus today — this is the gauge becoming honest.
+  rollup with reads from `standard_verification_rollup`. The **standard-level** gauge/badge
+  reflects all six tables; the **worksheet-level** gauge reflects the four worksheet-scoped
+  tables (`fields`, `equations`, `validation_rules`, `compliance_requirements`). Numbers will
+  drop versus today — this is the gauge becoming honest.
 - `src/lib/actions/verification.ts`: `VERIFIED` constant → `verified_against_standard`
   (imported from the Component A module). `unverify*` continues to reset to
   `imported_unverified`. Per-row and "verify all fields in worksheet" actions keep working
@@ -218,10 +230,9 @@ app verify action ──writes verified_against_standard──────►  s
 2. Ship code change (status module, `library.ts`, `verification.ts`, `verify-button.tsx`).
 3. Verify gauges render the honest numbers; spot-check A-138-1.
 
-## Open questions for spec review
+## Resolved during review (2026-06-22)
 
-- `verified_by_user_id`: FK to `auth.users(id)` vs plain `uuid` — match whatever
-  `fields`/`equations` already do (confirm during implementation; no behavior impact).
-- Whether the worksheet-level in-page gauge should stay fields+equations (local relevance) while
-  only the **standard-level** badge requires all six tables. Current design makes both use the
-  view; flag if you want the worksheet gauge to stay narrow.
+- `verified_by_user_id`: match whatever `fields`/`equations` already use (FK to `auth.users(id)`
+  vs plain `uuid`) — confirmed during implementation; no behavior impact.
+- Gauge scope: in-worksheet gauge uses the four worksheet-scoped tables; standard-level badge
+  uses all six. See Component E.
