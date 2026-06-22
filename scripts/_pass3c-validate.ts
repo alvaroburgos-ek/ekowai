@@ -144,9 +144,12 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
       errors.push({ sheet: 'Compliance_Requirements', row, message: `standard_code "${cr.standard_code}" does not match` });
     }
     if (!cr.title) errors.push({ sheet: 'Compliance_Requirements', row, message: 'title is required' });
-    // evaluation_expression is optional for field_presence type requirements — presence of the
-    // required_field_symbols IS the expression. Require it for all other types.
-    if (!cr.evaluation_expression && cr.evaluation_type !== 'field_presence') {
+    // evaluation_expression is optional for two types:
+    //  - field_presence: the required_field_symbols ARE the expression;
+    //  - manual: a human/cross-reference check (e.g. "nach DWA-A 202") with no machine-evaluable
+    //    expression. The app's compliance engine renders these as { kind: 'manual' } and the importer
+    //    maps the blank expression to a non-blocking condition. Require an expression for all other types.
+    if (!cr.evaluation_expression && cr.evaluation_type !== 'field_presence' && cr.evaluation_type !== 'manual') {
       errors.push({ sheet: 'Compliance_Requirements', row, message: 'evaluation_expression is required' });
     }
     if (crKeys.has(cr.requirement_code)) {
