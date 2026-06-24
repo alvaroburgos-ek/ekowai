@@ -16,6 +16,7 @@ import {
 import { SubAreasEditor } from './sub-areas-editor';
 import { KostraTableEditor } from './kostra-table-editor';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
+import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
@@ -442,6 +443,8 @@ export function WorksheetForm({
           <SaveIndicator status={saveStatus} />
         </div>
       </header>
+
+      <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
 
       {inheritedFieldsForPanel.length > 0 && (
         <section
