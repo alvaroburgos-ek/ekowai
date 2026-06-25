@@ -180,6 +180,14 @@ export const fields = pgTable(
      * fallback at render time when no project_parameters row and no
      * site_profile match exists. Never overwritten by user input. */
     defaultValue: jsonb('default_value'),
+    /** VSME owner boundary: which side produces this datapoint.
+     * Seeded by module default (B3–B7 → ekowai_env, B8–B11 → client_supplied,
+     * B1/B2 → general) and editable per-field in the Worklist. Nullable so
+     * non-VSME engineering fields stay untouched. */
+    owner: text('owner'),
+    /** VSME XBRL element id from the EFRAG taxonomy, used by the export
+     * mapping. Nullable; only populated for VSME fields. */
+    xbrlElementId: text('xbrl_element_id'),
   },
   (t) => ({ uniqWorksheetSymbol: unique().on(t.worksheetTemplateId, t.symbol) }),
 );
