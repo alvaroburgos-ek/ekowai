@@ -103,7 +103,7 @@ function EmissionCard({
   emphasis?: boolean;
 }) {
   return (
-    <Card className={cn('p-4', emphasis && 'bg-eko-gradient-soft')}>
+    <Card className={cn('p-4')} style={emphasis ? { background: 'var(--eko-gradient-soft)' } : undefined}>
       <div className="flex items-center gap-2 text-subtext">
         <Icon className="size-4" />
         <span className="text-xs font-medium">{label}</span>

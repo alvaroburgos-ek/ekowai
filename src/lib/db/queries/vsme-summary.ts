@@ -1,7 +1,7 @@
 import 'server-only';
 import { db } from '@/lib/db';
 import { fields, worksheetTemplates, standards, projectParameters } from '@/lib/db/schema';
-import { and, eq, isNotNull, or } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 /** Owner values used across VSME fields. */
 export type Owner = 'ekowai_env' | 'client_supplied' | 'general';
