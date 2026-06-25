@@ -376,21 +376,31 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
   const equations: EquationsRow[] = [];
 
   // ── 8. Compliance_Requirements — ≤5 field_presence CRs for B03 core totals
+  // Match on concept NAMES (f.symbol) — not labels — so the patterns are stable
+  // across language-specific label changes.
   const b3CoreCandidates = [
-    { pattern: /scope.*1/i, code: 'VSME-CR-B03-01', title: 'Scope 1 GHG emissions present' },
-    { pattern: /scope.*2/i, code: 'VSME-CR-B03-02', title: 'Scope 2 GHG emissions present' },
-    { pattern: /total.*ghg|ghg.*total/i, code: 'VSME-CR-B03-03', title: 'Total GHG emissions present' },
-    { pattern: /total.*energy|energy.*total/i, code: 'VSME-CR-B03-04', title: 'Total energy consumption present' },
-    { pattern: /renewable.*energy|energy.*renewable/i, code: 'VSME-CR-B03-05', title: 'Renewable energy share present' },
+    {
+      pattern: /GrossScope1GreenhouseGasEmissions/,
+      code: 'VSME-CR-B03-01',
+      title: 'Scope 1 GHG emissions present',
+    },
+    {
+      pattern: /GrossScope2.*GreenhouseGasEmissions/,
+      code: 'VSME-CR-B03-02',
+      title: 'Scope 2 GHG emissions present',
+    },
+    {
+      pattern: /TotalEnergyConsumption/,
+      code: 'VSME-CR-B03-04',
+      title: 'Total energy consumption present',
+    },
   ];
 
   const compliance_requirements: ComplianceRow[] = [];
   let crOrder = 1;
 
   for (const cand of b3CoreCandidates) {
-    const matchedField = fields.find(
-      (f) => f.origin_worksheet.includes('B03') && cand.pattern.test(f.label_en),
-    );
+    const matchedField = fields.find((f) => cand.pattern.test(f.symbol));
     if (matchedField) {
       compliance_requirements.push({
         requirement_code: cand.code,
@@ -408,6 +418,13 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
         severity: 'block',
       });
     }
+  }
+
+  if (compliance_requirements.length === 0) {
+    console.warn(
+      '[build-workbook] WARNING: no B03 core-total fields matched — 0 compliance requirements emitted. ' +
+        'Check concept names in the taxonomy against the expected patterns.',
+    );
   }
 
   return {
