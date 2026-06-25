@@ -12,6 +12,7 @@ import {
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { checkApprovalGate } from './approval-gate';
+import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 
 type FieldValue =
   | { type: 'number'; value: number | null }
@@ -224,6 +225,43 @@ export async function saveWorksheet(
             enteredAt: new Date(),
           },
         });
+
+      // Materialize derived surface outputs when A138-07's surface_inventory was saved.
+      // Runs inside the same transaction so derived rows are always consistent with
+      // the entered carrier value.
+      const wsFields = await tx
+        .select({ id: fields.id, symbol: fields.symbol })
+        .from(fields)
+        .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+      const surfaceFieldId = wsFields.find((f) => f.symbol === 'surface_inventory')?.id;
+
+      if (surfaceFieldId && fieldIds.includes(surfaceFieldId)) {
+        const carrier = input.values[surfaceFieldId]?.type === 'json' ? input.values[surfaceFieldId].value : null;
+        const outputs = materializeSurfaceOutputs(carrier);
+        const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
+        const derivedRows = (['A_C', 'C_m', 'A_E_ba', 'A_E_nba'] as const)
+          .map((sym) => ({ sym, fieldId: idBySymbol.get(sym) }))
+          .filter((x): x is { sym: typeof x.sym; fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: outputs[x.sym] == null ? null : String(outputs[x.sym]),
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: new Date(),
+          }));
+        if (derivedRows.length > 0) {
+          await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: new Date(),
+            },
+          });
+        }
+      }
 
       // ONE batched insert for all audit rows
       await tx.insert(auditLog).values(auditValues);
