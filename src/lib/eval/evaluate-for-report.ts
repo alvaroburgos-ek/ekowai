@@ -17,6 +17,7 @@ import { equationProfiles } from './equation-profiles';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { FORMULA_ENGINE_WHITELIST, whitelistKey } from './engine-whitelist';
+import { normalizeSurfaceCarrier } from './surface-inventory';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -24,6 +25,18 @@ import type {
   Gl8Scalars,
   Gl10Scalars,
 } from './aggregators';
+
+// A138-07 surface-producer equation ids (A_C, C_m, A_E_ba, A_E_nba).
+const A138_07_A_C_ID    = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
+const A138_07_C_M_ID    = 'a1380702-0000-4000-8000-000000000002';
+const A138_07_A_E_BA_ID = 'a1380702-0000-4000-8000-000000000003';
+const A138_07_A_E_NBA_ID = 'a1380702-0000-4000-8000-000000000004';
+const A138_07_SURFACE_IDS = new Set([
+  A138_07_A_C_ID,
+  A138_07_C_M_ID,
+  A138_07_A_E_BA_ID,
+  A138_07_A_E_NBA_ID,
+]);
 
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
@@ -161,6 +174,9 @@ export function evaluateWorksheetEquations(
     ? (floodJson as FloodSubAreasCarrier)
     : null;
 
+  // A138-07 surface carrier: drives the four surface-producer aggregators.
+  const surfaceCarrier = normalizeSurfaceCarrier(jsonBySymbol.get('surface_inventory'));
+
   const r_D_30_field = fieldBySymbol.get('r_D_30');
 
   const pickNum = (sym: string): number | null => {
@@ -221,7 +237,9 @@ export function evaluateWorksheetEquations(
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (eq.id === A138_10_GL2_ID) {
+    if (A138_07_SURFACE_IDS.has(eq.id)) {
+      aggregator = { surfaceInventory: surfaceCarrier };
+    } else if (eq.id === A138_10_GL2_ID) {
       aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
