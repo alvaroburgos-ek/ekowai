@@ -45,32 +45,47 @@ describe('evaluateFormula — A138-07 Gl. 2 (surface_inventory producer)', () =>
     expect(r.substituted['Σ unbefestigt']).toBeCloseTo(20, 6);
   });
 
-  it('mixed C — differs from naive total · arithmetic mean', () => {
+  it('weighted sum with unequal areas — differs from naive arithmetic mean', () => {
     const r = evaluateFormula(
       a138_07_gl2_req([
-        { id: '1', label: 'Steildach', tab9_value: 'schwarzdecke_asphalt', area_m2: 400, c_i: 0.9, c_s: 1.0, coeff_override: false },
-        { id: '2', label: 'Rasen', tab9_value: 'park_flach', area_m2: 400, c_i: 0.1, c_s: 0.2, coeff_override: false },
+        { id: '1', label: 'Steildach', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', label: 'Rasen', tab9_value: 'park_flach', area_m2: 900, c_i: 0.1, c_s: 0.2, coeff_override: false },
       ]),
     );
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    // Naive: 800 * 0.5 = 400; actual: 400*0.9 + 400*0.1 = 360 + 40 = 400 (same here)
-    // Use unequal area split to show divergence: 600 paved, 200 unpaved
-    expect(r.value).toBeLessThan(800); // sanity: A_C < total area
+    // Area-weighted: 100*0.9 + 900*0.1 = 90 + 90 = 180 m²
+    // Naive arithmetic mean: (0.9 + 0.1) / 2 = 0.5 → 1000 * 0.5 = 500 m² (clearly different)
+    expect(r.value).toBeCloseTo(180, 6);
+    expect(r.substituted['Σ befestigt']).toBeCloseTo(90, 6);
+    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(90, 6);
   });
 
-  it('manual_required when a row is missing its tab9_value — never a partial sum', () => {
+  it('excludes incomplete row from sum but still computes from the complete rows', () => {
     const r = evaluateFormula(
       a138_07_gl2_req([
         { id: '1', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 400, c_i: 0.9, c_s: 1.0, coeff_override: false },
         { id: '2', label: 'Unbestimmt', tab9_value: null, area_m2: 300, c_i: 0.9, c_s: 1.0, coeff_override: false },
       ]),
     );
-    // Row 2 has tab9_value=null → incomplete → still returns computed (row excluded from sum)
-    // The aggregator counts only complete rows, so this returns computed with only row 1
+    // Row 2 has tab9_value=null → incomplete → excluded from sum, but row 1 is complete
+    // Aggregator only counts complete rows, returns computed with only row 1's contribution
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    expect(r.value).toBeCloseTo(360, 6); // only row 1 counted
+    expect(r.value).toBeCloseTo(360, 6); // only row 1 counted: 400 * 0.9
+  });
+
+  it('manual_required when all rows are incomplete', () => {
+    const r = evaluateFormula(
+      a138_07_gl2_req([
+        { id: '1', label: 'Dach', tab9_value: null, area_m2: 400, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', label: 'Rasen', tab9_value: null, area_m2: 300, c_i: 0.1, c_s: 0.2, coeff_override: false },
+      ]),
+    );
+    // Both rows incomplete → no rows to sum → manual_required
+    expect(r.kind).toBe('manual_required');
+    if (r.kind !== 'manual_required') return;
+    expect(r.reason).toMatch(/Keine Flächen|keine vollständigen/i);
   });
 
   it('manual_required when carrier is empty', () => {
