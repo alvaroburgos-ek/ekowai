@@ -138,11 +138,24 @@ persists on next save:
 - backfill `c_s` from the matched entry only when stored `c_s` is null.
 - if stored `c_i` ≠ matched `cm` → set `coeff_override:true` (keep stored `c_i`; the Tab. 9 pair stays
   visible for confirmation). Never overwrite a stored `c_i`.
-- any old row whose `(c_i,c_s)` exactly equals one entry's `(cm,cs)` → map to that entry.
-- otherwise (`dach`, `pflaster`, `pflaster_offen`, `kies`, `sonstige`, …): `tab9_value:null`,
-  `coeff_override:false`, **keep** `c_i`/`c_s`; the row renders the badge
-  "⚠ Oberflächentyp neu wählen (Tab. 9)" and is **not** complete.
+- any old row whose `(c_i,c_s)` **uniquely** matches exactly one entry's `(cm,cs)` → map to that entry.
+  If the pair matches **more than one** entry (e.g. `0.9/1.0` matches ~6 entries) it is **ambiguous**
+  → it does NOT auto-map; it drops to reselection (next bullet).
+- otherwise — unmapped type (`dach`, `pflaster`, `pflaster_offen`, `kies`, `sonstige`, …) **or**
+  an ambiguous coefficient pair: `tab9_value:null`, `coeff_override:false`, **keep** `c_i`/`c_s`;
+  the row renders the badge "⚠ Oberflächentyp neu wählen (Tab. 9)" and is **not** complete.
 - rows already in the new shape pass through unchanged.
+
+**Migration is coefficient-preserving and Final-preserving for clean rows.** A clean migration
+(explicit label map, or unique exact-coefficient match) never changes a stored `c_i`, so each cleanly
+migrated row's `A·C_i` contribution — and therefore `A_C` and the worksheet's Final status — is
+**unchanged**. Only rows whose type is unmappable/ambiguous go incomplete. In the live PLT-HS-01
+data this means exactly **one** row legitimately drops: `Gewächshausdach` (old generic `dach`,
+0.9/1.0 → ambiguous), which goes to "Oberflächentyp neu wählen". `Parkplatz` (`asphalt`→Schwarzdecken,
+clean) and `Testfläche` (`rasen`→Parkanlagen-flach, C_s backfilled) migrate clean and complete. While
+`Gewächshausdach` is unresolved, A138-07 is **not Final** and `A_C` excludes it; once the engineer
+reselects its precise 0.9/1.0 roof type, the two-surface baseline `A_C = 4826.43`, `C_m = 0.9` holds
+unchanged (no coefficient was ever silently altered).
 
 ## §3 — A138-07 editor (the picker)
 
@@ -152,6 +165,9 @@ persists on next save:
 - Per-row "abweichend wählen" toggle (§5.3.3.5 permits adjusting C for permeable surfaces by soil
   permeability/slope): makes C_i/C_s editable, sets `coeff_override:true`, tags the row
   "engineer-adjusted", and shows the original Tab. 9 pair inline ("Tab. 9: 0.9 / 1.0") for audit.
+  **The override edits `c_i`/`c_s` ONLY — it never changes `tab9_value` or the derived `kind`.**
+  The selected Oberflächentyp (and thus its group/`kind`) is fixed by the picker; deviation adjusts
+  the coefficient pair against that fixed type, so `kind` and the audited Tab. 9 baseline stay intact.
 - A complete row cannot have C_s blank.
 - `kind` badge (befestigt/unbefestigt) is shown, derived, never an input.
 - Footer: Σ Fläche · A_C-Vorschau · A_E,b,a / A_E,nb,a preview · `n/m Zeilen vollständig`.
@@ -214,16 +230,25 @@ A138-07 instance status for this check.
 
 - `tab9.ts`: all 30 entries present; `kind` correct by group; `lookupTab9` round-trips; the two
   migration anchors (`schwarzdecke_asphalt` 0.9/1.0, `park_flach` 0.1/0.2) exist.
-- `normalizeSurfaceCarrier`: asphalt→Schwarzdecken; rasen→Parkanlagen-flach with C_s backfilled 0.2;
-  dach→reselection (tab9_value null, c_i/c_s preserved, not complete); never mutates a stored c_i;
-  idempotent on already-new rows.
-- `summarizeSurfaces`: Gewächshausdach 3786.8/0.9 + Parkplatz 1575.9/0.9 → A_C 4826.43, C_m 0.9,
-  A_E,b,a 5362.7, A_E,nb,a 0; test row `park_flach` A=100 → c_i 0.1, c_s 0.2, kind unpaved,
-  A·C_i 10, row complete.
+- `normalizeSurfaceCarrier`:
+  - explicit label maps: `asphalt`→Schwarzdecken (clean, complete); `rasen`→Parkanlagen-flach with
+    C_s backfilled 0.2 (clean, complete);
+  - **unique** exact-coefficient match → auto-maps; **ambiguous** pair (e.g. `0.9/1.0`, ~6 entries)
+    → does NOT auto-map, drops to reselection;
+  - unmapped type `dach` 0.9/1.0 → reselection (`tab9_value:null`, `c_i`/`c_s` preserved, not complete);
+  - never mutates a stored `c_i`; idempotent on already-new rows.
+- override: setting `coeff_override` edits `c_i`/`c_s` only; `tab9_value` and derived `kind` unchanged.
+- `summarizeSurfaces`: Gewächshausdach 3786.8/0.9 + Parkplatz 1575.9/0.9 (both cleanly typed) → A_C
+  4826.43, C_m 0.9, A_E,b,a 5362.7, A_E,nb,a 0; test row `park_flach` A=100 → c_i 0.1, c_s 0.2,
+  kind unpaved, A·C_i 10, row complete.
 - Engine: A138-07 produces A_C/C_m/A_E,b,a/A_E,nb,a; A138-10 inherits A_C/C_m; blanks with the right
   cause when A138-07 is draft or has incomplete rows.
 - A138-10 renders no editable sub-area input; Flächenverzeichnis is read-only there.
-- Regression: existing two-surface dataset still yields A_C 4826.43 / C_m 0.9.
+- Migration regression (clean rows preserve A_C): a dataset of only clean exact/label-mapped rows
+  migrates with **no** coefficient change and stays Final — A_C unchanged.
+- Live PLT-HS-01 migration: exactly one row (`Gewächshausdach`, ambiguous `dach`) drops to
+  reselection → A138-07 not Final, A_C excludes it; after reselecting a 0.9/1.0 roof type the
+  two-surface baseline A_C 4826.43 / C_m 0.9 holds.
 
 ## Out of scope
 
