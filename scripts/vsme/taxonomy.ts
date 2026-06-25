@@ -23,6 +23,7 @@ const NUMERIC_FRAGMENTS = [
   'pure',
   'area',
   'power',
+  'ghg',
 ];
 
 /**

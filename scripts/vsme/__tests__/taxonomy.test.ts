@@ -8,6 +8,10 @@ describe('mapXbrlType', () => {
     expect(mapXbrlType('dtr-types:volumeItemType', false)).toBe('number');
     expect(mapXbrlType('xbrli:monetaryItemType', false)).toBe('number');
   });
+  it('maps GHG emission XBRL types to number', () => {
+    expect(mapXbrlType('dtr-types:ghgEmissionsItemType', false)).toBe('number');
+    expect(mapXbrlType('dtr-types:ghgEmissionsPerMonetaryItemType', false)).toBe('number');
+  });
   it('maps enumeration to enum, string to text, boolean to boolean', () => {
     expect(mapXbrlType('enum2:enumerationItemType', false)).toBe('enum');
     expect(mapXbrlType('xbrli:stringItemType', false)).toBe('text');
