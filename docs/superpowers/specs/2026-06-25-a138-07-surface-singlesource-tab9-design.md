@@ -197,19 +197,54 @@ substituted map ("Σ befestigt" / "Σ unbefestigt") — derived by the same help
 separately persisted. A138-10 shows them read-only via the inherited Gl. 2 card.
 
 Engine change: add a `surfaceInventory` aggregator path keyed to the A138-07 equation ids, reading
-the `surface_inventory` carrier via `normalizeSurfaceCarrier`. The four A138-07 fields + equations
-are seeded via a `supabase/migrations/` SQL file (consistent with existing `_fix-138` / pass4-overlay
-practice), since they don't exist on A138-07 today. One equation → one output (existing write-back).
+the `surface_inventory` carrier via `normalizeSurfaceCarrier`. One equation → one output (existing
+write-back).
+
+**DB reality (verified 2026-06-25) — this is a consolidation, not a greenfield seed:**
+- A138-07 **already** has Gl. 2 → `A_C_preliminary` (eq `b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0`,
+  input `surface_inventory`), but it is **not** in `FORMULA_ENGINE_WHITELIST`, so it never computes.
+  This is the documented "A_C produced twice" violation. We **repurpose** it to output the canonical
+  `A_C` (retiring `A_C_preliminary`).
+- A138-10 **already** has Gl. 2→`A_C` (`1a48af79…`, whitelisted, but its aggregator wrongly reads the
+  empty `sub_areas_A138_10`), Gl. 2a→`A_C_sealed` (`d1a38110…0001`), Gl. 2b→`A_C_unsealed`
+  (`…0002`), Gl. 2c→`C_m` (`…0003`), Gl. 3→`Q_zu` (`b39dda00…`). Only Gl. 2 is whitelisted; 2a/2b/2c
+  never compute today.
+- New fields needed on A138-07: `A_C`, `C_m`, `A_E_ba`, `A_E_nba` (symbols), each with a one-output
+  equation delegating to `summarizeSurfaces`. Seeded via a `supabase/migrations/` SQL file
+  (consistent with existing `_fix-138` / pass4-overlay practice).
 
 ## §5 — A138-10 becomes a pure consumer
 
-- A138-07's `A_C` and `C_m` fields declare `consumer_worksheets` ⊇ `['A138-10']`; A138-10 inherits
-  them **by reference** (existing inherited-fields path), read-only, in "Vorgelagerte Werte".
-- The Flächenverzeichnis is **mirrored read-only** on A138-10 (read-only render of the same
-  normalized carrier — no second editable input).
-- `sub_areas_A138_10` retired: field `active=false`, `SubAreasEditor` section removed, and the
-  `A138_10_GL2_ID` aggregator path deleted from `use-equation-engine.ts`. (= task 4)
+- A138-07 becomes the **sole producer** of `A_C` and `C_m`. Its `A_C`/`C_m` fields declare
+  `consumer_worksheets` covering **every** current `A_C` consumer (the 9 worksheets A138-10, -13, -16,
+  -17, -18, -19, -20, -21, -22, -26 — the full set today held on A138-10's `A_C` field), so no
+  downstream sheet loses its source.
+- A138-10's `A_C`/`C_m` production is **retired** so the symbols are produced once (else `A_C` is
+  ambiguous → blanks everywhere): remove `A138-10:2` from the whitelist, deactivate A138-10's Gl. 2/2a/
+  2b/2c equations, drop the `A138_10_GL2_ID` aggregator path, and retire `sub_areas_A138_10`
+  (`active=false`, `SubAreasEditor` removed). (= task 4)
+- A138-10 inherits `A_C`/`C_m` **by reference** (existing inherited-fields path), read-only, in
+  "Vorgelagerte Werte". The Flächenverzeichnis is **mirrored read-only** on A138-10.
+- `A_C_sealed`/`A_C_unsealed` move to A138-07's Gl. 2 card display (Σ befestigt/unbefestigt) via
+  `summarizeSurfaces`.
 - `Q_zu` stays computed on A138-10 from inherited `A_C` + local `A_VA` + `r_D(n)` — math unchanged.
+
+**Cross-worksheet delivery depends on the engine-output-materialization gap.** For the 9 consumers to
+actually read A138-07's `A_C`, the derived value must persist (today engine outputs are in-memory
+only). Closing that gap for `A_C`/`C_m` is part of Plan 3.
+
+## Implementation decomposition (3 sequential plans)
+
+Full consolidation is split into independently-testable plans:
+- **Plan 1 — Foundation (no DB/engine):** `tab9.ts` accessor module, `SurfaceRow` shape +
+  `normalizeSurfaceCarrier` (migration), and the A138-07 `SurfaceInventoryEditor` picker (override,
+  derived kind, footer totals). Pure client + pure functions; fully unit-testable.
+- **Plan 2 — A138-07 production + A138-10 consumer:** `summarizeSurfaces` helper, `surfaceInventory`
+  aggregator wired to A138-07's Gl. 2 (output → `A_C`), new A138-07 fields/equations (`C_m`,
+  `A_E_ba`, `A_E_nba`) via migration, whitelist updates, retire A138-10 Gl. 2/2a/2b/2c + `sub_areas`,
+  A138-10 read-only mirror + inherited values + the 3-state upstream-cause message.
+- **Plan 3 — Consumer re-pointing + materialization:** re-point the 9 `A_C` consumers to A138-07,
+  persist derived `A_C`/`C_m` (engine-output-materialization) so downstream reads resolve.
 
 ## §6 — Upstream-cause message (3 states)
 
