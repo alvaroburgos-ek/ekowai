@@ -476,6 +476,11 @@
       "ownerEkowai": "EKOWAI produziert",
       "ownerClient": "Kunde liefert",
       "ownerGeneral": "Allgemein"
+    },
+    "export": {
+      "title": "Export",
+      "xlsx": "Excel herunterladen (.xlsx)",
+      "pdf": "PDF herunterladen"
     }
   }
 }

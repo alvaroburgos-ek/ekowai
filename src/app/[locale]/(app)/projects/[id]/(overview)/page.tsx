@@ -11,6 +11,7 @@ import { ProjectStandardsLayers } from '@/components/worksheet/project-standards
 import { isVsmeReport } from '@/lib/db/queries/is-vsme-report';
 import { loadVsmeSummary } from '@/lib/db/queries/vsme-summary';
 import { ReportOverview } from '@/components/vsme/report-overview';
+import { VsmeExportButton } from '@/components/vsme/vsme-export-button';
 
 export default async function ProjectOverviewPage({
   params,
@@ -22,7 +23,12 @@ export default async function ProjectOverviewPage({
 
   if (await isVsmeReport(id)) {
     const summary = await loadVsmeSummary(id);
-    return <ReportOverview projectId={id} locale={localeTyped} summary={summary} />;
+    return (
+      <div className="flex flex-col gap-8">
+        <ReportOverview projectId={id} locale={localeTyped} summary={summary} />
+        <VsmeExportButton projectId={id} />
+      </div>
+    );
   }
 
   const standardsWithWs = await listProjectStandardsWithWorksheets(id);
