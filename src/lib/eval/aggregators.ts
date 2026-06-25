@@ -12,6 +12,7 @@
  * bare number that hides a problem.
  */
 import type { EvalRequest, EvalState } from './formula';
+import { summarizeSurfaces, type SurfaceInventoryCarrier } from './surface-inventory';
 
 export type SubArea = {
   id: string;
@@ -84,6 +85,8 @@ export type Gl10Scalars = {
 export type AggregatorContext = {
   /** Carrier data for the sub-areas aggregator (A138-10 Gl. 2). */
   subAreas?: SubAreasCarrier | null;
+  /** Carrier for the A138-07 surface-inventory producers (Gl. 2 + C_m + area totals). */
+  surfaceInventory?: SurfaceInventoryCarrier | null;
   /** Carrier data for the KOSTRA-table aggregator (A138-13 Gl. 8). */
   kostraTable?: KostraCarrier | null;
   /** Scalar inputs the Gl. 8 aggregator reads in addition to the table.
@@ -630,9 +633,51 @@ const a138_26_gl10: Aggregator = {
   },
 };
 
+/** A138-07 producers: each reads the surface_inventory carrier and returns one
+ * scalar from the shared summarizeSurfaces(). manual_required when no complete
+ * row exists, so downstream blanks with a cause rather than showing 0. */
+function makeSurfaceAggregator(
+  pick: (s: ReturnType<typeof summarizeSurfaces>) => number | null,
+  formulaEvaluated: string,
+): Aggregator {
+  return {
+    run: (req) => {
+      const carrier = req.aggregator?.surfaceInventory;
+      if (!carrier || !Array.isArray(carrier.rows) || carrier.rows.length === 0) {
+        return { kind: 'manual_required', reason: 'Keine Flächen im Flächenverzeichnis (A138-07) erfasst.' };
+      }
+      const sum = summarizeSurfaces(carrier);
+      if (sum.complete === 0) {
+        return { kind: 'manual_required', reason: `Keine vollständigen Flächen-Zeilen (0/${sum.total}). Oberflächentyp, Fläche und C_i je Zeile erforderlich.` };
+      }
+      const value = pick(sum);
+      if (value == null || !Number.isFinite(value)) {
+        return { kind: 'manual_required', reason: 'Wert nicht berechenbar (Σ Fläche = 0).' };
+      }
+      const substituted: Record<string, number> = {
+        'Σ befestigt': sum.A_C_sealed ?? 0,
+        'Σ unbefestigt': sum.A_C_unsealed ?? 0,
+        'Σ A·C_i': sum.A_C ?? 0,
+      };
+      return { kind: 'computed', value, substituted, formulaEvaluated };
+    },
+  };
+}
+
+const a138_07_A_C = makeSurfaceAggregator((s) => s.A_C, 'A_C = Σ(A_E,i · C_i)   (Flächenverzeichnis, Tab. 9)');
+const a138_07_C_m = makeSurfaceAggregator((s) => s.C_m, 'C_m = A_C / Σ A_E,i');
+const a138_07_A_E_ba = makeSurfaceAggregator((s) => s.A_E_ba, 'A_E,b,a = Σ A_E,i (befestigt)');
+const a138_07_A_E_nba = makeSurfaceAggregator((s) => s.A_E_nba, 'A_E,nb,a = Σ A_E,i (unbefestigt)');
+
 export const aggregators: Record<string, Aggregator> = {
-  // DWA-A 138-1 · A138-10 · Gl. (2)
-  '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3': a138_10_gl2,
+  // DWA-A 138-1 · A138-07 · Gl. (2) A_C producer (surface_inventory)
+  'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0': a138_07_A_C,
+  // DWA-A 138-1 · A138-07 · Gl. (2c) C_m producer
+  'a1380702-0000-4000-8000-000000000002': a138_07_C_m,
+  // DWA-A 138-1 · A138-07 · Gl. (2d) A_E_ba producer
+  'a1380702-0000-4000-8000-000000000003': a138_07_A_E_ba,
+  // DWA-A 138-1 · A138-07 · Gl. (2e) A_E_nba producer
+  'a1380702-0000-4000-8000-000000000004': a138_07_A_E_nba,
   // DWA-A 138-1 · A138-13 · Gl. (8)
   '69f31e6e-a755-4246-af10-ae46668b5c86': a138_13_gl8,
   // DWA-A 138-1 · A138-16 · Gl. (11) Bilanz-Check

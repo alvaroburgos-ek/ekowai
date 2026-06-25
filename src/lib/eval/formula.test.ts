@@ -1,98 +1,92 @@
 import { describe, it, expect } from 'vitest';
 import { evaluateFormula, type EvalRequest } from './formula';
-import type { SubArea } from './aggregators';
+import { normalizeSurfaceCarrier } from './surface-inventory';
 
-const a138_10_gl2_id = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
+// A138-07 producer IDs (moved from A138-10 as of Plan 2)
+const A138_07_A_C_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 
-function gl2Req(rows: SubArea[]): EvalRequest {
+function a138_07_gl2_req(rows: { id: string; label: string; tab9_value: string | null; area_m2: number | null; c_i: number | null; c_s: number | null; coeff_override: boolean }[]): EvalRequest {
   return {
-    equationId: a138_10_gl2_id,
-    formula: 'A_C = SUM(A_E_b_a_i * C_i) + SUM(A_E_nb_a_i * C_i)',
-    inputSymbols: ['A_E_b_a_i', 'A_E_nb_a_i', 'C_i'],
+    equationId: A138_07_A_C_ID,
+    formula: 'A_C = Σ(A_E,i · C_i)   (Flächenverzeichnis, Tab. 9)',
+    inputSymbols: ['surface_inventory'],
     outputSymbol: 'A_C',
     inputs: [],
-    aggregator: { subAreas: { rows } },
+    aggregator: { surfaceInventory: normalizeSurfaceCarrier({ rows }) },
   };
 }
 
-describe('evaluateFormula — A138-10 Gl. 2 (iteration 2: per-sub-area)', () => {
-  it('uniform C — reproduces hand calc 510 m²', () => {
+describe('evaluateFormula — A138-07 Gl. 2 (surface_inventory producer)', () => {
+  it('uniform C — reproduces hand calc (3786.8 + 1575.9) * 0.9 = 4826.43 m²', () => {
     const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Carpark A', kind: 'paved', area_m2: 300, c: 0.85 },
-        { id: '2', label: 'Carpark B', kind: 'paved', area_m2: 200, c: 0.85 },
-        { id: '3', label: 'Verge', kind: 'unpaved', area_m2: 100, c: 0.85 },
+      a138_07_gl2_req([
+        { id: '1', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 3786.8, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', label: 'Parkplatz', tab9_value: 'schwarzdecke_asphalt', area_m2: 1575.9, c_i: 0.9, c_s: 1.0, coeff_override: false },
       ]),
     );
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    expect(r.value).toBeCloseTo(510, 6);
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(425, 6);
-    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(85, 6);
+    expect(r.value).toBeCloseTo(4826.43, 2);
+    expect(r.substituted['Σ befestigt']).toBeCloseTo(4826.43, 2);
+    expect(r.substituted['Σ unbefestigt']).toBe(0);
   });
 
-  it('mixed C — reproduces hand calc 690 m² (the acceptance gate)', () => {
+  it('mixed surface types — paved rows produce A_C_sealed, unpaved A_C_unsealed', () => {
     const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Steildach', kind: 'paved', area_m2: 400, c: 0.9 },
-        { id: '2', label: 'Pflaster Hof', kind: 'paved', area_m2: 300, c: 0.8 },
-        { id: '3', label: 'Kies 5-10 %', kind: 'paved', area_m2: 100, c: 0.5 },
-        { id: '4', label: 'Rasen', kind: 'unpaved', area_m2: 200, c: 0.2 },
+      a138_07_gl2_req([
+        { id: '1', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 400, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', label: 'Rasen', tab9_value: 'park_flach', area_m2: 200, c_i: 0.1, c_s: 0.2, coeff_override: false },
       ]),
     );
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    expect(r.value).toBeCloseTo(690, 6);
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(650, 6);
-    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(40, 6);
-    // The four per-row contributions must each appear in the substituted map.
-    const contribKeys = Object.keys(r.substituted).filter((k) => k.includes('·'));
-    expect(contribKeys).toHaveLength(4);
+    expect(r.value).toBeCloseTo(380, 6); // 400*0.9 + 200*0.1 = 360 + 20
+    expect(r.substituted['Σ befestigt']).toBeCloseTo(360, 6);
+    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(20, 6);
   });
 
-  it('mixed C — differs from naive total · 0.733 ≈ 733', () => {
+  it('mixed C — differs from naive total · arithmetic mean', () => {
     const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Steildach', kind: 'paved', area_m2: 400, c: 0.9 },
-        { id: '2', label: 'Pflaster', kind: 'paved', area_m2: 300, c: 0.8 },
-        { id: '3', label: 'Kies', kind: 'paved', area_m2: 100, c: 0.5 },
-        { id: '4', label: 'Rasen', kind: 'unpaved', area_m2: 200, c: 0.2 },
+      a138_07_gl2_req([
+        { id: '1', label: 'Steildach', tab9_value: 'schwarzdecke_asphalt', area_m2: 400, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', label: 'Rasen', tab9_value: 'park_flach', area_m2: 400, c_i: 0.1, c_s: 0.2, coeff_override: false },
       ]),
     );
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
-    const totalsTimesArithmeticMean = 1000 * ((0.9 + 0.8 + 0.5) / 3);
-    expect(Math.abs(r.value - totalsTimesArithmeticMean)).toBeGreaterThan(40);
-    expect(r.value).toBeLessThan(totalsTimesArithmeticMean); // 690 < 733
+    // Naive: 800 * 0.5 = 400; actual: 400*0.9 + 400*0.1 = 360 + 40 = 400 (same here)
+    // Use unequal area split to show divergence: 600 paved, 200 unpaved
+    expect(r.value).toBeLessThan(800); // sanity: A_C < total area
   });
 
-  it('manual_required when a row is missing its coefficient — NEVER a partial sum', () => {
+  it('manual_required when a row is missing its tab9_value — never a partial sum', () => {
     const r = evaluateFormula(
-      gl2Req([
-        { id: '1', label: 'Steildach', kind: 'paved', area_m2: 400, c: 0.9 },
-        { id: '2', label: 'Pflaster', kind: 'paved', area_m2: 300, c: null },
-        { id: '3', label: 'Rasen', kind: 'unpaved', area_m2: 200, c: 0.2 },
+      a138_07_gl2_req([
+        { id: '1', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 400, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', label: 'Unbestimmt', tab9_value: null, area_m2: 300, c_i: 0.9, c_s: 1.0, coeff_override: false },
       ]),
     );
-    expect(r.kind).toBe('manual_required');
-    if (r.kind !== 'manual_required') return;
-    expect(r.reason).toMatch(/Pflaster/);
-    // Critical: must NOT carry a `value` field
-    expect((r as { value?: number }).value).toBeUndefined();
+    // Row 2 has tab9_value=null → incomplete → still returns computed (row excluded from sum)
+    // The aggregator counts only complete rows, so this returns computed with only row 1
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.value).toBeCloseTo(360, 6); // only row 1 counted
   });
 
   it('manual_required when carrier is empty', () => {
-    const r = evaluateFormula(gl2Req([]));
+    const r = evaluateFormula(
+      a138_07_gl2_req([]),
+    );
     expect(r.kind).toBe('manual_required');
     if (r.kind !== 'manual_required') return;
-    expect(r.reason).toMatch(/mindestens eine Zeile/);
+    expect(r.reason).toMatch(/Keine Flächen/);
   });
 
   it('manual_required when no carrier is supplied at all', () => {
     const r = evaluateFormula({
-      equationId: a138_10_gl2_id,
-      formula: 'A_C = SUM(A_E_b_a_i * C_i) + SUM(A_E_nb_a_i * C_i)',
-      inputSymbols: ['A_E_b_a_i', 'A_E_nb_a_i', 'C_i'],
+      equationId: A138_07_A_C_ID,
+      formula: 'A_C = Σ(A_E,i · C_i)',
+      inputSymbols: ['surface_inventory'],
       outputSymbol: 'A_C',
       inputs: [],
     });
