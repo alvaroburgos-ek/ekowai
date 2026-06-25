@@ -14,6 +14,10 @@ BEGIN
     WHERE s.code='DWA-A-138-1' AND wt.code='A138-10';
   SELECT section_id INTO sec07 FROM fields WHERE worksheet_template_id=ws07 AND symbol='surface_inventory';
 
+  IF ws07 IS NULL OR ws10 IS NULL THEN
+    RAISE EXCEPTION 'A138 consolidation: worksheet template not found (ws07=% ws10=%)', ws07, ws10;
+  END IF;
+
   -- 1. Repoint A138-07 Gl.2 output A_C_preliminary -> A_C.
   UPDATE equations SET output_symbol='A_C', output_unit='m²'
     WHERE id='b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
@@ -25,7 +29,8 @@ BEGIN
     ('a1380700-0000-4000-8000-000000000002', ws07, sec07, 'C_m',     'Mittlerer Abflussbeiwert C_m',          'Mean runoff coeff C_m', 'number', '-', false, consumers, 91, true),
     ('a1380700-0000-4000-8000-000000000003', ws07, sec07, 'A_E_ba',  'Σ befestigte Fläche A_E,b,a',           'Σ paved area',  'number', 'm²', false, NULL, 92, true),
     ('a1380700-0000-4000-8000-000000000004', ws07, sec07, 'A_E_nba', 'Σ unbefestigte Fläche A_E,nb,a',        'Σ unpaved area','number', 'm²', false, NULL, 93, true)
-  ON CONFLICT (id) DO UPDATE SET consumer_worksheets=EXCLUDED.consumer_worksheets, active=true;
+  ON CONFLICT (worksheet_template_id, symbol) DO UPDATE
+  SET consumer_worksheets = EXCLUDED.consumer_worksheets, active = true;
 
   -- 3. New A138-07 equations for C_m / A_E_ba / A_E_nba (Gl.2 already exists).
   INSERT INTO equations (id, worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference)
@@ -33,7 +38,7 @@ BEGIN
     ('a1380702-0000-4000-8000-000000000002', ws07, '2c', 'C_m = A_C / A_E', ARRAY['surface_inventory'], 'C_m', '-', '§5.3.3.5'),
     ('a1380702-0000-4000-8000-000000000003', ws07, '2d', 'A_E_ba = Σ A_E,i (befestigt)', ARRAY['surface_inventory'], 'A_E_ba', 'm²', '§5.3.3.5'),
     ('a1380702-0000-4000-8000-000000000004', ws07, '2e', 'A_E_nba = Σ A_E,i (unbefestigt)', ARRAY['surface_inventory'], 'A_E_nba', 'm²', '§5.3.3.5')
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
 
   -- 4. Retire A138-10 duplicate producers: delete Gl.2/2a/2b/2c equations.
   DELETE FROM equations WHERE id IN (
