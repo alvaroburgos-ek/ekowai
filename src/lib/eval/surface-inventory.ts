@@ -110,3 +110,39 @@ export function normalizeSurfaceCarrier(value: unknown): SurfaceInventoryCarrier
   if (!Array.isArray(v.rows)) return { rows: [] };
   return { rows: v.rows.map(normalizeRow) };
 }
+
+export type SurfaceSummary = {
+  A_C: number | null;
+  A_C_sealed: number | null;
+  A_C_unsealed: number | null;
+  A_E_ba: number | null;
+  A_E_nba: number | null;
+  C_m: number | null;
+  complete: number;
+  total: number;
+};
+
+/** Single source of the Gl. 2 sums. Operates only on COMPLETE rows. When no
+ * row is complete every sum is null (C_m guards ΣA=0). */
+export function summarizeSurfaces(carrier: SurfaceInventoryCarrier): SurfaceSummary {
+  let sealed = 0;        // Σ(area·c_i) paved
+  let unsealed = 0;      // Σ(area·c_i) unpaved
+  let areaPaved = 0;     // Σ area paved
+  let areaUnpaved = 0;   // Σ area unpaved
+  let complete = 0;
+  for (const r of carrier.rows) {
+    if (!rowComplete(r)) continue;
+    complete++;
+    const area = r.area_m2 as number;
+    const contrib = area * (r.c_i as number);
+    if (rowKind(r) === 'paved') { sealed += contrib; areaPaved += area; }
+    else { unsealed += contrib; areaUnpaved += area; }
+  }
+  if (complete === 0) {
+    return { A_C: null, A_C_sealed: null, A_C_unsealed: null, A_E_ba: null, A_E_nba: null, C_m: null, complete: 0, total: carrier.rows.length };
+  }
+  const A_C = sealed + unsealed;
+  const areaTotal = areaPaved + areaUnpaved;
+  const C_m = areaTotal > 0 ? A_C / areaTotal : null;
+  return { A_C, A_C_sealed: sealed, A_C_unsealed: unsealed, A_E_ba: areaPaved, A_E_nba: areaUnpaved, C_m, complete, total: carrier.rows.length };
+}
