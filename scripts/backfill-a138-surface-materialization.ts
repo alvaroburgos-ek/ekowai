@@ -114,8 +114,8 @@ async function main(): Promise<void> {
   // -------------------------------------------------------------------------
   // 3. Load all projects that have a surface_inventory project_parameters row
   // -------------------------------------------------------------------------
-  const carrierParamRows = await sql<{ project_id: string; value_json: unknown }[]>`
-    SELECT project_id, value_json
+  const carrierParamRows = await sql<{ project_id: string; value_json: unknown; entered_by: string }[]>`
+    SELECT project_id, value_json, entered_by
     FROM project_parameters
     WHERE field_id = ${carrierId}
   `;
@@ -131,6 +131,12 @@ async function main(): Promise<void> {
   // -------------------------------------------------------------------------
   // 4. Plan the backfill (pure, no DB)
   // -------------------------------------------------------------------------
+  // Build a map of projectId → entered_by so we can stamp each derived row
+  // with a guaranteed-valid actor UUID (the same user who entered the carrier).
+  const enteredByByProject = new Map<string, string>(
+    carrierParamRows.map((row) => [row.project_id, row.entered_by]),
+  );
+
   const planInput = carrierParamRows.map((row) => ({
     projectId: row.project_id,
     acFieldId: acFieldId!,
@@ -151,8 +157,9 @@ async function main(): Promise<void> {
     const cm = projectRows.find((r) => r.fieldId === cmFieldId)?.valueNumber;
     const ba = projectRows.find((r) => r.fieldId === baFieldId)?.valueNumber;
     const nba = projectRows.find((r) => r.fieldId === nbaFieldId)?.valueNumber;
+    const enteredBy = enteredByByProject.get(inputRow.projectId) ?? '(unknown)';
     const status = ac == null ? 'SKIP (carrier empty/incomplete)' : `A_C=${ac?.toFixed(2)}, C_m=${cm?.toFixed(4)}, A_E_ba=${ba?.toFixed(2)}, A_E_nba=${nba?.toFixed(2)}`;
-    console.log(`  [${inputRow.projectId}] ${status}`);
+    console.log(`  [${inputRow.projectId}] ${status} | entered_by=${enteredBy}`);
   }
   console.log('');
 
@@ -169,19 +176,28 @@ async function main(): Promise<void> {
   // -------------------------------------------------------------------------
   let upsertCount = 0;
   for (const row of planned) {
+    // Stamp derived rows with the entered_by of that project's carrier row —
+    // a guaranteed-valid auth.users UUID (entered_by is NOT NULL / no default).
+    const enteredBy = enteredByByProject.get(row.projectId);
+    if (!enteredBy) {
+      console.warn(`  WARN: no entered_by found for project ${row.projectId} — skipping.`);
+      continue;
+    }
     // numeric column: pass null or the number as a string (postgres driver handles it)
     await sql`
-      INSERT INTO project_parameters (project_id, field_id, value_number, source_type)
+      INSERT INTO project_parameters (project_id, field_id, value_number, source_type, entered_by)
       VALUES (
         ${row.projectId}::uuid,
         ${row.fieldId}::uuid,
         ${row.valueNumber},
-        'derived'
+        'derived',
+        ${enteredBy}::uuid
       )
       ON CONFLICT (project_id, field_id)
       DO UPDATE SET
         value_number = EXCLUDED.value_number,
-        source_type  = 'derived'
+        source_type  = 'derived',
+        entered_by   = EXCLUDED.entered_by
     `;
     upsertCount++;
   }
