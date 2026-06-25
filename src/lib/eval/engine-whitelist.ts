@@ -15,7 +15,10 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   // ====================================================================
   // Original wiring — batch-0/1
   // ====================================================================
-  'A138-10:2',
+  'A138-07:2',   // A_C = Σ(A_E·C_i) from surface_inventory (producer)
+  'A138-07:2c',  // C_m
+  'A138-07:2d',  // A_E_ba (Σ befestigt area)
+  'A138-07:2e',  // A_E_nba (Σ unbefestigt area)
   'A138-13:8',
   'A138-18:21',
 
