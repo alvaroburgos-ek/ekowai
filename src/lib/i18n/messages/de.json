@@ -463,6 +463,19 @@
       "total": "Gesamt",
       "lines": "Aktivitäten",
       "empty": "Noch keine Aktivitäten erfasst."
+    },
+    "overview": {
+      "title": "VSME-Bericht · Überblick",
+      "subtitle": "Datenstand und Treibhausgas-Bilanz dieses Projekts.",
+      "completion": "Fertigstellung",
+      "fields": "Felder",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (standortbasiert)",
+      "total": "Gesamt",
+      "ownership": "Datenverantwortung",
+      "ownerEkowai": "EKOWAI produziert",
+      "ownerClient": "Kunde liefert",
+      "ownerGeneral": "Allgemein"
     }
   }
 }

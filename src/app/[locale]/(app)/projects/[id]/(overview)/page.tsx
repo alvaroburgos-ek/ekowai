@@ -8,6 +8,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
 import { ProjectStandardsLayers } from '@/components/worksheet/project-standards-layers';
+import { isVsmeReport } from '@/lib/db/queries/is-vsme-report';
+import { loadVsmeSummary } from '@/lib/db/queries/vsme-summary';
+import { ReportOverview } from '@/components/vsme/report-overview';
 
 export default async function ProjectOverviewPage({
   params,
@@ -16,6 +19,11 @@ export default async function ProjectOverviewPage({
 }) {
   const { locale, id } = await params;
   const localeTyped = (locale === 'en' ? 'en' : 'de') as 'de' | 'en';
+
+  if (await isVsmeReport(id)) {
+    const summary = await loadVsmeSummary(id);
+    return <ReportOverview projectId={id} locale={localeTyped} summary={summary} />;
+  }
 
   const standardsWithWs = await listProjectStandardsWithWorksheets(id);
 

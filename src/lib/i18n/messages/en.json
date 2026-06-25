@@ -463,6 +463,19 @@
       "total": "Total",
       "lines": "activities",
       "empty": "No activities recorded yet."
+    },
+    "overview": {
+      "title": "VSME report · Overview",
+      "subtitle": "Data status and greenhouse-gas balance for this project.",
+      "completion": "Completion",
+      "fields": "fields",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (location-based)",
+      "total": "Total",
+      "ownership": "Data ownership",
+      "ownerEkowai": "EKOWAI produces",
+      "ownerClient": "Client delivers",
+      "ownerGeneral": "General"
     }
   }
 }
