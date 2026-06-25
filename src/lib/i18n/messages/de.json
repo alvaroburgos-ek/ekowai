@@ -449,6 +449,20 @@
       "ownerEkowai": "EKOWAI",
       "ownerClient": "Kunde",
       "ownerGeneral": "Allgemein"
+    },
+    "emissions": {
+      "title": "THG-Aktivitäten",
+      "subtitle": "Tätigkeitsdaten mit hinterlegten UBA-Emissionsfaktoren.",
+      "recompute": "Neu berechnen",
+      "colCategory": "Kategorie",
+      "colAmount": "Menge",
+      "colFactor": "Faktor (UBA)",
+      "colResult": "tCO₂e",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (standortbasiert)",
+      "total": "Gesamt",
+      "lines": "Aktivitäten",
+      "empty": "Noch keine Aktivitäten erfasst."
     }
   }
 }

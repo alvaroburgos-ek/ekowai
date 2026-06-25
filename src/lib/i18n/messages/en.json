@@ -449,6 +449,20 @@
       "ownerEkowai": "EKOWAI",
       "ownerClient": "Client",
       "ownerGeneral": "General"
+    },
+    "emissions": {
+      "title": "GHG activities",
+      "subtitle": "Activity data with attached UBA emission factors.",
+      "recompute": "Recompute",
+      "colCategory": "Category",
+      "colAmount": "Amount",
+      "colFactor": "Factor (UBA)",
+      "colResult": "tCO₂e",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (location-based)",
+      "total": "Total",
+      "lines": "activities",
+      "empty": "No activities recorded yet."
     }
   }
 }

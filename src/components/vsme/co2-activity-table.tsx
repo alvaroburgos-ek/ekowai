@@ -1,10 +1,12 @@
 'use client';
 
 import type { JSX } from 'react';
+import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCw } from 'lucide-react';
+import { RotateCw, Loader2 } from 'lucide-react';
+import { recompute } from '@/lib/actions/co2-lines';
 
 /** One activity line in the CO₂ worksheet. Frozen shape — later tasks pass real data. */
 export interface Co2Line {
@@ -75,8 +77,8 @@ function ScopeChip({ scope }: { scope: string }) {
 }
 
 export function Co2ActivityTable({
-  projectId: _projectId,
-  worksheetInstanceId: _worksheetInstanceId,
+  projectId,
+  worksheetInstanceId,
   locale,
   lines,
   totals,
@@ -88,6 +90,13 @@ export function Co2ActivityTable({
   totals: Co2Totals;
 }): JSX.Element {
   const t = T[locale];
+  const [isPending, startTransition] = useTransition();
+
+  function handleRecompute() {
+    startTransition(async () => {
+      await recompute(projectId, worksheetInstanceId);
+    });
+  }
 
   return (
     <Card className="overflow-hidden">
@@ -96,9 +105,18 @@ export function Co2ActivityTable({
           <h2 className="text-lg font-semibold text-ink">{t.title}</h2>
           <p className="mt-0.5 text-sm text-subtext">{t.subtitle}</p>
         </div>
-        {/* No-op for the design layer — wired in a later task. */}
-        <Button variant="outline" size="sm" type="button">
-          <RotateCw />
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          onClick={handleRecompute}
+          disabled={isPending || !worksheetInstanceId}
+        >
+          {isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <RotateCw />
+          )}
           {t.recompute}
         </Button>
       </div>
@@ -146,7 +164,9 @@ export function Co2ActivityTable({
                     <span className="citation">{line.factorUbaId}</span>
                   </td>
                   <td className="px-5 py-3 align-top text-right tabular-nums font-medium text-ink whitespace-nowrap">
-                    {line.computedTco2e ?? '—'}
+                    {line.computedTco2e != null
+                      ? `${Number(line.computedTco2e).toLocaleString('de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`
+                      : '—'}
                   </td>
                 </tr>
               ))}
@@ -188,7 +208,7 @@ export const MOCK_CO2_LINES: Co2Line[] = [
     amount: '4.200',
     unit: 'kWh',
     factorUbaId: 'UBA-2024-NG-0182',
-    computedTco2e: '0,84',
+    computedTco2e: '0.84',
   },
   {
     id: 'l2',
@@ -198,7 +218,7 @@ export const MOCK_CO2_LINES: Co2Line[] = [
     amount: '1.100',
     unit: 'l',
     factorUbaId: 'UBA-2024-DSL-0091',
-    computedTco2e: '2,95',
+    computedTco2e: '2.95',
   },
   {
     id: 'l3',
@@ -208,7 +228,7 @@ export const MOCK_CO2_LINES: Co2Line[] = [
     amount: '18.500',
     unit: 'kWh',
     factorUbaId: 'UBA-2024-EL-LOC-22',
-    computedTco2e: '7,38',
+    computedTco2e: '7.38',
   },
 ];
 
