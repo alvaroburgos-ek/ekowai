@@ -15,6 +15,7 @@ import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { archiveProject } from '@/lib/actions/project';
 import { ProjectTabs } from '@/components/projects/project-tabs';
+import { isVsmeReport } from '@/lib/db/queries/is-vsme-report';
 
 export default async function OverviewLayout({
   children,
@@ -29,6 +30,8 @@ export default async function OverviewLayout({
 
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
   if (!project) notFound();
+
+  const isVsme = await isVsmeReport(id);
 
   const archiveAction = async () => {
     'use server';
@@ -84,7 +87,7 @@ export default async function OverviewLayout({
         </dl>
       </header>
 
-      <ProjectTabs locale={localeTyped} projectId={id} />
+      <ProjectTabs locale={localeTyped} projectId={id} isVsme={isVsme} />
 
       <div>{children}</div>
     </article>

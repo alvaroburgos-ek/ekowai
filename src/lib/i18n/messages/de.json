@@ -33,6 +33,11 @@
   "projects": {
     "title": "Projekte",
     "newProject": "Neues Projekt",
+    "tabs": {
+      "overview": "Übersicht",
+      "documents": "Dokumente",
+      "reports": "Berichtsverlauf"
+    },
     "name": "Projektname",
     "client": "Auftraggeber",
     "location": "Standort",
@@ -425,5 +430,11 @@
     "auditTitle": "Auditprotokoll",
     "auditEmpty": "Noch keine Aktionen für dieses Projekt aufgezeichnet.",
     "auditViewLink": "Auditprotokoll ansehen"
+  },
+  "vsme": {
+    "tabs": {
+      "worklist": "Arbeitsliste",
+      "emissions": "Emissionen"
+    }
   }
 }

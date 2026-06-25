@@ -33,6 +33,11 @@
   "projects": {
     "title": "Projects",
     "newProject": "New project",
+    "tabs": {
+      "overview": "Overview",
+      "documents": "Documents",
+      "reports": "Report history"
+    },
     "name": "Project name",
     "client": "Client",
     "location": "Location",
@@ -425,5 +430,11 @@
     "auditTitle": "Audit log",
     "auditEmpty": "No actions recorded for this project yet.",
     "auditViewLink": "View audit log"
+  },
+  "vsme": {
+    "tabs": {
+      "worklist": "Worklist",
+      "emissions": "Emissions"
+    }
   }
 }

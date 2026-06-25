@@ -2,19 +2,57 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FolderKanban, FileText, History, type LucideIcon } from 'lucide-react';
+import {
+  FolderKanban,
+  FileText,
+  History,
+  ClipboardList,
+  Wind,
+  type LucideIcon,
+} from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
-type Tab = { href: string; label: string; icon: LucideIcon; matchExact?: boolean };
+export type Tab = { href: string; label: string; icon: LucideIcon; matchExact?: boolean };
 
-export function ProjectTabs({ locale, projectId }: { locale: 'de' | 'en'; projectId: string }) {
-  const pathname = usePathname();
-  const base = `/${locale}/projects/${projectId}`;
-  const tabs: Tab[] = [
-    { href: base, label: 'Übersicht', icon: FolderKanban, matchExact: true },
-    { href: `${base}/documents`, label: 'Dokumente', icon: FileText },
-    { href: `${base}/reports`, label: 'Berichtsverlauf', icon: History },
+/** Pure function — testable without React or next-intl. */
+export function buildProjectTabs(
+  base: string,
+  t: (k: string) => string,
+  isVsme: boolean,
+): Tab[] {
+  const base_tabs: Tab[] = [
+    { href: base, label: t('projects.tabs.overview'), icon: FolderKanban, matchExact: true },
   ];
+
+  if (isVsme) {
+    base_tabs.push(
+      { href: `${base}/vsme/worklist`, label: t('vsme.tabs.worklist'), icon: ClipboardList },
+      { href: `${base}/vsme/emissions`, label: t('vsme.tabs.emissions'), icon: Wind },
+    );
+  }
+
+  base_tabs.push(
+    { href: `${base}/documents`, label: t('projects.tabs.documents'), icon: FileText },
+    { href: `${base}/reports`, label: t('projects.tabs.reports'), icon: History },
+  );
+
+  return base_tabs;
+}
+
+export function ProjectTabs({
+  locale,
+  projectId,
+  isVsme = false,
+}: {
+  locale: 'de' | 'en';
+  projectId: string;
+  isVsme?: boolean;
+}) {
+  const pathname = usePathname();
+  const t = useTranslations();
+  const base = `/${locale}/projects/${projectId}`;
+  const tabs = buildProjectTabs(base, t, isVsme);
 
   return (
     <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
