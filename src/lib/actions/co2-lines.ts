@@ -75,22 +75,16 @@ export async function deleteCo2Line(id: string): Promise<void> {
 
 /**
  * Recompute Scope 1 & 2 totals for a project.
- * Wraps `recomputeB3Co2` and sources the userId from the current session.
- *
- * @param _userId - Optional userId override (test fixtures only; bypasses auth).
+ * Wraps `recomputeB3Co2` and always sources the userId from the current session.
  */
 export async function recompute(
   projectId: string,
   worksheetInstanceId: string,
-  _userId?: string,
 ): Promise<Co2Totals> {
-  let actorId = _userId ?? null;
-  if (!actorId) {
-    const supabase = await createClient();
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) throw new Error('Not authenticated');
-    actorId = auth.user.id;
-  }
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) throw new Error('Not authenticated');
+  const actorId = auth.user.id;
 
   const totals = await recomputeB3Co2(projectId, worksheetInstanceId, actorId);
   revalidatePath('/[locale]/projects/[id]/vsme/emissions', 'page');

@@ -12,7 +12,8 @@ import { co2ActivityLines } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { seedCo2Fixture } from './_co2-fixture';
 import type { Co2FixtureCtx } from './_co2-fixture';
-import { addCo2Line, deleteCo2Line, recompute } from '@/lib/actions/co2-lines';
+import { addCo2Line, deleteCo2Line } from '@/lib/actions/co2-lines';
+import { recomputeB3Co2 } from '@/lib/actions/co2';
 
 describe('co2-lines actions (integration)', () => {
   let ctx: Co2FixtureCtx;
@@ -80,8 +81,8 @@ describe('co2-lines actions (integration)', () => {
 
   it('recompute returns scope1 > 0 and sets computed_tco2e on inserted line', async () => {
     // The fixture has Scope 1 + Scope 2 lines; we also added a Scope 1 line above.
-    // Pass ctx.userId to bypass auth (no Supabase GoTrue in the test environment).
-    const totals = await recompute(ctx.projectId, ctx.worksheetInstanceId, ctx.userId);
+    // Call recomputeB3Co2 directly (bypasses the auth layer — no GoTrue in tests).
+    const totals = await recomputeB3Co2(ctx.projectId, ctx.worksheetInstanceId, ctx.userId);
 
     expect(totals.scope1).toBeGreaterThan(0);
     expect(totals.totalLocation).toBeGreaterThan(0);

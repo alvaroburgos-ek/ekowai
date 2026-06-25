@@ -36,12 +36,10 @@ async function resolveVsmeC03InstanceId(projectId: string): Promise<string> {
         eq(standards.code, 'VSME'),
       ),
     )
-    // Pick the C03 instance; there should be exactly one per project.
-    // If multiple VSME templates exist, prefer the one whose code starts with C03.
-    .limit(10);
+    // Take the first VSME worksheet instance for this project.
+    .limit(1);
 
-  const c03 = rows.find((_r) => true); // all VSME worksheet instances are valid
-  return c03?.id ?? '';
+  return rows[0]?.id ?? '';
 }
 
 /**
@@ -102,14 +100,8 @@ async function loadTotals(projectId: string): Promise<Co2Totals> {
   const scope2Location = bySymbol.get(OUTPUT_SYMBOLS.scope2Location) ?? 0;
   const totalLocation = bySymbol.get(OUTPUT_SYMBOLS.total) ?? scope1 + scope2Location;
 
-  // Count lines that have a resolved tco2e
-  const linesWithValues = rows.filter(
-    (r) => symbols.includes(r.symbol as (typeof symbols)[number]) && r.valueNumber,
-  );
-  // Use a rough count — actual lineCount comes from the lines query if needed
-  const lineCount = linesWithValues.length > 0 ? linesWithValues.length : 0;
-
-  return { scope1, scope2Location, totalLocation, lineCount };
+  // lineCount is always overridden by the page from the actual lines query.
+  return { scope1, scope2Location, totalLocation, lineCount: 0 };
 }
 
 export default async function VsmeEmissionsPage({

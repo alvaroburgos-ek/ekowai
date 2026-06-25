@@ -58,8 +58,9 @@ const T = {
   },
 } as const;
 
-function fmt(n: number): string {
-  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function fmt(n: number, locale: 'de' | 'en'): string {
+  const bcp47 = locale === 'en' ? 'en-US' : 'de-DE';
+  return n.toLocaleString(bcp47, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function ScopeChip({ scope }: { scope: string }) {
@@ -165,7 +166,7 @@ export function Co2ActivityTable({
                   </td>
                   <td className="px-5 py-3 align-top text-right tabular-nums font-medium text-ink whitespace-nowrap">
                     {line.computedTco2e != null
-                      ? `${Number(line.computedTco2e).toLocaleString('de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`
+                      ? `${Number(line.computedTco2e).toLocaleString(locale === 'en' ? 'en-US' : 'de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`
                       : '—'}
                   </td>
                 </tr>
@@ -178,17 +179,17 @@ export function Co2ActivityTable({
       <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-1.5 border-t border-hairline bg-paper-2/40 px-5 py-3 text-sm">
         <span className="text-subtext">
           {t.scope1}:{' '}
-          <span className="tabular-nums font-medium text-ink">{fmt(totals.scope1)} t</span>
+          <span className="tabular-nums font-medium text-ink">{fmt(totals.scope1, locale)} t</span>
         </span>
         <span className="text-subtext">
           {t.scope2}:{' '}
           <span className="tabular-nums font-medium text-ink">
-            {fmt(totals.scope2Location)} t
+            {fmt(totals.scope2Location, locale)} t
           </span>
         </span>
         <span className="text-ink font-semibold">
           {t.total}:{' '}
-          <span className="tabular-nums">{fmt(totals.totalLocation)} tCO₂e</span>
+          <span className="tabular-nums">{fmt(totals.totalLocation, locale)} tCO₂e</span>
         </span>
         <span className="text-xs text-subtext tabular-nums">
           ({totals.lineCount} {t.lines})
