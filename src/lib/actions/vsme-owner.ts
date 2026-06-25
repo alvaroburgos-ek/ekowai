@@ -9,8 +9,14 @@ import { fields } from '@/lib/db/schema';
 export type VsmeOwner = 'ekowai_env' | 'client_supplied' | 'general';
 
 /**
- * Override the owner of a VSME field. Updates `fields.owner` and revalidates
- * all worklist pages so the UI reflects the change on next navigation.
+ * Override the owner of a VSME field. Updates `fields.owner` (template-level, standard-wide)
+ * and revalidates all worklist pages so the UI reflects the change on next navigation.
+ *
+ * @note This edits the template-level `fields.owner` attribute, affecting all projects
+ * that use this VSME standard — not just the current project.
+ *
+ * @todo(pre-prod): Add authentication and restrict to platform engineers before production.
+ * See Plan 4 final review.
  */
 export async function setFieldOwner(
   fieldId: string,

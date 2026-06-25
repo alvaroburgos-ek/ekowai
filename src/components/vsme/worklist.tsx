@@ -33,6 +33,7 @@ const T = {
     open: 'offen',
     empty: 'Keine Felder in dieser Kategorie.',
     ownerLabel: 'Zuständigkeit',
+    ownerHint: 'Standardweite Zuordnung (gilt für alle Projekte)',
     ownerEkowai: 'EKOWAI',
     ownerClient: 'Kunde',
     ownerGeneral: 'Allgemein',
@@ -47,6 +48,7 @@ const T = {
     open: 'open',
     empty: 'No fields in this category.',
     ownerLabel: 'Owner',
+    ownerHint: 'Standard-wide assignment (applies to all projects)',
     ownerEkowai: 'EKOWAI',
     ownerClient: 'Client',
     ownerGeneral: 'General',
@@ -88,17 +90,21 @@ function OwnerSelect({
   }
 
   return (
-    <Select
-      size="sm"
-      inline
-      value={currentOwner}
-      onChange={handleChange}
-      aria-label={t.ownerLabel}
-    >
-      <option value="ekowai_env">{t.ownerEkowai}</option>
-      <option value="client_supplied">{t.ownerClient}</option>
-      <option value="general">{t.ownerGeneral}</option>
-    </Select>
+    <div className="flex flex-col gap-1">
+      <Select
+        size="sm"
+        inline
+        value={currentOwner}
+        onChange={handleChange}
+        aria-label={t.ownerLabel}
+        title={t.ownerHint}
+      >
+        <option value="ekowai_env">{t.ownerEkowai}</option>
+        <option value="client_supplied">{t.ownerClient}</option>
+        <option value="general">{t.ownerGeneral}</option>
+      </Select>
+      <span className="text-xs text-subtext">{t.ownerHint}</span>
+    </div>
   );
 }
 
