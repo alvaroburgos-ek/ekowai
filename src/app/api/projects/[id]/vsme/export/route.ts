@@ -39,7 +39,9 @@ export async function GET(
     .limit(1);
   if (!row) return NextResponse.json({ error: 'not_found' }, { status: 404 });
 
-  const format = new URL(req.url).searchParams.get('format') ?? 'xlsx';
+  const searchParams = new URL(req.url).searchParams;
+  const format = searchParams.get('format') ?? 'xlsx';
+  const locale = searchParams.get('locale') === 'en' ? 'en' : 'de';
 
   try {
     if (format === 'pdf') {
@@ -56,7 +58,7 @@ export async function GET(
 
     // default: xlsx
     const data = await loadVsmeExportData(id);
-    const buffer = await buildVsmeXlsx(data, 'de');
+    const buffer = await buildVsmeXlsx(data, locale);
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

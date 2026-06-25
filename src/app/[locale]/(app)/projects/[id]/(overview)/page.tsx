@@ -26,7 +26,7 @@ export default async function ProjectOverviewPage({
     return (
       <div className="flex flex-col gap-8">
         <ReportOverview projectId={id} locale={localeTyped} summary={summary} />
-        <VsmeExportButton projectId={id} />
+        <VsmeExportButton projectId={id} locale={localeTyped} />
       </div>
     );
   }

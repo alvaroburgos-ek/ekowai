@@ -5,9 +5,10 @@ import { useTranslations } from 'next-intl';
 
 interface VsmeExportButtonProps {
   projectId: string;
+  locale: 'de' | 'en';
 }
 
-export function VsmeExportButton({ projectId }: VsmeExportButtonProps) {
+export function VsmeExportButton({ projectId, locale }: VsmeExportButtonProps) {
   const t = useTranslations('vsme.export');
 
   const base = `/api/projects/${projectId}/vsme/export`;
@@ -17,7 +18,7 @@ export function VsmeExportButton({ projectId }: VsmeExportButtonProps) {
       <h3 className="text-sm font-semibold text-ink">{t('title')}</h3>
       <div className="flex flex-wrap gap-3">
         <a
-          href={`${base}?format=xlsx`}
+          href={`${base}?format=xlsx&locale=${locale}`}
           download
           className="inline-flex items-center gap-1.5 rounded-lg border border-hairline bg-paper-2 px-3 py-2 text-xs font-medium text-accent transition-colors hover:bg-paper-2/80 hover:text-accent-2"
         >
