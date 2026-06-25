@@ -1,5 +1,5 @@
 // @vitest-environment node
-import './_setup-env';
+import '../../db/__tests__/_setup-env';
 import { describe, it, expect, afterAll } from 'vitest';
 
 // revalidatePath() requires Next.js request context; stub before importing the action.
