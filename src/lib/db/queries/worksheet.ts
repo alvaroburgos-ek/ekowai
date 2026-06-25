@@ -368,3 +368,38 @@ export async function userHasProjectAccess(
     .limit(1);
   return rows.length === 1;
 }
+
+/** Load the surface-inventory SOURCE (A138-07) instance status + carrier value
+ * for a consumer worksheet render. Returns null when the current worksheet is
+ * itself the owner of `surface_inventory`, or no source row exists. */
+export async function loadSurfaceSource(
+  projectId: string,
+  standardId: string,
+  currentWorksheetCode: string,
+): Promise<{ status: string; carrier: unknown } | null> {
+  const ownerField = await db
+    .select({ fieldId: fields.id, ownerCode: worksheetTemplates.code, templateId: worksheetTemplates.id })
+    .from(fields)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+    .where(and(
+      eq(worksheetTemplates.standardId, standardId),
+      eq(fields.symbol, 'surface_inventory'),
+      eq(fields.active, true),
+    ))
+    .limit(1);
+  if (ownerField.length === 0) return null;
+  const owner = ownerField[0];
+  if (owner.ownerCode === currentWorksheetCode) return null; // current sheet IS the source
+
+  const inst = await db
+    .select({ status: worksheetInstances.status })
+    .from(worksheetInstances)
+    .where(and(eq(worksheetInstances.projectId, projectId), eq(worksheetInstances.worksheetTemplateId, owner.templateId)))
+    .limit(1);
+  const param = await db
+    .select({ value: projectParameters.valueJson })
+    .from(projectParameters)
+    .where(and(eq(projectParameters.projectId, projectId), eq(projectParameters.fieldId, owner.fieldId)))
+    .limit(1);
+  return { status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null };
+}
