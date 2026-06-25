@@ -54,6 +54,8 @@ export type FieldRow = {
   description: string | null;
   verification_status: string | null;
   notes: string | null;
+  owner: string | null;
+  xbrl_element_id: string | null;
 };
 
 export type EnumValueRow = {

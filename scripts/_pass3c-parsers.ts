@@ -157,6 +157,8 @@ function parseFields(rows: Record<string, unknown>[]): FieldRow[] {
     description: asString(r.description),
     verification_status: asString(r.verification_status),
     notes: asString(r.notes),
+    owner: asString(r.owner),
+    xbrl_element_id: asString(r.xbrl_element_id),
   }));
 }
 

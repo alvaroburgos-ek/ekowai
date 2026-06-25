@@ -128,6 +128,8 @@ type NewFieldRow = {
   clauseReference: string | null;
   description: string | null;
   consumerWorksheets: string[] | null;
+  owner: string | null;
+  xbrlElementId: string | null;
 };
 
 function fieldContentChanged(existing: ExistingField, next: NewFieldRow): boolean {
@@ -402,6 +404,8 @@ async function executeImport(
       clauseReference: f.regulation_reference,
       description: f.description,
       consumerWorksheets: parseList(f.consumer_worksheets),
+      owner: f.owner,
+      xbrlElementId: f.xbrl_element_id,
     };
 
     // Re-import policy. Default for a row that doesn't yet exist:
@@ -456,6 +460,8 @@ async function executeImport(
           clauseReference: sql`excluded.clause_reference`,
           description: sql`excluded.description`,
           consumerWorksheets: sql`excluded.consumer_worksheets`,
+          owner: sql`excluded.owner`,
+          xbrlElementId: sql`excluded.xbrl_element_id`,
           // Re-import policy: verification audit columns now flow from
           // excluded.* — JS pre-pass already picked the right values
           // (preserve when unchanged, reset when content drifted).
