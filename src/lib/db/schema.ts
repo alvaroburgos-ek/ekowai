@@ -504,6 +504,31 @@ export const emissionFactors = pgTable(
 );
 
 // =============================================================================
+// VSME — CO₂ ACTIVITY LINES (working table; Plan 3)
+// =============================================================================
+// Per-line fuel/electricity activity data the CO₂ engine reads to compute
+// Scope 1 / Scope 2 totals.  🚩PROD-PROMOTE: applied to local only; human
+// promotes when coordinating both tracks.
+export const co2ActivityLines = pgTable(
+  'co2_activity_lines',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    worksheetInstanceId: uuid('worksheet_instance_id').references(() => worksheetInstances.id, { onDelete: 'set null' }),
+    scope: text('scope').notNull(),               // 'Scope 1' | 'Scope 2'
+    category: text('category').notNull(),         // matches emission_factors.category
+    subcategory: text('subcategory'),
+    amount: numeric('amount').notNull(),
+    unit: text('unit').notNull(),
+    factorUbaId: text('factor_uba_id').notNull(),
+    factorSourceVersion: text('factor_source_version').notNull(),
+    computedTco2e: numeric('computed_tco2e'),      // last computed result (cache)
+    createdBy: uuid('created_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+// =============================================================================
 // LEADS (inbound contact-form submissions from ekowai-landing-page)
 // =============================================================================
 // Anonymous form submissions land here via the landing-page server action using
