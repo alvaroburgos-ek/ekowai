@@ -244,6 +244,24 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {field.dataType === 'enum' && (() => {
         const v = value?.type === 'enum' ? value.value : null;
         const options = field.enumValues ?? [];
+        if (options.length === 0) {
+          // The field is an enum but its allowed values are not configured
+          // (enum_values NULL/empty in the DB). The correct values are unknown
+          // and must NOT be fabricated, so render no selectable control — but
+          // surface the gap with a visible, non-interactive notice instead of
+          // a silent, empty widget the engineer cannot use.
+          return (
+            <div
+              role="status"
+              data-testid="enum-no-options"
+              className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+            >
+              {locale === 'de'
+                ? 'Keine Auswahloptionen hinterlegt — dieses Feld ist noch nicht konfiguriert und kann derzeit nicht ausgefüllt werden.'
+                : 'No selectable options configured — this field is not yet set up and cannot be filled in.'}
+            </div>
+          );
+        }
         if (options.length <= 4) {
           return (
             <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
