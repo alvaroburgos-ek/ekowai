@@ -280,9 +280,14 @@ So the DB and code must flip together. For a ~2-user app the exposure is a brief
 4. **Run the backfill** against prod: `node scripts/backfill-a138-surface-materialization.ts --dry-run` then for real (compile per CLAUDE.md if `tsx` is broken). Populates A_C/C_m for existing 138 projects.
 5. **Smoke-test prod:** A138-07 reopen (the original bug), A_C computes; A138-13/26 inherited A_C present; one PDF report renders A_C.
 
-### Rollback
-- Code: re-deploy the previous prod build + re-point the alias back.
-- DB: the migration is additive + deactivating; a rollback SQL would re-activate A138-10's `A_C`/`C_m`/`sub_areas` fields and re-insert the deleted A138-10 equations. **Write this rollback SQL as part of Phase B prep** (not yet written) and keep it ready before step B2.
+### Phase B prep — REQUIRED before step B2 (from final review)
+- **Capture originals (the forward migration is lossy):** before B2, `SELECT` and save (a) A138-10's `A_C`/`C_m`/`sub_areas_A138_10` field rows incl. their `consumer_worksheets`, and (b) the full rows of the 4 A138-10 equations being deleted (`1a48af79…`, `d1a38110…0001/0002/0003`) — formula, input_symbols, output_symbol, equation_number, clause_reference. The forward migration sets A138-10's `A_C` `consumer_worksheets` to NULL, so the rollback must restore the captured value (known today: A_C consumers = `{A138-13,A138-16,A138-17,A138-18,A138-19,A138-20,A138-21,A138-22,A138-26}`; C_m consumers = empty).
+- **Author the rollback SQL** (`supabase/migrations/…_a138_singlesource_ROLLBACK.sql`, kept ready, not committed as a forward migration): re-activate A138-10 `A_C`/`C_m`/`sub_areas_A138_10` (`active=true`, restore captured `consumer_worksheets`); re-INSERT the 4 captured A138-10 equations; revert A138-07 Gl.2 `output_symbol` `A_C` → `A_C_preliminary`; deactivate A138-07's new `A_C`/`C_m` fields. Re-add `A138-10:2` to the whitelist + redeploy the previous build to fully roll back.
+- **Strengthen the B2 verification:** in addition to the field checks, assert the 3 NEW A138-07 equations exist post-apply (`SELECT count(*) FROM equations WHERE worksheet_template_id=<A138-07> AND equation_number IN ('2c','2d','2e')` = 3) — the migration's `ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING` would silently skip them if a number collided.
+
+### Rollback (execution)
+- Code: re-deploy the previous prod build + re-point the `-hannesoster-` alias back.
+- DB: run the pre-authored rollback SQL above.
 
 ---
 
