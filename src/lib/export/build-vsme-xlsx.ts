@@ -67,11 +67,11 @@ export async function buildVsmeXlsx(
         scope: line.scope,
         category: line.category,
         subcategory: line.subcategory ?? '',
-        amount: line.amount,
+        amount: Number(line.amount),
         unit: line.unit,
         factorUbaId: line.factorUbaId,
         factorSourceVersion: line.factorSourceVersion,
-        computedTco2e: line.computedTco2e ?? '',
+        computedTco2e: line.computedTco2e != null ? Number(line.computedTco2e) : null,
       });
     }
   }
@@ -86,9 +86,9 @@ export async function buildVsmeXlsx(
 
     ws.getRow(1).font = { bold: true };
 
-    ws.addRow({ category: 'Scope 1', value: String(data.totals.scope1) });
-    ws.addRow({ category: 'Scope 2 (location)', value: String(data.totals.scope2Location) });
-    ws.addRow({ category: 'Total (location)', value: String(data.totals.totalLocation) });
+    ws.addRow({ category: 'Scope 1', value: data.totals.scope1 });
+    ws.addRow({ category: 'Scope 2 (location)', value: data.totals.scope2Location });
+    ws.addRow({ category: 'Total (location)', value: data.totals.totalLocation });
   }
 
   // ── Citations ───────────────────────────────────────────────────────────────

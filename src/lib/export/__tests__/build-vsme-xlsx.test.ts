@@ -117,20 +117,40 @@ describe('buildVsmeXlsx', () => {
     expect(headerValues).toContain('tCO2e');
   });
 
-  it('Totals sheet contains scope1 value', async () => {
+  it('CO2 Activity Amount and tCO2e cells are native numbers', async () => {
+    const buf = await buildVsmeXlsx(fixture, 'de');
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf as unknown as Buffer);
+    const ws = wb.getWorksheet('CO2 Activity')!;
+    // Row 2 = first data row; columns: Scope=1 Category=2 Subcategory=3 Amount=4 Unit=5 Factor=6 FactorVersion=7 tCO2e=8
+    const amountCell = ws.getRow(2).getCell(4);
+    expect(typeof amountCell.value).toBe('number');
+    expect(amountCell.value).toBe(100);
+
+    const tco2eCell = ws.getRow(2).getCell(8);
+    expect(typeof tco2eCell.value).toBe('number');
+    expect(tco2eCell.value).toBe(20.1);
+  });
+
+  it('Totals sheet contains scope1 value as a native number', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(buf as unknown as Buffer);
     const ws = wb.getWorksheet('Totals')!;
     expect(ws.rowCount).toBeGreaterThanOrEqual(3);
-    // Collect all cell values across data rows
-    const allValues: string[] = [];
-    ws.eachRow((row) => {
-      (row.values as unknown[]).forEach((v) => {
-        if (v != null) allValues.push(String(v));
-      });
-    });
-    expect(allValues).toContain('42.5');
+
+    // Row 2 = Scope 1, Row 3 = Scope 2 (location), Row 4 = Total (location)
+    const scope1ValueCell = ws.getRow(2).getCell(2);
+    expect(typeof scope1ValueCell.value).toBe('number');
+    expect(scope1ValueCell.value).toBe(42.5);
+
+    const scope2ValueCell = ws.getRow(3).getCell(2);
+    expect(typeof scope2ValueCell.value).toBe('number');
+    expect(scope2ValueCell.value).toBe(10.0);
+
+    const totalValueCell = ws.getRow(4).getCell(2);
+    expect(typeof totalValueCell.value).toBe('number');
+    expect(totalValueCell.value).toBe(52.5);
   });
 
   it('Citations sheet has exactly 1 data row (only field with citationSources)', async () => {
