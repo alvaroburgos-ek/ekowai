@@ -15,6 +15,11 @@ describe('moduleCodeToOwner', () => {
     for (const c of ['B01', 'B02', 'C01', 'D99'])
       expect(moduleCodeToOwner(c)).toBe('general');
   });
+  it('full dot-notation codes are resolved correctly', () => {
+    expect(moduleCodeToOwner('B03.000')).toBe('ekowai_env');
+    expect(moduleCodeToOwner('B08.000')).toBe('client_supplied');
+    expect(moduleCodeToOwner('C06.000')).toBe('client_supplied');
+  });
 });
 
 describe('parseRoles', () => {
@@ -24,6 +29,10 @@ describe('parseRoles', () => {
     expect(r).toBeDefined();
     expect(r!.title.toLowerCase()).toContain('energy');
   });
+  it('no [99xxx] enumeration roles leak through — all codes match [A-Z]NN.NNN', () => {
+    const roles = parseRoles(TAXONOMY_DIR);
+    expect(roles.every((r) => /^[A-Z]\d{2}\.\d{3}$/.test(r.code))).toBe(true);
+  });
 });
 
 describe('conceptModuleMap', () => {
@@ -31,5 +40,9 @@ describe('conceptModuleMap', () => {
     const m = conceptModuleMap(TAXONOMY_DIR);
     // at least one concept maps to a B06 (water) module
     expect([...m.values()].some((v) => v.startsWith('B06'))).toBe(true);
+  });
+  it('preference upgrade path: every mapped value is a real module code (B/C/D) — no 99xxx enumeration roles leak through', () => {
+    const m = conceptModuleMap(TAXONOMY_DIR);
+    expect([...m.values()].every((v) => /^[BCD]\d{2}/.test(v))).toBe(true);
   });
 });
