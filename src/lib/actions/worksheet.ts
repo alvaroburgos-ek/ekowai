@@ -206,6 +206,10 @@ export async function saveWorksheet(
 
   if (savedCount > 0) {
     await db.transaction(async (tx) => {
+      // Single timestamp for the entire save — all rows written in this call
+      // share the same enteredAt so there is no skew from multiple new Date() calls.
+      const now = new Date();
+
       // ONE batched upsert for all parameter rows
       await tx
         .insert(projectParameters)
@@ -222,20 +226,35 @@ export async function saveWorksheet(
             sourceType: sql`excluded.source_type`,
             sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
             enteredBy: sql`excluded.entered_by`,
-            enteredAt: new Date(),
+            enteredAt: now,
           },
         });
 
       // Materialize derived surface outputs when A138-07's surface_inventory was saved.
       // Runs inside the same transaction so derived rows are always consistent with
       // the entered carrier value.
-      const wsFields = await tx
-        .select({ id: fields.id, symbol: fields.symbol })
+      //
+      // Optimization: first do a cheap indexed lookup — only if the saved batch
+      // actually contains a surface_inventory field for this template do we proceed
+      // to the full sibling-fields query + materialization.
+      const [surfacePresence] = await tx
+        .select({ id: fields.id })
         .from(fields)
-        .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
-      const surfaceFieldId = wsFields.find((f) => f.symbol === 'surface_inventory')?.id;
+        .where(
+          and(
+            inArray(fields.id, fieldIds),
+            eq(fields.symbol, 'surface_inventory'),
+            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+          ),
+        )
+        .limit(1);
 
-      if (surfaceFieldId && fieldIds.includes(surfaceFieldId)) {
+      if (surfacePresence) {
+        const surfaceFieldId = surfacePresence.id;
+        const wsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
         const carrier = input.values[surfaceFieldId]?.type === 'json' ? input.values[surfaceFieldId].value : null;
         const outputs = materializeSurfaceOutputs(carrier);
         const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
@@ -248,7 +267,7 @@ export async function saveWorksheet(
             valueNumber: outputs[x.sym] == null ? null : String(outputs[x.sym]),
             sourceType: 'derived' as const,
             enteredBy: userId,
-            enteredAt: new Date(),
+            enteredAt: now,
           }));
         if (derivedRows.length > 0) {
           await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
@@ -257,7 +276,7 @@ export async function saveWorksheet(
               valueNumber: sql`excluded.value_number`,
               sourceType: sql`excluded.source_type`,
               enteredBy: sql`excluded.entered_by`,
-              enteredAt: new Date(),
+              enteredAt: now,
             },
           });
         }
