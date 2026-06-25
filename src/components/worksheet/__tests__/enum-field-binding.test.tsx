@@ -146,10 +146,12 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
     expect(none).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('BUG REGRESSION — when enum_values is NULL the field renders ZERO option buttons', () => {
-    // Exactly the broken pre-Pile-9 production state. The description text
-    // "None / Nearby / Present." is still visible to the engineer, but no
-    // button is rendered to select any of them.
+  it('REPAIR — null enum_values renders NO fabricated options, only a visible "not configured" notice', () => {
+    // Previously this rendered a silent, empty SegmentedControl (zero buttons,
+    // no explanation). The repaired widget must (a) still NOT invent any option
+    // — the allowed values are unknown and must never be fabricated — and
+    // (b) surface the gap with a visible, non-interactive notice instead of a
+    // dead control.
     render(
       <DynamicField
         field={{ ...FIELD_BASE, enumValues: null }}
@@ -159,20 +161,25 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
         docs={[]}
       />,
     );
+    // No fabricated, selectable options.
     expect(screen.queryByRole('button', { name: 'None' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Nearby' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Present' })).not.toBeInTheDocument();
-    // The description text is still in the DOM — this is the text the
-    // engineer reported "seeing" in the preview, even though no control
-    // existed below it.
+    // No silent empty control: the broken radiogroup/select is gone.
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+    // A visible notice now explains why the field is not fillable.
+    const notice = screen.getByTestId('enum-no-options');
+    expect(notice).toBeInTheDocument();
+    expect(notice.textContent?.toLowerCase()).toMatch(/no selectable options|not.*configured/);
+    // The field's own description text is still shown.
     expect(screen.getByText('None / Nearby / Present.')).toBeInTheDocument();
   });
 
-  it('BUG REGRESSION — null enum_values means store stays null even after click attempts', async () => {
+  it('REPAIR — empty-array enum_values behaves like null (notice, no options, store stays null)', async () => {
     const user = userEvent.setup();
     render(
       <DynamicField
-        field={{ ...FIELD_BASE, enumValues: null }}
+        field={{ ...FIELD_BASE, enumValues: [] }}
         locale="en"
         projectId="fixture-project"
         standardCode="DWA-A-138-1"
@@ -180,13 +187,25 @@ describe('contaminated_land_status — enum_values binding (Pile-9 regression)',
       />,
     );
     expect(getStoredEnum()).toBeNull();
-    // No clickable target — confirm by counting all buttons inside the
-    // field's radiogroup. With null enum_values there are zero buttons,
-    // which is the exact failure mode the engineer reported.
-    const radiogroup = screen.getByRole('radiogroup');
-    expect(radiogroup.querySelectorAll('button')).toHaveLength(0);
-    // Sanity: clicking the radiogroup container does nothing.
-    await user.click(radiogroup);
+    const notice = screen.getByTestId('enum-no-options');
+    expect(notice).toBeInTheDocument();
+    // The notice is informational, not a control: clicking it writes nothing.
+    await user.click(notice);
     expect(getStoredEnum()).toBeNull();
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+  });
+
+  it('REPAIR — the not-configured notice is localized (German)', () => {
+    render(
+      <DynamicField
+        field={{ ...FIELD_BASE, enumValues: null }}
+        locale="de"
+        projectId="fixture-project"
+        standardCode="DWA-A-138-1"
+        docs={[]}
+      />,
+    );
+    const notice = screen.getByTestId('enum-no-options');
+    expect(notice.textContent).toMatch(/keine.*optionen|nicht.*konfiguriert/i);
   });
 });
