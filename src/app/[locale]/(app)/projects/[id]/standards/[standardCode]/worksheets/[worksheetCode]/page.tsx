@@ -9,6 +9,7 @@ import {
   loadProjectParameters,
   loadSameSymbolValues,
   loadInheritedFields,
+  loadSurfaceSource,
 } from '@/lib/db/queries/worksheet';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
@@ -121,6 +122,11 @@ export default async function WorksheetPage({
   // affordance in the approval bar. Single COUNT-ish query is cheap and the
   // index on (worksheet_instance_id, taken_at) keeps it O(log n).
   const priorSnapshotCount = await countSnapshotsForInstance(instance.id);
+
+  // Load surface-inventory source (A138-07) status + carrier for consumer
+  // worksheets (e.g. A138-10). Returns null when the current worksheet IS the
+  // owner of surface_inventory, or the standard has no surface_inventory field.
+  const surfaceSource = await loadSurfaceSource(projectId, ws.template.standard.id, worksheetCode);
 
   // Platform-engineer gating + verifier-label resolution. We batch-load the
   // profile emails of all distinct verifiers touched by this worksheet's
@@ -352,6 +358,7 @@ export default async function WorksheetPage({
           priorSnapshotCount={priorSnapshotCount}
           diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
           isPlatformEngineer={isPlatformEngineer}
+          surfaceSource={surfaceSource}
         />
       </main>
     </div>

@@ -13,9 +13,12 @@ import {
   ManualOverridePill,
   useManualOverride,
 } from './manual-override-pill';
-import { SubAreasEditor } from './sub-areas-editor';
 import { KostraTableEditor } from './kostra-table-editor';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
+import { SurfaceSourceBanner } from './surface-source-banner';
+import { surfaceSourceState } from '@/lib/eval/surface-source-state';
+import { normalizeSurfaceCarrier, type SurfaceInventoryCarrier } from '@/lib/eval/surface-inventory';
+import { lookupTab9 } from '@/lib/eval/tab9';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
@@ -124,6 +127,10 @@ type Props = {
   /** True when the current viewer is on the platform-engineer allowlist.
    * Gates the "Bestätigen" buttons on every field/equation. */
   isPlatformEngineer?: boolean;
+  /** Surface-inventory source data from A138-07 for consumer worksheets (e.g.
+   * A138-10). null when this worksheet IS the owner or the standard has no
+   * surface_inventory field. */
+  surfaceSource?: { status: string; carrier: unknown } | null;
 };
 
 export function WorksheetForm({
@@ -149,6 +156,7 @@ export function WorksheetForm({
   priorSnapshotCount,
   diffHref,
   isPlatformEngineer = false,
+  surfaceSource,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
@@ -301,14 +309,15 @@ export function WorksheetForm({
     [sortedEquations, engineEquationIds, fieldBySymbol],
   );
 
-  // A138-10 sub-areas: render the editor only when the worksheet declares the
-  // carrier field. The hook handles the rest.
-  const subAreasField = fields.find((f) => f.symbol.startsWith('sub_areas_'));
-  // A138-04 KOSTRA table: same pattern. The carrier field has symbol
-  // `r_D_n_table` and data_type='json'; the engine reads it from the store.
+  // A138-04 KOSTRA table: carrier field has symbol `r_D_n_table` and
+  // data_type='json'; the engine reads it from the store.
   const kostraField = fields.find((f) => f.symbol === 'r_D_n_table');
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
+
+  // Upstream-cause state for consumer worksheets (A138-10). null when this
+  // worksheet does not consume a surface-inventory source.
+  const srcState = surfaceSource ? surfaceSourceState(surfaceSource.carrier, surfaceSource.status) : null;
 
   // Legacy naive sum-evaluator for everything NOT on the engine whitelist.
   // It ignores `formula` and just sums input_symbols — built for DIN-276 cost
@@ -446,6 +455,8 @@ export function WorksheetForm({
 
       <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
 
+      {srcState && <SurfaceSourceBanner state={srcState} />}
+
       {inheritedFieldsForPanel.length > 0 && (
         <section
           className="border border-hairline rounded p-4 space-y-2"
@@ -518,12 +529,12 @@ export function WorksheetForm({
           />
         ))}
 
-      {subAreasField && (
-        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+      {surfaceSource && srcState && srcState.state !== 'missing' && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-2">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            Teilflächen-Erfassung (für A_C nach Gl. 2)
+            Flächenverzeichnis (aus A138-07 — schreibgeschützt)
           </h2>
-          <SubAreasEditor fieldId={subAreasField.id} />
+          <ReadOnlySurfaceTable carrier={surfaceSource.carrier} />
         </section>
       )}
 
@@ -584,6 +595,50 @@ export function WorksheetForm({
         diffHref={diffHref}
       />
     </article>
+  );
+}
+
+const NUM_FMT = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 });
+function fmt(v: number | null): string {
+  return v != null && Number.isFinite(v) ? NUM_FMT.format(v) : '—';
+}
+
+/** Read-only mirror of the A138-07 surface-inventory carrier for consumer
+ * worksheets (e.g. A138-10). No inputs; no store writes. */
+function ReadOnlySurfaceTable({ carrier }: { carrier: unknown }) {
+  const { rows } = normalizeSurfaceCarrier(carrier);
+  if (rows.length === 0) return <p className="text-sm text-subtext">Keine Zeilen erfasst.</p>;
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm border-collapse">
+        <thead>
+          <tr className="text-left text-[10px] uppercase tracking-[0.15em] text-subtext border-b border-hairline">
+            <th className="pr-4 pb-1 font-normal">Bezeichnung</th>
+            <th className="pr-4 pb-1 font-normal">Oberflächentyp</th>
+            <th className="pr-4 pb-1 font-normal text-right">A (m²)</th>
+            <th className="pr-4 pb-1 font-normal text-right">C_i</th>
+            <th className="pr-4 pb-1 font-normal text-right">C_s</th>
+            <th className="pb-1 font-normal text-right">A·C_i</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const typeLabel = row.tab9_value ? (lookupTab9(row.tab9_value)?.label ?? '—') : '—';
+            const aCi = row.area_m2 != null && row.c_i != null ? row.area_m2 * row.c_i : null;
+            return (
+              <tr key={row.id} className="border-b border-hairline last:border-b-0">
+                <td className="pr-4 py-1 text-ink">{row.label || '—'}</td>
+                <td className="pr-4 py-1 text-ink">{typeLabel}</td>
+                <td className="pr-4 py-1 font-mono tabular-nums text-right text-ink">{fmt(row.area_m2)}</td>
+                <td className="pr-4 py-1 font-mono tabular-nums text-right text-ink">{fmt(row.c_i)}</td>
+                <td className="pr-4 py-1 font-mono tabular-nums text-right text-ink">{fmt(row.c_s)}</td>
+                <td className="py-1 font-mono tabular-nums text-right text-ink">{fmt(aCi)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
