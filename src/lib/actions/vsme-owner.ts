@@ -16,8 +16,13 @@ export async function setFieldOwner(
   fieldId: string,
   owner: VsmeOwner,
 ): Promise<void> {
+  const VALID_OWNERS = ['ekowai_env', 'client_supplied', 'general'] as const;
+  if (!VALID_OWNERS.includes(owner as (typeof VALID_OWNERS)[number])) {
+    throw new Error(`Invalid owner value: ${owner}`);
+  }
+
   await db.update(fields).set({ owner }).where(eq(fields.id, fieldId));
 
-  // Revalidate all project worklist pages — the path is dynamic per [locale]/[id]
-  revalidatePath('/[locale]/(app)/projects/[id]/(overview)/vsme/worklist', 'page');
+  // Revalidate all project worklist pages — route-group folders are NOT part of the URL
+  revalidatePath('/[locale]/projects/[id]/vsme/worklist', 'page');
 }

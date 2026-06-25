@@ -56,4 +56,20 @@ describe('setFieldOwner (integration)', () => {
 
     expect(updated.owner).toBe(newOwner);
   });
+
+  it('flips a VSME field owner to general and reads back general', async () => {
+    const field = await findAnyVsmeField();
+    testFieldId = field.id;
+    originalOwner = field.originalOwner;
+
+    await setFieldOwner(testFieldId, 'general');
+
+    const [updated] = await db
+      .select({ owner: fields.owner })
+      .from(fields)
+      .where(eq(fields.id, testFieldId))
+      .limit(1);
+
+    expect(updated.owner).toBe('general');
+  });
 });
