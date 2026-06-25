@@ -12,6 +12,7 @@ import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
+import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -27,6 +28,18 @@ import type {
 } from '@/lib/db/schema';
 
 // Mirror the aggregator-id constants from use-equation-engine.ts.
+// A138-07 surface-producer equation ids (A_C, C_m, A_E_ba, A_E_nba).
+const A138_07_A_C_ID     = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
+const A138_07_C_M_ID     = 'a1380702-0000-4000-8000-000000000002';
+const A138_07_A_E_BA_ID  = 'a1380702-0000-4000-8000-000000000003';
+const A138_07_A_E_NBA_ID = 'a1380702-0000-4000-8000-000000000004';
+const A138_07_SURFACE_IDS = new Set([
+  A138_07_A_C_ID,
+  A138_07_C_M_ID,
+  A138_07_A_E_BA_ID,
+  A138_07_A_E_NBA_ID,
+]);
+
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 
@@ -194,6 +207,16 @@ export function buildSnapshotPayload(args: {
   // Carriers for aggregator-driven equations. The JSON value's shape is
   // checked at the aggregator boundary — if the carrier is malformed, the
   // aggregator reports manual_required and the snapshot captures that.
+  // A138-07 surface carrier: drives the four surface-producer aggregators.
+  // normalizeSurfaceCarrier never returns null — an empty/missing carrier
+  // produces { rows: [] }, which causes the aggregator to return manual_required.
+  const surfaceInventoryField = fieldList.find((f) => f.symbol === 'surface_inventory');
+  const surfaceCarrier = (() => {
+    if (!surfaceInventoryField) return normalizeSurfaceCarrier(null);
+    const p = paramByFieldId.get(surfaceInventoryField.id);
+    return normalizeSurfaceCarrier(p?.valueJson ?? null);
+  })();
+
   const subAreasField = fieldList.find((f) => f.symbol.startsWith('sub_areas_'));
   const subAreasCarrier: SubAreasCarrier | null = (() => {
     if (!subAreasField) return null;
@@ -288,7 +311,9 @@ export function buildSnapshotPayload(args: {
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (eq.id === A138_10_GL2_ID) {
+    if (A138_07_SURFACE_IDS.has(eq.id)) {
+      aggregator = { surfaceInventory: surfaceCarrier };
+    } else if (eq.id === A138_10_GL2_ID) {
       aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
