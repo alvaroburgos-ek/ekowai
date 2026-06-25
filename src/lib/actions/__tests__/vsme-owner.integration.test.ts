@@ -1,5 +1,5 @@
 // @vitest-environment node
-import './_setup-env'; // sets BYPASS_AUTH + BYPASS_AUTH_USER_ID before any other imports
+import './_setup-env';
 import { describe, it, expect, afterAll } from 'vitest';
 
 // revalidatePath() requires Next.js request context; stub before importing the action.
