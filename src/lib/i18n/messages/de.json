@@ -435,6 +435,20 @@
     "tabs": {
       "worklist": "Arbeitsliste",
       "emissions": "Emissionen"
+    },
+    "worklist": {
+      "title": "Arbeitsliste",
+      "subtitle": "Welche Datenpunkte EKOWAI produziert und welche der Kunde liefert.",
+      "columnEkowai": "EKOWAI produziert",
+      "columnClient": "Kunde liefert",
+      "columnGeneral": "Allgemein",
+      "fields": "Felder",
+      "open": "offen",
+      "empty": "Keine Felder in dieser Kategorie.",
+      "ownerLabel": "Zuständigkeit",
+      "ownerEkowai": "EKOWAI",
+      "ownerClient": "Kunde",
+      "ownerGeneral": "Allgemein"
     }
   }
 }

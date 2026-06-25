@@ -1,9 +1,12 @@
 'use client';
 
 import type { JSX } from 'react';
+import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
 import { OwnerBadge, type Owner } from '@/components/vsme/owner-badge';
+import { setFieldOwner, type VsmeOwner } from '@/lib/actions/vsme-owner';
 import { Check, Circle } from 'lucide-react';
 
 /** One field row in the worklist. Frozen shape — later tasks pass real data. */
@@ -29,6 +32,10 @@ const T = {
     fields: 'Felder',
     open: 'offen',
     empty: 'Keine Felder in dieser Kategorie.',
+    ownerLabel: 'Zuständigkeit',
+    ownerEkowai: 'EKOWAI',
+    ownerClient: 'Kunde',
+    ownerGeneral: 'Allgemein',
   },
   en: {
     title: 'Worklist',
@@ -39,6 +46,10 @@ const T = {
     fields: 'fields',
     open: 'open',
     empty: 'No fields in this category.',
+    ownerLabel: 'Owner',
+    ownerEkowai: 'EKOWAI',
+    ownerClient: 'Client',
+    ownerGeneral: 'General',
   },
 } as const;
 
@@ -57,6 +68,40 @@ function rowValue(r: WorklistRow): string {
   return r.valueText ?? r.valueNumber ?? '';
 }
 
+function OwnerSelect({
+  fieldId,
+  currentOwner,
+  locale,
+}: {
+  fieldId: string;
+  currentOwner: string;
+  locale: 'de' | 'en';
+}) {
+  const t = T[locale];
+  const [, startTransition] = useTransition();
+
+  function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value as VsmeOwner;
+    startTransition(() => {
+      void setFieldOwner(fieldId, next);
+    });
+  }
+
+  return (
+    <Select
+      size="sm"
+      inline
+      value={currentOwner}
+      onChange={handleChange}
+      aria-label={t.ownerLabel}
+    >
+      <option value="ekowai_env">{t.ownerEkowai}</option>
+      <option value="client_supplied">{t.ownerClient}</option>
+      <option value="general">{t.ownerGeneral}</option>
+    </Select>
+  );
+}
+
 function FieldRow({ row, locale }: { row: WorklistRow; locale: 'de' | 'en' }) {
   const t = T[locale];
   return (
@@ -67,6 +112,7 @@ function FieldRow({ row, locale }: { row: WorklistRow; locale: 'de' | 'en' }) {
         </div>
         <div className="citation mt-0.5">{row.symbol}</div>
       </div>
+      <OwnerSelect fieldId={row.fieldId} currentOwner={row.owner} locale={locale} />
       <OwnerBadge owner={row.owner as Owner} locale={locale} />
       {row.hasValue ? (
         <span className="inline-flex items-center gap-1.5 text-success tabular-nums shrink-0">

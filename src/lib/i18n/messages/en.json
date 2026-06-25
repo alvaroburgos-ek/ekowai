@@ -435,6 +435,20 @@
     "tabs": {
       "worklist": "Worklist",
       "emissions": "Emissions"
+    },
+    "worklist": {
+      "title": "Worklist",
+      "subtitle": "Which data points EKOWAI produces and which the client must deliver.",
+      "columnEkowai": "EKOWAI produces",
+      "columnClient": "Client delivers",
+      "columnGeneral": "General",
+      "fields": "fields",
+      "open": "open",
+      "empty": "No fields in this category.",
+      "ownerLabel": "Owner",
+      "ownerEkowai": "EKOWAI",
+      "ownerClient": "Client",
+      "ownerGeneral": "General"
     }
   }
 }
