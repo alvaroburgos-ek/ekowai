@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, act, within } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SurfaceInventoryEditor } from '../surface-inventory-editor';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
