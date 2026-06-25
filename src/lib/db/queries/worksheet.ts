@@ -391,15 +391,17 @@ export async function loadSurfaceSource(
   const owner = ownerField[0];
   if (owner.ownerCode === currentWorksheetCode) return null; // current sheet IS the source
 
-  const inst = await db
-    .select({ status: worksheetInstances.status })
-    .from(worksheetInstances)
-    .where(and(eq(worksheetInstances.projectId, projectId), eq(worksheetInstances.worksheetTemplateId, owner.templateId)))
-    .limit(1);
-  const param = await db
-    .select({ value: projectParameters.valueJson })
-    .from(projectParameters)
-    .where(and(eq(projectParameters.projectId, projectId), eq(projectParameters.fieldId, owner.fieldId)))
-    .limit(1);
+  const [inst, param] = await Promise.all([
+    db
+      .select({ status: worksheetInstances.status })
+      .from(worksheetInstances)
+      .where(and(eq(worksheetInstances.projectId, projectId), eq(worksheetInstances.worksheetTemplateId, owner.templateId)))
+      .limit(1),
+    db
+      .select({ value: projectParameters.valueJson })
+      .from(projectParameters)
+      .where(and(eq(projectParameters.projectId, projectId), eq(projectParameters.fieldId, owner.fieldId)))
+      .limit(1),
+  ]);
   return { status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null };
 }

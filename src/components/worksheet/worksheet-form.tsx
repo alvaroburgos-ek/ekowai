@@ -17,7 +17,7 @@ import { KostraTableEditor } from './kostra-table-editor';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
-import { normalizeSurfaceCarrier, type SurfaceInventoryCarrier } from '@/lib/eval/surface-inventory';
+import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
 import { lookupTab9 } from '@/lib/eval/tab9';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
