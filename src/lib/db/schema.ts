@@ -104,6 +104,25 @@ export const projects = pgTable(
   }),
 );
 
+// External parties (client / designer) attached per project. Internal staff stay
+// on org_members; these are the only non-org-member principals. role is plain text
+// with a CHECK ('client','designer') enforced in the access-control RLS migration.
+export const projectCollaborators = pgTable(
+  'project_collaborators',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    // references auth.users(id) in DB; kept as plain uuid like project_parameters.entered_by
+    userId: uuid('user_id').notNull(),
+    role: text('role').notNull(),
+    invitedBy: uuid('invited_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ uniqProjectUser: unique().on(t.projectId, t.userId) }),
+);
+
 // =============================================================================
 // STANDARDS LIBRARY (6 tables, read-only after import)
 // =============================================================================
