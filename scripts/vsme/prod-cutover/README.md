@@ -1,7 +1,14 @@
-# VSME → Prod cutover (STAGED — apply only on go)
+# VSME → Prod cutover (APPLIED 2026-06-26)
 
-Everything needed to put VSME on prod Supabase, staged and validated. **No prod
-write has happened.** Applying is one command once you give the go.
+**DB cutover APPLIED to prod (`vadsmshzebefjreqcicl`) and verified:**
+`vsme_present=true, templates=41, fields=143, emission_factors=281, co2_table=true, ef_policies=1`.
+Applied via `DATABASE_URL_PROD` (postgres.js, prepare:false) — the importer's
+prod-write channel. Note: prod `emission_factors` has **no `created_at`** column
+(local does); `03-seed` was regenerated without it. Remaining: code deploy
+(push → merge → `vercel --prod`).
+
+Everything needed to put VSME on prod Supabase, staged and validated. Applying is
+one command (`apply-to-prod.ps1`, Management-API path) or via `DATABASE_URL_PROD`.
 
 ## Verified prod state (read-only, 2026-06-26)
 Already on prod → **not touched** by this cutover: `fields.owner`,
