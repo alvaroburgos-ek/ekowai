@@ -55,3 +55,6 @@ playwright-report/
 
 # local Vercel project-link backup (when re-linking to a different team/project)
 .vercel.bak-mainteam/
+
+# local dev server log
+.dev-server.log
