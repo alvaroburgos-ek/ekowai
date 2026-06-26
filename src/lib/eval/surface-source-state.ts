@@ -35,18 +35,22 @@ export function surfaceSourceState(carrierRaw: unknown, sourceStatus: string | n
 export const SURFACE_DERIVED_SYMBOLS = ['A_C', 'C_m', 'A_E_ba', 'A_E_nba'] as const;
 
 /** Field ids a CONSUMER worksheet must withhold (drop from its seeded values)
- * when the surface source isn't `ok`: the surface-derived symbols that were
- * inherited FROM the source owner. Returns [] when ready or owner unknown.
- * Atomic inputs inherited from the owner are NOT withheld — only derived values. */
+ * when the surface source isn't `ok`: the surface-DERIVED symbols inherited
+ * FROM the source owner. Gates by the field's own `inheritedFromWorksheet`
+ * (set on every inherited field by mergeInheritedFields), NOT by how the value
+ * was seeded — the materialized producer row is loaded by field id and seeded
+ * via the local-param path, which never sets inheritedFromBySymbol, so gating
+ * on that map missed it (the "value shows above a 'hidden' banner" bug).
+ * Atomic inputs inherited from the owner are NOT withheld — only derived values.
+ * Returns [] when ready or owner unknown. */
 export function surfaceWithholdFieldIds(
-  fields: ReadonlyArray<{ id: string; symbol: string }>,
-  inheritedFromBySymbol: Record<string, string>,
+  fields: ReadonlyArray<{ id: string; symbol: string; inheritedFromWorksheet?: string | null }>,
   ownerCode: string | null,
   state: SurfaceSourceState['state'],
 ): string[] {
   if (state === 'ok' || !ownerCode) return [];
   const derived = new Set<string>(SURFACE_DERIVED_SYMBOLS);
   return fields
-    .filter((f) => derived.has(f.symbol) && inheritedFromBySymbol[f.symbol] === ownerCode)
+    .filter((f) => f.inheritedFromWorksheet === ownerCode && derived.has(f.symbol))
     .map((f) => f.id);
 }

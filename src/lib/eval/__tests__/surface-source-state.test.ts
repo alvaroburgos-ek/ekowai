@@ -30,30 +30,34 @@ describe('surfaceSourceState', () => {
 });
 
 describe('surfaceWithholdFieldIds — gate the value, not just the banner', () => {
+  // Inherited fields carry `inheritedFromWorksheet` (set by mergeInheritedFields),
+  // independent of how the value was seeded (param path vs same-symbol path).
   const fields = [
-    { id: 'f-ac', symbol: 'A_C' },
-    { id: 'f-cm', symbol: 'C_m' },
-    { id: 'f-other', symbol: 'gw_clearance' }, // atomic input also inherited from owner
-    { id: 'f-local', symbol: 'A_VA' },         // local, not inherited
+    { id: 'f-ac', symbol: 'A_C', inheritedFromWorksheet: 'A138-07' },
+    { id: 'f-cm', symbol: 'C_m', inheritedFromWorksheet: 'A138-07' },
+    { id: 'f-other', symbol: 'gw_clearance', inheritedFromWorksheet: 'A138-07' }, // atomic input inherited from owner
+    { id: 'f-local', symbol: 'A_VA' },                                            // local, not inherited
   ];
-  const inheritedFromBySymbol = { A_C: 'A138-07', C_m: 'A138-07', gw_clearance: 'A138-07' };
 
-  it('withholds the surface-DERIVED inherited symbols when state != ok', () => {
-    const ids = surfaceWithholdFieldIds(fields, inheritedFromBySymbol, 'A138-07', 'incomplete');
+  it('withholds the surface-DERIVED inherited symbols when state != ok (regardless of seeding path)', () => {
+    const ids = surfaceWithholdFieldIds(fields, 'A138-07', 'incomplete');
     expect(ids.sort()).toEqual(['f-ac', 'f-cm']); // NOT f-other (atomic input), NOT f-local
   });
   it('withholds on missing too', () => {
-    expect(surfaceWithholdFieldIds(fields, inheritedFromBySymbol, 'A138-07', 'missing').sort()).toEqual(['f-ac', 'f-cm']);
+    expect(surfaceWithholdFieldIds(fields, 'A138-07', 'missing').sort()).toEqual(['f-ac', 'f-cm']);
   });
   it('withholds nothing when state is ok', () => {
-    expect(surfaceWithholdFieldIds(fields, inheritedFromBySymbol, 'A138-07', 'ok')).toEqual([]);
+    expect(surfaceWithholdFieldIds(fields, 'A138-07', 'ok')).toEqual([]);
   });
   it('withholds nothing when ownerCode is null', () => {
-    expect(surfaceWithholdFieldIds(fields, inheritedFromBySymbol, null, 'incomplete')).toEqual([]);
+    expect(surfaceWithholdFieldIds(fields, null, 'incomplete')).toEqual([]);
   });
-  it('only withholds symbols actually inherited FROM the owner', () => {
-    // C_m inherited from a different worksheet → not withheld
-    const ids = surfaceWithholdFieldIds(fields, { A_C: 'A138-07', C_m: 'A138-99' }, 'A138-07', 'incomplete');
-    expect(ids).toEqual(['f-ac']);
+  it('only withholds derived fields inherited FROM the owner', () => {
+    // a derived field inherited from a different worksheet → not withheld
+    const other = [
+      { id: 'f-ac', symbol: 'A_C', inheritedFromWorksheet: 'A138-07' },
+      { id: 'f-cm', symbol: 'C_m', inheritedFromWorksheet: 'A138-99' },
+    ];
+    expect(surfaceWithholdFieldIds(other, 'A138-07', 'incomplete')).toEqual(['f-ac']);
   });
 });

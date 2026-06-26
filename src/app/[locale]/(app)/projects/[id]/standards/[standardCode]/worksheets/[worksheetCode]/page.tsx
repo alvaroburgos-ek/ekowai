@@ -231,7 +231,7 @@ export default async function WorksheetPage({
   // model: a value isn't trustworthy until formally approved.)
   if (surfaceSource) {
     const st = surfaceSourceState(surfaceSource.carrier, surfaceSource.status);
-    for (const id of surfaceWithholdFieldIds(mergedFields, inheritedFromBySymbol, surfaceSource.ownerCode, st.state)) {
+    for (const id of surfaceWithholdFieldIds(mergedFields, surfaceSource.ownerCode, st.state)) {
       delete initialValues[id];
     }
   }
