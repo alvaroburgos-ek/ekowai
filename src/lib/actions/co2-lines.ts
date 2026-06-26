@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { co2ActivityLines } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { userHasProjectAccess } from '@/lib/db/queries/worksheet';
 import { recomputeB3Co2 } from './co2';
 import type { Co2Totals } from './co2';
 
@@ -46,6 +47,13 @@ export async function addCo2Line(
     actorId = auth.user.id;
   }
 
+  // Org-membership guard: the actor must belong to the org that owns this
+  // project before we let them write a line into it. `db` runs as postgres and
+  // bypasses RLS, so this join IS the access check (mirrors saveWorksheet).
+  if (!(await userHasProjectAccess(input.projectId, actorId))) {
+    throw new Error('Forbidden: user is not a member of this project’s org');
+  }
+
   const [row] = await db
     .insert(co2ActivityLines)
     .values({
@@ -67,8 +75,37 @@ export async function addCo2Line(
   return { id: row.id };
 }
 
-/** Delete a CO₂ activity line by id. */
-export async function deleteCo2Line(id: string): Promise<void> {
+/**
+ * Delete a CO₂ activity line by id.
+ *
+ * @param id        - the line to delete
+ * @param actorId   - optional override for fixtures/tests that bypass session
+ *                    auth; production callers omit it (actor comes from session)
+ */
+export async function deleteCo2Line(id: string, actorId?: string): Promise<void> {
+  // Find the line's project so we can scope the org-membership check to it.
+  const [line] = await db
+    .select({ projectId: co2ActivityLines.projectId })
+    .from(co2ActivityLines)
+    .where(eq(co2ActivityLines.id, id))
+    .limit(1);
+  if (!line) return; // already gone — nothing to delete
+
+  // Resolve the actor; fall back to the caller-supplied actorId for fixtures.
+  let resolvedActor = actorId ?? null;
+  if (!resolvedActor) {
+    const supabase = await createClient();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) throw new Error('Not authenticated');
+    resolvedActor = auth.user.id;
+  }
+
+  // Org-membership guard before delete — must not let a user delete another
+  // org's line.
+  if (!(await userHasProjectAccess(line.projectId, resolvedActor))) {
+    throw new Error('Forbidden: user is not a member of this project’s org');
+  }
+
   await db.delete(co2ActivityLines).where(eq(co2ActivityLines.id, id));
   revalidatePath('/[locale]/projects/[id]/vsme/emissions', 'page');
 }

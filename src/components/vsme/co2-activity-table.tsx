@@ -1,12 +1,14 @@
 'use client';
 
 import type { JSX } from 'react';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCw, Loader2 } from 'lucide-react';
-import { recompute } from '@/lib/actions/co2-lines';
+import { RotateCw, Loader2, Trash2 } from 'lucide-react';
+import { recompute, deleteCo2Line } from '@/lib/actions/co2-lines';
+import { Co2AddActivity } from './co2-add-activity';
+import type { CatalogFactor } from '@/lib/db/queries/emission-factors-catalog';
 
 /** One activity line in the CO₂ worksheet. Frozen shape — later tasks pass real data. */
 export interface Co2Line {
@@ -41,6 +43,8 @@ const T = {
     total: 'Gesamt',
     lines: 'Aktivitäten',
     empty: 'Noch keine Aktivitäten erfasst.',
+    delete: 'Aktivität löschen',
+    colActions: 'Aktion',
   },
   en: {
     title: 'GHG activities',
@@ -55,6 +59,8 @@ const T = {
     total: 'Total',
     lines: 'activities',
     empty: 'No activities recorded yet.',
+    delete: 'Delete activity',
+    colActions: 'Action',
   },
 } as const;
 
@@ -83,19 +89,34 @@ export function Co2ActivityTable({
   locale,
   lines,
   totals,
+  catalog = [],
 }: {
   projectId: string;
   worksheetInstanceId: string;
   locale: 'de' | 'en';
   lines: Co2Line[];
   totals: Co2Totals;
+  /** Full emission-factor catalog for the Add-activity picker. */
+  catalog?: CatalogFactor[];
 }): JSX.Element {
   const t = T[locale];
   const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function handleRecompute() {
     startTransition(async () => {
       await recompute(projectId, worksheetInstanceId);
+    });
+  }
+
+  function handleDelete(id: string) {
+    setDeletingId(id);
+    startTransition(async () => {
+      try {
+        await deleteCo2Line(id);
+      } finally {
+        setDeletingId(null);
+      }
     });
   }
 
@@ -141,6 +162,9 @@ export function Co2ActivityTable({
                 <th className="px-5 py-2.5 font-medium text-subtext text-xs text-right">
                   {t.colResult}
                 </th>
+                <th className="px-3 py-2.5 font-medium text-subtext text-xs text-right w-12">
+                  <span className="sr-only">{t.colActions}</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-hairline">
@@ -169,12 +193,35 @@ export function Co2ActivityTable({
                       ? `${Number(line.computedTco2e).toLocaleString(locale === 'en' ? 'en-US' : 'de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`
                       : '—'}
                   </td>
+                  <td className="px-3 py-3 align-top text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(line.id)}
+                      disabled={isPending}
+                      aria-label={t.delete}
+                      title={t.delete}
+                      className="inline-flex items-center justify-center rounded-lg p-1.5 text-subtext transition-colors hover:bg-error-soft hover:text-error disabled:opacity-40 disabled:pointer-events-none"
+                    >
+                      {deletingId === line.id && isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-4" />
+                      )}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <Co2AddActivity
+        projectId={projectId}
+        worksheetInstanceId={worksheetInstanceId}
+        locale={locale}
+        catalog={catalog}
+      />
 
       <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-1.5 border-t border-hairline bg-paper-2/40 px-5 py-3 text-sm">
         <span className="text-subtext">

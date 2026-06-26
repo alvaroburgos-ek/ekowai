@@ -10,6 +10,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { Co2ActivityTable } from '@/components/vsme/co2-activity-table';
 import type { Co2Line, Co2Totals } from '@/components/vsme/co2-activity-table';
+import { loadEmissionFactorCatalog } from '@/lib/db/queries/emission-factors-catalog';
 
 const OUTPUT_SYMBOLS = {
   scope1: 'GrossScope1GreenhouseGasEmissions',
@@ -112,10 +113,11 @@ export default async function VsmeEmissionsPage({
   const { locale, id } = await params;
   const localeTyped = (locale === 'en' ? 'en' : 'de') as 'de' | 'en';
 
-  const [worksheetInstanceId, lines, totals] = await Promise.all([
+  const [worksheetInstanceId, lines, totals, catalog] = await Promise.all([
     resolveVsmeC03InstanceId(id),
     loadLines(id),
     loadTotals(id),
+    loadEmissionFactorCatalog(),
   ]);
 
   // Use the actual line count from loaded lines
@@ -131,6 +133,7 @@ export default async function VsmeEmissionsPage({
       locale={localeTyped}
       lines={lines}
       totals={totalsWithCount}
+      catalog={catalog}
     />
   );
 }
