@@ -36,7 +36,7 @@ VSME is independent of any other workstream: its tables (`emission_factors`, `co
 ## 2. Blockers to resolve BEFORE any prod step
 
 ### A. 🟠 Duplicate migration version number (rename before merge)
-`main` already has a migration stamped `20260625170000`, and the VSME branch independently used the same stamp for `20260625170000_co2_activity_lines.sql`. Two files with the same version in one `supabase/migrations/` tree = ambiguous ordering / one silently treated as already-applied. **Fix:** rename the VSME file to a free version (e.g. `20260626120000_co2_activity_lines.sql`) on `feat/vsme-seeders` before merge. Content-identical — only the filename/version changes. (This is plain merge hygiene, not a dependency on the other workstream.)
+`main` already has a migration stamped `20260625170000`, and the VSME branch independently used the same stamp for `20260625170000_co2_activity_lines.sql`. Two files with the same version in one `supabase/migrations/` tree = ambiguous ordering / one silently treated as already-applied. **Fix:** rename the VSME file to a free version (done: `20260626150000_co2_activity_lines.sql`, after the merged 138 migrations) before merge. Content-identical — only the filename/version changes. (This is plain merge hygiene, not a dependency on the other workstream.)
 
 ### B. 🔴 `created_by NOT NULL` on populated prod (will fail as written)
 `20260625180000_reconcile_citation_sources_created_by.sql` runs:
