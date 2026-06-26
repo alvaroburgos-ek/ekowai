@@ -16,7 +16,15 @@ describe('materializeSurfaceOutputs', () => {
     expect(out.A_E_nba).toBe(0);
   });
   it('returns nulls (not 0) when nothing is complete — clears stale downstream values', () => {
-    expect(materializeSurfaceOutputs({ rows: [] })).toEqual({ A_C: null, C_m: null, A_E_ba: null, A_E_nba: null });
-    expect(materializeSurfaceOutputs(null)).toEqual({ A_C: null, C_m: null, A_E_ba: null, A_E_nba: null });
+    expect(materializeSurfaceOutputs({ rows: [] })).toEqual({ A_C: null, C_m: null, A_E_ba: null, A_E_nba: null, A_C_sealed: null, A_C_unsealed: null });
+    expect(materializeSurfaceOutputs(null)).toEqual({ A_C: null, C_m: null, A_E_ba: null, A_E_nba: null, A_C_sealed: null, A_C_unsealed: null });
+  });
+  it('materializes A_C_sealed and A_C_unsealed', () => {
+    const out = materializeSurfaceOutputs({ rows: [
+      { id: '1', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+      { id: '2', tab9_value: 'park_flach', area_m2: 200, c_i: 0.3, c_s: 0.5, coeff_override: false },
+    ]});
+    expect(out.A_C_sealed).toBeCloseTo(90, 6);
+    expect(out.A_C_unsealed).toBeCloseTo(60, 6);
   });
 });

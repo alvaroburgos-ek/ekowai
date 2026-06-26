@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { surfaceSourceState, surfaceWithholdFieldIds } from '../surface-source-state';
+import { surfaceSourceState, surfaceWithholdFieldIds, SURFACE_DERIVED_SYMBOLS } from '../surface-source-state';
 
 const full = { rows: [{ id: '1', tab9_value: 'beton', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false }] };
 const partial = { rows: [
@@ -59,5 +59,12 @@ describe('surfaceWithholdFieldIds — gate the value, not just the banner', () =
       { id: 'f-cm', symbol: 'C_m', inheritedFromWorksheet: 'A138-99' },
     ];
     expect(surfaceWithholdFieldIds(other, 'A138-07', 'incomplete')).toEqual(['f-ac']);
+  });
+});
+
+describe('SURFACE_DERIVED_SYMBOLS', () => {
+  it('includes the reduced-area split', () => {
+    expect(SURFACE_DERIVED_SYMBOLS).toContain('A_C_sealed');
+    expect(SURFACE_DERIVED_SYMBOLS).toContain('A_C_unsealed');
   });
 });

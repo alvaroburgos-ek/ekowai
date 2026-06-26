@@ -6,6 +6,8 @@ const AC_FIELD_ID = 'field-ac';
 const CM_FIELD_ID = 'field-cm';
 const BA_FIELD_ID = 'field-ba';
 const NBA_FIELD_ID = 'field-nba';
+const SEALED_FIELD_ID = 'field-sealed';
+const UNSEALED_FIELD_ID = 'field-unsealed';
 const PROJECT_ID = 'proj-1';
 
 const COMPLETE_CARRIER = {
@@ -15,99 +17,91 @@ const COMPLETE_CARRIER = {
   ],
 };
 
-describe('planSurfaceBackfill', () => {
-  it('one project with a complete carrier → 4 rows with correct numbers', () => {
-    const rows = planSurfaceBackfill([
-      {
-        projectId: PROJECT_ID,
-        acFieldId: AC_FIELD_ID,
-        cmFieldId: CM_FIELD_ID,
-        baFieldId: BA_FIELD_ID,
-        nbaFieldId: NBA_FIELD_ID,
-        carrier: COMPLETE_CARRIER,
-      },
-    ]);
+const BASE_ROW = {
+  projectId: PROJECT_ID,
+  acFieldId: AC_FIELD_ID,
+  cmFieldId: CM_FIELD_ID,
+  baFieldId: BA_FIELD_ID,
+  nbaFieldId: NBA_FIELD_ID,
+  sealedFieldId: SEALED_FIELD_ID,
+  unsealedFieldId: UNSEALED_FIELD_ID,
+};
 
-    expect(rows).toHaveLength(4);
+describe('planSurfaceBackfill', () => {
+  it('one project with a complete carrier → 6 rows with correct numbers', () => {
+    const rows = planSurfaceBackfill([{ ...BASE_ROW, carrier: COMPLETE_CARRIER }]);
+
+    expect(rows).toHaveLength(6);
 
     const ac = rows.find((r) => r.fieldId === AC_FIELD_ID);
     const cm = rows.find((r) => r.fieldId === CM_FIELD_ID);
     const ba = rows.find((r) => r.fieldId === BA_FIELD_ID);
     const nba = rows.find((r) => r.fieldId === NBA_FIELD_ID);
+    const sealed = rows.find((r) => r.fieldId === SEALED_FIELD_ID);
+    const unsealed = rows.find((r) => r.fieldId === UNSEALED_FIELD_ID);
 
     expect(ac).toBeDefined();
     expect(cm).toBeDefined();
     expect(ba).toBeDefined();
     expect(nba).toBeDefined();
+    expect(sealed).toBeDefined();
+    expect(unsealed).toBeDefined();
 
     expect(ac!.projectId).toBe(PROJECT_ID);
     expect(ac!.valueNumber).toBeCloseTo(4826.43, 2);
     expect(cm!.valueNumber).toBeCloseTo(0.9, 6);
     expect(ba!.valueNumber).toBeCloseTo(5362.7, 4);
     expect(nba!.valueNumber).toBe(0);
+    // All rows are paved (schwarzdecke_asphalt group 1) → sealed = A_C, unsealed = 0
+    expect(sealed!.valueNumber).toBeCloseTo(4826.43, 2);
+    expect(unsealed!.valueNumber).toBe(0);
   });
 
-  it('empty carrier → 4 rows all null', () => {
-    const rows = planSurfaceBackfill([
-      {
-        projectId: PROJECT_ID,
-        acFieldId: AC_FIELD_ID,
-        cmFieldId: CM_FIELD_ID,
-        baFieldId: BA_FIELD_ID,
-        nbaFieldId: NBA_FIELD_ID,
-        carrier: { rows: [] },
-      },
-    ]);
+  it('complete carrier with mixed paved/unpaved → A_C_sealed and A_C_unsealed split correctly', () => {
+    const mixedCarrier = {
+      rows: [
+        { id: '1', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+        { id: '2', tab9_value: 'park_flach', area_m2: 200, c_i: 0.3, c_s: 0.5, coeff_override: false },
+      ],
+    };
+    const rows = planSurfaceBackfill([{ ...BASE_ROW, carrier: mixedCarrier }]);
 
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(6);
+    const sealed = rows.find((r) => r.fieldId === SEALED_FIELD_ID);
+    const unsealed = rows.find((r) => r.fieldId === UNSEALED_FIELD_ID);
+    expect(sealed!.valueNumber).toBeCloseTo(90, 6);
+    expect(unsealed!.valueNumber).toBeCloseTo(60, 6);
+  });
+
+  it('empty carrier → 6 rows all null', () => {
+    const rows = planSurfaceBackfill([{ ...BASE_ROW, carrier: { rows: [] } }]);
+
+    expect(rows).toHaveLength(6);
     for (const r of rows) {
       expect(r.valueNumber).toBeNull();
     }
   });
 
-  it('null/undefined carrier → 4 rows all null', () => {
-    const rows = planSurfaceBackfill([
-      {
-        projectId: PROJECT_ID,
-        acFieldId: AC_FIELD_ID,
-        cmFieldId: CM_FIELD_ID,
-        baFieldId: BA_FIELD_ID,
-        nbaFieldId: NBA_FIELD_ID,
-        carrier: null,
-      },
-    ]);
+  it('null/undefined carrier → 6 rows all null', () => {
+    const rows = planSurfaceBackfill([{ ...BASE_ROW, carrier: null }]);
 
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(6);
     for (const r of rows) {
       expect(r.valueNumber).toBeNull();
     }
   });
 
-  it('multiple projects → 4 rows per project', () => {
+  it('multiple projects → 6 rows per project', () => {
     const rows = planSurfaceBackfill([
-      {
-        projectId: 'proj-a',
-        acFieldId: AC_FIELD_ID,
-        cmFieldId: CM_FIELD_ID,
-        baFieldId: BA_FIELD_ID,
-        nbaFieldId: NBA_FIELD_ID,
-        carrier: COMPLETE_CARRIER,
-      },
-      {
-        projectId: 'proj-b',
-        acFieldId: AC_FIELD_ID,
-        cmFieldId: CM_FIELD_ID,
-        baFieldId: BA_FIELD_ID,
-        nbaFieldId: NBA_FIELD_ID,
-        carrier: { rows: [] },
-      },
+      { ...BASE_ROW, projectId: 'proj-a', carrier: COMPLETE_CARRIER },
+      { ...BASE_ROW, projectId: 'proj-b', carrier: { rows: [] } },
     ]);
 
-    expect(rows).toHaveLength(8);
+    expect(rows).toHaveLength(12);
     const projA = rows.filter((r) => r.projectId === 'proj-a');
     const projB = rows.filter((r) => r.projectId === 'proj-b');
-    expect(projA).toHaveLength(4);
-    expect(projB).toHaveLength(4);
+    expect(projA).toHaveLength(6);
+    expect(projB).toHaveLength(6);
     const acA = projA.find((r) => r.fieldId === AC_FIELD_ID);
     expect(acA!.valueNumber).toBeCloseTo(4826.43, 2);
     const acB = projB.find((r) => r.fieldId === AC_FIELD_ID);

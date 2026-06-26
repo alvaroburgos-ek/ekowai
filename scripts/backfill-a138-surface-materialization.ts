@@ -1,5 +1,5 @@
 /**
- * One-time (idempotent) backfill script: materialise A_C / C_m / A_E_ba / A_E_nba
+ * One-time (idempotent) backfill script: materialise A_C / C_m / A_E_ba / A_E_nba / A_C_sealed / A_C_unsealed
  * for all existing projects that have a DWA-A-138-1 / A138-07 surface_inventory row.
  *
  * Run ONCE at deploy (Runbook step 5) — NOT during Plan 3 implementation.
@@ -25,11 +25,13 @@ loadEnv({ path: '.env.local' });
 const STANDARD_CODE = 'DWA-A-138-1';
 const WORKSHEET_CODE = 'A138-07';
 
-// The four derived field symbols for A138-07
+// The six derived field symbols for A138-07
 const SYMBOL_AC = 'A_C';
 const SYMBOL_CM = 'C_m';
 const SYMBOL_BA = 'A_E_ba';
 const SYMBOL_NBA = 'A_E_nba';
+const SYMBOL_SEALED = 'A_C_sealed';
+const SYMBOL_UNSEALED = 'A_C_unsealed';
 const SYMBOL_CARRIER = 'surface_inventory';
 
 // ---------------------------------------------------------------------------
@@ -74,9 +76,9 @@ async function main(): Promise<void> {
   console.log(`Worksheet template id: ${worksheetTemplateId}`);
 
   // -------------------------------------------------------------------------
-  // 2. Resolve field ids for surface_inventory + the four derived outputs
+  // 2. Resolve field ids for surface_inventory + the six derived outputs
   // -------------------------------------------------------------------------
-  const fieldSymbols = [SYMBOL_CARRIER, SYMBOL_AC, SYMBOL_CM, SYMBOL_BA, SYMBOL_NBA];
+  const fieldSymbols = [SYMBOL_CARRIER, SYMBOL_AC, SYMBOL_CM, SYMBOL_BA, SYMBOL_NBA, SYMBOL_SEALED, SYMBOL_UNSEALED];
   const fieldRows = await sql<{ id: string; symbol: string }[]>`
     SELECT id, symbol
     FROM fields
@@ -92,23 +94,29 @@ async function main(): Promise<void> {
   const cmFieldId = fieldIdBySymbol.get(SYMBOL_CM);
   const baFieldId = fieldIdBySymbol.get(SYMBOL_BA);
   const nbaFieldId = fieldIdBySymbol.get(SYMBOL_NBA);
+  const sealedFieldId = fieldIdBySymbol.get(SYMBOL_SEALED);
+  const unsealedFieldId = fieldIdBySymbol.get(SYMBOL_UNSEALED);
 
-  if (!carrierId || !acFieldId || !cmFieldId || !baFieldId || !nbaFieldId) {
+  if (!carrierId || !acFieldId || !cmFieldId || !baFieldId || !nbaFieldId || !sealedFieldId || !unsealedFieldId) {
     console.error(`ERROR: could not resolve all required field ids.`);
     console.error(`  ${SYMBOL_CARRIER}: ${carrierId ?? 'MISSING'}`);
     console.error(`  ${SYMBOL_AC}: ${acFieldId ?? 'MISSING'}`);
     console.error(`  ${SYMBOL_CM}: ${cmFieldId ?? 'MISSING'}`);
     console.error(`  ${SYMBOL_BA}: ${baFieldId ?? 'MISSING'}`);
     console.error(`  ${SYMBOL_NBA}: ${nbaFieldId ?? 'MISSING'}`);
+    console.error(`  ${SYMBOL_SEALED}: ${sealedFieldId ?? 'MISSING'}`);
+    console.error(`  ${SYMBOL_UNSEALED}: ${unsealedFieldId ?? 'MISSING'}`);
     process.exit(1);
   }
 
   console.log(`Field ids resolved:`);
-  console.log(`  ${SYMBOL_CARRIER}: ${carrierId}`);
-  console.log(`  ${SYMBOL_AC}:      ${acFieldId}`);
-  console.log(`  ${SYMBOL_CM}:      ${cmFieldId}`);
-  console.log(`  ${SYMBOL_BA}:  ${baFieldId}`);
-  console.log(`  ${SYMBOL_NBA}: ${nbaFieldId}`);
+  console.log(`  ${SYMBOL_CARRIER}:     ${carrierId}`);
+  console.log(`  ${SYMBOL_AC}:          ${acFieldId}`);
+  console.log(`  ${SYMBOL_CM}:          ${cmFieldId}`);
+  console.log(`  ${SYMBOL_BA}:      ${baFieldId}`);
+  console.log(`  ${SYMBOL_NBA}:     ${nbaFieldId}`);
+  console.log(`  ${SYMBOL_SEALED}:   ${sealedFieldId}`);
+  console.log(`  ${SYMBOL_UNSEALED}: ${unsealedFieldId}`);
   console.log('');
 
   // -------------------------------------------------------------------------
@@ -143,6 +151,8 @@ async function main(): Promise<void> {
     cmFieldId: cmFieldId!,
     baFieldId: baFieldId!,
     nbaFieldId: nbaFieldId!,
+    sealedFieldId: sealedFieldId!,
+    unsealedFieldId: unsealedFieldId!,
     carrier: row.value_json,
   }));
 
@@ -157,8 +167,10 @@ async function main(): Promise<void> {
     const cm = projectRows.find((r) => r.fieldId === cmFieldId)?.valueNumber;
     const ba = projectRows.find((r) => r.fieldId === baFieldId)?.valueNumber;
     const nba = projectRows.find((r) => r.fieldId === nbaFieldId)?.valueNumber;
+    const sealed = projectRows.find((r) => r.fieldId === sealedFieldId)?.valueNumber;
+    const unsealed = projectRows.find((r) => r.fieldId === unsealedFieldId)?.valueNumber;
     const enteredBy = enteredByByProject.get(inputRow.projectId) ?? '(unknown)';
-    const status = ac == null ? 'SKIP (carrier empty/incomplete)' : `A_C=${ac?.toFixed(2)}, C_m=${cm?.toFixed(4)}, A_E_ba=${ba?.toFixed(2)}, A_E_nba=${nba?.toFixed(2)}`;
+    const status = ac == null ? 'SKIP (carrier empty/incomplete)' : `A_C=${ac?.toFixed(2)}, C_m=${cm?.toFixed(4)}, A_E_ba=${ba?.toFixed(2)}, A_E_nba=${nba?.toFixed(2)}, A_C_sealed=${sealed?.toFixed(2)}, A_C_unsealed=${unsealed?.toFixed(2)}`;
     console.log(`  [${inputRow.projectId}] ${status} | entered_by=${enteredBy}`);
   }
   console.log('');
