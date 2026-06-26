@@ -18,6 +18,8 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   'A138-07:2c',  // C_m
   'A138-07:2d',  // A_E_ba (Σ befestigt area)
   'A138-07:2e',  // A_E_nba (Σ unbefestigt area)
+  'A138-07:2f',  // A_C_sealed (reduced area, befestigt)
+  'A138-07:2g',  // A_C_unsealed (reduced area, unbefestigt)
   'A138-13:8',
   'A138-18:21',
   // §6.x.y batch

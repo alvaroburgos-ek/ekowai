@@ -26,16 +26,20 @@ import type {
   Gl10Scalars,
 } from './aggregators';
 
-// A138-07 surface-producer equation ids (A_C, C_m, A_E_ba, A_E_nba).
+// A138-07 surface-producer equation ids (A_C, C_m, A_E_ba, A_E_nba, A_C_sealed, A_C_unsealed).
 const A138_07_A_C_ID    = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 const A138_07_C_M_ID    = 'a1380702-0000-4000-8000-000000000002';
 const A138_07_A_E_BA_ID = 'a1380702-0000-4000-8000-000000000003';
 const A138_07_A_E_NBA_ID = 'a1380702-0000-4000-8000-000000000004';
+const A138_07_A_C_SEALED_ID = 'a1380702-0000-4000-8000-000000000005';
+const A138_07_A_C_UNSEALED_ID = 'a1380702-0000-4000-8000-000000000006';
 const A138_07_SURFACE_IDS = new Set([
   A138_07_A_C_ID,
   A138_07_C_M_ID,
   A138_07_A_E_BA_ID,
   A138_07_A_E_NBA_ID,
+  A138_07_A_C_SEALED_ID,
+  A138_07_A_C_UNSEALED_ID,
 ]);
 
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
