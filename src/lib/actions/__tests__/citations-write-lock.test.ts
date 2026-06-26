@@ -95,7 +95,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 // Import the actions AFTER mocks are set up.
-import { addCitation, removeCitation, attachCitation } from '@/lib/actions/citations';
+import { addCitation, removeCitation, attachCitation, detachCitation } from '@/lib/actions/citations';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -182,6 +182,7 @@ describe('citations write-lock guard', () => {
       mockWsStatus = 'draft';
       const result = await removeCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID, citationId: 'cit-1' });
       expect(result.ok).toBe(true);
+      expect(txUpdateMock).toHaveBeenCalled();
     });
 
     it('performs NO write when locked (engineer_approved)', async () => {
@@ -211,6 +212,7 @@ describe('citations write-lock guard', () => {
       mockWsStatus = 'draft';
       const result = await attachCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID, source: sampleSource });
       expect(result.ok).toBe(true);
+      expect(txInsertMock).toHaveBeenCalled();
     });
 
     it('performs NO write when locked (final)', async () => {
@@ -218,6 +220,36 @@ describe('citations write-lock guard', () => {
       await attachCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID, source: sampleSource });
       expect(txInsertMock).not.toHaveBeenCalled();
       expect(txUpdateMock).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── detachCitation ─────────────────────────────────────────────────────────
+
+  describe('detachCitation', () => {
+    it('returns field_not_in_project when resolveFieldWorksheetStatus returns null', async () => {
+      mockWsStatus = null;
+      const result = await detachCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID });
+      expect(result).toEqual({ ok: false, error: 'field_not_in_project' });
+    });
+
+    it('returns the locked error when status is final', async () => {
+      mockWsStatus = 'final';
+      const result = await detachCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID });
+      expect(result).toEqual({ ok: false, error: LOCKED_ERROR });
+    });
+
+    it('performs NO write when locked (final)', async () => {
+      mockWsStatus = 'final';
+      await detachCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID });
+      expect(txInsertMock).not.toHaveBeenCalled();
+      expect(txUpdateMock).not.toHaveBeenCalled();
+    });
+
+    it('passes the guard and proceeds to write when status is draft', async () => {
+      mockWsStatus = 'draft';
+      const result = await detachCitation({ projectId: PROJECT_ID, fieldId: FIELD_ID });
+      expect(result.ok).toBe(true);
+      expect(txUpdateMock).toHaveBeenCalled();
     });
   });
 });
