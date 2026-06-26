@@ -100,7 +100,7 @@ describe('co2-lines actions (integration)', () => {
   });
 
   it('deleteCo2Line removes the row from the DB', async () => {
-    await deleteCo2Line(insertedLineId);
+    await deleteCo2Line(insertedLineId, ctx.userId);
 
     const rows = await db
       .select({ id: co2ActivityLines.id })

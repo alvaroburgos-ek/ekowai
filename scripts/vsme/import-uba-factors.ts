@@ -28,6 +28,7 @@ export type FactorRow = {
   scope: string;
   category: string;
   subcategory: string | null;
+  name: string | null;
   unit: string;
   kg_co2e: number;
   kg_co2: number | null;
@@ -63,6 +64,52 @@ function toStr(v: unknown): string {
 function findCol(headers: string[], name: string): number {
   const nameLower = name.toLowerCase();
   return headers.findIndex((h) => h.toLowerCase().startsWith(nameLower));
+}
+
+/**
+ * UBA ID unit codes — the 5th ID segment encodes the Bezugsgröße (reference
+ * unit). Decoded from the workbook's "Technische_Hinweise" sheet:
+ *   01=kWh 02=l 03=kg 04=t 05=m³ 06=km 07=Gerät/a 08=h 09=pkm 10=tkm
+ * The text "Einheit" column is blank for most rows (the unit lives in the ID),
+ * so the ID suffix is the authoritative, always-present unit source.
+ */
+const UNIT_BY_SUFFIX: Record<string, string> = {
+  '01': 'kWh',
+  '02': 'l',
+  '03': 'kg',
+  '04': 't',
+  '05': 'm³',
+  '06': 'km',
+  '07': 'Gerät/a',
+  '08': 'h',
+  '09': 'pkm',
+  '10': 'tkm',
+};
+
+/** Resolve unit from the ID suffix, falling back to the text Einheit column. */
+function resolveUnit(rawId: string, unitText: string): string {
+  const suffix = rawId.split('_').pop() ?? '';
+  const fromId = UNIT_BY_SUFFIX[suffix];
+  if (fromId) return fromId;
+  return unitText.trim();
+}
+
+/**
+ * Derive the human-readable commodity name from the Level columns.
+ * The name is the deepest non-empty "Level N" value that is NOT a bare
+ * integer code (those numbers are UBA-internal heating-value references, e.g.
+ * 65/67/71/73, not commodity names). Returns null if no usable level exists.
+ */
+function deriveName(headers: string[], cells: unknown[]): string | null {
+  let best: string | null = null;
+  for (let i = 0; i < headers.length; i++) {
+    if (!/^level \d+$/i.test(headers[i])) continue;
+    const v = toStr(cells[i]);
+    if (!v || v === '-') continue;
+    if (/^\d+$/.test(v)) continue; // bare numeric code, not a name
+    best = v;
+  }
+  return best;
 }
 
 // ---------------------------------------------------------------------------
@@ -141,20 +188,28 @@ function extractRow(
   if (!rawId || !/^\d{2}_/.test(rawId)) return null;
 
   if (isKaeltemittel) {
-    // Sheet 04: no Scope column. Use GWP AR4 as kg_co2e. All factors → Scope 1.
+    // Sheet 04: no Scope column. GWP (kg CO2e/kg) is the factor. All → Scope 1.
+    // Primary = AR4 (mandated for HFKW by F-Gas-VO). Many blends (R-410A,
+    // R-404A, R-407C…) carry NO AR4 value but DO carry a F-Gas-VO GWP, so fall
+    // back AR4 → F-Gas-VO. Without this, ~133 common refrigerants are dropped.
     const ar4Idx = headers.findIndex((h) => h.toLowerCase().includes('gwp ar4'));
-    if (ar4Idx === -1) return null;
-    const co2eVal = toNum(cells[ar4Idx]);
+    const fgasIdx = headers.findIndex((h) => h.toLowerCase().includes('f-gas'));
+    const ar5Idx = headers.findIndex((h) => h.toLowerCase().includes('(ar5)'));
+    const co2eVal =
+      (ar4Idx !== -1 ? toNum(cells[ar4Idx]) : null) ??
+      (fgasIdx !== -1 ? toNum(cells[fgasIdx]) : null) ??
+      (ar5Idx !== -1 ? toNum(cells[ar5Idx]) : null);
     if (co2eVal === null) return null;
 
     const nameIdx = headers.findIndex((h) => h.toLowerCase().includes('industrielle'));
-    const subcategory = nameIdx !== -1 ? toStr(cells[nameIdx]) || null : null;
+    const name = nameIdx !== -1 ? toStr(cells[nameIdx]) || null : null;
 
     return {
       uba_id: rawId,
       scope: 'Scope 1',
       category: 'Kältemittel',
-      subcategory,
+      subcategory: name,
+      name,
       unit: 'kg',
       kg_co2e: co2eVal,
       kg_co2: null,
@@ -177,7 +232,9 @@ function extractRow(
 
   const category = lvl1Idx !== -1 ? toStr(cells[lvl1Idx]) : '';
   const subcategory = lvl2Idx !== -1 ? toStr(cells[lvl2Idx]) || null : null;
-  const unit = unitIdx !== -1 ? toStr(cells[unitIdx]).trim() : '';
+  const unitText = unitIdx !== -1 ? toStr(cells[unitIdx]).trim() : '';
+  const unit = resolveUnit(rawId, unitText);
+  const name = deriveName(headers, cells);
 
   // Detect sheet 03 pattern: has "kg CO2" but NOT "kg CO2e"
   const co2eIdx = headers.findIndex(
@@ -210,6 +267,7 @@ function extractRow(
     scope,
     category,
     subcategory,
+    name,
     unit,
     kg_co2e,
     kg_co2,
@@ -466,11 +524,11 @@ export async function importFactors(databaseUrl: string, rows: FactorRow[]): Pro
     for (const r of rows) {
       await sql`
         INSERT INTO emission_factors
-          (uba_id, scope, category, subcategory, unit, kg_co2e, kg_co2, kg_ch4, kg_n2o,
+          (uba_id, scope, category, subcategory, name, unit, kg_co2e, kg_co2, kg_ch4, kg_n2o,
            source, source_version, dataset_year, sheet)
         VALUES
           (${r.uba_id}, ${r.scope}, ${r.category}, ${r.subcategory ?? null},
-           ${r.unit}, ${r.kg_co2e}, ${r.kg_co2 ?? null}, ${r.kg_ch4 ?? null},
+           ${r.name ?? null}, ${r.unit}, ${r.kg_co2e}, ${r.kg_co2 ?? null}, ${r.kg_ch4 ?? null},
            ${r.kg_n2o ?? null}, ${'UBA'}, ${r.source_version}, ${r.dataset_year},
            ${r.sheet ?? null})
         ON CONFLICT (uba_id, source_version)
@@ -478,6 +536,7 @@ export async function importFactors(databaseUrl: string, rows: FactorRow[]): Pro
           scope          = EXCLUDED.scope,
           category       = EXCLUDED.category,
           subcategory    = EXCLUDED.subcategory,
+          name           = EXCLUDED.name,
           unit           = EXCLUDED.unit,
           kg_co2e        = EXCLUDED.kg_co2e,
           kg_co2         = EXCLUDED.kg_co2,

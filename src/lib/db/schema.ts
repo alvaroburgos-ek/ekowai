@@ -485,6 +485,12 @@ export const emissionFactors = pgTable(
     scope: text('scope').notNull(),
     category: text('category').notNull(), // UBA Level 1, e.g. "Strom"
     subcategory: text('subcategory'), // UBA Level 2, e.g. "Deutscher Strommix"
+    /**
+     * Human-readable commodity label for the picker (German; the UBA list is
+     * German-only so there is no name_en). Derived from the deepest non-numeric
+     * UBA Level column, e.g. "Dieselkraftstoff", "Erdgas (Heizwert)", "R-410A".
+     */
+    name: text('name'),
     unit: text('unit').notNull(), // e.g. "kWh"
     kgCo2e: numeric('kg_co2e').notNull(),
     kgCo2: numeric('kg_co2'),
