@@ -3,6 +3,7 @@ import {
   TRANSITIONS,
   nextStatus,
   userActionsFor,
+  isWorksheetEditable,
   type WorksheetStatus,
 } from '../state-machine';
 
@@ -117,5 +118,17 @@ describe('state-machine — userActionsFor()', () => {
       expect(events).not.toContain('deactivate');
       expect(events).not.toContain('reactivate');
     }
+  });
+});
+
+describe('isWorksheetEditable', () => {
+  it('allows edits only in draft and submitted_for_review', () => {
+    expect(isWorksheetEditable('draft')).toBe(true);
+    expect(isWorksheetEditable('submitted_for_review')).toBe(true);
+  });
+  it('locks engineer_approved, final, and deactivated (deny-by-default)', () => {
+    expect(isWorksheetEditable('engineer_approved')).toBe(false);
+    expect(isWorksheetEditable('final')).toBe(false);
+    expect(isWorksheetEditable('deactivated')).toBe(false);
   });
 });
