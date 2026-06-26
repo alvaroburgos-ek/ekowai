@@ -362,10 +362,31 @@ git commit -m "test(138): integration wiring for A_C_sealed/A_C_unsealed produce
 After Tasks 1–5 are green and reviewed, STOP and report "ready to deploy." Cutover, when approved, follows the proven runbook:
 1. Merge `feat/a138-area-singlesource` → `main` (138-only; VSME untouched).
 2. Apply `20260626140000_a138_area_singlesource.sql` to prod (`vadsmshzebefjreqcicl`) via the Management-API PAT.
-3. Verify (B2-style read-only): A138-07 has the 2 new producer fields + 2 equations; `A_E_ba`/`A_E_nba`/`A_C_sealed`/`A_C_unsealed` list `A138-10` as consumer; A138-10's 4 duplicate fields are `active=false`; no active A138 equation/condition references the deactivated symbols.
+3. **Verify B2 (read-only) — all must pass, incl. the explicit orphaned-field gate:**
+   - **B2.1 producers exist:** A138-07 has the 2 new producer fields (`A_C_sealed`,`A_C_unsealed`, active) + 2 equations (Gl. 2f/2g).
+   - **B2.2 consumers registered:** A138-07's `A_E_ba`/`A_E_nba`/`A_C_sealed`/`A_C_unsealed` each list `A138-10` in `consumer_worksheets`.
+   - **B2.3 duplicates deactivated:** A138-10's `A_E_b_a_total`,`A_E_nb_a_total`,`A_C_sealed`,`A_C_unsealed` are all `active=false`.
+   - **B2.4 ORPHANED-FIELD GATE (must return ZERO rows):** no *active* A138 equation input/formula or compliance condition references any deactivated A138-10 symbol. Run:
+     ```sql
+     WITH a138 AS (SELECT wt.id wtid, wt.code FROM worksheet_templates wt JOIN standards s ON s.id=wt.standard_id WHERE s.code='DWA-A-138-1'),
+          syms AS (SELECT unnest(ARRAY['A_E_b_a_total','A_E_nb_a_total']) sym)
+     SELECT 'eq-input' src, a.code, e.equation_number, e.input_symbols::text FROM equations e JOIN a138 a ON e.worksheet_template_id=a.wtid, syms WHERE e.input_symbols::text ILIKE '%'||syms.sym||'%'
+     UNION ALL SELECT 'eq-formula', a.code, e.equation_number, e.formula FROM equations e JOIN a138 a ON e.worksheet_template_id=a.wtid, syms WHERE e.formula ILIKE '%'||syms.sym||'%'
+     UNION ALL SELECT 'condition', a.code, cr.code, cr.condition FROM compliance_requirements cr JOIN a138 a ON cr.worksheet_template_id=a.wtid, syms WHERE cr.condition ILIKE '%'||syms.sym||'%';
+     ```
+     (Note: `A_C_sealed`/`A_C_unsealed` are intentionally re-used as A138-07 producer *outputs* post-migration, so the gate targets only the two area-total symbols, which must have zero references anywhere.) Confirmed empty pre-migration on 2026-06-26.
 4. `vercel --prod` + re-point the `-hannesoster-` alias ([[reference_ekowai_wizard_deploy]]).
 5. Run the surface backfill for existing projects so A138-10 consumers resolve the new split immediately (or save A138-07 once in-browser per project).
-6. Rollback ready: `scripts/rollback-20260626140000-a138-area-singlesource.sql` + the code-rollback note + previous build/alias.
+6. **Materialization SMOKE-TEST (mandatory — proves the DB round-trip the local tests could not):** in-browser, open a project's A138-07, ensure `surface_inventory` has ≥1 paved + ≥1 unpaved complete row, **save**, then read back from prod:
+   ```sql
+   SELECT f.symbol, pp.value_number, pp.source_type
+   FROM project_parameters pp JOIN fields f ON f.id=pp.field_id
+   JOIN worksheet_templates wt ON wt.id=f.worksheet_template_id JOIN standards s ON s.id=wt.standard_id
+   WHERE s.code='DWA-A-138-1' AND wt.code='A138-07' AND f.symbol IN ('A_C_sealed','A_C_unsealed')
+     AND pp.project_id = '<project-id>';
+   ```
+   Both rows must be present with `source_type='derived'` and finite values (sealed = Σ paved A_E·C, unsealed = Σ unpaved A_E·C). Then open A138-10 and confirm both inherit/display (withheld with cause if A138-07 not yet engineer_approved/final — that is correct, not a failure).
+7. Rollback ready: `scripts/rollback-20260626140000-a138-area-singlesource.sql` + the code-rollback note + previous build/alias.
 
 ---
 
