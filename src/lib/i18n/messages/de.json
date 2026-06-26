@@ -33,6 +33,11 @@
   "projects": {
     "title": "Projekte",
     "newProject": "Neues Projekt",
+    "tabs": {
+      "overview": "Übersicht",
+      "documents": "Dokumente",
+      "reports": "Berichtsverlauf"
+    },
     "name": "Projektname",
     "client": "Auftraggeber",
     "location": "Standort",
@@ -425,5 +430,57 @@
     "auditTitle": "Auditprotokoll",
     "auditEmpty": "Noch keine Aktionen für dieses Projekt aufgezeichnet.",
     "auditViewLink": "Auditprotokoll ansehen"
+  },
+  "vsme": {
+    "tabs": {
+      "worklist": "Arbeitsliste",
+      "emissions": "Emissionen"
+    },
+    "worklist": {
+      "title": "Arbeitsliste",
+      "subtitle": "Welche Datenpunkte EKOWAI produziert und welche der Kunde liefert.",
+      "columnEkowai": "EKOWAI produziert",
+      "columnClient": "Kunde liefert",
+      "columnGeneral": "Allgemein",
+      "fields": "Felder",
+      "open": "offen",
+      "empty": "Keine Felder in dieser Kategorie.",
+      "ownerLabel": "Zuständigkeit",
+      "ownerEkowai": "EKOWAI",
+      "ownerClient": "Kunde",
+      "ownerGeneral": "Allgemein"
+    },
+    "emissions": {
+      "title": "THG-Aktivitäten",
+      "subtitle": "Tätigkeitsdaten mit hinterlegten UBA-Emissionsfaktoren.",
+      "recompute": "Neu berechnen",
+      "colCategory": "Kategorie",
+      "colAmount": "Menge",
+      "colFactor": "Faktor (UBA)",
+      "colResult": "tCO₂e",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (standortbasiert)",
+      "total": "Gesamt",
+      "lines": "Aktivitäten",
+      "empty": "Noch keine Aktivitäten erfasst."
+    },
+    "overview": {
+      "title": "VSME-Bericht · Überblick",
+      "subtitle": "Datenstand und Treibhausgas-Bilanz dieses Projekts.",
+      "completion": "Fertigstellung",
+      "fields": "Felder",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (standortbasiert)",
+      "total": "Gesamt",
+      "ownership": "Datenverantwortung",
+      "ownerEkowai": "EKOWAI produziert",
+      "ownerClient": "Kunde liefert",
+      "ownerGeneral": "Allgemein"
+    },
+    "export": {
+      "title": "Export",
+      "xlsx": "Excel herunterladen (.xlsx)",
+      "pdf": "PDF herunterladen"
+    }
   }
 }

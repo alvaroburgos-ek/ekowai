@@ -180,6 +180,14 @@ export const fields = pgTable(
      * fallback at render time when no project_parameters row and no
      * site_profile match exists. Never overwritten by user input. */
     defaultValue: jsonb('default_value'),
+    /** VSME owner boundary: which side produces this datapoint.
+     * Seeded by module default (B3–B7 → ekowai_env, B8–B11 → client_supplied,
+     * B1/B2 → general) and editable per-field in the Worklist. Nullable so
+     * non-VSME engineering fields stay untouched. */
+    owner: text('owner'),
+    /** VSME XBRL element id from the EFRAG taxonomy, used by the export
+     * mapping. Nullable; only populated for VSME fields. */
+    xbrlElementId: text('xbrl_element_id'),
   },
   (t) => ({ uniqWorksheetSymbol: unique().on(t.worksheetTemplateId, t.symbol) }),
 );
@@ -463,6 +471,61 @@ export const reportArchives = pgTable(
   (t) => ({
     orgIdx: index('report_archives_org_idx').on(t.orgId),
   }),
+);
+
+// =============================================================================
+// VSME — EMISSION FACTORS REFERENCE TABLE (read-only after seeding; Plan 2)
+// =============================================================================
+export const emissionFactors = pgTable(
+  'emission_factors',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** UBA factor id, e.g. "05_20_01_001_01" — the citation key. */
+    ubaId: text('uba_id').notNull(),
+    scope: text('scope').notNull(),
+    category: text('category').notNull(), // UBA Level 1, e.g. "Strom"
+    subcategory: text('subcategory'), // UBA Level 2, e.g. "Deutscher Strommix"
+    unit: text('unit').notNull(), // e.g. "kWh"
+    kgCo2e: numeric('kg_co2e').notNull(),
+    kgCo2: numeric('kg_co2'),
+    kgCh4: numeric('kg_ch4'),
+    kgN2o: numeric('kg_n2o'),
+    source: text('source').notNull().default('UBA'),
+    sourceVersion: text('source_version').notNull(),
+    datasetYear: integer('dataset_year').notNull(),
+    sheet: text('sheet'), // provenance: which UBA sheet
+  },
+  (t) => ({
+    ubaIdVersionUnique: unique('emission_factors_uba_id_version_unique').on(
+      t.ubaId,
+      t.sourceVersion,
+    ),
+  }),
+);
+
+// =============================================================================
+// VSME — CO₂ ACTIVITY LINES (working table; Plan 3)
+// =============================================================================
+// Per-line fuel/electricity activity data the CO₂ engine reads to compute
+// Scope 1 / Scope 2 totals.  🚩PROD-PROMOTE: applied to local only; human
+// promotes when coordinating both tracks.
+export const co2ActivityLines = pgTable(
+  'co2_activity_lines',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    worksheetInstanceId: uuid('worksheet_instance_id').references(() => worksheetInstances.id, { onDelete: 'set null' }),
+    scope: text('scope').notNull(),               // 'Scope 1' | 'Scope 2'
+    category: text('category').notNull(),         // matches emission_factors.category
+    subcategory: text('subcategory'),
+    amount: numeric('amount').notNull(),
+    unit: text('unit').notNull(),
+    factorUbaId: text('factor_uba_id').notNull(),
+    factorSourceVersion: text('factor_source_version').notNull(),
+    computedTco2e: numeric('computed_tco2e'),      // last computed result (cache)
+    createdBy: uuid('created_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
 );
 
 // =============================================================================

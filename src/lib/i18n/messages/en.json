@@ -33,6 +33,11 @@
   "projects": {
     "title": "Projects",
     "newProject": "New project",
+    "tabs": {
+      "overview": "Overview",
+      "documents": "Documents",
+      "reports": "Report history"
+    },
     "name": "Project name",
     "client": "Client",
     "location": "Location",
@@ -425,5 +430,57 @@
     "auditTitle": "Audit log",
     "auditEmpty": "No actions recorded for this project yet.",
     "auditViewLink": "View audit log"
+  },
+  "vsme": {
+    "tabs": {
+      "worklist": "Worklist",
+      "emissions": "Emissions"
+    },
+    "worklist": {
+      "title": "Worklist",
+      "subtitle": "Which data points EKOWAI produces and which the client must deliver.",
+      "columnEkowai": "EKOWAI produces",
+      "columnClient": "Client delivers",
+      "columnGeneral": "General",
+      "fields": "fields",
+      "open": "open",
+      "empty": "No fields in this category.",
+      "ownerLabel": "Owner",
+      "ownerEkowai": "EKOWAI",
+      "ownerClient": "Client",
+      "ownerGeneral": "General"
+    },
+    "emissions": {
+      "title": "GHG activities",
+      "subtitle": "Activity data with attached UBA emission factors.",
+      "recompute": "Recompute",
+      "colCategory": "Category",
+      "colAmount": "Amount",
+      "colFactor": "Factor (UBA)",
+      "colResult": "tCO₂e",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (location-based)",
+      "total": "Total",
+      "lines": "activities",
+      "empty": "No activities recorded yet."
+    },
+    "overview": {
+      "title": "VSME report · Overview",
+      "subtitle": "Data status and greenhouse-gas balance for this project.",
+      "completion": "Completion",
+      "fields": "fields",
+      "scope1": "Scope 1",
+      "scope2": "Scope 2 (location-based)",
+      "total": "Total",
+      "ownership": "Data ownership",
+      "ownerEkowai": "EKOWAI produces",
+      "ownerClient": "Client delivers",
+      "ownerGeneral": "General"
+    },
+    "export": {
+      "title": "Export",
+      "xlsx": "Download Excel (.xlsx)",
+      "pdf": "Download PDF"
+    }
   }
 }
