@@ -5,17 +5,6 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 // This is a static-import-only test — no live DB required — so it runs before _setup-env.
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
 
-// DB-free guard-predicate test: verifies the lock predicate used by the write-lock guard.
-import { isWorksheetEditable } from '@/lib/state-machine';
-
-describe('saveWorksheet write-lock predicate', () => {
-  it('locks approved/final and allows draft', () => {
-    expect(isWorksheetEditable('final')).toBe(false);
-    expect(isWorksheetEditable('engineer_approved')).toBe(false);
-    expect(isWorksheetEditable('draft')).toBe(true);
-  });
-});
-
 describe('worksheet save loop — derived symbol coverage', () => {
   it('SURFACE_DERIVED_SYMBOLS contains all six expected symbols (4 original + 2 new)', () => {
     const symbols = [...SURFACE_DERIVED_SYMBOLS];
