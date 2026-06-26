@@ -668,6 +668,8 @@ const a138_07_A_C = makeSurfaceAggregator((s) => s.A_C, 'A_C = Σ(A_E,i · C_i) 
 const a138_07_C_m = makeSurfaceAggregator((s) => s.C_m, 'C_m = A_C / Σ A_E,i');
 const a138_07_A_E_ba = makeSurfaceAggregator((s) => s.A_E_ba, 'A_E,b,a = Σ A_E,i (befestigt)');
 const a138_07_A_E_nba = makeSurfaceAggregator((s) => s.A_E_nba, 'A_E,nb,a = Σ A_E,i (unbefestigt)');
+const a138_07_A_C_sealed = makeSurfaceAggregator((s) => s.A_C_sealed, 'A_C,b = Σ(A_E,b,a,i · C_i)   (reduzierte Fläche, befestigt)');
+const a138_07_A_C_unsealed = makeSurfaceAggregator((s) => s.A_C_unsealed, 'A_C,nb = Σ(A_E,nb,a,i · C_i)   (reduzierte Fläche, unbefestigt)');
 
 export const aggregators: Record<string, Aggregator> = {
   // DWA-A 138-1 · A138-07 · Gl. (2) A_C producer (surface_inventory)
@@ -678,6 +680,10 @@ export const aggregators: Record<string, Aggregator> = {
   'a1380702-0000-4000-8000-000000000003': a138_07_A_E_ba,
   // DWA-A 138-1 · A138-07 · Gl. (2e) A_E_nba producer
   'a1380702-0000-4000-8000-000000000004': a138_07_A_E_nba,
+  // DWA-A 138-1 · A138-07 · Gl. (2f) A_C_sealed producer (reduced area, befestigt)
+  'a1380702-0000-4000-8000-000000000005': a138_07_A_C_sealed,
+  // DWA-A 138-1 · A138-07 · Gl. (2g) A_C_unsealed producer (reduced area, unbefestigt)
+  'a1380702-0000-4000-8000-000000000006': a138_07_A_C_unsealed,
   // DWA-A 138-1 · A138-13 · Gl. (8)
   '69f31e6e-a755-4246-af10-ae46668b5c86': a138_13_gl8,
   // DWA-A 138-1 · A138-16 · Gl. (11) Bilanz-Check
