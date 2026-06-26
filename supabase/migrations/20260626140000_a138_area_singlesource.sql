@@ -26,6 +26,7 @@ BEGIN
     WHERE worksheet_template_id=ws07 AND symbol IN ('A_E_ba','A_E_nba');
 
   -- (2) Producer fields for the reduced-area split (A138-07 owns them; A138-10 consumes).
+  -- ON CONFLICT (id) is deliberate: A_C_sealed/A_C_unsealed are brand-new symbols on A138-07 with pre-assigned stable UUIDs.
   INSERT INTO fields (id, worksheet_template_id, section_id, symbol, label_de, label_en, data_type, unit, is_required, consumer_worksheets, order_index, active)
   VALUES
     ('a1380700-0000-4000-8000-000000000005', ws07, sec07, 'A_C_sealed',   'Reduzierte Fläche befestigt Σ(A_E,b·C)',    'Reduced sealed area Σ(A_E,b·C)',    'number', 'm²', false, ARRAY['A138-10'], 95, true),

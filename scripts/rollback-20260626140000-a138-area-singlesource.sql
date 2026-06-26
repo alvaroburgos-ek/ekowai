@@ -9,14 +9,20 @@
 --
 -- CODE rollback (must be done separately before deploying):
 --   - Remove whitelist keys 'A138-07:2f' and 'A138-07:2g' from
---       lib/engine/a138/whitelist.ts  AND  lib/engine/a138/whitelist-client.ts
---   - Remove the two ID consts from A138_07_SURFACE_IDS in both
---       lib/engine/a138/surface-engine.ts  AND  lib/engine/a138/surface-engine-client.ts
+--       src/lib/eval/whitelist.ts  AND  src/lib/eval/engine-whitelist.ts
+--   - Remove the two ID consts from A138_07_SURFACE_IDS in
+--       src/lib/eval/use-equation-engine.ts  AND  src/lib/eval/evaluate-for-report.ts
 --       (A_C_SEALED_ID = 'a1380700-0000-4000-8000-000000000005' and
 --        A_C_UNSEALED_ID = 'a1380700-0000-4000-8000-000000000006')
---   - Remove the two aggregator registry entries for A_C_sealed / A_C_unsealed.
---   - Remove 'A_C_sealed' and 'A_C_unsealed' from SURFACE_DERIVED_SYMBOLS,
---     the materialize call list, and the backfill script.
+--   - Remove the two aggregator registry entries (makeSurfaceAggregator consts) for
+--       A_C_sealed / A_C_unsealed from src/lib/eval/aggregators.ts
+--   - Remove 'A_C_sealed' and 'A_C_unsealed' from SURFACE_DERIVED_SYMBOLS in
+--       src/lib/eval/surface-source-state.ts
+--   - Remove the two symbols from SurfaceOutputs/return in
+--       src/lib/eval/materialize-surfaces.ts
+--   - Remove the two field-id wiring entries from
+--       src/lib/eval/backfill-surface-plan.ts  AND  scripts/backfill-a138-surface-materialization.ts
+--   - Revert the save loop in src/lib/actions/worksheet.ts back to the four-symbol list.
 DO $$
 DECLARE
   ws07 uuid;
