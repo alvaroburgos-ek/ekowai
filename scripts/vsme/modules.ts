@@ -66,14 +66,51 @@ export function parseRoles(taxonomyDir: string): ModuleRole[] {
 // ─── conceptModuleMap ───────────────────────────────────────────────────────
 
 /**
- * Build a Map<conceptName, moduleCodePrefix> from `vsme-presentation.xml`.
+ * Decide which of two FULL role codes (e.g. "B03.200" vs "C03.100") should own
+ * a concept that is presented under both. Returns true if `candidate` is a
+ * better owner than `current`. Deterministic, taxonomy-faithful:
+ *
+ *  1. Prefer a real disclosure module (B/C) over the residual "Other / entity
+ *     specific" bucket (D99) — never let D99 capture a B/C concept.
+ *  2. Prefer the BASIC module (B) over the COMPREHENSIVE module (C). The VSME
+ *     Standard discloses each datapoint ONCE as its primary obligation; the
+ *     comprehensive layer (C03.1xx) only RE-PRESENTS the same datapoints in a
+ *     target/baseline context. The primary disclosure home is therefore the B
+ *     role. This is exactly what fixes the GHG §30 set: the eight
+ *     Gross.../Total...GHGEmissions concepts appear under BOTH [B03.200]
+ *     Estimated GHG Emissions (Basic Module B3 ¶30) and [C03.100] GHG Emission
+ *     Reduction Targets — they belong on B3.
+ *  3. Otherwise keep the lexicographically smaller full code (stable, so the
+ *     output is reproducible regardless of presentation-link order).
+ */
+function isBetterOwner(candidate: string, current: string): boolean {
+  const candReal = candidate.startsWith('B') || candidate.startsWith('C');
+  const curReal = current.startsWith('B') || current.startsWith('C');
+  if (candReal !== curReal) return candReal; // (1) B/C beats D99/other
+
+  const candBasic = candidate.startsWith('B');
+  const curBasic = current.startsWith('B');
+  if (candBasic !== curBasic) return candBasic; // (2) Basic beats Comprehensive
+
+  return candidate.localeCompare(current) < 0; // (3) deterministic tie-break
+}
+
+/**
+ * Build a Map<conceptName, fullModuleCode> from `vsme-presentation.xml`.
  *
  * Each `link:presentationLink` carries an `@_xlink:role` URI that maps back to
  * a `ModuleRole.code` (via `parseRoles`).  Within each link, `link:loc`
  * locators have `@_xlink:href` ending in `#vsme_<ConceptName>`.
  *
- * Strategy for multi-role concepts: prefer the first real B/C module code
- * (skip D99 / unmapped if a better code already exists).
+ * The value is the FULL role code (e.g. "B03.200"), NOT the 3-char prefix, so
+ * each concept lands on the exact worksheet the taxonomy presents it under.
+ * (Collapsing to the 3-char prefix used to funnel every B03.xxx concept onto
+ * the single B03.000 worksheet, leaving B03.100/.200/.300 — and the analogous
+ * .1xx/.2xx/.3xx siblings of every module — permanently empty.)
+ *
+ * Strategy for multi-role concepts: see isBetterOwner — prefer the Basic (B)
+ * disclosure home over the Comprehensive (C) re-presentation, and any real B/C
+ * role over the residual D99 bucket.
  */
 export function conceptModuleMap(taxonomyDir: string): Map<string, string> {
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
@@ -114,14 +151,10 @@ export function conceptModuleMap(taxonomyDir: string): Map<string, string> {
 
       const existing = map.get(name);
       if (!existing) {
-        // No entry yet — set unconditionally
-        map.set(name, code.slice(0, 3));
-      } else {
-        // Prefer B/C codes over D99 / generic
-        const isBetter =
-          (code.startsWith('B') || code.startsWith('C')) &&
-          !(existing.startsWith('B') || existing.startsWith('C'));
-        if (isBetter) map.set(name, code.slice(0, 3));
+        // No entry yet — set unconditionally (full role code).
+        map.set(name, code);
+      } else if (isBetterOwner(code, existing)) {
+        map.set(name, code);
       }
     }
   }

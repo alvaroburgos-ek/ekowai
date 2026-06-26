@@ -229,6 +229,7 @@ function parseComplianceRequirements(
     required_field_symbols: asString(r.required_field_symbols),
     evaluation_expression: asString(r.evaluation_expression),  // may be null for field_presence type
     pass_condition: asString(r.pass_condition),
+    severity: asString(r.severity),  // optional column; 'warn' = advisory, else → 'block'
     regulation_reference: asString(r.regulation_reference),
     phase: asInt(r.phase),
     order_index: asInt(r.order_index),

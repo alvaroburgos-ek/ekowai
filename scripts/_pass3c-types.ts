@@ -91,6 +91,7 @@ export type ComplianceRow = {
   required_field_symbols: string | null;
   evaluation_expression: string | null;  // null for field_presence type (uses required_field_symbols)
   pass_condition: string | null;
+  severity: string | null;  // 'warn' = advisory (non-blocking); anything else/absent → 'block'
   regulation_reference: string | null;
   phase: number | null;
   order_index: number | null;

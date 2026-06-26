@@ -19,6 +19,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseConcepts } from './taxonomy';
 import { parseRoles, conceptModuleMap, moduleCodeToOwner } from './modules';
+import { buildUnitMap } from './units';
+import { buildCalculationEquations } from './calculations';
+import { buildComplianceRows, VSME_REQUIRED_FIELD_SYMBOLS } from './requirements';
 
 // ─── Inlined enum parser (mirrors enums.ts) ───────────────────────────────────
 
@@ -110,6 +113,189 @@ function parseEnumValues(taxonomyDir: string): EnumRow[] {
       for (const enumName of enumNames) {
         rows.push({ enum_name: enumName, value: locEntry.conceptName, label_en, order_index: Math.round(order) });
       }
+    }
+  }
+  return rows;
+}
+
+// ─── External-domain enum parsers ─────────────────────────────────────────────
+//
+// Three VSME enum fields draw their allowed values from domains that live
+// OUTSIDE vsme-definition.xml, so the inlined parseEnumValues() above cannot
+// see them and they ended up with empty enum_values:
+//
+//   • NaceSectorClassificationCodes
+//       enum2:domain   = nace:NACE_AllEconomicActivitiesNAMember
+//       enum2:linkrole = https://xbrl.efrag.org/taxonomy/nace/2026-02-01/roles/domain
+//       → enumerated in the sibling NACE linkbase (../../nace/2026-02-01/).
+//
+//   • CountryOfSite  and
+//   • CountryOfPrimaryOperationsAndLocationOfSignificantAssets
+//       enum2:domain   = country:CountryDomain
+//       enum2:linkrole = http://www.xbrl.org/taxonomy/int/country/roles/domain
+//       → the XBRL-International ISO-3166 country taxonomy, which is referenced
+//         by REMOTE URL only (https://www.xbrl.org/taxonomy/int/country/current/
+//         entry-en.xsd) and is NOT bundled in this package. The authoritative
+//         member list ships instead in EFRAG's own digital template
+//         (VSME-Digital-Template-latest.xlsx → sheet "Enumeration Lists",
+//         columns "Country List" / "CountryAxis"), which is what we read here.
+
+/** Resolve the sibling NACE linkbase dir from the VSME taxonomy dir. */
+function naceDirFrom(taxonomyDir: string): string {
+  // taxonomyDir = .../taxonomy/vsme/2026-02-01  →  .../taxonomy/nace/2026-02-01
+  return path.resolve(taxonomyDir, '..', '..', 'nace', '2026-02-01');
+}
+
+/** Resolve the EFRAG digital template path from the VSME taxonomy dir. */
+function templatePathFrom(taxonomyDir: string): string {
+  // .../01_Referenz/VSME-XBRL-Taxonomy-February-2026/xbrl.efrag.org/taxonomy/vsme/2026-02-01
+  // → .../01_Referenz/VSME-Digital-Template-latest.xlsx
+  return path.resolve(
+    taxonomyDir,
+    '..', '..', '..', '..', '..',
+    'VSME-Digital-Template-latest.xlsx',
+  );
+}
+
+/**
+ * Parse the complete NACE code domain (sections → divisions → groups → classes)
+ * from the NACE linkbase. Returns EnumRow[] for enum_name
+ * "NaceSectorClassificationCodes". Synchronous (XML only).
+ *
+ * Trace: nace-codes-definition.xml, single definitionLink role
+ * ".../roles/domain", 1047 domain-member arcs. Member loc href fragments
+ * (nace_NACE_<code>) give the value; English text comes from
+ * nace-codes-label-en.xml via the opaque loc→labelArc→res chain.
+ */
+export function parseNaceEnumRows(taxonomyDir: string): EnumRow[] {
+  const naceDir = naceDirFrom(taxonomyDir);
+  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
+
+  // 1. definition linkbase → ordered member concept fragments
+  const defDoc = parser.parse(
+    fs.readFileSync(path.join(naceDir, 'nace-codes-definition.xml'), 'utf8'),
+  );
+  const defLinks: Record<string, unknown>[] = ([] as any[]).concat(
+    defDoc['link:linkbase']?.['link:definitionLink'] ?? [],
+  );
+  const DOMAIN_ROLE = 'https://xbrl.efrag.org/taxonomy/nace/2026-02-01/roles/domain';
+  const DM_ARCROLE = 'http://xbrl.org/int/dim/arcrole/domain-member';
+
+  const locToConcept = new Map<string, string>(); // loc xlink:label → "NACE_A"
+  const memberLocLabels: string[] = [];           // arc "to" loc labels (members)
+
+  for (const dl of defLinks) {
+    if ((dl['@_xlink:role'] as string) !== DOMAIN_ROLE) continue;
+    for (const loc of ([] as any[]).concat(dl['link:loc'] ?? [])) {
+      const href = String(loc['@_xlink:href'] ?? '');
+      const label = String(loc['@_xlink:label'] ?? '');
+      const frag = href.includes('#') ? href.split('#')[1] : href;
+      const concept = frag.startsWith('nace_') ? frag.slice('nace_'.length) : frag;
+      locToConcept.set(label, concept);
+    }
+    for (const arc of ([] as any[]).concat(dl['link:definitionArc'] ?? [])) {
+      if ((arc['@_xlink:arcrole'] as string) !== DM_ARCROLE) continue;
+      memberLocLabels.push(String(arc['@_xlink:to'] ?? ''));
+    }
+  }
+
+  // 2. label linkbase → concept → English text (opaque loc/res bridging)
+  const labDoc = parser.parse(
+    fs.readFileSync(path.join(naceDir, 'nace-codes-label-en.xml'), 'utf8'),
+  );
+  const labLink = labDoc['link:linkbase']?.['link:labelLink'];
+  const labObj = Array.isArray(labLink) ? labLink[0] : labLink;
+
+  const conceptToLabelLoc = new Map<string, string>();
+  for (const loc of ([] as any[]).concat(labObj?.['link:loc'] ?? [])) {
+    const href = String(loc['@_xlink:href'] ?? '');
+    const label = String(loc['@_xlink:label'] ?? '');
+    const frag = href.includes('#') ? href.split('#')[1] : href;
+    const concept = frag.startsWith('nace_') ? frag.slice('nace_'.length) : frag;
+    conceptToLabelLoc.set(concept, label);
+  }
+  const locToRes = new Map<string, string>();
+  for (const arc of ([] as any[]).concat(labObj?.['link:labelArc'] ?? [])) {
+    locToRes.set(String(arc['@_xlink:from'] ?? ''), String(arc['@_xlink:to'] ?? ''));
+  }
+  const resToText = new Map<string, string>();
+  for (const lab of ([] as any[]).concat(labObj?.['link:label'] ?? [])) {
+    if (!String(lab['@_xlink:role'] ?? '').endsWith('/role/label')) continue;
+    resToText.set(String(lab['@_xlink:label'] ?? ''), String(lab['#text'] ?? '').trim());
+  }
+  const labelFor = (concept: string): string => {
+    const loc = conceptToLabelLoc.get(concept);
+    const res = loc ? locToRes.get(loc) : undefined;
+    return (res ? resToText.get(res) : '') ?? '';
+  };
+
+  // 3. one row per distinct member, deterministic order by NACE code
+  type Tmp = { value: string; code: string; label_en: string };
+  const tmp: Tmp[] = [];
+  const seen = new Set<string>();
+  for (const locLabel of memberLocLabels) {
+    const concept = locToConcept.get(locLabel); // "NACE_A011"
+    if (!concept || seen.has(concept)) continue;
+    seen.add(concept);
+    tmp.push({ value: concept, code: concept.replace(/^NACE_/, ''), label_en: labelFor(concept) });
+  }
+  tmp.sort((a, b) => a.code.localeCompare(b.code, 'en'));
+
+  return tmp.map((t, i) => ({
+    enum_name: 'NaceSectorClassificationCodes',
+    value: t.value,
+    label_en: t.label_en,
+    order_index: i + 1,
+  }));
+}
+
+/**
+ * Parse the ISO-3166 country domain from EFRAG's digital template
+ * (sheet "Enumeration Lists": col "Country List" = English name,
+ * col "CountryAxis" = "country:<ISO>"). Returns the same member set for BOTH
+ * country-typed enum fields. Async (ExcelJS reads the .xlsx).
+ *
+ * value = ISO alpha-2 code (the local-name of the country:XX domain member).
+ */
+export async function parseCountryEnumRows(taxonomyDir: string): Promise<EnumRow[]> {
+  const templatePath = templatePathFrom(taxonomyDir);
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.readFile(templatePath);
+  const ws = wb.getWorksheet('Enumeration Lists');
+  if (!ws) {
+    console.warn(
+      `[build-workbook] WARNING: "Enumeration Lists" sheet not found in ${templatePath} — ` +
+        'country enum_values will be empty.',
+    );
+    return [];
+  }
+
+  const cellStr = (cell: ExcelJS.Cell): string => {
+    const v = cell.value as unknown;
+    if (v == null) return '';
+    if (typeof v === 'object') {
+      const o = v as Record<string, unknown>;
+      if (Array.isArray(o.richText)) {
+        return (o.richText as { text: string }[]).map((t) => t.text).join('');
+      }
+      if ('result' in o) return String(o.result);
+      if ('text' in o) return String(o.text);
+      return '';
+    }
+    return String(v);
+  };
+
+  const enumNames = ['CountryOfSite', 'CountryOfPrimaryOperationsAndLocationOfSignificantAssets'];
+  const rows: EnumRow[] = [];
+  let order = 0;
+  for (let r = 2; r <= ws.rowCount; r++) {
+    const name = cellStr(ws.getRow(r).getCell(3));  // "Country List"
+    const qname = cellStr(ws.getRow(r).getCell(4)); // "CountryAxis" → country:XX
+    if (!qname.startsWith('country:')) continue;
+    const iso = qname.slice('country:'.length);     // ISO alpha-2 = member local-name
+    order += 1;
+    for (const enumName of enumNames) {
+      rows.push({ enum_name: enumName, value: iso, label_en: name, order_index: order });
     }
   }
   return rows;
@@ -231,13 +417,32 @@ export type VsmeRows = {
  * Build all 7 row arrays from the VSME XBRL taxonomy.
  * Pure function returning plain JS objects — useful for assertions without
  * touching the filesystem beyond reading the taxonomy XML files.
+ *
+ * @param taxonomyDir  path to .../taxonomy/vsme/2026-02-01
+ * @param externalEnumRows  extra enum_values rows for domains that live outside
+ *   vsme-definition.xml and need async parsing (the ISO-3166 country domain,
+ *   read from the EFRAG digital template by buildVsmeWorkbook). The NACE domain
+ *   is parsed synchronously here from the sibling linkbase. Defaults to [] so
+ *   synchronous unit tests still produce NACE without a template read.
  */
-export function buildVsmeRows(taxonomyDir: string): VsmeRows {
+export function buildVsmeRows(
+  taxonomyDir: string,
+  externalEnumRows: EnumRow[] = [],
+): VsmeRows {
   // ── 1. Parse taxonomy sources ─────────────────────────────────────────────
   const concepts = parseConcepts(taxonomyDir);
+  // Source-traced unit per numeric concept (taxonomy measurementGuidance UTR
+  // tokens, falling back to itemType measure-category defaults). See units.ts.
+  const unitMap = buildUnitMap(concepts, taxonomyDir);
   const roles = parseRoles(taxonomyDir);
   const moduleMap = conceptModuleMap(taxonomyDir);
-  const enumRows = parseEnumValues(taxonomyDir);
+  // VSME-definition enums + the full NACE domain (sync) + any externally-parsed
+  // rows (country domain, passed in by the async workbook builder).
+  const enumRows = [
+    ...parseEnumValues(taxonomyDir),
+    ...parseNaceEnumRows(taxonomyDir),
+    ...externalEnumRows,
+  ];
 
   // ── 2. Standards ──────────────────────────────────────────────────────────
   const standards: StandardsRow[] = [
@@ -255,18 +460,26 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
   ];
 
   // ── 3. Worksheets ─────────────────────────────────────────────────────────
-  // Keep only module roles that have ≥1 concrete (non-abstract) concept.
+  // Keep only module roles that own ≥1 concrete (non-abstract) concept. moduleMap
+  // now holds FULL role codes (e.g. "B03.200"), so a role survives iff a concept
+  // is presented under that exact role (after the Basic-over-Comprehensive
+  // tie-break in conceptModuleMap). Roles that only RE-present datapoints owned
+  // elsewhere (e.g. [C03.100] GHG Reduction Targets, which re-shows the B03.200
+  // GHG set under a target/baseline axis but owns no scalar of its own) drop out
+  // here instead of rendering a permanently-empty tab.
   const moduleCodesWithConcepts = new Set(moduleMap.values());
 
-  // A role code like "B03.000" → prefix "B03"; filter roles whose prefix has mapped concepts.
-  const rolesWithFields = roles.filter((r) => {
-    const prefix = r.code.slice(0, 3);
-    return moduleCodesWithConcepts.has(prefix);
-  });
+  const rolesWithFields = roles.filter((r) =>
+    moduleCodesWithConcepts.has(r.code),
+  );
 
   rolesWithFields.sort((a, b) => a.code.localeCompare(b.code));
 
-  const worksheets: WorksheetsRow[] = rolesWithFields.map((r, idx) => ({
+  // Candidate worksheets (one per role that owns ≥1 mapped concept, scalar OR
+  // structural). Empty ones — roles that only carry abstract/dimensional members
+  // and own no actual scalar datapoint — are suppressed AFTER field assignment
+  // (see "Suppress empty worksheets" below). Order index is assigned then.
+  const candidateWorksheets: WorksheetsRow[] = rolesWithFields.map((r) => ({
     worksheet_code: `VSME-${r.code}`,
     standard_code: 'VSME',
     title_de: r.title,
@@ -275,30 +488,18 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
     archetype: r.code === 'B01.000' ? 'registration' : 'data_collection',
     section_refs: '',
     equation_refs: '',
-    order_index: idx + 1,
+    order_index: 0,
     description: '',
     verification_status: 'imported_unverified',
   }));
 
-  // ── 4. Sections — one per worksheet ──────────────────────────────────────
-  const sections: SectionsRow[] = worksheets.map((ws, idx) => ({
-    worksheet_code: ws.worksheet_code,
-    section_code: `${ws.worksheet_code}-A`,
-    parent_section_code: '',
-    title: ws.title_de,
-    order_index: idx + 1,
-    purpose: '',
-    verification_status: 'imported_unverified',
-  }));
-
-  // Build modulePrefix → worksheet_code lookup (first matching role wins).
-  const prefixToWorksheetCode = new Map<string, string>();
-  for (const ws of worksheets) {
-    // "VSME-B03.000" → "B03"
-    const prefix = ws.worksheet_code.replace('VSME-', '').slice(0, 3);
-    if (!prefixToWorksheetCode.has(prefix)) {
-      prefixToWorksheetCode.set(prefix, ws.worksheet_code);
-    }
+  // Build fullModuleCode → worksheet_code lookup. moduleMap values are full role
+  // codes (e.g. "B03.200"), so this is a 1:1 mapping onto the candidate worksheets.
+  const codeToWorksheetCode = new Map<string, string>();
+  for (const ws of candidateWorksheets) {
+    // "VSME-B03.200" → "B03.200"
+    const code = ws.worksheet_code.replace('VSME-', '');
+    codeToWorksheetCode.set(code, ws.worksheet_code);
   }
 
   // ── 5. Fields ─────────────────────────────────────────────────────────────
@@ -321,33 +522,40 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
     }
 
     // Must have a module mapping from the presentation linkbase.
-    const modulePrefix = moduleMap.get(concept.name);
-    if (!modulePrefix) {
+    const moduleCode = moduleMap.get(concept.name);
+    if (!moduleCode) {
       droppedCount++;
       continue;
     }
 
-    const worksheetCode = prefixToWorksheetCode.get(modulePrefix);
+    const worksheetCode = codeToWorksheetCode.get(moduleCode);
     if (!worksheetCode) {
       droppedCount++;
       continue;
     }
 
-    const owner = moduleCodeToOwner(modulePrefix);
+    const owner = moduleCodeToOwner(moduleCode);
     const sectionCode = `${worksheetCode}-A`;
 
     fields.push({
       symbol: concept.name,
       label_de: concept.labelEn ?? concept.name,
       label_en: concept.labelEn ?? concept.name,
-      unit: '',
+      // Numeric fields carry their source-traced display unit; everything else
+      // (text/enum/boolean/date) stays unitless.
+      unit: unitMap.get(concept.name) ?? '',
       data_type: concept.dataType,
       kind: '',
       origin_worksheet: worksheetCode,
       origin_section: sectionCode,
       consumer_worksheets: '',
       equation_refs: '',
-      required: 'no',
+      // Obligation level is NOT in the XBRL taxonomy. is_required marks the
+      // datapoints the VSME Standard makes UNCONDITIONALLY mandatory (Basic
+      // Module, "shall disclose …" with no applicability qualifier). The exact,
+      // clause-cited member set lives in requirements.ts → parseRequired() in
+      // _pass3c-db.ts maps 'yes' → fields.is_required = true.
+      required: VSME_REQUIRED_FIELD_SYMBOLS.has(concept.name) ? 'yes' : 'no',
       validation_rules: '',
       regulation_reference: '',
       description: '',
@@ -362,6 +570,42 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
     `[build-workbook] fields: ${fields.length} emitted, ${droppedCount} dropped (abstract / structural / unmapped)`,
   );
 
+  // ── 3b/4. Suppress empty worksheets, then finalise worksheets + sections ───
+  // A candidate worksheet is kept iff it owns ≥1 emitted scalar field. Roles that
+  // only RE-PRESENT datapoints owned elsewhere (e.g. [C03.100] GHG Emission
+  // Reduction Targets, which re-shows the B03.200 GHG set under a target/baseline
+  // axis but contributes no scalar of its own) carry only abstract/dimensional
+  // members → 0 fields → dropped here, so the picker never renders an empty tab.
+  // This is safe because every downstream reference (equations.used_in_worksheet,
+  // compliance, sections) is keyed off fields, and a 0-field worksheet is
+  // referenced by none of them.
+  const worksheetsWithFields = new Set(fields.map((f) => f.origin_worksheet));
+  const suppressed = candidateWorksheets
+    .filter((w) => !worksheetsWithFields.has(w.worksheet_code))
+    .map((w) => w.worksheet_code);
+
+  const worksheets: WorksheetsRow[] = candidateWorksheets
+    .filter((w) => worksheetsWithFields.has(w.worksheet_code))
+    .map((w, idx) => ({ ...w, order_index: idx + 1 }));
+
+  if (suppressed.length > 0) {
+    console.log(
+      `[build-workbook] worksheets: ${worksheets.length} emitted, ` +
+        `${suppressed.length} suppressed as empty (re-presentation-only roles): ${suppressed.join(', ')}`,
+    );
+  }
+
+  // One section per (non-empty) worksheet.
+  const sections: SectionsRow[] = worksheets.map((ws, idx) => ({
+    worksheet_code: ws.worksheet_code,
+    section_code: `${ws.worksheet_code}-A`,
+    parent_section_code: '',
+    title: ws.title_de,
+    order_index: idx + 1,
+    purpose: '',
+    verification_status: 'imported_unverified',
+  }));
+
   // ── 6. Enum_Values ────────────────────────────────────────────────────────
   const enum_values: EnumValuesRow[] = enumRows.map((r) => ({
     enum_name: r.enum_name,
@@ -373,58 +617,64 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
     notes: '',
   }));
 
-  // ── 7. Equations — none in v1 (CO₂ engine is Plan 3) ────────────────────
-  const equations: EquationsRow[] = [];
+  // ── 7. Equations — summation totals from the XBRL calculation linkbase ──────
+  // Each calculationLink summation parent (Total = Σ weighted children) becomes
+  // one equation. Only relationships whose parent AND every child is an encoded
+  // scalar field are emitted; anything referencing a non-encoded concept is
+  // reported via buildCalculationEquations().skipped (see build-workbook test /
+  // the Task-5 diagnostic). output_unit is carried on the parent field already,
+  // so the Equations sheet stores formula/input/output only (matching the
+  // EquationRow contract the importer parses).
+  const fieldUnitMap = new Map(fields.map((f) => [f.symbol, f.unit]));
+  const fieldWorksheetMap = new Map(fields.map((f) => [f.symbol, f.origin_worksheet]));
+  const calc = buildCalculationEquations(taxonomyDir, fieldUnitMap, fieldWorksheetMap);
 
-  // ── 8. Compliance_Requirements — ≤5 field_presence CRs for B03 core totals
-  // Match on concept NAMES (f.symbol) — not labels — so the patterns are stable
-  // across language-specific label changes.
-  const b3CoreCandidates = [
-    {
-      pattern: /GrossScope1GreenhouseGasEmissions/,
-      code: 'VSME-CR-B03-01',
-      title: 'Scope 1 GHG emissions present',
-    },
-    {
-      pattern: /GrossScope2.*GreenhouseGasEmissions/,
-      code: 'VSME-CR-B03-02',
-      title: 'Scope 2 GHG emissions present',
-    },
-    {
-      pattern: /TotalEnergyConsumption/,
-      code: 'VSME-CR-B03-04',
-      title: 'Total energy consumption present',
-    },
-  ];
+  const equations: EquationsRow[] = calc.equations.map((e) => ({
+    equation_number: e.equation_number,
+    standard_code: e.standard_code,
+    description_de: e.description_de,
+    description_en: e.description_en,
+    formula: e.formula,
+    input_symbols: e.input_symbols,
+    output_symbol: e.output_symbol,
+    regulation_reference: e.regulation_reference,
+    used_in_worksheet: e.used_in_worksheet,
+    verification_status: e.verification_status,
+    notes: e.notes,
+  }));
 
-  const compliance_requirements: ComplianceRow[] = [];
-  let crOrder = 1;
-
-  for (const cand of b3CoreCandidates) {
-    const matchedField = fields.find((f) => cand.pattern.test(f.symbol));
-    if (matchedField) {
-      compliance_requirements.push({
-        requirement_code: cand.code,
-        standard_code: 'VSME',
-        title: cand.title,
-        description: `Requires that ${cand.title.toLowerCase()}`,
-        evaluation_type: 'field_presence',
-        required_field_symbols: matchedField.symbol,
-        evaluation_expression: '',
-        pass_condition: '',
-        regulation_reference: 'VSME B3',
-        phase: 1,
-        order_index: crOrder++,
-        verification_status: 'imported_unverified',
-        severity: 'block',
-      });
-    }
+  console.log(
+    `[build-workbook] equations: ${equations.length} emitted from calculation linkbase, ` +
+      `${calc.skipped.length} calc relationship(s) skipped`,
+  );
+  for (const s of calc.skipped) {
+    console.log(
+      `[build-workbook]   SKIP ${s.relationship.parent} (${s.relationship.roleShort}): ${s.reason}` +
+        (s.missingConcepts.length ? ` [missing: ${s.missingConcepts.join(', ')}]` : ''),
+    );
   }
+
+  // ── 8. Compliance_Requirements — curated, source-cited rule set ────────────
+  // Obligation level (mandatory / conditional / voluntary) is NOT in the XBRL
+  // taxonomy, so it is hand-encoded in requirements.ts, each row tied to the
+  // exact VSME Standard clause. Rows are kept only when every field symbol they
+  // reference actually exists in the emitted Fields sheet (stable on concept
+  // NAMES, not labels), so a renamed concept drops its gate instead of seeding
+  // a dangling one. See requirements.ts header for severity/gate mechanics.
+  const fieldSymbolSet = new Set(fields.map((f) => f.symbol));
+  const compliance_requirements: ComplianceRow[] = buildComplianceRows(fieldSymbolSet);
+
+  const crBlock = compliance_requirements.filter((c) => c.severity === 'block').length;
+  const crWarn = compliance_requirements.filter((c) => c.severity === 'warn').length;
+  console.log(
+    `[build-workbook] compliance_requirements: ${compliance_requirements.length} emitted ` +
+      `(${crBlock} block, ${crWarn} warn)`,
+  );
 
   if (compliance_requirements.length === 0) {
     console.warn(
-      '[build-workbook] WARNING: no B03 core-total fields matched — 0 compliance requirements emitted. ' +
-        'Check concept names in the taxonomy against the expected patterns.',
+      '[build-workbook] WARNING: 0 compliance requirements emitted — every curated rule was ' +
+        'dropped because its field symbols are absent. Check requirements.ts against the taxonomy.',
     );
   }
 
@@ -447,7 +697,10 @@ export function buildVsmeRows(taxonomyDir: string): VsmeRows {
  * round-tripped through parseWorkbook / parseWorkbookSync.
  */
 export async function buildVsmeWorkbook(taxonomyDir: string): Promise<Buffer> {
-  const rows = buildVsmeRows(taxonomyDir);
+  // Country domain ships in EFRAG's template, not the XBRL package → parse async
+  // and feed it into buildVsmeRows alongside the (sync) NACE + VSME-definition enums.
+  const countryEnumRows = await parseCountryEnumRows(taxonomyDir);
+  const rows = buildVsmeRows(taxonomyDir, countryEnumRows);
   const wb = new ExcelJS.Workbook();
 
   function addSheet<T extends Record<string, unknown>>(name: string, data: T[]): void {

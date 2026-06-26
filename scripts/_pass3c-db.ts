@@ -581,7 +581,8 @@ async function executeImport(
       condition,
       description: cr.description,
       clauseReference: cr.regulation_reference,
-      severity: 'block' as const,
+      // severity is workbook-driven: 'warn' = advisory (non-blocking); absent/empty/anything else → 'block'
+      severity: (cr.severity?.trim().toLowerCase() === 'warn' ? 'warn' : 'block') as 'warn' | 'block',
     };
   });
   if (crValues.length > 0) {
