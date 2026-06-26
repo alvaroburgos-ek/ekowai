@@ -13,6 +13,7 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { checkApprovalGate } from './approval-gate';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
+import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
 
 type FieldValue =
   | { type: 'number'; value: number | null }
@@ -258,13 +259,13 @@ export async function saveWorksheet(
         const carrier = input.values[surfaceFieldId]?.type === 'json' ? input.values[surfaceFieldId].value : null;
         const outputs = materializeSurfaceOutputs(carrier);
         const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
-        const derivedRows = (['A_C', 'C_m', 'A_E_ba', 'A_E_nba'] as const)
+        const derivedRows = (SURFACE_DERIVED_SYMBOLS as readonly string[])
           .map((sym) => ({ sym, fieldId: idBySymbol.get(sym) }))
-          .filter((x): x is { sym: typeof x.sym; fieldId: string } => x.fieldId != null)
+          .filter((x): x is { sym: string; fieldId: string } => x.fieldId != null)
           .map((x) => ({
             projectId: instance.projectId,
             fieldId: x.fieldId,
-            valueNumber: outputs[x.sym] == null ? null : String(outputs[x.sym]),
+            valueNumber: outputs[x.sym as keyof typeof outputs] == null ? null : String(outputs[x.sym as keyof typeof outputs]),
             sourceType: 'derived' as const,
             enteredBy: userId,
             enteredAt: now,

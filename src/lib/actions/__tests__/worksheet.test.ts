@@ -1,5 +1,23 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+
+// Focused unit test: assert the save loop symbol list equals SURFACE_DERIVED_SYMBOLS (all 6).
+// This is a static-import-only test — no live DB required — so it runs before _setup-env.
+import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
+
+describe('worksheet save loop — derived symbol coverage', () => {
+  it('SURFACE_DERIVED_SYMBOLS contains all six expected symbols (4 original + 2 new)', () => {
+    const symbols = [...SURFACE_DERIVED_SYMBOLS];
+    expect(symbols).toHaveLength(6);
+    expect(symbols).toContain('A_C');
+    expect(symbols).toContain('C_m');
+    expect(symbols).toContain('A_E_ba');
+    expect(symbols).toContain('A_E_nba');
+    expect(symbols).toContain('A_C_sealed');
+    expect(symbols).toContain('A_C_unsealed');
+  });
+});
+
 import './_setup-env';
 
 // IMPORTANT: imports must come AFTER the setup-env side-effect import.

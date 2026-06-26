@@ -1,9 +1,39 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateCondition } from './evaluate';
+import { evaluateCondition, jsonConditionValue } from './evaluate';
 
 function lookup(map: Record<string, unknown>) {
   return (sym: string) => map[sym] as number | string | boolean | null | undefined;
 }
+
+describe('jsonConditionValue — carrier presence for the condition DSL', () => {
+  it("returns 'present' for a carrier with rows", () => {
+    expect(jsonConditionValue({ rows: [{ id: '1' }] })).toBe('present');
+  });
+  it('returns null for an empty carrier / empty object / empty array / null', () => {
+    expect(jsonConditionValue({ rows: [] })).toBeNull();
+    expect(jsonConditionValue({})).toBeNull();
+    expect(jsonConditionValue([])).toBeNull();
+    expect(jsonConditionValue(null)).toBeNull();
+  });
+  it("returns 'present' for a non-empty array/object", () => {
+    expect(jsonConditionValue([1])).toBe('present');
+    expect(jsonConditionValue({ a: 1 })).toBe('present');
+  });
+});
+
+describe('json carrier IS NOT NULL (regression: REQ-06 surface_inventory)', () => {
+  const gate = (carrier: unknown) =>
+    evaluateCondition('surface_inventory IS NOT NULL', (s) =>
+      s === 'surface_inventory' ? (jsonConditionValue(carrier) ?? undefined) : undefined,
+    ).kind;
+  it('passes when the carrier has rows', () => {
+    expect(gate({ rows: [{ id: '1' }, { id: '2' }, { id: '3' }] })).toBe('pass');
+  });
+  it('fails when the carrier is empty or absent', () => {
+    expect(gate({ rows: [] })).toBe('fail');
+    expect(gate(null)).toBe('fail');
+  });
+});
 
 describe('evaluateCondition', () => {
   it('passes a numeric ≥ comparison when the value is above the threshold', () => {

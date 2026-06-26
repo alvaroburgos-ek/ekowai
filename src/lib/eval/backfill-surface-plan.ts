@@ -3,7 +3,7 @@
  * No DB access — the script wraps this with DB read + write.
  *
  * Single-source: uses `materializeSurfaceOutputs` (which calls `summarizeSurfaces`)
- * to compute the four derived scalars, identical to the server-side save path.
+ * to compute the six derived scalars, identical to the server-side save path.
  */
 import { materializeSurfaceOutputs } from './materialize-surfaces';
 
@@ -13,6 +13,8 @@ export type BackfillInputRow = {
   cmFieldId: string;
   baFieldId: string;
   nbaFieldId: string;
+  sealedFieldId: string;
+  unsealedFieldId: string;
   carrier: unknown;
 };
 
@@ -23,19 +25,21 @@ export type BackfillOutputRow = {
 };
 
 /**
- * For each project/carrier pair, materialise the four derived scalars and
+ * For each project/carrier pair, materialise the six derived scalars and
  * return a flat array of {projectId, fieldId, valueNumber} rows ready for
  * UPSERT. Null per field when the carrier is empty / not computable.
  */
 export function planSurfaceBackfill(rows: BackfillInputRow[]): BackfillOutputRow[] {
   const out: BackfillOutputRow[] = [];
   for (const row of rows) {
-    const { projectId, acFieldId, cmFieldId, baFieldId, nbaFieldId, carrier } = row;
+    const { projectId, acFieldId, cmFieldId, baFieldId, nbaFieldId, sealedFieldId, unsealedFieldId, carrier } = row;
     const outputs = materializeSurfaceOutputs(carrier);
     out.push({ projectId, fieldId: acFieldId, valueNumber: outputs.A_C });
     out.push({ projectId, fieldId: cmFieldId, valueNumber: outputs.C_m });
     out.push({ projectId, fieldId: baFieldId, valueNumber: outputs.A_E_ba });
     out.push({ projectId, fieldId: nbaFieldId, valueNumber: outputs.A_E_nba });
+    out.push({ projectId, fieldId: sealedFieldId, valueNumber: outputs.A_C_sealed });
+    out.push({ projectId, fieldId: unsealedFieldId, valueNumber: outputs.A_C_unsealed });
   }
   return out;
 }

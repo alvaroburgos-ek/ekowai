@@ -531,3 +531,25 @@ export function evaluateCondition(
   if (result === 'missing') return { kind: 'pending', missingSymbols: [...st.missing] };
   return result === 'true' ? { kind: 'pass' } : { kind: 'fail' };
 }
+
+/**
+ * Resolve a JSON carrier field's value FOR THE CONDITION DSL. The DSL only does
+ * existence checks on carriers (`symbol IS NOT NULL` / `IS NOT EMPTY`), never
+ * arithmetic — so map a carrier to a presence marker: a non-empty string when
+ * it has content, else `null`. `{rows: []}` / `{}` / `[]` / null ⇒ null
+ * (absent), so an empty inventory correctly fails `IS NOT NULL`/`IS NOT EMPTY`.
+ * Without this, json fields are skipped from the lookup → such gates always fail
+ * even when the carrier is populated.
+ */
+export function jsonConditionValue(json: unknown): string | null {
+  if (json == null) return null;
+  if (Array.isArray(json)) return json.length > 0 ? 'present' : null;
+  if (typeof json === 'object') {
+    const o = json as Record<string, unknown>;
+    if (Array.isArray((o as { rows?: unknown }).rows)) {
+      return (o.rows as unknown[]).length > 0 ? 'present' : null;
+    }
+    return Object.keys(o).length > 0 ? 'present' : null;
+  }
+  return 'present'; // primitive non-null (unusual for a carrier) ⇒ present
+}

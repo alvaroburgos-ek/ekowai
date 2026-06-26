@@ -3,7 +3,7 @@ import { useMemo, useTransition, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
-import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
+import { evaluateCondition, jsonConditionValue, type EvalResult } from '@/lib/compliance/evaluate';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
@@ -56,7 +56,13 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
         case 'enum': symbolToValue.set(f.symbol, v.value); break;
         case 'date': symbolToValue.set(f.symbol, v.value); break;
         case 'boolean': symbolToValue.set(f.symbol, v.value); break;
-        case 'json': /* skip */ break;
+        case 'json': {
+          // Presence marker so `symbol IS NOT NULL`/`IS NOT EMPTY` gates work
+          // (populated carrier ⇒ 'present'; empty/null ⇒ not set → absent).
+          const m = jsonConditionValue(v.value);
+          if (m != null) symbolToValue.set(f.symbol, m);
+          break;
+        }
       }
     }
     return (sym: string) => {

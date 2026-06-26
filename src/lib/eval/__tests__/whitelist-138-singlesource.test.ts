@@ -10,4 +10,8 @@ describe('engine whitelist — A138-07 single-source', () => {
   it('no longer whitelists A138-10:2 (production moved off A138-10)', () => {
     expect(FORMULA_ENGINE_WHITELIST.has('A138-10:2')).toBe(false);
   });
+  it('whitelists the reduced-area-split producers Gl. 2f/2g', () => {
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-07:2f')).toBe(true);
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-07:2g')).toBe(true);
+  });
 });

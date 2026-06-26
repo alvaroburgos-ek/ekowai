@@ -7,7 +7,7 @@ import {
   worksheetInstances,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
-import { evaluateCondition } from '@/lib/compliance/evaluate';
+import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -26,7 +26,7 @@ function extractValue(
   dataType: string,
   p: {
     valueNumber: unknown; valueText: string | null; valueEnum: string | null;
-    valueBoolean: boolean | null; valueDate: string | null;
+    valueBoolean: boolean | null; valueDate: string | null; valueJson: unknown;
   },
 ): GateValue | undefined {
   switch (dataType) {
@@ -35,7 +35,10 @@ function extractValue(
     case 'enum': return p.valueEnum != null ? p.valueEnum : undefined;
     case 'boolean': return p.valueBoolean != null ? p.valueBoolean : undefined;
     case 'date': return p.valueDate != null ? p.valueDate : undefined;
-    default: return undefined; // 'json' carriers are not read by the condition DSL
+    // JSON carriers: presence marker so `symbol IS NOT NULL`/`IS NOT EMPTY`
+    // gates work (a populated carrier ⇒ 'present'; empty/null ⇒ undefined).
+    case 'json': return jsonConditionValue(p.valueJson) ?? undefined;
+    default: return undefined;
   }
 }
 

@@ -3,6 +3,37 @@ import { describe, it, expect } from 'vitest';
 import { aggregators } from '../aggregators';
 import { normalizeSurfaceCarrier } from '../surface-inventory';
 
+const GL2F = 'a1380702-0000-4000-8000-000000000005';
+const GL2G = 'a1380702-0000-4000-8000-000000000006';
+
+// Two complete rows: one paved (befestigt) C_i=0.9, one unpaved C_i=0.3.
+const splitCarrier = {
+  surfaceInventory: {
+    rows: [
+      { id: '1', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+      { id: '2', label: 'Rasen', tab9_value: 'park_flach', area_m2: 200, c_i: 0.3, c_s: 0.5, coeff_override: false },
+    ],
+  },
+};
+
+describe('A138-07 reduced-area split producers (Gl. 2f/2g)', () => {
+  it('A_C_sealed = Σ(A_E·C_i) over befestigt rows', () => {
+    const r = aggregators[GL2F].run({ aggregator: splitCarrier } as never);
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBeCloseTo(90, 6); // 100*0.9
+  });
+  it('A_C_unsealed = Σ(A_E·C_i) over unbefestigt rows', () => {
+    const r = aggregators[GL2G].run({ aggregator: splitCarrier } as never);
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBeCloseTo(60, 6); // 200*0.3
+  });
+  it('both return manual_required when no row is complete', () => {
+    const empty = { surfaceInventory: { rows: [] } };
+    expect(aggregators[GL2F].run({ aggregator: empty } as never).kind).toBe('manual_required');
+    expect(aggregators[GL2G].run({ aggregator: empty } as never).kind).toBe('manual_required');
+  });
+});
+
 const A_C_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 const C_M_ID = 'a1380702-0000-4000-8000-000000000002';
 const BA_ID = 'a1380702-0000-4000-8000-000000000003';
