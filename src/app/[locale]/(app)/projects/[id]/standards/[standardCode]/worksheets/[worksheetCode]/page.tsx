@@ -13,6 +13,7 @@ import {
 } from '@/lib/db/queries/worksheet';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
+import { surfaceSourceState, surfaceWithholdFieldIds } from '@/lib/eval/surface-source-state';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
 import { BackLink } from '@/components/ui/back-link';
@@ -220,6 +221,18 @@ export default async function WorksheetPage({
     if (dv && dv.type === f.dataType && dv.value != null) {
       initialValues[f.id] = { type: dv.type, value: dv.value };
       prefillSourceByFieldId[f.id] = 'standard_default';
+    }
+  }
+
+  // Gate the VALUE, not just the banner: when the surface source is not `ok`
+  // (incomplete rows, or not engineer-approved/final), withhold its derived
+  // inherited values so the engine never computes off an unapproved value and
+  // the displayed value matches the upstream-cause banner. (Option-2 compliance
+  // model: a value isn't trustworthy until formally approved.)
+  if (surfaceSource) {
+    const st = surfaceSourceState(surfaceSource.carrier, surfaceSource.status);
+    for (const id of surfaceWithholdFieldIds(mergedFields, inheritedFromBySymbol, surfaceSource.ownerCode, st.state)) {
+      delete initialValues[id];
     }
   }
 

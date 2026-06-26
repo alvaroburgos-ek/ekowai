@@ -376,7 +376,7 @@ export async function loadSurfaceSource(
   projectId: string,
   standardId: string,
   currentWorksheetCode: string,
-): Promise<{ status: string; carrier: unknown } | null> {
+): Promise<{ status: string; carrier: unknown; ownerCode: string } | null> {
   const ownerField = await db
     .select({ fieldId: fields.id, ownerCode: worksheetTemplates.code, templateId: worksheetTemplates.id })
     .from(fields)
@@ -403,5 +403,5 @@ export async function loadSurfaceSource(
       .where(and(eq(projectParameters.projectId, projectId), eq(projectParameters.fieldId, owner.fieldId)))
       .limit(1),
   ]);
-  return { status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null };
+  return { status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null, ownerCode: owner.ownerCode };
 }
