@@ -6,6 +6,7 @@ import type { KostraRow, KostraCarrier } from '@/lib/eval/aggregators';
 
 type Props = {
   fieldId: string;
+  readOnly?: boolean;
 };
 
 const KOSTRA_DEFAULT_DURATIONS = [5, 10, 15, 30, 60, 120];
@@ -46,7 +47,7 @@ function readCarrier(value: unknown): KostraCarrier {
   return { rows };
 }
 
-export function KostraTableEditor({ fieldId }: Props) {
+export function KostraTableEditor({ fieldId, readOnly = false }: Props) {
   const raw = useWorksheetStore((s) => s.values[fieldId]);
   const setField = useWorksheetStore((s) => s.setField);
   const carrier = useMemo(
@@ -55,14 +56,17 @@ export function KostraTableEditor({ fieldId }: Props) {
   );
 
   function write(next: KostraCarrier) {
+    if (readOnly) return;
     setField(fieldId, { type: 'json', value: next });
   }
 
   function addRow(D?: number) {
+    if (readOnly) return;
     write({ rows: [...carrier.rows, newRow(D)] });
   }
 
   function seedDefaults() {
+    if (readOnly) return;
     const usedD = new Set(
       carrier.rows.map((r) => r.D_min).filter((d): d is number => d != null),
     );
@@ -73,12 +77,14 @@ export function KostraTableEditor({ fieldId }: Props) {
   }
 
   function updateRow(id: string, patch: Partial<KostraRow>) {
+    if (readOnly) return;
     write({
       rows: carrier.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)),
     });
   }
 
   function removeRow(id: string) {
+    if (readOnly) return;
     write({ rows: carrier.rows.filter((r) => r.id !== id) });
   }
 
@@ -101,8 +107,8 @@ export function KostraTableEditor({ fieldId }: Props) {
           <button
             type="button"
             onClick={seedDefaults}
-            className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
-            disabled={KOSTRA_DEFAULT_DURATIONS.every((d) =>
+            className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled={readOnly || KOSTRA_DEFAULT_DURATIONS.every((d) =>
               carrier.rows.some((r) => r.D_min === d),
             )}
           >
@@ -111,7 +117,8 @@ export function KostraTableEditor({ fieldId }: Props) {
           <button
             type="button"
             onClick={() => addRow()}
-            className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
+            disabled={readOnly}
+            className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink disabled:opacity-40 disabled:cursor-not-allowed"
           >
             + Zeile
           </button>
@@ -143,11 +150,13 @@ export function KostraTableEditor({ fieldId }: Props) {
                     <input
                       type="text"
                       value={r.label ?? ''}
-                      onChange={(e) =>
-                        updateRow(r.id, { label: e.target.value })
-                      }
+                      readOnly={readOnly}
+                      onChange={(e) => {
+                        if (readOnly) return;
+                        updateRow(r.id, { label: e.target.value });
+                      }}
                       placeholder="optional"
-                      className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none"
+                      className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                     />
                   </td>
                   <td className="py-1.5 pr-2">
@@ -156,11 +165,13 @@ export function KostraTableEditor({ fieldId }: Props) {
                       inputMode="decimal"
                       min={0}
                       value={r.D_min == null ? '' : r.D_min}
+                      readOnly={readOnly}
                       onChange={(e) => {
+                        if (readOnly) return;
                         const v = e.target.value;
                         updateRow(r.id, { D_min: v === '' ? null : Number(v) });
                       }}
-                      className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink text-right tabular-nums focus:border-accent focus:outline-none"
+                      className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink text-right tabular-nums focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                     />
                   </td>
                   <td className="py-1.5 pr-2">
@@ -170,11 +181,13 @@ export function KostraTableEditor({ fieldId }: Props) {
                       min={0}
                       step="0.1"
                       value={r.r_D_n == null ? '' : r.r_D_n}
+                      readOnly={readOnly}
                       onChange={(e) => {
+                        if (readOnly) return;
                         const v = e.target.value;
                         updateRow(r.id, { r_D_n: v === '' ? null : Number(v) });
                       }}
-                      className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink text-right tabular-nums focus:border-accent focus:outline-none"
+                      className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink text-right tabular-nums focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                     />
                   </td>
                   <td className="py-1.5 pl-2 text-right">
@@ -182,7 +195,8 @@ export function KostraTableEditor({ fieldId }: Props) {
                       type="button"
                       onClick={() => removeRow(r.id)}
                       aria-label="Zeile entfernen"
-                      className="text-subtext hover:text-error text-lg leading-none px-1"
+                      disabled={readOnly}
+                      className="text-subtext hover:text-error text-lg leading-none px-1 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       ×
                     </button>

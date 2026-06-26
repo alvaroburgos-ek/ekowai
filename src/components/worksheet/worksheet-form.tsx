@@ -23,6 +23,7 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
+import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -165,6 +166,7 @@ export function WorksheetForm({
   const saveStatus = useWorksheetStore((s) => s.saveStatus);
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const locked = !isWorksheetEditable(instance.status as WorksheetStatus);
 
   // Initialize the store ONCE per instance change.
   // We intentionally omit initialValues/initialSources from the dependency array —
@@ -182,6 +184,7 @@ export function WorksheetForm({
 
   // Debounced auto-save
   useEffect(() => {
+    if (locked) return;
     if (pendingFieldIds.size === 0) return;
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
@@ -190,7 +193,7 @@ export function WorksheetForm({
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [pendingFieldIds, flush]);
+  }, [locked, pendingFieldIds, flush]);
 
   // Equations sorted by equation_number — generator emits sub-totals before
   // grand totals (e.g. KG3-01…KG3-09 → KG3-10), so a single forward pass
@@ -436,6 +439,7 @@ export function WorksheetForm({
             ) : undefined
           }
           isPlatformEngineer={isPlatformEngineer}
+          readOnly={locked}
         />
       );
     });
@@ -452,6 +456,16 @@ export function WorksheetForm({
           <SaveIndicator status={saveStatus} />
         </div>
       </header>
+
+      {locked && (
+        <div
+          role="status"
+          data-testid="worksheet-lock-banner"
+          className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
+        >
+          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+        </div>
+      )}
 
       <SourceFormReferencePanel standardCode={standardCode} locale={locale} />
 
@@ -543,7 +557,7 @@ export function WorksheetForm({
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             KOSTRA-Tabelle (für V_VA nach Gl. 8)
           </h2>
-          <KostraTableEditor fieldId={kostraField.id} />
+          <KostraTableEditor fieldId={kostraField.id} readOnly={locked} />
         </section>
       )}
 
@@ -552,7 +566,7 @@ export function WorksheetForm({
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)
           </h2>
-          <SurfaceInventoryEditor fieldId={surfaceInventoryField.id} />
+          <SurfaceInventoryEditor fieldId={surfaceInventoryField.id} readOnly={locked} />
         </section>
       )}
 
