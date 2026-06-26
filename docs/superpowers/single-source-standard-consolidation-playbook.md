@@ -76,7 +76,12 @@ All paths are in this repo. For a new standard you write the **analogous** conte
 - A pure helper (`src/lib/eval/surface-source-state.ts`, `surfaceSourceState(carrier, sourceStatus) → 'missing' | 'incomplete' | 'ok'`) decides whether a consumer renders the inherited value or blanks-with-cause. `ok` only when **all rows complete AND** the source instance is `engineer_approved`/`final`.
 - A cross-worksheet loader (`src/lib/db/queries/worksheet.ts → loadSurfaceSource`) fetches the source worksheet's **status + carrier** for the consumer's server component (the standard inherited-fields path doesn't carry instance status).
 - A tiny banner component (`src/components/worksheet/surface-source-banner.tsx`) renders the cause; wired in `worksheet-form.tsx` above the inherited-values panel.
-- **Generalize:** same helper/loader/banner; only the message wording (worksheet code) is per-standard.
+- **GATE THE VALUE, NOT JUST THE BANNER (learned the hard way on 138).** A banner alone is decorative — the consumer's inherited value still renders and the engine still computes off it, so the banner ends up claiming "ausgeblendet" above a visible value. Fix: when the source state isn't `ok`, **withhold the derived inherited symbols from the consumer's seeded `initialValues`** (server-side, in the worksheet page) so the value blanks AND the engine can't compute off an unapproved value. See `surfaceWithholdFieldIds` + `SURFACE_DERIVED_SYMBOLS` in `surface-source-state.ts`, applied in the worksheet `page.tsx` after `initialValues` is built; `loadSurfaceSource` returns the `ownerCode` so you withhold only symbols inherited from the source owner (derived ones, not atomic inputs).
+- **Compliance model:** a derived value is **not trustworthy until the source is formally approved/final** — so `ok` requires complete rows AND `engineer_approved`/`final` status, and unapproved ⇒ value withheld downstream. (If a project never formally approves, derived values stay withheld — that's intended; pair it with the approve-with-a-note pattern in §3g.)
+- **Generalize:** same helper/loader/banner + the value-withholding; only the message wording and the derived-symbol set are per-standard.
+
+### 3g. Approve-with-a-note (compliance override) — PATTERN TO BUILD (separate plan, not yet implemented)
+A reusable compliance capability every guideline will want: **an engineer may approve an item that does not fully comply *only if* they attach a justification note, and that note becomes part of the audit trail.** This is the human-judgment escape hatch on top of the strict single-source gating (§3e): strict by default (unapproved/non-compliant ⇒ value withheld / gate blocks), overridable with a recorded, attributable justification. Likely seams: `compliance_requirements.requires_attestation` + the `audit_status`/`audited_by`/`audited_at`/`audit_notes` columns already on that table, and the worksheet approval transition (`worksheet-transition.ts` / `state-machine.ts`) — an `engineer_approved`-with-note variant that persists the note to the audit log. **Standard-agnostic.** Do NOT build it inside a consolidation; give it its own small plan after the first standard is confirmed clean, then every guideline inherits it.
 
 ### 3f. Server-side materialization + report/snapshot path rewiring
 - **Why:** engine outputs are computed client-side and only persist to `project_parameters` when the engineer saves. Downstream consumers + the PDF/snapshot read that stored row, so derived values must be **materialized server-side**.
@@ -119,13 +124,12 @@ The producer moves from one worksheet to another, so **code and migration are co
 
 ---
 
-## 6. ⚠️ Known-open items on 138 — CONFIRM FIXED before generalizing
+## 6. Known-open items on 138 — status (resolved 2026-06-26)
 
-Do **not** blindly replicate these until verified green on 138:
-- **"Quelle nicht final at 3/3" banner.** The upstream-cause banner has been observed showing "nicht final (n/m)" even when the source is complete (e.g. 3/3). Confirm the `surfaceSourceState` `ok` threshold (all rows complete **AND** status `engineer_approved`/`final`) behaves correctly — i.e. a complete+approved source shows the value, not the banner — before copying the banner logic to another standard.
-- **REQ-06 / REQ-22 clearing behavior.** Compliance requirements expected to clear (turn green) once the derived values resolve have been observed not clearing. Confirm the consolidation doesn't leave gate/requirement evaluation stale (the gate layer reads materialized values) before generalizing.
-
-If these turn out to be bugs, fix them on 138 first, then fold the fix into this playbook.
+- **"Quelle nicht final at 3/3" banner — RESOLVED.** Root cause: the banner was decorative; the value/engine weren't gated, so the banner contradicted a visible value. Fixed by **gating the value** (§3e: `surfaceWithholdFieldIds` withholds derived inherited symbols when state ≠ `ok`). The 3/3-but-draft case is now *correct*: data entered but not approved ⇒ value withheld + banner accurate. **When generalizing, copy the value-gating, not just the banner.**
+- **REQ-06 / REQ-22 — partially relevant, one scope lesson.**
+  - `A138-REQ-06` (`surface_inventory IS NOT NULL`): unaffected by the consolidation (the carrier is untouched) — clears whenever the carrier exists. Any non-clearing is a generic gate-evaluator concern, not caused by this work.
+  - `A138-REQ-22` (`IF flood_check_trigger THEN V_Rueck IS NOT NULL`): depends on **V_Rück**, a *different* derived value (the Gl. 10 flood path) that this consolidation **did not materialize**. ⇒ **Scope lesson (apply everywhere): materialize EVERY derived value a gate reads, not just the headline one.** When consolidating a standard, enumerate its block-severity `compliance_requirements` conditions and ensure each derived symbol they reference is materialized (§3f), or those gates won't clear.
 
 ---
 
