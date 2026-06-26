@@ -34,7 +34,7 @@ function buildEnumLabelMap(parser: XMLParser, file: string): Map<string, string>
   const doc = parser.parse(labelXml);
   const labelLink = doc['link:linkbase']?.['link:labelLink'];
   const labelLinkObj = Array.isArray(labelLink) ? labelLink[0] : labelLink;
-  const labelNodes: Record<string, unknown>[] = [].concat(
+  const labelNodes: Record<string, unknown>[] = ([] as any[]).concat(
     labelLinkObj?.['link:label'] ?? [],
   );
   const map = new Map<string, string>();
@@ -54,7 +54,7 @@ function parseEnumValues(taxonomyDir: string): EnumRow[] {
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
   const xsdRaw = fs.readFileSync(path.join(taxonomyDir, 'vsme-all.xsd'), 'utf8');
   const xsdDoc = parser.parse(xsdRaw);
-  const elements: Record<string, string>[] = [].concat(
+  const elements: Record<string, string>[] = ([] as any[]).concat(
     xsdDoc['xs:schema']?.['xs:element'] ?? [],
   );
 
@@ -75,7 +75,7 @@ function parseEnumValues(taxonomyDir: string): EnumRow[] {
 
   const defRaw = fs.readFileSync(path.join(taxonomyDir, 'vsme-definition.xml'), 'utf8');
   const defDoc = parser.parse(defRaw);
-  const defLinks: Record<string, unknown>[] = [].concat(
+  const defLinks: Record<string, unknown>[] = ([] as any[]).concat(
     defDoc['link:linkbase']?.['link:definitionLink'] ?? [],
   );
 
@@ -87,7 +87,8 @@ function parseEnumValues(taxonomyDir: string): EnumRow[] {
     const enumNames = linkroleToEnumNames.get(role);
     if (!enumNames || enumNames.length === 0) continue;
 
-    const locs: Record<string, string>[] = [].concat(defLink['link:loc'] ?? []);
+    const rawLoc = defLink['link:loc'] ?? [];
+    const locs: Record<string, string>[] = (Array.isArray(rawLoc) ? rawLoc : [rawLoc]) as Record<string, string>[];
     const locMap = new Map<string, { conceptName: string; locLabel: string }>();
     for (const loc of locs) {
       const href: string = (loc['@_xlink:href'] as string) ?? '';
@@ -97,7 +98,7 @@ function parseEnumValues(taxonomyDir: string): EnumRow[] {
       locMap.set(locLabel, { conceptName, locLabel });
     }
 
-    const arcs: Record<string, unknown>[] = [].concat(defLink['link:definitionArc'] ?? []);
+    const arcs: Record<string, unknown>[] = ([] as any[]).concat(defLink['link:definitionArc'] ?? []);
     for (const arc of arcs) {
       const arcrole: string = (arc['@_xlink:arcrole'] as string) ?? '';
       if (arcrole !== DOMAIN_MEMBER_ARCROLE) continue;

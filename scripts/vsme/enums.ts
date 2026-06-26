@@ -41,7 +41,7 @@ export function parseEnumValues(taxonomyDir: string): EnumRow[] {
   // ── 1. Collect enum concepts: name → linkrole ──────────────────────────────
   const xsdRaw = fs.readFileSync(path.join(taxonomyDir, 'vsme-all.xsd'), 'utf8');
   const xsdDoc = parser.parse(xsdRaw);
-  const elements: Record<string, string>[] = [].concat(
+  const elements: Record<string, string>[] = ([] as any[]).concat(
     xsdDoc['xs:schema']?.['xs:element'] ?? [],
   );
 
@@ -84,7 +84,7 @@ export function parseEnumValues(taxonomyDir: string): EnumRow[] {
   const defDoc = parser.parse(defRaw);
 
   const linkbase = defDoc['link:linkbase'] ?? {};
-  const defLinks: Record<string, unknown>[] = [].concat(
+  const defLinks: Record<string, unknown>[] = ([] as any[]).concat(
     linkbase['link:definitionLink'] ?? [],
   );
 
@@ -98,7 +98,7 @@ export function parseEnumValues(taxonomyDir: string): EnumRow[] {
     if (!enumNames || enumNames.length === 0) continue;
 
     // Build: loc xlink:label → (concept name, loc xlink:label)
-    const locs: Record<string, string>[] = [].concat(defLink['link:loc'] ?? []);
+    const locs: Record<string, string>[] = ([] as any[]).concat(defLink['link:loc'] ?? []);
     // locLabel → { conceptName, locLabel }
     const locMap = new Map<string, { conceptName: string; locLabel: string }>();
 
@@ -116,7 +116,7 @@ export function parseEnumValues(taxonomyDir: string): EnumRow[] {
     }
 
     // Collect domain-member arcs
-    const arcs: Record<string, unknown>[] = [].concat(
+    const arcs: Record<string, unknown>[] = ([] as any[]).concat(
       defLink['link:definitionArc'] ?? [],
     );
 
@@ -169,7 +169,7 @@ function buildLabelMap(parser: XMLParser, file: string): Map<string, string> {
   const labelLink = doc['link:linkbase']?.['link:labelLink'];
   const labelLinkObj = Array.isArray(labelLink) ? labelLink[0] : labelLink;
 
-  const labelNodes: Record<string, unknown>[] = [].concat(
+  const labelNodes: Record<string, unknown>[] = ([] as any[]).concat(
     labelLinkObj?.['link:label'] ?? [],
   );
 

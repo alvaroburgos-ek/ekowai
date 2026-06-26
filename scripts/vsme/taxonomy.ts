@@ -57,7 +57,7 @@ export function parseConcepts(taxonomyDir: string): VsmeConcept[] {
   // --- Parse XSD ---
   const xsdRaw = fs.readFileSync(path.join(taxonomyDir, 'vsme-all.xsd'), 'utf8');
   const xsdDoc = parser.parse(xsdRaw);
-  const elements: Record<string, string>[] = [].concat(
+  const elements: Record<string, string>[] = ([] as any[]).concat(
     xsdDoc['xs:schema']?.['xs:element'] ?? [],
   );
 
@@ -106,7 +106,7 @@ function parseLabels(parser: XMLParser, file: string): Map<string, string> {
   // labelLink is a single object in this taxonomy, but normalise defensively.
   const labelLinkObj = Array.isArray(labelLink) ? labelLink[0] : labelLink;
 
-  const labelNodes: Record<string, unknown>[] = [].concat(
+  const labelNodes: Record<string, unknown>[] = ([] as any[]).concat(
     labelLinkObj?.['link:label'] ?? [],
   );
 

@@ -44,7 +44,7 @@ export function parseRoles(taxonomyDir: string): ModuleRole[] {
   const xsdDoc = parser.parse(xsdRaw);
 
   const appinfo = xsdDoc['xs:schema']?.['xs:annotation']?.['xs:appinfo'];
-  const roleTypes: Record<string, unknown>[] = ([] as Record<string, unknown>[]).concat(
+  const roleTypes: Record<string, unknown>[] = ([] as any[]).concat(
     appinfo?.['link:roleType'] ?? [],
   );
 
@@ -89,7 +89,7 @@ export function conceptModuleMap(taxonomyDir: string): Map<string, string> {
   );
   const presDoc = parser.parse(presRaw);
 
-  const links: Record<string, unknown>[] = ([] as Record<string, unknown>[]).concat(
+  const links: Record<string, unknown>[] = ([] as any[]).concat(
     presDoc['link:linkbase']?.['link:presentationLink'] ?? [],
   );
 
@@ -100,7 +100,7 @@ export function conceptModuleMap(taxonomyDir: string): Map<string, string> {
     const code = rolesByUri.get(roleUri);
     if (!code) continue;
 
-    const locs: Record<string, unknown>[] = ([] as Record<string, unknown>[]).concat(
+    const locs: Record<string, unknown>[] = ([] as any[]).concat(
       link['link:loc'] ?? [],
     );
 
