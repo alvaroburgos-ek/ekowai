@@ -1,0 +1,147 @@
+# Single-Source Standard Consolidation — Reusable Playbook
+
+> **For a fresh agent with no prior context.** This generalizes the pattern proven on **DWA-A 138-1** (surface inventory + Tabelle 9 runoff coefficients) so it can be applied to **any** EKOWAI-Wizard standard. It separates the **reusable mechanism** (copy this) from the **per-standard content** (do NOT copy — re-derive per standard). It is written to later fold into the `regulatory-standard-encoder` skill as the post-encode "wiring + deploy" phase.
+
+Companion rule this implements: **[single-source-derivation-invariant]** (memory). Read that first — this playbook is its concrete realization.
+
+---
+
+## 0. When to use this
+
+Use when a standard has **derived values that must come from one place** but currently are (a) free-typed, (b) produced in two worksheets, and/or (c) not flowing to the worksheets that consume them. Symptoms: a coefficient typed by hand instead of chosen from the standard's table; the same symbol (e.g. a design area, a mean coefficient) "produced" on two worksheets; downstream worksheets showing a derived value as missing/blank; a duplicate empty input that mirrors a real one.
+
+The goal state: **one worksheet owns each datum; everyone else inherits it by reference; reference-table values are chosen via an accessor, never typed; downstream blanks with a cause when the source isn't ready.**
+
+---
+
+## 1. The invariant (the non-negotiable core)
+
+1. **Single owner per datum.** Each coefficient / area / derived value is produced by exactly ONE worksheet — the one where the underlying data is entered.
+2. **Inherit by reference, never re-enter or recompute.** Consumers inherit via the existing same-symbol / `consumer_worksheets` mechanism; they never re-type or run a second copy of the math.
+3. **Blank with an upstream-cause when the source isn't final.** A downstream derived value blanks out *with a reason* ("Quelle <WS> nicht final (n/m …)") instead of showing stale or independently-recomputed numbers.
+4. **Reference/table values come from the standard's tables via a single accessor, never free-typed.** Engineers select a table row; deviations are an explicit, audited override that keeps the original tabular value visible.
+5. **Mirror the standard's structure.** Equation cards, symbols, and clause references follow the guideline's own numbering so the encoded form stays traceable to the source.
+6. **Single active producer or the engine blanks it.** The eval engine's ambiguity guard refuses to compute a symbol that has >1 active producing field in the standard. Consolidation MUST end with exactly one active producing field per symbol.
+
+---
+
+## 2. Content vs. mechanism (read this before copying anything)
+
+| **CONTENT — per standard, do NOT copy** | **MECHANISM — generalizes, copy the shape** |
+|---|---|
+| The actual equations: formulas, equation **UUIDs**, equation numbers (`Gl. 2`, `2c`…) | The engine wiring: aggregator-registry keyed by equation id; per-equation write-back; whitelist keys `WSCODE:EQNUM` |
+| The table values (e.g. the 30 Tab. 9 coefficient triples) | The **accessor** pattern: a typed table behind `getX()/lookupX()`, tagged `standard`+`edition` |
+| Field symbols/labels, worksheet codes, the consumer set | The **row shape**: selected-key + effective-values + override flag; `kind`/original-pair/`complete` **derived, never stored** |
+| The migration's explicit legacy-label map (e.g. `asphalt → schwarzdecke_asphalt`) | The **migration logic**: explicit map → unique-coefficient match → else flag-for-reselection (never silently change a stored value) |
+| Which worksheet is the owner, which are consumers | The **invariant** (§1), the **3-plan structure** (§4), the **deploy runbook** (§5) |
+
+**Rule of thumb:** if it names a coefficient, a formula, a UUID, a symbol, or a worksheet code → it's content, re-derive it from the standard. If it's a function shape, a file's role, an ordering, or a check → it's mechanism, reuse it.
+
+---
+
+## 3. The reusable mechanisms (standard-agnostic), with code anchors
+
+All paths are in this repo. For a new standard you write the **analogous** content into these same seams; you do **not** restructure them.
+
+### 3a. Accessor-backed table picker (the "Tab. 9 picker")
+- **Module:** a constant table behind accessors — see `src/lib/eval/tab9.ts` (`getTab9Entries()`, `lookupTab9(value)`). Each entry is tagged `standard`/`edition` so a future `regulation_tables` DB table can swap in behind the accessor with **zero caller changes**.
+- **Rule:** callers (picker, backfill, kind/derivations, migration) use **only** the accessors — never import the raw array.
+- **Editor:** a per-row `<select>` (grouped) that, on selection, **auto-fills the effective values read-only** and offers an explicit **"abweichend wählen" override** that makes them editable, sets an override flag, and keeps the original tabular pair visible for audit. See `src/components/worksheet/surface-inventory-editor.tsx`.
+- **Generalize:** new standard → new `<thing>.ts` accessor module + the same editor shape pointed at its carrier field.
+
+### 3b. Row shape + unique-match-or-flag migration
+- **Shape** (`src/lib/eval/surface-inventory.ts`): stored row = `{ id, label, <selected_table_key>, <inputs…>, <effective coeffs…>, coeff_override }`. Everything else — the `kind`/category, the original table pair, "mismatch", "complete" — is **derived via the accessor**, never stored.
+- **Normalizer** = one shared parse/migration function used by **both** the editor and the engine (so they can't diverge), idempotent, runs lazily on load:
+  - explicit legacy-label map → ;
+  - else **unique** coefficient match (a stored pair that matches **exactly one** table entry) → auto-map;
+  - **ambiguous** (matches >1 entry) or unmapped → leave the table-key null, **preserve** stored values, flag "neu wählen", and mark the row **not complete**.
+  - **Never silently change a stored coefficient.** Only backfill a *missing* paired value; surface a stored-vs-table mismatch as an audited override.
+- **Generalize:** same normalizer logic; only the legacy-label map and the table are per-standard.
+
+### 3c. Single-producer consolidation (retire duplicate, repoint consumers)
+- When a symbol is produced on two worksheets (the classic violation), pick the **owner** (where the source data lives), and:
+  - add the producer field(s) + equation(s) on the owner;
+  - **repoint the consumer set** onto the owner's field (`consumer_worksheets`);
+  - **retire the other producer**: delete its equations, set its producing fields `active=false`.
+  - End state check (§1.6): exactly **one** active producing field per symbol.
+- DB topology lives in `fields` (`symbol`, `consumer_worksheets`, `active`) and `equations` (`output_symbol`, `equation_number`, `input_symbols`). Equations have **no `active` column** → retire = DELETE rows + drop from the whitelist.
+
+### 3d. The engine wiring (how derived values compute)
+- **Aggregator registry** (`src/lib/eval/aggregators.ts`): `Record<equationId, Aggregator>`, dispatched in `src/lib/eval/formula.ts` by `req.equationId`. Σ-over-rows math lives in an `Aggregator`; flat formulas evaluate directly.
+- **One equation → one output, write-back is per-equation** (`src/lib/eval/use-equation-engine.ts`): a worksheet can have several producer equations, each writing a different output field. The hook builds the per-equation aggregator **context** (e.g. `{ <carrierName>: carrier }`) for the producer's equation ids and reads the carrier via the shared normalizer; `consumedSymbolsFor` widens the consumed-symbol set for aggregator equations so the ambiguity guard sees the carrier.
+- **Whitelist** (`src/lib/eval/whitelist.ts` AND `src/lib/eval/engine-whitelist.ts` — update BOTH) gates which `WSCODE:EQNUM` the engine computes.
+- **Single shared summary helper** (e.g. `summarizeSurfaces`) is the ONLY place the sums live — the client engine, the report path, the snapshot path, the save-materialization, and the backfill ALL call it. No re-implementation anywhere.
+
+### 3e. Upstream-cause "Quelle nicht final" messaging (3-state)
+- A pure helper (`src/lib/eval/surface-source-state.ts`, `surfaceSourceState(carrier, sourceStatus) → 'missing' | 'incomplete' | 'ok'`) decides whether a consumer renders the inherited value or blanks-with-cause. `ok` only when **all rows complete AND** the source instance is `engineer_approved`/`final`.
+- A cross-worksheet loader (`src/lib/db/queries/worksheet.ts → loadSurfaceSource`) fetches the source worksheet's **status + carrier** for the consumer's server component (the standard inherited-fields path doesn't carry instance status).
+- A tiny banner component (`src/components/worksheet/surface-source-banner.tsx`) renders the cause; wired in `worksheet-form.tsx` above the inherited-values panel.
+- **Generalize:** same helper/loader/banner; only the message wording (worksheet code) is per-standard.
+
+### 3f. Server-side materialization + report/snapshot path rewiring
+- **Why:** engine outputs are computed client-side and only persist to `project_parameters` when the engineer saves. Downstream consumers + the PDF/snapshot read that stored row, so derived values must be **materialized server-side**.
+- **On save** (`src/lib/actions/worksheet.ts → saveWorksheet`): when the carrier field is among the saved fields, recompute via the shared helper and **UPSERT the derived `project_parameters` rows** (`source_type='derived'`, conflict on `(project_id, field_id)`, write `null` to clear stale). Gate it so it only fires for the owner worksheet.
+- **Report + snapshot** (`src/lib/eval/evaluate-for-report.ts`, `src/lib/snapshots/payload.ts`): add the **same** aggregator-context branch the client engine has, so server-rendered A_C/derived values compute from the carrier too. ⚠️ Missing this means the PDF/snapshot value goes blank the moment the whitelist changes — independent of the migration.
+- **Backfill** (one-time, for existing projects): a script computes the derived values for projects that already have carrier data and UPSERTs them, so consumers resolve immediately without a manual re-save. Idempotent; stamp `entered_by` from the project's existing carrier row (it's `NOT NULL` FK). NOTE: this self-heals anyway — the first post-deploy **save** of the owner worksheet materializes correctly via the tested code path.
+
+---
+
+## 4. The 3-plan structure (template)
+
+Decompose every consolidation the same way; each plan is independently testable.
+
+- **Plan 1 — Foundation (no DB/engine).** Accessor module + row shape + migrating normalizer + the picker editor. Pure client + pure functions → fully unit-testable. Ships nothing user-visible beyond the editor.
+- **Plan 2 — Production + Consumer.** Shared summary helper; aggregators wired to the **owner's** equation ids; DB migration (add owner producer fields/equations, repoint output, repoint the consumer set, retire the duplicate producer, deactivate its fields); whitelist updates; consumer UI (read-only mirror, retire the duplicate editor, upstream-cause banner); cross-worksheet source loader. **Migration written but NOT applied** until deploy.
+- **Plan 3 — Deploy slice.** Server-side materialization on save; report + snapshot path rewiring; one-time backfill; sweep deferred minors; the **deploy runbook** (§5).
+
+Execute each plan **subagent-driven** (implementer + spec/quality review per task, then a whole-branch review). Keep an SDD ledger (`.superpowers/sdd/progress.md`) so progress survives compaction.
+
+---
+
+## 5. Deploy runbook (template)
+
+The producer moves from one worksheet to another, so **code and migration are coupled — there is no zero-window ordering.** Minimize and pre-verify.
+
+**Pre-reqs (before any prod write):**
+- **Author the rollback SQL FIRST** — and capture the originals first, because the forward migration is **lossy** (e.g. it nulls the old producer's `consumer_worksheets`). The rollback re-inserts the deleted equations, re-activates + restores the old producer's fields/consumers, reverts the repointed output, and deactivates the new producer fields. Keep it in `scripts/` (NOT `supabase/migrations/`, so it's never auto-applied). Code rollback = re-add the old whitelist key + redeploy the prior build.
+- **Strengthen verification:** assert the *new* equations exist post-apply (an `ON CONFLICT … DO NOTHING` silently skips on a number collision).
+
+**Order = migration → deploy** (DB matches code the moment the new build goes live; brief blank window between the two). Optionally pre-verify the combined state on a throwaway DB first.
+
+**Steps:**
+1. Merge the branch → `main` (+ push). No auto-deploy happens here.
+2. **Apply the migration to prod.** Verify (read-only) the single-producer end state.
+3. **Deploy** (`vercel --prod`) **and re-point the custom alias** — `vercel --prod` updates the canonical alias only; the user's actual URL is a separate alias that must be re-pointed with `vercel alias set` (see **[reference_ekowai_wizard_deploy]**).
+4. **Backfill** existing projects (or rely on first-save materialization).
+5. **Smoke-test:** owner worksheet renders the picker + derived value; a consumer inherits it; one PDF renders it.
+
+**Safety:** keep the rollback ready before step 2; stop and roll back on any failed verification.
+
+---
+
+## 6. ⚠️ Known-open items on 138 — CONFIRM FIXED before generalizing
+
+Do **not** blindly replicate these until verified green on 138:
+- **"Quelle nicht final at 3/3" banner.** The upstream-cause banner has been observed showing "nicht final (n/m)" even when the source is complete (e.g. 3/3). Confirm the `surfaceSourceState` `ok` threshold (all rows complete **AND** status `engineer_approved`/`final`) behaves correctly — i.e. a complete+approved source shows the value, not the banner — before copying the banner logic to another standard.
+- **REQ-06 / REQ-22 clearing behavior.** Compliance requirements expected to clear (turn green) once the derived values resolve have been observed not clearing. Confirm the consolidation doesn't leave gate/requirement evaluation stale (the gate layer reads materialized values) before generalizing.
+
+If these turn out to be bugs, fix them on 138 first, then fold the fix into this playbook.
+
+---
+
+## 7. Hard-won infrastructure lessons (this machine / repo)
+
+- **Worktree-per-guideline isolation.** Do each guideline in its own git worktree AND its own local DB. Never share the data layer with another track (e.g. the VSME track has its own worktree + local Supabase stack; 138 must not touch it). Branch each off **`main`** only.
+- **Read-only Supabase MCP is the guardrail.** The MCP is `--read-only` by design — use it for all reads/verification; it cannot (and must not be tricked into) writing.
+- **Prod writes go via the Management-API PAT**, from an **explicit env var** (`SUPABASE_ACCESS_TOKEN`). The safety classifier will (correctly) **block**: scanning `~/.claude.json` for the token, probing env-var names to find it, and **writing hand-computed values straight into prod**. So: apply **reviewed migration files** (not ad-hoc SQL), and prefer the **real materialization/save path** over hand-written value SQL. The Management-API URL hardcodes the project ref → it can only hit prod, never local `54322`.
+- **Migrations are hand-applied** (POST the `.sql` to `https://api.supabase.com/v1/projects/<ref>/database/query`). They are **not** registered in Supabase's migration history → **Supabase branching is useless here** (it rebuilds a branch from the ~3 registered migrations, not the real schema). Don't rely on `create_branch` for a faithful copy.
+- **Docker is only reachable inside WSL** on this machine (no Docker Desktop); Windows can't reach WSL-published container ports; the `supabase/postgres` image won't run standalone; the schema is split across **drizzle** migrations (core tables) + **supabase** migrations (the DB-driven tables, needing supabase roles/RLS). ⇒ faithful local reconstruction is fragile; budget for it or skip it.
+- **`/api/dev/login` returns 404 on production** (`VERCEL_ENV=production`) → you cannot curl-authenticate prod. Authenticated UI checks must be done in-browser by the user.
+
+---
+
+## 8. How to fold into the `regulatory-standard-encoder` skill
+
+This playbook is the **post-encode wiring + deploy phase**. The encoder (Pass3c) produces **content** — equations, tables, fields, compliance — into the DB. This playbook then enforces the **single-source derivation** over that content: pick the owner, add the accessor + picker, consolidate duplicate producers, wire materialization, and deploy. When folding in: keep §1 (invariant) and §3 (mechanisms) as the skill body; treat §2 as the guardrail against copying content; ship §4–§5 as the execution template; and carry §6–§7 as "verify/known-traps" notes.
+
+**Reference implementation:** DWA-A 138-1, branch `feat/a138-07-surface-singlesource` (merged to `main` `805686d`), specs/plans in `docs/superpowers/specs/2026-06-25-a138-07-…` and `docs/superpowers/plans/2026-06-25-a138-07-tab9-plan-{1,2,3}-…`, rollback `scripts/rollback-20260625170000-a138-singlesource.sql`.
