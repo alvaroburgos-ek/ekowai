@@ -10,6 +10,7 @@ import {
 } from '@/lib/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
 export type CitationSource = {
   docId: string;
@@ -49,15 +50,15 @@ async function resolveProjectOrgId(
   return row?.orgId ?? null;
 }
 
-/** Returns true iff `fieldId` belongs to a worksheet template the project has
- *  instantiated. Blocks IDOR where a member writes citation_sources for a
- *  field from an unrelated standard. */
-async function assertFieldInProject(
+/** Returns the owning worksheet-instance status for `fieldId` within `projectId`,
+ *  or null when the field is not in any instantiated worksheet of the project
+ *  (blocks IDOR). Callers also use the status to enforce the write-lock. */
+async function resolveFieldWorksheetStatus(
   fieldId: string,
   projectId: string,
-): Promise<boolean> {
+): Promise<WorksheetStatus | null> {
   const [row] = await db
-    .select({ id: fields.id })
+    .select({ status: worksheetInstances.status })
     .from(fields)
     .innerJoin(
       worksheetInstances,
@@ -67,7 +68,7 @@ async function assertFieldInProject(
       and(eq(fields.id, fieldId), eq(worksheetInstances.projectId, projectId)),
     )
     .limit(1);
-  return !!row;
+  return (row?.status as WorksheetStatus | undefined) ?? null;
 }
 
 /** Append a citation to a field's citation_sources array. Creates the
@@ -85,8 +86,10 @@ export async function addCitation(input: {
   }
   const orgId = await resolveProjectOrgId(userId, input.projectId);
   if (!orgId) return { ok: false, error: 'project_not_found' };
-  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
-    return { ok: false, error: 'field_not_in_project' };
+  const wsStatus = await resolveFieldWorksheetStatus(input.fieldId, input.projectId);
+  if (wsStatus === null) return { ok: false, error: 'field_not_in_project' };
+  if (!isWorksheetEditable(wsStatus)) {
+    return { ok: false, error: 'Arbeitsblatt ist genehmigt/final und schreibgeschützt — Quellen können nicht geändert werden.' };
   }
 
   const citation: StoredCitation = {
@@ -166,8 +169,10 @@ export async function removeCitation(input: {
   }
   const orgId = await resolveProjectOrgId(userId, input.projectId);
   if (!orgId) return { ok: false, error: 'project_not_found' };
-  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
-    return { ok: false, error: 'field_not_in_project' };
+  const wsStatus = await resolveFieldWorksheetStatus(input.fieldId, input.projectId);
+  if (wsStatus === null) return { ok: false, error: 'field_not_in_project' };
+  if (!isWorksheetEditable(wsStatus)) {
+    return { ok: false, error: 'Arbeitsblatt ist genehmigt/final und schreibgeschützt — Quellen können nicht geändert werden.' };
   }
 
   try {
@@ -222,8 +227,10 @@ export async function attachCitation(input: {
   }
   const orgId = await resolveProjectOrgId(userId, input.projectId);
   if (!orgId) return { ok: false, error: 'project_not_found' };
-  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
-    return { ok: false, error: 'field_not_in_project' };
+  const wsStatus = await resolveFieldWorksheetStatus(input.fieldId, input.projectId);
+  if (wsStatus === null) return { ok: false, error: 'field_not_in_project' };
+  if (!isWorksheetEditable(wsStatus)) {
+    return { ok: false, error: 'Arbeitsblatt ist genehmigt/final und schreibgeschützt — Quellen können nicht geändert werden.' };
   }
 
   const citation: StoredCitation = {
@@ -302,8 +309,10 @@ export async function detachCitation(input: {
   }
   const orgId = await resolveProjectOrgId(userId, input.projectId);
   if (!orgId) return { ok: false, error: 'project_not_found' };
-  if (!(await assertFieldInProject(input.fieldId, input.projectId))) {
-    return { ok: false, error: 'field_not_in_project' };
+  const wsStatus = await resolveFieldWorksheetStatus(input.fieldId, input.projectId);
+  if (wsStatus === null) return { ok: false, error: 'field_not_in_project' };
+  if (!isWorksheetEditable(wsStatus)) {
+    return { ok: false, error: 'Arbeitsblatt ist genehmigt/final und schreibgeschützt — Quellen können nicht geändert werden.' };
   }
 
   try {
