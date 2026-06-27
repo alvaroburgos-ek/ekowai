@@ -5,12 +5,14 @@ import {
   projectParameters,
   fields,
   auditLog,
+  equations,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
+import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
 type FieldValue =
@@ -82,7 +84,7 @@ export async function saveWorksheet(
   // worksheet template so callers cannot write values for fields of a
   // different template within the same project.
   const fieldMetas = await db
-    .select({ id: fields.id, dataType: fields.dataType })
+    .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol })
     .from(fields)
     .where(
       and(
@@ -91,6 +93,19 @@ export async function saveWorksheet(
       ),
     );
   const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
+  const symbolById = new Map(fieldMetas.map((f) => [f.id, f.symbol]));
+
+  // Single-source integrity: a value this worksheet's equations PRODUCE must be
+  // persisted as `derived`, never as an engineer `entered` input — even when it
+  // arrives via the client engine's write-back auto-save rather than the
+  // surface-materialization path below. Compute the produced-symbol set from the
+  // template's equations (displayOnly outputs stay `entered` — they're engineer
+  // iteration variables). See @/lib/eval/derived-output-symbols.
+  const templateEquations = await db
+    .select({ id: equations.id, outputSymbol: equations.outputSymbol })
+    .from(equations)
+    .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
+  const derivedSymbols = derivedOutputSymbols(templateEquations);
 
   // Load existing parameters for diff
   const existing = await db
@@ -186,11 +201,17 @@ export async function saveWorksheet(
     const prev = existingById.get(fieldId);
     const action = prev ? 'update' : 'insert';
 
+    // A value the worksheet's own equations produce is `derived`, not an
+    // engineer `entered` input — so an engine write-back can never masquerade
+    // as a hand-entered value (single-source invariant).
+    const symbol = symbolById.get(fieldId);
+    const sourceType = symbol != null && derivedSymbols.has(symbol) ? 'derived' : 'entered';
+
     parameterValues.push({
       projectId: instance.projectId,
       fieldId,
       sourceWorksheetInstanceId: instance.id,
-      sourceType: 'entered',
+      sourceType,
       enteredBy: userId,
       ...valueColumns,
     });
