@@ -28,6 +28,14 @@ Exactly **one** rainfall table per project: `r_D_n_table` is a single json carri
 5. **Back-compat / migration:** an existing single-table carrier `{ rows }` migrates to `{ tables: [{ id: <stable>, name: 'Standardtabelle', source: 'engineer', rows }] }`; all facilities default-reference that id → **behavior unchanged** until a second table is added. (Migration is token-gated; see below.)
 6. **Table-selection, never value-selection (invariant):** the selector writes a table `id`; `r_D(n)` is never written/picked. Enforced by the field being an enum of table ids, and the value remaining engine-derived.
 
+## Composition model + series-system boundary (cross-ref Piece 1)
+
+This multi-table layer is the **location/source axis** of the project-wide composition model: a project = **N independent facilities composed in parallel**, each with (a) a **location → its own table reference** (this spec — handles two locations / two grid cells / different site corners), (b) a **type → its sizing equation** (Piece 1 profile), (c) its own **geometry/scalars**, and (d) a **duration mode** (iterated / fixed — Piece 1). Per facility: reference table → resolve duration → **derive** `r_D` → run sizing → produce size. **Invariant:** the table reference (and duration mode, type, geometry) are **inputs**; `r_D` and the size always **derive** — selecting a table never picks an `r_D` value (the cancelled free-pick stays cancelled).
+
+The **"two locations / different sizes / parallel"** case is therefore **already covered, not new scope**: facility A references table-1, facility B references table-2, each runs its own Piece-1 sizing → its own size.
+
+**⚠️ Series-system boundary (Tabelle 12 — confirmed by Alvaro against the source; NOT encoded today).** Our per-facility composition is the **Einfaches Verfahren** (dezentrale + einfache zentrale Anlagen). **Vernetzte Mulden-Rigolen-Systeme in Reihenschaltung** (networked series) require the **Nachweisverfahren / Langzeitsimulation** — a different method, **out of scope**, and must not be forced into the per-facility model. The wizard has no series/network composition today (grep: no Tabelle-12/Nachweisverfahren/Reihenschaltung notion). Full statement in the Piece 1 spec (`…/specs/2026-06-27-governing-duration-engine-design.md`).
+
 ## DB-free vs token-gated
 
 - **Buildable + testable NOW (DB-free):** the collection carrier type, a normalizer that accepts BOTH legacy `{ rows }` and new `{ tables }` (in-memory upgrade), the resolution helper (`resolveSelectedTable(carrier, ref)`), the multi-table editor UI, and the per-facility table-selector component (render tests).
