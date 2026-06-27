@@ -52,6 +52,26 @@ For each facility: the engine yields the **derived `r_D(n)`** (= `r_D` at the go
 - Tab.9, the flood path (Gl.10), and `main` untouched. Composes with — does not duplicate — Piece 2's table resolution.
 - No central A138-10 `r_D(n)` derivation (circular; per-facility only).
 
+## Composition model (project = N independent facilities) + series-system boundary
+
+**A project = multiple facilities composed in PARALLEL/independently.** Each facility carries, independently:
+- **(a) Location** → references its own rainfall table (Piece 2 `rainfall_table_ref`) — supports two locations / two grid cells / different corners of a site.
+- **(b) Type** → its sizing equation (this spec's `FacilityGoverningProfile`).
+- **(c) Geometry/scalars** (`A_C`, `k_f`, `A_S,m`, …) — already per-facility fields.
+- **(d) Duration mode** → **iterated** (storage → `iterateGoverningDuration`) | **fixed** (no-storage Flächenversickerung → `fixedDurationIntensity`, D=10–15) | **selected-from-predefined** (a general-model capability — see note).
+
+**Per-facility flow:** reference table → resolve duration (iterate/fix) → derive `r_D` → run sizing equation → produce size. **Invariant:** selections are always **inputs** (which table, type, duration mode, geometry); the computed values (`r_D`, size) always **derive**; *selecting never replaces the calculation* (no free-pick of `r_D` — the cancelled picker stays cancelled).
+
+**This is already the planned architecture, not new scope.** Piece 2 gives each facility its own table reference; Piece 1 gives each its own sizing profile + duration mode. The **"two locations / different sizes / parallel"** case = N independent facilities, each `(own table ref) × (own sizing profile) → own size`. It composes by construction.
+
+**Duration-mode note (DWA-138):** §6 uses only **iterated** (storage) and **fixed** (Flächenversickerung). `selected-from-predefined` is a general-model mode **not applicable to DWA-138** — applying it to a DWA-138 facility would reintroduce the cancelled free-pick `r_D` and violate §6.
+
+**⚠️ Series-system boundary (Tabelle 12 — confirmed by Alvaro against the source; NOT encoded in the wizard today).** Tabelle 12 separates:
+- **Einfaches Verfahren** — dezentrale + einfache zentrale Anlagen, sized **per-facility** → **THIS model.**
+- **Nachweisverfahren** — *vernetzte Mulden-Rigolen-Systeme in Reihenschaltung* (networked series) → require **long-term simulation (Langzeitsimulation)**, a **different method**.
+
+So **parallel/independent** facilities compose in our model (each its own table + duration + size); **networked series** systems are **out of scope** for the Einfaches Verfahren and must **NOT** be forced into the per-facility model — they need the Nachweisverfahren, which is **not implemented**. A grep of `audit-reports/` + code found **no** Tabelle-12 / Nachweisverfahren / Reihenschaltung notion — so the wizard has no series/network composition today, consistent with implementing only the Einfaches Verfahren. This boundary is documented here so series systems aren't silently forced into the per-facility model. *(Authoritative Tabelle-12 / §5.3.3 reading is Alvaro's from the Oct-2024 source; re-confirm exact anchors there.)*
+
 ## Gated build precondition (the ONLY one — MCP token)
 
 The **field inventory**: per facility, confirm which `r_D(n)`/`r_D_n_used` field is free-typed today (the conversion target), the exact `equationId` + `formula` + units, and the maximized quantity. Needed to wire each profile and to author any field/migration changes. **Build pauses here** until the token is back + Alvaro's go.
