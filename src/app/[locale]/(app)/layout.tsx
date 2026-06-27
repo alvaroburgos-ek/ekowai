@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/db';
+import { orgMembers } from '@/lib/db/schema';
 import { Nav } from '@/components/layout/nav';
 import { Footer } from '@/components/layout/footer';
 import type { Locale } from '@/lib/i18n/config';
@@ -21,6 +24,15 @@ export default async function AppLayout({
     }
     redirect(`/${locale}/login`);
   }
+
+  // Internal app shell: only org members may enter. External parties
+  // (project_collaborators: client/designer) are routed to their portal.
+  const membership = await db
+    .select({ userId: orgMembers.userId })
+    .from(orgMembers)
+    .where(eq(orgMembers.userId, user.id))
+    .limit(1);
+  if (membership.length === 0) redirect(`/${locale}/portal`);
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -6,11 +6,10 @@ import {
   fields,
   auditLog,
   approvalEvents,
-  projects,
-  orgMembers,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { checkApprovalGate } from './approval-gate';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
@@ -46,7 +45,9 @@ export async function saveWorksheet(
   if (!auth.user) return { ok: false, error: 'Not authenticated' };
   const userId = auth.user.id;
 
-  // Load instance + verify the caller is a member of the owning project's org
+  // Load the instance, then verify access via the shared guard. `db` uses the
+  // postgres role and bypasses RLS, so this app-level check is the real boundary:
+  // only internal org members may write. External collaborators are rejected here.
   const [instance] = await db
     .select({
       id: worksheetInstances.id,
@@ -55,16 +56,16 @@ export async function saveWorksheet(
       status: worksheetInstances.status,
     })
     .from(worksheetInstances)
-    .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
-    .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
-    .where(
-      and(
-        eq(worksheetInstances.id, input.instanceId),
-        eq(orgMembers.userId, userId),
-      ),
-    )
+    .where(eq(worksheetInstances.id, input.instanceId))
     .limit(1);
   if (!instance) return { ok: false, error: 'Worksheet not found or no access' };
+
+  try {
+    assertInternal(await resolveProjectAccess(userId, instance.projectId));
+  } catch (e) {
+    if (e instanceof AccessDeniedError) return { ok: false, error: 'Worksheet not found or no access' };
+    throw e;
+  }
 
   const fieldIds = Object.keys(input.values);
   if (fieldIds.length === 0) {
