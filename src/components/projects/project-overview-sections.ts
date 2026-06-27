@@ -1,0 +1,18 @@
+/** Ordered sections the project overview renders. */
+export type OverviewSection = 'standards' | 'vsme-report' | 'audit';
+
+/**
+ * Decide the project overview's section composition.
+ *
+ * The standards/guidelines list is ALWAYS the first, primary section — VSME
+ * must never short-circuit past it (the 2026-06-27 regression). When the
+ * project also links the VSME standard, the VSME report is surfaced as an
+ * ADDITIONAL section; VSME's own worksheets remain enterable both from the
+ * standards list and via the dedicated VSME tabs (see buildProjectTabs).
+ */
+export function projectOverviewSections(opts: { isVsme: boolean }): OverviewSection[] {
+  const sections: OverviewSection[] = ['standards'];
+  if (opts.isVsme) sections.push('vsme-report');
+  sections.push('audit');
+  return sections;
+}
