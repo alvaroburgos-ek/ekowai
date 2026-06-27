@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from 'vitest';
-import { admin, makeUser, cleanup } from './helpers';
+import { admin, makeUser, makeOrg, cleanup } from './helpers';
 import { createClient } from '@supabase/supabase-js';
 
 describe('standards library RLS — read-only for authenticated', () => {
@@ -7,8 +7,9 @@ describe('standards library RLS — read-only for authenticated', () => {
   const e2 = `rls-std-ins-${Date.now()}@test.local`;
   afterAll(async () => cleanup([e1, e2]));
 
-  it('authenticated user can SELECT from standards', async () => {
+  it('internal org member can SELECT from standards', async () => {
     const u = await makeUser(e1);
+    await makeOrg(u.client, u.id, 'Std Reader'); // library reads now require org membership
     const ad = admin();
 
     // Seed one standard via service-role
