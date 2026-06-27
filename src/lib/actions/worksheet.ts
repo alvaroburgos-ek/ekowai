@@ -5,14 +5,13 @@ import {
   projectParameters,
   fields,
   auditLog,
-  approvalEvents,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
-import { checkApprovalGate } from './approval-gate';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
+import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
 type FieldValue =
   | { type: 'number'; value: number | null }
@@ -65,6 +64,13 @@ export async function saveWorksheet(
   } catch (e) {
     if (e instanceof AccessDeniedError) return { ok: false, error: 'Worksheet not found or no access' };
     throw e;
+  }
+
+  // Post-approval write-lock: a worksheet's data is immutable once approved/final
+  // (or deactivated). Editing requires an explicit reopen → draft first. This is
+  // the integrity boundary — the UI lock is only UX.
+  if (!isWorksheetEditable(instance.status as WorksheetStatus)) {
+    return { ok: false, error: 'Arbeitsblatt ist genehmigt/final und schreibgeschützt — zum Bearbeiten zuerst „Wieder öffnen".' };
   }
 
   const fieldIds = Object.keys(input.values);
@@ -292,66 +298,6 @@ export async function saveWorksheet(
         .set({ updatedAt: new Date() })
         .where(eq(worksheetInstances.id, instance.id));
     });
-
-    // Post-approval revalidation hook. When a save mutates parameters on
-    // an already-approved worksheet AND the new values cause any
-    // block-severity compliance condition to fail, demote the worksheet
-    // back to draft so the approval cannot ship over a fresh violation.
-    // Uses the existing `reopen` event (engineer_approved → draft is
-    // already legal); actor_role='system' distinguishes it from manual
-    // engineer reopens. Runs OUTSIDE the save transaction so any error
-    // here can't roll back the parameter write the engineer expects to
-    // have succeeded.
-    if (instance.status === 'engineer_approved') {
-      const gate = await checkApprovalGate(instance.id);
-      if (gate.failingBlockConditions.length > 0) {
-        const failingCodes = gate.failingBlockConditions
-          .map((c) => c.code)
-          .join(', ');
-        const reopenComment =
-          `Auto-reopen: block-severity compliance now failing on changed fields (${failingCodes}).`;
-        await db.transaction(async (tx) => {
-          const updated = await tx
-            .update(worksheetInstances)
-            .set({ status: 'draft', updatedAt: new Date() })
-            .where(
-              and(
-                eq(worksheetInstances.id, instance.id),
-                eq(worksheetInstances.status, 'engineer_approved'),
-              ),
-            )
-            .returning({ id: worksheetInstances.id });
-          // If another writer already demoted/finalized in the meantime,
-          // updated[] is empty — skip the event/audit rows (the state
-          // has already moved past engineer_approved).
-          if (updated.length === 0) return;
-
-          await tx.insert(approvalEvents).values({
-            worksheetInstanceId: instance.id,
-            eventType: 'reopen',
-            fromStatus: 'engineer_approved',
-            toStatus: 'draft',
-            actorId: userId,
-            actorRole: 'system',
-            comment: reopenComment,
-          });
-
-          await tx.insert(auditLog).values({
-            actorId: userId,
-            actorRole: 'system',
-            projectId: instance.projectId,
-            tableName: 'worksheet_instances',
-            recordId: instance.id,
-            action: 'auto_reopen',
-            changes: {
-              reason: 'post_approval_compliance_break',
-              failingBlockConditions: gate.failingBlockConditions.map((c) => c.code),
-            },
-          });
-        });
-        warnings.push(reopenComment);
-      }
-    }
   }
 
   return { ok: true, saved: savedCount, warnings };

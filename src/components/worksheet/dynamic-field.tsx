@@ -60,9 +60,13 @@ type Props = {
   /** True when the current viewer is on the platform-engineer allowlist.
    * Gates the "Bestätigen" button next to the verification chip. */
   isPlatformEngineer?: boolean;
+  /** When true, the whole field is locked (worksheet approved/final).
+   * All editable controls are read-only/disabled and their onChange
+   * handlers early-return without writing to the store. */
+  readOnly?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -183,20 +187,21 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             value={v == null ? '' : v}
             required={field.isRequired}
             aria-required={required}
-            readOnly={isComputed}
-            tabIndex={isComputed ? -1 : undefined}
-            aria-readonly={isComputed || undefined}
+            readOnly={isComputed || readOnly}
+            tabIndex={isComputed || readOnly ? -1 : undefined}
+            aria-readonly={isComputed || readOnly || undefined}
             min={typeof min === 'number' ? min : undefined}
             max={typeof max === 'number' ? max : undefined}
             onChange={(e) => {
               if (isComputed) return;
+              if (readOnly) return;
               const raw = e.target.value;
               setField(field.id, {
                 type: 'number',
                 value: raw === '' ? null : Number(raw),
               });
             }}
-            className={`block w-full rounded-md border border-hairline-strong py-2 text-sm tabular-nums focus:outline-none focus:ring-0 ${isCurrency ? 'pl-8 pr-3' : 'px-3'} ${isComputed ? 'bg-paper-2 text-ink font-semibold cursor-default focus:border-hairline-strong' : 'bg-transparent text-ink focus:border-accent'}`}
+            className={`block w-full rounded-md border border-hairline-strong py-2 text-sm tabular-nums focus:outline-none focus:ring-0 ${isCurrency ? 'pl-8 pr-3' : 'px-3'} ${isComputed || readOnly ? 'bg-paper-2 text-ink font-semibold cursor-default focus:border-hairline-strong' : 'bg-transparent text-ink focus:border-accent'}`}
           />
         );
         return isCurrency ? (
@@ -224,9 +229,14 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            onChange={(e) => setField(field.id, { type: 'text', value: e.target.value || null })}
+            readOnly={readOnly}
+            aria-readonly={readOnly || undefined}
+            onChange={(e) => {
+              if (readOnly) return;
+              setField(field.id, { type: 'text', value: e.target.value || null });
+            }}
             rows={4}
-            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         ) : (
           <input
@@ -235,8 +245,13 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            onChange={(e) => setField(field.id, { type: 'text', value: e.target.value || null })}
-            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+            readOnly={readOnly}
+            aria-readonly={readOnly || undefined}
+            onChange={(e) => {
+              if (readOnly) return;
+              setField(field.id, { type: 'text', value: e.target.value || null });
+            }}
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         );
       })()}
@@ -267,11 +282,15 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
               <SegmentedControl
                 value={v ?? options[0]?.value ?? ''}
-                onChange={(val) => setField(field.id, { type: 'enum', value: val })}
+                onChange={(val) => {
+                  if (readOnly) return;
+                  setField(field.id, { type: 'enum', value: val });
+                }}
                 options={options.map((o) => ({
                   value: o.value,
                   label: pickEnumLabel(o, locale),
                 }))}
+                disabled={readOnly}
               />
             </div>
           );
@@ -281,7 +300,11 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
-            onChange={(e) => setField(field.id, { type: 'enum', value: e.target.value || null })}
+            disabled={readOnly}
+            onChange={(e) => {
+              if (readOnly) return;
+              setField(field.id, { type: 'enum', value: e.target.value || null });
+            }}
           >
             <option value="">—</option>
             {options.map((o) => (
@@ -302,8 +325,13 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            onChange={(e) => setField(field.id, { type: 'date', value: e.target.value || null })}
-            className="block w-full rounded-md border border-hairline-strong bg-transparent px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none focus:ring-0"
+            readOnly={readOnly}
+            aria-readonly={readOnly || undefined}
+            onChange={(e) => {
+              if (readOnly) return;
+              setField(field.id, { type: 'date', value: e.target.value || null });
+            }}
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         );
       })()}
@@ -314,11 +342,15 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
             <SegmentedControl
               value={v === true ? 'true' : v === false ? 'false' : ''}
-              onChange={(val) => setField(field.id, { type: 'boolean', value: val === 'true' })}
+              onChange={(val) => {
+                if (readOnly) return;
+                setField(field.id, { type: 'boolean', value: val === 'true' });
+              }}
               options={[
                 { value: 'true', label: 'Ja' },
                 { value: 'false', label: 'Nein' },
               ]}
+              disabled={readOnly}
             />
           </div>
         );

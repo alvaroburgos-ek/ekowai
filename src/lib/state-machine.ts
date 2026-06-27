@@ -53,6 +53,15 @@ export function nextStatus(
   return TRANSITIONS[current]?.[event] ?? null;
 }
 
+/** Statuses in which a worksheet's DATA may be written. Deny-by-default:
+ * any status not listed here is locked and requires an explicit `reopen`
+ * (→ draft) before edits. Consulted by every value-write path. */
+const EDITABLE_STATUSES = new Set<WorksheetStatus>(['draft', 'submitted_for_review']);
+
+export function isWorksheetEditable(status: WorksheetStatus): boolean {
+  return EDITABLE_STATUSES.has(status);
+}
+
 /** What event labels does the engineer see for a given status?
  * Excludes system-only events (deactivate/reactivate). */
 export function userActionsFor(status: WorksheetStatus): Array<{

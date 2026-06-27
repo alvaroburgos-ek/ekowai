@@ -13,7 +13,7 @@ import {
   type SurfaceInventoryCarrier,
 } from '@/lib/eval/surface-inventory';
 
-type Props = { fieldId: string };
+type Props = { fieldId: string; readOnly?: boolean };
 
 const GROUP_LABEL: Record<1 | 2 | 3, string> = {
   1: 'Wasserundurchlässige Flächen',
@@ -25,7 +25,7 @@ function formatNum(v: number): string {
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v);
 }
 
-export function SurfaceInventoryEditor({ fieldId }: Props) {
+export function SurfaceInventoryEditor({ fieldId, readOnly = false }: Props) {
   const raw = useWorksheetStore((s) => s.values[fieldId]);
   const setField = useWorksheetStore((s) => s.setField);
   const carrier = useMemo<SurfaceInventoryCarrier>(
@@ -39,23 +39,29 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
   }, []);
 
   function write(rows: SurfaceRow[]) {
+    if (readOnly) return;
     setField(fieldId, { type: 'json', value: { rows } });
   }
   function addRow() {
+    if (readOnly) return;
     write([...carrier.rows, newSurfaceRow()]);
   }
   function updateRow(id: string, patch: Partial<SurfaceRow>) {
+    if (readOnly) return;
     write(carrier.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
   function removeRow(id: string) {
+    if (readOnly) return;
     write(carrier.rows.filter((r) => r.id !== id));
   }
   function selectType(id: string, value: string) {
+    if (readOnly) return;
     const e = lookupTab9(value);
     if (!e) return;
     updateRow(id, { tab9_value: value, c_i: e.cm, c_s: e.cs, coeff_override: false });
   }
   function toggleOverride(id: string, on: boolean) {
+    if (readOnly) return;
     const row = carrier.rows.find((r) => r.id === id);
     if (!row) return;
     if (on) {
@@ -95,7 +101,8 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
         <button
           type="button"
           onClick={addRow}
-          className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink"
+          disabled={readOnly}
+          className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink disabled:opacity-40 disabled:cursor-not-allowed"
         >
           + Zeile hinzufügen
         </button>
@@ -130,17 +137,25 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
                       <input
                         type="text"
                         value={r.label ?? ''}
-                        onChange={(e) => updateRow(r.id, { label: e.target.value })}
+                        readOnly={readOnly}
+                        onChange={(e) => {
+                          if (readOnly) return;
+                          updateRow(r.id, { label: e.target.value });
+                        }}
                         placeholder="z.B. Hauptdach"
-                        className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none"
+                        className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                       />
                     </td>
                     <td className="py-1.5 pr-2">
                       <select
                         aria-label="Oberflächentyp"
                         value={r.tab9_value ?? ''}
-                        onChange={(e) => selectType(r.id, e.target.value)}
-                        className="rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none"
+                        disabled={readOnly}
+                        onChange={(e) => {
+                          if (readOnly) return;
+                          selectType(r.id, e.target.value);
+                        }}
+                        className="rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         <option value="" disabled>
                           — wählen —
@@ -184,11 +199,13 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
                         inputMode="decimal"
                         aria-label="Fläche"
                         value={r.area_m2 == null ? '' : r.area_m2}
+                        readOnly={readOnly}
                         onChange={(e) => {
+                          if (readOnly) return;
                           const v = e.target.value;
                           updateRow(r.id, { area_m2: v === '' ? null : Number(v) });
                         }}
-                        className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink text-right tabular-nums focus:border-accent focus:outline-none"
+                        className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink text-right tabular-nums focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                       />
                     </td>
                     <td className="py-1.5 pr-2 text-right tabular-nums">
@@ -201,11 +218,13 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
                           max="1"
                           aria-label="C_i (abweichend)"
                           value={r.c_i == null ? '' : r.c_i}
+                          readOnly={readOnly}
                           onChange={(e) => {
+                            if (readOnly) return;
                             const v = e.target.value;
                             updateRow(r.id, { c_i: v === '' ? null : Number(v) });
                           }}
-                          className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink text-right tabular-nums focus:border-accent focus:outline-none"
+                          className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink text-right tabular-nums focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                         />
                       ) : (
                         <span data-testid="c_i-readonly" className="font-mono text-ink">
@@ -223,11 +242,13 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
                           max="1"
                           aria-label="C_s (abweichend)"
                           value={r.c_s == null ? '' : r.c_s}
+                          readOnly={readOnly}
                           onChange={(e) => {
+                            if (readOnly) return;
                             const v = e.target.value;
                             updateRow(r.id, { c_s: v === '' ? null : Number(v) });
                           }}
-                          className="block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink text-right tabular-nums focus:border-accent focus:outline-none"
+                          className={`block w-full rounded border border-hairline px-2 py-1 text-sm text-ink text-right tabular-nums focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline' : 'bg-transparent focus:border-accent'}`}
                         />
                       ) : (
                         <span data-testid="c_s-readonly" className="font-mono text-ink">
@@ -246,7 +267,8 @@ export function SurfaceInventoryEditor({ fieldId }: Props) {
                         type="button"
                         onClick={() => removeRow(r.id)}
                         aria-label="Zeile entfernen"
-                        className="text-subtext hover:text-error text-lg leading-none px-1"
+                        disabled={readOnly}
+                        className="text-subtext hover:text-error text-lg leading-none px-1 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         ×
                       </button>
