@@ -116,4 +116,19 @@ export const GOVERNING_PROFILES: FacilityGoverningProfile[] = [
     },
     derived: { rDSymbol: 'r_D_n', governingDSymbol: 'D_min' },
   },
+  {
+    // A138-22 Beckenversickerung, Gl. 41:
+    //   V_VA = ((A_C+A_VA)·1e-7·r_D(n) − A_S_m·k_i − Q_Dr·1e-3)·D·60·f_Z·f_A
+    // The one storage facility whose sizing is a clean function of
+    // (D, r_D, given scalars): A_S_m is the engineer-supplied basin
+    // infiltration area, NOT a D-coupled solve. (m³: inflow & drain in m³/s,
+    // D·60 → s; r_D in l/(s·ha) so (A_C+A_VA)·1e-7·r_D = inflow in m³/s.)
+    facility: 'A138-22',
+    equationId: '433f7700-90cb-410d-8103-7b72f53db8fa',
+    maximizes: 'V_VA',
+    sizing: (D, r_D, s) =>
+      ((s.A_C + s.A_VA) * 1e-7 * r_D - s.A_S_m * s.k_i - s.Q_Dr * 1e-3) *
+      D * 60 * s.f_Z * s.f_A,
+    derived: { rDSymbol: 'r_D_n_B' },
+  },
 ];
