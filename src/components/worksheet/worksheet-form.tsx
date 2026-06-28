@@ -13,7 +13,9 @@ import {
   ManualOverridePill,
   useManualOverride,
 } from './manual-override-pill';
-import { KostraTableEditor } from './kostra-table-editor';
+import { RainfallTablesEditor } from './rainfall-tables-editor';
+import { RainfallTableSelector } from './rainfall-table-selector';
+import { normalizeRainfallCarrier } from '@/lib/eval/rainfall-tables';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
@@ -313,8 +315,22 @@ export function WorksheetForm({
   );
 
   // A138-04 KOSTRA table: carrier field has symbol `r_D_n_table` and
-  // data_type='json'; the engine reads it from the store.
+  // data_type='json'; the engine reads it from the store. The carrier may hold
+  // MULTIPLE source-tagged tables (Piece 2); it is EDITED on its owner (A138-04)
+  // and merely REFERENCED by a per-facility `rainfall_table_ref` selector on the
+  // consumer worksheets that inherit it.
   const kostraField = fields.find((f) => f.symbol === 'r_D_n_table');
+  const rainfallRefField = fields.find((f) => f.symbol === 'rainfall_table_ref');
+  const rainfallRefValue = rainfallRefField ? values[rainfallRefField.id] : undefined;
+  const rainfallTableRef =
+    (rainfallRefValue?.type === 'text' || rainfallRefValue?.type === 'enum') &&
+    typeof rainfallRefValue.value === 'string'
+      ? rainfallRefValue.value
+      : null;
+  const kostraValue = kostraField ? values[kostraField.id] : undefined;
+  const rainfallTables = normalizeRainfallCarrier(
+    kostraValue?.type === 'json' ? kostraValue.value : undefined,
+  ).tables;
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
@@ -552,12 +568,30 @@ export function WorksheetForm({
         </section>
       )}
 
-      {kostraField && (
+      {/* Owner (A138-04): manage the project's rainfall table(s). */}
+      {kostraField && !kostraField.inheritedFromWorksheet && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            KOSTRA-Tabelle (für V_VA nach Gl. 8)
+            Regenspendentabellen (für V_VA nach Gl. 8)
           </h2>
-          <KostraTableEditor fieldId={kostraField.id} readOnly={locked} />
+          <RainfallTablesEditor fieldId={kostraField.id} readOnly={locked} />
+        </section>
+      )}
+
+      {/* Consumer facility: choose WHICH inherited table this facility uses
+          (table id only — never an r_D(n) value). Rendered when the facility
+          carries the rainfall_table_ref field and inherits a carrier. */}
+      {rainfallRefField && kostraField?.inheritedFromWorksheet && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid="rainfall-table-ref-section">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Verwendete Regenspendentabelle
+          </h2>
+          <RainfallTableSelector
+            tables={rainfallTables}
+            value={rainfallTableRef}
+            onSelect={(id) => setField(rainfallRefField.id, { type: 'text', value: id })}
+            readOnly={locked}
+          />
         </section>
       )}
 
