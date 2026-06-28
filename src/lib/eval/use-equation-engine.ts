@@ -28,6 +28,7 @@ import type {
   Gl10Scalars,
 } from './aggregators';
 import { normalizeSurfaceCarrier, type SurfaceInventoryCarrier } from './surface-inventory';
+import { normalizeRainfallCarrier, resolveSelectedTable } from './rainfall-tables';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 
@@ -132,21 +133,50 @@ export function useEquationEngine({
   }, [values, surfaceField]);
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
-  // table. The field lives on A138-04 in production; cross-worksheet
-  // propagation is what surfaces it onto A138-13. For now the engine just
-  // looks up the symbol in whatever fields the caller passes.
+  // table(s). The field lives on A138-04 in production; cross-worksheet
+  // propagation is what surfaces it onto A138-13. A project may hold MULTIPLE
+  // source-tagged tables in this one carrier (`{ tables: [...] }`); the legacy
+  // single-table `{ rows }` shape is still accepted (Piece 2 normalizer).
   const kostraField = useMemo(
     () => fields.find((f) => f.symbol === 'r_D_n_table'),
     [fields],
   );
+  // Per-facility table reference: the atomic `rainfall_table_ref` field holds
+  // the id of the table this facility uses (TABLE id only — never an r_D(n)
+  // value). Unset/stale → primary table (back-compatible with one table).
+  const rainfallRefField = useMemo(
+    () => fields.find((f) => f.symbol === 'rainfall_table_ref'),
+    [fields],
+  );
+  const rainfallTableRef = useMemo<string | null>(() => {
+    if (!rainfallRefField) return null;
+    const v = values[rainfallRefField.id];
+    if ((v?.type === 'text' || v?.type === 'enum') && typeof v.value === 'string' && v.value) {
+      return v.value;
+    }
+    return null;
+  }, [values, rainfallRefField]);
   const kostraCarrier = useMemo<KostraCarrier | null>(() => {
     if (!kostraField) return null;
     const v = values[kostraField.id];
     if (v?.type !== 'json') return null;
-    const raw = v.value as { rows?: unknown } | null | undefined;
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as KostraCarrier;
-  }, [values, kostraField]);
+    const selected = resolveSelectedTable(
+      normalizeRainfallCarrier(v.value),
+      rainfallTableRef,
+    );
+    if (!selected) return { rows: [] };
+    // Map the resolved table's rows into the UNCHANGED KostraCarrier shape.
+    // The multi-table model carries no per-row labels, so the aggregator's
+    // kostraRowLabel falls back to its D-based label (identical to prod data,
+    // whose labels are empty). The aggregator math/signature is untouched.
+    return {
+      rows: selected.rows.map((r, i) => ({
+        id: `${selected.id}-${i}`,
+        D_min: r.D_min,
+        r_D_n: r.r_D_n,
+      })),
+    };
+  }, [values, kostraField, rainfallTableRef]);
 
   // Gl. 8 scalar inputs. Resolved from whichever field carries each symbol
   // (in production these flow via same-symbol inheritance from upstream

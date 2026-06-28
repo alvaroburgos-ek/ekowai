@@ -18,6 +18,7 @@ import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { FORMULA_ENGINE_WHITELIST, whitelistKey } from './engine-whitelist';
 import { normalizeSurfaceCarrier } from './surface-inventory';
+import { normalizeRainfallCarrier, resolveSelectedTable } from './rainfall-tables';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -159,7 +160,7 @@ export function evaluateWorksheetEquations(
   fields: ReportField[],
   parameters: ReportParameter[],
 ): EquationReportResult[] {
-  const { numByField, fieldBySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
+  const { numByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
 
   // Aggregator context — built once per worksheet, reused per equation.
   const subAreasJson = jsonBySymbol.get('sub_areas_A138_10') as { rows?: unknown } | undefined;
@@ -167,11 +168,26 @@ export function evaluateWorksheetEquations(
     ? (subAreasJson as SubAreasCarrier)
     : null;
 
-  const kostraJson = jsonBySymbol.get('r_D_n_table') as { rows?: unknown } | undefined;
-  const kostraCarrier: KostraCarrier | null = kostraJson && Array.isArray(kostraJson.rows)
-    ? (kostraJson as KostraCarrier)
-    : null;
+  // Multi-table rainfall carrier (Piece 2): the facility's `rainfall_table_ref`
+  // selects which table (id only) the unchanged Gl. 8 aggregator iterates;
+  // legacy `{ rows }` carriers normalize to one primary table. Unset → primary.
   const kostraField = fieldBySymbol.get('r_D_n_table');
+  const kostraRaw = jsonBySymbol.get('r_D_n_table');
+  const rainfallRefRaw = bySymbol.get('rainfall_table_ref');
+  const rainfallTableRef = typeof rainfallRefRaw === 'string' && rainfallRefRaw ? rainfallRefRaw : null;
+  const kostraCarrier: KostraCarrier | null = kostraRaw == null
+    ? null
+    : (() => {
+        const selected = resolveSelectedTable(normalizeRainfallCarrier(kostraRaw), rainfallTableRef);
+        if (!selected) return { rows: [] };
+        return {
+          rows: selected.rows.map((r, i) => ({
+            id: `${selected.id}-${i}`,
+            D_min: r.D_min,
+            r_D_n: r.r_D_n,
+          })),
+        };
+      })();
 
   const floodJson = jsonBySymbol.get('sub_areas_A138_26') as { rows?: unknown } | undefined;
   const floodCarrier: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)

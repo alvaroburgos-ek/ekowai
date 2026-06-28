@@ -13,6 +13,7 @@ import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
+import { normalizeRainfallCarrier, resolveSelectedTable } from '@/lib/eval/rainfall-tables';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -227,14 +228,30 @@ export function buildSnapshotPayload(args: {
     return raw as SubAreasCarrier;
   })();
 
+  // Multi-table rainfall carrier (Piece 2): the facility's `rainfall_table_ref`
+  // selects which table (id only) the unchanged Gl. 8 aggregator iterates;
+  // legacy `{ rows }` carriers normalize to one primary table. Unset → primary.
   const kostraField = fieldList.find((f) => f.symbol === 'r_D_n_table');
+  const rainfallRefField = fieldList.find((f) => f.symbol === 'rainfall_table_ref');
+  const rainfallTableRef = (() => {
+    if (!rainfallRefField) return null;
+    const p = paramByFieldId.get(rainfallRefField.id);
+    const v = p?.valueText ?? p?.valueEnum ?? null;
+    return typeof v === 'string' && v ? v : null;
+  })();
   const kostraCarrier: KostraCarrier | null = (() => {
     if (!kostraField) return null;
     const p = paramByFieldId.get(kostraField.id);
     if (!p || p.valueJson == null) return { rows: [] };
-    const raw = p.valueJson as { rows?: unknown };
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as KostraCarrier;
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
+    if (!selected) return { rows: [] };
+    return {
+      rows: selected.rows.map((r, i) => ({
+        id: `${selected.id}-${i}`,
+        D_min: r.D_min,
+        r_D_n: r.r_D_n,
+      })),
+    };
   })();
 
   // Gl8 scalar resolution: null out any symbol with >1 producer so the
