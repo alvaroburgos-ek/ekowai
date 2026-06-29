@@ -52,6 +52,8 @@ const A138_13_OWN_FIELDS: Field[] = [
 const INHERITED_ROWS: InheritedFieldShape<Field>[] = [
   { id: 'a08.f_Z', symbol: 'f_Z', unit: null, active: true, originWorksheetCode: 'A138-08' },
   { id: 'a08.f_A', symbol: 'f_A', unit: null, active: true, originWorksheetCode: 'A138-08' },
+  // Task 3: n is inherited from A138-08; needed to resolve the legacy design column.
+  { id: 'a08.n', symbol: 'n', unit: '1/a', active: true, originWorksheetCode: 'A138-08' },
   { id: 'a10.A_C', symbol: 'A_C', unit: 'm²', active: true, originWorksheetCode: 'A138-10' },
   { id: 'a10.A_VA', symbol: 'A_VA', unit: 'm²', active: true, originWorksheetCode: 'A138-10' },
   { id: 'a12.Q_S', symbol: 'Q_S', unit: 'l/s', active: true, originWorksheetCode: 'A138-12' },
@@ -174,6 +176,10 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
     const { fields: merged } = mergeInheritedFields(A138_13_OWN_FIELDS, INHERITED_ROWS);
     render(<Harness fields={merged} />);
 
+    // Task 3: n=0.2 → T_n=5 = design T_n. HEINSBERG_KOSTRA normalizes to a
+    // legacyDesignColumn table; served only when T_n matches the design return period.
+    setNumber('a08.n', 0.2);
+
     // Simulate "engineer saves values on origin worksheets" — project_parameters
     // is keyed by field_id, so the values land under the ORIGIN field's id.
     // When A138-13 loads, the page loader reads those same rows and seeds
@@ -204,6 +210,8 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
 
     setNumber('a08.f_Z', 1.2);
     setNumber('a08.f_A', 1.0);
+    // Task 3: n=0.2 → T_n=5 so the legacy carrier resolves; missing Q_S is the trigger.
+    setNumber('a08.n', 0.2);
     setNumber('a10.A_C', 1000);
     setNumber('a10.A_VA', 50);
     // Q_S deliberately NOT set on A138-12 → null in project_parameters
@@ -232,6 +240,8 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
 
     setNumber('a08.f_Z', 1.2);
     setNumber('a08.f_A', 1.0);
+    // Task 3: n=0.2 so the carrier resolves; unit guard fires after.
+    setNumber('a08.n', 0.2);
     setNumber('a10.A_C', 1000);
     setNumber('a10.A_VA', 50);
     setNumber('a12.Q_S', 5);
@@ -298,6 +308,7 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
     // Even with every value the engine would otherwise need, ambiguity wins.
     setNumber('a08.f_Z', 1.2);
     setNumber('a08.f_A', 1.0);
+    setNumber('a08.n', 0.2);
     setNumber('a10.A_C', 1000);
     setNumber('a10.A_VA', 50);
     // Both Q_S field ids set just to remove any doubt that we're not picking
@@ -333,6 +344,8 @@ describe('cross-worksheet inheritance — A138-13 Gl. 8 on the merged field list
 
     setNumber('a08.f_Z', 1.2);
     setNumber('a08.f_A', 1.0);
+    // Task 3: n=0.2 → T_n=5 = design T_n so the legacy carrier resolves.
+    setNumber('a08.n', 0.2);
     setNumber('a10.A_C', 1000);
     setNumber('a10.A_VA', 50);
     setNumber('a12.Q_S', 5);

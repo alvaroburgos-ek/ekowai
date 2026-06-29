@@ -34,6 +34,7 @@ const FIELD_IDS = {
   f_Z: 'fixture-f_Z',
   f_A: 'fixture-f_A',
   r_D_n_table: 'fixture-r_D_n_table',
+  n: 'fixture-n',
 };
 
 type FieldMeta = { id: string; symbol: string; unit: string | null };
@@ -47,6 +48,7 @@ const baseFields: FieldMeta[] = [
   { id: FIELD_IDS.f_Z, symbol: 'f_Z', unit: null },
   { id: FIELD_IDS.f_A, symbol: 'f_A', unit: null },
   { id: FIELD_IDS.r_D_n_table, symbol: 'r_D_n_table', unit: 'l/(s·ha)' },
+  { id: FIELD_IDS.n, symbol: 'n', unit: '1/a' },
 ];
 
 const EQUATIONS = [
@@ -116,6 +118,10 @@ function loadScalars() {
   setNumber(FIELD_IDS.Q_Dr, 0);
   setNumber(FIELD_IDS.f_Z, 1.2);
   setNumber(FIELD_IDS.f_A, 1.0);
+  // Task 3: n=0.2 → T_n=5 = the design T_n for back-compat legacy fixtures.
+  // The HEINSBERG_KOSTRA fixture is passed as-is (KostraCarrier rows shape) which
+  // normalizes to a legacyDesignColumn table — served only when T_n == design T_n.
+  setNumber(FIELD_IDS.n, 0.2);
 }
 
 function getStoredVVA(): number | null {
