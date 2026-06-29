@@ -13,6 +13,7 @@
  */
 import type { EvalRequest, EvalState } from './formula';
 import { summarizeSurfaces, type SurfaceInventoryCarrier } from './surface-inventory';
+import { iterateGoverningDuration, GOVERNING_PROFILES } from './governing-duration';
 
 export type SubArea = {
   id: string;
@@ -282,21 +283,23 @@ const a138_13_gl8: Aggregator = {
     const f_Z = scalars.f_Z as number;
     const f_A = scalars.f_A as number;
     const substituted: Record<string, number> = {};
-    let maxV: number | null = null;
-    let governingD: number | null = null;
-    for (let i = 0; i < carrier.rows.length; i++) {
+    // Delegate the per-duration iteration to the shared governing-duration
+    // engine via the basin profile — the iteration is defined ONCE (Piece 1)
+    // and applied per facility, mirroring §6. All rows are complete here
+    // (checked above), so perDuration aligns 1:1 with carrier.rows, preserving
+    // the exact substituted-map keys + values + governing pick.
+    const basinProfile = GOVERNING_PROFILES.find((p) => p.facility === 'A138-13')!;
+    const scalarBag = { A_C, A_VA, Q_S, Q_Dr, f_Z, f_A };
+    const governing = iterateGoverningDuration(
+      carrier.rows,
+      (D, r_D) => basinProfile.sizing(D, r_D, scalarBag),
+    );
+    governing.perDuration.forEach((p, i) => {
       const row = carrier.rows[i];
-      const D = row.D_min as number;
-      const r_D = row.r_D_n as number;
-      const Q_zu = r_D * (A_C + A_VA) * 1e-4;
-      const V = (Q_zu - Q_S - Q_Dr) * D * 60 * f_Z * f_A * 1e-3;
-      const key = `${kostraRowLabel(row, i)} (r_D=${r_D})`;
-      substituted[key] = V;
-      if (maxV === null || V > maxV) {
-        maxV = V;
-        governingD = D;
-      }
-    }
+      substituted[`${kostraRowLabel(row, i)} (r_D=${p.r_D})`] = p.value;
+    });
+    const maxV: number | null = governing.governingValue;
+    const governingD: number | null = governing.governingD;
 
     if (maxV === null || governingD === null) {
       // Shouldn't happen — incomplete rows are filtered above — but
