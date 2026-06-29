@@ -474,6 +474,12 @@ export function useEquationEngine({
   // equations whose output_symbol collides with a primary writer or an
   // engineer-entered iteration variable. The card still renders their
   // value; only the store/project_parameters write is suppressed.
+  //
+  // Task 2 (A138-10 auto-Q_zu): after the basin (A138-13) Gl.8 computes,
+  // also materialise derivedExtras.r_D_gov → the r_D_n field and
+  // derivedExtras.D_gov → the D_min field on A138-13, so A138-10 inherits
+  // the governing values by same-symbol (single producer). When the basin is
+  // manual_required / withheld, clear those fields so A138-10 Q_zu stays blank.
   useEffect(() => {
     for (const eq of equations) {
       if (!engineEquationIds.has(eq.id)) continue;
@@ -488,6 +494,33 @@ export function useEquationEngine({
       const desired = state?.kind === 'computed' ? state.value : null;
       if (currentNum !== desired) {
         setField(outField.id, { type: 'number', value: desired });
+      }
+
+      // Basin Gl.8: materialise governing D + r_D as derived fields on A138-13.
+      if (eq.id === A138_13_GL8_ID) {
+        const extras = state?.kind === 'computed' ? state.derivedExtras : undefined;
+
+        // r_D_gov → r_D_n field
+        const rDnField = fieldBySymbol.get('r_D_n');
+        if (rDnField) {
+          const rDnDesired = extras !== undefined ? extras.r_D_gov : null;
+          const rDnCurrent = values[rDnField.id];
+          const rDnCurrentNum = rDnCurrent?.type === 'number' ? rDnCurrent.value : null;
+          if (rDnCurrentNum !== rDnDesired) {
+            setField(rDnField.id, { type: 'number', value: rDnDesired });
+          }
+        }
+
+        // D_gov → D_min field
+        const dMinField = fieldBySymbol.get('D_min');
+        if (dMinField) {
+          const dMinDesired = extras !== undefined ? extras.D_gov : null;
+          const dMinCurrent = values[dMinField.id];
+          const dMinCurrentNum = dMinCurrent?.type === 'number' ? dMinCurrent.value : null;
+          if (dMinCurrentNum !== dMinDesired) {
+            setField(dMinField.id, { type: 'number', value: dMinDesired });
+          }
+        }
       }
     }
   }, [engineStates, engineEquationIds, equations, fieldBySymbol, values, setField]);

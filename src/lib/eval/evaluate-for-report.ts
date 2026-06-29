@@ -361,6 +361,30 @@ export function evaluateWorksheetEquations(
       aggregator,
     });
 
+    // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D
+    // as derived field values on A138-13 under the symbols A138-10 consumes.
+    // Inject into the mutable lookup maps so subsequent equations and compliance
+    // conditions evaluated for this worksheet can read r_D_n / D_min.
+    // When manual_required / derivedExtras absent: clear (write null) so stale
+    // values don't persist in the symbol map.
+    if (eq.id === A138_13_GL8_ID) {
+      const extras = state.kind === 'computed' ? state.derivedExtras : undefined;
+      const rDnField = fieldBySymbol.get('r_D_n');
+      if (rDnField) {
+        const rDnVal = extras !== undefined ? extras.r_D_gov : null;
+        numByField.set(rDnField.id, rDnVal);
+        if (rDnVal !== null) bySymbol.set('r_D_n', rDnVal);
+        else bySymbol.delete('r_D_n');
+      }
+      const dMinField = fieldBySymbol.get('D_min');
+      if (dMinField) {
+        const dMinVal = extras !== undefined ? extras.D_gov : null;
+        numByField.set(dMinField.id, dMinVal);
+        if (dMinVal !== null) bySymbol.set('D_min', dMinVal);
+        else bySymbol.delete('D_min');
+      }
+    }
+
     out.push({
       equationId: eq.id,
       equationNumber: eq.equationNumber,

@@ -205,9 +205,20 @@ export function buildSnapshotPayload(args: {
   }
 
   // ---- equation outputs -------------------------------------------------
+  // Task 2 (A138-10 auto-Q_zu): mutable override map for values derived
+  // from basin Gl.8 derivedExtras (r_D_gov → r_D_n, D_gov → D_min).
+  // Written after the basin equation computes; read by subsequent equation
+  // and compliance lookups in the same snapshot call.
+  const derivedOverrides = new Map<string, number | null>();
+
   const numberBySymbol = (sym: string): number | null => {
     const f = fieldBySymbol.get(sym);
     if (!f) return null;
+    // Derived-extras override takes precedence over DB value — the engine
+    // is the single source of truth for governing D / r_D (Task 2).
+    if (derivedOverrides.has(f.id)) {
+      return derivedOverrides.get(f.id) ?? null;
+    }
     const p = paramByFieldId.get(f.id);
     if (!p) return null;
     return readNumber(p);
@@ -462,6 +473,40 @@ export function buildSnapshotPayload(args: {
       aggregator,
     });
 
+    // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D
+    // as derived field values on A138-13 under the symbols A138-10 inherits.
+    // Populate derivedOverrides so subsequent equations + compliance conditions
+    // in this snapshot call read the governing values via numberBySymbol.
+    // Also write into the `parameters` map so the snapshot captures the
+    // derived values alongside the other persisted field values.
+    // When derivedExtras is absent (manual_required / withhold): write null to
+    // derivedOverrides (clears any stale DB value) and remove from parameters.
+    if (eq.id === A138_13_GL8_ID) {
+      const extras = state.kind === 'computed' ? state.derivedExtras : undefined;
+
+      const rDnField = fieldBySymbol.get('r_D_n');
+      if (rDnField) {
+        const rDnVal = extras !== undefined ? extras.r_D_gov : null;
+        derivedOverrides.set(rDnField.id, rDnVal);
+        if (rDnVal !== null) {
+          parameters[rDnField.id] = { type: 'number', value: rDnVal, unit: rDnField.unit ?? null, citationSources: [] };
+        } else {
+          delete parameters[rDnField.id];
+        }
+      }
+
+      const dMinField = fieldBySymbol.get('D_min');
+      if (dMinField) {
+        const dMinVal = extras !== undefined ? extras.D_gov : null;
+        derivedOverrides.set(dMinField.id, dMinVal);
+        if (dMinVal !== null) {
+          parameters[dMinField.id] = { type: 'number', value: dMinVal, unit: dMinField.unit ?? null, citationSources: [] };
+        } else {
+          delete parameters[dMinField.id];
+        }
+      }
+    }
+
     equationOutputs[eq.equationNumber] = toSnapshotOutput(state, eq.formula);
   }
 
@@ -471,6 +516,11 @@ export function buildSnapshotPayload(args: {
   ): number | string | boolean | null | undefined => {
     const f = fieldBySymbol.get(sym);
     if (!f) return undefined;
+    // Derived-extras override (Task 2): governing r_D_n / D_min from basin Gl.8.
+    if (derivedOverrides.has(f.id)) {
+      const ov = derivedOverrides.get(f.id);
+      return ov ?? undefined;
+    }
     const p = paramByFieldId.get(f.id);
     if (!p) return undefined;
     const v = readValue(p, f.dataType);

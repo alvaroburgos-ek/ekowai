@@ -1,4 +1,6 @@
-## Task 2 Report (rainfall-2d-grid): resolveColumn (2D grid → T_n column slice)
+# Task 2 Report — A138-10 auto-Q_zu: materialize basin governing r_D_n/D_min
+
+## Status: COMPLETE
 
 ---
 
