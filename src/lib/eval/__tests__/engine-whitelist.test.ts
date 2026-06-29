@@ -74,6 +74,18 @@ describe('FORMULA_ENGINE_WHITELIST single-source-of-truth', () => {
     expect(FORMULA_ENGINE_WHITELIST.has('A138-10:3')).toBe(true);
   });
 
+  it('A138-11:5 (k_i = k_f·f_K) is in the production whitelist — prevents naive-sum fallback', () => {
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-11:5')).toBe(true);
+  });
+
+  it('A138-11:6 (f_K = min(f_ort·f_methode,1)) is in the production whitelist — prevents naive-sum fallback', () => {
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-11:6')).toBe(true);
+  });
+
+  it('A138-13:9 (q_S_AC specific storage discharge) is in the production whitelist — prevents naive-sum fallback', () => {
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-13:9')).toBe(true);
+  });
+
   it('every ad-hoc per-test whitelist key is present in the production whitelist', () => {
     const adHoc = collectAdHocWhitelistKeys();
     expect(adHoc.length).toBeGreaterThan(0); // sanity — tests exist
