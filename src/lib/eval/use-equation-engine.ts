@@ -304,6 +304,43 @@ export function useEquationEngine({
     [fields],
   );
 
+  // Task 5 — Flood 30-column resolution.
+  // The flood case (A138-26 Gl.10) reads the T_n=30 column of the SHARED
+  // KOSTRA grid (§5.3.4: T_n_Ue = 30 a, FIXED — not facilityReturnPeriod).
+  // When the inherited grid has a populated 30-column we iterate all D over
+  // it via the A138-26 flood profile; when the grid exists but the 30-column
+  // is absent we withhold; when there's no native grid (legacy/none) we fall
+  // back to the typed r_D_30 scalar path (back-compat, unchanged).
+  type FloodColResolution =
+    | { status: 'ok';      carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'legacy' | 'none' };
+
+  const floodColResolution = useMemo<FloodColResolution>(() => {
+    if (!kostraField) return { status: 'none' };
+    const v = values[kostraField.id];
+    if (v?.type !== 'json') return { status: 'none' };
+    const selected = resolveSelectedTable(
+      normalizeRainfallCarrier(v.value),
+      rainfallTableRef,
+    );
+    if (!selected) return { status: 'none' };
+
+    const col30 = resolveColumn(selected, 30);
+    if (col30.status === 'ok') {
+      return { status: 'ok', carrier: { rows: col30.rows } };
+    }
+    if (col30.status === 'missing') {
+      return {
+        status: 'missing',
+        reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst (Hochwassernachweis Gl. 10)',
+      };
+    }
+    // status === 'legacy' → serve the single-curve fallback path; the
+    // aggregator will use typed r_D_T_n_Ue + D scalars (back-compat).
+    return { status: 'legacy' };
+  }, [values, kostraField, rainfallTableRef]);
+
   const engineStates = useMemo<Record<string, EvalState>>(() => {
     const next: Record<string, EvalState> = {};
     for (const eq of equations) {
@@ -384,12 +421,23 @@ export function useEquationEngine({
           kostraUnit: kostraField?.unit ?? null,
         };
       } else if (eq.id === A138_26_GL10_ID) {
+        // Task 5: thread the flood 30-column resolution into the aggregator.
+        // - ok → pass carrier; aggregator iterates all D; V_Rück = max(0, governing).
+        // - missing → pass missingFlood30Reason; aggregator withholds (no wrong column).
+        // - legacy/none → pass null carrier; aggregator falls back to typed scalars.
+        const flood30Carrier =
+          floodColResolution.status === 'ok' ? floodColResolution.carrier : null;
+        const missingFlood30Reason =
+          floodColResolution.status === 'missing' ? floodColResolution.reason : null;
+
         aggregator = {
           floodSubAreas: floodCarrier,
           gl10Scalars,
           // re-use kostraUnit slot for the r_D_30 unit guard (the
           // aggregator reads ctx.kostraUnit)
           kostraUnit: r_D_30_field?.unit ?? null,
+          floodKostra30Col: flood30Carrier,
+          missingFlood30Reason,
         };
       }
 
@@ -417,6 +465,7 @@ export function useEquationEngine({
     floodCarrier,
     gl10Scalars,
     r_D_30_field,
+    floodColResolution,
     ambiguousSymbols,
   ]);
 

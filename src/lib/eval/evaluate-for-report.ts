@@ -233,6 +233,32 @@ export function evaluateWorksheetEquations(
     ? (floodJson as FloodSubAreasCarrier)
     : null;
 
+  // Task 5 — Flood 30-column resolution (server path).
+  // Resolve T_n=30 from the same KOSTRA grid, FIXED at 30 regardless of the
+  // facility's design T_n (§5.3.4: T_n_Ue = 30 a). Uses the same selected
+  // table as the basin (same `rainfallTableRef`).
+  type FloodColServerResolution =
+    | { status: 'ok';      carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'legacy' | 'none' };
+
+  const floodColResolution: FloodColServerResolution = (() => {
+    if (kostraRaw == null) return { status: 'none' };
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(kostraRaw), rainfallTableRef);
+    if (!selected) return { status: 'none' };
+    const col30 = resolveColumn(selected, 30);
+    if (col30.status === 'ok') {
+      return { status: 'ok', carrier: { rows: col30.rows } };
+    }
+    if (col30.status === 'missing') {
+      return {
+        status: 'missing',
+        reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst (Hochwassernachweis Gl. 10)',
+      };
+    }
+    return { status: 'legacy' };
+  })();
+
   // A138-07 surface carrier: drives the four surface-producer aggregators.
   const surfaceCarrier = normalizeSurfaceCarrier(jsonBySymbol.get('surface_inventory'));
 
@@ -311,10 +337,17 @@ export function evaluateWorksheetEquations(
         kostraUnit: kostraField?.unit ?? null,
       };
     } else if (eq.id === A138_26_GL10_ID) {
+      // Task 5: thread the flood 30-column resolution into the aggregator.
+      const flood30Carrier =
+        floodColResolution.status === 'ok' ? floodColResolution.carrier : null;
+      const missingFlood30Reason =
+        floodColResolution.status === 'missing' ? floodColResolution.reason : null;
       aggregator = {
         floodSubAreas: floodCarrier,
         gl10Scalars,
         kostraUnit: r_D_30_field?.unit ?? null,
+        floodKostra30Col: flood30Carrier,
+        missingFlood30Reason,
       };
     }
 

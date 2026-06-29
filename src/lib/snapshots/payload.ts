@@ -23,6 +23,8 @@ import type {
   SubAreasCarrier,
   KostraCarrier,
   Gl8Scalars,
+  FloodSubAreasCarrier,
+  Gl10Scalars,
 } from '@/lib/eval/aggregators';
 // Type-only schema imports — keeps this module free of any runtime `db`
 // dependency so unit tests can call buildSnapshotPayload without env vars.
@@ -48,6 +50,7 @@ const A138_07_SURFACE_IDS = new Set([
 
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
+const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
 /** Stored JSONB shape — keep in lockstep with `calculation_snapshots` table comments. */
 export type SnapshotParameterValue = {
@@ -289,6 +292,55 @@ export function buildSnapshotPayload(args: {
       ? kostraSnapshotResolution.carrier
       : null;
 
+  // Flood sub-area carrier (A138-26 Gl.10).
+  const floodSubAreasField = fieldList.find((f) => f.symbol === 'sub_areas_A138_26');
+  const floodCarrier: FloodSubAreasCarrier | null = (() => {
+    if (!floodSubAreasField) return null;
+    const p = paramByFieldId.get(floodSubAreasField.id);
+    if (!p || p.valueJson == null) return { rows: [] };
+    const raw = p.valueJson as { rows?: unknown };
+    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
+    return raw as FloodSubAreasCarrier;
+  })();
+
+  // Task 5 — Flood 30-column resolution (snapshot path).
+  // T_n=30 is FIXED for the flood case (§5.3.4), regardless of facility T_n.
+  type FloodColSnapshotResolution =
+    | { status: 'ok';      carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'legacy' | 'none' };
+
+  const floodColResolution: FloodColSnapshotResolution = (() => {
+    if (!kostraField) return { status: 'none' };
+    const p = paramByFieldId.get(kostraField.id);
+    if (!p || p.valueJson == null) return { status: 'none' };
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
+    if (!selected) return { status: 'none' };
+    const col30 = resolveColumn(selected, 30);
+    if (col30.status === 'ok') {
+      return { status: 'ok', carrier: { rows: col30.rows } };
+    }
+    if (col30.status === 'missing') {
+      return {
+        status: 'missing',
+        reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst (Hochwassernachweis Gl. 10)',
+      };
+    }
+    return { status: 'legacy' };
+  })();
+
+  const r_D_30_field_snap = fieldList.find((f) => f.symbol === 'r_D_30');
+
+  // Gl.10 scalar resolution.
+  const gl10Scalars: Gl10Scalars = {
+    A_VA: numberBySymbol('A_VA'),
+    Q_S: numberBySymbol('Q_S'),
+    Q_Dr: numberBySymbol('Q_Dr'),
+    D: numberBySymbol('D_min') ?? numberBySymbol('D'),
+    V_VA: numberBySymbol('V_VA'),
+    r_D_T_n_Ue: numberBySymbol('r_D_30'),
+  };
+
   // Gl8 scalar resolution: null out any symbol with >1 producer so the
   // aggregator sees missing-input and produces manual_required instead of
   // silently picking one source.
@@ -384,6 +436,19 @@ export function buildSnapshotPayload(args: {
         kostraTable: kostraCarrier,
         gl8Scalars,
         kostraUnit: kostraField?.unit ?? null,
+      };
+    } else if (eq.id === A138_26_GL10_ID) {
+      // Task 5: thread the flood 30-column resolution into the aggregator.
+      const flood30Carrier =
+        floodColResolution.status === 'ok' ? floodColResolution.carrier : null;
+      const missingFlood30Reason =
+        floodColResolution.status === 'missing' ? floodColResolution.reason : null;
+      aggregator = {
+        floodSubAreas: floodCarrier,
+        gl10Scalars,
+        kostraUnit: r_D_30_field_snap?.unit ?? null,
+        floodKostra30Col: flood30Carrier,
+        missingFlood30Reason,
       };
     }
 
