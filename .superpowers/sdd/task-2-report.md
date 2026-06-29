@@ -6,9 +6,9 @@
 
 ## Commit
 
-- **Short hash:** `d64a85b`
-- **Branch:** `feat/rainfall-2d-grid`
-- **Message:** `feat(eval): resolveColumn (2D grid -> T_n column slice)`
+- **Short hash:** `b8b6a8c`
+- **Branch:** `feat/a138-10-auto-qzu`
+- **Message:** `feat(eval): materialize basin governing r_D_n/D_min; A138-10 Q_zu auto-computes at governing D`
 
 ## Files Changed
 
