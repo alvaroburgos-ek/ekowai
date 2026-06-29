@@ -107,16 +107,31 @@ facilities (A138-13/16/17/18/19/20/21/22) via migration (single-source: T_n stay
 A138-08, inherited by reference). The basin (A138-13) reads `T_n` for its column.
 (`n = 1/T_n`; we use `T_n` directly as the column key — no recomputation.)
 
-## 4. Flood-path unification (A138-26, Gl.10)
+## 4. Flood-path unification (A138-26, Gl.10) — a governing-duration PROFILE on the 30-column
 
-Today A138-26's `r_D_30` is a **free-typed** field feeding Gl.10's `r_D(T_n_Ue)`. Model A makes
-it **derived from the same grid**: resolve the inherited carrier's **T_n=30 column** at the flood
-duration (`D_flood_min`) → `r_D(30)`. So:
-- `r_D_30` becomes a **derived** value (read-only), produced from the grid — retire its
-  free-typed input (mirror the A138-07 "retire the orphaned input" precedent).
-- Gl.10 math is **unchanged**; only its `r_D(T_n_Ue)` source changes from a typed field to the
-  grid's 30-column slice at `D_flood_min`.
-- Single-source win: the flood event no longer maintains a separate rainfall number.
+**The flood D is ITERATED, not fixed** (§5.3.4, source L1876, verbatim): *"Die Ermittlung der
+maßgeblichen Dauerstufe des Bemessungsregens D erfolgt iterativ für unterschiedliche Dauerstufen
+D und jeweils zugehöriger Regenspende r_D(30)."* So the flood case sweeps **all D at the T_n=30
+column** and takes the governing one — the **same `iterateGoverningDuration` engine** (Piece 1),
+with a flood sizing function reading the 30-column. NOT a fixed `D_flood_min` row.
+
+Model: add a **`FacilityGoverningProfile` for A138-26** (`facility:'A138-26'`, `maximizes:'V_Rueck'`):
+- **rows** = `resolveColumn(inherited grid, 30)` — the T_n=30 column sliced to `{D_min, r_D_n}`.
+- **sizing(D, r_D, s)** = Gl.10's V_Rück per duration:
+  `((r_D·(Σ(A_E_b_a·C_S) + A_VA)/10000) − (Q_S + Q_Dr))·D·60/1000 − V_VA`.
+  Source details that MUST be honored:
+  - **(a) C_s (Spitzenabflussbeiwert) + paved areas `A_E,b,a`** — NOT `C_i`. The flood event uses the
+    peak runoff coefficient over the *befestigte* areas (`Σ(A_E_b_a·C_S)`), distinct from the
+    design-event mean coefficient.
+  - The iteration picks the governing D (max required retention).
+- **(b) V_Rück floors at 0** (source: *"ergibt … ein negatives Ergebnis für V_Rück, so wird V_Rück = 0
+  gesetzt"*): after taking the governing value, `V_Rueck = max(0, governingValue)`.
+- **`r_D_30`** stops being free-typed — it is the 30-column value at the governing D (**derived**);
+  retire its required input (mirror the A138-07 orphaned-input retirement). Gl.10's algebra is
+  unchanged; its `r_D(T_n_Ue)` source moves from a typed field to the grid's 30-column, and the
+  governing-D selection moves from "typed `D_flood_min`" to the shared iteration.
+- Single-source win: the flood event no longer maintains a separate rainfall number **or** a
+  separately-chosen duration.
 
 ## 5. Back-compat (existing 1D data → 2D)
 
@@ -171,8 +186,10 @@ Both must be green; the legacy one is the regression guard, the 2D one proves th
   `resolveColumn(table, inherited T_n)`; read `T_n` from fields.
 - **Modify** `src/lib/eval/evaluate-for-report.ts` + `src/lib/snapshots/payload.ts` — same column
   slice (server + snapshot paths).
-- **Modify** `src/lib/eval/aggregators.ts` (A138-26 Gl.10) + `use-equation-engine`/server — feed
-  the grid's T_n=30 column at `D_flood_min` as `r_D(T_n_Ue)`; make `r_D_30` derived.
+- **Modify** `src/lib/eval/governing-duration.ts` (add the A138-26 flood profile) +
+  `src/lib/eval/aggregators.ts` (A138-26 Gl.10 delegates to it over `resolveColumn(grid,30)`) +
+  `use-equation-engine`/server — iterate D over the 30-column; `V_Rueck = max(0, governing)`;
+  C_s + paved `A_E,b,a`; make `r_D_30` derived (retire the typed input).
 - **Modify** `src/components/worksheet/rainfall-tables-editor.tsx` — 2D matrix editor (D rows ×
   T_n columns). **Selector** unchanged (still table-id only; T_n is not picked).
 - **Create** migrations: extend `T_n.consumer_worksheets` to facilities; retire/repoint `r_D_30`

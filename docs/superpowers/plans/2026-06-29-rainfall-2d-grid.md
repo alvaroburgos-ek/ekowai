@@ -128,15 +128,26 @@ describe('resolveColumn', () => {
 
 ---
 
-### Task 5: flood-path unification — A138-26 Gl.10 reads the T_n=30 column (DB-free code)
+### Task 5: flood unification — A138-26 as a governing-duration PROFILE on the T_n=30 column (DB-free code)
 
-**Files:** Modify `src/lib/eval/use-equation-engine.ts` + `evaluate-for-report.ts` + `payload.ts` (A138-26 branch); Test `src/lib/eval/__tests__/flood-from-grid.test.ts`.
+> **Source-corrected (§5.3.4 L1876):** the flood D is **iterated**, not fixed. The flood case sweeps all D at the 30-column via the SHARED `iterateGoverningDuration` engine. C_s + paved `A_E,b,a` (NOT C_i); V_Rück floors at 0.
 
-**Produces:** A138-26's `r_D(T_n_Ue)` is sourced from `resolveColumn(grid, 30)` at `D_flood_min` (instead of the free-typed `r_D_30`); Gl.10 math unchanged.
+**Files:** Modify `src/lib/eval/governing-duration.ts` (add the flood profile) + `src/lib/eval/aggregators.ts` (A138-26 Gl.10 delegates to it) + `use-equation-engine.ts`/`evaluate-for-report.ts`/`payload.ts` (feed the 30-column + flood scalars); Test `src/lib/eval/__tests__/governing-duration-flood.test.ts` + `__tests__/flood-from-grid.test.ts`.
 
-- [ ] **Step 1: Failing test** — A138-26 with an inherited 2D grid (T_n=30 column populated) + `D_flood_min` set, NO `r_D_30` typed → assert Gl.10 resolves `r_D(30)` from the grid at `D_flood_min` and `V_Rueck` computes; and that a populated grid makes the formerly-required `r_D_30` unnecessary.
-- [ ] **Step 2: Run** → FAIL. **Step 3: Implement** — for the A138-26 Gl.10 aggregator inputs, derive `r_D_30` from `resolveColumn(grid, 30)` row at `D_flood_min` (nearest/exact D rule documented); thread it where `r_D_30` was read. **Step 4: Run** → PASS; full eval suite green.
-- [ ] **Step 5: Commit** `feat(eval): A138-26 flood reads the T_n=30 column of the shared grid`.
+**Produces:** a `FacilityGoverningProfile` `{ facility:'A138-26', maximizes:'V_Rueck', sizing }` consuming the 30-column rows; `V_Rueck = max(0, governingValue)`; `r_D_30` derived (the 30-column value at the governing D), not free-typed.
+
+- [ ] **Step 1: Failing unit test** — `governing-duration-flood.test.ts`: feed the 30-column rows + flood scalars `{ A_E_b_a_Cs_sum, A_VA, Q_S, Q_Dr, V_VA }` to `iterateGoverningDuration(rows, floodProfile.sizing)`; assert the governing D + a hand-computed `V_Rueck`; and a second case where every duration yields negative → `max(0, …) === 0`.
+
+```ts
+// sizing per duration (Gl.10):
+//   ((r_D·(ΣA_E_b_a·C_S + A_VA)/10000) − (Q_S + Q_Dr))·D·60/1000 − V_VA
+// floor the GOVERNING result at 0.
+```
+
+- [ ] **Step 2: Run** → FAIL. **Step 3: Implement** the flood profile in `governing-duration.ts` (sizing uses `s.AcS_paved` = Σ(A_E_b_a·C_S), `s.A_VA`, `s.Q_S`, `s.Q_Dr`, `s.V_VA`); apply `max(0, governingValue)` at the call site. **Step 4: Run** → PASS.
+- [ ] **Step 5: Commit** `feat(eval): flood (A138-26 Gl.10) as a governing-duration profile (iterated D, C_s, V_Rück≥0)`.
+- [ ] **Step 6: Wire** the A138-26 Gl.10 aggregator to delegate to the flood profile over `resolveColumn(grid, 30)`; thread the C_s/paved-area + V_VA scalars (client + server + snapshot). Add `flood-from-grid.test.ts` (A138-26 + inherited 2D grid, NO `r_D_30` typed → `V_Rueck` computes from the 30-column; governing D surfaced). Run → PASS; full eval suite green.
+- [ ] **Step 7: Commit** `feat(eval): A138-26 Gl.10 iterates the shared grid's T_n=30 column`.
 
 ---
 
@@ -173,7 +184,7 @@ describe('resolveColumn', () => {
 - **Spec coverage:** 2D carrier (T1), column slice (T2), basin column read (T3), server/snapshot parity (T4), flood unification (T5), 2D editor (T6), T_n-inheritance + r_D_30 retirement migrations (T7), verify/cutover (T8). Single-source (one grid/location, derive-not-pick), back-compat (legacy design column), and the 18.684 witness are explicit acceptance gates.
 - **Type consistency:** `RainfallGridRow.r: Partial<Record<TnKey, …>>`, `resolveColumn(table, T_n) → {id,D_min,r_D_n}[]`, `RETURN_PERIODS` used in T1/T2/T6 identically.
 - **Placeholders:** none — test + impl shapes given for the DB-free core; T5/T7 carry the exact source-grounded behavior (T_n=30 column at D_flood_min; T_n consumer extension + r_D_30 retirement).
-- **Open confirmations for review:** (a) base = union (design §0); (b) the legacy→design-T_n re-keying approach (read-time tolerant + app-canonicalization vs a one-time per-project data migration); (c) flood D rule (exact `D_flood_min` row vs nearest) — pick per §5.3.4.
+- **Decisions (resolved by Alvaro 2026-06-29):** (a) base = union ✓; (b) legacy re-keying = read-time-tolerant + app-canonicalization, NO bulk data migration ✓; (c) flood D is **iterated** per §5.3.4 L1876 (a governing-duration profile on the 30-column, C_s + paved areas, V_Rück≥0) — NOT a fixed `D_flood_min` ✓ (Task 5 rewritten).
 
 ## Playbook capture (after this lands)
 Record the **2D predefined-grid** as a variant of the multi-table/source pattern in §10 of the consolidation playbook: a key-by-(stepped-row × selected-column) accessor where the column is an inherited classification (T_n via Tab.8) and the value derives via the governing iteration — never free-picked.
