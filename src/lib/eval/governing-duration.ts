@@ -131,4 +131,27 @@ export const GOVERNING_PROFILES: FacilityGoverningProfile[] = [
       D * 60 * s.f_Z * s.f_A,
     derived: { rDSymbol: 'r_D_n_B' },
   },
+  {
+    // A138-26 Gl. 10 — Flood retention check (§5.3.4).
+    //
+    //   V_Rück(D) = ((r_D(30) · (AcS_paved + A_VA) / 10000) − (Q_S + Q_Dr))
+    //               · D · 60 / 1000  −  V_VA
+    //
+    // where AcS_paved = Σ(A_E,b,a · C_S)  (peak flood runoff coefficient C_S
+    // over befestigte areas, NOT the design-event C_i per Tab. 9).
+    //
+    // Source: §5.3.4 L1876 — D is ITERATED (governing = max V_Rück across the
+    // T_n=30 column); r_D(30) is the 30-column value at each duration D.
+    //
+    // Floor: the aggregator call site applies max(0, governingValue) — NOT here.
+    // scalars expected: { AcS_paved, A_VA, Q_S, Q_Dr, V_VA }
+    facility: 'A138-26',
+    equationId: '8e3c7e22-e3c7-449a-b267-928332c89306',
+    maximizes: 'V_Rueck',
+    sizing: (D, r_D, s) =>
+      ((r_D * (s.AcS_paved + s.A_VA)) / 10000 - (s.Q_S + s.Q_Dr)) *
+      D * 60 / 1000 -
+      s.V_VA,
+    derived: { rDSymbol: 'r_D_30', governingDSymbol: 'D_min' },
+  },
 ];
