@@ -44,14 +44,21 @@ The governing D is a **property of the basin sizing (A138-13/Gl.8)** — that is
 already runs (`GoverningResult.governingD` + `r_D_at_governing`). Single-source ⇒ produce it **once
 on A138-13**, consume it on A138-10.
 
-- **A138-13 (producer):** the Gl.8 engine already computes `governingD` + `r_D_at_governing`. Expose
-  them as two **derived fields** on A138-13: `D_gov` (min) and `r_D_gov` (l/(s·ha)), materialized by
-  the engine alongside `V_VA`. `consumer_worksheets = ['A138-10']`.
-- **A138-10 (consumer):**
-  - `D_min` ("Dauerstufe D (gewählt)") → **derived**, inherits `D_gov` (read-only).
-  - `r_D_n` ("Regenspende r_D(n)") → **derived**, inherits `r_D_gov` (read-only).
-  - `Q_zu` → unchanged Gl.3 `r_D(n)·(A_C+A_VA)·10⁻⁴`, now auto-computes from the inherited governing
-    `r_D` + A_C (Gl.2) + A_VA (own field). No free-typing anywhere.
+**Mechanism = the proven A138-07 area-consolidation pattern (same-symbol producer + consumer
+deactivates its local duplicate).** `mergeInheritedFields` is own-symbol-wins, so a distinct name
+like `D_gov` would NOT flow into A138-10's `r_D_n`. Instead the basin **produces the very symbols
+A138-10 consumes**:
+- **A138-13 (producer):** add two **derived fields** carrying the basin's governing values under the
+  symbols A138-10's Gl.3 already reads — `r_D_n` (l/(s·ha)) and `D_min` (min) — `consumer_worksheets =
+  ['A138-10']`, `is_required=false`. The Gl.8 engine materializes them from `derivedExtras`
+  (`r_D_gov`→the `r_D_n` field, `D_gov`→the `D_min` field) alongside `V_VA`, `source_type='derived'`.
+- **A138-10 (consumer):** its **local `r_D_n` + `D_min` are deactivated** (Task 3 migration) — exactly
+  as A138-10's duplicate area fields were deactivated when A138-07 became their producer. A138-10 then
+  inherits `r_D_n`/`D_min` from A138-13 by same-symbol; **Gl.3 is unchanged** and reads the inherited
+  governing `r_D` → `Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴` auto-computes. No free-typing, no equation alias.
+
+(Reference precedent: migration `20260626140000_a138_area_singlesource.sql` + the surface
+materialization in `use-equation-engine`/`evaluate-for-report`/`payload` — replicate that exact shape.)
 
 A138-10 does **not** itself run `resolveColumn`/`facilityReturnPeriod` — those run **once** inside the
 basin engine (A138-13), and A138-10 inherits the result by reference (single producer). This is the
