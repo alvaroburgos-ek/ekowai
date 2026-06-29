@@ -13,7 +13,10 @@
 - **Base branch = the union `integration/rainfall-govdur` (`7b4510a`)**, branch `feat/rainfall-2d-grid`, worktree `C:/Users/Ekowai/_wt-2dgrid`. NOT bare origin/main (it lacks Piece 2/Piece 1). **Confirm before build** (design §0).
 - Selection is the TABLE (location, Piece 2) + the COLUMN comes from the inherited **T_n** — **`r_D` is never free-picked** (no return of the cancelled picker).
 - Aggregator + `iterateGoverningDuration` math/signatures are **UNCHANGED**; the only new step is the 2D→1D column slice at the resolution boundary.
-- KOSTRA columns: **T_n ∈ {1,2,3,5,10,30,50,100} a** (`RETURN_PERIODS`). `n = 1/T_n`; use `T_n` as the column key directly.
+- KOSTRA columns: **T_n ∈ {1,2,3,5,10,30,50,100} a** (`RETURN_PERIODS`).
+- **Per-facility column key** via `facilityReturnPeriod`: local `n_*` (Mulde `n_M_Bemessung` / Rigole `n_R_Bemessung` / MRE `n_R` / MRS `n_R_MRS` / Becken `n_B_Bemessung`) → else inherited project `n`/`T_n` (basin A138-13, Flächenv. A138-16, Schacht A138-21) → `T_n = 1/n` → **snap to nearest `RETURN_PERIODS`**. NOT one project-wide value; NO new protection-category field; NO `T_n.consumer_worksheets` broadcast.
+- **Missing-column safety:** if a facility's snapped T_n column is not populated in the entered grid → **WITHHOLD with a cause** (surface-source "fehlend" style). NEVER fall back to a neighbouring column or the legacy design curve. A legacy un-migrated curve serves **only** the facility whose T_n equals the project design T_n.
+- Flood (A138-26) stays fixed at the **T_n=30** column per §5.3.4.
 - **The 18.684 @ D=30 witness must stay green** (`formula-Gl8.test.ts`, `governing-duration-basin.test.ts`, `engine-wiring-A138-13.test.tsx`).
 - Migrations WRITTEN-NOT-APPLIED until cutover; rollback authored; no blind data UPDATE (A138-07 precedent). Tests: `pnpm vitest run <path>` (worktree needs a `node_modules` junction like the others).
 - Out of scope: geometry-coupled facility profiles (Piece 1 Task 6 remainder); Becken stays inert; Tabelle-12 Nachweisverfahren.
@@ -104,17 +107,19 @@ describe('resolveColumn', () => {
 
 ---
 
-### Task 3: client engine column-resolution + 2D witness (DB-free)
+### Task 3: per-facility column resolution + guarded `resolveColumn` + withhold + 2D witness
 
-**Files:** Modify `src/lib/eval/use-equation-engine.ts`; Test `src/components/worksheet/__tests__/engine-wiring-A138-13-2d.test.tsx`.
+**Files:** Modify `src/lib/eval/rainfall-tables.ts` (revise `resolveColumn` to tagged+guarded), `src/lib/eval/use-equation-engine.ts` (add `facilityReturnPeriod`, wire basin, withhold); Tests: update `src/lib/eval/__tests__/rainfall-2d-resolve.test.ts`, create `src/components/worksheet/__tests__/engine-wiring-A138-13-2d.test.tsx`.
 
-**Consumes:** `resolveSelectedTable`, `resolveColumn`. **Produces:** the basin reads `resolveColumn(resolveSelectedTable(carrier, ref), T_n)` where `T_n` = the value of the inherited `T_n` field; feeds the **unchanged** `KostraCarrier`.
+**Consumes:** `resolveSelectedTable`, `RETURN_PERIODS`, `__legacyValue`. **Produces:** `resolveColumn(table, T_n, {designReturnPeriod?}) → { status:'ok'|'legacy'|'missing'; rows }`; `facilityReturnPeriod(worksheetCode, fields, values) → number|null`.
 
-- [ ] **Step 1: Failing test** — render `EquationEngineCard` via `useEquationEngine` for A138-13 with fields incl. `T_n`, a 2D `r_D_n_table` carrier whose **T_n=5 column** = the Heinsberg curve, scalars loaded, `T_n=5` → assert `V_VA = 18,684 m³` @ D=30. (Mirror `engine-wiring-A138-13-multitable.test.tsx`.)
-- [ ] **Step 2: Run** → FAIL (engine still reads the flat carrier).
-- [ ] **Step 3: Implement** — in `use-equation-engine.ts`, read the `T_n` field value (number) and replace the `selected.rows.map(...)` slice with `resolveColumn(selected, T_n).map(...)` into `KostraCarrier`. When `T_n` is missing, fall back to the legacy design column (resolveColumn already does this for legacy tables; for native 2D with no T_n, emit no rows → aggregator manual_required).
-- [ ] **Step 4: Run** → PASS. Also run `engine-wiring-A138-13.test.tsx` + `formula-Gl8.test.ts` + `governing-duration-basin.test.ts` → **all green (18.684 preserved)**.
-- [ ] **Step 5: Commit** `feat(eval): basin reads the inherited-T_n column of the 2D grid`.
+- [ ] **Step 1a: Revise `resolveColumn` (tagged + guarded) — failing test first.** Update `rainfall-2d-resolve.test.ts`: exact column → `{status:'ok'}`; legacy table + `designReturnPeriod===T_n` → `{status:'legacy'}`; legacy table + **different** T_n → `{status:'missing'}` (NO longer "serves any T_n"); native grid, absent column → `{status:'missing'}`.
+- [ ] **Step 1b: Implement** the tagged/guarded `resolveColumn` (legacy curve served only when `opts.designReturnPeriod === T_n`; else missing). Run both resolve + `rainfall-2d.test.ts` → PASS. Commit `refactor(eval): resolveColumn returns tagged status (ok/legacy/missing), guards legacy to design T_n`.
+- [ ] **Step 2a: `facilityReturnPeriod` — failing test** (`rainfall-2d-resolve.test.ts` or a new helper test): Becken worksheet with `n_B_Bemessung=0.033` → 30; basin (no local n_*) with inherited `n=0.2` → 5; `n=0.333` → 3; snapping (1/0.034≈29.4 → 30). 
+- [ ] **Step 2b: Implement** `facilityReturnPeriod(worksheetCode, fields, values)` in `use-equation-engine.ts`: a `FACILITY_FREQUENCY_SYMBOL: Record<string,string>` map (`A138-17→n_M_Bemessung, A138-18→n_R_Bemessung, A138-19→n_R, A138-20→n_R_MRS, A138-22→n_B_Bemessung`); else project `T_n` value if present else `1/n`; `T_n=1/n`; snap to nearest `RETURN_PERIODS`. Run → PASS.
+- [ ] **Step 3: Failing integration test** — `engine-wiring-A138-13-2d.test.tsx`: A138-13 fields incl. `n` (project, =0.2) + a 2D `r_D_n_table` whose **T_n=5 column** = the Heinsberg curve + scalars → assert `V_VA = 18,684 m³` @ D=30. Second case: the grid has only a T_n=10 column (no T_n=5) → assert the card is **manual_required/withheld** naming the missing T_n (NO number). Third case: a **legacy** `{rows}` carrier (design column) + `n=0.2` → still computes 18.684 (back-compat, T_n==design).
+- [ ] **Step 4: Implement** basin wiring in `use-equation-engine.ts`: `const T_n = facilityReturnPeriod(worksheetCode, fields, values)`; `const designRP = projectDesignReturnPeriod (1/project n)`; `const col = resolveColumn(resolveSelectedTable(carrier, ref), T_n, {designReturnPeriod: designRP})`; on `ok`/`legacy` feed `col.rows` to `KostraCarrier` (replacing the Task-1 `__legacyValue` bridge); on `missing` set the eq state to `manual_required` with reason `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst` (do NOT feed the aggregator).
+- [ ] **Step 5: Run** the 2D test + `engine-wiring-A138-13.test.tsx` + `formula-Gl8.test.ts` + `governing-duration-basin.test.ts` → **all green (18.684 preserved)**; typecheck clean. **Commit** `feat(eval): basin selects its T_n column per facilityReturnPeriod; withholds when the column is absent`.
 
 ---
 
@@ -165,8 +170,8 @@ describe('resolveColumn', () => {
 
 **Files:** Create `supabase/migrations/2026XXXX_a138_2d_grid.sql` + `scripts/rollback-…sql`.
 
-- [ ] Extend `T_n.consumer_worksheets` (A138-08) to add A138-13/16/17/18/19/20/21/22 (so facilities inherit the column key). Idempotent (`array` union, re-runnable).
-- [ ] Retire/repoint A138-26 `r_D_30` to **derived** (no producer-less required input): set `is_required=false`; it is produced by the grid at read time (mirror A138-07 `A_C_preliminary` retirement). Document that Gl.10 now reads the grid column.
+- [ ] ~~Extend `T_n.consumer_worksheets`~~ — **DROPPED** (Alvaro 2026-06-29). Per-facility column comes from the already-inherited `n` + local `n_*`; no T_n broadcast needed.
+- [ ] Retire/repoint A138-26 `r_D_30` to **derived** (no producer-less required input): set `is_required=false`; it is produced by the grid's T_n=30 column at read time (mirror A138-07 `A_C_preliminary` retirement). Document that Gl.10 now reads the grid column.
 - [ ] Validate read-only against prod (targets resolve, no collision); WRITTEN-NOT-APPLIED; author rollback (restore `T_n` consumers + `r_D_30` required flag).
 - [ ] No carrier data UPDATE — legacy curves canonicalize on next 2D-editor save (back-compat at read time meanwhile).
 
@@ -184,7 +189,7 @@ describe('resolveColumn', () => {
 - **Spec coverage:** 2D carrier (T1), column slice (T2), basin column read (T3), server/snapshot parity (T4), flood unification (T5), 2D editor (T6), T_n-inheritance + r_D_30 retirement migrations (T7), verify/cutover (T8). Single-source (one grid/location, derive-not-pick), back-compat (legacy design column), and the 18.684 witness are explicit acceptance gates.
 - **Type consistency:** `RainfallGridRow.r: Partial<Record<TnKey, …>>`, `resolveColumn(table, T_n) → {id,D_min,r_D_n}[]`, `RETURN_PERIODS` used in T1/T2/T6 identically.
 - **Placeholders:** none — test + impl shapes given for the DB-free core; T5/T7 carry the exact source-grounded behavior (T_n=30 column at D_flood_min; T_n consumer extension + r_D_30 retirement).
-- **Decisions (resolved by Alvaro 2026-06-29):** (a) base = union ✓; (b) legacy re-keying = read-time-tolerant + app-canonicalization, NO bulk data migration ✓; (c) flood D is **iterated** per §5.3.4 L1876 (a governing-duration profile on the 30-column, C_s + paved areas, V_Rück≥0) — NOT a fixed `D_flood_min` ✓ (Task 5 rewritten).
+- **Decisions (resolved by Alvaro 2026-06-29):** (a) base = union ✓; (b) legacy re-keying = read-time-tolerant + app-canonicalization, NO bulk data migration ✓; (c) flood D is **iterated** per §5.3.4 L1876 (a governing-duration profile on the 30-column, C_s + paved areas, V_Rück≥0) — NOT a fixed `D_flood_min` ✓ (Task 5 rewritten); (d) column is **per-facility** via `facilityReturnPeriod` (local `n_*` → else project `n`; T_n=1/n; snap), using the existing `n_*` fields — NO new category field, NO `T_n` broadcast ✓ (Task 3 rewritten, Task 7 item dropped); (e) a facility whose snapped T_n column is absent in the entered grid **withholds with a cause** — never falls back to a wrong/legacy column ✓ (Task 3 `resolveColumn` guarded).
 
 ## Playbook capture (after this lands)
 Record the **2D predefined-grid** as a variant of the multi-table/source pattern in §10 of the consolidation playbook: a key-by-(stepped-row × selected-column) accessor where the column is an inherited classification (T_n via Tab.8) and the value derives via the governing iteration — never free-picked.

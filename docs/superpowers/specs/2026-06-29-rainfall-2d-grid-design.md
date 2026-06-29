@@ -83,29 +83,58 @@ type RainfallTable = {
 type RainfallCarrier = { tables: RainfallTable[] };
 ```
 
-### 3.2 Column resolution (the new boundary — aggregator stays unchanged)
+### 3.2 Column resolution (the new boundary — aggregator stays unchanged) — TAGGED + SAFE
 
-A pure helper turns the 2D table + a chosen T_n back into the **1D `{D_min, r_D_n}` slice** the
-existing Gl.8 aggregator / governing engine already consume:
+A pure helper slices the 2D table to one return-period column. It returns a **tagged status** so
+the caller can withhold (never compute on the wrong column):
 ```ts
-/** Slice the table to one return-period column → the 1D rows the aggregator iterates.
- *  - exact column present → use r[Tn].
- *  - else if legacyDesignColumn → use the single legacy curve for ANY T_n (back-compat).
- *  - else → null cells (aggregator emits manual_required: column not entered). */
-function resolveColumn(table: RainfallTable, T_n: number): RainfallRow[] /* {D_min, r_D_n} */
+type ColumnResolution =
+  | { status: 'ok';      rows: Array<{ id; D_min: number|null; r_D_n: number|null }> } // exact T_n column present
+  | { status: 'legacy';  rows: Array<…> }   // served from the un-migrated design curve (only for the design T_n)
+  | { status: 'missing'; rows: [] };        // grid exists but THIS T_n column is not entered → WITHHOLD
+
+/** opts.designReturnPeriod = the project's design T_n (= 1/project n). A legacy/design-column
+ *  table's single curve is valid ONLY for that design T_n; any other requested T_n → 'missing'.
+ *  A native 2D grid: exact column → 'ok', else → 'missing'. Never serves a different column. */
+function resolveColumn(table: RainfallTable, T_n: number, opts?: { designReturnPeriod?: number }): ColumnResolution
 ```
 Resolution order at each read site: `resolveSelectedTable(carrier, ref)` (Piece 2, picks the
-location) → `resolveColumn(table, T_n)` (picks the T_n column) → 1D rows → **unchanged**
-`KostraCarrier` → **unchanged** Gl.8 aggregator / `iterateGoverningDuration`. The 2D→1D slice is
-the only new step; no aggregator/iteration math changes.
+location) → `resolveColumn(table, T_n, {designReturnPeriod})` (picks the T_n column) → on
+`ok`/`legacy`, feed the 1D rows to the **unchanged** `KostraCarrier` → **unchanged** Gl.8
+aggregator / `iterateGoverningDuration`; on `missing`, **withhold** (§3.4). The 2D→1D slice is the
+only new step; no aggregator/iteration math changes.
 
-### 3.3 T_n inheritance to facilities
+> This **tightens** Task 2's helper: the earlier "legacy serves ANY T_n" fallback is replaced by
+> the guarded `legacy` (design T_n only) + `missing` — per Alvaro's safety rule. Task 3 revises it.
 
-Currently `T_n` (A138-08) inherits only to **A138-04 + A138-26**. Facilities inherit `n` (=1/T_n).
-To let a facility select its column, **extend `T_n.consumer_worksheets`** to the storage
-facilities (A138-13/16/17/18/19/20/21/22) via migration (single-source: T_n stays owned by
-A138-08, inherited by reference). The basin (A138-13) reads `T_n` for its column.
-(`n = 1/T_n`; we use `T_n` directly as the column key — no recomputation.)
+### 3.3 Per-facility column selection (`facilityReturnPeriod`)
+
+`T_n` is **per-case**, driven by each facility's own design frequency — NOT one project-wide value.
+A shared helper resolves the column key per facility:
+```ts
+/** Return-period column key for a facility, snapped to the nearest RETURN_PERIODS annuity.
+ *  1. local n_* field present (Mulde n_M_Bemessung / Rigole n_R_Bemessung / MRE n_R /
+ *     MRS n_R_MRS / Becken n_B_Bemessung) → T_n = 1/n_local.
+ *  2. else (basin A138-13 / Flächenv. A138-16 / Schacht A138-21) → inherited project T_n
+ *     (A138-08) if present, else 1/inherited n. (n is already inherited to every facility.) */
+function facilityReturnPeriod(worksheetCode, fields, values): number | null
+```
+Matches Tabelle 8's own n↔T pairs (0.2→5a, 0.033→30a, 0.333→3a). **No `T_n.consumer_worksheets`
+broadcast** and **no new protection-category field** — the per-facility `n_*` already encodes the
+risk per facility (Tab.8 category → n is upstream/manual; surfacing the category as a UI guide
+later is fine, but the driver stays the single `n_*`). The project design T_n (`1/project n`) is
+also what `resolveColumn` uses as `designReturnPeriod` for the legacy-curve guard.
+
+### 3.4 Missing column → WITHHOLD with a cause (no wrong-column fallback)
+
+When a facility's snapped T_n column is **not populated** in the entered grid (`status:'missing'`),
+the engine **withholds** the derived value and surfaces a cause — mirroring the surface-source
+"fehlend" pattern — e.g. *"Regenspende r_D für T_n = {T_n} a nicht in der Niederschlagstabelle
+erfasst."* It does **not** fall back to a neighbouring column or the legacy design curve. The only
+case a single curve serves a facility is a still-un-migrated legacy table for the facility whose
+T_n equals the project design T_n (`status:'legacy'`) — preserving back-compat for that facility
+only (e.g. PLT-HS-01's basin), while a different-risk facility on the same un-migrated data
+correctly shows missing until its column is entered.
 
 ## 4. Flood-path unification (A138-26, Gl.10) — a governing-duration PROFILE on the 30-column
 
@@ -182,8 +211,9 @@ Both must be green; the legacy one is the regression guard, the 2D one proves th
 
 - **Modify** `src/lib/eval/rainfall-tables.ts` — 2D types, `RETURN_PERIODS`, `normalizeRainfallCarrier`
   (legacy→2D), `resolveColumn`. Keep `resolveSelectedTable`.
-- **Modify** `src/lib/eval/use-equation-engine.ts` — after `resolveSelectedTable`, call
-  `resolveColumn(table, inherited T_n)`; read `T_n` from fields.
+- **Modify** `src/lib/eval/use-equation-engine.ts` — add `facilityReturnPeriod` (local `n_*` → else
+  project `n`/`T_n`, `T_n=1/n`, snap); after `resolveSelectedTable`, call
+  `resolveColumn(table, T_n, {designReturnPeriod})`; on `missing` → withhold with a cause (§3.4).
 - **Modify** `src/lib/eval/evaluate-for-report.ts` + `src/lib/snapshots/payload.ts` — same column
   slice (server + snapshot paths).
 - **Modify** `src/lib/eval/governing-duration.ts` (add the A138-26 flood profile) +
@@ -192,8 +222,9 @@ Both must be green; the legacy one is the regression guard, the 2D one proves th
   C_s + paved `A_E,b,a`; make `r_D_30` derived (retire the typed input).
 - **Modify** `src/components/worksheet/rainfall-tables-editor.tsx` — 2D matrix editor (D rows ×
   T_n columns). **Selector** unchanged (still table-id only; T_n is not picked).
-- **Create** migrations: extend `T_n.consumer_worksheets` to facilities; retire/repoint `r_D_30`
-  to derived. WRITTEN-NOT-APPLIED; rollback authored.
+- **Create** migration: retire/repoint `r_D_30` (A138-26) to **derived** (produced from the grid's
+  T_n=30 column). WRITTEN-NOT-APPLIED; rollback authored. **No `T_n.consumer_worksheets` change** —
+  per-facility column comes from the already-inherited `n` + local `n_*` (§3.3).
 - **Tests**: 2D unit tests for `normalizeRainfallCarrier`/`resolveColumn`; 2D witness; flood-from-grid
   test; legacy back-compat test.
 
