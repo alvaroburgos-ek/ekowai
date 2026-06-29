@@ -157,7 +157,9 @@ This playbook is the **post-encode wiring + deploy phase**. The encoder (Pass3c)
 
 ---
 
-## 9. Post-approval write-lock — STANDING integrity requirement (standard-agnostic, OPEN BUG as of 2026-06-26)
+## 9. Post-approval write-lock — STANDING integrity requirement (standard-agnostic) — FIXED + LIVE 2026-06-27
+
+> **Status update:** the lock described below is now BUILT + deployed (`origin/main` `294c89d`): `saveWorksheet` refuses writes when `instance.status ∈ {engineer_approved, final}`, demanding an explicit `reopen → draft` first; UI mirrors it. Confirmed in use 2026-06-29 — the A138-07 materialization repair on PLT-HS-01 only landed after a `reopen → save → re-finalize` (a save without reopen was correctly blocked). The requirement text below is kept as the standing spec every guideline inherits.
 
 **Requirement (every guideline needs it):** once a worksheet reaches an approved state (`engineer_approved` or `final`), its data must be **immutable** — editable only after an explicit `reopen` that demotes it to `draft`. Otherwise an approved record can be altered under its own sign-off, and single-source **consumers inherit post-approval changes** from a producer they believe is frozen (e.g. A138-10 inheriting `A_C`/`A_E_ba`/`A_C_sealed` from a *final* A138-07 that was edited after finalization). This is exactly why single-source makes the lock load-bearing: an unlocked producer silently rewrites every consumer.
 
@@ -166,4 +168,38 @@ This playbook is the **post-encode wiring + deploy phase**. The encoder (Pass3c)
 - **The data-write path does NOT consult it.** `saveWorksheet` (`src/lib/actions/worksheet.ts`) checks auth + org-membership + field-template scope, then writes `project_parameters` (field values + `surface_inventory` + materialized derived rows) **unconditionally** (the `tx.insert(projectParameters)` ~L215) with **no `status` guard**. It reads `instance.status` only for a *post-commit* narrow auto-reopen (~L304) that fires **only for `engineer_approved`** and **only when the edit introduces a new block-severity violation** — it never blocks the edit, does nothing on benign edits, and **does not cover `final` at all**.
 - **No UI lock either:** `worksheet-form.tsx` auto-saves on change (`void flush(saveWorksheet)`); `dynamic-field.tsx` sets `readOnly` only for *computed* fields — no status-based disabling. A `final` worksheet's inputs are editable and auto-persist.
 
-**The fix shape (when scheduled — not yet built):** enforce the lock **server-side in `saveWorksheet`** (the real gate), not just the UI: refuse the write when `instance.status ∈ {engineer_approved, final}` (return an error telling the engineer to Reopen first), so editing an approved record is impossible without the explicit `reopen` transition. Mirror the lock in the UI (disable inputs / show a Reopen prompt) for UX, but the server check is the integrity boundary. Add a test asserting a save against an `engineer_approved`/`final` instance is rejected. Apply once, centrally (it's standard-agnostic — `saveWorksheet` is shared by all guidelines). Consider whether the existing narrow auto-reopen (L298–351) should be removed/subsumed once a hard lock exists.
+**The fix shape (now built):** enforce the lock **server-side in `saveWorksheet`** (the real gate), not just the UI: refuse the write when `instance.status ∈ {engineer_approved, final}` (return an error telling the engineer to Reopen first), so editing an approved record is impossible without the explicit `reopen` transition. Mirror the lock in the UI (disable inputs / show a Reopen prompt) for UX, but the server check is the integrity boundary. Add a test asserting a save against an `engineer_approved`/`final` instance is rejected. Apply once, centrally (it's standard-agnostic — `saveWorksheet` is shared by all guidelines). Consider whether the existing narrow auto-reopen (L298–351) should be removed/subsumed once a hard lock exists.
+
+---
+
+## 10. The pattern FAMILY is general — audit a new guideline, then apply what fits
+
+This playbook started as "single-source consolidation," but it is **one of a family of standard-agnostic patterns** proven on DWA-A 138-1. Every one is a reusable *mechanism* (copy the shape) carrying *content* that must be re-derived per guideline (§2). When you onboard or audit ANY new guideline (VSME, a new DIN/ISO/EN/FLL/VDI), do **not** assume which apply — **audit the guideline's own source document**, decide which patterns are warranted, and add the constructive update only where the source warrants it.
+
+### 10a. The proven patterns (mechanism → where it lives → what it fixes)
+
+| Pattern | Mechanism / code anchors | The defect it removes |
+|---|---|---|
+| **Single-source consolidation** | §1–§5 of this playbook; aggregator-registry + `consumer_worksheets` + ambiguity guard | Same datum produced in >1 worksheet, free-typed, or not flowing to consumers |
+| **Predefined-table accessor** | `src/lib/eval/predefined-table-accessor.ts` (`lookupAccessor`, `ACCESSOR_REGISTRY`, `accessorSourceState`); the Tab. 9 instance `src/lib/eval/tab9.ts` | A value that must come from a standard's table being free-typed instead of *selected by key → derived* |
+| **Multi-table / source layer** | `src/lib/eval/rainfall-tables.ts` (`normalizeRainfallCarrier`, `resolveSelectedTable`) + `RainfallTablesEditor`/`RainfallTableSelector` + per-facility `rainfall_table_ref` field (migration `20260628120000`) + resolution in `use-equation-engine`/`evaluate-for-report`/`snapshots/payload` | A project needs MULTIPLE source-tagged tables (grid cells / editions) and each consumer must pick WHICH (table id only — never the value) |
+| **Governing-iteration engine** | `src/lib/eval/governing-duration.ts` (`iterateGoverningDuration`, `fixedDurationIntensity`, `GOVERNING_PROFILES`); Gl.8 unified in `aggregators.ts` | A value the standard prescribes as an *iteration result* (argmax over a stepped parameter) being free-typed; one shared engine + per-facility sizing profile, fixed-path for the exception |
+| **Write-lock + derived materialization** | §9 (server-side `saveWorksheet` status guard); `materialize-surfaces.ts` + the "persist produced outputs as `source_type='derived'`" fix | Approved records editable under their own sign-off; engine outputs displayed but never persisted, so consumers read "fehlend" |
+
+These compose: a datum is *selected* (accessor / table-ref), *derived* (single producer / governing engine), *materialized* (`derived` rows), *frozen* (write-lock), and *inherited by reference* (single-source). Selections are always inputs; computed values always derive; selecting never replaces the calc. (Companion: **[single-source-derivation-invariant]**.)
+
+### 10b. Audit → apply-proven-patterns checklist (actionable for build subagents)
+
+Run this per new/edited guideline. **Ground every "yes" in the guideline's actual source** — quote the clause; never apply a pattern by analogy alone.
+
+- [ ] **Source in hand.** Have the real source doc (PDF/MD in `Desktop/Guidelines/`, or `audit-reports/<STANDARD>/`). The audit is read-against-source, not against the encoded DB alone (the encoding may itself be wrong).
+- [ ] **Single-source sweep.** Any symbol produced by >1 worksheet, free-typed but defined by a formula, or consumed-but-not-flowing? → classify atomic vs derived; make derived read-only via one registered equation + shared helper; register `consumer_worksheets`. (§1–§3c)
+- [ ] **Predefined-table accessor.** Any value the source says comes from a *table keyed by a selection* (material/class/coefficient table)? → accessor + picker, tagged `standard`+`edition`; never free-typed. **Guard:** only if the source treats it as a free key lookup — NOT if it's an iteration/fixed result (see next). (§3a, accessor module)
+- [ ] **Multi-table / source layer.** Can a project legitimately hold MORE THAN ONE such table (grid cells, local vs national edition, scenarios)? → collection-in-one-field + per-consumer table-ref (id only) + resolution boundary; legacy single-table normalizes to primary. (§10a row 3)
+- [ ] **Governing-iteration.** Does the source prescribe a value as the result of *iterating a stepped parameter and taking the governing case* (max/critical)? → derive via the shared engine + a per-facility sizing profile from the source equation; fixed-path for any prescribed-step exception. **Never** expose it as a free pick (that contradicts the method). Confirm the sizing formulation against the source (watch parameter-coupled geometry). (§10a row 4)
+- [ ] **Materialization.** Does every block-severity gate read a value that is actually persisted? → materialize EVERY derived value a gate reads as `source_type='derived'` on save (not just the headline one). (§3f, §6)
+- [ ] **Write-lock.** Inherited automatically — verify the standard's approved worksheets are immutable without reopen (it's central in `saveWorksheet`, so it already applies; just confirm the new worksheets' statuses transition correctly). (§9)
+- [ ] **Output a per-guideline matrix.** For each pattern: applies? (source citation) · constructive task (or "n/a, why") · owner worksheet/field/migration. This matrix IS the build backlog; each task then follows §4 (3-plan) + §5 (deploy runbook), branch-isolated, written-not-applied migration, rollback authored.
+- [ ] **No silent skips.** If a pattern *looks* applicable but the source doesn't warrant it (e.g. r_D(n) is iteration-governed, so a free-pick accessor is WRONG), record the explicit "considered, rejected, because <clause>" — that decision is as valuable as an applied pattern.
+
+**Reference implementations to copy the shape from:** single-source — `feat/a138-07-surface-singlesource` (merged `805686d`); accessor — `feat/kostra-rdn-accessor`; multi-table — `feat/rainfall-multi-table` (Piece 2, live 2026-06-29); governing engine — `feat/governing-duration-engine` (Piece 1); write-lock/materialization — `origin/main` `294c89d`.
