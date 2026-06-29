@@ -581,10 +581,12 @@ export function WorksheetForm({
         </section>
       )}
 
-      {/* Consumer facility: choose WHICH inherited table this facility uses
-          (table id only — never an r_D(n) value). Rendered when the facility
-          carries the rainfall_table_ref field and inherits a carrier. */}
-      {rainfallRefField && kostraField?.inheritedFromWorksheet && (
+      {/* Consumer facility: choose WHICH table this facility uses (table id
+          only — never an r_D(n) value). Rendered whenever the facility carries
+          the rainfall_table_ref field; the table options come from the
+          inherited carrier (empty list if none is inherited yet). Robust to
+          carrier-inheritance state — never falls back to a raw text input. */}
+      {rainfallRefField && !rainfallRefField.inheritedFromWorksheet && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid="rainfall-table-ref-section">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Verwendete Regenspendentabelle
