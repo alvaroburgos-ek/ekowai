@@ -249,48 +249,17 @@ export function useEquationEngine({
     if (!selected) return { status: 'none' };
 
     // Per-facility T_n: local n_* → else project T_n → else project n.
+    // May be null when no frequency data is available; resolveColumn handles
+    // null correctly per table type (legacy serves it, native withholds it).
     const T_n = facilityReturnPeriod(worksheetCode, fields, values);
 
-    // Project design return period (1/project n) for the legacy guard.
-    const nProject = (() => {
-      const f = fieldBySymbol.get('n');
-      if (!f) return null;
-      const pv = values[f.id];
-      if (pv?.type !== 'number' || !Number.isFinite(pv.value as number)) return null;
-      return pv.value as number;
-    })();
-    // Also check project T_n field for the design RP
-    const T_n_direct = (() => {
-      const f = fieldBySymbol.get('T_n');
-      if (!f) return null;
-      const pv = values[f.id];
-      if (pv?.type !== 'number' || !Number.isFinite(pv.value as number)) return null;
-      return pv.value as number;
-    })();
-    const designReturnPeriod: ReturnPeriod | null =
-      T_n_direct !== null && T_n_direct > 0
-        ? snapToReturnPeriod(T_n_direct)
-        : nProject !== null && nProject > 0
-        ? snapToReturnPeriod(1 / nProject)
-        : null;
-
-    if (T_n === null) {
-      // No usable T_n — withhold; the aggregator will not receive rows.
-      return {
-        status: 'missing',
-        reason: 'Bemessungshäufigkeit n nicht verfügbar — T_n kann nicht bestimmt werden',
-      };
-    }
-
-    const col = resolveColumn(selected, T_n, {
-      designReturnPeriod: designReturnPeriod ?? undefined,
-    });
+    const col = resolveColumn(selected, T_n);
 
     if (col.status === 'missing') {
-      return {
-        status: 'missing',
-        reason: `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst`,
-      };
+      const reason = T_n !== null
+        ? `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst`
+        : 'Bemessungshäufigkeit n nicht verfügbar — T_n kann nicht bestimmt werden';
+      return { status: 'missing', reason };
     }
 
     // ok or legacy — feed rows to the unchanged KostraCarrier.
@@ -298,7 +267,7 @@ export function useEquationEngine({
       status: col.status,
       carrier: { rows: col.rows },
     };
-  }, [values, kostraField, rainfallTableRef, worksheetCode, fields, fieldBySymbol]);
+  }, [values, kostraField, rainfallTableRef, worksheetCode, fields]);
 
   // Flat KostraCarrier for the aggregator (null when missing/none).
   const kostraCarrier = useMemo<KostraCarrier | null>(() => {

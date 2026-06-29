@@ -1,13 +1,14 @@
 /**
  * Task 3 — 2D KOSTRA grid integration test for A138-13 Gl. 8 (basin).
  *
- * Three cases:
- * (1) project n=0.2 (→ T_n=5) + 2D grid with T_n=5 column = Heinsberg curve
+ * CORRECTED CONTRACT:
+ * (a) native 2D grid, project n=0.2 (→ T_n=5) + T_n=5 column = Heinsberg curve
  *     → card computes V_VA = 18,684 m³, governing D = 30 min.
- * (2) grid has only T_n=10 column (no T_n=5) → card is manual_required, reason
- *     names the missing T_n; no number, store cleared.
- * (3) legacy {rows} carrier (design column) + n=0.2 (→ T_n=5 = design T_n)
- *     → still computes V_VA = 18,684 m³ (back-compat).
+ * (b) native 2D grid with ONLY T_n=10 column, facility wants T_n=5
+ *     → card is manual_required, reason names T_n=5; no number; store cleared.
+ * (c) legacy {rows} carrier WITH NO n FIELD AT ALL (facilityReturnPeriod → null)
+ *     → still computes V_VA = 18,684 m³ (legacy serves any T_n, never withheld).
+ *     This directly proves existing projects are not broken by the correction.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, within, act } from '@testing-library/react';
@@ -46,6 +47,12 @@ const baseFields: FieldMeta[] = [
   { id: FIELD_IDS.rainfall_table_ref, symbol: 'rainfall_table_ref', unit: null },
   { id: FIELD_IDS.n, symbol: 'n', unit: '1/a' },
 ];
+
+/**
+ * Fields WITHOUT the n field — used for case (c) to prove legacy serves T_n=null.
+ * facilityReturnPeriod will return null because there is no n, no T_n field.
+ */
+const fieldsWithoutN: FieldMeta[] = baseFields.filter((f) => f.symbol !== 'n');
 
 const EQUATIONS = [
   {
@@ -97,7 +104,7 @@ const CARRIER_2D_TN10_ONLY = {
   ],
 };
 
-// Legacy {rows} carrier — single design column.
+// Legacy {rows} carrier — single design column (the Heinsberg curve).
 const CARRIER_LEGACY = {
   rows: [
     { D_min: 5,   r_D_n: 300 },
@@ -159,10 +166,10 @@ function getStoredVVA(): number | null {
   return v.value;
 }
 
-describe('A138-13 Gl. 8 — 2D grid column resolution (Task 3)', () => {
+describe('A138-13 Gl. 8 — 2D grid column resolution (corrected contract)', () => {
   beforeEach(() => initStore());
 
-  it('(1) project n=0.2 + 2D grid T_n=5 column = Heinsberg → V_VA = 18,684 m³ @ D=30', () => {
+  it('(a) project n=0.2 + 2D grid T_n=5 column = Heinsberg → V_VA = 18,684 m³ @ D=30', () => {
     render(<Harness fields={baseFields} />);
     loadScalars();
     // project n = 0.2 → T_n = 1/0.2 = 5
@@ -176,7 +183,7 @@ describe('A138-13 Gl. 8 — 2D grid column resolution (Task 3)', () => {
     expect(getStoredVVA()).toBeCloseTo(18.684, 3);
   });
 
-  it('(2) grid has only T_n=10 column (no T_n=5) → manual_required, reason names missing T_n, no number, store cleared', () => {
+  it('(b) native 2D grid ONLY T_n=10 column, facility wants T_n=5 → manual_required, reason names T_n, no number, store cleared', () => {
     const { rerender } = render(<Harness fields={baseFields} />);
     loadScalars();
     // First compute with full grid to ensure store is populated
@@ -198,11 +205,14 @@ describe('A138-13 Gl. 8 — 2D grid column resolution (Task 3)', () => {
     expect(getStoredVVA()).toBeNull();
   });
 
-  it('(3) legacy {rows} carrier (design column) + n=0.2 → V_VA = 18,684 m³ (back-compat)', () => {
-    render(<Harness fields={baseFields} />);
+  it('(c) legacy {rows} carrier WITH NO n FIELD (facilityReturnPeriod → null) → still computes V_VA = 18,684 m³', () => {
+    // This is the critical regression guard: legacy tables must NEVER be
+    // withheld, even when facilityReturnPeriod returns null (no n field on
+    // the form). Under the WRONG contract this would emit missing → manual_required.
+    // Under the CORRECT contract legacyDesignColumn=true serves any T_n → 'legacy'.
+    render(<Harness fields={fieldsWithoutN} />);
     loadScalars();
-    // n=0.2 → T_n=5; legacy curve is the design column → served as legacy (T_n == design)
-    setNumber(FIELD_IDS.n, 0.2);
+    // NO n field set — facilityReturnPeriod() returns null
     setJson(FIELD_IDS.r_D_n_table, CARRIER_LEGACY);
 
     const card = screen.getByTestId('engine-card-gl-8');

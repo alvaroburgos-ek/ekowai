@@ -214,22 +214,41 @@ export type ColumnResolution =
 /**
  * Slice a 2D rainfall table to a single T_n column, returning a tagged result.
  *
- * Resolution rules:
- *  1. Exact column present (`row.r[String(T_n)]` is finite for at least one row)
- *     → `{ status: 'ok', rows }`.
- *  2. `table.legacyDesignColumn` is true AND `opts.designReturnPeriod === T_n`
- *     → `{ status: 'legacy', rows }` using `__legacyValue` per row.
- *  3. All other cases (absent native column, legacy table for a different T_n,
- *     no designReturnPeriod provided) → `{ status: 'missing', rows: [] }`.
- *     NEVER falls back to a neighbouring column or the wrong legacy column.
+ * The contract is CONDITIONAL ON TABLE TYPE:
+ *
+ *  - `table.legacyDesignColumn === true` (un-migrated 1D data, no real columns,
+ *    just the __legacyValue curve): serve that curve for ANY T_n — including
+ *    T_n=null → `{ status: 'legacy', rows }`.  NEVER returns 'missing'.
+ *    Existing projects have no columns and must keep computing for every
+ *    facility until the engineer fills a real 2D grid.
+ *
+ *  - native 2D table (legacyDesignColumn falsy): if the requested column is
+ *    populated (`row.r[String(T_n)]` finite for at least one row) →
+ *    `{ status: 'ok', rows }`.  If that specific column is empty/absent, or
+ *    `T_n === null` → `{ status: 'missing', rows: [] }`.  Never serves a
+ *    different/neighbouring column.
  *
  * Each output row gets a stable `id` derived from the table id + row index.
  */
 export function resolveColumn(
   table: RainfallTable,
-  T_n: number,
-  opts?: { designReturnPeriod?: number },
+  T_n: number | null,
 ): ColumnResolution {
+  // Legacy / design-column table: serve the single legacy curve for ANY T_n
+  // (including null). Withholding would break every existing project.
+  if (table.legacyDesignColumn) {
+    const rows = table.rows.map((row, i) => {
+      const r_D_n = typeof row.__legacyValue === 'number' && Number.isFinite(row.__legacyValue)
+        ? row.__legacyValue
+        : null;
+      return { id: `${table.id}-${i}`, D_min: row.D_min, r_D_n };
+    });
+    return { status: 'legacy', rows };
+  }
+
+  // Native 2D table: T_n=null or absent column → withhold.
+  if (T_n === null) return { status: 'missing', rows: [] };
+
   const key = String(T_n) as TnKey;
 
   // Check if the exact native column is present (at least one finite value).
@@ -247,18 +266,6 @@ export function resolveColumn(
       return { id: `${table.id}-${i}`, D_min: row.D_min, r_D_n };
     });
     return { status: 'ok', rows };
-  }
-
-  // Legacy design column: only serve when the requested T_n matches the
-  // project's design return period. Any other T_n → missing (safety rule).
-  if (table.legacyDesignColumn && opts?.designReturnPeriod === T_n) {
-    const rows = table.rows.map((row, i) => {
-      const r_D_n = typeof row.__legacyValue === 'number' && Number.isFinite(row.__legacyValue)
-        ? row.__legacyValue
-        : null;
-      return { id: `${table.id}-${i}`, D_min: row.D_min, r_D_n };
-    });
-    return { status: 'legacy', rows };
   }
 
   return { status: 'missing', rows: [] };
