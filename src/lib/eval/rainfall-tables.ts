@@ -204,6 +204,39 @@ export function normalizeRainfallCarrier(raw: unknown): RainfallCarrier {
   return { tables: [] };
 }
 
+/**
+ * Slice a 2D rainfall table to a single T_n column, returning the 1D row shape
+ * the unchanged Gl.8 aggregator / iterateGoverningDuration already consume.
+ *
+ * Resolution priority per row:
+ *  1. Explicit value for the requested column (`row.r[String(T_n)]` is finite).
+ *  2. If `table.legacyDesignColumn` is true, use `row.__legacyValue` for ANY T_n
+ *     (back-compat: a 1D curve serves every column until the real grid is filled).
+ *  3. `r_D_n: null` (column not present in this table).
+ *
+ * Each output row gets a stable `id` derived from the table id + row index.
+ */
+export function resolveColumn(
+  table: RainfallTable,
+  T_n: number,
+): Array<{ id: string; D_min: number | null; r_D_n: number | null }> {
+  const key = String(T_n) as TnKey;
+  return table.rows.map((row, i) => {
+    const explicit = row.r[key];
+    let r_D_n: number | null;
+    if (typeof explicit === 'number' && Number.isFinite(explicit)) {
+      r_D_n = explicit;
+    } else if (table.legacyDesignColumn) {
+      r_D_n = typeof row.__legacyValue === 'number' && Number.isFinite(row.__legacyValue)
+        ? row.__legacyValue
+        : null;
+    } else {
+      r_D_n = null;
+    }
+    return { id: `${table.id}-${i}`, D_min: row.D_min, r_D_n };
+  });
+}
+
 /** Resolve which table a facility uses: the one matching `ref`, else the
  * primary (first) table when `ref` is null/unset or stale, else null when the
  * project holds no tables. The selected table's rows feed the column resolver
