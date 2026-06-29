@@ -1,3 +1,59 @@
+## Task 2 Report (rainfall-2d-grid): resolveColumn (2D grid → T_n column slice)
+
+---
+
+## Commit
+
+- **Short hash:** `d64a85b`
+- **Branch:** `feat/rainfall-2d-grid`
+- **Message:** `feat(eval): resolveColumn (2D grid -> T_n column slice)`
+
+## Files Changed
+
+- `src/lib/eval/rainfall-tables.ts` — added and exported `resolveColumn`
+- `src/lib/eval/__tests__/rainfall-2d-resolve.test.ts` — new test file (verbatim from plan Task 2 Step 1)
+
+## Test Output Summary
+
+### New tests (rainfall-2d-resolve.test.ts)
+```
+Test Files  1 passed (1)
+     Tests  3 passed (3)
+  Duration  683ms
+```
+
+All 3 cases green:
+- `slices the requested T_n column to 1D rows` — explicit column values resolved correctly for T_n=5 and T_n=30
+- `missing column → null r_D_n cells` — T_n=100 (not in table) returns all null r_D_n
+- `legacy design column serves any T_n` — __legacyValue served for both T_n=5 and T_n=30
+
+### Regression (rainfall-2d.test.ts — Task 1)
+```
+Test Files  1 passed (1)
+     Tests  4 passed (4)
+  Duration  708ms
+```
+
+All 4 Task 1 tests green.
+
+### Typecheck
+`npx tsc --noEmit -p tsconfig.json | grep rainfall-tables` → `echo clean` confirmed. No type errors.
+
+## Implementation Notes
+
+- `resolveColumn` added immediately before `resolveSelectedTable` in `rainfall-tables.ts`.
+- Resolution priority exactly as spec: explicit finite `row.r[String(T_n)]` first; `row.__legacyValue` second when `legacyDesignColumn` is true; `null` otherwise.
+- Row `id` synthesized as `` `${table.id}-${i}` `` (stable, positional).
+- `normalizeRainfallCarrier` and `resolveSelectedTable` untouched.
+
+## Concerns
+
+None. Pure function, no side effects, no engine/UI/snapshot files touched.
+
+---
+
+## Original task-2 report (post-approval write-lock — different workstream)
+
 ## Task 2 Report: Server guard in saveWorksheet + remove dead auto-reopen
 
 ### What was implemented
