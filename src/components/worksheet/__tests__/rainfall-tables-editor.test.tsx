@@ -157,6 +157,30 @@ describe('RainfallTablesEditor — legacy design-column table', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Task 6 Bug Fix #2: fresh table after "Tabelle hinzufügen" must render native matrix
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('RainfallTablesEditor — fresh table renders native matrix (not legacy notice)', () => {
+  beforeEach(() => {
+    // Start with an EMPTY carrier (no tables at all)
+    initStore({ tables: [] });
+  });
+
+  it('after clicking "Tabelle hinzufügen" the new table shows the native 2D matrix (not legacy notice)', () => {
+    render(<RainfallTablesEditor fieldId={FIELD} />);
+    fireEvent.click(screen.getByText('Tabelle hinzufügen'));
+
+    // The native matrix must render column headers (e.g. "5a") — NOT the legacy notice
+    expect(screen.queryByText(/Altdaten/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/1D-Bemessungsspalte/i)).not.toBeInTheDocument();
+    // At least one T_n column header must be visible (native matrix rendered)
+    expect(screen.getByText('5a')).toBeInTheDocument();
+    // The D-column header should also appear
+    expect(screen.getByText('D (min)')).toBeInTheDocument();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Task 6 Bug Fix: convertLegacyToNative preserves r_D values into design column
 // ─────────────────────────────────────────────────────────────────────────────
 

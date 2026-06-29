@@ -119,8 +119,16 @@ function normalizeTable(raw: unknown, index: number): RainfallTable {
 
   const rawRows = Array.isArray(t.rows) ? t.rows : [];
 
-  // Detect if this is a native 2D table (row has `r` object) or legacy 1D
-  const isNative = detectNative2D(rawRows);
+  // Respect explicit legacyDesignColumn flag first; only fall back to row-shape
+  // detection for non-empty tables without an explicit flag.
+  // Empty rows (fresh table or just-converted table) must be treated as NATIVE —
+  // detectNative2D([]) === false would otherwise force legacyDesignColumn:true on
+  // every fresh table, making the editor render the legacy 1D notice instead of
+  // the 2D matrix.
+  const isNative =
+    t.legacyDesignColumn === true ? false      // explicitly a legacy/design-column table
+    : rawRows.length === 0 ? true              // empty native table (fresh or converted) — NOT legacy
+    : detectNative2D(rawRows);                 // non-empty: detect by row shape (1D r_D_n → legacy; 2D r{} → native)
 
   let rows: RainfallGridRow[];
   let legacyDesignColumn: boolean | undefined;

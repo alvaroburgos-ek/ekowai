@@ -24,3 +24,44 @@ describe('normalizeRainfallCarrier (2D)', () => {
     expect(normalizeRainfallCarrier(null)).toEqual({ tables: [] });
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Task 6 bug fix: normalizeTable respects explicit legacyDesignColumn +
+// treats empty rows as native (fresh/converted tables render the 2D matrix)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('normalizeTable — empty-rows / explicit-flag logic (bug fix)', () => {
+  it('empty fresh table (rows:[]) → legacyDesignColumn is falsy (native, NOT legacy)', () => {
+    // Root-cause repro: detectNative2D([]) === false used to force legacyDesignColumn=true
+    // on ANY empty table (editor's "Tabelle hinzufügen" + freshly-converted tables).
+    const out = normalizeRainfallCarrier({
+      tables: [{ id: 't', name: 'T', source: 'KOSTRA-DWD-2020', columns: [1,2,3,5,10,20,30,50,100], rows: [] }],
+    });
+    expect(out.tables[0].legacyDesignColumn).toBeFalsy();
+  });
+
+  it('converted-style table (rows with r:{}, no legacyDesignColumn) → native, r values preserved', () => {
+    const out = normalizeRainfallCarrier({
+      tables: [{ id: 'default', columns: [1,2,3,5,10,20,30,50,100], rows: [{ D_min: 30, r: { '5': 130 } }], legacyDesignColumn: undefined }],
+    });
+    expect(out.tables[0].legacyDesignColumn).toBeFalsy();
+    expect(out.tables[0].rows[0].r['5']).toBe(130);
+  });
+
+  it('explicit legacyDesignColumn:true on empty rows → stays legacy (flag respected)', () => {
+    const out = normalizeRainfallCarrier({
+      tables: [{ id: 'x', rows: [], legacyDesignColumn: true }],
+    });
+    expect(out.tables[0].legacyDesignColumn).toBe(true);
+  });
+
+  it('Piece-2 1D (r_D_n rows, no flag, non-empty) → still legacy, __legacyValue carried', () => {
+    // Back-compat must be preserved for existing stored data.
+    const out = normalizeRainfallCarrier({
+      tables: [{ id: 'p2', rows: [{ D_min: 30, r_D_n: 130 }] }],
+    });
+    expect(out.tables[0].legacyDesignColumn).toBe(true);
+    const row = out.tables[0].rows[0] as { __legacyValue?: number | null };
+    expect(row.__legacyValue).toBe(130);
+  });
+});
