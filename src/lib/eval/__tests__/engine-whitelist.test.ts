@@ -67,6 +67,13 @@ describe('FORMULA_ENGINE_WHITELIST single-source-of-truth', () => {
     expect(FORMULA_ENGINE_WHITELIST.size).toBeGreaterThanOrEqual(28);
   });
 
+  it('A138-10:3 (Gl.3 Q_zu) is in the production whitelist — prevents naive-sum fallback', () => {
+    // Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴ must be evaluated by the real arithmetic
+    // engine. Without this entry the legacy naive-sum evaluator would sum the
+    // input symbols instead, producing a grossly wrong result.
+    expect(FORMULA_ENGINE_WHITELIST.has('A138-10:3')).toBe(true);
+  });
+
   it('every ad-hoc per-test whitelist key is present in the production whitelist', () => {
     const adHoc = collectAdHocWhitelistKeys();
     expect(adHoc.length).toBeGreaterThan(0); // sanity — tests exist

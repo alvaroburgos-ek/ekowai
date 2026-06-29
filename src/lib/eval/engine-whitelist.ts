@@ -69,6 +69,11 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   'A138-21:40', // h_S filter form (displayOnly)
   'A138-22:41', // V_VA Becken
   'A138-26:10', // V_Rück flood-check (Pile-5 carrier sub_areas_A138_26)
+
+  // ====================================================================
+  // A138-10 — Einleitung in Gewässer
+  // ====================================================================
+  'A138-10:3',  // Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴  (Gl. 3, governing inflow)
 ]);
 
 /** Equation key format `Axxx-NN:M` (worksheet code + Gleichung number). */

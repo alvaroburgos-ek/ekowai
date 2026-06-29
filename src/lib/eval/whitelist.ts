@@ -43,4 +43,7 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   'A138-18:20', // V_R geometric (displayOnly)
   'A138-18:22', // s_R thin-wall alternative (displayOnly; Gl. 21 owns the field)
   'A138-18:23', // L_R required (displayOnly; engineer enters L_R as iteration var)
+
+  // A138-10 — Einleitung in Gewässer
+  'A138-10:3',  // Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴  (Gl. 3, governing inflow)
 ]);
