@@ -23,6 +23,9 @@
  * returning a memoised result) breaks this test with a clear "the
  * computed value doesn't match the inputs" failure rather than a
  * silent always-Heinsberg PDF.
+ *
+ * Task 4 additions: parity tests verifying the server path (evaluate-for-report)
+ * resolves the 2D grid by facilityReturnPeriod T_n — matching the client engine.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -42,6 +45,13 @@ const A138_13_FIELDS: ReportField[] = [
   { id: 'f-f_A', symbol: 'f_A', unit: null, dataType: 'number' },
   { id: 'f-r_D_n_table', symbol: 'r_D_n_table', unit: 'l/(s·ha)', dataType: 'json' },
   { id: 'f-V_VA', symbol: 'V_VA', unit: 'm³', dataType: 'number' },
+];
+
+// Extended field set for Task 4 parity tests — adds n (inherited project
+// frequency) so facilityReturnPeriod can resolve the T_n column.
+const A138_13_FIELDS_WITH_N: ReportField[] = [
+  ...A138_13_FIELDS,
+  { id: 'f-n', symbol: 'n', unit: '1/a', dataType: 'number' },
 ];
 
 const A138_13_GL8_EQUATIONS: ReportEquation[] = [
@@ -203,5 +213,135 @@ describe('PDF report path · evaluate-for-report computes from project inputs, n
     // V_VA scales linearly with f_Z because f_Z is a pure multiplier on the
     // outer expression. Doubling f_Z → doubling V_VA.
     expect(r.state.value).toBeCloseTo(PROJECT_A_EXPECTED_V_VA * 2, 3);
+  });
+});
+
+// =============================================================================
+// Task 4 parity tests — server path resolves the 2D grid by T_n
+// =============================================================================
+// The Heinsberg curve (PLT-HS-01) used as the T_n=5 column of a native 2D grid.
+// n = 0.2 → T_n = 1/0.2 = 5 → snapped to 5 → column '5'.
+const HEINSBERG_2D_KOSTRA_JSON = {
+  tables: [
+    {
+      id: 'plt-hs-01',
+      name: 'Heinsberg Rasterfeld',
+      source: 'KOSTRA-DWD-2020',
+      columns: [5, 10],
+      rows: [
+        { D_min: 5,   r: { '5': 300, '10': 380 } },
+        { D_min: 10,  r: { '5': 230, '10': 290 } },
+        { D_min: 15,  r: { '5': 195, '10': 245 } },
+        { D_min: 30,  r: { '5': 130, '10': 165 } }, // T_n=5 governs at D=30
+        { D_min: 60,  r: { '5': 80,  '10': 100 } },
+        { D_min: 120, r: { '5': 50,  '10': 65  } },
+      ],
+    },
+  ],
+};
+
+// Parameters for the 2D native grid test (n=0.2 → T_n=5).
+const PARAMS_2D_NATIVE_TN5: ReportParameter[] = [
+  { fieldId: 'f-n',         valueNumber: 0.2, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-A_C',       valueNumber: 1000, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-A_VA',      valueNumber: 50,   valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-Q_S',       valueNumber: 5,    valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-Q_Dr',      valueNumber: 0,    valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-f_Z',       valueNumber: 1.2,  valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-f_A',       valueNumber: 1.0,  valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  {
+    fieldId: 'f-r_D_n_table',
+    valueNumber: null, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null,
+    valueJson: HEINSBERG_2D_KOSTRA_JSON,
+  },
+];
+
+// The same grid but only has T_n=10; facility needs T_n=5 → missing → manual_required.
+const HEINSBERG_2D_ONLY_TN10_JSON = {
+  tables: [
+    {
+      id: 'plt-hs-01',
+      name: 'Heinsberg Rasterfeld',
+      source: 'KOSTRA-DWD-2020',
+      columns: [10],
+      rows: [
+        { D_min: 5,   r: { '10': 380 } },
+        { D_min: 15,  r: { '10': 245 } },
+        { D_min: 30,  r: { '10': 165 } },
+      ],
+    },
+  ],
+};
+
+const PARAMS_2D_MISSING_TN5: ReportParameter[] = [
+  { fieldId: 'f-n',         valueNumber: 0.2, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-A_C',       valueNumber: 1000, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-A_VA',      valueNumber: 50,   valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-Q_S',       valueNumber: 5,    valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-Q_Dr',      valueNumber: 0,    valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-f_Z',       valueNumber: 1.2,  valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  { fieldId: 'f-f_A',       valueNumber: 1.0,  valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  {
+    fieldId: 'f-r_D_n_table',
+    valueNumber: null, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null,
+    valueJson: HEINSBERG_2D_ONLY_TN10_JSON,
+  },
+];
+
+// Legacy {rows} carrier + n=0.2 → should still compute 18.684 (back-compat).
+const PARAMS_LEGACY_CARRIER_N02: ReportParameter[] = [
+  { fieldId: 'f-n',         valueNumber: 0.2, valueText: null, valueEnum: null, valueBoolean: null, valueDate: null, valueJson: null },
+  ...PROJECT_A_PARAMS.filter((p) => p.fieldId !== 'f-n'),
+];
+
+describe('Task 4 · server path (evaluate-for-report) · 2D grid parity with client', () => {
+  it('native 2D carrier, T_n=5 column (n=0.2) → V_VA = 18.684 m³ at D=30 (parity with client)', () => {
+    // Hand calc: T_n=5 column at D=30 has r_D_n=130, same Heinsberg curve.
+    // n=0.2 → T_n=5 → resolveColumn picks the '5' column → same aggregator
+    // path as before → V_VA = 18.684 (same as Project A using legacy carrier).
+    const results = evaluateWorksheetEquations(
+      'A138-13',
+      A138_13_GL8_EQUATIONS,
+      A138_13_FIELDS_WITH_N,
+      PARAMS_2D_NATIVE_TN5,
+    );
+    expect(results).toHaveLength(1);
+    const r = results[0];
+    expect(r.state.kind).toBe('computed');
+    if (r.state.kind !== 'computed') return;
+    expect(r.state.value).toBeCloseTo(PROJECT_A_EXPECTED_V_VA, 3); // 18.684
+    expect(r.state.substituted['Maßgebende Dauerstufe D (min)']).toBe(PROJECT_A_GOVERNING_D); // 30
+  });
+
+  it('native 2D grid, only T_n=10 present, facility needs T_n=5 → manual_required (withhold)', () => {
+    // The grid has a T_n=10 column but the facility needs T_n=5 (n=0.2).
+    // Server path must withhold — matching the client's missing-column guard.
+    const results = evaluateWorksheetEquations(
+      'A138-13',
+      A138_13_GL8_EQUATIONS,
+      A138_13_FIELDS_WITH_N,
+      PARAMS_2D_MISSING_TN5,
+    );
+    expect(results).toHaveLength(1);
+    const r = results[0];
+    expect(r.state.kind).toBe('manual_required');
+    if (r.state.kind !== 'manual_required') return;
+    expect(r.state.reason).toContain('T_n = 5');
+  });
+
+  it('legacy {rows} carrier + n=0.2 → still computes 18.684 (back-compat, never withheld)', () => {
+    // Legacy carriers (no real 2D columns) must serve the single curve for
+    // ANY T_n. The server path must never withhold a legacy carrier.
+    const results = evaluateWorksheetEquations(
+      'A138-13',
+      A138_13_GL8_EQUATIONS,
+      A138_13_FIELDS_WITH_N,
+      PARAMS_LEGACY_CARRIER_N02,
+    );
+    expect(results).toHaveLength(1);
+    const r = results[0];
+    expect(r.state.kind).toBe('computed');
+    if (r.state.kind !== 'computed') return;
+    expect(r.state.value).toBeCloseTo(PROJECT_A_EXPECTED_V_VA, 3);
   });
 });

@@ -32,8 +32,7 @@ import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
   resolveColumn,
-  RETURN_PERIODS,
-  type ReturnPeriod,
+  facilityReturnPeriod as facilityReturnPeriodPure,
 } from './rainfall-tables';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
@@ -50,73 +49,10 @@ const A138_07_SURFACE_IDS = new Set([A138_07_A_C_ID, A138_07_C_M_ID, A138_07_A_E
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
-/** Per-facility local frequency symbol. Mulde/Rigole/MRE/MRS/Becken have their
- *  own n_* field; basin (A138-13), Flächenversickerung (A138-16), and Schacht
- *  (A138-21) inherit the project n. */
-const FACILITY_FREQUENCY_SYMBOL: Record<string, string> = {
-  'A138-17': 'n_M_Bemessung',
-  'A138-18': 'n_R_Bemessung',
-  'A138-19': 'n_R',
-  'A138-20': 'n_R_MRS',
-  'A138-22': 'n_B_Bemessung',
-};
-
-/** Snap a raw return period to the nearest value in RETURN_PERIODS. */
-function snapToReturnPeriod(raw: number): ReturnPeriod {
-  let nearest: ReturnPeriod = RETURN_PERIODS[0];
-  let minDist = Math.abs(raw - nearest);
-  for (const rp of RETURN_PERIODS) {
-    const d = Math.abs(raw - rp);
-    if (d < minDist) { minDist = d; nearest = rp; }
-  }
-  return nearest;
-}
-
-/** Resolve the design return-period column key for a facility.
- *  1. If the worksheet has a local n_* field with a finite value → T_n = 1/n_local.
- *  2. Else use the project T_n field value if finite (direct return period).
- *  3. Else use the project n field value → T_n = 1/n.
- *  Result is snapped to the nearest RETURN_PERIODS annuity. Returns null if no
- *  usable input is available. */
-function facilityReturnPeriod(
-  worksheetCode: string,
-  fields: FieldMeta[],
-  values: Record<string, { type: string; value: unknown } | undefined>,
-): ReturnPeriod | null {
-  const fieldBySymbol = new Map(fields.map((f) => [f.symbol, f]));
-  const pickNumber = (sym: string): number | null => {
-    const f = fieldBySymbol.get(sym);
-    if (!f) return null;
-    const v = values[f.id];
-    if (v?.type !== 'number') return null;
-    const n = v.value;
-    if (typeof n !== 'number' || !Number.isFinite(n)) return null;
-    return n;
-  };
-
-  // 1. Local facility frequency (Mulde, Rigole, MRE, MRS, Becken)
-  const localSym = FACILITY_FREQUENCY_SYMBOL[worksheetCode];
-  if (localSym) {
-    const nLocal = pickNumber(localSym);
-    if (nLocal !== null && nLocal > 0) {
-      return snapToReturnPeriod(1 / nLocal);
-    }
-  }
-
-  // 2. Project T_n field (direct return period value)
-  const T_n_direct = pickNumber('T_n');
-  if (T_n_direct !== null && T_n_direct > 0) {
-    return snapToReturnPeriod(T_n_direct);
-  }
-
-  // 3. Project n field → T_n = 1/n
-  const nProject = pickNumber('n');
-  if (nProject !== null && nProject > 0) {
-    return snapToReturnPeriod(1 / nProject);
-  }
-
-  return null;
-}
+// FACILITY_FREQUENCY_SYMBOL and snapToReturnPeriod are now re-exported from
+// rainfall-tables.ts (pure shared helpers). The local copies have been removed.
+// facilityReturnPeriod is the pure version from rainfall-tables; the client
+// hook builds its pickNumberBySymbol closure below and delegates to it.
 
 type FieldMeta = {
   id: string;
@@ -251,7 +187,18 @@ export function useEquationEngine({
     // Per-facility T_n: local n_* → else project T_n → else project n.
     // May be null when no frequency data is available; resolveColumn handles
     // null correctly per table type (legacy serves it, native withholds it).
-    const T_n = facilityReturnPeriod(worksheetCode, fields, values);
+    // Delegates to the pure shared helper from rainfall-tables.ts; the client's
+    // pickNumberBySymbol closure reads from the React store values.
+    const pickNumberBySymbol = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      if (v?.type !== 'number') return null;
+      const n = v.value;
+      if (typeof n !== 'number' || !Number.isFinite(n)) return null;
+      return n;
+    };
+    const T_n = facilityReturnPeriodPure(worksheetCode, pickNumberBySymbol);
 
     const col = resolveColumn(selected, T_n);
 
@@ -267,7 +214,7 @@ export function useEquationEngine({
       status: col.status,
       carrier: { rows: col.rows },
     };
-  }, [values, kostraField, rainfallTableRef, worksheetCode, fields]);
+  }, [values, kostraField, rainfallTableRef, worksheetCode, fieldBySymbol]);
 
   // Flat KostraCarrier for the aggregator (null when missing/none).
   const kostraCarrier = useMemo<KostraCarrier | null>(() => {

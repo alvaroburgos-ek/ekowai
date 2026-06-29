@@ -13,7 +13,12 @@ import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
-import { normalizeRainfallCarrier, resolveSelectedTable } from '@/lib/eval/rainfall-tables';
+import {
+  normalizeRainfallCarrier,
+  resolveSelectedTable,
+  resolveColumn,
+  facilityReturnPeriod,
+} from '@/lib/eval/rainfall-tables';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -228,9 +233,11 @@ export function buildSnapshotPayload(args: {
     return raw as SubAreasCarrier;
   })();
 
-  // Multi-table rainfall carrier (Piece 2): the facility's `rainfall_table_ref`
-  // selects which table (id only) the unchanged Gl. 8 aggregator iterates;
-  // legacy `{ rows }` carriers normalize to one primary table. Unset → primary.
+  // Multi-table rainfall carrier (Piece 2 → 2D grid): the facility's
+  // `rainfall_table_ref` selects which table (id only); then resolveColumn
+  // slices the 2D grid by the per-facility T_n (from facilityReturnPeriod).
+  // On missing column → kostraSnapshotResolution carries the reason so the
+  // A138-13 Gl.8 branch produces manual_required instead of calling the aggregator.
   const kostraField = fieldList.find((f) => f.symbol === 'r_D_n_table');
   const rainfallRefField = fieldList.find((f) => f.symbol === 'rainfall_table_ref');
   const rainfallTableRef = (() => {
@@ -239,23 +246,48 @@ export function buildSnapshotPayload(args: {
     const v = p?.valueText ?? p?.valueEnum ?? null;
     return typeof v === 'string' && v ? v : null;
   })();
-  const kostraCarrier: KostraCarrier | null = (() => {
-    if (!kostraField) return null;
+
+  // Build a pickNumberBySymbol for facilityReturnPeriod (snapshot equivalent
+  // of the client hook's closure over the React store values).
+  const pickNumBySymbol = (sym: string): number | null => {
+    const f = fieldBySymbol.get(sym);
+    if (!f) return null;
+    const p = paramByFieldId.get(f.id);
+    if (!p) return null;
+    return readNumber(p);
+  };
+
+  type KostraSnapshotResolution =
+    | { status: 'ok' | 'legacy'; carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'none' };
+
+  const kostraSnapshotResolution: KostraSnapshotResolution = (() => {
+    if (!kostraField) return { status: 'none' };
     const p = paramByFieldId.get(kostraField.id);
-    if (!p || p.valueJson == null) return { rows: [] };
+    if (!p || p.valueJson == null) return { status: 'none' };
     const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
-    if (!selected) return { rows: [] };
-    // TODO Task 4: replace with resolveColumn(selected, T_n).map(...) so the
-    // snapshot path slices the 2D grid by inherited T_n. Until then, __legacyValue
-    // feeds the unchanged aggregator for legacy and design-column tables.
-    return {
-      rows: selected.rows.map((r, i) => ({
-        id: `${selected.id}-${i}`,
-        D_min: r.D_min,
-        r_D_n: r.__legacyValue ?? null,
-      })),
-    };
+    if (!selected) return { status: 'none' };
+
+    // Per-facility T_n resolution — same logic as client + server paths.
+    const T_n = facilityReturnPeriod(args.worksheetCode, pickNumBySymbol);
+    const col = resolveColumn(selected, T_n);
+
+    if (col.status === 'missing') {
+      const reason = T_n !== null
+        ? `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst`
+        : 'Bemessungshäufigkeit n nicht verfügbar — T_n kann nicht bestimmt werden';
+      return { status: 'missing', reason };
+    }
+
+    // ok or legacy — feed rows to the unchanged KostraCarrier.
+    return { status: col.status, carrier: { rows: col.rows } };
   })();
+
+  const kostraCarrier: KostraCarrier | null =
+    kostraSnapshotResolution.status === 'ok' || kostraSnapshotResolution.status === 'legacy'
+      ? kostraSnapshotResolution.carrier
+      : null;
 
   // Gl8 scalar resolution: null out any symbol with >1 producer so the
   // aggregator sees missing-input and produces manual_required instead of
@@ -328,6 +360,18 @@ export function buildSnapshotPayload(args: {
     for (const sym of neededSymbols) {
       const f = fieldBySymbol.get(aliasFor(sym));
       expectedUnits[sym] = f?.unit ?? null;
+    }
+
+    // Task 4 withhold: when the resolved 2D column is missing (T_n column not
+    // populated in a native grid), emit manual_required for A138-13 Gl.8
+    // BEFORE calling the aggregator — do NOT feed rows for a wrong/missing column.
+    // Matches the client hook's and server evaluator's kostraResolution guard.
+    if (eq.id === A138_13_GL8_ID && kostraSnapshotResolution.status === 'missing') {
+      equationOutputs[eq.equationNumber] = toSnapshotOutput(
+        { kind: 'manual_required', reason: kostraSnapshotResolution.reason },
+        eq.formula,
+      );
+      continue;
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];

@@ -18,7 +18,12 @@ import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { FORMULA_ENGINE_WHITELIST, whitelistKey } from './engine-whitelist';
 import { normalizeSurfaceCarrier } from './surface-inventory';
-import { normalizeRainfallCarrier, resolveSelectedTable } from './rainfall-tables';
+import {
+  normalizeRainfallCarrier,
+  resolveSelectedTable,
+  resolveColumn,
+  facilityReturnPeriod,
+} from './rainfall-tables';
 import type {
   SubAreasCarrier,
   KostraCarrier,
@@ -168,40 +173,18 @@ export function evaluateWorksheetEquations(
     ? (subAreasJson as SubAreasCarrier)
     : null;
 
-  // Multi-table rainfall carrier (Piece 2): the facility's `rainfall_table_ref`
-  // selects which table (id only) the unchanged Gl. 8 aggregator iterates;
-  // legacy `{ rows }` carriers normalize to one primary table. Unset → primary.
+  // Multi-table rainfall carrier (Piece 2 → 2D grid): the facility's
+  // `rainfall_table_ref` selects which table (id only); then resolveColumn
+  // slices the 2D grid by the per-facility T_n (from facilityReturnPeriod).
+  // On missing column → kostraWithheld is set so the A138-13 Gl.8 branch
+  // produces manual_required instead of feeding the aggregator.
   const kostraField = fieldBySymbol.get('r_D_n_table');
   const kostraRaw = jsonBySymbol.get('r_D_n_table');
   const rainfallRefRaw = bySymbol.get('rainfall_table_ref');
   const rainfallTableRef = typeof rainfallRefRaw === 'string' && rainfallRefRaw ? rainfallRefRaw : null;
-  const kostraCarrier: KostraCarrier | null = kostraRaw == null
-    ? null
-    : (() => {
-        const selected = resolveSelectedTable(normalizeRainfallCarrier(kostraRaw), rainfallTableRef);
-        if (!selected) return { rows: [] };
-        // TODO Task 4: replace with resolveColumn(selected, T_n).map(...) so the
-        // server path slices the 2D grid by inherited T_n. Until then, __legacyValue
-        // feeds the unchanged aggregator for legacy and design-column tables.
-        return {
-          rows: selected.rows.map((r, i) => ({
-            id: `${selected.id}-${i}`,
-            D_min: r.D_min,
-            r_D_n: r.__legacyValue ?? null,
-          })),
-        };
-      })();
 
-  const floodJson = jsonBySymbol.get('sub_areas_A138_26') as { rows?: unknown } | undefined;
-  const floodCarrier: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)
-    ? (floodJson as FloodSubAreasCarrier)
-    : null;
-
-  // A138-07 surface carrier: drives the four surface-producer aggregators.
-  const surfaceCarrier = normalizeSurfaceCarrier(jsonBySymbol.get('surface_inventory'));
-
-  const r_D_30_field = fieldBySymbol.get('r_D_30');
-
+  // Build a pickNumberBySymbol for facilityReturnPeriod (server equivalent of
+  // the client hook's closure over the React store values).
   const pickNum = (sym: string): number | null => {
     const f = fieldBySymbol.get(sym);
     if (!f) return null;
@@ -214,6 +197,46 @@ export function evaluateWorksheetEquations(
     const p = parameters.find((x) => x.fieldId === f.id);
     return p?.valueBoolean ?? null;
   };
+
+  type KostraServerResolution =
+    | { status: 'ok' | 'legacy'; carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'none' };
+
+  const kostraResolution: KostraServerResolution = (() => {
+    if (kostraRaw == null) return { status: 'none' };
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(kostraRaw), rainfallTableRef);
+    if (!selected) return { status: 'none' };
+
+    // Per-facility T_n resolution — same logic as the client hook.
+    const T_n = facilityReturnPeriod(worksheetCode, pickNum);
+    const col = resolveColumn(selected, T_n);
+
+    if (col.status === 'missing') {
+      const reason = T_n !== null
+        ? `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst`
+        : 'Bemessungshäufigkeit n nicht verfügbar — T_n kann nicht bestimmt werden';
+      return { status: 'missing', reason };
+    }
+
+    // ok or legacy — feed rows to the unchanged KostraCarrier.
+    return { status: col.status, carrier: { rows: col.rows } };
+  })();
+
+  const kostraCarrier: KostraCarrier | null =
+    kostraResolution.status === 'ok' || kostraResolution.status === 'legacy'
+      ? kostraResolution.carrier
+      : null;
+
+  const floodJson = jsonBySymbol.get('sub_areas_A138_26') as { rows?: unknown } | undefined;
+  const floodCarrier: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)
+    ? (floodJson as FloodSubAreasCarrier)
+    : null;
+
+  // A138-07 surface carrier: drives the four surface-producer aggregators.
+  const surfaceCarrier = normalizeSurfaceCarrier(jsonBySymbol.get('surface_inventory'));
+
+  const r_D_30_field = fieldBySymbol.get('r_D_30');
 
   const gl8Scalars: Gl8Scalars = {
     A_C: pickNum('A_C'),
@@ -257,6 +280,23 @@ export function evaluateWorksheetEquations(
     for (const sym of neededSymbols) {
       const f = fieldBySymbol.get(aliasFor(sym));
       expectedUnits[sym] = f?.unit ?? null;
+    }
+
+    // Task 4 withhold: when the resolved 2D column is missing (T_n column not
+    // populated in a native grid), emit manual_required for A138-13 Gl.8
+    // BEFORE calling the aggregator — do NOT feed rows for a wrong/missing column.
+    // Matches the client hook's kostraResolution.status === 'missing' guard.
+    if (eq.id === A138_13_GL8_ID && kostraResolution.status === 'missing') {
+      out.push({
+        equationId: eq.id,
+        equationNumber: eq.equationNumber,
+        worksheetCode,
+        formula: eq.formula,
+        outputSymbol: eq.outputSymbol,
+        outputUnit: eq.outputUnit,
+        state: { kind: 'manual_required', reason: kostraResolution.reason },
+      });
+      continue;
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];

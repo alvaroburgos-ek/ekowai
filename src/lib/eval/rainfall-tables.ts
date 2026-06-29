@@ -287,3 +287,74 @@ export function resolveSelectedTable(
   }
   return carrier.tables[0];
 }
+
+// =============================================================================
+// Per-facility return-period helpers (shared between client and server paths)
+// =============================================================================
+
+/** Per-facility local frequency symbol.
+ *  Mulde/Rigole/MRE/MRS/Becken have their own n_* field;
+ *  basin (A138-13), Flächenversickerung (A138-16), and Schacht (A138-21)
+ *  inherit the project n. */
+export const FACILITY_FREQUENCY_SYMBOL: Readonly<Record<string, string>> = {
+  'A138-17': 'n_M_Bemessung',
+  'A138-18': 'n_R_Bemessung',
+  'A138-19': 'n_R',
+  'A138-20': 'n_R_MRS',
+  'A138-22': 'n_B_Bemessung',
+};
+
+/** Snap a raw return period to the nearest value in RETURN_PERIODS. */
+export function snapToReturnPeriod(raw: number): ReturnPeriod {
+  let nearest: ReturnPeriod = RETURN_PERIODS[0];
+  let minDist = Math.abs(raw - nearest);
+  for (const rp of RETURN_PERIODS) {
+    const d = Math.abs(raw - rp);
+    if (d < minDist) { minDist = d; nearest = rp; }
+  }
+  return nearest;
+}
+
+/**
+ * Resolve the design return-period column key for a facility.
+ *
+ * Resolution order:
+ *  1. If the worksheet has a local n_* field with a finite value → T_n = 1/n_local.
+ *  2. Else use the project T_n field value if finite (direct return period).
+ *  3. Else use the project n field value → T_n = 1/n.
+ *
+ * Result is snapped to the nearest RETURN_PERIODS annuity. Returns null if no
+ * usable input is available.
+ *
+ * This is a pure shared helper — the client hook (`use-equation-engine.ts`)
+ * builds a `pickNumberBySymbol` closure from its React store and delegates here;
+ * the server paths (`evaluate-for-report.ts`, `payload.ts`) build a similar
+ * closure from their already-loaded value maps.
+ */
+export function facilityReturnPeriod(
+  worksheetCode: string,
+  pickNumberBySymbol: (sym: string) => number | null,
+): ReturnPeriod | null {
+  // 1. Local facility frequency (Mulde, Rigole, MRE, MRS, Becken)
+  const localSym = FACILITY_FREQUENCY_SYMBOL[worksheetCode];
+  if (localSym) {
+    const nLocal = pickNumberBySymbol(localSym);
+    if (nLocal !== null && nLocal > 0) {
+      return snapToReturnPeriod(1 / nLocal);
+    }
+  }
+
+  // 2. Project T_n field (direct return period value)
+  const T_n_direct = pickNumberBySymbol('T_n');
+  if (T_n_direct !== null && T_n_direct > 0) {
+    return snapToReturnPeriod(T_n_direct);
+  }
+
+  // 3. Project n field → T_n = 1/n
+  const nProject = pickNumberBySymbol('n');
+  if (nProject !== null && nProject > 0) {
+    return snapToReturnPeriod(1 / nProject);
+  }
+
+  return null;
+}
