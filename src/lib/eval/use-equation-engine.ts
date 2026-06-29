@@ -169,11 +169,14 @@ export function useEquationEngine({
     // The multi-table model carries no per-row labels, so the aggregator's
     // kostraRowLabel falls back to its D-based label (identical to prod data,
     // whose labels are empty). The aggregator math/signature is untouched.
+    // TODO Task 3: replace with resolveColumn(selected, T_n).map(...) so facilities
+    // use the inherited T_n column of the 2D grid. Until then, __legacyValue
+    // feeds the unchanged aggregator for legacy and design-column tables.
     return {
       rows: selected.rows.map((r, i) => ({
         id: `${selected.id}-${i}`,
         D_min: r.D_min,
-        r_D_n: r.r_D_n,
+        r_D_n: r.__legacyValue ?? null,
       })),
     };
   }, [values, kostraField, rainfallTableRef]);

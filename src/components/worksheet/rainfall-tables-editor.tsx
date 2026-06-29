@@ -4,9 +4,10 @@ import { useMemo } from 'react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import {
   normalizeRainfallCarrier,
+  RETURN_PERIODS,
   type RainfallCarrier,
   type RainfallTable,
-  type RainfallRow,
+  type RainfallGridRow,
   type RainfallSource,
 } from '@/lib/eval/rainfall-tables';
 
@@ -24,12 +25,15 @@ function uid(): string {
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function newRow(): RainfallRow & { id: string } {
-  return { id: uid(), D_min: null, r_D_n: null };
+// Task 1 back-compat: editor still operates as 1D until the Task 6 matrix rewrite.
+// New rows use the 2D GridRow shape; __legacyValue carries the r_D_n value for
+// normalizeRainfallCarrier to serve it as the design column (legacyDesignColumn=true).
+function newRow(): RainfallGridRow & { id: string } {
+  return { id: uid(), D_min: null, r: {}, __legacyValue: null };
 }
 
 function newTable(index: number): RainfallTable {
-  return { id: uid(), name: `Tabelle ${index + 1}`, source: 'engineer', rows: [] };
+  return { id: uid(), name: `Tabelle ${index + 1}`, source: 'engineer', columns: [...RETURN_PERIODS], rows: [] };
 }
 
 /** Manage the project's MULTIPLE source-tagged rainfall tables (Piece 2). Each
@@ -62,7 +66,7 @@ export function RainfallTablesEditor({ fieldId, readOnly = false }: Props) {
     if (!t) return;
     patchTable(tableId, { rows: [...t.rows, newRow()] });
   }
-  function patchRow(tableId: string, idx: number, patch: Partial<RainfallRow>) {
+  function patchRow(tableId: string, idx: number, patch: Partial<RainfallGridRow>) {
     const t = carrier.tables.find((x) => x.id === tableId);
     if (!t) return;
     patchTable(tableId, { rows: t.rows.map((r, i) => (i === idx ? { ...r, ...patch } : r)) });
@@ -160,10 +164,10 @@ export function RainfallTablesEditor({ fieldId, readOnly = false }: Props) {
                     <td className="py-1.5 pr-2">
                       <input
                         type="number" inputMode="decimal" min={0} step="0.1"
-                        value={r.r_D_n == null ? '' : r.r_D_n}
+                        value={r.__legacyValue == null ? '' : r.__legacyValue}
                         readOnly={readOnly}
                         aria-label="Regenspende r_D(n)"
-                        onChange={(e) => patchRow(t.id, idx, { r_D_n: e.target.value === '' ? null : Number(e.target.value) })}
+                        onChange={(e) => patchRow(t.id, idx, { __legacyValue: e.target.value === '' ? null : Number(e.target.value) })}
                         className={`${inputCls(readOnly)} text-right tabular-nums`}
                       />
                     </td>

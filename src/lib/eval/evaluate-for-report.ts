@@ -180,11 +180,14 @@ export function evaluateWorksheetEquations(
     : (() => {
         const selected = resolveSelectedTable(normalizeRainfallCarrier(kostraRaw), rainfallTableRef);
         if (!selected) return { rows: [] };
+        // TODO Task 4: replace with resolveColumn(selected, T_n).map(...) so the
+        // server path slices the 2D grid by inherited T_n. Until then, __legacyValue
+        // feeds the unchanged aggregator for legacy and design-column tables.
         return {
           rows: selected.rows.map((r, i) => ({
             id: `${selected.id}-${i}`,
             D_min: r.D_min,
-            r_D_n: r.r_D_n,
+            r_D_n: r.__legacyValue ?? null,
           })),
         };
       })();

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RainfallTableSelector } from '../rainfall-table-selector';
-import type { RainfallTable } from '@/lib/eval/rainfall-tables';
+import { type RainfallTable, RETURN_PERIODS } from '@/lib/eval/rainfall-tables';
 
+// Updated fixture: RainfallTable now requires `columns` (2D shape). Test intent unchanged.
 const TABLES: RainfallTable[] = [
-  { id: 'k1', name: 'KOSTRA Krefeld', source: 'KOSTRA-DWD-2020', rows: [] },
-  { id: 'l1', name: 'Lokal 531', source: 'DWA-A-531-local', rows: [] },
+  { id: 'k1', name: 'KOSTRA Krefeld', source: 'KOSTRA-DWD-2020', columns: [...RETURN_PERIODS], rows: [] },
+  { id: 'l1', name: 'Lokal 531', source: 'DWA-A-531-local', columns: [...RETURN_PERIODS], rows: [] },
 ];
 
 describe('RainfallTableSelector', () => {

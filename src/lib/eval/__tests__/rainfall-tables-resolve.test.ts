@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { resolveSelectedTable, type RainfallCarrier } from '../rainfall-tables';
+import { resolveSelectedTable, type RainfallCarrier, RETURN_PERIODS } from '../rainfall-tables';
 
+// Updated fixture to 2D grid row shape (r:{} + columns) — test intent is unchanged:
+// resolveSelectedTable picks by id or falls back to primary.
 const CARRIER: RainfallCarrier = {
   tables: [
-    { id: 'k1', name: 'KOSTRA', source: 'KOSTRA-DWD-2020', rows: [{ D_min: 10, r_D_n: 220 }] },
-    { id: 'l1', name: 'Lokal 531', source: 'DWA-A-531-local', rows: [{ D_min: 10, r_D_n: 240 }] },
+    { id: 'k1', name: 'KOSTRA', source: 'KOSTRA-DWD-2020', columns: [...RETURN_PERIODS], rows: [{ D_min: 10, r: {} }] },
+    { id: 'l1', name: 'Lokal 531', source: 'DWA-A-531-local', columns: [...RETURN_PERIODS], rows: [{ D_min: 10, r: {} }] },
   ],
 };
 
