@@ -182,3 +182,31 @@ Result: crashes before collection (no local Supabase).
 ### Commit
 
 `d304c69` — `fix(core): add saveWorksheet write-lock predicate test; tidy spacing`
+
+---
+
+## Whitelist Fix Report (commit 252fd68)
+
+### Status: COMPLETE
+
+### What was done
+
+Added `A138-10:3` (Gl.3 `Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴`) to the production engine whitelist so it is evaluated by the real arithmetic engine instead of the legacy naive-sum evaluator.
+
+**Files changed (3, 15 insertions):**
+
+- `src/lib/eval/engine-whitelist.ts` — added `'A138-10:3'` under a new `// A138-10 — Einleitung in Gewässer` section block (canonical production whitelist, drives runtime form + PDF report path)
+- `src/lib/eval/whitelist.ts` — added `'A138-10:3'` under the same section block (parallel client-form source of truth)
+- `src/lib/eval/__tests__/engine-whitelist.test.ts` — added regression-guard test: `'A138-10:3 (Gl.3 Q_zu) is in the production whitelist — prevents naive-sum fallback'`
+
+Only Gl.3 was whitelisted. Gl.2 (A_C, inherited single-source from A138-07) was deliberately NOT touched.
+
+### Test summary
+
+- `pnpm vitest run --project unit`: **87 test files passed, 748 tests passed** — 0 failures (prior baseline was 87 files / ~748 tests; the new regression-guard test adds 1 test to engine-whitelist.test.ts, count increase confirmed green)
+- Typecheck (`npx tsc --noEmit ... | grep -E "whitelist"`): **clean**
+- `A138-10:3` confirmed in `FORMULA_ENGINE_WHITELIST` via new unit assertion
+
+### Concerns
+
+None. The `a138-10-auto-qzu.test.tsx` harness already used `engineWhitelist: new Set<string>(['A138-10:3'])` explicitly, so the arithmetic path was validated by the existing Task-2 tests. This fix closes the production gap where the same key was absent from the prod whitelist.
