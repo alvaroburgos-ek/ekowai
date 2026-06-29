@@ -83,8 +83,12 @@ the grid column is missing → `D_gov`/`r_D_gov` are withheld (not written) and 
   manual_required, so they were never meaningfully set). The migration flips them to derived/not-
   required and the engine repopulates them on save. No stored value is deleted (mirror A138-07/r_D_30
   precedents: field-flag change, materialize via real code).
-- If a project DID type them, the derived value supersedes on the next basin compute; the typed value
-  is no longer an editable input (read-only). (Confirm none exist at cutover, like r_D_30.)
+- **Load precedence caveat (per dedicated review):** the basin value reaches A138-10 via the
+  same-symbol *seeding* path (step-2), which a project's OWN persisted A138-10 `r_D_n`/`D_min` param
+  row (step-1) still **wins** over. So a CLEAN project (no local value, e.g. PLT-HS-01) derives
+  correctly; a project that already TYPED a value keeps **showing it (shadowed, not superseded)**
+  until that param row is cleared. True supersession would require DELETING the stale param rows
+  (this migration does not). Only Köln-Lindenthal (throwaway, 200/15) is affected — accepted.
 
 ## 5. Witness / acceptance
 - Basin (A138-13) with the Heinsberg set still computes **V_VA = 18.684 @ D=30**, and now also

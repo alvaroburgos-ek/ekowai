@@ -5,14 +5,24 @@
 --   (1) A138-13 (basin) becomes the PRODUCER of `r_D_n` (governing intensity) and
 --       `D_min` (governing duration), consumed by A138-10. The Gl.8 engine
 --       materializes them (materializeBasinGoverning on save → source_type='derived').
---   (2) A138-10's local free-typed `r_D_n` + `D_min` are DEACTIVATED → A138-10 now
---       inherits them from A138-13 by same-symbol; Gl.3 (unchanged) auto-computes Q_zu.
+--   (2) A138-10's local free-typed `r_D_n` + `D_min` are DEACTIVATED. A138-10 then
+--       picks up the basin's values via the same-symbol SEEDING path (loadSameSymbolValues
+--       → initialValues), identical to the A138-07 precedent — NOT via mergeInheritedFields
+--       (own-symbol-wins drops the inherited row even when the own field is inactive).
+--       Gl.3 (unchanged) then auto-computes Q_zu.
+--       CAVEAT: the seeding path is step-2 — a project's OWN persisted A138-10 r_D_n/D_min
+--       param row (step-1) still WINS. So clean projects (no local value, e.g. PLT-HS-01)
+--       derive correctly; a project that already TYPED a value keeps showing it (shadowed,
+--       not superseded) until that param row is cleared. This migration does NOT delete
+--       any param row.
 --
 -- Read-only prod check 2026-06-29: A138-13 has NO existing r_D_n/D_min (no collision)
 -- + a section to attach to; A138-10 r_D_n=20569b22.../D_min=e8f2de04...; the only typed
--- values are r_D_n=200/D_min=15 on the throwaway "Wohngebiet Köln-Lindenthal" project —
--- superseded by the derived governing value (data preserved; rollback restores). NO
--- project_parameters row is deleted by this migration.
+-- values are r_D_n=200/D_min=15 on the throwaway "Wohngebiet Köln-Lindenthal" project.
+-- Per the step-1-wins caveat above, those local rows would SHADOW the derived value on
+-- that project (it keeps showing 200/15) — harmless (throwaway); PLT-HS-01 has no local
+-- A138-10 value so it derives correctly. NO project_parameters row is deleted by this
+-- migration (a separate DELETE of those 2 rows would be needed for true supersession).
 -- Idempotent (ON CONFLICT(id)). WRITTEN-NOT-APPLIED. Rollback:
 -- scripts/rollback-20260629140000-a138-10-governing-qzu.sql.
 DO $$
