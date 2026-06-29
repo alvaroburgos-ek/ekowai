@@ -12,8 +12,8 @@
  */
 
 /** Canonical KOSTRA-DWD-2020 return-period columns (years). */
-export const RETURN_PERIODS = [1, 2, 3, 5, 10, 30, 50, 100] as const;
-export type ReturnPeriod = typeof RETURN_PERIODS[number]; // 1|2|3|5|10|30|50|100
+export const RETURN_PERIODS = [1, 2, 3, 5, 10, 20, 30, 50, 100] as const;
+export type ReturnPeriod = typeof RETURN_PERIODS[number]; // 1|2|3|5|10|20|30|50|100
 export type TnKey = `${ReturnPeriod}`;                    // "1"|"2"|…|"100"
 
 export type RainfallSource = 'KOSTRA-DWD-2020' | 'DWA-A-531-local' | 'engineer';

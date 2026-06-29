@@ -15,7 +15,7 @@ const NATIVE_TABLE = {
   id: 'n1',
   name: 'Krefeld 2D',
   source: 'KOSTRA-DWD-2020',
-  columns: [1, 2, 3, 5, 10, 30, 50, 100],
+  columns: [1, 2, 3, 5, 10, 20, 30, 50, 100],
   rows: [
     { D_min: 10, r: { '5': 195, '10': 155, '30': 260 } },
     { D_min: 30, r: { '5': 130, '10': 100, '30': 180 } },
@@ -67,9 +67,9 @@ describe('RainfallTablesEditor — 2D matrix (native table)', () => {
     initStore({ tables: [NATIVE_TABLE] });
   });
 
-  it('renders all 8 T_n column headers', () => {
+  it('renders all 9 T_n column headers including 20a', () => {
     render(<RainfallTablesEditor fieldId={FIELD} />);
-    // Expected labels: "1a", "2a", "3a", "5a", "10a", "30a", "50a", "100a"
+    // Expected labels: "1a", "2a", "3a", "5a", "10a", "20a", "30a", "50a", "100a"
     for (const rp of RETURN_PERIODS) {
       expect(screen.getByText(`${rp}a`)).toBeInTheDocument();
     }
