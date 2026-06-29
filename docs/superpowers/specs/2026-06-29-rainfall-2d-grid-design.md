@@ -89,23 +89,29 @@ A pure helper slices the 2D table to one return-period column. It returns a **ta
 the caller can withhold (never compute on the wrong column):
 ```ts
 type ColumnResolution =
-  | { status: 'ok';      rows: Array<{ id; D_min: number|null; r_D_n: number|null }> } // exact T_n column present
-  | { status: 'legacy';  rows: Array<…> }   // served from the un-migrated design curve (only for the design T_n)
-  | { status: 'missing'; rows: [] };        // grid exists but THIS T_n column is not entered → WITHHOLD
+  | { status: 'ok';      rows: Array<{ id; D_min: number|null; r_D_n: number|null }> } // native grid: T_n column populated
+  | { status: 'legacy';  rows: Array<…> }   // legacy/design-column table: single curve served for ANY T_n
+  | { status: 'missing'; rows: [] };        // native grid: THIS T_n column is empty/absent → WITHHOLD
 
-/** opts.designReturnPeriod = the project's design T_n (= 1/project n). A legacy/design-column
- *  table's single curve is valid ONLY for that design T_n; any other requested T_n → 'missing'.
- *  A native 2D grid: exact column → 'ok', else → 'missing'. Never serves a different column. */
-function resolveColumn(table: RainfallTable, T_n: number, opts?: { designReturnPeriod?: number }): ColumnResolution
+/** The contract is CONDITIONAL ON TABLE TYPE:
+ *  - table.legacyDesignColumn === true (un-migrated 1D data, NO real columns, just the
+ *    __legacyValue curve): serve that curve for ANY T_n → 'legacy'. NEVER withhold — existing
+ *    projects have no columns and must keep computing for every facility.
+ *  - native 2D table (real T_n columns entered): requested column populated → 'ok';
+ *    that specific column empty/absent (or T_n null) → 'missing' (the safety rule). Never serves
+ *    a different/neighbouring column. */
+function resolveColumn(table: RainfallTable, T_n: number | null): ColumnResolution
 ```
 Resolution order at each read site: `resolveSelectedTable(carrier, ref)` (Piece 2, picks the
-location) → `resolveColumn(table, T_n, {designReturnPeriod})` (picks the T_n column) → on
-`ok`/`legacy`, feed the 1D rows to the **unchanged** `KostraCarrier` → **unchanged** Gl.8
-aggregator / `iterateGoverningDuration`; on `missing`, **withhold** (§3.4). The 2D→1D slice is the
-only new step; no aggregator/iteration math changes.
+location) → `resolveColumn(table, T_n)` (picks the T_n column) → on `ok`/`legacy`, feed the 1D
+rows to the **unchanged** `KostraCarrier` → **unchanged** Gl.8 aggregator /
+`iterateGoverningDuration`; on `missing`, **withhold** (§3.4). The 2D→1D slice is the only new
+step; no aggregator/iteration math changes.
 
-> This **tightens** Task 2's helper: the earlier "legacy serves ANY T_n" fallback is replaced by
-> the guarded `legacy` (design T_n only) + `missing` — per Alvaro's safety rule. Task 3 revises it.
+> Withhold is scoped to **native 2D grids** asking for an unfilled column. Legacy/design-column
+> tables (existing projects) are **never** withheld — they serve their single curve for any T_n
+> until the engineer enters a real grid (then canonicalized on save). No `designReturnPeriod`
+> param.
 
 ### 3.3 Per-facility column selection (`facilityReturnPeriod`)
 
@@ -127,14 +133,17 @@ also what `resolveColumn` uses as `designReturnPeriod` for the legacy-curve guar
 
 ### 3.4 Missing column → WITHHOLD with a cause (no wrong-column fallback)
 
-When a facility's snapped T_n column is **not populated** in the entered grid (`status:'missing'`),
-the engine **withholds** the derived value and surfaces a cause — mirroring the surface-source
-"fehlend" pattern — e.g. *"Regenspende r_D für T_n = {T_n} a nicht in der Niederschlagstabelle
-erfasst."* It does **not** fall back to a neighbouring column or the legacy design curve. The only
-case a single curve serves a facility is a still-un-migrated legacy table for the facility whose
-T_n equals the project design T_n (`status:'legacy'`) — preserving back-compat for that facility
-only (e.g. PLT-HS-01's basin), while a different-risk facility on the same un-migrated data
-correctly shows missing until its column is entered.
+Withholding applies to **native 2D grids only**. When a facility's snapped T_n column is **not
+populated** in an entered native grid (`status:'missing'`), the engine **withholds** the derived
+value and surfaces a cause — mirroring the surface-source "fehlend" pattern — e.g. *"Regenspende
+r_D für T_n = {T_n} a nicht in der Niederschlagstabelle erfasst."* It does **not** fall back to a
+neighbouring column.
+
+**Legacy/design-column tables are NEVER withheld** (`status:'legacy'`): they have no real columns,
+so they serve their single curve for ANY facility/T_n — existing projects keep computing for every
+facility, exactly as before, until the engineer enters a real 2D grid (then it's canonicalized on
+save and the per-column withhold begins to apply). Withholding a legacy table would break every
+existing project, so it must not happen.
 
 ## 4. Flood-path unification (A138-26, Gl.10) — a governing-duration PROFILE on the 30-column
 
