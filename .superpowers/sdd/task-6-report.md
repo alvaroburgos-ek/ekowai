@@ -1,4 +1,4 @@
-# Task 6 Report — 2D KOSTRA Grid Matrix Editor
+# Task 6 Report — 2D KOSTRA Grid Matrix Editor (+ Bug Fix: preserve r_D values into design-T_n column)
 
 **Branch:** feat/rainfall-2d-grid  
 **File modified:** `src/components/worksheet/rainfall-tables-editor.tsx`  
@@ -74,6 +74,29 @@ This matches the spec: "Writing any cell on a legacyDesignColumn table converts 
 
 ---
 
+## Bug Fix Session (2026-06-29) — preserve r_D values into design-T_n column
+
+**Commit:** `98ee21e`  
+**Status:** DONE — 16/16 tests green, 729/729 unit regression green, TypeScript clean.
+
+### What changed
+
+- **`Props`**: added `designReturnPeriod?: number | null`.
+- **`convertLegacyToNative(t, designReturnPeriod)`**: now accepts `designReturnPeriod`; when non-null sets `r = { [String(designReturnPeriod)]: row.__legacyValue ?? null }` for each row instead of discarding the value. The 16 legacy values are preserved into the project's design column (e.g. `r['5']` for T_n=5).
+- **`LegacyTableView`**: receives `designReturnPeriod`; disables "2D-Raster erfassen" when null and shows "Projekt-Wiederkehrzeit T_n nicht gesetzt" note; shows "Bemessungsspalte T_n = {n} a übernommen" hint when set.
+- **`worksheet-form.tsx`**: imports `facilityReturnPeriod`, builds a `pick` closure from `fieldBySymbol` + store `values`, computes `rainfallDesignReturnPeriod` in a `useMemo`, passes it as `designReturnPeriod` to `<RainfallTablesEditor>`.
+
+### Test summary
+
+**16 tests / 16 passed** (13 original + 3 new bug-fix assertions):
+- `with designReturnPeriod=5: each row's __legacyValue lands in r["5"]` — row 0 value 220 in `r['5']`, row 1 value 130 in `r['5']` ✓
+- `with designReturnPeriod=null: convert button is disabled and T_n-not-set note shows` ✓
+- `with designReturnPeriod=5: shows "T_n = 5 a übernommen" hint` ✓
+
+Full unit regression: **86 files / 729 tests — all green**.
+
+---
+
 ## Concerns / open items
 
 1. **Irreversible conversion in session**: The "2D-Raster erfassen" button immediately drops the legacy curve. If the engineer clicks it accidentally (before save), a page reload recovers the legacy state. A confirmation dialog could be added — deferred, as the spec does not require it and the UX cost is low.
@@ -85,3 +108,35 @@ This matches the spec: "Writing any cell on a legacyDesignColumn table converts 
 4. **No gridCell field UI change**: the existing `gridCell` metadata is preserved on the table object but its input widget was not in the original editor either — still out of scope per the task instructions.
 
 5. **Selector unchanged**: `rainfall-table-selector.tsx` is untouched per explicit task scope.
+
+---
+
+## Data-model fix (2026-06-29) — add 20a to RETURN_PERIODS (9 columns)
+
+**Commit:** `9540b6d`  
+**Status:** DONE — 736/736 unit tests green, TypeScript clean.
+
+### What changed
+
+- **`src/lib/eval/rainfall-tables.ts`**: `RETURN_PERIODS` extended from `[1,2,3,5,10,30,50,100]` to `[1,2,3,5,10,20,30,50,100]`. `ReturnPeriod` and `TnKey` union types pick up `20`/`"20"` automatically via `as const` derivation. No other logic changed.
+- **`src/components/worksheet/__tests__/rainfall-tables-editor.test.tsx`**: `NATIVE_TABLE.columns` updated from 8-element to 9-element array (added `20`). Test description updated from "renders all 8 T_n column headers" to "renders all 9 T_n column headers including 20a".
+- **`src/lib/eval/__tests__/rainfall-2d-resolve.test.ts`**: Added import of `snapToReturnPeriod`; added new describe block `snapToReturnPeriod — 9-column RETURN_PERIODS (incl. 20a)` with 7 tests.
+
+### Test summary — explicit confirmations
+
+- **(a) n=0.05 → 20 snap**: `snapToReturnPeriod(1/0.05)` = `20` ✓ (`1/0.05 = 20`, exact match)
+- **(b) Editor 9 columns incl. 20a**: "renders all 9 T_n column headers including 20a" iterates `RETURN_PERIODS` (now 9 values) and asserts each `{rp}a` label present ✓
+- **(c) 18.684 basin witnesses green**: `formula-Gl8.test.ts`, `governing-duration-basin.test.ts`, `engine-wiring-A138-13.test.tsx`, `engine-wiring-A138-13-2d.test.tsx` all use the 5a/30-column rows, unaffected — all green ✓
+- **(d) Flood T_n=30 tests green**: `governing-duration-flood.test.ts`, `flood-from-grid.test.ts` — T_n=30 is still in RETURN_PERIODS, fixed-30 resolution unchanged — all green ✓
+
+**Full suite: 86 files / 736 tests — all passed.**
+
+### Additional snap tests
+
+- `n≈0.034 → 29.4 → snaps to 30` (20 does not steal it: |29.4−20|=9.4 > |29.4−30|=0.6 ✓)
+- Tie-breaking at 15 (midpoint 10↔20) → 10; tie at 25 (midpoint 20↔30) → 20 (first candidate wins on `d < minDist` strict guard)
+- Exact annuities 5, 10, 30 still snap to themselves ✓
+
+### Concerns / back-compat
+
+None. Legacy tables serve any T_n from `__legacyValue` (column-agnostic). Native grids simply gain one more available column slot. No migration or data change required.
