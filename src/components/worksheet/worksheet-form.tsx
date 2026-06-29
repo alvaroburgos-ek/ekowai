@@ -15,7 +15,7 @@ import {
 } from './manual-override-pill';
 import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
-import { normalizeRainfallCarrier } from '@/lib/eval/rainfall-tables';
+import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
@@ -331,6 +331,20 @@ export function WorksheetForm({
   const rainfallTables = normalizeRainfallCarrier(
     kostraValue?.type === 'json' ? kostraValue.value : undefined,
   ).tables;
+
+  // Design return-period for the rainfall editor: resolve project n/T_n via the
+  // shared facilityReturnPeriod helper.  A pickNumberBySymbol closure reads from
+  // the store's current values using the field-by-symbol map built above.
+  const rainfallDesignReturnPeriod = useMemo(() => {
+    const pick = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      return v?.type === 'number' && v.value != null && Number.isFinite(v.value) ? v.value : null;
+    };
+    return facilityReturnPeriod(worksheet.template.code, pick);
+  }, [fieldBySymbol, values, worksheet.template.code]);
+
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
@@ -577,7 +591,7 @@ export function WorksheetForm({
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Regenspendentabellen (für V_VA nach Gl. 8)
           </h2>
-          <RainfallTablesEditor fieldId={kostraField.id} readOnly={locked} />
+          <RainfallTablesEditor fieldId={kostraField.id} readOnly={locked} designReturnPeriod={rainfallDesignReturnPeriod} />
         </section>
       )}
 

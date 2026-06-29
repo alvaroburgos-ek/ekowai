@@ -12,7 +12,7 @@ import {
   type TnKey,
 } from '@/lib/eval/rainfall-tables';
 
-type Props = { fieldId: string; readOnly?: boolean };
+type Props = { fieldId: string; readOnly?: boolean; designReturnPeriod?: number | null };
 
 const SOURCE_LABELS: Record<RainfallSource, string> = {
   'KOSTRA-DWD-2020': 'KOSTRA-DWD-2020',
@@ -36,17 +36,23 @@ function newTable(index: number): RainfallTable {
 }
 
 /** Convert a legacy table to a native 2D table: drop legacyDesignColumn and
- *  __legacyValue from each row, keep D_min, start with empty r: {}. */
-function convertLegacyToNative(t: RainfallTable): RainfallTable {
+ *  __legacyValue from each row, keep D_min.
+ *  When designReturnPeriod is set, each row's __legacyValue is preserved into
+ *  the r[String(designReturnPeriod)] column (the legacy 1D curve IS the design
+ *  return-period curve). When null, r stays empty. */
+function convertLegacyToNative(t: RainfallTable, designReturnPeriod: number | null): RainfallTable {
   const { legacyDesignColumn: _ldc, ...rest } = t;
   void _ldc;
   return {
     ...rest,
     legacyDesignColumn: undefined,
     rows: t.rows.map((row) => {
-      const { __legacyValue: _lv, ...rowRest } = row as RainfallGridRow & { __legacyValue?: unknown };
-      void _lv;
-      return { ...rowRest, r: {} };
+      const { __legacyValue: _lv, ...rowRest } = row as RainfallGridRow & { __legacyValue?: number | null };
+      const r: Partial<Record<TnKey, number | null>> =
+        designReturnPeriod != null
+          ? { [String(designReturnPeriod) as TnKey]: _lv ?? null }
+          : {};
+      return { ...rowRest, r };
     }),
   };
 }
@@ -57,7 +63,7 @@ function convertLegacyToNative(t: RainfallTable): RainfallTable {
  * conversion action to start 2D data entry.
  *
  * No r_D(n) value is ever derived/selected in this editor — that is the engine's job. */
-export function RainfallTablesEditor({ fieldId, readOnly = false }: Props) {
+export function RainfallTablesEditor({ fieldId, readOnly = false, designReturnPeriod = null }: Props) {
   const raw = useWorksheetStore((s) => s.values[fieldId]);
   const setField = useWorksheetStore((s) => s.setField);
   const carrier = useMemo<RainfallCarrier>(
@@ -96,7 +102,7 @@ export function RainfallTablesEditor({ fieldId, readOnly = false }: Props) {
   function startNativeGrid(tableId: string) {
     const t = carrier.tables.find((x) => x.id === tableId);
     if (!t) return;
-    write({ tables: carrier.tables.map((tbl) => (tbl.id === tableId ? convertLegacyToNative(tbl) : tbl)) });
+    write({ tables: carrier.tables.map((tbl) => (tbl.id === tableId ? convertLegacyToNative(tbl, designReturnPeriod) : tbl)) });
   }
 
   const inputCls = (ro: boolean) =>
@@ -166,6 +172,7 @@ export function RainfallTablesEditor({ fieldId, readOnly = false }: Props) {
               table={t}
               readOnly={readOnly}
               inputCls={inputCls}
+              designReturnPeriod={designReturnPeriod}
               onStartNativeGrid={() => startNativeGrid(t.id)}
             />
           ) : (
@@ -192,10 +199,12 @@ type LegacyTableViewProps = {
   table: RainfallTable;
   readOnly: boolean;
   inputCls: (ro: boolean) => string;
+  designReturnPeriod: number | null;
   onStartNativeGrid: () => void;
 };
 
-function LegacyTableView({ table, readOnly, inputCls, onStartNativeGrid }: LegacyTableViewProps) {
+function LegacyTableView({ table, readOnly, inputCls, designReturnPeriod, onStartNativeGrid }: LegacyTableViewProps) {
+  const canConvert = designReturnPeriod != null;
   return (
     <div className="space-y-2">
       {/* Notice banner */}
@@ -246,11 +255,22 @@ function LegacyTableView({ table, readOnly, inputCls, onStartNativeGrid }: Legac
         </table>
       </div>
 
+      {/* Conversion hint / guard note */}
+      {canConvert ? (
+        <p className="text-xs text-amber-700">
+          Beim Erfassen werden die bestehenden r_D-Werte in die Bemessungsspalte T_n = {designReturnPeriod} a übernommen.
+        </p>
+      ) : (
+        <p className="text-xs text-subtext">
+          Projekt-Wiederkehrzeit T_n nicht gesetzt — bitte zuerst n/T_n (A138-08) erfassen, bevor der 2D-Raster angelegt wird.
+        </p>
+      )}
+
       {/* Action to start 2D data entry */}
       <button
         type="button"
         onClick={onStartNativeGrid}
-        disabled={readOnly}
+        disabled={readOnly || !canConvert}
         className="text-xs px-3 py-1.5 rounded border border-hairline-strong hover:bg-paper-2 text-ink disabled:opacity-40 disabled:cursor-not-allowed"
       >
         2D-Raster erfassen

@@ -136,8 +136,8 @@ describe('RainfallTablesEditor — legacy design-column table', () => {
     expect(screen.getByDisplayValue('130')).toBeInTheDocument();
   });
 
-  it('clicking "2D-Raster erfassen" flips the table to native (legacyDesignColumn gone)', () => {
-    render(<RainfallTablesEditor fieldId={FIELD} />);
+  it('clicking "2D-Raster erfassen" flips the table to native (legacyDesignColumn gone) when designReturnPeriod is set', () => {
+    render(<RainfallTablesEditor fieldId={FIELD} designReturnPeriod={5} />);
     fireEvent.click(screen.getByText(/2D-Raster erfassen/i));
 
     const stored = useWorksheetStore.getState().values[FIELD] as {
@@ -145,13 +145,68 @@ describe('RainfallTablesEditor — legacy design-column table', () => {
     };
     const t = stored.value.tables[0];
     expect(t.legacyDesignColumn).toBeFalsy();
-    // Rows should now have native r: {} (no __legacyValue)
+    // Rows should now have native r object
     expect(t.rows[0].r).toBeDefined();
   });
 
   it('disables the "2D-Raster erfassen" action when readOnly', () => {
-    render(<RainfallTablesEditor fieldId={FIELD} readOnly />);
+    render(<RainfallTablesEditor fieldId={FIELD} readOnly designReturnPeriod={5} />);
     const btn = screen.getByText(/2D-Raster erfassen/i) as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Task 6 Bug Fix: convertLegacyToNative preserves r_D values into design column
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A legacy table with two rows, matching the PLT-HS-01 shape (n=0.2 → T_n=5). */
+const LEGACY_TABLE_TWO_ROWS = {
+  id: 'k2',
+  name: 'KOSTRA Krefeld (PLT-HS-01)',
+  source: 'KOSTRA-DWD-2020',
+  rows: [
+    { D_min: 10, r_D_n: 220 },
+    { D_min: 30, r_D_n: 130 },
+  ],
+};
+
+describe('RainfallTablesEditor — legacy→native conversion preserves r_D values (bug fix)', () => {
+  beforeEach(() => {
+    initStore({ tables: [LEGACY_TABLE_TWO_ROWS] });
+  });
+
+  it('with designReturnPeriod=5: each row\'s __legacyValue lands in r["5"]', () => {
+    render(<RainfallTablesEditor fieldId={FIELD} designReturnPeriod={5} />);
+    fireEvent.click(screen.getByText(/2D-Raster erfassen/i));
+
+    const stored = useWorksheetStore.getState().values[FIELD] as {
+      value: { tables: Array<{ legacyDesignColumn?: boolean; rows: Array<{ r: Record<string, unknown> }> }> };
+    };
+    const t = stored.value.tables[0];
+    // Must be native now
+    expect(t.legacyDesignColumn).toBeFalsy();
+    // Row 0: r_D_n was 220 → must be in r['5']
+    expect(t.rows[0].r['5']).toBe(220);
+    // Row 1: r_D_n was 130 → must be in r['5']
+    expect(t.rows[1].r['5']).toBe(130);
+  });
+
+  it('with designReturnPeriod=null: convert button is disabled and T_n-not-set note shows', () => {
+    render(<RainfallTablesEditor fieldId={FIELD} designReturnPeriod={null} />);
+    // Button must be disabled
+    const btn = screen.getByText(/2D-Raster erfassen/i) as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+    // Note must be visible
+    expect(
+      screen.getByText(/Projekt-Wiederkehrzeit T_n nicht gesetzt/i),
+    ).toBeInTheDocument();
+  });
+
+  it('with designReturnPeriod=5: shows "T_n = 5 a übernommen" hint', () => {
+    render(<RainfallTablesEditor fieldId={FIELD} designReturnPeriod={5} />);
+    expect(
+      screen.getByText(/Bemessungsspalte T_n = 5 a übernommen/i),
+    ).toBeInTheDocument();
   });
 });
