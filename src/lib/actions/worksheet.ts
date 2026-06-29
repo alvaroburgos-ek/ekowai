@@ -14,6 +14,20 @@ import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
+import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
+
+/** Symbols the basin Gl.8 governing-iteration produces and persists.
+ * These map to field symbols on the A138-13 worksheet template (same-symbol
+ * consolidation: A138-10 inherits them as its r_D_n/D_min inputs). */
+const BASIN_GOVERNING_SYMBOLS = ['r_D_n', 'D_min'] as const;
+
+/** The six scalar symbols A138-13 Gl.8 reads from other worksheets. */
+const BASIN_SCALAR_SYMBOLS = ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A'] as const;
+
+/** All symbols that need to be resolved from project_parameters for basin
+ * governing materialisation (scalars + return-period resolution). */
+const BASIN_LOOKUP_SYMBOLS = [...BASIN_SCALAR_SYMBOLS, 'n', 'T_n', 'rainfall_table_ref'] as const;
 
 type FieldValue =
   | { type: 'number'; value: number | null }
@@ -300,6 +314,174 @@ export async function saveWorksheet(
           }));
         if (derivedRows.length > 0) {
           await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
+        }
+      }
+
+      // Materialize basin governing outputs (r_D_n, D_min) when A138-13's
+      // r_D_n_table carrier was saved. These are persisted as derived rows so
+      // A138-10 can inherit them via same-symbol consolidation without running
+      // its own governing-duration iteration (single-producer rule).
+      //
+      // Detection: a cheap indexed lookup for the `r_D_n_table` field in the
+      // saved batch — the same optimisation pattern as the surface block above.
+      const [basinCarrierPresence] = await tx
+        .select({ id: fields.id })
+        .from(fields)
+        .where(
+          and(
+            inArray(fields.id, fieldIds),
+            eq(fields.symbol, 'r_D_n_table'),
+            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+          ),
+        )
+        .limit(1);
+
+      if (basinCarrierPresence) {
+        // 1. Gather sibling fields for this template (to resolve output field ids +
+        //    to pick scalar values from the saved batch).
+        const basinWsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const basinIdBySymbol = new Map(basinWsFields.map((f) => [f.symbol, f.id]));
+
+        // 2. Carrier (r_D_n_table): the JSON blob just saved.
+        const carrierFieldId = basinCarrierPresence.id;
+        const carrierRaw = input.values[carrierFieldId]?.type === 'json'
+          ? input.values[carrierFieldId].value
+          : null;
+
+        // 3. rainfall_table_ref: prefer the value being saved now, then fall back
+        //    to the existing persisted value.
+        const rainfallRefFieldId = basinIdBySymbol.get('rainfall_table_ref');
+        let rainfallTableRef: string | null = null;
+        if (rainfallRefFieldId) {
+          const savedRef = input.values[rainfallRefFieldId];
+          if (savedRef?.type === 'text' && typeof savedRef.value === 'string') {
+            rainfallTableRef = savedRef.value || null;
+          } else {
+            // Not in this save batch — read the already-persisted value.
+            const [existing] = await tx
+              .select({ valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, rainfallRefFieldId),
+              ))
+              .limit(1);
+            rainfallTableRef = existing?.valueText ?? null;
+          }
+        }
+
+        // 4. Cross-worksheet scalars + T_n resolution symbols: look up field ids
+        //    across ALL templates in the project (scalars come from A138-08/10/12).
+        //    Then fetch their persisted values from project_parameters.
+        //    NOTE: this intentionally reads ALREADY-PERSISTED values (before this
+        //    transaction's writes) because the scalar fields belong to OTHER worksheets
+        //    and their values are not part of this save batch.
+        const LOOKUP_SYMS = new Set(BASIN_LOOKUP_SYMBOLS);
+        const crossFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(
+            and(
+              inArray(fields.symbol, [...BASIN_LOOKUP_SYMBOLS]),
+              eq(fields.active, true),
+            ),
+          );
+
+        // Multiple templates may define a symbol (e.g. r_D_n appears on A138-13 itself);
+        // prefer a cross-worksheet parameter row that has an actual value.
+        const crossFieldIds = crossFields.map((f) => f.id);
+        const crossParams = crossFieldIds.length > 0
+          ? await tx
+              .select({
+                fieldId: projectParameters.fieldId,
+                valueNumber: projectParameters.valueNumber,
+                valueText: projectParameters.valueText,
+              })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, crossFieldIds),
+              ))
+          : [];
+
+        // Build symbol→numeric map (first non-null wins per symbol).
+        const crossNumBySymbol = new Map<string, number | null>();
+        const crossTextBySymbol = new Map<string, string | null>();
+        const crossFieldById = new Map(crossFields.map((f) => [f.id, f]));
+        for (const p of crossParams) {
+          const f = crossFieldById.get(p.fieldId);
+          if (!f) continue;
+          if (f.dataType === 'number' && !crossNumBySymbol.has(f.symbol)) {
+            const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+            crossNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+          }
+          if (f.dataType === 'text' && !crossTextBySymbol.has(f.symbol)) {
+            crossTextBySymbol.set(f.symbol, p.valueText ?? null);
+          }
+        }
+
+        // Also check the CURRENT save batch for scalar overrides (in case any
+        // scalar fields belong to THIS template and are being saved right now).
+        for (const f of basinWsFields) {
+          if (!LOOKUP_SYMS.has(f.symbol as typeof BASIN_LOOKUP_SYMBOLS[number])) continue;
+          const saved = input.values[f.id];
+          if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+            crossNumBySymbol.set(f.symbol, saved.value);
+          }
+        }
+
+        // 5. Resolve T_n via facilityReturnPeriod (A138-13 uses project n / T_n).
+        const pickNum = (sym: string): number | null => crossNumBySymbol.get(sym) ?? null;
+        const T_n = facilityReturnPeriod('A138-13', pickNum);
+
+        // 6. Build scalar bag.
+        const scalars = {
+          A_C:  crossNumBySymbol.get('A_C')  ?? (null as unknown as number),
+          A_VA: crossNumBySymbol.get('A_VA') ?? (null as unknown as number),
+          Q_S:  crossNumBySymbol.get('Q_S')  ?? (null as unknown as number),
+          Q_Dr: crossNumBySymbol.get('Q_Dr') ?? (null as unknown as number),
+          f_Z:  crossNumBySymbol.get('f_Z')  ?? (null as unknown as number),
+          f_A:  crossNumBySymbol.get('f_A')  ?? (null as unknown as number),
+        };
+
+        // 7. Run the pure governing-iteration.
+        const governing = materializeBasinGoverning({
+          carrierRaw,
+          rainfallTableRef,
+          T_n,
+          scalars,
+        });
+
+        // 8. UPSERT the two derived rows, or clear them when not computable.
+        //    Clearing (valueNumber=null) ensures A138-10 blanks-with-cause when
+        //    the basin is manual_required, rather than showing a stale value.
+        const basinDerivedRows = (BASIN_GOVERNING_SYMBOLS as readonly string[])
+          .map((sym) => ({ sym, fieldId: basinIdBySymbol.get(sym) }))
+          .filter((x): x is { sym: string; fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: governing != null
+              ? String(governing[x.sym as keyof typeof governing])
+              : null,
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: now,
+          }));
+
+        if (basinDerivedRows.length > 0) {
+          await tx.insert(projectParameters).values(basinDerivedRows).onConflictDoUpdate({
             target: [projectParameters.projectId, projectParameters.fieldId],
             set: {
               valueNumber: sql`excluded.value_number`,
