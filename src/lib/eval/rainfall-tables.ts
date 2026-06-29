@@ -318,10 +318,10 @@ export function snapToReturnPeriod(raw: number): ReturnPeriod {
 /**
  * Resolve the design return-period column key for a facility.
  *
- * Resolution order:
+ * Resolution order (single-source rule: owned field before derived field):
  *  1. If the worksheet has a local n_* field with a finite value → T_n = 1/n_local.
- *  2. Else use the project T_n field value if finite (direct return period).
- *  3. Else use the project n field value → T_n = 1/n.
+ *  2. Else use the project n field value → T_n = 1/n  (source, A138-08 owned field).
+ *  3. Else use the project T_n field value if finite (last-resort derived/direct value).
  *
  * Result is snapped to the nearest RETURN_PERIODS annuity. Returns null if no
  * usable input is available.
@@ -344,16 +344,16 @@ export function facilityReturnPeriod(
     }
   }
 
-  // 2. Project T_n field (direct return period value)
-  const T_n_direct = pickNumberBySymbol('T_n');
-  if (T_n_direct !== null && T_n_direct > 0) {
-    return snapToReturnPeriod(T_n_direct);
-  }
-
-  // 3. Project n field → T_n = 1/n
+  // 2. Project n field → T_n = 1/n  (source/owned field, preferred over derived T_n)
   const nProject = pickNumberBySymbol('n');
   if (nProject !== null && nProject > 0) {
     return snapToReturnPeriod(1 / nProject);
+  }
+
+  // 3. Project T_n field (last-resort: derived/direct return period value)
+  const T_n_direct = pickNumberBySymbol('T_n');
+  if (T_n_direct !== null && T_n_direct > 0) {
+    return snapToReturnPeriod(T_n_direct);
   }
 
   return null;
