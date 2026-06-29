@@ -375,6 +375,15 @@ const a138_13_gl8: Aggregator = {
             ? '   −  V_Zisterne   (§6.1 L1596: Zwangsentleerung vorhanden)'
             : '   (V_Zisterne nicht angerechnet — §6.1 L1596)')
           : ''),
+      // Task 1: expose the governing duration + intensity as structured numbers
+      // so consumers (A138-10 Q_zu via Task 2) can read them by reference.
+      // Only populated on the computed (non-manual_required) path, and only
+      // when governingD / r_D_at_governing are finite numbers (guaranteed here
+      // because we passed the null-check above and governing.governingD is set).
+      derivedExtras: {
+        D_gov: governingD,
+        r_D_gov: governing.r_D_at_governing as number,
+      },
     };
   },
 };
