@@ -384,6 +384,9 @@ export function WorksheetForm({
     const map = new Map<string | null, FieldDef[]>();
     for (const f of visibleFields(fields)) {
       if (f.inheritedFromWorksheet) continue;
+      // rainfall_table_ref is rendered by its dedicated RainfallTableSelector
+      // section (table-id picker), not as a raw text input in the field grid.
+      if (f.symbol === 'rainfall_table_ref') continue;
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
