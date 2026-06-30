@@ -364,6 +364,20 @@ const a138_13_gl8: Aggregator = {
     }
     substituted['V_VA netto (m³)'] = V_VA_net;
 
+    // Task 2: boundary-limited caveat — emit a non-blocking German warning when
+    // the governing duration sits at the longest tabulated D (no interior maximum
+    // found per §5.3.3.7). Spread only when non-empty so the interior-governing
+    // path returns no `warnings` property (keeps the witness's toBeUndefined()
+    // assertion true and avoids snapshot churn).
+    const warnings: string[] = [];
+    if (governing.boundaryLimited) {
+      warnings.push(
+        `Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand ` +
+        `(D = ${governingD} min). Bemessung ggf. außerhalb des Einfachen Verfahrens ` +
+        `(q_S_AC < 2 prüfen) oder Dauerstufenbereich nach DWA-A 117 erweitern.`,
+      );
+    }
+
     return {
       kind: 'computed',
       value: V_VA_net,
@@ -384,6 +398,7 @@ const a138_13_gl8: Aggregator = {
         D_gov: governingD,
         r_D_gov: governing.r_D_at_governing as number,
       },
+      ...(warnings.length > 0 ? { warnings } : {}),
     };
   },
 };

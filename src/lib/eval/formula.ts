@@ -74,6 +74,9 @@ export type EvalState =
        * Present only when the basin successfully iterates (not on manual_required
        * or error paths). Consumers read D_gov / r_D_gov by reference. */
       derivedExtras?: AggregatorDerivedExtras;
+      /** Non-blocking caveats on an otherwise-computed value (e.g. the governing
+       *  duration is boundary-limited). Rendered as an amber note, NOT a hard stop. */
+      warnings?: string[];
     }
   | {
       kind: 'manual_required';

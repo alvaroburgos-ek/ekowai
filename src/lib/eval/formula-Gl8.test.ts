@@ -173,6 +173,44 @@ describe('A138-13 Gl. 8 — V_VA over KOSTRA', () => {
 });
 
 /**
+ * Task 2 — warnings channel: boundary-limited governing duration.
+ *
+ * When the maximum V_VA occurs at the longest tabulated D (no interior
+ * maximum), the basin aggregator must emit a non-blocking German caveat on
+ * the `warnings` field of the computed EvalState (§5.3.3.7 / DWA-A 117).
+ */
+describe('Gl. 8 boundary-limited warnings (Task 2)', () => {
+  it('emits a boundary-limited warning when governing D is the longest tabulated D', () => {
+    // Monotonic-rising V_VA: r_D grows with D so the longest D (1440 min) wins.
+    const r = evaluateFormula(
+      req({
+        kostraTable: {
+          rows: [
+            { id: '5',    D_min: 5,    r_D_n: 50  },
+            { id: '60',   D_min: 60,   r_D_n: 80  },
+            { id: '1440', D_min: 1440, r_D_n: 120 },
+          ],
+        },
+        gl8Scalars: SCALARS,
+      }),
+    );
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.substituted['Maßgebende Dauerstufe D (min)']).toBe(1440);
+    expect(r.warnings?.[0]).toMatch(/eindeutiges Maximum|Tabellenrand/i);
+  });
+
+  it('emits no warning for an interior governing duration (witness shape unchanged)', () => {
+    // Standard KOSTRA table — governing D = 30 min (interior, not the longest).
+    const r = evaluateFormula(req());
+    expect(r.kind).toBe('computed');
+    if (r.kind !== 'computed') return;
+    expect(r.substituted['Maßgebende Dauerstufe D (min)']).toBe(30);
+    expect(r.warnings).toBeUndefined();
+  });
+});
+
+/**
  * Pile-8 — Zisternen-Anrechenbarkeit §6.1 L1596.
  *
  * Source quote (verbatim, §6.1 L1596): "Speicherräume können für eine
