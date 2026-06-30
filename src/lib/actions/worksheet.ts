@@ -325,26 +325,21 @@ export async function saveWorksheet(
         }
       }
 
-      // Materialize basin governing outputs (r_D_n, D_min) when A138-13's
-      // r_D_n_table carrier was saved. These are persisted as derived rows so
-      // A138-10 can inherit them via same-symbol consolidation without running
-      // its own governing-duration iteration (single-producer rule).
+      // Materialize basin governing outputs (r_D_n, D_min) whenever this save
+      // targets the basin worksheet (A138-13). Persisted as derived rows so
+      // A138-10 inherits them via same-symbol consolidation without re-running
+      // the governing-duration iteration (single-producer rule).
       //
-      // Detection: a cheap indexed lookup for the `r_D_n_table` field in the
-      // saved batch — the same optimisation pattern as the surface block above.
-      const [basinCarrierPresence] = await tx
-        .select({ id: fields.id })
-        .from(fields)
-        .where(
-          and(
-            inArray(fields.id, fieldIds),
-            eq(fields.symbol, 'r_D_n_table'),
-            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-          ),
-        )
-        .limit(1);
+      // Detection: the saved template owns the basin Gl.8 equation. We already
+      // loaded `templateEquations` for this template above (line ~119). This
+      // is topology-stable: the equation lives on A138-13 regardless of which
+      // fields are in the current save batch — so any A138-13 save triggers a
+      // recompute. (Previously the gate was on r_D_n_table being in the save
+      // batch, but that carrier moved to A138-04, making the block dead.)
+      const BASIN_GL8_EQUATION_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
+      const isBasinSave = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
 
-      if (basinCarrierPresence) {
+      if (isBasinSave) {
         // 1. Gather sibling fields for this template (to resolve output field ids +
         //    to pick scalar values from the saved batch).
         const basinWsFields = await tx
@@ -353,11 +348,28 @@ export async function saveWorksheet(
           .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
         const basinIdBySymbol = new Map(basinWsFields.map((f) => [f.symbol, f.id]));
 
-        // 2. Carrier (r_D_n_table): the JSON blob just saved.
-        const carrierFieldId = basinCarrierPresence.id;
-        const carrierRaw = input.values[carrierFieldId]?.type === 'json'
-          ? input.values[carrierFieldId].value
-          : null;
+        // 2. Carrier (r_D_n_table): read cross-worksheet from project_parameters.
+        //    The carrier lives on A138-04 (moved there during 2D-grid work) so it
+        //    is never in an A138-13 save batch. Look it up globally by symbol and
+        //    read the persisted value for this project — mirroring the cross-worksheet
+        //    scalar reads below (step 4).
+        const [carrierField] = await tx
+          .select({ id: fields.id })
+          .from(fields)
+          .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+          .limit(1);
+        let carrierRaw: unknown = null;
+        if (carrierField) {
+          const [carrierParam] = await tx
+            .select({ valueJson: projectParameters.valueJson })
+            .from(projectParameters)
+            .where(and(
+              eq(projectParameters.projectId, instance.projectId),
+              eq(projectParameters.fieldId, carrierField.id),
+            ))
+            .limit(1);
+          carrierRaw = carrierParam?.valueJson ?? null;
+        }
 
         // 3. rainfall_table_ref: prefer the value being saved now, then fall back
         //    to the existing persisted value.
