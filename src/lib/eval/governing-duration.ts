@@ -17,6 +17,11 @@ export type GoverningResult = {
   /** The maximized sized quantity at the governing duration. */
   governingValue: number | null;
   perDuration: Array<{ D: number; r_D: number; value: number }>;
+  /** True when the governing duration is the longest tabulated D (no interior
+   *  maximum found — §5.3.3.7 / DWA-A 117). Value still valid to display but
+   *  boundary-limited; extend the duration range or treat the design as failing
+   *  the Einfaches-Verfahren Anwendungsbedingung (q_S_AC < 2). */
+  boundaryLimited: boolean;
 };
 
 /**
@@ -49,14 +54,26 @@ export function iterateGoverningDuration(
     }
   });
 
+  const maxTabulatedD = perDuration.length
+    ? Math.max(...perDuration.map((p) => p.D))
+    : null;
+
   if (gi < 0) {
-    return { governingD: null, r_D_at_governing: null, governingValue: null, perDuration };
+    return {
+      governingD: null,
+      r_D_at_governing: null,
+      governingValue: null,
+      perDuration,
+      boundaryLimited: false,
+    };
   }
+  const governingD = perDuration[gi].D;
   return {
-    governingD: perDuration[gi].D,
+    governingD,
     r_D_at_governing: perDuration[gi].r_D,
     governingValue: perDuration[gi].value,
     perDuration,
+    boundaryLimited: maxTabulatedD !== null && governingD === maxTabulatedD,
   };
 }
 

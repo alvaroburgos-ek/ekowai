@@ -46,6 +46,56 @@ describe('iterateGoverningDuration', () => {
       r_D_at_governing: null,
       governingValue: null,
       perDuration: [],
+      boundaryLimited: false,
     });
+  });
+});
+
+describe('boundaryLimited', () => {
+  // V_VA rising monotonically → governing at the longest D → boundary-limited.
+  it('flags when the governing duration is the longest tabulated D', () => {
+    const rows = [
+      { D_min: 5, r_D_n: 1 },
+      { D_min: 10, r_D_n: 1 },
+      { D_min: 20, r_D_n: 1 },
+    ];
+    const r = iterateGoverningDuration(rows, (D) => D); // value grows with D
+    expect(r.governingD).toBe(20);
+    expect(r.boundaryLimited).toBe(true);
+  });
+
+  // Interior peak → not boundary-limited (a longer-D row has a smaller value).
+  it('does not flag a genuine interior maximum near the end', () => {
+    const rows = [
+      { D_min: 5, r_D_n: 1 },
+      { D_min: 10, r_D_n: 1 },
+      { D_min: 20, r_D_n: 1 }, // peak here
+      { D_min: 40, r_D_n: 1 },
+    ];
+    const r = iterateGoverningDuration(rows, (D) => (D === 20 ? 100 : D));
+    expect(r.governingD).toBe(20);
+    expect(r.boundaryLimited).toBe(false);
+  });
+
+  // Order independence: largest D not last in the array.
+  it('compares against max(D), not the last array index', () => {
+    const rows = [
+      { D_min: 40, r_D_n: 1 }, // largest D, listed first
+      { D_min: 5, r_D_n: 1 },
+      { D_min: 10, r_D_n: 1 },
+    ];
+    const r = iterateGoverningDuration(rows, (D) => D);
+    expect(r.governingD).toBe(40);
+    expect(r.boundaryLimited).toBe(true);
+  });
+
+  it('single complete row is boundary-limited (no interior max possible)', () => {
+    const r = iterateGoverningDuration([{ D_min: 30, r_D_n: 5 }], () => 7);
+    expect(r.boundaryLimited).toBe(true);
+  });
+
+  it('no governing row → not boundary-limited', () => {
+    const r = iterateGoverningDuration([], () => 1);
+    expect(r.boundaryLimited).toBe(false);
   });
 });
