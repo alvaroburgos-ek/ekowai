@@ -172,3 +172,8 @@ export const GOVERNING_PROFILES: FacilityGoverningProfile[] = [
     derived: { rDSymbol: 'r_D_30', governingDSymbol: 'D_min' },
   },
 ];
+
+/** Single authority for the basin Gl.8 equation ID. Derived from the registered
+ * GOVERNING_PROFILES entry so the save path (worksheet.ts) can never drift from
+ * the engine definition. */
+export const BASIN_GL8_EQUATION_ID = GOVERNING_PROFILES.find((p) => p.facility === 'A138-13')!.equationId;

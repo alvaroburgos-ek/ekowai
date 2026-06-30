@@ -27,6 +27,7 @@ import './_setup-env';
 // user context. RLS is verified separately in tests/rls/worksheet-save.test.ts.
 
 import { admin, makeUser, cleanup } from '../../../../tests/rls/helpers';
+import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 
 // ---------------------------------------------------------------------------
 // Task 4 integration: saveWorksheet A138-13 → basin r_D_n/D_min materialize
@@ -62,8 +63,6 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
   let dMinFieldId = '';         // A138-13 D_min field id
   let rainfallRefFieldId = '';  // A138-13 rainfall_table_ref field id
   let carrierFieldId = '';      // A138-04 r_D_n_table field id
-
-  const BASIN_GL8_EQ_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 
   // Heinsberg carrier: governing D=30, r_D_n=130 (Heinsberg witness values)
   const CARRIER_JSON = {
@@ -109,7 +108,7 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
       .insert({ code: `BASIN-T4-${Date.now()}`, title_de: 'Basin Task4', version: 'test' })
       .select('id').single();
 
-    // A138-13 template (the basin worksheet) — attach BASIN_GL8_EQ_ID
+    // A138-13 template (the basin worksheet) — attach BASIN_GL8_EQUATION_ID
     const { data: tmpl13 } = await ad
       .from('worksheet_templates')
       .insert({ standard_id: std!.id, code: 'A138-13', title_de: 'Basin 13' })
@@ -152,9 +151,9 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
       });
     }
 
-    // Equation on A138-13: the basin Gl.8 equation (equationId = BASIN_GL8_EQ_ID)
+    // Equation on A138-13: the basin Gl.8 equation (equationId = BASIN_GL8_EQUATION_ID)
     await ad.from('equations').insert({
-      id: BASIN_GL8_EQ_ID,
+      id: BASIN_GL8_EQUATION_ID,
       worksheet_template_id: a138_13_templateId,
       output_symbol: 'V_VA',
       label_de: 'Gl.8 basin',
@@ -250,7 +249,7 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
     // RED: before the fix, isBasinSave was gated on r_D_n_table being in the save batch
     //      on the SAME template (A138-13 has no r_D_n_table field → gate never matched →
     //      derived UPSERT never ran → rows stayed 'entered').
-    // GREEN: after the fix, isBasinSave = templateEquations.some(e => e.id === BASIN_GL8_EQ_ID)
+    // GREEN: after the fix, isBasinSave = templateEquations.some(e => e.id === BASIN_GL8_EQUATION_ID)
     //        fires on any A138-13 save; carrier read cross-worksheet from project_parameters.
 
     const { saveWorksheet } = await import('../worksheet');
@@ -316,6 +315,15 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
       .insert({ project_id: projectId, worksheet_template_id: tmplNb!.id })
       .select('id').single();
 
+    // Snapshot r_D_n/D_min BEFORE the non-basin save so we can assert they are untouched after.
+    const { data: basinBefore } = await ad
+      .from('project_parameters')
+      .select('field_id, source_type, value_number, updated_at')
+      .eq('project_id', projectId)
+      .in('field_id', [rDnFieldId, dMinFieldId]);
+    const rDnBefore  = basinBefore?.find((p) => p.field_id === rDnFieldId);
+    const dMinBefore = basinBefore?.find((p) => p.field_id === dMinFieldId);
+
     const { saveWorksheet } = await import('../worksheet');
     const result = await saveWorksheet({
       instanceId: instNb!.id,
@@ -323,15 +331,26 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
     });
     expect(result.ok).toBe(true);
 
-    // r_D_n and D_min for project_id must NOT be changed to 'derived' by this non-basin save
-    const { data: params } = await ad
+    // Assert: the basin r_D_n/D_min rows were NOT touched by the non-basin save.
+    // We compare source_type, value_number, and updated_at — if the non-basin block
+    // had fired, it would have written new rows (updating updated_at and possibly value_number).
+    const { data: basinAfter } = await ad
       .from('project_parameters')
-      .select('field_id, source_type')
+      .select('field_id, source_type, value_number, updated_at')
       .eq('project_id', projectId)
       .in('field_id', [rDnFieldId, dMinFieldId]);
+    const rDnAfter  = basinAfter?.find((p) => p.field_id === rDnFieldId);
+    const dMinAfter = basinAfter?.find((p) => p.field_id === dMinFieldId);
 
-    // After the previous (GREEN) test already set them to 'derived', they stay 'derived'.
-    // The point here: the non-basin save did not INTRODUCE or CORRUPT them.
+    // source_type and value_number must be identical (non-basin save must not re-derive them)
+    expect(rDnAfter?.source_type).toBe(rDnBefore?.source_type);
+    expect(rDnAfter?.value_number).toBe(rDnBefore?.value_number);
+    expect(dMinAfter?.source_type).toBe(dMinBefore?.source_type);
+    expect(dMinAfter?.value_number).toBe(dMinBefore?.value_number);
+    // updated_at must be identical — the non-basin save must not have re-written these rows
+    expect(rDnAfter?.updated_at).toBe(rDnBefore?.updated_at);
+    expect(dMinAfter?.updated_at).toBe(dMinBefore?.updated_at);
+
     // Additionally confirm no extra basin-derived rows appeared for the non-basin template:
     const { data: nbParams } = await ad
       .from('project_parameters')
@@ -341,7 +360,6 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
 
     const nbRow = nbParams?.find((p) => p.field_id === fNb!.id);
     expect(nbRow?.source_type).toBe('entered');  // non-basin save → entered, not derived
-    expect(result.ok).toBe(true);
   });
 });
 

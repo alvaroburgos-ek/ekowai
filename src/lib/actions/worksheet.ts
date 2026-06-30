@@ -16,6 +16,7 @@ import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
 import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
+import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
  * These map to field symbols on the A138-13 worksheet template (same-symbol
@@ -336,7 +337,6 @@ export async function saveWorksheet(
       // fields are in the current save batch — so any A138-13 save triggers a
       // recompute. (Previously the gate was on r_D_n_table being in the save
       // batch, but that carrier moved to A138-04, making the block dead.)
-      const BASIN_GL8_EQUATION_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
       const isBasinSave = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
 
       if (isBasinSave) {

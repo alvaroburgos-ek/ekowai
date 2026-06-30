@@ -22,8 +22,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
-
-const BASIN_GL8_EQUATION_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
+import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 
 // Canonical Heinsberg fixture — mirrors formula-Gl8.test.ts + materialize-basin-governing.test.ts
 const HEINSBERG_CARRIER = {
