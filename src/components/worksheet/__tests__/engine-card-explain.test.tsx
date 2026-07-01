@@ -308,7 +308,7 @@ describe('EquationEngineCard — Feature 3 (warnings caveat block)', () => {
       value: 293.17,
       substituted: { 'Maßgebende Dauerstufe D (min)': 1440 },
       formulaEvaluated: 'V_VA = ...',
-      warnings: ['Kein eindeutiges Maximum: der maximale Speicherbedarf tritt am Tabellenrand auf (D = 1440 min) — ein laengeres Dauerstufenspektrum kann das Ergebnis aendern.'],
+      warnings: ['Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand (D = 1440 min). Bemessung ggf. außerhalb des Einfachen Verfahrens (q_S_AC < 2 prüfen) oder Dauerstufenbereich nach DWA-A 117 erweitern.'],
     };
     render(
       <EquationEngineCard

@@ -353,6 +353,11 @@ export async function saveWorksheet(
         //    is never in an A138-13 save batch. Look it up globally by symbol and
         //    read the persisted value for this project — mirroring the cross-worksheet
         //    scalar reads below (step 4).
+        // NOTE: today exactly one worksheet template owns the `r_D_n_table` field
+        // (A138-04), so this symbol+active lookup is unambiguous. If a second template
+        // ever introduced its own `r_D_n_table` field, the limit(1) would silently pick
+        // one — the same latent multi-owner ambiguity noted on the scalar cross-worksheet
+        // reads below. Scope by template if that ever happens.
         const [carrierField] = await tx
           .select({ id: fields.id })
           .from(fields)

@@ -303,10 +303,17 @@ describe('saveWorksheet — basin A138-13 governing materialize (Task 4 integrat
       .insert({ worksheet_template_id: tmplNb!.id, section_id: secNb!.id, symbol: 'X', label_de: 'X', data_type: 'number', active: true })
       .select('id').single();
 
-    // Get user id from org_members for this project
+    // Get user id from org_members scoped to this test's project/org (avoid grabbing
+    // an unrelated org's member in a shared test DB).
+    const { data: projRow } = await ad
+      .from('projects')
+      .select('org_id')
+      .eq('id', projectId)
+      .single();
     const { data: orgMembers } = await ad
       .from('org_members')
       .select('user_id')
+      .eq('org_id', projRow!.org_id)
       .limit(1);
     const userId = orgMembers?.[0]?.user_id ?? '';
 
