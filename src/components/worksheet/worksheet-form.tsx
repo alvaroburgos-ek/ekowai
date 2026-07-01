@@ -211,13 +211,31 @@ export function WorksheetForm({
     return m;
   }, [fields]);
 
+  // Symbols that are equation outputs — the engine writes them; they must not
+  // be hand-editable (isComputed=true in DynamicField).
+  // BASIN_GOVERNING_SYMBOLS (r_D_n, D_min) are NOT equation outputs in the
+  // formula engine (they are persisted by materializeBasinGoverning on save),
+  // but they share the same single-source invariant: the value is authoritative
+  // from the governing-duration iteration and must not be overwritten by the
+  // engineer. We add them to computedSymbols here so DynamicField renders them
+  // with the same readOnly treatment as formula-engine outputs (bg-paper-2,
+  // cursor-default, tabIndex=-1). No new abstraction — same prop, same render.
+  const BASIN_GOVERNING_SYMBOLS = new Set(['r_D_n', 'D_min']);
   const computedSymbols = useMemo(() => {
     const set = new Set<string>();
     for (const e of sortedEquations) {
       const out = e.outputSymbol;
       if (out && fieldBySymbol.has(out)) set.add(out);
     }
+    // Basin-governing derived outputs: persisted by save (not live engine),
+    // but equally non-editable. Add them unconditionally — on non-A138-13
+    // worksheets these symbols simply won't appear in fieldBySymbol, so the
+    // entries in the set are harmless.
+    for (const sym of BASIN_GOVERNING_SYMBOLS) {
+      if (fieldBySymbol.has(sym)) set.add(sym);
+    }
     return set;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedEquations, fieldBySymbol]);
 
   // Engine wiring lives in a shared hook so the integration test renders
