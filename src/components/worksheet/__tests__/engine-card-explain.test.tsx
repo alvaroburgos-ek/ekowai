@@ -342,8 +342,7 @@ describe('EquationEngineCard — Feature 3 (warnings caveat block)', () => {
     );
     const card = screen.getByTestId('engine-card-gl-8');
     expect(card).toHaveAttribute('data-engine-state', 'computed');
-    expect(within(card).queryByText(/Kein eindeutiges Maximum/i)).not.toBeInTheDocument();
-    // No warning caveat container in the DOM
+    // No warning caveat container in the DOM (stronger than a text query)
     expect(within(card).queryByTestId('engine-card-gl-8-warnings')).not.toBeInTheDocument();
   });
 

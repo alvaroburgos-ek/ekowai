@@ -119,7 +119,7 @@ export function EquationEngineCard({
           {state.warnings && state.warnings.length > 0 && (
             <div
               data-testid={`engine-card-gl-${equationNumber}-warnings`}
-              className="rounded-md border border-warning/40 bg-warning/10 p-2 text-xs text-warning"
+              className="mt-2 rounded-md border border-warning/40 bg-warning/10 p-2 text-xs text-warning"
             >
               {state.warnings.map((w, i) => (
                 <p key={i} className="flex gap-1">
