@@ -18,6 +18,7 @@ import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governin
 import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
+import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
  * These map to field symbols on the A138-13 worksheet template (same-symbol
@@ -539,7 +540,6 @@ export async function saveWorksheet(
       // Trigger on equation topology (fires on ANY A138-12 save), NOT on a field being in
       // the save batch — ac_as_ratio is read-only/derived so it is never in the batch
       // (same dead-trigger class fixed for the basin block above).
-      const A138_12_ASM_EQUATION_ID = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac';
       const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
 
       if (isLoadingSave) {

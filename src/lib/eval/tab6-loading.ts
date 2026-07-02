@@ -151,6 +151,11 @@ export function tab6LoadingCheck(input: {
  *
  * Any change here must be mirrored in the migration enum and vice versa.
  */
+/** DWA-A 138-1 A138-12 Gl.(7) A_S,m equation id — identifies an A138-12 save so the
+ *  Tab.6 loading-check materialize fires on ANY A138-12 save (topology trigger, not
+ *  batch membership; ac_as_ratio is read-only so it's never in the save batch). */
+export const A138_12_ASM_EQUATION_ID = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac';
+
 export const FLAECHENGRUPPE_CODES = [
   'D',
   'VW1', 'V1', 'VW2', 'V2', 'V3',

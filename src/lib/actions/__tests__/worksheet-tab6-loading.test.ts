@@ -22,10 +22,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect } from 'vitest';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
-
-// The equation id that identifies the A138-12 loading-check worksheet.
-// This mirrors the A138_12_ASM_EQUATION_ID const in worksheet.ts.
-const A138_12_ASM_EQUATION_ID = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac';
+import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 
 // ---------------------------------------------------------------------------
 // Detection signal (equation-topology trigger — mirrors isLoadingSave in saveWorksheet)

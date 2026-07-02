@@ -34,6 +34,7 @@ import './_setup-env';
 
 import { admin, makeUser, cleanup } from '../../../../tests/rls/helpers';
 import { saveWorksheet } from '../worksheet';
+import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 
 describe('saveWorksheet — A138-12 Tab.6 loading-check materialize (integration)', () => {
   const email = `lc-task3-integ-${Date.now()}@test.local`;
@@ -114,7 +115,7 @@ describe('saveWorksheet — A138-12 Tab.6 loading-check materialize (integration
     // Seed the A_S_m equation that identifies this as A138-12 for isLoadingSave detection.
     // The equation id must match the A138_12_ASM_EQUATION_ID const in worksheet.ts.
     await ad.from('equations').insert({
-      id: '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac',
+      id: A138_12_ASM_EQUATION_ID,
       worksheet_template_id: tmpl12!.id,
       output_symbol: 'A_S_m',
       label_de: 'A_S_m Gleichung',
