@@ -3,7 +3,7 @@
  * Written BEFORE implementation — must fail on first run (RED).
  */
 import { describe, it, expect } from 'vitest';
-import { tab6Limit, tab6LoadingCheck, flaechengruppeToTier } from '../tab6-loading';
+import { tab6Limit, tab6LoadingCheck, flaechengruppeToTier, FLAECHENGRUPPE_CODES } from '../tab6-loading';
 
 // ---------------------------------------------------------------------------
 // tab6Limit — tier × BBZ-band → limit descriptor
@@ -242,4 +242,31 @@ describe('flaechengruppeToTier', () => {
   it('null → null (Flächengruppe unset)', () => expect(flaechengruppeToTier(null)).toBeNull());
   it('unknown string → null', () => expect(flaechengruppeToTier('XYZ')).toBeNull());
   it('empty string → null', () => expect(flaechengruppeToTier('')).toBeNull());
+});
+
+// ---------------------------------------------------------------------------
+// Enum / resolver consistency guard
+// Ensures the canonical FLAECHENGRUPPE_CODES list stays in sync with the
+// resolver switch, preventing silent drift between the DB enum
+// (scripts/migrations/20260702120000_a138_tab6_loading.sql) and the
+// flaechengruppeToTier() resolver.
+// ---------------------------------------------------------------------------
+describe('flaechengruppeToTier — enum/resolver consistency guard', () => {
+  it('FLAECHENGRUPPE_CODES contains exactly 19 entries (Tab.5 canonical set incl. BG3)', () => {
+    expect(FLAECHENGRUPPE_CODES.length).toBe(19);
+  });
+
+  it('every canonical code resolves to a non-null tier (resolver knows all 19)', () => {
+    const unknowns: string[] = [];
+    for (const code of FLAECHENGRUPPE_CODES) {
+      if (flaechengruppeToTier(code) === null) {
+        unknowns.push(code);
+      }
+    }
+    expect(unknowns).toEqual([]);
+  });
+
+  it('canonical set includes BG3 (previously missing)', () => {
+    expect(FLAECHENGRUPPE_CODES).toContain('BG3');
+  });
 });

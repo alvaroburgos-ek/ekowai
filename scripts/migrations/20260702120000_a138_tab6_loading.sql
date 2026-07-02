@@ -4,7 +4,7 @@
 -- Rollback: scripts/rollback-20260702120000-a138_tab6_loading.sql
 --
 -- Four idempotent operations:
---   (1) INSERT field `flaechengruppe` on A138-06 (data_type='enum', 18 Tab.5 codes)
+--   (1) INSERT field `flaechengruppe` on A138-06 (data_type='enum', 19 Tab.5 codes)
 --       so engineers can set the Flächengruppe that governs the Tab.6 tier.
 --       consumer_worksheets='{A138-12}' declares A138-12 as the downstream consumer.
 --   (2) UPDATE A138-07 field `A_C`: append 'A138-12' to consumer_worksheets so the
@@ -57,8 +57,16 @@ BEGIN
   END IF;
 
   -- ---------------------------------------------------------------------------
-  -- (1) INSERT field `flaechengruppe` on A138-06 (enum, Tab.5, 18 codes)
+  -- (1) INSERT field `flaechengruppe` on A138-06 (enum, Tab.5, 19 codes)
   --     Guard: only insert if not already present (idempotent).
+  --
+  --     CANONICAL CODE LIST (19 entries, Tab.5 order):
+  --       D, VW1, V1, VW2, V2, V3, BG1, BF, BL, BG2, BG3,
+  --       SD1, SD2, SV, SVW, SF, SL, SG, SA
+  --     Source of truth: flaechengruppeToTier() in
+  --       src/lib/eval/tab6-loading.ts (FLAECHENGRUPPE_CODES export).
+  --     Consistency test: src/lib/eval/__tests__/tab6-loading.test.ts
+  --       "flaechengruppeToTier — enum/resolver consistency guard".
   -- ---------------------------------------------------------------------------
   IF NOT EXISTS (
     SELECT 1 FROM fields
@@ -77,24 +85,25 @@ BEGIN
       'enum', false, true, max_order06,
       '§5.2.3.2 / Tab. 5', ARRAY['A138-12'],
       '[
-        {"label_de": "Dachflächen",                             "label_en": "Roof surfaces",                          "value": "D",   "order_index": 0,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Verkehrsflächen (gering belastet)",        "label_en": "Traffic areas (low load)",               "value": "VW1", "order_index": 1,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Verkehrsflächen (schwach belastet)",       "label_en": "Traffic areas (slightly loaded)",        "value": "V1",  "order_index": 2,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Verkehrsflächen (mäßig belastet)",        "label_en": "Traffic areas (moderately loaded)",      "value": "VW2", "order_index": 3,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Verkehrsflächen (mäßig-stark belastet)",  "label_en": "Traffic areas (medium-high load)",       "value": "V2",  "order_index": 4,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Verkehrsflächen (stark belastet)",         "label_en": "Traffic areas (heavily loaded)",         "value": "V3",  "order_index": 5,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Begrünte Flächen (gering belastet)",      "label_en": "Vegetated areas (low load)",             "value": "BG1", "order_index": 6,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Begrünte Flächen (Friedhöfe etc.)",       "label_en": "Vegetated areas (cemeteries etc.)",      "value": "BF",  "order_index": 7,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Landwirtschaftliche Hofflächen",           "label_en": "Agricultural yard areas",                "value": "BL",  "order_index": 8,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Begrünte Flächen (stärker belastet)",     "label_en": "Vegetated areas (higher load)",          "value": "BG2", "order_index": 9,  "regulation_reference": "Tab. 5"},
-        {"label_de": "Dachflächen (bes. Belastung, einfach)",   "label_en": "Roof surfaces (special load, simple)",   "value": "SD1", "order_index": 10, "regulation_reference": "Tab. 5"},
-        {"label_de": "Dachflächen (bes. Belastung, komplex)",   "label_en": "Roof surfaces (special load, complex)",  "value": "SD2", "order_index": 11, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Verkehr",                    "label_en": "Special traffic areas",                  "value": "SV",  "order_index": 12, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Verkehr (Waschen)",         "label_en": "Special traffic areas (washing)",        "value": "SVW", "order_index": 13, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Feuerwehr",                  "label_en": "Special fire-service areas",             "value": "SF",  "order_index": 14, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Lagerung",                   "label_en": "Special storage areas",                  "value": "SL",  "order_index": 15, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Gewerbe",                    "label_en": "Special commercial areas",               "value": "SG",  "order_index": 16, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Altlasten",                  "label_en": "Special contaminated-site areas",        "value": "SA",  "order_index": 17, "regulation_reference": "Tab. 5"}
+        {"label_de": "Dachflächen",                                                      "label_en": "Roof surfaces",                                          "value": "D",   "order_index": 0,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Hof-/Wegeflächen ohne Kfz-Verkehr",                               "label_en": "Yard/path surfaces without motor traffic",               "value": "VW1", "order_index": 1,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Verkehrsflächen, geringer Kfz-Verkehr (DTV ≤ 300)",              "label_en": "Traffic areas, low motor traffic (DTV ≤ 300)",           "value": "V1",  "order_index": 2,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Marktplätze / Veranstaltungs-/Einkaufsflächen",                  "label_en": "Market squares / event / shopping areas",                "value": "VW2", "order_index": 3,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Verkehrsflächen, mäßiger Kfz-Verkehr (DTV 300–15.000)",         "label_en": "Traffic areas, moderate motor traffic (DTV 300–15,000)", "value": "V2",  "order_index": 4,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Verkehrsflächen, hoher Kfz-Verkehr (DTV > 15.000)",              "label_en": "Traffic areas, high motor traffic (DTV > 15,000)",       "value": "V3",  "order_index": 5,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Gleisanlagen, Schotteroberbau ≤ 100.000 Lt/d",                  "label_en": "Rail track, ballast superstructure ≤ 100,000 trains/d",  "value": "BG1", "order_index": 6,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Flughafen-Betriebsflächen (Start-/Landebahnen)",                  "label_en": "Airport operational areas (runways/taxiways)",           "value": "BF",  "order_index": 7,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Landwirtschaftliche Hofflächen",                                   "label_en": "Agricultural yard areas",                                "value": "BL",  "order_index": 8,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Gleisanlagen, Schotter > 100.000 / feste Fahrbahn ≤ 100.000 Lt/d", "label_en": "Rail track, ballast > 100,000 / fixed trackway ≤ 100,000 trains/d", "value": "BG2", "order_index": 9,  "regulation_reference": "Tab. 5"},
+        {"label_de": "Gleisanlagen, feste Fahrbahn > 100.000 Lt/d",                    "label_en": "Rail track, fixed trackway > 100,000 trains/d",          "value": "BG3", "order_index": 10, "regulation_reference": "Tab. 5"},
+        {"label_de": "Dachflächen, bes. Materialbelastung (20–70 %)",                  "label_en": "Roof surfaces, special material load (20–70 %)",         "value": "SD1", "order_index": 11, "regulation_reference": "Tab. 5"},
+        {"label_de": "Dachflächen, bes. Materialbelastung (> 70 %)",                   "label_en": "Roof surfaces, special material load (> 70 %)",          "value": "SD2", "order_index": 12, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Verkehr (Gewerbe/Industrie, bes. Belastung)",      "label_en": "Special traffic areas (commercial/industrial, high load)","value": "SV",  "order_index": 13, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Verkehr, Wasserschutzgebiet",                        "label_en": "Special traffic areas, water protection zone",           "value": "SVW", "order_index": 14, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Flughafen (Wäsche/Betankung/Enteisung)",           "label_en": "Special airport areas (washing/fuelling/de-icing)",      "value": "SF",  "order_index": 15, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Landwirtschaft (Tierhaltung/Reinigung)",            "label_en": "Special agricultural areas (livestock/cleaning)",        "value": "SL",  "order_index": 16, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Gleis (Rangier-/Bremsstrecken, Herbizid)",         "label_en": "Special rail areas (shunting/braking sections, herbicide)","value": "SG", "order_index": 17, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Abfall-/Abwasseranlagen",                           "label_en": "Special waste/wastewater facility areas",                "value": "SA",  "order_index": 18, "regulation_reference": "Tab. 5"}
       ]'::jsonb,
       'imported_unverified'
     );

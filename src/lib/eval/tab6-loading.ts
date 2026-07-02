@@ -140,11 +140,32 @@ export function tab6LoadingCheck(input: {
 // ---------------------------------------------------------------------------
 
 /**
+ * Canonical set of all 19 Tab.5 Kurzzeichen (Flächengruppe codes), in Tab.5 order.
+ *
+ * This is the SINGLE SOURCE OF TRUTH for the code set shared between:
+ *   - flaechengruppeToTier() below
+ *   - the `flaechengruppe` enum_values in
+ *     scripts/migrations/20260702120000_a138_tab6_loading.sql
+ *   - the consistency guard test in
+ *     src/lib/eval/__tests__/tab6-loading.test.ts
+ *
+ * Any change here must be mirrored in the migration enum and vice versa.
+ */
+export const FLAECHENGRUPPE_CODES = [
+  'D',
+  'VW1', 'V1', 'VW2', 'V2', 'V3',
+  'BG1', 'BF', 'BL', 'BG2', 'BG3',
+  'SD1', 'SD2', 'SV', 'SVW', 'SF', 'SL', 'SG', 'SA',
+] as const;
+
+export type FlaechengruppeCode = typeof FLAECHENGRUPPE_CODES[number];
+
+/**
  * Resolve the Tab.6 treatment-requirement tier from a Tab.5 Kurzzeichen
  * (Flächengruppe short-code).
  *
  * Source: DWA-A 138-1 Tab.5 + Tab.6 (verified against source, Zeilen 936ff.).
- * 18 valid codes are recognised; anything else (including null) returns null
+ * 19 valid codes are recognised; anything else (including null) returns null
  * to signal "indeterminate" upstream.
  *
  * Tier mapping:
