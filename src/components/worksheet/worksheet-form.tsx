@@ -27,6 +27,24 @@ import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 
+// Derived symbols that the materialize pipeline writes on every A138-13 save.
+// They are NOT live formula-engine outputs, but share the same single-source
+// invariant: the governing-duration iteration is authoritative and the engineer
+// must not overwrite these values. `fieldBySymbol.has(sym)` inside
+// computedSymbols guards against false positives on other standards.
+const BASIN_GOVERNING_SYMBOLS = new Set(['r_D_n', 'D_min']);
+
+// Derived symbols materialized by the Tab.6 loading-check engine on every
+// A138-12 save (T3 materialize pass). Read-only for the same reason:
+// single-source from the materialize, not hand-editable.
+// `fieldBySymbol.has(sym)` means these are harmless on all other standards.
+const LOADING_CHECK_SYMBOLS = new Set([
+  'ac_as_ratio',
+  'ac_as_ratio_limit',
+  'ac_as_ratio_check',
+  'ac_as_ratio_check_reason',
+]);
+
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
   if (status === 'saving') {
@@ -220,7 +238,13 @@ export function WorksheetForm({
   // engineer. We add them to computedSymbols here so DynamicField renders them
   // with the same readOnly treatment as formula-engine outputs (bg-paper-2,
   // cursor-default, tabIndex=-1). No new abstraction — same prop, same render.
-  const BASIN_GOVERNING_SYMBOLS = new Set(['r_D_n', 'D_min']);
+  //
+  // LOADING_CHECK_SYMBOLS (ac_as_ratio, ac_as_ratio_limit, ac_as_ratio_check,
+  // ac_as_ratio_check_reason) are T3-materialized by the Tab.6 loading-check
+  // engine on every A138-12 save. They must be read-only for the same reason
+  // as BASIN_GOVERNING_SYMBOLS: single-source from the materialize pass, not
+  // hand-editable. The gating `fieldBySymbol.has(sym)` ensures these entries
+  // are harmless on every other standard where the symbols don't exist.
   const computedSymbols = useMemo(() => {
     const set = new Set<string>();
     for (const e of sortedEquations) {
@@ -232,6 +256,12 @@ export function WorksheetForm({
     // worksheets these symbols simply won't appear in fieldBySymbol, so the
     // entries in the set are harmless.
     for (const sym of BASIN_GOVERNING_SYMBOLS) {
+      if (fieldBySymbol.has(sym)) set.add(sym);
+    }
+    // Tab.6 loading-check derived outputs (A138-12): T3-materialized on save.
+    // Read-only via the same isComputed=true path. Harmless on other standards
+    // because fieldBySymbol.has(sym) gates inclusion.
+    for (const sym of LOADING_CHECK_SYMBOLS) {
       if (fieldBySymbol.has(sym)) set.add(sym);
     }
     return set;

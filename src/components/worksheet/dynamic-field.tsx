@@ -223,20 +223,23 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         const v = value?.type === 'text' ? value.value : null;
         const maxLength = field.validationRules?.maxLength;
         const useTextarea = (maxLength ?? 0) > 200;
+        const textLocked = isComputed || readOnly;
         return useTextarea ? (
           <textarea
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            readOnly={readOnly}
-            aria-readonly={readOnly || undefined}
+            readOnly={textLocked}
+            tabIndex={textLocked ? -1 : undefined}
+            aria-readonly={textLocked || undefined}
             onChange={(e) => {
+              if (isComputed) return;
               if (readOnly) return;
               setField(field.id, { type: 'text', value: e.target.value || null });
             }}
             rows={4}
-            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         ) : (
           <input
@@ -245,13 +248,15 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            readOnly={readOnly}
-            aria-readonly={readOnly || undefined}
+            readOnly={textLocked}
+            tabIndex={textLocked ? -1 : undefined}
+            aria-readonly={textLocked || undefined}
             onChange={(e) => {
+              if (isComputed) return;
               if (readOnly) return;
               setField(field.id, { type: 'text', value: e.target.value || null });
             }}
-            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         );
       })()}
