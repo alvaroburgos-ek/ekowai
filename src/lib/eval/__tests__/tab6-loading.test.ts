@@ -3,7 +3,7 @@
  * Written BEFORE implementation — must fail on first run (RED).
  */
 import { describe, it, expect } from 'vitest';
-import { tab6Limit, tab6LoadingCheck } from '../tab6-loading';
+import { tab6Limit, tab6LoadingCheck, flaechengruppeToTier } from '../tab6-loading';
 
 // ---------------------------------------------------------------------------
 // tab6Limit — tier × BBZ-band → limit descriptor
@@ -72,6 +72,28 @@ describe('tab6Limit', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const r = tab6Limit('tier4_unknown' as any, 0.30);
     expect(r.kind).toBe('indeterminate');
+  });
+
+  // authority tier -----------------------------------------------------------
+  it('authority → {kind:"none"} regardless of thickness', () => {
+    const r = tab6Limit('authority', 0.30);
+    expect(r.kind).toBe('none');
+  });
+
+  it('authority → reason is DISTINCT from tier1_none reason', () => {
+    const r1 = tab6Limit('tier1_none', 0.30);
+    const ra = tab6Limit('authority', 0.30);
+    expect(r1.kind).toBe('none');
+    expect(ra.kind).toBe('none');
+    if (r1.kind === 'none' && ra.kind === 'none') {
+      expect(ra.reason).not.toBe(r1.reason);
+      expect(ra.reason).toContain('behördlich');
+    }
+  });
+
+  it('authority with null thickness → {kind:"none"} (no numeric limit)', () => {
+    const r = tab6Limit('authority', null);
+    expect(r.kind).toBe('none');
   });
 });
 
@@ -173,4 +195,51 @@ describe('tab6LoadingCheck', () => {
       expect(r.pass).toBe(true);
     }
   });
+
+  // authority tier in loading check → kind:'na'
+  it('authority tier → {kind:"na"} (no numeric limit, ratio still computed)', () => {
+    const r = tab6LoadingCheck({ A_C: 4836.43, A_S_m: 45, tier: 'authority', bbzThicknessM: 0.30 });
+    expect(r.kind).toBe('na');
+    if (r.kind === 'na') {
+      expect(r.ratio).toBeCloseTo(107.476, 2);
+      expect(r.reason).toContain('behördlich');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// flaechengruppeToTier — Tab.5 Kurzzeichen → Tab.6 tier
+// ---------------------------------------------------------------------------
+describe('flaechengruppeToTier', () => {
+  // tier1_none (keine Anforderung) -------------------------------------------
+  it('VW1 → tier1_none', () => expect(flaechengruppeToTier('VW1')).toBe('tier1_none'));
+  it('V1  → tier1_none', () => expect(flaechengruppeToTier('V1')).toBe('tier1_none'));
+  it('BG1 → tier1_none', () => expect(flaechengruppeToTier('BG1')).toBe('tier1_none'));
+
+  // tier2 (30/50) ------------------------------------------------------------
+  it('VW2 → tier2 (correctness case)', () => expect(flaechengruppeToTier('VW2')).toBe('tier2'));
+  it('V2  → tier2', () => expect(flaechengruppeToTier('V2')).toBe('tier2'));
+  it('BF  → tier2', () => expect(flaechengruppeToTier('BF')).toBe('tier2'));
+  it('BG2 → tier2', () => expect(flaechengruppeToTier('BG2')).toBe('tier2'));
+
+  // tier3 (15/30) ------------------------------------------------------------
+  it('BL  → tier3 (correctness case)', () => expect(flaechengruppeToTier('BL')).toBe('tier3'));
+  it('V3  → tier3', () => expect(flaechengruppeToTier('V3')).toBe('tier3'));
+  it('BG3 → tier3', () => expect(flaechengruppeToTier('BG3')).toBe('tier3'));
+
+  // authority (behördlich *) -------------------------------------------------
+  it('D   → authority', () => expect(flaechengruppeToTier('D')).toBe('authority'));
+  it('SD1 → authority', () => expect(flaechengruppeToTier('SD1')).toBe('authority'));
+  it('SD2 → authority', () => expect(flaechengruppeToTier('SD2')).toBe('authority'));
+  it('SV  → authority (distinct from SVW)', () => expect(flaechengruppeToTier('SV')).toBe('authority'));
+  it('SVW → authority (distinct from SV)',  () => expect(flaechengruppeToTier('SVW')).toBe('authority'));
+  it('SF  → authority', () => expect(flaechengruppeToTier('SF')).toBe('authority'));
+  it('SL  → authority', () => expect(flaechengruppeToTier('SL')).toBe('authority'));
+  it('SG  → authority', () => expect(flaechengruppeToTier('SG')).toBe('authority'));
+  it('SA  → authority', () => expect(flaechengruppeToTier('SA')).toBe('authority'));
+
+  // null / unknown -----------------------------------------------------------
+  it('null → null (Flächengruppe unset)', () => expect(flaechengruppeToTier(null)).toBeNull());
+  it('unknown string → null', () => expect(flaechengruppeToTier('XYZ')).toBeNull());
+  it('empty string → null', () => expect(flaechengruppeToTier('')).toBeNull());
 });

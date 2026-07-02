@@ -18,7 +18,7 @@
 // ---------------------------------------------------------------------------
 
 /** Tab.6 treatment-requirement tier (resolved from Tab.5 soil/drainage group). */
-export type Tab6Tier = 'tier1_none' | 'tier2' | 'tier3';
+export type Tab6Tier = 'tier1_none' | 'tier2' | 'tier3' | 'authority';
 
 /**
  * Tab.6 max A_C/A_S,m for a (tier, BBZ-band). Discriminated union so callers
@@ -59,6 +59,9 @@ const THICK_BAND_M = 0.30;
 export function tab6Limit(tier: Tab6Tier | null, bbzThicknessM: number | null): Tab6Limit {
   if (tier === 'tier1_none') {
     return { kind: 'none', reason: 'Tab.6 Tier 1: keine Anforderung an A_C/A_S,m.' };
+  }
+  if (tier === 'authority') {
+    return { kind: 'none', reason: 'Tab.6: behördlich abzustimmen (*) (Anmerkung, Zeile 936).' };
   }
   if (tier !== 'tier2' && tier !== 'tier3') {
     return { kind: 'indeterminate', reason: 'Behandlungs-Anforderungsklasse (Tab.6) nicht gesetzt.' };
@@ -128,4 +131,62 @@ export function tab6LoadingCheck(input: {
 
   // Step 6 — evaluated
   return { kind: 'evaluated', ratio, limit: lim.max, pass: ratio <= lim.max };
+}
+
+// ---------------------------------------------------------------------------
+// flaechengruppeToTier
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve the Tab.6 treatment-requirement tier from a Tab.5 Kurzzeichen
+ * (Flächengruppe short-code).
+ *
+ * Source: DWA-A 138-1 Tab.5 + Tab.6 (verified against source, Zeilen 936ff.).
+ * 18 valid codes are recognised; anything else (including null) returns null
+ * to signal "indeterminate" upstream.
+ *
+ * Tier mapping:
+ * - tier1_none (keine Anforderung): VW1, V1, BG1
+ * - tier2         (30/50 limit):   VW2, V2, BF, BG2
+ * - tier3         (15/30 limit):   BL, V3, BG3
+ * - authority     (behördlich *):  D, SD1, SD2, SV, SVW, SF, SL, SG, SA
+ */
+export function flaechengruppeToTier(flaechengruppe: string | null): Tab6Tier | null {
+  if (flaechengruppe === null) return null;
+
+  switch (flaechengruppe) {
+    // tier1_none — keine Anforderung
+    case 'VW1':
+    case 'V1':
+    case 'BG1':
+      return 'tier1_none';
+
+    // tier2 — 30 (thin) / 50 (thick)
+    case 'VW2':
+    case 'V2':
+    case 'BF':
+    case 'BG2':
+      return 'tier2';
+
+    // tier3 — 15 (thin) / 30 (thick)
+    case 'BL':
+    case 'V3':
+    case 'BG3':
+      return 'tier3';
+
+    // authority — behördlich abzustimmen (*)
+    case 'D':
+    case 'SD1':
+    case 'SD2':
+    case 'SV':
+    case 'SVW':
+    case 'SF':
+    case 'SL':
+    case 'SG':
+    case 'SA':
+      return 'authority';
+
+    default:
+      return null;
+  }
 }
