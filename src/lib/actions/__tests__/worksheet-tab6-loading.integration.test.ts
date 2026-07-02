@@ -11,8 +11,10 @@
  *   - bbz_thickness=0.30 (from A138-06)
  *   - A_S_m=45 (local to A138-12, included in save batch)
  *
- * Save: triggers saveWorksheet on A138-12 with {A_S_m, ac_as_ratio} (ac_as_ratio in
- *   batch is the detection signal).
+ * Detection is equation-topology-based: the A138-12 worksheet template owns the
+ * A_S_m equation (id 55151cb1-…). The trigger fires on ANY A138-12 save regardless
+ * of which fields are in the batch — ac_as_ratio is ABSENT from the batch here,
+ * proving the fix (the old dead-trigger baked in ac_as_ratio presence in batch).
  *
  * Asserts four derived rows on A138-12:
  *   ac_as_ratio        ≈ 22.222 (1000/45), source_type='derived'
@@ -109,6 +111,16 @@ describe('saveWorksheet — A138-12 Tab.6 loading-check materialize (integration
       if (sym === 'ac_as_ratio_check')        acAsRatioCheckFieldId   = f!.id;
       if (sym === 'ac_as_ratio_check_reason') acAsRatioReasonFieldId  = f!.id;
     }
+    // Seed the A_S_m equation that identifies this as A138-12 for isLoadingSave detection.
+    // The equation id must match the A138_12_ASM_EQUATION_ID const in worksheet.ts.
+    await ad.from('equations').insert({
+      id: '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac',
+      worksheet_template_id: tmpl12!.id,
+      output_symbol: 'A_S_m',
+      label_de: 'A_S_m Gleichung',
+      formula: 'A_C / ac_as_ratio',
+      order_index: 1,
+    });
     const { data: inst12 } = await ad.from('worksheet_instances')
       .insert({ project_id: projectId, worksheet_template_id: tmpl12!.id })
       .select('id').single();
@@ -172,15 +184,15 @@ describe('saveWorksheet — A138-12 Tab.6 loading-check materialize (integration
 
   afterAll(async () => cleanup([email]));
 
-  it('RED→GREEN: A138-12 save (with ac_as_ratio in batch) writes four derived rows', async () => {
-    // Save A_S_m + ac_as_ratio on A138-12. Including ac_as_ratio triggers loadingPresence.
+  it('RED→GREEN: A138-12 save with ac_as_ratio ABSENT from batch writes four derived rows', async () => {
+    // Save only A_S_m on A138-12 — ac_as_ratio is NOT in the batch.
+    // The trigger must fire via equation topology (A_S_m equation present on template),
+    // not because ac_as_ratio is submitted. This is the RED scenario the old dead-trigger failed.
     const result = await saveWorksheet({
       instanceId: ws12InstanceId,
       values: {
-        [aSmFieldId]:       { type: 'number', value: A_S_M_VAL },
-        // ac_as_ratio is a 'number' field (data_type persisted by migration);
-        // null here — the materialize overwrites it with the computed value.
-        [acAsRatioFieldId]: { type: 'number', value: null },
+        [aSmFieldId]: { type: 'number', value: A_S_M_VAL },
+        // ac_as_ratio deliberately absent — proving equation-topology detection fires regardless.
       },
     });
     expect(result.ok).toBe(true);

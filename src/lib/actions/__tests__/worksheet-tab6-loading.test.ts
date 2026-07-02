@@ -8,10 +8,11 @@
  * (vitest `integration` project, DATABASE_URL required).
  *
  * Tests cover:
- *   - Detection signal: loadingPresence fires only when ac_as_ratio field is in the
- *     save batch AND belongs to the saved template (mirrors surfacePresence pattern).
- *   - Does NOT fire on a non-A138-12 template save (no over-firing).
- *   - Does NOT fire when ac_as_ratio is absent from the save batch.
+ *   - Detection signal: isLoadingSave fires on equation topology (A_S_m equation
+ *     present in templateEquations), NOT on ac_as_ratio being in the save batch.
+ *   - RED-relevant scenario: A138-12 save with ac_as_ratio ABSENT from batch (e.g.
+ *     saving A_S_m only) → isLoadingSave is still true; a non-A138-12 worksheet is false.
+ *   - Does NOT over-fire on a non-A138-12 worksheet (different equation set).
  *   - materializeLoadingCheck 4-state output: pass / fail / not_applicable / indeterminate.
  *   - Reason text: non-null for not_applicable and indeterminate; null for evaluated.
  *   - VW1 (tier1_none) and D (authority) produce DISTINCT not_applicable reasons.
@@ -22,62 +23,57 @@
 import { describe, it, expect } from 'vitest';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 
+// The equation id that identifies the A138-12 loading-check worksheet.
+// This mirrors the A138_12_ASM_EQUATION_ID const in worksheet.ts.
+const A138_12_ASM_EQUATION_ID = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac';
+
 // ---------------------------------------------------------------------------
-// Detection signal (logical equivalent of the saveWorksheet loadingPresence check)
+// Detection signal (equation-topology trigger — mirrors isLoadingSave in saveWorksheet)
 // ---------------------------------------------------------------------------
 describe('Tab.6 loading-check detection — unit (no DB)', () => {
-  it('fires for A138-12 save: ac_as_ratio field IS in the save batch for that template', () => {
-    const ws12_id = 'ws12-uuid';
-    const ac_as_ratio_field_id = 'field-ac-ratio';
-    const fieldMetas = [
-      { id: ac_as_ratio_field_id, symbol: 'ac_as_ratio', worksheetTemplateId: ws12_id },
+  it('fires for ANY A138-12 save: A_S_m equation present, ac_as_ratio NOT in batch', () => {
+    // Simulate an A138-12 save where only A_S_m is submitted — ac_as_ratio is absent.
+    // The trigger must still fire because it is equation-topology-based.
+    const templateEquations = [
+      { id: A138_12_ASM_EQUATION_ID, outputSymbol: 'A_S_m' },
     ];
-    const fieldIds = [ac_as_ratio_field_id];
-    const presence = fieldMetas.find(
-      (f) => fieldIds.includes(f.id) && f.symbol === 'ac_as_ratio' && f.worksheetTemplateId === ws12_id,
-    );
-    expect(presence).toBeDefined();
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    expect(isLoadingSave).toBe(true);
   });
 
-  it('does NOT fire for a non-A138-12 template: different template, different symbol', () => {
-    const ws07_id = 'ws07-uuid';
-    const ac_field_id = 'field-a-c'; // A_C on A138-07, not ac_as_ratio
-    const fieldMetas = [
-      { id: ac_field_id, symbol: 'A_C', worksheetTemplateId: ws07_id },
+  it('fires for A138-12 save: A_S_m equation present, rainfall fields only in batch', () => {
+    // Saving rainfall/other fields (not ac_as_ratio) on A138-12 must still trigger.
+    const templateEquations = [
+      { id: A138_12_ASM_EQUATION_ID, outputSymbol: 'A_S_m' },
+      { id: 'other-equation-id', outputSymbol: 'some_other_output' },
     ];
-    const fieldIds = [ac_field_id];
-    const presence = fieldMetas.find(
-      (f) => fieldIds.includes(f.id) && f.symbol === 'ac_as_ratio' && f.worksheetTemplateId === ws07_id,
-    );
-    expect(presence).toBeUndefined();
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    expect(isLoadingSave).toBe(true);
   });
 
-  it('does NOT fire for an A138-12 save batch that does NOT include ac_as_ratio', () => {
-    const ws12_id = 'ws12-uuid';
-    const a_s_m_field_id = 'field-a-s-m';
-    const fieldMetas = [
-      { id: a_s_m_field_id, symbol: 'A_S_m', worksheetTemplateId: ws12_id },
+  it('does NOT fire for a non-A138-12 worksheet: equation set lacks A_S_m equation', () => {
+    // A138-07 (surface worksheet) has different equations — no A138_12_ASM_EQUATION_ID.
+    const templateEquations = [
+      { id: 'a138-07-equation-uuid', outputSymbol: 'A_C' },
+      { id: 'some-other-uuid', outputSymbol: 'A_U' },
     ];
-    const fieldIds = [a_s_m_field_id];
-    const presence = fieldMetas.find(
-      (f) => fieldIds.includes(f.id) && f.symbol === 'ac_as_ratio' && f.worksheetTemplateId === ws12_id,
-    );
-    expect(presence).toBeUndefined();
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    expect(isLoadingSave).toBe(false);
   });
 
-  it('does NOT fire when ac_as_ratio field belongs to a different template (cross-template spoofing)', () => {
-    const ws12_id = 'ws12-uuid';
-    const ws07_id = 'ws07-uuid';
-    const imposter_id = 'field-imposter'; // symbol=ac_as_ratio but on ws07
-    const fieldMetas = [
-      { id: imposter_id, symbol: 'ac_as_ratio', worksheetTemplateId: ws07_id },
+  it('does NOT fire for an empty equation set (non-A138-12 worksheet)', () => {
+    const templateEquations: Array<{ id: string; outputSymbol: string }> = [];
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    expect(isLoadingSave).toBe(false);
+  });
+
+  it('does NOT fire when only a similar (wrong) equation id is present', () => {
+    // Guard against partial UUID matches or typos.
+    const templateEquations = [
+      { id: '55151cb1-4a5a-48d1-b5c0-2312ef7b78ab', outputSymbol: 'A_S_m' }, // last char differs
     ];
-    const fieldIds = [imposter_id];
-    // The save checks against instance.worksheetTemplateId = ws12, not ws07
-    const presence = fieldMetas.find(
-      (f) => fieldIds.includes(f.id) && f.symbol === 'ac_as_ratio' && f.worksheetTemplateId === ws12_id,
-    );
-    expect(presence).toBeUndefined();
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    expect(isLoadingSave).toBe(false);
   });
 });
 

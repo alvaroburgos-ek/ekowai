@@ -522,29 +522,27 @@ export async function saveWorksheet(
       // ac_as_ratio_check, ac_as_ratio_check_reason) whenever this save targets the
       // A138-12 (BBZ loading check) worksheet. Persisted as derived rows.
       //
-      // Detection: the saved batch contains the `ac_as_ratio` field belonging to
-      // this template — this is the "A138-12 owns the loading check" signal. The
-      // field is only added by the accompanying migration; until the migration is
-      // applied the presence check returns undefined and the block no-ops gracefully.
+      // Detection: A138-12 owns the A_S_m equation (55151cb1-…). We already loaded
+      // `templateEquations` for this template above (same array the basin block uses).
+      // This is topology-stable: the equation lives on A138-12 regardless of which
+      // fields are in the current save batch — so ANY A138-12 save triggers a
+      // recompute. Previously the gate was on `ac_as_ratio` being in the save batch,
+      // but ac_as_ratio is read-only/derived and is never user-entered → the block
+      // was permanently dead (same dead-trigger class fixed for the basin block above).
       //
       // Cross-worksheet reads:
       //   A_S_m         — LOCAL to A138-12 (prefer save batch, else persisted)
       //   A_C           — cross-worksheet from A138-07 (persisted)
       //   flaechengruppe— cross-worksheet from A138-06 (persisted, value_enum/value_text)
       //   bbz_thickness — cross-worksheet from A138-06 (persisted, value_number)
-      const [loadingPresence] = await tx
-        .select({ id: fields.id })
-        .from(fields)
-        .where(
-          and(
-            inArray(fields.id, fieldIds),
-            eq(fields.symbol, 'ac_as_ratio'),
-            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-          ),
-        )
-        .limit(1);
+      // A138-12 owns the Tab.6 loading check; its A_S_m equation identifies the worksheet.
+      // Trigger on equation topology (fires on ANY A138-12 save), NOT on a field being in
+      // the save batch — ac_as_ratio is read-only/derived so it is never in the batch
+      // (same dead-trigger class fixed for the basin block above).
+      const A138_12_ASM_EQUATION_ID = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac';
+      const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
 
-      if (loadingPresence) {
+      if (isLoadingSave) {
         // 1. Sibling field ids for A138-12 (resolve output field ids + A_S_m local field).
         const lcWsFields = await tx
           .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
@@ -636,12 +634,15 @@ export async function saveWorksheet(
           enteredBy: string;
           enteredAt: Date;
         };
-        const lcDerivedRows: LcDerivedRow[] = [
-          { sym: 'ac_as_ratio',              valueNumber: lc.ac_as_ratio != null ? String(lc.ac_as_ratio) : null, valueText: null },
-          { sym: 'ac_as_ratio_limit',        valueNumber: lc.ac_as_ratio_limit != null ? String(lc.ac_as_ratio_limit) : null, valueText: null },
-          { sym: 'ac_as_ratio_check',        valueNumber: null, valueText: lc.ac_as_ratio_check },
-          { sym: 'ac_as_ratio_check_reason', valueNumber: null, valueText: lc.ac_as_ratio_check_reason },
-        ]
+        // Map over the shared constant so the symbol list has a single source of truth.
+        const lcValueMap: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+          ac_as_ratio:              { valueNumber: lc.ac_as_ratio != null ? String(lc.ac_as_ratio) : null, valueText: null },
+          ac_as_ratio_limit:        { valueNumber: lc.ac_as_ratio_limit != null ? String(lc.ac_as_ratio_limit) : null, valueText: null },
+          ac_as_ratio_check:        { valueNumber: null, valueText: lc.ac_as_ratio_check },
+          ac_as_ratio_check_reason: { valueNumber: null, valueText: lc.ac_as_ratio_check_reason },
+        };
+        const lcDerivedRows: LcDerivedRow[] = LOADING_CHECK_OUTPUT_SYMBOLS
+          .map((sym) => ({ sym, ...lcValueMap[sym] }))
           .map((x) => ({ ...x, fieldId: lcIdBySymbol.get(x.sym) }))
           .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
           .map((x) => ({
