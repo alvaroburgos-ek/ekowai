@@ -50,8 +50,10 @@ const THICK_BAND_M = 0.30;
 /**
  * Return the Tab.6 maximum A_C/A_S,m for the given tier and BBZ thickness.
  *
- * - tier1_none (groups D, VW1, V1, BG1 and (*) authority groups): no numeric
- *   limit exists — returns `{kind:'none'}`.
+ * - tier1_none (groups VW1, V1, BG1 — keine Anforderung): no numeric limit —
+ *   returns `{kind:'none'}`.
+ * - authority (group D and S-groups SD1, SD2, SV, SVW, SF, SL, SG, SA —
+ *   behördlich abzustimmen *): no numeric limit — returns `{kind:'none'}`.
  * - tier2 (groups VW2, V2, BF, BG2): ≤30 thin / ≤50 thick.
  * - tier3 (groups BL, V3, BG3): ≤15 thin / ≤30 thick.
  * - Null / unknown tier or null / non-finite thickness: `{kind:'indeterminate'}`.
