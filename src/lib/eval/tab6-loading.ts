@@ -173,6 +173,14 @@ export type FlaechengruppeCode = typeof FLAECHENGRUPPE_CODES[number];
  * - tier2         (30/50 limit):   VW2, V2, BF, BG2
  * - tier3         (15/30 limit):   BL, V3, BG3
  * - authority     (behördlich *):  D, SD1, SD2, SV, SVW, SF, SL, SG, SA
+ *
+ * NOTE — Tab.6 also carries a Mulden-Rigolen overflow cap (Muldenüberlauf n_M)
+ * per row, which is OUT OF SCOPE for this A138-12 A_C/A_S,m ratio check and NOT
+ * modelled here. Capture-and-reference stub for the future A138-19
+ * (Mulden-Rigolen) facility check so it isn't lost:
+ *   - BK I row (D/VW1/V1/BG1):        Überlauf in Rigole mit n_M max. 2/a
+ *   - tier2 + tier3 rows (BK II/III): Überlauf in Rigole mit n_M max. 1/a
+ * (Tab.6, Zeilen 919/920/924.)
  */
 export function flaechengruppeToTier(flaechengruppe: string | null): Tab6Tier | null {
   if (flaechengruppe === null) return null;
