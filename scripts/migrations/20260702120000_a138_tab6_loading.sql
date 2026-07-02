@@ -10,8 +10,8 @@
 --   (2) UPDATE A138-07 field `A_C`: append 'A138-12' to consumer_worksheets so the
 --       drainage-contributing area flows to the loading check (A138-12 reads it).
 --   (3) ALTER A138-12 field `ac_as_ratio_check`: change data_type 'boolean' → 'text'
---       for the 4-state status; clear the stale value_boolean param row from the §10e
---       shadow (removes leftover boolean value after type change).
+--       for the 4-state status; null value_boolean on ALL param rows of that field
+--       (every boolean value is stale after the boolean→text retype; ~1 row today).
 --   (4) INSERT field `ac_as_ratio_check_reason` on A138-12: companion text field for
 --       the not_applicable / indeterminate reason text.
 DO $$
@@ -67,6 +67,9 @@ BEGIN
   --       src/lib/eval/tab6-loading.ts (FLAECHENGRUPPE_CODES export).
   --     Consistency test: src/lib/eval/__tests__/tab6-loading.test.ts
   --       "flaechengruppeToTier — enum/resolver consistency guard".
+--     NOTE: Tab. 5 lists "SV bzw. SVW" as ONE row with one shared specification and
+--       defines no SV/SVW distinction. Both codes carry the same source wording
+--       (differentiator = the code) and both route to `authority`.
   -- ---------------------------------------------------------------------------
   IF NOT EXISTS (
     SELECT 1 FROM fields
@@ -98,8 +101,8 @@ BEGIN
         {"label_de": "Gleisanlagen, feste Fahrbahn > 100.000 Lt/d",                    "label_en": "Rail track, fixed trackway > 100,000 trains/d",          "value": "BG3", "order_index": 10, "regulation_reference": "Tab. 5"},
         {"label_de": "Dachflächen, bes. Materialbelastung (20–70 %)",                  "label_en": "Roof surfaces, special material load (20–70 %)",         "value": "SD1", "order_index": 11, "regulation_reference": "Tab. 5"},
         {"label_de": "Dachflächen, bes. Materialbelastung (> 70 %)",                   "label_en": "Roof surfaces, special material load (> 70 %)",          "value": "SD2", "order_index": 12, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Verkehr (Gewerbe/Industrie, bes. Belastung)",      "label_en": "Special traffic areas (commercial/industrial, high load)","value": "SV",  "order_index": 13, "regulation_reference": "Tab. 5"},
-        {"label_de": "Sonderflächen Verkehr, Wasserschutzgebiet",                        "label_en": "Special traffic areas, water protection zone",           "value": "SVW", "order_index": 14, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Verkehr, Misch-/Gewerbe-/Industriegebiete, bes. Beeinträchtigung, z. B. Lagerflächen (SV)",      "label_en": "Special traffic areas, mixed/commercial/industrial zones, particular impairment, e.g. storage yards (SV)","value": "SV",  "order_index": 13, "regulation_reference": "Tab. 5"},
+        {"label_de": "Sonderflächen Verkehr, Misch-/Gewerbe-/Industriegebiete, bes. Beeinträchtigung, z. B. Lagerflächen (SVW)",                        "label_en": "Special traffic areas, mixed/commercial/industrial zones, particular impairment, e.g. storage yards (SVW)",           "value": "SVW", "order_index": 14, "regulation_reference": "Tab. 5"},
         {"label_de": "Sonderflächen Flughafen (Wäsche/Betankung/Enteisung)",           "label_en": "Special airport areas (washing/fuelling/de-icing)",      "value": "SF",  "order_index": 15, "regulation_reference": "Tab. 5"},
         {"label_de": "Sonderflächen Landwirtschaft (Tierhaltung/Reinigung)",            "label_en": "Special agricultural areas (livestock/cleaning)",        "value": "SL",  "order_index": 16, "regulation_reference": "Tab. 5"},
         {"label_de": "Sonderflächen Gleis (Rangier-/Bremsstrecken, Herbizid)",         "label_en": "Special rail areas (shunting/braking sections, herbicide)","value": "SG", "order_index": 17, "regulation_reference": "Tab. 5"},
@@ -127,7 +130,8 @@ BEGIN
     SET data_type = 'text'
     WHERE worksheet_template_id = ws12 AND symbol = 'ac_as_ratio_check';
 
-  -- Clear stale boolean value (if any) so it doesn't linger as a ghost after type change.
+  -- Null value_boolean on ALL param rows of this field (every boolean is stale after
+  -- the boolean→text retype; ~1 such row today). Scoped to this field's rows only.
   UPDATE project_parameters
     SET value_boolean = null
     WHERE field_id = (

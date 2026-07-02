@@ -179,6 +179,9 @@ export type FlaechengruppeCode = typeof FLAECHENGRUPPE_CODES[number];
  * - tier3         (15/30 limit):   BL, V3, BG3
  * - authority     (behördlich *):  D, SD1, SD2, SV, SVW, SF, SL, SG, SA
  *
+ * Note: Tab.5 lists "SV bzw. SVW" as ONE row (one shared specification, no SV/SVW
+ * distinction); both codes share the source wording and both → authority.
+ *
  * NOTE — Tab.6 also carries a Mulden-Rigolen overflow cap (Muldenüberlauf n_M)
  * per row, which is OUT OF SCOPE for this A138-12 A_C/A_S,m ratio check and NOT
  * modelled here. Capture-and-reference stub for the future A138-19
