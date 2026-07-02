@@ -8,6 +8,7 @@ import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { VerifyButton } from './verify-button';
+import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
 
 type FieldDef = {
   id: string;
@@ -64,9 +65,13 @@ type Props = {
    * All editable controls are read-only/disabled and their onChange
    * handlers early-return without writing to the store. */
   readOnly?: boolean;
+  /** Current value of the sibling `ac_as_ratio_check_reason` field. Only
+   * consumed when field.symbol === 'ac_as_ratio_check' and isComputed=true,
+   * where it is forwarded to AcAsRatioCheckStatus as the reason text. */
+  statusReason?: string | null;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -179,6 +184,20 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {/* Input control by data_type */}
       {field.dataType === 'number' && (() => {
         const v = value?.type === 'number' ? value.value : null;
+
+        // ac_as_ratio_limit is null in not_applicable / indeterminate cases.
+        // Show a clear label instead of a blank number box.
+        if (field.symbol === 'ac_as_ratio_limit' && isComputed && v == null) {
+          return (
+            <div
+              data-testid="ac-as-ratio-limit-null"
+              className="block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-subtext italic bg-paper-2 cursor-default"
+            >
+              — (kein Tab.6-Grenzwert)
+            </div>
+          );
+        }
+
         const inputEl = (
           <input
             id={inputId}
@@ -221,6 +240,19 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
 
       {field.dataType === 'text' && (() => {
         const v = value?.type === 'text' ? value.value : null;
+
+        // ac_as_ratio_check is a T3-materialized status field. When computed,
+        // replace the raw read-only text input with the four-state badge.
+        if (field.symbol === 'ac_as_ratio_check' && isComputed) {
+          const status = v ?? 'indeterminate';
+          return (
+            <AcAsRatioCheckStatus
+              status={status}
+              reason={statusReason ?? null}
+            />
+          );
+        }
+
         const maxLength = field.validationRules?.maxLength;
         const useTextarea = (maxLength ?? 0) > 200;
         const textLocked = isComputed || readOnly;

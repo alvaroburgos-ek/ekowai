@@ -5,8 +5,8 @@
  * loading-check result (ac_as_ratio_check + ac_as_ratio_check_reason).
  *
  * This is a pure display component — it renders NO editable controls. It is
- * used by DynamicField (via the `checkStatusOverride` slot) when the field
- * symbol is `ac_as_ratio_check`, replacing the default read-only text input.
+ * used by DynamicField when the field symbol is `ac_as_ratio_check` and
+ * isComputed=true, replacing the default read-only text input.
  *
  * Four states:
  *   pass          → green "bestanden"           (ratio ≤ Grenzwert)
@@ -21,6 +21,10 @@
  *   fail          → text-error   + bg-error/10   + border-error/30
  *   not_applicable → text-warning + bg-warning/10 + border-warning/30
  *   indeterminate  → text-subtext + bg-paper-2    + border-hairline-strong
+ *
+ * Note: the null-limit label ("— (kein Tab.6-Grenzwert)") is NOT rendered
+ * here. It lives in DynamicField's number render branch for ac_as_ratio_limit,
+ * keeping each field's null-state on its own render path.
  */
 
 export type AcAsRatioStatus = 'pass' | 'fail' | 'not_applicable' | 'indeterminate';
@@ -28,8 +32,6 @@ export type AcAsRatioStatus = 'pass' | 'fail' | 'not_applicable' | 'indeterminat
 type Props = {
   status: AcAsRatioStatus | string;
   reason: string | null;
-  /** When true, renders the null-limit notice (data-testid="ac-as-ratio-limit-null"). */
-  limitIsNull?: boolean;
 };
 
 const STATE_CONFIG: Record<
@@ -62,7 +64,7 @@ const STATE_CONFIG: Record<
   },
 };
 
-export function AcAsRatioCheckStatus({ status, reason, limitIsNull = false }: Props) {
+export function AcAsRatioCheckStatus({ status, reason }: Props) {
   const cfg =
     STATE_CONFIG[status as AcAsRatioStatus] ?? STATE_CONFIG.indeterminate;
 
@@ -78,15 +80,6 @@ export function AcAsRatioCheckStatus({ status, reason, limitIsNull = false }: Pr
 
       {cfg.showReason && reason && (
         <p className="text-xs text-subtext leading-snug">{reason}</p>
-      )}
-
-      {limitIsNull && (
-        <p
-          data-testid="ac-as-ratio-limit-null"
-          className="text-xs text-subtext italic"
-        >
-          — (kein Tab.6-Grenzwert)
-        </p>
       )}
     </div>
   );

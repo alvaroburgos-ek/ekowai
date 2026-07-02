@@ -494,6 +494,19 @@ export function WorksheetForm({
     const fs = fieldsBySectionId.get(sectionId) ?? [];
     return fs.map((f) => {
       const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
+
+      // For ac_as_ratio_check, resolve the sibling reason field's current
+      // value and thread it in as statusReason so AcAsRatioCheckStatus can
+      // display the distinguishing text (keine Anforderung vs behördlich).
+      let statusReason: string | null = null;
+      if (f.symbol === 'ac_as_ratio_check') {
+        const reasonField = fieldBySymbol.get('ac_as_ratio_check_reason');
+        if (reasonField) {
+          const rv = values[reasonField.id];
+          statusReason = rv?.type === 'text' ? (rv.value ?? null) : null;
+        }
+      }
+
       return (
         <DynamicField
           key={f.id}
@@ -521,6 +534,7 @@ export function WorksheetForm({
           }
           isPlatformEngineer={isPlatformEngineer}
           readOnly={locked}
+          statusReason={statusReason}
         />
       );
     });

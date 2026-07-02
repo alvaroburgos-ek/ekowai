@@ -193,7 +193,9 @@ describe('A138-12 ac_as_ratio — isComputed=true renders read-only', () => {
 });
 
 describe('A138-12 ac_as_ratio_limit — isComputed=true renders read-only', () => {
-  it('number input has readOnly attribute when isComputed=true', () => {
+  it('number input has readOnly attribute when isComputed=true and a value is set', () => {
+    // Supply a value so the regular read-only number path is hit (not the null-state path)
+    initStore({ [AC_AS_RATIO_LIMIT_FIELD_ID]: { type: 'number', value: 0.5 } });
     render(
       <DynamicField
         field={AC_AS_RATIO_LIMIT_FIELD}
@@ -210,7 +212,8 @@ describe('A138-12 ac_as_ratio_limit — isComputed=true renders read-only', () =
 
   it('typing into isComputed=true ac_as_ratio_limit does NOT write to store', async () => {
     const user = userEvent.setup();
-    initStore();
+    // Supply a value so the spinbutton is rendered (not the null-state div)
+    initStore({ [AC_AS_RATIO_LIMIT_FIELD_ID]: { type: 'number', value: 0.5 } });
     render(
       <DynamicField
         field={AC_AS_RATIO_LIMIT_FIELD}
@@ -224,12 +227,14 @@ describe('A138-12 ac_as_ratio_limit — isComputed=true renders read-only', () =
     const input = screen.getByRole('spinbutton');
     await user.type(input, '3');
     const stored = useWorksheetStore.getState().values[AC_AS_RATIO_LIMIT_FIELD_ID];
-    expect(stored).toBeUndefined();
+    // Store must still hold the original 0.5 — typing into isComputed must not write
+    expect(stored).toEqual({ type: 'number', value: 0.5 });
   });
 });
 
-describe('A138-12 ac_as_ratio_check — isComputed=true renders read-only text', () => {
-  it('text input has readOnly attribute when isComputed=true', () => {
+describe('A138-12 ac_as_ratio_check — isComputed=true renders badge (not raw textbox)', () => {
+  it('renders AcAsRatioCheckStatus badge instead of a raw text input when isComputed=true', () => {
+    initStore({ [AC_AS_RATIO_CHECK_FIELD_ID]: { type: 'text', value: 'pass' } });
     render(
       <DynamicField
         field={AC_AS_RATIO_CHECK_FIELD}
@@ -240,14 +245,13 @@ describe('A138-12 ac_as_ratio_check — isComputed=true renders read-only text',
         isComputed={true}
       />,
     );
-    // text type renders an <input type="text">
-    const input = screen.getByRole('textbox');
-    expect(input).toHaveAttribute('readonly');
+    // The four-state badge must be rendered
+    expect(screen.getByTestId('ac-as-ratio-check-badge')).toBeInTheDocument();
+    // The raw text input must NOT be present
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  it('typing into isComputed=true ac_as_ratio_check does NOT write to store', async () => {
-    const user = userEvent.setup();
-    initStore();
+  it('isComputed=false: still renders a raw text input (no badge)', () => {
     render(
       <DynamicField
         field={AC_AS_RATIO_CHECK_FIELD}
@@ -255,13 +259,12 @@ describe('A138-12 ac_as_ratio_check — isComputed=true renders read-only text',
         projectId="p1"
         standardCode="DWA-A-138-12"
         docs={[]}
-        isComputed={true}
+        isComputed={false}
       />,
     );
-    const input = screen.getByRole('textbox');
-    await user.type(input, 'pass');
-    const stored = useWorksheetStore.getState().values[AC_AS_RATIO_CHECK_FIELD_ID];
-    expect(stored).toBeUndefined();
+    // Non-computed → no special component, just the normal text input
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(screen.queryByTestId('ac-as-ratio-check-badge')).not.toBeInTheDocument();
   });
 });
 
@@ -355,19 +358,163 @@ describe('AcAsRatioCheckStatus — four-state render', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 4. Null-state for ac_as_ratio_limit
+// 4. Null-state for ac_as_ratio_limit (via DynamicField render path)
+//    The null-label lives in DynamicField's number branch, not in
+//    AcAsRatioCheckStatus. When the store has no value for ac_as_ratio_limit
+//    and isComputed=true, a clear "— (kein Tab.6-Grenzwert)" label is shown.
 // ---------------------------------------------------------------------------
 
-describe('AcAsRatioCheckStatus — null limit display', () => {
-  it('renders null-limit label when status is not_applicable', () => {
+describe('DynamicField — ac_as_ratio_limit null-state', () => {
+  it('renders null-limit label when isComputed=true and value is null', () => {
+    initStore(); // no value for ac_as_ratio_limit
     render(
-      <AcAsRatioCheckStatus
-        status="not_applicable"
-        reason="keine Anforderung nach Tab.6"
-        limitIsNull={true}
+      <DynamicField
+        field={AC_AS_RATIO_LIMIT_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
       />,
     );
-    // The null-limit label must be present somewhere in the component output
     expect(screen.getByTestId('ac-as-ratio-limit-null')).toBeInTheDocument();
+    expect(screen.getByText(/kein Tab\.6-Grenzwert/i)).toBeInTheDocument();
+    // The raw number spinbutton must NOT be present
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+  });
+
+  it('renders number input (not null-label) when isComputed=true and value is set', () => {
+    initStore({ [AC_AS_RATIO_LIMIT_FIELD_ID]: { type: 'number', value: 0.5 } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_LIMIT_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+      />,
+    );
+    expect(screen.queryByTestId('ac-as-ratio-limit-null')).not.toBeInTheDocument();
+    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 5. Integration: DynamicField renders AcAsRatioCheckStatus for ac_as_ratio_check
+//    This locks in the wiring so the gap can't silently reappear.
+// ---------------------------------------------------------------------------
+
+describe('DynamicField integration — ac_as_ratio_check badge wiring', () => {
+  it('renders badge with correct data-status when status=pass', () => {
+    initStore({ [AC_AS_RATIO_CHECK_FIELD_ID]: { type: 'text', value: 'pass' } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_CHECK_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+        statusReason={null}
+      />,
+    );
+    const badge = screen.getByTestId('ac-as-ratio-check-badge');
+    expect(badge).toHaveAttribute('data-status', 'pass');
+    // Raw text input must be absent
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('renders badge with correct data-status when status=fail', () => {
+    initStore({ [AC_AS_RATIO_CHECK_FIELD_ID]: { type: 'text', value: 'fail' } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_CHECK_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+        statusReason={null}
+      />,
+    );
+    const badge = screen.getByTestId('ac-as-ratio-check-badge');
+    expect(badge).toHaveAttribute('data-status', 'fail');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('not_applicable + reason "keine Anforderung" — reason text visible', () => {
+    initStore({ [AC_AS_RATIO_CHECK_FIELD_ID]: { type: 'text', value: 'not_applicable' } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_CHECK_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+        statusReason="keine Anforderung nach Tab.6"
+      />,
+    );
+    const badge = screen.getByTestId('ac-as-ratio-check-badge');
+    expect(badge).toHaveAttribute('data-status', 'not_applicable');
+    expect(screen.getByText(/keine Anforderung nach Tab\.6/i)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('not_applicable + reason "behördlich" — different reason text visible', () => {
+    initStore({ [AC_AS_RATIO_CHECK_FIELD_ID]: { type: 'text', value: 'not_applicable' } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_CHECK_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+        statusReason="behördlich abzustimmen (*)"
+      />,
+    );
+    const badge = screen.getByTestId('ac-as-ratio-check-badge');
+    expect(badge).toHaveAttribute('data-status', 'not_applicable');
+    expect(screen.getByText(/beh.*rdlich abzustimmen/i)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('indeterminate + reason — reason text visible', () => {
+    initStore({ [AC_AS_RATIO_CHECK_FIELD_ID]: { type: 'text', value: 'indeterminate' } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_CHECK_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+        statusReason="Flächengruppe fehlt"
+      />,
+    );
+    const badge = screen.getByTestId('ac-as-ratio-check-badge');
+    expect(badge).toHaveAttribute('data-status', 'indeterminate');
+    expect(screen.getByText(/Fl.*chengruppe fehlt/i)).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  });
+
+  it('no stored value → defaults to indeterminate badge', () => {
+    initStore(); // no value
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_CHECK_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+        statusReason={null}
+      />,
+    );
+    const badge = screen.getByTestId('ac-as-ratio-check-badge');
+    expect(badge).toHaveAttribute('data-status', 'indeterminate');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 });
