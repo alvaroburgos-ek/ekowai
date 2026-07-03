@@ -141,8 +141,13 @@ beforeEach(() => initStore());
 // 1. Read-only guard on the four derived fields
 // ---------------------------------------------------------------------------
 
-describe('A138-12 ac_as_ratio — isComputed=true renders read-only', () => {
-  it('number input has readOnly attribute when isComputed=true', () => {
+describe('A138-12 ac_as_ratio — isComputed=true renders formatted display (not editable spinbutton)', () => {
+  // ac_as_ratio when isComputed=true is rendered as a formatted display div
+  // (2 decimal places, German locale) instead of an input[type=number].
+  // This guarantees the raw float (e.g. 108.68382022471911) is never shown.
+
+  it('renders display div (not spinbutton) when isComputed=true', () => {
+    initStore({ [AC_AS_RATIO_FIELD_ID]: { type: 'number', value: 5.0 } });
     render(
       <DynamicField
         field={AC_AS_RATIO_FIELD}
@@ -153,11 +158,13 @@ describe('A138-12 ac_as_ratio — isComputed=true renders read-only', () => {
         isComputed={true}
       />,
     );
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveAttribute('readonly');
+    // Display div must be present; raw spinbutton must be absent
+    expect(screen.getByTestId('ac-as-ratio-display')).toBeInTheDocument();
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
   });
 
-  it('number input has aria-readonly when isComputed=true', () => {
+  it('display div shows "—" when no value and isComputed=true', () => {
+    initStore(); // no value
     render(
       <DynamicField
         field={AC_AS_RATIO_FIELD}
@@ -168,25 +175,8 @@ describe('A138-12 ac_as_ratio — isComputed=true renders read-only', () => {
         isComputed={true}
       />,
     );
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveAttribute('aria-readonly', 'true');
-  });
-
-  it('typing into isComputed=true does NOT write to store', async () => {
-    const user = userEvent.setup();
-    initStore();
-    render(
-      <DynamicField
-        field={AC_AS_RATIO_FIELD}
-        locale="de"
-        projectId="p1"
-        standardCode="DWA-A-138-12"
-        docs={[]}
-        isComputed={true}
-      />,
-    );
-    const input = screen.getByRole('spinbutton');
-    await user.type(input, '42');
+    expect(screen.getByTestId('ac-as-ratio-display')).toHaveTextContent('—');
+    // Store must be unchanged (no write from display)
     const stored = useWorksheetStore.getState().values[AC_AS_RATIO_FIELD_ID];
     expect(stored).toBeUndefined();
   });
@@ -404,6 +394,85 @@ describe('DynamicField — ac_as_ratio_limit null-state', () => {
 // 5. Integration: DynamicField renders AcAsRatioCheckStatus for ac_as_ratio_check
 //    This locks in the wiring so the gap can't silently reappear.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// 6. Fix 2 — ac_as_ratio rounds to 2 decimals (German locale) when isComputed
+// ---------------------------------------------------------------------------
+
+describe('DynamicField — ac_as_ratio 2-decimal formatting when isComputed', () => {
+  it('renders formatted value "108,68" for raw 108.68382 when isComputed=true', () => {
+    initStore({ [AC_AS_RATIO_FIELD_ID]: { type: 'number', value: 108.68382022471911 } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+      />,
+    );
+    // Formatted display must be present
+    expect(screen.getByTestId('ac-as-ratio-display')).toBeInTheDocument();
+    expect(screen.getByTestId('ac-as-ratio-display')).toHaveTextContent('108,68');
+    // Raw spinbutton must NOT be present for ac_as_ratio when isComputed
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+  });
+
+  it('shows "—" placeholder when ac_as_ratio has no value and isComputed=true', () => {
+    initStore(); // no value
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+      />,
+    );
+    expect(screen.getByTestId('ac-as-ratio-display')).toBeInTheDocument();
+    expect(screen.getByTestId('ac-as-ratio-display')).toHaveTextContent('—');
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+  });
+
+  it('guard: a DIFFERENT computed number field (e.g. A_E) does NOT get 2-decimal display', () => {
+    // A_E with a small value like 7.98e-8 — should still render spinbutton (raw), not 2-decimal div
+    const smallField = { ...A_E_FIELD, id: 'small-field-id', symbol: 'k_i', dataType: 'number' as const };
+    initStore({ 'small-field-id': { type: 'number', value: 7.98e-8 } });
+    render(
+      <DynamicField
+        field={smallField}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={true}
+      />,
+    );
+    // Must NOT render the ac_as_ratio-specific display element
+    expect(screen.queryByTestId('ac-as-ratio-display')).not.toBeInTheDocument();
+    // Must render the standard spinbutton
+    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+  });
+
+  it('guard: ac_as_ratio with isComputed=false still renders a spinbutton (editable path)', () => {
+    initStore({ [AC_AS_RATIO_FIELD_ID]: { type: 'number', value: 108.68382022471911 } });
+    render(
+      <DynamicField
+        field={AC_AS_RATIO_FIELD}
+        locale="de"
+        projectId="p1"
+        standardCode="DWA-A-138-12"
+        docs={[]}
+        isComputed={false}
+      />,
+    );
+    // Editable path — no special display, shows spinbutton
+    expect(screen.queryByTestId('ac-as-ratio-display')).not.toBeInTheDocument();
+    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+  });
+});
 
 describe('DynamicField integration — ac_as_ratio_check badge wiring', () => {
   it('renders badge with correct data-status when status=pass', () => {

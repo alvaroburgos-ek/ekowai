@@ -586,6 +586,19 @@ export function WorksheetForm({
                   ? new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v.value)
                   : v?.type === 'json' && v.value && typeof v.value === 'object'
                   ? '(Tabelle)'
+                  : v?.type === 'enum' && v.value != null
+                  ? (() => {
+                      if (f.enumValues) {
+                        const entry = f.enumValues.find((e) => e.value === v.value);
+                        const label = locale === 'de' ? entry?.label_de : entry?.label_en;
+                        return label ?? String(v.value);
+                      }
+                      return String(v.value);
+                    })()
+                  : v?.type === 'boolean' && v.value != null
+                  ? (v.value ? 'Ja' : 'Nein')
+                  : v?.type === 'text' && v.value
+                  ? v.value
                   : '—';
               const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
               return (

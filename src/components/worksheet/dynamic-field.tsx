@@ -198,6 +198,28 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           );
         }
 
+        // ac_as_ratio is a raw float (e.g. 108.68382022471911). When computed/
+        // read-only, display it rounded to 2 decimals in German locale so the
+        // engineer sees "108,68" instead of the full mantissa. Scoped strictly
+        // to this symbol — other computed numbers (k_i, etc.) keep their raw value.
+        if (field.symbol === 'ac_as_ratio' && isComputed) {
+          const formatted =
+            v != null && Number.isFinite(v)
+              ? new Intl.NumberFormat('de-DE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(v)
+              : '—';
+          return (
+            <div
+              data-testid="ac-as-ratio-display"
+              className="block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm tabular-nums font-semibold bg-paper-2 text-ink cursor-default"
+            >
+              {formatted}
+            </div>
+          );
+        }
+
         const inputEl = (
           <input
             id={inputId}
