@@ -52,8 +52,17 @@ export type SaveWorksheetInput = {
   values: Record<string, FieldValue>;   // by field_id
 };
 
+/** A single server-materialized derived value returned after a successful save.
+ * The client applies these to the store surgically (read-only computed fields
+ * only) so they appear without a manual page reload. */
+export type SavedDerivedRow = {
+  fieldId: string;
+  valueNumber: string | null;
+  valueText: string | null;
+};
+
 export type SaveWorksheetResult =
-  | { ok: true; saved: number; warnings: string[] }
+  | { ok: true; saved: number; warnings: string[]; derived: SavedDerivedRow[] }
   | { ok: false; error: string };
 
 /** Save user-entered values for a worksheet instance.
@@ -101,7 +110,7 @@ export async function saveWorksheet(
 
   const fieldIds = Object.keys(input.values);
   if (fieldIds.length === 0) {
-    return { ok: true, saved: 0, warnings: [] };
+    return { ok: true, saved: 0, warnings: [], derived: [] };
   }
 
   // Load field metadata — restrict to fields belonging to this instance's
@@ -257,6 +266,10 @@ export async function saveWorksheet(
 
   const savedCount = parameterValues.length;
 
+  // Accumulated derived rows written by the materialize passes below.
+  // Populated inside the transaction; returned to the client on ok=true.
+  const writtenDerived: SavedDerivedRow[] = [];
+
   if (savedCount > 0) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
@@ -332,6 +345,10 @@ export async function saveWorksheet(
               enteredAt: now,
             },
           });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of derivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
+          }
         }
       }
 
@@ -516,6 +533,10 @@ export async function saveWorksheet(
               enteredAt: now,
             },
           });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of basinDerivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
+          }
         }
       }
 
@@ -666,6 +687,10 @@ export async function saveWorksheet(
               enteredAt: now,
             },
           });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of lcDerivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+          }
         }
       }
 
@@ -679,7 +704,7 @@ export async function saveWorksheet(
     });
   }
 
-  return { ok: true, saved: savedCount, warnings };
+  return { ok: true, saved: savedCount, warnings, derived: writtenDerived };
 }
 
 function extractValue(

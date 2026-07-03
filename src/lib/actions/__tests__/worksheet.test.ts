@@ -4,6 +4,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 // Focused unit test: assert the save loop symbol list equals SURFACE_DERIVED_SYMBOLS (all 6).
 // This is a static-import-only test — no live DB required — so it runs before _setup-env.
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
+import type { SaveWorksheetResult, SavedDerivedRow } from '../worksheet';
 
 describe('worksheet save loop — derived symbol coverage', () => {
   it('SURFACE_DERIVED_SYMBOLS contains all six expected symbols (4 original + 2 new)', () => {
@@ -15,6 +16,52 @@ describe('worksheet save loop — derived symbol coverage', () => {
     expect(symbols).toContain('A_E_nba');
     expect(symbols).toContain('A_C_sealed');
     expect(symbols).toContain('A_C_unsealed');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task B — SaveWorksheetResult type shape (static, no DB required)
+// ---------------------------------------------------------------------------
+describe('SaveWorksheetResult type shape — Task B return contract', () => {
+  it('ok=true result includes a derived array (compile-time + runtime check)', () => {
+    // Construct values that the TypeScript type requires — if the type doesn't
+    // have `derived`, this will fail to compile (TS error surfaces as test error).
+    const okResult: SaveWorksheetResult = {
+      ok: true,
+      saved: 2,
+      warnings: [],
+      derived: [
+        { fieldId: 'f1', valueNumber: '108.68', valueText: null },
+        { fieldId: 'f2', valueNumber: null,     valueText: 'fail' },
+      ],
+    };
+    expect(okResult.ok).toBe(true);
+    if (okResult.ok) {
+      expect(Array.isArray(okResult.derived)).toBe(true);
+      expect(okResult.derived).toHaveLength(2);
+      const first = okResult.derived[0] as SavedDerivedRow;
+      expect(first.fieldId).toBe('f1');
+      expect(first.valueNumber).toBe('108.68');
+      expect(first.valueText).toBeNull();
+    }
+  });
+
+  it('ok=false result has no derived property (error shape unchanged)', () => {
+    const errResult: SaveWorksheetResult = { ok: false, error: 'DB error' };
+    expect(errResult.ok).toBe(false);
+    if (!errResult.ok) {
+      expect(errResult.error).toBe('DB error');
+      // TypeScript: accessing .derived on the error branch is a compile error —
+      // this runtime check confirms the object does not have it either.
+      expect('derived' in errResult).toBe(false);
+    }
+  });
+
+  it('SavedDerivedRow type has fieldId, valueNumber, valueText', () => {
+    const row: SavedDerivedRow = { fieldId: 'abc', valueNumber: '5.0', valueText: null };
+    expect(row.fieldId).toBe('abc');
+    expect(row.valueNumber).toBe('5.0');
+    expect(row.valueText).toBeNull();
   });
 });
 

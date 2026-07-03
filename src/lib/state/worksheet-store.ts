@@ -87,11 +87,43 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
     set({ saveStatus: 'saving' });
     const result = await saveFn({ instanceId: state.instanceId, values: valuesToSave });
     if (result.ok) {
-      set({
+      // Apply server-materialized derived values surgically to the store.
+      // Only the field ids returned in `derived` are updated; all other fields —
+      // including any dirty/pending user edits — are untouched (non-interference).
+      // These are read-only computed fields the user never edits, so updating
+      // them cannot clobber in-flight work.
+      const derivedUpdates: Record<string, FieldValue> = {};
+      if (result.derived && result.derived.length > 0) {
+        const currentValues = get().values;
+        for (const row of result.derived) {
+          // Determine the FieldValue type from the existing store entry for this
+          // field id (if any), or infer from which column is non-null.
+          // Priority: existing type from store (preserves the field's data type);
+          // fallback: valueText → 'text', valueNumber → 'number'.
+          const existing = currentValues[row.fieldId];
+          if (existing?.type === 'text' || (!existing && row.valueText !== null && row.valueNumber === null)) {
+            derivedUpdates[row.fieldId] = { type: 'text', value: row.valueText };
+          } else if (existing?.type === 'number' || (!existing && row.valueNumber !== null)) {
+            const num = row.valueNumber != null ? Number(row.valueNumber) : null;
+            derivedUpdates[row.fieldId] = { type: 'number', value: num != null && Number.isFinite(num) ? num : null };
+          } else if (existing) {
+            // Existing type is neither text nor number (enum/boolean/etc.) — leave alone;
+            // the materialize passes only write number/text columns.
+          }
+          // If no existing entry and both columns are null, skip (nothing to write).
+        }
+      }
+      set((s) => ({
         saveStatus: 'saved',
         lastSavedAt: new Date().toISOString(),
         pendingFieldIds: new Set(),
-      });
+        // Merge derived updates on top of current values. pendingFieldIds was
+        // cleared above so there are no dirty fields to protect at this point;
+        // but this spread preserves any fields not in derivedUpdates untouched.
+        values: Object.keys(derivedUpdates).length > 0
+          ? { ...s.values, ...derivedUpdates }
+          : s.values,
+      }));
       // Auto-clear 'saved' after 3s
       setTimeout(() => {
         if (get().saveStatus === 'saved') set({ saveStatus: 'idle' });
