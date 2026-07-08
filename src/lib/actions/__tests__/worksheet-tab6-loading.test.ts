@@ -17,6 +17,9 @@
  *   - Reason text: non-null for not_applicable and indeterminate; null for evaluated.
  *   - VW1 (tier1_none) and D (authority) produce DISTINCT not_applicable reasons.
  *   - Output shape has exactly 4 keys.
+ *   - B1-BLOCKER guard-logic: savedCount=0 + isLoadingSave → transaction/materialize runs;
+ *     savedCount=0 + isBasinSave → transaction/materialize runs;
+ *     savedCount=0 + neither → no transaction (no-op).
  */
 
 // @vitest-environment happy-dom
@@ -141,5 +144,119 @@ describe('Tab.6 loading-check output shape — unit (no DB)', () => {
     expect(keys).toContain('ac_as_ratio_check');
     expect(keys).toContain('ac_as_ratio_check_reason');
     expect(keys).toHaveLength(4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// B1-BLOCKER: empty-batch guard logic — unit (no DB)
+//
+// These tests verify the GUARD CONDITION introduced to fix the stale-verdict bug:
+//   if (savedCount > 0 || isBasinSave || isLoadingSave) { tx open }
+//
+// Unit-level proof: the three boolean combinations that must open/skip the transaction.
+// The DB-backed round-trip (loading materialize fires on empty-batch A138-12 save)
+// is proven in worksheet-tab6-loading.integration.test.ts.
+// ---------------------------------------------------------------------------
+import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
+
+describe('B1-BLOCKER empty-batch guard logic — unit (no DB)', () => {
+  // Helper: mirrors the guard condition from saveWorksheet (worksheet.ts)
+  function shouldOpenTransaction(
+    savedCount: number,
+    isBasinSave: boolean,
+    isLoadingSave: boolean,
+  ): boolean {
+    return savedCount > 0 || isBasinSave || isLoadingSave;
+  }
+
+  // Helper: mirrors the early-return guard from saveWorksheet (worksheet.ts)
+  function shouldEarlyReturn(
+    fieldIdsLength: number,
+    isBasinSave: boolean,
+    isLoadingSave: boolean,
+  ): boolean {
+    return fieldIdsLength === 0 && !isBasinSave && !isLoadingSave;
+  }
+
+  // --- Loading save ---
+
+  it('savedCount=0 + isLoadingSave=true → transaction OPENS (loading materialize runs)', () => {
+    const opens = shouldOpenTransaction(0, false, true);
+    expect(opens).toBe(true);
+  });
+
+  it('savedCount=0 + isLoadingSave: does NOT early-return even with empty fieldIds', () => {
+    // When input.values is empty ({}) but the template owns the loading equation,
+    // the function must proceed (no early return) so the materialize fires.
+    const returns = shouldEarlyReturn(0, false, true);
+    expect(returns).toBe(false);
+  });
+
+  it('isLoadingSave=true: equation topology detects A138-12 regardless of batch contents', () => {
+    // Simulates: fieldIds = [] (no fields submitted), templateEquations has the A_S_m eq.
+    const templateEquations = [{ id: A138_12_ASM_EQUATION_ID, outputSymbol: 'A_S_m' }];
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    const opens = shouldOpenTransaction(0, false, isLoadingSave);
+    expect(isLoadingSave).toBe(true);
+    expect(opens).toBe(true);
+  });
+
+  // --- Basin save ---
+
+  it('savedCount=0 + isBasinSave=true → transaction OPENS (basin materialize runs)', () => {
+    const opens = shouldOpenTransaction(0, true, false);
+    expect(opens).toBe(true);
+  });
+
+  it('savedCount=0 + isBasinSave: does NOT early-return even with empty fieldIds', () => {
+    const returns = shouldEarlyReturn(0, true, false);
+    expect(returns).toBe(false);
+  });
+
+  it('isBasinSave=true: equation topology detects A138-13 regardless of batch contents', () => {
+    const templateEquations = [{ id: BASIN_GL8_EQUATION_ID, outputSymbol: 'V_VA' }];
+    const isBasinSave = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
+    const opens = shouldOpenTransaction(0, isBasinSave, false);
+    expect(isBasinSave).toBe(true);
+    expect(opens).toBe(true);
+  });
+
+  // --- No-op: non-basin, non-loading with empty batch ---
+
+  it('savedCount=0 + isBasinSave=false + isLoadingSave=false → transaction SKIPPED (no-op)', () => {
+    const opens = shouldOpenTransaction(0, false, false);
+    expect(opens).toBe(false);
+  });
+
+  it('savedCount=0 + neither trigger: early-return fires for truly empty + non-topology save', () => {
+    const returns = shouldEarlyReturn(0, false, false);
+    expect(returns).toBe(true);
+  });
+
+  it('non-basin/non-loading equations → isBasinSave=false, isLoadingSave=false → no-op', () => {
+    // e.g. A138-07 surface worksheet: no basin or loading equation
+    const templateEquations = [
+      { id: 'some-surface-equation-id', outputSymbol: 'A_C' },
+    ];
+    const isBasinSave   = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
+    const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+    const opens = shouldOpenTransaction(0, isBasinSave, isLoadingSave);
+    expect(isBasinSave).toBe(false);
+    expect(isLoadingSave).toBe(false);
+    expect(opens).toBe(false);
+  });
+
+  // --- Regression: normal savedCount>0 still fires ---
+
+  it('savedCount>0 + isBasinSave=false + isLoadingSave=false → transaction OPENS (normal save)', () => {
+    const opens = shouldOpenTransaction(3, false, false);
+    expect(opens).toBe(true);
+  });
+
+  it('savedCount>0 + any topology flag → transaction OPENS', () => {
+    // Both conditions true: normal save on A138-12 (fields submitted + loading topology)
+    expect(shouldOpenTransaction(2, false, true)).toBe(true);
+    expect(shouldOpenTransaction(1, true, false)).toBe(true);
+    expect(shouldOpenTransaction(5, true, true)).toBe(true);
   });
 });

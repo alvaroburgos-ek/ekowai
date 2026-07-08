@@ -109,24 +109,6 @@ export async function saveWorksheet(
   }
 
   const fieldIds = Object.keys(input.values);
-  if (fieldIds.length === 0) {
-    return { ok: true, saved: 0, warnings: [], derived: [] };
-  }
-
-  // Load field metadata — restrict to fields belonging to this instance's
-  // worksheet template so callers cannot write values for fields of a
-  // different template within the same project.
-  const fieldMetas = await db
-    .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol })
-    .from(fields)
-    .where(
-      and(
-        inArray(fields.id, fieldIds),
-        eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-      ),
-    );
-  const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
-  const symbolById = new Map(fieldMetas.map((f) => [f.id, f.symbol]));
 
   // Single-source integrity: a value this worksheet's equations PRODUCE must be
   // persisted as `derived`, never as an engineer `entered` input — even when it
@@ -134,22 +116,57 @@ export async function saveWorksheet(
   // surface-materialization path below. Compute the produced-symbol set from the
   // template's equations (displayOnly outputs stay `entered` — they're engineer
   // iteration variables). See @/lib/eval/derived-output-symbols.
+  //
+  // Loaded BEFORE the early-return check so topology-driven triggers
+  // (isBasinSave, isLoadingSave) are available even on empty-batch saves.
   const templateEquations = await db
     .select({ id: equations.id, outputSymbol: equations.outputSymbol })
     .from(equations)
     .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
   const derivedSymbols = derivedOutputSymbols(templateEquations);
 
-  // Load existing parameters for diff
-  const existing = await db
-    .select()
-    .from(projectParameters)
-    .where(
-      and(
-        eq(projectParameters.projectId, instance.projectId),
-        inArray(projectParameters.fieldId, fieldIds),
-      ),
-    );
+  // Topology-based trigger flags — computed at function scope so the outer
+  // transaction guard can use them on empty-batch saves (savedCount === 0).
+  // These depend only on which equations the template owns, not on what's in
+  // the current save batch.
+  const isBasinSave   = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
+  const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+
+  // Fast-path: nothing submitted AND no topology-triggered recompute needed.
+  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave) {
+    return { ok: true, saved: 0, warnings: [], derived: [] };
+  }
+
+  // Load field metadata — restrict to fields belonging to this instance's
+  // worksheet template so callers cannot write values for fields of a
+  // different template within the same project.
+  // Guard against empty fieldIds: inArray with [] is a SQL error in some drivers.
+  const fieldMetas = fieldIds.length > 0
+    ? await db
+        .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol })
+        .from(fields)
+        .where(
+          and(
+            inArray(fields.id, fieldIds),
+            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+          ),
+        )
+    : [];
+  const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
+  const symbolById = new Map(fieldMetas.map((f) => [f.id, f.symbol]));
+
+  // Load existing parameters for diff (skip if no fields to diff).
+  const existing = fieldIds.length > 0
+    ? await db
+        .select()
+        .from(projectParameters)
+        .where(
+          and(
+            eq(projectParameters.projectId, instance.projectId),
+            inArray(projectParameters.fieldId, fieldIds),
+          ),
+        )
+    : [];
   const existingById = new Map(existing.map((p) => [p.fieldId, p]));
 
   const warnings: string[] = [];
@@ -270,31 +287,43 @@ export async function saveWorksheet(
   // Populated inside the transaction; returned to the client on ok=true.
   const writtenDerived: SavedDerivedRow[] = [];
 
-  if (savedCount > 0) {
+  // Open the transaction when:
+  //   (a) there are actual parameter rows to write (savedCount > 0), OR
+  //   (b) this worksheet owns a topology-triggered materialize block that must
+  //       recompute even on an empty save batch (upstream input changed on another
+  //       worksheet → stale-verdict fix).
+  //   The SURFACE block is excluded from the guard because surface_inventory being
+  //   in the save batch is what identifies a surface save — it only fires when
+  //   savedCount > 0, so adding surfacePresence here would be redundant.
+  if (savedCount > 0 || isBasinSave || isLoadingSave) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
       // share the same enteredAt so there is no skew from multiple new Date() calls.
       const now = new Date();
 
-      // ONE batched upsert for all parameter rows
-      await tx
-        .insert(projectParameters)
-        .values(parameterValues)
-        .onConflictDoUpdate({
-          target: [projectParameters.projectId, projectParameters.fieldId],
-          set: {
-            valueNumber: sql`excluded.value_number`,
-            valueText: sql`excluded.value_text`,
-            valueEnum: sql`excluded.value_enum`,
-            valueDate: sql`excluded.value_date`,
-            valueBoolean: sql`excluded.value_boolean`,
-            valueJson: sql`excluded.value_json`,
-            sourceType: sql`excluded.source_type`,
-            sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
-            enteredBy: sql`excluded.entered_by`,
-            enteredAt: now,
-          },
-        });
+      // ONE batched upsert for all parameter rows — guarded so an empty batch
+      // (topology-triggered recompute with no local field change) does not
+      // attempt to insert zero rows (which is a no-op but wastes a round-trip).
+      if (parameterValues.length > 0) {
+        await tx
+          .insert(projectParameters)
+          .values(parameterValues)
+          .onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              valueText: sql`excluded.value_text`,
+              valueEnum: sql`excluded.value_enum`,
+              valueDate: sql`excluded.value_date`,
+              valueBoolean: sql`excluded.value_boolean`,
+              valueJson: sql`excluded.value_json`,
+              sourceType: sql`excluded.source_type`,
+              sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
+      }
 
       // Materialize derived surface outputs when A138-07's surface_inventory was saved.
       // Runs inside the same transaction so derived rows are always consistent with
@@ -358,12 +387,12 @@ export async function saveWorksheet(
       // the governing-duration iteration (single-producer rule).
       //
       // Detection: the saved template owns the basin Gl.8 equation. We already
-      // loaded `templateEquations` for this template above (line ~119). This
-      // is topology-stable: the equation lives on A138-13 regardless of which
-      // fields are in the current save batch — so any A138-13 save triggers a
-      // recompute. (Previously the gate was on r_D_n_table being in the save
-      // batch, but that carrier moved to A138-04, making the block dead.)
-      const isBasinSave = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
+      // loaded `templateEquations` for this template above and hoisted `isBasinSave`
+      // to function scope. This is topology-stable: the equation lives on A138-13
+      // regardless of which fields are in the current save batch — so any A138-13
+      // save triggers a recompute. (Previously the gate was on r_D_n_table being in
+      // the save batch, but that carrier moved to A138-04, making the block dead.)
+      // `isBasinSave` is now declared at function scope (see above); used here directly.
 
       if (isBasinSave) {
         // 1. Gather sibling fields for this template (to resolve output field ids +
@@ -544,8 +573,8 @@ export async function saveWorksheet(
       // ac_as_ratio_check, ac_as_ratio_check_reason) whenever this save targets the
       // A138-12 (BBZ loading check) worksheet. Persisted as derived rows.
       //
-      // Detection: A138-12 owns the A_S_m equation (55151cb1-…). We already loaded
-      // `templateEquations` for this template above (same array the basin block uses).
+      // Detection: A138-12 owns the A_S_m equation (55151cb1-…). `isLoadingSave`
+      // is hoisted to function scope (see above) and used here directly.
       // This is topology-stable: the equation lives on A138-12 regardless of which
       // fields are in the current save batch — so ANY A138-12 save triggers a
       // recompute. Previously the gate was on `ac_as_ratio` being in the save batch,
@@ -557,11 +586,7 @@ export async function saveWorksheet(
       //   A_C           — cross-worksheet from A138-07 (persisted)
       //   flaechengruppe— cross-worksheet from A138-06 (persisted, value_enum/value_text)
       //   bbz_thickness — cross-worksheet from A138-06 (persisted, value_number)
-      // A138-12 owns the Tab.6 loading check; its A_S_m equation identifies the worksheet.
-      // Trigger on equation topology (fires on ANY A138-12 save), NOT on a field being in
-      // the save batch — ac_as_ratio is read-only/derived so it is never in the batch
-      // (same dead-trigger class fixed for the basin block above).
-      const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+      // `isLoadingSave` is declared at function scope; used here directly.
 
       if (isLoadingSave) {
         // 1. Sibling field ids for A138-12 (resolve output field ids + A_S_m local field).
@@ -694,8 +719,12 @@ export async function saveWorksheet(
         }
       }
 
-      // ONE batched insert for all audit rows
-      await tx.insert(auditLog).values(auditValues);
+      // ONE batched insert for all audit rows — guarded so an empty-batch
+      // topology-triggered save (no local field change) does not attempt to
+      // insert zero audit rows (which would be a DB error).
+      if (auditValues.length > 0) {
+        await tx.insert(auditLog).values(auditValues);
+      }
 
       await tx
         .update(worksheetInstances)
