@@ -13,7 +13,6 @@
  * SKIPS cleanly if DATABASE_URL is not set (using describe.skip pattern).
  */
 import { describe, it, expect } from 'vitest';
-import fs from 'node:fs';
 
 // Check if DATABASE_URL is set before importing any DB client.
 const DATABASE_URL = process.env.DATABASE_URL || process.env.VITE_DATABASE_URL;
@@ -21,13 +20,6 @@ const HAS_DB = !!DATABASE_URL;
 const maybe = HAS_DB ? describe : describe.skip;
 
 maybe('A_S_m single-source invariant (integration)', () => {
-  it('loads .env.local', () => {
-    // _setup-env imports are in other tests; this one is defensive.
-    // If DATABASE_URL is set, the test harness will have loaded .env.local already.
-    // This line ensures the test runs cleanly even when DB is unavailable.
-    expect(HAS_DB).toBe(true);
-  });
-
   it('exactly one active A_S_m field exists in DWA-A-138-1', async () => {
     if (!HAS_DB) return; // Redundant but defensive.
 
