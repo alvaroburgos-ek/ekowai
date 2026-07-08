@@ -1669,6 +1669,102 @@ export async function saveWorksheet(
                   },
                 });
                 writtenDerived.push({ fieldId: asmClearFieldId, valueNumber: null, valueText: null });
+
+                // Tab.6 clear-path recompute: A_S_m is now null — persist an indeterminate
+                // verdict immediately so previously-persisted ac_as_ratio* rows do not remain
+                // stale (reflecting the old facility's geometry). Mirrors step 7's chained
+                // re-fire exactly; cross inputs re-queried here because they are not in scope.
+                const clearLcCrossFields = await tx
+                  .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+                  .from(fields)
+                  .where(and(
+                    inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
+                    eq(fields.active, true),
+                  ));
+                const clearLcFieldIds = clearLcCrossFields.map((f) => f.id);
+                const clearLcParams = clearLcFieldIds.length > 0
+                  ? await tx
+                      .select({
+                        fieldId: projectParameters.fieldId,
+                        valueNumber: projectParameters.valueNumber,
+                        valueText: projectParameters.valueText,
+                        valueEnum: projectParameters.valueEnum,
+                      })
+                      .from(projectParameters)
+                      .where(and(
+                        eq(projectParameters.projectId, instance.projectId),
+                        inArray(projectParameters.fieldId, clearLcFieldIds),
+                      ))
+                  : [];
+                const clearLcFieldById = new Map(clearLcCrossFields.map((f) => [f.id, f]));
+                const clearLcNumBySymbol = new Map<string, number | null>();
+                const clearLcTextBySymbol = new Map<string, string | null>();
+                for (const p of clearLcParams) {
+                  const f = clearLcFieldById.get(p.fieldId);
+                  if (!f) continue;
+                  if (f.dataType === 'number' && !clearLcNumBySymbol.has(f.symbol)) {
+                    const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+                    clearLcNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+                  }
+                  if ((f.dataType === 'enum' || f.dataType === 'text') && !clearLcTextBySymbol.has(f.symbol)) {
+                    clearLcTextBySymbol.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
+                  }
+                }
+                const clearAC             = clearLcNumBySymbol.get('A_C')             ?? null;
+                const clearFlaechengruppe = clearLcTextBySymbol.get('flaechengruppe') ?? null;
+                const clearBbzThickness   = clearLcNumBySymbol.get('bbz_thickness')   ?? null;
+
+                const clearLc = materializeLoadingCheck({
+                  A_C: clearAC,
+                  A_S_m: null,
+                  flaechengruppe: clearFlaechengruppe,
+                  bbz_thickness: clearBbzThickness,
+                });
+
+                type AsmClearLcRow = {
+                  projectId: string;
+                  fieldId: string;
+                  valueNumber: string | null;
+                  valueText: string | null;
+                  sourceType: 'derived';
+                  enteredBy: string;
+                  enteredAt: Date;
+                };
+                const clearLcValueMap: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+                  ac_as_ratio:              { valueNumber: clearLc.ac_as_ratio != null ? String(clearLc.ac_as_ratio) : null, valueText: null },
+                  ac_as_ratio_limit:        { valueNumber: clearLc.ac_as_ratio_limit != null ? String(clearLc.ac_as_ratio_limit) : null, valueText: null },
+                  ac_as_ratio_check:        { valueNumber: null, valueText: clearLc.ac_as_ratio_check },
+                  ac_as_ratio_check_reason: { valueNumber: null, valueText: clearLc.ac_as_ratio_check_reason },
+                };
+                const clearLcRows: AsmClearLcRow[] = LOADING_CHECK_OUTPUT_SYMBOLS
+                  .map((sym) => ({ sym, ...clearLcValueMap[sym] }))
+                  .map((x) => ({ ...x, fieldId: asmCIdBySymbol.get(x.sym) }))
+                  .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
+                  .map((x) => ({
+                    projectId: instance.projectId,
+                    fieldId: x.fieldId,
+                    valueNumber: x.valueNumber,
+                    valueText: x.valueText,
+                    sourceType: 'derived' as const,
+                    enteredBy: userId,
+                    enteredAt: now,
+                  }));
+
+                if (clearLcRows.length > 0) {
+                  await tx.insert(projectParameters).values(clearLcRows).onConflictDoUpdate({
+                    target: [projectParameters.projectId, projectParameters.fieldId],
+                    set: {
+                      valueNumber: sql`excluded.value_number`,
+                      valueText: sql`excluded.value_text`,
+                      sourceType: sql`excluded.source_type`,
+                      enteredBy: sql`excluded.entered_by`,
+                      enteredAt: now,
+                    },
+                  });
+                  for (const r of clearLcRows) {
+                    writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+                  }
+                }
               }
             }
             if (invalidation.flagNeedsReconfirm) {
