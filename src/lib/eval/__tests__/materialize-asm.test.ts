@@ -14,6 +14,13 @@ describe('materializeAsm', () => {
     expect(r.A_S_m).toBe(62.5);
     expect(r.state).toMatchObject({ status: 'determined', value: 62.5, method: 'geometry', sourceWorksheet: 'A138-17' });
   });
+  it('geometry: self-corrects sourceWorksheet from resolved producer when caller passes wrong default', () => {
+    // Caller passes sourceWorksheet: 'A138-12' (wrong/default), but geometry/mulde resolves to A138-17
+    const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, geometryValue: 62.5, manualValue: null, manualProvenance: null, facilityType: 'mulde', sourceWorksheet: 'A138-12' });
+    expect(r.A_S_m).toBe(62.5);
+    // sourceWorksheet should be derived from the resolved producer, not the caller's wrong value
+    expect(r.state).toMatchObject({ status: 'determined', value: 62.5, method: 'geometry', sourceWorksheet: 'A138-17' });
+  });
   it('geometry unresolved (becken) ⇒ indeterminate, A_S_m null', () => {
     const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, ...noGeo, manualValue: null, manualProvenance: null, facilityType: 'becken', sourceWorksheet: null });
     expect(r.A_S_m).toBeNull();

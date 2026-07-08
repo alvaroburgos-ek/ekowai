@@ -71,8 +71,12 @@ export function materializeAsm(input: AsmMaterializeInput): { A_S_m: number | nu
   if (value == null) {
     return { A_S_m: null, state: { status: 'indeterminate', reason: `A_S,m per ${input.method} nicht bestimmbar — Eingaben fehlen.` } };
   }
+
+  // Derive sourceWorksheet from the resolved producer for geometry; otherwise use caller's value
+  const sourceWorksheet = producer.kind === 'geometry' ? producer.worksheetCode : (input.sourceWorksheet ?? 'A138-12');
+
   return {
     A_S_m: value,
-    state: { status: 'determined', value, method: input.method, sourceWorksheet: input.sourceWorksheet ?? 'A138-12' },
+    state: { status: 'determined', value, method: input.method, sourceWorksheet },
   };
 }
