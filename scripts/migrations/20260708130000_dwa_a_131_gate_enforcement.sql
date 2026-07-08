@@ -163,12 +163,16 @@ BEGIN
   -- FIX 2 — CR-016: arithmetic-in-condition -> reads materialized Gl. B.9 output (P-6b)
   --   §B.4/B.9, PDF Anhang B: Q_SR >= (Q_RS·TS_RS - Q_K·TS_BB)/TS_BS  == Gl. B.9.
   --   Equation B.9 already produces Q_SR_min with this exact RHS -> gate reads the field.
+  --   GRAMMAR NOTE (evaluate.ts L241-247/L364): a bare SYMBOL on the RHS of a compare
+  --   (`Q_SR >= Q_SR_min`) is coerced to a STRING LITERAL "Q_SR_min" (legacy path) and
+  --   silently always-fails. Symbol-vs-symbol MUST use the arithmetic acompare path:
+  --   write `Q_SR - Q_SR_min >= 0`, which forces numeric lookup of both operands.
   -- ================================================================================
   UPDATE compliance_requirements
-     SET condition = 'Q_SR >= Q_SR_min'
+     SET condition = 'Q_SR - Q_SR_min >= 0'
    WHERE worksheet_template_id = v_ws06
      AND code = 'CR-016'
-     AND condition IS DISTINCT FROM 'Q_SR >= Q_SR_min';
+     AND condition IS DISTINCT FROM 'Q_SR - Q_SR_min >= 0';
 
   -- ================================================================================
   -- FIX 3 — CR-017/018/019/020: `TRUE` cross-reference deferrals -> attestation (P-6e)
