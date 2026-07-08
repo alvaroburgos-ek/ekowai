@@ -189,13 +189,18 @@ Rules:
 | `becken` | A138-22 | Gl.41 consumes `A_S_m` | **No** — A138-22 is a *consumer*; A_S,m via `direct`/`manual` |
 | `MRE`,`MRS` | A138-19/20 | (out of scope this piece) | flag as residue |
 
-> **Open decision D-1 (needs your ruling).** For `flaeche`/`schacht`/`becken`
-> the standard has no Gl.-16/17-style "solve A_S,m from geometry" — those types
-> supply `A_S,m` by `direct` (A_S_min/A_S_max) or `manual`, while their own
-> geometry produces a *different* required-area symbol (`A_S`,
-> `A_S_Schacht`). The design treats `geometry` as available **only** for
-> `mulde`/`rigole`. Confirm that matches the source, or name the additional
-> geometry producers.
+> **D-1 — RESOLVED (source-verified): `geometry` = `mulde`/`rigole` only.**
+> Gl.12 → `A_S` is the Flächenversickerung design target (§5.3.3.7 "außer bei
+> der Flächenversickerung"); Gl.34 → `A_S,Schacht` is the shaft-area chain; only
+> Gl.16/Gl.17 produce `A_S,m` by name. `flaeche`/`schacht`/`becken` supply
+> `A_S,m` by `direct` or `manual`.
+>
+> **Residue R-1 (open ratification — do NOT decide silently in the build).**
+> Gl.34's `π·d_a·h_S/2` construction is *semantically* a mean infiltration area.
+> Whether a `schacht` run should write its `A_S` back to the canonical `A_S,m`
+> so `q_S_AC`/Tab.6 re-check against the shaft value is an open ratification
+> item. Logged here; the plan treats `schacht` as `direct`/`manual` for `A_S,m`
+> and flags R-1 for a human ruling before any schacht-geometry write-back.
 
 **Section 3 checkpoint — resolver shape + method availability table. OK?**
 
@@ -221,18 +226,27 @@ Rules:
   (not block) if `A_S,m(geometry) < A_S_max`. This is a **validation**, not a
   compute; surfaced as a discriminated warning, never mutates the value.
 
-### 4.3 `soil_estimate` (Tab.13) — third method
-- Source: Tab.13 gives `A_S ≈ 0,10·A_C` (favourable soil) or `0,20·A_C`
-  (unfavourable), a coarse pre-design estimate.
-- **Open decision D-2 (needs your ruling).** Two options:
-  - **(a) Encode it** — add the enum value `soil_estimate` + a soil-favourability
-    selector (2-way) and compute `A_S_m = factor·A_C` on A138-12. Small, keeps
-    the method set complete.
-  - **(b) Reserve the slot as residue** — add `soil_estimate` to the method enum
-    but mark it `not_yet_encoded` (UI disabled + a logged residue note), so the
-    architecture is complete and encoding it later is additive.
-  - Recommendation: **(a)** — it is two constants and one factor input, and
-    completeness here avoids a second migration. Confirm.
+### 4.3 `soil_estimate` (Tab.13) — third method — **D-2 RESOLVED: encode now**
+- Source (verbatim): Tab.13 gives `A_S = 0,10·A_C` for **Mittel-/Feinsand** and
+  `A_S = 0,20·A_C` for **schluffige Böden** — a coarse pre-design estimate.
+  Compute `A_S_m = factor·A_C` on A138-12.
+- **Favourability is bound to A138-05 soil data, not a free selector.** A138-05
+  owns `k_f` (m/s, `Wasserdurchlässigkeitsbeiwert`) and `soil_classification`
+  (free text today, no enum). Binding:
+  - Primary: derive the Tab.13 band from `k_f` (quantitative permeability) —
+    higher-permeability sandy soils → `0,10`, lower-permeability silty → `0,20`.
+    The `A_C`-factor is therefore a **derived, confirmable** value seeded from
+    A138-05, surfaced for engineer confirmation (single-source "seeded from
+    source data" pattern — never a blind re-entry).
+  - The exact `k_f` cut for the `0,10`/`0,20` band is a **to-verify item against
+    Tab.13 / Anh. A** — the plan's soil-estimate task must pin the threshold from
+    the source verbatim before shipping (no invented cut-off).
+  - `soil_classification` is secondary/advisory until it is promoted to a
+    Tab.13-keyed enum; when it is, the binding becomes an exact string map and
+    the `k_f` heuristic becomes the fallback. Flagged as follow-up, not built.
+- No standalone free `soil_favourability` field is introduced; the band is
+  resolved from A138-05 via the resolver (§3), keeping A138-05 the single source
+  of soil truth.
 
 ### 4.4 `manual` — datasheet / proprietary units (source-sanctioned)
 - Source: A_S,m "kann … vereinfacht vorgegeben werden"; the Fertigteil-Rigole
@@ -264,7 +278,8 @@ New / changed **fields** (via migration, mirroring the importer's UPSERT shape;
 |---|---|---|
 | Add `a_s_m_determination_method` (enum) | A138-12 | values `direct, geometry, soil_estimate, manual`; default `direct`; `regulation_reference §5.3.3.6/§6`. Consumer list: none (it is a local selector read by the resolver + registry). |
 | Add `a_s_m_provenance` (text) | A138-12 | required iff method=`manual`; holds datasheet/source ref. |
-| (D-2a only) Add `soil_favourability` (enum `favourable|unfavourable`) | A138-12 | drives Tab.13 factor. |
+| **No** new `soil_favourability` field | — | Tab.13 band derived from A138-05 `k_f` (§4.3); A138-05 stays the single source of soil truth. |
+| **Retire `A_S_m_Becken`** (A138-22) | A138-22 | DB-verified orphan: entered `number`, **no producing equation, `consumer_worksheets = null`, and Gl.41 consumes generic `A_S_m` not this symbol**. Deactivate (`active=false`) it; A138-22/Gl.41 reads canonical `A_S_m` by reference (D-4). Migration first **checks `project_parameters` for any stored `A_S_m_Becken` values** — if found, log as residue + surface for engineer re-entry via the method selector rather than silently dropping. If a read-only mirror is preferred over retirement, alias it to canonical `A_S_m` (no independent write). |
 | Mark `A_S_m` as derived/read-only in the UI | A138-12 | not a schema flag — enforced by the field being computed for all methods except `manual`; §6. |
 | Backfill | all existing 138 projects | set `a_s_m_determination_method = 'direct'` so PLT-HS-01 and every saved project are unchanged. |
 | (No new `A_S_m` field on A138-17/18) | — | geometry writes back to A138-12; confirm no orphan `A_S_m` fields exist there (topology says none today). |
@@ -424,12 +439,28 @@ now.**
    for any non-manual method (defect #9 closed structurally).
 8. Unit + integration tests run green on the isolated pnpm store before ship.
 
-## 14. Open decisions for your ruling (blocking the plan)
+## 14. Rulings (all RESOLVED 2026-07-08) + open residues
 
-- **D-1** — `geometry` available only for `mulde`/`rigole` (§3.1). Confirm or
-  extend.
-- **D-2** — Tab.13 `soil_estimate`: **encode now (a, recommended)** vs reserve
-  slot as residue (b).
-- **D-3** — Canonical home stays A138-12 (§2). Confirm (the alternative would be
-  a new always-present carrier; not recommended — A138-12 already owns the field
-  + consumer list and is Phase 3).
+**Resolved — the plan is unblocked:**
+- **D-1 ✅** `geometry` = `mulde`/`rigole` only (source-verified, §3.1).
+- **D-2 ✅** Encode Tab.13 `soil_estimate` now (0,10 Mittel-/Feinsand, 0,20
+  schluffig); favourability bound to A138-05 `k_f`, derived-and-confirmable
+  (§4.3).
+- **D-3 ✅** Canonical home = A138-12 (§2).
+- **D-4 ✅** `A_S_m_Becken` is a verified orphan dual-source → retire (or
+  read-only alias); `becken`/Gl.41 consumes canonical `A_S_m` by reference (§5).
+
+**Open residues (logged, NOT decided in the build — each needs a human ruling
+before its scope is touched):**
+- **R-1** — `schacht` Gl.34 (`π·d_a·h_S/2`) is semantically a mean area; whether
+  it write-backs to canonical `A_S,m` for q_S_AC/Tab.6 re-check is unratified.
+  Build treats `schacht` `A_S,m` as `direct`/`manual`; no schacht geometry
+  write-back until ratified (§3.1).
+- **R-2** — the exact `k_f` cut for the Tab.13 `0,10`/`0,20` band must be pinned
+  verbatim from Tab.13 / Anh. A during the soil-estimate task (no invented
+  threshold) (§4.3).
+- **R-3** — `soil_classification` → Tab.13 enum promotion (would make the band an
+  exact string map); follow-up, not built (§4.3).
+- **R-4** — `A_S` (bare) sibling single-source (Gl.12 vs Gl.34 vs the A138-12
+  `A_S` field); separate follow-up piece, not folded in (§12).
+- **R-5** — `MRE`/`MRS` (A138-19/20) geometry producers; residue (§12).
