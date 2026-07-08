@@ -20,6 +20,8 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
+import { materializeAsm } from '@/lib/eval/materialize-asm';
+import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax } from '@/lib/eval/asm-source';
 import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
@@ -133,6 +135,12 @@ export async function saveWorksheet(
   // the current save batch.
   const isBasinSave   = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
   const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+  // A138-12 A_S,m single-source owner: fires when this worksheet is A138-12 and must
+  // materialize A_S,m from the active determination method. ASM_GL7_EQUATION_ID is the
+  // same UUID as A138_12_ASM_EQUATION_ID — both identify the A138-12 Gl.7 equation —
+  // so isAsmSave === isLoadingSave. Declared separately for semantic clarity and to
+  // mirror the loading block pattern exactly (each owner block has its own flag).
+  const isAsmSave     = templateEquations.some((e) => e.id === ASM_GL7_EQUATION_ID);
 
   // Standard of the saved worksheet — scopes producer-side propagation to the SAME
   // standard. worksheet_templates.code is unique per-standard, NOT globally, so a
@@ -146,7 +154,7 @@ export async function saveWorksheet(
   const savedStandardId = savedTemplateRow?.standardId ?? null;
 
   // Fast-path: nothing submitted AND no topology-triggered recompute needed.
-  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave) {
+  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave && !isAsmSave) {
     return { ok: true, saved: 0, warnings: [], derived: [] };
   }
 
@@ -294,6 +302,85 @@ export async function saveWorksheet(
     });
   }
 
+  // ── A_S,m validation (owner path, before persistence) ─────────────────────
+  // Only runs when the saved worksheet is A138-12 (isAsmSave). Filters invalid
+  // rows out of parameterValues/auditValues before savedCount is computed so the
+  // transaction never persists values that violate the single-source invariant.
+  if (isAsmSave && fieldIds.length > 0) {
+    // V-1: A_S_min must not exceed A_S_max. If both are in the batch, reject the pair.
+    // Resolve field ids for the two symbols within this template's field map.
+    let aSmInFieldId: string | null = null;
+    let aSmAxFieldId: string | null = null;
+    for (const [fid, sym] of symbolById.entries()) {
+      if (sym === 'A_S_min') aSmInFieldId = fid;
+      if (sym === 'A_S_max') aSmAxFieldId = fid;
+    }
+    if (aSmInFieldId && aSmAxFieldId) {
+      const batchMin = input.values[aSmInFieldId];
+      const batchMax = input.values[aSmAxFieldId];
+      if (
+        batchMin?.type === 'number' && typeof batchMin.value === 'number' &&
+        batchMax?.type === 'number' && typeof batchMax.value === 'number' &&
+        batchMin.value > batchMax.value
+      ) {
+        warnings.push(
+          `A_S,min (${batchMin.value}) ist größer als A_S,max (${batchMax.value}) — Eingabe abgelehnt. Bitte korrigieren.`,
+        );
+        // Remove both fields from the persistence batch (keep the rest of the save intact).
+        const rejected = new Set([aSmInFieldId, aSmAxFieldId]);
+        const keepIdx = (fid: string) => !rejected.has(fid);
+        parameterValues.splice(0, parameterValues.length,
+          ...parameterValues.filter((r) => keepIdx(r.fieldId)),
+        );
+        auditValues.splice(0, auditValues.length,
+          ...auditValues.filter((r) => keepIdx(r.recordId)),
+        );
+      }
+    }
+
+    // V-2: manual method requires a non-empty a_s_m_provenance.
+    // Resolve the method field id and check batch + persisted.
+    let asmMethodFieldId: string | null = null;
+    let asmProvenanceFieldId: string | null = null;
+    for (const [fid, sym] of symbolById.entries()) {
+      if (sym === 'a_s_m_determination_method') asmMethodFieldId = fid;
+      if (sym === 'a_s_m_provenance') asmProvenanceFieldId = fid;
+    }
+    // Determine the method from the batch or existing persisted value.
+    let batchMethod: string | null = null;
+    if (asmMethodFieldId) {
+      const batchMethodVal = input.values[asmMethodFieldId];
+      if (batchMethodVal?.type === 'enum' && typeof batchMethodVal.value === 'string') {
+        batchMethod = batchMethodVal.value;
+      } else {
+        // Not in batch — check persisted.
+        const existingMethod = existingById.get(asmMethodFieldId);
+        batchMethod = existingMethod?.valueEnum ?? null;
+      }
+    }
+    if (batchMethod === 'manual') {
+      // Check provenance: prefer the batch value, else check persisted.
+      let hasProvenance = false;
+      if (asmProvenanceFieldId) {
+        const batchProv = input.values[asmProvenanceFieldId];
+        if (batchProv?.type === 'text' && typeof batchProv.value === 'string' && batchProv.value.trim() !== '') {
+          hasProvenance = true;
+        } else {
+          const existingProv = existingById.get(asmProvenanceFieldId);
+          if (existingProv?.valueText && existingProv.valueText.trim() !== '') {
+            hasProvenance = true;
+          }
+        }
+      }
+      if (!hasProvenance) {
+        warnings.push(
+          'Methode "Manuell": Herkunftsangabe (Datenblatt/Quelle) für A_S,m ist erforderlich — bitte ausfüllen.',
+        );
+      }
+    }
+  }
+  // ── End A_S,m validation ───────────────────────────────────────────────────
+
   const savedCount = parameterValues.length;
 
   // ── Option A: producer-side reactive recompute ─────────────────────────────
@@ -362,7 +449,7 @@ export async function saveWorksheet(
   //   The SURFACE block is excluded from the guard because surface_inventory being
   //   in the save batch is what identifies a surface save — it only fires when
   //   savedCount > 0, so adding surfacePresence here would be redundant.
-  if (savedCount > 0 || isBasinSave || isLoadingSave || producerEntries.length > 0) {
+  if (savedCount > 0 || isBasinSave || isLoadingSave || isAsmSave || producerEntries.length > 0) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
       // share the same enteredAt so there is no skew from multiple new Date() calls.
@@ -788,6 +875,207 @@ export async function saveWorksheet(
           for (const r of lcDerivedRows) {
             writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
           }
+        }
+      }
+
+      // Materialize A_S,m (owner path) when this save targets A138-12.
+      //
+      // Detection: A138-12 owns ASM_GL7_EQUATION_ID (same UUID as A138_12_ASM_EQUATION_ID
+      // used for isLoadingSave). `isAsmSave` is hoisted to function scope; used here directly.
+      // This is topology-stable — any A138-12 save triggers a recompute so A_S_m always
+      // reflects the latest inputs, regardless of which fields are in the batch.
+      //
+      // Owner path only: geometry sweep (Mulde/Rigole) is computed in the LATER producer
+      // task when a facility worksheet saves and writes A_S_m back to A138-12. Here we
+      // pass through the currently-persisted A_S_m value for method='geometry' (idempotent
+      // re-write — safe and correct; returns indeterminate when nothing is persisted yet).
+      //
+      // Inputs read:
+      //   LOCAL to A138-12 (prefer save batch, else persisted — mirrors the A_S_m read
+      //   in the isLoadingSave block above): A_S_min, A_S_max, a_s_m_determination_method,
+      //   soil_bodenart_tab13, a_s_m_provenance; A_C (may also come from A138-07 cross but
+      //   is listed on A138-12 as a derived consumer — read by symbol like loading block reads A_C).
+      //   LOCAL manual value: when method='manual', the A_S_m entered by the engineer in batch.
+      //   CROSS: facility_type_selected (A138-15), geometryValue (persisted A_S_m on A138-12).
+      if (isAsmSave) {
+        // 1. Sibling field ids for A138-12.
+        const asmWsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const asmIdBySymbol = new Map(asmWsFields.map((f) => [f.symbol, f.id]));
+
+        // Helper: read a numeric field from the save batch or persisted project_parameters.
+        const readLocalNum = async (sym: string): Promise<number | null> => {
+          const fid = asmIdBySymbol.get(sym);
+          if (!fid) return null;
+          const saved = input.values[fid];
+          if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+            return saved.value;
+          }
+          const [existing] = await tx
+            .select({ valueNumber: projectParameters.valueNumber })
+            .from(projectParameters)
+            .where(and(eq(projectParameters.projectId, instance.projectId), eq(projectParameters.fieldId, fid)))
+            .limit(1);
+          const v = existing?.valueNumber != null ? Number(existing.valueNumber) : null;
+          return v != null && Number.isFinite(v) ? v : null;
+        };
+
+        // Helper: read an enum/text field from batch or persisted.
+        const readLocalEnum = async (sym: string): Promise<string | null> => {
+          const fid = asmIdBySymbol.get(sym);
+          if (!fid) return null;
+          const saved = input.values[fid];
+          if (saved?.type === 'enum' && typeof saved.value === 'string') return saved.value || null;
+          if (saved?.type === 'text' && typeof saved.value === 'string') return saved.value || null;
+          const [existing] = await tx
+            .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+            .from(projectParameters)
+            .where(and(eq(projectParameters.projectId, instance.projectId), eq(projectParameters.fieldId, fid)))
+            .limit(1);
+          return existing?.valueEnum ?? existing?.valueText ?? null;
+        };
+
+        // 2. Determination method (value_enum), default 'direct'.
+        const rawMethod = await readLocalEnum('a_s_m_determination_method');
+        const method: AsmMethod = (rawMethod === 'direct' || rawMethod === 'geometry' || rawMethod === 'soil_estimate' || rawMethod === 'manual')
+          ? rawMethod
+          : 'direct';
+
+        // 3. Local numeric inputs.
+        const A_S_min = await readLocalNum('A_S_min');
+        const A_S_max = await readLocalNum('A_S_max');
+
+        // 4. A_C — read cross-worksheet by symbol (same pattern as loading block's A_C read).
+        //    Prefer a value from project_parameters for this project; cross-worksheet because
+        //    A_C is produced on A138-07 and shared by symbol. Fallback to A138-12 local if set.
+        const crossAcFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(and(eq(fields.symbol, 'A_C'), eq(fields.active, true)));
+        const crossAcFieldIds = crossAcFields.map((f) => f.id);
+        let A_C: number | null = null;
+        if (crossAcFieldIds.length > 0) {
+          const crossAcParams = await tx
+            .select({ fieldId: projectParameters.fieldId, valueNumber: projectParameters.valueNumber })
+            .from(projectParameters)
+            .where(and(
+              eq(projectParameters.projectId, instance.projectId),
+              inArray(projectParameters.fieldId, crossAcFieldIds),
+            ));
+          for (const p of crossAcParams) {
+            if (p.valueNumber != null) {
+              const v = Number(p.valueNumber);
+              if (Number.isFinite(v)) { A_C = v; break; }
+            }
+          }
+        }
+
+        // 5. Bodenart (Tab.13 selector, local to A138-12).
+        const rawBodenart = await readLocalEnum('soil_bodenart_tab13');
+        const bodenart: Tab13Bodenart | null = (rawBodenart === 'mittel_feinsand' || rawBodenart === 'schluffig')
+          ? rawBodenart
+          : null;
+
+        // 6. Manual inputs: provenance + manual value (A_S_m user-entered, only used when method='manual').
+        const manualProvenance = await readLocalEnum('a_s_m_provenance');
+        let manualValue: number | null = null;
+        if (method === 'manual') {
+          // When method='manual', the A_S_m field itself is user-editable.
+          // Read whatever the engineer entered in this batch (or the last persisted value).
+          manualValue = await readLocalNum('A_S_m');
+        }
+
+        // 7. CROSS: facility_type_selected (A138-15) — read by symbol, like the loading
+        //    block reads flaechengruppe.
+        const crossFtFields = await tx
+          .select({ id: fields.id })
+          .from(fields)
+          .where(and(eq(fields.symbol, 'facility_type_selected'), eq(fields.active, true)));
+        const crossFtFieldIds = crossFtFields.map((f) => f.id);
+        let facilityType: FacilityType | null = null;
+        if (crossFtFieldIds.length > 0) {
+          const [ftParam] = await tx
+            .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+            .from(projectParameters)
+            .where(and(
+              eq(projectParameters.projectId, instance.projectId),
+              inArray(projectParameters.fieldId, crossFtFieldIds),
+            ))
+            .limit(1);
+          const rawFt = ftParam?.valueEnum ?? ftParam?.valueText ?? null;
+          if (rawFt === 'flaeche' || rawFt === 'mulde' || rawFt === 'rigole' || rawFt === 'schacht' || rawFt === 'becken') {
+            facilityType = rawFt;
+          }
+        }
+
+        // 8. geometryValue: the currently-persisted A_S_m on A138-12.
+        //    For method='geometry', the owner path just passes through this value
+        //    (the geometry sweep is computed by the facility worksheet producer task).
+        //    Returns null if nothing persisted yet → materializeAsm returns indeterminate.
+        let geometryValue: number | null = null;
+        const asmFieldId = asmIdBySymbol.get('A_S_m');
+        if (method === 'geometry' && asmFieldId) {
+          const [existingAsm] = await tx
+            .select({ valueNumber: projectParameters.valueNumber })
+            .from(projectParameters)
+            .where(and(eq(projectParameters.projectId, instance.projectId), eq(projectParameters.fieldId, asmFieldId)))
+            .limit(1);
+          const gv = existingAsm?.valueNumber != null ? Number(existingAsm.valueNumber) : null;
+          geometryValue = gv != null && Number.isFinite(gv) ? gv : null;
+        }
+
+        // 9. Materialize.
+        const out = materializeAsm({
+          method,
+          A_S_min,
+          A_S_max,
+          A_C,
+          bodenart,
+          geometryValue,
+          manualValue,
+          manualProvenance: manualProvenance || null,
+          facilityType,
+          sourceWorksheet: 'A138-12',
+        });
+
+        // V-2: when method='geometry' and A_S_max is present, warn if the geometry-derived
+        // A_S,m falls below A_S,max (§6.3.2 Flächenbedarf-Untergrenze). Flag-only — does
+        // NOT change the computed A_S_m value.
+        if (method === 'geometry' && out.A_S_m != null) {
+          const v2 = validateGeometryAgainstMax(out.A_S_m, A_S_max);
+          if (v2.flag && v2.reason) {
+            warnings.push(v2.reason);
+          }
+        }
+
+        // 10. UPSERT A_S_m as a derived row, mirroring the loading-check UPSERT shape.
+        //     Only write when A_S_m is computable (non-null). When indeterminate, leave
+        //     the existing persisted value in place (do not overwrite with null — that
+        //     would break the loading-check's A_S_m read on the next save).
+        if (asmFieldId && out.A_S_m != null) {
+          await tx
+            .insert(projectParameters)
+            .values([{
+              projectId: instance.projectId,
+              fieldId: asmFieldId,
+              valueNumber: String(out.A_S_m),
+              valueText: null,
+              sourceType: 'derived',
+              enteredBy: userId,
+              enteredAt: now,
+            }])
+            .onConflictDoUpdate({
+              target: [projectParameters.projectId, projectParameters.fieldId],
+              set: {
+                valueNumber: sql`excluded.value_number`,
+                sourceType: sql`excluded.source_type`,
+                enteredBy: sql`excluded.entered_by`,
+                enteredAt: now,
+              },
+            });
+          writtenDerived.push({ fieldId: asmFieldId, valueNumber: String(out.A_S_m), valueText: null });
         }
       }
 
