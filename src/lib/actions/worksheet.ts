@@ -332,17 +332,22 @@ export async function saveWorksheet(
       // Optimization: first do a cheap indexed lookup — only if the saved batch
       // actually contains a surface_inventory field for this template do we proceed
       // to the full sibling-fields query + materialization.
-      const [surfacePresence] = await tx
-        .select({ id: fields.id })
-        .from(fields)
-        .where(
-          and(
-            inArray(fields.id, fieldIds),
-            eq(fields.symbol, 'surface_inventory'),
-            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-          ),
-        )
-        .limit(1);
+      // Guard inArray against an empty batch — empty-array inArray is fragile across
+      // drizzle versions (provably safe on 0.45.2 today, but don't rely on it). An
+      // empty fieldIds means no surface_inventory in the batch, so the block is a no-op.
+      const [surfacePresence] = fieldIds.length > 0
+        ? await tx
+            .select({ id: fields.id })
+            .from(fields)
+            .where(
+              and(
+                inArray(fields.id, fieldIds),
+                eq(fields.symbol, 'surface_inventory'),
+                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+              ),
+            )
+            .limit(1)
+        : [];
 
       if (surfacePresence) {
         const surfaceFieldId = surfacePresence.id;
