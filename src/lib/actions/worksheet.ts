@@ -728,162 +728,18 @@ export async function saveWorksheet(
         }
       }
 
-      // Materialize Tab.6 loading-check outputs (ac_as_ratio, ac_as_ratio_limit,
-      // ac_as_ratio_check, ac_as_ratio_check_reason) whenever this save targets the
-      // A138-12 (BBZ loading check) worksheet. Persisted as derived rows.
-      //
-      // Detection: A138-12 owns the A_S_m equation (55151cb1-…). `isLoadingSave`
-      // is hoisted to function scope (see above) and used here directly.
-      // This is topology-stable: the equation lives on A138-12 regardless of which
-      // fields are in the current save batch — so ANY A138-12 save triggers a
-      // recompute. Previously the gate was on `ac_as_ratio` being in the save batch,
-      // but ac_as_ratio is read-only/derived and is never user-entered → the block
-      // was permanently dead (same dead-trigger class fixed for the basin block above).
-      //
-      // Cross-worksheet reads:
-      //   A_S_m         — LOCAL to A138-12 (prefer save batch, else persisted)
-      //   A_C           — cross-worksheet from A138-07 (persisted)
-      //   flaechengruppe— cross-worksheet from A138-06 (persisted, value_enum/value_text)
-      //   bbz_thickness — cross-worksheet from A138-06 (persisted, value_number)
-      // `isLoadingSave` is declared at function scope; used here directly.
-
-      if (isLoadingSave) {
-        // 1. Sibling field ids for A138-12 (resolve output field ids + A_S_m local field).
-        const lcWsFields = await tx
-          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
-          .from(fields)
-          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
-        const lcIdBySymbol = new Map(lcWsFields.map((f) => [f.symbol, f.id]));
-
-        // 2. A_S_m — prefer save batch, else persisted A138-12 value.
-        const aSmFieldId = lcIdBySymbol.get('A_S_m');
-        let A_S_m: number | null = null;
-        if (aSmFieldId) {
-          const saved = input.values[aSmFieldId];
-          if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
-            A_S_m = saved.value;
-          } else {
-            const [existing] = await tx
-              .select({ valueNumber: projectParameters.valueNumber })
-              .from(projectParameters)
-              .where(and(
-                eq(projectParameters.projectId, instance.projectId),
-                eq(projectParameters.fieldId, aSmFieldId),
-              ))
-              .limit(1);
-            A_S_m = existing?.valueNumber != null ? Number(existing.valueNumber) : null;
-            if (A_S_m != null && !Number.isFinite(A_S_m)) A_S_m = null;
-          }
-        }
-
-        // 3. Cross-worksheet inputs from A138-06 (flaechengruppe, bbz_thickness)
-        //    and A138-07 (A_C). Look up by symbol across all active fields in the project.
-        //    NOTE: same single-owner assumption as the basin cross-worksheet reads.
-        const crossLcFields = await tx
-          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
-          .from(fields)
-          .where(
-            and(
-              inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
-              eq(fields.active, true),
-            ),
-          );
-        const crossLcFieldIds = crossLcFields.map((f) => f.id);
-        const crossLcParams = crossLcFieldIds.length > 0
-          ? await tx
-              .select({
-                fieldId: projectParameters.fieldId,
-                valueNumber: projectParameters.valueNumber,
-                valueText: projectParameters.valueText,
-                valueEnum: projectParameters.valueEnum,
-              })
-              .from(projectParameters)
-              .where(and(
-                eq(projectParameters.projectId, instance.projectId),
-                inArray(projectParameters.fieldId, crossLcFieldIds),
-              ))
-          : [];
-
-        const crossLcFieldById = new Map(crossLcFields.map((f) => [f.id, f]));
-        const crossLcNumBySymbol = new Map<string, number | null>();
-        const crossLcTextBySymbol = new Map<string, string | null>();
-        for (const p of crossLcParams) {
-          const f = crossLcFieldById.get(p.fieldId);
-          if (!f) continue;
-          if (f.dataType === 'number' && !crossLcNumBySymbol.has(f.symbol)) {
-            const v = p.valueNumber != null ? Number(p.valueNumber) : null;
-            crossLcNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
-          }
-          // flaechengruppe is stored as 'enum' in the field definition, read value_enum first
-          if ((f.dataType === 'enum' || f.dataType === 'text') && !crossLcTextBySymbol.has(f.symbol)) {
-            crossLcTextBySymbol.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
-          }
-        }
-
-        const A_C           = crossLcNumBySymbol.get('A_C')            ?? null;
-        const flaechengruppe= crossLcTextBySymbol.get('flaechengruppe') ?? null;
-        const bbz_thickness = crossLcNumBySymbol.get('bbz_thickness')  ?? null;
-
-        // 4. Run the pure loading-check materialize.
-        const lc = materializeLoadingCheck({ A_C, A_S_m, flaechengruppe, bbz_thickness });
-
-        // 5. UPSERT the four derived rows.
-        //    When a field id is missing (migration not yet applied), the map returns
-        //    undefined and the row is filtered out — safe no-op.
-        type LcDerivedRow = {
-          projectId: string;
-          fieldId: string;
-          valueNumber: string | null;
-          valueText: string | null;
-          sourceType: 'derived';
-          enteredBy: string;
-          enteredAt: Date;
-        };
-        // Map over the shared constant so the symbol list has a single source of truth.
-        const lcValueMap: Record<string, { valueNumber: string | null; valueText: string | null }> = {
-          ac_as_ratio:              { valueNumber: lc.ac_as_ratio != null ? String(lc.ac_as_ratio) : null, valueText: null },
-          ac_as_ratio_limit:        { valueNumber: lc.ac_as_ratio_limit != null ? String(lc.ac_as_ratio_limit) : null, valueText: null },
-          ac_as_ratio_check:        { valueNumber: null, valueText: lc.ac_as_ratio_check },
-          ac_as_ratio_check_reason: { valueNumber: null, valueText: lc.ac_as_ratio_check_reason },
-        };
-        const lcDerivedRows: LcDerivedRow[] = LOADING_CHECK_OUTPUT_SYMBOLS
-          .map((sym) => ({ sym, ...lcValueMap[sym] }))
-          .map((x) => ({ ...x, fieldId: lcIdBySymbol.get(x.sym) }))
-          .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
-          .map((x) => ({
-            projectId: instance.projectId,
-            fieldId: x.fieldId,
-            valueNumber: x.valueNumber,
-            valueText: x.valueText,
-            sourceType: 'derived' as const,
-            enteredBy: userId,
-            enteredAt: now,
-          }));
-
-        if (lcDerivedRows.length > 0) {
-          await tx.insert(projectParameters).values(lcDerivedRows).onConflictDoUpdate({
-            target: [projectParameters.projectId, projectParameters.fieldId],
-            set: {
-              valueNumber: sql`excluded.value_number`,
-              valueText: sql`excluded.value_text`,
-              sourceType: sql`excluded.source_type`,
-              enteredBy: sql`excluded.entered_by`,
-              enteredAt: now,
-            },
-          });
-          // Collect for client-side apply (Task B display-fix)
-          for (const r of lcDerivedRows) {
-            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
-          }
-        }
-      }
-
       // Materialize A_S,m (owner path) when this save targets A138-12.
       //
       // Detection: A138-12 owns ASM_GL7_EQUATION_ID (same UUID as A138_12_ASM_EQUATION_ID
       // used for isLoadingSave). `isAsmSave` is hoisted to function scope; used here directly.
       // This is topology-stable — any A138-12 save triggers a recompute so A_S_m always
       // reflects the latest inputs, regardless of which fields are in the batch.
+      //
+      // MUST run BEFORE isLoadingSave: both blocks fire on the same A138-12 save.
+      // The asm block UPSERTs A_S_m into project_parameters; the loading block then reads
+      // the persisted A_S_m. Running asm first ensures the loading block sees the
+      // freshly-materialized value within the same transaction (Postgres: prior writes are
+      // visible to subsequent reads in the same transaction).
       //
       // Owner path only: geometry sweep (Mulde/Rigole) is computed in the LATER producer
       // task when a facility worksheet saves and writes A_S_m back to A138-12. Here we
@@ -892,7 +748,7 @@ export async function saveWorksheet(
       //
       // Inputs read:
       //   LOCAL to A138-12 (prefer save batch, else persisted — mirrors the A_S_m read
-      //   in the isLoadingSave block above): A_S_min, A_S_max, a_s_m_determination_method,
+      //   in the isLoadingSave block below): A_S_min, A_S_max, a_s_m_determination_method,
       //   soil_bodenart_tab13, a_s_m_provenance; A_C (may also come from A138-07 cross but
       //   is listed on A138-12 as a derived consumer — read by symbol like loading block reads A_C).
       //   LOCAL manual value: when method='manual', the A_S_m entered by the engineer in batch.
@@ -1050,7 +906,7 @@ export async function saveWorksheet(
           }
         }
 
-        // 10. UPSERT A_S_m as a derived row, mirroring the loading-check UPSERT shape.
+        // 10. UPSERT A_S_m as a derived row, mirroring the loading-check UPSERT shape exactly.
         //     Only write when A_S_m is computable (non-null). When indeterminate, leave
         //     the existing persisted value in place (do not overwrite with null — that
         //     would break the loading-check's A_S_m read on the next save).
@@ -1070,12 +926,163 @@ export async function saveWorksheet(
               target: [projectParameters.projectId, projectParameters.fieldId],
               set: {
                 valueNumber: sql`excluded.value_number`,
+                valueText: sql`excluded.value_text`,
                 sourceType: sql`excluded.source_type`,
                 enteredBy: sql`excluded.entered_by`,
                 enteredAt: now,
               },
             });
           writtenDerived.push({ fieldId: asmFieldId, valueNumber: String(out.A_S_m), valueText: null });
+        }
+      }
+
+      // Materialize Tab.6 loading-check outputs (ac_as_ratio, ac_as_ratio_limit,
+      // ac_as_ratio_check, ac_as_ratio_check_reason) whenever this save targets the
+      // A138-12 (BBZ loading check) worksheet. Persisted as derived rows.
+      //
+      // Detection: A138-12 owns the A_S_m equation (55151cb1-…). `isLoadingSave`
+      // is hoisted to function scope (see above) and used here directly.
+      // This is topology-stable: the equation lives on A138-12 regardless of which
+      // fields are in the current save batch — so ANY A138-12 save triggers a
+      // recompute. Previously the gate was on `ac_as_ratio` being in the save batch,
+      // but ac_as_ratio is read-only/derived and is never user-entered → the block
+      // was permanently dead (same dead-trigger class fixed for the basin block above).
+      //
+      // Cross-worksheet reads:
+      //   A_S_m         — LOCAL to A138-12 (prefer save batch, else persisted)
+      //   A_C           — cross-worksheet from A138-07 (persisted)
+      //   flaechengruppe— cross-worksheet from A138-06 (persisted, value_enum/value_text)
+      //   bbz_thickness — cross-worksheet from A138-06 (persisted, value_number)
+      // `isLoadingSave` is declared at function scope; used here directly.
+
+      if (isLoadingSave) {
+        // 1. Sibling field ids for A138-12 (resolve output field ids + A_S_m local field).
+        const lcWsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const lcIdBySymbol = new Map(lcWsFields.map((f) => [f.symbol, f.id]));
+
+        // 2. A_S_m — prefer save batch, else persisted A138-12 value.
+        const aSmFieldId = lcIdBySymbol.get('A_S_m');
+        let A_S_m: number | null = null;
+        if (aSmFieldId) {
+          const saved = input.values[aSmFieldId];
+          if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+            A_S_m = saved.value;
+          } else {
+            const [existing] = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, aSmFieldId),
+              ))
+              .limit(1);
+            A_S_m = existing?.valueNumber != null ? Number(existing.valueNumber) : null;
+            if (A_S_m != null && !Number.isFinite(A_S_m)) A_S_m = null;
+          }
+        }
+
+        // 3. Cross-worksheet inputs from A138-06 (flaechengruppe, bbz_thickness)
+        //    and A138-07 (A_C). Look up by symbol across all active fields in the project.
+        //    NOTE: same single-owner assumption as the basin cross-worksheet reads.
+        const crossLcFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(
+            and(
+              inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
+              eq(fields.active, true),
+            ),
+          );
+        const crossLcFieldIds = crossLcFields.map((f) => f.id);
+        const crossLcParams = crossLcFieldIds.length > 0
+          ? await tx
+              .select({
+                fieldId: projectParameters.fieldId,
+                valueNumber: projectParameters.valueNumber,
+                valueText: projectParameters.valueText,
+                valueEnum: projectParameters.valueEnum,
+              })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, crossLcFieldIds),
+              ))
+          : [];
+
+        const crossLcFieldById = new Map(crossLcFields.map((f) => [f.id, f]));
+        const crossLcNumBySymbol = new Map<string, number | null>();
+        const crossLcTextBySymbol = new Map<string, string | null>();
+        for (const p of crossLcParams) {
+          const f = crossLcFieldById.get(p.fieldId);
+          if (!f) continue;
+          if (f.dataType === 'number' && !crossLcNumBySymbol.has(f.symbol)) {
+            const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+            crossLcNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+          }
+          // flaechengruppe is stored as 'enum' in the field definition, read value_enum first
+          if ((f.dataType === 'enum' || f.dataType === 'text') && !crossLcTextBySymbol.has(f.symbol)) {
+            crossLcTextBySymbol.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
+          }
+        }
+
+        const A_C           = crossLcNumBySymbol.get('A_C')            ?? null;
+        const flaechengruppe= crossLcTextBySymbol.get('flaechengruppe') ?? null;
+        const bbz_thickness = crossLcNumBySymbol.get('bbz_thickness')  ?? null;
+
+        // 4. Run the pure loading-check materialize.
+        const lc = materializeLoadingCheck({ A_C, A_S_m, flaechengruppe, bbz_thickness });
+
+        // 5. UPSERT the four derived rows.
+        //    When a field id is missing (migration not yet applied), the map returns
+        //    undefined and the row is filtered out — safe no-op.
+        type LcDerivedRow = {
+          projectId: string;
+          fieldId: string;
+          valueNumber: string | null;
+          valueText: string | null;
+          sourceType: 'derived';
+          enteredBy: string;
+          enteredAt: Date;
+        };
+        // Map over the shared constant so the symbol list has a single source of truth.
+        const lcValueMap: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+          ac_as_ratio:              { valueNumber: lc.ac_as_ratio != null ? String(lc.ac_as_ratio) : null, valueText: null },
+          ac_as_ratio_limit:        { valueNumber: lc.ac_as_ratio_limit != null ? String(lc.ac_as_ratio_limit) : null, valueText: null },
+          ac_as_ratio_check:        { valueNumber: null, valueText: lc.ac_as_ratio_check },
+          ac_as_ratio_check_reason: { valueNumber: null, valueText: lc.ac_as_ratio_check_reason },
+        };
+        const lcDerivedRows: LcDerivedRow[] = LOADING_CHECK_OUTPUT_SYMBOLS
+          .map((sym) => ({ sym, ...lcValueMap[sym] }))
+          .map((x) => ({ ...x, fieldId: lcIdBySymbol.get(x.sym) }))
+          .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: x.valueNumber,
+            valueText: x.valueText,
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: now,
+          }));
+
+        if (lcDerivedRows.length > 0) {
+          await tx.insert(projectParameters).values(lcDerivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              valueText: sql`excluded.value_text`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of lcDerivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+          }
         }
       }
 
