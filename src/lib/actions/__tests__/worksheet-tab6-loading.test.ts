@@ -20,6 +20,16 @@
  *   - B1-BLOCKER guard-logic: savedCount=0 + isLoadingSave → transaction/materialize runs;
  *     savedCount=0 + isBasinSave → transaction/materialize runs;
  *     savedCount=0 + neither → no transaction (no-op).
+ *
+ * Option A — producer-side registry tests:
+ *   - MATERIALIZE_REGISTRY contains loading, basin, surface entries.
+ *   - producerFiredEntries: flaechengruppe changed → loading fires.
+ *   - producerFiredEntries: belastungskategorie changed (non-input) → loading does NOT fire.
+ *   - producerFiredEntries: A_C changed → loading fires; basin fires; surface does NOT.
+ *   - producerFiredEntries: already-fired-by-owner guard prevents double-fire.
+ *   - consumerTemplateCode: loading entry has 'A138-12'; basin entry has 'A138-13'.
+ *   - Transaction-guard extended: shouldOpenTransaction returns true when any registry
+ *     entry would producer-fire (changedSymbols ∩ inputSymbols ≠ ∅).
  */
 
 // @vitest-environment happy-dom
@@ -158,6 +168,176 @@ describe('Tab.6 loading-check output shape — unit (no DB)', () => {
 // is proven in worksheet-tab6-loading.integration.test.ts.
 // ---------------------------------------------------------------------------
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
+
+// ---------------------------------------------------------------------------
+// Option A — producer-side registry unit tests (DB-free)
+// ---------------------------------------------------------------------------
+import { MATERIALIZE_REGISTRY, producerFiredEntries } from '@/lib/actions/materialize-registry';
+
+describe('MATERIALIZE_REGISTRY structure — Option A producer-side registry', () => {
+  it('registry contains at least loading, basin, and surface entries', () => {
+    const ids = MATERIALIZE_REGISTRY.map((e) => e.id);
+    expect(ids).toContain('loading');
+    expect(ids).toContain('basin');
+    expect(ids).toContain('surface');
+  });
+
+  it('loading entry has consumerTemplateCode = A138-12', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'loading');
+    expect(entry?.consumerTemplateCode).toBe('A138-12');
+  });
+
+  it('basin entry has consumerTemplateCode = A138-13', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'basin');
+    expect(entry?.consumerTemplateCode).toBe('A138-13');
+  });
+
+  it('loading inputSymbols includes flaechengruppe, bbz_thickness, A_C', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'loading')!;
+    expect(entry.inputSymbols.has('flaechengruppe')).toBe(true);
+    expect(entry.inputSymbols.has('bbz_thickness')).toBe(true);
+    expect(entry.inputSymbols.has('A_C')).toBe(true);
+  });
+
+  it('loading inputSymbols does NOT include A_S_m (local to A138-12, covered by ownerTrigger)', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'loading')!;
+    expect(entry.inputSymbols.has('A_S_m')).toBe(false);
+  });
+
+  it('basin inputSymbols includes the 6 scalar symbols + T_n/n/rainfall_table_ref', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'basin')!;
+    for (const sym of ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A', 'n', 'T_n', 'rainfall_table_ref']) {
+      expect(entry.inputSymbols.has(sym)).toBe(true);
+    }
+  });
+
+  it('loading ownerTrigger: true when A138_12_ASM_EQUATION_ID is in eqs', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'loading')!;
+    expect(entry.ownerTrigger([{ id: A138_12_ASM_EQUATION_ID }])).toBe(true);
+    expect(entry.ownerTrigger([{ id: 'other-eq' }])).toBe(false);
+  });
+
+  it('basin ownerTrigger: true when BASIN_GL8_EQUATION_ID is in eqs', () => {
+    const entry = MATERIALIZE_REGISTRY.find((e) => e.id === 'basin')!;
+    expect(entry.ownerTrigger([{ id: BASIN_GL8_EQUATION_ID }])).toBe(true);
+    expect(entry.ownerTrigger([{ id: 'other-eq' }])).toBe(false);
+  });
+});
+
+describe('producerFiredEntries — scope-guard + no-double-fire logic', () => {
+  it('flaechengruppe changed → loading fires (the key producer-side trigger)', () => {
+    const changed = new Set(['flaechengruppe']);
+    const result = producerFiredEntries(changed, new Set());
+    expect(result.map((e) => e.id)).toContain('loading');
+  });
+
+  it('bbz_thickness changed → loading fires', () => {
+    const changed = new Set(['bbz_thickness']);
+    const result = producerFiredEntries(changed, new Set());
+    expect(result.map((e) => e.id)).toContain('loading');
+  });
+
+  it('belastungskategorie changed (NOT a loading input) → loading does NOT fire (scope guard)', () => {
+    const changed = new Set(['belastungskategorie']);
+    const result = producerFiredEntries(changed, new Set());
+    expect(result.map((e) => e.id)).not.toContain('loading');
+  });
+
+  it('A_C changed → loading fires AND basin fires; surface does NOT fire (scope guard)', () => {
+    const changed = new Set(['A_C']);
+    const result = producerFiredEntries(changed, new Set());
+    const ids = result.map((e) => e.id);
+    expect(ids).toContain('loading');
+    expect(ids).toContain('basin');
+    expect(ids).not.toContain('surface');
+  });
+
+  it('surface_inventory changed → surface fires (but surface ownerTrigger=false, handled by in-batch check)', () => {
+    // Surface entry's inputSymbols includes surface_inventory.
+    // The producer-fire of surface is a no-op in practice (producer == consumer),
+    // but the registry correctly identifies it.
+    const changed = new Set(['surface_inventory']);
+    const result = producerFiredEntries(changed, new Set());
+    // surface entry IS in the registry, but whether it fires in the dispatch loop
+    // depends on the in-batch surface check. Here we only test the registry logic.
+    // The entry will appear in producerFiredEntries if not in alreadyFiredIds.
+    expect(result.map((e) => e.id)).toContain('surface');
+  });
+
+  it('no-double-fire: flaechengruppe changed + loading already fired by ownerTrigger → NOT in producer list', () => {
+    // Simulates an A138-12 save where flaechengruppe is ALSO in the save batch
+    // (ownerTrigger already scheduled loading) — producerFiredEntries must exclude it.
+    const changed = new Set(['flaechengruppe', 'A_S_m']);
+    const alreadyFired = new Set(['loading']); // ownerTrigger fired this
+    const result = producerFiredEntries(changed, alreadyFired);
+    expect(result.map((e) => e.id)).not.toContain('loading');
+  });
+
+  it('no-double-fire: A_C changed + basin already fired by ownerTrigger → NOT in producer list', () => {
+    const changed = new Set(['A_C']);
+    const alreadyFired = new Set(['basin']);
+    const result = producerFiredEntries(changed, alreadyFired);
+    expect(result.map((e) => e.id)).not.toContain('basin');
+  });
+
+  it('empty changedSymbols → no producer firings', () => {
+    const result = producerFiredEntries(new Set(), new Set());
+    expect(result).toHaveLength(0);
+  });
+
+  it('unrelated symbol changed → no producer firings', () => {
+    const result = producerFiredEntries(new Set(['some_random_symbol']), new Set());
+    expect(result).toHaveLength(0);
+  });
+});
+
+describe('Extended transaction-guard — Option A producer-side open condition', () => {
+  /**
+   * GENERAL helper that mirrors the new shouldOpenTransaction logic in saveWorksheet:
+   *   open when savedCount > 0 || isBasinSave || isLoadingSave || producerEntries.length > 0
+   *
+   * The producerEntries are derived from changedSymbols ∩ MATERIALIZE_REGISTRY[i].inputSymbols,
+   * filtered by alreadyFiredIds (ownerTrigger set).
+   */
+  function shouldOpenTransaction(
+    savedCount: number,
+    isBasinSave: boolean,
+    isLoadingSave: boolean,
+    changedSymbols: Set<string> = new Set(),
+    alreadyFiredIds: Set<string> = new Set(),
+  ): boolean {
+    const producerCount = producerFiredEntries(changedSymbols, alreadyFiredIds).length;
+    return savedCount > 0 || isBasinSave || isLoadingSave || producerCount > 0;
+  }
+
+  it('flaechengruppe changed on A138-06 save (not A138-12) → transaction opens for producer-fire', () => {
+    // isLoadingSave=false (A138-06, not A138-12), savedCount=1 (value was different)
+    // changedSymbols includes flaechengruppe → producerFiredEntries finds loading
+    const opens = shouldOpenTransaction(1, false, false, new Set(['flaechengruppe']), new Set());
+    expect(opens).toBe(true);
+  });
+
+  it('non-input symbol changed → no producer entries → transaction still opens because savedCount>0', () => {
+    // Normal A138-06 save where savedCount>0 but no loading input changed
+    const opens = shouldOpenTransaction(1, false, false, new Set(['belastungskategorie']), new Set());
+    expect(opens).toBe(true);
+  });
+
+  it('savedCount=0 + no topology + no producer change → transaction SKIPPED', () => {
+    const opens = shouldOpenTransaction(0, false, false, new Set(), new Set());
+    expect(opens).toBe(false);
+  });
+
+  it('savedCount=0 + flaechengruppe changed → transaction opens (producer-side trigger)', () => {
+    // This would happen if a value was submitted but was IDENTICAL to the persisted value
+    // (savedCount=0 for parameterValues, but changedSymbols is populated before filtering
+    // by actual-value-change... NOTE: in saveWorksheet, changedSymbols is computed only
+    // for ACTUALLY-changed values, so this scenario means savedCount>0 in practice.
+    // This test validates the guard logic in isolation.)
+    const opens = shouldOpenTransaction(0, false, false, new Set(['flaechengruppe']), new Set());
+    expect(opens).toBe(true);
+  });
+});
 
 describe('B1-BLOCKER empty-batch guard logic — unit (no DB)', () => {
   // Helper: mirrors the guard condition from saveWorksheet (worksheet.ts)

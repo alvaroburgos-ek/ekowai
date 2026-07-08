@@ -6,6 +6,7 @@ import {
   fields,
   auditLog,
   equations,
+  worksheetTemplates,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
@@ -19,6 +20,7 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
+import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
  * These map to field symbols on the A138-13 worksheet template (same-symbol
@@ -283,6 +285,59 @@ export async function saveWorksheet(
 
   const savedCount = parameterValues.length;
 
+  // ── Option A: producer-side reactive recompute ─────────────────────────────
+  // Compute the set of symbols whose value ACTUALLY changed in this save batch
+  // (comparing incoming vs previously persisted). This is the producer-side
+  // trigger signal: a downstream materialize fires when one of ITS input symbols
+  // is in this set.
+  //
+  // GENERAL MECHANISM: nothing here is 138-specific. The registry declares which
+  // symbols each materialize reads; this block just computes the changed set and
+  // asks the registry which materializes should fire.
+  //
+  // NOTE: we use `parameterValues` (validated rows only) NOT `fieldIds` so that
+  // skipped fields (wrong type, not found) do not spuriously trigger a recompute.
+  const changedSymbols = new Set<string>();
+  for (const row of parameterValues) {
+    const sym = symbolById.get(row.fieldId);
+    if (!sym) continue;
+    // Use the already-computed audit change record to determine whether the value
+    // actually differs from the previously persisted value.
+    //   action='insert' → no prior row → definitely a new/changed value.
+    //   action='update' → compare before/after; only add to changedSymbols if different.
+    // This avoids spurious producer-fires when an engineer saves an identical value
+    // (e.g. re-saves A138-06 with the same flaechengruppe — should NOT trigger recompute).
+    const auditRow = auditValues.find((a) => a.recordId === row.fieldId);
+    if (auditRow?.action === 'insert') {
+      changedSymbols.add(sym);
+    } else if (auditRow?.action === 'update') {
+      // `before` and `after` are computed in the audit pass above.
+      if (auditRow.changes && 'before' in auditRow.changes && 'after' in auditRow.changes) {
+        const c = auditRow.changes as { before: unknown; after: unknown };
+        // Stringify comparison handles number/string/null/boolean uniformly without
+        // floating-point precision issues (audit stores raw incoming.value).
+        if (JSON.stringify(c.before) !== JSON.stringify(c.after)) {
+          changedSymbols.add(sym);
+        }
+      }
+    }
+  }
+
+  // Determine which registry entries already fire via ownerTrigger (topology).
+  // These are excluded from producer-fire to prevent double-execution.
+  const ownerFiredIds = new Set<string>();
+  for (const entry of MATERIALIZE_REGISTRY) {
+    if (entry.ownerTrigger(templateEquations)) {
+      ownerFiredIds.add(entry.id);
+    }
+  }
+  // isBasinSave and isLoadingSave already correspond to the 'basin' and 'loading'
+  // registry entries. They are expressed directly in the topology flags above;
+  // the ownerFiredIds set is used to prevent double-fire in producerFiredEntries.
+
+  // Registry entries that should fire as producers (changed input, not already firing).
+  const producerEntries = producerFiredEntries(changedSymbols, ownerFiredIds);
+
   // Accumulated derived rows written by the materialize passes below.
   // Populated inside the transaction; returned to the client on ok=true.
   const writtenDerived: SavedDerivedRow[] = [];
@@ -291,11 +346,12 @@ export async function saveWorksheet(
   //   (a) there are actual parameter rows to write (savedCount > 0), OR
   //   (b) this worksheet owns a topology-triggered materialize block that must
   //       recompute even on an empty save batch (upstream input changed on another
-  //       worksheet → stale-verdict fix).
+  //       worksheet → stale-verdict fix), OR
+  //   (c) a producer-side input symbol changed → a downstream materialize must fire.
   //   The SURFACE block is excluded from the guard because surface_inventory being
   //   in the save batch is what identifies a surface save — it only fires when
   //   savedCount > 0, so adding surfacePresence here would be redundant.
-  if (savedCount > 0 || isBasinSave || isLoadingSave) {
+  if (savedCount > 0 || isBasinSave || isLoadingSave || producerEntries.length > 0) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
       // share the same enteredAt so there is no skew from multiple new Date() calls.
@@ -723,6 +779,179 @@ export async function saveWorksheet(
           }
         }
       }
+
+      // ── Option A: producer-side materialize firings ──────────────────────
+      //
+      // GENERAL MECHANISM: for each registry entry that should fire as a producer
+      // (because a changed input symbol ∈ entry.inputSymbols), we:
+      //   1. Look up the consumer worksheet_template by consumerTemplateCode.
+      //   2. Resolve output field ids against THAT template (not the saved template).
+      //   3. Run the materialize compute function with cross-worksheet inputs.
+      //   4. UPSERT the derived rows.
+      //
+      // CRITICAL (consumer-template resolution): the existing owner-triggered loading
+      // block at line ~657 queries `instance.worksheetTemplateId` to get lcWsFields.
+      // When the SAVED worksheet is A138-12, that is correct. When the SAVED worksheet
+      // is A138-06 (producer-fire), using `instance.worksheetTemplateId` would resolve
+      // A138-06's fields — but A138-06 has NO ac_as_ratio symbol, so lcDerivedRows
+      // would be empty. The fix: resolve the consumer template by `consumerTemplateCode`.
+      //
+      // 138-SPECIFIC: only the 'loading' block is producer-fired for now (the basin block
+      // reads its inputs from the saved template + cross-worksheet scalars, but its
+      // producer-fire would require the same fix; deferred until a concrete trigger exists).
+      // Surface is self-referential and handled by the in-batch check above.
+      // The dispatch below is general — it iterates producerEntries and dispatches by entry.id.
+
+      for (const producerEntry of producerEntries) {
+        if (producerEntry.id === 'loading') {
+          // ── Consumer-template resolution (the crux) ──────────────────────
+          // Look up the A138-12 template by code (consumerTemplateCode = 'A138-12').
+          // This is INDEPENDENT of `instance.worksheetTemplateId` (the saved template).
+          // GENERAL: any materialize entry with id='loading' uses its consumerTemplateCode.
+          const [consumerTmpl] = await tx
+            .select({ id: worksheetTemplates.id })
+            .from(worksheetTemplates)
+            .where(eq(worksheetTemplates.code, producerEntry.consumerTemplateCode))
+            .limit(1);
+
+          if (!consumerTmpl) {
+            // Consumer template not found in DB — skip gracefully (migration not yet applied
+            // or code differs). Do not error; the save itself succeeded.
+            continue;
+          }
+
+          // Resolve output field ids from the CONSUMER template (not the saved template).
+          const lcWsFieldsProducer = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, consumerTmpl.id), eq(fields.active, true)));
+          const lcIdBySymbolProducer = new Map(lcWsFieldsProducer.map((f) => [f.symbol, f.id]));
+
+          // A_S_m — read from the consumer (A138-12) project_parameters (persisted).
+          // It is NOT in the current save batch (which belongs to A138-06).
+          const aSmFieldIdProducer = lcIdBySymbolProducer.get('A_S_m');
+          let A_S_m_producer: number | null = null;
+          if (aSmFieldIdProducer) {
+            const [existingAsm] = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, aSmFieldIdProducer),
+              ))
+              .limit(1);
+            A_S_m_producer = existingAsm?.valueNumber != null ? Number(existingAsm.valueNumber) : null;
+            if (A_S_m_producer != null && !Number.isFinite(A_S_m_producer)) A_S_m_producer = null;
+          }
+
+          // Cross-worksheet inputs: A_C, flaechengruppe, bbz_thickness.
+          // These are read from project_parameters — INCLUDING the values just written
+          // by the main parameter UPSERT above (because we're inside the same transaction,
+          // the writes are visible to subsequent reads within the transaction).
+          const crossLcFieldsP = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(
+              and(
+                inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
+                eq(fields.active, true),
+              ),
+            );
+          const crossLcFieldIdsP = crossLcFieldsP.map((f) => f.id);
+          const crossLcParamsP = crossLcFieldIdsP.length > 0
+            ? await tx
+                .select({
+                  fieldId: projectParameters.fieldId,
+                  valueNumber: projectParameters.valueNumber,
+                  valueText: projectParameters.valueText,
+                  valueEnum: projectParameters.valueEnum,
+                })
+                .from(projectParameters)
+                .where(and(
+                  eq(projectParameters.projectId, instance.projectId),
+                  inArray(projectParameters.fieldId, crossLcFieldIdsP),
+                ))
+            : [];
+
+          const crossLcFieldByIdP = new Map(crossLcFieldsP.map((f) => [f.id, f]));
+          const crossLcNumBySymbolP = new Map<string, number | null>();
+          const crossLcTextBySymbolP = new Map<string, string | null>();
+          for (const p of crossLcParamsP) {
+            const f = crossLcFieldByIdP.get(p.fieldId);
+            if (!f) continue;
+            if (f.dataType === 'number' && !crossLcNumBySymbolP.has(f.symbol)) {
+              const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+              crossLcNumBySymbolP.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+            }
+            if ((f.dataType === 'enum' || f.dataType === 'text') && !crossLcTextBySymbolP.has(f.symbol)) {
+              crossLcTextBySymbolP.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
+            }
+          }
+
+          const A_C_p            = crossLcNumBySymbolP.get('A_C')             ?? null;
+          const flaechengruppe_p = crossLcTextBySymbolP.get('flaechengruppe') ?? null;
+          const bbz_thickness_p  = crossLcNumBySymbolP.get('bbz_thickness')   ?? null;
+
+          const lc_p = materializeLoadingCheck({
+            A_C: A_C_p,
+            A_S_m: A_S_m_producer,
+            flaechengruppe: flaechengruppe_p,
+            bbz_thickness: bbz_thickness_p,
+          });
+
+          type LcDerivedRowP = {
+            projectId: string;
+            fieldId: string;
+            valueNumber: string | null;
+            valueText: string | null;
+            sourceType: 'derived';
+            enteredBy: string;
+            enteredAt: Date;
+          };
+          const lcValueMapP: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+            ac_as_ratio:              { valueNumber: lc_p.ac_as_ratio != null ? String(lc_p.ac_as_ratio) : null, valueText: null },
+            ac_as_ratio_limit:        { valueNumber: lc_p.ac_as_ratio_limit != null ? String(lc_p.ac_as_ratio_limit) : null, valueText: null },
+            ac_as_ratio_check:        { valueNumber: null, valueText: lc_p.ac_as_ratio_check },
+            ac_as_ratio_check_reason: { valueNumber: null, valueText: lc_p.ac_as_ratio_check_reason },
+          };
+          const lcDerivedRowsP: LcDerivedRowP[] = LOADING_CHECK_OUTPUT_SYMBOLS
+            .map((sym) => ({ sym, ...lcValueMapP[sym] }))
+            .map((x) => ({ ...x, fieldId: lcIdBySymbolProducer.get(x.sym) }))
+            .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
+            .map((x) => ({
+              projectId: instance.projectId,
+              fieldId: x.fieldId,
+              valueNumber: x.valueNumber,
+              valueText: x.valueText,
+              sourceType: 'derived' as const,
+              enteredBy: userId,
+              enteredAt: now,
+            }));
+
+          if (lcDerivedRowsP.length > 0) {
+            await tx.insert(projectParameters).values(lcDerivedRowsP).onConflictDoUpdate({
+              target: [projectParameters.projectId, projectParameters.fieldId],
+              set: {
+                valueNumber: sql`excluded.value_number`,
+                valueText: sql`excluded.value_text`,
+                sourceType: sql`excluded.source_type`,
+                enteredBy: sql`excluded.entered_by`,
+                enteredAt: now,
+              },
+            });
+            for (const r of lcDerivedRowsP) {
+              writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+            }
+          }
+        }
+        // NOTE: 'basin' and 'surface' producer-fire paths not yet implemented.
+        // Basin producer-fire would require the same consumer-template resolution fix
+        // (resolve A138-13 by code), then run materializeBasinGoverning.
+        // Surface is self-referential (producer == consumer) and already handled above.
+        // Both are left as registry entries (for structural completeness + future extension)
+        // but the dispatch here is a no-op for them.
+      }
+      // ── End Option A ─────────────────────────────────────────────────────
 
       // ONE batched insert for all audit rows — guarded so an empty-batch
       // topology-triggered save (no local field change) does not attempt to
