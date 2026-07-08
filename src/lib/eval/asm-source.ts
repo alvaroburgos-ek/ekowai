@@ -80,3 +80,26 @@ export function computeSoilEstimate(aC: number | null, bodenart: Tab13Bodenart |
 // NOTE (A-1 / R-2): no soilFavourabilityFromKf. Any k_f→Bodenart seed would be a
 // Bild-2 (figure) heuristic Anh. A disqualifies as sole source → NR, needs
 // ratification. Omitted from this build; the Bodenart selector is authoritative.
+
+/**
+ * §6.3.2 V-2: The geometry-derived A_S,m must be ≥ A_S,max (Gl.7 term).
+ * "der erforderliche Flächenbedarf entspricht mindestens der maximalen
+ * Versickerungsfläche A_S,max".
+ *
+ * Flag-only: does NOT change A_S_m. The server surfaces this as a warning
+ * when method='geometry' and A_S_max is present.
+ */
+export function validateGeometryAgainstMax(
+  geometryValue: number | null,
+  aSmax: number | null,
+): { flag: boolean; reason: string | null } {
+  if (typeof geometryValue !== 'number' || !Number.isFinite(geometryValue)) return { flag: false, reason: null };
+  if (typeof aSmax !== 'number' || !Number.isFinite(aSmax)) return { flag: false, reason: null };
+  if (geometryValue < aSmax) {
+    return {
+      flag: true,
+      reason: `A_S,m (Geometrie ${geometryValue}) < A_S,max (${aSmax}) — §6.3.2 Flächenbedarf-Untergrenze verletzt.`,
+    };
+  }
+  return { flag: false, reason: null };
+}

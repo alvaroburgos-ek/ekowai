@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   resolveAsmProducer, computeDirect, computeSoilEstimate,
   ASM_GL16_EQUATION_ID, ASM_GL17_EQUATION_ID, FACILITY_TYPE_TO_WORKSHEET,
+  validateGeometryAgainstMax,
 } from '../asm-source';
 
 describe('resolveAsmProducer', () => {
@@ -49,5 +50,34 @@ describe('constants', () => {
   it('facility→worksheet map', () => {
     expect(FACILITY_TYPE_TO_WORKSHEET.mulde).toBe('A138-17');
     expect(FACILITY_TYPE_TO_WORKSHEET.becken).toBe('A138-22');
+  });
+});
+
+describe('V-2 geometry ≥ A_S_max cross-check (§6.3.2)', () => {
+  it('flags when geometry < A_S_max', () => {
+    expect(validateGeometryAgainstMax(40, 45).flag).toBe(true);
+  });
+  it('provides a reason string when flagged', () => {
+    const result = validateGeometryAgainstMax(40, 45);
+    expect(result.flag).toBe(true);
+    expect(typeof result.reason).toBe('string');
+    expect(result.reason).not.toBeNull();
+  });
+  it('no flag when geometry ≥ A_S_max', () => {
+    expect(validateGeometryAgainstMax(50, 45).flag).toBe(false);
+    expect(validateGeometryAgainstMax(45, 45).flag).toBe(false);
+  });
+  it('no flag when A_S_max is absent (null)', () => {
+    expect(validateGeometryAgainstMax(40, null).flag).toBe(false);
+  });
+  it('no flag when geometryValue is absent (null)', () => {
+    expect(validateGeometryAgainstMax(null, 45).flag).toBe(false);
+  });
+  it('no flag when both are null', () => {
+    expect(validateGeometryAgainstMax(null, null).flag).toBe(false);
+  });
+  it('reason is null when not flagged', () => {
+    expect(validateGeometryAgainstMax(50, 45).reason).toBeNull();
+    expect(validateGeometryAgainstMax(null, 45).reason).toBeNull();
   });
 });
