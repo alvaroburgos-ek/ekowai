@@ -98,7 +98,7 @@ export type MaterializeEntry = {
  * 138-SPECIFIC: the three entries below are DWA-A 138 specific.
  *   Loading entry:  A138-06 → A138-12 (flaechengruppe/bbz_thickness → ac_as_ratio*)
  *   Basin  entry:   A138-08/10/12 → A138-13 (scalars → r_D_n/D_min)
- *   Surface entry:  A138-07 self  (surface_inventory → A_C/C_m/A_E_*/A_C_sealed/unsealed)
+ *   Surface entry:  A138-07 self  (surface_inventory -> A_C, C_m, A_E_ba, A_E_nba, A_C_sealed, A_C_unsealed)
  *
  * GENERAL: for any other standard, push additional entries here with a different
  * consumerTemplateCode, inputSymbols, and ownerTrigger.
