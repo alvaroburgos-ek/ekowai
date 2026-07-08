@@ -537,7 +537,7 @@ export function WorksheetForm({
           sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
           inheritedFrom={inheritedFromBySymbol[f.symbol]}
           docs={docs}
-          isComputed={computedSymbols.has(f.symbol)}
+          isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
           inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
