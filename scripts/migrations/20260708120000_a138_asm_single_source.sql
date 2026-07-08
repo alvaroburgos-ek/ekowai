@@ -64,12 +64,18 @@ BEGIN
   IF asm_field IS NULL THEN
     RAISE EXCEPTION 'a138_asm: a_s_m_determination_method field could not be resolved — migration aborted';
   END IF;
+  -- entered_by is uuid NOT NULL — cannot use a text sentinel or NULL. Attribute the
+  -- backfilled row to the project's EARLIEST A138-12 param author (one row per project
+  -- via GROUP BY, which also avoids the multi-entered_by → unique-violation risk a plain
+  -- SELECT DISTINCT would have on the (project_id, field_id) unique constraint).
   INSERT INTO project_parameters (project_id, field_id, value_enum, source_type, entered_by, entered_at)
-  SELECT DISTINCT pp.project_id, asm_field, 'direct', 'entered', 'migration:20260708120000', NOW()
+  SELECT pp.project_id, asm_field, 'direct', 'entered',
+         (array_agg(pp.entered_by ORDER BY pp.entered_at))[1], NOW()
   FROM project_parameters pp
   JOIN fields f ON f.id = pp.field_id
   WHERE f.worksheet_template_id = ws12
-    AND NOT EXISTS (SELECT 1 FROM project_parameters x WHERE x.project_id=pp.project_id AND x.field_id=asm_field);
+    AND NOT EXISTS (SELECT 1 FROM project_parameters x WHERE x.project_id=pp.project_id AND x.field_id=asm_field)
+  GROUP BY pp.project_id;
 
   -- (4) Retire orphan A_S_m_Becken (D-4). Surface residue values before deactivating.
   SELECT id INTO becken_field FROM fields WHERE worksheet_template_id=ws22 AND symbol='A_S_m_Becken' LIMIT 1;
