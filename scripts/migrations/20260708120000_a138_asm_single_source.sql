@@ -49,7 +49,7 @@ BEGIN
     VALUES (ws12, sec12, 'a_s_m_needs_reconfirmation', 'A_S,m — Bestätigung erforderlich (Anlagentypwechsel)', 'boolean', false, true, max_order12, '§6.4.1', NULL, 'false'::jsonb, 'imported_unverified');
   END IF;
 
-  -- (2d) soil_bodenart_tab13 (enum, two verbatim Tab.13 rows, A-1)
+  -- (2c) soil_bodenart_tab13 (enum, two verbatim Tab.13 rows, A-1)
   IF NOT EXISTS (SELECT 1 FROM fields WHERE worksheet_template_id=ws12 AND symbol='soil_bodenart_tab13') THEN
     SELECT COALESCE(MAX(order_index),0)+1 INTO max_order12 FROM fields WHERE worksheet_template_id=ws12;
     INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, is_required, active, order_index, clause_reference, consumer_worksheets, enum_values, verification_status)

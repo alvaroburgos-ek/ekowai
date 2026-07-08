@@ -965,7 +965,7 @@ export async function saveWorksheet(
                   enteredAt: now,
                 },
               });
-            writtenDerived.push({ fieldId: asmNrcFieldIdOwner, valueNumber: null, valueText: 'reconfirmed' });
+            writtenDerived.push({ fieldId: asmNrcFieldIdOwner, valueNumber: null, valueText: null });
           }
         }
       }
@@ -1630,15 +1630,50 @@ export async function saveWorksheet(
           });
 
           // Task 8: facility_type_selected changed — apply type-change invalidation rule.
-          //   geometry → invalidated-by-recompute: materializeAsm above already recomputes
-          //              A_S_m for the new facility (geometryValueP from new type's geometry,
-          //              or null → indeterminate). No explicit clear write needed.
+          //   geometry → CLEAR A_S_m immediately (acceptance #4: mulde→rigole must not leave
+          //              stale geometry A_S_m). When the new facility's geometry is not yet
+          //              entered, geometryValueP=null → asmOutP.A_S_m=null → the step-6 UPSERT
+          //              is skipped. Without an explicit clear the OLD geometry value persists.
+          //              The clear runs BEFORE the chained Tab.6 re-fire so that re-fire reads
+          //              the cleared (null) A_S_m and correctly goes indeterminate.
           //   manual   → flag a_s_m_needs_reconfirmation=true so the engineer re-confirms
           //              that the datasheet value still applies to the new facility type.
+          //              A_S_m is NOT cleared (engineer's manual value is kept; reconfirm flag
+          //              is the signal that review is needed).
           //   direct / soil_estimate → facility-agnostic; no action.
           if (changedSymbols.has('facility_type_selected')) {
             const invalidation = asmInvalidationOnTypeChange(asmMethodP);
+            if (invalidation.clear) {
+              // Geometry A_S,m is facility-specific — clear it on type change so a stale
+              // value from the previous facility type does not propagate (to Tab.6 /
+              // q_S_AC / render). A subsequent facility-worksheet save recomputes and
+              // re-persists when the new geometry is complete.
+              const asmClearFieldId = asmCIdBySymbol.get('A_S_m');
+              if (asmClearFieldId) {
+                await tx.insert(projectParameters).values([{
+                  projectId: instance.projectId,
+                  fieldId: asmClearFieldId,
+                  valueNumber: null,
+                  valueText: null,
+                  sourceType: 'derived',
+                  enteredBy: userId,
+                  enteredAt: now,
+                }]).onConflictDoUpdate({
+                  target: [projectParameters.projectId, projectParameters.fieldId],
+                  set: {
+                    valueNumber: sql`excluded.value_number`,
+                    valueText: sql`excluded.value_text`,
+                    sourceType: sql`excluded.source_type`,
+                    enteredBy: sql`excluded.entered_by`,
+                    enteredAt: now,
+                  },
+                });
+                writtenDerived.push({ fieldId: asmClearFieldId, valueNumber: null, valueText: null });
+              }
+            }
             if (invalidation.flagNeedsReconfirm) {
+              // manual: keep A_S_m value, but flag that the engineer must re-confirm the
+              // datasheet value still applies to the newly selected facility type.
               const asmNrcFieldId = asmCIdBySymbol.get('a_s_m_needs_reconfirmation');
               if (asmNrcFieldId) {
                 await tx
@@ -1667,13 +1702,6 @@ export async function saveWorksheet(
                 writtenDerived.push({ fieldId: asmNrcFieldId, valueNumber: null, valueText: 'needs_reconfirmation' });
               }
             }
-            // invalidation.clear (geometry): handled by the materializeAsm recompute above;
-            // geometryValueP is already null if the new facility geometry is missing, so
-            // asmOutP.A_S_m will be null → the existing A_S_m row is left in place (stale
-            // but not overwritten — same policy as the owner block). This is acceptable
-            // because the geometry producer branch on A138-17/18 will overwrite it on the
-            // next facility-worksheet save. Explicit null-write is intentionally omitted
-            // to stay consistent with the owner block's "do not overwrite with null" rule.
           }
 
           // 6. UPSERT A_S_m onto the A138-12 consumer template's field id.
