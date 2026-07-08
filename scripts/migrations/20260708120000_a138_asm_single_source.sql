@@ -38,7 +38,18 @@ BEGIN
     VALUES (ws12, sec12, 'a_s_m_provenance', 'A_S,m — Herkunft (bei manueller Angabe)', 'text', false, true, max_order12, '§6.4.1', NULL, 'imported_unverified');
   END IF;
 
-  -- (2b) soil_bodenart_tab13 (enum, two verbatim Tab.13 rows, A-1)
+  -- (2b) a_s_m_needs_reconfirmation (boolean, Task 8 — type-change manual flag)
+  -- Set to true by the asm producer branch when facility_type_selected changes and
+  -- method='manual', so the engineer must re-confirm the datasheet value still applies.
+  -- Cleared to false on the next successful A138-12 owner save (materializeAsm produces
+  -- a determined result), signalling re-confirmation complete.
+  IF NOT EXISTS (SELECT 1 FROM fields WHERE worksheet_template_id=ws12 AND symbol='a_s_m_needs_reconfirmation') THEN
+    SELECT COALESCE(MAX(order_index),0)+1 INTO max_order12 FROM fields WHERE worksheet_template_id=ws12;
+    INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, is_required, active, order_index, clause_reference, consumer_worksheets, default_value, verification_status)
+    VALUES (ws12, sec12, 'a_s_m_needs_reconfirmation', 'A_S,m — Bestätigung erforderlich (Anlagentypwechsel)', 'boolean', false, true, max_order12, '§6.4.1', NULL, 'false'::jsonb, 'imported_unverified');
+  END IF;
+
+  -- (2d) soil_bodenart_tab13 (enum, two verbatim Tab.13 rows, A-1)
   IF NOT EXISTS (SELECT 1 FROM fields WHERE worksheet_template_id=ws12 AND symbol='soil_bodenart_tab13') THEN
     SELECT COALESCE(MAX(order_index),0)+1 INTO max_order12 FROM fields WHERE worksheet_template_id=ws12;
     INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, is_required, active, order_index, clause_reference, consumer_worksheets, enum_values, verification_status)

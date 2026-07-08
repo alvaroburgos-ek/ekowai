@@ -21,7 +21,7 @@ import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 import { materializeAsm, computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
-import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax } from '@/lib/eval/asm-source';
+import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
 import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
 
@@ -934,6 +934,39 @@ export async function saveWorksheet(
               },
             });
           writtenDerived.push({ fieldId: asmFieldId, valueNumber: String(out.A_S_m), valueText: null });
+
+          // Task 8: A successful materializeAsm on the owner worksheet (A138-12) clears the
+          // needs_reconfirmation flag. This covers re-confirmation for the manual case: the
+          // engineer re-saves A138-12 with a confirmed value → the flag is cleared.
+          // Only clear when A_S_m is determined (non-null) to avoid clearing the flag
+          // prematurely when the owner save is indeterminate.
+          const asmNrcFieldIdOwner = asmIdBySymbol.get('a_s_m_needs_reconfirmation');
+          if (asmNrcFieldIdOwner) {
+            await tx
+              .insert(projectParameters)
+              .values([{
+                projectId: instance.projectId,
+                fieldId: asmNrcFieldIdOwner,
+                valueBoolean: false,
+                valueNumber: null,
+                valueText: null,
+                sourceType: 'derived',
+                enteredBy: userId,
+                enteredAt: now,
+              }])
+              .onConflictDoUpdate({
+                target: [projectParameters.projectId, projectParameters.fieldId],
+                set: {
+                  valueBoolean: sql`excluded.value_boolean`,
+                  valueNumber: sql`excluded.value_number`,
+                  valueText: sql`excluded.value_text`,
+                  sourceType: sql`excluded.source_type`,
+                  enteredBy: sql`excluded.entered_by`,
+                  enteredAt: now,
+                },
+              });
+            writtenDerived.push({ fieldId: asmNrcFieldIdOwner, valueNumber: null, valueText: 'reconfirmed' });
+          }
         }
       }
 
@@ -1595,6 +1628,53 @@ export async function saveWorksheet(
             facilityType: facilityTypeP,
             sourceWorksheet: 'A138-12',
           });
+
+          // Task 8: facility_type_selected changed — apply type-change invalidation rule.
+          //   geometry → invalidated-by-recompute: materializeAsm above already recomputes
+          //              A_S_m for the new facility (geometryValueP from new type's geometry,
+          //              or null → indeterminate). No explicit clear write needed.
+          //   manual   → flag a_s_m_needs_reconfirmation=true so the engineer re-confirms
+          //              that the datasheet value still applies to the new facility type.
+          //   direct / soil_estimate → facility-agnostic; no action.
+          if (changedSymbols.has('facility_type_selected')) {
+            const invalidation = asmInvalidationOnTypeChange(asmMethodP);
+            if (invalidation.flagNeedsReconfirm) {
+              const asmNrcFieldId = asmCIdBySymbol.get('a_s_m_needs_reconfirmation');
+              if (asmNrcFieldId) {
+                await tx
+                  .insert(projectParameters)
+                  .values([{
+                    projectId: instance.projectId,
+                    fieldId: asmNrcFieldId,
+                    valueBoolean: true,
+                    valueNumber: null,
+                    valueText: null,
+                    sourceType: 'derived',
+                    enteredBy: userId,
+                    enteredAt: now,
+                  }])
+                  .onConflictDoUpdate({
+                    target: [projectParameters.projectId, projectParameters.fieldId],
+                    set: {
+                      valueBoolean: sql`excluded.value_boolean`,
+                      valueNumber: sql`excluded.value_number`,
+                      valueText: sql`excluded.value_text`,
+                      sourceType: sql`excluded.source_type`,
+                      enteredBy: sql`excluded.entered_by`,
+                      enteredAt: now,
+                    },
+                  });
+                writtenDerived.push({ fieldId: asmNrcFieldId, valueNumber: null, valueText: 'needs_reconfirmation' });
+              }
+            }
+            // invalidation.clear (geometry): handled by the materializeAsm recompute above;
+            // geometryValueP is already null if the new facility geometry is missing, so
+            // asmOutP.A_S_m will be null → the existing A_S_m row is left in place (stale
+            // but not overwritten — same policy as the owner block). This is acceptable
+            // because the geometry producer branch on A138-17/18 will overwrite it on the
+            // next facility-worksheet save. Explicit null-write is intentionally omitted
+            // to stay consistent with the owner block's "do not overwrite with null" rule.
+          }
 
           // 6. UPSERT A_S_m onto the A138-12 consumer template's field id.
           //    Mirrors the owner-path UPSERT (isAsmSave block) exactly.

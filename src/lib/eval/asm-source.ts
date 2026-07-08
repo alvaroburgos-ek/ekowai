@@ -82,6 +82,36 @@ export function computeSoilEstimate(aC: number | null, bodenart: Tab13Bodenart |
 // ratification. Omitted from this build; the Bodenart selector is authoritative.
 
 /**
+ * Task 8: Determines what happens to a persisted A_S,m when `facility_type_selected`
+ * (A138-15) changes. The answer depends on the PREVIOUS determination method:
+ *
+ *  - geometry     → value is facility-specific (Mulde/Rigole geometry). Clear it so
+ *                   the producer recomputes for the new type (or falls to indeterminate).
+ *                   The geometry recompute in the `asm` producer branch already handles
+ *                   this: when `facility_type_selected ∈ changedSymbols`, the branch
+ *                   re-runs materializeAsm for the new type — clearing is
+ *                   invalidation-by-recompute, not an explicit null write.
+ *  - manual       → value came from an engineer's datasheet entry; it may or may not
+ *                   apply to the new facility type. Do NOT clear — flag needs-reconfirmation
+ *                   so the engineer explicitly re-confirms or re-enters the value.
+ *  - direct / soil_estimate → facility-agnostic (computed from A_S,min/max or Bodenart/A_C).
+ *                   Unchanged: the formula still applies after a type change.
+ *
+ * Return type:
+ *   clear               — set A_S_m to null (geometry case; used if recompute is absent)
+ *   flagNeedsReconfirm  — persist a_s_m_needs_reconfirmation=true (manual case)
+ *
+ * Pure function: no DB access, no side-effects. Tested in asm-invalidation.test.ts.
+ */
+export function asmInvalidationOnTypeChange(
+  prevMethod: AsmMethod,
+): { clear: boolean; flagNeedsReconfirm: boolean } {
+  if (prevMethod === 'geometry') return { clear: true,  flagNeedsReconfirm: false };
+  if (prevMethod === 'manual')   return { clear: false, flagNeedsReconfirm: true  };
+  return { clear: false, flagNeedsReconfirm: false };
+}
+
+/**
  * §6.3.2 V-2: The geometry-derived A_S,m must be ≥ A_S,max (Gl.7 term).
  * "der erforderliche Flächenbedarf entspricht mindestens der maximalen
  * Versickerungsfläche A_S,max".
