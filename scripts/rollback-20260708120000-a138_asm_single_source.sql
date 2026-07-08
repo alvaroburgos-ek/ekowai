@@ -11,10 +11,6 @@ BEGIN
   SELECT id INTO asm_field FROM fields WHERE worksheet_template_id=ws12 AND symbol='a_s_m_determination_method' LIMIT 1;
   IF asm_field IS NOT NULL THEN DELETE FROM project_parameters WHERE field_id=asm_field; END IF;
   DELETE FROM fields WHERE worksheet_template_id=ws12 AND symbol IN ('a_s_m_determination_method','a_s_m_provenance','a_s_m_needs_reconfirmation','soil_bodenart_tab13');
-  UPDATE fields SET consumer_worksheets = (
-    SELECT CASE WHEN array_length(array_agg(c),1) IS NULL THEN NULL ELSE array_agg(c) END
-    FROM unnest(coalesce(consumer_worksheets, ARRAY[]::text[])) AS c
-    WHERE c NOT IN ('A138-13','A138-22')
-  ) WHERE worksheet_template_id=ws12 AND symbol='A_S_m';
+  -- (step 5 consumer append was a no-op: A138-13/A138-22 pre-existed → nothing to reverse).
   UPDATE fields SET active=true WHERE worksheet_template_id=ws22 AND symbol='A_S_m_Becken';
 END $$;

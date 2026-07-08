@@ -65,6 +65,53 @@ describe('A_S,m owner materialize (logic)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// V-2 manual-strip predicate — mirrors the server's A_S,m rejection logic.
+// ---------------------------------------------------------------------------
+describe('V-2 manual A_S,m without provenance — strip predicate (no DB)', () => {
+  /**
+   * Encodes the exact predicate the server uses to decide whether to splice
+   * A_S_m out of the persistence batch (Finding 1 fix).
+   * method must be 'manual' AND provenance must be absent/empty.
+   */
+  function shouldStripAsm(method: string | null, provenance: string | null | undefined): boolean {
+    if (method !== 'manual') return false;
+    return !provenance || provenance.trim() === '';
+  }
+
+  it('manual + no provenance → strip A_S_m', () => {
+    expect(shouldStripAsm('manual', null)).toBe(true);
+  });
+
+  it('manual + empty string provenance → strip A_S_m', () => {
+    expect(shouldStripAsm('manual', '')).toBe(true);
+  });
+
+  it('manual + whitespace-only provenance → strip A_S_m', () => {
+    expect(shouldStripAsm('manual', '   ')).toBe(true);
+  });
+
+  it('manual + non-empty provenance → do NOT strip A_S_m', () => {
+    expect(shouldStripAsm('manual', 'Datenblatt XY')).toBe(false);
+  });
+
+  it('direct + no provenance → do NOT strip A_S_m', () => {
+    expect(shouldStripAsm('direct', null)).toBe(false);
+  });
+
+  it('geometry + no provenance → do NOT strip A_S_m', () => {
+    expect(shouldStripAsm('geometry', null)).toBe(false);
+  });
+
+  it('soil_estimate + no provenance → do NOT strip A_S_m', () => {
+    expect(shouldStripAsm('soil_estimate', null)).toBe(false);
+  });
+
+  it('null method + no provenance → do NOT strip A_S_m', () => {
+    expect(shouldStripAsm(null, null)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // isAsmSave detection — equation-topology trigger.
 // Mirrors the pattern used for isLoadingSave in worksheet.ts.
 // ---------------------------------------------------------------------------

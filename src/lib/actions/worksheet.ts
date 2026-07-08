@@ -377,6 +377,23 @@ export async function saveWorksheet(
         warnings.push(
           'Methode "Manuell": Herkunftsangabe (Datenblatt/Quelle) für A_S,m ist erforderlich — bitte ausfüllen.',
         );
+        // Mirror V-1 splice idiom: remove A_S_m from both batches so the
+        // user-entered value is NOT persisted without required provenance.
+        // (The old persisted value, if any, remains untouched.)
+        let aSmFieldId: string | null = null;
+        for (const [fid, sym] of symbolById.entries()) {
+          if (sym === 'A_S_m') { aSmFieldId = fid; break; }
+        }
+        if (aSmFieldId) {
+          const rejectedAsm = new Set([aSmFieldId]);
+          const keepAsmIdx = (fid: string) => !rejectedAsm.has(fid);
+          parameterValues.splice(0, parameterValues.length,
+            ...parameterValues.filter((r) => keepAsmIdx(r.fieldId)),
+          );
+          auditValues.splice(0, auditValues.length,
+            ...auditValues.filter((r) => keepAsmIdx(r.recordId)),
+          );
+        }
       }
     }
   }
