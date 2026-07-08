@@ -20,8 +20,9 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { materializeAsm } from '@/lib/eval/materialize-asm';
+import { materializeAsm, computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax } from '@/lib/eval/asm-source';
+import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
 import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
@@ -1256,6 +1257,472 @@ export async function saveWorksheet(
             });
             for (const r of lcDerivedRowsP) {
               writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+            }
+          }
+        } else if (producerEntry.id === 'asm') {
+          // ── A_S,m producer branch (geometry write-back) ───────────────────
+          // Fires when a facility worksheet (A138-17 Mulde / A138-18 Rigole) or
+          // A138-15 (facility_type_selected) saves and a relevant input changed.
+          // Mirrors the 'loading' producer branch: resolve consumer template by
+          // code + savedStandardId (fail-closed), then recompute A_S_m on A138-12.
+          //
+          // ORDERING: the 'loading' entry precedes 'asm' in MATERIALIZE_REGISTRY, so
+          // the loading pass fires first in this loop. The chained Tab.6 re-fire
+          // (step 7, inside this branch) ensures a same-save geometry change updates
+          // BOTH A_S_m AND the Tab.6 verdict without depending on loop ordering.
+
+          // 1. Resolve the A138-12 consumer template by code + standardId.
+          //    Mirrors the loading branch's resolution exactly (fail-closed).
+          const [asmConsumerTmpl] = savedStandardId
+            ? await tx
+                .select({ id: worksheetTemplates.id })
+                .from(worksheetTemplates)
+                .where(and(
+                  eq(worksheetTemplates.code, producerEntry.consumerTemplateCode),
+                  eq(worksheetTemplates.standardId, savedStandardId),
+                ))
+                .limit(1)
+            : [];
+
+          if (!asmConsumerTmpl) {
+            // Consumer template A138-12 not found in this standard — skip gracefully.
+            continue;
+          }
+
+          // Resolve field ids from the CONSUMER (A138-12) template.
+          const asmCWsFields = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, asmConsumerTmpl.id), eq(fields.active, true)));
+          const asmCIdBySymbol = new Map(asmCWsFields.map((f) => [f.symbol, f.id]));
+
+          // 2. Read a_s_m_determination_method + facility_type_selected from persisted params.
+          //    The method lives on A138-12 (consumer); facility_type on A138-15 (cross-ws).
+          // 2a. Method — read from consumer template's persisted params.
+          const asmMethodFieldIdP = asmCIdBySymbol.get('a_s_m_determination_method');
+          let asmMethodP: AsmMethod = 'direct';
+          if (asmMethodFieldIdP) {
+            const [mRow] = await tx
+              .select({ valueEnum: projectParameters.valueEnum })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, asmMethodFieldIdP),
+              ))
+              .limit(1);
+            const rawM = mRow?.valueEnum ?? null;
+            if (rawM === 'direct' || rawM === 'geometry' || rawM === 'soil_estimate' || rawM === 'manual') {
+              asmMethodP = rawM;
+            }
+          }
+
+          // 2b. facility_type_selected — cross-worksheet by symbol (same as isAsmSave owner path).
+          const crossFtFieldsP = await tx
+            .select({ id: fields.id })
+            .from(fields)
+            .where(and(eq(fields.symbol, 'facility_type_selected'), eq(fields.active, true)));
+          const crossFtFieldIdsP = crossFtFieldsP.map((f) => f.id);
+          let facilityTypeP: FacilityType | null = null;
+          if (crossFtFieldIdsP.length > 0) {
+            const [ftRowP] = await tx
+              .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, crossFtFieldIdsP),
+              ))
+              .limit(1);
+            const rawFt = ftRowP?.valueEnum ?? ftRowP?.valueText ?? null;
+            if (rawFt === 'flaeche' || rawFt === 'mulde' || rawFt === 'rigole' ||
+                rawFt === 'schacht' || rawFt === 'becken') {
+              facilityTypeP = rawFt;
+            }
+          }
+
+          // 3. Compute geometryValue when method==='geometry'.
+          let geometryValueP: number | null = null;
+
+          if (asmMethodP === 'geometry') {
+            if (facilityTypeP === 'mulde') {
+              // ── Mulde Gl.16 Dauerstufen sweep (A-2) ──────────────────────
+              // Read the r_D_n_table carrier the SAME WAY the isBasinSave block does:
+              // global symbol lookup (carrier lives on A138-04, not the facility ws).
+              const [muldeCarrierField] = await tx
+                .select({ id: fields.id })
+                .from(fields)
+                .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+                .limit(1);
+              let muldeCarrierRaw: unknown = null;
+              if (muldeCarrierField) {
+                const [muldeCarrierParam] = await tx
+                  .select({ valueJson: projectParameters.valueJson })
+                  .from(projectParameters)
+                  .where(and(
+                    eq(projectParameters.projectId, instance.projectId),
+                    eq(projectParameters.fieldId, muldeCarrierField.id),
+                  ))
+                  .limit(1);
+                muldeCarrierRaw = muldeCarrierParam?.valueJson ?? null;
+              }
+
+              // Read rainfall_table_ref: prefer the save batch value, else persisted.
+              // The producer save targets A138-17 — worksheetTemplateId is A138-17's id.
+              const muldeWsFields = await tx
+                .select({ id: fields.id, symbol: fields.symbol })
+                .from(fields)
+                .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+              const muldeIdBySymbol = new Map(muldeWsFields.map((f) => [f.symbol, f.id]));
+
+              const muldeRrFieldId = muldeIdBySymbol.get('rainfall_table_ref');
+              let muldeRainfallTableRef: string | null = null;
+              if (muldeRrFieldId) {
+                const saved = input.values[muldeRrFieldId];
+                if (saved?.type === 'text' && typeof saved.value === 'string') {
+                  muldeRainfallTableRef = saved.value || null;
+                } else {
+                  const [existingRr] = await tx
+                    .select({ valueText: projectParameters.valueText })
+                    .from(projectParameters)
+                    .where(and(
+                      eq(projectParameters.projectId, instance.projectId),
+                      eq(projectParameters.fieldId, muldeRrFieldId),
+                    ))
+                    .limit(1);
+                  muldeRainfallTableRef = existingRr?.valueText ?? null;
+                }
+              }
+
+              // Read scalars A_C, h_M, f_Z, k_i + frequency symbols for T_n resolution.
+              // These are read cross-worksheet by symbol (A_C from A138-07; h_M/f_Z/k_i from A138-17).
+              // n_M_Bemessung is A138-17's local return-period selector (FACILITY_FREQUENCY_SYMBOL).
+              const muldeFreqSym = FACILITY_FREQUENCY_SYMBOL['A138-17'];
+              const MULDE_SCALAR_SYMS = ['A_C', 'h_M', 'f_Z', 'k_i', muldeFreqSym!, 'n', 'T_n'] as const;
+              const mScalarCrossFields = await tx
+                .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+                .from(fields)
+                .where(and(
+                  inArray(fields.symbol, [...MULDE_SCALAR_SYMS]),
+                  eq(fields.active, true),
+                ));
+              const mScalarFieldIds = mScalarCrossFields.map((f) => f.id);
+              const mScalarParams = mScalarFieldIds.length > 0
+                ? await tx
+                    .select({
+                      fieldId: projectParameters.fieldId,
+                      valueNumber: projectParameters.valueNumber,
+                    })
+                    .from(projectParameters)
+                    .where(and(
+                      eq(projectParameters.projectId, instance.projectId),
+                      inArray(projectParameters.fieldId, mScalarFieldIds),
+                    ))
+                : [];
+              const mScalarFieldById = new Map(mScalarCrossFields.map((f) => [f.id, f]));
+              const mNumBySymbol = new Map<string, number | null>();
+              for (const p of mScalarParams) {
+                const f = mScalarFieldById.get(p.fieldId);
+                if (!f) continue;
+                if (!mNumBySymbol.has(f.symbol)) {
+                  const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+                  mNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+                }
+              }
+              // Also check the current save batch for the producer (A138-17) field overrides.
+              for (const f of muldeWsFields) {
+                if (!(MULDE_SCALAR_SYMS as readonly string[]).includes(f.symbol)) continue;
+                const saved = input.values[f.id];
+                if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+                  mNumBySymbol.set(f.symbol, saved.value);
+                }
+              }
+
+              // Resolve T_n for A138-17 (uses n_M_Bemessung local, else project n/T_n).
+              const pickMuldeNum = (sym: string): number | null => mNumBySymbol.get(sym) ?? null;
+              const muldeT_n = facilityReturnPeriod('A138-17', pickMuldeNum);
+
+              // Resolve the column from the carrier (mirrors materialize-basin-governing.ts).
+              const muldeCarrier = normalizeRainfallCarrier(muldeCarrierRaw);
+              const muldeTable = resolveSelectedTable(muldeCarrier, muldeRainfallTableRef);
+              if (muldeTable) {
+                const muldeCol = resolveColumn(muldeTable, muldeT_n);
+                if (muldeCol.status !== 'missing' && muldeCol.rows.length > 0) {
+                  const mAC = mNumBySymbol.get('A_C') ?? null;
+                  const mhM = mNumBySymbol.get('h_M') ?? null;
+                  const mfZ = mNumBySymbol.get('f_Z') ?? null;
+                  const mki = mNumBySymbol.get('k_i') ?? null;
+                  if (mAC != null && mhM != null && mfZ != null && mki != null) {
+                    const muldeSwept = computeMuldeGeometrySweep(muldeCol.rows, {
+                      A_C: mAC, h_M: mhM, f_Z: mfZ, k_i: mki,
+                    });
+                    geometryValueP = muldeSwept.A_S_m;
+                  }
+                }
+              }
+
+            } else if (facilityTypeP === 'rigole') {
+              // ── Rigole one-shot Gl.17 = (b_R + h_R) · L_R + b_R · h_R ──
+              // Read b_R, h_R, L_R from the producer worksheet (A138-18).
+              // Cross-worksheet by symbol — prefer current save batch, else persisted.
+              const RIGOLE_SYMS = ['b_R', 'h_R', 'L_R'] as const;
+              const rigoleCrossFields = await tx
+                .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+                .from(fields)
+                .where(and(
+                  inArray(fields.symbol, [...RIGOLE_SYMS]),
+                  eq(fields.active, true),
+                ));
+              const rigoleFieldIds = rigoleCrossFields.map((f) => f.id);
+              const rigoleParams = rigoleFieldIds.length > 0
+                ? await tx
+                    .select({
+                      fieldId: projectParameters.fieldId,
+                      valueNumber: projectParameters.valueNumber,
+                    })
+                    .from(projectParameters)
+                    .where(and(
+                      eq(projectParameters.projectId, instance.projectId),
+                      inArray(projectParameters.fieldId, rigoleFieldIds),
+                    ))
+                : [];
+              const rigoleFieldById = new Map(rigoleCrossFields.map((f) => [f.id, f]));
+              const rigoleNumBySymbol = new Map<string, number | null>();
+              for (const p of rigoleParams) {
+                const f = rigoleFieldById.get(p.fieldId);
+                if (!f) continue;
+                if (!rigoleNumBySymbol.has(f.symbol)) {
+                  const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+                  rigoleNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+                }
+              }
+              // Prefer current save batch for the producer (A138-18) overrides.
+              const rigoleWsFields = await tx
+                .select({ id: fields.id, symbol: fields.symbol })
+                .from(fields)
+                .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+              for (const f of rigoleWsFields) {
+                if (!(RIGOLE_SYMS as readonly string[]).includes(f.symbol)) continue;
+                const saved = input.values[f.id];
+                if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+                  rigoleNumBySymbol.set(f.symbol, saved.value);
+                }
+              }
+              const bR = rigoleNumBySymbol.get('b_R') ?? null;
+              const hR = rigoleNumBySymbol.get('h_R') ?? null;
+              const lR = rigoleNumBySymbol.get('L_R') ?? null;
+              if (bR != null && hR != null && lR != null) {
+                // Gl.17: A_S,m = (b_R + h_R) · L_R + b_R · h_R
+                geometryValueP = (bR + hR) * lR + bR * hR;
+              }
+            }
+            // For other facility types with method='geometry', geometryValueP remains null →
+            // materializeAsm returns indeterminate (geometry only valid for mulde/rigole).
+          }
+
+          // 4. Read remaining A138-12 inputs for materializeAsm.
+          //    These are LOCAL to the consumer (A138-12) — read from persisted params only
+          //    (the current save batch belongs to the producer worksheet, not A138-12).
+          const readConsumerNum = async (sym: string): Promise<number | null> => {
+            const fid = asmCIdBySymbol.get(sym);
+            if (!fid) return null;
+            const [row] = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, fid),
+              ))
+              .limit(1);
+            const v = row?.valueNumber != null ? Number(row.valueNumber) : null;
+            return v != null && Number.isFinite(v) ? v : null;
+          };
+          const readConsumerEnum = async (sym: string): Promise<string | null> => {
+            const fid = asmCIdBySymbol.get(sym);
+            if (!fid) return null;
+            const [row] = await tx
+              .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, fid),
+              ))
+              .limit(1);
+            return row?.valueEnum ?? row?.valueText ?? null;
+          };
+
+          const pA_S_min = await readConsumerNum('A_S_min');
+          const pA_S_max = await readConsumerNum('A_S_max');
+          // A_C — cross-worksheet by symbol (same pattern as owner/loading branches).
+          const crossAcFieldsP2 = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(and(eq(fields.symbol, 'A_C'), eq(fields.active, true)));
+          const crossAcFieldIdsP2 = crossAcFieldsP2.map((f) => f.id);
+          let pA_C: number | null = null;
+          if (crossAcFieldIdsP2.length > 0) {
+            const crossAcParamsP2 = await tx
+              .select({ fieldId: projectParameters.fieldId, valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, crossAcFieldIdsP2),
+              ));
+            for (const p of crossAcParamsP2) {
+              if (p.valueNumber != null) {
+                const v = Number(p.valueNumber);
+                if (Number.isFinite(v)) { pA_C = v; break; }
+              }
+            }
+          }
+          const pRawBodenart = await readConsumerEnum('soil_bodenart_tab13');
+          const pBodenart: Tab13Bodenart | null =
+            pRawBodenart === 'mittel_feinsand' || pRawBodenart === 'schluffig' ? pRawBodenart : null;
+          const pManualProvenance = await readConsumerEnum('a_s_m_provenance');
+          let pManualValue: number | null = null;
+          if (asmMethodP === 'manual') {
+            pManualValue = await readConsumerNum('A_S_m');
+          }
+
+          // 5. Materialize A_S_m.
+          const asmOutP = materializeAsm({
+            method: asmMethodP,
+            A_S_min: pA_S_min,
+            A_S_max: pA_S_max,
+            A_C: pA_C,
+            bodenart: pBodenart,
+            geometryValue: geometryValueP,
+            manualValue: pManualValue,
+            manualProvenance: pManualProvenance || null,
+            facilityType: facilityTypeP,
+            sourceWorksheet: 'A138-12',
+          });
+
+          // 6. UPSERT A_S_m onto the A138-12 consumer template's field id.
+          //    Mirrors the owner-path UPSERT (isAsmSave block) exactly.
+          const asmConsumerFieldId = asmCIdBySymbol.get('A_S_m');
+          if (asmConsumerFieldId && asmOutP.A_S_m != null) {
+            await tx
+              .insert(projectParameters)
+              .values([{
+                projectId: instance.projectId,
+                fieldId: asmConsumerFieldId,
+                valueNumber: String(asmOutP.A_S_m),
+                valueText: null,
+                sourceType: 'derived',
+                enteredBy: userId,
+                enteredAt: now,
+              }])
+              .onConflictDoUpdate({
+                target: [projectParameters.projectId, projectParameters.fieldId],
+                set: {
+                  valueNumber: sql`excluded.value_number`,
+                  valueText: sql`excluded.value_text`,
+                  sourceType: sql`excluded.source_type`,
+                  enteredBy: sql`excluded.entered_by`,
+                  enteredAt: now,
+                },
+              });
+            writtenDerived.push({
+              fieldId: asmConsumerFieldId,
+              valueNumber: String(asmOutP.A_S_m),
+              valueText: null,
+            });
+
+            // 7. Chained Tab.6 re-fire: A_S_m just changed → re-run materializeLoadingCheck
+            //    with the fresh A_S_m so the Tab.6 verdict updates in the same save.
+            //    We use asmOutP.A_S_m directly (no DB round-trip needed; the value is
+            //    already consistent with the UPSERT above, visible within this transaction).
+            //    Cross-worksheet inputs (A_C, flaechengruppe, bbz_thickness) read from
+            //    project_parameters — identical to the loading producer branch.
+            const chainedLcCrossFields = await tx
+              .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+              .from(fields)
+              .where(and(
+                inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
+                eq(fields.active, true),
+              ));
+            const chainedLcFieldIds = chainedLcCrossFields.map((f) => f.id);
+            const chainedLcParams = chainedLcFieldIds.length > 0
+              ? await tx
+                  .select({
+                    fieldId: projectParameters.fieldId,
+                    valueNumber: projectParameters.valueNumber,
+                    valueText: projectParameters.valueText,
+                    valueEnum: projectParameters.valueEnum,
+                  })
+                  .from(projectParameters)
+                  .where(and(
+                    eq(projectParameters.projectId, instance.projectId),
+                    inArray(projectParameters.fieldId, chainedLcFieldIds),
+                  ))
+              : [];
+            const chainedLcFieldById = new Map(chainedLcCrossFields.map((f) => [f.id, f]));
+            const chainedLcNumBySymbol = new Map<string, number | null>();
+            const chainedLcTextBySymbol = new Map<string, string | null>();
+            for (const p of chainedLcParams) {
+              const f = chainedLcFieldById.get(p.fieldId);
+              if (!f) continue;
+              if (f.dataType === 'number' && !chainedLcNumBySymbol.has(f.symbol)) {
+                const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+                chainedLcNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+              }
+              if ((f.dataType === 'enum' || f.dataType === 'text') && !chainedLcTextBySymbol.has(f.symbol)) {
+                chainedLcTextBySymbol.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
+              }
+            }
+            const chainedAC             = chainedLcNumBySymbol.get('A_C')             ?? null;
+            const chainedFlaechengruppe = chainedLcTextBySymbol.get('flaechengruppe') ?? null;
+            const chainedBbzThickness   = chainedLcNumBySymbol.get('bbz_thickness')   ?? null;
+
+            const chainedLc = materializeLoadingCheck({
+              A_C: chainedAC,
+              A_S_m: asmOutP.A_S_m,
+              flaechengruppe: chainedFlaechengruppe,
+              bbz_thickness: chainedBbzThickness,
+            });
+
+            type AsmChainedLcRow = {
+              projectId: string;
+              fieldId: string;
+              valueNumber: string | null;
+              valueText: string | null;
+              sourceType: 'derived';
+              enteredBy: string;
+              enteredAt: Date;
+            };
+            const chainedLcValueMap: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+              ac_as_ratio:              { valueNumber: chainedLc.ac_as_ratio != null ? String(chainedLc.ac_as_ratio) : null, valueText: null },
+              ac_as_ratio_limit:        { valueNumber: chainedLc.ac_as_ratio_limit != null ? String(chainedLc.ac_as_ratio_limit) : null, valueText: null },
+              ac_as_ratio_check:        { valueNumber: null, valueText: chainedLc.ac_as_ratio_check },
+              ac_as_ratio_check_reason: { valueNumber: null, valueText: chainedLc.ac_as_ratio_check_reason },
+            };
+            const chainedLcRows: AsmChainedLcRow[] = LOADING_CHECK_OUTPUT_SYMBOLS
+              .map((sym) => ({ sym, ...chainedLcValueMap[sym] }))
+              .map((x) => ({ ...x, fieldId: asmCIdBySymbol.get(x.sym) }))
+              .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
+              .map((x) => ({
+                projectId: instance.projectId,
+                fieldId: x.fieldId,
+                valueNumber: x.valueNumber,
+                valueText: x.valueText,
+                sourceType: 'derived' as const,
+                enteredBy: userId,
+                enteredAt: now,
+              }));
+
+            if (chainedLcRows.length > 0) {
+              await tx.insert(projectParameters).values(chainedLcRows).onConflictDoUpdate({
+                target: [projectParameters.projectId, projectParameters.fieldId],
+                set: {
+                  valueNumber: sql`excluded.value_number`,
+                  valueText: sql`excluded.value_text`,
+                  sourceType: sql`excluded.source_type`,
+                  enteredBy: sql`excluded.entered_by`,
+                  enteredAt: now,
+                },
+              });
+              for (const r of chainedLcRows) {
+                writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+              }
             }
           }
         }
