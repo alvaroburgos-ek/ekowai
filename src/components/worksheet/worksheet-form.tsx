@@ -606,7 +606,7 @@ export function WorksheetForm({
                   key={f.id}
                   data-symbol={f.symbol}
                   data-inherited-from={f.inheritedFromWorksheet}
-                  className="border-b border-hairline last:border-b-0 py-1 flex items-baseline justify-between gap-2"
+                  className="border-b border-hairline last:border-b-0 py-1 flex items-start justify-between gap-2 min-w-0"
                 >
                   <div className="min-w-0">
                     <div className="text-ink break-words">
@@ -626,7 +626,7 @@ export function WorksheetForm({
                       {f.unit && <span className="ml-2 text-ink-2">{f.unit}</span>}
                     </div>
                   </div>
-                  <div className="font-mono tabular-nums text-ink shrink-0">{display}</div>
+                  <div className="font-mono tabular-nums text-ink text-right min-w-0 break-words">{display}</div>
                 </li>
               );
             })}
