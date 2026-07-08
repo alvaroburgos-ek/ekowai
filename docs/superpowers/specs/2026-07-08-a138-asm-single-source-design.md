@@ -215,38 +215,46 @@ Rules:
 - This is the **migration default** for all existing data (baseline safety).
 
 ### 4.2 `geometry` — Phase-4 facility write-back
-- `mulde`: Gl.16 from `h_M` (+ hydrology already present). `rigole`: Gl.17 from
-  `b_R, h_R, L_R`.
+- `rigole`: Gl.17 = `(b_R+h_R)·L_R + b_R·h_R` — **one-shot** from `b_R, h_R, L_R`.
+- `mulde`: Gl.16 is **ITERATIVE (A-2, source-verbatim):** "iterative Berechnung
+  für unterschiedliche Dauerstufen D und jeweils zugehöriger Regenspende r_D(n)."
+  The Mulde `A_S,m` is a **Dauerstufen sweep**: evaluate Gl.16 at each tabulated
+  `(D, r_D(n))` and take the **governing = maximum required area** across the
+  sweep. This reuses Piece-A's engine `iterateGoverningDuration(rows, sizing)`
+  (`src/lib/eval/governing-duration.ts`) — the same r_D(n)-table row pattern the
+  basin uses. A one-shot Gl.16 at a single D computes the **wrong** number.
 - The facility worksheet's geometry equation is registered as a producer of the
-  canonical A138-12 `A_S_m` (registry entry, §10). On facility save, `A_S_m`
-  materializes onto A138-12 and the Phase-3 consumers re-fire.
+  canonical A138-12 `A_S_m` (registry entry, §10). On facility save, the sweep
+  runs, `A_S_m` (= governing max) materializes onto A138-12, and the Phase-3
+  consumers re-fire.
 - Validation V-2 (source cross-check, §6.3.2): the geometry result must satisfy
   the Gl.7 envelope — "der erforderliche Flächenbedarf entspricht mindestens der
-  maximalen Versickerungsfläche `A_S,max`." When `A_S_max` is present, flag
-  (not block) if `A_S,m(geometry) < A_S_max`. This is a **validation**, not a
-  compute; surfaced as a discriminated warning, never mutates the value.
+  maximalen Versickerungsfläche `A_S,max`." **V-2 evaluates against the sweep
+  result** (the governing max), not a single-D value. When `A_S_max` is present,
+  flag (not block) if `A_S,m(geometry) < A_S_max`. This is a **validation**, not
+  a compute; surfaced as a discriminated warning, never mutates the value.
 
-### 4.3 `soil_estimate` (Tab.13) — third method — **D-2 RESOLVED: encode now**
+### 4.3 `soil_estimate` (Tab.13) — third method — **D-2 encode now; A-1 binding**
 - Source (verbatim): Tab.13 gives `A_S = 0,10·A_C` for **Mittel-/Feinsand** and
-  `A_S = 0,20·A_C` for **schluffige Böden** — a coarse pre-design estimate.
-  Compute `A_S_m = factor·A_C` on A138-12.
-- **Favourability is bound to A138-05 soil data, not a free selector.** A138-05
-  owns `k_f` (m/s, `Wasserdurchlässigkeitsbeiwert`) and `soil_classification`
-  (free text today, no enum). Binding:
-  - Primary: derive the Tab.13 band from `k_f` (quantitative permeability) —
-    higher-permeability sandy soils → `0,10`, lower-permeability silty → `0,20`.
-    The `A_C`-factor is therefore a **derived, confirmable** value seeded from
-    A138-05, surfaced for engineer confirmation (single-source "seeded from
-    source data" pattern — never a blind re-entry).
-  - The exact `k_f` cut for the `0,10`/`0,20` band is a **to-verify item against
-    Tab.13 / Anh. A** — the plan's soil-estimate task must pin the threshold from
-    the source verbatim before shipping (no invented cut-off).
-  - `soil_classification` is secondary/advisory until it is promoted to a
-    Tab.13-keyed enum; when it is, the binding becomes an exact string map and
-    the `k_f` heuristic becomes the fallback. Flagged as follow-up, not built.
-- No standalone free `soil_favourability` field is introduced; the band is
-  resolved from A138-05 via the resolver (§3), keeping A138-05 the single source
-  of soil truth.
+  `A_S = 0,20·A_C` for **schluffiger Sand / sandiger Schluff / Schluff** — a
+  coarse pre-design estimate. Compute `A_S_m = factor·A_C` on A138-12.
+- **A-1 — the band is a verbatim Bodenart selector, NOT a k_f threshold.**
+  Tab.13 is keyed by Bodenart. There is **no `k_f` cut in the source**: the only
+  `k_f ↔ Bodenart` correspondence is **Bild 2 (a figure)**, which Anhang A itself
+  disqualifies as a sole source ("mehrere Größenordnungen" Unsicherheit).
+  Therefore:
+  - **Primary (built):** a **two-option Bodenart selector** mirroring Tab.13's
+    rows verbatim — `Mittel-/Feinsand → 0,10`; `schluffiger Sand / sandiger
+    Schluff / Schluff → 0,20`. This is the single source of the band.
+  - **k_f seed (optional, badged):** at most a *suggestion* pre-selecting the
+    Bodenart option from A138-05 `k_f` via Bild 2 — explicitly badged as an
+    **encoder heuristic (figure-derived, NR, needs ratification)**, never
+    authoritative, and easily omitted. Default for the build: **omit the seed**
+    unless trivially cheap; the selector stands alone.
+  - `soil_classification` (A138-05, free text) → Tab.13 enum promotion stays a
+    follow-up (R-3).
+- The Bodenart selector lives on A138-12 (co-located with the method selector);
+  it is read only when `method = soil_estimate`.
 
 ### 4.4 `manual` — datasheet / proprietary units (source-sanctioned)
 - Source: A_S,m "kann … vereinfacht vorgegeben werden"; the Fertigteil-Rigole
@@ -456,9 +464,12 @@ before its scope is touched):**
   it write-backs to canonical `A_S,m` for q_S_AC/Tab.6 re-check is unratified.
   Build treats `schacht` `A_S,m` as `direct`/`manual`; no schacht geometry
   write-back until ratified (§3.1).
-- **R-2** — the exact `k_f` cut for the Tab.13 `0,10`/`0,20` band must be pinned
-  verbatim from Tab.13 / Anh. A during the soil-estimate task (no invented
-  threshold) (§4.3).
+- **R-2 (REVISED by A-1)** — there is **no `k_f` cut** to pin (Tab.13 is keyed by
+  Bodenart; the only `k_f↔Bodenart` map is Bild 2, a figure Anh. A disqualifies
+  as sole source). No threshold hunt, no STOP condition. The Bodenart selector
+  (§4.3) is authoritative; the optional Bild-2 `k_f` seed is an encoder heuristic
+  (figure-derived, NR) that **needs ratification** before it can pre-select
+  anything. If the seed is built at all, it is badged NR — else omitted.
 - **R-3** — `soil_classification` → Tab.13 enum promotion (would make the band an
   exact string map); follow-up, not built (§4.3).
 - **R-4** — `A_S` (bare) sibling single-source (Gl.12 vs Gl.34 vs the A138-12

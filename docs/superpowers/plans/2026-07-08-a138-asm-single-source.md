@@ -14,8 +14,11 @@
 - **PLT-HS-01 regression baseline stays byte-identical:** `A_C/A_S,m=107,48`, Tab.6 limit `50`, check `fail`; `V_VA=293,1695`; `Q_zu=2,8312`; `q_S_AC=0,00742`; `r_D_n=5,8`, `D=1440`; config `flaechengruppe=V2`, `A_S=A_S_min=A_S_max=45 ⇒ A_S,m=45`. The migration MUST default all existing data to `a_s_m_determination_method='direct'`.
 - **Consumers are method-agnostic:** `q_S_AC` (Gl.9), `V_M` (Gl.14/15), `V_VA` (Gl.41), Tab.6 — no per-method branch anywhere; identical output for a given `A_S_m`.
 - **Facility-scoped, multi-facility non-foreclosing:** one facility per run; all `A_S_m` reads/writes funnel through the resolver + registry so a future per-facility inventory is additive.
-- **Determination methods:** `direct` (Gl.7 = `(A_S_min+A_S_max)/2`, A138-12), `geometry` (Gl.16 Mulde / Gl.17 Rigole only — D-1), `soil_estimate` (Tab.13: `0,10·A_C` Mittel-/Feinsand, `0,20·A_C` schluffig — favourability from A138-05 `k_f`), `manual` (entered + required provenance).
-- **Residues — do NOT build:** R-1 schacht Gl.34 write-back; R-2 exact `k_f` band cut (pin verbatim from Tab.13/Anh.A in Task 2, no invented threshold); R-3 `soil_classification` enum; R-4 `A_S` bare; R-5 `MRE`/`MRS`.
+- **Determination methods:** `direct` (Gl.7 = `(A_S_min+A_S_max)/2`, A138-12), `geometry` (Gl.16 Mulde — **ITERATIVE Dauerstufen sweep, governing=max, A-2** / Gl.17 Rigole one-shot; D-1 mulde/rigole only), `soil_estimate` (Tab.13 **two-option Bodenart selector, verbatim rows, A-1**: `Mittel-/Feinsand → 0,10·A_C`, `schluffiger Sand / sandiger Schluff / Schluff → 0,20·A_C`), `manual` (entered + required provenance).
+- **A-1 (no k_f cut):** Tab.13 is keyed by Bodenart; there is NO source `k_f` threshold (only Bild 2, a figure Anh. A disqualifies). Build a Bodenart selector; any k_f→Bodenart seed is a badged encoder heuristic (NR, needs ratification) — **omitted in this build** unless trivial. No threshold hunt, no STOP.
+- **A-2 (Gl.16 iterative):** Mulde `A_S,m` = max required area over the Dauerstufen sweep, via `iterateGoverningDuration(rows, sizing)` in `governing-duration.ts` (Piece-A pattern). Rigole/Gl.17 stays one-shot. V-2 checks the sweep result.
+- **Residues — do NOT build:** R-1 schacht Gl.34 write-back; R-2 (revised) no k_f cut exists — Bodenart selector is authoritative, Bild-2 seed is NR; R-3 `soil_classification` enum; R-4 `A_S` bare; R-5 `MRE`/`MRS`.
+- **Mirror-by-reference (Q2):** where a task mirrors a B1 `worksheet.ts` block, anchor by **function/comment name** (e.g. "the `isLoadingSave` owner block", "the `for (const producerEntry of producerEntries)` dispatch loop"), NOT line numbers (they rot).
 - **Equation IDs (verified):** Gl.7 `55151cb1-4a5a-48d1-b5c0-2312ef7b78ac`; Gl.16 (Mulde) `14999c2a-cdeb-42c1-98fd-fcdec65123da`; Gl.17 (Rigole) `8afdb49a-7bb1-4f07-a64e-43009b8b6be1`; Gl.9 (q_S_AC) `e2ec4338-1356-480f-a7ab-da57fdc1fc22`.
 - **facility_type_selected enum → worksheet:** `flaeche→A138-16`, `mulde→A138-17`, `rigole→A138-18`, `schacht→A138-21`, `becken→A138-22` (`MRE`/`MRS` out of scope).
 - **Process:** Alvaro's git identity (`alvaro.burgos@ekowai.com`); run Vitest on the isolated pnpm store (defect-register P1) — set up in Task 0; migration written-not-applied (apply is a human step at cutover); test only on the `-hannesoster-` alias after hard-reload (P2). German UI copy, English code/docs.
@@ -72,10 +75,10 @@ Expected: PASS (proves the runner works before we add tests).
   - `type AsmProducer = { kind: 'direct' } | { kind: 'geometry'; worksheetCode: string; equationId: string } | { kind: 'soil_estimate' } | { kind: 'manual' } | { kind: 'unresolved'; reason: string }`
   - `const ASM_GL7_EQUATION_ID`, `ASM_GL16_EQUATION_ID`, `ASM_GL17_EQUATION_ID`
   - `const FACILITY_TYPE_TO_WORKSHEET: Record<FacilityType, string>`
+  - `type Tab13Bodenart = 'mittel_feinsand' | 'schluffig'`
   - `function resolveAsmProducer(method, facilityType): AsmProducer`
   - `function computeDirect(aSmin, aSmax): number | null`
-  - `function computeSoilEstimate(aC, favourability): number | null`
-  - `function soilFavourabilityFromKf(kf): 'favourable' | 'unfavourable' | null`
+  - `function computeSoilEstimate(aC, bodenart): number | null` — `mittel_feinsand → 0,10·A_C`, `schluffig → 0,20·A_C` (A-1, verbatim Tab.13 rows)
 
 - [ ] **Step 1: Write the failing test**
 
@@ -83,7 +86,7 @@ Expected: PASS (proves the runner works before we add tests).
 // src/lib/eval/__tests__/asm-source.test.ts
 import { describe, it, expect } from 'vitest';
 import {
-  resolveAsmProducer, computeDirect, computeSoilEstimate, soilFavourabilityFromKf,
+  resolveAsmProducer, computeDirect, computeSoilEstimate,
   ASM_GL16_EQUATION_ID, ASM_GL17_EQUATION_ID, FACILITY_TYPE_TO_WORKSHEET,
 } from '../asm-source';
 
@@ -117,20 +120,14 @@ describe('computeDirect (Gl.7)', () => {
   });
 });
 
-describe('computeSoilEstimate (Tab.13)', () => {
-  it('0,10·A_C favourable, 0,20·A_C unfavourable', () => {
-    expect(computeSoilEstimate(1000, 'favourable')).toBeCloseTo(100, 9);
-    expect(computeSoilEstimate(1000, 'unfavourable')).toBeCloseTo(200, 9);
+describe('computeSoilEstimate (Tab.13 — Bodenart-keyed, A-1)', () => {
+  it('0,10·A_C Mittel-/Feinsand, 0,20·A_C schluffig', () => {
+    expect(computeSoilEstimate(1000, 'mittel_feinsand')).toBeCloseTo(100, 9);
+    expect(computeSoilEstimate(1000, 'schluffig')).toBeCloseTo(200, 9);
   });
-  it('null when A_C or favourability missing', () => {
-    expect(computeSoilEstimate(null, 'favourable')).toBeNull();
+  it('null when A_C or Bodenart missing', () => {
+    expect(computeSoilEstimate(null, 'mittel_feinsand')).toBeNull();
     expect(computeSoilEstimate(1000, null)).toBeNull();
-  });
-});
-
-describe('soilFavourabilityFromKf', () => {
-  it('null when k_f missing (R-2: exact cut pinned in Task 2, band mapping here is provisional)', () => {
-    expect(soilFavourabilityFromKf(null)).toBeNull();
   });
 });
 
@@ -165,6 +162,8 @@ Expected: FAIL (module not found).
 
 export type AsmMethod = 'direct' | 'geometry' | 'soil_estimate' | 'manual';
 export type FacilityType = 'flaeche' | 'mulde' | 'rigole' | 'schacht' | 'becken';
+/** Tab.13 Bodenart rows (verbatim, A-1). */
+export type Tab13Bodenart = 'mittel_feinsand' | 'schluffig';
 
 /** Verified equation ids (Global Constraints). */
 export const ASM_GL7_EQUATION_ID  = '55151cb1-4a5a-48d1-b5c0-2312ef7b78ac'; // A138-12 direct
@@ -219,23 +218,18 @@ export function computeDirect(aSmin: number | null, aSmax: number | null): numbe
   return (aSmin + aSmax) / 2;
 }
 
-/** Tab.13: A_S,m = 0,10·A_C (favourable) / 0,20·A_C (unfavourable). */
-export function computeSoilEstimate(aC: number | null, fav: 'favourable' | 'unfavourable' | null): number | null {
-  if (typeof aC !== 'number' || !Number.isFinite(aC) || fav === null) return null;
-  return (fav === 'favourable' ? 0.10 : 0.20) * aC;
-}
-
 /**
- * Provisional favourability from A138-05 k_f (m/s). R-2: the EXACT Tab.13/Anh.A
- * cut MUST be pinned verbatim from source in Task 2 before ship — this heuristic
- * band is a placeholder for the null-handling contract only and is overwritten
- * once the verbatim cut is known.
+ * Tab.13 (verbatim, A-1): A_S,m = 0,10·A_C for Mittel-/Feinsand,
+ * 0,20·A_C for schluffiger Sand / sandiger Schluff / Schluff.
+ * Keyed by the Bodenart selector — NOT by k_f (there is no source k_f cut).
  */
-export function soilFavourabilityFromKf(kf: number | null): 'favourable' | 'unfavourable' | null {
-  if (typeof kf !== 'number' || !Number.isFinite(kf)) return null;
-  // Provisional; replaced by the verbatim Tab.13 cut in Task 2.
-  return kf >= 1e-5 ? 'favourable' : 'unfavourable';
+export function computeSoilEstimate(aC: number | null, bodenart: Tab13Bodenart | null): number | null {
+  if (typeof aC !== 'number' || !Number.isFinite(aC) || bodenart === null) return null;
+  return (bodenart === 'mittel_feinsand' ? 0.10 : 0.20) * aC;
 }
+// NOTE (A-1 / R-2): no soilFavourabilityFromKf. Any k_f→Bodenart seed would be a
+// Bild-2 (figure) heuristic Anh. A disqualifies as sole source → NR, needs
+// ratification. Omitted from this build; the Bodenart selector is authoritative.
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -257,49 +251,80 @@ git commit -m "feat(a138): A_S,m determination-method resolver + direct/soil com
 **Files:**
 - Create: `src/lib/eval/materialize-asm.ts`
 - Test: `src/lib/eval/__tests__/materialize-asm.test.ts`
-- Read (source verify, R-2): `C:\Users\Ekowai\Desktop\Guidelines\` DWA-A-138 Tab.13 / Anh. A — pin the k_f band cut verbatim; update `soilFavourabilityFromKf` in `asm-source.ts` to the verbatim cut and cite it in a comment. If the source is unavailable in the worktree, STOP and report BLOCKED (do not invent a cut).
+
+**A-1 (no source hunt):** soil-estimate is keyed by the **Bodenart selector**
+(verbatim Tab.13 rows), not `k_f`. There is no threshold to pin and **no STOP
+condition** — Task 1 already encodes `computeSoilEstimate(aC, bodenart)`.
+
+**A-2 (Mulde iterative):** the Mulde geometry value is the **governing max over
+the Dauerstufen sweep** of Gl.16, computed here via
+`iterateGoverningDuration(rows, sizing)` from
+`src/lib/eval/governing-duration.ts`. Rigole (Gl.17) is one-shot.
 
 **Interfaces:**
-- Consumes: `AsmMethod`, `computeDirect`, `computeSoilEstimate`, `soilFavourabilityFromKf`, `AsmState` from `asm-source.ts`.
-- Produces: `type AsmMaterializeInput = { method: AsmMethod; A_S_min: number|null; A_S_max: number|null; A_C: number|null; k_f: number|null; geometryValue: number|null; manualValue: number|null; manualProvenance: string|null; facilityType: FacilityType|null; sourceWorksheet: string|null }` and `function materializeAsm(input): { A_S_m: number | null; state: AsmState }`.
+- Consumes: `AsmMethod`, `Tab13Bodenart`, `computeDirect`, `computeSoilEstimate`, `AsmState` from `asm-source.ts`; `iterateGoverningDuration` from `governing-duration.ts`.
+- Produces:
+  - `function computeMuldeGeometrySweep(rows: ReadonlyArray<{D_min:number|null; r_D_n:number|null}>, scalars: {A_C:number; h_M:number; f_Z:number; k_i:number}): { A_S_m: number | null; governingD: number | null; boundaryLimited: boolean }` — Gl.16 swept, governing = max required area.
+  - `type AsmMaterializeInput = { method: AsmMethod; A_S_min: number|null; A_S_max: number|null; A_C: number|null; bodenart: Tab13Bodenart|null; geometryValue: number|null; manualValue: number|null; manualProvenance: string|null; facilityType: FacilityType|null; sourceWorksheet: string|null }` — `geometryValue` is the already-resolved facility value (Rigole one-shot Gl.17, or the Mulde sweep's `A_S_m`).
+  - `function materializeAsm(input): { A_S_m: number | null; state: AsmState }`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
 // src/lib/eval/__tests__/materialize-asm.test.ts
 import { describe, it, expect } from 'vitest';
-import { materializeAsm } from '../materialize-asm';
+import { materializeAsm, computeMuldeGeometrySweep } from '../materialize-asm';
 
+const noGeo = { geometryValue: null as number | null };
 describe('materializeAsm', () => {
   it('direct: PLT-HS-01 baseline 45/45 ⇒ A_S_m 45, determined', () => {
-    const r = materializeAsm({ method: 'direct', A_S_min: 45, A_S_max: 45, A_C: null, k_f: null, geometryValue: null, manualValue: null, manualProvenance: null, facilityType: null, sourceWorksheet: 'A138-12' });
+    const r = materializeAsm({ method: 'direct', A_S_min: 45, A_S_max: 45, A_C: null, bodenart: null, ...noGeo, manualValue: null, manualProvenance: null, facilityType: null, sourceWorksheet: 'A138-12' });
     expect(r.A_S_m).toBe(45);
     expect(r.state).toMatchObject({ status: 'determined', value: 45, method: 'direct' });
   });
-  it('geometry: uses the facility-provided value, determined', () => {
-    const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, k_f: null, geometryValue: 62.5, manualValue: null, manualProvenance: null, facilityType: 'mulde', sourceWorksheet: 'A138-17' });
+  it('geometry: uses the resolved facility value (sweep/one-shot), determined', () => {
+    const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, geometryValue: 62.5, manualValue: null, manualProvenance: null, facilityType: 'mulde', sourceWorksheet: 'A138-17' });
     expect(r.A_S_m).toBe(62.5);
     expect(r.state).toMatchObject({ status: 'determined', value: 62.5, method: 'geometry', sourceWorksheet: 'A138-17' });
   });
   it('geometry unresolved (becken) ⇒ indeterminate, A_S_m null', () => {
-    const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, k_f: null, geometryValue: null, manualValue: null, manualProvenance: null, facilityType: 'becken', sourceWorksheet: null });
+    const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, ...noGeo, manualValue: null, manualProvenance: null, facilityType: 'becken', sourceWorksheet: null });
     expect(r.A_S_m).toBeNull();
     expect(r.state.status).toBe('indeterminate');
   });
-  it('soil_estimate: 0,20·A_C when k_f low (unfavourable)', () => {
-    const r = materializeAsm({ method: 'soil_estimate', A_S_min: null, A_S_max: null, A_C: 1000, k_f: 1e-7, geometryValue: null, manualValue: null, manualProvenance: null, facilityType: null, sourceWorksheet: 'A138-12' });
+  it('soil_estimate: 0,20·A_C for schluffig Bodenart', () => {
+    const r = materializeAsm({ method: 'soil_estimate', A_S_min: null, A_S_max: null, A_C: 1000, bodenart: 'schluffig', ...noGeo, manualValue: null, manualProvenance: null, facilityType: null, sourceWorksheet: 'A138-12' });
     expect(r.A_S_m).toBeCloseTo(200, 6);
     expect(r.state.status).toBe('determined');
   });
   it('manual: passthrough value + provenance ⇒ manual state', () => {
-    const r = materializeAsm({ method: 'manual', A_S_min: null, A_S_max: null, A_C: null, k_f: null, geometryValue: null, manualValue: 88, manualProvenance: 'Datenblatt Fertigteil-Rigole XYZ', facilityType: 'rigole', sourceWorksheet: 'A138-12' });
+    const r = materializeAsm({ method: 'manual', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, ...noGeo, manualValue: 88, manualProvenance: 'Datenblatt Fertigteil-Rigole XYZ', facilityType: 'rigole', sourceWorksheet: 'A138-12' });
     expect(r.A_S_m).toBe(88);
     expect(r.state).toMatchObject({ status: 'manual', value: 88, provenance: 'Datenblatt Fertigteil-Rigole XYZ' });
   });
   it('manual without provenance ⇒ indeterminate (provenance required)', () => {
-    const r = materializeAsm({ method: 'manual', A_S_min: null, A_S_max: null, A_C: null, k_f: null, geometryValue: null, manualValue: 88, manualProvenance: null, facilityType: null, sourceWorksheet: 'A138-12' });
+    const r = materializeAsm({ method: 'manual', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, ...noGeo, manualValue: 88, manualProvenance: null, facilityType: null, sourceWorksheet: 'A138-12' });
     expect(r.A_S_m).toBeNull();
     expect(r.state.status).toBe('indeterminate');
+  });
+});
+
+describe('computeMuldeGeometrySweep (Gl.16 iterative, A-2)', () => {
+  const scalars = { A_C: 5000, h_M: 0.30, f_Z: 1.2, k_i: 1e-5 };
+  it('returns the MAX required area over the Dauerstufen sweep, not a single-D value', () => {
+    const rows = [
+      { D_min: 10, r_D_n: 200 },
+      { D_min: 60, r_D_n: 90 },
+      { D_min: 1440, r_D_n: 8 },
+    ];
+    const swept = computeMuldeGeometrySweep(rows, scalars);
+    // Governing must equal the maximum Gl.16 value across the three rows.
+    const gl16 = (D: number, r_D: number) => (scalars.A_C * 1e-7 * r_D) / (scalars.h_M / (D * 60 * scalars.f_Z) + scalars.k_i);
+    const expectedMax = Math.max(...rows.map((r) => gl16(r.D_min!, r.r_D_n!)));
+    expect(swept.A_S_m).toBeCloseTo(expectedMax, 6);
+  });
+  it('null when rows empty / all inputs missing', () => {
+    expect(computeMuldeGeometrySweep([], scalars).A_S_m).toBeNull();
   });
 });
 ```
@@ -322,17 +347,34 @@ Expected: FAIL (module not found).
  * A_S_m by reference and never see the method.
  */
 import {
-  type AsmMethod, type FacilityType, type AsmState,
-  resolveAsmProducer, computeDirect, computeSoilEstimate, soilFavourabilityFromKf,
+  type AsmMethod, type FacilityType, type Tab13Bodenart, type AsmState,
+  resolveAsmProducer, computeDirect, computeSoilEstimate,
 } from './asm-source';
+import { iterateGoverningDuration } from './governing-duration';
+
+/**
+ * A-2: Mulde Gl.16 is iterative over Dauerstufen. Evaluate
+ *   A_S,m(D,r_D) = (A_C·1e-7·r_D) / (h_M/(D·60·f_Z) + k_i)
+ * at each tabulated (D, r_D(n)) and take the GOVERNING = maximum required area.
+ * Reuses Piece-A's iterateGoverningDuration engine.
+ */
+export function computeMuldeGeometrySweep(
+  rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
+  scalars: { A_C: number; h_M: number; f_Z: number; k_i: number },
+): { A_S_m: number | null; governingD: number | null; boundaryLimited: boolean } {
+  const gov = iterateGoverningDuration(rows, (D, r_D) =>
+    (scalars.A_C * 1e-7 * r_D) / (scalars.h_M / (D * 60 * scalars.f_Z) + scalars.k_i),
+  );
+  return { A_S_m: gov.governingValue, governingD: gov.governingD, boundaryLimited: gov.boundaryLimited };
+}
 
 export type AsmMaterializeInput = {
   method: AsmMethod;
   A_S_min: number | null;
   A_S_max: number | null;
   A_C: number | null;
-  k_f: number | null;
-  /** Facility-produced geometry value (Gl.16/Gl.17), read from the facility worksheet. */
+  bodenart: Tab13Bodenart | null;
+  /** Resolved facility geometry value: Rigole one-shot Gl.17, or the Mulde sweep's A_S_m. */
   geometryValue: number | null;
   manualValue: number | null;
   manualProvenance: string | null;
@@ -361,8 +403,8 @@ export function materializeAsm(input: AsmMaterializeInput): { A_S_m: number | nu
   if (producer.kind === 'direct') {
     value = computeDirect(input.A_S_min, input.A_S_max);
   } else if (producer.kind === 'soil_estimate') {
-    value = computeSoilEstimate(input.A_C, soilFavourabilityFromKf(input.k_f));
-  } else { // geometry
+    value = computeSoilEstimate(input.A_C, input.bodenart);
+  } else { // geometry — geometryValue already resolved (Mulde sweep / Rigole one-shot)
     value = input.geometryValue != null && Number.isFinite(input.geometryValue) ? input.geometryValue : null;
   }
 
@@ -376,16 +418,16 @@ export function materializeAsm(input: AsmMaterializeInput): { A_S_m: number | nu
 }
 ```
 
-- [ ] **Step 4: Run tests + verify the R-2 verbatim cut is applied**
+- [ ] **Step 4: Run tests**
 
 Run: `pnpm vitest run src/lib/eval/__tests__/materialize-asm.test.ts src/lib/eval/__tests__/asm-source.test.ts`
-Expected: PASS. Confirm `soilFavourabilityFromKf` now carries the verbatim Tab.13/Anh.A cut + source citation (or the task is BLOCKED if source was unavailable).
+Expected: PASS — incl. the Mulde sweep max-over-Dauerstufen test (A-2) and the Bodenart-keyed soil test (A-1). No source-hunt / STOP condition.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/eval/materialize-asm.ts src/lib/eval/__tests__/materialize-asm.test.ts src/lib/eval/asm-source.ts
-git commit -m "feat(a138): materialize A_S,m per determination method (pure) + verbatim Tab.13 cut"
+git add src/lib/eval/materialize-asm.ts src/lib/eval/__tests__/materialize-asm.test.ts
+git commit -m "feat(a138): materialize A_S,m per method (pure) — Bodenart soil (A-1) + Mulde Dauerstufen sweep (A-2)"
 ```
 
 ---
@@ -399,6 +441,7 @@ git commit -m "feat(a138): materialize A_S,m per determination method (pure) + v
 **Scope (idempotent, mirrors the B1 migration style in `scripts/migrations/20260702120000_a138_tab6_loading.sql`):**
 1. INSERT `a_s_m_determination_method` (enum) on A138-12 — values `direct|geometry|soil_estimate|manual`, default `direct`.
 2. INSERT `a_s_m_provenance` (text) on A138-12.
+2b. INSERT `soil_bodenart_tab13` (enum) on A138-12 — two verbatim Tab.13 rows (A-1): `mittel_feinsand` "Mittel-/Feinsand", `schluffig` "schluffiger Sand / sandiger Schluff / Schluff". Read only when method=`soil_estimate`.
 3. BACKFILL: for every project that has any A138-12 parameter, ensure `a_s_m_determination_method='direct'` (so the baseline is unchanged) — insert a `direct` param row where none exists.
 4. RETIRE `A_S_m_Becken` (A138-22): first COUNT any `project_parameters` on it; if >0, RAISE NOTICE listing project_ids (residue — surfaced for engineer re-entry, not dropped), then set the field `active=false`. Do not delete param rows.
 5. Ensure `A_S_m` (A138-12) `consumer_worksheets` includes `A138-13, A138-22` (append if missing) so Gl.9/Gl.41 are declared consumers.
@@ -446,6 +489,16 @@ BEGIN
     VALUES (ws12, sec12, 'a_s_m_provenance', 'A_S,m — Herkunft (bei manueller Angabe)', 'text', false, true, max_order12, '§6.4.1', NULL, 'imported_unverified');
   END IF;
 
+  -- (2b) soil_bodenart_tab13 (enum, two verbatim Tab.13 rows, A-1)
+  IF NOT EXISTS (SELECT 1 FROM fields WHERE worksheet_template_id=ws12 AND symbol='soil_bodenart_tab13') THEN
+    SELECT COALESCE(MAX(order_index),0)+1 INTO max_order12 FROM fields WHERE worksheet_template_id=ws12;
+    INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, is_required, active, order_index, clause_reference, consumer_worksheets, enum_values, verification_status)
+    VALUES (ws12, sec12, 'soil_bodenart_tab13', 'Bodenart (Tab. 13 — nur bei Bodenart-Abschätzung)', 'enum', false, true, max_order12, 'Tab. 13', NULL,
+      '[{"value":"mittel_feinsand","label_de":"Mittel-/Feinsand","label_en":"Medium/fine sand","order_index":0,"regulation_reference":"Tab. 13"},
+        {"value":"schluffig","label_de":"schluffiger Sand / sandiger Schluff / Schluff","label_en":"Silty sand / sandy silt / silt","order_index":1,"regulation_reference":"Tab. 13"}]'::jsonb,
+      'imported_unverified');
+  END IF;
+
   -- (3) Backfill 'direct' for every project holding A138-12 params (baseline safety).
   SELECT id INTO asm_field FROM fields WHERE worksheet_template_id=ws12 AND symbol='a_s_m_determination_method' LIMIT 1;
   INSERT INTO project_parameters (project_id, field_id, value_enum, source_type, entered_by, entered_at)
@@ -485,7 +538,7 @@ BEGIN
   SELECT wt.id INTO ws22 FROM worksheet_templates wt JOIN standards s ON s.id=wt.standard_id WHERE s.code='DWA-A-138-1' AND wt.code='A138-22';
   SELECT id INTO asm_field FROM fields WHERE worksheet_template_id=ws12 AND symbol='a_s_m_determination_method' LIMIT 1;
   IF asm_field IS NOT NULL THEN DELETE FROM project_parameters WHERE field_id=asm_field; END IF;
-  DELETE FROM fields WHERE worksheet_template_id=ws12 AND symbol IN ('a_s_m_determination_method','a_s_m_provenance');
+  DELETE FROM fields WHERE worksheet_template_id=ws12 AND symbol IN ('a_s_m_determination_method','a_s_m_provenance','soil_bodenart_tab13');
   UPDATE fields SET active=true WHERE worksheet_template_id=ws22 AND symbol='A_S_m_Becken';
 END $$;
 ```
@@ -554,7 +607,7 @@ import { ASM_GL7_EQUATION_ID, ASM_GL16_EQUATION_ID, ASM_GL17_EQUATION_ID } from 
 // facility_type_selected on A138-15 (its change re-resolves the producer).
 const ASM_INPUT_SYMBOLS = [
   'A_S_min', 'A_S_max',                 // direct (A138-12)
-  'A_C', 'k_f',                         // soil_estimate (A138-12 / A138-05)
+  'A_C', 'soil_bodenart_tab13',         // soil_estimate (A138-12; Bodenart selector, A-1)
   'h_M', 'b_R', 'h_R', 'L_R',           // geometry (Mulde/Rigole)
   'facility_type_selected',             // producer re-resolution (A138-15)
   'a_s_m_determination_method',         // method switch (A138-12)
@@ -622,9 +675,9 @@ Run: `pnpm vitest run src/lib/actions/__tests__/worksheet-asm.test.ts`
 Expected: PASS at logic level (guards the invariant). The DB-integration assertion is verified live in Task 11.
 
 - [ ] **Step 3: Implement the server block.** In `worksheet.ts`:
-  1. Hoist `const isAsmSave = templateEquations.some((e) => e.id === ASM_GL7_EQUATION_ID);` next to `isLoadingSave` (line ~135). Add `isAsmSave` to the empty-batch guard (line 149) and the transaction guard (line 365).
+  1. Hoist `const isAsmSave = templateEquations.some((e) => e.id === ASM_GL7_EQUATION_ID);` next to the existing `const isLoadingSave = …` declaration. Add `isAsmSave` to the empty-batch early-return guard (the `if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave)` line) and to the transaction-open guard (the `if (savedCount > 0 || isBasinSave || isLoadingSave || producerEntries.length > 0)` condition).
   2. **Validation (before the transaction, mirroring existing `warnings` pushes):** when the save batch contains `A_S_min` and `A_S_max`, reject if `min>max` (push a warning, skip persisting those two). When `a_s_m_determination_method==='manual'`, require a non-empty `a_s_m_provenance` in the batch or persisted; else warn and set state indeterminate.
-  3. **Owner block (mirror lines 663–792):** when `isAsmSave`, read the method + inputs (A_S_min/A_S_max/A_C/manual/provenance local to A138-12; `k_f` cross-worksheet from A138-05; `facility_type_selected` cross from A138-15; `geometryValue` cross from the resolved facility worksheet's `A_S_m`), call `materializeAsm(...)`, and UPSERT `A_S_m` (value_number) as a derived row; push to `writtenDerived`. Persist the `AsmState.status` into a companion — reuse `a_s_m_provenance` for manual; store `needs_reconfirmation` handling in Task 8.
+  3. **Owner block (mirror the `if (isLoadingSave)` owner block — the sibling-field lookup + local A_S_m read + cross-worksheet read pattern):** when `isAsmSave`, read the method + inputs (A_S_min/A_S_max/A_C/manual/provenance/`soil_bodenart_tab13` local to A138-12; `facility_type_selected` cross from A138-15; `geometryValue` cross from the resolved facility worksheet — Task 6 computes it), call `materializeAsm(...)`, and UPSERT `A_S_m` (value_number) as a derived row; push to `writtenDerived`. Persist the `AsmState.status` into a companion — reuse `a_s_m_provenance` for manual; store `needs_reconfirmation` handling in Task 8.
 
 Show the core substitution (the rest mirrors the loading block verbatim):
 
@@ -638,8 +691,9 @@ if (isAsmSave) {
   const method = /* read a_s_m_determination_method (value_enum), default 'direct' */ 'direct' as AsmMethod;
   const A_S_min = await readLocalNum('A_S_min');
   const A_S_max = await readLocalNum('A_S_max');
-  // cross reads: A_C (A138-07/12), k_f (A138-05), facility_type_selected (A138-15), geometryValue (resolved facility A_S_m)
-  const out = materializeAsm({ method, A_S_min, A_S_max, A_C, k_f, geometryValue, manualValue, manualProvenance, facilityType, sourceWorksheet: 'A138-12' });
+  // local: A_C (A138-07 cross / A138-12), soil_bodenart_tab13 (A138-12), manualValue/provenance (A138-12);
+  // cross: facility_type_selected (A138-15), geometryValue (resolved facility value — Task 6).
+  const out = materializeAsm({ method, A_S_min, A_S_max, A_C, bodenart, geometryValue, manualValue, manualProvenance, facilityType, sourceWorksheet: 'A138-12' });
   const asmFieldId = asmIdBySymbol.get('A_S_m');
   if (asmFieldId && out.A_S_m != null) {
     await tx.insert(projectParameters).values([{ projectId: instance.projectId, fieldId: asmFieldId, valueNumber: String(out.A_S_m), valueText: null, sourceType: 'derived', enteredBy: userId, enteredAt: now }])
@@ -719,16 +773,19 @@ git commit -m "feat(a138): V-2 geometry≥A_S_max envelope cross-check (warning,
 ## Task 6: `saveWorksheet` — producer-fired A_S,m (geometry write-back) + chained re-fire
 
 **Files:**
-- Modify: `src/lib/actions/worksheet.ts` (add an `else if (producerEntry.id === 'asm')` branch to the producer dispatch at lines 816–973, mirroring the `'loading'` branch; after writing `A_S_m`, ensure the `loading` and `basin` entries re-fire in the same save)
+- Modify: `src/lib/actions/worksheet.ts` — add an `else if (producerEntry.id === 'asm')` branch to the `for (const producerEntry of producerEntries)` dispatch loop, mirroring the `if (producerEntry.id === 'loading')` branch; after writing `A_S_m`, ensure the `loading` and `basin` entries re-fire in the same save.
 - Test: covered by the registry test (Task 4) + the live verification (Task 11).
 
 **Interfaces:**
-- Consumes: `producerFiredEntries` results incl. `asm`; `materializeAsm`; the B1 consumer-template-by-code, standard_id-scoped resolution (lines 826–835).
+- Consumes: `producerFiredEntries` results incl. `asm`; `materializeAsm`, `computeMuldeGeometrySweep`; the B1 consumer-template-by-code, `standardId`-scoped resolution (the `const [consumerTmpl] = savedStandardId ? … : []` block inside the `loading` producer branch).
 - Produces: when a geometry input (`h_M`/`b_R`/`h_R`/`L_R`) or `facility_type_selected` changes on a facility/selection worksheet, `A_S_m` is recomputed onto A138-12; because `A_S_m ∈ loading.inputSymbols` and `basin.inputSymbols`, the Tab.6 check and `q_S_AC` re-fire.
 
-- [ ] **Step 1: Implement the `asm` producer branch.** Mirror the `'loading'` producer branch (816–966): resolve the A138-12 consumer template by code + `savedStandardId` (fail-closed); resolve the facility geometry value by reading the resolved facility worksheet's `A_S_m` (or geometry inputs) from `project_parameters` within the transaction; call `materializeAsm`; UPSERT `A_S_m` on A138-12; push to `writtenDerived`.
+- [ ] **Step 1: Implement the `asm` producer branch.** Mirror the `loading` producer branch (the `if (producerEntry.id === 'loading')` block): resolve the A138-12 consumer template by `consumerTemplateCode` + `savedStandardId` (fail-closed, same as the `loading` branch's consumer-template resolution); resolve `facility_type_selected` + `a_s_m_determination_method`; when `method='geometry'` compute the facility value:
+  - **Mulde** (`A138-17`): read the r_D(n) table rows (same accessor the basin block uses — the `rows`/`iterateGoverningDuration` path in `governing-duration.ts`) + scalars `{A_C, h_M, f_Z, k_i}`, then `computeMuldeGeometrySweep(rows, scalars)` → `A_S_m` (governing max, A-2).
+  - **Rigole** (`A138-18`): one-shot Gl.17 = `(b_R+h_R)·L_R + b_R·h_R` from the facility inputs.
+  Pass the resolved value as `geometryValue` to `materializeAsm`; UPSERT `A_S_m` on A138-12; push to `writtenDerived`.
 
-- [ ] **Step 2: Chain the re-fire.** After the `asm` producer writes `A_S_m`, add `'asm'` to the set of just-written producers and ensure `loading` + `basin` run against the new `A_S_m`. Two options — pick the one matching the existing dispatch: (a) if the producer dispatch already re-reads `A_S_m` from `project_parameters` for `loading`/`basin` (it does — they read persisted values inside the txn), simply guarantee the `asm` branch runs BEFORE the `loading`/`basin` branches in the `for (const producerEntry of producerEntries)` loop by ordering the registry array with `asm` first; (b) if not, after the `asm` write, explicitly invoke the loading materialize with the fresh `A_S_m`. Document which was used.
+- [ ] **Step 2: Chain the re-fire.** After the `asm` producer writes `A_S_m`, ensure `loading` + `basin` run against the new `A_S_m`. The `loading`/`basin` branches re-read `A_S_m` from `project_parameters` inside the txn, so guarantee the `asm` branch runs BEFORE them by ordering the `MATERIALIZE_REGISTRY` array with `asm` first (the dispatch loop iterates registry order). Document the ordering choice in a comment. If ordering is insufficient, after the `asm` write explicitly re-run the loading materialize with the fresh `A_S_m`.
 
 - [ ] **Step 3: Run tests** — `pnpm vitest run src/lib/actions/__tests__/materialize-registry.test.ts src/lib/actions/__tests__/worksheet-asm.test.ts` — Expected: PASS.
 
@@ -845,7 +902,7 @@ git commit -m "feat(a138): A_S,m type-change invalidation — clear geometry, fl
 
 - [ ] **Step 1: Build the badge** — three states: `derived` (grey "abgeleitet"), `manual` (blue "vorgegeben — Herkunft: …"), `needs_reconfirmation` (amber "Typ geändert — A_S,m bestätigen"). Pure presentational, German copy.
 
-- [ ] **Step 2: Gate `A_S_m` editability** — in `dynamic-field.tsx`, when `field.symbol==='A_S_m'`: `textLocked = method !== 'manual'`. When `method==='manual'`, `A_S_m` is editable and `a_s_m_provenance` becomes required (block save via the existing required-field path; German error "Herkunftsangabe erforderlich").
+- [ ] **Step 2: Gate `A_S_m` editability + conditional inputs** — in `dynamic-field.tsx`, when `field.symbol==='A_S_m'`: `textLocked = method !== 'manual'`. When `method==='manual'`, `A_S_m` is editable and `a_s_m_provenance` becomes required (block save via the existing required-field path; German error "Herkunftsangabe erforderlich"). Show `soil_bodenart_tab13` only when `method==='soil_estimate'`; show `a_s_m_provenance` only when `method==='manual'`.
 
 - [ ] **Step 3: Wire the badge** next to the `A_S_m` field, driven by the persisted state (derived vs provenance-present vs needs_reconfirmation marker).
 
@@ -895,7 +952,7 @@ git commit -m "feat(a138): PDF report line for specified (manual) A_S,m with pro
 
 ## Self-Review (author checklist — completed)
 
-**Spec coverage:** §2 model → Tasks 1–2; §3 producer-selection → Task 1 (`resolveAsmProducer`); §4.1 direct → Tasks 1/5; §4.2 geometry → Task 6; §4.2 V-2 cross-check → **Task 5a**; §4.3 soil_estimate + k_f binding → Tasks 1–2; §4.4 manual (4 reqs) → Tasks 2/5/9/10; §5 data model → Task 3; §6 write/read → Tasks 5–7; §7 method-agnostic consumers → Task 11 Steps 1–2; §8 type-change → Task 8; §9 states → Task 1; §10 registry → Task 4; §11 multi-facility → structural (resolver+registry indirection, Tasks 1/4/7); acceptance §13 → Task 11. **No spec requirement without a task.**
+**Spec coverage:** §2 model → Tasks 1–2; §3 producer-selection → Task 1 (`resolveAsmProducer`); §4.1 direct → Tasks 1/5; §4.2 geometry incl. **A-2 Mulde Dauerstufen sweep** → Tasks 2 (`computeMuldeGeometrySweep`) + 6; §4.2 V-2 cross-check (vs sweep result) → **Task 5a**; §4.3 soil_estimate **A-1 Bodenart selector** (no k_f cut) → Tasks 1–2 (`computeSoilEstimate(aC,bodenart)`) + 3 (`soil_bodenart_tab13` field); §4.4 manual (4 reqs) → Tasks 2/5/9/10; §5 data model → Task 3; §6 write/read → Tasks 5–7; §7 method-agnostic consumers → Task 11 Steps 1–2; §8 type-change → Task 8; §9 states → Task 1; §10 registry → Task 4; §11 multi-facility → structural (resolver+registry indirection, Tasks 1/4/7); acceptance §13 → Task 11. **No spec requirement without a task; A-1/A-2 folded; anchors by name (Q2).**
 
 **Placeholder scan:** the two `worksheet.ts` integration tasks (5–7) show the core substitution and point to the exact B1 blocks to mirror rather than re-pasting 300 lines — the blocks are in-repo at the cited line ranges. Report-file location (Task 10) is a locate-step, not a placeholder value.
 
