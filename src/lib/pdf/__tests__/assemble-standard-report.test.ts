@@ -356,4 +356,115 @@ describe('assembleStandardReport', () => {
     expect(kfField.valueSource).toBe('site_profile');
     expect(kfField.value).toBe('0.00001');
   });
+
+  // ---------------------------------------------------------------------------
+  // Task 10: aSmProvenanceLine — manual A_S,m provenance in the PDF report
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Helper: push the two A138-12 method fields + parameters into an input
+   * so that resolvedBySymbol sees them.
+   */
+  function withAsmMethod(
+    method: string,
+    provenance: string,
+  ): AssemblerInput {
+    const input = baseInput();
+    // Add the enum field for a_s_m_determination_method on A138-12
+    input.fields.push({
+      id: 'f-asm-method',
+      worksheetTemplateId: 'tpl-12',
+      sectionId: 'sec-12-1',
+      symbol: 'a_s_m_determination_method',
+      labelDe: 'Bestimmungsmethode A_S,m',
+      unit: null,
+      dataType: 'enum',
+      isRequired: false,
+      clauseReference: null,
+      orderIndex: 10,
+    });
+    // Add the text field for a_s_m_provenance on A138-12
+    input.fields.push({
+      id: 'f-asm-prov',
+      worksheetTemplateId: 'tpl-12',
+      sectionId: 'sec-12-1',
+      symbol: 'a_s_m_provenance',
+      labelDe: 'Herkunft A_S,m',
+      unit: null,
+      dataType: 'text',
+      isRequired: false,
+      clauseReference: null,
+      orderIndex: 11,
+    });
+    // Parameters
+    input.parameters.push({
+      fieldId: 'f-asm-method',
+      valueNumber: null,
+      valueText: null,
+      valueEnum: method,
+      valueDate: null,
+      valueBoolean: null,
+      valueJson: null,
+      sourceType: 'entered',
+      citationSources: [],
+    });
+    input.parameters.push({
+      fieldId: 'f-asm-prov',
+      valueNumber: null,
+      valueText: provenance,
+      valueEnum: null,
+      valueDate: null,
+      valueBoolean: null,
+      valueJson: null,
+      sourceType: 'entered',
+      citationSources: [],
+    });
+    return input;
+  }
+
+  it('aSmProvenanceLine: manual method + non-empty provenance → line set on A138-12', () => {
+    const input = withAsmMethod('manual', 'Bohrprotokoll 2026-03-15, Anlage 4');
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    expect(ws12.aSmProvenanceLine).toBe(
+      'A_S,m vorgegeben (nicht abgeleitet) — Herkunft: Bohrprotokoll 2026-03-15, Anlage 4',
+    );
+    // Other worksheets are unaffected
+    const ws01 = out.worksheets.find((w) => w.code === 'A138-01')!;
+    expect(ws01.aSmProvenanceLine).toBeNull();
+  });
+
+  it('aSmProvenanceLine: direct method → null (engine-derived, no provenance line)', () => {
+    const input = withAsmMethod('direct', 'irgendwas');
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    expect(ws12.aSmProvenanceLine).toBeNull();
+  });
+
+  it('aSmProvenanceLine: geometry method → null', () => {
+    const input = withAsmMethod('geometry', 'Muldengeometrie');
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    expect(ws12.aSmProvenanceLine).toBeNull();
+  });
+
+  it('aSmProvenanceLine: soil_estimate method → null', () => {
+    const input = withAsmMethod('soil_estimate', 'Tab.13');
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    expect(ws12.aSmProvenanceLine).toBeNull();
+  });
+
+  it('aSmProvenanceLine: manual method but empty provenance → null (no misleading line)', () => {
+    const input = withAsmMethod('manual', '   ');
+    const out = assembleStandardReport(input);
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    expect(ws12.aSmProvenanceLine).toBeNull();
+  });
+
+  it('aSmProvenanceLine: no method field at all → null (base input has no asm fields)', () => {
+    const out = assembleStandardReport(baseInput());
+    const ws12 = out.worksheets.find((w) => w.code === 'A138-12')!;
+    expect(ws12.aSmProvenanceLine).toBeNull();
+  });
 });
