@@ -6,6 +6,7 @@ import {
   fields,
   auditLog,
   equations,
+  worksheetTemplates,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
@@ -14,6 +15,31 @@ import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
+import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
+import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
+import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
+import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
+import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
+
+/** Symbols the basin Gl.8 governing-iteration produces and persists.
+ * These map to field symbols on the A138-13 worksheet template (same-symbol
+ * consolidation: A138-10 inherits them as its r_D_n/D_min inputs). */
+const BASIN_GOVERNING_SYMBOLS = ['r_D_n', 'D_min'] as const;
+
+/** The six scalar symbols A138-13 Gl.8 reads from other worksheets. */
+const BASIN_SCALAR_SYMBOLS = ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A'] as const;
+
+/** All symbols that need to be resolved from project_parameters for basin
+ * governing materialisation (scalars + return-period resolution). */
+const BASIN_LOOKUP_SYMBOLS = [...BASIN_SCALAR_SYMBOLS, 'n', 'T_n', 'rainfall_table_ref'] as const;
+
+/** Symbols the Tab.6 loading-check materialize produces and persists on A138-12.
+ * Disjoint from BASIN_GOVERNING_SYMBOLS (r_D_n / D_min) — no shared writes. */
+const LOADING_CHECK_OUTPUT_SYMBOLS = ['ac_as_ratio', 'ac_as_ratio_limit', 'ac_as_ratio_check', 'ac_as_ratio_check_reason'] as const;
+
+/** Cross-worksheet inputs the Tab.6 loading-check reads from other templates. */
+const LOADING_CHECK_CROSS_SYMBOLS = ['A_C', 'flaechengruppe', 'bbz_thickness'] as const;
 
 type FieldValue =
   | { type: 'number'; value: number | null }
@@ -28,8 +54,17 @@ export type SaveWorksheetInput = {
   values: Record<string, FieldValue>;   // by field_id
 };
 
+/** A single server-materialized derived value returned after a successful save.
+ * The client applies these to the store surgically (read-only computed fields
+ * only) so they appear without a manual page reload. */
+export type SavedDerivedRow = {
+  fieldId: string;
+  valueNumber: string | null;
+  valueText: string | null;
+};
+
 export type SaveWorksheetResult =
-  | { ok: true; saved: number; warnings: string[] }
+  | { ok: true; saved: number; warnings: string[]; derived: SavedDerivedRow[] }
   | { ok: false; error: string };
 
 /** Save user-entered values for a worksheet instance.
@@ -76,24 +111,6 @@ export async function saveWorksheet(
   }
 
   const fieldIds = Object.keys(input.values);
-  if (fieldIds.length === 0) {
-    return { ok: true, saved: 0, warnings: [] };
-  }
-
-  // Load field metadata — restrict to fields belonging to this instance's
-  // worksheet template so callers cannot write values for fields of a
-  // different template within the same project.
-  const fieldMetas = await db
-    .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol })
-    .from(fields)
-    .where(
-      and(
-        inArray(fields.id, fieldIds),
-        eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-      ),
-    );
-  const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
-  const symbolById = new Map(fieldMetas.map((f) => [f.id, f.symbol]));
 
   // Single-source integrity: a value this worksheet's equations PRODUCE must be
   // persisted as `derived`, never as an engineer `entered` input — even when it
@@ -101,22 +118,68 @@ export async function saveWorksheet(
   // surface-materialization path below. Compute the produced-symbol set from the
   // template's equations (displayOnly outputs stay `entered` — they're engineer
   // iteration variables). See @/lib/eval/derived-output-symbols.
+  //
+  // Loaded BEFORE the early-return check so topology-driven triggers
+  // (isBasinSave, isLoadingSave) are available even on empty-batch saves.
   const templateEquations = await db
     .select({ id: equations.id, outputSymbol: equations.outputSymbol })
     .from(equations)
     .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
   const derivedSymbols = derivedOutputSymbols(templateEquations);
 
-  // Load existing parameters for diff
-  const existing = await db
-    .select()
-    .from(projectParameters)
-    .where(
-      and(
-        eq(projectParameters.projectId, instance.projectId),
-        inArray(projectParameters.fieldId, fieldIds),
-      ),
-    );
+  // Topology-based trigger flags — computed at function scope so the outer
+  // transaction guard can use them on empty-batch saves (savedCount === 0).
+  // These depend only on which equations the template owns, not on what's in
+  // the current save batch.
+  const isBasinSave   = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
+  const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
+
+  // Standard of the saved worksheet — scopes producer-side propagation to the SAME
+  // standard. worksheet_templates.code is unique per-standard, NOT globally, so a
+  // consumer lookup by code alone could misfire into another guideline that shares
+  // a code (e.g. a second standard with an 'A138-12'). Fail-closed: if unknown, skip.
+  const [savedTemplateRow] = await db
+    .select({ standardId: worksheetTemplates.standardId })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.id, instance.worksheetTemplateId))
+    .limit(1);
+  const savedStandardId = savedTemplateRow?.standardId ?? null;
+
+  // Fast-path: nothing submitted AND no topology-triggered recompute needed.
+  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave) {
+    return { ok: true, saved: 0, warnings: [], derived: [] };
+  }
+
+  // Load field metadata — restrict to fields belonging to this instance's
+  // worksheet template so callers cannot write values for fields of a
+  // different template within the same project.
+  // Guard against empty fieldIds: inArray with [] is a SQL error in some drivers.
+  const fieldMetas = fieldIds.length > 0
+    ? await db
+        .select({ id: fields.id, dataType: fields.dataType, symbol: fields.symbol })
+        .from(fields)
+        .where(
+          and(
+            inArray(fields.id, fieldIds),
+            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+          ),
+        )
+    : [];
+  const dataTypeById = new Map(fieldMetas.map((f) => [f.id, f.dataType]));
+  const symbolById = new Map(fieldMetas.map((f) => [f.id, f.symbol]));
+
+  // Load existing parameters for diff (skip if no fields to diff).
+  const existing = fieldIds.length > 0
+    ? await db
+        .select()
+        .from(projectParameters)
+        .where(
+          and(
+            eq(projectParameters.projectId, instance.projectId),
+            inArray(projectParameters.fieldId, fieldIds),
+          ),
+        )
+    : [];
   const existingById = new Map(existing.map((p) => [p.fieldId, p]));
 
   const warnings: string[] = [];
@@ -233,31 +296,101 @@ export async function saveWorksheet(
 
   const savedCount = parameterValues.length;
 
-  if (savedCount > 0) {
+  // ── Option A: producer-side reactive recompute ─────────────────────────────
+  // Compute the set of symbols whose value ACTUALLY changed in this save batch
+  // (comparing incoming vs previously persisted). This is the producer-side
+  // trigger signal: a downstream materialize fires when one of ITS input symbols
+  // is in this set.
+  //
+  // GENERAL MECHANISM: nothing here is 138-specific. The registry declares which
+  // symbols each materialize reads; this block just computes the changed set and
+  // asks the registry which materializes should fire.
+  //
+  // NOTE: we use `parameterValues` (validated rows only) NOT `fieldIds` so that
+  // skipped fields (wrong type, not found) do not spuriously trigger a recompute.
+  const changedSymbols = new Set<string>();
+  for (const row of parameterValues) {
+    const sym = symbolById.get(row.fieldId);
+    if (!sym) continue;
+    // Use the already-computed audit change record to determine whether the value
+    // actually differs from the previously persisted value.
+    //   action='insert' → no prior row → definitely a new/changed value.
+    //   action='update' → compare before/after; only add to changedSymbols if different.
+    // This avoids spurious producer-fires when an engineer saves an identical value
+    // (e.g. re-saves A138-06 with the same flaechengruppe — should NOT trigger recompute).
+    const auditRow = auditValues.find((a) => a.recordId === row.fieldId);
+    if (auditRow?.action === 'insert') {
+      changedSymbols.add(sym);
+    } else if (auditRow?.action === 'update') {
+      // `before` and `after` are computed in the audit pass above.
+      if (auditRow.changes && 'before' in auditRow.changes && 'after' in auditRow.changes) {
+        const c = auditRow.changes as { before: unknown; after: unknown };
+        // Stringify comparison handles number/string/null/boolean uniformly without
+        // floating-point precision issues (audit stores raw incoming.value).
+        if (JSON.stringify(c.before) !== JSON.stringify(c.after)) {
+          changedSymbols.add(sym);
+        }
+      }
+    }
+  }
+
+  // Determine which registry entries already fire via ownerTrigger (topology).
+  // These are excluded from producer-fire to prevent double-execution.
+  const ownerFiredIds = new Set<string>();
+  for (const entry of MATERIALIZE_REGISTRY) {
+    if (entry.ownerTrigger(templateEquations)) {
+      ownerFiredIds.add(entry.id);
+    }
+  }
+  // isBasinSave and isLoadingSave already correspond to the 'basin' and 'loading'
+  // registry entries. They are expressed directly in the topology flags above;
+  // the ownerFiredIds set is used to prevent double-fire in producerFiredEntries.
+
+  // Registry entries that should fire as producers (changed input, not already firing).
+  const producerEntries = producerFiredEntries(changedSymbols, ownerFiredIds);
+
+  // Accumulated derived rows written by the materialize passes below.
+  // Populated inside the transaction; returned to the client on ok=true.
+  const writtenDerived: SavedDerivedRow[] = [];
+
+  // Open the transaction when:
+  //   (a) there are actual parameter rows to write (savedCount > 0), OR
+  //   (b) this worksheet owns a topology-triggered materialize block that must
+  //       recompute even on an empty save batch (upstream input changed on another
+  //       worksheet → stale-verdict fix), OR
+  //   (c) a producer-side input symbol changed → a downstream materialize must fire.
+  //   The SURFACE block is excluded from the guard because surface_inventory being
+  //   in the save batch is what identifies a surface save — it only fires when
+  //   savedCount > 0, so adding surfacePresence here would be redundant.
+  if (savedCount > 0 || isBasinSave || isLoadingSave || producerEntries.length > 0) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
       // share the same enteredAt so there is no skew from multiple new Date() calls.
       const now = new Date();
 
-      // ONE batched upsert for all parameter rows
-      await tx
-        .insert(projectParameters)
-        .values(parameterValues)
-        .onConflictDoUpdate({
-          target: [projectParameters.projectId, projectParameters.fieldId],
-          set: {
-            valueNumber: sql`excluded.value_number`,
-            valueText: sql`excluded.value_text`,
-            valueEnum: sql`excluded.value_enum`,
-            valueDate: sql`excluded.value_date`,
-            valueBoolean: sql`excluded.value_boolean`,
-            valueJson: sql`excluded.value_json`,
-            sourceType: sql`excluded.source_type`,
-            sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
-            enteredBy: sql`excluded.entered_by`,
-            enteredAt: now,
-          },
-        });
+      // ONE batched upsert for all parameter rows — guarded so an empty batch
+      // (topology-triggered recompute with no local field change) does not
+      // attempt to insert zero rows (which is a no-op but wastes a round-trip).
+      if (parameterValues.length > 0) {
+        await tx
+          .insert(projectParameters)
+          .values(parameterValues)
+          .onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              valueText: sql`excluded.value_text`,
+              valueEnum: sql`excluded.value_enum`,
+              valueDate: sql`excluded.value_date`,
+              valueBoolean: sql`excluded.value_boolean`,
+              valueJson: sql`excluded.value_json`,
+              sourceType: sql`excluded.source_type`,
+              sourceWorksheetInstanceId: sql`excluded.source_worksheet_instance_id`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
+      }
 
       // Materialize derived surface outputs when A138-07's surface_inventory was saved.
       // Runs inside the same transaction so derived rows are always consistent with
@@ -266,17 +399,22 @@ export async function saveWorksheet(
       // Optimization: first do a cheap indexed lookup — only if the saved batch
       // actually contains a surface_inventory field for this template do we proceed
       // to the full sibling-fields query + materialization.
-      const [surfacePresence] = await tx
-        .select({ id: fields.id })
-        .from(fields)
-        .where(
-          and(
-            inArray(fields.id, fieldIds),
-            eq(fields.symbol, 'surface_inventory'),
-            eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
-          ),
-        )
-        .limit(1);
+      // Guard inArray against an empty batch — empty-array inArray is fragile across
+      // drizzle versions (provably safe on 0.45.2 today, but don't rely on it). An
+      // empty fieldIds means no surface_inventory in the batch, so the block is a no-op.
+      const [surfacePresence] = fieldIds.length > 0
+        ? await tx
+            .select({ id: fields.id })
+            .from(fields)
+            .where(
+              and(
+                inArray(fields.id, fieldIds),
+                eq(fields.symbol, 'surface_inventory'),
+                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+              ),
+            )
+            .limit(1)
+        : [];
 
       if (surfacePresence) {
         const surfaceFieldId = surfacePresence.id;
@@ -308,11 +446,539 @@ export async function saveWorksheet(
               enteredAt: now,
             },
           });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of derivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
+          }
         }
       }
 
-      // ONE batched insert for all audit rows
-      await tx.insert(auditLog).values(auditValues);
+      // Materialize basin governing outputs (r_D_n, D_min) whenever this save
+      // targets the basin worksheet (A138-13). Persisted as derived rows so
+      // A138-10 inherits them via same-symbol consolidation without re-running
+      // the governing-duration iteration (single-producer rule).
+      //
+      // Detection: the saved template owns the basin Gl.8 equation. We already
+      // loaded `templateEquations` for this template above and hoisted `isBasinSave`
+      // to function scope. This is topology-stable: the equation lives on A138-13
+      // regardless of which fields are in the current save batch — so any A138-13
+      // save triggers a recompute. (Previously the gate was on r_D_n_table being in
+      // the save batch, but that carrier moved to A138-04, making the block dead.)
+      // `isBasinSave` is now declared at function scope (see above); used here directly.
+
+      if (isBasinSave) {
+        // 1. Gather sibling fields for this template (to resolve output field ids +
+        //    to pick scalar values from the saved batch).
+        const basinWsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const basinIdBySymbol = new Map(basinWsFields.map((f) => [f.symbol, f.id]));
+
+        // 2. Carrier (r_D_n_table): read cross-worksheet from project_parameters.
+        //    The carrier lives on A138-04 (moved there during 2D-grid work) so it
+        //    is never in an A138-13 save batch. Look it up globally by symbol and
+        //    read the persisted value for this project — mirroring the cross-worksheet
+        //    scalar reads below (step 4).
+        // NOTE: today exactly one worksheet template owns the `r_D_n_table` field
+        // (A138-04), so this symbol+active lookup is unambiguous. If a second template
+        // ever introduced its own `r_D_n_table` field, the limit(1) would silently pick
+        // one — the same latent multi-owner ambiguity noted on the scalar cross-worksheet
+        // reads below. Scope by template if that ever happens.
+        const [carrierField] = await tx
+          .select({ id: fields.id })
+          .from(fields)
+          .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+          .limit(1);
+        let carrierRaw: unknown = null;
+        if (carrierField) {
+          const [carrierParam] = await tx
+            .select({ valueJson: projectParameters.valueJson })
+            .from(projectParameters)
+            .where(and(
+              eq(projectParameters.projectId, instance.projectId),
+              eq(projectParameters.fieldId, carrierField.id),
+            ))
+            .limit(1);
+          carrierRaw = carrierParam?.valueJson ?? null;
+        }
+
+        // 3. rainfall_table_ref: prefer the value being saved now, then fall back
+        //    to the existing persisted value.
+        const rainfallRefFieldId = basinIdBySymbol.get('rainfall_table_ref');
+        let rainfallTableRef: string | null = null;
+        if (rainfallRefFieldId) {
+          const savedRef = input.values[rainfallRefFieldId];
+          if (savedRef?.type === 'text' && typeof savedRef.value === 'string') {
+            rainfallTableRef = savedRef.value || null;
+          } else {
+            // Not in this save batch — read the already-persisted value.
+            const [existing] = await tx
+              .select({ valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, rainfallRefFieldId),
+              ))
+              .limit(1);
+            rainfallTableRef = existing?.valueText ?? null;
+          }
+        }
+
+        // 4. Cross-worksheet scalars + T_n resolution symbols: look up field ids
+        //    across ALL templates in the project (scalars come from A138-08/10/12).
+        //    Then fetch their persisted values from project_parameters.
+        //    NOTE: this intentionally reads ALREADY-PERSISTED values (before this
+        //    transaction's writes) because the scalar fields belong to OTHER worksheets
+        //    and their values are not part of this save batch.
+        const LOOKUP_SYMS = new Set(BASIN_LOOKUP_SYMBOLS);
+        const crossFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(
+            and(
+              inArray(fields.symbol, [...BASIN_LOOKUP_SYMBOLS]),
+              eq(fields.active, true),
+            ),
+          );
+
+        // Multiple templates may define a symbol (e.g. r_D_n appears on A138-13 itself);
+        // prefer a cross-worksheet parameter row that has an actual value.
+        const crossFieldIds = crossFields.map((f) => f.id);
+        const crossParams = crossFieldIds.length > 0
+          ? await tx
+              .select({
+                fieldId: projectParameters.fieldId,
+                valueNumber: projectParameters.valueNumber,
+                valueText: projectParameters.valueText,
+              })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, crossFieldIds),
+              ))
+          : [];
+
+        // Build symbol→numeric map (first non-null wins per symbol).
+        const crossNumBySymbol = new Map<string, number | null>();
+        const crossTextBySymbol = new Map<string, string | null>();
+        const crossFieldById = new Map(crossFields.map((f) => [f.id, f]));
+        for (const p of crossParams) {
+          const f = crossFieldById.get(p.fieldId);
+          if (!f) continue;
+          if (f.dataType === 'number' && !crossNumBySymbol.has(f.symbol)) {
+            const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+            crossNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+          }
+          if (f.dataType === 'text' && !crossTextBySymbol.has(f.symbol)) {
+            crossTextBySymbol.set(f.symbol, p.valueText ?? null);
+          }
+        }
+
+        // Also check the CURRENT save batch for scalar overrides (in case any
+        // scalar fields belong to THIS template and are being saved right now).
+        for (const f of basinWsFields) {
+          if (!LOOKUP_SYMS.has(f.symbol as typeof BASIN_LOOKUP_SYMBOLS[number])) continue;
+          const saved = input.values[f.id];
+          if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+            crossNumBySymbol.set(f.symbol, saved.value);
+          }
+        }
+
+        // 5. Resolve T_n via facilityReturnPeriod (A138-13 uses project n / T_n).
+        const pickNum = (sym: string): number | null => crossNumBySymbol.get(sym) ?? null;
+        const T_n = facilityReturnPeriod('A138-13', pickNum);
+
+        // 6. Build scalar bag.
+        const scalars = {
+          A_C:  crossNumBySymbol.get('A_C')  ?? (null as unknown as number),
+          A_VA: crossNumBySymbol.get('A_VA') ?? (null as unknown as number),
+          Q_S:  crossNumBySymbol.get('Q_S')  ?? (null as unknown as number),
+          Q_Dr: crossNumBySymbol.get('Q_Dr') ?? (null as unknown as number),
+          f_Z:  crossNumBySymbol.get('f_Z')  ?? (null as unknown as number),
+          f_A:  crossNumBySymbol.get('f_A')  ?? (null as unknown as number),
+        };
+
+        // 7. Run the pure governing-iteration.
+        const governing = materializeBasinGoverning({
+          carrierRaw,
+          rainfallTableRef,
+          T_n,
+          scalars,
+        });
+
+        // 8. UPSERT the two derived rows, or clear them when not computable.
+        //    Clearing (valueNumber=null) ensures A138-10 blanks-with-cause when
+        //    the basin is manual_required, rather than showing a stale value.
+        const basinDerivedRows = (BASIN_GOVERNING_SYMBOLS as readonly string[])
+          .map((sym) => ({ sym, fieldId: basinIdBySymbol.get(sym) }))
+          .filter((x): x is { sym: string; fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: governing != null
+              ? String(governing[x.sym as keyof typeof governing])
+              : null,
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: now,
+          }));
+
+        if (basinDerivedRows.length > 0) {
+          await tx.insert(projectParameters).values(basinDerivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of basinDerivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
+          }
+        }
+      }
+
+      // Materialize Tab.6 loading-check outputs (ac_as_ratio, ac_as_ratio_limit,
+      // ac_as_ratio_check, ac_as_ratio_check_reason) whenever this save targets the
+      // A138-12 (BBZ loading check) worksheet. Persisted as derived rows.
+      //
+      // Detection: A138-12 owns the A_S_m equation (55151cb1-…). `isLoadingSave`
+      // is hoisted to function scope (see above) and used here directly.
+      // This is topology-stable: the equation lives on A138-12 regardless of which
+      // fields are in the current save batch — so ANY A138-12 save triggers a
+      // recompute. Previously the gate was on `ac_as_ratio` being in the save batch,
+      // but ac_as_ratio is read-only/derived and is never user-entered → the block
+      // was permanently dead (same dead-trigger class fixed for the basin block above).
+      //
+      // Cross-worksheet reads:
+      //   A_S_m         — LOCAL to A138-12 (prefer save batch, else persisted)
+      //   A_C           — cross-worksheet from A138-07 (persisted)
+      //   flaechengruppe— cross-worksheet from A138-06 (persisted, value_enum/value_text)
+      //   bbz_thickness — cross-worksheet from A138-06 (persisted, value_number)
+      // `isLoadingSave` is declared at function scope; used here directly.
+
+      if (isLoadingSave) {
+        // 1. Sibling field ids for A138-12 (resolve output field ids + A_S_m local field).
+        const lcWsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const lcIdBySymbol = new Map(lcWsFields.map((f) => [f.symbol, f.id]));
+
+        // 2. A_S_m — prefer save batch, else persisted A138-12 value.
+        const aSmFieldId = lcIdBySymbol.get('A_S_m');
+        let A_S_m: number | null = null;
+        if (aSmFieldId) {
+          const saved = input.values[aSmFieldId];
+          if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
+            A_S_m = saved.value;
+          } else {
+            const [existing] = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, aSmFieldId),
+              ))
+              .limit(1);
+            A_S_m = existing?.valueNumber != null ? Number(existing.valueNumber) : null;
+            if (A_S_m != null && !Number.isFinite(A_S_m)) A_S_m = null;
+          }
+        }
+
+        // 3. Cross-worksheet inputs from A138-06 (flaechengruppe, bbz_thickness)
+        //    and A138-07 (A_C). Look up by symbol across all active fields in the project.
+        //    NOTE: same single-owner assumption as the basin cross-worksheet reads.
+        const crossLcFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+          .from(fields)
+          .where(
+            and(
+              inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
+              eq(fields.active, true),
+            ),
+          );
+        const crossLcFieldIds = crossLcFields.map((f) => f.id);
+        const crossLcParams = crossLcFieldIds.length > 0
+          ? await tx
+              .select({
+                fieldId: projectParameters.fieldId,
+                valueNumber: projectParameters.valueNumber,
+                valueText: projectParameters.valueText,
+                valueEnum: projectParameters.valueEnum,
+              })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, crossLcFieldIds),
+              ))
+          : [];
+
+        const crossLcFieldById = new Map(crossLcFields.map((f) => [f.id, f]));
+        const crossLcNumBySymbol = new Map<string, number | null>();
+        const crossLcTextBySymbol = new Map<string, string | null>();
+        for (const p of crossLcParams) {
+          const f = crossLcFieldById.get(p.fieldId);
+          if (!f) continue;
+          if (f.dataType === 'number' && !crossLcNumBySymbol.has(f.symbol)) {
+            const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+            crossLcNumBySymbol.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+          }
+          // flaechengruppe is stored as 'enum' in the field definition, read value_enum first
+          if ((f.dataType === 'enum' || f.dataType === 'text') && !crossLcTextBySymbol.has(f.symbol)) {
+            crossLcTextBySymbol.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
+          }
+        }
+
+        const A_C           = crossLcNumBySymbol.get('A_C')            ?? null;
+        const flaechengruppe= crossLcTextBySymbol.get('flaechengruppe') ?? null;
+        const bbz_thickness = crossLcNumBySymbol.get('bbz_thickness')  ?? null;
+
+        // 4. Run the pure loading-check materialize.
+        const lc = materializeLoadingCheck({ A_C, A_S_m, flaechengruppe, bbz_thickness });
+
+        // 5. UPSERT the four derived rows.
+        //    When a field id is missing (migration not yet applied), the map returns
+        //    undefined and the row is filtered out — safe no-op.
+        type LcDerivedRow = {
+          projectId: string;
+          fieldId: string;
+          valueNumber: string | null;
+          valueText: string | null;
+          sourceType: 'derived';
+          enteredBy: string;
+          enteredAt: Date;
+        };
+        // Map over the shared constant so the symbol list has a single source of truth.
+        const lcValueMap: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+          ac_as_ratio:              { valueNumber: lc.ac_as_ratio != null ? String(lc.ac_as_ratio) : null, valueText: null },
+          ac_as_ratio_limit:        { valueNumber: lc.ac_as_ratio_limit != null ? String(lc.ac_as_ratio_limit) : null, valueText: null },
+          ac_as_ratio_check:        { valueNumber: null, valueText: lc.ac_as_ratio_check },
+          ac_as_ratio_check_reason: { valueNumber: null, valueText: lc.ac_as_ratio_check_reason },
+        };
+        const lcDerivedRows: LcDerivedRow[] = LOADING_CHECK_OUTPUT_SYMBOLS
+          .map((sym) => ({ sym, ...lcValueMap[sym] }))
+          .map((x) => ({ ...x, fieldId: lcIdBySymbol.get(x.sym) }))
+          .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: x.valueNumber,
+            valueText: x.valueText,
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: now,
+          }));
+
+        if (lcDerivedRows.length > 0) {
+          await tx.insert(projectParameters).values(lcDerivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              valueText: sql`excluded.value_text`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
+          // Collect for client-side apply (Task B display-fix)
+          for (const r of lcDerivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+          }
+        }
+      }
+
+      // ── Option A: producer-side materialize firings ──────────────────────
+      //
+      // GENERAL MECHANISM: for each registry entry that should fire as a producer
+      // (because a changed input symbol ∈ entry.inputSymbols), we:
+      //   1. Look up the consumer worksheet_template by consumerTemplateCode.
+      //   2. Resolve output field ids against THAT template (not the saved template).
+      //   3. Run the materialize compute function with cross-worksheet inputs.
+      //   4. UPSERT the derived rows.
+      //
+      // CRITICAL (consumer-template resolution): the existing owner-triggered loading
+      // block at line ~657 queries `instance.worksheetTemplateId` to get lcWsFields.
+      // When the SAVED worksheet is A138-12, that is correct. When the SAVED worksheet
+      // is A138-06 (producer-fire), using `instance.worksheetTemplateId` would resolve
+      // A138-06's fields — but A138-06 has NO ac_as_ratio symbol, so lcDerivedRows
+      // would be empty. The fix: resolve the consumer template by `consumerTemplateCode`.
+      //
+      // 138-SPECIFIC: only the 'loading' block is producer-fired for now (the basin block
+      // reads its inputs from the saved template + cross-worksheet scalars, but its
+      // producer-fire would require the same fix; deferred until a concrete trigger exists).
+      // Surface is self-referential and handled by the in-batch check above.
+      // The dispatch below is general — it iterates producerEntries and dispatches by entry.id.
+
+      for (const producerEntry of producerEntries) {
+        if (producerEntry.id === 'loading') {
+          // ── Consumer-template resolution (the crux) ──────────────────────
+          // Look up the A138-12 template by code (consumerTemplateCode = 'A138-12').
+          // This is INDEPENDENT of `instance.worksheetTemplateId` (the saved template).
+          // GENERAL: any materialize entry with id='loading' uses its consumerTemplateCode.
+          // Scope by standard_id (fail-closed): resolve the consumer template ONLY within
+          // the SAME standard as the saved worksheet. Without this, a second standard that
+          // shares the code could be picked arbitrarily (cross-standard misfire). If the
+          // saved standard is unknown, do not fire producer-side.
+          const [consumerTmpl] = savedStandardId
+            ? await tx
+                .select({ id: worksheetTemplates.id })
+                .from(worksheetTemplates)
+                .where(and(
+                  eq(worksheetTemplates.code, producerEntry.consumerTemplateCode),
+                  eq(worksheetTemplates.standardId, savedStandardId),
+                ))
+                .limit(1)
+            : [];
+
+          if (!consumerTmpl) {
+            // Consumer template not found in this standard — skip gracefully (migration not
+            // yet applied, code differs, or unknown standard). Do not error; the save succeeded.
+            continue;
+          }
+
+          // Resolve output field ids from the CONSUMER template (not the saved template).
+          const lcWsFieldsProducer = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, consumerTmpl.id), eq(fields.active, true)));
+          const lcIdBySymbolProducer = new Map(lcWsFieldsProducer.map((f) => [f.symbol, f.id]));
+
+          // A_S_m — read from the consumer (A138-12) project_parameters (persisted).
+          // It is NOT in the current save batch (which belongs to A138-06).
+          const aSmFieldIdProducer = lcIdBySymbolProducer.get('A_S_m');
+          let A_S_m_producer: number | null = null;
+          if (aSmFieldIdProducer) {
+            const [existingAsm] = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(projectParameters.fieldId, aSmFieldIdProducer),
+              ))
+              .limit(1);
+            A_S_m_producer = existingAsm?.valueNumber != null ? Number(existingAsm.valueNumber) : null;
+            if (A_S_m_producer != null && !Number.isFinite(A_S_m_producer)) A_S_m_producer = null;
+          }
+
+          // Cross-worksheet inputs: A_C, flaechengruppe, bbz_thickness.
+          // These are read from project_parameters — INCLUDING the values just written
+          // by the main parameter UPSERT above (because we're inside the same transaction,
+          // the writes are visible to subsequent reads within the transaction).
+          const crossLcFieldsP = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(
+              and(
+                inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
+                eq(fields.active, true),
+              ),
+            );
+          const crossLcFieldIdsP = crossLcFieldsP.map((f) => f.id);
+          const crossLcParamsP = crossLcFieldIdsP.length > 0
+            ? await tx
+                .select({
+                  fieldId: projectParameters.fieldId,
+                  valueNumber: projectParameters.valueNumber,
+                  valueText: projectParameters.valueText,
+                  valueEnum: projectParameters.valueEnum,
+                })
+                .from(projectParameters)
+                .where(and(
+                  eq(projectParameters.projectId, instance.projectId),
+                  inArray(projectParameters.fieldId, crossLcFieldIdsP),
+                ))
+            : [];
+
+          const crossLcFieldByIdP = new Map(crossLcFieldsP.map((f) => [f.id, f]));
+          const crossLcNumBySymbolP = new Map<string, number | null>();
+          const crossLcTextBySymbolP = new Map<string, string | null>();
+          for (const p of crossLcParamsP) {
+            const f = crossLcFieldByIdP.get(p.fieldId);
+            if (!f) continue;
+            if (f.dataType === 'number' && !crossLcNumBySymbolP.has(f.symbol)) {
+              const v = p.valueNumber != null ? Number(p.valueNumber) : null;
+              crossLcNumBySymbolP.set(f.symbol, v != null && Number.isFinite(v) ? v : null);
+            }
+            if ((f.dataType === 'enum' || f.dataType === 'text') && !crossLcTextBySymbolP.has(f.symbol)) {
+              crossLcTextBySymbolP.set(f.symbol, p.valueEnum ?? p.valueText ?? null);
+            }
+          }
+
+          const A_C_p            = crossLcNumBySymbolP.get('A_C')             ?? null;
+          const flaechengruppe_p = crossLcTextBySymbolP.get('flaechengruppe') ?? null;
+          const bbz_thickness_p  = crossLcNumBySymbolP.get('bbz_thickness')   ?? null;
+
+          const lc_p = materializeLoadingCheck({
+            A_C: A_C_p,
+            A_S_m: A_S_m_producer,
+            flaechengruppe: flaechengruppe_p,
+            bbz_thickness: bbz_thickness_p,
+          });
+
+          type LcDerivedRowP = {
+            projectId: string;
+            fieldId: string;
+            valueNumber: string | null;
+            valueText: string | null;
+            sourceType: 'derived';
+            enteredBy: string;
+            enteredAt: Date;
+          };
+          const lcValueMapP: Record<string, { valueNumber: string | null; valueText: string | null }> = {
+            ac_as_ratio:              { valueNumber: lc_p.ac_as_ratio != null ? String(lc_p.ac_as_ratio) : null, valueText: null },
+            ac_as_ratio_limit:        { valueNumber: lc_p.ac_as_ratio_limit != null ? String(lc_p.ac_as_ratio_limit) : null, valueText: null },
+            ac_as_ratio_check:        { valueNumber: null, valueText: lc_p.ac_as_ratio_check },
+            ac_as_ratio_check_reason: { valueNumber: null, valueText: lc_p.ac_as_ratio_check_reason },
+          };
+          const lcDerivedRowsP: LcDerivedRowP[] = LOADING_CHECK_OUTPUT_SYMBOLS
+            .map((sym) => ({ sym, ...lcValueMapP[sym] }))
+            .map((x) => ({ ...x, fieldId: lcIdBySymbolProducer.get(x.sym) }))
+            .filter((x): x is typeof x & { fieldId: string } => x.fieldId != null)
+            .map((x) => ({
+              projectId: instance.projectId,
+              fieldId: x.fieldId,
+              valueNumber: x.valueNumber,
+              valueText: x.valueText,
+              sourceType: 'derived' as const,
+              enteredBy: userId,
+              enteredAt: now,
+            }));
+
+          if (lcDerivedRowsP.length > 0) {
+            await tx.insert(projectParameters).values(lcDerivedRowsP).onConflictDoUpdate({
+              target: [projectParameters.projectId, projectParameters.fieldId],
+              set: {
+                valueNumber: sql`excluded.value_number`,
+                valueText: sql`excluded.value_text`,
+                sourceType: sql`excluded.source_type`,
+                enteredBy: sql`excluded.entered_by`,
+                enteredAt: now,
+              },
+            });
+            for (const r of lcDerivedRowsP) {
+              writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+            }
+          }
+        }
+        // NOTE: 'basin' and 'surface' producer-fire paths not yet implemented.
+        // Basin producer-fire would require the same consumer-template resolution fix
+        // (resolve A138-13 by code), then run materializeBasinGoverning.
+        // Surface is self-referential (producer == consumer) and already handled above.
+        // Both are left as registry entries (for structural completeness + future extension)
+        // but the dispatch here is a no-op for them.
+      }
+      // ── End Option A ─────────────────────────────────────────────────────
+
+      // ONE batched insert for all audit rows — guarded so an empty-batch
+      // topology-triggered save (no local field change) does not attempt to
+      // insert zero audit rows (which would be a DB error).
+      if (auditValues.length > 0) {
+        await tx.insert(auditLog).values(auditValues);
+      }
 
       await tx
         .update(worksheetInstances)
@@ -321,7 +987,7 @@ export async function saveWorksheet(
     });
   }
 
-  return { ok: true, saved: savedCount, warnings };
+  return { ok: true, saved: savedCount, warnings, derived: writtenDerived };
 }
 
 function extractValue(

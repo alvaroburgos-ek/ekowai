@@ -157,7 +157,9 @@ This playbook is the **post-encode wiring + deploy phase**. The encoder (Pass3c)
 
 ---
 
-## 9. Post-approval write-lock — STANDING integrity requirement (standard-agnostic, OPEN BUG as of 2026-06-26)
+## 9. Post-approval write-lock — STANDING integrity requirement (standard-agnostic) — FIXED + LIVE 2026-06-27
+
+> **Status update:** the lock described below is now BUILT + deployed (`origin/main` `294c89d`): `saveWorksheet` refuses writes when `instance.status ∈ {engineer_approved, final}`, demanding an explicit `reopen → draft` first; UI mirrors it. Confirmed in use 2026-06-29 — the A138-07 materialization repair on PLT-HS-01 only landed after a `reopen → save → re-finalize` (a save without reopen was correctly blocked). The requirement text below is kept as the standing spec every guideline inherits.
 
 **Requirement (every guideline needs it):** once a worksheet reaches an approved state (`engineer_approved` or `final`), its data must be **immutable** — editable only after an explicit `reopen` that demotes it to `draft`. Otherwise an approved record can be altered under its own sign-off, and single-source **consumers inherit post-approval changes** from a producer they believe is frozen (e.g. A138-10 inheriting `A_C`/`A_E_ba`/`A_C_sealed` from a *final* A138-07 that was edited after finalization). This is exactly why single-source makes the lock load-bearing: an unlocked producer silently rewrites every consumer.
 
@@ -166,7 +168,9 @@ This playbook is the **post-encode wiring + deploy phase**. The encoder (Pass3c)
 - **The data-write path does NOT consult it.** `saveWorksheet` (`src/lib/actions/worksheet.ts`) checks auth + org-membership + field-template scope, then writes `project_parameters` (field values + `surface_inventory` + materialized derived rows) **unconditionally** (the `tx.insert(projectParameters)` ~L215) with **no `status` guard**. It reads `instance.status` only for a *post-commit* narrow auto-reopen (~L304) that fires **only for `engineer_approved`** and **only when the edit introduces a new block-severity violation** — it never blocks the edit, does nothing on benign edits, and **does not cover `final` at all**.
 - **No UI lock either:** `worksheet-form.tsx` auto-saves on change (`void flush(saveWorksheet)`); `dynamic-field.tsx` sets `readOnly` only for *computed* fields — no status-based disabling. A `final` worksheet's inputs are editable and auto-persist.
 
-**The fix shape (when scheduled — not yet built):** enforce the lock **server-side in `saveWorksheet`** (the real gate), not just the UI: refuse the write when `instance.status ∈ {engineer_approved, final}` (return an error telling the engineer to Reopen first), so editing an approved record is impossible without the explicit `reopen` transition. Mirror the lock in the UI (disable inputs / show a Reopen prompt) for UX, but the server check is the integrity boundary. Add a test asserting a save against an `engineer_approved`/`final` instance is rejected. Apply once, centrally (it's standard-agnostic — `saveWorksheet` is shared by all guidelines). Consider whether the existing narrow auto-reopen (L298–351) should be removed/subsumed once a hard lock exists.
+**The fix shape (now built):** enforce the lock **server-side in `saveWorksheet`** (the real gate), not just the UI: refuse the write when `instance.status ∈ {engineer_approved, final}` (return an error telling the engineer to Reopen first), so editing an approved record is impossible without the explicit `reopen` transition. Mirror the lock in the UI (disable inputs / show a Reopen prompt) for UX, but the server check is the integrity boundary. Add a test asserting a save against an `engineer_approved`/`final` instance is rejected. Apply once, centrally (it's standard-agnostic — `saveWorksheet` is shared by all guidelines). Consider whether the existing narrow auto-reopen (L298–351) should be removed/subsumed once a hard lock exists.
+
+---
 
 ## 10. The pattern FAMILY is general — audit a new guideline, then apply what fits
 

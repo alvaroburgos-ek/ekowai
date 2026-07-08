@@ -28,6 +28,12 @@ import type {
   Gl10Scalars,
 } from './aggregators';
 import { normalizeSurfaceCarrier, type SurfaceInventoryCarrier } from './surface-inventory';
+import {
+  normalizeRainfallCarrier,
+  resolveSelectedTable,
+  resolveColumn,
+  facilityReturnPeriod as facilityReturnPeriodPure,
+} from './rainfall-tables';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 
@@ -42,6 +48,11 @@ const A138_07_A_C_UNSEALED_ID = 'a1380702-0000-4000-8000-000000000006';
 const A138_07_SURFACE_IDS = new Set([A138_07_A_C_ID, A138_07_C_M_ID, A138_07_A_E_BA_ID, A138_07_A_E_NBA_ID, A138_07_A_C_SEALED_ID, A138_07_A_C_UNSEALED_ID]);
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
+
+// FACILITY_FREQUENCY_SYMBOL and snapToReturnPeriod are now re-exported from
+// rainfall-tables.ts (pure shared helpers). The local copies have been removed.
+// facilityReturnPeriod is the pure version from rainfall-tables; the client
+// hook builds its pickNumberBySymbol closure below and delegates to it.
 
 type FieldMeta = {
   id: string;
@@ -132,21 +143,86 @@ export function useEquationEngine({
   }, [values, surfaceField]);
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
-  // table. The field lives on A138-04 in production; cross-worksheet
-  // propagation is what surfaces it onto A138-13. For now the engine just
-  // looks up the symbol in whatever fields the caller passes.
+  // table(s). The field lives on A138-04 in production; cross-worksheet
+  // propagation is what surfaces it onto A138-13. A project may hold MULTIPLE
+  // source-tagged tables in this one carrier (`{ tables: [...] }`); the legacy
+  // single-table `{ rows }` shape is still accepted (Piece 2 normalizer).
   const kostraField = useMemo(
     () => fields.find((f) => f.symbol === 'r_D_n_table'),
     [fields],
   );
-  const kostraCarrier = useMemo<KostraCarrier | null>(() => {
-    if (!kostraField) return null;
+  // Per-facility table reference: the atomic `rainfall_table_ref` field holds
+  // the id of the table this facility uses (TABLE id only — never an r_D(n)
+  // value). Unset/stale → primary table (back-compatible with one table).
+  const rainfallRefField = useMemo(
+    () => fields.find((f) => f.symbol === 'rainfall_table_ref'),
+    [fields],
+  );
+  const rainfallTableRef = useMemo<string | null>(() => {
+    if (!rainfallRefField) return null;
+    const v = values[rainfallRefField.id];
+    if ((v?.type === 'text' || v?.type === 'enum') && typeof v.value === 'string' && v.value) {
+      return v.value;
+    }
+    return null;
+  }, [values, rainfallRefField]);
+  // Task 3: KOSTRA carrier resolution with per-facility T_n column selection.
+  // Returns either a resolved KostraCarrier or a withhold cause so the basin
+  // equation state can be set to manual_required without feeding the aggregator.
+  type KostraResolution =
+    | { status: 'ok' | 'legacy'; carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'none' };
+
+  const kostraResolution = useMemo<KostraResolution>(() => {
+    if (!kostraField) return { status: 'none' };
     const v = values[kostraField.id];
-    if (v?.type !== 'json') return null;
-    const raw = v.value as { rows?: unknown } | null | undefined;
-    if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as KostraCarrier;
-  }, [values, kostraField]);
+    if (v?.type !== 'json') return { status: 'none' };
+    const selected = resolveSelectedTable(
+      normalizeRainfallCarrier(v.value),
+      rainfallTableRef,
+    );
+    if (!selected) return { status: 'none' };
+
+    // Per-facility T_n: local n_* → else project T_n → else project n.
+    // May be null when no frequency data is available; resolveColumn handles
+    // null correctly per table type (legacy serves it, native withholds it).
+    // Delegates to the pure shared helper from rainfall-tables.ts; the client's
+    // pickNumberBySymbol closure reads from the React store values.
+    const pickNumberBySymbol = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      if (v?.type !== 'number') return null;
+      const n = v.value;
+      if (typeof n !== 'number' || !Number.isFinite(n)) return null;
+      return n;
+    };
+    const T_n = facilityReturnPeriodPure(worksheetCode, pickNumberBySymbol);
+
+    const col = resolveColumn(selected, T_n);
+
+    if (col.status === 'missing') {
+      const reason = T_n !== null
+        ? `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst`
+        : 'Bemessungshäufigkeit n nicht verfügbar — T_n kann nicht bestimmt werden';
+      return { status: 'missing', reason };
+    }
+
+    // ok or legacy — feed rows to the unchanged KostraCarrier.
+    return {
+      status: col.status,
+      carrier: { rows: col.rows },
+    };
+  }, [values, kostraField, rainfallTableRef, worksheetCode, fieldBySymbol]);
+
+  // Flat KostraCarrier for the aggregator (null when missing/none).
+  const kostraCarrier = useMemo<KostraCarrier | null>(() => {
+    if (kostraResolution.status === 'ok' || kostraResolution.status === 'legacy') {
+      return kostraResolution.carrier;
+    }
+    return null;
+  }, [kostraResolution]);
 
   // Gl. 8 scalar inputs. Resolved from whichever field carries each symbol
   // (in production these flow via same-symbol inheritance from upstream
@@ -228,6 +304,43 @@ export function useEquationEngine({
     [fields],
   );
 
+  // Task 5 — Flood 30-column resolution.
+  // The flood case (A138-26 Gl.10) reads the T_n=30 column of the SHARED
+  // KOSTRA grid (§5.3.4: T_n_Ue = 30 a, FIXED — not facilityReturnPeriod).
+  // When the inherited grid has a populated 30-column we iterate all D over
+  // it via the A138-26 flood profile; when the grid exists but the 30-column
+  // is absent we withhold; when there's no native grid (legacy/none) we fall
+  // back to the typed r_D_30 scalar path (back-compat, unchanged).
+  type FloodColResolution =
+    | { status: 'ok';      carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'legacy' | 'none' };
+
+  const floodColResolution = useMemo<FloodColResolution>(() => {
+    if (!kostraField) return { status: 'none' };
+    const v = values[kostraField.id];
+    if (v?.type !== 'json') return { status: 'none' };
+    const selected = resolveSelectedTable(
+      normalizeRainfallCarrier(v.value),
+      rainfallTableRef,
+    );
+    if (!selected) return { status: 'none' };
+
+    const col30 = resolveColumn(selected, 30);
+    if (col30.status === 'ok') {
+      return { status: 'ok', carrier: { rows: col30.rows } };
+    }
+    if (col30.status === 'missing') {
+      return {
+        status: 'missing',
+        reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst (Hochwassernachweis Gl. 10)',
+      };
+    }
+    // status === 'legacy' → serve the single-curve fallback path; the
+    // aggregator will use typed r_D_T_n_Ue + D scalars (back-compat).
+    return { status: 'legacy' };
+  }, [values, kostraField, rainfallTableRef]);
+
   const engineStates = useMemo<Record<string, EvalState>>(() => {
     const next: Record<string, EvalState> = {};
     for (const eq of equations) {
@@ -292,18 +405,39 @@ export function useEquationEngine({
       if (A138_07_SURFACE_IDS.has(eq.id)) {
         aggregator = surfaceCarrier ? { surfaceInventory: surfaceCarrier } : undefined;
       } else if (eq.id === A138_13_GL8_ID) {
+        // Task 3 withhold: when the resolved column is missing (T_n column not
+        // populated in the grid), emit manual_required BEFORE calling the
+        // aggregator — do NOT feed rows for a wrong/missing column.
+        if (kostraResolution.status === 'missing') {
+          next[eq.id] = {
+            kind: 'manual_required',
+            reason: kostraResolution.reason,
+          };
+          continue;
+        }
         aggregator = {
           kostraTable: kostraCarrier,
           gl8Scalars,
           kostraUnit: kostraField?.unit ?? null,
         };
       } else if (eq.id === A138_26_GL10_ID) {
+        // Task 5: thread the flood 30-column resolution into the aggregator.
+        // - ok → pass carrier; aggregator iterates all D; V_Rück = max(0, governing).
+        // - missing → pass missingFlood30Reason; aggregator withholds (no wrong column).
+        // - legacy/none → pass null carrier; aggregator falls back to typed scalars.
+        const flood30Carrier =
+          floodColResolution.status === 'ok' ? floodColResolution.carrier : null;
+        const missingFlood30Reason =
+          floodColResolution.status === 'missing' ? floodColResolution.reason : null;
+
         aggregator = {
           floodSubAreas: floodCarrier,
           gl10Scalars,
           // re-use kostraUnit slot for the r_D_30 unit guard (the
           // aggregator reads ctx.kostraUnit)
           kostraUnit: r_D_30_field?.unit ?? null,
+          floodKostra30Col: flood30Carrier,
+          missingFlood30Reason,
         };
       }
 
@@ -325,11 +459,13 @@ export function useEquationEngine({
     engineEquationIds,
     surfaceCarrier,
     kostraCarrier,
+    kostraResolution,
     kostraField,
     gl8Scalars,
     floodCarrier,
     gl10Scalars,
     r_D_30_field,
+    floodColResolution,
     ambiguousSymbols,
   ]);
 
@@ -338,6 +474,12 @@ export function useEquationEngine({
   // equations whose output_symbol collides with a primary writer or an
   // engineer-entered iteration variable. The card still renders their
   // value; only the store/project_parameters write is suppressed.
+  //
+  // Task 2 (A138-10 auto-Q_zu): after the basin (A138-13) Gl.8 computes,
+  // also materialise derivedExtras.r_D_gov → the r_D_n field and
+  // derivedExtras.D_gov → the D_min field on A138-13, so A138-10 inherits
+  // the governing values by same-symbol (single producer). When the basin is
+  // manual_required / withheld, clear those fields so A138-10 Q_zu stays blank.
   useEffect(() => {
     for (const eq of equations) {
       if (!engineEquationIds.has(eq.id)) continue;
@@ -352,6 +494,33 @@ export function useEquationEngine({
       const desired = state?.kind === 'computed' ? state.value : null;
       if (currentNum !== desired) {
         setField(outField.id, { type: 'number', value: desired });
+      }
+
+      // Basin Gl.8: materialise governing D + r_D as derived fields on A138-13.
+      if (eq.id === A138_13_GL8_ID) {
+        const extras = state?.kind === 'computed' ? state.derivedExtras : undefined;
+
+        // r_D_gov → r_D_n field
+        const rDnField = fieldBySymbol.get('r_D_n');
+        if (rDnField) {
+          const rDnDesired = extras !== undefined ? extras.r_D_gov : null;
+          const rDnCurrent = values[rDnField.id];
+          const rDnCurrentNum = rDnCurrent?.type === 'number' ? rDnCurrent.value : null;
+          if (rDnCurrentNum !== rDnDesired) {
+            setField(rDnField.id, { type: 'number', value: rDnDesired });
+          }
+        }
+
+        // D_gov → D_min field
+        const dMinField = fieldBySymbol.get('D_min');
+        if (dMinField) {
+          const dMinDesired = extras !== undefined ? extras.D_gov : null;
+          const dMinCurrent = values[dMinField.id];
+          const dMinCurrentNum = dMinCurrent?.type === 'number' ? dMinCurrent.value : null;
+          if (dMinCurrentNum !== dMinDesired) {
+            setField(dMinField.id, { type: 'number', value: dMinDesired });
+          }
+        }
       }
     }
   }, [engineStates, engineEquationIds, equations, fieldBySymbol, values, setField]);

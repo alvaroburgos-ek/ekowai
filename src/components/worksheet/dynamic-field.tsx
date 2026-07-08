@@ -8,6 +8,7 @@ import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { VerifyButton } from './verify-button';
+import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
 
 type FieldDef = {
   id: string;
@@ -64,9 +65,13 @@ type Props = {
    * All editable controls are read-only/disabled and their onChange
    * handlers early-return without writing to the store. */
   readOnly?: boolean;
+  /** Current value of the sibling `ac_as_ratio_check_reason` field. Only
+   * consumed when field.symbol === 'ac_as_ratio_check' and isComputed=true,
+   * where it is forwarded to AcAsRatioCheckStatus as the reason text. */
+  statusReason?: string | null;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -179,6 +184,42 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {/* Input control by data_type */}
       {field.dataType === 'number' && (() => {
         const v = value?.type === 'number' ? value.value : null;
+
+        // ac_as_ratio_limit is null in not_applicable / indeterminate cases.
+        // Show a clear label instead of a blank number box.
+        if (field.symbol === 'ac_as_ratio_limit' && isComputed && v == null) {
+          return (
+            <div
+              data-testid="ac-as-ratio-limit-null"
+              className="block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-subtext italic bg-paper-2 cursor-default"
+            >
+              — (kein Tab.6-Grenzwert)
+            </div>
+          );
+        }
+
+        // ac_as_ratio is a raw float (e.g. 108.68382022471911). When computed/
+        // read-only, display it rounded to 2 decimals in German locale so the
+        // engineer sees "108,68" instead of the full mantissa. Scoped strictly
+        // to this symbol — other computed numbers (k_i, etc.) keep their raw value.
+        if (field.symbol === 'ac_as_ratio' && isComputed) {
+          const formatted =
+            v != null && Number.isFinite(v)
+              ? new Intl.NumberFormat('de-DE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(v)
+              : '—';
+          return (
+            <div
+              data-testid="ac-as-ratio-display"
+              className="block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm tabular-nums font-semibold bg-paper-2 text-ink cursor-default"
+            >
+              {formatted}
+            </div>
+          );
+        }
+
         const inputEl = (
           <input
             id={inputId}
@@ -221,22 +262,38 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
 
       {field.dataType === 'text' && (() => {
         const v = value?.type === 'text' ? value.value : null;
+
+        // ac_as_ratio_check is a T3-materialized status field. When computed,
+        // replace the raw read-only text input with the four-state badge.
+        if (field.symbol === 'ac_as_ratio_check' && isComputed) {
+          const status = v ?? 'indeterminate';
+          return (
+            <AcAsRatioCheckStatus
+              status={status}
+              reason={statusReason ?? null}
+            />
+          );
+        }
+
         const maxLength = field.validationRules?.maxLength;
         const useTextarea = (maxLength ?? 0) > 200;
+        const textLocked = isComputed || readOnly;
         return useTextarea ? (
           <textarea
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            readOnly={readOnly}
-            aria-readonly={readOnly || undefined}
+            readOnly={textLocked}
+            tabIndex={textLocked ? -1 : undefined}
+            aria-readonly={textLocked || undefined}
             onChange={(e) => {
+              if (isComputed) return;
               if (readOnly) return;
               setField(field.id, { type: 'text', value: e.target.value || null });
             }}
             rows={4}
-            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         ) : (
           <input
@@ -245,13 +302,15 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             value={v ?? ''}
             required={field.isRequired}
             aria-required={required}
-            readOnly={readOnly}
-            aria-readonly={readOnly || undefined}
+            readOnly={textLocked}
+            tabIndex={textLocked ? -1 : undefined}
+            aria-readonly={textLocked || undefined}
             onChange={(e) => {
+              if (isComputed) return;
               if (readOnly) return;
               setField(field.id, { type: 'text', value: e.target.value || null });
             }}
-            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${readOnly ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
+            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         );
       })()}

@@ -48,6 +48,18 @@ export type Rewrite = {
   reason: string;
 };
 
+/** Structured governing-duration outputs produced by the basin (A138-13) Gl.8
+ * engine when it successfully iterates. Consumers (A138-10 and downstream)
+ * read these values by reference instead of re-running the iteration. Only
+ * present on the `computed` path when the basin profile successfully iterates
+ * (i.e. NOT on the `manual_required` / cistern-only / error paths). */
+export type AggregatorDerivedExtras = {
+  /** Governing duration [min] — the duration that maximises V_VA. */
+  D_gov: number;
+  /** Design rainfall intensity at the governing duration [l/(s·ha)]. */
+  r_D_gov: number;
+};
+
 export type EvalState =
   | {
       kind: 'computed';
@@ -58,6 +70,13 @@ export type EvalState =
       formulaEvaluated: string;
       /** present when a rewrite was applied */
       rewrite?: Rewrite;
+      /** Structured governing-duration extras from the basin Gl.8 aggregator.
+       * Present only when the basin successfully iterates (not on manual_required
+       * or error paths). Consumers read D_gov / r_D_gov by reference. */
+      derivedExtras?: AggregatorDerivedExtras;
+      /** Non-blocking caveats on an otherwise-computed value (e.g. the governing
+       *  duration is boundary-limited). Rendered as an amber note, NOT a hard stop. */
+      warnings?: string[];
     }
   | {
       kind: 'manual_required';

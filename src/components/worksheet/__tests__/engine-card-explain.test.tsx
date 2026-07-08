@@ -301,5 +301,72 @@ describe('EquationEngineCard — three-state contract (regression guard)', () =>
   });
 });
 
+describe('EquationEngineCard — Feature 3 (warnings caveat block)', () => {
+  it('renders a boundary-limited caveat block on a computed result with warnings', () => {
+    const state: EvalState = {
+      kind: 'computed',
+      value: 293.17,
+      substituted: { 'Maßgebende Dauerstufe D (min)': 1440 },
+      formulaEvaluated: 'V_VA = ...',
+      warnings: ['Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand (D = 1440 min). Bemessung ggf. außerhalb des Einfachen Verfahrens (q_S_AC < 2 prüfen) oder Dauerstufenbereich nach DWA-A 117 erweitern.'],
+    };
+    render(
+      <EquationEngineCard
+        equationNumber="8"
+        sourceFormula="V_VA = ..."
+        state={state}
+        outputSymbol="V_VA"
+        outputUnit="m³"
+      />,
+    );
+    const card = screen.getByTestId('engine-card-gl-8');
+    expect(card).toHaveAttribute('data-engine-state', 'computed');
+    expect(within(card).getByText(/Kein eindeutiges Maximum/i)).toBeInTheDocument();
+  });
+
+  it('renders no caveat block when warnings is absent on a computed state', () => {
+    const state: EvalState = {
+      kind: 'computed',
+      value: 18.684,
+      substituted: { 'Maßgebende Dauerstufe D (min)': 30 },
+      formulaEvaluated: 'V_VA = ...',
+    };
+    render(
+      <EquationEngineCard
+        equationNumber="8"
+        sourceFormula="V_VA = ..."
+        state={state}
+        outputSymbol="V_VA"
+        outputUnit="m³"
+      />,
+    );
+    const card = screen.getByTestId('engine-card-gl-8');
+    expect(card).toHaveAttribute('data-engine-state', 'computed');
+    // No warning caveat container in the DOM (stronger than a text query)
+    expect(within(card).queryByTestId('engine-card-gl-8-warnings')).not.toBeInTheDocument();
+  });
+
+  it('renders no caveat block when warnings is an empty array', () => {
+    const state: EvalState = {
+      kind: 'computed',
+      value: 18.684,
+      substituted: { 'Maßgebende Dauerstufe D (min)': 30 },
+      formulaEvaluated: 'V_VA = ...',
+      warnings: [],
+    };
+    render(
+      <EquationEngineCard
+        equationNumber="8"
+        sourceFormula="V_VA = ..."
+        state={state}
+        outputSymbol="V_VA"
+        outputUnit="m³"
+      />,
+    );
+    const card = screen.getByTestId('engine-card-gl-8');
+    expect(within(card).queryByTestId('engine-card-gl-8-warnings')).not.toBeInTheDocument();
+  });
+});
+
 // Quiet the unused-import warning for fireEvent — we may want it in the future.
 void fireEvent;

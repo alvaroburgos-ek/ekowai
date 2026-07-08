@@ -112,6 +112,24 @@ export function EquationEngineCard({
             {outputUnit ? ` ${outputUnit}` : ''}
           </div>
 
+          {/* Non-blocking caveat: boundary-limited or other advisory warnings
+              from the engine aggregator. Amber/warning tone — visually distinct
+              from the red manual_required banner. Only rendered when the engine
+              emitted at least one warning string. */}
+          {state.warnings && state.warnings.length > 0 && (
+            <div
+              data-testid={`engine-card-gl-${equationNumber}-warnings`}
+              className="mt-2 rounded-md border border-warning/40 bg-warning/10 p-2 text-xs text-warning"
+            >
+              {state.warnings.map((w, i) => (
+                <p key={i} className="flex gap-1">
+                  <span aria-hidden="true">⚠</span>
+                  {w}
+                </p>
+              ))}
+            </div>
+          )}
+
           {/* Drill-down: substituted formula + per-input table. Collapsed by
               default and rendered only when expanded — keeps the verdict +
               brief inputs list as the only "Σ befestigt"-style strings in

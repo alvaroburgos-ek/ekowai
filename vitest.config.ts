@@ -27,6 +27,7 @@ export default defineConfig({
           // a real Postgres and would fail with ECONNREFUSED in the unit CI job.
           exclude: [
             'src/lib/actions/__tests__/worksheet.test.ts',
+            'src/lib/actions/__tests__/worksheet-tab6-loading.integration.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
             'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/actions/__tests__/co2.integration.test.ts',
@@ -58,6 +59,7 @@ export default defineConfig({
           name: 'integration',
           include: [
             'src/lib/actions/__tests__/worksheet.test.ts',
+            'src/lib/actions/__tests__/worksheet-tab6-loading.integration.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
             'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/actions/__tests__/co2.integration.test.ts',

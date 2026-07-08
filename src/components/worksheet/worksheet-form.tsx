@@ -13,7 +13,9 @@ import {
   ManualOverridePill,
   useManualOverride,
 } from './manual-override-pill';
-import { KostraTableEditor } from './kostra-table-editor';
+import { RainfallTablesEditor } from './rainfall-tables-editor';
+import { RainfallTableSelector } from './rainfall-table-selector';
+import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
@@ -24,6 +26,24 @@ import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+
+// Derived symbols that the materialize pipeline writes on every A138-13 save.
+// They are NOT live formula-engine outputs, but share the same single-source
+// invariant: the governing-duration iteration is authoritative and the engineer
+// must not overwrite these values. `fieldBySymbol.has(sym)` inside
+// computedSymbols guards against false positives on other standards.
+const BASIN_GOVERNING_SYMBOLS = new Set(['r_D_n', 'D_min']);
+
+// Derived symbols materialized by the Tab.6 loading-check engine on every
+// A138-12 save (T3 materialize pass). Read-only for the same reason:
+// single-source from the materialize, not hand-editable.
+// `fieldBySymbol.has(sym)` means these are harmless on all other standards.
+const LOADING_CHECK_SYMBOLS = new Set([
+  'ac_as_ratio',
+  'ac_as_ratio_limit',
+  'ac_as_ratio_check',
+  'ac_as_ratio_check_reason',
+]);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -209,13 +229,43 @@ export function WorksheetForm({
     return m;
   }, [fields]);
 
+  // Symbols that are equation outputs — the engine writes them; they must not
+  // be hand-editable (isComputed=true in DynamicField).
+  // BASIN_GOVERNING_SYMBOLS (r_D_n, D_min) are NOT equation outputs in the
+  // formula engine (they are persisted by materializeBasinGoverning on save),
+  // but they share the same single-source invariant: the value is authoritative
+  // from the governing-duration iteration and must not be overwritten by the
+  // engineer. We add them to computedSymbols here so DynamicField renders them
+  // with the same readOnly treatment as formula-engine outputs (bg-paper-2,
+  // cursor-default, tabIndex=-1). No new abstraction — same prop, same render.
+  //
+  // LOADING_CHECK_SYMBOLS (ac_as_ratio, ac_as_ratio_limit, ac_as_ratio_check,
+  // ac_as_ratio_check_reason) are T3-materialized by the Tab.6 loading-check
+  // engine on every A138-12 save. They must be read-only for the same reason
+  // as BASIN_GOVERNING_SYMBOLS: single-source from the materialize pass, not
+  // hand-editable. The gating `fieldBySymbol.has(sym)` ensures these entries
+  // are harmless on every other standard where the symbols don't exist.
   const computedSymbols = useMemo(() => {
     const set = new Set<string>();
     for (const e of sortedEquations) {
       const out = e.outputSymbol;
       if (out && fieldBySymbol.has(out)) set.add(out);
     }
+    // Basin-governing derived outputs: persisted by save (not live engine),
+    // but equally non-editable. Add them unconditionally — on non-A138-13
+    // worksheets these symbols simply won't appear in fieldBySymbol, so the
+    // entries in the set are harmless.
+    for (const sym of BASIN_GOVERNING_SYMBOLS) {
+      if (fieldBySymbol.has(sym)) set.add(sym);
+    }
+    // Tab.6 loading-check derived outputs (A138-12): T3-materialized on save.
+    // Read-only via the same isComputed=true path. Harmless on other standards
+    // because fieldBySymbol.has(sym) gates inclusion.
+    for (const sym of LOADING_CHECK_SYMBOLS) {
+      if (fieldBySymbol.has(sym)) set.add(sym);
+    }
     return set;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedEquations, fieldBySymbol]);
 
   // Engine wiring lives in a shared hook so the integration test renders
@@ -313,8 +363,36 @@ export function WorksheetForm({
   );
 
   // A138-04 KOSTRA table: carrier field has symbol `r_D_n_table` and
-  // data_type='json'; the engine reads it from the store.
+  // data_type='json'; the engine reads it from the store. The carrier may hold
+  // MULTIPLE source-tagged tables (Piece 2); it is EDITED on its owner (A138-04)
+  // and merely REFERENCED by a per-facility `rainfall_table_ref` selector on the
+  // consumer worksheets that inherit it.
   const kostraField = fields.find((f) => f.symbol === 'r_D_n_table');
+  const rainfallRefField = fields.find((f) => f.symbol === 'rainfall_table_ref');
+  const rainfallRefValue = rainfallRefField ? values[rainfallRefField.id] : undefined;
+  const rainfallTableRef =
+    (rainfallRefValue?.type === 'text' || rainfallRefValue?.type === 'enum') &&
+    typeof rainfallRefValue.value === 'string'
+      ? rainfallRefValue.value
+      : null;
+  const kostraValue = kostraField ? values[kostraField.id] : undefined;
+  const rainfallTables = normalizeRainfallCarrier(
+    kostraValue?.type === 'json' ? kostraValue.value : undefined,
+  ).tables;
+
+  // Design return-period for the rainfall editor: resolve project n/T_n via the
+  // shared facilityReturnPeriod helper.  A pickNumberBySymbol closure reads from
+  // the store's current values using the field-by-symbol map built above.
+  const rainfallDesignReturnPeriod = useMemo(() => {
+    const pick = (sym: string): number | null => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return null;
+      const v = values[f.id];
+      return v?.type === 'number' && v.value != null && Number.isFinite(v.value) ? v.value : null;
+    };
+    return facilityReturnPeriod(worksheet.template.code, pick);
+  }, [fieldBySymbol, values, worksheet.template.code]);
+
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
@@ -368,6 +446,9 @@ export function WorksheetForm({
     const map = new Map<string | null, FieldDef[]>();
     for (const f of visibleFields(fields)) {
       if (f.inheritedFromWorksheet) continue;
+      // rainfall_table_ref is rendered by its dedicated RainfallTableSelector
+      // section (table-id picker), not as a raw text input in the field grid.
+      if (f.symbol === 'rainfall_table_ref') continue;
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
@@ -413,6 +494,19 @@ export function WorksheetForm({
     const fs = fieldsBySectionId.get(sectionId) ?? [];
     return fs.map((f) => {
       const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
+
+      // For ac_as_ratio_check, resolve the sibling reason field's current
+      // value and thread it in as statusReason so AcAsRatioCheckStatus can
+      // display the distinguishing text (keine Anforderung vs behördlich).
+      let statusReason: string | null = null;
+      if (f.symbol === 'ac_as_ratio_check') {
+        const reasonField = fieldBySymbol.get('ac_as_ratio_check_reason');
+        if (reasonField) {
+          const rv = values[reasonField.id];
+          statusReason = rv?.type === 'text' ? (rv.value ?? null) : null;
+        }
+      }
+
       return (
         <DynamicField
           key={f.id}
@@ -440,6 +534,7 @@ export function WorksheetForm({
           }
           isPlatformEngineer={isPlatformEngineer}
           readOnly={locked}
+          statusReason={statusReason}
         />
       );
     });
@@ -491,6 +586,19 @@ export function WorksheetForm({
                   ? new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(v.value)
                   : v?.type === 'json' && v.value && typeof v.value === 'object'
                   ? '(Tabelle)'
+                  : v?.type === 'enum' && v.value != null
+                  ? (() => {
+                      if (f.enumValues) {
+                        const entry = f.enumValues.find((e) => e.value === v.value);
+                        const label = locale === 'de' ? entry?.label_de : entry?.label_en;
+                        return label ?? String(v.value);
+                      }
+                      return String(v.value);
+                    })()
+                  : v?.type === 'boolean' && v.value != null
+                  ? (v.value ? 'Ja' : 'Nein')
+                  : v?.type === 'text' && v.value
+                  ? v.value
                   : '—';
               const label = locale === 'de' ? f.labelDe : (f.labelEn ?? f.labelDe);
               return (
@@ -498,7 +606,7 @@ export function WorksheetForm({
                   key={f.id}
                   data-symbol={f.symbol}
                   data-inherited-from={f.inheritedFromWorksheet}
-                  className="border-b border-hairline last:border-b-0 py-1 flex items-baseline justify-between gap-2"
+                  className="border-b border-hairline last:border-b-0 py-1 flex items-start justify-between gap-2 min-w-0"
                 >
                   <div className="min-w-0">
                     <div className="text-ink break-words">
@@ -518,7 +626,7 @@ export function WorksheetForm({
                       {f.unit && <span className="ml-2 text-ink-2">{f.unit}</span>}
                     </div>
                   </div>
-                  <div className="font-mono tabular-nums text-ink shrink-0">{display}</div>
+                  <div className="font-mono tabular-nums text-ink text-right min-w-0 break-words">{display}</div>
                 </li>
               );
             })}
@@ -552,12 +660,32 @@ export function WorksheetForm({
         </section>
       )}
 
-      {kostraField && (
+      {/* Owner (A138-04): manage the project's rainfall table(s). */}
+      {kostraField && !kostraField.inheritedFromWorksheet && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
-            KOSTRA-Tabelle (für V_VA nach Gl. 8)
+            Regenspendentabellen (für V_VA nach Gl. 8)
           </h2>
-          <KostraTableEditor fieldId={kostraField.id} readOnly={locked} />
+          <RainfallTablesEditor fieldId={kostraField.id} readOnly={locked} designReturnPeriod={rainfallDesignReturnPeriod} />
+        </section>
+      )}
+
+      {/* Consumer facility: choose WHICH table this facility uses (table id
+          only — never an r_D(n) value). Rendered whenever the facility carries
+          the rainfall_table_ref field; the table options come from the
+          inherited carrier (empty list if none is inherited yet). Robust to
+          carrier-inheritance state — never falls back to a raw text input. */}
+      {rainfallRefField && !rainfallRefField.inheritedFromWorksheet && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid="rainfall-table-ref-section">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Verwendete Regenspendentabelle
+          </h2>
+          <RainfallTableSelector
+            tables={rainfallTables}
+            value={rainfallTableRef}
+            onSelect={(id) => setField(rainfallRefField.id, { type: 'text', value: id })}
+            readOnly={locked}
+          />
         </section>
       )}
 

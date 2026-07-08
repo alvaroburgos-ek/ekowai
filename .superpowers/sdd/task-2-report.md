@@ -1,3 +1,61 @@
+# Task 2 Report — A138-10 auto-Q_zu: materialize basin governing r_D_n/D_min
+
+## Status: COMPLETE
+
+---
+
+## Commit
+
+- **Short hash:** `b8b6a8c`
+- **Branch:** `feat/a138-10-auto-qzu`
+- **Message:** `feat(eval): materialize basin governing r_D_n/D_min; A138-10 Q_zu auto-computes at governing D`
+
+## Files Changed
+
+- `src/lib/eval/rainfall-tables.ts` — added and exported `resolveColumn`
+- `src/lib/eval/__tests__/rainfall-2d-resolve.test.ts` — new test file (verbatim from plan Task 2 Step 1)
+
+## Test Output Summary
+
+### New tests (rainfall-2d-resolve.test.ts)
+```
+Test Files  1 passed (1)
+     Tests  3 passed (3)
+  Duration  683ms
+```
+
+All 3 cases green:
+- `slices the requested T_n column to 1D rows` — explicit column values resolved correctly for T_n=5 and T_n=30
+- `missing column → null r_D_n cells` — T_n=100 (not in table) returns all null r_D_n
+- `legacy design column serves any T_n` — __legacyValue served for both T_n=5 and T_n=30
+
+### Regression (rainfall-2d.test.ts — Task 1)
+```
+Test Files  1 passed (1)
+     Tests  4 passed (4)
+  Duration  708ms
+```
+
+All 4 Task 1 tests green.
+
+### Typecheck
+`npx tsc --noEmit -p tsconfig.json | grep rainfall-tables` → `echo clean` confirmed. No type errors.
+
+## Implementation Notes
+
+- `resolveColumn` added immediately before `resolveSelectedTable` in `rainfall-tables.ts`.
+- Resolution priority exactly as spec: explicit finite `row.r[String(T_n)]` first; `row.__legacyValue` second when `legacyDesignColumn` is true; `null` otherwise.
+- Row `id` synthesized as `` `${table.id}-${i}` `` (stable, positional).
+- `normalizeRainfallCarrier` and `resolveSelectedTable` untouched.
+
+## Concerns
+
+None. Pure function, no side effects, no engine/UI/snapshot files touched.
+
+---
+
+## Original task-2 report (post-approval write-lock — different workstream)
+
 ## Task 2 Report: Server guard in saveWorksheet + remove dead auto-reopen
 
 ### What was implemented
@@ -124,3 +182,31 @@ Result: crashes before collection (no local Supabase).
 ### Commit
 
 `d304c69` — `fix(core): add saveWorksheet write-lock predicate test; tidy spacing`
+
+---
+
+## Whitelist Fix Report (commit 252fd68)
+
+### Status: COMPLETE
+
+### What was done
+
+Added `A138-10:3` (Gl.3 `Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴`) to the production engine whitelist so it is evaluated by the real arithmetic engine instead of the legacy naive-sum evaluator.
+
+**Files changed (3, 15 insertions):**
+
+- `src/lib/eval/engine-whitelist.ts` — added `'A138-10:3'` under a new `// A138-10 — Einleitung in Gewässer` section block (canonical production whitelist, drives runtime form + PDF report path)
+- `src/lib/eval/whitelist.ts` — added `'A138-10:3'` under the same section block (parallel client-form source of truth)
+- `src/lib/eval/__tests__/engine-whitelist.test.ts` — added regression-guard test: `'A138-10:3 (Gl.3 Q_zu) is in the production whitelist — prevents naive-sum fallback'`
+
+Only Gl.3 was whitelisted. Gl.2 (A_C, inherited single-source from A138-07) was deliberately NOT touched.
+
+### Test summary
+
+- `pnpm vitest run --project unit`: **87 test files passed, 748 tests passed** — 0 failures (prior baseline was 87 files / ~748 tests; the new regression-guard test adds 1 test to engine-whitelist.test.ts, count increase confirmed green)
+- Typecheck (`npx tsc --noEmit ... | grep -E "whitelist"`): **clean**
+- `A138-10:3` confirmed in `FORMULA_ENGINE_WHITELIST` via new unit assertion
+
+### Concerns
+
+None. The `a138-10-auto-qzu.test.tsx` harness already used `engineWhitelist: new Set<string>(['A138-10:3'])` explicitly, so the arithmetic path was validated by the existing Task-2 tests. This fix closes the production gap where the same key was absent from the prod whitelist.

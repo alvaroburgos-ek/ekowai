@@ -13,10 +13,18 @@ import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
+import {
+  normalizeRainfallCarrier,
+  resolveSelectedTable,
+  resolveColumn,
+  facilityReturnPeriod,
+} from '@/lib/eval/rainfall-tables';
 import type {
   SubAreasCarrier,
   KostraCarrier,
   Gl8Scalars,
+  FloodSubAreasCarrier,
+  Gl10Scalars,
 } from '@/lib/eval/aggregators';
 // Type-only schema imports — keeps this module free of any runtime `db`
 // dependency so unit tests can call buildSnapshotPayload without env vars.
@@ -42,6 +50,7 @@ const A138_07_SURFACE_IDS = new Set([
 
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
+const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
 /** Stored JSONB shape — keep in lockstep with `calculation_snapshots` table comments. */
 export type SnapshotParameterValue = {
@@ -196,9 +205,20 @@ export function buildSnapshotPayload(args: {
   }
 
   // ---- equation outputs -------------------------------------------------
+  // Task 2 (A138-10 auto-Q_zu): mutable override map for values derived
+  // from basin Gl.8 derivedExtras (r_D_gov → r_D_n, D_gov → D_min).
+  // Written after the basin equation computes; read by subsequent equation
+  // and compliance lookups in the same snapshot call.
+  const derivedOverrides = new Map<string, number | null>();
+
   const numberBySymbol = (sym: string): number | null => {
     const f = fieldBySymbol.get(sym);
     if (!f) return null;
+    // Derived-extras override takes precedence over DB value — the engine
+    // is the single source of truth for governing D / r_D (Task 2).
+    if (derivedOverrides.has(f.id)) {
+      return derivedOverrides.get(f.id) ?? null;
+    }
     const p = paramByFieldId.get(f.id);
     if (!p) return null;
     return readNumber(p);
@@ -227,15 +247,110 @@ export function buildSnapshotPayload(args: {
     return raw as SubAreasCarrier;
   })();
 
+  // Multi-table rainfall carrier (Piece 2 → 2D grid): the facility's
+  // `rainfall_table_ref` selects which table (id only); then resolveColumn
+  // slices the 2D grid by the per-facility T_n (from facilityReturnPeriod).
+  // On missing column → kostraSnapshotResolution carries the reason so the
+  // A138-13 Gl.8 branch produces manual_required instead of calling the aggregator.
   const kostraField = fieldList.find((f) => f.symbol === 'r_D_n_table');
-  const kostraCarrier: KostraCarrier | null = (() => {
-    if (!kostraField) return null;
+  const rainfallRefField = fieldList.find((f) => f.symbol === 'rainfall_table_ref');
+  const rainfallTableRef = (() => {
+    if (!rainfallRefField) return null;
+    const p = paramByFieldId.get(rainfallRefField.id);
+    const v = p?.valueText ?? p?.valueEnum ?? null;
+    return typeof v === 'string' && v ? v : null;
+  })();
+
+  // Build a pickNumberBySymbol for facilityReturnPeriod (snapshot equivalent
+  // of the client hook's closure over the React store values).
+  const pickNumBySymbol = (sym: string): number | null => {
+    const f = fieldBySymbol.get(sym);
+    if (!f) return null;
+    const p = paramByFieldId.get(f.id);
+    if (!p) return null;
+    return readNumber(p);
+  };
+
+  type KostraSnapshotResolution =
+    | { status: 'ok' | 'legacy'; carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'none' };
+
+  const kostraSnapshotResolution: KostraSnapshotResolution = (() => {
+    if (!kostraField) return { status: 'none' };
     const p = paramByFieldId.get(kostraField.id);
+    if (!p || p.valueJson == null) return { status: 'none' };
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
+    if (!selected) return { status: 'none' };
+
+    // Per-facility T_n resolution — same logic as client + server paths.
+    const T_n = facilityReturnPeriod(args.worksheetCode, pickNumBySymbol);
+    const col = resolveColumn(selected, T_n);
+
+    if (col.status === 'missing') {
+      const reason = T_n !== null
+        ? `Regenspende r_D für T_n = ${T_n} a nicht in der Niederschlagstabelle erfasst`
+        : 'Bemessungshäufigkeit n nicht verfügbar — T_n kann nicht bestimmt werden';
+      return { status: 'missing', reason };
+    }
+
+    // ok or legacy — feed rows to the unchanged KostraCarrier.
+    return { status: col.status, carrier: { rows: col.rows } };
+  })();
+
+  const kostraCarrier: KostraCarrier | null =
+    kostraSnapshotResolution.status === 'ok' || kostraSnapshotResolution.status === 'legacy'
+      ? kostraSnapshotResolution.carrier
+      : null;
+
+  // Flood sub-area carrier (A138-26 Gl.10).
+  const floodSubAreasField = fieldList.find((f) => f.symbol === 'sub_areas_A138_26');
+  const floodCarrier: FloodSubAreasCarrier | null = (() => {
+    if (!floodSubAreasField) return null;
+    const p = paramByFieldId.get(floodSubAreasField.id);
     if (!p || p.valueJson == null) return { rows: [] };
     const raw = p.valueJson as { rows?: unknown };
     if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
-    return raw as KostraCarrier;
+    return raw as FloodSubAreasCarrier;
   })();
+
+  // Task 5 — Flood 30-column resolution (snapshot path).
+  // T_n=30 is FIXED for the flood case (§5.3.4), regardless of facility T_n.
+  type FloodColSnapshotResolution =
+    | { status: 'ok';      carrier: KostraCarrier }
+    | { status: 'missing'; reason: string }
+    | { status: 'legacy' | 'none' };
+
+  const floodColResolution: FloodColSnapshotResolution = (() => {
+    if (!kostraField) return { status: 'none' };
+    const p = paramByFieldId.get(kostraField.id);
+    if (!p || p.valueJson == null) return { status: 'none' };
+    const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
+    if (!selected) return { status: 'none' };
+    const col30 = resolveColumn(selected, 30);
+    if (col30.status === 'ok') {
+      return { status: 'ok', carrier: { rows: col30.rows } };
+    }
+    if (col30.status === 'missing') {
+      return {
+        status: 'missing',
+        reason: 'Regenspende r_D für T_n = 30 a nicht in der Niederschlagstabelle erfasst (Hochwassernachweis Gl. 10)',
+      };
+    }
+    return { status: 'legacy' };
+  })();
+
+  const r_D_30_field_snap = fieldList.find((f) => f.symbol === 'r_D_30');
+
+  // Gl.10 scalar resolution.
+  const gl10Scalars: Gl10Scalars = {
+    A_VA: numberBySymbol('A_VA'),
+    Q_S: numberBySymbol('Q_S'),
+    Q_Dr: numberBySymbol('Q_Dr'),
+    D: numberBySymbol('D_min') ?? numberBySymbol('D'),
+    V_VA: numberBySymbol('V_VA'),
+    r_D_T_n_Ue: numberBySymbol('r_D_30'),
+  };
 
   // Gl8 scalar resolution: null out any symbol with >1 producer so the
   // aggregator sees missing-input and produces manual_required instead of
@@ -310,6 +425,18 @@ export function buildSnapshotPayload(args: {
       expectedUnits[sym] = f?.unit ?? null;
     }
 
+    // Task 4 withhold: when the resolved 2D column is missing (T_n column not
+    // populated in a native grid), emit manual_required for A138-13 Gl.8
+    // BEFORE calling the aggregator — do NOT feed rows for a wrong/missing column.
+    // Matches the client hook's and server evaluator's kostraResolution guard.
+    if (eq.id === A138_13_GL8_ID && kostraSnapshotResolution.status === 'missing') {
+      equationOutputs[eq.equationNumber] = toSnapshotOutput(
+        { kind: 'manual_required', reason: kostraSnapshotResolution.reason },
+        eq.formula,
+      );
+      continue;
+    }
+
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
     if (A138_07_SURFACE_IDS.has(eq.id)) {
       aggregator = { surfaceInventory: surfaceCarrier };
@@ -320,6 +447,19 @@ export function buildSnapshotPayload(args: {
         kostraTable: kostraCarrier,
         gl8Scalars,
         kostraUnit: kostraField?.unit ?? null,
+      };
+    } else if (eq.id === A138_26_GL10_ID) {
+      // Task 5: thread the flood 30-column resolution into the aggregator.
+      const flood30Carrier =
+        floodColResolution.status === 'ok' ? floodColResolution.carrier : null;
+      const missingFlood30Reason =
+        floodColResolution.status === 'missing' ? floodColResolution.reason : null;
+      aggregator = {
+        floodSubAreas: floodCarrier,
+        gl10Scalars,
+        kostraUnit: r_D_30_field_snap?.unit ?? null,
+        floodKostra30Col: flood30Carrier,
+        missingFlood30Reason,
       };
     }
 
@@ -333,6 +473,40 @@ export function buildSnapshotPayload(args: {
       aggregator,
     });
 
+    // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D
+    // as derived field values on A138-13 under the symbols A138-10 inherits.
+    // Populate derivedOverrides so subsequent equations + compliance conditions
+    // in this snapshot call read the governing values via numberBySymbol.
+    // Also write into the `parameters` map so the snapshot captures the
+    // derived values alongside the other persisted field values.
+    // When derivedExtras is absent (manual_required / withhold): write null to
+    // derivedOverrides (clears any stale DB value) and remove from parameters.
+    if (eq.id === A138_13_GL8_ID) {
+      const extras = state.kind === 'computed' ? state.derivedExtras : undefined;
+
+      const rDnField = fieldBySymbol.get('r_D_n');
+      if (rDnField) {
+        const rDnVal = extras !== undefined ? extras.r_D_gov : null;
+        derivedOverrides.set(rDnField.id, rDnVal);
+        if (rDnVal !== null) {
+          parameters[rDnField.id] = { type: 'number', value: rDnVal, unit: rDnField.unit ?? null, citationSources: [] };
+        } else {
+          delete parameters[rDnField.id];
+        }
+      }
+
+      const dMinField = fieldBySymbol.get('D_min');
+      if (dMinField) {
+        const dMinVal = extras !== undefined ? extras.D_gov : null;
+        derivedOverrides.set(dMinField.id, dMinVal);
+        if (dMinVal !== null) {
+          parameters[dMinField.id] = { type: 'number', value: dMinVal, unit: dMinField.unit ?? null, citationSources: [] };
+        } else {
+          delete parameters[dMinField.id];
+        }
+      }
+    }
+
     equationOutputs[eq.equationNumber] = toSnapshotOutput(state, eq.formula);
   }
 
@@ -342,6 +516,11 @@ export function buildSnapshotPayload(args: {
   ): number | string | boolean | null | undefined => {
     const f = fieldBySymbol.get(sym);
     if (!f) return undefined;
+    // Derived-extras override (Task 2): governing r_D_n / D_min from basin Gl.8.
+    if (derivedOverrides.has(f.id)) {
+      const ov = derivedOverrides.get(f.id);
+      return ov ?? undefined;
+    }
     const p = paramByFieldId.get(f.id);
     if (!p) return undefined;
     const v = readValue(p, f.dataType);

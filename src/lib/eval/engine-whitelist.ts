@@ -69,6 +69,22 @@ export const FORMULA_ENGINE_WHITELIST: ReadonlySet<string> = new Set<string>([
   'A138-21:40', // h_S filter form (displayOnly)
   'A138-22:41', // V_VA Becken
   'A138-26:10', // V_Rück flood-check (Pile-5 carrier sub_areas_A138_26)
+
+  // ====================================================================
+  // A138-10 — Einleitung in Gewässer
+  // ====================================================================
+  'A138-10:3',  // Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴  (Gl. 3, governing inflow)
+
+  // ====================================================================
+  // A138-11 — Drosselabfluss / Reduktionsbeiwerte
+  // ====================================================================
+  'A138-11:5',  // k_i = k_f · f_K  (Gl. 5, site-specific permeability)
+  'A138-11:6',  // f_K = min(f_ort·f_methode, 1)  (Gl. 6, correction factor cap)
+
+  // ====================================================================
+  // A138-13 — Einleitungsmengen (Speichervolumen)
+  // ====================================================================
+  'A138-13:9',  // q_S_AC = (k_i·A_S_m·1000 + Q_Dr)/A_C · 10^4  (Gl. 9, specific storage discharge)
 ]);
 
 /** Equation key format `Axxx-NN:M` (worksheet code + Gleichung number). */

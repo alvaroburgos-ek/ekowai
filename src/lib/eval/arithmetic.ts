@@ -24,10 +24,14 @@
  * evaluated.
  */
 
+/** The two numeric 2-arg functions the engine natively supports. */
+const SUPPORTED_FUNCTIONS = new Set<string>(['min', 'max']);
+
 type Token =
   | { kind: 'num'; value: number }
   | { kind: 'ident'; name: string }
-  | { kind: 'op'; op: '+' | '-' | '*' | '/' | '^' | '(' | ')' };
+  | { kind: 'fn'; name: 'min' | 'max' }
+  | { kind: 'op'; op: '+' | '-' | '*' | '/' | '^' | '(' | ')' | ',' };
 
 function tokenize(src: string): Token[] {
   const toks: Token[] = [];
@@ -38,8 +42,17 @@ function tokenize(src: string): Token[] {
       i++;
       continue;
     }
-    if (c === '(' || c === ')' || c === '+' || c === '-' || c === '*' || c === '/' || c === '^') {
-      toks.push({ kind: 'op', op: c });
+    if (
+      c === '(' ||
+      c === ')' ||
+      c === '+' ||
+      c === '-' ||
+      c === '*' ||
+      c === '/' ||
+      c === '^' ||
+      c === ','
+    ) {
+      toks.push({ kind: 'op', op: c as '+' | '-' | '*' | '/' | '^' | '(' | ')' | ',' });
       i++;
       continue;
     }
@@ -53,12 +66,17 @@ function tokenize(src: string): Token[] {
     if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c === '_') {
       const m = /^[A-Za-z_][A-Za-z0-9_]*/.exec(src.slice(i));
       if (!m) throw new Error(`Ungültiger Bezeichner an Position ${i}`);
-      // Reject identifier-followed-by-'(' (function call). These are formulas
-      // the engine cannot faithfully represent and they must be either
-      // rewritten or flagged manual.
+      // Check for identifier-followed-by-'(' (function call).
       let j = i + m[0].length;
       while (j < src.length && (src[j] === ' ' || src[j] === '\t')) j++;
       if (src[j] === '(') {
+        // Only min() and max() are natively supported as 2-arg numeric functions.
+        // All other function calls throw so unsupported formulas fail loud.
+        if (SUPPORTED_FUNCTIONS.has(m[0])) {
+          toks.push({ kind: 'fn', name: m[0] as 'min' | 'max' });
+          i += m[0].length;
+          continue;
+        }
         throw new Error(
           `Funktionsaufruf "${m[0]}(...)" wird nicht unterstützt — Rewrite-Regel erforderlich.`,
         );
@@ -143,7 +161,7 @@ class Parser {
     return left;
   }
 
-  // primary ::= NUMBER | IDENT | '(' expr ')'
+  // primary ::= NUMBER | IDENT | '(' expr ')' | min '(' expr ',' expr ')' | max '(' expr ',' expr ')'
   private parsePrimary(): number {
     const t = this.toks[this.pos++];
     if (!t) throw new Error('Ausdruck endet vorzeitig.');
@@ -154,6 +172,26 @@ class Parser {
         throw new Error(`Unbekanntes Symbol "${t.name}" im Ausdruck.`);
       }
       return v;
+    }
+    if (t.kind === 'fn') {
+      // Consume '('
+      const open = this.toks[this.pos++];
+      if (open?.kind !== 'op' || open.op !== '(') {
+        throw new Error(`Erwarte '(' nach "${t.name}".`);
+      }
+      const a = this.parseExpr();
+      // Consume ','
+      const comma = this.toks[this.pos++];
+      if (comma?.kind !== 'op' || comma.op !== ',') {
+        throw new Error(`Erwarte ',' im ${t.name}(...)-Aufruf.`);
+      }
+      const b = this.parseExpr();
+      // Consume ')'
+      const close = this.toks[this.pos++];
+      if (close?.kind !== 'op' || close.op !== ')') {
+        throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);
+      }
+      return t.name === 'min' ? Math.min(a, b) : Math.max(a, b);
     }
     if (t.kind === 'op' && t.op === '(') {
       const v = this.parseExpr();
