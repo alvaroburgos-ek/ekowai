@@ -112,3 +112,55 @@ Date:   Wed Jul 8 16:03:25 2026 +0200
 - Code follows brief exactly
 - Commit ready for review
 - No warnings or linter issues
+
+---
+
+## Fix — sourceWorksheet Attribution
+
+### Issue
+In the `determined` state branch, `sourceWorksheet` was set to `input.sourceWorksheet ?? 'A138-12'`. For geometry results, the true source is the resolved facility worksheet (e.g., A138-17 for mulde, A138-18 for rigole), but a caller passing `sourceWorksheet: 'A138-12'` would mislabel it. Attribution must be self-correcting, not caller-dependent.
+
+### Change
+Modified `materializeAsm` to derive `sourceWorksheet` from the resolved `producer` for geometry methods:
+
+```typescript
+// Derive sourceWorksheet from the resolved producer for geometry; otherwise use caller's value
+const sourceWorksheet = producer.kind === 'geometry' ? producer.worksheetCode : (input.sourceWorksheet ?? 'A138-12');
+
+return {
+  A_S_m: value,
+  state: { status: 'determined', value, method: input.method, sourceWorksheet },
+};
+```
+
+When `producer.kind === 'geometry'` → use `producer.worksheetCode` (e.g., A138-17).
+Otherwise → use `input.sourceWorksheet ?? 'A138-12'` (unchanged behavior for direct, soil_estimate, manual).
+
+### New Test
+Added test case proving self-correction:
+
+```typescript
+it('geometry: self-corrects sourceWorksheet from resolved producer when caller passes wrong default', () => {
+  // Caller passes sourceWorksheet: 'A138-12' (wrong/default), but geometry/mulde resolves to A138-17
+  const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, geometryValue: 62.5, manualValue: null, manualProvenance: null, facilityType: 'mulde', sourceWorksheet: 'A138-12' });
+  expect(r.A_S_m).toBe(62.5);
+  // sourceWorksheet should be derived from the resolved producer, not the caller's wrong value
+  expect(r.state).toMatchObject({ status: 'determined', value: 62.5, method: 'geometry', sourceWorksheet: 'A138-17' });
+});
+```
+
+### Test Run
+```
+pnpm vitest run src/lib/eval/__tests__/materialize-asm.test.ts
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  16:07:26
+   Duration  710ms (transform 51ms, setup 114ms, import 35ms, tests 6ms, environment 356ms)
+```
+
+### Commit
+```
+commit 4eac5c5
+fix(a138): derive A_S,m sourceWorksheet from resolved producer for geometry
+```
