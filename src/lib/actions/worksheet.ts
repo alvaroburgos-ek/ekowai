@@ -134,6 +134,17 @@ export async function saveWorksheet(
   const isBasinSave   = templateEquations.some((e) => e.id === BASIN_GL8_EQUATION_ID);
   const isLoadingSave = templateEquations.some((e) => e.id === A138_12_ASM_EQUATION_ID);
 
+  // Standard of the saved worksheet — scopes producer-side propagation to the SAME
+  // standard. worksheet_templates.code is unique per-standard, NOT globally, so a
+  // consumer lookup by code alone could misfire into another guideline that shares
+  // a code (e.g. a second standard with an 'A138-12'). Fail-closed: if unknown, skip.
+  const [savedTemplateRow] = await db
+    .select({ standardId: worksheetTemplates.standardId })
+    .from(worksheetTemplates)
+    .where(eq(worksheetTemplates.id, instance.worksheetTemplateId))
+    .limit(1);
+  const savedStandardId = savedTemplateRow?.standardId ?? null;
+
   // Fast-path: nothing submitted AND no topology-triggered recompute needed.
   if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave) {
     return { ok: true, saved: 0, warnings: [], derived: [] };
@@ -808,15 +819,24 @@ export async function saveWorksheet(
           // Look up the A138-12 template by code (consumerTemplateCode = 'A138-12').
           // This is INDEPENDENT of `instance.worksheetTemplateId` (the saved template).
           // GENERAL: any materialize entry with id='loading' uses its consumerTemplateCode.
-          const [consumerTmpl] = await tx
-            .select({ id: worksheetTemplates.id })
-            .from(worksheetTemplates)
-            .where(eq(worksheetTemplates.code, producerEntry.consumerTemplateCode))
-            .limit(1);
+          // Scope by standard_id (fail-closed): resolve the consumer template ONLY within
+          // the SAME standard as the saved worksheet. Without this, a second standard that
+          // shares the code could be picked arbitrarily (cross-standard misfire). If the
+          // saved standard is unknown, do not fire producer-side.
+          const [consumerTmpl] = savedStandardId
+            ? await tx
+                .select({ id: worksheetTemplates.id })
+                .from(worksheetTemplates)
+                .where(and(
+                  eq(worksheetTemplates.code, producerEntry.consumerTemplateCode),
+                  eq(worksheetTemplates.standardId, savedStandardId),
+                ))
+                .limit(1)
+            : [];
 
           if (!consumerTmpl) {
-            // Consumer template not found in DB — skip gracefully (migration not yet applied
-            // or code differs). Do not error; the save itself succeeded.
+            // Consumer template not found in this standard — skip gracefully (migration not
+            // yet applied, code differs, or unknown standard). Do not error; the save succeeded.
             continue;
           }
 
