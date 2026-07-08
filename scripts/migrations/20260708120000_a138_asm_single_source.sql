@@ -50,8 +50,11 @@ BEGIN
 
   -- (3) Backfill 'direct' for every project holding A138-12 params (baseline safety).
   SELECT id INTO asm_field FROM fields WHERE worksheet_template_id=ws12 AND symbol='a_s_m_determination_method' LIMIT 1;
+  IF asm_field IS NULL THEN
+    RAISE EXCEPTION 'a138_asm: a_s_m_determination_method field could not be resolved — migration aborted';
+  END IF;
   INSERT INTO project_parameters (project_id, field_id, value_enum, source_type, entered_by, entered_at)
-  SELECT DISTINCT pp.project_id, asm_field, 'direct', 'entered', pp.entered_by, NOW()
+  SELECT DISTINCT pp.project_id, asm_field, 'direct', 'entered', 'migration:20260708120000', NOW()
   FROM project_parameters pp
   JOIN fields f ON f.id = pp.field_id
   WHERE f.worksheet_template_id = ws12
@@ -60,11 +63,11 @@ BEGIN
   -- (4) Retire orphan A_S_m_Becken (D-4). Surface residue values before deactivating.
   SELECT id INTO becken_field FROM fields WHERE worksheet_template_id=ws22 AND symbol='A_S_m_Becken' LIMIT 1;
   IF becken_field IS NOT NULL THEN
-    SELECT COUNT(*) INTO becken_param_count FROM project_parameters WHERE field_id=becken_field AND (value_number IS NOT NULL OR value_text IS NOT NULL);
+    SELECT COUNT(*) INTO becken_param_count FROM project_parameters WHERE field_id=becken_field AND (value_number IS NOT NULL OR value_text IS NOT NULL OR value_enum IS NOT NULL OR value_json IS NOT NULL);
     IF becken_param_count > 0 THEN
       RAISE NOTICE 'a138_asm RESIDUE: % stored A_S_m_Becken value(s) — projects: %',
         becken_param_count,
-        (SELECT string_agg(DISTINCT project_id::text, ', ') FROM project_parameters WHERE field_id=becken_field AND (value_number IS NOT NULL OR value_text IS NOT NULL));
+        (SELECT string_agg(DISTINCT project_id::text, ', ') FROM project_parameters WHERE field_id=becken_field AND (value_number IS NOT NULL OR value_text IS NOT NULL OR value_enum IS NOT NULL OR value_json IS NOT NULL));
     END IF;
     UPDATE fields SET active=false WHERE id=becken_field; -- param rows kept for audit/re-entry
   END IF;
