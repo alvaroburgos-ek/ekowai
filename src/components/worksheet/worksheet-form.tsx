@@ -490,6 +490,26 @@ export function WorksheetForm({
   const orphanFields = fieldsBySectionId.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
 
+  // Resolve the A_S,m determination-method sibling values once so renderField
+  // can forward them to every relevant DynamicField without re-reading the store.
+  // These are only consumed by A_S_m / soil_bodenart_tab13 / a_s_m_provenance
+  // fields on A138-12; on all other worksheets the symbols are absent so the
+  // resolved values are null and the props are harmless.
+  const asmMethodField = fieldBySymbol.get('a_s_m_determination_method');
+  const asmMethodValue = asmMethodField ? values[asmMethodField.id] : undefined;
+  const asmMethod: string | null =
+    asmMethodValue?.type === 'enum' ? (asmMethodValue.value ?? null) : null;
+
+  const asmProvenanceField = fieldBySymbol.get('a_s_m_provenance');
+  const asmProvenanceValue = asmProvenanceField ? values[asmProvenanceField.id] : undefined;
+  const asmProvenance: string | null =
+    asmProvenanceValue?.type === 'text' ? (asmProvenanceValue.value ?? null) : null;
+
+  const asmReconfField = fieldBySymbol.get('a_s_m_needs_reconfirmation');
+  const asmReconfValue = asmReconfField ? values[asmReconfField.id] : undefined;
+  const asmNeedsReconfirmation: boolean | null =
+    asmReconfValue?.type === 'boolean' ? (asmReconfValue.value ?? null) : null;
+
   const renderField = (sectionId: string | null) => {
     const fs = fieldsBySectionId.get(sectionId) ?? [];
     return fs.map((f) => {
@@ -535,6 +555,9 @@ export function WorksheetForm({
           isPlatformEngineer={isPlatformEngineer}
           readOnly={locked}
           statusReason={statusReason}
+          asmMethod={asmMethod}
+          asmProvenance={asmProvenance}
+          asmNeedsReconfirmation={asmNeedsReconfirmation}
         />
       );
     });
