@@ -475,3 +475,20 @@ before its scope is touched):**
 - **R-4** — `A_S` (bare) sibling single-source (Gl.12 vs Gl.34 vs the A138-12
   `A_S` field); separate follow-up piece, not folded in (§12).
 - **R-5** — `MRE`/`MRS` (A138-19/20) geometry producers; residue (§12).
+- **R-6 (portable defect class — audit register)** — `loadSameSymbolValues`
+  (`src/lib/db/queries/worksheet.ts`, sole caller the render page
+  `…/worksheets/[worksheetCode]/page.tsx`) resolves cross-worksheet symbols
+  **symbol-only, "first-non-null-wins"** (ancestor → stage → recency). `A_S_m`
+  is now structurally safe (exactly one active field — guarded by the DB-gated
+  invariant test), but **any other symbol that ever gains fields on two
+  worksheets inherits this latent collision**. Cross-guideline class (same family
+  as E1). Out of B2 scope to fix; logged for the audit register.
+- **Task 7 reduction (recorded)** — the planned facility-scoped
+  `loadAuthoritativeAsm` resolver was **not built**: the collision it prevents is
+  structurally impossible today (single canonical `A_S_m` field + writes only to
+  A138-12). Replaced by (a) the Task-4 registry assertion
+  `consumerTemplateCode==='A138-12'` and (b) a DB-gated `COUNT(active A_S_m)=1`
+  invariant test. **§11 pointer:** when multi-facility lands, the authoritative
+  read goes at the **`loadSameSymbolValues` call site on the render page**
+  (`…/worksheets/[worksheetCode]/page.tsx`, ~line 61) — one named location so it
+  isn't rediscovered.
