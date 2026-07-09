@@ -189,6 +189,7 @@ export function WorksheetForm({
   const setField = useWorksheetStore((s) => s.setField);
   const values = useWorksheetStore((s) => s.values);
   const saveStatus = useWorksheetStore((s) => s.saveStatus);
+  const lastWarnings = useWorksheetStore((s) => s.lastWarnings);
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locked = !isWorksheetEditable(instance.status as WorksheetStatus);
@@ -603,6 +604,21 @@ export function WorksheetForm({
           className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
         >
           Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+        </div>
+      )}
+
+      {lastWarnings.length > 0 && (
+        <div
+          role="alert"
+          data-testid="save-warnings-banner"
+          className="border border-warning/40 rounded p-3 text-sm bg-warning/8 text-ink space-y-1"
+        >
+          {lastWarnings.map((w, i) => (
+            <p key={i} className="flex gap-2">
+              <span aria-hidden="true" className="shrink-0 text-warning">⚠</span>
+              {w}
+            </p>
+          ))}
         </div>
       )}
 

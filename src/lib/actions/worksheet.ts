@@ -227,6 +227,10 @@ export async function saveWorksheet(
   // read from the raw `input.values` snapshot and compute a false result
   // (e.g. mint a Tab.6 'pass' from an unprovenanced manual A_S,m=120).
   const rejectedFieldIds = new Set<string>();
+  // Revert rows for rejected fields: persisted values to send back to the client
+  // so the input fields revert to the DB state. Accumulated during the reject
+  // blocks below and merged into `writtenDerived` after that array is declared.
+  const rejectRevertRows: SavedDerivedRow[] = [];
 
   for (const fieldId of fieldIds) {
     const expectedType = dataTypeById.get(fieldId);
@@ -346,6 +350,7 @@ export async function saveWorksheet(
             fieldId: projectParameters.fieldId,
             valueEnum: projectParameters.valueEnum,
             valueText: projectParameters.valueText,
+            valueNumber: projectParameters.valueNumber,
           })
           .from(projectParameters)
           .where(and(
@@ -391,6 +396,18 @@ export async function saveWorksheet(
         auditValues.splice(0, auditValues.length,
           ...auditValues.filter((r) => keepIdx(r.recordId)),
         );
+        // Revert-push: send the persisted values back to the client so the input
+        // fields revert to the DB value (not the rejected user-typed value).
+        // existingById covers these ids because V-1 only fires when both fields
+        // are in the save batch (= in fieldIds = loaded into existingById).
+        for (const fid of rejected) {
+          const persisted = existingById.get(fid);
+          rejectRevertRows.push({
+            fieldId: fid,
+            valueNumber: persisted?.valueNumber ?? null,
+            valueText: persisted?.valueText ?? null,
+          });
+        }
       }
     }
 
@@ -417,6 +434,20 @@ export async function saveWorksheet(
         auditValues.splice(0, auditValues.length,
           ...auditValues.filter((r) => keepAsmIdx(r.recordId)),
         );
+        // Revert-push: send the persisted A_S_m back to the client so the input
+        // field reverts to the DB value (not the rejected user-typed value).
+        // asmPersistedByFid now includes valueNumber (added to the SELECT above).
+        // This push is safe from double-push with the owner block at ~line 980:
+        // that block is gated on `out.A_S_m != null` — but on the V-2 reject path
+        // the batch A_S_m is NOT in parameterValues, materializeAsm receives
+        // manualValue=null (stripped from batch), so out.A_S_m is null for manual
+        // method without geometry → the owner block's gated push is skipped.
+        const persistedAsm = asmPersistedByFid.get(aSmFieldId);
+        rejectRevertRows.push({
+          fieldId: aSmFieldId,
+          valueNumber: persistedAsm?.valueNumber ?? null,
+          valueText: persistedAsm?.valueText ?? null,
+        });
       }
     }
   }
@@ -479,7 +510,9 @@ export async function saveWorksheet(
 
   // Accumulated derived rows written by the materialize passes below.
   // Populated inside the transaction; returned to the client on ok=true.
-  const writtenDerived: SavedDerivedRow[] = [];
+  // Revert rows from rejected fields (computed before the transaction) are
+  // seeded here so the client applies them together with any materialize outputs.
+  const writtenDerived: SavedDerivedRow[] = [...rejectRevertRows];
 
   // Open the transaction when:
   //   (a) there are actual parameter rows to write (savedCount > 0), OR
