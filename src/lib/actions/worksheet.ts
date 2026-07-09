@@ -21,7 +21,7 @@ import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 import { materializeAsm, computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
-import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange } from '@/lib/eval/asm-source';
+import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
 import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
 
@@ -220,6 +220,14 @@ export async function saveWorksheet(
   const parameterValues: ParameterRow[] = [];
   const auditValues: AuditRow[] = [];
 
+  // Field ids whose batch value was REJECTED by a validation strip (V-1/V-2) and
+  // therefore WILL NOT persist. Every later local read (owner materialize,
+  // loading-check) must treat these as if they were never in the batch and fall
+  // through to the persisted DB value — otherwise a rejected value could still be
+  // read from the raw `input.values` snapshot and compute a false result
+  // (e.g. mint a Tab.6 'pass' from an unprovenanced manual A_S,m=120).
+  const rejectedFieldIds = new Set<string>();
+
   for (const fieldId of fieldIds) {
     const expectedType = dataTypeById.get(fieldId);
     const incoming = input.values[fieldId];
@@ -307,15 +315,61 @@ export async function saveWorksheet(
   // Only runs when the saved worksheet is A138-12 (isAsmSave). Filters invalid
   // rows out of parameterValues/auditValues before savedCount is computed so the
   // transaction never persists values that violate the single-source invariant.
+  //
+  // CRITICAL (root-cause fix): the method + provenance field ids MUST be resolved
+  // against the FULL A138-12 sibling-field set, NOT `symbolById` — `symbolById` is
+  // built from `fieldMetas`, which is restricted to the batch's field ids
+  // (inArray(fields.id, fieldIds)). On an A_S_m-only save the method/provenance
+  // fields are absent from the batch, so `symbolById` lacks them; the old code
+  // then resolved both ids to null, `batchMethod` fell to null, the guard
+  // `batchMethod === 'manual'` was false, and the strip silently no-op'd — letting
+  // an unprovenanced manual A_S,m persist and mint a false Tab.6 'pass'. We load
+  // the full sibling map (symbol → id) plus the persisted values for the fields the
+  // reject reads, so the reject decision reflects what WILL persist.
   if (isAsmSave && fieldIds.length > 0) {
+    // Full A138-12 sibling field map — batch-independent (fixes the null-resolution bug).
+    const asmSiblingFields = await db
+      .select({ id: fields.id, symbol: fields.symbol })
+      .from(fields)
+      .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+    const asmSiblingFidBySymbol = new Map(asmSiblingFields.map((f) => [f.symbol, f.id]));
+
+    // Persisted values for the sibling fields the reject reads (method / provenance / A_S_m).
+    // `existingById` only covers batch fields, so fetch these explicitly.
+    const rejectReadSymbols = ['a_s_m_determination_method', 'a_s_m_provenance', 'A_S_m'] as const;
+    const rejectReadFids = rejectReadSymbols
+      .map((s) => asmSiblingFidBySymbol.get(s))
+      .filter((v): v is string => typeof v === 'string');
+    const asmPersistedRows = rejectReadFids.length > 0
+      ? await db
+          .select({
+            fieldId: projectParameters.fieldId,
+            valueEnum: projectParameters.valueEnum,
+            valueText: projectParameters.valueText,
+          })
+          .from(projectParameters)
+          .where(and(
+            eq(projectParameters.projectId, instance.projectId),
+            inArray(projectParameters.fieldId, rejectReadFids),
+          ))
+      : [];
+    const asmPersistedByFid = new Map(asmPersistedRows.map((r) => [r.fieldId, r]));
+
+    // Effective value = batch value if the field is in the batch, else persisted.
+    // This is the post-strip / persistence-consistent view — NEVER the raw batch alone.
+    const effectiveEnumBySymbol = (sym: string): string | null => {
+      const fid = asmSiblingFidBySymbol.get(sym);
+      if (!fid) return null;
+      const b = input.values[fid];
+      if (b?.type === 'enum' && typeof b.value === 'string') return b.value || null;
+      if (b?.type === 'text' && typeof b.value === 'string') return b.value || null;
+      const p = asmPersistedByFid.get(fid);
+      return p?.valueEnum ?? p?.valueText ?? null;
+    };
+
     // V-1: A_S_min must not exceed A_S_max. If both are in the batch, reject the pair.
-    // Resolve field ids for the two symbols within this template's field map.
-    let aSmInFieldId: string | null = null;
-    let aSmAxFieldId: string | null = null;
-    for (const [fid, sym] of symbolById.entries()) {
-      if (sym === 'A_S_min') aSmInFieldId = fid;
-      if (sym === 'A_S_max') aSmAxFieldId = fid;
-    }
+    const aSmInFieldId = asmSiblingFidBySymbol.get('A_S_min') ?? null;
+    const aSmAxFieldId = asmSiblingFidBySymbol.get('A_S_max') ?? null;
     if (aSmInFieldId && aSmAxFieldId) {
       const batchMin = input.values[aSmInFieldId];
       const batchMax = input.values[aSmAxFieldId];
@@ -329,6 +383,7 @@ export async function saveWorksheet(
         );
         // Remove both fields from the persistence batch (keep the rest of the save intact).
         const rejected = new Set([aSmInFieldId, aSmAxFieldId]);
+        rejected.forEach((fid) => rejectedFieldIds.add(fid));
         const keepIdx = (fid: string) => !rejected.has(fid);
         parameterValues.splice(0, parameterValues.length,
           ...parameterValues.filter((r) => keepIdx(r.fieldId)),
@@ -340,60 +395,28 @@ export async function saveWorksheet(
     }
 
     // V-2: manual method requires a non-empty a_s_m_provenance.
-    // Resolve the method field id and check batch + persisted.
-    let asmMethodFieldId: string | null = null;
-    let asmProvenanceFieldId: string | null = null;
-    for (const [fid, sym] of symbolById.entries()) {
-      if (sym === 'a_s_m_determination_method') asmMethodFieldId = fid;
-      if (sym === 'a_s_m_provenance') asmProvenanceFieldId = fid;
-    }
-    // Determine the method from the batch or existing persisted value.
-    let batchMethod: string | null = null;
-    if (asmMethodFieldId) {
-      const batchMethodVal = input.values[asmMethodFieldId];
-      if (batchMethodVal?.type === 'enum' && typeof batchMethodVal.value === 'string') {
-        batchMethod = batchMethodVal.value;
-      } else {
-        // Not in batch — check persisted.
-        const existingMethod = existingById.get(asmMethodFieldId);
-        batchMethod = existingMethod?.valueEnum ?? null;
-      }
-    }
-    if (batchMethod === 'manual') {
-      // Check provenance: prefer the batch value, else check persisted.
-      let hasProvenance = false;
-      if (asmProvenanceFieldId) {
-        const batchProv = input.values[asmProvenanceFieldId];
-        if (batchProv?.type === 'text' && typeof batchProv.value === 'string' && batchProv.value.trim() !== '') {
-          hasProvenance = true;
-        } else {
-          const existingProv = existingById.get(asmProvenanceFieldId);
-          if (existingProv?.valueText && existingProv.valueText.trim() !== '') {
-            hasProvenance = true;
-          }
-        }
-      }
-      if (!hasProvenance) {
-        warnings.push(
-          'Methode "Manuell": Herkunftsangabe (Datenblatt/Quelle) für A_S,m ist erforderlich — bitte ausfüllen.',
+    // Resolve method + provenance from the EFFECTIVE (batch-or-persisted) view over
+    // the FULL sibling map — so an A_S_m-only save still sees method=manual/prov=null.
+    const effMethod = effectiveEnumBySymbol('a_s_m_determination_method');
+    const effProvenance = effectiveEnumBySymbol('a_s_m_provenance');
+    const { reject: rejectManualAsm } = resolveManualAsmReject(effMethod, effProvenance);
+    if (rejectManualAsm) {
+      warnings.push(
+        'Methode "Manuell": Herkunftsangabe (Datenblatt/Quelle) für A_S,m ist erforderlich — bitte ausfüllen.',
+      );
+      // Remove A_S_m from both batches so the user-entered value is NOT persisted
+      // without required provenance. (The old persisted value, if any, is untouched.)
+      const aSmFieldId = asmSiblingFidBySymbol.get('A_S_m') ?? null;
+      if (aSmFieldId) {
+        rejectedFieldIds.add(aSmFieldId);
+        const rejectedAsm = new Set([aSmFieldId]);
+        const keepAsmIdx = (fid: string) => !rejectedAsm.has(fid);
+        parameterValues.splice(0, parameterValues.length,
+          ...parameterValues.filter((r) => keepAsmIdx(r.fieldId)),
         );
-        // Mirror V-1 splice idiom: remove A_S_m from both batches so the
-        // user-entered value is NOT persisted without required provenance.
-        // (The old persisted value, if any, remains untouched.)
-        let aSmFieldId: string | null = null;
-        for (const [fid, sym] of symbolById.entries()) {
-          if (sym === 'A_S_m') { aSmFieldId = fid; break; }
-        }
-        if (aSmFieldId) {
-          const rejectedAsm = new Set([aSmFieldId]);
-          const keepAsmIdx = (fid: string) => !rejectedAsm.has(fid);
-          parameterValues.splice(0, parameterValues.length,
-            ...parameterValues.filter((r) => keepAsmIdx(r.fieldId)),
-          );
-          auditValues.splice(0, auditValues.length,
-            ...auditValues.filter((r) => keepAsmIdx(r.recordId)),
-          );
-        }
+        auditValues.splice(0, auditValues.length,
+          ...auditValues.filter((r) => keepAsmIdx(r.recordId)),
+        );
       }
     }
   }
@@ -783,7 +806,9 @@ export async function saveWorksheet(
         const readLocalNum = async (sym: string): Promise<number | null> => {
           const fid = asmIdBySymbol.get(sym);
           if (!fid) return null;
-          const saved = input.values[fid];
+          // A rejected field's batch value will NOT persist — ignore it and read the
+          // persisted value instead (consistency-with-persistence).
+          const saved = rejectedFieldIds.has(fid) ? undefined : input.values[fid];
           if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
             return saved.value;
           }
@@ -800,7 +825,9 @@ export async function saveWorksheet(
         const readLocalEnum = async (sym: string): Promise<string | null> => {
           const fid = asmIdBySymbol.get(sym);
           if (!fid) return null;
-          const saved = input.values[fid];
+          // A rejected field's batch value will NOT persist — ignore it and read the
+          // persisted value instead (consistency-with-persistence).
+          const saved = rejectedFieldIds.has(fid) ? undefined : input.values[fid];
           if (saved?.type === 'enum' && typeof saved.value === 'string') return saved.value || null;
           if (saved?.type === 'text' && typeof saved.value === 'string') return saved.value || null;
           const [existing] = await tx
@@ -1015,10 +1042,13 @@ export async function saveWorksheet(
         const lcIdBySymbol = new Map(lcWsFields.map((f) => [f.symbol, f.id]));
 
         // 2. A_S_m — prefer save batch, else persisted A138-12 value.
+        //    A rejected A_S_m (manual without provenance / A_S_min>max) will NOT persist,
+        //    so the loading check must compute against the PERSISTED (un-rejected) value —
+        //    never the raw batch snapshot. Otherwise a rejected 120 would mint a false 'pass'.
         const aSmFieldId = lcIdBySymbol.get('A_S_m');
         let A_S_m: number | null = null;
         if (aSmFieldId) {
-          const saved = input.values[aSmFieldId];
+          const saved = (aSmFieldId && rejectedFieldIds.has(aSmFieldId)) ? undefined : input.values[aSmFieldId];
           if (saved?.type === 'number' && typeof saved.value === 'number' && Number.isFinite(saved.value)) {
             A_S_m = saved.value;
           } else {

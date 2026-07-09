@@ -112,6 +112,35 @@ export function asmInvalidationOnTypeChange(
 }
 
 /**
+ * V-2 manual-provenance gate (pure decision).
+ *
+ * A138-12 A_S,m is user-editable ONLY when method='manual', and then a non-empty
+ * provenance (Datenblatt/Quelle) is MANDATORY. This helper decides — from the
+ * EFFECTIVE method and EFFECTIVE provenance (i.e. the values that WILL persist:
+ * batch value if the field is in the batch, else the persisted DB value) —
+ * whether a manual A_S,m save must be REJECTED (the A_S_m write stripped so it
+ * cannot persist without provenance).
+ *
+ * CRITICAL: callers MUST resolve `method` and `provenance` against the full
+ * A138-12 sibling-field set — NOT the batch-restricted field map. On an
+ * A_S_m-only save, the method/provenance fields are absent from the batch; if the
+ * caller resolves them only from batch metadata they read `null` and the reject
+ * silently no-ops, letting an unprovenanced manual A_S,m persist (the live bug).
+ *
+ * Returns { reject:true } iff method='manual' AND provenance is empty/whitespace.
+ * For every non-manual method the value is produced by a formula (direct/soil) or
+ * geometry, so this gate never fires — those paths stay byte-identical.
+ */
+export function resolveManualAsmReject(
+  method: string | null,
+  provenance: string | null | undefined,
+): { reject: boolean } {
+  if (method !== 'manual') return { reject: false };
+  const hasProvenance = typeof provenance === 'string' && provenance.trim() !== '';
+  return { reject: !hasProvenance };
+}
+
+/**
  * §6.3.2 V-2: The geometry-derived A_S,m must be ≥ A_S,max (Gl.7 term).
  * "der erforderliche Flächenbedarf entspricht mindestens der maximalen
  * Versickerungsfläche A_S,max".
