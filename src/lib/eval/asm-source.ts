@@ -111,6 +111,39 @@ export function asmInvalidationOnTypeChange(
   return { clear: false, flagNeedsReconfirm: false };
 }
 
+// Stable empty set: module-level constant so callers can use reference equality
+// to avoid useMemo/useEffect churn on worksheets where no symbols are suppressed.
+const _EMPTY_ASM_SUPPRESSED: ReadonlySet<string> = new Set();
+
+/**
+ * Returns the set of engine write-back symbols that must be suppressed for the
+ * given A_S,m determination method.
+ *
+ * OWNERSHIP PRINCIPLE:
+ *   Gl.7 (A138-12 formula engine) owns A_S,m ONLY when method='direct' (or null/
+ *   unset, which defaults to direct behaviour). For every other method the server
+ *   (materializeAsm) is the authoritative producer:
+ *     - 'manual'        → engineer enters value directly; Gl.7 must not clobber.
+ *     - 'geometry'      → geometry equations on A138-17/18 write back; Gl.7 must
+ *                         not fight the geometry value → suppressed.
+ *     - 'soil_estimate' → materializeAsm derives from Tab.13/A_C; Gl.7 writes 45
+ *                         (from A_S,min/max) while server writes 967 (from A_C) →
+ *                         infinite save loop unless suppressed.
+ *
+ * The returned set is stable-empty (same object reference) for non-suppressed
+ * cases so useMemo/useEffect deps do not churn.
+ *
+ * All five cases are unit-tested in asm-source.test.ts.
+ */
+export function asmEngineSuppressedSymbols(asmMethod: string | null): ReadonlySet<string> {
+  // Suppress for every method except 'direct' (and the null/unset default which
+  // resolves to direct behaviour). This covers manual, geometry, and soil_estimate.
+  if (asmMethod != null && asmMethod !== 'direct') {
+    return new Set(['A_S_m']);
+  }
+  return _EMPTY_ASM_SUPPRESSED;
+}
+
 /**
  * V-2 manual-provenance gate (pure decision).
  *

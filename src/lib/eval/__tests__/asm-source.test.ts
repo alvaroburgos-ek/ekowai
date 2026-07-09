@@ -3,6 +3,7 @@ import {
   resolveAsmProducer, computeDirect, computeSoilEstimate,
   ASM_GL16_EQUATION_ID, ASM_GL17_EQUATION_ID, FACILITY_TYPE_TO_WORKSHEET,
   validateGeometryAgainstMax,
+  asmEngineSuppressedSymbols,
 } from '../asm-source';
 
 describe('resolveAsmProducer', () => {
@@ -50,6 +51,50 @@ describe('constants', () => {
   it('facility→worksheet map', () => {
     expect(FACILITY_TYPE_TO_WORKSHEET.mulde).toBe('A138-17');
     expect(FACILITY_TYPE_TO_WORKSHEET.becken).toBe('A138-22');
+  });
+});
+
+describe('asmEngineSuppressedSymbols — Gl.7 write-back ownership', () => {
+  /**
+   * OWNERSHIP: Gl.7 (formula engine) is the authoritative producer of A_S,m
+   * ONLY when method='direct'. For every other method the server (materializeAsm)
+   * is the producer; the client engine write-back must be suppressed to prevent
+   * clobber (manual) or infinite save loops (soil_estimate/geometry).
+   */
+  it("direct → A_S_m NOT suppressed (Gl.7 is the owner)", () => {
+    const set = asmEngineSuppressedSymbols('direct');
+    expect(set.has('A_S_m')).toBe(false);
+  });
+
+  it("null (unset / default) → A_S_m NOT suppressed (defaults to direct behaviour)", () => {
+    const set = asmEngineSuppressedSymbols(null);
+    expect(set.has('A_S_m')).toBe(false);
+  });
+
+  it("manual → A_S_m suppressed (engineer enters value; Gl.7 must not clobber)", () => {
+    const set = asmEngineSuppressedSymbols('manual');
+    expect(set.has('A_S_m')).toBe(true);
+  });
+
+  it("geometry → A_S_m suppressed (A138-17/18 geometry eqs produce value; Gl.7 must not fight)", () => {
+    const set = asmEngineSuppressedSymbols('geometry');
+    expect(set.has('A_S_m')).toBe(true);
+  });
+
+  it("soil_estimate → A_S_m suppressed (materializeAsm derives from Tab.13/A_C; Gl.7 fighting causes infinite save loop)", () => {
+    const set = asmEngineSuppressedSymbols('soil_estimate');
+    expect(set.has('A_S_m')).toBe(true);
+  });
+
+  it("direct and null return the same stable empty-set reference (no useMemo churn on non-A138-12 worksheets)", () => {
+    // Both non-suppressed cases must return the same object so that useMemo
+    // deps using reference equality don't create spurious re-renders.
+    const a = asmEngineSuppressedSymbols(null);
+    const b = asmEngineSuppressedSymbols(null);
+    expect(a).toBe(b);
+    const c = asmEngineSuppressedSymbols('direct');
+    // direct also returns the stable empty set (not suppressed path)
+    expect(c).toBe(a);
   });
 });
 

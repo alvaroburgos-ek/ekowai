@@ -26,6 +26,7 @@ import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+import { asmEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -33,11 +34,6 @@ import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 // must not overwrite these values. `fieldBySymbol.has(sym)` inside
 // computedSymbols guards against false positives on other standards.
 const BASIN_GOVERNING_SYMBOLS = new Set(['r_D_n', 'D_min']);
-
-// Stable empty set for the engine suppress-write-back feature. A module-level
-// constant keeps the object identity stable so useMemo/useEffect deps don't
-// churn on non-A138-12 worksheets where no symbols are suppressed.
-const EMPTY_SUPPRESSED: ReadonlySet<string> = new Set();
 
 // Derived symbols materialized by the Tab.6 loading-check engine on every
 // A138-12 save (T3 materialize pass). Read-only for the same reason:
@@ -286,12 +282,22 @@ export function WorksheetForm({
   const asmMethod: string | null =
     asmMethodValueHoisted?.type === 'enum' ? (asmMethodValueHoisted.value ?? null) : null;
 
-  // Memoized suppression set: only contains 'A_S_m' when the engineer has
-  // chosen the manual determination method; empty otherwise. Uses a stable
-  // module-level EMPTY_SUPPRESSED constant so the memo/effect dep doesn't
-  // churn on worksheets where asmMethod is always null.
+  // Memoized suppression set fed to the engine's suppressWriteBackSymbols param.
+  //
+  // OWNERSHIP PRINCIPLE: Gl.7 (A138-12 formula engine) owns A_S,m ONLY when
+  // method='direct' (and when asmMethod is null/unset, which defaults to direct).
+  // For every other method the server (materializeAsm) is the authoritative
+  // producer, so the client engine write-back MUST be suppressed:
+  //   - 'manual'        → engineer enters directly; Gl.7 must not clobber.
+  //   - 'geometry'      → geometry eqs on A138-17/18 produce the value.
+  //   - 'soil_estimate' → materializeAsm derives from Tab.13/A_C; without
+  //                       suppression Gl.7 (e.g. 45) fights the server (e.g. 967)
+  //                       producing an INFINITE SAVE LOOP (~1 write/7 s).
+  //
+  // The helper returns a stable-empty set for the non-suppressed case so this
+  // memo/effect dep does not churn on non-A138-12 worksheets (asmMethod=null).
   const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
-    () => (asmMethod === 'manual' ? new Set(['A_S_m']) : EMPTY_SUPPRESSED),
+    () => asmEngineSuppressedSymbols(asmMethod),
     [asmMethod],
   );
 
@@ -559,7 +565,7 @@ export function WorksheetForm({
           sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
           inheritedFrom={inheritedFromBySymbol[f.symbol]}
           docs={docs}
-          isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')}
+          isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod != null && asmMethod !== 'direct')}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
           inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
