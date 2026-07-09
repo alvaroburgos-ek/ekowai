@@ -34,6 +34,11 @@ import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 // computedSymbols guards against false positives on other standards.
 const BASIN_GOVERNING_SYMBOLS = new Set(['r_D_n', 'D_min']);
 
+// Stable empty set for the engine suppress-write-back feature. A module-level
+// constant keeps the object identity stable so useMemo/useEffect deps don't
+// churn on non-A138-12 worksheets where no symbols are suppressed.
+const EMPTY_SUPPRESSED: ReadonlySet<string> = new Set();
+
 // Derived symbols materialized by the Tab.6 loading-check engine on every
 // A138-12 save (T3 materialize pass). Read-only for the same reason:
 // single-source from the materialize, not hand-editable.
@@ -268,6 +273,27 @@ export function WorksheetForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedEquations, fieldBySymbol]);
 
+  // Resolve the A_S,m determination-method BEFORE wiring the engine so the
+  // suppress-write-back set is in scope at the useEquationEngine call site.
+  // fieldBySymbol and values are both defined above (lines ~226 and ~185
+  // respectively) — no dependency ordering problem.
+  // On all worksheets other than A138-12 the `a_s_m_determination_method`
+  // symbol is absent, asmMethod resolves to null, and suppression is empty
+  // (behaviour identical to before this change).
+  const asmMethodFieldHoisted = fieldBySymbol.get('a_s_m_determination_method');
+  const asmMethodValueHoisted = asmMethodFieldHoisted ? values[asmMethodFieldHoisted.id] : undefined;
+  const asmMethod: string | null =
+    asmMethodValueHoisted?.type === 'enum' ? (asmMethodValueHoisted.value ?? null) : null;
+
+  // Memoized suppression set: only contains 'A_S_m' when the engineer has
+  // chosen the manual determination method; empty otherwise. Uses a stable
+  // module-level EMPTY_SUPPRESSED constant so the memo/effect dep doesn't
+  // churn on worksheets where asmMethod is always null.
+  const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
+    () => (asmMethod === 'manual' ? new Set(['A_S_m']) : EMPTY_SUPPRESSED),
+    [asmMethod],
+  );
+
   // Engine wiring lives in a shared hook so the integration test renders
   // EXACTLY the production code path (not a copy of it).
   const { engineEquationIds, engineStates } = useEquationEngine({
@@ -276,6 +302,7 @@ export function WorksheetForm({
     equations: sortedEquations,
     engineWhitelist: FORMULA_ENGINE_WHITELIST,
     ambiguousSymbols,
+    suppressWriteBackSymbols: engineSuppressedSymbols,
   });
 
   // Symbol → unit lookup for the engine-card drill-down "Eingaben im Detail".
@@ -490,16 +517,10 @@ export function WorksheetForm({
   const orphanFields = fieldsBySectionId.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
 
-  // Resolve the A_S,m determination-method sibling values once so renderField
-  // can forward them to every relevant DynamicField without re-reading the store.
-  // These are only consumed by A_S_m / soil_bodenart_tab13 / a_s_m_provenance
-  // fields on A138-12; on all other worksheets the symbols are absent so the
-  // resolved values are null and the props are harmless.
-  const asmMethodField = fieldBySymbol.get('a_s_m_determination_method');
-  const asmMethodValue = asmMethodField ? values[asmMethodField.id] : undefined;
-  const asmMethod: string | null =
-    asmMethodValue?.type === 'enum' ? (asmMethodValue.value ?? null) : null;
-
+  // asmMethod is resolved above (hoisted before useEquationEngine) so it can be
+  // forwarded both to the engine suppress-write-back set and to DynamicField here.
+  // asmProvenance + asmNeedsReconfirmation are only consumed by DynamicField
+  // (~line 558) so they stay here.
   const asmProvenanceField = fieldBySymbol.get('a_s_m_provenance');
   const asmProvenanceValue = asmProvenanceField ? values[asmProvenanceField.id] : undefined;
   const asmProvenance: string | null =
