@@ -42,7 +42,7 @@
 // ---- 138-SPECIFIC: equation ids used as owner-trigger identifiers ----
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { ASM_GL7_EQUATION_ID, ASM_GL16_EQUATION_ID, ASM_GL17_EQUATION_ID } from '@/lib/eval/asm-source';
+import { ASM_GL7_EQUATION_ID } from '@/lib/eval/asm-source';
 
 // ---- BASIN lookup symbols (kept in sync with worksheet.ts BASIN_LOOKUP_SYMBOLS) ----
 // 138-SPECIFIC: these are the cross-worksheet scalar / carrier symbols that
@@ -176,13 +176,19 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
   },
 
   // ── A_S,m single-source (A138-12) ─────────────────────────────────────────
-  // 138-SPECIFIC data: inputSymbols + ownerTrigger equation-ids + consumerTemplateCode.
-  // A138-12 owns Gl.7; a geometry save (Gl.16/17) fires producer-side.
+  // 138-SPECIFIC data: inputSymbols + ownerTrigger equation-id + consumerTemplateCode.
+  // ownerTrigger matches ONLY Gl.7 (the A138-12 owner equation) — it MUST mirror the
+  // owner-path dispatch gate `isAsmSave` in worksheet.ts, which is Gl.7-only. The
+  // geometry equations Gl.16 (A138-17 Mulde) / Gl.17 (A138-18 Rigole) are deliberately
+  // NOT listed: a geometry-facility save changes a geometry input symbol (h_M/b_R/h_R/L_R,
+  // all in ASM_INPUT_SYMBOLS) and must route through the PRODUCER path. Listing Gl.16/17
+  // here would set ownerFiredIds ⊇ {asm} on a facility save, suppressing the producer-fire
+  // while the owner path (Gl.7-gated) never runs it → asm materializes on NO path
+  // (defect #21). Keep ownerTrigger ≡ isAsmSave.
   {
     id: 'asm',
     inputSymbols: new Set<string>(ASM_INPUT_SYMBOLS),
-    ownerTrigger: (eqs) => eqs.some((e) =>
-      e.id === ASM_GL7_EQUATION_ID || e.id === ASM_GL16_EQUATION_ID || e.id === ASM_GL17_EQUATION_ID),
+    ownerTrigger: (eqs) => eqs.some((e) => e.id === ASM_GL7_EQUATION_ID),
     consumerTemplateCode: 'A138-12',
   },
 ] as const;
