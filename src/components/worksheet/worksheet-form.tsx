@@ -26,6 +26,7 @@ import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+import { asmEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -184,6 +185,7 @@ export function WorksheetForm({
   const setField = useWorksheetStore((s) => s.setField);
   const values = useWorksheetStore((s) => s.values);
   const saveStatus = useWorksheetStore((s) => s.saveStatus);
+  const lastWarnings = useWorksheetStore((s) => s.lastWarnings);
   const pendingFieldIds = useWorksheetStore((s) => s.pendingFieldIds);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const locked = !isWorksheetEditable(instance.status as WorksheetStatus);
@@ -268,6 +270,37 @@ export function WorksheetForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedEquations, fieldBySymbol]);
 
+  // Resolve the A_S,m determination-method BEFORE wiring the engine so the
+  // suppress-write-back set is in scope at the useEquationEngine call site.
+  // fieldBySymbol and values are both defined above (lines ~226 and ~185
+  // respectively) — no dependency ordering problem.
+  // On all worksheets other than A138-12 the `a_s_m_determination_method`
+  // symbol is absent, asmMethod resolves to null, and suppression is empty
+  // (behaviour identical to before this change).
+  const asmMethodFieldHoisted = fieldBySymbol.get('a_s_m_determination_method');
+  const asmMethodValueHoisted = asmMethodFieldHoisted ? values[asmMethodFieldHoisted.id] : undefined;
+  const asmMethod: string | null =
+    asmMethodValueHoisted?.type === 'enum' ? (asmMethodValueHoisted.value ?? null) : null;
+
+  // Memoized suppression set fed to the engine's suppressWriteBackSymbols param.
+  //
+  // OWNERSHIP PRINCIPLE: Gl.7 (A138-12 formula engine) owns A_S,m ONLY when
+  // method='direct' (and when asmMethod is null/unset, which defaults to direct).
+  // For every other method the server (materializeAsm) is the authoritative
+  // producer, so the client engine write-back MUST be suppressed:
+  //   - 'manual'        → engineer enters directly; Gl.7 must not clobber.
+  //   - 'geometry'      → geometry eqs on A138-17/18 produce the value.
+  //   - 'soil_estimate' → materializeAsm derives from Tab.13/A_C; without
+  //                       suppression Gl.7 (e.g. 45) fights the server (e.g. 967)
+  //                       producing an INFINITE SAVE LOOP (~1 write/7 s).
+  //
+  // The helper returns a stable-empty set for the non-suppressed case so this
+  // memo/effect dep does not churn on non-A138-12 worksheets (asmMethod=null).
+  const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
+    () => asmEngineSuppressedSymbols(asmMethod),
+    [asmMethod],
+  );
+
   // Engine wiring lives in a shared hook so the integration test renders
   // EXACTLY the production code path (not a copy of it).
   const { engineEquationIds, engineStates } = useEquationEngine({
@@ -276,6 +309,7 @@ export function WorksheetForm({
     equations: sortedEquations,
     engineWhitelist: FORMULA_ENGINE_WHITELIST,
     ambiguousSymbols,
+    suppressWriteBackSymbols: engineSuppressedSymbols,
   });
 
   // Symbol → unit lookup for the engine-card drill-down "Eingaben im Detail".
@@ -490,6 +524,20 @@ export function WorksheetForm({
   const orphanFields = fieldsBySectionId.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
 
+  // asmMethod is resolved above (hoisted before useEquationEngine) so it can be
+  // forwarded both to the engine suppress-write-back set and to DynamicField here.
+  // asmProvenance + asmNeedsReconfirmation are only consumed by DynamicField
+  // (~line 558) so they stay here.
+  const asmProvenanceField = fieldBySymbol.get('a_s_m_provenance');
+  const asmProvenanceValue = asmProvenanceField ? values[asmProvenanceField.id] : undefined;
+  const asmProvenance: string | null =
+    asmProvenanceValue?.type === 'text' ? (asmProvenanceValue.value ?? null) : null;
+
+  const asmReconfField = fieldBySymbol.get('a_s_m_needs_reconfirmation');
+  const asmReconfValue = asmReconfField ? values[asmReconfField.id] : undefined;
+  const asmNeedsReconfirmation: boolean | null =
+    asmReconfValue?.type === 'boolean' ? (asmReconfValue.value ?? null) : null;
+
   const renderField = (sectionId: string | null) => {
     const fs = fieldsBySectionId.get(sectionId) ?? [];
     return fs.map((f) => {
@@ -517,7 +565,7 @@ export function WorksheetForm({
           sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
           inheritedFrom={inheritedFromBySymbol[f.symbol]}
           docs={docs}
-          isComputed={computedSymbols.has(f.symbol)}
+          isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
           inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
@@ -535,6 +583,9 @@ export function WorksheetForm({
           isPlatformEngineer={isPlatformEngineer}
           readOnly={locked}
           statusReason={statusReason}
+          asmMethod={asmMethod}
+          asmProvenance={asmProvenance}
+          asmNeedsReconfirmation={asmNeedsReconfirmation}
         />
       );
     });
@@ -559,6 +610,21 @@ export function WorksheetForm({
           className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
         >
           Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+        </div>
+      )}
+
+      {lastWarnings.length > 0 && (
+        <div
+          role="alert"
+          data-testid="save-warnings-banner"
+          className="border border-warning/40 rounded p-3 text-sm bg-warning/8 text-ink space-y-1"
+        >
+          {lastWarnings.map((w, i) => (
+            <p key={i} className="flex gap-2">
+              <span aria-hidden="true" className="shrink-0 text-warning">⚠</span>
+              {w}
+            </p>
+          ))}
         </div>
       )}
 

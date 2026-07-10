@@ -42,6 +42,7 @@
 // ---- 138-SPECIFIC: equation ids used as owner-trigger identifiers ----
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
+import { ASM_GL7_EQUATION_ID } from '@/lib/eval/asm-source';
 
 // ---- BASIN lookup symbols (kept in sync with worksheet.ts BASIN_LOOKUP_SYMBOLS) ----
 // 138-SPECIFIC: these are the cross-worksheet scalar / carrier symbols that
@@ -53,6 +54,18 @@ const LOADING_CHECK_CROSS_SYMBOLS = ['A_C', 'flaechengruppe', 'bbz_thickness'] a
 // A_S_m is LOCAL to A138-12 (not cross-worksheet), so the producer-side trigger
 // activates only when an external input symbol changes on a DIFFERENT worksheet.
 // An A138-12 save always fires via ownerTrigger, so A_S_m need not be in inputSymbols.
+
+// ---- 138-SPECIFIC: inputs that change the authoritative A_S,m ----
+// Geometry inputs live on the Phase-4 facility worksheets; direct inputs + method
+// selector on A138-12; facility_type_selected on A138-15 (its change re-resolves the producer).
+const ASM_INPUT_SYMBOLS = [
+  'A_S_min', 'A_S_max',                 // direct (A138-12)
+  'A_C', 'soil_bodenart_tab13',         // soil_estimate (A138-12; Bodenart selector, A-1)
+  'h_M', 'b_R', 'h_R', 'L_R',           // geometry (Mulde/Rigole)
+  'facility_type_selected',             // producer re-resolution (A138-15)
+  'a_s_m_determination_method',         // method switch (A138-12)
+  'a_s_m_provenance',                   // manual provenance (A138-12)
+] as const;
 
 // ---- Type (general — no 138 references) ----
 export type MaterializeEntry = {
@@ -160,6 +173,23 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
     ownerTrigger: () => false,
     // 138-SPECIFIC: outputs land on A138-07 field ids.
     consumerTemplateCode: 'A138-07',
+  },
+
+  // ── A_S,m single-source (A138-12) ─────────────────────────────────────────
+  // 138-SPECIFIC data: inputSymbols + ownerTrigger equation-id + consumerTemplateCode.
+  // ownerTrigger matches ONLY Gl.7 (the A138-12 owner equation) — it MUST mirror the
+  // owner-path dispatch gate `isAsmSave` in worksheet.ts, which is Gl.7-only. The
+  // geometry equations Gl.16 (A138-17 Mulde) / Gl.17 (A138-18 Rigole) are deliberately
+  // NOT listed: a geometry-facility save changes a geometry input symbol (h_M/b_R/h_R/L_R,
+  // all in ASM_INPUT_SYMBOLS) and must route through the PRODUCER path. Listing Gl.16/17
+  // here would set ownerFiredIds ⊇ {asm} on a facility save, suppressing the producer-fire
+  // while the owner path (Gl.7-gated) never runs it → asm materializes on NO path
+  // (defect #21). Keep ownerTrigger ≡ isAsmSave.
+  {
+    id: 'asm',
+    inputSymbols: new Set<string>(ASM_INPUT_SYMBOLS),
+    ownerTrigger: (eqs) => eqs.some((e) => e.id === ASM_GL7_EQUATION_ID),
+    consumerTemplateCode: 'A138-12',
   },
 ] as const;
 

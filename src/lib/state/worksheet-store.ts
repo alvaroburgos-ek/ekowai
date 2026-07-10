@@ -12,6 +12,12 @@ type FieldValue =
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
+/** Warnings from the last completed save (e.g. rejected A_S,m field notices).
+ * Set to [] at the start of each flush so stale warnings don't linger across
+ * saves. Populated from result.warnings on ok=true. Empty on ok=false (hard
+ * error shown via saveStatus='error' is sufficient). */
+export type SaveWarnings = string[];
+
 export type Citation = {
   id: string;
   docId: string;
@@ -34,6 +40,10 @@ type WorksheetStore = {
   saveStatus: SaveStatus;
   lastSavedAt: string | null;
   pendingFieldIds: Set<string>;
+  /** Warnings from the most recent save (server-provided, already in German).
+   * Non-empty when the server rejected one or more fields (e.g. manual A_S,m
+   * without provenance). Cleared at the start of each new flush. */
+  lastWarnings: string[];
   init: (
     instanceId: string,
     initialValues: Record<string, FieldValue>,
@@ -56,6 +66,7 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
   saveStatus: 'idle',
   lastSavedAt: null,
   pendingFieldIds: new Set(),
+  lastWarnings: [],
 
   init: (instanceId, initialValues, initialSources, initialCitations) =>
     set({
@@ -65,6 +76,7 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
       citations: initialCitations,
       saveStatus: 'idle',
       pendingFieldIds: new Set(),
+      lastWarnings: [],
     }),
 
   setField: (fieldId, value) =>
@@ -84,7 +96,9 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
     for (const id of state.pendingFieldIds) {
       valuesToSave[id] = state.values[id];
     }
-    set({ saveStatus: 'saving' });
+    // Clear stale warnings at the start of each new flush so a prior rejected-save
+    // message does not persist across a subsequent clean save.
+    set({ saveStatus: 'saving', lastWarnings: [] });
     const result = await saveFn({ instanceId: state.instanceId, values: valuesToSave });
     if (result.ok) {
       // Apply server-materialized derived values surgically to the store.
@@ -117,6 +131,11 @@ export const useWorksheetStore = create<WorksheetStore>((set, get) => ({
         saveStatus: 'saved',
         lastSavedAt: new Date().toISOString(),
         pendingFieldIds: new Set(),
+        // Surface server warnings (e.g. rejected A_S,m without provenance) so the
+        // UI can display them. The server already returned the persisted value via
+        // derived rows, so the field reverts automatically via the derivedUpdates
+        // merge below. lastWarnings was cleared at the START of this flush (above).
+        lastWarnings: result.warnings ?? [],
         // Merge derived updates on top of current values. pendingFieldIds was
         // cleared above so there are no dirty fields to protect at this point;
         // but this spread preserves any fields not in derivedUpdates untouched.

@@ -55,6 +55,26 @@ export function WorksheetSection({ worksheet }: { worksheet: ReportWorksheet }) 
         ))
       )}
 
+      {/* A_S,m manual provenance notice (A138-12 only, method=manual) */}
+      {worksheet.aSmProvenanceLine ? (
+        <View
+          style={{
+            marginTop: 6,
+            marginBottom: 2,
+            paddingVertical: 5,
+            paddingHorizontal: 8,
+            borderWidth: 0.75,
+            borderColor: '#c8a86b',
+            backgroundColor: '#fdf6e8',
+          }}
+          wrap={false}
+        >
+          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: colors.warning }}>
+            {worksheet.aSmProvenanceLine}
+          </Text>
+        </View>
+      ) : null}
+
       {/* Equations + engine verdicts */}
       {worksheet.equations.length > 0 ? (
         <View>

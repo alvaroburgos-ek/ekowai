@@ -78,6 +78,12 @@ type Args = {
    * ambiguous. Comes from mergeInheritedFields. Any equation whose consumed
    * symbol list intersects this map returns manual_required immediately. */
   ambiguousSymbols?: Record<string, string[]>;
+  /** Output symbols whose engine write-back must be suppressed. When a symbol
+   * is in this set the hook skips the setField call for its equation's output
+   * so that a user-entered value is not clobbered by the formula computation.
+   * Symbol knowledge (which symbols to suppress and why) lives in the caller;
+   * the hook itself remains generic. */
+  suppressWriteBackSymbols?: ReadonlySet<string>;
 };
 
 /**
@@ -110,6 +116,7 @@ export function useEquationEngine({
   equations,
   engineWhitelist,
   ambiguousSymbols,
+  suppressWriteBackSymbols,
 }: Args): {
   engineEquationIds: Set<string>;
   engineStates: Record<string, EvalState>;
@@ -486,6 +493,10 @@ export function useEquationEngine({
       if (equationProfiles[eq.id]?.displayOnly) continue;
       const outSym = eq.outputSymbol;
       if (!outSym) continue;
+      // Manual-method (or other externally-specified) outputs: skip the engine write-back
+      // so a user-entered value is not clobbered by the formula computation. The set of
+      // suppressed output symbols is supplied by the caller (symbol knowledge stays there).
+      if (suppressWriteBackSymbols?.has(outSym)) continue;
       const outField = fieldBySymbol.get(outSym);
       if (!outField) continue;
       const state = engineStates[eq.id];
@@ -523,7 +534,7 @@ export function useEquationEngine({
         }
       }
     }
-  }, [engineStates, engineEquationIds, equations, fieldBySymbol, values, setField]);
+  }, [engineStates, engineEquationIds, equations, fieldBySymbol, values, setField, suppressWriteBackSymbols]);
 
   return { engineEquationIds, engineStates };
 }

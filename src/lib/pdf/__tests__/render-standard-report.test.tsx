@@ -132,6 +132,7 @@ describe('StandardReportDocument', () => {
         titleDe: 'Versickerungsfläche',
         status: 'submitted',
         orderIndex: 1,
+        aSmProvenanceLine: null,
         sections: [
           {
             id: 'sec-12-1',
@@ -272,6 +273,7 @@ describe('StandardReportDocument', () => {
         titleDe: 'Mulden- und Rinnenversickerung',
         status: 'draft',
         orderIndex: 2,
+        aSmProvenanceLine: null,
         sections: [
           {
             id: 'sec-16-1',

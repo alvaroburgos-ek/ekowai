@@ -9,6 +9,7 @@ import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
 import { VerifyButton } from './verify-button';
 import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
+import { AsmMethodStatus, type AsmMethodBadgeState } from './asm-method-status';
 
 type FieldDef = {
   id: string;
@@ -69,9 +70,20 @@ type Props = {
    * consumed when field.symbol === 'ac_as_ratio_check' and isComputed=true,
    * where it is forwarded to AcAsRatioCheckStatus as the reason text. */
   statusReason?: string | null;
+  /** Current value of the sibling `a_s_m_determination_method` field. Only
+   * consumed when field.symbol is one of the A_S,m-related fields
+   * (A_S_m, soil_bodenart_tab13, a_s_m_provenance). Drives read-only gating,
+   * conditional visibility, and badge state. */
+  asmMethod?: string | null;
+  /** Current value of the sibling `a_s_m_provenance` field. Forwarded to the
+   * AsmMethodStatus badge when the badge state is 'manual'. */
+  asmProvenance?: string | null;
+  /** Current value of the sibling `a_s_m_needs_reconfirmation` field. When
+   * true, the AsmMethodStatus badge shows the amber "Typ geändert" state. */
+  asmNeedsReconfirmation?: boolean | null;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -93,6 +105,10 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
     return m;
   }, [docs]);
 
+  // `required` drives aria-required on enum/date/boolean branches (static DB flag).
+  // `effectiveRequired` extends this with the dynamic a_s_m_provenance requirement;
+  // it is computed after the asmProvenanceRequired block and used in the
+  // text/number branches where the dynamic requirement applies.
   const required = field.isRequired || undefined;
   const isSubTotal = field.symbol.endsWith('_total');
   const isCurrency = field.unit === 'EUR';
@@ -102,6 +118,51 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   const rangeHintDe = hasRange
     ? `Bereich: ${typeof min === 'number' ? formatHintNumber(min) : '−∞'} – ${typeof max === 'number' ? formatHintNumber(max) : '∞'}${field.unit ? ` ${field.unit}` : ''}`
     : null;
+
+  // --- A_S,m determination-method gating -----------------------------------
+  //
+  // Three fields are conditionally visible or locked depending on the sibling
+  // `a_s_m_determination_method` value (passed as `asmMethod`).
+  //
+  // soil_bodenart_tab13 — only shown when method='soil_estimate'
+  // a_s_m_provenance    — only shown when method='manual'
+  // A_S_m               — read-only UNLESS method='manual'; when manual the
+  //                        provenance field is dynamically required.
+  //
+  // The hiding is implemented by returning null early — same pattern used for
+  // other conditional fields in the sheet (rainfall_table_ref, etc.).
+
+  if (field.symbol === 'soil_bodenart_tab13' && asmMethod !== 'soil_estimate') {
+    return null;
+  }
+  if (field.symbol === 'a_s_m_provenance' && asmMethod !== 'manual') {
+    return null;
+  }
+
+  // When method is not 'manual', A_S_m is server-derived (read-only).
+  // We add this on top of the existing isComputed/readOnly path.
+  const asmIsLocked = field.symbol === 'A_S_m' && asmMethod !== 'manual';
+
+  // Provenance is required when method='manual' — surface a * indicator and
+  // HTML required attribute via the dynamic flag below.
+  const asmProvenanceRequired =
+    field.symbol === 'a_s_m_provenance' && asmMethod === 'manual';
+
+  // Badge state for A_S_m field:
+  //   needs_reconfirmation beats everything (persisted flag from server)
+  //   manual when asmMethod='manual'
+  //   derived for all other methods
+  const asmBadgeState: AsmMethodBadgeState | null =
+    field.symbol === 'A_S_m'
+      ? asmNeedsReconfirmation
+        ? 'needs_reconfirmation'
+        : asmMethod === 'manual'
+        ? 'manual'
+        : 'derived'
+      : null;
+
+  // Effective isRequired: static DB flag OR dynamic provenance requirement.
+  const effectiveRequired = field.isRequired || asmProvenanceRequired;
 
   return (
     <div
@@ -121,7 +182,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         >
           {isSubTotal && <span className="mr-1.5">Σ</span>}
           {label}
-          {field.isRequired && field.dataType !== 'json' && <span className="ml-1 text-accent-2">*</span>}
+          {effectiveRequired && field.dataType !== 'json' && <span className="ml-1 text-accent-2">*</span>}
         </label>
         <div className="text-[10px] uppercase tracking-[0.18em] text-subtext mt-0.5 flex items-baseline gap-1.5 flex-wrap">
           {field.clauseReference && (
@@ -220,31 +281,66 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           );
         }
 
+        // A_S_m: locked (read-only) unless the engineer selected method='manual'.
+        // `asmIsLocked` is true when this is the A_S_m field AND the method is
+        // not 'manual'. This is layered on top of the existing isComputed/readOnly
+        // flags so that the A_S_m server-derived value is protected on all paths.
+        const effectiveLocked = isComputed || readOnly || asmIsLocked;
+
         const inputEl = (
           <input
             id={inputId}
             type="number"
             inputMode="decimal"
             value={v == null ? '' : v}
-            required={field.isRequired}
-            aria-required={required}
-            readOnly={isComputed || readOnly}
-            tabIndex={isComputed || readOnly ? -1 : undefined}
-            aria-readonly={isComputed || readOnly || undefined}
+            required={effectiveRequired}
+            aria-required={effectiveRequired || undefined}
+            readOnly={effectiveLocked}
+            tabIndex={effectiveLocked ? -1 : undefined}
+            aria-readonly={effectiveLocked || undefined}
             min={typeof min === 'number' ? min : undefined}
             max={typeof max === 'number' ? max : undefined}
             onChange={(e) => {
               if (isComputed) return;
               if (readOnly) return;
+              if (asmIsLocked) return;
               const raw = e.target.value;
               setField(field.id, {
                 type: 'number',
                 value: raw === '' ? null : Number(raw),
               });
             }}
-            className={`block w-full rounded-md border border-hairline-strong py-2 text-sm tabular-nums focus:outline-none focus:ring-0 ${isCurrency ? 'pl-8 pr-3' : 'px-3'} ${isComputed || readOnly ? 'bg-paper-2 text-ink font-semibold cursor-default focus:border-hairline-strong' : 'bg-transparent text-ink focus:border-accent'}`}
+            className={`block w-full rounded-md border border-hairline-strong py-2 text-sm tabular-nums focus:outline-none focus:ring-0 ${isCurrency ? 'pl-8 pr-3' : 'px-3'} ${effectiveLocked ? 'bg-paper-2 text-ink font-semibold cursor-default focus:border-hairline-strong' : 'bg-transparent text-ink focus:border-accent'}`}
           />
         );
+
+        // A_S_m field: render the method-status badge directly below the input.
+        if (asmBadgeState !== null) {
+          const wrappedInput = isCurrency ? (
+            <div className="relative">
+              <span
+                aria-hidden="true"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-subtext pointer-events-none select-none"
+              >
+                €
+              </span>
+              {inputEl}
+            </div>
+          ) : (
+            inputEl
+          );
+          return (
+            <div className="space-y-2">
+              {wrappedInput}
+              <AsmMethodStatus
+                state={asmBadgeState}
+                derivedMethod={asmMethod ?? undefined}
+                provenance={asmProvenance ?? undefined}
+              />
+            </div>
+          );
+        }
+
         return isCurrency ? (
           <div className="relative">
             <span
@@ -278,15 +374,25 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         const maxLength = field.validationRules?.maxLength;
         const useTextarea = (maxLength ?? 0) > 200;
         const textLocked = isComputed || readOnly;
+
+        // a_s_m_provenance: when method='manual' this field is required.
+        // Surface a German validation message via the title attribute so the
+        // browser's built-in constraint UI shows the correct text.
+        const provenanceRequiredTitle =
+          asmProvenanceRequired && !v
+            ? 'Herkunftsangabe erforderlich'
+            : undefined;
+
         return useTextarea ? (
           <textarea
             id={inputId}
             value={v ?? ''}
-            required={field.isRequired}
-            aria-required={required}
+            required={effectiveRequired}
+            aria-required={effectiveRequired || undefined}
             readOnly={textLocked}
             tabIndex={textLocked ? -1 : undefined}
             aria-readonly={textLocked || undefined}
+            title={provenanceRequiredTitle}
             onChange={(e) => {
               if (isComputed) return;
               if (readOnly) return;
@@ -296,22 +402,28 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
           />
         ) : (
-          <input
-            id={inputId}
-            type="text"
-            value={v ?? ''}
-            required={field.isRequired}
-            aria-required={required}
-            readOnly={textLocked}
-            tabIndex={textLocked ? -1 : undefined}
-            aria-readonly={textLocked || undefined}
-            onChange={(e) => {
-              if (isComputed) return;
-              if (readOnly) return;
-              setField(field.id, { type: 'text', value: e.target.value || null });
-            }}
-            className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
-          />
+          <>
+            <input
+              id={inputId}
+              type="text"
+              value={v ?? ''}
+              required={effectiveRequired}
+              aria-required={effectiveRequired || undefined}
+              readOnly={textLocked}
+              tabIndex={textLocked ? -1 : undefined}
+              aria-readonly={textLocked || undefined}
+              title={provenanceRequiredTitle}
+              onChange={(e) => {
+                if (isComputed) return;
+                if (readOnly) return;
+                setField(field.id, { type: 'text', value: e.target.value || null });
+              }}
+              className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
+            />
+            {asmProvenanceRequired && !v && (
+              <p className="text-xs text-error mt-0.5">Herkunftsangabe erforderlich</p>
+            )}
+          </>
         );
       })()}
 

@@ -284,3 +284,101 @@ describe('ac_as_ratio_check derived text field — specific case', () => {
     expect((v as { type: 'text'; value: string | null }).value).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// 5. Warnings — lastWarnings exposed and cleared correctly
+// ---------------------------------------------------------------------------
+
+const ASM_FIELD_ID = 'A_S_m-field-id-0010';
+
+describe('flush with warnings — lastWarnings state', () => {
+  it('sets lastWarnings from result.warnings when server rejects a field', async () => {
+    // Simulate: user types 120 for A_S_m (no provenance → server rejects it and
+    // returns a warning + the persisted value as a derived row).
+    initStore({
+      [ASM_FIELD_ID]: { type: 'number', value: 120 }, // user-typed (will be rejected)
+    }, [ASM_FIELD_ID]);
+
+    const warning = 'Methode "Manuell": Herkunftsangabe (Datenblatt/Quelle) für A_S,m ist erforderlich — bitte ausfüllen.';
+    mockSaveWorksheet.mockResolvedValueOnce({
+      ok: true,
+      saved: 0,
+      warnings: [warning],
+      // Server returns persisted value (45) as a revert derived row
+      derived: [{ fieldId: ASM_FIELD_ID, valueNumber: '45', valueText: null }],
+    } satisfies SaveWorksheetResult);
+
+    await useWorksheetStore.getState().flush(mockSaveWorksheet as never);
+
+    const state = useWorksheetStore.getState();
+
+    // Warning must be surfaced
+    expect(state.lastWarnings).toEqual([warning]);
+
+    // Field must have reverted to the persisted DB value (45), not the rejected 120
+    const v = state.values[ASM_FIELD_ID];
+    expect(v?.type).toBe('number');
+    expect((v as { type: 'number'; value: number | null }).value).toBeCloseTo(45, 4);
+  });
+
+  it('clears lastWarnings at the start of a subsequent flush', async () => {
+    // Seed the store with a prior warning state (from a previous rejected save)
+    initStore({
+      [ASM_FIELD_ID]: { type: 'number', value: 45 },
+      [DIRTY_FIELD_ID]: { type: 'number', value: 1 },
+    }, [DIRTY_FIELD_ID]);
+
+    // First flush: set a warning
+    mockSaveWorksheet.mockResolvedValueOnce({
+      ok: true,
+      saved: 0,
+      warnings: ['some prior warning'],
+      derived: [],
+    } satisfies SaveWorksheetResult);
+    await useWorksheetStore.getState().flush(mockSaveWorksheet as never);
+    expect(useWorksheetStore.getState().lastWarnings).toHaveLength(1);
+
+    // Second flush: clean save — warnings must be cleared
+    useWorksheetStore.getState().setField(DIRTY_FIELD_ID, { type: 'number', value: 2 });
+    mockSaveWorksheet.mockResolvedValueOnce({
+      ok: true,
+      saved: 1,
+      warnings: [],
+      derived: [],
+    } satisfies SaveWorksheetResult);
+    await useWorksheetStore.getState().flush(mockSaveWorksheet as never);
+
+    expect(useWorksheetStore.getState().lastWarnings).toEqual([]);
+  });
+
+  it('lastWarnings is empty after a clean save (no warnings)', async () => {
+    initStore({ [DIRTY_FIELD_ID]: { type: 'number', value: 5 } }, [DIRTY_FIELD_ID]);
+
+    mockSaveWorksheet.mockResolvedValueOnce({
+      ok: true,
+      saved: 1,
+      warnings: [],
+      derived: [],
+    } satisfies SaveWorksheetResult);
+
+    await useWorksheetStore.getState().flush(mockSaveWorksheet as never);
+
+    expect(useWorksheetStore.getState().lastWarnings).toEqual([]);
+  });
+
+  it('lastWarnings is NOT set on ok=false (hard error uses saveStatus=error)', async () => {
+    initStore({ [DIRTY_FIELD_ID]: { type: 'number', value: 1 } }, [DIRTY_FIELD_ID]);
+
+    mockSaveWorksheet.mockResolvedValueOnce({
+      ok: false,
+      error: 'DB connection lost',
+    } satisfies SaveWorksheetResult);
+
+    await useWorksheetStore.getState().flush(mockSaveWorksheet as never);
+
+    const state = useWorksheetStore.getState();
+    expect(state.saveStatus).toBe('error');
+    // lastWarnings was cleared at flush start and never set (ok=false path)
+    expect(state.lastWarnings).toEqual([]);
+  });
+});

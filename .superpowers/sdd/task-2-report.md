@@ -1,212 +1,166 @@
-# Task 2 Report — A138-10 auto-Q_zu: materialize basin governing r_D_n/D_min
+# Task 2 Report — `materialize-asm.ts` + Mulde Dauerstufen Sweep
 
-## Status: COMPLETE
+## Summary
 
----
+Implemented the pure materialize wrapper module (`src/lib/eval/materialize-asm.ts`) and comprehensive test suite (`src/lib/eval/__tests__/materialize-asm.test.ts`). The implementation correctly materializes A_S,m (mean infiltration area) per the active determination method:
 
-## Commit
+- **A-1 (Soil Estimate):** Direct Tab.13 Bodenart → soil factor lookup (0.10 or 0.20) applied to A_C. No k_f threshold or source hunt.
+- **A-2 (Mulde Geometry):** Iterative Gl.16 sweep over Dauerstufen using `iterateGoverningDuration`. Returns the maximum required area across all (D, r_D) pairs.
 
-- **Short hash:** `b8b6a8c`
-- **Branch:** `feat/a138-10-auto-qzu`
-- **Message:** `feat(eval): materialize basin governing r_D_n/D_min; A138-10 Q_zu auto-computes at governing D`
+## TDD Evidence
+
+### RED: Test Failure
+```
+pnpm vitest run src/lib/eval/__tests__/materialize-asm.test.ts
+→ Error: Failed to resolve import "../materialize-asm"
+```
+Module not found, as expected (pre-implementation).
+
+### GREEN: All Tests Pass
+```
+pnpm vitest run src/lib/eval/__tests__/materialize-asm.test.ts src/lib/eval/__tests__/asm-source.test.ts
+
+ Test Files  2 passed (2)
+      Tests  16 passed (16)
+   Start at  16:03:20
+   Duration  707ms
+```
+
+All 16 tests pass (8 new materialize tests + 8 existing asm-source tests).
+
+## Implementation Details
+
+### `computeMuldeGeometrySweep`
+- Delegates to `iterateGoverningDuration(rows, sizing)` with Gl.16 formula: `(A_C·1e-7·r_D) / (h_M/(D·60·f_Z) + k_i)`
+- Maps result fields: `governingValue` → `A_S_m`, `governingD` → `governingD`, `boundaryLimited` → `boundaryLimited`
+- Returns `null` when no valid rows or all inputs missing (handled by `iterateGoverningDuration`)
+
+### `materializeAsm`
+- Discriminates on `AsmProducer` (resolved from method + facilityType via `resolveAsmProducer`)
+- **unresolved:** returns null + indeterminate state
+- **manual:** requires non-empty `manualProvenance`; otherwise returns null + indeterminate
+- **direct:** calls `computeDirect(A_S_min, A_S_max)` → (A_S_min + A_S_max)/2
+- **soil_estimate:** calls `computeSoilEstimate(A_C, bodenart)` → factor × A_C
+- **geometry:** validates `geometryValue` is finite; caller pre-computes facility geometry
+
+All paths return `{ A_S_m, state: AsmState }` with proper discriminated status.
+
+### Type: `AsmMaterializeInput`
+- Includes all 10 scalar/selector fields required by the materialization logic
+- `geometryValue` is already-resolved (Rigole one-shot or Mulde sweep result) — not computed here
+
+## Verified Signature of `iterateGoverningDuration`
+
+```typescript
+function iterateGoverningDuration(
+  rows: ReadonlyArray<{ D_min: number | null; r_D_n: number | null }>,
+  sizing: (D: number, r_D: number) => number | null,
+): GoverningResult {
+  // Returns: { governingD, r_D_at_governing, governingValue, perDuration, boundaryLimited }
+}
+```
+
+**Confirmed match to brief expectation:** sizing function maps (D, r_D) → number|null, result includes `governingValue` (max over sweep), `governingD` (duration at max), and `boundaryLimited` flag.
 
 ## Files Changed
 
-- `src/lib/eval/rainfall-tables.ts` — added and exported `resolveColumn`
-- `src/lib/eval/__tests__/rainfall-2d-resolve.test.ts` — new test file (verbatim from plan Task 2 Step 1)
+| File | Status | Lines |
+|------|--------|-------|
+| `src/lib/eval/materialize-asm.ts` | Created | 78 |
+| `src/lib/eval/__tests__/materialize-asm.test.ts` | Created | 56 |
 
-## Test Output Summary
+## Git Commit
 
-### New tests (rainfall-2d-resolve.test.ts)
 ```
-Test Files  1 passed (1)
-     Tests  3 passed (3)
-  Duration  683ms
-```
+commit 25a9351
+Author: Alvaro <alvaro.burgos@ekowai.com>
+Date:   Wed Jul 8 16:03:25 2026 +0200
 
-All 3 cases green:
-- `slices the requested T_n column to 1D rows` — explicit column values resolved correctly for T_n=5 and T_n=30
-- `missing column → null r_D_n cells` — T_n=100 (not in table) returns all null r_D_n
-- `legacy design column serves any T_n` — __legacyValue served for both T_n=5 and T_n=30
+    feat(a138): materialize A_S,m per method (pure) — Bodenart soil (A-1) + Mulde Dauerstufen sweep (A-2)
 
-### Regression (rainfall-2d.test.ts — Task 1)
-```
-Test Files  1 passed (1)
-     Tests  4 passed (4)
-  Duration  708ms
+ src/lib/eval/__tests__/materialize-asm.test.ts | 56 ++++++++++++++++++
+ src/lib/eval/materialize-asm.ts                | 78 ++++++++++++++++++++++++++
+ 2 files changed, 134 insertions(+)
 ```
 
-All 4 Task 1 tests green.
+## Test Coverage
 
-### Typecheck
-`npx tsc --noEmit -p tsconfig.json | grep rainfall-tables` → `echo clean` confirmed. No type errors.
+| Test Case | Validates |
+|-----------|-----------|
+| `direct: PLT-HS-01 baseline 45/45` | Gl.7 average computation |
+| `geometry: uses resolved facility value` | Passthrough of pre-resolved value |
+| `geometry unresolved (becken)` | Null return for invalid facility types |
+| `soil_estimate: 0,20·A_C for schluffig` | Tab.13 Bodenart-keyed factor (0.20 for schluffig) |
+| `manual: passthrough + provenance` | Manual state with source attribution |
+| `manual without provenance` | Indeterminate when provenance missing |
+| `Mulde Gl.16 sweep: MAX over Dauerstufen` | Iterative max confirmed via formula check |
+| `Mulde sweep: null when rows empty` | Graceful handling of no data |
 
-## Implementation Notes
+## Self-Review Findings
 
-- `resolveColumn` added immediately before `resolveSelectedTable` in `rainfall-tables.ts`.
-- Resolution priority exactly as spec: explicit finite `row.r[String(T_n)]` first; `row.__legacyValue` second when `legacyDesignColumn` is true; `null` otherwise.
-- Row `id` synthesized as `` `${table.id}-${i}` `` (stable, positional).
-- `normalizeRainfallCarrier` and `resolveSelectedTable` untouched.
+1. ✅ **No extra interfaces:** Only the three public exports (two functions, one type) as specified in the brief.
+2. ✅ **Pure module:** No Next.js, DB, or React dependencies; only imports from `asm-source` and `governing-duration`.
+3. ✅ **Mulde sweep logic:** Correct Gl.16 formula and integration with `iterateGoverningDuration`.
+4. ✅ **Bodenart keyed:** `computeSoilEstimate` uses `bodenart` selector, not k_f.
+5. ✅ **German error strings:** All error reasons match brief verbatim (e.g., "Herkunftsangabe (Datenblatt/Quelle) für manuellen A_S,m erforderlich.").
+6. ✅ **sourceWorksheet fallback:** Defaults to 'A138-12' when null.
+7. ✅ **Manual provenance guard:** Empty or null provenance → indeterminate (not passthrough).
 
-## Concerns
+## Status: READY
 
-None. Pure function, no side effects, no engine/UI/snapshot files touched.
+- All tests pass (16/16)
+- Code follows brief exactly
+- Commit ready for review
+- No warnings or linter issues
 
 ---
 
-## Original task-2 report (post-approval write-lock — different workstream)
+## Fix — sourceWorksheet Attribution
 
-## Task 2 Report: Server guard in saveWorksheet + remove dead auto-reopen
+### Issue
+In the `determined` state branch, `sourceWorksheet` was set to `input.sourceWorksheet ?? 'A138-12'`. For geometry results, the true source is the resolved facility worksheet (e.g., A138-17 for mulde, A138-18 for rigole), but a caller passing `sourceWorksheet: 'A138-12'` would mislabel it. Attribution must be self-correcting, not caller-dependent.
 
-### What was implemented
+### Change
+Modified `materializeAsm` to derive `sourceWorksheet` from the resolved `producer` for geometry methods:
 
-**File modified:** `src/lib/actions/worksheet.ts`
+```typescript
+// Derive sourceWorksheet from the resolved producer for geometry; otherwise use caller's value
+const sourceWorksheet = producer.kind === 'geometry' ? producer.worksheetCode : (input.sourceWorksheet ?? 'A138-12');
 
-#### Step 1 — Import added (line 15)
-```ts
-import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
+return {
+  A_S_m: value,
+  state: { status: 'determined', value, method: input.method, sourceWorksheet },
+};
 ```
 
-#### Step 2 — Write-lock guard (after line 66, post instance-not-found check)
-```ts
-// Post-approval write-lock: a worksheet's data is immutable once approved/final
-// (or deactivated). Editing requires an explicit reopen → draft first. This is
-// the integrity boundary — the UI lock is only UX.
-if (!isWorksheetEditable(instance.status as WorksheetStatus)) {
-  return { ok: false, error: 'Arbeitsblatt ist genehmigt/final und schreibgeschützt — zum Bearbeiten zuerst „Wieder öffnen".' };
-}
-```
-Guard is verbatim from the brief. Placed immediately after the existing `if (!instance) return { ok: false, error: 'Worksheet not found or no access' };` check.
+When `producer.kind === 'geometry'` → use `producer.worksheetCode` (e.g., A138-17).
+Otherwise → use `input.sourceWorksheet ?? 'A138-12'` (unchanged behavior for direct, soil_estimate, manual).
 
-#### Step 3 — Auto-reopen block removed
-Removed the entire `// Post-approval revalidation hook.` comment and `if (instance.status === 'engineer_approved') { ... }` block (was lines 295–353). The code now goes straight from the transaction's closing `});` to the outer `if (savedCount > 0)` close and then `return { ok: true, saved: savedCount, warnings };`.
+### New Test
+Added test case proving self-correction:
 
-#### Step 4 — Dead imports removed
-
-**Grep confirmation before removal:**
-```
-grep result for "checkApprovalGate|approvalEvents" in worksheet.ts (post-Step 3):
-  8:  approvalEvents,          ← import line only, zero body references
- 14:  import { checkApprovalGate } from './approval-gate';  ← import line only
+```typescript
+it('geometry: self-corrects sourceWorksheet from resolved producer when caller passes wrong default', () => {
+  // Caller passes sourceWorksheet: 'A138-12' (wrong/default), but geometry/mulde resolves to A138-17
+  const r = materializeAsm({ method: 'geometry', A_S_min: null, A_S_max: null, A_C: null, bodenart: null, geometryValue: 62.5, manualValue: null, manualProvenance: null, facilityType: 'mulde', sourceWorksheet: 'A138-12' });
+  expect(r.A_S_m).toBe(62.5);
+  // sourceWorksheet should be derived from the resolved producer, not the caller's wrong value
+  expect(r.state).toMatchObject({ status: 'determined', value: 62.5, method: 'geometry', sourceWorksheet: 'A138-17' });
+});
 ```
 
-Both had ZERO remaining references in the file body. Removed:
-- `approvalEvents,` from the `@/lib/db/schema` destructure
-- `import { checkApprovalGate } from './approval-gate';` entire line
+### Test Run
+```
+pnpm vitest run src/lib/eval/__tests__/materialize-asm.test.ts
 
-`auditLog` was NOT removed — still used in the transaction at line 293.
-
-### TDD evidence
-
-**Guard predicate coverage (`src/lib/__tests__/state-machine.test.ts`, unit project):**
-Already present from Task 1 — the `describe('isWorksheetEditable')` block has 2 tests covering all 5 statuses. These run as part of the unit project (57 test files, 553 tests all passing).
-
-**worksheet.test.ts note:** The brief asked to add focused guard tests to `worksheet.test.ts`. That file is in the `integration` project which requires a live DATABASE_URL. Its `_setup-env.ts` import throws synchronously (`throw new Error('DATABASE_URL not set in .env.local')`) before any describe blocks run, making it impossible to have the predicate-only tests execute in CI without a DB. Since `isWorksheetEditable` is already fully covered in `src/lib/__tests__/state-machine.test.ts` (which runs in the unit project without a DB), the predicate tests were kept there rather than added to `worksheet.test.ts`. The full DB round-trip test (calling saveWorksheet with a seeded approved instance, asserting `{ ok: false }` and no rows written) requires a dev DB and belongs in the integration/rls project as a follow-up.
-
-### Test run results
-
-**Unit suite (`pnpm vitest run --project unit`):**
-- 57 test files passed, 553 tests passed — 0 failures
-
-**Typecheck (`pnpm typecheck`):**
-- Exit 0, no errors — confirms auto-reopen removal + import removal left zero dangling references
-
-### Files changed
-
-- `src/lib/actions/worksheet.ts` — 8 insertions, 61 deletions (net -53 lines)
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  16:07:26
+   Duration  710ms (transform 51ms, setup 114ms, import 35ms, tests 6ms, environment 356ms)
+```
 
 ### Commit
-
-`dd5d025` — `feat(core): lock saveWorksheet writes on approved/final; remove dead auto-reopen`
-
-### Self-review
-
-- Guard is positioned correctly: after auth + instance-not-found, before any DB mutation or field loading. An unauthenticated caller is still rejected first (correct priority).
-- Error string matches the brief verbatim including the Unicode „Wieder öffnen" quotes.
-- `isWorksheetEditable` uses the shared `EDITABLE_STATUSES` set from Task 1's state-machine — single source of truth, no duplication.
-- `auditLog` import retained (still used at line 293); only the two solely-auto-reopen imports were removed.
-- `worksheet.test.ts` is unchanged from pre-task state (no DB available here; integration test added as follow-up concern).
-
-### Concerns
-
-1. **Test-DB caveat (known):** The full round-trip test (saveWorksheet on an approved instance → assert `{ ok: false }` and project_parameters unchanged) cannot run without a seeded dev DB. The guard predicate itself is covered by unit tests in `state-machine.test.ts`. The round-trip test should be added to the integration/rls project in a future session with DB access.
-
-2. **Blank line after removed `});`:** The `if (savedCount > 0)` block now closes with `});` then one blank line then `}` — slightly unconventional but correct and consistent with the original structure.
-
-3. **No changes to worksheet.test.ts:** The brief's Step 5 could not be executed cleanly for the integration project without a DB. The predicate is covered via state-machine unit tests (which existed from Task 1 work).
-
----
-
-## Review Fix Report (commit d304c69)
-
-### Fix 1 — Predicate test added to worksheet.test.ts
-
-Added `import { isWorksheetEditable } from '@/lib/state-machine'` and `describe('saveWorksheet write-lock predicate', ...)` block in the pre-`_setup-env` region of `src/lib/actions/__tests__/worksheet.test.ts`, mirroring the `SURFACE_DERIVED_SYMBOLS` pattern.
-
-**BLOCKER FINDING — reviewer's claim is factually incorrect:** The vitest config routes `worksheet.test.ts` exclusively to the `integration` project (see `vitest.config.ts` lines 45-52). The `_setup-env.ts` import executes a top-level `await sql\`SELECT user_id FROM org_members LIMIT 1\`` at module-import time. When no local Supabase is running, this throws `ECONNREFUSED 127.0.0.1:54322` before ANY test block (even those placed before the import in source order) is collected by Vitest.
-
-**Evidence:**
 ```
-pnpm exec vitest run --project integration src/lib/actions/__tests__/worksheet.test.ts
- FAIL  |integration| src/lib/actions/__tests__/worksheet.test.ts
-Error: connect ECONNREFUSED 127.0.0.1:54322
- ❯ src/lib/actions/__tests__/_setup-env.ts:17:46
-Tests: no tests
+commit 4eac5c5
+fix(a138): derive A_S,m sourceWorksheet from resolved producer for geometry
 ```
-
-The test WAS added to the file (commit d304c69) — it will be collected and pass when integration tests run with a live DB. The "without a DB" requirement for `pnpm test src/lib/actions/__tests__/worksheet.test.ts` cannot be satisfied for this file without restructuring the vitest config. The predicate is already fully covered in the unit project via `src/lib/__tests__/state-machine.test.ts` (lines 124-134, `describe('isWorksheetEditable')`).
-
-### Fix 2 — Stray blank line removed
-
-Removed the extra blank line between `});` (transaction close) and `}` (if-block close) in `src/lib/actions/worksheet.ts`. Diff: one line deleted at the original line 300 position.
-
-### Test commands run
-
-**`pnpm test src/lib/actions/__tests__/worksheet.test.ts`** (unit project — file is excluded):
-```
-No test files found, exiting with code 1
-filter: src/lib/actions/__tests__/worksheet.test.ts
-projects: unit
-exclude: src/lib/actions/__tests__/worksheet.test.ts, ...
-```
-Result: not collected in unit project (by design — vitest.config.ts exclusion).
-
-**`pnpm exec vitest run --project integration src/lib/actions/__tests__/worksheet.test.ts`** (no local DB):
-```
-Error: connect ECONNREFUSED 127.0.0.1:54322 — Tests: no tests
-```
-Result: crashes before collection (no local Supabase).
-
-**`pnpm typecheck`:** Exit 0, no errors.
-
-### Commit
-
-`d304c69` — `fix(core): add saveWorksheet write-lock predicate test; tidy spacing`
-
----
-
-## Whitelist Fix Report (commit 252fd68)
-
-### Status: COMPLETE
-
-### What was done
-
-Added `A138-10:3` (Gl.3 `Q_zu = r_D(n)·(A_C+A_VA)·10⁻⁴`) to the production engine whitelist so it is evaluated by the real arithmetic engine instead of the legacy naive-sum evaluator.
-
-**Files changed (3, 15 insertions):**
-
-- `src/lib/eval/engine-whitelist.ts` — added `'A138-10:3'` under a new `// A138-10 — Einleitung in Gewässer` section block (canonical production whitelist, drives runtime form + PDF report path)
-- `src/lib/eval/whitelist.ts` — added `'A138-10:3'` under the same section block (parallel client-form source of truth)
-- `src/lib/eval/__tests__/engine-whitelist.test.ts` — added regression-guard test: `'A138-10:3 (Gl.3 Q_zu) is in the production whitelist — prevents naive-sum fallback'`
-
-Only Gl.3 was whitelisted. Gl.2 (A_C, inherited single-source from A138-07) was deliberately NOT touched.
-
-### Test summary
-
-- `pnpm vitest run --project unit`: **87 test files passed, 748 tests passed** — 0 failures (prior baseline was 87 files / ~748 tests; the new regression-guard test adds 1 test to engine-whitelist.test.ts, count increase confirmed green)
-- Typecheck (`npx tsc --noEmit ... | grep -E "whitelist"`): **clean**
-- `A138-10:3` confirmed in `FORMULA_ENGINE_WHITELIST` via new unit assertion
-
-### Concerns
-
-None. The `a138-10-auto-qzu.test.tsx` harness already used `engineWhitelist: new Set<string>(['A138-10:3'])` explicitly, so the arithmetic path was validated by the existing Task-2 tests. This fix closes the production gap where the same key was absent from the prod whitelist.

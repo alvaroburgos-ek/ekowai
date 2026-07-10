@@ -93,6 +93,14 @@ export type ReportWorksheet = {
   sections: ReportSection[];
   equations: ReportEquation[];
   compliance: ReportCompliance[];
+  /**
+   * Present only when A138-12's A_S,m was specified manually by the engineer
+   * (a_s_m_determination_method === 'manual' && a_s_m_provenance non-empty).
+   * The PDF renderer must show this line prominently so the reviewer knows the
+   * value was NOT derived by the engine.
+   * For all other worksheets and for the non-manual methods this is null.
+   */
+  aSmProvenanceLine: string | null;
 };
 
 export type ReportLetterhead = {
@@ -577,6 +585,26 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         };
       });
 
+      // -----------------------------------------------------------------------
+      // A138-12 manual A_S,m provenance line (Task 10).
+      // When the engineer specified A_S,m manually (not derived by the engine),
+      // the report must carry one explicit line making this visible to the
+      // reviewer. Authoritative discriminator: a_s_m_determination_method === 'manual'.
+      // -----------------------------------------------------------------------
+      let aSmProvenanceLine: string | null = null;
+      if (tpl.code === 'A138-12') {
+        const method = resolvedBySymbol.get('a_s_m_determination_method');
+        const prov   = resolvedBySymbol.get('a_s_m_provenance');
+        if (
+          method?.value === 'manual' &&
+          typeof prov?.value === 'string' &&
+          prov.value.trim() !== ''
+        ) {
+          aSmProvenanceLine =
+            `A_S,m vorgegeben (nicht abgeleitet) — Herkunft: ${prov.value.trim()}`;
+        }
+      }
+
       const instance = instanceByTemplateId.get(tpl.id);
       return {
         instanceId: instance?.id ?? null,
@@ -588,6 +616,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         sections: wsSections,
         equations: evaluatedEquations,
         compliance: evaluatedCompliance,
+        aSmProvenanceLine,
       };
     });
 
