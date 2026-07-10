@@ -55,8 +55,6 @@ const EQUATIONS = [
   },
 ];
 
-/** Engine whitelist — the two new A138-07 surface-split producers. */
-const ENGINE_WHITELIST = new Set<string>(['A138-07:2f', 'A138-07:2g']);
 
 /**
  * 2-row carrier:
@@ -98,7 +96,6 @@ function Harness() {
     worksheetCode: 'A138-07',
     fields: FIELDS,
     equations: EQUATIONS,
-    engineWhitelist: ENGINE_WHITELIST,
   });
   return null;
 }

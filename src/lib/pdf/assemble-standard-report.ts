@@ -1,6 +1,7 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
+import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 
 /**
  * Pure assembler for the per-standard PDF report data.
@@ -316,16 +317,19 @@ export type AssemblerInput = {
 };
 
 // =============================================================================
-// Engine whitelist — mirrors the one in worksheet-form.tsx. Kept in sync by
-// the matching unit test (a drift would be caught by the data-assembly
-// snapshot when a new equation is wired). The PDF renders a green verdict
-// only for these.
+// DWA-A-138 server-evaluable subset (PDF).
+//
+// Engine generalization (Layer 0): the PDF assembler builds only flat inputs —
+// it does NOT assemble browser-side carriers (surface_inventory, KOSTRA table,
+// flood sub-areas). DWA-A-138's carrier-dependent aggregator equations
+// (Gl. 2 / Gl. 8 / Gl. 10) therefore cannot be evaluated here and stay listed
+// out (rendered `not_evaluated`, not a misleading manual_required). This set is
+// the 138 equations that DO evaluate server-side without a carrier, kept so the
+// 138 PDF output is unchanged by generalization. Non-138 standards have no
+// carrier aggregators, so every non-138 equation routes through the evaluator
+// (minus the manual deny-set) directly — see the gate below.
 // =============================================================================
 export const PDF_ENGINE_WHITELIST = new Set<string>([
-  // Aggregator-driven equations (Gl. 2 / Gl. 8) are intentionally NOT in the
-  // server-side whitelist — they read browser-side carriers (sub_areas,
-  // KOSTRA table) the server-rendered PDF can't access. Those surface as
-  // `not_evaluated` rather than misleading manual_required.
   'A138-12:4',
   'A138-12:7',
   'A138-16:11',
@@ -524,8 +528,15 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       // evaluator the browser uses. NEVER returns a number when the
       // engine can't verify — that's the three-state contract.
       const evaluatedEquations: ReportEquation[] = tplEqs.map((eq) => {
-        const whitelistKey = `${tpl.code}:${eq.equationNumber}`;
-        if (!PDF_ENGINE_WHITELIST.has(whitelistKey)) {
+        const key = `${tpl.code}:${eq.equationNumber}`;
+        // 138 stays on its carrier-free curated subset (the assembler builds no
+        // carriers); every other standard routes through the evaluator except
+        // the manual deny-set. 138 PDF output is unchanged by generalization.
+        const is138 = tpl.code.startsWith('A138-');
+        const evaluable =
+          shouldEngineEvaluate(tpl.code, eq.equationNumber) &&
+          (is138 ? PDF_ENGINE_WHITELIST.has(key) : true);
+        if (!evaluable) {
           return {
             id: eq.id,
             equationNumber: eq.equationNumber,

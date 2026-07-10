@@ -8,7 +8,7 @@
 
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition } from '@/lib/compliance/evaluate';
-import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
+import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
@@ -371,11 +371,13 @@ export function buildSnapshotPayload(args: {
 
   const equationOutputs: Record<string, SnapshotEquationOutput> = {};
   for (const eq of equationList) {
-    const key = `${args.worksheetCode}:${eq.equationNumber}`;
-    if (!FORMULA_ENGINE_WHITELIST.has(key)) {
+    // Engine generalization (Layer 0): evaluate every equation except the
+    // manual deny-set. Deny-listed equations are recorded `skipped` (the
+    // engine intentionally renders no auto value for them).
+    if (!shouldEngineEvaluate(args.worksheetCode, eq.equationNumber)) {
       equationOutputs[eq.equationNumber] = {
         kind: 'skipped',
-        manualRequiredReason: 'Engine nicht für diese Gleichung verdrahtet',
+        manualRequiredReason: 'Gleichung steht auf der Engine-Sperrliste (manuell)',
         formula: eq.formula,
       };
       continue;

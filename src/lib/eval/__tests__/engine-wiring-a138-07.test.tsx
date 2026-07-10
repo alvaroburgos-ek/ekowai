@@ -70,7 +70,6 @@ const EQUATIONS = [
 ];
 
 /** Engine whitelist — the four A138-07 surface producers. */
-const ENGINE_WHITELIST = new Set<string>(['A138-07:2', 'A138-07:2c', 'A138-07:2d', 'A138-07:2e']);
 
 /** Two paved schwarzdecke_asphalt surfaces (c_i=0.9, c_s=1.0). */
 const SURFACE_CARRIER = {
@@ -88,7 +87,6 @@ function Harness() {
     worksheetCode: 'A138-07',
     fields: FIELDS,
     equations: EQUATIONS,
-    engineWhitelist: ENGINE_WHITELIST,
   });
   return null;
 }

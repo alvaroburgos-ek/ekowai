@@ -7,16 +7,16 @@
  * primitives drive both paths: `evaluateFormula` (arithmetic engine +
  * aggregators) and `evaluateCondition` (compliance DSL parser).
  *
- * SCOPE: equation results for every whitelisted equation
- * (`FORMULA_ENGINE_WHITELIST`) and compliance results for every
- * compliance row, both keyed for the per-worksheet report renderer.
+ * SCOPE: equation results for every equation (the engine routes all except
+ * the manual deny-set, see `equation-manual-denylist`) and compliance results
+ * for every compliance row, both keyed for the per-worksheet report renderer.
  */
 import { evaluateFormula, type EvalState } from './formula';
 import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
 import { equationProfiles } from './equation-profiles';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
-import { FORMULA_ENGINE_WHITELIST, whitelistKey } from './engine-whitelist';
+import { shouldEngineEvaluate } from './equation-manual-denylist';
 import { normalizeSurfaceCarrier } from './surface-inventory';
 import {
   normalizeRainfallCarrier,
@@ -285,8 +285,10 @@ export function evaluateWorksheetEquations(
 
   const out: EquationReportResult[] = [];
   for (const eq of equations) {
-    const key = whitelistKey(worksheetCode, eq.equationNumber);
-    if (!FORMULA_ENGINE_WHITELIST.has(key)) continue;
+    // Engine generalization (Layer 0): evaluate every equation except the
+    // manual deny-set, mirroring the client gate. The evaluator fail-safe
+    // blanks anything it cannot faithfully compute.
+    if (!shouldEngineEvaluate(worksheetCode, eq.equationNumber)) continue;
 
     const rewrite = rewriteRules[eq.id];
     const profile = equationProfiles[eq.id];

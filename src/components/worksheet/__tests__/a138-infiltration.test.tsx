@@ -85,12 +85,10 @@ const FK_EQUATIONS = [
 function FKHarness() {
   const memoFields     = useMemo(() => FK_FIELDS, []);
   const memoEquations  = useMemo(() => FK_EQUATIONS, []);
-  const memoWhitelist  = useMemo(() => new Set<string>(['A138-11:6']), []);
   const { engineStates } = useEquationEngine({
     worksheetCode: 'A138-11',
     fields:        memoFields,
     equations:     memoEquations,
-    engineWhitelist: memoWhitelist,
   });
   const state = engineStates[FK_ID];
   if (!state) return null;
@@ -134,12 +132,10 @@ const KI_EQUATIONS = [
 function KIHarness() {
   const memoFields     = useMemo(() => KI_FIELDS, []);
   const memoEquations  = useMemo(() => KI_EQUATIONS, []);
-  const memoWhitelist  = useMemo(() => new Set<string>(['A138-11:5']), []);
   const { engineStates } = useEquationEngine({
     worksheetCode: 'A138-11',
     fields:        memoFields,
     equations:     memoEquations,
-    engineWhitelist: memoWhitelist,
   });
   const state = engineStates[KI_ID];
   if (!state) return null;
@@ -187,12 +183,10 @@ const QS_EQUATIONS = [
 function QSHarness() {
   const memoFields     = useMemo(() => QS_FIELDS, []);
   const memoEquations  = useMemo(() => QS_EQUATIONS, []);
-  const memoWhitelist  = useMemo(() => new Set<string>(['A138-13:9']), []);
   const { engineStates } = useEquationEngine({
     worksheetCode: 'A138-13',
     fields:        memoFields,
     equations:     memoEquations,
-    engineWhitelist: memoWhitelist,
   });
   const state = engineStates[QS_ID];
   if (!state) return null;

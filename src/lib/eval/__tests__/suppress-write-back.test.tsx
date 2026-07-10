@@ -57,19 +57,16 @@ const EQUATIONS = [
 ];
 
 // Both equations are on the whitelist so the engine processes them.
-const ENGINE_WHITELIST = new Set<string>(['TEST-WS:S1', 'TEST-WS:S2']);
 
 // ---- Harness ----------------------------------------------------------------
 // Renders nothing to the DOM — we only care about the write-back effect.
 function Harness({ suppress }: { suppress: ReadonlySet<string> }) {
   const memoFields     = useMemo(() => FIELDS, []);
   const memoEquations  = useMemo(() => EQUATIONS, []);
-  const memoWhitelist  = useMemo(() => ENGINE_WHITELIST, []);
   useEquationEngine({
     worksheetCode: 'TEST-WS',
     fields:        memoFields,
     equations:     memoEquations,
-    engineWhitelist: memoWhitelist,
     suppressWriteBackSymbols: suppress,
   });
   return null;

@@ -36,6 +36,7 @@ import {
 } from './rainfall-tables';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
+import { shouldEngineEvaluate } from './equation-manual-denylist';
 
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
@@ -72,8 +73,6 @@ type Args = {
   worksheetCode: string;
   fields: FieldMeta[];
   equations: EquationMeta[];
-  /** Set of "WORKSHEETCODE:EQNUM" strings the engine is wired for. */
-  engineWhitelist: ReadonlySet<string>;
   /** symbol → list of producing worksheet codes when a consumed symbol is
    * ambiguous. Comes from mergeInheritedFields. Any equation whose consumed
    * symbol list intersects this map returns manual_required immediately. */
@@ -114,7 +113,6 @@ export function useEquationEngine({
   worksheetCode,
   fields,
   equations,
-  engineWhitelist,
   ambiguousSymbols,
   suppressWriteBackSymbols,
 }: Args): {
@@ -130,14 +128,19 @@ export function useEquationEngine({
     return m;
   }, [fields]);
 
+  // Engine-generalization (Layer 0): route EVERY equation to the real engine
+  // EXCEPT those in the manual deny-set. The old DWA-A-138-only allow-list is
+  // gone; the evaluator's own fail-safe (missing symbol / unsupported function
+  // / div-by-zero / non-finite → manual_required) keeps unfaithful arithmetic
+  // from producing a wrong number, and the deny-set covers the residual
+  // "valid-but-unfaithful" class the fail-safe cannot see (e.g. A138-18:18).
   const engineEquationIds = useMemo(() => {
     const ids = new Set<string>();
     for (const eq of equations) {
-      const key = `${worksheetCode}:${eq.equationNumber}`;
-      if (engineWhitelist.has(key)) ids.add(eq.id);
+      if (shouldEngineEvaluate(worksheetCode, eq.equationNumber)) ids.add(eq.id);
     }
     return ids;
-  }, [equations, worksheetCode, engineWhitelist]);
+  }, [equations, worksheetCode]);
 
   // Surface-inventory carrier: the `surface_inventory` json field on A138-07.
   // Read by the four A138-07 aggregator producers (A_C, C_m, A_E_ba, A_E_nba).
@@ -350,8 +353,39 @@ export function useEquationEngine({
 
   const engineStates = useMemo<Record<string, EvalState>>(() => {
     const next: Record<string, EvalState> = {};
+
+    // Multi-producer collision guard (standard-agnostic). When >1 active
+    // NON-displayOnly equation on THIS worksheet writes the same output
+    // symbol, the engine cannot pick a producer — under route-all both would
+    // fire and the write-back effect would oscillate (last-wins → infinite
+    // re-render). Blank every producer of a collided symbol so the value
+    // blanks instead of silently miscomputing. (displayOnly equations don't
+    // write back, so they don't count as writers; on 138 every symbol has a
+    // single active writer, so this never trips there.)
+    const writerCountBySymbol = new Map<string, number>();
     for (const eq of equations) {
       if (!engineEquationIds.has(eq.id)) continue;
+      if (equationProfiles[eq.id]?.displayOnly) continue;
+      const sym = eq.outputSymbol;
+      if (!sym) continue;
+      writerCountBySymbol.set(sym, (writerCountBySymbol.get(sym) ?? 0) + 1);
+    }
+    const collidingSymbols = new Set(
+      [...writerCountBySymbol].filter(([, c]) => c > 1).map(([s]) => s),
+    );
+
+    for (const eq of equations) {
+      if (!engineEquationIds.has(eq.id)) continue;
+
+      // Collision guard fires BEFORE evaluation: blank every producer (writer
+      // or displayOnly) of a symbol with >1 active writer on this worksheet.
+      if (eq.outputSymbol && collidingSymbols.has(eq.outputSymbol)) {
+        next[eq.id] = {
+          kind: 'manual_required',
+          reason: `mehrere aktive Produzenten für ${eq.outputSymbol} auf diesem Arbeitsblatt — eindeutige Quelle erforderlich`,
+        };
+        continue;
+      }
 
       // Ambiguity guard: if any consumed symbol resolves to >1 active
       // producing field within the standard, refuse to compute — the engine

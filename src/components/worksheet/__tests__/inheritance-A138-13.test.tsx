@@ -103,7 +103,6 @@ function Harness({
     worksheetCode: 'A138-13',
     fields: memoFields,
     equations: EQUATIONS,
-    engineWhitelist: new Set<string>(['A138-13:8']),
     ambiguousSymbols,
   });
   const state = engineStates[A138_13_GL8_EQ_ID];
