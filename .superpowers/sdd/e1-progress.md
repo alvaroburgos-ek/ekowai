@@ -84,5 +84,29 @@ STANDING RULE: update this ledger at EVERY task transition (recovery lifeline).
   2. VERIFY (not assume) the behavior-preserving claim: after all sites scoped, proof = full suite green PLUS a TARGETED check that a representative 138 save (A138-12 or A138-13) produces BYTE-IDENTICAL materialize reads pre/post scoping — the no-op-for-138 property DEMONSTRATED, not asserted.
   3. E1-C CLOSES ONLY when all 15 sites scoped AND the close-out report shows the site checklist with EACH ONE's commit. Remains the MANDATORY-BEFORE-FLL gate.
   Sites to scope (from the (a) audit above): worksheet.ts 573/652/701/890/929/1109/1285/1436/1466/1517/1584/1671/1761/1924; db/queries/worksheet.ts 238/386; co2.ts 63. Chokepoint helper ready: scopeFieldsToStandard (src/lib/db/queries/symbol-scoping.ts). savedStandardId available @ worksheet.ts:155.
+
+  ### E1-C — COMPLETE 2026-07-13. Cluster-by-cluster, one commit each, suite green between.
+  SITE CHECKLIST (each → commit):
+  | site | symbol(s) | cluster | commit | disposition |
+  |---|---|---|---|---|
+  | worksheet.ts 890 | A_C | asm owner | d049d1d | scoped |
+  | worksheet.ts 929 | facility_type_selected | asm owner | d049d1d | scoped |
+  | worksheet.ts 1448 | facility_type_selected | asm producer | 0fdb4bc | scoped |
+  | worksheet.ts 1478 | r_D_n_table | asm producer | 0fdb4bc | scoped |
+  | worksheet.ts 1529 | MULDE_SCALAR_SYMS | asm producer | 0fdb4bc | scoped |
+  | worksheet.ts 1596 | RIGOLE_SYMS | asm producer | 0fdb4bc | scoped |
+  | worksheet.ts 1683 | A_C | asm producer | 0fdb4bc | scoped |
+  | worksheet.ts 652 | r_D_n_table | basin | 869a6ae | scoped |
+  | worksheet.ts 701 | BASIN_LOOKUP_SYMBOLS | basin | 869a6ae | scoped |
+  | worksheet.ts 1121 | LOADING_CHECK_CROSS_SYMBOLS | loading owner | 7244ab8 | scoped |
+  | worksheet.ts 1297 | LOADING_CHECK_CROSS_SYMBOLS | loading producer | 7244ab8 | scoped |
+  | worksheet.ts 1806 | LOADING_CHECK_CROSS_SYMBOLS | loading clear | 7244ab8 | scoped |
+  | worksheet.ts 1969 | LOADING_CHECK_CROSS_SYMBOLS | loading chained | 7244ab8 | scoped |
+  | db/queries/worksheet.ts 238 | (many) loadSameSymbolValues | render resolver | 9c214d8 | current-standard-first tiebreak (NOT join-scope; preserves parent/child inheritance) |
+  | worksheet.ts 573 | surface_inventory | carrier owner | — | ALREADY scoped (worksheetTemplateId) — false positive |
+  | db/queries/worksheet.ts 386 | surface_inventory | carrier read | — | ALREADY scoped (standardId) — false positive |
+  | co2.ts 63 | VSME OUTPUT_SYMBOLS | co2 | — | ALREADY scoped (standards.code='VSME') — false positive |
+  RIDER-2 PROOF (no-op-for-138 DEMONSTRATED, not asserted): PLT-HS-01 is MULTI-standard (138 + M-1200-1 + M-820-1 + VSME). (1) zero foreign-standard params share a symbol with the 138 materialize reads → scoping cannot change any resolved value; (2) representative A138-13 basin: all 9 BASIN_LOOKUP scalars resolve IDENTICAL unscoped vs scoped (A_C 4836,43 / Q_S 0,003591 / f_Z 1,2 / … all identical=true). Full suite 1073/1073; tsc 28=28 (0 new).
+  <-- E1-C CLOSED. Mandatory-before-FLL gate satisfied: no server-side by-symbol read can leak a foreign guideline's field.
 - SESSION SEQUENCE AFTER THIS: (1) 15-site scoping pass → close E1-C · (2) E1-D short backlog (#17 derived→derived cascade, non-turnover flag generalization, r_D_n/D_min provenance; #22 cross-worksheet + governingD DEFERRED) · (3) FLL-GAR bring-up (E1 exit criterion: zero engine changes).
 - E1-D (backlog: #17 cascade, non-turnover flag, provenance; #22 cross-worksheet + governingD deferred): pending.
