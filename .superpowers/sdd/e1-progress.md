@@ -55,6 +55,15 @@ STANDING RULE: update this ledger at EVERY task transition (recovery lifeline).
   VERIFY: tsc 28=28 (0 new, none in gate files); full suite **1058/1058**.
   DISPOSITION (proposed, not applied): **A138-18:22 (bare `d`)** → FIX at source — equations-text migration `d`→ d_a OR d_i, REQUIRES source-verify §6.4.2 (which diameter the s_R pipe cross-section uses); written-not-applied; sits in deny-set until applied. **A138-26:10 `A_E_b_a`** → NOT a gate catch (SUM aggregate-exempt); `A_E_b_a` is a per-subarea carrier-row symbol in the Gl.10 flood aggregator, DISTINCT from the `A_E_ba` aggregate-output field → NOT a typo, no fix (documented to avoid re-diagnosis).
   <-- STOP: E1-A close-out report for user before E1-B.
-- E1-B (registry/dispatch hardening + CI integration tests): pending.
+- **E1-B (registry/dispatch hardening + CI tests) — COMPLETE 2026-07-13.**
+  Acceptance bar met:
+  (a) THREE invariants CI-encoded (reproduction-grade):
+    - **#21** ownerTrigger ⊆ owner-dispatch — NEW src/lib/actions/__tests__/dispatch-routing-matrix.test.ts (structural invariant + routing matrix). PROVEN against the historical bug: reverting the #21 fix (widen asm ownerTrigger → Gl.7|16|17) makes 3 tests FAIL (invariant + A138-17/A138-18 geometry routes-to-no-path); restored → 9/9 green.
+    - **#20** conditional-owner suppression — asm-source.test.ts:79/84 (geometry + soil_estimate → A_S_m suppressed; pre-#20-fix 'manual'-only would fail these).
+    - **#18** post-validation full field-map reads — worksheet-asm-manual-reject.test.ts:98 (batch-restricted symbolById → strip no-ops → false pass; full-sibling-map = fix).
+  (b) Dispatch-level routing matrix: owner/producer routing for loading/basin/asm/surface × save origins (A138-12 Gl.7, A138-13 Gl.8, A138-17/18 geometry, A138-15 facility, A138-06 flaechengruppe) — each runs on exactly one path, never both, never none.
+  (c) full suite **1067/1067**; tsc 28=28 (0 new, none in E1-B files).
+  SIDE-TASK (A138-18:22 fix, non-blocking): source-verified §6.4.2 — Gl.(21) uses d_i AND d_a; Gl.(22) thin-wall defines **d = d_i ≈ d_a** (verbatim source line 1836). READING: fix `d` → `d_i`. AWAITING user confirm → then equations-text migration (written-not-applied); A138-18:22 stays in gate deny-set until applied.
+- E1-B (registry/dispatch hardening + CI integration tests): DONE (above).
 - E1-C (standard-agnostic symbol scoping §10c — MANDATORY before FLL): pending.
 - E1-D (backlog: #17 cascade, non-turnover flag, provenance; #22 cross-worksheet + governingD deferred): pending.
