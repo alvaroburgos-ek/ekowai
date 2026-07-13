@@ -195,7 +195,29 @@ export type SameSymbolEntry = {
    * parent, …) of the current standard — used for hierarchical inheritance
    * (series, parallel, sub-standard all inherit from their parent). */
   isFromAncestor: boolean;
+  /** True if the source standard IS the current render's own standard. §10c
+   * TOP priority: the current standard's own field must win over any FOREIGN
+   * standard reusing the symbol — otherwise a foreign guideline with an earlier
+   * stage_order could leak its value. (No-op for single-standard projects: all
+   * candidates are from the current standard, so this key doesn't reorder them.) */
+  isFromCurrentStandard: boolean;
 };
+
+/**
+ * §10c-scoped precedence for a same-symbol bucket:
+ *   current standard's own field  →  ancestor chain  →  earliest stage  →  most recent.
+ * Pure so the ordering is unit-testable independent of the DB.
+ */
+export function compareSameSymbolEntries(a: SameSymbolEntry, b: SameSymbolEntry): number {
+  if (a.isFromCurrentStandard !== b.isFromCurrentStandard) return a.isFromCurrentStandard ? -1 : 1;
+  if (a.isFromAncestor !== b.isFromAncestor) return a.isFromAncestor ? -1 : 1;
+  const aStage = a.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
+  const bStage = b.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
+  if (aStage !== bStage) return aStage - bStage;
+  const at = a.updatedAt?.getTime() ?? 0;
+  const bt = b.updatedAt?.getTime() ?? 0;
+  return bt - at;
+}
 
 /** For each field symbol on this worksheet, find values already entered for
  * the same symbol elsewhere **in the same project** (any standard). Used both
@@ -315,21 +337,13 @@ export async function loadSameSymbolValues(
       updatedAt: p.enteredAt,
       sourceStageOrder: stageByStandardId.get(meta.sourceStandardId) ?? null,
       isFromAncestor: ancestorStandardIds.has(meta.sourceStandardId),
+      isFromCurrentStandard: currentStandardId != null && meta.sourceStandardId === currentStandardId,
     });
     out.set(meta.symbol, arr);
   }
-  // Sort each bucket: ancestor chain first, then earliest stage, then most-
-  // recently entered.
+  // Sort each bucket by §10c-scoped precedence (current standard first).
   for (const arr of out.values()) {
-    arr.sort((a, b) => {
-      if (a.isFromAncestor !== b.isFromAncestor) return a.isFromAncestor ? -1 : 1;
-      const aStage = a.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
-      const bStage = b.sourceStageOrder ?? Number.MAX_SAFE_INTEGER;
-      if (aStage !== bStage) return aStage - bStage;
-      const at = a.updatedAt?.getTime() ?? 0;
-      const bt = b.updatedAt?.getTime() ?? 0;
-      return bt - at;
-    });
+    arr.sort(compareSameSymbolEntries);
   }
   return out;
 }
