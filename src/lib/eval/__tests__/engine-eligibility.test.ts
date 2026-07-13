@@ -51,3 +51,44 @@ describe('validateEngineEligibility — class (i) parse + symbol-resolution gate
     expect(r.verified).toBe(true);
   });
 });
+
+/**
+ * DEMO (D1) — the gate on REAL, currently-encoded DWA-A-138-1 formulas.
+ * Field set = real active 138 field symbols (subset incl. every symbol below).
+ * Shows the gate catching mis-encodings the old manual whitelist trusted, and
+ * NOT over-rejecting a faithful formula.
+ */
+describe('E1-A DEMO — faithfulness gate on REAL DWA-A-138-1 encodings', () => {
+  const f138 = new Set([
+    's_F', 'b_R', 'h_R', 'az', 'd_a', 'd_i', 'r_D_n', 'A_C', 'A_VA', 'A_E_ba',
+    'C_S', 'Q_S', 'Q_Dr', 'D', 'V_VA', 'k_i', 'A_S_m', 'h_M', 'f_Z',
+  ]);
+
+  it('A138-18:22 (s_R) — was human-WHITELISTED, yet references bare `d` (fields are d_a/d_i) → CAUGHT, flagged, unresolved=[d]', () => {
+    const r = validateEngineEligibility(
+      's_R = (s_F / (b_R * h_R)) * (b_R * h_R + az * (pi * d^2/4) * ((1/s_F) - 1))',
+      ['s_F', 'b_R', 'h_R', 'az', 'd'],
+      f138,
+    );
+    expect(r.verified).toBe(false);
+    expect(r.verified === false && r.unresolved).toContain('d');
+  });
+
+  it('A138-26:10 (V_Rueck) — SUM() aggregate + A_E_b_a (field is A_E_ba) → NOT verified (not silently computed)', () => {
+    const r = validateEngineEligibility(
+      'V_Rueck = ((r_D(T_n_Ue) * (SUM(A_E_b_a * C_S) + A_VA) / 10000) - (Q_S + Q_Dr)) * D * 60 / 1000 - V_VA >= 0',
+      ['r_D(T_n_Ue)', 'A_E_b_a', 'C_S', 'A_VA', 'Q_S', 'Q_Dr', 'D', 'V_VA'],
+      f138,
+    );
+    expect(r.verified).toBe(false);
+  });
+
+  it('A138-10:3 (Q_zu) — faithful encoding → verified (gate does not over-reject)', () => {
+    const r = validateEngineEligibility(
+      'Q_zu = r_D(n) * (A_C + A_VA) * 10^-4',
+      ['r_D(n)', 'A_C', 'A_VA'],
+      f138,
+    );
+    expect(r.verified).toBe(true);
+  });
+});
