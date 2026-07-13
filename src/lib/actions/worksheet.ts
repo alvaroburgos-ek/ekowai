@@ -887,7 +887,13 @@ export async function saveWorksheet(
         const crossAcFields = await tx
           .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
           .from(fields)
-          .where(and(eq(fields.symbol, 'A_C'), eq(fields.active, true)));
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+          .where(and(
+            eq(fields.symbol, 'A_C'),
+            eq(fields.active, true),
+            // §10c: scope to the saved standard so a 2nd guideline reusing A_C can't leak.
+            savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+          ));
         const crossAcFieldIds = crossAcFields.map((f) => f.id);
         let A_C: number | null = null;
         if (crossAcFieldIds.length > 0) {
@@ -926,7 +932,13 @@ export async function saveWorksheet(
         const crossFtFields = await tx
           .select({ id: fields.id })
           .from(fields)
-          .where(and(eq(fields.symbol, 'facility_type_selected'), eq(fields.active, true)));
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+          .where(and(
+            eq(fields.symbol, 'facility_type_selected'),
+            eq(fields.active, true),
+            // §10c: scope to the saved standard.
+            savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+          ));
         const crossFtFieldIds = crossFtFields.map((f) => f.id);
         let facilityType: FacilityType | null = null;
         if (crossFtFieldIds.length > 0) {
