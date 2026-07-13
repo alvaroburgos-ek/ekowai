@@ -72,5 +72,11 @@ STANDING RULE: update this ledger at EVERY task transition (recovery lifeline).
   Also: src/lib/db/queries/worksheet.ts:238 (inArray symbols), :386 surface_inventory; src/lib/actions/co2.ts:63 (VSME OUTPUT_SYMBOLS).
   All resolve fields by symbol across ALL standards, then read project_parameters by field id (project-scoped). Safe TODAY only because 138 symbols are unique; FLL (or any 2nd standard reusing a symbol) collides. Rider-1 overlaps (V_VA@A138-22 vs basin, A_S@A138-21) are WITHIN-138 (gap-9); the cross-STANDARD case is the FLL trigger.
   FIX APPROACH: scope each lookup to the saved standard's worksheet set (join fields→worksheet_templates→standard_id = savedStandardId) via a shared scoped-resolver; reproduction test (two standards sharing A_C → resolves CURRENT; fails on first-wins).
-  <-- next: reproduction test (RED) + scoped-resolver + refactor sites + green.
+  ### (b) MECHANISM + REPRODUCTION — DONE
+  - `scopeFieldsToStandard(candidates, currentStandardId)` (src/lib/db/queries/symbol-scoping.ts) — the single tested chokepoint every by-symbol resolver routes through; filters candidates to the current standard BEFORE any first-wins reduction.
+  - Reproduction test (src/lib/db/queries/__tests__/symbol-scoping.test.ts, 3/3): two standards share A_C → scoped resolves the CURRENT (138) field; PRE-FIX first-wins resolves the FOREIGN (FLL) field (the collision); no cross-standard fallback. Same reproduction style as E1-B.
+  - Full suite 1070/1070; savedStandardId available function-wide (worksheet.ts:155).
+  ### (a) SITE APPLICATION — REMAINING (the 15 lookup sites)
+  Each site: add innerJoin worksheet_templates + `eq(worksheetTemplates.standardId, savedStandardId)` (or route candidates through scopeFieldsToStandard). BEHAVIOR-PRESERVING for single-standard 138 (savedStandardId=138 → scoping is a no-op since 138 symbols are unique) → suite stays green; CORRECT for multi-standard (FLL). Low-risk but 15 careful save-path edits — recommended as a focused pass with per-site + full-suite validation, NOT rushed.
+  <-- STATUS: E1-C audit + mechanism + reproduction DONE + pushed. Site application = remaining. Awaiting go to complete the 15-site scoping (or accept as foundation).
 - E1-D (backlog: #17 cascade, non-turnover flag, provenance; #22 cross-worksheet + governingD deferred): pending.
