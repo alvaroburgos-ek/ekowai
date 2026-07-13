@@ -64,13 +64,12 @@ export const EQUATION_MANUAL_DENYLIST: ReadonlySet<string> = new Set<string>([
  * here so the mis-encoded formula is NEVER silently computed.
  */
 export const EQUATION_GATE_DENYLIST: ReadonlySet<string> = new Set<string>([
-  // DWA-A-138-1 · A138-18 · Gl. (22) s_R — the stored formula references a bare
-  // `d`, which resolves to NO active field (the shaft diameters are d_a / d_i).
-  // Faithfulness gate (encode time): unresolved symbol `d`. This equation was
-  // human-whitelisted before generalization, yet never engine-verifiable.
-  // DISPOSITION: source-verify whether d = d_a or d_i per §6.4.2 → equations-text
-  // migration correcting the symbol at source; then this key is removed.
-  'A138-18:22',
+  // (empty) — the first and only gate-caught 138 defect, A138-18:22 (`s_R`), was
+  // FIXED AT SOURCE: migration 20260713120000 corrected the stored formula's bare
+  // `d` → `d_i` (source-verified §6.4.2 thin-wall preamble "d = d_i ≈ d_a").
+  // The encode-time gate now RE-VERIFIES A138-18:22 (all symbols resolve) → it
+  // routes normally. FULL CIRCLE: gate caught it → source verified → migration
+  // fixed → gate confirms. Future class-(i) failures land here (or are fixed).
 ]);
 
 /** Single runtime SSOT: manual (class ii) ∪ gate-computed (class i). */

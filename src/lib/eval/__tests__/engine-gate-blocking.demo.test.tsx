@@ -1,10 +1,11 @@
 /**
- * E1-A DEMO — the faithfulness gate BLOCKING end-to-end (route-all exclusion).
+ * E1-A DEMO — the deny-set SSOT gating route-all end-to-end, through the SAME
+ * production hook (useEquationEngine) the worksheet form runs.
  *
- * Renders the SAME production hook (useEquationEngine) the worksheet form runs
- * and asserts that a real mis-encoded formula is EXCLUDED from route-all
- * (never silently computed), while a faithful equation and a carrier-aggregator
- * are still routed. This closes the D1 condition: caught + flagged + NOT computed.
+ * Post-full-circle state: A138-18:22 (the gate's first catch) was FIXED at source
+ * (migration 20260713120000, d→d_i) and has LEFT the gate deny-set → it now routes.
+ * The deny-set SSOT still blocks class-(ii) manual-denied equations (A138-18:18,
+ * missing ×10³). This proves the single-SSOT enforcement both ways.
  */
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
@@ -12,48 +13,37 @@ import { useMemo } from 'react';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 
-// Field set WITHOUT a bare `d` field (fields are d_a / d_i) — the A138-18:22 defect.
 const FIELDS = [
   { id: 'f-s_F', symbol: 's_F', unit: null },
   { id: 'f-b_R', symbol: 'b_R', unit: null },
   { id: 'f-h_R', symbol: 'h_R', unit: null },
   { id: 'f-az', symbol: 'az', unit: null },
-  { id: 'f-d_a', symbol: 'd_a', unit: null },
   { id: 'f-d_i', symbol: 'd_i', unit: null },
   { id: 'f-A_C', symbol: 'A_C', unit: null },
   { id: 'f-k_i', symbol: 'k_i', unit: null },
-  { id: 'f-surf', symbol: 'surface_inventory', unit: null },
 ];
 
-// Real A138-18:22 (s_R) encoding — references bare `d` (no such field).
-const EQ_MISENCODED = {
-  id: 'eq-a138-18-22',
-  equationNumber: '22',
-  formula: 's_R = (s_F / (b_R * h_R)) * (b_R * h_R + az * (pi * d^2/4) * ((1/s_F) - 1))',
-  inputSymbols: ['s_F', 'b_R', 'h_R', 'az', 'd'],
-  outputSymbol: 's_R',
+// A138-18:18 — class-(ii) manual-denied (Q_S missing ×10³). Excluded by the SSOT.
+const EQ_DENIED = {
+  id: 'eq-a138-18-18', equationNumber: '18',
+  formula: 'Q_S = k_i * A_S', inputSymbols: ['k_i', 'A_S'], outputSymbol: 'Q_S',
 };
-// Faithful — every symbol resolves.
+// A138-18:22 — FIXED at source (d→d_i), left the gate deny-set → routes again.
+const EQ_FIXED = {
+  id: 'eq-a138-18-22', equationNumber: '22',
+  formula: 's_R = (s_F / (b_R * h_R)) * (b_R * h_R + az * (pi * d_i^2/4) * ((1/s_F) - 1))',
+  inputSymbols: ['s_F', 'b_R', 'h_R', 'az', 'd_i'], outputSymbol: 's_R',
+};
+// Faithful → routes.
 const EQ_FAITHFUL = {
-  id: 'eq-faithful',
-  equationNumber: '99',
-  formula: 'z = A_C * k_i',
-  inputSymbols: ['A_C', 'k_i'],
-  outputSymbol: 'z',
-};
-// Carrier-aggregator — consumes surface_inventory; exempt from the plain gate.
-const EQ_AGGREGATOR = {
-  id: 'eq-aggregator',
-  equationNumber: '98',
-  formula: 'agg = SUM(A_E * C_i)',
-  inputSymbols: ['A_E', 'C_i', 'surface_inventory'],
-  outputSymbol: 'agg',
+  id: 'eq-faithful', equationNumber: '99',
+  formula: 'z = A_C * k_i', inputSymbols: ['A_C', 'k_i'], outputSymbol: 'z',
 };
 
 let captured = new Set<string>();
 function Harness() {
   const memoFields = useMemo(() => FIELDS, []);
-  const memoEquations = useMemo(() => [EQ_MISENCODED, EQ_FAITHFUL, EQ_AGGREGATOR], []);
+  const memoEquations = useMemo(() => [EQ_DENIED, EQ_FIXED, EQ_FAITHFUL], []);
   const { engineEquationIds } = useEquationEngine({
     worksheetCode: 'A138-18',
     fields: memoFields,
@@ -63,15 +53,12 @@ function Harness() {
   return null;
 }
 
-describe('E1-A DEMO — gate blocking end-to-end (route-all exclusion)', () => {
-  it('mis-encoded A138-18:22 (bare `d`) is EXCLUDED from route-all; faithful + carrier-aggregator are routed', () => {
+describe('E1-A DEMO — deny-set SSOT gating route-all (post full-circle)', () => {
+  it('A138-18:18 (manual-denied) EXCLUDED; A138-18:22 (fixed at source) + faithful ROUTED', () => {
     useWorksheetStore.setState({ values: {} });
     render(<Harness />);
-    // BLOCKED — not silently computed:
-    expect(captured.has('eq-a138-18-22')).toBe(false);
-    // Faithful equation still routes:
+    expect(captured.has('eq-a138-18-18')).toBe(false); // deny-set SSOT still blocks class (ii)
+    expect(captured.has('eq-a138-18-22')).toBe(true);  // full circle: re-verified → routes
     expect(captured.has('eq-faithful')).toBe(true);
-    // Carrier-aggregator exempt (structural) — still routes despite SUM()/non-field symbols:
-    expect(captured.has('eq-aggregator')).toBe(true);
   });
 });
