@@ -128,7 +128,10 @@ export async function saveWorksheet(
     .select({ id: equations.id, outputSymbol: equations.outputSymbol })
     .from(equations)
     .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
-  const derivedSymbols = derivedOutputSymbols(templateEquations);
+  // r_D_n / D_min are governing-iteration outputs (never hand-entered) — inherited
+  // onto consumers like A138-10 where no equation produces them. Stamp them
+  // `derived`, not `entered` (gap-class 6 inverse). (E1-D)
+  const derivedSymbols = derivedOutputSymbols(templateEquations, BASIN_GOVERNING_SYMBOLS);
 
   // Topology-based trigger flags — computed at function scope so the outer
   // transaction guard can use them on empty-batch saves (savedCount === 0).
