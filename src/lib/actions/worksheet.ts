@@ -649,7 +649,13 @@ export async function saveWorksheet(
         const [carrierField] = await tx
           .select({ id: fields.id })
           .from(fields)
-          .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+          .where(and(
+            eq(fields.symbol, 'r_D_n_table'),
+            eq(fields.active, true),
+            // §10c: scope to the saved standard (resolves the multi-owner ambiguity noted above).
+            savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+          ))
           .limit(1);
         let carrierRaw: unknown = null;
         if (carrierField) {
@@ -696,10 +702,13 @@ export async function saveWorksheet(
         const crossFields = await tx
           .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
           .from(fields)
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
           .where(
             and(
               inArray(fields.symbol, [...BASIN_LOOKUP_SYMBOLS]),
               eq(fields.active, true),
+              // §10c: scope to the saved standard (was "across ALL templates in the project").
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
             ),
           );
 
