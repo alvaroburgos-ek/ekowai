@@ -37,6 +37,7 @@ import {
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
+import { validateEngineEligibility } from './engine-eligibility';
 
 /** Equation ids the engine has aggregator paths for. Used to decide which
  * carriers to plumb in. */
@@ -135,12 +136,32 @@ export function useEquationEngine({
   // from producing a wrong number, and the deny-set covers the residual
   // "valid-but-unfaithful" class the fail-safe cannot see (e.g. A138-18:18).
   const engineEquationIds = useMemo(() => {
+    const fieldSymbols = new Set(fields.map((f) => f.symbol));
+    const isCarrierSymbol = (s: string) =>
+      s === 'surface_inventory' || s.endsWith('_table') || s.startsWith('sub_areas_');
     const ids = new Set<string>();
     for (const eq of equations) {
-      if (shouldEngineEvaluate(worksheetCode, eq.equationNumber)) ids.add(eq.id);
+      if (!shouldEngineEvaluate(worksheetCode, eq.equationNumber)) continue;
+      // Carrier-aggregator exemption (STRUCTURAL): an equation that consumes a
+      // carrier symbol (surface_inventory / *_table / sub_areas_*) evaluates via a
+      // registered aggregator path — its symbols intentionally do NOT resolve as
+      // plain fields, so the plain gate does not apply. Delegates to
+      // consumedSymbolsFor + a carrier-symbol pattern, so any FUTURE aggregator
+      // (e.g. FLL) is exempt by the SAME rule, no gate change (not an id list).
+      const isCarrierAggregator = consumedSymbolsFor(eq).some(isCarrierSymbol);
+      if (!isCarrierAggregator) {
+        // BLOCKING faithfulness gate (E1-A / D1): exclude an equation whose input
+        // symbols fail to RESOLVE to a real field — the silent-wrong-preventing
+        // dimension (e.g. A138-18:22's bare `d`). Parse constructs (min()/SUM())
+        // route via engine paths + the fail-safe and are reported at encode time,
+        // not runtime-blocked here.
+        const gate = validateEngineEligibility(eq.formula, eq.inputSymbols ?? [], fieldSymbols);
+        if (!gate.verified && gate.unresolved.length > 0) continue;
+      }
+      ids.add(eq.id);
     }
     return ids;
-  }, [equations, worksheetCode]);
+  }, [equations, worksheetCode, fields]);
 
   // Surface-inventory carrier: the `surface_inventory` json field on A138-07.
   // Read by the four A138-07 aggregator producers (A_C, C_m, A_E_ba, A_E_nba).
