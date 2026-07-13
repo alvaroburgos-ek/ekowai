@@ -78,5 +78,11 @@ STANDING RULE: update this ledger at EVERY task transition (recovery lifeline).
   - Full suite 1070/1070; savedStandardId available function-wide (worksheet.ts:155).
   ### (a) SITE APPLICATION — REMAINING (the 15 lookup sites)
   Each site: add innerJoin worksheet_templates + `eq(worksheetTemplates.standardId, savedStandardId)` (or route candidates through scopeFieldsToStandard). BEHAVIOR-PRESERVING for single-standard 138 (savedStandardId=138 → scoping is a no-op since 138 symbols are unique) → suite stays green; CORRECT for multi-standard (FLL). Low-risk but 15 careful save-path edits — recommended as a focused pass with per-site + full-suite validation, NOT rushed.
-  <-- STATUS: E1-C audit + mechanism + reproduction DONE + pushed. Site application = remaining. Awaiting go to complete the 15-site scoping (or accept as foundation).
+  <-- STATUS: E1-C audit + mechanism + reproduction DONE + pushed (foundation banked). Site application = remaining, deferred to a fresh focused session.
+  ### NEXT SESSION — the 15-site scoping pass (user riders, binding):
+  1. CLUSTER BY MATERIALIZE BLOCK — group the 15 sites into clusters (asm owner / asm producer / basin / loading / carriers / db-queries / co2) and go cluster by cluster. Full suite GREEN between clusters. ONE COMMIT PER CLUSTER (so any regression bisects to a cluster instantly). NOT one big diff.
+  2. VERIFY (not assume) the behavior-preserving claim: after all sites scoped, proof = full suite green PLUS a TARGETED check that a representative 138 save (A138-12 or A138-13) produces BYTE-IDENTICAL materialize reads pre/post scoping — the no-op-for-138 property DEMONSTRATED, not asserted.
+  3. E1-C CLOSES ONLY when all 15 sites scoped AND the close-out report shows the site checklist with EACH ONE's commit. Remains the MANDATORY-BEFORE-FLL gate.
+  Sites to scope (from the (a) audit above): worksheet.ts 573/652/701/890/929/1109/1285/1436/1466/1517/1584/1671/1761/1924; db/queries/worksheet.ts 238/386; co2.ts 63. Chokepoint helper ready: scopeFieldsToStandard (src/lib/db/queries/symbol-scoping.ts). savedStandardId available @ worksheet.ts:155.
+- SESSION SEQUENCE AFTER THIS: (1) 15-site scoping pass → close E1-C · (2) E1-D short backlog (#17 derived→derived cascade, non-turnover flag generalization, r_D_n/D_min provenance; #22 cross-worksheet + governingD DEFERRED) · (3) FLL-GAR bring-up (E1 exit criterion: zero engine changes).
 - E1-D (backlog: #17 cascade, non-turnover flag, provenance; #22 cross-worksheet + governingD deferred): pending.
