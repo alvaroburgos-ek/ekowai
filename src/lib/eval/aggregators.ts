@@ -13,7 +13,7 @@
  */
 import type { EvalRequest, EvalState } from './formula';
 import { summarizeSurfaces, type SurfaceInventoryCarrier } from './surface-inventory';
-import { iterateGoverningDuration, GOVERNING_PROFILES } from './governing-duration';
+import { iterateGoverningDuration, GOVERNING_PROFILES, boundaryLimitedWarning } from './governing-duration';
 
 export type SubArea = {
   id: string;
@@ -371,10 +371,10 @@ const a138_13_gl8: Aggregator = {
     // assertion true and avoids snapshot churn).
     const warnings: string[] = [];
     if (governing.boundaryLimited) {
+      // Generalized non-turnover warning (E1-D) — basin passes its Einfaches-
+      // Verfahren caveat; the message text is byte-identical to the prior inline.
       warnings.push(
-        `Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand ` +
-        `(D = ${governingD} min). Bemessung ggf. außerhalb des Einfachen Verfahrens ` +
-        `(q_S_AC < 2 prüfen) oder Dauerstufenbereich nach DWA-A 117 erweitern.`,
+        boundaryLimitedWarning(governingD, 'Bemessung ggf. außerhalb des Einfachen Verfahrens (q_S_AC < 2 prüfen)'),
       );
     }
 
