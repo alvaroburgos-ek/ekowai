@@ -36,4 +36,19 @@ describe('derivedOutputSymbols', () => {
     const set = derivedOutputSymbols([{ id: NORMAL_ID, outputSymbol: null }]);
     expect(set.size).toBe(0);
   });
+
+  // E1-D: non-equation derived outputs (governing-iteration r_D_n/D_min) — gap-class 6 inverse.
+  it('includes non-equation governing outputs passed as extraDerivedSymbols (r_D_n/D_min inherited to A138-10 → derived, not entered)', () => {
+    // A138-10 has NO equation producing r_D_n/D_min; they are inherited governing
+    // outputs, so they must be stamped derived, not entered (the provenance bug).
+    const set = derivedOutputSymbols([{ id: NORMAL_ID, outputSymbol: 'Q_zu' }], ['r_D_n', 'D_min']);
+    expect(set.has('r_D_n')).toBe(true);
+    expect(set.has('D_min')).toBe(true);
+    expect(set.has('Q_zu')).toBe(true);
+  });
+
+  it('extraDerivedSymbols defaults to none — pure equation-output behavior unchanged', () => {
+    const set = derivedOutputSymbols([{ id: NORMAL_ID, outputSymbol: 'Q_zu' }]);
+    expect(set.has('r_D_n')).toBe(false);
+  });
 });
