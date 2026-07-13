@@ -1445,7 +1445,13 @@ export async function saveWorksheet(
           const crossFtFieldsP = await tx
             .select({ id: fields.id })
             .from(fields)
-            .where(and(eq(fields.symbol, 'facility_type_selected'), eq(fields.active, true)));
+            .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+            .where(and(
+              eq(fields.symbol, 'facility_type_selected'),
+              eq(fields.active, true),
+              // §10c: scope to the saved standard.
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+            ));
           const crossFtFieldIdsP = crossFtFieldsP.map((f) => f.id);
           let facilityTypeP: FacilityType | null = null;
           if (crossFtFieldIdsP.length > 0) {
@@ -1475,7 +1481,13 @@ export async function saveWorksheet(
               const [muldeCarrierField] = await tx
                 .select({ id: fields.id })
                 .from(fields)
-                .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+                .where(and(
+                  eq(fields.symbol, 'r_D_n_table'),
+                  eq(fields.active, true),
+                  // §10c: scope carrier lookup to the saved standard (r_D_n_table is on A138-04, in 138).
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+                ))
                 .limit(1);
               let muldeCarrierRaw: unknown = null;
               if (muldeCarrierField) {
@@ -1525,9 +1537,12 @@ export async function saveWorksheet(
               const mScalarCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
                 .where(and(
                   inArray(fields.symbol, [...MULDE_SCALAR_SYMS]),
                   eq(fields.active, true),
+                  // §10c: scope to the saved standard.
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                 ));
               const mScalarFieldIds = mScalarCrossFields.map((f) => f.id);
               const mScalarParams = mScalarFieldIds.length > 0
@@ -1592,9 +1607,12 @@ export async function saveWorksheet(
               const rigoleCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
                 .where(and(
                   inArray(fields.symbol, [...RIGOLE_SYMS]),
                   eq(fields.active, true),
+                  // §10c: scope to the saved standard.
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                 ));
               const rigoleFieldIds = rigoleCrossFields.map((f) => f.id);
               const rigoleParams = rigoleFieldIds.length > 0
@@ -1680,7 +1698,13 @@ export async function saveWorksheet(
           const crossAcFieldsP2 = await tx
             .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
             .from(fields)
-            .where(and(eq(fields.symbol, 'A_C'), eq(fields.active, true)));
+            .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+            .where(and(
+              eq(fields.symbol, 'A_C'),
+              eq(fields.active, true),
+              // §10c: scope to the saved standard.
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+            ));
           const crossAcFieldIdsP2 = crossAcFieldsP2.map((f) => f.id);
           let pA_C: number | null = null;
           if (crossAcFieldIdsP2.length > 0) {
