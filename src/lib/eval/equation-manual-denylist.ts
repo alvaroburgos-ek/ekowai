@@ -27,6 +27,8 @@
  * because it currently blanks — the fail-safe already handles those. Add ONLY
  * a formula that PARSES + COMPUTES but disagrees with its source.
  */
+import { validateEngineEligibility } from './engine-eligibility';
+
 export const EQUATION_MANUAL_DENYLIST: ReadonlySet<string> = new Set<string>([
   // ── Confirmed (source-verified unfaithful) ────────────────────────────────
   // DWA-A-138-1 · A138-18 · Gl. (18) — Q_S Rigole. Stored formula omits the
@@ -54,12 +56,83 @@ export const EQUATION_MANUAL_DENYLIST: ReadonlySet<string> = new Set<string>([
 ]);
 
 /**
+ * Class-(i) keys COMPUTED by the encode-time faithfulness gate
+ * (`computeEngineDenyKeys`), materialized here so the deny-set stays the SINGLE
+ * runtime SSOT (manual class-(ii) ∪ computed class-(i)). Each entry cites the
+ * gate reason. DISPOSITION for these is a source-verified fix (equations-text
+ * migration, at source per the playbook) — until the fix lands, the key sits
+ * here so the mis-encoded formula is NEVER silently computed.
+ */
+export const EQUATION_GATE_DENYLIST: ReadonlySet<string> = new Set<string>([
+  // DWA-A-138-1 · A138-18 · Gl. (22) s_R — the stored formula references a bare
+  // `d`, which resolves to NO active field (the shaft diameters are d_a / d_i).
+  // Faithfulness gate (encode time): unresolved symbol `d`. This equation was
+  // human-whitelisted before generalization, yet never engine-verifiable.
+  // DISPOSITION: source-verify whether d = d_a or d_i per §6.4.2 → equations-text
+  // migration correcting the symbol at source; then this key is removed.
+  'A138-18:22',
+]);
+
+/** Single runtime SSOT: manual (class ii) ∪ gate-computed (class i). */
+const EQUATION_DENYLIST: ReadonlySet<string> = new Set<string>([
+  ...EQUATION_MANUAL_DENYLIST,
+  ...EQUATION_GATE_DENYLIST,
+]);
+
+/**
  * True when the engine should attempt to evaluate this equation. The engine
- * evaluates every equation EXCEPT those in the manual deny-set.
+ * routes EVERY equation EXCEPT those in the unified deny-set (manual class-(ii)
+ * source-verified-unfaithful ∪ gate-computed class-(i) parse/symbol-resolution
+ * failures). The deny-set is the single SSOT; the gate feeds it at encode time.
  */
 export function shouldEngineEvaluate(
   worksheetCode: string,
   equationNumber: string,
 ): boolean {
-  return !EQUATION_MANUAL_DENYLIST.has(`${worksheetCode}:${equationNumber}`);
+  return !EQUATION_DENYLIST.has(`${worksheetCode}:${equationNumber}`);
+}
+
+/**
+ * Formula-structural aggregate detection: an equation whose formula uses an
+ * aggregate (Σ / SUM) iterates carrier rows through a registered aggregator
+ * path, so its non-field symbols are carrier-internal and the plain gate does
+ * not apply. Structural (formula-based) → future aggregators (e.g. FLL) are
+ * exempt by the SAME rule with no code change — not a hardcoded id list.
+ */
+function isCarrierAggregateFormula(formula: string): boolean {
+  return /Σ|SUM\s*\(/.test(formula);
+}
+
+export type EquationForGate = {
+  worksheetCode: string;
+  equationNumber: string;
+  formula: string;
+  inputSymbols: string[] | null;
+};
+
+/**
+ * ENCODE-TIME faithfulness gate (class (i)). Given a standard's equations and
+ * its active field-symbol set, return the keys of equations that FAIL parse +
+ * symbol-resolution — EXCLUDING carrier aggregates. These keys FEED the deny-set
+ * (the single runtime SSOT): the importer runs this at encode time, and any
+ * failure that is not fixed at source lands in EQUATION_GATE_DENYLIST with its
+ * reason. This is the D1 blocking precondition: no formula routes to the generic
+ * evaluator unless it passed here.
+ */
+export function computeEngineDenyKeys(
+  equations: readonly EquationForGate[],
+  fieldSymbols: ReadonlySet<string>,
+): Array<{ key: string; reason: string }> {
+  const out: Array<{ key: string; reason: string }> = [];
+  for (const eq of equations) {
+    if (isCarrierAggregateFormula(eq.formula)) continue; // aggregator-handled
+    const gate = validateEngineEligibility(eq.formula, eq.inputSymbols ?? [], fieldSymbols);
+    // Enforce the symbol-resolution dimension (the silent-wrong-preventing one).
+    // Parse constructs (min()) route via engine paths + the fail-safe and are
+    // reported, not denied, here.
+    if (!gate.verified && gate.unresolved.length > 0) {
+      out.push({ key: `${eq.worksheetCode}:${eq.equationNumber}`, reason: gate.reason });
+    }
+  }
+  return out;
 }
