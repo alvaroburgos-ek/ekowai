@@ -65,5 +65,12 @@ STANDING RULE: update this ledger at EVERY task transition (recovery lifeline).
   (c) full suite **1067/1067**; tsc 28=28 (0 new, none in E1-B files).
   SIDE-TASK (A138-18:22 fix, non-blocking): source-verified §6.4.2 — Gl.(21) uses d_i AND d_a; Gl.(22) thin-wall defines **d = d_i ≈ d_a** (verbatim source line 1836). READING: fix `d` → `d_i`. AWAITING user confirm → then equations-text migration (written-not-applied); A138-18:22 stays in gate deny-set until applied.
 - E1-B (registry/dispatch hardening + CI integration tests): DONE (above).
-- E1-C (standard-agnostic symbol scoping §10c — MANDATORY before FLL): pending.
+- **E1-C (standard-agnostic symbol scoping §10c) — IN PROGRESS.**
+  ### (a) AUDIT — by-symbol lookup sites (the §10c audit trigger)
+  Server-side `eq/inArray(fields.symbol, …)` lookups NOT scoped to the current standard (project-wide first-wins → cross-guideline collision when a 2nd standard reuses A_C/V_VA/D/Q_S). Sites in src/lib/actions/worksheet.ts:
+  - 573 surface_inventory (owner) · 652 r_D_n_table (basin carrier) · 701 BASIN_LOOKUP_SYMBOLS (basin scalars — §10c named instance) · 890 A_C (asm owner) · 929 facility_type_selected (asm owner) · 1109/1285/1761/1924 LOADING_CHECK_CROSS_SYMBOLS (loading owner/producer/clear/chained) · 1436 facility_type_selected (asm producer) · 1466 r_D_n_table (mulde sweep) · 1517 MULDE_SCALAR_SYMS (A_C/h_M/f_Z/k_i) · 1584 RIGOLE_SYMS · 1671 A_C (asm producer)
+  Also: src/lib/db/queries/worksheet.ts:238 (inArray symbols), :386 surface_inventory; src/lib/actions/co2.ts:63 (VSME OUTPUT_SYMBOLS).
+  All resolve fields by symbol across ALL standards, then read project_parameters by field id (project-scoped). Safe TODAY only because 138 symbols are unique; FLL (or any 2nd standard reusing a symbol) collides. Rider-1 overlaps (V_VA@A138-22 vs basin, A_S@A138-21) are WITHIN-138 (gap-9); the cross-STANDARD case is the FLL trigger.
+  FIX APPROACH: scope each lookup to the saved standard's worksheet set (join fields→worksheet_templates→standard_id = savedStandardId) via a shared scoped-resolver; reproduction test (two standards sharing A_C → resolves CURRENT; fails on first-wins).
+  <-- next: reproduction test (RED) + scoped-resolver + refactor sites + green.
 - E1-D (backlog: #17 cascade, non-turnover flag, provenance; #22 cross-worksheet + governingD deferred): pending.
