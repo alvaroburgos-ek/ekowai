@@ -12,7 +12,33 @@ STANDING RULE: update this ledger at EVERY task transition (recovery lifeline).
   D2 RIDER — 3 B2 invariants re-traced vs reconciled code: **#18** worksheet.ts byte-identical to main → intact; **#21** materialize-registry.ts byte-identical → intact; **#20** asm-source.ts identical + hook carries route-all AND suppressWriteBackSymbols + worksheet-form wires asmMethod→suppression → composed correctly. Branch touches ONLY client engine gate + PDF/snapshot gates; all server/registry invariant files untouched.
   NOTES for E1-A: (1) route-all evaluates MORE 138 client equations than the old whitelist — A_S_m Gl.16 (A138-17) was already whitelisted so no NEW behavior; A138-17 A_S_m client-eval remains the parked #22 dual-role, NOT a #20 regression. (2) PDF keeps `PDF_ENGINE_WHITELIST` as a deliberate 138-conservative gate ("138 PDF unchanged") — a THIRD whitelist-shaped construct, E1-A consolidation candidate. (3) deny-set seed (equation-manual-denylist.ts) carries the faithfulness-scan candidates; the D1 CONDITION (encode-time symbol-resolution+parse gate, blocking) is E1-A build work, not yet present.
   <-- STOP here per user: reconcile report delivered, await go before E1-A.
-- E1-A (whitelist consolidation → single deny-set SSOT + BLOCKING faithfulness gate [D1]): NEXT, not started.
+- **E1-A — IN PROGRESS.**
+  ### Rider 1 (VERIFIED): newly client-evaluated equations under route-all vs old client whitelist (whitelist.ts) — #20 check
+  Old CLIENT whitelist (whitelist.ts) had 24 keys; it LACKED all of A138-19/20/21/22/26 + A138-13:1, 16:13, 18:24/25. Those newly evaluate client-side under route-all. Deny-set (138): A138-18:18 only. For each newly-eval eq: does its output symbol get server-materialized TO THE SAME worksheet (the #20 write-back-loop shape)?
+
+  | key | output | #20 shape? | disposition |
+  |---|---|---|---|
+  | A138-13:1 | M | no | benign (facility-local) |
+  | A138-16:13 | (condition) | no (no write-back) | benign |
+  | A138-18:24 | q_VS | no | benign |
+  | A138-18:25 | (condition) | no | benign |
+  | A138-19:26/28 | V_MR | no | collision-guard pair (one displayOnly) |
+  | A138-19:27 | V_R | overload w/ A138-18 (gap-9) | §10c/E1-C, not #20 |
+  | A138-19:29, 20:32 | L_R | overload | §10c/E1-C |
+  | A138-20:30 | V_MUE | no | benign |
+  | A138-20:31 | Q_MUE | no | benign |
+  | A138-20:33 | Q_Dr | cross-ws producer (basin input), NOT server-materialized to A138-20 | benign for #20; note cross-ws |
+  | A138-21:34 | A_S | A_S≡A_S_m single-source for ponding (gap-9); Schacht-local here | §10c/E1-C + single-source note, not #20 |
+  | A138-21:35/36 | V_S | no | collision-guard pair |
+  | A138-21:37/40 | h_S | no | collision-guard pair |
+  | A138-21:38 | (condition) | no | benign |
+  | A138-21:39 | erf_k_f_FS | no | benign |
+  | A138-22:41 | V_VA | **overload w/ basin A138-13 V_VA (server-materialized), but on A138-22 (Becken), different worksheet** | §10c/E1-C (gap-9 overload), NOT a same-ws #20 loop |
+  | A138-26:10 | V_Rueck | no | benign |
+
+  **VERIFIED CONCLUSION (converts note 1 asserted→verified):** NO newly-eval equation writes a server-materialized symbol (A_C, A_S_m, ac_as_ratio*, basin V_VA/r_D_n/D_min) to the SAME worksheet that server-materializes it — those live on A138-07/12/13 and no newly-eval eq is on them. The only server-symbol overlaps (V_VA@A138-22, A_S@A138-21, V_R/L_R@A138-19/20) are cross-worksheet OVERLOADS (gap-class 9 / §10c) → E1-C scope, NOT #20 write-back loops. Same-worksheet duplicate producers (V_M, V_R, V_S, h_S, V_MR pairs) are handled by the branch's multi-producer collision guard (one of each pair is displayOnly). A_S_m (the one real conditional-owner) was ALREADY client-whitelisted (17:16/12:7) → unchanged. **No newly-eval eq needs new suppression or a new deny-set entry for #20 reasons.**
+
+- E1-A remaining: PDF_ENGINE_WHITELIST fate (rider 2); BLOCKING faithfulness gate (D1) + demo on Q_zu=45-class formula. NOT done.
 - E1-B (registry/dispatch hardening + CI integration tests): pending.
 - E1-C (standard-agnostic symbol scoping §10c — MANDATORY before FLL): pending.
 - E1-D (backlog: #17 cascade, non-turnover flag, provenance; #22 cross-worksheet + governingD deferred): pending.
