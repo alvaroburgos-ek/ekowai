@@ -21,7 +21,7 @@ Riders (binding):
 ## Task ledger
 
 - Task 0 (ratification bundle: D1 clauses + D3 predicate): IN PROGRESS — artifact written docs/superpowers/plans/2026-07-15-phase4-ratification.md; presented to user; AWAITING individual ratification of REQ-20/21/22 severities + Gl.38 Typ-B rider + phase_4_gate_result predicate. Tasks 3/5 gated on this.
-- Task 1–2 (#22 reproduction + fix): DISPATCHED (implementer, parallel with Task-0 review per user). Not ratification-gated.
+- Task 1–2 (#22 reproduction + fix): DONE 2026-07-15. RED commit a1bda0a (9 unit + 3 integration tests fail on missing export). GREEN commit 8c8edc0 (12/12 pass, 0 new TS errors, 1092/1092 unit suite). Files: asm-source.ts (+symbolHomeSuppressedSymbols), worksheet-form.tsx (union into engineSuppressedSymbols), asm-dual-role-a138-17.test.ts, a138-17-dual-role.test.tsx. Reproduction property: "bug path" test asserts manual_required when unsuppressed; "fix path" test asserts V_M≈22.05 m³ when suppressed. Report: .superpowers/sdd/task-1-2-report.md.
 - Task 3 (A138-23 summary aggregator): pending Task 0 D3 ratification.
 - Task 4 (REQ-19 enforcement verify): pending.
 - Task 5 (compliance gates importer): pending Task 0 D1 ratification.
