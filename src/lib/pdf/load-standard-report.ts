@@ -34,7 +34,7 @@ export type {
   AuditExcerptEntry,
   StoredCitation,
 } from './assemble-standard-report';
-export { PDF_ENGINE_WHITELIST } from './assemble-standard-report';
+export { PDF_138_FROZEN_GATE } from './assemble-standard-report';
 
 /**
  * Load the full per-standard snapshot for the PDF.

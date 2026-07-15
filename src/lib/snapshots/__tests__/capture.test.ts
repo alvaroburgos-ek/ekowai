@@ -129,18 +129,33 @@ describe('buildSnapshotPayload', () => {
     expect(payload.parameters).toEqual({});
   });
 
-  it('marks non-whitelisted equations as `skipped`', () => {
-    const equations = [mkEquation({ equationNumber: '99', formula: 'X = 1' })];
+  it('routes an ordinary equation through the engine (no longer skipped) — generalized gate', () => {
+    const equations = [
+      mkEquation({ equationNumber: '99', formula: 'X = 1', outputSymbol: 'X' }),
+    ];
     const payload = buildSnapshotPayload({
       fields: [],
       equations,
       complianceRequirements: [],
       parameters: [],
-      worksheetCode: 'A138-NOT-WIRED',
+      worksheetCode: 'ANY-STD-01',
     });
-    expect(payload.equationOutputs['99'].kind).toBe('skipped');
-    if (payload.equationOutputs['99'].kind === 'skipped') {
-      expect(payload.equationOutputs['99'].manualRequiredReason).toMatch(/Engine/i);
+    // Pre-generalization this was `skipped`; now it routes and computes.
+    expect(payload.equationOutputs['99'].kind).not.toBe('skipped');
+  });
+
+  it('skips a deny-listed equation (A138-18:18) with a deny-set reason', () => {
+    const equations = [mkEquation({ equationNumber: '18', formula: 'Q_S = 1' })];
+    const payload = buildSnapshotPayload({
+      fields: [],
+      equations,
+      complianceRequirements: [],
+      parameters: [],
+      worksheetCode: 'A138-18',
+    });
+    expect(payload.equationOutputs['18'].kind).toBe('skipped');
+    if (payload.equationOutputs['18'].kind === 'skipped') {
+      expect(payload.equationOutputs['18'].manualRequiredReason).toMatch(/Sperrliste/i);
     }
   });
 

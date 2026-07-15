@@ -410,4 +410,16 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes:
       '§6.4.2 Gl. (23): erforderliche Rigolen-Länge L_R. displayOnly — der Engineer trägt L_R als Iterationsgröße ein.',
   },
+
+  // FLL-GAR-2023 · FLL-GAR-22 · Gl. (2b) — g_prime ≥ (Delta_u·gamma_A − (…))/cos(beta).
+  // An INEQUALITY (Mindestauflast-Bedingung), NOT a producer of g_prime; Gl. (2a)
+  // is the sole producer. displayOnly so the multi-producer collision guard leaves
+  // Gl.2a's g_prime intact. Encoding-shape class: "inequality encoded as
+  // equation-producer" (see defect register).
+  'c7dc584b-0f65-476d-935a-d5306d885a65': {
+    expectedUnits: {},
+    displayOnly: true,
+    notes:
+      'FLL-GAR-22 Gl. (2b): Mindestauflast-Bedingung g_prime ≥ …; displayOnly — Gl. (2a) ist der Produzent von g_prime, Gl. (2b) ist die Prüfbedingung.',
+  },
 };

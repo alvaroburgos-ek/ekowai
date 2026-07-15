@@ -23,7 +23,6 @@ import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
 import { lookupTab9 } from '@/lib/eval/tab9';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
-import { FORMULA_ENGINE_WHITELIST } from '@/lib/eval/whitelist';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { asmEngineSuppressedSymbols } from '@/lib/eval/asm-source';
@@ -307,7 +306,6 @@ export function WorksheetForm({
     worksheetCode: worksheet.template.code,
     fields,
     equations: sortedEquations,
-    engineWhitelist: FORMULA_ENGINE_WHITELIST,
     ambiguousSymbols,
     suppressWriteBackSymbols: engineSuppressedSymbols,
   });
@@ -434,42 +432,13 @@ export function WorksheetForm({
   // worksheet does not consume a surface-inventory source.
   const srcState = surfaceSource ? surfaceSourceState(surfaceSource.carrier, surfaceSource.status) : null;
 
-  // Legacy naive sum-evaluator for everything NOT on the engine whitelist.
-  // It ignores `formula` and just sums input_symbols — built for DIN-276 cost
-  // roll-ups. Skips whitelisted equations so the engine output isn't clobbered.
-  useEffect(() => {
-    const numBySymbol: Record<string, number> = {};
-    for (const f of fields) {
-      const v = values[f.id];
-      if (v?.type === 'number' && v.value != null && Number.isFinite(v.value)) {
-        numBySymbol[f.symbol] = v.value;
-      }
-    }
-    for (const eq of sortedEquations) {
-      if (engineEquationIds.has(eq.id)) continue; // skip — engine owns this one
-      const outSym = eq.outputSymbol;
-      if (!outSym) continue;
-      const outField = fieldBySymbol.get(outSym);
-      if (!outField) continue;
-      const inputs = eq.inputSymbols ?? [];
-      let sum = 0;
-      let hasInput = false;
-      for (const s of inputs) {
-        const n = numBySymbol[s];
-        if (n !== undefined) {
-          sum += n;
-          hasInput = true;
-        }
-      }
-      const computed = hasInput ? sum : null;
-      if (computed !== null) numBySymbol[outSym] = computed;
-      const current = values[outField.id];
-      const currentNum = current?.type === 'number' ? current.value : null;
-      if (currentNum !== computed) {
-        setField(outField.id, { type: 'number', value: computed });
-      }
-    }
-  }, [values, fields, sortedEquations, fieldBySymbol, setField, engineEquationIds]);
+  // (Retired) The legacy naive sum-evaluator lived here — it ignored `formula`
+  // and summed input_symbols for every equation NOT on the old 138-only
+  // whitelist. Engine generalization (Layer 0) routes EVERY equation through
+  // the real evaluator (useEquationEngine), which computes faithful arithmetic
+  // (DIN-276 sums included) and blanks anything it cannot faithfully evaluate.
+  // Keeping the legacy sum would naive-sum the deny-listed equations and defeat
+  // the deny-set, so it is removed entirely.
 
   // Hide deprecated AND inherited fields from rendering. visibleFields(...)
   // strips `active=false` rows; the additional filter strips inherited rows

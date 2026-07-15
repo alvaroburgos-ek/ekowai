@@ -54,8 +54,8 @@ export type ReportData = {
       sourceType: string;
       enteredAt: string;
     }>;
-    /** Per-equation engine results, populated for every entry the
-     * production `FORMULA_ENGINE_WHITELIST` references on this worksheet. */
+    /** Per-equation engine results, populated for every engine-evaluated
+     * equation on this worksheet (all except the manual deny-set). */
     equations: EquationReportResult[];
     /** Per-row compliance results, parseable conditions evaluated against
      * project parameters + engine outputs. */

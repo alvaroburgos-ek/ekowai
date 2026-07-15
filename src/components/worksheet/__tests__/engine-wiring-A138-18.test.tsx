@@ -64,7 +64,6 @@ function Harness({ fields }: { fields: FieldMeta[] }) {
     worksheetCode: 'A138-18',
     fields: memoFields,
     equations: EQUATIONS,
-    engineWhitelist: new Set<string>(['A138-18:21']),
   });
   const state = engineStates[A138_18_GL21_EQ_ID];
   if (!state) return null;

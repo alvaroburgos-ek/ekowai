@@ -1,4 +1,5 @@
 import type { ParsedWorkbook } from './_pass3c-types';
+import { computeEngineDenyKeys, type EquationForGate } from '../src/lib/eval/equation-manual-denylist';
 
 const ALLOWED_DATA_TYPES = new Set([
   'number', 'text', 'enum', 'date', 'boolean', 'json',
@@ -156,4 +157,32 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
   });
 
   return errors;
+}
+
+/**
+ * ENCODE-TIME faithfulness gate (E1-A / D1). Runs the class-(i) parse +
+ * symbol-resolution gate over the parsed workbook and returns the equation keys
+ * that are NOT engine-verifiable (unresolved symbol / bad parse), EXCLUDING
+ * carrier aggregates. These are NON-BLOCKING for import — they FEED the deny-set
+ * (the single runtime SSOT, EQUATION_GATE_DENYLIST): the CLI surfaces them so the
+ * engineer either fixes the formula at source (equations-text migration) or the
+ * key is materialized into the deny-set. Until resolved, the mis-encoded formula
+ * is excluded from route-all and never silently computed.
+ */
+export function computeWorkbookGateDenyKeys(
+  parsed: ParsedWorkbook,
+): Array<{ key: string; reason: string }> {
+  const fieldSymbols = new Set<string>(
+    parsed.fields.map((f) => f.symbol).filter((s): s is string => !!s),
+  );
+  const equations: EquationForGate[] = parsed.equations.map((eq) => ({
+    worksheetCode: eq.used_in_worksheet?.split(',')[0].trim() ?? '',
+    equationNumber: eq.equation_number ?? '',
+    formula: eq.formula ?? '',
+    inputSymbols: (eq.input_symbols ?? '')
+      .split(/[|,]/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  }));
+  return computeEngineDenyKeys(equations, fieldSymbols);
 }

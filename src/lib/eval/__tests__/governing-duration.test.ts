@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { iterateGoverningDuration } from '../governing-duration';
+import { iterateGoverningDuration, boundaryLimitedWarning } from '../governing-duration';
 
 const ROWS = [
   { D_min: 5, r_D_n: 300 },
@@ -48,6 +48,25 @@ describe('iterateGoverningDuration', () => {
       perDuration: [],
       boundaryLimited: false,
     });
+  });
+});
+
+// E1-D: the boundary-limited (non-turnover) warning, generalized so ANY facility
+// profile can emit the same §5.3.3.7 / DWA-A 117 message.
+describe('boundaryLimitedWarning (generalized non-turnover flag)', () => {
+  it('facility-agnostic base message references the tabellenrand D and DWA-A 117', () => {
+    expect(boundaryLimitedWarning(1440)).toBe(
+      'Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand ' +
+      '(D = 1440 min). Dauerstufenbereich nach DWA-A 117 erweitern.',
+    );
+  });
+
+  it('reproduces the basin Einfaches-Verfahren message BYTE-IDENTICAL when given its mid-clause', () => {
+    expect(boundaryLimitedWarning(1440, 'Bemessung ggf. außerhalb des Einfachen Verfahrens (q_S_AC < 2 prüfen)')).toBe(
+      'Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand ' +
+      '(D = 1440 min). Bemessung ggf. außerhalb des Einfachen Verfahrens (q_S_AC < 2 prüfen) ' +
+      'oder Dauerstufenbereich nach DWA-A 117 erweitern.',
+    );
   });
 });
 

@@ -1,6 +1,7 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
+import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 
 /**
  * Pure assembler for the per-standard PDF report data.
@@ -316,16 +317,27 @@ export type AssemblerInput = {
 };
 
 // =============================================================================
-// Engine whitelist — mirrors the one in worksheet-form.tsx. Kept in sync by
-// the matching unit test (a drift would be caught by the data-assembly
-// snapshot when a new equation is wired). The PDF renders a green verdict
-// only for these.
+// DWA-A-138 PDF FROZEN GATE — DELIBERATE, SCHEDULED FOR REMOVAL (see design note).
+//
+// This is NOT a third general whitelist. It is a deliberate freeze of the 138
+// PDF's evaluated-equation set, kept ONLY for compliance-output stability.
+//
+//  WHY FROZEN: the 138 PDF was acceptance-verified live in Task 11 Step 6.3
+//    (PLT-HS-01, 2026-07-13) rendered THROUGH this exact set. Compliance output
+//    must not silently change without re-acceptance, so generalization does not
+//    touch the 138 PDF: only these 138 equations evaluate server-side (they need
+//    no browser carrier); carrier-dependent 138 aggregators (Gl. 2 / 8 / 10)
+//    stay `not_evaluated` (not a misleading manual_required). Non-138 standards
+//    have no carrier aggregators → every non-138 equation routes through the
+//    evaluator minus the deny-set (see the gate below). E1-A design note.
+//
+//  WHEN IT DIES (backlog task "retire PDF 138 gate", scheduled end of E1-D or
+//    138 Phase 4, whichever first): switch 138 PDF to route-all-minus-deny like
+//    client/server, then RE-VERIFY the PLT-HS-01 PDF against the Step-6.3
+//    baseline — diff the equation sections, confirm every newly-rendered engine
+//    verification is correct — before removing this gate.
 // =============================================================================
-export const PDF_ENGINE_WHITELIST = new Set<string>([
-  // Aggregator-driven equations (Gl. 2 / Gl. 8) are intentionally NOT in the
-  // server-side whitelist — they read browser-side carriers (sub_areas,
-  // KOSTRA table) the server-rendered PDF can't access. Those surface as
-  // `not_evaluated` rather than misleading manual_required.
+export const PDF_138_FROZEN_GATE = new Set<string>([
   'A138-12:4',
   'A138-12:7',
   'A138-16:11',
@@ -524,8 +536,15 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       // evaluator the browser uses. NEVER returns a number when the
       // engine can't verify — that's the three-state contract.
       const evaluatedEquations: ReportEquation[] = tplEqs.map((eq) => {
-        const whitelistKey = `${tpl.code}:${eq.equationNumber}`;
-        if (!PDF_ENGINE_WHITELIST.has(whitelistKey)) {
+        const key = `${tpl.code}:${eq.equationNumber}`;
+        // 138 stays on its carrier-free curated subset (the assembler builds no
+        // carriers); every other standard routes through the evaluator except
+        // the manual deny-set. 138 PDF output is unchanged by generalization.
+        const is138 = tpl.code.startsWith('A138-');
+        const evaluable =
+          shouldEngineEvaluate(tpl.code, eq.equationNumber) &&
+          (is138 ? PDF_138_FROZEN_GATE.has(key) : true);
+        if (!evaluable) {
           return {
             id: eq.id,
             equationNumber: eq.equationNumber,

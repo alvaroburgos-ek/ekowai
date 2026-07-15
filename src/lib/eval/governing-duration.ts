@@ -78,6 +78,22 @@ export function iterateGoverningDuration(
 }
 
 /**
+ * Standardized NON-TURNOVER (boundary-limited) warning — emitted when a
+ * governing-duration iteration hits the LONGEST tabulated D instead of an
+ * interior maximum (§5.3.3.7 / DWA-A 117). Generalized (E1-D) so ANY facility
+ * profile emits the same message from one source, not a per-facility hardcode.
+ * `midClause` carries the facility-specific caveat (e.g. the basin's Einfaches-
+ * Verfahren q_S_AC<2 note); omitted for facilities without one.
+ */
+export function boundaryLimitedWarning(governingD: number | null, midClause?: string): string {
+  const mid = midClause ? `${midClause} oder ` : '';
+  return (
+    `Kein eindeutiges Maximum: die maßgebende Dauerstufe liegt am Tabellenrand ` +
+    `(D = ${governingD} min). ${mid}Dauerstufenbereich nach DWA-A 117 erweitern.`
+  );
+}
+
+/**
  * Fixed-duration intensity for the no-storage Flächenversickerung exception
  * (§6.2.2 — prescribed D = 10–15 min, NOT iterated). Exact number → that
  * duration's row; range → the in-range row with the largest r_D (most

@@ -128,7 +128,10 @@ export async function saveWorksheet(
     .select({ id: equations.id, outputSymbol: equations.outputSymbol })
     .from(equations)
     .where(eq(equations.worksheetTemplateId, instance.worksheetTemplateId));
-  const derivedSymbols = derivedOutputSymbols(templateEquations);
+  // r_D_n / D_min are governing-iteration outputs (never hand-entered) — inherited
+  // onto consumers like A138-10 where no equation produces them. Stamp them
+  // `derived`, not `entered` (gap-class 6 inverse). (E1-D)
+  const derivedSymbols = derivedOutputSymbols(templateEquations, BASIN_GOVERNING_SYMBOLS);
 
   // Topology-based trigger flags — computed at function scope so the outer
   // transaction guard can use them on empty-batch saves (savedCount === 0).
@@ -649,7 +652,13 @@ export async function saveWorksheet(
         const [carrierField] = await tx
           .select({ id: fields.id })
           .from(fields)
-          .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+          .where(and(
+            eq(fields.symbol, 'r_D_n_table'),
+            eq(fields.active, true),
+            // §10c: scope to the saved standard (resolves the multi-owner ambiguity noted above).
+            savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+          ))
           .limit(1);
         let carrierRaw: unknown = null;
         if (carrierField) {
@@ -696,10 +705,13 @@ export async function saveWorksheet(
         const crossFields = await tx
           .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
           .from(fields)
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
           .where(
             and(
               inArray(fields.symbol, [...BASIN_LOOKUP_SYMBOLS]),
               eq(fields.active, true),
+              // §10c: scope to the saved standard (was "across ALL templates in the project").
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
             ),
           );
 
@@ -887,7 +899,13 @@ export async function saveWorksheet(
         const crossAcFields = await tx
           .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
           .from(fields)
-          .where(and(eq(fields.symbol, 'A_C'), eq(fields.active, true)));
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+          .where(and(
+            eq(fields.symbol, 'A_C'),
+            eq(fields.active, true),
+            // §10c: scope to the saved standard so a 2nd guideline reusing A_C can't leak.
+            savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+          ));
         const crossAcFieldIds = crossAcFields.map((f) => f.id);
         let A_C: number | null = null;
         if (crossAcFieldIds.length > 0) {
@@ -926,7 +944,13 @@ export async function saveWorksheet(
         const crossFtFields = await tx
           .select({ id: fields.id })
           .from(fields)
-          .where(and(eq(fields.symbol, 'facility_type_selected'), eq(fields.active, true)));
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+          .where(and(
+            eq(fields.symbol, 'facility_type_selected'),
+            eq(fields.active, true),
+            // §10c: scope to the saved standard.
+            savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+          ));
         const crossFtFieldIds = crossFtFields.map((f) => f.id);
         let facilityType: FacilityType | null = null;
         if (crossFtFieldIds.length > 0) {
@@ -1104,10 +1128,13 @@ export async function saveWorksheet(
         const crossLcFields = await tx
           .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
           .from(fields)
+          .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
           .where(
             and(
               inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
               eq(fields.active, true),
+              // §10c: scope to the saved standard.
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
             ),
           );
         const crossLcFieldIds = crossLcFields.map((f) => f.id);
@@ -1280,10 +1307,13 @@ export async function saveWorksheet(
           const crossLcFieldsP = await tx
             .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
             .from(fields)
+            .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
             .where(
               and(
                 inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
                 eq(fields.active, true),
+                // §10c: scope to the saved standard.
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
               ),
             );
           const crossLcFieldIdsP = crossLcFieldsP.map((f) => f.id);
@@ -1433,7 +1463,13 @@ export async function saveWorksheet(
           const crossFtFieldsP = await tx
             .select({ id: fields.id })
             .from(fields)
-            .where(and(eq(fields.symbol, 'facility_type_selected'), eq(fields.active, true)));
+            .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+            .where(and(
+              eq(fields.symbol, 'facility_type_selected'),
+              eq(fields.active, true),
+              // §10c: scope to the saved standard.
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+            ));
           const crossFtFieldIdsP = crossFtFieldsP.map((f) => f.id);
           let facilityTypeP: FacilityType | null = null;
           if (crossFtFieldIdsP.length > 0) {
@@ -1463,7 +1499,13 @@ export async function saveWorksheet(
               const [muldeCarrierField] = await tx
                 .select({ id: fields.id })
                 .from(fields)
-                .where(and(eq(fields.symbol, 'r_D_n_table'), eq(fields.active, true)))
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+                .where(and(
+                  eq(fields.symbol, 'r_D_n_table'),
+                  eq(fields.active, true),
+                  // §10c: scope carrier lookup to the saved standard (r_D_n_table is on A138-04, in 138).
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+                ))
                 .limit(1);
               let muldeCarrierRaw: unknown = null;
               if (muldeCarrierField) {
@@ -1513,9 +1555,12 @@ export async function saveWorksheet(
               const mScalarCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
                 .where(and(
                   inArray(fields.symbol, [...MULDE_SCALAR_SYMS]),
                   eq(fields.active, true),
+                  // §10c: scope to the saved standard.
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                 ));
               const mScalarFieldIds = mScalarCrossFields.map((f) => f.id);
               const mScalarParams = mScalarFieldIds.length > 0
@@ -1580,9 +1625,12 @@ export async function saveWorksheet(
               const rigoleCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
                 .where(and(
                   inArray(fields.symbol, [...RIGOLE_SYMS]),
                   eq(fields.active, true),
+                  // §10c: scope to the saved standard.
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                 ));
               const rigoleFieldIds = rigoleCrossFields.map((f) => f.id);
               const rigoleParams = rigoleFieldIds.length > 0
@@ -1668,7 +1716,13 @@ export async function saveWorksheet(
           const crossAcFieldsP2 = await tx
             .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
             .from(fields)
-            .where(and(eq(fields.symbol, 'A_C'), eq(fields.active, true)));
+            .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+            .where(and(
+              eq(fields.symbol, 'A_C'),
+              eq(fields.active, true),
+              // §10c: scope to the saved standard.
+              savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+            ));
           const crossAcFieldIdsP2 = crossAcFieldsP2.map((f) => f.id);
           let pA_C: number | null = null;
           if (crossAcFieldIdsP2.length > 0) {
@@ -1757,9 +1811,12 @@ export async function saveWorksheet(
                 const clearLcCrossFields = await tx
                   .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                   .from(fields)
+                  .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
                   .where(and(
                     inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
                     eq(fields.active, true),
+                    // §10c: scope to the saved standard.
+                    savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
                   ));
                 const clearLcFieldIds = clearLcCrossFields.map((f) => f.id);
                 const clearLcParams = clearLcFieldIds.length > 0
@@ -1920,9 +1977,12 @@ export async function saveWorksheet(
             const chainedLcCrossFields = await tx
               .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
               .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
               .where(and(
                 inArray(fields.symbol, [...LOADING_CHECK_CROSS_SYMBOLS]),
                 eq(fields.active, true),
+                // §10c: scope to the saved standard.
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
               ));
             const chainedLcFieldIds = chainedLcCrossFields.map((f) => f.id);
             const chainedLcParams = chainedLcFieldIds.length > 0

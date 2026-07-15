@@ -117,7 +117,6 @@ function BasinHarness({ fields }: { fields: FieldMeta[] }) {
     worksheetCode: 'A138-13',
     fields: memoFields,
     equations: BASIN_EQUATIONS,
-    engineWhitelist: new Set<string>(['A138-13:8']),
   });
   const state = engineStates[A138_13_GL8_ID];
   if (!state) return null;
@@ -141,7 +140,6 @@ function A10Harness({ fields }: { fields: FieldMeta[] }) {
     worksheetCode: 'A138-10',
     fields: memoFields,
     equations: A10_EQUATIONS,
-    engineWhitelist: new Set<string>(['A138-10:3']),
   });
   const state = engineStates[A138_10_GL3_ID];
   if (!state) return null;
