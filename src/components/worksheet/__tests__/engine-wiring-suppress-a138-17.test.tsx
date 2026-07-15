@@ -163,7 +163,7 @@ const WORKSHEET_FORM_PROPS = {
   inheritedFromBySymbol:    INHERITED_FROM,
   standardCode:             'DWA-A-138-1',
   docs:                     [],
-} as const;
+} satisfies Parameters<typeof WorksheetForm>[0];
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
