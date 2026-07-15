@@ -180,6 +180,32 @@ export function symbolHomeSuppressedSymbols(
 }
 
 /**
+ * Compose the engine write-back suppression set for a worksheet: the union of
+ * method-based suppression (asmEngineSuppressedSymbols) and home-boundary
+ * suppression (symbolHomeSuppressedSymbols, defect #22). This is the single
+ * seam worksheet-form calls, so a reproduction test on it fails if either
+ * suppression term is removed (the real code path).
+ *
+ * Stable-empty short-circuit: when both terms are empty the stable-empty
+ * module constant is returned (same object reference) so useMemo/useEffect
+ * deps do not churn on worksheets where nothing is suppressed.
+ */
+export function composeEngineSuppressedSymbols(
+  asmMethod: string | null,
+  worksheetCode: string,
+  symbolHomes: ReadonlyMap<string, string> | Readonly<Record<string, string>>,
+): ReadonlySet<string> {
+  const methodSet = asmEngineSuppressedSymbols(asmMethod);
+  const homeSet = symbolHomeSuppressedSymbols(worksheetCode, symbolHomes);
+  if (methodSet.size === 0 && homeSet.size === 0) return methodSet; // stable-empty ref
+  if (methodSet.size === 0) return homeSet;
+  if (homeSet.size === 0) return methodSet;
+  const merged = new Set<string>(methodSet);
+  for (const sym of homeSet) merged.add(sym);
+  return merged;
+}
+
+/**
  * V-2 manual-provenance gate (pure decision).
  *
  * A138-12 A_S,m is user-editable ONLY when method='manual', and then a non-empty

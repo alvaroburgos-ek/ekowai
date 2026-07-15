@@ -25,7 +25,7 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
-import { asmEngineSuppressedSymbols, symbolHomeSuppressedSymbols } from '@/lib/eval/asm-source';
+import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -305,20 +305,10 @@ export function WorksheetForm({
   // The union of both sets: on A138-12 method='direct' both are empty (no churn);
   // on A138-17 method='geometry' the asm set may already cover A_S_m, but the
   // home-boundary set provides the general guard independent of asmMethod.
-  const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(() => {
-    const methodSet = asmEngineSuppressedSymbols(asmMethod);
-    const homeSet = symbolHomeSuppressedSymbols(worksheet.template.code, inheritedFromBySymbol);
-    if (methodSet.size === 0 && homeSet.size === 0) {
-      // Both stable-empty → return the stable-empty constant (same reference).
-      return methodSet;
-    }
-    if (methodSet.size === 0) return homeSet;
-    if (homeSet.size === 0) return methodSet;
-    // Union: build a new set combining both.
-    const merged = new Set<string>(methodSet);
-    for (const sym of homeSet) merged.add(sym);
-    return merged;
-  }, [asmMethod, worksheet.template.code, inheritedFromBySymbol]);
+  const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
+    () => composeEngineSuppressedSymbols(asmMethod, worksheet.template.code, inheritedFromBySymbol),
+    [asmMethod, worksheet.template.code, inheritedFromBySymbol],
+  );
 
   // Engine wiring lives in a shared hook so the integration test renders
   // EXACTLY the production code path (not a copy of it).
