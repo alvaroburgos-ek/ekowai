@@ -410,4 +410,140 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes:
       '§6.4.2 Gl. (23): erforderliche Rigolen-Länge L_R. displayOnly — der Engineer trägt L_R als Iterationsgröße ein.',
   },
+
+  // ====================================================================
+  // DWA-M-205 · ES-1 (inequality-as-producer) neutralisation.
+  //   These "equations" are threshold BANDS extracted from prose, but their
+  //   output_symbol = the very entered input field being range-checked
+  //   (e.g. uv_dosis "produced" by both Gl. EQ-01 and the band EQ-02 → the
+  //   engine's multi-producer collision guard can BLANK the engineer's entry —
+  //   the same FLL-GAR-22:2b g_prime bug). displayOnly stops the write-back so
+  //   the band renders as a review aid without clobbering the input.
+  //   Every band + modal verb RENDER-confirmed against DWA-M_205.pdf (2013).
+  //   Each unique eq is encoded TWICE (S3 ×2, base M205-05/06/07/08 +
+  //   duplicate M205-10/13/15/17/21) — BOTH copies get the profile, identically.
+  //   Enforcement (where the source carries a modal) lives in the companion
+  //   compliance_requirement, NOT here — see
+  //   20260708260000_dwa_m_205_es1_disposition.sql.
+  // ====================================================================
+
+  // M205-05 · EQ-02 · §4.1.2.3 — uv_dosis 300–450 J/m² (Mindestbestrahlung)
+  'ba51e8f2-4c20-4c01-8f4d-9effcc262b37': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18, gerendert): "Danach beträgt die Mindestbestrahlung etwa 300 J/m² bis 450 J/m²…" — deskriptiver Richtwert (kein muss). ES-1: Band statt Produzent → displayOnly, kein Write-back auf das Eingabefeld uv_dosis.',
+  },
+  // M205-10 · EQ-02 (S3 ×2 Duplikat)
+  '31918a55-696c-4044-a398-1f1c5e36d1e1': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18): uv_dosis 300–450 J/m², "beträgt etwa" (Richtwert). ES-1 displayOnly. S3-Duplikat von M205-05 EQ-02.',
+  },
+
+  // M205-05 · EQ-12 · §4.1.2.3 — uv_dosis 400–700 J/m² (Schwankungsbreite)
+  '1a5e5b28-d9c1-4a49-8c5e-9d596e000ff9': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18): "…zeigt eine Schwankungsbreite … von 400 J/m² bis 600 J/m² und im Einzelfall bis zu 700 J/m²" — empirische Betriebsspanne (kein muss). ES-1 displayOnly. (Hinweis: DB-Band 400–700 verflacht die 400–600/Einzelfall-700-Qualifizierung — S9, separat.)',
+  },
+  // M205-10 · EQ-12 (S3 ×2 Duplikat)
+  'd55d6598-b169-469f-8e17-f7a1c9583bf2': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18): uv_dosis Schwankungsbreite 400–600, Einzelfall bis 700 J/m². ES-1 displayOnly. S3-Duplikat von M205-05 EQ-12.',
+  },
+
+  // M205-05 · EQ-06 · §4.1.5.2 — spez_strom_uv 30–60 Wh/m³
+  '197122ba-f723-4b27-80c1-51a972ea8e12': {
+    expectedUnits: { spez_strom_uv: 'Wh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.1.5.2 (PDF S. 24, gerendert): "…bewegt sich der spezifische Stromverbrauch im Bereich von 30 Wh bis 60 Wh pro Kubikmeter…" — deskriptiver Betriebswert (kein muss). ES-1 displayOnly.',
+  },
+  // M205-13 · EQ-06 (S3 ×2 Duplikat)
+  '246ff465-b925-47a4-85eb-beb9932f9f65': {
+    expectedUnits: { spez_strom_uv: 'Wh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.1.5.2 (PDF S. 24): spez_strom_uv 30–60 Wh/m³, "bewegt sich im Bereich" (deskriptiv). ES-1 displayOnly. S3-Duplikat von M205-05 EQ-06.',
+  },
+
+  // M205-06 · EQ-07 · §4.2.2 — spez_energie_membran 0.1–0.2 kWh/m³
+  'b3126c0d-7940-413e-b3f0-b25b02ccbf38': {
+    expectedUnits: { spez_energie_membran: 'kWh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.2.2 (PDF S. 25, gerendert): "Bei einem spezifischen Energiebedarf von ca. 0,1 kWh/m³ bis 0,2 kWh/m³ Filtrat…" — deskriptiver Wert ("von ca.", kein muss). ES-1 displayOnly.',
+  },
+  // M205-15 · EQ-07 (S3 ×2 Duplikat)
+  'd399b7fd-e988-4499-a2a6-6af379ab0db5': {
+    expectedUnits: { spez_energie_membran: 'kWh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.2.2 (PDF S. 25): spez_energie_membran 0,1–0,2 kWh/m³, "von ca." (deskriptiv). ES-1 displayOnly. S3-Duplikat von M205-06 EQ-07.',
+  },
+
+  // M205-07 · EQ-04 · §4.3.6 — ozon_pro_doc < 0.8 mg/mg
+  '5bc795dd-75f7-433c-a359-b2c1e58d7488': {
+    expectedUnits: { ozon_pro_doc: 'mg/mg' },
+    displayOnly: true,
+    notes:
+      '§4.3.6 (PDF S. 31, gerendert): "Die Bromatbildung kann minimiert werden, wenn Ozon proportional zum DOC (< 0,8 mg/mg) dosiert wird." — Betriebsempfehlung mit Sicherheitsbezug (Bromat-Minimierung), kein muss → warn-Kandidat. ES-1 displayOnly; Enforcement (warn) in der Migration.',
+  },
+  // M205-17 · EQ-04 (S3 ×2 Duplikat)
+  '30a51b8c-422f-411a-8c09-c728a393f433': {
+    expectedUnits: { ozon_pro_doc: 'mg/mg' },
+    displayOnly: true,
+    notes:
+      '§4.3.6 (PDF S. 31): ozon_pro_doc < 0,8 mg/mg, "kann minimiert werden, wenn … dosiert wird" (Empfehlung). ES-1 displayOnly. S3-Duplikat von M205-07 EQ-04.',
+  },
+
+  // M205-08 · EQ-09 · §4.4.2 — clo2_dosis 5–10 g/m³
+  '0e05ac69-c6c4-460a-80b0-7664370b08ca': {
+    expectedUnits: { clo2_dosis: 'g/m³' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 32, gerendert): "…sind etwa 5 g bis 10 g Chlordioxid pro Kubikmeter … notwendig, bei sandfiltriertem Abwasser … nur 1 g/m³ bis 5 g/m³." — deskriptive Dosierspanne (kein muss). ES-1 displayOnly. (DB-Band 5–10 lässt die sandfiltriert-Alternative 1–5 aus — S9, separat.)',
+  },
+  // M205-21 · EQ-09 (S3 ×2 Duplikat)
+  '0c258d85-0a1e-4456-b0df-12f529d11d2c': {
+    expectedUnits: { clo2_dosis: 'g/m³' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 32): clo2_dosis 5–10 g/m³ (sandfiltriert 1–5), "sind etwa … notwendig" (deskriptiv). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-09.',
+  },
+
+  // M205-08 · EQ-10 · §4.4.2 — freies_chlor 1–20 mg/l
+  '86f703b6-6348-4577-a624-029e1ce3c93b': {
+    expectedUnits: { freies_chlor: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 31, gerendert): "Je nach dem Gehalt an organischen Stoffen im Abwasser sind 1 mg bis 20 mg freies Chlor pro Liter … erforderlich." — kontextabhängige Betriebsspanne (kein muss auf feste Grenze). ES-1 displayOnly.',
+  },
+  // M205-21 · EQ-10 (S3 ×2 Duplikat)
+  '3f3b7237-8837-45ff-86a5-1582f7156cbd': {
+    expectedUnits: { freies_chlor: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 31): freies_chlor 1–20 mg/l, "sind … erforderlich" (kontextabhängig). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-10.',
+  },
+
+  // M205-08 · EQ-11 · §4.4.2 — restchlor_betrieb ≥ 0.2 mg/l (freies-Chlor-Überschuss)
+  'cb540d04-9822-4941-a6e2-12a9be184c8e': {
+    expectedUnits: { restchlor_betrieb: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 30/32, gerendert): "In dem aus dem Behandlungsbecken abfließenden Abwasser muss noch ein Überschuss von freiem Chlor in der Größenordnung von 0,2 mg/l nachzuweisen sein, um die Desinfektionswirkung sicherzustellen." — einziges ES-1-Item mit MUSS-Verb → block-Kandidat. ES-1 displayOnly (stoppt Collision-Blank); Enforcement (block, FÜR ALVARO) in der Migration. Hinweis: "in der Größenordnung von" mildert die harte ≥-Grenze → block/warn ist eine Modal-Ratifizierung.',
+  },
+  // M205-21 · EQ-11 (S3 ×2 Duplikat)
+  'b02ff29a-36a0-41b8-b466-0a3b701bd895': {
+    expectedUnits: { restchlor_betrieb: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 30/32): restchlor_betrieb ≥ 0,2 mg/l, "muss … nachzuweisen sein" (block-Kandidat). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-11.',
+  },
 };
