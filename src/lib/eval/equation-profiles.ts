@@ -665,4 +665,98 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes:
       '§5.5 (PDF S. 11, gerendert): "Bewährt haben sich Teiche mit einer Mindesttiefe von 1,2 m und einer Mindestfläche von 20 m²." — "Mindestfläche" = normativer Mindestwert (block), Verb "Bewährt haben sich" ist weicher (Erfahrungswert) → für Alvaro. ES-1 displayOnly. Enforcement bereits in CR-008 (`A_min_nachklaer>=20`, + h_nachklaer>=1.2 deckt die Mindesttiefe 1,2 m).',
   },
+
+  // ====================================================================
+  // DWA-A-102-2 · ES-1 (inequality-as-producer) neutralisation.
+  //   8 "Gleichungen" sind in Wirklichkeit Ungleichungen (`<=` / `>=`),
+  //   deren output_symbol das GEPRÜFTE Symbol selbst ist → zweiter Produzent
+  //   ihres eigenen Symbols → der Multi-Producer-Collision-Guard der Engine
+  //   kann den echten Produzenten-Wert bzw. die Ingenieur-Eingabe BLANKEN.
+  //   displayOnly stoppt den Write-back; die Ungleichung rendert als
+  //   Review-/Bemessungshilfe.
+  //   ES-1-Instanzen (register S1/S7), UUIDs gegen equations.id verifiziert:
+  //     Q_M   B.5 (A1022-08)       · echter Produzent = B.4
+  //     e_0   Gl.15/17/18 (A1022-28) · echter Produzent = Gl.13
+  //     Q_Dr  Gl.26/28 (A1022-33)  · KEIN Produzent (beide sind `>=`-Minima)
+  //     m     Gl.22/23 (A1022-36)  · echter Produzent (Mittel-m) = B.13/Gl.24
+  //   KEINE neuen Gates: die vorhandene AFS63-Durchsetzung (REQ-22
+  //   eta_ges>=eta_erf) trägt die Kernanforderung; keine Quell-Modalverb-
+  //   Grenze verlangt hier ein zusätzliches, in evaluate.ts faithful
+  //   ausdrückbares Gate (never-invent). Alle Formeln render-confirmed vs
+  //   DWA-A_102-2 (3).pdf (Opus 4.8, poppler — DEEP-DWA-A-102-2.md).
+  //   Enforcement-Dispositionen: siehe
+  //   20260708280000_dwa_a_102_2_es1_invtag_disposition.sql.
+  //   HINWEIS m (Gl.22/23): die WRITTEN-NOT-APPLIED Migration 2803d00
+  //   (20260708240000) retaggt Gl.22/23 output_symbol m -> m_min_required und
+  //   re-homed REQ-24. Hier NUR displayOnly (kein Re-Fix) — die Retag-/Gate-
+  //   Arbeit bleibt in 2803d00. Sobald 2803d00 angewendet ist, produzieren
+  //   Gl.22/23 m_min_required und REQ-24 (`m - m_min_required >= 0`) prüft es;
+  //   displayOnly bleibt korrekt (Minimum ist Bemessungshilfe, kein Mittel-m).
+  // ====================================================================
+
+  // A1022-08 · B.5 · §B.3.2.3.3 — Q_M Plausibilitäts-/Massenbilanz-Check
+  '44d37420-9559-4b89-a305-e87cf516e488': {
+    expectedUnits: { Q_M: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§B.3.2.3.3 (Anh. B): `Σ Q_M,i ≤ Q_M` — Plausibilitäts-/Massenbilanz-Check der Teilgebiets-Mischwasserabflüsse gegen den Gesamt-Q_M. KEIN Produzent von Q_M (das ist B.4 `f_S_QM·Q_S_aM+Q_F`). ES-1 displayOnly (stoppt Collision-Blank am B.4-Wert). KEIN Gate: die Formel enthält `Sum(...)` — in evaluate.ts nicht faithful ausdrückbar (kein SUM-Support) → NR, nicht erfinden.',
+  },
+
+  // A1022-28 · Gl.15 · §7.3.2.2 — e_0 Obergrenze (B_R_e_zul-Umstellung)
+  'a5bd51eb-1d34-4970-b633-68f8935a8ce9': {
+    expectedUnits: { e_0: '%' },
+    displayOnly: true,
+    notes:
+      '§7.3.2.2 Gl. (15): `e_0 ≤ (B_R_e_zul − V_R_aM·C_KA)/(V_R_aM·C_e − V_R_aM·C_KA)·100` — Obergrenze der zulässigen Entlastungsrate, algebraische Umstellung der Frachtbedingung Gl. (14) (`B_R_e ≤ B_R_e_zul`). KEIN Produzent von e_0 (das ist Gl.13 `V_e_MWUe/V_R_aM·100`). ES-1 displayOnly. KEIN neues Gate: die echte Frachtdurchsetzung ist Gl.14/REQ-22 (AFS63-Nachweis); ein e_0-Gate hier wäre Feld-gegen-Feld-Division (nicht faithful gegen numerischen RHS ausdrückbar) und würde die Nachweis-Logik duplizieren → never-invent.',
+  },
+
+  // A1022-28 · Gl.17 · §7.3.2.2 — e_0 Obergrenze (CSB-Konzentrationsform)
+  '46fb523a-2e8f-4f8e-b61b-ff4888a76ea4': {
+    expectedUnits: { e_0: '%' },
+    displayOnly: true,
+    notes:
+      '§7.3.2.2 Gl. (17): `e_0 ≤ (C_R_CSB − C_KA_CSB)/(C_e_CSB − C_KA_CSB)·100` — CSB-Konzentrationsform der e_0-Obergrenze. KEIN Produzent von e_0 (Gl.13). ES-1 displayOnly. KEIN Gate (Feld-gegen-Feld, Nachweis-Duplikat).',
+  },
+
+  // A1022-28 · Gl.18 · §7.3.2.2 — e_0 Obergrenze (Referenzwerte 107/70/3700)
+  '008a7bc7-43f2-4568-aa55-2f8431001c37': {
+    expectedUnits: { e_0: '%' },
+    displayOnly: true,
+    notes:
+      '§7.3.2.2 Gl. (18): `e_0 ≤ (107−70)/(C_e_CSB−70)·100 = 3.700/(C_e_CSB−70)` — Spezialform mit den Referenzwerten 107/70 (render-confirmed VA). KEIN Produzent von e_0 (Gl.13). ES-1 displayOnly. KEIN Gate: die DB-Formel enthält zusätzlich ein `= 3700/(…)` (Doppel-Gleichheit, kein evaluate.ts-Ausdruck) und wäre ohnehin Feld-gegen-Feld → never-invent.',
+  },
+
+  // A1022-33 · Gl.26 · §7.3.4.5 — Q_Dr Mindest-Drosselabfluss (Summenform)
+  '29c268ef-33c1-4b28-8269-c06d8465729f': {
+    expectedUnits: { Q_Dr: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.5 Gl. (26): `Q_Dr ≥ Q_T_aM + Q_R_krit + Σ Q_Dr,i` — Mindestanforderung an den Gesamt-Drosselabfluss. KEIN Produzent (Minimum-Ungleichung). ES-1 displayOnly. KEIN Gate: Formel enthält `Sum(...)` (kein SUM in evaluate.ts) und die Quelle druckt hier keine „muss"-Grenze als hartes Einzel-Gate → NR, never-invent.',
+  },
+
+  // A1022-33 · Gl.28 · §7.3.4.5 — Q_Dr Mindest-Drosselabfluss (m_Rue-Form)
+  '0708808f-84f8-4b82-82f0-a8dda7977bee': {
+    expectedUnits: { Q_Dr: 'l/s', m_Rue: null, Q_T_aM: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.5 Gl. (28): `Q_Dr ≥ (m_Rue + 1)·Q_T_aM` — bauwerksbezogene Mindestanforderung an den Drosselabfluss. KEIN Produzent (Minimum-Ungleichung, Partner von Gl.26). ES-1 displayOnly. KEIN Gate: die Quelle druckt kein eigenständiges „muss"-Q_Dr-Gate (Bemessungsminimum, A-102-2 mid-consolidation — konservativ) → never-invent, für Alvaro falls Durchsetzung gewünscht.',
+  },
+
+  // A1022-36 · Gl.22 · §7.3.4.2 — m_min_required = 7 (C_T,aM,CSB ≤ 600)
+  //   [Retag/Gate liegt in 2803d00; hier NUR displayOnly, kein Re-Fix.]
+  'd2d1bf8b-5e93-4ad8-963a-d297c89b2d14': {
+    expectedUnits: { m: null, C_T_aM_CSB: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.2 Gl. (22): `m ≥ 7 für C_T,aM,CSB ≤ 600 mg/l` — Mindestmischverhältnis (Bemessungshilfe), NICHT Produzent des mittleren m (das ist B.13/Gl.24). ES-1 displayOnly. HINWEIS: die WRITTEN-NOT-APPLIED Migration 2803d00 retaggt output_symbol m -> m_min_required und durchsetzt via REQ-24 (`m - m_min_required >= 0`, re-homed A1022-36). Hier KEIN Re-Fix — Enforcement bleibt in 2803d00; displayOnly bleibt auch nach Retag korrekt. Piecewise `if` → ENGINE-blocked (E1) für Auto-Compute.',
+  },
+
+  // A1022-36 · Gl.23 · §7.3.4.2 — m_min_required = (C_T,aM,CSB − 180)/60 (> 600)
+  //   [Retag/Gate liegt in 2803d00; hier NUR displayOnly, kein Re-Fix.]
+  '70ebb0c4-2db9-4405-85ef-da863172666c': {
+    expectedUnits: { m: null, C_T_aM_CSB: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.2 Gl. (23): `m ≥ (C_T,aM,CSB − 180)/60 für C_T,aM,CSB > 600 mg/l` — erhöhtes Mindestmischverhältnis (Bemessungshilfe), NICHT Produzent des mittleren m. ES-1 displayOnly. HINWEIS: Retag output_symbol m -> m_min_required + Durchsetzung via REQ-24 liegen in 2803d00 (WRITTEN-NOT-APPLIED) — hier kein Re-Fix. Piecewise `if` → ENGINE-blocked (E1).',
+  },
 };
