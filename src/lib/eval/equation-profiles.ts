@@ -546,4 +546,123 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes:
       '§4.4.2 (PDF S. 30/32): restchlor_betrieb ≥ 0,2 mg/l, "muss … nachzuweisen sein" (block-Kandidat). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-11.',
   },
+
+  // ====================================================================
+  // DWA-A-201 · ES-1 (inequality-as-producer) neutralisation.
+  //   Wie bei M-205 sind diese 12 "Gleichungen" Bemessungs-Schwellenwerte
+  //   aus Prosa (§5.1–5.5), deren output_symbol das GEPRÜFTE Eingabe-/
+  //   Bemessungsfeld selbst ist (V_erf_grobstoff, V_EW_absetz, …,
+  //   A_min_nachklaer). Damit ist jede Gleichung ein zweiter Produzent
+  //   ihres eigenen Symbols → der Multi-Producer-Collision-Guard der Engine
+  //   kann den vom Ingenieur eingegebenen Wert BLANKEN. displayOnly stoppt
+  //   den Write-back, sodass das Band als Review-Hilfe rendert, ohne die
+  //   Eingabe zu überschreiben.
+  //   KEIN S3 ×2 in A-201 — jede Gleichung existiert genau EINMAL (DB-Scan
+  //   F-01…F-21 bestätigt), daher genau ein Profil je ES-1-Gleichung.
+  //   Jeder Schwellenwert + jedes Modalverb RENDER-bestätigt gegen
+  //   "dwa_a_201 (1).pdf" (August 2005, korr. Dez. 2011), poppler pdftoppm
+  //   150 dpi S. 10 (§5.1–5.3) + S. 11 (§5.4–5.5).
+  //   Enforcement: die durchsetzbaren "muss"/"gilt"-Grenzwerte werden bereits
+  //   von den vorhandenen Gates CR-004/005/007/008 abgedeckt — hier werden
+  //   KEINE Gates dupliziert. Die Migration flaggt nur die pre-existing
+  //   Gate-Defekte (CR-006 kaputte doppelte IF-THEN + Cross-Worksheet-
+  //   Platzierung von CR-006/007) für Alvaro. Siehe
+  //   20260708270000_dwa_a_201_es1_disposition.sql.
+  // ====================================================================
+
+  // A201-08 · F-01 · §5.1 — V_erf_grobstoff ≥ Q_M · t_R,M
+  '48ef9e99-ffc6-4b51-a911-88fb8e40101d': {
+    expectedUnits: { V_erf_grobstoff: 'm³', Q_M: 'm³/h', t_R_M: 'h' },
+    displayOnly: true,
+    notes:
+      '§5.1 (PDF S. 10, gerendert): "Für die Bemessung der Grobstoffentnahme gilt: V_erf ≥ Q_M · t_R,M ; t_R,M = 0,5 h." — normative Bemessungsregel ("gilt"). ES-1: Ungleichung mit Feld-Symbolen auf der RHS → displayOnly (kein Write-back auf V_erf_grobstoff). Enforcement existiert bereits als CR-004 (`V_erf_grobstoff >= Q_M * t_R_M and t_R_M == 0.5`, arithmetischer RHS → acompare-Pfad, grammar-OK).',
+  },
+
+  // A201-09 · F-03 · §5.2 — V_EW_absetz ≥ 0,5 m³/E
+  '792d1332-5ed4-4b16-a106-8132a1fa7bf7': {
+    expectedUnits: { V_EW_absetz: 'm³/E' },
+    displayOnly: true,
+    notes:
+      '§5.2 (PDF S. 10, gerendert): "Absetzteiche werden auf V_EW ≥ 0,5 m³/E bemessen." — normativer Bemessungswert ("werden … bemessen"). ES-1 displayOnly. Enforcement bereits in CR-005.',
+  },
+
+  // A201-09 · F-04 · §5.2 — V_schlammraum_absetz ≥ 0,15 m³/E
+  'e3c30a7d-c11e-4076-8f09-a0d4a590946e': {
+    expectedUnits: { V_schlammraum_absetz: 'm³/E' },
+    displayOnly: true,
+    notes:
+      '§5.2 (PDF S. 10, gerendert): Schlammraum "≥ 0,15 m³/E … gewählt werden" (Bemessungswert). ES-1 displayOnly. Enforcement bereits in CR-005.',
+  },
+
+  // A201-09 · F-06 · §5.2 — t_R_absetz ≥ 1 d
+  'ba340cbf-9420-410d-bfc9-d4380dde9a6e': {
+    expectedUnits: { t_R_absetz: 'd' },
+    displayOnly: true,
+    notes:
+      '§5.2 (PDF S. 10, gerendert): "Es muss eine Durchflusszeit von mindestens einem Tag bei Trockenwetter eingehalten werden." — muss ≥ 1 d. ES-1 displayOnly. Enforcement bereits in CR-005.',
+  },
+
+  // A201-10 · F-07 · §5.3 — A_EW_unbelueftet ≥ 10 m²/E (Regelwert)
+  '2c9d5018-004f-4f67-b40b-dcc8898d3171': {
+    expectedUnits: { A_EW_unbelueftet: 'm²/E' },
+    displayOnly: true,
+    notes:
+      '§5.3 (PDF S. 10, gerendert): "Unbelüftete Abwasserteiche sind mit A_EW ≥ 10 m²/E zu bemessen." — normativer Regel-Bemessungswert ("sind … zu bemessen"). ES-1 displayOnly. Enforcement-Absicht in CR-006 vorhanden, aber CR-006 ist DEFEKT (doppeltes IF-THEN + auf falschem Worksheet A201-08) → in der Migration für Alvaro geflaggt, hier NICHT umgeschrieben (ES-1-Scope).',
+  },
+
+  // A201-10 · F-08 · §5.3 — A_EW_unbelueftet ≥ 8 m²/E (reduziert bei Vorschaltung Absetzteich)
+  '3f986494-9fae-4171-b602-ab106a8cd659': {
+    expectedUnits: { A_EW_unbelueftet: 'm²/E' },
+    displayOnly: true,
+    notes:
+      '§5.3 (PDF S. 10, gerendert): "Dieser Wert kann auf 8 m²/E vermindert werden, wenn nach Abschnitt 5.2 bemessene Absetzteiche vorgeschaltet sind." — bedingte Alternative ("kann … vermindert werden, wenn"). C9-Selektor-Partner zu F-07 (gleiches Symbol A_EW_unbelueftet, alternativer Wert). ES-1 displayOnly. Enforcement-Absicht in CR-006 (defekt, geflaggt).',
+  },
+
+  // A201-10 · F-10 · §5.3 — A_EW_nitrifikation ≥ 15 m²/E (deskriptive Beobachtung)
+  'a69cfcaf-18a2-482e-a359-63848ffa00b9': {
+    expectedUnits: { A_EW_nitrifikation: 'm²/E' },
+    displayOnly: true,
+    notes:
+      '§5.3 (PDF S. 10, gerendert): "Bei Bemessungswerten A_EW ≥ 15 m²/E ist im Sommer eine teilweise Nitrifikation festzustellen." — DESKRIPTIVE Beobachtung ("ist … festzustellen"), KEIN Bemessungs-Mindestwert. ES-1 displayOnly ONLY; ein Gate hier wäre eine erfundene Anforderung → unterlassen (never-invent).',
+  },
+
+  // A201-11 · F-11 · §5.4 — B_R_BSB ≤ 25 g/(m³·d) (Last-Grenzwert)
+  '2aa30964-75b6-4990-995e-58d16598fc2c': {
+    expectedUnits: { B_R_BSB: 'g/(m³·d)' },
+    displayOnly: true,
+    notes:
+      '§5.4 (PDF S. 11, gerendert): "Für die Bemessung von belüfteten Abwasserteichen muss eine BSB5-Raumbelastung von B_R,BSB ≤ 25 g/(m³·d) angesetzt werden." — muss ≤ 25 (Last-Grenzwert, block). ES-1 displayOnly. Enforcement bereits in CR-007 (`B_R_BSB <= 25`), aber CR-007 liegt auf A201-08 statt A201-11 → Cross-Worksheet-Platzierung geflaggt.',
+  },
+
+  // A201-11 · F-12 · §5.4 — t_R_belueftet ≥ 5 d
+  'c34e9132-0c2f-404a-bc06-c2673770c761': {
+    expectedUnits: { t_R_belueftet: 'd' },
+    displayOnly: true,
+    notes:
+      '§5.4 (PDF S. 11, gerendert): "Es muss eine Durchflusszeit von fünf Tagen bei Trockenwetter eingehalten werden." — muss ≥ 5 d (block). ES-1 displayOnly. Enforcement in CR-007 (Platzierung geflaggt).',
+  },
+
+  // A201-11 · F-13 · §5.4 — OV_C_BSB ≥ 1,5 kg/kg
+  '74018e72-ea91-4a1e-bef9-2cb4f3782f8d': {
+    expectedUnits: { OV_C_BSB: 'kg/kg' },
+    displayOnly: true,
+    notes:
+      '§5.4 (PDF S. 11, gerendert): "Als Sauerstoffverbrauch muss OV_C,BSB ≥ 1,5 kg/kg … angesetzt werden." — muss ≥ 1,5 (block). ES-1 displayOnly. Enforcement in CR-007 (Platzierung geflaggt).',
+  },
+
+  // A201-12 · F-15 · §5.5 — t_R_nachklaer ≥ 1 d
+  '05bc3636-53d6-4518-aa00-2f40fce08d5a': {
+    expectedUnits: { t_R_nachklaer: 'd' },
+    displayOnly: true,
+    notes:
+      '§5.5 (PDF S. 11, gerendert): "Das erforderliche gesamte Teichvolumen errechnet sich aus der erforderlichen Mindestdurchflusszeit t_R = 1 d …" — normative Mindest-Durchflusszeit (block). ES-1 displayOnly. Enforcement bereits in CR-008 (`t_R_nachklaer>=1`).',
+  },
+
+  // A201-12 · F-16 · §5.5 — A_min_nachklaer ≥ 20 m²
+  '4219cb5e-8ced-41b0-8eef-783e0d3fcfc5': {
+    expectedUnits: { A_min_nachklaer: 'm²' },
+    displayOnly: true,
+    notes:
+      '§5.5 (PDF S. 11, gerendert): "Bewährt haben sich Teiche mit einer Mindesttiefe von 1,2 m und einer Mindestfläche von 20 m²." — "Mindestfläche" = normativer Mindestwert (block), Verb "Bewährt haben sich" ist weicher (Erfahrungswert) → für Alvaro. ES-1 displayOnly. Enforcement bereits in CR-008 (`A_min_nachklaer>=20`, + h_nachklaer>=1.2 deckt die Mindesttiefe 1,2 m).',
+  },
 };
