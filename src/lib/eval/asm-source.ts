@@ -145,6 +145,41 @@ export function asmEngineSuppressedSymbols(asmMethod: string | null): ReadonlySe
 }
 
 /**
+ * Cross-home write-back suppression (defect #22, standard-agnostic).
+ *
+ * A facility worksheet must not let its local equation output shadow-write a
+ * symbol whose single active-field home is a DIFFERENT worksheet — the
+ * inherited home value is authoritative; the local producer drives the SERVER
+ * materialize (registry) only. Generalises asmEngineSuppressedSymbols from
+ * "method owns the symbol" to "home worksheet owns the symbol".
+ *
+ * Example: on A138-17, Gl.16 produces A_S_m but A_S_m's home is A138-12.
+ * The inherited A138-12 value must survive in the client store so Gl.14/15
+ * can consume it; Gl.16's server-side write-back (via worksheet.ts registry)
+ * is unaffected.
+ *
+ * @param currentWorksheetCode - the template code of the worksheet being rendered
+ * @param symbolHomes - map/record of symbol → home worksheet code
+ *   (entries where home === currentWorksheetCode are NOT suppressed)
+ * @returns stable-empty set (module constant) when nothing to suppress, else
+ *   a new set of all symbols whose home ≠ currentWorksheetCode.
+ */
+export function symbolHomeSuppressedSymbols(
+  currentWorksheetCode: string,
+  symbolHomes: ReadonlyMap<string, string> | Readonly<Record<string, string>>,
+): ReadonlySet<string> {
+  const entries =
+    symbolHomes instanceof Map
+      ? symbolHomes.entries()
+      : Object.entries(symbolHomes);
+  const out = new Set<string>();
+  for (const [symbol, homeCode] of entries) {
+    if (homeCode !== currentWorksheetCode) out.add(symbol);
+  }
+  return out.size === 0 ? _EMPTY_ASM_SUPPRESSED : out;
+}
+
+/**
  * V-2 manual-provenance gate (pure decision).
  *
  * A138-12 A_S,m is user-editable ONLY when method='manual', and then a non-empty

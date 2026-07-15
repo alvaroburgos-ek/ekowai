@@ -25,7 +25,7 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
-import { asmEngineSuppressedSymbols } from '@/lib/eval/asm-source';
+import { asmEngineSuppressedSymbols, symbolHomeSuppressedSymbols } from '@/lib/eval/asm-source';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -283,22 +283,42 @@ export function WorksheetForm({
 
   // Memoized suppression set fed to the engine's suppressWriteBackSymbols param.
   //
-  // OWNERSHIP PRINCIPLE: Gl.7 (A138-12 formula engine) owns A_S,m ONLY when
-  // method='direct' (and when asmMethod is null/unset, which defaults to direct).
-  // For every other method the server (materializeAsm) is the authoritative
-  // producer, so the client engine write-back MUST be suppressed:
+  // OWNERSHIP PRINCIPLE (method): Gl.7 (A138-12 formula engine) owns A_S,m
+  // ONLY when method='direct' (and when asmMethod is null/unset, which defaults
+  // to direct). For every other method the server (materializeAsm) is the
+  // authoritative producer, so the client engine write-back MUST be suppressed:
   //   - 'manual'        → engineer enters directly; Gl.7 must not clobber.
   //   - 'geometry'      → geometry eqs on A138-17/18 produce the value.
   //   - 'soil_estimate' → materializeAsm derives from Tab.13/A_C; without
   //                       suppression Gl.7 (e.g. 45) fights the server (e.g. 967)
   //                       producing an INFINITE SAVE LOOP (~1 write/7 s).
   //
-  // The helper returns a stable-empty set for the non-suppressed case so this
-  // memo/effect dep does not churn on non-A138-12 worksheets (asmMethod=null).
-  const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
-    () => asmEngineSuppressedSymbols(asmMethod),
-    [asmMethod],
-  );
+  // OWNERSHIP PRINCIPLE (home boundary, defect #22): A facility worksheet must
+  // not let a local equation shadow-write a symbol whose single active-field home
+  // is a DIFFERENT worksheet. inheritedFromBySymbol maps symbol → home worksheet
+  // code; every entry is an inherited symbol that the current worksheet does not
+  // own. Suppressing these write-backs ensures the inherited home value (e.g.
+  // A_S_m from A138-12 on A138-17) is not blanked by a local Gl.16 that cannot
+  // yet compute (missing h_M). The server materialize path (Gl.16→A138-12 via
+  // registry / worksheet.ts) is untouched.
+  //
+  // The union of both sets: on A138-12 method='direct' both are empty (no churn);
+  // on A138-17 method='geometry' the asm set may already cover A_S_m, but the
+  // home-boundary set provides the general guard independent of asmMethod.
+  const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(() => {
+    const methodSet = asmEngineSuppressedSymbols(asmMethod);
+    const homeSet = symbolHomeSuppressedSymbols(worksheet.template.code, inheritedFromBySymbol);
+    if (methodSet.size === 0 && homeSet.size === 0) {
+      // Both stable-empty → return the stable-empty constant (same reference).
+      return methodSet;
+    }
+    if (methodSet.size === 0) return homeSet;
+    if (homeSet.size === 0) return methodSet;
+    // Union: build a new set combining both.
+    const merged = new Set<string>(methodSet);
+    for (const sym of homeSet) merged.add(sym);
+    return merged;
+  }, [asmMethod, worksheet.template.code, inheritedFromBySymbol]);
 
   // Engine wiring lives in a shared hook so the integration test renders
   // EXACTLY the production code path (not a copy of it).
