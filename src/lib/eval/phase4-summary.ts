@@ -92,15 +92,15 @@ export type Phase4GateInput = {
 
   /**
    * True when any APPLICABLE facility BLOCK gate evaluated false:
-   *   REQ-20 (Gl.13)         — unconditional BLOCK
-   *   REQ-21 (Gl.25)         — BLOCK only when L_VS is present/nonzero
-   *   REQ-22 (Gl.38)         — BLOCK only when Schacht-Typ = B
+   *   REQ-31 (Gl.13)         — unconditional BLOCK
+   *   REQ-32 (Gl.25)         — BLOCK only when L_VS is present/nonzero
+   *   REQ-33 (Gl.38)         — BLOCK only when Schacht-Typ = B
    */
   blockGateFailed: boolean;
 
   /**
    * Human-readable reasons for each failed block gate, e.g.:
-   *   "REQ-21: L_VS·q_VS < r_5(n)·A_C·10⁻⁴"
+   *   "REQ-32: L_VS·q_VS < r_5(n)·A_C·10⁻⁴"
    * Must be provided when blockGateFailed is true.
    */
   blockGateReasons?: string[];
@@ -266,16 +266,16 @@ export function recommendationReasons(input: Phase4GateInput): string[] {
 /**
  * RATIFIED per-facility BLOCK-gate mapping (the NAMED fan-out boundary).
  *
- *   flaeche → REQ-20 (Fläche-Machbarkeit §6.2.2 Gl.13)  [UNCONDITIONAL BLOCK]
- *   rigole  → REQ-21 (Gl.25)                             [CONDITIONAL — only when L_VS present]
- *   schacht → REQ-22 (Gl.38)                             [CONDITIONAL — only when Schacht-Typ = B]
+ *   flaeche → REQ-31 (Fläche-Machbarkeit §6.2.2 Gl.13)  [UNCONDITIONAL BLOCK]
+ *   rigole  → REQ-32 (Gl.25)                             [CONDITIONAL — only when L_VS present]
+ *   schacht → REQ-33 (Gl.38)                             [CONDITIONAL — only when Schacht-Typ = B]
  *   mulde / mre / mrs / becken → no applicable BLOCK gate → null.
  *
  * Fan-out task numbers (reconciled — MINOR 4):
- *   Task 5  encodes ALL THREE gate ROWS (REQ-20/21/22) into the standard;
- *   Task 8  wires the per-facility REQ-21 (rigole) condition eval;
- *   Task 11 wires the per-facility REQ-22 (schacht) condition eval;
- *   Task 13 wires the per-facility REQ-20 (flaeche) condition eval.
+ *   Task 5  encodes ALL THREE gate ROWS (REQ-31/32/33) into the standard;
+ *   Task 8  wires the per-facility REQ-32 (rigole) condition eval;
+ *   Task 11 wires the per-facility REQ-33 (schacht) condition eval;
+ *   Task 13 wires the per-facility REQ-31 (flaeche) condition eval.
  *   → the accurate set touching these gates is Tasks 5/8/11/13.
  *
  * The MAPPING/topology lives here (single source); the fan-out tasks wire only the
@@ -283,12 +283,12 @@ export function recommendationReasons(input: Phase4GateInput): string[] {
  * gate condition — see the fail-safe guard below for UNCONDITIONAL gates.
  */
 export const PHASE4_SUMMARY_BLOCKGATE_FANOUT: Record<FacilityType, string | null> = {
-  flaeche: 'REQ-20', // UNCONDITIONAL — condition eval deferred to fan-out Task 13
+  flaeche: 'REQ-31', // UNCONDITIONAL — condition eval deferred to fan-out Task 13
   mulde:   null,     // pilot — no applicable block gate → correct now
-  rigole:  'REQ-21', // CONDITIONAL (L_VS present) — eval deferred to fan-out Task 8
+  rigole:  'REQ-32', // CONDITIONAL (L_VS present) — eval deferred to fan-out Task 8
   mre:     null,     // no applicable block gate
   mrs:     null,     // no applicable block gate
-  schacht: 'REQ-22', // CONDITIONAL (Schacht-Typ = B) — eval deferred to fan-out Task 11
+  schacht: 'REQ-33', // CONDITIONAL (Schacht-Typ = B) — eval deferred to fan-out Task 11
   becken:  null,     // no applicable block gate
 };
 
@@ -298,19 +298,19 @@ export const PHASE4_SUMMARY_BLOCKGATE_FANOUT: Record<FacilityType, string | null
  * a computed PASS is downgraded to at most CONDITIONAL and a mandatory manual-check
  * reason is injected (fail-safe within the ratified model — IMPORTANT 2).
  *
- * Currently only flaeche/REQ-20. rigole/schacht gates are CONDITIONAL-applicability
- * (REQ-21 only when L_VS present / Typ-B); their silent blockGateFailed=false is the
+ * Currently only flaeche/REQ-31. rigole/schacht gates are CONDITIONAL-applicability
+ * (REQ-32 only when L_VS present / Typ-B); their silent blockGateFailed=false is the
  * existing documented fan-out deferral and is wrong ONLY once that condition holds —
  * NOT downgraded here (see the code comment at the guard call site).
  *
- * Task 5 removes this set as it wires the real REQ-20 eval.
+ * Task 5 removes this set as it wires the real REQ-31 eval.
  */
 export const PHASE4_SUMMARY_UNCONDITIONAL_GATE_DEFERRED: ReadonlySet<FacilityType> =
   new Set<FacilityType>(['flaeche']);
 
 /** Mandatory manual-check reason injected for an unconditional-gate-deferred facility. */
 export const PHASE4_SUMMARY_REQ20_DEFERRED_REASON =
-  'REQ-20 (Fläche-Machbarkeit §6.2.2 Gl.13) noch nicht automatisch ausgewertet — Planer muss manuell prüfen.';
+  'REQ-31 (Fläche-Machbarkeit §6.2.2 Gl.13) noch nicht automatisch ausgewertet — Planer muss manuell prüfen.';
 
 // ---------------------------------------------------------------------------
 // assemblePhase4Summary — PURE assembly step (extracted from worksheet.ts)
@@ -383,7 +383,7 @@ export function assemblePhase4Summary(
   // blockGateFailed: per-facility condition eval is deferred to the fan-out
   // (PHASE4_SUMMARY_BLOCKGATE_FANOUT). Until then no gate CONDITION flags a fail here.
   //
-  // NOTE (rigole/schacht wrong-verdict risk): REQ-21/REQ-22 are CONDITIONAL-
+  // NOTE (rigole/schacht wrong-verdict risk): REQ-32/REQ-33 are CONDITIONAL-
   // applicability gates. Their silent blockGateFailed=false is only WRONG once the
   // applicability condition holds (L_VS present / Schacht-Typ = B). They are NOT in
   // the unconditional-deferred set below, so a Typ-B schacht / L_VS-rigole could get a
@@ -411,10 +411,10 @@ export function assemblePhase4Summary(
 
   // ── FAIL-SAFE guard (IMPORTANT 2) ──────────────────────────────────────────
   // For a facility whose applicable BLOCK gate is UNCONDITIONAL and NOT YET auto-
-  // evaluated (currently only flaeche/REQ-20), a silent PASS/CONDITIONAL would be
+  // evaluated (currently only flaeche/REQ-31), a silent PASS/CONDITIONAL would be
   // unsafe (the gate could fail). Downgrade a computed PASS to CONDITIONAL and inject
   // the mandatory manual-check reason. FAIL is left as-is (already the safe verdict).
-  // Task 5 removes this once the real REQ-20 eval is wired.
+  // Task 5 removes this once the real REQ-31 eval is wired.
   if (g.facilityType != null && PHASE4_SUMMARY_UNCONDITIONAL_GATE_DEFERRED.has(g.facilityType)) {
     if (recommendation === 'PASS') {
       recommendation = 'CONDITIONAL';

@@ -2250,7 +2250,7 @@ export async function saveWorksheet(
           //    the 8-field write-set) is computed by the exported pure function
           //    `assemblePhase4Summary` — the branch and the unit tests exercise the SAME
           //    code (no mirror). The per-facility BLOCK-gate mapping + the UNCONDITIONAL-
-          //    gate fail-safe guard (flaeche/REQ-20 → never a silent non-FAIL) live in
+          //    gate fail-safe guard (flaeche/REQ-31 → never a silent non-FAIL) live in
           //    phase4-summary.ts under the NAMED boundary PHASE4_SUMMARY_BLOCKGATE_FANOUT
           //    (fan-out Tasks 5/8/11/13). Tab.14 freeboard/slope thresholds deferred under
           //    PHASE4_SUMMARY_TAB14_SOURCE. phase_4_gate_result is ENGINEER-entered and is

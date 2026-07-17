@@ -167,7 +167,7 @@ describe('recommendedPhase4Gate — FAIL', () => {
   it('FAIL beats CONDITIONAL: blockGateFailed=true AND Tab.14 flagged → FAIL', () => {
     const input = passingInput({
       blockGateFailed: true,
-      blockGateReasons: ['REQ-21: L_VS·q_VS < r_5(n)·A_C·10⁻⁴'],
+      blockGateReasons: ['REQ-32: L_VS·q_VS < r_5(n)·A_C·10⁻⁴'],
       tab14: { t_E_hours: 92, freeboardOk: false, slopeOk: false },
     });
     expect(recommendedPhase4Gate(input)).toBe('FAIL');
@@ -311,7 +311,7 @@ describe('recommendationReasons — FAIL', () => {
   });
 
   it('blockGateFailed: reason carries blockGateReasons verbatim', () => {
-    const blockMsg = 'REQ-21: L_VS·q_VS < r_5(n)·A_C·10⁻⁴';
+    const blockMsg = 'REQ-32: L_VS·q_VS < r_5(n)·A_C·10⁻⁴';
     const input = passingInput({
       blockGateFailed: true,
       blockGateReasons: [blockMsg],
@@ -321,8 +321,8 @@ describe('recommendationReasons — FAIL', () => {
   });
 
   it('blockGateFailed with multiple reasons: all carried', () => {
-    const r1 = 'REQ-20: Gl.13 nicht erfüllt';
-    const r2 = 'REQ-22: Gl.38 bei Schacht-Typ B nicht erfüllt';
+    const r1 = 'REQ-31: Gl.13 nicht erfüllt';
+    const r2 = 'REQ-33: Gl.38 bei Schacht-Typ B nicht erfüllt';
     const input = passingInput({
       blockGateFailed: true,
       blockGateReasons: [r1, r2],
@@ -341,7 +341,7 @@ describe('recommendationReasons — FAIL', () => {
   });
 
   it('all three FAIL conditions simultaneously: all reasons present', () => {
-    const blockMsg = 'REQ-20: Gl.13 nicht erfüllt';
+    const blockMsg = 'REQ-31: Gl.13 nicht erfüllt';
     const input = passingInput({
       complete: false,
       meetsQsac: false,
@@ -356,7 +356,7 @@ describe('recommendationReasons — FAIL', () => {
   });
 
   it('FAIL(block+tab14) → reasons are FAIL reasons only, not Tab.14 (FAIL takes precedence)', () => {
-    const blockMsg = 'REQ-21: L_VS·q_VS < r_5(n)·A_C·10⁻⁴';
+    const blockMsg = 'REQ-32: L_VS·q_VS < r_5(n)·A_C·10⁻⁴';
     const input = passingInput({
       blockGateFailed: true,
       blockGateReasons: [blockMsg],

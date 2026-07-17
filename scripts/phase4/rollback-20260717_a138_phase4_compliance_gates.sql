@@ -11,4 +11,4 @@
 -- =============================================================================
 
 DELETE FROM compliance_requirements
-WHERE code IN ('A138-REQ-20', 'A138-REQ-21', 'A138-REQ-22');
+WHERE code IN ('A138-REQ-31', 'A138-REQ-32', 'A138-REQ-33');

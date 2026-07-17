@@ -8,9 +8,9 @@
 --
 -- Adds THREE block-severity compliance gates for DWA-A-138-1 Phase 4:
 --
---   A138-REQ-20  A138-16 Fläche    §6.2.2 Gl.(13)  k_i > r_D(n)·10⁻⁷
---   A138-REQ-21  A138-18 Rigole    §6.4.2 Gl.(25)  L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴
---   A138-REQ-22  A138-21 Schacht   §6.7.2 Gl.(38)  A_S,FS·k_f,FS ≥ A_S,Schacht·k_i  (Typ B only)
+--   A138-REQ-31  A138-16 Fläche    §6.2.2 Gl.(13)  k_i > r_D(n)·10⁻⁷
+--   A138-REQ-32  A138-18 Rigole    §6.4.2 Gl.(25)  L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴
+--   A138-REQ-33  A138-21 Schacht   §6.7.2 Gl.(38)  A_S,FS·k_f,FS ≥ A_S,Schacht·k_i  (Typ B only)
 --
 -- =============================================================================
 -- MIGRATION-REVIEW CHECKLIST
@@ -21,11 +21,11 @@
 -- [x] ON CONFLICT SET clause does NOT touch audit_status (preserved for existing rows)
 -- [x] worksheet_template_id resolved via correlated subquery (code + standard_id), never hardcoded
 -- [x] Symbols verified live in prod (see task-5-report.md):
---       REQ-20: k_i (cross-ws from A138-11), r_D_n_used (local A138-16)
---       REQ-21: L_VS, q_VS, r_5_n (local A138-18), A_C (cross-ws from A138-07)
---       REQ-22: A_S_FS, k_f_FS, A_S_Schacht (local A138-21), k_i (cross-ws A138-11),
+--       REQ-31: k_i (cross-ws from A138-11), r_D_n_used (local A138-16)
+--       REQ-32: L_VS, q_VS, r_5_n (local A138-18), A_C (cross-ws from A138-07)
+--       REQ-33: A_S_FS, k_f_FS, A_S_Schacht (local A138-21), k_i (cross-ws A138-11),
 --               shaft_type enum with values typ_A / typ_B (local A138-21)
--- [x] Absent-input behaviour verified: pending (non-blocking) — gives REQ-21 applicability for free
+-- [x] Absent-input behaviour verified: pending (non-blocking) — gives REQ-32 applicability for free
 -- [x] IF/THEN guard confirmed supported by evaluator (evaluate.ts:guard node)
 -- [x] No inbound FK from project_parameters to compliance_requirements (rollback is safe)
 -- =============================================================================
@@ -62,7 +62,7 @@ BEGIN
   IF v_wt_21 IS NULL THEN RAISE EXCEPTION 'Worksheet template A138-21 not found'; END IF;
 
   -- -------------------------------------------------------------------------
-  -- REQ-20: A138-16 Fläche — Infiltrationsfähigkeit §6.2.2 Gl.(13)
+  -- REQ-31: A138-16 Fläche — Infiltrationsfähigkeit §6.2.2 Gl.(13)
   --
   -- Condition:  k_i > r_D_n_used * 0.0000001
   -- Symbols:
@@ -83,7 +83,7 @@ BEGIN
     requires_attestation
   ) VALUES (
     v_wt_16,
-    'A138-REQ-20',
+    'A138-REQ-31',
     'Infiltrationsfähigkeit k_i > r_D(n)·10⁻⁷ (Gl. 13)',
     'Infiltration feasibility k_i > r_D(n)·10⁻⁷ (Eq. 13)',
     'k_i > r_D_n_used * 0.0000001',
@@ -104,7 +104,7 @@ BEGIN
   ;
 
   -- -------------------------------------------------------------------------
-  -- REQ-21: A138-18 Rigole — Vollsickerrohr hydraulische Kapazität §6.4.2 Gl.(25)
+  -- REQ-32: A138-18 Rigole — Vollsickerrohr hydraulische Kapazität §6.4.2 Gl.(25)
   --
   -- Condition:  L_VS * q_VS >= r_5_n * A_C * 0.0001
   -- Symbols:
@@ -129,7 +129,7 @@ BEGIN
     requires_attestation
   ) VALUES (
     v_wt_18,
-    'A138-REQ-21',
+    'A138-REQ-32',
     'Vollsickerrohr hydraulische Kapazität L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴ (Gl. 25)',
     'Fully perforated pipe hydraulic capacity L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴ (Eq. 25)',
     'L_VS * q_VS >= r_5_n * A_C * 0.0001',
@@ -150,7 +150,7 @@ BEGIN
   ;
 
   -- -------------------------------------------------------------------------
-  -- REQ-22: A138-21 Schacht — Filterschicht-Suffizienz §6.7.2 Gl.(38) — Typ B only
+  -- REQ-33: A138-21 Schacht — Filterschicht-Suffizienz §6.7.2 Gl.(38) — Typ B only
   --
   -- Condition:  IF shaft_type == typ_B THEN A_S_FS * k_f_FS >= A_S_Schacht * k_i
   -- Symbols:
@@ -177,7 +177,7 @@ BEGIN
     requires_attestation
   ) VALUES (
     v_wt_21,
-    'A138-REQ-22',
+    'A138-REQ-33',
     'Filterschicht-Suffizienz A_S,FS·k_f,FS ≥ A_S,Schacht·k_i (Gl. 38, Typ B)',
     'Filter layer sufficiency A_S,FS·k_f,FS ≥ A_S,Schacht·k_i (Eq. 38, Type B only)',
     'IF shaft_type == typ_B THEN A_S_FS * k_f_FS >= A_S_Schacht * k_i',

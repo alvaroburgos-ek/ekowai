@@ -217,7 +217,7 @@ describe('assemblePhase4Summary — Mulde pilot', () => {
   });
 });
 
-describe('assemblePhase4Summary — flaeche REQ-20 unconditional-gate fail-safe (IMPORTANT 2)', () => {
+describe('assemblePhase4Summary — flaeche REQ-31 unconditional-gate fail-safe (IMPORTANT 2)', () => {
   it('flaeche: volumeSymbol=null → complete requires only footprint A_S', () => {
     const out = assemble({
       facility_type_selected: 'flaeche',
@@ -231,9 +231,9 @@ describe('assemblePhase4Summary — flaeche REQ-20 unconditional-gate fail-safe 
     expect(out.get('facility_type_dimensioned')).toBe('A138-16');
   });
 
-  it('flaeche with otherwise-PASS inputs → NOT a silent PASS: downgraded to CONDITIONAL + REQ-20 note', () => {
+  it('flaeche with otherwise-PASS inputs → NOT a silent PASS: downgraded to CONDITIONAL + REQ-31 note', () => {
     // Complete, meetsQsac, no t_E flag → the ratified predicate alone would return PASS.
-    // The REQ-20 unconditional-gate deferral must force at most CONDITIONAL + a mandatory reason.
+    // The REQ-31 unconditional-gate deferral must force at most CONDITIONAL + a mandatory reason.
     const out = assemble({
       facility_type_selected: 'flaeche',
       A_S: 200,
@@ -242,7 +242,7 @@ describe('assemblePhase4Summary — flaeche REQ-20 unconditional-gate fail-safe 
     expect(out.recommendation).toBe('CONDITIONAL');
     expect(out.recommendation).not.toBe('PASS');
     expect(out.reasonsJoined).toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
-    expect(out.reasonsJoined).toContain('REQ-20');
+    expect(out.reasonsJoined).toContain('REQ-31');
     expect(out.reasonsJoined).toContain('noch nicht');
     expect(out.reasonsJoined).toContain('ausgewertet');
   });
@@ -254,11 +254,11 @@ describe('assemblePhase4Summary — flaeche REQ-20 unconditional-gate fail-safe 
       q_S_AC: 3,
     });
     expect(out.recommendation).toBe('FAIL');
-    // FAIL is already the safe verdict; the REQ-20 note is not appended over a FAIL.
+    // FAIL is already the safe verdict; the REQ-31 note is not appended over a FAIL.
     expect(out.reasonsJoined).not.toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
   });
 
-  it('mulde is UNAFFECTED by the flaeche guard (no REQ-20 note, PASS stays PASS)', () => {
+  it('mulde is UNAFFECTED by the flaeche guard (no REQ-31 note, PASS stays PASS)', () => {
     const out = assemble({
       facility_type_selected: 'mulde',
       V_M: 120,
@@ -267,6 +267,6 @@ describe('assemblePhase4Summary — flaeche REQ-20 unconditional-gate fail-safe 
       t_E: 60,
     });
     expect(out.recommendation).toBe('PASS');
-    expect(out.reasonsJoined).not.toContain('REQ-20');
+    expect(out.reasonsJoined).not.toContain('REQ-31');
   });
 });
