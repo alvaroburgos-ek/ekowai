@@ -90,8 +90,17 @@ export type Phase4GateInput = {
   /**
    * Symbols of required sizing outputs that are absent.
    * Used to build the 'incomplete' reason string when complete is false.
+   * @remarks Should be supplied whenever `complete` is false; omitting it yields
+   * the generic '(keine Angabe)' notice.
    */
   missingOutputs?: string[];
+
+  /**
+   * Measured specific infiltration performance q_S,AC in l/(s·ha); when supplied,
+   * the ¬q_S,AC reason cites it (e.g. "q_S,AC = 1.30 l/(s·ha) < 2 l/(s·ha)").
+   * Optional — backward-compatible; callers that omit this keep the static reason.
+   */
+  q_S_AC?: number | null;
 
   /**
    * §6/Tab.14 soft constraints for above-ground facilities.
@@ -197,7 +206,13 @@ export function recommendationReasons(input: Phase4GateInput): string[] {
   }
 
   if (!input.meetsQsac) {
-    reasons.push('q_S,AC < 2 l/(s·ha) (Phase-3 REQ-15 nicht erfüllt)');
+    if (input.q_S_AC != null && isFinite(input.q_S_AC)) {
+      reasons.push(
+        `q_S,AC = ${input.q_S_AC.toFixed(2)} l/(s·ha) < 2 l/(s·ha) (Phase-3 REQ-15 nicht erfüllt)`
+      );
+    } else {
+      reasons.push('q_S,AC < 2 l/(s·ha) (Phase-3 REQ-15 nicht erfüllt)');
+    }
   }
 
   // If any FAIL reason collected, return them — CONDITIONAL reasons do not add

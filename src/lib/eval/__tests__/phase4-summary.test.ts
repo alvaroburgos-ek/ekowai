@@ -373,6 +373,43 @@ describe('recommendationReasons — FAIL', () => {
 });
 
 // ---------------------------------------------------------------------------
+// M1 — !meetsQsac reason cites the measured q_S,AC value when supplied
+// ---------------------------------------------------------------------------
+
+describe('recommendationReasons — !meetsQsac with q_S_AC (M1)', () => {
+  it('!meetsQsac WITH q_S_AC=1.3 → reason includes measured value "1.30", "2", and REQ-15', () => {
+    const input = passingInput({ meetsQsac: false, q_S_AC: 1.3 });
+    const reasons = recommendationReasons(input);
+    const r = reasons.find((s) => s.includes('q_S,AC'));
+    expect(r).toBeTruthy();
+    expect(r).toContain('1.30');
+    expect(r).toContain('2');
+    expect(r).toContain('REQ-15');
+  });
+
+  it('!meetsQsac WITHOUT q_S_AC (omitted) → static fallback reason still present (backward-compat)', () => {
+    const input = passingInput({ meetsQsac: false });
+    const reasons = recommendationReasons(input);
+    const r = reasons.find((s) => s.includes('q_S,AC'));
+    expect(r).toBeTruthy();
+    expect(r).toBe('q_S,AC < 2 l/(s·ha) (Phase-3 REQ-15 nicht erfüllt)');
+  });
+
+  it('!meetsQsac WITH q_S_AC=null → static fallback reason (backward-compat)', () => {
+    const input = passingInput({ meetsQsac: false, q_S_AC: null });
+    const reasons = recommendationReasons(input);
+    const r = reasons.find((s) => s.includes('q_S,AC'));
+    expect(r).toBeTruthy();
+    expect(r).toBe('q_S,AC < 2 l/(s·ha) (Phase-3 REQ-15 nicht erfüllt)');
+  });
+
+  it('supplying q_S_AC does NOT change the FAIL verdict (logic untouched)', () => {
+    const input = passingInput({ meetsQsac: false, q_S_AC: 1.3 });
+    expect(recommendedPhase4Gate(input)).toBe('FAIL');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Consistency: verdict ↔ reasons alignment
 // ---------------------------------------------------------------------------
 
