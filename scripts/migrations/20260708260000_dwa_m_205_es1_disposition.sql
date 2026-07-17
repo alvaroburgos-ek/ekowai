@@ -181,7 +181,7 @@ BEGIN
     'DWA-M_205.pdf',
     '§4.4.2 Chlorung (PDF S. 30/32, gerendert)',
     'In dem aus dem Behandlungsbecken abfließenden Abwasser muss noch ein Überschuss von freiem Chlor in der Größenordnung von 0,2 mg/l nachzuweisen sein, um die Desinfektionswirkung sicherzustellen. Dieser Restchlorgehalt muss vor Einleitung in ein Gewässer mit Hilfe einer Entchlorungsstufe entfernt werden.',
-    'Bei Chlorung muss am Beckenablauf ein Überschuss an freiem Chlor in der Größenordnung von 0,2 mg/l nachweisbar sein (§4.4.2), um die Desinfektionswirkung sicherzustellen. [FÜR ALVARO: block↔warn ratifizieren — "muss … nachzuweisen sein" trägt ein hartes Modalverb, "in der Größenordnung von" weicht die exakte 0,2-Grenze auf.]',
+    'Bei Chlorung muss am Beckenablauf ein Überschuss an freiem Chlor in der Größenordnung von 0,2 mg/l nachweisbar sein (§4.4.2), um die Desinfektionswirkung sicherzustellen. [BLOCK RATIFIZIERT 2026-07-17: das "muss … nachzuweisen sein" ist ein hartes Modalverb → block. NR (exakte Grenze): die Quelle sagt "in der Größenordnung von 0,2 mg/l" — der 0,2-Zahlenwert ist ein Richtwert, nicht eine verbatim harte Schwelle; die genaue Grenze ist vom verantwortlichen Ingenieur zu bestätigen. Die Pflicht (Restchlor-Überschuss vorhanden) bleibt block; nur der exakte Zahlenwert ist NR.]',
     'Stellen Sie einen freien Restchlorüberschuss von ~0,2 mg/l am Beckenablauf sicher; vor Gewässereinleitung ist eine Entchlorungsstufe erforderlich (§4.4.2).'
   FROM (SELECT v_ws08 AS id UNION ALL SELECT v_ws21) ws
   ON CONFLICT (worksheet_template_id, code) DO NOTHING;
@@ -211,7 +211,7 @@ BEGIN
     'DWA-M_205.pdf',
     '§4.3.6 Ozonung (PDF S. 31, gerendert)',
     'Die Ozonung von bromidhaltigem Abwasser kann zur Bildung von Bromat führen, dessen Einleitung in Gewässer aufgrund seiner toxikologischen Eigenschaften grundsätzlich unerwünscht ist. … Die Bromatbildung kann minimiert werden, wenn Ozon proportional zum DOC (< 0,8 mg/mg) dosiert wird.',
-    'Zur Minimierung der Bromatbildung sollte Ozon proportional zum DOC mit einem Verhältnis < 0,8 mg/mg dosiert werden (§4.3.6). [FÜR ALVARO: warn-Wahl ratifizieren — Quelle sagt "kann minimiert werden, wenn … dosiert wird" (Empfehlung, kein muss); Sicherheitsbezug (Bromat toxisch) könnte block rechtfertigen.]',
+    'Zur Minimierung der Bromatbildung sollte Ozon proportional zum DOC mit einem Verhältnis < 0,8 mg/mg dosiert werden (§4.3.6). Bromat ist toxikologisch bedenklich und in Gewässern grundsätzlich unerwünscht; die Ozon-Dosierung proportional zum DOC hält seine Bildung niedrig. [WARN RATIFIZIERT 2026-07-17: die Quelle sagt "kann minimiert werden, wenn … dosiert wird" = Empfehlung (kein muss) → warn, kein block (ein block hier würde eine nicht vorhandene Pflicht erfinden). Sicherheits-/Bromat-Begründung im Warntext.]',
     'Dosieren Sie Ozon proportional zum DOC-Gehalt mit einem Verhältnis unter 0,8 mg O₃/mg DOC, um die Bromatbildung zu begrenzen (§4.3.6).'
   FROM (SELECT v_ws07 AS id UNION ALL SELECT v_ws17) ws
   ON CONFLICT (worksheet_template_id, code) DO NOTHING;
