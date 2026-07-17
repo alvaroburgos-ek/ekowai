@@ -23,7 +23,15 @@ import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 import { materializeAsm, computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
-import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
+import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE } from './materialize-registry';
+import {
+  facilitySummaryInputs,
+  recommendedPhase4Gate,
+  recommendationReasons,
+  FACILITY_TYPE_TO_SUMMARY_WORKSHEET,
+  type FacilityType as Phase4FacilityType,
+  type Phase4GateInput,
+} from '@/lib/eval/phase4-summary';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
  * These map to field symbols on the A138-13 worksheet template (same-symbol
@@ -151,14 +159,23 @@ export async function saveWorksheet(
   // consumer lookup by code alone could misfire into another guideline that shares
   // a code (e.g. a second standard with an 'A138-12'). Fail-closed: if unknown, skip.
   const [savedTemplateRow] = await db
-    .select({ standardId: worksheetTemplates.standardId })
+    .select({ standardId: worksheetTemplates.standardId, code: worksheetTemplates.code })
     .from(worksheetTemplates)
     .where(eq(worksheetTemplates.id, instance.worksheetTemplateId))
     .limit(1);
   const savedStandardId = savedTemplateRow?.standardId ?? null;
+  const savedTemplateCode = savedTemplateRow?.code ?? null;
+
+  // A138-23 Phase-4 summary owner: A138-23 owns NO equation (pure reconciliation
+  // worksheet), so its OWNER-path trigger cannot be an equation-topology flag like
+  // isBasinSave/isAsmSave. Gate on the template code instead — mirroring how the
+  // `surface` registry entry is a no-equation owner (see materialize-registry.ts).
+  // A save OF the A138-23 worksheet re-materializes its summary from the current
+  // cross-worksheet state.
+  const isPhase4SummarySave = savedTemplateCode === PHASE4_SUMMARY_CONSUMER_CODE;
 
   // Fast-path: nothing submitted AND no topology-triggered recompute needed.
-  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave && !isAsmSave) {
+  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave && !isAsmSave && !isPhase4SummarySave) {
     return { ok: true, saved: 0, warnings: [], derived: [] };
   }
 
@@ -509,7 +526,20 @@ export async function saveWorksheet(
   // the ownerFiredIds set is used to prevent double-fire in producerFiredEntries.
 
   // Registry entries that should fire as producers (changed input, not already firing).
-  const producerEntries = producerFiredEntries(changedSymbols, ownerFiredIds);
+  const producerEntriesBase = producerFiredEntries(changedSymbols, ownerFiredIds);
+
+  // A138-23 owner path: the phase4_summary entry has a no-equation ownerTrigger
+  // (() => false), so it never lands in ownerFiredIds and never producer-fires from
+  // its OWN save batch (A138-23 fields are the derived outputs, not inputs). When
+  // the SAVED worksheet IS A138-23, splice the phase4_summary entry into the fire
+  // list once (dedup-guarded) so an A138-23 save re-materializes its summary.
+  const phase4SummaryEntry = MATERIALIZE_REGISTRY.find((e) => e.id === 'phase4_summary');
+  const producerEntries =
+    isPhase4SummarySave &&
+    phase4SummaryEntry &&
+    !producerEntriesBase.some((e) => e.id === 'phase4_summary')
+      ? [...producerEntriesBase, phase4SummaryEntry]
+      : producerEntriesBase;
 
   // Accumulated derived rows written by the materialize passes below.
   // Populated inside the transaction; returned to the client on ok=true.
@@ -2067,6 +2097,300 @@ export async function saveWorksheet(
               for (const r of chainedLcRows) {
                 writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
               }
+            }
+          }
+        } else if (producerEntry.id === 'phase4_summary') {
+          // ── Phase-4 summary producer branch (A138-23) ─────────────────────
+          // Fires when a Phase-4 support symbol changes on ANY worksheet
+          // (PHASE4_SUMMARY_INPUT_SYMBOLS) OR when the A138-23 worksheet itself
+          // is saved (isPhase4SummarySave owner-marker path — the entry is
+          // spliced into producerEntries above). Mirrors the `asm` branch:
+          // resolve the A138-23 consumer template by code + savedStandardId
+          // (fail-closed), read cross-worksheet inputs SCOPED, write derived rows.
+
+          // 1. Resolve the A138-23 consumer template by code + standardId (fail-closed).
+          const [p4ConsumerTmpl] = savedStandardId
+            ? await tx
+                .select({ id: worksheetTemplates.id })
+                .from(worksheetTemplates)
+                .where(and(
+                  eq(worksheetTemplates.code, producerEntry.consumerTemplateCode),
+                  eq(worksheetTemplates.standardId, savedStandardId),
+                ))
+                .limit(1)
+            : [];
+
+          if (!p4ConsumerTmpl) {
+            // A138-23 not present in this standard — skip gracefully (migration not
+            // yet applied / different code / unknown standard). The save succeeded.
+            continue;
+          }
+
+          // Resolve output field ids from the CONSUMER (A138-23) template.
+          const p4CWsFields = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, p4ConsumerTmpl.id), eq(fields.active, true)));
+          const p4CIdBySymbol = new Map(p4CWsFields.map((f) => [f.symbol, f.id]));
+
+          // Scoped by-symbol readers — every cross-worksheet read routes through an
+          // innerJoin(worksheetTemplates)+eq(standardId, savedStandardId) (§10c rider).
+          // No bare inArray(fields.symbol, …). first-non-null-number / enum-or-text.
+          const readScopedNum = async (symbol: string): Promise<number | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              if (r.valueNumber != null) {
+                const v = Number(r.valueNumber);
+                if (Number.isFinite(v)) return v;
+              }
+            }
+            return null;
+          };
+          const readScopedEnumText = async (symbol: string): Promise<string | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              const v = r.valueEnum ?? r.valueText ?? null;
+              if (v != null) return v;
+            }
+            return null;
+          };
+          const readScopedBool = async (symbol: string): Promise<boolean | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueBoolean: projectParameters.valueBoolean })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              if (r.valueBoolean != null) return r.valueBoolean;
+            }
+            return null;
+          };
+
+          // 2. facility_type_selected (A138-15) — scoped. Map to the dimensioned
+          //    facility worksheet code (superset map incl. mre/mrs composites).
+          const rawFtP4 = await readScopedEnumText('facility_type_selected');
+          const facilityTypeP4: Phase4FacilityType | null =
+            rawFtP4 === 'flaeche' || rawFtP4 === 'mulde' || rawFtP4 === 'rigole' ||
+            rawFtP4 === 'mre' || rawFtP4 === 'mrs' || rawFtP4 === 'schacht' ||
+            rawFtP4 === 'becken'
+              ? rawFtP4
+              : null;
+
+          // Without a selected facility we cannot resolve the governing volume/
+          // footprint symbols — write an incomplete/FAIL summary so the summary
+          // never silently shows stale outputs from a previous facility.
+          const facilityWorksheetCodeP4 =
+            facilityTypeP4 != null ? FACILITY_TYPE_TO_SUMMARY_WORKSHEET[facilityTypeP4] : null;
+
+          // 3. Governing volume + footprint symbols for this facility.
+          const summaryInputs =
+            facilityTypeP4 != null ? facilitySummaryInputs(facilityTypeP4) : null;
+          const volumeSymbolP4 = summaryInputs?.volumeSymbol ?? null;
+          const footprintSymbolP4 = summaryInputs?.footprintSymbol ?? null;
+
+          // Read the governing volume + footprint persisted values (scoped by symbol).
+          const volumeValueP4 =
+            volumeSymbolP4 != null ? await readScopedNum(volumeSymbolP4) : null;
+          const footprintValueP4 =
+            footprintSymbolP4 != null ? await readScopedNum(footprintSymbolP4) : null;
+
+          // 4. q_S,AC (Phase-3 REQ-15 measured) + facility_meets_qsac + t_E (A138-17).
+          const qSacP4 = await readScopedNum('q_S_AC');
+          const meetsQsacFlagP4 = await readScopedBool('facility_meets_qsac');
+          const tEHoursP4 = await readScopedNum('t_E'); // above-ground emptying time; null = N/A
+
+          // 5. complete = footprint present AND (no governing volume OR volume present)
+          //    AND no required output null. missingOutputs lists the absent symbols so
+          //    the incomplete reason cites them.
+          const missingOutputsP4: string[] = [];
+          if (facilityTypeP4 == null) missingOutputsP4.push('facility_type_selected');
+          if (footprintSymbolP4 != null && footprintValueP4 == null) {
+            missingOutputsP4.push(footprintSymbolP4);
+          }
+          if (volumeSymbolP4 != null && volumeValueP4 == null) {
+            missingOutputsP4.push(volumeSymbolP4);
+          }
+          const completeP4 =
+            facilityTypeP4 != null &&
+            footprintValueP4 != null &&
+            (volumeSymbolP4 === null || volumeValueP4 != null);
+
+          // 6. meetsQsac — prefer the explicit facility_meets_qsac flag; else derive
+          //    from the measured Phase-3 q_S,AC (≥ 2 l/(s·ha), REQ-15). Pass the
+          //    measured q_S,AC into the input (M1) so the ¬q_S,AC reason cites it.
+          const meetsQsacP4 =
+            meetsQsacFlagP4 != null
+              ? meetsQsacFlagP4
+              : (qSacP4 != null && qSacP4 >= 2);
+
+          // 7. blockGateFailed applicability — RATIFIED per-facility gate mapping.
+          //    flaeche → REQ-20 (k_i > r_D(n)·1e-7)   [unconditional BLOCK]
+          //    rigole  → REQ-21 (L_VS present/nonzero) [conditional BLOCK]
+          //    schacht → REQ-22 (Schacht-Typ = B)      [conditional BLOCK]
+          //    mulde / mre / mrs / becken → NO applicable BLOCK gate → false.
+          //
+          //  NAMED BOUNDARY (deferred to fan-out Tasks 5/8/11/13 — per-facility gate
+          //  wiring): for flaeche/rigole/schacht the gate CONDITION must be evaluated
+          //  from the same persisted inputs (or the persisted compliance result read
+          //  cleanly). Evaluating REQ-20/21/22 here would duplicate the compliance
+          //  engine's condition logic, which this branch cannot cleanly reach from the
+          //  summary worksheet. Per the task's documented-boundary rule we therefore
+          //  set blockGateFailed=false for those facilities FOR NOW and record the
+          //  named boundary `PHASE4_SUMMARY_BLOCKGATE_FANOUT` (see below). The
+          //  facility→requirement MAPPING is present in code so the fan-out only wires
+          //  the evaluation, not the topology. The PILOT (mulde) and the other
+          //  no-gate facilities are already CORRECT (false) with no deferral.
+          const PHASE4_SUMMARY_BLOCKGATE_FANOUT: Record<Phase4FacilityType, string | null> = {
+            flaeche: 'REQ-20',   // boundary: condition eval deferred to fan-out Task 5
+            mulde:   null,       // pilot — no applicable block gate → correct now
+            rigole:  'REQ-21',   // boundary: condition eval deferred to fan-out Task 8
+            mre:     null,       // no applicable block gate
+            mrs:     null,       // no applicable block gate
+            schacht: 'REQ-22',   // boundary: condition eval deferred to fan-out Task 13
+            becken:  null,       // no applicable block gate
+          };
+          // Applicable-gate lookup is present (mapping intact); the CONDITION eval is
+          // the deferred part. Until fan-out wires it, no facility flags a block fail
+          // from this branch — mulde/pilot is exactly right; the three gated
+          // facilities are conservatively non-blocking (documented above).
+          void PHASE4_SUMMARY_BLOCKGATE_FANOUT;
+          const blockGateFailedP4 = false;
+          const blockGateReasonsP4: string[] = [];
+
+          // 8. tab14 — t_E drives the CONDITIONAL branch for above-ground facilities.
+          //    freeboardOk / slopeOk = null for now: Tab.14 numeric thresholds not yet
+          //    sourced (NAMED BOUNDARY `PHASE4_SUMMARY_TAB14_SOURCE` — a documented
+          //    source/fan-out item; the pure module already treats null as N/A).
+          const gateInput: Phase4GateInput = {
+            complete: completeP4,
+            meetsQsac: meetsQsacP4,
+            blockGateFailed: blockGateFailedP4,
+            blockGateReasons: blockGateReasonsP4,
+            missingOutputs: missingOutputsP4,
+            q_S_AC: qSacP4,
+            tab14: {
+              t_E_hours: tEHoursP4,
+              freeboardOk: null, // PHASE4_SUMMARY_TAB14_SOURCE — threshold not yet sourced
+              slopeOk: null,     // PHASE4_SUMMARY_TAB14_SOURCE — threshold not yet sourced
+            },
+          };
+
+          const recommendationP4 = recommendedPhase4Gate(gateInput);
+          const reasonsP4 = recommendationReasons(gateInput);
+
+          // 9. WRITE the 8 A138-23 support/recommendation fields BY SYMBOL. All are
+          //    derived/read-only (source_type='derived'). phase_4_gate_result is
+          //    ENGINEER-entered and is NEVER written here (D3 rider).
+          type P4Row = {
+            projectId: string;
+            fieldId: string;
+            valueNumber: string | null;
+            valueText: string | null;
+            valueBoolean: boolean | null;
+            valueEnum: string | null;
+            valueDate: string | null;
+            sourceType: 'derived';
+            enteredBy: string;
+            enteredAt: Date;
+          };
+          const nowIsoDate = now.toISOString().slice(0, 10);
+          const p4Writes: Array<{
+            symbol: string;
+            valueNumber?: string | null;
+            valueText?: string | null;
+            valueBoolean?: boolean | null;
+            valueEnum?: string | null;
+            valueDate?: string | null;
+          }> = [
+            { symbol: 'facility_type_dimensioned', valueText: facilityTypeP4 != null ? facilityWorksheetCodeP4 : null },
+            { symbol: 'facility_specific_volume_m3', valueNumber: volumeValueP4 != null ? String(volumeValueP4) : null },
+            { symbol: 'facility_footprint_m2', valueNumber: footprintValueP4 != null ? String(footprintValueP4) : null },
+            { symbol: 'facility_meets_qsac', valueBoolean: meetsQsacP4 },
+            { symbol: 'facility_specific_dimensioning_complete', valueBoolean: completeP4 },
+            { symbol: 'facility_design_completion_date', valueDate: completeP4 ? nowIsoDate : null },
+            { symbol: 'recommended_phase_4_gate', valueEnum: recommendationP4 },
+            { symbol: 'phase_4_recommendation_reasons', valueText: reasonsP4.join('; ') },
+          ];
+
+          const p4Rows: P4Row[] = p4Writes
+            .map((w) => ({ ...w, fieldId: p4CIdBySymbol.get(w.symbol) }))
+            .filter((w): w is typeof w & { fieldId: string } => w.fieldId != null)
+            .map((w) => ({
+              projectId: instance.projectId,
+              fieldId: w.fieldId,
+              valueNumber: w.valueNumber ?? null,
+              valueText: w.valueText ?? null,
+              valueBoolean: w.valueBoolean ?? null,
+              valueEnum: w.valueEnum ?? null,
+              valueDate: w.valueDate ?? null,
+              sourceType: 'derived' as const,
+              enteredBy: userId,
+              enteredAt: now,
+            }));
+
+          if (p4Rows.length > 0) {
+            await tx.insert(projectParameters).values(p4Rows).onConflictDoUpdate({
+              target: [projectParameters.projectId, projectParameters.fieldId],
+              set: {
+                valueNumber: sql`excluded.value_number`,
+                valueText: sql`excluded.value_text`,
+                valueBoolean: sql`excluded.value_boolean`,
+                valueEnum: sql`excluded.value_enum`,
+                valueDate: sql`excluded.value_date`,
+                sourceType: sql`excluded.source_type`,
+                enteredBy: sql`excluded.entered_by`,
+                enteredAt: now,
+              },
+            });
+            for (const r of p4Rows) {
+              writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
             }
           }
         }

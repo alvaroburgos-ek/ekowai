@@ -28,6 +28,24 @@ export type FacilityType =
   | 'schacht'
   | 'becken';
 
+/**
+ * facility_type_selected (A138-15) → dimensioned facility worksheet code, for the
+ * Phase-4 summary. Superset of asm-source's FACILITY_TYPE_TO_WORKSHEET: adds the
+ * COMPOSITE facilities mre (Mulden-Rigolen-Element → A138-19) and mrs
+ * (Mulden-Rigolen-System → A138-20), which the A_S,m single-source map omits
+ * (they don't produce A_S,m via geometry). The summary DOES need them because
+ * their governing storage volumes (V_MR / V_MUE) live on those worksheets.
+ */
+export const FACILITY_TYPE_TO_SUMMARY_WORKSHEET: Record<FacilityType, string> = {
+  flaeche: 'A138-16',
+  mulde:   'A138-17',
+  rigole:  'A138-18',
+  mre:     'A138-19',
+  mrs:     'A138-20',
+  schacht: 'A138-21',
+  becken:  'A138-22',
+};
+
 // ---------------------------------------------------------------------------
 // facilitySummaryInputs
 // ---------------------------------------------------------------------------

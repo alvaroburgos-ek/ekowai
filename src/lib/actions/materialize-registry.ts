@@ -67,6 +67,31 @@ const ASM_INPUT_SYMBOLS = [
   'a_s_m_provenance',                   // manual provenance (A138-12)
 ] as const;
 
+// ---- 138-SPECIFIC: Phase-4 summary (A138-23) refire inputs ----
+// The summary reconciles, per selected facility, the governing storage volume +
+// footprint + Phase-3 q_S,AC into the recommended Phase-4 gate. Any of these
+// symbols changing on ANY facility/support worksheet should refire the summary:
+//   facility_type_selected (A138-15)                       — governing-facility re-resolution
+//   V_M/V_R/V_MR/V_MUE/V_S/V_VA (per-facility storage vols) — governing volume value
+//   A_S/A_S_m (footprints; area-devices use A_S)            — governing footprint value
+//   q_S_AC (Phase-3 REQ-15 measured performance)           — meetsQsac + reason value
+//   t_E (A138-17 emptying time)                            — Tab.14 CONDITIONAL driver
+const PHASE4_SUMMARY_INPUT_SYMBOLS = [
+  'facility_type_selected',
+  'V_M', 'V_R', 'V_MR', 'V_MUE', 'V_S', 'V_VA',
+  'A_S', 'A_S_m',
+  'q_S_AC',
+  't_E',
+] as const;
+
+// ---- 138-SPECIFIC: A138-23 has NO equation. ownerTrigger is a template-code
+// marker (`templateCode === 'A138-23'`) — mirroring how `surface` handles a
+// no-equation owner. The equation-topology predicate can never match A138-23, so
+// the registry entry exposes the template code and the dispatch loop gates the
+// owner-path on `savedTemplateCode === 'A138-23'` (see worksheet.ts). Here the
+// equation-based ownerTrigger returns false (identical shape to `surface`).
+export const PHASE4_SUMMARY_CONSUMER_CODE = 'A138-23';
+
 // ---- Type (general — no 138 references) ----
 export type MaterializeEntry = {
   /** Stable identifier for this materialize block. */
@@ -190,6 +215,21 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
     inputSymbols: new Set<string>(ASM_INPUT_SYMBOLS),
     ownerTrigger: (eqs) => eqs.some((e) => e.id === ASM_GL7_EQUATION_ID),
     consumerTemplateCode: 'A138-12',
+  },
+
+  // ── Phase-4 summary (A138-23) ─────────────────────────────────────────────
+  // 138-SPECIFIC data: inputSymbols + consumerTemplateCode. A138-23 owns NO
+  // equation (it is a pure reconciliation/summary worksheet), so its ownerTrigger
+  // CANNOT be an equation-id predicate. Like `surface`, the equation-based
+  // ownerTrigger is `() => false`; the OWNER path is driven in worksheet.ts by a
+  // template-code marker (savedTemplateCode === 'A138-23'). Producer-fire still
+  // works normally: any PHASE4_SUMMARY_INPUT_SYMBOLS change on another worksheet
+  // routes here via producerFiredEntries.
+  {
+    id: 'phase4_summary',
+    inputSymbols: new Set<string>(PHASE4_SUMMARY_INPUT_SYMBOLS),
+    ownerTrigger: () => false,
+    consumerTemplateCode: PHASE4_SUMMARY_CONSUMER_CODE,
   },
 ] as const;
 

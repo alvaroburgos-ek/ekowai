@@ -28,6 +28,7 @@ export default defineConfig({
           exclude: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/worksheet-tab6-loading.integration.test.ts',
+            'src/lib/actions/__tests__/worksheet-phase4-summary.integration.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
             'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/actions/__tests__/co2.integration.test.ts',
@@ -61,6 +62,7 @@ export default defineConfig({
           include: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/worksheet-tab6-loading.integration.test.ts',
+            'src/lib/actions/__tests__/worksheet-phase4-summary.integration.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
             'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/actions/__tests__/co2.integration.test.ts',
