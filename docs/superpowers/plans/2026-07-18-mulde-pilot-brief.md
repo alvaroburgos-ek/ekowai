@@ -12,7 +12,12 @@ cp -r /c/Users/Ekowai/projects/ekowai-wizard/.vercel /c/Users/Ekowai/_wt-138-p4/
 cd /c/Users/Ekowai/_wt-138-p4 && vercel pull --yes --environment=preview
 vercel deploy            # NOT --prod → preview build; capture the build ID + URL
 ```
-**Standing rules (defect-register P2/P3):** test ONLY on the returned alias URL after a **hard reload**; **close all other PLT-HS-01 tabs** (one-tab rule — a stale tab autosaves and clobbers). Vercel skew routes stale bundles to the old deployment → false failures. → **build ID + URL: [fill after deploy]**.
+**Standing rules (defect-register P2/P3):** test ONLY on the returned URL after a **hard reload**; **close all other PLT-HS-01 tabs** (one-tab rule — a stale tab autosaves and clobbers). Vercel skew routes stale bundles to the old deployment → false failures.
+
+> **DEPLOYED 2026-07-18 (preview, target≠prod — prod aliases UNTOUCHED):**
+> - Build ID **`cbcqmcpcs`** · deployment `dpl_Ah3LWiKZFy2tc4cYmABhHjgR5v7i` · READY · from branch tip `450f432` (code-identical to f0264bf; the intervening commit is docs-only).
+> - **URL:** `https://ekowai-wizard-preview-cbcqmcpcs-hannesosters-projects.vercel.app`
+> - Preview → **prod Supabase** `vadsmshzebefjreqcicl` (PLT-HS-01 lives here). Hard-reload this exact URL, one tab, before trusting the screen.
 
 ## Predictions (write-before-browser — DB is the arbiter)
 Discriminating design value **h_M = 0.30** (vs the discriminator h_M = 0.25 → A_S_m = 1126.08, a distinct path).
