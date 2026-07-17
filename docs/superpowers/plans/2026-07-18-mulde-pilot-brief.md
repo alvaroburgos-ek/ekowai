@@ -30,7 +30,15 @@ Discriminating design value **h_M = 0.30** (vs the discriminator h_M = 0.25 → 
 | P9 | `phase_4_recommendation_reasons` | A138-23 | contains **"q_S,AC = 0.xx l/(s·ha) < 2 … (REQ-15)"** | M1 measured-value reason (exact q_S,AC per whether the save refires the basin recompute — DB decides 0.01 vs 0.16) |
 | P10 | `phase_4_gate_result` | A138-23 | **unchanged / engineer-entered** | aggregator must NOT write it (ratified) |
 
-**Note on the FAIL verdict:** PLT-HS-01's tiny k_i makes q_S,AC ≪ 2, so the honest recommendation is FAIL — which is exactly the right proof that the predicate + measured-value reason work. Optional **discriminating verdict-flips** (prove PASS/CONDITIONAL end-to-end) as a second pass: (a) temporarily set `facility_meets_qsac=true` → expect **PASS** (no Tab.14 flags, t_E absent); (b) then set `t_E=92` → expect **CONDITIONAL** + reason "t_E = 92 h > 84 h (Tab.14, §6.3.2)"; restore after.
+### P1 derivation (checkable) — Gl.16, §6.3.2
+`A_S,m = (A_C · 10⁻⁷ · r_D(n)) / ( h_M / (D · 60 · f_Z) + k_i )` at the governing duration **D = 1440 min**, r_D(1440) = **5.8** l/(s·ha).
+- Numerator = `A_C · 10⁻⁷ · r_D_n` = 4836.43 · 1e-7 · 5.8 = **2.8051294e-3**
+- Denominator = `h_M/(D·60·f_Z) + k_i` = 0.30/(1440·60·1.2) + 7.98e-8 = 0.30/103680 + 7.98e-8 = 2.89352e-6 + 7.98e-8 = **2.97332e-6**
+- **A_S,m = 2.8051294e-3 / 2.97332e-6 = 943.43 m²** ✓ (matches the B2 sweep governing value)
+
+Discriminator check (h_M=0.25): denominator = 0.25/103680 + 7.98e-8 = 2.41127e-6 + 7.98e-8 = 2.49107e-6 → A_S,m = 2.8051294e-3/2.49107e-6 = **1126.08 m²** ✓ (shallower mulde ⇒ more area — a sensible, distinct path).
+
+**Note on the FAIL verdict:** PLT-HS-01's tiny k_i makes q_S,AC ≪ 2, so the honest recommendation is FAIL — which is exactly the right proof that the predicate + measured-value reason work. Optional **discriminating verdict-flips** (prove PASS/CONDITIONAL end-to-end) as a second pass — **RIDER (binding): each flip is TEMPORARY, restored, and DB-verified restored before pilot close**: (a) temporarily set `facility_meets_qsac=true` → expect **PASS** (no Tab.14 flags, t_E absent); (b) then set `t_E=92` → expect **CONDITIONAL** + reason "t_E = 92 h > 84 h (Tab.14, §6.3.2)"; restore both, then re-query to confirm they are back (facility_meets_qsac cleared/false, t_E cleared) before proceeding to the baseline restore.
 
 ## Input sequence (nudge-to-dirty on EVERY save)
 1. **A138-15** → `facility_type_selected` flaeche → **mulde**. Save. (This is a real change → dirties.)
@@ -71,6 +79,29 @@ order by f.symbol;
 -- EXPECT P3–P9 as tabled; recommended_phase_4_gate=FAIL (derived); reasons contains the q_S,AC measured value;
 --        phase_4_gate_result NULL/engineer-entered (NOT written by the aggregator).
 ```
+
+## Baseline restore (MANDATORY before pilot close) — PLT-HS-01 is the regression reference
+PLT-HS-01's **A138-12/13 baseline is the project's regression reference** ([[plt-hs-01-regression-baseline]]): `A_S_m=45` / `a_s_m_determination_method=direct` / `ac_as_ratio=107.47622(→107.48)` / `ac_as_ratio_check=fail` / `ac_as_ratio_limit=50`; A138-13 `V_VA=293.169549312`. The pilot reconfigures away from it, so the pilot ENDS with **one of**:
+
+**(A) DB-verified restore to the reference** — reverse the pilot sequence:
+1. A138-12 → `a_s_m_determination_method` geometry → **direct**. Save (nudge). → A_S_m recomputes to 45; Tab.6 re-fires → ac_as_ratio 107.48 / check fail / limit 50.
+2. A138-15 → `facility_type_selected` mulde → **flaeche**. Save.
+3. A138-13 → **basin re-fire** (defect #17: V_VA only recomputes when its own inputs change) — nudge a basin input (e.g. f_A 1→0.9→save→1→save) to drive V_VA back to **293.169549312** (proven round-trip in the 138 regression, 2026-07-15).
+4. DB-verify (query below) all five reference values return, `is_stale=false`, FRESH timestamps:
+```sql
+select f.symbol, pp.value_number, pp.value_enum, pp.source_type, pp.is_stale, pp.entered_at
+from project_parameters pp join fields f on f.id=pp.field_id
+join worksheet_templates wt on wt.id=f.worksheet_template_id
+join projects p on p.id=pp.project_id
+where p.name ilike 'PLT-HS-01%'
+  and f.symbol in ('A_S_m','a_s_m_determination_method','ac_as_ratio','ac_as_ratio_check','ac_as_ratio_limit','V_VA')
+order by wt.code, f.symbol;
+-- EXPECT: A_S_m=45, method=direct, ac_as_ratio=107.47622…, check=fail, limit=50, V_VA=293.169549312 — all fresh.
+```
+
+**(B) Explicit new-baseline proposal for your sign-off** — the **A138-23 recommendation fields did not exist pre-pilot**, so a perfect restore is impossible for them. Post-restore-to-flaeche the aggregator recomputes A138-23 for flaeche (footprint=A_S, no volume; the flaeche REQ-31 fail-safe → recommendation ≤ CONDITIONAL + "REQ-31 … noch nicht ausgewertet" reason). This is a NEW additive state on A138-23. I will present the exact post-restore A138-23 values and propose them as the **updated regression baseline** (reference + the new Phase-4 summary/recommendation columns) for your explicit sign-off — I will NOT silently redefine the baseline.
+
+The pilot does not close until either (A) is DB-verified OR (B) is signed off by you.
 
 ## Sign-off (pilot GATE)
 PASS the pilot when, DB-verified with fresh timestamps: **A_S_m=943.43 materialised on A138-12 AND V_M computed on A138-17** (the #22 chain, live), the six support fields populated correctly, `recommended_phase_4_gate`+reasons persisted as `derived` (and `phase_4_gate_result` untouched). Enumerate any defect class surfaced → fix in the shared pattern before fan-out. Then close-out (Task 7) + your GO to fan out (Tasks 8–13).
