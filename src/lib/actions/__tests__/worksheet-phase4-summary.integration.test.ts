@@ -3,8 +3,15 @@
  *
  * Exercises the REAL producer branch (`producerEntry.id === 'phase4_summary'`) via
  * saveWorksheet against a live Postgres. Runs in the `integration` vitest project;
- * requires DATABASE_URL in .env.local (skips cleanly otherwise via _setup-env throw
- * on the integration runner — matching the sibling tab6-loading integration test).
+ * requires DATABASE_URL in .env.local.
+ *
+ * WITHOUT DATABASE_URL this file does NOT skip cleanly — `./_setup-env` THROWS at
+ * import/collection time (`_setup-env.ts:14`), which fails collection of this file.
+ * It is EXCLUDED from the `unit` project (see vitest.config.ts), so the exclusion —
+ * not a clean skip — is what keeps `pnpm vitest run --project unit` green. Do NOT
+ * rely on this file for CI logic coverage; the pure `assemblePhase4Summary` unit
+ * tests in worksheet-phase4-summary.test.ts carry the branch's logic coverage. This
+ * file is the TRUE DB round-trip, run only when DATABASE_URL is present.
  *
  * Fixture: Mulde. facility_type_selected='mulde' (A138-15), V_M + A_S_m present,
  * q_S_AC≥2, t_E≤84 → recommended_phase_4_gate='PASS', support fields written.

@@ -26,11 +26,10 @@ import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY
 import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE } from './materialize-registry';
 import {
   facilitySummaryInputs,
-  recommendedPhase4Gate,
-  recommendationReasons,
+  assemblePhase4Summary,
   FACILITY_TYPE_TO_SUMMARY_WORKSHEET,
   type FacilityType as Phase4FacilityType,
-  type Phase4GateInput,
+  type Phase4SummaryGathered,
 } from '@/lib/eval/phase4-summary';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
@@ -2246,88 +2245,32 @@ export async function saveWorksheet(
           const meetsQsacFlagP4 = await readScopedBool('facility_meets_qsac');
           const tEHoursP4 = await readScopedNum('t_E'); // above-ground emptying time; null = N/A
 
-          // 5. complete = footprint present AND (no governing volume OR volume present)
-          //    AND no required output null. missingOutputs lists the absent symbols so
-          //    the incomplete reason cites them.
-          const missingOutputsP4: string[] = [];
-          if (facilityTypeP4 == null) missingOutputsP4.push('facility_type_selected');
-          if (footprintSymbolP4 != null && footprintValueP4 == null) {
-            missingOutputsP4.push(footprintSymbolP4);
-          }
-          if (volumeSymbolP4 != null && volumeValueP4 == null) {
-            missingOutputsP4.push(volumeSymbolP4);
-          }
-          const completeP4 =
-            facilityTypeP4 != null &&
-            footprintValueP4 != null &&
-            (volumeSymbolP4 === null || volumeValueP4 != null);
-
-          // 6. meetsQsac — prefer the explicit facility_meets_qsac flag; else derive
-          //    from the measured Phase-3 q_S,AC (≥ 2 l/(s·ha), REQ-15). Pass the
-          //    measured q_S,AC into the input (M1) so the ¬q_S,AC reason cites it.
-          const meetsQsacP4 =
-            meetsQsacFlagP4 != null
-              ? meetsQsacFlagP4
-              : (qSacP4 != null && qSacP4 >= 2);
-
-          // 7. blockGateFailed applicability — RATIFIED per-facility gate mapping.
-          //    flaeche → REQ-20 (k_i > r_D(n)·1e-7)   [unconditional BLOCK]
-          //    rigole  → REQ-21 (L_VS present/nonzero) [conditional BLOCK]
-          //    schacht → REQ-22 (Schacht-Typ = B)      [conditional BLOCK]
-          //    mulde / mre / mrs / becken → NO applicable BLOCK gate → false.
-          //
-          //  NAMED BOUNDARY (deferred to fan-out Tasks 5/8/11/13 — per-facility gate
-          //  wiring): for flaeche/rigole/schacht the gate CONDITION must be evaluated
-          //  from the same persisted inputs (or the persisted compliance result read
-          //  cleanly). Evaluating REQ-20/21/22 here would duplicate the compliance
-          //  engine's condition logic, which this branch cannot cleanly reach from the
-          //  summary worksheet. Per the task's documented-boundary rule we therefore
-          //  set blockGateFailed=false for those facilities FOR NOW and record the
-          //  named boundary `PHASE4_SUMMARY_BLOCKGATE_FANOUT` (see below). The
-          //  facility→requirement MAPPING is present in code so the fan-out only wires
-          //  the evaluation, not the topology. The PILOT (mulde) and the other
-          //  no-gate facilities are already CORRECT (false) with no deferral.
-          const PHASE4_SUMMARY_BLOCKGATE_FANOUT: Record<Phase4FacilityType, string | null> = {
-            flaeche: 'REQ-20',   // boundary: condition eval deferred to fan-out Task 5
-            mulde:   null,       // pilot — no applicable block gate → correct now
-            rigole:  'REQ-21',   // boundary: condition eval deferred to fan-out Task 8
-            mre:     null,       // no applicable block gate
-            mrs:     null,       // no applicable block gate
-            schacht: 'REQ-22',   // boundary: condition eval deferred to fan-out Task 13
-            becken:  null,       // no applicable block gate
+          // 5.–9. PURE ASSEMBLY. Everything after the scoped DB reads (complete,
+          //    meetsQsac, blockGate applicability, Tab.14, recommendation, reasons and
+          //    the 8-field write-set) is computed by the exported pure function
+          //    `assemblePhase4Summary` — the branch and the unit tests exercise the SAME
+          //    code (no mirror). The per-facility BLOCK-gate mapping + the UNCONDITIONAL-
+          //    gate fail-safe guard (flaeche/REQ-20 → never a silent non-FAIL) live in
+          //    phase4-summary.ts under the NAMED boundary PHASE4_SUMMARY_BLOCKGATE_FANOUT
+          //    (fan-out Tasks 5/8/11/13). Tab.14 freeboard/slope thresholds deferred under
+          //    PHASE4_SUMMARY_TAB14_SOURCE. phase_4_gate_result is ENGINEER-entered and is
+          //    NEVER in the write-set (D3 rider).
+          const gathered: Phase4SummaryGathered = {
+            facilityType: facilityTypeP4,
+            facilityWorksheetCode: facilityWorksheetCodeP4,
+            volumeSymbol: volumeSymbolP4,
+            footprintSymbol: footprintSymbolP4,
+            volumeValue: volumeValueP4,
+            footprintValue: footprintValueP4,
+            qSac: qSacP4,
+            meetsQsacFlag: meetsQsacFlagP4,
+            tEHours: tEHoursP4,
           };
-          // Applicable-gate lookup is present (mapping intact); the CONDITION eval is
-          // the deferred part. Until fan-out wires it, no facility flags a block fail
-          // from this branch — mulde/pilot is exactly right; the three gated
-          // facilities are conservatively non-blocking (documented above).
-          void PHASE4_SUMMARY_BLOCKGATE_FANOUT;
-          const blockGateFailedP4 = false;
-          const blockGateReasonsP4: string[] = [];
+          const nowIsoDate = now.toISOString().slice(0, 10);
+          const assembled = assemblePhase4Summary(gathered, nowIsoDate);
 
-          // 8. tab14 — t_E drives the CONDITIONAL branch for above-ground facilities.
-          //    freeboardOk / slopeOk = null for now: Tab.14 numeric thresholds not yet
-          //    sourced (NAMED BOUNDARY `PHASE4_SUMMARY_TAB14_SOURCE` — a documented
-          //    source/fan-out item; the pure module already treats null as N/A).
-          const gateInput: Phase4GateInput = {
-            complete: completeP4,
-            meetsQsac: meetsQsacP4,
-            blockGateFailed: blockGateFailedP4,
-            blockGateReasons: blockGateReasonsP4,
-            missingOutputs: missingOutputsP4,
-            q_S_AC: qSacP4,
-            tab14: {
-              t_E_hours: tEHoursP4,
-              freeboardOk: null, // PHASE4_SUMMARY_TAB14_SOURCE — threshold not yet sourced
-              slopeOk: null,     // PHASE4_SUMMARY_TAB14_SOURCE — threshold not yet sourced
-            },
-          };
-
-          const recommendationP4 = recommendedPhase4Gate(gateInput);
-          const reasonsP4 = recommendationReasons(gateInput);
-
-          // 9. WRITE the 8 A138-23 support/recommendation fields BY SYMBOL. All are
-          //    derived/read-only (source_type='derived'). phase_4_gate_result is
-          //    ENGINEER-entered and is NEVER written here (D3 rider).
+          // WRITE the 8 A138-23 support/recommendation fields BY SYMBOL. All are
+          // derived/read-only (source_type='derived').
           type P4Row = {
             projectId: string;
             fieldId: string;
@@ -2340,24 +2283,14 @@ export async function saveWorksheet(
             enteredBy: string;
             enteredAt: Date;
           };
-          const nowIsoDate = now.toISOString().slice(0, 10);
-          const p4Writes: Array<{
-            symbol: string;
-            valueNumber?: string | null;
-            valueText?: string | null;
-            valueBoolean?: boolean | null;
-            valueEnum?: string | null;
-            valueDate?: string | null;
-          }> = [
-            { symbol: 'facility_type_dimensioned', valueText: facilityTypeP4 != null ? facilityWorksheetCodeP4 : null },
-            { symbol: 'facility_specific_volume_m3', valueNumber: volumeValueP4 != null ? String(volumeValueP4) : null },
-            { symbol: 'facility_footprint_m2', valueNumber: footprintValueP4 != null ? String(footprintValueP4) : null },
-            { symbol: 'facility_meets_qsac', valueBoolean: meetsQsacP4 },
-            { symbol: 'facility_specific_dimensioning_complete', valueBoolean: completeP4 },
-            { symbol: 'facility_design_completion_date', valueDate: completeP4 ? nowIsoDate : null },
-            { symbol: 'recommended_phase_4_gate', valueEnum: recommendationP4 },
-            { symbol: 'phase_4_recommendation_reasons', valueText: reasonsP4.join('; ') },
-          ];
+          const p4Writes = assembled.writes.map((w) => ({
+            symbol: w.symbol,
+            valueNumber: w.kind === 'number' ? (w.value != null ? String(w.value) : null) : undefined,
+            valueText: w.kind === 'text' ? w.value : undefined,
+            valueBoolean: w.kind === 'boolean' ? w.value : undefined,
+            valueEnum: w.kind === 'enum' ? w.value : undefined,
+            valueDate: w.kind === 'date' ? w.value : undefined,
+          }));
 
           const p4Rows: P4Row[] = p4Writes
             .map((w) => ({ ...w, fieldId: p4CIdBySymbol.get(w.symbol) }))

@@ -4,12 +4,13 @@
  * DB-free — runs in the vitest `unit` project (the full DB round-trip runs in the
  * `integration` project against a live Postgres, mirroring worksheet-asm/tab6).
  *
- * These tests are REPRODUCTION-GRADE for the producer branch in worksheet.ts
- * (`producerEntry.id === 'phase4_summary'`): a small faithful mirror of the
- * branch's input-gathering → Phase4GateInput → recommendedPhase4Gate /
- * recommendationReasons → write-set. If the governing volume/footprint symbol
- * resolution, the complete predicate, the meetsQsac derivation, or the write-set
- * shape were wrong, these tests fail.
+ * These tests exercise the EXACT code the producer branch runs: the branch in
+ * worksheet.ts (`producerEntry.id === 'phase4_summary'`) gathers scalars via scoped
+ * DB reads and then calls the exported pure function `assemblePhase4Summary`. These
+ * tests call that SAME function directly (no hand-copied mirror), so they cannot
+ * drift from the branch. The tiny `gather()` helper below only reproduces the
+ * facility→worksheet-code + governing-symbol resolution the DB reads perform, then
+ * hands the scalars to the real assembly.
  */
 
 // @vitest-environment happy-dom
@@ -21,11 +22,11 @@ import {
 } from '../materialize-registry';
 import {
   facilitySummaryInputs,
-  recommendedPhase4Gate,
-  recommendationReasons,
+  assemblePhase4Summary,
   FACILITY_TYPE_TO_SUMMARY_WORKSHEET,
+  PHASE4_SUMMARY_REQ20_DEFERRED_REASON,
   type FacilityType,
-  type Phase4GateInput,
+  type Phase4SummaryGathered,
 } from '@/lib/eval/phase4-summary';
 
 // ---------------------------------------------------------------------------
@@ -78,10 +79,10 @@ describe('FACILITY_TYPE_TO_SUMMARY_WORKSHEET (composites)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Producer-branch logic mirror.
-// Faithful transcription of the branch's input-gathering + build + compute +
-// write-set, over an in-memory persisted-parameter map. The mirror MUST stay
-// byte-equivalent to worksheet.ts so a divergence breaks a test.
+// gather() — reproduces ONLY the facility→worksheet-code + governing-symbol/value
+// resolution that the branch's scoped DB reads perform, then hands the scalars to
+// the REAL exported `assemblePhase4Summary`. This is NOT a mirror of the assembly
+// logic (complete/meetsQsac/verdict/write-set) — that is the code under test.
 // ---------------------------------------------------------------------------
 
 type Persisted = {
@@ -93,19 +94,7 @@ type Persisted = {
   [sym: string]: number | string | boolean | null | undefined;
 };
 
-type SummaryWriteSet = {
-  facility_type_dimensioned: string | null;
-  facility_specific_volume_m3: number | null;
-  facility_footprint_m2: number | null;
-  facility_meets_qsac: boolean;
-  facility_specific_dimensioning_complete: boolean;
-  facility_design_completion_date: string | null;
-  recommended_phase_4_gate: 'PASS' | 'CONDITIONAL' | 'FAIL';
-  phase_4_recommendation_reasons: string;
-};
-
-/** Mirror of the worksheet.ts phase4_summary branch (steps 2–9). */
-function computeSummary(p: Persisted, nowIsoDate = '2026-07-17'): SummaryWriteSet {
+function gather(p: Persisted): Phase4SummaryGathered {
   const rawFt = p.facility_type_selected ?? null;
   const facilityType: FacilityType | null =
     rawFt === 'flaeche' || rawFt === 'mulde' || rawFt === 'rigole' ||
@@ -122,122 +111,99 @@ function computeSummary(p: Persisted, nowIsoDate = '2026-07-17'): SummaryWriteSe
 
   const asNum = (v: unknown): number | null =>
     typeof v === 'number' && Number.isFinite(v) ? v : null;
-  const volumeValue = volumeSymbol != null ? asNum(p[volumeSymbol]) : null;
-  const footprintValue = footprintSymbol != null ? asNum(p[footprintSymbol]) : null;
-
-  const qSac = p.q_S_AC ?? null;
-  const meetsQsacFlag = p.facility_meets_qsac ?? null;
-  const tEHours = p.t_E ?? null;
-
-  const missingOutputs: string[] = [];
-  if (facilityType == null) missingOutputs.push('facility_type_selected');
-  if (footprintSymbol != null && footprintValue == null) missingOutputs.push(footprintSymbol);
-  if (volumeSymbol != null && volumeValue == null) missingOutputs.push(volumeSymbol);
-
-  const complete =
-    facilityType != null &&
-    footprintValue != null &&
-    (volumeSymbol === null || volumeValue != null);
-
-  const meetsQsac =
-    meetsQsacFlag != null ? meetsQsacFlag : (qSac != null && qSac >= 2);
-
-  const blockGateFailed = false; // pilot/no-gate; gated facilities deferred to fan-out
-  const blockGateReasons: string[] = [];
-
-  const gateInput: Phase4GateInput = {
-    complete,
-    meetsQsac,
-    blockGateFailed,
-    blockGateReasons,
-    missingOutputs,
-    q_S_AC: qSac,
-    tab14: { t_E_hours: tEHours, freeboardOk: null, slopeOk: null },
-  };
-
-  const recommendation = recommendedPhase4Gate(gateInput);
-  const reasons = recommendationReasons(gateInput);
 
   return {
-    facility_type_dimensioned: facilityType != null ? facilityWorksheetCode : null,
-    facility_specific_volume_m3: volumeValue,
-    facility_footprint_m2: footprintValue,
-    facility_meets_qsac: meetsQsac,
-    facility_specific_dimensioning_complete: complete,
-    facility_design_completion_date: complete ? nowIsoDate : null,
-    recommended_phase_4_gate: recommendation,
-    phase_4_recommendation_reasons: reasons.join('; '),
+    facilityType,
+    facilityWorksheetCode,
+    volumeSymbol,
+    footprintSymbol,
+    volumeValue: volumeSymbol != null ? asNum(p[volumeSymbol]) : null,
+    footprintValue: footprintSymbol != null ? asNum(p[footprintSymbol]) : null,
+    qSac: p.q_S_AC ?? null,
+    meetsQsacFlag: p.facility_meets_qsac ?? null,
+    tEHours: p.t_E ?? null,
   };
 }
 
-describe('Phase-4 summary producer-branch logic (Mulde pilot)', () => {
+/** Convenience: gather → assemblePhase4Summary, returning writes as a symbol→value map. */
+function assemble(p: Persisted, nowIsoDate = '2026-07-17') {
+  const { writes, recommendation, reasons } = assemblePhase4Summary(gather(p), nowIsoDate);
+  const bySymbol = new Map(writes.map((w) => [w.symbol, w.value]));
+  return {
+    recommendation,
+    reasonsJoined: reasons.join('; '),
+    get: (sym: string) => bySymbol.get(sym),
+  };
+}
+
+describe('assemblePhase4Summary — Mulde pilot', () => {
   // Mulde: volumeSymbol=V_M, footprintSymbol=A_S_m.
   it('case 1 — V_M + A_S_m present, q_S_AC≥2, t_E≤84 → PASS + support fields written', () => {
-    const out = computeSummary({
+    const out = assemble({
       facility_type_selected: 'mulde',
       V_M: 120,
       A_S_m: 45,
       q_S_AC: 2.5,
       t_E: 60,
     });
-    expect(out.recommended_phase_4_gate).toBe('PASS');
-    expect(out.facility_type_dimensioned).toBe('A138-17');
-    expect(out.facility_specific_volume_m3).toBe(120);
-    expect(out.facility_footprint_m2).toBe(45);
-    expect(out.facility_meets_qsac).toBe(true);
-    expect(out.facility_specific_dimensioning_complete).toBe(true);
-    expect(out.facility_design_completion_date).toBe('2026-07-17');
-    expect(out.phase_4_recommendation_reasons).toContain('Alle anwendbaren');
+    expect(out.recommendation).toBe('PASS');
+    expect(out.get('facility_type_dimensioned')).toBe('A138-17');
+    expect(out.get('facility_specific_volume_m3')).toBe(120);
+    expect(out.get('facility_footprint_m2')).toBe(45);
+    expect(out.get('facility_meets_qsac')).toBe(true);
+    expect(out.get('facility_specific_dimensioning_complete')).toBe(true);
+    expect(out.get('facility_design_completion_date')).toBe('2026-07-17');
+    expect(out.reasonsJoined).toContain('Alle anwendbaren');
   });
 
   it('case 2 — t_E = 92 > 84 → CONDITIONAL, reason cites "92" and "84"', () => {
-    const out = computeSummary({
+    const out = assemble({
       facility_type_selected: 'mulde',
       V_M: 120,
       A_S_m: 45,
       q_S_AC: 2.5,
       t_E: 92,
     });
-    expect(out.recommended_phase_4_gate).toBe('CONDITIONAL');
-    expect(out.phase_4_recommendation_reasons).toContain('92');
-    expect(out.phase_4_recommendation_reasons).toContain('84');
+    expect(out.recommendation).toBe('CONDITIONAL');
+    expect(out.reasonsJoined).toContain('92');
+    expect(out.reasonsJoined).toContain('84');
     // support fields still populated on CONDITIONAL
-    expect(out.facility_specific_volume_m3).toBe(120);
-    expect(out.facility_footprint_m2).toBe(45);
-    expect(out.facility_specific_dimensioning_complete).toBe(true);
+    expect(out.get('facility_specific_volume_m3')).toBe(120);
+    expect(out.get('facility_footprint_m2')).toBe(45);
+    expect(out.get('facility_specific_dimensioning_complete')).toBe(true);
   });
 
   it('case 3 — V_M missing → incomplete → FAIL, completion_date null, reason cites V_M', () => {
-    const out = computeSummary({
+    const out = assemble({
       facility_type_selected: 'mulde',
       // V_M absent
       A_S_m: 45,
       q_S_AC: 2.5,
       t_E: 60,
     });
-    expect(out.recommended_phase_4_gate).toBe('FAIL');
-    expect(out.facility_specific_dimensioning_complete).toBe(false);
-    expect(out.facility_design_completion_date).toBeNull();
-    expect(out.facility_specific_volume_m3).toBeNull();
-    expect(out.phase_4_recommendation_reasons).toContain('unvollständig');
-    expect(out.phase_4_recommendation_reasons).toContain('V_M');
+    expect(out.recommendation).toBe('FAIL');
+    expect(out.get('facility_specific_dimensioning_complete')).toBe(false);
+    expect(out.get('facility_design_completion_date')).toBeNull();
+    expect(out.get('facility_specific_volume_m3')).toBeNull();
+    expect(out.reasonsJoined).toContain('unvollständig');
+    expect(out.reasonsJoined).toContain('V_M');
   });
 
   it('case 4 — q_S_AC = 1.3 < 2 (no explicit flag) → FAIL, reason cites the measured value', () => {
-    const out = computeSummary({
+    const out = assemble({
       facility_type_selected: 'mulde',
       V_M: 120,
       A_S_m: 45,
       q_S_AC: 1.3,
       t_E: 60,
     });
-    expect(out.recommended_phase_4_gate).toBe('FAIL');
-    expect(out.facility_meets_qsac).toBe(false);
-    expect(out.phase_4_recommendation_reasons).toContain('1.30');
+    expect(out.recommendation).toBe('FAIL');
+    expect(out.get('facility_meets_qsac')).toBe(false);
+    expect(out.reasonsJoined).toContain('1.30');
   });
 
   it('case 5 — explicit facility_meets_qsac=true overrides a low measured q_S_AC', () => {
-    const out = computeSummary({
+    const out = assemble({
       facility_type_selected: 'mulde',
       V_M: 120,
       A_S_m: 45,
@@ -246,22 +212,61 @@ describe('Phase-4 summary producer-branch logic (Mulde pilot)', () => {
       t_E: 60,
     });
     // Explicit flag wins → not a q_S,AC FAIL; complete + t_E ok → PASS.
-    expect(out.facility_meets_qsac).toBe(true);
-    expect(out.recommended_phase_4_gate).toBe('PASS');
+    expect(out.get('facility_meets_qsac')).toBe(true);
+    expect(out.recommendation).toBe('PASS');
   });
 });
 
-describe('Phase-4 summary — area device (Flächenversickerung) has no governing volume', () => {
+describe('assemblePhase4Summary — flaeche REQ-20 unconditional-gate fail-safe (IMPORTANT 2)', () => {
   it('flaeche: volumeSymbol=null → complete requires only footprint A_S', () => {
-    const out = computeSummary({
+    const out = assemble({
       facility_type_selected: 'flaeche',
       A_S: 200,
       q_S_AC: 3,
     });
     // No V_S required for flaeche; footprint present → complete.
-    expect(out.facility_specific_dimensioning_complete).toBe(true);
-    expect(out.facility_specific_volume_m3).toBeNull();
-    expect(out.facility_footprint_m2).toBe(200);
-    expect(out.facility_type_dimensioned).toBe('A138-16');
+    expect(out.get('facility_specific_dimensioning_complete')).toBe(true);
+    expect(out.get('facility_specific_volume_m3')).toBeNull();
+    expect(out.get('facility_footprint_m2')).toBe(200);
+    expect(out.get('facility_type_dimensioned')).toBe('A138-16');
+  });
+
+  it('flaeche with otherwise-PASS inputs → NOT a silent PASS: downgraded to CONDITIONAL + REQ-20 note', () => {
+    // Complete, meetsQsac, no t_E flag → the ratified predicate alone would return PASS.
+    // The REQ-20 unconditional-gate deferral must force at most CONDITIONAL + a mandatory reason.
+    const out = assemble({
+      facility_type_selected: 'flaeche',
+      A_S: 200,
+      q_S_AC: 3,
+    });
+    expect(out.recommendation).toBe('CONDITIONAL');
+    expect(out.recommendation).not.toBe('PASS');
+    expect(out.reasonsJoined).toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
+    expect(out.reasonsJoined).toContain('REQ-20');
+    expect(out.reasonsJoined).toContain('noch nicht');
+    expect(out.reasonsJoined).toContain('ausgewertet');
+  });
+
+  it('flaeche that FAILs (incomplete) stays FAIL — the guard never masks a FAIL', () => {
+    const out = assemble({
+      facility_type_selected: 'flaeche',
+      // A_S absent → incomplete → FAIL
+      q_S_AC: 3,
+    });
+    expect(out.recommendation).toBe('FAIL');
+    // FAIL is already the safe verdict; the REQ-20 note is not appended over a FAIL.
+    expect(out.reasonsJoined).not.toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
+  });
+
+  it('mulde is UNAFFECTED by the flaeche guard (no REQ-20 note, PASS stays PASS)', () => {
+    const out = assemble({
+      facility_type_selected: 'mulde',
+      V_M: 120,
+      A_S_m: 45,
+      q_S_AC: 2.5,
+      t_E: 60,
+    });
+    expect(out.recommendation).toBe('PASS');
+    expect(out.reasonsJoined).not.toContain('REQ-20');
   });
 });
