@@ -1,5 +1,13 @@
 @AGENTS.md
 
+# Deploy workflow — staging-first
+
+Default working branch is **`staging`**, not `main`. Do the work and deploy it on
+`staging` first (push to `staging` → Vercel auto-deploy), then Nacho reviews it on Slack.
+Promote to `main` (production) **only after Nacho's OK**. When Johannes says "deploy"
+without qualification, deploy to `staging`. Never push to `main` unless he explicitly
+says it's approved for production.
+
 # Importing standard workbooks (Pass3c)
 
 ## Where the workbooks come from
