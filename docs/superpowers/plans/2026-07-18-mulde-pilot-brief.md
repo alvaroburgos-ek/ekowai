@@ -47,8 +47,8 @@ Discriminator check (h_M=0.25): denominator = 0.25/103680 + 7.98e-8 = 2.41127e-6
 
 ## Input sequence (nudge-to-dirty on EVERY save)
 1. **A138-15** → `facility_type_selected` flaeche → **mulde**. Save. (This is a real change → dirties.)
-2. **A138-12** → `a_s_m_determination_method` direct → **geometry**. Save. → triggers the `asm` geometry sweep → materialises A_S_m@A138-12.
-3. **A138-17** → confirm `h_M=0.30`; **nudge** it (0.30→0.31→save→0.30→save) to force the producer-fire if step 2 didn't already. Verify V_M computes on-screen (the #22 unblock) — but DB decides.
+2. **A138-12** → `a_s_m_determination_method` direct → **geometry**. Save. → this ONLY sets the method. **CORRECTION (pilot Finding C, code-verified):** the A138-12 owner save does NOT run the Gl.16 sweep — for method=geometry the owner path (isAsmSave, worksheet.ts:859-861/1000-1004) PASSES THROUGH the currently-persisted A_S_m (45), and the sweep-bearing producer branch is suppressed (asm already in ownerFiredIds, :528). So A_S_m stays 45 here — EXPECTED, not a bug. The sweep fires at step 3.
+3. **A138-17** → confirm `h_M=0.30`; **nudge** it (0.30→0.31→save→0.30→save). **This is the sweep's real trigger** — an A138-17 save fires the PRODUCER path (worksheet.ts:1434+, Mulde Gl.16 sweep :1523/1644) because h_M ∈ ASM_INPUT_SYMBOLS and ownerTrigger(asm)=false on A138-17 → producer runs → A_S_m materialises to A138-12. Verify V_M computes on-screen (the #22 unblock) — but DB decides.
 4. The A138-23 summary aggregator fires on the facility_type change (input symbol) → populates P3–P9. If A138-23 shows stale, open A138-23 and re-save (nudge) to force the summary producer.
 5. (Optional discriminating pass) the two verdict-flips above, each nudge-saved + restored.
 
