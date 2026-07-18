@@ -62,6 +62,16 @@ In Supabase → Authentication → URL Configuration → "Redirect URLs", add:
 - [ ] **Sign Supabase DPA** in Supabase Dashboard → Settings → Organization → DPA.
       Free with Pro tier (€25/mo).
 
+- [ ] **Sign Mistral AV-Vertrag / DPA (Art. 28 GDPR)** — get the data-processing
+      agreement from Mistral (console.mistral.ai → org/legal) and confirm **no
+      training on API data** in the console/terms. This is the AI provider that
+      replaced DeepSeek/Kimi (EU, France). **Blocker for the AI feature:** must be
+      signed *before* the `/api/draft-rationale` endpoint (Plan 6 reattachment) is
+      reactivated — that's when real user worksheet inputs start flowing to Mistral.
+      Until it's signed, the AI-processing section in `legal.datenschutz`
+      ({de,en}.json) must stay a draft and the "draft" banner must stay on.
+      Owner: Nacho (account/contract) → then confirm status here.
+
 - [ ] **Trademark check** on "EKOWAI Wizard" — DPMA + EUIPO. Lawyer's job.
 
 ## Infrastructure
