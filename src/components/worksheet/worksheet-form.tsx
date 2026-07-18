@@ -231,6 +231,27 @@ export function WorksheetForm({
     return m;
   }, [fields]);
 
+  // HOME SIGNAL (fix-wave 2): the reliable "this symbol's home is elsewhere"
+  // signal is the FIELD being inherited — `field.inheritedFromWorksheet` — NOT
+  // inheritedFromBySymbol. On A138-17 the A_S_m field is an INJECTED inherited
+  // field (inheritedFromWorksheet='A138-12') that ALSO has a project_parameters
+  // row by field-id, so the page's initialValues loop resolves it as a "local
+  // param" (step 1) and NEVER sets inheritedFromBySymbol['A_S_m']. Keying the
+  // home-boundary suppression / render exclusion on inheritedFromBySymbol alone
+  // is therefore a no-op for the exact symbol we must protect. We UNION the
+  // field-derived homes over inheritedFromBySymbol and feed the union to BOTH
+  // home-boundary consumers (composeEngineSuppressedSymbols and
+  // computeComputedSymbols). Field homes win on collision (they are the direct
+  // field-level truth); non-inherited own fields never add an entry so the
+  // home!==current filter inside the helpers leaves owners unsuppressed.
+  const inheritedHomeBySymbol = useMemo<Record<string, string>>(() => {
+    const m: Record<string, string> = { ...inheritedFromBySymbol };
+    for (const f of fields) {
+      if (f.inheritedFromWorksheet) m[f.symbol] = f.inheritedFromWorksheet;
+    }
+    return m;
+  }, [inheritedFromBySymbol, fields]);
+
   // Symbols that are equation outputs — the engine writes them; they must not
   // be hand-editable (isComputed=true in DynamicField).
   // BASIN_GOVERNING_SYMBOLS (r_D_n, D_min) are NOT equation outputs in the
@@ -258,11 +279,11 @@ export function WorksheetForm({
   // composeEngineSuppressedSymbols so the inherited store value survives.
   const computedSymbols = useMemo(
     () =>
-      computeComputedSymbols(sortedEquations, inheritedFromBySymbol, {
+      computeComputedSymbols(sortedEquations, inheritedHomeBySymbol, {
         hasField: (sym) => fieldBySymbol.has(sym),
         extraSymbols: [...BASIN_GOVERNING_SYMBOLS, ...LOADING_CHECK_SYMBOLS],
       }),
-    [sortedEquations, fieldBySymbol, inheritedFromBySymbol],
+    [sortedEquations, fieldBySymbol, inheritedHomeBySymbol],
   );
 
   // Resolve the A_S,m determination-method BEFORE wiring the engine so the
@@ -291,8 +312,10 @@ export function WorksheetForm({
   //
   // OWNERSHIP PRINCIPLE (home boundary, defect #22): A facility worksheet must
   // not let a local equation shadow-write a symbol whose single active-field home
-  // is a DIFFERENT worksheet. inheritedFromBySymbol maps symbol → home worksheet
-  // code; every entry is an inherited symbol that the current worksheet does not
+  // is a DIFFERENT worksheet. inheritedHomeBySymbol maps symbol → home worksheet
+  // code (field-derived homes UNIONed over inheritedFromBySymbol — see the memo
+  // above for why the field signal is the reliable one); every entry is an
+  // inherited symbol that the current worksheet does not
   // own. Suppressing these write-backs ensures the inherited home value (e.g.
   // A_S_m from A138-12 on A138-17) is not blanked by a local Gl.16 that cannot
   // yet compute (missing h_M). The server materialize path (Gl.16→A138-12 via
@@ -302,8 +325,8 @@ export function WorksheetForm({
   // on A138-17 method='geometry' the asm set may already cover A_S_m, but the
   // home-boundary set provides the general guard independent of asmMethod.
   const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
-    () => composeEngineSuppressedSymbols(asmMethod, worksheet.template.code, inheritedFromBySymbol),
-    [asmMethod, worksheet.template.code, inheritedFromBySymbol],
+    () => composeEngineSuppressedSymbols(asmMethod, worksheet.template.code, inheritedHomeBySymbol),
+    [asmMethod, worksheet.template.code, inheritedHomeBySymbol],
   );
 
   // Engine wiring lives in a shared hook so the integration test renders

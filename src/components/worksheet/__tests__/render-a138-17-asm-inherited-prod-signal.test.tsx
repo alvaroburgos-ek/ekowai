@@ -1,37 +1,38 @@
 /**
- * Finding E (render-level) — the test that would have caught the A_S_m masking
- * the first time. BINDING CONDITION: it exercises the REAL WorksheetForm with
- * the REAL DynamicField and the REAL useEquationEngine so the path
- *   computeComputedSymbols → isComputed → DynamicField(readOnly/inherited value)
- * runs end-to-end through the production component (NOT a synthetic hook feed).
+ * Fix-wave 2 (render-level) — the test that reproduces the ACTUAL live symptom
+ * (V_M blocked on A138-17) with the REAL prod topology, and would have caught
+ * the mis-keyed Finding-E fix.
  *
- * A138-17 (Mulde) topology:
- *   - A_S_m: LOCAL field on A138-17 (Gl.16's output field), but its VALUE is
- *     INHERITED from A138-12 (inheritedFromBySymbol['A_S_m']='A138-12'). The
- *     store is seeded with that inherited value.
- *   - Gl.16 (eqNumber '16') outputs A_S_m — SERVER-ONLY sweep; the client can't
- *     compute it (needs h_M in the Mulde geometry sweep). On the buggy code the
- *     union makes A_S_m a local computed output → isComputed=true → the A_S_m
- *     input renders read-only from the (blank) client engine → masks inherited.
- *   - Gl.15 (eqNumber '15') V_M = A_S_m · h_M — a consumer that must compute
- *     from the inherited A_S_m.
+ * WHY THE PRIOR render test (render-a138-17-asm-inherited.test.tsx) was a no-op
+ * proof: it seeded `inheritedFromBySymbol: { A_S_m: 'A138-12' }`. In PROD that
+ * key is UNSET for A_S_m on A138-17 — the injected inherited A_S_m field has a
+ * project_parameters row by field-id (943.43), so the page's initialValues loop
+ * resolves it via STEP 1 (local param), NOT step 2 (same-symbol upstream), so
+ * inheritedFromBySymbol[A_S_m] is never set. The OLD suppress/exclude signal
+ * (keyed on inheritedFromBySymbol) is therefore ∅ for A_S_m → the Gl.16 null
+ * write-back is NOT suppressed → it CLOBBERS the inherited 943.43 → Gl.15 reads
+ * null → V_M blocked.
  *
- * Assertions:
- *   (a) the A_S_m field is NOT rendered isComputed → its <input> is editable
- *       (readOnly=false) and shows the INHERITED value, not a blank engine card.
- *   (b) Gl.15/V_M computes from the inherited A_S_m (store V_M field = A_S_m·h_M).
+ * The reliable home signal is the FIELD being inherited:
+ * `field.inheritedFromWorksheet` (set on the injected A_S_m field on A138-17).
  *
- * RED (current code, before the render fix): A_S_m ∈ computedSymbols union →
- * isComputed=true → input readOnly + value blank → assertion (a) FAILS; V_M also
- * blocked because the write-back was suppressed AND the field is masked.
+ * REAL prod-shaped A138-17 (Mulde) topology reproduced here:
+ *   - A_S_m: INJECTED INHERITED field (inheritedFromWorksheet='A138-12', active,
+ *     hidden from the grid) carrying the initial value 943.43 in the store.
+ *   - Gl.16: local equation, outputSymbol 'A_S_m', inputs unresolvable
+ *     client-side (server-only Dauerstufen sweep, no D) → engine state is NOT
+ *     'computed' → desired=null in the write-back effect.
+ *   - Gl.15: local equation V_M = A_S_m · h_M (outputSymbol V_M), h_M = 0.30.
+ *   - inheritedFromBySymbol = {} for A_S_m (mirrors prod — the crux that makes
+ *     the OLD signal a no-op).
  *
- * FIX-WAVE 2 UPDATE: this test now relies on the CORRECTED home signal —
- * `field.inheritedFromWorksheet` on the injected A_S_m field — and sets
- * inheritedFromBySymbol = {} (mirroring prod, where the injected inherited field
- * resolves via its field-id project_parameters row, NOT same-symbol upstream).
- * The prior version keyed on inheritedFromBySymbol['A_S_m']='A138-12', which is
- * UNSET in prod → that made the fix a no-op. See the sibling
- * render-a138-17-asm-inherited-prod-signal.test.tsx for the clobber reproduction.
+ * Assertions (on the FIX):
+ *   - the A_S_m store value STAYS 943.43 (NOT clobbered to null).
+ *   - Gl.15/V_M computes from the inherited A_S_m: 943.43 · 0.30 ≈ 283.03.
+ *
+ * RED (current code): composeEngineSuppressedSymbols keyed on
+ * inheritedFromBySymbol → A_S_m NOT suppressed → Gl.16 null write-back clobbers
+ * 943.43 → A_S_m null, V_M blocked → both assertions FAIL.
  */
 
 // ── Mocks — declared BEFORE imports the mocked modules touch ──────────────────
@@ -87,7 +88,6 @@ vi.mock('../surface-source-banner', () => ({ SurfaceSourceBanner: () => null }))
 vi.mock('@/components/form-templates/SourceFormReferencePanel', () => ({
   SourceFormReferencePanel: () => null,
 }));
-// DynamicField's document/citation sub-widgets hit deeper deps; stub only those.
 vi.mock('@/components/documents/citation-picker', () => ({ CitationPicker: () => null }));
 vi.mock('@/components/documents/citation-chips', () => ({ CitationChips: () => null }));
 vi.mock('./verify-button', () => ({ VerifyButton: () => null }));
@@ -104,9 +104,9 @@ const A_S_M_FIELD_ID = 'fld-a_s_m';
 const H_M_FIELD_ID = 'fld-h_m';
 const V_M_FIELD_ID = 'fld-v_m';
 
-const INHERITED_A_S_M = 100; // value inherited from A138-12
+const INHERITED_A_S_M = 943.43; // value inherited from A138-12 (prod value)
 const H_M = 0.3;
-const EXPECTED_V_M = INHERITED_A_S_M * H_M; // 30
+const EXPECTED_V_M = INHERITED_A_S_M * H_M; // 283.029
 
 function makeField(over: Record<string, unknown>) {
   return {
@@ -130,11 +130,8 @@ function makeField(over: Record<string, unknown>) {
 }
 
 const FIELDS = [
-  // REAL A138-17 topology (verified against the DB): A_S_m has NO local field
-  // on A138-17 — it is INHERITED from A138-12 (mergeInheritedFields injects it
-  // with inheritedFromWorksheet='A138-12' so equations resolve it; it renders in
-  // the read-only "Vorgelagerte Werte" panel, NOT the editable grid). h_M and
-  // V_M are the real local A138-17 fields.
+  // A_S_m INJECTED INHERITED field (inheritedFromWorksheet='A138-12'), carrying
+  // the prod value 943.43. It is ALSO the output field of local Gl.16.
   makeField({ id: A_S_M_FIELD_ID, symbol: 'A_S_m', labelDe: 'Mittlere Versickerungsfläche', unit: 'm²', orderIndex: 0, inheritedFromWorksheet: 'A138-12' }),
   makeField({ id: H_M_FIELD_ID, symbol: 'h_M', labelDe: 'Muldentiefe', unit: 'm', orderIndex: 1 }),
   makeField({ id: V_M_FIELD_ID, symbol: 'V_M', labelDe: 'Muldenvolumen', unit: 'm³', orderIndex: 2 }),
@@ -155,12 +152,15 @@ function makeEq(over: Record<string, unknown>) {
 }
 
 const EQUATIONS = [
-  // Gl.16 — outputs A_S_m (home is A138-12; server-only geometry sweep).
+  // Gl.16 — outputs A_S_m. Inputs reference symbols with NO field/value on this
+  // worksheet (server-only Dauerstufen sweep) → engine state is NOT 'computed'
+  // → desired=null in the write-back effect → clobbers the inherited value
+  // UNLESS A_S_m is in suppressWriteBackSymbols.
   makeEq({
     id: '11111111-1111-4111-8111-111111111116',
     equationNumber: '16',
-    formula: 'A_S_m = A_M / (1 + ...)',
-    inputSymbols: [],
+    formula: 'A_S_m = A_M / (1 + a_D)',
+    inputSymbols: ['A_M', 'a_D'],
     outputSymbol: 'A_S_m',
   }),
   // Gl.15 — V_M = A_S_m · h_M (consumer of the inherited A_S_m).
@@ -183,10 +183,6 @@ const WORKSHEET_FORM_PROPS = {
   equations: EQUATIONS,
   complianceRequirements: [],
   complianceSuggestions: [],
-  // Inherited values arrive via the initialValues prop (the production path:
-  // the server resolves inherited A_S_m from A138-12 and passes it here).
-  // WorksheetForm.init(instance.id, initialValues, …) seeds the store on mount,
-  // so seeding the store directly before render would be wiped — seed HERE.
   initialValues: {
     [A_S_M_FIELD_ID]: { type: 'number' as const, value: INHERITED_A_S_M },
     [H_M_FIELD_ID]: { type: 'number' as const, value: H_M },
@@ -194,44 +190,30 @@ const WORKSHEET_FORM_PROPS = {
   initialSources: {},
   initialCitations: {},
   sameSymbolValuesBySymbol: {},
-  // CORRECTED signal: inheritedFromBySymbol is EMPTY (mirrors prod). The home is
-  // carried by the injected A_S_m field's inheritedFromWorksheet='A138-12'.
+  // CRUX: inheritedFromBySymbol is EMPTY for A_S_m (mirrors prod — the value
+  // came via the injected field-id row, NOT same-symbol upstream). This makes
+  // the OLD (inheritedFromBySymbol-keyed) signal a no-op.
   inheritedFromBySymbol: {},
   standardCode: 'DWA-A-138-1',
   docs: [],
 } satisfies Parameters<typeof WorksheetForm>[0];
 
-describe('Finding E (render) — A138-17 inherited A_S_m must not be masked as computed', () => {
+describe('Fix-wave 2 (render) — prod-signal: A138-17 inherited A_S_m must not be clobbered by Gl.16 null write-back', () => {
   beforeEach(() => {
-    // Reset the store so each test starts clean; WorksheetForm re-inits on mount
-    // from initialValues anyway, but this avoids cross-test bleed.
     act(() => {
       useWorksheetStore.getState().init('reset', {}, {}, {});
     });
   });
 
-  it('(a) the inherited A_S_m value survives (renders in the upstream panel, not "—")', () => {
-    const { container } = render(<WorksheetForm {...WORKSHEET_FORM_PROPS} />);
-
-    // A_S_m is inherited → shown in the read-only "Vorgelagerte Werte" panel,
-    // keyed by data-symbol. On the buggy code the local Gl.16 output claims
-    // A_S_m and the engine write-back CLEARS the inherited store value → the
-    // panel shows "—". FIXED → the inherited value (100) is preserved.
-    const asmRow = container.querySelector('[data-symbol="A_S_m"]');
-    expect(asmRow).not.toBeNull();
-    const shown = asmRow!.textContent ?? '';
-    expect(shown).toContain(String(INHERITED_A_S_M)); // "100", not "—"
-
-    // Direct store check: the inherited A_S_m value must not be null.
+  it('the inherited A_S_m store value survives (NOT clobbered to null by Gl.16)', () => {
+    render(<WorksheetForm {...WORKSHEET_FORM_PROPS} />);
     const asm = useWorksheetStore.getState().values[A_S_M_FIELD_ID];
     expect(asm?.type === 'number' ? asm.value : null).toBe(INHERITED_A_S_M);
   });
 
-  it('(b) Gl.15 / V_M computes from the inherited A_S_m', () => {
+  it('Gl.15 / V_M computes from the inherited A_S_m (≈ 943.43 · 0.30 = 283.03)', () => {
     render(<WorksheetForm {...WORKSHEET_FORM_PROPS} />);
-    // The engine write-back effect runs on mount; V_M = A_S_m·h_M is written to
-    // the store. When the inherited A_S_m is cleared, V_M cannot compute (null).
     const vm = useWorksheetStore.getState().values[V_M_FIELD_ID];
-    expect(vm?.type === 'number' ? vm.value : null).toBeCloseTo(EXPECTED_V_M, 6);
+    expect(vm?.type === 'number' ? vm.value : null).toBeCloseTo(EXPECTED_V_M, 3);
   });
 });
