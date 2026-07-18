@@ -425,7 +425,12 @@ export function assemblePhase4Summary(
   }
 
   const writes: Phase4SummaryWrite[] = [
-    { symbol: 'facility_type_dimensioned', kind: 'text', value: g.facilityType != null ? g.facilityWorksheetCode : null },
+    // Finding A: this field is the dimensioned facility TYPE ("Dimensionierter
+    // Anlagentyp", e.g. 'mulde'/'rigole') — NOT the design-worksheet code.
+    // Previously wrote g.facilityWorksheetCode (e.g. 'A138-17'), which is the
+    // mapped code, so A138-23 showed "A138-17" instead of "mulde". Write the
+    // raw facility type.
+    { symbol: 'facility_type_dimensioned', kind: 'text', value: g.facilityType },
     { symbol: 'facility_specific_volume_m3', kind: 'number', value: g.volumeValue },
     { symbol: 'facility_footprint_m2', kind: 'number', value: g.footprintValue },
     { symbol: 'facility_meets_qsac', kind: 'boolean', value: meetsQsac },

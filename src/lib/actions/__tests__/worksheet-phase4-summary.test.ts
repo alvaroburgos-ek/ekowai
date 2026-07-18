@@ -147,7 +147,9 @@ describe('assemblePhase4Summary — Mulde pilot', () => {
       t_E: 60,
     });
     expect(out.recommendation).toBe('PASS');
-    expect(out.get('facility_type_dimensioned')).toBe('A138-17');
+    // Finding A: facility_type_dimensioned is the facility TYPE ('mulde'), not
+    // the mapped design-worksheet code ('A138-17').
+    expect(out.get('facility_type_dimensioned')).toBe('mulde');
     expect(out.get('facility_specific_volume_m3')).toBe(120);
     expect(out.get('facility_footprint_m2')).toBe(45);
     expect(out.get('facility_meets_qsac')).toBe(true);
@@ -228,7 +230,8 @@ describe('assemblePhase4Summary — flaeche REQ-31 unconditional-gate fail-safe 
     expect(out.get('facility_specific_dimensioning_complete')).toBe(true);
     expect(out.get('facility_specific_volume_m3')).toBeNull();
     expect(out.get('facility_footprint_m2')).toBe(200);
-    expect(out.get('facility_type_dimensioned')).toBe('A138-16');
+    // Finding A: TYPE not CODE.
+    expect(out.get('facility_type_dimensioned')).toBe('flaeche');
   });
 
   it('flaeche with otherwise-PASS inputs → NOT a silent PASS: downgraded to CONDITIONAL + REQ-31 note', () => {
