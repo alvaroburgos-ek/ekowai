@@ -264,7 +264,7 @@
     },
     "datenschutz": {
       "title": "Privacy Policy",
-      "intro": "[to be drafted by lawyer]"
+      "intro": "Note: This privacy policy is a work in progress and has not yet been finally reviewed by legal counsel. The following section on AI-based processing is a draft.\n\nUse of AI for text generation\nWithin the application (EKOWAI Wizard) we use an AI service to automatically generate rationale and explanatory texts based on your worksheet inputs. For this purpose, the data you enter and the values computed from it (e.g. technical parameters and selected values) are transmitted to and processed by the AI service.\n\nProvider: Mistral AI SAS, France (EU). Processing takes place within the European Union; no transfer to a third country outside the EU/EEA occurs.\n\nPurpose: Automated generation of rationale and explanatory texts for the worksheets.\n\nLegal basis: Art. 6(1)(b) GDPR (performance of the usage contract) and Art. 6(1)(f) GDPR (legitimate interest in efficient, AI-assisted text generation).\n\nData processing agreement: A data processing agreement pursuant to Art. 28 GDPR is concluded with the provider. [to be confirmed internally once the DPA with Mistral is in place]\n\nNo use for training: According to the provider, inputs transmitted via the API are not used to train the AI models. [verify against Mistral's current data processing / terms of use before publishing]\n\n[Further sections – including controller, hosting, cookies/consent, retention periods, data subject rights, and the right to lodge a complaint with a supervisory authority – will be added and legally reviewed.]"
     },
     "agb": {
       "title": "Terms and Conditions",
