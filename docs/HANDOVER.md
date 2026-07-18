@@ -8,7 +8,7 @@ A Next.js 16 web app that helps German Planungsingenieur:innen run
 **DWA-A-201 sizing calculations** for wastewater pond plants. Multi-tenant
 on Supabase with RLS. 22 real DWA-A-201 worksheets imported from the
 EKOWAI-Agent Python pipeline. Decisions, compliance gating, multi-stage
-approval workflow, optional AI rationale drafting (DeepSeek + Kimi),
+approval workflow, optional AI rationale drafting (Mistral, EU),
 Resend email notifications.
 
 **Live:** https://ekowai-wizard.vercel.app
@@ -30,7 +30,7 @@ pnpm install
 pnpm dev   # http://localhost:3000
 ```
 
-`.env.local` already has the keys (Supabase, DeepSeek, Kimi, Resend,
+`.env.local` already has the keys (Supabase, Mistral, Resend,
 DEV_AUTOLOGIN_EMAIL). The dev autologin signs in as
 `leadership@ekowai.com` automatically.
 
@@ -78,10 +78,10 @@ existing 22 worksheet JSONs and the `_knowledge.json` knowledge map.
 └──────────┬─────────────────────────┬─────────────┬───────────────┘
            │                         │             │
 ┌──────────▼──────────┐  ┌───────────▼─────────┐  ┌▼─────────────┐
-│ Supabase Frankfurt  │  │ Resend (SDK)        │  │ DeepSeek +   │
-│ - Postgres + RLS    │  │ - approval emails   │  │ Kimi (LLM    │
-│ - Auth (magic-link) │  │ - SMTP relay for    │  │ rationale via│
-│ - 9 tables          │  │   Supabase auth     │  │ AI SDK)      │
+│ Supabase Frankfurt  │  │ Resend (SDK)        │  │ Mistral (EU) │
+│ - Postgres + RLS    │  │ - approval emails   │  │ LLM rationale│
+│ - Auth (magic-link) │  │ - SMTP relay for    │  │ via AI SDK   │
+│ - 9 tables          │  │   Supabase auth     │  │              │
 │   (orgs, projects,  │  │   (USER ACTION:     │  │              │
 │   calculations,     │  │    not yet wired)   │  │              │
 │   decisions, ...)   │  │                     │  │              │
