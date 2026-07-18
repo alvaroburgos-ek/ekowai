@@ -759,4 +759,141 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes:
       '§7.3.4.2 Gl. (23): `m ≥ (C_T,aM,CSB − 180)/60 für C_T,aM,CSB > 600 mg/l` — erhöhtes Mindestmischverhältnis (Bemessungshilfe), NICHT Produzent des mittleren m. ES-1 displayOnly. HINWEIS: Retag output_symbol m -> m_min_required + Durchsetzung via REQ-24 liegen in 2803d00 (WRITTEN-NOT-APPLIED) — hier kein Re-Fix. Piecewise `if` → ENGINE-blocked (E1).',
   },
+
+  // ====================================================================
+  // ES-1 TAIL — DWA-A-262E · DWA-A-222 · DWA-M-187 · DWA-M-760 · FLL-Naturteich
+  //   The last five standards carrying ES-1 (inequality-as-producer) instances:
+  //   the "equation's" output_symbol IS the very field being range-/minimum-
+  //   checked, so the equation is a second producer of its own symbol → the
+  //   engine's multi-producer collision-guard can BLANK the real producer's
+  //   value or the engineer's entry. displayOnly stops the write-back; the
+  //   inequality still renders as a review / sizing aid.
+  //   ALL-DISPLAYONLY, NO NEW GATES on this tail — verified per instance:
+  //     • A-262E: enforcement pre-exists (REQ-13 B_d_TKN<=B_A_TKN_zul, warn,
+  //       tied to Gl.13/14; commit 39f2291 gate layer) — do-not-rewrite-
+  //       enforcing. Q_M rows carry SUM(...) → not faithfully expressible in
+  //       evaluate.ts (no SUM) → NR, never-invent.
+  //     • A-222: A_NB_theo/A_NB are the REQUIRED-AREA minima themselves (the
+  //       output IS the minimum); A222-14 has no separate "chosen area" field
+  //       → a gate would compare a field to itself (circular). Modal is
+  //       "maßgebend/ergibt sich zu" (Gl.22) / "können … Bemessungsvorgaben"
+  //       (Gl.27, conditional basin type) — no hard muss on a fixed threshold.
+  //       → displayOnly only; a downstream chosen-vs-required gate is FLAGGED
+  //       for Alvaro, not invented.
+  //     • M-187: ok_boolean is a BOOLEAN CHECK output (b_R_a/(A_F/A_b_a) ≤
+  //       b_krit) → benign ES-1; displayOnly, NO gate (a gate = the invented
+  //       G9 Nachweis; boolean-check outputs never get a gate). DRAFT (P3).
+  //     • M-760: NS_eff (ns_fettabscheider ≥ NS) — the enforcing sizing gate
+  //       REQ-M760-13 (`ns_fettabscheider - NS >= 0`, block, subtraction form)
+  //       already exists (commit f9b93a4, WRITTEN-NOT-APPLIED) → displayOnly
+  //       only, do-not-duplicate.
+  //     • FLL-Naturteich (⚠ P5 VA-BLOCKED — markdown extraction only, NO PDF;
+  //       provenance ceiling = DS, NEVER VA): filter_50x_rule_met is a boolean
+  //       check → benign displayOnly; splash_water_tank_volume is a number →
+  //       harmful displayOnly. Pre-existing enforcing gate REQ-33 already
+  //       covers the 150 l/m² rule (block) → no new gate. F-area (wrong
+  //       reference area: pool_underwater_surface vs source's inundated water
+  //       surface) is a SEPARATE SEV-2/DS defect — NOT fixed here.
+  //   Every threshold/modal render- or DS-confirmed against the standard's own
+  //   source (A-262E/A-222/M-187/M-760 PDF+markdown; FLL markdown only).
+  //   All-displayOnly ⇒ NO migration for this tail (nothing to enforce/insert).
+  //   UUIDs verified against equations.id (prod read-only, 2026-07-18).
+  // ====================================================================
+
+  // --- DWA-A-262E (English, November 2017) --------------------------------
+
+  // A262-06 · Gl. (6) · Q_M — NOT ES-1 (assignment `Q_M = f_S,QM·Q_S,d,aM + Q_F`
+  // FUSED with a `≥ Σ Q_Dr,RUB` constraint tail). Left as the sole Q_M producer
+  // (Gl. 8 below is displayOnly → no collision). FLAGGED for re-encoding: split
+  // the assignment from the ≥-constraint (S7/malformed) — not masked with displayOnly.
+  // A262-06 · Gl. (8) · Q_M reine verkettete Ungleichung (SUM)
+  'c99aba1c-ea82-4294-b136-9f9ce2f1f033': {
+    expectedUnits: { Q_M: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§ hydraulische Belastung (PDF/MD Z. 646): `Q_M ≥ Σ Q_Dr,RU ≥ Σ Q_krit (l/s)` — reine verkettete Ungleichung, produziert nichts (DEEP F-constraint-as-eq: Gl.8 pure chained inequality). C9-Mitproduzent von Q_M mit Gl. (6). ES-1 displayOnly. KEIN Gate: verkettetes `≥…≥` + SUM(...) → in evaluate.ts nicht ausdrückbar → NR, never-invent.',
+  },
+
+  // A262-25 · Gl. (13) · A_F_TKN_red piecewise (≥-Zweig)
+  'cb011262-3770-41a8-bf27-293f19aafe90': {
+    expectedUnits: { A_F_TKN_red: 'm²', B_d_TKN: 'g/(m²·d)', A_F_CSB_red: 'm²', B_A_TKN_zul: 'g/(m²·d)' },
+    displayOnly: true,
+    notes:
+      '§4.5 (PDF/MD Z. 1098-1101): "the dimensioning requirements according to Section 4.5 apply: for B_d,TKN/A_F,CSB,red ≥ B_A,TKN,zul use: A_F,TKN,red = B_d,TKN/B_A,TKN,zul" — Produzent der reduzierten TKN-Filterfläche (kein Grenzwert). ES-1 displayOnly (C9-Mitproduzent mit Gl.14, identische RHS = Quell-Quirk, DEEP-bestätigt VA p35 450 dpi). KEIN neues Gate: die bindende Bedingung `B_d_TKN ≤ B_A_TKN_zul` ist bereits als REQ-13 (warn, A262-25) gegatet → do-not-rewrite-enforcing.',
+  },
+  // A262-25 · Gl. (14) · A_F_TKN_red piecewise (<-Zweig, identische RHS)
+  '7e28ed89-6c72-4058-b450-fe8d14f6e1c2': {
+    expectedUnits: { A_F_TKN_red: 'm²', B_d_TKN: 'g/(m²·d)', A_F_CSB_red: 'm²', B_A_TKN_zul: 'g/(m²·d)' },
+    displayOnly: true,
+    notes:
+      '§4.5 (PDF/MD Z. 1102): "for B_d,TKN/A_F,CSB,red < B_A,TKN,zul use: A_F,TKN,red = B_d,TKN/B_A,TKN,zul" — <-Zweig des piecewise mit IDENTISCHER RHS wie Gl.13 (DEEP: Quell-Quirk, keine Encoder-Fehler, VA p35). Produzent von A_F_TKN_red, C9-Mitproduzent mit Gl.13. ES-1 displayOnly. KEIN Gate (Enforcement = REQ-13, pre-existing).',
+  },
+
+  // --- DWA-A-222 (Mai 2011, korr. Okt. 2018 · WD korr5) --------------------
+
+  // A222-14 · Gl. (22) · A_NB_theo erforderliche NB-Fläche (Trichterbecken)
+  'f5215c5e-172a-4151-8288-b4342bb9b4ca': {
+    expectedUnits: { A_NB_theo: 'm²', Q_bem: 'm³/h', RV: null },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (MD Z. 818-821): "Für die Berechnung ist die theoretische Oberfläche maßgebend. Sie ergibt sich zu: A_NB,theo ≥ Q_bem·(1+RV)/2,2 (m²)" — die erforderliche Mindestfläche IST das Bemessungsergebnis (Constraint-as-Producer, DEEP C9). ES-1 displayOnly (stoppt Collision-Blank). KEIN Gate: A222-14 trägt kein separates "gewählte Fläche"-Feld (nur A_NB_theo + A_NB + nachklaerung_typ) → ein Gate vergliche das Feld mit sich selbst (zirkulär); Modal "maßgebend/ergibt sich zu" ist kein harter muss auf einen festen Schwellenwert. Ein downstream gewählt-vs-erforderlich-Gate ist FÜR ALVARO geflaggt, nicht erfunden.',
+  },
+  // A222-14 · Gl. (27) · A_NB erforderliche NB-Fläche (horizontal durchströmt)
+  '285e3568-0773-4177-821c-9bf2ea769553': {
+    expectedUnits: { A_NB: 'm²', Q_bem: 'm³/h', RV: null },
+    displayOnly: true,
+    notes:
+      '§4.4.3 (MD Z. 863-866): "… können auch horizontal durchströmte Nachklärbecken mit den nachstehenden Bemessungsvorgaben eingesetzt werden: A_NB ≥ Q_bem·(1+RV)/2,8 (m²)" — bedingte (Beckentyp-abhängige) erforderliche Mindestfläche; die Fläche IST das Bemessungsergebnis. ES-1 displayOnly. KEIN Gate: zirkulär (kein separates Wahl-Feld) + Modal "können … Bemessungsvorgaben" ist konditional/optional, kein muss → never-invent. Geflaggt für Alvaro (wie Gl.22).',
+  },
+
+  // --- DWA-M-187 GD (Entwurf September 2025 · P3 draft) --------------------
+
+  // M187-09 · Gl. (2) · ok_boolean AFS63-Flächenbelastungs-Nachweis
+  '6b3dc34c-a3da-4cfd-9e3a-803109b1bd12': {
+    expectedUnits: { b_R_a: 'kg/(m²·a)', A_F: 'm²', A_b_a: 'ha', b_krit: 'kg/(m²·a)' },
+    displayOnly: true,
+    notes:
+      '§5.5.4 (PDF p37, render-VA): "Nachweis der zulässigen … maximal zulässigen AFS63-Filterflächenbelastung b_krit = 7 kg/(m²·a) gemäß … DWA-A 178:2019" — `b_R_a/(A_F/A_b_a) ≤ b_krit` → output_symbol = ok_boolean (BOOLEAN Prüf-Flag, kein Produzent, DEEP S7). Benigne ES-1: displayOnly, KEIN Gate (ein Gate wäre die erfundene G9-Nachweis-Anforderung; Boolean-Check-Outputs bekommen nie ein Gate). P4-adoptiert aus DWA-A 178:2019. P3-Entwurf — bei Weißdruck re-verifizieren.',
+  },
+  // M187-22 · Gl. (2) · ok_boolean (S3 ×2 Duplikat)
+  '75d9844f-9f7f-45ba-a8fc-e2bf850be7a5': {
+    expectedUnits: { b_R_a: 'kg/(m²·a)', A_F: 'm²', A_b_a: 'ha', b_krit: 'kg/(m²·a)' },
+    displayOnly: true,
+    notes:
+      '§5.5.4 (PDF p37): `b_R_a/(A_F/A_b_a) ≤ b_krit` → ok_boolean (Boolean-Check). Benigne ES-1 displayOnly, KEIN Gate. S3-Duplikat von M187-09 Gl.2 (S3 ×2 dedup FÜR ALVARO geflaggt, nicht ausgeführt). P3-Entwurf.',
+  },
+
+  // --- DWA-M-760 WD (April 2025 · final) -----------------------------------
+
+  // M760-09 · EQ-M760-02 · NS_eff Fettabscheider-Nenngröße ns ≥ NS
+  '2ffe9ec8-e7d8-41bc-8546-6349881acb06': {
+    expectedUnits: { ns_fettabscheider: null, NS: null },
+    displayOnly: true,
+    notes:
+      '§7.2.6.3 + DIN EN 1825-2:2002 6.1 (VC, VA-blockiert): `ns_fettabscheider ≥ NS` → output NS_eff (Constraint-as-Producer, DEEP S7). ES-1 displayOnly (stoppt Collision-Blank). KEIN neues Gate: das durchsetzende Sizing-Gate REQ-M760-13 (`ns_fettabscheider - NS >= 0`, block, Subtraktionsform) existiert bereits (Commit f9b93a4, WRITTEN-NOT-APPLIED) → do-not-duplicate.',
+  },
+  // M760-15 · EQ-M760-02 · NS_eff (S3 ×2 Duplikat, Sizing-Worksheet)
+  '12244089-c454-4436-a855-6fba6946ea86': {
+    expectedUnits: { ns_fettabscheider: null, NS: null },
+    displayOnly: true,
+    notes:
+      '§7.2.6.3 + DIN EN 1825-2:2002 6.1: `ns_fettabscheider ≥ NS` → NS_eff. ES-1 displayOnly. S3-Duplikat von M760-09 EQ-M760-02 (S3 ×2 dedup FÜR ALVARO geflaggt). Enforcement = REQ-M760-13 auf M760-15 (pre-existing, Commit f9b93a4) → KEIN neues Gate.',
+  },
+
+  // --- FLL-Naturteich (2017 2. Aufl. · ⚠ P5 VA-BLOCKED, DS-Decke, KEIN PDF) --
+
+  // FLLNT-10 · EQ-01 · filter_50x_rule_met 50×-Regel (Boolean-Check)
+  '0a875bd8-1e8f-47f2-9a38-62396ea73c70': {
+    expectedUnits: { filter_colonized_surface_actual: 'm²', pool_underwater_surface: 'm²' },
+    displayOnly: true,
+    notes:
+      '⚠ DS (kein PDF, Provenienz-Decke DS, NIE VA). §10.3.1 / App.5 (MD Z. 1569/2770/4068): "at least 50-times all visible [underwater] surfaces" → `filter_colonized_surface_actual ≥ 50·pool_underwater_surface` → output filter_50x_rule_met (BOOLEAN Prüf-Flag, DEEP S7). Benigne ES-1: displayOnly, KEIN Gate (Boolean-Check bekommt nie ein Gate; never-invent).',
+  },
+  // FLLNT-11 · EQ-05 · splash_water_tank_volume 150 l/m² (Zahl, harmful)
+  '27f94c84-87bd-411e-a9e5-c7546c59f713': {
+    expectedUnits: { splash_water_tank_volume: 'l', pool_underwater_surface: 'm²' },
+    displayOnly: true,
+    notes:
+      '⚠ DS (kein PDF, DS-Decke, NIE VA). §10.3.1 (MD Z. 2936-2937): "The usable volume of the splash water tank must be dimensioned so that at least 150 l per square metre can be provided to the inundated water surface." → `splash_water_tank_volume ≥ 150·pool_underwater_surface` → produziert eine Zahl (harmful ES-1). displayOnly (stoppt Collision-Blank). KEIN neues Gate: das durchsetzende REQ-33 (`IF rigid_overflow_used THEN splash_water_tank_volume ≥ 150·pool_underwater_surface`, block, Guard-Grammatik evaluate.ts-unterstützt) existiert bereits → do-not-duplicate. HINWEIS F-area (SEV-2, DS): sowohl EQ-05 als auch REQ-33 nutzen pool_underwater_surface (Boden + Wandfläche) statt der Quell-Bezugsfläche inundated_water_surface (horizontale Wasserfläche) → überdimensioniert. NICHT hier gefixt (ES-1-Scope + DS-Decke + never-invent) → FÜR ALVARO geflaggt.',
+  },
 };
