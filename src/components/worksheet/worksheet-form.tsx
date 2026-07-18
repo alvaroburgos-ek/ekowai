@@ -26,6 +26,7 @@ import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
+import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -246,28 +247,23 @@ export function WorksheetForm({
   // as BASIN_GOVERNING_SYMBOLS: single-source from the materialize pass, not
   // hand-editable. The gating `fieldBySymbol.has(sym)` ensures these entries
   // are harmless on every other standard where the symbols don't exist.
-  const computedSymbols = useMemo(() => {
-    const set = new Set<string>();
-    for (const e of sortedEquations) {
-      const out = e.outputSymbol;
-      if (out && fieldBySymbol.has(out)) set.add(out);
-    }
-    // Basin-governing derived outputs: persisted by save (not live engine),
-    // but equally non-editable. Add them unconditionally — on non-A138-13
-    // worksheets these symbols simply won't appear in fieldBySymbol, so the
-    // entries in the set are harmless.
-    for (const sym of BASIN_GOVERNING_SYMBOLS) {
-      if (fieldBySymbol.has(sym)) set.add(sym);
-    }
-    // Tab.6 loading-check derived outputs (A138-12): T3-materialized on save.
-    // Read-only via the same isComputed=true path. Harmless on other standards
-    // because fieldBySymbol.has(sym) gates inclusion.
-    for (const sym of LOADING_CHECK_SYMBOLS) {
-      if (fieldBySymbol.has(sym)) set.add(sym);
-    }
-    return set;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortedEquations, fieldBySymbol]);
+  // Finding E (home-exclusion): a local equation output whose value is INHERITED
+  // from a different worksheet (its home) must NOT render as a local computed
+  // output — it renders the inherited value, not a blank client-engine card.
+  // computeComputedSymbols folds in the two materialized-derived extra symbol
+  // groups (BASIN_GOVERNING / LOADING_CHECK) byte-identically to the previous
+  // inline union, and applies the same fieldBySymbol.has() gate, EXCEPT it now
+  // drops any symbol whose home (inheritedFromBySymbol) is elsewhere. The engine
+  // write-back for those symbols is already suppressed via
+  // composeEngineSuppressedSymbols so the inherited store value survives.
+  const computedSymbols = useMemo(
+    () =>
+      computeComputedSymbols(sortedEquations, inheritedFromBySymbol, {
+        hasField: (sym) => fieldBySymbol.has(sym),
+        extraSymbols: [...BASIN_GOVERNING_SYMBOLS, ...LOADING_CHECK_SYMBOLS],
+      }),
+    [sortedEquations, fieldBySymbol, inheritedFromBySymbol],
+  );
 
   // Resolve the A_S,m determination-method BEFORE wiring the engine so the
   // suppress-write-back set is in scope at the useEquationEngine call site.
