@@ -8,6 +8,6 @@ export interface RationaleRequest {
 }
 
 export interface LLMProvider {
-  name: 'groq' | 'deepseek' | 'kimi';
+  name: 'mistral-large' | 'mistral-small';
   draftRationale(req: RationaleRequest, prompt: string): Promise<string>;
 }

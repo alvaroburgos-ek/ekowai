@@ -1,11 +1,10 @@
 import type { LLMProvider, RationaleRequest } from './types';
-import { deepseekProvider } from './deepseek';
-import { kimiProvider } from './kimi';
+import { mistralLargeProvider, mistralSmallProvider } from './mistral';
 import { promptDe } from './prompts/rationale-de';
 import { promptEn } from './prompts/rationale-en';
 
-const PRIMARY: LLMProvider = deepseekProvider;
-const FALLBACK: LLMProvider = kimiProvider;
+const PRIMARY: LLMProvider = mistralLargeProvider;
+const FALLBACK: LLMProvider = mistralSmallProvider;
 
 function buildPrompt(req: RationaleRequest): string {
   return req.locale === 'de' ? promptDe(req) : promptEn(req);
