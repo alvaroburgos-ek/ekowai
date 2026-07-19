@@ -8,6 +8,7 @@ import { SectionGroup } from './section-group';
 import { EquationsBlock } from './equations-block';
 import { ComplianceBlock } from './compliance-block';
 import { ApprovalBar } from './approval-bar';
+import { RationalePanel } from './rationale-panel';
 import { EquationEngineCard } from './equation-engine-card';
 import {
   ManualOverridePill,
@@ -764,6 +765,7 @@ export function WorksheetForm({
         locale={locale}
         projectId={projectId}
       />
+      <RationalePanel instanceId={instance.id} locale={locale} />
       <ApprovalBar
         instanceId={instance.id}
         status={instance.status}
