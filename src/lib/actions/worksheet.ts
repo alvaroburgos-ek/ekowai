@@ -23,7 +23,7 @@ import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
 import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize } from '@/lib/eval/materialize-asm';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
-import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE } from './materialize-registry';
+import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE, phase4SummaryChainFires, shouldOpenTransaction } from './materialize-registry';
 import {
   facilitySummaryInputs,
   assemblePhase4Summary,
@@ -533,12 +533,26 @@ export async function saveWorksheet(
   // the SAVED worksheet IS A138-23, splice the phase4_summary entry into the fire
   // list once (dedup-guarded) so an A138-23 save re-materializes its summary.
   const phase4SummaryEntry = MATERIALIZE_REGISTRY.find((e) => e.id === 'phase4_summary');
-  const producerEntries =
+  const producerEntriesWithOwner =
     isPhase4SummarySave &&
     phase4SummaryEntry &&
     !producerEntriesBase.some((e) => e.id === 'phase4_summary')
       ? [...producerEntriesBase, phase4SummaryEntry]
       : producerEntriesBase;
+
+  // Finding G1(a) — CHAIN-FIRE: when the asm/facility materialize fires (it writes
+  // A_S_m + Finding-F's V_M SERVER-side, values NEVER in the user batch), the summary
+  // must recompute in the SAME tx (mirror of the chained Tab.6 re-fire). Append the
+  // phase4_summary entry AFTER the asm entry so the branch reads the freshly-persisted
+  // A_S_m/V_M. Dedup-guarded via phase4SummaryChainFires. 138-SPECIFIC: keyed on 'asm'.
+  const firedEntryIds = new Set<string>([
+    ...ownerFiredIds,
+    ...producerEntriesWithOwner.map((e) => e.id),
+  ]);
+  const producerEntries =
+    phase4SummaryEntry && phase4SummaryChainFires(firedEntryIds)
+      ? [...producerEntriesWithOwner, phase4SummaryEntry]
+      : producerEntriesWithOwner;
 
   // Accumulated derived rows written by the materialize passes below.
   // Populated inside the transaction; returned to the client on ok=true.
@@ -551,11 +565,21 @@ export async function saveWorksheet(
   //   (b) this worksheet owns a topology-triggered materialize block that must
   //       recompute even on an empty save batch (upstream input changed on another
   //       worksheet → stale-verdict fix), OR
-  //   (c) a producer-side input symbol changed → a downstream materialize must fire.
+  //   (c) a producer-side input symbol changed → a downstream materialize must fire, OR
+  //   (d) isPhase4SummarySave — a deliberate no-dirty A138-23 re-save must re-run the
+  //       aggregator even with no dirty field (Finding G1 manual fallback).
   //   The SURFACE block is excluded from the guard because surface_inventory being
   //   in the save batch is what identifies a surface save — it only fires when
   //   savedCount > 0, so adding surfacePresence here would be redundant.
-  if (savedCount > 0 || isBasinSave || isLoadingSave || isAsmSave || producerEntries.length > 0) {
+  //   Predicate extracted to shouldOpenTransaction (materialize-registry) — unit-tested.
+  if (shouldOpenTransaction({
+    savedCount,
+    isBasinSave,
+    isLoadingSave,
+    isAsmSave,
+    isPhase4SummarySave,
+    producerEntriesLength: producerEntries.length,
+  })) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
       // share the same enteredAt so there is no skew from multiple new Date() calls.

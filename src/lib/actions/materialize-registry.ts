@@ -257,3 +257,59 @@ export function producerFiredEntries(
     return false;
   });
 }
+
+/**
+ * Finding G1(a) — CHAIN-FIRE the Phase-4 summary after an upstream materialize.
+ *
+ * The summary's inputs (A_S_m, V_M, facility values) are materialized SERVER-side by
+ * OTHER save branches (asm/facility geometry sweep + Finding-F V_M). Those values are
+ * NEVER in the user's save batch → `producerFiredEntries` never sees them change →
+ * the summary would freeze at its Step-1 snapshot. So when an upstream materialize
+ * that produces a summary input has fired in this tx, chain-fire the summary in the
+ * SAME tx — the same shape as the existing chained Tab.6 re-fire (which re-runs the
+ * loading check after A_S_m materializes).
+ *
+ * Fires iff the 'asm' materialize fired (it produces A_S_m + Finding-F's V_M — the
+ * governing footprint/volume the summary consumes) AND the summary is not already
+ * scheduled (dedup — no double-fire). 138-SPECIFIC: keyed on the 'asm' entry id.
+ *
+ * @param firedEntryIds ids of the materialize entries already fired in this tx
+ *   (owner + producer).
+ * @returns true when phase4_summary must be chain-fired.
+ */
+export function phase4SummaryChainFires(firedEntryIds: ReadonlySet<string>): boolean {
+  if (firedEntryIds.has('phase4_summary')) return false; // already firing → no double-fire
+  return firedEntryIds.has('asm');
+}
+
+/**
+ * Finding G1(b) — the tx-open predicate (extracted so it is unit-testable).
+ *
+ * The transaction opens when:
+ *   (a) there are actual parameter rows to write (savedCount > 0), OR
+ *   (b) a topology-triggered owner materialize must recompute on an empty batch
+ *       (isBasinSave / isLoadingSave / isAsmSave), OR
+ *   (c) a producer-side input changed → a downstream materialize must fire, OR
+ *   (d) isPhase4SummarySave — a deliberate no-dirty A138-23 re-save must re-run the
+ *       aggregator even with no dirty field (G1 manual fallback; the chain in (a)/(c)
+ *       is the primary mechanism).
+ *
+ * NOTE: mirror this list exactly at the worksheet.ts:558 call site.
+ */
+export function shouldOpenTransaction(args: {
+  savedCount: number;
+  isBasinSave: boolean;
+  isLoadingSave: boolean;
+  isAsmSave: boolean;
+  isPhase4SummarySave: boolean;
+  producerEntriesLength: number;
+}): boolean {
+  return (
+    args.savedCount > 0 ||
+    args.isBasinSave ||
+    args.isLoadingSave ||
+    args.isAsmSave ||
+    args.isPhase4SummarySave ||
+    args.producerEntriesLength > 0
+  );
+}
