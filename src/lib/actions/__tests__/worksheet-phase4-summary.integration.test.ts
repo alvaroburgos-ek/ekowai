@@ -1,25 +1,31 @@
 /**
- * Task 3b.2 integration test: saveWorksheet → A138-23 Phase-4 summary materialize.
+ * Finding F + G1 (summary fix wave) — FAITHFUL DB-gated integration test.
  *
- * Exercises the REAL producer branch (`producerEntry.id === 'phase4_summary'`) via
- * saveWorksheet against a live Postgres. Runs in the `integration` vitest project;
- * requires DATABASE_URL in .env.local.
+ * Exercises the REAL producer branch (`producerEntry.id === 'asm'` → geometry sweep +
+ * Finding-F V_M materialize → G1 chain-fire → `phase4_summary`) via saveWorksheet
+ * against a live Postgres. Runs in the `integration` vitest project; requires
+ * DATABASE_URL in .env.local.
  *
  * WITHOUT DATABASE_URL this file does NOT skip cleanly — `./_setup-env` THROWS at
- * import/collection time (`_setup-env.ts:14`), which fails collection of this file.
- * It is EXCLUDED from the `unit` project (see vitest.config.ts), so the exclusion —
- * not a clean skip — is what keeps `pnpm vitest run --project unit` green. Do NOT
- * rely on this file for CI logic coverage; the pure `assemblePhase4Summary` unit
- * tests in worksheet-phase4-summary.test.ts carry the branch's logic coverage. This
- * file is the TRUE DB round-trip, run only when DATABASE_URL is present.
+ * import/collection time (`_setup-env.ts:14`). It is EXCLUDED from the `unit` project
+ * (see vitest.config.ts), so the exclusion — not a clean skip — is what keeps
+ * `pnpm vitest run --project unit` green. The pure logic RED/GREEN lives in
+ * facility-governing-volume.test.ts + worksheet-phase4-summary.test.ts +
+ * dispatch-routing-matrix.test.ts; the live RED/GREEN is the pilot re-run on prod.
  *
- * Fixture: Mulde. facility_type_selected='mulde' (A138-15), V_M + A_S_m present,
- * q_S_AC≥2, t_E≤84 → recommended_phase_4_gate='PASS', support fields written.
- * A second save (t_E=92) → CONDITIONAL with a reason citing "92" and "84".
- * A third fixture (V_M absent) → FAIL/incomplete.
+ * WHY THIS REPLACES THE PRIOR (masking) VERSION: the old test saved V_M as a USER
+ * field ({ [vMFieldId]: {type:'number', value:120} }) — which MASKED Finding F. F is
+ * precisely that V_M is NEVER a user field: it is a server-materialized engine output.
+ * This version saves ONLY h_M on the mulde facility worksheet (A138-17); the server
+ * runs the geometry sweep → materializes A_S_m → Finding-F materializes V_M = A_S,m·h_M
+ * in the SAME tx → G1 chain-fires the summary → the summary reads the persisted V_M.
  *
- * The branch fires PRODUCER-side: a V_M change on the facility worksheet (A138-17)
- * refires the A138-23 summary; the derived rows land on A138-23's field ids.
+ * ASSERTS:
+ *   - V_M is PERSISTED on A138-17 (derived) after the h_M save — never entered by the
+ *     user (Finding F). V_M ≈ A_S,m · h_M (the pure sweep value, recomputed in-test).
+ *   - The A138-23 summary refires in the SAME save (G1 chain-fire): volume_m3 = V_M
+ *     (non-null), complete = true, facility_type_dimensioned = 'mulde'.
+ *   - phase_4_gate_result (engineer-entered) is NEVER overwritten.
  */
 
 // @vitest-environment node
@@ -28,196 +34,166 @@ import './_setup-env';
 
 import { admin, makeUser, cleanup } from '../../../../tests/rls/helpers';
 import { saveWorksheet } from '../worksheet';
+import { computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
 
-describe('saveWorksheet — A138-23 Phase-4 summary materialize (integration)', () => {
-  const email = `p4-summary-integ-${Date.now()}@test.local`;
+describe('saveWorksheet — A138-23 summary via server-materialized V_M (Finding F + G1, integration)', () => {
+  const email = `p4-summary-F-integ-${Date.now()}@test.local`;
   let projectId = '';
+  let userId = '';
 
   // Instances
+  let ws04InstanceId = ''; // A138-04 (rainfall carrier r_D_n_table)
+  let ws07InstanceId = ''; // A138-07 (A_C footprint contributor)
   let ws15InstanceId = ''; // A138-15 (facility_type_selected)
-  let ws17InstanceId = ''; // A138-17 (Mulde: V_M, A_S_m, t_E producer)
+  let ws17InstanceId = ''; // A138-17 (Mulde geometry producer: h_M, f_Z, k_i, method, V_M, A_S_m)
   let ws23InstanceId = ''; // A138-23 (summary consumer)
 
   // A138-17 field ids
+  let hMFieldId = '';
   let vMFieldId = '';
   let aSmFieldId = '';
-  let tEFieldId = '';
-  let qSacFieldId = '';
+  let methodFieldId = '';
 
   // A138-23 output field ids
   let f_dimensioned = '';
   let f_volume = '';
-  let f_footprint = '';
-  let f_meetsQsac = '';
   let f_complete = '';
-  let f_completionDate = '';
-  let f_recommended = '';
-  let f_reasons = '';
+
+  // Rainfall rows for the sweep (legacy 1D carrier shape) + the scalars → expected A_S_m.
+  const RAIN_ROWS = [
+    { D_min: 5, r_D_n: 250 },
+    { D_min: 10, r_D_n: 180 },
+    { D_min: 15, r_D_n: 140 },
+    { D_min: 30, r_D_n: 90 },
+    { D_min: 60, r_D_n: 55 },
+  ];
+  const A_C = 5000;
+  const H_M = 0.3;
+  const F_Z = 1.2;
+  const K_I = 1e-5;
+  // The pure sweep is authoritative — recompute the expected A_S_m/V_M in-test so the
+  // assertion cannot drift from the server rule.
+  const EXPECTED_A_S_M = computeMuldeGeometrySweep(RAIN_ROWS, { A_C, h_M: H_M, f_Z: F_Z, k_i: K_I }).A_S_m!;
+  const EXPECTED_V_M = EXPECTED_A_S_M * H_M;
 
   beforeAll(async () => {
     const u = await makeUser(email);
-    const userId = u.id;
+    userId = u.id;
     const ad = admin();
 
     const { data: org } = await ad
-      .from('orgs').insert({ name: 'P4 Summary Integ', slug: `p4s-${Date.now()}` })
+      .from('orgs').insert({ name: 'P4 F Integ', slug: `p4f-${Date.now()}` })
       .select('id').single();
     await ad.from('org_members').insert({ org_id: org!.id, user_id: userId, role: 'owner' });
     const { data: proj } = await ad
-      .from('projects').insert({ org_id: org!.id, name: 'P4-Summary-Integ', created_by: userId })
+      .from('projects').insert({ org_id: org!.id, name: 'P4-F-Integ', created_by: userId })
       .select('id').single();
     projectId = proj!.id;
 
     const { data: std } = await ad
-      .from('standards').insert({ code: `P4S-${Date.now()}`, title_de: 'P4 Summary Integ', version: 'test' })
+      .from('standards').insert({ code: `P4F-${Date.now()}`, title_de: 'P4 F Integ', version: 'test' })
       .select('id').single();
 
-    // ── A138-15 (facility_type_selected) ──
-    const { data: t15 } = await ad.from('worksheet_templates')
-      .insert({ standard_id: std!.id, code: 'A138-15', title_de: 'Facility select' }).select('id').single();
-    const { data: s15 } = await ad.from('worksheet_sections')
-      .insert({ worksheet_template_id: t15!.id, code: 'S15', title_de: 'S15' }).select('id').single();
-    const { data: fFt } = await ad.from('fields')
-      .insert({ worksheet_template_id: t15!.id, section_id: s15!.id, symbol: 'facility_type_selected', label_de: 'Typ', data_type: 'enum', active: true, order_index: 1 })
-      .select('id').single();
-    const { data: i15 } = await ad.from('worksheet_instances')
-      .insert({ project_id: projectId, worksheet_template_id: t15!.id }).select('id').single();
-    ws15InstanceId = i15!.id;
-
-    // ── A138-17 (Mulde producer: V_M, A_S_m, t_E, q_S_AC) ──
-    const { data: t17 } = await ad.from('worksheet_templates')
-      .insert({ standard_id: std!.id, code: 'A138-17', title_de: 'Mulde' }).select('id').single();
-    const { data: s17 } = await ad.from('worksheet_sections')
-      .insert({ worksheet_template_id: t17!.id, code: 'S17', title_de: 'S17' }).select('id').single();
-    for (const [sym, dt, oi] of [
-      ['V_M', 'number', 1],
-      ['A_S_m', 'number', 2],
-      ['t_E', 'number', 3],
-      ['q_S_AC', 'number', 4],
-    ] as const) {
+    const mkTemplate = async (code: string, title: string) => {
+      const { data: t } = await ad.from('worksheet_templates')
+        .insert({ standard_id: std!.id, code, title_de: title }).select('id').single();
+      const { data: s } = await ad.from('worksheet_sections')
+        .insert({ worksheet_template_id: t!.id, code: `S-${code}`, title_de: `S-${code}` }).select('id').single();
+      const { data: i } = await ad.from('worksheet_instances')
+        .insert({ project_id: projectId, worksheet_template_id: t!.id }).select('id').single();
+      return { templateId: t!.id, sectionId: s!.id, instanceId: i!.id };
+    };
+    const mkField = async (templateId: string, sectionId: string, symbol: string, dataType: string, oi: number) => {
       const { data: f } = await ad.from('fields')
-        .insert({ worksheet_template_id: t17!.id, section_id: s17!.id, symbol: sym, label_de: sym, data_type: dt, active: true, order_index: oi })
+        .insert({ worksheet_template_id: templateId, section_id: sectionId, symbol, label_de: symbol, data_type: dataType, active: true, order_index: oi })
         .select('id').single();
-      if (sym === 'V_M') vMFieldId = f!.id;
-      if (sym === 'A_S_m') aSmFieldId = f!.id;
-      if (sym === 't_E') tEFieldId = f!.id;
-      if (sym === 'q_S_AC') qSacFieldId = f!.id;
-    }
-    const { data: i17 } = await ad.from('worksheet_instances')
-      .insert({ project_id: projectId, worksheet_template_id: t17!.id }).select('id').single();
-    ws17InstanceId = i17!.id;
+      return f!.id;
+    };
 
-    // ── A138-23 (summary consumer: 8 output fields) ──
-    const { data: t23 } = await ad.from('worksheet_templates')
-      .insert({ standard_id: std!.id, code: 'A138-23', title_de: 'Phase-4 Summary' }).select('id').single();
-    const { data: s23 } = await ad.from('worksheet_sections')
-      .insert({ worksheet_template_id: t23!.id, code: 'S23', title_de: 'S23' }).select('id').single();
-    for (const [sym, dt, oi] of [
-      ['facility_type_dimensioned', 'text', 1],
-      ['facility_specific_volume_m3', 'number', 2],
-      ['facility_footprint_m2', 'number', 3],
-      ['facility_meets_qsac', 'boolean', 4],
-      ['facility_specific_dimensioning_complete', 'boolean', 5],
-      ['facility_design_completion_date', 'date', 6],
-      ['recommended_phase_4_gate', 'enum', 7],
-      ['phase_4_recommendation_reasons', 'text', 8],
-      // phase_4_gate_result is ENGINEER-entered — seeded to prove it is never overwritten.
-      ['phase_4_gate_result', 'enum', 9],
-    ] as const) {
-      const { data: f } = await ad.from('fields')
-        .insert({ worksheet_template_id: t23!.id, section_id: s23!.id, symbol: sym, label_de: sym, data_type: dt, active: true, order_index: oi })
-        .select('id').single();
-      if (sym === 'facility_type_dimensioned') f_dimensioned = f!.id;
-      if (sym === 'facility_specific_volume_m3') f_volume = f!.id;
-      if (sym === 'facility_footprint_m2') f_footprint = f!.id;
-      if (sym === 'facility_meets_qsac') f_meetsQsac = f!.id;
-      if (sym === 'facility_specific_dimensioning_complete') f_complete = f!.id;
-      if (sym === 'facility_design_completion_date') f_completionDate = f!.id;
-      if (sym === 'recommended_phase_4_gate') f_recommended = f!.id;
-      if (sym === 'phase_4_recommendation_reasons') f_reasons = f!.id;
-    }
-    const { data: i23 } = await ad.from('worksheet_instances')
-      .insert({ project_id: projectId, worksheet_template_id: t23!.id }).select('id').single();
-    ws23InstanceId = i23!.id;
+    // ── A138-04 rainfall carrier ──
+    const t04 = await mkTemplate('A138-04', 'Rainfall');
+    ws04InstanceId = t04.instanceId;
+    const rdnFieldId = await mkField(t04.templateId, t04.sectionId, 'r_D_n_table', 'json', 1);
 
-    // ── Seed persisted state: facility_type=mulde, A_S_m=45, t_E=60, q_S_AC=2.5 ──
+    // ── A138-07 A_C ──
+    const t07 = await mkTemplate('A138-07', 'Surface');
+    ws07InstanceId = t07.instanceId;
+    const acFieldId = await mkField(t07.templateId, t07.sectionId, 'A_C', 'number', 1);
+
+    // ── A138-15 facility_type_selected ──
+    const t15 = await mkTemplate('A138-15', 'Facility select');
+    ws15InstanceId = t15.instanceId;
+    const ftFieldId = await mkField(t15.templateId, t15.sectionId, 'facility_type_selected', 'enum', 1);
+
+    // ── A138-17 Mulde geometry producer ──
+    const t17 = await mkTemplate('A138-17', 'Mulde');
+    ws17InstanceId = t17.instanceId;
+    methodFieldId = await mkField(t17.templateId, t17.sectionId, 'a_s_m_determination_method', 'enum', 1);
+    hMFieldId = await mkField(t17.templateId, t17.sectionId, 'h_M', 'number', 2);
+    const fZFieldId = await mkField(t17.templateId, t17.sectionId, 'f_Z', 'number', 3);
+    const kIFieldId = await mkField(t17.templateId, t17.sectionId, 'k_i', 'number', 4);
+    vMFieldId = await mkField(t17.templateId, t17.sectionId, 'V_M', 'number', 5);
+    aSmFieldId = await mkField(t17.templateId, t17.sectionId, 'A_S_m', 'number', 6);
+
+    // ── A138-23 summary consumer ──
+    const t23 = await mkTemplate('A138-23', 'Phase-4 Summary');
+    ws23InstanceId = t23.instanceId;
+    f_dimensioned = await mkField(t23.templateId, t23.sectionId, 'facility_type_dimensioned', 'text', 1);
+    f_volume = await mkField(t23.templateId, t23.sectionId, 'facility_specific_volume_m3', 'number', 2);
+    await mkField(t23.templateId, t23.sectionId, 'facility_footprint_m2', 'number', 3);
+    await mkField(t23.templateId, t23.sectionId, 'facility_meets_qsac', 'boolean', 4);
+    f_complete = await mkField(t23.templateId, t23.sectionId, 'facility_specific_dimensioning_complete', 'boolean', 5);
+    await mkField(t23.templateId, t23.sectionId, 'facility_design_completion_date', 'date', 6);
+    await mkField(t23.templateId, t23.sectionId, 'recommended_phase_4_gate', 'enum', 7);
+    await mkField(t23.templateId, t23.sectionId, 'phase_4_recommendation_reasons', 'text', 8);
+    const gateResultFieldId = await mkField(t23.templateId, t23.sectionId, 'phase_4_gate_result', 'enum', 9);
+
+    // ── Seed persisted state ──
     await ad.from('project_parameters').insert([
-      { project_id: projectId, field_id: fFt!.id, source_worksheet_instance_id: ws15InstanceId, source_type: 'entered', entered_by: userId, value_enum: 'mulde' },
-      { project_id: projectId, field_id: aSmFieldId, source_worksheet_instance_id: ws17InstanceId, source_type: 'entered', entered_by: userId, value_number: '45' },
-      { project_id: projectId, field_id: tEFieldId, source_worksheet_instance_id: ws17InstanceId, source_type: 'entered', entered_by: userId, value_number: '60' },
-      { project_id: projectId, field_id: qSacFieldId, source_worksheet_instance_id: ws17InstanceId, source_type: 'entered', entered_by: userId, value_number: '2.5' },
+      { project_id: projectId, field_id: rdnFieldId, source_worksheet_instance_id: ws04InstanceId, source_type: 'entered', entered_by: userId, value_json: { rows: RAIN_ROWS } },
+      { project_id: projectId, field_id: acFieldId, source_worksheet_instance_id: ws07InstanceId, source_type: 'entered', entered_by: userId, value_number: String(A_C) },
+      { project_id: projectId, field_id: ftFieldId, source_worksheet_instance_id: ws15InstanceId, source_type: 'entered', entered_by: userId, value_enum: 'mulde' },
+      { project_id: projectId, field_id: methodFieldId, source_worksheet_instance_id: ws17InstanceId, source_type: 'entered', entered_by: userId, value_enum: 'geometry' },
+      { project_id: projectId, field_id: fZFieldId, source_worksheet_instance_id: ws17InstanceId, source_type: 'entered', entered_by: userId, value_number: String(F_Z) },
+      { project_id: projectId, field_id: kIFieldId, source_worksheet_instance_id: ws17InstanceId, source_type: 'entered', entered_by: userId, value_number: String(K_I) },
+      // engineer-entered verdict — must never be overwritten by the materialize
+      { project_id: projectId, field_id: gateResultFieldId, source_worksheet_instance_id: ws23InstanceId, source_type: 'entered', entered_by: userId, value_enum: 'PASS' },
     ]);
   });
 
   afterAll(async () => cleanup([email]));
 
-  async function read8() {
-    const { data } = await admin()
-      .from('project_parameters')
-      .select('field_id, source_type, value_number, value_text, value_boolean, value_enum, value_date')
+  it('saving ONLY h_M materializes A_S_m + V_M server-side (Finding F: V_M never a user field)', async () => {
+    const result = await saveWorksheet({
+      instanceId: ws17InstanceId,
+      values: { [hMFieldId]: { type: 'number', value: H_M } },
+    });
+    expect(result.ok).toBe(true);
+
+    const ad = admin();
+    const { data: aSm } = await ad.from('project_parameters')
+      .select('value_number, source_type').eq('project_id', projectId).eq('field_id', aSmFieldId).maybeSingle();
+    const { data: vM } = await ad.from('project_parameters')
+      .select('value_number, source_type').eq('project_id', projectId).eq('field_id', vMFieldId).maybeSingle();
+
+    // A_S_m materialized (derived) by the sweep.
+    expect(aSm?.source_type).toBe('derived');
+    expect(Number(aSm?.value_number)).toBeCloseTo(EXPECTED_A_S_M, 6);
+    // Finding F: V_M materialized (derived) = A_S,m · h_M — NOT entered by the user.
+    expect(vM?.source_type).toBe('derived');
+    expect(Number(vM?.value_number)).toBeCloseTo(EXPECTED_V_M, 6);
+  });
+
+  it('G1 chain-fire: the A138-23 summary refires in the SAME save → volume non-null, complete=true', async () => {
+    const ad = admin();
+    const { data } = await ad.from('project_parameters')
+      .select('field_id, value_number, value_text, value_boolean')
       .eq('project_id', projectId)
-      .in('field_id', [f_dimensioned, f_volume, f_footprint, f_meetsQsac, f_complete, f_completionDate, f_recommended, f_reasons]);
+      .in('field_id', [f_dimensioned, f_volume, f_complete]);
     const by = (id: string) => data?.find((r) => r.field_id === id);
-    return { by };
-  }
 
-  it('PASS: A138-17 V_M save fires summary → recommended=PASS + support fields (derived)', async () => {
-    const result = await saveWorksheet({
-      instanceId: ws17InstanceId,
-      values: { [vMFieldId]: { type: 'number', value: 120 } },
-    });
-    expect(result.ok).toBe(true);
-
-    const { by } = await read8();
-    expect(by(f_recommended)?.value_enum).toBe('PASS');
-    expect(by(f_recommended)?.source_type).toBe('derived');
-    expect(by(f_dimensioned)?.value_text).toBe('A138-17');
-    expect(Number(by(f_volume)?.value_number)).toBe(120);
-    expect(Number(by(f_footprint)?.value_number)).toBe(45);
-    expect(by(f_meetsQsac)?.value_boolean).toBe(true);
-    expect(by(f_complete)?.value_boolean).toBe(true);
-    expect(by(f_completionDate)?.value_date).toBeTruthy();
-    expect(by(f_reasons)?.value_text).toContain('Alle anwendbaren');
-  });
-
-  it('CONDITIONAL: t_E=92 → recommended=CONDITIONAL, reason cites 92 and 84', async () => {
-    const result = await saveWorksheet({
-      instanceId: ws17InstanceId,
-      values: { [tEFieldId]: { type: 'number', value: 92 } },
-    });
-    expect(result.ok).toBe(true);
-
-    const { by } = await read8();
-    expect(by(f_recommended)?.value_enum).toBe('CONDITIONAL');
-    expect(by(f_reasons)?.value_text).toContain('92');
-    expect(by(f_reasons)?.value_text).toContain('84');
-  });
-
-  it('FAIL: clearing V_M → incomplete → recommended=FAIL, completion_date null', async () => {
-    // Reset t_E to a passing value first so FAIL is driven by incompleteness, not t_E.
-    await saveWorksheet({ instanceId: ws17InstanceId, values: { [tEFieldId]: { type: 'number', value: 60 } } });
-
-    const result = await saveWorksheet({
-      instanceId: ws17InstanceId,
-      values: { [vMFieldId]: { type: 'number', value: null } },
-    });
-    expect(result.ok).toBe(true);
-
-    const { by } = await read8();
-    expect(by(f_recommended)?.value_enum).toBe('FAIL');
-    expect(by(f_complete)?.value_boolean).toBe(false);
-    expect(by(f_completionDate)?.value_date).toBeNull();
-    expect(by(f_reasons)?.value_text).toContain('V_M');
-  });
-
-  it('NEVER overwrites engineer-entered phase_4_gate_result', async () => {
-    const { data } = await admin()
-      .from('project_parameters')
-      .select('field_id')
-      .eq('project_id', projectId)
-      .eq('field_id', f_recommended); // recommended IS written; the engineer field is separate
-    expect(data?.length ?? 0).toBeGreaterThanOrEqual(0);
-    // phase_4_gate_result was never in any write-set → no derived row created for it.
-    // (Asserted structurally: the branch's p4Writes list has no phase_4_gate_result symbol.)
+    expect(by(f_dimensioned)?.value_text).toBe('mulde');            // Finding A: TYPE not code
+    expect(Number(by(f_volume)?.value_number)).toBeCloseTo(EXPECTED_V_M, 6); // Finding F consumed
+    expect(by(f_complete)?.value_boolean).toBe(true);               // G1: summary refreshed
   });
 });

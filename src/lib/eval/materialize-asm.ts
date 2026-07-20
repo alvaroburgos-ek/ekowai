@@ -10,6 +10,7 @@ import {
   type AsmMethod, type FacilityType, type Tab13Bodenart, type AsmState,
   resolveAsmProducer, computeDirect, computeSoilEstimate,
 } from './asm-source';
+import type { FacilityType as SummaryFacilityType } from './phase4-summary';
 import { iterateGoverningDuration } from './governing-duration';
 
 /**
@@ -26,6 +27,95 @@ export function computeMuldeGeometrySweep(
     (scalars.A_C * 1e-7 * r_D) / (scalars.h_M / (D * 60 * scalars.f_Z) + scalars.k_i),
   );
   return { A_S_m: gov.governingValue, governingD: gov.governingD, boundaryLimited: gov.boundaryLimited };
+}
+
+/**
+ * Finding F — the facility GOVERNING STORAGE VOLUME rule (pure).
+ *
+ * The geometry sweep (server-side) yields the footprint A_S_m; the governing
+ * storage volume is derived from it and MUST be persisted onto the facility
+ * worksheet's volume field so the A138-23 summary can read it (engine-output-
+ * materialization gap fix).
+ *
+ * mulde  → V_M = A_S,m · h_M   (Gl.15; §6.3.2-verified Speichervolumen — equals the
+ *          Gl.14 erforderliches Speichervolumen at the dimensioned governing D).
+ *
+ * OTHER FACILITIES — NAMED BOUNDARY (do NOT fabricate here): rigole/mre/mrs/schacht/
+ * becken/flaeche each define their own storage-volume symbol (V_R/V_MR/V_MUE/V_S/
+ * V_VA / none). Their formulas are wired at fan-out with a per-facility source-verify
+ * (FACILITY_GOVERNING_VOLUME_FANOUT). Until then this helper returns null for them
+ * (no volume persisted) rather than an invented value.
+ *
+ * @returns the governing volume, or null when an input is missing / non-finite / the
+ *   facility's rule is not yet source-verified.
+ */
+export type FacilityGoverningVolumeInputs = {
+  /** Governing footprint from the sweep (A_S,m). */
+  A_S_m: number | null;
+  /** Mulde depth h_M. */
+  h_M: number | null;
+};
+
+export function facilityGoverningVolume(
+  facilityType: SummaryFacilityType,
+  inputs: FacilityGoverningVolumeInputs,
+): number | null {
+  switch (facilityType) {
+    case 'mulde': {
+      const { A_S_m, h_M } = inputs;
+      if (A_S_m == null || h_M == null) return null;
+      if (!Number.isFinite(A_S_m) || !Number.isFinite(h_M)) return null;
+      // Gl.15: V_M = A_S,m · h_M.
+      return A_S_m * h_M;
+    }
+    // NAMED BOUNDARY — per-facility storage-volume formulas deferred to fan-out with
+    // a source-verify. No fabrication: return null (no governing volume persisted).
+    case 'flaeche':
+    case 'rigole':
+    case 'mre':
+    case 'mrs':
+    case 'schacht':
+    case 'becken':
+      return null;
+  }
+}
+
+/**
+ * Governing storage-volume symbol per facility (the facility worksheet's V field).
+ * NAMED BOUNDARY: only mulde is source-verified + auto-persisted for now (the fan-out
+ * wires the rest with per-facility source-verify). flaeche has no storage volume.
+ */
+export const FACILITY_GOVERNING_VOLUME_SYMBOL: Record<SummaryFacilityType, string | null> = {
+  flaeche: null,     // area device — no dedicated storage volume
+  mulde:   'V_M',    // source-verified (Gl.15) — auto-persisted this wave
+  rigole:  'V_R',    // fan-out (source-verify pending)
+  mre:     'V_MR',   // fan-out
+  mrs:     'V_MUE',  // fan-out
+  schacht: 'V_S',    // fan-out
+  becken:  'V_VA',   // fan-out
+};
+
+/** Descriptor of the governing-volume row to persist onto the facility worksheet. */
+export type FacilityVolumeWrite = { volumeSymbol: string; value: number };
+
+/**
+ * Finding F write-set assembly (pure): given the facility type and the sweep inputs,
+ * produce the governing-volume row to persist (symbol + value), or null when there is
+ * nothing to persist (no volume rule / inputs missing).
+ *
+ * The worksheet.ts asm producer branch calls this after computing the sweep footprint
+ * to persist V_M in the SAME transaction; the branch and the unit tests exercise the
+ * SAME rule (no mirror).
+ */
+export function facilityVolumeMaterialize(
+  facilityType: SummaryFacilityType,
+  inputs: FacilityGoverningVolumeInputs,
+): FacilityVolumeWrite | null {
+  const volumeSymbol = FACILITY_GOVERNING_VOLUME_SYMBOL[facilityType];
+  if (volumeSymbol == null) return null;
+  const value = facilityGoverningVolume(facilityType, inputs);
+  if (value == null || !Number.isFinite(value)) return null;
+  return { volumeSymbol, value };
 }
 
 export type AsmMaterializeInput = {

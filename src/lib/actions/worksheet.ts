@@ -20,7 +20,7 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { materializeAsm, computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
+import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize } from '@/lib/eval/materialize-asm';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
 import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE } from './materialize-registry';
@@ -1519,6 +1519,9 @@ export async function saveWorksheet(
 
           // 3. Compute geometryValue when method==='geometry'.
           let geometryValueP: number | null = null;
+          // Finding F: the mulde depth h_M captured from the geometry read so the
+          // governing volume V_M = A_S,m · h_M can be materialized in step 6 (same tx).
+          let muldeHmForVolume: number | null = null;
 
           if (asmMethodP === 'geometry') {
             if (facilityTypeP === 'mulde') {
@@ -1642,6 +1645,9 @@ export async function saveWorksheet(
                       A_C: mAC, h_M: mhM, f_Z: mfZ, k_i: mki,
                     });
                     geometryValueP = muldeSwept.A_S_m;
+                    // Finding F: retain h_M so the governing volume V_M = A_S,m · h_M
+                    // is materialized alongside A_S_m in step 6 (same transaction).
+                    muldeHmForVolume = mhM;
                   }
                 }
               }
@@ -1996,6 +2002,65 @@ export async function saveWorksheet(
               valueNumber: String(asmOutP.A_S_m),
               valueText: null,
             });
+
+            // 6b. Finding F — persist the facility GOVERNING VOLUME (a materialize).
+            //     The geometry sweep produced the footprint A_S,m; the governing storage
+            //     volume V_M = A_S,m · h_M (Gl.15, §6.3.2-verified) is a derived engine
+            //     output that was NEVER persisted → the A138-23 summary read null →
+            //     complete=false / recommendation stuck FAIL. Materialize it here (same
+            //     tx, source_type='derived') onto the facility worksheet's volume field,
+            //     resolved BY SYMBOL scoped to the saved standard (no bare by-symbol read).
+            //     NAMED BOUNDARY: only mulde is source-verified/auto-persisted now;
+            //     facilityVolumeMaterialize returns null for the others (fan-out).
+            if (facilityTypeP != null) {
+              const volumeWrite = facilityVolumeMaterialize(facilityTypeP, {
+                A_S_m: asmOutP.A_S_m,
+                h_M: muldeHmForVolume,
+              });
+              if (volumeWrite) {
+                // Resolve the volume field id on the producer (saved) worksheet, scoped.
+                const volFieldRows = await tx
+                  .select({ id: fields.id })
+                  .from(fields)
+                  .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+                  .where(and(
+                    eq(fields.symbol, volumeWrite.volumeSymbol),
+                    eq(fields.active, true),
+                    eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                    savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+                  ))
+                  .limit(1);
+                const volumeFieldId = volFieldRows[0]?.id;
+                if (volumeFieldId) {
+                  await tx
+                    .insert(projectParameters)
+                    .values([{
+                      projectId: instance.projectId,
+                      fieldId: volumeFieldId,
+                      valueNumber: String(volumeWrite.value),
+                      valueText: null,
+                      sourceType: 'derived',
+                      enteredBy: userId,
+                      enteredAt: now,
+                    }])
+                    .onConflictDoUpdate({
+                      target: [projectParameters.projectId, projectParameters.fieldId],
+                      set: {
+                        valueNumber: sql`excluded.value_number`,
+                        valueText: sql`excluded.value_text`,
+                        sourceType: sql`excluded.source_type`,
+                        enteredBy: sql`excluded.entered_by`,
+                        enteredAt: now,
+                      },
+                    });
+                  writtenDerived.push({
+                    fieldId: volumeFieldId,
+                    valueNumber: String(volumeWrite.value),
+                    valueText: null,
+                  });
+                }
+              }
+            }
 
             // 7. Chained Tab.6 re-fire: A_S_m just changed → re-run materializeLoadingCheck
             //    with the fresh A_S_m so the Tab.6 verdict updates in the same save.
