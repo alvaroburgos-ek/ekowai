@@ -8,6 +8,23 @@ Isolated test store (P1): /c/Users/Ekowai/.pnpm-store-138test — run vitest fro
 Identity: alvaro.burgos@ekowai.com (verify before every commit).
 
 STANDING RULES:
+- FINGERPRINT-BEFORE-SAVE on every build switch (user-endorsed 2026-07-20): before any browser action on a (re)deployed build, confirm the running build via a visible fingerprint (a build-specific marker — e.g. the G2b read-only recommendation marker, or a build-hash in-UI) BEFORE the first save, so you're not acting on a stale/wrong bundle. Corollary cross-wire log: the "89pt3vfmx" build id (2026-07-20) was an ADVISORY-SIDE FABRICATION (not a real deployment; my `vercel ls` record-pull showed only cbcqmcpcs+kzzi38djz; 89pt3vfmx→HTTP 404). Trust the deploy-record URL, never a hand-relayed id.
+
+## RED BASELINE — summary fix wave (pre-fix, prod PLT-HS-01, captured 2026-07-20 13:39)
+Documented "before" for the post-deploy GREEN comparison. Source: prod project_parameters, PLT-HS-01.
+- **A_S_m (input) = 943.4338711204341** (A138-12, derived, is_stale=false, entered_at 2026-07-20 13:37:28). Expected V_M = A_S_m·h_M = 943.4339·0.30 = **283.0302** (Gl.15, source-verified Speichervolumen).
+- **V_M row: ABSENT** — zero V_M rows in project_parameters for the project ← THE Finding-F defect (governing volume never materialized).
+- **A138-23 summary (all entered_at 2026-07-20 13:39:05.982, derived, not stale):**
+  - facility_type_dimensioned = **'mulde'** (value_text) → **Finding A CONFIRMED FIXED live** (aggregator re-fired with the type-not-code fix; was "A138-17" at Step 4).
+  - facility_footprint_m2 = **943.4338711204341** (fresh A_S_m).
+  - facility_meets_qsac = **false** (value_boolean).
+  - facility_specific_dimensioning_complete = **false** (value_boolean) ← RED (V_M missing).
+  - facility_specific_volume_m3 = **NULL** ← RED (Finding F).
+  - facility_design_completion_date = NULL.
+  - recommended_phase_4_gate = **FAIL** (value_enum).
+  - phase_4_recommendation_reasons = **"Bemessung unvollständig: fehlende Größen V_M; q_S,AC = 0.01 l/(s·ha) < 2 l/(s·ha) (Phase-3 REQ-15 nicht erfüllt)"** ← RED (V_M-missing clause).
+- GREEN TARGET (post-fix): V_M=283.0302 persisted derived fresh; volume_m3=283.0302; complete=true; reasons drop the V_M clause (q_S,AC-only → recommendation still FAIL because q_S,AC<2). #22 baseline (A_S_m=943.4338711204341) untouched.
+
 - Update this ledger at EVERY task transition (recovery lifeline), with DB-verified values.
 - TSC: audit BY FILE, not by count (user-endorsed 2026-07-15). A `tsc | wc -l` total hid a per-file regression (the #22 wiring test's 3 errors sat under an unchanged 28-adjacent count). Baseline 28 = worksheet-store-derived-apply.test.ts 14 + build-vsme-xlsx.test.ts 10 + pass3c-validate.test.ts 2 + export-route.integration 1 + build-workbook 1. Any implementer/reviewer reporting "0 new" must diff the by-file breakdown, not the count.
 - CODE-ALLOCATION (user-endorsed 2026-07-18, after the REQ-20/21/22 collision): any proposal that allocates a sequential identifier (compliance-requirement code REQ-NN, and analogous keyed IDs) MUST inventory the ENTIRE standard's existing codes first — `SELECT max + full list` across ALL worksheets — never just the phase's worksheet range. The Task-0 proposal picked REQ-20/21/22 as "next after REQ-19" having queried only A138-16..23; codes were actually taken through REQ-30 on A138-24..28. Next-free is computed against the whole standard.
