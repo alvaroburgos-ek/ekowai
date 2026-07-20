@@ -46,6 +46,16 @@ const LOADING_CHECK_SYMBOLS = new Set([
   'ac_as_ratio_check_reason',
 ]);
 
+// Finding G2a — A138-23 has NO equations → computeComputedSymbols returns ∅ →
+// recommended_phase_4_gate (a DERIVED engine-written enum) would render as a normal
+// EDITABLE SegmentedControl, visually identical to the editable phase_4_gate_result
+// verdict beside it (the #15b adjacency; selecting FAIL on it = no dirty → no save).
+// Mark it read-only here (same shape as BASIN_GOVERNING_SYMBOLS / LOADING_CHECK_SYMBOLS)
+// so DynamicField locks it + labels it as a recommendation. phase_4_gate_result stays
+// EDITABLE (it is the engineer-entered verdict, D3 rider). `fieldBySymbol.has(sym)`
+// keeps this harmless on every other worksheet/standard.
+const PHASE4_READONLY_SYMBOLS = new Set(['recommended_phase_4_gate']);
+
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
   if (status === 'saving') {
@@ -281,7 +291,7 @@ export function WorksheetForm({
     () =>
       computeComputedSymbols(sortedEquations, inheritedHomeBySymbol, {
         hasField: (sym) => fieldBySymbol.has(sym),
-        extraSymbols: [...BASIN_GOVERNING_SYMBOLS, ...LOADING_CHECK_SYMBOLS],
+        extraSymbols: [...BASIN_GOVERNING_SYMBOLS, ...LOADING_CHECK_SYMBOLS, ...PHASE4_READONLY_SYMBOLS],
       }),
     [sortedEquations, fieldBySymbol, inheritedHomeBySymbol],
   );

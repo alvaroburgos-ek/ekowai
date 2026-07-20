@@ -430,6 +430,13 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {field.dataType === 'enum' && (() => {
         const v = value?.type === 'enum' ? value.value : null;
         const options = field.enumValues ?? [];
+        // G2 (Finding G2a/b): a derived/computed enum (e.g. recommended_phase_4_gate)
+        // is a READ-ONLY recommendation, not an editable verdict. It must not be a
+        // click-target (the #15b adjacency: selecting FAIL on it = no dirty → no save,
+        // which the user mistook for "my FAIL didn't persist"). Lock it (no onChange,
+        // disabled) and mark it visually distinct from the editable verdict beside it.
+        const enumLocked = isComputed || readOnly;
+        const isReadOnlyRecommendation = isComputed && !readOnly;
         if (options.length === 0) {
           // The field is an enum but its allowed values are not configured
           // (enum_values NULL/empty in the DB). The correct values are unknown
@@ -450,18 +457,34 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         }
         if (options.length <= 4) {
           return (
-            <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
+            <div
+              role="radiogroup"
+              aria-labelledby={`${inputId}-label`}
+              aria-required={required}
+              // G2b marker: a stable, fingerprint-able signal that this enum is a
+              // locked read-only recommendation (distinct from the editable verdict).
+              data-readonly-recommendation={isReadOnlyRecommendation || undefined}
+            >
+              {isReadOnlyRecommendation && (
+                <span
+                  data-testid="readonly-recommendation-lock"
+                  className="mb-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-subtext"
+                >
+                  <span aria-hidden="true">🔒</span>
+                  {locale === 'de' ? 'Empfehlung (schreibgeschützt)' : 'Recommendation (read-only)'}
+                </span>
+              )}
               <SegmentedControl
                 value={v ?? options[0]?.value ?? ''}
                 onChange={(val) => {
-                  if (readOnly) return;
+                  if (enumLocked) return;
                   setField(field.id, { type: 'enum', value: val });
                 }}
                 options={options.map((o) => ({
                   value: o.value,
                   label: pickEnumLabel(o, locale),
                 }))}
-                disabled={readOnly}
+                disabled={enumLocked}
               />
             </div>
           );
@@ -471,9 +494,10 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
-            disabled={readOnly}
+            disabled={enumLocked}
+            data-readonly-recommendation={isReadOnlyRecommendation || undefined}
             onChange={(e) => {
-              if (readOnly) return;
+              if (enumLocked) return;
               setField(field.id, { type: 'enum', value: e.target.value || null });
             }}
           >
