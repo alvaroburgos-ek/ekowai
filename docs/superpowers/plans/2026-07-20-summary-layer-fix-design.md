@@ -41,6 +41,9 @@ The facility geometry sweep already runs **server-side** in the asm producer bra
 4. Full suite + #22 regression guard green + by-file tsc (baseline 28).
 5. Redeploy preview → resume pilot Step 4 (expect: aggregator re-fires → facility_type_dimensioned='mulde' [confirms Finding A], volume≈283.03, complete=true, meets_qsac=false → recommended FAIL; then the verdict-flips now demonstrate PASS/CONDITIONAL) → baseline restore → close.
 
+## SOURCE-VERIFICATION (§6.3.2) — done 2026-07-20, ruling CONFIRMED
+Source_quotes (prod equations): Gl.(14) `V_M=[...]·D·60·f_Z` = "erforderliches Speichervolumen der Mulde"; Gl.(15) `V_M=A_S,m·h_M` (geometric, h_M=max Einstauhöhe); Gl.(16) is derived by SETTING Gl.(15)=Gl.(14) and solving for A_S,m. → at the dimensioned point (sweep A_S,m) the geometric `A_S,m·h_M` EQUALS the erforderliches Speichervolumen; both are V_M, both = 283.03. So persisting `V_M = A_S,m·h_M` IS the standard's Mulde Speichervolumen (source does NOT say otherwise) → build approved. FAN-OUT RULE: same source-check per facility (persist the standard's own storage-volume definition).
+
 ## Open decisions for your ratification
 1. **F volume source:** persist `V_M = A_S_m·h_M` (geometric, = design value at governing D) on the facility save — OK? (vs. the fuller Gl.14 form, which the sweep could also emit.)
 2. **G2 scope:** G2a+G2b (read-only marker + lock styling) in THIS wave; deeper #15b card-redesign to the display batch — OK?
