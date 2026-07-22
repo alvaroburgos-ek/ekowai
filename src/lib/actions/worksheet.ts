@@ -2276,6 +2276,15 @@ export async function saveWorksheet(
             }
             return null;
           };
+          // Reads an ENGINEER-ENTERED boolean override for `symbol`, scoped to the
+          // saved standard. IMPORTANT (summary self-reference guard): the summary
+          // DERIVES facility_meets_qsac and writes it back with source_type='derived'.
+          // If this read honoured that derived self-write, the first materialized value
+          // would pin `meetsQsacFlag` forever and the q_S,AC-derived value (Gl.9) could
+          // never change it on a later save. So we read ONLY entered rows — a true
+          // engineer override — matching the documented "explicit flag if set, else
+          // derive from q_S,AC" semantics (assemblePhase4Summary). Derived self-writes
+          // are ignored → meetsQsac falls through to the q_S,AC derivation.
           const readScopedBool = async (symbol: string): Promise<boolean | null> => {
             const cand = await tx
               .select({ id: fields.id })
@@ -2289,14 +2298,15 @@ export async function saveWorksheet(
             const ids = cand.map((f) => f.id);
             if (ids.length === 0) return null;
             const rows = await tx
-              .select({ valueBoolean: projectParameters.valueBoolean })
+              .select({ valueBoolean: projectParameters.valueBoolean, sourceType: projectParameters.sourceType })
               .from(projectParameters)
               .where(and(
                 eq(projectParameters.projectId, instance.projectId),
                 inArray(projectParameters.fieldId, ids),
               ));
             for (const r of rows) {
-              if (r.valueBoolean != null) return r.valueBoolean;
+              // Only an engineer-entered override counts; skip the summary's own derived write.
+              if (r.sourceType === 'entered' && r.valueBoolean != null) return r.valueBoolean;
             }
             return null;
           };

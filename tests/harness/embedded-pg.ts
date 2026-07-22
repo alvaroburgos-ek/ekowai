@@ -37,7 +37,12 @@ export type Harness = {
   stop: () => Promise<void>;
 };
 
-let portCounter = 55432;
+// Each harness test file runs in its OWN vitest worker process, so a fixed
+// starting port collides when 2+ harness files run in the same run (EADDRINUSE on
+// 55432). Seed the counter per-process from the PID so distinct workers pick
+// distinct port ranges; `startHarness` additionally retries adjacent ports on a
+// bind failure (belt-and-suspenders against an unlucky PID overlap).
+let portCounter = 50000 + (process.pid % 12000);
 
 /** Generate the full CREATE DDL for the app schema from the Drizzle model. */
 async function schemaDdl(): Promise<string[]> {
@@ -53,16 +58,39 @@ async function schemaDdl(): Promise<string[]> {
  */
 export async function startHarness(): Promise<Harness> {
   const dataDir = mkdtempSync(join(tmpdir(), 'ekowai-harness-'));
-  const port = portCounter++;
-  const pg = new EmbeddedPostgres({
-    databaseDir: dataDir,
-    user: 'postgres',
-    password: 'postgres',
-    port,
-    persistent: false,
-  });
-  await pg.initialise();
-  await pg.start();
+
+  // Bring up the PG binary, retrying adjacent ports if the chosen one is taken.
+  let pg: EmbeddedPostgres | null = null;
+  let port = 0;
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    port = portCounter++;
+    const candidate = new EmbeddedPostgres({
+      databaseDir: dataDir,
+      user: 'postgres',
+      password: 'postgres',
+      port,
+      persistent: false,
+      // Force a UTF-8 cluster. On Windows the default initdb encoding is WIN1252
+      // (from the host locale), and template1 inherits it — so a CREATE DATABASE
+      // inherits WIN1252 too, and any non-ASCII write (e.g. the loading-check
+      // reason string 'A_S,m ≤ 0.') fails with 22P05 report_untranslatable_char.
+      // --locale=C keeps collation deterministic; --encoding=UTF8 is the fix.
+      initdbFlags: ['--encoding=UTF8', '--locale=C'],
+    });
+    try {
+      if (attempt === 0) await candidate.initialise();
+      await candidate.start();
+      pg = candidate;
+      break;
+    } catch (e) {
+      lastErr = e;
+      try { await candidate.stop(); } catch { /* ignore */ }
+      // initialise() only needs to run once (it writes the data dir); on a bind
+      // failure we retry start() on the next port with the same initialised dir.
+    }
+  }
+  if (!pg) throw lastErr ?? new Error('embedded-postgres failed to bind a port');
   await pg.createDatabase('harness');
 
   const databaseUrl = `postgres://postgres:postgres@localhost:${port}/harness`;
