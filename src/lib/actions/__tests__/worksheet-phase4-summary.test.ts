@@ -122,6 +122,17 @@ function gather(p: Persisted): Phase4SummaryGathered {
     qSac: p.q_S_AC ?? null,
     meetsQsacFlag: p.facility_meets_qsac ?? null,
     tEHours: p.t_E ?? null,
+    // Per-facility BLOCK-gate inputs (fan-out): forwarded from the persisted map.
+    k_i: asNum(p.k_i),
+    rDnUsed: asNum(p.r_D_n_used),
+    L_VS: asNum(p.L_VS),
+    q_VS: asNum(p.q_VS),
+    r_5_n: asNum(p.r_5_n),
+    A_C: asNum(p.A_C),
+    shaftType: (p.shaft_type as string | null | undefined) ?? null,
+    A_S_FS: asNum(p.A_S_FS),
+    k_f_FS: asNum(p.k_f_FS),
+    A_S_Schacht: asNum(p.A_S_Schacht),
   };
 }
 
@@ -219,12 +230,15 @@ describe('assemblePhase4Summary — Mulde pilot', () => {
   });
 });
 
-describe('assemblePhase4Summary — flaeche REQ-31 unconditional-gate fail-safe (IMPORTANT 2)', () => {
-  it('flaeche: volumeSymbol=null → complete requires only footprint A_S', () => {
+describe('assemblePhase4Summary — flaeche REQ-31 Gl.13 feasibility (fan-out)', () => {
+  it('flaeche: volumeSymbol=null → complete requires only footprint a138_A_s_dim', () => {
     const out = assemble({
       facility_type_selected: 'flaeche',
-      A_S: 200,
+      a138_A_s_dim: 200,
       q_S_AC: 3,
+      // feasible Gl.13: k_i=1e-5 > r_D(n)·1e-7 = 100·1e-7 = 1e-5? no — pick clearly feasible.
+      k_i: 1e-4,
+      r_D_n_used: 100,
     });
     // No V_S required for flaeche; footprint present → complete.
     expect(out.get('facility_specific_dimensioning_complete')).toBe(true);
@@ -234,34 +248,54 @@ describe('assemblePhase4Summary — flaeche REQ-31 unconditional-gate fail-safe 
     expect(out.get('facility_type_dimensioned')).toBe('flaeche');
   });
 
-  it('flaeche with otherwise-PASS inputs → NOT a silent PASS: downgraded to CONDITIONAL + REQ-31 note', () => {
-    // Complete, meetsQsac, no t_E flag → the ratified predicate alone would return PASS.
-    // The REQ-31 unconditional-gate deferral must force at most CONDITIONAL + a mandatory reason.
+  it('flaeche feasible (k_i > r_D(n)·10⁻⁷) + otherwise-PASS → PASS, no manual-check note', () => {
     const out = assemble({
       facility_type_selected: 'flaeche',
-      A_S: 200,
+      a138_A_s_dim: 200,
       q_S_AC: 3,
+      k_i: 1e-4,       // 1e-4 > 100·1e-7 = 1e-5 → feasible
+      r_D_n_used: 100,
     });
-    expect(out.recommendation).toBe('CONDITIONAL');
-    expect(out.recommendation).not.toBe('PASS');
-    expect(out.reasonsJoined).toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
-    expect(out.reasonsJoined).toContain('REQ-31');
-    expect(out.reasonsJoined).toContain('noch nicht');
-    expect(out.reasonsJoined).toContain('ausgewertet');
-  });
-
-  it('flaeche that FAILs (incomplete) stays FAIL — the guard never masks a FAIL', () => {
-    const out = assemble({
-      facility_type_selected: 'flaeche',
-      // A_S absent → incomplete → FAIL
-      q_S_AC: 3,
-    });
-    expect(out.recommendation).toBe('FAIL');
-    // FAIL is already the safe verdict; the REQ-31 note is not appended over a FAIL.
+    expect(out.recommendation).toBe('PASS');
     expect(out.reasonsJoined).not.toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
   });
 
-  it('mulde is UNAFFECTED by the flaeche guard (no REQ-31 note, PASS stays PASS)', () => {
+  it('flaeche INFEASIBLE (k_i ≤ r_D(n)·10⁻⁷) → FAIL via REQ-31 block, reason cites Gl.13', () => {
+    const out = assemble({
+      facility_type_selected: 'flaeche',
+      a138_A_s_dim: 200,
+      q_S_AC: 3,
+      k_i: 5e-7,        // 5e-7 ≤ 100·1e-7 = 1e-5 → infeasible
+      r_D_n_used: 100,
+    });
+    expect(out.recommendation).toBe('FAIL');
+    expect(out.reasonsJoined).toContain('REQ-31');
+    expect(out.reasonsJoined).toContain('Gl.13');
+    expect(out.reasonsJoined).toContain('nicht machbar');
+  });
+
+  it('flaeche with Gl.13 inputs MISSING → fail-safe downgrade to CONDITIONAL + manual note', () => {
+    const out = assemble({
+      facility_type_selected: 'flaeche',
+      a138_A_s_dim: 200,
+      q_S_AC: 3,
+      // k_i / r_D_n_used absent → REQ-31 cannot evaluate
+    });
+    expect(out.recommendation).toBe('CONDITIONAL');
+    expect(out.reasonsJoined).toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
+  });
+
+  it('flaeche that FAILs (incomplete) stays FAIL', () => {
+    const out = assemble({
+      facility_type_selected: 'flaeche',
+      // footprint absent → incomplete → FAIL
+      q_S_AC: 3,
+    });
+    expect(out.recommendation).toBe('FAIL');
+    expect(out.reasonsJoined).not.toContain(PHASE4_SUMMARY_REQ20_DEFERRED_REASON);
+  });
+
+  it('mulde is UNAFFECTED by the flaeche gate (no REQ-31 note, PASS stays PASS)', () => {
     const out = assemble({
       facility_type_selected: 'mulde',
       V_M: 120,

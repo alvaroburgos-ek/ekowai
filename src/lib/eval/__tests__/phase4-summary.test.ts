@@ -3,9 +3,67 @@ import {
   facilitySummaryInputs,
   recommendedPhase4Gate,
   recommendationReasons,
+  evalReq31Flaeche,
+  evalReq32Rigole,
+  evalReq33Schacht,
   type FacilityType,
   type Phase4GateInput,
 } from '../phase4-summary';
+
+// ---------------------------------------------------------------------------
+// Per-facility BLOCK-gate condition evaluators (fan-out — source-verified)
+// ---------------------------------------------------------------------------
+describe('evalReq31Flaeche — §6.2.2 Gl.13 (k_i > r_D(n)·10⁻⁷)', () => {
+  it('feasible → not flagged', () => {
+    expect(evalReq31Flaeche(1e-4, 100)).toEqual({ flagged: false, reason: null });
+  });
+  it('infeasible (k_i ≤ r_D(n)·10⁻⁷) → flagged with a Gl.13 reason', () => {
+    const r = evalReq31Flaeche(5e-7, 100);
+    expect(r?.flagged).toBe(true);
+    expect(r?.reason).toContain('Gl.13');
+  });
+  it('below the threshold r_D(n)·10⁻⁷ → infeasible (strict >)', () => {
+    // r_D(n)·10⁻⁷ for r_D=100 is ~1e-5; a k_i clearly under it must flag.
+    expect(evalReq31Flaeche(9e-6, 100)?.flagged).toBe(true);
+  });
+  it('missing input → null (cannot evaluate)', () => {
+    expect(evalReq31Flaeche(null, 100)).toBeNull();
+    expect(evalReq31Flaeche(1e-4, null)).toBeNull();
+  });
+});
+
+describe('evalReq32Rigole — §6.4.2 Gl.25 (L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴)', () => {
+  it('not applicable when L_VS absent/zero → null', () => {
+    expect(evalReq32Rigole({ L_VS: null, q_VS: 5, r_5_n: 200, A_C: 1000 })).toBeNull();
+    expect(evalReq32Rigole({ L_VS: 0, q_VS: 5, r_5_n: 200, A_C: 1000 })).toBeNull();
+  });
+  it('sufficient capacity → not flagged', () => {
+    // L_VS·q_VS = 20·5 = 100 ≥ 200·1000·1e-4 = 20 → ok.
+    expect(evalReq32Rigole({ L_VS: 20, q_VS: 5, r_5_n: 200, A_C: 1000 })).toEqual({ flagged: false, reason: null });
+  });
+  it('insufficient capacity → flagged with a Gl.25 reason', () => {
+    // L_VS·q_VS = 1·0.2 = 0.2 < 200·1000·1e-4 = 20 → block.
+    const r = evalReq32Rigole({ L_VS: 1, q_VS: 0.2, r_5_n: 200, A_C: 1000 });
+    expect(r?.flagged).toBe(true);
+    expect(r?.reason).toContain('Gl.25');
+  });
+});
+
+describe('evalReq33Schacht — §6.7.2 Gl.38 (A_S,FS·k_f,FS ≥ A_S,Schacht·k_i)', () => {
+  it('not applicable unless Schacht Typ B → null', () => {
+    expect(evalReq33Schacht({ shaftType: 'typ_a', A_S_FS: 1, k_f_FS: 1e-4, A_S_Schacht: 1, k_i: 1e-5 })).toBeNull();
+    expect(evalReq33Schacht({ shaftType: null, A_S_FS: 1, k_f_FS: 1e-4, A_S_Schacht: 1, k_i: 1e-5 })).toBeNull();
+  });
+  it('Typ B sufficient filter → not flagged', () => {
+    // 1·1e-4 = 1e-4 ≥ 1·1e-5 = 1e-5 → ok.
+    expect(evalReq33Schacht({ shaftType: 'typ_b', A_S_FS: 1, k_f_FS: 1e-4, A_S_Schacht: 1, k_i: 1e-5 })).toEqual({ flagged: false, reason: null });
+  });
+  it('Typ B insufficient filter → flagged with a Gl.38 reason', () => {
+    const r = evalReq33Schacht({ shaftType: 'typ_b', A_S_FS: 1, k_f_FS: 1e-7, A_S_Schacht: 5, k_i: 1e-5 });
+    expect(r?.flagged).toBe(true);
+    expect(r?.reason).toContain('Gl.38');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -27,8 +85,10 @@ function passingInput(overrides?: Partial<Phase4GateInput>): Phase4GateInput {
 // ---------------------------------------------------------------------------
 
 describe('facilitySummaryInputs — verbatim symbol mapping', () => {
-  it('flaeche: no volume symbol, footprint A_S', () => {
-    expect(facilitySummaryInputs('flaeche')).toEqual({ volumeSymbol: null, footprintSymbol: 'A_S' });
+  it('flaeche: no volume symbol, footprint a138_A_s_dim (dimensioned/built area)', () => {
+    // §6.2.2 — area device; footprint is the DIMENSIONED area (a138_A_s_dim),
+    // not the dead generic A_S (inactive on A138-16).
+    expect(facilitySummaryInputs('flaeche')).toEqual({ volumeSymbol: null, footprintSymbol: 'a138_A_s_dim' });
   });
 
   it('mulde: V_M, A_S_m', () => {
@@ -47,12 +107,14 @@ describe('facilitySummaryInputs — verbatim symbol mapping', () => {
     expect(facilitySummaryInputs('mrs')).toEqual({ volumeSymbol: 'V_MUE', footprintSymbol: 'A_S_m' });
   });
 
-  it('schacht: V_S, A_S', () => {
-    expect(facilitySummaryInputs('schacht')).toEqual({ volumeSymbol: 'V_S', footprintSymbol: 'A_S' });
+  it('schacht: V_S, A_S_Schacht (active footprint, Gl.34)', () => {
+    // §6.7.2 — footprint is the active A_S_Schacht, not the dead generic A_S.
+    expect(facilitySummaryInputs('schacht')).toEqual({ volumeSymbol: 'V_S', footprintSymbol: 'A_S_Schacht' });
   });
 
-  it('becken: V_VA, A_S_m', () => {
-    expect(facilitySummaryInputs('becken')).toEqual({ volumeSymbol: 'V_VA', footprintSymbol: 'A_S_m' });
+  it('becken: V_B, A_S_m', () => {
+    // §6.8.2 Gl.41 — the active volume field on A138-22 is V_B (no V_VA field).
+    expect(facilitySummaryInputs('becken')).toEqual({ volumeSymbol: 'V_B', footprintSymbol: 'A_S_m' });
   });
 
   it('covers all 7 FacilityType values exhaustively', () => {

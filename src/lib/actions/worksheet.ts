@@ -20,7 +20,7 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize } from '@/lib/eval/materialize-asm';
+import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient } from '@/lib/eval/materialize-asm';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
 import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE, phase4SummaryChainFires, shouldOpenTransaction } from './materialize-registry';
@@ -1546,6 +1546,12 @@ export async function saveWorksheet(
           // Finding F: the mulde depth h_M captured from the geometry read so the
           // governing volume V_M = A_S,m · h_M can be materialized in step 6 (same tx).
           let muldeHmForVolume: number | null = null;
+          // Fan-out (Rigole): capture the geometric-volume inputs (Gl.20 + Gl.21 s_R)
+          // so V_R = b_R·h_R·L_R·s_R can be materialized in step 6b (same tx).
+          let rigoleVolInputs: {
+            b_R: number | null; h_R: number | null; L_R: number | null;
+            s_F: number | null; az: number | null; d_i: number | null; d_a: number | null;
+          } | null = null;
 
           if (asmMethodP === 'geometry') {
             if (facilityTypeP === 'mulde') {
@@ -1680,7 +1686,7 @@ export async function saveWorksheet(
               // ── Rigole one-shot Gl.17 = (b_R + h_R) · L_R + b_R · h_R ──
               // Read b_R, h_R, L_R from the producer worksheet (A138-18).
               // Cross-worksheet by symbol — prefer current save batch, else persisted.
-              const RIGOLE_SYMS = ['b_R', 'h_R', 'L_R'] as const;
+              const RIGOLE_SYMS = ['b_R', 'h_R', 'L_R', 's_F', 'az', 'd_i', 'd_a'] as const;
               const rigoleCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
@@ -1733,6 +1739,15 @@ export async function saveWorksheet(
                 // Gl.17: A_S,m = (b_R + h_R) · L_R + b_R · h_R
                 geometryValueP = (bR + hR) * lR + bR * hR;
               }
+              // Fan-out (Rigole): retain the Gl.20/Gl.21 inputs so V_R is materialized
+              // in step 6b (V_R = b_R·h_R·L_R·s_R; s_R via Gl.21/22 server compute).
+              rigoleVolInputs = {
+                b_R: bR, h_R: hR, L_R: lR,
+                s_F: rigoleNumBySymbol.get('s_F') ?? null,
+                az: rigoleNumBySymbol.get('az') ?? null,
+                d_i: rigoleNumBySymbol.get('d_i') ?? null,
+                d_a: rigoleNumBySymbol.get('d_a') ?? null,
+              };
             }
             // For other facility types with method='geometry', geometryValueP remains null →
             // materializeAsm returns indeterminate (geometry only valid for mulde/rigole).
@@ -2037,9 +2052,25 @@ export async function saveWorksheet(
             //     NAMED BOUNDARY: only mulde is source-verified/auto-persisted now;
             //     facilityVolumeMaterialize returns null for the others (fan-out).
             if (facilityTypeP != null) {
+              // Fan-out (Rigole): compute s_R server-side (Gl.21 exact) then V_R via Gl.20.
+              const rigoleSR =
+                facilityTypeP === 'rigole' && rigoleVolInputs
+                  ? computeRigoleStorageCoefficient({
+                      s_F: rigoleVolInputs.s_F,
+                      b_R: rigoleVolInputs.b_R,
+                      h_R: rigoleVolInputs.h_R,
+                      az: rigoleVolInputs.az,
+                      d_i: rigoleVolInputs.d_i,
+                      d_a: rigoleVolInputs.d_a,
+                    })
+                  : null;
               const volumeWrite = facilityVolumeMaterialize(facilityTypeP, {
                 A_S_m: asmOutP.A_S_m,
                 h_M: muldeHmForVolume,
+                b_R: rigoleVolInputs?.b_R ?? null,
+                h_R: rigoleVolInputs?.h_R ?? null,
+                L_R: rigoleVolInputs?.L_R ?? null,
+                s_R: rigoleSR,
               });
               if (volumeWrite) {
                 // Resolve the volume field id on the producer (saved) worksheet, scoped.
@@ -2344,6 +2375,25 @@ export async function saveWorksheet(
           const meetsQsacFlagP4 = await readScopedBool('facility_meets_qsac');
           const tEHoursP4 = await readScopedNum('t_E'); // above-ground emptying time; null = N/A
 
+          // 4b. Per-facility BLOCK-gate condition inputs (fan-out — scoped by-symbol).
+          //     Only read those relevant to the selected facility (cheap conditional reads).
+          //     REQ-31 flaeche (Gl.13): k_i, r_D(n) used on A138-16.
+          //     REQ-32 rigole (Gl.25): L_VS, q_VS, r_5(n), A_C.
+          //     REQ-33 schacht (Gl.38): shaft_type, A_S,FS, k_f,FS, A_S,Schacht, k_i.
+          const kiP4 =
+            facilityTypeP4 === 'flaeche' || facilityTypeP4 === 'schacht'
+              ? await readScopedNum('k_i')
+              : null;
+          const rDnUsedP4 = facilityTypeP4 === 'flaeche' ? await readScopedNum('r_D_n_used') : null;
+          const lVsP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('L_VS') : null;
+          const qVsP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('q_VS') : null;
+          const r5nP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('r_5_n') : null;
+          const acReqP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('A_C') : null;
+          const shaftTypeP4 = facilityTypeP4 === 'schacht' ? await readScopedEnumText('shaft_type') : null;
+          const aSFsP4 = facilityTypeP4 === 'schacht' ? await readScopedNum('A_S_FS') : null;
+          const kfFsP4 = facilityTypeP4 === 'schacht' ? await readScopedNum('k_f_FS') : null;
+          const aSSchachtP4 = facilityTypeP4 === 'schacht' ? await readScopedNum('A_S_Schacht') : null;
+
           // 5.–9. PURE ASSEMBLY. Everything after the scoped DB reads (complete,
           //    meetsQsac, blockGate applicability, Tab.14, recommendation, reasons and
           //    the 8-field write-set) is computed by the exported pure function
@@ -2364,6 +2414,16 @@ export async function saveWorksheet(
             qSac: qSacP4,
             meetsQsacFlag: meetsQsacFlagP4,
             tEHours: tEHoursP4,
+            k_i: kiP4,
+            rDnUsed: rDnUsedP4,
+            L_VS: lVsP4,
+            q_VS: qVsP4,
+            r_5_n: r5nP4,
+            A_C: acReqP4,
+            shaftType: shaftTypeP4,
+            A_S_FS: aSFsP4,
+            k_f_FS: kfFsP4,
+            A_S_Schacht: aSSchachtP4,
           };
           const nowIsoDate = now.toISOString().slice(0, 10);
           const assembled = assemblePhase4Summary(gathered, nowIsoDate);

@@ -62,13 +62,23 @@ export function facilitySummaryInputs(facilityType: FacilityType): {
   footprintSymbol: string;
 } {
   switch (facilityType) {
-    case 'flaeche': return { volumeSymbol: null,    footprintSymbol: 'A_S' };
+    // flaeche: area device (§6.2.2 Gl.12 A_S IS an area) → no storage volume.
+    // Footprint = the DIMENSIONED/built area `a138_A_s_dim` ("Bemessungs-
+    // Versickerungsfläche"), NOT the dead `A_S` (inactive on A138-16) nor the
+    // required `a138_A_s_erf`. Source-verified via field descriptions (DB).
+    case 'flaeche': return { volumeSymbol: null,    footprintSymbol: 'a138_A_s_dim' };
     case 'mulde':   return { volumeSymbol: 'V_M',   footprintSymbol: 'A_S_m' };
+    // rigole: V_R = b_R·h_R·L_R·s_R (§6.4.2 Gl.20); footprint A_S_m inherited.
     case 'rigole':  return { volumeSymbol: 'V_R',   footprintSymbol: 'A_S_m' };
+    // mre: V_MR = V_M + V_R (§6.5.2 Gl.26); footprint A_S_m inherited.
     case 'mre':     return { volumeSymbol: 'V_MR',  footprintSymbol: 'A_S_m' };
     case 'mrs':     return { volumeSymbol: 'V_MUE', footprintSymbol: 'A_S_m' };
-    case 'schacht': return { volumeSymbol: 'V_S',   footprintSymbol: 'A_S' };
-    case 'becken':  return { volumeSymbol: 'V_VA',  footprintSymbol: 'A_S_m' };
+    // schacht: V_S (§6.7.2 Gl.36); footprint = the active `A_S_Schacht`
+    // ("Versickerungsfläche Schacht", Gl.34), NOT the dead generic `A_S`.
+    case 'schacht': return { volumeSymbol: 'V_S',   footprintSymbol: 'A_S_Schacht' };
+    // becken: volume field is the ACTIVE `V_B` (§6.8.2 Gl.41 output), NOT `V_VA`
+    // (no `V_VA` field on A138-22); footprint A_S_m inherited.
+    case 'becken':  return { volumeSymbol: 'V_B',   footprintSymbol: 'A_S_m' };
   }
 }
 
@@ -283,32 +293,98 @@ export function recommendationReasons(input: Phase4GateInput): string[] {
  * gate condition — see the fail-safe guard below for UNCONDITIONAL gates.
  */
 export const PHASE4_SUMMARY_BLOCKGATE_FANOUT: Record<FacilityType, string | null> = {
-  flaeche: 'REQ-31', // UNCONDITIONAL — condition eval deferred to fan-out Task 13
+  flaeche: 'REQ-31', // UNCONDITIONAL — Gl.13 feasibility, now auto-evaluated (fan-out)
   mulde:   null,     // pilot — no applicable block gate → correct now
-  rigole:  'REQ-32', // CONDITIONAL (L_VS present) — eval deferred to fan-out Task 8
+  rigole:  'REQ-32', // CONDITIONAL (L_VS present) — Gl.25 eval (fan-out)
   mre:     null,     // no applicable block gate
   mrs:     null,     // no applicable block gate
-  schacht: 'REQ-33', // CONDITIONAL (Schacht-Typ = B) — eval deferred to fan-out Task 11
+  schacht: 'REQ-33', // CONDITIONAL (Schacht-Typ = B) — Gl.38 eval (fan-out)
   becken:  null,     // no applicable block gate
 };
 
+// ---------------------------------------------------------------------------
+// Per-facility BLOCK-gate condition evaluators (fan-out — source-verified)
+// ---------------------------------------------------------------------------
+
+/** REQ-31 / §6.2.2 Gl.13 — Flächenversickerung feasibility: k_i > r_D(n)·10⁻⁷.
+ *  feasible ⇒ pass; else the Gl.12 A_S goes negative → BLOCK. Returns null when an
+ *  input is missing (cannot evaluate → treated as not-flagging here; completeness
+ *  gating handles the missing-input case separately). */
+export function evalReq31Flaeche(
+  k_i: number | null,
+  r_D_n_used: number | null,
+): { flagged: boolean; reason: string | null } | null {
+  if (k_i == null || r_D_n_used == null || !isFinite(k_i) || !isFinite(r_D_n_used)) return null;
+  const feasible = k_i > r_D_n_used * 1e-7;
+  if (feasible) return { flagged: false, reason: null };
+  return {
+    flagged: true,
+    reason:
+      `REQ-31 (§6.2.2 Gl.13): k_i = ${k_i.toExponential(2)} m/s ≤ r_D(n)·10⁻⁷ = ` +
+      `${(r_D_n_used * 1e-7).toExponential(2)} m/s — Flächenversickerung nicht machbar ` +
+      `(A_S nach Gl.12 negativ).`,
+  };
+}
+
+/** REQ-32 / §6.4.2 Gl.25 — Vollsickerrohr hydraulic capacity: L_VS·q_VS ≥ r_5(n)·A_C·10⁻⁴.
+ *  Applicable ONLY when L_VS is present/nonzero. Returns null when not applicable or an
+ *  input is missing. */
+export function evalReq32Rigole(inputs: {
+  L_VS: number | null; q_VS: number | null; r_5_n: number | null; A_C: number | null;
+}): { flagged: boolean; reason: string | null } | null {
+  const { L_VS, q_VS, r_5_n, A_C } = inputs;
+  // CONDITIONAL applicability: only when a Vollsickerrohr length is designed.
+  if (L_VS == null || !isFinite(L_VS) || L_VS === 0) return null;
+  if (q_VS == null || r_5_n == null || A_C == null) return null;
+  if (![q_VS, r_5_n, A_C].every(isFinite)) return null;
+  const lhs = L_VS * q_VS;
+  const rhs = r_5_n * A_C * 1e-4;
+  if (lhs >= rhs) return { flagged: false, reason: null };
+  return {
+    flagged: true,
+    reason:
+      `REQ-32 (§6.4.2 Gl.25): L_VS·q_VS = ${lhs.toFixed(3)} < r_5(n)·A_C·10⁻⁴ = ` +
+      `${rhs.toFixed(3)} l/s — Versickerrohr hydraulisch unzureichend.`,
+  };
+}
+
+/** REQ-33 / §6.7.2 Gl.38 — filter-layer permeability (Schacht Typ B):
+ *  A_S,FS·k_f,FS ≥ A_S,Schacht·k_i. Applicable ONLY when shaft_type = 'typ_B'.
+ *  Returns null when not applicable or an input is missing. */
+export function evalReq33Schacht(inputs: {
+  shaftType: string | null;
+  A_S_FS: number | null; k_f_FS: number | null; A_S_Schacht: number | null; k_i: number | null;
+}): { flagged: boolean; reason: string | null } | null {
+  const { shaftType, A_S_FS, k_f_FS, A_S_Schacht, k_i } = inputs;
+  // CONDITIONAL applicability: only for Schacht Typ B (filter layer present).
+  const isTypB = shaftType != null && /(^|_)b$|typ_b|typ-b|^b$/i.test(shaftType);
+  if (!isTypB) return null;
+  if (A_S_FS == null || k_f_FS == null || A_S_Schacht == null || k_i == null) return null;
+  if (![A_S_FS, k_f_FS, A_S_Schacht, k_i].every(isFinite)) return null;
+  const lhs = A_S_FS * k_f_FS;
+  const rhs = A_S_Schacht * k_i;
+  if (lhs >= rhs) return { flagged: false, reason: null };
+  return {
+    flagged: true,
+    reason:
+      `REQ-33 (§6.7.2 Gl.38): A_S,FS·k_f,FS = ${lhs.toExponential(2)} < A_S,Schacht·k_i = ` +
+      `${rhs.toExponential(2)} — Filterschicht begrenzt die Versickerungsleistung.`,
+  };
+}
+
 /**
- * Facilities whose applicable BLOCK gate is UNCONDITIONAL and NOT YET auto-evaluated
- * (fan-out deferral). For these the recommendation must NEVER be a silent non-FAIL:
- * a computed PASS is downgraded to at most CONDITIONAL and a mandatory manual-check
- * reason is injected (fail-safe within the ratified model — IMPORTANT 2).
- *
- * Currently only flaeche/REQ-31. rigole/schacht gates are CONDITIONAL-applicability
- * (REQ-32 only when L_VS present / Typ-B); their silent blockGateFailed=false is the
- * existing documented fan-out deferral and is wrong ONLY once that condition holds —
- * NOT downgraded here (see the code comment at the guard call site).
- *
- * Task 5 removes this set as it wires the real REQ-31 eval.
+ * Facilities whose applicable BLOCK gate is UNCONDITIONAL. REQ-31 (flaeche §6.2.2
+ * Gl.13) is now AUTO-EVALUATED in `assemblePhase4Summary`; the fail-safe downgrade is
+ * applied only in the residual case where the gate's inputs (k_i / r_D(n)) are absent
+ * and it therefore could not be evaluated (see the guard at the call site). This set
+ * documents the facility→unconditional-gate topology; it is retained for callers that
+ * enumerate unconditional gates.
  */
 export const PHASE4_SUMMARY_UNCONDITIONAL_GATE_DEFERRED: ReadonlySet<FacilityType> =
   new Set<FacilityType>(['flaeche']);
 
-/** Mandatory manual-check reason injected for an unconditional-gate-deferred facility. */
+/** Mandatory manual-check reason — injected only when REQ-31 could not be evaluated
+ *  (k_i / r_D(n) absent), so the verdict is not a silent non-FAIL. */
 export const PHASE4_SUMMARY_REQ20_DEFERRED_REASON =
   'REQ-31 (Fläche-Machbarkeit §6.2.2 Gl.13) noch nicht automatisch ausgewertet — Planer muss manuell prüfen.';
 
@@ -335,6 +411,22 @@ export type Phase4SummaryGathered = {
   meetsQsacFlag: boolean | null;
   /** Above-ground emptying time t_E in hours, or null (= N/A). */
   tEHours: number | null;
+
+  // ── Per-facility BLOCK-gate condition inputs (fan-out) ──
+  /** REQ-31 (flaeche, Gl.13): bemessungsrelevante Infiltrationsrate k_i (m/s). */
+  k_i?: number | null;
+  /** REQ-31 (flaeche, Gl.13): r_D(n) used on A138-16 (l/(s·ha)). */
+  rDnUsed?: number | null;
+  /** REQ-32 (rigole, Gl.25): L_VS / q_VS / r_5(n) / A_C. */
+  L_VS?: number | null;
+  q_VS?: number | null;
+  r_5_n?: number | null;
+  A_C?: number | null;
+  /** REQ-33 (schacht, Gl.38): shaft_type + A_S,FS / k_f,FS / A_S,Schacht (+ k_i above). */
+  shaftType?: string | null;
+  A_S_FS?: number | null;
+  k_f_FS?: number | null;
+  A_S_Schacht?: number | null;
 };
 
 /** One derived write: the target symbol, the typed value, and its value-kind. */
@@ -380,17 +472,36 @@ export function assemblePhase4Summary(
   const meetsQsac =
     g.meetsQsacFlag != null ? g.meetsQsacFlag : (g.qSac != null && g.qSac >= 2);
 
-  // blockGateFailed: per-facility condition eval is deferred to the fan-out
-  // (PHASE4_SUMMARY_BLOCKGATE_FANOUT). Until then no gate CONDITION flags a fail here.
-  //
-  // NOTE (rigole/schacht wrong-verdict risk): REQ-32/REQ-33 are CONDITIONAL-
-  // applicability gates. Their silent blockGateFailed=false is only WRONG once the
-  // applicability condition holds (L_VS present / Schacht-Typ = B). They are NOT in
-  // the unconditional-deferred set below, so a Typ-B schacht / L_VS-rigole could get a
-  // wrong non-FAIL until the fan-out (Tasks 8/11) wires their eval. Leave as the
-  // existing documented deferral.
-  const blockGateFailed = false;
+  // blockGateFailed: per-facility BLOCK-gate condition eval (fan-out — now wired).
+  //   flaeche → REQ-31 (§6.2.2 Gl.13, UNCONDITIONAL)
+  //   rigole  → REQ-32 (§6.4.2 Gl.25, CONDITIONAL: L_VS present)
+  //   schacht → REQ-33 (§6.7.2 Gl.38, CONDITIONAL: Schacht Typ B)
+  // Each evaluator returns null when its inputs are missing / not applicable → no flag.
   const blockGateReasons: string[] = [];
+  let blockGateFailed = false;
+  // REQ-31 is UNCONDITIONAL: if it could NOT be evaluated (k_i / r_D(n) missing) the
+  // verdict must not silently pass — a manual-check downgrade is injected below.
+  let req31Unevaluated = false;
+  if (g.facilityType === 'flaeche') {
+    const r = evalReq31Flaeche(g.k_i ?? null, g.rDnUsed ?? null);
+    if (r == null) {
+      req31Unevaluated = true;
+    } else if (r.flagged) {
+      blockGateFailed = true;
+      if (r.reason) blockGateReasons.push(r.reason);
+    }
+  } else if (g.facilityType === 'rigole') {
+    const r = evalReq32Rigole({
+      L_VS: g.L_VS ?? null, q_VS: g.q_VS ?? null, r_5_n: g.r_5_n ?? null, A_C: g.A_C ?? null,
+    });
+    if (r?.flagged) { blockGateFailed = true; if (r.reason) blockGateReasons.push(r.reason); }
+  } else if (g.facilityType === 'schacht') {
+    const r = evalReq33Schacht({
+      shaftType: g.shaftType ?? null, A_S_FS: g.A_S_FS ?? null, k_f_FS: g.k_f_FS ?? null,
+      A_S_Schacht: g.A_S_Schacht ?? null, k_i: g.k_i ?? null,
+    });
+    if (r?.flagged) { blockGateFailed = true; if (r.reason) blockGateReasons.push(r.reason); }
+  }
 
   const gateInput: Phase4GateInput = {
     complete,
@@ -410,12 +521,13 @@ export function assemblePhase4Summary(
   const reasons = recommendationReasons(gateInput);
 
   // ── FAIL-SAFE guard (IMPORTANT 2) ──────────────────────────────────────────
-  // For a facility whose applicable BLOCK gate is UNCONDITIONAL and NOT YET auto-
-  // evaluated (currently only flaeche/REQ-31), a silent PASS/CONDITIONAL would be
-  // unsafe (the gate could fail). Downgrade a computed PASS to CONDITIONAL and inject
-  // the mandatory manual-check reason. FAIL is left as-is (already the safe verdict).
-  // Task 5 removes this once the real REQ-31 eval is wired.
-  if (g.facilityType != null && PHASE4_SUMMARY_UNCONDITIONAL_GATE_DEFERRED.has(g.facilityType)) {
+  // REQ-31 (flaeche §6.2.2 Gl.13) is now auto-evaluated above. The fail-safe now
+  // fires ONLY in the residual case where the gate could NOT be evaluated because
+  // its inputs (k_i / r_D(n)) were absent: a silent PASS/CONDITIONAL would be unsafe
+  // (the gate might fail), so downgrade a computed PASS to CONDITIONAL and inject the
+  // mandatory manual-check reason. When the gate WAS evaluated (pass or block) no
+  // downgrade is applied — the real verdict stands. FAIL is always left as-is.
+  if (req31Unevaluated) {
     if (recommendation === 'PASS') {
       recommendation = 'CONDITIONAL';
     }
