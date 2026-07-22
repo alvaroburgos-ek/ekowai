@@ -148,3 +148,13 @@ Task 1–2 (#22): COMPLETE 2026-07-15, review-clean (commits a238dcb..e56c86e: a
 - Loop summary: Task 1 (Finding H fix, real-save-path harness) ✓verified + Task 2 (pilot-script 4/4 + Finding H2 fix) ✓verified. Real saveWorksheet over embedded Postgres proves F(V_M=283.03 persists)+G1(chain-fire)+G2(read-only marker)+verdict/REQ-19+PASS/CONDITIONAL flip+baseline restore. #22 guard intact; by-file tsc 28; unit 1195+1xfail; harness integration green.
 - PROD PLT-HS-01 still at RED (V_M null) BY DESIGN — the user's browser nudge on the alias (fixed build → prod Supabase) materializes V_M=283.0302 = the final human GREEN. Fingerprint = the G2b read-only "Recommended Phase-4 gate" marker.
 - HONEST RESIDUE: (a) prod GREEN awaits the user's browser nudge (autonomous loop is green in the harness against a real DB; prod untouched by design). (b) V_VA basin restore + the 5 non-mulde facility volumes = documented NAMED fan-out boundaries (each needs per-facility §-source-verify). (c) 23 other integration test files need an external DATABASE_URL (pre-existing env requirement, unrelated to this change).
+
+## MILESTONE 1 (fan-out) — subagent STOPPED; orchestrator RE-VERIFIED 2026-07-22
+Subagent source-verified rulings (CONFIRMED): 16 Fläche=area/no-volume (Gl.12); 18 Rigole=Gl.20 geom V_R; 19 MRE=Gl.26 V_MR sum; 21 Schacht=Gl.36 geom V_S; 22 Becken=Gl.41 V_VA. But it OVER-CONCLUDED "importer re-encode" for Fläche/Becken. ORCHESTRATOR DB-VERIFY of actual field symbols overturns that:
+- 16 Fläche footprint: fields = a138_A_s_dim (dimensioned) / A_S_flaeche / a138_A_s_erf (req). facilitySummaryInputs maps 'A_S' (no home) → MAPPING FIX to a138_A_s_dim. IN-LAYER, not re-encode.
+- 22 Becken volume: field = V_B (not V_VA). Mapping 'V_VA'→'V_B'. IN-LAYER. footprint=A_S_m (inherited, ok).
+- 21 Schacht: V_S field ✓; footprint field A_S_Schacht (mapping 'A_S'→'A_S_Schacht'). V_S materialize needs h_S(Gl.37 swept)+d_S_innen. IN-LAYER.
+- 19 MRE: V_MR field ✓ (+ V_M_MRE/V_R_MRE). Sum materialize. IN-LAYER.
+- 18 Rigole: V_R (Gl.20 geom, needs s_R Gl.21/22 + L_R). IN-LAYER (new s_R compute).
+- 20 MRS — GENUINE BLOCK (ratification): §6.6.2 "analog zur Bemessung von MRE (6.5.2)" → storage = V_MR (V_M+V_R); Gl.30 V_MÜ = "Überlaufvolumen" (overflow, NOT storage). Ratified 2026-07-15 mapping mrs→V_MUE is WRONG per source. AND A138-20 has NO V_MR field (only V_MUE) → even if remapped, no home field → needs (a) ratify the reversal + (b) a re-encode (add V_MR field) = prod apply. BATCHED for user ratification.
+CONCLUSION: 5/6 buildable in-layer (mapping fixes + materialize computes are fix-details within the approved F design, my delegated authority); MRS = 1 ratification item. Re-dispatching the 5.
