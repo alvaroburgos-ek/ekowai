@@ -1,0 +1,96 @@
+/**
+ * REAL-save-path integration harness — a self-provided, disposable Postgres.
+ *
+ * Stands up a genuine PostgreSQL 18 server via `embedded-postgres` (a real PG
+ * binary — NO Docker, NO prod, NO prod credentials), applies the app's Drizzle
+ * schema (generated from `src/lib/db/schema.ts`, so no Supabase RLS/role SQL),
+ * and hands back a connection string. The application's `postgres.js` client
+ * (`src/lib/db`) connects over TCP exactly as in production — this exercises the
+ * REAL `saveWorksheet`, not a proxy.
+ *
+ * WHY embedded-postgres (chosen mechanism, per HARNESS DB DECISION 2026-07-22):
+ *   - postgres.js needs a real TCP Postgres. embedded-postgres ships the PG
+ *     binary and starts it locally on this Windows box (verified: PG 18.4,
+ *     initdb/postgres/pg_ctl present under @embedded-postgres/windows-x64).
+ *   - pg-mem was the fallback but is unnecessary — the real binary works, so we
+ *     get true SQL/transaction fidelity (the F/G1 tx behaviors are the point).
+ *
+ * The schema is applied from the Drizzle model (generateMigration on an empty
+ * snapshot) rather than the committed migrations, because those migrations carry
+ * Supabase-only SQL (RLS policies, GRANTs to the `anon`/`authenticated` roles,
+ * `auth.users`) that a bare Postgres does not have. The app tables + enums are
+ * identical; only the Supabase security layer (which `db` bypasses as the
+ * postgres role anyway) is omitted.
+ */
+import EmbeddedPostgres from 'embedded-postgres';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { generateDrizzleJson, generateMigration } from 'drizzle-kit/api';
+import postgres from 'postgres';
+import * as schema from '@/lib/db/schema';
+
+export type Harness = {
+  databaseUrl: string;
+  /** A raw postgres.js client on the harness DB (for seeding + verification reads). */
+  sql: postgres.Sql;
+  stop: () => Promise<void>;
+};
+
+let portCounter = 55432;
+
+/** Generate the full CREATE DDL for the app schema from the Drizzle model. */
+async function schemaDdl(): Promise<string[]> {
+  const cur = generateDrizzleJson(schema as Record<string, unknown>);
+  const empty = generateDrizzleJson({});
+  return generateMigration(empty, cur);
+}
+
+/**
+ * Start a disposable embedded Postgres, apply the app schema, return handles.
+ * The caller MUST call `stop()` in afterAll to shut the server down and delete
+ * its data dir.
+ */
+export async function startHarness(): Promise<Harness> {
+  const dataDir = mkdtempSync(join(tmpdir(), 'ekowai-harness-'));
+  const port = portCounter++;
+  const pg = new EmbeddedPostgres({
+    databaseDir: dataDir,
+    user: 'postgres',
+    password: 'postgres',
+    port,
+    persistent: false,
+  });
+  await pg.initialise();
+  await pg.start();
+  await pg.createDatabase('harness');
+
+  const databaseUrl = `postgres://postgres:postgres@localhost:${port}/harness`;
+  const sql = postgres(databaseUrl, { prepare: false });
+
+  // Apply schema DDL statement-by-statement.
+  const stmts = await schemaDdl();
+  for (const stmt of stmts) {
+    await sql.unsafe(stmt);
+  }
+
+  const stop = async () => {
+    try {
+      await sql.end({ timeout: 5 });
+    } catch {
+      /* ignore */
+    }
+    try {
+      await pg.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      rmSync(dataDir, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return { databaseUrl, sql, stop };
+}

@@ -17,10 +17,13 @@
  *
  *   WITH suppression (fixed path):
  *     Gl.16 write-back suppressed → inherited A_S_m=68.82 stays in store
- *     → Gl.14 computes V_M ≈ 22.05 m³.
+ *     → Gl.14 computes V_M ≈ 22.05 m³ (engine state) but — post Finding H —
+ *     Gl.14 is displayOnly so it does NOT write V_M to the store; the server
+ *     materialize (= A_S,m·h_M) is the authoritative V_M persist.
  *
  * Regression guard: pure-consumer shape (no local Gl.16) resolves inherited
- * A_S_m cleanly and computes V_M regardless of the suppression set.
+ * A_S_m cleanly and Gl.14 computes V_M (engine state) regardless of the
+ * suppression set.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
@@ -202,13 +205,16 @@ describe('defect #22 — A138-17 A_S_m dual-role (integration, reproduction grad
       expect(gl14.value).toBeCloseTo(22.051, 2); // ~22 m³ (§6.3.2 reference)
     }
 
-    // V_M is written back to the store by Gl.14 (not displayOnly).
-    const vm = getStoredNumber(FIELD_IDS.V_M);
-    expect(vm).not.toBeNull();
-    expect(vm!).toBeCloseTo(22.051, 2);
+    // Finding H: Gl.14 is now displayOnly — it computes (state above) but does
+    // NOT write V_M back to the store. On real prod Gl.14 can't resolve the
+    // server-only governing D → its client write-back was V_M=null, which
+    // clobbered the server-materialized governing volume. With Gl.14 displayOnly
+    // the client never enqueues V_M → the SERVER materialize (= A_S,m·h_M, Gl.15)
+    // is authoritative. So no V_M store write-back here (both V_M producers are
+    // displayOnly).
+    expect(getStoredNumber(FIELD_IDS.V_M)).toBeNull();
 
     // Gl.15 (displayOnly): evaluates using the inherited A_S_m but h_M is absent → manual_required.
-    // (displayOnly never writes back; V_M store value is from Gl.14 only.)
     expect(capturedStates[GL15_ID]?.kind).toBe('manual_required');
   });
 

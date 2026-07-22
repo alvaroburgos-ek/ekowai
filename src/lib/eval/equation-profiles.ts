@@ -341,8 +341,18 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // Finding H (§6.3.2): Gl.14 needs D — the GOVERNING Dauerstufe from the
+    // server-only Mulde geometry sweep (worksheet.ts computeMuldeGeometrySweep).
+    // The CLIENT engine cannot resolve D → client-side Gl.14 can't compute → its
+    // write-back enqueues V_M=null, which the autosave then persists, CLOBBERING
+    // the server-materialized governing volume (step-6b). Marking Gl.14
+    // displayOnly stops the client write-back loop (use-equation-engine.ts:527
+    // skips displayOnly equations) so the client never enqueues V_M — the SERVER
+    // materialize (V_M = A_S,m · h_M, Gl.15, §6.3.2-verified Speichervolumen) is
+    // authoritative. Gl.14 still renders in the equation card + evaluates purely.
+    displayOnly: true,
     notes:
-      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. Schreibt V_M (primärer Design-Wert).',
+      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. displayOnly — der maßgebende D stammt aus dem serverseitigen Dauerstufen-Sweep; die Persistierung von V_M erfolgt server-materialisiert (= A_S,m·h_M, Gl.15), damit der Client-Write-back kein null clobbert (Finding H).',
   },
 
   // A138-17 · Gl. (15) · §6.3.2 — V_M geometric
