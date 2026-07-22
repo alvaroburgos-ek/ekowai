@@ -233,6 +233,78 @@ export async function seedRigole(base: Base): Promise<FacilityFixture & { expect
   };
 }
 
+// ── RIGOLE REQ-32 (Gl.25) block case: L_VS·q_VS < r_5(n)·A_C·10⁻⁴ ───────────
+export async function seedRigoleReq32Fail(base: Base): Promise<FacilityFixture> {
+  const ctx = await freshCtx(base);
+  const projectId = await mkProject(ctx, 'HS-RIGOLE-REQ32');
+  const summary = await mkSummary(ctx, projectId);
+  await mkSupport(ctx, projectId, 'rigole', 1000);
+
+  const t18 = await mkTemplate(ctx, 'A138-18');
+  const i18 = await mkInstance(ctx, projectId, t18.templateId);
+  // Provide a materialized V_R + footprint so the summary is complete, then a
+  // FAILING Vollsickerrohr: L_VS·q_VS = 1·0.2 = 0.2 < r_5(n)·A_C·1e-4 = 200·1000·1e-4 = 20.
+  const vR = await mkField(ctx, t18.templateId, t18.sectionId, 'V_R', 'number', 1);
+  const lVs = await mkField(ctx, t18.templateId, t18.sectionId, 'L_VS', 'number', 2);
+  const qVs = await mkField(ctx, t18.templateId, t18.sectionId, 'q_VS', 'number', 3);
+  const r5n = await mkField(ctx, t18.templateId, t18.sectionId, 'r_5_n', 'number', 4);
+  const qsac = await mkField(ctx, t18.templateId, t18.sectionId, 'q_S_AC', 'number', 5);
+  await insParam(ctx, projectId, vR, i18, { value_number: '3.5' });
+  await insParam(ctx, projectId, lVs, i18, { value_number: '1' });
+  await insParam(ctx, projectId, qVs, i18, { value_number: '0.2' });
+  await insParam(ctx, projectId, r5n, i18, { value_number: '200' });
+  await insParam(ctx, projectId, qsac, i18, { value_number: '3' });
+  // footprint A_S_m inherited via A138-12.
+  const t12 = await mkTemplate(ctx, 'A138-12');
+  const i12 = await mkInstance(ctx, projectId, t12.templateId);
+  const aSm = await mkField(ctx, t12.templateId, t12.sectionId, 'A_S_m', 'number', 1);
+  await insParam(ctx, projectId, aSm, i12, { value_number: '45' });
+
+  return {
+    projectId, facilityInstanceId: i18, ws23InstanceId: summary.instanceId, volumeFieldId: vR,
+    f_dimensioned: summary.f_dimensioned, f_volume: summary.f_volume, f_footprint: summary.f_footprint,
+    f_complete: summary.f_complete, f_recommended: summary.f_recommended, f_reasons: summary.f_reasons,
+    nudgeFieldId: lVs, nudgeValue: 1,
+  };
+}
+
+// ── SCHACHT REQ-33 (Gl.38) block case: Typ B, A_S,FS·k_f,FS < A_S,Schacht·k_i ─
+export async function seedSchachtReq33Fail(base: Base): Promise<FacilityFixture> {
+  const ctx = await freshCtx(base);
+  const projectId = await mkProject(ctx, 'HS-SCHACHT-REQ33');
+  const summary = await mkSummary(ctx, projectId);
+  await mkSupport(ctx, projectId, 'schacht', 500);
+
+  const t12 = await mkTemplate(ctx, 'A138-12');
+  const i12 = await mkInstance(ctx, projectId, t12.templateId);
+  const kiF = await mkField(ctx, t12.templateId, t12.sectionId, 'k_i', 'number', 1);
+  await insParam(ctx, projectId, kiF, i12, { value_number: '1e-5' });
+
+  const t21 = await mkTemplate(ctx, 'A138-21');
+  const i21 = await mkInstance(ctx, projectId, t21.templateId);
+  const vS = await mkField(ctx, t21.templateId, t21.sectionId, 'V_S', 'number', 1);
+  const aSchacht = await mkField(ctx, t21.templateId, t21.sectionId, 'A_S_Schacht', 'number', 2);
+  const shaftType = await mkField(ctx, t21.templateId, t21.sectionId, 'shaft_type', 'enum', 3);
+  const aSFs = await mkField(ctx, t21.templateId, t21.sectionId, 'A_S_FS', 'number', 4);
+  const kfFs = await mkField(ctx, t21.templateId, t21.sectionId, 'k_f_FS', 'number', 5);
+  const dInnen = await mkField(ctx, t21.templateId, t21.sectionId, 'd_S_innen', 'number', 6);
+  const qsac = await mkField(ctx, t21.templateId, t21.sectionId, 'q_S_AC', 'number', 7);
+  // V_S + footprint present → complete; Typ B filter FAILS: 1·1e-7 = 1e-7 < 5·1e-5 = 5e-5.
+  await insParam(ctx, projectId, vS, i21, { value_number: '2.0' });
+  await insParam(ctx, projectId, aSchacht, i21, { value_number: '5' });
+  await insParam(ctx, projectId, shaftType, i21, { value_enum: 'typ_b' });
+  await insParam(ctx, projectId, aSFs, i21, { value_number: '1' });
+  await insParam(ctx, projectId, kfFs, i21, { value_number: '1e-7' });
+  await insParam(ctx, projectId, qsac, i21, { value_number: '3' });
+
+  return {
+    projectId, facilityInstanceId: i21, ws23InstanceId: summary.instanceId, volumeFieldId: vS,
+    f_dimensioned: summary.f_dimensioned, f_volume: summary.f_volume, f_footprint: summary.f_footprint,
+    f_complete: summary.f_complete, f_recommended: summary.f_recommended, f_reasons: summary.f_reasons,
+    nudgeFieldId: dInnen, nudgeValue: 1.0,
+  };
+}
+
 // ── MRE (A138-19) — V_MR = persisted V_M + persisted V_R (Gl.26) ────────────
 export async function seedMre(base: Base): Promise<FacilityFixture & { expectedVMR: number }> {
   const ctx = await freshCtx(base);

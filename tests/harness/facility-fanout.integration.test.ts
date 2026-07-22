@@ -52,8 +52,10 @@ beforeAll(async () => {
     flaecheFeasible: await facil.seedFlaeche(base, { feasible: true }),
     flaecheInfeasible: await facil.seedFlaeche(base, { feasible: false }),
     rigole: await facil.seedRigole(base),
+    rigoleReq32: await facil.seedRigoleReq32Fail(base),
     mre: await facil.seedMre(base),
     schacht: await facil.seedSchacht(base),
+    schachtReq33: await facil.seedSchachtReq33Fail(base),
     becken: await facil.seedBecken(base),
   };
   ({ saveWorksheet } = await import('@/lib/actions/worksheet'));
@@ -135,6 +137,30 @@ describe('Rigole (A138-18) — V_R = b_R·h_R·L_R·s_R (Gl.20)', () => {
     expect((await summaryRow(r.projectId, r.f_dimensioned))?.value_text).toBe('rigole');
     expect(Number((await summaryRow(r.projectId, r.f_volume))?.value_number)).toBeCloseTo(r.expectedVR, 9);
     expect((await summaryRow(r.projectId, r.f_complete))?.value_boolean).toBe(true);
+  });
+
+  it('REQ-32 (Gl.25): L_VS·q_VS < r_5(n)·A_C·10⁻⁴ → FAIL, reason cites Gl.25', async () => {
+    const r = seeds.rigoleReq32;
+    const res = await saveWorksheet({
+      instanceId: r.facilityInstanceId,
+      values: { [r.nudgeFieldId]: { type: 'number', value: r.nudgeValue } },
+    });
+    expect(res.ok).toBe(true);
+    expect((await summaryRow(r.projectId, r.f_recommended))?.value_enum).toBe('FAIL');
+    expect((await summaryRow(r.projectId, r.f_reasons))?.value_text ?? '').toContain('Gl.25');
+  });
+});
+
+describe('Schacht REQ-33 (A138-21, Gl.38) — Typ B filter-layer block', () => {
+  it('Typ B, A_S,FS·k_f,FS < A_S,Schacht·k_i → FAIL, reason cites Gl.38', async () => {
+    const s = seeds.schachtReq33;
+    const res = await saveWorksheet({
+      instanceId: s.facilityInstanceId,
+      values: { [s.nudgeFieldId]: { type: 'number', value: s.nudgeValue } },
+    });
+    expect(res.ok).toBe(true);
+    expect((await summaryRow(s.projectId, s.f_recommended))?.value_enum).toBe('FAIL');
+    expect((await summaryRow(s.projectId, s.f_reasons))?.value_text ?? '').toContain('Gl.38');
   });
 });
 
