@@ -130,3 +130,9 @@ Task 1–2 (#22): COMPLETE 2026-07-15, review-clean (commits a238dcb..e56c86e: a
 - Task 7 (pilot close-out): pending.
 - Tasks 8–13 (fan-out Rigole/MRE/MRS/Schacht/Becken/Fläche): pending pilot sign-off.
 - Task 14 (full regression + deploy + close-out): pending.
+
+## AUTONOMOUS LOOP — Task 1 (real-save-path harness + Finding H): COMPLETE + ORCHESTRATOR-VERIFIED 2026-07-22
+- Commit ce184d0. Harness = embedded-postgres@18 (real PG binary, NO prod/Docker/credentials), schema via drizzle-kit/api, seeded PLT-HS-01 mulde fixture, real `saveWorksheet` over postgres.js. Files: tests/harness/{embedded-pg,seed-plt-hs01,_harness-env,finding-h-real-save-path.integration.test}.ts + vitest.config.
+- FIX: Gl.14 (bfe6e59a) marked displayOnly (ratified Finding-H design option b; §6.3.2 — persisted V_M = A_S_m·h_M/Gl.15 = Speichervolumen). Client write-back loop skips displayOnly → no client null V_M enqueued → step-6b server materialize authoritative.
+- ORCHESTRATOR VERIFY: (1) #22 over-reach AUDIT PASS — a138-17-dual-role still asserts A_S_m survives (68.82) + Gl.14 engine-state computes V_M≈22.05 (survival+computability proof intact); only the store-write assertion legitimately flipped to null (Gl.14 now displayOnly). Bug-path intact. NOT guard-weakening. (2) REVERT-VERIFY through real save path: reverted Gl.14 displayOnly → harness test FAILS "expected null to be close to 283.03" (V_M null clobber via real saveWorksheet); restored. (3) #22 guard GREEN (45+1); by-file tsc 28 (0 new); suite 1195 pass.
+- Closes the false-confidence gap: acceptance now runs the REAL saveWorksheet against a real DB, not a pure helper.
