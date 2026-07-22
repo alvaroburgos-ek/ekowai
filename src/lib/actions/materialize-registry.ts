@@ -78,8 +78,15 @@ const ASM_INPUT_SYMBOLS = [
 //   t_E (A138-17 emptying time)                            — Tab.14 CONDITIONAL driver
 const PHASE4_SUMMARY_INPUT_SYMBOLS = [
   'facility_type_selected',
-  'V_M', 'V_R', 'V_MR', 'V_MUE', 'V_S', 'V_VA',
+  'V_M', 'V_R', 'V_MR', 'V_MUE', 'V_S', 'V_VA', 'V_B',
   'A_S', 'A_S_m',
+  // Fan-out: active facility footprint symbols (flaeche dimensioned area, schacht),
+  // so a footprint-only change on A138-16/21 refires the summary.
+  'a138_A_s_dim', 'A_S_Schacht',
+  // Fan-out: per-facility BLOCK-gate inputs — changing any must refire the summary
+  // so REQ-31/32/33 re-evaluate (flaeche Gl.13, rigole Gl.25, schacht Gl.38).
+  'r_D_n_used', 'k_i', 'L_VS', 'q_VS', 'r_5_n', 'A_C',
+  'shaft_type', 'A_S_FS', 'k_f_FS',
   'q_S_AC',
   't_E',
 ] as const;
