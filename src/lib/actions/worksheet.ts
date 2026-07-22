@@ -20,7 +20,8 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient } from '@/lib/eval/materialize-asm';
+import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient, computeSchachtHeadSweep } from '@/lib/eval/materialize-asm';
+import { GOVERNING_PROFILES } from '@/lib/eval/governing-duration';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
 import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE, phase4SummaryChainFires, shouldOpenTransaction } from './materialize-registry';
@@ -2483,6 +2484,198 @@ export async function saveWorksheet(
             });
             for (const r of p4Rows) {
               writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+            }
+          }
+        } else if (producerEntry.id === 'facility_volume') {
+          // ── Facility governing-volume producer (MRE/Schacht/Becken) ─────────
+          // Fan-out: mulde/rigole volumes ride the `asm` branch; these three get their
+          // OWN materialize, fired when a volume-driving input changes on their facility
+          // worksheet (FACILITY_VOLUME_INPUT_SYMBOLS). producer == consumer: the volume
+          // lands on the SAVED facility worksheet. Then the summary chain-fires (G1).
+          //
+          //   MRE (A138-19): V_MR = persisted V_M + persisted V_R (Gl.26, cross-ws sum).
+          //   Schacht (A138-21): V_S = π·d_i²/4·h_S (Gl.36; h_S swept via Gl.37).
+          //   Becken (A138-22): V_B via the Gl.41 governing sweep (GOVERNING_PROFILES).
+          const fvCode = savedTemplateCode;
+          const fvFacility: Phase4FacilityType | null =
+            fvCode === 'A138-19' ? 'mre'
+            : fvCode === 'A138-21' ? 'schacht'
+            : fvCode === 'A138-22' ? 'becken'
+            : null;
+          if (!fvFacility) continue; // not a facility-volume-owning worksheet
+
+          // Scoped by-symbol number reader (§10c: innerJoin + standardId).
+          const fvReadNum = async (symbol: string): Promise<number | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              if (r.valueNumber != null) {
+                const v = Number(r.valueNumber);
+                if (Number.isFinite(v)) return v;
+              }
+            }
+            return null;
+          };
+          // Prefer a value from the current save batch (on the SAVED facility ws) over
+          // the persisted one — so an in-batch geometry change is used immediately.
+          const savedFacilityFields = await tx
+            .select({ id: fields.id, symbol: fields.symbol })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+          const fvBatchBySymbol = new Map<string, number | null>();
+          for (const f of savedFacilityFields) {
+            const saved = input.values[f.id];
+            if (saved?.type === 'number') fvBatchBySymbol.set(f.symbol, saved.value);
+          }
+          const fvNum = async (symbol: string): Promise<number | null> => {
+            if (fvBatchBySymbol.has(symbol)) {
+              const v = fvBatchBySymbol.get(symbol);
+              if (v != null && Number.isFinite(v)) return v;
+            }
+            return fvReadNum(symbol);
+          };
+
+          // Resolve the rainfall column governing D (schacht/becken need the sweep).
+          const fvResolveRows = async (): Promise<Array<{ D_min: number | null; r_D_n: number | null }>> => {
+            // Carrier lives on A138-04 (global symbol lookup like the mulde block).
+            const carrierRows = await tx
+              .select({ valueJson: projectParameters.valueJson })
+              .from(projectParameters)
+              .innerJoin(fields, eq(fields.id, projectParameters.fieldId))
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(fields.symbol, 'r_D_n_table'),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ))
+              .limit(1);
+            const carrierRaw = carrierRows[0]?.valueJson ?? null;
+            const refRows = await tx
+              .select({ valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .innerJoin(fields, eq(fields.id, projectParameters.fieldId))
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                eq(fields.symbol, 'rainfall_table_ref'),
+              ))
+              .limit(1);
+            const carrier = normalizeRainfallCarrier(carrierRaw);
+            const table = resolveSelectedTable(carrier, refRows[0]?.valueText ?? null);
+            if (!table) return [];
+            // Resolve the facility's return period (local selector else project n).
+            const localSym = FACILITY_FREQUENCY_SYMBOL[fvCode!];
+            const nLocal = localSym ? await fvNum(localSym) : null;
+            const nProj = await fvReadNum('n');
+            const tnProj = await fvReadNum('T_n');
+            const T_n = facilityReturnPeriod(fvCode!, (s) =>
+              s === (localSym ?? '') ? nLocal : s === 'n' ? nProj : s === 'T_n' ? tnProj : null,
+            );
+            const col = resolveColumn(table, T_n);
+            return col.status !== 'missing' ? col.rows : [];
+          };
+
+          // Compute the governing volume per facility.
+          let fvInputs: Parameters<typeof facilityVolumeMaterialize>[1] | null = null;
+          if (fvFacility === 'mre') {
+            // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped.
+            const vM = await fvReadNum('V_M');
+            const vR = await fvReadNum('V_R');
+            fvInputs = { A_S_m: null, h_M: null, V_M: vM, V_R: vR };
+          } else if (fvFacility === 'schacht') {
+            // Gl.36/37: V_S = π·d_i²/4·h_S, h_S swept via Gl.37 (governing D).
+            const A_C = await fvReadNum('A_C');
+            const d_a = await fvNum('d_S_aussen');
+            const d_i = await fvNum('d_S_innen');
+            const k_i = await fvReadNum('k_i');
+            const f_Z = await fvReadNum('f_Z');
+            let h_S: number | null = null;
+            if (A_C != null && d_a != null && d_i != null && k_i != null && f_Z != null) {
+              const rows = await fvResolveRows();
+              h_S = computeSchachtHeadSweep(rows, { A_C, d_a, d_i, k_i, f_Z }).h_S;
+            }
+            fvInputs = { A_S_m: null, h_M: null, d_i, h_S };
+          } else if (fvFacility === 'becken') {
+            // Gl.41 governing sweep (GOVERNING_PROFILES 'A138-22').
+            const beckenProfile = GOVERNING_PROFILES.find((p) => p.facility === 'A138-22');
+            const A_C = await fvReadNum('A_C');
+            const A_VA = await fvNum('A_VA_Becken');
+            const A_S_m = await fvReadNum('A_S_m');
+            const k_i = await fvReadNum('k_i');
+            const f_Z = await fvReadNum('f_Z');
+            const Q_Dr = (await fvReadNum('Q_Dr')) ?? 0; // optional drain
+            const f_A = (await fvReadNum('f_A')) ?? 1;    // optional reduction (§6.8.2)
+            let V_B_governing: number | null = null;
+            if (beckenProfile && A_C != null && A_VA != null && A_S_m != null && k_i != null && f_Z != null) {
+              const rows = await fvResolveRows();
+              const scalars = { A_C, A_VA, A_S_m, k_i, f_Z, Q_Dr, f_A };
+              let maxV = -Infinity;
+              for (const row of rows) {
+                if (row.D_min == null || row.r_D_n == null) continue;
+                const v = beckenProfile.sizing(row.D_min, row.r_D_n, scalars);
+                if (v != null && Number.isFinite(v) && v > maxV) maxV = v;
+              }
+              V_B_governing = maxV > -Infinity ? maxV : null;
+            }
+            fvInputs = { A_S_m: null, h_M: null, V_B_governing };
+          }
+
+          if (fvInputs) {
+            const volumeWrite = facilityVolumeMaterialize(fvFacility, fvInputs);
+            if (volumeWrite) {
+              // Resolve the volume field id on the SAVED facility worksheet, scoped.
+              const fvFieldRows = await tx
+                .select({ id: fields.id })
+                .from(fields)
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+                .where(and(
+                  eq(fields.symbol, volumeWrite.volumeSymbol),
+                  eq(fields.active, true),
+                  eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+                ))
+                .limit(1);
+              const fvFieldId = fvFieldRows[0]?.id;
+              if (fvFieldId) {
+                await tx
+                  .insert(projectParameters)
+                  .values([{
+                    projectId: instance.projectId,
+                    fieldId: fvFieldId,
+                    valueNumber: String(volumeWrite.value),
+                    valueText: null,
+                    sourceType: 'derived',
+                    enteredBy: userId,
+                    enteredAt: now,
+                  }])
+                  .onConflictDoUpdate({
+                    target: [projectParameters.projectId, projectParameters.fieldId],
+                    set: {
+                      valueNumber: sql`excluded.value_number`,
+                      valueText: sql`excluded.value_text`,
+                      sourceType: sql`excluded.source_type`,
+                      enteredBy: sql`excluded.entered_by`,
+                      enteredAt: now,
+                    },
+                  });
+                writtenDerived.push({ fieldId: fvFieldId, valueNumber: String(volumeWrite.value), valueText: null });
+              }
             }
           }
         }

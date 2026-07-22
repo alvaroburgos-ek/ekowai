@@ -232,3 +232,136 @@ export async function seedRigole(base: Base): Promise<FacilityFixture & { expect
     expectedVR: 0.5 * 1.0 * 20 * 0.35,
   };
 }
+
+// ── MRE (A138-19) — V_MR = persisted V_M + persisted V_R (Gl.26) ────────────
+export async function seedMre(base: Base): Promise<FacilityFixture & { expectedVMR: number }> {
+  const ctx = await freshCtx(base);
+  const projectId = await mkProject(ctx, 'HS-MRE');
+  const summary = await mkSummary(ctx, projectId);
+  await mkSupport(ctx, projectId, 'mre', 1000);
+
+  // Persisted component volumes live on A138-17 (V_M) and A138-18 (V_R).
+  const t17 = await mkTemplate(ctx, 'A138-17');
+  const i17 = await mkInstance(ctx, projectId, t17.templateId);
+  const vM = await mkField(ctx, t17.templateId, t17.sectionId, 'V_M', 'number', 1);
+  await insParam(ctx, projectId, vM, i17, { value_number: '12.5' });
+
+  const t18 = await mkTemplate(ctx, 'A138-18');
+  const i18 = await mkInstance(ctx, projectId, t18.templateId);
+  const vR = await mkField(ctx, t18.templateId, t18.sectionId, 'V_R', 'number', 1);
+  await insParam(ctx, projectId, vR, i18, { value_number: '3.5' });
+
+  const t19 = await mkTemplate(ctx, 'A138-19');
+  const i19 = await mkInstance(ctx, projectId, t19.templateId);
+  const vMR = await mkField(ctx, t19.templateId, t19.sectionId, 'V_MR', 'number', 1);
+  const vMmre = await mkField(ctx, t19.templateId, t19.sectionId, 'V_M_MRE', 'number', 2);
+  const aSm = await mkField(ctx, t19.templateId, t19.sectionId, 'A_S_m', 'number', 3);
+  const qsac = await mkField(ctx, t19.templateId, t19.sectionId, 'q_S_AC', 'number', 4);
+  await mkEquation(ctx, t19.templateId, GL28_A138_19, 'Gl.28', 'A_C*A_VA*r_D_n*b_R*h_R*L_R*k_i*D*f_Z', 'V_MR');
+  // footprint A_S_m inherited (summary reads A_S_m).
+  await insParam(ctx, projectId, aSm, i19, { value_number: '45' });
+  await insParam(ctx, projectId, qsac, i19, { value_number: '3' });
+
+  return {
+    projectId, facilityInstanceId: i19, ws23InstanceId: summary.instanceId,
+    volumeFieldId: vMR,
+    f_dimensioned: summary.f_dimensioned, f_volume: summary.f_volume, f_footprint: summary.f_footprint,
+    f_complete: summary.f_complete, f_recommended: summary.f_recommended, f_reasons: summary.f_reasons,
+    nudgeFieldId: vMmre, nudgeValue: 1,
+    expectedVMR: 12.5 + 3.5,
+  };
+}
+
+// ── SCHACHT (A138-21) — V_S = π·d_i²/4·h_S (Gl.36; h_S swept Gl.37) ──────────
+export async function seedSchacht(base: Base): Promise<FacilityFixture & { expectedVS: number }> {
+  const ctx = await freshCtx(base);
+  const projectId = await mkProject(ctx, 'HS-SCHACHT');
+  const summary = await mkSummary(ctx, projectId);
+  await mkSupport(ctx, projectId, 'schacht', 500);
+
+  // k_i + f_Z inherit from A138-12 (co-located with the standard). Seed them there.
+  const t12 = await mkTemplate(ctx, 'A138-12');
+  const i12 = await mkInstance(ctx, projectId, t12.templateId);
+  const kiF = await mkField(ctx, t12.templateId, t12.sectionId, 'k_i', 'number', 1);
+  const fZF = await mkField(ctx, t12.templateId, t12.sectionId, 'f_Z', 'number', 2);
+  await insParam(ctx, projectId, kiF, i12, { value_number: '1e-5' });
+  await insParam(ctx, projectId, fZF, i12, { value_number: '1.2' });
+
+  const t21 = await mkTemplate(ctx, 'A138-21');
+  const i21 = await mkInstance(ctx, projectId, t21.templateId);
+  const vS = await mkField(ctx, t21.templateId, t21.sectionId, 'V_S', 'number', 1);
+  const dInnen = await mkField(ctx, t21.templateId, t21.sectionId, 'd_S_innen', 'number', 2);
+  const dAussen = await mkField(ctx, t21.templateId, t21.sectionId, 'd_S_aussen', 'number', 3);
+  const aSchacht = await mkField(ctx, t21.templateId, t21.sectionId, 'A_S_Schacht', 'number', 4);
+  const shaftType = await mkField(ctx, t21.templateId, t21.sectionId, 'shaft_type', 'enum', 5);
+  const qsac = await mkField(ctx, t21.templateId, t21.sectionId, 'q_S_AC', 'number', 6);
+  await mkEquation(ctx, t21.templateId, GL35_A138_21, 'Gl.35', 'A_C*r_D_n*A_S*k_i*D*f_Z', 'V_S');
+  await insParam(ctx, projectId, dInnen, i21, { value_number: '1.0' });
+  await insParam(ctx, projectId, dAussen, i21, { value_number: '1.1' });
+  await insParam(ctx, projectId, aSchacht, i21, { value_number: '5' }); // footprint (Gl.34, entered)
+  await insParam(ctx, projectId, shaftType, i21, { value_enum: 'typ_a' }); // Typ A → REQ-33 N/A
+  await insParam(ctx, projectId, qsac, i21, { value_number: '3' });
+
+  // Governing h_S = max over rows of Gl.37. Compute expected in-test.
+  const A_C = 500, d_a = 1.1, d_i = 1.0, k_i = 1e-5, f_Z = 1.2;
+  const hOf = (D: number, r_D: number) => {
+    const num = A_C * 1e-7 * r_D - (Math.PI * d_a ** 2) / 4 * k_i;
+    const den = (Math.PI * d_i ** 2) / (4 * D * 60 * f_Z) + (d_a * Math.PI * k_i) / 2;
+    return num / den;
+  };
+  const hGov = Math.max(...RAIN_ROWS.map((r) => hOf(r.D_min, r.r_D_n)));
+  const expectedVS = (Math.PI * d_i ** 2) / 4 * hGov;
+
+  return {
+    projectId, facilityInstanceId: i21, ws23InstanceId: summary.instanceId,
+    volumeFieldId: vS,
+    f_dimensioned: summary.f_dimensioned, f_volume: summary.f_volume, f_footprint: summary.f_footprint,
+    f_complete: summary.f_complete, f_recommended: summary.f_recommended, f_reasons: summary.f_reasons,
+    nudgeFieldId: dInnen, nudgeValue: 1.0,
+    expectedVS,
+  };
+}
+
+// ── BECKEN (A138-22) — V_B via Gl.41 governing sweep ────────────────────────
+export async function seedBecken(base: Base): Promise<FacilityFixture & { expectedVB: number }> {
+  const ctx = await freshCtx(base);
+  const projectId = await mkProject(ctx, 'HS-BECKEN');
+  const summary = await mkSummary(ctx, projectId);
+  await mkSupport(ctx, projectId, 'becken', 2000);
+
+  // A_S_m + k_i + f_Z inherit from A138-12.
+  const t12 = await mkTemplate(ctx, 'A138-12');
+  const i12 = await mkInstance(ctx, projectId, t12.templateId);
+  const aSmF = await mkField(ctx, t12.templateId, t12.sectionId, 'A_S_m', 'number', 1);
+  const kiF = await mkField(ctx, t12.templateId, t12.sectionId, 'k_i', 'number', 2);
+  const fZF = await mkField(ctx, t12.templateId, t12.sectionId, 'f_Z', 'number', 3);
+  await insParam(ctx, projectId, aSmF, i12, { value_number: '50' });
+  await insParam(ctx, projectId, kiF, i12, { value_number: '1e-5' });
+  await insParam(ctx, projectId, fZF, i12, { value_number: '1.2' });
+
+  const t22 = await mkTemplate(ctx, 'A138-22');
+  const i22 = await mkInstance(ctx, projectId, t22.templateId);
+  const vB = await mkField(ctx, t22.templateId, t22.sectionId, 'V_B', 'number', 1);
+  const aVa = await mkField(ctx, t22.templateId, t22.sectionId, 'A_VA_Becken', 'number', 2);
+  const hB = await mkField(ctx, t22.templateId, t22.sectionId, 'h_B', 'number', 3);
+  const qsac = await mkField(ctx, t22.templateId, t22.sectionId, 'q_S_AC', 'number', 4);
+  await mkEquation(ctx, t22.templateId, GL41_A138_22, 'Gl.41', 'A_C*A_VA*r_D_n*A_S_m*k_i*Q_Dr*D*f_Z*f_A', 'V_B');
+  await insParam(ctx, projectId, aVa, i22, { value_number: '100' });
+  await insParam(ctx, projectId, hB, i22, { value_number: '0.5' });
+  await insParam(ctx, projectId, qsac, i22, { value_number: '3' });
+
+  // Expected: governing over rows of Gl.41 (Q_Dr=0, f_A=1).
+  const A_C = 2000, A_VA = 100, A_S_m = 50, k_i = 1e-5, f_Z = 1.2, Q_Dr = 0, f_A = 1;
+  const vOf = (D: number, r_D: number) =>
+    ((A_C + A_VA) * 1e-7 * r_D - A_S_m * k_i - Q_Dr * 1e-3) * D * 60 * f_Z * f_A;
+  const expectedVB = Math.max(...RAIN_ROWS.map((r) => vOf(r.D_min, r.r_D_n)));
+
+  return {
+    projectId, facilityInstanceId: i22, ws23InstanceId: summary.instanceId,
+    volumeFieldId: vB,
+    f_dimensioned: summary.f_dimensioned, f_volume: summary.f_volume, f_footprint: summary.f_footprint,
+    f_complete: summary.f_complete, f_recommended: summary.f_recommended, f_reasons: summary.f_reasons,
+    nudgeFieldId: aVa, nudgeValue: 100,
+    expectedVB,
+  };
+}

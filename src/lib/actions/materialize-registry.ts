@@ -99,6 +99,19 @@ const PHASE4_SUMMARY_INPUT_SYMBOLS = [
 // equation-based ownerTrigger returns false (identical shape to `surface`).
 export const PHASE4_SUMMARY_CONSUMER_CODE = 'A138-23';
 
+// ---- 138-SPECIFIC: facility governing-volume producer inputs (MRE/Schacht/Becken) ----
+// Volume-driving inputs on the facility worksheets whose change must re-materialize the
+// facility's governing storage volume (V_MR / V_S / V_B). mulde/rigole ride the `asm`
+// branch instead (geometry sweep), so their inputs are NOT here.
+const FACILITY_VOLUME_INPUT_SYMBOLS = [
+  // MRE (A138-19, Gl.26): sum of persisted component volumes.
+  'V_M_MRE', 'V_R_MRE', 'n_R', 'A_VA_MRE',
+  // Schacht (A138-21, Gl.36/37): inner/outer diameter drive the swept V_S.
+  'd_S_innen', 'd_S_aussen', 'n_S_Bemessung',
+  // Becken (A138-22, Gl.41): overregnete area + basin design inputs.
+  'A_VA_Becken', 'h_B', 'n_B_Bemessung', 'r_D_n_B',
+] as const;
+
 // ---- Type (general — no 138 references) ----
 export type MaterializeEntry = {
   /** Stable identifier for this materialize block. */
@@ -238,6 +251,27 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
     ownerTrigger: () => false,
     consumerTemplateCode: PHASE4_SUMMARY_CONSUMER_CODE,
   },
+
+  // ── Facility governing-volume materialize (MRE/Schacht/Becken) ─────────────
+  // 138-SPECIFIC (fan-out). The mulde/rigole governing volumes are materialized in
+  // the `asm` producer branch (they ride the A_S,m geometry sweep). MRE/Schacht/Becken
+  // do NOT produce A_S,m via A138-12, so they get their OWN producer branch, fired when
+  // a volume-driving input changes on their facility worksheet:
+  //   MRE (A138-19): V_MR = persisted V_M + persisted V_R (Gl.26) — fired on V_M_MRE/
+  //     V_R_MRE/n_R change (or an A138-19 save touching any local field).
+  //   Schacht (A138-21): V_S = π·d_i²/4·h_S (Gl.36; h_S swept via Gl.37) — d_S_innen/
+  //     d_S_aussen change.
+  //   Becken (A138-22): V_B via Gl.41 sweep — A_VA_Becken/h_B change.
+  // The branch resolves the facility worksheet by the SAVED template code, reads the
+  // facility-local inputs + scoped cross-ws scalars, and materializes the volume onto
+  // the facility worksheet. consumerTemplateCode is unused (producer==consumer here);
+  // set to a sentinel that the branch ignores.
+  {
+    id: 'facility_volume',
+    inputSymbols: new Set<string>(FACILITY_VOLUME_INPUT_SYMBOLS),
+    ownerTrigger: () => false,
+    consumerTemplateCode: '(facility-local)',
+  },
 ] as const;
 
 /**
@@ -286,7 +320,10 @@ export function producerFiredEntries(
  */
 export function phase4SummaryChainFires(firedEntryIds: ReadonlySet<string>): boolean {
   if (firedEntryIds.has('phase4_summary')) return false; // already firing → no double-fire
-  return firedEntryIds.has('asm');
+  // Fires after 'asm' (mulde/rigole V_M/V_R via the geometry sweep) OR after
+  // 'facility_volume' (MRE/Schacht/Becken V_MR/V_S/V_B) — both write a governing
+  // volume the summary must consume in the SAME tx.
+  return firedEntryIds.has('asm') || firedEntryIds.has('facility_volume');
 }
 
 /**

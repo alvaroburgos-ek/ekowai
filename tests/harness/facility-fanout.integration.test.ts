@@ -14,14 +14,19 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { startHarness, type Harness } from './embedded-pg';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
-import { A138_18_V_R_EQUATIONS } from './seed-facilities';
+import {
+  A138_18_V_R_EQUATIONS, A138_19_V_MR_EQUATIONS,
+  A138_21_V_S_EQUATIONS, A138_22_V_B_EQUATIONS,
+} from './seed-facilities';
 
-/** Whether the real client would enqueue a V_R write-back on A138-18: true iff at
- *  least one V_R-producing equation is NOT displayOnly (mirrors use-equation-engine
- *  write-back skip). The Gl.19 displayOnly flip is what stops the null clobber. */
-function clientSendsVR(): boolean {
-  return A138_18_V_R_EQUATIONS.some((id) => !equationProfiles[id]?.displayOnly);
-}
+/** Whether the real client would enqueue a volume write-back: true iff at least one
+ *  volume-producing equation is NOT displayOnly (mirrors use-equation-engine
+ *  write-back skip). The displayOnly flip is what stops the null clobber (RED→GREEN). */
+const clientSends = (ids: readonly string[]) => ids.some((id) => !equationProfiles[id]?.displayOnly);
+const clientSendsVR = () => clientSends(A138_18_V_R_EQUATIONS);
+const clientSendsVMR = () => clientSends(A138_19_V_MR_EQUATIONS);
+const clientSendsVS = () => clientSends(A138_21_V_S_EQUATIONS);
+const clientSendsVB = () => clientSends(A138_22_V_B_EQUATIONS);
 
 const HARNESS_USER_ID = '00000000-0000-4000-8000-000000000002';
 
@@ -42,11 +47,14 @@ beforeAll(async () => {
   process.env.NEXT_PUBLIC_APP_URL ??= 'http://localhost:3000';
 
   const facil = await import('./seed-facilities');
-  const ctx = await facil.seedFacilityBase(harness.sql, HARNESS_USER_ID);
+  const base = await facil.seedFacilityBase(harness.sql, HARNESS_USER_ID);
   seeds = {
-    flaecheFeasible: await facil.seedFlaeche(ctx, { feasible: true }),
-    flaecheInfeasible: await facil.seedFlaeche(ctx, { feasible: false }),
-    rigole: await facil.seedRigole(ctx),
+    flaecheFeasible: await facil.seedFlaeche(base, { feasible: true }),
+    flaecheInfeasible: await facil.seedFlaeche(base, { feasible: false }),
+    rigole: await facil.seedRigole(base),
+    mre: await facil.seedMre(base),
+    schacht: await facil.seedSchacht(base),
+    becken: await facil.seedBecken(base),
   };
   ({ saveWorksheet } = await import('@/lib/actions/worksheet'));
 }, 120_000);
@@ -127,5 +135,79 @@ describe('Rigole (A138-18) — V_R = b_R·h_R·L_R·s_R (Gl.20)', () => {
     expect((await summaryRow(r.projectId, r.f_dimensioned))?.value_text).toBe('rigole');
     expect(Number((await summaryRow(r.projectId, r.f_volume))?.value_number)).toBeCloseTo(r.expectedVR, 9);
     expect((await summaryRow(r.projectId, r.f_complete))?.value_boolean).toBe(true);
+  });
+});
+
+describe('MRE (A138-19) — V_MR = persisted V_M + V_R (Gl.26)', () => {
+  it('saving A138-19 materializes V_MR from the persisted component volumes → summary set', async () => {
+    const m = seeds.mre;
+    const res = await saveWorksheet({
+      instanceId: m.facilityInstanceId,
+      values: { [m.nudgeFieldId]: { type: 'number', value: m.nudgeValue } },
+    });
+    expect(res.ok).toBe(true);
+    const s2: Record<string, { type: 'number'; value: number | null }> = {};
+    if (clientSendsVMR()) s2[m.volumeFieldId] = { type: 'number', value: null };
+    expect((await saveWorksheet({ instanceId: m.facilityInstanceId, values: s2 })).ok).toBe(true);
+
+    const [vmr] = await sql()<{ value_number: string | null; source_type: string }[]>`
+      SELECT value_number, source_type FROM project_parameters
+      WHERE project_id = ${m.projectId} AND field_id = ${m.volumeFieldId}`;
+    expect(vmr?.source_type).toBe('derived');
+    expect(Number(vmr?.value_number)).toBeCloseTo(m.expectedVMR, 9); // 16.0
+
+    expect((await summaryRow(m.projectId, m.f_dimensioned))?.value_text).toBe('mre');
+    expect(Number((await summaryRow(m.projectId, m.f_volume))?.value_number)).toBeCloseTo(m.expectedVMR, 9);
+    expect((await summaryRow(m.projectId, m.f_complete))?.value_boolean).toBe(true);
+  });
+});
+
+describe('Schacht (A138-21) — V_S = π·d_i²/4·h_S (Gl.36; h_S swept Gl.37)', () => {
+  it('saving A138-21 sweeps the governing h_S and materializes V_S → summary set', async () => {
+    const s = seeds.schacht;
+    const res = await saveWorksheet({
+      instanceId: s.facilityInstanceId,
+      values: { [s.nudgeFieldId]: { type: 'number', value: s.nudgeValue } },
+    });
+    expect(res.ok).toBe(true);
+    const s2: Record<string, { type: 'number'; value: number | null }> = {};
+    if (clientSendsVS()) s2[s.volumeFieldId] = { type: 'number', value: null };
+    expect((await saveWorksheet({ instanceId: s.facilityInstanceId, values: s2 })).ok).toBe(true);
+
+    const [vs] = await sql()<{ value_number: string | null; source_type: string }[]>`
+      SELECT value_number, source_type FROM project_parameters
+      WHERE project_id = ${s.projectId} AND field_id = ${s.volumeFieldId}`;
+    expect(vs?.source_type).toBe('derived');
+    expect(Number(vs?.value_number)).toBeCloseTo(s.expectedVS, 6);
+
+    expect((await summaryRow(s.projectId, s.f_dimensioned))?.value_text).toBe('schacht');
+    expect(Number((await summaryRow(s.projectId, s.f_volume))?.value_number)).toBeCloseTo(s.expectedVS, 6);
+    // footprint maps to A_S_Schacht (=5) → present → complete=true.
+    expect(Number((await summaryRow(s.projectId, s.f_footprint))?.value_number)).toBe(5);
+    expect((await summaryRow(s.projectId, s.f_complete))?.value_boolean).toBe(true);
+  });
+});
+
+describe('Becken (A138-22) — V_B via Gl.41 governing sweep', () => {
+  it('saving A138-22 sweeps Gl.41 and materializes V_B → summary set', async () => {
+    const b = seeds.becken;
+    const res = await saveWorksheet({
+      instanceId: b.facilityInstanceId,
+      values: { [b.nudgeFieldId]: { type: 'number', value: b.nudgeValue } },
+    });
+    expect(res.ok).toBe(true);
+    const s2: Record<string, { type: 'number'; value: number | null }> = {};
+    if (clientSendsVB()) s2[b.volumeFieldId] = { type: 'number', value: null };
+    expect((await saveWorksheet({ instanceId: b.facilityInstanceId, values: s2 })).ok).toBe(true);
+
+    const [vb] = await sql()<{ value_number: string | null; source_type: string }[]>`
+      SELECT value_number, source_type FROM project_parameters
+      WHERE project_id = ${b.projectId} AND field_id = ${b.volumeFieldId}`;
+    expect(vb?.source_type).toBe('derived');
+    expect(Number(vb?.value_number)).toBeCloseTo(b.expectedVB, 6);
+
+    expect((await summaryRow(b.projectId, b.f_dimensioned))?.value_text).toBe('becken');
+    expect(Number((await summaryRow(b.projectId, b.f_volume))?.value_number)).toBeCloseTo(b.expectedVB, 6);
+    expect((await summaryRow(b.projectId, b.f_complete))?.value_boolean).toBe(true);
   });
 });
