@@ -196,7 +196,13 @@ export const equationProfiles: Record<string, EquationProfile> = {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm', L_R: 'm',
       k_i: 'm/s', D: 'min', f_Z: null,
     },
-    notes: '§6.5.2 Gl. (28): erforderliches MRE-Volumen. Schreibt V_MR (primär).',
+    // Fan-out (MRE): the "required" V_MR eq needs the server-swept governing D; the
+    // client cannot resolve D → its write-back enqueues V_MR=null, clobbering the
+    // server materialize (V_MR = persisted V_M + persisted V_R, Gl.26). Mark
+    // displayOnly so the client never enqueues V_MR — the SERVER cross-ws sum is
+    // authoritative. Gl.28 still renders + evaluates in the equation card.
+    displayOnly: true,
+    notes: '§6.5.2 Gl. (28): erforderliches MRE-Volumen. displayOnly — V_MR wird server-materialisiert als V_M + V_R (Gl.26); der maßgebende D stammt aus dem serverseitigen Sweep, der Client-Write-back darf V_MR nicht null-clobbern.',
   },
 
   // A138-19 · Gl. (29) · §6.5.2 — L_R required (MRE)
@@ -257,7 +263,12 @@ export const equationProfiles: Record<string, EquationProfile> = {
     expectedUnits: {
       A_C: 'm²', r_D_n: 'l/(s·ha)', A_S: 'm²', k_i: 'm/s', D: 'min', f_Z: null,
     },
-    notes: '§6.7.2 Gl. (35): erforderliches Schachtvolumen V_S.',
+    // Fan-out (Schacht): the "required" V_S eq needs the server-swept governing D →
+    // the client write-back enqueues V_S=null, clobbering the server materialize
+    // (V_S = π·d_i²/4·h_S, Gl.36, at the Gl.37-swept governing head). Mark displayOnly
+    // so the client never enqueues V_S — the SERVER materialize is authoritative.
+    displayOnly: true,
+    notes: '§6.7.2 Gl. (35): erforderliches Schachtvolumen V_S. displayOnly — V_S wird server-materialisiert (Gl.36 am Gl.37-Sweep-Einstau); der Client-Write-back darf V_S nicht null-clobbern.',
   },
 
   // A138-21 · Gl. (36) · §6.7.2 — V_S geometric (π·d_i²/4·h_S)
@@ -303,13 +314,19 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes: '§6.7.2 Gl. (40): alternative h_S-Berechnung (Filterschicht limitierend). displayOnly — Gl. (37) primär.',
   },
 
-  // A138-22 · Gl. (41) · §6.8.2 — V_VA Becken
+  // A138-22 · Gl. (41) · §6.8.2 — V_B Becken (field symbol is V_B, not V_VA)
   '433f7700-90cb-410d-8103-7b72f53db8fa': {
     expectedUnits: {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', A_S_m: 'm²',
       k_i: 'm/s', Q_Dr: 'l/s', D: 'min', f_Z: null, f_A: null,
     },
-    notes: '§6.8.2 Gl. (41): Becken-Speichervolumen. Schreibt V_VA auf A138-22 (separates Feld vs Gl. 8 V_VA auf A138-13).',
+    // Fan-out (Becken): Gl.41 is iterated over D (governing = max V) server-side
+    // (GOVERNING_PROFILES 'A138-22'); the client cannot resolve the governing D →
+    // its write-back enqueues V_B=null, clobbering the server materialize. Mark
+    // displayOnly so the client never enqueues V_B — the SERVER Gl.41 sweep is
+    // authoritative.
+    displayOnly: true,
+    notes: '§6.8.2 Gl. (41): Becken-Speichervolumen V_B. displayOnly — V_B wird server-materialisiert über den Gl.41-Dauerstufen-Sweep; der Client-Write-back darf V_B nicht null-clobbern.',
   },
 
   // A138-26 · Gl. (10) V_Rück flood-check · §5.3.4
@@ -341,8 +358,18 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // Finding H (§6.3.2): Gl.14 needs D — the GOVERNING Dauerstufe from the
+    // server-only Mulde geometry sweep (worksheet.ts computeMuldeGeometrySweep).
+    // The CLIENT engine cannot resolve D → client-side Gl.14 can't compute → its
+    // write-back enqueues V_M=null, which the autosave then persists, CLOBBERING
+    // the server-materialized governing volume (step-6b). Marking Gl.14
+    // displayOnly stops the client write-back loop (use-equation-engine.ts:527
+    // skips displayOnly equations) so the client never enqueues V_M — the SERVER
+    // materialize (V_M = A_S,m · h_M, Gl.15, §6.3.2-verified Speichervolumen) is
+    // authoritative. Gl.14 still renders in the equation card + evaluates purely.
+    displayOnly: true,
     notes:
-      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. Schreibt V_M (primärer Design-Wert).',
+      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. displayOnly — der maßgebende D stammt aus dem serverseitigen Dauerstufen-Sweep; die Persistierung von V_M erfolgt server-materialisiert (= A_S,m·h_M, Gl.15), damit der Client-Write-back kein null clobbert (Finding H).',
   },
 
   // A138-17 · Gl. (15) · §6.3.2 — V_M geometric
@@ -366,8 +393,14 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // Fan-out (Rigole): the "required" V_R eq needs the server-swept governing D →
+    // the client write-back enqueues V_R=null, clobbering the server materialize
+    // (V_R = b_R·h_R·L_R·s_R, Gl.20, with s_R computed server-side via Gl.21/22).
+    // Mark displayOnly so the client never enqueues V_R — the SERVER geometric
+    // materialize is authoritative.
+    displayOnly: true,
     notes:
-      '§6.4.2 Gl. (19): erforderliches Rigolenspeichervolumen. Schreibt V_R (primär). Das eingebettete ((b+h)·L+b·h)·k_i ist hier dimensional m³/s — intern konsistent (anders als die Gl. (18)-Standalone-Falle).',
+      '§6.4.2 Gl. (19): erforderliches Rigolenspeichervolumen. displayOnly — V_R wird server-materialisiert als b_R·h_R·L_R·s_R (Gl.20, s_R nach Gl.21/22); der Client-Write-back darf V_R nicht null-clobbern.',
   },
 
   // A138-18 · Gl. (20) · §6.4.2 — V_R geometric

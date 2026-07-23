@@ -4,6 +4,8 @@ import {
   ASM_GL16_EQUATION_ID, ASM_GL17_EQUATION_ID, FACILITY_TYPE_TO_WORKSHEET,
   validateGeometryAgainstMax,
   asmEngineSuppressedSymbols,
+  symbolHomeSuppressedSymbols,
+  composeEngineSuppressedSymbols,
 } from '../asm-source';
 
 describe('resolveAsmProducer', () => {
@@ -95,6 +97,69 @@ describe('asmEngineSuppressedSymbols — Gl.7 write-back ownership', () => {
     const c = asmEngineSuppressedSymbols('direct');
     // direct also returns the stable empty set (not suppressed path)
     expect(c).toBe(a);
+  });
+});
+
+describe('composeEngineSuppressedSymbols — reproduction tests (defect #22)', () => {
+  /**
+   * KEY REPRODUCTION TEST (defect #22):
+   * On A138-17 with method='direct', the asm method set is EMPTY (direct → no
+   * suppression). The ONLY path that adds A_S_m to the result is the home-boundary
+   * term (symbolHomeSuppressedSymbols). If that term is removed from
+   * composeEngineSuppressedSymbols, this test FAILS — proving the fix is present.
+   */
+  it('A138-17 + method=direct + A_S_m home=A138-12 → A_S_m IS suppressed (home-boundary term)', () => {
+    const inheritedFromBySymbol = { A_S_m: 'A138-12' };
+    const result = composeEngineSuppressedSymbols('direct', 'A138-17', inheritedFromBySymbol);
+    // method='direct' → methodSet is EMPTY; only homeSet can add A_S_m
+    expect(result.has('A_S_m')).toBe(true);
+  });
+
+  /**
+   * HOME WORKSHEET: on the home worksheet A138-12, A_S_m is NOT cross-home
+   * (home === current), so the home-boundary term must NOT suppress A_S_m.
+   * With method='direct' (also no method suppression), result is empty.
+   */
+  it('A138-12 + method=direct + A_S_m home=A138-12 → A_S_m NOT suppressed (home === current)', () => {
+    const inheritedFromBySymbol = { A_S_m: 'A138-12' };
+    const result = composeEngineSuppressedSymbols('direct', 'A138-12', inheritedFromBySymbol);
+    expect(result.has('A_S_m')).toBe(false);
+  });
+
+  /**
+   * UNION CORRECTNESS: when both terms contribute symbols the result must contain
+   * symbols from both. Use method='geometry' (suppresses A_S_m via method term)
+   * plus a second cross-home symbol (A_D) contributed by the home-boundary term.
+   */
+  it('A138-17 + method=geometry + {A_S_m: A138-12, A_D: A138-15} → union contains both A_S_m and A_D', () => {
+    const inheritedFromBySymbol = { A_S_m: 'A138-12', A_D: 'A138-15' };
+    const result = composeEngineSuppressedSymbols('geometry', 'A138-17', inheritedFromBySymbol);
+    // A_S_m comes from BOTH the method term AND the home term (union; deduplicated)
+    expect(result.has('A_S_m')).toBe(true);
+    // A_D comes only from the home term (A138-15 ≠ A138-17)
+    expect(result.has('A_D')).toBe(true);
+  });
+
+  /**
+   * STABLE-EMPTY: when neither term suppresses anything, the function returns
+   * the stable-empty reference (for useMemo dep stability).
+   */
+  it('no suppressions → returns stable-empty reference (no useMemo churn)', () => {
+    const result1 = composeEngineSuppressedSymbols('direct', 'A138-12', {});
+    const result2 = composeEngineSuppressedSymbols('direct', 'A138-12', {});
+    expect(result1.size).toBe(0);
+    // Both calls with nothing to suppress return the same object reference
+    expect(result1).toBe(result2);
+  });
+
+  /**
+   * MAP INPUT: symbolHomes may be a ReadonlyMap, not just a plain Record.
+   * Verify the function handles both correctly.
+   */
+  it('accepts ReadonlyMap as symbolHomes', () => {
+    const homesMap = new Map([['A_S_m', 'A138-12']]);
+    const result = composeEngineSuppressedSymbols('direct', 'A138-17', homesMap);
+    expect(result.has('A_S_m')).toBe(true);
   });
 });
 

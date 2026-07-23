@@ -25,7 +25,8 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
-import { asmEngineSuppressedSymbols } from '@/lib/eval/asm-source';
+import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
+import { computeComputedSymbols } from '@/lib/eval/computed-symbols';
 
 // Derived symbols that the materialize pipeline writes on every A138-13 save.
 // They are NOT live formula-engine outputs, but share the same single-source
@@ -44,6 +45,16 @@ const LOADING_CHECK_SYMBOLS = new Set([
   'ac_as_ratio_check',
   'ac_as_ratio_check_reason',
 ]);
+
+// Finding G2a — A138-23 has NO equations → computeComputedSymbols returns ∅ →
+// recommended_phase_4_gate (a DERIVED engine-written enum) would render as a normal
+// EDITABLE SegmentedControl, visually identical to the editable phase_4_gate_result
+// verdict beside it (the #15b adjacency; selecting FAIL on it = no dirty → no save).
+// Mark it read-only here (same shape as BASIN_GOVERNING_SYMBOLS / LOADING_CHECK_SYMBOLS)
+// so DynamicField locks it + labels it as a recommendation. phase_4_gate_result stays
+// EDITABLE (it is the engineer-entered verdict, D3 rider). `fieldBySymbol.has(sym)`
+// keeps this harmless on every other worksheet/standard.
+const PHASE4_READONLY_SYMBOLS = new Set(['recommended_phase_4_gate']);
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   if (status === 'idle') return null;
@@ -230,6 +241,27 @@ export function WorksheetForm({
     return m;
   }, [fields]);
 
+  // HOME SIGNAL (fix-wave 2): the reliable "this symbol's home is elsewhere"
+  // signal is the FIELD being inherited — `field.inheritedFromWorksheet` — NOT
+  // inheritedFromBySymbol. On A138-17 the A_S_m field is an INJECTED inherited
+  // field (inheritedFromWorksheet='A138-12') that ALSO has a project_parameters
+  // row by field-id, so the page's initialValues loop resolves it as a "local
+  // param" (step 1) and NEVER sets inheritedFromBySymbol['A_S_m']. Keying the
+  // home-boundary suppression / render exclusion on inheritedFromBySymbol alone
+  // is therefore a no-op for the exact symbol we must protect. We UNION the
+  // field-derived homes over inheritedFromBySymbol and feed the union to BOTH
+  // home-boundary consumers (composeEngineSuppressedSymbols and
+  // computeComputedSymbols). Field homes win on collision (they are the direct
+  // field-level truth); non-inherited own fields never add an entry so the
+  // home!==current filter inside the helpers leaves owners unsuppressed.
+  const inheritedHomeBySymbol = useMemo<Record<string, string>>(() => {
+    const m: Record<string, string> = { ...inheritedFromBySymbol };
+    for (const f of fields) {
+      if (f.inheritedFromWorksheet) m[f.symbol] = f.inheritedFromWorksheet;
+    }
+    return m;
+  }, [inheritedFromBySymbol, fields]);
+
   // Symbols that are equation outputs — the engine writes them; they must not
   // be hand-editable (isComputed=true in DynamicField).
   // BASIN_GOVERNING_SYMBOLS (r_D_n, D_min) are NOT equation outputs in the
@@ -246,28 +278,23 @@ export function WorksheetForm({
   // as BASIN_GOVERNING_SYMBOLS: single-source from the materialize pass, not
   // hand-editable. The gating `fieldBySymbol.has(sym)` ensures these entries
   // are harmless on every other standard where the symbols don't exist.
-  const computedSymbols = useMemo(() => {
-    const set = new Set<string>();
-    for (const e of sortedEquations) {
-      const out = e.outputSymbol;
-      if (out && fieldBySymbol.has(out)) set.add(out);
-    }
-    // Basin-governing derived outputs: persisted by save (not live engine),
-    // but equally non-editable. Add them unconditionally — on non-A138-13
-    // worksheets these symbols simply won't appear in fieldBySymbol, so the
-    // entries in the set are harmless.
-    for (const sym of BASIN_GOVERNING_SYMBOLS) {
-      if (fieldBySymbol.has(sym)) set.add(sym);
-    }
-    // Tab.6 loading-check derived outputs (A138-12): T3-materialized on save.
-    // Read-only via the same isComputed=true path. Harmless on other standards
-    // because fieldBySymbol.has(sym) gates inclusion.
-    for (const sym of LOADING_CHECK_SYMBOLS) {
-      if (fieldBySymbol.has(sym)) set.add(sym);
-    }
-    return set;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortedEquations, fieldBySymbol]);
+  // Finding E (home-exclusion): a local equation output whose value is INHERITED
+  // from a different worksheet (its home) must NOT render as a local computed
+  // output — it renders the inherited value, not a blank client-engine card.
+  // computeComputedSymbols folds in the two materialized-derived extra symbol
+  // groups (BASIN_GOVERNING / LOADING_CHECK) byte-identically to the previous
+  // inline union, and applies the same fieldBySymbol.has() gate, EXCEPT it now
+  // drops any symbol whose home (inheritedFromBySymbol) is elsewhere. The engine
+  // write-back for those symbols is already suppressed via
+  // composeEngineSuppressedSymbols so the inherited store value survives.
+  const computedSymbols = useMemo(
+    () =>
+      computeComputedSymbols(sortedEquations, inheritedHomeBySymbol, {
+        hasField: (sym) => fieldBySymbol.has(sym),
+        extraSymbols: [...BASIN_GOVERNING_SYMBOLS, ...LOADING_CHECK_SYMBOLS, ...PHASE4_READONLY_SYMBOLS],
+      }),
+    [sortedEquations, fieldBySymbol, inheritedHomeBySymbol],
+  );
 
   // Resolve the A_S,m determination-method BEFORE wiring the engine so the
   // suppress-write-back set is in scope at the useEquationEngine call site.
@@ -283,21 +310,33 @@ export function WorksheetForm({
 
   // Memoized suppression set fed to the engine's suppressWriteBackSymbols param.
   //
-  // OWNERSHIP PRINCIPLE: Gl.7 (A138-12 formula engine) owns A_S,m ONLY when
-  // method='direct' (and when asmMethod is null/unset, which defaults to direct).
-  // For every other method the server (materializeAsm) is the authoritative
-  // producer, so the client engine write-back MUST be suppressed:
+  // OWNERSHIP PRINCIPLE (method): Gl.7 (A138-12 formula engine) owns A_S,m
+  // ONLY when method='direct' (and when asmMethod is null/unset, which defaults
+  // to direct). For every other method the server (materializeAsm) is the
+  // authoritative producer, so the client engine write-back MUST be suppressed:
   //   - 'manual'        → engineer enters directly; Gl.7 must not clobber.
   //   - 'geometry'      → geometry eqs on A138-17/18 produce the value.
   //   - 'soil_estimate' → materializeAsm derives from Tab.13/A_C; without
   //                       suppression Gl.7 (e.g. 45) fights the server (e.g. 967)
   //                       producing an INFINITE SAVE LOOP (~1 write/7 s).
   //
-  // The helper returns a stable-empty set for the non-suppressed case so this
-  // memo/effect dep does not churn on non-A138-12 worksheets (asmMethod=null).
+  // OWNERSHIP PRINCIPLE (home boundary, defect #22): A facility worksheet must
+  // not let a local equation shadow-write a symbol whose single active-field home
+  // is a DIFFERENT worksheet. inheritedHomeBySymbol maps symbol → home worksheet
+  // code (field-derived homes UNIONed over inheritedFromBySymbol — see the memo
+  // above for why the field signal is the reliable one); every entry is an
+  // inherited symbol that the current worksheet does not
+  // own. Suppressing these write-backs ensures the inherited home value (e.g.
+  // A_S_m from A138-12 on A138-17) is not blanked by a local Gl.16 that cannot
+  // yet compute (missing h_M). The server materialize path (Gl.16→A138-12 via
+  // registry / worksheet.ts) is untouched.
+  //
+  // The union of both sets: on A138-12 method='direct' both are empty (no churn);
+  // on A138-17 method='geometry' the asm set may already cover A_S_m, but the
+  // home-boundary set provides the general guard independent of asmMethod.
   const engineSuppressedSymbols = useMemo<ReadonlySet<string>>(
-    () => asmEngineSuppressedSymbols(asmMethod),
-    [asmMethod],
+    () => composeEngineSuppressedSymbols(asmMethod, worksheet.template.code, inheritedHomeBySymbol),
+    [asmMethod, worksheet.template.code, inheritedHomeBySymbol],
   );
 
   // Engine wiring lives in a shared hook so the integration test renders
