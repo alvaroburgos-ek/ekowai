@@ -164,3 +164,35 @@ CONCLUSION: 5/6 buildable in-layer (mapping fixes + materialize computes are fix
 - ORCHESTRATOR VERIFY: harness integration 13/13 pass (8 facility + finding-H + pilot 4); #22 guard GREEN (21+1xfail); by-file tsc 28 (0 new); unit 1220+1xfail. REVERT-VERIFY Schacht: reverting Gl.35 displayOnly → Schacht harness test FAILS (V_S clobber via real save path); restored. (22 other integration files fail = pre-existing DATABASE_URL-gated, unrelated.)
 - NEW FINDING (Becken): A138-22 has no f_A/Q_Dr home fields → defaulted 1/0 per §6.8.2 "gegebenenfalls" (optional). Reduced-f_A/drain projects would need an importer field-add (batched with re-encode items).
 - BATCHED RATIFICATION (MRS): §6.6.2 "analog zur Bemessung von MRE" → MRS storage = V_MR (V_M+V_R), NOT the ratified V_MUE (Gl.30 overflow). A138-20 has no V_MR field. Needs: (a) reverse the mrs→V_MUE ratified mapping, (b) re-encode a V_MR field on A138-20 (prod). Awaiting user ratification.
+
+## SIGNED BASELINE 2026-07-23 — new tracked regression reference
+User-audit-confirmed prod PLT-HS-01 value set. This is the tracked regression reference for DWA-A-138-1 Phase 4 going forward.
+
+- Facility: mulde (A138-17), confirms Finding A.
+- A_S_m (footprint) = 943.4338711204341. Nudge re-swept live: 913,79/283,28 at h_M=0,31, then restored to 943,4339/283,0302 (record both the nudge and the restore).
+- V_M / A138-23 governing volume = 283.0301613361302 (persisted, real-save-path verified).
+- ac_as_ratio ≈ 107.47622.
+- Summary reasons: q_S,AC-only.
+- phase_4_gate_result = PASS — engineer OVERRIDE over the FAIL recommendation; logged explicitly as the override-path test (deliberate, by the user).
+- recommended_phase_4_gate = FAIL (derived; meets_qsac=false).
+- REQ-19 ✓; A138-28 aggregating with REQ-30 (now WARN) blocking correctly.
+- Prod severity state: R3 REQ-30=warn + all-gates conjunction; R2b REQ-21 condition = `design_adequacy_result IN {PASS, NA}`; R4 REQ-26 source_quote corrected (§5.3.4.1). Applied+verified prod, commit 63948e7.
+- Merged to main: 14de502.
+
+### STEP-3 prod deploy (2026-07-23)
+- Vercel project: ekowai-wizard-preview (single prod project; NO auto-deploy on merge — deployed manually via `vercel --prod`).
+- Deployment id: dpl_CzLorfDav51BJXWpAzFahmTQt5PL — readyState READY, target production.
+- Deployment URL: ekowai-wizard-preview-m1fkcvgd3-hannesosters-projects.vercel.app
+- All wizard-family prod aliases re-pointed to the new deployment (SOURCE = ...-m1fkcvgd3-...), each curl 200 → /de/login:
+  - wizard.ekowai-engineering.de (auto-aliased by deploy)
+  - ekowai-wizard-preview.vercel.app (auto-aliased by deploy)
+  - ekowai-138-pilot.vercel.app (stable pilot alias)
+  - ekowai-wizard-preview-hannesoster-hannesosters-projects.vercel.app (user's -hannesoster- custom alias)
+  - ekowai-wizard-preview-hannesosters-projects.vercel.app (-hannesosters- custom alias)
+  - ekowai-wizard-preview-alvaroburgos-2539-hannesosters-projects.vercel.app (-alvaroburgos- custom alias)
+
+### RATIFIED-but-deferred (to Phases 5-6 / MRS build)
+- R1: MRS → V_MR, WARN.
+- R2: A138-25 recommended-verdict field, BLOCK.
+- R5: Becken fields, BLOCK.
+These are ratified but deferred; not part of this baseline's applied prod state.
