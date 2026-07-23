@@ -1,6 +1,7 @@
 import { config as loadEnv } from 'dotenv';
 import { parseWorkbook } from './_pass3c-parsers';
-import { validateWorkbook } from './_pass3c-validate';
+import { validateWorkbook, computeWorkbookGateDenyKeys } from './_pass3c-validate';
+import { computeWorkbookScanFindings } from './_pass3c-scans';
 import { importWorkbook, type ImportCounts } from './_pass3c-db';
 
 loadEnv({ path: '.env.local' });
@@ -47,6 +48,24 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   console.log(`✓ Validation passed (no errors)`);
+
+  // Encode-time defect scans (NON-BLOCKING) — the faithfulness gate plus the
+  // three machine detectors (ES-1 → S1/S7, inverted-tag → S12, twin → S3/S4).
+  // They surface candidates for the deep audit / fix campaign; they never block
+  // import. See DEFECT-REGISTER "Import-time SCANS" + 2026-07-15-audit-scan-inventory.
+  const gateDeny = computeWorkbookGateDenyKeys(parsed);
+  const scans = computeWorkbookScanFindings(parsed);
+  const es1Harmful = scans.es1.filter((f) => f.harmful);
+  console.log('Encode-time scans (non-blocking — triage for the deep audit):');
+  console.log(
+    `  Faithfulness gate (unresolved-symbol deny candidates): ${gateDeny.length}` +
+      (gateDeny.length ? ` — ${gateDeny.map((d) => d.key).join(', ')}` : ''),
+  );
+  console.log(`  ES-1 inequality-as-producer: ${scans.es1.length} (${es1Harmful.length} harmful → displayOnly/compliance disposition)`);
+  for (const f of es1Harmful) console.log(`    ⚠ ${f.key} produces ${f.outputSymbol} via inequality`);
+  console.log(`  Inverted clause tag (S12, wrong-field-entry): ${scans.invertedTag.length}`);
+  for (const f of scans.invertedTag) console.log(`    ⚠ ${f.worksheet}: ${f.decoy} [${f.tag}] unconsumed vs consumed twin ${f.consumedTwin} (source-verify before dedup)`);
+  console.log(`  Twin fields (#15b, low-precision review surface): ${scans.twin.length}`);
 
   if (dryRun) {
     console.log('--dry-run: skipping DB write.');
