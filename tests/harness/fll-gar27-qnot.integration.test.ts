@@ -13,12 +13,14 @@
  * use is false confidence. Here BOTH the compute (evaluateFormula) and the persist
  * (saveWorksheet) are the production code paths.
  *
- * KNOWN ITEM #1 — the C=0,82 correction:
+ * KNOWN ITEM #1 — the C=1,0 correction (RATIFIED; 0,82 WITHDRAWN):
  *   The live project f7249ae1… has the equation-consumed field `C` = 0.83, which
- *   persists the WRONG Q_NOT = 5.237382. The correct abflussbeiwert is 0.82 (it is
- *   present but stranded in the decoy twin `C_abflusswert`). With C = 0.82 the
- *   chain yields Q_NOT = 5.274728. This test asserts the corrected chain (GREEN)
- *   AND the current wrong chain (RED) so the number is genuinely discriminating.
+ *   persists the WRONG Q_NOT = 5.237382. The correct abflussbeiwert is C = 1,0 —
+ *   the ONLY abflussbeiwert the FLL-GAR-2023 source states, verbatim in the
+ *   Anhang-1 Düsseldorf worked example ("Abflussbeiwert C = 1", nach DIN 1986-100).
+ *   With C = 1,0 the chain yields Q_NOT = (317 − 142·1)·(263/10000) = 4.6025.
+ *   This test asserts the corrected chain (GREEN) AND the current wrong chain (RED)
+ *   so the number is genuinely discriminating.
  */
 // @vitest-environment node
 import './_harness-env-fll'; // top-level-await: starts PG + seeds BEFORE @/lib/db loads
@@ -81,7 +83,7 @@ describe('FLL-GAR-27 Q_NOT — real client-compute + real saveWorksheet (embedde
     // Guards the assertion targets against formula drift.
     expect(clientComputesQNot(GAR27.C_CORRECT)).toBeCloseTo(expectedQNot(GAR27.C_CORRECT), 9);
     expect(clientComputesQNot(GAR27.C_WRONG)).toBeCloseTo(expectedQNot(GAR27.C_WRONG), 9);
-    expect(expectedQNot(GAR27.C_CORRECT)).toBeCloseTo(5.274728, 6); // KNOWN ITEM #1 target
+    expect(expectedQNot(GAR27.C_CORRECT)).toBeCloseTo(4.6025, 6);   // RATIFIED target (C=1,0)
     expect(expectedQNot(GAR27.C_WRONG)).toBeCloseTo(5.237382, 6);   // current wrong value
   });
 
@@ -93,17 +95,17 @@ describe('FLL-GAR-27 Q_NOT — real client-compute + real saveWorksheet (embedde
     expect(q).not.toBeNull();
     expect(q!).toBeCloseTo(5.237382, 6);
     // Prove the target is NOT already satisfied by the wrong C (discrimination).
-    expect(Math.abs(q! - 5.274728)).toBeGreaterThan(0.03);
+    expect(Math.abs(q! - 4.6025)).toBeGreaterThan(0.03);
   });
 
-  it('GREEN — corrected chain (C=0,82) drives Q_NOT = 5.274728 through the REAL save path', async () => {
+  it('GREEN — corrected chain (C=1,0) drives Q_NOT = 4.6025 through the REAL save path', async () => {
     const computed = clientComputesQNot(GAR27.C_CORRECT);
     const res = await saveQNot(GAR27.C_CORRECT, computed);
     expect(res.ok).toBe(true);
     const q = await persistedQNot();
     expect(q).not.toBeNull();
-    // KNOWN ITEM #1 acceptance — Q_NOT = 5,274728 (± float epsilon) through
+    // KNOWN ITEM #1 acceptance — Q_NOT = 4,6025 (± float epsilon) through
     // real client-compute (evaluateFormula) + real saveWorksheet.
-    expect(q!).toBeCloseTo(5.274728, 6);
+    expect(q!).toBeCloseTo(4.6025, 6);
   });
 });

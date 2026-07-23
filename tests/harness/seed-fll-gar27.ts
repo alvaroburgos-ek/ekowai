@@ -21,13 +21,18 @@
  *   - A = 263, r_5_100 = 317, r_5_5 = 142  → the live project's entered inputs.
  *   - C: the live equation-consumed field `C` (id d6f02425-…) holds 0.83, which
  *     yields the WRONG derived Q_NOT = 5.237382 currently persisted on the live
- *     project. The CORRECT abflussbeiwert is 0.82 — it is present but stranded in
- *     the DECOY field `C_abflusswert` (id 34d5b6f0-…). With C = 0.82 the chain
- *     yields Q_NOT = 5.274728 (KNOWN ITEM #1 target). See fll-m1-report.md.
+ *     project. The CORRECT abflussbeiwert is C = 1,0 — the ONLY abflussbeiwert
+ *     the FLL-GAR-2023 source states, VERBATIM in the Anhang-1 Düsseldorf worked
+ *     example: "Abflussbeiwert C = 1", "nach DIN 1986-100" (GAR PDF
+ *     `fll_gewaesserabdichtungsrichtlinien_2023__2 (2).pdf`, Anhang-1 line 16;
+ *     the same example computes Q_NOT = 23,28 l/s for its 800 m² case). With
+ *     C = 1,0 the live chain yields Q_NOT = (317 − 142·1)·(263/10000) =
+ *     175·0,0263 = 4.6025 (RATIFIED target). See fll-m1-closeout-report.md.
  *
- * The FLL-GAR PDF itself does NOT tabulate C (it defers to DIN 1986-100 for the
- * Abflussbeiwert; §… L1591-1603). C = 0.82 is a DIN-1986-100 runoff coefficient,
- * NOT an FLL-GAR value — recorded as such in the report's ratification bundle.
+ * The decoy twin `C_abflusswert` (id 34d5b6f0-…) holds 0,82 — a DIN-1986-100
+ * runoff coefficient traced to the bring-up log, NOT an FLL-GAR source value.
+ * The user WITHDREW 0,82; SR-1 worked correctly. We do NOT use the twin's value;
+ * it is collapsed into consumed `C`.
  */
 import type postgres from 'postgres';
 
@@ -37,15 +42,15 @@ export const GAR_GL1_FORMULA = '(r_5_100 - r_5_5 * C) * (A / 10000)';
 
 /**
  * Live FLL-GAR-27 inputs from project f7249ae1… (read-only source-verified).
- * C_CORRECT (0.82) is the fix target; C_WRONG (0.83) is the currently-persisted
- * equation-consumed value that produces the wrong Q_NOT.
+ * C_CORRECT (1.0) is the RATIFIED, PDF-attested fix target; C_WRONG (0.83) is the
+ * currently-persisted equation-consumed value that produces the wrong Q_NOT.
  */
 export const GAR27 = {
   A: 263,
   r_5_100: 317,
   r_5_5: 142,
-  C_CORRECT: 0.82, // → Q_NOT = 5.274728  (KNOWN ITEM #1 target)
-  C_WRONG: 0.83,   // → Q_NOT = 5.237382  (currently persisted on the live project)
+  C_CORRECT: 1.0, // → Q_NOT = 4.6025   (RATIFIED target; PDF Anhang-1 "C = 1")
+  C_WRONG: 0.83,  // → Q_NOT = 5.237382 (currently persisted on the live project)
 };
 
 /** Q_NOT for a given C, computed in-test so the assertion cannot drift from the
@@ -131,10 +136,11 @@ export async function seedFllGar27(
   await insParam(aFieldId, { value_number: String(GAR27.A) });
   await insParam(r5100FieldId, { value_number: String(GAR27.r_5_100) });
   await insParam(r55FieldId, { value_number: String(GAR27.r_5_5) });
-  // The decoy twins carry saved values on the live row (A mirrored; the correct
-  // C=0.82 stranded in C_abflusswert). Seed them for row-shape fidelity.
+  // The decoy twins carry saved values on the live row (A mirrored; the stale
+  // DIN-1986-100 0,82 stranded in C_abflusswert — NOT the ratified value). Seed
+  // them for row-shape fidelity; the twin's 0,82 is withdrawn and unused.
   await insParam(aEinzugsflaecheFieldId, { value_number: String(GAR27.A) });
-  await insParam(cAbflusswertFieldId, { value_number: String(GAR27.C_CORRECT) });
+  await insParam(cAbflusswertFieldId, { value_number: '0.82' });
   // NOTE: the equation-consumed `C` and the derived `Q_NOT` are NOT pre-seeded —
   // the test drives them through saveWorksheet so the assertion exercises the
   // real save path, not a pre-baked row.
