@@ -37,14 +37,20 @@ const DEFECT_REGISTER =
   'C:/Users/Ekowai/Obsidian/SecondBrain/01-Projects/ekowai-wizard/defect-register.md';
 const LEDGER_DIR = join(repoRoot, '.superpowers', 'sdd');
 
-const STANDARD_DIRS = {
-  'DWA-A-138-1': 'DWA-A-138-1',
-  'FLL-GAR-2023': 'FLL-GAR-2023',
-  'FLL-Naturteich-2017': 'FLL-Naturteich-2017',
-  'FLL-TP-RHIZOM-2023': 'FLL-TP-RHIZOM-2023',
-  'DIN-18130-1': 'DIN-18130-1',
-  'DWA-A-102-2': 'DWA-A-102-2',
-};
+// STANDARD_DIRS auto-discovers every subdirectory under the reasoning-maps root:
+// each subdir is one standard (dir name == standard code). This picks up
+// newly-generated maps with no per-standard edit here. Non-directory entries and
+// dotfiles are ignored. Must be a function of `mapsDir` because --maps can point
+// at a fixtures copy, so we compute it after CLI parsing (see below).
+function discoverStandardDirs(root) {
+  const dirs = {};
+  for (const ent of readdirSync(root, { withFileTypes: true })) {
+    if (!ent.isDirectory()) continue;
+    if (ent.name.startsWith('.') || ent.name.startsWith('_')) continue;
+    dirs[ent.name] = ent.name;
+  }
+  return dirs;
+}
 // Files that are map-level, not value nodes (exempt from #1/#2 source_page checks).
 const MAP_LEVEL = new Set(['_index', '_template-node']);
 // The single intentional external wikilink target shared by every map.
@@ -59,6 +65,9 @@ function argVal(flag) {
 const mapsDir = argVal('--maps') || DEFAULT_MAPS_DIR;
 const jsonOut = argVal('--json');
 const queryName = argVal('--query');
+
+// Auto-discovered standard set for THIS mapsDir (each subdir = one standard).
+const STANDARD_DIRS = discoverStandardDirs(mapsDir);
 
 // ── Frontmatter + typed-link parser ─────────────────────────────────────────
 function parseFrontmatter(text) {
@@ -249,6 +258,28 @@ const defects = defectRegisterNodes();
 const maps = {};
 for (const std of Object.keys(STANDARD_DIRS)) maps[std] = loadMap(std);
 
+// Cross-map link resolution.
+// A path-style wikilink target `[[A/B]]` (e.g. [[DWA-M-229-1/_index]],
+// [[DWA-A-138-1/_template-node]]) resolves iff map dir `A` exists AND node `B`
+// exists in it — where `B` may also be a map-level node (`_index`/`_template-node`).
+// Non-path targets resolve locally (same map) as before. Only truly-unresolvable
+// targets are flagged. This does NOT touch KNOWN_BUILDS = gitCommitsExist().
+function linkResolves(localNodeIds, target) {
+  const t = target.split('|')[0].trim(); // strip alias
+  if (localNodeIds.has(t) || t === SHARED_EXTERNAL) return true;
+  const slash = t.indexOf('/');
+  if (slash > 0) {
+    const std = t.slice(0, slash);
+    const node = t.slice(slash + 1);
+    const otherMap = maps[std];
+    if (otherMap) {
+      if (MAP_LEVEL.has(node)) return true; // _index / _template-node always allowed
+      if (otherMap.nodeIds.has(node)) return true;
+    }
+  }
+  return false;
+}
+
 // ═════════════════════════ CHECK 1 — STRUCTURAL INTEGRITY ════════════════════
 function checkStructural(map) {
   const { stdCode, nodes, nodeIds } = map;
@@ -289,10 +320,12 @@ function checkStructural(map) {
           `normative-as-input-reference with no consumed_by:: edge (must be a reference input)`);
     }
 
-    // wikilink targets resolve (no dangling edges)
+    // wikilink targets resolve (no dangling edges).
+    // Cross-map path-style links [[A/B]] resolve via linkResolves (see above);
+    // only truly-unresolvable targets are flagged.
     for (const target of node.wikilinks) {
       const t = target.split('|')[0].trim(); // strip alias
-      const ok = nodeIds.has(t) || t === SHARED_EXTERNAL;
+      const ok = linkResolves(nodeIds, target);
       bumpCheck('1.links-resolve', ok);
       if (!ok)
         finding('ERROR', '1.links-resolve', stdCode, id, `dangling wikilink -> [[${t}]]`);

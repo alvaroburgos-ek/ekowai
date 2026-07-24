@@ -60,6 +60,18 @@ finding (the F-7 class). Classification happens at map-generation from the PDF +
 cases (normative binding table vs. exemplary Anhang worked example, modal verbs) go to Alvaro's
 decision batch — never guessed.
 
+**Flywheel — validator link-resolution rule (added 2026-07-24, Wave-0 reconciliation).** The
+reasoning-map validator (`scripts/reasoning-map/validate.mjs`, check `1.links-resolve`) treats a
+path-style cross-map wikilink `[[A/B]]` as RESOLVED when map dir `A` exists AND node `B` exists in it
+(or `B` is `_index`/`_template-node`); only truly-unresolvable targets are flagged. Before this
+refinement, every legitimate cross-map reference (e.g. `[[DWA-M-229-1/_index]]`) counted as a dangling
+edge — a validator-convention false positive, NOT a real defect. Correspondingly, a Wave-0 PDF-VA node
+carries `provenance_build: ""` (VA justified by `source_page`; the `2b.va-build-resolves` check exempts
+empty) — a non-commit placeholder build string is an artifact, not a defect. `KNOWN_BUILDS =
+gitCommitsExist()` remains the un-poisonable VA-build anchor. Guard: the 5-known-errors proof
+(`seed-known-errors.mjs` → fixtures → validate) must still exit 6 after any resolver change, so the
+refinement can never over-exempt a real dangler.
+
 ## Process
 - **Raw output for claims.** Every "it passes / it persists / it fires" claim is backed by pasted raw
   command output (vitest result, SQL read-back, git log), not a summary.
@@ -82,6 +94,13 @@ decision batch — never guessed.
   (`guidelines_for_the_planning_construction_and_maintenance_of_private_natural_swimming_pools_2017_p (1).pdf`).
 - **DWA-A-138-1 PDF:** `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-138-1\DWA-A_138-1_WD (5).pdf`
   (markdown/xlsx siblings in the same folder).
+- **DWA / DIN regulations:** `C:\Users\Ekowai\Desktop\Guidelines\` (incl. `DWA DIN Scribd\`) and
+  `C:\Users\Ekowai\Desktop\Share\Regulations\` (per-standard subfolders; e.g. DWA-A-102-2 is a 4-part set).
+- **ISO / environmental standards:** `C:\Users\Ekowai\Desktop\Circular economy, sustainability and water test\`
+  (all ISO-5667-x, ISO-59xxx, 14015/14033/14050/14097/14019-1/14002-2/46001, ATV-A-704E) and VSME at
+  `C:\Users\Ekowai\Desktop\environmental-reporting service\01_Referenz\`.
+- **Sweep staging drop:** newly-supplied PDFs land in `C:\Users\Ekowai\Desktop\Sweep Guidelines PDF\<code>.pdf`
+  (the one known gap at inventory time: ISO-5667-6).
 
 ## PDF reader pipeline (Ekowai-PC-01)
 WSL `/mnt/c` is BLIND to `C:\Users\Ekowai\Desktop\FLL Guidelines PDF` — use Windows paths, not the
