@@ -1,0 +1,3 @@
+# Transient proof artifacts — regenerate with seed-known-errors.mjs + validate.mjs
+fixtures/
+_*-result.json
