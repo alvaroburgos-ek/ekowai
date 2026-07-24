@@ -25,6 +25,13 @@ chat**. Every source verification reads the RENDERED PDF; markdown/JSON extracti
 convenience only. **A VA (verified-authoritative) claim without a PDF-page reference is invalid.**
 PDF-confirmed = VA; markdown-only = VC; a PDF-vs-markdown disagreement is itself a finding (PDF wins).
 
+**SR-4 — Infra for a mandate is auto-approved.** Schema/infrastructure changes needed to fulfill an
+APPROVED mandate are auto-approved: pick the option consistent with production reality + the mandate,
+log the decision + rationale in the ledger, and proceed — never stop to ask for this class (e.g. when
+a brief's premise doesn't match reality, take the reality-consistent path and continue). The ONLY
+stop-conditions are: prod applies OUTSIDE an approved mandate, changes to ratified designs, and
+irreversibles.
+
 ## Provenance grades
 - **EV** — encoded/exists in the DB, unverified against source.
 - **VC** — verified against a convenience extraction (markdown/JSON) only; PDF page not confirmed.

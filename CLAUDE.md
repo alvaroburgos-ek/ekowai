@@ -12,6 +12,10 @@ chat memory. **Every subagent brief must paste that doctrine VERBATIM, never sum
 - **SR-2** — ranges are surfaced as explicit engineer selections, never auto-picked.
 - **SR-3** — the rendered PDF is ground truth (**PDF > markdown > encoding > ledger > chat**); a VA
   claim without a PDF-page ref is invalid.
+- **SR-4** — schema/infrastructure changes needed to fulfill an **approved mandate are
+  AUTO-APPROVED**: pick the option consistent with production reality + the mandate, log the decision
+  + rationale in the ledger, proceed. Never stop to ask for this class. The ONLY stop-conditions
+  remain: prod applies OUTSIDE an approved mandate, changes to ratified designs, irreversibles.
 - **data_class** on every value node: `standard_fixed` (PDF-page required) / `standard_range`
   (SR-2 selection) / `engineer_input` / `derived` (trace required), with the #22 and F-7 validator rules.
 - **Process** — raw output for every claim; sequential subagent-per-task with orchestrator
