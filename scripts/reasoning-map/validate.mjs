@@ -42,6 +42,7 @@ const STANDARD_DIRS = {
   'FLL-GAR-2023': 'FLL-GAR-2023',
   'FLL-Naturteich-2017': 'FLL-Naturteich-2017',
   'FLL-TP-RHIZOM-2023': 'FLL-TP-RHIZOM-2023',
+  'DIN-18130-1': 'DIN-18130-1',
 };
 // Files that are map-level, not value nodes (exempt from #1/#2 source_page checks).
 const MAP_LEVEL = new Set(['_index', '_template-node']);
@@ -129,7 +130,12 @@ function inferType(id, fm) {
 }
 
 function extractCrCode(title, id) {
-  // Node CR codes: "A138-REQ-01 …", "FLL-GAR REQ-08 …", "FLLTP-RHZ REQ-RHZ18-VERDICT …"
+  // Node CR codes: "A138-REQ-01 …", "FLL-GAR REQ-08 …", "FLLTP-RHZ REQ-RHZ18-VERDICT …",
+  // and the DIN-family form "<STD>-CR-NN" (e.g. "DIN-18130-1-CR-01 …"). Match the
+  // fully-qualified <STD>-CR-NN first so the whole DB code is captured, then the
+  // REQ-family, then fall back to the filename slug.
+  const cr = title.match(/([A-Z0-9]+(?:-[A-Z0-9]+)*-CR-[A-Z0-9-]+)/);
+  if (cr) return cr[1];
   const m = title.match(/(A138-REQ-[A-Z0-9-]+|REQ-[A-Z0-9-]+)/);
   if (m) return m[1];
   const im = id.match(/(req-[a-z0-9-]+)/i);

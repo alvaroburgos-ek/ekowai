@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-24T12:08:07.325Z",
+  "exported_at": "2026-07-24T12:30:37.677Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "DWA-A-138-1": {
@@ -18612,6 +18612,1458 @@
               "label_en": "terminated early",
               "order_index": 3,
               "regulation_reference": "§3.12"
+            }
+          ]
+        }
+      ]
+    },
+    "DIN-18130-1": {
+      "standard": {
+        "id": "4a53393a-e875-446f-b153-f47a402a4370",
+        "code": "DIN-18130-1",
+        "title_de": "Baugrund, Untersuchung von Bodenproben – Bestimmung des Wasserdurchlässigkeitsbeiwerts – Teil 1: Laborversuche",
+        "title_en": "Soil, investigation and testing – Determination of the coefficient of water permeability – Part 1: Laboratory tests",
+        "version": "1998-05 (Ersatz für 1989-11)"
+      },
+      "worksheets": [
+        {
+          "id": "608240ce-515d-4320-954d-dad8934865b8",
+          "code": "DIN-18130-1-01",
+          "standard_id": "4a53393a-e875-446f-b153-f47a402a4370",
+          "title_de": "Versuchsgrundlagen, Bodenauswahl und Versuchsklasse",
+          "phase": 1,
+          "archetype": "data_collection",
+          "order_index": 1
+        },
+        {
+          "id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "code": "DIN-18130-1-02",
+          "standard_id": "4a53393a-e875-446f-b153-f47a402a4370",
+          "title_de": "Versuchsanordnung und Versuchsdurchführung",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 2
+        },
+        {
+          "id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "code": "DIN-18130-1-03",
+          "standard_id": "4a53393a-e875-446f-b153-f47a402a4370",
+          "title_de": "Messdatenerfassung (Durchfluss/Spiegelhöhen/Zeit)",
+          "phase": 3,
+          "archetype": "data_collection",
+          "order_index": 3
+        },
+        {
+          "id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "code": "DIN-18130-1-04",
+          "standard_id": "4a53393a-e875-446f-b153-f47a402a4370",
+          "title_de": "Auswertung – Berechnung des Durchlässigkeitsbeiwerts k",
+          "phase": 4,
+          "archetype": "calculation",
+          "order_index": 4
+        },
+        {
+          "id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa",
+          "code": "DIN-18130-1-05",
+          "standard_id": "4a53393a-e875-446f-b153-f47a402a4370",
+          "title_de": "Ergebnisangabe und Transfer an DWA-A-138",
+          "phase": 5,
+          "archetype": "summary",
+          "order_index": 5
+        }
+      ],
+      "fields": [
+        {
+          "id": "597006b7-7a19-4f40-bc02-814552e25c49",
+          "symbol": "bodenart",
+          "data_type": "text",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02",
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "bodenart != ''"
+          }
+        },
+        {
+          "id": "d7a1693d-9968-4e2a-b2d9-8832ec0d3602",
+          "symbol": "bodengruppe",
+          "data_type": "text",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "08a5ce38-c0da-435c-a0a6-7b35c6bbe158",
+          "symbol": "max_d",
+          "data_type": "number",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "max_d > 0"
+          }
+        },
+        {
+          "id": "6d6c6496-cb39-438d-89a7-41ded8a97cf3",
+          "symbol": "ungleichfoermig",
+          "data_type": "boolean",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "b4a22ebc-9e9d-4086-9148-30e4e980c7ef",
+          "symbol": "wasser_geeignet",
+          "data_type": "boolean",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "wasser_geeignet == true"
+          }
+        },
+        {
+          "id": "4cb64643-51ba-4514-aa87-35dc0a698394",
+          "symbol": "S_r",
+          "data_type": "number",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02",
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "S_r >= 0 AND S_r <= 1"
+          }
+        },
+        {
+          "id": "ef6e2637-66ea-4f58-a735-196e2ac312d1",
+          "symbol": "dichte_konstant",
+          "data_type": "boolean",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "9040ec63-d366-4173-9a85-5a84dc4fda21",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "dichte_konstant == true"
+          }
+        },
+        {
+          "id": "0813691e-6a6e-4148-bddf-550cb50b650d",
+          "symbol": "versuchsklasse",
+          "data_type": "enum",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "713e6f9f-1571-4a04-a12f-d731031aba99",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02",
+            "DIN-18130-1-05"
+          ],
+          "enum_values": [
+            {
+              "value": "1a",
+              "label_de": "Wassersättigung nachgewiesen, Strömung stationär nachgewiesen",
+              "label_en": "Saturation proven, steady flow proven",
+              "order_index": 1,
+              "regulation_reference": "Tab.4"
+            },
+            {
+              "value": "1b",
+              "label_de": "Wassersättigung nachgewiesen, Strömung stationär angenommen",
+              "label_en": "Saturation proven, steady flow assumed",
+              "order_index": 2,
+              "regulation_reference": "Tab.4"
+            },
+            {
+              "value": "2",
+              "label_de": "Keine Wassersättigung, Strömung stationär nachgewiesen",
+              "label_en": "No saturation, steady flow proven",
+              "order_index": 3,
+              "regulation_reference": "Tab.4"
+            },
+            {
+              "value": "3",
+              "label_de": "Keine Wassersättigung, Strömung nicht nachgewiesen",
+              "label_en": "No saturation, steady flow not proven",
+              "order_index": 4,
+              "regulation_reference": "Tab.4"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "versuchsklasse IN {1a,1b,2,3}"
+          }
+        },
+        {
+          "id": "a386681f-97c9-4e3e-917b-e057f56f1f11",
+          "symbol": "bezeichnung",
+          "data_type": "text",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "713e6f9f-1571-4a04-a12f-d731031aba99",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "59bc1db9-de60-40cc-8bfb-027362c69253",
+          "symbol": "durchlaessigkeitsbereich",
+          "data_type": "enum",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "713e6f9f-1571-4a04-a12f-d731031aba99",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": [
+            {
+              "value": "sehr_schwach_durchlaessig",
+              "label_de": "sehr schwach durchlässig (k < 1e-8 m/s)",
+              "label_en": "very low permeability (k < 1e-8 m/s)",
+              "order_index": 1,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "schwach_durchlaessig",
+              "label_de": "schwach durchlässig (1e-8 bis 1e-6 m/s)",
+              "label_en": "low permeability (1e-8 to 1e-6 m/s)",
+              "order_index": 2,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "durchlaessig",
+              "label_de": "durchlässig (>1e-6 bis 1e-4 m/s)",
+              "label_en": "permeable (>1e-6 to 1e-4 m/s)",
+              "order_index": 3,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "stark_durchlaessig",
+              "label_de": "stark durchlässig (>1e-4 bis 1e-2 m/s)",
+              "label_en": "highly permeable (>1e-4 to 1e-2 m/s)",
+              "order_index": 4,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "sehr_stark_durchlaessig",
+              "label_de": "sehr stark durchlässig (> 1e-2 m/s)",
+              "label_en": "very highly permeable (> 1e-2 m/s)",
+              "order_index": 5,
+              "regulation_reference": "Tab.1"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "ac2a7a68-7dd2-41c6-b6e8-213f5f9ebd94",
+          "symbol": "alpha",
+          "data_type": "number",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "401fe41a-f593-4b6d-82f6-df576e7d0a5a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "alpha > 0"
+          }
+        },
+        {
+          "id": "3ba4ba52-6c0a-4019-963c-61a69c96e454",
+          "symbol": "A_min",
+          "data_type": "number",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8",
+          "section_id": "401fe41a-f593-4b6d-82f6-df576e7d0a5a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "A_min >= 10"
+          }
+        },
+        {
+          "id": "6f55ff07-4824-4278-b49e-d8043fe0362f",
+          "symbol": "versuchsanordnung",
+          "data_type": "enum",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "5d01d893-e7df-4445-a733-1f2c408945a5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-03",
+            "DIN-18130-1-04"
+          ],
+          "enum_values": [
+            {
+              "value": "KD",
+              "label_de": "Kompressions-Durchlässigkeitsgerät (statische Belastung)",
+              "label_en": "Compression permeameter (static load)",
+              "order_index": 1,
+              "regulation_reference": "§7.1; Tab.5"
+            },
+            {
+              "value": "ZY",
+              "label_de": "Versuchszylinder (Standrohre bzw. Durchlässigkeitsgerät)",
+              "label_en": "Test cylinder (standpipes / permeameter)",
+              "order_index": 2,
+              "regulation_reference": "§7.2; §7.4; Tab.5"
+            },
+            {
+              "value": "TX",
+              "label_de": "Triaxialzelle",
+              "label_en": "Triaxial cell",
+              "order_index": 3,
+              "regulation_reference": "§7.3; Tab.5"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "versuchsanordnung IN {KD,ZY,TX}"
+          }
+        },
+        {
+          "id": "673f92f6-ba13-4e9b-ae09-6730d0bcdfaa",
+          "symbol": "gefaelle_typ",
+          "data_type": "enum",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "07771c9f-8ba3-4868-bec4-cba57876bda6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-03",
+            "DIN-18130-1-04"
+          ],
+          "enum_values": [
+            {
+              "value": "konstant",
+              "label_de": "konstantes hydraulisches Gefälle",
+              "label_en": "constant hydraulic gradient",
+              "order_index": 1,
+              "regulation_reference": "§6.1.1"
+            },
+            {
+              "value": "veraenderlich",
+              "label_de": "veränderliches hydraulisches Gefälle",
+              "label_en": "variable hydraulic gradient",
+              "order_index": 2,
+              "regulation_reference": "§6.1.2"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "gefaelle_typ IN {konstant,veraenderlich}"
+          }
+        },
+        {
+          "id": "088c758e-9a08-4597-9d7c-82ec64846946",
+          "symbol": "stroemungsrichtung",
+          "data_type": "enum",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "07771c9f-8ba3-4868-bec4-cba57876bda6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": [
+            {
+              "value": "unten_nach_oben",
+              "label_de": "von unten nach oben",
+              "label_en": "upward",
+              "order_index": 1,
+              "regulation_reference": "§6.1.3"
+            },
+            {
+              "value": "oben_nach_unten",
+              "label_de": "von oben nach unten",
+              "label_en": "downward",
+              "order_index": 2,
+              "regulation_reference": "§6.1.3"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "stroemungsrichtung IN {unten_nach_oben,oben_nach_unten}"
+          }
+        },
+        {
+          "id": "954b00dc-ae2e-49a9-9298-73f339783dec",
+          "symbol": "messung_wassermenge",
+          "data_type": "enum",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "07771c9f-8ba3-4868-bec4-cba57876bda6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-03"
+          ],
+          "enum_values": [
+            {
+              "value": "messzylinder",
+              "label_de": "Meßzylinder",
+              "label_en": "measuring cylinder",
+              "order_index": 1,
+              "regulation_reference": "§6.3; Tab.5"
+            },
+            {
+              "value": "standrohr_buerette",
+              "label_de": "Standrohr oder Bürette",
+              "label_en": "standpipe or burette",
+              "order_index": 2,
+              "regulation_reference": "§6.3; Tab.5"
+            },
+            {
+              "value": "kapillare",
+              "label_de": "kalibrierte Glaskapillare",
+              "label_en": "calibrated glass capillary",
+              "order_index": 3,
+              "regulation_reference": "§6.3; Tab.5"
+            },
+            {
+              "value": "druckerzeuger",
+              "label_de": "Druckerzeuger",
+              "label_en": "pressure generator",
+              "order_index": 4,
+              "regulation_reference": "Tab.5"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "messung_wassermenge IN {messzylinder,standrohr_buerette,kapillare,druckerzeuger}"
+          }
+        },
+        {
+          "id": "36992010-1463-4180-8efc-ba98623d0592",
+          "symbol": "saettigung_aufgebracht",
+          "data_type": "boolean",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "372c02a6-643c-4a89-b559-8254fafd3a22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-03"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "b3a2b009-9e60-49c5-bd90-b9b9a89a019b",
+          "symbol": "u_0",
+          "data_type": "number",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "372c02a6-643c-4a89-b559-8254fafd3a22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "u_0 >= 0"
+          }
+        },
+        {
+          "id": "ccbb1e48-980c-4a75-996b-1b2ea5819f48",
+          "symbol": "umlaeufigkeit_verhindert",
+          "data_type": "boolean",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "372c02a6-643c-4a89-b559-8254fafd3a22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "umlaeufigkeit_verhindert == true"
+          }
+        },
+        {
+          "id": "6de4835a-2381-406f-a0d1-fd7e23622645",
+          "symbol": "statische_belastung",
+          "data_type": "boolean",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "372c02a6-643c-4a89-b559-8254fafd3a22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "dbac1531-cd84-4cb8-8694-63aadd6a48e6",
+          "symbol": "h",
+          "data_type": "number",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "07771c9f-8ba3-4868-bec4-cba57876bda6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "h > 0"
+          }
+        },
+        {
+          "id": "50a6bf3b-d18e-4123-91aa-6027d4aeaeb8",
+          "symbol": "h_0",
+          "data_type": "number",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "07771c9f-8ba3-4868-bec4-cba57876bda6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "h_0 > 0"
+          }
+        },
+        {
+          "id": "2469cefe-a11d-48a5-84ac-ce7a718c0ac5",
+          "symbol": "gamma_org",
+          "data_type": "number",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b",
+          "section_id": "07771c9f-8ba3-4868-bec4-cba57876bda6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "gamma_org > 0"
+          }
+        },
+        {
+          "id": "904354fc-c526-48a4-8bdf-b8179beef2f0",
+          "symbol": "A",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "bcacb667-4e2c-46cc-8de2-4ead67bbf029",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "A > 0"
+          }
+        },
+        {
+          "id": "78708f8c-9d0e-4691-bb74-75cf4e05cd88",
+          "symbol": "l",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "bcacb667-4e2c-46cc-8de2-4ead67bbf029",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "l > 0"
+          }
+        },
+        {
+          "id": "3eabe319-1183-477b-88cc-8a7699bcbf3c",
+          "symbol": "l_0",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "bcacb667-4e2c-46cc-8de2-4ead67bbf029",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "l_0 > 0"
+          }
+        },
+        {
+          "id": "26d0fac3-5f6a-4504-8418-2239fa86bbbb",
+          "symbol": "a",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "bcacb667-4e2c-46cc-8de2-4ead67bbf029",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "a > 0"
+          }
+        },
+        {
+          "id": "b477266b-0464-47d6-a1ac-71b6fd3641aa",
+          "symbol": "t",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "t > 0"
+          }
+        },
+        {
+          "id": "8ddf3a9b-2feb-48a8-b5c2-d71e530f8926",
+          "symbol": "V_w",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "V_w > 0"
+          }
+        },
+        {
+          "id": "ef26cd5f-0808-4feb-b5ac-4ad9fae2f0d2",
+          "symbol": "h_1",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "h_1 > 0"
+          }
+        },
+        {
+          "id": "5d8e8051-d38e-4a31-9d16-bb231c0f2637",
+          "symbol": "h_2",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "h_2 > 0 AND h_2 < h_1"
+          }
+        },
+        {
+          "id": "c06e8c96-1b44-4411-82d3-4ce281f32779",
+          "symbol": "h_o",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "h_o >= 0"
+          }
+        },
+        {
+          "id": "b6612290-3535-447f-832f-a36b0f0f5b59",
+          "symbol": "h_u",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "h_u >= 0"
+          }
+        },
+        {
+          "id": "4b59cbfc-8caf-4c47-aca3-78908f8a8ac5",
+          "symbol": "p_o",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "p_o >= 0"
+          }
+        },
+        {
+          "id": "0ff7675b-e106-4d7f-a731-abc34942bfa4",
+          "symbol": "p_u",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "p_u >= 0"
+          }
+        },
+        {
+          "id": "43335c8a-cde4-4ee6-9172-37d8e5731c0c",
+          "symbol": "gamma_w",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "b586c06e-ed5e-480f-82f5-27b8cc079806",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-02",
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "gamma_w > 0"
+          }
+        },
+        {
+          "id": "e6acad67-811a-4aec-a005-bec29e2f311e",
+          "symbol": "T",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-04"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "T > 0 AND T < 40"
+          }
+        },
+        {
+          "id": "28abc442-a5dd-49ce-b30d-16fb7801d195",
+          "symbol": "rho",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "rho > 0"
+          }
+        },
+        {
+          "id": "aa045eb7-3b13-46f2-a782-09081e721c7c",
+          "symbol": "rho_d",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "rho_d > 0"
+          }
+        },
+        {
+          "id": "e95afe5d-2c6d-41b5-a7fd-3c2b2dc28f74",
+          "symbol": "rho_s",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "rho_s > 0"
+          }
+        },
+        {
+          "id": "cec53830-aa4c-4e9f-b18a-cd1cdfcc6300",
+          "symbol": "e",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "e > 0"
+          }
+        },
+        {
+          "id": "47fc17d6-f99f-46b4-825e-1c6f8763f823",
+          "symbol": "n_pore",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "n_pore >= 0 AND n_pore <= 1"
+          }
+        },
+        {
+          "id": "f2dba419-2fc7-445f-b0d3-a61a74ae93a2",
+          "symbol": "w_a",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "w_a >= 0"
+          }
+        },
+        {
+          "id": "6174a6af-dac9-4075-b818-88f3d4859bdc",
+          "symbol": "w_e",
+          "data_type": "number",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075",
+          "section_id": "cae607d1-2188-4e15-ba62-46662ba82fdd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "w_e >= 0"
+          }
+        },
+        {
+          "id": "c23e7ec2-da24-480d-989a-19d1e2ed0bcd",
+          "symbol": "Q",
+          "data_type": "number",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "section_id": "dae5c8eb-bff9-4bbb-aa85-a33ac8e0a6d9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "Q > 0"
+          }
+        },
+        {
+          "id": "bde45807-8eeb-4b8f-9dd0-5f565a59ab4a",
+          "symbol": "v",
+          "data_type": "number",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "section_id": "dae5c8eb-bff9-4bbb-aa85-a33ac8e0a6d9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "v > 0"
+          }
+        },
+        {
+          "id": "2f1f51b2-b264-4352-8488-3bbfb2f884f3",
+          "symbol": "i",
+          "data_type": "number",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "section_id": "dae5c8eb-bff9-4bbb-aa85-a33ac8e0a6d9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "i > 0"
+          }
+        },
+        {
+          "id": "934803b1-519e-4cb5-aadc-2780731e3b66",
+          "symbol": "k",
+          "data_type": "number",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "section_id": "7a3a1440-6cf8-44de-9184-883a7492769e",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "k > 0"
+          }
+        },
+        {
+          "id": "970ac97f-e655-4b76-bd40-ff9d544db69e",
+          "symbol": "k_T",
+          "data_type": "number",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "section_id": "349410cc-3219-4bab-b195-3c9fe81a1b88",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "k_T > 0"
+          }
+        },
+        {
+          "id": "defe9a0f-e8c6-4012-863b-1425c0522fe7",
+          "symbol": "k_10",
+          "data_type": "number",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373",
+          "section_id": "349410cc-3219-4bab-b195-3c9fe81a1b88",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "DIN-18130-1-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "k_10 > 0"
+          }
+        },
+        {
+          "id": "544cbf1c-5adb-4655-a2d5-1f9449ec34f4",
+          "symbol": "k_f",
+          "data_type": "number",
+          "worksheet_template_id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa",
+          "section_id": "265de2bf-8172-4fc8-978e-417608c275a9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "k_f > 0"
+          }
+        },
+        {
+          "id": "7babd5f2-ba5f-458c-be93-316aad3fc305",
+          "symbol": "i_bereich",
+          "data_type": "text",
+          "worksheet_template_id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa",
+          "section_id": "265de2bf-8172-4fc8-978e-417608c275a9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "281f9678-076b-42be-b542-4bbd4bb7a3f9",
+          "symbol": "versuchsbericht_vollstaendig",
+          "data_type": "boolean",
+          "worksheet_template_id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa",
+          "section_id": "d0459fc0-0e2b-41f0-87cf-c7251c5c32ee",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "versuchsbericht_vollstaendig == true"
+          }
+        },
+        {
+          "id": "a25cd636-5652-4791-b624-6977c29b7f45",
+          "symbol": "freigabe_sachverstaendiger",
+          "data_type": "boolean",
+          "worksheet_template_id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa",
+          "section_id": "1d79cc35-b667-40d0-86c9-4021f90c528e",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        }
+      ],
+      "equations": [
+        {
+          "id": "92004c30-d370-4773-8c87-65346ec3abe1",
+          "equation_number": "7",
+          "output_symbol": "h",
+          "input_symbols": [
+            "h_0",
+            "gamma_w",
+            "gamma_org"
+          ],
+          "formula": "h = (h_0 * (gamma_w - gamma_org)) / gamma_w",
+          "clause_reference": "§6.1.1",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b"
+        },
+        {
+          "id": "b82db8f3-e49b-4318-b843-031dfd4d86a4",
+          "equation_number": "1",
+          "output_symbol": "Q",
+          "input_symbols": [
+            "V_w",
+            "t"
+          ],
+          "formula": "Q = V_w / t",
+          "clause_reference": "§3.1 Gl.(1)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "94288a73-ebc1-4d02-8fbb-0bc2c6f35899",
+          "equation_number": "2",
+          "output_symbol": "v",
+          "input_symbols": [
+            "Q",
+            "A"
+          ],
+          "formula": "v = Q / A",
+          "clause_reference": "§3.2 Gl.(2)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "6783ca37-3606-4f9a-8709-1f887f9f48f1",
+          "equation_number": "3",
+          "output_symbol": "i",
+          "input_symbols": [
+            "h",
+            "l"
+          ],
+          "formula": "i = h / l",
+          "clause_reference": "§3.5 Gl.(3)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "1a99d7dd-f20a-4b40-a65c-578554fb6057",
+          "equation_number": "4",
+          "output_symbol": "k",
+          "input_symbols": [
+            "v",
+            "i"
+          ],
+          "formula": "k = v / i",
+          "clause_reference": "§3.6 Gl.(4)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "21c8ff7a-28c2-46a2-bde3-7f5297d90977",
+          "equation_number": "6",
+          "output_symbol": "k_10",
+          "input_symbols": [
+            "T",
+            "k_T",
+            "alpha"
+          ],
+          "formula": "k_10 = (1.359 / (1 + 0.0337*T + 0.00022*T^2)) * k_T = alpha * k_T",
+          "clause_reference": "§5.7 Gl.(6)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "25ab35d0-8eab-4a21-99ee-ea9aad5193df",
+          "equation_number": "8",
+          "output_symbol": "k",
+          "input_symbols": [
+            "Q",
+            "l",
+            "A",
+            "h"
+          ],
+          "formula": "k = (Q * l) / (A * h)",
+          "clause_reference": "§8.1 Gl.(8)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "a464fee1-e159-4228-8081-cca885eefe37",
+          "equation_number": "9",
+          "output_symbol": "k",
+          "input_symbols": [
+            "a",
+            "l_0",
+            "A",
+            "t",
+            "h_1",
+            "h_2"
+          ],
+          "formula": "k = (a * l_0) / (A * t) * ln(h_1 / h_2)",
+          "clause_reference": "§8.2 Gl.(9)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        }
+      ],
+      "compliance": [
+        {
+          "id": "3bf9d48b-7585-4ef6-807e-62d397d0ac76",
+          "code": "DIN-18130-1-CR-01",
+          "condition": "max_d IS NOT NULL AND A_min IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "§5.8",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "608240ce-515d-4320-954d-dad8934865b8"
+        },
+        {
+          "id": "ff50f812-c9d8-4cdc-814f-c358ec7a1fd8",
+          "code": "DIN-18130-1-CR-02",
+          "condition": "umlaeufigkeit_verhindert == true",
+          "severity": "block",
+          "clause_reference": "§6.4",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b"
+        },
+        {
+          "id": "6e9f0d8c-6e45-4934-b50c-a67789d94ce3",
+          "code": "DIN-18130-1-CR-03",
+          "condition": "saettigung_aufgebracht == true OR versuchsklasse IN {2,3}",
+          "severity": "block",
+          "clause_reference": "§6.5; Tab.3",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "041a8b9d-d13f-4500-9cd0-ccd617a0d66b"
+        },
+        {
+          "id": "c31a2a78-4205-4ed5-9682-46dda76e3ac3",
+          "code": "DIN-18130-1-CR-04",
+          "condition": "V_w > 0 AND t > 0",
+          "severity": "block",
+          "clause_reference": "§6.3; §5.5",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "5ce6eb88-4a9b-403d-9ccd-afce3208c075"
+        },
+        {
+          "id": "58bf8cc3-bc96-49b1-9c97-28fb5df73033",
+          "code": "DIN-18130-1-CR-05",
+          "condition": "k_10 > 0",
+          "severity": "block",
+          "clause_reference": "§5.7; §8.4; Gl.(6)",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "7704fc08-5ed6-49f1-af77-ee689e5116d4",
+          "code": "DIN-18130-1-CR-06",
+          "condition": "versuchsbericht_vollstaendig == true AND k_10 > 0",
+          "severity": "block",
+          "clause_reference": "§8.4",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa"
+        },
+        {
+          "id": "17039318-a7cf-442a-a0e5-96c878bd6119",
+          "code": "DIN-18130-1-CR-07",
+          "condition": "k_f IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "§8.4",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "worksheet_template_id": "7064e6b8-c94d-4fd9-b81a-cae53cf677fa"
+        }
+      ],
+      "enum_values": [
+        {
+          "field_id": "0813691e-6a6e-4148-bddf-550cb50b650d",
+          "symbol": "versuchsklasse",
+          "enum_values": [
+            {
+              "value": "1a",
+              "label_de": "Wassersättigung nachgewiesen, Strömung stationär nachgewiesen",
+              "label_en": "Saturation proven, steady flow proven",
+              "order_index": 1,
+              "regulation_reference": "Tab.4"
+            },
+            {
+              "value": "1b",
+              "label_de": "Wassersättigung nachgewiesen, Strömung stationär angenommen",
+              "label_en": "Saturation proven, steady flow assumed",
+              "order_index": 2,
+              "regulation_reference": "Tab.4"
+            },
+            {
+              "value": "2",
+              "label_de": "Keine Wassersättigung, Strömung stationär nachgewiesen",
+              "label_en": "No saturation, steady flow proven",
+              "order_index": 3,
+              "regulation_reference": "Tab.4"
+            },
+            {
+              "value": "3",
+              "label_de": "Keine Wassersättigung, Strömung nicht nachgewiesen",
+              "label_en": "No saturation, steady flow not proven",
+              "order_index": 4,
+              "regulation_reference": "Tab.4"
+            }
+          ]
+        },
+        {
+          "field_id": "59bc1db9-de60-40cc-8bfb-027362c69253",
+          "symbol": "durchlaessigkeitsbereich",
+          "enum_values": [
+            {
+              "value": "sehr_schwach_durchlaessig",
+              "label_de": "sehr schwach durchlässig (k < 1e-8 m/s)",
+              "label_en": "very low permeability (k < 1e-8 m/s)",
+              "order_index": 1,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "schwach_durchlaessig",
+              "label_de": "schwach durchlässig (1e-8 bis 1e-6 m/s)",
+              "label_en": "low permeability (1e-8 to 1e-6 m/s)",
+              "order_index": 2,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "durchlaessig",
+              "label_de": "durchlässig (>1e-6 bis 1e-4 m/s)",
+              "label_en": "permeable (>1e-6 to 1e-4 m/s)",
+              "order_index": 3,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "stark_durchlaessig",
+              "label_de": "stark durchlässig (>1e-4 bis 1e-2 m/s)",
+              "label_en": "highly permeable (>1e-4 to 1e-2 m/s)",
+              "order_index": 4,
+              "regulation_reference": "Tab.1"
+            },
+            {
+              "value": "sehr_stark_durchlaessig",
+              "label_de": "sehr stark durchlässig (> 1e-2 m/s)",
+              "label_en": "very highly permeable (> 1e-2 m/s)",
+              "order_index": 5,
+              "regulation_reference": "Tab.1"
+            }
+          ]
+        },
+        {
+          "field_id": "6f55ff07-4824-4278-b49e-d8043fe0362f",
+          "symbol": "versuchsanordnung",
+          "enum_values": [
+            {
+              "value": "KD",
+              "label_de": "Kompressions-Durchlässigkeitsgerät (statische Belastung)",
+              "label_en": "Compression permeameter (static load)",
+              "order_index": 1,
+              "regulation_reference": "§7.1; Tab.5"
+            },
+            {
+              "value": "ZY",
+              "label_de": "Versuchszylinder (Standrohre bzw. Durchlässigkeitsgerät)",
+              "label_en": "Test cylinder (standpipes / permeameter)",
+              "order_index": 2,
+              "regulation_reference": "§7.2; §7.4; Tab.5"
+            },
+            {
+              "value": "TX",
+              "label_de": "Triaxialzelle",
+              "label_en": "Triaxial cell",
+              "order_index": 3,
+              "regulation_reference": "§7.3; Tab.5"
+            }
+          ]
+        },
+        {
+          "field_id": "673f92f6-ba13-4e9b-ae09-6730d0bcdfaa",
+          "symbol": "gefaelle_typ",
+          "enum_values": [
+            {
+              "value": "konstant",
+              "label_de": "konstantes hydraulisches Gefälle",
+              "label_en": "constant hydraulic gradient",
+              "order_index": 1,
+              "regulation_reference": "§6.1.1"
+            },
+            {
+              "value": "veraenderlich",
+              "label_de": "veränderliches hydraulisches Gefälle",
+              "label_en": "variable hydraulic gradient",
+              "order_index": 2,
+              "regulation_reference": "§6.1.2"
+            }
+          ]
+        },
+        {
+          "field_id": "088c758e-9a08-4597-9d7c-82ec64846946",
+          "symbol": "stroemungsrichtung",
+          "enum_values": [
+            {
+              "value": "unten_nach_oben",
+              "label_de": "von unten nach oben",
+              "label_en": "upward",
+              "order_index": 1,
+              "regulation_reference": "§6.1.3"
+            },
+            {
+              "value": "oben_nach_unten",
+              "label_de": "von oben nach unten",
+              "label_en": "downward",
+              "order_index": 2,
+              "regulation_reference": "§6.1.3"
+            }
+          ]
+        },
+        {
+          "field_id": "954b00dc-ae2e-49a9-9298-73f339783dec",
+          "symbol": "messung_wassermenge",
+          "enum_values": [
+            {
+              "value": "messzylinder",
+              "label_de": "Meßzylinder",
+              "label_en": "measuring cylinder",
+              "order_index": 1,
+              "regulation_reference": "§6.3; Tab.5"
+            },
+            {
+              "value": "standrohr_buerette",
+              "label_de": "Standrohr oder Bürette",
+              "label_en": "standpipe or burette",
+              "order_index": 2,
+              "regulation_reference": "§6.3; Tab.5"
+            },
+            {
+              "value": "kapillare",
+              "label_de": "kalibrierte Glaskapillare",
+              "label_en": "calibrated glass capillary",
+              "order_index": 3,
+              "regulation_reference": "§6.3; Tab.5"
+            },
+            {
+              "value": "druckerzeuger",
+              "label_de": "Druckerzeuger",
+              "label_en": "pressure generator",
+              "order_index": 4,
+              "regulation_reference": "Tab.5"
             }
           ]
         }
