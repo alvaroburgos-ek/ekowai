@@ -219,7 +219,14 @@ function ledgerBuildIds() {
   }
   return set;
 }
-const KNOWN_BUILDS = new Set([...gitCommitsExist(), ...ledgerBuildIds()]);
+// KNOWN_BUILDS is git-commits-ONLY. A prior version also folded in any bare 7-hex
+// token found in ledger prose (ledgerBuildIds), but that self-poisons: the validator's
+// own report documents example/fabricated build ids (e.g. a seeded 'deadbee'), which
+// then count as "known" and mask the very defect the 2b check exists to catch. Real VA
+// builds are always git commits, so git is the authoritative, un-poisonable anchor.
+// (ledgerBuildIds retained above for reference but intentionally NOT trusted.)
+const KNOWN_BUILDS = gitCommitsExist();
+void ledgerBuildIds;
 
 function defectRegisterNodes() {
   // Collect wikilink-style node refs the register attaches findings to (rare for FLL),
