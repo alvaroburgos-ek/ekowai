@@ -35,6 +35,7 @@ const STANDARDS = {
   'FLL-Naturteich-2017': 'c11f0e54-fef3-4552-be7b-f6eb50b468da',
   'FLL-TP-RHIZOM-2023': 'd0a661ab-c448-4c97-baf1-fd860fd9adca',
   'DIN-18130-1': '4a53393a-e875-446f-b153-f47a402a4370',
+  'DWA-A-102-2': 'b52680be-e0df-4313-b5b5-a08bdbb82773',
 };
 
 const token = process.env.SUPABASE_ACCESS_TOKEN;

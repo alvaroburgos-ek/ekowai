@@ -43,6 +43,7 @@ const STANDARD_DIRS = {
   'FLL-Naturteich-2017': 'FLL-Naturteich-2017',
   'FLL-TP-RHIZOM-2023': 'FLL-TP-RHIZOM-2023',
   'DIN-18130-1': 'DIN-18130-1',
+  'DWA-A-102-2': 'DWA-A-102-2',
 };
 // Files that are map-level, not value nodes (exempt from #1/#2 source_page checks).
 const MAP_LEVEL = new Set(['_index', '_template-node']);

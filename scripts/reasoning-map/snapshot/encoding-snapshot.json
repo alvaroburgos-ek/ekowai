@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-24T12:30:37.677Z",
+  "exported_at": "2026-07-24T12:49:47.013Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "DWA-A-138-1": {
@@ -20064,6 +20064,4583 @@
               "label_en": "pressure generator",
               "order_index": 4,
               "regulation_reference": "Tab.5"
+            }
+          ]
+        }
+      ]
+    },
+    "DWA-A-102-2": {
+      "standard": {
+        "id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+        "code": "DWA-A-102-2",
+        "title_de": "Grundsätze zur Bewirtschaftung und Behandlung von Regenwetterabflüssen zur Einleitung in Oberflächengewässer — Teil 2: Emissionsbezogene Bewertungen und Regelungen",
+        "title_en": "Principles for the management and treatment of stormwater runoff for discharge into surface waters — Part 2: Emission-related assessments and regulations",
+        "version": "Dezember 2020 (korrigierte Fassung: Stand August 2022)"
+      },
+      "worksheets": [
+        {
+          "id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "code": "A1022-01",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Projektregistrierung",
+          "phase": 1,
+          "archetype": "registration",
+          "order_index": 10
+        },
+        {
+          "id": "ce0729ea-9360-49fc-b24f-42413eb9fd55",
+          "code": "A1022-02",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Bilanzgebietsdefinition / Einzugsgebiet",
+          "phase": 1,
+          "archetype": "registration",
+          "order_index": 20
+        },
+        {
+          "id": "717a37f6-153f-4fbe-83a1-4f1d3a345033",
+          "code": "A1022-03",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Entwässerungssystem-Klassifikation",
+          "phase": 1,
+          "archetype": "registration",
+          "order_index": 30
+        },
+        {
+          "id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6",
+          "code": "A1022-04",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Flächenkategorisierung nach Belastungskategorien I-III",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 40
+        },
+        {
+          "id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "code": "A1022-05",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Angeschlossene befestigte Fläche A_b,a",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 50
+        },
+        {
+          "id": "45c5fb7a-6c13-46de-955f-2b3902da14d8",
+          "code": "A1022-06",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Rechenwerte zu AFS63-Konzentrationen und Stoffabtrag (Tabelle 4)",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 60
+        },
+        {
+          "id": "4272e2c5-7d0b-4be2-b9e7-a581d134f594",
+          "code": "A1022-07",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Hydrologische Eingangsdaten",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 70
+        },
+        {
+          "id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "code": "A1022-08",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Kanalnetz- und Kläranlagen-Eingangsdaten",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 80
+        },
+        {
+          "id": "710dfbfe-1f51-4d84-9cf8-56c68648f339",
+          "code": "A1022-09",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Abminderungswert f_D (Anhang C)",
+          "phase": 2,
+          "archetype": "data_collection",
+          "order_index": 90
+        },
+        {
+          "id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "code": "A1022-10",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Stoffabtrag-Bilanzierung AFS63",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 100
+        },
+        {
+          "id": "8023ea91-44b5-41d4-ac92-8ef974824d7f",
+          "code": "A1022-11",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Erforderlicher Wirkungsgrad η_erf",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 110
+        },
+        {
+          "id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "code": "A1022-12",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Resultierender Stoffaustrag nach Behandlung",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 120
+        },
+        {
+          "id": "aaa690c8-bbd9-439a-ad6b-88a1435cf32e",
+          "code": "A1022-13",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Kritischer Regenabfluss Q_R,krit",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 130
+        },
+        {
+          "id": "f4f9a8a1-65e0-40c0-9465-21f8d0fc2a9a",
+          "code": "A1022-14",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Bemessungszufluss Q_Bem,Tr",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 140
+        },
+        {
+          "id": "a601ee91-f391-4890-a959-94b62313db06",
+          "code": "A1022-15",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Oberflächenbeschickung q_A,Bem",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 150
+        },
+        {
+          "id": "3093e607-21ed-4639-a325-c8780a367aca",
+          "code": "A1022-16",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Sedimentationswirkungsgrad η_sed",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 160
+        },
+        {
+          "id": "4b283dc6-a1f8-42ab-bada-180346451486",
+          "code": "A1022-17",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Gesamtwirkungsgrad η_ges",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 170
+        },
+        {
+          "id": "982be055-55d7-425a-b762-115a9c3943c3",
+          "code": "A1022-18",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Bemessung Regenklärbecken (A_RKB, V_RKB) und Schrägklärer (A_eff)",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 180
+        },
+        {
+          "id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "code": "A1022-19",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Regenabfluss im Drosselabfluss Q_R,Dr",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 190
+        },
+        {
+          "id": "d07f3e88-096f-481c-b2a0-8f5d146e3d75",
+          "code": "A1022-20",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "TW-Abflussspende q_T,aM",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 200
+        },
+        {
+          "id": "64c4e487-751e-4fec-8435-cf5438ea4d15",
+          "code": "A1022-21",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Fließzeitabminderung a_f",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 210
+        },
+        {
+          "id": "0845b805-cf83-43a3-b561-00a2e04ba0d7",
+          "code": "A1022-22",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Mittlerer Regenabfluss bei Entlastung Q_R,e",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 220
+        },
+        {
+          "id": "5a3aac18-028c-48d9-ae7c-6ca02527da9f",
+          "code": "A1022-23",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Mittleres Mischverhältnis m",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 230
+        },
+        {
+          "id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "code": "A1022-24",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Einflusswerte a_c,CSB, a_h, a_a",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 240
+        },
+        {
+          "id": "cbef4e3e-e270-475c-b23a-b00bc0391989",
+          "code": "A1022-25",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Bemessungskonzentration C_b,CSB",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 250
+        },
+        {
+          "id": "cb183be9-c834-482a-a18c-d2e54d615772",
+          "code": "A1022-26",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Flächenspez. Stoffabtrag b_R,a,AFS63 und Einflusswert a_R,AFS63",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 260
+        },
+        {
+          "id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428",
+          "code": "A1022-27",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Mittlere Entlastungskonzentration C_e,CSB",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 270
+        },
+        {
+          "id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "code": "A1022-28",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Zulässige Entlastungsrate e_0",
+          "phase": 3,
+          "archetype": "calculation",
+          "order_index": 280
+        },
+        {
+          "id": "61568b1c-bc30-464d-b3f5-13ce56250c42",
+          "code": "A1022-29",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Hilfsgrößen H1 und H2",
+          "phase": 4,
+          "archetype": "calculation",
+          "order_index": 290
+        },
+        {
+          "id": "40121900-e641-4a78-b810-1e12732a8479",
+          "code": "A1022-30",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Erforderliches Gesamtspeichervolumen V_s, V",
+          "phase": 4,
+          "archetype": "calculation",
+          "order_index": 300
+        },
+        {
+          "id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f",
+          "code": "A1022-31",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Zusammenfassung Trennsystem-Ergebnisse",
+          "phase": 5,
+          "archetype": "summary",
+          "order_index": 310
+        },
+        {
+          "id": "c7ba554c-acba-4905-8250-e8cf6ad58137",
+          "code": "A1022-32",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Zusammenfassung Mischsystem-Ergebnisse",
+          "phase": 5,
+          "archetype": "summary",
+          "order_index": 320
+        },
+        {
+          "id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "code": "A1022-33",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Gesamtübersicht — bauwerksbezogene Nachweise",
+          "phase": 5,
+          "archetype": "summary",
+          "order_index": 330
+        },
+        {
+          "id": "9fa4ee7a-6966-487b-900a-6886aa18b712",
+          "code": "A1022-34",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Nachweis: Stoffabtrag AFS63 (Trennsystem)",
+          "phase": 6,
+          "archetype": "verification",
+          "order_index": 340
+        },
+        {
+          "id": "5fb3b4ed-4097-407b-b3b0-8021c7e4a702",
+          "code": "A1022-35",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Nachweis: Gesamtspeichervolumen (Mischsystem)",
+          "phase": 6,
+          "archetype": "verification",
+          "order_index": 350
+        },
+        {
+          "id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "code": "A1022-36",
+          "standard_id": "b52680be-e0df-4313-b5b5-a08bdbb82773",
+          "title_de": "Nachweis: Mindestmischverhältnis m",
+          "phase": 6,
+          "archetype": "verification",
+          "order_index": 360
+        }
+      ],
+      "fields": [
+        {
+          "id": "8ff76069-1b24-44ea-8887-c926cf8d1b08",
+          "symbol": "project_id",
+          "data_type": "text",
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "all_downstream"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "non_empty"
+          }
+        },
+        {
+          "id": "8edc7bf9-6b78-4041-885d-f19f713403f6",
+          "symbol": "project_name",
+          "data_type": "text",
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "all_downstream"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "non_empty"
+          }
+        },
+        {
+          "id": "a0999b19-5959-4ed3-b211-d595aa166a52",
+          "symbol": "client",
+          "data_type": "text",
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-33"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "non_empty"
+          }
+        },
+        {
+          "id": "21e6c916-1f0f-466e-baeb-6edbd7cc066b",
+          "symbol": "project_location",
+          "data_type": "text",
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-02",
+            "A1022-07"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "non_empty"
+          }
+        },
+        {
+          "id": "76309dc6-8c46-4195-b02e-471a5164f439",
+          "symbol": "regulation_edition",
+          "data_type": "text",
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "all_downstream"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "non_empty"
+          }
+        },
+        {
+          "id": "6f4049ec-25a5-4ffa-b8da-db62f848887e",
+          "symbol": "assessment_scope",
+          "data_type": "enum",
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-03"
+          ],
+          "enum_values": [
+            {
+              "value": "emission_afs63",
+              "label_de": "Emissions-Beurteilung AFS63",
+              "label_en": "AFS63 emission assessment",
+              "order_index": 1,
+              "regulation_reference": "§1, §5"
+            },
+            {
+              "value": "rkb_sizing",
+              "label_de": "RKB-Bemessung (Trenn)",
+              "label_en": "Stormwater clarifier basin sizing (separate)",
+              "order_index": 2,
+              "regulation_reference": "§6.2"
+            },
+            {
+              "value": "gesamtspeichervolumen",
+              "label_de": "Gesamtspeichervolumen (Misch)",
+              "label_en": "Total storage volume (combined)",
+              "order_index": 3,
+              "regulation_reference": "§7.3.2"
+            },
+            {
+              "value": "immission_dwa_m_102_3",
+              "label_de": "Immissionsbeurteilung (DWA-M 102-3)",
+              "label_en": "Immission-based assessment (DWA-M 102-3)",
+              "order_index": 4,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "wasserhaushalt_dwa_m_102_4",
+              "label_de": "Wasserhaushaltsbilanz (DWA-M 102-4)",
+              "label_en": "Water balance (DWA-M 102-4)",
+              "order_index": 5,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "schmutzfracht_nachweis",
+              "label_de": "Schmutzfrachtnachweis (Section 8)",
+              "label_en": "Pollutant load proof (Section 8)",
+              "order_index": 6,
+              "regulation_reference": "§8"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "enum:assessment_scope"
+          }
+        },
+        {
+          "id": "281fe5c5-dbad-4886-a788-0484f5c26a3a",
+          "symbol": "balance_area_size",
+          "data_type": "number",
+          "worksheet_template_id": "ce0729ea-9360-49fc-b24f-42413eb9fd55",
+          "section_id": "6dcd74aa-db07-47ed-a048-fc36b2856fa3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-04",
+            "A1022-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "dfa25f4d-ac1f-4671-92f4-cc9dbd437812",
+          "symbol": "A_E_k_b",
+          "data_type": "number",
+          "worksheet_template_id": "ce0729ea-9360-49fc-b24f-42413eb9fd55",
+          "section_id": "ff046ac6-2017-4308-9f43-7964b3abea63",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "70d9690a-bff9-45a8-ab1d-374687b9b2a7",
+          "symbol": "A_E_k_b_na",
+          "data_type": "number",
+          "worksheet_template_id": "ce0729ea-9360-49fc-b24f-42413eb9fd55",
+          "section_id": "ff046ac6-2017-4308-9f43-7964b3abea63",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "a07ab18f-c0b9-49e1-a546-cb6723825a7a",
+          "symbol": "system_type",
+          "data_type": "enum",
+          "worksheet_template_id": "717a37f6-153f-4fbe-83a1-4f1d3a345033",
+          "section_id": "0aef871e-eed9-48f1-8012-33936b329168",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "all_calc"
+          ],
+          "enum_values": [
+            {
+              "value": "trenn",
+              "label_de": "Trennsystem",
+              "label_en": "Separate sewer",
+              "order_index": 1,
+              "regulation_reference": "§1, §4.1"
+            },
+            {
+              "value": "misch",
+              "label_de": "Mischsystem",
+              "label_en": "Combined sewer",
+              "order_index": 2,
+              "regulation_reference": "§1, §4.1"
+            },
+            {
+              "value": "modified",
+              "label_de": "Modifiziertes System",
+              "label_en": "Modified system",
+              "order_index": 3,
+              "regulation_reference": "§1, §4.1"
+            },
+            {
+              "value": "both",
+              "label_de": "Beide Systeme im Bilanzgebiet",
+              "label_en": "Both systems in balance area",
+              "order_index": 4,
+              "regulation_reference": "§1, §4.1"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "enum:system_type"
+          }
+        },
+        {
+          "id": "cbf8f51b-2859-4d59-9360-8ffb5387dc8e",
+          "symbol": "trenn_active",
+          "data_type": "boolean",
+          "worksheet_template_id": "717a37f6-153f-4fbe-83a1-4f1d3a345033",
+          "section_id": "0aef871e-eed9-48f1-8012-33936b329168",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-10..A1022-18",
+            "A1022-31",
+            "A1022-34"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "from:system_type"
+          }
+        },
+        {
+          "id": "41be928d-ae4d-4ab3-8f68-900a22633b97",
+          "symbol": "misch_active",
+          "data_type": "boolean",
+          "worksheet_template_id": "717a37f6-153f-4fbe-83a1-4f1d3a345033",
+          "section_id": "0aef871e-eed9-48f1-8012-33936b329168",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-19..A1022-30",
+            "A1022-32",
+            "A1022-35",
+            "A1022-36"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "from:system_type"
+          }
+        },
+        {
+          "id": "016eaca3-5add-4b09-84a1-8a542b9a594e",
+          "symbol": "A_b_a_I",
+          "data_type": "number",
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6",
+          "section_id": "52d10f75-fa6a-4169-b2b0-ec5d9124d12e",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05",
+            "A1022-10",
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "5a81545d-78c7-436f-ba0e-15077873f17b",
+          "symbol": "A_b_a_II",
+          "data_type": "number",
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6",
+          "section_id": "52d10f75-fa6a-4169-b2b0-ec5d9124d12e",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05",
+            "A1022-10",
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "26e84294-ec69-4ff0-91ff-76316a26315e",
+          "symbol": "A_b_a_III",
+          "data_type": "number",
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6",
+          "section_id": "52d10f75-fa6a-4169-b2b0-ec5d9124d12e",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05",
+            "A1022-10",
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "54a94f00-40dd-4f2d-b87c-076179b1e0c3",
+          "symbol": "A_b_a",
+          "data_type": "number",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "section_id": "00546414-b9cc-4a51-9a48-32b667fdc770",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-13",
+            "A1022-18",
+            "A1022-19",
+            "A1022-26",
+            "A1022-30"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "9e48bf2c-a9f2-404d-9e2e-a6709acee8d8",
+          "symbol": "p_I",
+          "data_type": "number",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "section_id": "00546414-b9cc-4a51-9a48-32b667fdc770",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=100"
+          }
+        },
+        {
+          "id": "b7ce5a5a-3001-44c2-b865-f0d08cd33153",
+          "symbol": "p_II",
+          "data_type": "number",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "section_id": "00546414-b9cc-4a51-9a48-32b667fdc770",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=100"
+          }
+        },
+        {
+          "id": "9f23a69a-f7cc-4f5d-b084-791ec33bbcd1",
+          "symbol": "p_III",
+          "data_type": "number",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "section_id": "00546414-b9cc-4a51-9a48-32b667fdc770",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=100"
+          }
+        },
+        {
+          "id": "51e04045-efd8-406d-8634-efdeeebfdd2c",
+          "symbol": "psi_aM",
+          "data_type": "number",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "section_id": "e29579d4-abdb-4c9b-8cd5-ee4071f061d6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<value<=1"
+          }
+        },
+        {
+          "id": "9bf49a02-e2b0-4f15-94ee-52bbad761abb",
+          "symbol": "V_R_aM",
+          "data_type": "number",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8",
+          "section_id": "00546414-b9cc-4a51-9a48-32b667fdc770",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "3d90e2ce-0b9d-4808-aa71-36ad4e8f9dc9",
+          "symbol": "b_R_a_AFS63_I",
+          "data_type": "number",
+          "worksheet_template_id": "45c5fb7a-6c13-46de-955f-2b3902da14d8",
+          "section_id": "ff8375cc-7ce6-4895-a96c-60db79e579b3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-10"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "dfd9f491-855b-4b87-8d8c-25d70d25eacc",
+          "symbol": "b_R_a_AFS63_II",
+          "data_type": "number",
+          "worksheet_template_id": "45c5fb7a-6c13-46de-955f-2b3902da14d8",
+          "section_id": "ff8375cc-7ce6-4895-a96c-60db79e579b3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-10"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "f0bc0c0d-5bbf-4e32-a840-dcb82447d2a5",
+          "symbol": "b_R_a_AFS63_III",
+          "data_type": "number",
+          "worksheet_template_id": "45c5fb7a-6c13-46de-955f-2b3902da14d8",
+          "section_id": "ff8375cc-7ce6-4895-a96c-60db79e579b3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-10"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "c869969d-018f-47f2-886b-13f01b7ac183",
+          "symbol": "b_R_e_zul_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "45c5fb7a-6c13-46de-955f-2b3902da14d8",
+          "section_id": "ff8375cc-7ce6-4895-a96c-60db79e579b3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-11",
+            "A1022-34"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value=280"
+          }
+        },
+        {
+          "id": "f2715c1c-0a6f-4323-bd92-cea6934ef106",
+          "symbol": "C_R_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "45c5fb7a-6c13-46de-955f-2b3902da14d8",
+          "section_id": "ff8375cc-7ce6-4895-a96c-60db79e579b3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-27"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "442e28a4-e203-4ec0-a66e-4a16e89d33c9",
+          "symbol": "r_krit",
+          "data_type": "number",
+          "worksheet_template_id": "4272e2c5-7d0b-4be2-b9e7-a581d134f594",
+          "section_id": "e65d3c0f-9589-484d-ba29-3181768ddbd1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-13",
+            "A1022-15",
+            "A1022-33"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "9e33f0b4-f0ee-45bb-9a7c-4ed719464d9d",
+          "symbol": "h_Na",
+          "data_type": "number",
+          "worksheet_template_id": "4272e2c5-7d0b-4be2-b9e7-a581d134f594",
+          "section_id": "e65d3c0f-9589-484d-ba29-3181768ddbd1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-05",
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "ecb50db7-001e-4e94-a723-b9902c1ca2bb",
+          "symbol": "t_f",
+          "data_type": "number",
+          "worksheet_template_id": "4272e2c5-7d0b-4be2-b9e7-a581d134f594",
+          "section_id": "e65d3c0f-9589-484d-ba29-3181768ddbd1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-21",
+            "A1022-33"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "4b48eb95-9841-402b-a3c8-b0ead6d79ffb",
+          "symbol": "NG_m",
+          "data_type": "number",
+          "worksheet_template_id": "4272e2c5-7d0b-4be2-b9e7-a581d134f594",
+          "section_id": "e65d3c0f-9589-484d-ba29-3181768ddbd1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "62731c79-a6c5-45b1-8f38-94dc6a1e8375",
+          "symbol": "Q_M",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-19"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "74062673-0820-4a85-aa15-4a7ffb5fc93f",
+          "symbol": "Q_T_aM",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-19",
+            "A1022-20",
+            "A1022-23",
+            "A1022-33"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "69086214-16e0-4338-8d34-700e203f3e0b",
+          "symbol": "Q_T_h_max",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=Q_T_aM"
+          }
+        },
+        {
+          "id": "9aee502a-d946-4472-abd9-c9f4c7bd5e1d",
+          "symbol": "Q_F",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-14"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "36524ae5-b6dd-4ea8-ada6-5da27d9dd2fa",
+          "symbol": "Q_R_Tr",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-19",
+            "A1022-23",
+            "A1022-33"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "7519144e-3d78-4db5-a8ca-8baabe5e00e0",
+          "symbol": "C_T_aM_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24",
+            "A1022-36"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "dd81269c-d507-4d93-9050-2f0f9c91a037",
+          "symbol": "C_R_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-27"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value=107"
+          }
+        },
+        {
+          "id": "fa947904-afc4-4e7c-b992-d65e9cedf30a",
+          "symbol": "C_KA_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-28"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value=70"
+          }
+        },
+        {
+          "id": "2a5c2295-79f8-4fbd-8fba-425947254cd2",
+          "symbol": "d_I",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "85dd4741-dd6a-4215-9d50-f8f8090c54ae",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "3d63b445-a504-4d51-8c0d-e06bcddb519b",
+          "symbol": "f_S_QM",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "8cb618f2-3331-4423-b0b0-460eb8fe7df5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "2fc68f68-e7aa-4732-81d0-ff92c0dcdcb6",
+          "symbol": "Q_S_aM",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "8cb618f2-3331-4423-b0b0-460eb8fe7df5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "f431c5fb-96a6-41f3-84a0-c95e6d383071",
+          "symbol": "Q_M_i",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "8cb618f2-3331-4423-b0b0-460eb8fe7df5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "2b2130e1-f6e3-49b3-8b2e-9fe00de80a54",
+          "symbol": "Q_S_h_max_Tr",
+          "data_type": "number",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f",
+          "section_id": "8cb618f2-3331-4423-b0b0-460eb8fe7df5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "0c41f726-d046-4364-864f-f510fa1fa18a",
+          "symbol": "f_D",
+          "data_type": "number",
+          "worksheet_template_id": "710dfbfe-1f51-4d84-9cf8-56c68648f339",
+          "section_id": "7218a8bd-59b6-43bb-a186-078ba631184a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-13",
+            "A1022-19",
+            "A1022-22",
+            "A1022-24",
+            "A1022-30"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<value<=1"
+          }
+        },
+        {
+          "id": "bf4d8f57-4410-4198-80f4-3a53e4039975",
+          "symbol": "oberflaechentyp",
+          "data_type": "text",
+          "worksheet_template_id": "710dfbfe-1f51-4d84-9cf8-56c68648f339",
+          "section_id": "7218a8bd-59b6-43bb-a186-078ba631184a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "bce8fb6d-3d77-4fa1-ab83-bba87f3bad58",
+          "symbol": "B_R_a_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "4875ebdb-f818-4194-91e5-99b466e642b1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-11",
+            "A1022-12",
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "2af6b99c-ecc5-43b6-8a03-3b0ef7700b27",
+          "symbol": "b_R_a_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "4875ebdb-f818-4194-91e5-99b466e642b1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-11",
+            "A1022-26"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "6ab6d893-9d69-40b1-9280-9228a5202939",
+          "symbol": "B_R_a_AFS63_I",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "4875ebdb-f818-4194-91e5-99b466e642b1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "c8901702-ef01-4436-a95e-998c5a3632ac",
+          "symbol": "B_R_a_AFS63_II",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "4875ebdb-f818-4194-91e5-99b466e642b1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "efbd68b4-b821-4e4a-aaf7-2e04a0f215eb",
+          "symbol": "B_R_a_AFS63_III",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "4875ebdb-f818-4194-91e5-99b466e642b1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "1b719c1a-44d9-4e74-8fb8-26b44d3ef196",
+          "symbol": "B_R_a_AFS63_i",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "4875ebdb-f818-4194-91e5-99b466e642b1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "6f97e508-5f90-4b61-a80f-89583f52e6dc",
+          "symbol": "A_b_a_i",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "2caca354-6a44-4bef-89de-f14ef9449d42",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "3dfa5d74-5505-4f9c-90f7-fd5d2b774416",
+          "symbol": "b_R_a_AFS63_i",
+          "data_type": "number",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c",
+          "section_id": "2caca354-6a44-4bef-89de-f14ef9449d42",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "1691c314-3a3b-4df7-b811-b5849c0565a2",
+          "symbol": "eta_erf",
+          "data_type": "number",
+          "worksheet_template_id": "8023ea91-44b5-41d4-ac92-8ef974824d7f",
+          "section_id": "031d8781-580b-4ad8-9f25-d0a534608221",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-17",
+            "A1022-34"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=100"
+          }
+        },
+        {
+          "id": "fef35d5a-9be7-4052-9a9d-d05065447ed9",
+          "symbol": "b_R_e_zul_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "8023ea91-44b5-41d4-ac92-8ef974824d7f",
+          "section_id": "a414c7df-8f3d-4cc8-abb7-4c7a031b1262",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "a2f2dbbe-e70f-4fcc-872e-e77f725d1373",
+          "symbol": "b_R_a_AFS63_ref",
+          "data_type": "number",
+          "worksheet_template_id": "8023ea91-44b5-41d4-ac92-8ef974824d7f",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "1dac9d1b-7de9-4f79-aa12-28db5de23f9f",
+          "symbol": "B_R_e_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": "793a076f-df5e-43d6-bf26-4a024070e4d9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-31",
+            "A1022-34"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "637f9a88-170e-4ed4-9917-87f4ab08904e",
+          "symbol": "eta_ges_in",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": "d3a71c3e-49c4-4c2d-b983-7ae4c5629b9d",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "ef1643c4-e914-454e-81f4-983f8825484a",
+          "symbol": "B_R_a_AFS63_ref",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "7ea7de55-bdfb-4b36-93f5-0dc2be159219",
+          "symbol": "eta_ges_ref",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "5f396344-718c-44b9-9101-9b6164d14cf9",
+          "symbol": "B_R_e_AFS63_i",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": "793a076f-df5e-43d6-bf26-4a024070e4d9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "c049cf03-8041-4e38-be84-53b2b4239138",
+          "symbol": "A_b_a_i",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": "9747c129-aa04-4a84-9ddd-1472052e69e9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "2b19aed5-3aad-45df-b454-515b79b0b609",
+          "symbol": "eta_i",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": "9747c129-aa04-4a84-9ddd-1472052e69e9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "b08f169e-8113-4615-86b5-e3d09e8bf083",
+          "symbol": "b_R_a_AFS63_i",
+          "data_type": "number",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462",
+          "section_id": "9747c129-aa04-4a84-9ddd-1472052e69e9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "cfa62ac1-0c29-496d-8b4f-2027792315bd",
+          "symbol": "Q_R_krit",
+          "data_type": "number",
+          "worksheet_template_id": "aaa690c8-bbd9-439a-ad6b-88a1435cf32e",
+          "section_id": "4bcf4d12-8a07-4b47-8efa-7a471dfe1b04",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-14"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "370d6afe-edfa-45ed-9737-c8bfc8a31449",
+          "symbol": "A_b_a_ref",
+          "data_type": "number",
+          "worksheet_template_id": "aaa690c8-bbd9-439a-ad6b-88a1435cf32e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "190daf28-12b5-440a-914e-521132bcfaba",
+          "symbol": "f_D_ref",
+          "data_type": "number",
+          "worksheet_template_id": "aaa690c8-bbd9-439a-ad6b-88a1435cf32e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "f6170dd6-5cb0-4230-b785-f9c6c3e412cd",
+          "symbol": "r_krit_ref",
+          "data_type": "number",
+          "worksheet_template_id": "aaa690c8-bbd9-439a-ad6b-88a1435cf32e",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "9dda87b6-905e-4736-9666-ab1640713db0",
+          "symbol": "Q_Bem_Tr",
+          "data_type": "number",
+          "worksheet_template_id": "f4f9a8a1-65e0-40c0-9465-21f8d0fc2a9a",
+          "section_id": "4dfb3c64-8c97-4915-85e9-c258481fbdab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-15",
+            "A1022-18"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "b8e8ec28-1e2f-4477-964e-b3129746e473",
+          "symbol": "Q_F_ref",
+          "data_type": "number",
+          "worksheet_template_id": "f4f9a8a1-65e0-40c0-9465-21f8d0fc2a9a",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "eb304553-e5d1-4188-a326-a2cecfc180e2",
+          "symbol": "Q_R_krit_ref",
+          "data_type": "number",
+          "worksheet_template_id": "f4f9a8a1-65e0-40c0-9465-21f8d0fc2a9a",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "27ab3670-164a-47e6-98cd-ea438385420c",
+          "symbol": "q_A_Bem",
+          "data_type": "number",
+          "worksheet_template_id": "a601ee91-f391-4890-a959-94b62313db06",
+          "section_id": "b481aad0-3608-47fb-bca4-69d4e9d03c5d",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-16",
+            "A1022-17",
+            "A1022-18"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "2aa850ed-3347-487b-98c6-c0b93faf6aa2",
+          "symbol": "A_sed",
+          "data_type": "number",
+          "worksheet_template_id": "a601ee91-f391-4890-a959-94b62313db06",
+          "section_id": "8acac19f-bb0f-4776-a5fe-78afb7463929",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "399d0235-35fe-4d96-804d-04be6b2d5a69",
+          "symbol": "q_A_max",
+          "data_type": "number",
+          "worksheet_template_id": "a601ee91-f391-4890-a959-94b62313db06",
+          "section_id": "8acac19f-bb0f-4776-a5fe-78afb7463929",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "beb405fd-6c8f-4d90-b465-9f549902a595",
+          "symbol": "q_A_b",
+          "data_type": "number",
+          "worksheet_template_id": "a601ee91-f391-4890-a959-94b62313db06",
+          "section_id": "b481aad0-3608-47fb-bca4-69d4e9d03c5d",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "e7a84075-c85a-4a35-9983-bf933cf80484",
+          "symbol": "eta_sed",
+          "data_type": "number",
+          "worksheet_template_id": "3093e607-21ed-4639-a325-c8780a367aca",
+          "section_id": "efe7aec4-3952-4e84-8755-1e7e8a01ca4f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-17"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=1"
+          }
+        },
+        {
+          "id": "ca601de3-ea6f-4d7c-a91f-992ad48348fe",
+          "symbol": "q_A_max_lookup",
+          "data_type": "number",
+          "worksheet_template_id": "3093e607-21ed-4639-a325-c8780a367aca",
+          "section_id": "be060920-9d49-4203-b1fa-e9722ba2ddc3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "7adbe3f4-f7f4-4c7e-a23c-f47dcc05aa8c",
+          "symbol": "eta_ges",
+          "data_type": "number",
+          "worksheet_template_id": "4b283dc6-a1f8-42ab-bada-180346451486",
+          "section_id": "3bbbc176-9576-44b2-9977-c0682d255dd1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-12",
+            "A1022-18",
+            "A1022-31",
+            "A1022-34"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=1"
+          }
+        },
+        {
+          "id": "c21cb7a8-9809-4f1b-8d5e-14830f134119",
+          "symbol": "q_A_Bem_for_eta",
+          "data_type": "number",
+          "worksheet_template_id": "4b283dc6-a1f8-42ab-bada-180346451486",
+          "section_id": "030c1be7-c7ea-4baa-a5de-2ee1a932b5ac",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "a86325ba-af3e-41ba-af13-710742405bc8",
+          "symbol": "q_A_Bem",
+          "data_type": "number",
+          "worksheet_template_id": "4b283dc6-a1f8-42ab-bada-180346451486",
+          "section_id": "3bbbc176-9576-44b2-9977-c0682d255dd1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "ae962702-4498-4686-932c-dd6ee2a9bddb",
+          "symbol": "A_RKB",
+          "data_type": "number",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3",
+          "section_id": "fe5652f3-22d6-4187-a8a3-d00d6c601549",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-31"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "705a02b4-2796-4653-a100-0935dce4a0d9",
+          "symbol": "V_RKB",
+          "data_type": "number",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3",
+          "section_id": "fe5652f3-22d6-4187-a8a3-d00d6c601549",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-31"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "e131958b-ee67-4bc1-b4ca-801f047d032a",
+          "symbol": "h_RKB",
+          "data_type": "number",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3",
+          "section_id": "d1bd7299-b594-4d60-9610-2f8bb4a0f65b",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-18"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=2"
+          }
+        },
+        {
+          "id": "fc608d56-da1c-429c-85e4-4396f524ab66",
+          "symbol": "A_eff",
+          "data_type": "number",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3",
+          "section_id": "fe5652f3-22d6-4187-a8a3-d00d6c601549",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "e83d1ee8-0c11-4b12-9a20-8f501829f549",
+          "symbol": "Q_R_Dr",
+          "data_type": "number",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "section_id": "825c5ebe-8491-43a1-817d-149dcf141824",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-22",
+            "A1022-29"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "2b7408d7-8dd7-41f2-bd68-f4031f6333fb",
+          "symbol": "q_R_Dr",
+          "data_type": "number",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "section_id": "825c5ebe-8491-43a1-817d-149dcf141824",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-22",
+            "A1022-29"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "c7e3af0b-06b8-4bcc-aade-c91b94999693",
+          "symbol": "Q_M_ref",
+          "data_type": "number",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "3086c0e2-5873-4c03-98aa-263b258721ea",
+          "symbol": "Q_R_Tr_ref",
+          "data_type": "number",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "4db545d0-4a21-45bd-8692-b3535d931206",
+          "symbol": "Q_T_aM_ref",
+          "data_type": "number",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "e24a923c-bce0-4e0d-b30f-34b15fc7bafa",
+          "symbol": "A_b_a_ref",
+          "data_type": "number",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "13936f12-e3de-4176-9edc-15efe4c77440",
+          "symbol": "q_T_aM",
+          "data_type": "number",
+          "worksheet_template_id": "d07f3e88-096f-481c-b2a0-8f5d146e3d75",
+          "section_id": "f1f604a5-caf0-4eae-8e66-705a626ea527",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "801b3dad-880d-416c-befe-8afbcf87c581",
+          "symbol": "A_b_a_ref",
+          "data_type": "number",
+          "worksheet_template_id": "d07f3e88-096f-481c-b2a0-8f5d146e3d75",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "b263cdbc-92e4-4acd-8bdf-3034b23e814f",
+          "symbol": "Q_T_aM_ref",
+          "data_type": "number",
+          "worksheet_template_id": "d07f3e88-096f-481c-b2a0-8f5d146e3d75",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "c75f2046-2b59-4b5f-8f62-7a46851b0855",
+          "symbol": "a_f",
+          "data_type": "number",
+          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15",
+          "section_id": "cd1f0e27-b540-454d-a265-86eaf02ee22f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-22"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0.5<=value<=1"
+          }
+        },
+        {
+          "id": "cbcf58b9-3b80-437b-a9b6-33e936f838e4",
+          "symbol": "t_f_ref",
+          "data_type": "number",
+          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "df3ce90c-16d2-4d43-9c42-6980ef883d4c",
+          "symbol": "Q_R_e",
+          "data_type": "number",
+          "worksheet_template_id": "0845b805-cf83-43a3-b561-00a2e04ba0d7",
+          "section_id": "98c50422-2d34-48fa-8554-01eaf3c1977c",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-23"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "e4fab943-efd6-48dc-abef-07ec6a078c9f",
+          "symbol": "V_e_MWUe",
+          "data_type": "number",
+          "worksheet_template_id": "0845b805-cf83-43a3-b561-00a2e04ba0d7",
+          "section_id": "e128e39a-38ff-4483-9bce-7710429adf3f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "f4f835de-3da3-4d2e-a7e0-aca76b5b1a26",
+          "symbol": "D_e",
+          "data_type": "number",
+          "worksheet_template_id": "0845b805-cf83-43a3-b561-00a2e04ba0d7",
+          "section_id": "e128e39a-38ff-4483-9bce-7710429adf3f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "98480f2b-5937-4197-a1bc-8453a83e213c",
+          "symbol": "m",
+          "data_type": "number",
+          "worksheet_template_id": "5a3aac18-028c-48d9-ae7c-6ca02527da9f",
+          "section_id": "e1ba98d4-a549-4b82-9685-47afcc9f1778",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-27",
+            "A1022-33",
+            "A1022-36"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "9a6d0843-7964-459d-91f7-631492ef8578",
+          "symbol": "Q_R_e_ref",
+          "data_type": "number",
+          "worksheet_template_id": "5a3aac18-028c-48d9-ae7c-6ca02527da9f",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "3466564e-26f0-45de-8b20-c663ba1ba67d",
+          "symbol": "Q_R_Tr_ref",
+          "data_type": "number",
+          "worksheet_template_id": "5a3aac18-028c-48d9-ae7c-6ca02527da9f",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "2f5d04a0-dc68-49c4-bfa6-21bfa5507fbb",
+          "symbol": "Q_T_aM_ref",
+          "data_type": "number",
+          "worksheet_template_id": "5a3aac18-028c-48d9-ae7c-6ca02527da9f",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "069c6e59-e4d8-45c0-be69-3bb891cd2056",
+          "symbol": "a_c_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "d5a5a33f-7807-48a4-9f59-c411e4bae4dc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-25"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=1"
+          }
+        },
+        {
+          "id": "12586623-92c9-43b7-9858-141b83a6312d",
+          "symbol": "a_h",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "d5a5a33f-7807-48a4-9f59-c411e4bae4dc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-25"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "-0.25<=value<=0.25"
+          }
+        },
+        {
+          "id": "ad272c6e-3ad4-4937-bc6b-9942274e23a8",
+          "symbol": "a_a",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "d5a5a33f-7807-48a4-9f59-c411e4bae4dc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-25"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "62a54fc3-1be4-454a-8ff0-be3cc2106dc1",
+          "symbol": "x_a",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "d5a5a33f-7807-48a4-9f59-c411e4bae4dc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "d253b42e-3c60-4795-a558-3b7b6d201a01",
+          "symbol": "tau",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "d5a5a33f-7807-48a4-9f59-c411e4bae4dc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-24"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "85b17e53-3770-4400-a69d-ba0568a99d46",
+          "symbol": "d_i",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "2a5c86d3-146e-4105-8884-b4f5e56ca33a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "6a9751d3-fbec-4659-968b-7f2243cbcb75",
+          "symbol": "I_S_i",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "2a5c86d3-146e-4105-8884-b4f5e56ca33a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "860b1007-ac50-4640-9a3d-bc139394f03a",
+          "symbol": "l_i",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "2a5c86d3-146e-4105-8884-b4f5e56ca33a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "caee74ce-ba53-4ee4-a16b-2073eff2b1e8",
+          "symbol": "d_I",
+          "data_type": "number",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a",
+          "section_id": "d5a5a33f-7807-48a4-9f59-c411e4bae4dc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "0797ff36-3b15-4827-9b83-e4e73f460f9a",
+          "symbol": "C_b_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "cbef4e3e-e270-475c-b23a-b00bc0391989",
+          "section_id": "be9b6eb8-9ca0-4858-993b-7a58dbd53ab6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-27"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "76f91896-7367-4bd3-9452-7e586e349e93",
+          "symbol": "a_a_ref",
+          "data_type": "number",
+          "worksheet_template_id": "cbef4e3e-e270-475c-b23a-b00bc0391989",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "e2dd3abb-9e95-40eb-9d2c-17ad9b6781fb",
+          "symbol": "a_c_CSB_ref",
+          "data_type": "number",
+          "worksheet_template_id": "cbef4e3e-e270-475c-b23a-b00bc0391989",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "781dfc14-cf25-4e35-b4ce-270b356da421",
+          "symbol": "a_h_ref",
+          "data_type": "number",
+          "worksheet_template_id": "cbef4e3e-e270-475c-b23a-b00bc0391989",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "12edc409-5fc4-4ec8-9669-a93a2e996f65",
+          "symbol": "a_R_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772",
+          "section_id": "0536dbd0-db11-491a-80c4-5e04795b8027",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-27"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "1<=value<=1.20"
+          }
+        },
+        {
+          "id": "2efaf1ce-eb5b-40f0-b6ce-620838e7c70d",
+          "symbol": "b_R_a_AFS63",
+          "data_type": "number",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "084b55ec-4dd3-45d3-af54-5e4b29a55425",
+          "symbol": "p_I_ref",
+          "data_type": "number",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "634071e7-5d64-4e7f-89ca-493b7561f53a",
+          "symbol": "p_II_ref",
+          "data_type": "number",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "4d3acded-5f8b-4631-9bb0-5b1737b18df6",
+          "symbol": "p_III_ref",
+          "data_type": "number",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "594eb3be-c21a-4a99-8145-0c20aa11cd4b",
+          "symbol": "C_e_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428",
+          "section_id": "03ee75bb-37a9-49f1-9b4a-731dcc1b026a",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-28"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=0"
+          }
+        },
+        {
+          "id": "acc14378-1cfc-4cfa-a121-c595c5583880",
+          "symbol": "C_R_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428",
+          "section_id": "a28ecc70-d093-4e1a-8f83-2b9e8137e73e",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "319e80ac-ce53-4b75-8e4d-335874a64675",
+          "symbol": "C_b_CSB_ref",
+          "data_type": "number",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "02b202aa-c572-4bc4-bc50-bab620840f70",
+          "symbol": "m_ref",
+          "data_type": "number",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "d25e06a5-b588-4f47-90d0-706b476f06d0",
+          "symbol": "a_R_AFS63_ref",
+          "data_type": "number",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "4b49904f-962d-4331-8a10-9bb1f5fbc190",
+          "symbol": "e_0",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "68205e3e-0934-4610-bfa8-e51864cb082f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-30",
+            "A1022-35"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "0<=value<=100"
+          }
+        },
+        {
+          "id": "57da8a9c-b538-4dc4-afec-2f23b2c1b3ea",
+          "symbol": "C_KA_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "b845ea62-f320-4f19-8a80-aa2c9e1e59e2",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "8ba6f437-5b79-4758-82af-21f8411f4db5",
+          "symbol": "C_e_CSB_ref",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "95af1c86-5f34-4740-810c-63520ea6dc53",
+          "symbol": "C_R_CSB_ref",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "7390d198-f194-435d-9394-a5ab6e92c1c7",
+          "symbol": "V_R_aM_ref",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "846ecde5-5146-4c50-beeb-2ed0d67dcbbc",
+          "symbol": "V_R_aM",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "788c8712-3de3-4ecf-90b0-9ab5089bf0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "8807ca72-9bb9-4f01-bc34-2b7b48e67e27",
+          "symbol": "B_R_e",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "68205e3e-0934-4610-bfa8-e51864cb082f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "9ffb25df-529b-489a-82c6-f99b8b181bc7",
+          "symbol": "C_e",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "788c8712-3de3-4ecf-90b0-9ab5089bf0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "8060aa9d-2524-40f6-83af-5aa7389376a3",
+          "symbol": "C_KA",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "788c8712-3de3-4ecf-90b0-9ab5089bf0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "084ec7ae-c823-4d99-82f3-c6c711e5cdb8",
+          "symbol": "B_R_e_zul",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "788c8712-3de3-4ecf-90b0-9ab5089bf0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "4ea5716f-5f25-4e4f-ac73-dd81f2f29ed9",
+          "symbol": "B_R_e_zul_CSB",
+          "data_type": "number",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028",
+          "section_id": "68205e3e-0934-4610-bfa8-e51864cb082f",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "698df758-b0d7-47e7-acb5-440e83cb3769",
+          "symbol": "H1",
+          "data_type": "number",
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42",
+          "section_id": "c0cb93f6-f422-4641-8acf-e1aa3d1828fd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-30"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "1130d492-9c0f-450c-8828-92083e03f06e",
+          "symbol": "H2",
+          "data_type": "number",
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42",
+          "section_id": "c0cb93f6-f422-4641-8acf-e1aa3d1828fd",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-30"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "cfceceac-0e6f-4f3b-8181-b218ded64cab",
+          "symbol": "V_S_min",
+          "data_type": "number",
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42",
+          "section_id": "77e1231e-7522-43c7-b5d8-9a2dc6498afc",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-30",
+            "A1022-35"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value=5"
+          }
+        },
+        {
+          "id": "3248cf26-ffb5-45f4-97b1-48a53c8331a3",
+          "symbol": "V_s",
+          "data_type": "number",
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479",
+          "section_id": "a9eb8c41-c58a-46de-89f4-bf981b133cce",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-32",
+            "A1022-35"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>=5"
+          }
+        },
+        {
+          "id": "4041092c-0720-469d-bdcc-361fc58fbe8d",
+          "symbol": "V",
+          "data_type": "number",
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479",
+          "section_id": "a9eb8c41-c58a-46de-89f4-bf981b133cce",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-32",
+            "A1022-35"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value>0"
+          }
+        },
+        {
+          "id": "d521792c-ffe8-4ab6-a904-3fa8efcbf552",
+          "symbol": "V_S_min",
+          "data_type": "number",
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479",
+          "section_id": "36ee69ad-c39c-4125-a266-0f30f0c41c78",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "1338cfd0-ff20-475e-a140-c2d2adaacadd",
+          "symbol": "tr_b_R_a_AFS63_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f",
+          "section_id": "f1e96d21-41c3-4554-9a5e-7e0bacd64cb5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "9aaaf0b0-7478-4e2f-aaf3-9e35e935aeed",
+          "symbol": "tr_eta_erf_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f",
+          "section_id": "f1e96d21-41c3-4554-9a5e-7e0bacd64cb5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "8ae49185-d285-4965-9173-a45c5182e3f1",
+          "symbol": "tr_eta_ges_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f",
+          "section_id": "f1e96d21-41c3-4554-9a5e-7e0bacd64cb5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "ba7b7dc5-3e77-4bca-beb5-eb1cfcbeada0",
+          "symbol": "tr_A_RKB",
+          "data_type": "number",
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f",
+          "section_id": "f1e96d21-41c3-4554-9a5e-7e0bacd64cb5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "75465444-d959-4b34-be28-6fe0dcc4571e",
+          "symbol": "tr_V_RKB",
+          "data_type": "number",
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f",
+          "section_id": "f1e96d21-41c3-4554-9a5e-7e0bacd64cb5",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "c06cc598-0898-442d-8db8-b7e6e28f2114",
+          "symbol": "ms_e_0_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c7ba554c-acba-4905-8250-e8cf6ad58137",
+          "section_id": "e41b549e-7684-43dd-b3ce-a67572d11d6c",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "3f5e88f4-fd0c-4a4a-8fc7-37d494b86046",
+          "symbol": "ms_V_s_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c7ba554c-acba-4905-8250-e8cf6ad58137",
+          "section_id": "e41b549e-7684-43dd-b3ce-a67572d11d6c",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "5cd0eb91-5b92-41ad-94c4-865662780dd5",
+          "symbol": "ms_V_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c7ba554c-acba-4905-8250-e8cf6ad58137",
+          "section_id": "e41b549e-7684-43dd-b3ce-a67572d11d6c",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "6393b73d-1a83-4249-a1e1-22de412d051f",
+          "symbol": "ms_m_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c7ba554c-acba-4905-8250-e8cf6ad58137",
+          "section_id": "e41b549e-7684-43dd-b3ce-a67572d11d6c",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "daa89a4f-8178-472d-9222-4c244426558a",
+          "symbol": "ms_C_b_CSB_summary",
+          "data_type": "number",
+          "worksheet_template_id": "c7ba554c-acba-4905-8250-e8cf6ad58137",
+          "section_id": "e41b549e-7684-43dd-b3ce-a67572d11d6c",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "6fb2670a-b1c5-47b6-add4-fb41b8ecfd7e",
+          "symbol": "overall_verdict",
+          "data_type": "enum",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "a99563c9-477d-4182-a769-950cc9fb7010",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "—"
+          ],
+          "enum_values": [
+            {
+              "value": "compliant",
+              "label_de": "konform",
+              "label_en": "compliant",
+              "order_index": 1,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "compliant_with_conditions",
+              "label_de": "konform mit Auflagen",
+              "label_en": "compliant with conditions",
+              "order_index": 2,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "not_compliant",
+              "label_de": "nicht konform",
+              "label_en": "not compliant",
+              "order_index": 3,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "insufficient_data",
+              "label_de": "unzureichende Daten",
+              "label_en": "insufficient data",
+              "order_index": 4,
+              "regulation_reference": "—"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "enum:compliance_verdict"
+          }
+        },
+        {
+          "id": "964af6fb-2dc6-4798-b39e-9a80f0c066a7",
+          "symbol": "Q_Dr_minimum",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "030584b4-30b8-458e-a75d-ef73261496d1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "59917f98-eb20-4cf0-983e-648e9e1c18b5",
+          "symbol": "m_Rue",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "030584b4-30b8-458e-a75d-ef73261496d1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "9541b955-0f03-4f79-bcc3-9b84d8e96060",
+          "symbol": "r_krit_calc",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "030584b4-30b8-458e-a75d-ef73261496d1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "4eb26f65-fce9-4bd4-bb63-5688c0730273",
+          "symbol": "Q_T_aM_ref",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "7e8f5d2c-d018-41b1-8350-3ab2c039f08e",
+          "symbol": "Q_R_e_ref",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "214cf6ad-457c-47ec-ad22-ed2918fbcab6",
+          "symbol": "Q_R_Tr_ref",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "67be9433-c73b-4a7c-a5aa-8fed964cb391",
+          "symbol": "m",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "030584b4-30b8-458e-a75d-ef73261496d1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "3468faab-eeac-4b4d-aed8-8c4cc54cb341",
+          "symbol": "r_krit",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "030584b4-30b8-458e-a75d-ef73261496d1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "03f5b671-c00a-4ac7-a707-7bf9b68b55d7",
+          "symbol": "Q_Dr",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "030584b4-30b8-458e-a75d-ef73261496d1",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "7f67a64f-cdf1-4be0-8292-e938c490ad7e",
+          "symbol": "Q_Dr_i",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": "384e2e7d-9d5e-4aea-af47-7143dccf41e9",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "eaec7f0f-14f5-4d73-8b20-32f440572397",
+          "symbol": "Q_R_krit_ref",
+          "data_type": "number",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "ab9087b2-0315-42b4-98f4-8697e7df64ec",
+          "symbol": "trenn_verdict",
+          "data_type": "enum",
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712",
+          "section_id": "04b52630-3319-4a76-8f7b-04e0926222b3",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-33"
+          ],
+          "enum_values": [
+            {
+              "value": "pass",
+              "label_de": "bestanden",
+              "label_en": "pass",
+              "order_index": 1,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "fail",
+              "label_de": "nicht bestanden",
+              "label_en": "fail",
+              "order_index": 2,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "conditional",
+              "label_de": "bedingt",
+              "label_en": "conditional",
+              "order_index": 3,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "not_applicable",
+              "label_de": "nicht zutreffend",
+              "label_en": "not applicable",
+              "order_index": 4,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "pending",
+              "label_de": "ausstehend",
+              "label_en": "pending",
+              "order_index": 5,
+              "regulation_reference": "workflow"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "enum:gate_result"
+          }
+        },
+        {
+          "id": "6431350b-1b38-403c-978f-c9512305c796",
+          "symbol": "nachweis_AFS_tr_pass",
+          "data_type": "boolean",
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712",
+          "section_id": "0c946c7e-710e-474b-8dd0-7980af99c24b",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "7557248e-0570-4056-b108-583fac65202f",
+          "symbol": "nachweis_AFS_tr_comment",
+          "data_type": "text",
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712",
+          "section_id": "0c946c7e-710e-474b-8dd0-7980af99c24b",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "f063707a-1070-4978-a202-edb2cb839464",
+          "symbol": "V_s_max_economic",
+          "data_type": "number",
+          "worksheet_template_id": "5fb3b4ed-4097-407b-b3b0-8021c7e4a702",
+          "section_id": "5e787491-c572-4c87-8127-84d4895cbcd6",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-35"
+          ],
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": {
+            "raw": "value=40"
+          }
+        },
+        {
+          "id": "e89a84ae-6269-413d-a8bf-042fc874baeb",
+          "symbol": "misch_volume_verdict",
+          "data_type": "enum",
+          "worksheet_template_id": "5fb3b4ed-4097-407b-b3b0-8021c7e4a702",
+          "section_id": "f243bade-7f47-430b-bd50-8a01bc577536",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-33"
+          ],
+          "enum_values": [
+            {
+              "value": "pass",
+              "label_de": "bestanden",
+              "label_en": "pass",
+              "order_index": 1,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "fail",
+              "label_de": "nicht bestanden",
+              "label_en": "fail",
+              "order_index": 2,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "conditional",
+              "label_de": "bedingt",
+              "label_en": "conditional",
+              "order_index": 3,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "not_applicable",
+              "label_de": "nicht zutreffend",
+              "label_en": "not applicable",
+              "order_index": 4,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "pending",
+              "label_de": "ausstehend",
+              "label_en": "pending",
+              "order_index": 5,
+              "regulation_reference": "workflow"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "enum:gate_result"
+          }
+        },
+        {
+          "id": "fba976d1-92e7-440e-8006-0cabc1f337bb",
+          "symbol": "nachweis_Vs_min_pass",
+          "data_type": "boolean",
+          "worksheet_template_id": "5fb3b4ed-4097-407b-b3b0-8021c7e4a702",
+          "section_id": "c0a5fb90-ae47-4491-b7ee-8642a5c0d0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "5090bf46-55db-4c56-9f2f-5e1e620f1179",
+          "symbol": "nachweis_Vs_max_pass",
+          "data_type": "boolean",
+          "worksheet_template_id": "5fb3b4ed-4097-407b-b3b0-8021c7e4a702",
+          "section_id": "c0a5fb90-ae47-4491-b7ee-8642a5c0d0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "15006aa0-1f3a-4427-9f1f-3709869d0889",
+          "symbol": "nachweis_Vs_comment",
+          "data_type": "text",
+          "worksheet_template_id": "5fb3b4ed-4097-407b-b3b0-8021c7e4a702",
+          "section_id": "c0a5fb90-ae47-4491-b7ee-8642a5c0d0ab",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "37192828-6dbf-4d04-93b0-5927ea649703",
+          "symbol": "m_min_verdict",
+          "data_type": "enum",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "section_id": "a5440b74-62d9-42cd-b972-e54b33065931",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "A1022-33"
+          ],
+          "enum_values": [
+            {
+              "value": "pass",
+              "label_de": "bestanden",
+              "label_en": "pass",
+              "order_index": 1,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "fail",
+              "label_de": "nicht bestanden",
+              "label_en": "fail",
+              "order_index": 2,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "conditional",
+              "label_de": "bedingt",
+              "label_en": "conditional",
+              "order_index": 3,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "not_applicable",
+              "label_de": "nicht zutreffend",
+              "label_en": "not applicable",
+              "order_index": 4,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "pending",
+              "label_de": "ausstehend",
+              "label_en": "pending",
+              "order_index": 5,
+              "regulation_reference": "workflow"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "enum:gate_result"
+          }
+        },
+        {
+          "id": "4c406003-ceae-41cf-8a3c-255b7ad326ad",
+          "symbol": "m_min_required",
+          "data_type": "number",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "section_id": "de9d8655-e367-4d13-a556-8176fa64ea22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "9a46609b-ef67-401c-8aff-15fba8377498",
+          "symbol": "nachweis_m_pass",
+          "data_type": "boolean",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "section_id": "de9d8655-e367-4d13-a556-8176fa64ea22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "9c1ac4e2-4229-4ace-bbe6-98ba3dedf161",
+          "symbol": "nachweis_m_comment",
+          "data_type": "text",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "section_id": "de9d8655-e367-4d13-a556-8176fa64ea22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "e8e765b2-7644-4ebd-ba88-c9d730fec948",
+          "symbol": "C_T_aM_CSB_ref",
+          "data_type": "number",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "section_id": null,
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        },
+        {
+          "id": "70092079-5467-4691-a46e-f34c46207414",
+          "symbol": "m",
+          "data_type": "number",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf",
+          "section_id": "de9d8655-e367-4d13-a556-8176fa64ea22",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": null,
+          "enum_values": null,
+          "default_value": null,
+          "validation_rules": null
+        }
+      ],
+      "equations": [
+        {
+          "id": "997a1ee0-0288-4fbd-ab24-3afee90f6cdb",
+          "equation_number": "1",
+          "output_symbol": "A_b_a",
+          "input_symbols": [
+            "A_E_k_b",
+            "A_E_k_b_na"
+          ],
+          "formula": "A_b_a = A_E_k_b - A_E_k_b_na",
+          "clause_reference": "Section 4.2.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8"
+        },
+        {
+          "id": "c4495497-60aa-479b-99d8-4d9b1ae2ec7e",
+          "equation_number": "2",
+          "output_symbol": "V_R_aM",
+          "input_symbols": [
+            "h_Na",
+            "A_b_a",
+            "psi_aM"
+          ],
+          "formula": "V_R_aM = h_Na * A_b_a * psi_aM * 10",
+          "clause_reference": "Section 4.3.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "80cb34bf-d45e-4932-b023-5294a93ef7f8"
+        },
+        {
+          "id": "a6eae5bc-bc2a-4b75-bb61-77a70220d6cd",
+          "equation_number": "3",
+          "output_symbol": "B_R_a_AFS63_i",
+          "input_symbols": [
+            "A_b_a_i",
+            "b_R_a_AFS63_i"
+          ],
+          "formula": "B_R_a_AFS63_i = A_b_a_i * b_R_a_AFS63_i",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "7e0416d5-115e-48bd-a747-d97b782f66cd",
+          "equation_number": "5",
+          "output_symbol": "b_R_a_AFS63",
+          "input_symbols": [
+            "B_R_a_AFS63",
+            "A_b_a"
+          ],
+          "formula": "b_R_a_AFS63 = B_R_a_AFS63 / A_b_a",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "08d98c33-b401-44b3-ae04-d9193150c7d2",
+          "equation_number": "6",
+          "output_symbol": "eta_erf",
+          "input_symbols": [
+            "b_R_e_zul_AFS63",
+            "b_R_a_AFS63"
+          ],
+          "formula": "eta_erf = Max(0; 1 - b_R_e_zul_AFS63 / b_R_a_AFS63)  (-)  | eta_erf = Max(0; 1 - b_R_e_zul_AFS63 / b_R_a_AFS63) * 100  in %",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "8023ea91-44b5-41d4-ac92-8ef974824d7f"
+        },
+        {
+          "id": "daef07a1-965b-4b4b-b1e4-7ba168a905fc",
+          "equation_number": "7",
+          "output_symbol": "B_R_e_AFS63_i",
+          "input_symbols": [
+            "A_b_a_i",
+            "eta_i",
+            "b_R_a_AFS63_i"
+          ],
+          "formula": "B_R_e_AFS63_i = A_b_a_i * (1 - eta_i) * b_R_a_AFS63_i",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462"
+        },
+        {
+          "id": "ecd555eb-d4a2-42b3-8f3a-5349ae367302",
+          "equation_number": "8",
+          "output_symbol": "B_R_e_AFS63",
+          "input_symbols": [
+            "eta_ges",
+            "B_R_a_AFS63"
+          ],
+          "formula": "B_R_e_AFS63 = (1 - eta_ges) * B_R_a_AFS63",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "6cc217d5-a7b6-46ba-a728-66c9836b2462"
+        },
+        {
+          "id": "ee790735-7db9-488d-9082-b07343521138",
+          "equation_number": "9",
+          "output_symbol": "q_A_b",
+          "input_symbols": [
+            "q_A_max",
+            "r_krit"
+          ],
+          "formula": "q_A_b = q_A_max * 15 / r_krit",
+          "clause_reference": "Section 6.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "a601ee91-f391-4890-a959-94b62313db06"
+        },
+        {
+          "id": "bd2ca141-44d0-4541-be76-bf2170e92f35",
+          "equation_number": "10",
+          "output_symbol": "A_RKB",
+          "input_symbols": [
+            "Q_Bem_Tr",
+            "q_A_Bem"
+          ],
+          "formula": "A_RKB = 3.6 * Q_Bem_Tr / q_A_Bem",
+          "clause_reference": "Section 6.2.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3"
+        },
+        {
+          "id": "ff6456ed-db2f-4399-9183-d8b9d47e55c9",
+          "equation_number": "11",
+          "output_symbol": "V_RKB",
+          "input_symbols": [
+            "A_RKB",
+            "h_RKB"
+          ],
+          "formula": "V_RKB = A_RKB * h_RKB",
+          "clause_reference": "Section 6.2.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3"
+        },
+        {
+          "id": "e79ac053-281c-450b-a11e-c3eadaafcbae",
+          "equation_number": "12",
+          "output_symbol": "A_eff",
+          "input_symbols": [
+            "Q_Bem_Tr",
+            "q_A_max"
+          ],
+          "formula": "A_eff = 3.6 * Q_Bem_Tr / q_A_max",
+          "clause_reference": "Section 6.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "982be055-55d7-425a-b762-115a9c3943c3"
+        },
+        {
+          "id": "a1f91610-47b4-44e3-938e-5249fd446133",
+          "equation_number": "13",
+          "output_symbol": "e_0",
+          "input_symbols": [
+            "V_e_MWUe",
+            "V_R_aM"
+          ],
+          "formula": "e_0 = V_e_MWUe / V_R_aM * 100",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "626077ea-6c5a-4cf5-b10b-63836e0419b8",
+          "equation_number": "14",
+          "output_symbol": "B_R_e",
+          "input_symbols": [
+            "V_R_aM",
+            "e_0",
+            "C_e",
+            "C_KA",
+            "B_R_e_zul"
+          ],
+          "formula": "B_R_e = (V_R_aM * e_0 * C_e + V_R_aM * (100 - e_0) * C_KA) / 100 <= B_R_e_zul",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "a5bd51eb-1d34-4970-b633-68f8935a8ce9",
+          "equation_number": "15",
+          "output_symbol": "e_0",
+          "input_symbols": [
+            "B_R_e_zul",
+            "V_R_aM",
+            "C_KA",
+            "C_e"
+          ],
+          "formula": "e_0 <= (B_R_e_zul - V_R_aM * C_KA) / (V_R_aM * C_e - V_R_aM * C_KA) * 100",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "a39c4e42-db13-408a-adb9-ca194128f5d8",
+          "equation_number": "16",
+          "output_symbol": "B_R_e_zul_CSB",
+          "input_symbols": [
+            "V_R_aM",
+            "C_R_CSB"
+          ],
+          "formula": "B_R_e_zul_CSB = V_R_aM * C_R_CSB",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "46fb523a-2e8f-4f8e-b61b-ff4888a76ea4",
+          "equation_number": "17",
+          "output_symbol": "e_0",
+          "input_symbols": [
+            "C_R_CSB",
+            "C_KA_CSB",
+            "C_e_CSB"
+          ],
+          "formula": "e_0 <= (C_R_CSB - C_KA_CSB) / (C_e_CSB - C_KA_CSB) * 100",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "008a7bc7-43f2-4568-aa55-2f8431001c37",
+          "equation_number": "18",
+          "output_symbol": "e_0",
+          "input_symbols": [
+            "C_e_CSB"
+          ],
+          "formula": "e_0 <= (107 - 70) / (C_e_CSB - 70) * 100 = 3700 / (C_e_CSB - 70)",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "7d065f24-3485-4cd3-bc56-a94d82fc5a03",
+          "equation_number": "19",
+          "output_symbol": "C_e_CSB",
+          "input_symbols": [
+            "C_R_CSB",
+            "m",
+            "C_b_CSB"
+          ],
+          "formula": "C_e_CSB = (C_R_CSB * m + C_b_CSB) / (m + 1)",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428"
+        },
+        {
+          "id": "316f8622-ffef-47a7-829c-909dba3af623",
+          "equation_number": "20",
+          "output_symbol": "C_e_CSB",
+          "input_symbols": [
+            "C_R_CSB",
+            "a_R_AFS63",
+            "m",
+            "C_b_CSB"
+          ],
+          "formula": "C_e_CSB = (C_R_CSB * a_R_AFS63 * m + C_b_CSB) / (m + 1)",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428"
+        },
+        {
+          "id": "9a210010-2290-49f6-80e7-956680292ecb",
+          "equation_number": "21a",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "a_R_AFS63 = 1.0  if b_R_a_AFS63 <= 478",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "53a5778f-0083-4743-95d0-93e681711b5f",
+          "equation_number": "21b",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "a_R_AFS63 = Min(b_R_a_AFS63 / 478; 1.20)  if b_R_a_AFS63 > 478",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "d2d1bf8b-5e93-4ad8-963a-d297c89b2d14",
+          "equation_number": "22",
+          "output_symbol": "m",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "m >= 7  if C_T_aM_CSB <= 600",
+          "clause_reference": "Section 7.3.4.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf"
+        },
+        {
+          "id": "70ebb0c4-2db9-4405-85ef-da863172666c",
+          "equation_number": "23",
+          "output_symbol": "m",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "m >= (C_T_aM_CSB - 180) / 60  if C_T_aM_CSB > 600",
+          "clause_reference": "Section 7.3.4.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf"
+        },
+        {
+          "id": "89404ab0-4b15-4544-a486-4d25a0f7edff",
+          "equation_number": "24",
+          "output_symbol": "m",
+          "input_symbols": [
+            "Q_R_e",
+            "Q_R_Tr",
+            "Q_T_aM"
+          ],
+          "formula": "m = (Q_R_e + Q_R_Tr) / Q_T_aM",
+          "clause_reference": "Section 7.3.4.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "9a8579c6-ed2b-4608-a10a-9475d041f1f0",
+          "equation_number": "25a",
+          "output_symbol": "r_krit",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "r_krit = 15 * 120 / (t_f + 120)  if t_f <= 120",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "3eea2a5a-f85a-46af-becb-bee4adc85bae",
+          "equation_number": "25b",
+          "output_symbol": "r_krit",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "r_krit = 7.5  if t_f > 120",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "29c268ef-33c1-4b28-8269-c06d8465729f",
+          "equation_number": "26",
+          "output_symbol": "Q_Dr",
+          "input_symbols": [
+            "Q_T_aM",
+            "Q_R_krit",
+            "Q_Dr_i"
+          ],
+          "formula": "Q_Dr >= Q_T_aM + Q_R_krit + Sum(Q_Dr_i)",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "ef227cf7-ff9c-493f-a503-82ba965050bb",
+          "equation_number": "27",
+          "output_symbol": "m_Rue",
+          "input_symbols": [
+            "Q_Dr",
+            "Q_T_aM"
+          ],
+          "formula": "m_Rue = (Q_Dr - Q_T_aM) / Q_T_aM",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "0708808f-84f8-4b82-82f0-a8dda7977bee",
+          "equation_number": "28",
+          "output_symbol": "Q_Dr",
+          "input_symbols": [
+            "m_Rue",
+            "Q_T_aM"
+          ],
+          "formula": "Q_Dr >= (m_Rue + 1) * Q_T_aM",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "acd00262-4e8f-48db-acab-e544450601a2",
+          "equation_number": "B.1",
+          "output_symbol": "Q_R_krit",
+          "input_symbols": [
+            "r_krit",
+            "A_b_a",
+            "f_D"
+          ],
+          "formula": "Q_R_krit = r_krit * A_b_a * f_D",
+          "clause_reference": "Section B.1.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "aaa690c8-bbd9-439a-ad6b-88a1435cf32e"
+        },
+        {
+          "id": "d0256603-30ed-4e04-8bb0-a141e0548c26",
+          "equation_number": "B.2",
+          "output_symbol": "Q_Bem_Tr",
+          "input_symbols": [
+            "Q_R_krit",
+            "Q_F"
+          ],
+          "formula": "Q_Bem_Tr = Q_R_krit + Q_F",
+          "clause_reference": "Section B.2.1",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f4f9a8a1-65e0-40c0-9465-21f8d0fc2a9a"
+        },
+        {
+          "id": "5341b82e-0ac8-4fa9-8d51-80bbbf90cde8",
+          "equation_number": "B.3",
+          "output_symbol": "q_A_Bem",
+          "input_symbols": [
+            "Q_Bem_Tr",
+            "A_sed"
+          ],
+          "formula": "q_A_Bem = 3.6 * Q_Bem_Tr / A_sed",
+          "clause_reference": "Section B.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "a601ee91-f391-4890-a959-94b62313db06"
+        },
+        {
+          "id": "5f36c093-d01e-4d4b-a723-9573374f7bc1",
+          "equation_number": "B.4",
+          "output_symbol": "Q_M",
+          "input_symbols": [
+            "f_S_QM",
+            "Q_S_aM",
+            "Q_F"
+          ],
+          "formula": "Q_M = f_S_QM * Q_S_aM + Q_F",
+          "clause_reference": "Section B.3.2.3.1",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f"
+        },
+        {
+          "id": "44d37420-9559-4b89-a305-e87cf516e488",
+          "equation_number": "B.5",
+          "output_symbol": "Q_M",
+          "input_symbols": [
+            "Q_M_i",
+            "Q_M"
+          ],
+          "formula": "Sum(Q_M_i) <= Q_M",
+          "clause_reference": "Section B.3.2.3.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f"
+        },
+        {
+          "id": "fdb39a49-f9d9-47e4-9ac4-5605b8242f7c",
+          "equation_number": "B.6",
+          "output_symbol": "Q_R_Tr",
+          "input_symbols": [
+            "Q_S_h_max_Tr"
+          ],
+          "formula": "Q_R_Tr = Q_S_h_max_Tr",
+          "clause_reference": "Section B.3.2.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ab0caa75-4806-4faf-938b-4485426a335f"
+        },
+        {
+          "id": "929c3944-03c9-4c42-98ee-3a824a7b27c3",
+          "equation_number": "B.7",
+          "output_symbol": "Q_R_Dr",
+          "input_symbols": [
+            "Q_M",
+            "Q_T_aM",
+            "Q_R_Tr"
+          ],
+          "formula": "Q_R_Dr = Q_M - Q_T_aM - Q_R_Tr",
+          "clause_reference": "Section B.3.3.1",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551"
+        },
+        {
+          "id": "c86641c2-c5bc-407e-9dba-969169250768",
+          "equation_number": "B.8",
+          "output_symbol": "q_R_Dr",
+          "input_symbols": [
+            "Q_R_Dr",
+            "A_b_a"
+          ],
+          "formula": "q_R_Dr = Q_R_Dr / A_b_a",
+          "clause_reference": "Section B.3.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "40701cb5-8dcb-428e-94eb-bde8ea913551"
+        },
+        {
+          "id": "42cbd2b0-dab8-4e39-b7c9-ee05b269a605",
+          "equation_number": "B.9",
+          "output_symbol": "q_T_aM",
+          "input_symbols": [
+            "Q_T_aM",
+            "A_b_a"
+          ],
+          "formula": "q_T_aM = Q_T_aM / A_b_a",
+          "clause_reference": "Section B.3.3.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "d07f3e88-096f-481c-b2a0-8f5d146e3d75"
+        },
+        {
+          "id": "1cd06fe2-0b67-447b-895c-0db16528edd1",
+          "equation_number": "B.10",
+          "output_symbol": "a_f",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "a_f = 0.50 + 50 / (t_f + 100)  if t_f <= 30  |  a_f = 0.885  if t_f > 30",
+          "clause_reference": "Section B.3.3.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15"
+        },
+        {
+          "id": "aa0ed5ff-3b65-440b-8922-80c78e4dc84a",
+          "equation_number": "B.11",
+          "output_symbol": "Q_R_e",
+          "input_symbols": [
+            "V_e_MWUe",
+            "D_e",
+            "Q_R_Dr"
+          ],
+          "formula": "Q_R_e = V_e_MWUe / (D_e * 3.6) + Q_R_Dr",
+          "clause_reference": "Section B.3.3.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "0845b805-cf83-43a3-b561-00a2e04ba0d7"
+        },
+        {
+          "id": "33301fd3-1cd7-4a09-980a-55cbcb9b8ae6",
+          "equation_number": "B.12",
+          "output_symbol": "Q_R_e",
+          "input_symbols": [
+            "a_f",
+            "A_b_a",
+            "f_D",
+            "Q_R_Dr"
+          ],
+          "formula": "Q_R_e = a_f * (3.0 * A_b_a * f_D + 3.2 * Q_R_Dr)",
+          "clause_reference": "Section B.3.3.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "0845b805-cf83-43a3-b561-00a2e04ba0d7"
+        },
+        {
+          "id": "88c45a6c-2601-419c-b713-f4a799d7afea",
+          "equation_number": "B.13",
+          "output_symbol": "m",
+          "input_symbols": [
+            "Q_R_e",
+            "Q_R_Tr",
+            "Q_T_aM"
+          ],
+          "formula": "m = (Q_R_e + Q_R_Tr) / Q_T_aM",
+          "clause_reference": "Section B.3.3.6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "5a3aac18-028c-48d9-ae7c-6ca02527da9f"
+        },
+        {
+          "id": "c77b5384-345a-49d7-ab3e-41a05235f35c",
+          "equation_number": "B.14",
+          "output_symbol": "C_b_CSB",
+          "input_symbols": [
+            "a_c_CSB",
+            "a_h",
+            "a_a"
+          ],
+          "formula": "C_b_CSB = 600 * (a_c_CSB + a_h + a_a)",
+          "clause_reference": "Section B.3.3.7",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cbef4e3e-e270-475c-b23a-b00bc0391989"
+        },
+        {
+          "id": "739e1f02-ad16-4410-80d8-dadf7173451a",
+          "equation_number": "B.15a",
+          "output_symbol": "a_c_CSB",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "a_c_CSB = 1  if C_T_aM_CSB <= 600",
+          "clause_reference": "Section B.3.3.8",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "135015bc-ebf9-4818-844a-93dd9a2b853c",
+          "equation_number": "B.15b",
+          "output_symbol": "a_c_CSB",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "a_c_CSB = C_T_aM_CSB / 600  if C_T_aM_CSB > 600",
+          "clause_reference": "Section B.3.3.8",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "89c13422-4fe9-423b-92a7-b59a00b9345d",
+          "equation_number": "B.16",
+          "output_symbol": "a_h",
+          "input_symbols": [
+            "h_Na"
+          ],
+          "formula": "a_h = h_Na/800 - 1  if 600 <= h_Na <= 1000  |  a_h = -0.25  if h_Na < 600  |  a_h = +0.25  if h_Na > 1000",
+          "clause_reference": "Section B.3.3.9",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "c2ef6396-4394-4be5-9bd7-456b518deea8",
+          "equation_number": "B.17",
+          "output_symbol": "d_I",
+          "input_symbols": [
+            "d_i",
+            "I_S_i",
+            "l_i"
+          ],
+          "formula": "d_I = Sum(d_i * I_S_i * l_i) / Sum(l_i)",
+          "clause_reference": "Section B.3.3.10",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "d5a0f906-917e-4038-9ada-1ed13005239a",
+          "equation_number": "B.18",
+          "output_symbol": "d_I",
+          "input_symbols": [
+            "NG_m"
+          ],
+          "formula": "d_I = 0.001 * (1 + 2 * (NG_m - 1))",
+          "clause_reference": "Section B.3.3.10",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "1c3f10bd-01f7-4f31-b79a-3094ce76a3dd",
+          "equation_number": "B.19",
+          "output_symbol": "x_a",
+          "input_symbols": [
+            "Q_T_aM",
+            "Q_T_h_max"
+          ],
+          "formula": "x_a = 24 * Q_T_aM / Q_T_h_max",
+          "clause_reference": "Section B.3.3.10",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "caf672ab-572d-4514-921c-b17f4ff6c4a3",
+          "equation_number": "B.20",
+          "output_symbol": "tau",
+          "input_symbols": [
+            "q_T_aM",
+            "f_D",
+            "d_I"
+          ],
+          "formula": "tau = 430 * (q_T_aM / f_D)^0.45 * (d_I)",
+          "clause_reference": "Section B.3.3.10",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "51714be6-c070-42f2-8c0f-a8bec98b32d4",
+          "equation_number": "B.21",
+          "output_symbol": "a_a",
+          "input_symbols": [
+            "x_a",
+            "tau"
+          ],
+          "formula": "a_a = (24 / x_a)^2 * (2 - tau) / 10 ;  a_a >= 0",
+          "clause_reference": "Section B.3.3.10",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "3fe9e932-5352-41cb-8212-ca5d7fcd6d8b",
+          "equation_number": "B.22",
+          "output_symbol": "b_R_a_AFS63",
+          "input_symbols": [
+            "p_I",
+            "p_II",
+            "p_III"
+          ],
+          "formula": "b_R_a_AFS63 = (p_I * 280 + p_II * 530 + p_III * 760) / 100",
+          "clause_reference": "Section B.3.3.11",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "517badbe-f603-483f-9d94-17b81d398834",
+          "equation_number": "B.23a",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "a_R_AFS63 = 1.0  if b_R_a_AFS63 <= 478",
+          "clause_reference": "Section B.3.3.12",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "0cabf252-a613-4295-835b-3f005caa4dc1",
+          "equation_number": "B.23b",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "a_R_AFS63 = Min(b_R_a_AFS63 / 478; 1.20)  if b_R_a_AFS63 > 478",
+          "clause_reference": "Section B.3.3.12",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "adb9665b-6c15-4e3f-aa7f-923355af3832",
+          "equation_number": "B.24",
+          "output_symbol": "C_e_CSB",
+          "input_symbols": [
+            "C_R_CSB",
+            "a_R_AFS63",
+            "m",
+            "C_b_CSB"
+          ],
+          "formula": "C_e_CSB = (C_R_CSB * a_R_AFS63 * m + C_b_CSB) / (m + 1)",
+          "clause_reference": "Section B.3.3.13",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428"
+        },
+        {
+          "id": "6f3377ba-89fc-4d1f-abf6-e9d2ae0fe198",
+          "equation_number": "T6.H1",
+          "output_symbol": "H1",
+          "input_symbols": [
+            "q_R_Dr",
+            "f_D"
+          ],
+          "formula": "H1 = (4000 + 25 * q_R_Dr / f_D) / (0.551 + q_R_Dr / f_D)",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42"
+        },
+        {
+          "id": "c561a298-74d5-4ade-a4b9-5dd0f2b4078c",
+          "equation_number": "T6.H2",
+          "output_symbol": "H2",
+          "input_symbols": [
+            "q_R_Dr",
+            "f_D"
+          ],
+          "formula": "H2 = (36.8 + 13.5 * q_R_Dr / f_D) / (0.5 + q_R_Dr / f_D)",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42"
+        },
+        {
+          "id": "a928532e-5aee-425a-afd1-e0044656039e",
+          "equation_number": "T6.Vs",
+          "output_symbol": "V_s",
+          "input_symbols": [
+            "H1",
+            "e_0",
+            "H2",
+            "V_S_min"
+          ],
+          "formula": "V_s = Max(H1 / (e_0 + 6) - H2; V_S_min)",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
+        },
+        {
+          "id": "57ff0b47-b91f-4729-9789-3cdef356fe83",
+          "equation_number": "T6.V",
+          "output_symbol": "V",
+          "input_symbols": [
+            "V_s",
+            "A_b_a",
+            "f_D"
+          ],
+          "formula": "V = V_s * A_b_a * f_D",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
+        },
+        {
+          "id": "6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b",
+          "equation_number": "T6.a_f",
+          "output_symbol": "a_f",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "a_f = Max(0.5 + 50 / (t_f + 100); 0.885)",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15"
+        },
+        {
+          "id": "f24d3d57-1d4f-4bf4-8a2b-30978d188535",
+          "equation_number": "REG-Bild4",
+          "output_symbol": "q_A_Bem",
+          "input_symbols": [
+            "eta_ges"
+          ],
+          "formula": "q_A_Bem = -8.333 * ln(eta_ges) - 1.6629",
+          "clause_reference": "Bild 4 / Zusatzdatei RKB",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "4b283dc6-a1f8-42ab-bada-180346451486"
+        },
+        {
+          "id": "ed169cec-be2a-42c0-b6db-71a80e491228",
+          "equation_number": "4",
+          "output_symbol": "B_R_a_AFS63",
+          "input_symbols": [
+            "B_R_a_AFS63_i"
+          ],
+          "formula": "B_R_a_AFS63 = Sum(B_R_a_AFS63_i)",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        }
+      ],
+      "compliance": [
+        {
+          "id": "b32088ed-4ee4-4cad-b32a-7a5567b58943",
+          "code": "REQ-02",
+          "condition": "system_type IN {trenn,misch,modified,both}",
+          "severity": "warn",
+          "clause_reference": "2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e"
+        },
+        {
+          "id": "035eef93-0593-41b7-a1ab-8fa2ccdaaee2",
+          "code": "REQ-28",
+          "condition": "regulation_edition == 'Dez 2020, korr. Aug 2022'",
+          "severity": "block",
+          "clause_reference": "Korrekturen 2022",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e"
+        },
+        {
+          "id": "56a76063-b0e0-48a4-bdca-ad6b5aa6d83d",
+          "code": "REQ-01",
+          "condition": "assessment_scope IN {emission_afs63}",
+          "severity": "warn",
+          "clause_reference": "2.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "5f42ca6f-a115-401a-80c5-8700c7d0959e"
+        },
+        {
+          "id": "2dce513b-37ab-45c1-8b1a-7b0934f585fb",
+          "code": "REQ-03",
+          "condition": "balance_area_size > 0",
+          "severity": "block",
+          "clause_reference": "§4.1, §4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "ce0729ea-9360-49fc-b24f-42413eb9fd55"
+        },
+        {
+          "id": "8f4249a6-266c-42a9-a113-4726e8b828e8",
+          "code": "REQ-04",
+          "condition": "A_b_a_I + A_b_a_II + A_b_a_III == A_b_a",
+          "severity": "block",
+          "clause_reference": "2.3.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
+        },
+        {
+          "id": "0e34f47a-f555-4d68-b252-eb60b42d6563",
+          "code": "REQ-05",
+          "condition": "values match Tabelle 4 entries (subject to Pass 3b lookup)",
+          "severity": "warn",
+          "clause_reference": "2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
+        },
+        {
+          "id": "4fb4b210-d89c-4a87-a588-5b4929b77b87",
+          "code": "REQ-06",
+          "condition": "A_b_a_I > 0 AND A_b_a_II > 0 AND A_b_a_III > 0",
+          "severity": "block",
+          "clause_reference": "2.3.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
+        },
+        {
+          "id": "3b012613-e590-4b89-93ab-fe2a6b37c8ea",
+          "code": "REQ-07",
+          "condition": "IF misch_active == True THEN (A_b_a_I > 0 AND A_b_a_II > 0 AND A_b_a_III > 0)",
+          "severity": "block",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
+        },
+        {
+          "id": "d37f13a4-b377-4b2a-8aaf-2c286bc832f7",
+          "code": "REQ-29",
+          "condition": "if B/S surfaces present then §5.2.3.3 handling documented",
+          "severity": "warn",
+          "clause_reference": "2.3.3.3",
+          "requires_attestation": true,
+          "audit_status": null,
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
+        },
+        {
+          "id": "ce1a02ff-c924-4d3d-82e6-96dbebb593f7",
+          "code": "REQ-08",
+          "condition": "f_D > 0 AND f_D <= 1",
+          "severity": "block",
+          "clause_reference": "Anh. C, Anh. B.3.2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "710dfbfe-1f51-4d84-9cf8-56c68648f339"
+        },
+        {
+          "id": "2fccfeaa-e091-4fa4-b1ed-eae2149b3bf0",
+          "code": "REQ-09",
+          "condition": "b_R_a_AFS63 = computed via Gl. 5",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "eb9dd380-3c55-4907-8005-e97e97e662f5",
+          "code": "REQ-10",
+          "condition": "eta_erf computed; cap at >=0",
+          "severity": "warn",
+          "clause_reference": "2.3.3.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "319afa46-9532-4829-920e-dd7453c0ec68",
+          "code": "REQ-11",
+          "condition": "IF trenn_active == True THEN (A_RKB > 0 AND V_RKB > 0)",
+          "severity": "block",
+          "clause_reference": "2.3.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "055149c4-3da4-4f6c-9000-76a754609060",
+          "code": "REQ-12",
+          "condition": "m computed via Gl. B.13",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "ad1f8e9c-83df-4e6b-bff6-f3a1eed1c342",
+          "code": "REQ-13",
+          "condition": "C_b_CSB computed via Gl. B.14",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "471aaaa5-1258-4234-8077-df0b22e03611",
+          "code": "REQ-14",
+          "condition": "e_0 computed via Gl. 18",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "247bff9b-e897-465c-9218-3c5ae6e755ef",
+          "code": "REQ-30",
+          "condition": "Zusatzdatei use documented if applicable",
+          "severity": "warn",
+          "clause_reference": "2.3.4.2",
+          "requires_attestation": true,
+          "audit_status": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "32f5f76a-74b7-4753-83ca-8c9e43cbd536",
+          "code": "REQ-15",
+          "condition": "a_R_AFS63 >= 1.0 AND a_R_AFS63 <= 1.20",
+          "severity": "block",
+          "clause_reference": "§7.3.2.2, Anh. B.3.3.12",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "15955f28-3aa0-4404-9c1d-9eae9027f783",
+          "code": "REQ-16",
+          "condition": "H1, H2 > 0 computed via Tabelle 6",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42"
+        },
+        {
+          "id": "74cdc8b0-24ff-4ce8-bbce-4eafc3ad67c6",
+          "code": "REQ-17",
+          "condition": "V_s >= V_S_min",
+          "severity": "block",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42"
+        },
+        {
+          "id": "eacef0d2-78c6-4721-baa9-d64c0a560a67",
+          "code": "REQ-18",
+          "condition": "V_s <= 40 m³/ha OR alternative measures documented",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": true,
+          "audit_status": null,
+          "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42"
+        },
+        {
+          "id": "9dce8f56-2881-4940-9bfa-47c7a13b3991",
+          "code": "REQ-23",
+          "condition": "V_s >= 5",
+          "severity": "block",
+          "clause_reference": "§7.3.2.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
+        },
+        {
+          "id": "de80f934-6e65-417c-ad00-089e204c3b4a",
+          "code": "REQ-19",
+          "condition": "A1022-31 consolidation complete",
+          "severity": "warn",
+          "clause_reference": "2.5.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f"
+        },
+        {
+          "id": "b0be149e-58f4-45ac-b6a3-13c54cb7f458",
+          "code": "REQ-20",
+          "condition": "A1022-32 consolidation complete",
+          "severity": "warn",
+          "clause_reference": "2.5.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f"
+        },
+        {
+          "id": "5274759c-ee50-40db-b315-fba824d9725a",
+          "code": "REQ-21",
+          "condition": "if RÜB/SKO/SKU/RÜ exists then all structure criteria documented",
+          "severity": "warn",
+          "clause_reference": "2.5.4",
+          "requires_attestation": true,
+          "audit_status": null,
+          "worksheet_template_id": "c2fb7f0a-c3a1-4e47-b0b2-a72dd96eb91f"
+        },
+        {
+          "id": "3f3e815a-b455-4fed-8a57-845159d633db",
+          "code": "REQ-22",
+          "condition": "eta_ges >= eta_erf",
+          "severity": "block",
+          "clause_reference": "2.3.3.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712"
+        },
+        {
+          "id": "738258a8-f39f-49e9-9c04-155d5ad43289",
+          "code": "REQ-24",
+          "condition": "m >= m_min_required",
+          "severity": "block",
+          "clause_reference": "2.5.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712"
+        },
+        {
+          "id": "90002885-8305-47c3-bb82-2a7314cf3fcb",
+          "code": "REQ-25",
+          "condition": "(V_s · 10000 / q_R_Dr / 3600) <= 15  (units: m³/ha → s → h)",
+          "severity": "warn",
+          "clause_reference": "2.3.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712"
+        },
+        {
+          "id": "236ae4f6-5fcc-4d61-9960-402ac516bcde",
+          "code": "REQ-26",
+          "condition": "if mess_proof then authority_coordination_documented",
+          "severity": "warn",
+          "clause_reference": "2.5.3",
+          "requires_attestation": true,
+          "audit_status": null,
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712"
+        },
+        {
+          "id": "f9a2a753-e843-4ba6-9d8e-106ddd6c1afe",
+          "code": "REQ-27",
+          "condition": "if q_R_Dr > 2 then Nachweisverfahren_triggered",
+          "severity": "warn",
+          "clause_reference": "2.5.5",
+          "requires_attestation": true,
+          "audit_status": null,
+          "worksheet_template_id": "9fa4ee7a-6966-487b-900a-6886aa18b712"
+        }
+      ],
+      "enum_values": [
+        {
+          "field_id": "6f4049ec-25a5-4ffa-b8da-db62f848887e",
+          "symbol": "assessment_scope",
+          "enum_values": [
+            {
+              "value": "emission_afs63",
+              "label_de": "Emissions-Beurteilung AFS63",
+              "label_en": "AFS63 emission assessment",
+              "order_index": 1,
+              "regulation_reference": "§1, §5"
+            },
+            {
+              "value": "rkb_sizing",
+              "label_de": "RKB-Bemessung (Trenn)",
+              "label_en": "Stormwater clarifier basin sizing (separate)",
+              "order_index": 2,
+              "regulation_reference": "§6.2"
+            },
+            {
+              "value": "gesamtspeichervolumen",
+              "label_de": "Gesamtspeichervolumen (Misch)",
+              "label_en": "Total storage volume (combined)",
+              "order_index": 3,
+              "regulation_reference": "§7.3.2"
+            },
+            {
+              "value": "immission_dwa_m_102_3",
+              "label_de": "Immissionsbeurteilung (DWA-M 102-3)",
+              "label_en": "Immission-based assessment (DWA-M 102-3)",
+              "order_index": 4,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "wasserhaushalt_dwa_m_102_4",
+              "label_de": "Wasserhaushaltsbilanz (DWA-M 102-4)",
+              "label_en": "Water balance (DWA-M 102-4)",
+              "order_index": 5,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "schmutzfracht_nachweis",
+              "label_de": "Schmutzfrachtnachweis (Section 8)",
+              "label_en": "Pollutant load proof (Section 8)",
+              "order_index": 6,
+              "regulation_reference": "§8"
+            }
+          ]
+        },
+        {
+          "field_id": "a07ab18f-c0b9-49e1-a546-cb6723825a7a",
+          "symbol": "system_type",
+          "enum_values": [
+            {
+              "value": "trenn",
+              "label_de": "Trennsystem",
+              "label_en": "Separate sewer",
+              "order_index": 1,
+              "regulation_reference": "§1, §4.1"
+            },
+            {
+              "value": "misch",
+              "label_de": "Mischsystem",
+              "label_en": "Combined sewer",
+              "order_index": 2,
+              "regulation_reference": "§1, §4.1"
+            },
+            {
+              "value": "modified",
+              "label_de": "Modifiziertes System",
+              "label_en": "Modified system",
+              "order_index": 3,
+              "regulation_reference": "§1, §4.1"
+            },
+            {
+              "value": "both",
+              "label_de": "Beide Systeme im Bilanzgebiet",
+              "label_en": "Both systems in balance area",
+              "order_index": 4,
+              "regulation_reference": "§1, §4.1"
+            }
+          ]
+        },
+        {
+          "field_id": "6fb2670a-b1c5-47b6-add4-fb41b8ecfd7e",
+          "symbol": "overall_verdict",
+          "enum_values": [
+            {
+              "value": "compliant",
+              "label_de": "konform",
+              "label_en": "compliant",
+              "order_index": 1,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "compliant_with_conditions",
+              "label_de": "konform mit Auflagen",
+              "label_en": "compliant with conditions",
+              "order_index": 2,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "not_compliant",
+              "label_de": "nicht konform",
+              "label_en": "not compliant",
+              "order_index": 3,
+              "regulation_reference": "—"
+            },
+            {
+              "value": "insufficient_data",
+              "label_de": "unzureichende Daten",
+              "label_en": "insufficient data",
+              "order_index": 4,
+              "regulation_reference": "—"
+            }
+          ]
+        },
+        {
+          "field_id": "ab9087b2-0315-42b4-98f4-8697e7df64ec",
+          "symbol": "trenn_verdict",
+          "enum_values": [
+            {
+              "value": "pass",
+              "label_de": "bestanden",
+              "label_en": "pass",
+              "order_index": 1,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "fail",
+              "label_de": "nicht bestanden",
+              "label_en": "fail",
+              "order_index": 2,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "conditional",
+              "label_de": "bedingt",
+              "label_en": "conditional",
+              "order_index": 3,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "not_applicable",
+              "label_de": "nicht zutreffend",
+              "label_en": "not applicable",
+              "order_index": 4,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "pending",
+              "label_de": "ausstehend",
+              "label_en": "pending",
+              "order_index": 5,
+              "regulation_reference": "workflow"
+            }
+          ]
+        },
+        {
+          "field_id": "e89a84ae-6269-413d-a8bf-042fc874baeb",
+          "symbol": "misch_volume_verdict",
+          "enum_values": [
+            {
+              "value": "pass",
+              "label_de": "bestanden",
+              "label_en": "pass",
+              "order_index": 1,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "fail",
+              "label_de": "nicht bestanden",
+              "label_en": "fail",
+              "order_index": 2,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "conditional",
+              "label_de": "bedingt",
+              "label_en": "conditional",
+              "order_index": 3,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "not_applicable",
+              "label_de": "nicht zutreffend",
+              "label_en": "not applicable",
+              "order_index": 4,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "pending",
+              "label_de": "ausstehend",
+              "label_en": "pending",
+              "order_index": 5,
+              "regulation_reference": "workflow"
+            }
+          ]
+        },
+        {
+          "field_id": "37192828-6dbf-4d04-93b0-5927ea649703",
+          "symbol": "m_min_verdict",
+          "enum_values": [
+            {
+              "value": "pass",
+              "label_de": "bestanden",
+              "label_en": "pass",
+              "order_index": 1,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "fail",
+              "label_de": "nicht bestanden",
+              "label_en": "fail",
+              "order_index": 2,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "conditional",
+              "label_de": "bedingt",
+              "label_en": "conditional",
+              "order_index": 3,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "not_applicable",
+              "label_de": "nicht zutreffend",
+              "label_en": "not applicable",
+              "order_index": 4,
+              "regulation_reference": "workflow"
+            },
+            {
+              "value": "pending",
+              "label_de": "ausstehend",
+              "label_en": "pending",
+              "order_index": 5,
+              "regulation_reference": "workflow"
             }
           ]
         }
