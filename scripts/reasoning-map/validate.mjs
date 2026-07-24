@@ -273,6 +273,22 @@ function checkStructural(map) {
         finding('ERROR', '2.fixed-has-page', stdCode, id, `standard_fixed but no source_page`);
     }
 
+    // #8 normative-as-input-reference ⇒ source_page (like standard_fixed) AND ≥1 consumed_by::
+    // Formal data_class ratified by Alvaro 2026-07-24 (pilot item C-2, DWA-A-102-2 Gl.(18) e_0):
+    // a normative, printed value/formula that is ALSO consumed as a reference input by other nodes.
+    if (fm.data_class === 'normative-as-input-reference') {
+      const hasPage = !!(fm.source_page && fm.source_page.trim());
+      bumpCheck('8.norm-input-ref-has-page', hasPage);
+      if (!hasPage)
+        finding('ERROR', '8.norm-input-ref-has-page', stdCode, id,
+          `normative-as-input-reference but no source_page`);
+      const hasConsumer = node.links.consumed_by.length >= 1;
+      bumpCheck('8.norm-input-ref-consumed', hasConsumer);
+      if (!hasConsumer)
+        finding('ERROR', '8.norm-input-ref-consumed', stdCode, id,
+          `normative-as-input-reference with no consumed_by:: edge (must be a reference input)`);
+    }
+
     // wikilink targets resolve (no dangling edges)
     for (const target of node.wikilinks) {
       const t = target.split('|')[0].trim(); // strip alias
