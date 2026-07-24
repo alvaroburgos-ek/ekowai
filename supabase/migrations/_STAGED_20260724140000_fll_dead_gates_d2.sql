@@ -1,0 +1,99 @@
+-- ============================================================================
+-- STAGED — WRITTEN-NOT-APPLIED — D-2 dead/vacuous gates (FLL M2)
+-- ----------------------------------------------------------------------------
+-- `_STAGED_` prefix => runner SKIPS. Prod write outside the D-3 mandate =>
+-- STOP-and-batch for Alvaro. Gate-DESIGN changes are ratification-gated.
+--
+-- Author: Alvaro Burgos <alvaro.burgos@ekowai.com>
+-- Co-authored: Claude Opus 4.8 <noreply@anthropic.com>
+--
+-- This file contains ONE mechanically-unambiguous fix (FLLNT-03 REQ-07 re-
+-- parenthesisation — a pure parse-correction with a single correct form, proven
+-- against the real evaluate.ts this session) plus, as comments, the dead-gate
+-- items that need a human topology RULING (move-gate vs add-discriminator) and
+-- therefore carry NO SQL. Nothing is applied.
+--
+-- ============================================================================
+-- FIX 1 (mechanical, applied-when-ratified): FLLNT-03 REQ-07 greedy-AND
+-- ----------------------------------------------------------------------------
+-- M2 finding FLLNT-03/F1-REQ07-DEAD-BRANCH (HIGH). Live condition:
+--   IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50
+--   AND IF natural_pool_type == type_III THEN regeneration_area_share > 30
+-- parseAtom parses IF-body via parseOr (greedy over AND) → whole thing is
+--   IF (I∨II) THEN ( share>50 AND (IF III THEN share>30) ).
+-- For a Type-III pool the outer guard is FALSE → gate VACUOUSLY PASSES → the
+-- Type-III ">30 %" regeneration rule is NEVER evaluated (proven: type_III,
+-- share=10 returns PASS).
+--
+-- SR-1/SR-3 SOURCE (rendered this session): Naturteich PDF (2017 EN),
+--   Table 1 "Dimension of the regeneration area compared to the total area":
+--   Type I > 50% | Type II > 50% | Type III > 30%.
+-- WHAT IT SHOULD ENFORCE: Type I/II regeneration area > 50 % of total; Type III
+--   regeneration area > 30 % of total.
+-- DEFECT: greedy-AND parse makes the Type-III leg a dead branch.
+-- FIX: parenthesise each IF/THEN as its own AND operand so both guards are
+--   independent. PROVEN against src/lib/compliance/evaluate.ts this session
+--   (src/lib/compliance/__tests__ tmp run): NEW condition FAILs type_III/share=10,
+--   PASSes type_III/share=40, keeps type_I/share=40 FAIL and type_I/share=60 PASS.
+--   Mirrors the already-correct parenthesised pattern in REQ-10 on the same sheet.
+
+UPDATE compliance_requirements
+SET condition = '(IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50) AND (IF natural_pool_type == type_III THEN regeneration_area_share > 30)'
+WHERE id = 'fabaa982-e703-4080-b596-1b19025bd23f'   -- FLLNT-03 REQ-07
+  AND condition <> '(IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50) AND (IF natural_pool_type == type_III THEN regeneration_area_share > 30)';
+-- verify: exactly 1 row; re-run FLLNT-03 REQ-07 Type-III case → PASS→FAIL for share=10.
+
+-- ============================================================================
+-- DEAD-GATE ITEMS NEEDING A HUMAN RULING (NO SQL — Alvaro decision batch)
+-- ----------------------------------------------------------------------------
+-- Each below is a dead/vacuous gate whose fix is a TOPOLOGY choice (move the
+-- gate to the worksheet that owns the fields, OR add a discriminator field, OR
+-- confirm the project-wide fallback is intended). SR-1 forbids picking one
+-- silently; staged as decisions in .superpowers/sdd/fll-d2-d3-d4.md §D-2.
+--
+-- GAR-10 — THE "NINE DEAD GATES" (M2 GAR-10/F1 + F2, HIGH):
+--   REQ-12,13,14,15,16,17,18,20,22 are shaped `IF abdichtungs_art == <material>
+--   THEN ...` but `abdichtungs_art` is NOT a field on FLL-GAR-10 → all 9 resolve
+--   PENDING, never fire (only attestation REQ-19/REQ-21 can). They also reference
+--   symbols owned by sibling material worksheets (mz_durchlaessigkeit_kf,
+--   bauteildicke_cm, bentonit_type, peeh_dichte_g_cm3, feinkornanteil_063_pct, …).
+--   SHOULD enforce (VA, GAR.txt): e.g. REQ-12 Tab.3 (L1924-1934) Kornanteil>=15,
+--   organische Substanz<=5, Kalkgehalt<=15, kf<=1e-9, DPr>=97; REQ-18 Bahnendicke
+--   >=1,2 mm (L4088). DEFECT: phantom guard field + cross-worksheet body symbols.
+--   RULING: (a) introduce an `abdichtungs_art` enum on GAR-10 with the exact 8
+--   material tokens, OR (b) re-home each material gate to its own worksheet and
+--   keep only REQ-12 + REQ-19/21 here. (M2 GAR-10/D2.)
+--
+-- GAR-01 (M2 GAR-01/F1, HIGH): both block gates (REQ-02/REQ-03) test fields of
+--   FLL-GAR-03 (lbo_genehmigung_erforderlich, whg_einleitung_genehmigung) → never
+--   fire on GAR-01. RULING: re-home to GAR-03 or confirm fallback.
+--
+-- GAR-22 REQ-23 (M2 GAR-22/F-02): references freibord_zu_gelaende_cm /
+--   freibord_zu_bauwerk_cm — neither a field on GAR-22 (they live on GAR-23).
+--   Dead. RULING: re-home to GAR-23.
+--
+-- RHZ-02 (M2 RHZ-02/FND-1+2, HIGH): `wachstumshemmende_wirkstoffe != null` and
+--   `mehrschichtprodukt == false OR schutzschicht_definition != null` can never
+--   return FAIL (evaluate.ts maps NULL/'' → missing → `!= null` never satisfiably
+--   false; the required field is always present). RULING: re-author to a
+--   fail-reachable form or drop.
+--
+-- RHZ-05 (M2 RHZ-05/FIND-1, HIGH): REQ-06 apparatus gate hosted on RHZ-04 but all
+--   its symbols (gefaess_innenmass_*, anzahl_pruefgefaesse, widerlager_dicke_mm…)
+--   live on RHZ-05. RULING: move REQ-06 to RHZ-05.
+--
+-- RHZ-16 REQ-18 (M2 RHZ-16/F1, HIGH, WRONG-OPERAND): references
+--   dichte_relativ_prozent (a RHZ-13 field) instead of the 24-month
+--   relativ_prozent_24mon → the project-wide fallback silently resolves the wrong
+--   6-month value into the 24-month endpoint gate. RULING: repoint the operand.
+--
+-- RHZ-19 REQ-22 (M2 RHZ-19/F1, HIGH): the 4 §10 extension-condition symbols map to
+--   RHZ-20 → pending/missing. RULING: re-home to RHZ-20.
+--
+-- RESOLVED THIS BATCH (not re-staged):
+--   * RHZ-18 (was "(Gate)" with 0 gates) — FIXED by the D-3 APPLY
+--     (scripts/phase4/20260724_fll_rhz18_rhz21_verdict_block_gates.sql). Live block
+--     gate now fires FAIL on nicht_rhizomfest/vorzeitig_abgebrochen.
+--   * RHZ-07 (16 limits, 0 CRs) — addressed by the D-3 ES-1 stage
+--     (_STAGED_20260724130000_fll_check_encodings_es1.sql).
+-- ============================================================================
