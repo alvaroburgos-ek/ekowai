@@ -533,6 +533,52 @@ export function evaluateCondition(
 }
 
 /**
+ * Extract the free SYMBOL references a condition would look up at evaluation time
+ * (D-1 task 2 residual gate-symbol check).
+ *
+ * Returns the set of identifiers the evaluator resolves against the value map —
+ * i.e. `aref`/existence/membership/truthy/compare targets and arithmetic operands.
+ * It deliberately EXCLUDES: keywords, numeric/string literals, and bare identifiers
+ * that sit in membership (`IN {a,b}`) or equality-RHS position (`x == enum_val`),
+ * because the parser turns those into string LITERALS the evaluator never looks up
+ * as symbols (enum-value tokens). Returns `null` for a condition that does not parse
+ * — exactly the inputs `evaluateCondition` reports as `manual` — so callers can
+ * separate genuine symbol references from natural-language prose.
+ */
+export function extractConditionSymbols(condition: string): Set<string> | null {
+  if (!condition || !condition.trim()) return null;
+  const toks = tokenize(condition);
+  if (!toks || toks.length === 0) return null;
+  const ast = new Parser(toks).parse();
+  if (!ast) return null;
+  const out = new Set<string>();
+  const walkArith = (n: ArithNode): void => {
+    switch (n.kind) {
+      case 'aref': out.add(n.symbol); return;
+      case 'aneg': walkArith(n.inner); return;
+      case 'abin': walkArith(n.left); walkArith(n.right); return;
+      default: return; // anum/astr/abool/anull carry no symbol
+    }
+  };
+  const walk = (n: Node): void => {
+    switch (n.kind) {
+      case 'truthy': out.add(n.symbol); return;
+      case 'exists': out.add(n.symbol); return;
+      case 'in': out.add(n.symbol); return; // members are literals, not looked-up symbols
+      case 'compare': out.add(n.symbol); return; // rhs is a literal (incl. bare-ident enum value)
+      case 'acompare': walkArith(n.left); walkArith(n.right); return;
+      case 'and':
+      case 'or': walk(n.left); walk(n.right); return;
+      case 'not': walk(n.inner); return;
+      case 'guard': walk(n.guard); walk(n.body); return;
+      case 'lit': return;
+    }
+  };
+  walk(ast);
+  return out;
+}
+
+/**
  * Resolve a JSON carrier field's value FOR THE CONDITION DSL. The DSL only does
  * existence checks on carriers (`symbol IS NOT NULL` / `IS NOT EMPTY`), never
  * arithmetic — so map a carrier to a presence marker: a non-empty string when
