@@ -569,3 +569,27 @@ GATES/METRIC WORKFLOW DISPATCHED: wf_ee3c4d81-9f6 — all 22 CRs driven BOTH WAY
         real evaluate.ts + full workflow metric EXECUTED (every equation probed, collision
         check, runnable/blocked per worksheet). Results persist to journal.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+M-102-4 PROOF MANDATE EXECUTED (wf_ee3c4d81-9f6) + fix waves 2-3 (fable-5):
+        GATES: 22/22 driven BOTH WAYS through real evaluate.ts. 10 ENFORCE (pass+fail
+        demonstrated) / 3 WARN-ONLY / 9 NOT-DRIVABLE (abs()/max()/prose - no function calls
+        in the condition grammar) / 0 dead. REQ-18 enforces but conditionally (cross-ws
+        fallback omits disagreeing symbols -> pending -> silent stop, F-4-adjacent).
+        METRIC EXECUTED (31/31 equations probed through real evaluateFormula):
+        **31 runnable / 4 blocked** (M104-07 spine, M104-22, M104-27, M104-28).
+        5 equations COMPUTE (Gl.3/4/7/8/9; spine identity closes a+g+v=1.000 exactly).
+        6 multi-producer collisions (A-178 class). HONEST FINDING: the Gl.3 fix computes at
+        engine level but is DISCARDED at worksheet level (Gl.5 collision) - real but
+        insufficient; writer-retirement = ruling G-D8.
+        FIX WAVE 3 APPLIED + PROVEN: Gl.2 self-ref drop (manual_required -> computed 300),
+        C.1 comma-LHS -> own output_symbol (hard error -> computed 715). Migration
+        20260727190000 + rollback; effects verified by query; single-writer outputs so both
+        LAND. Gl.1/5/6 self-refs deliberately held (collision parties -> G-D8).
+        SHEET: G-D8 (writer retirement, unblocks spine), G-D9 (abs() rewrites), G-D10
+        ([mm/a] strips) added -> 50 open. Map: eq-m104-gl2-r + eq-m104-c1-eta stamped.
+        M-102-4 SEVEN-ELEMENT STATUS: bidirectional walk DONE · equations 31/31 DONE ·
+        tables captured DONE (922 rows) · gates both-ways DONE · source-settled fixes DONE
+        (6 rows across 3 migrations, all execution-proven) · map write-back DONE (7 nodes;
+        5 tables lack nodes - map gap logged) · REMAINING: deployed-build harness + render
+        spot-check (campaign alias not yet created) + _index re-render.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.

@@ -142,3 +142,52 @@ execution on a deployed build · render spot-check · source-settled fixes appli
    this standard** — a schema/infra change serving the mandate, therefore pre-authorised, but
    large. Tabelle C.3 alone is several hundred values.
 5. GAPs 2/3/4 are mostly **rulings** (new equations, new fields, a new enum) → sign-off sheet.
+
+---
+
+# PROOF MANDATE EXECUTED (run `wf_ee3c4d81-9f6`) + fix waves 2-3
+
+## Gates — all 22 CRs driven BOTH ways through the real evaluate.ts
+
+| class | count | which |
+|---|---|---|
+| **ENFORCES** (pass+fail demonstrated) | **10** | REQ-01/02/03/08/09/14/18/19/20/22 |
+| WARN-ONLY (flips correctly, warn never blocks) | 3 | REQ-04/12/13 |
+| NOT-DRIVABLE (parse-dead: `abs()`/`max()`/prose) | 9 | REQ-05/06/07/10/11/15/16/17/21 |
+| dead/pending | 0 | — |
+
+Notable both-ways evidence: REQ-08 fails **below and above** the 500–1700 band; REQ-18
+enforces but its enforcement is conditional on cross-worksheet value agreement (fallback
+omits disagreeing symbols → pending → silent stop — F-4-adjacent, on the sheet); REQ-22
+enforces mechanically but gates on a manually-entered status enum, a self-referential
+workflow encoding (sheet). The 6 `abs()`-class rewrites are grammar-conform one-liners but
+are condition changes → sheet, not applied.
+
+## Workflow metric — EXECUTED: **31 runnable / 4 blocked** (was "assessed" — now proven)
+
+- **5 equations COMPUTE**: Gl.3 (190, post-fix), Gl.4 (110), Gl.7/8/9 — and the spine
+  identity closes exactly: a+g+v = 0.2375+0.1375+0.625 = **1.000**.
+- **BLOCKED, demonstrated**: M104-07 (spine — R_D collision Gl.3+Gl.5 blanks both
+  pre-evaluation, PLUS self-ref inputs; **my Gl.3 fix computes at engine level but is
+  DISCARDED at worksheet level** — honest finding, the fix was real but insufficient),
+  M104-22 (Z collision + `[mm/a]` inside stored formulas), M104-27 (B.6 multi-statement
+  `;`), M104-28 (B.7 `sum_{` unregistered aggregate).
+- 8 worksheets runnable-with-dead-headline-coefficient (annex ln/exp by design; hand-entry
+  sibling fields exist).
+- **6 multi-producer collisions** across 5 worksheets (A-178 class): P_korr, R_D, a_F ×3, Z.
+
+## Fix waves 2–3 (all execution-proven broken→computes, single-writer outputs only)
+
+| eq | fix | before | after | migration |
+|---|---|---|---|---|
+| Gl.3 | formula commas + self-ref input | manual_required | computed 8* | 20260727180000 |
+| Gl.4 | self-ref input drop | manual_required | computed 7 | 20260727180000 |
+| Gl.2 | self-ref input drop | manual_required | **computed 300** | 20260727190000 |
+| C.1 | comma-LHS → own output_symbol | **hard error** | **computed 715** | 20260727190000 |
+
+*Gl.3 lands at engine level only — worksheet-level effect awaits the Gl.5 collision ruling.
+Gl.1/5/6 self-refs deliberately untouched (collision parties; ruling first).
+
+## Remaining before fully-treated: deployed-build harness pass + render spot-check
+(campaign alias not yet created) · collision/writer-retirement rulings · map `_index`
+re-render. Everything else on the seven-element list is now DONE for this standard.
