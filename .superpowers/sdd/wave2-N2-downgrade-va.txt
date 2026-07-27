@@ -1,0 +1,99 @@
+﻿VA NOT-FOUND (proposed VA->VC downgrades) = 98
+DIN-14071-1          section-din14071-03.md                 claimed=  20 pdf=  24 
+DIN-EN-ISO-14044     cr-14044-01.md                         claimed=  15 pdf=  19 
+DWA-A-131            section-a131-01.md                     claimed=   9 pdf=  11 
+DWA-A-131            section-a131-06.md                     claimed=  39 pdf=  41 
+DWA-A-138-1          cr-a138-req-10.md                      claimed=  30 pdf=  32 
+DWA-A-138-1          eq-gl2-a138-07.md                      claimed=  30 pdf=  32 
+DWA-A-138-1          eq-gl2c-a138-07.md                     claimed=  30 pdf=  32 
+DWA-A-138-1          eq-gl2d-a138-07.md                     claimed=  30 pdf=  32 
+DWA-A-138-1          eq-gl2e-a138-07.md                     claimed=  30 pdf=  32 
+DWA-A-138-1          eq-gl2f-a138-07.md                     claimed=  30 pdf=  32 
+DWA-A-138-1          eq-gl2g-a138-07.md                     claimed=  30 pdf=  32 
+DWA-A-138-1          section-a138-04.md                     claimed=  37 pdf=  39 
+DWA-A-138-1          section-a138-14.md                     claimed=  48 pdf=  50 
+DWA-A-138-1          tab-05.md                              claimed=  26 pdf=  28 
+DWA-A-138-1          tab-13.md                              claimed=  44 pdf=  46 
+DWA-A-178            cr-a178-req-02.md                      claimed=   4 pdf=   6 
+DWA-A-178            cr-a178-req-28.md                      claimed=  20 pdf=  22 
+DWA-A-222            section-a222-02.md                     claimed=  10 pdf=  11 
+DWA-A-262E           cr-req-33.md                           claimed=  11 pdf=  13 
+DWA-A-262E           cr-req-34.md                           claimed=  11 pdf=  13 
+DWA-A-262E           cr-req-35.md                           claimed=  11 pdf=  13 
+DWA-A-262E           cr-req-36.md                           claimed=  11 pdf=  13 
+DWA-A-262E           section-a262-02.md                     claimed=   4 pdf=   6 
+DWA-A-262E           section-a262-07.md                     claimed=  44 pdf=  46 
+DWA-M-1200-3         cr-m12003-07-cr12.md                   claimed=  25 pdf=  25 
+DWA-M-179-1          section-m179-03.md                     claimed=  22 pdf=  22 
+DWA-M-229-1          section-m2291-03.md                    claimed=  10 pdf=  11 
+DWA-M-229-2          cr-o2-thresholds.md                    claimed=  38 pdf=  40 
+DWA-M-277E           cr-m277e-req-07.md                     claimed=  28 pdf=  30 
+DWA-M-349            section-m349-02.md                     claimed=  38 pdf=  40 
+DWA-M-349            section-m349-05.md                     claimed=  31 pdf=  33 
+DWA-M-363            section-m363-22.md                     claimed=  42 pdf=  44 
+DWA-M-363            section-m363-23.md                     claimed=  46 pdf=  48 
+DWA-M-381E           dp-381-eta-hand-entered.md             claimed=   7 pdf=   7 
+DWA-M-708            cr-req-708-07.md                       claimed=  10 pdf=  10 
+DWA-M-708            section-m708-04.md                     claimed=   8 pdf=   8 
+DWA-M-708            section-m708-09.md                     claimed=  30 pdf=  30 
+DWA-M-708            section-m708-11.md                     claimed=  10 pdf=  10 
+DWA-M-760            eq-m760-03-ffett.md                    claimed=  33 pdf=  35 
+DWA-M-820-1          section-M820-14.md                     claimed=  63 pdf=  65 
+DWA-M-820-3          section-8203-15.md                     claimed=  15 pdf=  17 
+FLL-GAR-2023         cr-gar-req-05.md                       claimed=   4 pdf=   6 
+FLL-GAR-2023         cr-gar-req-06.md                       claimed=   4 pdf=   6 
+FLL-GAR-2023         cr-gar-req-10.md                       claimed=   4 pdf=   6 
+FLL-GAR-2023         cr-gar-req-11.md                       claimed=   4 pdf=   6 
+FLL-GAR-2023         cr-gar-req-27.md                       claimed=   4 pdf=   6 
+FLL-GAR-2023         cr-gar-req-29.md                       claimed=   4 pdf=   6 
+FLL-GAR-2023         dp-gar-12-beton-gate.md                claimed=   4 pdf=   6 
+FLL-GAR-2023         dp-gar-13-asphalt-gate.md              claimed=   4 pdf=   6 
+FLL-GAR-2023         dp-gar-19-soll-modal.md                claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-03.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-06.md                      claimed=   7 pdf=   9 
+FLL-GAR-2023         section-gar-12.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-14.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-24.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-25.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-26.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         section-gar-28.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         tab-gar-03-mineral.md                  claimed=   4 pdf=   6 
+FLL-GAR-2023         tab-gar-06-beton.md                    claimed=   4 pdf=   6 
+FLL-GAR-2023         tab-gar-12-asphalt.md                  claimed=   4 pdf=   6 
+FLL-GAR-2023         tab-gar-13-gtd.md                      claimed=   4 pdf=   6 
+FLL-GAR-2023         tab-gar-24-pehd.md                     claimed=   4 pdf=   6 
+FLL-GAR-2023         tab-gar-28-edge.md                     claimed=   4 pdf=   6 
+FLL-Naturteich-2017  cr-fllnt-req-22.md                     claimed=  82 pdf=  85 
+FLL-Naturteich-2017  eq-fllnt-10-eq02.md                    claimed=  82 pdf=  85 
+FLL-Naturteich-2017  section-fllnt-01.md                    claimed=   8 pdf=  11 
+FLL-Naturteich-2017  section-fllnt-03.md                    claimed=   8 pdf=  11 
+ISO-14004            dp-iso14004-guidance-normativity.md    claimed=  22 pdf=  26 
+ISO-14046            cr-iso14046-req01.md                   claimed=  10 pdf=  20 
+ISO-14046            cr-iso14046-req13.md                   claimed=  10 pdf=  20 
+ISO-14046            section-iso14046-01.md                 claimed=  10 pdf=  20 
+ISO-14064-1          cr-1064-015.md                         claimed=  31 pdf=  35 
+ISO-14064-1          eq-1064-qcat.md                        claimed=  29 pdf=  33 
+ISO-14064-2          section-iso1642-03.md                  claimed=  32 pdf=  36 
+ISO-14064-2          section-iso1642-05.md                  claimed=  33 pdf=  37 
+ISO-14097            cr-iso14097-cr-001.md                  claimed=   3 pdf=   3 
+ISO-14097            dp-iso14097-scoping-vs-published.md    claimed=   4 pdf=   4 
+ISO-14097            fld-iso14097-user_type.md              claimed=   3 pdf=   3 
+VDI-3477             section-vdi-02.md                      claimed=   7 pdf=   7 
+VDI-3477             section-vdi-07.md                      claimed=  15 pdf=  15 
+VSME                 section-b01_000.md                     claimed=   8 pdf=   9 PAGE-OUT-OF-RANGE
+VSME                 section-b03_000.md                     claimed=   9 pdf=  10 PAGE-OUT-OF-RANGE
+VSME                 section-b03_100.md                     claimed=   9 pdf=  10 PAGE-OUT-OF-RANGE
+VSME                 section-b03_200.md                     claimed=   9 pdf=  10 PAGE-OUT-OF-RANGE
+VSME                 section-b03_300.md                     claimed=   9 pdf=  10 PAGE-OUT-OF-RANGE
+VSME                 section-b05_000.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b06_000.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b07_000.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b07_100.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b07_200.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b08_000.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b08_100.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b08_300.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b09_000.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b10_000.md                     claimed=  10 pdf=  11 PAGE-OUT-OF-RANGE
+VSME                 section-b11_000.md                     claimed=  11 pdf=  12 PAGE-OUT-OF-RANGE
+VSME                 section-c09_000.md                     claimed=  14 pdf=  15 PAGE-OUT-OF-RANGE

@@ -379,3 +379,40 @@ STILL OWED for DWA-M-102-4 before it can be called fully treated:
 
 CONVERGENCE TABLE (unchanged this turn): FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
         (DWA-M-102-4 moves untouched -> in progress on wave open.)
+
+WAVE 4 RESULT (partial, wave stays OPEN) -> .superpowers/sdd/wave4-DWA-M-102-4.md
+        Workflow wf_180cf1cd-985: 39 agents, 2.66M subagent tokens, 778 tool calls.
+        OFFSET -2 derived independently: 8 text folios + 4 RENDERED-PDF confirmations + TOC
+        cross-check. Body starts PDF 12. Trap: PDF 44 is rotated landscape, naive footer
+        scrape returns the licence watermark.
+        *** FIRST BIDIRECTIONAL TOC WALK EVER RUN - 49 clauses, 41 normative ***
+        VERDICT: NOT READY-TO-USE. Every printed REGRESSION is encoded; essentially every
+        printed LOOKUP TABLE is absent. Invisible from the encoding->source direction, which
+        is exactly why the reverse direction was mandated.
+        GAP 1 SEV-1: ZERO regulation_tables rows for this standard (4460 exist across 34
+          other standards). Tab. C.3 - which IS the simplified Anhang-C method, several
+          hundred values - plus C.4/C.5/C.6/C.7, B.1, A.1, A.4 all unencoded. Encoding
+          substitutes free-entry numbers with raw-text hints ("from Tab. C.3 lookup"): the
+          worksheet NEVER ASKS THE QUESTION THE TABLE ANSWERS.
+        GAP 2 SEV-1: six printed equations with no equation record, incl. C.5 R_D = r*R and
+          GWN = R - R_D -> step 8 of the C.2 procedure is UNCOMPUTABLE.
+        GAP 3 SEV-2: Tab. A.1 companion rules g_F=0 / v_F=1-a_F absent; g_F_dach + v_F_dach
+          exist with NOTHING producing them.
+        GAP 4 SEV-1: Anlagentyp UNASKABLE - M104-22 is titled "Anlagentyp-Wahl" and has no
+          facility-type field; FIVE facility classes have no route through the encoding.
+        GAP 5: WHG cross-refs, the real §6 obligation, >=20a DWD criterion ungated, A_GOK,
+          nine Tabelle-2 symbols with no field.
+        ANCHORING WARNING (propagate corpus-wide): clause_reference is UNRELIABLE here -
+          REQ-02/REQ-20 both anchored "Hinweis für die Benutzung", REQ-14/19 titled vs
+          anchored disagree, M104-34 cites "Bild 5" which THIS STANDARD DOES NOT CONTAIN.
+          Mechanical clause matching would give a wrong map in BOTH directions.
+        EQUATIONS: only 12 of 31 examined. 6 FAITHFUL (1,2,5,7,8,9) / 1 refuted away (11) /
+          5 surviving defects (3,4,6,10,12) / >=1 source-settled (eq 3).
+        *** MY DISPATCH WAS DEFECTIVE, NOT THE ENCODING ***
+          I fanned out over generated integers '1'..'31'. This standard numbers equations
+          A.2..A.10, B.2..B.7, C.1..C.4. The 19 CANNOT-VERIFY agents queried rows that do not
+          exist and correctly refused to substitute. RE-RUN reading real equation_number
+          values from prod first; resumeFromRunId reuses the 12 cached verifications.
+        CARRY INTO RE-RUN AS PRIORITY: eq B.7 encoded denominator P*(A_W + SUM ...) vs printed
+          p.39 P*A_W + SUM ... - different grouping, different value, refuter never saw it.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.

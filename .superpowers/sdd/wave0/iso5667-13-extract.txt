@@ -1,0 +1,1732 @@
+                                                                              INTERNATIONAL                                             ISO
+                                                                              STANDARD                                              5667-13
+
+                                                                                                                                         Second edition
+                                                                                                                                            2011-05-01
+
+
+
+
+                                                                              Water quality — Sampling —
+                                                                              Part 13:
+                                                                              Guidance on sampling of sludges
+                                                                              Qualité de l'eau — Échantillonnage —
+                                                                              Partie 13: Lignes directrices pour l'échantillonnage de boues
+
+
+
+
+                                                                                                                                     Reference number
+                                                                                                                                   ISO 5667-13:2011(E)
+
+
+
+                                                                                                                                              © ISO 2011
+                                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+Copyright International Organization for Standardization
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                           Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+
+                                                                                                                                                     --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+                                    COPYRIGHT PROTECTED DOCUMENT
+           © ISO 2011
+           All rights reserved. Unless otherwise specified, no part of this publication may be reproduced or utilized in any form or by any means,
+           electronic or mechanical, including photocopying and microfilm, without permission in writing from either ISO at the address below or
+           ISO's member body in the country of the requester.
+                ISO copyright office
+                Case postale 56 • CH-1211 Geneva 20
+                Tel. + 41 22 749 01 11
+                Fax + 41 22 749 09 47
+                E-mail copyright@iso.org
+                Web www.iso.org
+           Published in Switzerland
+
+
+
+
+           ii
+Copyright International Organization for Standardization                                                          © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                   Not for Resale
+                                                                                                                                                                 ISO 5667-13:2011(E)
+
+
+
+
+                          Contents                                                                                                                                                           Page
+
+
+                          Foreword ............................................................................................................................................................iv
+                          Introduction........................................................................................................................................................vi
+                          1              Scope ......................................................................................................................................................1
+                          2              Normative references............................................................................................................................1
+                          3              Terms and definitions ...........................................................................................................................2
+                          4              Developing a sampling plan .................................................................................................................3
+                          4.1            Sampling objectives..............................................................................................................................3
+                          4.2            Variability considerations.....................................................................................................................4
+                          5              Sampling equipment and containers ..................................................................................................4
+                          5.1            General ...................................................................................................................................................4
+                          5.2            Sampling equipment .............................................................................................................................4
+                          5.3            Containers and sample preservation ..................................................................................................4
+                          6              Sampling procedure..............................................................................................................................5
+                          6.1            Sampling regime....................................................................................................................................5
+                          6.2            Replicate sampling................................................................................................................................7
+                          6.3            Methodology ..........................................................................................................................................8
+                          6.4            Sample homogenization and sub-sampling for sludge cakes (quartering) ..................................11
+
+
+
+                                                                                                                                                                                                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+                          7              Sample storage....................................................................................................................................12
+                          7.1            General..................................................................................................................................................12
+                          7.2            Storage .................................................................................................................................................13
+                          8              Safety ....................................................................................................................................................13
+                          9              Labelling and reporting.......................................................................................................................13
+                          Annex A (informative) Support on the selection of equipment....................................................................14
+                          Annex B (informative) Vacuum sampling devices.........................................................................................18
+                          Annex C (informative) Apparatus for sampling from pipes under pressure ..............................................20
+                          Annex D (informative) Minimum number of samples in a composite sample —
+                                Calculation example............................................................................................................................22
+                          Bibliography......................................................................................................................................................24
+
+
+
+
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization                                                                                                                                           iii
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                           Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+
+           Foreword
+           ISO (the International Organization for Standardization) is a worldwide federation of national standards bodies
+           (ISO member bodies). The work of preparing International Standards is normally carried out through ISO
+           technical committees. Each member body interested in a subject for which a technical committee has been
+           established has the right to be represented on that committee. International organizations, governmental and
+           non-governmental, in liaison with ISO, also take part in the work. ISO collaborates closely with the
+           International Electrotechnical Commission (IEC) on all matters of electrotechnical standardization.
+
+           International Standards are drafted in accordance with the rules given in the ISO/IEC Directives, Part 2.
+
+           The main task of technical committees is to prepare International Standards. Draft International Standards
+           adopted by the technical committees are circulated to the member bodies for voting. Publication as an
+           International Standard requires approval by at least 75 % of the member bodies casting a vote.
+
+           Attention is drawn to the possibility that some of the elements of this document may be the subject of patent
+           rights. ISO shall not be held responsible for identifying any or all such patent rights.
+
+           ISO 5667-13 was prepared by Technical Committee ISO/TC 147, Water quality, Subcommittee SC 6,
+           Sampling (general methods).
+
+           This second edition cancels and replaces the first edition (ISO 5667-13:1997), which has been technically
+           revised.
+
+           ISO 5667 consists of the following parts, under the general title Water quality — Sampling:
+
+           ⎯       Part 1: Guidance on the design of sampling programmes and sampling techniques
+
+           ⎯       Part 3: Preservation and handling of water samples
+
+           ⎯       Part 4: Guidance on sampling from lakes, natural and man-made
+
+           ⎯       Part 5: Guidance on sampling of drinking water from treatment works and piped distribution systems
+
+           ⎯       Part 6: Guidance on sampling of rivers and streams
+
+           ⎯       Part 7: Guidance on sampling of water and steam in boiler plants
+
+           ⎯       Part 8: Guidance on the sampling of wet deposition
+
+           ⎯       Part 9: Guidance on sampling from marine waters
+
+           ⎯       Part 10: Guidance on sampling of waste waters
+
+           ⎯       Part 11: Guidance of sampling of groundwaters
+
+           ⎯       Part 12: Guidance on sampling of bottom sediments
+
+           ⎯       Part 13: Guidance on sampling of sludges
+
+           ⎯       Part 14: Guidance on quality assurance of environmental water sampling and handling
+
+           ⎯       Part 15: Guidance on the preservation and handling of sludge and sediment samples
+
+
+                                                                   --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+           iv
+Copyright International Organization for Standardization                                                                 © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                        Not for Resale
+                                                                                                                      ISO 5667-13:2011(E)
+
+
+
+                          ⎯       Part 16: Guidance on biotesting of samples
+
+                          ⎯       Part 17: Guidance on sampling of bulk suspended solids
+
+                          ⎯       Part 19: Guidance on sampling of marine sediments
+
+                          ⎯       Part 20: Guidance on the use of sampling data for decision making — Compliance with thresholds and
+                                  classification systems
+
+                          ⎯       Part 21: Guidance on sampling of drinking water distributed by tankers or means other than distribution
+                                  pipes
+
+                          ⎯       Part 22: Guidance on the design and installation of groundwater monitoring points
+
+                          ⎯       Part 23: Guidance on passive sampling
+
+
+
+
+                                                                                                                                       --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization                                                                                                             v
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+
+           Introduction
+           This part of ISO 5667 should be read in conjunction with ISO 5667-1 and ISO 5667-15. The general
+           terminology used is in accordance with the various parts of ISO 6107.
+
+           Sampling and the determination of the physical and chemical properties of sludges and related solids are
+           normally carried out for a specific purpose. The sampling methods given are suitable for general use but do
+           not exclude modification in the light of any special factor known to the analyst receiving the samples or any
+           operational reason dictating the need for sampling. Personnel taking samples should be fully aware of safety
+           requirements before sampling occurs.
+
+           The importance of using a valid sampling technique cannot be overemphasized if the subsequent analysis is
+           to be worthwhile. It is important that the personnel taking and analysing the sample be fully aware of its nature
+           and the purpose for which the analysis is required before embarking on any work programme. Full
+           cooperation with the laboratory analysing the samples ensures that the most effective application of the
+           sampling occasion can be made. For example, the use of method-specific sample preservation techniques
+           assists in the accurate determination of results.
+
+           This part of ISO 5667 is applicable to sampling motivated by different objectives, some of which are to:
+
+           a)       provide data for the operation of activated sludge plants;
+
+           b)       provide data for the operation of sludge treatment facilities;
+
+           c)       determine the concentration of pollutants in wastewater sludges for disposal to landfill;
+
+           d)       test whether prescribed substance limits are contravened when sludge is used in agriculture;
+
+           e)       provide information on process control in potable and wastewater treatment, including:
+
+                    1)       addition or withdrawal of solids,
+
+                    2)       addition or withdrawal of liquid;
+
+           f)       provide information for legally enforceable aspects of the disposal of sewage and waterworks sludges;
+
+           g)       facilitate special investigations into the performance of new equipment and processes;
+
+           h)       optimize costs, e.g. for the transport of sludges for treatment or disposal.
+
+           When designing a sludge sampling programme, it is essential that the objectives of the study be kept in mind,
+           so that the information gained corresponds to that required. In addition, the data should not be distorted by the
+           use of inappropriate techniques, e.g. inadequate sample storage temperatures or the sampling of
+           unrepresentative parts of a sludge-treatment plant.
+
+
+
+
+                                                                                        --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+           vi
+Copyright International Organization for Standardization                                                                     © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS             Not for Resale
+                                                             INTERNATIONAL STANDARD                                                                    ISO 5667-13:2011(E)
+
+
+
+
+                                                             Water quality — Sampling —
+                                                             Part 13:
+                                                             Guidance on sampling of sludges
+
+
+                                                             WARNING — Persons using this International Standard should be familiar with normal laboratory
+                                                             practice. This standard does not purport to address all of the safety problems, if any, associated with
+                                                             its use. It is the responsibility of the user to establish appropriate safety and health practices and to
+                                                             ensure compliance with any national regulatory conditions.
+
+
+                                                             1    Scope
+                                                             This part of ISO 5667 gives guidance on the sampling of sludges from wastewater treatment works, water
+                                                             treatment works and industrial processes. It is applicable to all types of sludge arising from these works and also
+                                                             to sludges of similar characteristics, e.g. septic tank sludges. Guidance is also given on the design of sampling
+                                                             programmes and techniques for the collection of samples.
+
+
+                                                             2    Normative references
+                                                             The following referenced documents are indispensable for the application of this document. For dated
+                                                             references, only the edition cited applies. For undated references, the latest edition of the referenced
+                                                             document (including any amendments) applies.
+
+                                                             ISO 5667-1, Water quality — Sampling — Part 1: Guidance on the design of sampling programmes and
+                                                             sampling techniques
+
+                                                             ISO 5667-10:1992, Water quality — Sampling — Part 10: Guidance on sampling of waste waters
+
+                                                             ISO 5667-12, Water quality — Sampling — Part 12: Guidance on sampling of bottom sediments
+
+                                                             ISO 5667-14, Water quality — Sampling — Part 14: Guidance on quality assurance of environmental water
+                                                             sampling and handling
+
+                                                             ISO 5667-15:2009, Water quality — Sampling — Part 15: Guidance on the preservation and handling of
+                                                             sludge and sediment samples
+
+                                                             ISO 6107 (all parts), Water quality — Vocabulary
+
+                                                             ISO/TR 8363, Measurement of liquid flow in open channels — General guidelines for selection of method
+
+                                                             ISO 18283, Hard coal and coke — Manual sampling
+
+                                                             CEN/TR 13097, Characterization of sludges — Good practice for sludge utilisation in agriculture
+
+
+
+
+                        --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+Copyright International Organization for Standardization     © ISO 2011 – All rights reserved                                                                                 1
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                                  Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+           3       Terms and definitions
+           For the purposes of this document, the terms and definitions given in ISO 6107 and the following apply.
+
+           3.1
+           batch
+           unit of production produced in a single plant using uniform production parameters — or a number of such units,
+           when stored together — and that can be identified for the purposes of recall and re-treatment or disposal
+           should tests show that to be necessary
+
+           3.2
+           composite sample
+           two or more samples or sub-samples, mixed together in appropriate known proportions (either discretely or
+           continuously), from which the average value of a desired characteristic can be obtained
+
+           NOTE 1               The proportions are usually based on time or flow measurements.
+
+           NOTE 2               Adapted from ISO 6107-2:2006, 29.
+
+           3.3
+           critical control point
+           point, step or procedure at which control can be applied and is essential to prevent or eliminate a hazard or
+           reduce it to an acceptable level
+
+           3.4
+           draw-off head
+           height of sludge above the extraction point providing hydraulic pressure available for withdrawal of sludge
+           when removal is dependent upon gravity flow
+
+           3.5
+           flow-related sampling
+           samples taken at varying time intervals governed by material flow
+
+           NOTE                 “Flow-related sampling” usually applies to liquid sludges; for further guidance, see ISO 5667-10.
+
+           3.6
+           grab sample
+           discrete sample taken randomly (with regard to time and/or location) from a body of sludge
+
+           NOTE                 Adapted from ISO 6107-2:2006, 128.
+
+           3.7
+           heap
+           pile of dewatered sludge of approximately equal dimensions
+
+           3.8
+           liquid sludge
+           sludge flowing under the effect of gravity or pressure below a certain threshold
+
+           [CEN/TR 15463:2007[7]]
+
+           3.9
+           long pile
+           pile of dewatered sludge with length greater than width
+
+           3.10
+           open channel
+           pipe or conduit where the liquid surface is at atmospheric pressure
+
+
+
+                                                                                                       --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+           2
+Copyright International Organization for Standardization                                                                                    © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                      Not for Resale
+                                                                                                                                                     ISO 5667-13:2011(E)
+
+
+
+                                                            3.11
+                                                            proportional sampling
+                                                            technique for obtaining a sample from flowing sludge in which the frequency of collection (in the case of
+                                                            discrete sampling), or the sample flow rate (in the case of continuous sampling), is directly proportional to the
+                                                            flow rate of the sampled sludge
+                                                            [ISO 6107-2:2006, 91]
+
+                                                            3.12
+                                                            quality control point
+                                                            point, step or procedure at which control can be applied and is important or even critical for acceptable quality,
+                                                            but not necessarily for safety
+
+                                                            3.13
+                                                            sampling performance
+                                                            precision of sampling assessed by quality control methods, e.g. repeated sampling, field blanks, field controls,
+                                                            intersampler comparisons, and sampling at reference stations
+
+                                                            3.14
+                                                            sludge
+                                                            mixture of water and solids separated from various types of water as a result of natural or artificial processes
+                                                            NOTE         Adapted from ISO 6107-1:2004, 67.
+
+                                                            3.15
+                                                            sludge cake
+                                                            sludge generated from dewatering devices
+                                                            EXAMPLE           Filter press, centrifuge.
+
+                                                            [EN 1085:2007[5], 9490]
+
+                                                            3.16
+                                                            static belt
+                                                            stationary conveyor where material is conveyed on a belt
+
+                                                            3.17
+                                                            stockpile
+                                                            storage of treated sludge until it is utilized or disposed of
+
+
+                                                            4     Developing a sampling plan
+
+                                                            4.1    Sampling objectives
+                                                            Definition of the objectives of the sampling programme is an essential step towards defining the type and
+                                                            quality of information that is to be obtained through sampling.
+
+                                                            The type of sampling that is undertaken depends upon whether the objective of the sampling programme is
+                                                            monitoring for process control or for effluent quality. Typically, a sampling programme targets the critical
+                                                            control points and quality control points in conjunction with in-line process instrumentation. Consult
+                                                            CEN/TR 13097 for details of hazard analysis critical control point, an approach to identifying critical control
+                                                            points and quality control points.
+
+                                                            A sampling programme might include:
+
+                                                            ⎯     influent monitoring;
+
+                                                            ⎯     in-process monitoring;
+
+                                                            ⎯     effluent monitoring;
+
+                                                            ⎯     equipment inspection and testing.
+
+
+
+                       --`,,```,,,,````-`-`,,`,,`,`,,`---   © ISO 2011 – All rights reserved                                                                                   3
+Copyright International Organization for Standardization
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                                   Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+           4.2        Variability considerations
+
+           Variability, in time and space, is probably the most significant aspect to be considered in the design of
+           sampling plans. Variability determines the number of sites, number of replicates, and the frequency of sample
+           collection. High variability of environment or industrial discharge combined with poor sampling design or too
+           few samples can result in data that are too variable to reveal an impact, disturbance or trend. Local
+           heterogeneity, sampling variance and analytical variance can be estimated and vetted against data quality
+           requirements (i.e. by the method of Reference [8]).
+
+           Examples of variation in wastewater due to process variability include:
+
+
+
+
+                                                                                                                                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+           ⎯       daily and weekly variation: particular processes, e.g. scheduled cleaning, can always occur on the same
+                   day of the week, leading to a consistent pattern of variation in the quality of the discharge;
+
+           ⎯       seasonal variation: in communities with large seasonal load changes, e.g. a holiday resort or where there
+                   is a food processing operation (fish, fruit, or vegetables), the characteristics of the sewage sludge can
+                   vary over the course of a year;
+
+           ⎯       event variation: the influent (and effluent) from sewage treatment plants varies after a rainfall event due to
+                   the infiltration and inflow into the sewage system diluting the concentration, but increasing the volume of
+                   wastewater.
+
+           How process variability considerations are taken into account in the design of a monitoring plan depends upon
+           the objective of monitoring, e.g. to determine the maximum concentrations of a pollutant, the variability of
+           discharge or the average concentration.
+
+
+           5       Sampling equipment and containers
+
+           5.1        General
+
+           The sampling of sludge from fixed points can require the installation of permanent equipment, even if this is
+           only an additional pipe and valve to the processing plant. It is important to verify that any such equipment is
+           regularly cleaned and that it is free from corrosion. In addition, it is necessary to assess the potential for
+           interference on any test results that the equipment can have. In general, the laboratory performing the sludge
+           examination should be consulted before installation of any fixed-point equipment or at the implementation of a
+           new sampling scheme.
+
+           5.2        Sampling equipment
+
+           In general, sludge sampling equipment is most practical if it is as simple in design and construction as
+           possible. The physical properties of sludges depend on their type and solids content. Guidance on selection of
+           sampling equipment for different situations is given in Annex A. Some specific examples of equipment for
+           liquid sludges under particular circumstances are given in Annexes B and C. Sampling equipment should be
+           robust and free of any contaminating influence; equipment should be kept clean and corrosion free.
+
+           Composite samples of liquids taken as time or flow proportional samples are often collected by an automatic
+           sampling unit programmed to collect individual samples of liquid at selected intervals. Generally, the sampling
+           unit automatically purges the sample connection and tubing before collecting a sample.
+
+           5.3        Containers and sample preservation
+
+           Sample containers should be chosen with care. Obtain specific guidance on containers and sample
+           preservation from ISO 5667-15 and in all cases consult the analyst.
+
+           Samples for total moisture determination should be collected and stored in containers that are both leak-tight,
+           to prevent leakage or ingress, and airtight, to reduce moisture loss by evaporation. The sample containers
+           should be shielded from any direct source of heat, including the sun, at all times and returned to the laboratory
+           for refrigerated storage and/or rapid analysis to alleviate the risk of gas build-up in the containers.
+
+
+
+           4
+Copyright International Organization for Standardization                                              © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS           Not for Resale
+                                                                                                                         ISO 5667-13:2011(E)
+
+
+
+                          Except for samples to be analysed for trace organic materials, double polyethylene bags can be used for
+                          sludge cake samples. Polyethylene, polypropylene, polycarbonate, and glass containers are satisfactory from
+                          the point of view of chemical stability when sludge sampling. However, caution should be exercised since
+                          containers can become pressurized due to gas production in wastewater sludges and explosive situations can
+                          occur. Care should be taken, particularly when glass containers are used, to prevent build-up of gas pressure
+                          and to minimize the dispersion of fragments if an explosion occurs. Further guidance on overcoming the
+                          problem is given in Clause 8. Some manufacturers offer self-regulating pressure equalization closures for
+                          glass containers. For additional safety guidance, consult ISO 5667-15.
+
+                          Glass containers should be used when organic constituents, e.g. pesticides, are to be determined, whereas
+                          polyethylene containers are preferable for sampling parameters of general interest, e.g. pH and dry matter. It
+                          is possible that polyethylene containers are not suitable for collecting samples to be analysed for some trace
+                          metals, e.g. mercury. These containers should only be used if preliminary tests indicate acceptable levels of
+                          interference.
+
+                          The introduction of aged material from the dead space in sample lines can also contribute to contamination of
+                          samples due to corrosion (see 6.3.4) and can prove to be a serious potential source of error if not eliminated.
+
+                          Sample containers should be made of a material appropriate to the preservation of the natural properties of
+                          both the sample and the expected range of contaminants. For guidance on the type of sample container to be
+                          used and recommendations for the preparation of containers, consult ISO 5667-15.
+
+
+                          6        Sampling procedure
+
+                          6.1          Sampling regime
+
+                          6.1.1           General
+
+                          The most appropriate way of sampling in any situation depends on several factors:
+
+                          a)       access to the sampling point by personnel;
+
+                          b)       the practicality of installing and maintaining automatic equipment, if appropriate;
+
+                          c)       the practicalities of interrupting safely a stream of moving liquid sludge or cake when manually sampling;
+
+                          d)       the nature of the chamber or tank design with respect to stratification of liquid sludges.
+
+                          For a fixed plant, site safety, practicality of sample collection and representativeness of collected samples
+                          should be taken into account when selecting sampling site locations.
+
+                          Where sludge is passing in an accessible stream, either continuous or intermittent sampling should be
+                          considered. The greater the number of samples taken, the greater the degree of confidence in the
+                          representativeness of the sludge sample. Consult ISO 5667-1 and ISO 5667-14 for further information. There
+                          can be a requirement to consider the representative nature of solid sludges. Consult ISO 18283 for guidance
+                          on the statistical assessment of bulk loads of solid materials. When a non-representative sample has been
+                          collected, the analytical data need to be interpreted with caution.
+
+                          Nevertheless, it is often desirable to take daily or shift samples for control purposes, since definitions of
+                          batches and periods vary from plant to plant. Continuous sampling is more likely to be practicable where a
+                          fixed conveyor discharge can be sampled automatically. Intermittent sampling is more suited to manual
+                          sampling from a wagon or tanker.
+
+
+
+
+                                                                                                                                                5
+                               --`,,```,,,,````-`-`,,`,,`,`,,`---
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                   Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+           6.1.2         Sample type
+
+           The basic types of sample which can be required are:
+
+           a)      a composite sample which can be generated from either continuous or grab samples from stockpiles,
+                   sampling of liquid or cake sludges;
+
+           b)      a grab sample, which is taken at random from a liquid or conveyor flow of cake or from a single sample
+                   point in a stockpile. A programmed series of grab samples analysed individually, which can be liquid or
+                   cake samples, is a refinement of this technique.
+
+           6.1.3         Time-basis sampling
+
+           Time-basis samples can be a programmed series of grab samples that are to be analysed individually or
+           combined into a composite sample.
+
+           Calculate the maximum sampling interval, t, in minutes, between taking samples when using time-based
+           sampling, using Equation (1):
+
+                           60 × m
+                    t=                                                                                                                                       (1)
+                             qn
+
+           where
+
+                   60 is the number of minutes per hour;
+
+                   m        is the mass, in tonnes, of the batch;
+
+                   q        is the maximum mass flow rate, in tonnes per hour;
+
+                   n        is the number of samples.
+
+           6.1.4         Composite sampling
+
+           6.1.4.1             General
+
+           A composite sample is made from a number of discrete samples that have been collected from a body of
+           material and combined into a single sample. This single, composite, sample is representative of the average
+           conditions in that sampled body of material.
+
+           The composite sample should be homogenized before analysis and can be reduced to provide multiple sub-
+           samples (see 6.4).
+
+           6.1.4.2             Number of sub-samples
+
+           To calculate the minimum sample number for taking composite samples, Equation (2) should be used:
+                                               2
+                      ⎛ 1,96 × s ⎞
+                    n=⎜          ⎟                                                                                                                           (2)
+                      ⎝    E     ⎠
+
+           where
+
+                   1,96 is the z-value (number of standard deviations from the mean) for 95 % confidence;
+
+                   s           is the standard deviation estimated from test sampling;
+
+                   E           is the maximum permitted error, expressed in the same units as s;
+
+                   n           is the number of samples.
+
+
+                                                                                            --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+           6
+Copyright International Organization for Standardization                                                                         © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS               Not for Resale
+                                                                                                                     ISO 5667-13:2011(E)
+
+
+
+                          The standard deviation can be estimated by repeated collection and analysis of a large number (W30) of grab
+                          samples, e.g. at plant set-up, and checked at intervals.
+
+                          See Annex D for an example calculation.
+
+                          6.1.4.3             Continuous sampling
+
+                          In continuous sampling at regular intervals, the samples are taken uniformly throughout the whole supply of
+                          sludge, but are then grouped together into composite samples.
+
+                          6.1.4.4             Intermittent or consignment sampling
+
+                          For this type of sampling, the sludge is regarded as a series of batches and only a proportion is selected for
+                          sampling. The selected batches are spread uniformly throughout the whole supply of sludge, and the samples
+                          are taken uniformly from each batch selected for sampling. For example, one might sample by randomly
+                          picking tankers irrespective of the source of the sludge or the mass transported.
+
+                          With this type of sampling scheme, it is necessary to allow for the fact that the time-interval average is
+                          influenced by the variation between batches, which cannot be predicted. More samples are required over the
+                          time interval to achieve a given confidence than if continuous sampling had been carried out, since the error of
+                          sampling a batch is now only a portion of the total error.
+
+                          6.1.4.5             Flow-related sampling
+
+                          This is accomplished by extracting a mass of sludge proportional to the flow rate at the sampling point at the
+                          end of each time interval. This can either be added to a composite sample or to a partial composite sample.
+                          This method is applicable when sampling primary sludge at the time of draw-off, i.e. as the draw-off head falls,
+                          the discharge rate drops and the flow proportionality changes. If there is a requirement for mass transfer
+                          information, it is prudent to measure the associated flow rate or batch size of the sludge. For example, daily
+                          metals-loading information can be required for sludge pumped to agricultural land. For further guidance,
+                          consult ISO/TR 8363.
+
+                          6.2         Replicate sampling
+
+                          In a situation where automatic sampling is to be installed, e.g. on a conveyor belt, it is preferable to establish
+                          that the point at which the samples are being taken is representative of the output from that particular part of
+                          the plant. Under these circumstances, replicate sampling should be used to assess the variability of the output
+                          stream at the proposed sampling point. This technique can be applied to liquid as well as cake sludges.
+
+                          For example, when replicate sampling is in progress, two samples should be taken by placing samples
+                          alternately in two containers labelled A and B. After a number of samples have been collected in replicate, the
+                          results should be examined and the number of samples or the number of batches sampled should be changed
+                          in accordance with the guidance given in ISO 5667-1 and ISO 5667-14. After carrying out this test, it might be
+                          found that fewer samples can be taken in the future than were at first estimated to achieve the required
+                          confidence defined by the need for sampling. Consult ISO 18283 for details of the calculation of the number of
+                          samples, if the material can be likened to a mineral.
+
+                          If occasional confirmation of the sampling performance is required, replicate sampling is ideal. This should be
+                          achieved by taking a run of 10 paired replicate samples (i.e. 20 samples) after every 40 ordinary samples. It is
+                          not possible to assess whether there has been a change in sampling behaviour until two sets of 10 paired
+                          replicate results have been obtained and compared. If, at any time, there is reason to believe that sampling
+                          conditions have changed, a further set of 10 paired replicate samples should be collected and statistically
+                          tested before any decision to alter the regime is made.
+
+                          It is important to ensure that samples taken for confirmation of the sampling performance are not taken with
+                          more than ordinary care. One way of ensuring this is always to sample in replicate pairs, but to amalgamate
+                          the two sub-samples together and prepare the combined sample when replicate results are not required.
+
+
+
+                                                                       --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+                           © ISO for
+Copyright International Organization 2011  – All rights reserved
+                                      Standardization                                                                                     7
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                    Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+           6.3        Methodology
+
+           6.3.1         General
+
+           There is no definitive guidance that can be given on the need to sample sludges as cakes or liquids. For
+           example, it can be necessary to sample sludge in both forms on any particular plant in order that the process
+           can be optimized and the quality of the final output monitored for disposal purposes.
+
+           6.3.2         Sample size
+
+           6.3.2.1             Liquid sludges
+
+           It should be noted that thin liquid sludges (of low solids content) require the preparation of relatively large
+           volumes of the sampled material to provide sufficient dry matter to allow for a truly representative analysis of
+           constituents, e.g. metals. The analyst should always be consulted as to the quantities of sludge required, and
+           the sample reduced accordingly in the field before returning to the laboratory. Large volumes of sample
+           accrued by the combination of representative samples need to be homogenized before sub-sampling. The
+           mixing process should preferably be tested to ensure efficacy of mixing. The homogenization can be achieved
+           in a container such as a plastic dustbin using a suitable paddle to prevent settlement.
+
+           6.3.2.2             Sludge cake
+
+           To obtain a representative sample of sludge cake, the mass accumulated is always too large for laboratory
+           manipulation at the bench. Sample size reduction is, therefore, best carried out in the field in accordance with
+           the procedures specified in 6.4.
+
+
+
+
+                                                                                                                                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+           NOTE          Little guidance can be given as to the size of samples. This is because this criterion is dependent on the
+           variability of the sampled material and the type of analysis to be carried out.
+
+           6.3.3         Sampling from tanks and road tankers
+
+           The performance of tanks used for sedimentation or consolidation of wastewater or sewage sludges, digesters
+           and other vessels, cannot always be gauged from samples taken from the inlet and outlet pipelines. The
+           segregation of solids likely to occur can be detected by sampling different sections and depths of a tank.
+           Access to different strata is often provided by a design feature, e.g. stepped draw-off pipework. Examples of
+           equipment that could be used when this is not the case are given in Annex A.
+
+           Usually a composite sample of the sludge is required. The sludge in the tank should, where possible, have
+           been thoroughly mixed before sampling. Alternatively, grab samples can be taken either using a long-handled
+           ladle to sample the discharge or by diverting the flow at random intervals into a separate container to allow
+           separate mixing and subsequent sampling. This technique assists in removing some of the problems of
+           stratification that can occur when some sludges are left standing in tanks or tankers (e.g. with easily settleable
+           sludges).
+
+           6.3.4         Sampling from pipes
+
+           See 6.1.4.5 for guidance on flow-related sampling. If pumping is taking place, correct sampling can be
+           achieved with samples being taken at appropriate intervals at the pump outlet or a similar convenient place.
+           However, factors such as the nature of the sludge, the flow rate, the diameter of the pipes and the roughness
+           of the pipe can produce turbulent flow that results in mixing of the sludge. Minimizing the influence of this
+           potential problem can be achieved by allowing the flow to equilibrate before collecting a portion from which to
+           take a sub-sample after mixing. Any side arms or valves utilized in the sampling arrangement should be
+           flushed with at least three times the standing volume to ensure that any stagnant material is removed from the
+           pipework. When taking the sample in this manner, visual checks should be made to ensure that the flow rate
+           and consistency remain constant. Blockages in pipes due to fibrous materials can effectively filter the sludge,
+           thereby giving spurious results. This can go undetected at the time of sampling, and requires repetition of the
+           exercise to assess the reliability of results.
+
+
+
+
+           8
+Copyright International Organization for Standardization                                              © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS           Not for Resale
+                                                                                                                                                 ISO 5667-13:2011(E)
+
+
+
+                                                        A special case is the sampling of conditioned sludge from a high-pressure line prior to plate filter pressing. In
+                                                        this case, if sludge were to be sampled in a conventional manner allowing rapid decompression, its filtration
+                                                        properties would probably deteriorate markedly due to shear in the sampling valve. To sample a conditioned
+                                                        sludge with the minimum of shear, the simple apparatus shown in Annex B can be used. This type of sampling
+                                                        is usually required if testing for specific resistance to filtration has been requested to assess the potential
+                                                        efficacy of chemical dosing on press performance.
+
+                                                        6.3.5     Sampling from open channels
+
+                                                        A weighted bucket or a pump should be used, depending on the solids content of the sludge. When using a
+                                                        pump to sample from an open channel, a solids content of up to 5 % mass fraction can be sampled, provided
+                                                        the velocity in the suction pipe is sufficient to keep all the particulates in suspension. This velocity has to be
+                                                        established on a site-specific basis using a transparent section of the pump uptake tube to visually assess the
+                                                        performance of the suction. Samples should be taken across the width and depth of the channel to ensure
+                                                        that a representative composite sample is obtained after mixing individual samples. It should be borne in mind
+                                                        that the physical characteristics of the sludge can change on passing through a pump, due to shear of the
+                                                        particulate matter. The practice of sampling from open channels is probably only likely to occur when dealing
+                                                        with wastewater activated-sludge plants, and therefore a weighted bucket is often more appropriate.
+
+                                                        6.3.6     Sampling of sludge cake from heaps and stockpiles
+
+                                                        In general, sampling of sludge cake from heaps and stockpiles is prohibited by safety requirements, and is not
+                                                        technically required. However, if it is necessary to sample from heaps and stockpiles, the following guidance
+                                                        applies.
+
+                                                        When sampling heaps of air-dried sludge lifted from drying beds or stockpiles of sludge cake, it is important to
+                                                        obtain portions of sludge from throughout the mass and not just from the surface layer. The sludge taken off
+                                                        drying beds should be free of the bed media, since inclusion of grit or sand distorts measurements of dry
+                                                        matter content. The inclusion of any grit or sand is only applicable if it is representative of the whole mass of
+                                                        sludge being processed. A mechanical excavator can be the most practical tool, but particular care is
+                                                        necessary to ensure representative sampling.
+
+                                                        If, after assessment of safety requirements, no concerns are apparent and equipment is available, core
+                                                        sampling can be considered as a means of obtaining samples. Samples should be taken throughout the depth
+                                                        of the heap or stockpile. A composite sample can then be prepared from a statistically significant number, nsp,
+                                                        of such cores. Statistically, nsp is given by the equation:
+
+                                                                         √V
+                                                                n sp =
+                                                                          2
+
+                                                        where V is the nominal volume, in cubic metres, of the stockpile.
+
+                                                        The value of nsp, rounded to the nearest whole number, should lie between 4 and 30. Consult ISO 5667-12 for
+                                                        further guidance on core sampling.
+
+
+
+
+                   --`,,```,,,,````-`-`,,`,,`,`,,`---
+                                                        Major variations in data throughout stockpiles can be found, particularly old ones, in which the top layers
+                                                        desiccate to form crusts which allow anaerobic activity to increase below and aerobic activity to proliferate in
+                                                        the upper near-surface layers. The migration of nutrient species due to leaching in these situations can also
+                                                        cause difficulty when attempting to take representative samples or use analytical results. The surface layers
+                                                        can therefore give rise to misinterpretation when coring to the centre or full depth of the heap, due to surface
+                                                        area-to-volume ratio inconsistencies dependent on the stockpile shape. In certain circumstances, accessing
+                                                        the cross-sections of a heap with a mechanical excavator should be considered if it can be safely undertaken
+                                                        to enable representative sampling.
+
+
+
+
+Copyright International Organization for Standardization© ISO 2011 – All rights reserved                                                                                9
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                             Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+           6.3.7         Sampling from wagons
+
+           The only method considered satisfactory for sampling from wagons is to take samples in such a way that they
+           are representative of all parts of the sludge in the wagon. Normally, most of the sludge in a wagon is
+           inaccessible and methods usually involve sampling after unloading. The method to be adopted depends upon
+           the method of handling wagon-borne sludge and upon the types of wagons concerned. Sampling from
+           wagons should not be routine practice, but where circumstances dictate (e.g. on delivery to a landfill) the
+           following guidance applies.
+
+           It is evident that samples of sludge taken from the tops of wagons cannot be representative of its moisture
+           content if the sludge has been exposed for some time to rain or snow, or to the drying effects of exposure to
+           the open air during transport. Consequently, sampling from the tops of wagons for moisture or ash content is
+           not satisfactory. In addition, appropriate safety precautions for regular access make this practice an unlikely
+           routine measure.
+
+           If sampling is for the purpose of determining the dry solid or ash content, then a homogenized intermittent
+           sample should be taken at the point of discharge from the wagon after unloading, if it is judged safe to do so,
+           i.e. not at the tipping face of a working landfill.
+
+           6.3.8         Sampling from conveyor belts
+
+           6.3.8.1             General
+
+           Fragments of pressed or otherwise consolidated sludge tend to segregate by size and density when agitated
+           and fines are likely to drop to the bottom. In order to obtain a representative sample of material on a conveyor
+           belt, a complete cross-sectional portion should be removed, including fines. If the solid material is of
+           approximately uniform size, lumps can be removed, with caution, from a moving belt at random.
+
+           6.3.8.2             Sampling from a static belt
+
+           The samples taken from a stationary conveyor under these conditions should originate from the full width and
+           depth of the stream. A complete section should then be taken from a sufficient length to give the required
+           mass. It is convenient to define a suitable position for regular sampling by marking the framework adjacent to
+           the belt.
+
+           6.3.8.3             Sampling from a falling stream
+
+           This sampling is best done by a device which temporarily collects the whole flow at a transfer station or
+           conveyor discharge point, e.g. diversion of the flow to a sampling bin or barrow.
+
+           Where it is not possible to stop the conveyor, the sludge should be sampled while the conveyor is in motion.
+           When practicable, the sample can be taken as the sludge passes from the loading booms into wagons or
+           hoppers. When this is not possible, the sludge can be sampled as it passes from one conveyor to another, if
+           there is sufficient fall for the insertion of a sampling scoop. A suitable point is often found where the sludge
+           falls from a belt on to the loading boom or ramp and a platform can be erected to make access for manual
+           sampling easy and safe (see Clause 8).
+
+           Such techniques are useful for taking representative samples when sludge cake is being loaded on to wagons.
+           If it is not possible to use such a collection technique at a transfer station or discharge point, an alternative
+           procedure is to stop the conveyor periodically and treat the material on it as a long pile (see 6.3.9).
+
+           6.3.8.4             Manual sampling from a moving belt
+
+           A scoop or shovel should be used for sampling from a moving belt. It is essential that the stream be sampled
+           in such a way that no bias is introduced. The scoop can be inserted, for alternate samples, from the left, and
+           from the right, and passed entirely through the stream to ensure that the sludge cake from the full width is
+           included in the sample. If the size of the stream is too great to be sampled as a whole, successive samples
+           can be taken from adjacent parts of the stream.
+
+           Whether the belt is stopped or not, the sample loading should be controlled as far as possible so that the
+           samples are not of excessive mass (see Clause 8).
+
+
+                                        --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+           10
+Copyright International Organization for Standardization                                        © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS             Not for Resale
+                                                                                                                                   ISO 5667-13:2011(E)
+
+
+
+                          6.3.8.5             Mechanical sampling from a moving belt
+
+                          Machinery has been developed for the sampling of minerals from conveyor belts and falling streams which
+                          can be converted for use with sludge cake. However, the adaptation of such equipment is not common. If a
+                          particular situation arises where the use of such equipment appears practical, a statistical analysis of the
+                          performance should be carried out before implementation on a full-time basis is contemplated.
+
+                          6.3.9         Sampling from long piles
+
+                          With this technique, the conveyor flow is deflected into an area which has been marked out, or specifically
+                          designed as a long bin with removable dividers. If convenient, the dividers can be put in place prior to the next
+                          stage. The material should be poured into the pile area or bin in such a way that it is distributed uniformly.
+
+                          If preplacement is not an option, pairs of braced dividers should be inserted into the pile at fixed intervals
+                          along its length. The bracing is necessary to prevent the dividers being forced together during the removal of
+                          the sample. These dividers should make good contact with the base. The sample comprises all the material
+                          between the pairs of dividers, including the fines at the bottom.
+
+                          6.3.10 Sampling after dewatering by centrifugation
+
+                          Installations that incinerate sludge locally use this type of technology. Generally the sampling point is put after
+                          the high-pressure pump (similar to a concrete pump) used to convey the paste-like sludge from the
+                          centrifugation device to the oven.
+
+                          NOTE                 It is possible that the internal pipework needs more frequent inspection than when used for concrete.
+
+                          6.4         Sample homogenization and sub-sampling for sludge cakes (quartering)
+
+                          6.4.1         General
+
+                          It is usually necessary to reduce the mass of any bulk solid sample. This results in a laboratory sample which
+                          in turn is reduced to obtain a test portion of appropriate mass. The sample reduction therefore needs to be
+                          carried out in such a way as to obtain at each stage a representative part of the sample.
+
+                          The sample should be thoroughly mixed by heaping it on to a clean, flat and hard surface to form a cone. This
+                          is then turned over, e.g. with a shovel, to form a new cone, the operation being carried out three times. Each
+                          conical heap should be formed by depositing each shovelful of material on the apex of the cone, so that the
+
+
+
+                                                                                                                                                        --`,,```,,,,````-`-`,,`,,`,`,,`---
+                          portions which slide down the sides are distributed as evenly as possible, and the centre of the cone is not
+                          displaced.
+
+                          The heap should then be divided into quarters, which should be uniform in thickness and diameter, giving due
+                          regard to the irregular shape. Diametrically opposed quarters are retained and should be recombined. The
+                          process is repeated until the final two quarters produce the required sample mass.
+
+                          Sludges that have a gelatinous appearance, and behave more like a jelly than a mineral solid-like gravel, are
+                          unlikely to be suitably homogenized by this technique. Mixing such as that employed for the hand or
+                          mechanical preparation of cement mortar can be more appropriate. Division into sub-samples can still be
+                          achieved by the combination of diametrically opposed quarters.
+
+                          6.4.2         Sample reduction to provide multiple sub-samples
+
+                          When two or more laboratory samples are required from a bulk sample, the sample mass should be reduced
+                          by quartering. All of the excess bulk sample rejected should be recombined at the individual division stages,
+                          mixed thoroughly and reduced again to provide a second laboratory sample. This should be repeated as
+                          necessary to provide the required number of laboratory samples.
+
+                          In the laboratory, when handling dry material, quartering is often performed on a plastic sheet which can then
+                          be used for mixing the material and forming a new mound ready for the next mass reduction. The mixing is
+                          performed by the repeated turning in of opposite quarters, by lifting the edges of the sheet and folding it into
+                          the middle or by the use of plastics implements.
+
+
+
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization                                                                                               11
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                            Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+           This procedure should also be adopted if division into laboratory duplicates is required. The procedure thus
+           ensures the maximum homogeneity of the two duplicates from the same bulk sample, e.g. after
+           homogenization of a sub-sample prepared for the analysis of metals.
+
+           Alternatively, the sample can be poured into a conical mound which has been divided into four using flat
+           dividers larger than the pile. Diametrically opposite quadrants should be removed (including fines) and
+           combined. This process is repeated until the sample is sufficiently reduced in volume to provide the analyst
+           with an appropriate sample size. When samples have been dried and homogenized, devices such as riffle
+           boxes (see Figure 1) can be used for sub-division if sufficient material exists. Where riffle boxes are used, the
+           material should be distributed evenly across the width to ensure the sample is divided representatively. If wet
+           samples are treated in this manner, they do not divide properly and can cause clogging.
+
+
+
+
+                       --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+                                                            Figure 1 — Typical riffle box used for subdivision of samples in the laboratory
+
+
+
+
+           7       Sample storage
+
+           7.1        General
+
+           The methods of sampling can be time dependent in terms of the analytical technique to be used (e.g. pH
+           change over time). In addition, if there is an immediate operational requirement for information, a loss of
+           statistical confidence can be acceptable. Judgements have to be made on a situation-specific basis. For
+           example, when temperature is the parameter to be monitored, it is possible that sample homogeneity is not
+           regarded as critical. For further guidance, see ISO 5667-15.
+
+           For some types of liquid sludge, particularly raw sewage sludge, gross atypical solids, e.g. rags, can be
+           removed by passing the sample through a stainless steel or plastics screen of nominal size of openings not
+           less than 5 mm.
+
+           NOTE        Stainless steel contains chromium and nickel. Neither are expected to be a significant problem in terms of
+           release to the sample, but awareness of the presence of these metals is prudent when extremes of pH are encountered.
+           With plastics screens, the plasticizer used in manufacture can interfere with biocide analysis.
+
+
+
+           12
+Copyright International Organization for Standardization                                                                       © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                       Not for Resale
+                                                                                                                    ISO 5667-13:2011(E)
+
+
+
+                          Atypical solids can be needed for further examination and should be retained. Some samples can change
+                          significantly because of biological activity. It is therefore important that such samples be analysed as soon as
+                          possible after collection.
+
+                          Some form of heat treatment, such as autoclaving, can be appropriate prior to storage, e.g. if volatile
+                          components are of no interest and the sample is being retained for composite metals determination. Specific
+                          guidance should always be sought from the receiving analyst.
+
+
+
+
+                                                                                                                                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+                          7.2         Storage
+                          Samples should be stored at the laboratory until all data are obtained and checked, in case spurious results
+                          require investigation. The storage duration and conditions of sludge samples within the laboratory are specific
+                          to the analyte(s) to be analysed.
+
+                          Samples should be stored no longer than the maximum storage duration times. Samples should be stored in
+                          containers appropriate to the analyte(s) to be analysed, with preservatives added if necessary. For further
+                          guidance, consult ISO 5667-15:2009, Table 1.
+
+                          Specific guidance should always be sought from the receiving analyst.
+
+
+                          8       Safety
+                          It can be necessary to take samples from a sewer system as well as a sewage treatment works or similar site,
+                          but in either case certain risks are likely to be present. When selecting sampling locations and when sampling
+                          potentially hazardous sludge, safety and health aspects should be observed. In general, the safety advice
+                          given in other parts of ISO 5667 is relevant on many occasions when sludge is sampled (e.g. refer to
+                          ISO 5667-10:1992, Clause 6).
+
+                          However, these guidelines cannot be substituted for the provisions of local or national health and safety
+                          regulations, which should always be carefully studied and put into effect before sampling occurs.
+
+
+                          9       Labelling and reporting
+                          Sample containers should be clearly and unambiguously marked, so that subsequent analytical results can be
+                          properly interpreted. All details relevant to the sample should be recorded on a label attached to the sample
+                          container, in addition to the results of any on-site tests carried out by the sampler (e.g. pH). Alternatively, a
+                          codified system, e.g. using barcodes, should be used. When many sample containers are needed for a single
+                          occasion, the containers should be identified by code numbers and all relevant details entered on a sample
+                          record form. Labels or forms should always be completed at the time of sample collection.
+
+                          The detailed form of sample report depends on the objectives of sampling. Details which should be
+                          considered for inclusion are:
+
+                          a)      the name of the plant;
+
+                          b)      the sampling site (this description should be complete enough to allow another person to find the exact
+                                  location without further guidance);
+
+                          c)      the date and time of sample collection;
+
+                          d)      the name of the sample collector;
+
+                          e)      the weather conditions at the time of sampling;
+
+                          f)      the appearance of the sample;
+
+                          g)      information on any sample preservation technique used;
+
+                          h)      information on any specific sample storage requirements (e.g. whether refrigeration is necessary).
+
+
+
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization                                                                                13
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                    Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+                                                                            Annex A
+                                                                          (informative)
+
+                                                              Support on the selection of equipment
+
+
+           Suggested applications for generic types of sampling equipment are listed in Table A.1.
+
+
+
+
+                 --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+           14
+Copyright International Organization for Standardization                                              © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                   Not for Resale
+Copyright International Organization for Standardization
+
+
+
+
+                                                                                                                                                                    Table A.1 — Suggested applications for generic types of sampling equipment
+
+                                                                                                                                                                                                                                Maximum
+Provided by IHS under license with ISO
+
+                                                                                                                                                                                                          Size of  Sample                                    Fit for
+                                                                                                                                                                                     Applicationb                               sampling      Level of                    Can be        Fit for
+                                                                                                                           Sampling tool              Main application                                   openings length or                                 stratified
+                                                                                                                                                                                                                                  depth     disturbanceb                 sterilized   analysisb,e
+                                                                                                                                                                                                                   volume                                  samplingb
+                                                                                                                                                                                La      SC/Pc       Pd     mm                       m
+                                                                                                                                                                                                                                                                                        tm +++
+No reproduction or networking permitted without license from IHS
+                                                                                                                           Dutch or                                                                                  10 cm to
+                                                                                                                                                                                −        ++         −    40 to 200               5 to 10         0             ++           yes
+                                                                                                                           Edelman Auger                                                                              15 cm                                                              vol −
+                                                                                                                                                                                                                                                                                        tm +++
+                                                   © ISO 2011 – All rights reserved
+
+                                                                                                                                                                                                                     10 cm to
+                                                                                                                           Bucket auger                                         −        ++         −    40 to 200                 3             0             +            yes
+                                                                                      --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+                                                                                                                                                                                                                      15 cm                                                              vol −
+                                                                                                                           Gouge operated                                                                            30 cm to                                                           tm +++
+                                                                                                                                            Soft and cohesive materials         −        +++        −    10 to 60               0,5 to 10        +            +++           yes
+                                                                                                                           with body weight                                                                          100 cm                                                              vol −
+                                                                                                                           Handhammer                                                                                30 cm to                                                           tm +++
+                                                                                                                                              Cohesive materials                −        +++        −       25                  0,5 to 10        +            +++           yes
+                                                                                                                           operated gouge                                                                            100 cm                                                              vol −
+                                                                                                                           Peat sampling                                                                                                                                                tm +++
+                                                                                                                                              Sediments/sludges                 −        +++        −       25        50 cm       <10           ++            +++           yes
+                                                                                                                           device                                                                                                                                                        vol +
+                                                                                                                           Flap gouge
+                                                                                                                           auger (small       Powders/sediments/sludges/bio-                                                                                                            tm +++
+                                                                                                                                                                                −        +++        −       12        25 cm        <3           ++            +++           yes
+Not for Resale                                                                                                             peat sampling      reactors                                                                                                                                   vol −
+                                                                                                                           device)
+                                                                                                                           Sampling device                                                                                                                                              tm +++
+                                                                                                                                             Materials to be analysed for                                            5 cm to
+                                                                                                                           for volatiles (no                                    −        ++         −    15 to 40                 <10           +++           +++           yes
+                                                                                                                                             volatiles                                                                20 cm                                                            vol +++
+                                                                                                                           headspace)
+                                                                                                                           Piston sampling    Liquid-saturated uncohesive                                            75 cm to                                                           tm +++
+                                                                                                                                                                                −         +         −    30 to 50                 <10           +++           +++         difficult
+                                                                                                                           devices            materials                                                              200 cm                                                              vol +
+                                                                                                                           Piston sampling
+                                                                                                                           devices with       Liquid-saturated uncohesive                                            50 cm to                                                           tm +++
+                                                                                                                                                                                −         +         −    60 to 70                 <10           +++           +++         difficult
+                                                                                                                           lockable cutting   harder materials                                                       150 cm                                                              vol +
+                                                                                                                           head
+                                                                                                                           Remote
+                                                                                                                           operated piston    Liquid-saturated uncohesive                                                                                                               tm +++
+                                                                                                                                                                                −         0         −    50 to 70    500 cm        >5           +++           +++           no
+                                                                                                                           sampling           materials at larger depths                                                                                                                 vol +
+                                                                                                                           devices
+                                                                                                                                                                                                                                                                                        tm +++
+                                                                                                                           Spoon              Fine dry or moist bulk material   −         +         +f      30                     0             0             −            yes
+                                                                                                                                                                                                                                                                                         vol −
+                                                                                                                                                                                                                                                                                                    ISO 5667-13:2011(E)
+                                                 15
+                                                 16
+Copyright International Organization for Standardization
+                                                                                                                                                                                                        Table A.1 (continued)
+
+                                                                                                                                                                                                                                      Maximum
+                                                                                                                                                                                                              Size of  Sample                                       Fit for
+                                                                                                                                                                                        Applicationb                                  sampling       Level of                    Can be        Fit for
+                                                                                                                            Sampling tool               Main application                                     openings length or                                    stratified
+                                                                                                                                                                                                                                        depth      disturbanceb                 sterilized   analysisb,e
+                                                                                                                                                                                                                       volume                                     samplingb
+                                                                                                                                                                                   La      SC/Pc       Pd      mm                         m
+Provided by IHS under license with ISO
+
+
+
+                                                                                                                                                                                                                                                                                               tm +++
+                                                                                                                           Spade (flat)       Dry or moist bulk material; soil     −        ++         ++       200        20 cm         <2             +             +            yes
+                                                                                                                                                                                                                                                                                                vol +
+                                                                                                                                                                                                                                                                                                           ISO 5667-13:2011(E)
+
+No reproduction or networking permitted without license from IHS
+                                                                                                                           Spade with                                                                                                                                                          tm +++
+                                                                                                                                              Waste with debris                    −        ++         ++    150 to 300    20 cm         <1             +             −            yes
+                                                                                                                           sides                                                                                                                                                                vol +
+                                                                                                                                                                                                                                                                                               tm ++
+                                                                                                                           Scoop/trowel                                            −         +         +f                  15 cm        <0,5            0             −            yes
+                                                                                                                                                                                                                                                                                                vol −
+                                                                                                                           Weighted
+                                                                                                                           bottle/weighted                                                                                                                                                     tm ++
+                                                                                                                                              Liquids and free-flowing slurries   +++g       −         −                   500 ml        15             −             −            yes
+                                                                                                                           cage with                                                                                                                                                            vol +
+                                                                                                                           sample bottle
+                                                                                                                           Simple weighted                                                                                                                                                     tm ++
+                                                                                                                                           Liquids                                +++        −         −                   500 ml        15             −             −            yes
+                                                                                                                           can                                                                                                                                                                  vol +
+                                                                                                                           Valve sampling                                                                                                                                                      tm ++
+                                                                                                                           cylinder (sinker Liquids                               +++        −         −                                               ++             ++           yes
+                                                                                                                           sampling device)                                                                                                                                                     vol +
+
+Not for Resale                                                                                                             Bottom sampling                                                                                                                                                     tm ++
+                                                                                                                                           Liquids                                +++        −         −                   500 ml        15             −             −            yes
+                                                                                                                           device                                                                                                                                                               vol +
+                                                                                                                           Column                                                                                                                                                              tm ++
+                                                                                                                                           Liquids                                +++        −         −                                               +++           +++           yes
+                                                                                      --`,,```,,,,````-`-`,,`,,`,`,,`---
+                                                                                                                           sampling device                                                                                                                                                      vol +
+                                                                                                                           Drum and tank                                                                                                                                                       tm ++
+                                                                                                                                           Liquids                                +++        −         −                                  1            +++           +++           yes
+                                                                                                                           sampling device                                                                                                                                                      vol −
+                                                                                                                           Tube sampling                                                                                                                                                       tm +++
+                                                                                                                                              Liquids                             +++        −         −      20 to 40                   1,5           +++           +++           yes
+                                                                                                                           device                                                                                                                                                             vol +++
+                                                                                                                           Pond sampling                                                                                  150 ml to                                                            tm ++
+                                                                                                                                              Liquids                              +         −         −                              2,5 to 4,5        −             −            yes
+                                                                                                                           device                                                                                          600 ml                                                               vol −
+                                                                                                                                              Liquids and free-flowing                                                                                                                         tm ++
+                                                                                                                           Vacuum pumps                                           +++        −         +++                                              −             −            yes
+                                                                                                                                              particulates                                                                                                                                      vol −
+                                                                                                                                              Liquids, sludges and slurries in                                                                                                                 tm ++
+                                                                                                                           Peristaltic pump                                        +         −         −                                                −             −            yes
+                                                                                                                                              containers                                                                                                                                        vol −
+                                                   © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization
+
+
+
+
+                                                                                                                                                                                                           Table A.1 (continued)
+
+                                                                                                                                                                                                                                       Maximum
+Provided by IHS under license with ISO
+
+                                                                                                                                                                                                                 Size of  Sample                                   Fit for
+                                                                                                                                                                                           Applicationb                                sampling     Level of                    Can be        Fit for
+                                                                                                                        Sampling tool               Main application                                            openings length or                                stratified
+                                                                                                                                                                                                                                         depth    disturbanceb                 sterilized   analysisb,e
+                                                                                                                                                                                                                          volume                                 samplingb
+                                                                                                                                                                                      La      SC/Pc       Pd      mm                       m
+                                                                                                                                                                                                                                                                                              tm ++
+No reproduction or networking permitted without license from IHS
+
+                                                                                                                    Valve                 Liquids under pressure                     +++           −      −                                            −             −          difficult
+                                                                                                                                                                                                                                                                                               vol −
+                                                                                                                                                                                                                                                                                              tm ++
+                                                   © ISO 2011 – All rights reserved
+
+                                                                                                                                          Liquids; particulates free-flowing
+                                                                                                                    Tap                                                              +++           −      +++                                          −             −          difficult
+                                                                                                                                          under gravity                                                                                                                                        vol −
+                                                                                                                    Thief (grain                                                                                            60 cm to                                                          tm ++
+                                                                                                                                     Particulates                                      −           −      +h    12 to 25                               −             −            yes
+                                                                                                                    sampling device)                                                                                        100 cm                                                             vol −
+                                                                                                                                                                                                                            60 cm to                                                          tm ++
+                                                                                                                    Trier                 Soft to firm solids                          −           +      +h    12 to 25                              ++             ++           yes
+                                                                                                                                                                                                                            100 cm                                                             vol −
+                                                                                                                                                                                                                            30 cm to                                                          tm ++
+                                                                                                                    Split tube                                                         −           +      ++    35 to 125                 <1          +++           +++           yes
+                                                                                                                                                                                                                             90 cm                                                             vol +
+                                                                                                                    Thin-walled                                                                                                                                                               tm ++
+                                                                                                                                                                                                                            25 cm to
+                                                                               --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+                                                                                                                    (Shelby) tube                                                      −           ++     −     50 to 100                 <1          +++           +++           yes
+                                                                                                                                                                                                                             90 cm                                                             vol +
+Not for Resale                                                                                                      sampling device
+                                                                                                                    Pile sampling                                                                                                                                                             tm ++
+                                                                                                                                                                                       −           +      ++    0 to 140    <140 cm                   ++             ++           yes
+                                                                                                                    device                                                                                                                                                                     vol −
+                                                                                                                    a     Liquids.
+                                                                                                                    b     −/0/+/++/+++ a scale ranging from “not appropriate” to “most appropriate”.
+                                                                                                                    c     Sludge cake or paste.
+                                                                                                                    d     Particulate material.
+                                                                                                                    e     The symbols used in this column are:
+                                                                                                                          tm    suitable for trace metals;
+                                                                                                                          vol   suitable for volatiles.
+                                                                                                                    f     Not suitable for representative samples.
+                                                                                                                    g     Not suitable for viscous liquids.
+                                                                                                                    h     Can be difficult to retain the sample with very dry granular material.
+
+
+
+
+                                                                                                                                                                                                                                                                                                          ISO 5667-13:2011(E)
+                                                 17
+           ISO 5667-13:2011(E)
+
+
+
+                                                                           Annex B
+                                                                         (informative)
+
+                                                                   Vacuum sampling devices
+
+
+
+           B.1 Thick sludge from open vessels
+           For thick, e.g. primary, sludges, the vacuum sampler illustrated in Figure B.1 has been used successfully in
+           circumstances such as storage tanks that have not been fitted with pipework for stratified sampling. Sample
+           uptake pipes can be set to sample at predetermined depths from the top of the tank. Construction consists of
+           a pipe of 25 mm bore, electrically earthed to the tank, in up to a maximum of five 2 m sections joined by screw
+           connections which do not reduce the bore. This is connected via a flexible pipe and valve to a 10 l bottle or
+           Buchner flask which is surrounded by a guard to prevent injury should it collapse; it can be evacuated either
+           by hand or by an electrically operated vacuum pump fitted with an intrinsically spark-free motor.
+
+           It is necessary to obtain a good vacuum in the bottle before opening the valve to the sampling line. Before
+           taking a sample, some sludge should be withdrawn into another clean 10 l bottle to flush out the pipe. The
+           volume of the purge sample should be three times the standing volume of the sampling arm. This method is
+           particularly suitable for sampling from digesters, either through a port on the roof or through a sludge seal in
+           floating head types. It is important to remove encrusted sludge from the sampling point before inserting the
+           aluminium pipe. In order to ensure that the sample of sludge is representative, the siting of the uptake tube
+           needs careful consideration.
+
+           NOTE       In situations in which a very viscous layer develops in a stratified sludge, such equipment can draw up less
+           viscous material and overlying rainwater, thus generating an unrepresentative sample.
+
+           The equipment has been demonstrated to be unsuitable for sampling sludges with dry solids contents greater
+           than a mass fraction of 6 % to 8 %.
+
+
+           B.2 Thin sludge
+           For sampling thin sludges (i.e. those of low solids content), e.g. in blanket clarifiers or final settlement tanks, a
+           suitable commercial sampler using small-bore (not less than 6 mm diameter) plastics tube can be used. Care
+           should be taken to clean all pipework after use to avoid accumulation of bacterial slimes or algal growths on
+           the internal pipe surfaces.
+
+
+
+
+                                                                           --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+           18 Organization for Standardization
+Copyright International                                                                                          © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                Not for Resale
+                                                                                                                                         ISO 5667-13:2011(E)
+
+
+
+                                                                                                                                 5
+                                                                           4                                                         6
+
+
+
+                                                                                                                                 7
+                                                                   3
+                                                                                                                                 8
+
+
+
+
+                                                                       2
+
+                                                                                                            1
+
+
+                          Key
+                          1      25 mm bore (intake)                                 5        outlet valve
+                          2      electrical earth to tank                            6        to vacuum
+                          3      support                                             7        10 l sample bottle
+                          4      intake valve                                        8        protective covering
+
+                                        Figure B.1 — Suggested apparatus for the sampling of thick liquid sludge under vacuum
+
+
+
+
+                                                                                                                                                         19
+                                                                       --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                                Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+                                                                                  Annex C
+                                                                                (informative)
+
+                                                              Apparatus for sampling from pipes under pressure
+
+
+           The suggested valve arrangement (see Figure C.1) should be connected to a system of gauges capable of
+           measuring and equilibrating pressures in the sampling vessel with the pressurized pipe to which it is
+           connected. The device acts as a pressure lock to allow a controlled decompression into the sample vessel.
+           This operation is an aid to the safe handling of the sample and considerably reduces the effects of shear on
+           the sludge. The following steps outline the operating procedure.
+
+           a)      Connect the apparatus vertically to the high-pressure line at point A with all valves closed.
+
+           b)      Open valve D and admit compressed air until the pressure in the apparatus is equal to the operating
+                   pressure of the filter press or pipe in question.
+
+           c)      Close valve D and open valve B.
+
+           d)      Slightly open valve E to allow air to escape and sludge to be sampled through the open valve B.
+
+           e)      When sludge appears at the outlet of valve E, the sampling compartment is full of sludge. Close valve E.
+
+           f)      Close valve B and open valve E to reduce the pressure to ambient atmospheric conditions.
+
+           g)      Open valve C and withdraw the sludge sample.
+
+           In order to compensate for the dead volume of sludge in the pressure sampling line A, the above procedure
+           should be repeated to provide a purge equivalent to three times the volume of the pipe being sampled. This
+           ensures that new sludge is drawn off as the sample.
+
+
+
+
+                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+           20
+Copyright International Organization for Standardization                                                  © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                         Not for Resale
+                                                                                                                                                    ISO 5667-13:2011(E)
+
+
+
+                                                                                                                         D
+
+                                                                                                     1
+                                                                                                                              E
+                                                                                                             2
+                                                                                                         B
+                                                                                        3
+
+                                                                                                A
+                                                                                                                              C           4
+                                                                                                                                  5
+                                                                                                                                  6
+
+
+
+                                                     Key
+                                                     1                compressed air intake              4       container
+                                                     2                pipe, 15 mm outside diameter       5       PVC pipe, 30 mm outside diameter
+                                                     3                high-pressure sludge line          6       sample-collecting container
+                                                     A, B, C, D, E    see text
+
+                                                               Figure C.1 — Suggested valve arrangement for sampling liquid sludge under pressure
+
+
+
+
+                --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+                                                     © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization                                                                                                            21
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                             Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+                                                                                  Annex D
+                                                                                (informative)
+
+                                        Minimum number of samples in a composite sample —
+                                                      Calculation example
+
+
+
+           D.1 General
+           The minimum number of sub-samples required for taking composite samples is specified in 6.1.4.2. D.2
+           and D.3 describe an example to illustrate the process.
+
+
+           D.2 Test sampling
+           A test sampling was carried out to determine typical variability between sludge samples and to determine how
+           many samples should be collected for a composite sample. The analytical results from 30 samples collected
+           are presented in Table D.1.
+
+                                                              Table D.1 — Mass fraction of copper in 30 test samples
+
+                                                                               Copper mass fraction
+                                                                                 mg/kg dry mass
+
+                                                                   235                 275                    218
+                                                                   216                 270                    242
+                                                                   284                 274                    289
+                                                                   291                 290                    323
+                                                                   293                 289                    297
+                                                                   238                 229                    264
+                                                                   224                 276                    295
+                                                                   256                 201                    240
+                                                                   322                 346                    336
+                                                                   321                 335                    319
+
+
+
+           The average copper mass fraction in the sludge, estimated from the 30 samples, is 276,3 mg/kg dry mass.
+
+           It is decided that the maximum permitted error in the estimated sludge copper mass fraction should be
+           ±30 mg/kg dry mass.
+
+
+           D.3 Calculation
+           To calculate the minimum sample number for taking composite samples, Equation (2) is used:
+
+                                                     2
+                      ⎛ 1,96 × s ⎞
+                    n=⎜          ⎟                                                                                                              (2)
+                      ⎝    E     ⎠
+
+
+                         --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+           22 Organization for Standardization
+Copyright International                                                                                             © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                             Not for Resale
+                                                                                                                        ISO 5667-13:2011(E)
+
+
+
+                          where
+
+                                  1,96 is the z-value (number of standard deviations from the mean) for 95 % confidence;
+
+                                  s           is the standard deviation estimated from test sampling;
+
+                                  E           is the maximum permitted error, expressed in the same units as s;
+
+                                  n           is the number of samples.
+
+                          Based on the test sampling data, the standard deviation of the copper mass fraction, s = 39,7 mg/kg dry mass.
+
+                          It is decided that the maximum permitted error in the copper mass fraction, E = ±30 mg/kg dry mass.
+
+                          Substituting these values into the equation:
+
+                                                                   2
+                                     ⎛ 1,96 × 39,7 ⎞
+                                   n=⎜             ⎟ = 2,60 2 = 6,73 ≈ 7
+                                     ⎝     30      ⎠
+
+                          Since it is not possible to take part of a sample, the result is rounded up to the nearest integer.
+
+                          So, in this example, seven samples should be collected and mixed together to form a composite sample.
+
+
+
+
+                                                                                                                                              --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+                          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization                                                                                23
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                      Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+                                                                                             Bibliography
+
+
+           [1]           ISO 3534-2:2006, Statistics — Vocabulary and symbols — Part 2: Applied statistics
+
+           [2]           ISO 5667-16, Water quality — Sampling — Part 16: Guidance on biotesting of samples
+
+           [3]           ISO 10381-4, Soil quality — Sampling — Part 4: Guidance on the procedure for investigation of natural,
+                         near-natural and cultivated sites
+
+           [4]           ISO 10381-6, Soil quality — Sampling — Part 6: Guidance on the collection, handling and storage of
+                         soil under aerobic conditions for the assessment of microbiological processes, biomass and diversity
+                         in the laboratory
+
+           [5]           EN 1085:2007, Wastewater treatment — Vocabulary
+
+           [6]           EN 12832, Characterization of sludges — Utilization and disposal of sludges — Vocabulary
+
+           [7]           CEN/TR 15463:2007, Characterization of sludges — Physical consistency — Thixotropic behaviour
+                         and piling behaviour
+
+           [8]           CLARK, M.J.R., LAIDLAW, M.C.A., RYNEVELD, S.C., W ARD, M.L. Estimating sampling variance and local
+                         environmental heterogeneity for both known and estimated analytical variance. Chemosphere 1996,
+                         32, pp. 1133-1151
+
+
+
+
+                                                                   --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+           24 Organization for Standardization
+Copyright International                                                                                                  © ISO 2011 – All rights reserved
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS                                        Not for Resale
+                                       --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+Copyright International Organization for Standardization
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS            Not for Resale
+           ISO 5667-13:2011(E)
+
+
+
+
+                  --`,,```,,,,````-`-`,,`,,`,`,,`---
+
+
+
+
+          ICS 13.060.30; 13.060.45
+          Price based on 24 pages
+
+
+
+          © ISO 2011 – All rights reserved
+Copyright International Organization for Standardization
+Provided by IHS under license with ISO
+No reproduction or networking permitted without license from IHS   Not for Resale
+

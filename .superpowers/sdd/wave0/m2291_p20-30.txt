@@ -1,0 +1,783 @@
+                                                                                                                  DWA-M 229-1
+
+
+
+                                   Kurzzeichen     Einheit   Erläuterung
+
+                                   OVh,Prog         kg/h     Stündlicher Sauerstoffverbrauch im Prognose-Zustand
+
+                                   P                kW       Leistung
+                                                       3
+                                   PBB             W/ mBB    Spezifische Mischenergie im Belebungsbecken
+
+                                   PK               kW       Kupplungsleistung
+                                                             Q0 ·Δp
+                                                                    + PV
+                                                              600
+
+                                   PN               kW                       PK
+                                                             Netzleistung
+                                                                             ηges
+
+                                   Pth              kW                              Q0 ·Δp
+                                                             Verdichterleistung
+                                                                                     600
+
+                                   PV               kW       Verlustleistung
+
+                                   PLS               –       Prozessleitsystem
+
+                                   p                hPa      Druck
+
+                                   p1,abs           hPa      Absoluter Druck auf der Saugseite des Gebläses
+                                                             patm – Δp1
+
+                                   p2,abs           hPa      Absoluter Druck auf der Druckseite des Gebläses (Austrittsdruck)
+                                                             p1,abs + Δp
+
+                                   patm             hPa      Atmosphärischer Luftdruck am Anlagenstandort
+
+                                   pB               hPa      Absoluter Druck des Luftvolumenstroms im Zustand B
+
+
+
+
+Für Käufer des Belebungsexperts
+                                   pN               hPa      Normluftdruck: 1.013,25 hPa
+
+                                   pS               hPa      Sättigungsdampfdruck
+                                                                        17,62·TL,1 
+                                                             6,112·EXP                
+                                                                        243,12 + T 
+                                                                                  L,1 
+
+
+                                                      3
+                                   Q0               m /h     Theoretischer Ansaugvolumenstrom Q1 + QV
+                                                      3
+                                   Q1               m /h     Volumenstrom der angesaugten Luft
+
+                                   QL              mN3 /h    Erforderlicher Luftbedarf
+
+                                   QL,B            mN3 /h    Luftvolumenstrom mit den Zustandsgrößen B (Druck, Temperatur)
+
+                                   QL,N            mN3 /h    Luftvolumenstrom im Normzustand nach DIN 1343:1990
+                                                             (TN = 0 °C, pN = 1013 hPa, rF = 0 %)
+                                                             Angaben gemäß ISO 2533:1975 oder ISO 1217:2009 weichen davon auf-
+                                                             grund anderer Bezugstemperaturen und -drücke ab.
+                                                      3
+                                   QM               m /h     Mischwasserabfluss zur Kläranlage
+                                                      3
+                                   QT,d,aM          m /d     Mittlerer täglicher Trockenwetterabfluss im Jahresmittel
+                                                      3
+                                   QT,h,max         m /h     Maximaler stündlicher Trockenwetterabfluss
+
+
+
+
+                                  September 2017                                                                DWA-Regelwerk   19
+                                  DWA-M 229-1
+
+
+
+                                   Kurzzeichen        Einheit      Erläuterung
+                                                         3
+                                   QV                  m /h        Verlustvolumenstrom
+                                                                           1,293·Δp
+                                                                   QV100 ·
+                                                                             100·ρ1
+
+                                                         3
+                                   QV100               m /h        Verlustvolumenstrom bei 100 hPa
+
+                                   q0                   l/U        Theoretisches Fördervolumen
+
+                                   qL,BB            mN3 /( mBB
+                                                            3
+                                                               ·h) Spezifischer Luftvolumenstrom bezogen auf das Belebungsbecken-
+                                                                   volumen
+
+                                   qL,Bel            mN3 /(St·h)   Luftbeaufschlagung, spezifischer Luftvolumenstrom je Belüfter-
+                                                                   element
+
+                                   qL,Bel,erf        mN3 /(St·h)   Luftbeaufschlagung, erforderlicher spezifischer Luftvolumenstrom je
+                                                                   Belüfterelement
+
+                                   qL,Bel,tat        mN3 /(St·h)   Luftbeaufschlagung, tatsächlicher spezifischer Luftvolumenstrom je
+                                                                   Belüfterelement
+                                       2
+                                   r                     –         Bestimmtheitsmaß bei der Berechnung des Belüftungskoeffizienten aus
+                                                                   der Gasleerrohrgeschwindigkeit
+
+                                   rF                    %         Relative Feuchte
+
+                                   STDS,St              g/l        Salzgehalt in Reinwasser
+                                                                   (Abdampfrückstand gemäß DIN 38409 H1:1989)
+
+                                   STDS,α               g/l        Salzgehalt unter Betriebsbedingungen
+                                                                   (Abdampfrückstand gemäß DIN 38409 H1:1989)
+
+
+
+
+Für Käufer des Belebungsexperts
+                                   SAE               kg/kWh        engl. Standard Aeration Efficiency; Sauerstoffertrag in Reinwasser
+
+                                   SBR                   –         engl. Sequencing Batch Reactor
+
+                                   SOTR                kg/h        engl. Standard Oxygen Transfer Rate; Standard-Sauerstoffzufuhr in
+                                                                   Reinwasser
+
+                                   SSOTE               %/m         engl. Specific Standard Oxygen Transfer Efficiency;
+                                                                   Spezifische Standard-Sauerstoffausnutzung
+
+                                   SSOTR            g/( mN3 ·m)    engl. Specific Standard Oxygen Transfer Rate; Spezifische Standard-
+                                                                   Sauerstoffzufuhr
+
+                                   TB                   °C         Temperatur im Zustand B
+
+                                   TBB                  °C         Maßgebende Wassertemperatur im Belebungsbecken
+
+                                   TL,1                 °C         Temperatur der angesaugten Luft (auf der Saugseite des Gebläses)
+
+                                   TL,2                 °C         Temperatur der komprimierten Luft (auf der Druckseite des Gebläses);
+                                                                   Austrittstemperatur
+
+                                   TN                    K         Temperatur im physikalischen Normzustand (T = 0 °C), entspricht 273,15 K
+
+                                   TW                   °C         Maßgebende Wassertemperatur im Belebungsbecken
+
+
+
+
+                                  20        DWA-Regelwerk                                                                   September 2017
+                                                                                                                               DWA-M 229-1
+
+
+
+                                   Kurzzeichen     Einheit        Erläuterung
+
+                                   TDS               g/l          engl. Total Dissolved Solids
+                                                              3
+                                   TSBB            kg/m           Feststoffgehalt des belebten Schlamms im Belebungsbecken
+
+                                   tR                h            Dauer der SBR-Reaktionsphasen
+
+                                   tTS               d            Schlammalter
+                                                          3
+                                   V                 m            Volumen
+                                                          3
+                                   VBB               m            Volumen des Belebungsbeckens
+                                                          3
+                                   VDN               m            Volumen des Denitrifikationsbeckens
+                                                          3
+                                   VN                m            Volumen des Nitrifikationsbeckens
+
+                                   v                m/s           Strömungsgeschwindigkeit
+
+                                   W                 J            Energie
+
+                                   Wv              kJ/kg          Volumenänderungsarbeit
+
+                                                                                                             1,4 − 1
+                                                                                                                         
+                                                                                                 p2,abs  1,4        
+                                                                  1,4 · 287,12 · (TN + TL,1) ·                     − 1
+                                                                                                    p
+                                                                                                 1,abs               
+                                                                                   (1,4 − 1) · 1.000
+
+
+                                   α                 –            α-Wert (Grenzflächenfaktor)
+
+                                   αmax              –            Maximaler Grenzflächenfaktor zur Ermittlung der Sauerstoffzufuhr im
+                                                                  Lastfall 3
+
+
+
+
+Für Käufer des Belebungsexperts
+                                   αmin              –            Minimaler Grenzflächenfaktor zur Ermittlung der Sauerstoffzufuhr im
+                                                                  Lastfall 2
+
+                                   αmittel           –            Mittlerer Grenzflächenfaktor zur Ermittlung der Sauerstoffzufuhr im
+                                                                  Lastfall 1
+                                                         –1
+                                   αkLaT             h            Belüftungskoeffizient in belebtem Schlamm bei T (°C)
+
+                                   αSAE            kg/kWh         engl. Standard Aeration Efficiency; Sauerstoffertrag in belebtem
+                                                                  Schlamm
+
+                                   αSOTR            kg/h          engl. Standard Oxygen Transfer Rate; Standard-Sauerstoffzufuhr in
+                                                                  belebtem Schlamm
+
+                                   βα                –            Salzfaktor Sauerstoffsättigungswert unter Betriebsbedingungen
+
+
+                                   βSt               –            Salzfaktor Sauerstoffsättigungswert in Reinwasser
+
+                                   Δp               hPa           erforderliche Druckerhöhung
+
+                                   Δp1              hPa           Druckverlust auf der Saugseite
+
+                                   ΔpBel            hPa           Druckverlust eines Belüfterelements
+
+
+
+
+                                  September 2017                                                                              DWA-Regelwerk   21
+                                  DWA-M 229-1
+
+
+
+                                   Kurzzeichen     Einheit     Erläuterung
+
+                                   ΔpBel,B          hPa        Druckverlust eines Belüfterelements bei Betrieb mit einem
+                                                               Luftvolumenstrom mit den Zustandsgrößen B (Druck, Temperatur)
+
+                                   ΔpBel,N          hPa        Druckverlust eines Belüfterelements bei Betrieb mit einem
+                                                               Luftvolumenstrom mit den Zustandsgrößen N (Druck, Temperatur)
+
+                                   Δtth              °C        Temperaturerhöhung durch das Gebläse
+
+                                   ζ                  –        Druckverlustbeiwert
+
+                                   ηFU                –        Wirkungsgrad des Frequenzumformers
+
+                                   ηges               –        Gesamtwirkungsgrad des Elektroantriebs ηFU · ηMot
+
+                                   ηMot               –        Wirkungsgrad des Antriebsmotors
+
+                                   ηV                 –                                                      Q1
+                                                               Volumetrischer Wirkungsgrad des Gebläses
+                                                                                                             Q0
+
+                                   ηVer               –        Wirkungsgrad des Gebläses
+                                                               Q1 · ρ1 · Wv
+                                                                 60 · PK
+
+                                   θ                  –        Temperaturkorrekturfaktor: 1,024
+
+                                   ρ1
+                                                           3
+                                                    kg/m       Dichte im Ansaugzustand
+
+                                   ρB
+                                                           3
+                                                    kg/m       Dichte der Luft mit den Zustandsgrößen B (Druck, Temperatur)
+
+                                   ρN
+                                                           3                                                        3
+                                                    kg/m       Dichte der Luft unter Normbedingungen: 1,293 kg/m
+
+                                   ρS
+                                                           3
+                                                    kg/m       Wasserdampfdichte im Sättigungszustand:
+
+
+
+
+Für Käufer des Belebungsexperts
+                                                                   pS · 0,018015
+                                                                                       ⋅ 100
+                                                               8,314 · (273,15 + TL,1)
+
+                                   ϕ                 %         Relative Luftfeuchtigkeit
+
+
+
+
+                                  3.4        Chemische Elemente und Verbindungen, Summenparameter
+
+                                   Kurzzeichen      Einheit       Erläuterung
+
+                                   CSB                kg/d        Chemischer Sauerstoffbedarf
+
+                                   KN                 kg/d        engl. Kjeldahl Nitrogen; Kjeldahlstickstoff (KN = org. N + NH4-N)
+
+                                   NH4-N              kg/d        Ammoniumstickstoff
+
+                                   Norg               kg/d        Organischer Stickstoff
+
+                                   NOX-N              kg/d        Oxidierter Stickstoff (Summe aus Nitrat- und Nitritstickstoff)
+
+                                   Pges               kg/d        Gesamt-Phosphor-Gehalt
+
+
+
+
+                                  22      DWA-Regelwerk                                                                 September 2017
+                                                                                                                     DWA-M 229-1
+
+
+
+
+                                  4          Belüftung
+                                  4.1        Arten von Belüftungssystemen
+
+                                  4.1.1      Allgemeines
+                                  Die Aufgabe von Belüftungssystemen ist es, den für den Stoffwechsel der aeroben Mikroorganismen
+                                  benötigten Sauerstoff in das Belebungsbecken einzutragen. Dazu werden Druckbelüftungs- und
+                                  Oberflächenbelüftungssysteme eingesetzt.
+
+                                  Unter dem Begriff Belüftungssystem sind alle Komponenten zu verstehen, die erforderlich sind, um
+                                  Sauerstoff in das Becken einzutragen.
+
+
+
+
+                                  4.1.2      Druckbelüftungssysteme
+
+                                  4.1.2.1 Sauerstoffübergang
+                                  Bei Druckbelüftungssystemen erfolgt der Sauerstoffübergang durch die im Wasser aufsteigenden
+                                  Luftblasen. Es wird immer nur ein Teil des enthaltenen Sauerstoffs in das Wasser übertragen. In
+                                  Sonderfällen kann auch technisch reiner Sauerstoff eingeblasen werden. Wie viel Sauerstoff über-
+                                  tragen wird, ist von verschiedenen Einflussfaktoren abhängig, z. B.:
+
+                                     Blasengröße:
+                                      Die ins Abwasser übertragene Sauerstoffmenge ist umso größer, je größer die durch die Oberflä-
+                                      che der Luftblasen gebildete Grenzfläche zwischen Luft und Abwasser ist. Je kleiner die einzel-
+                                                                                                                             3
+                                      nen Luftblasen sind, umso größer ist die Gesamtoberfläche der Luftblasen (z. B. hat 1 m Luft bei
+                                                                                                          2
+                                      einer mittleren Blasengröße von 3 mm eine Oberfläche von 2.000 m , bei einem mittleren Bla-
+                                                                                                        2
+                                      sendurchmesser von 1 cm allerdings nur eine Oberfläche von 600 m ).
+
+
+
+
+Für Käufer des Belebungsexperts
+                                      In einem Kubikmeter Luft sind im physikalischen Normzustand (pN = 1.013 hPa und T = 0 °C) etwa
+                                                                           3
+                                      300 g Sauerstoff enthalten. Wenn 1 m Druckluft durch Reinwasser einen Meter aufsteigt, werden
+                                      bei feinblasiger Belüftung (Blasengröße 2 mm bis 5 mm) bis zu 25 g Sauerstoff in sauerstofffreies
+                                      Wasser übertragen. Bei zunehmender Blasengröße sinkt der Sauerstoffübergang auf bis zu
+                                      5 g Sauerstoff pro Kubikmeter Luft und pro Meter Einblastiefe ab.
+
+                                     Turbulenz in der Phasengrenzschicht:
+                                      Der Transport des Sauerstoffs aus der Luftblase in das Wasser erfolgt in mehreren Teilschritten.
+                                      Ein wesentlicher Teilschritt ist die Transportgeschwindigkeit des Sauerstoffs von der Phasen-
+                                      grenzfläche durch die Phasengrenzschicht in den Wasserkörper. Diese wird durch die Bewegung
+                                      der Wasserteilchen in der Phasengrenzschicht beeinflusst (z. B. DANKWERTS 1951, HIGBIE 1935,
+                                      LEWIS & WHITMAN 1924).
+
+                                     Aufenthaltszeit der Blasen im Wasser:
+                                      Je länger die Aufenthaltszeit der Luftblasen im Wasser ist, desto mehr Sauerstoff kann übertra-
+                                      gen werden. Die Aufenthaltszeit der Blasen im Wasser ist von drei Faktoren abhängig: der Was-
+                                      sertiefe, der vertikalen Wasserbewegung und der Steiggeschwindigkeit der Luftblasen, die wie-
+                                      derum durch die Koaleszens beeinflusst wird.
+
+                                      Luftblasen steigen in ruhendem Wasser nach einer kurzen Beschleunigungsstrecke mit einer
+                                      praktisch konstanten Geschwindigkeit von 25 cm/s auf. Bei ungünstiger Belüfterverteilung treten
+                                      aufwärts gerichtete Strömungen im Belebungsbecken auf. Durch die Überlagerung der Blasen-
+                                      aufstiegsgeschwindigkeit mit der Aufströmgeschwindigkeit des Wassers wird die Aufenthaltszeit
+                                      der Blase im Wasser verkürzt und damit die Sauerstoffzufuhr verringert.
+
+                                      BEISPIEL: Bei einer Einblastiefe von 4 m bleiben die Blasen ca. 16 s im Wasser. Sind Strömungs-
+                                      walzen mit einer Vertikalgeschwindigkeit von z. B. 20 cm/s im Becken vorhanden, bewegen sich
+
+
+
+                                  September 2017                                                                  DWA-Regelwerk     23
+                                  DWA-M 229-1
+
+
+                                       die Luftblasen mit einer Absolutgeschwindigkeit von 45 cm/s nach oben. Dadurch sinkt die Auf-
+                                       enthaltszeit der Luftblasen auf ca. 9 s und die Sauerstoffzufuhr geht deutlich zurück (typischer
+                                       Wert: minus 30 %).
+
+                                      Sauerstoffkonzentration im Belebungsbecken:
+                                       Die pro Zeiteinheit transportierte Sauerstoffmasse ist direkt proportional der Differenz zwischen
+                                       dem Sättigungswert minus aktuellem Sauerstoffgehalt (Sättigungsdefizit = treibende Kraft für
+                                       den Stofftausch). Je größer der aktuelle Sauerstoffgehalt im Belebungsbecken ist, desto kleiner
+                                       wird die Sauerstoffzufuhr. Die größte Sauerstoffzufuhr tritt daher bei einem gelösten Sauerstoff-
+                                       gehalt von C = 0 mg/l auf.
+
+                                      Temperatur:
+                                       Mit steigender Temperatur im Belebungsbecken sinkt der Sättigungswert und steigt der Belüf-
+                                       tungskoeffizient. Details können dem Merkblatt DWA-M 209 entnommen werden. Steigt die Tem-
+                                       peratur von TW = 10 °C auf TW = 20 °C, so erhöht sich die Standard-Sauerstoffzufuhr in Reinwasser
+                                       um ca. 2 %.
+                                      Abwasserinhaltsstoffe:
+                                       In Abwasser wird gegenüber Reinwasser der Sauerstoffeintrag verändert. Von Einfluss sind, ne-
+                                       ben den Feststoffen (belebter Schlamm), grenzflächenaktive Stoffe (z. B. Waschmitteltenside)
+                                       und Salze. Diese Stoffe beeinflussen unter anderem die Blasenbildung, die Aufstiegsbewegung
+                                       der Blasen im Wasser und die Blasenkoaleszenz (Zusammenschließen kleinerer zu größeren
+                                       Blasen) (WAGNER 1991, TSCHUI et al. 1996).
+
+                                       Mit steigendem Salzgehalt wird die Koaleszenzneigung der Blasen geringer und die Sauerstoff-
+                                       zufuhr steigt (z. B. Merkblatt DWA-M 209, ZLOKARNIK 1980). Bei Anwesenheit von geringen Men-
+                                       gen an Tensiden wird die Sauerstoffzufuhr deutlich reduziert (WAGNER 1991, TSCHUI et al. 1996). In
+                                       der Regel werden bei feinblasiger Belüftung im Abwasser nur etwa 40 % bis 70 % der Sauerstoff-
+                                       zufuhr in Reinwasser erreicht. Bei größeren Blasen ist der Einfluss des Abwassers wesentlich
+                                       schwächer, d. h. es werden 80 % bis 90 % der Ausnutzung im Reinwasser erreicht.
+
+                                      Meerwassereinträge:
+                                       Salze gelangen nicht nur über das zu behandelnde Schmutzwasser in den Kläranlagenzulauf. In
+
+
+
+
+Für Käufer des Belebungsexperts
+                                       Küstenstädten kann das Grundwasser aufgrund des direkten Kontakts zum Meerwasser einen
+                                       erhöhten Salzgehalt aufweisen, sodass hier erhöhte Salzgehalte im Kläranlagenzulauf auch auf
+                                       Fremdwasser zurückgeführt werden können (WAGNER & SANDERS 2015). Auch in Städten in denen
+                                       Meerwasser zur Toilettenspülung eingesetzt wird wie beispielsweise Hong Kong (YU et al. 2002),
+                                       ist mit erhöhten Salzgehalten im Zulauf zu rechnen.
+
+
+
+
+                                  4.1.2.2 Material von Belüfterelementen
+                                  Für die Herstellung von Belüfterelementen werden Keramik, mineralisches Granulat, Hartkunst-
+                                  stoffgranulat und Elastomere eingesetzt.
+
+                                  Die Formgebung von mechanisch und chemisch beständigen starr-porösen Belüfterelementen kann
+                                  durch mechanisches Bearbeiten von Rohlingen erfolgen. Mineralische Körner werden mit Klebstoff
+                                  vermengt und in Form gepresst. Je feiner die Körnung ist, desto kleinere Hohlräume entstehen und
+                                  desto kleinere Blasen können erzeugt werden. Dadurch steigt aber auch die Verstopfungsanfällig-
+                                  keit. Elemente aus keramischem Material und mineralischen Körnern haben einen vergleichsweise
+                                  geringen Druckverlust, weil die Poren immer offen sind und nicht erst eine Membran durch einen
+                                  Vordruck gedehnt werden muss. Beim Abstellen der Luft sinkt der Druck im Belüfterelement auf
+                                  den Wasserdruck ab und belebter Schlamm kann in die Poren eindringen. Wird die Luft wieder an-
+                                  gestellt, wird nur ein Teil des Schlamms wieder verdrängt, wodurch es zu einer Erhöhung des
+                                  Druckverlusts kommt. In der Regel eignen sich starr-poröse Elemente nicht für einen intermittie-
+                                  renden Betrieb. Im Einzelfall und unter Beachtung bestimmter Randbedingungen können sie jedoch
+                                  auch für eine intermittierende Belüftung verwendet werden.
+
+
+
+
+                                  24      DWA-Regelwerk                                                                  September 2017
+                                                                                                                      DWA-M 229-1
+
+
+                                  Der anfängliche Druckverlust nach der Installation von starr-porösen Belüftern (Neuzustand) liegt je
+                                  nach Bauform und Luftbeaufschlagung bei 15 hPa bis 20 hPa.
+
+                                  Zur Herstellung von Belüfterelementen aus Hartkunststoffgranulat (z. B. Hochdruckpolyethylen)
+                                  werden die Körner gesintert oder verklebt. Üblicherweise haben diese Elemente eine gröbere Kör-
+                                  nung als die vorgenannten Systeme, wodurch die Blasengröße steigt. Gleichzeitig nimmt die Ver-
+                                  stopfungsneigung ab. Auch sie sind jedoch in der Regel nicht für einen intermittierenden Betrieb
+                                  geeignet.
+
+                                  Für Belüfterelemente aus Elastomeren (auch Membranbelüfter genannt) kommen folgende Mate-
+                                  rialien zum Einsatz:
+                                     EPDM (Ethylen-Propylen-Dien-Terpolymer),
+                                     PU (Polyurethan),
+                                     Silikon.
+
+                                  Das schwarze EPDM hat eine hohe mechanische Festigkeit und ist chemisch weitgehend beständig.
+                                  EPDM ist kein „reiner“ Kunststoff, sondern besteht aus einigen „Zutaten“. Je nach Rezeptur und
+                                  Verarbeitung ergeben sich große Unterschiede in den Gebrauchseigenschaften, die sich insbesonde-
+                                  re auf die Härte, die Reißfestigkeit, Reißdehnung, den Weiterreißwiderstand und die Beständigkeit
+                                  gegen chemischen Angriff sowie Temperatur beziehen. Ein im Betrieb auftretendes Problem kann
+                                  das durch mikrobielle Abbauprozesse verursachte Herauslösen der im EPDM vorhandenen Weich-
+                                  macher und die dadurch eintretende Versprödung des Materials („Alterung“) sein. Als Reaktion da-
+                                  rauf werden auch „weichmacherarme“ EPDM-Membranen angeboten, für die inzwischen erste
+                                  Langzeit-Betriebserfahrungen vorliegen, nach denen die früher beobachtete Versprödung nun nicht
+                                  mehr auftritt. Der anfängliche Druckverlust nach der Installation von EPDM-Belüftern (Neuzustand)
+                                  liegt je nach Bauform und Luftbeaufschlagung bei 20 hPa bis 40 hPa. Der typische erforderliche
+                                  Mindestdruck zur Öffnung der Poren bei EPDM-Membranen beträgt ca. 15 hPa.
+
+                                  Polyurethan (PU) wird als dünne Folie (0,5 mm bis 2 mm) verwendet. Es ist sehr reißfest und gegen
+                                  viele Chemikalien beständig. Mit feiner Nadelung können mit diesem Material sehr kleine Blasen
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  (< 1 mm) erzeugt werden. Der Druckverlust ist dann aber deutlich höher als bei anderen Systemen
+                                  (typischer Wert im Neuzustand: 60 hPa).
+
+                                  Auch Silikon wird für Abwasserbelüfter eingesetzt. Es wird mit einer Materialstärke von 1 mm bis
+                                  3 mm hergestellt. Silikon ist chemisch sehr beständig und wird daher auch in Industriekläranlagen
+                                  oder Anlagen mit hohem Industrie- und Gewerbeanteil eingesetzt. Silikon wird häufig an Schlauchbe-
+                                  lüftern verbaut. Der Druckverlust liegt je nach Bauform und Luftbeaufschlagung im Neuzustand bei
+                                  20 hPa bis 40 hPa. In Einzelfällen wurde in der Vergangenheit über gerissene Silikonbelüfter berichtet.
+
+                                  Alle auf Elastomeren basierende Belüftungselemente sind für den intermittierenden Betrieb geeig-
+                                  net, da sie beim Abschalten weitgehend selbstabdichtend sind.
+
+
+
+
+                                  4.1.2.3 Bauformen von Belüfterelementen
+                                  Die häufigsten Bauformen von Belüfterelementen sind:
+                                     Rohrbelüfter (Quarzsand/Kunstharzgemisch, Elastomere mit Stützkörper):
+                                      Durchmesser:     50 mm – 100 mm;
+                                      Länge:          500 mm – 1.000 mm
+
+                                     Schlauchbelüfter ohne Stützkörper (Elastomere):
+                                      Durchmesser:     50 mm – 100 mm;
+                                      Länge:         500 mm – 1.000 mm
+                                                     (in Ausnahmefällen auch bis zu 5 m)
+
+
+
+                                  September 2017                                                                    DWA-Regelwerk     25
+                                  DWA-M 229-1
+
+
+                                      Dombelüfter (Quarzsand/Kunstharzgemisch):
+                                       Durchmesser: 200 mm
+
+                                      Tellerbelüfter (Quarzsand/Kunstharzgemisch, Elastomere):
+                                       Durchmesser: 200 mm – 500 mm
+
+                                      Plattenbelüfter (Elastomere):
+                                       Breite × Länge: 100 mm × 500 mm bis 1.000 mm × 2.000 mm
+                                  Die Grundkörper bei Membranbelüftern bestehen in der Regel aus Kunststoff. Systembedingt verfü-
+                                  gen bestimmte Membranbelüfter über eine Drossel und/oder eine Rückschlagsicherung. Die Dros-
+                                  sel reduziert den Luftdurchsatz, falls die Membran beschädigt wird. Die Rückschlagsicherung ver-
+                                  hindert das Eindringen von Wasser (und Schlamm) in das Rohrleitungssystem bei Beschädigungen
+                                  der Membran oder bei intermittierendem Betrieb.
+
+
+
+
+                                  4.1.2.4 Drucklufterzeuger für die Abwasserbelüftung
+                                  Je nach der vorhandenen Einblastiefe und dem erforderlichen Luftvolumenstrom kommen in der Ab-
+                                  wassertechnik folgende Typen von Drucklufterzeugern zum Einsatz:
+                                      Drehkolbengebläse (zwei- und dreiflügelig):
+                                       – maximale Druckdifferenz:       ca. 1.000 hPa
+                                                                                      3
+                                       – üblicher Luftvolumenstrom bis:       3.000 m /h
+                                                                                      3
+                                       – maximal bis:                        15.000 m /h
+                                       – Funktionsprinzip:         Verdrängungsprinzip
+                                       Die Luft wird quer zu den Kolbenwellen durch das Gehäuse gefördert und auf der Druckseite
+                                       durch die gegenläufigen Kolben, die mit gleicher Drehzahl laufen, aus dem Gehäuse hinausge-
+                                       schoben. Der Förderstrom pulsiert konstruktionsbedingt bei zweiflügeligen Gebläsen stärker als
+                                       bei Dreiflügeligen.
+
+                                      Niederdruck-Schraubenverdichter:
+
+
+
+
+Für Käufer des Belebungsexperts
+                                       – maximale Druckdifferenz:     ca. 1.500 hPa
+                                                                                      3
+                                       –   üblicher Luftvolumenstrom bis:     1.500 m /h
+                                                                                      3
+                                       –   maximal bis:                       9.000 m /h
+                                       –   Funktionsprinzip:       Verdrängungsprinzip
+
+                                       Die Luft wird parallel zu den Kolbenwellen durch das Gehäuse gefördert. Die positiv und nega-
+                                       tiv ausgeformten Kolben laufen mit unterschiedlicher Drehzahl. Dadurch erfolgt bereits im Ge-
+                                       häuse eine Verdichtung der Luft und der Förderstrom ist weitgehend pulsationsfrei.
+
+                                      Turboverdichter (einstufig) mit Leitapparaten:
+                                       – maximale Druckdifferenz:             2.000 hPa
+                                                                                      3
+                                       –   üblicher Luftvolumenstrom bis:    30.000 m /h
+                                                                                      3
+                                       –   maximal bis:                     100.000 m /h
+                                       – Funktionsprinzip: Turbogebläse arbeiten nach dem Strömungsprinzip der hydrodynamischen
+                                       Förderung ähnlich wie Kreiselpumpen.
+
+                                       Die Luft strömt zentrisch über das Vorleitgitter in das Laufrad, wird von diesem beschleunigt und
+                                       radial über das Nachleitgitter in das Spiralgehäuse gefördert. Die verdichtete Luft strömt pulsati-
+                                       onsfrei über den Druckstutzen in die Rohrleitung. Das Laufrad dreht sich mit hoher, konstanter
+                                       Drehzahl (typischer Wert: 17.000 U/min). Der Luftvolumenstrom wird über eine Verstellung der
+                                       Leitapparate variiert.
+                                      Drehzahlverstellbare Turboverdichter (einstufig) ohne Leitapparate:
+                                       – maximale Druckdifferenz:       ca. 1.200 hPa
+                                                                                    3
+                                       – Luftvolumenstrom bis:         ca. 15.000 m /h
+                                       – Funktionsprinzip:        wie Turboverdichter
+
+
+
+                                  26       DWA-Regelwerk                                                                  September 2017
+                                                                                                                     DWA-M 229-1
+
+
+                                     Das magnet-, luft- oder foliengelagerte Laufrad dreht sich mit sehr hoher, variabler Drehzahl
+                                     (typischer Wert: bis zu 40.000 U/min). Die Regelung des Luftvolumenstroms erfolgt durch Dreh-
+                                     zahländerung des Hochgeschwindigkeitsmotors, der über einen speziellen Frequenzumrichter
+                                     angesteuert wird.
+
+                                  Darüber hinaus werden insbesondere im Ausland mehrstufige Seitenkanalverdichter (Radialverdich-
+                                  ter) eingesetzt. Im Vergleich zu den oben aufgeführten Drucklufterzeugern weisen diese jedoch ei-
+                                  nen deutlich geringeren Wirkungsgrad auf.
+
+                                  Gerade bei tiefen Becken kann im Einzelfall auch eine Wärmerückgewinnung aus der verdichteten
+                                  Luft wirtschaftlich interessant werden, sofern eine Abnahmemöglichkeit der Wärme besteht.
+
+                                  Weitergehende Informationen zu den spezifischen Eigenschaften von Drucklufterzeugern finden sich
+                                  im NRW-Energiehandbuch 2.0 (MKULNV NRW 2017).
+
+
+
+
+                                  4.1.2.5 Rohrleitungen und Armaturen
+                                  Für den Transport der verdichteten Luft vom Gebläse zu den Belüfterelementen sind Transport- und
+                                  Verteilleitungen vorzusehen. Um die Energieverluste möglichst gering zu halten, sollten die Rohr-
+                                  dimensionen so ausgewählt werden, dass der Druckverlust im gesamten Leitungssystem, d. h. von den
+                                  Gebläsen bis zu den Belüftern, einen Wert von 40 hPa bis 50 hPa nicht überschreitet.
+
+                                  Besondere Sorgfalt ist bei der Auswahl und beim Einbau von Einrichtungen zur Messung des Luftvo-
+                                  lumenstroms erforderlich. Hinweise zur richtigen Auslegung der Vor- und Nachlaufstrecken bzw.
+                                  Plausibilitätsprüfung/Kalibrierung der Messeinrichtungen sind beispielsweise dem Merkblatt DWA-
+                                  M 264 zu entnehmen. Werden Drosselgeräte zur Bestimmung des Luftvolumenstroms (z. B. Blen-
+                                  den, Düsen oder Venturi-Düsen gemäß DIN EN ISO 5167 Teile 1 bis 4) eingesetzt, so ist deren Regel-
+                                  bereich sorgfältig zu bestimmen. Da der Wirkdruck mit dem Durchfluss quadratisch ansteigt, kommt
+                                  der richtigen Auslegung dieser Einrichtungen besondere Bedeutung zu. Auch ist auf die Größe des
+                                  Druckverlusts von gegebenenfalls erforderlichen Strömungsgleichrichtern und/oder Reduzierungen zu
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  achten.
+
+                                  Für betriebliche Zwecke eignen sich Messgeräte, die nach dem Verfahren des Hitzdrahtanemome-
+                                  ters arbeiten. Damit kann der Luftmassenstrom direkt gemessen werden. Daraus ergibt sich unmit-
+                                  telbar die Luftmenge im Normzustand. Die Sonde besteht aus einem Stab mit kleinem Durchmesser,
+                                  der in der Regel nur vernachlässigbare Verluste verursacht. Wie bei den anderen Verfahren sind
+                                  aber auch hier die hohen Anforderungen an die Länge der Ein- und Auslaufstrecken zu beachten.
+
+                                  Zur Regelung des Luftvolumenstroms und Verteilung der Luft auf einzelne Becken oder Beckenab-
+                                  schnitte kommen unterschiedliche Armaturen zum Einsatz (z. B. Klappen, Blendenregulierschieber
+                                  mit verschiedenen Geometrien, Ringkolbenventile, Ventile weiterer Bauarten). Klappen besitzen nur
+                                  einen kleinen nutzbaren Regelbereich verbunden mit einem relativ hohen Druckverlust und sollten
+                                  daher für Regel- und Verteilaufgaben nicht mehr eingesetzt werden. Sie sollten lediglich als Absperr-
+                                  armatur genutzt werden.
+
+                                  Für Luft entwickelte und optimierte Blendenregulierschieber weisen einen deutlich größeren linea-
+                                  ren Betriebsbereich als Klappen auf, können aber bei ungünstiger Nennweite auch relativ hohe
+                                  Druckverluste im Regelbetrieb und entsprechend hohe zusätzliche Betriebskosten aufweisen. Re-
+                                  gelventile verfügen in der Regel über eine weitestgehend lineare Betriebskennlinie. Auf eine strö-
+                                  mungstechnisch günstige Form und somit relativ geringen Druckverlust im typischen Regelbereich
+                                  sollte geachtet werden, um die Druckverluste und somit die Betriebskosten gering zu halten (siehe
+                                  DIN EN ISO 5167).
+
+                                  Spätestens bei der Werkplanung sind die Eigenfrequenz des Rohrleitungssystems (bzw. Abschnitten
+                                  davon) und die vorhandenen Erregerfrequenzen (z. B. durch das Gebläse) zu ermitteln, um Lärm-
+
+
+
+                                  September 2017                                                                  DWA-Regelwerk     27
+                                  DWA-M 229-1
+
+
+                                  probleme mit Resonanzfrequenzen zu vermeiden. Nachträglich ausgeführte Dämmmaßnahmen sind
+                                  meist erheblich ineffektiver und teurer als entsprechend optimierte Leitungen (WAGNER 2008).
+
+                                  Die Absperr- und Regelarmaturen sind gemäß den Anforderungen an die Automatisierung der Luft-
+                                  verteilung bei Minimierung der Druckverluste (siehe oben) anzuordnen. Insbesondere bei druck-
+                                  oder luftmengenbasierten Automatisierungslösungen mit einer sauerstoffgeführten, lokalen Dros-
+                                  selregelung ist darauf zu achten, dass die Regelarmaturen auch kleine Luftmengen sachgerecht
+                                  regeln und verteilen können. Dazu haben sich im Gegensatz zu Plattenschiebern vor allem Mehreck-
+                                  blendenregulierschieber oder strömungstechnisch günstige Regelventile bewährt. Ist durch die
+                                  Regelarmatur – wie bei der intermittierenden Nitrifikation/Denitrifikation – ein sicherer Luftab-
+                                  schluss zu gewährleisten, sollte die gewählte Armatur selbst gasdicht schließen.
+
+                                  Es wird auch empfohlen, Entwässerungsleitungen vorzusehen und diese für eine regelmäßige Kon-
+                                  trolle in einfacher Weise zugänglich zu machen. Manche Systeme (Platten- und Rohrbelüfter) ver-
+                                  zichten häufig auf Entwässerungsleitungen, weil das Wasser auch über den Belüfter selbst austre-
+                                  ten kann. Diese Vorgehensweise ist im Einzelfall kritisch zu hinterfragen.
+
+
+
+
+                                  4.1.2.6 Elektro-, Mess-, Steuer- und Regelungstechnik (EMSR)
+                                  Für die Automatisierung der Belüftung steht in Abhängigkeit der Anlagenkonfiguration eine große
+                                  Zahl von Steuer- und Regelstrategien unter Einbindung von kontinuierlichen Messgeräten zur Verfü-
+                                  gung (siehe Arbeitsblatt DWA-A 268 und Merkblatt DWA-M 256-1). Vorzuziehen ist bei größeren An-
+                                  lagen mit Druckluftbelüftung eine belastungsabhängige und druckoptimierte Regelung der Sauer-
+                                  stoffzufuhr. Eine genaue, frühzeitige Abstimmung der aus der Bemessung und Auslegung
+                                  bestimmten klärtechnischen Elemente (Belüfter, Verdichter, Luftverteilung, Regelarmaturen) mit
+                                  der geplanten Automatisierungslösung ist dabei von hoher Bedeutung. Da beide Gewerke in der
+                                  Funktion untrennbar miteinander verbunden sind, ist bei der Planung eine parallele Bearbeitung von
+                                  Belüftungstechnik und EMSR-Technik unabdingbar.
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  4.1.3      Oberflächenbelüftungssysteme
+
+                                  4.1.3.1 Sauerstoffübergang
+                                  Der Sauerstoffeintrag erfolgt bei dieser Art der Belüfter durch die mechanische Einwirkung der
+                                  Belüfter an der Wasseroberfläche, wobei sich die Mechanismen im Einzelnen bei Kreisel- und Wal-
+                                  zenbelüftern (Rotoren) etwas unterscheiden. Neben dem Sauerstoffeintrag erzeugen Oberflächen-
+                                  belüfter auch ein Strömungsfeld, wodurch der belebte Schlamm und die Inhaltsstoffe des Abwassers
+                                  miteinander vermischt und Schlammablagerungen verhindert werden. Ein Oberflächenbelüftungs-
+                                  system besteht aus dem Belüfterrotor, einem Getriebe und dem Antriebsmotor. Dabei wird zwischen
+                                  Systemen mit horizontaler Achse (Walzenbelüfter) und solchen mit vertikaler Achse (Kreiselbelüfter)
+                                  unterschieden.
+
+                                  Bei Oberflächenbelüftern kann mit 90 % bis 100 % der Reinwassersauerstoffzufuhr in Abwasser
+                                  gerechnet werden.
+
+
+
+
+                                  4.1.3.2 Walzenbelüfter (Rotoren)
+                                  Walzenbelüfter (siehe Bild 1) bestehen aus einer horizontalen Hohlwelle mit daran befestigten
+                                  Flachstäben (Stahl oder glasfaserverstärkter Kunststoff), die in Form von „Sternen“ angeordnet
+                                  sind. Die Bestückung besteht aus mehreren achsparallelen Reihen, die geringfügig versetzt ange-
+                                  ordnet sind, um einen geräuscharmen und stoßfreien Betrieb zu gewährleisten.
+
+
+
+                                  28      DWA-Regelwerk                                                              September 2017
+                                                                                                                    DWA-M 229-1
+
+
+
+
+                                                                                       Bild 1: Schnitt durch ein Belebungsbecken mit
+                                                                                       einem Walzenbelüfter
+
+                                  Der Antrieb des Walzenbelüfters erfolgt über eine elastische Torsionskupplung zwischen Hohlwelle
+                                  und Getriebe. Walzenbelüfter werden mit einem Durchmesser von 700 mm und 1.000 mm herge-
+                                  stellt, wobei letztere den Standard darstellen. Die Länge der Walzen kann bis zu 9,0 m betragen. Die
+                                  Umfangsgeschwindigkeit liegt typischerweise bei 3 m/s bis 4 m/s.
+
+                                  Durch die Rotation der Walze wird hinter den Stabwalzen ein stark turbulentes Luftblasen-
+                                  Wassergemisch erzeugt, Energie in den Wasserkörper übertragen und dadurch eine Strömung induziert.
+
+                                  Walzenbelüfter werden senkrecht (quer) zur Strömungsrichtung angeordnet und erfordern daher in
+                                  der Regel Becken mit einer gerichteten Strömung. Zu nennen sind hierfür: Oxidationsgräben, Schlei-
+                                  fen- bzw. Carrousel-Becken und Kreisringbecken.
+
+                                  Der Sauerstoffeintrag erfolgt bei Walzenbelüftern fast ausschließlich über die Aufrauung der Was-
+                                  seroberfläche und die damit verbundene Grenzflächenerneuerung. Die Belüftung über eingesaugte
+                                  Luftblasen spielt eine untergeordnete Rolle.
+
+                                  Die auftretenden Geräusch- und Aerosolemissionen von Walzenbelüftern lassen sich durch techni-
+                                  sche Maßnahmen, wie Verbreiterung der Betonbrücken, Schalldämmung der Antriebe und durch
+                                  Aerosolsperren, weitgehend vermeiden.
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  4.1.3.3 Kreiselbelüfter
+                                  Kreiselbelüfter (siehe Bild 2) sind ähnlich aufgebaut wie Pumpenlaufräder und rotieren um eine
+                                  vertikale Welle. Man unterscheidet eine offene Bauform mit einer horizontalen Grundplatte und
+                                  daran angebrachten, vertikal angeordneten Schaufeln sowie eine geschlossene Bauform. Heute
+                                  angebotene Kreiseltypen haben fast immer eine offene Bauform, da deren Fertigung meist einfacher
+                                  und preiswerter als diejenigen der geschlossenen Bauformen ist. Der Kreiseldurchmesser liegt
+                                  üblicherweise im Bereich zwischen 1,5 m und 4 m. Die Umfangsgeschwindigkeit beträgt 4 m/s bis
+                                  6 m/s.
+
+                                  Kreiselbelüfter werden in annähernd quadratischen Mischbecken und in den letzten Jahren ver-
+                                  mehrt auch in Umlaufbecken eingesetzt.
+
+
+
+
+                                                                                     Bild 2: Schnitt durch ein Belebungsbecken mit
+                                                                                     einem Kreiselbelüfter
+
+
+
+
+                                  September 2017                                                                  DWA-Regelwerk      29
+

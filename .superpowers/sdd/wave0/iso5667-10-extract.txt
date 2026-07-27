@@ -1,0 +1,1884 @@
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+                                          STANDARD                                                           ISO
+                                          INTERNACIONAL                                                  5667- 10
+
+                                                                                                         Segunda edición
+                                                                                                                2020-11
+
+
+
+
+                                         Calidad del agua – muestreo –
+                                         Parte 10:
+                                         Guía de muestreo para aguas residuales
+
+
+
+
+                                                                                                                       i
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                                ISO 5667-10:2020 (E)
+
+
+
+
+           DOCUMENTO PROTEGIDO POR COPYRIGHT
+
+
+Todos los derechos están reservados. A menos que se especifique lo contrario, o se requiera en el contexto de su aplicación, ninguna
+parte de esta publicación puede ser reproducida o utilizada de cualquier otra forma o por cualquier medio, electrónico o mecánico,
+incluida la fotocopia, o la publicación en Internet o en una intranet, sin autorización previa por escrito. La autorización puede solicitarse
+a ISO en la dirección o al organismo miembro de ISO en el país del solicitante.
+
+    Oficina de derechos de autor de ISO
+    CP 401 - Ch. de Blandonnet 8
+    CH-1214 Vernier, Ginebra
+    Teléfono: +41 22 749 01 11
+    Correo electrónico: copyright@iso.org
+    Sitio web: www.iso.org
+    Publicado en Suiza
+
+                                                                                                                                          ii
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                                                         ISO 5667-10:2020 (E)
+
+
+Contenido
+Prólogo ................................................................................................................................................................ vi
+1 Ámbito de aplicación .........................................................................................................................................1
+2 Referencias normativas .....................................................................................................................................1
+3 Términos y definiciones .....................................................................................................................................1
+   3.1. Muestra compuesta ..................................................................................................................................2
+   3.2. Punto de muestreo ....................................................................................................................................2
+   3.3. Muestra puntual ........................................................................................................................................2
+   3.4. muestra puntual cualificada ......................................................................................................................2
+   3.5. efluente líquido radiactivo ........................................................................................................................2
+   3.6. sobrenadante ............................................................................................................................................2
+   3.7. vertido planificado .....................................................................................................................................2
+   3.8. vertido permanente ..................................................................................................................................3
+   3.9. Tanque .......................................................................................................................................................3
+   3.10. Muestreo desencadenado por un evento ...............................................................................................3
+4 Aspectos generales ............................................................................................................................................3
+   4.1. Diseño del programa de muestreo ............................................................................................................3
+   4.2. Selección del punto de muestreo - Representatividad .............................................................................3
+   4.3. Frecuencia y tiempo de muestreo .............................................................................................................4
+       4.3.1 Número de muestras ...........................................................................................................................4
+       4.3.2 Tiempo de muestreo de la corriente de efluentes ..............................................................................4
+5 Muestreo en lugares específicos .......................................................................................................................6
+   5.1. Muestreo de alcantarillas, canales y pozos de registro ............................................................................6
+   5.2 Muestreo de las plantas de tratamiento de aguas residuales ...................................................................7
+   5.3 Muestreo de los emplazamientos industriales ..........................................................................................7
+   5.4 Muestreo de los sistemas de refrigeración ................................................................................................8
+6 Principales tipos de muestreo de aguas residuales...........................................................................................9
+   6.1 Muestreo puntual .......................................................................................................................................9
+   6.2 Muestreo compuesto .................................................................................................................................9
+7 Muestreo de aguas residuales ...........................................................................................................................9
+   7.1 Aspectos generales .....................................................................................................................................9
+       7.1.1 Preparación de la campaña de muestreo......................................................................................... 10
+       7.1.2 Llegada a la sede............................................................................................................................... 10
+   7.2 Muestreo compuesto para el control de la calidad de las aguas residuales........................................... 11
+       7.2.1 Generalidades ................................................................................................................................... 11
+
+                                                                                                                                                                        iii
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                                                     ISO 5667-10:2020 (E)
+
+
+       7.2.2 Muestreo compuesto automático .................................................................................................... 11
+       7.2.3 Muestreo compuesto manual .......................................................................................................... 14
+       7.2.4 Reconstitución manual de la muestra .............................................................................................. 14
+   7.3 Muestreo puntual en un flujo de efluentes ............................................................................................ 15
+       7.3.1 Generalidades ................................................................................................................................... 15
+       7.3.2 Muestreo directo .............................................................................................................................. 16
+       7.3.3 Muestreo indirecto ........................................................................................................................... 17
+       7.3.4 Muestreo automático, de inicio remoto o activado por eventos .................................................... 17
+   7.4 Muestreo puntual de las cisternas - vertidos previstos .......................................................................... 17
+8. Equipo de muestreo ...................................................................................................................................... 18
+   8.1 Generalidades.......................................................................................................................................... 18
+   8.2 Muestreador automático ........................................................................................................................ 19
+   8.3 Equipo de muestreo manual .................................................................................................................. 19
+       8.3.1 Generalidades ................................................................................................................................... 19
+       8.3.2 Colector de muestras con lastre ....................................................................................................... 20
+       8.3.3 Cubo, muestreador vertical de agua ................................................................................................ 20
+   8.4 Equipo de muestreo del tanque .............................................................................................................. 20
+       8.4.1 Mezcla............................................................................................................................................... 20
+       8.4.2 Equipo de muestreo ......................................................................................................................... 21
+9. Homogeneización, conservación, transporte y almacenamiento de las muestras ....................................... 21
+   9.1 Homogeneización del volumen recogido ................................................................................................ 21
+   9.2 Distribución del volumen recogido en los frascos de laboratorio ........................................................... 22
+   9.3 Conservación y embalaje de las muestras............................................................................................... 23
+   9.4 Transporte y recepción ............................................................................................................................ 23
+       9.4.1 Generalidades ................................................................................................................................... 23
+       9.4.2 Tiempo .............................................................................................................................................. 23
+       9.4.3 Temperatura ..................................................................................................................................... 23
+   9.5 Seguridad y trazabilidad de las muestras durante el almacenamiento y la entrega .............................. 24
+       9.5.1 Muestras de rutina ........................................................................................................................... 24
+       9.5.2 Muestras que pueden utilizarse con fines legales ........................................................................... 24
+10 Garantía de calidad....................................................................................................................................... 24
+   10.1 Evitar la contaminación ......................................................................................................................... 24
+   10.2 Identificación y registro de las muestras ............................................................................................... 25
+   10.3 Garantía y control de calidad ................................................................................................................ 25
+11. Informes ...................................................................................................................................................... 25
+
+                                                                                                                                                                   iv
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                                               ISO 5667-10:2020 (E)
+
+
+  11.1 Informes analíticos ................................................................................................................................ 25
+  11.2 Protocolos de muestreo ........................................................................................................................ 27
+  12. Precauciones de seguridad ...................................................................................................................... 27
+  12.1 Generalidades........................................................................................................................................ 27
+  12.2 Seguridad del personal .......................................................................................................................... 27
+
+
+
+
+                                                                                                                                                             v
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+Prólogo
+La ISO (Organización Internacional de Normalización) es una federación mundial de organismos
+nacionales de normalización (organismos miembros de ISO). El trabajo de preparación de las normas
+internacionales se realiza normalmente a través de los comités técnicos de ISO. Cada organismo
+miembro interesado en un tema para el que se ha establecido un comité técnico tiene derecho a estar
+representado en dicho comité internacional. Las organizaciones internacionales, gubernamentales
+y no gubernamentales, en colaboración con ISO, también participan en el trabajo. ISO colabora
+estrechamente con la Comisión Electrotécnica Internacional (CEI) en todos los asuntos de
+normalización electrotécnica.
+
+Los procedimientos utilizados para desarrollar este documento y los destinados a su posterior
+mantenimiento se describen en las Directivas ISO/IEC, Parte 1. En particular, deben tenerse en cuenta
+los diferentes criterios de aprobación necesarios para los diferentes tipos de documentos ISO. Este
+documento se ha redactado de acuerdo con las normas de redacción de las Directivas ISO/IEC, Parte
+2 (véase www.iso.org/directives).
+
+Llamamos la atención sobre la posibilidad de que algunos de los elementos de este documento
+puedan ser objeto de derechos de patente. ISO no se responsabiliza de la identificación de tales
+derechos de patente. Los detalles de los derechos de patente identificados durante el desarrollo del
+documento aparecerán en la Introducción y/o en la lista de declaraciones de patentes de ISO. En la
+lista de ISO de declaraciones de patentes recibidas (véase www.iso.org/patents).
+
+Cualquier nombre comercial utilizado en este documento es una información que se ofrece para
+comodidad de los usuarios y no constituye una aprobación.
+
+Para una explicación de la naturaleza voluntaria de las normas, el significado de los términos y
+expresiones específicas de ISO y expresiones específicas de ISO relacionadas con la evaluación de la
+conformidad, así como información sobre la adhesión de ISO a los principios de la Organización
+Mundial del Comercio (OMC). Organización Mundial del Comercio (OMC) en los Obstáculos Técnicos al
+Comercio (OTC), véase www.iso.org/iso/foreword.html.
+
+Este documento ha sido elaborado por el Comité Técnico ISO/TC 147, Calidad del agua, SC 6, Muestreo
+(métodos generales).
+
+Esta segunda edición anula y sustituye a la primera edición (ISO 5667-10:1992), que ha sido
+técnicamente revisada. Los principales cambios con respecto a la edición anterior son los siguientes
+
+- Integración del muestreo de efluentes líquidos radiactivos y sus especificidades;
+
+- Integración del muestreo cualificado de puntos.
+
+La lista de todas las partes de la serie ISO 5667 puede encontrarse en el sitio web de la ISO.
+
+Cualquier comentario o pregunta sobre este documento debe dirigirse al organismo nacional de
+normalización del usuario. A lista completa de estos organismos puede encontrarse en
+www.iso.org/members.html.
+
+
+
+
+                                                                                                                      vi
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+
+
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+Calidad del agua – Muestreo –
+Parte 10:
+Guía de muestreo para aguas residuales
+1 Ámbito de aplicación
+Este documento contiene detalles sobre el muestreo de aguas residuales domésticas e industriales,
+es decir, el diseño de los programas de muestreo y las técnicas de recogida de muestras. Abarca las
+aguas residuales en todas sus formas, es decir, aguas residuales industriales, aguas residuales
+radiactivas, aguas de refrigeración, aguas residuales domésticas crudas y tratadas. domésticas
+crudas y tratadas.
+
+Trata de las distintas técnicas de muestreo utilizadas y de las normas que deben aplicarse para
+garantizar que las muestras sean representativas.
+
+No se incluye el muestreo de vertidos accidentales, aunque los métodos descritos en algunos casos
+pueden también pueden ser aplicables a los vertidos.
+
+
+2 Referencias normativas
+Los siguientes documentos de referencia son indispensables para la aplicación de este documento.
+Para las referencias, sólo se aplica la edición citada. Para las referencias sin fecha, se aplica la última
+edición del documento (incluida cualquier enmienda).
+
+ISO 5667-1, Water quality — Sampling — Part 1: Guidance on the design of sampling programmes and
+sampling techniques
+
+ISO 5667-3, Water quality — Sampling — Part 3: Preservation and handling of water samples
+
+ISO 5667-7, Water quality — Sampling — Part 7: Guidance on sampling of water and steam in boiler
+plants
+
+ISO 5667-14, Water quality — Sampling — Part 14: Guidance on quality assurance and quality control
+of environmental water sampling and handling
+
+ISO 5667-16, Water quality — Sampling — Part 16: Guidance on biotesting of samples
+
+ISO 6107 (all parts), Water quality — Vocabulary
+
+ISO 19458, Water quality — Sampling for microbiological análisis
+
+
+3 Términos y definiciones
+A los efectos de este documento, se aplican los términos y definiciones que figuran en la norma ISO
+6107 (en todas sus partes) y los siguientes.
+
+La ISO y la CEI mantienen bases de datos terminológicas para su uso en la normalización en las
+siguientes direcciones
+
+- Plataforma de navegación en línea de ISO: disponible en https://www.iso.org/obp
+
+- IEC Electropedia: disponible en http://www.electropedia.org/
+                                                                                                                      1
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+3.1. Muestra compuesta
+Dos o más muestras o submuestras, mezcladas en proporciones debidamente conocidas (ya sea
+discreta o continua), a partir de la cual se puede obtener el valor medio de una característica deseada
+
+Nota 1 de la entrada: El número de muestras o submuestras suele basarse en el tiempo, las
+mediciones de flujo, el área o muestreo del perfil de profundidad.
+
+EJEMPLO; El muestreo compuesto puede realizarse de diferentes maneras:
+
+- muestreo de volumen constante y tiempo variable (C.V.V.T): muestreo proporcional al caudal
+basado en la recogida de volúmenes iguales volúmenes iguales de muestra a frecuencias
+proporcionales al flujo.
+
+- Muestreo de tiempo constante y volumen variable (C.T.V.V): muestreo proporcional al flujo basado
+en la recogida de muestras a intervalos de tiempo fijos, pero en el que el volumen de la muestra varía
+en proporción al flujo.
+
+- Muestreo de tiempo constante y volumen constante (C.T.C.V): volúmenes iguales de muestra o
+submuestra recogidos en incrementos de tiempo iguales.
+
+3.2. Punto de muestreo
+Posición precisa dentro de un lugar de muestreo del que se toman muestras.
+
+3.3. Muestra puntual
+Muestra discreta tomada al azar (con respecto al tiempo y/o la ubicación) de una masa de agua,
+generalmente tomada de forma manual, pero puede ser tomada por equipos de muestreo
+automáticos.
+
+3.4. muestra puntual cualificada
+Forma especial de una muestra compuesta (3.1), formada por al menos cinco muestras puntuales,
+tomadas y mezcladas en un plazo un período máximo de dos horas y con un intervalo no inferior a
+dos minutos.
+
+3.5. efluente líquido radiactivo
+Agua o agua residual que contiene sustancias radiactivas, resultante de un proceso y que puede ser
+reciclado, tratado y/o vertido al medio ambiente.
+
+Nota 1 de la entrada: La concentración de actividad del efluente líquido radiactivo suele medirse
+antes de ser vertido en el medio ambiente para verificar que es inferior a los niveles autorizados para
+cumplir con la la normativa nacional.
+
+3.6. sobrenadante
+Fase sólida o líquida presente en la superficie de un efluente
+
+3.7. vertido planificado
+Vertido sujeto a un acuerdo previo tras una consulta entre varias partes basada en el conocimiento
+de ciertos parámetros predefinidos y la referencia a valores límite (reglamentarios o no).
+
+Nota 1 de la entrada: Estos parámetros pueden ser, por ejemplo, las mediciones físicas, químicas y
+radiológicas, el volumen de vertido estimado, el período de vertido o el caudal máximo de vertido.
+
+
+
+
+                                                                                                                      2
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+3.8. vertido permanente
+Vertido directo en un canal o colector o en una masa de agua, que no está sujeto a un acuerdo, pero
+que se ajustará a los valores límite.
+
+3.9. Tanque
+Objeto hueco, de tamaño muy variable, utilizado para contener líquidos.
+
+Nota 1 de la entrada: Abarca las denominaciones habituales como tanque, cámara y piscina. El
+contenido de este tanque está destinado a descarga directa e indirecta de líquidos al medio ambiente
+o a un tratamiento específico.
+
+3.10. Muestreo desencadenado por un evento
+El muestreo que se desencadena porque se ha cumplido un criterio predeterminado (por ejemplo,
+precipitaciones, cambios en conductividad eléctrica, el pH o la introducción de una sustancia
+contaminante), cuando las muestras deben tomarse manualmente o con equipos automáticos.
+
+
+4 Aspectos generales
+4.1. Diseño del programa de muestreo
+El muestreo suele ser el primer paso en la realización de una investigación y determina en gran
+medida la calidad de toda la investigación. Por lo tanto, se recomienda elaborar una estrategia de
+muestreo detallada de muestreo, a menudo basada en una investigación preliminar en la que se han
+identificado los aspectos importantes. Tanto el objetivo como la situación ambiental determinan la
+forma de llevar a cabo el muestreo. Los aspectos generales para el diseño del programa de muestreo
+pueden encontrarse en la norma ISO 5667-1.
+
+4.2. Selección del punto de muestreo - Representatividad
+La selección del punto de muestreo debe ser representativa del flujo de residuos que se va a
+examinar. En algunas aguas residuales esta representatividad puede ser difícil de obtener debido a
+la heterogeneidad espacial y temporal de la masa de agua. Es necesario realizar el muestreo en las
+secciones en las que el flujo está bien mezclado y es homogéneo.
+
+El término "representatividad" engloba dos nociones en función del tipo de medio que va a ser
+muestreado:
+
+- representatividad en un flujo (canal, alcantarilla, pozo de registro, tuberías a presión, etc.)
+
+- representatividad en un almacenamiento (depósito, lagunas, cuencas, etc.).
+
+Estas dos nociones deben tratarse de forma diferente, pero el objetivo sigue siendo obtener una
+muestra representativa de la masa de agua. Los puntos de muestreo pueden estar claramente
+identificados (por el texto normativo) o no, en cuyo caso se recomienda una investigación preliminar.
+
+Este suele ser el caso de la selección de los lugares de muestreo del alcantarillado. Estudiando
+inicialmente los planos del sistema de alcantarillado, se pueden identificar las posibles ubicaciones.
+
+Posteriormente, se debe realizar una inspección in situ para garantizar que la ubicación de las
+alcantarillas y el recorrido del flujo de residuos se corresponden con los planos y para asegurarse de
+que la ubicación seleccionada es representativa para el objetivo del muestreo. Los estudios de
+rastreo pueden ser una herramienta útil. Cada punto de muestreo debe documentarse. Es
+importante reunir, por ejemplo, la siguiente
+
+
+                                                                                                                      3
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+información: identificación, ubicación del lugar, fotos, coordenadas geográficas, ubicación del lugar,
+tipo de flujo (abierto, cerrado), condiciones de acceso y técnica de muestreo. Si es necesario, describa
+y etiquete específicamente el lugar de muestreo. Seleccione el lugar de manera que puedan
+obtenerse muestras representativas y que el flujo de aguas residuales (con excepción del equipo de
+muestreo fijo) sea claramente visible desde el lugar de muestreo. Para los lugares de muestreo que
+incluyan un dispositivo de muestreo automático fijo, se deberá disponer de las siguientes
+instalaciones de muestreo:
+
+- Acceso para los vehículos de motor a las inmediaciones del lugar de muestreo
+
+- Superficies de trabajo planas a una altura adecuada por encima del punto de muestreo para la
+instalación de los dispositivos de muestreo ;
+
+- Iluminación y conexión eléctrica adecuadas
+
+- Conexión de agua para limpiar el equipo después del muestreo
+
+- Precauciones de seguridad adecuadas (por ejemplo, rejillas, barandillas, dispositivos anticaída);
+
+- Medidores de caudal en el caso de un muestreo dependiente del caudal.
+
+Si las condiciones hidráulicas no garantizan la representatividad de la muestra (ausencia de flujo,
+actividad reducida actividad, aumento anormal de la carga), esta situación inusual debe anotarse en
+el informe de muestreo y el cliente y al laboratorio de análisis.
+
+4.3. Frecuencia y tiempo de muestreo
+4.3.1 Número de muestras
+Los análisis deben basarse en muestras tomadas a intervalos regulares durante un período
+determinado (compuesto o puntual). La decisión sobre el número necesario de muestras tomadas
+durante cada período debe decidirse basándose en técnicas estadísticas (véase ISO 2602,[1] ISO
+3534 (todas las partes)[2] e ISO 5667-1). Pero el número de muestras a tomar puede ser decidido a
+menudo por el organismo regulador o las autoridades de control de la contaminación.
+
+4.3.2 Tiempo de muestreo de la corriente de efluentes
+El objetivo de un programa de muestreo suele dictar cuándo y cómo se recoge una muestra y a
+menudo está determinado por la legislación o las directivas. En general, al tomar muestras de aguas
+residuales y efluentes, es normal tener en cuenta las siguientes fuentes de variación de la calidad:
+
+a) las variaciones diurnas (es decir, la variabilidad dentro del día)
+
+b) variaciones entre días de la semana
+
+c) variaciones entre semanas y meses
+
+d) variaciones entre estaciones;
+
+e) variaciones debidas a episodios de aguas pluviales; y
+
+f) tendencias.
+
+Si hay poca o ninguna variación diurna, o variaciones diarias, entonces la hora del día o el día de la
+semana para el muestreo es relativamente poco importante.
+
+Si la identificación de la naturaleza y la magnitud de la carga máxima son importantes, el muestreo
+debe limitarse a los períodos del día, la semana o el mes en que se sabe que se producen las cargas
+máximas.
+                                                                                                                      4
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+Relacionar los momentos de muestreo con el proceso concreto que se está controlando puede ser
+muy importante a la hora de considerar los vertidos de efluentes industriales que son estacionales o
+que funcionan por lotes.
+
+En cualquier caso, el vertido no será continuo y el programa de muestreo deberá tener en cuenta
+este hecho. El muestreo para la detección de tendencias requiere una planificación cuidadosa. Por
+ejemplo, cuando se detectan tendencias mes a mes, puede ser conveniente tomar muestras siempre
+el mismo día de la semana, para que las variaciones diurnas y diarias se eliminen de la variabilidad
+general de los datos, permitiendo así detectar más eficazmente las tendencias.
+
+Cuando se haya decidido el número de muestras según el punto 4.3.1, deberán determinarse los
+tiempos de muestreo. Normalmente, las muestras deben tomarse a intervalos fijos durante todo el
+período de control. El período de muestreo puede ser de un año, de varios meses o semanas, o incluso
+de períodos más cortos.
+
+si el período de muestreo abarca un año, los días de muestreo pueden determinarse mediante una
+fórmula. Un ejemplo es:
+
+Fórmula (1) para un número de muestras (n), superior a unas 25 y de la Fórmula (2) para un número de
+muestras inferior a unas 25.
+
+La fórmula (1) indica el número de días durante los cuales debe realizarse el muestreo.
+
+                                    365            365𝑥2      365𝑥3          365𝑥𝑛
+                               𝐴+       ,     𝐴+         , 𝐴+       ,…., 𝐴 +
+                                     𝑛               𝑛          𝑛              𝑛
+Donde
+
+n Número de muestras;
+A Número aleatorio en un intervalo entre – 365/n y 0.
+
+La fórmula (2) indica el número de la semana durante la cual debe realizarse el muestreo. El día de
+cada semana debe determinarse de manera que las muestras se tomen todos los días de la semana.
+
+                                       52            52𝑥2      52𝑥3          52𝑥𝑛
+                                 𝐵+       ,     𝐵+        , 𝐴+      ,…., 𝐴 +
+                                       𝑛              𝑛         𝑛             𝑛
+Donde
+
+n Número de muestras;
+A Número aleatorio en un intervalo entre – 52/n y 0.
+
+Pueden utilizarse fórmulas similares para otros períodos, por ejemplo, un mes, tres meses, seis
+meses, etc.
+
+El periodo elegido debe abarcar cualquier variación estacional. Tras determinar los intervalos y el
+número de días o semanas, hay que asegurarse de que el muestreo no conlleve ningún riesgo de error
+sistemático, por ejemplo, tomando siempre muestras en un día, u omitiendo sistemáticamente los
+días de la semana.
+
+
+
+
+                                                                                                                      5
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+5 Muestreo en lugares específicos
+Los perfiles de concentración de sustancias disueltas y sólidos en suspensión medidos en un efluente
+son a menudo heterogéneos porque dependen de las condiciones hidráulicas y de transporte de la
+fase sólida en la masa de agua. Las observaciones son:
+
+- Un gradiente vertical de concentración, debido a que las velocidades del flujo o los esfuerzos
+cortantes cerca del fondo son bajas;
+
+- Una capa muy densa en la interfaz entre el depósito del fondo y el agua que circula en la estructura;
+
+- Un aumento de la concentración cerca de las paredes;
+
+- Un aumento de la concentración cerca de la superficie del flujo debido a la presencia de materia
+flotante.
+
+Por lo tanto, es necesario definir cuidadosamente el posicionamiento de la muestra tomada dentro
+de la masa de agua. Para tomar una muestra teóricamente representativa de la concentración media
+de la sección medida, es aconsejable situar el punto de muestreo aproximadamente a la mitad de la
+columna de agua y a una distancia suficiente de las paredes y los depósitos para evitar el sesgo de la
+medición
+
+5.1. Muestreo de alcantarillas, canales y pozos de registro
+Debe elegirse un lugar en el que el efluente tenga un alto flujo turbulento para garantizar una buena
+mezcla. A menudo la accesibilidad, la falta de seguridad del lugar o la indisponibilidad de energía
+pueden impedir el uso de los mejores lugares.
+
+Dado que los canales de efluentes suelen estar diseñados para hacer frente tanto a la descarga de
+efluentes como de aguas pluviales y/o para caudales superiores a los que realmente se producen, a
+menudo puede producirse un flujo laminar. En ausencia de un lugar con condiciones de flujo
+turbulento en el lugar de muestreo permanente, dichas condiciones deben inducirse restringiendo el
+flujo, por ejemplo, con un deflector o una presa. La restricción debe hacerse de tal manera que no se
+produzca la sedimentación aguas arriba de la restricción (por ejemplo, prever ampliación del canal
+del efluente aguas abajo en comparación con el canal aguas arriba, para evitar cualquier aumento de
+la presión del efluente aguas abajo).
+
+El punto de toma de muestras debe estar siempre situado aguas abajo de la restricción y, como
+norma general, debe situarse al menos tres veces el diámetro de la tubería, o la anchura del canal,
+aguas abajo de la restricción. La entrada de la sonda de muestreo debe orientarse preferentemente
+en la dirección del flujo, pero puede orientarse aguas abajo si se producen demasiadas obstrucciones.
+La ubicación exacta del punto de muestreo debe evaluarse con respecto a las variaciones del nivel
+del agua, los tipos y las concentraciones de los productos, etc. El punto de muestreo debe estar a una
+distancia mínima del fondo y de las paredes para evitar la contaminación de la muestra por los
+depósitos o las biopelículas que se desarrollan. En general, puede recomendarse un punto de
+muestreo entre un tercio y la mitad de la profundidad del agua del efluente por debajo de la superficie
+del agua.
+
+Siempre que sea posible, deben establecerse lugares de muestreo permanentes, teniendo cuidado
+de garantizar condiciones de muestreo reproducibles. Antes de proceder al muestreo de los vertidos
+industriales y si la información es accesible, las condiciones dentro de la planta (por ejemplo,
+procesos y tasas de producción) deben anotarse y registrarse junto con cualquier peligro potencial.
+
+
+
+                                                                                                                      6
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+5.2 Muestreo de las plantas de tratamiento de aguas residuales
+A la hora de elegir los lugares de muestreo de las plantas de tratamiento de aguas residuales, también
+es importante referirse a el objetivo del programa de recogida de datos, del que forma parte el
+muestreo.Los objetivos típicos son
+
+- control del rendimiento de toda la planta de tratamiento: las muestras deben recogerse en los
+principales puntos de entrada y de salida;
+
+- control del funcionamiento de las unidades de tratamiento individuales, o de grupos de unidades:
+las muestras deben recogerse en la entrada y la salida de las unidades en cuestión.
+
+Al tomar muestras en las plantas de tratamiento de aguas residuales, debe evaluarse la relevancia
+de cualquier flujo de derivación y del muestreo de estos flujos ya que puede ser necesario para que
+el muestreo sea representativo del efluente global.
+
+Cuando se realicen muestreos en las entradas de las plantas, deberá considerarse cuidadosamente
+el objetivo del programa de muestreo. En algunas situaciones, puede ser necesario tomar muestras
+de las aguas residuales crudas en la mezcla con líquido de procesamiento recirculado (por ejemplo,
+en la evaluación de las cargas del tanque de sedimentación primario y eficiencia). En otros casos,
+puede ser necesario excluir el efecto de estos líquidos (por ejemplo, al recoger datos diseñados para
+evaluar las cargas domésticas/industriales de una planta o para ayudar al control de los efluentes
+industriales). El muestreo representativo suele facilitarse utilizando lugares situados aguas abajo de
+un canal de medición o vertedero (véase también el punto 5.1).
+
+Cuando se toman muestras de efluentes de procesos que emplean más de una unidad de tratamiento
+individual (por ejemplo, varios tanques de sedimentación), hay que asegurarse de que la muestra es
+representativa de la corriente global de efluentes y no de una unidad de tratamiento específica (a
+menos que esa unidad sea la base de un estudio específico).
+
+Es necesario revisar con frecuencia los lugares de muestreo de una planta para asegurarse de que
+cualquier cambio relevante en el funcionamiento de los procesos de la unidad se tengan en cuenta
+en el muestreo. Por ejemplo, el funcionamiento del filtro de percolación puede pasar de una
+operación de "paso único" a una operación de "recirculación" o de "doble filtración alterna".
+
+El funcionamiento de la planta de tratamiento puede implicar cambios en la forma en que se
+introducen los líquidos de alimentación o de retorno en la planta (por ejemplo, el retorno de las aguas
+residuales desde los tanques de tormenta, cambios en la posición en la que se devuelven los líquidos
+de tratamiento). Siempre que se tomen muestras de aguas residuales, se debe tener mucho cuidado
+para superar o minimizar la importante heterogeneidad causada por los sólidos en suspensión que
+suelen estar presentes. Del mismo modo, la estratificación térmica de los flujos de efluentes
+industriales separados puede encontrarse al muestrear efluentes o vertidos de procesos
+industriales, por lo que deben tomarse medidas para promover la mezcla de dichas corrientes antes
+del muestreo.
+
+5.3 Muestreo de los emplazamientos industriales
+El muestreo de los efluentes líquidos implica la toma de muestras de una determinada cantidad
+representativa antes y/o después de que de ser transferidos a los canales de descarga o a los
+colectores.El método de muestreo depende del tipo de vertido o transferencia que se realice. Por lo
+tanto, hay que distinguir lo siguiente:
+
+- Los vertidos previstos, que requieren una inspección previa antes de que se produzca el vertido.
+Estos pueden ser, por ejemplo, los vertidos de los depósitos de efluentes líquidos de las instalaciones
+
+                                                                                                                      7
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+antes de su traslado a los colectores generales o a las piscinas de amortiguación antes de ser vertidos
+al medio ambiente (véase el apartado 7.4);
+
+- los vertidos permanentes, que se refieren a los efluentes que se vierten de forma continua. Son
+controlados en base a un muestreo secuencial o continuo del efluente descargado. Pueden ser, por
+ejemplo, los vertidos de un colector de efluentes a la salida de un emplazamiento nuclear o un
+colector de aguas pluviales antes de su vertido al medio ambiente.
+
+Por ello, el tipo de muestreo y la creación de muestras representativas se adaptarán al tipo de vertido
+y su posible heterogeneidad (por ejemplo, la presencia de materias en suspensión o cualquier
+densidad o estratificación térmica). Para ello, y para garantizar la representatividad, las muestras se
+elaborarán;
+
+- garantizando que el muestreo sólo se realice tras obtener una homogeneidad adecuada del
+efluente
+
+- garantizando que no haya cambios en la naturaleza del efluente ni contaminación cruzada; y
+
+- teniendo en cuenta los volúmenes de los depósitos, los caudales y las condiciones de flujo en las
+líneas, para
+
+permitir la cuantificación de los vertidos de la instalación en cuestión (véase un ejemplo de muestreo
+de tanques en la figura A.1 del anexo A).El muestreo puede realizarse en función de varias
+configuraciones, según las instalaciones
+
+- en un tanque antes de su descarga (véase el anexo A, figuras A.1 y A.3)
+
+- en un flujo continuo o discontinuo en una línea o un canal de descarga (véase el anexo A, figura A.1).
+
+5.4 Muestreo de los sistemas de refrigeración
+La selección de los puntos de muestreo en los procesos de refrigeración industrial que utilizan agua
+como refrigerante depende del sistema de agua de refrigeración que se vaya a analizar.
+
+En los sistemas de refrigeración de flujo continuo, se utiliza agua dulce (agua subterránea, filtrado de
+banco, agua superficial) o agua salina y se utilizan en un flujo o en varios. Los puntos de muestreo se
+sitúan tanto delante como detrás de los agregados, que serán enfriados.
+
+Durante el enfriamiento a través del circuito primario y/o secundario, se acoplan dos circuitos de
+enfriamiento en los que un circuito secundario cerrado se refrigera con un circuito primario. El
+circuito primario puede consistir en un sistema de enfriamiento continuo, una planta de re-
+enfriamiento abierta o cerrada o una planta de refrigeración (por ejemplo refrigeración por
+salmuera). El lugar de muestreo debe estar en el lado de retorno y en un lugar de paso del sistema
+circulatorio.
+
+En muchos casos, el agua de refrigeración se preenfría en un sistema abierto mediante refrigeración
+por evaporación, por lo que las pérdidas de agua debidas a la evaporación, la pulverización y el
+desalado (desalinización) se sustituyen por agua dulce.
+
+En el proceso de enfriamiento cerrado, el agua de refrigeración fluye a través de tuberías, que son
+enfriadas desde el exterior por aire o agua. Los métodos de enfriamiento abierto y cerrado pueden
+combinarse. El lugar de muestreo se encuentra en el lado de retorno del sistema de circulación.
+
+Se definirán lugares de muestreo representativos en todo el sistema para realizar controles
+microbiológicos/higiene. En la norma ISO 19458 se ofrecen orientaciones sobre el muestreo
+
+                                                                                                                      8
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+microbiológico. La muestra se tomará preferentemente del agua circulante entre la bomba en
+funcionamiento en la etapa de pulverización/trickling.
+
+En una instalación de muestreo (grifo de muestreo que permita la desinfección, preferiblemente por
+flameo, y el vaciado) se dejará correr el agua durante al menos 30 s antes del muestreo. El muestreo
+se realizará de manera que los resultados no se vean distorsionados por la dosificación de biocidas.
+El lugar de muestreo estará situado aguas arriba del punto de dosificación del biocida. Si el muestreo
+no es posible en este lugar, la muestra puede tomarse del agua pulverizada o mediante fianza de la
+cuenca de agua circulante[3].
+
+Los procesos especiales de refrigeración suelen utilizarse cuando el medio a refrigerar está muy
+caliente (por ejemplo, calentadores de residuos bombas de calor) o cuando se requieren
+temperaturas de flujo muy bajas (por ejemplo, refrigeración por salmuera). Para la refrigeración
+especial en el rango de altas temperaturas (temperatura > 100 °C), se aplicará la norma ISO 5667-7.
+
+
+6 Principales tipos de muestreo de aguas residuales
+6.1 Muestreo puntual
+En el caso del muestreo puntual (véase el anexo B), es posible realizar:
+
+    a) muestreo directo en la masa de agua residual:
+         1. Directamente, utilizando botellas de laboratorio
+         2. Utilizando un recolector de muestras lastrado y equipado con botellas de laboratorio
+         3. Utilizando un muestreador automático.
+    b) muestreo indirecto en la masa de agua residual
+         1. Utilizando una barra de muestreo equipada con un recipiente de recogida;
+         2. Utilizando un cubo u otro equipo.
+
+NOTA: Las muestras puntuales suelen tomarse manualmente, pero pueden tomarse con un equipo
+de muestreo automático o con muestreadores automáticos activados por eventos.
+
+6.2 Muestreo compuesto
+El muestreo compuesto consiste en varias muestras discretas. Puede realizarse de forma automática
+o manual (véase el anexo B).
+
+Para el muestreo compuesto automático, existen varios tipos de muestra compuesta (véase la norma
+ISO 5667-1). Es posible implementar:
+
+   - muestreo de volumen constante y tiempo variable (C.V.V.T)
+
+   - muestreo de volumen variable de tiempo constante (C.T.V.V)
+
+   - muestreo de volumen constante en tiempo constante (C.T.C.V)
+
+Para el muestreo compuesto manual, este enfoque es equivalente al muestreo con tiempo fijo, flujo
+fijo y volumen fijo.
+
+
+7 Muestreo de aguas residuales
+7.1 Aspectos generales
+El cliente debe definir claramente el objetivo del muestreo para que el operario aplique las
+estrategias de muestreo adecuadas.
+
+                                                                                                                      9
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+7.1.1 Preparación de la campaña de muestreo
+El muestreo controlado está condicionado por una buena preparación de la campaña de muestreo y
+el conocimiento de la actividad del establecimiento, el tipo y el modo de funcionamiento.
+
+El operario de muestreo debe tomar todas las medidas necesarias para asegurarse de que se
+establecen de antemano las coordenadas y la viabilidad de las operaciones solicitadas. El uso de un
+GPS y la explotación de las fotos y/o planos puestos a disposición o de las observaciones recogidas
+durante la investigación preliminar permiten evitar cualquier error de localización.
+
+El operario de muestreo tendrá a su disposición los procedimientos relativos a las operaciones de
+muestreo y a las mediciones, así como los avisos específicos de los aparatos de medición in-situ (pH-
+metro, conductividad, etc.)
+
+Todo el equipo (aparato de medición in situ, equipo de muestreo, dispositivo refrigerado) deberá
+haber sido revisado. Utilizar equipos específicos para el muestreo de aguas residuales.
+
+Los frascos de laboratorio deben seleccionarse y prepararse de acuerdo con el tipo de análisis
+solicitado y respetando las condiciones de envasado y conservación prescritas por el laboratorio.
+
+Los registros de las operaciones de muestreo (formulario de campo, etiqueta, otros) deben
+prepararse y si es posible rellenarse previamente.
+
+Garantizar las condiciones de seguridad (véase la cláusula 12) antes de cualquier intervención.
+
+7.1.2 Llegada a la sede
+Es importante confirmar in situ la ubicación de los puntos en los que se llevará a cabo la operación de
+muestreo. En caso de identificación de contaminación, hay que tener en cuenta el alcance de la
+misma.
+
+Si es posible, la muestra debe tomarse por debajo de la superficie del agua para no recoger materiales
+o fluidos flotantes que no puedan ser muestreados de forma representativa. Evitar al máximo las
+manipulaciones (como el trasvase, la agitación) de las muestras, ya que pueden provocar cambios. El
+volumen de la muestra depende del programa de estudio y de la extensión del análisis y puede variar
+dentro de amplios límites, desde unos pocos mililitros hasta muchos litros.
+
+Por regla general, las sustancias flotantes y sedimentadas no pueden tomarse de forma
+representativa en el agua corriente. Para su identificación, es conveniente tomarlas en una muestra
+separada; una mala cuantificación no suele ser útil.
+
+Cuando se tomen muestras de las alcantarillas utilizando cucharones, se debe tener cuidado de que
+la cuchara se mueva en la dirección del flujo bajo la superficie del agua a una velocidad adaptada. La
+abertura de la cuchara está en la dirección del flujo.
+
+Para evitar la contaminación de la muestra, hay que asegurarse de que la cuchara no toque la pared
+del pozo de muestreo ni el fondo de la alcantarilla.
+
+En muchos casos, se utilizan tuberías especiales para el muestreo con una anchura nominal pequeña,
+que tienen un flujo continuo de agua residual o de refrigeración (línea de derivación) o con un
+dispositivo de cierre (dispositivo de muestreo). Lo mejor es tomar las muestras de las tuberías
+verticales con flujo turbulento. Al colocar las líneas de muestreo, deben evitarse los tramos de
+tubería horizontales más largos. La longitud de las líneas de muestreo debe ser al menos cinco veces
+el diámetro de la tubería desde el colector para garantizar un muestreo en la zona totalmente
+mezclada.
+
+
+                                                                                                                      10
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+
+
+7.2 Muestreo compuesto para el control de la calidad de las aguas residuales
+7.2.1 Generalidades
+El objetivo es constituir una muestra representativa de la masa de agua estudiada a lo largo de un
+período de tiempo, que puede ir desde unas horas hasta un día o una semana.
+
+Para seleccionar el período de muestreo en el que debe tomarse una muestra compuesta, deben
+tenerse en cuenta dos factores:
+
+a) El objetivo del muestreo. Por ejemplo, puede ser necesario evaluar la carga orgánica media en un
+flujo a lo largo de varios períodos de 24 horas, en cuyo caso serán adecuadas las muestras
+compuestas proporcionales al flujo.
+
+b) La estabilidad de la muestra. En el ejemplo dado en a), no sería necesariamente práctico prolongar
+el período de composición durante más de 24 h, ya que el componente orgánico de la muestra en
+estudio puede deteriorarse.
+
+El período total de muestreo puede variar desde unas pocas horas, cuando se están monitoreando
+estudios de rastreo de sustancias orgánicas volátiles, hasta varios días, cuando se están
+monitoreando especies inorgánicas estables.
+
+La estabilidad de la muestra puede limitar a menudo la duración del período de muestreo. En estos
+casos, se debe hacer referencia a las técnicas analíticas específicas que se van a emplear y se debe
+consultar al laboratorio receptor, con el fin de poder utilizar las medidas de conservación correctas.
+
+La norma ISO 5667-3 ofrece más detalles sobre la conservación y el almacenamiento de las
+muestras.
+
+El tiempo de muestreo depende, entre otras cosas, de la estabilidad del proceso de la planta de
+tratamiento de aguas residuales, de la naturaleza de la declaración que debe realizarse (instantánea
+o media) y de la durabilidad de los parámetros que deben examinarse.
+
+Para detectar picos de concentración en las aguas residuales con una composición que cambia
+rápidamente, realice un muestreo a corto plazo con alta frecuencia. Tomar muestras medias para
+detectar cargas medias durante períodos de tiempo definidos. En este caso, el muestreo de flujo
+continuo es el más adecuado. Para el muestreo discontinuo, seleccione los intervalos más cortos
+posibles entre las muestras individuales. No deben superar los 5 minutos para la muestra mixta de 2
+horas y los 30 minutos para la muestra mixta de 24 horas.
+
+La duración del muestreo depende de los parámetros especificados en los permisos de vertido de
+aguas. La información sobre la duración del muestreo (muestra aleatoria, muestra aleatoria
+cualificada, muestra mixta de 2 h, muestra compuesta de 24 h) se basa en la legislación (por ejemplo,
+los anexos relacionados con el origen de las aguas residuales de la Ordenanza de Aguas Residuales).
+
+El muestreo compuesto se realiza generalmente mediante muestreadores automáticos o de forma
+manual.
+
+El muestreo suele llevarse a cabo en un único recipiente (constitución de una muestra media) o en
+varios recipientes (estudio de la variación de la concentración de contaminantes en el tiempo).
+
+7.2.2 Muestreo compuesto automático
+Los equipos de muestreo automático suelen poder programarse para realizar el muestreo a volumen
+constante (muestreo proporcional al tiempo) o a volumen variable (muestreo proporcional al caudal).
+                                                                                                                      11
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+7.2.2.1 Recomendaciones generales sobre el uso de un muestreador automático
+Para la instalación y utilización de un muestreador automático, se recomienda seguir los siguientes
+puntos
+
+- Colocación del muestreador: colocar el muestreador en posición horizontal de forma segura (véase
+el punto 12.3) y a una altura adecuada por encima del punto de muestreo (especialmente en el caso
+del muestreador automático con bomba de vacío) y lo más cerca posible de la masa de agua. Siga las
+recomendaciones de instalación del fabricante. El muestreador automático debe recoger las
+muestras por encima de la altura requerida, independientemente de la colocación retenida;
+
+- Posicionamiento de la tubería de entrada de agua: seleccione tramos de medición en los que el flujo
+esté bien mezclado, sea homogéneo y esté siempre provisto de agua.
+
+-Sistema de muestreo y tubo de salida al contenedor:
+
+- deben ser lo más cortos posible, inertes con respecto a las sustancias deseadas y siempre en
+posición ascendente para evitar la formación de depósitos (evitar curvas, sifones, rodamientos)
+
+- debe tener un diámetro interno mayor o igual a 9 mm;
+
+- debe estar dispuesta de manera que ninguna parte del fluido muestreado quede retenida dentro
+de la línea de muestreo
+
+- debe comprobarse después de cada muestreo para asegurarse de que no se ha producido ninguna
+obstrucción de la tubería (por ejemplo, purgando el tubo de aspiración).
+
+- Colador: si todavía hay que utilizar un colador, éste
+
+- no debe estar obstruido por macrodesechos (desechos, sólidos de mayor tamaño, etc.)
+
+- debe tener una malla correspondiente al diámetro del tubo de aspiración para evitar la
+
+muestreo de materiales sólidos de gran diámetro;
+
+- debe comprobarse después de cada muestreo para asegurarse de que no se ha producido ninguna
+obstrucción del colador
+
+- Velocidad de aspiración: no debe ser inferior a 0,5 m/s para evitar la segregación de la materia en
+suspensión en el
+
+para evitar la segregación de la materia en suspensión en el bucle de muestreo y así evitar el riesgo
+de obstrucción.
+
+NOTA 1 Pueden ser posibles velocidades de aspiración inferiores si se demuestra que son
+satisfactorias. Un ejemplo es cuando el diámetro interno del tubo de aspiración es de 12 mm o más,
+en cuyo caso se ha demostrado que una velocidad de aspiración de 0,3 m/s es aceptable[5].
+
+NOTA 2 Los usuarios deben cumplir con los requisitos nacionales cuando sea aplicable.
+
+- Volumen de la unidad:
+
+- debe ser adecuado para garantizar un muestreo representativo (por ejemplo, al menos 50 ml para
+la bomba de vacío o 25 ml para el émbolo en línea);
+
+- el sesgo no deberá ser superior al 10 %;
+
+- la repetibilidad no será superior al 5 %.
+
+                                                                                                                      12
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+La incertidumbre de gasto resultante U (k=2) no será superior al 15 % (véase el anexo I). La mayoría
+de los muestreadores automáticos tienen un coeficiente de variación de la repetibilidad del 5 % como
+máximo para un volumen de 250 ml. Por lo tanto, si se trabaja con un volumen inferior, deberá
+validarse antes de su aplicación y comprobar si cumple los requisitos.
+
+NOTA Hay que tener en cuenta el número de muestras por hora necesarias para obtener una muestra
+representativa. Los usuarios pueden remitirse a las orientaciones nacionales cuando corresponda.
+
+7.2.2.2 Muestreo compuesto automático, muestreo proporcional al caudal (C.V.V.T y C.T.V.V)
+Una muestra compuesta proporcional al caudal puede recogerse utilizando uno de los dos métodos.
+Un método consiste en recoger un volumen de muestra constante a intervalos de tiempo variables y
+proporcionales al caudal de aguas residuales (C.V.V.T). En el otro método, la muestra se recoge
+variando el volumen de cada alícuota individual de forma proporcional al caudal, mientras se
+mantiene un intervalo de tiempo constante entre las alícuotas (C.T.V.V).
+
+Estos métodos de muestreo son los más representativos de la masa a tomar y son esenciales para
+caracterizar un flujo de contaminantes. Para ello es necesario que el muestreador automático esté
+conectado a un caudalímetro.
+
+Existen dos tipos principales de dispositivos de medición de flujo para controlar el muestreo en el
+caudal:
+
+    -    dispositivos en línea cerrada con sensores electromagnéticos o ultrasónicos;
+    -    dispositivos en canal abierto equipados con diversos sensores (ultrasónicos, piezoresistivos,
+         de burbuja, altura/velocidad).
+
+Es necesario conocer el volumen y la variabilidad del efluente para programar el muestreador
+automático para tomar las submuestras adecuadas.
+
+En función de la capacidad del muestreador automático y del volumen necesario para llevar a cabo
+el análisis, el volumen unitario debe determinarse conforme a los requisitos (véase la cláusula 10 de
+garantía de calidad).
+
+7.2.2.3 Muestreo compuesto automático, muestreo proporcional al tiempo y muestreo media
+reconstituido en función del caudal
+Cuando el muestreador automático no puede conectarse al caudalímetro (por incompatibilidad de
+los equipos o por una distancia demasiado grande entre ambos dispositivos), cuando el caudal y/o la
+composición del efluente son variables o por exigencias legales, se puede realizar un muestreo
+ponderado en el tiempo. Por lo tanto, es necesario construir la muestra compuesta (sujeto al uso de
+un muestreador automático de botellas múltiples).
+
+Para construir la muestra compuesta, es necesario recoger en paralelo la información relacionada
+con el caudal y/o la carga contaminante (pH, conductividad, temperatura, etc.).
+
+En función de la capacidad del muestreador automático, el volumen necesario para los análisis, los
+intervalos de tiempo constantes y el volumen unitario deben determinarse de acuerdo con los
+requisitos (véase 7.2.2.1).
+
+La metodología para obtener una muestra media reconstituida en relación con el flujo es la siguiente.
+El operario de muestreo homogeneiza cada botella individual y toma, en cada botella individual, un
+volumen proporcional al caudal. Toma el mayor volumen en la botella individual más llena.
+
+Para las demás botellas individuales, toma el volumen (ml) que debe tomarse (Vn) en la botella. n es
+un porcentaje relativo al volumen total (Fórmula 3):
+                                                                                                                      13
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+
+
+                                                                  𝑀3 𝑛
+                                              𝑉𝑛 = [𝑉𝑓𝑖𝑛𝑎𝑙 𝑥 (            )]
+                                                                 𝑀3 𝑡𝑜𝑡𝑎𝑙
+
+Vn: volumen de la muestra (ml) a tomar en la botella n
+
+Vfinal: volumen total (ml) de las botellas del laboratorio
+
+M3total: volumen total descargado (M3)
+
+M3n: volumen descargado durante el muestreo de la botella n (M3)
+
+7.2.2.4 Muestreo compuesto automático, muestreo proporcional al tiempo (CTCV)
+Este método puede aplicarse, por ejemplo, cuando el caudal instantáneo del efluente varía poco en
+el tiempo (coeficiente de variación de la repetibilidad del 20 % por término medio y si la información
+recogida demuestra que la carga contaminante no es muy variable durante el período de muestreo).
+
+En este caso, como el caudal no es relevante para los compuestos ponderados por tiempo, se
+recomienda que las muestras se recojan en una sola botella para evitar la etapa de transferencia.
+
+7.2.2.5 Validación de la representatividad del muestreo compuesto
+La validación de la representatividad del muestreo se consigue respetando los criterios de control de
+calidad (véase el anexo H) antes y después de la campaña de muestreo.
+
+En caso de desviación, la organización de muestreo aplicará medidas correctoras, que deberán incluir
+la información al cliente y los medios puestos en marcha para remediarla.
+
+Deberá registrarse toda la información proporcionada por el muestreador automático (por ejemplo,
+número de impulsos transmitidos por el caudalímetro y número y volumen de las muestras
+incrementales tomadas, etc.).
+
+7.2.3 Muestreo compuesto manual
+Este método consiste en tomar manualmente múltiples muestras incrementales discretas sin utilizar
+un muestreador automático. El volumen muestreado de cada muestra discreta debe ser idéntico
+para obtener una muestra representativa.
+
+Se debe comprobar el equipo de muestreo y el coeficiente de variación de la repetibilidad del equipo
+de muestreo debe ser inferior o igual al 5 %.
+
+A continuación, se mezclan todas las muestras discretas en un recipiente más grande, se
+homogeneizan y se submuestran en frascos de laboratorio.
+
+Para el muestreo realizado regularmente en tanques, es posible instalar un sistema de muestreo
+(barra de muestreo equipada con una válvula, varias barras de muestreo colocadas a diferentes
+alturas, etc.).
+
+7.2.4 Reconstitución manual de la muestra
+Cada muestra discreta, proporcional o no al flujo (véase 7.2.2.3), se decanta en un recipiente inerte
+más grande equipado, si es posible, con un grifo y una tapa para evitar la contaminación exterior. Una
+vez decantadas todas las muestras en el mismo recipiente, se homogeneiza toda la muestra
+compuesta según las recomendaciones definidas en el punto 9.1.
+
+
+
+
+                                                                                                                      14
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+En la figura 1 se muestra un ejemplo de la metodología de la reconstitución manual de la muestra.
+
+
+
+
+Figura 1 - Ejemplo de reconstitución manual de una muestra
+
+Este método no debe aplicarse cuando la muestra es una muestra compuesta automática,
+ponderada por volumen o por flujo, con un muestreador de botella única. En este caso, la
+homogeneización se realiza directamente en el muestreador de botella única según las
+recomendaciones definidas en el punto 9.1.
+
+Si el muestreo compuesto automático se lleva a cabo con un muestreador de botellas múltiples, se
+aplicará la metodología anterior (Figura 1).
+
+La mezcla debe realizarse con el mínimo arrastre de aire.
+
+7.3 Muestreo puntual en un flujo de efluentes
+7.3.1 Generalidades
+Las actividades urbanas o industriales que vierten aguas al alcantarillado presentan una gran
+variabilidad en el tiempo. En consecuencia, la naturaleza de las sustancias disueltas o sólidas
+presentes y la carga contaminante pueden variar considerablemente a lo largo del tiempo en las
+aguas residuales y esto puede ser cíclico y/o aleatorio. Por este motivo, el muestreo manual por
+puntos de las aguas residuales no es el tipo de muestreo más adecuado, ni el más utilizado para el
+muestreo representativo de las aguas residuales sin tratar.
+
+Sin embargo, hay algunas circunstancias en las que este tipo de muestreo es útil, como en los casos
+de contaminación en curso o en la respuesta de emergencia en caso de contaminación accidental
+(véase el anexo B). En el caso de un vertido de aguas residuales (entrada, salida de la planta de
+tratamiento de aguas residuales, alcantarillado, vertido industrial), el muestreo debe llevarse a cabo
+en el canal principal, preferiblemente lejos de los bordes y obstáculos presentes. El equipo de
+muestreo se colocará en el canal principal del vertido. La abertura o entrada del recipiente de
+muestreo se orientará en la dirección del flujo del vertido.
+
+A menos que el cliente especifique lo contrario o por una razón técnica, el muestreo se realiza
+normalmente a unos 30 cm por debajo de la superficie o a media altura de la columna de agua en una
+zona homogénea para evitar tomar la película superficial o los sedimentos.
+
+                                                                                                                      15
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                        ISO 5667-10:2020 (E)
+
+
+Es importante comprobar la ausencia de elementos interferentes (cuerpos flotantes) antes y durante
+el período de muestreo.
+
+No enjuagar los frascos de laboratorio con la masa de agua antes del muestreo (consultar la norma
+ISO 5667-3).
+
+Después del muestreo y una vez cerradas las botellas de laboratorio (antes de almacenarlas y
+transportarlas), si la pared exterior está húmeda, enjuagar las paredes de las botellas de laboratorio
+con agua limpia (por ejemplo, agua potable, agua destilada, etc.) o limpiarlas y secarlas con toallitas.
+
+Si se utiliza un equipo intermedio, debe limpiarse para no contaminar el agua del cuerpo y las
+muestras (véase el anexo C).
+
+NOTA Todas las operaciones realizadas y cualquier anomalía observada se registran en la hoja de campo (véase el Anexo D).
+
+
+
+7.3.2 Muestreo directo
+7.3.2.1 Generalidades
+El muestreo directo puede realizarse directamente en botellas de laboratorio o con un soporte para
+botellas.
+
+Es importante minimizar la oxigenación al llenar las botellas de laboratorio (por ejemplo, utilizando
+botellas de apertura ancha). En el caso de las botellas que contienen un estabilizador, realice el
+muestreo utilizando otra botella similar como intermedio y transfiera el agua muestreada a las
+botellas que contienen el estabilizador, minimizando la oxigenación.
+
+El operario de muestreo sumerge las botellas de laboratorio directamente en la masa de agua. Las
+botellas sin estabilizador se sumergen preferentemente, con la boca hacia abajo, y luego se giran
+lentamente para que queden paralelas al flujo, con la boca de la botella orientada en la dirección del
+flujo.
+
+En la mayoría de los casos, hay que llenar la botella hasta arriba para excluir el aire, ya que el
+intercambio de gases podría cambiar rápidamente la calidad de la muestra. En algunos casos, como
+cuando se añade un disolvente directamente a las botellas, como en el análisis de aceites, por
+ejemplo, la botella debe llenarse sólo hasta el hombro. El laboratorio se debe orientar sobre el nivel
+de llenado de la botella.
+
+7.3.2.2 Directamente en las botellas de laboratorio
+Las botellas de laboratorio se abren y cierran directamente bajo el agua para asegurarse de que están
+completamente llenas.
+
+El operario de muestreo puede utilizar una varilla de muestreo equipada con la botella de laboratorio
+o un colector de muestras lastrado equipado con botellas de laboratorio.
+
+- En el caso de una varilla de muestreo: El operario de muestreo situado en el borde de una estructura
+(clarificador primario, canal de salida, etc.) adapta la longitud de la varilla de muestreo para que la
+botella llegue al canal de descarga principal.
+
+- En el caso de un muestreador con lastre: El operario de muestreo se posiciona por encima de la zona
+a muestrear (por ejemplo, alcantarilla, pozo de registro del alcantarillado). La longitud de la cuerda o
+cadena del muestreador lastrado debe ajustarse de manera que se sumerja hasta la mitad de la altura
+de la columna de agua.
+
+
+
+                                                                                                                            16
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                     ISO 5667-10:2020 (E)
+
+
+7.3.3 Muestreo indirecto
+El muestreo indirecto consiste en un muestreo desde un equipo de muestreo o un contenedor
+intermedio a las botellas.
+
+7.3.3.1 Desde una alcantarilla
+Hay varios materiales adecuados para el muestreo desde una alcantarilla: cubo, bombas y botellas
+de solapa.
+
+En todos los casos, el equipo de muestreo (sistema, cuerda) debe protegerse de todas las fuentes de
+contaminación (por ejemplo, no colocar la cuerda en el suelo).
+
+7.3.3.2 Desde el borde de una estructura al aire libre
+El operario de muestreo, situado en el borde de la estructura al aire libre, adapta la longitud de la
+varilla de muestreo para que la botella de la varilla (distinta de la botella de laboratorio) llegue a la
+corriente principal del flujo (consulte el apartado 7.3.2).
+
+7.3.4 Muestreo automático, de inicio remoto o activado por eventos
+El muestreo automático activado por eventos, basado en la monitorización en línea en tiempo real
+de los parámetros de las aguas residuales, aumenta la posibilidad de obtener una muestra
+representativa de la calidad real de las aguas residuales en ese momento específico.
+
+7.4 Muestreo puntual de las cisternas - vertidos previstos
+Se trata de tomar una muestra representativa del efluente líquido contenido en una cisterna, para
+analizarla fuera de línea en un laboratorio. Esta operación se realiza antes de la autorización de
+vertido y sirve para cuantificar la concentración de sustancias químicas y/o la concentración de
+actividad de los distintos radionúclidos.
+NOTA Este método de muestreo se utiliza actualmente para los efluentes nucleares. El efluente nuclear es una parte muy
+pequeña de los vertidos de aguas residuales, pero importante. Esta técnica puede aplicarse también a los efluentes
+industriales.
+
+Antes de recoger la muestra, el contenido del tanque debe mezclarse durante un período que debe
+definir el operativo de muestreo (véase 8.4).
+
+Para no modificar y conservar el carácter representativo de la muestra, se seguirán las siguientes
+instrucciones deberán seguirse:
+
+- mantener la mezcla durante el muestreo, y;
+
+- tomar medidas para evitar que cualquier efluente fluya en el tanque entre el inicio y el final del
+muestreo, hasta el final de la descarga autorizada.
+NOTA Algunas bombas de recirculación pueden necesitar la entrada de fluido (agua pública o agua desmineralizada) para el
+sellado y/o la refrigeración. Este flujo de entrada puede recuperarse en el depósito. En este caso, esta afluencia se evalúa en
+función de su impacto en la representatividad de la muestra.
+
+El muestreo implica varias operaciones consecutivas que deben realizarse para garantizar la mejor
+representatividad posible de la muestra:
+
+    -    la mezcla del contenido a muestrear antes y durante el muestreo. La eficacia de la mezcla
+         depende de las dimensiones y la forma del tanque, de la composición físico-química del
+         efluente y del método de mezcla;
+    -    enjuagar la varilla de muestreo o el ramal de la línea de recirculación con el efluente que se va
+         a recoger. La duración del enjuague corresponderá como mínimo a la renovación de al menos
+         una vez el volumen del sistema de muestreo
+                                                                                                                            17
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+    -    el llenado de los recipientes con el efluente a una velocidad suficiente para limitar los
+         depósitos en el sistema de muestreo. Se justificará la representatividad de las muestras
+         tomadas de un depósito (nuevo o existente). Una descripción de los métodos y ensayos
+         utilizados para estimar las incertidumbres relativas al muestreo.
+
+Para demostrar la homogeneidad de los efluentes contenidos en la cisterna, se controlan algunos
+parámetros físico-químicos pertinentes (conductividad, materias en suspensión, sales, metales y
+compuestos orgánicos, por ejemplo) de las muestras recogidas a distintas alturas de la cisterna o
+para duraciones de mezcla variables, con el fin de determinar la duración mínima de la mezcla que
+debe observarse para lograr una composición homogénea del efluente en todo el tanque y garantizar
+la representatividad del muestreo. La desviación máxima tolerada entre dos mediciones del
+parámetro seleccionado para satisfacer el criterio de homogeneidad será preferentemente inferior
+al 20 %.
+
+La homogeneidad de un efluente también podrá evaluarse mediante el seguimiento de los cambios
+en la concentración de un agente de marcado radiactivo o químico añadido (nitrato o cloruro de
+sodio, cloruro de litio, agente colorante, elemento radiactivo de corta duración, etc.). El agente de
+marcado utilizado deberá ser adecuado a las restricciones de funcionamiento de la instalación y a los
+requisitos medioambientales.
+
+En el caso del muestreo en un solo punto, la duración mínima de la agitación se determina alcanzando
+una plataforma o estado estacionario definido por los resultados de la medición de una serie de
+muestras distribuidas en el tiempo. En este caso, debe garantizarse que no haya zonas muertas al
+mezclar.
+
+Cuando sea posible, debe comprobarse la representatividad de una muestra, mediante el muestreo
+continuo del tubo de descarga, aguas abajo del tanque, durante toda la duración de la descarga. En
+este caso, se observará la coherencia (desviación inferior al 20 %) entre las mediciones de los
+parámetros elegidos para la validación. Esta medida se tomará si no hay mezcla antes o durante la
+descarga.
+
+
+8. Equipo de muestreo
+8.1 Generalidades
+La naturaleza de los materiales del equipo de muestreo se elegirá en función de su compatibilidad
+con el parámetro objetivo y deberá garantizar la ausencia de interferencias físico-químicas con los
+parámetros a medir (véase el anexo E).
+
+No se deben utilizar los siguientes materiales para las muestras de los parámetros a bajo nivel de
+concentración[7]:
+
+- material que contenga conexiones de latón;
+
+- material plástico pigmentado (plástico coloreado);
+
+- material de plástico policlorado no alimentario (PVC).
+
+Se sabe que estos materiales liberan metales (zinc, cadmio, etc.) y compuestos orgánicos. Si se
+utilizan estos tipos de materiales (PVC, metal) u otros, será necesario demostrar la ausencia de
+contaminación o la adsorción del parámetro o parámetros (véase 10.3).
+
+
+
+                                                                                                                      18
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+8.2 Muestreador automático
+Los muestreadores automáticos pueden ser fijos o portátiles y también pueden estar equipados con
+una cámara refrigerada.
+
+El muestreador automático tendrá un compartimento cerrado para llenar y almacenar las muestras
+recogidas en la oscuridad, y un sistema que permita mantener las muestras a una temperatura
+compatible con los requisitos de conservación de la norma ISO 5667-3 durante todo el tiempo que
+dure el muestreo, que puede durar varios días. En algunos casos, y si se requiere de acuerdo con el
+cliente, es posible el uso de un muestreador automático portátil no refrigerado (por ejemplo, la
+accesibilidad del punto de muestreo, la estabilidad del analito en condiciones ambientales).
+
+Los muestreadores automáticos permiten cierta autonomía en cuanto a la duración del muestreo
+(hasta varios días) y, por tanto, reducen la frecuencia de las operaciones de recogida de muestras por
+parte de personas. Esta capacidad no debe afectar a la calidad de las muestras recogidas.
+
+El muestreo de los sistemas de bombeo puede realizarse mediante diferentes tecnologías [por
+ejemplo, mediante una bomba de vacío (VAP), mediante una bomba peristáltica (PP), mediante un
+émbolo en línea o utilizando sistemas de bombeo externos]. Las ventajas e inconvenientes de los dos
+tipos principales de muestreadores se presentan en el Anexo F.
+
+Sea cual sea el muestreador automático seleccionado, éste debe cumplir las condiciones de
+seguridad definidas en el apartado 12.3. También debe estar aislado y protegido de las temperaturas
+extremas y de las precipitaciones.
+
+Los muestreadores automáticos pueden utilizar contenedores individuales para crear una única
+muestra media a lo largo de un período, o varios contenedores para crear varias muestras a lo largo
+de un período determinado.
+
+La elección del muestreador automático deberá adaptarse en función de cada problema de muestreo
+para obtener la mejor representatividad del muestreo o para satisfacer las condiciones facilitadas
+por el cliente (véase el punto 7.2.2.1).
+
+La naturaleza de los materiales del muestreador automático se elegirá en función de su
+compatibilidad con el componente objetivo y deberá garantizar la ausencia de interferencias físico-
+químicas con los parámetros a medir (véase el anexo E).
+
+A la hora de seleccionar el muestreador automático, el usuario también deberá tener en cuenta que
+el manual de instrucciones deberá ser de fácil lectura y estar redactado en un idioma que el operario
+de muestreo entienda y sea adecuado. También debe tenerse en cuenta la disponibilidad del servicio
+posventa y de las piezas de recambio. Por último, es imprescindible que los requisitos del equipo para
+el suministro de electricidad o aire comprimido se correspondan con la disponibilidad de servicios en
+el lugar donde se va a utilizar el equipo.
+
+8.3 Equipo de muestreo manual
+8.3.1 Generalidades
+El equipo más sencillo para la toma de muestras de efluentes consiste en frascos de laboratorio,
+colector de muestras lastrado y equipado con frascos de laboratorio, varilla de muestreo equipada
+con un recipiente o cubo de recogida. El volumen debe ser el adecuado para garantizar un muestreo
+representativo (25 ml como mínimo).
+
+
+
+
+                                                                                                                      19
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+Cuando se utilicen muestras manuales para la preparación de muestras compuestas, el volumen del
+frasco de laboratorio, del recipiente de recogida o del cubo deberá estar bien definido y ser conocido.
+El coeficiente de variación de la repetibilidad debe estar dentro del ± 5 %.
+
+Las muestras manuales también pueden tomarse con un muestreador de agua vertical, que consiste
+en un tubo de 1 l a 3 l de volumen con una tapa abatible en cada extremo del tubo, u otros
+muestreadores que funcionan según un principio similar [véase la referencia 4].
+
+El equipo de muestreo manual debe ser de un material inerte que no influya en los análisis que se
+realizarán posteriormente con las muestras (véase la norma ISO 5667-3).
+
+Antes de iniciar el muestreo, el equipo debe limpiarse (véase el anexo C) y comprobarse (véase 10.3).
+
+Los detergentes utilizados no deben contener sustancias que puedan influir en los análisis que se
+van a estudiar.
+
+El equipo de muestreo debe enjuagarse adecuadamente antes del muestreo y puede lavarse con
+agua desmineralizada/desionizada o con agua del grifo antes de utilizarlo en la corriente de aguas
+residuales de la que se toma la muestra para minimizar el riesgo de contaminación. No enjuague el
+equipo de muestreo en las aguas residuales cuando esto vaya a influir en los análisis que se realicen
+posteriormente (por ejemplo, análisis de aceites y grasas, efluentes brutos y finales y análisis
+microbiológicos).
+
+8.3.2 Colector de muestras con lastre
+El equipo utilizado puede ser una barra de muestreo o un muestreador lastrado. El muestreo puede
+realizarse directamente con el equipo suministrado con las botellas de laboratorio o indirectamente
+con el equipo y un contenedor. En este último caso, es necesario transferir el contenido del
+contenedor a las botellas de laboratorio.
+
+8.3.3 Cubo, muestreador vertical de agua
+Cuando la operación de muestreo utiliza este tipo de equipo, se deben tomar las siguientes
+precauciones:
+
+- no utilice una cuerda para la parte sumergible y sustitúyala por un cable o cadena o por un hilo
+flexible recubierto de politetrafluoroetileno (PTFE) o polietileno que sea más fácil de mantener limpio;
+
+- reservar el equipo para este fin específico. Debe prepararse cuidadosamente antes de cada
+muestreo para evitar la contaminación de las muestras tomadas (limpieza, etc.);
+
+- mantener el equipo limpio mientras se almacena y durante todo el muestreo.
+
+8.4 Equipo de muestreo del tanque
+8.4.1 Mezcla
+El sistema de mezcla se utiliza para garantizar la homogeneidad del contenido de un tanque antes de
+la descarga y para recoger una muestra representativa (véase el anexo A).
+
+Hay que asegurarse de que la mezcla sea eficaz y no dé lugar a una estratificación del efluente
+agitado (por ejemplo, carga salina que produzca depósitos de lodo que no vuelvan a entrar
+completamente en suspensión mediante la mezcla o la presencia de varias fases no miscibles, como
+sobrenadantes y emulsiones). La mezcla deberá durar un tiempo predefinido, para garantizar la
+homogeneidad del efluente en el contenedor.
+
+El sistema de mezcla en un contenedor puede estar compuesto por uno o varios de los siguientes
+sistemas:
+                                                                                                                      20
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+- uno o varios agitadores mecánicos
+
+- burbujeo mediante sobrepresión (aire comprimido, por ejemplo)
+
+- recirculación forzada del efluente (boquilla motriz o bomba, por ejemplo).
+
+Los materiales utilizados para construir el tanque y el sistema de mezcla y muestreo deberán ser
+inertes con respecto a la composición físico-química del efluente.
+
+8.4.2 Equipo de muestreo
+El sistema de muestreo puede estar compuesto por los siguientes elementos principales
+
+- una tubería de muestreo equipada con una válvula, utilizada para recoger el líquido a cierta
+distancia de la pared interior del depósito. Este dispositivo puede prolongarse mediante una tubería
+que lo una al sistema de llenado del contenedor de muestras. Esta tubería será lo más corta posible
+para evitar el riesgo de depósitos. El muestreo puede realizarse por gravedad, mediante una bomba
+(bomba peristáltica, por ejemplo) o cualquier otro sistema de aspiración. La posición del extremo de
+la tubería de muestreo deberá permitir un muestreo lo más representativo posible para adaptarse al
+método de mezcla elegido. Preferiblemente, se evitarán las posiciones extremas (superficie, borde y
+fondo del recipiente);
+
+- varios tubos de muestreo colocados a diferentes alturas. En este caso, la muestra final podrá estar
+compuesta por una mezcla de las muestras en proporciones a determinar, para formar una muestra
+compuesta;
+
+- un muestreador lastrado, equipado con un sistema de apertura/cierre autosellante en su parte
+inferior (bola, válvula, etc.) para llenarlo hasta el nivel deseado; y
+
+- un by-pass o una derivación en una línea de recirculación asociada a un contenedor.
+
+NOTA Es aconsejable que el operario de muestreo utilice equipos de muestreo diferentes, como
+varillas o achicadores, para cada tipo de efluente (por ejemplo, aguas residuales brutas, efluentes
+finales, vertidos industriales, etc.). Véase también el punto 8.3 (equipo de muestreo manual).
+
+
+
+
+9. Homogeneización, conservación, transporte y almacenamiento de las muestras
+9.1 Homogeneización del volumen recogido
+Si el volumen de muestra requerido es tan grande que se necesitan varias extracciones y/o hay que
+llenar diferentes frascos con una misma muestra, deberá garantizarse la homogeneidad de la
+muestra. Esto es especialmente importante en muestras que contienen partículas y para la
+determinación de analitos, que se enriquecen en partículas sólidas.
+
+La homogeneización puede llevarse a cabo in situ o en una instalación de laboratorio. Si este paso se
+realiza de forma incorrecta, puede provocar diferencias en la concentración de sólidos en suspensión
+en las botellas para el laboratorio. Los microcontaminantes orgánicos hidrofóbicos tienen una gran
+afinidad con los sólidos en suspensión. Las consecuencias de una homogeneización inadecuada
+pueden ser importantes (Figura 2).
+
+Para volúmenes de muestra mayores (por ejemplo, > 5 l), los homogeneizadores con recipientes de
+muestra transportables y
+
+con agitador magnético o mecánico deberían utilizarse.
+
+                                                                                                                      21
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+Para volúmenes inferiores recogidos (≤5 l), puede aplicarse el método de laboratorio (por ejemplo,
+agitación manual, mezcla con varillas, etc.).
+
+Este paso es esencial, incluso para las muestras con un bajo contenido de sólidos en suspensión. Si la
+homogeneización manual es apropiada para el efluente que se está muestreando debido a
+circunstancias excepcionales, se debe hacer todo lo posible para garantizar que no se produzcan los
+problemas de asentamiento antes del submuestreo.
+
+
+
+
+Figura 2 - Consecuencias de una homogeneización inadecuada: diferente concentración de materia
+en suspensión de una botella a otra
+
+
+
+Se recomienda llevar a cabo la etapa de homogeneización, utilizando un método validado. Se
+comprobará la eficacia del método de homogeneización (posición de la hélice, velocidad de agitación,
+duración de la homogeneización). La diferencia máxima entre dos mediciones del parámetro debe
+ser preferiblemente <20 %. Consulte la norma ISO 5667-14:2016, 7.4.4.
+
+NOTA Asegúrese de que se toma un volumen de muestra suficiente para que sea representativo de
+todos los frascos que se van a llenar.
+
+9.2 Distribución del volumen recogido en los frascos de laboratorio
+En el caso de volúmenes mayores recogidos (por ejemplo, > 5 l) de la muestra homogeneizada, la
+distribución a las diferentes botellas de laboratorio debe realizarse bajo mezcla continua. La
+distribución a las botellas de laboratorio puede hacerse de forma fraccionada o botella por botella.
+El Anexo G presenta las ventajas e inconvenientes según el tipo de método de distribución elegido y
+su aplicabilidad según el tipo de muestreo y el método aplicado. En todos los casos en los que sea
+probable que se produzcan asentamientos, el submuestreo debe realizarse inmediatamente en las
+botellas o contenedores de laboratorio correspondientes.
+
+NOTA: Asegúrese de que la representatividad de la muestra se mantiene durante el submuestreo.
+
+                                                                                                                      22
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+9.3 Conservación y embalaje de las muestras
+El tipo de frascos de laboratorio utilizados para la recogida y el almacenamiento se indican en la
+norma ISO 5667-3 y deben definirse conjuntamente con el laboratorio.
+
+Pueden ser necesarios algunos tratamientos previos de la muestra, mediante acidificación,
+alcalinización (para el carbono radiactivo o los metales, por ejemplo), congelación o adición de
+agentes de etiquetado desde la recogida de la muestra. Consulte la norma ISO 5667-3.
+
+Para la conservación y la manipulación de las muestras destinadas al laboratorio, deben observarse
+las disposiciones establecidas por la norma ISO 5667-3.
+
+La muestra recogida se envasa en recipientes sellados, preferiblemente de plástico (polietileno, etc.)
+o de vidrio y, si es necesario, diseñados para adaptarse a la geometría de recuento cuando los análisis
+radiológicos se realizan directamente sobre la muestra recogida.
+
+9.4 Transporte y recepción
+9.4.1 Generalidades
+Es importante ajustarse a las siguientes consideraciones generales sobre el transporte de las
+muestras
+
+al laboratorio y cumplir los requisitos de las normas ISO 5667-3, ISO 5667-16 e ISO 19458.
+
+Los procedimientos aplicados se ajustarán a las instrucciones del laboratorio y a los requisitos de las
+normas ISO 5667-3, ISO 5667-16 e ISO 19458.
+
+El laboratorio responsable del análisis de las muestras deberá ser consultado siempre en relación con
+la selección del método de conservación y el posterior transporte y almacenamiento.
+
+9.4.2 Tiempo
+El tiempo máximo de almacenamiento de las muestras entre el muestreo y el análisis deberá
+ajustarse a los requisitos definidos en las normas ISO 5667-3, ISO 5667-16 e ISO 19458. En caso
+contrario, deberá justificarse cualquier modificación de este período.
+
+En todos los casos, el tiempo máximo de almacenamiento de la muestra deberá acordarse entre el
+organismo de muestreo, el laboratorio y el cliente.
+
+9.4.3 Temperatura
+Para garantizar la integridad de la muestra entre el muestreo y la recepción en el laboratorio, las
+muestras deben almacenarse en un dispositivo de refrigeración capaz de mantener una temperatura
+de (5 ± 3) °C. Para evaluar adecuadamente las condiciones durante el transporte, puede utilizarse un
+dispositivo capaz de registrar la temperatura del aire que rodea la muestra. En el momento de la
+recepción en el laboratorio, las muestras deben almacenarse de acuerdo con las normas ISO 5667-3,
+ISO 5667-16 o ISO 19458.
+
+La cantidad y el tamaño del dispositivo o dispositivos de refrigeración utilizados deben adaptarse al
+número de muestras que se vayan a transportar. La cantidad y la naturaleza de las placas eutécticas
+deben adaptarse a la temperatura de las muestras y a las condiciones meteorológicas.
+
+NOTA El rendimiento de las placas eutécticas depende de la capacidad del fluido para restablecer el
+frío en el tiempo. Para garantizar su eficacia, se envasan y utilizan de acuerdo con las
+recomendaciones del proveedor.
+
+
+
+                                                                                                                      23
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+9.5 Seguridad y trazabilidad de las muestras durante el almacenamiento y la
+entrega
+9.5.1 Muestras de rutina
+El operario de muestreo es responsable de la seguridad y la trazabilidad de las muestras,
+submuestras y documentos de registro de muestras a su cargo.
+
+El operario de muestreo debe comprobar que las muestras, submuestras, etiquetas, documentos de
+registro de muestras, etc., no estén dañados y se depositen en el lugar designado. Si los contenedores
+se pierden, dañan o rompen durante el transporte, el operario de muestreo deberá registrarlo en el
+formulario de registro de muestras.
+
+Si interviene un mensajero, éste deberá hacer un registro similar mientras las muestras estén a su
+cargo. El mensajero deberá entregar las muestras de acuerdo con las instrucciones del laboratorio,
+especialmente si la entrega tiene lugar cuando el laboratorio no está atendido.
+
+9.5.2 Muestras que pueden utilizarse con fines legales
+Las normas que deben seguirse si las muestras van a utilizarse con fines legales pueden ser mucho
+más onerosas, dependiendo del sistema legal que opere en una jurisdicción concreta.
+
+Se llama la atención sobre la existencia en algunos países de una legislación nacional, con la que todas
+las personas implicadas en cualquier fase del muestreo, el almacenamiento o la entrega de muestras,
+o en la documentación asociada, deberían estar completamente familiarizadas.
+
+
+10 Garantía de calidad
+10.1 Evitar la contaminación
+Deben proporcionarse instrucciones específicas por escrito al personal encargado de la toma de
+muestras sobre los protocolos necesarios que deben seguirse para evitar la contaminación en el
+muestreo de aguas residuales. Se debería animar al personal de muestreo a documentar cualquier
+desviación de los riesgos previstos para facilitar la interpretación de los resultados. Es esencial evitar
+la contaminación durante el muestreo. Deben tenerse en cuenta todas las posibles fuentes de
+contaminación y, en caso necesario, aplicar el control adecuado.
+
+La naturaleza de los materiales del equipo de muestreo debe elegirse en función de su compatibilidad
+con los analitos estudiados, y para garantizar la ausencia de interferencias fisicoquímicas con los
+analitos a medir. En el Anexo E se define la naturaleza de los materiales de los muestreadores
+automáticos que deben utilizarse con respecto a los analitos que se van a medir. Antes de salir del
+recinto, es esencial preparar todo el equipo de muestreo que entre en contacto con la muestra y
+asegurarse de que el equipo no se libera. El protocolo de limpieza se estipula en el Anexo C.
+
+Todo el equipo de muestreo debe almacenarse lejos de cualquier fuente de contaminación
+(combustibles, polvo, tráfico rodado, etc.). Del mismo modo, el muestreo debe realizarse de forma
+que se evite la contaminación de la muestra. El uso de guantes (por ejemplo, guantes de nitrilo sin
+polvo de un solo uso) para todas las operaciones (muestreo y acondicionamiento de la muestra) es
+necesario. Se recomienda encarecidamente que durante todas las operaciones de muestreo limitar
+los materiales intermedios.
+
+Sin embargo, si es necesario utilizar materiales o equipo intermedios, es indispensable que este
+equipo se enjuague eficazmente antes de volver a utilizarlo y, si el efluente que se esté muestreando
+lo requiera, deberá enjuagarse con agua (por ejemplo, agua potable, agua comercial agua ultrapura)
+antes de cualquier muestreo.
+                                                                                                                      24
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+Todos los frascos de laboratorio que se utilicen deberán estar claramente etiquetados desde el
+momento en que se tome la muestra, evitando la contaminación de la muestra (por ejemplo, para los
+compuestos volátiles no se deben utilizar marcadores que contengan disolventes). Se seguirán los
+procedimientos de seguimiento de la contaminación y su control de acuerdo con la norma ISO 5667-
+14.
+
+10.2 Identificación y registro de las muestras
+Toda la información debe ser reportada en el formulario de campo, especificando las condiciones
+ambientales, aspectos de la descarga, la presencia de cualquier contaminante, cualquier anomalía
+observada y las coordenadas precisas o la ubicación del punto o puntos de muestreo. Si el muestreo
+no es posible, o si la ubicación del punto debe modificarse para garantizar la representatividad del
+muestreo, se informará al cliente, y la información se documentará en el formulario de campo (véase
+el Anexo D).
+
+Todo el equipo y los procedimientos de muestreo deberán documentarse y registrarse en una hoja
+de campo adecuada o en un cuaderno de bitácora para facilitar la repetición exacta de las encuestas
+de acuerdo con la escala temporal en la que se realicen los estudios. Los recipientes de las muestras
+deben estar identificados de forma clara e inequívoca para que los resultados analíticos posteriores
+puedan interpretarse correctamente. Todos los detalles relevantes para la identificación de la
+muestra deben registrarse en una etiqueta fijada al contenedor de la muestra.
+
+Las muestras se identifican mediante una etiqueta preimpresa con los datos del lugar y un código
+único legible por máquina duplicado tanto en la etiqueta de la muestra como en el documento de
+registro de la muestra del laboratorio, así será necesario registrar menos detalles.
+
+Sólo los detalles que pueden cambiar, como la fecha, la hora y quizás la identificación del operario
+(que puede ser en forma de firma), son necesarios. No deben tomarse más muestras hasta que se
+hayan etiquetado todos los frascos de muestras.
+
+10.3 Garantía y control de calidad
+El control de calidad mide los requisitos de calidad de un proceso y utiliza técnicas para corregir
+cualquier desviación de un proceso. Consulte la norma ISO 5667-14 para conocer todos los detalles
+de estas técnicas para su uso en el muestreo de aguas residuales.
+
+Todo el material que entre en contacto con la muestra debe someterse a medidas de control de
+calidad para garantizar que no haya contaminación y/o pérdida de analitos. Estos controles de
+calidad son de esperar cuando se adquiere el equipo o cuando se modifica/adapta.
+
+El equipo de muestreo debe ser revisado (Anexo H). En caso de incumplimiento, las desviaciones
+deben ser analizadas. Todos estos controles deben ser registrados. Estos controles permiten
+dominar una posible deriva de del equipo a lo largo del tiempo.
+
+En el caso de campañas de muestreo largas o continuas, la periodicidad de los controles de calidad
+puede ajustarse a la luz de los requisitos anteriores.
+
+
+11. Informes
+11.1 Informes analíticos
+Los detalles del informe de muestreo dependen de los objetivos del mismo. Deben anotarse todas
+las condiciones que puedan influir en los resultados analíticos. Las cuestiones que podrían
+considerarse para su inclusión son:
+
+                                                                                                                      25
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+- fecha y hora del muestreo (mención adicional de la fecha y hora de finalización del muestreo en el
+caso del muestreo compuesto, etc.)
+
+- identidad del operador de muestreo
+
+- identificación exacta del lugar de muestreo y de la ubicación del mismo (dirección, - descripción o
+fotos, coordenadas geográficas, etc.)
+
+- descripción exacta del punto de muestreo en el lugar (por ejemplo, "salida del canal 1 de la estación
+de depuración", "muestreo en la cuenca de decantación primaria nº 1", etc.)
+
+- número de muestras elementales tomadas o no (en caso de muestreo compuesto)
+
+- tipo de muestreo (compuesto, puntual);
+
+-resultados de las mediciones fisicoquímicas in situ o in situ (por ejemplo, temperatura del agua, pH,
+etc.)
+
+-aplicación de controles de calidad (sí/no) y tipo de control, si procede
+
+-la información sobre cualquier técnica de conservación de la muestra utilizada
+
+-la información sobre cualquier técnica de filtración de la muestra utilizada
+
+-la información sobre cualquier condición de almacenamiento de la muestra
+
+-cualquier desviación de los protocolos estándar; y
+
+-cualquier observación y comentario relevante para la interpretación de futuros resultados
+analíticos (fuente de contaminación observada durante el muestreo, durante la conservación,
+razones del cambio de ubicación, etc.).
+
+En el caso de que se utilice un muestreador automático, también es necesario garantizar la
+trazabilidad de la siguiente información:
+
+-identificación del equipo utilizado
+
+-programación utilizada para el muestreo;
+
+-control paramétrico de las condiciones de uso (velocidad de aspiración, repetibilidad de los
+volúmenes tomados, etc.);
+
+-limpieza del material (sí o no) antes de su utilización;
+
+-diámetro del tubo de aspiración en mm;
+
+-longitud del tubo de aspiración en m;
+
+-velocidad de aspiración;
+
+-purga de las tuberías (sí o no) antes de su uso;
+
+-utilización de un colador (sí o no);
+
+-volumen total recogido;
+
+-cualquier observación y comentario que se haya hecho sobre el muestreador automático que pueda
+interpretar los resultados de futuros análisis.
+
+
+                                                                                                                      26
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+En el anexo D figura un ejemplo de protocolo de informe de muestreo.
+
+11.2 Protocolos de muestreo
+Debe mantenerse un "historial" de los cambios en los protocolos y procedimientos de muestreo que
+permita a una persona que examine los datos la oportunidad de evaluar los impactos de los cambios
+de procedimiento, tanto en el campo como en el laboratorio, en la serie de observaciones recogidas.
+Los cambios en el laboratorio, como los límites de detección y la precisión, suelen registrarse, pero
+los cambios en los métodos de muestreo, los puntos de muestreo y el personal también deberían
+formar parte del registro. A veces esto se aplica a una estación específica, y otras veces a toda una
+red. Con demasiada frecuencia se atribuye erróneamente la comprensión de un registro de datos.
+
+12. Precauciones de seguridad
+12.1 Generalidades
+Los puntos tratados en esta sección no son exhaustivos, no pretenden cubrir todas las situaciones.
+La seguridad es responsabilidad de varias personas: el cliente, la agencia de muestreo y el
+subcontratista. Sin embargo, tener en cuenta la seguridad es un aspecto importante que puede tener
+un efecto directo en la calidad de la operación de muestreo.
+
+Las directrices de este documento no pueden sustituir a las normas y reglamentos locales y/o
+nacionales. El riesgo asociado al muestreo debe ser considerado antes de que se realice cualquier
+muestreo.
+
+12.2 Seguridad del personal
+La primera preocupación del operario de muestreo que interviene en el lugar (planta de tratamiento
+de aguas residuales colectivas o industriales, sitio industrial, red de alcantarillado, etc.) debe ser la de
+su seguridad y la de las personas presentes en el lugar o cerca de él. Ninguna operación técnica,
+ninguna instalación, ningún coste, ningún retraso, deberá prevalecer sobre la seguridad de las
+personas.
+
+El operario de muestreo que acuda al lugar debe asegurarse de que la zona de muestreo está
+asegurada como exigen los protocolos del lugar (por ejemplo, colocando señales, etc.).
+
+Los peligros que se encuentran en los lugares de muestreo pueden ser muy variados y cada operario
+de muestreo debe estar formado y ser consciente de todos los riesgos, como: ahogamiento,
+explosión, caída, envenenamiento, proyección, quemadura (térmica, química, eléctrica), infección
+(riesgo microbiológico), material utilizado (batería, botellas de vidrio, etc.), así como a los
+conservantes y reactivos presentes en las botellas proporcionadas por el laboratorio (ácidos, bases,
+reactivos).
+
+Durante el muestreo, el operario debe llevar un equipo de protección personal adecuado a cada uno
+de los riesgos a los que se expone. Estos riesgos dependen de la naturaleza del lugar, la zona de
+muestreo, el período de muestreo y las condiciones climáticas.
+
+Los equipos de protección personal que deben utilizarse sistemáticamente para realizar todas las
+operaciones de muestreo son: zapatos y/o botas de seguridad, cascos, gafas, guantes desechables y
+guantes de manipulación, para protegerse de los riesgos de exposición a materiales tóxicos o
+patógenos (ingestión, inhalación, contacto con la piel).
+
+Los equipos de protección individual que deben poseerse en función de los peligros que puedan
+encontrarse son: máscara de emergencia, máscara antigás, detector de gases (H2S, CO, O2, etc.),
+arnés de seguridad, trípode, parada de caída, dispositivo de alarma para el trabajador solitario,
+guantes resistentes a productos químicos (disolventes, hidrocarburos, etc.).
+                                                                                                                      27
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+                                                                                                   ISO 5667-10:2020 (E)
+
+
+La lista de peligros potenciales y elementos de seguridad puede establecerse durante la visita
+preliminar. El operario encargado de la toma de muestras debe ser formado e informado antes de
+realizar las operaciones de muestreo. Los riesgos identificados pueden formalizarse en un plan de
+prevención.
+
+En algunos casos en los que existen riesgos específicos, la operación de muestreo debe ser llevada a
+cabo por dos personas para garantizar la seguridad y dar la alerta si hay algún problema.
+
+Si no se cumplen las condiciones de acceso o seguridad del operario de muestreo, no se debe realizar
+el muestreo y se debe informar al cliente y al laboratorio de análisis.
+
+12.3 Seguridad de los equipos
+
+En el caso de los muestreadores automáticos o los equipos de muestreo instalados en el lugar, deben
+tomarse las precauciones adecuadas para no exponerlos a riesgos naturales, robos o vandalismo.
+Los equipos instalados in situ tampoco deben suponer un riesgo para el medio ambiente ni para el
+público.
+
+Las operaciones de muestreo en espacios confinados (cuenca, tubería, tanque, alcantarilla) y, en
+particular, en las redes de alcantarillado, requieren el cumplimiento de normas de seguridad
+específicas para el equipo.
+
+Se prestará atención a los riesgos asociados a la subida repentina del agua en las alcantarillas o en
+las tuberías que podrían dañar o destruir el equipo de muestreo.
+
+Prevea que, al medir la altura del agua, el dispositivo de medición de la altura del agua no debe estar
+bajo el agua cuando el caudal sea nulo. En el caso de un equipo de muestreo, como la línea de
+muestreo debe permanecer bajo el agua para evitar el bombeo de aire, el canal de medición debe
+incluir un pozo de muestreo lateral que siempre esté lleno de agua para que la línea de muestreo
+permanezca bajo el agua.
+
+NOTA En los casos en los que la altura del nivel del agua no pueda ser perturbada por el bombeo de
+la línea de muestreo del equipo de muestreo automático y si la mezcla es buena justo aguas arriba
+del obstáculo, entonces la toma se puede situar allí, teniendo cuidado de que no se muestreen
+sedimentos y asegurándose de que la toma permanece por debajo del nivel del líquido.
+
+La zona de instalación del equipo de muestreo debe estar claramente identificada y etiquetada.
+
+En determinadas condiciones, el cliente puede imponer el uso de materiales específicos [por ejemplo,
+equipos para atmósferas potencialmente explosivas (ATEX)]. El equipo de muestreo deberá cumplir
+el requisito pertinente para el uso de equipos en atmósferas potencialmente explosivas en el caso de
+que los equipos de muestreo se instalen en una atmósfera explosiva peligrosa o de la que se
+bombeen líquidos. Utilice equipos seguros y consulte las normas ISO sobre equipos intrínsecamente
+seguros.
+
+
+
+
+                                                                                                                      28
+© ISO 2020 – Todos los derechos reservados
+                            Este documento ha sido adquirido por BIOSSEMA, S.C.A. el 2021-7-11.
+        Para poder utilizarlo en un sistema de red interno, deberá disponer de la correspondiente licencia de AENOR
+

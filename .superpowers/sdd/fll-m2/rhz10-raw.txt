@@ -1,0 +1,186 @@
+﻿
+ RUN  v4.1.5 C:/Users/Ekowai/_wt-fll
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+The files belonging to this database system will be owned by user "Ekowai".
+This user must also own the server process.
+
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+fixing permissions on existing directory C:/Users/Ekowai/AppData/Local/Temp/ekowai-harness-RdWzFD ... ok
+creating subdirectories ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+ok
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+selecting dynamic shared memory implementation ... windows
+selecting default "max_connections" ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+100
+selecting default "shared_buffers" ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+128MB
+selecting default time zone ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+Europe/Berlin
+creating configuration files ...
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+ 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+ok
+running bootstrap script ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+ok
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+performing post-bootstrap initialization ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+ok
+syncing data to disk ... 
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+ok
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+
+Success. You can now start the database server using:
+
+    ^"C^:^\Users^\Ekowai^\^_wt^-138^-p4^\node^_modules^\^.pnpm^\^@embedded^-postgres^+windows^-x64^@18^.4^.0^-beta^.17^\node^_modules^\^@embedded^-postgres^\windows^-x64^\native^\bin^\pg^_ctl^" -D ^"C^:^\Users^\Ekowai^\AppData^\Local^\Temp^\ekowai^-harness^-RdWzFD^" -l logfile start
+
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+2026-07-23 19:31:39.518 CEST [27492] LOG:  starting PostgreSQL 18.4 on x86_64-windows, compiled by msvc-19.44.35226, 64-bit
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+2026-07-23 19:31:39.523 CEST [27492] LOG:  listening on IPv6 address "::1", port 61100
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+2026-07-23 19:31:39.523 CEST [27492] LOG:  listening on IPv4 address "127.0.0.1", port 61100
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+2026-07-23 19:31:39.588 CEST [18708] LOG:  database system was shut down at 2026-07-23 19:31:38 CEST
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+2026-07-23 19:31:39.596 CEST [27492] LOG:  database system is ready to accept connections
+
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "worksheet_sections_worksheet_template_id_worksheet_templates_id_fk" will be truncated to "worksheet_sections_worksheet_template_id_worksheet_templates_id"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "compliance_requirements_worksheet_template_id_worksheet_templates_id_fk" will be truncated to "compliance_requirements_worksheet_template_id_worksheet_templat"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "compliance_suggestions_requirement_id_compliance_requirements_id_fk" will be truncated to "compliance_suggestions_requirement_id_compliance_requirements_i"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "worksheet_instances_worksheet_template_id_worksheet_templates_id_fk" will be truncated to "worksheet_instances_worksheet_template_id_worksheet_templates_i"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "project_parameters_source_worksheet_instance_id_worksheet_instances_id_fk" will be truncated to "project_parameters_source_worksheet_instance_id_worksheet_insta"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "calculation_snapshots_worksheet_instance_id_worksheet_instances_id_fk" will be truncated to "calculation_snapshots_worksheet_instance_id_worksheet_instances"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42622',
+  message: 'identifier "co2_activity_lines_worksheet_instance_id_worksheet_instances_id_fk" will be truncated to "co2_activity_lines_worksheet_instance_id_worksheet_instances_id"',
+  file: 'scansup.c',
+  line: '102',
+  routine: 'truncate_identifier'
+}
+
+ ✓ |integration| tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > exposes exactly the 5 prod fields with the right types 2ms
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > drives the source-attested §7.2 state through real saveWorksheet
+RHZ-10 save.ok: true  error: null
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > drives the source-attested §7.2 state through real saveWorksheet
+RHZ-10 persisted  datum: "2026-01-15T00:00:00.000Z"  methode: "ohne Widerlager und Abdichtung, analog Prüfgefäße (§6.1)"  unten_mm: 20  oben_mm: 150  standrohr: true
+
+ ✓ |integration| tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > drives the source-attested §7.2 state through real saveWorksheet 570ms
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > note: no gate enforces the (20±5)/(150±5) mm ranges — out-of-range values persist unchecked
+RHZ-10 out-of-range save.ok: true  error: null
+
+stdout | tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > note: no gate enforces the (20±5)/(150±5) mm ranges — out-of-range values persist unchecked
+RHZ-10 after out-of-range persisted unten_mm: 999  oben_mm: 0
+
+ ✓ |integration| tests/harness/verify-fll-rhizom-rhz10.integration.test.ts > VERIFY FLLTP-RHZ-10 — Vorbereitung der Kontrollgefäße data-collection save > note: no gate enforces the (20±5)/(150±5) mm ranges — out-of-range values persist unchecked 9ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  19:31:35
+   Duration  5.87s (transform 287ms, setup 0ms, import 4.74s, tests 933ms, environment 0ms)
+

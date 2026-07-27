@@ -1,0 +1,187 @@
+Diese Abrufversion ist Ihre persönliche Version. Das Weiterleiten dieser Datei, oder einzelner Auszüge, an Dritte ist nur mit ausdrücklicher Zustimmung der FLL gestattet!
+                                                                                                                                                                             4.4        Bauliche Erfordernisse
+
+                                                                                                                                                                             Abdichtungen sind so herzustellen, dass umgebendes Gelände und angrenzende Bauwerke
+                                                                                                                                                                             vor einem unkontrollierten Wasserverlust (z. B. Überlaufen, Hinterläufigkeit) geschützt werden.
+                                                                                                                                                                             Dies gilt auch für eine kontrollierte Ableitung des Wassers auf der Geländeoberfläche in an-
+                                                                                                                                                                             grenzende Bodenschichten (Überschusswasserableitung, Entwässerung).
+
+                                                                                                                                                                             Bei Kondensatbildungen unterhalb der Abdichtung kann eine Zwischenentwässerung (z. B.
+                                                                                                                                                                             Entlastungsbohrung im Kehlbereich) erforderlich werden, um Wasseransammlungen zu ver-
+                                                                                                                                                                             meiden.
+
+                                                                                                                                                                             Die Abdichtung muss ihre Funktion auch bei zu erwartenden Bewegungen der Bauteile (z. B.
+                                                                                                                                                                             durch Befüllen und Entleeren, Schwinden, Temperaturschwankungen und Setzungen) dauer-
+                                                                                                                                                                             haft erfüllen.
+
+                                                                                                                                                                             Liegt der Grundwasserspiegel über der Gewässeroberfläche, muss die Auflast der Abdichtung
+                                                                                                                                                                             auf den maximalen Wasserüberdruck bemessen werden. Das Flächengewicht der Auflast
+                                                                                                                                                                             muss so dimensioniert werden, dass der Überdruck nicht zu einem Abheben der Abdichtung
+                                                                                                                                                                             führt. Im Böschungsbereich ist ggf. zusätzlich der Nachweis gegen Abgleiten der Auflast zu
+                                                                                                                                                                             führen. Hinweise zur Flächengewichtsberechnung der Auflast gegen Abheben sind dem infor-
+                                                                                                                                                                             mativen Anhang zu entnehmen.
+
+                                                                                                                                                                             Bei einer Gewässertrennung (z. B. Entflechtung eines Fließgewässers) sind beide Gewässer
+                                                                                                                                                                             so abzudichten, dass keine Beeinträchtigungen der Wasserhaltung (z. B. durch Hinter- oder
+                                                                                                                                                                             Unterspülung der Abdichtung) des jeweiligen Gewässers bestehen.
+
+                                                                                                                                                                             Angaben über Größe und Art der aufzunehmenden Bewegungen müssen bei der Planung
+                                                                                                                                                                             vorliegen. Die Abdichtung muss Risse im Bauwerk, die z. B. durch Schwinden oder Setzungen
+                                                                                                                                                                             entstehen, überbrücken können.
+
+                                                                                                                                                                             Auf Abdichtungen dürfen keine planmäßigen Kräfte übertragen werden, die parallel zur Ge-
+                                                                                                                                                                             wässerabdichtungsebene wirksam sind. In Sonderfällen muss durch konstruktive Maßnahmen
+                                                                                                                                                                             sichergestellt werden, dass Bauteile auf der Abdichtung z. B. nicht gleiten oder ausknicken
+                                                                                                                                                                             können. Ggf. kann es notwendig werden, bauzeitliche Sicherungen der Abdichtungen durch
+                                                                                                                                                                             einen Einbindegraben herzustellen.
+
+                                                                                                                                                                             Ist eine Eisbildung nicht auszuschließen, ist der Randbereich, insbesondere die An- und Ab-
+                                                                                                                                                                             schlüsse und Übergänge, ggf. vor Eisdruck zu schützen.
+
+
+
+                                                                                                                                                                             4.5        Profilierung und Neigung
+
+                                                                                                                                                                             Für die Neigung der Abdichtung von Böschungen bestehen werkstoffspezifische Einschrän-
+                                                                                                                                                                             kungen (s. Tab. 1).
+
+                                                                                                                                                                             Insbesondere Abdichtungen mit systembedingter Auflast erfordern eine auf die Böschungs-
+                                                                                                                                                                             neigung und Gefällesituation abgestimmte Planung und Ausführung. In der Regel gilt für diese
+                                                                                                                                                                             Bauweisen eine Böschungsneigung mit natürlichen Schüttwinkel ≤ 1:3 (≤ 33 %).
+
+                                                                                                                                                                             In Zweifelsfällen sind die angenommenen inneren Reibungswinkel der in-situ-Böden und das
+                                                                                                                                                                             Kontaktreibungsverhalten in den Grenzflächen in den Anwendungen vor Bauausführung durch
+                                                                                                                                                                             objektbezogene Scherversuche gesondert nachzuweisen.
+
+                                                                                                                                                                             Die Angaben in der Tabelle entbinden nicht von einer rechnerischen Überprüfung der Stand-
+                                                                                                                                                                             und Gleitsicherheit (z. B. mittels Scherversuchen).
+
+
+                                                                                                                                                                                                                           28
+Diese Abrufversion ist Ihre persönliche Version. Das Weiterleiten dieser Datei, oder einzelner Auszüge, an Dritte ist nur mit ausdrücklicher Zustimmung der FLL gestattet!
+                                                                                                                                                                             Dargestellt sind die Anforderungen in Regelbauweise mit den stoff- bzw. bauweisenspezifi-
+                                                                                                                                                                             schen Neigungsverhältnissen und Gefälleangaben. Die angegebenen Werte sind Richtwerte
+                                                                                                                                                                             und hängen u. a. von den örtlichen Gegebenheiten ab, wie z. B. verwendete Bodenarten, Kon-
+                                                                                                                                                                             taktreibungsfläche, etc..
+
+                                                                                                                                                                             Tab. 1:      Richtwerte für werkstoffspezifische Böschungsneigungen verschiedener Abdich-
+                                                                                                                                                                                          tungsarten
+                                                                                                                                                                             Nr.                        1                                    2                  3
+
+                                                                                                                                                                             1     Art der Abdichtung                           Neigungsverhältnis    Gefälle in %
+
+                                                                                                                                                                                   rohe oder homogenisierte Grubentone/Lehm,
+                                                                                                                                                                             2                                                  ≤ 1:3                 ≤ 33 %
+                                                                                                                                                                                   vakuumverpresste Grubentone
+
+                                                                                                                                                                                   mit Bentonit/Tonmehl/Kunststoff vergütete
+                                                                                                                                                                             3                                                  ≤ 1:3                 ≤ 33 %
+                                                                                                                                                                                   Böden
+
+                                                                                                                                                                             4     Ortbeton (ohne Schalung)                     ≤ 1:2                 ≤ 50 %
+
+
+                                                                                                                                                                             5     Asphaltmastix                                ≤ 1:3                 ≤ 33 %
+
+
+                                                                                                                                                                             6     Gussasphalt                                  ≤ 1:5                 ≤ 20 %
+
+
+                                                                                                                                                                             7     Asphaltbeton                                 ≤ 1:2                 ≤ 50 %
+
+
+                                                                                                                                                                             8     Geosynthetische Tondichtungsbahnen (GTD)     ≤ 1:3                 ≤ 33 %
+
+
+                                                                                                                                                                             9     Bitumenbahnen                                ≤ 1:3                 ≤ 33 %
+
+
+                                                                                                                                                                             10    Kunststoff- und Elastomerbahnen              ≤ 1:1,5               ≤ 66 %
+
+
+                                                                                                                                                                             11    Abdichtungen mit Flüssigkunststoffen         ≤ 1:1                 ≤ 100 %
+
+
+                                                                                                                                                                             12    Kunststoffbahnen aus PEHD                    ≤ 1:1,5               ≤ 66 %
+
+
+
+
+                                                                                                                                                                             Abweichende nutzungsbedingte Anforderungen an die Neigung (z. B. senkrechte Wände bei
+                                                                                                                                                                             Schwimmteichen) erfordern besondere planerische Maßnahmen.
+
+                                                                                                                                                                             Wird eine naturnahe Gestaltung des Gewässers für Flora und Fauna angestrebt, ist eine ent-
+                                                                                                                                                                             sprechende Modellierung und Profilierung des Baugrundes erforderlich (z. B. Zonierung mit
+                                                                                                                                                                             Sumpf-, Flach- und Tiefwasserzone).
+
+
+
+                                                                                                                                                                             4.6          Baugrund, Untergrund
+
+                                                                                                                                                                             Die Anforderungen an den Baugrund sind z. B. abhängig von den zu erwartenden Lastan-
+                                                                                                                                                                             nahmen durch Wasserdruck, dynamische Beanspruchungen bei Bau, Betrieb, Wartung,
+                                                                                                                                                                             Pflege sowie Einzellasten, wie z. B. Einbauten und Ausstattungsgegenständen. Die Anforde-
+                                                                                                                                                                             rungen sind auf das jeweilige Einzelobjekt abzustimmen und in der Leistungsbeschreibung
+                                                                                                                                                                             festzulegen.
+
+                                                                                                                                                                             Der Baugrund soll hinsichtlich bodenphysikalischer Eigenschaften von einheitlicher Beschaf-
+                                                                                                                                                                             fenheit sein und muss eine dem Einzelfall angemessene ausreichende Tragfähigkeit und
+                                                                                                                                                                             Ebenheit aufweisen. Für eine anforderungsgerechte Tragfähigkeit ist mindestens ein
+                                                                                                                                                                                                                               29
+Diese Abrufversion ist Ihre persönliche Version. Das Weiterleiten dieser Datei, oder einzelner Auszüge, an Dritte ist nur mit ausdrücklicher Zustimmung der FLL gestattet!
+                                                                                                                                                                             Verformungsmodul Ev2 ≥ 45 MPa (Ev2/Ev1 ≤ 2,5) erforderlich. Der Verdichtungsgrad des Bau-
+                                                                                                                                                                             grundes soll DPr ≥ 97 % betragen.
+
+                                                                                                                                                                             Im Rahmen der Voruntersuchung des Baugrundes können Prüfungen erforderlich werden, die
+                                                                                                                                                                             z. B. die Bodenkennwerte (z. B. Standfestigkeit), hydrologische Verhältnisse (z. B. Auftriebs-
+                                                                                                                                                                             gefahr, wechselnde Grundwasserstände), Wurzelwachstum vorhandener Vegetation, Gelän-
+                                                                                                                                                                             deneigung und die Geländelage klären. Art und Umfang der Untersuchungen sind auf den
+                                                                                                                                                                             jeweiligen Einzelfall abzustimmen.
+
+                                                                                                                                                                             Eine geeignete Auflagefläche für die Gewässerabdichtung kann z. B. durch Bearbeitung des
+                                                                                                                                                                             Baugrundes (Planum), Verbesserung des Baugrundes (z. B. Kalk- bzw. Zementzugabe, Ein-
+                                                                                                                                                                             satz von Geogittern) und ggf. Austausch des Baugrundes geschaffen werden.
+
+                                                                                                                                                                             Bauwerksflächen müssen frostfrei, fest, eben, frei von Nestern und klaffenden Rissen, Graten
+                                                                                                                                                                             sowie frei von schädlichen Verunreinigungen sein. Bei aufgeklebten Abdichtungen muss die
+                                                                                                                                                                             Oberfläche des Bauwerks trocken sein. Vertiefungen > 5 mm sind mit geeigneten Werkstoffen
+                                                                                                                                                                             zu schließen. Unebenheiten sind zu egalisieren. Kanten müssen gefast und Kehlen sollten
+                                                                                                                                                                             gerundet sein.
+
+                                                                                                                                                                             Entsprechend den hydrologischen Verhältnissen ist ggf. eine Baugrundentwässerung zum
+                                                                                                                                                                             Zeitpunkt der Herstellung und im Betrieb vorzusehen. Die für die Herstellung der Abdichtung
+                                                                                                                                                                             erforderliche Tragfähigkeit muss erhalten bleiben.
+
+
+
+                                                                                                                                                                             4.7        Abdichtungssystem
+
+                                                                                                                                                                             Die Wahl des Abdichtungssystem ist u. a. abhängig von:
+                                                                                                                                                                              der Nutzungsart und Intensität (z. B. mechanische Beanspruchung, Schwimmteich);
+                                                                                                                                                                              der Dimensionierung, Profilierung und Neigung (z. B. Volumen, Bemessungswasser-
+                                                                                                                                                                                stand);
+                                                                                                                                                                              der Art des Bauwerks (z. B. Beckenform, gewachsener Boden);
+                                                                                                                                                                              der Beschaffenheit des Baugrundes/Untergrundes (z. B. Bodenart, Bodenkennwerte);
+                                                                                                                                                                              den klimatischen Bedingungen (z. B. UV-Strahlung, Temperaturunterschiede, Nieder-
+                                                                                                                                                                                schläge);
+                                                                                                                                                                              den baulichen Vorgaben (z. B. Randausbildung, Anschlüsse, Durchdringungen und
+                                                                                                                                                                                technische Einbauten);
+                                                                                                                                                                              der Flora und Fauna (z. B. Fischverträglichkeit, Wurzel- bzw. Rhizomfestigkeit);
+                                                                                                                                                                              der Nutzungsdauer des Bauwerks (z. B. temporäre Nutzung);
+                                                                                                                                                                              dem Instandhaltungsaufwand (z. B. Reinigungsart, Inspektionsintervalle);
+                                                                                                                                                                              der Umweltverträglichkeit (z. B. trinkwasser- und bodengefährdende Stoffe);
+                                                                                                                                                                              der Wasserqualität des Füllwassers (z. B. keine die Abdichtung schädigenden Reaktionen);
+                                                                                                                                                                              den werkstoffspezifischen Eigenschaften (z. B. Wasserverlust bei Grubenton/Lehm).
+
+                                                                                                                                                                             Die Art der Abdichtungsstoffe, die Anzahl der Lagen und deren Anordnung sowie die Verfahren
+                                                                                                                                                                             zur Herstellung der Abdichtungsschicht müssen in ihrem Zusammenwirken die Funktion der
+                                                                                                                                                                             Abdichtung sicherstellen.
+
+                                                                                                                                                                             Die Auswahl des Abdichtungssystems erfordert unterschiedliche Funktionsschichten. Die
+                                                                                                                                                                             nachfolgende schematische Darstellung verdeutlicht das Grundprinzip zur Lage und Funktion
+                                                                                                                                                                             der einzelnen Schichten.
+
+
+
+                                                                                                                                                                                                                          30
+

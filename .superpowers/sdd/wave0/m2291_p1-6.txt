@@ -1,0 +1,223 @@
+                                  www.dwa.de
+
+
+
+
+                                  DWA-Regelwerk
+                                  Merkblatt DWA-M 229-1
+                                  Systeme zur Belüftung und Durchmischung von Belebungsanlagen
+                                  – Teil 1: Planung, Ausschreibung und Ausführung
+
+
+
+                                  September 2017, korrigierte Fassung: Stand Februar 2021
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  www.dwa.de
+
+
+
+
+                                  DWA-Regelwerk
+                                  Merkblatt DWA-M 229-1
+                                  Systeme zur Belüftung und Durchmischung von Belebungsanlagen
+                                  – Teil 1: Planung, Ausschreibung und Ausführung
+
+
+
+                                  September 2017, korrigierte Fassung: Stand Februar 2021
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  DWA-M 229-1
+
+
+
+
+                                  Die Deutsche Vereinigung für Wasserwirtschaft, Abwasser und Abfall e. V. (DWA) setzt sich intensiv
+                                  für die Entwicklung einer sicheren und nachhaltigen Wasser- und Abfallwirtschaft ein. Als politisch
+                                  und wirtschaftlich unabhängige Organisation arbeitet sie fachlich auf den Gebieten Wasserwirt-
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  schaft, Abwasser, Abfall und Bodenschutz.
+
+                                  In Europa ist die DWA die mitgliederstärkste Vereinigung auf diesem Gebiet und nimmt durch ihre
+                                  fachliche Kompetenz bezüglich Regelsetzung, Bildung und Information sowohl der Fachleute als
+                                  auch der Öffentlichkeit eine besondere Stellung ein. Die rund 14 000 Mitglieder repräsentieren die
+                                  Fachleute und Führungskräfte aus Kommunen, Hochschulen, Ingenieurbüros, Behörden und Unter-
+                                  nehmen.
+
+
+                                      Impressum
+                                      Herausgeber und Vertrieb:                                               Satz:
+                                      DWA Deutsche Vereinigung für Wasserwirtschaft,                          Christiane Krieg, DWA
+                                      Abwasser und Abfall e. V. (DWA)                                         Druck:
+                                      Theodor-Heuss-Allee 17                                                  druckhaus köthen GmbH & Co KG
+                                      53773 Hennef, Deutschland
+                                      Tel.:      +49 2242 872-333
+                                                                                                              ISBN:
+                                                                                                              978-3-88721-512-5 (Print)
+                                      Fax:       +49 2242 872-100
+                                                                                                              978-3-88721-513-2 (E-Book)
+                                      E-Mail:    info@dwa.de
+                                      Internet:  www.dwa.de                                                   Gedruckt auf 100 % Recyclingpapier
+
+                                      © DWA, 1. Auflage, korrigierte Fassung: Stand Februar 2021, Hennef 2021
+
+
+                                  Alle Rechte, insbesondere die der Übersetzung in andere Sprachen, vorbehalten. Kein Teil dieses Merkblatts darf ohne
+                                  schriftliche Genehmigung des Herausgebers in irgendeiner Form – durch Fotokopie, Digitalisierung oder irgendein ande-
+                                  res Verfahren – reproduziert oder in eine von Maschinen, insbesondere von Datenverarbeitungsmaschinen, verwendbare
+                                  Sprache übertragen werden.
+
+
+
+
+                                  2      DWA-Regelwerk                                                                               September 2017
+                                                                                                                    DWA-M 229-1
+
+
+
+                                  Vorwort
+                                  Die Belüftung und Durchmischung von Belebungsanlagen zählen mit großem Abstand zu den größ-
+                                  ten Energieverbrauchern einer Kläranlage. Je nach verfahrenstechnischer Auslegung einer Bele-
+                                  bungsanlage entfallen zwischen 50 % und 80 % des Gesamtenergiebedarfs der Abwasserreinigung
+                                  auf die Belüftung und Durchmischung. Daher kommt einer energieeffizienten Planung nicht nur bei
+                                  der erstmaligen Erstellung einer Belebungsanlage, sondern zunehmend auch bei anstehenden Re-
+                                  investitionsmaßnahmen eine große Bedeutung zu. In diesem Sinne will das vorliegende Merkblatt
+                                  Hinweise zur verfahrens- und energieoptimierten Auslegung von Belüftungs- und Durchmischungs-
+                                  einrichtungen bei Belebungsanlagen geben.
+
+                                  Das vorliegende Merkblatt greift die grundlegenden Ansätze zur Bemessung von Belebungsanlagen
+                                  und Ermittlung des Sauerstoffbedarfs aus dem Regelwerk der DWA auf und führt sie konsequent
+                                  fort. Es werden sowohl für Druck- wie auch für Oberflächenbelüftungssysteme konkrete Bemes-
+                                  sungsvorgaben formuliert, sodass für die jeweiligen Belüftungssysteme eine detaillierte Auslegung
+                                  erfolgen kann.
+
+                                  Ein wesentlicher Schwerpunkt der inhaltlichen Gestaltung dieses Merkblatts liegt auf der detaillier-
+                                  ten Betrachtung der Wechselwirkungen zwischen Belüftung und Durchmischung einschließlich kon-
+                                  kreter Hinweise zur Anordnung von Belüftungseinrichtungen und Durchmischungsaggregaten in
+                                  Abhängigkeit von der Beckenform. Angesichts der vielfältigen Beckenformen von Belebungsanlagen
+                                  ist es aber nicht Ziel dieses Merkblatts, allgemein gültige Hinweise für jede mögliche Beckengeo-
+                                  metrie zu geben, sondern vielmehr durch das Aufzeigen von möglichen Wechselwirkungen dem
+                                  Planer Hinweise und Richtlinien zu vermitteln, die es ihm ermöglichen, eine entsprechend optimier-
+                                  te Lage für Durchmischung und Belüftung festzulegen.
+
+                                  Eine verfahrenstechnisch und energetisch optimierte Auslegung bedeutet, dass neben einer unter
+                                  Berücksichtigung der Grundsätze dieses Merkblatts erfolgten Auslegung der Belüftungs- und
+                                  Durchmischungseinrichtungen von Belebungsanlagen auch die Grundsätze der Automatisierung,
+                                  insbesondere im Hinblick auf die Nährstoffelimination sowie die konkreten Hinweise zur Überprü-
+                                  fung der Garantiewerte von Belüftungseinrichtungen beachtet werden. Insofern stellt dieses Merk-
+
+
+
+
+Für Käufer des Belebungsexperts
+                                  blatt eine notwendige Ergänzung des im Regelwerk der DWA vorliegenden Merkblatts DWA-M 209
+                                  „Messung der Sauerstoffzufuhr von Belüftungseinrichtungen in Belebungsanlagen in Reinwasser
+                                  und in belebtem Schlamm“ und des Arbeitsblatts DWA-A 268 „Automatisierung von einstufigen Be-
+                                  lebungsanlagen“ dar.
+
+                                  Der vorliegende erste Teil des Merkblatts befasst sich vorrangig mit den Grundlagen, der Dimensio-
+                                  nierung, der konkreten Planung und Anordnung von Belüftungs- und Durchmischungseinrichtungen
+                                  sowie deren Ausschreibung. Im zweiten Teil werden ergänzend die betrieblichen Aspekte im Zu-
+                                  sammenhang mit Wartung und Instandhaltung, Überwachung der Leistungsfähigkeit und Energie-
+                                  effizienz sowie dem Erkennen des richtigen Zeitpunkts für eine mögliche Erneuerung und weitere
+                                  wichtige betriebliche Aspekte behandelt.
+
+                                  Im Juni 2016 erschien das Arbeitsblatt DWA-A 131 „Bemessung von einstufigen Belebungsanlagen“.
+                                  Die in diesem Arbeitsblatt getroffenen Festlegungen sowie neue Erkenntnisse zum Einfluss von
+                                  Meersalz auf die Sauerstoffzufuhr sowie Empfehlungen zur Wahl von α-Werten waren Anlass für die
+                                  vorliegende redaktionelle Überarbeitung.
+
+                                  Änderungen
+                                  Gegenüber dem Merkblatt DWA-M 229-1 (05/2013) wurden folgende Ergänzungen und Änderungen
+                                  vorgenommen:
+                                  a) Berücksichtigung des Einflusses von Meersalz auf die Sauerstoffzufuhr auf Basis neuester For-
+                                     schungsergebnisse und technischer Untersuchungen;
+                                  b) Einführung der Faktoren β-Wert (Salzfaktor Sauerstoffsättigung) und fS-Wert (Salzfaktor Belüf-
+                                     tungskoeffizient);
+
+
+
+                                  September 2017                                                                  DWA-Regelwerk     3
+                                  DWA-M 229-1
+
+
+                                  c) Anpassung der üblichen Betriebsbereiche an die neuesten Entwicklungen (Unterabschnitt
+                                     4.1.2.4);
+                                  d) Hinweis auf Luftvolumenstrommessungen (Unterabschnitt 4.1.2.5);
+                                  e) textliche Anpassung auf Basis der Empfehlungen im Merkblatt DWA-M 229-2;
+                                  f) Streichung des Unterabschnitts 4.2.5 „Leerrohrgeschwindigkeit“;
+                                  g) Anpassung von Gleichung (16) an die Anforderungen des Arbeitsblatts DWA-A 131 (Unterab-
+                                     schnitt 4.3.1);
+                                  h) Ergänzung der neuen Tabelle 1 mit Empfehlungswerten für den α-Wert (Unterabschnitt 4.3.2);
+                                  i) Anpassung der Tabellenblätter in Anhang A.1 und A.2 an die Formeln zur Berücksichtigung des
+                                     Meersalzeinflusses;
+                                  j) neues Beispiel zum Meersalzeinfluss;
+                                  k) Anpassung der Ermittlung des minimalen Sauerstoffbedarfs an das neue Arbeitsblatt DWA-
+                                     A 131;
+                                  l) Anpassung an die europäische Normung und zwischenzeitlich eingetretene Veränderungen hin-
+                                     sichtlich Gesetzen und Verordnungen.
+
+                                  In diesem Merkblatt wird im Hinblick auf einen gut verständlichen und lesefreundlichen Text für
+                                  personenbezogene Berufs- und Funktionsbezeichnungen verallgemeinernd die männliche Form
+                                  verwendet. Alle Informationen beziehen sich in gleicher Weise auf alle Geschlechter.
+
+                                  Frühere Ausgaben
+                                  Merkblatt DWA-M 229-1 (05/2013)
+
+
+
+
+Für Käufer des Belebungsexperts
+
+
+
+                                  4     DWA-Regelwerk                                                              September 2017
+                                                                                                                    DWA-M 229-1
+
+
+
+                                  Verfasser
+                                  Das Merkblatt wurde von der DWA-Arbeitsgruppe KA-6.5 „Belüftung und Durchmischung“ im DWA-
+                                  Fachausschuss KA-6 „Aerobe biologische Abwasserreinigungsverfahren“ redaktionell überarbeitet.
+                                  Mitglieder der DWA-Arbeitsgruppe KA-6.5:
+                                  BAUMANN, Peter                    Prof. Dr.-Ing., Stuttgart
+                                  FREY, Wilhelm                     Dr.-Ing., Leobendorf
+                                  FRÖSE, Gero                       Dipl.-Ing., Cremlingen
+                                  GÜNKEL-LANGE, Tobias              Dr.-Ing., Griesheim
+                                  HUNZE, Michaela                   PD Dr.-Ing. habil., Hannover
+                                  JARDIN, Norbert                   Prof. Dr.-Ing., Essen (Sprecher)
+                                  PETER-FRÖHLICH, Anton             Dr.-Ing., Berlin (Mitglied bis Juni 2013)
+                                  LÜDICKE, Carsten                  Dipl.-Ing., Berlin (Mitglied seit Juni 2013)
+                                  SEIBERT-ERLING, Gerhard           Dr.-Ing., Frechen
+                                  WAGNER, Martin                    Prof. Dr.-Ing., Darmstadt
+                                  WEICHGREBE, Dirk                  Dr.-Ing., Hannover (Mitglied bis Januar 2014)
+
+
+                                  Als Gast hat mitgewirkt:
+                                  SANDER, Stephan                   M.Sc., Wülfrath
+
+
+                                  Projektbetreuer in der DWA-Bundesgeschäftsstelle:
+                                  WILHELM, Christian                Dr.-Ing., Hennef
+                                                                    Abteilung Wasser- und Abfallwirtschaft
+
+
+
+
+Für Käufer des Belebungsexperts
+
+
+
+                                  September 2017                                                                   DWA-Regelwerk   5
+
