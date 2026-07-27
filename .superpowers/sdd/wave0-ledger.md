@@ -274,3 +274,41 @@ MAP WRITE-BACK applied retroactively: 51 nodes stamped. Idempotency bug caught b
 CORPUS: 3978 nodes / ERRORS 3345 / WARNINGS 1033 / rule 10a=0 / rule 10b=4. SHEET: 39 open.
 RESUME: (1) A178-D8 6 NULL-quote CRs (2) validator rule for display-vs-enforcement asymmetry
         (3) build DIN-14021's 30 missing CR nodes (4) DWA-M-102-4. A-178 NOT closed.
+
+# ============================================================
+# CONVERGENCE TABLE — corpus-wide position, 2026-07-27
+# Ratified: full treatment applies to ALL ~71 owned standards, not only touched ones.
+# Full treatment = bidirectional page comparison + PROOF MANDATE (execution) +
+#   source-settled fixes + judgment items on the sheet + map write-back + validator green.
+# ============================================================
+
+FULLY TREATED   0  of 71
+        NONE. Under the ratified definition no standard has yet had the full treatment.
+        Two new mandates (PROOF, BIDIRECTIONAL) are unmet corpus-wide, so every standard
+        previously read as "closed" is downgraded to in-progress. This is a scoreboard
+        correction, not a regression - the work stands, the bar moved.
+
+IN PROGRESS     5
+        DWA-A-178          audited full depth + 13/13 equations verified vs the page.
+                           MISSING: proof mandate (14/19 is ASSESSED, not executed),
+                           bidirectional coverage (TOC walk never done), 9 judgment items
+                           unsigned, 5 blocked worksheets need E-D2/E-D4 rulings.
+        VDI-3814-Blatt-2-1 audited + 28 quotes backfilled + map written back.
+                           MISSING: proof mandate, bidirectional coverage, 8 judgment items.
+        HOAI-2021          23 quotes backfilled + map written back. Re-opened from a
+                           premature COMPLIANT close. MISSING: deep audit, proof,
+                           bidirectional.
+        DIN-14021          30 quotes backfilled (3 stubs + 27 headings). MISSING: deep audit,
+                           proof, bidirectional, AND its map has 17 nodes for 50 CRs so 30
+                           fixes could not be written back at all.
+        DVS-2225-4         page provenance 48.6 -> 100%. MISSING: everything else.
+
+UNTOUCHED      66
+        Triaged in wave 0 only. Tier labels are a snapshot under the rules of their day and
+        confer no treatment. The ranked queue (re-rank on live validator errors each move)
+        currently heads: DWA-M-102-4 (2), DWA-M-187 (3), DWA-M-1200-2 (3), DWA-M-277E (5),
+        ISO-14050 (6), DIN-14071-1 (7), ISO-14064-2 (7).
+
+HONEST NOTE: at the rate of one standard per deep wave, 66 untouched standards is the real
+        shape of this campaign. The convergence table exists so that fact stays visible
+        instead of being masked by per-wave fix counts.

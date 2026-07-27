@@ -90,7 +90,60 @@ effort throughout.
 one-paragraph absence summary — standards completed, fixed counts, workflow-metric movement,
 sign-off sheet count.
 
-# MAP WRITE-BACK RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
+# THE PROOF MANDATE (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "A standard's workflow metric is only claimable by EXECUTION, never by assessment. Per
+> standard, before the wave closes: (1) extend/reuse the harness to drive every runnable
+> worksheet chain through the REAL save path — values persist, derived fields compute,
+> summaries aggregate — raw output per chain; (2) every live gate demonstrated BOTH ways
+> where drivable: a state that passes it and a state that violates it (the F-4 lesson: gates
+> that fire but never enforce are invisible to static reading); (3) blocked worksheets stated
+> with the demonstrated blocker, not the suspected one — 'cannot run because X' must show X
+> actually stopping the run; (4) after any fix wave: regression — the standard's previously-green
+> chains re-driven, plus the #22-guard class for anything touching dual-role fields; (5) the wave
+> report's workflow metric cites the harness run ID/raw output — 'runnable' means RAN.
+> Retroactively: A-178's '14 of 19' gets its execution proof at the next touch of that standard;
+> new standards get it in-wave."
+
+**"Runnable" means RAN.** An assessed metric is a hypothesis. Until a chain has been driven
+through the real save path, the honest word is *"expected to run"*, and it must be written that
+way. **A-178's current 14/19 is therefore UNPROVEN** and is labelled so until its next touch.
+
+# BIDIRECTIONAL COVERAGE (STANDING — owner's order, ratified 2026-07-27)
+
+Per standard the comparison runs **both ways**:
+
+- **Encoding → source** (the direction already practised): does every encoded item match its
+  printed page?
+- **Source → encoding** (the direction that was missing): does every normative element the
+  guideline *prints* exist in the encoding? Walk the standard's own table of contents and clause
+  structure. Every section carrying normative content — requirements, equations, tables,
+  procedures — either maps to worksheet content **or** is listed in the residue as
+  not-encoded-with-reason.
+
+**A standard is not READY-TO-USE if the guideline demands something the worksheets never ask.**
+Coverage gaps are silent by construction: nothing in the encoding points at what is absent from
+it, which is exactly why the sweep must start from the source's own structure and not from the
+encoded rows.
+
+# CORPUS-WIDE SCOPE (STANDING — confirmed 2026-07-27)
+
+**The full treatment applies to EVERY owned standard in the ranked queue — all ~71 — not only
+the ones already touched.** Full treatment = bidirectional page comparison · proof mandate ·
+source-settled fixes applied · judgment items on the sheet · map write-back · validator green
+for the classes checked.
+
+**No standard is "done" by triage alone.** Wave-0 triage assigned tiers; it did not treat
+anything. Every wave report carries a **convergence table** so the corpus-wide position is
+visible every time:
+
+| state | meaning |
+|---|---|
+| **fully treated** | all six full-treatment elements satisfied, with execution proof |
+| **in progress** | audited and/or partly repaired, missing at least one element |
+| **untouched** | triaged only |
+
+Report the counts every wave, and never let partial work read as completion.
 
 > "The reasoning map is updated in the SAME wave as every change it describes — a fix without
 > its map write-back is incomplete work. Per fix: the affected node's frontmatter updates
