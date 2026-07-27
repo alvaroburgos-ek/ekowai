@@ -26,6 +26,7 @@ function valid(): ParsedWorkbook {
       required: 'yes', validation_rules: null,
       regulation_reference: null, description: null,
       verification_status: null, notes: null,
+      owner: null, xbrl_element_id: null,
     }],
     enumValues: [],
     equations: [],
@@ -101,9 +102,11 @@ describe('Pass3c validator', () => {
     const p = valid();
     p.complianceRequirements.push({
       requirement_code: 'R1', standard_code: 'WRONG',
+      worksheet_code: null,
       title: 'T', description: null,
       evaluation_type: null, required_field_symbols: null,
       evaluation_expression: 'x == 1', pass_condition: null,
+      severity: null,
       regulation_reference: null, phase: null, order_index: null,
       verification_status: null,
     });
