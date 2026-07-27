@@ -1,5 +1,30 @@
 @AGENTS.md
 
+# AUTONOMOUS SEQUENCING RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "AUTONOMOUS SEQUENCING RULE: The orchestrator never presents option menus or asks 'where
+> should work go.' The standing priority order decides, always: (1) prod-write fixes that
+> clear an active validator rule are PRE-AUTHORIZED when each fix is a verbatim source quote
+> captured from the standard's own PDF in-session (SR-1 compliant by construction —
+> quote-backfills, reference-edge additions, provenance corrections); (2) [CODE]-class
+> tooling fixes — always pre-authorized, just do them; (3) next standard in the ranked queue.
+> Decision items needing MY ruling (modal severities, range choices, normative ambiguity)
+> accumulate in the queue file and NEVER block or sequence work — I sign asynchronously. The
+> ONLY stops remain: prod writes that CHANGE computed values or enforcement behavior,
+> ratified-design changes, irreversibles."
+
+**Operational reading.** No menus, no "which should I do first". Work the order 1→2→3 and keep
+going. Ratification items are *written down*, never *waited on*. The pre-authorisation in (1) is
+scoped by its own justification: it holds only while the write is **evidence capture** — text
+lifted verbatim from the standard's own PDF in the acting session. The moment a write would move
+a number, a severity, a condition, or a gate's enforcement, it leaves clause (1) and hits the
+stop-list, regardless of how small it looks. Capturing a quote is pre-authorised; deciding what
+the quote *means* is not.
+
+**Interaction with R-1/R-2.** In-session is load-bearing. A quote captured by another session,
+another agent, or read out of a prior ledger is UNVERIFIED INPUT and does NOT qualify for the
+pre-authorisation — it must be re-extracted from the PDF here before it may be written.
+
 # CONTENT BOUNDARY RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
 
 > "A worksheet's content universe is exactly its own guideline's printed pages — nothing

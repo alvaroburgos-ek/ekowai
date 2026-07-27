@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-27T14:00:04.925Z",
+  "exported_at": "2026-07-27T14:30:42.392Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -4382,17 +4382,6 @@
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
-          "id": "2ff95419-9d9e-4e89-bf04-99ce28e53e2a",
-          "code": "REQ-35",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.9",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §7.9]",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
           "id": "e6c654f0-9fa0-4fae-bf0c-d211b2d45617",
           "code": "REQ-37",
           "condition": "selected_claim_type IS NOT NULL",
@@ -4470,17 +4459,6 @@
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
-          "id": "391df0ce-a733-4ece-a072-7097918daa58",
-          "code": "REQ-36",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.10",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §7.10]",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
           "id": "09fcb3a0-b6f8-401d-b4fe-f512601c681c",
           "code": "REQ-41",
           "condition": "selected_claim_type IS NOT NULL",
@@ -4522,6 +4500,28 @@
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "7.3.2.1 The following qualifications refer to all types of degradation, including for instance biodegradation and photodegradation.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "2ff95419-9d9e-4e89-bf04-99ce28e53e2a",
+          "code": "REQ-35",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.9",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "7.9.2.1 Alle Aussagen zum reduzierten Energieverbrauch müssen begründet sein. Weil der reduzierte Energieverbrauch eine vergleichende Aussage ist, müssen die Anforderungen von 6.3 erfüllt sein.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "391df0ce-a733-4ece-a072-7097918daa58",
+          "code": "REQ-36",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.10",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "7.10.2.2 Alle Aussagen zum reduzierten Ressourcenverbrauch müssen begründet sein. 7.10.2.3 Reduzierungen des Ressourcenverbrauchs für Produkte und Verpackung müssen getrennt angegeben und dürfen nicht zusammengefasst werden.",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4840,7 +4840,7 @@
           "clause_reference": "5,6,7",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §5/§6/§7 (Roll-up)]",
+          "source_quote": "[Abschnitt 5, PDF S.21] Die in Abschnitt 5 aufgeführten Anforderungen gelten für sämtliche umweltbezogenen Anbietererklärungen, unabhängig davon, ob es eine von den ausgewählten Aussagen ist, auf die in Abschnitt 7 verwiesen wird, oder eine sonstige Umweltaussage. — [Abschnitt 6, PDF S.27] Der für Umweltaussagen Zuständige ist für Bewertung und Bereitstellung von Daten verantwortlich, die für die Überprüfung von umweltbezogenen Anbietererklärungen notwendig sind. — [Abschnitt 7, PDF S.31] Abschnitt 7 gibt Erklärungen und Anwendungshinweise für ausgewählte, häufig in umweltbezogenen Anbietererklärungen verwendete Begriffe.",
           "worksheet_template_id": "d064e6e4-9507-4203-b45c-ae7f0d566bb5"
         }
       ],
@@ -164064,17 +164064,6 @@
       ],
       "compliance": [
         {
-          "id": "12effad6-35b9-405b-ae47-16e56d1d6442",
-          "code": "HOAI-CR-11",
-          "condition": "(p_ing_lph1+p_ing_lph2+p_ing_lph3+p_ing_lph4+p_ing_lph5+p_ing_lph6+p_ing_lph7+p_ing_lph8+p_ing_lph9) == 100",
-          "severity": "block",
-          "clause_reference": "§43 Abs.1",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §43 Abs.1]",
-          "worksheet_template_id": "646fc966-8c34-41c2-97a1-5369c709af5e"
-        },
-        {
           "id": "5c3fdc65-42c9-4ebd-9123-763c26e89fe2",
           "code": "HOAI-CR-12",
           "condition": "(p_ver_lph1+p_ver_lph2+p_ver_lph3+p_ver_lph4+p_ver_lph5+p_ver_lph6+p_ver_lph7+p_ver_lph8+p_ver_lph9) == 100",
@@ -164082,7 +164071,18 @@
           "clause_reference": "§47 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §47 Abs.1]",
+          "source_quote": "(1) § 34 Absatz 1 gilt entsprechend. Die Grundleistungen für Verkehrsanlagen sind in neun Leistungsphasen unterteilt und werden wie folgt in Prozentsätzen der Honorare des § 48 bewertet: 1. für die Leistungsphase 1 (Grundlagenermittlung) mit 2 Prozent, 2. für die Leistungsphase 2 (Vorplanung) mit 20 Prozent, 3. für die Leistungsphase 3 (Entwurfsplanung) mit 25 Prozent, …",
+          "worksheet_template_id": "646fc966-8c34-41c2-97a1-5369c709af5e"
+        },
+        {
+          "id": "12effad6-35b9-405b-ae47-16e56d1d6442",
+          "code": "HOAI-CR-11",
+          "condition": "(p_ing_lph1+p_ing_lph2+p_ing_lph3+p_ing_lph4+p_ing_lph5+p_ing_lph6+p_ing_lph7+p_ing_lph8+p_ing_lph9) == 100",
+          "severity": "block",
+          "clause_reference": "§43 Abs.1",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "(1) § 34 Absatz 1 gilt entsprechend. Die Grundleistungen für Ingenieurbauwerke sind in neun Leistungsphasen unterteilt und werden wie folgt in Prozentsätzen der Honorare des § 44 bewertet: 1. für die Leistungsphase 1 (Grundlagenermittlung) mit 2 Prozent, 2. für die Leistungsphase 2 (Vorplanung) mit 20 Prozent, 3. für die Leistungsphase 3 (Entwurfsplanung) mit 25 Prozent, …",
           "worksheet_template_id": "646fc966-8c34-41c2-97a1-5369c709af5e"
         },
         {
@@ -164093,7 +164093,7 @@
           "clause_reference": "§51 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §51 Abs.1]",
+          "source_quote": "(1) Die Grundleistungen der Tragwerksplanung sind für Gebäude und zugehörige bauliche Anlagen sowie für Ingenieurbauwerke nach § 41 Nummer 1 bis 5 in den Leistungsphasen 1 bis 6 sowie für Ingenieurbauwerke nach § 41 Nummer 6 und 7 in den Leistungsphasen 2 bis 6 zusammengefasst und werden wie folgt in Prozentsätzen der Honorare des § 52 bewertet.",
           "worksheet_template_id": "841f7723-114b-4fe3-9096-aeb5d98d8d03"
         },
         {
@@ -164104,8 +164104,19 @@
           "clause_reference": "§55 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §55 Abs.1]",
+          "source_quote": "(1) Das Leistungsbild Technische Ausrüstung umfasst Grundleistungen für Neuanlagen, Wiederaufbauten, Erweiterungsbauten, Umbauten, Modernisierungen, Instandhaltungen und Instandsetzungen. Die Grundleistungen bei der Technischen Ausrüstung sind in neun Leistungsphasen zusammengefasst und werden wie folgt in Prozentsätzen der Honorare des § 56 bewertet.",
           "worksheet_template_id": "841f7723-114b-4fe3-9096-aeb5d98d8d03"
+        },
+        {
+          "id": "acbc0905-6d65-4a62-8fbd-2bd33b8ed15c",
+          "code": "HOAI-CR-23",
+          "condition": "TRUE",
+          "severity": "block",
+          "clause_reference": "§11",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "(1) Umfasst ein Auftrag mehrere Objekte, so sind die Honorare vorbehaltlich der folgenden Absätze für jedes Objekt getrennt zu berechnen.",
+          "worksheet_template_id": "4a8434b2-efca-42f5-a833-1f66a7eba735"
         },
         {
           "id": "c9a76dba-1f5f-4793-96fe-efa4e2b6d13e",
@@ -164115,7 +164126,7 @@
           "clause_reference": "§7 Abs.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §7 Abs.2]",
+          "source_quote": "(2) Der Auftragnehmer hat den Auftraggeber, sofern dieser Verbraucher ist, vor Abgabe von dessen verbindlicher Vertragserklärung zur Honorarvereinbarung in Textform darauf hinzuweisen, dass ein höheres oder niedrigeres Honorar als die in den Honorartafeln dieser Verordnung enthaltenen Werte vereinbart werden kann. Erfolgt der Hinweis nach Satz 1 nicht oder nicht rechtzeitig, gilt für die zwischen den Vertragsparteien vereinbarten Grundleistungen anstelle eines höheren Honorars ein Honorar in Höhe des jeweiligen Basishonorarsatzes als vereinbart.",
           "worksheet_template_id": "4a8434b2-efca-42f5-a833-1f66a7eba735"
         },
         {
@@ -164126,7 +164137,7 @@
           "clause_reference": "§7 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §7 Abs.1]",
+          "source_quote": "(1) Das Honorar richtet sich nach der Vereinbarung, die die Vertragsparteien in Textform treffen.",
           "worksheet_template_id": "4a8434b2-efca-42f5-a833-1f66a7eba735"
         },
         {
@@ -164137,18 +164148,7 @@
           "clause_reference": "§15",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §15]",
-          "worksheet_template_id": "4a8434b2-efca-42f5-a833-1f66a7eba735"
-        },
-        {
-          "id": "acbc0905-6d65-4a62-8fbd-2bd33b8ed15c",
-          "code": "HOAI-CR-23",
-          "condition": "TRUE",
-          "severity": "block",
-          "clause_reference": "§11",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §11]",
+          "source_quote": "§ 15 Fälligkeit des Honorars, Abschlagszahlungen — Für die Fälligkeit der Honorare für die von dieser Verordnung erfassten Leistungen gilt § 650g Absatz 4 des Bürgerlichen Gesetzbuchs entsprechend. Für das Recht, Abschlagszahlungen zu verlangen, gilt § 632a des Bürgerlichen Gesetzbuchs entsprechend.",
           "worksheet_template_id": "4a8434b2-efca-42f5-a833-1f66a7eba735"
         },
         {
@@ -164159,7 +164159,7 @@
           "clause_reference": "§1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §1]",
+          "source_quote": "§ 1 Anwendungsbereich — Diese Verordnung gilt für Honorare für Ingenieur- und Architektenleistungen, soweit diese Leistungen durch diese Verordnung erfasst sind. Die Regelungen dieser Verordnung können zum Zwecke der Honorarberechnung einer Honorarvereinbarung zugrunde gelegt werden.",
           "worksheet_template_id": "c8481784-747b-4a7f-ac38-1ce874fa10c7"
         },
         {
@@ -164170,7 +164170,7 @@
           "clause_reference": "§4 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §4 Abs.1]",
+          "source_quote": "(1) Anrechenbare Kosten sind Teil der Kosten für die Herstellung, den Umbau, die Modernisierung, Instandhaltung oder Instandsetzung von Objekten sowie für die damit zusammenhängenden Aufwendungen.",
           "worksheet_template_id": "09d5958d-2157-4cfb-8bd4-70f9b26061b8"
         },
         {
@@ -164181,7 +164181,7 @@
           "clause_reference": "§17",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §17]",
+          "source_quote": "(1) Leistungen der Bauleitplanung umfassen die Vorbereitung der Aufstellung von Flächennutzungs- und Bebauungsplänen im Sinne des § 1 Absatz 2 des Baugesetzbuches in der jeweils geltenden Fassung die erforderlichen Ausarbeitungen und Planfassungen sowie die Mitwirkung beim Verfahren. (2) Leistungen beim Städtebaulichen Entwurf sind Besondere Leistungen.",
           "worksheet_template_id": "09d5958d-2157-4cfb-8bd4-70f9b26061b8"
         },
         {
@@ -164192,7 +164192,7 @@
           "clause_reference": "§6 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §6 Abs.1]",
+          "source_quote": "(1) Bei der Ermittlung des Honorars für Grundleistungen im Sinne des § 3 Absatz 1 sind zugrunde zu legen 1. das Leistungsbild, 2. die Honorarzone und 3. die dazugehörige Honorartafel zur Honorarorientierung.",
           "worksheet_template_id": "09d5958d-2157-4cfb-8bd4-70f9b26061b8"
         },
         {
@@ -164203,7 +164203,7 @@
           "clause_reference": "§4 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §4 Abs.1]",
+          "source_quote": "(1) Anrechenbare Kosten sind Teil der Kosten für die Herstellung, den Umbau, die Modernisierung, Instandhaltung oder Instandsetzung von Objekten sowie für die damit zusammenhängenden Aufwendungen. Sie sind nach allgemein anerkannten Regeln der Technik oder nach Verwaltungsvorschriften (Kostenvorschriften) auf der Grundlage ortsüblicher Preise zu ermitteln.",
           "worksheet_template_id": "09d5958d-2157-4cfb-8bd4-70f9b26061b8"
         },
         {
@@ -164214,7 +164214,7 @@
           "clause_reference": "§5",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §5 (objektart-gated I-III/I-V)]",
+          "source_quote": "(1) Die Grundleistungen der Flächen-, Objekt- oder Fachplanungen werden zur Berechnung der Honorare nach den jeweiligen Planungsanforderungen Honorarzonen zugeordnet, die von der Honorarzone I aus ansteigend den Schwierigkeitsgrad der Planung einstufen.",
           "worksheet_template_id": "09d5958d-2157-4cfb-8bd4-70f9b26061b8"
         },
         {
@@ -164225,7 +164225,7 @@
           "clause_reference": "§13",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §13]",
+          "source_quote": "§ 13 Interpolation — Zwischenstufen der in den Honorartafeln angegebenen anrechenbaren Kosten und Flächen oder Verrechnungseinheiten sind durch lineare Interpolation zu ermitteln.",
           "worksheet_template_id": "09d5958d-2157-4cfb-8bd4-70f9b26061b8"
         },
         {
@@ -164236,7 +164236,7 @@
           "clause_reference": "§6 Abs.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §6 Abs.2 (z_umbau>=0, Default 20%)]",
+          "source_quote": "(2) Honorare für Grundleistungen bei Umbauten und Modernisierungen gemäß § 2 Absatz 5 und 6 sind zu ermitteln nach … 5. dem Umbau- oder Modernisierungszuschlag auf das Honorar. Der Umbau- oder Modernisierungszuschlag ist unter Berücksichtigung des Schwierigkeitsgrads der Leistungen in Textform zu vereinbaren. Sofern keine Vereinbarung in Textform getroffen wurde, gilt ein Zuschlag von 20 Prozent ab einem durchschnittlichen Schwierigkeitsgrad als vereinbart.",
           "worksheet_template_id": "0ae57ed7-99bc-47ad-8ba9-b6964261b1e9"
         },
         {
@@ -164247,7 +164247,7 @@
           "clause_reference": "§14",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §14]",
+          "source_quote": "(1) Der Auftragnehmer kann neben den Honoraren dieser Verordnung auch die für die Ausführung des Auftrags erforderlichen Nebenkosten in Rechnung stellen; ausgenommen sind die abziehbaren Vorsteuern gemäß § 15 Absatz 1 des Umsatzsteuergesetzes in der jeweils geltenden Fassung.",
           "worksheet_template_id": "0ae57ed7-99bc-47ad-8ba9-b6964261b1e9"
         },
         {
@@ -164258,7 +164258,7 @@
           "clause_reference": "§16",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §16]",
+          "source_quote": "(1) Der Auftragnehmer hat Anspruch auf Ersatz der gesetzlich geschuldeten Umsatzsteuer für nach dieser Verordnung abrechenbare Leistungen, sofern nicht die Kleinunternehmerregelung nach § 19 des Umsatzsteuergesetzes angewendet wird.",
           "worksheet_template_id": "0ae57ed7-99bc-47ad-8ba9-b6964261b1e9"
         },
         {
@@ -164269,7 +164269,7 @@
           "clause_reference": "§2a; §7",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §2a/§7]",
+          "source_quote": "[§ 2a Abs. 2] Basishonorarsatz ist der jeweils untere in den Honorartafeln dieser Verordnung enthaltene Honorarsatz. — [§ 7 Abs. 1] Das Honorar richtet sich nach der Vereinbarung, die die Vertragsparteien in Textform treffen. Sofern keine Vereinbarung über die Höhe des Honorars in Textform getroffen wurde, gilt für Grundleistungen der jeweilige Basishonorarsatz als vereinbart, der sich bei der Anwendung der Honorargrundlagen des § 6 ergibt.",
           "worksheet_template_id": "0ae57ed7-99bc-47ad-8ba9-b6964261b1e9"
         },
         {
@@ -164280,7 +164280,7 @@
           "clause_reference": "§8 Abs.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §8 Abs.1]",
+          "source_quote": "(1) Werden dem Auftragnehmer nicht alle Leistungsphasen eines Leistungsbildes übertragen, so dürfen nur die für die übertragenen Phasen vorgesehenen Prozentsätze berechnet und vereinbart werden. Die Vereinbarung hat in Textform zu erfolgen.",
           "worksheet_template_id": "0ae57ed7-99bc-47ad-8ba9-b6964261b1e9"
         },
         {
@@ -164291,7 +164291,7 @@
           "clause_reference": "§39 Abs.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §39 Abs.3]",
+          "source_quote": "(3) Die Grundleistungen bei Freianlagen sind in neun Leistungsphasen unterteilt und werden wie folgt in Prozentsätzen der Honorare des § 40 bewertet.",
           "worksheet_template_id": "bc794f99-1b70-45c3-934a-3df79bf1ce66"
         },
         {
@@ -164302,7 +164302,7 @@
           "clause_reference": "§34 Abs.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §34 Abs.3]",
+          "source_quote": "(3) Die Grundleistungen sind in neun Leistungsphasen unterteilt und werden wie folgt in Prozentsätzen der Honorare des § 35 bewertet: 1. für die Leistungsphase 1 (Grundlagenermittlung) mit je 2 Prozent für Gebäude und Innenräume, 2. für die Leistungsphase 2 (Vorplanung) mit je 7 Prozent für Gebäude und Innenräume, 3. für die Leistungsphase 3 (Entwurfsplanung) mit 15 Prozent für Gebäude und Innenräume, 4. für die Leistungsphase 4 (Genehmigungsplanung) mit 3 Prozent für Gebäude und 2 Prozent für Innenräume, 5. für die Leistungsphase 5 (Ausführungsplanung) mit 25 Prozent für Gebäude und 30 Prozent für Innenräume, …",
           "worksheet_template_id": "bc794f99-1b70-45c3-934a-3df79bf1ce66"
         },
         {
@@ -164313,7 +164313,7 @@
           "clause_reference": "§34 Abs.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: §34 Abs.3]",
+          "source_quote": "(3) Die Grundleistungen sind in neun Leistungsphasen unterteilt und werden wie folgt in Prozentsätzen der Honorare des § 35 bewertet: … 4. für die Leistungsphase 4 (Genehmigungsplanung) mit 3 Prozent für Gebäude und 2 Prozent für Innenräume, 5. für die Leistungsphase 5 (Ausführungsplanung) mit 25 Prozent für Gebäude und 30 Prozent für Innenräume, … [Innenraum-Spalte desselben Absatzes]",
           "worksheet_template_id": "bc794f99-1b70-45c3-934a-3df79bf1ce66"
         }
       ],
@@ -225035,7 +225035,7 @@
           "clause_reference": "§6.3.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.3.1",
+          "source_quote": "Eine eindeutige Bezeichnung für das Projekt (Projektname) ist zu vergeben und es ist gegebenenfalls eine Abkürzung für die Projektbezeichnung festzulegen (insbesondere bei sehr langen Projektbezeichnungen empfehlenswert) sowie eventuell eine eindeutige Projektnummer.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225046,7 +225046,7 @@
           "clause_reference": "§6.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.2",
+          "source_quote": "Grundlegende Informationen zum AG, z. B.: • Name, Adresse • Organisationsform • Vertreter/Bevollmächtigter • Projektleiter und dessen Verantwortungsbereich, Befugnisse und Kompetenzen • gegebenenfalls weitere wichtige Informationen (z. B. vorsteuerabzugsberechtigt, unterliegt dem öffentlichen Beschaffungsrecht)",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225057,7 +225057,7 @@
           "clause_reference": "§6.3.4",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.3.4",
+          "source_quote": "Es folgt eine detaillierte, eindeutige Beschreibung der Leistungen, die innerhalb des Projekts zu erbringen sind.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225068,7 +225068,7 @@
           "clause_reference": "§6.4.1; §6.4.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.4.1; §6.4.2",
+          "source_quote": "[§6.4.1] Die Ziele des AG sind zu beschreiben. — [§6.4.2] Eine der wichtigsten Bestandteile einer Bedarfsermittlung ist die Priorisierung der Ziele. Bei der Festlegung der Prioritäten ist zu beachten, dass zwischen den einzelnen Zielen Wechselwirkungen bestehen, die unbedingt beachtet und mit dem AG abgestimmt werden müssen.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225079,7 +225079,7 @@
           "clause_reference": "§6.5",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.5",
+          "source_quote": "Werden zum Projekt weitere Parallelprojekte durchgeführt oder Eigenleistungen vom AG erbracht, entstehen Schnittstellen. Gegebenenfalls vorhandener Bestand (Gebäude/Technik) ist bezüglich der Schnittstellen ebenfalls zu berücksichtigen.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225090,7 +225090,7 @@
           "clause_reference": "§6.6",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.6",
+          "source_quote": "Nutzungsprozesse (Primär-/Kernprozesse) sind in der Regel die Wertschöpfungsprozesse eines Unternehmens, die im Rahmen der Nutzung eines Gebäudes ablaufen/durchgeführt werden. Es wird empfohlen, jeden Nutzungsprozess zu beschreiben.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225101,7 +225101,7 @@
           "clause_reference": "§6.7",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.7",
+          "source_quote": "Die Bestandserfassung versteht sich als eine systematische Erfassung und Beschreibung der Dokumente, die bereits beim AG vorliegen und für das betrachtete Projekt relevante Anforderungen enthalten.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225112,7 +225112,7 @@
           "clause_reference": "§6.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§6.1",
+          "source_quote": "Die Anforderungen müssen quantifizierbar und prüfbar sein.",
           "worksheet_template_id": "bccce3d8-cfcf-450a-a263-23a4042bc64e"
         },
         {
@@ -225123,7 +225123,7 @@
           "clause_reference": "§7.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.2",
+          "source_quote": "Die Ziele eines Betreiberkonzepts sind: • eine wirtschaftliche Betriebsführung • ein durchgängiges Konzept zur optimalen Nutzung der betrieblichen Einrichtungen • ein umfassendes „Werkzeug“ zur Betrachtung, Analyse und Optimierung aller kostenrelevanten Vorgänge der zu betreibenden Objekte",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225134,7 +225134,7 @@
           "clause_reference": "§7.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.3",
+          "source_quote": "Nutzer des Betreiberkonzepts sind alle, die innerhalb einer Liegenschaft oder eines Projekts auf die über die Strukturen der GA erfassten und bereitgestellten Daten oder auf die Ergebnisse der Auswertungen dieser Daten zugreifen.",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225145,7 +225145,7 @@
           "clause_reference": "§7.4",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.4",
+          "source_quote": "Hier sind in Anlehnung an das Schalenmodell gemäß VDI 3814 Blatt 1 die von dem zu erstellenden/anzupassenden Betreiberkonzept eingeschlossenen Liegenschaften mit ihren Gebäuden, Bereichen und gegebenenfalls speziellen Räumen (Raumtypen) und Sondernutzungsflächen aufzulisten.",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225156,7 +225156,7 @@
           "clause_reference": "§7.5",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.5",
+          "source_quote": "Die Ziele des Betreiberkonzepts für die organisatorische Umsetzung sind festzulegen.",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225167,7 +225167,7 @@
           "clause_reference": "§7.6",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.6",
+          "source_quote": "Dabei ist für die Betreiberorganisation zu unterscheiden zwischen: • Betreiben mit eigenem Personal (Eigenbetreiben) • Betreiben mit fremdem Personal (Fremdbetreiben) • Kombinationen von Eigenbetreiben und Fremdbetreiben",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225178,7 +225178,7 @@
           "clause_reference": "§7.7.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.7.1",
+          "source_quote": "Bei der Planung und beim Einsatz der GA-Systeme innerhalb von Liegenschaften mit mehreren Gebäuden und unterschiedlicher Nutzung oder bei der Unterteilung einzelner Gebäude in unterschiedliche Funktionsbereiche ist eine Zuordnung von Prioritäten sowohl für die Gebäude, Bereiche als auch die einzelnen darin enthaltenen technischen Anlagen sinnvoll.",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225189,7 +225189,7 @@
           "clause_reference": "§7.7.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§7.7.2",
+          "source_quote": "Das zentrale Element dieser Dienstgütevereinbarung ist die Leistungsqualität (z. B. Verfügbarkeit einer klimatechnischen Anlage von 99,98 %). Die Vereinbarung enthält die klare Definition der Anforderung.",
           "worksheet_template_id": "2859accd-ef51-428e-8cdf-64c1ad069bfd"
         },
         {
@@ -225200,7 +225200,7 @@
           "clause_reference": "§8.1; §6.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.1; §6.1",
+          "source_quote": "Ein GA-Lastenheft stellt die Anforderungen des AG hinsichtlich Bedarf, Nutzung, Liefer- und Leistungsplanung dar und wird sinnvollerweise im Rahmen der Bedarfsplanung oder parallel dazu erstellt. Die Ergebnisse einer Bedarfsplanung sind sinnvollerweise in einem Lastenheft zu dokumentieren.",
           "worksheet_template_id": "a95f8e89-503b-49ba-98f2-3beafafff8d3"
         },
         {
@@ -225211,7 +225211,7 @@
           "clause_reference": "§8.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.2",
+          "source_quote": "Die funktionale, interoperable Verbindung von Einrichtungen der Raum- und Anlagenautomation, der Management- und Bedieneinrichtungen sowie zu Einrichtungen für besondere Anwendungen erfolgt mittels Kommunikationseinrichtungen, für die genormte Datenkommunikationsprotokolle vorgegeben werden sollen.",
           "worksheet_template_id": "a95f8e89-503b-49ba-98f2-3beafafff8d3"
         },
         {
@@ -225222,7 +225222,7 @@
           "clause_reference": "§8.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.3",
+          "source_quote": "Das Störfall-, Meldungs- und Informationsmanagement dient dem Melden, der Verwaltung und der Dokumentation aller Störungen und Ereignisse im GA-System.",
           "worksheet_template_id": "a95f8e89-503b-49ba-98f2-3beafafff8d3"
         },
         {
@@ -225233,7 +225233,7 @@
           "clause_reference": "§8.4; §8.5",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.4; §8.5",
+          "source_quote": "[§8.4] Die Arten der zu verwendenden Sensoren und Aktoren sowie deren Merkmale sind gemäß den Anforderungen zu spezifizieren. — [§8.5] Für diese sind neben dem zu verwendenden Datenkommunikationsprotokoll und der notwendigen Datenschnittstelleneinheiten eventuell zusätzlich notwendige Speicheranforderungen und die Art der manuellen Übersteuerungsmöglichkeiten festzulegen.",
           "worksheet_template_id": "70f2ebe7-be67-448c-918c-4ef1c854337e"
         },
         {
@@ -225244,7 +225244,7 @@
           "clause_reference": "§8.6",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.6",
+          "source_quote": "Bei der Planung und Realisierung von Management- und Bedieneinrichtungen (MBE) kommt es vor allem auf die Berücksichtigung und Umsetzung der Bedürfnisse und Anforderungen der zukünftigen Nutzer/Betreiber an. Hierbei sind neben der Art des vorgesehenen Systems (webbasierendes oder Rich-Client-System oder beides) und den eventuell vorgegebenen und einzuhaltenden Betriebssystemen u. a. zu berücksichtigen: • Applikationen der MBE • Lizenzierung • Benutzermanagement",
           "worksheet_template_id": "70f2ebe7-be67-448c-918c-4ef1c854337e"
         },
         {
@@ -225255,7 +225255,7 @@
           "clause_reference": "§8.7",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.7",
+          "source_quote": "Bei den Anforderungen an die Schaltschränke der GA und deren Baugruppen sind u. a. die nachfolgenden Punkte zu berücksichtigen: • Bauweise, Ausführung des Gehäuses (z. B. Farbton) • Montageplatten • Trennung, Schottung Schaltschrank • Türen, Sichttüren und Sichtfenster sowie deren Verschlüsse",
           "worksheet_template_id": "70f2ebe7-be67-448c-918c-4ef1c854337e"
         },
         {
@@ -225266,7 +225266,7 @@
           "clause_reference": "§8.8",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.8",
+          "source_quote": "Es ist zu klären, ob ein separates GA-Netzwerk aufgebaut/genutzt wird oder ob eine Integration in ein vorhandenes Unternehmensnetzwerk erfolgen soll. Dies gilt auch für alle im GA-System notwendigen IT-Systeme/Infrastrukturkomponenten.",
           "worksheet_template_id": "70f2ebe7-be67-448c-918c-4ef1c854337e"
         },
         {
@@ -225277,7 +225277,7 @@
           "clause_reference": "§8.10",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.10",
+          "source_quote": "Die anzustrebende Energieeffizienzklasse gemäß DIN EN 15232 ist festzulegen.",
           "worksheet_template_id": "e8ff3319-4846-4adb-bfaa-a020e28c3676"
         },
         {
@@ -225288,7 +225288,7 @@
           "clause_reference": "§8.11",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.11",
+          "source_quote": "Die notwendigen Vorgaben bezüglich der Historisierung der Datenspeicherung sind festzulegen, insbesondere wenn es Anforderungen an die historische Speicherdauer gibt.",
           "worksheet_template_id": "e8ff3319-4846-4adb-bfaa-a020e28c3676"
         },
         {
@@ -225299,7 +225299,7 @@
           "clause_reference": "§8.12",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.12",
+          "source_quote": "Bei der Bedarfsplanung der GA ist grundsätzlich eine Prüfung von Schnittstellen zu anderen Systemen des CAFM zu berücksichtigen.",
           "worksheet_template_id": "e8ff3319-4846-4adb-bfaa-a020e28c3676"
         },
         {
@@ -225310,7 +225310,7 @@
           "clause_reference": "§8.13",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.13",
+          "source_quote": "Für jedes Projekt sind Anforderungen an die Funktionen der Systemselbstüberwachung und an die Systemreaktionen von Feldgeräten, Automations- sowie Management- und Bedieneinrichtungen im Fehlerfall festzulegen. [§8.13.2] Die Verwaltungsmethoden hinsichtlich Uhrzeit, Datum, Kalender und Zeitzonen sind für das gesamte GA-System einheitlich anzugeben.",
           "worksheet_template_id": "e8ff3319-4846-4adb-bfaa-a020e28c3676"
         },
         {
@@ -225321,7 +225321,7 @@
           "clause_reference": "§8.14",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§8.14",
+          "source_quote": "Im Rahmen der Bedarfsplanung empfiehlt es sich, detaillierte einheitliche Spezifizierungen der gewerkespezifischen Schnittstellen gemeinsam mit dem AG vorzunehmen und diese im weiteren Planungsprozess verfeinern zu lassen.",
           "worksheet_template_id": "e8ff3319-4846-4adb-bfaa-a020e28c3676"
         },
         {
@@ -225332,7 +225332,7 @@
           "clause_reference": "§5; §8.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "[Klausel-verifiziert: ]§5; §8.1",
+          "source_quote": "Die im Rahmen der Bedarfsplanung erstellten Dokumente, wie Betreiberkonzepte und Lastenhefte, sind durch den AG kontinuierlich zu pflegen und durch alle Verwender verpflichtend zu beachten.",
           "worksheet_template_id": "9eb0fba7-b492-49dc-bc04-4c6f53c31901"
         }
       ],
