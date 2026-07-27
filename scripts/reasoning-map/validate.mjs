@@ -523,6 +523,47 @@ function checkDrift(map) {
   bumpCheck('3.drift', nodeEqs >= 1);
 }
 
+// ═════════ CHECK 9 — TRIAGE ROWS MUST JOIN TO THE RAW DB INVENTORY ═══════════
+// Ratified by Alvaro 2026-07-27 (roster-verification order). A triage row that
+// names a standard absent from the raw DB inventory is INVALID — the corpus is
+// defined by the database, never by a report. The snapshot IS the DB inventory
+// (SELECT-only export of `standards`), so joining against it joins against prod.
+// Same rule applied in reverse to map directories: a map for a non-existent
+// standard is equally invalid.
+const TRIAGE_FILE =
+  argVal('--triage') || join(here, '..', '..', '.superpowers', 'sdd', 'wave0-TRIAGE-TABLE.md');
+
+function checkTriageInventory() {
+  const inventory = new Set(Object.keys(snapshot.standards || {}));
+
+  // 9a — every map directory must name a standard that exists in the inventory.
+  for (const std of Object.keys(maps)) {
+    const ok = inventory.has(std);
+    if (!ok)
+      finding('ERROR', '9.map-in-inventory', std, '_index',
+        `map exists for '${std}' but NO such standard in the raw DB inventory (${inventory.size} encoded)`);
+    else bumpCheck('9.map-in-inventory', true);
+  }
+
+  // 9b — every triage-table row must join to the inventory.
+  if (!existsSync(TRIAGE_FILE)) return; // no triage table in this run (e.g. fixtures) — not a defect
+  const lines = readFileSync(TRIAGE_FILE, 'utf8').split(/\r?\n/);
+  const seen = new Set();
+  for (const line of lines) {
+    if (!/^\|\s*[A-Z]/.test(line)) continue;      // tier-table data rows only
+    const code = (line.split('|')[1] || '').trim();
+    if (!code || !/^[A-Z]/.test(code)) continue;
+    if (/^(code|rank|standard|document|check|metric)$/i.test(code)) continue; // header rows
+    if (seen.has(code)) continue;
+    seen.add(code);
+    const ok = inventory.has(code);
+    if (!ok)
+      finding('ERROR', '9.triage-row-in-inventory', code, '_triage',
+        `triage row '${code}' does NOT join to the raw DB inventory — invalid row (fabrication class)`);
+    else bumpCheck('9.triage-row-in-inventory', true);
+  }
+}
+
 // ── Run all checks ────────────────────────────────────────────────────────────
 for (const std of Object.keys(maps)) {
   checkStructural(maps[std]);
@@ -531,6 +572,7 @@ for (const std of Object.keys(maps)) {
   checkDefectAttachment(maps[std]);
   checkDrift(maps[std]);
 }
+checkTriageInventory();
 
 // ═══════════════════════════ 4 CORE QUERIES ══════════════════════════════════
 function qBelowVa(std) {
