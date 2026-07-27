@@ -155,3 +155,37 @@ BLOCKER  CLI 2.1.220 available upstream but winget manifest lags (exit 43 after 
         RE-CONFIRMED independently 2026-07-27 in the Wave-3 session (winget source update, then
         winget upgrade --id Anthropic.ClaudeCode -> exit 43). Ran on 2.1.218. Not installed
         out-of-band (would fork a winget-managed install). Decide: wait for manifest, or out-of-band.
+
+W3-D1 DONE 2026-07-27 — ALL 54 EVIDENCE-FREE QUOTES BACKFILLED, RULE 10a AT ZERO.
+        Prod writes, pre-authorised under the AUTONOMOUS SEQUENCING RULE (codified in
+        CLAUDE.md this session: verbatim in-session PDF quote capture = pre-authorised).
+          VDI-3814 28/28 (20260727120000) · HOAI-2021 23/23 (20260727130000)
+          DIN-14021 3/3 (20260727140000)   commit 225b005, 3 rollbacks authored
+        10.evidence-backs-match 54 -> 0. ERRORS 3399 -> 3345 = the pre-rule-10 baseline,
+        so the 54 cleared and nothing else regressed. source_file moves .md -> .pdf,
+        which is what lifts these rows to VA under SR-3.
+        SCOPE: evidence capture only — no condition/severity/gate touched anywhere.
+        TOOLING (traps fixed, not worked around): bilingual column extractor (VDI is
+        DE/EN two-column; a naive -layout grep splices the languages into a plausible
+        FABRICATED sentence) · clause slicer with cross-reference guard ("§ 4 Absatz 1"
+        beats the heading of §4) + designator guard ("VDI 3814 Blatt" parsed as heading
+        "3814", truncating quotes) · Beuth watermark filter. Offsets derived per doc.
+
+W3-D11 DONE — validator fail= counters were 2x on EVERY rule (finding() bumped + call
+        site bumped). Now exact: fails sum to 4405 = 3345 ERR + 1060 WARN. Retires the
+        triage table's wikilink-duplicate mis-attribution. commit 7a2d995.
+W3-D9  DONE — VDI-3814 map index fields 74 -> 69 (live). Delta of 5 UNEXPLAINED, logged.
+W2-D2  DONE — DVS-2225-4 pages 48.6% -> 100.0% (35/35). SCOPE WAS WRONG AS QUEUED: the
+        +1 spans cr-req/eq/section/tab AND dp = 17 of 18 nodes (+1 at +2), not a 5/5 dp
+        block; "5/5 purity" was an artefact of slicing residuals by node class. Applied
+        per-node on each node's own evidence, NOT as a document shift — 17 nodes verify
+        correctly at offset 0 and a blanket +1 would have broken them.
+W3-D12 NEW — DIN-14021: 27 CRs whose source_quote is a LaTeX section HEADING (rule 10b).
+        With its 3 stubs, 30 of 50 CRs carried non-evidence. Queued, not folded into D1.
+
+RATIFICATION BATCH consolidated for signature -> vault reasoning-maps/_RATIFICATION-BATCH.md
+        29 open items (A-138-1 x6, A-262E x12, Wave-2 x2, Wave-3 x8, +W3-D12), each with
+        verbatim printed evidence. 5 items closed this session. Per the sequencing rule
+        these NEVER block work; Alvaro signs asynchronously.
+
+NEXT IN QUEUE (not started): DWA-A-178 (2 live errors) then DWA-M-102-4 (2).
