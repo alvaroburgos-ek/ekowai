@@ -326,3 +326,15 @@ DEPLOYED-PRODUCT PROOF ratified 2026-07-27. Full treatment now has a SEVENTH ele
         UNPROVEN. Never silently substitute a local run and call it deployed.
         NEW SHEET ITEM TYPE: when a standard reaches fully-treated, queue a one-liner
         "ready for your 5-minute look: [alias], [standard], [what to check]".
+
+TERMINATION CONDITION ratified 2026-07-27 and placed as the TOPMOST rule in CLAUDE.md.
+        The campaign ends at ONE state: 71 of 71 FULLY TREATED / 0 UNTOUCHED. Nothing else
+        is a finish line. Finishing a standard is not a checkpoint to report and await
+        instructions on - it is the trigger to dispatch the next queue entry immediately.
+        Sessions end at context boundaries; THE CAMPAIGN DOES NOT. Every resume continues
+        the march from the queue without being told which standard.
+        Standards named in past orders (DWA-A-178, DWA-M-102-4, ...) were QUEUE POSITIONS,
+        never scope limits.
+        CURRENT POSITION: 0 fully treated / 5 in progress / 66 untouched.
+        NEXT DISPATCH (no confirmation needed, ever): DWA-M-102-4 under the full seven-element
+        treatment, then re-rank on live validator errors and take the next.

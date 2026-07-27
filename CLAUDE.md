@@ -1,5 +1,41 @@
 @AGENTS.md
 
+# ⛳ THE CAMPAIGN TERMINATION CONDITION — READ FIRST, OVERRIDES EVERYTHING BELOW
+### (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "This campaign ends at exactly ONE state: ALL ~71 owned standards FULLY TREATED — every
+> single one through the complete treatment (bidirectional TOC walk, symbol-by-symbol equation
+> verification, row-by-row tables, both-ways gates, harness execution on a deployed build,
+> source-settled fixes, map write-back, depth ledger). There is NO other finish line. Completing
+> one standard is not progress to report and await instructions on — it is the trigger to
+> dispatch the NEXT standard from the queue, immediately, automatically, forever, until the
+> convergence table reads 71 of 71 fully treated / 0 untouched. Sessions end at context
+> boundaries; THE CAMPAIGN NEVER ENDS until 71/71. Every session, every resume, every lean boot
+> continues the march without being told which standard — the queue decides, the convergence
+> table tracks, and the only report that means 'done' is the one showing zero in the untouched
+> column. Named standards in any past order were queue positions, never scope limits."
+
+**Operational reading — the three things this forbids.**
+
+1. **Never stop to ask which standard.** The ranked queue decides, re-ranked on live validator
+   errors as it moves. A finished standard is a *dispatch trigger*, not a checkpoint.
+2. **Never treat a named standard as the scope.** Every standard named in any past instruction
+   was a queue position. Finishing it means starting the next one in the same breath.
+3. **Never report "done" on anything but 71/71.** The only completion report is a convergence
+   table with **0 untouched**. Per-standard completions are waypoints and are reported as such.
+
+**What still applies unchanged.** Sessions end at context boundaries — that is physics, not a
+stop. At a boundary: wave edge, resume pointer, absence summary, and the next session resumes
+the march from the queue without being told. The three genuine stops (interpretation-dependent
+severity/enforcement changes, ratified-design changes, irreversibles) still stop *that item* —
+log it, skip it, continue. They never stop the campaign.
+
+**Honest scale note, recorded once so it is not rediscovered each session.** 66 of 71 standards
+are untouched, and the full treatment is now seven elements deep including deployed-build
+execution proof. At roughly one standard per deep wave this is a many-session campaign measured
+in dozens of context windows, not a few. That is a statement of shape, not an objection: the
+convergence table exists precisely so the distance stays visible and honest every single wave.
+
 # AUTONOMOUS SEQUENCING RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
 
 > "AUTONOMOUS SEQUENCING RULE: The orchestrator never presents option menus or asks 'where
