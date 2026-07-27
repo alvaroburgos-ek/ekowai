@@ -1,5 +1,34 @@
 @AGENTS.md
 
+# The continuous-improvement cycle (STANDING — the campaign's shape)
+
+Binding for the regulatory audit→fix campaign. Governed by `docs/verification-doctrine.md` (SR-1..4)
+and `docs/source-pdf-inventory.md`. Ratified by Alvaro 2026-07-27. **The corpus is a living system,
+not a queue to drain.**
+
+1. **Every new defect class becomes a validator rule IMMEDIATELY.** The moment any wave surfaces a
+   new failure mode, it is encoded as a check in `scripts/reasoning-map/validate.mjs` — in the same
+   wave, not deferred to a cleanup pass. The new rule is then **re-run against ALL previously swept
+   standards, including DWA-A-138-1 and the FLL set.** A re-catch on an already-certified standard
+   is a finding like any other and is worked like any other — seniority earns no exemption.
+2. **The triage table is a LIVING artifact.** `wave0-TRIAGE-TABLE.md` is re-rendered after every
+   wave from live validator output — never hand-patched, never allowed to go stale. A stale triage
+   table is itself a defect.
+3. **Tiers move DOWN as well as up.** A certified/harness-ready standard that fails a newly added
+   rule **drops tier** and is fixed. Certification is a snapshot under the rules of its day, not a
+   permanent grant. Demotions are reported as prominently as promotions.
+4. **Periodic full-corpus validator re-runs are part of the cadence** — every few waves, not only
+   when something looks wrong. Drift between snapshot and prod is its own finding class.
+5. **Every wave report carries the two convergence metrics** (the dashboard):
+   - **per-standard cost** — effort/tokens per standard swept. **Should fall** wave over wave as the
+     patterns harden. A rise is a signal to fix the brief, not to push harder.
+   - **re-catch rate on old standards** — how many previously-swept standards the new rules catch.
+     **Should trend to zero.** If it does not fall across a few waves, the *generator* is emitting
+     the defect, and the generator gets fixed before more standards are swept.
+
+**Never block a wave on a missing source.** Cap the affected nodes per doctrine, list the standard as
+source-absent, and keep moving. **Never fill a source gap from memory.**
+
 # Importing standard workbooks (Pass3c)
 
 ## Where the workbooks come from

@@ -88,6 +88,14 @@ refinement can never over-exempt a real dangler.
 - **Honest residue is a deliverable**, not a footnote — named per item with why.
 
 ## Source documents (recorded paths)
+
+**PER-STANDARD INVENTORY → `docs/source-pdf-inventory.md`** (built 2026-07-27 from an exhaustive
+787-PDF machine sweep; **70 of 71 encoded standards have a recorded source path**). That file is the
+authority for "where is this standard's PDF" — consult it before any VA claim. **Acquisition policy:
+every guideline we work with is already on this machine — no external acquisitions. A "missing"
+document is NOT-YET-LOCATED and is re-searched, never bought.** The single confirmed source-absent
+standard is **ISO-5667-6** (VC-capped).
+
 - **FLL PDFs:** `C:\Users\Ekowai\Desktop\FLL Guidelines PDF\` — GAR 2023
   (`fll_gewaesserabdichtungsrichtlinien_2023__2 (2).pdf`), TP-Rhizomfestigkeit 2023
   (`fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf`), Naturteich 2017
