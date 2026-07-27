@@ -72,6 +72,21 @@ function normalizeWs(s: string): string {
   return s.replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Normalizes CRLF -> LF. Applied once, at read time, to every text file this
+ * module loads (the migration SQL and VSME.md) — see `loadNormTextNormalized`
+ * and the two `fs.readFileSync(MIGRATION_PATH, ...)` call sites below. Without
+ * this, `parseMigrationRows`'s statement regex (which anchors on literal
+ * `\n` sequences between the SQL clauses of each `UPDATE ... SET
+ * source_quote = '...'` statement) fails to match when the migration file
+ * was materialized with CRLF line endings (e.g. a fresh Windows checkout of
+ * a repo without a `.gitattributes` pin for `scripts/migrations/*.sql`) —
+ * every `\r\n` in the file breaks the literal `\n` match, so zero rows parse.
+ */
+function normalizeLineEndings(s: string): string {
+  return s.replace(/\r\n/g, '\n');
+}
+
 /** Splits a source_quote into { body, page } or returns null if it doesn't
  *  end in the expected " [p.N]" tag. */
 function parsePageTag(quote: string): { body: string; page: string } | null {
@@ -81,7 +96,7 @@ function parsePageTag(quote: string): { body: string; page: string } | null {
 }
 
 function loadNormTextNormalized(): string {
-  const raw = fs.readFileSync(NORM_TEXT_PATH, 'utf8');
+  const raw = normalizeLineEndings(fs.readFileSync(NORM_TEXT_PATH, 'utf8'));
   return normalizeWs(raw);
 }
 
@@ -212,7 +227,7 @@ async function runFileMode(): Promise<boolean> {
     console.error(`Migration file not found: ${MIGRATION_PATH}`);
     return false;
   }
-  const sqlText = fs.readFileSync(MIGRATION_PATH, 'utf8');
+  const sqlText = normalizeLineEndings(fs.readFileSync(MIGRATION_PATH, 'utf8'));
   const normText = loadNormTextNormalized();
   const rows = parseMigrationRows(sqlText);
 
@@ -230,7 +245,7 @@ async function runDbMode(dbUrl: string): Promise<boolean> {
     console.error(`Migration file not found (needed to derive expected totals): ${MIGRATION_PATH}`);
     return false;
   }
-  const expected = expectedCountsFromMigration(fs.readFileSync(MIGRATION_PATH, 'utf8'));
+  const expected = expectedCountsFromMigration(normalizeLineEndings(fs.readFileSync(MIGRATION_PATH, 'utf8')));
 
   const { default: postgres } = await import('postgres');
   const sql = postgres(dbUrl, { prepare: false, max: 1 });
@@ -303,6 +318,7 @@ export {
   parseMigrationRows,
   checkRow,
   loadNormTextNormalized,
+  normalizeLineEndings,
   runFileMode,
   printReport,
   expectedCountsFromMigration,

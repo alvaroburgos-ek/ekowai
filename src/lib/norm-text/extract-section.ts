@@ -246,11 +246,24 @@ export function extractSection(source: string, clauseRef: string): SectionMatch 
   const query = parseClauseReference(clauseRef);
   if (!query) return { found: false };
 
-  const headings = parseHeadings(source);
-  const lines = source.split('\n');
+  // Normalize CRLF -> LF ONCE, here, at the single production entry point.
+  // Both the LaTeX heading regex (HEADING_RE) and the ATX heading regex
+  // (ATX_HEADING_RE) are anchored with `$` against a single line (no `m`
+  // flag) after `source.split('\n')`; if a line still carries a trailing
+  // `\r` (which happens whenever the source file was materialized with
+  // CRLF line endings — e.g. Windows checkouts of a repo without a
+  // `.gitattributes` pin), `.` in `(.*)$`/`\}\s*$` cannot consume the `\r`
+  // and the heading fails to match entirely. Normalizing here, before the
+  // source is handed to `parseHeadings` or split into `lines`, means every
+  // downstream consumer (including `extractParagraph`) sees LF-only text
+  // and behaves byte-identically to true-LF input.
+  const normalizedSource = source.replace(/\r\n/g, '\n');
+
+  const headings = parseHeadings(normalizedSource);
+  const lines = normalizedSource.split('\n');
 
   if (query.kind === 'paragraph') {
-    return extractParagraph(source, headings, query.module, query.para);
+    return extractParagraph(normalizedSource, headings, query.module, query.para);
   }
 
   // Locate the matching heading.

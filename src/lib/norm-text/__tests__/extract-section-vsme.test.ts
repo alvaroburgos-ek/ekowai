@@ -257,6 +257,43 @@ describe('extractSection — VSME paragraph extraction', () => {
   });
 });
 
+describe('extractSection — CRLF-safe (regression)', () => {
+  // A repo without a `.gitattributes` pin materializes `data/norm-text/*.md`
+  // with CRLF line endings on a fresh Windows checkout (core.autocrlf=true).
+  // Both the LaTeX (HEADING_RE) and ATX (ATX_HEADING_RE) heading regexes are
+  // `$`-anchored against a single line with no `m` flag; a trailing `\r`
+  // left on the line makes `.` (which excludes line terminators, including
+  // `\r`) unable to reach `$`, so the heading silently fails to match and
+  // every downstream lookup for that module returns `{ found: false }`.
+  // This test converts the same FIXTURE used above to CRLF and asserts
+  // `extractSection` returns the byte-identical result either way.
+  const CRLF_FIXTURE = FIXTURE.replace(/\n/g, '\r\n');
+
+  it('VSME B3 para 30 — same result on CRLF as on LF', () => {
+    const lf = extractSection(FIXTURE, 'VSME B3 para 30');
+    const crlf = extractSection(CRLF_FIXTURE, 'VSME B3 para 30');
+    expect(crlf).toEqual(lf);
+    expect(crlf.found).toBe(true);
+  });
+
+  it('VSME B1 para 24(a) — same result on CRLF as on LF, sub-items included', () => {
+    const lf = extractSection(FIXTURE, 'VSME B1 para 24(a)');
+    const crlf = extractSection(CRLF_FIXTURE, 'VSME B1 para 24(a)');
+    expect(crlf).toEqual(lf);
+    expect(crlf.found).toBe(true);
+    if (!crlf.found) return;
+    expect(crlf.markdown).toContain('OPTION A: Basic Module (only)');
+  });
+
+  it('VSME B1 para 43 — B1-vs-B11 disambiguation still holds on CRLF', () => {
+    expect(extractSection(CRLF_FIXTURE, 'VSME B1 para 43')).toEqual({ found: false });
+  });
+
+  it('VSME B3 para 99 — non-approximating found:false still holds on CRLF', () => {
+    expect(extractSection(CRLF_FIXTURE, 'VSME B3 para 99')).toEqual({ found: false });
+  });
+});
+
 // Smoke test against the real, generated `data/norm-text/VSME.md` — the
 // FIXTURE above covers the contract in isolation; this additionally proves
 // the converter's actual output resolves the reasoning map's verified

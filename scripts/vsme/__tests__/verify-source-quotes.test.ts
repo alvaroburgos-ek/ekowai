@@ -5,6 +5,7 @@ import {
   parseMigrationRows,
   checkRow,
   loadNormTextNormalized,
+  normalizeLineEndings,
   printReport,
   expectedCountsFromMigration,
 } from '../verify-source-quotes';
@@ -16,6 +17,7 @@ const MIGRATION_PATH = path.resolve(
   'migrations',
   '20260727120000_vsme_source_quotes.sql',
 );
+const NORM_TEXT_PATH = path.resolve(__dirname, '..', '..', '..', 'data', 'norm-text', 'VSME.md');
 
 describe('verify-source-quotes (--file mode, programmatic)', () => {
   it('the staged migration file exists', () => {
@@ -84,6 +86,54 @@ describe('expectedCountsFromMigration', () => {
     const sqlText = fs.readFileSync(MIGRATION_PATH, 'utf8');
     const expected = expectedCountsFromMigration(sqlText);
     expect(expected).toEqual({ fields: 138, equations: 8, compliance_requirements: 31 });
+  });
+});
+
+describe('--file check is CRLF-safe (regression)', () => {
+  // A repo without a `.gitattributes` pin materializes both
+  // `scripts/migrations/*.sql` and `data/norm-text/*.md` with CRLF line
+  // endings on a fresh Windows checkout (core.autocrlf=true). Two things
+  // break if that CRLF text is used unnormalized:
+  //   - `parseMigrationRows`'s statement regex anchors on literal `\n`
+  //     sequences between the clauses of each `UPDATE ... SET source_quote`
+  //     statement; every `\r\n` in the file breaks that literal match, so
+  //     zero rows parse out of a CRLF migration file.
+  //   - `loadNormTextNormalized`'s substring check would still tolerate
+  //     stray `\r` (it whitespace-collapses), but is exercised here anyway
+  //     for full "--file check" parity.
+  // `runFileMode` normalizes both inputs via `normalizeLineEndings` at read
+  // time (see verify-source-quotes.ts); this test reproduces that same
+  // pipeline directly against CRLF-converted copies of the real committed
+  // migration file and VSME.md, and asserts identical results to the LF
+  // (as-committed) versions.
+  const lfSqlText = fs.readFileSync(MIGRATION_PATH, 'utf8');
+  const lfNormRaw = fs.readFileSync(NORM_TEXT_PATH, 'utf8');
+  const crlfSqlText = normalizeLineEndings(lfSqlText).replace(/\n/g, '\r\n');
+  const crlfNormRaw = normalizeLineEndings(lfNormRaw).replace(/\n/g, '\r\n');
+
+  it('parses the same 177 rows (138 fields + 8 equations + 31 CRs) from a CRLF migration file', () => {
+    const rows = parseMigrationRows(normalizeLineEndings(crlfSqlText));
+    expect(rows).toHaveLength(177);
+    expect(rows.filter((r) => r.table === 'fields')).toHaveLength(138);
+    expect(rows.filter((r) => r.table === 'equations')).toHaveLength(8);
+    expect(rows.filter((r) => r.table === 'compliance_requirements')).toHaveLength(31);
+  });
+
+  it('every row from the CRLF migration file still verifies verbatim against CRLF VSME.md', () => {
+    const rows = parseMigrationRows(normalizeLineEndings(crlfSqlText));
+    const normText = normalizeLineEndings(crlfNormRaw).replace(/\s+/g, ' ').trim();
+    const failures = rows.map((row) => checkRow(row, normText)).filter((r) => !r.ok);
+    expect(failures).toHaveLength(0);
+  });
+
+  it('derives the same expected counts from a CRLF migration file', () => {
+    const expected = expectedCountsFromMigration(normalizeLineEndings(crlfSqlText));
+    expect(expected).toEqual({ fields: 138, equations: 8, compliance_requirements: 31 });
+  });
+
+  it('WITHOUT normalization, a CRLF migration file fails to parse (proves the bug this test guards against)', () => {
+    const rows = parseMigrationRows(crlfSqlText);
+    expect(rows.length).toBe(0);
   });
 });
 

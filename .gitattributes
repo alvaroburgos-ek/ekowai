@@ -1,0 +1,2 @@
+data/norm-text/*.md text eol=lf
+scripts/migrations/*.sql text eol=lf
