@@ -481,3 +481,18 @@ WAVE 4 ANNEX SWEEP DONE (wf_b9675613-7aa, 22 agents, 1.32M tokens): 19/19 examin
         src/lib/eval (vitest globs *.test.ts). Removed. Workflow briefs MUST instruct agents to
         clean up probes - the A-178 agent did so voluntarily, and voluntary is not a control.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+RULE 11 SHIPPED (M104-D-comma -> validator, same wave per cycle rule 1) + corpus re-run:
+        11.comma-protected-formula WARN, inventory-style. WARNINGS 1033 -> 1042 (+9, all
+        rule 11; ERRORS unchanged 3345).
+        9 hits = DWA-M-102-4 x4 (B.2/B.3/B.4/B.5 - the PROVEN ln-phantom class) +
+        DWA-A-138-1 x5 (eq 2, 2d-2g).
+        HONEST CLASSIFICATION of the A-138 five: they are SIGMA-aggregator rows
+        ("A_C = Σ_i (A_E,i · C_i)"). The Σ breaks parsing before any fn( question, and prod
+        serves A_C via the dedicated aggregator code from the A138-07 single-source work.
+        They belong in the INVENTORY (their subscripts must not be blind-renamed either) but
+        the ln-phantom harm mechanism does NOT apply to them. NOT claimed as defects, NOT a
+        gold-copy re-catch - a same-shape different-mechanism neighbor, recorded as such.
+        MODEL CHANGE mid-wave: session model now claude-fable-5 (owner /model command),
+        supersedes the opus-5 pin. Results from here traceable to fable-5.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.

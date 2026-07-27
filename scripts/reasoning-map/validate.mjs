@@ -637,6 +637,41 @@ function checkEvidenceClaims() {
   }
 }
 
+// ═══ CHECK 11 — COMMA-SUBSCRIPT PROTECTED FORMULAS (M104-D-comma class) ═══════
+// Wave-4 finding, registered per continuous-improvement rule 1 (new defect class →
+// validator rule in the SAME wave, then re-run corpus-wide).
+//
+// The class: an equation formula containing a comma-subscript token (`f_S,M`,
+// `A_b,a,i`) alongside a fn( call the engine cannot evaluate (ln, exp, …). The comma
+// currently PROTECTS the row: it breaks normalize-formula's FN_LIKE pattern, so the
+// "Funktionsaufruf" throw fires and formula.ts converts it into an honest amber
+// manual_required badge. A well-meaning subscript rename (`f_S,M` → `f_S_M`) makes
+// the fn( call MATCH FN_LIKE, turning it into a phantom identifier — the protective
+// throw never fires, the tokenizer dies later with a NON-recoverable message (red
+// error pill), and validateEngineEligibility flips verified:false → TRUE. Proven by
+// execution on DWA-M-102-4 B.2 (probe: manual_required before, hard error after).
+//
+// So this rule is an INVENTORY, not a defect list: WARN so any future normalisation
+// sweep sees exactly which rows are booby-trapped. Fixing these requires the
+// engine-mechanism ruling (fn-rewrite or SUM/ln support), never a bare rename.
+const COMMA_SUBSCRIPT = /[A-Za-z_][A-Za-z0-9_]*,[A-Za-z]/;
+const UNSUPPORTED_FN = /\b(?!min\b|max\b)[a-zA-Z_][a-zA-Z0-9_]*\s*\(/;
+
+function checkCommaProtected() {
+  for (const [stdCode, enc] of Object.entries(snapshot.standards || {})) {
+    for (const e of enc.equations || []) {
+      const f = e.formula || '';
+      const hasComma = COMMA_SUBSCRIPT.test(f);
+      if (hasComma && UNSUPPORTED_FN.test(f)) {
+        finding('WARN', '11.comma-protected-formula', stdCode, e.equation_number || e.id,
+          `formula has comma-subscript token(s) protecting an unsupported fn( call — renaming the comma converts amber manual_required into a hard error and flips eligibility green (M104-D-comma): ${JSON.stringify(f.slice(0, 80))}`);
+      } else {
+        bumpCheck('11.comma-protected-formula', true);
+      }
+    }
+  }
+}
+
 // ── Run all checks ────────────────────────────────────────────────────────────
 for (const std of Object.keys(maps)) {
   checkStructural(maps[std]);
@@ -647,6 +682,7 @@ for (const std of Object.keys(maps)) {
 }
 checkTriageInventory();
 checkEvidenceClaims();
+checkCommaProtected();
 
 // ═══════════════════════════ 4 CORE QUERIES ══════════════════════════════════
 function qBelowVa(std) {
