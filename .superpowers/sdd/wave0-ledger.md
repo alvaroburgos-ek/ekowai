@@ -416,3 +416,17 @@ WAVE 4 RESULT (partial, wave stays OPEN) -> .superpowers/sdd/wave4-DWA-M-102-4.m
         CARRY INTO RE-RUN AS PRIORITY: eq B.7 encoded denominator P*(A_W + SUM ...) vs printed
           p.39 P*A_W + SUM ... - different grouping, different value, refuter never saw it.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+SCOPE RESOLUTION 2026-07-27 — "the guidelines folder" is NOT a second corpus.
+        Enumerated C:\Users\Ekowai\Desktop\Guidelines: 53 PDFs / 237 MB, in directories that
+        mirror the encoded standards (DWA-A-178, DWA-M-102-4, DWA-A-262E, ...) plus the
+        "DWA DIN Scribd" directory holding the VDI / DIN / ISO / HOAI / DVS set.
+        docs/source-pdf-inventory.md already maps 70 of 71 encoded standards onto these files
+        (the single unmapped one is ISO-5667-6, source genuinely ABSENT = acquisition target).
+        => The folder is the campaign's SOURCE LIBRARY. Working "the rest of the guidelines in
+        the folder" IS working the ranked queue of 71. No scope expansion, no separate track.
+        The termination condition (71/71 fully treated / 0 untouched) already covers it.
+        NOTE for a future session: do NOT treat a PDF-count of 53 as a standard-count. Several
+        standards share the Scribd directory, some directories hold multiple parts/annexes, and
+        the corpus of record is the DATABASE (71 real rows in `standards`, 16 test/junk rows
+        excluded), never the filesystem.
