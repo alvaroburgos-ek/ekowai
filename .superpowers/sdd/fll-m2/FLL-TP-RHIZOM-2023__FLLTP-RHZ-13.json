@@ -1,0 +1,139 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-13",
+  "worksheetTitle": "Wuchsleistung Zwischenauswertung 6 Monate",
+  "templateId": "0cfab84e-ac23-44c1-a2fe-dbe30b6553e7",
+  "standardId": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "version": "Dezember 2023",
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt (rendered from fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf)",
+  "counts": { "equations": 3, "gates": 1, "fields": 16 },
+  "equations": [
+    {
+      "id": "671b9319-2596-4464-868c-e1775bb7e2b2",
+      "number": "EQ-1",
+      "formula": "bestandsdichte_p_avg = (P_1 + P_2 + P_3 + P_4 + P_5 + P_6 + P_7 + P_8) / 8",
+      "output_symbol": "bestandsdichte_p_avg",
+      "verdict": "VA",
+      "quote": "Tab. 1 P1..P8 + 'ØP1–P8'; §3.7: '1. Zwischenauswertung (nach 6 Monaten) ≥ 80 Halme/Gefäße'; Tab. 3 heading: 'Durchschnittliche Bestandsdichte der Testpflanzen in den 8 Prüfgefäßen'",
+      "note": "Arithmetic mean over exactly 8 test vessels (P1..P8). Divisor 8 = the 8 Prüfgefäße confirmed by Tab.1 row set and Tab.3 heading '8 Prüfgefäßen'. Formula shape, all 8 summands, /8 divisor, and output symbol all PDF-attested. Unit Halme/Gefäß matches PDF. VA-grade."
+    },
+    {
+      "id": "dd5a8102-1d46-4adf-8525-eab204970019",
+      "number": "EQ-2",
+      "formula": "bestandsdichte_k_avg = (K_1 + K_2 + K_3) / 3",
+      "output_symbol": "bestandsdichte_k_avg",
+      "verdict": "VA",
+      "quote": "Tab. 2 heading: 'Bestandsdichte der Testpflanzen in den 3 Kontrollgefäßen' with rows K1, K2, K3, ØK1–K3; §3.7: 'bezogen auf die Durchschnittswerte der Testpflanzen in den drei Kontrollgefäßen'",
+      "note": "Arithmetic mean over exactly 3 control vessels (K1..K3). Divisor 3 = the 3 Kontrollgefäße confirmed by Tab.2 heading ('3 Kontrollgefäßen') and Tab.3 note ('drei Kontrollgefäßen'). Formula shape, 3 summands, /3 divisor, output symbol all PDF-attested. VA-grade."
+    },
+    {
+      "id": "14e149fe-4453-44e7-8b28-c28f41575cb7",
+      "number": "EQ-3",
+      "formula": "dichte_relativ_prozent = (bestandsdichte_p_avg / bestandsdichte_k_avg) * 100",
+      "output_symbol": "dichte_relativ_prozent",
+      "verdict": "VA",
+      "quote": "Tab. 3: 'Durchschnittliche Bestandsdichte der Testpflanzen in den 8 Prüfgefäßen bezogen auf die Durchschnittswerte der Testpflanzen in den drei Kontrollgefäßen (Sollwert: ≥ 80 %)' — ØP1–P8 / ØK1–K3 rendered in % rows; §3.7: 'Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den Kontrollgefäßen betragen.'",
+      "note": "Ratio ØP/ØK expressed as %. The *100 factor and the P-over-K direction (Prüf bezogen auf Kontroll) are both PDF-attested by Tab.3 (% rows, ØP1–P8 over ØK1–K3) and §3.7. Output symbol correct. VA-grade. No trig / cos_beta involvement."
+    }
+  ],
+  "chains": [
+    {
+      "name": "EQ-2 K-average over 3 control vessels",
+      "ran": true,
+      "liveValue": 110,
+      "pdfExpected": "no numeric worked example in PDF (Tab.2 prints an empty template with '>> Monat Jahr <<' placeholders); arithmetic sanity-check only",
+      "verdict": "VC",
+      "raw": "EQ-2 kAvg computed = 110  persisted = 110  src = derived  (inputs K_1=100,K_2=110,K_3=120 → (100+110+120)/3 = 110). saveWorksheet stamped bestandsdichte_k_avg source_type='derived' (single-source integrity). Test passed."
+    },
+    {
+      "name": "EQ-1 P-average over 8 test vessels",
+      "ran": true,
+      "liveValue": 87.25,
+      "pdfExpected": "no numeric worked example (Tab.1/Tab.3 are blank templates); arithmetic sanity-check only",
+      "verdict": "VC",
+      "raw": "EQ-1 pAvg computed = 87.25  persisted = 87.25  src = derived  (inputs P_1..P_8 = 80,82,84,86,88,90,92,96 → sum 698 / 8 = 87.25). saveWorksheet stamped bestandsdichte_p_avg source_type='derived'. Test passed."
+    },
+    {
+      "name": "EQ-3 relative density % = (pAvg / kAvg) * 100",
+      "ran": true,
+      "liveValue": 79.31818181818183,
+      "pdfExpected": "no numeric worked example; Sollwert threshold ≥ 80 % (this sanity example lands at 79.32 %, i.e. just below the soll — a plausible fail case)",
+      "verdict": "VC",
+      "raw": "EQ-3 rel% computed = 79.31818181818183  persisted = 79.31818181818183  src = derived  (87.25 / 110 * 100). toBeCloseTo(79.3181818,4) asserted. saveWorksheet stamped dichte_relativ_prozent source_type='derived'. Test passed."
+    }
+  ],
+  "gates": [
+    {
+      "id": "78772867-c2b5-44ed-a110-7a8146c07daa",
+      "code": "REQ-15",
+      "condition": "bestandsdichte_p_avg_6mon >= 80 AND dichte_relativ_prozent >= 80",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "quote": "§3.7: '1. Zwischenauswertung (nach 6 Monaten) ≥ 80 Halme/Gefäße' AND 'Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den Kontrollgefäßen betragen.'",
+      "note": "BOTH thresholds (>=80 Halme/Gefäß absolute 6-month P-average, >=80 % relative density) are PDF-attested verbatim. Gate exercised through the REAL saveWorksheet + evaluateCondition path in 4 states: PASS 85/90 → pass; FAIL 60/70 → fail; BOUNDARY 80/80 → pass (>= inclusive, correct); rel-only 85/79 → fail. Both legs independently drive the verdict → fully fireable, NOT vacuous, NOT CR-006 class."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "type": "producer-consumer-disconnect",
+      "title": "EQ-1 output bestandsdichte_p_avg is NOT the gate's 6-month input",
+      "detail": "EQ-1 produces bestandsdichte_p_avg (field order_index 71, is_required=false, an EQ-1/single-source 'derived' output). But gate REQ-15 checks bestandsdichte_p_avg_6mon (a SEPARATE field: section D, order_index 0, is_required=true, no equation produces it — a manually-entered input). The PDF's '1. Zwischenauswertung (nach 6 Monaten) ≥ 80 Halme/Gefäße' IS exactly the ØP1–P8 that EQ-1 computes. So the encoding computes the 6-month P-average via EQ-1 but the ≥80 gate reads a hand-entered twin (bestandsdichte_p_avg_6mon) that EQ-1 never feeds. Result: an engineer can enter P1..P8 (giving one ØP), yet type a different bestandsdichte_p_avg_6mon that the gate trusts. The EQ-1 output is effectively orphaned w.r.t. the gate. This is a single-source violation of the derivation invariant: the value the gate governs should be the derived EQ-1 output, not a re-entered input. NOTE: sibling worksheets RHZ (12/18/24-mon, REQ-16/17/18) use the same _12mon/_18mon/_24mon manual-input pattern, so this is a standard-wide encoding choice, not a one-off typo.",
+      "pdfQuote": "'1. Zwischenauswertung (nach 6 Monaten) ≥ 80 Halme/Gefäße' (§3.7)",
+      "recommendation": "Either (a) point REQ-15 at bestandsdichte_p_avg (the EQ-1 derived output) instead of bestandsdichte_p_avg_6mon, OR (b) add an equation bestandsdichte_p_avg_6mon = bestandsdichte_p_avg so the gated value inherits by reference. STAGED as decision D1 — do NOT auto-apply (SR: findings over fixes)."
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "type": "orphaned-derived-output",
+      "title": "bestandsdichte_p_avg feeds only EQ-3, never the 6-month gate",
+      "detail": "Consequence of F1: bestandsdichte_p_avg (EQ-1 output) is consumed only by EQ-3 (relative %). It is not consumed by REQ-15's absolute-threshold leg. So the absolute ≥80 Halme/Gefäß check and the relative ≥80 % check draw the P-average from two different sources (the gate's absolute leg from bestandsdichte_p_avg_6mon; the relative leg indirectly from bestandsdichte_p_avg via EQ-3). These two P-averages can silently disagree."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-numeric-worked-example",
+      "detail": "The FLL TP-Rhizom PDF prints the growth-performance tables (Tab.1 P1–P8, Tab.2 K1–K3, Tab.3 relative %) as BLANK report templates with '>> Monat Jahr <<' and '>> Produktname <<' placeholders — no filled example numbers. Therefore the 3 chains could only be arithmetic-sanity-checked (formula shape VA, live numeric result VC), not asserted against a printed worked example. Live values 110 / 87.25 / 79.32 % are internally consistent and correct for the chosen inputs.",
+      "grade": "VC"
+    },
+    {
+      "id": "R2",
+      "type": "engine-not-materializing",
+      "detail": "The generic FLL arithmetic-mean/ratio equations (EQ-1/2/3) are NOT registered in the app's MATERIALIZE_REGISTRY (which is 138-surface specific). saveWorksheet therefore does NOT auto-compute the derived outputs from raw P_/K_ inputs; it only stamps a SUPPLIED produced-symbol value as source_type='derived'. The chains were run by computing the mean/ratio in the test and driving the derived value through saveWorksheet, which correctly persisted them as 'derived'. So the persistence + single-source stamping path is proven live, but automatic server-side recomputation of these means is NOT wired for this standard. Not a defect of THIS worksheet's encoding — recorded as engine-coverage residue.",
+      "grade": "VC"
+    },
+    {
+      "id": "R3",
+      "type": "cos_beta-trig",
+      "detail": "N/A — FLLTP-RHZ-13 has no trig-bearing equations (only arithmetic mean + ratio). The known cos_beta/math-function engine gap does not apply. No equations blocked.",
+      "grade": "n/a"
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "single-source-fix",
+      "status": "written-not-applied",
+      "detail": "Wire REQ-15's 6-month absolute leg to the EQ-1 derived output. Option A (repoint gate): UPDATE compliance_requirements SET condition = 'bestandsdichte_p_avg >= 80 AND dichte_relativ_prozent >= 80' WHERE id = '78772867-c2b5-44ed-a110-7a8146c07daa'; -- makes the ≥80 Halme/Gefäß check read the EQ-1 output ØP1–P8. Option B (add equation): INSERT an equation bestandsdichte_p_avg_6mon = bestandsdichte_p_avg on template 0cfab84e-... so the gated input inherits by reference. Applies standard-wide to REQ-16/17/18 (12/18/24-mon) too. REQUIRES human decision (which option; whether the '6mon' input field is intentionally engineer-overridable) before a single controlled apply pass. NOT applied — prod is read-only this run.",
+      "range": null
+    },
+    {
+      "id": "D2",
+      "type": "range-surface",
+      "status": "for-awareness",
+      "detail": "SR-2: §3.7 gives a SCHEDULE of month-specific absolute thresholds (6-mon ≥80, 12-mon ≥120, 18-mon ≥160, 24-mon ≥160 Halme/Gefäße). FLLTP-RHZ-13 correctly uses the 6-month value (≥80) — verbatim 'nach 6 Monaten ≥ 80 Halme/Gefäße'. No auto-pick was made; the 80 here is the PDF-fixed 6-month point, not a free choice from the schedule. The other thresholds belong to sibling worksheets (RHZ 12/18/24-mon). Recorded so a reviewer confirms 80 (not 120/160) is the right threshold for THIS 6-month worksheet — it is.",
+      "range": "6-mon: ≥80; 12-mon: ≥120; 18-mon: ≥160; 24-mon: ≥160 Halme/Gefäße (§3.7). Relative density threshold ≥80 % (constant across all evaluations)."
+    }
+  ],
+  "verdictSummary": {
+    "equations": { "VA": 3, "VC": 0, "FINDING": 0 },
+    "chainsRan": 3,
+    "chainsTotal": 3,
+    "gatesFired": 1,
+    "gatesVacuous": 0,
+    "checksPassed": 6
+  }
+}

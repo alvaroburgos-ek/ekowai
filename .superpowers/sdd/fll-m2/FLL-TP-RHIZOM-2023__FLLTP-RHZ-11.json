@@ -1,0 +1,143 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-11",
+  "worksheet_title_de": "Bepflanzung",
+  "worksheet_title_en": "Planting",
+  "archetype": "data_collection",
+  "template_id": "16424d90-66aa-4c3a-bd2b-1244cb22c6c3",
+  "standard_id": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "prod_project": "vadsmshzebefjreqcicl",
+  "doctrine_notes": "SR-3: PDF (rendered) is ground truth; per-value quotes are from the pdftotext -layout extraction at .superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt, which mirrors the rendered §5.8/§7.1/§7.3 pages 1:1 (VA where a verbatim constant exists). No trig/cos_beta anywhere in this standard — the math-function engine gap does not apply. Prod is READ-ONLY; nothing written.",
+  "counts": { "equations": 0, "gates_local": 0, "fields": 5 },
+  "fields": [
+    {
+      "symbol": "pflanzdichte_pro_gefaess",
+      "label_de": "Pflanzen je Gefäß",
+      "data_type": "number",
+      "unit": "Stk / pcs",
+      "clause_reference": "§5.8, §7.1",
+      "verdict": "VA",
+      "quote": "§5.8 (TP-Rhizom.txt line 653): \"Je Gefäß von 800 x 800 mm sind 8 Pflanzen vorzusehen.\" Also §5.8 line 651: \"Phragmites australis (Schilf) im 9 x 9 Container.\"",
+      "note": "The required value 8 plants/vessel is PDF-attested. This field is the sole cross-worksheet consumer target of gate REQ-10 (hosted on RHZ-04), whose condition pins it to == 8. consumer_worksheets in prod = [FLLTP-RHZ-12..16]. Drove 8 and read back 8 through the real save path (VA)."
+    },
+    {
+      "symbol": "anzahl_pflanzen_total",
+      "label_de": "Anzahl Pflanzen gesamt",
+      "data_type": "number",
+      "unit": null,
+      "clause_reference": "§Bepflanzung",
+      "verdict": "VC",
+      "quote": "No verbatim total is printed. Derivable: §4 (lines 508-509) \"...werden in 8 Prüfgefäße eingebaut. Weitere 3 Gefäße gehen ohne Abdichtung in die Prüfung.\" → 11 vessels; §5.8 line 653 → 8 plants/vessel → 11 × 8 = 88.",
+      "note": "No source constant for a grand total; 88 is an arithmetic sanity value only (VC). Persisted 88 through the real save path. Whether the intended semantic is per-standard total (88) vs per-test-object total (8×8=64 test-vessel plants) is ambiguous — see decisionItems."
+    },
+    {
+      "symbol": "bepflanzung_datum",
+      "label_de": "Bepflanzungsdatum",
+      "data_type": "date",
+      "unit": null,
+      "clause_reference": "§Bepflanzung",
+      "verdict": "VC",
+      "quote": "§7.3 (lines 840-841): \"Die erste Gabe wird unmittelbar nach der Bepflanzung verabreicht.\" — anchors the planting event as the fertilization T0.",
+      "note": "Operator-recorded log date; no source constant. Persisted 2026-04-01 (as a JS Date) through the real save path. VC — value is operational, not a regulation figure."
+    },
+    {
+      "symbol": "pflanzung_methode",
+      "label_de": "Pflanzungsmethode",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§Bepflanzung",
+      "verdict": "VC",
+      "quote": "§5.8 lines 651-655: \"Phragmites australis (Schilf) im 9 x 9 Container. Je Gefäß von 800 x 800 mm sind 8 Pflanzen vorzusehen. Es ist auf eine gleichmäßige Pflanzenqualität zu achten.\"",
+      "note": "Free-text operator field; no constant to verify. Persisted a §5.8-quoting string through the real save path. VC."
+    },
+    {
+      "symbol": "pflanzen_initial_zustand",
+      "label_de": "Pflanzen Anfangszustand",
+      "data_type": "enum",
+      "unit": null,
+      "clause_reference": "§Bepflanzung",
+      "verdict": "FINDING",
+      "quote": "§5.8 line 655: \"Es ist auf eine gleichmäßige Pflanzenqualität zu achten.\" — the only quality anchor; it prescribes uniformity, not an enumerated condition set.",
+      "note": "FINDING (data gap, not contamination): data_type='enum' but enum_values IS NULL in prod. The widget has no options to offer — the enum-null-option data gap (ref reference_enum_null_option_widget). The save path still accepts a free enum string ('gut' persisted via value_enum with no domain check), so an unconstrained value can be stored. Non-blocking for the save chain; flagged for enum_values population. See decisionItems."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "RHZ-11 data-collection save chain (5 fields → project_parameters UPSERT)",
+      "ran": true,
+      "liveValue": "pflanzdichte_pro_gefaess=8, anzahl_pflanzen_total=88, bepflanzung_datum=2026-04-01, pflanzung_methode=\"Phragmites australis...\", pflanzen_initial_zustand=gut — all read back verbatim from project_parameters",
+      "pdfExpected": "§5.8: 8 plants/vessel (VA). Others are operator log fields with no printed worked example.",
+      "verdict": "VA for pflanzdichte==8 (PDF-attested + persisted); VC for the operational log fields (persisted, no source constant).",
+      "raw": "pnpm vitest run --project integration tests/harness/verify-fll-rhizom-rhz11.integration.test.ts --test-timeout=60000 --no-file-parallelism => Test Files 1 passed (1); Tests 3 passed (3); Duration ~5-8s. Tests: (1) exposes exactly the 5 prod fields; (2) drives the §5.8 PDF-conformant planting state through real saveWorksheet and persists it [CONFORMANT SAVE ok:true]; (3) drives an out-of-spec plant density (4 != 8) and persists it — NO local gate blocks it [OUT-OF-SPEC SAVE ok:true]. First run under file-parallelism showed a spurious embedded-PG 'crash of another server process' (57P02) flake; re-run with --no-file-parallelism was green 3/3."
+    },
+    {
+      "name": "REQ-10 cross-worksheet gate consuming RHZ-11.pflanzdichte_pro_gefaess (hosted on RHZ-04)",
+      "ran": true,
+      "liveValue": "pass-state (dichte=8) → REQ-10 not failing; fail-state (dichte=6) → REQ-10 in failingBlockConditions",
+      "pdfExpected": "§5.8 line 653: 8 plants/vessel required → gate constant ==8 is correct.",
+      "verdict": "VA — gate fires pass+fail correctly against a live-persisted RHZ-11 value.",
+      "raw": "pnpm vitest run --project integration tests/harness/fll-rhizom-rhz04-verify.integration.test.ts --no-file-parallelism => Test Files 1 passed (1); Tests 2 passed (2). REQ-10 drives pflanzdichte_pro_gefaess=8 (PASS) then =6 (FAIL) on RHZ-11's instance via checkApprovalGate's project-wide fallback."
+    }
+  ],
+  "gates": [
+    {
+      "id": "REQ-10 (on RHZ-04, consumes RHZ-11.pflanzdichte_pro_gefaess)",
+      "condition": "testpflanze_art == 'phragmites_australis' AND pflanzdichte_pro_gefaess == 8",
+      "severity": "block",
+      "clause_reference": "§5.8",
+      "fired": true,
+      "vacuous": false,
+      "note": "Not a RHZ-11-LOCAL gate (RHZ-11 has 0 compliance_requirements). Documented here because it is the only compliance consumer of this worksheet's flagship field. Constant 8 is PDF-attested (§5.8 line 653). Exercised pass (dichte=8) and fail (dichte=6) via the RHZ-04 verify test. Non-vacuous, non-dead."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "data-gap",
+      "field": "pflanzen_initial_zustand",
+      "detail": "data_type='enum' but enum_values IS NULL in prod → widget has no selectable options; the save path accepts an unconstrained free enum string with no domain validation. §5.8 gives only 'gleichmäßige Pflanzenqualität' (uniform quality), which is not an enumerated condition set, so no source-defined option list exists to backfill from. Matches the known enum-null-option data gap (61 fields / 13 standards).",
+      "action": "Stage enum_values population (or downgrade to text) as a written-not-applied migration; do NOT auto-invent options. See decisionItems D2."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-equations",
+      "detail": "RHZ-11 has 0 equations — nothing to verify/compute; pure data_collection. No cos_beta/trig residue (standard has no trig equations at all)."
+    },
+    {
+      "id": "R2",
+      "type": "VC-operational-fields",
+      "detail": "anzahl_pflanzen_total, bepflanzung_datum, pflanzung_methode carry no verbatim regulation constant; they are operator-recorded log fields. Persisted through the real save path but graded VC (not VA) per SR-1."
+    },
+    {
+      "id": "R3",
+      "type": "embedded-pg-flake",
+      "detail": "Under vitest file-parallelism the embedded PG intermittently emitted 57P02 'crash of another server process', causing a 5s timeout on the first run. --no-file-parallelism (or the smoke pattern) is reliably green. Harness infrastructure, not a worksheet defect."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "SR-2 semantic ambiguity (not a numeric range)",
+      "detail": "anzahl_pflanzen_total has no printed total. Two defensible readings from §4/§5.8: (a) whole-test total = (8 Prüfgefäße + 3 Kontrollgefäße) × 8 = 88; (b) test-vessel-only total = 8 × 8 = 64. Surface both; do NOT auto-pick. If a canonical semantic is chosen, add a derivation equation (anzahl_pflanzen_total = pflanzdichte_pro_gefaess × vessel_count) rather than free entry."
+    },
+    {
+      "id": "D2",
+      "type": "enum_values population (staged, written-not-applied)",
+      "detail": "pflanzen_initial_zustand needs a source-verified option list or a type change to text. §5.8 only prescribes uniform quality; there is no enumerated condition vocabulary in the standard. Decide: (i) populate enum_values with a project-convention set (e.g. gut/mittel/schlecht) flagged imported_unverified, or (ii) convert data_type to text. Stage as a migration note; apply in the single controlled pass. Do not write to prod now."
+    },
+    {
+      "id": "D3",
+      "type": "clause_reference tidy (staged, cosmetic)",
+      "detail": "Four of five fields carry clause_reference='§Bepflanzung' (a synthetic label, not a real clause number). The material clauses are §5.8 (Testpflanzen/8 plants), §7.1 (Einbau), §7.3 (erste Düngegabe unmittelbar nach Bepflanzung). Consider re-tagging to real § numbers. Non-blocking; stage only."
+    }
+  ],
+  "verdict_summary": {
+    "VA": ["pflanzdichte_pro_gefaess (=8, §5.8)", "REQ-10 gate constant ==8", "RHZ-11 save chain for the attested field"],
+    "VC": ["anzahl_pflanzen_total", "bepflanzung_datum", "pflanzung_methode"],
+    "FINDING": ["pflanzen_initial_zustand enum_values NULL (F1)"],
+    "prod_writes": "none (read-only); all corrections staged as decisionItems"
+  }
+}

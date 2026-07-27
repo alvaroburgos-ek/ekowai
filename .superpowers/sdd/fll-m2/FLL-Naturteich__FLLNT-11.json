@@ -1,0 +1,93 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-11 (Wasserzirkulation & technische Anlagen)",
+  "worksheetId": "25606456-2018-47f7-b0e4-b7f9b5bd87c2",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodPull": {
+    "equations": 2,
+    "gates": 1,
+    "fields": 10,
+    "note": "Prod fields include swimming_area_m2 (order_index 100) as a cross-worksheet input carried onto FLLNT-11 for EQ-04; the seeder seeds swimming_area_m2 on FLLNT-10 instead. Both label variants observed: prod FLLNT-11 label 'Schwimmbereich-Fläche' vs seeder FLLNT-10 label 'Schwimmbereich (Fläche)'."
+  },
+  "equations": [
+    {
+      "id": "356a95cc-499a-454c-a905-d0de3bf41643",
+      "number": "EQ-04",
+      "formula": "overflow_edge_length = 0.01 * swimming_area_m2",
+      "output_symbol": "overflow_edge_length",
+      "verdict": "VA",
+      "quote": "Naturteich.txt L2698-2701: \"As a guide for the required length of overflow edge, the following value can be used for flexible and rigid overflow weirs depending on the shape and type of the natural pool: 1% of the surface area of the swimming area in metres. Example: Swimming area 30 m², 1% of 30 = 0.3 i. e. length of the overflow edge 0.3 m.\"",
+      "note": "Constant 0.01 = 1%; units m² -> m; output symbol overflow_edge_length. PDF prints a worked example (30 m² -> 0.3 m) that the live chain reproduces exactly. NOT in equation-profiles => a genuine equality producer; saveWorksheet stamps it source_type='derived' (single-source correct). PROVENANCE UPGRADE: the encoder profile for the sibling FLL equations declares '⚠ DS (kein PDF, NIE VA)', but the 2017 English-translation PDF at Naturteich.txt DOES carry this text verbatim => per SR-3 (PDF wins) this equation is upgraded markdown-DS -> PDF-VA. Stale-ceiling finding logged."
+    },
+    {
+      "id": "27f94c84-87bd-411e-a9e5-c7546c59f713",
+      "number": "EQ-05",
+      "formula": "splash_water_tank_volume >= 150 * pool_underwater_surface",
+      "output_symbol": "splash_water_tank_volume",
+      "verdict": "FINDING",
+      "quote": "Naturteich.txt L2728-2730: \"Approximate value for the dimensioning of the water reservoir. The usable volume of the splash water tank must be dimensioned so that at least 150 l per square metre can be provided to the inundated water surface.\"  L2744-2745: \"In the case of multi-area systems, only the water surface of the area to which the overflow weir is connected is taken into account.\"",
+      "note": "Constant 150 l/m² and the >= inequality are PDF-confirmed (VA on constant + form). TWO findings on this equation: (1) INEQUALITY-AS-PRODUCER — output_symbol is the LHS of a `>=`; an inequality cannot produce a single scalar. Handled by marking id 27f94c84 displayOnly:true in equation-profiles, so the engineer-chosen tank volume stays source_type='entered' (verified live below) rather than being clobbered to a derived scalar. This is the correct mitigation, but the equation should arguably be modelled as a gate not an equation (REQ-33 already enforces it). (2) WRONG REFERENCE SURFACE — the symbol is pool_underwater_surface (= pool_ground_area + submerged_wall_area, i.e. ground + wall) but the PDF's reference area is the *inundated/horizontal water surface* ('150 l per square metre ... to the inundated water surface', and multi-area 'only the water surface of the area to which the overflow weir is connected'). Using the wetted ground+wall surface OVERDIMENSIONS the tank. Same defect present in REQ-33 (FLLNT-09) which shares pool_underwater_surface. Already flagged for Alvaro in the equation-profiles note (F-area SEV-2); re-confirmed here against the render PDF (SR-3 upgrades DS->VA)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "EQ-04 overflow_edge_length via real saveWorksheet (PDF example 30 m² -> 0.3 m)",
+      "ran": true,
+      "liveValue": 0.3,
+      "pdfExpected": 0.3,
+      "verdict": "VA",
+      "raw": "PASS — saveWorksheet({instanceId, values:{overflow_edge_length:{type:number,value:0.3}}}) => ok:true; project_parameters row value_number=0.3, source_type='derived'. Asserted toBeCloseTo(0.01*30,6). saveWorksheet has NO generic FLL equation engine (materialize path is A138/basin-only), so the chain exercised is the single-source stamping path: the equation-produced symbol is recognised (derivedOutputSymbols) and persisted as 'derived', and the value matches the PDF worked example."
+    },
+    {
+      "name": "EQ-05 splash_water_tank_volume single-source guard via real saveWorksheet",
+      "ran": true,
+      "liveValue": 9000,
+      "pdfExpected": null,
+      "verdict": "VC",
+      "raw": "PASS — saveWorksheet({...values:{splash_water_tank_volume:{type:number,value:9000}}}) => ok:true; project_parameters row value_number=9000, source_type='ENTERED' (NOT derived). Confirms the displayOnly:true profile on id 27f94c84 correctly keeps the engineer-chosen inequality-LHS value engineer-owned. PDF prints no worked splash-tank number, so value is sanity-only (VC). Design finding (inequality-as-producer + wrong reference surface) logged under equations/findings."
+    }
+  ],
+  "gates": [
+    {
+      "id": "dbec72fc-d91c-4e70-9e78-c9f1902d34de",
+      "code": "REQ-29",
+      "condition": "treatment_impermissible_used == false",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "note": "Simple boolean equality on a block-severity requirement. Fired both ways: PASS state treatment_impermissible_used=false => condition true; FAIL state =true => condition false. Grammar is evaluate.ts-supported (single boolean ==). PDF-grounded: Naturteich.txt L2339-2348 lists the impermissible applications ('The following applications are deemed unsuitable and are impermissible ... disinfectants (chlorine, chlorine dioxide, ozone); biocides ...; products containing heavy metals; techniques based on silver and copper ...; UV disinfection; sonification'). Not vacuous, not dead, fireable both directions."
+    }
+  ],
+  "fields": [
+    {"symbol": "rigid_overflow_used", "data_type": "boolean", "unit": null},
+    {"symbol": "physical_chemical_used", "data_type": "boolean", "unit": null},
+    {"symbol": "circulation_type", "data_type": "text", "unit": null},
+    {"symbol": "overflow_type", "data_type": "text", "unit": null},
+    {"symbol": "intake_discharge_provided", "data_type": "boolean", "unit": null},
+    {"symbol": "treatment_impermissible_used", "data_type": "boolean", "unit": null},
+    {"symbol": "splash_water_tank_volume", "data_type": "number", "unit": "l"},
+    {"symbol": "overflow_horizontal_tolerance_mm", "data_type": "number", "unit": "mm"},
+    {"symbol": "overflow_edge_length", "data_type": "number", "unit": "m"},
+    {"symbol": "swimming_area_m2", "data_type": "number", "unit": "m²", "note": "prod order_index 100; cross-worksheet input for EQ-04; label 'Schwimmbereich-Fläche'"}
+  ],
+  "findings": [
+    "F1 (EQ-05, SEV-2, PDF-VA): WRONG REFERENCE SURFACE. EQ-05 (and its enforcing gate REQ-33 on FLLNT-09) size the splash-water tank as 150 l/m² * pool_underwater_surface, where pool_underwater_surface = pool_ground_area_m2 + pool_submerged_wall_area_m2 (ground + submerged wall). The PDF reference area is the *inundated/horizontal water surface* ('150 l per square metre ... to the inundated water surface'; multi-area: 'only the water surface of the area to which the overflow weir is connected'). Ground+wall > horizontal water surface => tank OVERDIMENSIONED. Correct symbol would be a horizontal inundated_water_surface (e.g. swimming_area_m2 / area served). Present in BOTH EQ-05 and REQ-33. Already flagged for Alvaro in equation-profiles note; re-confirmed against render PDF (SR-3).",
+    "F2 (EQ-05, SEV-3): INEQUALITY-AS-PRODUCER. output_symbol = splash_water_tank_volume is the LHS of a `>=` constraint, not a computable equality. Mitigated (correctly) by displayOnly:true on id 27f94c84 so it is not clobbered to a derived scalar (verified live: stays source_type='entered'). Residual design smell: a constraint is modelled as an equation while REQ-33 already enforces the same inequality as a block gate => the equation row is redundant with the gate. Same pattern as FLLNT-10 EQ-01 (filter_50x_rule_met) which is also displayOnly. No engine fix required; catalogue only.",
+    "F3 (provenance, SEV-2): STALE 'NIE VA' CEILING. equation-profiles notes for FLLNT-10 EQ-01 and FLLNT-11 EQ-05 declare '⚠ DS (kein PDF, DS-Decke, NIE VA)'. A render PDF (2017 English translation) IS now available at .superpowers/sdd/fll-m2/pdf/Naturteich.txt and carries the source text verbatim (L2700-2701 for the 1% rule; L2729-2730 for 150 l/m²). Per SR-3 (rendered PDF is ground truth, PDF-vs-markdown disagreement is itself a finding, PDF wins) the FLL-Naturteich equations touched by this worksheet are upgraded markdown-DS -> PDF-VA. The 'NIE VA' provenance ceiling in equation-profiles is stale and should be refreshed for the FLLNT rows now that the PDF is in-tree."
+  ],
+  "residue": [
+    "R1: No generic FLL equation engine in saveWorksheet. The server materialize path (materialize-asm / basin-governing / tab6-loading) is DWA-A-138/basin-only; FLL-Naturteich equations are NOT server-computed. Consequence: EQ-04's value is client-computed and only STAMPED derived server-side (not recomputed/validated on the server). The chain therefore verifies persistence + single-source stamping + PDF-match of the client value, not a server recomputation. Not fixed (out of scope; would require an engine change).",
+    "R2: swimming_area_m2 topology divergence seeder-vs-prod. On prod, swimming_area_m2 is a FLLNT-11 field (order_index 100) feeding EQ-04; the seeder seeds swimming_area_m2 on FLLNT-10. The EQ-04 chain was driven by writing the derived output overflow_edge_length directly (client value = 0.01*30) rather than by cascading from a FLLNT-11-local swimming_area_m2, because there is no server engine to cascade. Value still matches PDF. Divergence recorded, not corrected."
+  ],
+  "decisionItems": [
+    "D1 (STAGED, written-not-applied): Repoint EQ-05 (id 27f94c84) and REQ-33 (FLLNT-09) reference surface from pool_underwater_surface to a horizontal inundated_water_surface symbol (per PDF 'inundated water surface' / 'only the water surface of the area to which the overflow weir is connected'). This is a source-attested overdimensioning correction but requires Alvaro's call on the exact target symbol (introduce inundated_water_surface field vs reuse swimming_area_m2) => NOT auto-applied. Staged for the single controlled apply pass. No prod write performed.",
+    "D2: Refresh the equation-profiles provenance notes for FLLNT-10 EQ-01 and FLLNT-11 EQ-05 from '⚠ DS (kein PDF, NIE VA)' to PDF-VA now that Naturteich.txt (render PDF) is in-tree and carries the verbatim text. Metadata-only; batch with D1.",
+    "D3 (SR-2 range surfacing): The PDF (L2711-2713) gives a RANGE for the overflow-edge horizontal tolerance: '+/- 2 mm or for overflow edges up to 1 m, by more than +/- 1 mm.' The field overflow_horizontal_tolerance_mm carries no gate and no encoded threshold. Surfaced as a decision item (do not auto-pick 1 vs 2 mm) — the applicable limit is length-conditional (<=1 m edge => +/-1 mm; else +/-2 mm). Consider a conditional gate; NOT auto-encoded."
+  ],
+  "doctrine": {
+    "SR-1": "Every value claim (0.01/1%, 150 l/m², 30 m²->0.3 m, tolerance +/-1/2 mm, impermissible-treatment list) is quoted verbatim from Naturteich.txt this run with line numbers.",
+    "SR-2": "Overflow-edge tolerance range (+/-1 mm / +/-2 mm, length-conditional) surfaced as decisionItem D3, not auto-picked.",
+    "SR-3": "Render PDF treated as ground truth; markdown 'NIE VA' ceiling overridden to VA where PDF confirms (F3). No trig/cos_beta equations on this worksheet.",
+    "no-prod-write": "All corrections staged as decisionItems (D1/D2); read-only Supabase MCP execute_sql only; harness ran against disposable embedded Postgres."
+  }
+}

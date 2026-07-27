@@ -1,0 +1,82 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-08",
+  "worksheetTitle": "Bauliche Erfordernisse",
+  "templateId": "3874c55c-1849-4b78-8be1-ab48bee0aff4",
+  "standardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "prodTopology": { "equations": 0, "compliance_requirements": 0, "fields": 7 },
+  "note": "Task id 3874c55c-1849-4b78-8be1-ab48bee0aff4 is the worksheet_template id (NOT a worksheet_instance id; that table row does not exist in prod). Resolved via worksheet_templates. Worksheet maps to FLL-GAR-2023 section 4.4 'Bauliche Erfordernisse' (PDF p.28, GAR.txt line 1412). Seeder tags all 7 fields clause_reference '§6' — a generic picker artifact, not the source clause (§4.4).",
+  "equations": [],
+  "fields": [
+    { "id": "d63f352d-7464-4e67-8d19-5d25a08777dc", "symbol": "beckenform", "label_de": "Beckenform", "data_type": "text", "unit": null, "clause_reference": "§6", "verdict": "VC", "quote": "GAR.txt L1573: 'der Art des Bauwerks (z. B. Beckenform, gewachsener Boden);' — 'Beckenform' appears ONCE in the whole PDF, as an example item in the §4.3 system-choice factor list, NOT as a §4.4 structural-requirement capture field.", "note": "Plausible design input but NOT attested by §4.4 'Bauliche Erfordernisse'. Scaffold field." },
+    { "id": "05758858-faec-4e8b-a810-01e8bc9a3e7d", "symbol": "wassertiefe_max", "label_de": "Max. Wassertiefe", "data_type": "number", "unit": "m", "clause_reference": "§6", "verdict": "VC", "quote": "GAR.txt L5279: '...der vorgesehenen Wassertiefe und Beanspruchung dimensioniert werden.' and L5719 (edge-zone). 'Wassertiefe' appears 2x, never under §4.4 and never as a captured max-depth parameter.", "note": "No §4.4 attestation; unit 'm' is dimensionally sane. Scaffold field." },
+    { "id": "a19844fa-bbf8-4cb0-a6c2-7bd550263b1a", "symbol": "wasserspiegelflaeche", "label_de": "Wasserspiegelfläche", "data_type": "number", "unit": "m²", "clause_reference": "§6", "verdict": "VC", "quote": "grep 'Wasserspiegelfläche' over GAR.txt = 0 hits. Term does not exist anywhere in the standard.", "note": "Not attested anywhere in FLL-GAR-2023. Scaffold field. Unit m² sane." },
+    { "id": "20571f6e-da0f-4b16-b8b5-b19893a0f775", "symbol": "beckenvolumen", "label_de": "Beckenvolumen", "data_type": "number", "unit": "m³", "clause_reference": "§6", "verdict": "VC", "quote": "grep 'Beckenvolumen' = 0 hits. §4.3 (L1571) mentions 'Volumen' generically as a dimensioning factor ('der Dimensionierung ... z. B. Volumen, Bemessungswasserstand') but never 'Beckenvolumen' and never under §4.4.", "note": "Not attested as a §4.4 field. Scaffold. Unit m³ sane." },
+    { "id": "7a5cd0d0-9712-4045-9969-4d41f1e0ba25", "symbol": "umfang_oberkante", "label_de": "Umfang Oberkante", "data_type": "number", "unit": "m", "clause_reference": "§6", "verdict": "VC", "quote": "'Umfang' appears 16x in GAR.txt but in the sense 'umfasst' / scope-of-work, not as a basin top-edge perimeter under §4.4. No 'Umfang Oberkante' geometry field in §4.4.", "note": "Not attested. Scaffold. Unit 'm' sane." },
+    { "id": "079fed2d-0004-46ba-9e95-8c97c8e5d4a3", "symbol": "ueberlauf_position", "label_de": "Überlauf-Position", "data_type": "text", "unit": null, "clause_reference": "§6", "verdict": "VC", "quote": "GAR.txt §4.4 L1414-1415: 'Abdichtungen sind so herzustellen, dass umgebendes Gelände und angrenzende Bauwerke vor einem unkontrollierten Wasserverlust (z. B. Überlaufen, Hinterläufigkeit) geschützt werden.' §4.4 does address overflow control conceptually, but does NOT define an 'Überlauf-Position' capture field.", "note": "Closest §4.4-relevant field (overflow protection is a §4.4 requirement), but the discrete 'position' capture is a scaffold, not verbatim. VC." },
+    { "id": "4d1effa1-6625-4520-bc46-f233407acacc", "symbol": "zugang_wartung", "label_de": "Zugang für Wartung", "data_type": "text", "unit": null, "clause_reference": "§6", "verdict": "VC", "quote": "'Wartung' appears 23x in GAR.txt (maintenance is a pervasive theme, e.g. inspection/Instandhaltung), but §4.4 'Bauliche Erfordernisse' does not prescribe a 'Zugang für Wartung' field.", "note": "Maintenance-access is standard-relevant but the field is a scaffold under §4.4. VC." }
+  ],
+  "chains": [
+    {
+      "name": "FLL-GAR-08 data-capture persistence (no equation — save-path round-trip of all 7 fields)",
+      "ran": true,
+      "liveValue": "beckenform='rechteckig', wassertiefe_max=1.5, wasserspiegelflaeche=40, beckenvolumen=60, umfang_oberkante=26, ueberlauf_position='Nordseite', zugang_wartung='Treppe Ostseite' — all persisted to project_parameters via real saveWorksheet",
+      "pdfExpected": "N/A — §4.4 prints no worked example and no numeric target; worksheet is pure data capture. Entered values are arbitrary sane test inputs, NOT source claims (SR-1).",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll | Test Files 1 passed (1) | Tests 2 passed (2) | Duration ~5-6.5s. Test 1 'exposes the 7 capture fields' PASS; Test 2 'persists engineer-entered values for all 7 fields through saveWorksheet' PASS — saveWorksheet returned ok:true and all 7 project_parameters rows verified (4 numeric close-to, 3 text exact)."
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "provenance",
+      "title": "FLL-GAR-08 fields are generic scaffold, not source-verified §4.4 encoding",
+      "detail": "The 7 encoded fields (beckenform, wassertiefe_max, wasserspiegelflaeche, beckenvolumen, umfang_oberkante, ueberlauf_position, zugang_wartung) are basin-geometry capture inputs. FLL-GAR-2023 §4.4 'Bauliche Erfordernisse' (the worksheet's title/subject) is prose-only qualitative structural requirements (uncontrolled-water-loss protection, movement accommodation, buoyancy/uplift dimensioning of the Auflast, ice protection) and defines NONE of these geometry fields. 'Wasserspiegelfläche', 'Beckenvolumen' have 0 hits in the entire PDF; 'Beckenform' appears only as a §4.3 example; 'Beckenvolumen' concept surfaces only as generic 'Volumen' in §4.3. This worksheet is a scaffolded pool-geometry sheet mislabeled to §4.4. Not prod-breaking; flagged for source-verification / re-source of §4.4 into either qualitative checklist requirements or correctly-attributed geometry inputs."
+    },
+    {
+      "id": "F2",
+      "severity": "metadata",
+      "title": "clause_reference '§6' is wrong for all 7 fields",
+      "detail": "Every field carries clause_reference '§6'. FLL-GAR-2023 uses section numbering (4.4 'Bauliche Erfordernisse'); there is no '§6' matching this content. '§6' is a generic picker/scaffold placeholder. Correct reference for this worksheet's subject is section 4.4 (PDF p.28)."
+    },
+    {
+      "id": "F3",
+      "severity": "info",
+      "title": "Task worksheet id is a template id, not an instance id",
+      "detail": "The task id 3874c55c-1849-4b78-8be1-ab48bee0aff4 resolves to worksheet_templates.id, not worksheet_instances.id (no such instance row exists in prod). Verified via join on worksheet_templates. Not a defect; recorded so downstream ledger consumers do not treat it as a live instance."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "title": "No source-verified point values obtainable for the 7 fields (SR-1)",
+      "reason": "§4.4 prints no numeric example. All persisted chain values are arbitrary sane placeholders, not verbatim source claims. Any real assertion on these fields would violate SR-1; none made."
+    },
+    {
+      "id": "R2",
+      "title": "cos_beta / trig engine residue — N/A for GAR-08",
+      "reason": "GAR-08 has 0 equations, so no trig-blocked equation here. Trig residue lives on GAR-22 Gl.2b, not this worksheet. Recorded for completeness."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "re-source",
+      "title": "Re-source FLL-GAR-08 against §4.4 'Bauliche Erfordernisse'",
+      "detail": "Decide whether FLL-GAR-08 should encode §4.4's actual qualitative requirements (overflow/Hinterläufigkeit protection, uplift/Auflast dimensioning when Grundwasserspiegel > Gewässeroberfläche, movement/crack-bridging, ice protection at the edge) as a compliance checklist — versus keeping generic basin-geometry inputs (which may better belong to a §4.3 dimensioning worksheet). STAGED as decision, NOT applied. No migration authored (scope = re-source, needs human source review)."
+    },
+    {
+      "id": "D2",
+      "type": "migration-staged",
+      "title": "Correct clause_reference '§6' -> '4.4' for the 7 GAR-08 fields",
+      "detail": "Written-not-applied migration note: UPDATE fields SET clause_reference='4.4' WHERE worksheet_template_id='3874c55c-1849-4b78-8be1-ab48bee0aff4'. Contingent on D1 outcome (if fields are removed/re-sourced, the clause fix is moot). Read-only prod this run; NOT applied."
+    },
+    {
+      "id": "D3",
+      "type": "range-surfaced",
+      "title": "§4.5 slope range (adjacent, informational)",
+      "detail": "SR-2: §4.5/Tab.1 gives werkstoffspezifische Böschungsneigung RANGES (e.g. Grubentone ≤1:3/≤33%, PEHD ≤1:1,5/≤66%, Flüssigkunststoff ≤1:1/≤100%). These belong to the slope/profiling worksheet, NOT GAR-08, but surfaced here because §4.5 immediately follows §4.4 in the text read for this verification and any 'wassertiefe/neigung' geometry field must not auto-pick a single slope limit. No point value picked."
+    }
+  ]
+}

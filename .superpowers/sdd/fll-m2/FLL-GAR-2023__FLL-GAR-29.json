@@ -1,0 +1,116 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-29",
+  "worksheet_title_de": "Konformitaetszusammenfassung & Freigabe",
+  "template_id": "2aef101c-8e8a-4cde-ad69-3f36510414fc",
+  "standard_id": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "summary": "Conformity-summary / engineer+customer sign-off worksheet. 0 equations, 5 fields, 1 block gate (REQ-30). No math and no printed worked example in the standard. Verdict enum is an EKOWAI methodology construct (each value tagged regulation_reference='methodology'), not a verbatim FLL category. The formal sign-off act itself IS attested by GAR §11 (Abnahme).",
+  "counts": { "equations": 0, "fields": 5, "gates": 1 },
+  "equations": [],
+  "fields": [
+    {
+      "symbol": "compliance_verdict_final",
+      "data_type": "enum",
+      "required": true,
+      "enum_values": ["compliant", "compliant_with_conditions", "not_compliant", "insufficient_data"],
+      "verdict": "VC",
+      "note": "Overall conformity verdict. All four enum options carry regulation_reference='methodology' in the seed — i.e. an EKOWAI aggregation taxonomy, NOT a verbatim FLL-GAR category. Honestly labelled (not fabricated as source). clause_reference='All'. source_quote is NULL (correct — no single clause).",
+      "quote": "enum_values[*].regulation_reference == 'methodology' (from prod fields row); no matching verbatim string in GAR.txt"
+    },
+    {
+      "symbol": "konf_abdichtungssystem_gewaehlt",
+      "data_type": "text",
+      "required": false,
+      "verdict": "VA",
+      "note": "Selected sealing system carried forward from §9 (Abdichtungssysteme). clause_reference='§9'. The concept of a chosen Abdichtungssystem is standard-attested; the free-text carrier is a summary echo.",
+      "quote": "GAR.txt: multiple §9 references to 'Abdichtungssysteme' / choice of sealing system (structural section 9)."
+    },
+    {
+      "symbol": "konf_alle_nachweise_bestanden",
+      "data_type": "boolean",
+      "required": false,
+      "verdict": "VC",
+      "note": "Boolean roll-up 'all proofs passed', clause_reference='§9-§16'. A methodology aggregation flag over the §9-§16 proof worksheets; no single verbatim source line. Persisted correctly through saveWorksheet (true and false)."
+    },
+    {
+      "symbol": "konf_freigabe_datum",
+      "data_type": "date",
+      "required": false,
+      "verdict": "VA",
+      "note": "Release/acceptance date. clause_reference='Engineer-doc'. Backed by GAR §11.1 Abnahme — the acceptance act is formal and dated; persists correctly (round-tripped 2026-07-23).",
+      "quote": "GAR §11.1: 'Abnahme bedeutet die körperliche Hinnahme der Leistung des Auftragnehmers durch den Auftraggeber, verbunden mit der Erklärung, dass er das Werk als im Wesentlichen vertragsgemäß anerkennt.'"
+    },
+    {
+      "symbol": "konf_bemerkungen",
+      "data_type": "text",
+      "required": false,
+      "verdict": "VA",
+      "note": "Free-text remarks/notes. clause_reference='Engineer-doc'. Backed by §11: joint written record of the result.",
+      "quote": "GAR §11.1: '... gemeinsam von Auftraggeber und Auftragnehmer festzustellen und das Ergebnis schriftlich niederzulegen.'"
+    }
+  ],
+  "chains": [
+    {
+      "name": "sign-off state (compliant) — drive all 5 fields through real saveWorksheet",
+      "ran": true,
+      "liveValue": "compliance_verdict_final='compliant', konf_abdichtungssystem_gewaehlt='GTD (Bentonit-Ton)', konf_alle_nachweise_bestanden=true, konf_freigabe_datum=2026-07-23, konf_bemerkungen='Alle Nachweise erbracht.'",
+      "pdfExpected": "no worked example printed in the standard (sign-off worksheet, not a calc)",
+      "verdict": "VC",
+      "raw": "PASS — persisted values read back from project_parameters match inputs; date round-trips to ISO 2026-07-23"
+    },
+    {
+      "name": "re-drive to not_compliant / conditions-not-met",
+      "ran": true,
+      "liveValue": "compliance_verdict_final='not_compliant', konf_alle_nachweise_bestanden=false",
+      "pdfExpected": "n/a (no printed example)",
+      "verdict": "VC",
+      "raw": "PASS — verdict flips to not_compliant and persists"
+    }
+  ],
+  "gates": [
+    {
+      "id": "55f68973-8414-4d17-8bf6-f177dbfd4bcc",
+      "code": "REQ-30",
+      "severity": "block",
+      "condition": "compliance_verdict_final in {compliant, compliant_with_conditions}",
+      "fired": true,
+      "vacuous": false,
+      "note": "Grammar parses as an IN-membership node (single bare aref LHS, two bare-ident string-literal members). Exercised through production evaluateCondition(): PASS on 'compliant' and 'compliant_with_conditions'; FAIL on 'not_compliant' and 'insufficient_data'; PENDING (missingSymbols=['compliance_verdict_final']) when unset. Genuinely fireable in both directions — NOT a CR-006 vacuous/dead gate."
+    }
+  ],
+  "findings": [],
+  "residue": [
+    {
+      "kind": "no-equations",
+      "note": "0 equations on this worksheet — nothing to verify against PDF constants/units. Consistent with a summary/sign-off worksheet. No cos_beta/trig residue applicable."
+    },
+    {
+      "kind": "VC-methodology-enum",
+      "symbol": "compliance_verdict_final",
+      "note": "The verdict taxonomy (compliant / compliant_with_conditions / not_compliant / insufficient_data) is an EKOWAI methodology construct, correctly self-tagged regulation_reference='methodology'. Not PDF-attested (VC), but honestly labelled — not a fabrication finding."
+    },
+    {
+      "kind": "VC-rollup-flag",
+      "symbol": "konf_alle_nachweise_bestanden",
+      "note": "Boolean aggregation over §9-§16 proof worksheets; no single verbatim source line (VC). Correct as a summary roll-up."
+    }
+  ],
+  "decisionItems": [
+    {
+      "kind": "range-not-applicable",
+      "note": "SR-2: no numeric range appears anywhere on this worksheet (no equations, no numeric fields), so there is no peak-vs-yearly / range point to surface. No auto-picked point values exist."
+    },
+    {
+      "kind": "attestation-gap-observation",
+      "note": "REQ-30 description says 'engineer + customer sign-off' but compliance_requirements.requires_attestation=false and no attestation field is wired. Not staged as a fix (findings-over-fixes); flagged for human decision on whether the sign-off gate should require attestation. No prod write."
+    }
+  ],
+  "doctrine_notes": {
+    "SR-1": "Every value claim above carries a verbatim quote from GAR.txt (this run) or an explicit 'no verbatim source' marker. No log/prior-chat numbers used.",
+    "SR-2": "No ranges present — nothing auto-picked.",
+    "SR-3": "GAR.txt is the pdftotext -layout extraction of the rendered PDF; §11 Abnahme quotes confirmed at lines 6276-6321. markdown-only items flagged VC.",
+    "prod_writes": "NONE. Read-only execute_sql only; the one observation (attestation gap) is logged as a decisionItem, not applied."
+  },
+  "test_file": "tests/harness/verify-fll-gar-29-agent.integration.test.ts",
+  "vitest_raw": "Test Files 1 passed (1); Tests 8 passed (8); Duration 4.76s. Cases: topology exposes all 5 fields; saveWorksheet persists compliant state (all 5 fields round-trip, date=2026-07-23); re-drive not_compliant persists; REQ-30 PASS(compliant); REQ-30 PASS(compliant_with_conditions); REQ-30 FAIL(not_compliant); REQ-30 FAIL(insufficient_data); REQ-30 PENDING(unset, missingSymbols contains compliance_verdict_final)."
+}

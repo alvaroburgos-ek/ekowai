@@ -1,0 +1,100 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-02",
+  "worksheetId": "1ee4baaa-432d-4f3c-b338-1da00fbbfc32",
+  "worksheetTitle": "Anwendungsbereich & Abgrenzung",
+  "runDate": "2026-07-23",
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\GAR.txt (rendered from fll_gewaesserabdichtungsrichtlinien_2023__2 (2).pdf)",
+  "equations": [],
+  "equationsNote": "FLL-GAR-02 has ZERO equations in prod (verified via SELECT on equations WHERE worksheet_template_id=1ee4baaa-…). It is a pure scoping/delimitation worksheet — nothing to compute. No trig/cos_beta residue applies here.",
+  "fields": [
+    {
+      "id": "c4e66354-21d9-45d0-88d6-7d4545fe84e9",
+      "symbol": "gewaesser_type",
+      "data_type": "enum",
+      "verdict": "VA",
+      "quote": "Section 1.1 IN-SCOPE list verbatim (GAR.txt L606-614): 'Teiche; Wasserbecken; Bachläufe; Schwimm-, Badeteiche sowie Freibäder mit biologischer Wasseraufbereitung; Retentionsbodenfilter und Pflanzenkläranlagen; Regenrückhaltebecken; Reitplätze mit regulierbarem Wasserstand (Anstauplätze); Löschwasserteiche; Beschneiungsteiche und -becken.' OUT-OF-SCOPE list verbatim (L616-620): 'Die Gewässerabdichtungsrichtlinien gelten nicht für: Deponien; Fischereieinrichtungen; Talsperren und Speicherbecken; Wasserstraßen.'",
+      "note": "All 15 enum options map VERBATIM to Sec.1.1: 11 in-scope values (teich, wasserbecken, bachlauf, schwimmteich, freibad_bio, retentionsbodenfilter, pflanzenklaeranlage, regenrueckhaltebecken, anstauplatz, loeschwasserteich, beschneiungsteich) + 4 out-of-scope values (deponie order_index 90, fischerei 91, talsperre 92, wasserstrasse 93). One-to-one with the PDF's two bullet lists. clause_reference Sec.1.1 correct. PDF-confirmed = VA."
+    },
+    {
+      "id": "82863074-e152-43fd-b9cd-b5d9f0f1e14c",
+      "symbol": "gewaesser_in_scope",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "Sec.1.1 partition 'gelten für … / gelten nicht für …' (GAR.txt L603-620). The boolean encodes the in/out partition the standard draws.",
+      "note": "Boolean scope flag; validation_rules.raw = 'true/false; computed from gewaesser_type'. Its meaning (in scope vs not) is Sec.1.1-attested. SEE FINDING F-02: no producer (equation) exists to actually derive it from gewaesser_type — the 'computed from' contract is unmaterialized. consumer_worksheets = ['All'] (whole standard depends on it)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "REQ-01 scope gate — FAIL state (out-of-scope) through real saveWorksheet + evaluateCondition",
+      "ran": true,
+      "liveValue": "value_boolean=false persisted; evaluateCondition('gewaesser_in_scope == true') => {kind:'fail'}",
+      "pdfExpected": "An out-of-scope water body (Deponie/Fischerei/Talsperre/Wasserstraße per Sec.1.1 'gelten nicht für') must be blocked; gate fails.",
+      "verdict": "VA",
+      "raw": "saveWorksheet({instanceId, values:{[gewaesser_in_scope]:{type:'boolean',value:false}}}) -> res.ok=true; SELECT value_boolean => false; evaluateCondition => fail. PASS."
+    },
+    {
+      "name": "REQ-01 scope gate — PASS state (in-scope) through real saveWorksheet + evaluateCondition",
+      "ran": true,
+      "liveValue": "value_boolean=true persisted; evaluateCondition('gewaesser_in_scope == true') => {kind:'pass'}",
+      "pdfExpected": "An in-scope water body (Teich/Bachlauf/… per Sec.1.1 'gelten für') passes the scope gate.",
+      "verdict": "VA",
+      "raw": "saveWorksheet({instanceId, values:{[gewaesser_in_scope]:{type:'boolean',value:true}}}) -> res.ok=true; SELECT value_boolean => true; evaluateCondition => pass. PASS."
+    },
+    {
+      "name": "REQ-01 scope gate — PENDING (missing flag) via evaluateCondition",
+      "ran": true,
+      "liveValue": "evaluateCondition('gewaesser_in_scope == true', ()=>undefined) => {kind:'pending', missingSymbols:['gewaesser_in_scope']}",
+      "pdfExpected": "n/a — grammar coverage check: an unanswered scope flag is pending, not silently vacuous.",
+      "verdict": "VA",
+      "raw": "evaluateCondition with empty lookup -> pending, missingSymbols contains gewaesser_in_scope. PASS."
+    }
+  ],
+  "chainsSummary": "3/3 gate exercises ran GREEN through the real save + real evaluator path. NO equation chains exist on this worksheet (0 equations), so there is no arithmetic chain to run — this is expected, not a gap. vitest: 'Test Files 1 passed (1) / Tests 4 passed (4)' (tests/harness/fll-gar02-scope.integration.test.ts). Includes a topology assertion (2 scope fields, 0 equations, 1 compliance_requirement).",
+  "gates": [
+    {
+      "id": "ba8e1b20-1a67-4a87-a537-dc0f6ee9837e",
+      "code": "REQ-01",
+      "condition": "gewaesser_in_scope == true",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "note": "Parses cleanly as a compare node (symbol gewaesser_in_scope, op ==, rhs literal true). Fired in BOTH a passing state (true=>pass) and a failing state (false=>fail) against live-persisted project_parameters through the real evaluator. NOT vacuous/dead (contrast CR-006 class). clause_reference Sec.1.1 correct. Worksheet-local lookup: gewaesser_in_scope is a field ON this worksheet, so the gate resolves in-worksheet. VA."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-02",
+      "severity": "low",
+      "title": "gewaesser_in_scope is a declared-derived boolean with NO producer (unmaterialized derivation)",
+      "detail": "Field gewaesser_in_scope (82863074-…) carries validation_rules.raw='true/false; computed from gewaesser_type', i.e. it is meant to be DERIVED from the enum gewaesser_type per Sec.1.1's in/out partition. But FLL-GAR-02 has ZERO equations and no other producer materializes it. So the gate REQ-01 (block severity) depends on an engineer manually entering the correct boolean that should have been computed from the chosen gewaesser_type. Risk: an engineer can pick gewaesser_type='deponie' (explicitly OUT of scope per Sec.1.1) yet set gewaesser_in_scope=true, and REQ-01 would PASS — the block gate does not actually enforce the Sec.1.1 partition against the selected type. This is a single-source/derivation-invariant gap, not a false PDF claim; the enum options themselves are Sec.1.1-verbatim (VA). Consistent with the standing 'unmaterialized gate / single-owner' debt catalogued in the single-source audit.",
+      "recommendation": "STAGED (written-not-applied): add a producer that computes gewaesser_in_scope = (gewaesser_type NOT IN {deponie, fischerei, talsperre, wasserstrasse}) OR re-point REQ-01's condition to test the enum directly, e.g. condition 'gewaesser_type IN {teich, wasserbecken, bachlauf, schwimmteich, freibad_bio, retentionsbodenfilter, pflanzenklaeranlage, regenrueckhaltebecken, anstauplatz, loeschwasserteich, beschneiungsteich}'. See decisionItems D-02. No prod write performed."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-01",
+      "type": "no-equation-chains",
+      "detail": "No computational chains run through saveWorksheet were possible: FLL-GAR-02 has 0 equations. This is by design (scoping worksheet). Not a seeder limitation — the seeder drove the boolean field + gate exercises successfully."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-01",
+      "type": "SR-2 range / partition surfaced",
+      "detail": "Sec.1.1 defines a PARTITION (in-scope vs not-in-scope), not a numeric range. gewaesser_type is a discrete enum, so no peak-vs-yearly point-value pick is required. The only decision the standard leaves open is which of the 15 types the concrete project is — that is an engineer input, not an auto-pick. Recorded per SR-2 so it is not silently defaulted; the seeder's enum-first default ('teich') is a placeholder, NOT a source claim."
+    },
+    {
+      "id": "D-02",
+      "type": "gate-hardening (from F-02)",
+      "detail": "DECISION NEEDED: should REQ-01 enforce scope against the selected gewaesser_type (compute/derive gewaesser_in_scope, or re-point the gate condition to an IN {…} membership test on gewaesser_type), so an out-of-scope type cannot pass with a hand-set boolean? Proposed condition (STAGED, not applied): 'gewaesser_type IN {teich, wasserbecken, bachlauf, schwimmteich, freibad_bio, retentionsbodenfilter, pflanzenklaeranlage, regenrueckhaltebecken, anstauplatz, loeschwasserteich, beschneiungsteich}'. Requires a single controlled apply pass; NOT written to prod in this run."
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Every value claim above is backed by a verbatim Sec.1.1 quote pulled from GAR.txt THIS run (L602-620). No prior-log numbers used.",
+    "SR-2": "Sec.1.1 is a discrete partition, not a numeric range; the type selection is surfaced as D-01 rather than auto-picked.",
+    "SR-3": "PDF text (rendered) is ground truth. GAR.txt is the pdftotext rendering of the FLL 2023 PDF; enum options match it verbatim => VA. No markdown-vs-PDF disagreement found.",
+    "readOnlyProd": "Only read-only SELECTs run against prod (vadsmshzebefjreqcicl). All fixes are STAGED in findings/decisionItems. No prod writes."
+  }
+}

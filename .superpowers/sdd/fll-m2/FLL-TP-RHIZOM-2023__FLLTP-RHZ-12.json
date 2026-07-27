@@ -1,0 +1,145 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-12",
+  "worksheetTitle": "Pflege & Düngungsprotokoll / Care & fertilization log",
+  "templateId": "31238173-4fb8-4088-99f6-ec46dae0b1f9",
+  "archetype": "data_collection",
+  "phase": 4,
+  "verifiedRun": "2026-07-23",
+  "pdfSource": "C:\\Users\\Ekowai\\Desktop\\FLL Guidelines PDF\\fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf (text at .superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt)",
+  "counts": { "equations": 0, "gates": 3, "fields": 7 },
+  "fields": [
+    { "symbol": "duenger_gabe_g", "label_de": "Düngergabe je Gefäß", "data_type": "number", "unit": "g" },
+    { "symbol": "duenger_loesung_l", "label_de": "Düngerlösung Volumen", "data_type": "number", "unit": "l" },
+    { "symbol": "duenger_intervall_monate", "label_de": "Düngeintervall", "data_type": "number", "unit": "Monate / months" },
+    { "symbol": "wasserstand_max_ueber_vts_mm", "label_de": "Wasserstand max. über VTS", "data_type": "number", "unit": "mm" },
+    { "symbol": "wasserstand_min_unter_vts_mm", "label_de": "Wasserstand max. unter VTS", "data_type": "number", "unit": "mm", "note": "label_de says 'max.' — should read 'Wasserstand min. unter VTS' (min level 50 mm below); minor label finding F-3" },
+    { "symbol": "ersatz_pflanzen_periode_mon", "label_de": "Ersatz abgestorbener Pflanzen - Periode", "data_type": "number", "unit": "Monate / months" },
+    { "symbol": "halmschnitt_im_gruenen_zulaessig", "label_de": "Halmschnitt im grünen Zustand zulässig?", "data_type": "boolean", "unit": null }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "care/fertilization data-collection save (§7.3) — PASS state",
+      "ran": true,
+      "liveValue": "saveWorksheet ok:true; persisted wasserstand_max_ueber_vts_mm=20, wasserstand_min_unter_vts_mm=50, duenger_intervall_monate=1, duenger_gabe_g=5, duenger_loesung_l=20, ersatz_pflanzen_periode_mon=3, halmschnitt_im_gruenen_zulaessig=false",
+      "pdfExpected": "§7.3: Wasserstand 20 mm über / 50 mm unter VTS; monatlich (1); 5 g in 20 l; Ersatz nur erste 3 Monate; Halmschnitt grün nicht zulässig (false). No worked numeric example in PDF — this is a data-collection worksheet; values are the §7.3 protocol constants.",
+      "verdict": "VA",
+      "raw": "CONFORMANT SAVE ok: true / PASS-STATE REQ-14: {\"kind\":\"pass\"}"
+    },
+    {
+      "name": "care/fertilization data-collection save — FAIL/out-of-spec state",
+      "ran": true,
+      "liveValue": "saveWorksheet ok:true; persisted duenger_gabe_g=10, duenger_intervall_monate=2, ersatz_pflanzen_periode_mon=6, halmschnitt_im_gruenen_zulaessig=true",
+      "pdfExpected": "Deviations from §7.3 persist verbatim; REQ-14 block gate fires (fail).",
+      "verdict": "VA",
+      "raw": "OUT-OF-SPEC SAVE ok: true / FAIL-STATE REQ-14: {\"kind\":\"fail\"}"
+    }
+  ],
+  "gates": [
+    {
+      "id": "a106c1af-ef20-411a-9c59-f750aacbc269",
+      "code": "REQ-14",
+      "title": "Pflege & Düngung dokumentiert (§7.3)",
+      "condition": "wasserstand_max_ueber_vts_mm == 20 AND wasserstand_min_unter_vts_mm == 50 AND duenger_intervall_monate == 1 AND duenger_gabe_g == 5 AND duenger_loesung_l == 20 AND ersatz_pflanzen_periode_mon <= 3 AND halmschnitt_im_gruenen_zulaessig == false",
+      "fired": true,
+      "vacuous": false,
+      "note": "LOCAL + genuinely fireable. All 7 symbols are fields of RHZ-12. Fired PASS (kind=pass) on §7.3-conformant state and FAIL (kind=fail) on out-of-spec state through the real save path. Every constant PDF-attested (VA) — see quotes below.",
+      "quote": "§7.3 (PDF lines 834-852): 'Der für die Testpflanzen einzuhaltende Wasserstand liegt zwischen 20 mm über bzw. 50 mm unter der Oberfläche der Vegetationstragschicht. ... Die Düngung erfolgt in monatlichem Abstand. Pro Gabe und Gefäß (800 x 800 mm) werden 5 g Düngemittel ... gelöst in 20 l Wasser appliziert. ... Abgestorbene Pflanzen sind zu ersetzen. ... ist dies jedoch nur während der ersten drei Monate gestattet. ... Ein Schnitt der Halme im grünen Zustand ist nicht zulässig.'"
+    },
+    {
+      "id": "faccb52d-fff7-48d9-9dff-5046c0a0dd0e",
+      "code": "REQ-16",
+      "title": "Wuchsleistung 12 Monate ausreichend (§3.7, §8.1)",
+      "condition": "bestandsdichte_p_avg_12mon >= 120 AND dichte_relativ_prozent >= 80",
+      "fired": false,
+      "vacuous": true,
+      "note": "DEAD/VACUOUS on RHZ-12 (CR-006 class, FINDING F-1). Neither symbol is a field of RHZ-12: bestandsdichte_p_avg_12mon lives on FLLTP-RHZ-14, dichte_relativ_prozent on FLLTP-RHZ-13. Worksheet-local evaluation returns kind=pending,missingSymbols=[bestandsdichte_p_avg_12mon,dichte_relativ_prozent] for EVERY state → never fires. Condition itself is sound (verified pass@120/80 + fail@100/70 when symbols supplied). Threshold 120 IS PDF-attested (§3.7).",
+      "quote": "§3.7 (PDF line 414): '2. Zwischenauswertung (nach 12 Monaten) ≥ 120 Halme/Gefäße'; relative-density 80%: §3.7 (line 420-421) 'Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den Kontrollgefäßen betragen.'"
+    },
+    {
+      "id": "58683d0b-3d30-4a20-a186-838049acf7c3",
+      "code": "REQ-17",
+      "title": "Wuchsleistung 18 Monate ausreichend (§3.7, §8.1)",
+      "condition": "bestandsdichte_p_avg_18mon >= 160 AND dichte_relativ_prozent >= 80",
+      "fired": false,
+      "vacuous": true,
+      "note": "DEAD/VACUOUS on RHZ-12 (CR-006 class, FINDING F-2). bestandsdichte_p_avg_18mon lives on FLLTP-RHZ-15, dichte_relativ_prozent on FLLTP-RHZ-13 — neither on RHZ-12. Worksheet-local eval returns kind=pending,missingSymbols=[bestandsdichte_p_avg_18mon,dichte_relativ_prozent] always. Condition sound (pass@160/80 + fail@140/70 when supplied). Threshold 160 PDF-attested (§3.7).",
+      "quote": "§3.7 (PDF line 415): '3. Zwischenauswertung (nach 18 Monaten) ≥ 160 Halme/Gefäße'"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "medium",
+      "code": "REQ-16",
+      "type": "misplaced/vacuous gate (CR-006 class)",
+      "summary": "REQ-16 (12-month growth adequacy) is attached to FLLTP-RHZ-12 (Pflege & Düngungsprotokoll) but its condition references only bestandsdichte_p_avg_12mon (field of FLLTP-RHZ-14) and dichte_relativ_prozent (field of FLLTP-RHZ-13). Under worksheet-local gate evaluation it can never resolve → permanently pending → dead on RHZ-12. Live proof: kind=pending,missingSymbols=[bestandsdichte_p_avg_12mon,dichte_relativ_prozent]. The growth-adequacy gate provides NO enforcement where it currently sits.",
+      "recommendation": "Re-home REQ-16 to the worksheet that owns its growth symbols (FLLTP-RHZ-14 for the 12-month avg; dichte_relativ_prozent is on RHZ-13) or the roll-up worksheet that materializes both, so the block gate is fireable. Staged as decision item D-1 (no prod write this run)."
+    },
+    {
+      "id": "F-2",
+      "severity": "medium",
+      "code": "REQ-17",
+      "type": "misplaced/vacuous gate (CR-006 class)",
+      "summary": "REQ-17 (18-month growth adequacy) is on FLLTP-RHZ-12 but references bestandsdichte_p_avg_18mon (FLLTP-RHZ-15) and dichte_relativ_prozent (FLLTP-RHZ-13) — neither is a RHZ-12 field. Permanently pending on RHZ-12. Live proof: kind=pending,missingSymbols=[bestandsdichte_p_avg_18mon,dichte_relativ_prozent].",
+      "recommendation": "Re-home REQ-17 to the worksheet owning bestandsdichte_p_avg_18mon (FLLTP-RHZ-15) / the growth roll-up. Staged as decision item D-2."
+    },
+    {
+      "id": "F-3",
+      "severity": "low",
+      "field": "wasserstand_min_unter_vts_mm",
+      "type": "field label error",
+      "summary": "Field wasserstand_min_unter_vts_mm has label_de 'Wasserstand max. unter VTS' and label_en 'Water level max below substrate'. The symbol and §7.3 semantics make this the MINIMUM water level (50 mm below the substrate surface). Label reads 'max.' where it should read 'min.' — cosmetic/UX, no computational effect (no equation consumes it; REQ-14 uses the symbol not the label).",
+      "recommendation": "Correct label_de → 'Wasserstand min. unter VTS' and label_en → 'Water level min below substrate'. Staged as decision item D-3."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "type": "VC — no worked numeric example in PDF",
+      "note": "FLLTP-RHZ-12 is a data_collection worksheet with 0 equations. The PDF §7.3 prints protocol CONSTANTS (water-level band, dose, interval, replacement window, cut rule) but NO worked example computing a downstream value. The two save chains were therefore sanity-checked against the §7.3 constants (all VA) rather than an arithmetic worked example; the 'chain' here is the real UPSERT/persist path, which ran green."
+    },
+    {
+      "id": "R-2",
+      "type": "cos_beta / trig",
+      "note": "N/A for this worksheet — FLL-TP-RHIZOM has no trig-bearing equations, and RHZ-12 has 0 equations. No engine math-function residue."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-1",
+      "kind": "gate re-home (staged, written-not-applied)",
+      "target": "compliance_requirements REQ-16 (id faccb52d-fff7-48d9-9dff-5046c0a0dd0e)",
+      "current": "worksheet_template_id = 31238173-... (FLLTP-RHZ-12)",
+      "proposed": "move to the FLLTP-RHZ-14 template (owns bestandsdichte_p_avg_12mon) or the growth roll-up worksheet that materializes both bestandsdichte_p_avg_12mon and dichte_relativ_prozent; requires confirming which worksheet materializes dichte_relativ_prozent alongside the 12-month avg.",
+      "migrationNote": "UPDATE compliance_requirements SET worksheet_template_id = '<RHZ-14-or-rollup template id>' WHERE id = 'faccb52d-fff7-48d9-9dff-5046c0a0dd0e'; -- NOT APPLIED; single controlled apply pass. Confirm target worksheet co-locates BOTH condition symbols before applying.",
+      "blockedOn": "Alvaro / human decision on canonical owner worksheet for growth-adequacy gates."
+    },
+    {
+      "id": "D-2",
+      "kind": "gate re-home (staged, written-not-applied)",
+      "target": "compliance_requirements REQ-17 (id 58683d0b-3d30-4a20-a186-838049acf7c3)",
+      "current": "worksheet_template_id = 31238173-... (FLLTP-RHZ-12)",
+      "proposed": "move to FLLTP-RHZ-15 (owns bestandsdichte_p_avg_18mon) / growth roll-up worksheet.",
+      "migrationNote": "UPDATE compliance_requirements SET worksheet_template_id = '<RHZ-15-or-rollup template id>' WHERE id = '58683d0b-3d30-4a20-a186-838049acf7c3'; -- NOT APPLIED.",
+      "blockedOn": "same as D-1."
+    },
+    {
+      "id": "D-3",
+      "kind": "field label fix (staged, written-not-applied)",
+      "target": "fields wasserstand_min_unter_vts_mm (id be9fae5d-cd32-40d1-953e-835d6189a8f3)",
+      "proposed": "label_de 'Wasserstand max. unter VTS' → 'Wasserstand min. unter VTS'; label_en 'Water level max below substrate' → 'Water level min below substrate'.",
+      "migrationNote": "UPDATE fields SET label_de = 'Wasserstand min. unter VTS', label_en = 'Water level min below substrate' WHERE id = 'be9fae5d-cd32-40d1-953e-835d6189a8f3'; -- NOT APPLIED.",
+      "blockedOn": "trivial; batch with next controlled apply pass."
+    },
+    {
+      "id": "D-4",
+      "kind": "SR-2 range surfaced (no auto-pick)",
+      "target": "REQ-14 water-level band",
+      "note": "§7.3 gives water level as a RANGE ('zwischen 20 mm über bzw. 50 mm unter der Oberfläche der VTS'), i.e. any level within [-50 mm, +20 mm] relative to substrate surface is conformant. REQ-14 encodes this by requiring the two RECORDED band-EDGE fields to equal exactly the band extremes (max_ueber==20 AND min_unter==50). This is a defensible encoding of the protocol edges but does NOT check an operational reading against the band. Surfaced as a decision item per SR-2 — do not auto-reinterpret; confirm intended semantics (edge-declaration vs. reading-in-band) with the standard owner before any change."
+    }
+  ],
+  "harnessTest": "tests/harness/verify-fll-rhizom-rhz12.integration.test.ts (4/4 green)",
+  "rawVitest": "Test Files 1 passed (1); Tests 4 passed (4). CONFORMANT SAVE ok: true / PASS-STATE REQ-14: {\"kind\":\"pass\"} / REQ-16 over RHZ-12 fields: {\"kind\":\"pending\",\"missingSymbols\":[\"bestandsdichte_p_avg_12mon\",\"dichte_relativ_prozent\"]} / REQ-17 over RHZ-12 fields: {\"kind\":\"pending\",\"missingSymbols\":[\"bestandsdichte_p_avg_18mon\",\"dichte_relativ_prozent\"]} / OUT-OF-SPEC SAVE ok: true / FAIL-STATE REQ-14: {\"kind\":\"fail\"} / REQ-16/17 fireable when foreign symbols supplied: pass@120/160/80, fail@100/140/70."
+}

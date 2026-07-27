@@ -1,0 +1,121 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "standardTitle": "Technische Prüfbestimmungen zur Bestimmung der Rhizomfestigkeit von Gewässerabdichtungen (Ausgabe 2023)",
+  "worksheet": "FLLTP-RHZ-15",
+  "worksheetTitleDe": "Wuchsleistung Zwischenauswertung 18 Monate",
+  "worksheetTitleEn": "Growth assessment - 18 month interim",
+  "templateId": "cae0dc25-c73b-4c19-bd27-7faaa5f9438a",
+  "archetype": "calculation",
+  "run": "2026-07-23",
+  "prodRef": "vadsmshzebefjreqcicl",
+  "note": "The task-supplied 'instance id cae0dc25...' is in fact the worksheet_TEMPLATE id on prod (verified: no worksheet_instances row with that id; worksheet_templates.code=FLLTP-RHZ-15 matches it exactly). This is a QUALITATIVE test-procedure standard: the whole PDF (FLL TP Rhizomfestigkeit) contains NO engineering formulas. The only quantitative relationships are the growth-density thresholds in §3.7 and the relative-density ratio in the Prüfbericht Tab. 3.",
+  "counts": { "equations": 0, "gates": 0, "fields": 5 },
+  "fields": [
+    {
+      "id": "31a0c80e-89ce-48e2-8858-028d26b50319",
+      "symbol": "bestandsdichte_p_avg_18mon",
+      "data_type": "number",
+      "unit": "Halme/Gefäß",
+      "clause_reference": "§3.7",
+      "verification_status": "imported_unverified",
+      "source_quote": null,
+      "verdict": "VA",
+      "quote": "§3.7 Wuchsleistung der Testpflanzen: \"3. Zwischenauswertung (nach 18 Monaten) ≥ 160 Halme/Gefäße\" (TP-Rhizom.txt line 415). Field description carries \"Sollwert ≥ 160\", which is PDF-correct for the 18-month interim. Unit 'Halme/Gefäß' matches the PDF unit.",
+      "note": "Value/threshold PDF-confirmed. BUT no gate enforces the ≥160 threshold (see F3). source_quote is NULL in prod (VC on provenance-attachment)."
+    },
+    {
+      "id": "728c28f3-8ade-4868-8929-43a45a649ece",
+      "symbol": "kontrolle_p_avg_18mon",
+      "data_type": "number",
+      "unit": null,
+      "clause_reference": "§Wuchsleistung",
+      "verification_status": "imported_unverified",
+      "source_quote": null,
+      "verdict": "VA",
+      "quote": "§3.7: \"Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den Kontrollgefäßen betragen.\" (TP-Rhizom.txt lines 419-421). Prüfbericht Anhang 2 Tab. 2/Tab. 3: mean of control vessels ØK1–K3 (lines 1261-1295). This field = ØK1–K3 for the 18-month term.",
+      "note": "Control-mean concept PDF-confirmed. Unit is NULL in prod though the analogous test field carries Halme/Gefäß — minor unit-omission inconsistency (Halme/Gefäß expected). clause_reference '§Wuchsleistung' is non-canonical; the standard's clause is §3.7."
+    },
+    {
+      "id": "da10db54-409f-4e99-83e8-f0807c9aadaf",
+      "symbol": "relativ_prozent_18mon",
+      "data_type": "number",
+      "unit": "%",
+      "clause_reference": "§Wuchsleistung",
+      "verification_status": "imported_unverified",
+      "source_quote": null,
+      "verdict": "FINDING",
+      "quote": "Prüfbericht Anhang 2 Tab. 3: \"Durchschnittliche Bestandsdichte der Testpflanzen in den 8 Prüfgefäßen bezogen auf die Durchschnittswerte der Testpflanzen in den drei Kontrollgefäßen (Sollwert: ≥ 80 %)\" with the printed formula \"ØP1–P8 / ØK1–K3 x 100\" (TP-Rhizom.txt lines 1288-1295).",
+      "note": "F1: The standard DEFINES this % by a formula (ØP1–P8/ØK1–K3×100), but on prod it is a plain entered number with NO producing equation. Proven un-derived at runtime: saveWorksheet stored an internally inconsistent 42 (ØP/ØK×100 would be 89.47) verbatim without recompute. Single-source-derivation-invariant violation."
+    },
+    {
+      "id": "9f4a8d97-0568-4ed6-8e13-c49ebc53c164",
+      "symbol": "wuchsleistung_18mon_ausreichend",
+      "data_type": "boolean",
+      "unit": null,
+      "clause_reference": "§Wuchsleistung",
+      "verification_status": "imported_unverified",
+      "source_quote": null,
+      "verdict": "FINDING",
+      "quote": "§3.7: sufficient growth requires (a) ≥ 160 Halme/Gefäß at 18 months AND (b) test density ≥ 80 % of control density. §3.12 / §7 (numbered 2.7 in body cross-refs): \"Wird im Prüfungsverlauf keine ausreichende Wuchsleistung der Testpflanzen erzielt (s. 2.7), ist die Prüfung abzubrechen.\" (TP-Rhizom.txt lines 490-491, 848-849).",
+      "note": "F2: This boolean is the pass/fail verdict that gates whether the test may continue, yet it has NO equation deriving it from the two inputs and NO compliance_requirement enforcing it. A FAIL state (ØP=110, rel=57.9%, ausreichend=false) saves clean through the real path. The abort-on-insufficient-growth rule of §3.12 is therefore unenforced."
+    },
+    {
+      "id": "2e4e86ac-cb9a-4616-8b7b-206e6b5c883e",
+      "symbol": "auswertungs_datum_18mon",
+      "data_type": "date",
+      "unit": null,
+      "clause_reference": "§Wuchsleistung",
+      "verification_status": "imported_unverified",
+      "source_quote": null,
+      "verdict": "VA",
+      "quote": "§3.7: \"Die Ausbreitung der Testpflanzen wird im Abstand von 6 Monaten erfasst.\" (TP-Rhizom.txt line 410); §8.1: \"Halbjährlich ist bei allen Prüf- und Kontrollgefäßen die Wüchsigkeit der Testpflanzen durch Erfassen der Halmanzahl festzuhalten\" (lines 871-872). A per-term evaluation date is a plain metadata capture, PDF-supported.",
+      "note": "Metadata field, no numeric claim. clause_reference '§Wuchsleistung' non-canonical (§3.7)."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "RHZ-15 data-collection save — PASS state (18-month interim ≥160 & ≥80%)",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_18mon": 170, "kontrolle_p_avg_18mon": 190, "relativ_prozent_18mon": 89.47368421052632, "wuchsleistung_18mon_ausreichend": true, "auswertungs_datum_18mon": "2026-01-15" },
+      "pdfExpected": "≥160 Halme (§3.7 l.415) → 170 passes; rel = 170/190×100 = 89.47% ≥ 80% Sollwert (Tab.3) → ausreichend=true. Standard prints no numeric worked example, so inputs are illustrative PDF-anchored values; the ≥160/≥80% thresholds are the verbatim ground truth.",
+      "verdict": "VA (thresholds) / VC (illustrative inputs)",
+      "raw": "vitest v4.1.5 — Test Files 1 passed (1); Tests 4 passed (4); Duration ~5.0s. saveWorksheet returned ok=true; persisted ØP=170, ØK=190, rel%≈89.4737, ausreichend=true, datum=2026-01-15 (all assertions green)."
+    },
+    {
+      "name": "RHZ-15 data-collection save — FAIL state (ØP=110 <160, rel=57.9% <80%)",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_18mon": 110, "kontrolle_p_avg_18mon": 190, "relativ_prozent_18mon": 57.89473684210527, "wuchsleistung_18mon_ausreichend": false },
+      "pdfExpected": "An insufficient state per §3.7/§3.12 should block progression (Prüfung abzubrechen). saveWorksheet accepts it (ok=true) — no gate → thresholds unenforced.",
+      "verdict": "FINDING (see F2)",
+      "raw": "saveWorksheet returned ok=true for the FAIL state; persisted ØP=110, rel%≈57.8947, ausreichend=false. No compliance_requirement blocked the save (0 gates on this worksheet)."
+    },
+    {
+      "name": "RHZ-15 un-derived-relative probe (store 42 with ØP=170,ØK=190)",
+      "ran": true,
+      "liveValue": { "relativ_prozent_18mon": 42 },
+      "pdfExpected": "If ØP/ØK×100 were materialized by an equation the save path would recompute to 89.47; instead the inconsistent 42 persists verbatim.",
+      "verdict": "FINDING (see F1)",
+      "raw": "persisted rel% = 42 (NOT recomputed to 89.47) → confirms relativ_prozent_18mon has no producing equation."
+    }
+  ],
+  "gates": [],
+  "findings": [
+    "F1 (single-source-derivation): relativ_prozent_18mon is a plain entered number but the standard DEFINES it as ØP1–P8/ØK1–K3×100 (Prüfbericht Tab.3, TP-Rhizom.txt l.1288-1295). No producing equation exists on prod; runtime proof: an inconsistent 42 was stored verbatim instead of being recomputed to 89.47. Violates the derived-read-only invariant; the same defect is present on sibling terms RHZ-13/14/16 (6/12/24-month).",
+    "F2 (unenforced verdict / dead threshold): wuchsleistung_18mon_ausreichend is the §3.7/§3.12 pass-fail verdict (abort test if insufficient) yet has neither a deriving equation nor a compliance_requirement. A FAIL state (ØP=110 <160, rel=57.9% <80%) saves clean. The ≥160 Halme/Gefäß and ≥80% relative thresholds are entirely unenforced for this worksheet.",
+    "F3 (missing gate for ≥160 threshold): bestandsdichte_p_avg_18mon carries a PDF-correct 'Sollwert ≥ 160' in its description (§3.7 l.415) but no compliance_requirement enforces it. Documented, not enforced.",
+    "F4 (provenance not attached): all 5 fields are verification_status=imported_unverified with source_quote=NULL — no verbatim regulation quote is stored in prod. PDF-verifiable but currently VC on provenance-attachment (SR-1).",
+    "F5 (clause-reference inconsistency): 4 of 5 fields cite the non-canonical clause '§Wuchsleistung'; only bestandsdichte_p_avg_18mon cites the real clause '§3.7'. Cosmetic/traceability; the canonical clause for all five is §3.7.",
+    "F6 (unit omission): kontrolle_p_avg_18mon has unit=NULL though it is a Halme/Gefäß count like bestandsdichte_p_avg_18mon (unit='Halme/Gefäß'); relative field correctly '%'. Minor."
+  ],
+  "residue": [
+    "No equations to run for this worksheet (0 on prod) — nothing blocked on cos_beta/trig; the standard is qualitative and has NO trig/math-function content anywhere in the PDF.",
+    "No gates to fire (0 compliance_requirements on prod) — the pass+fail exercise instead targeted the data-collection save path and the (missing) enforcement, which is the substantive finding.",
+    "PDF prints no fully-worked numeric example for the 18-month term (Prüfbericht Anhang 2 Tab.1/2/3 are blank template forms with '>> Monat Jahr <<' placeholders); chain inputs are illustrative values anchored to the verbatim §3.7 thresholds, so chain values are VC while the thresholds themselves are VA."
+  ],
+  "decisionItems": [
+    "SR-2 range surfaced — §3.7 defines a STEPPED threshold schedule, NOT a single value: ≥80 (6 mon), ≥120 (12 mon), ≥160 (18 mon), ≥160 (24 mon endauswertung) [TP-Rhizom.txt l.413-416]. RHZ-15 is the 18-month term so ≥160 is the applicable point, but the full ladder must be surfaced so the encoder does not auto-collapse the 18/24-month terms (both ≥160) or confuse them with the 6/12-month steps. Decide: confirm ≥160 is the intended 18-month threshold (it is, per l.415) before wiring any gate.",
+    "STAGED remediation (written-not-applied, no prod write this run): (a) add a compliance_requirement on FLLTP-RHZ-15 enforcing bestandsdichte_p_avg_18mon ≥ 160 (block severity, clause §3.7) and relativ_prozent_18mon ≥ 80 (clause §3.7 / Tab.3); (b) add a producing equation relativ_prozent_18mon = bestandsdichte_p_avg_18mon / kontrolle_p_avg_18mon * 100 (make it derived-read-only) and derive wuchsleistung_18mon_ausreichend from (≥160 AND ≥80%); (c) backfill source_quote on all 5 fields with the §3.7 verbatim; (d) normalize clause_reference '§Wuchsleistung' → '§3.7' and set kontrolle_p_avg_18mon unit='Halme/Gefäß'. Apply together with the identical RHZ-13/14/16 fixes in one controlled pass.",
+    "Human decision: is FLLTP-RHZ-15 intended as a pure data-capture worksheet (thresholds enforced elsewhere / manually by the Prüfinstitut) or should the abort-on-insufficient-growth rule (§3.12) be a hard gate here? This governs whether F2/F3 are 'fix' or 'by-design'."
+  ]
+}

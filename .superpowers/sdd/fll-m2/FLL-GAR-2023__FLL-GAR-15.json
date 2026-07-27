@@ -1,0 +1,147 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-15",
+  "worksheet_title_de": "Bitumenbahnen",
+  "template_id": "080c5e5d-132d-427f-a509-6276aaf7a1ec",
+  "instance_id": "080c5e5d-132d-427f-a509-6276aaf7a1ec (template); driven via seeded worksheet_instance",
+  "pdf_source": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\GAR.txt (rendered from fll_gewaesserabdichtungsrichtlinien_2023__2 (2).pdf)",
+  "summary": "Pure data-capture worksheet: 6 fields, 0 equations, 0 compliance_requirements. No computation, no gates, no worked example in the standard. Content maps to PDF section 6.1 'Bitumenbahnen'. One provenance FINDING: all 6 fields carry clause_reference '§9.7' but Bitumenbahnen material is §6.1 (§9 is 'Randausbildungen'). The bb_zugfestigkeit unit 'N/50mm' is not attested for Bitumenbahnen in §6.1 (VC).",
+  "fields": [
+    {
+      "id": "f3dbcaa2-3181-485c-9331-2315fea86b64",
+      "symbol": "bb_bahnentyp",
+      "label_de": "Bitumenbahn-Typ",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.7",
+      "verdict": "VC",
+      "quote": "§6.1.1.1 Tab. 19: 'Stoffe für die Abdichtung mit Bitumen- und Polymerbitumenbahn, Typ BA gemäß DIN 18535-2' — enumerated Bahnenarten incl. 'Polymerbitumenschweißbahnen: PYE G 200 S4' (Nr.10).",
+      "note": "Descriptive free-text field; the enumerable domain is Tab.19 but the field is data_type=text with no enum_values, so no source-value assertion possible. clause_reference §9.7 does not match the Bitumenbahn material clause §6.1 (see finding F1)."
+    },
+    {
+      "id": "1b0f5c7a-8ba2-48f6-92cd-c64d9b0db498",
+      "symbol": "bb_dicke",
+      "label_de": "Bahnendicke",
+      "data_type": "number",
+      "unit": "mm",
+      "clause_reference": "§9.7",
+      "verdict": "VC",
+      "quote": "§6.1.1.2 Bahnendicke und Anzahl der Lagen: 'Die Bahnendicke ist abhängig von der verwendeten Stoffart, die als Anwendungstyp in DIN EN 13969 in Verbindung mit DIN/TS20.000-202 geregelt ist.'",
+      "note": "Standard prints NO fixed thickness value (deferred to DIN EN 13969 / product type). Unit 'mm' is plausible/consistent; no numeric threshold to assert. VC."
+    },
+    {
+      "id": "b2b6dda7-d05a-49d9-b2ba-a816b152689f",
+      "symbol": "bb_lagen_anzahl",
+      "label_de": "Anzahl Lagen",
+      "data_type": "number",
+      "unit": "1",
+      "clause_reference": "§9.7",
+      "verdict": "VC",
+      "quote": "§6.1.2 Ausführung: 'Abdichtungen aus Bitumenbahnen sind i. d. R. mehrlagig herzustellen.'",
+      "note": "'mehrlagig' (multi-layer, i.e. >=2) is qualitative — no fixed layer count is printed. Dimensionless count, unit '1' consistent. VC."
+    },
+    {
+      "id": "4364f769-a574-47f5-bd97-51339ef19b27",
+      "symbol": "bb_verlegeart",
+      "label_de": "Verlegeart",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.7",
+      "verdict": "VC",
+      "quote": "§6.1.2.1 Fügetechnik: 'Je nach Bahnenart sind unterschiedliche Fügetechniken möglich: Gießverfahren; Gieß- und Einwalzverfahren; Flämmverfahren; Schweißverfahren; Kaltselbstklebeverfahren.'",
+      "note": "Free-text; the standard lists possible Fügetechniken but the field has no enum_values. VC."
+    },
+    {
+      "id": "dc7525ff-1374-4ceb-b495-de3428fcfb91",
+      "symbol": "bb_nahtverbindung",
+      "label_de": "Nahtverbindung",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.7",
+      "verdict": "VC",
+      "quote": "§6.1.2: 'Bei Bitumenbahnen, Bitumenschweißbahnen und kaltselbstklebenden Bitumen-Dichtungsbahnen muss die Mindestbreite der Überlappung an Nähten 80 mm und an Stößen und Anschlüssen 100 mm betragen.' + §6.1.2.1: 'Die Herstellung von Nahtverbindungen bei Bitumenbahnen ist nach DIN 18535 sowie DIN 18533 auszuführen.'",
+      "note": "Free-text descriptor. The 80 mm / 100 mm overlap minima (200 mm at Quernähten for edelstahlkaschiert) are the printed constraints but are NOT encoded as a numeric field/gate on this worksheet — surfaced as decision item D2. VC."
+    },
+    {
+      "id": "22185728-36d3-48db-b2e9-a41a5b1b946f",
+      "symbol": "bb_zugfestigkeit",
+      "label_de": "Zugfestigkeit",
+      "data_type": "number",
+      "unit": "N/50mm",
+      "clause_reference": "§9.7",
+      "verdict": "FINDING",
+      "quote": "No Zugfestigkeit value or 'N/50mm' unit appears for Bitumenbahnen anywhere in §6.1 of GAR.txt. (The only 'Zugfestigkeit' thresholds in the PDF are for Geotextiles: §'Zugfestigkeit (längs und quer) DIN EN ISO 10319 >= 10 kN/m' at line 3292 — a DIFFERENT product family, unit kN/m not N/50mm.)",
+      "note": "The unit 'N/50mm' for a Bitumenbahn Zugfestigkeit is a Werkstoffnorm convention (DIN EN 13969) but is NOT attested in the standard text; it is imported_unverified. No source threshold to assert. See finding F2."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "saveWorksheet persistence round-trip (all 6 fields)",
+      "ran": true,
+      "liveValue": "bb_bahnentyp='PYE G 200 S4'; bb_dicke=4; bb_lagen_anzahl=2; bb_verlegeart='Schweißverfahren'; bb_nahtverbindung='Naht >= 80 mm, Stoss/Anschluss >= 100 mm'; bb_zugfestigkeit=900 — all persisted unchanged (res.ok=true)",
+      "pdfExpected": "N/A — no worked example / no computation in the standard for this worksheet. Descriptive values chosen from §6.1 (Tab.19 Nr.10 Bahnentyp; §6.1.2 mehrlagig=>2 layers; Schweißverfahren; 80/100 mm overlaps). bb_dicke and bb_zugfestigkeit are sanity values (standard prints no fixed numbers).",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\\n Test Files  1 passed (1)\\n      Tests  1 passed (1)\\n   Duration  5.12s (transform 339ms, setup 0ms, import 4.19s, tests 739ms)\\n test file: tests/harness/fll-gar15-verify.integration.test.ts — 'FLL-GAR-15 — real saveWorksheet persistence of all 6 fields (embedded PG)' > 'persists §6.1 attested descriptive values through the REAL save path' PASSED"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "provenance",
+      "field": "all 6 fields (bb_bahnentyp, bb_dicke, bb_lagen_anzahl, bb_verlegeart, bb_nahtverbindung, bb_zugfestigkeit)",
+      "issue": "clause_reference='§9.7' on every field, but the Bitumenbahnen material section in the standard is §6.1 (§6.1.1 Anforderungen an Stoffe und Bauteile, §6.1.2 Ausführung, §6.1.3 Prüfungen). §9 of GAR is 'Randausbildungen' (edge design) and there is no §9.7 subsection in the rendered PDF at all.",
+      "evidence": "GAR.txt line 3726 '6.1 Bitumenbahnen'; line 280 '9 ANFORDERUNGEN AN PLANUNG UND AUSFÜHRUNG VON ...'; grep for '9.7' as a section header returns no match.",
+      "verdict": "FINDING (wrong clause_reference across all fields — misattributes provenance). VA (PDF-confirmed the correct clause is §6.1, not §9.7).",
+      "staged_migration": "UPDATE fields SET clause_reference='§6.1' WHERE worksheet_template_id='080c5e5d-132d-427f-a509-6276aaf7a1ec'; -- (bb_nahtverbindung could be §6.1.2/§6.1.2.1; bb_verlegeart §6.1.2.1; bb_bahnentyp §6.1.1.1; bb_dicke §6.1.1.2). WRITTEN-NOT-APPLIED — see decisionItems D1."
+    },
+    {
+      "id": "F2",
+      "severity": "provenance",
+      "field": "bb_zugfestigkeit",
+      "issue": "Unit 'N/50mm' and the very existence of a Zugfestigkeit requirement for Bitumenbahnen are not attested in §6.1. The standard defers Bitumenbahn material properties to DIN EN 13969 / DIN SPEC 20000-202 (product type BA) and prints no Zugfestigkeit threshold. The only Zugfestigkeit thresholds in GAR are for Geotextiles (DIN EN ISO 10319, >= 10 kN/m — unit kN/m, different product).",
+      "evidence": "grep 'N/50' and 'Zugfestigkeit' in GAR.txt: no Bitumenbahn hit; Geotextile hit at line 3292 (kN/m).",
+      "verdict": "FINDING (imported_unverified value with no standard backing; unit possibly a Werkstoffnorm carry-over). Not a computation error (no equation consumes it).",
+      "staged_migration": "No auto-fix. Decision needed: keep as optional Herstellerkennwert citing DIN EN 13969, or drop. See decisionItems D3."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-computable-chain",
+      "reason": "0 equations on FLL-GAR-15 — nothing to compute. The only drivable path is the saveWorksheet persistence round-trip, which was RUN and passed (chain C1). No cos_beta/trig residue applies (no equations)."
+    },
+    {
+      "id": "R2",
+      "type": "VC-descriptive-fields",
+      "reason": "All 6 fields are descriptive (2 number, 4 text) with no enum_values and no numeric source thresholds printed in §6.1 (dimensions deferred to DIN EN 13969). Values entered are §6.1-consistent but cannot be VA-asserted against a printed figure; bb_dicke and bb_zugfestigkeit are sanity placeholders."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "clause-reference-correction",
+      "prompt": "Apply staged migration to correct clause_reference '§9.7' -> '§6.1' (or finer per-field §6.1.1.1 / §6.1.1.2 / §6.1.2 / §6.1.2.1) on all 6 FLL-GAR-15 fields. WRITTEN-NOT-APPLIED; single controlled apply pass. PDF-attested (VA).",
+      "options": ["coarse: all -> §6.1", "fine: per-field §6.1.x as noted in F1", "leave as-is (reject)"]
+    },
+    {
+      "id": "D2",
+      "type": "SR-2-range-not-autopicked",
+      "prompt": "§6.1.2 prints Überlappungs-Mindestbreiten as a set of thresholds, NOT a single value: Nähte >= 80 mm; Stöße/Anschlüsse >= 100 mm; edelstahlkaschierte Bitumenschweißbahnen: Längsnähte >= 100 mm, Quernähte/Stöße/Anschlüsse >= 200 mm. These are currently only free-text on bb_nahtverbindung. DECISION: encode as numeric field(s)+gate, or leave as descriptive text? Do NOT auto-pick one figure.",
+      "options": ["encode min-overlap numeric + block gate (>=80/>=100)", "keep as descriptive text (current)", "split by Bahnenart"]
+    },
+    {
+      "id": "D3",
+      "type": "unattested-field",
+      "prompt": "bb_zugfestigkeit (unit N/50mm) has no §6.1 backing (F2). DECISION: keep as optional Herstellerkennwert (cite DIN EN 13969) with a note that GAR itself sets no threshold, or remove the field?",
+      "options": ["keep, re-cite DIN EN 13969, mark imported_unverified", "remove field", "leave as-is (reject)"]
+    }
+  ],
+  "doctrine_notes": {
+    "SR-1": "Every value claim is quoted verbatim from GAR.txt this run; the passing chain value is a driven placeholder, not a verified input.",
+    "SR-2": "Overlap thresholds surfaced as D2 (range/threshold-set, not auto-picked).",
+    "SR-3": "GAR.txt is the pdftotext -layout render of the ground-truth PDF; §6.1 vs §9.7 mismatch is the PDF-vs-encoding disagreement, PDF wins (F1).",
+    "prod_writes": "NONE. All corrections staged as written-not-applied (F1 migration, D1/D3) for a single controlled apply pass. execute_sql used read-only only."
+  }
+}

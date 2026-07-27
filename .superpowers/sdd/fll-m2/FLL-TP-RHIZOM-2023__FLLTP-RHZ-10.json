@@ -1,0 +1,151 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-10",
+  "worksheetTitle": "Vorbereitung der Kontrollgefäße",
+  "templateId": "86cfecb3-0a54-4ffb-aca4-b4d10a09aa6d",
+  "instanceIdSource": "harness fixture fx.byCode['FLLTP-RHZ-10'].instanceId (disposable embedded PG; prod not written)",
+  "pdfSource": "C:\\Users\\Ekowai\\Desktop\\FLL Guidelines PDF\\fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf",
+  "pdfTextExtract": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt",
+  "pdfSection": "§7.2 Vorbereitung der Kontrollgefäße (TP-Rhizom.txt lines 819-825)",
+  "prodPull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 5
+  },
+  "fields": [
+    {
+      "symbol": "kontroll_einbau_datum",
+      "label_de": "Einbau-Datum Kontrollgefäße",
+      "data_type": "date",
+      "unit": null,
+      "is_required": true,
+      "pdfConstraint": null,
+      "verdict": "VA",
+      "note": "Free-form install-date data capture; §7.2 prints no date value, so no numeric range applies. Field shape (date/required) matches its data-collection role. PDF-confirmed the worksheet describes an install procedure (Einbau)."
+    },
+    {
+      "symbol": "kontroll_vts_einbau_methode",
+      "label_de": "VTS-Einbaumethode Kontrolle",
+      "data_type": "text",
+      "unit": null,
+      "is_required": true,
+      "pdfConstraint": "§7.2: 'ohne Widerlager und Abdichtung ... Die Bepflanzung erfolgt analog zu den Prüfgefäßen, wie unter Abschnitt 6.1 beschrieben.'",
+      "verdict": "VA",
+      "quote": "In die 3 wasserdichten Kontrollgefäße wird ohne Widerlager und Abdichtung die untere Vegetationstragschicht ... eingebaut. ... Die Bepflanzung erfolgt analog zu den Prüfgefäßen, wie unter Abschnitt 6.1 beschrieben.",
+      "note": "Free-text method field; the method the standard prescribes (ohne Widerlager/Abdichtung, analog Prüfgefäße §6.1) is verbatim in §7.2. No enumerated constraint on prod, correct for a narrative method field."
+    },
+    {
+      "symbol": "kontroll_vts_dicke_unten_mm",
+      "label_de": "Untere VTS-Schichtdicke Kontrolle",
+      "data_type": "number",
+      "unit": "mm",
+      "is_required": true,
+      "pdfConstraint": "(20 ±5) mm  → range 15..25 mm",
+      "verdict": "VA",
+      "quote": "In die 3 wasserdichten Kontrollgefäße wird ohne Widerlager und Abdichtung die untere Vegetationstragschicht in einer Dicke von (20 ±5) mm eingebaut.",
+      "note": "Symbol/unit (mm) match §7.2. Nominal 20 mm, tolerance ±5 mm. SR-2: this is a RANGE (15..25 mm) — surfaced as decisionItem, not auto-picked. No gate enforces it (see gates)."
+    },
+    {
+      "symbol": "kontroll_vts_dicke_oben_mm",
+      "label_de": "Obere VTS-Schichtdicke Kontrolle",
+      "data_type": "number",
+      "unit": "mm",
+      "is_required": true,
+      "pdfConstraint": "(150 ±5) mm  → range 145..155 mm",
+      "verdict": "VA",
+      "quote": "Nach Anbringen des Standrohrs in der Nähe der Gefäßwand wird die obere Vegetationstragschicht in einer Dicke von (150 ±5) mm eingebaut.",
+      "note": "Symbol/unit (mm) match §7.2. Nominal 150 mm, tolerance ±5 mm. SR-2: RANGE (145..155 mm) surfaced as decisionItem. No gate enforces it."
+    },
+    {
+      "symbol": "kontroll_standrohr_eingebaut",
+      "label_de": "Standrohr eingebaut Kontrolle",
+      "data_type": "boolean",
+      "unit": null,
+      "is_required": true,
+      "pdfConstraint": "§7.2 requires a Standrohr be fitted before the upper VTS layer.",
+      "verdict": "VA",
+      "quote": "Nach Anbringen des Standrohrs in der Nähe der Gefäßwand wird die obere Vegetationstragschicht in einer Dicke von (150 ±5) mm eingebaut.",
+      "note": "Boolean capture of 'Standrohr angebracht'. §7.2 mandates the Standrohr; a compliant control vessel therefore has true. No gate enforces true (see gates), so a false value is storable — a data-collection worksheet with no enforcement layer."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "RHZ-10 §7.2 source-attested data-collection save (all 5 fields)",
+      "ran": true,
+      "liveValue": {
+        "kontroll_einbau_datum": "2026-01-15T00:00:00.000Z",
+        "kontroll_vts_einbau_methode": "ohne Widerlager und Abdichtung, analog Prüfgefäße (§6.1)",
+        "kontroll_vts_dicke_unten_mm": 20,
+        "kontroll_vts_dicke_oben_mm": 150,
+        "kontroll_standrohr_eingebaut": true
+      },
+      "pdfExpected": "untere VTS (20 ±5) mm; obere VTS (150 ±5) mm; Standrohr angebracht (§7.2). Standard prints no single worked numeric example for this worksheet — nominal values used.",
+      "verdict": "VA",
+      "note": "Drove the REAL saveWorksheet path against the embedded PG; save.ok=true; all 5 values round-tripped verbatim on read-back of project_parameters. Nominal 20/150 mm are the §7.2 range midpoints (VA on the range statement; the specific point is a user entry, not a standard-fixed value).",
+      "raw": "RHZ-10 save.ok: true  error: null | RHZ-10 persisted  datum: \"2026-01-15T00:00:00.000Z\"  methode: \"ohne Widerlager und Abdichtung, analog Prüfgefäße (§6.1)\"  unten_mm: 20  oben_mm: 150  standrohr: true"
+    },
+    {
+      "name": "RHZ-10 out-of-range persistence probe (no gate enforcement)",
+      "ran": true,
+      "liveValue": {
+        "kontroll_vts_dicke_unten_mm": 999,
+        "kontroll_vts_dicke_oben_mm": 0
+      },
+      "pdfExpected": "N/A (probe) — §7.2 tolerance is 15..25 / 145..155 mm; 999/0 are grossly out of range.",
+      "verdict": "VC",
+      "note": "save.ok=true and 999/0 persisted unchecked. Confirms there is NO range-validation gate on this worksheet. Expected for a data-collection worksheet (0 compliance_requirements in prod), recorded as an observation not a defect.",
+      "raw": "RHZ-10 out-of-range save.ok: true  error: null | RHZ-10 after out-of-range persisted unten_mm: 999  oben_mm: 0"
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "type": "no-gate-range-enforcement",
+      "note": "The two §7.2 mm-thickness fields carry PDF-attested tolerances ((20±5), (150±5) mm) but no compliance_requirement enforces them; the out-of-range probe (999/0) persisted with save.ok=true. This matches prod (0 compliance_requirements) and the worksheet's data-collection nature, so it is residue, not a finding. If EKOWAI later wants tolerance enforcement, it would be a NEW gate authored against these ranges — flagged in decisionItems, not applied here."
+    },
+    {
+      "type": "cos_beta-trig",
+      "note": "N/A — FLLTP-RHZ-10 has 0 equations; no trig/cos_beta blockage."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "RHZ10-DEC-01",
+      "type": "SR-2 range (never auto-pick)",
+      "field": "kontroll_vts_dicke_unten_mm",
+      "range": "(20 ±5) mm → 15..25 mm",
+      "quote": "die untere Vegetationstragschicht in einer Dicke von (20 ±5) mm eingebaut",
+      "note": "§7.2 gives a nominal±tolerance range, not a single value. Surfaced for a human to decide whether the Wizard should (a) store the entered value only, or (b) add an advisory/blocking tolerance gate (15..25 mm). NOT applied."
+    },
+    {
+      "id": "RHZ10-DEC-02",
+      "type": "SR-2 range (never auto-pick)",
+      "field": "kontroll_vts_dicke_oben_mm",
+      "range": "(150 ±5) mm → 145..155 mm",
+      "quote": "die obere Vegetationstragschicht in einer Dicke von (150 ±5) mm eingebaut",
+      "note": "Same as DEC-01 for the upper layer. Range surfaced, not auto-picked; optional tolerance gate (145..155 mm) left as a human decision. NOT applied."
+    },
+    {
+      "id": "RHZ10-DEC-03",
+      "type": "optional-gate proposal (written-not-applied)",
+      "field": "kontroll_standrohr_eingebaut",
+      "quote": "Nach Anbringen des Standrohrs in der Nähe der Gefäßwand wird die obere Vegetationstragschicht ... eingebaut.",
+      "note": "§7.2 mandates a Standrohr in each control vessel; prod has no gate requiring kontroll_standrohr_eingebaut = true. A blocking gate (condition: kontroll_standrohr_eingebaut == true) could be authored. Left as a decision for the controlled apply pass; NOT applied to prod."
+    }
+  ],
+  "harness": {
+    "test": "tests/harness/verify-fll-rhizom-rhz10.integration.test.ts",
+    "env": "tests/harness/_harness-env-fll-rhizom.ts (embedded PG + seedFllRhizom whole standard)",
+    "command": "pnpm vitest run --project integration --testTimeout=30000 --reporter=verbose tests/harness/verify-fll-rhizom-rhz10.integration.test.ts",
+    "result": "3 passed / 3 (Test Files 1 passed). Note: default 5s per-test timeout can flake on cold embedded-PG start; --testTimeout=30000 is reliably green. save.ok=true on every save; prod NOT written.",
+    "rawTail": "Test Files  1 passed (1) | Tests  3 passed (3)"
+  },
+  "doctrine": {
+    "SR-1": "Every mm/procedure claim is quoted verbatim from §7.2 of the TP-Rhizom PDF text captured this run; no scalar taken from seeder defaults or prior logs.",
+    "SR-2": "Both thickness tolerances surfaced as decisionItems (ranges 15..25 / 145..155 mm), never auto-picked as a point compliance value.",
+    "SR-3": "Verified against the pdftotext -layout extract of the rendered PDF (TP-Rhizom.txt §7.2); no markdown-vs-PDF disagreement observed. All field claims VA (PDF-confirmed).",
+    "findingsOverFixes": "No prod writes. The only candidate corrections (add tolerance/Standrohr gates) are staged as decisionItems for a single controlled apply pass; none applied."
+  }
+}

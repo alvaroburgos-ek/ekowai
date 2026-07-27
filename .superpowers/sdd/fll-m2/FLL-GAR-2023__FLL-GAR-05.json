@@ -1,0 +1,122 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-05",
+  "worksheetTitle": "Einwirkungen und Beanspruchungen",
+  "templateId": "af279097-5346-486a-a6aa-66fe7bcd5c90",
+  "phase": 2,
+  "archetype": "data_collection",
+  "summary": "Pure data-collection worksheet: 7 fields, 0 equations, 0 compliance_requirements. Each field's values/labels were verified VERBATIM against the rendered PDF (GAR.txt). Tab.18 (Einwirkungen und Standortbedingungen, auf Grundlage DIN 18535-1) attests the three DIN classification enums (W/R/S) and Fuellhoehe exactly. Frost/Exposition/Eisbildung are attested from Sec.4 prose. The only drivable chain is the saveWorksheet persistence round-trip, which passed GREEN through the REAL save path (all 7 fields persisted unchanged).",
+  "fields": [
+    {
+      "id": "d2bec104-6f5b-447d-a3fd-9bf1221f627a",
+      "symbol": "wassereinwirkungsklasse",
+      "data_type": "enum",
+      "verdict": "VA",
+      "quote": "Tab. 18 ... 2 Wassereinwirkungsklasse | Füllhöhe ; 3 W1-B | ≤5m ; 4 W2-B | ≤ 10 m ; 5 W3-B | > 10 m (GAR.txt L3693-3699); prose: 'der projektspezifisch erforderlichen Wassereinwirkungsklasse (W1-B bis W3-B)' (L3753-3754)",
+      "note": "Three enum values W1-B/W2-B/W3-B and their Fuellhoehe thresholds (<=5 / <=10 / >10 m) match Tab.18 exactly. Encoded labels 'W1-B (<= 5 m)' etc. faithful. is_required=true, consumers GAR-15/16/17."
+    },
+    {
+      "id": "f63cc1d5-03d4-40f0-956b-3c0be77d5361",
+      "symbol": "rissklasse",
+      "data_type": "enum",
+      "verdict": "VA",
+      "quote": "Tab.18: '7 R0-B | keine Rissbreitenveränderung bzw. Neurissbildung ; 8 R1-B | ... bis max. 0,2 mm ; 9 R2-B | ... bis max. 0,5 mm ; 10 R3-B | ... bis max. 1,0 mm, Rissversatz bis 0,5 mm' (GAR.txt L3703-3713)",
+      "note": "Four values R0-B..R3-B with crack-width thresholds 0,2 / 0,5 / 1,0 mm and R3-B offset (Rissversatz) <=0,5 mm all match Tab.18 verbatim. Encoded label 'R3-B (<= 1,0 mm, Versatz <= 0,5 mm)' faithful. consumers GAR-12/15/16."
+    },
+    {
+      "id": "a689008c-f7bd-48b7-93af-3f09749ef817",
+      "symbol": "standortklasse",
+      "data_type": "enum",
+      "verdict": "VA",
+      "quote": "Tab.18: '11 Standort ... 12 S1-B | Behälter im Außenbereich, der nicht mit einem Bauwerk verbunden ist. ; 13 S2-B | Behälter im Außenbereich, der an ein Bauwerk angrenzt und mit diesem verbunden ist sowie Behälter im Innenbereich.' (GAR.txt L3715-3722)",
+      "note": "Two values S1-B (frei stehend / free-standing) and S2-B (am Bauwerk / Innenbereich) match Tab.18. Only S1-B/S2-B exist (no S3) — matches prose 'S1-B oder S2-B' (L3755). consumers GAR-15/16/17."
+    },
+    {
+      "id": "f1da3cc7-cc40-4c8c-bd21-69bc39b5a75d",
+      "symbol": "frosteinwirkung",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "'Standort (z. B. Exposition, Frosteinwirkung, Lage des Gewässers)' (GAR.txt L1336); '... häufigen Frost-Tau-Wechseln ausgesetzt sind, aus Beton mit hohem Frostwiderstand' (L2477-2478)",
+      "note": "Boolean 'site subject to freeze-thaw'. Frosteinwirkung named verbatim as a Standort factor (L1336) and Frost-Tau-Wechsel driving concrete-frost-resistance (L2477). clause_reference 'Sec.4.1; Sec.4.3' consistent. consumers GAR-09/12."
+    },
+    {
+      "id": "f5446995-4d47-4758-8c5f-956c29bec49b",
+      "symbol": "exposition",
+      "data_type": "enum",
+      "verdict": "VC",
+      "quote": "'Standort (z. B. Exposition, Frosteinwirkung, Lage des Gewässers)' (GAR.txt L1336)",
+      "note": "The FIELD 'Exposition' is PDF-attested (L1336, Sec.4.1) and is_required=false (correct — the standard lists it as an e.g. factor, not mandatory). BUT the three enum values sonne/halbschatten/schatten are NOT enumerated verbatim anywhere in the PDF — they are an encoder-supplied convenience breakdown. Field=VA, enum options=VC. See decisionItems."
+    },
+    {
+      "id": "320cffd7-96d0-45f3-9d66-6278f9d597d8",
+      "symbol": "eisbildung_moeglich",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "'Ist eine Eisbildung nicht auszuschließen, ist der Randbereich, insbesondere die An- und Abschlüsse und Übergänge, ggf. vor Eisdruck zu schützen.' (GAR.txt L1448-1449)",
+      "note": "Boolean matches Sec.4.4 verbatim: if Eisbildung is possible, the Randbereich must be protected against Eisdruck. description ('If true, the Randbereich must be protected against Eisdruck') faithful. consumer GAR-23 (Randbereich)."
+    },
+    {
+      "id": "6804f0f9-027b-40db-941b-22e891a3c48f",
+      "symbol": "fuellhoehe_m",
+      "data_type": "number",
+      "unit": "m",
+      "verdict": "VA",
+      "quote": "Tab.18: 'Wassereinwirkungsklasse | Füllhöhe ; W1-B ≤5m ; W2-B ≤ 10 m ; W3-B > 10 m' (GAR.txt L3693-3699); 'dem wirksamen Druck (Füllhöhe)' (L3673)",
+      "note": "Number in metres (m). The 'Füllhöhe (Wassersaeule)' assigns the Wassereinwirkungsklasse via the Tab.18 thresholds — description matches. unit=m correct. consumers GAR-15/16/17."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLL-GAR-05 saveWorksheet persistence round-trip (all 7 fields)",
+      "ran": true,
+      "liveValue": "W2-B / R1-B / S1-B / frost=true / exposition=sonne / eisbildung=true / fuellhoehe=7.5",
+      "pdfExpected": "N/A — no worked example; data-collection worksheet has no computed output. Values chosen are Tab.18-consistent (fuellhoehe 7.5 m <= 10 m => W2-B).",
+      "verdict": "VA-path (real saveWorksheet), values VC (no printed worked example to assert against)",
+      "raw": "pnpm vitest run --project integration tests/harness/fll-gar05-verify.integration.test.ts => Test Files 1 passed (1); Tests 1 passed (1); Duration ~5.6s. Assertion 'persists Tab.18 attested values through the REAL save path': res.ok===true and every readParam(...) returned the entered value_enum/value_boolean/value_number unchanged."
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "kind": "no-equation-chain",
+      "note": "FLL-GAR-05 has 0 equations, so there is NO computable formula chain to drive. The persistence round-trip was run in its place (chains 1/1)."
+    },
+    {
+      "kind": "no-gates",
+      "note": "FLL-GAR-05 has 0 compliance_requirements — nothing to fire, no vacuous/dead gate possible on this worksheet. Gate coverage N/A (0/0)."
+    },
+    {
+      "kind": "VC-enum-values",
+      "note": "exposition enum {sonne, halbschatten, schatten} is markdown/encoder-only (VC) — the PDF names 'Exposition' as a Standort factor but does not enumerate a sun/partial-shade/shade tri-split. Not a defect (field is optional and honest), but flagged per SR-3."
+    },
+    {
+      "kind": "downstream-consumer-not-verified-here",
+      "note": "All 7 fields declare consumer_worksheets (GAR-09/12/15/16/17/23). Whether those consumers actually resolve these as inputs (materialization) is out of scope for this per-worksheet verify and is verified when those worksheets are audited."
+    }
+  ],
+  "decisionItems": [
+    {
+      "kind": "range-surfaced (SR-2)",
+      "field": "fuellhoehe_m -> wassereinwirkungsklasse",
+      "note": "Tab.18 maps Fuellhoehe to a class by RANGE (W1-B <=5 m, W2-B <=10 m, W3-B >10 m). The worksheet stores Fuellhoehe as a free number and the class as a separate manual enum — these are NOT auto-linked by any equation. DECISION: should an equation/derivation assign wassereinwirkungsklasse from fuellhoehe_m per the Tab.18 ranges (single-source), or is manual dual-entry intended? Currently a user could enter fuellhoehe=12 m (W3-B) but pick W1-B with no gate catching it. No auto-pick performed."
+    },
+    {
+      "kind": "enum-provenance (SR-3)",
+      "field": "exposition",
+      "note": "STAGED, written-not-applied: the exposition enum {sonne, halbschatten, schatten} is not source-enumerated. DECISION for a later controlled pass: either (a) source-attest these options from a cited clause/table, (b) mark them imported_unverified, or (c) leave as documented VC convenience. No change applied to prod."
+    },
+    {
+      "kind": "consistency-gate-candidate (advisory)",
+      "field": "fuellhoehe_m vs wassereinwirkungsklasse",
+      "note": "Because there is no gate on this worksheet, a fuellhoehe/class mismatch is uncatchable. Candidate advisory compliance_requirement (severity likely 'warn', NOT 'block') to flag inconsistency. STAGED only — not authored, not applied. Requires human decision on whether GAR-05 should carry any gate at all (it is deliberately gate-free as data-collection)."
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Every field value claim above carries a verbatim PDF quote with GAR.txt line refs.",
+    "SR-2": "The Fuellhoehe->Wassereinwirkungsklasse RANGE mapping (Tab.18) is surfaced as a decisionItem, not auto-picked.",
+    "SR-3": "PDF (GAR.txt, rendered via pdftotext -layout) is ground truth; VA/VC flagged per field. exposition enum flagged VC.",
+    "prod-writes": "NONE. All verification ran against the disposable embedded Postgres via the real saveWorksheet. Prod touched read-only (Supabase MCP execute_sql) to pull the 7 fields / 0 equations / 0 requirements."
+  }
+}

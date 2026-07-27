@@ -1,0 +1,108 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-20",
+  "worksheetTitle": "Umschreibung & Verlängerung",
+  "templateId": "34fab739-cbb7-438d-a8c9-14eae8fc6484",
+  "pdfSource": "C:/Users/Ekowai/Desktop/FLL Guidelines PDF/fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf",
+  "pdfText": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt",
+  "counts": { "equations": 0, "gates": 0, "fields": 5 },
+  "equations": [],
+  "fields": [
+    {
+      "symbol": "pruefgrundlagen_unveraendert",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "die Prüfgrundlagen in wesentlichen Punkten nicht geändert wurden;",
+      "quoteLoc": "TP-Rhizom.txt L950 (PDF §10 area / p.22, Verlängerungs-Bedingungen)",
+      "note": "Boolean field maps verbatim to the first of four §10 extension conditions. Faithful encoding."
+    },
+    {
+      "symbol": "produkt_aktuell_im_lieferprogramm",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "das geprüfte Produkt noch dem aktuellen Lieferprogramm des Antragstellers entspricht;",
+      "quoteLoc": "TP-Rhizom.txt L951",
+      "note": "Maps verbatim to the second §10 extension condition. Faithful."
+    },
+    {
+      "symbol": "rueckstellmuster_erneut_hinterlegt",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "erneut Rückstellmuster beim Prüfinstitut hinterlegt werden (s. Abschnitt 5);",
+      "quoteLoc": "TP-Rhizom.txt L952",
+      "note": "Maps verbatim to the third §10 extension condition. Faithful."
+    },
+    {
+      "symbol": "eidesstattliche_erklaerung_vorhanden",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "der Hersteller durch eidesstattliche Erklärung zusichert, dass das Produkt sowie deren Herstellung und Fügetechnik mit dem geprüften Produkt identisch sind.",
+      "quoteLoc": "TP-Rhizom.txt L953-954",
+      "note": "Maps verbatim to the fourth §10 extension condition. Faithful."
+    },
+    {
+      "symbol": "verlangerung_zeitabschnitt_jahre",
+      "data_type": "number",
+      "unit": "Jahre / years",
+      "verdict": "VA",
+      "quote": "Durch eine Bestätigung des Prüfinstituts kann die Gültigkeitsdauer des Prüfberichts in Zeitabschnitten von 5 Jahren verlängert werden, jedoch nur wenn ...",
+      "quoteLoc": "TP-Rhizom.txt L948-949",
+      "note": "The standard fixes the extension interval at 5-year blocks (base validity is 10 years per L945-946: 'eine Gültigkeitsdauer von 10 Jahren'). This is a standard-fixed interval, not a free-pick value — see decisionItems (SR-2)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "RHZ-20 persistence chain (extension conditions + period) via real saveWorksheet",
+      "ran": true,
+      "liveValue": {
+        "saved": 5,
+        "pruefgrundlagen_unveraendert": true,
+        "produkt_aktuell_im_lieferprogramm": true,
+        "rueckstellmuster_erneut_hinterlegt": true,
+        "eidesstattliche_erklaerung_vorhanden": true,
+        "verlangerung_zeitabschnitt_jahre": 5,
+        "derived": []
+      },
+      "pdfExpected": "No worked numeric example in the standard for this worksheet (it is a documentary/attestation checklist, not a calculation). Extension period per §10 = 5-year interval blocks; 4 booleans must all be true for extension to be granted.",
+      "verdict": "VC",
+      "note": "Worksheet carries no equations, so there is nothing to compute. The save path persisted all 5 fields correctly (4 booleans=true, period=5) with derived=[] (correct: no producers). Value is a sanity-attested persistence proof, not a PDF worked-example match — hence VC.",
+      "raw": "SAVE_RESULT {\"ok\":true,\"saved\":5,\"warnings\":[],\"derived\":[]}\nPERSISTED [{\"symbol\":\"eidesstattliche_erklaerung_vorhanden\",\"value_boolean\":true,\"value_number\":null},{\"symbol\":\"produkt_aktuell_im_lieferprogramm\",\"value_boolean\":true,\"value_number\":null},{\"symbol\":\"pruefgrundlagen_unveraendert\",\"value_boolean\":true,\"value_number\":null},{\"symbol\":\"rueckstellmuster_erneut_hinterlegt\",\"value_boolean\":true,\"value_number\":null},{\"symbol\":\"verlangerung_zeitabschnitt_jahre\",\"value_boolean\":null,\"value_number\":\"5\"}]\nTest Files 1 passed (1) / Tests 1 passed (1)"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "RHZ20-F1",
+      "severity": "observation",
+      "title": "No compliance_requirement enforces the §10 all-four-conditions extension rule",
+      "detail": "The standard is explicit (§10, L948-954): a report's validity 'kann ... verlängert werden, jedoch nur wenn' ALL FOUR listed conditions hold. The worksheet encodes the four conditions as booleans + the 5-year period, but there is NO compliance_requirement (0 gates) that fires when the extension period is set while any of the four booleans is false. The 'jedoch nur wenn' conjunction is therefore unenforced — an engineer could record an extension with unmet preconditions and no block. This is a gate-coverage gap (severity=block candidate), not an encoding error in the existing fields.",
+      "quote": "Durch eine Bestätigung des Prüfinstituts kann die Gültigkeitsdauer des Prüfberichts in Zeitabschnitten von 5 Jahren verlängert werden, jedoch nur wenn [die Prüfgrundlagen ... nicht geändert; ... Lieferprogramm ...; ... Rückstellmuster ...; ... eidesstattliche Erklärung ...]",
+      "quoteLoc": "TP-Rhizom.txt L948-954"
+    }
+  ],
+  "residue": [
+    {
+      "id": "RHZ20-R1",
+      "kind": "no-worked-example",
+      "note": "The standard prints no numeric worked example for §10; the persistence chain is verified against the standard's stated 5-year interval + all-conditions-true state, not against a printed calculation. Chain verdict is VC for this reason. No trig/cos_beta residue (worksheet has no equations)."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "RHZ20-D1",
+      "kind": "SR-2-interval",
+      "title": "Extension period is a standard-fixed interval, not a free value",
+      "detail": "§10 (L948-949) fixes extension in 'Zeitabschnitten von 5 Jahren' on top of a base validity of 10 years (L945-946). The number field 'verlangerung_zeitabschnitt_jahre' currently accepts any number with no constraint. DECISION: should the field/gate constrain it to multiples of 5 (5, 10, 15, ...) per the standard's interval wording, or is a free number intended? Do NOT auto-pick — surfaced per SR-2. STAGED as decision, not applied.",
+      "quote": "in Zeitabschnitten von 5 Jahren verlängert werden ... eine Gültigkeitsdauer von 10 Jahren",
+      "quoteLoc": "TP-Rhizom.txt L948-949 / L945-946",
+      "stagedMigration": "none written — depends on the D1 decision (enum-of-multiples vs range-check gate). Author only after human ruling."
+    },
+    {
+      "id": "RHZ20-D2",
+      "kind": "gate-add",
+      "title": "Add block-severity gate for the §10 all-four-conditions rule (from RHZ20-F1)",
+      "detail": "Staged, written-not-applied. Candidate compliance_requirement on FLLTP-RHZ-20: fire (block) when verlangerung_zeitabschnitt_jahre > 0 AND NOT (pruefgrundlagen_unveraendert AND produkt_aktuell_im_lieferprogramm AND rueckstellmuster_erneut_hinterlegt AND eidesstattliche_erklaerung_vorhanden). NOTE: the supported condition grammar (per reference_wizard_compliance_gates) has no chained AND across booleans / no arithmetic-in-conditions in some encodings — verify grammar support before authoring, else it lands as a NON_PARSING dead gate (CR-006 class). Do NOT write to prod; apply in the single controlled pass.",
+      "stagedMigration": "not written — pending grammar-capability confirmation + human go."
+    }
+  ]
+}

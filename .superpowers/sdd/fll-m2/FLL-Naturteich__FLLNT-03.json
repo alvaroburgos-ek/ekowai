@@ -1,0 +1,169 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-03 :: Auswahl Naturteich-Typ (I–V)",
+  "worksheetTemplateId": "e48c94ce-ebac-4c2b-8d48-7d987f89a272",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodRef": "vadsmshzebefjreqcicl (read-only)",
+  "pdfSource": "C:\\Users\\Ekowai\\Desktop\\FLL Guidelines PDF\\guidelines_for_the_planning_construction_and_maintenance_of_private_natural_swimming_pools_2017_p (1).pdf (text at .superpowers/sdd/fll-m2/pdf/Naturteich.txt)",
+  "counts": { "equations": 0, "gates": 5, "fields": 5 },
+
+  "equations": [],
+
+  "fields": [
+    {
+      "symbol": "natural_pool_type", "id": "3a59f2ca-de58-4bf6-a6ea-97602675ead4",
+      "data_type": "enum", "section": "C", "verdict": "VA",
+      "quote": "Table 1: Complete overview natural pool types … Type I | Type II | Type III | Type IV | Type V (PDF Naturteich.txt L1207); enum labels + §5/Tab.2-6 regulation_reference match the section headings.",
+      "note": "Five enum members type_I..type_V PDF-confirmed. enum_values regulation_reference tags (§5, Tab.2..Tab.6) align with Tables 2-6."
+    },
+    {
+      "symbol": "regeneration_area_share", "id": "c1e604b2-48cb-424d-b842-ee07990dbc22",
+      "data_type": "number", "unit": "%", "section": "D", "verdict": "VA",
+      "quote": "Dimension of the regeneration area compared to the total area: Type I > 50% | Type II > 50% | Type III > 30% | Type IV/V information on construction based on design refer to Tab. 5/Tab. 6 (PDF L1248-1250).",
+      "note": "Unit % and the >50 / >30 thresholds are the values consumed by REQ-07."
+    },
+    {
+      "symbol": "regeneration_technique", "id": "68b4d127-3f83-40f7-a368-66138e143bf2",
+      "data_type": "enum", "section": "D", "verdict": "VA",
+      "quote": "10.2.1 hydrobotanical system; 10.2.2 Controlled slow flow through the substrate filter; 10.2.3 Controlled quick flow through the substrate filter; 10.2.4 Controlled flow through the technical unit; 10.2.5 physical/chemical (PDF L2357-2359, L2473, L2552, L2651).",
+      "note": "Six enum members map to §10.2.1-10.2.5; regulation_reference tags on each option match. No gate on FLLNT-03 consumes this field."
+    },
+    {
+      "symbol": "p_binding_required", "id": "f50d5716-54d6-4675-9ae6-baff2c7c5bec",
+      "data_type": "boolean", "section": "D", "verdict": "VA",
+      "quote": "Table 4: Natural pool type III – natural swimming pools with a controlled slow flow through the substrate filter and downstream P-binding unit (PDF L1340); 'Substrate filters with a controlled slow flow must be equipped with a downstream phosphrous-[binding] unit' (PDF L2485).",
+      "note": "Type III mandates a downstream P-binding stage. Field is not consumed by any FLLNT-03 gate; it is read by REQ-08 on FLLNT-09 (if filter_flow_type=='slow' then p_binding_required==true)."
+    },
+    {
+      "symbol": "type_III", "id": "8c627e22-4795-4b4b-89ef-95d0bacaa769",
+      "data_type": "number", "unit": null, "section": null, "verdict": "FINDING",
+      "quote": "No source basis. 'type_III' appears in the standard only as an enum VALUE of natural_pool_type and as a literal on the RHS of REQ-07 (`IF natural_pool_type == type_III THEN ...`).",
+      "note": "ORPHAN/PHANTOM FIELD. A section-less, unitless number field named 'type_III' (label 'Type III', imported_unverified) was created on FLLNT-03. It is a mis-parse: the bare token type_III from REQ-07's condition leaked into the fields table as a field symbol. It is NOT a real input field. Harmless to gate evaluation (the evaluator treats the RHS type_III as a string literal, not a field ref), but it is spurious data that should be deleted. See findings + decisionItems."
+    }
+  ],
+
+  "chains": [
+    {
+      "name": "no equation chains (FLLNT-03 has 0 equations)",
+      "ran": false, "liveValue": null, "pdfExpected": null, "verdict": "N/A",
+      "raw": "SELECT count(*) FROM equations WHERE worksheet_template_id=e48c94ce... => 0. Confirmed in-test (expect(e).toBe(0) passed). Nothing computational to drive; FLLNT-03 is a type-selection / gating worksheet."
+    }
+  ],
+
+  "gates": [
+    {
+      "id": "72a58096-3cda-45a4-91dd-03f0ba0a0dea", "code": "REQ-06",
+      "condition": "natural_pool_type IN {type_I,type_II,type_III,type_IV,type_V}",
+      "fired": true, "vacuous": false, "verdict": "VA",
+      "note": "Driven through REAL saveWorksheet: type_III persisted -> PASS; out-of-list type_VI persisted -> FAIL; unset -> PENDING(missing natural_pool_type). Set members PDF-confirmed (Table 1, L1207)."
+    },
+    {
+      "id": "fabaa982-e703-4080-b596-1b19025bd23f", "code": "REQ-07",
+      "condition": "IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50 AND IF natural_pool_type == type_III THEN regeneration_area_share > 30",
+      "fired": true, "vacuous": false, "verdict": "FINDING",
+      "note": "Thresholds PDF-confirmed (Type I/II >50, Type III >30, L1249). BUT operator precedence makes the Type-III sub-rule a DEAD BRANCH. parseAtom parses IF..THEN with body=parseOr (which consumes AND), so the whole expression parses as IF(I∨II) THEN ( share>50 AND IF(III) THEN share>30 ). When natural_pool_type==type_III the outer guard is FALSE, the guard vacuously passes, and the nested Type-III guard is NEVER evaluated. Proven live: type_III + share=10 (a source violation, 10 !> 30) returns PASS. The >30 rule for Type III cannot fire from this gate. STAGED FIX below."
+    },
+    {
+      "id": "86bb8bb3-2a4e-4f3f-86f4-6a8c50207644", "code": "REQ-09",
+      "condition": "water_test_ammonium <= 0.5 AND water_test_iron <= 0.2 AND water_test_p_total <= 0.03 AND water_test_hardness >= 1.0 AND water_test_conductivity <= 1000 AND water_test_manganese <= 0.05 AND water_test_nitrate <= 50.0 AND water_test_orthophosphate <= 0.01 AND water_test_ph >= 6.0 AND water_test_ph <= 9.0 AND water_test_acid_capacity_ks43 >= 2",
+      "fired": true, "vacuous": false, "verdict": "VA",
+      "note": "Every constant PDF-confirmed against Table 7 (Approximate chemical values for the fill-up water, L1690-1706): Ammonium<=0.5, Iron<=0.2, Ptotal<=0.03, Hardness>=1.0 mmol/l, Conductivity<=1000, Manganese<=0.05, Nitrate<=50.0, Orthophosphate<=0.01, pH 6.0-9.0, KS4.3>=2. Fired PASS (all in-range) + FAIL (ammonium 0.9>0.5). TOPOLOGY NOTE: all 11 symbols live on FLLNT-04, not FLLNT-03 — cross-worksheet gate; driven via evaluator, not this worksheet's saveWorksheet."
+    },
+    {
+      "id": "d1cacb11-3cbb-421a-8ea5-03980ce5e5f8", "code": "REQ-10",
+      "condition": "swimming_test_ammonium <= 0.3 AND swimming_test_hardness >= 1.0 AND swimming_test_conductivity <= 1000 AND swimming_test_nitrate <= 30.0 AND swimming_test_nitrite <= 0.01 AND swimming_test_ph >= 7.0 AND swimming_test_ph <= 9.0 AND swimming_test_acid_capacity_ks43 >= 2 AND (IF natural_pool_type IN {type_I,type_II,type_III} THEN (swimming_test_p_total <= 0.03 AND swimming_test_orthophosphate <= 0.03)) AND (IF natural_pool_type IN {type_IV,type_V} THEN (swimming_test_p_total <= 0.01 AND swimming_test_orthophosphate <= 0.01))",
+      "fired": true, "vacuous": false, "verdict": "VA",
+      "note": "All constants PDF-confirmed against Table 8 (Approximate chemical values for the swimming area, L1720-1739): Ammonium<=0.3, Hardness>=1.0, Conductivity<=1000, Nitrate<=30.0, Nitrite<=0.01, pH 7.0-9.0, KS4.3>=2, Ptotal & Orthophosphate <=0.03 (type I-III) / <=0.01 (type IV,V). The two P-guards are correctly parenthesised (unlike REQ-07) so BOTH type branches are live. Fired PASS (type_III, P=0.02<=0.03) + FAIL (type_IV, P=0.02>0.01). Cross-worksheet symbols on FLLNT-04 + natural_pool_type on FLLNT-03."
+    },
+    {
+      "id": "09b0ff45-9bf0-4a54-bd01-a74717bc3e26", "code": "REQ-11",
+      "condition": "concrete_spec_compliant == true AND wood_treatment_compliant == true AND materials_biocide_free == true AND plant_substrate_compliant == true",
+      "fired": true, "vacuous": false, "verdict": "VA",
+      "note": "PDF-confirmed §7.2 (Requirements pertaining to construction/building materials, L1753-1759): 'The materials must not have a biocidal or disinfect effect' (biocide_free); §7.2.1 Concrete (L1762), §7.2.2 Wood (L1770), §7.2.4 Plant substrates (L1841). Fired PASS (all four flags true) + FAIL (materials_biocide_free false). Cross-worksheet symbols live on FLLNT-05."
+    }
+  ],
+
+  "findings": [
+    {
+      "id": "F1-REQ07-DEAD-BRANCH", "severity": "high", "gate": "REQ-07",
+      "summary": "REQ-07 Type-III regeneration-area rule is a DEAD BRANCH due to IF/THEN operator precedence.",
+      "detail": "Condition 'IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50 AND IF natural_pool_type == type_III THEN regeneration_area_share > 30' parses (per src/lib/compliance/evaluate.ts parseAtom, IF-body = parseOr which greedily consumes AND) as: IF (I∨II) THEN ( share>50 AND (IF III THEN share>30) ). For a Type-III pool the outer guard is false => whole gate vacuously PASSES => the '>30' sub-rule is never evaluated. Live-proven: natural_pool_type=type_III, regeneration_area_share=10 (violates PDF Tab.1 '>30%') returns PASS. Consequence: a non-compliant Type-III pool with regeneration area <=30% is NOT blocked. PDF ground truth (L1249): Type III must have regeneration area > 30% of total.",
+      "staged": true
+    },
+    {
+      "id": "F2-ORPHAN-FIELD-type_III", "severity": "medium", "field": "type_III (8c627e22-4795-4b4b-89ef-95d0bacaa769)",
+      "summary": "Phantom field 'type_III' on FLLNT-03: section-less, unitless number, imported_unverified, no source basis.",
+      "detail": "A field row symbol='type_III', data_type='number', section_id=NULL, label_de='Type III' was imported onto FLLNT-03. 'type_III' is only an enum VALUE of natural_pool_type and a bare RHS literal in REQ-07; it is not an input field. This is a Pass3c mis-parse where a condition token leaked into the Fields sheet. Harmless to evaluation but pollutes the field set (5th 'field' is spurious; the worksheet really has 4 real fields).",
+      "staged": true
+    },
+    {
+      "id": "F3-CROSS-WORKSHEET-GATES", "severity": "info", "gates": ["REQ-09", "REQ-10", "REQ-11"],
+      "summary": "3 of 5 FLLNT-03 gates reference symbols that live entirely (REQ-09/REQ-11) or mostly (REQ-10) on OTHER worksheets (FLLNT-04 water tests, FLLNT-05 materials).",
+      "detail": "REQ-09 (11 water_test_* symbols) and REQ-11 (4 material flags) reference zero fields owned by FLLNT-03; REQ-10 references FLLNT-04 swimming_test_* plus FLLNT-03's own natural_pool_type. This mirrors prod topology and is not necessarily wrong (the app resolves symbols project-wide), but it means these gates on the type-selection worksheet cannot be exercised through FLLNT-03's own saveWorksheet inputs alone — they were fired via the real evaluateCondition with cross-worksheet values. Flagging for the topology reviewer; not staged as a fix."
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R1-cross-ws-save-path", "reason": "REQ-09/REQ-10/REQ-11 symbols are not FLLNT-03 fields, so their PASS/FAIL was driven through the real evaluateCondition (not through a FLLNT-03 saveWorksheet write). The saveWorksheet persistence path was exercised end-to-end only for natural_pool_type (REQ-06). Full cross-worksheet persistence would require saving FLLNT-04/FLLNT-05 instances — out of this worksheet's scope; covered by those worksheets' verifications.",
+      "grade": "VC-for-persistence, VA-for-condition-constants"
+    },
+    {
+      "id": "R2-no-trig", "reason": "No cos_beta / trig-dependent equations on FLLNT-03 (0 equations total). Engine trig gap not exercised here.",
+      "grade": "N/A"
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D1-REQ07-fix", "type": "staged-fix", "priority": "high",
+      "target": "compliance_requirements id fabaa982-e703-4080-b596-1b19025bd23f (REQ-07) on template e48c94ce-...",
+      "problem": "Type-III '>30' sub-rule is dead (see F1).",
+      "proposedCondition": "(IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50) AND (IF natural_pool_type == type_III THEN regeneration_area_share > 30)",
+      "rationale": "Parenthesising each IF/THEN as its own AND operand makes both guards independent; the Type-III branch then fires (share<=30 for a Type-III pool FAILS) while Type I/II keep the >50 rule. Matches PDF Tab.1 L1249. Mirrors the CORRECT parenthesised pattern already used in REQ-10 on the same worksheet.",
+      "migration": "WRITTEN-NOT-APPLIED. UPDATE compliance_requirements SET condition = '(IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50) AND (IF natural_pool_type == type_III THEN regeneration_area_share > 30)' WHERE id = 'fabaa982-e703-4080-b596-1b19025bd23f';  -- verify one row affected; re-run this test's REQ-07 Type-III case which must then flip PASS->FAIL for share=10.",
+      "applied": false
+    },
+    {
+      "id": "D2-delete-orphan-field", "type": "staged-fix", "priority": "medium",
+      "target": "fields id 8c627e22-4795-4b4b-89ef-95d0bacaa769 (symbol type_III) on template e48c94ce-...",
+      "problem": "Phantom field (see F2).",
+      "proposedAction": "Delete the orphan field (and any project_parameters rows referencing it). Confirm no equation/condition references it as a FIELD (it does not — only as an enum value / literal).",
+      "migration": "WRITTEN-NOT-APPLIED. DELETE FROM project_parameters WHERE field_id = '8c627e22-4795-4b4b-89ef-95d0bacaa769'; DELETE FROM fields WHERE id = '8c627e22-4795-4b4b-89ef-95d0bacaa769';  -- verify FLLNT-03 field count drops 5->4.",
+      "applied": false
+    },
+    {
+      "id": "D3-range-surfacing", "type": "range-decision", "priority": "info",
+      "note": "SR-2: FLLNT-03 gate thresholds are hard limits, not ranges — no peak-vs-yearly ambiguity to surface. The only 'range' shapes are the pH bands (fill-up 6.0-9.0, swimming 7.0-9.0), which are two-sided inequalities correctly encoded as (ph>=lo AND ph<=hi); no auto-pick was made. No open range decision."
+    }
+  ],
+
+  "harnessRun": {
+    "command": "pnpm vitest run --project integration tests/harness/verify-fll-naturteich-fllnt03.integration.test.ts",
+    "result": "Test Files 1 passed (1); Tests 14 passed (14); Duration 5.47s",
+    "seeder": "tests/harness/seed-fll-naturteich.ts (generic full-project seeder); smoke green 5/5",
+    "rawVerbose": [
+      "✓ exposes FLLNT-03 with 0 equations and 5 gates 2ms",
+      "✓ REQ-06 PASS — a valid pool type persists and fires pass 425ms",
+      "✓ REQ-06 FAIL — an out-of-list pool type persists and fires fail 12ms",
+      "✓ REQ-06 PENDING — no pool type reported pending (not vacuous) 1ms",
+      "✓ REQ-07 Type-I/II branch PASS — share 60 > 50 passes 0ms",
+      "✓ REQ-07 Type-I/II branch FAIL — share 40 <= 50 fails 0ms",
+      "✓ REQ-07 Type-III DEAD BRANCH — share 10 (< 30, should FAIL) but gate PASSES 0ms",
+      "✓ REQ-07 Type-IV/V — no share rule applies; gate vacuously passes 0ms",
+      "✓ REQ-09 PASS — all fill-up water params within Tab. 7 limits 0ms",
+      "✓ REQ-09 FAIL — ammonium 0.9 > 0.5 fails 0ms",
+      "✓ REQ-10 PASS Type-III — P total 0.02 <= 0.03 passes 0ms",
+      "✓ REQ-10 FAIL Type-IV — P total 0.02 > 0.01 fails (stricter type-IV/V branch) 0ms",
+      "✓ REQ-11 PASS — all four material flags true 0ms",
+      "✓ REQ-11 FAIL — biocide-free flag false fails 0ms"
+    ]
+  },
+
+  "doctrine": {
+    "SR-1": "All threshold constants quoted verbatim from Naturteich.txt (PDF-rendered) THIS run — Tables 1, 7, 8 and §7.2/§10.2. No log/prior-run numbers used.",
+    "SR-2": "No open ranges auto-picked; pH bands encoded as two-sided inequalities (see D3).",
+    "SR-3": "All quotes from the pdftotext -layout extraction of the rendered PDF; VA where PDF-confirmed. No PDF-vs-markdown disagreement observed.",
+    "no-prod-writes": "Prod accessed read-only via Supabase MCP execute_sql. Both corrections staged as written-not-applied migrations (D1, D2)."
+  }
+}

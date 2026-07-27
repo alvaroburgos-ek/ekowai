@@ -1,0 +1,92 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-06",
+  "worksheetTitle": "Baugrund und Untergrund (Subsoil and Substrate)",
+  "worksheetId": "d2c52a3f-d142-4f27-a32c-977d492574cf",
+  "archetype": "data_collection",
+  "prodCounts": { "equations": 0, "compliance_requirements": 0, "fields": 3 },
+  "fields": [
+    {
+      "id": "cc82874a-3cad-43d4-ba4f-d8725ac457c1",
+      "symbol": "baugrund_typ",
+      "data_type": "text",
+      "clause_reference": "Sec.4.6",
+      "verdict": "VA",
+      "quote": "4.6 Baugrund, Untergrund … Der Baugrund soll hinsichtlich bodenphysikalischer Eigenschaften von einheitlicher Beschaffenheit sein … der Beschaffenheit des Baugrundes/Untergrundes (z. B. Bodenart, Bodenkennwerte)",
+      "note": "PDF-confirmed at GAR.txt lines 1529, 1537, 1574. Free-text subsoil description (e.g. Kies-Sand, Lehm, Ton) — the standard collects Bodenart/Bodenkennwerte, matching label + description. clause_reference Sec.4.6 is exact."
+    },
+    {
+      "id": "fd36248c-76da-4e00-b21b-1797e273af35",
+      "symbol": "baugrund_tragfaehig",
+      "data_type": "boolean",
+      "clause_reference": "Sec.4.6",
+      "verdict": "VA",
+      "quote": "Der Baugrund soll … muss eine dem Einzelfall angemessene ausreichende Tragfähigkeit und Ebenheit aufweisen. Für eine anforderungsgerechte Tragfähigkeit ist mindestens ein Verformungsmodul Ev2 ≥ 45 MPa (Ev2/Ev1 ≤ 2,5) erforderlich. Der Verdichtungsgrad des Baugrundes soll DPr ≥ 97 % betragen.",
+      "note": "PDF-confirmed at GAR.txt lines 1538-1543. Boolean 'bearing capacity adequate' is a faithful reduction of the §4.6 Tragfähigkeit requirement. NOTE (SR-2): the standard supplies QUANTITATIVE acceptance thresholds (Ev2 >= 45 MPa, Ev2/Ev1 <= 2,5, DPr >= 97%) that a boolean cannot capture — surfaced as a decision item, not a defect of this data_collection field."
+    },
+    {
+      "id": "268a1a68-fa1d-45f6-a0f8-a53a4785e588",
+      "symbol": "setzungen_zu_erwarten",
+      "data_type": "boolean",
+      "clause_reference": "Sec.9.1",
+      "verdict": "VA-with-note",
+      "quote": "Randausbildungen erfordern einen tragfähigen Untergrund (z. B. Baugrund, Unterkonstruktion, Bauteiloberfläche), auf den die Abdichtung aufgebracht wird (s. Abschnitt 4.6). Sind Setzungen zu erwarten (z. B. bei aufgefülltem Bodenmaterial), ist eine Nachverdichtung erforderlich.",
+      "note": "PDF-confirmed VERBATIM at GAR.txt lines 5816-5819. The field description ('If true, additional Nachverdichtung required') is an exact echo of the source sentence. HOWEVER the clause_reference is stored as 'Sec.9.1' whereas the verbatim text falls under §9.2 (Anforderungen an Stoffe und Bauteile; §9.2 header at line 5810, the Setzungen/Nachverdichtung sentence at 5816-5819). Clause-pointer discrepancy = minor FINDING (see findings)."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLL-GAR-06 data-collection persistence (baugrund_typ + baugrund_tragfaehig + setzungen_zu_erwarten via real saveWorksheet)",
+      "ran": true,
+      "liveValue": "baugrund_typ='Kies-Sand', baugrund_tragfaehig=true, setzungen_zu_erwarten=true — all persisted to project_parameters; re-save with false/false overwrote both booleans",
+      "pdfExpected": "N/A — no worked example; data_collection fields have no computed output. Values are engineer-entered collected inputs, sanity-consistent with §4.6 vocabulary.",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ |integration| tests/harness/fll-gar06-verify.integration.test.ts > FLL-GAR-06 ... > exposes the 3 collected fields 2ms\n ✓ |integration| tests/harness/fll-gar06-verify.integration.test.ts > FLL-GAR-06 ... > drives the data-collection fields through the REAL saveWorksheet and persists them 454ms\n ✓ |integration| tests/harness/fll-gar06-verify.integration.test.ts > FLL-GAR-06 ... > re-save with opposite booleans overwrites (no post-approval lock on data-collection) 9ms\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n   Duration  6.35s"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "GAR-06-F1",
+      "severity": "minor",
+      "type": "clause_reference_mismatch",
+      "field": "setzungen_zu_erwarten (268a1a68-fa1d-45f6-a0f8-a53a4785e588)",
+      "stored": "Sec.9.1",
+      "attested": "Sec.9.2",
+      "note": "The verbatim source sentence 'Sind Setzungen zu erwarten … ist eine Nachverdichtung erforderlich' (GAR.txt 5816-5819) sits under §9.2 (Anforderungen an Stoffe und Bauteile), not §9.1 (Allgemeine Anforderungen). The substance is fully PDF-attested; only the clause pointer is off by one subsection. Staged as a written-not-applied correction (decisionItems), NOT applied to prod per doctrine.",
+      "evidence": "PDF §9.2 header at line 5810; Setzungen/Nachverdichtung sentence at 5816-5819."
+    }
+  ],
+  "residue": [
+    {
+      "id": "GAR-06-R1",
+      "type": "no-worked-example",
+      "note": "FLL-GAR-06 is data_collection: no equation, no gate, no printed worked example. Chain assertions are persistence-only (VC), sanity-checked against §4.6 vocabulary — there is no numeric ground truth to assert VA against. This is expected, not a defect."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "GAR-06-D1",
+      "type": "staged-correction",
+      "target": "fields.clause_reference for setzungen_zu_erwarten (268a1a68-fa1d-45f6-a0f8-a53a4785e588)",
+      "current": "Sec.9.1",
+      "proposed": "Sec.9.2",
+      "migrationNote": "UPDATE fields SET clause_reference='Sec.9.2' WHERE id='268a1a68-fa1d-45f6-a0f8-a53a4785e588'; -- verbatim source of the Setzungen->Nachverdichtung requirement is §9.2 (GAR.txt 5816-5819), currently mis-tagged §9.1. WRITTEN-NOT-APPLIED; batch into the single controlled apply pass.",
+      "applied": false
+    },
+    {
+      "id": "GAR-06-D2",
+      "type": "range-not-auto-picked",
+      "target": "baugrund_tragfaehig (fd36248c-76da-4e00-b21b-1797e273af35)",
+      "note": "SR-2: §4.6 gives QUANTITATIVE bearing-capacity acceptance criteria — Verformungsmodul Ev2 >= 45 MPa, Ev2/Ev1 <= 2,5, Verdichtungsgrad DPr >= 97 % (GAR.txt 1542-1543). The current model reduces this to a single boolean 'tragfaehig ja/nein'. Decision for the human: keep the boolean (engineer attests the §4.6 criteria are met) OR add numeric fields (Ev2, Ev2/Ev1, DPr) + a gate enforcing the thresholds. NOT auto-decided; NOT applied.",
+      "applied": false
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Every field claim carries a verbatim §4.6 / §9.2 quote captured THIS run from GAR.txt; no prior-chat/log numbers used.",
+    "SR-2": "§4.6 Ev2/DPr thresholds surfaced as decision item D2, not auto-picked into the boolean.",
+    "SR-3": "GAR.txt is a pdftotext -layout extraction; all quotes located and line-referenced in it. Markdown-only extraction => VC baseline; the §4.6/§9.2 verbatim matches are treated VA on the strength of the layout-preserved source. No PDF-vs-markdown disagreement observed for this worksheet.",
+    "findings-over-fixes": "The one correction (D1 clause pointer) is STAGED as a written-not-applied migration note; nothing written to prod. Prod accessed read-only via Supabase MCP execute_sql only."
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-05",
+  "worksheetTitle": "Prüf- und Kontrollgefäße & Apparatur",
+  "templateId": "98f1e3b8-0ebb-44b4-9351-73cdb91e1b7b",
+  "standardId": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "prodCounts": { "equations": 0, "compliance_requirements": 0, "fields": 11 },
+  "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt (FLL TP Rhizomfestigkeit Gewässerabdichtungen, Ausgabe 2023)",
+  "equations": [],
+  "equationsNote": "FLLTP-RHZ-05 has ZERO equations in prod (confirmed by execute_sql and by the committed manifest, equations:null). This is a materials/apparatus data-collection worksheet; nothing to verify formula-wise. No cos_beta/trig involvement.",
+  "fields": [
+    {
+      "symbol": "gefaess_innenmass_l_mm",
+      "unit": "mm",
+      "verdict": "VA",
+      "quote": "§5.2, line 548: \"Die Gefäße müssen ein Innenmaß von mindestens 800 x 800 x 250 mm aufweisen (s. Abb. 1).\"",
+      "note": "Länge minimum 800 mm. This is a MINIMUM ('mindestens'), not a fixed value — surfaced as decisionItem (SR-2)."
+    },
+    {
+      "symbol": "gefaess_innenmass_b_mm",
+      "unit": "mm",
+      "verdict": "VA",
+      "quote": "§5.2, line 548: \"...ein Innenmaß von mindestens 800 x 800 x 250 mm...\"",
+      "note": "Breite minimum 800 mm."
+    },
+    {
+      "symbol": "gefaess_innenmass_h_mm",
+      "unit": "mm",
+      "verdict": "VA",
+      "quote": "§5.2, line 548: \"...ein Innenmaß von mindestens 800 x 800 x 250 mm...\"; Abb.1 (line 566): \"250 mm\".",
+      "note": "Höhe minimum 250 mm."
+    },
+    {
+      "symbol": "wasserablauf_durchmesser_mm",
+      "unit": "mm",
+      "verdict": "VA",
+      "quote": "Abb.1 caption, line 576: \"Der Wasserablauf (Ø 40 mm) ist nur bei den Prüfgefäßen vorzusehen.\"",
+      "note": "Fixed Ø 40 mm. NOTE: distinct from Standrohr Ø 50 mm (§3.5, line 390) — do not conflate. REQ-06 correctly asserts wasserablauf_durchmesser_mm == 40."
+    },
+    {
+      "symbol": "anzahl_pruefgefaesse",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§5.2, line 580: \"Für jede zu untersuchende Abdichtung sind 8 Prüfgefäße mit Wasserablauf erforderlich.\" (also §4, line 508: \"...werden in 8 Prüfgefäße eingebaut.\")",
+      "note": "Fixed 8 per abdichtung."
+    },
+    {
+      "symbol": "anzahl_kontrollgefaesse",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§5.2, lines 580-582: \"...sind pro Prüfung – unabhängig von der Anzahl der zu prüfenden Abdichtungen – 3 Kontrollgefäße (ohne Wasserablauf) vorzusehen.\" (also §4, line 508-509: \"Weitere 3 Gefäße gehen ohne Abdichtung in die Prüfung.\")",
+      "note": "Fixed 3 per Prüfung."
+    },
+    {
+      "symbol": "gefaess_material",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§5.2, lines 554-555: \"Die Gefäße sind aus korrosionsfesten Materialien mit stabiler Wandung herzustellen. Das Material muss pflanzenverträglich sein.\"",
+      "note": "Free-text material descriptor; requirement = korrosionsfest + pflanzenverträglich. No enumerated set in the standard."
+    },
+    {
+      "symbol": "widerlager_dicke_mm",
+      "unit": "mm",
+      "verdict": "VA",
+      "quote": "§5.3, line 588: \"Das Widerlager besteht aus Polystyrolplatten (DAA dh) 10 ±1 mm dick, mit denen die Gefäßinnenseiten ausgekleidet werden...\"",
+      "note": "10 ±1 mm = RANGE 9–11 mm — surfaced as decisionItem (SR-2). REQ-06 encodes it as widerlager_dicke_mm >= 9 AND <= 11, which matches the ±1 tolerance."
+    },
+    {
+      "symbol": "widerlager_material",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§5.3, line 588: \"Das Widerlager besteht aus Polystyrolplatten (DAA dh) 10 ±1 mm dick...\" (§3.2, line 366: \"Das Widerlager besteht aus Polystyrolplatten...\")",
+      "note": "Polystyrolplatten (DAA dh). §3.2/§5.3 also note a Widerlager may be omitted for rigid materials (e.g. Gussasphalt) — an optionality the field does not capture, but is_required=true in prod (minor residue)."
+    },
+    {
+      "symbol": "trennlage_eingebaut",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§5.4, lines 598-599: \"Bei Polystyrol-Unverträglichkeit des zu prüfenden Produktes ist der zusätzliche Einbau einer produktverträglichen Trennlage zulässig.\"",
+      "note": "Boolean — conditional Trennlage. Consistent with §3.3 and §7.1 (ggf. Trennlage)."
+    },
+    {
+      "symbol": "trennlage_wasserdurchlaessig",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§5.4, lines 599-601: \"Für die Prüfung ist der Einbau einer wasserdurchlässigen Trennlage erforderlich, um während der Prüfung auftretende Undichtigkeiten des zu prüfenden Produktes feststellen zu können.\"",
+      "note": "When a Trennlage IS used it must be wasserdurchlässig. is_required=false in prod (correct — only relevant when trennlage_eingebaut=true)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "RHZ-05 apparatus data-collection save (PDF-conformant PASS state)",
+      "ran": true,
+      "liveValue": "gefaess_innenmass_l/b/h_mm = 800/800/250, wasserablauf=40, prüf=8, kontroll=3, widerlager=10; all persisted and read back equal; REQ-06 over these fields = {kind:'pass'}",
+      "pdfExpected": "no worked numeric example in the standard for this worksheet; values are the §5.2/§5.3/Abb.1 minima/fixed dims — sanity-checked against PDF",
+      "verdict": "VA",
+      "raw": "pnpm vitest run --project integration tests/harness/verify-fll-rhizom-rhz05.integration.test.ts → Test Files 1 passed (1); Tests 2 passed (2); Duration 4.75s. Test 1 (PASS state): saveWorksheet ok=true, all 8 apparatus persisted-value asserts green, evaluateCondition(REQ-06) => 'pass'."
+    },
+    {
+      "name": "RHZ-05 apparatus save (out-of-spec FAIL state)",
+      "ran": true,
+      "liveValue": "gefaess_innenmass_l_mm=600 (<800), wasserablauf=50 (!=40), widerlager=20 (>11); persisted; REQ-06 over these fields = {kind:'fail'}",
+      "pdfExpected": "an undersized/wrong apparatus must be rejected by the dimensioning requirement",
+      "verdict": "VA",
+      "raw": "Test 2 (FAIL state): saveWorksheet ok=true, persisted 600 & 50 confirmed, evaluateCondition(REQ-06) => 'fail'. Proves the condition is fireable (pass+fail both reachable) WHEN its variables resolve."
+    }
+  ],
+  "gates": [
+    {
+      "id": "REQ-06 (Apparatur korrekt dimensioniert)",
+      "attachedTo": "FLLTP-RHZ-04 (template 3df43d07-3461-460e-8731-3c24fb236a94) — NOT this worksheet",
+      "fired": true,
+      "vacuous": true,
+      "note": "REQ-06 is the ONLY gate whose condition references RHZ-05's apparatus fields, but it is attached to a DIFFERENT worksheet template (FLLTP-RHZ-04) in prod. Under the Wizard's documented worksheet-local gate lookup (compliance evaluate resolves symbols within the gate's own worksheet), a gate on RHZ-04 cannot see gefaess_innenmass_*/anzahl_*/wasserablauf_/widerlager_dicke_ which exist ONLY on RHZ-05 → in prod its variables never resolve → PENDING, never fireable = CR-006-class vacuity by misplacement. In the harness I proved it CAN evaluate pass AND fail when the RHZ-05 field values are supplied to the DSL, isolating the defect as placement, not condition logic. FLLTP-RHZ-05 itself has 0 own gates."
+    }
+  ],
+  "findings": [
+    {
+      "id": "FIND-RHZ05-1",
+      "severity": "high",
+      "title": "REQ-06 apparatus gate is misplaced (governs RHZ-05 fields, attached to RHZ-04) → vacuous under worksheet-local lookup",
+      "detail": "compliance_requirements.REQ-06 'Apparatur korrekt dimensioniert' (severity=block) sits on worksheet_template FLLTP-RHZ-04 (3df43d07-...). Its condition variables (gefaess_innenmass_l_mm, gefaess_innenmass_b_mm, gefaess_innenmass_h_mm, anzahl_pruefgefaesse, anzahl_kontrollgefaesse, wasserablauf_durchmesser_mm, widerlager_dicke_mm) exist ONLY on FLLTP-RHZ-05 (verified: those symbols return worksheet_code=FLLTP-RHZ-05 exclusively). Per reference_wizard_compliance_gates, gate evaluation uses a worksheet-local field lookup, so on RHZ-04 these symbols resolve to undefined and the gate can never fire in prod. Result: RHZ-05's apparatus (Gefäß-Mindestmaße 800x800x250, 8 Prüf/3 Kontrollgefäße, Wasserablauf Ø40, Widerlager 10±1) has NO enforceable gate. STAGED FIX (written-not-applied): move REQ-06 to worksheet_template FLLTP-RHZ-05 (98f1e3b8-...) — i.e. UPDATE compliance_requirements SET worksheet_template_id='98f1e3b8-0ebb-44b4-9351-73cdb91e1b7b' WHERE code='REQ-06' AND worksheet_template_id='3df43d07-3461-460e-8731-3c24fb236a94'. Requires human decision (see decisionItems). Do NOT apply here."
+    }
+  ],
+  "residue": [
+    {
+      "id": "RES-RHZ05-1",
+      "title": "gefaess_material has no enumerated value set",
+      "detail": "gefaess_material is free text (data_type=text) with the §5.2 requirement 'korrosionsfest + pflanzenverträglich'. No gate/enum enforces korrosionsfestigkeit or Pflanzenverträglichkeit. VC — captured as a data-collection field only; standard gives no enumerable list.",
+      "grade": "VC"
+    },
+    {
+      "id": "RES-RHZ05-2",
+      "title": "widerlager_material / widerlager_dicke marked is_required=true but §3.2/§5.3 permit omission of the Widerlager for rigid materials",
+      "detail": "§3.2 (line 369) and §5.3 (line 369) state that for starre Werkstoffe (z.B. Gussasphalt) 'kann auf ein Widerlager verzichtet werden'. Prod marks widerlager_dicke_mm and widerlager_material is_required=true, which would force a value even when the Widerlager is legitimately omitted. Minor conditional-requiredness residue (VC) — no equation/gate impact on this worksheet; flagged for the encoder, not fixed."
+    },
+    {
+      "id": "RES-RHZ05-3",
+      "title": "No PDF worked example for apparatus dimensions",
+      "detail": "The standard prints minima/fixed dims but no numeric worked example for this worksheet, so the chain values are sanity-checked against §5.2/§5.3/Abb.1 rather than reproduced. Chain verdict rests on persistence + gate evaluation, both VA-observed."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "DEC-RHZ05-1",
+      "type": "range (SR-2)",
+      "title": "Widerlager-Dicke is a tolerance range 9–11 mm (10 ±1 mm), not a point value",
+      "quote": "§5.3, line 588: \"Polystyrolplatten (DAA dh) 10 ±1 mm dick\"",
+      "decision": "Confirm whether widerlager_dicke_mm should be entered/validated as the nominal 10 mm or accept the full 9–11 mm band. REQ-06 already encodes the band (>=9 AND <=11); do NOT auto-pick 10 without human sign-off."
+    },
+    {
+      "id": "DEC-RHZ05-2",
+      "type": "minimum-vs-actual (SR-2)",
+      "title": "Gefäß-Innenmaß 800 x 800 x 250 mm is a MINIMUM ('mindestens'), larger gefäße explicitly allowed",
+      "quote": "§5.2, lines 548-552: \"Die Gefäße müssen ein Innenmaß von mindestens 800 x 800 x 250 mm aufweisen ... kann es notwendig sein, größere Gefäße einzusetzen. Alle nachfolgenden Angaben ... sind an die ggf. größer dimensionierten Gefäße anzupassen.\"",
+      "decision": "The dimensioning gate uses >= (correct for a minimum). Decide whether downstream per-gefäß quantities (Substrat ~110 l, Widerlager/Trennlage ~1,5 m², Abdichtung ~2 m², 8 Pflanzen) must scale when größere Gefäße are used — out of scope for RHZ-05 fields but a cross-worksheet consequence to record."
+    },
+    {
+      "id": "DEC-RHZ05-3",
+      "type": "gate-placement fix (staged)",
+      "title": "Apply the REQ-06 re-parent migration",
+      "quote": "prod query: REQ-06 worksheet_code=FLLTP-RHZ-04; its 8 variables all worksheet_code=FLLTP-RHZ-05",
+      "decision": "Approve/deny the staged UPDATE that moves REQ-06 from template 3df43d07 (RHZ-04) to 98f1e3b8 (RHZ-05) so the apparatus gate becomes fireable. Written-not-applied; single controlled apply pass later per doctrine. Confirm this against the broader REQ-06 placement question already flagged in project memory (single_source_audit / gate_enforcement_remediation)."
+    }
+  ],
+  "doctrineNotes": {
+    "SR1": "Every field value claim carries a verbatim §/line quote from the TP-Rhizom PDF text captured THIS run. No default from the seeder was treated as a source value.",
+    "SR2": "Two ranges/minima surfaced as decisionItems (Widerlager 9–11 mm; Gefäß-Innenmaß minimum) — not auto-picked.",
+    "SR3": "Verification is against the pdftotext extraction of the RENDERED PDF (TP-Rhizom.txt). Key strings (Ø 40 mm ablauf; 10 ±1 mm Polystyrolplatten (DAA dh); mindestens 800 x 800 x 250 mm; 8 Prüf-/3 Kontrollgefäße) grep-confirmed. No PDF-vs-markdown disagreement observed. All field verdicts VA.",
+    "prodWriteLock": "Read-only prod (execute_sql only). REQ-06 re-parent is STAGED as a written-not-applied decisionItem, not applied."
+  }
+}

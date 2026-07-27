@@ -1,0 +1,167 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-09",
+  "worksheetTitle": "Hydrobotanisches System – Bemessung",
+  "templateId": "488a3367-537b-4628-b186-c323eb976dc9",
+  "verifiedRun": "2026-07-23",
+  "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/Naturteich.txt (English FLL Guidelines 2017, personal release version)",
+  "counts": { "equations": 0, "gates": 7, "fieldsActive": 10 },
+  "equations": [],
+  "equationsNote": "FLLNT-09 has 0 equations on prod (confirmed by SQL and by the harness COUNT assertion). No formula shapes/constants/units to verify on this worksheet. The hydrobotanical sizing is expressed entirely as gate thresholds (REQ-19) against Table 10, not as producer equations.",
+  "chains": [
+    {
+      "name": "FLLNT-09 local field persistence (hydrobot_type enum)",
+      "ran": true,
+      "liveValue": "submergent",
+      "pdfExpected": "n/a (persistence smoke — no worked example)",
+      "verdict": "VC",
+      "raw": "PASS: hydrobot_type enum persists (submergent) via saveWorksheet 512ms"
+    },
+    {
+      "name": "FLLNT-09 local field persistence (hydrobot number fields)",
+      "ran": true,
+      "liveValue": "water_column=90, substrate_thickness=15, grain_size_max=8, feed_rate=5",
+      "pdfExpected": "n/a (persistence smoke); values themselves are within Tab.10 limits (grain ≤8, feed ≤5, column ≥80, substrate 10-20)",
+      "verdict": "VC",
+      "raw": "PASS: hydrobot number fields persist (water column 90, substrate 15, grain 8, feed 5) 12ms"
+    },
+    {
+      "name": "No producer chain on FLLNT-09 (0 equations)",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "residue",
+      "raw": "FLLNT-09 has no equations; all machine-evaluable artifacts are the 7 gates, exercised via evaluateCondition. Cross-worksheet producer pool_underwater_surface consumed by REQ-33 is produced by FLLNT-06 EQ-PUWS (verified in the FLLNT-06 worksheet run, not re-produced here)."
+    }
+  ],
+  "gates": [
+    {
+      "id": "607cb5f4-e16d-4c6f-b47c-2700d2d18c56",
+      "code": "REQ-08",
+      "condition": "if filter_flow_type == 'slow' then p_binding_required == true",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Guarded gate; fired pass (slow+p_binding), fail (slow, no p_binding), vacuous-pass (quick). PDF-confirmed: §10.2.2 line 2485-2486 'Substrate filters with a controlled slow flow must be equipped with a downstream phosphorous-binding purification stage (submergent hydrobotanical system or adsorbing filter material).' Note: filter_flow_type & p_binding_required are cross-worksheet symbols (FLLNT-10 / FLLNT-03)."
+    },
+    {
+      "id": "0ff40c3b-1b77-4d20-8cd3-61a12a92c200",
+      "code": "REQ-19",
+      "condition": "hydrobot_grain_size_max <= 8 AND hydrobot_feed_rate <= 5 AND (IF hydrobot_type == submergent THEN (hydrobot_water_column >= 80 AND hydrobot_substrate_thickness >= 10 AND hydrobot_substrate_thickness <= 20)) AND (IF hydrobot_type == emersed THEN (hydrobot_water_column >= 10 AND hydrobot_water_column <= 50 AND hydrobot_substrate_thickness >= 10 AND hydrobot_substrate_thickness <= 30))",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Primary FLLNT-09 gate. Fired submergent-pass, submergent-fail (column 70<80), emersed-pass, grain-fail (10>8), and pending. Every constant PDF-confirmed against Table 10 (line 2418-2450): 'Water column height ≥ 80 cm | 10 – 50 cm'; 'Thickness of substrate layer 10 – 20 cm | 10 – 30 cm'; 'Grain size range ≤ 8 mm'; 'Feed rate Qmax 5 m³/(m² x day) | 5 m³/(m² x day)'. Both parenthesized guards are proper AND atoms (NOT the REQ-07-style dead-branch bug)."
+    },
+    {
+      "id": "0414e322-5142-4e84-b268-662362f63236",
+      "code": "REQ-20",
+      "condition": "(IF filter_flow_direction IN {vertical_continuous_overflow, vertical_no_overflow} THEN (...)) AND (IF filter_flow_direction == vertical_continuous_overflow THEN (...)) AND (IF filter_flow_direction == vertical_no_overflow THEN filter_feed_rate_slow_qmax <= 8)",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Fired continuous-overflow-pass, continuous-overflow-fail (Qmax 6>5), and horizontal-vacuous-pass. Constants PDF-confirmed against Table 11 (line 2495-2535): layer ≥40cm, grain ≤16mm, oversize ≤15% by weight, elutriated ≤2% by weight, frost 'is mandatory', layer tolerance '10% deviation', permeability '≥10-4 m/s', water column '≥10 cm', Qmax '5 m³/(m² x day)' (cont. overflow) / '8 m³/(m² x day)' (no overflow). Cross-worksheet: filter_* symbols live on FLLNT-10."
+    },
+    {
+      "id": "8ccccbf8-3590-4058-baa5-ec19392da9b1",
+      "code": "REQ-21",
+      "condition": "IF filter_flow_direction IN {vertical_continuous_overflow,vertical_no_overflow} THEN (filter_layer_thickness >= 50 AND filter_grain_size_max <= 32 AND filter_substrate_oversize_pct <= 15 AND filter_substrate_elutriated_pct <= 0.5 AND filter_frost_resistance == true AND filter_layer_tolerance_pct <= 10 AND filter_kf >= 0.001 AND filter_feed_rate_quick_qmin >= 15)",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Fired pass (all Tab.12 limits) and fail (Qmin 12<15). Constants PDF-confirmed against Table 12 (line 2590-2618) and §10.2.3 (line 2583-2584): layer ≥50cm, grain ≤32mm, oversize ≤15%, elutriated ≤0.5% by weight, frost mandatory; Qmin 'Qmin ≥ 15 m³/(m² x day)'. NOTE coverage gap: guard omits 'horizontal' (a valid enum on filter_flow_direction, and Table 12 has a horizontal column marked 'Individual verification') → horizontal vacuously passes. See findings."
+    },
+    {
+      "id": "4a216065-edc6-45b3-8536-e46dd9cf08a1",
+      "code": "REQ-23",
+      "condition": "attest_fllnt_09_req_23 == True",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Attestation gate for §10.3 water circulation (field label 'Nachweis: §10.3'). Fired pass (true) and fail (false). §10.3 'Water circulation' is a real source requirement (line 2681+); attestation is a legitimate manual-gate encoding, not vacuous."
+    },
+    {
+      "id": "f6526e14-b0a5-47e3-984d-7b733abfa5b3",
+      "code": "REQ-24",
+      "condition": "IF physical_chemical_used == true THEN NOT (regeneration_technique IN {physical_chemical})",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Fired pass (phys/chem used, primary technique biological), fail (phys/chem IS the primary technique), and vacuous-pass (not used). PDF-confirmed §10.2.5 line 2673-2674: 'Physical and/or chemical techniques can only be used in conjunction with biological techniques and should only be regarded as supplementary methods.' The NOT(... IN {physical_chemical}) correctly forbids phys/chem being the sole/primary regeneration_technique."
+    },
+    {
+      "id": "585759fc-a645-4d0e-b484-bd75558b23f6",
+      "code": "REQ-33",
+      "condition": "IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * pool_underwater_surface",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Arithmetic acompare. Fired pass (3000 >= 150*20), fail (2000 < 3000), vacuous-pass (no rigid overflow). Constant 150 PDF-confirmed §10.3.1 line 2729-2730: 'The usable volume of the splash water tank must be dimensioned so that at least 150 l per square metre can be provided to the inundated water surface.' Units: 150 l/m² × pool_underwater_surface(m²) = l; field splash_water_tank_volume unit = 'l'. 'inundated water surface' maps to pool_underwater_surface. Cross-worksheet: rigid_overflow_used/splash_water_tank_volume on FLLNT-11, pool_underwater_surface produced on FLLNT-06."
+    }
+  ],
+  "findings": [
+    {
+      "id": "FLLNT09-F1",
+      "severity": "medium",
+      "type": "phantom-fields / enum-tokens-materialized-as-fields",
+      "detail": "Four rows in the fields table for template 488a3367... are not real worksheet fields but enum-VALUE tokens that leaked into the fields table: 'emersed' (data_type number, no section), 'submergent' (number, no section), 'vertical_continuous_overflow' (boolean, no section), 'vertical_no_overflow' (boolean, no section). They are the bare-ident RHS operands of the guarded conditions in REQ-19 (hydrobot_type == submergent / == emersed) and REQ-20/REQ-21 (filter_flow_direction IN {vertical_continuous_overflow, vertical_no_overflow}). The evaluator treats bare-ident RHS as STRING LITERALS, so the gates evaluate correctly regardless — these field rows are inert/dead. They inflate the field count (10 'active' vs 5 real hydrobot fields + 1 attest) and could surface as spurious inputs in the UI. Same class as the CR-006 leakage pattern. attest_fllnt_09_req_23 is a legitimate attestation carrier (not phantom).",
+      "evidence": "SELECT ... FROM fields WHERE worksheet_template_id='488a3367-537b-4628-b186-c323eb976dc9' returned rows: emersed(number), submergent(number), vertical_continuous_overflow(boolean), vertical_no_overflow(boolean), all section_code=null."
+    },
+    {
+      "id": "FLLNT09-F2",
+      "severity": "low",
+      "type": "gate-coverage-gap",
+      "detail": "REQ-21 (quick filter Tab.12) and REQ-20 (slow filter Tab.11) guard only the two VERTICAL filter_flow_direction values. 'horizontal' is a valid enum option on filter_flow_direction (FLLNT-10) and Table 11/12 both list a horizontal column ('Individual verification' / 'no further information'). A horizontal filter therefore vacuously passes these dimensioning gates with no constraint. PDF is permissive for horizontal ('Individual verification'), so this is arguably faithful to the source, but the gate provides zero enforcement for a horizontal filter and no attestation is required in its place. Logged as a coverage gap, not a mis-encoded constant.",
+      "evidence": "REQ-20/REQ-21 conditions guard IN {vertical_continuous_overflow, vertical_no_overflow} only; test 'REQ-20 vacuous PASS horizontal' fires green. Table 11/12 (PDF line 2495-2535, 2590-2624) have a 'horizontal flow' column."
+    }
+  ],
+  "residue": [
+    {
+      "id": "FLLNT09-R1",
+      "type": "no-worked-example",
+      "detail": "The FLL-Naturteich guideline prints no numeric worked example for the hydrobotanical sizing (Table 10 gives only threshold ranges, not a solved case). The two persistence chains are therefore VC (sanity-checked values within Tab.10 limits), not asserted against a printed result. Per SR-3 this whole standard is markdown/text-derived convenience — all VA verdicts here rest on the rendered-text Table extractions; a page-image PDF re-confirmation of Tables 10/11/12 would upgrade confidence but pdftotext -layout preserved the table structure cleanly."
+    },
+    {
+      "id": "FLLNT09-R2",
+      "type": "cos_beta / trig",
+      "detail": "None. No FLLNT-09 equation or gate involves cos_beta or any trig function. No engine-blocked residue on this worksheet."
+    },
+    {
+      "id": "FLLNT09-R3",
+      "type": "cross-worksheet-symbol-dependency",
+      "detail": "5 of 7 gates consume symbols owned by sibling worksheets: REQ-08 (filter_flow_type FLLNT-10, p_binding_required FLLNT-03), REQ-20/REQ-21 (filter_* FLLNT-10), REQ-24 (regeneration_technique FLLNT-03), REQ-33 (rigid_overflow_used & splash_water_tank_volume FLLNT-11, pool_underwater_surface produced by FLLNT-06 EQ-PUWS). Exercised here via injected lookups; their producers/owners are verified in the respective sibling worksheet runs. This is topology-faithful to prod, not a defect."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "FLLNT09-D1",
+      "type": "SR-2 range (peak-vs-point not auto-picked)",
+      "detail": "Table 10 emersed 'Water column height 10 – 50 cm' and 'Thickness of substrate layer 10 – 30 cm' (and submergent 10 – 20 cm) are RANGES. REQ-19 encodes them as two-sided inequalities (>= low AND <= high), which is the faithful range encoding — NOT an auto-picked point. Surfaced for the record: confirm the reviewer wants band-enforcement (current) rather than a target value. No change proposed.",
+      "staged": false
+    },
+    {
+      "id": "FLLNT09-D2",
+      "type": "staged-correction-candidate (written-not-applied)",
+      "detail": "FINDING FLLNT09-F1: consider deleting the four phantom enum-token field rows (emersed, submergent, vertical_continuous_overflow, vertical_no_overflow) from template 488a3367... These are inert (evaluator reads bare-ident RHS as string literals) so deletion is behavior-preserving for the gates but removes dead UI inputs. STAGED ONLY — do not apply to prod. Suggested migration: DELETE FROM fields WHERE worksheet_template_id='488a3367-537b-4628-b186-c323eb976dc9' AND symbol IN ('emersed','submergent','vertical_continuous_overflow','vertical_no_overflow') AND section_id IS NULL; (verify no project_parameters reference them first). Needs the same-class fix applied consistently across the standard, so batch with the CR-006/leaked-token cleanup rather than one-off.",
+      "staged": true
+    },
+    {
+      "id": "FLLNT09-D3",
+      "type": "coverage-decision",
+      "detail": "FINDING FLLNT09-F2: decide whether horizontal-flow substrate filters need an explicit gate/attestation (Table 11/12 'Individual verification') or whether vacuous-pass is acceptable given the source's 'Individual verification' language. No change proposed pending reviewer call.",
+      "staged": false
+    }
+  ],
+  "vitestRaw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll · Test Files 1 passed (1) · Tests 24 passed (24) · Duration 5.40s\n✓ exposes FLLNT-09 with 0 equations and 7 gates\n✓ hydrobot_type enum persists (submergent) via saveWorksheet 512ms\n✓ hydrobot number fields persist (water column 90, substrate 15, grain 8, feed 5) 12ms\n✓ REQ-19 PASS submergent — grain 8, feed 5, column 90, substrate 15 (Tab.10)\n✓ REQ-19 FAIL submergent — column 70 < 80 fails (Tab.10 ≥80cm)\n✓ REQ-19 PASS emersed — column 30 in [10,50], substrate 25 in [10,30]\n✓ REQ-19 FAIL — grain 10 > 8 fails (Tab.10 ≤8mm)\n✓ REQ-19 PENDING — no inputs reported pending (not vacuous)\n✓ REQ-20 PASS continuous overflow — all Tab.11 limits met\n✓ REQ-20 FAIL continuous overflow — Qmax 6 > 5 fails (Tab.11)\n✓ REQ-20 vacuous PASS horizontal — guard false, gate does not constrain (coverage gap)\n✓ REQ-21 PASS — all Tab.12 quick-flow limits met\n✓ REQ-21 FAIL — Qmin 12 < 15 fails (Tab.12 §10.2.3 Qmin≥15)\n✓ REQ-08 PASS — slow flow WITH p-binding required\n✓ REQ-08 FAIL — slow flow WITHOUT p-binding\n✓ REQ-08 vacuous PASS — quick flow, guard false\n✓ REQ-24 PASS — phys/chem used but regeneration_technique is biological\n✓ REQ-24 FAIL — phys/chem used AND it IS the primary regeneration technique\n✓ REQ-24 vacuous PASS — phys/chem not used\n✓ REQ-33 PASS — rigid overflow, tank 3000 l >= 150 * 20 m²\n✓ REQ-33 FAIL — rigid overflow, tank 2000 l < 150 * 20 m² (=3000)\n✓ REQ-33 vacuous PASS — no rigid overflow, guard false\n✓ REQ-23 PASS — attestation true\n✓ REQ-23 FAIL — attestation false",
+  "testFile": "C:/Users/Ekowai/_wt-fll/tests/harness/verify-fll-naturteich-fllnt09.integration.test.ts",
+  "summary": {
+    "chainsRun": 2,
+    "chainsTotal": 2,
+    "checksPassed": 24,
+    "gatesFired": 7,
+    "vacuousGates": 0,
+    "findingsCount": 2,
+    "residueCount": 3,
+    "decisionCount": 3
+  }
+}

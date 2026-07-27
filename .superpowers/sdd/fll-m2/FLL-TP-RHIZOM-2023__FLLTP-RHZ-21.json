@@ -1,0 +1,141 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-21",
+  "worksheetTitle": "Endgültige Rhizomfestigkeit-Konformität / Bescheinigung (attestation final worksheet)",
+  "templateId": "7456ddd1-3eaf-4495-9491-5c3f02ef7f71",
+  "instanceIdNote": "The id 7456ddd1-3eaf-4495-9491-5c3f02ef7f71 given in the task is the worksheet_TEMPLATE id (confirmed against prod), not a worksheet_instance id.",
+  "prodPull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 6
+  },
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt (extracted from fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf)",
+  "fields": [
+    {
+      "symbol": "final_rhizom_conformity",
+      "data_type": "enum",
+      "enum_values": ["rhizomfest", "nicht_rhizomfest", "vorzeitig_abgebrochen"],
+      "verdict": "VA",
+      "quote": "§3.11 Prüfergebnis (line 472-474): \"Ein Produkt gilt als rhizomfest, wenn in allen Prüfgefäßen nach Ablauf der Prüfdauer keine Rhizomeindringungen ... festzustellen sind.\" | §9 (line 924): \"... Feststellung, dass sich das Produkt als nicht rhizomfest nach FLL erwiesen hat.\" | §3.12 Vorzeitiger Abbruch der Prüfung (line 485-488): \"... Die Prüfung kann abgebrochen werden.\"",
+      "note": "All three enum values are PDF-attested: 'rhizomfest' (§3.11), 'nicht rhizomfest' (§9 line 924), 'vorzeitig abgebrochen' (§3.12). Enum regulation_reference tags in prod (§3.11 / §3.11,§8 / §3.12) match. §8 is the Bewertung/Zusammenfassung section referenced for the negative verdict. VA."
+    },
+    {
+      "symbol": "bescheinigung_gueltig_bis",
+      "data_type": "date",
+      "verdict": "VA",
+      "quote": "§9 (line 945-946): \"Der Prüfbericht wurde am ........ erstellt und hat grundsätzlich eine Gültigkeitsdauer von 10 Jahren.\" | cert template (line 1040): \"Der Bericht hat eine Gültigkeitsdauer von 10 Jahren.\" | extension (line 948-949): \"Durch eine Bestätigung des Prüfinstituts kann die Gültigkeitsdauer des Prüfberichts in Zeitabschnitten von 5 Jahren verlängert werden ...\"",
+      "note": "Validity period is a RANGE, not a point: base 10 years, extensible in 5-year steps (SR-2). Surfaced as decisionItem — not auto-picked. Field type (free date) is correct; base-case gueltig_bis = ausstellungsdatum + 10 years."
+    },
+    {
+      "symbol": "bescheinigung_ausgestellt_durch",
+      "data_type": "text",
+      "verdict": "VA",
+      "quote": "§9 (line 919): \"Nach Beendigung des Versuchs ist von der jeweiligen Prüfinstitution ein vollständiger Prüfbericht ... zu erstellen ...\" | cert template header (line 1013): \">> Prüfinstitut <<\" | (line 1198): \"Prüfinstitut: >> Name des Prüfinstituts <<\"",
+      "note": "Issuing body is the Prüfinstitut/Prüfinstitution — PDF-attested as the report author. VA."
+    },
+    {
+      "symbol": "bescheinigung_pruefnummer",
+      "data_type": "text",
+      "verdict": "VC",
+      "quote": "cert footer (line 1198): \"Prüfinstitut: >> Name des Prüfinstituts << (Ber.-Nr. >> xy <<)\"",
+      "note": "The PDF's report-identifier is 'Ber.-Nr.' (Berichtsnummer / report number), NOT literally 'Prüfnummer' (test number). A unique report number IS a required certificate element (line 1198), so the field is legitimate, but the German label 'Prüfnummer' does not verbatim match the source term 'Ber.-Nr.'. Flagged VC + captured as a low-severity finding (label vs source-term nuance). No hard mismatch."
+    },
+    {
+      "symbol": "bescheinigung_ausstellung_datum",
+      "data_type": "date",
+      "verdict": "VA",
+      "quote": "§9 (line 945): \"Der Prüfbericht wurde am ........ erstellt ...\" | cert template (line 1041): \"Datum des Berichts: >> Tag. Monat. Jahr <<\"",
+      "note": "Issue date of the Prüfbericht — PDF-attested. VA."
+    },
+    {
+      "symbol": "pruefer_signatur_eingeholt",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "cert template signature block (line 1194): \">> Name und Unterschrift des Bearbeiters <<\" (also line 1195 Kontaktdaten des Bearbeiters)",
+      "note": "The signature of the Bearbeiter (test engineer) is a required element of the Prüfbericht/Prüfzeugnis. The boolean 'signature obtained' is a faithful gate on that requirement. VA."
+    }
+  ],
+  "equations": [],
+  "equationsNote": "0 equations on FLLTP-RHZ-21 (confirmed against prod). This is a data-capture/attestation worksheet. The standard's only 3 equations live on FLLTP-RHZ-13 (P_avg/K_avg/ratio arithmetic means). No cos_beta/trig involvement here (per seeder header). No equation findings, no equation residue.",
+  "chains": [
+    {
+      "name": "attestation-persistence (all 6 fields through REAL saveWorksheet)",
+      "ran": true,
+      "liveValue": "final_rhizom_conformity=rhizomfest; bescheinigung_gueltig_bis=2036-07-23; bescheinigung_ausgestellt_durch='Prüfinstitut'; bescheinigung_pruefnummer='Ber.-Nr. 2026-001'; bescheinigung_ausstellung_datum=2026-07-23; pruefer_signatur_eingeholt=true; all source_type='entered'; saved=6",
+      "pdfExpected": "No worked numeric example printed (attestation worksheet). Sanity: 10-year validity (2026-07-23 + 10y = 2036-07-23) matches §9 line 945/1040; verdict enum + signature match cert template.",
+      "verdict": "VC",
+      "raw": "✓ |integration| tests/harness/verify-rhz21.integration.test.ts > VERIFY FLLTP-RHZ-21 — attestation persistence through REAL saveWorksheet > persists all 6 certification fields with correct typed columns 435ms\nTest Files  1 passed (1)\nTests  2 passed (2)"
+    },
+    {
+      "name": "terminated-early verdict (§3.12 enum path through REAL saveWorksheet)",
+      "ran": true,
+      "liveValue": "final_rhizom_conformity=vorzeitig_abgebrochen persisted",
+      "pdfExpected": "§3.12 'Vorzeitiger Abbruch der Prüfung' — enum value present in source.",
+      "verdict": "VA",
+      "raw": "✓ |integration| tests/harness/verify-rhz21.integration.test.ts > ... > accepts the terminated-early verdict enum value (§3.12) 10ms\nTest Files  1 passed (1)\nTests  2 passed (2)"
+    }
+  ],
+  "gates": [],
+  "gatesNote": "0 compliance_requirements on FLLTP-RHZ-21 (confirmed against prod). No gate to fire, so no vacuous/dead-gate (CR-006 class) risk on this worksheet. This is arguably an ENCODING GAP finding: a final attestation worksheet with a required 'signature obtained' boolean and a mandatory conformity verdict carries NO block-severity gate ensuring signature=true or a valid verdict is set before approval. Captured as a finding + decision item (do not fix — findings over fixes).",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "low",
+      "type": "label-vs-source-term",
+      "field": "bescheinigung_pruefnummer",
+      "detail": "Field German label is 'Prüfnummer' (test number) but the PDF's mandatory report identifier is 'Ber.-Nr.' (Berichtsnummer / report number, line 1198). Concept present and required, but the label does not verbatim match the source term. No data corruption; a relabel to 'Berichtsnummer (Ber.-Nr.)' would align it with the source. Staged as decision item, not applied."
+    },
+    {
+      "id": "F2",
+      "severity": "medium",
+      "type": "missing-gate / encoding-gap",
+      "field": "worksheet-level",
+      "detail": "FLLTP-RHZ-21 is the terminal attestation worksheet (final conformity verdict + signature) yet has ZERO compliance_requirements. There is no block-severity gate enforcing that pruefer_signatur_eingeholt=true or that final_rhizom_conformity is set to a non-null verdict before the worksheet/project is approved. Per §9 a Prüfbericht is only valid with the Bearbeiter signature (line 1194) and a definitive Bewertung (§2.11/§8). Consider adding block gates: (a) pruefer_signatur_eingeholt == true; (b) final_rhizom_conformity in {rhizomfest, nicht_rhizomfest, vorzeitig_abgebrochen}. Findings-over-fixes: NOT applied; staged as decision item."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-worked-example",
+      "detail": "The PDF prints no numeric worked example for this worksheet (it is a certificate template with placeholder >> ... << tokens), so the persistence chain values are sanity-checked against the source narrative (10y validity, enum verdicts, signature) rather than asserted against a printed result. Chain verdict VC on that basis."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "range (SR-2)",
+      "field": "bescheinigung_gueltig_bis",
+      "detail": "Report validity is a RANGE, not a point value: base Gültigkeitsdauer 10 Jahre (§9 line 945-946 / cert line 1040), extensible by Prüfinstitut confirmation in 5-Jahres-Zeitabschnitten (§9 line 948-949). Surfaced (not auto-picked): decide whether gueltig_bis should default to ausstellungsdatum + 10y and whether extension steps of +5y need a first-class capture. No value written."
+    },
+    {
+      "id": "D2",
+      "type": "staged-relabel (F1)",
+      "field": "bescheinigung_pruefnummer",
+      "detail": "Written-not-applied: relabel field 'Prüfnummer' → 'Berichtsnummer (Ber.-Nr.)' to match the source term at PDF line 1198. UPDATE fields SET label_de = 'Berichtsnummer (Ber.-Nr.)' WHERE id = 'fb52e0b7-bc2e-4974-b9d6-6b40f10ab1ac'; -- NOT APPLIED, needs human go."
+    },
+    {
+      "id": "D3",
+      "type": "staged-gate-add (F2)",
+      "field": "worksheet-level",
+      "detail": "Written-not-applied: add block-severity compliance_requirements on template 7456ddd1-3eaf-4495-9491-5c3f02ef7f71 enforcing (a) pruefer_signatur_eingeholt == true and (b) final_rhizom_conformity is set. Grammar must match the wizard condition grammar (severity='block', worksheet-local field lookup). NOT APPLIED — catalogued for a single controlled apply pass."
+    }
+  ],
+  "doctrine": {
+    "SR1_verbatim": "Every field value claim carries a verbatim PDF quote (this run).",
+    "SR2_ranges": "bescheinigung_gueltig_bis 10y/+5y range surfaced as D1, never auto-picked.",
+    "SR3_pdf_ground_truth": "Verdicts VA are PDF/markdown-agreeing; the source is the extracted PDF text. No markdown-only claims relied upon. bescheinigung_pruefnummer downgraded to VC due to source-term nuance.",
+    "no_prod_writes": "Read-only prod pull only (Supabase MCP execute_sql). All corrections staged as decisionItems (D2/D3), nothing applied.",
+    "cos_beta": "N/A on this worksheet (no equations)."
+  },
+  "summary": {
+    "chainsRun": 2,
+    "chainsTotal": 2,
+    "checksPassed": 2,
+    "findings": 2,
+    "residue": 1,
+    "decisions": 3,
+    "equationsVA": 0,
+    "gatesFired": 0,
+    "vacuousGates": 0
+  }
+}

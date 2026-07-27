@@ -1,0 +1,97 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-20",
+  "worksheetTitle": "Alkalisilikate / Alkali Silicates",
+  "templateId": "c803c953-bd0d-4aec-9a0c-7675b2840db5",
+  "prodPull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 2,
+    "note": "Pure data_collection worksheet. Field/equation/gate counts pulled read-only from prod (vadsmshzebefjreqcicl) and match the task expectation (0/0/2)."
+  },
+  "fields": [
+    {
+      "id": "2c2f59e6-e1d6-49ce-a986-1517b78a25de",
+      "symbol": "alkalisilikat_type",
+      "data_type": "enum",
+      "enum_values": ["Na (Natrium-Wasserglas)", "Li (Lithium-Wasserglas)", "K (Kalium-Wasserglas)"],
+      "clause_reference": "Sec.7.2",
+      "verdict": "VA",
+      "quote": "Je nach chemischer Zusammensetzung (Art des metallischen Gegenions) unterscheidet man zwischen Natrium-Wasserglas, Lithium-Wasserglas und Kalium-Wasserglas, die in Pulverform bindigen Böden beigemischt werden. (7.2, GAR.txt L4938-4940) — and — Natrium-Wasserglas und Lithium-Wasserglas sind phytotoxisch; Kalium-Wasserglas ist pflanzenverträglich. (7.2, GAR.txt L4944-4945)",
+      "note": "Three enum options (Na/Li/K) confirmed VERBATIM against §7.2. Field description 'potassium-water-glass only is plant-compatible' is confirmed by the phytotoxicity sentence. clause_reference Sec.7.2 correct. PDF-confirmed (VA)."
+    },
+    {
+      "id": "3707685f-856a-4f37-8ca9-d70631fe71fb",
+      "symbol": "feinkornanteil_063_pct",
+      "data_type": "number",
+      "unit": "Masse-%",
+      "validation_rules": ">= 20 (Alkalisilikat)",
+      "clause_reference": "Sec.7.2.1",
+      "verdict": "VA",
+      "quote": "Der Feinkornanteil < 0,063 mm des anstehenden Bodens soll mind. 20 Masse-% betragen. (7.2.1.1 Abdichtungsstoffe, GAR.txt L4956-4957)",
+      "note": "Fines fraction < 0,063 mm, unit Masse-%, min threshold 20 confirmed VERBATIM. Threshold value (20) and unit (Masse-%) match the field. VA. Two provisos recorded in decisionItems: (1) the standard says 'soll mind.' (SHOULD, soft target) not 'muss' — the >=20 validation encodes it as hard; (2) the value lives in §7.2.1.1 (Abdichtungsstoffe), the seeded clause_reference Sec.7.2.1 points at the parent subsection (correct parent, one level coarser)."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "saveWorksheet persistence — plant-compatible K case (alkalisilikat_type=K, feinkornanteil_063_pct=20)",
+      "ran": true,
+      "liveValue": "value_enum='K', value_number=20",
+      "pdfExpected": "No worked numeric example printed in §7.2 (data-collection worksheet, no engine). K = pflanzenverträglich per L4944-4945; 20 Masse-% = the §7.2.1.1 minimum threshold L4956-4957.",
+      "verdict": "VA",
+      "raw": "PASS — Test Files 1 passed (1), Tests 3 passed (3). '✓ persists the plant-compatible potassium case (K, fines=20 Masse-%) 426ms'. project_parameters read back value_enum='K', value_number=20."
+    },
+    {
+      "name": "saveWorksheet re-save/overwrite — phytotoxic Na case (alkalisilikat_type=Na, feinkornanteil_063_pct=35)",
+      "ran": true,
+      "liveValue": "value_enum='Na', value_number=35",
+      "pdfExpected": "No printed worked example; sanity check only. Na = phytotoxisch per L4944; 35 Masse-% >= 20 min. Confirms overwrite/re-save path.",
+      "verdict": "VC",
+      "raw": "PASS — '✓ re-save with phytotoxic Na and a higher fines fraction overwrites 15ms'. Re-read project_parameters value_enum='Na', value_number=35. Sanity-checked (no printed example), recorded VC."
+    },
+    {
+      "name": "field-presence smoke (both fields exposed by fixture)",
+      "ran": true,
+      "liveValue": "alkalisilikat_type + feinkornanteil_063_pct field ids present",
+      "pdfExpected": "n/a",
+      "verdict": "VA",
+      "raw": "PASS — '✓ exposes the 2 collected fields 1ms'."
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "type": "no-equations",
+      "note": "0 equations on this worksheet — nothing to verify for formula shape/constants/units/output-symbol, and no cos_beta/trig-blocked equations. §7.2.1.1 mentions a kf permeability range (kf < 1*10^-9 bis 5*10^-11 m/s, L4955) as narrative context but it is NOT encoded as a field or equation here (kf is the general §5.1.1 requirement referenced by 'Die Anforderungen ... entsprechen den Anforderungen gemäß Abschnitt 5.1.1', L4965-4966). Not a gap for GAR-20 scope."
+    },
+    {
+      "type": "no-gates",
+      "note": "0 compliance_requirements on this worksheet — no gate to fire (no pass/fail state to exercise), so no vacuous/dead-gate (CR-006 class) risk exists here. The phytotoxicity rule (Na/Li phytotoxisch vs K pflanzenverträglich, L4944-4945) is captured descriptively in the enum field metadata but is NOT enforced as a severity=block gate. Candidate enforceable gate — see decisionItems."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "GAR-20-D1",
+      "type": "soft-vs-hard-threshold (SR-2 range/qualifier)",
+      "note": "§7.2.1.1 states the fines threshold with 'soll mind. 20 Masse-%' (SHOULD, a soft target), quote: 'Der Feinkornanteil < 0,063 mm des anstehenden Bodens soll mind. 20 Masse-% betragen.' (GAR.txt L4956-4957). The field validation_rules encodes it as a hard '>= 20'. DECISION: keep as hard >=20 validation, or relax to a soft/advisory check to mirror the standard's 'soll'? Not auto-picked. No prod write staged (validation_rules only; no migration authored)."
+    },
+    {
+      "id": "GAR-20-D2",
+      "type": "clause-precision",
+      "note": "feinkornanteil_063_pct.clause_reference = 'Sec.7.2.1'; the source sentence actually sits in §7.2.1.1 (Abdichtungsstoffe) per GAR.txt L4952/L4956. Correct parent, one level coarse. DECISION: optionally refine clause_reference 7.2.1 -> 7.2.1.1. Cosmetic; STAGED as written-not-applied note, not applied."
+    },
+    {
+      "id": "GAR-20-D3",
+      "type": "unenforced-rule -> candidate gate",
+      "note": "The phytotoxicity distinction (Na/Li phytotoxisch; K pflanzenverträglich, GAR.txt L4944-4945) is descriptive metadata only and not enforced by any compliance_requirement. If GAR-20 is used for a planted/near-vegetation water body, a gate of the form 'if alkalisilikat_type in (Na, Li) then warn/block on plant compatibility' could be authored. DECISION: author such a gate or leave as advisory. Not built, not written to prod (findings-over-fixes)."
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Every value claim above is attached to a VERBATIM German quote from GAR.txt captured THIS run; no reliance on logs/prior chats.",
+    "SR-2": "The kf permeability range (1*10^-9..5*10^-11 m/s) is narrative, not a field, so no auto-pick was needed; the 'soll mind. 20' soft-qualifier is surfaced as decision GAR-20-D1 rather than silently hardened.",
+    "SR-3": "GAR.txt is a pdftotext -layout extraction of the rendered PDF (§7.2 p.103). Field values (3 types, 20 Masse-%) are unambiguous in the layout text -> marked VA. No PDF-vs-markdown disagreement observed.",
+    "writes": "Read-only prod (Supabase MCP execute_sql) only. No migration authored/applied; corrections are STAGED as decisionItems for a later controlled apply pass."
+  }
+}

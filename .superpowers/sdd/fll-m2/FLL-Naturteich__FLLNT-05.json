@@ -1,0 +1,127 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-05 — Baustoff-Anforderungen (construction-material requirements)",
+  "worksheetTemplateId": "cbd7bc4b-3808-4c8c-ac84-da45115b0fb7",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodPull": {
+    "activeFields": 7,
+    "equations": 0,
+    "complianceRequirements": 1,
+    "fields": [
+      "concrete_spec_compliant (boolean)",
+      "wood_treatment_compliant (boolean)",
+      "plant_substrate_compliant (boolean)",
+      "materials_biocide_free (boolean)",
+      "filter_substrate_elutable_p (number, mg/kg)",
+      "filter_substrate_oversize_pct (number, %)",
+      "filter_substrate_elutriated_pct (number, %)"
+    ],
+    "note": "Prod pull matches the seeder spec exactly (7 active fields, 0 equations, 1 block gate REQ-12). saveWorksheet-driven test seeds all 7 fields."
+  },
+  "equations": [],
+  "equationsNote": "FLLNT-05 has ZERO equations on prod and in the seeder. This is CORRECT: the only quantitative material parameter, filter_substrate_elutable_p, is a LAB MEASUREMENT input governed by Appendix 2 (normative), not a wizard-computed value. Appendix 2 defines the measurement formula A = c*VL/me [mg/kg] (PDF p.71, lines 3517-3530: A = release of water/acid-soluble phosphate at solid-solution ratio 1:2 in mg/kg; VL = eluent volume in l; me = solid net weight in kg; c = P concentration in eluate in mg/l). That equation is a laboratory analytics procedure performed off-platform; encoding it as a wizard equation would be wrong. No equation gap.",
+  "chains": [
+    {
+      "name": "REQ-12 gate chain (filter_substrate_elutable_p -> saveWorksheet -> evaluateCondition) PASS",
+      "ran": true,
+      "liveValue": "value_number=3 persisted; evaluateCondition('filter_substrate_elutable_p <= 5', 3) => pass",
+      "pdfExpected": "<= 5 mg P/kg (PDF §7.2.3 line 1809 + Table 9 line 1834). 3 <= 5 => compliant.",
+      "verdict": "VA",
+      "raw": "REQ-12 PASS — elutable P below limit persists and fires pass 479ms"
+    },
+    {
+      "name": "REQ-12 gate chain BOUNDARY (elutable_p = 5 exactly) PASS",
+      "ran": true,
+      "liveValue": "value_number=5 persisted; evaluateCondition(..., 5) => pass",
+      "pdfExpected": "<= 5 is inclusive (PDF: 'should not exceed 5 mg P/kg' + Table 9 '<= 5 mg P/kg'), so 5 is compliant.",
+      "verdict": "VA",
+      "raw": "REQ-12 PASS at boundary — elutable P exactly 5 persists and fires pass 12ms"
+    },
+    {
+      "name": "REQ-12 gate chain (elutable_p = 6) FAIL",
+      "ran": true,
+      "liveValue": "value_number=6 persisted; evaluateCondition(..., 6) => fail",
+      "pdfExpected": "6 > 5 => non-compliant. Gate correctly fires fail.",
+      "verdict": "VA",
+      "raw": "REQ-12 FAIL — elutable P above limit persists and fires fail 10ms"
+    },
+    {
+      "name": "REQ-12 gate chain PENDING (no value) — vacuity probe",
+      "ran": true,
+      "liveValue": "evaluateCondition(..., undefined) => pending, missingSymbols contains filter_substrate_elutable_p",
+      "pdfExpected": "n/a — proves gate is not vacuous/dead (missing input yields pending, not silent pass).",
+      "verdict": "VA",
+      "raw": "REQ-12 PENDING — no value reported pending (not vacuous) 1ms"
+    }
+  ],
+  "chainsNote": "Full vitest run: Test Files 1 passed (1) | Tests 5 passed (5) | Duration ~4.8-5.2s. Test file: tests/harness/verify-fll-naturteich-fllnt05.integration.test.ts. All 5 exercise the REAL saveWorksheet (@/lib/actions/worksheet) writing to the embedded PG and the REAL evaluator (@/lib/compliance/evaluate). The material-boolean fields (concrete/wood/plant/biocide) carry no local gate on FLLNT-05 and no equation, so there is no chain to drive for them beyond persistence (covered by the field-existence assertion test).",
+  "gates": [
+    {
+      "id": "REQ-12",
+      "condition": "filter_substrate_elutable_p <= 5",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "note": "VA. Fired in 4 states via the real evaluator: pass(3), boundary-pass(5), fail(6), pending(none). Threshold 5 and inequality direction VERBATIM from PDF §7.2.3 line 1809 and Table 9 line 1834. NOT vacuous/dead (CR-006 class): missing input => pending with correct missingSymbols. UNIT NOTE: field unit is 'mg/kg'; PDF states 'mg P/kg' (i.e. as elemental P) — the encoded unit drops the 'as P' qualifier (minor units-precision finding, not a value error). SEVERITY NOTE: PDF phrasing at line 1809 is 'should not exceed 5 mg P/kg' (recommendation), yet Table 9 tabulates it as a hard requirement '<= 5 mg P/kg' for type III/IV filter substrate. Encoded as 'block' — defensible via Table 9, flagged as a decision item."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1-FLLNT05",
+      "severity": "minor",
+      "type": "units-precision",
+      "field": "filter_substrate_elutable_p",
+      "detail": "Field unit encoded as 'mg/kg'; PDF specifies 'mg P/kg' (elutable phosphorus expressed as elemental P). The 'as P' qualifier is dropped in the encoded unit. Not a numeric error (REQ-12 threshold 5 is correct) but the unit string is imprecise vs the standard.",
+      "quote": "'The level of elutable phosphorus should not exceed 5 mg P/kg.' (Naturteich.txt line 1809); Table 9 'Elutable phosphorus level  <= 5 mg P/kg' (line 1833-1835)."
+    },
+    {
+      "id": "F2-FLLNT05",
+      "severity": "info",
+      "type": "gate-coverage-gap",
+      "detail": "Two quantitative material limits from §7.2.3 / Table 9 that ARE fields on FLLNT-05 have NO gate on FLLNT-05: filter_substrate_oversize_pct (Table 9: <= 15% by weight) and filter_substrate_elutriated_pct (Table 9: <= 2% type III / <= 0.5% type IV). They are instead gated on FLLNT-09 (REQ-20 slow filter / REQ-21 quick filter), where the pool-type conditional lives. So the limits ARE enforced in the standard, just not on this worksheet. Not a defect — the worksheet where the field is INPUT (FLLNT-05) differs from where it is GATED (FLLNT-09). Recorded so a reviewer knows FLLNT-05's oversize/elutriated fields are ungated locally by design.",
+      "quote": "'The percentage of oversized grain must not exceed 15% by weight.' (line 1804); 'silt and clay percentage (< 0.063 mm) of <= 0.5% by weight ... a threshold value of <= 2% by weight applies here for all other filter substrates' (lines 1805-1807); Table 9 (lines 1814-1835)."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1-FLLNT05",
+      "type": "off-platform-measurement",
+      "detail": "filter_substrate_elutable_p is a lab result per Appendix 2 (normative). Appendix 2's measurement equation A = c*VL/me [mg/kg] is intentionally NOT encoded as a wizard equation (it is an external analytics procedure). No engine work needed; recorded so nobody later 'adds the missing equation'.",
+      "quote": "Appendix 2 Calculation: 'A = (c * VL) / me' where A in mg/kg, VL eluent volume in l, me solid net weight in kg, c P concentration in eluate in mg/l (Naturteich.txt lines 3517-3530)."
+    },
+    {
+      "id": "R2-FLLNT05",
+      "type": "no-cos_beta-or-trig",
+      "detail": "No trig / cos_beta-blocked equations on FLLNT-05 (0 equations total). N/A for this worksheet."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1-FLLNT05",
+      "type": "SR-2 range / conditional threshold",
+      "field": "filter_substrate_elutriated_pct",
+      "detail": "The standard gives a RANGE / pool-type-conditional pair for elutriated-parts (< 0.063 mm) fraction: <= 0.5% by weight for QUICK-flow filter bodies (natural pool type IV), <= 2% by weight for ALL OTHER filter substrates (type III). This is NOT auto-picked to a single point value anywhere on FLLNT-05 (correctly — the field is ungated here). Decision for the reviewer: confirm the type-IV vs type-III split is enforced on FLLNT-09 (REQ-20 uses <= 2, REQ-21 uses <= 0.5) and that FLLNT-05 is meant to stay the pure INPUT worksheet with no local threshold. Do NOT collapse the two thresholds into one on this worksheet.",
+      "quote": "'Filter substrates that are used in controlled quick flow through filter bodies (natural pool type IV) should indicate a silt and clay percentage (< 0.063 mm) of <= 0.5% by weight; a threshold value of <= 2% by weight applies here for all other filter substrates.' (Naturteich.txt lines 1804-1807)."
+    },
+    {
+      "id": "D2-FLLNT05",
+      "type": "severity / block-vs-recommendation",
+      "gate": "REQ-12",
+      "detail": "PDF body text (line 1809) states the elutable-P limit as 'should not exceed 5 mg P/kg' (recommendation register), while Table 9 (line 1834) tabulates it as a requirement '<= 5 mg P/kg' for filter substrate types III and IV. REQ-12 is encoded severity='block'. Decision: keep as block (Table 9 requirement register) vs downgrade to warn (body 'should' register). No change staged; surfaced only. STAGING: if downgraded, migration would UPDATE compliance_requirements SET severity='warn' WHERE code='REQ-12' AND worksheet_template_id='cbd7bc4b-3808-4c8c-ac84-da45115b0fb7' — written-not-applied, awaiting single controlled apply pass. Recommend KEEP block (Table 9 is normative).",
+      "quote": "body: 'should not exceed 5 mg P/kg' (line 1809) vs Table 9: 'Elutable phosphorus level  <= 5 mg P/kg' (lines 1833-1835)."
+    },
+    {
+      "id": "D3-FLLNT05",
+      "type": "units-precision fix (staged, not applied)",
+      "field": "filter_substrate_elutable_p",
+      "detail": "Optional correction for F1: change field unit 'mg/kg' -> 'mg P/kg' (or add 'as P' label note) to match the standard verbatim. STAGING (written-not-applied): UPDATE fields SET unit='mg P/kg' WHERE symbol='filter_substrate_elutable_p' AND worksheet_template_id='cbd7bc4b-3808-4c8c-ac84-da45115b0fb7'. Cosmetic; does not affect REQ-12 evaluation. Awaiting single controlled apply pass. NOT applied to prod."
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Every value claim carries a VERBATIM PDF quote from this run (Naturteich.txt, this session). REQ-12 threshold 5 and inequality direction confirmed against PDF text lines 1809 & 1833-1835.",
+    "SR-2": "The elutriated-parts range (0.5% vs 2%) and the oversize/elutable limits are surfaced as decisionItems D1; no point value auto-picked on this worksheet.",
+    "SR-3": "Values here are markdown/pdftotext-extraction of the RENDERED PDF; the -layout text at lines 1804-1835 (Table 9) and 1809 is legible and consistent, so REQ-12 is graded VA. No PDF-vs-markdown disagreement observed for FLLNT-05 content.",
+    "prod": "READ-ONLY. No writes to prod. All corrections staged as written-not-applied migration notes in decisionItems (D2, D3)."
+  },
+  "verdict": "PASS — REQ-12 VA-confirmed and driven pass/boundary/fail/pending through the real saveWorksheet path; 0 equations (correct, Appendix-2 measurement is off-platform); 2 findings (1 minor units-precision, 1 info gate-coverage), 2 residue, 3 decision items (SR-2 range, block-vs-recommendation severity, units-precision). No engine work required."
+}

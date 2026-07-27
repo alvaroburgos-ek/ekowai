@@ -1,0 +1,151 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-04 — Standort & Gewächshausbedingungen",
+  "worksheetTemplateId": "3df43d07-3461-460e-8731-3c24fb236a94",
+  "verifiedRun": "2026-07-23",
+  "doctrineGrade": "VA = confirmed against rendered PDF text (TP-Rhizom.txt, pdftotext -layout of the FLL 2023 PDF, 2. Ausgabe Dez 2023); VC = markdown/uncertain",
+  "counts": { "equations": 0, "gates": 6, "fields": 6 },
+
+  "equations": [],
+  "equationsNote": "FLLTP-RHZ-04 owns ZERO equations in prod (confirmed by execute_sql). Nothing to verify. No trig/cos_beta involvement anywhere in FLL-TP-RHIZOM (its only 3 equations are the FLLTP-RHZ-13 arithmetic means/ratio, out of scope for this worksheet).",
+
+  "fields": [
+    { "symbol": "gewaechshaus_id", "data_type": "text", "unit": null, "is_required": true, "verdict": "VA", "quote": "5.1 Standort für die Durchführung — «Es ist ein Gewächshaus vorzusehen, das mit einer regelbaren Heizung und Lüftung ausgestattet ist.» (identifier field, no numeric constant to check)" },
+    { "symbol": "temp_tagsueber_C", "data_type": "number", "unit": "°C", "is_required": true, "verdict": "VA", "quote": "§5.1: «Die Heizung ist so einzustellen, dass die Innentemperatur tagsüber bei (18 ±3) °C … liegt.» → envelope 15–21 °C" },
+    { "symbol": "temp_nachts_C", "data_type": "number", "unit": "°C", "is_required": true, "verdict": "VA", "quote": "§5.1: «… und während der Nacht bei (16 ±3) °C liegt.» → envelope 13–19 °C" },
+    { "symbol": "temp_lueftung_schwelle_C", "data_type": "number", "unit": "°C", "is_required": true, "verdict": "VA", "quote": "§5.1: «Ab einer Innentemperatur von (22 ±3) °C ist das Gewächshaus zu lüften.» → envelope 19–25 °C" },
+    { "symbol": "temp_max_C", "data_type": "number", "unit": "°C", "is_required": true, "verdict": "VA", "quote": "§5.1: «Eine anhaltende Innentemperatur > 35 °C ist zu vermeiden.» → cap ≤ 35 °C" },
+    { "symbol": "flaechenbedarf_pro_gefaess_m2", "data_type": "number", "unit": "m²", "is_required": false, "verdict": "VA-range", "quote": "§5.1: «Der Flächenbedarf pro Gefäß (800 x 800 mm) … liegt - je nach Anordnung der Gefäße - bei rund 1,5 bis 2 m².» → RANGE, not a point value (see decisionItems D1)" }
+  ],
+
+  "chains": [
+    {
+      "name": "REQ-05 temperature envelope — REAL saveWorksheet + checkApprovalGate, pass & fail",
+      "ran": true,
+      "liveValue": "PASS-state (18/16/22/35): REQ-05 NOT in failingBlockConditions. FAIL-state (tagsüber=30 > 21, max=40 > 35): REQ-05 IN failingBlockConditions.",
+      "pdfExpected": "§5.1 tagsüber (18±3), nachts (16±3), Lüftung (22±3), max >35 vermeiden → gate temp_tagsueber_C∈[15,21] ∧ temp_nachts_C∈[13,19] ∧ temp_lueftung_schwelle_C∈[19,25] ∧ temp_max_C≤35",
+      "verdict": "VA",
+      "raw": "REQ-05 PASS-state failing? [\"REQ-06\",\"REQ-07\",\"REQ-08\",\"REQ-09\",\"REQ-10\"]  (REQ-05 absent = passes)\nREQ-05 FAIL-state failing? [\"REQ-05\",\"REQ-06\",\"REQ-07\",\"REQ-08\",\"REQ-09\",\"REQ-10\"]  (REQ-05 present = fires)"
+    },
+    {
+      "name": "REQ-06..REQ-10 cross-worksheet gates — REAL path via project-wide fallback, pass & fail",
+      "ran": true,
+      "liveValue": "PASS-state (all cross-worksheet operands driven compliant on RHZ-05/06/07/08/11): failingBlockConditions = []. FAIL-state (one operand of each broken): failingBlockConditions = [REQ-06,REQ-07,REQ-08,REQ-09,REQ-10].",
+      "pdfExpected": "Tab.1 (VTS) §5.6, Tab.2 (Wasser) §5.9, §5.7 Dünger, §5.2/5.3 Apparatur, §5.8 Testpflanzen — all thresholds match encoded conditions (see gates[] quotes)",
+      "verdict": "VA",
+      "raw": "CROSS PASS-state failing codes: []\nCROSS FAIL-state failing codes: [\"REQ-06\",\"REQ-07\",\"REQ-08\",\"REQ-09\",\"REQ-10\"]"
+    }
+  ],
+  "chainsSummary": "2/2 chains ran green through the REAL saveWorksheet + checkApprovalGate path (embedded PG, whole standard seeded). Deterministic 3/3 after describe.sequential fix. No PDF worked-example prints a numeric result for these gate states (this is a boolean-conformance worksheet, not a calculation), so verdicts are conformance-of-gate, PDF-attested at the constant level (VA).",
+
+  "gates": [
+    {
+      "id": "d6d9b1c2-792e-4810-80e6-a8ae3ec6a663",
+      "code": "REQ-05",
+      "title_de": "Gewächshausbedingungen eingehalten",
+      "condition": "temp_tagsueber_C >= 15 AND temp_tagsueber_C <= 21 AND temp_nachts_C >= 13 AND temp_nachts_C <= 19 AND temp_lueftung_schwelle_C >= 19 AND temp_lueftung_schwelle_C <= 25 AND temp_max_C <= 35",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "All 4 envelopes are RHZ-04-LOCAL fields → resolves locally. Fires both ways. Every constant PDF-verbatim §5.1: (18±3)→[15,21], (16±3)→[13,19], (22±3)→[19,25], >35→≤35. Correct encoding of the ±3 bands."
+    },
+    {
+      "id": "d7724761-e5af-4fa6-909c-f7808336e32d",
+      "code": "REQ-06",
+      "title_de": "Apparatur korrekt dimensioniert",
+      "condition": "gefaess_innenmass_l_mm >= 800 AND gefaess_innenmass_b_mm >= 800 AND gefaess_innenmass_h_mm >= 250 AND anzahl_pruefgefaesse == 8 AND anzahl_kontrollgefaesse == 3 AND wasserablauf_durchmesser_mm == 40 AND widerlager_dicke_mm >= 9 AND widerlager_dicke_mm <= 11",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "ALL operands are foreign (live on RHZ-05); fires via checkApprovalGate project-wide fallback. §5.2 «Innenmaß von mindestens 800 x 800 x 250 mm»; §5.2 «8 Prüfgefäße»; §5.2 «3 Kontrollgefäße»; Abb.1 caption «Wasserablauf (Ø 40 mm)»; §5.3 «Polystyrolplatten … 10 ±1 mm dick»→[9,11]. All VA. See F1 (placement) + D2 (==40 strictness)."
+    },
+    {
+      "id": "f06a01fe-ea0e-474f-96a1-2d51ebf60879",
+      "code": "REQ-07",
+      "title_de": "Vegetationstragschicht entspricht Tab. 1",
+      "condition": "vts_ph_cacl2 >= 6.0 AND vts_ph_cacl2 <= 7.5 AND vts_salz_h2o_g_l <= 1.0 AND vts_salz_caso4_g_l <= 0.5 AND vts_n_cat_mg_l <= 50 AND vts_p2o5_cat_mg_l <= 25 AND vts_k2o_cat_mg_l <= 100 AND vts_caco3_scheibler_prozent >= 1 AND vts_caco3_scheibler_prozent <= 10",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Operands foreign (RHZ-06); fires via fallback. Tab.1 §5.6 verbatim: pH(CaCl2) 6,0-7,5; Salz(H2O) ≤1,0 g/l; Salz(CaSO4) ≤0,5 g/l; N(CAT) ≤50 mg/l; P2O5(CAT) ≤25 mg/l; K2O(CAT) ≤100 mg/l; CaCO3(Scheibler) 1-10 M.-%. All 7 columns encoded, all VA."
+    },
+    {
+      "id": "ff42932c-d18a-4807-ae7e-dbe41299a47c",
+      "code": "REQ-08",
+      "title_de": "Düngemittel-Anforderungen erfüllt",
+      "condition": "duenger_chloridarm == true AND duenger_spurelemente_vorhanden == true",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Operands foreign (RHZ-07); fires via fallback. §5.7 «wasserlöslicher, chloridarmer Mehrnährstoffdünger … der zusätzlich die Spurennährelemente Eisen (Fe), Kupfer (Cu), Molybdän (Mo), Mangan (Mn), Bor (B) und Zink (Zn) enthält.» Boolean encoding of the chloridarm + Spurenelemente requirements. VA. (NPK-MgO percentages 15/10/15/2 are approximate «ca.» and are NOT gated — appropriate, see note in residue R2.)"
+    },
+    {
+      "id": "efca0cac-83d1-4411-92d1-10cf1d7fa251",
+      "code": "REQ-09",
+      "title_de": "Gießwasser entspricht Tab. 2",
+      "condition": "wasser_ammonium_mg_l <= 0.5 AND wasser_eisen_mg_l <= 0.2 AND wasser_p_gesamt_mg_l <= 0.03 AND wasser_haerte_mmol_l >= 1.0 AND wasser_leitfaehigkeit_uS_cm <= 1000.0 AND wasser_mangan_mg_l <= 0.05 AND wasser_nitrat_mg_l <= 50.0 AND wasser_ortho_phosphat_mg_l <= 0.01 AND wasser_ph >= 6.0 AND wasser_ph <= 9.0 AND wasser_saurekapazitaet_mmol_l >= 2.0",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Operands foreign (RHZ-07); fires via fallback. Tab.2 §5.9 verbatim: Ammonium ≤0,5 mg/l; Eisen ≤0,2 mg/l; Gesamtphosphor (Pges) ≤0,03 mg/l; Härte ≥1,0 mmol/l; Leitfähigkeit ≤1000,0 µS/cm bei 20°C; Mangan ≤0,05 mg/l; Nitrat ≤50,0 mg/l; ortho-Phosphat (P) ≤0,01 mg/l; pH-Wert 6,0-9,0; Säurekapazität KS4,3 ≥2,0 mmol/l. All 10 gated params VA. (Tab.2 also lists dH° equivalents ≥5,6 as derived restatements of the mmol/l rows — correctly NOT double-gated.)"
+    },
+    {
+      "id": "43ef43ea-493f-42a1-bc10-f7a249124fc1",
+      "code": "REQ-10",
+      "title_de": "Testpflanzen verwendet",
+      "condition": "testpflanze_art == 'phragmites_australis' AND pflanzdichte_pro_gefaess == 8",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Operands foreign (testpflanze_art on RHZ-08, pflanzdichte_pro_gefaess on RHZ-11); fires via fallback. §5.8 «Phragmites australis (Schilf) im 9 x 9 Container.» + «Je Gefäß von 800 x 800 mm sind 8 Pflanzen vorzusehen.» Enum value 'phragmites_australis' + count 8. VA."
+    }
+  ],
+
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "low",
+      "class": "gate-placement / worksheet-locality",
+      "text": "REQ-06..REQ-10 are hosted on FLLTP-RHZ-04 but reference ZERO fields that live on RHZ-04 — every operand is a field of another worksheet (RHZ-05/06/07/08/11). They evaluate correctly ONLY because checkApprovalGate resolves cross-worksheet symbols via its conflict-free project-wide fallback (makeGateLookup/buildFallbackValues). Consequence: on the RHZ-04 worksheet itself, if any of those other worksheets is unsaved/absent, these gates sit PENDING (not fail) — which is why with seeder defaults they appeared in failingBlockConditions until their host worksheets were driven. NOT a correctness defect (verdicts proven correct both ways), but the placement means RHZ-04's own approval readiness depends on 5 other worksheets' state. Recommend documenting/relocating these gates to their data-owning worksheets (REQ-06→RHZ-05, REQ-07→RHZ-06, REQ-08/09→RHZ-07, REQ-10→RHZ-08/11) OR confirming RHZ-04 is intended as the aggregate 'apparatus & inputs conformance' worksheet."
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R1",
+      "text": "No PDF worked numeric example exists for this worksheet (it is a boolean-conformance / apparatus-setup worksheet, no calculation), so chains are gate-conformance rather than value-reproduction. Constant-level attestation is VA; there is no engine-computed scalar to cross-check against a printed result."
+    },
+    {
+      "id": "R2",
+      "text": "§5.7 fertilizer composition «ca. 15 % N, 10 % P2O5, 15 % K2O, 2 % MgO» is stored as ungated advisory fields (duenger_n_prozent etc. on RHZ-07). Not gated because the standard says «ca.» (approximate) with no tolerance band — a hard equality gate would be over-strict. Left as VA advisory, no gate. Flagged only so a later reviewer knows the omission is deliberate."
+    },
+    {
+      "id": "R3",
+      "text": "cos_beta / trig: N/A for this worksheet and this standard (no trig equations). No engine-blocked residue."
+    },
+    {
+      "id": "R4",
+      "text": "Harness test-isolation: the two it-blocks share ONE embedded-PG project, so default concurrent execution was flaky (state leaked between the REQ-05 test and the cross-worksheet test — 1 of ~4 runs failed). Fixed with describe.sequential; then deterministic 3/3 green. Not a product defect — an artifact of driving several gates against one shared project row-set. Test file: tests/harness/fll-rhizom-rhz04-verify.integration.test.ts; bootstrap: tests/harness/_harness-env-fll-rhizom.ts."
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D1",
+      "class": "SR-2 range",
+      "field": "flaechenbedarf_pro_gefaess_m2",
+      "text": "§5.1 gives a RANGE: «bei rund 1,5 bis 2 m²» per Gefäß (800x800mm). The field is free-entry with no gate, so no auto-pick was made. Surface the range for the engineer: low-bound 1,5 m² vs peak 2,0 m², «je nach Anordnung der Gefäße». No migration needed (no gate/constant to correct); decision is which value(s) to guide the user toward.",
+      "staged_migration": "none (informational range, no encoded constant)"
+    },
+    {
+      "id": "D2",
+      "class": "gate-strictness",
+      "gate": "REQ-06",
+      "text": "wasserablauf_durchmesser_mm == 40 is a STRICT equality. Its source is the Abb.1 caption «Der Wasserablauf (Ø 40 mm) ist nur bei den Prüfgefäßen vorzusehen» (PDF-attested, VA) — a figure caption, not §5.2 body text (which mentions only «Wasserablauf» without a diameter). Decide whether 40 mm should remain a hard == gate or be relaxed to informational, given the standard states it only in a figure caption and gives no tolerance. Do NOT confuse with §3.5 Standrohr Ø 50 mm (distinct element).",
+      "staged_migration": "written-not-applied: IF relaxation approved, UPDATE compliance_requirements SET condition = replace(condition,' AND wasserablauf_durchmesser_mm == 40','') WHERE id='d7724761-e5af-4fa6-909c-f7808336e32d'; -- STAGED ONLY, do not apply without decision"
+    }
+  ],
+
+  "prodReadOnly": true,
+  "prodWrites": "none — all prod access was Supabase MCP execute_sql SELECT; the two staged migrations (D2) are written-not-applied notes only."
+}

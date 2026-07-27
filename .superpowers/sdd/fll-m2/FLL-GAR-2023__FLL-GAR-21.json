@@ -1,0 +1,161 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-21",
+  "worksheetTitle": "GUP (glasfaserverstärktes Polyester)",
+  "templateId": "ea6be617-6982-4111-84ab-33ba722f0412",
+  "standardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "summary": "Pure data_collection worksheet: 6 material-property fields, 0 equations, 0 compliance_requirements. No engine chain, no gate. The only 'chain' is REAL saveWorksheet persistence of the 6 GUP fields, which was driven and asserted green (3/3). Real source of every field is PDF §7.3 (Glasfaserverstärktes ungesättigtes Polyester), NOT the encoded §9.13 (which does not exist — Section 9 = Randausbildungen, ends at 9.3.7). clause_reference defect is the headline finding.",
+  "fields": [
+    {
+      "id": "5c79fdf1-4032-4a6f-80d8-d42669f46271",
+      "symbol": "gup_harztyp",
+      "label_de": "Harztyp (UP/VE)",
+      "data_type": "text",
+      "unit": null,
+      "encoded_clause": "§9.13",
+      "verdict": "VA",
+      "quote": "§7.3.1.1 Abdichtungsstoffe: 'Als Reaktionsharze sind ungesättigte Polyesterharze nach DIN 16946 Teil 2 zu verwenden.' (GAR.txt L5097)",
+      "note": "Source states UP (ungesättigtes Polyesterharz) explicitly. The label offers 'UP/VE' but VE (Vinylester) is NOT mentioned anywhere in the GUP section — VE is an unsourced option in the field label. Free-text field, no enum_values, so it does not fabricate options; UP is the only source-attested value."
+    },
+    {
+      "id": "575799f4-4543-47e5-8563-23d05eaedad7",
+      "symbol": "gup_glasfaser_anteil",
+      "label_de": "Glasfaser-Anteil",
+      "data_type": "number",
+      "unit": "%",
+      "encoded_clause": "§9.13",
+      "verdict": "VA",
+      "quote": "§7.3.1.1: 'Unabhängig vom Einbauverfahren soll ein Glasgehalt von 30% des Laminats angestrebt werden, um die notwendigen Festigkeitswerte gemäß DIN 18820 zu erreichen.' (GAR.txt L5101-5102)",
+      "note": "Label says 'Glasfaser-Anteil' but the source value 30% is a GLASGEHALT (glass CONTENT of the laminate), and it is a TARGET ('soll ... angestrebt werden'), not a hard limit → SR-2 decision item. Unit % matches."
+    },
+    {
+      "id": "a937bf22-f1fb-4a99-8787-5ab43be82e82",
+      "symbol": "gup_laminatdicke",
+      "label_de": "Laminatdicke",
+      "data_type": "number",
+      "unit": "mm",
+      "encoded_clause": "§9.13",
+      "verdict": "VA",
+      "quote": "§7.3.1.2 Schichtdicke: 'Die Wanddicke bzw. die Laminatdicke der Beschichtung soll mind. 4 mm betragen.' (GAR.txt L5110); reinforced §7.3.2.2 'um die geforderte Wanddicke von mind. 4 mm zu erreichen' (L5177-5178)",
+      "note": "Source is a MINIMUM (soll mind. 4 mm), not a fixed value → SR-2: surface the ≥4 mm minimum as a decision item, do not treat 4 as the answer. Unit mm matches."
+    },
+    {
+      "id": "ecbe919b-bfb1-4151-9feb-1a950657da49",
+      "symbol": "gup_biegefestigkeit",
+      "label_de": "Biegefestigkeit",
+      "data_type": "number",
+      "unit": "N/mm²",
+      "encoded_clause": "§9.13",
+      "verdict": "VC",
+      "quote": "No FLL-GAR-stated Biegefestigkeit value. §7.3.1.1 only refers out: '... um die notwendigen Festigkeitswerte gemäß DIN 18820 zu erreichen.' (GAR.txt L5102)",
+      "note": "The GUP section states NO numeric Biegefestigkeit in N/mm²; the required strength values live in the external DIN 18820, not in this standard. Legitimate capture field (engineer enters the DIN/datasheet value), but no FLL source value exists to VA-attest — VC. Not a finding; unit N/mm² is a plausible flexural-strength unit."
+    },
+    {
+      "id": "263220d1-4fb6-4780-80b5-004a4b15a898",
+      "symbol": "gup_verarbeitung",
+      "label_de": "Verarbeitungsart (Spritzen/Handlaminat)",
+      "data_type": "text",
+      "unit": null,
+      "encoded_clause": "§9.13",
+      "verdict": "VA",
+      "quote": "§7.3.2.2: Handlaminat — 'Die Glasfasermatten werden stückweise (ca. 70 * 70 cm) verarbeitet und gleichmäßig mit der Mischung ... getränkt' (L5173-5174); Spritzen — 'Der Glasfaserauftrag kann alternativ auch mittels Faserspritzen (Glasroving) erfolgen.' (L5180)",
+      "note": "Both Handlaminat (mat lay-up) and Spritzen (Faserspritzen/Glasroving) are explicitly source-attested as the two placement methods. Free-text field, options match source."
+    },
+    {
+      "id": "06a1e5b4-bc87-4155-8adb-d2880e29c4d8",
+      "symbol": "gup_topcoat",
+      "label_de": "Topcoat vorhanden",
+      "data_type": "boolean",
+      "unit": null,
+      "encoded_clause": "§9.13",
+      "verdict": "VA",
+      "quote": "§7.3.2.2: 'Zur Oberflächenversiegelung wird abschließend ein Schlusslackharz in entsprechender Farbe mit ca. 0,5 mm Schichtdicke aufgebracht.' (GAR.txt L5186-5187)",
+      "note": "The surface-sealing Schlusslackharz (~0,5 mm) is the 'topcoat' the boolean captures. Source-attested as a finishing step. Boolean present/absent is a faithful encoding."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "GUP data_collection persistence (6 fields) via REAL saveWorksheet",
+      "ran": true,
+      "liveValue": "gup_harztyp=UP, gup_glasfaser_anteil=30, gup_laminatdicke=4, gup_biegefestigkeit=100(placeholder), gup_verarbeitung=Handlaminat, gup_topcoat=true; re-save overwrite: harztyp=VE, laminatdicke=6, verarbeitung=Spritzen, topcoat=false",
+      "pdfExpected": "No worked example printed for GUP (§7.3 is descriptive, not a computed example). Individual field source values (UP; 30% Glasgehalt target; ≥4 mm laminate; Handlaminat/Spritzen; Schlusslackharz topcoat) attested per-field above.",
+      "verdict": "VA-persistence / VC-values",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll — tests/harness/fll-gar21-verify.integration.test.ts — Test Files 1 passed (1); Tests 3 passed (3); Duration 5.41s. Tests: (1) exposes all 6 collected fields; (2) persists the PDF §7.3-attested GUP case [saveWorksheet ok, all 6 project_parameters asserted]; (3) re-save (VE/Spritzen/no topcoat) overwrites [saveWorksheet ok, overwrite asserted]. Smoke seed-fll-gar-smoke also green (5/5)."
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1-clause-ref-9.13-nonexistent",
+      "severity": "medium",
+      "field": "ALL 6 fields (gup_harztyp, gup_glasfaser_anteil, gup_laminatdicke, gup_biegefestigkeit, gup_verarbeitung, gup_topcoat)",
+      "issue": "Every field carries clause_reference '§9.13'. §9.13 DOES NOT EXIST in FLL-GAR-2023. Section 9 is 'Randausbildungen/An- und Abschlüsse' and its deepest subsection is 9.3.7 (Weitere Bauweisen); there is no 9.4..9.13 (grep of GAR.txt confirms the only '9.13'/'9,13' token is a table datum at L1860, unrelated). The true source of all GUP material properties is §7.3 (Glasfaserverstärktes ungesättigtes Polyester), with per-field sub-clauses: harztyp/glasfaser_anteil §7.3.1.1, laminatdicke §7.3.1.2, verarbeitung/topcoat §7.3.2.2. The wrong clause_reference points a reviewer away from the actual source.",
+      "staged_correction": "UPDATE fields SET clause_reference = '§7.3.1.1' WHERE id IN ('5c79fdf1-4032-4a6f-80d8-d42669f46271','575799f4-4543-47e5-8563-23d05eaedad7'); UPDATE fields SET clause_reference = '§7.3.1.2' WHERE id = 'a937bf22-f1fb-4a99-8787-5ab43be82e82'; UPDATE fields SET clause_reference = '§7.3.2.2' WHERE id IN ('263220d1-4fb6-4780-80b5-004a4b15a898','06a1e5b4-bc87-4155-8adb-d2880e29c4d8'); gup_biegefestigkeit (ecbe919b-...) → '§7.3.1.1' (DIN 18820 cross-ref lives there). WRITTEN-NOT-APPLIED — staged only, see decisionItems.",
+      "doctrine": "read-only prod; correction staged not applied per Findings-over-fixes."
+    },
+    {
+      "id": "F2-VE-option-unsourced",
+      "severity": "low",
+      "field": "gup_harztyp",
+      "issue": "Field label 'Harztyp (UP/VE)' presents VE (Vinylester) as a choice, but the GUP section only sources UP (ungesättigtes Polyesterharz nach DIN 16946 Teil 2). VE is not mentioned in §7.3. Free-text field so no fabricated enum, but the label suggests a source-unsupported option.",
+      "staged_correction": "None auto — flag for engineer: confirm whether VE resin is an intended EKOWAI extension or should be dropped from the label. Decision item.",
+      "doctrine": "SR-1: only UP is verbatim-attested."
+    }
+  ],
+  "residue": [
+    {
+      "item": "gup_biegefestigkeit has no FLL-stated numeric value",
+      "reason": "§7.3.1.1 defers strength to external DIN 18820; the standard prints no Biegefestigkeit in N/mm². Field value can only ever be VC (engineer enters DIN/datasheet value). Not fixable from this standard's text.",
+      "class": "VC-source-blocked"
+    },
+    {
+      "item": "No cos_beta/trig residue",
+      "reason": "This worksheet has no equations at all, so no engine-blocked math. N/A.",
+      "class": "n/a"
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1-clause-ref-fix",
+      "type": "staged-migration-apply",
+      "question": "Apply the §9.13→§7.3.x clause_reference correction for all 6 FLL-GAR-21 fields (see findings.F1.staged_correction) in the single controlled apply pass?",
+      "default": "hold — batch with other FLL-GAR clause_reference fixes"
+    },
+    {
+      "id": "D2-glasgehalt-target-vs-limit",
+      "type": "range/target (SR-2)",
+      "question": "gup_glasfaser_anteil: the source '30%' is a TARGET ('soll ... angestrebt werden'), not a hard limit. Encode as a soft target/guidance, or leave as free-numeric capture? Do NOT auto-pin 30 as a validation threshold.",
+      "quote": "'soll ein Glasgehalt von 30% des Laminats angestrebt werden' (§7.3.1.1)"
+    },
+    {
+      "id": "D3-laminatdicke-minimum",
+      "type": "range/minimum (SR-2)",
+      "question": "gup_laminatdicke: source is a MINIMUM (mind. 4 mm). If a validation gate is ever added, it must be '≥ 4' (min), not '= 4'. Surface the minimum, do not auto-pick a point value.",
+      "quote": "'Die ... Laminatdicke der Beschichtung soll mind. 4 mm betragen.' (§7.3.1.2)"
+    },
+    {
+      "id": "D4-VE-option",
+      "type": "scope",
+      "question": "Keep or drop VE (Vinylester) from the gup_harztyp label? Not source-attested in §7.3.",
+      "quote": "only 'ungesättigte Polyesterharze nach DIN 16946 Teil 2' are named (§7.3.1.1)"
+    }
+  ],
+  "counts": {
+    "equations": 0,
+    "gates": 0,
+    "fields": 6,
+    "chainsRan": 1,
+    "chainsTotal": 1,
+    "checksPassed": 3,
+    "findings": 2,
+    "residue": 2,
+    "decisions": 4
+  },
+  "doctrineApplied": {
+    "SR-1": "Every field value claim carries a verbatim §7.3 quote with GAR.txt line refs; no reliance on logs/bring-up numbers.",
+    "SR-2": "30% (target) and ≥4 mm (minimum) surfaced as decisionItems D2/D3, not auto-picked.",
+    "SR-3": "GAR.txt is the pdftotext extraction of the rendered GAR PDF; §7.3 located and read in full; §9.13 non-existence confirmed against the same extraction.",
+    "findings-over-fixes": "clause_reference correction WRITTEN-NOT-APPLIED (staged in F1 + D1); read-only prod, no writes."
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-13",
+  "worksheetTitle": "Mineralisch mit Bitumen (Asphalt)",
+  "templateId": "621ba06b-152e-4256-a5fe-7c3bbc0b5da2",
+  "prodProject": "vadsmshzebefjreqcicl",
+  "verifiedRun": "2026-07-23",
+  "counts": { "equations": 0, "gates": 0, "fields": 6 },
+  "fields": [
+    {
+      "id": "ab4f887f-8e0b-4659-9f78-e36253c89cff",
+      "symbol": "hohlraumgehalt_asphaltbeton_vol_pct",
+      "label_de": "Hohlraumgehalt Asphaltbeton",
+      "unit": "Vol.-%",
+      "clause_reference": "Sec.5.4.1.1; Tab.12 note 1",
+      "verdict": "VA",
+      "quote": "Asphaltbeton gilt als wasserdicht, wenn dieser mit einer Schichtdicke von mind. 40 mm eingebaut wird und die eingebaute Schicht einen Hohlraumgehalt ≤ 3 Vol.-% aufweist. (Sec.5.4.1.1) / ¹1 Hohlraumgehalt im eingebauten Zustand ≤ 3 Vol.-%. (Tab.12 note 1)",
+      "note": "Unit Vol.-% and the clause anchor are PDF-confirmed at GAR.txt lines 2954-2955 and 2981. The ≤ 3 Vol.-% limit is the water-tightness criterion for Asphaltbeton. source_quote column in prod is NULL (provenance not materialized) - VC on provenance, VA on value. SR-2: this is a LIMIT (≤ 3), surfaced as decisionItem D1 (threshold not a free number; also currently unguarded by any gate)."
+    },
+    {
+      "id": "7e9de606-dc00-4d02-83b4-0c820928ae88",
+      "symbol": "asph_dicke",
+      "label_de": "Asphaltdicke",
+      "unit": "cm",
+      "clause_reference": "§9.5",
+      "verdict": "FINDING",
+      "quote": "Beim Einbau von Asphaltmastix, Gussasphalt und wasserdichtem Asphaltbeton sind die Nenndicken der Tabelle 12 einzuhalten. (Sec.5.4.1.2, GAR.txt 2961-2962) / Tab.12: wasserdichter Asphaltbeton 40 mm¹1; Asphaltmastix 7–15 mm; Gussasphalt 25–40 mm.",
+      "note": "clause_reference '§9.5' does NOT exist in FLL-GAR-2023. Chapter 9 = 'Anforderungen an Planung und Ausführung von Randausbildungen' with subsections 9.1/9.2/9.3(.1-.7) only; no 9.4/9.5. The correct anchor for Asphaltdicke is Sec.5.4.1.2 + Tab.12. Wrong-clause-anchor FINDING F-2. Also: unit is 'cm' but the standard prints thicknesses in mm (40 mm = 4 cm) - unit conversion mismatch vs source presentation, surfaced as decisionItem D2. source_quote NULL."
+    },
+    {
+      "id": "a82af633-211f-41d7-9fba-b2926d8cff99",
+      "symbol": "asph_bindemittel",
+      "label_de": "Bindemittel-Typ",
+      "unit": null,
+      "clause_reference": "§9.5",
+      "verdict": "FINDING",
+      "quote": "Abdichtungen mit bitumenhaltigen Bindemitteln können aus Asphaltmastix, Gussasphalt oder Asphaltbeton hergestellt werden. (Sec.5.4, GAR.txt 2930-2931) / Die Anforderungen an die Mischgutzusammensetzung von Asphaltbeton sind in den TL Asphalt-StB 07 geregelt. (Sec.5.4.1, 2942-2943)",
+      "note": "clause_reference '§9.5' is a non-existent clause (see asph_dicke). Content belongs to Sec.5.4/5.4.1. Wrong-clause-anchor FINDING F-2. source_quote NULL."
+    },
+    {
+      "id": "3bd2b9c0-4bcb-40d8-9d36-6dc449d661e1",
+      "symbol": "asph_kornverteilung",
+      "label_de": "Kornverteilung",
+      "unit": null,
+      "clause_reference": "§9.5",
+      "verdict": "FINDING",
+      "quote": "Die Anforderungen an die Mischgutzusammensetzung von Asphaltbeton sind in den TL Asphalt-StB 07 geregelt. (Sec.5.4.1, GAR.txt 2942-2943) / Die Mischgutzusammensetzung richtet sich nach den zu erwartenden Belastungen. (Sec.5.4.1.1, 2955-2956)",
+      "note": "clause_reference '§9.5' non-existent. Kornverteilung/Mischgutzusammensetzung is Sec.5.4.1 (delegated to TL Asphalt-StB 07). Wrong-clause-anchor FINDING F-2. source_quote NULL."
+    },
+    {
+      "id": "be758abf-4186-4eb7-a185-bfd2905520de",
+      "symbol": "asph_verdichtungsgrad",
+      "label_de": "Verdichtungsgrad",
+      "unit": "%",
+      "clause_reference": "§9.5",
+      "verdict": "FINDING",
+      "quote": "No Verdichtungsgrad requirement is stated for Asphaltbeton in Sec.5.4. The 97% Verdichtungsgrad values in the PDF (GAR.txt 1934, 2346: 'Der Verdichtungsgrad der Abdichtungsschicht muss Dpr ≥ 97 % betragen.') belong to MINERAL (clay/soil) sealing sections, NOT the Asphalt section.",
+      "note": "clause_reference '§9.5' non-existent. Additionally the standard prescribes NO Verdichtungsgrad % for Asphaltbeton (its water-tightness is governed by Hohlraumgehalt ≤ 3 Vol.-%, not a Dpr%). The ≥ 97% figure is a mineral-liner requirement; applying it to Asphalt would be a source misattribution. Field is optional (is_required=false) so it is a descriptive capture, but the '§9.5' anchor is wrong. Wrong-clause-anchor + potential unit/criterion-misattribution FINDING F-2/F-4. source_quote NULL. VC: value semantics uncertain for Asphalt."
+    },
+    {
+      "id": "85371482-3f13-4957-b73a-40670f6938b5",
+      "symbol": "asph_nahttechnik",
+      "label_de": "Nahttechnik",
+      "unit": null,
+      "clause_reference": "§9.5",
+      "verdict": "FINDING",
+      "quote": "Sec.5.4.2 'Ausführung' and Abb.12 describe the Asphalt build-up; seam/joint (Naht) handling is covered under execution (Sec.5.4.2 ff.), not a numbered '§9.5'. No Tab./clause named 9.5 exists.",
+      "note": "clause_reference '§9.5' non-existent. Nahttechnik is an execution attribute (Sec.5.4.2). Wrong-clause-anchor FINDING F-2. source_quote NULL."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLL-GAR-13 full-field persistence via real saveWorksheet",
+      "ran": true,
+      "liveValue": "hohlraumgehalt=3 Vol.-%, asph_dicke=4 cm, asph_verdichtungsgrad=97 %, asph_bindemittel='Bitumen (Asphaltbeton)' all persisted to project_parameters and read back verbatim",
+      "pdfExpected": "No worked numeric example printed for this worksheet (descriptive/material-capture worksheet, 0 equations). Inputs chosen at PDF-attested boundaries: Hohlraumgehalt=3 (the ≤ 3 Vol.-% limit), asph_dicke=4 cm (=40 mm mind. Schichtdicke).",
+      "verdict": "VA (persistence proven through real save path); values VA-anchored to Sec.5.4.1.1/Tab.12 where the standard prints them",
+      "raw": "RUN  v4.1.5 C:/Users/Ekowai/_wt-fll\\n Test Files  1 passed (1)\\n      Tests  1 passed (1)\\n   Duration  5.56s (transform 377ms, import 4.48s, tests 867ms)\\n[test file: tests/harness/fll-gar-13-verify.integration.test.ts; env: tests/harness/_harness-env-fll-gar13.ts -> seedFllGar against embedded PG; assertions: res.ok===true, all 6 fields present, hohlraumgehalt read-back===3, asph_dicke===4, asph_verdichtungsgrad===97, asph_bindemittel text round-trips, Object.keys(fields).length===6]"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "medium",
+      "title": "Water-tightness criterion Hohlraumgehalt ≤ 3 Vol.-% is unguarded (no compliance_requirement)",
+      "detail": "Sec.5.4.1.1 makes Asphaltbeton 'wasserdicht' conditional on Hohlraumgehalt ≤ 3 Vol.-% AND Schichtdicke ≥ 40 mm. The worksheet captures both as free fields but has ZERO compliance_requirements, so an engineer can enter Hohlraumgehalt=8 or Dicke=2 cm and nothing fires. This is the CR-006-class defect (a normative limit that exists in source but has no enforcing gate). PDF quote: 'Asphaltbeton gilt als wasserdicht, wenn ... Schichtdicke von mind. 40 mm ... und ... Hohlraumgehalt ≤ 3 Vol.-% aufweist.' (GAR.txt 2954-2955)."
+    },
+    {
+      "id": "F-2",
+      "severity": "medium",
+      "title": "5 of 6 fields carry a non-existent clause anchor '§9.5'",
+      "detail": "asph_dicke, asph_bindemittel, asph_kornverteilung, asph_verdichtungsgrad, asph_nahttechnik all cite '§9.5'. FLL-GAR-2023 has no clause 9.5: Chapter 9 is 'Anforderungen an Planung und Ausführung von Randausbildungen' with only 9.1, 9.2, 9.3 (9.3.1–9.3.7). The correct anchors are in Sec.5.4 (5.4.1 material / 5.4.1.2+Tab.12 thickness / 5.4.2 execution). Wrong-clause-anchor across the whole descriptive block; provenance cannot be trusted for these 5 fields."
+    },
+    {
+      "id": "F-3",
+      "severity": "low",
+      "title": "All 6 fields have NULL source_quote (provenance not materialized)",
+      "detail": "verification/provenance columns (source_quote, source_anchor) are NULL for every field including the correctly-anchored Hohlraumgehalt field. Per SR-3, PDF is ground truth and quotes should be attached; currently the DB carries no verbatim provenance for this worksheet."
+    },
+    {
+      "id": "F-4",
+      "severity": "low",
+      "title": "asph_verdichtungsgrad (% Dpr) likely misattributed to Asphalt",
+      "detail": "The standard prescribes Verdichtungsgrad Dpr ≥ 97 % only for MINERAL/soil sealing layers (GAR.txt 1934, 2346), not for Asphaltbeton, whose watertightness criterion is Hohlraumgehalt ≤ 3 Vol.-%. Capturing a Dpr% on the Asphalt worksheet has no source basis in Sec.5.4; keep as descriptive-only or drop. Flagged for human decision, not auto-fixed."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "title": "No prod source_quote to cross-check against markdown",
+      "detail": "SR-3 PDF-vs-markdown disagreement check is N/A here: the PDF (GAR.txt) is the sole source consulted; there is no per-field markdown/source_quote stored to disagree with. All value claims rest on the rendered-PDF text extract only."
+    },
+    {
+      "id": "R-2",
+      "title": "No equations/gates to run",
+      "detail": "0 equations and 0 compliance_requirements on this template (confirmed in prod). No cos_beta/trig-blocked equations here. Equation-verification and gate-firing steps are vacuously complete for this worksheet."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "title": "Hohlraumgehalt ≤ 3 Vol.-% — add enforcing gate? (SR-2 limit)",
+      "options": ["Add compliance_requirement: block when hohlraumgehalt_asphaltbeton_vol_pct > 3 (severity=block, clause Sec.5.4.1.1/Tab.12 note 1)", "Leave as descriptive capture"],
+      "recommendation": "STAGE a written-not-applied migration adding the >3 Vol.-% block gate plus a Schichtdicke ≥ 40 mm (asph_dicke ≥ 4 cm) block gate; both are PDF-attested normative limits. Do NOT apply (read-only prod, controlled apply pass later).",
+      "sourceQuote": "Asphaltbeton gilt als wasserdicht, wenn dieser mit einer Schichtdicke von mind. 40 mm eingebaut wird und die eingebaute Schicht einen Hohlraumgehalt ≤ 3 Vol.-% aufweist. (GAR.txt 2954-2955)"
+    },
+    {
+      "id": "D2",
+      "title": "asph_dicke unit: cm (field) vs mm (standard)",
+      "options": ["Keep cm and document the 40 mm = 4 cm mapping", "Change field unit to mm to match Tab.12 presentation"],
+      "recommendation": "Human decision. If a Schichtdicke gate is added (D1), the threshold must match the chosen unit (≥ 40 mm or ≥ 4 cm). STAGE only.",
+      "sourceQuote": "Tab.12 Nr.4 wasserdichter Asphaltbeton 40 mm¹1 (GAR.txt 2977-2979)"
+    },
+    {
+      "id": "D3",
+      "title": "Re-anchor the 5 '§9.5' fields to Sec.5.4",
+      "options": ["Repoint clause_reference: asph_dicke->Sec.5.4.1.2/Tab.12; asph_bindemittel & asph_kornverteilung->Sec.5.4.1/TL Asphalt-StB 07; asph_nahttechnik->Sec.5.4.2; asph_verdichtungsgrad->remove or Sec.5.4.2 (see F-4)", "Leave as-is"],
+      "recommendation": "STAGE a written-not-applied migration correcting the 5 clause_reference anchors + populating source_quote from the verbatim PDF lines above. Do NOT apply now.",
+      "sourceQuote": "FLL-GAR-2023 chapter map: Chapter 9 = Randausbildungen (9.1/9.2/9.3.x only); Asphalt material = Sec.5.4. No clause 9.5 exists."
+    }
+  ]
+}

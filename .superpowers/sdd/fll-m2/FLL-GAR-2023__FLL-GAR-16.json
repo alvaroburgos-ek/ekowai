@@ -1,0 +1,113 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-16",
+  "worksheetId": "ee84b740-1a61-4554-8660-07e92cfdabc9",
+  "title_de": "Kunststoff-/Elastomerbahnen",
+  "summary": "Pure data-collection worksheet: 0 equations, 0 compliance_requirements, 6 fields (2 number, 2 enum, 1 boolean, 1 number). No engine chain, no gate. Only drivable chain = REAL saveWorksheet persistence round-trip, which RAN green (3/3) against the embedded PG. All 6 field thresholds/enum domains PDF-confirmed (VA) against Sec.6.2.1.2, Sec.6.2.2.1, Tab.22. One annotation finding on nahtbreite_min_mm.validation_rules.raw (mixes Tab.22 Fügebreite with the Sec.6.2.2.1 Überlappung 60 mm value).",
+  "equations": [],
+  "fields": [
+    {
+      "symbol": "bahnendicke_mm",
+      "id": "9b691c43-70ed-4126-9421-6b33ed8d240c",
+      "verdict": "VA",
+      "clause": "Sec.6.2.1.2",
+      "quote": "Die Bahnen müssen eine Mindestdicke von 1,2 mm aufweisen. Bei werkseitig vorkonfektionierten Bahnen für gering beanspruchte Nutzungen (z. B. Gartenteiche) sind Bahnendicken ≥ 1,0 mm zulässig.",
+      "note": "validation_rules.raw '>= 1,2 (Sec.6.2.1.2; 1,0 fuer Garten)' matches PDF verbatim. RANGE surfaced as decisionItem (1,0 vs 1,2)."
+    },
+    {
+      "symbol": "nahtbreite_min_mm",
+      "id": "0ca604fb-65ec-4de1-88e7-bd21689387a0",
+      "verdict": "FINDING",
+      "clause": "Sec.6.2.2.1; Tab.22",
+      "quote": "Tab. 22: ... Mindestfügebreite der Nähte mm | Quellschweißen EVA/PIB/PVC-P 30 | Heißluftschweißen oder Heizkeilschweißen ECB/EVA/PIB/FPO/PVC-P/TPE 20, EPDM 30 | Heißvulkanisation (Hot Bonding) EPDM 20 | Heißluftschweißen EPDM mit PBS 40",
+      "note": "validation_rules.raw '>= 20/30/40/60 per Tab.22' — the '60' is NOT a Tab.22 Mindestfügebreite. Tab.22 range is 20/30/40 (max 40, EPDM mit PBS). The 60 mm value is the Sec.6.2.2.1 *Mindestüberlappung* for polymer-bitumen sheets, a different measure (Überlappung vs Fügebreite). Annotation conflates the two. Field itself is a legit collected input; only the raw hint string is imprecise."
+    },
+    {
+      "symbol": "fuegeverfahren",
+      "id": "9d82bb24-ba48-452e-aef5-238eca4ac7ef",
+      "verdict": "VA",
+      "clause": "Tab.22",
+      "quote": "Tab. 22 Sp.1 Fügeverfahren: Quellschweißen | Heißluftschweißen oder Heizkeilschweißen | Heißvulkanisation (Hot Bonding) | Heißluftschweißen [EPDM mit PBS]",
+      "note": "4 enum options (quellschweissen / heissluft_heizkeil / heissvulkanisation / heissluft_pbs) map 1:1 onto Tab.22 rows Nr.2/3/4/5. VA."
+    },
+    {
+      "symbol": "bahn_material_naht",
+      "id": "38941592-d6e5-4002-8f2e-5feb0ff85680",
+      "verdict": "VA",
+      "clause": "Tab.22",
+      "quote": "Tab. 22 Sp.2 Stoffart: EVA, PIB, PVC-P, ECB, FPO, TPE, EPDM, EPDM mit PBS",
+      "note": "8 enum options (EVA/PIB/PVC-P/ECB/FPO/TPE/EPDM/EPDM_PBS) all present in Tab.22 Stoffart column. VA."
+    },
+    {
+      "symbol": "polymerbitumen_beschichtung",
+      "id": "5c33b7ce-599d-4c2b-9e71-fa8f71132e1c",
+      "verdict": "VA",
+      "clause": "Sec.6.2.2.1",
+      "quote": "Bei Kunststoff- und Elastormerbahnen ist an den Längs- und Quernähten eine Mindestbreite der Überlappung von 40 mm einzuhalten. Bei Bahnen mit Polymerbitumenbeschichtung ist eine Mindestbreite von 60 mm einzuhalten.",
+      "note": "Boolean drives the 40->60 mm overlap switch. Description 'changes Mindestueberlappung from 40 mm to 60 mm' matches PDF verbatim. VA."
+    },
+    {
+      "symbol": "naht_ueberlappung_kunststoff_mm",
+      "id": "fe9a88d1-2719-4b69-b4bd-1d1bc098da82",
+      "verdict": "VA",
+      "clause": "Sec.6.2.2.1; Tab.22",
+      "quote": "Bei Kunststoff- und Elastormerbahnen ist an den Längs- und Quernähten eine Mindestbreite der Überlappung von 40 mm einzuhalten. Bei Bahnen mit Polymerbitumenbeschichtung ist eine Mindestbreite von 60 mm einzuhalten.",
+      "note": "validation_rules.raw '>= 40 (or 60 if poly.-bit.)' matches PDF verbatim. clause_reference lists 'Tab.22' but the 40/60 mm come from Sec.6.2.2.1 prose (Überlappung), not Tab.22 (Fügebreite) — minor cross-ref imprecision, see decisionItem. RANGE (40 vs 60) surfaced as decisionItem."
+    }
+  ],
+  "chains": [
+    {
+      "name": "saveWorksheet persistence round-trip (all 6 fields)",
+      "ran": true,
+      "liveValue": "bahnendicke_mm=1.2, nahtbreite_min_mm=30, fuegeverfahren=quellschweissen, bahn_material_naht=PVC-P, polymerbitumen_beschichtung=false, naht_ueberlappung_kunststoff_mm=40 (all persisted to project_parameters); re-save poly-bit path fuegeverfahren=heissluft_pbs, bahn_material_naht=EPDM_PBS, nahtbreite_min_mm=40, polymerbitumen_beschichtung=true, naht_ueberlappung_kunststoff_mm=60 persisted (no post-approval lock)",
+      "pdfExpected": "No printed worked example — data-collection worksheet. Field values are PDF-attested thresholds (Sec.6.2.1.2 1,2 mm; Tab.22 Quellschweißen/PVC-P 30 mm; Sec.6.2.2.1 40/60 mm overlap).",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ |integration| tests/harness/fll-gar16-verify.integration.test.ts > FLL-GAR-16 (Kunststoff-/Elastomerbahnen) — real saveWorksheet persistence of all 6 fields > exposes all 6 collected fields 2ms\n ✓ ... > drives all 6 fields with PDF-attested values through the REAL saveWorksheet and persists them 425ms\n ✓ ... > re-save with poly-bitumen path (Sec.6.2.2.1: 60 mm overlap) overwrites — no post-approval lock 14ms\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n Duration ~5.3s"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "GAR16-F1",
+      "field": "nahtbreite_min_mm",
+      "severity": "annotation",
+      "note": "validation_rules.raw = '>= 20/30/40/60 per Tab.22' overstates the Tab.22 range. Tab.22 Mindestfügebreite spans only 20/30/40 (max 40 = EPDM mit PBS, Heißluftschweißen). The '60' is the Sec.6.2.2.1 *Überlappung* (poly-bitumen), a distinct measure that belongs to naht_ueberlappung_kunststoff_mm, not to the Tab.22 Fügebreite. No engine/gate consumes this raw string, so no live impact; staged as a doc-string correction only."
+    }
+  ],
+  "residue": [
+    {
+      "id": "GAR16-R1",
+      "note": "No printed worked-example numeric in the PDF for GAR-16 (data-collection worksheet), so the persistence chain is asserted on PDF-attested threshold values (VA per field) but the round-trip semantics themselves are VC (sanity-checked, no oracle)."
+    },
+    {
+      "id": "GAR16-R2",
+      "note": "cos_beta / trig engine gap: N/A for GAR-16 (no equations). Recorded for completeness only."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "GAR16-D1",
+      "field": "bahnendicke_mm",
+      "range": "1,0 mm vs 1,2 mm",
+      "note": "SR-2: Sec.6.2.1.2 gives a two-branch minimum — 1,2 mm general; 1,0 mm only for factory-prefabricated sheets for lightly-loaded uses (e.g. garden ponds). Do NOT auto-pick; the applicable minimum depends on whether the pond is a prefab garden-pond use case."
+    },
+    {
+      "id": "GAR16-D2",
+      "field": "naht_ueberlappung_kunststoff_mm",
+      "range": "40 mm vs 60 mm",
+      "note": "SR-2: Sec.6.2.2.1 — 40 mm minimum overlap; 60 mm for sheets with polymer-bitumen coating. Driven by polymerbitumen_beschichtung boolean; surface both, do not auto-pick."
+    },
+    {
+      "id": "GAR16-D3",
+      "field": "nahtbreite_min_mm",
+      "range": "20 / 30 / 40 mm (Tab.22, by Fügeverfahren x Stoffart)",
+      "note": "SR-2: Tab.22 Mindestfügebreite is a matrix over Fügeverfahren x Stoffart: Quellschweißen 30; Heißluft/Heizkeil 20 (EPDM 30); Heißvulkanisation 20; Heißluftschweißen EPDM mit PBS 40. The correct minimum is a lookup on the two enum inputs — surface the applicable cell, never a single default."
+    },
+    {
+      "id": "GAR16-D4",
+      "field": "nahtbreite_min_mm.validation_rules.raw",
+      "range": "n/a — staged correction",
+      "note": "STAGED (written-not-applied): correct raw hint from '>= 20/30/40/60 per Tab.22' to '>= 20/30/40 per Tab.22' (drop the 60; that value is the Sec.6.2.2.1 Überlappung, owned by naht_ueberlappung_kunststoff_mm). Read-only prod; apply in the single controlled pass, not now."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "standard": "FLL-Naturteich (FLL Naturteich / Schwimmteich, prod standard c11f0e54-fef3-4552-be7b-f6eb50b468da)",
+  "worksheet": "FLLNT-15 — Konformitäts-Zusammenfassung (template a7351d4c-f156-43da-9816-d76afbd2c2b1)",
+  "verifiedRun": "2026-07-23",
+  "doctrine": "SR-1 verbatim only; SR-2 ranges surfaced not auto-picked; SR-3 PDF ground truth; findings over fixes; read-only prod",
+  "prodPull": {
+    "fieldsActive": 7,
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fieldSymbols": [
+      "phase_1_gate", "phase_2_gate", "phase_3_gate", "phase_4_gate",
+      "phase_5_gate", "phase_6_gate", "compliance_verdict_overall"
+    ],
+    "note": "All 6 phase_N_gate fields share the identical 5-value enum (pass/fail/conditional/not_applicable/pending). compliance_verdict_overall has a 4-value enum (compliant/compliant_with_conditions/not_compliant/insufficient_data). EVERY enum option on all 7 fields carries regulation_reference='workflow' in prod — i.e. these are Wizard-internal process states, not source-attested values."
+  },
+  "equations": [],
+  "chains": [
+    {
+      "name": "saveWorksheet enum round-trip (phase_1_gate=pass, compliance_verdict_overall=compliant)",
+      "ran": true,
+      "liveValue": "value_enum persisted: phase_1_gate='pass', compliance_verdict_overall='compliant'",
+      "pdfExpected": "N/A — no worked example / no phase-gate table / no verdict scale in the FLL-Naturteich PDF; FLLNT-15 is a workflow rollup, not a standard-attested computation",
+      "verdict": "VC (sanity-checked: enum values are valid options; round-trips through REAL saveWorksheet UPSERT; no source scalar to assert against — workflow artifact)",
+      "raw": "Test Files 1 passed (1); Tests 3 passed (3); Duration 5.49s. it#1 template carries 0 equations, 0 compliance_requirements, 7 active fields — PASS. it#2 persists phase_1_gate='pass' + compliance_verdict_overall='compliant' via @/lib/actions/worksheet saveWorksheet, read back value_enum — PASS. it#3 overwrite phase_1_gate='fail' round-trips (idempotent UPSERT) — PASS."
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "type": "no-computational-chain",
+      "detail": "FLLNT-15 has 0 equations. There is no derived value to persist or assert against a PDF worked example. Only exercisable behaviour is enum input persistence, which was driven through the REAL saveWorksheet path (3/3 green)."
+    },
+    {
+      "type": "no-gates (CR-006-absence baseline)",
+      "detail": "FLLNT-15 has 0 compliance_requirements. No gate to fire in pass/fail, so no vacuous/dead-gate finding is possible here. This is the absence baseline, not a defect: the conformity SUMMARY worksheet is enforced upstream (per-phase gates live on FLLNT-01..14), it does not re-enforce them."
+    },
+    {
+      "type": "workflow-only content (VC, not VA)",
+      "detail": "All 7 fields are Wizard workflow constructs (regulation_reference='workflow'). The FLL-Naturteich PDF (Naturteich.txt, 4381 lines) prints no six-phase-gate model, no gate-state vocabulary, and no overall conformity-verdict scale. Verbatim search for phase/gate/conformity/verdict/summary returned only DIN EN 206-1 'conformity', legal-'verdict' case citations, and TOC 'acceptance inspection' (§10.4.4/§11) — none define phase gates or a verdict scale. Therefore NONE of FLLNT-15's field vocabulary is VA-gradeable; it is VC by construction (source-blocked, wizard-defined workflow layer)."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "DEC-FLLNT15-01",
+      "type": "range / count not source-fixed (SR-2 surface, do not auto-pick)",
+      "detail": "The worksheet models exactly SIX phase gates (phase_1_gate..phase_6_gate). The standard's own process structure is NOT explicitly enumerated as six numbered phases in the PDF — the TOC exposes named sections (e.g. §10 construction, §10.4.4 completion/ready-for-acceptance, §11 acceptance inspection & defect claims) rather than a canonical 1..6 phase list. Whether 6 is the correct/intended phase count (vs. the FLL five-phase gated method used elsewhere in the EKOWAI encoding, or the standard's actual section breakdown) is a human decision, not auto-resolvable from this PDF. Surfaced per SR-2; NOT changed. No prod write.",
+      "prodWrite": "none (read-only; no migration staged — this is a structural/semantic question, not an attested-value correction)"
+    }
+  ],
+  "verdictSummary": "FLLNT-15 is a workflow rollup worksheet: 0 equations, 0 gates, 7 workflow enum fields. No VA-gradeable content exists in the standard for it. The only exercisable behaviour — enum persistence through the REAL saveWorksheet path — was driven live (3/3 green). No findings (nothing to be wrong: no constants, no formula shapes, no fireable gates). One SR-2 decision item surfaced (six-phase-gate count is not source-fixed). Everything catalogued as residue/decision; nothing written to prod."
+}

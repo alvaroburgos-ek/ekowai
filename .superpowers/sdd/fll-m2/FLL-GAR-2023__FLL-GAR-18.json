@@ -1,0 +1,122 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-18",
+  "worksheetTitle": "Kunststoffbahnen aus PE (PELD/PEHD)",
+  "worksheetId": "67de72ff-6fec-427a-acdc-9cdd58cc8f4a",
+  "prodPull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 5
+  },
+  "fields": [
+    {
+      "symbol": "peeh_dichte_g_cm3",
+      "id": "47b8a433-416e-40cc-b260-57a5f86247ad",
+      "data_type": "number",
+      "unit": "g/cm3",
+      "validation_rules": "> 0,940",
+      "clause_reference": "Tab.24",
+      "verdict": "VA",
+      "quote": "Tab. 24 Nr.3  Dichte  > 0,940  g/cm³  DIN EN ISO 1183 (GAR.txt line 4525)",
+      "note": "Constant 0,940 and '>' operator + unit g/cm³ match PDF Tab.24 verbatim."
+    },
+    {
+      "symbol": "peeh_mfr",
+      "id": "28df0e02-b030-4f12-9a8f-1779c51b3300",
+      "data_type": "number",
+      "unit": "g/10min",
+      "validation_rules": ">= 1,0 / <= 3,0",
+      "clause_reference": "Tab.24",
+      "verdict": "VA",
+      "quote": "Tab. 24 Nr.4  Schmelze-Masse-fließrate (MFR)  ≥ 1,0 / ≤ 3,0  g/10 min.  DIN EN ISO 1133 (GAR.txt line 4528)",
+      "note": "Both bounds 1,0 and 3,0 and operators >= / <= match Tab.24 verbatim. This is a RANGE (see decisionItems)."
+    },
+    {
+      "symbol": "peeh_russgehalt_pct",
+      "id": "25408312-0351-4bba-9268-0168dc3eca5b",
+      "data_type": "number",
+      "unit": "%",
+      "validation_rules": "2 - 3",
+      "clause_reference": "Tab.24",
+      "verdict": "VA",
+      "quote": "Tab. 24 Nr.5  Rußgehalt  2-3  %  ASTM D 1603 / ASTM D 4218 (GAR.txt line 4531)",
+      "note": "Range 2-3 % matches Tab.24 verbatim. This is a RANGE (see decisionItems). Note: Tab.24 Nr.6 Rußverteilung is also '2-3' but in 'Kategorie' units (ASTM D 5596); this field encodes only the % Rußgehalt row — correct."
+    },
+    {
+      "symbol": "pe_beanspruchung_klasse",
+      "id": "1e529bc6-adc8-4a80-bf35-18cd3597245a",
+      "data_type": "enum",
+      "unit": null,
+      "clause_reference": "Tab.25",
+      "verdict": "VA",
+      "quote": "Tab. 25: geringe hydraulische Gradienten ... PELD ≥ 0,8 mm (private Zier- und Badeteiche, Konvektions- und Rhizomsperre); mittlere ... PELD ≥ 1,5 mm / PEHD ≥ 1,0 mm (öffentliche Zierteiche, Bachläufe); hohe ... PEHD ≥ 2,0 mm (öffentliche Badeteiche, ... befahrbare Bereiche, Fließgewässer); wie vor, jedoch Dichtungsbahn freiliegend ... PEHD ≥ 2,5 mm (Regenrückhaltebecken, Beschneiungsteiche) (GAR.txt lines 4593-4616)",
+      "note": "All 4 enum options + their thickness thresholds + Anwendungsbeispiele match Tab.25 verbatim. Options: gering(PELD≥0,8) / mittel(PELD≥1,5 OR PEHD≥1,0) / hoch(PEHD≥2,0) / freiliegend(PEHD≥2,5). Field description encodes the thresholds exactly. The class is an Objektplaner selection (Tab.25 note: 'Kategorisierung ... obliegt dem Objektplanenden') — surfaced as decisionItem, not auto-picked."
+    },
+    {
+      "symbol": "naht_pe_ueberlappung_mm",
+      "id": "70877da4-4572-4275-a98b-7ab349f5e851",
+      "data_type": "number",
+      "unit": "mm",
+      "validation_rules": "100-150",
+      "clause_reference": "Sec.6.4.2.1",
+      "verdict": "VA",
+      "quote": "§6.4.2.1 Fügetechnik und Nahtkontrollen: 'Die Nahtüberlappung sollte je nach verwendetem Schweißautomaten zwischen 100 und 150 mm betragen.' (GAR.txt lines 4681-4682)",
+      "note": "Range 100-150 mm matches §6.4.2.1 verbatim. This is a RANGE + a 'sollte' (recommendation, not mandatory) — see decisionItems."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLL-GAR-18 real-saveWorksheet persistence round-trip (5 fields, no equation chain)",
+      "ran": true,
+      "liveValue": "peeh_dichte_g_cm3=0.945, peeh_mfr=2.0, peeh_russgehalt_pct=2.5, pe_beanspruchung_klasse='hoch', naht_pe_ueberlappung_mm=120 — all persisted back unchanged via real saveWorksheet (res.ok=true)",
+      "pdfExpected": "No worked example printed in the standard for this worksheet (pure material-spec collection). Entered values chosen in-spec per Tab.24/Tab.25/§6.4.2.1; sanity-check only.",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll — tests/harness/fll-gar18-verify.integration.test.ts — Test Files 1 passed (1), Tests 1 passed (1), Duration 5.06s. Smoke (seed-fll-gar-smoke): Test Files 1 passed (1), Tests 5 passed (5)."
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "type": "no-computable-chain",
+      "note": "FLL-GAR-18 has 0 equations, so there is no formula chain to assert against a worked example. The only drivable chain is the saveWorksheet persistence round-trip, verified VC. No cos_beta/trig residue for this worksheet."
+    },
+    {
+      "type": "no-gates",
+      "note": "FLL-GAR-18 has 0 compliance_requirements. Tab.24 spec limits (Dichte>0,940; MFR 1,0-3,0; Rußgehalt 2-3%) are encoded ONLY as field validation_rules (raw strings), NOT as enforcing gates. They are advisory/informational, not block-severity — no gate fires on out-of-spec material. Not a defect of this worksheet per se, but flagged as a coverage observation: an out-of-spec PEHD density (e.g. 0.930) would save without any compliance block."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "GAR18-DEC-01",
+      "symbol": "peeh_mfr",
+      "type": "range",
+      "note": "SR-2: Tab.24 Nr.4 MFR is a RANGE ≥1,0 / ≤3,0 g/10min, not a point value. The in-range test value 2.0 is a sanity placeholder, NOT a source-asserted answer. Any real project value must fall within [1,0 ; 3,0]."
+    },
+    {
+      "id": "GAR18-DEC-02",
+      "symbol": "peeh_russgehalt_pct",
+      "type": "range",
+      "note": "SR-2: Tab.24 Nr.5 Rußgehalt is a RANGE 2-3 %, not a point value. Test value 2.5 is an in-range placeholder."
+    },
+    {
+      "id": "GAR18-DEC-03",
+      "symbol": "pe_beanspruchung_klasse / (implied) Nenndicke",
+      "type": "class-ladder / range",
+      "note": "SR-2: Tab.25 gives a graduated Nenndicke ladder keyed to a load class the Objektplaner selects ('Kategorisierung ... obliegt dem Objektplanenden'). The test picks 'hoch' (PEHD ≥2,0 mm) only to exercise the enum; the class MUST be chosen per project, not auto-defaulted. The material thickness itself (Tab.25 col.3) is a per-class minimum (≥), i.e. an open range from the class floor upward — do not treat the floor as 'the' thickness."
+    },
+    {
+      "id": "GAR18-DEC-04",
+      "symbol": "naht_pe_ueberlappung_mm",
+      "type": "range + recommendation",
+      "note": "SR-2: §6.4.2.1 Nahtüberlappung is a RANGE 100-150 mm AND phrased 'sollte ... zwischen 100 und 150 mm betragen' (recommendation dependent on the welding machine used), not a hard minimum. Test value 120 is an in-range placeholder."
+    }
+  ],
+  "doctrine": {
+    "SR1": "All 5 field constants/operators/units quoted verbatim from GAR.txt this run (Tab.24 lines 4518-4546, Tab.25 lines 4587-4619, §6.4.2.1 lines 4676-4682).",
+    "SR2": "4 ranges surfaced as decisionItems; none auto-picked as a source answer.",
+    "SR3": "GAR.txt is a pdftotext -layout extraction of the rendered PDF; all 5 fields VA-grade (PDF-confirmed via layout table extraction). No PDF-vs-markdown disagreement observed.",
+    "writeToProd": "NONE. Read-only Supabase MCP pulls only. No migration needed — 0 findings requiring correction."
+  }
+}

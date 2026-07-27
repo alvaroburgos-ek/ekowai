@@ -1,0 +1,120 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-14",
+  "worksheet_title_de": "Wuchsleistung Zwischenauswertung 12 Monate",
+  "template_id": "3d3194e9-5c2c-44e1-9b7a-d621f29dd7d0",
+  "standard_id": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "prod_snapshot": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 5,
+    "field_list": [
+      { "symbol": "bestandsdichte_p_avg_12mon", "data_type": "number", "unit": "Halme/Gefäß", "label_de": "Ø Bestandsdichte Prüfgefäße 12 Mon.", "section": "D (Abgeleitete Werte / Berechnungen)", "is_required": true },
+      { "symbol": "kontrolle_p_avg_12mon", "data_type": "number", "unit": null, "label_de": "Kontroll-Bestandsdichte Mittelwert 12 Mon.", "section": null, "is_required": true },
+      { "symbol": "relativ_prozent_12mon", "data_type": "number", "unit": "%", "label_de": "Relative Dichte 12 Mon.", "section": null, "is_required": true },
+      { "symbol": "wuchsleistung_12mon_ausreichend", "data_type": "boolean", "unit": null, "label_de": "Wuchsleistung 12 Mon. ausreichend", "section": null, "is_required": true },
+      { "symbol": "auswertungs_datum_12mon", "data_type": "date", "unit": null, "label_de": "Auswertungsdatum 12 Mon.", "section": null, "is_required": true }
+    ]
+  },
+  "equations": [],
+  "chains": [
+    {
+      "name": "PASS state save (≥120 Halme AND ≥80% rel.) via real saveWorksheet",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_12mon": 130, "kontrolle_p_avg_12mon": 150, "relativ_prozent_12mon": 86.66666666666667, "wuchsleistung_12mon_ausreichend": true, "auswertungs_datum_12mon": "2026-01-15" },
+      "pdfExpected": "§3.7: 12-Mon. Sollwert ≥ 120 Halme/Gefäß; Prüfbericht Tab.3: relative Dichte = ØP1–P8 / ØK1–K3 × 100, Sollwert ≥ 80 %. 130 Halme ≥ 120 ✓; 130/150×100 = 86.667 % ≥ 80 % ✓ → ausreichend=true.",
+      "verdict": "VA",
+      "raw": "RHZ-14 PASS save.ok: true  error: null | RHZ-14 PASS persisted  ØP: 130  ØK: 150  rel%: 86.66666666666667  ausreichend: true  datum: \"2026-01-15T00:00:00.000Z\""
+    },
+    {
+      "name": "FAIL state save (<120 Halme AND <80% rel.) via real saveWorksheet — exercises the un-enforced threshold",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_12mon": 90, "kontrolle_p_avg_12mon": 150, "relativ_prozent_12mon": 60, "wuchsleistung_12mon_ausreichend": false },
+      "pdfExpected": "90 Halme < 120 ⇒ insufficient; 90/150×100 = 60 % < 80 %. Standard §3.12: 'Wird im Prüfungsverlauf keine ausreichende Wuchsleistung der Testpflanzen erzielt (s. 2.7 [=3.7]), ist die Prüfung abzubrechen.' The save path stores the insufficient state unblocked (no compliance_requirement on this worksheet).",
+      "verdict": "VA",
+      "raw": "RHZ-14 FAIL save.ok: true  error: null | RHZ-14 FAIL persisted ØP: 90  rel%: 60  ausreichend: false"
+    },
+    {
+      "name": "Inconsistent relative % (42 ≠ ØP/ØK×100) — confirms relativ_prozent_12mon is un-derived",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_12mon": 130, "kontrolle_p_avg_12mon": 150, "relativ_prozent_12mon": 42 },
+      "pdfExpected": "Tab.3 formula would give 86.667 %. An entered 42 % persists verbatim (not recomputed) — proving no equation materializes ØP/ØK×100 for this worksheet.",
+      "verdict": "VA",
+      "raw": "RHZ-14 inconsistent-relative persisted rel%: 42 (expected 42, NOT recomputed to 86.67 → confirms no equation)"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "RHZ14-F1",
+      "severity": "medium",
+      "type": "derivation-invariant / single-source gap",
+      "title": "relativ_prozent_12mon is a plain entered number with no equation, but the standard DEFINES it by a formula",
+      "detail": "Prod carries 0 equations on FLLTP-RHZ-14, yet the PDF Prüfbericht Tab.3 prints the exact formula for this value: 'ØP1–P8 / ØK1–K3 x 100' (Sollwert ≥ 80 %). The relative density is a DERIVED value that should be produced once by a registered equation from bestandsdichte_p_avg_12mon (ØP1–P8) and kontrolle_p_avg_12mon (ØK1–K3), not free-entered. Proven un-derived by the live test: entering rel%=42 while ØP=130/ØK=150 persisted 42 verbatim (would be 86.667 if computed). Sibling worksheet FLLTP-RHZ-13 (6-month interim) DOES carry the analogous equation (per smoke test: dichte_relativ_prozent output) — so the 12/18/24-month roll-up worksheets appear to have dropped the equation. STAGED as a decision item; not applied.",
+      "quote_pdf": "Tab. 3: Durchschnittliche Bestandsdichte der Testpflanzen in den 8 Prüfgefäßen bezogen auf die Durchschnittswerte der Testpflanzen in den drei Kontrollgefäßen (Sollwert: ≥ 80 %) … ØP1–P8 / ØK1–K3  x 100"
+    },
+    {
+      "id": "RHZ14-F2",
+      "severity": "medium",
+      "type": "un-enforced threshold / missing gate",
+      "title": "No compliance_requirement enforces the ≥120 Halme/Gefäß (12-Mon.) or ≥80% relative Sollwert",
+      "detail": "FLLTP-RHZ-14 has 0 compliance_requirements. The boolean wuchsleistung_12mon_ausreichend is free-entered and is never checked against bestandsdichte_p_avg_12mon (≥120) or relativ_prozent_12mon (≥80). Live FAIL test proved an insufficient state (ØP=90, rel=60%, ausreichend=false) saves unblocked. Per §3.12 an insufficient 12-month result mandates test termination ('ist die Prüfung abzubrechen'), so an enforcing gate on ≥120 AND ≥80% (or on a consistent ausreichend derivation) would be justified. STAGED as decision item.",
+      "quote_pdf": "§3.7: '2. Zwischenauswertung (nach 12 Monaten) ≥ 120 Halme/Gefäße' ; 'Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den Kontrollgefäßen betragen.' ; §3.12: 'Wird im Prüfungsverlauf keine ausreichende Wuchsleistung der Testpflanzen erzielt (s. 2.7), ist die Prüfung abzubrechen.'"
+    },
+    {
+      "id": "RHZ14-F3",
+      "severity": "low",
+      "type": "encoding inconsistency (unit)",
+      "title": "kontrolle_p_avg_12mon has NULL unit while its sibling bestandsdichte_p_avg_12mon carries 'Halme/Gefäß'",
+      "detail": "Both fields are the same physical quantity (average stem count per vessel, ØP1–P8 vs ØK1–K3). bestandsdichte_p_avg_12mon.unit = 'Halme/Gefäß' but kontrolle_p_avg_12mon.unit = NULL. Cosmetic/consistency only; the standard's Tab.1/Tab.2 both use 'Anzahl Halme / Gefäß'. Recorded, low priority.",
+      "quote_pdf": "Prüfbericht Tab.1 & Tab.2 column header: 'Anzahl Halme / Gefäß'"
+    }
+  ],
+  "residue": [
+    {
+      "id": "RHZ14-R1",
+      "type": "VC — markdown/text-layer only (SR-3)",
+      "detail": "All PDF quotes were taken from the pdftotext -layout extraction at .superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt (searchable convenience). The §3.7 thresholds (lines 413-421) and the Prüfbericht Tab.3 formula (lines 1288-1295) are consistent and unambiguous in the text layer, but were NOT re-rendered from the source PDF page images this run. Per SR-3, treat as VA-candidate pending a rendered-PDF spot-check of p.10 (§3.7) and p.31 (Prüfbericht Tab.3); no PDF-vs-markdown disagreement was detected."
+    },
+    {
+      "id": "RHZ14-R2",
+      "type": "no worked numeric example in the standard",
+      "detail": "The FLL TP prints the Prüfbericht Tab.3 as a BLANK template ('>> Monat Jahr <<', '%' cells empty) — it gives the formula (ØP/ØK×100) and the thresholds (≥120 Halme, ≥80%) but no filled-in worked numbers. The chain values driven here (130/150→86.667; 90/150→60) are self-constructed to straddle the thresholds and are sanity-checked against the formula, not matched to a printed example (none exists). Recorded as VC for the specific numbers; the formula and thresholds are VA."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "RHZ14-D1",
+      "title": "STAGE (written-not-applied): add ØP/ØK×100 equation to FLLTP-RHZ-14 (and the 18/24-month siblings) so relativ_prozent is derived, mirroring FLLTP-RHZ-13",
+      "migration_note": "INSERT INTO equations (worksheet_template_id, equation_number, formula, output_symbol) VALUES ('3d3194e9-5c2c-44e1-9b7a-d621f29dd7d0', 'RHZ14-1', 'relativ_prozent_12mon = bestandsdichte_p_avg_12mon / kontrolle_p_avg_12mon * 100', 'relativ_prozent_12mon');  -- verify symbol wiring against FLLTP-RHZ-13's dichte_relativ_prozent equation before applying. NOT APPLIED.",
+      "requires_human": true
+    },
+    {
+      "id": "RHZ14-D2",
+      "title": "STAGE (written-not-applied): add a block-severity compliance_requirement enforcing 12-month sufficiency (≥120 Halme AND ≥80% relative)",
+      "migration_note": "Candidate condition grammar (confirm against evaluate.ts supported grammar — no chained compares): two gates, e.g. cond1 'bestandsdichte_p_avg_12mon >= 120' and cond2 'relativ_prozent_12mon >= 80', both severity='block', title tied to §3.7 / §3.12. NOT APPLIED — needs human confirmation of the desired enforce-vs-record policy for a data-collection interim worksheet.",
+      "requires_human": true
+    },
+    {
+      "id": "RHZ14-D3",
+      "title": "SR-2 range surfacing (no auto-pick)",
+      "detail": "This worksheet's governing standard values are one-sided THRESHOLDS (≥120 Halme/Gefäß; ≥80% relative), not two-sided ranges, so there is no peak-vs-yearly style point to pick. No value was auto-picked. Recorded for completeness; no action.",
+      "requires_human": false
+    }
+  ],
+  "verdict_summary": {
+    "equations_VA": 0,
+    "equations_VC": 0,
+    "equations_FINDING": 0,
+    "chains_ran": 3,
+    "chains_total": 3,
+    "gates_total": 0,
+    "gates_vacuous": 0,
+    "findings": 3,
+    "residue": 2,
+    "decisionItems": 3,
+    "checks_passed": 4,
+    "test_file": "tests/harness/verify-fll-rhizom-rhz14.integration.test.ts",
+    "vitest": "Test Files 1 passed (1) | Tests 4 passed (4)"
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-09",
+  "worksheet_title_de": "Abdichtungssystem Auswahl",
+  "worksheet_template_id": "9ded628f-9522-4841-aa29-aef6f19822b1",
+  "standard_id": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "prod_project": "vadsmshzebefjreqcicl",
+  "summary": "Selection/classification worksheet (Sec.4.7 Abdichtungssystem). 0 equations, 5 fields, 1 compliance requirement (REQ-10 CE-Kennzeichnung). No math chain; all field clause-references and the gate condition PDF-confirmed VA. All 12 enum sealing-type values map 1:1 to the PDF section structure (5.1-5.5, 6.1-6.4, 7.1-7.3).",
+  "equations": [],
+  "equations_note": "No equations attached to FLL-GAR-09 (confirmed in prod: 0 rows). Nothing to verify. Consistent with a material-selection worksheet — the numeric chains live in GAR-15 (anzahl_lagen consumer), GAR-27 (Q_NOT) etc.",
+  "fields": [
+    {
+      "symbol": "abdichtungs_art",
+      "label_de": "Abdichtungsart",
+      "data_type": "enum",
+      "clause_reference": "Sec.4.7; Sec.5-7",
+      "verdict": "VA",
+      "quote": "4.7 Abdichtungssystem — 'Die Wahl des Abdichtungssystem ist u. a. abhängig von: ...' (GAR.txt L1567-1584). The 12 enum values map 1:1 to the PDF TOC/section headers: 5.1 'MINERALISCHE STOFFE OHNE ZUSATZSTOFFE' (L202/L1898); 5.2 'MINERALISCHE ABDICHTUNGSSTOFFE MIT ZUSATZSTOFFEN' (L206/L2213); 5.3 'MINERALISCHE ABDICHTUNGSSTOFFE MIT HYDRAULISCHEN BINDEMITTELN' (L210/L2457); 5.4 'MINERALISCHE STOFFE MIT BITUMEN ALS BINDEMITTEL' (L217/L2924); 5.5 'VERBUNDWERKSTOFFE' (L221/L3149); 6.1 'BITUMENBAHNEN' (L228/L3726); 6.2 'KUNSTSTOFF- UND ELASTOMERBAHNEN' (L232); 6.3 'FLÜSSIGKUNSTSTOFFE' (L236); 6.4 'KUNSTSTOFFBAHNEN AUS POLYETHYLEN' (L240); 7.1 'STAHL' (L247); 7.2 'ALKALISILIKATE' (L251); 7.3 'GLASFASERVERSTÄRKTES UNGESÄTTIGTES POLYESTER' (L255).",
+      "note": "All 12 enum values + their per-value regulation_reference (Sec.5.1..Sec.7.3) PDF-confirmed. source_quote column is NULL in prod (see FINDING F1)."
+    },
+    {
+      "symbol": "anzahl_lagen",
+      "label_de": "Anzahl Lagen",
+      "data_type": "number",
+      "clause_reference": "Sec.6.1.1.2",
+      "verdict": "VA",
+      "quote": "'6.1.1.2 Bahnendicke und Anzahl der Lagen' (GAR.txt L3807). 'Abdichtungen aus Bitumenbahnen sind i. d. R. mehrlagig herzustellen.' (L3809).",
+      "note": "Clause title verbatim matches. Consumer FLL-GAR-15. source_quote NULL in prod (F1)."
+    },
+    {
+      "symbol": "dichtigkeitsnachweis_required",
+      "label_de": "Dichtigkeitsnachweis erforderlich",
+      "data_type": "boolean",
+      "clause_reference": "Sec.4.1",
+      "verdict": "VA",
+      "quote": "4.1 Allgemeines — 'Fordert der Auftraggeber einen Dichtigkeitsnachweis der Abdichtung, ist dieser gemäß werkstoff- bzw. bauweisenspezifischer Anforderungen vertraglich zu vereinbaren.' (GAR.txt L1348-1349).",
+      "note": "Consumer FLL-GAR-25. source_quote NULL in prod (F1)."
+    },
+    {
+      "symbol": "wurzel_rhizomfestigkeit_required",
+      "label_de": "Wurzel-/Rhizomfestigkeit gefordert",
+      "data_type": "boolean",
+      "clause_reference": "Sec.4.1; Sec.10.3-10.4",
+      "verdict": "VA",
+      "quote": "4.1 — 'Besonders zu berücksichtigen ist die Auswahl des Werkstoffes, wenn z. B. Wurzel- und Rhizomfestigkeit gefordert sind' (GAR.txt L1349-1351); cross-ref 'Rhizomsperre gegenüber wurzel- und rhizomagressiven Pflanzenarten, s. Abschnitte 10.3, 10.4' (L1341-1342).",
+      "note": "Consumers FLL-GAR-10..21, FLL-GAR-24. source_quote NULL in prod (F1)."
+    },
+    {
+      "symbol": "ce_kennzeichnung_geprueft",
+      "label_de": "CE-Kennzeichnung geprueft",
+      "data_type": "boolean",
+      "clause_reference": "Sec.4.7",
+      "verdict": "VA",
+      "quote": "4.7 — 'Bei der Auswahl von Produkten für die Gewässerabdichtung ist auch die rechtliche Einhaltung von z. B. CE-Kennzeichnungen, EU-BauPVO, MVV-TB für die jeweilige Anwendung zu prüfen.' (GAR.txt L1615-1616).",
+      "note": "Drives REQ-10. Consumer FLL-GAR-26. source_quote NULL in prod (F1)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "field-persist chain (enum abdichtungs_art + booleans + number anzahl_lagen through REAL saveWorksheet)",
+      "ran": true,
+      "liveValue": "abdichtungs_art=value_enum 'bahn_kunststoff_elastomer'; ce_kennzeichnung_geprueft=value_boolean true; anzahl_lagen=value_number 2 — all persisted to project_parameters and read back",
+      "pdfExpected": "n/a (no worked example; selection worksheet). Sanity: enum value is one of the 12 PDF-attested sealing types.",
+      "verdict": "VC",
+      "raw": "PASS: 'saveWorksheet persists an enum selection + booleans + number' 455ms. Enum stored in value_enum, CE boolean true, anzahl_lagen number=2 round-tripped via real @/lib/actions/worksheet.saveWorksheet against embedded PG."
+    }
+  ],
+  "gates": [
+    {
+      "id": "c7f9b379-292c-4c5b-ac9b-d2d8da18e4a8",
+      "code": "REQ-10",
+      "title_de": "CE-Kennzeichnung / EU-BauPVO / MVV-TB Konformitaet",
+      "condition": "ce_kennzeichnung_geprueft == true",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "note": "PDF-confirmed VA against Sec.4.7 (GAR.txt L1615-1616). Exercised through REAL evaluateCondition in three states: PASS (ce==true -> pass), FAIL (ce==false -> fail), PENDING (symbol missing -> pending, not a false fail). Boolean-equality compare parses cleanly; NOT vacuous/dead. requires_attestation=false, source_quote NULL (F1)."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "low",
+      "type": "provenance-gap",
+      "text": "All 5 fields AND the REQ-10 compliance_requirement have source_quote = NULL in prod, despite every clause_reference being verbatim-attestable in the rendered PDF (quotes catalogued above). Documentation/provenance debt, not a correctness error. Staged as a decision item to backfill source_quote — NOT applied (findings-over-fixes, read-only prod)."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-equations",
+      "text": "FLL-GAR-09 has 0 equations, so there is no numeric chain to drive against a printed worked example. The saveWorksheet round-trip is the only computable chain and it is VC (no PDF worked example for a selection worksheet). No cos_beta/trig residue applies here."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "staged-migration-note",
+      "text": "STAGED (written-not-applied): backfill fields.source_quote + compliance_requirements.source_quote for FLL-GAR-09 with the verbatim GAR.txt quotes catalogued in this file (5 fields + REQ-10). Single controlled apply pass later; do NOT auto-apply.",
+      "applied": false
+    },
+    {
+      "id": "D2",
+      "type": "range-note (SR-2)",
+      "text": "Not a forced pick, surfaced for awareness: the standard (Tab. in Sec.4.6 region, GAR.txt L1506-1512) relates each sealing type to a max slope/Gefälle RANGE (e.g. Bitumenbahnen <=1:3 / <=33 %, Flüssigkunststoffe <=1:1 / <=100 %). That range governs downstream slope/layer worksheets (GAR-15 etc.), NOT a scalar in GAR-09. No point value is auto-picked in GAR-09. Flagged so the consuming worksheet's verify does not silently collapse the range.",
+      "applied": false
+    }
+  ],
+  "test_file": "C:\\Users\\Ekowai\\_wt-fll\\tests\\harness\\_verify-fll-gar09.integration.test.ts",
+  "test_result_raw": "RUN v4.1.5  |  Test Files 1 passed (1)  |  Tests 6 passed (6)  |  Duration 5.28s. Verbose: (1) exposes the 5 GAR-09 fields ✓; (2) saveWorksheet persists an enum selection + booleans + number ✓ 455ms; (3) REQ-10 condition PARSES (not manual/vacuous) ✓; (4) PASS state ce==true -> pass ✓; (5) FAIL state ce==false -> fail ✓; (6) PENDING state symbol missing -> pending ✓.",
+  "doctrine": {
+    "SR-1": "Every value claim carries a verbatim GAR.txt quote captured THIS run.",
+    "SR-2": "Range (slope-per-sealing-type Tab.) surfaced as decisionItem D2, not auto-picked.",
+    "SR-3": "Verified against GAR.txt (pdftotext -layout extraction of the rendered PDF); clause headers + prose lines cross-checked. All field/gate verdicts VA (PDF-confirmed). The one chain is VC (no printed worked example).",
+    "read_only": "No writes to prod. Corrections staged as decisionItems D1/D2."
+  }
+}

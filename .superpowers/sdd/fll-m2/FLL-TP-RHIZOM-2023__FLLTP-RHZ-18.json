@@ -1,0 +1,94 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-18",
+  "worksheetTitle": "Bewertung Rhizomfestigkeit (Gate)",
+  "worksheetTemplateId": "c2ead780-210c-4067-b282-0908e98ce4bb",
+  "standardId": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "prodCounts": { "equations": 0, "compliance_requirements": 0, "fields": 2 },
+  "doctrine": "SR-1 verbatim quotes attached; SR-2 ranges surfaced as decisionItems; SR-3 PDF is ground truth (TP-Rhizom.txt confirmed against rendered sections §3.7/§3.11/§3.12/§8/§9). No prod writes.",
+  "fields": [
+    {
+      "id": "67f23442-0409-40ad-9409-2bf0fd79d25e",
+      "symbol": "pruefergebnis_rhizomfest",
+      "data_type": "enum",
+      "is_required": true,
+      "verdict": "VA",
+      "enum_values": ["rhizomfest", "nicht_rhizomfest", "vorzeitig_abgebrochen"],
+      "quote": "§3.11 (TP-Rhizom.txt line 474): \"Ein Produkt gilt als rhizomfest, wenn in allen Pruefgefaessen nach Ablauf der Pruefdauer keine Rhizomeindringungen gemaess Abschnitt 2.9 sowie keine Rhizomdurchdringungen gemaess Abschnitt 2.10 festzustellen sind.\" | §9 (line 924): \"...dass sich das Produkt als nicht rhizomfest nach FLL erwiesen hat.\" | §3.12 (line 485): \"Vorzeitiger Abbruch der Pruefung\" / (line 490-491): \"Wird im Pruefungsverlauf keine ausreichende Wuchsleistung der Testpflanzen erzielt (s. 2.7), ist die Pruefung abzubrechen.\"",
+      "note": "All three enum options are PDF-attested: rhizomfest=§3.11, nicht_rhizomfest=§3.11/§9, vorzeitig_abgebrochen=§3.12. regulation_reference tags on each option match the source sections. VA."
+    },
+    {
+      "id": "9cabdf11-9832-444c-a6c2-3b8d1c7d2770",
+      "symbol": "abbruchsgrund",
+      "data_type": "text",
+      "is_required": false,
+      "verdict": "VA",
+      "quote": "§3.12 (TP-Rhizom.txt line 487-491): \"Bei erkennbaren Durchdringungen von Rhizomen am zu pruefenden Produkt ist der Auftraggeber der Untersuchung zu unterrichten. Die Pruefung kann abgebrochen werden. Wird im Pruefungsverlauf keine ausreichende Wuchsleistung der Testpflanzen erzielt (s. 2.7), ist die Pruefung abzubrechen.\"",
+      "note": "Free-text reason-for-early-termination field. Two source grounds for abort exist (durchdringungen; keine ausreichende Wuchsleistung) but the field is free text, so no enum enforcement is expected. Optional (is_required=false) is consistent with only applying when result=vorzeitig_abgebrochen. VA."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "PASS — pruefergebnis_rhizomfest=rhizomfest",
+      "ran": true,
+      "liveValue": "rhizomfest",
+      "pdfExpected": "rhizomfest (§3.11 no ein-/durchdringungen)",
+      "verdict": "VA",
+      "raw": "RHZ-18 PASS save.ok: true  error: null; RHZ-18 PASS persisted pruefergebnis: \"rhizomfest\""
+    },
+    {
+      "name": "FAIL — pruefergebnis_rhizomfest=nicht_rhizomfest (no gate blocks)",
+      "ran": true,
+      "liveValue": "nicht_rhizomfest",
+      "pdfExpected": "nicht rhizomfest (§9 line 924)",
+      "verdict": "VA",
+      "raw": "RHZ-18 FAIL save.ok: true  error: null; RHZ-18 FAIL persisted pruefergebnis: \"nicht_rhizomfest\" — save succeeded, confirming NO block-severity compliance_requirement fires on a failing verdict."
+    },
+    {
+      "name": "ABORT — pruefergebnis_rhizomfest=vorzeitig_abgebrochen + abbruchsgrund text",
+      "ran": true,
+      "liveValue": "vorzeitig_abgebrochen; abbruchsgrund='Keine ausreichende Wuchsleistung der Testpflanzen (§3.12 / §2.7)'",
+      "pdfExpected": "vorzeitig abgebrochen (§3.12)",
+      "verdict": "VA",
+      "raw": "RHZ-18 ABORT save.ok: true  error: null; RHZ-18 ABORT persisted pruefergebnis: \"vorzeitig_abgebrochen\"  abbruchsgrund: \"Keine ausreichende Wuchsleistung der Testpflanzen (§3.12 / §2.7)\""
+    },
+    {
+      "name": "structural — 0 equations / 0 compliance_requirements confirmed live",
+      "ran": true,
+      "liveValue": "equations=0, compliance_requirements=0",
+      "pdfExpected": "n/a (structural assertion)",
+      "verdict": "VA",
+      "raw": "RHZ-18 equations: 0  compliance_requirements: 0"
+    }
+  ],
+  "gates": [],
+  "vitestRaw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll — tests/harness/verify-fll-rhizom-rhz18.integration.test.ts — Test Files 1 passed (1); Tests 5 passed (5); Duration ~5.4s. Console: RHZ-18 PASS save.ok: true error: null; RHZ-18 PASS persisted pruefergebnis: \"rhizomfest\"; RHZ-18 FAIL save.ok: true error: null; RHZ-18 FAIL persisted pruefergebnis: \"nicht_rhizomfest\"; RHZ-18 ABORT save.ok: true error: null; RHZ-18 ABORT persisted pruefergebnis: \"vorzeitig_abgebrochen\" abbruchsgrund: \"Keine ausreichende Wuchsleistung der Testpflanzen (§3.12 / §2.7)\"; RHZ-18 equations: 0 compliance_requirements: 0.",
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "class": "CR-006 (gate worksheet with no fireable gate)",
+      "title": "RHZ-18 is titled 'Bewertung Rhizomfestigkeit (Gate)' but carries 0 compliance_requirements",
+      "detail": "This worksheet holds pruefergebnis_rhizomfest, the pass/fail verdict of the ENTIRE standard (§3.11 Pruefergebnis / §9 Pruefbericht). Yet prod has no block-severity compliance_requirement on the template. The live save path was exercised with value 'nicht_rhizomfest' and with 'vorzeitig_abgebrochen' and BOTH persisted with save.ok=true — nothing blocks a failing or aborted verdict. The '(Gate)' in the title is therefore vacuous: there is no gate. A downstream conformity roll-up (e.g. FLLTP-RHZ-21 final_rhizom_conformity) would need to consume this verdict, but this worksheet enforces nothing itself.",
+      "evidence": "compliance_requirements query for worksheet_template_id c2ead780-210c-4067-b282-0908e98ce4bb returned []. Live FAIL/ABORT saves both returned save.ok=true.",
+      "recommendation": "STAGED (do NOT apply): add a block-severity compliance_requirement to RHZ-18 that fires when pruefergebnis_rhizomfest != 'rhizomfest', so a non-conforming verdict blocks the approval gate. See decisionItems D1 — grammar to confirm against evaluate.ts supported condition set (worksheet-local, no chained compares)."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-equations",
+      "detail": "RHZ-18 has 0 equations, so there is no formula/constant/unit/output-symbol to verify and no derived-materialize chain to drive. No cos_beta/trig residue applies (FLL-TP-RHIZOM has no trig-bearing equations at all)."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "STAGED-migration (written-not-applied)",
+      "title": "Add enforcing gate to RHZ-18 so a non-rhizomfest verdict blocks",
+      "detail": "Proposed compliance_requirement (block severity) on worksheet_template c2ead780-210c-4067-b282-0908e98ce4bb, condition ~ pruefergebnis_rhizomfest == 'rhizomfest' (fires/blocks when not met). MUST be validated against the app's supported condition grammar (compliance_requirements + evaluate.ts, worksheet-local lookup, no chained compares/when/eq per the wizard-compliance-gates reference) before authoring. Also decide whether 'vorzeitig_abgebrochen' should block (test terminated → no valid Pruefbericht per §9 line 921-924) or be treated as a distinct incomplete state. Grounds: §3.11 (line 474) + §9 (line 921-924). NOT applied this run.",
+      "sourceQuote": "§9 (line 921-924): '...ein vollstaendiger Pruefbericht ... zu erstellen, jedoch nur, wenn sich das Produkt gemaess Abschnitt 2.11 als rhizomfest erwiesen hat. Firmen und Produkte, die ohne Erfolg an der Untersuchung teilgenommen haben, erhalten keinen Pruefbericht, sondern lediglich eine schriftliche Mitteilung ... dass sich das Produkt als nicht rhizomfest nach FLL erwiesen hat.'"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-17",
+  "worksheetTitle": "Rhizomeindringung & -durchdringung Erfassung / Rhizome ingress & penetration recording",
+  "templateId": "e907634a-bfde-4867-a298-8d4974c19333",
+  "archetype": "data_collection",
+  "verifiedRun": "2026-07-23",
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt (rendered from fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf)",
+  "counts": { "equations": 0, "gates": 2, "fields": 10 },
+
+  "equations": [],
+
+  "fields": [
+    {
+      "symbol": "rhizomeindringung_flaeche_count", "data_type": "number", "unit": "Stk / pcs", "required": true,
+      "verdict": "VA",
+      "quote": "§8.2: \"Gemäß der Abschnitte 2.9, 2.10 und 2.12 werden ein- und durchgedrungene Rhizome bei der geprüften Abdichtung in absoluten Zahlen erfasst. Dies erfolgt getrennt für folgende Bereiche — bei bahnenartigen Abdichtung: die Fläche und die Nähte\"",
+      "note": "Ingress count in the area (Fläche). §3.9 defines Rhizomeindringung. Unit 'absolute Zahlen' = count → matches 'Stk'."
+    },
+    {
+      "symbol": "rhizomeindringung_naehte_count", "data_type": "number", "unit": "Stk / pcs", "required": true,
+      "verdict": "VA",
+      "quote": "§8.2: \"... bei bahnenartigen Abdichtung: die Fläche und die Nähte\"",
+      "note": "Ingress count in the seams (Nähte). VA-grade."
+    },
+    {
+      "symbol": "rhizomeindringung_arbeitsfuge_count", "data_type": "number", "unit": "Stk / pcs", "required": false,
+      "verdict": "VA",
+      "quote": "§8.2: \"... bei nicht bahnenförmigen Abdichtungen: die Fläche und die Arbeitsunterbrechungsfuge, falls diese erkennbar ist.\"",
+      "note": "Ingress count in the Arbeitsunterbrechungsfuge; is_required=false correctly mirrors PDF 'falls diese erkennbar ist' (conditional presence). VA-grade."
+    },
+    {
+      "symbol": "rhizomdurchdringung_flaeche_count", "data_type": "number", "unit": "Stk / pcs", "required": true,
+      "verdict": "VA",
+      "quote": "§3.10: \"Rhizomdurchdringungen liegen vor, wenn in der Fläche oder in den Nähten eines geprüften Produktes Rhizome durchgewachsen sind.\" + §8.2 'ein- und durchgedrungene Rhizome ... in absoluten Zahlen ... getrennt für ... die Fläche'",
+      "note": "Penetration count in the area. VA-grade."
+    },
+    {
+      "symbol": "rhizomdurchdringung_naehte_count", "data_type": "number", "unit": "Stk / pcs", "required": true,
+      "verdict": "VA",
+      "quote": "§3.10: \"Rhizomdurchdringungen liegen vor, wenn in der Fläche oder in den Nähten eines geprüften Produktes Rhizome durchgewachsen sind.\"",
+      "note": "Penetration count in the seams. VA-grade."
+    },
+    {
+      "symbol": "max_eindringtiefe_ueberlappung_mm", "data_type": "number", "unit": "mm", "required": false,
+      "verdict": "VA",
+      "quote": "§8.2: \"Bei Eindringungen von Rhizomen in den Überlappungsbereich von Nähten ist die maximale Eindringtiefe festzuhalten.\"",
+      "note": "Max ingress depth in the seam-overlap zone; unit mm; conditional (is_required=false) mirrors 'Bei Eindringungen'. VA-grade."
+    },
+    {
+      "symbol": "rhizome_unter_5mm_bei_hemmstoff_count", "data_type": "number", "unit": "Stk / pcs", "required": false,
+      "verdict": "VA",
+      "quote": "§3.9: \"Nicht als Rhizomeindringung zu werten, aber im Prüfbericht aufzuführen sind: ... In die Fläche oder Naht bzw. Arbeitsunterbrechungsfuge ≤ 5 mm eingewachsene Rhizome bei Produkten, die wachstumshemmende Wirkstoffe enthalten\"",
+      "note": "Non-counted (nicht gewertet) sighting, correctly excluded from REQ-19. Label carries the ≤5mm/Hemmstoff qualifier. VA-grade."
+    },
+    {
+      "symbol": "rhizome_in_poren_count", "data_type": "number", "unit": "Stk / pcs", "required": false,
+      "verdict": "VA",
+      "quote": "§3.9: \"Nicht als Rhizomeindringung zu werten, aber im Prüfbericht aufzuführen sind: In bereits vorhandene Poren einer Abdichtung (Fläche oder Naht bzw. Arbeitsunterbrechungsfuge) eingewachsene Rhizome (d. h. keine Beschädigung).\"",
+      "note": "Non-counted sighting into pre-existing pores, correctly excluded from REQ-19. VA-grade."
+    },
+    {
+      "symbol": "fotos_dokumentiert", "data_type": "boolean", "unit": null, "required": true,
+      "verdict": "VA",
+      "quote": "§8.2: \"Ein- und durchgedrungene Rhizome sind beispielhaft fotografisch zu belegen.\"",
+      "note": "Photographic documentation flag. VA-grade."
+    },
+    {
+      "symbol": "rueckstellproben_entnommen", "data_type": "boolean", "unit": null, "required": true,
+      "verdict": "VA",
+      "quote": "§8.2: \"Von der untersuchten Abdichtung sind zum Ende der Prüfung Rückstellproben zu entnehmen, die das Ergebnis der Untersuchung dokumentieren. Die Proben sind gemäß Abschnitt 5 zu lagern.\"",
+      "note": "End-of-test retained-sample flag. VA-grade. (Cross-refs §6/§5 retention conditions.)"
+    }
+  ],
+
+  "chains": [
+    {
+      "name": "RHZ-17 PASS state (§3.11 rhizomfest: all ingress+penetration counts == 0)",
+      "ran": true,
+      "liveValue": "save.ok=true; persisted flaeche=0,naehte=0,arbeitsfuge=0,durchdr_flaeche=0,durchdr_naehte=0; unter5mm=2,poren=1 (non-counted); fotos=true; rueckstellproben=true",
+      "pdfExpected": "§3.11: 'Ein Produkt gilt als rhizomfest, wenn ... keine Rhizomeindringungen ... sowie keine Rhizomdurchdringungen ... festzustellen sind.' → REQ-19 pass, REQ-20 pass",
+      "verdict": "VA",
+      "raw": "RHZ-17 PASS save.ok: true  error: null / PASS-STATE REQ-19: {\"kind\":\"pass\"}  REQ-20: {\"kind\":\"pass\"}"
+    },
+    {
+      "name": "RHZ-17 FAIL state (ingress in Fläche=3, penetration in Naht=1 → NOT rhizomfest)",
+      "ran": true,
+      "liveValue": "save.ok=true (data-collection worksheet saves the non-conformant state); persisted flaeche=3, durchdr_naehte=1",
+      "pdfExpected": "§3.9/§3.10 ingress+penetration present → REQ-19 fail, REQ-20 fail",
+      "verdict": "VA",
+      "raw": "RHZ-17 FAIL save.ok: true  error: null / FAIL-STATE REQ-19: {\"kind\":\"fail\"}  REQ-20: {\"kind\":\"fail\"}"
+    }
+  ],
+
+  "gates": [
+    {
+      "id": "42d34746-29ed-4fa7-b381-62af9dfa5860",
+      "code": "REQ-19",
+      "title": "Keine gewerteten Rhizomeindringungen",
+      "condition": "rhizomeindringung_flaeche_count == 0 AND rhizomeindringung_naehte_count == 0 AND rhizomeindringung_arbeitsfuge_count == 0",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "note": "All 3 symbols are LOCAL fields of RHZ-17 → genuinely fireable. Exercised PASS (all 0 → pass) and FAIL (flaeche=3 → fail). Correctly excludes the non-counted §3.9 fields (unter_5mm, poren). Encodes §3.11 'keine Rhizomeindringungen' + §3.9 definition. VA-grade."
+    },
+    {
+      "id": "72e5fe64-dd11-45c5-9ebb-fe81ada098a5",
+      "code": "REQ-20",
+      "title": "Keine Rhizomdurchdringungen",
+      "condition": "rhizomdurchdringung_flaeche_count == 0 AND rhizomdurchdringung_naehte_count == 0",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "note": "Both symbols LOCAL → genuinely fireable. Exercised PASS (both 0 → pass) and FAIL (naehte=1 → fail). Encodes §3.10 + §3.11 'keine Rhizomdurchdringungen'. VA-grade. NOTE: covers only Fläche+Nähte durchdringung; the §8.2 'Arbeitsunterbrechungsfuge' pathway (for nicht-bahnenförmige Abdichtungen) has no durchdringung field/term — see FINDING F1."
+    }
+  ],
+
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "coverage-gap",
+      "title": "Durchdringung in Arbeitsunterbrechungsfuge is un-encoded (asymmetry vs ingress)",
+      "detail": "§8.2 records BOTH ein- (ingress) AND durchgedrungene (penetration) Rhizome 'getrennt für ... bei nicht bahnenförmigen Abdichtungen: die Fläche und die Arbeitsunterbrechungsfuge'. The ingress side has a field+gate term for the Arbeitsunterbrechungsfuge (rhizomeindringung_arbeitsfuge_count in REQ-19), but the DURCHDRINGUNG side (REQ-20) has only rhizomdurchdringung_flaeche_count and rhizomdurchdringung_naehte_count — there is NO rhizomdurchdringung_arbeitsfuge_count field or term. For a non-web/coating Abdichtung (Flüssigabdichtung, Gussasphalt, GUP), a penetration through the Arbeitsunterbrechungsfuge would not be captured by REQ-20 and would not block. This is a per-standard coverage gap, not a wrong constant.",
+      "quote": "§8.2: \"... werden ein- und durchgedrungene Rhizome ... getrennt für folgende Bereiche ... bei nicht bahnenförmigen Abdichtungen: die Fläche und die Arbeitsunterbrechungsfuge, falls diese erkennbar ist.\"",
+      "recommendation": "STAGED (written-not-applied) — see decisionItems D1. Do NOT auto-add: the encoder may deliberately treat Naht ≡ Arbeitsunterbrechungsfuge for penetration; needs human decision.",
+      "prodChange": false
+    },
+    {
+      "id": "F2",
+      "severity": "observation",
+      "title": "Gates evaluate at approval, not enforced at save — non-rhizomfest state persists via saveWorksheet",
+      "detail": "The FAIL chain (ingress=3, penetration=1) returned save.ok=true; saveWorksheet does not block a non-conformant data-collection state. This is the standard-wide gate-enforcement architecture (compliance_requirements evaluated at the approval gate, not on save) — expected for a data_collection worksheet, recorded for completeness. REQ-19/REQ-20 DO fire (fail) when evaluated, so the block is effective at the gate, not the keystroke.",
+      "quote": "n/a (architecture observation)",
+      "prodChange": false
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-cos_beta",
+      "detail": "FLLTP-RHZ-17 has 0 equations and no trig/cos_beta content, so the known math-function engine gap is not applicable here. No equation blocked."
+    },
+    {
+      "id": "R2",
+      "type": "VC-none",
+      "detail": "No VC (markdown-only) verdicts on this worksheet — every field, both gates, and both chains are PDF-confirmed VA-grade against §3.9/§3.10/§3.11/§8.2. No PDF-vs-markdown disagreement observed."
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "staged-migration-note",
+      "title": "Consider adding rhizomdurchdringung_arbeitsfuge_count + extending REQ-20 (F1)",
+      "detail": "IF the encoder intends the Arbeitsunterbrechungsfuge penetration pathway to be captured/blocked for nicht-bahnenförmige Abdichtungen, add a field rhizomdurchdringung_arbeitsfuge_count (number, Stk, not-required) to RHZ-17 and extend REQ-20 to '... AND rhizomdurchdringung_arbeitsfuge_count == 0'. STAGED as written-not-applied; requires human confirmation that Naht is not already treated as covering the Arbeitsunterbrechungsfuge for penetration. NOT applied to prod.",
+      "status": "written-not-applied"
+    },
+    {
+      "id": "D2",
+      "type": "range-surface (SR-2)",
+      "title": "No numeric RANGE inputs on this worksheet to surface",
+      "detail": "RHZ-17 records observed counts/depths (not spec ranges with a peak-vs-yearly ambiguity). §3.9's '≤ 5 mm' Hemmstoff threshold is a classification boundary embedded in a non-counted field label, not a point-value pick. No SR-2 auto-pick risk. Recorded for completeness."
+    }
+  ]
+}

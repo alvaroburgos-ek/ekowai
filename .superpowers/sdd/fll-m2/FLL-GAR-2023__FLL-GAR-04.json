@@ -1,0 +1,155 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-04",
+  "worksheetId": "0cb31398-bc37-49ef-bc59-8bbc85c6e07a",
+  "title_de": "Nutzungsfestlegung",
+  "pdf": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\GAR.txt",
+  "summary": "Data-capture worksheet: 0 equations, 4 own fields (Sec.4.1 + Sec.4.8), 4 compliance_requirements. All field clause_references and gate clause_references are PDF-attested (VA). Only REQ-04 references this worksheet's own fields; REQ-05/06/07 reference symbols that physically live on OTHER worksheets (GAR-05/06/09) and resolve via the project-wide fallback in checkApprovalGate. REQ-06 is severity=warn AND its condition does not parse (colon + prose) => MANUAL/vacuous => never enforces. All chains driven through the REAL saveWorksheet + REAL evaluateCondition + REAL checkApprovalGate on embedded PG (7/7 tests green).",
+  "equations": [],
+  "equationsNote": "No equations exist for FLL-GAR-04 in prod (SELECT returned []). Nutzungsfestlegung is a pure data-capture worksheet; the PDF Sec.4.1 lists usage-driven aspects (Funktion, Dimensionierung Volumen/Tiefe, Standort, Randausbildung) as qualitative determinations, no formula. VA: confirmed no formula in Sec.4.1/4.8.",
+  "fields": [
+    {
+      "symbol": "nutzung_funktion",
+      "id": "8a04c631-e317-49ef-bef6-8fd6387a26d8",
+      "data_type": "text",
+      "clause_reference": "Sec.4.1",
+      "verdict": "VA",
+      "quote": "GAR.txt l.1327-1329: 'Darüber hinaus ist die vorgesehene Nutzung des Gewässers zu bestimmen. Die Festlegung der Nutzung bestimmt u. a. folgende Aspekte: Funktion der Abdichtung (z. B. Löschwasserteich, ober- und unterirdische Regenrückhaltebecken);'",
+      "note": "Description 'E.g., Loeschwasserteich, ober-/unterirdisches RRB, Badeteich, Zierteich' matches the PDF's Funktion examples. Free-text field, validation_rules {raw:'free text'} — consistent with a qualitative Festlegung. consumer_worksheets=['All'] plausible (usage drives all downstream design)."
+    },
+    {
+      "symbol": "gewaesser_volumen_m3",
+      "id": "94f8677d-2e44-41d8-b57a-7f82015621b3",
+      "data_type": "number",
+      "unit": "m3",
+      "clause_reference": "Sec.4.1",
+      "verdict": "VA",
+      "quote": "GAR.txt l.1337: 'Dimensionierung (z. B. Volumen, Tiefe);'",
+      "note": "Volumen is an explicit Dimensionierung aspect in Sec.4.1. Unit m3 correct. validation_rules '> 0' sane. Consumers FLL-GAR-07/09 not contradicted by PDF (VC on the exact consumer routing — routing is an app-topology claim, not a standard claim)."
+    },
+    {
+      "symbol": "gewaesser_tiefe_m",
+      "id": "287b0643-ffca-41c2-9694-3328c279efc3",
+      "data_type": "number",
+      "unit": "m",
+      "clause_reference": "Sec.4.1",
+      "verdict": "VA",
+      "quote": "GAR.txt l.1337: 'Dimensionierung (z. B. Volumen, Tiefe);'",
+      "note": "Tiefe is an explicit Dimensionierung aspect in Sec.4.1. Unit m correct. validation_rules '> 0' sane."
+    },
+    {
+      "symbol": "hoechstwasserstand_m",
+      "id": "e94e513a-5b3f-4aba-86be-da548bf072d7",
+      "data_type": "number",
+      "unit": "m",
+      "clause_reference": "Sec.4.8",
+      "verdict": "VA",
+      "quote": "GAR.txt l.1634-1636 (Sec.4.8 Randausbildung): 'Die Abdichtung am Gewässerrand sollte i. d. R. im frei gestalteten Übergang zum angrenzenden Gelände dauerhaft mind. 5 cm höher sein als der vorgesehene Höchstwasserstand. Dies gilt auch für Schwimm- und Badeteiche.'",
+      "note": "Field clause_reference Sec.4.8 (NOT Sec.4.1 like the other three) is CORRECT: Höchstwasserstand and its 5-cm edge overheight are defined in Sec.4.8 Randausbildung, not Sec.4.1. Description 'drives edge height (>= 5 cm above)' verbatim-supported. consumer_worksheets=['FLL-GAR-23'] (Randausbildung) — topologically consistent (VC on exact routing)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "input-persistence-roundtrip (all 4 fields via REAL saveWorksheet)",
+      "ran": true,
+      "liveValue": "nutzung_funktion='Badeteich', gewaesser_volumen_m3=120, gewaesser_tiefe_m=2.0, hoechstwasserstand_m=1.95 — all persisted to project_parameters unchanged",
+      "pdfExpected": "no printed worked example (data-capture worksheet); values are illustrative Sec.4.1 examples (Badeteich is a named Nutzungsfunktion). Sanity: hoechstwasserstand_m (1.95) < gewaesser_tiefe_m (2.0), physically plausible.",
+      "verdict": "VC",
+      "raw": "saveWorksheet -> {ok:true}; SELECT value_number/value_text confirms round-trip. Test 'persists a Sec.4.1 Nutzungsfestlegung (Badeteich) via saveWorksheet' PASS."
+    }
+  ],
+  "gates": [
+    {
+      "id": "4822d51e-5bb8-45a3-bc8d-95a6651c71be",
+      "code": "REQ-04",
+      "severity": "block",
+      "condition": "gewaesser_tiefe_m IS NOT NULL AND gewaesser_volumen_m3 IS NOT NULL AND nutzung_funktion IS NOT EMPTY AND hoechstwasserstand_m IS NOT NULL",
+      "fired": true,
+      "vacuous": false,
+      "note": "PARSEABLE + LOCAL (all 4 symbols are this worksheet's own fields). Fired pass+fail through REAL evaluateCondition: all-present => PASS; any missing/empty => FAIL (existence is a total predicate — never pending). clause_reference Sec.4.1 VA (l.1327). Genuinely enforcing gate. Observation: IS NOT NULL/IS NOT EMPTY missing-symbol resolves to FAIL not PENDING — so this block gate WILL block engineer_approve until all four inputs are entered, which is the intended completeness guard."
+    },
+    {
+      "id": "3744d416-399b-4053-a940-73520c5d4e83",
+      "code": "REQ-05",
+      "severity": "block",
+      "condition": "IF abdichtungs_art IN {bahn_bitumen,bahn_kunststoff_elastomer,fluessigkunststoff,bahn_pe} THEN wassereinwirkungsklasse IS NOT NULL AND rissklasse IS NOT NULL AND standortklasse IS NOT NULL",
+      "fired": true,
+      "vacuous": false,
+      "note": "PARSEABLE guard. Symbols are CROSS-WORKSHEET: abdichtungs_art lives on FLL-GAR-09, wassereinwirkungsklasse/rissklasse/standortklasse live on FLL-GAR-05 (verified via prod query). checkApprovalGate resolves them via conflict-free project-wide fallback, so the guard IS live at the project level. Fired 3 states through REAL evaluateCondition: guard-true+classes-set => PASS; guard-true+class-empty => FAIL; guard-false => vacuous PASS. clause_reference 'Sec.6.1.1; Tab.18' VA (GAR.txt l.505/3686 Tab.18 lists Wassereinwirkungsklasse/Rissklasse/Standortbedingungen; l.3753-3755 Sec.6.1.1 names W1-B..W3-B, R0-B..R3-B, S1-B/S2-B). Not vacuous, but see decisionItem: enum-first seeded default of abdichtungs_art can silently satisfy/trip the guard in a real project."
+    },
+    {
+      "id": "e62c903f-ea96-4d3f-9e57-c5e7a0ca9042",
+      "code": "REQ-06",
+      "severity": "warn",
+      "condition": "if eisbildung_moeglich == true: documented ice-pressure protection",
+      "fired": false,
+      "vacuous": true,
+      "note": "VACUOUS/DEAD (CR-006 class) on TWO independent grounds: (1) severity='warn' => checkApprovalGate never even evaluates it (only severity='block' rows are loaded), and (2) the condition does not parse — 'if ... == true:' uses a colon + free-text body 'documented ice-pressure protection', which is NOT the IF..THEN grammar; the ':' char is not tokenized so tokenize() returns null => evaluateCondition => MANUAL. Fired true/false/absent ice states through REAL evaluateCondition: MANUAL in every state (never pass/fail). clause_reference Sec.4.4 is source-correct (GAR.txt l.1448-1449: 'Ist eine Eisbildung nicht auszuschließen, ist der Randbereich ... ggf. vor Eisdruck zu schützen.'), and eisbildung_moeglich physically lives on FLL-GAR-05 — but the gate can never mechanically fire. FINDING."
+    },
+    {
+      "id": "706fdfbf-ccba-405c-a51a-65b348206614",
+      "code": "REQ-07",
+      "severity": "block",
+      "condition": "setzungen_zu_erwarten IS NOT NULL AND baugrund_typ IS NOT EMPTY AND baugrund_tragfaehig IS NOT NULL",
+      "fired": true,
+      "vacuous": false,
+      "note": "PARSEABLE. Symbols are CROSS-WORKSHEET: setzungen_zu_erwarten/baugrund_typ/baugrund_tragfaehig all live on FLL-GAR-06 (Baugrund), NOT on GAR-04 (verified via prod query). Resolved via project-wide fallback. Fired pass+fail through REAL evaluateCondition: all-present => PASS; empty/missing => FAIL. clause_reference Sec.4.6 VA (GAR.txt l.1529-1543: Baugrund, Tragfähigkeit Ev2>=45 MPa, Verdichtungsgrad DPr>=97 %, plus l.1537 'ausreichende Tragfähigkeit'). Genuinely enforcing but on ANOTHER worksheet's inputs — see FINDING on gate placement."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "code": "REQ-06",
+      "title": "REQ-06 is a vacuous/dead gate (CR-006 class) — cannot mechanically fire",
+      "detail": "condition 'if eisbildung_moeglich == true: documented ice-pressure protection' does NOT parse (colon + prose body, not IF..THEN). evaluateCondition returns MANUAL in all states (verified true/false/absent). Additionally severity='warn' means checkApprovalGate never evaluates it. So the ice-pressure protection requirement of Sec.4.4 (GAR.txt l.1448-1449) is captured as a requirement row but never enforced or even surfaced as pass/fail. STAGED fix only (see decisionItems D1)."
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "code": "REQ-05 / REQ-06 / REQ-07",
+      "title": "Three of four gates on FLL-GAR-04 reference NO field of FLL-GAR-04 — gate placement is on the wrong worksheet",
+      "detail": "REQ-05 symbols live on GAR-05/GAR-09; REQ-06 on GAR-05; REQ-07 on GAR-06 (all verified via prod field query). Only REQ-04 uses GAR-04's own fields. The project-wide fallback in checkApprovalGate means REQ-05/REQ-07 still evaluate live (so they are not silently broken), but attaching Baugrund/Einwirkungsklassen/Eisdruck gates to the Nutzungsfestlegung template is a modelling smell: the engineer approving GAR-04 gets blocked by inputs owned by GAR-05/06/09, and the same requirements are (or should be) also gated on their home worksheets. This is a placement observation, NOT a numeric error. No fix staged; flagged for the encoder's single-owner review."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "kind": "VC-topology",
+      "detail": "consumer_worksheets routing (nutzung_funktion->['All'], gewaesser_volumen_m3->GAR-07/09, gewaesser_tiefe_m->GAR-05/09, hoechstwasserstand_m->GAR-23) is an app-topology claim not asserted by the standard text; not independently source-verifiable per SR-1. Marked VC. No downstream chain consumes these numerically on GAR-04 itself, so nothing computable was left un-run."
+    },
+    {
+      "id": "R2",
+      "kind": "engine-not-applicable",
+      "detail": "No cos_beta/trig or any math-function equation on this worksheet (0 equations). No engine-blocked residue for FLL-GAR-04."
+    },
+    {
+      "id": "R3",
+      "kind": "reporter-swallowed-log",
+      "detail": "The checkApprovalGate console.log('GAR04_APPROVAL_GATE', ...) line was not surfaced by vitest's default reporter, so the exact ok/failingBlockConditions payload was not captured verbatim. The gate CALL ran (test 'REAL checkApprovalGate' PASS) and the load-bearing assertion (REQ-04 NOT in failingBlockConditions) held. Deterministic reasoning: with only GAR-04 saved and other worksheets at seeded text/boolean defaults, REQ-07 fails (baugrund_typ default is empty text => IS NOT EMPTY false) => ok=false expected, but that is a seed-placeholder artifact, not a code defect."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "kind": "STAGED-fix (written-not-applied)",
+      "code": "REQ-06",
+      "detail": "To make REQ-06 enforceable, rewrite its condition into the supported grammar, e.g. 'IF eisbildung_moeglich == true THEN eisdruck_schutz IS NOT NULL' (requires an eisdruck_schutz carrier field) and/or promote severity warn->block if Sec.4.4 is to be a hard gate. Sec.4.4 text (GAR.txt l.1448-1449) says protection is conditional ('ggf.') on ice not being excludable, so warn severity may be intentional — this is a JUDGEMENT call for the engineer, hence a decision item not an auto-fix. NO prod write performed.",
+      "sqlSketch": "UPDATE compliance_requirements SET condition = 'IF eisbildung_moeglich == true THEN eisdruck_schutz IS NOT NULL' WHERE id='e62c903f-ea96-4d3f-9e57-c5e7a0ca9042'; -- STAGED, do not apply without the eisdruck_schutz field + engineer sign-off"
+    },
+    {
+      "id": "D2",
+      "kind": "SR-2 range surfaced (not auto-picked)",
+      "detail": "Sec.4.8 gives edge-overheight as a set of alternatives, NOT a single value: '>= 5 cm above Höchstwasserstand' at the frei gestalteter Übergang (l.1635); '30 cm above' at aufgehenden Bauteilen/Bauwerken (l.1644); reducible to '>= 15 cm' with angepasster Randbefestigung (l.1646-1647). FLL-GAR-04 only stores hoechstwasserstand_m and does not encode which overheight case applies — that choice (5 / 15 / 30 cm) belongs to the Randausbildung worksheet (FLL-GAR-23, the declared consumer). Surface as a decision: the applicable edge case must be picked per detail, not defaulted. No value auto-selected."
+    }
+  ],
+  "chainsRun": 1,
+  "checksPassed": 7,
+  "provenance": {
+    "prodStandardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+    "prodProject": "vadsmshzebefjreqcicl (read-only, Supabase MCP execute_sql)",
+    "harness": "embedded PG via tests/harness/_harness-env-fll-gar04.ts + seedFllGar (seed-fll-gar.ts), full 29-worksheet snapshot",
+    "testFile": "tests/harness/fll-gar04-verify.integration.test.ts",
+    "vitestResult": "Test Files 1 passed (1); Tests 7 passed (7); Duration ~6s. No prod writes."
+  }
+}

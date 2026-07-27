@@ -1,0 +1,134 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-07",
+  "worksheetTitle": "Düngemittel & Gießwasser-Eingangsprüfung",
+  "templateId": "516cefc1-2f36-40a9-a350-b728ee2663e9",
+  "standardId": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt (FLL Technische Prüfbestimmungen Rhizomfestigkeit Gewässerabdichtung 2023)",
+  "prodCounts": { "equations": 0, "compliance_requirements": 0, "fields": 16 },
+
+  "equations": [],
+
+  "fields": [
+    { "symbol": "duenger_n_prozent", "unit": "%", "verdict": "VA", "section": "B",
+      "quote": "§5.7 Düngemittel (S.15): \"Als Düngemittel ist ein wasserlöslicher, chloridarmer Mehrnährstoffdünger mit ca. 15 % N, 10 % P2O5, 15 % K2O, 2 % MgO vorzusehen\"",
+      "note": "N=ca.15 %. VA — PDF-confirmed. 'ca.' (approximate) target, not a hard limit; field is a plain number input with no bounding gate." },
+    { "symbol": "duenger_p2o5_prozent", "unit": "%", "verdict": "VA", "section": "B",
+      "quote": "§5.7: \"...ca. 15 % N, 10 % P2O5, 15 % K2O, 2 % MgO...\"",
+      "note": "P2O5=10 %. VA. Note: substrate Tab.1 also lists a 'P2O5' column but in [mg/l] (≤25) for the Vegetationstragschicht — a DIFFERENT quantity; this field maps to the fertilizer %-spec, not Tab.1. No contamination." },
+    { "symbol": "duenger_k2o_prozent", "unit": "%", "verdict": "VA", "section": "B",
+      "quote": "§5.7: \"...ca. 15 % N, 10 % P2O5, 15 % K2O, 2 % MgO...\"",
+      "note": "K2O=15 %. VA." },
+    { "symbol": "duenger_mgo_prozent", "unit": "%", "verdict": "VA", "section": "B",
+      "quote": "§5.7: \"...2 % MgO vorzusehen...\"",
+      "note": "MgO=2 %. VA." },
+    { "symbol": "duenger_spurelemente_vorhanden", "unit": null, "verdict": "VA", "section": "B",
+      "quote": "§5.7: \"...der zusätzlich die Spurennährelemente Eisen (Fe), Kupfer (Cu), Molybdän (Mo), Mangan (Mn), Bor (B) und Zink (Zn) enthält.\"",
+      "note": "Boolean 'trace elements present?'. VA — the standard requires 6 named trace elements. The field is a single yes/no and cannot capture the required SET of six; adequate as a presence flag only (see finding F-03)." },
+    { "symbol": "duenger_chloridarm", "unit": null, "verdict": "VA", "section": "B",
+      "quote": "§5.7: \"...ist ein wasserlöslicher, chloridarmer Mehrnährstoffdünger...\"",
+      "note": "Boolean 'chloride-low?'. VA — 'chloridarm' is a required property." },
+
+    { "symbol": "wasser_ammonium_mg_l", "unit": "mg/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 Anforderungen an die Wasserqualität, row 2: \"Ammonium  ≤ 0,5 mg/l\"",
+      "note": "Threshold ≤ 0,5 mg/l. VA. Limit not materialized as a gate (finding F-01)." },
+    { "symbol": "wasser_eisen_mg_l", "unit": "mg/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 3: \"Eisen  ≤ 0,2 mg/l\"",
+      "note": "≤ 0,2 mg/l. VA." },
+    { "symbol": "wasser_p_gesamt_mg_l", "unit": "mg/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 4: \"Gesamtphosphor (Pges)  ≤ 0,03 mg/l\"",
+      "note": "≤ 0,03 mg/l. VA. Field label 'P_gesamt' == Gesamtphosphor Pges." },
+    { "symbol": "wasser_haerte_mmol_l", "unit": "mmol/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 5: \"Härte (Summe Erdalkalien)  ≥ 1,0 mmol/l\" (\"entspricht Gesamthärte ≥ 5,6 dH°\")",
+      "note": "≥ 1,0 mmol/l (a LOWER bound — opposite direction to the other ≤ limits). VA. The dH° equivalent is a parallel unit statement, not a separate field." },
+    { "symbol": "wasser_leitfaehigkeit_uS_cm", "unit": "µS/cm", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 6: \"Leitfähigkeit  ≤ 1000,0 µS/cm bei 20 °C\"",
+      "note": "≤ 1000,0 µS/cm at 20 °C. VA. Field unit 'µS/cm' correct; the 'bei 20 °C' reference temperature is an unmodeled measurement condition (decisionItem D-03)." },
+    { "symbol": "wasser_mangan_mg_l", "unit": "mg/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 7: \"Mangan  ≤ 0,05 mg/l\"",
+      "note": "≤ 0,05 mg/l. VA." },
+    { "symbol": "wasser_nitrat_mg_l", "unit": "mg/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 8: \"Nitrat  ≤ 50,0 mg/l\"",
+      "note": "≤ 50,0 mg/l. VA." },
+    { "symbol": "wasser_ortho_phosphat_mg_l", "unit": "mg/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 9: \"ortho-Phosphat (Angabe P)  ≤ 0,01 mg/l\"",
+      "note": "≤ 0,01 mg/l. VA. Field label matches '(Angabe P)'." },
+    { "symbol": "wasser_ph", "unit": "-", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 10: \"ph-Wert  6,0 – 9,0\"",
+      "note": "RANGE 6,0-9,0 (both-sided). VA. SR-2: surfaced as decisionItem D-01, not auto-picked. Verify driver drove midpoint 7.5 ONLY to exercise persistence — not a source-picked value." },
+    { "symbol": "wasser_saurekapazitaet_mmol_l", "unit": "mmol/l", "verdict": "VA", "section": "C",
+      "quote": "§5.9 Tab.2 row 11: \"Säurekapazität KS4,3  ≥ 2,0 mmol/l\" (\"entspricht Carbonathärte ≥ 5,6 dH°\")",
+      "note": "≥ 2,0 mmol/l (LOWER bound). VA. Field label matches KS4,3." }
+  ],
+
+  "chains": [
+    {
+      "name": "saveWorksheet real-path persistence of all 16 §5.7/§5.9 threshold inputs",
+      "ran": true,
+      "liveValue": "16/16 fields round-tripped to project_parameters (14 numbers via value_number, 2 booleans via value_boolean); res.ok=true",
+      "pdfExpected": "n/a — worksheet has 0 equations, no computed output & no PDF worked example. This is a data-entry / input-inspection sheet; the 'chain' is persistence, sanity-checked against the §5.7/§5.9 verbatim thresholds.",
+      "verdict": "VC",
+      "raw": "pnpm vitest run --project integration tests/harness/verify-rhz07.integration.test.ts  (from C:\\Users\\Ekowai\\_wt-fll)\n RUN  v4.1.5 C:/Users/Ekowai/_wt-fll\n Test Files  1 passed (1)\n      Tests  1 passed (1)\n   Duration  16.74s\n(2 consecutive green runs. Two earlier runs failed on the default 5000ms testTimeout + an embedded-PG shared-memory crash '57P02 checkpointer process exited' — environmental flake, not a logic failure; resolved by setting an explicit 60s per-test timeout. Smoke seed-fll-rhizom.smoke.integration.test.ts also green 5/5.)"
+    }
+  ],
+
+  "gates": [],
+
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "high",
+      "title": "Zero materialized gates on an all-acceptance-criteria worksheet",
+      "detail": "Every one of the 16 fields carries a source-attested acceptance threshold from FLL §5.7 / §5.9 Tab.2 (13 one-sided limits ≤/≥, 1 two-sided range for pH, plus 2 required boolean properties). Yet FLLTP-RHZ-07 has 0 compliance_requirements in prod. Nothing enforces e.g. Nitrat ≤ 50,0 mg/l or pH ∈ [6,0; 9,0]; an out-of-spec Gießwasser/Düngemittel passes silently. This is the CR-006 unmaterialized-gate class applied to an entire input-inspection sheet. STAGED (not applied) — see decisionItems D-02 for the proposed compliance_requirements set."
+    },
+    {
+      "id": "F-02",
+      "severity": "info",
+      "title": "Zero equations — expected for this sheet",
+      "detail": "FLLTP-RHZ-07 is a pure input-inspection sheet (Eingangsprüfung); it has no derived value and no equation, correctly. Confirms nothing is wrongly missing on the equation side — the whole standard's only equations live on FLLTP-RHZ-13 (per seeder header). Not a defect; recorded so the 0-equation count is not mistaken for a gap."
+    },
+    {
+      "id": "F-03",
+      "severity": "low",
+      "title": "Trace-element requirement collapsed to a single boolean",
+      "detail": "§5.7 requires six specific trace elements (Fe, Cu, Mo, Mn, B, Zn). The field duenger_spurelemente_vorhanden is one yes/no flag and cannot attest the individual six. Adequate as a presence flag but under-specified vs the standard. Documentation-only; no fix proposed here."
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R-01",
+      "title": "Embedded-PG flake under back-to-back boots",
+      "detail": "The verify driver crashed twice with Postgres '57P02 — terminating connection because of crash of another server process / checkpointer process exited with exit code 1' when re-run rapidly, and separately hit the vitest default 5000ms testTimeout. Both are environmental (shared-memory crash of the disposable PG + too-tight default timeout), not logic. Mitigated with an explicit 60s per-test timeout; two consecutive green runs afterward. No engine/data change."
+    },
+    {
+      "id": "R-02",
+      "title": "cos_beta / trig — N/A here",
+      "detail": "FLLTP-RHZ-07 has no equations and no trig; the known math-function engine gap does not apply. Recorded per doctrine only to close it out for this worksheet."
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D-01",
+      "type": "SR-2 range",
+      "title": "pH acceptance is a RANGE, not a point",
+      "detail": "§5.9 Tab.2: pH 6,0 – 9,0 (verbatim). Do NOT auto-pick. Any gate on wasser_ph must be a two-sided band (>= 6.0 AND <= 9.0). The verify driver's 7.5 was a persistence probe only.",
+      "requiresHuman": true
+    },
+    {
+      "id": "D-02",
+      "type": "staged gate proposal (written-not-applied)",
+      "title": "Materialize the §5.7/§5.9 acceptance limits as block-severity compliance_requirements",
+      "detail": "STAGED for a later single controlled apply pass — NOT written to prod. Proposed one block gate per threshold on template 516cefc1-2f36-40a9-a350-b728ee2663e9, mirroring the wizard's supported condition grammar (single comparison per requirement; the pH band needs two requirements or a two-clause AND if grammar allows): wasser_ammonium_mg_l <= 0.5; wasser_eisen_mg_l <= 0.2; wasser_p_gesamt_mg_l <= 0.03; wasser_haerte_mmol_l >= 1.0; wasser_leitfaehigkeit_uS_cm <= 1000.0; wasser_mangan_mg_l <= 0.05; wasser_nitrat_mg_l <= 50.0; wasser_ortho_phosphat_mg_l <= 0.01; wasser_ph >= 6.0 AND wasser_ph <= 9.0; wasser_saurekapazitaet_mmol_l >= 2.0; duenger_chloridarm = true; duenger_spurelemente_vorhanden = true. Fertilizer N/P2O5/K2O/MgO are 'ca.' targets (approximate) — a tolerance band would have to be a human decision, so NOT proposed as hard gates (see D-03).",
+      "requiresHuman": true
+    },
+    {
+      "id": "D-03",
+      "type": "specification ambiguity",
+      "title": "Fertilizer %-values are 'ca.' (approximate); Leitfähigkeit limit carries a reference temperature",
+      "detail": "§5.7 says 'ca. 15 % N, 10 % P2O5, 15 % K2O, 2 % MgO' — 'ca.' means no exact conformance limit is defined; deciding a tolerance is a human call. Separately, §5.9 Leitfähigkeit ≤ 1000,0 µS/cm 'bei 20 °C' — the reference temperature is not captured by any field; whether to model it is a human decision.",
+      "requiresHuman": true
+    }
+  ]
+}

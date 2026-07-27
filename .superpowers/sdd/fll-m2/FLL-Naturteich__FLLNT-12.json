@@ -1,0 +1,156 @@
+{
+  "standard": "FLL-Naturteich (Guidelines for the Planning, Construction and Maintenance of Private Natural Swimming Pools, 2017 EN)",
+  "worksheet": "FLLNT-12 — Pflanzplan / Plants & Planting Plan (archetype: data_collection)",
+  "worksheet_template_id": "68730103-ba9f-42a5-8ded-48338ee0feeb",
+  "note_on_id": "The task called 68730103-... an 'instance id'; in prod it is the worksheet_TEMPLATE id. No worksheet_instance with that id exists in prod (it is a seeded fixture concept). All prod pulls were done against the template id.",
+  "pdf_source": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\Naturteich.txt (pdftotext -layout of the 2017 EN Naturteich PDF)",
+
+  "equations": [],
+  "equations_note": "0 equations on this template (confirmed via prod: SELECT ... FROM equations WHERE worksheet_template_id = template → []). Matches task expectation (0). data_collection archetype — no derived outputs, so no formula/constant/symbol verification applies and no cos_beta/trig residue.",
+
+  "chains": [
+    {
+      "name": "FLLNT-12 field persistence via REAL saveWorksheet",
+      "ran": true,
+      "liveValue": "saved=6; project_parameters read-back: plant_density_submerged_per_m2=8, plant_density_marsh_small_per_m2=4, plant_density_marsh_medium_per_m2=6, pre_maturity_care_provided=true, planting_completion_date=2026-05-15, plant_species_list={rows:[...]} (json persisted, truthy)",
+      "pdfExpected": "No worked numeric example in the standard (data_collection worksheet). Entered densities chosen WITHIN the source ranges (submerged 6-10, half/tall marsh 3-5, medium/tall marsh 5-7 plants/m²) to exercise persistence; values are test inputs, not source-attested scalars.",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll | Test Files 1 passed (1) | Tests 4 passed (4) | Duration ~4.5s. Verbose: ✓ FLLNT-12 saveWorksheet chain (data_collection) > persists all 6 fields through the real saveWorksheet path 83ms. (embedded-PG NOTICE lines about FK identifier truncation are harness schema noise, not failures.)"
+    },
+    {
+      "name": "REQ-25 gate PASS state (attest_fllnt_12_req_25 == true)",
+      "ran": true,
+      "liveValue": "evaluateCondition -> { kind: 'pass' }",
+      "pdfExpected": "Attestation gate; no numeric example. Fires pass when attest driver is true.",
+      "verdict": "VC",
+      "raw": "✓ FLLNT-12 gate REQ-25 > PASS state: attest = true 1ms"
+    },
+    {
+      "name": "REQ-25 gate FAIL state (attest_fllnt_12_req_25 == false)",
+      "ran": true,
+      "liveValue": "evaluateCondition -> { kind: 'fail' }",
+      "pdfExpected": "Gate must be violable — fires fail when attest driver is false.",
+      "verdict": "VC",
+      "raw": "✓ FLLNT-12 gate REQ-25 > FAIL state: attest = false 0ms"
+    },
+    {
+      "name": "REQ-25 gate PENDING state (driver missing)",
+      "ran": true,
+      "liveValue": "evaluateCondition -> { kind: 'pending', missingSymbols: ['attest_fllnt_12_req_25'] }",
+      "pdfExpected": "Gate reports pending (blocks approval) when the attestation is unanswered.",
+      "verdict": "VC",
+      "raw": "✓ FLLNT-12 gate REQ-25 > PENDING state: attest missing 0ms"
+    }
+  ],
+
+  "gates": [
+    {
+      "id": "REQ-25 (204d41f2-dde8-4433-9db4-dab57774d2f4)",
+      "condition": "attest_fllnt_12_req_25 == True",
+      "severity": "block",
+      "requires_attestation": true,
+      "fired": true,
+      "vacuous": false,
+      "note": "NOT vacuous/dead: pass (true), fail (false) and pending (missing) all reachable and demonstrated through the real evaluateCondition. Parses cleanly (aref == abool-literal → compare node). This is an engineer-attestation gate: the driver field attest_fllnt_12_req_25 IS present in prod (field 469d4f03-..., data_type boolean, is_required true, section_id NULL). MINOR NOTE (not a finding): the harness seeder omits attest_fllnt_12_req_25 from FLLNT-12's field list (6 fields vs 7 in prod), so in-harness the gate driver is not a seeded field — evaluated the gate directly via the evaluator with an explicit lookup instead. Condition/clause coherence OK: description cites §10.4/§10.4.4/§10.4.5 but source_quote is the §10.4 native/invasive-species sentence — quote is narrower than the description scope (see findings)."
+    }
+  ],
+
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "low",
+      "type": "quote-scope-mismatch",
+      "target": "compliance_requirements REQ-25.source_quote vs REQ-25.description/clause_reference",
+      "detail": "REQ-25.description covers three obligations (plants placed per §10.4; ready-for-acceptance per §10.4.4; pre-maturity care per §10.4.5) and clause_reference='§10.4 / §6.2.2', but source_quote only carries the §10.4 native-species sentence ('plant species native to Central Europe must be favoured and in particular, no invasive alien species (non-indigenous species) are to be used.'). The quote is VERBATIM-correct (PDF lines 1544-1545) but does not substantiate the §10.4.4/§10.4.5/§6.2.2 parts of the requirement, nor the invasive-species obligation as a machine-checkable condition (the gate only checks a boolean attestation, which is acceptable for an attestation gate). Also §6.2.2 in clause_reference is not evidenced by any attached quote. No prod write proposed; flagged for source-quote enrichment."
+    },
+    {
+      "id": "F2",
+      "severity": "info",
+      "type": "seeder-vs-prod field-count drift",
+      "target": "tests/harness/seed-fll-naturteich.ts FLLNT-12 field list",
+      "detail": "Prod FLLNT-12 has 7 fields (6 data + attest_fllnt_12_req_25 driver); the harness seeder seeds only the 6 data fields and omits the attestation driver. Consequence: an in-harness saveWorksheet cannot set the gate driver, so REQ-25 could not be fired end-to-end through persisted project_parameters — it was fired through the evaluator directly instead. Not a prod defect; a fixture completeness gap for anyone wanting a fully DB-driven gate run on this worksheet."
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R1",
+      "type": "VC-only value grade",
+      "detail": "All chain values are VC (markdown/text-extraction convenience + test inputs), NOT VA. The standard prints NO worked numeric example for FLLNT-12, so no live result can be asserted against a source-printed value. Density ranges themselves are PDF-confirmed (VA-grade quotes below) but the specific persisted numbers (8/4/6) are chosen test inputs."
+    },
+    {
+      "id": "R2",
+      "type": "PDF-vs-rendered-PDF",
+      "detail": "Verification used the pdftotext -layout extraction (Naturteich.txt), i.e. markdown-tier per SR-3. The rendered PDF page (§10.4.3, p.57) was not re-opened image-wise this run. Range quotes are textually unambiguous and page-anchored (p.57 footer at line 2910), but strictly they are VC until confirmed against the rendered page; treat density-range quotes as high-confidence-VC."
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "SR-2 range — plant density (submerged)",
+      "clause": "§10.4.3",
+      "range": "6 – 10 plants per m² of planting surface area",
+      "verbatim": "•   submerged plants                                                   6 – 10 plants;",
+      "basis_verbatim": "The aforementioned number of plants applies to pot plants P 0.5 (500 cm³).",
+      "pdf_anchor": "Naturteich.txt lines 2876-2883 (§10.4.3 'Diversity of species, plant density', p.57)",
+      "grade": "VA-textquote (range surfaced, NOT auto-picked)",
+      "note": "Field plant_density_submerged_per_m2 validation_rules.raw = '6–10 plants/m² per §10.4.3 (P 0.5 pot plants)' — MATCHES source exactly (range + pot basis). No point value should be auto-selected; engineer picks per design."
+    },
+    {
+      "id": "D2",
+      "type": "SR-2 range — plant density (half-height to tall marsh & aquatic)",
+      "clause": "§10.4.3",
+      "range": "3 – 5 plants per m²",
+      "verbatim": "•   half-height to tall marsh and aquatic plants                       3 – 5 plants;",
+      "pdf_anchor": "Naturteich.txt line 2879 (§10.4.3, p.57)",
+      "grade": "VA-textquote",
+      "note": "Field plant_density_marsh_small_per_m2 validation_rules.raw = '3–5 plants/m² per §10.4.3' — MATCHES source. Label EN 'Plant density — half-height to tall marsh' matches the source bullet. Range surfaced; not auto-picked."
+    },
+    {
+      "id": "D3",
+      "type": "SR-2 range — plant density (medium height to tall marsh & aquatic)",
+      "clause": "§10.4.3",
+      "range": "5 – 7 plants per m²",
+      "verbatim": "•   medium height to tall marsh and aquatic plants                     5 – 7 plants;",
+      "pdf_anchor": "Naturteich.txt line 2880 (§10.4.3, p.57)",
+      "grade": "VA-textquote",
+      "note": "Field plant_density_marsh_medium_per_m2 validation_rules.raw = '5–7 plants/m² per §10.4.3' — MATCHES source. Range surfaced; not auto-picked. NOTE the source labels overlap conceptually (half-to-tall 3-5 vs medium-to-tall 5-7); the two fields correctly preserve the two distinct source bullets."
+    },
+    {
+      "id": "D4",
+      "type": "SR-2 range — maturity-attainment timing (informational; not a FLLNT-12 field but governs §10.4.4 in REQ-25 description)",
+      "clause": "§10.4.4",
+      "range": "approx. 4 – 8 weeks (planted in vegetation period) / approx. 4 – 6 weeks after next vegetation period (planted outside)",
+      "verbatim": "• after approximately 4 - 8 weeks if the plants are planted during the vegetation period ... ; • approximately 4 - 6 weeks after the next vegetation period begins if the plants are planted outside the vegetation period.",
+      "pdf_anchor": "Naturteich.txt lines 2916-2919 (§10.4.4, p.57-58)",
+      "grade": "VA-textquote",
+      "note": "No FLLNT-12 field encodes these ranges; surfaced because REQ-25 references §10.4.4. Decision only if a future field/gate wants to encode the maturity window — do not auto-pick."
+    },
+    {
+      "id": "D5",
+      "type": "quote enrichment decision (from F1) — STAGED, not applied",
+      "target": "REQ-25.source_quote / clause_reference",
+      "note": "Proposed (written-not-applied): broaden REQ-25.source_quote to also cover §10.4.4 ('planting is completed with this pre-maturity care stage until the status \"ready for acceptance inspection\" has been attained', lines 2901-2903) and §10.4.5 ('We recommend allowing the installation firm to perform the pre-maturity care of the plants', line 2927), and verify/justify the §6.2.2 reference or drop it. NO prod write performed — read-only run. Single controlled apply pass later."
+    }
+  ],
+
+  "prod_pull_summary": {
+    "equations": 0,
+    "compliance_requirements": 1,
+    "fields": 7,
+    "fields_detail": "6 data fields (plant_species_list json/req, planting_completion_date date/req, pre_maturity_care_provided boolean/req, plant_density_submerged_per_m2 number/opt, plant_density_marsh_small_per_m2 number/opt, plant_density_marsh_medium_per_m2 number/opt) + 1 attestation driver attest_fllnt_12_req_25 (boolean/req, section NULL). Task said 7 fields — confirmed."
+  },
+  "verbatim_quotes": {
+    "native_invasive_species_REQ25": "more, plant species native to Central Europe must be favoured and in particular, no invasive alien species (non-indigenous species) are to be used. [Naturteich.txt lines 1544-1545]",
+    "density_intro": "For plant density, the following number of plants applies as an approximate value per m² of planting surface area: [lines 2876-2877]",
+    "pot_basis": "The aforementioned number of plants applies to pot plants P 0.5 (500 cm³). [line 2883]"
+  },
+  "doctrine_flags": {
+    "SR1": "Every value claim carries a verbatim PDF quote from THIS run; no reliance on prior logs.",
+    "SR2": "All four source ranges surfaced as decisionItems D1-D4; none auto-picked.",
+    "SR3": "Verification done on pdftotext extraction (markdown-tier) → density-range quotes graded high-confidence-VC (R2); no rendered-page disagreement observed.",
+    "no_prod_writes": "true — read-only Supabase MCP only; F1/D5 correction STAGED as written-not-applied.",
+    "cos_beta_trig": "N/A — 0 equations."
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": {
+    "code": "FLLTP-RHZ-02",
+    "id": "8586354e-f0f9-49a8-a49e-b0661e7d57bc",
+    "title_de": "Produkt- und Herstellerangaben",
+    "title_en": "Product and manufacturer data",
+    "archetype": "data_collection",
+    "standardId": "d0a661ab-c448-4c97-baf1-fd860fd9adca"
+  },
+  "counts": { "equations": 0, "fields": 9, "gates": 2 },
+  "equations": [],
+  "chains": [
+    {
+      "name": "data-collection save path (no equations)",
+      "ran": true,
+      "liveValue": "save.ok === true; 7 fields UPSERTed to project_parameters via REAL saveWorksheet against embedded PG",
+      "pdfExpected": "n/a — FLLTP-RHZ-02 has 0 equations; §6/§8 print a manufacturer-data form (Musterprüfbericht Seite 2, PDF lines 1048-1067) with no worked numeric example",
+      "verdict": "VC",
+      "raw": "PASS-STATE save.ok=true; both gates evaluated over persisted RHZ-02 project_parameters. No numeric worked example exists in the standard for this data-collection sheet, so the save is sanity-checked (persists + read-back) rather than asserted against a printed figure."
+    }
+  ],
+  "gates": [
+    {
+      "id": "4ec40bc4-54a9-4cc9-8657-d3faa740040f",
+      "code": "REQ-03",
+      "title_de": "Wachstumshemmende Wirkstoffe gekennzeichnet",
+      "condition": "wachstumshemmende_wirkstoffe != null",
+      "clause_reference": "§3.9",
+      "severity": "block",
+      "fired": true,
+      "vacuous": true,
+      "note": "VACUOUS / DEAD block gate (CR-006 class). Evaluated through the REAL evaluateCondition across every reachable value of the required boolean wachstumshemmende_wirkstoffe: true->pass, false->pass, absent->pending. It NEVER returns 'fail'. Since the field is is_required=true, it is always non-null once saved, so the gate never discriminates and can never block. The regulatory INTENT (§3.9: growth-inhibitor products must be declared by the manufacturer at test start) is real and correctly clause-mapped, but 'field != null' on a required boolean encodes presence, which the required-flag already guarantees -> zero enforcement value."
+    },
+    {
+      "id": "2b3475a4-f4d7-4979-8687-c45841f8055f",
+      "code": "REQ-04",
+      "title_de": "Mehrschichtprodukt: Schutzschicht definiert",
+      "condition": "mehrschichtprodukt == false OR (schutzschicht_definition != null)",
+      "clause_reference": "§3.9",
+      "severity": "block",
+      "fired": true,
+      "vacuous": true,
+      "note": "NOT hard-fireable. Exercised through the REAL evaluateCondition across all 6 reachable (mehrschichtprodukt, schutzschicht_definition) combos: {false,*}->pass; {true,null}->pending; {true,''}->pending; {true,'Deckschicht'}->pass. NO combo yields 'fail'. The intended block state (multilayer product with protective layer undefined) resolves to 'pending', not 'fail', because the DSL (src/lib/compliance/evaluate.ts) treats both SQL NULL and empty string as *missing* in the compare node, so 'schutzschicht_definition != null' is never a satisfiable false -> the OR is false-OR-missing -> pending. Driven live through saveWorksheet: persisted schutzschicht_definition=null in the multilayer state, DB-state eval returned {kind:'pending', missingSymbols:['schutzschicht_definition']}. Clause mapping (§3.9 / reinforced §6) is correct and PDF-confirmed; the FINDING is the encoding mechanism, whose block intent is unreachable."
+    }
+  ],
+  "findings": [
+    {
+      "id": "FND-RHZ02-1",
+      "severity": "high",
+      "class": "vacuous-gate (CR-006)",
+      "target": "compliance_requirements REQ-03 (id 4ec40bc4-54a9-4cc9-8657-d3faa740040f)",
+      "detail": "Block gate 'wachstumshemmende_wirkstoffe != null' can never return 'fail' (true->pass, false->pass, absent->pending) and the underlying field is is_required=true, so it is always present. Dead/vacuous gate with no enforcement power. Proven live through the real evaluateCondition (test: proves REQ-03 is VACUOUS).",
+      "pdf": "VA — §3.9 (PDF lines 450-454): 'In die Fläche oder Naht bzw. Arbeitsunterbrechungsfuge <= 5 mm eingewachsene Rhizome bei Produkten, die wachstumshemmende Wirkstoffe enthalten ... sind solche Produkte vom Hersteller zu Pruefungsbeginn eindeutig als \"mit wachstumshemmenden Wirkstoffen versehen\" zu definieren.'",
+      "suggested_fix": "STAGED (not applied). To make the gate meaningful, either (a) drop it as pure duplication of the is_required flag, or (b) if the intent is 'a growth-inhibitor product must also carry a declaration/attestation', re-encode as a cross-field guard, e.g. 'IF wachstumshemmende_wirkstoffe == true THEN <declaration_field> IS NOT EMPTY'. Requires a declaration field that does not currently exist on RHZ-02."
+    },
+    {
+      "id": "FND-RHZ02-2",
+      "severity": "high",
+      "class": "unfireable-block-condition",
+      "target": "compliance_requirements REQ-04 (id 2b3475a4-f4d7-4979-8687-c45841f8055f)",
+      "detail": "Block gate 'mehrschichtprodukt == false OR (schutzschicht_definition != null)' cannot return 'fail' in any reachable state. Its intended block case (multilayer product, protective layer undefined) resolves to 'pending' because the evaluate.ts compare node maps NULL and '' to missing, so 'X != null' is never a satisfiable false. Proven live via saveWorksheet + evaluateCondition across all 6 combos (test: drives a would-be-FAIL state for REQ-04).",
+      "pdf": "VA — §3.9 (PDF lines 455-459): 'Eingewachsene Rhizome in die Flaeche von mehrschichtigen Produkten ... wenn die Schicht, welche den Ein- und Durchdringungsschutz uebernimmt, dabei nicht beschaedigt wird. Um eine derartige Bewertung zu ermoeglichen, ist diese Schicht vom Hersteller zu Pruefungsbeginn eindeutig festzulegen.' Reinforced §6 (PDF lines 718-721): '... vom Hersteller zu Pruefbeginn eindeutig festzulegen, welche Schicht den Ein- und Durchdringungsschutz uebernimmt.'",
+      "suggested_fix": "STAGED (not applied). Re-encode using the DSL's existence grammar so the empty/NULL case fails instead of going pending: 'mehrschichtprodukt == false OR schutzschicht_definition IS NOT EMPTY'. (evaluate.ts 'exists' node returns false->fail for empty/NULL, whereas the compare node returns missing->pending.) Equivalently a guarded form 'IF mehrschichtprodukt == true THEN schutzschicht_definition IS NOT EMPTY'. This is a migration note only; no prod write performed."
+    },
+    {
+      "id": "FND-RHZ02-3",
+      "severity": "low",
+      "class": "clause-reference-drift (field metadata)",
+      "target": "fields produktbezeichnung (§2,§8), hersteller_name (§8)",
+      "detail": "Field clause_reference cites '§8' for manufacturer/product data, but in the RENDERED PDF section 8 is 'Auswertung' (evaluation). The manufacturer/product-data content actually lives in section 6 'Probenahme und Angaben des Herstellers' (PDF lines 693-721) and the Musterpruefbericht form on Seite 2 (PDF lines 1048-1067). The '§2' cite (Geltungsbereich, scope + sealing types + separate-sublayer rule) is correct. Field metadata only; no equation/gate impact.",
+      "pdf": "VA — §6 header 'Probenahme und Angaben des Herstellers' (PDF line 693); manufacturer-data list (PDF lines 707-716); §8 header is 'Auswertung' (PDF line 862).",
+      "suggested_fix": "STAGED (not applied). Optionally correct the §8 field clause_reference to §6 (and/or the Musterpruefbericht Seite 2). Cosmetic provenance fix; does not change behavior."
+    }
+  ],
+  "residue": [
+    {
+      "id": "RES-RHZ02-1",
+      "kind": "no-equations",
+      "detail": "FLLTP-RHZ-02 has 0 equations in prod (confirmed by SQL). No compute chain exists to drive; the only executable path is the data-collection save + the 2 gates, both of which were driven live. cos_beta/trig residue N/A (no trig equations anywhere in FLL-TP-RHIZOM)."
+    },
+    {
+      "id": "RES-RHZ02-2",
+      "kind": "no-worked-example",
+      "detail": "The standard prints no worked numeric example for this data-collection sheet (the Musterpruefbericht is a blank form). The save-path chain is therefore recorded VC (sanity-checked persist + read-back) rather than asserted against a printed figure."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "DEC-RHZ02-1",
+      "kind": "range",
+      "field": "abdichtungsart",
+      "detail": "SR-2: §2 enumerates a SET of admissible sealing types (Bitumenbahnen; Kunststoff- und Elastomerbahnen; Fluessigabdichtungen; Gussasphalt; GUP-Beschichtungen — PDF lines 315-319). The enum encodes 6 options (splitting Kunststoff/Elastomer into two). This is a set, not a numeric range, and is surfaced for confirmation rather than auto-narrowed. No point-pick required.",
+      "pdf": "VA — §2 (PDF lines 314-320)."
+    },
+    {
+      "id": "DEC-RHZ02-2",
+      "kind": "staged-fix-apply",
+      "detail": "Apply the two STAGED gate re-encodings (FND-RHZ02-1 REQ-03, FND-RHZ02-2 REQ-04) in a single controlled migration pass. REQ-04 fix is mechanical (compare '!= null' -> 'IS NOT EMPTY' or guarded IF/THEN). REQ-03 needs a product decision: drop the gate (pure duplicate of is_required) OR add a declaration field + guarded condition. Read-only prod this run; nothing written."
+    },
+    {
+      "id": "DEC-RHZ02-3",
+      "kind": "clause-ref-fix",
+      "detail": "Confirm whether to correct the §8 field clause_reference on produktbezeichnung/hersteller_name to §6 (FND-RHZ02-3). Cosmetic provenance only."
+    }
+  ],
+  "provenance": {
+    "sr1_verbatim_source": "FLL TP Rhizomfestigkeit Gewaesserabdichtungen, Ausgabe 2023 (PDF), section 3.9 (lines 439-461), section 6 (lines 693-721), section 2 (lines 307-343), Musterpruefbericht (lines 1013-1074). Read this run from .superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt (VC where markdown-only) cross-checked against the rendered PDF text.",
+    "sr3_note": "PDF text (pdftotext -layout of fll_tp_rhizomfestigkeit_...pdf) is ground truth; the .txt snapshot matched.",
+    "live_run": "REAL saveWorksheet + REAL evaluateCondition against a disposable embedded Postgres seeded by seedFllRhizom (whole standard). Test file: tests/harness/verify-fll-rhizom-rhz02.integration.test.ts. Result: 3/3 passed.",
+    "no_prod_write": true
+  },
+  "vitest_raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\nintegration tests/harness/verify-fll-rhizom-rhz02.integration.test.ts (3 tests) ok\n  PASS-STATE  REQ-03: {\"kind\":\"pass\"}  REQ-04: {\"kind\":\"pass\"}\n  FAIL-STATE(from DB)  REQ-03: {\"kind\":\"pass\"}  REQ-04: {\"kind\":\"pending\",\"missingSymbols\":[\"schutzschicht_definition\"]}\n  persisted schutzschicht_definition = null\n  REQ-04 across combos: [{\"m\":false,\"s\":null,\"kind\":\"pass\"},{\"m\":false,\"s\":\"\",\"kind\":\"pass\"},{\"m\":false,\"s\":\"Deckschicht\",\"kind\":\"pass\"},{\"m\":true,\"s\":null,\"kind\":\"pending\"},{\"m\":true,\"s\":\"\",\"kind\":\"pending\"},{\"m\":true,\"s\":\"Deckschicht\",\"kind\":\"pass\"}]\n  REQ-03 vacuity  true: pass  false: pass  absent: pending\nTest Files  1 passed (1)\nTests  3 passed (3)"
+}

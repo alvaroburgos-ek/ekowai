@@ -252,3 +252,25 @@ W3-D12 DONE 2026-07-27 — DIN-14021 27 heading-as-evidence CRs backfilled, rule
         not decided.
 
 NEXT: A178-D8 (6 NULL-quote CRs), then DWA-M-102-4 (2 live errors) per the ranked queue.
+
+# ============================================================
+# WAVE BOUNDARY 2026-07-27 -> .superpowers/sdd/wave3-BOUNDARY-2026-07-27.md
+# ============================================================
+A-178 EQUATION SWEEP: all 13 equations verified vs the printed page (16-agent workflow,
+        adversarial refute). 11 FAITHFUL / 1 refuted-away / 1 STANDARD-DEFECT /
+        **0 SOURCE-SETTLED FIXES**. Nothing applied - correct outcome, not missing work.
+        3 REVERSALS of my own findings, all toward MORE severe: F-2 mechanism wrong
+        (SUM throw is specified intent, degrades to manual_required BY DESIGN); F-2
+        conclusion wrong (B_RBF_zu CANNOT be hand-entered - isComputed locks it and the
+        write-back effect NULLS it, proven on the real hook); F-4 multi-producer is the
+        ACTUAL root blocker and is FAITHFUL encoding (selector data already exists, the
+        ENGINE MECHANISM is missing). SUM_over_i and VQ_DR_RBF_zu are each sufficient
+        blockers but NEITHER IS NECESSARY.
+WORKFLOW METRIC (first ever): A-178 = 14 of 19 worksheets runnable, 5 blocked (the design
+        spine A178-09->10->11 + 13 + 15). Only Gl.8/11/12 compute in prod.
+MAP WRITE-BACK applied retroactively: 51 nodes stamped. Idempotency bug caught by RE-RUNNING
+        (duplicate fixed:: lines), de-duplicated + guard fixed + re-verified. 30 of 81 fixes
+        have NO map node - all of DIN-14021 (17 nodes for 50 CRs), 2.cr-db-has-node class.
+CORPUS: 3978 nodes / ERRORS 3345 / WARNINGS 1033 / rule 10a=0 / rule 10b=4. SHEET: 39 open.
+RESUME: (1) A178-D8 6 NULL-quote CRs (2) validator rule for display-vs-enforcement asymmetry
+        (3) build DIN-14021's 30 missing CR nodes (4) DWA-M-102-4. A-178 NOT closed.

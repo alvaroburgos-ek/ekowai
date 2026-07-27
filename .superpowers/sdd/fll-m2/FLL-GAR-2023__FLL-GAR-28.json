@@ -1,0 +1,149 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-28",
+  "worksheetTitle": "Instandhaltung (Inspektion / Wartung / Instandsetzung)",
+  "templateId": "a7fbec25-51c8-4006-a2c3-53488236e763",
+  "standardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "archetype": "verification",
+  "verifiedRun": "2026-07-23",
+  "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/GAR.txt (Sec.13 = PDF l.6371-6469)",
+  "equations": [],
+  "equationsNote": "0 equations in prod for this worksheet (verification/data-capture archetype). No formulas to verify; no cos_beta/trig residue.",
+  "fields": [
+    {
+      "id": "222a6d80-5d92-4144-8760-595063dc2432",
+      "symbol": "inspektion_intervall_jahr",
+      "data_type": "number",
+      "unit": "Jahr",
+      "clause_reference": "Sec.13.1",
+      "verdict": "VA",
+      "quote": "13.1 Inspektion — 'Für die Instandhaltung sind in regelmäßigen Abständen (z. B. mindestens einmal im Jahr) Inspektionen vorzusehen, um die Funktion der Abdichtung zu überprüfen.' (GAR.txt l.6390-6393)",
+      "note": "Number field for the inspection interval in years; gated by REQ-29 <= 1. Sec.13.1 clause reference PDF-confirmed. VA."
+    },
+    {
+      "id": "1c4e3fa2-7dba-433e-985a-2f9aff9035f5",
+      "symbol": "inst_inspektionsintervall",
+      "data_type": "text",
+      "clause_reference": "§16",
+      "verdict": "VC",
+      "quote": "Concept present at Sec.13.1 (inspection interval) but the §16 clause label is a FORM_TEMPLATE artifact, not a GAR section (GAR has no §16; Instandhaltung = Abschnitt 13, cf. l.1792 'Abschnitt 13').",
+      "note": "FINDING candidate: duplicate of inspektion_intervall_jahr (same concept, text vs number). Un-gated, un-consumed."
+    },
+    {
+      "id": "645ef5e8-3669-4bfb-8e14-8237a83fa625",
+      "symbol": "inst_wartungsintervall",
+      "data_type": "text",
+      "clause_reference": "§16",
+      "verdict": "VA",
+      "quote": "13.2 Wartung — 'Das Wartungskonzept sollte mindestens folgende Punkte enthalten: ... Wartungsintervalle; Zeitpunkt der Wartung;' (GAR.txt l.6441-6445)",
+      "note": "Maintenance interval is a required element of the Wartungskonzept per Sec.13.2. Concept VA; §16 clause label is a form-template artifact (VC on the label only)."
+    },
+    {
+      "id": "9743dcd8-aad0-4912-89b9-866731729e02",
+      "symbol": "inst_qualifikation_pruefer",
+      "data_type": "text",
+      "clause_reference": "§16",
+      "verdict": "VC",
+      "quote": "Sec.13 assigns inspection tasks (13.1) but does NOT print an explicit inspector-qualification requirement in the Sec.13 body; 'fachgerechte Wartung' (l.6430) implies competence but no verbatim qualification clause. §16 label is a form-template artifact.",
+      "note": "Reasonable capture field; not backed by a verbatim Sec.13 qualification requirement. VC."
+    },
+    {
+      "id": "4c8c841f-4b3f-49d8-b6e5-d06a4b48661c",
+      "symbol": "inst_protokollierung",
+      "data_type": "text",
+      "clause_reference": "§16",
+      "verdict": "VA",
+      "quote": "13.1 Inspektion — 'Die Ergebnisse der Inspektion sind schriftlich zu dokumentieren.' (GAR.txt l.6416-6417)",
+      "note": "Documentation/protocol method is required by Sec.13.1 (schriftlich zu dokumentieren). Concept VA; §16 clause label is a form-template artifact."
+    }
+  ],
+  "chains": [
+    {
+      "name": "saveWorksheet persistence — yearly Instandhaltungskonzept (interval=1, all 5 fields)",
+      "ran": true,
+      "liveValue": "inspektion_intervall_jahr=1; inst_inspektionsintervall='jährlich'; inst_wartungsintervall='halbjährlich'; inst_qualifikation_pruefer='Fachbetrieb GaLaBau'; inst_protokollierung='schriftliches Inspektionsprotokoll'",
+      "pdfExpected": "No printed worked example (data-capture worksheet). Sanity: interval=1 satisfies Sec.13.1 'mindestens einmal im Jahr'.",
+      "verdict": "VC",
+      "raw": "PASS — persists a Sec.13 Instandhaltungskonzept (yearly inspection) via saveWorksheet 485ms"
+    },
+    {
+      "name": "saveWorksheet re-save overwrite — too-long interval (2 yr)",
+      "ran": true,
+      "liveValue": "inspektion_intervall_jahr=2 (persisted, overwrote prior 1)",
+      "pdfExpected": "No printed example; confirms upsert semantics on project_parameters.",
+      "verdict": "VC",
+      "raw": "PASS — re-save with a too-long interval overwrites (2-yearly) 10ms"
+    }
+  ],
+  "gates": [
+    {
+      "id": "c51535ef-bac3-4b78-9ead-cccd82728a1f",
+      "code": "REQ-29",
+      "condition": "inspektion_intervall_jahr <= 1",
+      "severity": "block",
+      "clause_reference": "Sec.13",
+      "fired": true,
+      "vacuous": false,
+      "exercised": {
+        "pass_interval_1": "pass",
+        "pass_interval_0.5": "pass",
+        "fail_interval_2": "fail",
+        "absent_symbol": "pending"
+      },
+      "note": "Real evaluateCondition fired in pass (=1, =0.5), fail (=2), and pending (absent) states. NOT vacuous/dead — a total numeric comparison on a single carrier. Threshold <=1 (year) is PDF-attested by Sec.13.1 'mindestens einmal im Jahr' (l.6392). VA. See decisionItem DEC-1 re: 'z. B.' softening the floor from mandatory to example."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "topology-debt",
+      "title": "Duplicate inspection-interval fields (number vs text)",
+      "detail": "inspektion_intervall_jahr (number, Jahr, Sec.13.1, gated by REQ-29) and inst_inspektionsintervall (text, §16) both capture the inspection interval. The text field is un-gated and has no consumer_worksheets. A user could fill the text field and leave the numeric one absent → REQ-29 stays 'pending' (never blocks) while the concept appears answered. Single-source violation (two carriers for one datum).",
+      "recommendation": "Consolidate to the numeric inspektion_intervall_jahr (the gated carrier) or make inst_inspektionsintervall a derived/mirror of it. STAGED as decision, not applied."
+    },
+    {
+      "id": "F-2",
+      "severity": "clause-label",
+      "title": "§16 clause_reference on 4 fields is a form-template artifact, not a GAR clause",
+      "detail": "inst_inspektionsintervall / inst_wartungsintervall / inst_qualifikation_pruefer / inst_protokollierung all carry clause_reference '§16'. FLL-GAR-2023 has no §16 for Instandhaltung — the material lives in Abschnitt 13 (l.1792 'ist Abschnitt 13 zu entnehmen'; l.6371 '13 Instandhaltung'). §16 is a FORM_TEMPLATE section numbering leaked into clause_reference.",
+      "recommendation": "Re-point clause_reference of the 4 inst_* fields to Sec.13.1 (interval, protocol), Sec.13.2 (Wartungsintervall) as attested. STAGED."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "title": "Worked-example absence",
+      "detail": "Instandhaltung is a data-capture/verification worksheet; the standard prints NO numeric worked example. Both saveWorksheet chains are therefore VC (persistence round-trip sanity-checked), not VA-against-a-printed-value."
+    },
+    {
+      "id": "R-2",
+      "title": "inst_qualifikation_pruefer has no verbatim Sec.13 backing",
+      "detail": "No explicit inspector-qualification requirement is printed in the Sec.13 body (only 'fachgerechte Wartung', l.6430, implies competence). Field is reasonable but VC."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "DEC-1",
+      "title": "Is yearly inspection a hard block or a recommended default? (SR-2 range/strength)",
+      "detail": "Sec.13.1 (l.6392) states inspections at regular intervals '(z. B. mindestens einmal im Jahr)'. The 'z. B.' (e.g.) frames 'mindestens einmal im Jahr' as an EXAMPLE, and l.6412-6414 says 'Art, Umfang und Zeitpunkt … richten sich nach Art der Abdichtung, den Standortverhältnissen … und dem Grad der Nutzung' — i.e. the interval is context-dependent, not a fixed statutory floor. REQ-29 encodes it as a hard 'block' at <= 1 yr. DECIDE: keep as block (conservative, treats yearly as minimum) vs downgrade to warn (respect that the standard gives it as an example/context-dependent).",
+      "quote": "'Für die Instandhaltung sind in regelmäßigen Abständen (z. B. mindestens einmal im Jahr) Inspektionen vorzusehen' (l.6392); 'Art, Umfang und Zeitpunkt … richten sich nach Art der Abdichtung, den Standortverhältnissen … und dem Grad der Nutzung' (l.6412-6414)",
+      "staged": true,
+      "applied": false
+    },
+    {
+      "id": "DEC-2",
+      "title": "Consolidate duplicate inspection-interval fields (F-1)",
+      "detail": "Written-not-applied: drop or derive inst_inspektionsintervall (text) so the gated numeric carrier is single-source. No migration written yet; requires human go per doctrine (findings over fixes).",
+      "staged": true,
+      "applied": false
+    },
+    {
+      "id": "DEC-3",
+      "title": "Re-point §16 clause_reference to Sec.13 (F-2)",
+      "detail": "Written-not-applied: update clause_reference on the 4 inst_* fields from '§16' to the attested Sec.13.1 / Sec.13.2 clauses. Staged for the controlled apply pass.",
+      "staged": true,
+      "applied": false
+    }
+  ],
+  "rawVitest": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n Test Files  1 passed (1)\n      Tests  7 passed (7)\n  ✓ exposes GAR-28 with all five fields 2ms\n  ✓ persists a Sec.13 Instandhaltungskonzept (yearly inspection) via saveWorksheet 485ms\n  ✓ re-save with a too-long interval overwrites (2-yearly) 10ms\n  ✓ REQ-29 yearly interval (=1) → PASS 1ms\n  ✓ REQ-29 sub-yearly interval (0.5) → PASS 0ms\n  ✓ REQ-29 too-long interval (2 yr) → FAIL (gate fires) 0ms\n  ✓ REQ-29 absent interval → PENDING (not a false pass/fail) 0ms"
+}

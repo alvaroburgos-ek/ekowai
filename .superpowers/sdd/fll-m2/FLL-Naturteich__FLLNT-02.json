@@ -1,0 +1,83 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-02",
+  "worksheetTitle": "Standortanalyse & Untergrundverhältnisse",
+  "templateId": "a2314397-c34b-4be9-8fa9-e92db59b05f4",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodPull": {
+    "equationsCount": 0,
+    "complianceCount": 1,
+    "fieldsCount": 6,
+    "fields": [
+      { "symbol": "existing_system", "data_type": "boolean", "unit": null },
+      { "symbol": "site_address", "data_type": "text", "unit": null },
+      { "symbol": "subsoil_type", "data_type": "enum", "unit": null },
+      { "symbol": "groundwater_level", "data_type": "number", "unit": "m" },
+      { "symbol": "enclosure_provided", "data_type": "boolean", "unit": null },
+      { "symbol": "operating_manual_provided", "data_type": "boolean", "unit": null }
+    ],
+    "note": "Prod (vadsmshzebefjreqcicl) confirms FLLNT-02 has 0 equations, 1 block-severity compliance_requirement (REQ-05), and 6 active fields. Matches the seeder spec exactly."
+  },
+  "equations": [],
+  "equationsNote": "FLLNT-02 carries NO equations in prod or seeder. This is a data-capture worksheet (site analysis / subsoil conditions), so there is nothing to verify against a worked example. No formula-shape / constant / unit / symbol checks apply.",
+  "chains": [
+    {
+      "name": "operating_manual_provided round-trip via REAL saveWorksheet",
+      "ran": true,
+      "liveValue": true,
+      "pdfExpected": null,
+      "verdict": "VC",
+      "note": "No computational chain exists on FLLNT-02 (0 equations). Instead the sole persisted input (operating_manual_provided) was driven through the genuine saveWorksheet path against a disposable embedded Postgres seeded with the full FLL-Naturteich standard. Value UPSERTed and read back as value_boolean=true. This is a save-path sanity check, not a PDF worked-example assertion (the standard prints no numeric example for FLLNT-02), hence VC.",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ |integration| tests/harness/fllnt02-verify.integration.test.ts > FLLNT-02 — real saveWorksheet round-trip + REQ-05 gate > persists operating_manual_provided through the REAL saveWorksheet path 403ms\n ✓ |integration| tests/harness/fllnt02-verify.integration.test.ts > FLLNT-02 — real saveWorksheet round-trip + REQ-05 gate > REQ-05 gate fires PASS and FAIL against the real evaluator 14ms\n Test Files  1 passed (1)\n      Tests  2 passed (2)\n   Duration  4.66s"
+    }
+  ],
+  "gates": [
+    {
+      "id": "b323cfcc-0869-4ba1-ae87-8f3e533d08f0",
+      "code": "REQ-05",
+      "title": "Operating manual",
+      "condition": "operating_manual_provided == true",
+      "severity": "block",
+      "fired": true,
+      "vacuous": false,
+      "verdict": "VA",
+      "note": "Grammar = simple boolean compare (compare-node, symbol == true). Exercised against the REAL evaluateCondition in both states: operating_manual_provided=false -> kind='fail'; =true -> kind='pass'. Gate is fireable in both directions (NOT a CR-006-class vacuous/dead gate). Requirement is PDF-attested: §8.1.5 'Operating manual' — 'A written operating manual must be created for the proper planning and construction of a natural pond.' The block severity is appropriate to a MUST clause."
+    }
+  ],
+  "findings": [],
+  "residue": [
+    {
+      "item": "subsoil_type enum value-set not source-attested",
+      "class": "VC",
+      "detail": "The enum_values for subsoil_type (rock, gravel, sand, clay, loam, mixed, fill) are carried structurally from prod. §8.1.3 'Subsoil' lists 'soil type' as a survey attribute and points to DIN 18196 / DIN EN ISO 14688 for soil classification, but the FLL-Naturteich PDF does NOT print this specific 7-value list. The values are plausible but markdown/structural-only, not verbatim from the standard. Not a functional defect — flagged for source-classification only.",
+      "quote": "§8.1.3: 'soil conditions, in particular: - grown or heaped subsoil; - soil type; ...' and 'DIN 18196 – Earthworks and foundations – soil classification for civil engineering purposes'"
+    },
+    {
+      "item": "No computational chain to run",
+      "class": "structural",
+      "detail": "FLLNT-02 has 0 equations, so no formula chain could be driven/asserted. Recorded per task instruction to log each un-run chain with a reason. Reason: the worksheet is a data-capture step with no derived outputs.",
+      "quote": null
+    }
+  ],
+  "decisionItems": [
+    {
+      "item": "Ratify or re-source the subsoil_type enum",
+      "detail": "Decide whether the 7-value subsoil_type list (rock/gravel/sand/clay/loam/mixed/fill) should be (a) accepted as an engineering convenience classification, or (b) re-sourced to align with a cited standard (DIN 18196 group symbols) referenced by §8.1.3. No SR-2 range is auto-picked; this is a value-set provenance decision, not a threshold pick. STAGED as a note only — no prod write performed.",
+      "staged": true,
+      "migration": null
+    }
+  ],
+  "doctrine": {
+    "SR-1": "REQ-05 value claim quoted verbatim from §8.1.5 this run; no reliance on logs/prior chats.",
+    "SR-2": "FLLNT-02 fields carry no ranges (groundwater_level is a captured measurement, not a bounded limit); nothing auto-picked.",
+    "SR-3": "Provenance drawn from the layout-extracted PDF text (Naturteich.txt via pdftotext -layout); §8.1.5/§8.1.3/§8.1.4 headings and body confirmed. No PDF-vs-markdown disagreement observed for this worksheet.",
+    "prodWrites": "NONE. Read-only prod pull (execute_sql) + local embedded-PG harness only."
+  },
+  "summary": {
+    "chainsRun": "1/1 (the single save-path round-trip; 0 equation chains exist)",
+    "checksPassed": 2,
+    "findings": 0,
+    "residue": 2,
+    "decisions": 1
+  }
+}

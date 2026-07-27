@@ -1,0 +1,90 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-27",
+  "worksheetTitle": "Inbetriebnahme (phase 6, archetype=verification)",
+  "worksheetId": "c51f9051-529e-43c2-b5df-bd7c4f27d227",
+  "note": "Task brief calls this the 'Q_NOT Notueberlauf' worksheet, but the prod title is 'Inbetriebnahme' (commissioning). GAR-27 collects commissioning evidence AND embeds ONE informative example equation (Anhang 1) for the Notueberlauf Q_NOT calculation referencing DIN 1986-100. Both aspects verified below.",
+  "counts": { "equations": 1, "gates": 0, "fields": 12 },
+  "equations": [
+    {
+      "id": "02387918-c243-4a7e-b38d-993c65f79754",
+      "equation_number": "1",
+      "dbFormula": "Q_NOT = (r_5_100 - r_5_5 * C) * (A / 10000)",
+      "outputSymbol": "Q_NOT",
+      "outputUnit_db": null,
+      "clause_reference": "Anhang 1 (informativ)",
+      "verdict": "VA",
+      "quote": "GAR.txt L6505: 'Q NOT = [ (r5,100 - (r5,5 * C) ] * (A / 10.000)'  |  L6507: '= ( (607 - 316 l/(s*ha)) ) * (800 m2 / 10.000) = 23,28 l/sec'  |  L6495: 'Fuer Duesseldorf gilt: r5,5 = 316 l / (s*ha) und r5,100 = 607 l / (s*ha)'  |  L6497: 'Abflusswirksame Flaeche = 800 m2'  |  L6499: 'Abflussbeiwert C = 1'",
+      "note": "Formula shape, constant 10.000 (=10000), input symbols {r_5_100,r_5_5,C,A} and output symbol Q_NOT all match the PDF Anhang-1 worked example VERBATIM. Arithmetic re-derived: (607 - 316*1)*(800/10000) = 291*0.08 = 23.28 l/s, matching PDF 'aeqv 23,28 l/sec'. PDF-confirmed => VA. Minor metadata: equations.output_unit is NULL though the Q_NOT field carries unit 'l/s' and PDF prints 'l/sec' — staged as a decision item, not a formula defect. Not a producer-collision (single equation, single output). No trig/cos_beta involvement."
+    }
+  ],
+  "chains": [
+    {
+      "name": "Q_NOT Notueberlauf (Anhang 1, Duesseldorf worked example)",
+      "ran": true,
+      "liveValue": 23.28,
+      "pdfExpected": 23.28,
+      "verdict": "VA",
+      "raw": "evaluateFormula(equationId=02387918..., inputs r_5_100=607 r_5_5=316 C=1 A=800) -> {kind:'computed', value:23.28}; saveWorksheet({instanceId: GAR-27, values:{r_5_100:607,r_5_5:316,C:1,A:800,Q_NOT:23.28}}) -> {ok:true}; SELECT value_number FROM project_parameters WHERE field_id=Q_NOT => 23.28. Test 'CHAIN Q_NOT ... = 23.28 l/s' PASS; 'persists 23.28 through REAL saveWorksheet' PASS."
+    },
+    {
+      "name": "Commissioning evidence fields (ibn_datum date, ibn_dichtheit_bestanden bool, ibn_befuellung_dauer number)",
+      "ran": true,
+      "liveValue": "ibn_datum=2024-06-01, ibn_dichtheit_bestanden=true, ibn_befuellung_dauer=3",
+      "pdfExpected": "no worked example (data_collection §15) — sanity-check persistence only",
+      "verdict": "VC",
+      "raw": "saveWorksheet -> {ok:true}; persisted value_date year=2024 month=June, value_boolean=true. Test 'COMMISSIONING fields persist ...' PASS. No source number to assert against => VC (persistence-only sanity)."
+    }
+  ],
+  "vitestRaw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll | tests/harness/verify-fll-gar-27-agent.integration.test.ts (4 tests) | Test Files 1 passed (1) | Tests 4 passed (4) | Duration 5.24s. Tests: 'exposes the 12 fields incl. the Q_NOT chain symbols' PASS; 'CHAIN Q_NOT — real engine reproduces the PDF Duesseldorf worked example = 23.28 l/s' PASS; 'CHAIN Q_NOT — corrected/source chain persists 23.28 through REAL saveWorksheet' PASS; 'COMMISSIONING fields persist through REAL saveWorksheet (date + boolean)' PASS.",
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1-GAR27-duplicate-area-field",
+      "severity": "medium",
+      "kind": "duplicate-symbol / dead-field",
+      "detail": "Two 'catchment area' fields on GAR-27: 'A' (id a5712ffb..., clause 'Anhang 1', unit m^2, order 61) is the equation-consumed input; 'A_einzugsflaeche' (id bd84d4da..., label 'Einzugsflaeche A', clause '§Gl.1', unit m², order 60) is NOT referenced by equation Gl.1 (input_symbols = [r_5_100,r_5_5,C,A]). A_einzugsflaeche is therefore a dead/duplicate input — an engineer entering it sees no effect on Q_NOT. PDF gives ONE area ('Abflusswirksame Flaeche = 800 m2'). Staged for consolidation decision, not auto-fixed."
+    },
+    {
+      "id": "F2-GAR27-duplicate-C-field",
+      "severity": "medium",
+      "kind": "duplicate-symbol / dead-field",
+      "detail": "Two 'Abflussbeiwert' fields: 'C' (id d6f02425..., clause 'Anhang 1') is equation-consumed; 'C_abflusswert' (id 34d5b6f0..., label 'Abflussbeiwert C', clause '§Gl.1') is NOT in equation input_symbols and is dead w.r.t. Gl.1. PDF gives ONE: 'Abflussbeiwert C = 1'. Same duplicate-symbol pattern as F1."
+    },
+    {
+      "id": "F3-GAR27-equation-output-unit-null",
+      "severity": "low",
+      "kind": "metadata-gap",
+      "detail": "equations.output_unit is NULL for Gl.1 while the Q_NOT field carries unit 'l/s' and the PDF prints the result as '23,28 l/sec'. The engine still computes correctly (unit is display metadata), but output_unit should be 'l/s' for provenance completeness. Staged as decision item."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1-seed-gar27-nonsource-inputs",
+      "kind": "VC-flag / test-fixture divergence",
+      "detail": "The pre-existing hand-shaped fixture seed-fll-gar27.ts drives Q_NOT with r_5_100=317, r_5_5=142, A=263 (yielding 4.6025 / 5.237382) — these are NOT the FLL-GAR-2023 source values. Per SR-1 only the PDF Duesseldorf example (r_5_100=607, r_5_5=316, A=800, C=1 => 23.28) is source-verified. This verify run used the GENERIC seedFllGar seeder + PDF values instead. seed-fll-gar27's r/A inputs are unverified against the standard and should be treated as VC in any doc that cites them."
+    },
+    {
+      "id": "R2-informative-annex",
+      "kind": "scope-note",
+      "detail": "Gl.1 lives in 'Anhang 1 (informativ)' — an INFORMATIVE annex, i.e. an example, not a normative requirement. The Q_NOT calc is illustrative of applying DIN 1986-100; the binding dimensioning rule is DIN 1986-100 itself (GAR.txt L1689-1697, L5745-5747). VA for what it prints; scope = example."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1-abflussbeiwert-single-value-not-range",
+      "sr": "SR-2 / SR-1",
+      "detail": "The standard states exactly ONE Abflussbeiwert: 'Abflussbeiwert C = 1' (GAR.txt L6499). No range is given in FLL-GAR-2023 for C. Therefore C=1 is the source value (not a point-picked from a range). Any live project storing C != 1 for this example is a data defect; the sibling KNOWN ITEM #1 flags a live project with C=0.83. Decision: confirm C=1 as the seed/default for GAR-27's example."
+    },
+    {
+      "id": "D2-set-output-unit",
+      "sr": "findings-over-fixes",
+      "detail": "STAGED (written-not-applied): UPDATE equations SET output_unit='l/s' WHERE id='02387918-c243-4a7e-b38d-993c65f79754'. Rationale: PDF result '23,28 l/sec' and Q_NOT field unit 'l/s'. Do NOT apply here; batch into the single controlled apply pass."
+    },
+    {
+      "id": "D3-consolidate-duplicate-fields",
+      "sr": "findings-over-fixes",
+      "detail": "STAGED (written-not-applied): decide whether to deactivate/merge the dead duplicate fields A_einzugsflaeche->A and C_abflusswert->C (single-source pattern) so the worksheet has one owner per physical quantity. Requires human sign-off (may affect UI/consumers); no auto-fix."
+    }
+  ]
+}

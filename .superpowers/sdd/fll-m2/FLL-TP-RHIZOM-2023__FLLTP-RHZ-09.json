@@ -1,0 +1,102 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-09",
+  "worksheetId": "87afdf31-866c-43db-b847-06d430c00f41",
+  "worksheetTitle": "Einbau der Abdichtung in Prüfgefäße (§7.1)",
+  "run": "2026-07-23",
+  "pdfSource": "TP-Rhizom.txt (rendered from fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf) — VA where §-quoted, VC where markdown-only",
+  "equations": [],
+  "equationsNote": "0 equations on this worksheet (confirmed empty from prod: SELECT ... FROM equations WHERE worksheet_template_id=... → []). §7.1 is a data-collection/installation-procedure worksheet; it prints no formulas. Substrate-volume figures in §7.1 ('ca. 12 l', 'ca. 100 l') are informative material-demand estimates, not encoded equations. cos_beta/trig N/A (no trig anywhere in this standard).",
+  "fields": [
+    {"symbol": "vts_untere_schicht_dicke_mm", "unit": "mm", "verdict": "VA", "quote": "Nach dem Einbau des ersten Prüfmusters wird die untere Vegetationstragschicht in einer Schichtdicke von (20 ±5) mm eingebaut. (§7.1, PDF line 757-758)", "note": "Tolerance band (20 ±5) → [15,25]. Consumed by FLLTP-RHZ-10. Field source_quote NULL in prod (VC on provenance metadata); value itself PDF-attested VA."},
+    {"symbol": "vts_obere_schicht_dicke_mm", "unit": "mm", "verdict": "VA", "quote": "Nach dem Einbau des zweiten Prüfmusters wird ... die obere Vegetationstragschicht in einer Schichtdicke von (150 ±5) mm eingebaut. (§7.1, PDF line 777-779)", "note": "Tolerance band (150 ±5) → [145,155]. Consumed by FLLTP-RHZ-10."},
+    {"symbol": "naht_anzahl_wand_eck", "unit": "Stk", "verdict": "VA", "quote": "Hierbei sind vier Wand-Eck-Nähte, zwei Boden-Eck-Nähte und ein mittig verlaufende T-Naht auszuführen. (§7.1, PDF line 746-747)", "note": "= 4 wall-corner seams (1st specimen)."},
+    {"symbol": "naht_anzahl_boden_eck", "unit": "Stk", "verdict": "VA", "quote": "vier Wand-Eck-Nähte, zwei Boden-Eck-Nähte und ein mittig verlaufende T-Naht (§7.1, PDF line 746-747)", "note": "= 2 floor-corner seams (1st specimen)."},
+    {"symbol": "naht_anzahl_t_naht", "unit": "Stk", "verdict": "VA", "quote": "ein mittig verlaufende T-Naht (§7.1, PDF line 747)", "note": "= 1 T-seam (1st specimen)."},
+    {"symbol": "naht_anzahl_laengs_2_pruefmuster", "unit": "Stk", "verdict": "VA", "quote": "Bei bahnenartigen Abdichtungen sind zwei Längsnähte erforderlich. (§7.1, PDF line 764-765)", "note": "= 2 longitudinal seams (2nd specimen)."},
+    {"symbol": "arbeitsfuge_zeitabstand_h", "unit": "h", "verdict": "VA", "quote": "Der Zeitabstand zwischen den beiden Arbeitsschritten muss mindestens 12 Stunden betragen. (§7.1, PDF line 753-755)", "note": "Min interval between the two work steps of the Arbeitsunterbrechungsfuge for non-sheet sealings; ≥ 12 h."},
+    {"symbol": "pruefmuster_2_versatz_grad", "unit": "°", "verdict": "VA", "quote": "Auf die untere Vegetationstragschicht wird das zweite Prüfmuster der Abdichtung um 45° versetzt zum ersten Prüfmuster eingebaut. (§7.1, PDF line 764-765)", "note": "= 45° rotation of 2nd specimen relative to 1st. REQ-11 checks == 45 exactly (point value, not a range)."},
+    {"symbol": "standrohr_durchmesser_mm", "unit": "mm", "verdict": "VA", "quote": "Durch zwei eingelassene Rohre (∅ 50 mm, Länge 200 mm) aus pflanzenverträglichen Werkstoffen ... (§3.5, PDF line 390)", "note": "Standpipe ∅ = 50 mm. clause_reference in prod = '§3.5, Abb. 5'; the DN value is from §3.5 verbatim. No gate constrains this field (data-collection only) — see finding F-3."}
+  ],
+  "chains": [
+    {
+      "name": "CHAIN-A: persist PDF-attested §7.1 installation values via REAL saveWorksheet",
+      "ran": true,
+      "liveValue": {"vts_untere_schicht_dicke_mm": 20, "vts_obere_schicht_dicke_mm": 150, "naht_anzahl_wand_eck": 4, "naht_anzahl_boden_eck": 2, "naht_anzahl_t_naht": 1, "naht_anzahl_laengs_2_pruefmuster": 2, "arbeitsfuge_zeitabstand_h": 12, "pruefmuster_2_versatz_grad": 45, "standrohr_durchmesser_mm": 50},
+      "pdfExpected": "no worked example in the standard — §7.1 prints procedural constraints, not a numeric calc. Sanity-check: every persisted value equals its PDF-attested nominal (band centres 20/150, seam counts 4/2/1/2, offset 45, interval 12, DN 50).",
+      "verdict": "VA",
+      "raw": "CHAIN-A persisted: {\"arbeitsfuge_zeitabstand_h\":12,\"naht_anzahl_boden_eck\":2,\"naht_anzahl_laengs_2_pruefmuster\":2,\"naht_anzahl_t_naht\":1,\"naht_anzahl_wand_eck\":4,\"pruefmuster_2_versatz_grad\":45,\"standrohr_durchmesser_mm\":50,\"vts_obere_schicht_dicke_mm\":150,\"vts_untere_schicht_dicke_mm\":20}  |  ✓ CHAIN A 441ms"
+    }
+  ],
+  "gates": [
+    {
+      "id": "REQ-11",
+      "condition": "ist_bahnenartig == false OR (naht_anzahl_wand_eck >= 4 AND naht_anzahl_boden_eck >= 2 AND naht_anzahl_t_naht >= 1 AND naht_anzahl_laengs_2_pruefmuster >= 2 AND pruefmuster_2_versatz_grad == 45)",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fireable both ways. PASS state (bahnenartig=true + all seams/offset correct) → not in failingBlockConditions. FAIL state (bahnenartig=true, offset=30≠45) → REQ-11 in failingBlockConditions. Cross-worksheet guard 'ist_bahnenartig' (a boolean field on FLLTP-RHZ-02, NOT on this worksheet) resolves via the project-wide conflict-free fallback in approval-gate.ts makeGateLookup — so the guard is NOT dead. All 5 seam/offset constants (4,2,1,2,45) VA-confirmed against §7.1 (PDF line 746-747, 764-765)."
+    },
+    {
+      "id": "REQ-12",
+      "condition": "ist_bahnenartig == true OR arbeitsfuge_zeitabstand_h >= 12",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fireable both ways. When bahnenartig=true → left true → vacuous pass (correct: sheet sealings have no Arbeitsunterbrechungsfuge). FAIL state (bahnenartig=false, arbeitsfuge=6 < 12) → REQ-12 in failingBlockConditions, and REQ-11 correctly NOT firing (its '== false' guard-left is true). Constant 12 h VA-confirmed (§7.1 PDF line 753-755)."
+    },
+    {
+      "id": "REQ-13",
+      "condition": "vts_untere_schicht_dicke_mm >= 15 AND vts_untere_schicht_dicke_mm <= 25 AND vts_obere_schicht_dicke_mm >= 145 AND vts_obere_schicht_dicke_mm <= 155",
+      "fired": true,
+      "vacuous": false,
+      "note": "Always-active band check (no guard). PASS state (20/150) → not failing. FAIL state (lower VTS=40 > 25) → REQ-13 in failingBlockConditions. Both bands correctly encode (20 ±5)=[15,25] and (150 ±5)=[145,155] — VA-confirmed (§7.1 PDF line 757-758, 777-779). prod source_quote present and matches PDF (VA on provenance too)."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "info",
+      "title": "Gate guards reference a cross-worksheet field (ist_bahnenartig on FLLTP-RHZ-02) — resolves by design, not dead",
+      "detail": "REQ-11 and REQ-12 both key on ist_bahnenartig, which is NOT one of this worksheet's 9 fields; it is a boolean on FLLTP-RHZ-02. Under the wizard's worksheet-local-first lookup this would be 'pending' — but approval-gate.ts builds a project-wide conflict-free fallback (buildFallbackValues + makeGateLookup), so the guard resolves from the RHZ-02 instance value. Verified live: setting ist_bahnenartig on RHZ-02 flips REQ-11/REQ-12 activation as expected. NOT a defect; logged for awareness that these two gates depend on RHZ-02 being saved. If RHZ-02's ist_bahnenartig is never entered, both gates go pending (never a false fail) — acceptable."
+    },
+    {
+      "id": "F-2",
+      "severity": "low",
+      "title": "Field-level provenance metadata absent on all 9 fields (source_quote / source_anchor NULL)",
+      "detail": "Every field on FLLTP-RHZ-09 has source_quote=NULL, source_anchor=NULL, owner=NULL in prod. The VALUES are all PDF-attested VA (see fields[]), but the encoding does not carry the verbatim quote at field granularity — provenance is VC at the metadata layer. Only REQ-13 carries a source_quote (which matches the PDF). Recommend backfilling source_quote/source_anchor from §7.1 for the 9 fields. STAGED as decision item D-1 (not applied — read-only run)."
+    },
+    {
+      "id": "F-3",
+      "severity": "info",
+      "title": "standrohr_durchmesser_mm is collected but unconstrained by any gate",
+      "detail": "The standpipe diameter (§3.5: ∅ 50 mm, a fixed spec value) is a required field but no compliance_requirement checks it == 50. Low risk (it is a fixed apparatus dimension, engineer-entered). Optional: add a REQ checking standrohr_durchmesser_mm == 50. Logged, not a blocker."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "title": "cos_beta / trig engine gap",
+      "detail": "Not applicable to FLLTP-RHZ-09 — 0 equations, no trig. No residue on this axis."
+    },
+    {
+      "id": "R-2",
+      "title": "Downstream consumer chain (FLLTP-RHZ-10) not driven from this run",
+      "detail": "vts_untere_schicht_dicke_mm and vts_obere_schicht_dicke_mm declare consumer_worksheets=['FLLTP-RHZ-10']. This run verified the producer (RHZ-09) persists them via the real save path; it did not drive RHZ-10's consumption. RHZ-10 is a separate worksheet with its own verification task. VC on end-to-end inheritance."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-1",
+      "type": "staged-correction",
+      "title": "Backfill field-level source_quote/source_anchor for the 9 RHZ-09 fields",
+      "detail": "Written-not-applied. Proposed UPDATE fields SET source_quote=<§7.1 verbatim>, source_anchor='§7.1' WHERE symbol IN (the 9). Verbatim quotes are in this file's fields[]. Requires a single controlled apply pass; NOT applied here (read-only prod).",
+      "sql_note": "UPDATE public.fields SET source_quote=$1, source_anchor='§7.1' WHERE worksheet_template_id='87afdf31-866c-43db-b847-06d430c00f41' AND symbol=$2;  -- one row per field; standrohr uses §3.5"
+    },
+    {
+      "id": "D-2",
+      "type": "range-surfaced",
+      "title": "VTS tolerance bands are ±5 tolerances, not peak/yearly ranges — no auto-pick required",
+      "detail": "(20 ±5) mm and (150 ±5) mm are manufacturing/installation tolerance bands, already fully encoded as REQ-13 inequality bands [15,25] and [145,155]. No point-value was auto-picked (the nominal 20/150 used in CHAIN-A are band centres for the save, and the gate accepts the whole band). SR-2 satisfied; surfaced here for the record, no decision needed."
+    }
+  ],
+  "summary": {"chainsRun": "1/1", "checksPassed": 5, "findings": 3, "residue": 2, "decisions": 2, "gatesFired": 3, "vacuousGates": 0}
+}

@@ -1,0 +1,168 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-17",
+  "worksheetTitle": "Fluessigkunststoff (Fluessigkunststoff / liquid-applied waterproofing)",
+  "templateId": "564c7e4f-02d7-4742-90c8-60b11096bcc7",
+  "phase": 4,
+  "archetype": "calculation",
+  "prodCounts": { "equations": 0, "gates": 0, "fields": 6 },
+  "fields": [
+    {
+      "id": "34d59006-73ef-421a-aab4-9e25f7b1d447",
+      "symbol": "fk_systemtyp",
+      "label_de": "Systemtyp (PUR/PMMA/etc.)",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.9",
+      "verdict": "VA",
+      "quote": "Tab. 23: Stoffe und Anforderungen fuer Fluessigkunststoffe ... flexibles, ungesaettigtes Polyesterharz UP ... PUR 1K ... flexibles Polyurethanharz PUR 2K ... flexibles Polymethylmethacrylatharz PMMA (GAR.txt lines 4291-4312)",
+      "note": "System-type enumeration (UP / PUR 1K / PUR 2K / PMMA) is directly attested by Tab. 23 (§6.3.1.1). Field is free-text with no enum_values encoded -> honest capture but no source-locked option set (VC-adjacent widget gap, see findings)."
+    },
+    {
+      "id": "251e7f4c-8c34-466c-8202-f0a9803b5011",
+      "symbol": "fk_trockenschichtdicke",
+      "label_de": "Trockenschichtdicke",
+      "data_type": "number",
+      "unit": "mm",
+      "clause_reference": "§9.9",
+      "verdict": "VA",
+      "quote": "§6.3.1.2 Schichtdicke und Anzahl der Lagen: 'Die Mindestschichtdicke der ausgehaerteten fluessigen Abdichtung muss den Angaben der Zulassung (ETA, AbP gemaess MVV TB) entsprechen. Sie betraegt gemaess Tabelle 23 mind. 2,0 mm. Wenn die in der ETA angegebene Mindestschichtdicke hoeher ist, gilt der hoehere Wert.' (GAR.txt lines 4323-4325); Tab.23 col 'Schichtdicke ... >= 2,0 mm' (line 4308)",
+      "note": "Unit mm confirmed; dry-film thickness concept + >= 2,0 mm minimum threshold source-attested. The threshold is a RANGE-style floor governed by the ETA (higher ETA value wins) -> surfaced as decisionItem, not a hard-coded gate here (worksheet has 0 gates)."
+    },
+    {
+      "id": "8c7fa93e-885b-4ca9-ad20-f09c6fd20466",
+      "symbol": "fk_armierung",
+      "label_de": "Armierung (Vlies/Gewebe)",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.9",
+      "verdict": "VA",
+      "quote": "§6.3.2: 'Es muessen Einlagen (z. B. Glasvlies, Polyestervlies) mit einem Flaechengewicht von mind. 110 g/m2 eingesetzt werden.' (GAR.txt lines 4350-4351); 'Ist eine Armierung vorgesehen, sind die ...' (line 2784); Tab.23 'Flaechengewicht der Einlage >= 110 g/m2' (line 4308)",
+      "note": "Term 'Armierung' appears verbatim (line 2784) and reinforcement/Einlage requirement is attested. Label parenthetical 'Vlies/Gewebe': 'Vlies' (Glasvlies/Polyestervlies) is verbatim; 'Gewebe' (woven) is NOT literally in these clauses (standard says Einlage/Vlies) -> minor label-embellishment, VC on the 'Gewebe' token only. Overall VA."
+    },
+    {
+      "id": "5dde1e35-6ab5-41c1-8408-20144a566245",
+      "symbol": "fk_auftragsverfahren",
+      "label_de": "Auftragsverfahren",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.9",
+      "verdict": "VA",
+      "quote": "§6.3.2: 'Abdichtungen mit Fluessigkunststoffen werden i. d. R. vollflaechig haftend und mindestens zweischichtig (Traeger-, Deckschicht) mit Einlage ausgefuehrt. Dies kann durch Streichen, Rollen oder Spritzen erfolgen.' (GAR.txt lines 4348-4350)",
+      "note": "Application-method concept attested; the discrete methods (Streichen/Rollen/Spritzen) are source-listed. Field is free-text with no enum_values -> capture is honest but options not source-locked (widget gap)."
+    },
+    {
+      "id": "8da120af-8701-4608-be64-735136a7bd73",
+      "symbol": "fk_haftung_untergrund",
+      "label_de": "Haftung am Untergrund",
+      "data_type": "number",
+      "unit": "N/mm²",
+      "clause_reference": "§9.9",
+      "verdict": "VC",
+      "quote": "§6.3.2: 'Zur Vermeidung der Hinterlaeufigkeit ist ein vollflaechiger Haftungsverbund zum Untergrund herzustellen.' (GAR.txt lines 4345-4346); §9.3.6: 'bei geeignetem Untergrund mit ausreichender Haftung' (line 6060-6061); §8.4.8: 'einen vollflaechigen Haftungsverbund mit der fluessigen Abdichtung geeignet sein muss' (line 5642)",
+      "note": "The requirement 'vollflaechiger Haftungsverbund / ausreichende Haftung' is source-attested as a QUALITATIVE requirement. NO numeric bond-strength threshold in N/mm2 is printed anywhere in GAR-2023 for Fluessigkunststoff (searched Haftung/Haftzug/N/mm2). The numeric data_type + unit N/mm2 is an encoder modelling choice with no source value -> VC. Missing/deferred threshold -> decisionItem + finding."
+    },
+    {
+      "id": "392ab9ed-cfa2-4077-b7de-ed074a8230c5",
+      "symbol": "fk_uv_bestaendigkeit",
+      "label_de": "UV-Beständigkeit",
+      "data_type": "text",
+      "unit": null,
+      "clause_reference": "§9.9",
+      "verdict": "VC",
+      "quote": "§6.3: 'Nach Aushaertung der aufgebrachten Schichten ist der Belag wasserdicht und bietet als einlagige Abdichtung einen ausreichendenden Widerstand gegenueber natuerlichen Witterungs- und Alterungsprozessen.' (GAR.txt lines 4271-4273)",
+      "note": "The literal term 'UV-Bestaendigkeit' does NOT appear in GAR-2023. The nearest source concept is 'Widerstand gegenueber natuerlichen Witterungs- und Alterungsprozessen' (weathering/ageing resistance), which subsumes but is not identical to UV resistance. Field label is a paraphrase/narrowing of the source -> VC. Performance level 'S' (Klimazonen M,S in Tab.23) is the closest encoded weathering-class token (line 4301)."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLL-GAR-17 (no encoded equations)",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "N/A",
+      "raw": "Worksheet FLL-GAR-17 has 0 equations in prod (execute_sql returned []). It is a documentation/spec-capture worksheet (systemtyp, trockenschichtdicke, armierung, auftragsverfahren, haftung_untergrund, uv_bestaendigkeit). There is no computable chain and the standard prints no worked numeric example for this section (§6.3 / §9.3.6 are descriptive). Nothing to drive through saveWorksheet as a producer chain. Fixture drivability was nonetheless proven: seed-fll-gar-smoke passed (see below), which builds the full 29-worksheet fixture incl. FLL-GAR-17 with all 6 field ids present verbatim, so the save path IS available for this worksheet if a future engineer encodes a rule."
+    }
+  ],
+  "smokeRun": {
+    "command": "pnpm vitest run --project integration tests/harness/seed-fll-gar-smoke.integration.test.ts",
+    "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Duration  ~5s",
+    "snapshotFieldIdCheck": "All 6 prod FLL-GAR-17 field ids (34d59006..., 251e7f4c..., 8c7fa93e..., 5dde1e35..., 8da120af..., 392ab9ed...) present exactly once in tests/harness/fll-gar-snapshot.ts; template id 564c7e4f... present. Embedded snapshot topology is byte-identical to prod for this worksheet."
+  },
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1-clause-ref-nonexistent",
+      "severity": "medium",
+      "type": "wrong-clause-reference",
+      "detail": "All 6 fields carry clause_reference '§9.9'. GAR-2023 chapter 9 (Randausbildung) has NO subsection 9.9 — chapter 9 runs 9.1, 9.2, 9.3, 9.3.1..9.3.7 only (GAR.txt lines 282-294, 5694-6086). The Fluessigkunststoff content these fields capture lives at §6.3 / §6.3.1 / §6.3.1.1 (Tab.23) / §6.3.1.2 / §6.3.2 (materials + execution) and §9.3.6 (Randausbildung with Fluessigkunststoff). The '§9.9' reference is unverifiable/incorrect for every field. STAGED correction only (findings-over-fixes): retag to §6.3.1.1/§6.3.1.2/§6.3.2 as appropriate, or §9.3.6 for edge detailing. Written-not-applied — added to decisionItems."
+    },
+    {
+      "id": "F2-haftung-unit-no-source-value",
+      "severity": "medium",
+      "type": "unit-without-source-threshold",
+      "detail": "fk_haftung_untergrund is typed number with unit N/mm² but GAR-2023 gives only a QUALITATIVE bond requirement ('vollflaechiger Haftungsverbund', 'ausreichende Haftung'); no numeric N/mm² value or acceptance threshold is printed for Fluessigkunststoff. The unit implies a quantitative acceptance criterion the standard does not supply. Recommend either (a) demote to text/qualitative capture, or (b) source the numeric bond-strength requirement from the referenced product approval (ETA / ETAG 005 / EAD 030350-00-0402) not from GAR-2023 itself. decisionItem raised."
+    },
+    {
+      "id": "F3-uv-label-vs-source",
+      "severity": "low",
+      "type": "label-not-verbatim",
+      "detail": "fk_uv_bestaendigkeit label 'UV-Beständigkeit' has no verbatim basis in GAR-2023; the source concept is 'Widerstand gegenueber natuerlichen Witterungs- und Alterungsprozessen' (§6.3). Narrowing weathering/ageing resistance to 'UV' specifically is an unsupported specialization. Suggest relabel to 'Witterungs-/Alterungsbestaendigkeit' or link to Tab.23 Klimazonen/Temperaturbestaendigkeit performance levels (M,S / TL3..TH4)."
+    },
+    {
+      "id": "F4-freetext-no-enum",
+      "severity": "low",
+      "type": "missing-enum-values",
+      "detail": "fk_systemtyp and fk_auftragsverfahren are free-text but the standard supplies a closed option set (systemtyp: UP/PUR 1K/PUR 2K/PMMA per Tab.23; auftragsverfahren: Streichen/Rollen/Spritzen per §6.3.2). Encoding these as enum with source-locked values would prevent free-text drift. Non-blocking widget-quality gap."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1-no-chains",
+      "reason": "0 equations on FLL-GAR-17 -> no computable producer chain to run through saveWorksheet. Not a seeder limitation: seed-fll-gar smoke passed and exposes fx.worksheets['FLL-GAR-17'] with all 6 fields, so the real save path is available; there is simply nothing to compute. Recorded per doctrine (findings over fixes)."
+    },
+    {
+      "id": "R2-no-gates",
+      "reason": "0 compliance_requirements on FLL-GAR-17 -> no gate to fire (pass/fail state). The min-thickness >=2,0 mm (§6.3.1.2) and >=110 g/m² Einlage weight (§6.3.2) are candidate gate conditions that are currently NOT encoded as compliance_requirements on this worksheet. Recorded as residue; potential future gate work (not fixed here)."
+    },
+    {
+      "id": "R3-markdown-vs-pdf",
+      "reason": "Verification used the pdftotext -layout extraction at .superpowers/sdd/fll-m2/pdf/GAR.txt (SR-3: rendered PDF is ground truth). Extraction is layout-mode text of the rendered PDF, treated as PDF-attested (VA) for §6.3/§9.3.6 quotes. No PDF-vs-markdown disagreement observed for the quoted passages."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1-clause-ref-retag",
+      "type": "staged-correction",
+      "detail": "Retag clause_reference on all 6 FLL-GAR-17 fields from the nonexistent '§9.9' to the real sections: §6.3.1.1 (systemtyp, Tab.23), §6.3.1.2 (trockenschichtdicke), §6.3.2 (armierung, auftragsverfahren, haftung_untergrund), §6.3 (uv/witterungsbestaendigkeit); optionally §9.3.6 for edge-detailing context. WRITTEN-NOT-APPLIED — single controlled apply pass later. No prod write performed."
+    },
+    {
+      "id": "D2-thickness-range",
+      "type": "range-surface (SR-2)",
+      "detail": "Trockenschichtdicke minimum is a governed range/floor, NOT a single point value: standard floor = mind. 2,0 mm (Tab.23 / §6.3.1.2), BUT 'Wenn die in der ETA angegebene Mindestschichtdicke hoeher ist, gilt der hoehere Wert' — the binding minimum is max(2,0 mm, ETA value). Do not auto-pick 2,0 mm as THE threshold; surface both the FLL floor and the product-ETA-dependent higher value as a decision for the engineer."
+    },
+    {
+      "id": "D3-haftung-model",
+      "type": "modelling-decision",
+      "detail": "Decide how to model fk_haftung_untergrund: (a) demote to qualitative/text ('vollflaechiger Haftungsverbund hergestellt: ja/nein'), or (b) keep numeric N/mm² and source the acceptance threshold from the product approval (ETA / ETAG 005 / EAD 030350-00-0402), which GAR-2023 references but does not quantify. GAR-2023 alone cannot verify a numeric value."
+    },
+    {
+      "id": "D4-uv-relabel",
+      "type": "label-decision",
+      "detail": "Decide whether to relabel fk_uv_bestaendigkeit to the source term 'Witterungs-/Alterungsbestaendigkeit' (§6.3) or bind it to Tab.23 performance levels (Klimazonen M,S; Temperaturbestaendigkeit TL3/TH3/TL4/TH4). Current 'UV' label is an unsupported narrowing."
+    },
+    {
+      "id": "D5-enum-encode",
+      "type": "widget-decision",
+      "detail": "Decide whether to convert fk_systemtyp and fk_auftragsverfahren from free-text to source-locked enums (systemtyp: UP/PUR 1K/PUR 2K/PMMA; auftragsverfahren: Streichen/Rollen/Spritzen)."
+    }
+  ],
+  "doctrineNotes": {
+    "SR-1": "Every value/verdict above is tied to a verbatim GAR.txt quote captured THIS run; no reliance on prior chats or bring-up numbers.",
+    "SR-2": "Thickness floor surfaced as range (D2, max(2,0 mm, ETA)) — not auto-picked.",
+    "SR-3": "pdftotext -layout render of GAR PDF treated as ground truth; §6.3/§9.3.6 quotes are PDF-attested (VA). Qualitative-only concepts (haftung numeric, UV) flagged VC.",
+    "findingsOverFixes": "No prod writes. All corrections staged as decisionItems (D1-D5) for a later single controlled apply pass. Read-only Supabase execute_sql only.",
+    "trig": "No cos_beta/trig equations on this worksheet — N/A."
+  }
+}

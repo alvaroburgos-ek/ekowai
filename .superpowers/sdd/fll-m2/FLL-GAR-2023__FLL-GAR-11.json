@@ -1,0 +1,154 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-11",
+  "worksheet_title_de": "Mineralisch mit Zusatzstoffen",
+  "template_id": "1ae09ca3-98f2-47e1-98fe-d7b1ef8b4412",
+  "standard_id": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "prod_topology": { "equations": 0, "compliance_requirements": 0, "fields": 6 },
+  "clause_reference_prod": "§9.3",
+  "source_section": "5.2 Mineralische Abdichtungsstoffe mit Zusatzstoffen (GAR.txt lines 2213-2451); parameter thresholds in Tab. 3 (lines 1919-1938) and Tab. 5 (lines 2267-2284)",
+  "fields": [
+    {
+      "id": "29e3c4d7-4a09-4339-93af-f24dba5bce62",
+      "symbol": "mz_zusatzstofftyp",
+      "data_type": "text",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "Zusatzstoffe natürlicher Herkunft — Für Abdichtungszwecke geeignet sind pulverförmige Zusatzstoffe wie Calcium- und Natriumbentonit, die einen hohen Montmorillonitgehalt (i. d. R. > 60 Masse-%) aufweisen. Ebenso sind kaolinitische Tonmehle geeignet. ... Zusatzstoffe synthetischer Herkunft — ... ein- bzw. zweikomponentige Systeme auf Basis von Polymeren (GAR.txt §5.2, lines 2219-2231)",
+      "note": "Additive type is a legitimate §5.2 field. DATA GAP: enum_values = null. Source enumerates a closed-ish set (Calcium-/Natriumbentonit, kaolinitisches Tonmehl, Polymer-Systeme) that should be seeded as enum options; currently a free-text field."
+    },
+    {
+      "id": "3c7cceb4-c186-4571-826c-13f7a740e2b8",
+      "symbol": "mz_zusatzstoff_anteil",
+      "data_type": "number",
+      "unit": "%",
+      "verdict": "VA",
+      "quote": "Die Dosierung des Zusatzstoffes (Mischungsverhältnis) zur Erreichung der Anforderungen ist vorab in einer Eignungsprüfung festzulegen. (GAR.txt §5.2.1.1 lines 2250-2251); Im Rahmen der Eignungsprüfung ist die Dosierung des Zusatzstoffes (Mischungsverhältnisses) zu bestimmen. (§5.2.3.1 lines 2416-2417)",
+      "note": "Mixing ratio / dosage as a percentage. The standard does NOT print a fixed value — it is project-specifically determined by the Eignungsprüfung. Correctly left as an input; no fixed threshold to verify."
+    },
+    {
+      "id": "e3f13923-3a00-4010-9360-0810aa4539d6",
+      "symbol": "mz_dicke",
+      "data_type": "number",
+      "unit": "cm",
+      "verdict": "VA",
+      "quote": "Tab. 5: natürlich vorkommende Mineralböden mit Bentonit/Tonmehl bzw. Kunststoffen — Dicke der Abdichtungsschicht ≥ 30 cm, in 2 Lagen von 15 bis 20 cm; Dicke der Auflast/Schutzschicht ≥ 30 cm. 1 Abweichungen von 10% der vorgegebenen Schichtdicken sind zulässig. (GAR.txt lines 2277-2284)",
+      "note": "RANGE surfaced as decisionItem (SR-2): Abdichtungsschicht >= 30 cm built in 2 layers of 15-20 cm, Auflast/Schutzschicht >= 30 cm, +/-10% tolerance. Single scalar 'mz_dicke' cannot capture the layered spec (Abdichtungsschicht vs Auflast/Schutzschicht are two distinct >=30 cm layers). No enforcing gate exists (see FINDING F1)."
+    },
+    {
+      "id": "0098c4f9-76b6-47c1-9614-62d794eea2ed",
+      "symbol": "mz_durchlaessigkeit_kf",
+      "data_type": "number",
+      "unit": "m/s",
+      "verdict": "VA",
+      "quote": "Güte und Menge der verwendeten natürlichen und synthetischen Zusatzstoffe müssen so beschaffen sein, dass die gleichwertigen Anforderungen nach Tabelle 3 erfüllt werden. (GAR.txt §5.2.1.1 lines 2243-2244); Tab. 3 Z.5: Durchlässigkeitsbeiwert kf bei hydr. Gradient i = 30 — ≤ 1 * 10-9 m/s — DIN EN ISO 17892-11 (lines 1930-1932)",
+      "note": "kf threshold <= 1e-9 m/s applies 'gleichwertig' to the with-additives case via the Tab.3 back-reference. Unit m/s correct. Test hydraulic gradient i = 30 is part of the requirement (not encoded anywhere on this worksheet). No enforcing gate exists (FINDING F1)."
+    },
+    {
+      "id": "3aac621c-74b7-4562-adb8-3b3a1f960316",
+      "symbol": "mz_einbau_verdichtung",
+      "data_type": "text",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "Verfahren zur Bodenmischung sind: Baumischverfahren (mixed-in-place); Zentralmischverfahren (mixed-in-plant). (GAR.txt §5.2.2 lines 2297-2299); Der Verdichtungsgrad der Abdichtungsschicht muss Dpr ≥ 97 % betragen. (§5.2.2.1 line 2346)",
+      "note": "Compaction/placement method. Free-text field bundles TWO source facts: (a) the mixing method enum {Baumischverfahren, Zentralmischverfahren} and (b) the Dpr >= 97% compaction-degree threshold. DATA GAP: enum_values = null; and Dpr >= 97% is neither a separate field nor a gate."
+    },
+    {
+      "id": "75110470-4523-4194-af14-ab9c1240b962",
+      "symbol": "mz_dichtungswirkung_nachgewiesen",
+      "data_type": "boolean",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "5.2.3.3 Kontrollprüfung — Nach Einbau der Dichtungsschicht sind seitens des Auftraggebers Kontrollprüfungen zu veranlassen. Sie können ... umfassen: ... Bestimmung des Wasserdurchlässigkeitsbeiwertes gemäß DIN EN ISO 17892-11; visuelle Kontrolle hinsichtlich Homogenität. (GAR.txt lines 2435-2446)",
+      "note": "Boolean 'sealing effect proven' maps to the §5.2.3.3 Kontrollprüfung (kf-Wert-Bestimmung). Legitimate attestation-style field. Not wired to any compliance_requirement, so setting it false has no compliance effect in prod (FINDING F1)."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "data-entry — all 6 fields persist through real saveWorksheet (Tab.5 PASS state)",
+      "ran": true,
+      "liveValue": "mz_zusatzstofftyp='Natriumbentonit', mz_zusatzstoff_anteil=8, mz_dicke=30, mz_durchlaessigkeit_kf=1e-9, mz_einbau_verdichtung='Baumischverfahren', mz_dichtungswirkung_nachgewiesen=true — all read back verbatim from project_parameters",
+      "pdfExpected": "No worked example in the standard (data-entry worksheet). Sanity: dicke=30 cm satisfies Tab.5 (>=30 cm); kf=1e-9 satisfies Tab.3 Z.5 (<=1e-9 m/s)",
+      "verdict": "VC",
+      "raw": "PASS 438ms — persistedText/Number/Bool assertions all green"
+    },
+    {
+      "name": "CANDIDATE GATE (not encoded in prod) — Tab.3/Tab.5 condition fires PASS then FAIL through real evaluator + real saveWorksheet",
+      "ran": true,
+      "liveValue": "PASS state (kf=1e-9, proven=true) -> evaluateCondition kind='pass'; FAIL state (kf=1e-5, proven=false) -> kind='fail'",
+      "pdfExpected": "kf <= 1e-9 m/s (Tab.3 Z.5) AND Dichtungswirkung nachgewiesen (§5.2.3.3) both must hold",
+      "verdict": "VA",
+      "raw": "PASS 22ms — condition 'IF abdichtungs_art == mineralisch_mit_zusatzstoffen THEN mz_durchlaessigkeit_kf <= 0.000000001 AND mz_dichtungswirkung_nachgewiesen == true' fired pass+fail via real src/lib/compliance/evaluate.ts. NB: this gate does NOT exist in prod; it was injected to prove the requirement is evaluable."
+    },
+    {
+      "name": "FINDING probe — candidate guard is PENDING in prod (abdichtungs_art not a field here)",
+      "ran": true,
+      "liveValue": "evaluateCondition kind='pending' when abdichtungs_art unresolved",
+      "pdfExpected": "n/a — structural probe",
+      "verdict": "VC",
+      "raw": "PASS 0ms — with no abdichtungs_art anywhere the guarded IF resolves 'pending', never pass/fail"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "block-gap",
+      "title": "No compliance_requirements on a worksheet that carries hard source thresholds",
+      "detail": "FLL-GAR-11 has 0 compliance_requirements in prod, yet §5.2 (via the Tab.3 'gleichwertig' back-reference) imposes verifiable pass/fail thresholds: kf <= 1*10-9 m/s (Tab.3 Z.5), Dpr >= 97% (§5.2.2.1), and 'Dichtungswirkung nachgewiesen' (§5.2.3.3 Kontrollprüfung). None are enforced. The sibling worksheet FLL-GAR-10 (mineralisch OHNE Zusatzstoffe) DOES encode the equivalent Tab.3 gate (REQ-12) plus attestation gates. The candidate gate 'IF abdichtungs_art == mineralisch_mit_zusatzstoffen THEN mz_durchlaessigkeit_kf <= 0.000000001 AND mz_dichtungswirkung_nachgewiesen == true' fires correctly pass/fail through the real evaluator (see chain 2) — it is simply not seeded. STAGED, not applied (findings-over-fixes)."
+    },
+    {
+      "id": "F2",
+      "severity": "data-gap",
+      "title": "Enum fields seeded as free text (enum_values = null)",
+      "detail": "mz_zusatzstofftyp and mz_einbau_verdichtung are text fields with enum_values=null, but the source enumerates closed option sets: Zusatzstofftyp in {Calcium-/Natriumbentonit, kaolinitisches Tonmehl, synthetische Polymer-Systeme} (§5.2 lines 2219-2234); Einbauverfahren in {Baumischverfahren (mixed-in-place), Zentralmischverfahren (mixed-in-plant)} (§5.2.2 lines 2297-2299). Matches the known 'enum null-option widget' data gap across 61 fields."
+    },
+    {
+      "id": "F3",
+      "severity": "modeling-gap",
+      "title": "Single mz_dicke scalar under-models the two-layer Tab.5 spec",
+      "detail": "Tab.5 specifies TWO independent >=30 cm layers (Abdichtungsschicht in 2 Lagen von 15-20 cm; Auflast/Schutzschicht >= 30 cm). A single 'mz_dicke' cm field cannot distinguish them, so neither the Abdichtungsschicht layering (15-20 cm per Lage) nor the separate Auflast requirement is capturable/verifiable. Also the +/-10% tolerance (Tab.5 footnote) is unencoded."
+    },
+    {
+      "id": "F4",
+      "severity": "info",
+      "title": "mz_einbau_verdichtung conflates method + Dpr threshold",
+      "detail": "The compaction-degree requirement Dpr >= 97% (§5.2.2.1) has no dedicated numeric field on this worksheet; it is only implicitly nameable inside the free-text mz_einbau_verdichtung. FLL-GAR-10 has a dedicated verdichtungsgrad_Dpr numeric field + gate; FLL-GAR-11 does not."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "no-equations",
+      "detail": "0 equations on this worksheet → no formula/constant/unit chain to verify. Pure data-entry worksheet; no cos_beta/trig residue applies."
+    },
+    {
+      "id": "R2",
+      "type": "VC-value",
+      "detail": "The data-entry chain has no printed worked example in the standard, so the persisted round-trip is sanity-checked (dicke=30, kf=1e-9 satisfy Tab.5/Tab.3) and flagged VC rather than VA on the numeric outcome."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "SR-2-range",
+      "detail": "mz_dicke Tab.5 range: Abdichtungsschicht >= 30 cm built in 2 Lagen von 15 bis 20 cm; Auflast/Schutzschicht >= 30 cm; +/-10% Abweichung zulässig. Do NOT auto-pick a point value — engineer must choose per Eignungsprüfung. Quote: GAR.txt lines 2277-2284."
+    },
+    {
+      "id": "D2",
+      "type": "SR-2-range",
+      "detail": "mz_zusatzstoff_anteil (Mischungsverhältnis): the standard gives NO fixed value; dosage is determined per project in the Eignungsprüfung (§5.2.1.1 / §5.2.3.1). Surface as an engineer-set input, not a defaulted number."
+    },
+    {
+      "id": "D3",
+      "type": "staged-migration",
+      "detail": "STAGED (written-not-applied): add compliance_requirements to FLL-GAR-11 mirroring FLL-GAR-10's REQ-12/attestation pattern — (a) kf gate: mz_durchlaessigkeit_kf <= 0.000000001 (Tab.3 Z.5, i=30); (b) Dpr gate: needs a new numeric field verdichtungsgrad_Dpr >= 97 (§5.2.2.1); (c) sealing-proof gate: mz_dichtungswirkung_nachgewiesen == true (§5.2.3.3). Candidate condition (b) also requires the F3/F4 field additions first. Requires a single controlled apply pass + human sign-off; NOT applied here."
+    },
+    {
+      "id": "D4",
+      "type": "staged-migration",
+      "detail": "STAGED: populate enum_values for mz_zusatzstofftyp and mz_einbau_verdichtung per F2 source lists. Human decides whether Zusatzstofftyp is a closed enum or 'other'-allowing."
+    }
+  ]
+}

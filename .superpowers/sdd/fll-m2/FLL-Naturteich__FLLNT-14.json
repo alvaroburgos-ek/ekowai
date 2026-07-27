@@ -1,0 +1,106 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-14",
+  "worksheetTitle": "Instandhaltung & Betrieb (maintenance & operation)",
+  "worksheetTemplateId": "f76478cd-4292-4f77-8d14-5105b71138f3",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodPull": {
+    "equations": 0,
+    "fields": 3,
+    "complianceRequirements": 1,
+    "note": "Read-only execute_sql against prod vadsmshzebefjreqcicl. Fields (all active, order_index 0): inspection_frequency(text, id 4fd22e99-5e00-493d-888f-baf4f8e0d275), maintenance_contract_in_place(boolean, id 1d73d7a8-6ecc-4f10-9d5f-447bb5207bd3), repair_provisions(text, id 4bdd7fff-e11b-4da5-b316-5ba4a285d015). Equations query returned []. One block-severity compliance_requirement: REQ-27 (id 03890b11-a518-4ed1-8b2d-b8cad0bdbe26). Seeder tests/harness/seed-fll-naturteich.ts FLLNT-14 spec matches prod exactly (same 3 fields, same REQ-27 condition/severity, 0 equations)."
+  },
+  "equations": [],
+  "chains": [
+    {
+      "name": "no computational chain (0 equations)",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "N/A",
+      "raw": "FLLNT-14 has 0 equations in prod (execute_sql returned [] and the seeder carries an empty equations array). It is a maintenance/operation worksheet with two free-text descriptors (inspection_frequency, repair_provisions) and one boolean (maintenance_contract_in_place); there is no formula and §12 prints no worked numeric example applicable to these fields. The only machine-evaluable artifact is the single REQ-27 block gate, which WAS driven end-to-end through the REAL saveWorksheet persist path + the REAL evaluateCondition (see gates). The two text inputs were additionally round-tripped through the REAL saveWorksheet to prove the whole worksheet's persist path (not just the gated field)."
+    }
+  ],
+  "gates": [
+    {
+      "id": "03890b11-a518-4ed1-8b2d-b8cad0bdbe26",
+      "code": "REQ-27",
+      "title": "Maintenance plan in place",
+      "condition": "maintenance_contract_in_place == true",
+      "fired": true,
+      "vacuous": false,
+      "drivenThrough": "REAL saveWorksheet (boolean persist, value_boolean=true verified in project_parameters) + REAL evaluateCondition (pass/fail/pending)",
+      "states": {
+        "pass": "value_boolean=true persisted through saveWorksheet -> evaluateCondition kind=pass",
+        "fail": "maintenance_contract_in_place=false -> kind=fail",
+        "pending": "no value -> kind=pending, missingSymbols contains maintenance_contract_in_place"
+      },
+      "note": "Gate MECHANICS are fully sound: fires all three ways (pass, fail, pending) and the gated boolean round-trips through the genuine save path (value_boolean=true asserted from project_parameters). VERDICT on SOURCE ATTESTATION = VC/FINDING: the hard-block condition `maintenance_contract_in_place == true` OVER-ENFORCES the standard. §12.1 (line 2998-3000) verbatim: 'If the owner of the pool is unwilling or incapable of performing this work him- or herself to the required extent and with the necessary professional expertise, he or she SHOULD contract a suitably qualified and reliable company to do all or part of this work for the owner.' The contract is CONDITIONAL (only if the owner cannot self-maintain) and phrased 'should' (a recommendation), NOT an unconditional mandate. What §12.1 (line 2991) actually makes mandatory is that the pool 'will only work in the long run if it is maintained regularly and properly' and (line 3002-3003) that 'Written operating instructions MUST be created'. A hard block requiring a third-party maintenance CONTRACT for every project has no §12 basis. See findings[0]."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "type": "gate-over-enforces-source (should-vs-must + conditional-as-unconditional)",
+      "field": "maintenance_contract_in_place",
+      "worksheet": "FLLNT-14",
+      "gate": "REQ-27",
+      "claim": "REQ-27 is a block-severity gate whose condition `maintenance_contract_in_place == true` requires that a maintenance/service CONTRACT with a third party is in place for EVERY project, or the worksheet cannot be approved.",
+      "pdfSays": "§12.1 verbatim (line 2998-3000): 'If the owner of the pool is unwilling or incapable of performing this work him- or herself to the required extent and with the necessary professional expertise, he or she should contract a suitably qualified and reliable company to do all or part of this work for the owner.' And (line 2991): 'A natural pool will only work in the long run if it is maintained regularly and properly.' And (line 3002-3003): 'Written operating instructions must be created for the proper planning and construction of a natural pool.'",
+      "problem": "The source makes the maintenance CONTRACT (a) CONDITIONAL on the owner being unable/unwilling to self-maintain, and (b) a 'should' (recommendation), not a 'must'. What is unconditionally MANDATORY per §12 is: regular/proper maintenance itself, and written operating instructions. Encoding a third-party contract as an unconditional == true block gate forces a false-negative for the fully-permitted case of a competent owner self-maintaining. It is not vacuous/dead (it fires and blocks), but it blocks a source-permitted state.",
+      "recommendation": "STAGED (written-not-applied): options in decisionItems[0] — (a) downgrade REQ-27 severity block->warn/info; (b) rewrite the condition to enforce the actually-mandatory obligations (written operating instructions present AND regular maintenance provided), which would require adding operating_instructions_provided / maintenance_regime_described fields; (c) keep as-is only if EKOWAI deliberately imposes a stricter service-contract policy, in which case tag imported_unverified as a policy overlay, not a §12 requirement. Do NOT auto-apply.",
+      "verdict": "VC"
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "type": "unmodelled-mandatory-obligation (coverage gap)",
+      "worksheet": "FLLNT-14",
+      "claim": "FLLNT-14 has 3 fields: inspection_frequency(text), maintenance_contract_in_place(bool), repair_provisions(text).",
+      "pdfSays": "§12.1 (line 3002-3007) verbatim: 'Written operating instructions must be created for the proper planning and construction of a natural pool. This includes: required checks; required maintenance, care and intervals; instructions for use; instructions for technical products in/around the natural pool.' §12.2 (line 3031-3033): 'the supplier should be instructed to perform the checks once annually for the duration of the time period in which warranty claims can be made. After that period, routine checks should be made (e.g. once a year) by a specialist.'",
+      "problem": "The single genuinely-MUST obligation of §12 (written operating instructions must be created, with the 4 enumerated contents) is NOT captured by any field on FLLNT-14 and is NOT gated here. inspection_frequency is a free-text field with no validation against §12.2's 'once annually' guidance; repair_provisions is free-text with no link to §12.4's repair list. The worksheet models the maintenance topic thinly relative to §12.",
+      "recommendation": "STAGED: consider adding operating_instructions_provided(bool) gated to the actually-mandatory §12.1 obligation, and (optionally) an enum/structured inspection_frequency aligned to §12.2. Catalogue only; see decisionItems[1].",
+      "verdict": "VC"
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "vc-source-tier",
+      "detail": "All PDF quotes in this run are from the pdftotext/markdown extraction at .superpowers/sdd/fll-m2/pdf/Naturteich.txt (searchable convenience per SR-3), not from a freshly rendered PDF page image. Section 12 (Maintenance) with §12.1 General information (line 2986-3009), §12.2 Checks/inspections (line 3012-3033), §12.3 Care and maintenance (line 3038), §12.4 Repairs (line 3169-3176) were all located and quoted verbatim. Tier is VC (markdown) not VA (rendered-PDF-confirmed). No PDF-vs-markdown disagreement observed. Promote F1/F2 to VA by re-confirming the §12.1 'should contract' wording and the 'written operating instructions must be created' sentence against the rendered PDF page (pdf p.59-60).",
+      "blocking": false
+    },
+    {
+      "id": "R2",
+      "type": "no-worked-example",
+      "detail": "§12 prints no numeric worked example that maps to FLLNT-14's fields (the closest numbers — 2 mm/day, 12 mm/day evaporation, 10 m3/user, water-analysis frequency 1-2x/3-5x annually in Table 13 — are operation guidance, not derivations of these three fields). No chain to sanity-check a live value against a printed result; the two text fields and one boolean were round-tripped to prove persist only.",
+      "blocking": false
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "topic": "REQ-27 severity / condition vs §12.1 'should contract' (conditional recommendation)",
+      "range": "§12.1 makes the maintenance contract CONDITIONAL ('if the owner is unwilling or incapable') and a 'should' (recommendation), while REQ-27 encodes it as an unconditional block. Options: (a) block->warn/info downgrade; (b) rewrite condition to gate the actually-mandatory obligations (written operating instructions + regular maintenance provided); (c) retain as a deliberate EKOWAI stricter-than-source policy overlay (tag imported_unverified). Not a numeric range but a should-vs-must + conditional-vs-unconditional axis that must not be auto-picked.",
+      "sr2": "The decision axis is the RECOMMENDED ('should')/CONDITIONAL status of the source obligation vs the block enforcement — surfaced for human decision, not auto-resolved.",
+      "staged": "written-not-applied — no migration authored; catalogue only."
+    },
+    {
+      "id": "D2",
+      "topic": "Unmodelled §12.1 mandatory 'written operating instructions must be created' + §12.2 inspection cadence",
+      "range": "§12.1 makes written operating instructions (with 4 enumerated contents) MANDATORY ('must'); §12.2 gives 'once annually' during the warranty period then 'e.g. once a year' as check cadence. Options: (a) add operating_instructions_provided(bool) as the correctly-mandatory gate; (b) structure inspection_frequency to §12.2 guidance; (c) leave FLLNT-14 as-is and rely on other worksheets. The §12.2 cadence is guidance ('should'/'e.g.'), so any threshold must be advisory, never a hard block.",
+      "sr2": "§12.2 'once annually' / 'e.g. once a year' is guidance, not a hard limit — surfaced as advisory, never auto-encoded as a block.",
+      "staged": "written-not-applied — no migration authored; catalogue only."
+    }
+  ],
+  "vitestRaw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ |integration| tests/harness/verify-fll-naturteich-fllnt14.integration.test.ts > FLLNT-14 — real saveWorksheet round-trip + REQ-27 gate > exposes FLLNT-14 with its 3 maintenance fields and 0 equations 2ms\n ✓ |integration| ... > persists maintenance_contract_in_place through the REAL saveWorksheet path 526ms\n ✓ |integration| ... > also round-trips the two text inputs (inspection_frequency, repair_provisions) 13ms\n ✓ |integration| ... > REQ-27 gate fires PASS, FAIL and PENDING against the real evaluator 14ms\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Duration  5.84s",
+  "testFile": "C:\\Users\\Ekowai\\_wt-fll\\tests\\harness\\verify-fll-naturteich-fllnt14.integration.test.ts",
+  "checksPassed": 4,
+  "doctrineNotes": {
+    "SR-1": "Every value/scope claim carries a verbatim quote pulled from Naturteich.txt THIS run (§12.1 lines 2991/2998-3000/3002-3007, §12.2 lines 3031-3033, §12.4 lines 3169-3176). No prior-chat/log/bring-up numbers used. The prod field/equation/gate inventory was pulled fresh via read-only execute_sql this run.",
+    "SR-2": "§12.1 'should contract' (recommendation) and §12.2 'once annually / e.g. once a year' (guidance) surfaced as decisionItems D1/D2 on the should-vs-must / advisory-vs-block axis; nothing auto-picked.",
+    "SR-3": "All quotes are markdown-tier (VC). No PDF-vs-markdown disagreement found. VA promotion requires rendered-PDF re-confirm of §12.1/§12.2 (residue R1).",
+    "writeLock": "Read-only prod (execute_sql only). No writes to prod. Both findings staged as written-not-applied; no migration authored. Test file added to harness only."
+  }
+}

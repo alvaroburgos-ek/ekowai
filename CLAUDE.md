@@ -58,6 +58,57 @@ be demonstrated, not asserted — the F-4 lesson (gates that FIRE but never enfo
 what static reasoning misses. Where the real save path cannot be driven, say so explicitly and
 state what was proven instead; never let an argued fix read as an executed one.
 
+# UNATTENDED LONG-RUN (STANDING — owner's order, ratified 2026-07-27)
+
+**Mission: every owned guideline to WORKING-WORKSHEET state** — audited at full depth AND
+repaired, standard after standard from the ranked queue. Execute without asking until context
+physically forces the boundary.
+
+**Pre-authorised, never ask:**
+1. **Source-settled prod fixes** (see the section above) — with proof, reproduction check,
+   rollback, raw-output verify.
+2. **Quote/evidence backfills.**
+3. **All `[CODE]`/tooling fixes.**
+4. **Schema/infra changes serving the mandate.**
+5. **Sequencing** — the ranked queue decides, re-ranked on live validator errors as it moves.
+
+**Accumulate, never block.** All judgment items (modal severities, ranges, normative
+ambiguity, new gates) go to the sign-off sheet with verbatim evidence. The owner signs on
+return; nothing waits on a signature.
+
+**The only three stops:** severity/enforcement changes resting on interpretation ·
+ratified-design changes · irreversibles outside the pre-authorised classes. **If one is
+genuinely hit: log it, SKIP that item, continue with the next. Never idle on a stop.**
+
+**Hygiene, every wave:** depth mandate in full (100 % in subagents) · three-line summaries
+in-session, full reports to disk · honest reversals logged · **verify effects, never exit
+codes** · ledger updated at every transition · campaign-skill playbooks applied explicitly
+per standard · **one guideline at a time — never parallel standards** · maximum reasoning
+effort throughout.
+
+**At context end:** stop on a wave boundary, write a resume pointer, and leave a
+one-paragraph absence summary — standards completed, fixed counts, workflow-metric movement,
+sign-off sheet count.
+
+# MAP WRITE-BACK RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "The reasoning map is updated in the SAME wave as every change it describes — a fix without
+> its map write-back is incomplete work. Per fix: the affected node's frontmatter updates
+> (provenance grade lifted where the fix earns it — e.g. quote-backfilled → VA;
+> verification_method = re-executed; data_class corrected if it changed), a `fixed::` entry is
+> appended to the node (date, defect class, commit/migration id, one-line what-changed), and
+> findings previously attached to the node flip to resolved. Per wave: the standard's `_index`
+> re-renders from live prod + the validator re-runs, so map-vs-reality drift stays at zero
+> (drift is its own finding class, rule 3). New defect classes discovered mid-fix still become
+> validator rules in the same wave and re-check the corpus — including the already-fixed nodes.
+> The map is the single truthful mirror: anyone reading a node sees what the standard says,
+> what the encoding does, what was broken, what fixed it, and when — without opening any other
+> artifact."
+
+**Operational note.** A provenance lift is earned by *evidence*, not by activity: a
+quote-backfilled node reaches VA only because a PDF page now backs it. Never lift a grade
+because a row was touched. A fix that did not change what is known leaves the grade alone.
+
 # CONTENT BOUNDARY RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
 
 > "A worksheet's content universe is exactly its own guideline's printed pages — nothing

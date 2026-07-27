@@ -1,0 +1,173 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-06",
+  "worksheetTitle": "Vegetationstragschicht-Eingangsprüfung (substrate inspection vs. Tab. 1 / §5.6)",
+  "templateId": "da4ed995-69e5-4df4-8210-c4129d81bef8",
+  "standardId": "d0a661ab-c448-4c97-baf1-fd860fd9adca",
+  "prodCounts": { "equations": 0, "compliance_requirements": 0, "fields": 9 },
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt (rendered from fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf)",
+  "equations": [],
+  "equationsNote": "0 equations on this worksheet in prod AND in the committed manifest — confirmed by execute_sql (empty result) and by reading fll-tp-rhizom-manifest.json (equations:null). Nothing to verify formula/constant/unit/output-symbol against. FLLTP-RHZ-06 is a data-collection/verification worksheet, not a compute worksheet.",
+  "fields": [
+    {
+      "symbol": "vts_ph_cacl2",
+      "unit": "-",
+      "data_type": "number",
+      "soll": "6,0 - 7,5",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... pH (CaCl2) ... [-] ... 6,0 - 7,5",
+      "note": "RANGE (min-max), see decisionItems. Field description in prod says 'Sollbereich 6,0 - 7,5' — matches PDF exactly. clause_reference '§5.6, Tab. 1' correct."
+    },
+    {
+      "symbol": "vts_salz_h2o_g_l",
+      "unit": "g/l",
+      "data_type": "number",
+      "soll": "≤ 1,0",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... Salz (H2O) ... [g/l] ... ≤ 1,0",
+      "note": "Prod description 'Sollwert ≤ 1,0 g/l' matches. Unit g/l matches header row [g/l]."
+    },
+    {
+      "symbol": "vts_salz_caso4_g_l",
+      "unit": "g/l",
+      "data_type": "number",
+      "soll": "≤ 0,5",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... Salz (CaSO4) ... [g/l] ... ≤ 0,5",
+      "note": "Prod description 'Sollwert ≤ 0,5 g/l' matches. Extraction method (CaSO4) captured in symbol/label."
+    },
+    {
+      "symbol": "vts_n_cat_mg_l",
+      "unit": "mg/l",
+      "data_type": "number",
+      "soll": "≤ 50",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... N (CAT) ... [mg/l] ... ≤ 50",
+      "note": "Prod description 'Sollwert ≤ 50 mg/l' matches. CAT extraction captured."
+    },
+    {
+      "symbol": "vts_p2o5_cat_mg_l",
+      "unit": "mg/l",
+      "data_type": "number",
+      "soll": "≤ 25",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... P2O5 (CAT) ... [mg/l] ... ≤ 25",
+      "note": "Prod description 'Sollwert ≤ 25 mg/l' matches."
+    },
+    {
+      "symbol": "vts_k2o_cat_mg_l",
+      "unit": "mg/l",
+      "data_type": "number",
+      "soll": "≤ 100",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... K2O (CAT) ... [mg/l] ... ≤ 100",
+      "note": "Prod description 'Sollwert ≤ 100 mg/l' matches."
+    },
+    {
+      "symbol": "vts_caco3_scheibler_prozent",
+      "unit": "M.-%",
+      "data_type": "number",
+      "soll": "1 - 10",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... CaCO3 (Scheibler) ... [M.-%] ... 1 - 10",
+      "note": "RANGE (min-max), see decisionItems. Prod description 'Sollbereich 1 - 10 M.-%' matches PDF exactly. Method (Scheibler) captured; unit M.-% matches header."
+    },
+    {
+      "symbol": "vts_koernung",
+      "unit": "mm",
+      "data_type": "text",
+      "soll": "gewaschener Sand 0-4 mm",
+      "verdict": "VA",
+      "quote": "§5.6: 'Die Vegetationstragschicht wird zweischichtig eingebaut und besteht aus gewaschenem Sand der Körnung 0-4 mm, entsprechend den Anforderungen der Tabelle 1.'",
+      "note": "text field carrying the grain-size spec. PDF-confirmed. Unit 'mm' is loosely attached to a text value '0-4' but faithful to source."
+    },
+    {
+      "symbol": "vts_gesamt_dicke_mm",
+      "unit": "mm",
+      "data_type": "number",
+      "soll": "170 ±10 mm (total, two-layer)",
+      "verdict": "VC",
+      "quote": "§5.6: 'Der Substratbedarf beträgt bei der geforderten Schichtdicke von (170 ±10) mm ca. 110 l je Versuchsgefäß (800 x 800 mm).' + 'Die Vegetationstragschicht wird zweischichtig eingebaut'",
+      "note": "is_required=false, no validation_rules encoding the 170±10 mm Sollwert or the ±10 tolerance. PDF-attested value exists (170±10 mm) but the worksheet does not enforce/record the tolerance nor split the two layers. Flagged VC because the Sollwert/tolerance is present in the source but NOT captured in the field encoding. See findings F-2 and decisionItems D-3."
+    }
+  ],
+  "chains": [
+    {
+      "name": "data-collection save (Tab.1 conformant state)",
+      "ran": true,
+      "liveValue": "all 9 fields persisted: ph=6.8, salzH2O=0.8, salzCaSO4=0.4, N=40, P2O5=20, K2O=90, CaCO3=5, koernung='0-4', dicke=170",
+      "pdfExpected": "N/A — Tab.1 is a threshold table, the PDF prints no worked numeric example. Values chosen inside every Sollbereich purely to exercise the save path.",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll | Test Files 1 passed (1) | Tests 2 passed (2) | Duration 6.13s | console: 'CONFORMANT SAVE ok: true' ; all 9 persisted-value assertions green."
+    },
+    {
+      "name": "data-collection save (out-of-Sollbereich state)",
+      "ran": true,
+      "liveValue": "ph=8.0 (>7,5), salzH2O=2.0 (>1,0) both persisted; save.ok=true",
+      "pdfExpected": "No gate/equation exists to reject out-of-range input; expected behaviour is that the save succeeds and the non-conformant value persists verbatim (no automated Sollbereich enforcement on RHZ-06).",
+      "verdict": "VC",
+      "raw": "console: 'OUT-OF-RANGE SAVE ok: true' ; persisted ph=8.0, salzH2O=2.0 assertions green. Confirms there is NO compliance layer enforcing Tab.1 thresholds on this worksheet."
+    }
+  ],
+  "gates": [],
+  "gatesNote": "0 compliance_requirements on this worksheet in prod AND manifest. No gate to fire. This is itself a finding class (F-1): the Tab.1 Sollbereich thresholds are encoded only as prose in each field's description, with NO block/warn gate to enforce pass/fail — so a substrate that violates Tab.1 saves clean. Distinct from the CR-006 'vacuous gate' class (there is no gate at all here).",
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "medium",
+      "title": "No enforcement of Tab.1 Sollbereiche — verification worksheet with zero gates",
+      "detail": "FLLTP-RHZ-06 is archetype 'verification' and its whole purpose (per prod description) is the Eingangsprüfung of the substrate against Tab.1. Yet it has 0 compliance_requirements. The 7 Tab.1 thresholds (pH 6,0-7,5; Salz H2O ≤1,0; Salz CaSO4 ≤0,5; N ≤50; P2O5 ≤25; K2O ≤100; CaCO3 1-10) live only as free-text in each field's description. A save with pH=8.0 / Salz=2.0 persists clean (proven live, chain 2). A verification worksheet that verifies nothing is a gap. Recommend staging block/warn gates (one per parameter, or one compound gate) — NOT applied this run per doctrine.",
+      "proof": "chain 'data-collection save (out-of-Sollbereich state)' — save.ok=true with pH=8.0, Salz H2O=2.0."
+    },
+    {
+      "id": "F-2",
+      "severity": "low",
+      "title": "vts_gesamt_dicke_mm does not capture the (170 ±10) mm Sollwert nor the two-layer split",
+      "detail": "§5.6 gives a definite required layer thickness of (170 ±10) mm and states the VTS is 'zweischichtig eingebaut' (two-layer). The field is optional (is_required=false), has no validation_rules, no default carrying 170, and no companion fields for the upper/lower sub-layers. The Sollwert + tolerance are source-attested but unencoded. Consider (staged) making it required and adding a range validation 160-180 mm, or a warn gate.",
+      "proof": "§5.6 line: 'Der Substratbedarf beträgt bei der geforderten Schichtdicke von (170 ±10) mm ...'"
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "title": "No cos_beta/trig residue",
+      "detail": "FLLTP-RHZ-06 has 0 equations, so the known math-function engine gap (cos_beta/trig) does not apply. Recorded for completeness only."
+    },
+    {
+      "id": "R-2",
+      "title": "No PDF worked example to assert chain output against",
+      "detail": "Tab.1 is a threshold/acceptance table; the standard prints no worked numeric example for a substrate analysis. Both chains are therefore VC (sanity-checked save-path exercises), not VA computation-attested. Not fixable — inherent to the worksheet type."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-1",
+      "type": "range",
+      "parameter": "vts_ph_cacl2",
+      "range": "6,0 - 7,5 [-]",
+      "quote": "Tab. 1: pH (CaCl2) [-] 6,0 - 7,5",
+      "note": "SR-2: two-sided range. If a gate is authored, it must enforce BOTH bounds (>=6.0 AND <=7.5). Do not collapse to a single point value."
+    },
+    {
+      "id": "D-2",
+      "type": "range",
+      "parameter": "vts_caco3_scheibler_prozent",
+      "range": "1 - 10 [M.-%]",
+      "quote": "Tab. 1: CaCO3 (Scheibler) [M.-%] 1 - 10",
+      "note": "SR-2: two-sided range (>=1 AND <=10). Surface both bounds if a gate is staged."
+    },
+    {
+      "id": "D-3",
+      "type": "encoding-decision",
+      "parameter": "vts_gesamt_dicke_mm + Tab.1 gate coverage",
+      "quote": "§5.6 '(170 ±10) mm'; Tab.1 seven Sollbereiche",
+      "note": "Human decision needed: (a) whether to stage block/warn compliance_requirements enforcing the 7 Tab.1 thresholds (F-1); (b) whether to encode the 170±10 mm thickness Sollwert/tolerance + two-layer split on RHZ-06 (F-2). STAGED as written-not-applied — no prod write performed this run."
+    }
+  ],
+  "doctrine": {
+    "SR1": "Every field verdict above quotes the Tab.1/§5.6 text read from the rendered-PDF text extract THIS run; no scalar taken from logs/manifest defaults (manifest defaults are inert 0/'' placeholders — ignored).",
+    "SR2": "Both two-sided ranges (pH, CaCO3) surfaced as decisionItems D-1/D-2, never auto-collapsed.",
+    "SR3": "Source is the rendered-PDF text extract (TP-Rhizom.txt) produced from the FLL PDF; all 8 threshold/spec fields are PDF-confirmed = VA. The thickness field is VC (source value exists but under-encoded). No PDF-vs-markdown disagreement observed.",
+    "noProdWrite": "Read-only prod (execute_sql) only. The only writes were to the disposable embedded PG in the test harness. All corrections are staged in findings/decisionItems, none applied."
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-25",
+  "worksheetTitleDe": "Pruefungen (Eignung / Eigen- / Fremd- / Kontroll-)",
+  "templateId": "00bbe3e9-e4c3-4d86-be48-5274762cfa28",
+  "verifiedRun": "2026-07-23",
+  "counts": { "equations": 0, "fields": 4, "gates": 3 },
+  "note": "Task header said 'equations (0), gates/compliance_requirements (3), fields (4)'. Prod confirms EXACTLY 0 equations, 3 compliance_requirements, 4 fields. This is a verification/documentation worksheet (archetype=verification, phase 6) with no math and no worked example — chains are field-persistence + gate pass/fail exercises.",
+  "equations": [],
+  "equationsNote": "Zero equations on FLL-GAR-25 (confirmed via prod SELECT on equations WHERE worksheet_template_id = template id → []). No formula/constant/unit to verify. FLL-GAR-25 is a Pruefungen (test-cascade) documentation worksheet; no cos_beta/trig residue applies here.",
+  "fields": [
+    {
+      "symbol": "eignungspruefung_durchgefuehrt",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "clause_ref_db": "Sec.3 (Begriffe); Sec.5.x.3",
+      "quote": "Eignungsprüfungen: Prüfungen zum Nachweis der Eignung der Baustoffe und Bauteile für den vorgesehenen Zweck. Der Nachweis ist von demjenigen zu erbringen, der den jeweiligen Baustoff bzw. das jeweilige Bauteil vorgibt. (GAR.txt L1149-1152, Sec.3 Begriffe) + '5.1.3.1 Eignungsprüfung — An dem für die Abdichtung vorgesehenen Material ist vor dem Einbau eine Eignungsprüfung durchzuführen.' (GAR.txt L2168-2170)",
+      "note": "PDF-confirmed term + per-material 5.x.3.1 clauses. Field is a boolean 'durchgefuehrt' flag; the standard defines the test category verbatim. consumer_worksheets=[FLL-GAR-26]."
+    },
+    {
+      "symbol": "fremdueberwachung_zertifikat",
+      "data_type": "text",
+      "verdict": "VA",
+      "clause_ref_db": "Sec.3",
+      "quote": "Fremdüberwachung: Prüfungen, die von beauftragten Dritten durchgeführt werden. Art und Umfang der Prüfungen und der zu erbringenden Nachweise sind zu vereinbaren. Mit der Fremdüberwachung sollen anerkannte Personen, Betriebe oder Institutionen beauftragt werden. (GAR.txt L1164-1167, Sec.3 Begriffe)",
+      "note": "PDF-confirmed. Field is a free-text certificate reference. Standard notes Fremdüberwachung is not a statutory obligation per material (e.g. 'Eine gesetzliche Pflicht zur Fremdüberwachung besteht nicht.' GAR.txt L2186-2187) → optional field (is_required=false) is consistent. consumer_worksheets=[FLL-GAR-26]."
+    },
+    {
+      "symbol": "kontrollpruefung_dokumentiert",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "clause_ref_db": "Sec.3; Sec.5.x.3",
+      "quote": "Kontrollprüfungen: Prüfungen des Auftraggebers, um festzustellen, ob die Baustoffe und Bauteile sowie die fertigen Leistungen den vertraglichen Vereinbarungen entsprechen. (GAR.txt L1159-1161) + '5.1.3.3 Kontrollprüfungen — Nach Einbau der Dichtungsschicht sind seitens des Auftraggebers Kontrollprüfungen zur veranlassen' (GAR.txt L2190-2193). 'Die Ergebnisse der Kontrollprüfung werden der Abnahme und Abrechnung zugrunde gelegt.' (GAR.txt L2206)",
+      "note": "PDF-confirmed. boolean 'dokumentiert' flag. NB per-material variation: for GTD/bahnen (Sec.5.3.3.3) 'Kontrollprüfungen sind für Abdichtungen nicht erforderlich.' (GAR.txt L2918-2920) — a SR-2 range/per-material distinction surfaced as decision item. consumer_worksheets=[FLL-GAR-26]."
+    },
+    {
+      "symbol": "attest_fll_gar_25_req_26",
+      "data_type": "boolean",
+      "verdict": "VC",
+      "clause_ref_db": null,
+      "quote": "No standalone PDF text — this is a synthetic attestation carrier field created to back the REQ-26 gate (label_de 'Nachweis: Sec.5.x.3/6.x.3/7.x.3'). Its underlying claim IS PDF-attested (the 5.x.3/6.x.3/7.x.3 Eignungs-/Eigen-/Fremd-/Kontroll- cascade exists per material), but the boolean carrier itself is an engineer self-attestation, not a source value.",
+      "note": "VC: attestation carrier (clause_reference NULL, no consumer_worksheets, validation_rules NULL). CR-006-class: the gate REQ-26 tests only this self-attest boolean, not a source-derived value — it can never mechanically catch a missing test, only that the engineer ticked the box. Logged as a finding (soft), not a hard defect: it is fireable (pass/fail both reachable), so not vacuous."
+    }
+  ],
+  "chains": [
+    {
+      "name": "CHAIN A — 4 local fields persist through real saveWorksheet",
+      "ran": true,
+      "liveValue": "eignungspruefung_durchgefuehrt=true, fremdueberwachung_zertifikat='ZERT-2024-0815', kontrollpruefung_dokumentiert=true, attest_fll_gar_25_req_26=true",
+      "pdfExpected": "N/A (no worked example; documentation worksheet). Values are illustrative, not source-picked.",
+      "verdict": "VC",
+      "raw": "PASS — 'drives all 4 fields (full cascade documented) and persists' 389ms. Re-read from project_parameters confirmed value_boolean/value_text round-trip."
+    },
+    {
+      "name": "GATE REQ-26 (block) pass+fail via real checkApprovalGate",
+      "ran": true,
+      "liveValue": "attest=false ⇒ REQ-26 IN failingBlockConditions; attest=true ⇒ REQ-26 NOT in failingBlockConditions",
+      "pdfExpected": "N/A (attestation gate; no numeric example)",
+      "verdict": "VA-mechanism",
+      "raw": "PASS x2 — 'FAIL state: attest=false ⇒ checkApprovalGate reports REQ-26 failing' 43ms; 'PASS state: attest=true ⇒ REQ-26 no longer failing' 14ms"
+    },
+    {
+      "name": "GATE REQ-27 (block) pass+fail cross-worksheet via project-wide fallback (abnahme_datum on GAR-26)",
+      "ran": true,
+      "liveValue": "abnahme_datum NULL on GAR-26 ⇒ REQ-27 fails on GAR-25; abnahme_datum='2024-06-15' ⇒ REQ-27 passes on GAR-25",
+      "pdfExpected": "Sec.11.1 Abnahme requires formal acceptance (date). Existence check only; no numeric example.",
+      "verdict": "VA-mechanism",
+      "raw": "PASS x2 — 'FAIL state: abnahme_datum blank on GAR-26 ⇒ REQ-27 fails on GAR-25 via project fallback' 9ms; 'PASS state: abnahme_datum set on GAR-26 ⇒ REQ-27 passes on GAR-25 via project fallback' 12ms. Confirms cross-worksheet field IS resolvable via approval-gate project-wide conflict-free fallback (makeGateLookup/buildFallbackValues) — NOT dead."
+    },
+    {
+      "name": "GATE REQ-28 (warn) pass+fail — evaluateCondition direct + confirm checkApprovalGate ignores it",
+      "ran": true,
+      "liveValue": "cond 'ibn_datum IS NOT NULL AND ibn_befuellung_methode IS NOT EMPTY' → fail when both blank, pass when both present; checkApprovalGate never lists REQ-28 (warn severity)",
+      "pdfExpected": "Sec.12 Inbetriebnahme: 'Eignung des Füllwassers (z. B. pH-Wert, Wasserhärte, Nährstoffgehalte, Inhaltsstoffe) für die Abdichtung' + 'Glättung etwaiger Falten im Zuge des Befüllvorgangs' (GAR.txt L6357-6362). Existence check; no numeric example.",
+      "verdict": "VA-mechanism",
+      "raw": "PASS x2 — 'is warn-severity ⇒ NOT evaluated by checkApprovalGate (block-only) — evaluate directly' 0ms; 'confirms checkApprovalGate ignores REQ-28 (warn) even when its fields are blank' 12ms"
+    }
+  ],
+  "gates": [
+    {
+      "id": "a5671a1e-39e4-4430-aab6-15fb0f66565f",
+      "code": "REQ-26",
+      "severity": "block",
+      "condition": "attest_fll_gar_25_req_26 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fireable pass AND fail (both exercised live). Field is LOCAL to GAR-25. VA-grade clause content (Sec.5.x.3/6.x.3/7.x.3 cascade PDF-attested). SOFT FINDING: attestation-only gate (CR-006 class) — it tests a self-ticked boolean, not a source-derived test result, so it cannot mechanically detect a genuinely-missing Eignungs-/Kontroll-Prüfung. Not vacuous (both verdicts reachable), but low assurance."
+    },
+    {
+      "id": "03cf776f-d5a0-475d-b69d-606ccff68617",
+      "code": "REQ-27",
+      "severity": "block",
+      "condition": "abnahme_datum IS NOT NULL",
+      "fired": true,
+      "vacuous": false,
+      "note": "CROSS-WORKSHEET: abnahme_datum is a field on FLL-GAR-26, NOT on GAR-25. Fireable pass+fail via approval-gate project-wide conflict-free fallback (verified live). PDF-attested by Sec.11.1 Abnahme (GAR.txt L6285-6293). NOT dead — but see finding on evaluation-surface asymmetry."
+    },
+    {
+      "id": "cf4cfe44-5bcd-415b-8f43-13f0b1fc496c",
+      "code": "REQ-28",
+      "severity": "warn",
+      "condition": "ibn_datum IS NOT NULL AND ibn_befuellung_methode IS NOT EMPTY",
+      "fired": true,
+      "vacuous": false,
+      "note": "CROSS-WORKSHEET: both ibn_datum + ibn_befuellung_methode are fields on FLL-GAR-27, NOT on GAR-25. Condition parses + fires pass/fail (evaluateCondition direct). warn severity ⇒ checkApprovalGate (block-only) NEVER evaluates it — it can never block approval, only surface as a warning on the compliance surface. PDF-attested by Sec.12 Inbetriebnahme (Füllwasser-Eignung + Faltenglättung, GAR.txt L6357-6362)."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1-GAR25-attestation-gate",
+      "severity": "soft",
+      "code": "REQ-26",
+      "title": "REQ-26 is an attestation-only (CR-006 class) block gate",
+      "detail": "REQ-26 condition 'attest_fll_gar_25_req_26 == True' tests a synthetic self-attestation boolean (field attest_fll_gar_25_req_26, clause_reference NULL, no consumer_worksheets). It cannot mechanically detect a genuinely-missing Eignungs-/Eigen-/Fremd-/Kontroll-Prüfung — it only confirms the engineer ticked the box. The three REAL cascade fields on the worksheet (eignungspruefung_durchgefuehrt, kontrollpruefung_dokumentiert booleans; fremdueberwachung_zertifikat text) are NOT referenced by any gate. Consider strengthening REQ-26 to 'eignungspruefung_durchgefuehrt == True AND kontrollpruefung_dokumentiert == True' (per-material-aware) so it fires on the actual data rather than a self-attest. NOT auto-applied (findings-over-fixes)."
+    },
+    {
+      "id": "F2-GAR25-crossworksheet-gate-surface-asymmetry",
+      "severity": "soft",
+      "code": "REQ-27 / REQ-28",
+      "title": "REQ-27 (block) and REQ-28 (warn) reference fields owned by other worksheets",
+      "detail": "REQ-27 reads abnahme_datum (owned by FLL-GAR-26); REQ-28 reads ibn_datum + ibn_befuellung_methode (owned by FLL-GAR-27). On the engineer-approval path they resolve correctly through the conflict-free project-wide fallback in approval-gate.ts (verified: REQ-27 fires pass+fail live). This is by design (makeGateLookup) and NOT a dead gate. RISK note: the *form-local* compliance surface (evaluate-for-report / worksheet form) is worksheet-local and would show these as `pending` on GAR-25 until GAR-26/GAR-27 are filled — surface asymmetry between the approval gate (project-wide) and the in-form display (local). Flag for review; no fix applied."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1-GAR25-no-worked-example",
+      "reason": "FLL-GAR-25 is a documentation/verification worksheet: 0 equations, no PDF worked example. CHAIN A field values (ZERT-2024-0815 etc.) are illustrative placeholders, not source-picked → recorded VC. No numeric ground truth exists to assert against per SR-1."
+    },
+    {
+      "id": "R2-GAR25-in-form-surface-not-driven",
+      "reason": "The in-form (worksheet-local) compliance surface for REQ-27/REQ-28 was NOT driven through the UI evaluate-for-report path (only the approval-gate path + evaluateCondition unit path). The worksheet-local display verdict for these cross-worksheet gates is asserted by code-read (localSymbols scoping), not by a live in-form render. Left as residue."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1-GAR25-kontrollpruefung-per-material-range",
+      "type": "SR-2 range / per-material distinction",
+      "detail": "Kontrollprüfung requirement is NOT uniform across materials. For mineral liners (5.1.3.3 Grubentone, 5.2.3.3) Kontrollprüfungen are 'zu veranlassen' / erforderlich; for Dichtungsbahnen/GTD (5.3.3.3) 'Kontrollprüfungen sind für Abdichtungen nicht erforderlich.' (GAR.txt L2918-2920). The single boolean kontrollpruefung_dokumentiert on GAR-25 cannot express this per-material split. DECISION for a human: whether GAR-25 (and REQ-26) should be material-conditioned so the Kontrollprüfung flag/gate is only demanded where the material class requires it. Do NOT auto-pick a single 'required/not-required' value."
+    },
+    {
+      "id": "D2-GAR25-strengthen-REQ-26",
+      "type": "gate-content staged change (written-not-applied)",
+      "detail": "STAGED (not applied): consider replacing REQ-26 condition 'attest_fll_gar_25_req_26 == True' with a condition over the real cascade booleans, e.g. 'eignungspruefung_durchgefuehrt == True AND kontrollpruefung_dokumentiert == True' (material-conditioned per D1). Requires a controlled migration on compliance_requirements.condition + potentially retiring the attest_fll_gar_25_req_26 carrier field. Bundle into the single controlled apply pass; NOT written to prod this run."
+    }
+  ]
+}

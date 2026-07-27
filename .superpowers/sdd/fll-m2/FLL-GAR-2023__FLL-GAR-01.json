@@ -1,0 +1,97 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-01",
+  "worksheetTitle": "Projektregistrierung",
+  "templateId": "8f5a3c3a-15ec-46c3-9c9c-2dfaefa3df43",
+  "archetype": "registration",
+  "prodStandardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "counts": { "equations": 0, "gates": 2, "fields": 7 },
+  "equations": [],
+  "equationsNote": "FLL-GAR-01 is a registration archetype (admin project data). Prod returns ZERO equations for template 8f5a3c3a-... — verified via SELECT on equations WHERE worksheet_template_id. Nothing to formula-verify against the PDF. No cos_beta/trig residue applies here.",
+  "chains": [
+    {
+      "name": "GAR-01 registration persistence (7 admin fields)",
+      "ran": true,
+      "liveValue": {
+        "project_code": "FLL-2024-001",
+        "project_name": "Naturteich Musterhausen",
+        "bauherr": "Familie Muster",
+        "planer": "Landschaftsarchitekt Beispiel",
+        "ausfuehrungsbetrieb": "GaLaBau Beispiel GmbH",
+        "project_date": "2024-05-01",
+        "standort_address": "Musterweg 1, 47800 Krefeld"
+      },
+      "pdfExpected": "n/a — registration data, standard prints no worked example",
+      "verdict": "VC",
+      "raw": "pnpm vitest run --project integration tests/harness/verify-fll-gar-01.integration.test.ts --reporter=verbose\n RUN  v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ |integration| VERIFY FLL-GAR-01 — Projektregistrierung > CHAIN: persists the 7 registration fields through real saveWorksheet + reads back 78ms\n ✓ GATE REQ-02: is a permanent FAIL on GAR-01 (symbol lives on GAR-03, not here) 1ms\n ✓ GATE REQ-03: is a permanent FAIL on GAR-01 (symbol lives on GAR-03, not here) 0ms\n ✓ TOPOLOGY: neither gate symbol is among GAR-01 fields (proves the vacuity) 1ms\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Duration  5.05s",
+      "note": "Real saveWorksheet path returned ok:true saved:7; DB read-back matches every entered value (text + date). Round-trip fidelity confirmed. VC because there is no standard-printed worked example to assert against — registration is administrative data (Sec.4.1)."
+    }
+  ],
+  "gates": [
+    {
+      "id": "0ab42efe-6862-4078-ade9-4d5be241f3fb",
+      "code": "REQ-02",
+      "titleDe": "Baurechtliche Genehmigungen geprueft",
+      "condition": "lbo_genehmigung_erforderlich IS NOT NULL",
+      "severity": "block",
+      "clauseReference": "Sec.4.1/4.2",
+      "fired": true,
+      "vacuous": true,
+      "note": "FIRED both states via real evaluateCondition. FAIL: GAR-01-local lookup (only the 7 registration symbols) -> symbol absent -> exists=false -> fail. PASS: only reachable by an off-worksheet lookup that supplies lbo_genehmigung_erforderlich. That symbol is NOT a field of GAR-01 (it lives on FLL-GAR-03, verified in prod). ComplianceBlock (compliance-block.tsx L48-72) builds its symbol->value map ONLY from the current worksheet's props.fields, so on GAR-01 this gate is a PERMANENT block-severity FAIL that no GAR-01 input can ever clear. Vacuous/dead on this worksheet (CR-006 class)."
+    },
+    {
+      "id": "328a10c6-e9ab-4bd0-8373-fd2d74103aa3",
+      "code": "REQ-03",
+      "titleDe": "WHG-Einleitungsgenehmigung geklaert",
+      "condition": "whg_einleitung_genehmigung IS NOT NULL",
+      "severity": "block",
+      "clauseReference": "Sec.4.10",
+      "fired": true,
+      "vacuous": true,
+      "note": "FIRED both states via real evaluateCondition. Same defect as REQ-02: symbol whg_einleitung_genehmigung is a field of FLL-GAR-03, not GAR-01. GAR-01-local lookup -> fail; pass unreachable on this worksheet -> permanent block-severity FAIL. Vacuous/dead on GAR-01 (CR-006 class)."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "type": "gate-topology / vacuous-block-gate (CR-006 class)",
+      "worksheet": "FLL-GAR-01",
+      "requirements": ["REQ-02", "REQ-03"],
+      "detail": "Both block-severity compliance_requirements on FLL-GAR-01 test symbols that are NOT fields of FLL-GAR-01. REQ-02 condition 'lbo_genehmigung_erforderlich IS NOT NULL' and REQ-03 condition 'whg_einleitung_genehmigung IS NOT NULL' both reference fields that prod places on FLL-GAR-03 (verified: SELECT symbol,wt.code FROM fields JOIN worksheet_templates -> both rows return code=FLL-GAR-03). The wizard gate evaluator is worksheet-local (compliance-block.tsx builds lookup only from the current worksheet's fields), so on GAR-01 both symbols resolve to undefined -> IS NOT NULL -> permanent FAIL. Consequence: FLL-GAR-01 shows 2 permanent red block-violations that the user can NEVER clear by editing GAR-01, AND the underlying LBO/WHG permit questions are never actually asked to the engineer on the registration worksheet. The gates are simultaneously always-failing (noise / false blocker) and never-satisfiable (dead) here.",
+      "pdfSupport": "The requirements are REAL per the standard: Sec.4.1 line 1333-1334 verbatim: 'Erfordernis von Genehmigungsverfahren (z. B. baurechtliche Genehmigungen gemäß LBO, Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG)'. So the compliance intent is source-attested; only the HOME worksheet of the gates is wrong.",
+      "proposedRemedy": "Either (a) re-home REQ-02/REQ-03 onto FLL-GAR-03 (where lbo_genehmigung_erforderlich / whg_einleitung_genehmigung actually live), or (b) add those two boolean/enum fields to FLL-GAR-01 so the gate has a local field to test. Decision required (see decisionItems D1). STAGED ONLY — not applied."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "clause-reference nuance (VC, not a finding)",
+      "detail": "REQ-03 clause_reference is 'Sec.4.10' (Überlauf- und Zulaufeinrichtungen, PDF line 1666). Sec.4.10 does discuss discharge being genehmigungspflichtig (line 1682-1683: 'Die Einleitung von Wasser aus einem künstlich abgedichteten Gewässer ... können genehmigungspflichtig sein'), but the explicit WHG anchor is at Sec.4.1 (line 1334). Clause ref is defensible but the WHG keyword itself is in 4.1. Low priority; noted for completeness, no correction proposed.",
+      "verdict": "VC"
+    },
+    {
+      "id": "R2",
+      "type": "PDF-vs-DB tier",
+      "detail": "All gate/field facts above are DB-confirmed (prod execute_sql) and the compliance INTENT is PDF-confirmed (VA) at Sec.4.1 line 1333-1334. The field-symbol home (GAR-03) is a DB fact, not a PDF fact (the PDF does not name symbols). No PDF-vs-markdown disagreement found for this worksheet."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "gate re-home vs field-add (human decision, STAGED not applied)",
+      "detail": "FLL-GAR-01 REQ-02/REQ-03 are vacuous block-gates (Finding F1). Two valid fixes: (A) MOVE both compliance_requirements to worksheet_template_id of FLL-GAR-03 (the worksheet that owns lbo_genehmigung_erforderlich / whg_einleitung_genehmigung) so the gate evaluates against a present local field; or (B) ADD lbo_genehmigung_erforderlich + whg_einleitung_genehmigung as boolean/enum fields on FLL-GAR-01 (duplicating the permit-declaration onto the registration sheet). (A) preserves single-source and matches where the permit data is actually captured; (B) keeps the gate on the registration sheet but duplicates fields. Recommended: (A). Migration written-not-applied to be authored under a single controlled apply pass. Do NOT auto-pick.",
+      "options": ["A: re-home REQ-02/REQ-03 -> FLL-GAR-03", "B: add the two permit fields to FLL-GAR-01"]
+    }
+  ],
+  "provenance": {
+    "SR1_verbatim_quotes": [
+      "Sec.4.1 (PDF p.25, line 1333-1334): 'Erfordernis von Genehmigungsverfahren (z. B. baurechtliche Genehmigungen gemäß LBO, Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG);'",
+      "Sec.4.2 (PDF p.26, line ~1360): '4.2 Baurechtliche Anforderungen — Im Planungsverlauf ist zu prüfen, welche jeweiligen bauaufsichtlichen Anforderungen die Herstellung, Inbetriebnahme, Nutzung und Instandhaltung des Gewässers beeinflussen ... können'",
+      "Sec.4.10 (PDF line 1682-1683): 'Die Einleitung von Wasser aus einem künstlich abgedichteten Gewässer in das angrenzende Gelände (Beeinträchtigung des Grundwassers) sowie in das öffentliche Kanalnetz können genehmigungspflichtig sein.'"
+    ],
+    "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/GAR.txt",
+    "prodReadOnly": "Supabase MCP execute_sql, project vadsmshzebefjreqcicl, read-only. No writes to prod.",
+    "harnessTest": "tests/harness/verify-fll-gar-01.integration.test.ts (embedded PG via seedFllGar, real saveWorksheet path). 4/4 passed."
+  }
+}

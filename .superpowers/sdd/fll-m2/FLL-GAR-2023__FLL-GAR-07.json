@@ -1,0 +1,137 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-07",
+  "worksheetId": "59ec25aa-e745-4987-a1cb-fad214dea86a",
+  "title_de": "Profilierung und Boeschungsneigung",
+  "title_en": "Profiling and Slope",
+  "pdfSection": "4.5 Profilierung und Neigung (S.28); Tab.1 (S.28); 4.7 Abdichtungssystem (S.30)",
+  "equations": [],
+  "equationsNote": "FLL-GAR-07 has ZERO equations in prod (confirmed via execute_sql). Sec.4.5 is a materials-selection / range-limit clause, not a calculation. Nothing to verify at the equation level; no cos_beta/trig residue applies here.",
+  "fields": [
+    {
+      "id": "d455a15f-3562-4301-a13a-438da6849162",
+      "symbol": "boeschungsneigung_ratio",
+      "data_type": "text",
+      "unit": null,
+      "validation_rules": "format: 1:n",
+      "clause_reference": "Sec.4.5; Tab.1",
+      "verdict": "VA",
+      "quote": "Tab. 1: Richtwerte fuer werkstoffspezifische Boeschungsneigungen verschiedener Abdichtungsarten ... Neigungsverhaeltnis ... [rows 2..12: '<= 1:3', '<= 1:2', '<= 1:5', '<= 1:1,5', '<= 1:1']",
+      "note": "The 1:n ratio field is PDF-confirmed: Tab.1 column 2 is 'Neigungsverhaeltnis' expressed as 1:n. Field shape correct."
+    },
+    {
+      "id": "a959be80-5efb-41ca-a9d4-e811ebc4c515",
+      "symbol": "gefaelle_percent",
+      "data_type": "number",
+      "unit": "%",
+      "validation_rules": "0...100",
+      "clause_reference": "Sec.4.5; Tab.1",
+      "verdict": "VA",
+      "quote": "Tab. 1 ... Gefaelle in % ... [rows: '<= 33 %', '<= 50 %', '<= 20 %', '<= 66 %', '<= 100 %']",
+      "note": "Unit '%' PDF-confirmed (Tab.1 column 3 'Gefaelle in %'). Range 0..100 is a plausible UI bound but is NOT source-attested as a hard cap — Tab.1 material maxima top out at 100% (row 11 Fluessigkunststoffe <= 1:1 = <= 100 %). The 0..100 rule is a field-level UI hint only and is NOT enforced by the save engine (see finding F-3)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "GAR-07 input-persistence chain (Tab.1-conformant pair)",
+      "ran": true,
+      "liveValue": "boeschungsneigung_ratio='1:1,5', gefaelle_percent=66",
+      "pdfExpected": "Tab.1 row 10 Kunststoff- und Elastomerbahnen: '<= 1:1,5 | <= 66 %' (also row 12 PEHD). No printed WORKED example — Tab.1 is a range table.",
+      "verdict": "VC",
+      "raw": "PASS 576ms — 'persists a Tab.1-conformant slope pair (Kunststoffbahnen 1:1,5 = 66 %) via saveWorksheet': res.ok===true; persisted value_text='1:1,5', value_number=66. saveWorksheet is the production persist path (same import as fll-gar27-qnot). VC because no printed worked example exists to assert against; the pair is a sanity check against Tab.1 row 10."
+    },
+    {
+      "name": "GAR-07 over-limit gefaelle (no engine guard)",
+      "ran": true,
+      "liveValue": "gefaelle_percent=120",
+      "pdfExpected": "Tab.1 max material limit is 100% (Fluessigkunststoffe). 120% exceeds every row.",
+      "verdict": "FINDING",
+      "raw": "PASS 13ms — 'persists an over-limit gefaelle (120 %) too': res.ok===true; persisted value_number=120. The save path accepts a value beyond the field's own 0..100 rule AND beyond every Tab.1 material maximum, with no gate to catch it (see F-3)."
+    }
+  ],
+  "gates": [
+    {
+      "id": "66b9e6bd-3278-4b55-8bbc-b5dc754dad06",
+      "code": "REQ-08",
+      "title_de": "Boeschungsneigung material-konform (Tab.1)",
+      "severity": "warn",
+      "condition": "Slope per Tab.1 row for chosen abdichtungs_art",
+      "fired": false,
+      "vacuous": true,
+      "verdict": "FINDING",
+      "note": "Condition is natural-language prose. Run through REAL evaluateCondition against BOTH a compliant state (1:1,5 / 66% / Kunststoffbahnen) and a non-compliant state (1:1 / 100% / Gussasphalt whose Tab.1 limit is 1:5/20%): both return kind='manual'. The gate NEVER produces pass or fail (CR-006 class dead gate). Additionally severity='warn' — even if it parsed it would not block. It cannot enforce the Tab.1 material-specific slope limit it references.",
+      "clauseVerdict": "VA — the referenced Tab.1 material limits are PDF-confirmed (Sec.4.5, S.28)."
+    },
+    {
+      "id": "3a6b667c-6e8f-4920-a25d-9f81972a1c0e",
+      "code": "REQ-09",
+      "title_de": "Abdichtungssystem ausgewaehlt und nutzungsadequat",
+      "severity": "warn",
+      "condition": "Engineer-judged selection traceable to Sec.4.7 criteria",
+      "fired": false,
+      "vacuous": true,
+      "verdict": "FINDING",
+      "note": "Condition is natural-language prose ('Engineer-judged selection ...'). Run through REAL evaluateCondition against two states: both return kind='manual'. Never fires pass/fail. This one is legitimately an engineer-judgment / attestation gate (Sec.4.7 is a bulleted selection-criteria list, inherently manual) — so 'manual' is arguably the CORRECT semantics, but as encoded it is severity='warn' with no attestation carrier, so it neither blocks nor is it recorded as an explicit engineer sign-off. Flagged as a soft finding, not a hard defect.",
+      "clauseVerdict": "VA — Sec.4.7 (S.30) lists the selection criteria (Nutzungsart, Dimensionierung/Profilierung/Neigung, Baugrund, Flora/Fauna Wurzel-/Rhizomfestigkeit, etc.) that the condition paraphrases."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "warn",
+      "title": "REQ-08 is a dead/vacuous gate (CR-006 class)",
+      "detail": "compliance_requirement REQ-08 condition 'Slope per Tab.1 row for chosen abdichtungs_art' does not parse in the evaluator grammar → evaluateCondition returns 'manual' for every state (proven pass+fail). The Tab.1 material-specific slope limit (which IS source-verifiable: 1:1 .. 1:5 / 20%..100% by material) is therefore not machine-enforced. To become fireable it would need (a) a machine-evaluable condition mapping abdichtungs_art -> {ratio_max, gefaelle_max} per Tab.1, AND (b) an abdichtungs_art carrier field on this worksheet (currently absent — GAR-07 has only ratio + gefaelle_percent). severity is 'warn' (non-blocking) regardless.",
+      "staged": true
+    },
+    {
+      "id": "F-2",
+      "severity": "info",
+      "title": "REQ-09 vacuous but semantically manual",
+      "detail": "REQ-09 condition is prose → 'manual'. Unlike F-1 this is inherently an engineer-judgment gate (Sec.4.7 criteria list). Not a hard defect, but as encoded there is no attestation field to record the judgment, so the gate is invisible in the compliance surface (neither block, warn-fired, nor logged sign-off)."
+    },
+    {
+      "id": "F-3",
+      "severity": "warn",
+      "title": "gefaelle_percent field rule 0..100 is UI-only; save path accepts out-of-range",
+      "detail": "saveWorksheet persisted gefaelle_percent=120 with res.ok===true. The field validation_rules '0...100' is a client-side hint, not enforced server-side, and there is no compliance_requirement bounding gefaelle. Values exceeding every Tab.1 material maximum (max 100%) pass silently. Standard-agnostic gap consistent with the known 'field-level validation is UI-only' pattern."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "type": "VC",
+      "detail": "No printed WORKED example exists for GAR-07 in the PDF — Sec.4.5/Tab.1 is a range/limit table, not a calculation. The driven chain (1:1,5 / 66%) is a sanity check against Tab.1 row 10, recorded VC, not a source-attested equality."
+    },
+    {
+      "id": "R-2",
+      "type": "no-trig",
+      "detail": "No cos_beta/trig-blocked equations on this worksheet (0 equations). No engine residue."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-1",
+      "type": "SR-2 range",
+      "title": "Tab.1 material-specific Boeschungsneigung / Gefaelle is a RANGE — do NOT auto-pick",
+      "detail": "The permissible slope depends on the chosen Abdichtungsart and spans the full table. Surface as an engineer decision, do not default. Verbatim Tab.1 (S.28): row2 rohe/homogenisierte Grubentone/Lehm '<= 1:3 | <= 33 %'; row3 verguetete Boeden '<= 1:3 | <= 33 %'; row4 Ortbeton (ohne Schalung) '<= 1:2 | <= 50 %'; row5 Asphaltmastix '<= 1:3 | <= 33 %'; row6 Gussasphalt '<= 1:5 | <= 20 %'; row7 Asphaltbeton '<= 1:2 | <= 50 %'; row8 Geosynthetische Tondichtungsbahnen (GTD) '<= 1:3 | <= 33 %'; row9 Bitumenbahnen '<= 1:3 | <= 33 %'; row10 Kunststoff- und Elastomerbahnen '<= 1:1,5 | <= 66 %'; row11 Abdichtungen mit Fluessigkunststoffen '<= 1:1 | <= 100 %'; row12 Kunststoffbahnen aus PEHD '<= 1:1,5 | <= 66 %'. Note verbatim (S.28): 'In der Regel gilt fuer diese Bauweisen [systembedingte Auflast] eine Boeschungsneigung mit natuerlichem Schuettwinkel <= 1:3 (<= 33 %).' And (S.28): 'Die Angaben in der Tabelle entbinden nicht von einer rechnerischen Ueberpruefung der Stand- und Gleitsicherheit.'"
+    },
+    {
+      "id": "D-2",
+      "type": "staged-fix (written-not-applied)",
+      "title": "Make REQ-08 fireable OR mark it advisory",
+      "detail": "STAGED, not applied. Option A: add an abdichtungs_art enum field (Tab.1 rows) to GAR-07 and rewrite REQ-08 as machine-evaluable per-material bounds (requires a lookup-table condition capability the current grammar lacks — likely a materialized derived check, not a single condition string). Option B: leave as engineer-advisory but relabel so it is not mistaken for an enforced gate. Requires a human decision; do NOT auto-pick. No prod write performed."
+    },
+    {
+      "id": "D-3",
+      "type": "staged-fix (written-not-applied)",
+      "title": "Server-side bound for gefaelle_percent (F-3)",
+      "detail": "STAGED, not applied. Consider enforcing gefaelle_percent <= 100 (absolute physical/material ceiling from Tab.1) at the compliance layer, since the field-level 0..100 is UI-only. Standard-agnostic; defer to the field-validation-enforcement workstream. No prod write performed."
+    }
+  ],
+  "provenance": {
+    "prodRead": "Supabase MCP execute_sql (read-only) against vadsmshzebefjreqcicl; equations/compliance_requirements/fields for worksheet_template 59ec25aa-e745-4987-a1cb-fad214dea86a.",
+    "pdf": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/GAR.txt (rendered from fll_gewaesserabdichtungsrichtlinien_2023). Tab.1 read at lines 1453-1521; Sec.4.7 at lines 1567-1606.",
+    "harness": "tests/harness/fll-gar07-verify.integration.test.ts + _harness-env-fll-gar07.ts, seed via seedFllGar (embedded PG). 5/5 passing.",
+    "noProdWrite": true
+  }
+}

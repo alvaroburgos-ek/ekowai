@@ -1,0 +1,149 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-10",
+  "worksheetTitle": "Substratfilter – Bemessung (Langsam-/Schnellströmung)",
+  "worksheetInstanceId": "4cbb5d72-3f5e-4998-95af-89c88d31b69d",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/Naturteich.txt",
+  "pdfGroundTruth": "Appendix 5 (informative): Filter description and calculation, lines 3967-4036; 50x rule statements lines 2565-2567 and 3972-3974; aerobic-filtration mandate line 2369",
+  "counts": { "equationsPulled": 3, "gatesPulled": 2, "fieldsPulled": 17, "fieldsInSeeder": 15 },
+  "equations": [
+    {
+      "id": "0a875bd8-1e8f-47f2-9a38-62396ea73c70",
+      "equation_number": "EQ-01",
+      "formula": "filter_colonized_surface_actual >= 50 * pool_underwater_surface",
+      "output_symbol": "filter_50x_rule_met",
+      "verdict": "FINDING",
+      "quote": "The outer grain surfaces of the filter material in the filter body that can be colonized should, as experience shows, amount to at least 50-times the surfaces of the pool that are exposed to light and inundated (refer to Appendix 5). (Naturteich.txt L2565-2567); worked example: 'Required colonized surface in the filter / 95 m² x 50 = 4750 m²' (L3997-3998)",
+      "note": "INEQUALITY-AS-PRODUCER. The constant 50, the '50-times' relation, and the symbols (colonized filter surface vs. light-exposed inundated pool surface = pool_underwater_surface) are all PDF-confirmed (VA on the source relation). BUT the DB output_symbol is the BOOLEAN filter_50x_rule_met while the formula is a `>=` comparison. rhs() (src/lib/eval/formula.ts L117-122) strips the LHS up to the first comparison operator and the arithmetic engine evaluates only `50 * pool_underwater_surface`, returning the NUMERIC threshold (95*50 = 4750), never a boolean. Proven live: evaluateFormula returned 4750 (== PDF 4750). Therefore the engine can NEVER produce the boolean filter_50x_rule_met, and gate REQ-22 (filter_50x_rule_met == true) is producer-starved — it only ever fires from a hand-entered boolean, not from the equation. Two clean encodings exist: (a) output_symbol should be filter_colonized_surface_actual (the min-threshold value) not the boolean, or (b) the boolean must be produced by a real comparison the engine supports. Staged as decision item, NOT applied."
+    },
+    {
+      "id": "e56fc10a-de59-4b62-af9b-bbfa6bc012b4",
+      "equation_number": "EQ-02",
+      "formula": "filter_colonized_surface_actual = grain_specific_surface * F_filter * h_filter",
+      "output_symbol": "filter_colonized_surface_actual",
+      "verdict": "VA",
+      "quote": "Example 1: known filter volume / Filter cross-section F: 15 m2 / Filter height: 0.7 m / Surface grain size 8-16 mm (according to Table 1): 600 m2/m3 / Surface of the filter body = 600 m2/m3 x 15 m2 x 0.7 m = 6300 m2 (Naturteich.txt L3977-3982)",
+      "note": "Formula shape (grain_specific_surface [m²/m³] × F_filter [m²] × h_filter [m] = surface [m²]) and units are EXACTLY the PDF product 600 × 15 × 0.7 = 6300 m². Verified live: evaluateFormula returned 6300.000. VA on shape+constants+units. CAVEAT / MULTI-PRODUCER: filter_colonized_surface_actual is the output_symbol of BOTH EQ-02 (this producer) AND appears on the LHS of EQ-01 (as the compared value). EQ-02 is the sole numeric producer; EQ-01 only reads it — no true collision, but the name reuse is fragile. RESIDUE: F_filter and h_filter are prod fields with NO section (section_code=null) and non-canonical symbol names not present in the seeder's field set; the chain runs only with hand-supplied values. On prod these symbols exist so EQ-02 CAN resolve; the seeder deliberately omits them (documented in seed header L30-33)."
+    },
+    {
+      "id": "b722809a-24c4-4c2d-8e8c-ea65a65a7e49",
+      "equation_number": "EQ-03",
+      "formula": "filter_volume_required = (pool_underwater_surface * 50) / grain_specific_surface",
+      "output_symbol": "filter_volume_required",
+      "verdict": "VA",
+      "quote": "Example 2: known pool size ... Total: 95 m² / Required colonized surface in the filter / 95 m² x 50 = 4750 m² / a) grain 8-16 mm ... Surface filter material 600 m2/m3 / Required filter volume: 4750 m² / 600 m² / m³ = approx. 8 m³ (Naturteich.txt L3988-4004); b) grain 4-8 mm 1200 m²/m³ → 4750/1200 = approx. 4 m³ (L4007-4010)",
+      "note": "Formula = (pool_underwater_surface × 50) / grain_specific_surface. Constant 50 and the divide-by-specific-surface both PDF-confirmed. Verified live via REAL saveWorksheet (persisted grain_specific_surface=600) + REAL evaluateFormula: (95×50)/600 = 7.9166… which rounds to the PDF 'approx. 8 m³'; and (95×50)/1200 = 3.958… → PDF 'approx. 4 m³'. Exact match on both worked branches. VA."
+    }
+  ],
+  "chains": [
+    {
+      "name": "EQ-03 filter_volume_required (grain 8-16, 600 m²/m³)",
+      "ran": true,
+      "liveValue": 7.9166666666666,
+      "pdfExpected": "approx. 8 m³ (4750/600)",
+      "verdict": "VA",
+      "raw": "saveWorksheet ok:true, grain_specific_surface persisted=600; evaluateFormula kind=computed value=7.9166… round=8"
+    },
+    {
+      "name": "EQ-03 filter_volume_required (grain 4-8, 1200 m²/m³)",
+      "ran": true,
+      "liveValue": 3.9583333333333,
+      "pdfExpected": "approx. 4 m³ (4750/1200)",
+      "verdict": "VA",
+      "raw": "evaluateFormula kind=computed value=3.958… round=4"
+    },
+    {
+      "name": "EQ-02 filter_colonized_surface_actual (600×15×0.7)",
+      "ran": true,
+      "liveValue": 6300,
+      "pdfExpected": "6300 m² (Example 1)",
+      "verdict": "VA",
+      "raw": "evaluateFormula kind=computed value=6300.000000"
+    },
+    {
+      "name": "EQ-02 with F_filter/h_filter absent",
+      "ran": true,
+      "liveValue": null,
+      "pdfExpected": "n/a (residue probe)",
+      "verdict": "VC",
+      "raw": "evaluateFormula kind=manual_required missing=[F_filter,h_filter] — confirms seeder omits these unsectioned prod fields"
+    },
+    {
+      "name": "EQ-01 inequality-as-producer (95→threshold)",
+      "ran": true,
+      "liveValue": 4750,
+      "pdfExpected": "95 × 50 = 4750 m² (numeric threshold, NOT a boolean)",
+      "verdict": "FINDING",
+      "raw": "evaluateFormula kind=computed value=4750 — engine returns RHS threshold, output_symbol is boolean filter_50x_rule_met which is never produced"
+    },
+    {
+      "name": "REQ-22 gate (50x rule) pass/fail/pending",
+      "ran": true,
+      "liveValue": "pass|fail|pending",
+      "pdfExpected": "gate must be fireable both ways",
+      "verdict": "VA",
+      "raw": "evaluateCondition true→pass, false→fail, undefined→pending(missingSymbols includes filter_50x_rule_met). Fireable but starved by EQ-01 (see finding)."
+    },
+    {
+      "name": "REQ-30 gate (aerobic filtration) pass/fail",
+      "ran": true,
+      "liveValue": "pass|fail",
+      "pdfExpected": "'The filtration systems must operate aerobically…' (L2369)",
+      "verdict": "VA",
+      "raw": "saveWorksheet ok:true, aerobic_filtration_confirmed persisted=true; evaluateCondition true→pass, false→fail"
+    }
+  ],
+  "gates": [
+    {
+      "id": "REQ-22",
+      "condition": "filter_50x_rule_met == true",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fired pass (true), fail (false), pending (missing) through the REAL evaluateCondition. Grammar is a simple boolean equality — supported and correctly evaluated. NOT vacuous as a gate. HOWEVER its sole producer EQ-01 is an inequality-as-producer that returns a NUMBER, so filter_50x_rule_met is never auto-populated by the engine → the gate is producer-starved (fires only from a hand-set boolean). This is the EQ-01 FINDING, not a CR-006-class dead/vacuous condition."
+    },
+    {
+      "id": "REQ-30",
+      "condition": "aerobic_filtration_confirmed == true",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fired pass (aerobic=true, persisted via real saveWorksheet) and fail (aerobic=false) through the REAL evaluateCondition. PDF-mandated (L2369). Live, fireable, not vacuous."
+    }
+  ],
+  "findings": [
+    "EQ-01 (0a875bd8-…) INEQUALITY-AS-PRODUCER: output_symbol is the boolean filter_50x_rule_met but the formula is `filter_colonized_surface_actual >= 50 * pool_underwater_surface`. rhs() strips the LHS and the engine returns the numeric threshold (proven live = 4750 for pool=95), never a boolean. The boolean the gate REQ-22 needs is therefore never engine-produced. PDF-attested relation (VA) but the ENCODING is wrong. Staged as decision item; NOT applied.",
+    "REQ-22 PRODUCER-STARVATION (consequence of EQ-01): the gate is grammatically fine and fireable, but its only symbol filter_50x_rule_met has no valid engine producer (its 'producer' EQ-01 yields a number). Without a hand-entered boolean the gate sits pending forever. Distinct from a vacuous/dead condition — the condition works, the supply chain is broken.",
+    "SCHEMA DRIFT prod-vs-seeder: prod FLLNT-10 has 17 fields including F_filter and h_filter (section_code = null); the seeder ships 15 (omits both, documented in seed-fll-naturteich.ts L30-33). EQ-02 references those two symbols, so on the seeded harness EQ-02 resolves only with hand-supplied values (manual_required otherwise). On prod the fields exist. Not a defect per se, but F_filter/h_filter are unsectioned and non-source-canonically named."
+  ],
+  "residue": [
+    "EQ-02 depends on F_filter and h_filter, which are unsectioned prod fields absent from the seeder; the EQ-02 chain was driven with PDF-Example-1 hand values (600/15/0.7). VC on the seeded path; the numeric identity 600×15×0.7=6300 is VA against the PDF. No trig/cos_beta involvement — none of the 3 equations use trig, so no engine-blocked residue class here.",
+    "pool_underwater_surface (the driver of EQ-01 and EQ-03) is produced on FLLNT-06 by EQ-PUWS (pool_underwater_surface = pool_ground_area_m2 + pool_submerged_wall_area_m2); PDF Example 2 gives ground 50 + wall 45 = 95 (L3993-3995). This cross-worksheet value was supplied to the FLLNT-10 evaluator as the PDF's 95 rather than chained from a real FLLNT-06 save — cross-worksheet materialization of pool_underwater_surface into FLLNT-10 is out of scope of this worksheet and recorded as VC here.",
+    "grain_specific_surface source table: the worked example cites '(according to Table 1)' for the 600 / 1200 m²/m³ surfaces, but the surface-vs-grain table is actually printed as 'Table 15: Grain sizes – surfaces' (L4017-4030, values 4/6=1400 … 22/32=250). The in-example 'Table 1' reference is a PDF cross-reference slip (Table 1 is the natural-pool-type overview, L376/1204). Recorded as residue: the numeric surfaces used (600 for 8/16, 1200 for 4/8) are correct per Table 15 (L4023, L4026)."
+  ],
+  "decisionItems": [
+    {
+      "id": "DEC-FLLNT10-01",
+      "type": "equation-encoding-fix (STAGED, written-not-applied)",
+      "subject": "EQ-01 0a875bd8-1e8f-47f2-9a38-62396ea73c70",
+      "issue": "Inequality-as-producer: boolean output_symbol filter_50x_rule_met cannot be produced by `>= ` formula (engine returns numeric RHS).",
+      "options": [
+        "(a) Change output_symbol to filter_colonized_surface_actual and treat the value as the minimum-required colonized surface (50 × pool_underwater_surface) — i.e. a MIN-threshold producer; then have REQ-22/UI compare filter_colonized_surface_actual (from EQ-02) against this threshold.",
+        "(b) Keep the boolean but produce it via a comparison path the engine supports (boolean-producing evaluator), not the arithmetic rhs()-stripping path.",
+        "(c) Leave EQ-01 as a display-only min-threshold and require the engineer to hand-set filter_50x_rule_met (status quo) — then REQ-22 must be documented as an attestation gate, not an engine-driven one."
+      ],
+      "recommendation": "Option (a): the PDF frames the rule as a required colonized surface (95×50=4750 m²) to be met by the filter body surface (EQ-02, 6300 m²), so the natural encoding is a threshold value + a downstream comparison, not a self-evaluating boolean.",
+      "applied": false,
+      "migrationNote": "No migration written this run per doctrine (findings-over-fixes); this is the staged item for the single controlled apply pass. Prod NOT modified."
+    },
+    {
+      "id": "DEC-FLLNT10-02",
+      "type": "range-surface (SR-2)",
+      "subject": "grain_specific_surface m²/m³ (Table 15 / L4017-4030)",
+      "issue": "The specific surface is a RANGE across grain classes (4/6=1400, 4/8=1200, 6/8=1000, 8/12=700, 8/16=600, 12/16=500, 16/22=350, 16/32=300, 22/32=250 m²/m³). The worked example uses 600 (8/16) and 1200 (4/8). Do NOT auto-pick a single value — the operative surface depends on the chosen grain class of the actual filter material.",
+      "decision": "SURFACE AS RANGE: grain_specific_surface must be entered per the specified grain size of the substrate actually used (Table 15). Not auto-picked.",
+      "applied": false
+    }
+  ],
+  "vitestRaw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ exposes FLLNT-10 with 3 equations and 2 gates 2ms\n ✓ EQ-03 — persists inputs via real save, evaluator matches PDF worked example (≈8 m³) 467ms\n ✓ EQ-02 — evaluator matches PDF Example 1 (600×15×0.7 = 6300 m²) 0ms\n ✓ EQ-02 — with F_filter/h_filter absent the engine reports manual_required (residue) 1ms\n ✓ EQ-01 FINDING — inequality-as-producer returns numeric threshold (4750), not boolean 0ms\n ✓ REQ-22 PASS/FAIL/PENDING through the real evaluator 13ms\n ✓ REQ-30 PASS — aerobic flag true persists and fires pass 8ms\n ✓ REQ-30 FAIL — aerobic flag false fires fail 0ms\n Test Files  1 passed (1)\n Tests  8 passed (8)\n Duration  4.88s",
+  "testFile": "C:/Users/Ekowai/_wt-fll/tests/harness/verify-fll-naturteich-fllnt10.integration.test.ts"
+}

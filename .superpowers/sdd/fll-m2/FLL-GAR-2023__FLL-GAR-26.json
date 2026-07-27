@@ -1,0 +1,94 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-26",
+  "worksheetTitle": "Abnahme und Mängelansprüche (Acceptance & defects-liability)",
+  "templateId": "831d2afc-8381-4a72-9757-345335e07311",
+  "phase": 6,
+  "archetype": "verification",
+  "prodPull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 2
+  },
+  "fields": [
+    {
+      "id": "7fb630c3-a497-48d2-8f88-7ca41a1443ab",
+      "symbol": "abnahme_datum",
+      "data_type": "date",
+      "clause_reference": "Sec.11.1",
+      "verdict": "VA",
+      "quote": "11.1 Abnahme — Abnahme bedeutet die körperliche Hinnahme der Leistung des Auftragnehmers durch den Auftraggeber, verbunden mit der Erklärung, dass er das Werk als im Wesentlichen vertragsgemäß anerkennt. (GAR.txt lines 6285-6289)",
+      "note": "Field = formal acceptance date. Section 11.1 defines Abnahme (acceptance) but prints NO specific date and NO numeric constant to verify — it is a captured event date. PDF-confirmed that an acceptance step exists; the field itself is a free date input, correctly typed as date, is_required. VA on existence/semantics."
+    },
+    {
+      "id": "4134953b-3f37-4f0e-95c9-326904bf1e73",
+      "symbol": "maengelfrist_5_jahre",
+      "data_type": "boolean",
+      "clause_reference": "Sec.11.2",
+      "verdict": "VA",
+      "quote": "11.2 Mängelansprüche — Bei Arbeiten an einem Bauwerk beträgt die Verjährungsfrist für Mängelansprüche fünf Jahre (vier Jahre bei VOB-Verträgen). ... Bei einem deutlichen Übergewicht von Arbeiten an einem Bauwerk (z. B. Abdichtungsarbeiten) gilt i. d. R. die fünfjährige Frist auch für die vegetationstechnischen Arbeiten. (GAR.txt lines 6328-6341)",
+      "note": "5-year defects-liability period for Bauwerk work IS PDF-confirmed, including the 'also applies to bundled vegetation work' note that the field description restates. BUT §11.2 gives a RANGE of statutory limitation periods (see decisionItems SR-2): 5 yr Bauwerk / 4 yr VOB / 2 yr Sache. Encoding this as a single boolean 'maengelfrist_5_jahre' flattens that range to only the 5-year branch."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "saveWorksheet persistence — compliant Bauwerk case (abnahme_datum=2024-06-01, maengelfrist_5_jahre=true)",
+      "ran": true,
+      "liveValue": "value_date=2024-06-01, value_boolean=true persisted to project_parameters; saveWorksheet returned {ok:true}",
+      "pdfExpected": "No worked example in the standard (verification worksheet, §11 is prose). Sanity: acceptance date free input + 5-year flag true.",
+      "verdict": "VC",
+      "raw": "Test Files 1 passed (1); Tests 3 passed (3). 'persists the compliant Bauwerk case (acceptance date + 5-year period applied)' PASSED. Persisted date read back via to_char(value_date,'YYYY-MM-DD')='2024-06-01', value_boolean=true."
+    },
+    {
+      "name": "saveWorksheet re-save/overwrite — 2-year-Sache case (abnahme_datum=2025-03-15, maengelfrist_5_jahre=false)",
+      "ran": true,
+      "liveValue": "value_date=2025-03-15, value_boolean=false persisted (overwrote prior row); saveWorksheet returned {ok:true}",
+      "pdfExpected": "No worked example. Exercises the false branch of the boolean (the standard's non-Bauwerk / 2-year Sache path per §11.2).",
+      "verdict": "VC",
+      "raw": "'re-save toggling the 5-year flag false + new date overwrites (2-year-Sache case)' PASSED. Re-read value_boolean=false, value_date='2025-03-15'."
+    },
+    {
+      "name": "field-exposure smoke — both fields present in fixture",
+      "ran": true,
+      "liveValue": "fixture.worksheets['FLL-GAR-26'].fields has abnahme_datum + maengelfrist_5_jahre",
+      "pdfExpected": "2 fields per prod pull.",
+      "verdict": "VA",
+      "raw": "'exposes the 2 collected fields' PASSED."
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "type": "no-equations",
+      "note": "0 equations on this worksheet — no formula/constant/unit/symbol to verify, no cos_beta/trig blockage. Nothing to compute."
+    },
+    {
+      "type": "no-gates",
+      "note": "0 compliance_requirements on this worksheet — no condition grammar to evaluate, no gate to fire (no CR-006-class vacuous gate can exist here). §11 is purely contractual/legal prose with no encodeable pass/fail threshold, so absence of a gate is source-consistent, not a defect."
+    },
+    {
+      "type": "VC-no-worked-example",
+      "note": "The standard prints no worked numeric example for §11 (it is a prose acceptance/limitation-period section). Both chains are therefore sanity-checked round-trip persistence (VC), not asserted against a printed expected value (which would be VA)."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "DI-GAR26-01",
+      "type": "SR-2-range",
+      "clause": "Sec.11.2",
+      "issue": "§11.2 gives a RANGE of statutory defects-liability (Verjährung) periods, not a single value: 5 Jahre (Arbeiten an einem Bauwerk) / 4 Jahre (VOB-Verträge) / 2 Jahre (Werk = Herstellung, Wartung oder Veränderung einer Sache). The field 'maengelfrist_5_jahre' is a single boolean that only models the 5-year branch.",
+      "quote": "Bei Arbeiten an einem Bauwerk beträgt die Verjährungsfrist für Mängelansprüche fünf Jahre (vier Jahre bei VOB-Verträgen). Bei Werken, dessen Erfolg in der Herstellung, Wartung oder Veränderung einer Sache besteht, beträgt die Verjährungsfrist für Mängelansprüche zwei Jahre. (GAR.txt lines 6330-6334)",
+      "options": ["5 Jahre (Bauwerk, gesetzlich)", "4 Jahre (VOB-Vertrag)", "2 Jahre (Sache: Herstellung/Wartung/Veränderung)"],
+      "recommendation": "Do NOT auto-pick 5 years. Surface for human decision: consider replacing the boolean with an enum (verjaehrungsfrist: 5J-Bauwerk | 4J-VOB | 2J-Sache) so the actual contractual/statutory case is captured rather than assumed. STAGED as a written-not-applied schema note; no prod write.",
+      "prodWrite": "NONE — staged only."
+    }
+  ],
+  "doctrineNotes": {
+    "SR-1": "Every value claim above is backed by a verbatim German quote from GAR.txt captured THIS run (lines cited). No bring-up numbers used.",
+    "SR-2": "The §11.2 limitation-period range is surfaced as DI-GAR26-01, not auto-picked.",
+    "SR-3": "Verified against the pdftotext -layout extraction (GAR.txt). §11 is prose with no figures/tables, so markdown/PDF disagreement risk is minimal; classified VA where the clause text is directly quoted, VC for the round-trip persistence chains that have no printed expected value. Rendered-PDF page 127 (lines 6285-6341) is the source; no re-render mismatch observed.",
+    "findingsOverFixes": "No corrections proposed as applied. The one improvement candidate (boolean→enum for the limitation-period range) is staged as a decisionItem only. Read-only prod (execute_sql) used throughout; no writes."
+  }
+}

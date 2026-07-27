@@ -1,0 +1,107 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-19",
+  "worksheet_title_de": "Stahl",
+  "template_id": "8de8df5b-69e5-43c7-bfc5-728b5306a583",
+  "standard_id": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "verified_at": "2026-07-23",
+  "doctrine": "SR-1 verbatim / SR-2 ranges-as-decisions / SR-3 PDF ground truth (VA vs VC); findings-over-fixes, read-only prod",
+  "prod_pull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 2,
+    "note": "Matches task expectation (0/0/2). Pure data_collection worksheet, no engine chain and no gate."
+  },
+  "equations": [],
+  "fields": [
+    {
+      "id": "9a726196-893f-4fd5-afcd-c2a825ec6909",
+      "symbol": "stahl_typ",
+      "data_type": "enum",
+      "verdict": "VA",
+      "clause_reference": "Sec.7.1",
+      "enum_verification": {
+        "V2A": {"db_label": "Edelstahl V2A (1.4301)", "verdict": "VA", "quote": "sind daher nicht rostende Staehle V2A (Werkstoffnummer 1.4301), da diese Edelstaehle bestaendig gegen Trinkwasser sind (GAR.txt line 4816)"},
+        "V4A": {"db_label": "Edelstahl V4A (1.4401)", "verdict": "VA", "quote": "sind rostfreie Staehle V4A (Werkstoffnummer 1.4401) zu verwenden (GAR.txt line 4821)"},
+        "V5A": {"db_label": "Edelstahl V5A (1.4539)", "verdict": "VA", "quote": "sind noch hoeherwertige Staehle, wie z. B. V5A (Werkstoffnummer 1.4539) zu verwenden (GAR.txt line 4822-4823)"},
+        "CorTen_A": {"db_label": "Wetterfester Baustahl CorTen A (1.8946)", "verdict": "VA", "quote": "Fuer duennere Produktstaerken bis 12,5 mm steht Stahl der Werkstoffnummer 1.8946 (z. B. COR-TEN A) zur Verfuegung (GAR.txt line 4825-4826)"},
+        "CorTen_B": {"db_label": "Wetterfester Baustahl CorTen B (1.8965)", "verdict": "VA", "quote": "Fuer dickere Produktstaerken bis ueber 50 mm wird Werkstoffnummer 1.8965 (z. B. COR-TEN B) eingesetzt (GAR.txt line 4827-4828)"},
+        "unlegiert": {"db_label": "Unlegierter Stahl (feuerverzinkt)", "verdict": "VA", "quote": "Unlegierte Staehle muessen verzinkt und ggf. beschichtet werden, um eine Korrosion zu verhindern (GAR.txt line 4834)"}
+      },
+      "note": "All 6 enum options and their Werkstoffnummer material codes are verbatim PDF-attested in section 7.1.1.1 Abdichtungsstoffe. VA-grade. verification_status=imported_unverified in prod; source_quote/owner NULL (see findings)."
+    },
+    {
+      "id": "b815422f-48b2-4b49-a45b-215a70df76ce",
+      "symbol": "verzinkung_dicke_um",
+      "data_type": "number",
+      "unit": "micrometer",
+      "verdict": "VA",
+      "clause_reference": "Sec.7.1",
+      "validation_rules_raw": ">= 100 (unlegiert)",
+      "quote": "Durch Schmelztauchen (Feuerverzinken) soll eine Schichtstaerke von wenigstens 100 um erreicht werden (GAR.txt line 4835). Applies to unlegierte Staehle per line 4834.",
+      "note": "Constant 100, unit micrometer (um), and unlegiert-scoping all PDF-confirmed. The >=100 threshold is stored ONLY as an advisory validation_rules.raw string; there is NO compliance_requirement enforcing it (see findings F1). SR verb is 'soll' (should), not 'muss' -> non-mandatory in the standard's own grammar (relevant to any future gate severity decision)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "real saveWorksheet persistence (2 collected fields)",
+      "ran": true,
+      "liveValue": "stahl_typ=unlegiert -> value_enum='unlegiert'; verzinkung_dicke_um=100 -> value_number=100; re-save stahl_typ=V2A -> value_enum='V2A'",
+      "pdfExpected": "N/A — standard prints no worked numeric example for this data-collection worksheet; values chosen to exercise the unlegiert/100um source rule + one Edelstahl grade",
+      "verdict": "VA (persistence path proven live)",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll | Test Files 1 passed (1) | Tests 3 passed (3) | Duration ~4.9-5.0s. Tests: (1) exposes the 2 collected fields; (2) persists the unalloyed-steel case (stahl_typ=unlegiert, verzinkung=100 um); (3) re-save with V2A stainless (no galvanisation value) overwrites. All green. Test file: tests/harness/fll-gar19-verify.integration.test.ts, seeded via seedFllGar (all 29 worksheets) against embedded PG."
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "title": "No enforcing gate for the >=100 um galvanisation minimum",
+      "detail": "verzinkung_dicke_um carries validation_rules.raw '>= 100 (unlegiert)' but there is NO compliance_requirement on this worksheet (0 gates). The source rule (Schichtstaerke von wenigstens 100 um, GAR.txt line 4835) is therefore advisory-only: an engineer can save verzinkung_dicke_um < 100 for an unlegiert selection with no block. Note the standard uses 'soll' (should) not 'muss', so if a gate is added it should likely be severity='warn'/advisory, not 'block' — surfaced as decisionItem D1.",
+      "fix_status": "staged-not-applied (findings-over-fixes; no prod write)"
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "title": "Both fields imported_unverified with NULL source_quote/owner",
+      "detail": "stahl_typ and verzinkung_dicke_um are verification_status=imported_unverified with source_quote=NULL and owner=NULL, despite both being cleanly VA-attestable from section 7.1.1.1. The verbatim quotes now exist in this JSON and can be backfilled into fields.source_quote at the controlled apply pass.",
+      "fix_status": "staged-not-applied"
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "VC / coverage",
+      "detail": "The Schichtdicke sub-section 7.1.1.2 (GAR.txt lines 4856-4867) prescribes MINIMUM material thicknesses per steel type that are NOT encoded as any field on FLL-GAR-19: rostfreie Staehle mind. 1 mm (line 4858); nicht rostende wetterfeste Staehle / COR-TEN mind. 5 mm (line 4861); verzinkte und beschichtete Stahlbleche mind. 5 mm (line 4865). Also the coating recommendation 'Beschichtungsstaerke von wenigstens 320 um' (line 4839). These are un-encoded, so cannot be driven/gated. Recorded as residue, not auto-added. See decisionItems D2/D3."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "prompt": "Should a compliance_requirement be added enforcing verzinkung_dicke_um >= 100 (only when stahl_typ = unlegiert)? Standard grammar is 'soll' (should) -> candidate severity = warn/advisory, NOT block. Human to confirm severity + conditional scoping before any migration.",
+      "range_or_choice": "severity: block vs warn vs none"
+    },
+    {
+      "id": "D2",
+      "prompt": "SR-2 range: section 7.1.1.2 gives thickness minima that VARY by steel type (rostfrei >=1 mm; COR-TEN >=5 mm; verzinkt+beschichtet >=5 mm). These are not a single pickable value. Decide whether to add a blech_dicke_mm field + a per-type conditional gate, and which minimum applies to which enum option. Do NOT auto-pick a single threshold.",
+      "range_or_choice": "1 mm (rostfrei) | 5 mm (COR-TEN) | 5 mm (verzinkt+beschichtet)"
+    },
+    {
+      "id": "D3",
+      "prompt": "Coating thickness: standard recommends 'wenigstens 320 um' (2 Voranstriche + 3 Deckanstriche) but the mandatory minimum is 'mindestens einem Voranstrich und mindestens einem Deckanstrich' (line 4837-4839). This is a recommended-vs-minimum RANGE. Decide whether to encode a beschichtung_dicke_um field and whether 320 um is a target or a threshold.",
+      "range_or_choice": "minimum (1+1 coats) vs recommended >=320 um (2+3 coats)"
+    }
+  ],
+  "summary": {
+    "chains_ran": "1/1",
+    "checks_passed": 3,
+    "equations_VA": 0,
+    "fields_VA": 2,
+    "findings": 2,
+    "residue": 1,
+    "decisions": 3,
+    "gates_fired": 0,
+    "vacuous_gates": 0
+  }
+}

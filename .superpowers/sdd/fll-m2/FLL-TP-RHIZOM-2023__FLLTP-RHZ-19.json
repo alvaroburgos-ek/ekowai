@@ -1,0 +1,143 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-19",
+  "worksheetTitle": "Prüfbericht Erstellung (§9 Prüfbericht / §10 Umschreibung-Verlängerung)",
+  "templateId": "33e26f8c-9c0b-43d5-9b63-1259ccde30b6",
+  "prod": "vadsmshzebefjreqcicl (read-only, MCP execute_sql)",
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\TP-Rhizom.txt (extraction of the FLL TP-Rhizomfestigkeit 2023 rendered PDF)",
+  "note": "This is a documentary/attestation worksheet: it carries the test-report metadata (§9) — it has ZERO equations. Verification therefore centres on the 4 fields and the 2 gates. cos_beta/trig N/A (no equations).",
+
+  "fields": [
+    {
+      "symbol": "bericht_datum",
+      "data_type": "date",
+      "unit": null,
+      "section": "F",
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "§9 Musterprüfbericht (p.25): \"Datum des Berichts: >> Tag. Monat. Jahr <<\"; §9 required formulation: \"Der Prüfbericht wurde am ........ erstellt ...\"",
+      "note": "Report-date field is source-mandated content of the Prüfbericht. Confirmed."
+    },
+    {
+      "symbol": "bericht_seitenanzahl",
+      "data_type": "number",
+      "unit": "pages",
+      "section": "F",
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "§9: \"Der Bericht muss zudem folgende Formulierungen enthalten: „Der Prüfbericht umfasst ..... Seiten und darf nur in ungekürzter Form verwendet werden“\"; Muster (p.25): \"Der Bericht umfasst >> xy << Seiten\"",
+      "note": "Page-count is a mandated verbatim formulation in the report. unit 'pages' matches 'Seiten'. Confirmed."
+    },
+    {
+      "symbol": "gueltigkeitsdauer_jahre",
+      "data_type": "number",
+      "unit": "Jahre / years",
+      "section": "F",
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "§9: \"„Der Prüfbericht wurde am ........ erstellt und hat grundsätzlich eine Gültigkeitsdauer von 10 Jahren.“\" and \"Durch eine Bestätigung des Prüfinstituts kann die Gültigkeitsdauer des Prüfberichts in Zeitabschnitten von 5 Jahren verlängert werden\"; Muster (p.25): \"Der Bericht hat eine Gültigkeitsdauer von 10 Jahren.\"",
+      "note": "Base validity = 10 years, extensible in 5-year increments. See decisionItems[0] (SR-2: 10 a base vs 5 a extension step is a range, not a single pickable point). The field is a free number entry (no default constraint encoded), so the standard's 10 a is NOT auto-enforced — surfaced as a decision item."
+    },
+    {
+      "symbol": "attest_flltp_rhz_19_req_21",
+      "data_type": "boolean",
+      "unit": null,
+      "section": null,
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "§9: \"Der Bericht muss folgende Daten enthalten: ... Angaben des Herstellers ...; detaillierte Angaben über die Vorbereitung der Prüfgefäße ...; alle Ergebnisse der Auswertungen ...; eine zusammenfassende Bewertung des untersuchten Produktes gemäß Abschnitt 2.11.\"",
+      "note": "Attestation carrier for the §9 report-content checklist; drives gate REQ-21. Section_id NULL matches prod (documented in seeder header)."
+    }
+  ],
+
+  "equations": [],
+
+  "chains": [
+    {
+      "name": "persist-4-local-fields (REAL saveWorksheet)",
+      "ran": true,
+      "liveValue": "gueltigkeitsdauer_jahre=10, bericht_seitenanzahl=27, bericht_datum=2026-07-23, attest_flltp_rhz_19_req_21=true — all UPSERTed to project_parameters via the real saveWorksheet path against embedded PG",
+      "pdfExpected": "Standard prints no numeric worked example for this documentary worksheet (§9 gives literal template values: 10 Jahre validity, 'xy' Seiten placeholder). Values driven are source-consistent (10 a) or arbitrary metadata (27 pages, today's date).",
+      "verdict": "VC",
+      "raw": "Test Files 1 passed (1) / Tests 3 passed (3); test 'persists the 4 local fields through the REAL saveWorksheet path' green — value_number=10, value_number=27, value_date=2026-07-23 (Date), value_boolean=true all read back from project_parameters."
+    }
+  ],
+
+  "gates": [
+    {
+      "id": "3d2b031a-1ebe-4d24-9c7b-f763314cc2b6",
+      "code": "REQ-21",
+      "condition": "attest_flltp_rhz_19_req_21 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "FIREABLE. Field is local to FLLTP-RHZ-19. Exercised both states through the real evaluateWorksheetCompliance report evaluator against persisted state: attest=true → PASS; attest=false → FAIL. Grammar parses cleanly (boolean == True literal)."
+    },
+    {
+      "id": "68cc432a-95a9-4957-ace9-3e2fd98de5d4",
+      "code": "REQ-22",
+      "condition": "pruefgrundlagen_unveraendert == true AND produkt_aktuell_im_lieferprogramm == true AND rueckstellmuster_erneut_hinterlegt == true AND eidesstattliche_erklaerung_vorhanden == true",
+      "fired": false,
+      "vacuous": true,
+      "note": "VACUOUS / DEAD GATE (CR-006 class) on FLLTP-RHZ-19. All 4 operand symbols (pruefgrundlagen_unveraendert, produkt_aktuell_im_lieferprogramm, rueckstellmuster_erneut_hinterlegt, eidesstattliche_erklaerung_vorhanden) are fields of FLLTP-RHZ-20, NOT of FLLTP-RHZ-19. The report compliance evaluator (evaluateWorksheetCompliance) builds a WORKSHEET-LOCAL symbol map, so all 4 resolve undefined → the condition is permanently 'pending' — it can never PASS and can never BLOCK from this worksheet's state. Confirmed live: evaluator returned kind='pending' with missingSymbols = all 4. Grammar itself is valid; the defect is field-placement, not syntax."
+    }
+  ],
+
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "code": "REQ-22",
+      "class": "vacuous-gate / orphaned-condition (CR-006 class)",
+      "summary": "REQ-22 (§9 5-year Verlängerung/extension preconditions) is attached ONLY to FLLTP-RHZ-19 but references 4 boolean fields that live exclusively on FLLTP-RHZ-20. Under the worksheet-local compliance scoping (evaluate-for-report.ts buildValueMap), none of the 4 operands can ever resolve on RHZ-19, so REQ-22 is permanently 'pending' — a dead block-gate that neither enforces nor passes. There is NO copy of REQ-22 on FLLTP-RHZ-20 (the worksheet that owns the fields), so the extension precondition is effectively unenforced anywhere.",
+      "evidence": "prod query: the 4 symbols map to ws_code=FLLTP-RHZ-20; REQ-22 exists only on FLLTP-RHZ-19. Live evaluator returned pending/missing for all 4. Source: §9 lines 948-954 of TP-Rhizom.txt list exactly these 4 Verlängerung conditions.",
+      "staged": true
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R1",
+      "class": "VC",
+      "summary": "No numeric worked example exists in the standard for this documentary worksheet, so the persisted chain values (27 pages, 2026-07-23) are sanity-only, not PDF-attested figures. gueltigkeitsdauer=10 a IS source-attested (VA) but was driven as an input, not computed."
+    },
+    {
+      "id": "R2",
+      "class": "note",
+      "summary": "cos_beta / trig engine gap does NOT apply — FLLTP-RHZ-19 has zero equations. No engine-blocked residue."
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "SR-2 range",
+      "summary": "Gültigkeitsdauer: standard states base validity = 10 Jahre (§9) AND extension 'in Zeitabschnitten von 5 Jahren' (§9). These are two distinct governed durations (10 a initial vs 5 a extension step) — do NOT auto-pick one. The gueltigkeitsdauer_jahre field is an unconstrained free number (no default / no min/max encoded); recommend a human decision on whether to (a) default it to 10, (b) add a validity gate enforcing 10 a initial, and (c) how the 5-year extension is represented.",
+      "quotes": [
+        "§9: „... hat grundsätzlich eine Gültigkeitsdauer von 10 Jahren.“",
+        "§9: „... kann die Gültigkeitsdauer des Prüfberichts in Zeitabschnitten von 5 Jahren verlängert werden ...“"
+      ]
+    },
+    {
+      "id": "D2",
+      "type": "staged-fix (written-not-applied)",
+      "target": "compliance_requirements REQ-22 placement",
+      "summary": "STAGED, NOT APPLIED (read-only prod). Fix F1 by relocating REQ-22 to the worksheet that owns its operands. Option A (preferred): move REQ-22 from worksheet_template FLLTP-RHZ-19 to FLLTP-RHZ-20 (which carries all 4 fields) — makes the extension precondition fireable. Option B: move the 4 Verlängerung boolean fields onto FLLTP-RHZ-19. Choose per encoding intent (RHZ-20 appears to be the Verlängerung worksheet). Proposed migration (DO NOT run here):",
+      "stagedMigration": "-- staged, apply in a controlled pass only. Repoint REQ-22 to the FLLTP-RHZ-20 template.\nUPDATE compliance_requirements cr\nSET worksheet_template_id = (\n  SELECT wt.id FROM worksheet_templates wt JOIN standards s ON s.id = wt.standard_id\n  WHERE s.code = 'FLL-TP-RHIZOM-2023' AND wt.code = 'FLLTP-RHZ-20')\nWHERE cr.id = '68cc432a-95a9-4957-ace9-3e2fd98de5d4';\n-- Verify: REQ-22 now co-located with pruefgrundlagen_unveraendert et al. on FLLTP-RHZ-20; re-run gate fire test.",
+      "requiresHuman": true
+    }
+  ],
+
+  "summary": {
+    "chainsRan": 1,
+    "chainsTotal": 1,
+    "checksPassed": 3,
+    "findings": 1,
+    "residue": 2,
+    "decisions": 2,
+    "gatesFired": 1,
+    "vacuousGates": 1,
+    "equations": 0,
+    "va": 4,
+    "vc": 1
+  }
+}

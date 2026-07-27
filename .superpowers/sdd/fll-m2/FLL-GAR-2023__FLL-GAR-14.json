@@ -1,0 +1,176 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-14",
+  "worksheetTitle": "Verbundwerkstoffe (GTD) / Composite Materials (GCL)",
+  "templateId": "ea4457a8-c88d-4f37-9072-effa0feb77a9",
+  "topology": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "fields": 9,
+    "note": "Matches task spec (0 eq / 0 gate / 9 fields). Selection/classification worksheet for Geosynthetic clay liners (GTD / Bentonitmatten / GBR-C). No math, no gates — the only computable 'chain' is field persistence through the real saveWorksheet path."
+  },
+  "equations": [],
+  "fieldChecks": [
+    {
+      "symbol": "bentonit_type",
+      "id": "b9464ff6-bda2-45d8-ae4a-43b786244a22",
+      "data_type": "enum (Na/Ca)",
+      "clause_reference": "Sec.5.5.1; Tab.13",
+      "verdict": "VA",
+      "quote": "Tab. 13: Mindestanforderungen an Bentonite für GTD ... Anforderungen Na-Bentonit / Ca-Bentonit (GAR.txt L3184-3204). Montmorillonit ... differenziert ... in Calcium- und Natrium-Montmorillonit (L3172-3173).",
+      "note": "Both enum options Na/Ca are source-attested by the Tab.13 column split."
+    },
+    {
+      "symbol": "bentonit_flaecheneinheit_g_m2",
+      "id": "a50146a6-87a9-458b-945e-88583af15bd5",
+      "data_type": "number g/m2",
+      "validation_rules": ">= 3600 (Na) / >= 8000 (Ca)",
+      "clause_reference": "Tab.13; Tab.15",
+      "verdict": "VA",
+      "quote": "Tab.13 row 2 Bentonit-Flächeneinheit Mclay (bezogen auf Wassergehalt 0 Masse-%): ≥ 3.600 g/m² (Na) / ≥ 8.000 g/m² (Ca) (GAR.txt L3191-3195). Tab.15 row 2: ≥ 3.600 g/m² (Na-Bentonit) (L3273).",
+      "note": "Both thresholds VERBATIM. Field description 'water content 0%' matches Tab.13 '(bezogen auf Wassergehalt 0 Masse-%)'."
+    },
+    {
+      "symbol": "quellvermoegen_ml",
+      "id": "d524e2a5-bad9-4bc8-ad18-bb8e32e73bbb",
+      "data_type": "number ml",
+      "validation_rules": ">= 24 (Na) / >= 8 (Ca)",
+      "clause_reference": "Tab.13",
+      "verdict": "VA",
+      "quote": "Tab.13 row 4 Quellvermögen, ASTM D 5890: ≥ 24 ml (Na) / ≥ 8 ml (Ca) (GAR.txt L3200). Prose L3174-3176: Na 'Quellvermögen ≥ 24 ml'; Ca 'Quellvermögen ca. 8-12 ml'.",
+      "note": "Field encodes the Tab.13 minimums (>=24 / >=8), which is correct. See decisionItem re the prose 'ca. 8-12 ml' Ca range (SR-2)."
+    },
+    {
+      "symbol": "gtd_schichtdicke_mm",
+      "id": "927be82f-e7e1-4175-aa39-6c4f29aa6bab",
+      "data_type": "number mm",
+      "validation_rules": "6...10 mm trocken",
+      "clause_reference": "Sec.5.5.1.2",
+      "verdict": "VA",
+      "quote": "5.5.1.2 Schichtdicke: 'Die Dicke der GTD ... beträgt im trockenen Zustand 6 bis 10 mm.' (GAR.txt L3315-3318).",
+      "note": "Range 6-10 mm verbatim. Surfaced as SR-2 range decisionItem (spec band, not a point value)."
+    },
+    {
+      "symbol": "gtd_polyolefin_beschichtung",
+      "id": "b420bb8d-849c-418f-856d-81656aff95fe",
+      "data_type": "boolean",
+      "clause_reference": "Sec.5.5.1; Tab.15; Tab.16",
+      "verdict": "VA",
+      "quote": "'Optional sind auch GTD erhältlich, die mit einer zusätzlichen polyolefinen Beschichtung ausgestattet sind.' (GAR.txt L3240-3241). Tab.15 col 'mit polyolefiner Beschichtung' PE-Beschichtung ≥ 400 g/m² (L3281-3284). Tab.16 rows split Ohne/Mit polyolefine Beschichtung (L3336, L3344).",
+      "note": "Boolean correctly drives Tab.15 PE-Beschichtung row + Tab.16 Auflast-Schichtdicke rows, as the field description states."
+    },
+    {
+      "symbol": "gtd_auflast_funktion",
+      "id": "829d9c86-7b62-4eae-a296-384dc5b36a88",
+      "data_type": "enum (quellgegendruck / austrocknung_frost)",
+      "clause_reference": "Tab.16",
+      "consumer_worksheets": ["FLL-GAR-22"],
+      "verdict": "VA",
+      "quote": "Tab.16 Schichtdicken von Auflasten: 'Überdeckung für Quellgegendruck bei Erstquellen der GTD ... ≥ 0,30 m' (GAR.txt L3334-3336, L3343); 'Überdeckung für ausreichenden Schutz vor Austrocknung und Frosteinwirkung ... ≥ 0,60 m' (L3338-3340, L3347).",
+      "note": "Both enum options attested by Tab.16. The 0.30 m vs 0.60 m consequence is documented; this field feeds FLL-GAR-22 (Auflast/Standsicherheit) per consumer_worksheets. See SR-2 decisionItem re Ohne vs Mit Beschichtung producing distinct Tab.16 rows for the same function."
+    },
+    {
+      "symbol": "gtd_ueberlappung_laengs_cm",
+      "id": "b8feb3f1-b229-45ca-bed1-049def36cdd2",
+      "data_type": "number cm",
+      "validation_rules": ">= 30",
+      "clause_reference": "Sec.5.5.2.1",
+      "verdict": "VA",
+      "quote": "5.5.2.1: 'Die Mindestüberlappung in Längsrichtung beträgt i. d. R. 30 cm' (GAR.txt L3444-3445).",
+      "note": "Threshold 30 cm verbatim. Standard qualifies with 'i. d. R.' (as a rule) — a soft minimum; encoded as >=30 which is faithful."
+    },
+    {
+      "symbol": "gtd_ueberlappung_quer_cm",
+      "id": "41f5a125-4afd-4609-8587-ddb4894d3f0d",
+      "data_type": "number cm",
+      "validation_rules": ">= 50",
+      "clause_reference": "Sec.5.5.2.1",
+      "verdict": "VA",
+      "quote": "5.5.2.1: '... in Querrichtung am Ende jeder Rolle i. d. R. 50 cm.' (GAR.txt L3445).",
+      "note": "Threshold 50 cm verbatim. 'i. d. R.' soft minimum, encoded >=50 — faithful."
+    },
+    {
+      "symbol": "groesstkorn_auflast_mm",
+      "id": "9b92e06e-69af-4f5d-92d6-7db2c5a05200",
+      "data_type": "number mm",
+      "validation_rules": "<= 16 (or <= 32 if U>=5)",
+      "clause_reference": "Sec.5.5.2.1",
+      "verdict": "VA",
+      "quote": "5.5.2.1: 'Der Größtkorndurchmesser darf 16 mm bzw. 32 mm bei U ≥ 5 nicht überschreiten.' (GAR.txt L3465).",
+      "note": "Conditional limit 16 / 32 (U>=5) verbatim. The U>=5 branch is a conditional, surfaced as SR-2 decisionItem. NOTE: a separate Untergrund-Verbesserung passage (L3395-3398) gives Größtkorn ≤ 12 mm for the top 15 cm of a gravelly subgrade (GTD ohne Beschichtung) — that is the SUBGRADE grain limit, distinct from this Auflast (cover-load) grain limit; the field correctly encodes the Auflast value 16/32."
+    }
+  ],
+  "chains": [
+    {
+      "name": "GAR-14 field-persistence chain — Na-bentonite / quellgegendruck / no coating (9 fields)",
+      "ran": true,
+      "liveValue": "bentonit_type=Na, bentonit_flaecheneinheit_g_m2=3600, quellvermoegen_ml=24, gtd_schichtdicke_mm=8, gtd_polyolefin_beschichtung=false, gtd_auflast_funktion=quellgegendruck, gtd_ueberlappung_laengs_cm=30, gtd_ueberlappung_quer_cm=50, groesstkorn_auflast_mm=16 — all persisted verbatim in project_parameters via real saveWorksheet (res.ok=true)",
+      "pdfExpected": "No worked example in standard (selection worksheet). Values chosen at the Tab.13/Tab.15/Sec.5.5.2.1 minimum thresholds — Na Mclay>=3600, Quellv>=24, Schichtdicke in 6-10 band, Überl. 30/50, Größtkorn<=16 — all satisfy the source thresholds.",
+      "verdict": "VA-persistence / VC-value (no worked example to assert against; thresholds source-checked)",
+      "raw": "Test Files 1 passed (1); Tests 3 passed (3); tests/harness/verify-fll-gar-14.integration.test.ts"
+    },
+    {
+      "name": "GAR-14 field-persistence chain — Ca-bentonite / austrocknung_frost / coated (alt point)",
+      "ran": true,
+      "liveValue": "bentonit_type=Ca, bentonit_flaecheneinheit_g_m2=8000, quellvermoegen_ml=8, gtd_polyolefin_beschichtung=true, gtd_auflast_funktion=austrocknung_frost — all persisted verbatim via real saveWorksheet (res.ok=true)",
+      "pdfExpected": "Ca minima per Tab.13: Mclay>=8000 g/m², Quellv>=8 ml. austrocknung_frost -> Tab.16 >=0,60 m. All source-attested.",
+      "verdict": "VA-persistence / VC-value",
+      "raw": "included in the same 3-passing test run"
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "item": "No worked numeric example",
+      "reason": "FLL-GAR-14 is a material selection/classification worksheet; the standard prints requirement tables (Tab.13/14/15/16) and construction rules (Sec.5.5.2.1) but no end-to-end worked calculation. Chain values are therefore VC (sanity-checked against source thresholds) rather than assertable against a printed result."
+    },
+    {
+      "item": "No compliance_requirements encoded for GAR-14",
+      "reason": "0 gates in prod. The Tab.13/15/16 minimums (Mclay, Quellvermögen, Deck-/Trägergeotextil masses, kf, Permittivität, Auflast-Schichtdicke, Überlappung, Größtkorn) are captured only as field validation_rules text, NOT as fireable compliance_requirements. This is an encoding-coverage gap consistent with the standard's other spec-table worksheets — logged as residue (not a defect of GAR-14's own topology), see decisionItem GAR14-DEC-04."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "GAR14-DEC-01",
+      "type": "SR-2 range",
+      "field": "quellvermoegen_ml (Ca)",
+      "issue": "Field encodes Ca minimum >= 8 ml (Tab.13). Prose L3175-3176 states Ca 'Quellvermögen ca. 8-12 ml' — a RANGE. Do not auto-collapse to a single value; the Tab.13 hard minimum (8) and the typical-band upper (~12) are distinct. Confirm the acceptance threshold is the Tab.13 >=8 (VA) and treat 8-12 as informational typical range.",
+      "quotes": ["Tab.13 row4: ≥ 8 ml (Ca) [L3200]", "Prose: 'Quellvermögen ca. 8-12 ml' [L3176]"]
+    },
+    {
+      "id": "GAR14-DEC-02",
+      "type": "SR-2 range",
+      "field": "gtd_schichtdicke_mm",
+      "issue": "Standard gives 6-10 mm dry as a band (Sec.5.5.1.2), not a point value. Surfaced per SR-2 — do not auto-pick. Field correctly stores it as a free number with a 6..10 validation band.",
+      "quotes": ["'... beträgt im trockenen Zustand 6 bis 10 mm.' [L3318]"]
+    },
+    {
+      "id": "GAR14-DEC-03",
+      "type": "SR-2 conditional",
+      "field": "groesstkorn_auflast_mm",
+      "issue": "Größtkorn limit is conditional: <=16 mm normally, <=32 mm if U>=5 (Uniformity coefficient). Two acceptance branches, not one value. Confirm whether the wizard captures U (Ungleichförmigkeitszahl) anywhere to select the branch; currently no U field on GAR-14, so the 32 mm branch is not machine-selectable and defaults conservatively to <=16.",
+      "quotes": ["'... darf 16 mm bzw. 32 mm bei U ≥ 5 nicht überschreiten.' [L3465]"]
+    },
+    {
+      "id": "GAR14-DEC-04",
+      "type": "encoding coverage",
+      "field": "worksheet-level",
+      "issue": "STAGED (written-not-applied, findings-only): consider promoting Tab.13/Tab.15/Tab.16 hard minimums to compliance_requirements so they FIRE, rather than living as free-text validation_rules. E.g. bentonit_flaecheneinheit_g_m2 >= (Na?3600:8000); quellvermoegen_ml >= (Na?24:8); gtd_schichtdicke_mm between 6 and 10; gtd_ueberlappung_laengs_cm >= 30; gtd_ueberlappung_quer_cm >= 50; groesstkorn_auflast_mm <= 16. NOT applied this run per doctrine (findings over fixes). Requires the condition grammar to support the Na/Ca branch and Tab.16 Ohne/Mit-Beschichtung split; queue for a single controlled apply pass.",
+      "quotes": ["Tab.13 [L3184-3204]", "Tab.15 [L3263-3305]", "Tab.16 [L3329-3348]", "Sec.5.5.2.1 [L3444-3465]"]
+    },
+    {
+      "id": "GAR14-DEC-05",
+      "type": "cross-worksheet / SR-2",
+      "field": "gtd_auflast_funktion -> FLL-GAR-22",
+      "issue": "gtd_auflast_funktion drives Tab.16 Auflast-Schichtdicke and declares FLL-GAR-22 as consumer. Tab.16 gives FOUR rows: {Ohne Beschichtung: Quellgegendruck>=0,30 m, Austrocknung+Frost>=0,60 m} and {Mit Beschichtung: Quellgegendruck+Austrocknung>=0,30 m, Frost>=0,60 m}. The enum only carries the FUNCTION (quellgegendruck / austrocknung_frost); the resulting minimum thickness depends ALSO on gtd_polyolefin_beschichtung. Confirm FLL-GAR-22 reads BOTH fields to resolve the correct Tab.16 row (0,30 vs 0,60 m) — a two-input lookup, not a single-input pick.",
+      "quotes": ["Tab.16 Ohne Beschichtung: ≥ 0,30 m / ≥ 0,60 m [L3334-3340]", "Tab.16 Mit polyolefiner Beschichtung: ≥ 0,30 m / ≥ 0,60 m [L3341-3348]"]
+    }
+  ],
+  "doctrineFlags": {
+    "SR-1": "Every field value claim carries a VERBATIM GAR.txt quote with line refs; no log/prior-chat numbers used.",
+    "SR-2": "Ranges (Quellv Ca 8-12, Schichtdicke 6-10) and conditionals (Größtkorn 16/32 @ U>=5; Tab.16 0,30/0,60) surfaced as decisionItems, never auto-picked.",
+    "SR-3": "Verdicts VA where confirmed against the rendered-PDF-derived pdftotext -layout extraction of GAR.txt (Tab.13/15/16 + Sec.5.5.1.2/5.5.2.1). No PDF-vs-markdown disagreement observed for these fields.",
+    "no-prod-writes": "Read-only prod (execute_sql) for topology pull only. No migrations applied; DEC-04 promotion staged as written-not-applied."
+  }
+}

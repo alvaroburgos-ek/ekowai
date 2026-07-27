@@ -1,0 +1,138 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-16",
+  "worksheetTitle": "Wuchsleistung Endauswertung 24 Monate",
+  "templateId": "ac16a8c5-4f9a-4ae5-bbaa-217cf5641bc4",
+  "prodProject": "vadsmshzebefjreqcicl",
+  "run": "2026-07-23 (read-only prod + disposable embedded PG via seed-fll-rhizom)",
+  "counts": { "equations": 0, "gates": 1, "fields": 5 },
+  "fields": [
+    { "symbol": "bestandsdichte_p_avg_24mon", "data_type": "number", "unit": "Halme/Gefäß", "is_required": true, "section": "D — Abgeleitete Werte / Berechnungen", "note": "Sits in a DERIVED section but has NO equation (0 equations on this worksheet) → entered by hand, not materialized." },
+    { "symbol": "kontrolle_p_avg_24mon", "data_type": "number", "unit": null, "is_required": true, "section": null },
+    { "symbol": "relativ_prozent_24mon", "data_type": "number", "unit": "%", "is_required": true, "section": null, "note": "The 24-month relative density (ØP/ØK×100). This is the operand REQ-18 SHOULD test but does not." },
+    { "symbol": "wuchsleistung_24mon_ausreichend", "data_type": "boolean", "is_required": true, "section": null, "note": "The literal §3.7 pass/fail verdict; NOT referenced by REQ-18." },
+    { "symbol": "endauswertung_datum", "data_type": "date", "is_required": true, "section": null }
+  ],
+  "equations": [],
+  "equationsNote": "0 equations on FLLTP-RHZ-16. The standard DEFINES two computable quantities for this worksheet — Tab.1 Ø-Bestandsdichte (ØP1–P8) and Tab.3 relative density (ØP1–P8 / ØK1–K3 × 100) — but neither is encoded as an equation. bestandsdichte_p_avg_24mon and relativ_prozent_24mon are plain entered numbers (confirmed empirically: an internally inconsistent relative % of 42 is stored verbatim, NOT recomputed). No cos_beta/trig anywhere.",
+  "chains": [
+    {
+      "name": "save PASS state (ØP=170 ≥160, ØK=190, rel=89.47% ≥80, ausreichend=true)",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_24mon": 170, "kontrolle_p_avg_24mon": 190, "relativ_prozent_24mon": 89.47368421052632, "wuchsleistung_24mon_ausreichend": true, "endauswertung_datum": "2027-01-15T00:00:00.000Z" },
+      "pdfExpected": "no numeric worked example printed in the standard (Tab.1/2/3 cells are all '>> Monat Jahr <<' placeholders); thresholds only: ØP ≥160 Halme/Gefäß (§3.7 pt.4), relative ≥80% (§3.7). Sanity-check values chosen to satisfy both.",
+      "verdict": "VC",
+      "raw": "RHZ-16 PASS save.ok: true error: null | RHZ-16 PASS persisted ØP: 170 ØK: 190 rel%: 89.47368421052632 ausreichend: true datum: 2027-01-15T00:00:00.000Z"
+    },
+    {
+      "name": "GATE REQ-18 fires PASS (local ØP=170 ≥160 AND foreign RHZ-13 dichte_relativ_prozent=85 ≥80)",
+      "ran": true,
+      "liveValue": "checkApprovalGate → failingBlockConditions=[], missingRequiredFields=[]",
+      "pdfExpected": "gate should not block a sufficient endauswertung (§3.7: both thresholds met)",
+      "verdict": "VC",
+      "raw": "RHZ-16 gate(pass-state) failing: []  missingReq: []"
+    },
+    {
+      "name": "GATE REQ-18 fires FAIL (local ØP=170 ≥160 but foreign RHZ-13 dichte_relativ_prozent=60 <80)",
+      "ran": true,
+      "liveValue": "checkApprovalGate → failingBlockConditions=[REQ-18]",
+      "pdfExpected": "a relative density <80% must be flagged (§3.7). Gate fires — but on the WRONG field (foreign RHZ-13, see FINDING F1).",
+      "verdict": "VC",
+      "raw": "RHZ-16 gate(fail-state) failing: [{\"code\":\"REQ-18\",\"titleDe\":\"Wuchsleistung 24 Monate ausreichend\",\"condition\":\"bestandsdichte_p_avg_24mon >= 160 AND dichte_relativ_prozent >= 80\"}]"
+    },
+    {
+      "name": "WRONG-OPERAND proof: local relativ_prozent_24mon=95 (healthy) yet REQ-18 still FAILS because foreign RHZ-13=60",
+      "ran": true,
+      "liveValue": "REQ-18 failing = true DESPITE a healthy local 24-month relative of 95%",
+      "pdfExpected": "the 24-month endauswertung gate must read the 24-month relative (relativ_prozent_24mon); a 95% value should PASS. It FAILS → the local operand is ignored.",
+      "verdict": "FINDING",
+      "raw": "RHZ-16 wrong-operand: local rel=95 (healthy) but REQ-18 failing= true (driven by FOREIGN RHZ-13 rel=60, NOT local relativ_prozent_24mon)"
+    },
+    {
+      "name": "save FAIL data state (ØP=100 <160, rel=52.6% <80) — save succeeds (block only refuses approval, not save)",
+      "ran": true,
+      "liveValue": { "bestandsdichte_p_avg_24mon": 100 },
+      "pdfExpected": "insufficient endauswertung; data still recordable, approval would be refused",
+      "verdict": "VC",
+      "raw": "save.ok true; persisted ØP=100"
+    },
+    {
+      "name": "no-equation proof: store inconsistent relativ_prozent_24mon=42 (≠ ØP/ØK×100=89.47) → stored verbatim",
+      "ran": true,
+      "liveValue": { "relativ_prozent_24mon": 42 },
+      "pdfExpected": "if Tab.3 (ØP/ØK×100) were encoded as an equation the save path would override 42 with 89.47; it does not → confirms un-derived",
+      "verdict": "FINDING",
+      "raw": "RHZ-16 inconsistent-relative persisted rel%: 42 (expected 42, NOT recomputed to 89.47 → confirms no equation)"
+    }
+  ],
+  "chainSummary": "6/6 planned chains ran green through the REAL saveWorksheet + checkApprovalGate path (vitest: 7 passed / 7). No PDF numeric worked example exists for this worksheet, so numeric assertions are sanity-checks (VC), not PDF-attested.",
+  "gates": [
+    {
+      "id": "057c9d5e-ee15-4de5-b759-253a9140d274",
+      "code": "REQ-18",
+      "title": "Wuchsleistung 24 Monate ausreichend",
+      "severity": "block",
+      "condition": "bestandsdichte_p_avg_24mon >= 160 AND dichte_relativ_prozent >= 80",
+      "fired": true,
+      "vacuous": false,
+      "note": "FIRED both ways this run: PASS (170≥160 ∧ 85≥80) and FAIL (60<80). NOT vacuous/dead — the second operand resolves via the project-wide conflict-free fallback (approval-gate.ts makeGateLookup/buildFallbackValues) from FLLTP-RHZ-13.dichte_relativ_prozent. BUT the operand is the WRONG FIELD: it reads RHZ-13's relative density instead of this worksheet's own relativ_prozent_24mon (FINDING F1). Both numeric constants (160, 80) are PDF-VERBATIM correct (§3.7)."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "type": "wrong-operand / cross-worksheet symbol reference",
+      "where": "compliance_requirements REQ-18 on FLLTP-RHZ-16",
+      "detail": "The gate condition 'bestandsdichte_p_avg_24mon >= 160 AND dichte_relativ_prozent >= 80' references dichte_relativ_prozent, which is a field of FLLTP-RHZ-13 (verified: SELECT over fields shows dichte_relativ_prozent ∈ RHZ-13, relativ_prozent_24mon ∈ RHZ-16). On RHZ-16 the correct 24-month relative-density field is relativ_prozent_24mon. Because approval-gate.ts resolves non-local symbols from the project-wide fallback, REQ-18 reads RHZ-13's (6-month/generic) relative density, NOT the 24-month endauswertung value it is meant to guard. Proven empirically: local relativ_prozent_24mon=95 (healthy) + foreign RHZ-13=60 → REQ-18 still FAILS. So a compliant 24-month endauswertung can be wrongly blocked (or, symmetrically, a bad 24-month relative can pass if RHZ-13's is healthy). Constants 160/80 themselves are PDF-correct.",
+      "pdfQuote": "§3.7: '4. Endauswertung (nach 24 Monaten) ≥ 160 Halme/Gefäße' and 'Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in den Kontrollgefäßen betragen.'",
+      "verdict": "VA (constants PDF-confirmed); the symbol wiring is a structural defect",
+      "proposedFix": "Change REQ-18 operand dichte_relativ_prozent → relativ_prozent_24mon (STAGED, see decisionItems D1). Do NOT apply here."
+    },
+    {
+      "id": "F2",
+      "severity": "medium",
+      "type": "missing equation / derived value entered by hand",
+      "where": "FLLTP-RHZ-16 fields relativ_prozent_24mon and bestandsdichte_p_avg_24mon",
+      "detail": "The standard defines relative density as ØP1–P8 / ØK1–K3 × 100 (Tab.3, Sollwert ≥80%) and the average Bestandsdichte ØP1–P8 (Tab.1). Neither is encoded as an equation on this worksheet (0 equations). relativ_prozent_24mon is a free-entry number: storing an inconsistent 42 (vs computed 89.47) is accepted verbatim, so the printed formula is unenforced and the value is not single-sourced from the per-Gefäß counts. Same pattern flagged on sibling RHZ-14 (12-mon) test.",
+      "pdfQuote": "Tab.3: 'ØP1–P8 / ØK1–K3  x 100'  (Sollwert: ≥ 80 %). §3.7 pt.4: 'Endauswertung (nach 24 Monaten) ≥ 160 Halme/Gefäße'.",
+      "verdict": "VA (formula PDF-confirmed); encoding gap",
+      "proposedFix": "Optionally encode Tab.3 as an equation output_symbol=relativ_prozent_24mon = bestandsdichte_p_avg_24mon / kontrolle_p_avg_24mon * 100 and derive bestandsdichte_p_avg_24mon from the 8 per-Gefäß counts. Cross-standard decision, not applied. See D2."
+    },
+    {
+      "id": "F3",
+      "severity": "low",
+      "type": "verdict-field not gated",
+      "where": "FLLTP-RHZ-16 field wuchsleistung_24mon_ausreichend",
+      "detail": "The boolean wuchsleistung_24mon_ausreichend is the literal §3.7 sufficiency verdict, but REQ-18 does not reference it, nor is it derived from the two thresholds. It can be set true even while ØP<160 / relative<80 (a data-collection worksheet: the FAIL save with ØP=100 succeeded). The verdict is thus a free-entry boolean disconnected from its own defining thresholds.",
+      "pdfQuote": "§3.7: 'Eine ausreichende Wuchsleistung ist gegeben, wenn die Pflanzen in den Prüfgefäßen im Durchschnitt folgende Bestandsdichte aufweisen: … 4. Endauswertung (nach 24 Monaten) ≥ 160 Halme/Gefäße'.",
+      "verdict": "VA (verdict definition PDF-confirmed); consistency not enforced",
+      "proposedFix": "Consider deriving/validating wuchsleistung_24mon_ausreichend against (ØP≥160 AND relative≥80). Not applied."
+    }
+  ],
+  "residue": [
+    { "id": "R1", "type": "no PDF numeric worked example", "detail": "The Prüfbericht Tab.1/2/3 in the standard are blank templates ('>> Monat Jahr <<', empty Gefäß rows), so there is NO source-attested numeric result to assert live-persisted values against. All chain numbers are internally-consistent SANITY-CHECK inputs → VC, not VA per SR-3." },
+    { "id": "R2", "type": "cos_beta/trig", "detail": "N/A — FLLTP-RHZ-16 has no trig-bearing equations (0 equations). Engine math-function gap does not apply here." }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "kind": "staged-migration (written-not-applied)",
+      "summary": "Fix REQ-18 wrong operand: dichte_relativ_prozent → relativ_prozent_24mon on FLLTP-RHZ-16.",
+      "stagedSql": "UPDATE compliance_requirements SET condition = 'bestandsdichte_p_avg_24mon >= 160 AND relativ_prozent_24mon >= 80' WHERE id = '057c9d5e-ee15-4de5-b759-253a9140d274'; -- REQ-18 on FLLTP-RHZ-16 (template ac16a8c5-4f9a-4ae5-bbaa-217cf5641bc4). NOT APPLIED — batch into the single controlled apply pass.",
+      "rationale": "Makes the 24-month endauswertung gate read this worksheet's own 24-month relative density (relativ_prozent_24mon) instead of FLLTP-RHZ-13's field. Constants 160/80 unchanged (PDF-verbatim §3.7). Requires human confirm because the same wrong-operand pattern may exist on the sibling zwischenauswertung gates (18-mon etc.) and should be swept together."
+    },
+    {
+      "id": "D2",
+      "kind": "encoding decision (not staged)",
+      "summary": "Whether to encode Tab.3 relative-density and Tab.1 Ø-Bestandsdichte as equations so the values are single-sourced/enforced rather than free-entry (F2). Cross-worksheet (affects RHZ-13/14/15/16). Defer to the standard-owner.",
+      "rationale": "SR-1/single-source: the printed formula ØP/ØK×100 is currently unenforced across all four wuchsleistung worksheets. A coordinated equation rollout is a design decision, not an isolated fix."
+    },
+    {
+      "id": "D3",
+      "kind": "range surfaced (SR-2)",
+      "summary": "§3.7 lists a SCHEDULE of increasing thresholds across the four auswertungen (6mon ≥80, 12mon ≥120, 18mon ≥160, 24mon ≥160 Halme/Gefäß). For the 24-MONTH endauswertung the single applicable value is ≥160 (point 4). No range remains for THIS worksheet — the correct point (160) is unambiguous. Recorded so no other threshold from the schedule is mistakenly applied to the 24-mon gate.",
+      "rationale": "SR-2: do not auto-pick across the schedule; 160 is the sole 24-mon value, 80% relative applies throughout. Confirmed against PDF §3.7."
+    }
+  ]
+}

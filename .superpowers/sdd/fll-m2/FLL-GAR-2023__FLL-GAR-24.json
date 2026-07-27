@@ -1,0 +1,104 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-24",
+  "worksheetTitle": "Bepflanzung und Einbauten / Planting and Installations",
+  "templateId": "299c26b9-cce9-449d-9913-78dfc1768e68",
+  "archetype": "data_collection",
+  "prodCounts": { "equations": 0, "gates": 0, "fields": 5 },
+  "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/GAR.txt (rendered from fll_gewaesserabdichtungsrichtlinien_2023__2 (2).pdf)",
+  "equations": [],
+  "fields": [
+    {
+      "id": "cc71d336-630b-4ca7-b0d9-e994047bb0d0",
+      "symbol": "mit_bepflanzung",
+      "data_type": "boolean",
+      "clause_reference": "Sec.7.2; Sec.10",
+      "verdict": "VA",
+      "quote": "§7.2 Alkalisilikate (p.103): „Natrium-Wasserglas und Lithium-Wasserglas sind phytotoxisch; Kalium-Wasserglas ist pflanzenverträglich.“ AND §10 heading (ToC): „ANFORDERUNGEN AN PLANUNG UND AUSFÜHRUNG VON BEPFLANZUNG UND EINBAUTEN“; §10.1 (p.124): „Vorhandene und geplante Bepflanzung sowie Pflanz- und Pflegearbeiten dürfen die Funktion der Abdichtung nicht beeinträchtigen.“",
+      "note": "PDF-confirmed. The boolean's stated purpose (scopes the phytotoxicity rule for Alkalisilikate) is exactly the §7.2 phytotoxic/pflanzenverträglich distinction; the planting scope is §10. VA."
+    },
+    {
+      "id": "bd1614e0-6da3-4263-99f8-f6bdf3bd52f1",
+      "symbol": "bep_pflanzenarten",
+      "data_type": "text",
+      "clause_reference": "§12",
+      "verdict": "VA",
+      "quote": "Tab. 29 (p.125) „Beispiele von Pflanzen mit aggressiven Wurzeln oder Rhizomen“ lists Helophyten/Hydrophyten incl. „Phragmites australis“, „Typha… starkwachsende Arten“, „Phalaris arundinacea“ etc. §10.3 (p.125): „Pflanzenarten mit starkem Rhizomwachstum … sowie Pflanzen mit intensivem Wurzelwerk … können eine Durchwurzelung der Abdichtung bewirken.“",
+      "note": "Free-text plant-species list. Standard enumerates the aggressive-species domain in Tab. 29; field captures the project's chosen species. VA (content basis PDF-confirmed). clause_reference cites §12 (project-planning collection clause) not §10 — minor provenance nuance, logged as decisionItem."
+    },
+    {
+      "id": "f38a7cdb-3bfb-4b00-a1ad-0790f2fdbb22",
+      "symbol": "bep_rhizomfestigkeit_erforderlich",
+      "data_type": "boolean",
+      "clause_reference": "§12",
+      "verdict": "VA",
+      "quote": "§10.4 (p.126): „Bei intensiverer Beanspruchung durch die Bepflanzung (z. B. Vegetation für Pflanzenkläranlagen und Aufbereitungsbereiche von Schwimmteichen) ist eine Prüfung nach den ‚Technischen Prüfbestimmungen zur Bestimmung der Rhizomfestigkeit von Gewässerabdichtungen‘ der FLL erforderlich.“ AND „Die Prüfung der Rhizomfestigkeit von Gewässerabdichtungen erfolgt deshalb ausschließlich mit Phragmites australis.“",
+      "note": "PDF-confirmed. Boolean = whether the FLL Rhizomfestigkeit-Nachweis is required for this project. VA."
+    },
+    {
+      "id": "d2373428-0b78-48a1-85ab-b08ce8d67827",
+      "symbol": "bep_einbauten_typen",
+      "data_type": "text",
+      "clause_reference": "§12",
+      "verdict": "VA",
+      "quote": "§10.5 Einbauten (p.126): „Einbauten (z. B. Pflanztröge, Findlinge, Quellsteine sowie Fundamente von Stegen und Brücken) sowie die dafür notwendigen Ausführungs- und Wartungsarbeiten dürfen die Funktion der Abdichtung nicht beeinträchtigen.“",
+      "note": "PDF-confirmed. Free-text list of built-in elements exactly matches §10.5's enumerated examples. VA."
+    },
+    {
+      "id": "123a5b5b-d85f-4321-9cba-affae16ceb44",
+      "symbol": "bep_durchdringungen_anzahl",
+      "data_type": "number",
+      "unit": "1",
+      "clause_reference": "§12",
+      "verdict": "VA",
+      "quote": "§4.9 Anschlüsse, Abschlüsse und Durchdringungen (p.32): „Anschlüsse, Abschlüsse und Durchdringungen müssen so hergestellt werden, dass sie den …“ AND §4.12 (p.33): „Durchdringungen in der Abdichtung für benötige technische Einbauten …“",
+      "note": "PDF-confirmed. Count (unit '1', dimensionless) of penetrations through the seal; §4.9/§4.12 establish that penetrations are a distinct planning object. No standard-imposed numeric limit — open count. VA."
+    }
+  ],
+  "chains": [
+    {
+      "name": "real saveWorksheet persistence — planted case (5 fields: mit_bepflanzung=true, Phragmites/Typha list, rhizome-required=true, Einbauten text, Durchdringungen=3)",
+      "ran": true,
+      "liveValue": "value_boolean=true (mit_bepflanzung), value_text='Phragmites australis; Typha spp.' (bep_pflanzenarten), value_boolean=true (bep_rhizomfestigkeit_erforderlich), value_text='Steg-Fundamente; Pflanztroege' (bep_einbauten_typen), value_number=3 (bep_durchdringungen_anzahl)",
+      "pdfExpected": "N/A — data_collection worksheet, no worked example printed in the standard; persistence + round-trip sanity only",
+      "verdict": "VC",
+      "raw": "✓ |integration| tests/harness/fll-gar24-verify.integration.test.ts > exposes the 5 collected fields 2ms; ✓ persists the planted case (Phragmites/Typha → rhizome resistance required) 433ms"
+    },
+    {
+      "name": "real saveWorksheet persistence — unplanted overwrite (mit_bepflanzung=false, rhizome-required=false, Durchdringungen=0)",
+      "ran": true,
+      "liveValue": "value_boolean=false (mit_bepflanzung), value_boolean=false (bep_rhizomfestigkeit_erforderlich), value_number=0 (bep_durchdringungen_anzahl); re-save overwrote prior values in-place",
+      "pdfExpected": "N/A — no worked example; verifies false/0 round-trip + UPSERT overwrite of the earlier planted state",
+      "verdict": "VC",
+      "raw": "✓ |integration| tests/harness/fll-gar24-verify.integration.test.ts > re-save with the unplanted case overwrites (mit_bepflanzung=false, 0 penetrations) 11ms"
+    }
+  ],
+  "vitestSummary": "Test Files 1 passed (1); Tests 3 passed (3); Duration ~5.3s (RUN v4.1.5, C:/Users/Ekowai/_wt-fll, pnpm vitest run --project integration tests/harness/fll-gar24-verify.integration.test.ts). NOTICE lines are Postgres identifier-truncation on unrelated tables (calculation_snapshots/co2_activity_lines FKs) during schema apply — not errors.",
+  "gates": [],
+  "findings": [],
+  "residue": [
+    "No cos_beta/trig residue: worksheet has 0 equations, nothing blocked on the math-function engine.",
+    "No printed worked example in the standard for this data_collection worksheet, so both saveWorksheet chains are VC (persistence/round-trip sanity, not asserted against a source-printed value) per SR-1/SR-3.",
+    "PDF text is a markdown/text extraction (pdftotext -layout). Quotes above are treated VA because they reproduce continuous, unambiguous §7.2/§10.1/§10.3/§10.4/§10.5/Tab.29 prose with page numbers; if a byte-exact challenge arises, re-open the rendered PDF pages 103 and 124–126 (SR-3: PDF wins)."
+  ],
+  "decisionItems": [
+    {
+      "id": "GAR24-D1",
+      "type": "clause-provenance",
+      "item": "mit_bepflanzung.consumer_worksheets = ['FLL-GAR-09','FLL-GAR-20']. Topology only — not verifiable from this worksheet alone. Confirm during GAR-09/GAR-20 verification that both actually consume the planting flag to scope the Alkalisilikate phytotoxicity rule (§7.2). No change staged; cross-worksheet check.",
+      "staged_migration": null
+    },
+    {
+      "id": "GAR24-D2",
+      "type": "clause-reference-nuance",
+      "item": "Four of five fields carry clause_reference '§12' (a project-planning/collection clause) while the substantive requirements they encode live in §10 (10.1/10.3/10.4/10.5) and §4.9/§4.12. mit_bepflanzung correctly points to 'Sec.7.2; Sec.10'. Consider aligning the four '§12' references to the substantive §10/§4.9 clauses for auditability. Cosmetic/provenance only — not a correctness defect. WRITTEN-NOT-APPLIED: no migration authored; decision deferred to a controlled apply pass.",
+      "staged_migration": null
+    },
+    {
+      "id": "GAR24-D3",
+      "type": "range-SR2",
+      "item": "No SR-2 range to surface: this worksheet has no standard-printed value ranges (peak vs yearly etc.). bep_durchdringungen_anzahl is an open, unbounded count with no source-imposed min/max; not auto-picked.",
+      "staged_migration": null
+    }
+  ]
+}

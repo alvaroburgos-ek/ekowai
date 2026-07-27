@@ -1,0 +1,113 @@
+{
+  "standard": "FLL-Naturteich (FLL Guidelines for the Planning, Construction and Maintenance of Private Natural Swimming Pools, 2017)",
+  "worksheet": "FLLNT-13 — Abnahme (acceptance inspection); template id df243e6f-47cc-4611-ad1e-a67d267a4e1a; standard c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodSnapshot": {
+    "fields_active": 5,
+    "fields": [
+      "acceptance_date (date)",
+      "acceptance_passed (boolean)",
+      "attest_fllnt_13_req_28 (boolean)",
+      "completion_notice_days_advance (number, days)",
+      "defects_noted (text)"
+    ],
+    "equations": 0,
+    "compliance_requirements": 2
+  },
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLLNT-13 has no equations — no computable derivation chain",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "N/A",
+      "raw": "SELECT count(*) FROM equations WHERE worksheet_template_id = df243e6f... => 0. FLLNT-13 (Abnahme) is a procedural acceptance worksheet; per PDF §11 the acceptance inspection and limitation periods 'comply with the contractual stipulations' (VOB/B, BGB) — there is no formula or worked numeric example in the standard for this worksheet. The test asserts e=0 live against the seeded template. Recorded as residue R1 (nothing to drive), not a failure."
+    },
+    {
+      "name": "REQ-26 real-save persistence exercise (acceptance_passed + defects_noted through saveWorksheet)",
+      "ran": true,
+      "liveValue": "acceptance_passed persisted {false,true,false}; defects_noted persisted {'Riss in der Dichtungsfolie am Nordrand','kleiner Restmangel',''}",
+      "pdfExpected": "no numeric worked example in standard; acceptance is pass/fail + defect log per §11.1/§11.2 (VOB/B §12). Sanity: gate semantics match the acceptance concept.",
+      "verdict": "VC",
+      "raw": "vitest: 5 passed (5). REQ-26 FAIL (470ms), REQ-26 PASS via acceptance_passed (10ms), REQ-26 PASS via empty defects (8ms) — all via REAL @/lib/actions/worksheet saveWorksheet against embedded PG, values read back from project_parameters. VC because there is no printed source scalar to assert against; verified as a live round-trip + gate-semantics sanity."
+    }
+  ],
+  "gates": [
+    {
+      "id": "bfc837c6-a703-4e96-a770-6853c88e302b",
+      "code": "REQ-26",
+      "condition": "acceptance_passed == true OR defects_noted IS EMPTY",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fired through the REAL evaluateCondition in three states, driven by REAL saveWorksheet: (1) FAIL — acceptance_passed=false AND defects_noted non-empty => fail; (2) PASS — acceptance_passed=true => pass (left OR branch); (3) PASS — acceptance_passed=false AND defects_noted='' => pass (right OR branch, IS EMPTY true). Both OR branches independently exercised to a pass and the conjunction-of-negatives to a fail => not vacuous, not dead. SEMANTIC NOTE (see F2): the OR makes this gate pass whenever acceptance_passed=true EVEN IF defects_noted is non-empty — i.e. an accepted work with recorded outstanding defects still passes REQ-26. That matches VOB Abnahme-unter-Vorbehalt (acceptance with reservation of defect claims) but means REQ-26 does NOT block on unresolved defects; flagged as design-review item, not a coding bug."
+    },
+    {
+      "id": "b5b2bd44-64ba-483a-b007-aea692f38266",
+      "code": "REQ-28",
+      "condition": "attest_fllnt_13_req_28 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "Fired through the REAL evaluateCondition in pass (true), fail (false) and pending (missing) states. Pure single-boolean attestation gate mapping to PDF §12.4 Repairs ('Repair provisions and re-stabilization'). Not vacuous (references a real prod boolean field attest_fllnt_13_req_28 and can genuinely fail/pend). Could NOT be driven through saveWorksheet because the generic seeder omits this field (residue R2)."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "seeder-gap",
+      "title": "Seeder omits prod field attest_fllnt_13_req_28 referenced by REQ-28",
+      "detail": "Prod FLLNT-13 has 5 active fields incl. the boolean attest_fllnt_13_req_28 (label 'Nachweis: §12.4'), which is the sole symbol in REQ-28's condition. seed-fll-naturteich.ts FLLNT-13 fields[] lists only 4 (completion_notice_days_advance, defects_noted, acceptance_date, acceptance_passed) and OMITS attest_fllnt_13_req_28. Consequence: REQ-28 cannot be driven end-to-end through saveWorksheet in the harness (it was fired against a synthetic lookup instead). Same class of gap already noted for FLLNT-01's attest_fllnt_01_req_03/_04. Not a prod defect — a harness-fidelity gap. Staged as decision D1 (add the attest field to the seeder), not applied."
+    },
+    {
+      "id": "F2",
+      "severity": "design-review",
+      "title": "REQ-26 does not block on unresolved defects when acceptance_passed=true",
+      "detail": "Condition `acceptance_passed == true OR defects_noted IS EMPTY` passes as soon as acceptance_passed=true regardless of defects_noted content. So a work accepted WITH a recorded defect list still satisfies REQ-26. PDF §11.1/§11.2 (VOB/B §12, BGB) frames Abnahme as physical acceptance possibly 'under reservation' of defect claims, so an accept-with-defects state is legally coherent and the OR is arguably intentional. Flagged for human confirmation only — is REQ-26 meant to enforce a defect-free acceptance, or accept-with-reservation? No verbatim standard sentence dictates a machine threshold here (acceptance 'comply[s] with the contractual stipulations', PDF §11.1). Surfaced as decision D2. No fix staged."
+    },
+    {
+      "id": "F3",
+      "severity": "coverage-gap",
+      "title": "completion_notice_days_advance (>=3 working days) is captured but NOT enforced by any gate",
+      "detail": "Field completion_notice_days_advance exists on FLLNT-13 (number, unit 'days'). PDF §11.1 states VERBATIM: 'The supplier must inform the purchaser of pending completion dates no later than 3 working days before the respective completion date.' This is a machine-checkable >=3 requirement, but NO compliance_requirement on FLLNT-13 references completion_notice_days_advance — the only two gates are REQ-26 and REQ-28. The 3-working-days rule is therefore un-enforced (data captured, never checked). Candidate new gate `completion_notice_days_advance >= 3`. NOTE (SR-2): '3 working days' is a firm minimum (>=), not a range, so no range-decision applies — but the working-days-vs-calendar-days distinction is a nuance (the field unit is bare 'days'). Surfaced as decision D3; no gate authored/applied."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "reason": "FLLNT-13 has 0 equations — no derivation/computational chain exists to run through saveWorksheet. Verified live (count(*)=0). This is expected: acceptance is a procedural pass/fail worksheet, not a calculation. No un-run computable chain remains."
+    },
+    {
+      "id": "R2",
+      "reason": "REQ-28 could not be driven through the REAL saveWorksheet because seed-fll-naturteich.ts does not seed attest_fllnt_13_req_28 (see F1). It was fired against the real evaluateCondition via a synthetic lookup (pass/fail/pending all confirmed). To close: add the field to the seeder (D1)."
+    },
+    {
+      "id": "R3",
+      "reason": "PDF-vs-markdown tier (SR-3): all quotes here are from the pdftotext extraction Naturteich.txt (VC-tier convenience text), not a hand-opened rendered PDF page image. The §11.1 '3 working days' sentence and §12.4 repairs list were read from that extraction. Verbatim strings are unambiguous and layout-clean, but per doctrine they are markdown-extraction-grade unless a rendered-PDF page confirms them; treat F3's quote as VC until PDF-page-confirmed."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "seeder-fix (written-not-applied)",
+      "detail": "Add FieldSpec { symbol: 'attest_fllnt_13_req_28', label_de: 'Nachweis: §12.4', data_type: 'boolean', unit: null, order_index: 0, section: 'C' } to FLLNT-13.fields in seed-fll-naturteich.ts so REQ-28 can be driven through the real saveWorksheet. NOT applied (findings-over-fixes)."
+    },
+    {
+      "id": "D2",
+      "type": "compliance-semantics (human decision)",
+      "detail": "Confirm intended semantics of REQ-26: should acceptance with recorded outstanding defects (acceptance_passed=true AND defects_noted non-empty) PASS (current behaviour, = Abnahme unter Vorbehalt) or should it require defect-free acceptance? No source sentence forces a machine rule; needs Alvaro's call. No change staged."
+    },
+    {
+      "id": "D3",
+      "type": "new-gate candidate (written-not-applied)",
+      "detail": "Consider adding a block gate on FLLNT-13: condition `completion_notice_days_advance >= 3`, mapping the PDF §11.1 verbatim '...no later than 3 working days before the respective completion date.' Open sub-question: encode as working days vs the field's bare 'days' unit. Range check (SR-2): none — '3 working days' is a firm minimum. Not authored/applied."
+    }
+  ],
+  "verbatimQuotes": {
+    "SR-1_completion_notice_3_working_days": "\"The supplier must inform the purchaser of pending completion dates no later than 3 working days before the respective completion date.\" (Naturteich.txt lines 2958-2959, PDF §11.1 Acceptance inspection of the building work)",
+    "SR-1_acceptance_definition": "\"The acceptance inspection is the physical acceptance of the service provided by the supplier by the purchaser combined with the assertion that the he or she basically accepts the work as specified in the contract.\" (Naturteich.txt lines 2967-2969, §11.1)",
+    "SR-1_acceptance_contractual": "\"The acceptance inspection and the periods of limitation for claims due to defects comply with the contractual stipulations.\" (Naturteich.txt lines 2963-2964, §11.1) — establishes there is no fixed numeric worked example for this worksheet.",
+    "SR-1_req28_repairs_scope": "\"Repairs that are found to be necessary during the checks or during the performance of maintenance work should be performed within the agreed scope, e. g.: replacing filter materials; replacing defective technical systems; replacing and supplementing plants; repairing structural installations.\" (Naturteich.txt §12.4 Repairs, lines 3169-3176) — REQ-28 title 'Repair provisions and re-stabilization' maps here.",
+    "SR-1_req28_restabilization": "\"If a comprehensive or complete change of water is unavoidable, it must be taken into account that the biological system will usually need 1 to 2 months to stabilize itself again.\" (Naturteich.txt lines 3178-3179, §12.4) — the 're-stabilization' half of REQ-28's title."
+  },
+  "rawVitest": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n |integration| tests/harness/verify-fll-naturteich-fllnt13.integration.test.ts\n ✓ exposes FLLNT-13 with its acceptance fields and 0 equations, 2 gates 3ms\n ✓ REQ-26 FAIL — not passed AND defects noted persists and fires fail 470ms\n ✓ REQ-26 PASS via acceptance_passed — passed=true persists and fires pass despite defects text 10ms\n ✓ REQ-26 PASS via empty defects — passed=false but no defects fires pass (OR branch) 8ms\n ✓ REQ-28 fires pass/fail/pending against the real evaluator 1ms\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Duration  4.87s\n(NOTICE lines from embedded-PG identifier truncation are harmless DDL notices.)",
+  "testFile": "C:\\Users\\Ekowai\\_wt-fll\\tests\\harness\\verify-fll-naturteich-fllnt13.integration.test.ts"
+}

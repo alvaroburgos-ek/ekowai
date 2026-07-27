@@ -1,0 +1,126 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-10 (Mineralisch ohne Zusatzstoffe)",
+  "worksheetId": "6d4bcfd9-a78d-45d6-9442-9cae7080e252",
+  "standardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "runDate": "2026-07-23",
+  "doctrine": "SR-1 verbatim quotes attached; SR-2 ranges surfaced as decisionItems; SR-3 PDF is ground truth; findings-not-fixes (no prod writes)",
+  "counts": { "equations": 0, "fields": 18, "gates": 11 },
+  "equations": [
+    {
+      "id": null,
+      "verdict": "VA",
+      "quote": "(no equations attached to FLL-GAR-10 in prod; SELECT ... FROM equations WHERE worksheet_template_id = '6d4bcfd9-...' returned []) ",
+      "note": "Confirmed 0 equations. FLL-GAR-10 is a material-classification / requirements checklist worksheet (Abschnitt 5.1 mineralische Stoffe ohne Zusatzstoffe + cross-refs to sibling material types). It carries compliance gates, not producers. No formula shape / constant / output-symbol to verify. Nothing blocked on cos_beta/trig here."
+    }
+  ],
+  "chains": [
+    {
+      "name": "REQ-12 PASS — Tab.3 mineral requirements satisfied",
+      "ran": true,
+      "liveValue": "kf=5e-10, korn=20, org=3, kalk=10, DPr=98 persisted via real saveWorksheet; evaluateCondition => {kind:'pass'}",
+      "pdfExpected": "Tab.3 (GAR.txt L1919-1934): Kornanteil<0,002mm >=15 Masse-%; organische Substanz VGL <=5 Masse-%; Kalkgehalt VCA <=15 Masse-%; Durchlaessigkeitsbeiwert kf <= 1*10-9 m/s; Verdichtungsgrad DPr >= 97 %",
+      "verdict": "VA",
+      "raw": "PASS (393ms) — saveWorksheet res.ok=true; persisted kf toBeCloseTo 5e-10; korn=20; gate evaluated PASS with guard abdichtungs_art='mineralisch_ohne_zusatzstoffe'"
+    },
+    {
+      "name": "REQ-12 FAIL — kf=1e-5 (>>1e-9) and DPr=90 (<97)",
+      "ran": true,
+      "liveValue": "kf=1e-5, DPr=90 persisted via real saveWorksheet; evaluateCondition => {kind:'fail'}",
+      "pdfExpected": "same Tab.3 thresholds; a state violating kf<=1e-9 and DPr>=97 must fail",
+      "verdict": "VA",
+      "raw": "PASS (12ms) — real save persisted the violating values; gate fired RED (fail)"
+    },
+    {
+      "name": "REQ-19 attestation gate — attest_fll_gar_10_req_19 == True (pass + fail)",
+      "ran": true,
+      "liveValue": "boolean true => pass; boolean false => fail, both via real saveWorksheet",
+      "pdfExpected": "Sec.6.3; Anhang 3 — Fluessigkunststoff Klassen-Kurzzeichen-System (attestation checkpoint, no numeric threshold)",
+      "verdict": "VC",
+      "raw": "PASS (14ms) — attest true persisted value_boolean=true => gate pass; attest false => gate fail. Attestation-carrier boolean (engineer sign-off), not a source numeric; VC."
+    },
+    {
+      "name": "REQ-21 attestation gate — attest_fll_gar_10_req_21 == True (pass + fail)",
+      "ran": true,
+      "liveValue": "boolean true => pass; boolean false => fail, both via real saveWorksheet",
+      "pdfExpected": "Sec.7.1.3.2 — Stahl Werkstoffwahl V2A/V4A/V5A/CorTen (attestation checkpoint)",
+      "verdict": "VC",
+      "raw": "PASS (12ms) — attest true => pass; attest false => fail. Attestation carrier, VC."
+    },
+    {
+      "name": "Guarded gates (REQ-12..18,20,22) — discriminator missing => PENDING",
+      "ran": true,
+      "liveValue": "evaluateCondition('IF abdichtungs_art == ... THEN ...', no abdichtungs_art) => {kind:'pending'} for all sampled",
+      "pdfExpected": "n/a (structural)",
+      "verdict": "FINDING",
+      "raw": "PASS (0ms) — three sampled guarded conditions all resolve to pending because abdichtungs_art is not a field on this worksheet. See findings[0]."
+    }
+  ],
+  "gates": [
+    { "id": "1b2f1655-af3a-4cf4-a91f-f8d47d8b9827", "code": "REQ-12", "fired": true, "vacuous": false, "note": "Tab.3 constants (15/5/15/1e-9/97) match PDF L1924-1934 VERBATIM (VA). Drove PASS+FAIL through real saveWorksheet with guard satisfied. BUT in the live worksheet the guard symbol abdichtungs_art is absent -> gate is pending unless that discriminator exists. severity=block correct (Tab.3 uses hard '>=/<=' Anforderungen, not 'soll')." },
+    { "id": "696ed9b0-d84b-413f-9937-2b348f440866", "code": "REQ-13", "fired": false, "vacuous": true, "note": "Guarded on abdichtungs_art==mineralisch_mit_zusatzstoffen AND references mz_durchlaessigkeit_kf, mz_dichtungswirkung_nachgewiesen — NONE of these three symbols are fields on FLL-GAR-10. Vacuous/never-fireable here (FIELD_MISSING). Belongs on the 'mit Zusatzstoffen' worksheet." },
+    { "id": "1918d21c-f84e-462e-be7f-dc1c718a7b04", "code": "REQ-14", "fired": false, "vacuous": true, "note": "Guarded on abdichtungs_art==mineralisch_hydraulisch AND references bauteildicke_cm, wasserzementwert, zementgehalt_kg_m3 — none are fields on FLL-GAR-10. Vacuous here. Beton (WU) thresholds w/z<=0.60, Zement>=280 not PDF-checked this run (out of this worksheet's scope)." },
+    { "id": "8a503cd4-178d-4494-b00b-a0f07e1f7ca2", "code": "REQ-15", "fired": false, "vacuous": true, "note": "Guarded on abdichtungs_art==mineralisch_bitumen AND references hohlraumgehalt_asphaltbeton_vol_pct — not a field here. Vacuous." },
+    { "id": "5e2a7232-a69b-437d-b42d-a392ce525c65", "code": "REQ-16", "fired": false, "vacuous": true, "note": "Guarded on verbundwerkstoff_gtd AND references bentonit_type, bentonit_flaecheneinheit_g_m2, quellvermoegen_ml, gtd_ueberlappung_* — none are fields here. Vacuous." },
+    { "id": "30c7b625-9cac-4569-9c72-bf907ce79fde", "code": "REQ-17", "fired": false, "vacuous": true, "note": "Guarded on bahn_bitumen AND references anzahl_lagen — not a field here. Vacuous. severity=warn." },
+    { "id": "a008b8e3-ca77-44e7-b8a9-7e6be12485a2", "code": "REQ-18", "fired": false, "vacuous": true, "note": "Guarded on bahn_kunststoff_elastomer AND references bahnendicke_mm — not a field here. Vacuous. Threshold 1.2mm PDF-confirmed VA (GAR.txt L4088 'Mindestdicke von 1,2 mm'; L4090 '>= 1,0 mm' for prefab)." },
+    { "id": "6dcd17ac-be84-4cca-bf15-bfd536d8d659", "code": "REQ-19", "fired": true, "vacuous": false, "note": "attest_fll_gar_10_req_19 == True — the boolean IS a field on this worksheet. Drove pass(true)+fail(false) through real saveWorksheet. Fireable. Attestation carrier (VC). severity=block." },
+    { "id": "ffb62b93-b294-4bd6-b700-e5887d0662c9", "code": "REQ-20", "fired": false, "vacuous": true, "note": "Guarded on bahn_pe AND references peeh_dichte_g_cm3, peeh_mfr, peeh_russgehalt_pct — none are fields here. Vacuous." },
+    { "id": "89d6a621-208b-4fbe-8650-5d1ad135ed6c", "code": "REQ-21", "fired": true, "vacuous": false, "note": "attest_fll_gar_10_req_21 == True — boolean field present. Drove pass+fail through real saveWorksheet. Fireable. Attestation carrier (VC). severity=block." },
+    { "id": "3e442a48-91d4-403a-9dd2-e44c75eeb78d", "code": "REQ-22", "fired": false, "vacuous": true, "note": "Guarded on alkalisilikat AND references schichtdicke_abdichtung_cm (field present) but also feinkornanteil_063_pct (NOT a field here). Guard symbol abdichtungs_art absent -> vacuous. Thresholds PDF-confirmed VA: L4975 'Dicke ... soll mind. 25 cm', L4957 'Feinkornanteil < 0,063 mm ... mind. 20 Masse-%'. Note PDF says 'soll' (recommendation) -> severity=warn is correct." }
+  ],
+  "findings": [
+    {
+      "id": "F1-DISCRIMINATOR-MISSING",
+      "severity": "high",
+      "title": "9 of 11 gates reference a discriminator field `abdichtungs_art` that does not exist on FLL-GAR-10 -> all 9 are perpetually PENDING (never fire) in the live worksheet",
+      "detail": "REQ-12,13,14,15,16,17,18,20,22 are all shaped `IF abdichtungs_art == <material> THEN ...`. The worksheet's 18 fields do NOT include `abdichtungs_art`. Per evaluate.ts guard semantics, a missing guard symbol makes the whole gate resolve to `pending` (not pass/fail). Confirmed live: evaluateCondition(guard, ()=>undefined) => {kind:'pending'}. Net effect: only the two attestation gates (REQ-19, REQ-21) can ever fire on this worksheet as seeded. This is the CR-006 vacuous-gate class at scale.",
+      "evidence": "test 'FINDING — guarded gates are PENDING' PASS; field list has no abdichtungs_art symbol."
+    },
+    {
+      "id": "F2-CROSS-WORKSHEET-FIELDS",
+      "severity": "high",
+      "title": "Gate conditions reference symbols that are fields of OTHER material worksheets, not FLL-GAR-10",
+      "detail": "mz_durchlaessigkeit_kf, mz_dichtungswirkung_nachgewiesen (REQ-13); bauteildicke_cm, wasserzementwert, zementgehalt_kg_m3 (REQ-14); hohlraumgehalt_asphaltbeton_vol_pct (REQ-15); bentonit_type, bentonit_flaecheneinheit_g_m2, quellvermoegen_ml, gtd_ueberlappung_laengs_cm, gtd_ueberlappung_quer_cm (REQ-16); anzahl_lagen (REQ-17); bahnendicke_mm (REQ-18); peeh_dichte_g_cm3, peeh_mfr, peeh_russgehalt_pct (REQ-20); feinkornanteil_063_pct (REQ-22). NONE of these are fields on FLL-GAR-10. Even if abdichtungs_art existed, these gates would resolve to `pending` on the body (missing consumed symbols). They appear mis-placed: material-specific gates copied onto the 'ohne Zusatzstoffe' worksheet. Only REQ-12 (its own material) is body-computable here.",
+      "evidence": "prod fields query vs prod compliance_requirements query — symbol set disjoint except REQ-12 group + the two attest_ booleans + schichtdicke_abdichtung_cm."
+    },
+    {
+      "id": "F3-BARE-IDENT-RHS-COUPLING",
+      "severity": "medium",
+      "title": "Guard uses bare-identifier RHS (`== mineralisch_ohne_zusatzstoffe`) -> string-literal comparison, silently couples to how abdichtungs_art is stored",
+      "detail": "Per evaluate.ts (operandToLiteral: bare ident RHS -> string literal), the guard compares abdichtungs_art to the STRING 'mineralisch_ohne_zusatzstoffe'. If abdichtungs_art were ever an enum whose stored value differs (e.g. a code or label) the guard would silently never match -> another vacuous path. If it were introduced, its enum_values must contain the exact strings used across all 9 gates.",
+      "evidence": "evaluate.ts L364 operandToLiteral aref->string literal; REQ-12 PASS test required abdichtungs_art='mineralisch_ohne_zusatzstoffe' verbatim to reach pass."
+    }
+  ],
+  "residue": [
+    { "id": "R1", "reason": "REQ-19 (Sec.6.3 / Anhang 3 Fluessigkunststoff Klassen-Kurzzeichen) and REQ-21 (Sec.7.1.3.2 Stahl-Werkstoffwahl) are attestation booleans with no machine-checkable numeric threshold. Fired pass/fail structurally but the underlying source requirement is engineer-attested prose -> VC, not VA. Cannot be numerically source-bound this run." },
+    { "id": "R2", "reason": "REQ-13/14/15/16/20 thresholds (mit-Zusatzstoffen kf, Beton w/z & Zementgehalt & fck, Asphalt Hohlraumgehalt, GTD Bentonit/Quellvermoegen, PEHD Dichte/MFR/Russ) were NOT PDF-verified this run because those gates are out of FLL-GAR-10's material scope (they belong on sibling worksheets). They must be verified on their OWN worksheets, not here." },
+    { "id": "R3", "reason": "No cos_beta/trig-blocked equations on this worksheet (0 equations) -> no engine-math residue." }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "range",
+      "title": "SR-2: REQ-18 Kunststoff-/Elastomerbahn Mindestdicke is a RANGE, not a single value",
+      "detail": "PDF (GAR.txt L4088-4090): standard 'Mindestdicke von 1,2 mm'; BUT 'Bei werkseitig vorkonfektionierten [Gartenteich] ... >= 1,0 mm zulaessig'. The gate hardcodes `bahnendicke_mm >= 1.2`. Do NOT auto-pick: decide whether prefab-Gartenteich exception (>=1,0 mm) must be encoded as an alternative branch. (This gate lives properly on the Bahn-Kunststoff worksheet; flagged here since REQ-18 sits on FLL-GAR-10.)"
+    },
+    {
+      "id": "D2",
+      "type": "staged-migration",
+      "title": "Remove or re-home the 9 material-mismatched gates on FLL-GAR-10 (written-not-applied)",
+      "detail": "Findings F1/F2: REQ-13,14,15,16,17,18,20,22 and the guard of REQ-12 depend on abdichtungs_art + cross-worksheet symbols absent here. STAGED CORRECTION (not applied, read-only prod honored): EITHER (a) introduce an `abdichtungs_art` enum field on FLL-GAR-10 whose enum_values contain the exact 8 material strings used in the guards, so the guards become live discriminators; OR (b) move each material-specific gate to its own material worksheet and keep only REQ-12 + REQ-19/21 here. Requires human decision before any apply pass. No SQL executed."
+    },
+    {
+      "id": "D3",
+      "type": "severity",
+      "title": "Confirm severity of REQ-22 (alkalisilikat 25cm / 20% Feinkorn) — PDF says 'soll'",
+      "detail": "PDF L4975 'soll mind. 25 cm', L4957 'soll mind. 20 Masse-%' = recommendation. Current severity='warn' aligns with 'soll'. No change proposed; logged for the controlled review so it is not silently upgraded to block."
+    }
+  ],
+  "verdictSummary": {
+    "equationsVA": 1, "equationsVC": 0, "equationsFINDING": 0,
+    "chainsRun": 5, "chainsTotal": 5,
+    "gatesFired": 3, "gatesVacuous": 8,
+    "findings": 3, "residue": 3, "decisionItems": 3
+  }
+}

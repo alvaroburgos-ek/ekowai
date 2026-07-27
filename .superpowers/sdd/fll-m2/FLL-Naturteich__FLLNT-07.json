@@ -1,0 +1,134 @@
+{
+  "standard": "FLL-Naturteich (FLL Guidelines for the Planning, Construction and Maintenance of Private Natural Swimming Pools, 2017)",
+  "worksheet": "FLLNT-07 — Bau- & Konstruktionsanforderungen (Building & construction requirements)",
+  "worksheetTemplateId": "bfa6c52f-6594-4b7d-a437-6f9d36934a55",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodCounts": { "fields": 9, "equations": 0, "compliance_requirements": 0 },
+  "note_on_task_id": "The task called bfa6c52f-6594-4b7d-a437-6f9d36934a55 a worksheet_instance id; in prod it is the worksheet_TEMPLATE id for FLLNT-07 (no instance rows exist for this standard on prod — it is attached to no project). Verification proceeded against the template + its fields.",
+  "fields": [
+    {
+      "symbol": "area_separation_method",
+      "data_type": "text",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§9.2 (p.41): 'The area used by swimmers must be kept separate from the regeneration area by at least an inundated barrier. ... For example the separation can be executed by means of earth modelling, wood, natural stone, concrete, dimension stone or synthetic/stainless steel elements.'",
+      "note": "Free-text capture of the §9.2 separation method. Consumed by sibling gate FLLNT-06:REQ-15 (area_separation_method IS NOT EMPTY). PDF-confirmed."
+    },
+    {
+      "symbol": "excavation_depth",
+      "data_type": "number",
+      "unit": "m",
+      "verdict": "VA",
+      "quote": "§9.1 Excavation (p.41): 'The subsoil must be load-bearing otherwise it should be compacted or improved ... The surface of the excavation (bottom and sides) must be constructed in a manner that continuously avoids damage through use of the designated sealing material.'",
+      "note": "§9.1 prescribes NO numeric excavation-depth limit (governed by external DIN 18300/1054/18196/4020/4124 refs), so this is an unconstrained capture field. Unit 'm' is sensible for a dug depth. No standard-attested value to check against; VA that the field is a legitimate §9.1 capture with no source constant to contradict."
+    },
+    {
+      "symbol": "sealing_type",
+      "data_type": "enum",
+      "unit": null,
+      "enumRegulationReference": "§9.3",
+      "verdict": "VA",
+      "quote": "§9.3 Sealing (p.41): 'Natural pools must be durably sealed against the subsoil ... The sealings and protective layers cannot be treated with biocides; consequently, only sealings that allow biofilm to form on the surface are permissible. ... Synthetic and elastomer liners in visible areas: - are to be installed crease-free on level and stable subsoil (e.g. made of concrete) ...'",
+      "note": "Enum options {clay_loam, EPDM, PVC, concrete, other} tagged §9.3. The standard names clay/loam, synthetic/elastomer liners (EPDM/PVC), and concrete subsoil bases; the enum is a reasonable materialization of §9.3 sealing families. No closed source list of exactly these five values is printed verbatim, so the SET membership is VC (author judgement), but each named member is source-attested. Verdict VA at the field level (correct section, correct semantics); see residue for the set-closure caveat."
+    },
+    {
+      "symbol": "edge_design",
+      "data_type": "text",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§9.4 Edge design (p.42): 'The waterside/pool edge must be formed in a manner that ... the edge design is permanently stable and withstands the intended loads; the introduction of surface water into the swimming and regeneration areas is structurally prevented ...'",
+      "note": "Free-text capture of the §9.4 edge design. Consumed by sibling gate FLLNT-06:REQ-17 (edge_design IS NOT EMPTY). PDF-confirmed."
+    },
+    {
+      "symbol": "entry_exit_provision",
+      "data_type": "text",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§9.5.3 Entry and exit points, walkways, diving boards (p.43): 'They must be safe to walk on and have a non-slip finish. ... There must be at least one entry/exit point in the swimming area.'",
+      "note": "Free-text capture of §9.5.3 entry/exit provision. PDF-confirmed."
+    },
+    {
+      "symbol": "freeboard_water_to_seal",
+      "data_type": "number",
+      "unit": "cm",
+      "verdict": "VA",
+      "quote": "§9.4 Edge design (p.42): 'depending on the expected wash of the waves, the water level remains consistently at least 5 cm below the upper edge of the sealing system. This does not apply to technical equipment installed in the pool for water extraction purposes.'",
+      "note": "Field captures the water-level-to-sealing-top distance; §9.4 sets the minimum at 5 cm. Unit 'cm' matches the PDF verbatim. This field FEEDS sibling gate FLLNT-06:REQ-31 (freeboard_water_to_seal >= 5). Constant 5 and unit cm PDF-confirmed."
+    },
+    {
+      "symbol": "edge_height_tolerance_mm",
+      "data_type": "number",
+      "unit": "mm",
+      "verdict": "VA",
+      "quote": "§9.4 Edge design (p.42): 'the ends of the edges can indicate a maximum deviation of the planned nominal height of +/- 10 mm.'",
+      "note": "Field captures the edge nominal-height deviation; §9.4 sets it at +/- 10 mm. Unit 'mm' matches PDF verbatim. FEEDS sibling gate FLLNT-06:REQ-31 (edge_height_tolerance_mm <= 10). Constant 10 and unit mm PDF-confirmed."
+    },
+    {
+      "symbol": "sealing_biocide_free_biofilm_ok",
+      "data_type": "boolean",
+      "unit": null,
+      "verdict": "VA",
+      "quote": "§9.3 Sealing (p.41): 'The sealings and protective layers cannot be treated with biocides; consequently, only sealings that allow biofilm to form on the surface are permissible.'",
+      "note": "Boolean captures the §9.3 biocide-free + biofilm-permissive requirement exactly. FEEDS sibling gate FLLNT-06:REQ-32 (sealing_biocide_free_biofilm_ok == true). PDF-confirmed."
+    },
+    {
+      "symbol": "ground_covering_type",
+      "data_type": "enum",
+      "unit": null,
+      "enumRegulationReference": "§9.5.2",
+      "verdict": "VC",
+      "quote": "§9.5.2 Ground coverings (p.43): 'Ground coverings, including steps on stairs and ladders, must be made safe to walk on and must be slip resistant. ... Only washed material must be used in cases of sand and gravel areas inside the swimming area.'",
+      "note": "Enum options {gravel, sand, mortar, plastic_mat, other} tagged §9.5.2. §9.5.2 explicitly names sand and gravel ('sand and gravel areas') as walkable coverings but does NOT enumerate a closed list — mortar/screed and plastic_mat are NOT named in §9.5.2 (author-inferred coverings). Markdown/PDF gives no closed source list -> VC. Not a FINDING (options are plausible and 'other' is present), but the set closure is unverified; surfaced in residue."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "FLLNT-07 persistence smoke (no equation chain exists on this worksheet)",
+      "ran": true,
+      "liveValue": "freeboard_water_to_seal=5 cm, edge_height_tolerance_mm=10 mm, excavation_depth=1.2 m, sealing_type=EPDM, ground_covering_type=gravel, sealing_biocide_free_biofilm_ok=true, area_separation_method/edge_design/entry_exit_provision text all round-tripped",
+      "pdfExpected": "No worked example printed in the standard for FLLNT-07 (pure capture worksheet); §9.4 constants (freeboard>=5 cm, edge tol +/-10 mm) used as realistic inputs. saveWorksheet persisted every field of every data type.",
+      "verdict": "VC",
+      "raw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n\n Test Files  1 passed (1)\n      Tests  5 passed (5)\n   Start at  19:20:30\n   Duration  5.40s (transform 291ms, setup 0ms, import 1.39s, tests 3.81s, environment 0ms)\n\nCases: exposes FLLNT-07 with 9 fields/0 eq/0 CR; number fields persist; enum fields persist; boolean field persists; text fields persist — all green via REAL saveWorksheet against embedded PG."
+    }
+  ],
+  "gates": [],
+  "findings": [],
+  "residue": [
+    {
+      "id": "R1-no-eq-no-gate",
+      "kind": "no-computable-artifact",
+      "note": "FLLNT-07 has 0 equations and 0 compliance_requirements on prod. It is a pure §9 construction data-capture worksheet whose numeric/boolean fields are CONSUMED by gates on the sibling worksheet FLLNT-06 (REQ-31 freeboard_water_to_seal>=5 AND edge_height_tolerance_mm<=10; REQ-32 sealing_biocide_free_biofilm_ok==true) and by text-presence gates REQ-15/REQ-17. There is therefore no equation chain and no local gate to fire on THIS worksheet; those gates are verified under the FLLNT-06 worksheet task. The only end-to-end assertion available here is the field persistence round-trip (ran green)."
+    },
+    {
+      "id": "R2-sealing_type-set-closure",
+      "kind": "VC-set-closure",
+      "note": "sealing_type enum {clay_loam, EPDM, PVC, concrete, other} (tagged §9.3): each named member is source-attested (§9.3 names clay/loam, synthetic/elastomer liners, concrete subsoil) but the standard prints no closed list of exactly five sealing types, so the SET is author-materialized (VC). 'other' backstops the openness. No fix warranted."
+    },
+    {
+      "id": "R3-ground_covering-set-closure",
+      "kind": "VC-set-closure",
+      "note": "ground_covering_type enum {gravel, sand, mortar, plastic_mat, other} (tagged §9.5.2): §9.5.2 names only sand and gravel explicitly; mortar/screed and plastic_mat are author-inferred, not verbatim in §9.5.2. Set is VC. 'other' present. No fix warranted."
+    },
+    {
+      "id": "R4-crease-tolerance-uncaptured",
+      "kind": "coverage-gap-benign",
+      "note": "§9.3 prints a detailed synthetic/elastomer-liner crease tolerance (creases up to 1.0 cm height and up to 2.0 m length, min 2.0 m spacing, no crossing, 'apply to the natural pool when it is filled'). FLLNT-07 has NO field capturing this crease tolerance and no gate enforces it. This is a coverage gap, not a contradiction — logged as benign residue, not a finding."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1-crease-tolerance-materialization",
+      "type": "coverage / possible-new-field",
+      "quote": "§9.3 (p.41): 'if concrete has not be applied to the subsoil, creases with a height of up to 1.0 cm and a length of up to 2.0 m with a minimum distance of 2.0 m from each other can be tolerated. Creases are not permitted to cross over each other. These specifications apply to the natural pool when it is filled.'",
+      "decision": "Decide whether to add FLLNT-07 field(s) + a gate for the §9.3 liner-crease tolerances (height <=1.0 cm, length <=2.0 m, spacing >=2.0 m, no crossing). Currently uncaptured. STAGED as a written-not-applied consideration; NOT applied to prod.",
+      "range": "Multiple distinct limits (1.0 cm height / 2.0 m length / 2.0 m spacing) — do NOT auto-collapse into one value; each is its own constraint if materialized."
+    },
+    {
+      "id": "D2-freeboard-conditional-exclusion",
+      "type": "gate-scope (belongs to FLLNT-06:REQ-31, surfaced here)",
+      "quote": "§9.4 (p.42): 'the water level remains consistently at least 5 cm below the upper edge of the sealing system. This does not apply to technical equipment installed in the pool for water extraction purposes.'",
+      "decision": "The 5 cm freeboard minimum has a source-stated EXCEPTION (water-extraction technical equipment). Sibling gate FLLNT-06:REQ-31 encodes freeboard_water_to_seal>=5 unconditionally with no exception carve-out. Decision: confirm whether the exception should be modelled (e.g. an N/A flag) or is acceptably out of scope. Surfaced as a decision item for the REQ-31 owner; NOT changed here."
+    }
+  ]
+}

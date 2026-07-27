@@ -1,0 +1,108 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-04 — Wasserqualitäts-Anforderungen",
+  "worksheetTemplateId": "2d834d44-cbfb-462b-9e5a-8d6020b7a905",
+  "prodPull": {
+    "note": "The id in the task (2d834d44-...) is the worksheet_TEMPLATE id, not an instance id. Confirmed via execute_sql against standard c11f0e54-fef3-4552-be7b-f6eb50b468da in prod vadsmshzebefjreqcicl (read-only).",
+    "fieldCount": 20,
+    "equationCount": 0,
+    "complianceRequirementCount": 0
+  },
+  "equations": [],
+  "equationsNote": "FLLNT-04 has ZERO equations in prod (confirmed) and ZERO in the seeder spec. It is a pure water-test data-input worksheet. Nothing to verify for formula shape / constants / output symbol.",
+  "fields": {
+    "count": 20,
+    "prodVsSeeder": "MATCH — all 20 prod field symbols (water_source + 11 water_test_* + 9 swimming_test_*) are present in the seeder FLLNT-04 spec with identical data_type and unit.",
+    "unitVerificationVsPDF": [
+      {"symbol": "water_test_ammonium", "unit": "mg/l", "pdf": "Table 7 No.1 Ammonium ≤ 0.5 mg/l", "verdict": "VA"},
+      {"symbol": "water_test_iron", "unit": "mg/l", "pdf": "Table 7 No.2 Iron ≤ 0.2 mg/l", "verdict": "VA"},
+      {"symbol": "water_test_p_total", "unit": "mg/l", "pdf": "Table 7 No.3 Total phosphorus [Ptotal] ≤ 0.03 mg/l", "verdict": "VA"},
+      {"symbol": "water_test_hardness", "unit": "mmol/l", "pdf": "Table 7 No.4 Hardness (total alkaline earth) ≥ 1.0 mmol/l (Corresponds to total hardness ≥ 5.6 dH°)", "verdict": "VA"},
+      {"symbol": "water_test_conductivity", "unit": "µS/cm", "pdf": "Table 7 No.5 Conductivity ≤ 1000 µS/cm at 20°C", "verdict": "VA"},
+      {"symbol": "water_test_manganese", "unit": "mg/l", "pdf": "Table 7 No.6 Manganese ≤ 0.05 mg/l", "verdict": "VA"},
+      {"symbol": "water_test_nitrate", "unit": "mg/l", "pdf": "Table 7 No.7 Nitrate ≤ 50.0 mg/l", "verdict": "VA"},
+      {"symbol": "water_test_orthophosphate", "unit": "mg/l", "pdf": "Table 7 No.8 Orthophosphate (indicated as P) ≤ 0.01 mg/l", "verdict": "VA"},
+      {"symbol": "water_test_ph", "unit": "-", "pdf": "Table 7 No.9 pH value 6.0 – 9.0", "verdict": "VA", "range": true},
+      {"symbol": "water_test_acid_capacity_ks43", "unit": "mmol/l", "pdf": "Table 7 No.10 Acid capacity KS 4.3 ≥ 2 mmol/l (Corresponds to carbon hardness ≥ 5.6 dH°)", "verdict": "VA"},
+      {"symbol": "swimming_test_ammonium", "unit": "mg/l", "pdf": "Table 8 No.1 Ammonium ≤ 0.3 mg/l", "verdict": "VA"},
+      {"symbol": "swimming_test_p_total", "unit": "mg/l", "pdf": "Table 8 No.2 Total phosphorus [Ptotal] ≤ 0.03 mg/l (type I-III) / ≤ 0.01 mg/l (type IV, V)", "verdict": "VA", "range": true},
+      {"symbol": "swimming_test_hardness", "unit": "mmol/l", "pdf": "Table 8 No.3 Hardness (total alkaline earth) ≥ 1.0 mmol/l", "verdict": "VA"},
+      {"symbol": "swimming_test_conductivity", "unit": "µS/cm", "pdf": "Table 8 No.4 Conductivity ≤ 1000 µS/cm at 20°C", "verdict": "VA"},
+      {"symbol": "swimming_test_nitrate", "unit": "mg/l", "pdf": "Table 8 No.5 Nitrate ≤ 30.0 mg/l", "verdict": "VA"},
+      {"symbol": "swimming_test_nitrite", "unit": "mg/l", "pdf": "Table 8 No.6 Nitrite ≤ 0.01 mg/l", "verdict": "VA"},
+      {"symbol": "swimming_test_orthophosphate", "unit": "mg/l", "pdf": "Table 8 No.7 Orthophosphate (indicated as P) ≤ 0.03 mg/l (type I-III) / ≤ 0.01 mg/l (type IV, V)", "verdict": "VA", "range": true},
+      {"symbol": "swimming_test_ph", "unit": "-", "pdf": "Table 8 No.8 pH value 7.0 – 9.0", "verdict": "VA", "range": true},
+      {"symbol": "swimming_test_acid_capacity_ks43", "unit": "mmol/l", "pdf": "Table 8 No.9 Acid capacity KS 4.3 ≥ 2 mmol/l (Corresponds to carbon hardness ≥ 5.6 dH°)", "verdict": "VA"},
+      {"symbol": "water_source", "unit": null, "pdf": "§7.1.1 'Tap water, well water and rainwater are all potentially suitable as fill-up water.' Enum tap_water/well_water/rainwater carries regulation_reference §7.1.1 in prod.", "verdict": "VA"}
+    ]
+  },
+  "chains": [
+    {
+      "name": "FLLNT-04 has no computable chain",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "N/A",
+      "raw": "FLLNT-04 carries 0 equations in prod and 0 in the seeder. There is no derived output on this worksheet, so there is no saveWorksheet-driven chain to fire. The threshold-consuming logic lives on FLLNT-03 gates REQ-09 (Tab.7 fill-up) and REQ-10 (Tab.8 swimming) which read these FLLNT-04 fields; those chains belong to the FLLNT-03 worksheet audit, not this one. Seeder smoke test green (5/5, 4.22s) confirms the standard seeds and this worksheet's fields/params materialize."
+    }
+  ],
+  "gates": [],
+  "gatesNote": "FLLNT-04 has ZERO compliance_requirements in prod (confirmed) and ZERO in the seeder. No local gate to fire, none vacuous. The Tab.7/Tab.8 thresholds these fields feed are enforced by REQ-09 and REQ-10 which are attached to FLLNT-03 (cross-worksheet gate placement). Correctness of those two gate conditions was cross-checked against the PDF here as a courtesy and both encode the source thresholds correctly (see decisionItems for the two ranges).",
+  "findings": [
+    {
+      "id": "F-NT04-1",
+      "severity": "info",
+      "title": "Water-quality thresholds are enforced on a DIFFERENT worksheet than where the fields live",
+      "detail": "All 20 water/swimming test fields live on FLLNT-04, but the two block-severity gates that enforce their Tab.7/Tab.8 limits (REQ-09, REQ-10) are attached to FLLNT-03. This is a legitimate encoding choice (single decision worksheet), not a defect — recorded so the FLLNT-03 audit does not double-count and so no one 'fixes' FLLNT-04 by adding redundant gates. No prod change proposed."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-NT04-1",
+      "reason": "No computable chain on FLLNT-04 (0 equations). Nothing to run through saveWorksheet for this worksheet; the value-carrying assertions are the field/unit VA checks above, all PDF-confirmed."
+    },
+    {
+      "id": "R-NT04-2",
+      "reason": "PDF is the English 2017 translation ('guidelines_for_the_planning_construction_and_maintenance_of_private_natural_swimming_pools_2017'). Field labels in prod are German; unit and threshold verification is language-independent and PDF-confirmed. No German-source PDF available this run."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-NT04-1",
+      "type": "range",
+      "field": "water_test_ph",
+      "range": "6.0 – 9.0",
+      "quote": "Table 7 No.9 'pH value  6.0 – 9.0'",
+      "note": "SR-2: source gives a RANGE, not a single limit. REQ-09 (on FLLNT-03) encodes it as two bounds (water_test_ph >= 6.0 AND water_test_ph <= 9.0), which matches. Surfaced as a decision item, not auto-picked."
+    },
+    {
+      "id": "D-NT04-2",
+      "type": "range",
+      "field": "swimming_test_ph",
+      "range": "7.0 – 9.0",
+      "quote": "Table 8 No.8 'pH value  7.0 – 9.0'",
+      "note": "SR-2: RANGE. REQ-10 (on FLLNT-03) encodes swimming_test_ph >= 7.0 AND <= 9.0, matches. Note the LOWER bound differs from Tab.7 (7.0 vs 6.0) — confirm the two are not conflated when auditing FLLNT-03."
+    },
+    {
+      "id": "D-NT04-3",
+      "type": "type-conditional-threshold",
+      "field": "swimming_test_p_total / swimming_test_orthophosphate",
+      "range": "≤ 0.03 mg/l (type I-III) vs ≤ 0.01 mg/l (type IV, V)",
+      "quote": "Table 8 No.2 'Total phosphorus [Ptotal]  ≤ 0.03 mg/l (type I-III) / ≤ 0.01 mg/l (type IV, V)'; No.7 'Orthophosphate (indicated as P)  ≤ 0.03 mg/l (type I-III) / ≤ 0.01 mg/l (type IV, V)'",
+      "note": "SR-2: threshold is type-conditional. REQ-10 (FLLNT-03) splits it correctly with an IF natural_pool_type IN {I,II,III} branch (≤0.03) and IF IN {IV,V} branch (≤0.01). Surfaced so a single-point encoding is never substituted."
+    }
+  ],
+  "verdictSummary": {
+    "equationsVA": 0,
+    "equationsVC": 0,
+    "equationsFinding": 0,
+    "fieldsVA": 20,
+    "fieldsVC": 0,
+    "chainsRun": 0,
+    "chainsTotal": 0,
+    "gatesFired": 0,
+    "gatesVacuous": 0,
+    "checksPassed": 20,
+    "seederSmoke": "green 5/5 4.22s"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-03",
+  "worksheetTitle": "Baurechtliche Anforderungen",
+  "templateId": "25c51316-c35c-4975-95a8-ea80c215cc3e",
+  "note": "The task-supplied 'instanceId 25c51316-...' is in fact the worksheet_template_id in prod; no worksheet_instance with that id exists (instances are seeder-generated). Verified against prod standard b252ce89-6efc-4081-9684-8560b72651ed.",
+  "prodInventory": { "equations": 0, "gates": 0, "fields": 2 },
+  "equations": [],
+  "fields": [
+    {
+      "id": "e255a354-98db-4f44-8399-3449333f0019",
+      "symbol": "lbo_genehmigung_erforderlich",
+      "data_type": "boolean",
+      "clause_reference_db": "Sec.4.2",
+      "verdict": "FINDING",
+      "quote": "Erfordernis von Genehmigungsverfahren (z. B. baurechtliche Genehmigungen gemäß LBO, Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG)",
+      "quoteAnchor": "GAR.txt line 1333-1334, under Sec.4.1 'Allgemeines' (Nutzungs-Aspektliste)",
+      "note": "Concept (LBO building-law permit requirement) is PDF-attested → VA on concept. BUT clause_reference 'Sec.4.2' is imprecise: the literal acronym 'LBO' appears only in the Sec.4.1 Nutzungs-list (line 1333-1334). Sec.4.2 'Baurechtliche Anforderungen' (line 1359+) discusses 'bauaufsichtliche Anforderungen / Bauordnung / Genehmigungsverfahren der Länder und Kommunen' generically and never uses the acronym 'LBO'. source_quote is NULL in prod (SR-1 provenance gap)."
+    },
+    {
+      "id": "c530e24c-27d8-46e8-8621-d5f1cc980472",
+      "symbol": "whg_einleitung_genehmigung",
+      "data_type": "boolean",
+      "clause_reference_db": "Sec.4.2",
+      "verdict": "FINDING",
+      "quote": "Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG",
+      "quoteAnchor": "GAR.txt line 1334, under Sec.4.1 'Allgemeines' (Nutzungs-Aspektliste)",
+      "note": "Concept (WHG discharge permit) is PDF-attested → VA on concept. Same clause-misreference as LBO: the acronym 'WHG' occurs at line 1334 (Sec.4.1). Sec.4.2 refers only to 'wasserwirtschaftliche Gesetze des Bundes und der Länder für ... eine kontrollierte Entwässerung des Überschusswassers' (line 1375-1376) without the 'WHG' acronym. source_quote is NULL in prod (SR-1 provenance gap)."
+    }
+  ],
+  "chains": [
+    {
+      "name": "saveWorksheet persistence round-trip (TRUE/TRUE — both permits required)",
+      "ran": true,
+      "liveValue": { "lbo_genehmigung_erforderlich": true, "whg_einleitung_genehmigung": true },
+      "pdfExpected": "n/a — no worked example; data-collection worksheet, no equation. Sanity: both booleans persist as entered.",
+      "verdict": "VC",
+      "raw": "PASS — persists TRUE/TRUE (both permits required) through the REAL save path 442ms; readBool(lbo)=true, readBool(whg)=true"
+    },
+    {
+      "name": "saveWorksheet persistence round-trip (FALSE/FALSE — no permits)",
+      "ran": true,
+      "liveValue": { "lbo_genehmigung_erforderlich": false, "whg_einleitung_genehmigung": false },
+      "pdfExpected": "n/a — no worked example. Sanity: both booleans persist as entered.",
+      "verdict": "VC",
+      "raw": "PASS — persists FALSE/FALSE (no permits) through the REAL save path 15ms; readBool(lbo)=false, readBool(whg)=false"
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F-GAR03-1",
+      "severity": "low",
+      "type": "clause-misreference / provenance",
+      "field": "lbo_genehmigung_erforderlich",
+      "detail": "clause_reference='Sec.4.2' but the literal 'LBO' basis is in Sec.4.1 (line 1333-1334). Sec.4.2 never uses 'LBO'. Recommend clause_reference 'Sec.4.1' (or 'Sec.4.1/4.2') and populate source_quote verbatim. STAGED as decision item — not applied.",
+      "staged": true
+    },
+    {
+      "id": "F-GAR03-2",
+      "severity": "low",
+      "type": "clause-misreference / provenance",
+      "field": "whg_einleitung_genehmigung",
+      "detail": "clause_reference='Sec.4.2' but the literal 'WHG' basis is in Sec.4.1 (line 1334). Sec.4.2 speaks only of 'wasserwirtschaftliche Gesetze des Bundes und der Länder' (line 1375-1376) without the acronym. Recommend clause_reference correction + source_quote population. STAGED as decision item — not applied.",
+      "staged": true
+    },
+    {
+      "id": "F-GAR03-3",
+      "severity": "info",
+      "type": "verification-status",
+      "detail": "Both fields remain verification_status='imported_unverified' with source_quote NULL. Concepts are PDF-confirmed; ready to be advanced to verified once source_quote is backfilled. STAGED."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-GAR03-1",
+      "type": "no-equation-chain",
+      "detail": "0 equations on FLL-GAR-03 → no computable formula chain to drive. Not a defect: FLL-GAR-03 is a pure data-collection worksheet (building-law permit flags). Only drivable 'chain' = saveWorksheet persistence, which was run (see chains, both PASS)."
+    },
+    {
+      "id": "R-GAR03-2",
+      "type": "no-gate",
+      "detail": "0 compliance_requirements on FLL-GAR-03 → nothing to fire/evaluate. Whether these two permit booleans SHOULD gate downstream consumers (consumer_worksheets = FLL-GAR-09, FLL-GAR-26) is a design question outside this worksheet's scope."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-GAR03-1",
+      "type": "staged-correction (written-not-applied)",
+      "detail": "Correct clause_reference for both fields from 'Sec.4.2' to the acronym-bearing source 'Sec.4.1' (LBO/WHG appear in the Sec.4.1 Nutzungs-Aspektliste, line 1333-1334). Optionally 'Sec.4.1/4.2' to retain the 'Baurechtliche Anforderungen' heading link.",
+      "proposedSql": "UPDATE fields SET clause_reference='Sec.4.1' WHERE id IN ('e255a354-98db-4f44-8399-3449333f0019','c530e24c-27d8-46e8-8621-d5f1cc980472'); -- NOT APPLIED, read-only run"
+    },
+    {
+      "id": "D-GAR03-2",
+      "type": "staged-provenance-backfill (written-not-applied)",
+      "detail": "Backfill source_quote for both fields with the verbatim GAR.txt line 1333-1334 quote so SR-1 provenance is attached and the fields can be moved off 'imported_unverified'.",
+      "proposedSql": "UPDATE fields SET source_quote='Erfordernis von Genehmigungsverfahren (z. B. baurechtliche Genehmigungen gemäß LBO, Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG)' WHERE id IN ('e255a354-98db-4f44-8399-3449333f0019','c530e24c-27d8-46e8-8621-d5f1cc980472'); -- NOT APPLIED, read-only run"
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Verbatim quote (GAR.txt line 1333-1334) attached to both field claims. prod source_quote is NULL → flagged as provenance gap (decision item D-GAR03-2).",
+    "SR-2": "No range present on this worksheet (two booleans) → no auto-pick concern.",
+    "SR-3": "Verified against GAR.txt (pdftotext -layout extraction of the rendered PDF). No PDF-vs-markdown disagreement encountered; text-only search sufficed. VA on concept, VC on the persistence sanity-check (no worked example to attest a value against).",
+    "cos_beta": "n/a — no trig/cos_beta equations on this worksheet."
+  }
+}

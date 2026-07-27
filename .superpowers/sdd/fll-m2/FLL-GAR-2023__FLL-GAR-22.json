@@ -1,0 +1,170 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-22",
+  "worksheetTitle": "Schutzlagen und Schutzschichten",
+  "templateId": "969d527d-be79-4f80-9c19-d45a5cdf5e53",
+  "prodProject": "vadsmshzebefjreqcicl",
+  "standardId": "b252ce89-6efc-4081-9684-8560b72651ed",
+  "verifiedRun": "2026-07-23",
+  "counts": { "equations": 3, "compliance": 4, "fields": 20 },
+  "equations": [
+    {
+      "id": "430d62b2-a4b5-4bfb-afd2-bc7f8bd03d6f",
+      "number": "2a",
+      "formula": "g_prime = gamma_D_prime * d_D",
+      "output": "g_prime",
+      "verdict": "VA",
+      "quote": "Anhang 2 (GAR.txt L6519-6524, L6547): \"Das erforderliche Flächengewicht g' der Deckschicht ... ergibt sich aus: g'=ˠ 'D dD\" ; \"ˠ 'D  Wichte der Auflast unter Auftrieb [kN/m³ ]\" ; \"dD  Dicke der Auflast [m]\"",
+      "note": "Formula shape g' = gamma_D_prime * d_D is PDF-confirmed (product of surcharge unit weight and surcharge thickness). PDF-attested. NOTE: the ENCODED field LABELS mislabel the operands as Dichtung/Dichtungsschicht rather than Auflast (see F-01). The equation math is correct; the label provenance is not."
+    },
+    {
+      "id": "c7dc584b-0f65-476d-935a-d5306d885a65",
+      "number": "2b",
+      "formula": "g_prime >= (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)",
+      "output": "g_prime",
+      "verdict": "FINDING",
+      "quote": "Anhang 2 (GAR.txt L6524-6527): \"g'=ˠ 'D  dD ≥ ∆u x ˠ A  - (ˠ 'F x dF + ˠ 'Di x dDi) / cos ß\" ; (L6545) \"ˠA  Sicherheit gegen Auftrieb [-], ˠ A = 1,00\"",
+      "note": "Formula RHS is PDF-shape-correct. TWO issues: (1) it is an INEQUALITY (g' >= ...) encoded with output_symbol=g_prime — an inequality-as-producer that would collide with the true producer 2a; ALREADY MITIGATED: registered displayOnly in src/lib/eval/equation-profiles.ts (c7dc584b, displayOnly:true) and guarded by test fll-gar-22-2b-displayonly.test.tsx, so the collision guard does not blank 2a's g_prime. (2) cos(beta) is UNSUPPORTED by the arithmetic engine (only min/max implemented, src/lib/eval/arithmetic.ts) => trig-blocked RESIDUE, do NOT fix engine. Live evaluateFormula returns kind != 'computed' (verified in chain 2b). gamma_A carried as an input symbol; PDF fixes gamma_A = 1,00 (surface as decision item)."
+    },
+    {
+      "id": "38e580ef-1f6a-4ab2-b7e6-9154efbce529",
+      "number": "2c",
+      "formula": "Delta_u = (Delta_h_W + z_a) * gamma_w",
+      "output": "Delta_u",
+      "verdict": "VA",
+      "quote": "Anhang 2 (GAR.txt L6529-6531): \"mit der Gleichung: ∆u=(∆hW + za) ˠw\" ; (L6538) \"∆u  Porenwasserüberdruck unter der Dichtung [kN/m²]\" ; (L6542) \"∆hW  Höhenunterschied [m] zwischen Grundwasserspiegel und Ruhewasserspiegel\"",
+      "note": "Formula shape Delta_u = (Delta_h_W + z_a) * gamma_w is PDF-confirmed exactly. PDF-attested. Caveat: PDF misprints z_a unit as [kN/m²] (L6539 \"za  maximaler schneller Wasserspiegelabsunk [kN/m²]\") where it must be [m] for dimensional consistency — a SOURCE-side typo (see F-03); the ENCODED z_a unit is [m] which is dimensionally correct."
+    }
+  ],
+  "chains": [
+    {
+      "name": "2c Delta_u=(Delta_h_W+z_a)*gamma_w",
+      "ran": true,
+      "inputs": "Delta_h_W=0.5 m, z_a=0.3 m, gamma_w=10 kN/m^3 (illustrative; NO PDF worked example for Anhang 2)",
+      "liveValue": 8.0,
+      "pdfExpected": "no worked example in standard",
+      "verdict": "VC",
+      "raw": "evaluateFormula -> kind='computed' value=8.0 ; saveWorksheet res.ok=true ; persistedNum(Delta_u)=8.0 (toBeCloseTo 8.0, 6). Test PASS."
+    },
+    {
+      "name": "2a g_prime=gamma_D_prime*d_D",
+      "ran": true,
+      "inputs": "gamma_D_prime=11 kN/m^3, d_D=0.30 m (illustrative; NO PDF worked example)",
+      "liveValue": 3.3,
+      "pdfExpected": "no worked example in standard",
+      "verdict": "VC",
+      "raw": "evaluateFormula -> kind='computed' value=3.3 ; saveWorksheet res.ok=true ; persistedNum(g_prime)=3.3 (toBeCloseTo 3.3, 6). Test PASS."
+    },
+    {
+      "name": "2b g_prime>=.../cos(beta)",
+      "ran": true,
+      "inputs": "Delta_u=8.0, gamma_A=1.0, gamma_F_prime=6, d_F=0.01, gamma_Di_prime=8, d_Di=0.05, beta=20°",
+      "liveValue": null,
+      "pdfExpected": "inequality check, not a producer",
+      "verdict": "RESIDUE",
+      "raw": "evaluateFormula -> state.kind != 'computed' (arithmetic engine has no cos(); only min/max). Asserted NOT computed. Test PASS. Trig-blocked per doctrine — engine NOT fixed."
+    }
+  ],
+  "gates": [
+    {
+      "id": "a2bc041d-85f1-4646-8b39-6541e5f80cc0",
+      "code": "REQ-25",
+      "severity": "block",
+      "condition": "attest_fll_gar_22_req_25 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "FIREABLE. Attestation boolean field attest_fll_gar_22_req_25 EXISTS on this worksheet. evaluateCondition -> pass when true, fail when false (both exercised, test PASS). Backs Sec.10.4/Tab.29 root-/rhizome screening (GAR.txt L1403-1405 Phragmites australis; L6150,L6168 Tab.29). VA source; gate mechanism valid."
+    },
+    {
+      "id": "ab65828e-1b3d-4ff2-956b-f0207558c101",
+      "code": "REQ-23",
+      "severity": "warn",
+      "condition": "freibord_zu_gelaende_cm >= 5 AND freibord_zu_bauwerk_cm >= 30",
+      "fired": false,
+      "vacuous": true,
+      "note": "DEAD/PENDING: both referenced symbols (freibord_zu_gelaende_cm, freibord_zu_bauwerk_cm) are ABSENT from this worksheet's 20 fields, so the gate can never resolve pass/fail with worksheet-local values (resolves pending/manual, verified). Constants themselves ARE PDF-confirmed VA (GAR.txt L1635 '>= 5 cm', L1644-1647 '30 cm ... auf >= 15 cm möglich'). See F-02. The >=15cm reduced-fastening alternative is NOT captured (SR-2 -> decision item)."
+    },
+    {
+      "id": "e05d1ef3-9a2c-4bdd-b701-55cfbd37039f",
+      "code": "REQ-24",
+      "severity": "warn",
+      "condition": "Engineer-judged adequacy of protective layers",
+      "fired": false,
+      "vacuous": true,
+      "note": "NON-ENFORCING: prose condition -> evaluateCondition returns 'manual' (verified). Never machine-fires. Underlying requirement is real & PDF-attested (Sec.8, Tab.26/27; GAR.txt L5389 Tab.26 'in Abhängigkeit von der Baugrundbelastung', L5452 Tab.27) but encoded as a non-parseable engineer-judgement string. CR-006-class vacuous gate. See F-04."
+    },
+    {
+      "id": "6b839233-a3cd-4f04-ab8a-81b785babdd5",
+      "code": "REQ-11",
+      "severity": "warn",
+      "condition": "If required and abdichtung not inherently resistant: separate Wurzelschutzbahn",
+      "fired": false,
+      "vacuous": true,
+      "note": "NON-ENFORCING: prose condition -> 'manual' (verified). Requirement PDF-attested (Sec.4.7; GAR.txt L1611-1613 'Bei nicht wurzelfesten Abdichtungen ... Einbau einer FLL-geprüften Wurzelschutzbahn'). Encoded as prose; never machine-fires. CR-006-class."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "medium",
+      "type": "label-provenance-mismatch (PDF wins, SR-3)",
+      "detail": "Field LABELS for the Anhang-2 symbols contradict the PDF's own symbol legend. Encoded: d_D label='Dichtungsdicke d_D', gamma_D_prime label='Auftrieb-Wichte Dichtung γ_D', g_prime label='Effektives Eigengewicht Dichtungsschicht', d_Di label='Drainschicht-Dicke d_Di', gamma_Di_prime label='Drainschicht-Wichte γ_Di'. PDF Anhang 2 (GAR.txt L6534-6549) defines: dD='Dicke der AUFLAST', gamma_D_prime='Wichte der AUFLAST unter Auftrieb', g'='Flächengewicht der AUFLAST', dDi='Dicke der DICHTUNGSSCHICHT', gamma_Di_prime='Wichte des DICHTUNGSMATERIALS', dF='Dicke des Filters'. The encoding systematically swapped Auflast<->Dichtung in the human-readable labels. The FORMULAS (2a,2c) remain math-correct; only the labels mis-describe the physical layer. Staged as a written-not-applied correction (labels only, no formula change).",
+      "quote": "GAR.txt L6534 'dD  Dicke der Auflast [m]'; L6535 'dDi  Dicke der Dichtungsschicht [m]'; L6547 'ˠ 'D  Wichte der Auflast unter Auftrieb'; L6549 'ˠ 'Di  Wichte des Dichtungsmaterials unter Auftrieb'; L6537 'g'  Flächengewicht der Auflast [kN/m² ]'"
+    },
+    {
+      "id": "F-02",
+      "severity": "medium",
+      "type": "dead-gate (missing-field reference)",
+      "detail": "REQ-23 condition references freibord_zu_gelaende_cm and freibord_zu_bauwerk_cm, neither of which is a field on FLL-GAR-22 (20-field set has no freibord* symbols). Gate can never fire with worksheet-local values. Either the fields must be added, or the requirement belongs on a Randausbildung worksheet, not GAR-22 (Schutzlagen). Constants are VA-correct; the wiring is dead."
+    },
+    {
+      "id": "F-03",
+      "severity": "low",
+      "type": "source-typo (SR-3, PDF-side)",
+      "detail": "PDF misprints z_a unit as [kN/m²] (GAR.txt L6539) where dimensional consistency of Delta_u=(Delta_h_W+z_a)*gamma_w requires z_a in [m]. The ENCODING correctly uses z_a [m]. Logged as a PDF/source defect, not an encoding defect — encoding is right, PDF is wrong."
+    },
+    {
+      "id": "F-04",
+      "severity": "low",
+      "type": "vacuous-gate (CR-006 class)",
+      "detail": "REQ-24 ('Engineer-judged adequacy of protective layers') and REQ-11 ('If required and abdichtung not inherently resistant: separate Wurzelschutzbahn') are prose conditions that resolve 'manual' and never machine-fire. Requirements are real & PDF-attested but non-enforcing as encoded. This is the primary safeguard content of a 'Schutzlagen' worksheet, so its two protective-layer/root-protection warns being non-enforcing is a coverage gap (severity warn, not block, so lower risk)."
+    },
+    {
+      "id": "F-05",
+      "severity": "low",
+      "type": "inequality-as-producer (mitigated)",
+      "detail": "Eq 2b is an inequality registered with output_symbol=g_prime (multi-producer collision candidate with 2a). Already neutralized via equation-profiles displayOnly:true (c7dc584b) + guard test. Recorded for the pattern library; no action needed beyond confirming displayOnly stays."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-01",
+      "item": "Eq 2b g_prime>= .../cos(beta) is uncomputable: arithmetic engine (src/lib/eval/arithmetic.ts) implements only min/max, no cos/sin/tan. Trig-blocked per doctrine — engine NOT fixed. The Mindestauflast check against uplift cannot be auto-evaluated; remains an engineer-manual check.",
+      "grade": "residue-by-doctrine"
+    },
+    {
+      "id": "R-02",
+      "item": "No PDF worked example exists for Anhang 2 (the whole Flächengewichtsberechnung is informative with symbol legend only). Chains 2a and 2c were driven with illustrative inputs and sanity-checked (VC), not asserted against a printed standard result.",
+      "grade": "VC"
+    },
+    {
+      "id": "R-03",
+      "item": "Anhang 2 is labelled '(informativ)' in the standard (GAR.txt L318, L6476, L6514). All three equations inherit informative status — non-normative per the FLL publication systematics (L6653-6654). Flag for consumers.",
+      "grade": "VC"
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D-01",
+      "item": "REQ-23 Randausbildung Mindestüberhöhung has a RANGE/alternative not captured: building/Bauteil default >= 30 cm, but PDF (GAR.txt L1644-1647) allows reduction to >= 15 cm 'durch Verwendung angepasster Randbefestigungen'. The encoded condition hardcodes 30 and drops the 15cm-with-adapted-fastening branch. SR-2: do not auto-pick — surface both thresholds; decide whether the gate should accept >=15 when adapted fastening is attested."
+    },
+    {
+      "id": "D-02",
+      "item": "gamma_A: PDF fixes 'Sicherheit gegen Auftrieb [-], ˠA = 1,00' (GAR.txt L6545). It is currently an open input symbol on Eq 2b (engineer-entered). Decide: hard-code gamma_A=1.00 as an equation constant vs keep as an input defaulting to 1.00. (2b is displayOnly/trig-blocked so low urgency.)"
+    },
+    {
+      "id": "D-03",
+      "item": "STAGED CORRECTION (written-not-applied): fix the F-01 field labels so Auflast/Dichtung/Filter/Drainage descriptions match the PDF Anhang-2 legend (labels only; formulas untouched). Batch into the single controlled apply pass. Also decide F-02 disposition: add freibord_* fields to GAR-22 or relocate REQ-23 to a Randausbildung worksheet."
+    }
+  ]
+}

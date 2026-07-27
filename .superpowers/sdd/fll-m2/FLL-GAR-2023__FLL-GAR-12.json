@@ -1,0 +1,185 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-12",
+  "worksheetTitle_de": "Mineralisch mit hydraulischen Bindemitteln (Beton)",
+  "templateId": "225d4b67-be67-4741-b906-c76faa6fdbd7",
+  "prodTopology": { "fields": 8, "equations": 0, "compliance_requirements": 0 },
+  "pdfSource": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\GAR.txt (rendered FLL Gewässerabdichtungsrichtlinien 2023, Tab.6/7/8, §5.3)",
+  "fields": [
+    {
+      "symbol": "wassereindringtiefe_geprueft",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "clause_reference": "Sec.5.3.1; Tab.6",
+      "validation_rules_prod": "true/false; DIN EN 12390-8",
+      "quote": "GAR.txt L2851-2852: \"Ein Nachweis des Wassereindringwiderstands des Betons ist nur durch eine Prüfung an Probekörpern nach DIN EN 12390-8 möglich.\" + L789: \"DIN EN 12390-8   Prüfung von Festbeton – Teil 8: Wassereindringtiefe unter Druck.\"",
+      "note": "Boolean flag correctly bound to the DIN EN 12390-8 water-penetration proof. PDF-confirmed."
+    },
+    {
+      "symbol": "wasserzementwert",
+      "data_type": "number",
+      "verdict": "VA",
+      "clause_reference": "Tab.6",
+      "validation_rules_prod": "<= 0,60 (d <= 40 cm) or <= 0,70 (d > 40 cm)",
+      "quote": "GAR.txt L2484: \"2  ≤ 40  Wasserzementwert  w/z  ≤ 0,60\"; L2489: \"5  > 40  Wasserzementwert  w/z  ≤ 0,70\" (Tab.6 Anforderungen an Beton mit hohem Wassereindringwiderstand)",
+      "note": "Both thresholds (0,60 for d≤40; 0,70 for d>40) verbatim in Tab.6. Symbol w/z verbatim. PDF-confirmed."
+    },
+    {
+      "symbol": "zementgehalt_kg_m3",
+      "data_type": "number",
+      "unit": "kg/m3",
+      "verdict": "VA",
+      "clause_reference": "Tab.6",
+      "validation_rules_prod": ">= 280 (d <= 40 cm)",
+      "quote": "GAR.txt L2486: \"3  ≤ 40  Zementgehalt 3  Z  ≥ 280 kg/m³\"",
+      "note": "Value 280 kg/m³, symbol Z, d≤40 scope all verbatim in Tab.6 Z.3. PDF-confirmed. See FINDING F1: Tab.6 gives NO Zementgehalt row for d>40, so the '(d <= 40 cm)' scope is faithful — but Tab.6 offers no >40 substitute, a genuine gap in the standard, not the encoding."
+    },
+    {
+      "symbol": "druckfestigkeit_fck",
+      "data_type": "text",
+      "verdict": "VA",
+      "clause_reference": "Tab.6",
+      "validation_rules_prod": ">= C25/30 (d <= 40 cm)",
+      "quote": "GAR.txt L2488: \"4  ≤ 40  Druckfestigkeit 4  fck  ≥ C25/30\" (Fußnote 4 L2497: \"Charakteristische Druckfestigkeit ... 28 Tagen\")",
+      "note": "Value C25/30, symbol fck, d≤40 scope verbatim in Tab.6 Z.4. PDF-confirmed. SEE decisionItem D1: Tab.7 raises fck to C35/45 for the Sole-/Meerwasser and Pflanzenkläranlagen application cases — an application-dependent minimum this text field cannot express."
+    },
+    {
+      "symbol": "bauteildicke_cm",
+      "data_type": "number",
+      "unit": "cm",
+      "verdict": "VA",
+      "clause_reference": "Sec.5.3.1; Tab.6; Tab.8",
+      "validation_rules_prod": "any positive",
+      "quote": "GAR.txt L2483-2489 (Tab.6 column 'Bauteildicke d in cm', rows ≤40/>40) + L2605 (Tab.8 'Bauteildicke d in mm bei Ausführungsart', values ≥240/≥250/≥200)",
+      "note": "The discriminator that selects Tab.6 (>40 vs ≤40) w/z threshold and the Tab.8 minimum thickness. NB: Tab.6 uses cm, Tab.8 uses mm — the field unit is cm; a consumer must convert (see FINDING F2: unit-mismatch trap when comparing this cm field against Tab.8 mm minimums)."
+    },
+    {
+      "symbol": "bauteil_type",
+      "data_type": "enum",
+      "verdict": "VA",
+      "clause_reference": "Tab.8",
+      "enum_prod": ["waende", "bodenplatte"],
+      "quote": "GAR.txt L2611: \"3  Wände  ≥ 240  ≥ 240 1  ≥ 200  ≥ 240 2\"; L2614: \"4  Bodenplatte  ≥ 250  -  ≥ 200  ≥ 250 2\" (Tab.8 Mindestdicken für Gewässerabdichtungen aus Beton)",
+      "note": "Exactly the two Tab.8 Bauteil rows (Wände / Bodenplatte). PDF-confirmed."
+    },
+    {
+      "symbol": "beton_ausfuehrungsart",
+      "data_type": "enum",
+      "verdict": "VA",
+      "clause_reference": "Tab.8",
+      "enum_prod": ["ortbeton", "elementwand", "fertigteil", "spritzbeton"],
+      "quote": "GAR.txt L2608-2609: \"Ortbeton | Element-wände | Fertigteile | Spritzbeton/faserverstärkter Spritzbeton\" (Tab.8 Ausführungsart columns 2-5)",
+      "note": "Exactly the four Tab.8 Ausführungsart columns. PDF-confirmed. NB Tab.8: for Bodenplatte × Elementwand the cell is '-' (not applicable) — see FINDING F3, an inapplicable combination the flat enum cross-product allows."
+    },
+    {
+      "symbol": "anwendungsfall_concrete",
+      "data_type": "enum",
+      "verdict": "VA",
+      "clause_reference": "Tab.7",
+      "enum_prod": ["wasserbecken_teich", "bachlauf", "schwimmbecken_bade", "schwimmbecken_sole", "pflanzenklaeranlage"],
+      "quote": "GAR.txt Tab.7 L2570-2586: Z.2 \"Wasserbecken und Teiche\"; Z.3 \"Bachläufe (offene Gerinne)\"; Z.4 \"Schwimmbecken und Schwimmteiche mit Badewasserqualität\"; Z.5 \"Schwimmbecken mit Sole-/Meerwasserqualität\"; Z.6 \"Pflanzenklär-anlagen/Bodenretentionsfilter\"",
+      "note": "Exactly the five Tab.7 application cases in order. PDF-confirmed. These 5 cases drive Festigkeitsklasse / Expositionsklasse / Feuchtigkeitsklasse / Bewehrungsüberdeckung (see decisionItems D1, D2)."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "data-entry persistence — all 8 fields through real saveWorksheet (Tab.6/7/8 PASS state, d<=40)",
+      "ran": true,
+      "liveValue": {
+        "wassereindringtiefe_geprueft": true,
+        "wasserzementwert": 0.60,
+        "zementgehalt_kg_m3": 280,
+        "druckfestigkeit_fck": "C25/30",
+        "bauteildicke_cm": 24,
+        "bauteil_type": "waende",
+        "beton_ausfuehrungsart": "ortbeton",
+        "anwendungsfall_concrete": "wasserbecken_teich"
+      },
+      "pdfExpected": "N/A — data-entry worksheet, no worked example printed. Values are Tab.6 Z.2-4 minimums (w/z 0,60; Z 280; fck C25/30) + Tab.8 Wände/Ortbeton 240mm=24cm; Tab.7 Z.2 case.",
+      "verdict": "VC",
+      "raw": "vitest v4.1.5 — Test Files 1 passed (1), Tests 4 passed (4). '✓ CHAIN data-entry — all 8 fields persist through real saveWorksheet (Tab.6/7/8 PASS state, d<=40) 647ms'. Each field read back from project_parameters (value_boolean/value_number/value_text/value_enum) matches the entered value."
+    },
+    {
+      "name": "candidate gate Tab.6 w/z (<=0.60) PASS+FAIL through real evaluator",
+      "ran": true,
+      "liveValue": "PASS at w/z=0.55; FAIL at w/z=0.75",
+      "pdfExpected": "Tab.6 Z.2 w/z <= 0,60 (d<=40)",
+      "verdict": "VA",
+      "raw": "'✓ CANDIDATE GATE Tab.6 w/z (not encoded in prod) — fires PASS then FAIL through real evaluator (d<=40) 23ms'. saveWorksheet persisted 0.55 then 0.75; evaluateCondition('wasserzementwert <= 0.60') returned kind=pass then kind=fail."
+    },
+    {
+      "name": "candidate gate Tab.6 Zementgehalt (>=280) PASS+FAIL through real evaluator",
+      "ran": true,
+      "liveValue": "PASS at Z=300; FAIL at Z=240",
+      "pdfExpected": "Tab.6 Z.3 Z >= 280 kg/m³ (d<=40)",
+      "verdict": "VA",
+      "raw": "'✓ CANDIDATE GATE Tab.6 Zementgehalt (not encoded) — PASS then FAIL through real evaluator 22ms'. saveWorksheet persisted 300 then 240; evaluateCondition('zementgehalt_kg_m3 >= 280') returned kind=pass then kind=fail."
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "title": "No encoded compliance_requirements for the Tab.6 water-tight-concrete minima",
+      "detail": "FLL-GAR-12 has 0 compliance_requirements in prod, yet Tab.6 prints hard, machine-checkable minima: w/z<=0,60 (d<=40) / w/z<=0,70 (d>40), Z>=280 kg/m³ (d<=40), fck>=C25/30 (d<=40). The candidate gates 'wasserzementwert <= 0.60' and 'zementgehalt_kg_m3 >= 280' were driven PASS+FAIL through the REAL evaluator (evaluate.ts) and REAL saveWorksheet, proving they are fully evaluable. They are simply not encoded. Staged as decisionItem D3 (written-not-applied) — not auto-fixed per doctrine.",
+      "quote": "GAR.txt Tab.6 L2484-2489"
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "title": "Unit mismatch cm (Tab.6/field) vs mm (Tab.8) — silent conversion trap",
+      "detail": "bauteildicke_cm has unit 'cm' (matching Tab.6's 'Bauteildicke d in cm'), but Tab.8's minimum thicknesses are given in mm ('Bauteildicke d in mm bei Ausführungsart', ≥240/≥250/≥200 mm). Any future Tab.8 gate comparing this field to those minimums must ×10. No current gate exists so no live defect, but flagged so a Tab.8 gate is not authored against the raw cm value.",
+      "quote": "GAR.txt L2483 (Tab.6 'in cm') vs L2605 (Tab.8 'in mm')"
+    },
+    {
+      "id": "F3",
+      "severity": "low",
+      "title": "Enum cross-product admits the Tab.8 inapplicable cell (Bodenplatte × Elementwand)",
+      "detail": "bauteil_type × beton_ausfuehrungsart is a flat 2×4 cross-product (8 combinations), but Tab.8 marks Bodenplatte/Elementwände as '-' (not applicable). The encoding cannot express that exclusion; a user can select an inapplicable pair with no warning. Cosmetic/completeness gap, not a numeric error.",
+      "quote": "GAR.txt L2614: \"4  Bodenplatte  ≥ 250  -  ≥ 200  ≥ 250 2\" (dash = Elementwände n/a for floor slab)"
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "VC-not-VA",
+      "detail": "The data-entry persistence chain has no printed worked example in the standard (Tab.6/7/8 are requirement tables, not a numeric example). The PASS-state values are Tab.6/7/8 minima, source-attested, but the end-to-end chain result is sanity-checked, not example-matched → recorded VC per SR-3."
+    },
+    {
+      "id": "R2",
+      "type": "no-trig-blocked-equations",
+      "detail": "FLL-GAR-12 has 0 equations, so there is NO cos_beta/trig residue on this worksheet (the trig-blocked GAR-22 Gl.2b lives on a different worksheet). Nothing engine-blocked here."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "SR-2 range / application-dependent minimum",
+      "title": "Festigkeitsklasse fck is application-case-dependent (C25/30 vs C35/45) — do not auto-pick",
+      "detail": "druckfestigkeit_fck validation_rules say '>= C25/30 (d <= 40 cm)' (from Tab.6), but Tab.7 raises the Festigkeitsklasse to C35/45 for anwendungsfall_concrete ∈ {schwimmbecken_sole, pflanzenklaeranlage}. The binding minimum therefore ranges C25/30…C35/45 by application case. Surface as a decision item: which minimum applies is governed by anwendungsfall_concrete, not a single point value. No auto-pick.",
+      "quote": "GAR.txt Tab.6 L2488 'fck ≥ C25/30' vs Tab.7 L2582 'Schwimmbecken mit Sole-/Meerwasserqualität ... C35/45' and L2585 'Pflanzenklär-anlagen/Bodenretentionsfilter ... C35/45'"
+    },
+    {
+      "id": "D2",
+      "type": "SR-2 range / application-dependent classes",
+      "title": "Expositions-/Feuchtigkeits-/Überdeckungsklasse range by Tab.7 case — currently not captured as fields",
+      "detail": "Tab.7 also fixes Expositionsklasse (XC4,XF1(3) WF 40mm for cases 2-4; XC4,XF2,XD2,XS2(3) WA 55mm for Sole; XC4,XF3,XA1 WA 40mm for Pflanzenkläranlagen). FLL-GAR-12 encodes anwendungsfall_concrete but has NO fields for Expositions-/Feuchtigkeits-/Bewehrungsüberdeckungsklasse. Decision: whether to add read-only derived fields keyed off anwendungsfall_concrete (single-source) or leave as guidance. Range surfaced, not picked.",
+      "quote": "GAR.txt Tab.7 L2571-2586"
+    },
+    {
+      "id": "D3",
+      "type": "staged migration (written-not-applied)",
+      "title": "Author compliance_requirements for Tab.6 minima (w/z, Z, fck) — STAGED, not applied",
+      "detail": "Proposed (NOT applied to prod): add compliance_requirements on template 225d4b67-be67-4741-b906-c76faa6fdbd7: (a) code FLL-GAR-12-WZ, condition 'IF bauteildicke_cm <= 40 THEN wasserzementwert <= 0.60' + a >40 branch 'IF bauteildicke_cm > 40 THEN wasserzementwert <= 0.70', clause Tab.6, severity block; (b) code FLL-GAR-12-Z, condition 'IF bauteildicke_cm <= 40 THEN zementgehalt_kg_m3 >= 280', clause Tab.6, severity block. Both grammar-validated by exercising the real evaluator PASS+FAIL in this run. fck (D1) deferred pending the application-case-dependent minimum decision. Requires one controlled apply pass + human sign-off. Do NOT auto-apply.",
+      "quote": "GAR.txt Tab.6 L2484-2489"
+    }
+  ],
+  "doctrine": {
+    "SR1": "Every field value claim carries a verbatim GAR.txt line quote from THIS run's PDF read. No log/prior-chat numbers used.",
+    "SR2": "fck (D1) and the Tab.7 exposition/coverage classes (D2) surfaced as ranges/decision items; not auto-picked.",
+    "SR3": "GAR.txt is the rendered-PDF extraction; all 8 fields PDF-confirmed = VA. The data-entry chain lacks a printed worked example → VC (R1). No PDF-vs-markdown disagreement observed.",
+    "findingsOverFixes": "No prod writes. The one correction (encode Tab.6 gates) is STAGED as decisionItem D3, written-not-applied."
+  }
+}

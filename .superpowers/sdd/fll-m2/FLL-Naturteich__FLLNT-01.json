@@ -1,0 +1,152 @@
+{
+  "standard": "FLL-Naturteich",
+  "worksheet": "FLLNT-01",
+  "worksheetTitle": "Projekteinrichtung & Kundenberatung (project setup & customer consultation)",
+  "worksheetTemplateId": "17f48e47-c9b7-4643-a8ad-a523e06a4037",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "prodPull": {
+    "equations": 0,
+    "fields": 12,
+    "complianceRequirements": 4,
+    "note": "The task id 17f48e47-... is the FLLNT-01 worksheet_template id. Prod fields: client_name, client_address, project_name, project_id, planner_name, contractor_name, pool_use_type(enum), planning_date(date), intended_use_intensity(enum low/medium/high §6.5), consultation_checklist_completed(bool), attest_fllnt_01_req_03(bool §8.1.3/§9.1), attest_fllnt_01_req_04(bool §8.1.4)."
+  },
+  "equations": [],
+  "chains": [
+    {
+      "name": "no computational chain",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "N/A",
+      "raw": "FLLNT-01 has 0 equations in prod (confirmed by execute_sql: [] returned). It is a pure project-setup / scoping / consultation worksheet — no formula to drive through saveWorksheet. The only machine-evaluable artifacts are the 4 block gates, which were exercised through the real saveWorksheet + real evaluateCondition (see gates)."
+    }
+  ],
+  "gates": [
+    {
+      "id": "ef3fbb56-de11-45ec-97ea-2d401bade0be",
+      "code": "REQ-01",
+      "title": "Scope applicability",
+      "condition": "pool_use_type IN {private_single_household,private_multi_household}",
+      "fired": true,
+      "vacuous": false,
+      "drivenThrough": "REAL saveWorksheet (enum persist) + REAL evaluateCondition",
+      "states": {
+        "pass": "value_enum='private_single_household' persisted -> evaluateCondition kind=pass",
+        "fail": "value_enum='commercial_hotel' persisted -> evaluateCondition kind=fail",
+        "pending": "no value -> kind=pending, missingSymbols contains pool_use_type"
+      },
+      "note": "Fires all three ways. VERDICT VC on the ENUM MEMBERSHIP: §1.1 verbatim restricts scope to pools 'which are exclusively used for private purposes' and expressly excludes commercial/public (§37 IfSG, e.g. hotel pools). The standard does NOT split private use into 'single household' vs 'multi household' — the two enum members private_single_household / private_multi_household are a schema-invented sub-distinction with no §1.1 basis. Gate mechanics are sound; the enum VOCABULARY is not source-attested. See findings[0]."
+    },
+    {
+      "id": "2a97678c-5b5d-4063-be30-bd1c5f554daa",
+      "code": "REQ-02",
+      "title": "Customer consultation",
+      "condition": "consultation_checklist_completed == true",
+      "fired": true,
+      "vacuous": false,
+      "drivenThrough": "REAL saveWorksheet (boolean persist) + REAL evaluateCondition",
+      "states": {
+        "pass": "value_boolean=true persisted -> kind=pass",
+        "fail": "value_boolean=false persisted -> kind=fail",
+        "pending": "(covered by evaluator semantics; not separately asserted for REQ-02 but false!=missing)"
+      },
+      "note": "Fires pass+fail through the real save path. VA: Appendix 3 (informative) 'Checklist for customer consultation' is present in the PDF (TOC line 362; body line 3275/3575), and §6 (line 1189) requires 'extensive consultation must take place'. The gate correctly enforces that the consultation checklist is marked completed."
+    },
+    {
+      "id": "444f53e8-3ef1-448c-8ec9-deda0ec77d17",
+      "code": "REQ-03",
+      "title": "Site and subsoil suitable",
+      "condition": "attest_fllnt_01_req_03 == True",
+      "fired": true,
+      "vacuous": false,
+      "drivenThrough": "REAL evaluateCondition (field NOT seeded — see residue[0])",
+      "states": {
+        "pass": "attest_fllnt_01_req_03=true -> kind=pass",
+        "fail": "attest_fllnt_01_req_03=false -> kind=fail",
+        "pending": "no value -> kind=pending, missingSymbols contains attest_fllnt_01_req_03"
+      },
+      "note": "Attestation-style gate. VA on the reference targets: field label 'Nachweis: §8.1.3 / §9.1'. §8.1.3 'Subsoil' (line 1915) and §9.1 'Excavation' (line 2153) both exist verbatim in the PDF and cover subsoil suitability / load-bearing ('The subsoil must be load-bearing otherwise it should be compacted or improved', line 2155). Gate fires all three ways against the real evaluator. Could not be driven through saveWorksheet because the seeder omits this field (residue[0])."
+    },
+    {
+      "id": "3b935b1f-5325-4583-b79f-5c5cced31205",
+      "code": "REQ-04",
+      "title": "Legal duty / enclosure",
+      "condition": "attest_fllnt_01_req_04 == True",
+      "fired": true,
+      "vacuous": false,
+      "drivenThrough": "REAL evaluateCondition (field NOT seeded — see residue[0])",
+      "states": {
+        "pass": "attest_fllnt_01_req_04=true -> kind=pass",
+        "fail": "attest_fllnt_01_req_04=false -> kind=fail",
+        "pending": "no value -> kind=pending, missingSymbols contains attest_fllnt_01_req_04"
+      },
+      "note": "Attestation-style gate. VA on the reference target: field label 'Nachweis: §8.1.4'. §8.1.4 'Legal duty to maintain safety, enclosure' (line 1960) exists verbatim: 'Every property owner is subject to the legal duty to maintain safety and this also applies to private natural pools' (1969) and enclosure of the property to protect children (1989-1991). Gate fires all three ways. Could not be driven through saveWorksheet because the seeder omits this field (residue[0])."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "low",
+      "type": "unattested-enum-vocabulary",
+      "field": "pool_use_type",
+      "worksheet": "FLLNT-01",
+      "gate": "REQ-01",
+      "claim": "The enum offers two private sub-types private_single_household / private_multi_household, both tagged regulation_reference '§1'.",
+      "pdfSays": "§1.1 verbatim: 'The ... guidelines ... apply to ... natural pools: ... which are exclusively used for private purposes; ...'. And: 'Installations which are used for commercial and public purposes and not exclusively for private purposes in accordance with § 37 of the Infektionsschutzgesetz (e. g. hotel pools) are subject to the [public guidelines].'",
+      "problem": "§1.1 defines scope as private-vs-(commercial/public); it does NOT distinguish single-household from multi-family private use. The two-member private split is schema-invented and not source-attested. It does not break the gate (any member still passes REQ-01) but the vocabulary should be marked imported_unverified or reduced to a single 'private' member unless a source page for the split is found.",
+      "recommendation": "STAGED (written-not-applied): either (a) collapse to a single 'private' enum member, or (b) keep both but tag regulation_reference as imported_unverified. Do NOT auto-apply — needs human decision. See decisionItems[0].",
+      "verdict": "VC"
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "type": "unattested-ordinal-enum",
+      "field": "intended_use_intensity",
+      "worksheet": "FLLNT-01",
+      "claim": "intended_use_intensity is a low/medium/high enum, each member tagged regulation_reference '§6.5'.",
+      "pdfSays": "§6.5 'Importance of the intensity of use' (line 1650) verbatim in full: 'The type and size of the swimming area and regeneration area must be adapted to the behaviour of the users. A minimum water volume of 10 m³ per user is recommended.'",
+      "problem": "§6.5 does NOT define a categorical low/medium/high intensity scale. The three-level ordinal enum is a schema convenience, not a source construct. The one quantitative rule §6.5 actually states (10 m³ per user, RECOMMENDED) is nowhere captured as a field on FLLNT-01. This is an informational field on FLLNT-01 (not gated), so no gate is affected.",
+      "recommendation": "Tag the enum members as imported_unverified; consider adding a min_water_volume_per_user field (=10 m³, recommended) on the space-planning worksheet FLLNT-06. STAGED, no auto-apply. See decisionItems[1].",
+      "verdict": "VC"
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "type": "seeder-field-gap",
+      "detail": "seed-fll-naturteich.ts seeds only 10 of FLLNT-01's 12 prod fields. The two attestation booleans attest_fllnt_01_req_03 and attest_fllnt_01_req_04 (present in prod, id cbea4d56-... and ac9fb01c-...) are NOT in the seeder's FLLNT-01 field list. Consequence: REQ-03/REQ-04 could not be driven through the REAL saveWorksheet persist path; they were fired against the REAL evaluateCondition with a synthetic lookup (pass+fail+pending all confirmed). The gate LOGIC is verified; the persist round-trip for these two fields is not. Recommend adding the two attest fields to the seeder's FLLNT-01 spec so a future run can drive them end-to-end.",
+      "blocking": false
+    },
+    {
+      "id": "R2",
+      "type": "vc-source-tier",
+      "detail": "All PDF quotes in this run are from the markdown/pdftotext extraction at .superpowers/sdd/fll-m2/pdf/Naturteich.txt (searchable convenience per SR-3), not from a freshly rendered PDF page image. Section headers, §1.1 scope text, §6.5, §8.1.3, §8.1.4, §9.1, and Appendix 3 were all located and quoted, but tier is VC (markdown) rather than VA (rendered-PDF-confirmed). No PDF-vs-markdown disagreement was observed. Re-confirm the §1.1 private-purpose wording and the §6.5 '10 m³ per user' recommendation against the rendered PDF page if promoting F1/F2 to VA.",
+      "blocking": false
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "topic": "pool_use_type enum vocabulary (REQ-01 scope)",
+      "range": "The standard supports exactly ONE private scope class ('exclusively private purposes'); prod encodes TWO (single-household, multi-household). Options: (a) collapse to a single 'private' member; (b) retain both but mark regulation_reference imported_unverified.",
+      "sr2": "Not a numeric range, but a vocabulary-granularity choice that must not be auto-picked. Surfaced for human decision.",
+      "staged": "written-not-applied — no migration authored; catalogue only."
+    },
+    {
+      "id": "D2",
+      "topic": "intended_use_intensity ordinal + §6.5 '10 m³ per user'",
+      "range": "§6.5 gives a RECOMMENDED minimum water volume of 10 m³ per user (recommendation, not a hard limit). Options: (a) leave intensity enum as imported_unverified; (b) additionally encode min_water_volume_per_user=10 m³ (recommended, non-blocking) on FLLNT-06. The 'recommended' qualifier means any threshold must be surfaced as advisory, never a block gate.",
+      "sr2": "The '10 m³/user' is a single recommended value, not a range, but its RECOMMENDED (vs REQUIRED) status is the decision axis — surfaced, not auto-encoded.",
+      "staged": "written-not-applied — no migration authored; catalogue only."
+    }
+  ],
+  "vitestRaw": "RUN v4.1.5 C:/Users/Ekowai/_wt-fll\n ✓ tests/harness/verify-fll-naturteich-fllnt01.integration.test.ts > FLLNT-01 — real saveWorksheet + real evaluateCondition > exposes FLLNT-01 with its scope/consultation fields and 0 equations, 4 gates 2ms\n ✓ REQ-01 PASS — in-scope use type persists and fires pass 561ms\n ✓ REQ-01 FAIL — an out-of-list use type persists and fires fail 12ms\n ✓ REQ-01 PENDING — no use type reported pending (not vacuous) 1ms\n ✓ REQ-02 FAIL — consultation not completed persists false and fires fail 7ms\n ✓ REQ-02 PASS — consultation completed persists true and fires pass 7ms\n ✓ REQ-03 fires pass/fail/pending against the real evaluator 1ms\n ✓ REQ-04 fires pass/fail/pending against the real evaluator 0ms\n Test Files  1 passed (1)\n      Tests  8 passed (8)\n   Duration  4.70s",
+  "testFile": "C:\\Users\\Ekowai\\_wt-fll\\tests\\harness\\verify-fll-naturteich-fllnt01.integration.test.ts",
+  "checksPassed": 8,
+  "doctrineNotes": {
+    "SR-1": "Every value/scope claim carries a verbatim quote pulled from Naturteich.txt THIS run (§1.1, §6.5, §8.1.3, §8.1.4, §9.1, App.3). No prior-chat/log numbers used.",
+    "SR-2": "§6.5 '10 m³ per user' recommendation surfaced as decisionItem D2 (advisory vs required axis); pool_use_type granularity surfaced as D1 — neither auto-picked.",
+    "SR-3": "All quotes are markdown-tier (VC). No PDF-vs-markdown disagreement found. VA promotion requires rendered-PDF re-confirm (residue R2).",
+    "writeLock": "Read-only prod (execute_sql only). No writes to prod. Both findings staged as written-not-applied; no migration authored."
+  }
+}

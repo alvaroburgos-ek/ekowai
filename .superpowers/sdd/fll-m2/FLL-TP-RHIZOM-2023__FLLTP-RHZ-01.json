@@ -1,0 +1,99 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-01",
+  "worksheet_title": "Technische Prüfbestimmungen zur Bestimmung der Rhizomfestigkeit von Gewässerabdichtungen (registration archetype)",
+  "template_id": "991950b1-8c67-4387-a51c-c654caa89ff3",
+  "note_on_id": "The task-supplied instanceId 991950b1-... is in prod actually the worksheet_template_id for FLLTP-RHZ-01 (archetype=registration). No worksheet_instance with that id exists in prod. Verification driven against a freshly seeded instance via seedFllRhizom.",
+  "pdf_source": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt (pdftotext -layout of fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf)",
+  "counts": { "equations": 0, "gates": 2, "fields": 7 },
+  "equations": [],
+  "equations_note": "0 equations on this worksheet (confirmed prod query + seeder). Registration archetype carries no formulas. No cos_beta/trig residue applies. Nothing to VA/VC at the equation layer.",
+  "chains": [
+    {
+      "name": "saveWorksheet(FLLTP-RHZ-01) real-path persistence (7 registration fields: institute, report-nr, client, client-contact, start-date, end-date, attest_req_02)",
+      "ran": true,
+      "liveValue": "{\"ok\":true,\"saved\":7,\"warnings\":[],\"derived\":[]} ; attest_flltp_rhz_01_req_02 persisted value_boolean=true",
+      "pdfExpected": "N/A — no worked example. Registration worksheet has no computed output; the standard prints no numeric example for these instance-data fields.",
+      "verdict": "VC",
+      "raw": "SAVE_RESULT {\"ok\":true,\"saved\":7,\"warnings\":[],\"derived\":[]}\nATTEST_PERSISTED [{\"value_text\":null,\"value_boolean\":true,\"value_date\":null}]\nTest Files 1 passed (1) / Tests 3 passed (3) / Duration 4.89s"
+    }
+  ],
+  "gates": [
+    {
+      "id": "658cacf7-27d2-4f80-bba6-fe75535ab286",
+      "code": "REQ-01",
+      "condition": "abdichtungsart IN {bitumen,kunststoff,elastomer,fluessig,gussasphalt,gup} AND scope_einzelprodukt_bestaetigt == true",
+      "fired": false,
+      "vacuous": true,
+      "note": "CR-006-class VACUOUS on this worksheet. The condition parses and is exercisable in the abstract (pass when abdichtungsart=bitumen & scope=true; fail when abdichtungsart=holz), but NEITHER symbol (abdichtungsart, scope_einzelprodukt_bestaetigt) is a field on FLLTP-RHZ-01 (confirmed: fixture.fieldIds['abdichtungsart']===undefined, ['scope_einzelprodukt_bestaetigt']===undefined; prod field set = pruefinstitut_name, pruefbericht_nr, auftraggeber_name, auftraggeber_kontakt, pruefung_startdatum, pruefung_enddatum, attest_flltp_rhz_01_req_02). Under the live worksheet-local lookup both symbols are permanently missing => gate resolves 'pending' forever, never pass/fail => never enforces. Raw: REQ01 {\"pass\":{\"kind\":\"pass\"},\"fail\":{\"kind\":\"fail\"},\"live\":{\"kind\":\"pending\",\"missingSymbols\":[\"abdichtungsart\",\"scope_einzelprodukt_bestaetigt\"]}}"
+    },
+    {
+      "id": "b0993f22-00c8-4512-95dc-8e5324aaff50",
+      "code": "REQ-02",
+      "condition": "attest_flltp_rhz_01_req_02 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "FIREABLE. Field attest_flltp_rhz_01_req_02 exists (boolean, is_required, requires_attestation=true). Exercised all three states: pass (attest=true), fail (attest=false), pending (missing). Raw: REQ02 {\"pass\":{\"kind\":\"pass\"},\"fail\":{\"kind\":\"fail\"},\"pending\":{\"kind\":\"pending\",\"missingSymbols\":[\"attest_flltp_rhz_01_req_02\"]}}. Source_quote present + verbatim-matches PDF §2 (see decisionItems for the SR-2 range note re. bambus)."
+    }
+  ],
+  "findings": [
+    {
+      "code": "F1-REQ-01-VACUOUS",
+      "severity": "finding",
+      "title": "REQ-01 is a dead/vacuous gate on FLLTP-RHZ-01 (CR-006 class)",
+      "detail": "REQ-01 'Geltungsbereich erfüllt' (severity=block) tests abdichtungsart + scope_einzelprodukt_bestaetigt, but neither symbol is a field on this registration worksheet. Gates evaluate worksheet-local (per reference_wizard_compliance_gates); with no owning field the condition is permanently 'pending' and can never block. Either (a) the two fields must be added to FLLTP-RHZ-01, or (b) the gate must move to whichever worksheet owns abdichtungsart, or (c) if those symbols are cross-worksheet consumer inputs the gate needs a consumer wiring. Staged as decisionItem, NOT auto-fixed."
+    },
+    {
+      "code": "F2-CLAUSE-REF-SECTION-MISMATCH",
+      "severity": "finding",
+      "title": "Report-field clause_reference '§8' points at 'Auswertung'; the report content lives in §9 'Prüfbericht' (PDF wins, SR-3)",
+      "detail": "Fields pruefinstitut_name / pruefbericht_nr / auftraggeber_name / auftraggeber_kontakt carry clause_reference='§8'. In the rendered PDF, §8 is 'Auswertung' (TOC line 151) and §9 is 'Prüfbericht' (heading line 915). The report-content requirement — 'ein Exemplar für das Prüfinstitut und den Auftraggeber' (line 920) and the report header 'Prüfinstitut: >> Name des Prüfinstituts << (Ber.-Nr. >> xy <<)' (line 1073) — is under §9. So the institute/report-nr/client fields are mis-cited to §8. NB the standard's own internal cross-refs are loose (§3.11 says 'Abschnitt 2.9/2.10/2.7' where it means 3.9/3.10/3.7, lines 475-478), which likely seeded the off-by-one. Provenance-only; no data value is wrong. Staged as decisionItem."
+    },
+    {
+      "code": "F3-NO-SOURCE-QUOTES",
+      "severity": "finding",
+      "title": "All 7 fields + REQ-01 have source_quote=NULL (unverified provenance, VC)",
+      "detail": "Every field is verification_status='imported_unverified' with source_quote=null; REQ-01 also has source_quote=null. Per SR-1 none of these carries a run-attached verbatim quote in prod. REQ-02 is the only element with a verbatim source_quote (matches PDF §2 lines 332-336). Recommend attaching verbatim anchors on a controlled pass; catalogued, not fixed."
+    }
+  ],
+  "residue": [
+    {
+      "code": "R1-NO-EQUATIONS",
+      "detail": "0 equations => no computable calculation chain on this worksheet. The only 'chain' run is the saveWorksheet persistence path (green, saved=7). No PDF worked example exists for registration instance-data => value sanity-check only (VC). No cos_beta/trig residue (standard has none; the 3 standard equations live on FLLTP-RHZ-13, out of scope here)."
+    },
+    {
+      "code": "R2-INSTANCE-ID-IS-TEMPLATE-ID",
+      "detail": "Task-supplied id 991950b1-8c67-4387-a51c-c654caa89ff3 resolves in prod to the worksheet_TEMPLATE for FLLTP-RHZ-01, not a worksheet_instance (query on worksheet_instances returned empty). Verification used a seeded instance. Flagging in case the ledger/id map expects an instance id."
+    }
+  ],
+  "decisionItems": [
+    {
+      "code": "D1-REQ-01-REWIRE",
+      "type": "gate-fix",
+      "detail": "Decide the fix for the vacuous REQ-01 gate (add abdichtungsart + scope_einzelprodukt_bestaetigt fields to FLLTP-RHZ-01, OR relocate the gate to the owning worksheet, OR wire cross-worksheet consumers). Written-not-applied: no migration authored (root-cause is a modeling decision, not a mechanical typo). Read-only prod preserved.",
+      "staged_migration": "none authored pending decision"
+    },
+    {
+      "code": "D2-CLAUSE-REF-8-TO-9",
+      "type": "metadata-fix",
+      "detail": "Stage an UPDATE to correct report-field clause_reference from '§8' to '§9' (Prüfbericht) for pruefinstitut_name, pruefbericht_nr, auftraggeber_name, auftraggeber_kontakt on template 991950b1-... . PDF-attested (SR-3, §9 heading line 915; report header line 1073). WRITTEN-NOT-APPLIED — do not run without the single controlled apply pass. Example (staged, not run): UPDATE fields SET clause_reference='§9' WHERE worksheet_template_id='991950b1-8c67-4387-a51c-c654caa89ff3' AND symbol IN ('pruefinstitut_name','pruefbericht_nr','auftraggeber_name','auftraggeber_kontakt');",
+      "staged_migration": "inline above, not applied"
+    },
+    {
+      "code": "D3-SR2-BAMBUS-NOT-A-RANGE",
+      "type": "range-review",
+      "detail": "SR-2 scan: this worksheet prints no numeric RANGE that was auto-picked. The only §2-adjacent numerics in the standard (growth thresholds 80/120/160 Halme at 6/12/18/24 months, line 413-416; ≥80% Bestandsdichte line 420) belong to §3.7 Wuchsleistung on the growth/verification worksheets (FLLTP-RHZ-13 etc.), NOT to this registration worksheet. No range decision to surface for FLLTP-RHZ-01. Recorded for completeness."
+    },
+    {
+      "code": "D4-REQ-01-ENUM-VS-PDF",
+      "type": "content-review",
+      "detail": "REQ-01 enum {bitumen,kunststoff,elastomer,fluessig,gussasphalt,gup} vs PDF §2 five bullets (lines 315-319): 'Bitumenbahnen; Kunststoff- und Elastomerbahnen; Flüssigabdichtungen; Gussasphalt; GUP-Beschichtungen'. The encoding split the single 'Kunststoff- und Elastomerbahnen' bullet into kunststoff+elastomer (6 members from 5 bullets) — defensible (two named materials). No mismatch flagged; recorded for reviewer sign-off. VA against §2 verbatim."
+    }
+  ],
+  "provenance_quotes": {
+    "REQ-02_bambus_§2": "Das Ergebnis der geprüften Werkstoffe ist nicht übertragbar auf den Ein- und Durchdringungswiderstand gegen Pflanzen mit sehr starkem Rhizomwachstum, z. B. Bambus-Arten. Bei Verwendung derartiger Pflanzenarten sind über den befundenen Ein- und Durchdringungschutz hinausgehende bauliche Vorkehrungen zu treffen und besondere Pflegemaßnahmen vorzusehen. (PDF §2, lines 332-336)",
+    "REQ-01_geltungsbereich_§2": "Dazu gehören z. B. folgende Abdichtungen: Bitumenbahnen; Kunststoff- und Elastomerbahnen; Flüssigabdichtungen; Gussasphalt; GUP-Beschichtungen (PDF §2, lines 314-319)",
+    "2-year_duration_§4": "Die 2-jährige Prüfung wird in einem klimagesteuerten Gewächshaus unter Verwendung von Phragmites australis (Schilf) durchgeführt. (PDF §4, lines 504-505)",
+    "report_content_§9": "Prüfinstitut: >> Name des Prüfinstituts << (Ber.-Nr. >> xy <<) (PDF §9 Prüfbericht Muster, line 1073); 'je ein Exemplar für das Prüfinstitut und den Auftraggeber' (line 920)"
+  }
+}

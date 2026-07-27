@@ -1,0 +1,98 @@
+{
+  "standard": "FLL-Naturteich",
+  "standardId": "c11f0e54-fef3-4552-be7b-f6eb50b468da",
+  "worksheet": "FLLNT-08",
+  "worksheetTitle": "Anlagenausstattung & Leistungsbeschreibung",
+  "templateId": "746a7ca6-d086-48ee-8110-981c6c4cb56a",
+  "note": "The id 746a7ca6-... supplied in the task as the 'worksheet instance' is in fact the worksheet_TEMPLATE id for FLLNT-08 (worksheet_instances lookup returned empty; worksheet_templates lookup returned the row). Prod read-only via Supabase MCP execute_sql against vadsmshzebefjreqcicl on 2026-07-23.",
+  "prodPull": {
+    "equations": 0,
+    "compliance_requirements": 0,
+    "activeFields": 2,
+    "fields": [
+      {"id": "2e34761a-5bc2-4505-b443-68ab3540097c", "symbol": "equipment_elements_list", "label_de": "Anlagenausstattung", "data_type": "json", "unit": null, "section": "C", "active": true},
+      {"id": "6d80bc47-9de0-4625-b7c2-b692debbbacb", "symbol": "service_description_provided", "label_de": "Leistungsbeschreibung erstellt", "data_type": "boolean", "unit": null, "section": "C", "active": true}
+    ],
+    "crossWorksheetConsumers": "NONE — no equation.formula and no compliance_requirement.condition anywhere in FLL-Naturteich references equipment_elements_list or service_description_provided (verified by ILIKE scan across the whole standard)."
+  },
+  "equations": [],
+  "chains": [
+    {
+      "name": "(none) — FLLNT-08 has no equations",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": null,
+      "verdict": "N/A",
+      "raw": "No equations on this worksheet template (eq_count=0). No producer or consumer formula references either field. There is no computable chain to drive through saveWorksheet. Seeder infra confirmed green independently: `pnpm vitest run --project integration tests/harness/seed-fll-naturteich.smoke.integration.test.ts` -> Test Files 1 passed (1), Tests 5 passed (5), Duration 4.25s."
+    }
+  ],
+  "gates": [],
+  "fieldVerification": [
+    {
+      "symbol": "equipment_elements_list",
+      "data_type": "json",
+      "verdict": "VA",
+      "quote": "8.3 Equipment elements. For example, equipment elements include: walkways; ladders/stairs; platforms; showers; diving rocks/boards; underwater lighting; covers; counter current system; fountains/streams; heater.",
+      "quoteLoc": "Naturteich.txt lines 2083-2098 (rendered PDF p.39, section 8.3)",
+      "note": "Field is a free-form JSON list capturing the equipment inventory enumerated in section 8.3. Open list ('For example ... include') — the standard gives an illustrative, non-exhaustive enumeration, not a closed/validated set. No units, no constant, no equation. Existence + meaning PDF-confirmed = VA."
+    },
+    {
+      "symbol": "service_description_provided",
+      "data_type": "boolean",
+      "verdict": "VA",
+      "quote": "8.4 Description of services. Sections 0 of the Allgemeinen Technischen Vertragsbedingungen fuer Bauleistungen (ATV) ... of part C of the VOB contain instructions for drawing up the description of services. Compliance with these instructions is prerequisite for a proper description of services.",
+      "quoteLoc": "Naturteich.txt lines 2121-2132 (rendered PDF p.39-40, section 8.4)",
+      "note": "Boolean flag attesting a VOB/ATV-compliant Leistungsbeschreibung was drawn up. Section 8.4 is prose guidance (ATV DIN 18299 / DIN 18300-18306 references) with no numeric threshold. Existence + meaning PDF-confirmed = VA. NB: the standard says these ATV instructions 'do not become an integral part of the contract' (line 2126-2127) — i.e. the standard treats this as advisory, which is consistent with prod carrying NO block-gate on this flag."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "observation",
+      "title": "Task id is a template id, not a worksheet_instance id",
+      "detail": "The task addressed FLLNT-08 by 'id 746a7ca6-d086-48ee-8110-981c6c4cb56a' as a worksheet instance; that id is the worksheet_templates.id for FLLNT-08. No worksheet_instance with that id exists in prod. Not a data defect in the standard — a mislabel in the task framing. Recorded so downstream ledger consumers do not treat it as an instance."
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "title": "service_description_provided has no gate although it is a natural block-candidate",
+      "detail": "FLLNT-08 carries zero compliance_requirements. The boolean service_description_provided reads like a phase-gate attestation ('Leistungsbeschreibung erstellt'), and sibling worksheets gate analogous booleans as severity=block (e.g. FLLNT-02 REQ-05 operating_manual_provided == true, FLLNT-14 REQ-27 maintenance_contract_in_place == true). No such requirement exists for FLLNT-08. This is NOT a CR-006-class vacuous/dead gate (there is no gate at all) — it is a possible MISSING gate. Because SR-1/doctrine forbids fabricating a requirement, this is surfaced as a decisionItem (D1), not applied. The standard text (section 8.4) explicitly states the ATV instructions 'do not become an integral part of the contract', which is a legitimate reason a hard block was intentionally omitted — so this is flagged low, not a defect."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "reason": "No computable chain. FLLNT-08 has 0 equations and 0 gates; both fields (json list, boolean) are terminal documentation inputs consumed by no formula/gate. saveWorksheet chain-verification is therefore not applicable. Seeder path itself verified green (smoke 5/5).",
+      "grade": "N/A"
+    },
+    {
+      "id": "R2",
+      "reason": "equipment_elements_list is a free-text/JSON list with no schema and no enum_values on prod (enum_values=null). Its contents cannot be machine-validated against section 8.3's enumeration; correctness of any user-entered list is un-checkable by the engine. VC as to any specific captured value (only the field's existence/meaning is VA).",
+      "grade": "VC"
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "question": "Should service_description_provided carry a block-severity compliance_requirement (analogous to FLLNT-02 REQ-05 / FLLNT-14 REQ-27), or is the omission intentional given section 8.4's statement that the ATV instructions 'do not become an integral part of the contract'?",
+      "options": ["Add block gate 'service_description_provided == true'", "Leave un-gated (documentation-only, per 8.4 advisory framing)"],
+      "recommendation": "Human decision required; do NOT auto-add. No source sentence in section 8.4 imposes a mandatory pass/fail on the planner, so the conservative reading supports leaving it un-gated. STAGED as written-not-applied — no migration authored.",
+      "staged": true,
+      "migrationApplied": false
+    },
+    {
+      "id": "D2",
+      "question": "Should equipment_elements_list be given a structured schema / enum backing derived from section 8.3's enumeration (walkways, ladders/stairs, platforms, showers, diving rocks/boards, underwater lighting, covers, counter current system, fountains/streams, heater)?",
+      "options": ["Keep as free JSON (matches the 'For example ... include' open-list wording)", "Introduce a multi-select enum + free-text 'other'"],
+      "recommendation": "SR-2-adjacent: section 8.3 is explicitly illustrative/non-exhaustive ('For example'), so it is NOT a closed set and must not be auto-materialised into a closed enum. Surface as decision, keep free JSON unless product wants a guided multi-select. Not applied.",
+      "staged": true,
+      "migrationApplied": false
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Both field verdicts quote section 8.3 / 8.4 verbatim from the rendered-PDF-derived text this run (Naturteich.txt lines 2083-2098, 2121-2132). No prior-chat or log numbers used.",
+    "SR-2": "Section 8.3's equipment enumeration is an open, illustrative list (not a range but a non-exhaustive set) — surfaced as decisionItem D2 rather than auto-closed into an enum. No numeric range appears on this worksheet.",
+    "SR-3": "Text used is the pdftotext -layout extraction of the FLL Naturteich PDF; section headers 8.3/8.4 and their bullet contents are unambiguous in the extraction. No markdown-vs-PDF disagreement encountered. Field verdicts marked VA on that basis; equipment-list CONTENTS remain VC (R2).",
+    "prodWrites": "NONE. Read-only Supabase MCP execute_sql only. No migration authored; D1/D2 staged as written-not-applied for a later controlled pass."
+  }
+}

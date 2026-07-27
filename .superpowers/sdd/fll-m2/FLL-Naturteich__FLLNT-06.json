@@ -1,0 +1,160 @@
+{
+  "standard": "FLL-Naturteich (FLL Naturteich / Schwimmteich, English translation 2023; prod standard_id c11f0e54-fef3-4552-be7b-f6eb50b468da)",
+  "worksheet": "FLLNT-06 — Flächenplanung (area planning); instance 4a40a163-e465-40f7-b672-bdc2eccd9823",
+  "verifiedRun": "2026-07-23, PDF C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\Naturteich.txt (markdown extract of the rendered PDF); no page-level pdftotext re-render performed — see residue R1 (VC downgrade per SR-3)",
+  "counts": { "equations": 1, "gates": 8, "fields": 10 },
+  "equations": [
+    {
+      "id": "c1928ea5-bdb7-4396-9cbd-cdaffa5c4b2f",
+      "equation_number": "EQ-PUWS",
+      "formula": "pool_underwater_surface = pool_ground_area_m2 + pool_submerged_wall_area_m2",
+      "output_symbol": "pool_underwater_surface",
+      "verdict": "VC",
+      "quote": "Appendix 5 (informative): Filter description and calculation … Example 2: known pool size … Surface that can be colonized / Ground area: 50 m² / Wall area: 45 m² / Total: 95 m² … Required colonized surface in the filter / 95 m² x 50 = 4750 m²  (Naturteich.txt lines 3988-3998). And the definition at lines 3972-3974: 'The outer grain surfaces … should … amount to at least 50-times the surfaces of the pool that are exposed to light and submerged.'",
+      "note": "Formula shape CONFIRMED against the printed worked example: the colonizable/underwater surface = ground area + wall area (50 + 45 = 95 m²). Output symbol pool_underwater_surface (label 'Unterwasserfläche (besonnt)' = surface exposed to light and submerged) matches the standard's phrase 'surfaces of the pool that are exposed to light and submerged'. No constant in the formula (pure additive), units consistent (m² + m² = m²). Real-engine evaluateFormula computed 95 for (50,45) and 90 for (60,30); missing input blanks (fail-safe) — see chains. Verdict VC not VA ONLY because the source is the markdown extract, not a page-level PDF re-render (SR-3); the example is otherwise unambiguous. NOTE: the standard PRINTS the two components (ground 50, wall 45, total 95) but does NOT print a standalone algebraic equation 'PUWS = ground + wall' — the equation is a faithful encoding of the example's arithmetic, not a verbatim source equation. Recommend a page-range pdftotext confirm to promote VC→VA."
+    }
+  ],
+  "chains": [
+    {
+      "name": "EQ-PUWS PDF Example 2 (ground 50 + wall 45 = 95 m²)",
+      "ran": true,
+      "liveValue": "inputs persisted via REAL saveWorksheet (pool_ground_area_m2=50, pool_submerged_wall_area_m2=45 read back from project_parameters); derived pool_underwater_surface computed = 95 via REAL evaluateFormula",
+      "pdfExpected": "95 (Total: 95 m², Naturteich.txt line 3995)",
+      "verdict": "PASS (VC — matches printed worked example; source is markdown extract)",
+      "raw": "Test Files 1 passed (1); Tests 12 passed (12); Duration 4.61s. 'EQ-PUWS — ground 50 + wall 45 persists and the real engine computes 95 m² (PDF Example 2)' green."
+    },
+    {
+      "name": "EQ-PUWS sanity pair (60 + 30 = 90)",
+      "ran": true,
+      "liveValue": "90 via REAL evaluateFormula",
+      "pdfExpected": "n/a (sanity check of additive shape)",
+      "verdict": "PASS (VC sanity)",
+      "raw": "'EQ-PUWS — a second worked pair (60 + 30 = 90) sanity-checks the additive shape' green."
+    },
+    {
+      "name": "EQ-PUWS fail-safe (one input missing)",
+      "ran": true,
+      "liveValue": "not 'computed' (blanked)",
+      "pdfExpected": "n/a",
+      "verdict": "PASS (engine fail-safe blanks rather than emitting a wrong number)",
+      "raw": "'EQ-PUWS — missing an input blanks (fail-safe), never a wrong number' green."
+    },
+    {
+      "name": "Server-side materialization of pool_underwater_surface via saveWorksheet",
+      "ran": false,
+      "liveValue": null,
+      "pdfExpected": "95",
+      "verdict": "NOT-MATERIALIZED (residue R2)",
+      "raw": "saveWorksheet (src/lib/actions/worksheet.ts) only materializes derived outputs for hardcoded A138 equation IDs (surface/basin/ASM/loading-check registries). The generic FLL EQ-PUWS is NOT in any registry, so pool_underwater_surface is NEVER persisted as a source_type='derived' project_parameters row on save — it is computed client-side by useEquationEngine and written back to the store only. This mirrors the standing engine-output materialization gap (memory project_engine_output_materialization), not an FLLNT-06-specific defect. The client engine value IS correct (95); it just doesn't persist server-side."
+    }
+  ],
+  "gates": [
+    {
+      "id": "REQ-13",
+      "condition": "total_pool_area_m2 IS NOT NULL AND regeneration_area_m2 IS NOT NULL AND swimming_area_m2 IS NOT NULL",
+      "fired": true,
+      "vacuous": false,
+      "note": "All three symbols are FLLNT-06 fields. Real evaluateCondition: pass (all present) / fail (one NULL) / fail (all missing — an IS NOT NULL existence check on an absent symbol is a decidable FAIL, not pending). Live gate. Quote (space requirement, §9.5.1/Tab context): 'The surfaces … in the swimming area…' — REQ-13 is a completeness/existence gate, not a numeric threshold; no source scalar to verify."
+    },
+    {
+      "id": "REQ-14",
+      "condition": "attest_fllnt_06_req_14 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "Attest boolean (label 'Nachweis: §9.1' Excavation). Fires pass/fail/pending. Field exists on prod but is NOT emitted by the seeder (seeder ships 10 fields incl. this attest, actually PRESENT — confirmed fieldIds carries attest_fllnt_06_req_14), driven via real evaluator. §9.1 Excavation quote lines 2153+: 'The surface of the excavation (bottom and sides) must be constructed…'. Attestation gate, no scalar."
+    },
+    {
+      "id": "REQ-15",
+      "condition": "area_separation_method IS NOT EMPTY",
+      "fired": true,
+      "vacuous": false,
+      "note": "SYMBOL area_separation_method is a field on FLLNT-07 (construction), NOT FLLNT-06 — see FINDING F1. Fires pass (non-empty) / fail (empty) / fail (missing). §9.2 quote lines 2178-2189: 'Natural pools must be separated into a swimming area and a regeneration area. … The separation must be structurally durable and stable.'"
+    },
+    {
+      "id": "REQ-16",
+      "condition": "sealing_type IS NOT NULL",
+      "fired": true,
+      "vacuous": false,
+      "note": "SYMBOL sealing_type is a field on FLLNT-07, NOT FLLNT-06 — FINDING F1. Fires pass/fail/fail(missing). §9.3 quote lines 2197-2208: 'Natural pools must be durably sealed against the subsoil…'."
+    },
+    {
+      "id": "REQ-17",
+      "condition": "edge_design IS NOT EMPTY",
+      "fired": true,
+      "vacuous": false,
+      "note": "SYMBOL edge_design is a field on FLLNT-07, NOT FLLNT-06 — FINDING F1. Fires pass/fail/fail(missing). §9.4 quote line 2241+: 'Edge design — The waterside/pool edge must be formed in a manner that…'."
+    },
+    {
+      "id": "REQ-18",
+      "condition": "attest_fllnt_06_req_18 == True",
+      "fired": true,
+      "vacuous": false,
+      "note": "Attest boolean (label 'Nachweis: §9.5.1-3' Swimming-area construction). Fires pass/fail/pending. §9.5 quote line 2262+. Attestation gate, no scalar."
+    },
+    {
+      "id": "REQ-31",
+      "condition": "freeboard_water_to_seal >= 5 AND edge_height_tolerance_mm <= 10",
+      "fired": true,
+      "vacuous": false,
+      "note": "BOTH constants VA-grade against §9.4 (lines 2244-2255). Symbols freeboard_water_to_seal (cm) and edge_height_tolerance_mm (mm) are fields on FLLNT-07, NOT FLLNT-06 — FINDING F1. Boundary tested: (5,10)->pass, (4,10)->fail, (5,11)->fail, missing->pending. Quotes: 'the water level remains consistently at least 5 cm below the upper edge of the sealing system' (=> >=5 cm freeboard) and 'the ends of the edges can indicate a maximum deviation of the planned nominal height of +/- 10 mm' (=> <=10 mm tolerance). Both constants + units match the source exactly."
+    },
+    {
+      "id": "REQ-32",
+      "condition": "sealing_biocide_free_biofilm_ok == true",
+      "fired": true,
+      "vacuous": false,
+      "note": "VA against §9.3 (lines 2207-2208): 'The sealings and protective layers cannot be treated with biocides; consequently, only sealings that allow biofilm to form on the surface are permissible.' Symbol sealing_biocide_free_biofilm_ok is a field on FLLNT-07, NOT FLLNT-06 — FINDING F1. Fires pass/fail/pending."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "title": "Cross-worksheet gate/field split: 6 of FLLNT-06's 8 gates read symbols that are input fields on FLLNT-07, not FLLNT-06.",
+      "detail": "REQ-15 (area_separation_method), REQ-16 (sealing_type), REQ-17 (edge_design), REQ-31 (freeboard_water_to_seal, edge_height_tolerance_mm), REQ-32 (sealing_biocide_free_biofilm_ok) are attached to FLLNT-06 (Flächenplanung / planning) but all six symbols are entered on FLLNT-07 (Bau- & Konstruktionsanforderungen / construction) — confirmed by prod query (all six resolve to worksheet FLLNT-07). Per the wizard's worksheet-LOCAL compliance evaluation (memory reference_wizard_compliance_gates: 'worksheet-local lookup'), these gates cannot see the FLLNT-07-entered values when evaluated on the FLLNT-06 instance, so they resolve fail/pending on FLLNT-06 for a placement reason rather than a real deficiency (REQ-07-class 'red for the wrong reason'). NOT a doctrine violation of the source; a gate-placement / cross-worksheet-inheritance gap. DECISION D1.",
+      "quotes": "prod: area_separation_method,edge_design,edge_height_tolerance_mm,freeboard_water_to_seal,sealing_biocide_free_biofilm_ok,sealing_type -> all worksheet=FLLNT-07."
+    },
+    {
+      "id": "F2",
+      "severity": "low",
+      "title": "EQ-PUWS is a synthesized (encoder-authored) equation, not a verbatim source equation.",
+      "detail": "The standard prints the components of the worked example (ground 50 m², wall 45 m², total 95 m²) and the 50x rule verbiage, but does NOT print an algebraic equation 'pool_underwater_surface = pool_ground_area_m2 + pool_submerged_wall_area_m2'. The encoded formula is a faithful transcription of Example 2's arithmetic; the shape is correct and matches the printed total exactly. Flagged so it is not mistaken for a verbatim-source equation. No fix needed; provenance note only. DECISION D2 (whether to add a source-reference tag 'Appendix 5, Example 2' to the equation row)."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "reason": "SR-3 VC downgrade: verification used the markdown extract Naturteich.txt (searchable convenience), not a fresh page-level pdftotext re-render of the rendered PDF. The Appendix-5 worked example (95 m²) and §9.4 constants (5 cm, 10 mm) and §9.3 biocide clause were all confirmed in the extract but are VC until a page-range pdftotext confirm is run. PDF at C:\\Users\\Ekowai\\Desktop\\FLL Guidelines PDF\\fll_gewaesserabdichtungsrichtlinien_2023__2 (2).pdf — NOTE: task PDF pointer is the Gewaesserabdichtung PDF; the Naturteich text lives in the 'guidelines_for_the_planning_construction_and_maintenance_of_private_natural_swimming_pools_2017_p (1).pdf'. Re-render the Naturteich PDF pages for Appendix 5 (~p.81-82) and §9.3/9.4 (~p.41-42) to promote VC->VA."
+    },
+    {
+      "id": "R2",
+      "reason": "pool_underwater_surface is not server-materialized: saveWorksheet only writes derived rows for hardcoded A138 equation registries; the generic FLL EQ-PUWS output is computed client-side (useEquationEngine) and written to the store, never persisted as a source_type='derived' project_parameters row. Standing engine-output-materialization gap (memory project_engine_output_materialization), standard-agnostic; not fixed here. Consequence: any downstream gate/consumer reading pool_underwater_surface by symbol (e.g. FLLNT-09 REQ-33, FLLNT-10 EQ-01/EQ-03, FLLNT-11 EQ-05) resolves 'fehlend' from persisted state even though the planning worksheet computed 95."
+    },
+    {
+      "id": "R3",
+      "reason": "No source RANGE was encountered for FLLNT-06 (EQ-PUWS is a single additive identity; REQ-31 constants 5 cm / 10 mm are fixed single-valued limits, not ranges). SR-2 not triggered on this worksheet. (Ranges DO appear elsewhere in the standard, e.g. Tab.10 water column 10-50 cm on FLLNT-09 — out of scope here.)"
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "gate-placement",
+      "title": "FLLNT-06 gates REQ-15/16/17/31/32 read FLLNT-07-entered symbols under worksheet-local evaluation.",
+      "options": [
+        "(a) Move these 5 gates to FLLNT-07 (where their inputs are entered).",
+        "(b) Add cross-worksheet symbol inheritance so FLLNT-06 can see FLLNT-07 values.",
+        "(c) Move the input fields (area_separation_method, sealing_type, edge_design, freeboard_water_to_seal, edge_height_tolerance_mm, sealing_biocide_free_biofilm_ok) onto FLLNT-06.",
+        "(d) Accept as-is (planning worksheet asserts construction-phase attributes at review time)."
+      ],
+      "staged": "NO migration staged — this is a design decision, not an unambiguous fix. Read-only; no prod write. Awaiting Alvaro's call.",
+      "recommendation": "Prefer (a) or (b): the section provenance (§9.2/9.3/9.4) is construction; the gates most naturally live where their evidence is entered (FLLNT-07)."
+    },
+    {
+      "id": "D2",
+      "type": "provenance-tag",
+      "title": "Tag EQ-PUWS with its source reference (Appendix 5, Example 2) since it is encoder-synthesized, not verbatim.",
+      "staged": "No migration staged (documentation-only, non-behavioral). Would add a source_reference note to the equations row. Read-only; awaiting decision.",
+      "recommendation": "Low priority; add when the Naturteich PDF page re-render (R1) is done so the VC->VA promotion and the tag land together."
+    }
+  ]
+}

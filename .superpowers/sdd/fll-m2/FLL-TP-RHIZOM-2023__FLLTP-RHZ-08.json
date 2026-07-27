@@ -1,0 +1,129 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-08",
+  "worksheetId": "9cbd49ba-cc3b-4902-a241-599f31186de7",
+  "title_de": "Testpflanzen-Qualität",
+  "title_en": "Test plant quality check",
+  "archetype": "verification",
+  "phase": 2,
+  "pdfSource": "C:/Users/Ekowai/_wt-fll/.superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt",
+  "prodInventory": { "equations": 0, "compliance_requirements": 0, "fields": 2 },
+
+  "fields": [
+    {
+      "symbol": "testpflanze_art",
+      "data_type": "enum",
+      "unit": null,
+      "is_required": true,
+      "enum_values": [
+        { "value": "phragmites_australis", "label_de": "Phragmites australis (Schilf)", "label_en": "Phragmites australis (Reed)", "regulation_reference": "§5.8, §3.6" }
+      ],
+      "verdict": "VA",
+      "quote": "§5.8 Testpflanzen (line 650-651): \"Bei der Prüfung ist folgende Pflanzenart in der angegebenen Qualität einzusetzen: Phragmites australis (Schilf) im 9 x 9 Container.\" — corroborated by §3.6 Testpflanzenarten (line 398) and §5.7/Abschnitt-4 (line 505): \"Phragmites australis (Schilf) durchgeführt.\"",
+      "note": "Single-option enum is exactly the standard's sole prescribed species. PDF-confirmed on the rendered layout text (§5.8 + §3.6). enum_values regulation_reference (§5.8, §3.6) matches the PDF sections. VA."
+    },
+    {
+      "symbol": "testpflanze_container_format",
+      "data_type": "text",
+      "unit": null,
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "§5.8 Testpflanzen (line 651): \"Phragmites australis (Schilf) im 9 x 9 Container.\"",
+      "note": "The standard prescribes a FIXED single container size, verbatim \"9 x 9\" (cm, Topfformat). Prod encodes this as a free-text field rather than a fixed/read-only constant or single-option enum, so the source-mandated value is not enforced by the schema — see finding F-2. Value itself is PDF-confirmed (VA)."
+    }
+  ],
+
+  "equations": [],
+
+  "chains": [
+    {
+      "name": "RHZ-08 data-collection save (§5.8 source-attested state)",
+      "ran": true,
+      "liveValue": { "testpflanze_art": "phragmites_australis", "testpflanze_container_format": "9 x 9" },
+      "pdfExpected": { "testpflanze_art": "phragmites_australis", "testpflanze_container_format": "9 x 9" },
+      "verdict": "VA",
+      "raw": "RHZ-08 save.ok: true  error: null\nRHZ-08 persisted  testpflanze_art: \"phragmites_australis\"  container_format: \"9 x 9\""
+    },
+    {
+      "name": "RHZ-08 out-of-enum species save (typha_latifolia) — validation probe",
+      "ran": true,
+      "liveValue": { "testpflanze_art": "typha_latifolia" },
+      "pdfExpected": "rejection or coercion (only phragmites_australis is a valid species per §3.6/§5.8)",
+      "verdict": "FINDING",
+      "raw": "RHZ-08 bad-enum save.ok: true  error: null\nRHZ-08 after bad-enum persisted testpflanze_art: \"typha_latifolia\""
+    }
+  ],
+
+  "gates": [],
+
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "medium",
+      "scope": "standard-agnostic (saveWorksheet enum validation)",
+      "title": "saveWorksheet accepts and persists an out-of-enum value for testpflanze_art",
+      "detail": "Driving the REAL saveWorksheet path with testpflanze_art='typha_latifolia' (NOT in the field's single-option enum {phragmites_australis}) returned {ok:true} and the illegal value was persisted verbatim to project_parameters.value_enum. There is no server-side enum-membership check. For FLLTP-RHZ-08 this matters because §5.8/§3.6 mandate exactly ONE species (Phragmites australis); any other species is a non-conformant test setup that the encoding cannot catch. No compliance_requirement backstops it either (0 gates on this worksheet). NOT fixed (findings-over-fixes). Standard-agnostic — likely affects every enum field; catalogue, do not patch here.",
+      "evidence": "RHZ-08 bad-enum save.ok: true  error: null / persisted testpflanze_art: \"typha_latifolia\""
+    },
+    {
+      "id": "F-2",
+      "severity": "low",
+      "scope": "encoding (FLLTP-RHZ-08)",
+      "title": "Container format is a fixed source constant but encoded as free text",
+      "detail": "§5.8 prescribes a SINGLE fixed container size verbatim \"9 x 9\" (Container). Prod encodes testpflanze_container_format as data_type='text' (free entry), so an engineer can type any format and nothing enforces the standard's mandated \"9 x 9\". A single-option enum (mirroring testpflanze_art) or a read-only constant would make the source-mandated value self-enforcing. Value is PDF-confirmed; the encoding CHOICE is the weakness. No prod write (staged as decision D-1)."
+    },
+    {
+      "id": "F-3",
+      "severity": "info",
+      "scope": "coverage (FLLTP-RHZ-08)",
+      "title": "§5.8 'gleichmäßige Pflanzenqualität' and '8 Pflanzen je 800x800-Gefäß' not captured on this worksheet",
+      "detail": "§5.8 states two further requirements verbatim: (line 653) \"Je Gefäß von 800 x 800 mm sind 8 Pflanzen vorzusehen.\" and (line 655) \"Es ist auf eine gleichmäßige Pflanzenqualität zu achten.\" The worksheet title/description reference 'gleichmäßige Pflanzenqualität' but there is NO field or gate for planting density (8 per 800x800) nor a uniform-quality attestation on FLLTP-RHZ-08. The 800x800/8-plants requirement may live on a sibling worksheet (line 782 repeats it: 'Pro Prüfgefäß von 800 x 800 mm sind acht Pflanzen'), but the uniform-quality clause appears uncaptured. Flag for the encoding owner; no auto-fix."
+    }
+  ],
+
+  "residue": [
+    {
+      "id": "R-1",
+      "type": "VC-none",
+      "note": "No markdown-only (VC) values on this worksheet — both field values are PDF-confirmed (VA) on the rendered §5.8/§3.6 layout text. SR-3 satisfied."
+    },
+    {
+      "id": "R-2",
+      "type": "cos_beta/trig",
+      "note": "N/A — FLLTP-RHZ-08 has 0 equations; no trig/math-function-blocked equation exists. The known engine gap does not apply to this worksheet."
+    },
+    {
+      "id": "R-3",
+      "type": "un-run-chain",
+      "note": "None. The only computable path on this worksheet is the data-collection save, which was driven end-to-end through the REAL saveWorksheet against the embedded PG (chain ran=true, green)."
+    }
+  ],
+
+  "decisionItems": [
+    {
+      "id": "D-1",
+      "kind": "staged-encoding-change (written-not-applied)",
+      "title": "Consider converting testpflanze_container_format to a fixed/single-option constant '9 x 9'",
+      "detail": "§5.8 mandates exactly one container size. Staging (NOT applying) a migration note: change field testpflanze_container_format (id cbf913d9-2517-49f5-8c91-1e86850d5ba1) from data_type='text' to a single-option enum {value:'9x9', label_de:'9 x 9 Container'} OR mark it read-only with default '9 x 9'. Human decision required — do NOT write to prod. See F-2.",
+      "prodTarget": "vadsmshzebefjreqcicl / fields.id=cbf913d9-2517-49f5-8c91-1e86850d5ba1",
+      "applied": false
+    },
+    {
+      "id": "D-2",
+      "kind": "range-surface (SR-2)",
+      "title": "No numeric range on this worksheet — nothing to surface",
+      "detail": "SR-2 checked: FLLTP-RHZ-08 carries no field with a source RANGE (the two fields are a fixed-species enum and a fixed-format string). §5.8's only numeric figures (800x800 mm gefäß, 8 Pflanzen) are point values on sibling scope, not ranges. No auto-pick risk. Recorded for completeness.",
+      "applied": null
+    }
+  ],
+
+  "doctrine": {
+    "SR-1": "Every value claim carries a verbatim §5.8/§3.6 quote from the PDF text read THIS run; no prior-log/bring-up numbers used.",
+    "SR-2": "No range on this worksheet — nothing auto-picked; recorded as D-2.",
+    "SR-3": "Values confirmed against the rendered §5.8 layout text (VA). No PDF-vs-markdown disagreement.",
+    "no-prod-write": "Read-only Supabase MCP only. The one encoding weakness (F-2) staged as decision D-1, not applied."
+  },
+
+  "verdict": "PASS-with-findings",
+  "summary": "FLLTP-RHZ-08 (Testpflanzen-Qualität, verification archetype): 0 equations, 0 gates, 2 fields. Both field values (species=Phragmites australis, container=9 x 9) are VA-grade, PDF-confirmed verbatim from §5.8 (line 651) + §3.6. The single computable chain — the data-collection save — was driven through the REAL saveWorksheet path against embedded PG and round-tripped correctly (green). 3 findings: F-1 saveWorksheet accepts an out-of-enum species (no server-side enum check, standard-agnostic), F-2 fixed 9x9 container encoded as free text, F-3 §5.8 uniform-quality / 8-plants-per-800x800 clauses not captured on this worksheet. No trig residue (no equations)."
+}

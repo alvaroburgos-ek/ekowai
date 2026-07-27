@@ -1,0 +1,141 @@
+{
+  "standard": "FLL-GAR-2023",
+  "worksheet": "FLL-GAR-23",
+  "worksheetTitle": "Randausbildungen (Edge terminations)",
+  "worksheetId": "17b8386e-6207-4bee-ae24-037c5ca3dde2",
+  "phase": 5,
+  "archetype": "calculation",
+  "prodCounts": { "equations": 0, "compliance_requirements": 0, "fields": 3 },
+  "pdf": "C:\\Users\\Ekowai\\_wt-fll\\.superpowers\\sdd\\fll-m2\\pdf\\GAR.txt",
+  "equations": [],
+  "equationsNote": "0 equations encoded for this worksheet in prod. FLL-GAR-23 is a data-collection/input worksheet (edge-termination heights + application case); §4.8 and Tab.28 state minima as inequalities, not producer equations. Nothing to verify as a formula. Not a residue gap — the standard prints no computed output symbol here.",
+  "fields": [
+    {
+      "id": "6dfb6931-5b1d-48be-a54f-476d6bedb9e4",
+      "symbol": "freibord_zu_gelaende_cm",
+      "data_type": "number",
+      "unit": "cm",
+      "validation_raw": ">= 5",
+      "clause_reference": "Sec.4.8",
+      "verdict": "VA",
+      "quote": "Die Abdichtung am Gewässerrand sollte i. d. R. im frei gestalteten Übergang zum angrenzenden Gelände dauerhaft mind. 5 cm höher sein als der vorgesehene Höchstwasserstand. Dies gilt auch für Schwimm- und Badeteiche. (§4.8, GAR.txt L1634-1636)",
+      "note": "5 cm minimum verbatim-confirmed against §4.8 (PDF ground truth). Unit cm correct. Also Tab.28 row 4 '≥5' column Freifläche=X, i.e. 5 cm is the free-terrain minimum."
+    },
+    {
+      "id": "c0fcbcfa-a69f-44d4-9bd6-5321ba3a632a",
+      "symbol": "freibord_zu_bauwerk_cm",
+      "data_type": "number",
+      "unit": "cm",
+      "validation_raw": ">= 30 (or >= 15 with adapted fastening)",
+      "clause_reference": "Sec.4.8",
+      "verdict": "VA",
+      "quote": "An aufgehenden Bauteilen und Bauwerken ist die Oberkante der Abdichtung i. d. R. 30 cm über den geplanten Höchstwasserstand auszuführen. Durch Verwendung angepasster Randbefestigungen ist eine Reduzierung der Mindestüberhöhung der Abdichtung auf ≥ 15 cm möglich. (§4.8, GAR.txt L1644-1647)",
+      "note": "Both the 30 cm default and the ≥15 cm reduced value (with 'angepasste Randbefestigung' = adapted fastening) are verbatim-confirmed against §4.8 (PDF ground truth). The raw string collapses a conditional range into one field — see decisionItem DI-1 (SR-2)."
+    },
+    {
+      "id": "c80db394-71aa-4f07-8741-fc5daf7251c7",
+      "symbol": "abschluss_anwendungsfall",
+      "data_type": "enum",
+      "enum_values": ["bauteil_bauwerk", "freiflaeche", "schwimmteich"],
+      "clause_reference": "Tab.28",
+      "verdict": "VA",
+      "quote": "Tab. 28: Objektbezogene An- und Abschlusshöhen für Gewässerabdichtungen ... in cm  Bauteil/Bauwerk  Freifläche  Schwimmteich (GAR.txt L5759, L5769). Cross-ref: 'Tabelle 28 gibt einen Überblick über die An- und Abschlusshöhen für Abdichtungsbahnen an Bauteilen und Bauwerken ... Freiflächen ... sowie bei Nutzung als Schwimmteich.' (§9.3.5, GAR.txt L5968-5970)",
+      "note": "All 3 enum options map exactly to the 3 Anwendungsfälle-columns of Tab.28 (Bauteil/Bauwerk, Freifläche, Schwimmteich). regulation_reference='Tab.28' on each option is correct. VA."
+    }
+  ],
+  "chains": [
+    {
+      "name": "saveWorksheet PASS state (freibord 5cm/30cm, Bauteil/Bauwerk)",
+      "ran": true,
+      "liveValue": "freibord_zu_gelaende_cm=5, freibord_zu_bauwerk_cm=30, abschluss_anwendungsfall=bauteil_bauwerk (persisted to project_parameters via real saveWorksheet, res.ok=true)",
+      "pdfExpected": "§4.8 minima: ground 5 cm, building 30 cm; case = Bauteil/Bauwerk (Tab.28)",
+      "verdict": "VA",
+      "raw": "✓ PASS state: freibord 5cm/30cm, Bauteil/Bauwerk case persists 418ms"
+    },
+    {
+      "name": "saveWorksheet FAIL/below-min state (freibord 3cm/10cm, Schwimmteich)",
+      "ran": true,
+      "liveValue": "freibord_zu_gelaende_cm=3, freibord_zu_bauwerk_cm=10, abschluss_anwendungsfall=schwimmteich (persisted; res.ok=true — no gate blocks below-minimum values)",
+      "pdfExpected": "3 cm < 5 cm §4.8 min and 10 cm < 30/15 cm §4.8 min → these are non-compliant per §4.8, yet nothing in the encoding rejects them",
+      "verdict": "VC",
+      "raw": "✓ FAIL/below-min state: freibord 3cm/10cm, Schwimmteich case still persists (no gate enforces) 9ms"
+    },
+    {
+      "name": "field-presence chain (3 fields exposed by fixture)",
+      "ran": true,
+      "liveValue": "all 3 field ids resolvable via fx.worksheets['FLL-GAR-23'].fields",
+      "pdfExpected": "n/a (topology check)",
+      "verdict": "VA",
+      "raw": "✓ exposes the 3 collected fields 2ms"
+    }
+  ],
+  "chainsSummary": "3/3 test cases green. Real saveWorksheet path drove all 3 fields (2 number + 1 enum) into project_parameters in both a §4.8-compliant and a below-minimum state; both persisted (as expected, since 0 compliance_requirements). Standard prints NO worked numeric example for this worksheet (Tab.28 is a matrix of admissible heights, not a worked calc), so pass values are sanity-checked against the §4.8 minima verbatim rather than a printed result.",
+  "vitestRaw": "RUN v4.1.5\n Test Files  1 passed (1)\n      Tests  3 passed (3)\n ✓ exposes the 3 collected fields 2ms\n ✓ PASS state: freibord 5cm/30cm, Bauteil/Bauwerk case persists 418ms\n ✓ FAIL/below-min state: freibord 3cm/10cm, Schwimmteich case still persists (no gate enforces) 9ms",
+  "gates": [],
+  "gatesNote": "0 compliance_requirements encoded for FLL-GAR-23. No gate to fire → none reported vacuous (there is simply none). However the ABSENCE is itself a finding (F-1): the §4.8/Tab.28 minima are enforceable numeric thresholds that would normally be a severity='block' compliance_requirement, but here they live only as non-enforcing validation_rules.raw free-text strings.",
+  "findings": [
+    {
+      "id": "F-1",
+      "severity": "medium",
+      "type": "missing-gate / non-enforcing-constraint",
+      "title": "§4.8 / Tab.28 edge-height minima are not enforced by any compliance_requirement",
+      "detail": "freibord_zu_gelaende_cm (>=5) and freibord_zu_bauwerk_cm (>=30 / >=15 with adapted fastening) are hard numeric minima stated in §4.8 and Tab.28 (both quoted verbatim, VA). They are encoded ONLY as validation_rules.raw strings ('>= 5', '>= 30 (or >= 15 with adapted fastening)') which are dead free-text (per the wizard gates architecture, only compliance_requirements with severity='block' + evaluate.ts enforce; validation_rules is not evaluated). PROVEN live: the FAIL-state chain saved freibord 3cm/10cm with res.ok=true. Consumers therefore inherit non-compliant edge heights silently. Staged fix (written-not-applied) in decisionItems, NOT applied to prod per doctrine."
+    },
+    {
+      "id": "F-2",
+      "severity": "low",
+      "type": "range-collapsed-into-raw-string",
+      "title": "freibord_zu_bauwerk_cm packs a conditional range (30 vs 15) into one field + one raw string",
+      "detail": "§4.8 gives TWO admissible minima for the building case: 30 cm default, reducible to >=15 cm only with 'angepasste Randbefestigungen'. The encoding stores this as a single number field with raw='>= 30 (or >= 15 with adapted fastening)'. The 'adapted fastening' condition is not itself captured as a field/flag, so a correct >=15 entry cannot be distinguished from a non-compliant one. Surfaced as decisionItem DI-1 per SR-2 (do not auto-pick 30 vs 15)."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R-1",
+      "type": "no-worked-example",
+      "detail": "The standard prints no worked numeric example for FLL-GAR-23 edge heights (Tab.28 is a height matrix, §4.8 is prose). Pass-state chain values were therefore sanity-checked against the §4.8 verbatim minima, not asserted against a printed result → chain verdict VA for the compliant case (minima verbatim), VC for the below-min case (no printed counter-example)."
+    },
+    {
+      "id": "R-2",
+      "type": "markdown-vs-pdf",
+      "detail": "The field label_en 'Freeboard'/'Freibord' does NOT appear anywhere in the German PDF (grep 0 hits); the PDF uses 'Höhe/Überhöhung der Abdichtung über den (Höchst-)Wasserstand'. This is an EN-label paraphrase, not a mismatch of the constraint itself (the cm minima match verbatim). Flagged as VC-only on the label wording; the numeric constraints remain VA."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "DI-1",
+      "type": "SR-2-range",
+      "title": "freibord_zu_bauwerk_cm: 30 cm vs 15 cm is a conditional range — do not auto-pick",
+      "options": [
+        "30 cm — §4.8 default at aufgehende Bauteile/Bauwerke",
+        "15 cm — §4.8 reduced minimum, ONLY with 'angepasste Randbefestigungen' (adapted fastening)"
+      ],
+      "quote": "An aufgehenden Bauteilen und Bauwerken ist die Oberkante der Abdichtung i. d. R. 30 cm über den geplanten Höchstwasserstand auszuführen. Durch Verwendung angepasster Randbefestigungen ist eine Reduzierung der Mindestüberhöhung der Abdichtung auf ≥ 15 cm möglich. (§4.8, GAR.txt L1644-1647)",
+      "recommendation": "Add a boolean flag field 'angepasste_randbefestigung' so the applicable minimum (30 vs 15) is determined by the case, not silently collapsed. Surface for human decision; do not auto-pick."
+    },
+    {
+      "id": "DI-2",
+      "type": "SR-2-range / Tab.28 matrix",
+      "title": "Tab.28 gives a per-Anwendungsfall RANGE of admissible heights — surface the matrix, don't reduce to one number",
+      "options": [
+        "Bauteil/Bauwerk: only ≥15 (as (X), i.e. with geeigneter Randbefestigung + Sicherung gegen Hinter-/Unterläufigkeit); ≥10/≥5/0 only als Sonderkonstruktion (Fußnote 1)",
+        "Freifläche: ≥15, ≥10, ≥5 all X (zugelassen); 0 only als Sonderkonstruktion",
+        "Schwimmteich: ≥15, ≥10 X; ≥5 als Sonderkonstruktion; 0 als Sonderkonstruktion"
+      ],
+      "quote": "Tab.28 rows: '≥15 (X) X X' | '≥10 -1 X X' | '≥5 -1 X -1' | '0 -1' ; '1 Nur als Sonderkonstruktion, d. h. als besondere planerische und technische Lösung.' (GAR.txt L5773-5785). '(X) = nur mit geeigneter Randbefestigung und Sicherung gegen Hinter- und Unterläufigkeit' (L5765-5766).",
+      "recommendation": "The admissible edge height is a FUNCTION of abschluss_anwendungsfall (a matrix range), not a global >=5/>=30. A future gate should evaluate the (case, height) pair against Tab.28. Decision for a human: whether to encode Tab.28 as a lookup gate. Not applied."
+    },
+    {
+      "id": "DI-3",
+      "type": "staged-migration (written-not-applied)",
+      "title": "STAGED: add severity='block' compliance_requirements enforcing §4.8 minima (fixes F-1)",
+      "migrationNote": "INSERT compliance_requirements for template 17b8386e-6207-4bee-ae24-037c5ca3dde2: (a) code FLL-GAR-23-CR-freibord-gelaende, condition 'freibord_zu_gelaende_cm >= 5', severity block, clause Sec.4.8; (b) code FLL-GAR-23-CR-freibord-bauwerk, condition 'freibord_zu_bauwerk_cm >= 15', severity block, clause Sec.4.8 (15 is the absolute floor; the 30-vs-15 distinction needs DI-1's flag before a stricter gate is safe). Grammar note: evaluate.ts supports simple 'symbol >= literal' — both conditions are within the supported grammar. WRITTEN-NOT-APPLIED — no prod write per doctrine; queue for the single controlled apply pass."
+    }
+  ],
+  "doctrine": {
+    "SR-1": "Every value claim carries a verbatim German quote with GAR.txt line refs; seeder defaults were NOT used as source (chains re-drove values via saveWorksheet).",
+    "SR-2": "Both ranges (30-vs-15 conditional; Tab.28 case-matrix) surfaced as decisionItems DI-1/DI-2 — not auto-picked.",
+    "SR-3": "PDF (GAR.txt from pdftotext -layout of the rendered PDF) is treated as ground truth; the EN 'Freeboard' label mismatch vs PDF German (R-2) is flagged VC, numeric minima VA.",
+    "no-prod-write": "No writes to prod. The one enforceability correction (F-1) is staged as DI-3 written-not-applied."
+  }
+}

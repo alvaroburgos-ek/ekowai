@@ -1,0 +1,120 @@
+{
+  "standard": "FLL-TP-RHIZOM-2023",
+  "worksheet": "FLLTP-RHZ-03",
+  "worksheetTitle": "Geltungsbereichsprüfung (scope/applicability check)",
+  "templateId": "7a294fc9-dc07-4bbe-9ad8-35373effb127",
+  "instanceId": "7a294fc9-dc07-4bbe-9ad8-35373effb127 (template) — instance created per-run by seeder",
+  "pdfSource": "C:/Users/Ekowai/Desktop/FLL Guidelines PDF/fll_tp_rhizomfestigkeit_gewaesserabdichtung_2023 (1).pdf; text at .superpowers/sdd/fll-m2/pdf/TP-Rhizom.txt",
+  "pdfSectionAnchor": "§2 Geltungsbereich (rendered page 8, TP-Rhizom.txt lines 307-343)",
+  "fields": [
+    {
+      "symbol": "scope_einzelprodukt_bestaetigt",
+      "label_de": "Einzelprodukt (kein System)?",
+      "data_type": "boolean",
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "\"Das Verfahren beinhaltet die Prüfung einzelner Produkte für die Herstellung von Abdichtungsschichten von Gewässern inklusive der zugehörigen Fügetechnik. Die Prüfung eines Abdichtungssystems, d. h. eines aus mehreren Funktionsschichten bestehenden Aufbaus oder einer zusätzlichen Kaschierung der Gewässerabdichtung ist nicht zulässig.\" (§2, TP-Rhizom.txt L322-325)",
+      "note": "PDF-attested. Field encodes the §2 admissibility rule: only single products (kein System) are testable. Boolean true = Einzelprodukt confirmed (admissible); false = System (nicht zulässig). Semantics match the standard exactly."
+    },
+    {
+      "symbol": "scope_anwendungsbereich",
+      "label_de": "Anwendungsbereich des Produkts",
+      "data_type": "text",
+      "is_required": true,
+      "verdict": "VA",
+      "quote": "\"Das Verfahren gilt für die Bestimmung des Widerstandes gegen Ein- und Durchdringungen von Rhizomen ... für Abdichtungsschichten gemäß Abschnitt 10.4 der FLL-Gewässerabdichtungsrichtlinien ...\" and \"für alle Ausbildungsformen von Gewässern im Garten-, Landschafts- und Sportplatzbau.\" (§2, TP-Rhizom.txt L309-312, L320). Also captured on the Prüfbericht data sheet as \"Anwendungsbereich:\" (§ Anforderungen, L1051)",
+      "note": "PDF-attested. Free-text scope descriptor; matches the §2 domain statement and the mandatory Prüfbericht field 'Anwendungsbereich'. No constant/range involved."
+    },
+    {
+      "symbol": "scope_geltung_validiert",
+      "label_de": "Geltungsbereich validiert",
+      "data_type": "boolean",
+      "is_required": true,
+      "verdict": "VC",
+      "quote": "No verbatim standard text mandates an explicit 'Geltungsbereich validiert' sign-off boolean; it is a wizard workflow attest field derived from §2 as a whole (\"Das Verfahren gilt für ...\", L309). §2 defines the scope but does not print a validation-checkbox requirement.",
+      "note": "Markdown/encoding-workflow field, not a source-printed datum. Reasonable process attestation over §2; flagged VC (not PDF-mandated as a discrete requirement)."
+    },
+    {
+      "symbol": "scope_pruefer_name",
+      "label_de": "Prüfer-Name",
+      "data_type": "text",
+      "is_required": true,
+      "verdict": "VC",
+      "quote": "The standard's Prüfbericht requires identifying the testing party (§ registration/Prüfbericht, e.g. \"Angaben des >> Name des Auftraggebers <<\", L1048), but §2 Geltungsbereich itself prints no 'Prüfer-Name' field. Generic provenance/audit field.",
+      "note": "Workflow provenance field (who performed the scope check). Not a §2 datum; VC. No range, no constant."
+    },
+    {
+      "symbol": "scope_pruefung_datum",
+      "label_de": "Prüfdatum",
+      "data_type": "date",
+      "is_required": true,
+      "verdict": "VC",
+      "quote": "Date/provenance field; §2 prints no test date requirement. The Prüfbericht chapter carries dated identifying data generally but not a §2 'Prüfdatum'.",
+      "note": "Workflow provenance date. Not a §2 datum; VC. No range, no constant."
+    }
+  ],
+  "equations": [],
+  "chains": [
+    {
+      "name": "scope-save-positive (Einzelprodukt=true, valid scope)",
+      "ran": true,
+      "liveValue": "res.ok=true; persisted scope_einzelprodukt_bestaetigt.value_boolean=true, scope_geltung_validiert.value_boolean=true, scope_anwendungsbereich.value_text contains 'Garten-...Sportplatzbau', scope_pruefung_datum.value_date=2026-01-15 (verified via getFullYear/getMonth/getDate on the persisted Date)",
+      "pdfExpected": "No worked example — §2 is a qualitative scope clause with no numeric example. Persistence + admissibility semantics sanity-checked against §2 verbatim.",
+      "verdict": "VC",
+      "raw": "pnpm vitest run --project integration tests/harness/verify-rhz03.integration.test.ts → Test Files 1 passed (1); Tests 3 passed (3); Duration ~5.0s. Test 1 'drives saveWorksheet through the REAL path (scope bool/text/date fields)' PASSED (res.ok true + all 4 persisted-value assertions green)."
+    },
+    {
+      "name": "scope-save-negative (Einzelprodukt=false → System, nicht zulässig)",
+      "ran": true,
+      "liveValue": "res.ok=true; persisted scope_einzelprodukt_bestaetigt.value_boolean=false",
+      "pdfExpected": "§2: 'Die Prüfung eines Abdichtungssystems ... ist nicht zulässig' — the false state represents the inadmissible System case; save still succeeds (worksheet has no local gate to block it — see finding F1).",
+      "verdict": "VC",
+      "raw": "Test 2 'drives a FAIL/negative scope state' PASSED; NEG_PERSISTED value_boolean=false."
+    },
+    {
+      "name": "no-equation / no-gate structural assertion",
+      "ran": true,
+      "liveValue": "equations count = 0, compliance_requirements count = 0 on templateId 7a294fc9",
+      "pdfExpected": "n/a — §2 defines no formula and no numeric threshold.",
+      "verdict": "VA",
+      "raw": "Test 3 'confirms this worksheet carries NO equations and NO compliance_requirements' PASSED; EQ_CR_COUNTS eqCount=0 crCount=0. Cross-checked against prod: equations=[], compliance_requirements=[]."
+    }
+  ],
+  "gates": [],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "info",
+      "title": "scope_einzelprodukt_bestaetigt is a cross-worksheet producer with no LOCAL consumer; its only consumer (REQ-01 on FLLTP-RHZ-01) is vacuous",
+      "detail": "The §2-attested admissibility symbol scope_einzelprodukt_bestaetigt is DEFINED as a field on THIS worksheet (FLLTP-RHZ-03) but the only compliance_requirement referencing it is REQ-01 on FLLTP-RHZ-01: condition 'abdichtungsart IN {bitumen,kunststoff,elastomer,fluessig,gussasphalt,gup} AND scope_einzelprodukt_bestaetigt == true'. Wizard gates evaluate worksheet-locally (symbols resolve against the requirement's own worksheet field set). FLLTP-RHZ-01 carries neither abdichtungsart nor scope_einzelprodukt_bestaetigt as fields (confirmed in verify-rhz01 test: both fieldIds undefined), so REQ-01 is permanently pending → vacuous/dead (CR-006 class). Net effect: the §2 'kein System' admissibility rule is captured as data on RHZ-03 but is NOT enforced by any fireable gate anywhere. This is an RHZ-01 gate defect (owner of the vacuous gate) surfaced from the RHZ-03 producer side; recorded here as the produce/consume mismatch."
+    }
+  ],
+  "residue": [
+    {
+      "id": "R1",
+      "reason": "scope_geltung_validiert / scope_pruefer_name / scope_pruefung_datum are wizard workflow/provenance fields (VC), not §2-printed data. §2 Geltungsbereich prints no discrete validation-checkbox, tester-name, or test-date requirement. Kept as VC residue; no PDF disagreement, just no discrete source anchor."
+    },
+    {
+      "id": "R2",
+      "reason": "No cos_beta/trig equations on this worksheet (RHZ-03 has 0 equations). Trig-engine gap does not apply here — noted for completeness only."
+    },
+    {
+      "id": "R3",
+      "reason": "Console.log stdout markers (SAVE_RESULT/SCOPE_PERSISTED/NEG_PERSISTED/EQ_CR_COUNTS) were suppressed by the vitest reporter's onConsoleLog filter and did not appear in captured stdout; the embedded assertions inside the 3 passing tests are the authoritative persistence proof (res.ok===true + value_boolean/value_text/value_date equalities all green)."
+    }
+  ],
+  "decisionItems": [
+    {
+      "id": "D1",
+      "type": "gate-enforcement",
+      "title": "Decide how to make the §2 'kein System' admissibility rule enforceable",
+      "detail": "REQ-01 (FLLTP-RHZ-01) references scope_einzelprodukt_bestaetigt but that symbol lives only on FLLTP-RHZ-03 → gate is vacuous. Options: (a) add a block-severity compliance_requirement ON FLLTP-RHZ-03 that fires on scope_einzelprodukt_bestaetigt == false (i.e. reject Systeme, verbatim §2 L322-325); (b) make scope_einzelprodukt_bestaetigt a project_parameter consumed cross-worksheet by REQ-01 (requires the wizard's cross-worksheet resolution, which the gate architecture does NOT currently support); (c) accept as documentation-only. STAGED as a decision — NOT applied. No migration written yet because the fix locus (RHZ-03 new gate vs RHZ-01 gate rewrite) is a human call; primary owner of the vacuous gate is FLLTP-RHZ-01 (see that worksheet's verify)."
+    },
+    {
+      "id": "D2",
+      "type": "range",
+      "title": "No SR-2 range on this worksheet",
+      "detail": "§2 Geltungsbereich contains no numeric range or peak/yearly point-value choice; nothing to surface. Recorded to show SR-2 was applied and found N/A."
+    }
+  ]
+}
