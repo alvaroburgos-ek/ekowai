@@ -549,3 +549,23 @@ GAP 1 CAPTURE APPLIED 2026-07-27 (fable-5): regulation_tables 0 -> 922 for DWA-M
         (delete-all: standard had 0 rows before, verified).
         BEHAVIOUR UNCHANGED: nothing reads these rows for this standard yet. WIRING = G-D1.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+SOURCE-SETTLED FIX APPLIED (fable-5): DWA-M-102-4 Gl.3 + Gl.4 — migration 20260727180000.
+        Gl.3: formula "R_D = R_D,o + R_D,z" -> "R_D = R_D_o + R_D_z" AND inputs
+        [R_D,R_D_o,R_D_z] -> [R_D_o,R_D_z]. Gl.4: inputs [R_B,GWN] -> [GWN].
+        *** EXECUTION CAUGHT ANOTHER SILENT NO-OP CLASS *** The audited "Part A comma fix"
+        for Gl.3 ALONE changes nothing: the self-referential R_D in input_symbols
+        short-circuits first (manual_required "Fehlende Eingaben: R_D" before AND after).
+        Only formula+inputs together give broken->computes (probe: computed 8 / computed 7).
+        No fn( calls in either formula -> M104-D-comma FN_LIKE trap N/A (checked).
+        First apply attempt: HTTP 400, input_symbols is text[] not jsonb — failed LOUD,
+        nothing applied; casts fixed; re-applied 201; EFFECT VERIFIED BY QUERY (both rows).
+        SCOPE DISCIPLINE: identical self-ref artifact on Gl.6/10/12 NOT touched — circular
+        structures the auditors held as rulings -> sheet G-D8 (to add).
+        Rollback authored (restores originals verbatim). Probes deleted.
+MAP WRITE-BACK: 5 nodes stamped (eq-m104-gl3-rd, eq-m104-gl4-rb, tab-m104-a1/c3/c7).
+        MAP GAP: no nodes exist for tables A.4/B.1/C.4/C.5/C.6 — reported, not dropped.
+GATES/METRIC WORKFLOW DISPATCHED: wf_ee3c4d81-9f6 — all 22 CRs driven BOTH WAYS through the
+        real evaluate.ts + full workflow metric EXECUTED (every equation probed, collision
+        check, runnable/blocked per worksheet). Results persist to journal.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
