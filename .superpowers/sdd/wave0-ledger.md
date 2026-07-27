@@ -593,3 +593,26 @@ M-102-4 PROOF MANDATE EXECUTED (wf_ee3c4d81-9f6) + fix waves 2-3 (fable-5):
         5 tables lack nodes - map gap logged) · REMAINING: deployed-build harness + render
         spot-check (campaign alias not yet created) + _index re-render.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+# ============================================================
+# WAVE 5 OPENED — DWA-M-187 (queue position after M-102-4), 2026-07-27 (fable-5)
+# ============================================================
+STANDARD: DWA-M-187 "Retentionsbodenfilteranlagen: Sonderanwendungen" — **September 2025
+        ENTWURF (draft)**. Next queue entry DWA-M-1200-2 is a **Gelbdruck** draft too.
+        DRAFT DOCTRINE APPLIED: per the do-not-touch list, content fixes on drafts are
+        DEFERRED TO THE WEISSDRUCK. This wave = full READ-ONLY depth audit + staged
+        (not applied) fix drafts. Evidence capture rules unchanged.
+        SIZE: 25 ws / 139 fields / 4 eq / 15 CRs / 65 regulation_tables rows (tables WERE
+        imported here, unlike M-102-4 — the wave verifies them incl. 10-cell spot-check
+        against rendered pages). Parent Arbeitsblatt DWA-A-178 already fully audited;
+        cross-refs are reference edges per the CONTENT BOUNDARY RULE.
+        PDF verified: DWA-M-187\DWA-M_187_GD.pdf, 48 pages, text layer (309,210 chars).
+DISPATCHED: wf_66003b8b-2a8 / task wvd7w1u3c — full template proven on M-102-4:
+        independent offset -> bidirectional TOC walk (incl. regulation_tables verification)
+        -> equations over REAL equation_numbers read from prod first (the M-102-4 lesson)
+        with rendered-page grouping checks + adversarial refuters -> all 15 CRs both-ways +
+        executed metric. Probes deleted by instruction. Results persist to journal.
+M-102-4 wave 4 STATUS AT HANDOFF: 6 of 7 elements done; remaining = deployed-build
+        harness/render check (campaign alias) + G-D8 signature (spine unblock is Alvaro's
+        writer-retirement ruling — no further mechanical work exists for it).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 7 / UNTOUCHED 64.
