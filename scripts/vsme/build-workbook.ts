@@ -571,6 +571,31 @@ export function buildVsmeRows(
     });
   }
 
+  // Task 5 (B03.300 GHG-intensity equations, VSME para 31): the 4 dividend
+  // totals (B03.200) + Turnover (B01.000) are cross-worksheet inputs to the
+  // hand-authored equations built in section 7b below. Declare VSME-B03.300
+  // as a consumer so cross-worksheet inheritance (src/lib/db/queries/
+  // worksheet.ts loadInheritedFields, `ANY(fields.consumer_worksheets)`) can
+  // find them from that worksheet. See the KNOWN LIMIT note at 7b: whether
+  // this resolves at RUNTIME also depends on the separate, open engine-output
+  // materialization workstream — the declaration here is correct regardless.
+  const B03_300_INTENSITY_INPUT_SYMBOLS = new Set<string>([
+    'TotalGrossLocationBasedScope1AndScope2GHGEmissions',
+    'TotalGrossMarketBasedScope1AndScope2GHGEmissions',
+    'TotalGrossLocationBasedGHGEmissions',
+    'TotalGrossMarketBasedGHGEmissions',
+    'Turnover',
+  ]);
+  for (const f of fields) {
+    if (!B03_300_INTENSITY_INPUT_SYMBOLS.has(f.symbol)) continue;
+    const existing = (f.consumer_worksheets ?? '')
+      .split(/[,;]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!existing.includes('VSME-B03.300')) existing.push('VSME-B03.300');
+    f.consumer_worksheets = existing.join(', ');
+  }
+
   console.log(
     `[build-workbook] fields: ${fields.length} emitted, ${droppedCount} dropped (abstract / structural / unmapped)`,
   );
@@ -658,6 +683,66 @@ export function buildVsmeRows(
         (s.missingConcepts.length ? ` [missing: ${s.missingConcepts.join(', ')}]` : ''),
     );
   }
+
+  // ── 7b. Hand-authored equations — B03.300 GHG intensity (VSME para 31) ────
+  // NOT in the calculation linkbase (para 31's division-by-turnover isn't a
+  // summation-item relationship, so buildCalculationEquations() can't see
+  // it). Verbatim source (rendered PDF, printed p.9): "31. The undertaking
+  // shall disclose its GHG intensity calculated by dividing 'gross greenhouse
+  // gas (GHG) emissions' disclosed under paragraph 30 by 'turnover (in Euro)'
+  // disclosed under paragraph 24(e)(iv)." Four dividends — the B3 ¶30 GHG
+  // totals on VSME-B03.200 — each divided by the single B1 ¶24(e)(iv)
+  // Turnover field on VSME-B01.000; all four outputs live on VSME-B03.300
+  // (unit tCO2eq/EUR, confirmed no equations before this task). Appended
+  // AFTER the linkbase-derived rows so equation_number continues the same
+  // VSME-EQ-NN sequence (never touches calculations.ts / the linkbase rows
+  // above). Cross-worksheet inputs: consumer_worksheets was already
+  // declared for these 5 fields above (section 5); if runtime resolution on
+  // B03.300 still needs the open engine-output materialization workstream,
+  // that gap is NOT fixed here (see project_engine_output_materialization) —
+  // these equations are correct data regardless of that gap.
+  const INTENSITY_EQUATIONS: Array<{ output_symbol: string; dividend: string }> = [
+    {
+      output_symbol: 'Scope1AndScope2GreenhouseGasEmissionsIntensityValueLocationBased',
+      dividend: 'TotalGrossLocationBasedScope1AndScope2GHGEmissions',
+    },
+    {
+      output_symbol: 'Scope1AndScope2GreenhouseGasEmissionsIntensityValueMarketBased',
+      dividend: 'TotalGrossMarketBasedScope1AndScope2GHGEmissions',
+    },
+    {
+      output_symbol: 'TotalLocationBasedGreenhouseGasEmissionsIntensityValue',
+      dividend: 'TotalGrossLocationBasedGHGEmissions',
+    },
+    {
+      output_symbol: 'TotalMarketBasedGreenhouseGasEmissionsIntensityValue',
+      dividend: 'TotalGrossMarketBasedGHGEmissions',
+    },
+  ];
+  let intensityN = equations.length; // continue the VSME-EQ-NN sequence
+  for (const { output_symbol, dividend } of INTENSITY_EQUATIONS) {
+    intensityN++;
+    equations.push({
+      equation_number: `VSME-EQ-${String(intensityN).padStart(2, '0')}`,
+      standard_code: 'VSME',
+      description_de: `${output_symbol} = ${dividend} / Turnover (THG-Intensität, VSME §31)`,
+      description_en: `${output_symbol} = ${dividend} / Turnover (GHG intensity, VSME para 31)`,
+      formula: `${output_symbol} = ${dividend} / Turnover`,
+      input_symbols: `${dividend}, Turnover`,
+      output_symbol,
+      regulation_reference: 'VSME B3 para 31',
+      used_in_worksheet: 'VSME-B03.300',
+      verification_status: 'imported_unverified',
+      notes:
+        'Hand-authored (not in the XBRL calculation linkbase — para 31 is a division, not a ' +
+        'summation-item relationship). Dividend lives on VSME-B03.200, Turnover on VSME-B01.000; ' +
+        'both declare VSME-B03.300 as a consumer_worksheets entry (Task 5, feat/vsme-gate-repair).',
+    });
+  }
+  console.log(
+    `[build-workbook] equations: +${INTENSITY_EQUATIONS.length} hand-authored B03.300 GHG-intensity ` +
+      `rows (VSME para 31) appended, ${equations.length} total`,
+  );
 
   // ── 8. Compliance_Requirements — curated, source-cited rule set ────────────
   // Obligation level (mandatory / conditional / voluntary) is NOT in the XBRL

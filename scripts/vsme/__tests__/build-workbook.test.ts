@@ -171,6 +171,72 @@ describe('buildVsmeRows', () => {
   });
 });
 
+describe('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
+  const r = buildVsmeRows(TAXONOMY_DIR);
+
+  // VSME para 31 (rendered PDF p.9): "The undertaking shall disclose its GHG
+  // intensity calculated by dividing 'gross greenhouse gas (GHG) emissions'
+  // disclosed under paragraph 30 by 'turnover (in Euro)' disclosed under
+  // paragraph 24(e)(iv)." Four dividends (the B3 ¶30 GHG totals) each divided
+  // by the single B1 ¶24(e)(iv) Turnover field.
+  const EXPECTED: Array<{ output: string; dividend: string }> = [
+    {
+      output: 'Scope1AndScope2GreenhouseGasEmissionsIntensityValueLocationBased',
+      dividend: 'TotalGrossLocationBasedScope1AndScope2GHGEmissions',
+    },
+    {
+      output: 'Scope1AndScope2GreenhouseGasEmissionsIntensityValueMarketBased',
+      dividend: 'TotalGrossMarketBasedScope1AndScope2GHGEmissions',
+    },
+    {
+      output: 'TotalLocationBasedGreenhouseGasEmissionsIntensityValue',
+      dividend: 'TotalGrossLocationBasedGHGEmissions',
+    },
+    {
+      output: 'TotalMarketBasedGreenhouseGasEmissionsIntensityValue',
+      dividend: 'TotalGrossMarketBasedGHGEmissions',
+    },
+  ];
+
+  it('emits 14 equations total (10 linkbase-derived + 4 hand-authored B03.300 intensity)', () => {
+    expect(r.equations).toHaveLength(14);
+  });
+
+  it('each intensity equation is present with the exact formula string, on VSME-B03.300, cited to para 31', () => {
+    for (const { output, dividend } of EXPECTED) {
+      const eq = r.equations.find((e: any) => e.output_symbol === output);
+      expect(eq, output).toBeDefined();
+      expect(eq!.formula).toBe(`${output} = ${dividend} / Turnover`);
+      expect(eq!.used_in_worksheet).toBe('VSME-B03.300');
+      expect(eq!.regulation_reference).toBe('VSME B3 para 31');
+      expect(eq!.standard_code).toBe('VSME');
+      expect(eq!.verification_status).toBe('imported_unverified');
+      expect(eq!.input_symbols).toContain(dividend);
+      expect(eq!.input_symbols).toContain('Turnover');
+    }
+  });
+
+  it('the 4 dividend totals + Turnover declare VSME-B03.300 as a consumer_worksheets entry', () => {
+    const inputSymbols = [...EXPECTED.map((e) => e.dividend), 'Turnover'];
+    for (const sym of inputSymbols) {
+      const f = r.fields.find((x: any) => x.symbol === sym);
+      expect(f, sym).toBeDefined();
+      const consumers = (f!.consumer_worksheets ?? '')
+        .split(/[,;]/)
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+      expect(consumers, sym).toContain('VSME-B03.300');
+    }
+  });
+
+  it('does not disturb the 10 linkbase-generated equations', () => {
+    const linkbaseNumbers = r.equations
+      .filter((e: any) => e.equation_number.startsWith('VSME-EQ-') && Number(e.equation_number.slice(-2)) <= 10)
+      .map((e: any) => e.equation_number);
+    expect(linkbaseNumbers).toHaveLength(10);
+  });
+});
+
 describe('buildVsmeWorkbook round-trip', () => {
   it('xlsx parses through the real pass3c parser', async () => {
     const buffer = await buildVsmeWorkbook(TAXONOMY_DIR);
