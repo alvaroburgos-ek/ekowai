@@ -941,4 +941,85 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes:
       '⚠ DS (kein PDF, DS-Decke, NIE VA). §10.3.1 (MD Z. 2936-2937): "The usable volume of the splash water tank must be dimensioned so that at least 150 l per square metre can be provided to the inundated water surface." → `splash_water_tank_volume ≥ 150·pool_underwater_surface` → produziert eine Zahl (harmful ES-1). displayOnly (stoppt Collision-Blank). KEIN neues Gate: das durchsetzende REQ-33 (`IF rigid_overflow_used THEN splash_water_tank_volume ≥ 150·pool_underwater_surface`, block, Guard-Grammatik evaluate.ts-unterstützt) existiert bereits → do-not-duplicate. HINWEIS F-area (SEV-2, DS): sowohl EQ-05 als auch REQ-33 nutzen pool_underwater_surface (Boden + Wandfläche) statt der Quell-Bezugsfläche inundated_water_surface (horizontale Wasserfläche) → überdimensioniert. NICHT hier gefixt (ES-1-Scope + DS-Decke + never-invent) → FÜR ALVARO geflaggt.',
   },
+
+  // ====================================================================
+  // VSME · B03.300 GHG-intensity — VSME para 31 (Task 5, feat/vsme-gate-repair)
+  //
+  //   KEY-CONVENTION DEVIATION (documented, not silent): every key above is a
+  //   real `equations.id` (DB-generated `uuid ... defaultRandom()`, see
+  //   src/lib/db/schema.ts) — verified against a standard already imported to
+  //   prod. VSME has NOT been (re-)imported with these 4 hand-authored rows
+  //   yet (they are new in this task's build-workbook.ts output, still a
+  //   workbook, not a DB row) — so no real id exists to hardcode. Keyed here
+  //   by the equation_number the build script assigns deterministically
+  //   (VSME-EQ-11..14, continuing the linkbase sequence VSME-EQ-01..10 — see
+  //   scripts/vsme/build-workbook.ts section 7b), which is stable and
+  //   human-traceable. ⚠ ACTION REQUIRED AFTER IMPORT: once VSME (re-)imports
+  //   via scripts/import-pass3c.ts, query `equations.id` for
+  //   worksheet_template VSME-B03.300 equation_number VSME-EQ-11..14 and
+  //   REKEY these 4 entries to the real UUIDs (the engine looks up
+  //   `equationProfiles[eq.id]`, per formula.ts / use-equation-engine.ts — a
+  //   stale equation_number key here is a silent no-op profile in prod).
+  //
+  //   Source (rendered PDF, printed p.9, verbatim): "31. The undertaking
+  //   shall disclose its GHG intensity calculated by dividing 'gross
+  //   greenhouse gas (GHG) emissions' disclosed under paragraph 30 by
+  //   'turnover (in Euro)' disclosed under paragraph 24(e)(iv)." Turnover's
+  //   taxonomy-derived unit (scripts/vsme/units.ts buildUnitMap) is already
+  //   'EUR' — confirmed matching para 31, no drift to flag.
+  //
+  //   Cross-worksheet: dividends live on VSME-B03.200, Turnover on
+  //   VSME-B01.000, outputs on VSME-B03.300; consumer_worksheets declared
+  //   for all 5 (build-workbook.ts section 5). If those inputs still don't
+  //   resolve at runtime on B03.300, that is the pre-existing, OPEN
+  //   engine-output-materialization gap — not fixed here (KNOWN LIMIT).
+  // ====================================================================
+
+  // VSME-B03.300 · VSME-EQ-11 · VSME B3 para 31 — Scope1+2 intensity (location-based)
+  'VSME-EQ-11': {
+    expectedUnits: {
+      TotalGrossLocationBasedScope1AndScope2GHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'Scope1AndScope2GreenhouseGasEmissionsIntensityValueLocationBased = TotalGrossLocationBasedScope1AndScope2GHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
+
+  // VSME-B03.300 · VSME-EQ-12 · VSME B3 para 31 — Scope1+2 intensity (market-based)
+  'VSME-EQ-12': {
+    expectedUnits: {
+      TotalGrossMarketBasedScope1AndScope2GHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'Scope1AndScope2GreenhouseGasEmissionsIntensityValueMarketBased = TotalGrossMarketBasedScope1AndScope2GHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
+
+  // VSME-B03.300 · VSME-EQ-13 · VSME B3 para 31 — total GHG intensity (location-based)
+  'VSME-EQ-13': {
+    expectedUnits: {
+      TotalGrossLocationBasedGHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'TotalLocationBasedGreenhouseGasEmissionsIntensityValue = TotalGrossLocationBasedGHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
+
+  // VSME-B03.300 · VSME-EQ-14 · VSME B3 para 31 — total GHG intensity (market-based)
+  'VSME-EQ-14': {
+    expectedUnits: {
+      TotalGrossMarketBasedGHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'TotalMarketBasedGreenhouseGasEmissionsIntensityValue = TotalGrossMarketBasedGHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
 };

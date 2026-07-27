@@ -85,6 +85,8 @@ export type EquationRow = {
 export type ComplianceRow = {
   requirement_code: string;
   standard_code: string;
+  /** Optional explicit host worksheet. Absent → legacy phase fallback. */
+  worksheet_code: string | null;
   title: string;
   description: string | null;
   evaluation_type: string | null;
