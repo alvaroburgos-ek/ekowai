@@ -90,6 +90,85 @@ describe('buildVsmeRows', () => {
     const b1 = crs.find((c: any) => c.requirement_code === 'VSME-CR-B01-01');
     expect(b1?.severity).toBe('block');
   });
+  it('every compliance row is hosted where ALL its gated symbols live (gate reachability)', () => {
+    const rows = buildVsmeRows(TAXONOMY_DIR);
+    const fieldWs = new Map(rows.fields.map((f) => [f.symbol, f.origin_worksheet]));
+    const unreachable: string[] = [];
+    for (const cr of rows.compliance_requirements) {
+      const syms = (cr.required_field_symbols ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const hosts = new Set(syms.map((s) => fieldWs.get(s)));
+      if (hosts.size === 1) {
+        // single-owner CR: MUST be explicitly hosted there
+        if (cr.worksheet_code !== [...hosts][0]) {
+          unreachable.push(`${cr.requirement_code} → ${cr.worksheet_code} but fields on ${[...hosts][0]}`);
+        }
+      } else {
+        // multi-worksheet CR: STOP case — must NOT carry a fabricated host
+        if (cr.worksheet_code != null) {
+          unreachable.push(`${cr.requirement_code} spans ${[...hosts].join('+')} yet claims ${cr.worksheet_code}`);
+        }
+      }
+    }
+    expect(unreachable).toEqual([]);
+    // and the collapse itself is gone: not everything on B01.000
+    const hostSet = new Set(rows.compliance_requirements.map((c: any) => c.worksheet_code ?? 'LEGACY'));
+    expect(hostSet.size).toBeGreaterThan(1);
+  });
+  it('frozen host distribution — 31 compliance rows land on their owning worksheet, not the B01.000 collapse (regression guard)', () => {
+    // Captured from actual buildVsmeRows output after the Task-3 fix (2026-07-27).
+    // 8 rows legitimately stay on VSME-B01.000 (their gated fields DO live there);
+    // the other 23 move off the dead B01.000-collapse onto their real host
+    // worksheet. Zero STOP+REPORT (multi-worksheet) cases exist in the current
+    // curated set — if a future edit to requirements.ts introduces one, this
+    // test will fail loudly rather than silently re-collapsing hosting.
+    const EXPECTED_HOSTS: Record<string, string | null> = {
+      'VSME-CR-B01-01': 'VSME-B01.000',
+      'VSME-CR-B01-02': 'VSME-B01.000',
+      'VSME-CR-B01-03': 'VSME-B01.000',
+      'VSME-CR-B01-04': 'VSME-B01.000',
+      'VSME-CR-B01-05': 'VSME-B01.000',
+      'VSME-CR-B01-06': 'VSME-B01.000',
+      'VSME-CR-B01-07': 'VSME-B01.000',
+      'VSME-CR-B01-08': 'VSME-B01.000',
+      'VSME-CR-B01-09': 'VSME-B01.200',
+      'VSME-CR-B03-01': 'VSME-B03.000',
+      'VSME-CR-B03-02': 'VSME-B03.200',
+      'VSME-CR-B03-03': 'VSME-B03.200',
+      'VSME-CR-B03-04': 'VSME-B03.300',
+      'VSME-CR-B05-01': 'VSME-B05.000',
+      'VSME-CR-B06-01': 'VSME-B06.000',
+      'VSME-CR-B06-02': 'VSME-B06.000',
+      'VSME-CR-B07-01': 'VSME-B07.000',
+      'VSME-CR-B07-02': 'VSME-B07.200',
+      'VSME-CR-B08-01': 'VSME-B08.000',
+      'VSME-CR-B08-02': 'VSME-B08.100',
+      'VSME-CR-B08-03': 'VSME-B08.300',
+      'VSME-CR-B09-01': 'VSME-B09.000',
+      'VSME-CR-B09-02': 'VSME-B09.000',
+      'VSME-CR-B09-03': 'VSME-B09.000',
+      'VSME-CR-B10-01': 'VSME-B10.000',
+      'VSME-CR-B10-02': 'VSME-B10.000',
+      'VSME-CR-B11-01': 'VSME-B11.000',
+      'VSME-CR-C01-01': 'VSME-C01.000',
+      'VSME-CR-C06-01': 'VSME-C06.000',
+      'VSME-CR-C08-01': 'VSME-C08.100',
+      'VSME-CR-C09-01': 'VSME-C09.000',
+    };
+    const actual: Record<string, string | null> = {};
+    for (const cr of r.compliance_requirements) {
+      actual[cr.requirement_code] = cr.worksheet_code;
+    }
+    expect(Object.keys(actual).sort()).toEqual(Object.keys(EXPECTED_HOSTS).sort());
+    expect(actual).toEqual(EXPECTED_HOSTS);
+    // exactly 23 rows moved off the legacy VSME-B01.000 collapse.
+    const rehosted = r.compliance_requirements.filter(
+      (c: any) => c.worksheet_code != null && c.worksheet_code !== 'VSME-B01.000',
+    );
+    expect(rehosted).toHaveLength(23);
+  });
 });
 
 describe('buildVsmeWorkbook round-trip', () => {

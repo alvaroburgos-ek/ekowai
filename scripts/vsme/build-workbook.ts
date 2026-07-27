@@ -388,6 +388,11 @@ export type EquationsRow = {
 export type ComplianceRow = {
   requirement_code: string;
   standard_code: string;
+  /** Host worksheet, derived from where ALL gated field symbols live — never
+   *  the `module` tag (see requirements.ts WORKSHEET-LOCALITY header). `null`
+   *  for the rare cross-worksheet gate (STOP+REPORT case; falls back to
+   *  legacy phase hosting). */
+  worksheet_code: string | null;
   title: string;
   description: string;
   evaluation_type: string;
@@ -661,8 +666,8 @@ export function buildVsmeRows(
   // reference actually exists in the emitted Fields sheet (stable on concept
   // NAMES, not labels), so a renamed concept drops its gate instead of seeding
   // a dangling one. See requirements.ts header for severity/gate mechanics.
-  const fieldSymbolSet = new Set(fields.map((f) => f.symbol));
-  const compliance_requirements: ComplianceRow[] = buildComplianceRows(fieldSymbolSet);
+  const fieldWorksheetBySymbol = new Map(fields.map((f) => [f.symbol, f.origin_worksheet]));
+  const compliance_requirements: ComplianceRow[] = buildComplianceRows(fieldWorksheetBySymbol);
 
   const crBlock = compliance_requirements.filter((c) => c.severity === 'block').length;
   const crWarn = compliance_requirements.filter((c) => c.severity === 'warn').length;
@@ -715,7 +720,7 @@ export async function buildVsmeWorkbook(taxonomyDir: string): Promise<Buffer> {
           'regulation_reference', 'used_in_worksheet', 'verification_status', 'notes',
         ],
         Compliance_Requirements: [
-          'requirement_code', 'evaluation_expression', 'standard_code',
+          'requirement_code', 'evaluation_expression', 'standard_code', 'worksheet_code',
           'title', 'description', 'evaluation_type', 'required_field_symbols',
           'pass_condition', 'regulation_reference', 'phase', 'order_index',
           'verification_status', 'severity',
