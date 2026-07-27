@@ -533,3 +533,19 @@ WAVE 4 CONTINUES (fable-5): GAP 1 TABLE CAPTURE DISPATCHED + judgment items file
         tables, 6 missing equations, Anlagentyp field, A.1 companion rules, REQ-19 rescope,
         DWD >=20a gate, anchor repair. Sheet now sections A-G.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+GAP 1 CAPTURE APPLIED 2026-07-27 (fable-5): regulation_tables 0 -> 922 for DWA-M-102-4.
+        Workflow wf_58c8546a-9f0 (16 agents, 900k tokens): 8/8 tables DOUBLE-TRANSCRIBED from
+        rendered pages with ZERO cell diffs (incl. C.3 across the rotated page - both agents
+        rotated rasters and read images; verifier caught text-layer collapsing "2 - 4" and
+        confirmed the printed trailing-comma typo "kf,)" in A.1 as genuine).
+        Migration 20260727170000 generated DETERMINISTICALLY from the verified JSON by
+        scripts/m1024-tables-to-sql.mjs - no third transcription exists. Pipe-pack per
+        pattern-rules (segment-internal pipes -> em-dash to keep the pack unambiguous).
+        Blank printed cells materialized as value_text=''. Per-row source_quote NULL by
+        rule-10 philosophy (provenance lives in the migration header + run id).
+        EFFECT VERIFIED BY QUERY: A.1=72 A.4=8 B.1=48 C.3=600(300 num) C.4=56 C.5=60 C.6=30
+        C.7=48(48/48 numeric = the printed "48 r-values" exactly). Rollback authored
+        (delete-all: standard had 0 rows before, verified).
+        BEHAVIOUR UNCHANGED: nothing reads these rows for this standard yet. WIRING = G-D1.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
