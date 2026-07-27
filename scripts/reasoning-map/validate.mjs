@@ -267,6 +267,12 @@ for (const std of Object.keys(STANDARD_DIRS)) maps[std] = loadMap(std);
 function linkResolves(localNodeIds, target) {
   const t = target.split('|')[0].trim(); // strip alias
   if (localNodeIds.has(t) || t === SHARED_EXTERNAL) return true;
+  // `_schema/<name>` — corpus-level schema/doctrine notes are a legitimate link target
+  // from any node (e.g. a product_workflow node citing its data-class definition).
+  // Resolved by existence on disk, so a typo'd schema link is still caught.
+  if (t.startsWith('_schema/')) {
+    return existsSync(join(mapsDir, `${t}.md`));
+  }
   const slash = t.indexOf('/');
   if (slash > 0) {
     const std = t.slice(0, slash);
