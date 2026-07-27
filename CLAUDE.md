@@ -109,6 +109,37 @@ sign-off sheet count.
 through the real save path, the honest word is *"expected to run"*, and it must be written that
 way. **A-178's current 14/19 is therefore UNPROVEN** and is labelled so until its next touch.
 
+# DEPLOYED-PRODUCT PROOF (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "The product is the wizard in a browser, not the database. Per standard, the proof mandate's
+> execution runs against a DEPLOYED build: (1) maintain the campaign preview deployment — after
+> any code-affecting fix wave, build + deploy the branch, re-point the stable campaign alias
+> (one URL, from raw vercel output only), verify 200; (2) the harness proof runs against that
+> deployment's real API (not a local shortcut), so 'runnable' means runnable ON A BUILD; (3) per
+> standard at wave close: a RENDER SPOT-CHECK — fetch the standard's key worksheets from the
+> deployed app and verify the fixed values/evidence actually appear in the served page (the
+> Finding-E class: server-green, render-broken — catchable only by looking at what the app
+> serves); (4) the wave report names the build ID + alias state alongside the harness run ID.
+> Owner browser passes stay the FINAL sign-off per standard — queue a one-line 'ready for your
+> 5-minute look: [alias], [standard], [what to check]' entry on the sign-off sheet when a
+> standard reaches fully-treated."
+
+**The campaign alias is NOT the owner's alias.** Alvaro works on the `-hannesoster-` URL and
+has a standing directive never to be sent elsewhere. The campaign deployment therefore gets its
+**own stable alias**, re-pointed freely by the campaign; `-hannesoster-` is re-pointed only on a
+deliberate production cutover. A campaign deploy must never repoint the owner's working URL.
+
+**Alias discipline.** The alias is set from **raw `vercel` output only** — never from a
+remembered or reconstructed deployment URL. Verify 200 on the alias itself after re-pointing,
+not on the deployment URL it now serves. Per the standing lesson: verify effects, never exit
+codes — a deploy that returns success and an alias still pointing at the old build look
+identical from the command line.
+
+**First-run check.** The Vercel CLI has previously been absent in this environment and blocked a
+deploy. Confirm the CLI and project link before promising a deployed proof; if it is missing,
+that is a logged blocker and the standard's metric stays UNPROVEN — never downgrade silently to
+a local run and call it deployed.
+
 # BIDIRECTIONAL COVERAGE (STANDING — owner's order, ratified 2026-07-27)
 
 Per standard the comparison runs **both ways**:

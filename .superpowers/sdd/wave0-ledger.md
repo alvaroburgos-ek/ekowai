@@ -312,3 +312,17 @@ UNTOUCHED      66
 HONEST NOTE: at the rate of one standard per deep wave, 66 untouched standards is the real
         shape of this campaign. The convergence table exists so that fact stays visible
         instead of being masked by per-wave fix counts.
+
+DEPLOYED-PRODUCT PROOF ratified 2026-07-27. Full treatment now has a SEVENTH element:
+        execution proof must run against a DEPLOYED build, plus a per-standard RENDER
+        SPOT-CHECK (Finding-E class: server-green / render-broken), with build ID + alias
+        state named in the wave report. CONVERGENCE TABLE UNCHANGED: FULLY TREATED 0 / IN
+        PROGRESS 5 / UNTOUCHED 66 - the bar moved again, nothing regressed.
+        SAFETY: the campaign alias is SEPARATE from the owner's -hannesoster- URL. Campaign
+        deploys re-point the campaign alias ONLY; -hannesoster- moves only on a deliberate
+        production cutover. Standing directive: never send Alvaro to a temp deploy URL.
+        FIRST-RUN BLOCKER TO CHECK: Vercel CLI was previously ABSENT in this environment
+        (it blocked the VSME code deploy). If missing -> logged blocker, the standard stays
+        UNPROVEN. Never silently substitute a local run and call it deployed.
+        NEW SHEET ITEM TYPE: when a standard reaches fully-treated, queue a one-liner
+        "ready for your 5-minute look: [alias], [standard], [what to check]".
