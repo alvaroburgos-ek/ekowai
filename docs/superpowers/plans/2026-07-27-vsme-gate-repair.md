@@ -522,7 +522,14 @@ Use **superpowers:finishing-a-development-branch**: re-run the full gate on the 
 Order is fixed; each step verifies before the next. **All prod writes happen only after telling Alvaro in-channel that the write is about to happen.**
 
 - [ ] **Step 1 — Pre-flight (read-only):** snapshot prod compliance rows to the scratchpad: `select id, wt.code, cr.code, severity from compliance_requirements cr join worksheet_templates wt … where s.code='VSME'` → save as rollback evidence. Confirm still 31 rows / 40 draft instances / 1 param.
-- [ ] **Step 2 — Data: regenerate + import the VSME workbook against PROD** via the documented Management-API path (CLAUDE.md "Push — Supabase MCP path"; `--dry-run` equivalent first: run `parseWorkbook`+`validateWorkbook` locally and print the resolution table). Expected effect: same 143 fields, 14 equations (10+4), 31 CRs now distributed across their owning worksheets, 0 stale rows left on B01.000 beyond its own 8+any legitimate.
+- [ ] **Step 2 — Data: regenerate + import the VSME workbook against PROD.**
+  **HARD CONDITION (final-review I-1):** the Management-API helper `scripts/_p3c-gen-sql-tmp.ts`
+  still carries the OLD inline phase resolution and NO compliance delete-stale — used as-is it
+  re-collapses all 31 CRs onto B01.000 and the whole repair silently no-ops. Import prod through
+  the REAL importer (`scripts/import-pass3c.ts` with a prod `DATABASE_URL`), or first bring the
+  helper up to parity (route through `resolveComplianceWorksheet` + add the standard-scoped
+  compliance delete-stale) and verify its generated SQL re-hosts identically. Dry-run first:
+  run `parseWorkbook`+`validateWorkbook` locally and print the resolution table. Expected effect: same 143 fields, 14 equations (10+4), 31 CRs now distributed across their owning worksheets, 0 stale rows left on B01.000 beyond its own 8+any legitimate.
 - [ ] **Step 3 — Verify hosting:** re-run the Task 3 host-distribution query against prod; diff against the frozen snapshot test. Any mismatch → apply rollback (restore snapshot hosts by id) and stop.
 - [ ] **Step 4 — Data: apply `20260727120000_vsme_source_quotes.sql`** via the same path; run `verify-source-quotes.ts` against prod; record `quoted/total` + residue list.
 - [ ] **Step 4b — Rekey the intensity equation profiles (MANDATORY, blocks Step 5):** the four
