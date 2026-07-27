@@ -39,15 +39,15 @@ external acquisitions**. A "missing" entry means *not yet located*, and is re-se
 | DIN-EN-16941-2 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-EN-16941-2\DIN-EN-16941-2.pdf` | AUTO | |
 | DIN-EN-ISO-14044 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-EN-ISO-14044\DIN-EN-ISO-14044-D.pdf` | AUTO | |
 | DVS-2225-4 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DVS-2225-4\DVS-2225-4.pdf` | AUTO | |
-| DWA-A-102-2 | `C:\Users\Ekowai\Desktop\Share\Regulations\DWA\DWA 102-2\DWA-A_102-2_Part1.pdf | _Part2 | _Part3 | _Part4  (4-part set)` | VERIFIED | |
+| DWA-A-102-2 | `C:\Users\Ekowai\Desktop\Share\Regulations\DWA\DWA 102-2\DWA-A_102-2_Part{1,2,3,4}.pdf` (4-part set) | VERIFIED | per-part page offsets −1/+24/+49/+74 per the doctrine |
 | DWA-A-125 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-125\DWA-A-125.pdf` | AUTO | |
-| DWA-A-131 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-131\DWA-A-131-WD-Fuer-Belebungsexpert.pdf` | AUTO | |
-| DWA-A-138-1 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-138-1\DWA-A_138-1_WD (5).pdf` | VERIFIED | |
+| DWA-A-131 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-131\DWA-A-131.pdf` | **VERIFIED 2026-07-27** | Arbeitsblatt DWA-A 131 "Bemessung von einstufigen Belebungsanlagen", **Juni 2016**, **76 pp**, text-extractable, not encrypted. **CORRECTED:** the auto-match had recorded the sibling `DWA-A-131-WD-Fuer-Belebungsexpert.pdf` — a buyer's variant ("Für Käufer des Belebungsexperts") of only **72 pp**, 4 pages short. Cite the 76-pp file only. |
+| DWA-A-138-1 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-138-1\DWA-A_138-1_WD (5).pdf` | **VERIFIED 2026-07-27** | Arbeitsblatt DWA-A 138-1 "Anlagen zur Versickerung von Niederschlagswasser – Teil 1: Planung, Bau, Betrieb", **Oktober 2024**, **104 pp**, text-extractable, not encrypted. **Nachweisverfahren = §5.3.3.3**, TOC p8 → printed p39 = PDF p41 (confirms the −2 offset); Tab.12 Einfaches-vs-Nachweisverfahren at PDF p51. |
 | DWA-A-178 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-178\DWA-A_178.pdf` | AUTO | |
 | DWA-A-201 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-201\dwa_a_201 (1).pdf` | AUTO | |
 | DWA-A-222 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-222\DWA-A_222 (1).pdf` | AUTO | |
 | DWA-A-226 | `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-226\DWA-A-226.pdf` | AUTO | |
-| DWA-A-262E | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-262E\DWA-A_262E (2).pdf` | AUTO | |
+| DWA-A-262E | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-262E\DWA-A_262E (2).pdf` | **VERIFIED 2026-07-27** | Standard DWA-A 262E "Principles for Dimensioning, Construction and Operation of Wastewater Treatment Plants with Planted and Unplanted Filters…", **November 2017** (DWA "Check 2024 Approved by Experts"), **76 pp**, text-extractable, not encrypted. Bilingual title block (EN + DE). Carries a DWA per-licensee watermark — strip it from quotes. |
 | DWA-A-272E | `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-272E\DWA-A_272E (1).pdf` | AUTO | |
 | DWA-M-102-4 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-102-4\DWA-M_102-4.pdf` | AUTO | |
 | DWA-M-1200-1 | `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-1\DWA-M_1200-1_GD.pdf` | AUTO | |
