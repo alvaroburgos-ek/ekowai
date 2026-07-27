@@ -518,3 +518,18 @@ RESUME POINTER (wave 4 still open, DWA-M-102-4):
   4. Judgment items (GAP 2/3/4 rulings) -> _RATIFICATION-BATCH.md sections G.
   5. Re-rank live errors -> next standard (DWA-M-187 / DWA-M-1200-2 at 3 each, last rank).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+WAVE 4 CONTINUES (fable-5): GAP 1 TABLE CAPTURE DISPATCHED + judgment items filed.
+        Dispatched wf_58c8546a-9f0 / task wehlya62m: all 8 missing printed lookup tables
+        (A.1, A.4, B.1, C.3, C.4, C.5, C.6, C.7) transcribed row-by-row from RENDERED pages
+        with INDEPENDENT DOUBLE-TRANSCRIPTION (agent A transcribes, agent B re-renders and
+        re-transcribes blind, cell-level diff; only 100%-match + complete tables count as
+        verified). Agents read pattern-rules.md pipe-pack convention + live schema first.
+        Unreadable cells = "?" never guessed; German commas kept as printed; footnotes kept.
+        Capture only - NO prod writes by agents. SQL authoring + apply happens after the
+        verified JSON lands (evidence capture = pre-authorized; WIRING lookups into
+        fields/equations = behaviour change = ruling G-D1).
+        SIGN-OFF SHEET: section G added (7 items, G-D1..G-D7) - M-102-4's rulings: wire
+        tables, 6 missing equations, Anlagentyp field, A.1 companion rules, REQ-19 rescope,
+        DWD >=20a gate, anchor repair. Sheet now sections A-G.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
