@@ -1,10 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
   parseMigrationRows,
   checkRow,
   loadNormTextNormalized,
+  printReport,
+  expectedCountsFromMigration,
 } from '../verify-source-quotes';
 
 const MIGRATION_PATH = path.resolve(
@@ -74,5 +76,80 @@ describe('verify-source-quotes (--file mode, programmatic)', () => {
     const result = checkRow(bad, normText);
     expect(result.ok).toBe(false);
     expect(result.reason).toMatch(/page tag/);
+  });
+});
+
+describe('expectedCountsFromMigration', () => {
+  it('derives 138 fields / 8 equations / 31 compliance_requirements from the migration file', () => {
+    const sqlText = fs.readFileSync(MIGRATION_PATH, 'utf8');
+    const expected = expectedCountsFromMigration(sqlText);
+    expect(expected).toEqual({ fields: 138, equations: 8, compliance_requirements: 31 });
+  });
+});
+
+describe('--db mode expected-total shortfall guard (simulated, no live DB required)', () => {
+  // Reproduces the real-world failure mode from FIX-round-1 Finding 2: applying
+  // the migration BEFORE the Task 10 Step 2 Pass3c re-import re-hosts
+  // compliance_requirements means 23 of the 31 CR UPDATEs match zero rows on
+  // the legacy VSME-B01.000-only topology and silently no-op. A DB query that
+  // only ever selects `source_quote IS NOT NULL` would report those 8
+  // surviving CRs as "8/8 verified" (100%, vacuously) unless compared against
+  // the migration's own expected total (31). This simulates exactly that: a
+  // "DB" result set containing every field/equation row plus only the 8 CR
+  // rows that still resolve on the legacy topology (VSME-B01.000-hosted).
+  const sqlText = fs.readFileSync(MIGRATION_PATH, 'utf8');
+  const normText = loadNormTextNormalized();
+  const expected = expectedCountsFromMigration(sqlText);
+  const allRows = parseMigrationRows(sqlText);
+
+  it('flags a shortfall and fails when 23/31 compliance_requirements rows are missing', () => {
+    const simulatedDbRows = allRows.filter(
+      (r) => r.table !== 'compliance_requirements' || r.ws === 'VSME-B01.000',
+    );
+    // Sanity: the simulated legacy-topology DB really is short exactly the
+    // 23 re-hosted CRs (31 total - 8 still on VSME-B01.000 = 23 missing).
+    const simulatedCrCount = simulatedDbRows.filter((r) => r.table === 'compliance_requirements').length;
+    expect(simulatedCrCount).toBe(8);
+    expect(expected.compliance_requirements).toBe(31);
+
+    const results = simulatedDbRows.map((row) => checkRow(row, normText));
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const ok = printReport(results, expected);
+      expect(ok).toBe(false); // must FAIL even though every present row verifies verbatim
+      const printed = logSpy.mock.calls.map((c) => c.join(' ')).join('\n');
+      expect(printed).toMatch(/SHORTFALL/);
+      expect(printed).toMatch(/compliance_requirements/);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('passes when the full expected set is present (positive control)', () => {
+    const results = allRows.map((row) => checkRow(row, normText));
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const ok = printReport(results, expected);
+      expect(ok).toBe(true);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
+
+  it('--file mode (no expected argument) is unaffected by the shortfall guard', () => {
+    // Same partial set as the shortfall test above, but called the way --file
+    // mode calls printReport (no `expected` argument) — must NOT fail purely
+    // on count, only on verbatim-correctness of what's present.
+    const simulatedDbRows = allRows.filter(
+      (r) => r.table !== 'compliance_requirements' || r.ws === 'VSME-B01.000',
+    );
+    const results = simulatedDbRows.map((row) => checkRow(row, normText));
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      const ok = printReport(results); // no expected -> old, unchanged behaviour
+      expect(ok).toBe(true); // every present row is verbatim-correct -> passes
+    } finally {
+      logSpy.mockRestore();
+    }
   });
 });

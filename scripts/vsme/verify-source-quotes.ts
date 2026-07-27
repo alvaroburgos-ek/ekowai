@@ -27,6 +27,20 @@
  * Prints a quoted/total count per table plus up to 10 failures (with the
  * offending row identifier and quote) and exits non-zero if any check fails
  * or if a row's quote does not parse as `<text> [p.N]`.
+ *
+ * --db mode EXPECTED-TOTAL GUARD: `--db` only ever SELECTs rows where
+ * source_quote IS NOT NULL (that's the set there is anything to verify
+ * against). Naively reporting "quoted/total" over that same pre-filtered set
+ * is vacuously 100% by construction and CANNOT detect a partial or
+ * mis-ordered apply (e.g. applying this migration before the Task 10 Step 2
+ * VSME Pass3c re-import re-hosts compliance_requirements — see the migration
+ * file's header — silently no-ops 23 of the 31 CR UPDATEs). To catch that,
+ * --db mode additionally parses the migration file itself to compute the
+ * EXPECTED row count per table (fields 138, equations 8,
+ * compliance_requirements 31 as of this migration) and FAILS (non-zero exit)
+ * if the DB's quoted-row count for any table is below that expectation, even
+ * if every row that IS present verifies verbatim. --file mode is unaffected
+ * — it already checks 100% of what it parsed, so there is nothing to guard.
  */
 
 import fs from 'node:fs';
@@ -96,6 +110,22 @@ function parseMigrationRows(sqlText: string): Row[] {
   return rows;
 }
 
+type ExpectedCounts = Record<Row['table'], number>;
+
+/**
+ * Derives the expected quoted-row count per table straight from the
+ * migration file itself (one UPDATE parsed by parseMigrationRows == one row
+ * this migration expects to carry a source_quote once fully, correctly
+ * applied). This is the source of truth --db mode checks live DB counts
+ * against — never a hardcoded number, so it can't drift from the migration.
+ */
+function expectedCountsFromMigration(sqlText: string): ExpectedCounts {
+  const rows = parseMigrationRows(sqlText);
+  const counts: ExpectedCounts = { fields: 0, equations: 0, compliance_requirements: 0 };
+  for (const r of rows) counts[r.table]++;
+  return counts;
+}
+
 function checkRow(row: Row, normText: string): CheckResult {
   const parsed = parsePageTag(row.quote);
   if (!parsed) {
@@ -111,7 +141,7 @@ function checkRow(row: Row, normText: string): CheckResult {
   return { row, ok: true };
 }
 
-function printReport(results: CheckResult[]): boolean {
+function printReport(results: CheckResult[], expected?: ExpectedCounts): boolean {
   const byTable = new Map<string, CheckResult[]>();
   for (const r of results) {
     if (!byTable.has(r.row.table)) byTable.set(r.row.table, []);
@@ -123,6 +153,7 @@ function printReport(results: CheckResult[]): boolean {
 
   let anyFail = false;
   const failures: CheckResult[] = [];
+  const shortfalls: { table: string; found: number; expected: number }[] = [];
 
   for (const table of ['fields', 'equations', 'compliance_requirements'] as const) {
     const rs = byTable.get(table) ?? [];
@@ -134,12 +165,33 @@ function printReport(results: CheckResult[]): boolean {
         failures.push(r);
       }
     }
+    if (expected) {
+      const exp = expected[table];
+      console.log(`  expected from migration file: ${exp} row(s) should carry a source_quote`);
+      if (rs.length < exp) {
+        anyFail = true;
+        shortfalls.push({ table, found: rs.length, expected: exp });
+      }
+    }
   }
 
   const total = results.length;
   const totalOk = results.filter((r) => r.ok).length;
   console.log('-'.repeat(60));
   console.log(`TOTAL: ${totalOk}/${total} verified`);
+
+  if (shortfalls.length > 0) {
+    console.log('');
+    console.log('EXPECTED-TOTAL SHORTFALL (partial or mis-ordered apply?):');
+    for (const s of shortfalls) {
+      console.log(
+        `  [${s.table}] found ${s.found} quoted row(s) in the DB but the migration file expects ` +
+          `${s.expected} — missing ${s.expected - s.found}. If this is compliance_requirements, ` +
+          'check whether the Task 10 Step 2 VSME Pass3c re-import (which re-hosts CRs onto their ' +
+          'owning worksheets) has run yet — see the migration file header.',
+      );
+    }
+  }
 
   if (failures.length > 0) {
     console.log('');
@@ -174,6 +226,12 @@ async function runFileMode(): Promise<boolean> {
 }
 
 async function runDbMode(dbUrl: string): Promise<boolean> {
+  if (!fs.existsSync(MIGRATION_PATH)) {
+    console.error(`Migration file not found (needed to derive expected totals): ${MIGRATION_PATH}`);
+    return false;
+  }
+  const expected = expectedCountsFromMigration(fs.readFileSync(MIGRATION_PATH, 'utf8'));
+
   const { default: postgres } = await import('postgres');
   const sql = postgres(dbUrl, { prepare: false, max: 1 });
   try {
@@ -218,7 +276,7 @@ async function runDbMode(dbUrl: string): Promise<boolean> {
     }
 
     const results = rows.map((row) => checkRow(row, normText));
-    return printReport(results);
+    return printReport(results, expected);
   } finally {
     await sql.end();
   }
@@ -241,5 +299,12 @@ if (require.main === module) {
   main();
 }
 
-export { parseMigrationRows, checkRow, loadNormTextNormalized, runFileMode, printReport };
-export type { Row, CheckResult };
+export {
+  parseMigrationRows,
+  checkRow,
+  loadNormTextNormalized,
+  runFileMode,
+  printReport,
+  expectedCountsFromMigration,
+};
+export type { Row, CheckResult, ExpectedCounts };

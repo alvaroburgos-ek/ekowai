@@ -10,6 +10,36 @@
 -- Rollback:  scripts/migrations/rollback-20260727120000_vsme_source_quotes.sql
 -- Verify:    npx tsx scripts/vsme/verify-source-quotes.ts [--db <url>]
 --
+-- ============================================================================
+-- !! HARD ORDERING DEPENDENCY — READ BEFORE APPLYING ANYWHERE (local or prod) !!
+--
+-- APPLY ONLY AFTER the VSME Pass3c re-import — plan file
+-- docs/superpowers/plans/2026-07-27-vsme-gate-repair.md, Task 10, Step 2
+-- ("Data: regenerate + import the VSME workbook against PROD") — has actually
+-- re-hosted compliance_requirements onto their owning worksheets.
+--
+-- WHY: 23 of the 31 compliance_requirements UPDATEs below are keyed by their
+-- NEW (post-re-home) worksheet code, e.g. wt.code = 'VSME-B03.200'. As of this
+-- writing (pre-Task-10), the live/current DB still hosts ALL 31 CRs on
+-- VSME-B01.000 (the pre-Task-3 legacy collapse — see the frozen EXPECTED_HOSTS
+-- map in scripts/vsme/__tests__/build-workbook.test.ts for what "re-hosted"
+-- means and which 23 rows move). Applied out of order, each of those 23
+-- `UPDATE compliance_requirements ... WHERE wt.code = '<new-home>' AND cr.code
+-- = '<code>'` statements matches ZERO rows on the old topology and SILENTLY
+-- NO-OPS — apply-migration.mjs prints "OK" per statement with no row-count
+-- check, so an out-of-order apply looks clean and leaves those 23 CRs with
+-- source_quote still NULL, with no error surfaced anywhere.
+--
+-- CORRECT ORDER: Task 10 Step 1 (pre-flight snapshot) -> Step 2 (re-import,
+-- re-hosts the 23 CRs) -> Step 3 (verify hosting) -> Step 4 (apply THIS file)
+-- -> run `npx tsx scripts/vsme/verify-source-quotes.ts --db <url>` and confirm
+-- it reports the full expected totals (fields 138, equations 8,
+-- compliance_requirements 31) with none short — see that script's --db mode,
+-- which now fails loudly (non-zero exit) if the DB count for any table is
+-- below its expected total from this migration, rather than reporting a
+-- vacuous 100% over whatever partial set happened to be non-NULL.
+-- ============================================================================
+--
 -- ----------------------------------------------------------------------------
 -- SCOPE — Task 7 of the VSME gate-repair plan (dp-vsme-03): backfill source_quote
 -- for every VSME row with a verbatim substring of data/norm-text/VSME.md (the
