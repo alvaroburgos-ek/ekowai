@@ -616,3 +616,15 @@ M-102-4 wave 4 STATUS AT HANDOFF: 6 of 7 elements done; remaining = deployed-bui
         harness/render check (campaign alias) + G-D8 signature (spine unblock is Alvaro's
         writer-retirement ruling — no further mechanical work exists for it).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 7 / UNTOUCHED 64.
+
+WAVE 5 DONE (audit) — DWA-M-187 -> .superpowers/sdd/wave5-DWA-M-187.md
+        Offset 0 (6 footers + TOC). Tables: 65/65 rows verified, 10+ cells vs rendered
+        pages, ZERO mismatches, no printed table missing — but 27 rows SCHEMA-BROKEN
+        (columns shifted; values right, storage wrong; staged M187-F3, draft-safe).
+        FINDINGS (ALL STAGED, Gelbdruck deferral): F1 collision kills the standard's ONLY
+        genuine calc (Klein-RBF A_F duplicated M187-09+22); F2 mis-homed block gates
+        (operands absent on host ws; Klein-RBF ws carry NO gate at all); F4 ~15 ungated
+        printed minima + 2 worksheet mislabels. Data layer FAITHFUL; enforcement layer
+        broken; NOT ready-to-use. Sheet: H-D1 (Weissdruck trigger / override). 51 open.
+        NEXT QUEUE: DWA-M-1200-2 (Gelbdruck — same draft doctrine), then DWA-M-277E (5).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 7 / UNTOUCHED 64.
