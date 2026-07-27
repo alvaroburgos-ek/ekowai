@@ -525,6 +525,15 @@ Order is fixed; each step verifies before the next. **All prod writes happen onl
 - [ ] **Step 2 — Data: regenerate + import the VSME workbook against PROD** via the documented Management-API path (CLAUDE.md "Push — Supabase MCP path"; `--dry-run` equivalent first: run `parseWorkbook`+`validateWorkbook` locally and print the resolution table). Expected effect: same 143 fields, 14 equations (10+4), 31 CRs now distributed across their owning worksheets, 0 stale rows left on B01.000 beyond its own 8+any legitimate.
 - [ ] **Step 3 — Verify hosting:** re-run the Task 3 host-distribution query against prod; diff against the frozen snapshot test. Any mismatch → apply rollback (restore snapshot hosts by id) and stop.
 - [ ] **Step 4 — Data: apply `20260727120000_vsme_source_quotes.sql`** via the same path; run `verify-source-quotes.ts` against prod; record `quoted/total` + residue list.
+- [ ] **Step 4b — Rekey the intensity equation profiles (MANDATORY, blocks Step 5):** the four
+  `equationProfiles` entries for the B03.300 intensity equations are keyed by placeholder
+  `'VSME-EQ-11'..'VSME-EQ-14'` because `equations.id` UUIDs only exist after import (Task 5
+  finding, review-confirmed: profiles are keyed by DB UUID; placeholder keys are INERT — the
+  kEUR unit guard does not fire until rekeyed). After Step 2's import, query the four new
+  equation UUIDs (`select id, output_symbol from equations … where regulation_reference =
+  'VSME B3 para 31'`), replace the placeholder keys in `src/lib/eval/equation-profiles.ts`,
+  commit to main, and only then deploy. Also rekey against the LOCAL db if local testing needs
+  the guard. The deploy in Step 5 must contain the rekeyed file.
 - [ ] **Step 5 — Code deploy:** from the worktree on merged `main`:
 
 ```bash
