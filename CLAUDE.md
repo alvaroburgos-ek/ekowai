@@ -1,5 +1,26 @@
 @AGENTS.md
 
+# CONTENT BOUNDARY RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "A worksheet's content universe is exactly its own guideline's printed pages — nothing
+> more. (1) Methodology, equations, tables the guideline itself prints — including
+> reproductions it prints from other standards ('Tab. X nach DIN Y' printed in full) — are
+> the guideline's own encodable content, verified against ITS pages, provenance-noted as
+> reproduction where applicable. (2) A bare reference to another document ('nach DWA-A 117')
+> is encoded AS a reference only — displayed honestly, never expanded, never filled from
+> memory, training knowledge, or plausibility. (3) Never extend a printed reproduction
+> beyond what the guideline printed — leaving the page is inventing. (4) Missing referenced
+> documents: in_library:false node, NR/VC cap, acquisition list entry, visible gap — never
+> silently filled."
+
+**Validator query:** any node whose source anchor points outside its own standard's document
+without an explicit reference edge = violation. Implementation:
+`scripts/reasoning-map/content-boundary-scan.mjs` (alias table required —
+a standard's own variant designation is not a foreign one; `product_workflow` exempt).
+
+Full schema entry + derived implementation notes:
+`reasoning-maps/_schema/CONTENT-BOUNDARY-RULE.md`.
+
 # UNVERIFIED PROVENANCE — the gravest incident class (STANDING, read first)
 
 Ratified 2026-07-27. **The failure mode: a claim of completed work that no live command
