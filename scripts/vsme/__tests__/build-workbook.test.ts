@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import ExcelJS from 'exceljs';
-import { buildVsmeRows, buildVsmeWorkbook } from '../build-workbook';
+import { buildVsmeRows, buildVsmeWorkbook, type ComplianceRow, type EquationsRow, type FieldsRow } from '../build-workbook';
 import { parseWorkbookSync } from '../../_pass3c-parsers';
 import { TAXONOMY_DIR } from '../_setup';
 
@@ -114,7 +114,7 @@ describe('buildVsmeRows', () => {
     }
     expect(unreachable).toEqual([]);
     // and the collapse itself is gone: not everything on B01.000
-    const hostSet = new Set(rows.compliance_requirements.map((c: any) => c.worksheet_code ?? 'LEGACY'));
+    const hostSet = new Set(rows.compliance_requirements.map((c: ComplianceRow) => c.worksheet_code ?? 'LEGACY'));
     expect(hostSet.size).toBeGreaterThan(1);
   });
   it('frozen host distribution — 31 compliance rows land on their owning worksheet, not the B01.000 collapse (regression guard)', () => {
@@ -165,7 +165,7 @@ describe('buildVsmeRows', () => {
     expect(actual).toEqual(EXPECTED_HOSTS);
     // exactly 23 rows moved off the legacy VSME-B01.000 collapse.
     const rehosted = r.compliance_requirements.filter(
-      (c: any) => c.worksheet_code != null && c.worksheet_code !== 'VSME-B01.000',
+      (c: ComplianceRow) => c.worksheet_code != null && c.worksheet_code !== 'VSME-B01.000',
     );
     expect(rehosted).toHaveLength(23);
   });
@@ -204,7 +204,7 @@ describe('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
 
   it('each intensity equation is present with the exact formula string, on VSME-B03.300, cited to para 31', () => {
     for (const { output, dividend } of EXPECTED) {
-      const eq = r.equations.find((e: any) => e.output_symbol === output);
+      const eq = r.equations.find((e: EquationsRow) => e.output_symbol === output);
       expect(eq, output).toBeDefined();
       expect(eq!.formula).toBe(`${output} = ${dividend} / Turnover`);
       expect(eq!.used_in_worksheet).toBe('VSME-B03.300');
@@ -219,7 +219,7 @@ describe('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
   it('the 4 dividend totals + Turnover declare VSME-B03.300 as a consumer_worksheets entry', () => {
     const inputSymbols = [...EXPECTED.map((e) => e.dividend), 'Turnover'];
     for (const sym of inputSymbols) {
-      const f = r.fields.find((x: any) => x.symbol === sym);
+      const f = r.fields.find((x: FieldsRow) => x.symbol === sym);
       expect(f, sym).toBeDefined();
       const consumers = (f!.consumer_worksheets ?? '')
         .split(/[,;]/)
@@ -231,8 +231,8 @@ describe('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
 
   it('does not disturb the 10 linkbase-generated equations', () => {
     const linkbaseNumbers = r.equations
-      .filter((e: any) => e.equation_number.startsWith('VSME-EQ-') && Number(e.equation_number.slice(-2)) <= 10)
-      .map((e: any) => e.equation_number);
+      .filter((e: EquationsRow) => e.equation_number.startsWith('VSME-EQ-') && Number(e.equation_number.slice(-2)) <= 10)
+      .map((e: EquationsRow) => e.equation_number);
     expect(linkbaseNumbers).toHaveLength(10);
   });
 });
