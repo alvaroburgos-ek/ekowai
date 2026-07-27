@@ -452,3 +452,32 @@ WAVE 4 CONTINUES 2026-07-27 — annex-equation sweep DISPATCHED (resume step 1 e
             instruction that disproving it is an equally valid result.
         Coefficients to be checked digit by digit (regressions): e.g. 11,79 / 3,14 / 0,18594.
 CONVERGENCE UNCHANGED: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+WAVE 4 ANNEX SWEEP DONE (wf_b9675613-7aa, 22 agents, 1.32M tokens): 19/19 examined.
+        16 FAITHFUL (A.2-A.10, B.4, B.6, B.7, C.1-C.4) / 3 refuted away (B.2, B.3, B.5) /
+        0 CANNOT-VERIFY / ZERO SOURCE-SETTLED FIXES. With pass 1: 31 of 31 equations now
+        verified against the printed page.
+        REVERSAL: my B.7 priority flag was WRONG - B.7 is FAITHFUL. The grouping suspicion
+        came from a coverage agent reading the FLATTENED TEXT LAYER where fraction bars do not
+        survive. The mandated rendered-image grouping check is what caught it.
+        B.2 REFUTATION IS THE SUBSTANCE OF THIS WAVE. The proposed comma-rename fix was killed
+        BY EXECUTION and would have been ACTIVELY HARMFUL:
+          BEFORE manual_required("Funktionsaufruf ln(...) nicht unterstuetzt")
+          AFTER  error("Unerwartetes Zeichen ; an Position 45")
+        normalize-formula FN_LIKE rewrites ln(P)->ln_P. Today ln(f_S,F) ESCAPES that rewrite
+        because the comma breaks the pattern, so the throw fires and formula.ts turns it into an
+        honest amber badge. Rename the comma and ln(f_S_F) MATCHES FN_LIKE -> phantom identifier
+        ln_f_S_F -> the protective throw never fires -> tokenizer dies on the ';' whose message
+        is NOT in the recoverable regex -> RED ERROR PILL in the product.
+        WORSE: validateEngineEligibility flips verified:false -> TRUE, so the encode-time
+        faithfulness gate goes GREEN on a row the evaluator hard-errors on.
+        = the reproduction check run in reverse: broken before, MORE broken after.
+        NEW SYSTEMIC CLASS M104-D-comma: comma-subscripts recur in B.3/B.4/B.5 (f_S,M) and B.7
+        (A_b,a,i / a_F,i). The comma currently PROTECTS these rows. MUST become a validator rule
+        BEFORE anyone normalises subscripts anywhere in the corpus.
+        OPEN OBSERVATION (not a finding): P/ET_p carry RANGE-form consumer_worksheets
+        ("M104-22-28") that do not literally contain M104-23; range expansion unverified.
+        HYGIENE DEFECT IN MY OWN TOOLING: refuter agents left 5 *.test.ts probe files in
+        src/lib/eval (vitest globs *.test.ts). Removed. Workflow briefs MUST instruct agents to
+        clean up probes - the A-178 agent did so voluntarily, and voluntary is not a control.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
