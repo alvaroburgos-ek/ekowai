@@ -496,3 +496,25 @@ RULE 11 SHIPPED (M104-D-comma -> validator, same wave per cycle rule 1) + corpus
         MODEL CHANGE mid-wave: session model now claude-fable-5 (owner /model command),
         supersedes the opus-5 pin. Results from here traceable to fable-5.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+
+DEPLOY GATE CLEARED 2026-07-27 (was: logged blocker). Non-interactive link path worked:
+        copied .vercel/project.json from _wt-a138-10 (ekowai-wizard-preview,
+        prj_3UlbRvatPrYOoRTm9adrSjI8jVhB). `vercel whoami` -> alvaroburgos-2539. CLI 54.17.3.
+        DEPLOY ANALYSIS (honest): every campaign fix so far is a DATA fix (DB writes -
+        quote backfills, page corrections). NO app-code change exists on this branch, so per
+        the doctrine ("after any CODE-AFFECTING fix wave, build+deploy") no new deploy is
+        due yet - the CURRENT prod deployment already serves the backfilled quotes to the
+        browser. The campaign alias gets created at the first code-affecting fix wave OR at
+        the first render spot-check, whichever comes first.
+        RENDER SPOT-CHECK PREREQ (next session): prod is behind Vercel SSO
+        (reference_ekowai_wizard_access - bypass-token bookmark; token values never printed).
+        Spot-check = fetch key worksheets of VDI-3814/HOAI/DIN-14021 via the bypass route and
+        confirm the PDF-verbatim quotes render in the served page (Finding-E class).
+RESUME POINTER (wave 4 still open, DWA-M-102-4):
+  1. Render spot-check via SSO bypass (above) for the 3 quote-backfilled standards.
+  2. GAP 1: regulation_tables population for M-102-4 (pre-authorized infra; C.3 is the
+     big one). Row-by-row from rendered pages; pipe-pack convention per pattern-rules.
+  3. Both-ways gate demo + harness for M-102-4's 22 CRs; then map write-back + _index.
+  4. Judgment items (GAP 2/3/4 rulings) -> _RATIFICATION-BATCH.md sections G.
+  5. Re-rank live errors -> next standard (DWA-M-187 / DWA-M-1200-2 at 3 each, last rank).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
