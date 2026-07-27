@@ -430,3 +430,25 @@ SCOPE RESOLUTION 2026-07-27 — "the guidelines folder" is NOT a second corpus.
         standards share the Scribd directory, some directories hold multiple parts/annexes, and
         the corpus of record is the DATABASE (71 real rows in `standards`, 16 test/junk rows
         excluded), never the filesystem.
+
+WAVE 4 CONTINUES 2026-07-27 — annex-equation sweep DISPATCHED (resume step 1 executed).
+        ROOT CAUSE CONFIRMED by direct query: this standard's equation_number values are
+        1..12 (plain) PLUS A.2-A.10, B.2-B.7, C.1-C.4 = 31. The first run fanned out over
+        generated integers 1..31, so it covered exactly the 12 plain ones and queried 19
+        non-existent rows. Diagnosis was right; nothing was wrong with the encoding.
+        DISPATCHED: workflow wf_b9675613-7aa / task wnei8q30s over the 19 ANNEX equations.
+        script scratchpad/m1024-annex.js (re-invocable with resumeFromRunId).
+        HARDENED vs the first run:
+          - agents locate equations by PRINTED NUMBER, not by clause_reference (proven
+            unreliable in this standard last wave);
+          - every agent must RENDER the page to PNG and read the image before judging
+            grouping - the text layer flattens fraction bars, which is exactly how a
+            denominator-grouping defect hides;
+          - a grouping_check field is REQUIRED in the schema so the fraction-bar question
+            cannot be silently skipped;
+          - ln/exp explicitly declared NOT a defect (known engine gap) so agents do not
+            re-report the tracked A178-style false positive;
+          - B.7 flagged as priority with its unverified observation stated AND with the
+            instruction that disproving it is an equally valid result.
+        Coefficients to be checked digit by digit (regressions): e.g. 11,79 / 3,14 / 0,18594.
+CONVERGENCE UNCHANGED: FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
