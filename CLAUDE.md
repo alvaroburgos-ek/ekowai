@@ -25,6 +25,39 @@ the quote *means* is not.
 another agent, or read out of a prior ledger is UNVERIFIED INPUT and does NOT qualify for the
 pre-authorisation — it must be re-extracted from the PDF here before it may be written.
 
+# SOURCE-SETTLED FIXES (STANDING — owner's verbatim text, ratified 2026-07-27)
+
+> "SOURCE-SETTLED FIXES are pre-authorized prod writes: corrections where the printed
+> standard or the standard's own declared structure fully determines the right answer, with
+> zero interpretation — (a) symbol/case mismatches between a formula and its own declared
+> fields (the Gl.13 class), (b) values/operators contradicting the verbatim printed page
+> (with the quote captured in-session as evidence), (c) dead references to the standard's
+> own content. Each ships with: the source quote or structural proof, a reproduction check
+> (broken before, computes after — through the real save path where feasible), rollback,
+> raw-output verify. What still stops for me: severity changes, anything resting on a modal
+> reading or ambiguous language, new gates, range selections — the judgment layer stays mine."
+
+**THE MISSION IS WORKING WORKSHEETS, NOT DOCUMENTED DEFECTS.** A findings list is not a
+deliverable. Per standard, a wave is **done** only when all three hold:
+
+1. Every **source-settled** defect is FIXED and re-verified.
+2. Every **judgment** item is on the sign-off sheet with its evidence.
+3. The **workflow metric** is stated: *what can an engineer actually run today?* — named
+   worksheets that compute end-to-end, and named ones that still cannot, with the reason.
+
+**The zero-interpretation test — apply it honestly, and default to NO.** A fix is
+source-settled only if any competent engineer reading the same page or the same declared
+structure would produce the identical correction. If the fix requires choosing a
+representation the engine does not already provide (e.g. inventing a summation form for
+`SUM_over_i`), deciding what a clause *means*, or picking among candidates, it is NOT
+source-settled — it is a ruling, and it goes on the sheet. The bar is "determined", not
+"probably right". Being 90 % sure is a ruling.
+
+**The reproduction check is the point, not paperwork.** "Broken before, computes after" must
+be demonstrated, not asserted — the F-4 lesson (gates that FIRE but never enforce) is exactly
+what static reasoning misses. Where the real save path cannot be driven, say so explicitly and
+state what was proven instead; never let an argued fix read as an executed one.
+
 # CONTENT BOUNDARY RULE (STANDING — owner's verbatim text, ratified 2026-07-27)
 
 > "A worksheet's content universe is exactly its own guideline's printed pages — nothing
