@@ -128,8 +128,8 @@ in the corpus; they cap dependent nodes at NR until located:
 |---|---|---|
 | **DIN 1986-100** | 7 nodes / 5 std | DWA-A-138-1, FLL-GAR-2023, DWA-M-102-4, DWA-M-179-1, DWA-M-1200-3 |
 | **ISO 14040** | 10 / 4 | DIN-14071-1, ISO-59014, DIN-EN-ISO-14044, ISO-14004 |
-| **DWA-A 118** (Hydraulische Bemessung) | 8 / 3 | DWA-A-226, DWA-A-138-1, DWA-A-102-2 |
-| **DWA-A 117** (Regenrückhalteräume) | — | referenced only; not in corpus |
+| **DWA-A 118** (Hydraulische Bemessung) | 8 / 3 | DWA-A-226, DWA-A-138-1, DWA-A-102-2 — live-verified refs: `DWA-A-226.CR-023` §3.2, `DWA-A-226.q_F` §3.2 |
+| **DWA-A 117** (Bemessung von Regenrückhalteräumen) | 1 / 1 | DWA-A-138-1 — live-verified ref: field `f_A` §5.3.3.7 "Reduction factor per DWA-A 117". **Acquiring it lifts f_A off its NR cap.** |
 | VO (EU) 2020/741 | 7 / 3 | DWA-M-1200-3, DWA-M-708, DWA-M-1200-2 |
 | DWA-M 209 | 7 / 2 | DWA-M-229-1, DWA-M-229-2 |
 | ISO 14064-3 | 5 / 3 | ISO-14064-2, ISO-14064-1, ISO-14067 |

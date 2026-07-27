@@ -1,5 +1,59 @@
 @AGENTS.md
 
+# UNVERIFIED PROVENANCE — the gravest incident class (STANDING, read first)
+
+Ratified 2026-07-27. **The failure mode: a claim of completed work that no live command
+can reproduce.** Fabricated output is byte-identical to real output — a pasted table of DB
+rows, a PDF cover-page quote, a wave report, a decision batch. Nothing about the *text*
+distinguishes them. Therefore:
+
+**R-1 — Raw output must be RE-EXECUTABLE.** Any claim citing DB rows, files, page counts,
+or deploys is valid only if THIS session can re-run the command and get the same result.
+A pasted result is not evidence; the command is. Cite the command, not the output.
+
+**R-2 — Session boundary.** Work claimed by another session, chat, or ledger is
+**UNVERIFIED INPUT** — the same standing as an assertion pasted by a human. It is a lead to
+check, never a foundation to build on. Re-execute against DB/disk in the acting session
+before any downstream work depends on it. This binds the ledger and the triage table too.
+
+**R-3 — The verification asymmetry.** Because fabricated and real output are
+indistinguishable by inspection, **verification means RE-EXECUTION, never reading harder.**
+"It looks right" is not a check. If you cannot re-run it, you have not verified it.
+
+**R-4 — Join or invalid.** Every triage row, roster entry, and wave claim must join to a
+live DB/disk query run in the acting session. Enforced by validator rule 9
+(`9.triage-row-in-inventory`, `9.map-in-inventory`). Rows that do not join are INVALID.
+
+**R-5 — Report the reversal.** If a claimed defect is not in the source, say so and STOP.
+Never fabricate a finding, an incident, or a correction to match a premise — including a
+premise supplied by the user, and including one about your own past behaviour. Writing a
+false incident record is itself the incident class. (Doctrine's reverse-Trap-6, generalised.)
+
+**Never-invent applies to locations.** If asked for a path/URL that does not exist, print
+the failing search, not a plausible string. A fabricated location in a ledger is
+indistinguishable from a real one until someone opens it.
+
+## Incident record — A-117/A-118 phantom roster (2026-07-27)
+
+A Wave-1 roster naming **DWA-A-117** and **DWA-A-118** entered the campaign from outside
+verified ground. Live re-execution in the acting session found:
+- `standards`: `a117_rows=0, a118_rows=0` (87 rows total = 71 real + 16 test/junk).
+- `worksheet_templates` / CRs / equations / fields / project_standards /
+  worksheet_instances matching A-117/A-118 as ENCODED entities: **0 rows.**
+- Whole-`C:\` search, any extension: **no A-117 or A-118 file exists.**
+- **Legitimate references DO exist and are correct** — `DWA-A-138-1.f_A`
+  ("Reduction factor per DWA-A 117", §5.3.3.7), `DWA-A-226.CR-023` + `q_F`
+  ("Hydraulische Bemessung nach DWA-A 118", §3.2), plus `doc-dwa-a-118.md` map nodes
+  carrying `in_library: false` / `provenance: NR`. **References stay; encodings-of-nothing
+  would die — there were none to delete.**
+
+**Scope note, recorded for accuracy.** This session did not produce fabricated A-117/A-118
+execution: it reported both as non-existent at every step and never ran a wave on them.
+Whether the roster originated in a prior session's unverifiable report or elsewhere is
+**outside this session's evidence**, and is recorded as unknown rather than guessed — per
+R-5. The rules above stand regardless of origin, which is the point: they make origin
+irrelevant, because nothing is trusted that cannot be re-run here.
+
 # The continuous-improvement cycle (STANDING — the campaign's shape)
 
 Binding for the regulatory audit→fix campaign. Governed by `docs/verification-doctrine.md` (SR-1..4)
