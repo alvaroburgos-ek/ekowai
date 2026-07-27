@@ -227,3 +227,28 @@ WAVE 3  STD 2 = DWA-A-178 DONE 2026-07-27 -> .superpowers/sdd/wave3-DWA-A-178.md
 
 NEXT: W3-D12 (DIN-14021 27 heading-quotes, pre-authorized backfill), then A178-D8 quote
         backfill, then DWA-M-102-4 (2 live errors) per the ranked queue.
+
+W3-D12 DONE 2026-07-27 — DIN-14021 27 heading-as-evidence CRs backfilled, rule 10b 31->4.
+        Pre-authorized quote-backfill (sequencing rule clause 1). Migration
+        20260727150000 + rollback. WARNINGS 1060 -> 1033. ERRORS unchanged 3345.
+        Remaining 10b = 4 singletons (DVS-2225-4, DWA-A-125, DWA-M-229-1, VDI-3477).
+        With the 3 stubs from W3-D1, DIN-14021 had 30 of 50 CRs carrying non-evidence.
+        LANGUAGE SHIFT (deliberate): old quotes were ENGLISH headings from a markdown
+        source; new quotes are GERMAN, because the library PDF is DIN EN ISO 14021:2016-07
+        (German edition) and SR-3 makes the rendered PDF ground truth. Clause numbering is
+        identical across editions so anchors still line up. Offset +6 (printed = PDF - 6),
+        cross-checked twice (folio 38 on PDF p.44; folio 16 closing §5.6 on PDF p.22).
+        *** SILENT NO-OP CAUGHT — new trap worth remembering ***
+        First apply returned HTTP 201, raised its NOTICE, and changed ZERO rows. Guard was
+        `source_quote LIKE '\subsection*{%'`; in LIKE, BACKSLASH IS THE DEFAULT ESCAPE
+        CHARACTER, so that pattern means "starts with subsection*{" and matches nothing.
+        A success-looking apply that did nothing. Only the validator re-run exposed it.
+        Fixed to starts_with(source_quote, chr(92) || 'subsection*{'). LESSON: an idempotent
+        guard that is WRONG is indistinguishable from an idempotent guard that is SATISFIED
+        — both report 0 rows. Always verify the effect, never the exit code.
+        NEW RULING QUEUED A14021-D1: all 27 are `block`, but several now visibly rest on
+        DEFINITIONAL text (7.12.1.1/7.12.1.2 define "wiederverwendbar"/"nachfüllbar", they
+        do not command) while others rest on genuine "darf nicht"/"müssen". Severity split
+        not decided.
+
+NEXT: A178-D8 (6 NULL-quote CRs), then DWA-M-102-4 (2 live errors) per the ranked queue.

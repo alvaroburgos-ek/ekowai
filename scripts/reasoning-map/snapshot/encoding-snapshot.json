@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-27T14:30:42.392Z",
+  "exported_at": "2026-07-27T15:13:44.099Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -4312,7 +4312,7 @@
           "clause_reference": "7.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.2 Compostable}",
+          "source_quote": "[7.2.2.1] Eine Aussage zur Kompostierbarkeit darf nicht erfolgen, wenn ein Produkt, eine Verpackung oder ein Produkt- oder Verpackungsbestandteil: a) den Gesamtnutzen des Komposts als Bodenverbesserungsmittel negativ beeinflusst; b) zu irgendeinem Zeitpunkt der Zersetzung oder danach Stoffe in gefährlichen Konzentrationen freisetzt …",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4323,40 +4323,7 @@
           "clause_reference": "7.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.3 Degradable}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "c8a266f1-4b79-42f2-9db7-54b0f605554e",
-          "code": "REQ-30",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.4",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.4 Designed for disassembly}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "a3226816-26c6-4ecb-bde8-ec991432c9b6",
-          "code": "REQ-31",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.5",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.5 Extended life product}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "d2851137-8c96-49a9-8249-a6b2b95547d7",
-          "code": "REQ-32",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.6",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.6 Recovered energy}",
+          "source_quote": "[7.3.2.1 a)] Aussagen zur Abbaubarkeit dürfen nur in Bezug auf ein bestimmtes Prüfverfahren erfolgen, das den zu erreichenden Abbaugrad und die Testdauer einschließt, und sie müssen für die Umstände zutreffen, unter denen [das Produkt entsorgt wird].",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4367,18 +4334,7 @@
           "clause_reference": "7.7",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.7 Recyclable}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "109b97e2-4db9-4be3-9152-fce850628ea8",
-          "code": "REQ-34",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.8",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.8 Recycled content}",
+          "source_quote": "[7.7.2] Falls keine Sammelstellen oder Sammeleinrichtungen für das Recycling des Produktes oder der Verpackung für einen angemessenen Anteil an Käufern, potentiellen Käufern oder Anwendern des Produktes in verkehrsgünstiger Lage zur Verfügung stehen, gilt Folgendes: a) Es muss eine konkrete Aussage zur Recyclingfähigkeit [erfolgen] …",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4400,62 +4356,7 @@
           "clause_reference": "7.12.1.1",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.12.1.1 Reusable}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "4950267a-8ec6-489e-897e-afd0e3bf28d6",
-          "code": "REQ-39",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.12.1.2",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.12.1.2 Refillable}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "bb3ed37c-07d2-49b1-8b16-00bb2d8a592d",
-          "code": "REQ-40",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.13",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.13 Waste reduction}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "97b3f082-3c5b-41d6-b56e-28dcd163c4b4",
-          "code": "REQ-43",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.16",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.16 Sustainable}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "b0bfc06b-53cc-4c32-b4aa-ed335f0192a3",
-          "code": "REQ-44",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.17.2",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.17.2 Product \"carbon footprint\"}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "4917d4f9-110b-427b-8447-8671bad8074f",
-          "code": "REQ-45",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.17.3",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.17.3 \"Carbon neutral\"}",
+          "source_quote": "[7.12.1.1 Wiederverwendbar] Charakteristisches Merkmal von Produkten oder Verpackungen, die dafür vorgesehen und konstruiert wurden, während ihres Lebensweges eine gewisse Anzahl an Gebrauchszyklen oder Umläufen im Rahmen der vorgesehenen Verwendung zu durchlaufen.",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4466,7 +4367,7 @@
           "clause_reference": "7.14",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.14 Renewable material}",
+          "source_quote": "[7.14.2] Wenn bei Primärrohstoffen Aussagen zur Erneuerbarkeit gemacht werden, müssen diese Materialien aus Quellen stammen, die sich mit einer Geschwindigkeit regenerieren, die gleich oder höher als die Geschwindigkeit des Abbaus ist.",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4477,18 +4378,7 @@
           "clause_reference": "7.15",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.15 Renewable energy}",
-          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
-        },
-        {
-          "id": "c0d3dc96-d982-48f7-88b2-787ead3fa73e",
-          "code": "REQ-47",
-          "condition": "selected_claim_type IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.2",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{5.2 Relationship to ISO 14020}",
+          "source_quote": "[7.15.2] Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig, wenn 100 % der Energie erneuerbar ist. Andernfalls müssen Aussagen zur erneuerbaren Energie wie folgt eingeschränkt werden. Wenn ein Anteil der Energie aus erneuerbaren Energiequellen stammt, muss der prozentuale Anteil eindeutig angegeben werden.",
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
@@ -4525,37 +4415,114 @@
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
-          "id": "e8148c1d-3cc4-400f-9aa8-98fc11095b50",
-          "code": "REQ-03",
-          "condition": "sustainability_claim_present IS NOT NULL",
+          "id": "c8a266f1-4b79-42f2-9db7-54b0f605554e",
+          "code": "REQ-30",
+          "condition": "selected_claim_type IS NOT NULL",
           "severity": "block",
-          "clause_reference": "5.5",
+          "clause_reference": "7.4",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{5.5 Claims of sustainability}",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+          "source_quote": "[7.4.2.1] Die Aussage für zerlegbar konstruiert muss mit einer erklärenden Stellungnahme verbunden sein, die die Bestandteile oder Einzelteile festlegt, die wiederzuverwenden, zu recyceln, zur Rückgewinnung von Energie zu nutzen oder auf bestimmte andere Weise vom anfallenden Abfall abzutrennen sind.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
-          "id": "b2dd8d63-5014-4eee-b9ac-c4b3264cba62",
-          "code": "REQ-01",
-          "condition": "vague_claim_present IS NOT NULL",
+          "id": "a3226816-26c6-4ecb-bde8-ec991432c9b6",
+          "code": "REQ-31",
+          "condition": "selected_claim_type IS NOT NULL",
           "severity": "block",
-          "clause_reference": "5.3",
+          "clause_reference": "7.5",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{5.3 Vague or non-specific claims}",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+          "source_quote": "[7.5.2.1] Sämtliche Aussagen zum verlängerten Produktleben müssen dargelegt werden. Weil die Aussagen zum verlängerten Produktleben vergleichende Aussagen sind, müssen die Anforderungen von 6.3 erfüllt sein.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
-          "id": "c567fc09-2574-4a12-9efe-065dda27d766",
-          "code": "REQ-02",
-          "condition": "free_claim_substance_level_ok IS NOT NULL",
+          "id": "d2851137-8c96-49a9-8249-a6b2b95547d7",
+          "code": "REQ-32",
+          "condition": "selected_claim_type IS NOT NULL",
           "severity": "block",
-          "clause_reference": "5.4",
+          "clause_reference": "7.6",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{5.4 Claims of \"... free\"}",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+          "source_quote": "[7.6.2] Damit die Aussage erfolgen kann, dass ein Produkt mit zurückgewonnener Energie produziert wurde, muss die verwendete Energie folgende Anforderungen erfüllen und nach 7.6.3 bewertet werden.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "109b97e2-4db9-4be3-9152-fce850628ea8",
+          "code": "REQ-34",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.8",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.8.2.1] Erfolgt eine Aussage zum Recyclatgehalt, muss der prozentuale Anteil an recyceltem Material angegeben werden. [7.8.2.2] Der prozentuale Anteil des Recyclats für Produkte und Verpackung muss einzeln angegeben und darf nicht zusammengefasst werden.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "4950267a-8ec6-489e-897e-afd0e3bf28d6",
+          "code": "REQ-39",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.12.1.2",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.12.1.2 Nachfüllbar] Charakteristisches Merkmal von Produkten oder Verpackungen, die in der Ausgangsform mit dem gleichen oder einem vergleichbaren Produkt mehr als einmal ohne zusätzliche Bearbeitung, mit Ausnahme von bestimmten Anforderungen wie Reinigen und Waschen, befüllt werden können.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "bb3ed37c-07d2-49b1-8b16-00bb2d8a592d",
+          "code": "REQ-40",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.13",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.13.2.1] Alle Aussagen zur Abfallminderung müssen begründet sein. Weil Abfallminderung eine vergleichende Aussage ist, müssen die Anforderungen von 6.3 erfüllt sein.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "97b3f082-3c5b-41d6-b56e-28dcd163c4b4",
+          "code": "REQ-43",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.16",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.16.1] Wie in 5.5 angeführt, darf keine Anbietererklärung über das Erreichen von Nachhaltigkeit abgegeben werden. Im vorliegenden Unterabschnitt wird nochmals betont, dass Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit“ nicht verwendet werden dürfen.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "b0bfc06b-53cc-4c32-b4aa-ed335f0192a3",
+          "code": "REQ-44",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.17.2",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.17.2.1] Unter einem „Carbon Footprint“ eines Produktes wird die Nettosumme der Treibhausgase (siehe 3.1.9) eines Produkt-Lebenswegs (siehe 3.1.10) verstanden. Dieser schließt auch langzeitige netto CO2-Entfernung ein.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "4917d4f9-110b-427b-8447-8671bad8074f",
+          "code": "REQ-45",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.17.3",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.17.3.1] „CO2-neutral“ bezieht sich auf ein Produkt (als ein Produktsystem) mit einem „Carbon Footprint“ (siehe 7.17.2) von null oder einem Produkt, bei dem der „Carbon Footprint“ ausgeglichen wurde.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
+        },
+        {
+          "id": "c0d3dc96-d982-48f7-88b2-787ead3fa73e",
+          "code": "REQ-47",
+          "condition": "selected_claim_type IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "5.2",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.2] Zusätzlich zu den Anforderungen dieser Internationalen Norm gelten die in ISO 14020 aufgestellten Prinzipien. Dort, wo diese Internationale Norm spezifischere Anforderungen stellt als ISO 14020, müssen diese spezifischeren Anforderungen erfüllt werden.",
+          "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
           "id": "b6f892c8-ae95-45cb-aec1-e41ecd13f1d7",
@@ -4565,7 +4532,7 @@
           "clause_reference": "5.6",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{5.6 Use of explanatory statements}",
+          "source_quote": "[5.6] Umweltbezogene Anbietererklärungen müssen mit einer ergänzenden Erklärung verbunden sein, wenn die Aussage allein möglicherweise zu Missverständnissen führen kann. Eine Umweltaussage darf nur dann ohne ergänzende Erklärung erfolgen, wenn sie unter allen vorhersehbaren Umständen ohne Einschränkungen gültig ist.",
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
@@ -4635,17 +4602,6 @@
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
-          "id": "da592ff5-47cb-45d1-ac51-6060f963217b",
-          "code": "REQ-26",
-          "condition": "TRUE",
-          "severity": "block",
-          "clause_reference": "5.2",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{5.2 Relationship to ISO 14020}",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
           "id": "8e1f3c48-bc8f-4566-bb4b-7406f7780b28",
           "code": "REQ-48",
           "condition": "mobius_loop_used IS NOT NULL",
@@ -4654,6 +4610,50 @@
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "5.10.2.1 The Mobius loop is a symbol in the shape of three twisted chasing arrows forming a triangle. Whenever it is used to make an environmental claim, the design shall meet the graphical requirements for ISO 7000-1135. There should, however, be enough contrast so that the symbol is clear and distinguishable. Some examples of the form of the Mobius loop are provided in Figure 1. Clause 7 provides detailed requirements concerning the use and applicability of the Mobius loop.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "e8148c1d-3cc4-400f-9aa8-98fc11095b50",
+          "code": "REQ-03",
+          "condition": "sustainability_claim_present IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "5.5",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.5] Konzepte im Zusammenhang mit Nachhaltigkeit sind äußerst kompliziert und werden noch untersucht. Gegenwärtig gibt es keine bestimmten Verfahren zur Messung von Nachhaltigkeit oder zu ihrer Bestätigung. Deshalb darf keine Aussage über das Erreichen von Nachhaltigkeit gemacht werden.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "b2dd8d63-5014-4eee-b9ac-c4b3264cba62",
+          "code": "REQ-01",
+          "condition": "vague_claim_present IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "5.3",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.3] Eine unbestimmte oder unspezifische Umweltaussage oder eine, die allgemein darauf abzielt, dass ein Produkt günstig für die Umwelt oder umweltverträglich ist, darf nicht gemacht werden. Deshalb dürfen keine Umweltaussagen wie „umweltsicher“, „umweltfreundlich“, „freundlich zur Erde“, „ohne Emissionen“, „grün“, „naturfreundlich“ und „ozonfreundlich“ verwendet werden.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "c567fc09-2574-4a12-9efe-065dda27d766",
+          "code": "REQ-02",
+          "condition": "free_claim_substance_level_ok IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "5.4",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.4] Eine Aussage von „... frei“ darf nur gemacht werden, wenn der Anteil des bestimmten Stoffes nicht größer ist als der, der als anerkannte Spurenverunreinigung oder natürliche Grundbelastung vorzufinden wäre.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "da592ff5-47cb-45d1-ac51-6060f963217b",
+          "code": "REQ-26",
+          "condition": "TRUE",
+          "severity": "block",
+          "clause_reference": "5.2",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.2] Zusätzlich zu den Anforderungen dieser Internationalen Norm gelten die in ISO 14020 aufgestellten Prinzipien. Dort, wo diese Internationale Norm spezifischere Anforderungen stellt als ISO 14020, müssen diese spezifischeren Anforderungen erfüllt werden.",
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
@@ -4712,17 +4712,6 @@
           "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
         },
         {
-          "id": "d14782e7-1141-469a-b319-0b7131ede08c",
-          "code": "REQ-17",
-          "condition": "method_selected IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "6.4",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{6.4 Selection of methods}",
-          "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
-        },
-        {
           "id": "87320174-d1cb-46f2-a755-be609e37f1ef",
           "code": "REQ-18",
           "condition": "verifiable_without_confidential IS NOT NULL",
@@ -4745,6 +4734,17 @@
           "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
         },
         {
+          "id": "d14782e7-1141-469a-b319-0b7131ede08c",
+          "code": "REQ-17",
+          "condition": "method_selected IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "6.4",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[6.4] Bewertungsverfahren und Verfahren zur Überprüfung von Aussagen müssen in der Reihenfolge Internationale Normen, anerkannte Normen internationaler Akzeptanz (diese können regionale oder nationale Normen sein) oder Verfahren von Industrie und Handel, die sich in einer Prüfung durch Dritte als gleichwertig erwiesen haben, durchgeführt werden.",
+          "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
+        },
+        {
           "id": "a325c518-9105-4c0f-af62-0a69168940f2",
           "code": "REQ-46",
           "condition": "comparative_claim IS NOT NULL AND comparison_basis IS NOT NULL AND comparison_same_functional_unit IS NOT NULL",
@@ -4752,7 +4752,7 @@
           "clause_reference": "6.3",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{6.3 Evaluation of comparative claims}",
+          "source_quote": "[6.3.1] Vergleichende Aussagen müssen im Hinblick auf einen oder mehrere der folgenden Punkte bewertet werden: a) vorheriges Verfahren einer Organisation; b) vorheriges Produkt einer Organisation; c) Verfahren einer anderen Organisation; oder d) Produkt einer anderen Organisation.",
           "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
         },
         {
@@ -4774,7 +4774,7 @@
           "clause_reference": "7.14.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.14.2 Qualifications}",
+          "source_quote": "[7.14.2] Wenn bei Primärrohstoffen Aussagen zur Erneuerbarkeit gemacht werden, müssen diese Materialien aus Quellen stammen, die sich mit einer Geschwindigkeit regenerieren, die gleich oder höher als die Geschwindigkeit des Abbaus ist.",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
         },
         {
@@ -4785,7 +4785,7 @@
           "clause_reference": "7.15.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.15.2 Qualifications}",
+          "source_quote": "[7.15.2] Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig, wenn 100 % der Energie erneuerbar ist. Andernfalls müssen Aussagen zur erneuerbaren Energie wie folgt eingeschränkt werden. Wenn ein Anteil der Energie aus erneuerbaren Energiequellen stammt, muss der prozentuale Anteil eindeutig angegeben werden.",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
         },
         {
@@ -4797,17 +4797,6 @@
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "An unqualified claim of \"carbon neutral\" shall not be made.",
-          "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
-        },
-        {
-          "id": "26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea",
-          "code": "REQ-25",
-          "condition": "carbon_footprint_value IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.17.2.2",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "\\subsection*{7.17.2.2 Evaluation methodology}",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
         },
         {
@@ -4829,7 +4818,18 @@
           "clause_reference": "7.17.2.2",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "\\subsection*{7.17.2.2 Evaluation methodology}",
+          "source_quote": "[7.17.2.2] Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067 durchgeführt werden.",
+          "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
+        },
+        {
+          "id": "26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea",
+          "code": "REQ-25",
+          "condition": "carbon_footprint_value IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "7.17.2.2",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[7.17.2.2] Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067 durchgeführt werden.",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
         },
         {
