@@ -338,3 +338,44 @@ TERMINATION CONDITION ratified 2026-07-27 and placed as the TOPMOST rule in CLAU
         CURRENT POSITION: 0 fully treated / 5 in progress / 66 untouched.
         NEXT DISPATCH (no confirmation needed, ever): DWA-M-102-4 under the full seven-element
         treatment, then re-rank on live validator errors and take the next.
+
+# ============================================================
+# WAVE 4 OPENED — DWA-M-102-4 (queue position 1 after re-rank), 2026-07-27
+# ============================================================
+DEPLOY GATE CHECKED (deployed-product proof, first run):
+        vercel CLI PRESENT = 54.17.3 at %APPDATA%\npm\vercel.ps1. The PRIOR BLOCKER IS GONE
+        (it had blocked the VSME code deploy).
+        BUT: no .vercel/project.json in worktree _wt-fll -> project NOT LINKED here, and
+        `vercel link` is interactive while this shell is non-interactive.
+        => LOGGED BLOCKER, item SKIPPED per the stop rule, campaign CONTINUED.
+        Consequence: DWA-M-102-4's workflow metric will be UNPROVEN this wave. It is NOT
+        downgraded to a local run and relabelled - per doctrine that substitution is banned.
+        NEXT SESSION FIRST ACTION: link the project (needs one interactive step from Alvaro,
+        or copy .vercel/project.json from a linked worktree e.g. _wt-a138-10 / _wt-vsme),
+        then create the CAMPAIGN alias - SEPARATE from -hannesoster-.
+
+STANDARD: DWA-M-102-4 "Wasserhaushaltsbilanz für die Bewirtschaftung des Niederschlagswassers",
+        Maerz 2022. id 05e76a06-fbc4-45f9-8aee-423e7e165f2d.
+        SIZE: 35 worksheets / 252 fields / 31 equations / 22 CRs  (2.4x A-178 on equations).
+        SOURCE PDF VERIFIED THIS SESSION: Desktop\Guidelines\DWA-102-4\DWA-M_102-4.pdf,
+        56 pages, text layer present (323,719 chars extracted).
+        LIVE VALIDATOR: 2 ERRORS = 2.fixed-has-page (doc-dwa-a-138-1) +
+        8.norm-input-ref-consumed (section-m104-16). nodes=107.
+
+DISPATCHED (background, results persist to disk and survive the context boundary):
+        Workflow run wf_180cf1cd-985 / task w5lw6mx3e
+        journal: .claude/projects/.../subagents/workflows/wf_180cf1cd-985/journal.jsonl
+        script:  scratchpad/m1024-wave.js  (re-invocable with resumeFromRunId)
+        PHASES: (1) page offset derived INDEPENDENTLY - no inheritance;
+                (2) BIDIRECTIONAL TOC WALK - source->encoding coverage, the direction never
+                    previously run on any standard;
+                (3) all 31 equations symbol-by-symbol vs the printed page, one agent each;
+                (4) adversarial refuter on every claimed defect.
+        Each agent queries its own row - no pasted formula can enter the chain.
+
+STILL OWED for DWA-M-102-4 before it can be called fully treated:
+        row-by-row tables · both-ways gate demonstration · harness execution on a DEPLOYED
+        build (blocked above) · render spot-check · source-settled fixes · map write-back.
+
+CONVERGENCE TABLE (unchanged this turn): FULLY TREATED 0 / IN PROGRESS 6 / UNTOUCHED 65.
+        (DWA-M-102-4 moves untouched -> in progress on wave open.)
