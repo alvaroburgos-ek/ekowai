@@ -192,14 +192,23 @@ function loadMap(stdCode) {
 // ── Findings model ──────────────────────────────────────────────────────────
 const findings = [];
 let checkStats = {};
+// W3-D11. `finding()` records the fail; call sites record the pass. Previously BOTH
+// did, so every rule's `fail=` column read at exactly 2x — the inflation the triage
+// table long mis-attributed to duplicate wikilinks. `pass=` and the ERRORS/WARNINGS
+// totals were never affected (those come from the findings array), so no past headline
+// number moves; only the per-check fail column becomes truthful.
+//
+// Invariant this relies on: every failing check also emits a finding. That held at all
+// call sites but one (`3.drift` nodeEqs, which bumped a fail silently) — now fixed, so
+// a failure can no longer be counted without being reported.
 function bumpCheck(check, ok) {
   checkStats[check] = checkStats[check] || { pass: 0, fail: 0 };
   if (ok) checkStats[check].pass++;
-  else checkStats[check].fail++;
 }
 function finding(sev, check, std, node, msg) {
   findings.push({ severity: sev, check, standard: std, node, message: msg });
-  bumpCheck(check, false);
+  checkStats[check] = checkStats[check] || { pass: 0, fail: 0 };
+  checkStats[check].fail++;
 }
 
 // ── Load snapshot ───────────────────────────────────────────────────────────
@@ -526,7 +535,14 @@ function checkDrift(map) {
   if (nodeCrs < dbCrs)
     finding('WARN', '3.drift', stdCode, '_index', `CR node count ${nodeCrs} < DB CR count ${dbCrs} (drift)`);
   bumpCheck('3.drift', nodeCrs >= dbCrs);
-  bumpCheck('3.drift', nodeEqs >= 1);
+  // Was a silent fail-bump: a map with no equation nodes at all counted against
+  // 3.drift but reported nothing, so it was visible only as an unexplained counter.
+  // Standards with genuinely zero equations (VDI-3814 has none) are not drift, so
+  // this only fires when the DB HAS equations and the map modelled none.
+  if (nodeEqs < 1 && enc.equations.length > 0)
+    finding('WARN', '3.drift', stdCode, '_index',
+      `map has no equation nodes but DB has ${enc.equations.length} equations (drift)`);
+  else bumpCheck('3.drift', true);
 }
 
 // ═════════ CHECK 9 — TRIAGE ROWS MUST JOIN TO THE RAW DB INVENTORY ═══════════
