@@ -54,8 +54,46 @@ Two of those classes were generation/validator-convention ARTIFACTS, not real de
 
 **Corrected total: ERRORS = 3345 / WARN = 1029** (raw exit capped at 250; true count from the findings
 array). NOTE on the "~2726 / ~1330 / ~792" figures the first pass cited: those were the per-check
-`fail` COUNTERS, which double-count (one bump per wikilink occurrence, incl. duplicates) — the real
-ERROR-finding counts are ~half. The trustworthy signal is the findings array (= exit code).
+`fail` COUNTERS, which double-count — the real ERROR-finding counts are ~half. The trustworthy signal
+is the findings array (= exit code).
+
+> **ROOT CAUSE of the `fail=` double-count, found 2026-07-27 (Wave 3).** It is not "one bump per
+> wikilink occurrence". `finding()` (L200-203) itself calls `bumpCheck(check, false)`, while every
+> call site *also* calls `bumpCheck(check, ok)` — so each failure is counted twice, for **every**
+> rule, exactly 2×. `pass=` counters and the ERRORS/WARNINGS totals are unaffected (those come from
+> the findings array). New rule 10 bumps only the pass side and is therefore exact; rules 1-9 still
+> read 2× on `fail=`. Not retro-fixed corpus-wide in this wave — logged as **W3-D11 [CODE] SEV-3**.
+
+> ## RE-RENDER 2026-07-27 (Wave 3) — validator rule 10 added
+>
+> Re-run after registering rule 10 (Wave-3 finding F-1) per continuous-improvement rule 1:
+> ```
+> node scripts/reasoning-map/export-encoding-snapshot.mjs   # +source_quote, 71 standards
+> node scripts/reasoning-map/validate.mjs
+> TOTAL nodes = 3978   ERRORS = 3399   WARNINGS = 1060   (exit 250)
+> ```
+> **Delta vs the 3345/1029 baseline = +54 ERRORS / +31 WARNINGS — all of it rule 10, no drift
+> elsewhere.** The corpus was otherwise stable across the re-export.
+>
+> **10a `evidence-backs-match` (ERROR, exact shape test) — 54:** VDI-3814-Blatt-2-1 **28**,
+> HOAI-2021 **23**, DIN-14021 **3**. `audit_status='match'` while `source_quote` is nothing but a
+> `[Klausel-verifiziert: …]` label — a verification *claim* carrying no printed text.
+>
+> **10b `evidence-not-markup` (WARN, heuristic) — 31:** DIN-14021 **27**, DVS-2225-4 1,
+> DWA-A-125 1, DWA-M-229-1 1, VDI-3477 1. Evidence that is pure markup with no prose — dominated by
+> DIN-14021 storing LaTeX **section headings** (`\subsection*{7.3 Degradable}`) as the quote.
+> **NEW this wave:** combined with its 3 stubs, **30 of DIN-14021's 50 CRs carry non-evidence.**
+>
+> **Re-catch on already-swept standards: 5** — HOAI-2021 (closed ✅ COMPLIANT-pending-review in
+> `DATA-FIX-CAMPAIGN.md` item 4, commit `fe85f05`, noted "quotes backfilled VA" → **re-opened**,
+> W3-D2), DIN-14021, DVS-2225-4, DWA-A-125, DWA-M-229-1, VDI-3477.
+> **Gold copy clean:** DWA-A-138-1 and the whole FLL set score **0** on both 10a and 10b.
+>
+> Counts independently reproduced by direct SQL against prod before the rule was written (R-1/R-3).
+> A first residue-length heuristic (`<12` chars) under-counted HOAI at 21 — it passed
+> `[Klausel-verifiziert: §6 Abs.2 (z_umbau>=0, Default 20%)]`, whose residue is an *encoder
+> annotation*, not source prose. **The shape test is the definition; the length heuristic was
+> discarded.** The prior wave's figure of 54 is CONFIRMED, my first figure of 52 was wrong.
 
 Prod `vadsmshzebefjreqcicl` read-only. Doctrine SR-1..4 / EV·VC·VA·NR / data_class per
 `docs/verification-doctrine.md`. Nothing applied to prod — map-file build strings + validator

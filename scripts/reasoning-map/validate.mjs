@@ -570,6 +570,57 @@ function checkTriageInventory() {
   }
 }
 
+// ═══ CHECK 10 — "VERIFIED" STATUS WITH ZERO EVIDENCE TEXT (UNVERIFIED PROVENANCE) ═══
+// Wave-3 finding F-1, registered per continuous-improvement rule 1 (new defect class →
+// validator rule in the SAME wave, then re-run corpus-wide).
+//
+// The class: a compliance requirement whose `source_quote` is nothing but a
+// `[Klausel-verifiziert: …]` label — a *claim* of clause verification carrying no
+// printed text — while `audit_status = 'match'` asserts the check passed. This is
+// CLAUDE.md R-1/R-3 in stored form: an assertion of verification indistinguishable
+// from real verification by inspection. `source_quote IS NULL` is NOT a member —
+// storing nothing is honest; storing a verification claim with no evidence is not.
+//
+// Shape test, not a length threshold. An earlier residue-length heuristic (<12 chars)
+// under-counted: it passed `[Klausel-verifiziert: §6 Abs.2 (z_umbau>=0, Default 20%)]`,
+// whose residue is an ENCODER ANNOTATION, not source prose. The shape is what matters —
+// if the whole quote is the label wrapper (plus bare clause refs), there is no evidence.
+const LABEL_STUB = /^\s*\[\s*Klausel[- ]verifiziert\s*:[^\]]*\]\s*(§[^\s;]+\s*;?\s*)*$/;
+
+// 10b — evidence that is pure markup with no prose (e.g. a bare `\begin{table}`).
+// Same class, different shape. Reported as WARN: "prose" is heuristic here, whereas
+// 10a is exact, and a false ERROR would poison the corpus-wide error ranking.
+const MARKUP_ONLY = /^\s*(\\[a-zA-Z]+\**(\{[^}]*\})*|\$+[^$]*\$+|[{}\\$&~^_\s]+)+\s*$/;
+
+function checkEvidenceClaims() {
+  for (const [stdCode, enc] of Object.entries(snapshot.standards || {})) {
+    for (const c of enc.compliance || []) {
+      const q = c.source_quote;
+      if (q == null) continue; // storing nothing is honest — not this defect
+      const claimsMatch = c.audit_status === 'match';
+
+      // NOTE: finding() already bumps the fail counter — bump ONLY the pass side here,
+      // or the check's fail= stat doubles. (The rest of this file bumps both; that
+      // inflates every existing rule's fail= column 2×. ERRORS/WARNINGS totals come
+      // from the findings array and are unaffected. Logged, not silently fixed.)
+      const stub = LABEL_STUB.test(q);
+      if (stub && claimsMatch) {
+        finding('ERROR', '10.evidence-backs-match', stdCode, c.code,
+          `audit_status='match' but source_quote is a bare verification LABEL with no printed text: ${JSON.stringify(q.slice(0, 60))}`);
+        continue;
+      }
+      bumpCheck('10.evidence-backs-match', true);
+
+      if (!stub && claimsMatch && q.trim() && MARKUP_ONLY.test(q)) {
+        finding('WARN', '10b.evidence-not-markup', stdCode, c.code,
+          `audit_status='match' but source_quote is markup with no prose: ${JSON.stringify(q.slice(0, 60))}`);
+      } else if (claimsMatch) {
+        bumpCheck('10b.evidence-not-markup', true);
+      }
+    }
+  }
+}
+
 // ── Run all checks ────────────────────────────────────────────────────────────
 for (const std of Object.keys(maps)) {
   checkStructural(maps[std]);
@@ -579,6 +630,7 @@ for (const std of Object.keys(maps)) {
   checkDrift(maps[std]);
 }
 checkTriageInventory();
+checkEvidenceClaims();
 
 // ═══════════════════════════ 4 CORE QUERIES ══════════════════════════════════
 function qBelowVa(std) {

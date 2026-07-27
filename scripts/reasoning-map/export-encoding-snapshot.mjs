@@ -28,15 +28,35 @@ const REF = 'vadsmshzebefjreqcicl';
 const here = dirname(fileURLToPath(import.meta.url));
 const outDir = join(here, 'snapshot');
 
-// The four standards the maps cover (code -> live standard id).
-const STANDARDS = {
-  'DWA-A-138-1': '5d64c48d-4cca-48d9-99f0-d1348082f0da',
-  'FLL-GAR-2023': 'b252ce89-6efc-4081-9684-8560b72651ed',
-  'FLL-Naturteich-2017': 'c11f0e54-fef3-4552-be7b-f6eb50b468da',
-  'FLL-TP-RHIZOM-2023': 'd0a661ab-c448-4c97-baf1-fd860fd9adca',
-  'DIN-18130-1': '4a53393a-e875-446f-b153-f47a402a4370',
-  'DWA-A-102-2': 'b52680be-e0df-4313-b5b5-a08bdbb82773',
+// Reasoning-map dir codes that differ from the DB `standards.code` value.
+// The maps use `FLL-Naturteich-2017`; prod stores it as `FLL-Naturteich`. The
+// snapshot is keyed by the MAP dir name so validate.mjs (which keys off the map
+// subdir) can look it up. All other standards use their DB code verbatim.
+const DB_CODE_TO_MAP_KEY = {
+  'FLL-Naturteich': 'FLL-Naturteich-2017',
 };
+
+// Test / scaffold / junk rows that are NOT real standards (importer smoke-test
+// rows, RLS probes). Excluded from the snapshot. Matched by code prefix.
+const JUNK_PREFIXES = ['T-', 'RA-', 'RLS-', 'RLS-OWN-', 'RLS-SAVE-', 'PC-', 'VW-', 'TEST-'];
+function isJunk(code) {
+  return JUNK_PREFIXES.some((p) => code.startsWith(p));
+}
+
+// Discover the FULL live library at export time (code -> id), skipping junk rows,
+// so newly-imported standards are snapshotted with no per-standard edit here.
+async function discoverStandards() {
+  const rows = await query(
+    `select id, code from standards order by code;`,
+  );
+  const out = {};
+  for (const r of rows) {
+    if (isJunk(r.code)) continue;
+    const key = DB_CODE_TO_MAP_KEY[r.code] || r.code;
+    out[key] = r.id;
+  }
+  return out;
+}
 
 const token = process.env.SUPABASE_ACCESS_TOKEN;
 if (!token) {
@@ -83,7 +103,8 @@ select json_build_object(
                           where w.standard_id = ${s}) e),
   'compliance', (select coalesce(json_agg(row_to_json(c)), '[]'::json)
                    from (select c.id, c.code, c.condition, c.severity, c.clause_reference,
-                                c.requires_attestation, c.audit_status, c.worksheet_template_id
+                                c.requires_attestation, c.audit_status, c.source_quote,
+                                c.worksheet_template_id
                            from compliance_requirements c
                            join worksheet_templates w on w.id = c.worksheet_template_id
                           where w.standard_id = ${s}) c),
@@ -96,6 +117,9 @@ select json_build_object(
 }
 
 const out = { exported_at: new Date().toISOString(), project_ref: REF, standards: {} };
+
+const STANDARDS = await discoverStandards();
+console.log(`discovered ${Object.keys(STANDARDS).length} real standards (junk rows excluded)\n`);
 
 for (const [code, id] of Object.entries(STANDARDS)) {
   const rows = await query(treeSql(id));

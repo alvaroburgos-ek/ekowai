@@ -1,0 +1,157 @@
+# Wave 0 ledger
+
+DONE DWA-A-272E nodes=98 belowVA=78 dead=7 tier=fix-first
+DONE DWA-M-363 nodes=85 belowVA=44 dead=2 tier=fix-first
+DONE DWA-A-262E nodes=130 belowVA=28 dead=1 tier=fix-first
+DONE DWA-M-816 nodes=91 belowVA=70 dead=12 tier=fix-first
+DONE DIN-276 nodes=84 belowVA=55 dead=21 tier=fix-first
+DONE DWA-M-277E nodes=79 belowVA=69 dead=4 tier=fix-first
+DONE DWA-M-205 nodes=100 belowVA=96 dead=14 tier=fix-first
+DONE DWA-M-1200-3 nodes=78 belowVA=63 dead=5 tier=fix-first
+DONE DWA-A-222 nodes=135 belowVA=64 dead=1 tier=fix-first
+DONE DWA-A-201 nodes=67 belowVA=19 dead=4 tier=fix-first
+DONE DWA-M-760 nodes=74 belowVA=50 dead=5 tier=acquisition-blocked
+DONE DWA-M-820-2 nodes=105 belowVA=75 dead=5 tier=fix-first
+DONE DWA-M-229-1 nodes=94 belowVA=48 dead=15 tier=fix-first
+DONE DWA-M-179-1 nodes=76 belowVA=36 dead=9 tier=fix-first
+DONE DWA-M-820-3 nodes=76 belowVA=47 dead=3 tier=fix-first
+DONE DWA-M-102-4 nodes=106 belowVA=36 dead=4 tier=fix-first
+DONE DWA-A-178 nodes=68 belowVA=17 dead=1 tier=fix-first
+DONE DWA-M-708 nodes=61 belowVA=33 dead=2 tier=fix-first
+DONE DWA-M-187 nodes=51 belowVA=35 dead=4 tier=fix-first
+DONE DWA-A-226 nodes=73 belowVA=18 dead=7 tier=acquisition-blocked
+DONE VSME nodes=86 belowVA=69 dead=23 tier=fix-first
+DONE DWA-M-1200-1 nodes=64 belowVA=53 dead=2 tier=fix-first
+DONE DWA-M-229-2 nodes=48 belowVA=35 dead=8 tier=fix-first
+DONE DWA-M-820-1 nodes=77 belowVA=39 dead=4 tier=fix-first
+DONE DWA-M-732 nodes=55 belowVA=33 dead=1 tier=fix-first
+DONE DWA-M-1200-2 nodes=50 belowVA=35 dead=4 tier=fix-first
+DONE VDI-2163 nodes=64 belowVA=47 dead=0 tier=fix-first
+DONE DIN-14021 nodes=104 belowVA=98 dead=40 tier=fix-first
+DONE DWA-M-349 nodes=54 belowVA=44 dead=11 tier=fix-first
+DONE VDI-3477 nodes=94 belowVA=28 dead=3 tier=fix-first
+DONE DWA-M-381E nodes=46 belowVA=20 dead=3 tier=fix-first
+DONE DIN-1989-2 nodes=39 belowVA=33 dead=2 tier=fix-first
+DONE ISO-14067 nodes=94 belowVA=48 dead=4 tier=fix-first
+DONE ISO-14064-1 nodes=49 belowVA=11 dead=3 tier=fix-first
+DONE ISO-14004 nodes=72 belowVA=25 dead=2 tier=fix-first
+DONE DIN-EN-16941-2 nodes=72 belowVA=42 dead=0 tier=fix-first
+DONE VDI-3814-Blatt-2-1 nodes=46 belowVA=12 dead=1 tier=fix-first
+DONE ISO-14046 nodes=73 belowVA=55 dead=2 tier=fix-first
+DONE DIN-EN-ISO-14044 nodes=36 belowVA=12 dead=2 tier=fix-first
+DONE ISO-14064-2 nodes=47 belowVA=19 dead=5 tier=fix-first
+DONE DVS-2225-4 nodes=52 belowVA=22 dead=2 tier=fix-first
+DONE DIN-14071-1 nodes=57 belowVA=22 dead=4 tier=fix-first
+DONE ISO-9001 nodes=66 belowVA=66 dead=3 tier=fix-first
+DONE DWA-A-131 nodes=72 belowVA=16 dead=0 tier=fix-first
+DONE ISO-46001 nodes=24 belowVA=24 dead=3 tier=acquisition-blocked
+DONE ISO-59014 nodes=69 belowVA=69 dead=0 tier=acquisition-blocked
+DONE DWA-A-125 nodes=49 belowVA=42 dead=2 tier=fix-first
+DONE HOAI-2021 nodes=55 belowVA=30 dead=4 tier=fix-first
+DONE ISO-59020 nodes=61 belowVA=61 dead=4 (+15 cross-sheet at-risk) tier=acquisition-blocked
+DONE ISO-59004 nodes=10 belowVA=10 dead=10 tier=acquisition-blocked
+DONE DIN-1989-1 nodes=39 belowVA=13 dead=2 tier=fix-first
+DONE ATV-A-704E nodes=58 belowVA=58 dead=3 tier=fix-first
+DONE ISO-5667-16 nodes=53 belowVA=53 dead=35 tier=acquisition-blocked
+DONE ISO-14015 nodes=44 belowVA=44 dead=1 tier=fix-first
+DONE ISO-5667-6 nodes=108 belowVA=108 dead=14 tier=acquisition-blocked
+DONE ISO-59010 nodes=14 belowVA=14 dead=12 tier=acquisition-blocked
+DONE ISO-14033 nodes=46 belowVA=46 dead=2 tier=acquisition-blocked
+DONE ISO-14019-1 nodes=44 belowVA=8 dead=1 tier=fix-first
+DONE ISO-14002-2 nodes=54 belowVA=20 dead=0 tier=fix-first
+DONE ISO-5667-10 nodes=56 belowVA=36 dead=23 tier=fix-first
+DONE ISO-5667-1 nodes=44 belowVA=30 dead=4 tier=fix-first
+DONE ISO-14050 nodes=18 belowVA=18 dead=0 tier=acquisition-blocked
+DONE ISO-59032 nodes=30 belowVA=3 dead=2 (+7 cross-sheet at-risk) tier=fix-first (PDF present; brief said missing - corrected per SR-4)
+DONE ISO-14097 nodes=58 belowVA=30 dead=1 tier=fix-first
+DONE ISO-5667-13 nodes=45 belowVA=32 dead=2 tier=fix-first
+
+# ============================================================
+# CAMPAIGN STATE — updated 2026-07-27 (model claude-opus-5, CLI 2.1.218, effort high)
+# ============================================================
+
+WAVE 1  DONE  2 standards audited read-only -> .superpowers/sdd/wave1-DWA-A-138-1.md
+                                              .superpowers/sdd/wave1-DWA-A-262E.md
+        BATCH 18 ratification items OPEN = 138-1 R-1..R-6 (6) + 262E R1..R12 (12). Unsigned.
+        REVERSAL (R-5, stands): "KOSTRA-DWD-2020 unblocks ~22 NR nodes" is FALSE. The located
+        files are per-Rasterfeld grid-cell DATA EXPORTS = project data, not methodology.
+        r_D(n) is engineer_input, not standard_fixed. Strike the "KOSTRA unblocks 22" line
+        from the acquisition list; the Anwendungshilfe (real methodology) is still ABSENT.
+
+N-1     DONE  data_class product_workflow ratified + created (_schema/DATA-CLASS-product-workflow.md).
+        6 DWA-A-138-1 CRs reclassified (req-09/16/19/21/23/30); verifier reports skipped=6 (live).
+        2026-07-27 FIXED: all 6 body texts still asserted "PDF PRINTED p.NN" against their own
+        frontmatter -> rewritten to state the class + withdrawn page claim (SEV-1 shape).
+        ISO-14064-2 cr-1642-03 checked vs its own source: genuine VA, NOT a member. Ruling upheld.
+
+WAVE 2  DONE  corpus-wide source-page verification -> .superpowers/sdd/wave2-source-page-verification.md
+        CORPUS ACCURACY 51.4% (889 CONFIRMED / 1730 testable; 2715 page-bearing of 3983 nodes).
+        OFF-BY-N 639 (|n|=1:336, 2:103, 3:63, >=4:137) · NOT-FOUND 202 · UNTESTABLE 985.
+        BULK CORRECTION NOT APPLIED — premise did not hold. Verifier already applies the derived
+        per-document offset; residuals are POST-offset. Same claimed page yields DIFFERENT
+        residuals (A-222 p.20: 9x-1 vs 17x other) => per-node defects, not page drift.
+        Only proven block corpus-wide: DVS-2225-4 dp +1 (5/5). Not applied; queued as W2-D2.
+        SOURCE-BLOCKED 8 (SR-3 capped, unverifiable NOT disproven): ATV-A-704E, DIN-18130-1,
+        DIN-1989-1, DWA-A-125, ISO-5667-16, ISO-59010, ISO-9001 (image-only), ISO-5667-6 (no path).
+        DEMOTION PROPOSED: DIN-18130-1 certified -> source-blocked (0/28 testable, image-only).
+        ISO-5667-6 re-checked on disk: only 5667-1/-10/-13/-16 exist under Desktop\Ciruclar...\.
+        PDF genuinely ABSENT (acquisition target, not a missing path entry). Corpus already
+        honest: 0 page-bearing nodes, belowVA=108/108 -> no VA claim rests on it, nothing to
+        downgrade. Search scope: Desktop+Documents+Downloads (where all other source PDFs live).
+        NEW DECISIONS: W2-D1 residual adjudication policy · W2-D2 DVS block · W2-D3 demotion.
+        CAVEAT: OFF-BY-N is a CANDIDATE defect (token may legitimately recur) = upper bound.
+
+WAVE 3  IN PROGRESS (2026-07-27, model claude-opus-5, CLI 2.1.218, effort high)
+        STD 1 = VDI-3814-Blatt-2-1 -> .superpowers/sdd/wave3-VDI-3814-Blatt-2-1.md (read-only, 0 writes)
+        QUEUE CORRECTION (R-3): ledger ranking used wave0 belowVA/dead + wave2 acc% only. Live
+        validator over the FULL corpus = 3978 nodes, ERRORS 3345, WARNINGS 1029 (exit 250). The
+        "ERRORS=0" in _PROGRAM-REPORT covers only the 6 hand-built maps (512 nodes), NOT the 66
+        wave-0 generated maps. Live per-standard errors: VDI-3814 = 0 (0 warns) vs DWA-M-205 = 50
+        (belowVA 96/100, dead 14). VDI-3814 is the correct closest-to-usable pick, not M-205.
+        OFFSET re-derived independently = 0 (14 pages); map's own footer-derived claim CONFIRMED.
+        FINDINGS: F-1 SEV-1 CROSS-STANDARD 54 CRs assert audit_status='match' with an empty
+        "[Klausel-verifiziert: ]" stub and no evidence text (VDI-3814 28, HOAI-2021 23, DIN-14021 3)
+        -> HOAI-2021 is a RE-CATCH on a standard closed COMPLIANT-pending-review (fe85f05) => TIER
+        DROP per standing-order rule 3. F-2 SEV-1 ag_freigabe required but "Freigabe"/"genehmig"
+        appear 0x in all 34 pages = invented requirement. F-3 SEV-1 CR-15 block contradicts §8.1
+        p.20 which explicitly permits NOT creating a Lastenheft. F-4 SEV-2 dead gate CR-28 (TRUE)
+        + ungated anforderungen_pruefbar are ONE defect: §6.1 p.6 "Die Anforderungen müssen
+        quantifizierbar und prüfbar sein" -> re-home CR-28 WS-02->WS-07 (engine-safe, no
+        cross-worksheet). F-5 CR-27 CONFIRMED faithful (§5 p.5 "sind ... zu pflegen"). F-6 map
+        claims 74 fields, prod has 69. F-7 dp-vdi-03 says 3 ungated required fields, prod says 14
+        across all 7 worksheets (§8.9 ga_funktionen has NO CR at all). F-8 CANDIDATE ONLY: 11 block
+        CRs whose own clause has no mandatory modal -- NOT reported as over-enforcement because
+        §6.1 p.6 mandates §6.2-§6.7 collectively ("festzulegen sind"); inheritance needs ratifying.
+        BATCH: W3-D1..D10 open. NOT READY-TO-USE (D3/D4/D7 are ratification-only by doctrine).
+        RESIDUE: verbatim quotes captured for 4 of 28 clauses; NO harness run; Tab.1 rows and the
+        6 in_library:false doc refs not yet boundary-scanned.
+
+W3-D10 DONE 2026-07-27 (model claude-opus-5, CLI 2.1.218, effort high) — VALIDATOR RULE 10 SHIPPED.
+        Standing-order rule 1 discharged for Wave-3 F-1: new defect class -> rule in the SAME wave,
+        then re-run corpus-wide. Commands (re-executable, R-1):
+          node scripts/reasoning-map/export-encoding-snapshot.mjs   # +source_quote, 71 standards
+          node scripts/reasoning-map/validate.mjs
+          TOTAL nodes = 3978  ERRORS = 3399  WARNINGS = 1060  (exit 250)
+        DELTA vs 3345/1029 = +54 ERR / +31 WARN, 100% rule 10. No drift elsewhere.
+        10a evidence-backs-match ERROR 54 = VDI-3814 28 + HOAI-2021 23 + DIN-14021 3.
+        10b evidence-not-markup  WARN  31 = DIN-14021 27 + DVS-2225-4/DWA-A-125/DWA-M-229-1/VDI-3477 1 ea.
+        RE-CATCH RATE this wave = 5 standards (HOAI-2021 re-opened; DIN-14021 + 3 others NEW).
+        DIN-14021 is the new worst: 30 of 50 CRs carry non-evidence (3 stubs + 27 LaTeX headings).
+        GOLD COPY CLEAN: DWA-A-138-1 + the full FLL set score 0 on both sub-rules.
+        SELF-CORRECTION (R-5): my first pass used a residue-length heuristic (<12 chars) and got 52,
+        under-counting HOAI at 21 — it passed encoder ANNOTATIONS as if they were source prose. The
+        shape test is the definition. The prior wave's 54 is CONFIRMED; my 52 was the wrong number.
+        NEW DECISION W3-D11 [CODE] SEV-3: `finding()` bumps the fail counter AND every call site
+        bumps it again -> every rule 1-9 reports `fail=` at exactly 2x. pass= and ERRORS/WARNINGS
+        totals unaffected (findings array). Rule 10 bumps pass-side only and is exact. This is the
+        ROOT CAUSE of the "double-count" the triage table previously attributed to wikilink dupes.
+        Triage table re-rendered per standing-order rule 2 (live output, not hand-patched).
+
+WAVES 3+ REMAINING QUEUE (next after VDI-3814): re-rank on live validator errors, not ledger prose.
+        Lowest live-error candidates: DWA-A-178 (2), DWA-M-102-4 (2), DWA-M-1200-2 (3), DWA-M-187 (3),
+        DWA-M-277E (5), ISO-14050 (6), DIN-14071-1 (7), ISO-14064-2 (7), DWA-M-732 (15).
+
+BLOCKER  CLI 2.1.220 available upstream but winget manifest lags (exit 43 after source update).
+        RE-CONFIRMED independently 2026-07-27 in the Wave-3 session (winget source update, then
+        winget upgrade --id Anthropic.ClaudeCode -> exit 43). Ran on 2.1.218. Not installed
+        out-of-band (would fork a winget-managed install). Decide: wait for manifest, or out-of-band.
