@@ -189,3 +189,41 @@ RATIFICATION BATCH consolidated for signature -> vault reasoning-maps/_RATIFICAT
         these NEVER block work; Alvaro signs asynchronously.
 
 NEXT IN QUEUE (not started): DWA-A-178 (2 live errors) then DWA-M-102-4 (2).
+
+WAVE 3  STD 2 = DWA-A-178 DONE 2026-07-27 -> .superpowers/sdd/wave3-DWA-A-178.md (read-only)
+        Retentionsbodenfilteranlagen, Juni 2019. 19 ws / 118 fields / 13 eq / 28 CR.
+        Offset -2 RE-DERIVED (DWA footer, 4 pages: PDF 12->10, 20->18, 30->28, 40->38).
+        THRESHOLDS: 11 of 11 verified verbatim against the PDF -> ALL CONFIRMED. Zero
+        numeric defects. The values are sound; the damage is in the computation layer.
+        FOUR REVERSALS (suspected, source/engine DISPROVED — reported per R-5):
+          RV-1 six IF..THEN block gates "dead" -> FALSE, evaluate.ts L165/L457 implements
+               IF/THEN with vacuous-pass. The SKILL DOC was stale, not the encoding.
+          RV-2 REQ-18 A_F >= 100*A_E_b_a "off by 1e4" -> FALSE, A_F m² vs A_E_b_a ha.
+          RV-3 REQ-19 "4 <= b_F" symbol-RHS trap -> FALSE, left is numeric -> acompare.
+          RV-4 "== True" casing -> FALSE, evaluate.ts L54 maps both cases.
+        FINDINGS: F-1 SEV-1 Gl.13 references VQ_DR_RBF_zu, NOT A FIELD (declared VQ_Dr_RBF,
+        case+suffix differ; engine case-sensitive) -> eta_F cannot compute, feeds Gl.5/6/7.
+        F-2 SEV-1 Gl.2/3 call SUM_over_i; SUPPORTED_FUNCTIONS={min,max}, all others THROW
+        -> B_RBF_zu never produced (degrades to hand-entry, it is also a field).
+        F-3 SEV-1 Gl.9 formula "4 <= b_F <= b_krit = 7 [kg/(m^2*a)]" is not evaluable.
+        F-4 SEV-2 multi-producer C9: B_RBF_zu<-Gl.2/3, b_F<-Gl.5/6/7, NO selector encoded.
+        F-5 SEV-2 8 CRs carry placeholder conditions (manual_check x6 etc) — all warn, so
+        NO enforcement lost; question is a first-class manual-attestation type.
+        F-6 SEV-2 REQ-20 restates Gl.10 byte-identical instead of reading its output (G12).
+        F-7 SEV-2 REQ-15 + REQ-27 block over DESCRIPTIVE clauses ("liegen zwischen",
+        "haben sich bewährt"); cf REQ-13 whose "muss" earns its block.
+        F-8 SEV-3 6 CRs source_quote NULL (honest, rule-10-exempt) — queue backfill.
+        F-9 SEV-3 TRIAGE TABLE MISLABELLED this standard "Straßen-Entwässerung/RiStWag";
+        RiStWag occurs once, in §6.2.1.3, as a cross-ref. Title corrected in the table.
+        F-10 SEV-3 the 2 live ERRORs = map under-linking on section-a178-06/07 (inference).
+        F-11 SEV-3 all 118 fields imported_unverified.
+        BATCH A178-D1..D11 open. D9 (title) + D11 (skill doc) APPLIED as [CODE].
+        A178-D11 IS THE HIGHEST-LEVERAGE ITEM: references/engine-grammar.md asserted
+        IF..THEN was dead/unenforced. Corrected in the skill. OPEN ACTION: re-check any
+        standard previously "fixed" for dead IF..THEN gates — those findings were not real.
+        METRICS: per-standard cost DOWN (W3-D1 toolchain reused unchanged, +1 watermark
+        pattern). Re-catch on standards = 0; but D11 is a re-catch on the campaign's OWN
+        reference material, which the convergence metric does not currently model.
+
+NEXT: W3-D12 (DIN-14021 27 heading-quotes, pre-authorized backfill), then A178-D8 quote
+        backfill, then DWA-M-102-4 (2 live errors) per the ranked queue.

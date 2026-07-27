@@ -66,6 +66,8 @@ function runsOf(line) {
 const NOISE = [
   /Externe elektronische Auslegestelle/i,
   /Normen-Download-Beuth/i, // Beuth per-licensee watermark, one line per page
+  /Von der DWA lizenziert für/i, // DWA per-licensee watermark
+  /^\s*\d{1,3}\s+DWA-Regelwerk\s|^\s*\w+\s+\d{4}\s+DWA-Regelwerk\s/i, // DWA running footer
   /-KdNr\.\d+-ID\./i, // same watermark, alternate rendering
   /Alle Rechte vorbehalten/i,
   /^VDI \d+ Blatt/i,
