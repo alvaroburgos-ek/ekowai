@@ -700,3 +700,22 @@ WAVE 7 DONE — DWA-M-277E -> .superpowers/sdd/wave7-DWA-M-277E.md (44 agents, 3
         [ \t]*. Verify effects not exit codes (again).
         NEXT QUEUE: ISO-14050 (6 live errors).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 9 / UNTOUCHED 62.
+
+# ============================================================
+# WAVE 8 OPENED — ISO-14050 (vocabulary), 2026-07-28 (fable-5)
+# ============================================================
+STANDARD: ISO 14050:2020(E) "Environmental management - Vocabulary" (4th ed). A TERMINOLOGY
+        standard - 13 ws / 25 fields / 0 eq / 0 tables / 6 CRs. First non-computational
+        standard of the campaign: nothing computes/gates, so the 7-element template is
+        largely vacuous. Treatment reframed for a vocabulary reference:
+        (a) coverage HONESTY - 25 fields vs a standard defining hundreds of terms => is it a
+            full transcription or a curated subset? Must be labelled honestly.
+        (b) verify the 25 encoded fields vs their printed definitions.
+        (c) build the 6 orphan CR map nodes (validator 2.cr-db-has-node x6) + backfill quotes.
+        6 CRs all severity=warn/condition=manual/quote NULL - advisory notes, not gates.
+        SOURCE verified: ISO-14050-2020-en.pdf, 80 pages, text layer (166k chars).
+        1 cross-standard error noted: ISO-14033's doc-iso-14050 ref lacks source_page (that's
+        on the 14033 map, addressed when 14033 is swept).
+DISPATCHED: wf_b18d9326-071 / task wi5fqdwd9 (compact 2-phase: coverage+field-verify, then
+        CR characterisation+quote+node proposals). Results -> journal.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 10 / UNTOUCHED 61.
