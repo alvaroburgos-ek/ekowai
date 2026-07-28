@@ -980,3 +980,14 @@ WAVE 14 OPENED — ISO-14015 (EASO: env assessment of sites), 2026-07-28 (fable-
         SOURCE: ISO 14015-2022...pdf, 38 pages. Live error: 1 (dangling wikilink memory ref).
         DISPATCHED wf_e74db548-02e / task wna5catav. Fixes APPLY. NEXT IN RUN: ISO-59004, ISO-14033.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 16 / UNTOUCHED 55.
+
+WAVE 14 CLOSED — ISO-14015 (EASO), 2026-07-28. CLEAN standard: bidirectional coverage COMPLETE,
+        zero field defects, correct modal mapping (guidance→all-warn), eq-sweep verified. FIX
+        APPLIED: 9 mis-homed WARN gates re-homed (CR-002..007→ws02, CR-008..010→ws03) — source-
+        settled dead-reference class c, engine-proven pending→pass/fail, enforcement unchanged.
+        mig 20260728190000 (rollback written). Map write-back: 9 CR nodes + DP node, dangling
+        wikilink stripped, snapshot refreshed, validator ISO-14015 0/0. Sheet +3 (Section R:
+        CR-028 manual, 5× IS-NOT-NULL, cosmetic §) = 73 open. NEW: class register refined — warn
+        mis-home = source-settled re-home, block mis-home = ruling (severity is the discriminator).
+        Deployed-build exec still element-7 owner-blocked.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 16 / UNTOUCHED 55. NEXT: ISO-59004 (dispatching now).
