@@ -1080,3 +1080,9 @@ ENUM-OPTIONS DIAGNOSTIC 2026-07-28 — surveyed the "options must be shown" defe
   quoted verbatim from each guideline's printed list, and clause_reference is proven unreliable
   (DWA-M-102-4 roof/street/vegetation_type cite Tab.4 = water-balance HAD, NOT surface types). Per-field
   source hunt required; never invent. Next focused unit.
+
+ENUM "OPTIONS MUST BE SHOWN" — 7-guideline verbatim extraction (workflow wj1nyz2en), 2026-07-28.
+  3 of 18 POPULATED from source (DWA-M-102-4 roof/street/vegetation types, Anhang A Tab.A.1 + Anhang C
+  Tab.C.5, verbatim, umlauts correct, wrong clause_reference fixed; mig 20260728270000). 15 NOT populated
+  — 10 have no printed pick-list, 5 are mis-typed non-enums — recorded to sheet V RESOLUTION as re-type
+  rulings (NEVER invented options). Disciplined outcome: only source-verified dropdowns populated.
