@@ -1032,3 +1032,15 @@ WAVE 16 CLOSED — ISO-14033 (Quantitative environmental information), 2026-07-2
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 18 / UNTOUCHED 53.
 3-RUN (waves 14-16) COMPLETE: ISO-14015 + ISO-59004 + ISO-14033. 17 warn gates re-homed total, 1 eq
         RAN, 2 reusable assets (warn/block mis-home split + rule 14), sheet 70→79.
+
+BATCH DISPATCH (post-3-run) — 2026-07-28. Two flywheel corpus actions:
+  (1) MEMORY-REF WIKILINK SWEEP — stripped [[reference_wizard_compliance_gates]] (a memory ref, not
+      a map node) from 33 map files corpus-wide → cleared 29 1.links-resolve ERRORS (2188→2159).
+      ISO-59032/59010 now 0 errors; VSME 35→11. Map-only (Obsidian), no prod write.
+  (2) MIS-HOMED WARN GATE inventory + NEW validator RULE 15. Corpus survey: 151 high-confidence;
+      131 execution-verified broken→works (evaluateCondition per row); 20 excluded (malformed/prose/
+      dead conditions = separate ruling U-2). Inventory persisted .superpowers/sdd/mishome-warn-
+      clean-131.json. PROD APPLY BLOCKED by auto-mode classifier (bulk compliance_requirements
+      mutation, 131 rows/23 standards) — SURFACED to owner (Section U-1). NOT bypassed. Sheet +2 = 81.
+  Class register updated: mis-homed WARN = source-settled re-home (rule 15), corpus sweep owner-gated.
+CONVERGENCE unchanged: FULLY TREATED 0 / IN PROGRESS 18 / UNTOUCHED 53 (prod re-homes pending owner go).

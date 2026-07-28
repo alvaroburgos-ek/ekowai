@@ -813,6 +813,56 @@ function checkManualPlaceholder() {
   }
 }
 
+// ═══ CHECK 15 — MIS-HOMED WARN GATE (high-confidence, corpus class) ══════════════
+// Recurring PROD class (registered 2026-07-28, after fixing it by hand on ISO-14015/59004/14033).
+// A severity='warn' CR whose condition's field-operands ALL live on exactly ONE other worksheet
+// (none on the host, and none declaring the host in consumer_worksheets → no inheritance path).
+// Under the engine's worksheet-LOCAL lookup the gate resolves pending/fail forever; it never
+// reflects the answer the engineer enters on the operand's worksheet. FIX = re-home the CR to the
+// operands' worksheet (source-settled: exactly one correct home; warn→warn = zero enforcement
+// change). Distinct from rule 13 (BLOCK gates = ruling). Corpus survey 2026-07-28: 151 high-
+// confidence; 131 of them ALSO pass an executed broken→works reproduction (the other 20 carry a
+// deeper malformed/prose/dead condition where re-home alone does not resolve them → those are a
+// separate ruling, NOT this class's fix). The 131-row re-home is a guarded per-standard sweep
+// pending apply (the corpus-scale single migration is human-gated).
+const R15_KW = new Set(['AND','OR','NOT','IF','THEN','IS','NULL','EMPTY','IN','TRUE','FALSE','true','false','eq','MIN','MAX','min','max']);
+function r15syms(cond) {
+  const o = new Set();
+  for (const m of (cond || '').matchAll(/[A-Za-z_][A-Za-z0-9_]*/g)) { const t = m[0]; if (R15_KW.has(t) || /^\d/.test(t)) continue; o.add(t); }
+  return o;
+}
+function checkMisHomedWarnGates() {
+  for (const [stdCode, enc] of Object.entries(snapshot.standards || {})) {
+    const wsById = new Map((enc.worksheets || []).map((w) => [w.id, w.code]));
+    const fieldWs = new Map(), fieldCons = new Map();
+    for (const f of enc.fields || []) {
+      if (!f.symbol) continue;
+      const wc = wsById.get(f.worksheet_template_id);
+      if (!fieldWs.has(f.symbol)) fieldWs.set(f.symbol, new Set());
+      if (wc) fieldWs.get(f.symbol).add(wc);
+      const cons = Array.isArray(f.consumer_worksheets) ? f.consumer_worksheets.join(' ') : String(f.consumer_worksheets ?? '');
+      fieldCons.set(f.symbol, (fieldCons.get(f.symbol) || '') + ' ' + cons);
+    }
+    for (const c of enc.compliance || []) {
+      if ((c.severity || '') !== 'warn') { bumpCheck('15.mis-homed-warn-gate', true); continue; }
+      const host = wsById.get(c.worksheet_template_id);
+      if (!host) { bumpCheck('15.mis-homed-warn-gate', true); continue; }
+      const syms = [...r15syms(c.condition)].filter((s) => fieldWs.has(s));
+      const misHomed = syms.length > 0
+        && syms.every((s) => !fieldWs.get(s).has(host))
+        && !syms.some((s) => (fieldCons.get(s) || '').includes(host))
+        && new Set([].concat(...syms.map((s) => [...fieldWs.get(s)]))).size === 1;
+      if (misHomed) {
+        const target = [...new Set([].concat(...syms.map((s) => [...fieldWs.get(s)])))][0];
+        finding('WARN', '15.mis-homed-warn-gate', stdCode, c.code,
+          `warn gate operand(s) [${syms.join(',')}] all live on ${target}, not host ${host}, no consumer-inheritance → resolves pending/fail forever. Source-settled re-home to ${target}.`);
+      } else {
+        bumpCheck('15.mis-homed-warn-gate', true);
+      }
+    }
+  }
+}
+
 // ── Run all checks ────────────────────────────────────────────────────────────
 for (const std of Object.keys(maps)) {
   checkStructural(maps[std]);
@@ -827,6 +877,7 @@ checkCommaProtected();
 checkConditionOperator();
 checkMisHomedGates();
 checkManualPlaceholder();
+checkMisHomedWarnGates();
 
 // ═══════════════════════════ 4 CORE QUERIES ══════════════════════════════════
 function qBelowVa(std) {
