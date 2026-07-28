@@ -1019,3 +1019,16 @@ WAVE 16 OPENED — ISO-14033 (Quantitative environmental information — Guideli
         (parameter_value vs fld-parameter-value) + 2× rule-14 manual (known sheet class). DISPATCHED
         wf_1e2d35d0-bdb / task wdf0wxkn9.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 17 / UNTOUCHED 54.
+
+WAVE 16 CLOSED — ISO-14033 (Quantitative environmental information), 2026-07-28. Richest fix set of
+        the 3-run. FIXES APPLIED (mig 20260728210000, rollback written): (1) 5 mis-homed WARN gates
+        re-homed CR-005/006/007→ws02, CR-008→ws03, CR-019 ws05→ws06 (engine-proven pending/fail→pass);
+        (2) §6.2.3 dead-ref retag on equation+field+CR-019 → §6.1.2.2.4, Annex A.2.4 c) 1); (3) ws03
+        "ten"→"nine" principles; (4) ws06 false-normative description corrected. THE 1 EQUATION RAN
+        (evaluateFormula → computed 20). Map: 3 rule-8 ERRORS cleared (source_page backfills), 2
+        rule-2 WARNs cleared (produces node-id→symbol parameter_value), eq node freshened, snapshot
+        refreshed, validator ISO-14033 0 errors. CR-003 cross-sheet = ruling (T-1); doc-iso-14000-vv
+        reclass ruling (T-2). Sheet +2 (Section T) = 79 open. Deployed-build exec still element-7 blocked.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 18 / UNTOUCHED 53.
+3-RUN (waves 14-16) COMPLETE: ISO-14015 + ISO-59004 + ISO-14033. 17 warn gates re-homed total, 1 eq
+        RAN, 2 reusable assets (warn/block mis-home split + rule 14), sheet 70→79.
