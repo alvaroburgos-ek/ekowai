@@ -644,3 +644,9 @@ DISPATCHED: wf_251c1479-b7f / task wzpxkig89 — the proven template: independen
         prod + refuters -> 15 CRs both-ways incl. the M-187 mis-homing check -> executed
         metric with collision census. Results persist to journal.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 8 / UNTOUCHED 63.
+
+A178-D8 DONE 2026-07-28 (fable-5): 6 NULL-quote CRs backfilled (REQ-07/14/17/19/20/22),
+        migration 20260728100000 + rollback. Quotes re-captured in-session from a178-de.txt;
+        Gl.1/9/10 renderings verified by the earlier rendered-page sweeps. EFFECT VERIFIED:
+        backfilled=6, still_null=0 -> A-178 now has ZERO evidence-free CRs.
+        Map write-back run on the 6 nodes (see command output for hit/miss).
