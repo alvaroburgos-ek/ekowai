@@ -1074,3 +1074,9 @@ MIS-HOMED WARN RE-HOME — COMPLETE, 2026-07-28. Final 14 applied (owner added p
   Rule 15 corpus: 151 -> 20 (the 20 remaining = U-2 malformed-condition CRs, structurally mis-homed
   but not re-homable — need real conditions, separate ruling). 131 dead advisory gates now resolve.
   NEXT: map-node owner_worksheet write-back for the 131 re-homed CRs (mirror integrity).
+
+ENUM-OPTIONS DIAGNOSTIC 2026-07-28 — surveyed the "options must be shown" defect: 18 enum fields /
+  7 standards render empty dropdowns. Recorded to sheet Section V. NOT auto-populated: options must be
+  quoted verbatim from each guideline's printed list, and clause_reference is proven unreliable
+  (DWA-M-102-4 roof/street/vegetation_type cite Tab.4 = water-balance HAD, NOT surface types). Per-field
+  source hunt required; never invent. Next focused unit.
