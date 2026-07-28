@@ -71,6 +71,11 @@ const STANDARD_DIRS = discoverStandardDirs(mapsDir);
 
 // ── Frontmatter + typed-link parser ─────────────────────────────────────────
 function parseFrontmatter(text) {
+  // Strip a leading UTF-8 BOM — wave-0-generated nodes were written with one, which
+  // defeats the ^--- anchor, drops the whole frontmatter (crCode/type lost), and made
+  // 268 CRs across 8 maps read as false orphans. Tolerate it here; files are also
+  // BOM-stripped on disk by strip-bom.mjs.
+  if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
   const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   const fm = {};
   if (!m) return fm;
@@ -144,14 +149,19 @@ function extractCrCode(title, id) {
   // and the DIN-family form "<STD>-CR-NN" (e.g. "DIN-18130-1-CR-01 …"). Match the
   // fully-qualified <STD>-CR-NN first so the whole DB code is captured, then the
   // REQ-family, then fall back to the filename slug.
-  const cr = title.match(/([A-Z0-9]+(?:-[A-Z0-9]+)*-CR-[A-Z0-9-]+)/);
+  // Suffix classes allow a trailing lowercase letter: DB codes like REQ-02c, REQ-04b,
+  // REQ-19eff-a exist and truncating them at the first lowercase char mis-matched the row.
+  const cr = title.match(/([A-Z0-9]+(?:-[A-Z0-9]+)*-CR-[A-Za-z0-9-]+)/);
   if (cr) return cr[1];
-  const m = title.match(/(A138-REQ-[A-Z0-9-]+|REQ-[A-Z0-9-]+)/);
+  const m = title.match(/(A138-REQ-[A-Za-z0-9-]+|REQ-[A-Za-z0-9-]+)/);
   if (m) return m[1];
-  // Bare "CR-NNN" form (ISO vocabulary maps store the DB code as CR-001, unprefixed).
-  // Placed AFTER the prefixed <STD>-CR-NN match so DIN-family codes still capture whole.
-  const bare = title.match(/\bCR-[0-9]+\b/);
+  // Bare "CR-NNN" (ISO vocabulary maps) — after the prefixed <STD>-CR-NN match.
+  const bare = title.match(/\bCR-[0-9]+[a-z]?\b/);
   if (bare) return bare[0];
+  // Irregular DB code forms seen in a few standards: COMP-18 (DWA-A-272E),
+  // C363-23 (DWA-M-363), CR-M732-04 (DWA-M-732), REQ-708-02, REQ-M760-10.
+  const irr = title.match(/\b(COMP-[0-9]+|C[0-9]+-[0-9]+|CR-[A-Z][0-9]+-[0-9]+)\b/);
+  if (irr) return irr[1];
   const im = id.match(/(req-[a-z0-9-]+)/i);
   return im ? im[1].toUpperCase().replace(/^REQ/, 'REQ') : null;
 }
@@ -182,7 +192,13 @@ function loadMap(stdCode) {
       title,
       links,
       wikilinks,
-      crCode: type === 'compliance_requirement' ? extractCrCode(title, id) : null,
+      // Prefer an explicit `crCode:` frontmatter field (authoritative — the generator
+      // writes the exact DB code) over title-regex extraction, which cannot capture
+      // irregular codes like COMP-18 / C363-23 / CR-M732-04.
+      crCode:
+        type === 'compliance_requirement'
+          ? (fm.crCode && String(fm.crCode).trim()) || extractCrCode(title, id)
+          : null,
       // produces target may carry an inline annotation, e.g. "A_C  (derived)" or
       // "g_prime (as a >= inequality …)" — take the leading symbol token only.
       producesSymbols: links.produces

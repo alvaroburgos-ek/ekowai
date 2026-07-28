@@ -736,3 +736,29 @@ WAVE 8 DONE — ISO-14050 (vocabulary) -> .superpowers/sdd/wave8-ISO-14050.md. F
         built CR nodes. Candidate for a batched node-generation pass.
         NEXT QUEUE: DIN-14071-1 (now 4 errors after the extractor fix; was 7).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 10 / UNTOUCHED 61.
+
+CORPUS-HYGIENE PASS 2026-07-28 (fable-5) — CR-node orphan class 924 -> 0, both directions.
+        Triggered by the ISO-14050 flywheel (bare-CR extractor gap). Turned into a full
+        corpus sweep of the 2.cr-db-has-node class (was the dominant error, 924 across 35 std).
+        ROOT CAUSES FOUND & FIXED (each caught by "verify effects", not exit codes):
+        1. extractCrCode too narrow: added crCode: frontmatter as authoritative source,
+           bare CR-NNN, lowercase suffixes (REQ-02c/REQ-04b/REQ-19eff-a), and irregular
+           forms (COMP-18/C363-23/CR-M732-04). validate.mjs + generate-cr-nodes.mjs kept
+           BYTE-IDENTICAL (divergence = regenerated dups).
+        2. **UTF-8 BOM on 1136 wave-0 map files** broke the ^--- frontmatter anchor ->
+           fm={} -> crCode/type lost -> 268 FALSE orphans + inflated warnings. Stripped all
+           1136 BOMs; hardened parseFrontmatter to tolerate a leading BOM. WARNINGS 1023->587.
+        3. VDI-2163/VDI-3477: 39 original CR nodes mis-coded from wave-0 (bare "CR-01" while
+           DB uses "VDI-2163-CR-01") -> never matched. Stamped crCode=<STD>-CR-NN (verified
+           vs snapshot), deleted the generated duplicates.
+        NEW TOOL scripts/reasoning-map/generate-cr-nodes.mjs: mirrors orphan DB CRs into map
+        nodes. HONESTY: mirrors DB only, provenance conservative (VC w/ quote, EV w/o, NEVER
+        VA), crCode verbatim, idempotent. ~700 genuine orphan nodes created corpus-wide.
+        MY OWN ERROR, caught & undone: first generator run created 1927 nodes (present-
+        detection read only crCode: frontmatter, missing title-coded originals) -> ~1266
+        DUPLICATES. Deleted all generated, fixed present-detection to title-extract too,
+        re-ran. Verify effects, never the error-count drop.
+        FINAL VERIFIED: 2.cr-db-has-node 0/1933, 2.cr-node-has-db 0/1933, generator
+        idempotent (created 0 on re-run). ERRORS 3345-region -> 2199; WARNINGS 1023 -> 587.
+CONVERGENCE UNCHANGED: FULLY TREATED 0 / IN PROGRESS 10 / UNTOUCHED 61 (this was corpus
+        map-hygiene, not a per-standard treatment).
