@@ -991,3 +991,10 @@ WAVE 14 CLOSED — ISO-14015 (EASO), 2026-07-28. CLEAN standard: bidirectional c
         mis-home = source-settled re-home, block mis-home = ruling (severity is the discriminator).
         Deployed-build exec still element-7 owner-blocked.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 16 / UNTOUCHED 55. NEXT: ISO-59004 (dispatching now).
+
+WAVE 15 OPENED — ISO-59004 (Circular economy: vocabulary/principles/guidance), 2026-07-28. Second
+        of the 3-standard run. 6 ws / 33 fields / 0 eq / 44 CRs. Bilingual EN/FR IMANOR copy of
+        ISO/FDIS 59004:2024, 62pp; verify vs ENGLISH. Live errors: 2 dangling wikilinks + a
+        dp-phantom-field-gates node → mis-homing likely recurs (settled split: warn=re-home,
+        block=ruling). DISPATCHED wf_7256b3c4-f12 / task wqsfdopwm. NEXT: ISO-14033.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 16 / UNTOUCHED 55.
