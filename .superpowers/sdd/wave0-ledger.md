@@ -683,3 +683,20 @@ DISPATCHED: wf_bf618658-e29 / task wct8o81me — the proven template scaled to 6
         trap, collisions, mis-homed gates, [unit]-in-formula). Fixes APPLY (orchestrator
         applies what survives adversarial refutation, execution-proven). Results -> journal.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 9 / UNTOUCHED 62.
+
+WAVE 7 DONE — DWA-M-277E -> .superpowers/sdd/wave7-DWA-M-277E.md (44 agents, 3.22M tokens).
+        Offset +2. TABLES: 150 rows = 6 printed tables; 40+ cells incl. all safety-critical
+        (TBL-3/4/AnnexB) verified EXACT vs rendered pages.
+        APPLIED (source-settled, RE-VERIFIED in-session): (1) TBL-2 Characteristics 4-cell
+        column-shift corrected — I re-rendered printed p16/PDF18 and read it MYSELF (not the
+        audit's read, R-2), migration 20260728110000 + rollback, effect verified. (2) 6
+        table-node source_page (p15/16/17/20/26/32) — the TOC is WRONG for Tables 4 (says 19,
+        real 20) and 5 (says 24, real 26). Validator 3345 -> 3340 (5 errors cleared).
+        NOT READY: J-D1 §9 chain collision (6 producers on Q_GW - worst yet; example rows
+        share output_symbol with live eqs), J-D2 C2 hygiene gates non-enforcing (quality_category
+        absent from host), J-D3 E.coli C2 limit ungated (SAFETY). Sheet section J. 55 open.
+        BUG CAUGHT: my map-stamp guard used /^source_page:\s*\S/ — \s crosses newlines so it
+        matched the NEXT frontmatter line and falsely reported "has-value" for all 6. Fixed to
+        [ \t]*. Verify effects not exit codes (again).
+        NEXT QUEUE: ISO-14050 (6 live errors).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 9 / UNTOUCHED 62.

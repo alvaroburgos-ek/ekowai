@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-27T15:13:44.099Z",
+  "exported_at": "2026-07-28T06:33:18.892Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -47047,7 +47047,7 @@
           "clause_reference": "§5.2.4",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "Ein Eintrag feinpartikulärer Feststoffe (AFS63), der das in Misch- und Trennsystemen sowie bei der Straßenentwässerung übliche Frachtaufkommen von bis zu 1.000 kg/(ha·a) (FUCHS et al. 2010) deutlich überschreitet, erzeugt ein erhebliches Kolmationsrisiko.",
           "worksheet_template_id": "6de49f5c-dcc2-4903-b5ad-2314debe5753"
         },
         {
@@ -47058,7 +47058,7 @@
           "clause_reference": "§6.1.4.10",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "Es ist sicherzustellen, dass bei Volleinstau des Retentionsraums die spezifische Drosselabflussspende auf qDr,RBF = 0,05 l/(s·m²) begrenzt ist.",
           "worksheet_template_id": "4bd2fafe-1720-4caf-b9da-73845e382332"
         },
         {
@@ -47080,7 +47080,7 @@
           "clause_reference": "§6.2.2.1 Gl.(1)",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "1. Vorbemessung der Bodenfilteroberfläche AF über die Stoffbilanz: Die erforderliche Bodenfilteroberfläche wird über die zulässige Filterflächenbelastung, bezogen auf AFS63, ermittelt. — Vorbemessung Bodenfilteroberfläche: AF = (BRBF,zu / bkrit) · ηB,soll (Gl. 1)",
           "worksheet_template_id": "65ef19e1-f6ab-4384-819c-7c59e5946f20"
         },
         {
@@ -47212,19 +47212,8 @@
           "clause_reference": "§6.2.2.3, Gl. (9)",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "Zulässige AFS63-Bodenfilteroberflächenbelastung: 4 kg/(m²·a) ≤ bF ≤ bkrit = 7 kg/(m²·a) (Gl. 9)",
           "worksheet_template_id": "8d9359b4-b8d0-4188-8f99-072c57e19df6"
-        },
-        {
-          "id": "8b808afb-9d48-45de-a0b6-1e4db1c7b2be",
-          "code": "REQ-20",
-          "condition": "B_RBFA_ab / A_E_b_a <= b_R_e_zul",
-          "severity": "block",
-          "clause_reference": "§6.2.2.3, Gl. (10)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5f91c058-613d-425b-83c0-9b8f63c30212"
         },
         {
           "id": "cd323ef6-b95c-4346-af41-305ee3a77324",
@@ -47238,6 +47227,17 @@
           "worksheet_template_id": "5f91c058-613d-425b-83c0-9b8f63c30212"
         },
         {
+          "id": "8b808afb-9d48-45de-a0b6-1e4db1c7b2be",
+          "code": "REQ-20",
+          "condition": "B_RBFA_ab / A_E_b_a <= b_R_e_zul",
+          "severity": "block",
+          "clause_reference": "§6.2.2.3, Gl. (10)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Spezifische Einleitfracht aus der Retentionsbodenfilteranlage: BRBFA,ab / AE,b,a ≤ bR,e,zul (Gl. 10)",
+          "worksheet_template_id": "5f91c058-613d-425b-83c0-9b8f63c30212"
+        },
+        {
           "id": "33ad1e02-8480-4515-8af9-50e3022bd311",
           "code": "REQ-22",
           "condition": "n_RBF >= 10",
@@ -47245,7 +47245,7 @@
           "clause_reference": "§6.2.2.3c, §6.2.1.1",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "Die Beschickungshäufigkeit muss im langjährigen Mittel ≥ 10 a sein.",
           "worksheet_template_id": "94d5c961-4540-4bda-b5c3-d071c56621f8"
         },
         {
@@ -72406,47 +72406,6 @@
           "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
         },
         {
-          "id": "4430a74a-150d-43ad-880c-27c168aa02b3",
-          "equation_number": "2",
-          "output_symbol": "R",
-          "input_symbols": [
-            "R",
-            "R_D",
-            "R_B"
-          ],
-          "formula": "R = R_D + R_B",
-          "clause_reference": "§5.1, Gl. (2) (line 538)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "e59eb085-4e3e-4071-99ce-46e1ca5262a8",
-          "equation_number": "3",
-          "output_symbol": "R_D",
-          "input_symbols": [
-            "R_D",
-            "R_D_o",
-            "R_D_z"
-          ],
-          "formula": "R_D = R_D,o + R_D,z",
-          "clause_reference": "§5.1, Gl. (3) (line 539)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "3de1904c-874a-4076-aa63-ec3fe2725862",
-          "equation_number": "4",
-          "output_symbol": "R_B",
-          "input_symbols": [
-            "R_B",
-            "GWN"
-          ],
-          "formula": "R_B = GWN",
-          "clause_reference": "§5.1, Gl. (4) (line 540)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
           "id": "c8a7ab70-c4db-4b17-bf96-2ee0f1ca4858",
           "equation_number": "5",
           "output_symbol": "R_D",
@@ -72558,20 +72517,6 @@
           "worksheet_template_id": "bcee9138-b5af-4bfb-8f6b-67855e32897b"
         },
         {
-          "id": "46d1fd5d-b497-4f0c-ba7b-43d10d3dd204",
-          "equation_number": "C.1",
-          "output_symbol": "ET_a_korr",
-          "input_symbols": [
-            "ET_a",
-            "f_L",
-            "f_W"
-          ],
-          "formula": "ET_a,korr = ET_a * f_L * f_W",
-          "clause_reference": "§C.4.2, Gl. (C.1) (line 1208)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
-        },
-        {
           "id": "edfe3c2d-277b-48b4-8988-339627205773",
           "equation_number": "C.2",
           "output_symbol": "a_F",
@@ -72671,6 +72616,31 @@
           "clause_reference": "§A.5 (line 820)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "abd79aad-6096-4fba-90b6-5f76a6041710"
+        },
+        {
+          "id": "3de1904c-874a-4076-aa63-ec3fe2725862",
+          "equation_number": "4",
+          "output_symbol": "R_B",
+          "input_symbols": [
+            "GWN"
+          ],
+          "formula": "R_B = GWN",
+          "clause_reference": "§5.1, Gl. (4) (line 540)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
+        },
+        {
+          "id": "4430a74a-150d-43ad-880c-27c168aa02b3",
+          "equation_number": "2",
+          "output_symbol": "R",
+          "input_symbols": [
+            "R_D",
+            "R_B"
+          ],
+          "formula": "R = R_D + R_B",
+          "clause_reference": "§5.1, Gl. (2) (line 538)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
         },
         {
           "id": "25c75004-a856-492b-997d-c045cf422c46",
@@ -72831,6 +72801,33 @@
           "clause_reference": "§B.7 (lines 1054-1056)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "253f0170-6e7e-4a1c-9a18-bf24bca3c2cb"
+        },
+        {
+          "id": "e59eb085-4e3e-4071-99ce-46e1ca5262a8",
+          "equation_number": "3",
+          "output_symbol": "R_D",
+          "input_symbols": [
+            "R_D_o",
+            "R_D_z"
+          ],
+          "formula": "R_D = R_D_o + R_D_z",
+          "clause_reference": "§5.1, Gl. (3) (line 539)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
+        },
+        {
+          "id": "46d1fd5d-b497-4f0c-ba7b-43d10d3dd204",
+          "equation_number": "C.1",
+          "output_symbol": "ET_a_korr",
+          "input_symbols": [
+            "ET_a",
+            "f_L",
+            "f_W"
+          ],
+          "formula": "ET_a_korr = ET_a * f_L * f_W",
+          "clause_reference": "§C.4.2, Gl. (C.1) (line 1208)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
         }
       ],
       "compliance": [
