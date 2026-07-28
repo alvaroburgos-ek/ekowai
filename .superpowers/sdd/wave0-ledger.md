@@ -1067,3 +1067,10 @@ MIS-HOMED WARN RE-HOME — PER-GUIDELINE ROLLOUT (owner-authorized), 2026-07-28.
   re-homed CRs.
 CONVERGENCE: 117 dead advisory gates across 17 guidelines now resolve (broken->works). FULLY TREATED
   still 0 (deployed-build exec = element 7 owner-blocked).
+
+MIS-HOMED WARN RE-HOME — COMPLETE, 2026-07-28. Final 14 applied (owner added permission rule):
+  DWA-M-820-2 8 · ATV-A-704E 1 · DWA-A-102-2 1 · DWA-A-201 1 · DWA-A-222 1 · DWA-M-1200-2 1 ·
+  DWA-M-179-1 1. TOTAL 131/131 clean re-homes across 24 guidelines APPLIED + verified.
+  Rule 15 corpus: 151 -> 20 (the 20 remaining = U-2 malformed-condition CRs, structurally mis-homed
+  but not re-homable — need real conditions, separate ruling). 131 dead advisory gates now resolve.
+  NEXT: map-node owner_worksheet write-back for the 131 re-homed CRs (mirror integrity).
