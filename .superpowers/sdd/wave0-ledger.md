@@ -926,3 +926,11 @@ WAVE 12 DONE — ISO-5667-1 -> .superpowers/sdd/wave12-ISO-5667-1.md (6 agents, 
         Sheet 64 open. Harness NOT run (element-7) UNPROVEN.
         NEXT QUEUE: ISO-5667-13 / ISO-14015 (1 error) or re-rank.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 14 / UNTOUCHED 57.
+
+WAVE 13 OPENED — ISO-5667-13 (Water Sampling Pt13: sludge), 2026-07-28 (fable-5)
+        8 ws / 46 fields / 3 eq / 23 CRs. SOURCE: ISO-5667-13-2011.pdf, 32 pages, text (139k).
+        Live error: 1 (doc-iso-5667-10 standard_fixed w/o source_page - a REFERENCE to sibling
+        ISO 5667-10). DISPATCHED wf_c696f18b-ef6 / task wt5duqedp - full template + doc-ref
+        source_page/reclassify. Fixes APPLY (final). Brief carries all corpus classes incl.
+        eq-operator, IS-NOT-NULL-on-boolean-shall, mis-homing.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 15 / UNTOUCHED 56.
