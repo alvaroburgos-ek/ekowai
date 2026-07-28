@@ -719,3 +719,20 @@ STANDARD: ISO 14050:2020(E) "Environmental management - Vocabulary" (4th ed). A 
 DISPATCHED: wf_b18d9326-071 / task wi5fqdwd9 (compact 2-phase: coverage+field-verify, then
         CR characterisation+quote+node proposals). Results -> journal.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 10 / UNTOUCHED 61.
+
+WAVE 8 DONE — ISO-14050 (vocabulary) -> .superpowers/sdd/wave8-ISO-14050.md. First
+        non-computational standard. PREMISE REVERSED: not a 25-field subset — the 12 enum
+        selectors carry ALL 354 terms verbatim (354/354 = 100% coverage). Map's "PDF MISSING"
+        gate was FALSE — PDF located + read in-session (offset +6), gate lifted, EV→VA.
+        APPLIED (source-settled, in-session re-verified): 6 CR quotes backfilled + §3.11.5
+        enum-bleed stripped (migration 20260728120000) + 6 CR map nodes built.
+        *** VALIDATOR EXTRACTOR FIX = 343-ERROR CORPUS DROP *** extractCrCode didn't handle
+        bare CR-NNN codes (built for prefixed <STD>-CR-NN); added a fallback -> ERRORS
+        3340 -> 2997. VERIFIED CORRECT: 2.cr-node-has-db held at 17 fails (no mis-match
+        spike); remaining 924 cr-db-has-node are genuine missing-node orphans in wave-0 maps
+        (real backlog: DIN-14021 50, ATV-A-704E 30, DIN-EN-16941-2 19, ...). Flywheel win.
+        Sheet K-D1 (CR-001/002 over-assert, SEV-3). Standard effectively DONE.
+        NEW BACKLOG SURFACED: 924 cr-db-has-node orphans corpus-wide = wave-0 maps that never
+        built CR nodes. Candidate for a batched node-generation pass.
+        NEXT QUEUE: DIN-14071-1 (now 4 errors after the extractor fix; was 7).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 10 / UNTOUCHED 61.

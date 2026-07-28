@@ -148,6 +148,10 @@ function extractCrCode(title, id) {
   if (cr) return cr[1];
   const m = title.match(/(A138-REQ-[A-Z0-9-]+|REQ-[A-Z0-9-]+)/);
   if (m) return m[1];
+  // Bare "CR-NNN" form (ISO vocabulary maps store the DB code as CR-001, unprefixed).
+  // Placed AFTER the prefixed <STD>-CR-NN match so DIN-family codes still capture whole.
+  const bare = title.match(/\bCR-[0-9]+\b/);
+  if (bare) return bare[0];
   const im = id.match(/(req-[a-z0-9-]+)/i);
   return im ? im[1].toUpperCase().replace(/^REQ/, 'REQ') : null;
 }

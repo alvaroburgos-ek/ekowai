@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T06:33:18.892Z",
+  "exported_at": "2026-07-28T06:56:21.999Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -179873,7 +179873,7 @@
               "value": "carbon_offsetting__3_11_5",
               "label_de": "carbon offsetting",
               "label_en": "carbon offsetting",
-              "description": "DEF: mechanism for compensating for all or for a part of the carbon footprint of a product (3.11.1) or the partial carbon footprint of a product (3.11.2) through the prevention of the release (3.5.19) of, reduction in, or removal of an amount of greenhouse gas emissions (3.9.8) in a process (3.1.9) outside the product system (3.5.1) under study 3.12 Terms relating to economy and finance",
+              "description": "DEF: mechanism for compensating for all or for a part of the carbon footprint of a product (3.11.1) or the partial carbon footprint of a product (3.11.2) through the prevention of the release (3.5.19) of, reduction in, or removal of an amount of greenhouse gas emissions (3.9.8) in a process (3.1.9) outside the product system (3.5.1) under study",
               "order_index": 5,
               "regulation_reference": "§3.11.5"
             }
@@ -180302,7 +180302,7 @@
           "clause_reference": "§3.4.32, §3.6.18, §3.8.11, §3.9.35, §3.5.9",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "Domain-qualified entries carry a leading <…> qualifier, e.g. §3.4.32 objective evidence \"<audit> data supporting the existence or verity of something\"; §3.6.18 impact category \"<life cycle assessment> …\"; §3.8.11 climate sensitivity \"<climate change> …\"; §3.9.35 verification \"<greenhouse gas> …\"; §3.5.9 product environmental criteria \"<environmental labelling> …\". [ISO 14050:2020, verbatim qualifiers]",
           "worksheet_template_id": "8242f7e0-e159-4523-9184-058327894059"
         },
         {
@@ -180313,7 +180313,7 @@
           "clause_reference": "Introduction, §3",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "Communication is important in the implementation and operation of environmental management systems. This communication will be most effective if there is a common understanding of the terms used. [ISO 14050:2020, Introduction]",
           "worksheet_template_id": "8242f7e0-e159-4523-9184-058327894059"
         },
         {
@@ -180324,7 +180324,7 @@
           "clause_reference": "§3.4.48",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "§3.4.48 certification: \"third-party attestation related to an object of conformity assessment, with the exception of accreditation (3.4.30)\". [ISO 14050:2020, adopted from ISO/IEC 17000:2020, 7.6]",
           "worksheet_template_id": "afc5ed47-9bb7-459c-a2c9-50a4fc741d37"
         },
         {
@@ -180335,7 +180335,7 @@
           "clause_reference": "§3.9.35",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "§3.9.35 verification: \"<greenhouse gas> process (3.1.9) to evaluate a statement of historical data and information to determine if the statement is materially correct and conforms to criteria\". [ISO 14050:2020]",
           "worksheet_template_id": "c25e4cda-62d5-445a-8267-e324e3d13bb6"
         },
         {
@@ -180346,7 +180346,7 @@
           "clause_reference": "§3.9.36",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "§3.9.36 validation: \"<greenhouse gas> process (3.1.9) to evaluate the reasonableness of the assumptions, limitations and methods that support a statement about the outcome of future activities\". [ISO 14050:2020]",
           "worksheet_template_id": "c25e4cda-62d5-445a-8267-e324e3d13bb6"
         },
         {
@@ -180357,7 +180357,7 @@
           "clause_reference": "§3.9.33",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
+          "source_quote": "§3.9.33 greenhouse gas statement / GHG statement; DEPRECATED: GHG assertion — \"factual and objective declaration related to greenhouse gas (3.9.1) made by the responsible party\". [ISO 14050:2020]",
           "worksheet_template_id": "c25e4cda-62d5-445a-8267-e324e3d13bb6"
         }
       ],
@@ -182894,7 +182894,7 @@
               "value": "carbon_offsetting__3_11_5",
               "label_de": "carbon offsetting",
               "label_en": "carbon offsetting",
-              "description": "DEF: mechanism for compensating for all or for a part of the carbon footprint of a product (3.11.1) or the partial carbon footprint of a product (3.11.2) through the prevention of the release (3.5.19) of, reduction in, or removal of an amount of greenhouse gas emissions (3.9.8) in a process (3.1.9) outside the product system (3.5.1) under study 3.12 Terms relating to economy and finance",
+              "description": "DEF: mechanism for compensating for all or for a part of the carbon footprint of a product (3.11.1) or the partial carbon footprint of a product (3.11.2) through the prevention of the release (3.5.19) of, reduction in, or removal of an amount of greenhouse gas emissions (3.9.8) in a process (3.1.9) outside the product system (3.5.1) under study",
               "order_index": 5,
               "regulation_reference": "§3.11.5"
             }
