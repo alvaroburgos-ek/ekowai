@@ -692,6 +692,102 @@ function checkCommaProtected() {
   }
 }
 
+// ═══ CHECK 12 — UNSUPPORTED CONDITION OPERATOR (`eq` / dead-gate class) ═══════════
+// Recurring wave-0 generator defect (registered corpus-wide 2026-07-28 after fixing it
+// one-standard-at-a-time in waves 12/13). A CR condition written with `eq` instead of
+// `==`: the condition grammar has no `eq` token, so evaluateCondition returns
+// kind:'manual' for EVERY state — a silently DEAD gate. Proven: 'X eq true' -> manual;
+// 'X == true' -> pass/fail. 61 simple/compound cases were swept to `==` (migration
+// 20260728180000); this rule flags any residual `eq` (5 remain with deeper MIN()/->/prose
+// issues that need rulings) and catches future ones immediately.
+function checkConditionOperator() {
+  for (const [stdCode, enc] of Object.entries(snapshot.standards || {})) {
+    for (const c of enc.compliance || []) {
+      const cond = c.condition || '';
+      if (/(^|\s)eq(\s|$)/.test(cond)) {
+        finding('WARN', '12.dead-eq-operator', stdCode, c.code,
+          `condition uses the unsupported operator 'eq' (grammar has '==' only) → dead gate (manual for every state): ${JSON.stringify(cond.slice(0, 70))}`);
+      } else {
+        bumpCheck('12.dead-eq-operator', true);
+      }
+    }
+  }
+}
+
+// ═══ CHECK 13 — MIS-HOMED GATE (operand not on the CR's own worksheet) ════════════
+// Recurring class (registered 2026-07-28) that hides DEAD SAFETY GATES: a CR is hosted on
+// worksheet A, but its condition references a field that lives only on worksheet B and is
+// not inherited to A. evaluate.ts resolves symbols worksheet-locally, so the operand is
+// permanently absent → the gate sits `pending` (block: never blocks; presence-check: may
+// spuriously fail). Found on ISO-59020 (15 CRs), ISO-46001 (CR-005 leadership block),
+// ISO-5667-1/-13 (safety blocks). CONSERVATIVE detection: flag only when a condition symbol
+// is a field OF THE STANDARD, is NOT a field of the CR's own worksheet, and its owning
+// field's consumer_worksheets does NOT mention the CR's worksheet code (substring-tolerant
+// of range forms like "M104-22-28"). Attestation/status/boolean-literal tokens excluded.
+const COND_KEYWORDS = new Set(['AND','OR','NOT','IF','THEN','IS','NULL','EMPTY','IN','TRUE','FALSE','true','false','eq','MIN','MAX','min','max']);
+function conditionSymbols(cond) {
+  const out = new Set();
+  for (const m of (cond || '').matchAll(/[A-Za-z_][A-Za-z0-9_]*/g)) {
+    const t = m[0];
+    if (COND_KEYWORDS.has(t) || /^\d/.test(t)) continue;
+    out.add(t);
+  }
+  return out;
+}
+function checkMisHomedGates() {
+  for (const [stdCode, enc] of Object.entries(snapshot.standards || {})) {
+    const wsById = new Map((enc.worksheets || []).map((w) => [w.id, w.code]));
+    // field symbol -> {ownWs: Set(wsCode), consumers: string}
+    const stdFieldSymbols = new Set();
+    const fieldOwnWs = new Map();  // symbol -> Set of ws codes that own it
+    const fieldConsumers = new Map(); // symbol -> concatenated consumer string
+    for (const f of enc.fields || []) {
+      if (!f.symbol) continue;
+      stdFieldSymbols.add(f.symbol);
+      const wc = wsById.get(f.worksheet_template_id);
+      if (!fieldOwnWs.has(f.symbol)) fieldOwnWs.set(f.symbol, new Set());
+      if (wc) fieldOwnWs.get(f.symbol).add(wc);
+      const cons = Array.isArray(f.consumer_worksheets) ? f.consumer_worksheets.join(' ') : String(f.consumer_worksheets ?? '');
+      fieldConsumers.set(f.symbol, (fieldConsumers.get(f.symbol) || '') + ' ' + cons);
+    }
+    for (const c of enc.compliance || []) {
+      // Scope to BLOCK-severity gates only: a mis-homed block gate is the dangerous case —
+      // it silently NEVER ENFORCES (the F-4 dead-safety-gate class). Warn/manual mis-homed
+      // gates are lower-stakes and far noisier (range-form consumer_worksheets inflate them),
+      // so they are excluded to keep this rule a high-signal safety inventory, not a
+      // 500-row candidate list. A block gate whose operand can never resolve is a real,
+      // actionable finding worth a per-CR ruling.
+      if ((c.severity || '') !== 'block') { bumpCheck('13.mis-homed-block-gate', true); continue; }
+      const hostWs = wsById.get(c.worksheet_template_id);
+      if (!hostWs) continue;
+      let misHomed = null;
+      for (const sym of conditionSymbols(c.condition)) {
+        if (!stdFieldSymbols.has(sym)) continue;               // not a field (attest_*, output, literal) — skip
+        if (/^attest_|_status$|^worksheet_status$/.test(sym)) continue;
+        const owners = fieldOwnWs.get(sym) || new Set();
+        if (owners.has(hostWs)) continue;                       // field is local to the host — fine
+        const cons = (fieldConsumers.get(sym) || '').trim();
+        // HIGH-CONFIDENCE only: the operand field declares NO consumer worksheets at all, yet
+        // it is referenced by a block gate on a DIFFERENT worksheet. With zero declared
+        // consumers there is no inheritance path, so the operand is definitely unresolvable
+        // on the host — a true dead block gate, not a range-expansion false positive.
+        // (Fields WITH a consumer list are skipped: their range-form strings like "M104-22-28"
+        // cannot be range-expanded here without replicating the app, so flagging them would be
+        // a candidate/upper-bound, not a confirmed defect. Those are left for a per-standard
+        // audit rather than a noisy corpus rule — the deliberate precision/recall trade.)
+        if (cons && cons !== 'null' && cons !== '[]') continue;
+        misHomed = sym; break;
+      }
+      if (misHomed) {
+        finding('WARN', '13.mis-homed-block-gate', stdCode, c.code,
+          `BLOCK gate references field '${misHomed}' (which declares NO consumer worksheets) not on its worksheet ${hostWs} → operand permanently absent → gate NEVER ENFORCES (F-4 dead safety gate)`);
+      } else {
+        bumpCheck('13.mis-homed-block-gate', true);
+      }
+    }
+  }
+}
+
 // ── Run all checks ────────────────────────────────────────────────────────────
 for (const std of Object.keys(maps)) {
   checkStructural(maps[std]);
@@ -703,6 +799,8 @@ for (const std of Object.keys(maps)) {
 checkTriageInventory();
 checkEvidenceClaims();
 checkCommaProtected();
+checkConditionOperator();
+checkMisHomedGates();
 
 // ═══════════════════════════ 4 CORE QUERIES ══════════════════════════════════
 function qBelowVa(std) {

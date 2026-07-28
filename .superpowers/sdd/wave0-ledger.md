@@ -948,3 +948,29 @@ WAVE 13 DONE — ISO-5667-13 -> .superpowers/sdd/wave13-ISO-5667-13.md (6 agents
         68 open. Harness NOT run (element-7) UNPROVEN.
         NEXT QUEUE: ISO-14015 (1 error) or re-rank.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 15 / UNTOUCHED 56.
+
+# ============================================================
+# SYSTEM-IMPROVEMENT PASS (flywheel) 2026-07-28 (fable-5)
+# ============================================================
+"Improve the system to improve others faster" — turned recurring per-standard defect classes
+into corpus-wide validator rules + sweeps. Process documented at
+reasoning-maps/_PROCESS-recurring-class-sweeps.md (reusable method + class register).
+  EQ-OPERATOR CLASS SWEPT: 66 `eq` CRs corpus-wide (all warn). Guarded sweep of the 61 cleanly-
+  fixable (simple + compound-AND/OR of `X eq val`) -> `==` (mig 20260728180000 + rollback). 5
+  residual excluded (Q_GWT eq MIN() x2, C363 `->` implication x2, COMP-16 Table-5-verbatim) ->
+  rulings Q-D2. Proven eq->manual / ==->pass/fail. One migration = ~10 waves of local fixes.
+  VALIDATOR RULE 12 (12.dead-eq-operator) registered -> residual 5 cross-validates the sweep;
+  catches future `eq` immediately.
+  VALIDATOR RULE 13 (13.mis-homed-block-gate) registered: HIGH-CONFIDENCE dead-block-gate
+  detector (operand field w/ zero consumers, off the gate's worksheet -> never enforces).
+  142 corpus-wide, CONFIRMED REAL (DWA-A-178 REQ-09 n_RBF etc.). Deliberately scoped: block-only
+  + empty-consumers to avoid range-form consumer_worksheets false positives (501 all-sev ->
+  290 block -> 142 high-confidence). Incomplete by design (misses with-consumer mis-homing).
+  Sheet Q-D1 = corpus safety inventory (all rulings, re-home = enforcement change).
+  MAP: process doc created; 10 affected standards' fixes captured at the class level (per-node
+  stamping of 61 mechanical warn-fixes is disproportionate; rule 12 documents the residual).
+  NOTE: eq-sweep rollback is best-effort (== -> eq on simple clauses; would over-revert
+  always-== CRs) - forward direction is the safe/beneficial one; nobody rolls back a dead->live
+  fix. Logged honestly.
+CONVERGENCE UNCHANGED: FULLY TREATED 0 / IN PROGRESS 15 / UNTOUCHED 56 (corpus improvement, not
+  a per-standard treatment). Corpus: ERRORS 2194, WARNINGS 734.
