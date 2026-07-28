@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T12:22:56.190Z",
+  "exported_at": "2026-07-28T13:29:52.376Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -169758,7 +169758,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
+          "worksheet_template_id": "92b49d23-b8e4-4b32-b0ff-d01b5099193c"
         },
         {
           "id": "d19e0f24-02d9-47e3-aee2-e4ed5d31fed3",
@@ -169769,7 +169769,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
+          "worksheet_template_id": "92b49d23-b8e4-4b32-b0ff-d01b5099193c"
         },
         {
           "id": "4da8f445-2029-4e8b-8f5e-1fbe1f9dfc05",
@@ -169780,7 +169780,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
+          "worksheet_template_id": "92b49d23-b8e4-4b32-b0ff-d01b5099193c"
         },
         {
           "id": "7c53a380-000d-4933-953e-c0713cadd516",
@@ -169791,40 +169791,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
-        },
-        {
-          "id": "9d102dc9-54a2-4836-8eb3-156ec4b56f01",
-          "code": "CR-008",
-          "condition": "roles_responsibilities_established == true",
-          "severity": "warn",
-          "clause_reference": "§5.2.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
-        },
-        {
-          "id": "8f661a8e-7146-466f-ae27-266e1a143560",
-          "code": "CR-010",
-          "condition": "provider_roles_addressed IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§5.2.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
-        },
-        {
-          "id": "2e0190dd-4293-48ac-9a8b-0ace7aef3c07",
-          "code": "CR-005",
-          "condition": "confidentiality_maintained == true",
-          "severity": "warn",
-          "clause_reference": "4.2.4",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Information should not be used inappropriately for personal gain by those involved in the EDD assessment or in a manner detrimental to the legitimate interest of the EDD assessment client or the scope of the assessment. This concept includes the proper handling of sensitive or confidential information.",
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
+          "worksheet_template_id": "92b49d23-b8e4-4b32-b0ff-d01b5099193c"
         },
         {
           "id": "79f21f31-e2ae-48e2-a855-41fce38ea38a",
@@ -169835,7 +169802,40 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
+          "worksheet_template_id": "92b49d23-b8e4-4b32-b0ff-d01b5099193c"
+        },
+        {
+          "id": "2e0190dd-4293-48ac-9a8b-0ace7aef3c07",
+          "code": "CR-005",
+          "condition": "confidentiality_maintained == true",
+          "severity": "warn",
+          "clause_reference": "4.2.4",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Information should not be used inappropriately for personal gain by those involved in the EDD assessment or in a manner detrimental to the legitimate interest of the EDD assessment client or the scope of the assessment. This concept includes the proper handling of sensitive or confidential information.",
+          "worksheet_template_id": "92b49d23-b8e4-4b32-b0ff-d01b5099193c"
+        },
+        {
+          "id": "9d102dc9-54a2-4836-8eb3-156ec4b56f01",
+          "code": "CR-008",
+          "condition": "roles_responsibilities_established == true",
+          "severity": "warn",
+          "clause_reference": "§5.2.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "156c5f48-70f7-4f3f-9f5c-5c517525df3c"
+        },
+        {
+          "id": "8f661a8e-7146-466f-ae27-266e1a143560",
+          "code": "CR-010",
+          "condition": "provider_roles_addressed IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§5.2.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "156c5f48-70f7-4f3f-9f5c-5c517525df3c"
         },
         {
           "id": "bb485c16-a2ea-4249-9a08-352b391586b3",
@@ -169846,7 +169846,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "758d1271-96bf-4561-9427-6e97f8215f08"
+          "worksheet_template_id": "156c5f48-70f7-4f3f-9f5c-5c517525df3c"
         },
         {
           "id": "8208a601-8ddc-49c0-992a-b529333f3b8a",
@@ -206161,6 +206161,17 @@
           "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
         },
         {
+          "id": "4a95649c-bf91-41b9-b04b-e1a7a1d64ac9",
+          "code": "CR-002",
+          "condition": "ce_commitment == true",
+          "severity": "warn",
+          "clause_reference": "§1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
+        },
+        {
           "id": "102122d1-acd6-43f1-b9d6-eab15744b171",
           "code": "CR-003",
           "condition": "ce_vision_statement IS NOT NULL",
@@ -206169,7 +206180,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
+          "worksheet_template_id": "f5db7641-ae89-4694-b9c7-dca8cf542191"
         },
         {
           "id": "3a33395b-79f1-4a45-be55-1e7b1c0c3194",
@@ -206180,7 +206191,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
+          "worksheet_template_id": "f5db7641-ae89-4694-b9c7-dca8cf542191"
         },
         {
           "id": "f4938924-939d-450c-ae0a-84b9e222b132",
@@ -206191,18 +206202,7 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
-        },
-        {
-          "id": "4a95649c-bf91-41b9-b04b-e1a7a1d64ac9",
-          "code": "CR-002",
-          "condition": "ce_commitment == true",
-          "severity": "warn",
-          "clause_reference": "§1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
+          "worksheet_template_id": "f5db7641-ae89-4694-b9c7-dca8cf542191"
         },
         {
           "id": "6440b428-dded-4f72-be32-65d91c86376f",

@@ -998,3 +998,16 @@ WAVE 15 OPENED — ISO-59004 (Circular economy: vocabulary/principles/guidance),
         dp-phantom-field-gates node → mis-homing likely recurs (settled split: warn=re-home,
         block=ruling). DISPATCHED wf_7256b3c4-f12 / task wqsfdopwm. NEXT: ISO-14033.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 16 / UNTOUCHED 55.
+
+WAVE 15 CLOSED — ISO-59004 (Circular economy vocab/principles), 2026-07-28. Clean behavioural
+        coverage (12/12 fields faithful), 0 field defects. FIX APPLIED: 3 mis-homed WARN gates
+        re-homed (CR-003/004/005 ws01→ws03) — source-settled, engine-proven fail/pending→pass.
+        mig 20260728200000 (rollback written). Map write-back: DP + section-03 resolved, 2 dangling
+        wikilinks stripped, snapshot refreshed, validator ISO-59004 0 errors. MAJOR CORRECTED
+        FINDING (executed, refuted agent's static read): 24 condition='manual' CRs are DEAD-PENDING
+        not the friendly manual bucket → corpus 70 CRs/21 stds → NEW validator rule 14
+        (14.dead-manual-condition), cross-validated =70. Disposition RULING (semantics-shifting) →
+        sheet S-2. Sheet +4 (Section S: CR-015 block-vs-warn, manual sweep, vocab gap, PDF acquired)
+        = 77 open. NEW LESSON: semantics-preserving→auto-sweep, semantics-shifting→sheet.
+        Deployed-build exec still element-7 owner-blocked.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 17 / UNTOUCHED 54. NEXT: ISO-14033 (dispatching now).

@@ -788,6 +788,31 @@ function checkMisHomedGates() {
   }
 }
 
+// ═══ CHECK 14 — DEAD 'manual' PLACEHOLDER CONDITION ══════════════════════════════
+// Recurring class (registered 2026-07-28, ISO-59004 wave 15). A CR whose condition is the
+// LITERAL bare token 'manual' does NOT reach the engine's first-class manual-review bucket:
+// evaluate.ts returns {kind:'manual'} ONLY for an empty/unparseable condition (lines 524-528).
+// 'manual' is a valid identifier, so it parses as a truthy lookup of a nonexistent symbol
+// named 'manual' → {kind:'pending', missingSymbols:['manual']} FOREVER (executed proof, this
+// session, on ISO-14015 CR-028 and ISO-59004). So the encoder's intent ("manual review item")
+// is defeated: the gate shows a permanent broken "fehlend: manual" instead of the manual bucket.
+// Corpus survey 2026-07-28: 70 such CRs across 21 standards. DISPOSITION = RULING, not an auto-
+// sweep: 'manual'→empty is SEMANTICS-SHIFTING (result kind pending→manual), unlike the eq→==
+// sweep which was semantics-preserving. Recommended one-decision corpus sweep is on the sign-off
+// sheet; this rule tracks the class so nothing is lost and re-catches new instances.
+function checkManualPlaceholder() {
+  for (const [stdCode, enc] of Object.entries(snapshot.standards || {})) {
+    for (const c of enc.compliance || []) {
+      if ((c.condition || '').trim() === 'manual') {
+        finding('WARN', '14.dead-manual-condition', stdCode, c.code,
+          `condition is the bare token 'manual' → parses as a lookup of nonexistent symbol 'manual' → PENDING forever, NOT the engine's manual bucket (which needs an EMPTY condition). Encoder intent defeated; fix = clear the condition (ruling: semantics-shifting).`);
+      } else {
+        bumpCheck('14.dead-manual-condition', true);
+      }
+    }
+  }
+}
+
 // ── Run all checks ────────────────────────────────────────────────────────────
 for (const std of Object.keys(maps)) {
   checkStructural(maps[std]);
@@ -801,6 +826,7 @@ checkEvidenceClaims();
 checkCommaProtected();
 checkConditionOperator();
 checkMisHomedGates();
+checkManualPlaceholder();
 
 // ═══════════════════════════ 4 CORE QUERIES ══════════════════════════════════
 function qBelowVa(std) {
