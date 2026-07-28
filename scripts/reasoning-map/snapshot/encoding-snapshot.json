@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T11:00:38.035Z",
+  "exported_at": "2026-07-28T11:39:53.308Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -198953,8 +198953,8 @@
           "enum_values": [
             {
               "value": "sample_identification",
-              "label_de": "Probenkennung",
-              "label_en": "Sample identification",
+              "label_de": "Name der Anlage",
+              "label_en": "Name of the plant",
               "order_index": 1,
               "regulation_reference": "§9 a)"
             },
@@ -199125,7 +199125,7 @@
         {
           "id": "8826e8f9-1a98-45d3-8761-d7259fbed217",
           "code": "CR-007",
-          "condition": "laboratory_consulted eq true",
+          "condition": "laboratory_consulted == true",
           "severity": "warn",
           "clause_reference": "§5.1",
           "requires_attestation": false,
@@ -199136,7 +199136,7 @@
         {
           "id": "88aa455e-9f29-4d6d-afd5-12234b053a22",
           "code": "CR-008",
-          "condition": "equipment_clean_corrosion_free eq true",
+          "condition": "equipment_clean_corrosion_free == true",
           "severity": "warn",
           "clause_reference": "§5.1, §5.2",
           "requires_attestation": false,
@@ -199279,7 +199279,7 @@
         {
           "id": "eca7dc10-812c-41e1-b33b-739d03e14f6a",
           "code": "CR-021",
-          "condition": "storage_conditions_per_iso15 eq true",
+          "condition": "storage_conditions_per_iso15 == true",
           "severity": "warn",
           "clause_reference": "§7.2",
           "requires_attestation": false,
@@ -199290,7 +199290,7 @@
         {
           "id": "a6bb4881-b73f-4819-a284-200c8e27c88f",
           "code": "CR-023",
-          "condition": "sample_label_complete eq true",
+          "condition": "sample_label_complete == true",
           "severity": "warn",
           "clause_reference": "§9",
           "requires_attestation": false,
@@ -199684,8 +199684,8 @@
           "enum_values": [
             {
               "value": "sample_identification",
-              "label_de": "Probenkennung",
-              "label_en": "Sample identification",
+              "label_de": "Name der Anlage",
+              "label_en": "Name of the plant",
               "order_index": 1,
               "regulation_reference": "§9 a)"
             },

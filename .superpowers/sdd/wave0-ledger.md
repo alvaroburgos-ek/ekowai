@@ -934,3 +934,17 @@ WAVE 13 OPENED — ISO-5667-13 (Water Sampling Pt13: sludge), 2026-07-28 (fable-
         source_page/reclassify. Fixes APPLY (final). Brief carries all corpus classes incl.
         eq-operator, IS-NOT-NULL-on-boolean-shall, mis-homing.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 15 / UNTOUCHED 56.
+
+WAVE 13 DONE — ISO-5667-13 -> .superpowers/sdd/wave13-ISO-5667-13.md (6 agents, 407k tokens).
+        Offset printed=PDF-6. 3 eq FAITHFUL (t=60m/qn; n=(1,96s/E)^2; n_sp=sqrt(V)/2 -> manual
+        by design). APPLIED (source-settled): 4x eq->== (CR-007/008/021/023, all warn, dead ->
+        live; mig 20260728160000); §9 a) relabel 'Sample identification' -> 'Name of the plant'
+        (printed §9 a verified p13; display labels, value key preserved; mig 20260728170000);
+        doc-iso-5667-10 reclassified standard_fixed -> reference-doc/in_library:false/page 1
+        (ISO 5667-10 cited §2 p1, §3.5 p2, §8 p13) -> VALIDATOR-CLEAN. All verified by query.
+        RULINGS (sheet P): P-D1 mis-homed CR-004/006 (ws01 vs ws03) + CR-015/016/017 (ws05 vs
+        ws06); CR-017 safety BLOCK NON-ENFORCING (F-4). P-D2 CR-005 bare 'manual' token. P-D3
+        IS-NOT-NULL safety weakness. P-D4 CR-001/003 over-escalated block from guidance. Sheet
+        68 open. Harness NOT run (element-7) UNPROVEN.
+        NEXT QUEUE: ISO-14015 (1 error) or re-rank.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 15 / UNTOUCHED 56.
