@@ -872,3 +872,19 @@ WAVE 10 DONE — ISO-59020 -> .superpowers/sdd/wave10-ISO-59020.md (23 agents, 1
         Metric: WS-05/06/07 now compute; harness NOT run (element-7 blocked) UNPROVEN.
         NEXT QUEUE: re-rank on live errors; ISO-46001 / ISO-5667-1/-13 / ISO-14015 candidates.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 12 / UNTOUCHED 59.
+
+# ============================================================
+# WAVE 11 OPENED — ISO-46001 (Water Efficiency Management Systems), 2026-07-28 (fable-5)
+# ============================================================
+STANDARD: ISO 46001:2019 "Water efficiency management systems - Requirements". HLS
+        management-system REQUIREMENTS std with water-balance computation (Win/Wout,
+        recycling rate). 10 ws / 97 fields / 4 eq / 40 CRs / 0 tables. Aligns with the water
+        theme. SOURCE verified: ISO-46001.pdf, 50 pages, text (124k chars).
+        Live error: 1 (dangling wikilink [[cr-iso46001-NNN]] placeholder -> strip) + 3 WARN
+        eq outputs (Win/Wout/plant_recycling_rate) lacking producing map nodes.
+DISPATCHED: wf_c0b81fb3-6cc / task w73nedms3 — full template (offset -> bidirectional walk ->
+        4 eq over real numbers + rendered-page checks + refuters -> 40 CRs both-ways +
+        executed metric). Fixes APPLY (final). Watch for the ISO-59020 %/unit-LHS class + the
+        mis-homing class.
+ELEMENT 7 still owner-blocked (campaign alias live).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 13 / UNTOUCHED 58.
