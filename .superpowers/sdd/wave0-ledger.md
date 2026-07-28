@@ -794,3 +794,38 @@ WAVE 9 DONE — DIN-14071-1 -> .superpowers/sdd/wave9-DIN-14071-1.md. LCA critic
         Sheet 58 open. Workflow metric NOT executed (static; worksheets expected-run UNPROVEN).
         NEXT QUEUE: ISO-14064-2 (7 errors) or re-rank on live errors.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 11 / UNTOUCHED 60.
+
+# ============================================================
+# ELEMENT 7 — DEPLOYED-BUILD PROOF: PARTIAL, 2026-07-28 (fable-5)
+# ============================================================
+CAMPAIGN ALIAS CREATED + VERIFIED (the deploy element, DONE):
+        https://ekowai-wizard-campaign.vercel.app  ->  deployment
+        ekowai-wizard-preview-aj69o8m4q-hannesosters-projects.vercel.app (Production, Ready).
+        Raw `vercel alias set` output confirmed "Success!". SEPARATE from -hannesoster-
+        (owner's URL untouched). Verified: root 307 -> /de -> 200, serves "EKOWAI Wizard".
+        NO NEW BUILD made: every campaign fix so far is a DATA fix already on prod; zero
+        app-code change on feat/fll-revision -> the current Ready build already serves the
+        backfilled quotes/tables/equation fixes. Per doctrine no code-affecting wave = no
+        new deploy due. Aliased the current Ready deployment.
+GENUINE STOP (logged, not faked): the AUTHENTICATED render spot-check + deployed-build
+        save-path harness CANNOT be run headlessly. The wizard's worksheet data is behind
+        Supabase login (de/login wall); worksheet pages are client-rendered against an
+        authed API, so curl gets only the shell. The public library SSR shows a few standard
+        names but NOT the deep compliance-quote/table/worksheet data the render spot-check
+        must verify. I hold the Supabase MANAGEMENT token (used all session), NOT a USER
+        session; there is no headless login path without a test user's credentials.
+        => This is exactly the "owner browser pass = FINAL sign-off" the DEPLOYED-PRODUCT
+        PROOF doctrine reserves for Alvaro, and the same class as every earlier "Alvaro
+        in-browser test matrix".
+CONSEQUENCE FOR THE SCOREBOARD (honest): fully-treated STAYS 0. Not because the work is
+        undone, but because element 7's execution proof ("runnable means RAN") requires an
+        authenticated run I cannot perform. Faking it would violate the proof mandate.
+UNBLOCK (either): (a) a seeded CAMPAIGN TEST USER's credentials (email+password, or a
+        Supabase session/JWT) -> I drive the deployed API + render headlessly and move
+        standards to fully-treated; OR (b) Alvaro's ~5-min browser pass on the campaign
+        alias per standard (the doctrine's owner sign-off).
+NOTE on M-102-4 "6/7": even with the harness it is NOT fully treated — its 5 blocked
+        worksheets need the G-D8 collision RULING (spine writer-retirement). The closest to
+        fully-treated is ISO-14050 (all elements done/n-a; only the K-D1 minor over-assertion
+        judgment item remains) — it would flip to fully-treated on a render spot-check alone.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 11 / UNTOUCHED 60.
