@@ -762,3 +762,19 @@ CORPUS-HYGIENE PASS 2026-07-28 (fable-5) — CR-node orphan class 924 -> 0, both
         idempotent (created 0 on re-run). ERRORS 3345-region -> 2199; WARNINGS 1023 -> 587.
 CONVERGENCE UNCHANGED: FULLY TREATED 0 / IN PROGRESS 10 / UNTOUCHED 61 (this was corpus
         map-hygiene, not a per-standard treatment).
+
+# ============================================================
+# WAVE 9 OPENED — DIN-14071-1 (LCA critical-review requirements), 2026-07-28 (fable-5)
+# ============================================================
+STANDARD: DIN CEN ISO/TS 14071:2016 - "Ökobilanz: Prozesse der Kritischen Prüfung und
+        Kompetenzen der Prüfer, Zusätzliche Anforderungen zu ISO 14044". Requirements/process
+        standard - 4 ws / 60 fields / 0 eq / 0 tables / 17 CRs. Second non-computational
+        standard, but a REQUIREMENTS doc (real shall-CRs, unlike ISO-14050's advisory notes).
+        Parent ISO 14044 OUT OF LIBRARY - cross-refs are reference edges (content boundary).
+        SOURCE verified: DIN-CEN-ISO-14071-1.pdf, 30 pages, text layer (157k chars).
+        VALIDATOR (post-hygiene): 4 errors = 3 dead CR nodes (cr-din14071-cx01/02/03, no
+        fired_by/gated_by) + 1 VA-no-page (dp-din14071-scope-enums).
+DISPATCHED: wf_dd0376ba-97a / task whcrvztbs (compact 2-phase: coverage+field-verify, then
+        17 CRs both-ways + map structural fix material for the 4 errors). Fixes APPLY (final).
+        Focus: modal-verb severity match (shall->block vs should->warn) on a requirements std.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 11 / UNTOUCHED 60.
