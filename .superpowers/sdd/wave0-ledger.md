@@ -1086,3 +1086,8 @@ ENUM "OPTIONS MUST BE SHOWN" — 7-guideline verbatim extraction (workflow wj1ny
   Tab.C.5, verbatim, umlauts correct, wrong clause_reference fixed; mig 20260728270000). 15 NOT populated
   — 10 have no printed pick-list, 5 are mis-typed non-enums — recorded to sheet V RESOLUTION as re-type
   rulings (NEVER invented options). Disciplined outcome: only source-verified dropdowns populated.
+
+ENUM RE-TYPE 2026-07-28 (mig 20260728280000, user-authorized) — 13 mis-typed empty enums re-typed
+  (12 text + 1 number) so they render as working inputs instead of dead dropdowns; 2 left as enum
+  (duration_method ambiguous → owner; evap_method → populate as 2-option, autonomous follow-up).
+  ENUM QUESTION NOW: 3 populated verbatim + 13 re-typed = 16/18 working; 2 open.
