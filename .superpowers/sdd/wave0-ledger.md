@@ -974,3 +974,9 @@ reasoning-maps/_PROCESS-recurring-class-sweeps.md (reusable method + class regis
   fix. Logged honestly.
 CONVERGENCE UNCHANGED: FULLY TREATED 0 / IN PROGRESS 15 / UNTOUCHED 56 (corpus improvement, not
   a per-standard treatment). Corpus: ERRORS 2194, WARNINGS 734.
+
+WAVE 14 OPENED — ISO-14015 (EASO: env assessment of sites), 2026-07-28 (fable-5). First of a
+        3-standard run. 8 ws / 54 fields / 0 eq / 34 CRs. Its 28 eq CRs already corpus-swept.
+        SOURCE: ISO 14015-2022...pdf, 38 pages. Live error: 1 (dangling wikilink memory ref).
+        DISPATCHED wf_e74db548-02e / task wna5catav. Fixes APPLY. NEXT IN RUN: ISO-59004, ISO-14033.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 16 / UNTOUCHED 55.
