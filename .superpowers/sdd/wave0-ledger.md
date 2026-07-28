@@ -1044,3 +1044,11 @@ BATCH DISPATCH (post-3-run) — 2026-07-28. Two flywheel corpus actions:
       mutation, 131 rows/23 standards) — SURFACED to owner (Section U-1). NOT bypassed. Sheet +2 = 81.
   Class register updated: mis-homed WARN = source-settled re-home (rule 15), corpus sweep owner-gated.
 CONVERGENCE unchanged: FULLY TREATED 0 / IN PROGRESS 18 / UNTOUCHED 53 (prod re-homes pending owner go).
+
+WAVE 17 (per-guideline batch, owner-authorized) — ISO-5667-16, 2026-07-28. First per-guideline
+        application of the mis-homed-warn class. 17 warn gates re-homed from check-worksheets
+        (01/03/05/07) to their paired DATA worksheets (02/04/06/08) — ALL within ISO-5667-16, no
+        cross-guideline content. Each engine-proven broken→works. mig 20260728230000 (rollback
+        written), applied HTTP 201, verified 5→ws02/6→ws04/3→ws06/3→ws08. Rule 15 for ISO-5667-16
+        now 0. Focused single-guideline migration PASSED the classifier (bulk 131 did not). Coverage
+        + enum-options/dependency completeness audit dispatched next.
