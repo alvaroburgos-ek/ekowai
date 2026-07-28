@@ -1,0 +1,4 @@
+-- ROLLBACK 20260728255000 ISO-59014
+DO $$ BEGIN
+  UPDATE compliance_requirements SET worksheet_template_id='6152f477-9245-4865-ae1c-50467f53e5f5' WHERE id IN ('3669a9b7-1771-4e17-b252-58384ceda095','ec153f1f-386f-4707-8961-79757e4a1473');
+END $$;

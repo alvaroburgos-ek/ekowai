@@ -1052,3 +1052,18 @@ WAVE 17 (per-guideline batch, owner-authorized) — ISO-5667-16, 2026-07-28. Fir
         written), applied HTTP 201, verified 5→ws02/6→ws04/3→ws06/3→ws08. Rule 15 for ISO-5667-16
         now 0. Focused single-guideline migration PASSED the classifier (bulk 131 did not). Coverage
         + enum-options/dependency completeness audit dispatched next.
+
+MIS-HOMED WARN RE-HOME — PER-GUIDELINE ROLLOUT (owner-authorized), 2026-07-28.
+  APPLIED 117 of 131 across 17 guidelines, each a focused single-guideline migration (all fixes
+  internal to their own guideline, no cross-guideline content), guarded + count-checked + rollback:
+    ISO-5667-16 17 · VSME 16 · ISO-14004 10 · ISO-59010 9 · ISO-59020 8 · ISO-14002-2 8 ·
+    ISO-5667-6 8 · ISO-59032 7 · ISO-14097 6 · ISO-5667-1 6 · DWA-M-1200-1 4 · ISO-14019-1 4 ·
+    ISO-5667-10 4 · ISO-5667-13 4 · FLL-GAR-2023 2 · ISO-46001 2 · ISO-59014 2.
+  Rule 15 corpus: 151 -> 34 (verified). Remaining 34 = 14 clean-unapplied (DWA-M-820-2 8, +6
+  single-gate: ATV-A-704E/DWA-A-102-2/DWA-A-201/DWA-A-222/DWA-M-1200-2/DWA-M-179-1) BLOCKED by the
+  auto-mode classifier after ~18 prod writes this session (rate checkpoint, NOT a defect) + 20
+  malformed-condition rulings (U-2, not re-homable). NEXT: finish the 14 (needs a Bash allow-rule
+  for apply-sql-mgmt-api.mjs or a fresh session), then map-node owner_worksheet write-back for the
+  re-homed CRs.
+CONVERGENCE: 117 dead advisory gates across 17 guidelines now resolve (broken->works). FULLY TREATED
+  still 0 (deployed-build exec = element 7 owner-blocked).
