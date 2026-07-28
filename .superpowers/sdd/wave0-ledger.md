@@ -628,3 +628,19 @@ WAVE 5 DONE (audit) — DWA-M-187 -> .superpowers/sdd/wave5-DWA-M-187.md
         broken; NOT ready-to-use. Sheet: H-D1 (Weissdruck trigger / override). 51 open.
         NEXT QUEUE: DWA-M-1200-2 (Gelbdruck — same draft doctrine), then DWA-M-277E (5).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 7 / UNTOUCHED 64.
+
+# ============================================================
+# WAVE 6 OPENED — DWA-M-1200-2 (Gelbdruck Juli 2025), 2026-07-28 (fable-5)
+# ============================================================
+STANDARD: "Wasserwiederverwendung Teil 2: weitergehende Wasseraufbereitung", GELBDRUCK.
+        Draft doctrine: full read-only depth, all fixes STAGED for the Weissdruck.
+        SIZE: 19 ws / 84 fields / 4 eq / 15 CRs / 130 regulation_tables rows (imported -
+        wave VERIFIES them; log-reduction thresholds flagged SAFETY-CRITICAL in the brief).
+        SOURCE: DWA-M-1200-2\DWA-M_1200-2_GD.pdf — 100 pages (LARGEST source yet, 679k
+        chars), text layer verified this session.
+DISPATCHED: wf_251c1479-b7f / task wzpxkig89 — the proven template: independent offset ->
+        bidirectional walk + 130-row table verification (12+ cell spot-check, M-187
+        schema-broken-row class explicitly checked) -> equations over REAL numbers from
+        prod + refuters -> 15 CRs both-ways incl. the M-187 mis-homing check -> executed
+        metric with collision census. Results persist to journal.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 8 / UNTOUCHED 63.
