@@ -778,3 +778,19 @@ DISPATCHED: wf_dd0376ba-97a / task whcrvztbs (compact 2-phase: coverage+field-ve
         17 CRs both-ways + map structural fix material for the 4 errors). Fixes APPLY (final).
         Focus: modal-verb severity match (shall->block vs should->warn) on a requirements std.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 11 / UNTOUCHED 60.
+
+WAVE 9 DONE — DIN-14071-1 -> .superpowers/sdd/wave9-DIN-14071-1.md. LCA critical-review
+        REQUIREMENTS std (0 eq/0 tbl). Offset printed=PDF-4. FIELD FIDELITY STRONG (17/60
+        spot-checked, all faithful); 13/17 CRs ENFORCE with correct modal-severity match
+        (every REQ maps to a printed shall; shoulds correctly un-gated). Well-built encoding.
+        APPLIED: dp-din14071-scope-enums source_page=10 (cleared 1.va-has-page; §4.1 confirmed
+        printed p10/PDF14); 3 dead-gate nodes annotated (NOT silenced with fake links).
+        RULINGS (sheet L): L-D1 CX-01/02/03 dead (condition literally TRUE, always-pass block
+        over framing content; CX-02 clause is `may` = block mismatch); L-D2 coverage holes
+        (§4.7.1 chairperson duties largest, §4.2.3 replacement, §4.5 chairperson-signature +
+        non-conformance-6.1 un-gated; REQ-06 modal mismatch).
+        PRE-AUTHORIZED NEXT: quote-backfill 60 fields + 17 CRs (all NULL/imported_unverified)
+        from verbatim PDF pp.11-28 + clause_reference drift fixes (§4.1->§4.4/§4.5; §5->§4.7.2).
+        Sheet 58 open. Workflow metric NOT executed (static; worksheets expected-run UNPROVEN).
+        NEXT QUEUE: ISO-14064-2 (7 errors) or re-rank on live errors.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 11 / UNTOUCHED 60.
