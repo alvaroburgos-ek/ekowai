@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T09:44:52.914Z",
+  "exported_at": "2026-07-28T10:30:56.879Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -192122,13 +192122,9 @@
             "WD",
             "R1",
             "R2",
-            "R3",
-            "O1",
-            "O2",
-            "O3",
-            "O4"
+            "R3"
           ],
-          "formula": "Win = WD + R1 + R2 + R3 ; Wout = O1 + O2 + O3 + O4 ; Win = Wout",
+          "formula": "Win = WD + R1 + R2 + R3",
           "clause_reference": "AnnexC C.1/C.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "5bbf2997-4f82-442e-8966-538fa658de79"

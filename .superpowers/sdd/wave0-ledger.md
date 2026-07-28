@@ -888,3 +888,20 @@ DISPATCHED: wf_c0b81fb3-6cc / task w73nedms3 — full template (offset -> bidire
         mis-homing class.
 ELEMENT 7 still owner-blocked (campaign alias live).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 13 / UNTOUCHED 58.
+
+WAVE 11 DONE — ISO-46001 -> .superpowers/sdd/wave11-ISO-46001.md (9 agents, 649k tokens).
+        Offset printed=PDF-10. Coverage essentially COMPLETE (HLS 4-10 all mapped, modal
+        severity match good). 4 eq verified (C.2b/C.3/C.5 faithful).
+        APPLIED (source-settled, execution-proven): C.1 (Win) merged 3 printed statements into
+        one formula (;/multi-= unparseable) -> Win never computed. Printed C.2 p34 determines
+        Win=WD+R1+R2+R3. Probe: manual_required -> computed 135. NOTE: static audit predicted
+        'error'; real engine gives manual_required (in-session probe authoritative). Migration
+        20260728140000 + rollback, verified by query. Placeholder wikilink stripped ->
+        VALIDATOR-CLEAN (0 errors). Map: C.1 eq node stamped.
+        RULING N-D1: 3 mis-homed gates - CR-005 (leadership block, §5.1) ws01 vs operand ws02
+        -> dead block gate; CR-037 (Win==Wout) + CR-038 ws06 vs operands ws08 -> pending;
+        CR-037 also bare-symbol-RHS always-fail (-> Win-Wout==0). Re-home = enforcement change
+        = ruling. Sheet 60 open.
+        Metric: mgmt worksheets run; WS-08 Win now computes; harness NOT run (element-7) UNPROVEN.
+        NEXT QUEUE: ISO-5667-1 / ISO-5667-13 / ISO-14015 (1 error each) or re-rank.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 13 / UNTOUCHED 58.
