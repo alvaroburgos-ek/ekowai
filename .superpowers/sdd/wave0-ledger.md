@@ -840,3 +840,21 @@ ELEMENT 7 SEED PATH BLOCKED 2026-07-28: Alvaro chose "seed a campaign test user"
         DONE + STANDS: campaign alias live + verified 200. fully-treated NOT faked (stays 0).
         Holding new-standard dispatch per Alvaro priority; can do pre-authorized in-progress
         evidence work meanwhile.
+
+# ============================================================
+# WAVE 10 OPENED — ISO-59020 (Circular Economy circularity measurement), 2026-07-28 (fable-5)
+# ============================================================
+QUEUE RESUMED (Alvaro released the element-7-first hold: "proceed with the next guidelines").
+        Re-ranked on LIVE validator errors post-hygiene: untouched cluster at 1-4 errors.
+        Picked ISO-59020 for VALUE not just cheapness: COMPUTATIONAL (13 eq), the flagship
+        Circular-Economy circularity-measurement standard (60 dependents, was acquisition
+        rank 1), 2024 current edition, aligns with the circular-economy/sustainability theme.
+        SIZE: 9 ws / 83 fields / 13 eq / 37 CRs / 0 tables. SOURCE: ISO-59020-2024...pdf,
+        90 pages, text verified. Live error: 1 (dangling wikilink to a memory ref in a
+        decision-point node -> trivial map strip).
+DISPATCHED: wf_c621a042-255 / task wda664mrf — full computational template (offset ->
+        bidirectional TOC walk -> 13 eq over REAL numbers from prod + rendered-page grouping
+        checks + refuters -> 37 CRs both-ways + executed metric with collision census). Fixes
+        APPLY (final). Results persist to journal.
+ELEMENT 7 STILL owner-blocked (campaign alias live; needs Alvaro credential/browser pass).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 12 / UNTOUCHED 59.
