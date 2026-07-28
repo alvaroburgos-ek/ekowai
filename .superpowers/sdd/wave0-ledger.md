@@ -1011,3 +1011,11 @@ WAVE 15 CLOSED — ISO-59004 (Circular economy vocab/principles), 2026-07-28. Cl
         = 77 open. NEW LESSON: semantics-preserving→auto-sweep, semantics-shifting→sheet.
         Deployed-build exec still element-7 owner-blocked.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 17 / UNTOUCHED 54. NEXT: ISO-14033 (dispatching now).
+
+WAVE 16 OPENED — ISO-14033 (Quantitative environmental information — Guidelines & examples),
+        2026-07-28. Final of the 3-standard run. 8 ws / 48 fields / 1 eq / 27 CRs. ISO-14033:2019,
+        73pp English, has WORKED EXAMPLES (real numeric content). Live: 3 errors (rule-8 ref-page
+        ×3: doc-iso-14000-vv, doc-iso-14050, fld-emission-removal-factor) + rule-2 eq name drift
+        (parameter_value vs fld-parameter-value) + 2× rule-14 manual (known sheet class). DISPATCHED
+        wf_1e2d35d0-bdb / task wdf0wxkn9.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 17 / UNTOUCHED 54.
