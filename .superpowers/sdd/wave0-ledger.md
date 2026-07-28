@@ -667,3 +667,19 @@ WAVE 6 DONE (audit) — DWA-M-1200-2 -> .superpowers/sdd/wave6-DWA-M-1200-2.md
         Sheet: I-D1. 52 open.
         NEXT QUEUE: DWA-M-277E (5 live errors — NOT a draft, fixes apply).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 8 / UNTOUCHED 63.
+
+# ============================================================
+# WAVE 7 OPENED — DWA-M-277E (Weissdruck 2017, greywater), 2026-07-28 (fable-5)
+# ============================================================
+STANDARD: "Grauwasser-Behandlung/Nutzung", English edition, October 2017 — WEISSDRUCK/final.
+        NOT a draft: source-settled fixes APPLY. Greywater REUSE -> pathogen/hygiene
+        thresholds SAFETY-CRITICAL.
+        SIZE: 24 ws / 198 fields / 22 eq / 62 CRs / 150 table rows — biggest gate+equation
+        surface of the campaign so far. SOURCE: DWA-M_277E (1).pdf, 40 pages, text verified.
+        LIVE VALIDATOR: 5 table nodes lack source_page (tab-m277e-01/02/03/05/annexb) +
+        Q_GW/Q_SW eq outputs lack producing map nodes — all repairable [CODE] this wave.
+DISPATCHED: wf_bf618658-e29 / task wct8o81me — the proven template scaled to 62 CRs / 22 eq,
+        with all accumulated corpus classes in the brief (self-ref inputs, comma-FN_LIKE
+        trap, collisions, mis-homed gates, [unit]-in-formula). Fixes APPLY (orchestrator
+        applies what survives adversarial refutation, execution-proven). Results -> journal.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 9 / UNTOUCHED 62.
