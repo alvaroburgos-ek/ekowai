@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T08:40:59.235Z",
+  "exported_at": "2026-07-28T09:44:52.914Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -213483,7 +213483,7 @@
             "mREUI_X",
             "mTI_X"
           ],
-          "formula": "%REUI(X) = (mREUI(X) / mTI(X)) * 100",
+          "formula": "pct_REUI_X = (mREUI(X) / mTI(X)) * 100",
           "clause_reference": "§A.2.2 (A.1)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "506c2462-1211-4922-ab01-211065c01962"
@@ -213496,7 +213496,7 @@
             "mRECI_X",
             "mTI_X"
           ],
-          "formula": "%RECI(X) = (mRECI(X) / mTI(X)) * 100",
+          "formula": "pct_RECI_X = (mRECI(X) / mTI(X)) * 100",
           "clause_reference": "§A.2.3 (A.2)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "506c2462-1211-4922-ab01-211065c01962"

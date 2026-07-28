@@ -858,3 +858,17 @@ DISPATCHED: wf_c621a042-255 / task wda664mrf — full computational template (of
         APPLY (final). Results persist to journal.
 ELEMENT 7 STILL owner-blocked (campaign alias live; needs Alvaro credential/browser pass).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 12 / UNTOUCHED 59.
+
+WAVE 10 DONE — ISO-59020 -> .superpowers/sdd/wave10-ISO-59020.md (23 agents, 1.58M tokens).
+        Offset printed=PDF-10 (body), PDF-2 (roman front). All 13 eq A.1-A.13 verbatim-verified.
+        APPLIED (source-settled, execution-proven): A.1 (%REUI) + A.2 (%RECI) formula LHS began
+        with '%' -> rhs() can't strip -> hard ERROR. Set LHS to declared output_symbol
+        pct_REUI_X/pct_RECI_X. Probe: error -> computed 30/25. These are 2 of 3 MANDATORY inflow
+        core indicators (Table 3 p17) -> WS-05 unblocked. Migration 20260728130000 + rollback;
+        verified by query. Dangling wikilink stripped (cleared the 1 validator error -> 0).
+        Map: eq-a1/a2 nodes stamped. RULING M-D1: 15 arithmetic CRs (CR-011..025) mis-homed on
+        WS-04, operands on WS-05/06/07 -> pending, never enforce; kills the 2 BLOCK 100%-balance
+        gates (CR-014/019) verbatim demanded. Re-home = enforcement change = ruling. Sheet 59 open.
+        Metric: WS-05/06/07 now compute; harness NOT run (element-7 blocked) UNPROVEN.
+        NEXT QUEUE: re-rank on live errors; ISO-46001 / ISO-5667-1/-13 / ISO-14015 candidates.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 12 / UNTOUCHED 59.
