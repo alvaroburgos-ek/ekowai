@@ -1091,3 +1091,22 @@ ENUM RE-TYPE 2026-07-28 (mig 20260728280000, user-authorized) — 13 mis-typed e
   (12 text + 1 number) so they render as working inputs instead of dead dropdowns; 2 left as enum
   (duration_method ambiguous → owner; evap_method → populate as 2-option, autonomous follow-up).
   ENUM QUESTION NOW: 3 populated verbatim + 13 re-typed = 16/18 working; 2 open.
+
+=== SESSION CONSOLIDATION / RESUME POINTER — 2026-07-28 ===
+PROD working-tool fixes this session (all committed, guarded, rollback each):
+  - 3 full-treatment waves: ISO-14015, ISO-59004, ISO-14033 (coverage, fields, 1 eq RAN, gates, map).
+  - Mis-homed WARN gate class CLOSED: 131/131 re-homed across 24 guidelines + 131 map nodes written back.
+  - Enum "options must be shown": 4 populated verbatim (DWA-M-102-4 roof/street/vegetation/evap),
+    13 re-typed (12 text +1 number); 1 open = DWA-M-816.duration_method (owner call).
+  - Memory-ref wikilink corpus sweep (33 files). 3 new validator rules (14 dead-manual, 15 mis-homed-warn).
+Corpus errors 2188 -> 2159 (map-side; prod-side materially cleaner). Sheet ~88 items w/ evidence.
+
+NEXT CLEAN UNIT (pre-authorized [CODE]/tooling, not yet started): missing-FIELD-NODE generator.
+  Root cause of 1.links-resolve (1318) + 6.eq-classifiable (294): equation/CR map nodes reference
+  field nodes ([[field-<sym>]] / [[<sym>]]) that were never generated (wave-0 gap), exactly like the
+  orphan-CR gap that generate-cr-nodes.mjs closed. Build a generate-field-nodes.mjs mirroring prod
+  fields (symbol, data_type, worksheet, consumer_worksheets), provenance-conservative, idempotent;
+  reconcile bare-symbol-as-wikilink vs field-node targets. Would clear ~1600 map errors. Investigate
+  target-to-prod-field match cleanliness first (some [[n]]/[[q]] may be symbol refs that should be bare).
+OPEN RULINGS awaiting owner: 70-CR manual->empty sweep (S-2); 20 malformed conditions (U-2);
+  15->2 enum re-types signed; duration_method type; CR-015 block-vs-warn; doc-iso-14000-vv reclass.
