@@ -653,3 +653,17 @@ A178-D8 DONE 2026-07-28 (fable-5): 6 NULL-quote CRs backfilled (REQ-07/14/17/19/
         MAP WRITE-BACK CORRECTED: A-178 nodes use cr-a178-req-NN naming (the generic tool's
         code-regex needs a prefix before REQ- so it missed them — tool gap logged, W-D-tool).
         6/6 stamped directly, provenance -> VA.
+
+WAVE 6 DONE (audit) — DWA-M-1200-2 -> .superpowers/sdd/wave6-DWA-M-1200-2.md
+        Offset 0 (11 footers/100pp + TOC). TABLES: STRONGEST YET — 130 rows cover all 8
+        printed tables + cost list; 50+ cells spot-checked incl. all safety-critical
+        log-reduction tables (T3/TB1/TB2) ALL FAITHFUL; ZERO schema breaks. One missing
+        table E.1 (explicitly provisional). FINDINGS (STAGED, Gelbdruck): F1 SEV-1 SAFETY
+        Tabelle-3 quality limits UNENFORCED (REQ-02 prose+warn); F2 SEV-1 3/4 eq engine-dead
+        (Gl.1 log10 = core log-reduction formula, median/log10 outside {min,max}); F3 SEV-1
+        binomial 15-of-16/8-of-16 acceptance rule not encoded; F4 REQ-07 over-strict
+        (rejects permitted Stichproben); F5 collision candidate log10_reduktion field+eq.
+        VERDICT: data layer strongest of campaign; enforcement layer unsafe; NOT ready.
+        Sheet: I-D1. 52 open.
+        NEXT QUEUE: DWA-M-277E (5 live errors — NOT a draft, fixes apply).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 8 / UNTOUCHED 63.
