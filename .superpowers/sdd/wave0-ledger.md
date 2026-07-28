@@ -650,3 +650,6 @@ A178-D8 DONE 2026-07-28 (fable-5): 6 NULL-quote CRs backfilled (REQ-07/14/17/19/
         Gl.1/9/10 renderings verified by the earlier rendered-page sweeps. EFFECT VERIFIED:
         backfilled=6, still_null=0 -> A-178 now has ZERO evidence-free CRs.
         Map write-back run on the 6 nodes (see command output for hit/miss).
+        MAP WRITE-BACK CORRECTED: A-178 nodes use cr-a178-req-NN naming (the generic tool's
+        code-regex needs a prefix before REQ- so it missed them — tool gap logged, W-D-tool).
+        6/6 stamped directly, provenance -> VA.
