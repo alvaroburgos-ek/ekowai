@@ -912,3 +912,17 @@ WAVE 12 OPENED — ISO-5667-1 (Water quality Sampling Pt1: programme design), 20
         source_page). DISPATCHED wf_a6282f65-47b / task wq7h210mw — full template + edition
         verify + dp source_page determination. Fixes APPLY (final).
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 14 / UNTOUCHED 57.
+
+WAVE 12 DONE — ISO-5667-1 -> .superpowers/sdd/wave12-ISO-5667-1.md (6 agents, 495k tokens).
+        Offset printed=PDF-1. Edition NTC-ISO 5667-1:1995 = ISO 5667/1:1980 (DB faithful).
+        3 eq verified: eq3 n=(2K*sigma/L)^2 COMPUTES 61.47 ~ printed n~61; eq1/eq2 sqrt/SUM
+        -> manual by design (rewrite = ruling). APPLIED (source-settled, execution-proven):
+        CR-001/CR-010 'eq' operator -> '==' (probe: manual both ways -> pass/fail; warn, no
+        blocking change), migration 20260728150000 + rollback, verified; dp-01 source_page=1
+        (edition/scope printed p1) -> VALIDATOR-CLEAN. Map: dp + 2 CR nodes stamped.
+        RULINGS (sheet O): O-D1 K-table not encoded (free K input); O-D2 mis-homed stat gates
+        CR-023/024; O-D3 F-4 safety-weakness CR-008/009/014/016 (IS NOT NULL on boolean shall
+        -> false still passes block); O-D4 CR-012 over-strong / CR-016 unconditional groundwater.
+        Sheet 64 open. Harness NOT run (element-7) UNPROVEN.
+        NEXT QUEUE: ISO-5667-13 / ISO-14015 (1 error) or re-rank.
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 14 / UNTOUCHED 57.

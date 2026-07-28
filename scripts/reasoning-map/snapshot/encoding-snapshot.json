@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T10:30:56.879Z",
+  "exported_at": "2026-07-28T11:00:38.035Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -194153,17 +194153,6 @@
       ],
       "compliance": [
         {
-          "id": "c7d91d41-551e-47b1-9bb5-83c149570a02",
-          "code": "CR-001",
-          "condition": "objectives_defined eq true",
-          "severity": "warn",
-          "clause_reference": "§3, §4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5eeffbaf-5b5b-4feb-9ced-308c709e2189"
-        },
-        {
           "id": "975913ce-15d0-486b-871b-ec839ebedeec",
           "code": "CR-002",
           "condition": "programme_purpose IS NOT NULL",
@@ -194219,6 +194208,17 @@
           "worksheet_template_id": "5eeffbaf-5b5b-4feb-9ced-308c709e2189"
         },
         {
+          "id": "c7d91d41-551e-47b1-9bb5-83c149570a02",
+          "code": "CR-001",
+          "condition": "objectives_defined == true",
+          "severity": "warn",
+          "clause_reference": "§3, §4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5eeffbaf-5b5b-4feb-9ced-308c709e2189"
+        },
+        {
           "id": "5649c92d-6bb9-400c-8db7-41c52e21f89d",
           "code": "CR-008",
           "condition": "hazardous_atmosphere_tested IS NOT NULL",
@@ -194243,7 +194243,7 @@
         {
           "id": "1a0c6f63-f2a9-46ff-9f3d-2e62c5a79e98",
           "code": "CR-010",
-          "condition": "sampling_location_identified eq true",
+          "condition": "sampling_location_identified == true",
           "severity": "warn",
           "clause_reference": "§8.2",
           "requires_attestation": false,
