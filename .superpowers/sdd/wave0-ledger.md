@@ -905,3 +905,10 @@ WAVE 11 DONE — ISO-46001 -> .superpowers/sdd/wave11-ISO-46001.md (9 agents, 64
         Metric: mgmt worksheets run; WS-08 Win now computes; harness NOT run (element-7) UNPROVEN.
         NEXT QUEUE: ISO-5667-1 / ISO-5667-13 / ISO-14015 (1 error each) or re-rank.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 13 / UNTOUCHED 58.
+
+WAVE 12 OPENED — ISO-5667-1 (Water quality Sampling Pt1: programme design), 2026-07-28 (fable-5)
+        8 ws / 51 fields / 3 eq / 27 CRs. Water-sampling technical std. SOURCE: ISO-5667-1.pdf
+        17 pages, text (73k chars). Live error: 1 (dp-01-source-edition standard_fixed w/o
+        source_page). DISPATCHED wf_a6282f65-47b / task wq7h210mw — full template + edition
+        verify + dp source_page determination. Fixes APPLY (final).
+CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 14 / UNTOUCHED 57.
