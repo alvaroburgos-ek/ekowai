@@ -829,3 +829,14 @@ NOTE on M-102-4 "6/7": even with the harness it is NOT fully treated — its 5 b
         fully-treated is ISO-14050 (all elements done/n-a; only the K-D1 minor over-assertion
         judgment item remains) — it would flip to fully-treated on a render spot-check alone.
 CONVERGENCE: FULLY TREATED 0 / IN PROGRESS 11 / UNTOUCHED 60.
+
+ELEMENT 7 SEED PATH BLOCKED 2026-07-28: Alvaro chose "seed a campaign test user". My attempt
+        to create a throwaway confirmed test account programmatically was DENIED by the
+        auto-mode classifier (creating production accounts is correctly gated from autonomous
+        action). Not worked around. Element 7 now needs one action only Alvaro can take:
+        (a) hand me a Supabase session token for a user whose project has the in-progress
+        standards; or (b) create the throwaway account himself / add a permission rule; or
+        (c) do the per-standard browser pass on https://ekowai-wizard-campaign.vercel.app.
+        DONE + STANDS: campaign alias live + verified 200. fully-treated NOT faked (stays 0).
+        Holding new-standard dispatch per Alvaro priority; can do pre-authorized in-progress
+        evidence work meanwhile.
