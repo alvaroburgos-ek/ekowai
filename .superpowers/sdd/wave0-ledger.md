@@ -1110,3 +1110,9 @@ NEXT CLEAN UNIT (pre-authorized [CODE]/tooling, not yet started): missing-FIELD-
   target-to-prod-field match cleanliness first (some [[n]]/[[q]] may be symbol refs that should be bare).
 OPEN RULINGS awaiting owner: 70-CR manual->empty sweep (S-2); 20 malformed conditions (U-2);
   15->2 enum re-types signed; duration_method type; CR-015 block-vs-warn; doc-iso-14000-vv reclass.
+
+MAP SWEEP 2026-07-29 — symbol-as-wikilink in equation requires::. Un-wikilinked 293 broken symbol
+  refs (151 bare like [[n]]→n + 142 field-/fld- like [[field-Q_bem]]→Q_bem) to the bare-symbol
+  convention rule 6 endorses. total errors 2159→1592 (−567 combined w/ prior); 6.eq-classifiable
+  294→21. DWA-M-816 (138) the biggest. Map-only (Obsidian), fabricates nothing. Remaining
+  1.links-resolve (1026) are in other link types (produces/section/doc/dp refs) — next characterize.
