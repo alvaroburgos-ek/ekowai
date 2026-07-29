@@ -1130,3 +1130,10 @@ MAP SWEEP cont. 2026-07-29 — CR-ref naming reconciliation. Re-pointed 310 dang
   total errors 1437→1248. TURN TOTAL: 2159→1248 (-911), all map-only, nothing fabricated.
   Remaining 1.links-resolve 682: 190 no-match cr-refs + references->doc 18 + consumed_by->section 15
   + fired_by 58 + ~inline body links — need node create/accept/semantics, a nuanced next workstream.
+
+MAP GEN 2026-07-29 — in_library:false doc nodes. Generated 49 doc nodes (generate-doc-nodes.mjs) for
+  external standards referenced by DWA-A-272E(15)/VDI-3477(13)/DIN-EN-16941-2(12)/DWA-M-760(8)/
+  DWA-A-125(1) but not in library. Content-boundary compliant: in_library:false, provenance NR,
+  acquisition-list candidates, title from slug, NEVER fills content. total errors 1248→1146.
+  TURN TOTAL: 2159→1146 (-1013). Remaining 1.links-resolve 580: section-(120) reconcile-candidate,
+  cr- no-match(190), field/fld non-eq(190), dp-(97), eq-(74), tab-(26), template/scaffold bare(211).
