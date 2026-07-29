@@ -1116,3 +1116,11 @@ MAP SWEEP 2026-07-29 — symbol-as-wikilink in equation requires::. Un-wikilinke
   convention rule 6 endorses. total errors 2159→1592 (−567 combined w/ prior); 6.eq-classifiable
   294→21. DWA-M-816 (138) the biggest. Map-only (Obsidian), fabricates nothing. Remaining
   1.links-resolve (1026) are in other link types (produces/section/doc/dp refs) — next characterize.
+
+MAP SWEEP cont. 2026-07-29 — produces:: symbol-as-wikilink (eq nodes). Un-wikilinked 155 produces::
+  refs (field-/fld-/bare → symbol), consistent w/ the eq-1-parameter fix + requires sweep. total
+  errors 1592→1437. THIS TURN TOTAL: 2159→1437 (−722) via 448 un-wikilinked eq symbol refs, all
+  map-only, nothing fabricated. Residual: 45 2.eq-node-has-db WARNs (produces symbol vs DB
+  output_symbol alignment — mostly fld- kebab e.g. a-max vs a_max; follow-up, non-erroring).
+  REMAINING 1.links-resolve 871 = node-existence refs (gated_by/consumed_by->cr 128, references->doc
+  18, ->section 15, fired_by 58, ~500 inline body links) — need node create/accept, not un-wikilink.
