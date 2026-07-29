@@ -1137,3 +1137,13 @@ MAP GEN 2026-07-29 — in_library:false doc nodes. Generated 49 doc nodes (gener
   acquisition-list candidates, title from slug, NEVER fills content. total errors 1248→1146.
   TURN TOTAL: 2159→1146 (-1013). Remaining 1.links-resolve 580: section-(120) reconcile-candidate,
   cr- no-match(190), field/fld non-eq(190), dp-(97), eq-(74), tab-(26), template/scaffold bare(211).
+
+MAP SWEEP final 2026-07-29 — broadened produces/requires un-wikilink to all node types (eq nodes
+  whose filenames aren't eq-*): 66 more symbol refs un-wikilinked. total errors 1146->1086.
+  ===== TURN TOTAL 2026-07-29: corpus errors 2159 -> 1086 (-1073, ~50%). =====
+  Clean map-mirror fixes, nothing fabricated: 293 requires + 155 produces + 66 broadened un-wikilinks;
+  310 CR-ref reconciles; 49 in_library:false doc nodes generated.
+  ACCURATE remaining 1.links-resolve (520): cr- no-match 147, field/fld graph-edge refs ~120,
+  dp- 60, eq- 52, section- 37, tab- 12, bare-inline ~83 — all need node GENERATION (section/dp/tab
+  nodes mirroring prod) or per-case judgment (no-match cr, semantic edges), NOT mechanical sweep.
+  Other error classes untouched this turn: 1.cr-fired-or-dead 190, 8.norm-input-ref-* 221, 2.fixed-has-page 92.
