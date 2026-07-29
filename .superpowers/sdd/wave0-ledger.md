@@ -1124,3 +1124,9 @@ MAP SWEEP cont. 2026-07-29 — produces:: symbol-as-wikilink (eq nodes). Un-wiki
   output_symbol alignment — mostly fld- kebab e.g. a-max vs a_max; follow-up, non-erroring).
   REMAINING 1.links-resolve 871 = node-existence refs (gated_by/consumed_by->cr 128, references->doc
   18, ->section 15, fired_by 58, ~500 inline body links) — need node create/accept, not un-wikilink.
+
+MAP SWEEP cont. 2026-07-29 — CR-ref naming reconciliation. Re-pointed 310 dangling [[cr-*]] refs to
+  existing CR nodes (trailing-code match; e.g. cr-704e-030 -> cr-atv-a-704e-cr-030). 190 no-match left.
+  total errors 1437→1248. TURN TOTAL: 2159→1248 (-911), all map-only, nothing fabricated.
+  Remaining 1.links-resolve 682: 190 no-match cr-refs + references->doc 18 + consumed_by->section 15
+  + fired_by 58 + ~inline body links — need node create/accept/semantics, a nuanced next workstream.
