@@ -1175,3 +1175,11 @@ FULL-TREATMENT BATCH 1 CLOSED 2026-07-30 — ISO-14002-2/59010/59014. Coverage C
 
 FULL-TREATMENT BATCH 2 OPENED 2026-07-30 — ISO-5667-1(3eq), ISO-59020(13eq), ISO-59032, ISO-14019-1.
   Coverage+gates+equation-phase. wf_9397cf08-08d / wcvbqmzc3.
+
+FULL-TREATMENT BATCH 2 CLOSED 2026-07-30 — ISO-5667-1/59020/59032/14019-1. Coverage COMPLETE all 4;
+  equations verified (5667-1 3/3 Eq3 computes 61.47; 59020 13/13 faithful). APPLIED (mig 20260730120000):
+  title_en backfill 319 CRs/10 std (English text was mis-stored in title_de -> blank English UI);
+  ISO-59020 CR-020 warn re-home; ISO-5667-1 clause fixes. RULINGS -> Section X: block-mishomes (18),
+  is-not-null safety gates (3), modal, synthesized enum. NEW CLASS registered: title_en/title_de
+  English-UI gap (per-guideline sweep for English stds; German/Spanish = translation ruling).
+  NEXT: batch 3 (ISO-5667-10/-13, 14097, 46001, 14050, 14067).
