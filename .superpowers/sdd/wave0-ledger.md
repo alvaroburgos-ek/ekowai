@@ -1166,3 +1166,9 @@ MANUAL SWEEP 2026-07-30 (owner authorized) — condition='manual' -> '' for all 
 FULL-TREATMENT BATCH 1 OPENED 2026-07-30 — ISO-14002-2, ISO-59010, ISO-59014 (0-eq guidance).
   Sequential per-guideline coverage + gates + metric. Corpus classes pre-swept; focus coverage gaps +
   rulings + source-settled. wf_9fa4eaec-202 / wa5hoz7ip. Then next batch.
+
+FULL-TREATMENT BATCH 1 CLOSED 2026-07-30 — ISO-14002-2/59010/59014. Coverage COMPLETE all 3, fields
+  clean, swept classes hold. APPLIED (mig 20260730110000): ISO-59010 CR-018 warn re-home ws07->ws08;
+  ISO-59014 CR-005 §6.1. RULINGS -> Section W: 25 rule-13 BLOCK-mishomes (HIGH, 4 ws blocked), 11
+  modal-overblock, CR-009 AND-too-strict, ISO-59014 54x title_en null. Block residual = standing rule-13
+  ruling class, recurs every guidance std. NEXT: batch 2.
