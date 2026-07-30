@@ -1189,3 +1189,11 @@ SECTION title_en SWEEP 2026-07-30 — worksheet_sections.title_en=title_de for 1
   English titles.
 FULL-TREATMENT BATCH 3 OPENED — ISO-5667-10(3eq), ISO-5667-13(3eq), ISO-14097, ISO-14050.
   wf_4af80330-cd4 / wlt9hzu6f. All English source.
+
+FULL-TREATMENT BATCH 3 CLOSED 2026-07-30 — ISO-5667-10/-13/14097/14050. Coverage COMPLETE all 4.
+  APPLIED (mig 20260730140000): ISO-5667-10 Eq1/Eq2 prose-tail strip (hard-error->computed 14.6/15.6,
+  proven), Eq3 unit 'ml'; ISO-5667-13 § prefixes; title_en + section title_en backfill (3 English std).
+  RULINGS -> Section Y: block-mishomes, is-not-null (12), modal, k-exposure, ISO-14097 both-titles-null,
+  ISO-14050 enum gaps. NEW eq class: prose-iteration-tail in formula -> hard parser error (strip = SS).
+CONVERGENCE (batches 1-3): 11 guidelines full-treated (coverage COMPLETE), ~19 equations verified,
+  source-settled applied each; ~340 CRs got English titles; block-mishome rulings ~66 accumulated.
