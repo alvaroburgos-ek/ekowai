@@ -1217,3 +1217,17 @@ FULL-TREATMENT BATCH 4 CLOSED 2026-07-30 — ATV-A-704E/ISO-14067/ISO-46001/ISO-
 CONVERGENCE (batches 1-4): 15 guidelines full-treated coverage-COMPLETE; ~38 equations verified;
   source-settled applied each; title_en English UI fixed on 15 English standards (~400 CRs).
   BLOCK-mishome rulings ~76 accumulated (owner batch ratification = biggest working-tool unblock).
+
+=== RESUME POINTER (2026-07-30, after batch 4) ===
+STATE: 15 guidelines full-treated this run (batches 1-4), coverage COMPLETE all, ~38 equations verified,
+  source-settled applied each, all committed w/ rollbacks. Corpus improvements: manual sweep (70),
+  title_en English-UI fix (~400 CRs / 15 English standards + sections), 2 new flywheel classes.
+NEXT (batch 5+): remaining ~50 untouched standards. English-source next (if PDF available): ISO-14046,
+  ISO-14064-1, ISO-14064-2, ISO-14050(done), DWA-M-277E/-381E (English variants). Then German DWA
+  standards (title_en = translation ruling, coverage+gates still valuable): DWA-A-131/178/222/226/262E,
+  DWA-M-205/363/816/820-x, DIN-*, VDI-*, etc. Use the batch-N workflow template (inline Workflow script,
+  4 stds/batch, coverage+eq+gates). Apply source-settled per batch, sheet rulings, title_en for English.
+OWNER RATIFICATION QUEUE (sheet Sections W/X/Y/Z, biggest working-tool unblock):
+  - BLOCK-mishome re-homes (~76) — approve batch => unblocks dozens of worksheets across ~15 guidelines.
+  - IS-NOT-NULL-on-boolean safety gates (~24) — strengthen to ==true?
+  - modal over-block downgrades; ATV CR-025 pipette-threshold bug; invented-enum corrections.
