@@ -1156,3 +1156,9 @@ MAP GEN 2026-07-30 — field nodes from prod. generate-field-nodes.mjs created 7
   Remaining 1.links-resolve 408: cr- no-match 147, dp- 60, eq- 52, section-missing 37, tab- 12,
   field/fld stale 29, bare-inline ~80 — mix of node-gen + per-case. Non-link: 1.cr-fired-or-dead 190,
   8.norm-input-ref-* 221, 2.fixed-has-page 92.
+
+MANUAL SWEEP 2026-07-30 (owner authorized) — condition='manual' -> '' for all 70 CRs / 21 standards
+  (mig 20260730100000, single guarded transform, rollback written). Now reach {kind:manual} review
+  bucket instead of dead-pending "fehlend: manual". Rule 14: 70->0. Map write-back: 63 CR nodes + 8
+  manual DP nodes. Strict improvement, non-blocking (warn). 70 more gates behave as intended.
+  NEXT: remaining untouched guidelines, per-guideline full-treatment waves, one by one.
