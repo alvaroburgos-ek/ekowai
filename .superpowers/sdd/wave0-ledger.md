@@ -1162,3 +1162,7 @@ MANUAL SWEEP 2026-07-30 (owner authorized) — condition='manual' -> '' for all 
   bucket instead of dead-pending "fehlend: manual". Rule 14: 70->0. Map write-back: 63 CR nodes + 8
   manual DP nodes. Strict improvement, non-blocking (warn). 70 more gates behave as intended.
   NEXT: remaining untouched guidelines, per-guideline full-treatment waves, one by one.
+
+FULL-TREATMENT BATCH 1 OPENED 2026-07-30 — ISO-14002-2, ISO-59010, ISO-59014 (0-eq guidance).
+  Sequential per-guideline coverage + gates + metric. Corpus classes pre-swept; focus coverage gaps +
+  rulings + source-settled. wf_9fa4eaec-202 / wa5hoz7ip. Then next batch.
