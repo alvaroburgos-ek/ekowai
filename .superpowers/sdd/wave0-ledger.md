@@ -1197,3 +1197,14 @@ FULL-TREATMENT BATCH 3 CLOSED 2026-07-30 — ISO-5667-10/-13/14097/14050. Covera
   ISO-14050 enum gaps. NEW eq class: prose-iteration-tail in formula -> hard parser error (strip = SS).
 CONVERGENCE (batches 1-3): 11 guidelines full-treated (coverage COMPLETE), ~19 equations verified,
   source-settled applied each; ~340 CRs got English titles; block-mishome rulings ~66 accumulated.
+
+FULL-TREATMENT BATCH 4 OPENED 2026-07-30 — ATV-A-704E(6eq), ISO-14067(7eq), ISO-46001(4eq),
+  ISO-5667-16(2eq). Heavier (19 eq). ATV/46001 German + ISO-14067 Spanish title_de -> title_en=ruling;
+  ISO-5667-16 English + image-only PDF (render). wf_b5e9da22-3da / wts32tu2o.
+=== RESUME POINTER (mid full-treatment sweep, 2026-07-30) ===
+  DONE this session-run: manual sweep (70); batches 1-3 (11 guidelines coverage-COMPLETE + ~19 eq
+  verified + source-settled applied each); title_en 340+ CRs / 13 English std + section titles; map
+  hygiene (errors ~2194->~961 earlier). Batch 4 RUNNING (wts32tu2o). NEXT after batch 4: batch 5 =
+  remaining ISO/DWA English standards; then German/Spanish standards (title_en = translation);
+  then the map-node generation residual. Rulings accumulate on sheet Sections W/X/Y (block-mishome
+  ~66, is-not-null ~18, modal, metadata) — need owner BATCH ratification (esp. block re-homes).
