@@ -1172,3 +1172,6 @@ FULL-TREATMENT BATCH 1 CLOSED 2026-07-30 — ISO-14002-2/59010/59014. Coverage C
   ISO-59014 CR-005 §6.1. RULINGS -> Section W: 25 rule-13 BLOCK-mishomes (HIGH, 4 ws blocked), 11
   modal-overblock, CR-009 AND-too-strict, ISO-59014 54x title_en null. Block residual = standing rule-13
   ruling class, recurs every guidance std. NEXT: batch 2.
+
+FULL-TREATMENT BATCH 2 OPENED 2026-07-30 — ISO-5667-1(3eq), ISO-59020(13eq), ISO-59032, ISO-14019-1.
+  Coverage+gates+equation-phase. wf_9397cf08-08d / wcvbqmzc3.
