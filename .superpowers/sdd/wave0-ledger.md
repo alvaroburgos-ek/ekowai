@@ -1208,3 +1208,12 @@ FULL-TREATMENT BATCH 4 OPENED 2026-07-30 — ATV-A-704E(6eq), ISO-14067(7eq), IS
   remaining ISO/DWA English standards; then German/Spanish standards (title_en = translation);
   then the map-node generation residual. Rulings accumulate on sheet Sections W/X/Y (block-mishome
   ~66, is-not-null ~18, modal, metadata) — need owner BATCH ratification (esp. block re-homes).
+
+FULL-TREATMENT BATCH 4 CLOSED 2026-07-30 — ATV-A-704E/ISO-14067/ISO-46001/ISO-5667-16. Coverage
+  COMPLETE (ATV, 5667-16). APPLIED (mig 20260730150000): ATV IGC->IQC (6 eq) + EQ-05/06 unit; ISO-46001
+  C.3/C.5 unit; ISO-5667-16 log_e2->0.6931; title_en+section (ATV, 5667-16 English). RULINGS -> Section Z:
+  block-mishomes (10), bare-symbol-rhs (4), is-not-null (6), modal, ATV CR-025 pipette-threshold bug
+  (source-verified, block), invented enums, ISO-14067/46001 title_en=translation.
+CONVERGENCE (batches 1-4): 15 guidelines full-treated coverage-COMPLETE; ~38 equations verified;
+  source-settled applied each; title_en English UI fixed on 15 English standards (~400 CRs).
+  BLOCK-mishome rulings ~76 accumulated (owner batch ratification = biggest working-tool unblock).
