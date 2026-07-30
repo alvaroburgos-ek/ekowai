@@ -1147,3 +1147,12 @@ MAP SWEEP final 2026-07-29 — broadened produces/requires un-wikilink to all no
   dp- 60, eq- 52, section- 37, tab- 12, bare-inline ~83 — all need node GENERATION (section/dp/tab
   nodes mirroring prod) or per-case judgment (no-match cr, semantic edges), NOT mechanical sweep.
   Other error classes untouched this turn: 1.cr-fired-or-dead 190, 8.norm-input-ref-* 221, 2.fixed-has-page 92.
+
+MAP GEN 2026-07-30 — field nodes from prod. generate-field-nodes.mjs created 76 DB-mirror field nodes
+  (DWA-A-226 40, DIN-14021 19, DWA-A-125 15, ISO-5667-16 2) resolving the field-node gap that fed
+  section/CR/eq dangling refs. data_class = derived (eq output) else engineer_input; provenance VC;
+  nothing invented. 29 no-prod DWA-A-125 kebab refs left (stale/not-in-prod). total errors 1086->961;
+  6.eq-classifiable ~0. TURN TOTAL 2026-07-30: 2159->961 (-1198, ~55%).
+  Remaining 1.links-resolve 408: cr- no-match 147, dp- 60, eq- 52, section-missing 37, tab- 12,
+  field/fld stale 29, bare-inline ~80 — mix of node-gen + per-case. Non-link: 1.cr-fired-or-dead 190,
+  8.norm-input-ref-* 221, 2.fixed-has-page 92.
