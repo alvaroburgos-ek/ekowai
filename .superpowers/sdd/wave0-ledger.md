@@ -1183,3 +1183,9 @@ FULL-TREATMENT BATCH 2 CLOSED 2026-07-30 — ISO-5667-1/59020/59032/14019-1. Cov
   is-not-null safety gates (3), modal, synthesized enum. NEW CLASS registered: title_en/title_de
   English-UI gap (per-guideline sweep for English stds; German/Spanish = translation ruling).
   NEXT: batch 3 (ISO-5667-10/-13, 14097, 46001, 14050, 14067).
+
+SECTION title_en SWEEP 2026-07-30 — worksheet_sections.title_en=title_de for 10 verified-English
+  standards (mig 20260730130000, umlaut-guarded). Same English-UI gap as CRs, sections now show
+  English titles.
+FULL-TREATMENT BATCH 3 OPENED — ISO-5667-10(3eq), ISO-5667-13(3eq), ISO-14097, ISO-14050.
+  wf_4af80330-cd4 / wlt9hzu6f. All English source.
