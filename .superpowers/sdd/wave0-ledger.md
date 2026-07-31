@@ -1443,3 +1443,13 @@ FULL-TREATMENT BATCH 19 CLOSED 2026-07-31 — DWA-A-125 + DWA-M-179-1 → 47 gui
   VDI-2163); spec'd as validator rule 16 (TOP [CODE] item next session, needs per-instance verify before
   destructive delete). DWA-A-125 3 bare-symbol-RHS false-blocks (HIGH, 2 ws unusable) + M179-1 A_b_a m²/ha
   10^4-risk are the highest-value rulings. NEXT: DWA-M-1200-1/1200-2 (siblings); then 732/708/760/187/381E.
+
+FULL-TREATMENT BATCH 20 OPENED 2026-07-31 — DWA-M-1200-1(1eq/21cr), DWA-M-1200-2(4eq/15cr) siblings.
+  wf_a314ba70-30e / wh2m8urrz. Schema gained explicit phantom-field ruling kind. 1200-1 has a legit enum
+  'ja' (do NOT boolean-convert). RESUME: on batch-20 return → read tasks/wh2m8urrz.output, apply source-
+  settled (verify each in-session per R-2, esp. any "contradicts source" claim → re-extract PDF quote),
+  sheet rulings Section AP, commit, then dispatch batch-21 = DWA-M-760(6eq/20cr)+DWA-M-708(5eq/14cr).
+  Remaining queue after 20: DWA-M-732/708/760/187/381E. Source-blocked (acquisition, never dispatch):
+  DWA-A-131/226/201/M-229-1. CONVERGENCE: 47/71 full-treated; 24 untouched (incl 4 source-blocked → ~20
+  reachable). TOP [CODE] next session: validator rule 16 phantom-enum-value-field (spec in ratification
+  Section AO); implement + corpus re-run before more deletes.
