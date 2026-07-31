@@ -1308,3 +1308,10 @@ FULL-TREATMENT BATCH 8 CLOSED 2026-07-31 — DWA-M-816 (30 eq faithful, clean), 
   5 block-mishomes (M816 gate-dumping ground M816-19), DWA-M-820-2 ~41 modal-over-block (procurement
   guidance), cosmetics. NEXT: batch 9 (DWA-M-820-1, DWA-M-1200-3).
 CONVERGENCE (batches 1-8): 25 guidelines full-treated.
+
+FULL-TREATMENT BATCH 9 OPENED 2026-07-31 — DWA-M-1200-3(10eq/32cr), DWA-M-820-1(0eq/26cr). German.
+  wf_9c35d1a1-7ef / wellv51o9. On completion -> process + apply + sheet + commit + dispatch batch 10.
+  NEXT queue after: DIN/VDI German (DIN-1989-1/-2, DIN-14021, DIN-276, VDI-2163/3477/3814, DIN-14071-1,
+  DIN-18130-1, DIN-EN-16941-2, DIN-EN-ISO-14044), Spanish (ISO-9001, ISO-14067 already done),
+  FLL-Naturteich/FLL-GAR/FLL-TP-RHIZOM, HOAI-2021, DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/
+  179-1, DWA-A-125. Source-blocked (no PDF): DWA-A-131/226/201/M-229-1 -> acquisition list.
