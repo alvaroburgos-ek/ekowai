@@ -1294,3 +1294,11 @@ FULL-TREATMENT BATCH 7 CLOSED 2026-07-31 — DWA-A-262E, DWA-M-205. APPLIED (mig
   ~24, tautology/dimension/title gate defects. NEXT: batch 8.
 CONVERGENCE (batches 1-7): 23 guidelines full-treated; DWA-A-222 31 + DWA-M-205 24 = 55 dead attestation
   gates fixed live; DWA-M-363 6 eq compute. German attestation-gate fix (ja->True) = high-yield class.
+
+FULL-TREATMENT BATCH 8 OPENED 2026-07-31 — DWA-M-816(30eq/26cr), DWA-M-820-2(0eq/60cr). German,
+  German-format-aware. wf_e02c5a18-f28 / wqkio6ob0. On completion -> process + apply (German-format eq
+  fixes reproduction-checked, ja->True, unit-strips) + sheet + commit + dispatch batch 9.
+  == 'ja' class CONFIRMED EXHAUSTED corpus-wide (only DWA-M-1200-1 has 1, non-boolean = legit enum, left).
+  DWA-A-131(78eq)/DWA-A-226/DWA-A-201/DWA-M-229-1 = source-blocked (no PDF) -> acquisition list.
+NEXT after batch 8: batch 9 = DWA-M-820-1, DWA-M-1200-3, then DIN/VDI German + Spanish (ISO-9001/14067)
+  + FLL + HOAI + remaining. DWA-A-262E 12 eq unit-strips (AC-1) to apply.
