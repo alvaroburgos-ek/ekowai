@@ -1320,3 +1320,10 @@ FULL-TREATMENT BATCH 9 CLOSED 2026-07-31 — DWA-M-1200-3 (all 15 tables materia
   STRONG), DWA-M-820-1. No clean auto-apply (gate bugs = block-condition/mis-home rulings). RULINGS -> AE:
   CR-06/CR-14 severe enum-value/case + mis-home, bare-placeholder CRs, empty-dup gates, coverage gaps.
 CONVERGENCE (batches 1-9): 27 guidelines full-treated. NEXT: batch 10 (DIN/VDI German + remaining DWA).
+
+FULL-TREATMENT BATCH 10 OPENED 2026-07-31 — DIN-EN-16941-2(2eq/19cr), VDI-3477(18eq/19cr). First DIN/VDI.
+  wf_022155b1-efb / wnddjk6bz. DWA-M-820-1 (batch 9) had 3 SS condition fixes (REQ-01 enum-value,
+  REQ-07/19 arithmetic — some compound w/ mis-home) -> apply carefully next w/ reproduction check.
+  NEXT queue: DIN-1989-1/-2, DIN-14021, DIN-276, VDI-2163/3814, DIN-14071-1, DIN-18130-1, DIN-EN-ISO-14044;
+  ISO-9001 (Spanish); FLL-Naturteich/GAR/RHIZOM; HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/1200-1/2/
+  179-1; DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
