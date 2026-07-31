@@ -1243,3 +1243,23 @@ FULL-TREATMENT BATCH 5 CLOSED 2026-07-31 — ISO-14046/14064-1/14064-2/14004. Co
   backfills were valid hygiene; German/Spanish fallback-to-title_de = the real translation gap.
 CONVERGENCE (batches 1-5): 19 guidelines full-treated coverage-verified; ~47 equations verified;
   source-settled applied each. NEXT: batch 6 = German DWA (DWA-M-205/A-222/A-262E/M-363).
+
+FULL-TREATMENT BATCH 6 OPENED 2026-07-31 — DWA-A-222(28eq/63cr), DWA-M-363(22eq/48cr). German-source,
+  equation-heavy; representative eq spot-check. title_en=translation (fallback renders title_de).
+  wf_7219177a-5be / wldif5vmr. Output: tasks/wldif5vmr.output.
+=== RESUME POINTER (2026-07-31, after batch 5 / batch 6 dispatched) ===
+STATE: 19 guidelines full-treated (batches 1-5), coverage-verified, ~47 eq verified, source-settled
+  applied each, all committed w/ rollbacks. Corpus: manual sweep (70), map hygiene (errors ~2194->~961),
+  title_en hygiene (~400 CRs, CORRECTED = data hygiene not render fix; UI falls back title_en??title_de).
+IN FLIGHT: batch 6 (DWA-A-222, DWA-M-363) running wldif5vmr -> when it returns: parse tasks/wldif5vmr.output,
+  apply source-settled (eq strips/units/symbol-fixes, warn re-homes missed), sheet rulings (Section AB),
+  commit, then dispatch batch 7.
+NEXT BATCHES (remaining ~48, use inline Workflow batch template, 2-4 stds/batch by size):
+  German DWA (heavy, eq spot-check): DWA-A-131(78eq!), DWA-A-262E, DWA-M-205, DWA-M-816, DWA-M-820-x,
+  DWA-A-226, DWA-M-1200-x, DWA-M-229-x, DWA-A-125, DWA-M-179-1, DWA-M-349, DWA-M-708/732/760/187, etc.;
+  DIN/VDI German; ISO-9001/14067 Spanish (title_en=translation); FLL-* ; HOAI-2021; DIN-276.
+  For German/Spanish: coverage+eq+gates valuable; title_en = translation ruling (do NOT sweep).
+OWNER RATIFICATION QUEUE (sheet W/X/Y/Z/AA — the biggest working-tool unblock):
+  BLOCK-mishome re-homes (~86); IS-NOT-NULL safety-gate strengthenings (~36); modal over-block
+  downgrades; ATV CR-025 pipette bug; invented-enum corrections. One "approve block re-homes" =>
+  dozens of worksheets unblocked across ~19 guidelines.
