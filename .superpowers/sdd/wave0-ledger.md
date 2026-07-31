@@ -1417,3 +1417,7 @@ FULL-TREATMENT BATCH 17 CLOSED 2026-07-31 — FLL-TP-RHIZOM-2023 + HOAI-2021 →
   is-not-null + modal + stuck-pending + 9 coverage gaps; HOAI CR-05 vacuous+mishome, CR-16/17 over-block,
   CR-02/21/22/23 vacuous-TRUE, 3 held umbau-caps, Landschaftsplanung coverage gap. NO phantom/null-enum.
   NEXT (final DWA stretch): DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1; DWA-A-125.
+
+FULL-TREATMENT BATCH 18 OPENED 2026-07-31 — DWA-M-229-2(12eq/20cr), DWA-M-349(10eq/27cr) [22 eq, densest].
+  wf_89476f8b-681 / w787iawmt. All queue PDFs confirmed present. Remaining after: DWA-M-732/708/760/187/
+  381E/1200-1/1200-2/179-1; DWA-A-125 (all sourced).
