@@ -1466,3 +1466,7 @@ FULL-TREATMENT BATCH 20 CLOSED 2026-07-31 — DWA-M-1200-1 + DWA-M-1200-2 → 49
 FULL-TREATMENT BATCH 21 OPENED 2026-07-31 — DWA-M-760(6eq/20cr, _WD), DWA-M-708(5eq/14cr, verify edition).
   wf_dc4a2b5d-34b / wvrtmdmtd. Schema gained bare-symbol-rhs + guard-chain ruling kinds + edition-check
   step. Remaining after: DWA-M-732/187/381E. CONVERGENCE 49/71.
+
+FULL-TREATMENT BATCH 21 CLOSED 2026-07-31 — DWA-M-760 (Weißdruck) + DWA-M-708 (GELBDRUCK/held) → 51 full-treated.
+  ZERO source-settled auto-applies (760 no defect; 708 held-draft). Edition-check step CAUGHT 708 as draft.
+  Rulings sheeted AQ. bare-symbol-RHS now ~9 instances. Next: reconcile full corpus (queue may be subset).
