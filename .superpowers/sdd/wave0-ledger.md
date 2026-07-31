@@ -1484,3 +1484,9 @@ ratification-sheet batch section headers + ledger CLOSED lines (authoritative, n
   ARITHMETIC: 54 treated + 7 reachable-untouched + 4 source-blocked + 6 prior = 71. ✓
   TRUE CONVERGENCE: 54/71 batch/wave-treated; 7 reachable remain (~4 batches); then 6 prior re-touch +
   4 source-blocked (need PDFs) to reach 71/71. NEXT queue order: 732,187 → 381E,DVS-2225-4 → 272E,820-3 → 5667-6.
+
+FULL-TREATMENT BATCH 22 CLOSED 2026-08-01 — DWA-M-732 (Weißdruck) + DWA-M-187 (GELBDRUCK/held) → 56 treated.
+  ZERO source-settled auto-applies (732 faithful per engine run, range-formula SR-2 ruling; 187 draft-held).
+  Rulings sheeted AR. Edition-check caught 187 draft. NEW classes: compound-LHS-comparison-as-equation.
+  REACHABLE-UNTOUCHED now 5: DWA-M-381E, DVS-2225-4, DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF unconfirmed).
+  CONVERGENCE 56/71. NEXT: DWA-M-381E + DVS-2225-4.
