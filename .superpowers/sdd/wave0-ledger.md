@@ -1431,3 +1431,7 @@ FULL-TREATMENT BATCH 18 CLOSED 2026-07-31 — DWA-M-229-2 + DWA-M-349 → 45 gui
   mishome + ~8 modal + CR-005 brittle == + CR-016 enforceable-TRUE + Gl.7 + unmaterialized Tab.4/7/8 +
   coverage §7.3.3/§6.5). NO phantom/null-enum on either. NEXT: DWA-M-732/708/760/187/381E/1200-1/1200-2/
   179-1; DWA-A-125 (all sourced).
+
+FULL-TREATMENT BATCH 19 OPENED 2026-07-31 — DWA-A-125(2eq/16cr pipe-jacking), DWA-M-179-1(6eq/33cr).
+  wf_185c8229-4a7 / w24imzz8t. BRIEF HARDENED: added R-2/R-5 verbatim-proof clause + modal-quote rule
+  (from batch-18 CR-019 near-miss). Remaining after: DWA-M-732/708/760/187/381E/1200-1/1200-2.
