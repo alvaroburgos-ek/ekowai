@@ -1490,3 +1490,7 @@ FULL-TREATMENT BATCH 22 CLOSED 2026-08-01 — DWA-M-732 (Weißdruck) + DWA-M-187
   Rulings sheeted AR. Edition-check caught 187 draft. NEW classes: compound-LHS-comparison-as-equation.
   REACHABLE-UNTOUCHED now 5: DWA-M-381E, DVS-2225-4, DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF unconfirmed).
   CONVERGENCE 56/71. NEXT: DWA-M-381E + DVS-2225-4.
+
+FULL-TREATMENT BATCH 23 OPENED 2026-08-01 — DWA-M-381E(4eq/20cr, English), DVS-2225-4(3eq/18cr, German).
+  wf_c5dd6f18-c48 / w6rue3uma. Agents resolve std_id by code (DVS id not pre-fetched). Remaining after:
+  DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF?). CONVERGENCE 56/71.
