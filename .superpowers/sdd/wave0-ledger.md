@@ -1348,3 +1348,9 @@ APPLIED AC-1 (2026-07-31, while batch 11 runs) — DWA-A-262E 11 eq unit-in-form
   annotations moved to output_unit. Gl.15 A_ANF excluded (div-by-zero test only). DWA-A-262E now has
   ~16 computing equations. Remaining pending source-settled: VDI-3477/DIN CR condition fixes (AF),
   DWA-M-820-1 3 SS (need exact CR ids from prod).
+
+FULL-TREATMENT BATCH 11 CLOSED 2026-07-31 — DIN-1989-1, DIN-14021. APPLIED (mig 20260731170000):
+  4 eq fixes reproduction-checked (DIN-1989-1 Eq4 comma-in-fn-context, DIN-14021 EQ-01/02/03 short-symbol).
+  RULINGS -> AG: coverage tables, is-not-null batch, block-mishome. NEXT: batch 12 (DIN-1989-2, DIN-276).
+CONVERGENCE (batches 1-11): 31 guidelines full-treated; German formula-fix class now spans DWA-M-363/
+  A-262E/DIN-1989-1/DIN-14021 (comma/case/short-symbol/unit-strip all reproduction-checked).
