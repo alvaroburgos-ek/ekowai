@@ -1,0 +1,2558 @@
+NORMA TÉCNICA                                                 NTC-ISO
+COLOMBIANA                                                      14046
+
+                                                                    2017-03-22
+
+
+
+
+GESTIÓN AMBIENTAL.
+HUELLA DE AGUA. PRINCIPIOS, REQUISITOS Y
+DIRECTRICES
+
+
+
+
+E:       ENVIRONMENTAL MANAGEMENT. WATER FOOTPRINT.
+         PRINCIPLES, REQUIREMENTS AND GUIDELINES
+
+
+CORRESPONDENCIA:                      esta norma es una adopción idéntica
+                                      (IDT) por traducción de la norma ISO
+                                      14046:2014.
+
+DESCRIPTORES:                         medio ambiente; gestión ambiental;
+                                      huella de agua.
+
+
+
+
+I.C.S.: 13.020.40
+
+Editada por el Instituto Colombiano de Normas Técnicas y Certificación (ICONTEC)
+Apartado 14237 Bogotá, D.C. - Tel. (571) 6078888 - Fax (571) 2221435
+
+
+
+Prohibida su reproducción                                        Editada 2017-03-29
+                                          PRÓLOGO
+
+
+
+El Instituto Colombiano de Normas Técnicas y Certificación, ICONTEC, es el organismo
+nacional de normalización, según el Decreto 1595 de 2015.
+
+ICONTEC es una entidad de carácter privado, sin ánimo de lucro, cuya Misión es fundamental
+para brindar soporte y desarrollo al productor y protección al consumidor. Colabora con el sector
+gubernamental y apoya al sector privado del país, para lograr ventajas competitivas en los
+mercados interno y externo.
+
+La representación de todos los sectores involucrados en el proceso de Normalización Técnica
+está garantizada por los Comités Técnicos y el período de Consulta Pública, este último
+caracterizado por la participación del público en general.
+
+La norma NTC-ISO 14046 fue ratificada por el Consejo Directivo de 2017-03-22.
+
+Esta norma está sujeta a ser actualizada permanentemente con el objeto de que responda en
+todo momento a las necesidades y exigencias actuales.
+
+A continuación se relacionan las empresas que colaboraron en el estudio de esta norma a
+través de su participación en el Comité Técnico 14 Gestión ambiental.
+2C DESIGN S.A.S.                                    INDUSTRIA MILITAR COLOMBIANA -
+AMERICANA DE CURTIDOS LTDA. Y CÍA.                  INDUMIL-
+S.C.A.                                              INSTITUTO      DE     HIDROLOGÍA,
+ASESORÍA Y CAPACITACIÓN PARA EL                     METEOROLOGÍA       Y     ESTUDIOS
+LIDERAZGO -ASCAL-                                   AMBIENTALES -IDEAM-
+CAJA DE COMPENSACIÓN FAMILIAR                       LEGRAND COLOMBIA S.A.
+DEL TOLIMA - COMFATOLIMA                            MINISTERIO    DE    AMBIENTE    Y
+CONVENIO USTA - ICONTEC                             DESARROLLO SOSTENIBLE
+EXPRESS DEL FUTURO S.A.                             PINTURAS SÚPER LTDA.
+GAIA S.A.                                           UNIVERSIDAD ECCI
+
+Además de las anteriores, en Consulta Pública el Proyecto se puso a consideración de las
+siguientes empresas:
+
+ACEITES FINOS S.A.S.                                CORPORACIÓN AMBIENTAL
+ACEITES MANUELITA S.A.                              EMPRESARIAL
+AKZONOBEL                                           CORPORACIÓN AUTÓNOMA REGIONAL
+ARAUJO IBARRA & ASOCIADOS S.A.                      RIONEGRO NARE-CORNARE
+ASEGURADORA DE CALIDAD S.A.S.                       DEPARTAMENTO ADMINISTRATIVO
+BELISARIO VELÁSQUEZ Y ASOCIADOS                     DIRECCIÓN NACIONAL DE
+LTDA.                                               INTELIGENCIA
+CAJA DE COMPENSACIÓN FAMILIAR                       DERIVADOS LÁCTEOS DEL NORTES.A.S.
+COMPENSAR                                           ENLACE CONSULTORES EN GESTIÓN
+CINSET                                              EMPRESARIAL LTDA.
+CODENSA S.A. E.S.P.                                 ESPECIALIDADES OFTALMOLÓGICASS.A.
+COMFAMILIAR RISARALDA                               ESTACIONES DE SERVICIO LA
+CONSOLUCIÓN ASESORES                                MILAGROSA Y TRONCAL DEL NORTE
+EXTRUCOL S.A.                                   NEOGEEK SOLUTIONS S.A.S.
+FUNDACIÓN CONSCIENTIA                           ORGANISMO NACIONAL DE
+FUNDACIÓN UNIVERSITARIA AGRARIA                 ACREDITACIÓN DE COLOMBIA -ONAC-
+DE COLOMBIA                                     PERALTA PERFILERIA S.A.S.
+FUNDICOM FUNDICIONES Y                          PINTUBLER DE COLOMBIA S.A.
+COMPONENTES AUTOMOTORES S.A.S.                  SCHNEIDER ELECTRIC DE COLOMBIA
+FUNDICOM S.A.S.                                 SECRETARÍA DISTRITAL DE AMBIENTE
+GENSI S.A.S.                                    SERVIQUALITYQ
+GESCYAM LTDA.                                   SIDERÚRGICA NACIONAL -SIDENAL S.A.-
+GOBERNACIÓN DE CUNDINAMARCA                     SIKA COLOMBIA S.A.S.
+GUSTAVO VARGAS DE LA ROSA                       STIQMA CONSULTING LTDA.
+INDUSEL S.A.S.                                  TRIMCO S.A.
+INGENIO PICHICHI S.A.                           TUS COMPETENCIAS LTDA.
+INLAC COLOMBIA                                  UNIVERSIDAD DE ANTIOQUIA
+INTERNATIONAL MANAGEMENT                        UNIVERSIDAD ICESI
+QUALITY SYSTEMS                                 UNIVERSIDAD LIBRE
+ISOLUCIONES S.A.S.                              UNIVERSIDAD PILOTO DE COLOMBIA
+MEALS DE COLOMBIA S.A.S.                        Y&V BOHORQUEZ INGENIERÍA S.A.S.
+
+ICONTEC cuenta con un Centro de Información que pone a disposición de los interesados
+normas internacionales, regionales y nacionales y otros documentos relacionados.
+
+                                                        DIRECCIÓN DE NORMALIZACIÓN
+                                          PRÓLOGO
+
+
+
+ISO (Organización Internacional de Normalización) es una federación mundial de organismos
+nacionales de normalización (organismos miembros de ISO). El trabajo de preparación de las
+Normas Internacionales normalmente se realiza a través de los comités técnicos de ISO. Cada
+organismo miembro interesado en una materia para la cual se haya establecido un comité
+técnico, tiene el derecho de estar representado en dicho comité. Las organizaciones
+internacionales, públicas y privadas, en coordinación con ISO, también participan en el trabajo.
+ISO colabora estrechamente con la Comisión Electrotécnica Internacional (IEC) en todas las
+materias de normalización electrotécnica.
+
+En la Parte 1 de las Directivas ISO/IEC se describen los procedimientos utilizados para
+desarrollar esta norma y para su mantenimiento posterior. En particular debería tomarse nota de
+los diferentes criterios de aprobación necesarios para los distintos tipos de documentos ISO.
+Esta norma se redactó de acuerdo a las reglas editoriales de la parte 2 de las Directivas
+ISO/IEC. www.iso.org/directives.
+
+Se llama la atención sobre la posibilidad de que algunos de los elementos de este documento
+puedan estar sujetos a derechos de patente. ISO no asume la responsabilidad por la
+identificación de cualquiera o todos los derechos de patente. Los detalles sobre cualquier
+derecho de patente identificado durante el desarrollo de esta norma se indican en la
+introducción y/o en la lista ISO de declaraciones de patente recibidas. www.iso.org/patents.
+
+Cualquier nombre comercial utilizado en esta norma es información a la atención de los
+usuarios y no constituyen una recomendación.
+
+Para obtener una explicación sobre el significado de los términos específicos de ISO y
+expresiones relacionadas con la evaluación de la conformidad, así como información de la
+adhesión de ISO a los principios de la OMC (Organización Mundial del Comercio) respecto a los
+obstáculos     técnicos    al    comercio    (TBT),    véase     la    siguiente    dirección:
+http://www.iso.org/iso/home/standards_development/resources-for-technical-work/foreword.htm.
+
+El comité responsable de este documento es el Comité Técnico ISO/TC 207, Gestión ambiental,
+Subcommittee SC 5, Análisis de ciclo de vida.
+                             PRÓLOGO DE LA VERSIÓN EN ESPAÑOL
+
+
+
+Esta Norma Internacional1 ha sido traducida por el Grupo de Trabajo Spanish Translation Task
+Force (STTF) del Comité Técnico ISO/TC 207, Gestión ambiental, en el que participan
+representantes de los organismos nacionales de normalización y representantes del sector
+empresarial de los siguientes países:
+
+Argentina, Bolivia, Chile, Colombia, Costa Rica, Cuba, Ecuador, España, Estados Unidos de
+América, México, Perú y Uruguay.
+
+Igualmente, en el citado Grupo de Trabajo participan representantes de COPANT (Comisión
+Panamericana de Normas Técnicas) e INLAC (Instituto Latinoamericano de la Calidad).
+
+Esta traducción es parte del resultado del trabajo que el Grupo ISO/TC 207, viene desarrollando
+desde su creación en el año 1999 para lograr la unificación de la terminología en lengua
+española en el ámbito de la gestión ambiental.
+
+
+
+
+1
+       Nota nacional: El término Norma Internacional se mantiene en la Norma Técnica Colombiana, NTC-ISO
+       14046, para garantizar la fidelidad a la traducción realizada por el grupo de trabajo STTF del Comité Técnico
+       ISO/TC 207.
+NORMA TÉCNICACOLOMBIANA                                        NTC-ISO 14046
+
+
+
+
+                                                              CONTENIDO
+
+
+                                                                                                                                      Página
+
+
+INTRODUCCIÓN ......................................................................................................................... i
+
+
+1.        OBJETO Y CAMPO DE APLICACIÓN ..........................................................................1
+
+
+2.        REFERENCIAS NORMATIVAS .....................................................................................1
+
+
+3.        TÉRMINOS Y DEFINICIONES .......................................................................................1
+
+3.1       TÉRMINOS RELACIONADOS CON LOS TIPOS Y CLASIFICACIONES
+          DEL AGUA .....................................................................................................................1
+
+3.2       TÉRMINOS RELACIONADOS CON EL AGUA............................................................. 3
+
+3.        TÉRMINOS RELACIONADOS AL ANÁLISIS DEL CICLO DE VIDA
+          Y A LA EVALUACIÓN DE LA HUELLA DE AGUA....................................................... 3
+
+4.        TÉRMINOS RELACIONADOS CON LA INTERPRETACIÓN
+          Y CON EL INFORME DE RESULTADOS DE LA HUELLA DE AGUA......................... 5
+
+5.        TÉRMINOS RELACIONADOS CON LOS PRODUCTOS,
+          LOS SISTEMAS DEL PRODUCTO, LOS PROCESOS Y LAS ORGANIZACIONES...5
+
+6.        TÉRMINOS RELACIONADOS A LOS DATOS Y LA CALIDAD DE LOS DATOS.......7
+
+
+4.        PRINCIPIOS.................................................................................................................... 8
+
+4.1       GENERALIDADES .........................................................................................................8
+
+4.2       PERSPECTIVA DEL CICLO DE VIDA........................................................................... 8
+
+4.3       ENFOQUE AMBIENTAL ................................................................................................8
+
+4.4       ENFOQUE RELATIVO Y UNIDAD FUNCIONAL .......................................................... 8
+
+4.5       ENFOQUE ITERATIVO ..................................................................................................9
+
+4.6       TRANSPARENCIA......................................................................................................... 9
+NORMA TÉCNICACOLOMBIANA                                     NTC-ISO 14046
+
+
+
+
+                                                                                                                                    Página
+
+
+4.7    PERTINENCIA................................................................................................................ 9
+
+4.8    INTEGRIDAD.................................................................................................................. 9
+
+4.9    COHERENCIA................................................................................................................ 9
+
+4.10   EXACTITUD.................................................................................................................... 9
+
+4.11   PRIORIDAD DEL ENFOQUE CIENTÍFICO....................................................................9
+
+4.12   PERTINENCIA GEOGRÁFICA ...................................................................................... 9
+
+4.13   INTEGRIDAD.................................................................................................................. 9
+
+5.     MARCO METODOLÓGICO.......................................................................................... 10
+
+5.1    REQUISITOS GENERALES......................................................................................... 10
+
+5.2    DEFINICIÓN DEL OBJETIVO Y DEL ALCANCE........................................................ 11
+
+5.3    ANÁLISIS DEL INVENTARIO DE LA HUELLA DE AGUA......................................... 16
+
+5.4    EVALUACIÓN DEL IMPACTO DE LA HUELLA DE AGUA .......................................22
+
+5.5    INTERPRETACIÓN DE LOS RESULTADOS.............................................................. 27
+
+5.6    LIMITACIONES DE LA HUELLA DE AGUA ............................................................... 27
+
+
+6.     INFORME...................................................................................................................... 28
+
+6.1    GENERALIDADES....................................................................................................... 28
+
+2.     REQUISITOS ADICIONALES Y ORIENTACIÓN PARA LOS INFORMES
+       PARA UNA TERCERA PARTE....................................................................................29
+
+3.     ASEVERACIÓN COMPARATIVA Y ESTUDIOS COMPARATIVOS ..........................32
+
+
+7.     REVISIÓN CRÍTICA .....................................................................................................33
+
+7.1    GENERALIDADES .......................................................................................................33
+
+7.2    NECESIDAD PARA REALIZAR LA REVISIÓN CRÍTICA........................................... 33
+NORMA TÉCNICACOLOMBIANA                                         NTC-ISO 14046
+
+
+
+
+                                                                                                                                       Página
+
+
+3.         REVISIÓN CRÍTICA POR UN EXPERTO INTERNO O EXTERNO.............................34
+
+4.         REVISIÓN CRÍTICA POR UN PANEL DE PARTES INTERESADAS.........................34
+
+
+BIBLIOGRAFÍA........................................................................................................................ 38
+
+
+ANEXO A (Normativo)
+REQUISITOS ADICIONALES Y DIRECTRICES PARA LAS ORGANIZACIONES................ 35
+
+
+FIGURAS
+Figura 1. Fases de la evaluación de la huella de agua ........................................................ 11
+
+Figura 2. Procedimientos para el análisis del inventario de la huella de agua................. 17
+
+Figura 3. Relación entre los sistemas de producto y los procedimientos
+de asignación ..........................................................................................................................21
+
+Figura 4. Concepto de indicadores de categoría ilustrado para una categoría
+de impacto considerando la escasez de agua ..................................................................... 23
+
+Figura 5. Concepto de la huella de agua como una evaluación única
+e independiente o como parte de un análisis del ciclo de vida..........................................24
+NORMA TÉCNICA COLOMBIANA                      NTC-ISO 14046
+
+
+
+
+                                          INTRODUCCIÓN
+
+
+
+El agua es un recurso natural esencial.
+
+El tema del agua y su gestión se ha convertido de manera progresiva en un punto primordial en
+el debate sobre el desarrollo sostenible. Este interés se ha impulsado por el crecimiento de la
+demanda de agua, el incremento de la escasez de agua en muchas áreas y/o en la degradación
+de la calidad del agua. Esto lleva a la necesidad de un mejor entendimiento de los impactos
+relacionados con el agua como una base para mejorar la gestión del agua a nivel local,
+regional, nacional y global.
+
+Por lo tanto es deseable tener técnicas de evaluación apropiadas que puedan utilizarse
+internacionalmente de manera coherente.
+
+Una de las técnicas que se han desarrollado para este propósito es la evaluación de la huella
+de agua.
+
+Hay una demanda creciente para la evaluación e informe de huellas del agua. Existen para su
+realización varias metodologías, y actualmente estas metodologías enfatizan diferentes
+aspectos relacionados con el agua. Por lo tanto es necesario asegurarse de la coherencia para
+la evaluación e informe de huellas del agua.
+
+Se espera que esta Norma Internacional beneficie a organizaciones, gobiernos y otras partes
+interesadas en todo el mundo al proporcionar transparencia, coherencia, reproducibilidad y
+credibilidad para la evaluación e informe de las huellas del agua de productos, procesos u
+organizaciones.
+
+La evaluación de la huella de agua realizada de conformidad con esta Norma Internacional:
+
+-      se basa en el análisis del ciclo de vida (de acuerdo con la Norma ISO 14044);
+
+-      es modular (por ejemplo: huellas del agua de diferentes etapas del ciclo de vida pueden
+       sumarse para representar el resultado de la huella de agua);
+
+-      identifica el impacto o los impactos ambientales potenciales relacionados con el agua;
+
+-      incluye dimensiones geográficas y temporales pertinentes;
+
+-      identifica la cantidad de consumo de agua y los cambios en la calidad del agua; y
+
+-      utiliza conocimientos de hidrología.
+
+Una evaluación de la huella de agua puede ayudar en:
+
+a)     evaluar la magnitud de impactos ambientales potenciales relacionados con el agua;
+
+                                                  1
+NORMA TÉCNICA COLOMBIANA                           NTC-ISO 14046
+
+b)      identificar oportunidades para reducir los impactos ambientales potenciales relacionados
+        con el agua asociados con productos en varias etapas de su ciclo de vida, así como con
+        procesos y organizaciones;
+
+c)      la gestión estratégica del riesgo relacionado con el agua;
+
+d)      facilitar la eficiencia del agua y la optimización de la gestión del agua al nivel de
+        productos, procesos y organización;
+
+e)      informar a quienes toman decisiones en la industria, las organizaciones
+        gubernamentales y no gubernamentales de sus impactos ambientales potenciales
+        relacionados con el agua (por ejemplo para propósitos de planificación estratégica,
+        establecimiento de prioridades, diseño o re-diseño de productos y procesos; toma de
+        decisiones sobre inversiones de recursos);
+
+f)      proporcionar información coherente y fiable con base en evidencia científica para dar el
+        informe de los resultados de la huella de agua.
+
+Una evaluación de la huella de agua de una situación particular es insuficiente si se utiliza para
+describir los impactos ambientales potenciales generales de los productos, procesos o las
+organizaciones.
+
+La evaluación de la huella de agua, de acuerdo con esta Norma Internacional se puede realizar
+e informar como una evaluación única e individual donde solamente se evalúan los impactos
+relacionados con el agua; o bien, como parte del análisis del ciclo de vida donde se dan
+consideraciones integrales del conjunto de impactos ambientales, y no solamente los impactos
+relacionados con el agua.
+
+En esta Norma Internacional, el término “huella de agua” se utiliza exclusivamente cuando es el
+resultado de una evaluación del impacto.
+
+El alcance específico de la evaluación de la huella de agua se define por los usuarios de esta
+Norma Internacional de acuerdo con sus requisitos.
+
+NOTA 1 En esta Norma Internacional el término “producto” incluye servicios.
+
+NOTA 2 En esta Norma Internacional el término “impactos ambientales” incluye categorías que generalmente se
+encuentran en modelos utilizados en el análisis del ciclo de vida tales como los impactos en los ecosistemas, en la
+salud humana y en los recursos.
+
+NOTA 3 Informar, es diferente de comunicar. Se incluyen en esta Norma Internacional los requisitos y directrices para
+proporcionar informes, pero los requisitos y las directrices para comunicar, tales como las declaraciones o etiquetas
+ambientales están fuera del alcance de esta Norma Internacional.
+
+
+
+
+                                                         2
+NORMA TÉCNICACOLOMBIANA                            NTC-ISO 14046
+
+
+
+
+GESTIÓN AMBIENTAL.
+HUELLA DE AGUA.
+PRINCIPIOS, REQUISITOS Y DIRECTRICES
+
+
+
+
+1.      OBJETO Y CAMPO DE APLICACIÓN
+
+Esta Norma Internacional especifica los principios, los requisitos y las directrices relacionados
+con la evaluación de la huella de agua de productos, procesos y organizaciones basada en el
+análisis del ciclo de vida (ACV).
+
+Esta Norma Internacional proporciona los principios, los requisitos y las directrices para realizar
+e informar de una evaluación de huella de agua única o individual, o como parte de una
+evaluación ambiental más integral.
+
+Sólo las emisiones al aire y los vertidos al suelo con impactos en la calidad del agua se incluyen
+en la evaluación y no se incluyen todas las emisiones al aire o vertidos al suelo.
+
+El resultado de la evaluación de la huella de agua es un valor individual; o un perfil de los
+resultados del indicador del impacto.
+
+Aunque el informe está dentro del campo de aplicación de esta Norma Internacional, la
+comunicación de los resultados de la huella de agua, por ejemplo en forma de etiquetas o
+declaraciones, está fuera del campo de aplicación de esta Norma Internacional.
+
+NOTA Los requisitos específicos y las directrices para las organizaciones se proporcionan en el Anexo A.
+
+
+
+2.      REFERENCIAS NORMATIVAS
+
+Los documentos indicados a continuación, en su totalidad o en parte, son normas para consulta
+indispensables para la aplicación de este documento. Para las referencias con fecha, sólo se
+aplica la edición citada. Para las referencias sin fecha se aplica la última edición (incluyendo
+cualquier modificación de ésta).
+
+ISO 14044:2006, Gestión Ambiental. Análisis del ciclo de vida. Requisitos y directrices.
+
+3.      TÉRMINOS Y DEFINICIONES
+
+Para los fines de este documento, se aplican los términos y definiciones siguientes:
+
+1.      TÉRMINOS RELACIONADOS CON LOS TIPOS Y CLASIFICACIONES DEL AGUA
+
+1.    Agua dulce. Agua que contiene una concentración baja de sólidos disueltos.
+                                         1 de 38
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+NOTA 1 a la entrada El agua dulce comúnmente contiene menos de 1 000 miligramos por litro de sólidos disueltos y
+generalmente se acepta como adecuada para su extracción y tratamiento convencional para producir agua potable.
+
+NOTA 2 a la entrada La concentración de sólidos disueltos totales puede variar considerablemente en el espacio y/o
+el tiempo.
+
+2.Agua salobre. Agua que contiene sólidos disueltos en una concentración menor que la del
+agua de mar (3.1.4), pero en cantidades que exceden las normas generalmente aceptables
+para usos municipales, domésticos y de irrigación.
+
+NOTA 1 a la entrada La concentración de sólidos disueltos en las aguas solobres puede variar de 1 000 a 30 000
+miligramos por litro.
+
+NOTA 2 a la entrada La concentración de sólidos disueltos totales en muchas aguas salobres puede variar
+considerablemente en el espacio y/ o el tiempo.
+
+3.Agua superficial. Agua sobre el suelo que fluye y se almacena, tales como ríos y lagos,
+excluyendo el agua de mar (3.1.4).
+
+4.    Agua de mar. Agua en el mar o en el océano.
+
+NOTA 1 a la entrada El agua de mar tiene una concentración de sólidos disueltos mayor o igual a 30 000 miligramos
+por litro.
+
+5.Agua subterránea. Agua que está contenida en una formación subterránea y que puede
+recuperarse.
+
+[FUENTE: ISO 11074-2005, 3.2.2 modificada - La Nota se eliminó]
+
+6.Agua fósil. Agua subterránea (3.1.5) que tiene una tasa insignificante de recarga natural en la
+escala del-tiempo humana.
+
+NOTA 1 a la entrada Algunas veces el término “no renovable” se utiliza para este concepto.
+
+7.Cuerpo de agua. Entidad de agua con características hidrológicas, hidrogeomorfológicas,
+físicas, químicas y biológicas definidas en un área geográfica dada.
+
+EJEMPLO          Lagos, ríos, aguas subterráneas, mares, icebergs, glaciares y reservorios.
+
+NOTA 1 a la entrada En caso de que se disponga, el detalle de la georreferenciación de un cuerpo de agua debería
+determinarse en la etapa del objetivo y el alcance. Este puede reagruparse en diferentes cuerpos de agua más
+pequeños.
+
+8.Cuenca hidrográfica. Área desde la cual las escorrentías de agua procedentes de
+precipitaciones drenan por gravedad a una corriente u otro cuerpo de agua (3.1.7).
+
+NOTA 1 a la entrada Algunas veces los términos “derrames de agua”, “área de drenado”, “captación” “área de
+captación” o “cuenca de río” se utilizan para el concepto de “cuenca hidrográfica”.
+
+NOTA 2 a la entrada Una cuenca hidrográfica de agua subterránea no necesariamente se corresponde en área con
+la cuenca hidrográfica superficial.
+
+NOTA 3 a la entrada El detalle georreferenciado de una cuenca hidrográfica se debería determinar en la etapa del
+objetivo y del alcance, puede reagrupar diferentes subcuencas hidrográficas.
+
+9.Flujo elemental de agua. Agua que entra al sistema bajo estudio, que ha sido extraída del
+medio ambiente; o agua que sale del sistema bajo estudio que es liberada al medio ambiente.
+
+                                                         2
+NORMA TÉCNICA COLOMBIANA                             NTC-ISO 14046
+
+[FUENTE: ISO 14044:2006, 3.12, modificada]
+
+2.       TÉRMINOS RELACIONADOS CON EL AGUA
+
+1.     Uso del agua. Uso del agua por actividades humanas.
+
+NOTA 1 a la entrada El uso incluye, pero no está limitado a cualquier extracción del agua (3.2.2), liberación del agua,
+u otras actividades humanas dentro de la cuenca hidrográfica (3.1.8) que impacte en los flujos del agua y/o en su
+calidad, incluyendo en las corrientes, como son la pesca, diversión, transporte.
+
+NOTA 2 a la entrada El término “consumo de agua” a menudo, se utiliza para describir el agua extraída de la cuenca
+hidrográfica pero no retornada a la misma cuenca hidrográfica (3.1.8). El consumo de agua puede ser debido a la
+evaporación, a la transpiración, a la integración en un producto o por liberación en una cuenca hidrográfica diferente o
+en el mar. Los cambios en la evaporación causados por un cambio en el uso del suelo se consideran como consumo
+de agua. (por ejemplo: reservorio) La cobertura temporal y geográfica de la evaluación de la huella de agua (3.3.2)
+debe definirse en el objetivo y el alcance.
+
+2.Extracción del agua. La remoción antropogénica del agua de cualquier cuerpo de agua
+(3.1.7) o de cualquier cuenca hidrográfica (3.1.8), ya sea de forma permanente o temporal.
+
+3.     Degradación del agua. Cambios negativos en la calidad del agua (3.2.4).
+
+4.Calidad del agua. Características físicas (por ejemplo: termales), químicas y biológicas del
+agua con respecto a su aptitud para el uso previsto por los humanos o los ecosistemas.
+
+3.       TÉRMINOS RELACIONADOS AL ANÁLISIS DEL CICLO DE VIDA Y A LA
+         EVALUACIÓN DE LA HUELLA DE AGUA
+
+1.Huella de agua. Métrica o métricas con las que se cuantifican los impactos ambientales
+potenciales relacionados con el agua.
+
+NOTA 1 a la entrada En el caso de que los impactos ambientales potenciales relacionados con el agua, no hayan
+sido evaluados integralmente, el término “huella de agua” solamente puede utilizarse si está acompañado por un
+calificativo. Un calificativo es una o varias palabras adicionales utilizadas en conjunto con el término “huella de agua”
+para describir la categoría o las categorías del impacto estudiadas en la evaluación de la huella de agua por ejemplo:
+huella de agua por escasez¸ huella de agua por eutrofización, “huella de agua no integral”.
+
+2.Evaluación de la huella de agua. Recopilación y evaluación de las entradas, las salidas y los
+impactos ambientales potenciales ambientales relacionados con el agua utilizada o afectada,
+por un producto, un proceso, o una organización.
+
+NOTA 1 a la entrada En esta Norma Internacional el término “estudio” se utiliza a menudo como sinónimo de
+“evaluación de la huella de agua”.
+
+3.Evaluación integral de la huella de agua. La evaluación de la huella de agua (3.3.2) que
+cumple el principio de integridad (véase 4.13).
+NOTA 1 a la entrada El principio de integridad implica considerar todos los atributos ambientales pertinentes, o
+aspectos del medio ambiente, de la salud humana y de los recursos relacionados con el agua, incluyendo la
+disponibilidad del agua (3.3.16) y la degradación del agua (3.2.3).
+
+4.Ciclo de vida. Etapas consecutivas e interrelacionadas de un sistema del producto, desde la
+adquisición de materia prima o de su generación a partir de recursos naturales hasta la
+disposición final.
+
+[FUENTE: ISO 14044:2006, 3.1]
+
+                                                           3
+NORMA TÉCNICA COLOMBIANA                           NTC-ISO 14046
+
+5.Análisis de ciclo de vida. ACV. Recopilación y evaluación de la entradas, las salidas y los
+impactos ambientales potenciales de un sistema de producto a través de sus ciclo de vida
+(3.3.4).
+
+[FUENTE: ISO 14044:2006, 3.2]
+
+6.Análisis del inventario del ciclo de vida. ICV. Fase del análisis del ciclo de vida (3.3.4) que
+implica la recopilación y la cuantificación de entradas y resultados de un sistema del producto
+durante su ciclo de vida.
+
+[FUENTE: ISO 14044:2006, 3.3]
+
+7.Análisis del inventario de la huella de agua. Fase de la evaluación de la huella de agua
+(3.3.2) que implica la recopilación y la cuantificación de entradas y resultados relacionados con
+el agua para productos, procesos u organizaciones como se indica en la definición del objetivo y
+el alcance.
+
+NOTA 1 a la entrada        Esto incluye, cuando es pertinente, las emisiones provenientes del aire suelo y agua que
+tienen impactos en la calidad del agua (3.2.4).
+
+8.Límite del sistema. Conjunto de criterios que especifican cuáles de los procesos unitarios
+son parte de un sistema del producto o de las actividades de una organización.
+
+[FUENTE: ISO 14044:2006, 3.3.2, modificada]
+
+9.Criterios de corte. Especificación de la cantidad de flujo de materia o de energía o del nivel
+de importancia ambiental asociado a los procesos unitarios o al sistema del producto para su
+exclusión del estudio.
+
+[FUENTE: ISO 14040:2006, 3.18]
+
+10.Evaluación del impacto de la huella de agua. Fase de la evaluación de la huella de agua
+(3.3.2), que es continuación del análisis del inventario de la huella de agua (3.3.7) dirigida a
+conocer y evaluar la magnitud y cuán significativos son los impactos ambientales potenciales
+relacionados con el agua de un producto, proceso u organización.
+
+[FUENTE: ISO 14044:2006, 3.4 modificada]
+
+11.Categoría de impacto. Clase que representa asuntos ambientales de interés a la cual se
+pueden asignar los resultados del análisis del inventario del ciclo de vida (3.3.6).
+
+[FUENTE: ISO 14044:2006, 3.39]
+
+12.Indicador de categoría de impacto. Representación cuantificable de una categoría de
+impacto (3.3.11).
+
+NOTA 1 a la entrada       La expresión abreviada: “indicador de categoría” se puede utilizar para mejorar la lectura.
+
+[FUENTE: ISO 1044:2006, 3.40, modificado. La nota se ha modificado]
+
+13.Perfil de la huella de agua. Recopilación de resultados de los indicadores de categoría de
+impacto (3.3.12) que consideran los impactos ambientales potenciales relacionados con el
+agua.
+
+
+                                                          4
+NORMA TÉCNICA COLOMBIANA                             NTC-ISO 14046
+
+NOTA 1 a la entrada Si el perfil de la huella de agua es integral, se le puede denominar “perfil de la huella de agua”
+sin ningún calificativo. A los resultados de éste perfil de la huella de agua se les pueden denominar “huella de agua”
+(3.3.1). Si el perfil de la huella de agua no es integral, es necesario que esté asociado a un calificativo que describa
+objetivamente lo que se ha evaluado.
+
+14.Factor de caracterización. Factor que surge de un modelo de caracterización que se aplica
+para convertir el resultado del análisis del inventario del ciclo de vida (3.3.6) asignado a la
+unidad común del indicador de categoría (3.3.12).
+
+NOTA 1 a la entrada La unidad común permite reagrupar los resultados en un mismo indicador de categoría.
+
+[FUENTE: ISO 14044:2006, 3.37]
+
+15.Mecanismo ambiental. Sistema de procesos físicos, químicos y biológicos para una
+categoría de impacto (3.3.11) dada, que vincula los resultados del análisis del inventario del
+ciclo de vida (3.3.6) con indicadores de categoría (3.3.12) y con puntos finales de categoría.
+
+[FUENTE: ISO 14044:2006, 3.38]
+
+16.Disponibilidad del agua. La extensión en la cual los seres humanos y los ecosistemas
+tienen suficientes recursos de agua para sus necesidades.
+
+NOTA 1 a la entrada La disponibilidad del agua depende de la ubicación y de la temporalidad. La cobertura temporal
+y geográfica y la definición para evaluar la disponibilidad del agua, se deberían de determinar en la fase del objetivo y
+del alcance.
+
+NOTA 2 a la entrada La calidad del agua (3.2.4) también puede tener influencia sobre la disponibilidad; por ejemplo:
+si la calidad del agua no es suficiente para cubrir las necesidades de los usuarios.
+
+NOTA 3 a la entrada La gestión del agua y del suelo (por ejemplo: forestal, agrícola, conservación de humedales,
+generación de energía hidroeléctrica), puede modificar la disponibilidad del agua (por ejemplo: la regulación del flujo
+de los ríos y la recarga de las aguas subterráneas).
+
+NOTA 4 a la entrada Si la disponibilidad del agua considera solamente la cantidad del agua; se denomina escasez de
+agua (3.3.17).
+
+17.Escasez de agua. La extensión en que la demanda de agua se compara con el
+reabastecimiento del agua en un área. Por ejemplo: una cuenca hidrográfica (3.1.8) sin tomar
+en cuenta la calidad del agua (3.2.4).
+
+4.       TÉRMINOS RELACIONADOS CON LA INTERPRETACIÓN Y CON EL INFORME DE
+         RESULTADOS DE LA HUELLA DE AGUA
+
+1.Aseveración comparativa. Declaración ambiental en relación con la superioridad o
+equivalencia de un producto con respecto a un producto competidor que realiza la misma
+función.
+
+[FUENTE: ISO 14044:2006, 3.6]
+
+2.Parte interesada. Persona u organización que puede afectar, verse afectada, o percibirse
+como afectada por los resultados de una evaluación de la huella de agua.
+
+5.       TÉRMINOS RELACIONADOS CON LOS PRODUCTOS, LOS SISTEMAS DEL
+         PRODUCTO, LOS PROCESOS Y LAS ORGANIZACIONES
+
+1.     Producto. Bienes o servicio.
+
+                                                           5
+NORMA TÉCNICA COLOMBIANA                           NTC-ISO 14046
+
+NOTA 1 a la entrada      El producto se puede categorizar como sigue:
+
+-       servicios (por ejemplo: transporte, implementación de eventos);
+
+-       software (por ejemplo: programas informáticos, diccionario);
+
+-       hardware (por ejemplo: parte mecánica de un motor);
+
+-       materiales procesados (por ejemplo: acero); y
+
+-       productos agrícolas y forestales (por ejemplo: alimentos, madera, papel).
+
+[FUENTE. ISO 14044:2006, 3.9 modificada]
+
+2.Coproducto. Cualquier producto (3.5.1) de entre dos o más productos provenientes del
+mismo proceso unitario (3.5.6) o sistema del producto (3.5.4).
+
+[Fuente: ISO 14044:2006, 3.10]
+
+3.Residuo. Sustancias u objetos cuya disposición se procede o se está obligado a proceder.
+
+NOTA 1 a la entrada La definición se tomó de la Convención de Basilea sobre Control de Movimientos
+Transfronterizos de Residuos Peligrosos y su Disposición (22 de marzo de 1989), pero no está limitada en esta
+Norma Internacional a los residuos peligrosos.
+
+[FUENTE: ISO 14044:2006, 3.35]
+
+4.Sistema de producto. Conjunto de procesos unitarios (3.5.6) con flujos elementales y flujos
+de producto, que desempeña una o más funciones definidas, y que sirve de modelo para el
+ciclo de vida (3.3.4) de un producto (3.5.1).
+
+[FUENTE: ISO 14044:2006, 3.28]
+
+5.Proceso. Conjunto de actividades mutuamente relacionadas o que interactúan, las cuáles
+transforman elementos de entrada en resultados.
+
+[FUENTE: ISO 14044:2006, 3.11]
+
+6.Proceso unitario. Elemento más pequeño considerado en el análisis del inventario del ciclo
+de vida (3.3.6) para el cual se cuantifican datos de entrada y salida.
+
+[FUENTE: ISO 14044:2006, 3.34]
+
+7.Unidad funcional. Desempeño cuantificado de un sistema del producto (3.5.4), proceso
+(3.5.5.) u organización (3.5.11) para su utilización como unidad de referencia.
+NOTA 1 a la entrada En el caso de la evaluación de la huella de agua (3.3.2) para las organizaciones, el término
+“unidad del informe” puede reemplazar al término “unidad funcional”.
+
+[FUENTE: ISO 14044:2006, 3.20 modificada]
+
+8.Flujo de referencia. Medida de las salidas de los procesos (3.5.5) en un sistema del producto
+determinado (3.5.4) requerida para cumplir la función expresada mediante la unidad funcional
+(3.5.7).
+
+[FUENTE: ISO 14044:2006, 3.29]
+
+                                                         6
+NORMA TÉCNICA COLOMBIANA                           NTC-ISO 14046
+
+9.Categoría de producto. Grupo de productos que pueden cumplir funciones equivalentes.
+
+[FUENTE: ISO 14025:2006, 3.12]
+
+10.Reglas de categorías de producto. Conjunto de reglas específicas, requisitos y guías para
+el desarrollo de declaraciones ambientales Tipo III para una o más categorías de producto
+(3.5.9).
+
+[FUENTE: ISO 14025:2006, 3.5]
+
+NOTA 1 a la entrada Las reglas de categoría de producto cumplen con la Norma ISO 14044.
+
+11.Organización. Persona o grupo de personas que tiene sus propias funciones con
+responsabilidades, autoridades y relaciones para el logro de sus objetivos.
+
+12.Instalación. Instalación única, conjunto de instalaciones o procesos de producción (fijos o
+móviles), que se pueden definir dentro de un límite geográfico único, una unidad de la
+organización o un proceso de producción.
+
+[FUENTE: ISO 14064-1:2006, 2.21]
+
+13.Inventario de la huella de agua. Resultado del análisis del inventario de la huella de agua
+(3.3.7), incluyendo flujos elementales que se utilizan para evaluaciones posteriories del impacto
+de la huella de agua (3.3.10).
+
+14.Inventario de la huella de agua directo. Inventario de la huella de agua (3.5.13) que
+considera las entradas y los resultados que derivan de las actividades dentro de los límites
+establecidos por la organización.
+
+15.Inventario de la huella de agua indirecto. Inventario de la huella de agua (3.5.13) que
+considera las entradas y los resultados que son consecuencia de las actividades de una
+organización pero que surgen de los procesos que son de su propiedad, o que están bajo el
+control de otras organizaciones.
+
+6.      TÉRMINOS RELACIONADOS A LOS DATOS Y LA CALIDAD DE LOS DATOS
+
+1.Datos primarios. Valor cuantificado de un proceso unitario (3.5.6) o de una actividad obtenida
+de una medición directa, o de cálculos con base en mediciones directas de su fuente original.
+
+NOTA 1 a la entrada La necesidad de datos primarios no se origina necesariamente en el sistema del producto
+(3.5.4) bajo estudio, porque los datos primarios pueden estar relacionados con sistemas del producto diferentes, pero
+comparables al que se está estudiando.
+
+[FUENTE: ISO/TS 14067:2013, 3.1.7.1 modificada. Nota 2 eliminada]
+
+2.Datos secundarios. Datos obtenidos de otras fuentes diferentes a las de una medición
+directa o a los de un cálculo basado en mediciones directas de la fuente original.
+
+NOTA 1 a la entrada Dichas fuentes pueden incluir bases de datos y bibliografía publicada validada por autoridades
+competentes en la materia.
+
+[FUENTE: ISO/TS 14067:2013, 3.1.7.3]
+
+
+
+                                                         7
+NORMA TÉCNICA COLOMBIANA                      NTC-ISO 14046
+
+3.6.3 Análisis de la incertidumbre. Procedimiento sistemático para cuantificar la incertidumbre
+introducida en los resultados de un análisis de inventario del ciclo de vida (3.3.6) debido a los
+efectos acumulativos de la imprecisión del modelo, de la incertidumbre de las entradas y de la
+variabilidad de los datos.
+
+NOTA 1 a la entrada   Se utilizan márgenes o distribuciones de probabilidad para determinar la incertidumbre de
+los resultados.
+
+[FUENTE: ISO 14040:2006, 3.33]
+
+
+4.      PRINCIPIOS
+
+1.      GENERALIDADES
+
+Estos principios son fundamentales y deben utilizarse como orientación para las decisiones
+relacionadas con la planificación, la realización y el informe de la evaluación de la huella de
+agua.
+
+La evaluación de la huella de agua de acuerdo con esta Norma Internacional se puede realizar
+e informar como una evaluación única e individual (donde solamente se evalúan los impactos
+ambientales potenciales relacionados con el agua); o como una parte de la evaluación del ciclo
+de vida (donde se hacen consideraciones a todos los impactos ambientales potenciales
+pertinentes; y no solamente a los impactos ambientales potenciales relacionados con el agua).
+La evaluación de la huella de agua debería ser integral y considerar todos los atributos
+pertinentes o los aspectos relacionados con el ambiente, la salud humana y los recursos. Al
+hacer la consideración de todos los aspectos y atributos pertinentes dentro de un estudio, por
+medio de un cruce de perspectivas, se pueden identificar y evaluar las compensaciones
+potenciales.
+
+2.      PERSPECTIVA DEL CICLO DE VIDA
+
+La evaluación de la huella de agua de un producto considera todas las etapas del ciclo de vida
+del producto, según sea apropiado, desde la materia prima hasta su disposición final. A través
+de este panorama y perspectiva sistemáticos la trasferencia de una carga ambiental potencial
+entre las etapas del ciclo de vida de los procesos individuales puede identificarse y
+posiblemente evitarse. Una evaluación de la huella de agua de una organización adopta una
+perspectiva del ciclo de vida basada en todas sus actividades. Si es apropiado, y se justifica, la
+evaluación de la huella de agua puede restringirse a una o a varias etapas del ciclo de vida.
+
+3.      ENFOQUE AMBIENTAL
+
+La evaluación de la huella de agua evalúa los impactos ambientales potenciales relacionados
+con el agua, asociados con un producto, proceso u organización. Los impactos económicos o
+sociales típicamente están fuera del alcance de la evaluación de la huella de agua. Otras
+herramientas pueden combinarse con la evaluación de la huella de agua para evaluaciones
+más extensas y complementarias.
+
+4.      ENFOQUE RELATIVO Y UNIDAD FUNCIONAL
+
+Una evaluación de la huella de agua se relaciona con su unidad funcional y con el resultado o
+los resultados calculados relativos a esta unidad funcional.
+
+
+
+                                                     8
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+5.      ENFOQUE ITERATIVO
+
+Una evaluación de la huella de agua es una técnica iterativa. Las fases individuales de la
+evaluación de la huella de agua utilizan los resultados de las otras fases. El enfoque iterativo
+dentro y entre las fases contribuye a la integridad y a la coherencia del estudio y a los
+resultados informados.
+
+6.      TRANSPARENCIA
+
+Se divulga información suficiente y apropiada con objeto de permitir que los usuarios de la
+evaluación de la huella de agua tomen decisiones con una confianza razonable.
+
+7.      PERTINENCIA
+
+Se seleccionan aquellos datos y métodos que son los apropiados para la evaluación de la
+huella de agua.
+
+8.      INTEGRIDAD
+
+Todos los datos que proporcionen una contribución significativa a la evaluación de la huella de
+agua se incluyen en el inventario.
+
+9.      COHERENCIA
+
+Las suposiciones, métodos y datos se aplican de la misma manera a lo largo de la evaluación
+de la huella de agua para llegar a conclusiones de acuerdo con la definición del objetivo y del
+alcance.
+
+10.     EXACTITUD
+
+El sesgo y la incertidumbre se reducen tanto como sea posible.
+
+11.     PRIORIDAD DEL ENFOQUE CIENTÍFICO
+
+Las decisiones que se hacen sobre la huella de agua se basan preferentemente en las ciencias
+naturales. Si esto no es posible, pueden utilizarse otros enfoques científicos (por ejemplo: las
+ciencias sociales o económicas) o bien referirlas a convenciones internacionales. Si no existe
+ninguna base científica, ni son posibles las justificaciones basadas en otros enfoques científicos
+o convenciones internacionales, entonces según aplique, las decisiones pueden basarse en
+juicios de valor.
+
+12.     PERTINENCIA GEOGRÁFICA
+
+La evaluación de la huella de agua se realiza a una escala y definición (por ejemplo: una
+cuenca hidrográfica) que proporciona resultados pertinentes de acuerdo con el objetivo y el
+alcance del estudio y toma en cuenta el contexto local.
+
+13.     INTEGRIDAD
+
+Una huella de agua considera todos los atributos ambientales pertinentes, o los aspectos del
+medio ambiente natural, la salud humana y los recursos relacionados con el agua (incluida la
+disponibilidad del agua y la degradación del agua).
+
+NOTA      Una evaluación no integral conlleva el riesgo de no tomar en cuenta la transferencia de contaminación de
+una categoría de impacto a otra.                          9
+NORMA TÉCNICACOLOMBIANA                    NTC-ISO 14046
+
+5.     MARCO METODOLÓGICO
+
+1.     REQUISITOS GENERALES
+
+La evaluación de la huella de agua trata el impacto ambiental potencial o los impactos
+ambientales potenciales relacionados con el agua asociados con un producto, proceso u
+organización.
+
+Una evaluación de la huella de agua de acuerdo con esta Norma Internacional debe incluir las
+cuatro fases del análisis del ciclo de vida:
+
+a)     definición del objetivo y alcance (véase 5.2);
+
+b)     análisis del inventario de la huella de agua (véase 5.3);
+
+c)     evaluación del impacto de la huella de agua (véase 5.4); y
+
+d)     interpretación de los resultados (véase 5.5).
+
+Véase la Figura 1.
+
+Un estudio del inventario de la huella de agua de acuerdo con esta Norma Internacional debe
+incluir las siguientes tres fases del análisis del ciclo de vida:
+
+-      definición del objetivo y del alcance (véase 5.2);
+
+-      análisis del inventario de la huella de agua (véase 5.3); e
+-interpretación de los resultados (véase 5.5).
+
+Véase la Figura 1.
+
+Para las organizaciones se deben aplicar los requisitos adicionales y las directrices
+proporcionadas en el Anexo A.
+
+Se puede realizar el informe de los resultados del análisis del inventario de la huella de agua,
+pero no debe realizar el informe como huella de agua.
+
+La evaluación de la huella de agua se puede realizar como una evaluación única e
+independiente, o como parte del análisis del ciclo de vida.
+
+La huella de agua es el resultado de una evaluación integral, con la cual se obtiene un perfil de
+resultados del indicador de categoría de impacto. Si la ponderación se aplica, debe llevarse a
+cabo y realizar el informe de de acuerdo con la Norma ISO 14044.
+
+Cuando se realiza una evaluación integral, se debe demostrar que todos los impactos
+ambientales significativos potenciales relacionados con el agua se hayan tratado por las
+categorías de impacto seleccionadas La falta de datos no puede ser una justificación para no
+tomar en cuenta una categoría de impacto importante.
+
+Los resultados de una evaluación de la huella de agua no integral se deben expresar en el
+informe, como huella de agua con un calificativo; por ejemplo: “huella de agua según
+disponibilidad”; “huella de agua según la escasez”, “huella de agua según la eutrofización”;
+
+                                                 10
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+“huella de agua según la ecotoxicidad”; “huella de agua según la acidificación”, “huella de agua
+no integral”.
+
+El término “huella de agua” de una organización, sin el calificativo, se debe utilizar solamente si
+se consideraron los inventarios directos e indirectos de la organización en una evaluación de la
+huella de agua integral.
+
+Cuando existan reglas de categoría de producto pertinentes, éstas deberían de adoptarse,
+siempre que:
+
+-      hayan sido desarrolladas de conformidad con la Norma ISO 14025, y
+
+-      sean consideradas apropiadas (por ejemplo: límites del sistema, modularidad,
+       asignación o calidad e los datos) por la organización que aplique esta Norma
+       Internacional.
+
+                                     Evaluación de la huella de agua
+
+
+
+
+                                     Evaluación de la huella de agua
+
+
+
+
+                                  Definicióndel
+                                    objetivo y
+                                  alcance(5,2)
+
+
+
+
+                                   Análisis del
+                                                           Interpretación
+                                 inventario dela
+                                                               de los
+                                 huella deagua
+                                                          resultados(5,5)
+                                      (5,3)
+
+
+
+
+                                 Evaluacióndel
+                                 impacto de la
+                                 huella deagua
+                                      (5,4)
+
+
+
+
+                         Figura 1. Fases de la evaluación de la huella de agua
+
+2.     DEFINICIÓN DEL OBJETIVO Y DEL ALCANCE
+
+1.     Objetivo del estudio
+
+Al definir el objetivo de la evaluación de la huella de agua, se deben declarar sin ambigüedades
+los siguientes elementos:
+
+-      las aplicaciones previstas,
+                                                   11
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+-      las razones para efectuar el estudio,
+
+-      el público objetivo, por ejemplo: a quienes está previsto que se les informe de los
+       resultados del estudio,
+
+-      si el estudio es una evaluación única e independiente o forma parte de un análisis del
+       ciclo de vida, y
+
+-      si el estudio forma parte del análisis del ciclo de vida donde está prevista una
+       aseveración comparativa.
+
+5.2.2 Alcance del estudio
+
+El alcance de la evaluación de la huella de agua debe ser coherente con el objetivo de la
+evaluación de la huella de agua (véase 5.2.1). Al definir el alcance del estudio, los siguientes
+elementos se deben de considerar y describir claramente, tomando en cuenta los requisitos y la
+orientación dada en los capítulos pertinentes:
+a)     sistema bajo estudio, límites del sistema, y límites de la organización según sea
+       pertinente (véase 5.2.3);
+
+b)     unidad funcional;
+
+c)     definición y cobertura geográfica y temporal del estudio;
+
+d)     datos y requisitos de calidad de los datos (véase 5.2.4);
+
+e)     criterios de corte;
+
+f)     procedimientos de asignación (véase 5.3.3);
+
+g)     suposiciones, juicios de valor y elementos opcionales;
+
+h)     metodología de evaluación del impacto de la huella de agua, y las categorías de impacto
+       seleccionadas (véase 5.4);
+
+i)     considerar si los resultados de la evaluación de la huella de agua van a incluir un
+       resultado del indicador del impacto (y especificar cuál), un perfil de la huella de agua, y/o
+       una huella de agua después de la ponderación (véase 5.4.1);
+
+j)     considerar si la evaluación de la huella de agua será de integral (véase 5.4);
+
+k)     qué cadenas de causa-efecto e impactos ambientales potenciales están cubiertos por la
+       evaluación de la huella de agua e identificar las consecuencias previsibles de los
+       impactos ambientales potenciales excluidos (véase 5.4);
+
+l)     incertidumbres y limitaciones (véase 5.6);
+
+m)     justificaciones para las exclusiones del estudio;
+
+n)     condiciones de la línea base con las que se comparen las condiciones actuales
+       causadas por las actividades, si es aplicable;
+       NOTA       Las condiciones de la línea base pueden incluir el período utilizado como referencia para la
+       comparación y su inventario.
+                                                       12
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+o)     tipo de informe (véase el Capítulo 6); y
+
+p)     tipo de revisión crítica. Si hay (véase el Capítulo 7).
+
+En algunos casos el alcance del estudio se puede revisar debido a limitaciones no previsibles; o
+por restricciones o como resultado de información adicional. Tales modificaciones, junto con su
+justificación/explicación deben documentarse.
+
+5.2.3 Límites del Sistema
+
+Los límites del sistema determinan qué procesos unitarios deben incluirse dentro de la
+evaluación de la huella de agua. La selección de los límites del sistema debe ser coherente con
+el objetivo del estudio. Los criterios utilizados para establecer los límites del sistema se deben
+identificar y explicar.
+
+Los límites del sistema para la evaluación de la huella de agua se deben documentar de
+manera clara y deben de indicar si es que la huella de agua se determinará para un producto
+específico, proceso u organización. Si la huella de agua se va a determinar para un producto, se
+deben aplicar los requisitos y directrices de la Norma ISO 14044 sobre los límites del sistema.
+
+Cuando se realice una evaluación de la huella de agua de una organización se deben
+determinar los límites de la organización y los límites del sistema. El método de consolidación
+aplicado se debe documentar y todos los cambios efectuados al método de consolidación se
+deben explicar (véase el Anexo A).
+
+Se deben tomar decisiones respecto qué procesos unitarios incluir en el estudio y el nivel de
+detalle bajo el cual se deben estudiar éstos procesos unitarios.
+
+Los procesos unitarios que están incluidos en el análisis del inventario de la huella de agua
+deben estar claramente identificados.
+
+Se deben tomar decisiones con respecto a qué elementos de entrada y salida se deben incluir
+en el estudio, y establecer claramente el nivel de detalle del análisis del inventario de la huella
+de agua.
+
+La omisión de etapas del ciclo de vida, procesos, entradas o salidas se permite solamente si
+esto no cambia significativamente las conclusiones generales del estudio. Se deben identificar
+claramente las omisiones de las-etapas del ciclo de vida, los procesos y las entradas o salidas,
+y se deben explicar las razones e implicaciones de sus omisiones.
+
+La fase de definición del objetivo y del alcance debe incluir la identificación de:
+
+-      los procesos unitarios que requieren de una evaluación detallada basada en los datos
+       primarios, debido a que son una contribución esperada significativa para los resultados,
+       y
+
+-      los procesos unitarios para los cuales el inventario puede estar basado en datos
+       secundarios o en datos estimados; puesto que son de menor significancia o son difíciles
+       de obtener como datos primarios.
+
+Esta identificación puede revisarse durante la fase de interpretación. En consecuencia algunos
+de los procesos unitarios deben detallarse y basarse en datos primarios dada su contribución
+significativa en los resultados.
+
+                                                  13
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+Cuando se seleccionan los procesos unitarios para incluirlos en el estudio, se debe considerar
+que las cuestiones del agua dependen de la escasez del agua local, y de la calidad del agua
+local. Los procesos unitarios que están localizados en diferentes áreas deberían mantenerse
+por separado.
+
+4.     Requisitos de los datos y de la calidad de los datos
+
+1.     Datos a considerar para la recopilación de datos
+
+Entre otros datos por recopilar, los siguientes datos relacionados con el agua se deben
+considerar para su recopilación:
+a)     cantidades de agua utilizada (incluyendo la liberación y extracción del agua) (véase
+       5.3.2);
+
+b)     tipos de recursos de agua utilizados (incluidos para la extracción del agua y para el
+       cuerpo receptor del agua) (véase 5.3.2);
+
+c)     los datos que describen la calidad del agua (incluidos para la extracción del agua, la
+       liberación y para el cuerpo receptor de agua) (véase 5.3.2);
+
+d)     formas de uso del agua (véase 5.3.2);
+
+e)     cambios en el drenado, flujo de corrientes, flujo subterráneo, o evaporación del agua
+       obtenidos por cambios en el uso del suelo, actividades de gestión del suelo, y otras
+       formas de intercepción del agua cuando sea importante para el alcance y los límites del
+       estudio que se está realizando;
+
+f)     los lugares del uso del agua (incluidos para la extracción del agua, liberación del agua o
+       la influencia en la calidad del agua) que se requieren para determinar algún indicador de
+       condición ambiental relacionado con el área donde tiene lugar el uso del agua (véase
+       5.3.2);
+
+g)     aspectos estacionales en los flujos del agua; extracción y liberación, o cambios en la
+       calidad del agua, cuando sea pertinente;
+
+h)     aspectos temporales en el uso del agua, incluyendo si es pertinente los tiempos en el
+       uso del agua y la duración del almacenamiento del agua.
+
+Lo siguiente se debe de incluir, si es pertinente para las categorías de impacto seleccionadas
+dentro de la fase del objetivo y campo de aplicación:
+
+-      las emisiones al aire y los vertidos al agua y el suelo con impactos sobre la calidad del
+       agua, y
+
+-      cualquier otro dato necesario para el método aplicado para la evaluación del impacto de
+       la huella de agua.
+
+Se deben considerar los valores absolutos así como las diferencias de la línea base para las
+cantidades de consumo de agua y las emisiones/vertidos, donde aplique y sea pertinente.
+
+Cuando se hayan considerado cualquiera de estos elementos, pero no se hayan incluido, se
+debe documentar la base para la exclusión.
+
+                                                14
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+Se deben documentar las suposiciones hechas en la recopilación, validación, análisis,
+agregación y realización del informe de los datos.
+
+5.2.4.2 Calidad de los datos
+
+Los datos primarios se deberían recopilar cuando sea factible.
+
+Los datos secundarios solamente se deberían utilizar para las entradas cuando la recopilación
+de los datos primarios no sean posibles o factibles y pueden incluir: datos procedentes de
+bibliografía, datos calculados, estimados, predicciones del modelo u otros datos representativos.
+Las razones para utilizar datos secundarios para procesos significativos deben justificarse y
+documentarse.
+
+Los requisitos para la calidad de los datos deberían tratar lo siguiente:
+a)     cobertura relacionada con el tiempo: antigüedad de los datos y período de tiempo
+       mínimo en el que se deberían recopilar los datos;
+
+b)     cobertura geográfica: área geográfica donde se deberían recopilar los datos de los
+       procesos unitarios para satisfacer el objetivo del estudio;
+
+c)     cobertura tecnológica: tecnología específica o mezcla de tecnologías;
+
+d)     precisión: medida de la variabilidad de los valores de los datos para cada dato
+       expresado (por ejemplo: varianza);
+
+e)     integridad: porcentaje de datos que se han medido o estimado;
+
+f)     representatividad: evaluación cualitativa del grado en el cual el conjunto de datos
+       reflejan la verdadera población de interés (por ejemplo: cobertura geográfica, período de
+       tiempo y cobertura tecnológica);
+
+g)     coherencia: evaluación cualitativa de si la metodología del estudio se aplica de manera
+       uniforme a los distintos componentes del análisis;
+
+h)     reproducibilidad: evaluación cualitativa de la extensión en la cual la información sobre la
+       metodología y los valores de los datos podrían permitir a un profesional independiente
+       reproducir los resultados que han sido informados;
+
+i)     fuentes de los datos, incluyendo los modelos cuando se utilicen (incluyendo
+       documentación sobre las suposiciones del modelo; variación del modelo y exactitud);
+
+j)     incertidumbre de la información (por ejemplo: datos, modelos y suposiciones).
+
+5.2.4.3 Datos que faltan
+
+Se debe documentar el tratamiento de los datos que faltan. Cuando se hagan suposiciones,
+éstas deben indicarse claramente como tales y debe describirse la base de las suposiciones. Se
+debería evaluar la importancia de los datos que faltan.
+
+5.2.5 Compensación
+
+Los resultados de la huella de agua no deben incluir compensaciones.
+
+                                                 15
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+NOTA La compensación es un mecanismo para compensar la huella de agua de un producto, proceso u organización
+mediante actividades que reducen los impactos del agua en un proceso fuera de los límites del sistema del producto.
+
+3.      ANÁLISIS DEL INVENTARIO DE LA HUELLA DE AGUA
+
+1.      Cálculo del inventario de la huella de agua
+
+Los cálculos del inventario deben seguir los procedimientos descritos en la Norma ISO 14044
+(véase también la Figura 2).
+
+a)      El cálculo de los datos debe estar de acuerdo con el apartado 4.3.3 de la Norma ISO
+        14044:2006: todos los procedimientos de cálculo deben documentarse explícitamente y
+        se deben especificar y explicar claramente las suposiciones realizadas. Se deberían
+        aplicar los mismos procedimientos de cálculo regularmente a lo largo de todo el estudio.
+
+b)      La validación de los datos debe realizarse de acuerdo con el apartado 4.3.3.2 de la
+        Norma ISO 14044:2006: una verificación de la validez de los datos debe realizarse
+        durante el proceso de recopilación de datos para confirmar y proporcionar evidencia de
+        que se han cumplido los requisitos de la calidad de los datos para la aplicación prevista.
+        La validación puede implicar, por ejemplo: realizar balances de materia de agua y/o
+        análisis comparativo de factores de liberación en agua. Como cada proceso unitario
+        obedece a las leyes de conservación de la materia y energía, los balances de materia y
+        energía proporcionan una verificación útil de la validación de la descripción de un
+        proceso unitario.
+
+c)      Los datos relacionados con procesos unitarios, flujos de referencia y evaluación de la
+        unidad funcional deben estar de acuerdo con el apartado 4.3.3.3 de la Norma ISO
+        14044:2006. Se debe determinar un flujo apropiado para cada proceso unitario. Se
+        deben calcular los datos cuantitativos de entrada y salida en relación con este flujo. Con
+        base en el diagrama de flujo y los flujos entre procesos unitarios, los flujos de todos los
+        procesos unitarios se relacionan con el flujo de referencia. El cálculo debe dar como
+        resultado que todos los datos de entrada y salida estén referenciados a la unidad
+        funcional.
+
+d)      Se debería tener cuidado al sumar las entradas y las salidas. El nivel de agregación
+        debe ser coherente con el objetivo del estudio.
+
+        NOTA Véanse los requisitos para la agregación de datos en 5.3.2.
+
+e)      El ajuste de los límites del sistema debe hacerse de acuerdo con el apartado 4.3.3.4 de
+        la Norma ISO 14044:2006. Reflejar la naturaleza iterativa de la evaluación de la huella
+        de agua, las decisiones respecto a los datos que se van a incluir deben basarse en un
+        análisis de sensibilidad para determinar su importancia, por lo tanto verificar el análisis
+        inicial descrito en 5.2. Los límites iniciales del sistema se deben revisar, según
+        corresponda, de acuerdo con los criterios de corte establecidos en la definición del
+        alcance. Se deben documentar los resultados de este proceso de ajuste y del análisis de
+        sensibilidad.
+El análisis de sensibilidad puede dar como resultado:
+
+-       la exclusión de etapas del ciclo de vida o de procesos unitarios cuando el análisis de
+        sensibilidad pueda demostrar que carece de importancia;
+
+
+                                                       16
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+-         a exclusión de entradas y salidas que carecen de importancia para los resultados del
+          estudio;
+
+-         la inclusión de nuevos procesos unitarios, entradas y salidas que ha demostrado que
+          son potencialmente importantes.
+
+Este análisis sirve para limitar el tratamiento posterior de los datos correspondientes a esos
+datos de entrada y salida que se determinaron como importantes para el objetivo de la
+evaluación de la huella de agua.
+
+
+                                        Definición del objetivo y alcance (5,2)
+
+
+
+
+                                 Preparación para la recopilación de datos (5,2,4,1)
+
+                      Hoja derecopilación
+                                                                   Hoja de recopilación de datos
+                       de datos revisada
+
+                                 Recopilación de datos (4,3,2 en ISO 14044:2006)
+
+                                                                          Datos recopilados
+
+                                  Validación de datos (4,3,3,2 en ISO14044:2006)
+
+                                                                           Datos validados
+                                                                                                   La asignación
+                                  Relación de los datos conlos procesos unitarios                     incluye
+    Datos ad icionales                     (4,3,3,3 en ISO 14044:2006)                             reutilización y
+    o proces o unitario
+                                                                                                     reciclado
+    requerid o omitido                                                Datos validados por
+                                                                         proceso unitario
+                                    Relación de los datos con la unidad funcional
+                                             (4,3,3 en ISO 14044:2006)
+                                                                         Datos validados por
+                                                                          unidad funcional
+
+                                  Suma de los datos (4,3,3,3 en ISO 14044:2006)
+
+                                                                         Inventario calculado
+
+                                            Ajuste de los límites delsistema
+                                             (4,3,3,4 en ISO 14044:2006)
+
+
+
+
+                                                  Inventario terminado
+
+
+                    Figura 2. Procedimientos para el análisis del inventario de la huella de agua
+
+
+
+
+                                                           17
+NORMA TÉCNICACOLOMBIANA                     NTC-ISO 14046
+
+5.3.2 Flujos elementales
+
+Los datos relacionados con el agua que representan flujos elementales pueden recopilarse
+directamente de los procesos unitarios o derivados de los datos que representan flujos de
+materia, por ejemplo: materiales secundarios o residuos para procesado posterior.
+
+El inventario de la huella de agua debe incluir entradas y salidas para cada proceso unitario que
+forme parte del sistema en estudio. Cualquier discrepancia en el balance del inventario debe
+explicarse.
+
+En general, la información de cada flujo elemental, donde sea pertinente debería incluir:
+
+a)     cantidades de agua utilizada: masa, o volumen (por ejemplo entradas de agua y salidas
+       de agua);
+
+b)     recursos tipo de agua utilizada:
+
+       -      pluvial;
+
+       -      agua superficial;
+
+       -      agua de mar;
+
+       -      agua salobre;
+
+       -      agua subterránea (excluyendo agua fósil);
+
+       - aguafósil;
+
+c)     parámetros y/o características de calidad del agua por ejemplo: características físicas
+       (por ejemplo termal), químicas y biológicas o descriptores funcionales de la calidad del
+       agua;
+
+d)     formas de uso del agua, por ejemplo:
+
+       -      evaporación;
+
+       -      transpiración;
+
+       -      integración en el producto;
+
+       -      liberación en diferentes cuencas hidrográficas o en el mar;
+
+       -      desplazamiento de agua de un tipo de recurso fuente de agua a otro tipo de
+              recurso de agua dentro de una cuenca hidrográfica por ejemplo: agua
+              subterránea hacia agua superficial;
+
+       - otras formas de uso del agua; por ejemplo: uso en lascorrientes;
+
+e)     ubicación geográfica del uso del agua o de su afectación (incluyendo extracción y/o
+       liberación del agua): información de la ubicación física del uso del agua o de su
+       afectación incluyendo la extracción y liberación (como sitio específico, según sea
+       necesario) o bien la asignación de las ubicaciones físicas hacia una categoría derivada
+       de una clasificación apropiada de las cuencas hidrográficas o de las regiones;
+                                               18
+NORMA TÉCNICA COLOMBIANA                          NTC-ISO 14046
+
+        NOTA 1       Algunos indicadores de la condición ambiental (ejemplo: escasez de agua, nivel local de
+        desarrollo social, etc.) pueden requerir información del lugar donde se hace uso del agua.
+
+f)      aspectos temporales del uso del agua, por ejemplo tiempo de uso y liberación si el
+        período de residencia pertinente ocurre dentro de los límites del sistema;
+
+g)      emisiones al aire o vertidos al agua y al suelo que impactan en la calidad del agua.
+
+        NOTA 2 Puede haber otras emisiones al aire y vertidos al suelo en el sistema bajo estudio, que no impacten
+        a la calidad del agua, los cuales no se incluyen; por ejemplo: emisiones directas al aire que contribuyan a
+        dañar la salud humana solamente por inhalación.
+
+        Se pueden utilizar categorías de datos adicionales con base en el alcance del estudio.
+
+        Entradas de agua o salidas del agua de diferentes tipos de recursos, diferente calidad,
+        diferente forma, diferente lugar con diferentes indicadores de la condición ambiental, o
+        de diferente período no deben de agregarse en la fase del inventario. La agregación
+        puede efectuarse en la fase de evaluación del impacto.
+
+        NOTA 3 El agua del grifo o el agua tratada (por ejemplo de una planta de tratamiento), o el agua residual
+        que no se libera directamente al medio ambiente (por ejemplo se envía a una planta de tratamiento de aguas
+        residuales) no son flujos elementales del agua pero son flujos intermedios de un proceso dentro de la
+        tecnosfera.
+
+3.      Asignación
+
+1.      Generalidades
+
+Para la asignación que se utilice en la evaluación de la huella de agua de productos, procesos
+y/o organizaciones, la orientación que se muestra a continuación se basa en la que se
+proporciona en la Norma ISO 14044.
+
+La asignación es necesaria cuando los sistemas o procesos producen múltiples productos o
+servicios (coproductos), y cuando otras opciones no son posibles (por ejemplo: ampliación de
+los límites del sistema). La asignación se utiliza para asignar las entradas y salidas de los
+procesos a la función que se está estudiando.
+
+Los procedimientos de asignación deben estar claramente definidos en la descripción de la
+recopilación de datos. Según sea apropiado, se deben especificar reglas adicionales en la fase
+de definición del objetivo y del alcance. El método de asignación seleccionado se debe describir
+detalladamente en el informe.
+
+NOTA El Informe Técnico ISO/TR 14049 proporciona varios ejemplos de asignación para co-productos y reciclado.
+
+Las entradas y salidas del proceso deben ser asignadas a los diferentes productos, de acuerdo
+con procedimientos claramente establecidos que deben documentarse y explicarse junto con el
+procedimiento de asignación.
+
+La suma de las entradas y salidas asignadas de un proceso unitario deben ser iguales a las
+entradas y salidas del proceso unitario antes de la asignación.
+
+Cada vez que diversos procedimientos de asignación alternativos parezcan posibles de aplicar,
+se debe efectuar un análisis de sensibilidad para ilustrar las consecuencias de la desviación del
+enfoque seleccionado.
+
+
+                                                        19
+NORMA TÉCNICACOLOMBIANA                    NTC-ISO 14046
+
+5.3.3.2 Procedimiento de asignación
+
+El estudio debe identificar los procesos compartidos con otros sistemas del producto y tratarlos
+de acuerdo con el procedimiento por pasos que se presenta a continuación.
+
+a)     Paso 1: Siempre que sea posible, se debería evitar la asignación al:
+
+       -      dividir el proceso unitario a asignar, en dos o más sub-procesos y recopilar los
+              datos de entrada y salida relacionados con estos sub-procesos, o
+
+       -      ampliar el sistema del producto para incluir las funciones adicionales
+              relacionadas con los coproductos tomando en cuenta los requisitos del límite del
+              sistema.
+b)     Paso 2: Cuando no se pueda evitar la asignación, las entradas y salidas del sistema
+       deberían dividirse entre sus diferentes productos o funciones, de tal forma que reflejen
+       las relaciones físicas subyacentes entre ellos, por ejemplo: deberían reflejar la forma en
+       la cual las entradas y salidas se cambian por los cambios cuantitativos en los productos
+       o funciones procedentes del sistema.
+
+c)     Paso 3: cuando la relación física por sí misma no se pueda establecer o utilizar como
+       base de la asignación, las entradas y salidas deberían asignarse entre los productos y
+       las funciones de tal forma que reflejen otras relaciones entre ellos. Por ejemplo: los
+       datos de entrada y salida podrían asignarse entre coproductos en proporción al valor
+       económico de los productos.
+
+Algunas salidas pueden ser parcialmente coproductos y parcialmente residuos. En estos casos
+es necesario identificar la proporción entre coproductos y residuos puesto que las entradas y
+salidas deben asignarse solamente a la parte correspondiente a los coproductos.
+
+Los procedimientos de asignación deben aplicarse de manera uniforme a las entradas y salidas
+similares del sistema en consideración. Por ejemplo, si se hace la asignación para productos
+utilizables (por ejemplo: productos intermedios o desechados) que salen del sistema, entonces
+el procedimiento de asignación debe ser similar al procedimiento de asignación utilizado para
+aquellos productos que entran al sistema.
+
+El inventario se basa en los balances de materia entre entradas y salidas. Por lo tanto los
+procedimientos de asignación deberían aproximarse lo más posible a tales relaciones y
+características de entrada/salida fundamentales.
+
+5.3.3.3 Procedimientos de asignación para reutilización y reciclado
+
+Los principios y procedimientos de asignación del apartado 5.3.3.2 también se aplican a las
+situaciones de reutilización y reciclado cuando se utilizan en la evaluación de la huella de agua.
+
+Se deben tener en cuenta los cambios en las propiedades inherentes de los materiales.
+Además, particularmente para los procesos de recuperación entre el sistema de producto
+original y subsecuente, los límites del sistema deben identificarse y explicarse, asegurándose
+que los principios de asignación se observen, tal como se describen en el apartado 5.3.3.2.
+
+Sin embargo en estas situaciones, es necesario realizar un esfuerzo adicional por las siguientes
+razones:
+
+
+                                               20
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+-      la reutilización y el reciclado (así como el compostaje, la recuperación de la energía y
+       otros procesos que se pueden incorporar a la reutilización/reciclado) pueden implicar
+       que las entradas y salidas asociadas con procesos unitarios para extracción y procesado
+       de materias primas y disposición final de productos están por ser compartidas por más
+       de un sistema del producto;
+
+-      la reutilización y el reciclado pueden cambiar las propiedades inherentes de los
+       materiales en su uso posterior;
+
+-      se debería tener al cuidado específico se debería tener al definir los límites del sistema
+       en lo que respecta a procesos de recuperación.
+
+Son aplicables diversos procedimientos de asignación para la reutilización y el reciclado. La
+aplicación de algunos procedimientos se describe conceptualmente en la Figura 3 y se muestra
+a continuación el modo de abordar las limitaciones señaladas anteriormente.
+
+
+                      Sistema de
+                       producto
+
+
+
+
+                    Procesado del
+                       material
+
+
+
+
+                                       Sí      Sistema de              Procedimiento
+                   Reciclado en el
+                                              producto de             de asignación
+                   mismo producto
+                                              ciclo cerrado           de ciclo cerrado
+
+
+                                No
+
+
+                     Sistema de
+                     producto de
+                     ciclo abierto
+
+
+
+
+                    Cambio en las      No
+                     propiedades
+                      inherentes
+
+
+                                Sí
+
+
+                    Procedimiento
+                    de asignación
+                    de ciclo abierto
+
+
+
+          Figura 3. Relación entre los sistemas de producto y los procedimientos de asignación
+
+
+
+                                                   21
+NORMA TÉCNICA COLOMBIANA                       NTC-ISO 14046
+
+a)     Un procedimiento de asignación de “ciclo cerrado” se aplica a sistemas de producto de
+       “ciclo cerrado”. También se aplica en sistemas de producto de “ciclo abierto” en que no
+       ocurren cambios en las propiedades inherentes del material reciclado. En estos casos se
+       evita la necesidad de asignación ya que la utilización de material secundario sustituye a
+       la utilización de material virgen (primario). Sin embargo el primer uso de materiales
+       vírgenes en sistemas de producto de “ciclo abierto” aplicables, puede seguir un
+       procedimiento de asignación de “ciclo abierto” descrito en b).
+
+b)     Un procedimiento de asignación de “ciclo abierto” se aplica en sistemas producto de
+       “ciclo abierto” en los que el material se recicla en otros sistemas de producto y el
+       material sufre un cambio en sus propiedades inherentes.
+
+Los procedimientos de asignación para los procesos unitarios compartidos mencionados en el
+apartado 5.3.3.3, deberían utilizar como base de la asignación, si es viable, el siguiente orden:
+
+-      propiedades físicas (por ejemplo: la materia);
+
+-      valor económico (por ejemplo: el valor en el mercado del material sobrante, o material
+       reciclado en relación al valor en el mercado del material primario); o
+
+-      el número de usos posteriores del material reciclado (véase el Informe Técnico ISO/TR
+       14049).
+
+4.     EVALUACIÓN DEL IMPACTO DE LA HUELLA DE AGUA
+
+1.     Generalidades
+
+La evaluación del impacto de la huella de agua debe cumplir con la Norma ISO 14044.
+
+NOTA     Véase el apartado 4.4 de la Norma ISO 14044:2006.
+
+Esta Norma Internacional proporciona otros requisitos y directrices para evaluar los impactos
+ambientales potenciales relacionados con el agua.
+
+Los impactos relacionados con el agua se pueden representar por uno o más parámetros que
+cuantifiquen los impactos ambientales potenciales de un sistema del producto, proceso u
+organización relacionados con el agua, incluyendo:
+
+-      el resultado del indicador de la huella de agua (por ejemplo: huella de agua por
+       escasez), relacionado con una sola categoría de impacto (por ejemplo: escasez de
+       agua) (véase la Figura 4, y la Figura 5);
+
+-      el perfil de la huella de agua que abarca varios resultados de indicadores (véase la
+       Figura 5).
+
+Cuando se aplica la ponderación, se debe de realizar e informar de acuerdo con la Norma ISO
+14044.
+
+El término huella de agua solo se debe utilizar para describir el resultado o los resultados de
+una evaluación integral de la huella de agua. Si los impactos ambientales potenciales
+relacionados con el agua no se evalúan integralmente, entonces el término huella de agua solo
+debe utilizarse con un calificativo.
+
+
+                                                    22
+NORMA TÉCNICA COLOMBIANA                         NTC-ISO 14046
+
+Se debe establecer claramente cuáles de estos parámetros están                        previstos para ser
+determinados, en la fase de evaluación del impacto del estudio.
+
+                                                                      Ejemplos
+
+                                                            Entradas y salidas de agua con
+             Resultado del inventario
+                                                          indicación de la región y cuerpo de
+                del ciclo de vida
+                                                            aguas (posiblemente junto con
+                                                               otros flujos elementales)
+
+
+                             Categoría del impacto                Escasez de agua
+
+          Resultado del ICV
+            asignados a la                                     Entradas y salidas de
+
+
+
+
+                                                                                                   Mecanismo ambiental
+         categoría del impacto                                agua con indicación de la
+                                                              región y cuerpo de agua
+                         Modelo de caracterización
+
+
+
+        Indicador de categoría                            Contribución a la escasez de agua
+
+
+                               Indicador ambiental
+
+
+
+
+         Punto (s) final (es) de                              Salud humana, calidad de
+             categoría (s)                                    los ecosistemas, recursos
+
+
+
+NOTA    Adaptada de la Figura 3 de la Norma ISO 14044:2006.
+
+ Figura 4. Concepto de indicadores de categoría ilustrado para una categoría de impacto considerando la
+                                            escasez de agua
+
+
+
+
+                                                     23
+NORMA TÉCNICACOLOMBIANA                                       NTC-ISO 14046
+
+
+     Inventario                                                                  1. Análisis del inventario del ciclo devida
+     de la huella    1. Análisis del inventario de la huella de agua
+      de agua
+
+
+
+
+                    2. Evaluación del impacto de la huella de agua               2. Evaluación del impacto del ciclo de vida
+
+                       Categoría de impacto a       Categoría de impacto a       Categoría de impacto           Categoría de impacto
+                       ej: escasez de agua        ej: eutrofización del agua    ej: calentamiento global     ej: respiratorios orgánicos
+
+
+
+
+                                        Caracterización                                             Caracterización
+
+
+
+
+     Inventario       Resultado del indicador     Resultado del indicador       Resultado del indicador       Resultado del indicador
+     de la huella       de la huella de agua        de la huella de agua               de categoría           de la huella de agua
+                                                            3
+      de agua         ej: m³ H2O equivalentes     ej: kg PO 4equivalentes      ej: kg de CO 2 equivalentes    ej: PM 2,5 equivalentes
+
+
+
+
+                                 Normalización y ponderaciónb                               Normalización y ponderaciónb
+
+
+
+
+                            Huella de agua después de ponderaciónb                      Parámetros después de ponderación b
+
+
+
+
+                          3. Interpretación de la huella de agua                       3. Interpretación del ciclo devida
+
+
+
+LEYENDA
+
+a.          Ejemplo de otras categorías de impacto incluyendo ecotoxicidad acuática, acidificación acuática,
+            contaminación térmica, toxicidad humana (debida a la contaminación del agua).
+
+b.          Denota fases opcionales.
+
+NOTA      En la figura, el concepto de la huella de agua como una evaluación única e independiente solamente se
+muestra en las cajas negras; la fase del análisis del ciclo de vida completo se muestra en las cajas grises.
+
+     Figura 5. Concepto de la huella de agua como una evaluación única e independiente o como parte de un
+                                             análisis del ciclo de vida
+
+5.4.2 Selección de categorías de impacto; indicadores de categoría y modelos de
+      caracterización
+
+Los impactos relacionados con el agua están asociados con numerosos mecanismos
+ambientales y por lo tanto numerosos indicadores de categoría son posibles. El indicador de
+categoría o los indicadores de categoría, y el método o métodos de evaluación del impacto de la
+huella de agua se deben seleccionar con base en los objetivos y el alcance del estudio. El
+método o los métodos aplicados en la evaluación del impacto de la huella de agua deben
+describirse claramente y documentarse. La descripción debe incluir una descripción de los
+mecanismos ambientales que son considerados por el método o métodos de evaluación del
+impacto de la huella de agua.
+
+
+                                                                     24
+NORMA TÉCNICA COLOMBIANA                           NTC-ISO 14046
+
+Un método de evaluación del impacto de la huella de agua puede incluir varios indicadores de
+categoría relacionados con diferentes mecanismos ambientales.
+
+El indicador de categoría o los indicadores de categoría, se pueden elegir en cualquier parte a
+lo largo del mecanismo ambiental del modelo o de los modelos de caracterización. El nombre
+del indicador de categoría de impacto debe ser lo suficientemente explícito como para expresar
+con claridad a qué mecanismo ambiental se refiere. Cada indicador de categoría de impacto
+debe documentarse de manera que refleje a qué mecanismo ambiental se refiere.
+
+3.      Clasificación
+
+Si el cálculo de la huella de agua se basa en categorías de impacto diferentes, los resultados
+del inventario del ciclo de vida deben asignarse a éstas categorías de impacto diferentes.
+
+4.      Caracterización
+
+1.       Generalidades
+
+El método para calcular los resultados del indicador debe identificarse y documentarse
+incluyendo los juicios de valor y las suposiciones utilizadas.
+
+El método o métodos de evaluación del impacto de la huella de agua deben considerar el
+impacto o los impactos ambientales potenciales debidos al cambio en la cantidad del agua y/o
+al cambio en la calidad de las aguas causados por el sistema bajo estudio. Cualquier cambio en
+la calidad del agua puede tener un efecto directo en la disponibilidad posterior o en los posibles
+usos del agua retornada (por ejemplo extracción del agua para el consumo humano,
+biodiversidad, o funciones del ecosistema).
+
+Hay diferentes tipos de recursos de agua (por ejemplo: agua subterránea, agua superficial,
+agua de mar). Las cuestiones que pertenecen al uso de cada tipo deben distinguirse tan
+extensamente como sea posible. Los tipos de recursos de agua tal como se describen en el
+apartado 3.1, deberían tenerse en cuenta, según sea apropiado, para la caracterización.
+
+La elección de los métodos de caracterización y los factores para cada categoría de impacto
+evaluada se deben explicar y justificar.
+
+2.       Cuestiones geográficas y temporales en la caracterización
+
+Las cuestiones sobre el agua son de carácter local y están relacionadas con una cuenca
+hidrográfica y con características específicas de precipitación, hidrológicas, geográficas; y a las
+condiciones climáticas, eco-sistémicas y socio-económicas. La evaluación del impacto de la
+huella de agua debe considerar las condiciones locales y puede, cuando aplique, estar
+relacionada con cuestiones más amplias regionales y globales.
+
+Los aspectos de temporalidad, incluyendo el estacional, se deben considerar también cuando
+sea pertinente.
+
+NOTA Si un reservorio cambia la disponibilidad del agua a lo largo del año, es apropiado reflejar esto en los cálculos
+del inventario.
+
+5.      Huella de agua según su disponibilidad
+
+El propósito de la huella de agua según su disponibilidad es dar una evaluación de la
+contribución de productos, procesos y organizaciones a los impactos ambientales potenciales
+relacionados con la presión en la disponibilidad25
+                                                 del agua.
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+NOTA 1 La huella de agua según su disponibilidad puede incluir presionar otros tipos de agua distintos al agua dulce.
+
+El nivel de cobertura temporal y geográfica y la definición para evaluar la disponibilidad del agua
+debe describirse con el detalle adecuado.
+
+Los mecanismos ambientales cubiertos por la huella de agua según su disponibilidad deben
+describir e identificar las consecuencias previsibles de los impactos ambientales potenciales
+excluidos relacionados con la disponibilidad del agua.
+
+La huella de agua según su disponibilidad abarca una o varias categorías de impacto.
+
+Si la huella de agua según su disponibilidad solo considera la cantidad del agua se debería
+llamar huella de agua por escasez. El cálculo de las huellas del agua por escasez debería
+realizarse utilizando factores de caracterización derivados de los modelos de caracterización
+que se contabilizan por las diferencias locales en la escasez de agua.
+
+NOTA 2 El agua de mar típicamente se excluye del cálculo de escasez. Sin embargo, en algunos casos, el agua del
+mar puede estar sujeta a la escasez, (por ejemplo en los mares interiores de la tierra) y por lo tanto no está excluida
+por defecto de la evaluación.
+
+NOTA 3 Si solamente se evalúa un tipo de recurso de agua en la evaluación de la huella de agua por escasez; se
+puede utilizar un calificativo para aclarar qué tipo de recurso se utilizó (por ejemplo: “huella de agua dulce por
+escasez”).
+
+6.      Huellas de agua que consideran la degradación del agua
+
+El propósito de las huellas del agua que tratan la degradación del agua es el de dar una
+evaluación de la contribución de productos, procesos y/o organizaciones a los impactos
+ambientales potenciales relacionados con la calidad del agua.
+
+Los mecanismos ambientales cubiertos por las categorías de impacto seleccionadas para
+considerar la degradación del agua (por ejemplo: eutrofización acuática, acidificación acuática,
+eco-toxicidad acuática, contaminación térmica) deben describirse y las consecuencias
+previsibles de los impactos ambientales potenciales excluidos relacionados con la degradación
+del agua deben identificarse.
+
+NOTA Se puede encontrar información adicional sobre algunas categorías de impacto en el Informe Técnico ISO/TR
+14047.
+
+Si se selecciona una categoría de impacto (por ejemplo: eutrofización), entonces, esta categoría
+de impacto debe identificarse en el calificativo de la huella de agua (por ejemplo: huella de agua
+por eutrofización).
+
+7.      Perfil de la huella de agua
+
+Un perfil de la huella de agua considera un rango de impactos ambientales potenciales
+asociados con el agua. Un perfil de la huella de agua está hecho con varios resultados de
+indicadores de categorías de impacto, que se calculan a partir de varias categorías de impacto.
+
+Si un perfil de la huella de agua no es integral, se debería informar de manera transparente
+utilizando un calificativo.
+
+Los impactos ambientales potenciales cubiertos por el perfil de la huella de agua se deben
+describir y las consecuencias previsibles de los impactos ambientales potenciales excluidos
+relacionados con el agua deben identificarse.
+
+                                                         26
+NORMA TÉCNICA COLOMBIANA                         NTC-ISO 14046
+
+El perfil de la huella de agua se puede agregar como un solo parámetro. Si se aplica la
+ponderación, esta se debe de realizar e informar de acuerdo con la Norma ISO 14044.
+
+Si se aplica la ponderación, los resultados no deben utilizarse como base de una aseveración
+comparativa prevista para su divulgación al público.
+
+5.5     INTERPRETACIÓN DE LOS RESULTADOS
+
+La fase de interpretación de la huella de agua debe incluir lo siguiente:
+a)      identificación de las cuestiones significativas basadas en los resultados de la evaluación
+        de la huella de agua por ejemplo: procesos con una contribución significativa al cálculo
+        de las huellas del agua, mecanismos ambientales principalmente afectados, flujos
+        elementales que tienen la mayor contribución a los resultados de la evaluación de la
+        huella de agua;
+
+b)      evaluación que considera las verificaciones de los análisis de integridad, sensibilidad y
+        coherencia;
+
+c)      consideraciones de aspectos geográficos y temporales;
+
+d)      conclusiones de la evaluación de la huella de agua;
+
+e)      limitaciones de la evaluación de la huella de agua;
+
+f)      evaluación cualitativa y/o cuantitativa de la incertidumbre, por ejemplo mediante la
+        aplicación del método de simulación de Monte Carlo;
+
+g)      consideraciones del análisis de sensibilidad para proporcionar rangos acerca de los
+        resultados informados.
+
+NOTA El apartado B.3.3 de la Norma ISO 14044:2006 proporciona orientación adicional para realizar la verificación
+del análisis de sensibilidad.
+
+5.6     LIMITACIONES DE LA HUELLA DE AGUA
+
+Una evaluación de la huella de agua de una situación particular no es suficiente para utilizarse
+en la descripción completa de los impactos ambientales potenciales de productos, procesos u
+organizaciones (véase introducción). Las decisiones sobre los impactos que se basan
+solamente en una cuestión ambiental, pueden estar en conflicto con los objetivos y metas
+relacionados con otras cuestiones ambientales.
+
+La huella de agua no siempre puede demostrar diferencias significativas entre las categorías de
+impacto y los resultados de los indicadores relacionados con productos alternativos, procesos u
+organizaciones Esto puede ser debido a:
+
+-       limitaciones asociadas con el establecimiento de una unidad funcional,
+
+-       desarrollo limitado de los modelos de caracterización, análisis de sensibilidad y análisis
+        de incertidumbre para la evaluación del impacto de la huella de agua,
+
+-       limitaciones del análisis del inventario de la huella de agua, tales como: establecer los
+        límites del sistema, que no abarquen todos los posibles procesos unitarios para un
+        producto, proceso u organización, o que no incluyan todas las entradas y salidas de
+
+                                                      27
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+        cada proceso unitario, puesto que hay criterios de corte, brechas en los datos y
+        suposiciones asociadas,
+
+-       limitaciones del análisis del inventario de la huella de agua, tales como la calidad
+        inadecuada de los datos del inventario de la huella de agua, los cuales por ejemplo
+        pueden causarse por incertidumbres o diferencias en los procedimientos de asignación y
+        de agregación,
+
+-       limitaciones en la disponibilidad de datos representativos y apropiados del inventario
+        para cada categoría de impacto.
+
+Las incertidumbres están asociadas con características espaciales y temporales para cada
+categoría de impacto. Las diferencias en las definiciones espaciales y temporales pueden
+conducir a diferentes resultados de la huella de agua.
+
+Actualmente no hay consenso sobre una metodología única aceptada para asociar de manera
+exacta y coherente los datos del inventario con los impactos ambientales potenciales
+específicos. Los modelos para las categorías de impacto están en diferentes etapas de
+desarrollo.
+
+NOTA Basada en el apartado 5.4.3 de la Norma ISO 14040:2006.
+
+
+6.      INFORME
+
+6.1     GENERALIDADES
+
+El informe de la evaluación de la huella de agua y de los resultados de la huella de agua
+debería seguir las reglas especificadas en la Norma ISO 14044.
+
+Si los impactos ambientales potenciales relacionados con el agua no se evaluaron de manera
+integral, entonces el término “huella de agua” solo se debe informar con un calificativo. Un
+calificativo es una o varias palabras adicionales utilizadas en conjunto con el término “huella de
+agua” para describir la categoría de impacto o las categorías de impactos estudiadas en la
+evaluación de la “huella de agua” por ejemplo: “huella de agua por disponibilidad”; “huella de
+agua por escasez”, huella de agua por eutrofización, “huella de agua por ecotoxicidad”; huella
+de agua por acidificación”; “huella de agua no integral”.
+
+El tipo y formato del informe debe determinarse en la fase de definición del objetivo y alcance
+del estudio.
+
+Los resultados y conclusiones de la evaluación de la huella de agua deben informarse de forma
+completa, exacta y sin sesgo al público previsto. Los resultados, datos, métodos, suposiciones y
+limitaciones deben ser transparentes y presentarse con suficiente detalle para permitir al lector
+comprender las complejidades de las compensaciones de información inherentes a la
+evaluación de la huella de agua. El informe también debe permitir que los resultados e
+interpretación se utilicen de forma coherente con los objetivos del estudio.
+
+Los tipos del recurso de agua utilizados y los impactos ambientales potenciales relacionados
+con el agua tratados por el método o los métodos de evaluación del impacto de la huella de
+agua utilizados deben ser explícitos.
+
+El informe del inventario de la huella de agua debería ser transparente dando información
+acerca de cada flujo elemental, según lo especificado en el apartado 5.3.2; así como acerca de
+las fuentes de datos.
+                                             28
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+El informe de la evaluación del impacto de la huella de agua debería ser transparente.
+
+No se debe realizar el informe en paralelo de los indicadores de categoría de impacto
+redundantes, (por ejemplo: los indicadores que contienen doble contabilidad), sin una clara
+indicación de la redundancia.
+
+Se debe realizar el informe de los resultados de la interpretación.
+
+Si es viable, se debería realizar el informe de las iniciativas para mejorar el desempeño
+ambiental relacionado con el agua asociadas a productos, procesos u organizaciones en varios
+puntos del ciclo de vida.
+
+Cuando se comparan las huellas del agua de diferentes sistemas del producto, procesos u
+organizaciones, se debería realizar una verificación del análisis de coherencia, tal como se
+describe en la Norma ISO 14044.
+
+6.2    REQUISITOS ADICIONALES Y ORIENTACIÓN PARA LOS INFORMES PARA UNA
+       TERCERA PARTE
+
+Cuando se realiza el informe de los resultados de la evaluación de la huella de agua a una
+tercera parte (es decir, otras partes interesadas distintas de quien encarga o realiza el estudio),
+se debe preparar un informe de tercera parte.
+
+El informe de tercera parte se puede basar en documentación del estudio que contiene
+información confidencial, la cual puede no incluirse en el informe de tercera parte.
+
+El informe de tercera parte constituye un documento de referencia y debe estar disponible para
+cualquier tercera parte a la cual se informa sobre la evaluación de la huella de agua y los
+resultados de la huella de agua. El informe de tercera parte debe cubrir los siguientes aspectos:
+
+a)     aspectos generales:
+
+       1)      quién encarga y quién realiza el estudio (interno o externo);
+
+       2)      fecha del informe; y
+       3)      declaración de que el estudio se ha realizado de acuerdo con los requisitos de
+               esta Norma Internacional;
+
+b)     objetivo del estudio:
+
+       1)      razones para realizar el estudio;
+
+       2)      las aplicaciones previstas;
+
+       3)      el público objetivo;
+
+       4)      si el estudio es una evaluación única e independiente o parte de un análisis del
+               ciclo de vida; y
+
+       5)      si el estudio es parte de un análisis del ciclo de vida donde está prevista una
+               aseveración comparativa;
+
+
+
+                                                   29
+NORMA TÉCNICACOLOMBIANA                   NTC-ISO 14046
+
+c)   alcance del estudio:
+
+     1)     función, incluyendo:
+
+            i)      la declaración de las características de desempeño; y
+            ii)cualquier omisión de funciones adicionales en las comparaciones;
+
+     2)     unidad funcional incluyendo:
+
+            i)      coherencia con el objetivo y el alcance;
+
+            ii)     definición; y
+            iii)resultado de la medición del desempeño;
+
+     3)     límites del sistema incluyendo:
+
+            i)      dimensiones geográficas y temporales del estudio;
+
+            ii)     omisiones de etapas del ciclo de vida, procesos o necesidad de datos;
+
+            iii)    cuantificación de las entradas y salidas de energía y materia;
+
+            iv)     suposiciones acerca de la producción de electricidad si fuese pertinente;
+
+            v)      tipo de entradas y de salidas del sistema como flujos elementales;
+
+            vi)     criterios de decisión; y
+
+            vii)    límites de la organización, cuando sea pertinente;
+     4)
+            criterios de corte para la inclusión inicial de entradas y salidas incluyendo:
+
+            i)      descripción de criterios de corte y suposiciones;
+
+            ii)     efecto de la selección en los resultados; y
+
+            iii)    inclusión de criterios;
+     5)
+             justificación de cualquier modificación hecha al alcance inicial;
+d)   análisis del inventario de la huella de agua:
+
+     1)     procedimientos de recopilación de datos;
+
+     2)     descripción cualitativa y cuantitativa de los procesos unitarios incluyendo detalles
+            sobre datos individuales;
+
+     3)     fuentes de datos, incluyendo el modelo o modelos utilizados y bibliografía;
+
+     4)     procedimientos de cálculo;
+
+
+
+                                               30
+NORMA TÉCNICA COLOMBIANA                 NTC-ISO 14046
+
+     5)     validación de datos incluyendo:
+
+            i)     requisitos de calidad de los datos;
+
+            ii)    evaluación de la calidad de los datos; y
+
+            iii)   tratamiento de los datos que faltan;
+
+     6)     análisis de sensibilidad para ajustar los límites del sistema;
+
+     7)     principios y procedimientos de asignación que incluyen:
+
+            i)     documentación y justificación de los procedimientos de asignación;
+
+            ii)    aplicación uniforme de los procedimientos de asignación;
+
+     8)     inventario del período utilizado como línea base, cuando sea pertinente;
+
+e)   evaluación de la huella de agua, cuando aplique:
+     1)     los procedimientos de evaluación del impacto, los cálculos y los resultados del
+            estudio;
+
+     2)     las limitaciones de los resultados de la evaluación del impacto relativos al
+            objetivo y alcance definidos;
+
+     3)     la relación de los resultados de la evaluación del impacto con el objetivo y el
+            alcance definidos;
+
+     4)     la relación de los resultados de la evaluación del impacto con los resultados del
+            inventario;
+
+     5)     las categorías de impacto e indicadores de categoría considerados, incluyendo
+            las razones para su selección y una referencia a su fuente;
+
+     6)     las descripciones o las referencias a todos los modelos de caracterización,
+            factores de caracterización y métodos utilizados incluyendo todas las
+            suposiciones y limitaciones;
+
+     7)     descripciones o referencias a todas los juicios de valor utilizadas en relación con
+            las categorías de impacto, modelos de caracterización, factores de
+            caracterización, normalización, agrupamiento, ponderación y, en otras partes de
+            la evaluación del impacto, la justificación para su uso y su influencia sobre los
+            resultados, conclusiones y recomendaciones;
+
+     8)     una declaración de que los resultados de la evaluación del impacto son
+            expresiones relativas y no predicen los impactos en puntos finales de categoría,
+            ni sobrepasan los umbrales, los márgenes de seguridad o riesgos;
+     9)     y cuando se incluyen como una parte de la evaluación de la huella de agua,
+            también:
+            i)     una descripción y justificación de la definición y descripción de cualquier
+                   categoría de impacto e indicadores de categoría o modelos de
+                   caracterización utilizados para la evaluación del impacto;
+                                             31
+NORMA TÉCNICA COLOMBIANA                       NTC-ISO 14046
+
+               ii)       una declaración y justificación de cualquier agrupación de las categorías
+                         de impacto;
+
+               iii)      cualquier otro procedimiento que transforme los resultados del indicador y
+                         una justificación de las referencias seleccionadas, factores de
+                         ponderación, etc.;
+
+               iv)       cualquier análisis de los resultados del indicador, por ejemplo análisis de
+                         sensibilidad e incertidumbre o el uso de datos ambientales incluida
+                         cualquier implicación para los resultados;
+
+               v)        incertidumbre del método de evaluación del impacto de la huella de agua;
+                         y
+
+               vi)       los datos y resultados de indicadores obtenidos previamente a la
+                         normalización, agrupación o ponderación deben estar disponibles junto
+                         con los resultados normalizados, agrupados o ponderados;
+
+f)     interpretación:
+
+       1)      los resultados;
+
+       2)      conclusiones;
+
+       3)      suposiciones y limitaciones asociadas con la interpretación de los resultados
+               relacionados con la metodología y los datos;
+
+       4)      evaluación de la calidad de los datos;
+
+       5)      transparencia en términos de juicios de valor, justificaciones y juicios de expertos;
+               y
+
+       6)      si es importante, la descripción de los aspectos positivos, si hay.
+
+       NOTA Un ejemplo de un aspecto positivo puede ser un sitio de producción que extrae agua del río, y
+       posteriormente remueve la materia orgánica del agua antes de utilizarla en los procesos, regresando la
+       mayoría del agua tratada al río con un menor contenido de materia orgánica.
+
+g)     revisión crítica, cuando aplique:
+
+       1)      nombre y afiliación de los revisores;
+
+       2)      informes de revisión crítica;
+
+       3)      respuestas a las recomendaciones.
+
+6.3    ASEVERACIÓN COMPARATIVA Y ESTUDIOS COMPARATIVOS
+
+6.3.1 Aseveraciones comparativas
+
+Las aseveraciones comparativas, tal como se definen en la Norma ISO 14044, no se deben
+basar en una evaluación de una situación particular de la huella de agua ya que la evaluación
+de una situación particular de la huella de agua evalúa solamente categorías de impacto
+limitadas.
+
+                                                    32
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+Una evaluación de la huella de agua que es parte de un estudio del análisis del ciclo de vida
+para una aseveración comparativa prevista para su divulgación al público debe aplicar los
+requisitos pertinentes de la Norma ISO 14044 y ser objeto de una revisión crítica.
+
+6.3.2 Estudios comparativos
+
+En un estudio comparativo, la equivalencia de los sistemas que van a compararse debe
+evaluarse antes de la interpretación de los resultados. En consecuencia, el alcance del estudio
+se debe definir de tal manera que los sistemas puedan comparase. Los sistemas deben
+compararse utilizando la misma unidad funcional y consideraciones metodológicas
+equivalentes, tales como desempeño, alcance geográfico, límites del sistema, calidad de los
+datos, procedimientos de asignación, reglas de decisión al evaluar entradas y salidas y reglas
+de decisión sobre la evaluación del impacto. Cualquier diferencia entre los sistemas con
+respecto a estos parámetros se debe identificar y se debe realizar el informe.
+
+
+7.      REVISIÓN CRÍTICA
+
+7.1     GENERALIDADES
+
+El alcance y tipo de la revisión crítica deseada debe definirse en la fase del alcance de la
+evaluación de la huella de agua, y la decisión sobre el tipo de revisión crítica debe registrarse.
+
+Una evaluación de la huella de agua que es parte de un estudio del análisis del ciclo de vida
+prevista para una aseveración comparativa para su divulgación al público, debe aplicar los
+requisitos pertinentes de la Norma ISO 14044 y estar sujeta notablemente a una revisión crítica.
+En ese caso, se deben aplicar los mismos procedimientos y requisitos de la Norma ISO 14044.
+
+NOTA Se puede encontrar información adicional en la Especificación Técnica ISO/TS 14071.
+
+Para los estudios no previstos para utilizarse en aseveraciones comparativas, aunque la
+revisión crítica no se requiere, dicha revisión crítica también es posible y esta información puede
+ser de ayuda, según sea apropiado.
+
+El proceso de revisión crítica debe verificar que:
+
+-       los métodos utilizados para determinar las huellas del agua son coherentes con esta
+        Norma Internacional,
+
+-       los métodos y el modelo de simulación del inventario utilizados para realizar la
+        evaluación de la huella de agua son científica y técnicamente válidos,
+
+
+-       los datos y los resultados del modelo utilizados son apropiados y razonables en relación
+        con el objetivo del estudio,
+-       las interpretaciones reflejan las limitaciones identificadas y el objetivo del estudio, y
+
+-       el informe del estudio es transparente y coherente con el objetivo y el alcance del
+        estudio.
+
+7.2     NECESIDAD PARA REALIZAR LA REVISIÓN CRÍTICA
+
+Una revisión crítica puede facilitar la comprensión y aumento de credibilidad del estudio, por
+ejemplo al involucrar a las partes interesadas.
+
+                                                      33
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+Si los resultados (o parte de los resultados) de una evaluación de la huella de agua están
+previstos para informarse a terceras partes:
+
+-      se debería realizar una revisión crítica del estudio, y
+
+-      se debería hacer una declaración de la revisión crítica disponible para cualquier tercera
+       parte.
+
+3.     REVISIÓN CRÍTICA POR UN EXPERTO INTERNO O EXTERNO
+
+Una revisión crítica la puede realizar un experto interno o externo. En este caso un experto
+independiente de la evaluación de la huella de agua debe realizar la revisión. La declaración de
+revisión, los comentarios de quien realiza el estudio y cualquier respuesta a las
+recomendaciones realizadas por el revisor deben incluirse en el informe de la evaluación de la
+huella de agua.
+
+4.     REVISIÓN CRÍTICA POR UN PANEL DE PARTES INTERESADAS
+
+Una revisión crítica se puede realizar como una revisión por las partes interesadas. En este
+caso, quien encarga el estudio original debería seleccionar un experto externo independiente
+para presidir un panel de revisión constituido por al menos tres miembros. Con base en el
+objetivo y el alcance del estudio, el presidente debería seleccionar otros revisores
+independientes calificados. Este panel puede incluir otras partes interesadas afectadas por las
+conclusiones extraídas de la evaluación de la huella de agua; tales como agencias
+gubernamentales, grupos no gubernamentales, competidores e industrias afectadas.
+
+Para la evaluación de la huella de agua, debe considerarse la experiencia de los revisores en
+las disciplinas científicas pertinentes a las categorías de impacto importantes del estudio,
+además de otras experiencias e intereses.
+
+La declaración de revisión y el informe del panel de revisión, así como los comentarios del
+experto y cualquier respuesta a las recomendaciones hechas por el revisor o el panel deben
+incluirse en el informe de la evaluación de la huella de agua.
+
+La revisión crítica debe verificar si la evaluación de la huella de agua se realizó cumpliendo con
+los requisitos de esta Norma Internacional.
+
+
+
+
+                                                 34
+NORMA TÉCNICACOLOMBIANA                       NTC-ISO 14046
+
+                                               ANEXO A
+                                              (Normativo)
+
+       REQUISITOS ADICIONALES Y DIRECTRICES PARA LAS ORGANIZACIONES
+
+
+1.     DEFINICIÓN DEL OBJETIVO Y EL ALCANCE PARA LAS ORGANIZACIONES
+
+Se aplican los requisitos del apartado 5.2.
+
+
+2.     LOS LÍMITES DE LA ORGANIZACIÓN
+
+La organización puede estar compuesta por una o más instalaciones. Los impactos ambientales
+potenciales relacionados con el agua pueden ser consecuencia de una o más unidades físicas
+o procesos.
+
+La organización debe consolidar los impactos ambientales potenciales de sus instalaciones
+relacionadas con el agua mediante uno de los siguientes enfoques:
+a)     control: la organización realiza la evaluación de los impactos ambientales potenciales
+       relacionados con el agua, de los procesos y de las unidades físicas de instalaciones
+       sobre las qué tiene el control financiero;
+
+b)     participación de capital: la organización realiza la evaluación de los impactos
+       ambientales potenciales relacionados con el agua de los procesos y de las unidades
+       físicas de sus respectivas instalaciones de acuerdo a sus intereses de participación de
+       capital.
+
+Cuando una instalación está controlada por varias organizaciones, estas deberían adoptar el
+mismo enfoque de consolidación.
+
+La organización debe documentar qué método de consolidación aplica.
+
+La organización debe explicar cualquier cambio respecto al método de consolidación
+seleccionado.
+
+
+A.3    REQUISITOS ESPECÍFICOS PARA LA EVALUACIÓN DE LA HUELLA DE AGUA DE
+       UNA ORGANIZACIÓN
+
+De acuerdo con su objetivo y alcance, una organización puede estar interesada en desarrollar
+un evaluación de la huella de agua adoptando diferentes perspectivas (véase la Figura A.1).
+
+
+
+
+                                                  35
+NORMA TÉCNICACOLOMBIANA                             NTC-ISO 14046
+
+
+
+                                            Organización
+
+                             Instalación 1            Instalación...n
+
+
+         Adquisición
+                                                       Procesosde
+         dematerias           Producción                                          Uso              Fin devida
+                                                        producción
+           primas
+
+
+
+
+         Adquisición
+         dematerias           Producción                                          Uso              Fin devida
+           primas
+
+
+
+                                 Otras                        Otras
+                              actividades                  actividades
+
+
+
+
+    Leyenda
+                                  Límites para una instalación
+                                  Límites para unaorganización
+                                  Límites del ciclo de vida para un producto
+                                  Límites de la cuna a la puerta de una organización
+                                  Límites del ciclo de vida (desde la cuna a la tumba) para una organización
+
+    Figura A.1 Ejemplos de diferentes límites del sistema para la evaluación de la huella de agua de una
+                                                organización
+
+El inventario de la huella de agua a nivel de una organización o de una instalación debe
+considerar el inventario directo de la huella de agua de las actividades controladas directamente
+por la organización o por su instalación o instalaciones específicas bajo estudio.
+
+El inventario de la huella de agua utilizando la perspectiva del análisis del ciclo de vida para una
+organización debe considerar los inventarios de la huella de agua directos e indirectos de las
+actividades asociadas con la organización que ha adoptado una perspectiva del ciclo de vida.
+
+La organización debe de considerar el ciclo de vida completo para cubrir todas las entradas y
+salidas relacionadas con las actividades de la organización y justificar y divulgar cualquier
+exclusión.
+
+Una evaluación completa desde la “cuna a la tumba” de una organización como se muestra en
+la Figura A.1 incluye el uso y el tratamiento al final de la vida de los productos vendidos por la
+organización que informa (en el período referenciado). Esto incluye las emisiones y vertidos en
+la fase de uso de los productos vendidos durante su vida útil esperada y en la disposición de
+residuos y tratamiento al final de la vida de los productos vendidos por la organización que
+informa (en el período de referencia). Se deberían incluir los flujos en la etapa de uso, si los
+productos utilizan agua, consumen energía o generan emisiones con impactos ambientales
+potenciales en el agua durante su uso, por ejemplo: lavadoras de ropa y de vajilla, ropa
+
+
+                                                            36
+NORMA TÉCNICA COLOMBIANA NTC-ISO 14046
+
+(requiere lavado y secado), alimentos (requieren cocinado y refrigeración) o jabones y
+detergentes (requieren agua caliente).
+
+El cálculo de entradas y salidas para la etapa de uso típicamente requiere de especificaciones
+de diseño del producto y de suposiciones acerca de cómo los consumidores usan los productos
+(por ejemplo: perfiles de uso, suposiciones sobre el tiempo de vida útil de los productos, etc.).
+
+Si se justifica en la fase de definición del objetivo y el alcance del estudio de la huella de agua,
+se puede realizar un estudio "desde la cuna a la puerta" donde queden excluidas las etapas de
+uso y fin de la vida útil.
+
+
+
+
+                                                37
+NORMA TÉCNICA COLOMBIANA                  NTC-ISO 14046
+
+                                        BIBLIOGRAFÍA
+
+
+[1]    ISO 11074:2005, Soil Quality. Vocabulary.
+
+[2]    ISO 14025:2006, Etiquetas y declaraciones ambientales. Declaraciones ambientales tipo
+       III. Principios y procedimientos.
+
+[3]    ISO 14040:2006, Gestión ambiental. Análisis de ciclo de vida. Principios y marco de
+       referencia.
+
+[4]    ISO/TR 14047, Environmental Management. Life Cycle Assessment. Illustrative
+       Examples on How to Apply ISO 14044 to Impact Assessment Situations.
+
+[5]    ISO/TR 14049, Environmental Management. Life Cycle Assessment. Illustrative
+       Examples on How to Apply ISO 14044 to Goal and Scope Definition and Inventory
+       Analysis.
+
+[6]    ISO 14051, Gestión ambiental. Contabilidad de costos del flujo de materiales. Marco de
+       referencia general.
+
+[7]    ISO 14064-1:2006, Gases de efecto invernadero. Parte 1: Especificación con
+       orientación, a nivel de las organizaciones, para la cuantificación y el informe de las
+       emisiones y remociones de gases de efecto invernadero.
+
+[8]    ISO 14064-2:2006, Gases de efecto invernadero. Parte 2: Especificación con
+       orientación, a nivel de proyecto, para la cuantificación, el seguimiento y el informe de la
+       reducción de emisiones o el aumento en las remociones de gases de efecto
+       invernadero.
+
+[9]    ISO 14064-3:2006, Gases de efecto invernadero. Parte 3: Especificación con orientación
+       para la validación y verificación de declaraciones sobre gases de efecto invernadero.
+
+
+[10]   ISO/TS 14067:2013, Gases de efecto invernadero. Huella de carbono de productos.
+       Requisitos y directrices para cuantificación y comunicación.
+
+[11]   ISO/TS 14071, Environmental Management. Life Cycle Assessment. Critical Review
+       Processes and Reviewer Competencies: Additional Requirements and Guidelines to
+       ISO 14044:2006.
+
+[12]   ISO/TS 14072, Environmental Management. Life cycle Assessment. Requirements and
+       Guidelines for Organizational Life Cycle Assessment.
+
+
+
+
+                                               38
+

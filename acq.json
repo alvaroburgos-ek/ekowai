@@ -1,0 +1,2078 @@
+[
+  {
+    "standard": "ISO-59020",
+    "document": "doc-iso-59020-pdf-missing",
+    "title": "DOC — ISO 59020:2024 rendered PDF (MISSING from library)",
+    "dependents": 60,
+    "depNodes": [
+      "cr-iso59020-001",
+      "cr-iso59020-002",
+      "cr-iso59020-003",
+      "cr-iso59020-004",
+      "cr-iso59020-005",
+      "cr-iso59020-006",
+      "cr-iso59020-007",
+      "cr-iso59020-008",
+      "cr-iso59020-009",
+      "cr-iso59020-010",
+      "cr-iso59020-011",
+      "cr-iso59020-012",
+      "cr-iso59020-013",
+      "cr-iso59020-014",
+      "cr-iso59020-015",
+      "cr-iso59020-016",
+      "cr-iso59020-017",
+      "cr-iso59020-018",
+      "cr-iso59020-019",
+      "cr-iso59020-020",
+      "cr-iso59020-021",
+      "cr-iso59020-022",
+      "cr-iso59020-023",
+      "cr-iso59020-024",
+      "cr-iso59020-025",
+      "cr-iso59020-026",
+      "cr-iso59020-027",
+      "cr-iso59020-028",
+      "cr-iso59020-029",
+      "cr-iso59020-030",
+      "cr-iso59020-031",
+      "cr-iso59020-032",
+      "cr-iso59020-033",
+      "cr-iso59020-034",
+      "cr-iso59020-035",
+      "cr-iso59020-036",
+      "cr-iso59020-037",
+      "dp-iso59020-crosssheet-eqmirror-gates",
+      "eq-iso59020-a1",
+      "eq-iso59020-a10",
+      "eq-iso59020-a11",
+      "eq-iso59020-a12",
+      "eq-iso59020-a13",
+      "eq-iso59020-a2",
+      "eq-iso59020-a3",
+      "eq-iso59020-a4",
+      "eq-iso59020-a5",
+      "eq-iso59020-a6",
+      "eq-iso59020-a7",
+      "eq-iso59020-a8",
+      "eq-iso59020-a9",
+      "section-iso59020-01",
+      "section-iso59020-02",
+      "section-iso59020-03",
+      "section-iso59020-04",
+      "section-iso59020-05",
+      "section-iso59020-06",
+      "section-iso59020-07",
+      "section-iso59020-08",
+      "section-iso59020-09"
+    ]
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "document": "doc-kostra-dwd-2020",
+    "title": "DOC — KOSTRA-DWD-2020 (design rainfall r_D(n))",
+    "dependents": 22,
+    "depNodes": [
+      "cr-a138-req-05",
+      "cr-a138-req-31",
+      "cr-a138-req-32",
+      "eq-gl10-a138-26",
+      "eq-gl11-a138-16",
+      "eq-gl12-a138-16",
+      "eq-gl13-a138-16",
+      "eq-gl14-a138-17",
+      "eq-gl16-a138-17",
+      "eq-gl19-a138-18",
+      "eq-gl23-a138-18",
+      "eq-gl25-a138-18",
+      "eq-gl28-a138-19",
+      "eq-gl29-a138-19",
+      "eq-gl3-a138-10",
+      "eq-gl30-a138-20",
+      "eq-gl31-a138-20",
+      "eq-gl32-a138-20",
+      "eq-gl35-a138-21",
+      "eq-gl37-a138-21",
+      "eq-gl40-a138-21",
+      "eq-gl41-a138-22"
+    ]
+  },
+  {
+    "standard": "ISO-14050",
+    "document": "doc-iso-14050-pdf-missing",
+    "title": "DOC — ISO 14050:2020 rendered PDF (MISSING from library)",
+    "dependents": 17,
+    "depNodes": [
+      "dp-iso14050-manual-warn-nonenforcing",
+      "dp-iso14050-missing-crossref-edges",
+      "dp-iso14050-phantom-numeric-fields",
+      "dp-iso14050-sentinel-consumer-edges",
+      "section-iso14050-01",
+      "section-iso14050-02",
+      "section-iso14050-03",
+      "section-iso14050-04",
+      "section-iso14050-05",
+      "section-iso14050-06",
+      "section-iso14050-07",
+      "section-iso14050-08",
+      "section-iso14050-09",
+      "section-iso14050-10",
+      "section-iso14050-11",
+      "section-iso14050-12",
+      "section-iso14050-13"
+    ]
+  },
+  {
+    "standard": "DWA-A-226",
+    "document": "doc-atv-dvwk-a-131",
+    "title": "ATV-DVWK-A 131 — Bemessung von einstufigen Belebungsanlagen",
+    "dependents": 13,
+    "depNodes": [
+      "cr-a226-cr-009",
+      "cr-a226-cr-010",
+      "cr-a226-cr-011",
+      "cr-a226-cr-022",
+      "eq-gl10-a226-05",
+      "eq-gl18-a226-07",
+      "eq-gl21-a226-07",
+      "eq-gl22-a226-07",
+      "eq-gl9-a226-05",
+      "section-a226-01",
+      "section-a226-04",
+      "section-a226-05",
+      "section-a226-07"
+    ]
+  },
+  {
+    "standard": "ISO-59010",
+    "document": "doc-iso-59010-pdf-missing",
+    "title": "DOC — ISO 59010:2024 PDF (out-of-library)",
+    "dependents": 12,
+    "depNodes": [
+      "dp-iso59010-all-warn-nonenforcing",
+      "dp-iso59010-manual-nonfiring",
+      "dp-iso59010-phantom-field-gates",
+      "section-iso59010-01",
+      "section-iso59010-02",
+      "section-iso59010-03",
+      "section-iso59010-04",
+      "section-iso59010-05",
+      "section-iso59010-06",
+      "section-iso59010-07",
+      "section-iso59010-08",
+      "section-iso59010-09"
+    ]
+  },
+  {
+    "standard": "ISO-59004",
+    "document": "doc-iso-59004-pdf-missing",
+    "title": "DOC — ISO 59004:2024 rendered PDF (MISSING from library)",
+    "dependents": 9,
+    "depNodes": [
+      "dp-iso59004-eq-operator",
+      "dp-iso59004-manual-warn-nonenforcing",
+      "dp-iso59004-phantom-field-gates",
+      "section-iso59004-01",
+      "section-iso59004-02",
+      "section-iso59004-03",
+      "section-iso59004-04",
+      "section-iso59004-05",
+      "section-iso59004-06"
+    ]
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "document": "doc-had-bfg-2003a",
+    "title": "DOC — HAD / BfG 2003a (Hydrologischer Atlas Deutschland)",
+    "dependents": 8,
+    "depNodes": [
+      "eq-m104-a2-af",
+      "eq-m104-c1-eta",
+      "section-m104-03",
+      "section-m104-20",
+      "tab-m104-04-had",
+      "tab-m104-bild1",
+      "tab-m104-c3",
+      "tab-m104-c7"
+    ]
+  },
+  {
+    "standard": "DWA-M-708",
+    "document": "doc-abwv-anhang-3",
+    "title": "AbwV Anhang 3 (Milch/Nahrungsmittel)",
+    "dependents": 8,
+    "depNodes": [
+      "cr-req-708-01",
+      "cr-req-708-05",
+      "cr-req-708-11",
+      "section-m708-06",
+      "section-m708-07",
+      "section-m708-25",
+      "section-m708-26",
+      "tab-02-emission-limits"
+    ]
+  },
+  {
+    "standard": "HOAI-2021",
+    "document": "doc-din-276-2008",
+    "title": "DOC — DIN 276-1:2008-12 (Kostenermittlung / anrechenbare Kosten)",
+    "dependents": 7,
+    "depNodes": [
+      "cr-hoai-03",
+      "cr-hoai-04",
+      "cr-hoai-20",
+      "dp-hoai-06-din276-K",
+      "eq-hoai-01-hbasis",
+      "eq-hoai-02-hoben",
+      "section-hoai-02"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-iso-5667-15",
+    "title": "DOC — ISO 5667-15 (sample preservation & handling of sludge)",
+    "dependents": 7,
+    "depNodes": [
+      "cr-003-normative-refs",
+      "cr-009-container-material",
+      "cr-010-container-airtight",
+      "cr-021-storage-iso15",
+      "section-01-registration",
+      "section-04-equipment",
+      "section-08-storage"
+    ]
+  },
+  {
+    "standard": "DIN-276",
+    "document": "doc-din-277-1",
+    "title": "DIN 277-1 — floor areas & volumes (document)",
+    "dependents": 6,
+    "depNodes": [
+      "dp-din-02-phantom-refunit-gates",
+      "eq-din-ident03-kennwert",
+      "section-din-05",
+      "tab-din-02-refunits",
+      "tab-din-03-kg300-refunits",
+      "tab-din-04-kg400-refunits"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-1",
+    "document": "doc-dwa-m-209",
+    "title": "DWA-M 209 (external reference)",
+    "dependents": 6,
+    "depNodes": [
+      "cr-006-salzfaktoren",
+      "cr-026-abnahme",
+      "eq-11-beta-alpha",
+      "eq-sotr-def",
+      "section-m2291-03",
+      "section-m2291-10"
+    ]
+  },
+  {
+    "standard": "HOAI-2021",
+    "document": "doc-anlagen-10-15",
+    "title": "DOC — HOAI Anlagen 10–15 (Grundleistungen & Bewertungsmerkmale)",
+    "dependents": 6,
+    "depNodes": [
+      "cr-hoai-05",
+      "dp-hoai-04-phasen-pct-input",
+      "dp-hoai-08-honorarzone-range",
+      "section-hoai-04",
+      "section-hoai-05",
+      "section-hoai-06"
+    ]
+  },
+  {
+    "standard": "DWA-A-226",
+    "document": "doc-dwa-a-118",
+    "title": "DWA-A 118 — Hydraulische Bemessung von Entwässerungssystemen",
+    "dependents": 5,
+    "depNodes": [
+      "cr-a226-cr-023",
+      "eq-gl4-a226-03",
+      "eq-gl5-a226-03",
+      "eq-gl6-a226-03",
+      "section-a226-03"
+    ]
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "document": "doc-dgfdb-r",
+    "title": "DOC — DGfdB R fact sheets (R 60.03 / 65.06 / 65.09)",
+    "dependents": 5,
+    "depNodes": [
+      "cr-fllnt-req-33",
+      "eq-fllnt-11-eq05",
+      "section-fllnt-11",
+      "section-fllnt-14",
+      "tab-fllnt-13-maintenance"
+    ]
+  },
+  {
+    "standard": "HOAI-2021",
+    "document": "doc-eugh-c37717",
+    "title": "DOC — EuGH C-377/17 (Novelle 2020/2021, Orientierungswerte)",
+    "dependents": 5,
+    "depNodes": [
+      "cr-hoai-02",
+      "dp-hoai-01-ssatz-range",
+      "dp-hoai-07-basishonorarsatz",
+      "tab-hoai-honorartafel-ingenieurbauwerke",
+      "tab-hoai-honorartafel-tragwerk"
+    ]
+  },
+  {
+    "standard": "DIN-14071-1",
+    "document": "doc-iso-14040",
+    "title": "DOC — ISO 14040:2006 (LCA principles and framework)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-din14071-req10",
+      "cr-din14071-req11",
+      "section-din14071-01",
+      "section-din14071-03"
+    ]
+  },
+  {
+    "standard": "DIN-1989-2",
+    "document": "doc-din-en-12056-3",
+    "title": "DOC — DIN EN 12056-3:2001-01 (Regenentwässerung, Tab. C.1)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-din-1989-2-03",
+      "cr-din-1989-2-04",
+      "eq-gl1-din-1989-2-02",
+      "eq-gl2-din-1989-2-02"
+    ]
+  },
+  {
+    "standard": "DIN-EN-16941-2",
+    "document": "doc-bs-8525",
+    "title": "document — BS 8525 (greywater quality series, out of library)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-17-wasserqualitaet",
+      "dp-anhang-d-informative",
+      "section-16941-2-05",
+      "tab-d1-quality"
+    ]
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "document": "doc-eu-2020-741",
+    "title": "Verordnung (EU) 2020/741 - EU-WasserWVVO (document, in_library:false)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-m12003-06-cr10",
+      "cr-m12003-19-cr10",
+      "section-m12003-06",
+      "section-m12003-19"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-din-19650",
+    "title": "DOC - DIN 19650 (Irrigation water quality classes)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-m277e-req-24",
+      "section-m277e-03",
+      "section-m277e-04",
+      "section-m277e-11"
+    ]
+  },
+  {
+    "standard": "DWA-M-381E",
+    "document": "doc-duemv-klaerschlammvo",
+    "title": "DOC — DüMV / Klärschlammverordnung (PAM + declaration thresholds)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-013",
+      "cr-014",
+      "dp-381-cr013-polarity",
+      "section-381-07"
+    ]
+  },
+  {
+    "standard": "ISO-14019-1",
+    "document": "doc-iso-iec-17029",
+    "title": "DOC — ISO/IEC 17029 (out-of-library normative reference)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-001",
+      "cr-014",
+      "section-iso-14019-1-01",
+      "section-iso-14019-1-04"
+    ]
+  },
+  {
+    "standard": "ISO-14046",
+    "document": "doc-lcia-water-method",
+    "title": "DOC — water-footprint LCIA characterization method (out-of-library)",
+    "dependents": 4,
+    "depNodes": [
+      "dp-iso14046-eq01-enterable",
+      "dp-iso14046-lcia-method-source",
+      "eq-iso14046-01-category-indicator",
+      "section-iso14046-04"
+    ]
+  },
+  {
+    "standard": "ISO-14067",
+    "document": "doc-ipcc-gwp",
+    "title": "IPCC GWP100 assessment (external document)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-iso-20",
+      "dp-iso-gwp-ipcc-source",
+      "eq-iso-01-cfp",
+      "section-iso-05"
+    ]
+  },
+  {
+    "standard": "ISO-59014",
+    "document": "doc-iso-14040",
+    "title": "DOCUMENT — ISO 14040 (LCA principles & framework)",
+    "dependents": 4,
+    "depNodes": [
+      "cr-iso59014-004",
+      "cr-iso59014-005",
+      "cr-iso59014-016",
+      "section-iso59014-04"
+    ]
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-dvs-2212-3",
+    "title": "DOC — DVS 2212-3 (Kunststoffschweißer-Prüfung, Prüfgruppe III)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-req-05",
+      "dp-out-of-library-refs",
+      "section-02"
+    ]
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-dvs-2226-3",
+    "title": "DOC — DVS 2226-3 (Schälversuch-Verfahren)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-req-14",
+      "dp-cr14-verdict-enum",
+      "section-04"
+    ]
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-atv-a161-gw312",
+    "title": "ATV-A 161 / DVGW GW 312 — statical calculation basis (document)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-009-statik",
+      "cr-012-vorpresskraft",
+      "section-a125-05"
+    ]
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "document": "doc-din-1986-100",
+    "title": "DOC — DIN 1986-100 (flood-protection / Ueberflutungsnachweis)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-a138-req-22",
+      "cr-a138-req-23",
+      "eq-gl10-a138-26"
+    ]
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "document": "doc-dwa-a-118",
+    "title": "DOC — DWA-A 118:2024 (Hydraulische Bemessung Entwaesserungssysteme)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-a138-req-08",
+      "cr-a138-req-29",
+      "tab-08"
+    ]
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "document": "doc-din-276",
+    "title": "DIN 276 (document, out-of-library)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-m12002-15-req14",
+      "cr-m12002-15-req15",
+      "section-m12002-15"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-abwv-annex-1",
+    "title": "DOC - AbwV Annex 1 (Wastewater discharge requirements)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-m277e-req-25",
+      "section-m277e-10",
+      "section-m277e-23"
+    ]
+  },
+  {
+    "standard": "DWA-M-760",
+    "document": "doc-din-en-1825-2",
+    "title": "DOC — DIN EN 1825-2 (Fettabscheider: Bemessung / Nenngröße)",
+    "dependents": 3,
+    "depNodes": [
+      "eq-m760-01-ns",
+      "eq-m760-02-ns-eff",
+      "section-m760-15"
+    ]
+  },
+  {
+    "standard": "ISO-14019-1",
+    "document": "doc-iso-14019-4",
+    "title": "DOC — ISO 14019-4:2026 (out-of-library normative reference)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-021",
+      "cr-028",
+      "section-iso-14019-1-06"
+    ]
+  },
+  {
+    "standard": "ISO-14064-2",
+    "document": "doc-ipcc-ar-gwp",
+    "title": "doc — IPCC AR / recognized-source GWP + emission factors (out-of-library)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-1642-14",
+      "eq-1642-ssr",
+      "section-iso1642-06"
+    ]
+  },
+  {
+    "standard": "ISO-14064-2",
+    "document": "doc-iso-14064-3",
+    "title": "doc — ISO 14064-3 (verification/validation methodology, out-of-library)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-1642-20",
+      "cr-1642-22",
+      "section-iso1642-10"
+    ]
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "document": "doc-din-en-15232",
+    "title": "DOC — DIN EN 15232 (Energieeffizienzklassen der Gebäudeautomation)",
+    "dependents": 3,
+    "depNodes": [
+      "cr-vdi-22",
+      "dp-vdi-04-energieklasse-nr",
+      "section-vdi-06"
+    ]
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-atv-a-138",
+    "title": "DOC — ATV-A 138 (Versickerungsanlagen Bemessung)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-din-1989-1-11",
+      "section-din-1989-1-05"
+    ]
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-din-1989-3",
+    "title": "DOC — DIN 1989-3 (Regenwasserspeicher aus Beton/Kunststoff)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-din-1989-1-04",
+      "section-din-1989-1-02"
+    ]
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-din-en-1717",
+    "title": "DOC — DIN EN 1717 (Sicherungseinrichtungen Typ AA/AB)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-din-1989-1-06",
+      "section-din-1989-1-03"
+    ]
+  },
+  {
+    "standard": "DIN-EN-ISO-14044",
+    "document": "doc-iso-14040",
+    "title": "DOCUMENT — ISO 14040 (Grundsätze und Rahmenbedingungen / principles & framework)",
+    "dependents": 2,
+    "depNodes": [
+      "section-14044-01",
+      "section-14044-06"
+    ]
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-din-4020",
+    "title": "DIN 4020 — geotechnical investigations (document)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-006-baugrund",
+      "section-a125-03"
+    ]
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-din-en-14457",
+    "title": "DIN EN 14457 — general joint requirements / shear-load proof (document)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-003-scherlast",
+      "section-a125-02"
+    ]
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-ral-gz-961",
+    "title": "RAL-GZ 961 — quality-assurance mark for pipe construction (document)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-014-qualifikation",
+      "section-a125-07"
+    ]
+  },
+  {
+    "standard": "DWA-A-131",
+    "document": "doc-atv-dvwk-a198",
+    "title": "DOCUMENT — ATV-DVWK-A 198 (Belastungsermittlung)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-a131-017",
+      "section-a131-02"
+    ]
+  },
+  {
+    "standard": "DWA-A-131",
+    "document": "doc-dwa-a202",
+    "title": "DOCUMENT — DWA-A 202 (Phosphorelimination)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-a131-018",
+      "section-a131-05"
+    ]
+  },
+  {
+    "standard": "DWA-A-178",
+    "document": "doc-kostra-dwd",
+    "title": "KOSTRA-DWD - external reference (document, out-of-library)",
+    "dependents": 2,
+    "depNodes": [
+      "bild-a178-01-planungsprozess",
+      "section-a178-01"
+    ]
+  },
+  {
+    "standard": "DWA-A-226",
+    "document": "doc-atv-dvwk-a-198",
+    "title": "ATV-DVWK-A 198 — Vereinheitlichung/Herleitung von Bemessungswerten",
+    "dependents": 2,
+    "depNodes": [
+      "cr-a226-cr-021",
+      "tab-01-frachten"
+    ]
+  },
+  {
+    "standard": "DWA-A-226",
+    "document": "doc-din-19559",
+    "title": "DIN 19559 — Durchflussmessung von Abwasser",
+    "dependents": 2,
+    "depNodes": [
+      "cr-a226-cr-019",
+      "section-a226-08"
+    ]
+  },
+  {
+    "standard": "DWA-A-226",
+    "document": "doc-dwa-m-268",
+    "title": "DWA-M 268 — Steuerung/Regelung der Stickstoffelimination",
+    "dependents": 2,
+    "depNodes": [
+      "cr-a226-cr-024",
+      "section-a226-06"
+    ]
+  },
+  {
+    "standard": "DWA-A-272E",
+    "document": "doc-bdew-2011",
+    "title": "DOC — BDEW (2011) flush-water requirement (out-of-library)",
+    "dependents": 2,
+    "depNodes": [
+      "eq-a272e-rule-07",
+      "tab-a272e-05-loads"
+    ]
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "document": "doc-dwa-a-102-1",
+    "title": "DOC — DWA-A 102-1 / 102-2 (Zielvorgabe Wasserhaushalt)",
+    "dependents": 2,
+    "depNodes": [
+      "section-m104-10",
+      "section-m104-32"
+    ]
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "document": "doc-eu-badegewaesser-2006-7",
+    "title": "EU-Badegewässerrichtlinie 2006/7/EG (document, out-of-library)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m12002-03-req05",
+      "section-m12002-05"
+    ]
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "document": "doc-bbodschv",
+    "title": "BBodSchV Anlage 1 Tabelle 3 (Schwermetall-Vorsorgewerte) (document, in_library:false)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m12003-08-cr18",
+      "dp-m12003-ranges-and-varvar"
+    ]
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "document": "doc-trinkwv",
+    "title": "TrinkwV / Trinkwasser-analogue disinfection (document, in_library:false)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m12003-01-cr16",
+      "cr-m12003-07-cr16"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-1",
+    "document": "doc-dwa-a-131-2016",
+    "title": "DWA-A 131:2016 (external reference)",
+    "dependents": 2,
+    "depNodes": [
+      "eq-17-ovhmin",
+      "section-m2291-02"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-din-1988-300",
+    "title": "DOC - DIN 1988-300 (Pipe sizing / booster stations)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m277e-req-26",
+      "section-m277e-09"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-din-1989-1",
+    "title": "DOC - DIN 1989-1 (Rainwater/greywater backfeed system)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m277e-req-27",
+      "section-m277e-09"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-din-en-1717",
+    "title": "DOC - DIN EN 1717 (Protection against pollution / network separation)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m277e-req-16",
+      "section-m277e-09"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-din-en-806-1988-200",
+    "title": "DOC - DIN EN 806-2 / DIN 1988-200 (Pipework, multi-pump)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m277e-req-27",
+      "section-m277e-19"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-dvgw-w-406",
+    "title": "DOC - DVGW W 406 (Water meter sizing)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-m277e-req-26",
+      "section-m277e-09"
+    ]
+  },
+  {
+    "standard": "DWA-M-349",
+    "document": "doc-dwa-m-210",
+    "title": "DOC — DWA-M 210 (SBR-Auslegung)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-023",
+      "section-m349-04"
+    ]
+  },
+  {
+    "standard": "DWA-M-349",
+    "document": "doc-dwa-m-368",
+    "title": "DOC — DWA-M 368 (Schlammkennwerte PS/UES)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-026",
+      "eq-gl7-m349-02"
+    ]
+  },
+  {
+    "standard": "DWA-M-381E",
+    "document": "doc-din-19552",
+    "title": "DOC — DIN 19552 (gravity thickener construction)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-016",
+      "section-381-03"
+    ]
+  },
+  {
+    "standard": "DWA-M-381E",
+    "document": "doc-din-en-12880",
+    "title": "DOC — DIN EN 12880 (solids content analysis method)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-015",
+      "section-381-02"
+    ]
+  },
+  {
+    "standard": "DWA-M-708",
+    "document": "doc-awsv",
+    "title": "AwSV / WHG §63",
+    "dependents": 2,
+    "depNodes": [
+      "cr-req-708-13",
+      "section-m708-02"
+    ]
+  },
+  {
+    "standard": "DWA-M-708",
+    "document": "doc-eu-2020-741",
+    "title": "VO (EU) 2020/741",
+    "dependents": 2,
+    "depNodes": [
+      "cr-req-708-12",
+      "section-m708-24"
+    ]
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "document": "doc-din-1986-100",
+    "title": "DOC — DIN 1986-100 (Regenspende r_5,5 / r_5,100)",
+    "dependents": 2,
+    "depNodes": [
+      "eq-gar-gl1-qnot",
+      "section-gar-27"
+    ]
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "document": "doc-eta-abp-mvvtb",
+    "title": "DOC — ETA / AbP gemäß MVV TB (Zulassung, Fluessigkunststoff-Mindestdicke)",
+    "dependents": 2,
+    "depNodes": [
+      "section-gar-17",
+      "tab-gar-23-fluessig"
+    ]
+  },
+  {
+    "standard": "HOAI-2021",
+    "document": "doc-bgb",
+    "title": "DOC — BGB (Fälligkeit / Abschlagszahlungen, §15)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-hoai-21",
+      "section-hoai-07"
+    ]
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14001",
+    "title": "DOC — ISO 14001 (Umweltmanagementsysteme — Anforderungen)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso14004-catalogue",
+      "section-iso14004-01"
+    ]
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14031",
+    "title": "DOC — ISO 14031 (Umweltleistungsbewertung / Kennzahlen)",
+    "dependents": 2,
+    "depNodes": [
+      "section-iso14004-03",
+      "section-iso14004-05"
+    ]
+  },
+  {
+    "standard": "ISO-14064-1",
+    "document": "doc-iso-14064-3",
+    "title": "doc — ISO 14064-3 (verification methodology, out-of-library)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-1064-024",
+      "section-iso1064-08"
+    ]
+  },
+  {
+    "standard": "ISO-14067",
+    "document": "doc-iso-ts-14027",
+    "title": "ISO/TS 14027 (external document)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso-02",
+      "cr-iso-26"
+    ]
+  },
+  {
+    "standard": "ISO-14067",
+    "document": "doc-iso-ts-14071",
+    "title": "ISO/TS 14071 (external document)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso-28",
+      "section-iso-07"
+    ]
+  },
+  {
+    "standard": "ISO-5667-1",
+    "document": "doc-iso-2602",
+    "title": "DOC — ISO 2602 (Estimation of the mean / confidence interval)",
+    "dependents": 2,
+    "depNodes": [
+      "section-iso5667-1-07",
+      "section-iso5667-1-08"
+    ]
+  },
+  {
+    "standard": "ISO-5667-1",
+    "document": "doc-iso-5667-2",
+    "title": "DOC — ISO 5667-2 (Sampling techniques)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso5667-1-004",
+      "section-iso5667-1-01"
+    ]
+  },
+  {
+    "standard": "ISO-5667-10",
+    "document": "doc-iso-5667-14",
+    "title": "DOC — ISO 5667-14 (QS/QK der Umwelt-Wasserprobenahme)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso5667-10-032",
+      "section-iso5667-10-09"
+    ]
+  },
+  {
+    "standard": "ISO-5667-10",
+    "document": "doc-iso-5667-3",
+    "title": "DOC — ISO 5667-3 (Konservierung & Handhabung von Proben)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso5667-10-026",
+      "section-iso5667-10-08"
+    ]
+  },
+  {
+    "standard": "ISO-5667-10",
+    "document": "doc-national-ww-legislation",
+    "title": "DOC — National waste-water legislation (Ordenanza de Aguas Residuales)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso5667-10-016",
+      "dp-iso5667-10-composite-interval-branch"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-cen-tr-13097",
+    "title": "DOC — CEN/TR 13097 (hazard analysis / control points)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-005-control-points",
+      "section-03-plan"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-iso-18283",
+    "title": "DOC — ISO 18283 (mechanical sampling — replicate performance)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-014-replicate",
+      "section-05-regime"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-iso-5667-12",
+    "title": "DOC — ISO 5667-12 (sampling of bottom sediments / heap bounds)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-017-heap-nsp",
+      "eq-3-heap-nsp"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-iso-6107",
+    "title": "DOC — ISO 6107 (water quality vocabulary)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-003-normative-refs",
+      "section-01-registration"
+    ]
+  },
+  {
+    "standard": "ISO-5667-16",
+    "document": "doc-iso-5667-3",
+    "title": "DOC — ISO 5667-3 (Preservation & handling of water samples)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-iso567716-002",
+      "section-iso567716-01"
+    ]
+  },
+  {
+    "standard": "ISO-59010",
+    "document": "doc-iso-59020-taxonomy-ref",
+    "title": "DOC — ISO 59020 circularity indicator taxonomy (referenced, out-of-library for this dep)",
+    "dependents": 2,
+    "depNodes": [
+      "section-iso59010-03",
+      "section-iso59010-04"
+    ]
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "document": "doc-din-en-iso-16484-5",
+    "title": "DOC — DIN EN ISO 16484-5 (Datenkommunikationsprotokoll)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-vdi-16",
+      "section-vdi-04"
+    ]
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "document": "doc-vdma-24774",
+    "title": "DOC — VDMA 24774 (IT-Sicherheit in der Gebäudeautomation)",
+    "dependents": 2,
+    "depNodes": [
+      "cr-vdi-21",
+      "section-vdi-05"
+    ]
+  },
+  {
+    "standard": "ATV-A-704E",
+    "document": "doc-din-en-iso-5667",
+    "title": "DOC — DIN EN ISO 5667 (water sampling series)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-704e-029"
+    ]
+  },
+  {
+    "standard": "DIN-14021",
+    "document": "doc-iso-14020",
+    "title": "DOC — ISO 14020 (environmental labels, general principles)",
+    "dependents": 1,
+    "depNodes": [
+      "section-14021-01"
+    ]
+  },
+  {
+    "standard": "DIN-14021",
+    "document": "doc-iso-14044",
+    "title": "DOC — ISO 14044 (LCA requirements & guidelines)",
+    "dependents": 1,
+    "depNodes": [
+      "section-14021-04"
+    ]
+  },
+  {
+    "standard": "DIN-14021",
+    "document": "doc-iso-7000-1135",
+    "title": "DOC — ISO 7000 symbol reg.no. 1135 (Mobius loop graphic)",
+    "dependents": 1,
+    "depNodes": [
+      "section-14021-03"
+    ]
+  },
+  {
+    "standard": "DIN-14021",
+    "document": "doc-iso-ts-14067",
+    "title": "DOC — ISO/TS 14067 (product carbon footprint)",
+    "dependents": 1,
+    "depNodes": [
+      "section-14021-05"
+    ]
+  },
+  {
+    "standard": "DIN-14071-1",
+    "document": "doc-iso-14021",
+    "title": "DOC — ISO 14021 (self-declared environmental claims) — NOT cited in this source",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din14071-cx03"
+    ]
+  },
+  {
+    "standard": "DIN-14071-1",
+    "document": "doc-iso-14025",
+    "title": "DOC — ISO 14025 (Type III environmental declarations)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din14071-cx02"
+    ]
+  },
+  {
+    "standard": "DIN-14071-1",
+    "document": "doc-iso-14045",
+    "title": "DOC — ISO 14045 (eco-efficiency assessment)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din14071-cx02"
+    ]
+  },
+  {
+    "standard": "DIN-14071-1",
+    "document": "doc-iso-ts-14067",
+    "title": "DOC — ISO/TS 14067 (carbon footprint of products)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din14071-cx02"
+    ]
+  },
+  {
+    "standard": "DIN-18130-1",
+    "document": "doc-din-18137-2",
+    "title": "DOC - DIN 18137-2 (Wassersaettigung nachgewiesen/kontrolliert)",
+    "dependents": 1,
+    "depNodes": [
+      "dp-02-versuchsklasse"
+    ]
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-din-2403",
+    "title": "DOC — DIN 2403 (Kennzeichnung von Rohrleitungen)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din-1989-1-09"
+    ]
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-din-4109",
+    "title": "DOC — DIN 4109 (Schallschutz im Hochbau)",
+    "dependents": 1,
+    "depNodes": [
+      "section-din-1989-1-01"
+    ]
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-din-en-124",
+    "title": "DOC — DIN EN 124 (Aufsaetze/Abdeckungen fuer Verkehrsflaechen)",
+    "dependents": 1,
+    "depNodes": [
+      "tab-01-belastungsklassen"
+    ]
+  },
+  {
+    "standard": "DIN-1989-2",
+    "document": "doc-din-1989-1",
+    "title": "DOC — DIN 1989-1 (Regenwassernutzungsanlagen Teil 1, Begriffe)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din-1989-2-16"
+    ]
+  },
+  {
+    "standard": "DIN-1989-2",
+    "document": "doc-din-1989-3",
+    "title": "DOC — DIN 1989-3:2003-08 (Regenwasserspeicher, Standsicherheit 4.4.4)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din-1989-2-10"
+    ]
+  },
+  {
+    "standard": "DIN-1989-2",
+    "document": "doc-din-en-iso-9001",
+    "title": "DOC — DIN EN ISO 9001 (WPK-Grundlage)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-din-1989-2-13"
+    ]
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-bam-zulassung",
+    "title": "DOC — BAM-Zulassungsrichtlinie (Kunststoff-Dichtungsbahnen Deponien)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-req-01"
+    ]
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-din-en-10204",
+    "title": "DOC — DIN EN 10204-3.1 (Abnahmeprüfzeugnis)",
+    "dependents": 1,
+    "depNodes": [
+      "section-05"
+    ]
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "document": "doc-kostra-dwd",
+    "title": "DOC - KOSTRA-DWD-2020 / DWD Jahresniederschlagshöhe",
+    "dependents": 1,
+    "depNodes": [
+      "dp-04-kostra-hna"
+    ]
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "document": "doc-zusatzdatei-rkb",
+    "title": "DOC - Zusatzdatei RKB-Bemessung (Bild 4 Regressionsdaten)",
+    "dependents": 1,
+    "depNodes": [
+      "dp-03-bild4-regression"
+    ]
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-din-en-12889",
+    "title": "DIN EN 12889 — trenchless construction & testing (document)",
+    "dependents": 1,
+    "depNodes": [
+      "section-a125-01"
+    ]
+  },
+  {
+    "standard": "DWA-A-178",
+    "document": "doc-atv-a-128",
+    "title": "ATV-A 128 - external reference (document, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "eq-a178-gl03-brbfzu-misch"
+    ]
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "document": "doc-din-1986-100",
+    "title": "DOC — DIN 1986-100 (800 m² Relevanzgrenze)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-m104-req-03"
+    ]
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "document": "doc-dwa-m-153",
+    "title": "DOC — DWA-M 153 (Regenwasser-Handlungsempfehlung)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-m104-req-20"
+    ]
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "document": "doc-eu-2020-741",
+    "title": "Verordnung (EU) 2020/741 (document, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-m12002-13-req03"
+    ]
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "document": "doc-din-1986-100",
+    "title": "DWA-M-179-1 — DIN 1986-100:2016 (external ref, out)",
+    "dependents": 1,
+    "depNodes": [
+      "tab-m179-02-formelzeichen"
+    ]
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "document": "doc-dwa-a-166",
+    "title": "DWA-M-179-1 — DWA-A 166 (external ref, out)",
+    "dependents": 1,
+    "depNodes": [
+      "bild-m179-03-abflussaufteilung"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-1",
+    "document": "doc-dwa-m-210",
+    "title": "DWA-M 210 (external reference)",
+    "dependents": 1,
+    "depNodes": [
+      "eq-21-fsbr"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-2",
+    "document": "doc-din-31051",
+    "title": "DIN 31051 (external reference)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-dead-presence-gates"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-2",
+    "document": "doc-dwa-a-216",
+    "title": "DWA-A 216 (external reference)",
+    "dependents": 1,
+    "depNodes": [
+      "section-m2292-06"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-2",
+    "document": "doc-dwa-a-268",
+    "title": "DWA-A 268 (external reference)",
+    "dependents": 1,
+    "depNodes": [
+      "section-m2292-05"
+    ]
+  },
+  {
+    "standard": "DWA-M-229-2",
+    "document": "doc-dwa-m-209",
+    "title": "DWA-M 209 (external reference)",
+    "dependents": 1,
+    "depNodes": [
+      "section-m2292-07"
+    ]
+  },
+  {
+    "standard": "DWA-M-277E",
+    "document": "doc-ral-gz-992",
+    "title": "DOC - RAL-GZ 992 (Laundry quality mark)",
+    "dependents": 1,
+    "depNodes": [
+      "section-m277e-12"
+    ]
+  },
+  {
+    "standard": "DWA-M-349",
+    "document": "doc-din-en-12255-1",
+    "title": "DOC — DIN EN 12255-1 (Klaeranlagen: Allg. Baugrundsaetze)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-027"
+    ]
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-ipcc-2006",
+    "title": "DWA-M-363 — IPCC 2006 Guidelines Vol.5 Ch.3 (Waste, Eq.3.5) (external ref)",
+    "dependents": 1,
+    "depNodes": [
+      "eq-m363-gl7-ddoc"
+    ]
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-vdi-3790-2",
+    "title": "DWA-M-363 — VDI 3790 Blatt 2 — Emissionen Deponien (external ref)",
+    "dependents": 1,
+    "depNodes": [
+      "eq-m363-gl7-ddoc"
+    ]
+  },
+  {
+    "standard": "DWA-M-708",
+    "document": "doc-12-bimschv",
+    "title": "12. BImSchV (Stoerfall-VO)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-req-708-14"
+    ]
+  },
+  {
+    "standard": "DWA-M-708",
+    "document": "doc-4-bimschv",
+    "title": "4. BImSchV",
+    "dependents": 1,
+    "depNodes": [
+      "cr-req-708-06"
+    ]
+  },
+  {
+    "standard": "DWA-M-708",
+    "document": "doc-bvt-ngm",
+    "title": "BVT-Merkblatt Nahrungsmittel-, Getraenke- und Milchindustrie",
+    "dependents": 1,
+    "depNodes": [
+      "val-bvt-classes"
+    ]
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "document": "doc-atv-din-18300",
+    "title": "DOC — ATV DIN 18300 (Erdarbeiten / Ground work)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-fllnt-req-14"
+    ]
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "document": "doc-fll-wurzelfestigkeit",
+    "title": "DOC — FLL Wurzelfestigkeitspruefung (Verfahren zur Untersuchung der Wurzelfestigkeit, 2008)",
+    "dependents": 1,
+    "depNodes": [
+      "section-rhz-03"
+    ]
+  },
+  {
+    "standard": "HOAI-2021",
+    "document": "doc-baugb",
+    "title": "DOC — BauGB (Bauleitplanung, §17)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-hoai-22"
+    ]
+  },
+  {
+    "standard": "ISO-14002-2",
+    "document": "doc-iso-14001",
+    "title": "DOCUMENT — ISO 14001 (external, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14002-01"
+    ]
+  },
+  {
+    "standard": "ISO-14002-2",
+    "document": "doc-iso-14031",
+    "title": "DOCUMENT — ISO 14031 performance evaluation (external, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14002-08"
+    ]
+  },
+  {
+    "standard": "ISO-14002-2",
+    "document": "doc-iso-14046",
+    "title": "DOCUMENT — ISO 14046 water footprint (external, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14002-03"
+    ]
+  },
+  {
+    "standard": "ISO-14002-2",
+    "document": "doc-iso-14063",
+    "title": "DOCUMENT — ISO 14063 environmental communication (external, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14002-06"
+    ]
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14063",
+    "title": "DOC — ISO 14063 (Umweltkommunikation)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14004-06"
+    ]
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-19011",
+    "title": "DOC — ISO 19011 (Leitfaden zur Auditierung von Managementsystemen)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14004-08"
+    ]
+  },
+  {
+    "standard": "ISO-14019-1",
+    "document": "doc-iso-14019-2",
+    "title": "DOC — ISO 14019-2 (out-of-library normative reference)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso-14019-1-08"
+    ]
+  },
+  {
+    "standard": "ISO-14046",
+    "document": "doc-iso-14026",
+    "title": "DOC — ISO 14026 (footprint communication, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso14046-06"
+    ]
+  },
+  {
+    "standard": "ISO-14067",
+    "document": "doc-iso-14044",
+    "title": "ISO 14044:2006 (external document)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso-01"
+    ]
+  },
+  {
+    "standard": "ISO-14097",
+    "document": "doc-iso14097-referenced-frameworks",
+    "title": "ISO-14097 referenced frameworks (external document cluster, in_library:false)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-iso14097-cr-016"
+    ]
+  },
+  {
+    "standard": "ISO-5667-1",
+    "document": "doc-iso-3534",
+    "title": "DOC — ISO 3534 (Statistics — Vocabulary and symbols)",
+    "dependents": 1,
+    "depNodes": [
+      "eq-gl1-s"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-iso-5667-14",
+    "title": "DOC — ISO 5667-14 (QA of environmental water sampling)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-003-normative-refs"
+    ]
+  },
+  {
+    "standard": "ISO-5667-13",
+    "document": "doc-iso-tr-8363",
+    "title": "DOC — ISO/TR 8363 (open-channel liquid flow measurement)",
+    "dependents": 1,
+    "depNodes": [
+      "cr-003-normative-refs"
+    ]
+  },
+  {
+    "standard": "ISO-5667-6",
+    "document": "doc-iso-555-2",
+    "title": "ISO 555-2 — origin of Annex A Eq.(A.1) (external ref)",
+    "dependents": 1,
+    "depNodes": [
+      "eq-iso5667-6-a1"
+    ]
+  },
+  {
+    "standard": "ISO-9001",
+    "document": "doc-iso-19011",
+    "title": "ISO 19011 — Leitfaden Auditierung (external, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso9001-06"
+    ]
+  },
+  {
+    "standard": "ISO-9001",
+    "document": "doc-iso-9000",
+    "title": "ISO 9000 — Grundlagen und Begriffe (external, out-of-library)",
+    "dependents": 1,
+    "depNodes": [
+      "section-iso9001-01"
+    ]
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "document": "doc-din-18205",
+    "title": "DOC — DIN 18205 (Bedarfsplanung im Bauwesen)",
+    "dependents": 1,
+    "depNodes": [
+      "section-vdi-02"
+    ]
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "document": "doc-vdi-3814-blatt-1",
+    "title": "DOC — VDI 3814 Blatt 1 (GA Grundlagen / Begriffe / Abkürzungen)",
+    "dependents": 1,
+    "depNodes": [
+      "section-vdi-01"
+    ]
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "document": "doc-vdi-4700-blatt-1",
+    "title": "DOC — VDI 4700 Blatt 1 (Begriffe der Bau- und Gebäudetechnik)",
+    "dependents": 1,
+    "depNodes": [
+      "section-vdi-01"
+    ]
+  },
+  {
+    "standard": "ATV-A-704E",
+    "document": "doc-din-38xxx",
+    "title": "DOC — DIN 38xxx (German standard analytical methods, DEV)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DIN-1989-1",
+    "document": "doc-din-4102",
+    "title": "DOC — DIN 4102 (Brandverhalten von Baustoffen)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DIN-276",
+    "document": "doc-din-18960",
+    "title": "DIN 18960 — utilisation costs (document)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DIN-EN-16941-2",
+    "document": "doc-en-referenced",
+    "title": "document cluster — referenced EN/ISO standards (out of library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-din-878",
+    "title": "DOC — DIN 878 (mechanische Messuhren)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-din-en-13492",
+    "title": "DOC — DIN EN 13492 (geosynthetische Dichtungsbahnen, flüssige Abfälle)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-din-en-13493",
+    "title": "DOC — DIN EN 13493 (geosynthetische Dichtungsbahnen, feste Abfälle)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DVS-2225-4",
+    "document": "doc-din-en-iso-9863-1",
+    "title": "DOC — DIN EN ISO 9863-1 (Dickenbestimmung Geokunststoffe)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "document": "doc-dwa-a-118",
+    "title": "DOC - DWA-A 118 (hydraulische Bemessung Entwässerungssysteme)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-din-18319",
+    "title": "DIN 18319 — VOB trenchless pipe jacking works (document)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-din-en-681-1",
+    "title": "DIN EN 681-1 — elastomeric seals (document)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-125",
+    "document": "doc-dvgw-gw-301-302",
+    "title": "DVGW GW 301 / GW 302 — contractor qualification schemes (document)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "document": "doc-dwa-a-531",
+    "title": "DOC — DWA-A 531 (Starkregen / Regenspenden)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-178",
+    "document": "doc-ristwag",
+    "title": "RiStWag - external reference (document, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-A-226",
+    "document": "doc-abwv-anhang-1",
+    "title": "AbwV Anhang 1 — Abwasserverordnung (kommunales Abwasser)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "document": "doc-bfg-2003b",
+    "title": "DOC — BfG 2003b (Verdunstungs-/Abflusshöhe)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "document": "doc-dwa-m-1200-1",
+    "title": "DWA-M 1200-1 (document, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "document": "doc-dwa-regelwerk",
+    "title": "DWA-Regelwerk misc. cross-refs (document, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "document": "doc-din-1986-100",
+    "title": "DIN 1986-100 (Entwaesserung) analogue (document, in_library:false)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "document": "doc-dwa-m-1200-1-2",
+    "title": "DWA-M 1200-1 / DWA-M 1200-2 (sibling parts) (document, in_library:false)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "document": "doc-dwa-regelwerk",
+    "title": "Misc. DWA-A/M Regelwerk cross-refs (document, in_library:false)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "document": "doc-dwa-a-199",
+    "title": "DWA-M-179-1 — DWA-A 199 (external ref, out)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "document": "doc-dwa-m-369",
+    "title": "DWA-M-179-1 — DWA-M 369 (external ref, out)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "document": "doc-kvr-leitlinien",
+    "title": "DWA-M-179-1 — KVR-Leitlinien (external ref, out)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "document": "doc-ristwag",
+    "title": "DWA-M-179-1 — RiStWag (external ref, out)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-187",
+    "document": "doc-dwa-a-166",
+    "title": "DWA-M-187 — DWA-A 166 (OUT of library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-187",
+    "document": "doc-lawa-lawa-disposal",
+    "title": "DWA-M-187 — LAWA / LAGA disposal references (OUT of library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-229-1",
+    "document": "doc-atv-dvwk-a-198",
+    "title": "ATV-DVWK-A 198 (external reference)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-229-1",
+    "document": "doc-din-en-12255-15",
+    "title": "DIN EN 12255-15 (external reference)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-349",
+    "document": "doc-dwa-a-268",
+    "title": "DOC — DWA-A 268 (Regelung der Sauerstoffzufuhr)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-349",
+    "document": "doc-dwa-m-256-2",
+    "title": "DOC — DWA-M 256-2 (Prozessmesstechnik O2)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-bimschv-regime",
+    "title": "DWA-M-363 — BImSchG/4./12./44. BImSchV, TA Luft 2021, TRAS 120, TRGS 900, BauGB §35 (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-din-en-15259",
+    "title": "DWA-M-363 — DIN EN 15259 — Messplatzanforderungen Emissionsmessung (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-din-en-16723-2",
+    "title": "DWA-M-363 — DIN EN 16723-2 — Biomethan als Kraftstoff (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-dvgw-g260",
+    "title": "DWA-M-363 — DVGW G 260 — Gasbeschaffenheit (Netzeinspeisung) (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-dwa-m-361",
+    "title": "DWA-M-363 — DWA-M 361 — Reinigung und Aufbereitung von Biogas (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-dwa-m-380",
+    "title": "DWA-M-363 — DWA-M 380 — Co-Vergaerung (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-363",
+    "document": "doc-ktbl-yields",
+    "title": "DWA-M-363 — KTBL Substrat-Gasausbeutetabellen (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-381E",
+    "document": "doc-din-en-1085",
+    "title": "DOC — DIN EN 1085 (wastewater/sludge terminology)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "DWA-M-760",
+    "document": "doc-outoflibrary-cited",
+    "title": "DOC cluster — out-of-library cited standards (in_library:false)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14002-2",
+    "document": "doc-iso-14005",
+    "title": "DOCUMENT — ISO 14005 phased implementation (external, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14005",
+    "title": "DOC — ISO 14005 (Stufenkonzept zur Verwirklichung)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14006",
+    "title": "DOC — ISO 14006 (Einbindung umweltverträglicher Produktgestaltung)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14040",
+    "title": "DOC — ISO 14040 (Ökobilanz / LCA — Grundsätze und Rahmen)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14044",
+    "title": "DOC — ISO 14044 (Ökobilanz / LCA — Anforderungen und Anleitungen)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14004",
+    "document": "doc-iso-14062",
+    "title": "DOC — ISO/TR 14062 (Umweltverträgliche Produktgestaltung)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14019-1",
+    "document": "doc-iso-14019-3",
+    "title": "DOC — ISO 14019-3 (out-of-library normative reference)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14064-1",
+    "document": "doc-ipcc-ar-gwp",
+    "title": "doc — IPCC Assessment Report / GWP + emission-factor source (out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14064-1",
+    "document": "doc-iso-14065",
+    "title": "doc — ISO 14065 (verification bodies, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14064-1",
+    "document": "doc-iso-14066",
+    "title": "doc — ISO 14066 (team competence, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14067",
+    "document": "doc-iso-14026",
+    "title": "ISO 14026 (external document)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-14067",
+    "document": "doc-iso-14064",
+    "title": "ISO 14064-1 / ISO 14064-3 (external document)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-5667-1",
+    "document": "doc-iso-5667-3",
+    "title": "DOC — ISO 5667-3 (Preservation & handling of samples)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-5667-16",
+    "document": "doc-iso-8466",
+    "title": "DOC — ISO 8466 (Calibration & evaluation of analytical methods)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-5667-6",
+    "document": "doc-iso-5667-14",
+    "title": "ISO 5667-14 — QC/QA of water sampling (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-5667-6",
+    "document": "doc-iso-5667-23",
+    "title": "ISO 5667-23 — passive sampling (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-5667-6",
+    "document": "doc-iso-5667-3",
+    "title": "ISO 5667-3 — sample preservation & transport (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-5667-6",
+    "document": "doc-iso-iec-17025",
+    "title": "ISO/IEC 17025 — lab competence (external ref)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-59014",
+    "document": "doc-iso-14075",
+    "title": "DOCUMENT — ISO 14075 (Social LCA principles & framework)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "ISO-9001",
+    "document": "doc-iso-9004",
+    "title": "ISO 9004 — Leitfaden nachhaltiger Erfolg (external, out-of-library)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "VDI-3477",
+    "document": "doc-registry",
+    "title": "Out-of-library document registry (13 referenced standards, in_library:false)",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "VSME",
+    "document": "doc-ghg-protocol",
+    "title": "DOC -- GHG Protocol Corporate Standard (2004) + Scope 3 Technical Guidance",
+    "dependents": 0,
+    "depNodes": []
+  },
+  {
+    "standard": "VSME",
+    "document": "doc-nace-1893-2006",
+    "title": "DOC -- NACE / Regulation (EC) No 1893/2006",
+    "dependents": 0,
+    "depNodes": []
+  }
+]

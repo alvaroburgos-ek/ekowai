@@ -1,0 +1,2604 @@
+                                                                          DEUTSCHE NORM                                         August 2004
+
+
+                                                                        DtN 1989-2
+                                                                                                                               DIN
+           ICS 13.060.25; 91.140.60
+
+
+
+
+          Regenwassernutzungsanlagen                                          -
+          Teil 2: Filter
+          Rainwater harvesting systems                         -
+          Part2: Filters
+          Systèmes d'utilisation des eaux pluviales                               -
+          Partie 2: Filtres
+
+
+
+a
+a
+at
+6
+o
+o
+€
+o
+N
+
+Ë
+o
+a
+o
+ñ
+a
+o
+o
+o
+o
+o
+b
+6
+o
+6
+t¡.
+a
+a
+6
+b
+ø
+o
+o
+o
+a
+þ
+a
+o
+6
+al
+ô
+È
+s6
+T
+I
+{
+È
+v
+tê
+(}
+o
+o
+a                                                                                                                   Gesamtumfang 26 Seiten
+a
+e
+¡
+G
+
+
+
+o
+o
+\o                                                    Normenausschuss Wasserwesen (NAW) im DIN
+*o
+co
+o
+q
+      O DIN Deutsches lnst¡tut für Normung e.V. . Jede Art der Verv¡elfältigung, auch auszugsweise, nur mil   Preisgruppe 13
+¡É
+G
+            Genehmigung des DIN Deutsches lnstitut für Normung e. V., Berl¡n, gestattet.                         ww.din.dê
+                                                                                                                                tililililtilililtililil
+      Alleinverkauf der Normen durch Beulh Verlag GmbH, 10772 Bêrlin                                          www.beuth.dê
+õ                                                                                                                                            9555904
+      DIN 1989-2:2004-08
+
+
+
+      lnhalt
+                                                                                                                        Seite
+
+
+
+      1
+
+      2        Normative Venneisungen                                                                                       .3
+      3
+      4        Symbole                                                                                                       b
+      5        Anforderungen ................                                                                  ..............7
+      5.1
+      5.2
+      5.2.1
+      5.2.2    Werkstoffe fü r Filterelemente                                                                                7
+      5.2.3    Werkstoffe fü r Filtergehäuse                                                                                 7
+      5.3
+      5.3.1    Zuordnung                                                                                                   ..8
+      5.3.2    Typ   I                                                                                                     ..8
+      5.3.3    Typ B                                                                                                         9
+      5.3.4    Typ c                                                                                                       10
+      5.4      Hydra
+      5.4.1    Hydra ulische Funktion                                                                                      10
+      5.4.2    Hydraulischer Wirkungsgrad des unbelasteten Filtersystems.................. ................10
+6     5.4.3    HydraulischerWirkungsgrad des dauerbelasteten Filtersystems (Leistungsfähigkeit)..............10
+      5.5     Filtertrennwirkung..........                                                                    .............10
+q     5.6
+6
+      5.7     Standsicherheit ..............                                                                  .............1 I
+q
+s     6
+6
+G
+N     6.1     Allgemeines                                                                                                  11
+      6.2     Werkstofi Maße, Filterelemente und Filtereinheit..............                            ....................11
+a     6.3     Bauart und Einbauort                                                                                         11
+a
+N
+      6.4     Prüfung der hydraulischen Anforderungen...........,,...                                               .......11
+N
+a     6.4.1
+o     6.4.2
+a
+q
+o
+o
+      6.4.3   Reihenfolge der Prüfung                                                             ............13
+b
+      6.4.4   Prüfung der hydraulischen Funktion des unbelasteten Filtersystems          .................,...13
+l¡.   6.4.5   Bestimmung des hydraulischen Wirkungsgrades des unbelasteten Filtersystems ....................13
+sa            Bestimmung des hydraulischen Wirkungsgrades des dauerbelasteten Systems
+      6.4.6
+b
+(J
+              (Prüfung der Leistungsfähigkeit)...                                            .................14
+(J
+o     6.5     Prüfung der Filtertrennwirkung                                            ......................15
+a
+a     6.5.1   Prüfbedingungen............                                                                     .............15
+a
+o
+6
+      6.5.2   Prüfdurchführun9.............                                                                     ...........16
+e
+o     6.5.3   Ermittlung der FilteÉrennwirkung....                                                           ..............16
+ñ
+b
+6
+      7       Kennzeichnung................                                                                    .......,...,18
+      I       Konformitätsbewertung.                                                                          .............18
+u
+¿
+      8.1     Allgemeines                                                                                                  l8
+È     8.2
+Y
++
+€
+      8.3   Eigenüberwachung (Werkseigene Produktionskontrolle)..                                  ...................18
+o     I     Einbau, Betrieb und Wartung                                                     ..........................19
+è
+I
+o
+      Anhang A (informativ) Beispiel für die Ermittlung der Trennwirkung eines Filters Typ A                        ..20
+o
+      Anhang B (informativ) Beispiel für die Ermittlung der Trennwirkung eines Filters Typ g                        ..21
+a
+o     Anhang C (informativ) Beispiel für die Ermittlung der Trennwirkung eines Filters Typ C ........................22
+¡
+G
+À
+      Anhang D (informativ) Extrembeispiele..........                                                    .............23
+o     Anhang E (informativ) Beispiel eines Prüfberichtes.........                                       ..............25
+¡0
+o
+
+o
+
+þ     2
+o
+
+¡å
+G
+
+
+õ
+                                                                                                 DIN 1989-2:2004-08
+
+
+
+      Voruvort
+
+       Diese Norm wurde vom Arbeitsausschuss V 8 ,,Regenwassernutzungsanlagen"           ausgearbeitet.
+
+      Die Substitution von Trinkwasser durch Betriebswasser gewinnt zunehmend an Bedeutung. Für die Regen-
+      wassernutzung im häuslichen, gewerblichen und industriellen Bereich hat sich eine neue Anlagentechnik mit
+      neuen Bauteilen und Komponenten entwickelt.
+
+      Unter Berücksichtigung der allgemein anerkannten Regeln der Technik für Trinkwasserinstallationen nach der
+      Normenreihe DIN 1988 und für Entwässerungsanlagen nach DIN 1986-100 und DIN EN 12056-1 bis
+      DIN EN 12056-5 sind neue Anwendungstechniken für Regenwassernutzungsanlagen entstanden. Frlr Filter in
+      Regenwassernutzungsanlagen werden in dieser Norm Anforderungen und Prüfverfahren festgelegt.
+
+      D I N 1 989,,Regenwasse rn utz u ngsa n I agen" besteht a us :
+
+           Teil 1: Planung, Ausführung, Betrieb und Waftung,
+           Teil 2: Filter,
+           Teil 3: Regenwasserspeicher,
+           Teil 4: Bauteile zur Steuerung und Nachspeisung.
+
+
+
+ N
+      1 Anwendungsbereich
+      Diese Norm legt Anforderungen und Prüfungen für mechanisch wirkende Filter fest, die in den Zulauf von
+ 6
+ q
+      Regenwasserspeichern für Regenwassernutzungsanlagen eingebaut werden.
+ o
+ s
+ 6
+ N
+      Diese Norm gilt nicht für
+
+ o
+          Laubfänge in Dachrinnen,
+ o
+ a        Filter in Entnahmeleitungen von Regenspeichern,
+ N
+ a        Filter in Druckleitungen von Regenwassernutzungsanlagen,
+ o
+ o
+ o
+ o
+ o        Schlammfänge.
+ b
+
+\
+6
+c0
+      ANMERKUNG Um die Reproduzierbarkeit der Prüfungen und die Vergleichbarkeit der Prüfergebnisse sichezustellen,
+a     werden die in der Norm beschriebenen Prüfungen mit Klauasser Or¡nt<wasser oOer n
+k,
+(J    Qualitätl und künstl¡ch beigegebenen Prüfstoffen durchgeführt. Die auf der Grundlage dieser Norm durchgeführten
+o
+o     Prüfungen von Filtersystemen und die ezielten Prüfergebnisse können daher in der praktischen Anwendung geringfügig
+a     abweichen.
+6
+a
+o
+€
+r?
+
+ìNb
+o
+      2 NormativeVerweisungen
+ t    Diese Norm enthält durch datierte oder undatierte Verweisungen Festlegungen aus anderen Publikationen.
+È
+=     Diese normativen Verweisungen sind an den jeweiligen Stellen im Text zitiert, und die Publikationen sind
+Y
+É     nachstehend aufgeführt. Bei datierten Venirreisungen gehören spåtere Anderungen oder Überarbeitungen
+a
+      dieser Publikationen nur zu dieser Norm, falls sie durch Anderung oder Überarbeitung eingearbeitet sind. Bei
+o
+      undatierten Verweisungen gilt die letzte Ausgabe der in Bezug genommenen Publikation (einschließlich
+o
+o
+      Anderungen).
+ô     DIN 1986-100, Entwässerungsanlagen für Gebê)ude und Grundstücke- Teil100: Zusätzliche Bestimmungen
+e
+      zu DIN EN 752 und DIN EN 12056.
+Ì
+G
+À
+
+a
+!a
+      DIN 1988 (alle Teile), Technische Regeln für TrinkwasserJnstallationen (TRW)
+ó
+
+ô
+ù
+o                                                                                                                     3
+
+¡
+G
+
+ta
+         DIN 1989-2:2004-08
+
+
+
+         DIN 1989-1, Regenwasse rnutzungsanlagen - Teil 1: Planung, Ausführung, Betrieb und Waftung.
+
+         DIN 1989-3:2003-08, Regenwasse rnutzungsanlagen              - Teil3: Regenwasserspeicher.
+     DIN EN 12056-1, Schwerkraftentwässerungsanlagen innerhalb von Gebäuden- Teill: Allgemeine und
+     A u sfü h ru n gs a nfo rd e ru nge n ; D e utsc he Fassarng EN 1 20 56- 1 : 2000.
+
+
+     DIN EN 12056-2, Schwerkraftenfwässerungsanlagen innerhalb von Gebäuden- Teil 2: Schmutzwasseran-
+     lagen, Planung und Berechnung; Deutsche Fassung EN 12056-2:2000.
+
+     DIN EN 12056-3:2001-01, Schwerkraftentwässerungsanlagen innerhalb von Gebäuden- Teil3: Dachent-
+     wässerung, Planung und Berechnung; Deutsche Fassung EN 12056-3:2000.
+
+     DIN EN 12056-4, Schwerkraftenfwässerungsanlagen innerhalb von Gebäuden- Teil4: Abwasserhebean-
+     lagen, Planung und Bemessung; Deutsche Fassung EN 12056-4:2000.
+
+     DIN EN 12056-5, Schwerkraftenfwässerungsanlagen innerhalb von Gebäuden- TeilS: Installation und
+     Prüfung, Anleitung für Betrieb, Wartung und Gebrauch; Deutsche Fassung EN 12056-5:2000.
+
+     DIN EN 12904, Produkte zur Aufbereitung von Wasser für den menschlichen Gebrauch- Sand und Kes;
+     Deutsche Fassung EN 12904:1999.
+
+     DIN EN ISO 1043-1, Kunststoffe- Kennbuchstaben und Kurzzeichen- Teill: Basis-Polymere und ihre
+a    besonderen Eigenschaften (/SO 1043-1:2001); Deutsche FassungE/V/SO 1043-1:2002.
+1ì
+1ì
+s    DIN EN ISO 9001, Qualitätsmanagementsysteme- Anforderungen (lSO 9001:2000); Dreisprachige Fassung
+6    EN /SO 9001:2000.
+o
+o
+.å
+o    DlNlSO3310-1, Analysensiebe- Technische Anforderungen und Prüfung- Teil1: Analysensiebe mit
+N
+     Metalldrahtgewebe (l SO 331 0-1 :2000).
+a
+a
+ñ
+a    3 Begriffe
+a
+a
+o
+o
+o    Ftir die Anwendung dieser Norm gelten die in DIN 1989-1 angegebenen und die folgenden Begriffe
+I
+\a   3.1
+a    Filter
+b
+o
+(J   Einrichtung, die zwischen Auffangfläche und Speicherzulauf über eine oder mehrere mechanisch wirkende
+()
+o    Trennflächen ungelöste Fremdstoffe vom aufgefangenen Regenwasser abtrennt
+a
+a
+o
+o    3.2
+6
+I
+ci   Filterelement
+ñ.
+b    alle Bauteile einer Anlage, an denen sich die mechanische Trennung der ungelösten Stoffe des
+o
+     Niederschlagswassers vollzieht
+6
+t
+2
+È    3.3
+Y
+ta   Porenbeton
+E    Gattungsbegriff für Beton mit planmäßig hergestellter großer Anzahl zusammenhängender Porenkanäle
+o    kleiner Durchmesser
+è
+ô
+o
+o
+     3.4
+o    Filterfeinheit
+e
+G    maximale Korngröße der ungelösten Fremdstoffe, die vom Filterelement nicht zurückgehalten werden
++
+c
+o
+a
+ó
+
+ô
+ù
+o
+     4
+q
+
+\
+G
+
+Ë
+a
+                                                                                             DIN 1989-2:2004-08
+
+
+
+      3.5
+      Filtereinheit
+      alle beweglichen und lösbaren Bauteile, die im Betriebszustand kraftschlüssig mit dem Filtergehäuse
+      verbunden sind, einschließlich des Filterelements und in der Regel für Wartungs- und Reinigungszwecke
+      bewegt bzw. gelöst werden können
+
+      3.6
+      Filtergehäuse
+      alle Bauteile und Anlagen, die die Filtereinheit gegenüber den Beanspruchungen aus der Einbaulage
+      schützen
+
+      3.7
+      Funktionsprinzip
+      Verfahren, mit dem Schmutz auf mechanischem Wege aus dem Regenwasser zurückgehalten oder
+      abgetrennt wird
+
+      3.8
+      Filter mit Fremdstoffableitung (Typ C)
+      Filter, mit dem auf mechanischem Wege mittels eines Filterelements vor dem Zulauf in den Speicher
+      ungelöste Stoffe aus dem Regenwasser entfernt, aus dem Filtergehäuse herausgeführt und einer
+      Versickerungsanlage, einem Vorfluter oder einem Kanal zugeleitet werden
+
+      3.9
+      Filter mit Fremdstoffrückhalt (Typ A oder Typ B)
+e
+      Filter, mit dem auf mechanischem Wege mittels eines Filterelements vor dem Zulauf in den Speicher
+      ungelöste Stoffe aus dem Regenwasser entfernt und vor dem Filter in einem definierten Rückhalteraum
+6     zurückgehalten werden
+o
+o
+      3.'t0
+o
+N     integriertes F iltersystem
+ 0
+      System, dessen Filtereinheit in einem Filtergehäuse so verankert ist, dass keine äußeren Beanspruchungen
+00
+a     (Temperatur, Wasser- und Erddruck usw.) auf die Filtereinheit wirken
+ñ
+N
+o     3.11
+o
+a
+o     separates Filtersystem für den Erdeinbau
+o
+b
+6
+      in ein gesondertes Filtergehäuse eingebaute Filtereinheit, die nicht mit anderen Funktionen einer
+6     Regenwassernutzungsanlage ( z. B. Speicher) kombiniert wird
+lÀ
+a
+c0
+k)    ANMERKUNG Gehäuse und Filtereinheit bilden eine Anlage, deren ausschließlicher Zweck die Filterung von Regen-
+o
+o     wasser ist.
+o
+o
+a
+€     3.12
+o
+q
+6
+o?
+      separates Filtersystem für den oberirdischen Einbau
+o     Filtersystem, dessen Filtereinheit und -gehäuse sich oberhalb der Gelååndeoberkante bzw. der Rückstau-
+¡b    ebene befinden, die nicht mit anderen Funktionen einer Regenwassernutzungsanlage (2. B. Speicher)
+o
+      kombiniert werden
+\t
+è
+=     ANMERKUNG Gehäuse und Filtereinheit bilden eine Anlage, deren ausschließlicher Zweck die Filterung von
+taY   Regenwasser ist.
+o
+Þ     3.13
+o
+      hydraulische Funktion
+      Fähigkeit eines Filters, den maximalen Volumenstrom aus der voll gefüllten Zulaufleitung ohne Rückstau und
+o
+o     ohne Querschnittsverengung durch das Filtersystem zu leiten
+Ìc
+G
+
+      ANMERKUNG Siehe auch DIN EN 12056-3.
+o
+e
+o
+:o
+o
+o
+                                                                                                                  5
+
+¡*
+G
+
+
+o
+     DIN 1989-2:2004-08
+
+
+
+     3.14
+     Filtertrennwirkung
+     definierter Anteil von Fremdstoffen, der aus dem Regenwasser bzw. Prüfmedium am Filter abgetrennt bzw
+     zurückgehalten wird
+
+     3.15
+     hyd raulischer Wi rku n gsg rad des u nbelasteten Filtersystems
+     Leistungsfähigkeit des unverschmutzten Filters bei Klanvasserbeaufschlagung
+
+     ANMERKUNG Der Wirkungsgrad ist das Verhåltnis des jeweiligen Volumenstromes, der durch das Filtersystem in den
+     Speicher weitergeleitet wird zu dem Volumenstrom, der sich aus der Nennweite der Zulaufleitung ergibt.
+
+     3.16
+     hydraulischer Wirkungsgrad des dauerbelasteten Filtersystems
+     Leistungsfähigkeit eines verschmutzten Filtersystems
+
+     3.17
+     Verwurf
+     abgetrennte Feststoffe, die in den Schmutzwasserabfluss geleitet werden
+
+     3.18
+     Fremdstoff
+     Stoff, der Funktionsstörungen in Regenwassernutzungsanlagen hervorrufen bzw. die Wasserqualität
+     nachteilig beeinflussen kann
+a
+N
+s    ANMERKUNG Beispiele für solche Stoffe sind Blätter, Staub, Sand.
+6
+q
+o    3.19
+6    Prüfstoff
+o
+N    Fremdstoffe, die bei der Filterprüfungen dem Klarwasser zugeführt werden
+g
+o    ANMERKUNG Prüfstoffe sind in Tabelle 3 aufgeführt.
+a
+N
+N
+t0
+o
+a
+o
+6
+     4 Symbole
+o
+b
+     o                  Volumenstrom in der planmäßigen Zulaufleitung
+\
+€
+a
+t0
+k)   Q^.*               maximal zufließender Volumenstrom in Liter je Sekunde
+s
+o
+o
+o
+     Qzu                dem Filter zufl ießender Volumenstrom
+a
+6
+o
+o
+s    Qno                vom Filter abfließender und in die Speicherzulaufleitung fließender Volumenstrom
+ì
+ci
+N
+     zRu.k              Einstauvolumen des Rückhaltebereiches in Liter
+6
+t    vprut              Volumen des Vorlagebehälters
+È
+=
+Y
+t
+a    n                  Wirkungsgrad
+o
+è
+o
+o
+o
+ô
+e
+¡
+G
+
+
+
+o
+!0
+o
+s
+
+o
+o
+     6
+
+¡
+G
+
+È
+a
+                                                                                              DIN 1989-2:2004-08
+
+
+
+        5 Anforderungen
+        5.1 Allgemeines
+        Filterfür Regenwassernutzungsanlagen sind so zu konstruieren, dass Fremdstoffe, die Funktionsstörungen in
+        der Regenwassernutzungsanlage hervorrufen können oder die Wasserqualität nachteilig beeinflussen
+        könnten, zurückgehalten werden.
+
+        Filter mit Zulaufnennweiten < DN 200 müssen allen Anforderungen dieser Norm entsprechen.
+
+        Für Filter mit Zulaufnennweite > DN 200 gibt es für die Anforderung Filtertrennwirkung und hydraulischer
+        Wirkungsgrad des dauerbelasteten Systems zur Zeil kein genormtes Prüfverfahren. Der Hersteller muss diese
+        Werte angeben und nachvollziehbar dokumentieren, wie er diese Werte ermittelt hat. Dem Auftraggeber und
+        den Prüfstellen ist das Verfahren zur Ermittlung der angegebenen Werte auf Verlangen vorzulegen. Alle
+        anderen Anforderungen müssen DIN 1989-2 entsprechen.
+
+        Hinsichtlich Bauart, Einbauort und Funktionsprinzip sind sie zu unterscheiden in:
+
+            Systeme mit separater Ableitung von Fremdstoffen;
+
+            Systeme mit Rückhaltung von Fremdstoffen innerhalb des Filters in definierten Rückhalteräumen.
+
+        Zur Verbesserung der Wasserqualität und der Betriebssicherheit von Regenwassernutzungsanlagen sind
+        Filter im Speicherzulauf zu installieren.
+6
+N
+        lm Gegensatz zu Schlammfängen sind Filter mit einem oder mehreren mechanisch wirkenden Filterelementen
+a:
+        (mechanische Filtration) zu versehen.
+6
+o
+o
+        5.2 Werkstoffe
+o
+N
+        5.2.1 Allgemeines
+    o
+o
+a       Werkstoffe für alle Bauteile müssen für die zu erwartenden Belastungen aus den hydraulischen Kräften, wie
+ñ
+N
+a       Strömungsdruck, Sog, Rückstau, Aufstau und Wassereigengewicht geeignet sein und dabei auftretende
+a       Kräfte sicher auf das Filtergehäuse übertragen.
+a
+o
+q
+o
+b
+        Die venvendeten Werkstoffe und Schutzüberzüge mL¡ssen gegen alle bei sachgemäßem Einsatz zu
+\qs
+6
+        en¡uartenden physikalischen (u.a. Temperatur), chemischen und korrosiven Beanspruchungen ausreichend
+a       beständig sein. Eine Beeinträchtigung der Funktion muss ausgeschlossen sein.
+b
+o
+o
+o
+o       Sie dürfen keine zusätzlichen Stoffe abgeben, die die Qualität des Regenwassers nachteilig beeinflussen
+o
+6       könnten.
+c0
+I
+
+ci      5.2.2 WerkstoffefürFilterelemente
+¡
+o
+r€      Vorzugsweise sind Werkstoffe wie Kunststoffe, Metalle (korrosionsbeständig oder beschichtet), textile Stoffe
+t       oder Porenbeton unter Beachtung der im Abschnitt 5.2.1 genannten Kriterien zu venruenden.
+¿
+È
+{a
+!
+        5.2.3 Werkstoffe für Filtergehäuse
+o
+        Zusätzlich zu 5.2.2 sind für separate Filtersysteme für den Erdeinbau die Anforderungen nach
+I
+o       DIN 1989-3:2003-08, 4.2 einzuhalten.
+a
+a
+e       Für den Einbau in Fallrohre muss der Werkstoff zwischen -20 "C und +80 'C temperaturbeständig sein.
+¡I
+G
+
+
+
+o
+        Vorzugsweise sollten Werkstoffe wie Kunststoffe, Metalle (korrosionsbeständig oder beschichtet) oder Beton
+o       venryendet werden.
+o
+
+
+*o
+g                                                                                                                  7
+o
+
+
+tG
+å
+õ
+        DIN 1989-2:2004-08
+
+
+
+        5.3 FilteÉypen
+        5.3.1 Zuordnung
+        Aufgrund der unterschiedlichen Funktionsprinzipien sind Filter den in Tabelle 1 aufgeführten Typen zuzu-
+        ordnen.
+                                                       Tabelle I
+                                                                   - Filtefipen
+                                                                        Funktionsprinzip
+                                      Filter mit mechanischer Filtration und Sedimentation       Filter mit mechanischer
+                                                                                                         Filtration
+                    Filterart
+                                              großes                           kleines                    ohne
+                                      Sedimentationsvolumen         Sedimentationsvolumen        Sedimentationsvolumen
+        mit Fremdstoffrückhalt                TYP A                            TYP B
+        mit Fremdstoffableitung               TYP A                            TYP B                     TYP C
+
+
+        5.3.2 Typ R
+        Bei Filtern des Typs A erfolgt eine mechanische Abtrennung der Fremdstoffe mit anschließender
+        Sedimentation dieser Stoffe in einem ausreichend großen Volumen zur Aktivierung einer dauerhaft wirksamen
+    6
+    N   Sedimentations- und/oder Rückhaltewirkung (siehe Bild 1). Die Filtereinheiten müssen vor den Trennflächen
+        (bei senkrechter Anordnung) oder über den Trennflächen (bei waagrechter Anordnung) ein Einstauvolumen
+s
+s       Zpu"¡ nach Gleichung 1 sicherstellen. Filter des Typs A dürfen sowohl innerhalb als auch außerhalb von
+q       Regenwasserspeichern angeordnet werden.
+o
+o
+N            Vs¡"¡= Qx25                                                                                                   (1)
+
+    o
+a       Dabei ist
+a
+ñ
+N       zRü.k       das Einstauvolumen in Liter;
+a
+o
+o
+o       0           der Volumenstrom in der planmäßigen Zulaufleitung zum Filter bei einem Füllungsgrad von 70 % und
+o
+s
+b                   einem Gefälle vonl o/o nach DIN EN 12056-3:2001-01, Tabelle C.1, in Liter je Sekunde
+6
+o
+t¡.     25          Dauer in Sekunden.
+a
+a
+b
+s
+o       Das Einstauvolumen muss für Reinigungszwecke zugänglich sein
+(J
+ô
+a
+6
+a
+o       Legende
+cl
+o
+È
+b       1 Zulauf in den Filter
+6
+u
+2
+        2 vao.x                                                                          3         4
+È
+Y
+t
+aÈ      3 Filterelement
+                                                                           2
+o
+o
+        4 Ablauf (Überlauf¡
+o
+a
+o       5 Speicherzulauf
+o
+                                                                                             5
+G
+Å
+                                                   B¡ld I
+o
+o
+                                                            - Prinzipskizze - Typ A
+o
+
+o
+I
+c       8
+o
+ø
+G
+È
+å
+o
+                                                                                          DIN 1989-2:2004-08
+
+
+
+     5.3.3 Typ B
+     Bei Filtern des Typs B erfolgt eine mechanische Abtrennung der Fremdstoffe mit anschließender
+     Sedimentation dieser Stoffe durch eine zuverlässige und planmäßige Rückhaltewirkung, die durch die
+     Anordnung von Behåltnissen zur Sammlung der Fremdstoffe ezielt werden kann. Diese Behältnisse müssen
+     ohne Venvendung von Werkzeugen leicht herausnehmbar und übersichtlich angeordnet sein. Die Fremdstoffe
+     müssen vor dem Filterelement (zulaufseitig) gesammelt werden (siehe Bild 2).
+
+     Die Masse eines planmäßig herausnehmbaren Behältnisses darf im gefüllten Zustand 20 kg nicht
+     überschreiten.
+
+     Bei Erdeinbau darf zwischen Geländeoberkante (Schachtabdeckung) und Entnahmeelement (2. B. Haltegriff)
+     eine Tiefe von 60 cm nicht überschritten werden.
+
+     Filter des Typs B dürfen sowohl innerhalb als auch außerhalb von Regenwasserspeichern angeordnet
+     werden.
+
+     Das Volumen der herausnehmbaren Behältnisse tr/Rück muss mindestens betragen:
+
+          Vç.¡.¡ = Qx2                                                                                       (2)
+
+     Dabeiist
+
+e
+N    zRti.t     das Einstauvolumen in Liter;
+r)
+6    0          der Volumenstrom in der planmäßigen Zulaufleitung zum Filter bei einem Füllungsgrad von 70 % und
+o
+o
+                einem Gefälle von 1 Yo nach DIN EN 12056-3:2001-01, Tabelle C.1, in Liter je Sekunde;
+s
+o
+N    2          Dauer in Sekunden
+ o
+o    Das Einstauvolumen muss für Reinigungszwecke zugänglich sein
+a
+N
+N
+a    Auf den für diesen Filtertyp erhöhten Wartungsaufirvand muss der Hersteller in seiner Bedienungsanleitung
+a
+o    hinweisen.
+q
+o
+b
+q
+\o
+6
+
+!0
+b    Legende
+a
+o
+o
+o
+a
+     I Zulauf in den Filter
+6
+a
+0                                                                                            l*
+o    2 va¿.*                                                  1
+
+ci
+                                                                                  3
+t
+b
+@    3 Filterelement
+È
+IÈ   4 Ablauf (Überlaufl
+Y
+t    5 Speicherzulauf
+o
+è                                                                                     5
+o
+o
+.e
+a
+                                               B¡ld 2
+                                                        - Prinzipskizze - Typ B
+e
+G
+T
+o
+a
+ô
+
+
+¡
+o
+                                                                                                              I
+Ø
+
+tñ
+Ë
+a
+        DIN 1989-2:2004-08
+
+
+
+        5.3.4 Typ G
+        Alle Filter mit Fremdstoffableitung ohne planmäßige Sedimentations- und Rückhaltewirkung (siehe Bild 3) sind
+        in Typ C einzustufen. Filter des Typs C dürfen sowohl innerhalb als auch außerhalb von Regenwasser-
+        speichern angeordnet werden.
+
+        Legende
+
+        1 Zulauf in den Filter
+        2 Filterelement                                        1                                 3
+                                                                                   2
+        3 Ablauf(Fremdstoffableitung)
+        4 Speicherzulauf
+
+                                                                                        l-
+                                              B¡ld 3       Prinzipskizze - Typ C
+                                                       -
+        5.4 Hydraulische Anforderungen
+        5.4.1 HydraulischeFunktion
+q
+        Der Filter darf als Bestandteil der Entwässerungsanlage den Querschnitt der Zulaufleitung zum Regenwasser-
+o
+6
+        speicher nicht einengen.
+a
+o
+6
+        Die Dachentwässerung muss sowohl bei unbelastetem als auch bei belastetem Filter bei maximalem
+6
+N
+        Volumenstrom ohne Rückstau sichergestellt sein (siehe DIN EN 12056-3).
+
+    g   Die Prüfung ist nach Abschnitt 6 durchzuführen. Für andere Auffangflächen sind die einschlägigen Regeln der
+û0
+a       Technik zu beachten.
+N
+N
+a
+o
+o       5.4.2 HydraulischerWirkungsgrad des unbelasteten Filtersystems
+o
+o
+o
+b       Der hydraulische Wirkungsgrad am unbelasteten System ist nach 6.4.5 zu ermitteln und in der Produkt-
+€
+l{      dokumentation anzugeben.
+a
+e
+b
+q       Bezugsgröße ist der maximal zufließende Volumenstrom Q,",, nach DIN EN 12056-3:2001-01, Tabelle C.1 in
+o       Abhängigkeit von der Nennweite DN der Zulaufleitung bei 1 % Gefälle (70 % Füllungsgrad).
+o
+o
+o
+€
+o
+o       5.4.3 Hydraulischer Wirkungsgrad des dauerbelasteten Filtersystems (Leistungsfähigkeit)
+r?
+o
+N
+b
+        Um Rückschlüsse auf die Dauerhaftigkeit und die Betriebssicherheit des Filtersystems zu ermöglichen, ist für
+        Filter mit Zulaufnennweiten < DN 200 der hydraulische Wirkungsgrad des belasteten Filters nach 6.4.6 zu
+€       ermitteln und in der Produktdokumentation anzugeben.
+t
+¿
+È
+Y
+ta      5.5 Filtertrennwirkung
+o       Die Filtertrennwirkung ist für Fílter mit Zulaufnennweiten < DN 200 nachzuweisen. Bei der Prüfung nach 6.5
+o       sind möglichst viele Fremdstoffe, die dem Filter zufließen, vor dem Zufluss in den Speicher zurückzuhalten
+o       oder abzuleiten.
+ô
+e       Die Filtertrennwirkung ist als Quotient aus zurückgehaltenen Prüfstoffen bzw. abgeleiteten Prüfstoffen zur
+G
+I
+        Gesamtfeststoffmasse je nach Filtertyp zu ermitteln.
+o       Hinsichtlich der Abtrennung von Fremdstoffen müssen diese Filter einen Wirkungsgrad von mindestens 0,7
+a
+o       erreichen (siehe 6.5.3).
+\ô
+q       10
+o
+I
+¡É
+G
+
+
+o
+                                                                                               DIN 1989-2:2004-08
+
+
+
+        5.6 Dichtheit
+        Verfügen Filter planmåißig über einen Wasserinhalt und werden diese in Böden mit Schicht- oder Grund-
+        wasser eingebaut, gelten die Anforderungen nach DIN 1989-3:2003-08,4.4.3.
+
+        Bei allen anderen Filtern darf im Betrieb Wasser nicht unplanmåißig austreten.
+
+        5.7 Standsicherheit
+        Separate Filtersysteme für den Erdeinbau müssen den Anforderungen an die Standsicherheit für Behälter
+        nach DIN 1989-3:2003-08, 4.4.4 entsprechen.
+
+
+        6 Prüfungen
+        6.1 Allgemeines
+        Die Prüfung ist am fertigen Bauteil in der vom Hersteller empfohlenen Einbaulage durchzuführen. Die
+        Ubereinstimmung des Prüfstücks einschließlich Abdeckung(en) mit den vorgelegten Zeichnungen und
+        Angaben ist zu prüfen. Die Eignung des Werkstoffes ist durch lnaugenscheinnahme des Herstellerzertifikates
+        zu prüfen.
+        Für Filter mit Zulaufnennweite > DN 200 sind die Prüfung des hydraulischen Wirkungsgrads des
+        dauerbelasteten Systems nach 6.4.6 und der Filtertrennwirkung nach 6.5 nicht geeignet. ln diesen Fällen ist
+        vom Hersteller nachvollziehbar zu dokumentieren, wie er die von ihm angegebenen Werte ermittelt hat
+        (siehe 5.1).
+6
+N
+        6,2 Werkstoff, Maße, Filterelemente und Filtereinheit
+o
+e       Die Angaben des Herstellers zu den nach 5.2 erforderlichen Eigenschaften des ven¡rendeten Werkstoffes für
+q
+o       Filterelemente und Filtergehäuse sowie die Maße sind durch lnaugenscheinnahme zu prüfen.
+s
+sa
+        Die Prüfung der Stabilität, Dichtheit, Maßhaltigkeit der Anschlüsse und der Festigkeit lösbarer Teile, muss am
+        fertigen Bauteil durch lnaugenscheinnahme der Gesamtanlage während und nach der Prüfung nach 6.4
+a0
+c0
+        durchgeführt werden.
+N
+N
+a       Die Prüfung gilt als bestanden, wenn die Maßhaltigkeit der Filterelemente, sowie deren Einzelteile den
+o
+a
+I       Herstellerangaben entspricht, alle lösbaren Teile des Filtersystems in Übereinstimmung mit der Bedienungs-
+o
+o
+b       anleitung fest eingebaut sind und die Werkstoffangaben den relevanten Eigenschaften von 5.2 entsprechen.
+s
+t¡.
+(0
+a
+        6.3 Bauart und Einbauort
+b
+o
+o       Während der Prüfung des hydraulischen Verhaltens nach 6.4 ist das Filtergehäuse sowie die Anschluss- und
+(J
+o       Verbindungsstellen durch lnaugenscheinnahme auf Dichtheit zu prüfen. Separate Filtersysteme für den
+o
+e       Erdeinbau sind hinsichtlich ihrer Standsicherheit, Belastungsklassen, Baugrundsätze und Bauausführung
+a
+o       nach DIN 1989-3:2003-08, 4.1 , 4.4, 4.4.4 und 4.5 zu prüfen.
+6
+ci
+ñ.
+ro      6.4 Pri.ifung der hydraulischen Anforderungen
+6
+        6.4.1 Prüfaufbau
+¿
+    {
+b
+v       Die Prüfanordnung ist nach Bild 4 einzurichten. Der Einbau des Filters in die Prüfanordnung ist nach
+^t      Herstelleran leitu n g d urchzuführen.
+È
+o       Vor Beginn der Einzelprüfung sind folgende vorbereitenden Arbeitsschritte durchzuführen:
+è
+Io      a) Säuberung des Vorlage- und Auffangbehälters,
+a
+e
+        b) Spülung der Rohrleitung,
++       c) waagerechte Justierung des Filters in zwei zueinander rechtwinkligen, horizontalen Achsen,
+o
+o
+        d) Benetzung der Filterfläche durch Spülung nach 6.4.4,
+ó
+        e) Kalibrierung des Messgerätes (Nullpunkt-Einstellung des Durchflussmessgerätes).
+o
+!
+
+o                                                                                                                  11
+o
+
+\åß
+o
+     DIN 1989-2:2004-08
+
+
+
+     ln einem vollständig entleerbaren Vorlagebehälter ist mittels eines Rührwerkes eine gut durchmischte
+     homogene Mischung von Wasser und einer definierten Menge von Prüfstoffen nach Tabelle 3 herzustellen.
+     Zur Erzeugung verschiedener Volumenströme 07u muss ein ausreichender hydrostatischer Druck bereit-
+     gestellt werden können.
+
+     Die Zulaufleitung, mit der das Wasser, bzw. das Wasser-Zusa2stoff-Gemisch dem zu prüfenden Filter
+     zugeführt wird, muss folgenden Anforderungen genügen:
+          die Nennweite ist dem Filteranschluss entsprechend auszuwählen;
+          Geflille von 1 o/oi
+          eine beruhigte Anströmung des Filters nach Einbauanleitung des Herstellers sichezustellen;
+          Einrichtungen zur Messung und Regelung der Volumenströme 02, müssen vorhanden sein;
+
+          keine Einengungen des Querschnittes;
+          keine Ablagerungen.
+
+     Filter sind nach Einbauanleitung des Herstellers fest und unbeweglich in die Prüfeinrichtung zu installieren.
+
+                                                            Vott agenbehätter
+                                                            Volumen /pr¡1
+
+F
+                                   Zulauf in den Fitter mit
+                                   Durchflussregelung
+6
+o                                  und- messung von d¿u
+e
+ô
+ôt
+
+                                                                   Fitter
+o
+ o                                                                                                    Abtauf
+a                                                                                                     (Übert auf)
+N
+N
+a                                                                                                     (Typ A, B)
+o                          Speicherzulauf
+a                                                                     Abt auf
+o
+6                          mit Durchfluss-
+a
+b
+                                                 m3   /h    (Fr e m ds tof f a bl eit ung)
+6                          messung von û46
+so                                                                    (Typ C)
+\o                         (atte Typen)
+a
+k)
+o
+o
+o
+o
+6                                           Auffangbehätter                     Auf f an gbeh ätter
+a
+o
+                                            mit Austass                         rnil Austass
+ci
+ñ
+b
+a
+o
+o
+t                                                 S ieb                                  S ieb
+È
+=
+Y
+ta
+o
+ò
+o                                                           Tr ocken s chr ank
+o
+o
+o
+e
+G
+                                                               L abor wa age
+
+o
+a
+                                                   B¡ld 4
+                                                            - Prüfanordnung
+o
+\
+     12
+o
+
+¡¿
+G
+
+
+õ
+                                                                                            DIN 1989-2:2004-08
+
+
+
+     Die Nennweite von Leitungen für den Ablauf (Fremdstoffableitung) (Typ C) zum Auffangbehälter und für den
+     Ablauf (Überlauf¡ (Typ A, B) ist dem Filteranschluss entsprechend auszuwählen. Eine Einrichtung zur
+     Messung des Volumenstromes gzu muss vorhanden sein (alternativ kann dies über die Füllstandsmessung
+     im Auffangbehälter für das Filtrat erfolgen). Die Bildung von Ablagerungen ist zu vermeiden.
+
+     Auffangbehälter miissen ein Volumen von mindestens 1 m3 aufirueisen und vollståndig entleert werden
+     können. Ablagerungen im Auslass sind zu vermeiden.
+
+     Zur Trennung der im Wasser befindlichen Prtifstoffe sind für die Nasssiebung geeignete Siebe mit einer
+     Maschenweite von 125 trrm nach DIN ISO 3301-1 zu venruenden.
+
+     ln einem Trockenschrank, in dem über t h eine konstante Temperatur von 105 "C aufrecht zu halten ist, sind
+     die in den Ablaufleitungen wieder gefundenen Prüfstoffe zu trocknen.
+
+     Mit Hilfe einer Laborwaage sind die getrockneten wieder gefundenen Prüfstoffe auf 0,1 g zu wägen.
+
+     6.4.2 Prüfmedien
+     Als Prüfmedium wird Klarwasser (Trinkwasser oder Regenwasser vergleichbarer Qualittit) ven¡rendet. Bei
+     einigen Prüfabschnitten wird das Klanrvasser mit einer definierten Masse an Prüfstoffen (siehe 6.5.1 und
+     Tabelle 3) versetzt, welche sedimentierbare Stoffe, Schwebstoffe und Schwimmstoffe des zulaufenden
+     Regenwassers repräsentieren.
+
+€
+N    6.4.3 Reihenfolge der Prüfung
+s
+     Die Prüfung ist in folgender Reihenfolge durchzuführen
+q
+o
+G
+         Prüfung der hydraulischen Funktion des unbelasteten Filtersystems $.4.Ð,
+N
+
+o        Prüfung des hydraulischen Wirkungsgrades des unbelasteten Filtersystems (6.4.5);
+a
+o
+ñ
+N        Prüfung der Filtertrennwirkung (6.5);
+a
+o
+a
+o
+o        Prüfung des hydraulischen Wirkungsgrades des dauerbelasteten Systems (Prüfung der Leistungs-
+o
+b
+6        fähigkeit) (6.4.6).
+It
+t0
+a
+o
+b
+     6.4.4 Prüfung der hydraulischen Funktion des unbelasteten Filtersystems
+o
+o
+(J
+o    Als Prüfmedium ist Klanvasser ohne Prüfstoffe zu ven¡renden. Die Filterelemente (siehe 3.2) sind während
+a
+a    dieser Prüfung abzudecken oder durch einen Blindeinsatz zu verschließen.
+a
+o
+q
+ô    Das unbelastete Filtersystem ist über die vorgegebene Nennweite des Zulaufquerschnitts, Gefälle I = 11100
+r{   nach DIN EN 12056-3:2001-01, TabelleC.l, mit dem maximalen Volumenstrom bei einem Rohrfüllungsgrad
+6
+     von hld = 0,7 anzuströmen.
+{
+¿
+È    Der Volumenstrom muss über eine Dauer von 5 min ohne Rückstau in der Zulaufleitung den Filter passieren.
+V
+tÊ
+o    6.4.5 Bestimmung des hydraulischen Wirkungsgrades des unbelasteten Filtersystems
+è
+Io   Als Prüfmedium ist Klarwasser zu verwenden. Das unbelastete Filtersystem wird über die vorgegebene
+a    Nennweite des Zulaufquerschnitts, Gefälle I = 11100 nach DIN EN 12056-3:2001-01, TabelleC.l mit in
+e    Tabelle 2 angegebenen Volumenströmen über eine jeweils festgelegte Dauer angeströmt. Anströmungen des
+G
++    Filters mit geringeren Volumenströmen sind über längere Zeit (4 min bzw. 8 min) aufrecht zu erhalten, um bei
+     der Füllstandsmessung im Auffangbehälter eine höhere Genauigkeit zu erzielen.
+o
+a
+d,
+
+
+o
+!
+                                                                                                              13
+g
+G
+
+É
+o
+     DIN 1989-2:2004-08
+
+
+
+                                        Tabelle 2
+                                                    - Prüfzeiten für Volumenströme
+                                     Volumenstrom                          Prüfzeit
+
+                                          Qzu
+                                        Qzu,^"*                                t
+                                           %                                 min
+
+                                          100                                 2
+                                           50                                 2
+
+                                           20                                 3
+                                           10                                 4
+                                           5                                  8
+
+                                          2,5                                 I
+                                           1                                  8
+
+
+
+     Der hydraulische Wirkungsgrad des unbelasteten Filtersystems ist nach Gleichung (3) zu ermitteln
+
+6                    Qzu - Qeo
+N          0nyar                                                                                             (3)
+                       Qzu
+o
+o
+o    Dabeiist
+o
+o               der dem Filtersystem zugeführte Volumenstrom in Liter je Sekunde;
+N    Zzu
+ È
+ g
+a    8nø        der vom Filtersystem in den Ablauf (2. B. Kanal, Versickerungsanlage) abgeführte Volumenstrom in
+o
+ñ
+N               Liter je Sekunde.
+a
+o
+a
+o
+o
+o
+     6.4.6 Bestimmung des hydraulischen Wirkungsgrades des dauerbelasteten Systems
+b             (Prüfung der Leistungsfähigkeit)
+!.
+t0
+a
+6
+     Als Prüfmedium ist Klarwasser zu verwenden, dem sedimentierbare Stoffe, Schwebstoffe und Schwimmstoffe
+b
+o
+o
+     nach 6.5.1 und Tabelle 3 hinzugefügt sind. Der Vorlagebehälter muss mindestens einem Volumen Izrrul
+o
+è    entsprechen, das dem maximalen Volumenstroffi Qzr,^", der jeweils vorgegebenen Nennweite des
+a
+a
+a    Querschniltes der Zulaufleitung bei 1 % Gefälle, multipliziert mit g0 s entspricht.
+o
+6
+ci         Vpru¡ >   Q7u,^^*x90                                                                              (4)
+'i
+¡ô
+\v   Dabeiist
+(
+6
+
+=
+È
+Y
+tÊ   Vprüf            Volumen des Vorlagebehälters in Liter;
+
+o
+è    Qzu,*^, maximaler Volumenstrom in Liter je Sekunde;
+Io
+.a
+a
+     90      Dauer in Sekunden.
+e
+G    Die Menge, Masse und Konzentration des einzelnen Prüfstoffes je 1000 Liter Prüfmedium muss Tabelle3
+t    entsprechen.
+o
+a
+o
+
+
+¡o
+o    14
+o
+
+a
+å
+o
+                                                                                                            DIN 1989-2:2004-08
+
+
+
+     Das zunächst unverschmutzte Filtersystem ist mit einem konstant eingestellten Volumenstrom des mit
+     Prüfstoffen versehenen Klarwassers von 30 % des maximalen Volumenstroms Qzu,^u, über eine Dauer von
+     4 min zu beaufschlagen.
+
+     Anschließend folgen mindestens 10 min Pause. Dieser intermittierende Betrieb erfolgt über 100 Zyklen.
+
+     Abschließend ist der hydraulische Wirkungsgrad des verschmu2ten Systems mit Klanuasser unter Einhaltung
+     der Volumenströme und der Dauer nach 6.4.5 zu ermitteln.
+
+     Der hydraulische Wirkungsgrad des dauerbelasteten Filtersystems ist zu ermitteln nach
+
+           .-
+           Ilnva,øel =
+                       Qzu-Qm                                                                                               (5)
+                       ,^
+
+     Dabei ist
+
+                    der hydraulische Wirkungsgrad des dauerbelasteten Systems;
+     '/hyd,bet
+     Qnø            der Kanalisation oder der Versickerungsanlage zufließende Volumenstrom;
+
+     Qzu            dem Speicher zufließender Volumenstrom.
+
+     Bei Filtersystemen mit verschmutzungsgradabhängiger Reinigung kann die Reinigungsfunktion während der
+     Prüfung oder Durchführung aktiviert bleiben. Alle anderen zyklusabhängigen Reinigungssysteme müssen
+ e
+ N   während der Prüfung abgeschaltet oder außer Funktion genommen werden.
+$
+6
+     6.5 PrüfungderFiltertrennw¡rkung
+o
+ê    6.5.1 Prüfbedingungen
+õ
+N
+     Als Prüfmedium ist Klarwasser zu verwenden, dem folgende kontinuierlich sedimentierbare Stoffe,
+ o   Schwebstoffe und Schwim mstoffe hinzuzufügen sind :
+o
+a
+N          Kunststofffolie aus Hochdruck-Polyethylen (en: low density PE (LDPE)) mit den Abmessungen
+N
+a          5 cm x 5 cm und 15 pm Dicke,
+o
+a
+o
+o          Polypropylenkugeln mit Durchmessern von 3,5 mm und 2 mm,
+o
+b
+6
+q
+€          Quarzsand HFs 0,7111,25 mit Korngrößen von 250 pm bis 1250 pm nach DIN EN 12904.
+l{
+a
+a
+b    Die Menge, Masse und Konzentration des einzelnen Prüfstoffes je 1000Liter Prüfmedium muss Tabelle3
+o    entsprechen:
+o
+o
+a
+6
+o                                   Tabelle 3                      je 1000 Liter Prüfmedium
+o
+$?                                                - Prüfstoffe
+ì
+ô
+N
+b
+                                     Priifstoff                Menge          Masse           Massen-
+                                                                                            konzentration
+þ                                                                                g
+t                                                              Stück                                 sll
+È
+=
+Y
+ta                          LDPE-Folie, 15 pm dick               15            150 a            0,15 g/l
+o                           Polypropylenkugeln                                  150             0,15 g/l
+è
+o
+o
+                            d= 3,5 mm                                           75
+o
+                            d=2mm                                               75
+iì
+o
+                            Quarzsand HFs                                      200              0,20 gll
+¡I
+G
+                            250 pm bis 1250 pm
+o
+a                           a   Die LDPE-Folie geht f¡ktiv mit 10 g/Stück in die Massenbilanz ein.
+o
+
+o
+
+o
+o
+                                                                                                                            15
+
+¡å
+G
+
+
+õ
+     DIN 1989-2:2004-08
+
+
+
+     Art und Zusammensetzung der Zusätze sind nach Tabelle 3 und Tabelle 4 zu wählen.
+
+
+                                                        Tabelle 4
+                                                                    - Zusatz Quarzsand
+                                            Kornklasse                        Massenanteil
+                                                 pm                                o/o
+
+
+
+                                            125 bis 250                            0
+                                                > 250                             100
+
+
+
+     Der Vorlagebehälter muss mindestens einem Volumen Zpry entsprechen, das dem maximalen Volumenstrom
+     Qzu,            jeweils vorgegebenen Nennweite des Querschnittes der Zulaufleitung bei 1o/o Gefälle, multipliziert
+          ^u*der
+     mit 180 s entspricht (Gleichung (6)).
+
+            Vp^¡ >   Qru,^"rxl8,Û                                                                                   (6)
+
+
+     Dabeiist
+
+     Vpr¡f           Volumen des Vorlagebehälters in Liter;
+
+
+a    Qzu,^   ,        maximaler Volumenstrom in Liter je Sekunde;
+
+
+6
+     180              Dauer in Sekunden.
+o
+o
+     6.5.2 Prüfdurchführung
+o
+N
+     Das zunächst unbelastete Filtersystem ist mit einem konstant eingestellten Volumenstrom des Prüfmediums
+ o   (Klarurasser, das mit Prüfstoffen versehen wurde) von 30 % des maximalen Volumenstroryts Qzu,ma" für die
+o
+o
+N    Dauer von 10 min zu beaufschlagen.
+a
+o
+q
+o    Nach erfolgter Beschickung des Filters mit dem Prüfmedium (Klanarasser mit Prüfstoffen), ist der Filter mit
+6
+o
+b
+     Klarwasser und dem von der Zulaufnennweite abhängigen, maximalen Volumenstrom für 1 min zu
+     beaufschlagen, um alle Prüfstoffe, die im Bereich des Ablaufes zurückgeblieben sind, auszuspülen.
+\a
+@
+
+!0
+b    Nicht abgetrennte Prüfstoffe sind am Filterablauf mit einem Drahtsieb mit einer Nennmaschenweite von
+ó
+o
+o    250pm nach DIN lSO3310-1, das zur Nasssiebung geeignet ist, aufzufangen, zu trocknen und zu wägen.
+o    Bei Filtern TypC ist der Ven¡¡urf (siehe3.17) in gleicher Weise zu ermitteln. Maßgebend sind jeweils die
+a
+6
+o    Mengen- bzw. Masseanteile der gefundenen Zusätze.
+o
+6
+
+ìb
+ci
+N
+     ANMERKUNG Anhang E enthält ein Beispiel eines Prüfberichtes.
+
+     6.5.3 Ermittlung der Filtertrennwirkung
+t
+È
+=
+Y    6.5.3.1 Filter Typ A und Typ B
+ta
+o    Für die Filter Typ A und Typ B ist die FilteÍrennwirkung 4*u".^u zu ermitteln aus
+ò
+o
+o                       t-t
+                        !ges.Festst !Sp.vel:W
+o           4nu.k,¡,e =-                                                                                            (7)
+e
+G
+                              tÊ   g€s.¡estst
+
+f
+
+o
+a
+o
+
+
+ìo
+o    16
+o
+I
+¡å
+G
+
+
+a
+                                                                                                   DIN 1989-2:2004-08
+
+
+
+     Dabei ist
+
+     t/Ruck.A,B          Filtertrennwirkung für Typ A bzw. Typ B;
+
+     tges.Festst         Summe der zugegebenen Prüfstoffe;
+
+     >sp.verunr          Summe der ermittelten Masseanteile, die in den Speicher eindringt.
+
+     Die Filterwirkung wird berücksichtigt, indem die Differenz der Gesamtmasse an zugesetzten Fremdstoffen
+     (,r?ses.Fesrst   ) und der Masse der gemessenen Speicherverunreinigung (rnsp.u",unr) gebildet wird.
+
+     ANMERKUNG 1 Diese Differenz ist auch eine Angabe über die im Filter zurückgehaltenen Stoffe.
+
+     ANMERKUNG 2 Jeweils ein Beispiel für die Ermittlung des Trennwirkung eines Filters Typ A und eines Filters Typ B
+     enthält Anhang A und Anhang B.
+
+
+     6.5.3.2 Filter Typ C
+     Filter vom Typ C verfrigen über kein planmäßiges Rrickhaltevolumen. Die Prüfung wird gegenüber Typ A und
+     Typ B um die Wirksamkeit des Verwurfes von Fremdstoffen in die Abflussleitung (so genannte Schmutz-
+     frachttrennung) ergänzt.
+
+6
+     Hierfür ist analog zur Ermittlung der Speicherverunreinigung in einer parallelen Messung der Quotient aus den
+N
+     in der Abflussleitung gefundenen Fremdstoffmassen (Venvurf) mit der Gesamtmasse an zugegebenen
+     Fremdstoffen zu ermitteln.
+6
+o
+o
+6
+                          Iv"*                                                                                     (8)
+6                       Iges.Festst
+ñ
+
+a    Die Filtertrennwirkung wird ermittelt, indem die Ergebnisse beider Prüfungen, d. h. der Prüfung der Speicher-
+o    verunreinigung sowie der Prüfung des Venryurfes gleichmäßig gewichtet werden.
+ñ
+a
+o    Es wird das arithmetische Mittel aus (4*u"* +riv"* ) gebildet, folglich gilt:
+a
+I
+o
+o
+b
+6
+t{
+                                             I ges.Festst - I so.u"*r. + I v"*
+sa          4c = 0,5(0¡.,:"k + t/v",-) =                                                                           (e)
+                                                        > ges.Festst
+b
+I
+o
+(J
+è    Dabeiist
+a
+a
+a
+o
+6
+o?
+     ltc                 Trennwirkung des Typs C;
+ô
+ñ
+6
+     ?Rtic¡              Trennwirkung bei Speicherverunreinigung;
+
+6
+{    rlúerw              Trennwirkung bei Ven¡¡urf;
+à
+È
+v
+t    >ges.Fesrst Summe der zugegebenen festen Stoffe;
+o
+     > sp.verunr Summe der ermittelten Masseanteile, die in den Speicher eingedrungen sind;
+I
+o
+.a
+o
+     X   v"*             Summe der in die Abflussleitung eingedrungenen festen Stoffe.
+e
+¡I
+G
+     ANMERKUNG Ein Beispiel für die Ermittlung der Trennwirkung eines Filters Typ C enth¿ilt Anhang C. Extrembeispiele
+     sind im Anhang D dargestellt.
+o
+a
+o
+
+
+t
+                                                                                                                   17
+o
+q
+Ìå
+o
+
+o
+      DIN 1989-2:2004-08
+
+
+
+      7 Kennzeichnung
+      Regenwasserfilter nach dieser Norm sind deutlich sichtbar und dauerhaft wie folgt zu kennzeichnen mit:
+
+      a) Nummer dieser Norm;
+      b) Name und/oder Zeichen des Herstellers;
+      c) Tvp;
+      d) Nenngröße des Zu- und Ablaufs;
+      e) Fließrichtung;
+      f) Filtertrennwirkung nach 6.5.3;
+      S) Werkstoffbezeichnung (nur bei Kunststoff nach DIN EN ISO 1043-1);
+      h) Herstelldatum;
+      i) Zeichen der üben¡vachenden Stelle.
+
+6
+a     I    Konformitätsbewertung
+o
+a
+      8.1 Allgemeines
+q     Bauteile, die nach dieser Norm hergestellt werden, sind folgenden Verfahren der Konformitätsbewertung zu
+o
+      unterziehen:
+o
+N
+           Erstprüfung (Typprüfung)
+È
+a          Werkseigene Produktionskontrolle (Eigenüberwachung)
+a
+N
+q
+a     8.2 Erstprüfung
+a
+o
+o
+o     Vor Produktionsbeginn ist von jedem Filtersystem mindestens ein Prüfstück auf Übereinstimmung mit allen
+b
+      Anforderungen dieser Norm nach Abschnitt 6 zu prüfen.
+t¡.
+e
+a     Die Prüfung ist in der vom Hersteller empfohlenen Einbausituation durchzuführen.
+b
+o
+(J
+o
+o     Die Erstprüfung ist mindestens an einem Regenwasserfilter eines Typs durchzuführen. Filter, die sich bei
+a
+a     grundsätzlich identischen Fertigungsverfahren nur in einzelnen Punkten (2. B. verschiedene Bauhöhen bei
+a
+o
+6     gleichen Durchmessern oder unterschiedliche Anschlusshöhen) unterscheiden, dürfen zu Baugruppen
+ci    zusammengefasst werden. Die Abgrenzung der Baugruppen ist mit dem Prüfinstitut abzustimmen.
+ñ
+ro
+a
+s     Die Prüfstücke müssen repräsentativ für die Produktion sein.
+6
+{
+¿
+È     Die Erstprüfung ist vom Hersteller durchzuführen und zu dokumentieren. Die Übereinstimmung der Produkte
+V
++     mit den Anforderungen dieser Norm ist durch eine akkreditierte Zertifizierungsstelle zu bestätigen.
+Ê
+o
+è     Die Prüfungsunterlagen sind vom Hersteller solange aufzubewahren, wie das betreffende Produkt am Markt
+o
+      angeboten und in Verkehr gebracht wird, jedoch mindestens 10 Jahre.
+o
+a
+o     8.3 Eigenüberwachung (Werkseigene Produktionskontrolle)
+G
++     Der Hersteller muss entsprechend der Art des Produktes und der Art der Produktion ein geeignetes System
+o     zur Produktionskontrolle durchführen. Das System kann auf der Grundlage von DIN EN ISO 9001 oder im
+a     Rahmen eines werkseigenen Produktionskontrollsystems betrieben werden.
+d,
+
+
+o
+
+
+a     18
+o
+G
+
+å
+õ
+                                                                                               DIN 1989-2:2004-08
+
+
+
+      Für die Durchführung der werkseigenen Produktionskontrolle ist der Hersteller selbst verantwortlich. Die
+      werkseigene Produktionskontrolle muss aus Kontrollen und Prüfungen bestehen, die in regelmäßigen
+      Abständen durch den Hersteller so durchgeführt werden, dass die Konformität der Produkte mit den
+      Anforderungen der Norm während des gesamten Herstellungszeitraumes sichergestellt ist.
+
+      Die werkseigene Produktionskontrolle ist vom Hersteller zu dokumentieren. Der Mindestumfang der
+      durchzuführenden Prüfungen und Kontrollen muss Tabelle 5 entsprechen.
+
+                                     Tabelle 5
+                                                 - Werkseigene Produktionskontrolle
+           Prüfgegenstand     Anforderungen nach                Prüfung                    Prüfhäufigkeit
+
+
+          Werkstoff          Abschnitt 5              lnaugenscheinnahme des       Jede Anlieferung
+                                                      Lieferscheines
+          Maße               Herstellerunterlagen    Vergleich mit Erstprüfstück   Halbjêihrlich an einem
+                                                                                   Prüfstück
+
+
+      Die vollständigen Prüfberichte sind vom Hersteller mindestens 10 Jahre aufzubewahren
+
+
+
+6     I   Einbau, Betrieb und Wartung
+      Alle Filter sind vom Hersteller mit einer ausreichenden Produktbeschreibung, insbesondere der Funktions-
+6
+      weise, sowie einer Einbau-, Betriebs- und Wartungsanleitung zu versehen und nach diesen zu installieren, zu
+o
+o     betreiben und zu warten.
+o
+N
+      Die Einbauanweisung muss eine Beschreibung und eine Zeichnung mit Darstellung der erforderlichen
+o
+ a    Randbedingungen (2. B. Beschaffenheit der Baugrube, Verfüllung usw.) und der Montage des Filters
+o     (ggf. aller beweglichen Teile) enthalten.
+N
+a
+o
+a
+      Die Betriebsanleitung sollte eine Beschreibung der Funktionsweise sowie ggf. Hinweise für den laufenden
+q
+q     Betrieb enthalten, damit ein störungsfreier Betrieb gewährleistet ist.
+o
+b
+€
+l¡.
+a
+a
+6
+b
+I
+o
+(J
+ô
+a
+a
+a
+so
+c?
+o
+N
+b
+o
+{
+à
+È
+Y
+È
+Ê
+o
+I
+o
+.a
+a
+e
+G
+Å
+
+o
+o
+o
+:
+.s
+ o
+!
+
+o
+o
+                                                                                                               19
+q
+
+¡à
+G
+
+
+a
+         DIN 1989-2:2004-08
+
+
+
+                                                                   Anhang A
+                                                                   (informativ)
+
+               Beispiel für die Ermittlung der Trennwirkung eines Filters Typ A
+
+
+        Einstufun gskriterium :           Vati"x2 Q,zu,^"r X 25 S
+
+        Legende
+
+        1 Zulauf in den Filter
+        2 vnt"x                                                      1                     3                 l*
+
+
+        3 Filterelement
+                                                                                    2
+        4 Ablauf (Überlaufl
+        5 Speicherzulauf
+                                                                                                      6
+ 6      6 Durchflussmessung
+
+e
+                                                                                                  5
+d,
+o
+6
+                      B¡ld A.l
+o
+N                                 - Prüfanordnung zur Ermittlung der Trennwirkung für Filter Typ A
+    o
+a
+o       Beispiel:
+N
+a
+o
+a
+o
+o                                                                  x der Fremdstoffe,
+o
+b
+€            X der Fremdstoffe im Zulauf                          die im Filter zurück-               I der Fremdstoffe im
+                                                                   gehalten wurden                        Ablauf (Überlauf¡
+                     in den Filter
+I¡.
+o
+                                                                    = 6 Einheiten
+                                                                                                            = I Einheit
+a
+6                   = l0 Einheiten
+b
+o
+o
+(J
+è
+a
+a                                                                                I Verunreinigungen, die sich
+a
+o                                                                                 im Speicherzulauf befinden
+6
+                                                                                        = 3 Einheiten
+ô?
+ô
+ñ
+k)
+6       Bei der Prüfung nach 6.5 ergibt sich eine Trennwirkung von:
+I
+{
+¿                        EFestst.Zulauf   - Eso.u"* 10- 3
+È
+v            i/e=4nu"r= .                             =--T;-=U,t                                                              (4.1)
+ta                              ! Festst.Zulâuf           I   v
+
+o
+g
+o
+
+a
+e
+G
++
+o
+a
+ó
+È
+¡ô
+o
+o
+        20
+
+G
+
+Ë
+a
+                                                                                                        DIN 1989-2:2004-08
+
+
+
+                                                              Anhang B
+                                                             (informativ)
+
+               Beispiel für die Ermittlung der Trennwirkung eines Filters Typ B
+
+        Einstufun gskriterien :
+
+            Kein Werkzeug zur Entnahme erforderlich,
+            Gewicht mit lnhalt: max. 20 kg,
+            Abstand GOK bis Haltegriff: max. 60 cm,
+            Qzu,^ *, bei Vollfüllung der Zulaufleitung zum Filter nach DIN EN 12056-3, Gefälle 1 %,
+            I/¡¡"¡, Einstauvolumen des Sedimentationsbereichs,
+            Znu"r   ) Qzu,^"*X 25 S,
+
+         Legende
+
+    6   1 Zulauf in den Filter                                1                                    l+
+    N
+        2 Vau.u.                                                                     l
+6
+o
+        3 Filterelement
+o
+6
+Õ
+        4 Ablauf (Überlauf¡
+N
+        5 Speicherzulauf
+    o
+a
+a       6 Durchflussmessung                                                                   6
+ñ
+N
+a
+o
+a
+o                                                                                         5
+o
+o
+b
+6
+Õ
+a
+It                      Bild B.l
+a0
+a
+6
+                                    - Prüfanordnung zur Ermittlung der Trennwirkung für Filter Typ B
+b
+s
+(J
+o
+o       Beispiel
+a
+a
+a
+o
+€                                                        I der Fremdstoffe, die im
+ô?
+ô         I der Fremdstoffe im Zulauf in                                                       X der Fremdstoffe im
+ñ                      den Filter                          Filter zurückgehalten                  Ablauf (Übedauf¡
+b
+€                                                                wurden
+                    = l0 Einheiten                                                                  = I Einheit
+6                                                             = 6 Einheiten
+{
+¿
+I
+v
+ta                                                                        E Verunreinigungen, die sich
+                                                                           im Speicherzulauf befinden
+o
+è                                                                                = 3 Einheiten
+I
+o
+o
+a
+e       Bei der Prüfung nach 6.5 ergibt sich eine Trennwirkung von
++
+                          EFestst.zulauf  - Eso.u"* 10- 3
+o
+e           4,q=4nu.t=           s
+                                 ! Festst Zulauf
+                                                  =-=ul
+                                                     10
+                                                                                                                      (8.1)
+o
+
+o
+ù
+o
+                                                                                                                        21
+
+ñ
+I
+Ë
+o
+          DIN 1989-2:2004-08
+
+
+
+                                                                Anhang C
+                                                                (informativ)
+
+                 Beispiel für die Ermittlung der Trennwirkung eines Filters Typ C
+
+
+         Einstufungskriterien :
+
+              Qzu,^",, Volumenstrom bei Vollfüllung der Zulaufleitung zum Filter nach DIN EN 12056-3, Gefälle 1 %
+              Zp¡¿, entfällt
+
+
+
+          Legende
+
+          1 Zulauf in den Filter                                 1                                                      3
+
+          2 Filterelement                                                                2
+                                                                                                                 6
+          3 Ablauf(Fremdstoffableitung)
+          4 Speicherzulauf
+    a
+    N     5 Durchflussmessung
+    0
+    rt
+    6
+          6 Durchflussmessung                                                                             5
+    o
+    o
+    6
+    Õ                                                                                                l+
+    N
+
+    þ
+                          B¡ld C.l
+                                         - Prüfanordnung zur Ermittlung der Trennwirkung für Filter Typ C
+    c0
+    a
+    N
+    N
+    a
+    o
+    a
+    o    Beispiel
+    o
+    o
+    o
+    6
+    o
+r0
+    \     I der Fremdstoffe im Zdauf                        I der Fremdstoffe, die im                     I der Fremdstoffe, die
+a   6
+                      in den Filter                           Filter zurückgehalten                           abgeleitet werden
+                    = l0 Einheiten
+    b
+()                                                                    wurden                                   = 7 Einheiten
+o
+ô                                                                    = I Einheit
+a
+6
+a
+o                                                                                     I Verunreinigungen, die sich
+a?                                                                                     im Speicherzulauf befinden
+G
+ñ.
+b
+                                                                                             = 2 Einheiten
+         Bei der Prüfung nach 6.5 ergibt sich eine Trennwirkung von
+2
+    {
+È
+Y                      IFesrst.zulauf   - Iso.r"*    10-2
+ta
+ È
+              4n¡"t=           tr"-"-,r,r           = 10 =u'ö                                                                     (c.1)
+(5
+    È
+    o
+    o
+    o         îtv"*=*ffi=h=0,,                                                                                                    (c.2)
+a
+e
+¡
+G
+
+s
+o
+a
+                 4c   =0,5þ*u.u+?h"*)=o,uff =o,s1o                                           =o,zs                                (c a)
+o                                                                                     '3*7
+
+!
+
+o        22
+o
+q
+
+¡É
+G
+
+
+o
+                                                                                                                          DIN 1989-2:2004-08
+
+
+
+                                                                    Anhang D
+                                                                    (informativ)
+
+                                                              Extrembeispiele
+
+
+       Folgende Extrembeispiele zeigen die Notwendigkeit einer zusätzlichen Prüfung der gefundenen Fremdstoffe
+       im Filterablauf (Venwurf), um die Wirkungsweise der gewünschten Feststoffableitung zu überprüfen.
+
+       Extrembeispiel 1 zeigt einen ungenügend funktionierenden Filter, Typ C
+
+       Extrembeispiel l:
+
+
+         I der Fremdstoffe im Zulauf                         x der Fremdstoffe, die im                               I der Fremdstoffe, die
+                      in den Filter                              Filter zurückgehalten                                 abgeleitet werden
+                    = l0 Einheiten                                         wurden                                        = 0 Einheiten
+                                                                     = l0 Einheiten
+
+
+                                                                                    I Verunreinigungen, die sich
+€
+q
+                                                                                       im Speicherzulauf befinden
+                                                                                                   = 0 Einheiten
+6
+o
+o
+6
+õ
+N
+       Hierbei werden die Fremdstoffe nicht in den Speicher abgegeben (positiv), sammeln sich aber unkontrolliert
+       im Filtergehååuse, obwohl dort kein planmäßiger Sammelraum (vgl. Typen A und B) vorhanden ist. Die
+o
+a      eigentlich vorgesehene Ableitung (Veruvurf) findet nicht statt, was durch die zusätzliche Messung bewiesen
+N
+N      wird.
+a
+o
+a
+q
+6      Durch die Bildung des arithmetischen Mittels der Messung der Speicherverunreinigung (hier: sehr gut) mit der
+o
+b
+6      Messung des Verwurfs (hier: sehr schlecht) wird die ungenügende Wirkungsweise des Filters mit einer
+\aos   Trennwirkung von î/ç = 0,5 dokumentiert.
+a
+6
+b
+o
+o
+a
+               rn,i"r, =
+                           è*;i-3*.*='Îoo ='',0
+                              ¿ ges.Festst
+                                                                                                                                              (D.1)
+a
+6
+o
+o
+6
+çl
+o
+ñ.
+               îtv"*=*ffi=*=.                                                                                                                 (D.2)
+b
+a
+
+t                                                 E
+                                                      e"' F"'o' --r sp   u"* * E vt*           1   0, * 0
+à
+vÈ
+                   \ç = o,S(q*u"u + þv"* )- 6,5                 t ges.Festst
+                                                                                       = o,s             9
+                                                                                                         0
+                                                                                                             = o,s                            (D.3)
+ta                                                                                                   1
+
+
+
+o
+o
+a
+o
+o
+G
+l
+
+o
+a
+o
+
+
+¡o
+co                                                                                                                                              23
+o
+
+¡å
+G
+
+
+o
+     DIN 1989-2:2004-08
+
+
+
+     Efrembeispiel 2 zeigt einen ideal funktionierenden Filter, Typ C:
+
+     Extrembeispiel 2:
+
+
+
+      I der Fremdstoffe im Zulauf in          I' der Fremdstoffe, die im                       x der Fremdstoffe im
+                      den Filter                 Filter zurückgehalten                           Ablauf (Überlauf¡
+              = l0 Einheiten                             wurden                                      = l0 Einheiten
+                                                      = 0 Einheiten
+
+
+
+                                                                          x Verunreinigungen, die sich
+                                                                          im Speicherzulauf befinden
+                                                                                = 0 Einheiten
+
+
+     Hierbei werden die Fremdstoffe nicht in den Speicher abgegeben (positiv), sammeln sich auch nicht
+     unkontrolliert im Filtergehäuse, sondern werden planmäßig in den Ablauf geleitet (venvorfen), was durch die
+     zusätzliche Messung bewiesen wird.
+
+     Durch die Bildung des arithmetischen Mittels der Messung der Speicherverunreinigung (hier: sehr gut) mit der
+     Messung des Ven¡vurfs (hier: sehr gut) wird die ideale Wirkungsweise des Filters mit einer Trennwirkung von
+6
+     0c = 1,O dokumentiert.
+ç)
+6
+o
+I6                =   &-=-.t-r= ,1ão =.',0
+                           ! ges.Festst
+                                                                                                                      (D.4)
+          'nu"r
+è
+N
+
+È
+g
+o
+a
+          ?v"*=*-ffi=iå=,0                                                                                            (D.5)
+
+N
+a
+o                                         2               t"*    { lv"*                 1o
+ô
+o            0c = 0,5(t1*u"u+ rlv"*) =                                     = o,s10-å*        = r,o                    (D.6)
+o                                                 > ges.Festst
+o
+b
+þ
+\a
+6
+
+a
+6
+b
+o
+(J
+()
+o
+a
+6
+a
+0
+6
+ci
+*b
+o
+
+6
+È
+¿
+È
+v
+È
+aÈ
+o
+ è
+ o
+a
+o
+e
+G
++
+c
+o
+!0
+o
+
+:ô
+o
+     24
+q
+G
+
+Ê
+a
+                                                                                              DIN 1989-2:2004-08
+
+
+
+                                                      Anhang E
+                                                     (informativ)
+
+                                        Beispiel ei nes Prtifberichtes
+
+      l. Prüfinstitut: (Bezeichnung, Ort, lnstitution, Abteilung, Stempel, Sachbearbeiter)
+      2. Prüfdatum:
+
+      3. Kennzeichnung
+
+          Hersteller (Adresse):
+          Typenbezeichnung:
+          Baujahr:
+          Zugehörige Konstruktionszeichnung (Anlage):
+          Nennweite der   Zulaufleitung:           DN
+          Typisierung nach Funktionsprinzip (siehe 5.3):                                   A trB NC
+
+      4. Prüfergebnisse
+6
+
+o     lnaugenscheinnahme:
+I
+€     a)  der Übereinstimmung Prüfgegenstand und Herstellerangaben (Zeichnung)               !ja       n nein
+d¡
+o
+6
+o
+      b) der Typisierung korrekt (siehe 5.3)                                                 !ja       ! nein
+N
+
+o
+      c) des Nachweises der Materialgüte / Herstellerzertifikate vollständig (siehe 5.2)     !ja       ! nein
+o
+o
+ñ
+N
+      Prüfung:
+q
+o
+a
+      a) der ausreichenden Stabilität (siehe 5.7)                                     ¡ja              ¡ nein
+o
+o
+o
+b
+6
+      b) der hydraulischen Leistung                                                   !ja              ! nein
+t¡.
+e
+a
+e
+      c) der Rückstaufreiheit nach DIN 1986-100                                       ¡ja              I nein
+b
+o
+o
+o
+o     d) bei abgeklebten Filterflächen/ Blindeinsatz (siehe 6.2)                      !ja              ! nein
+a
+6
+o
+q
+6
+      e) des hydraulischen Wirkungsgrades (Darstellung in Diagrammform nach Bild E.1)
+I
+ìr,
+ci
+N        1) am unbelasteten System (siehe 6.4.5)
+6
+!t
+{        2) am dauerbelasteten System (siehe 6.4.6)
+e
+È
+Y
+ta
+      ANMERKUNG Dem Anwender dieses Formblattes ist die Vervielfältigung gestattet.
+o
+è
+ó
+o
+o
+a
+e
+Ì
+G
+
+
+
+o
+To
+
+ o
+!
+ê                                                                                                               25
+o
+ø
+G
+
+Ë
+a
+        DIN 1989-2:2004-08
+
+
+
+
+                                     100
+                                               }t      L.
+                                     80
+                                =N
+                                @                                      L
+                                     60
+                                C
+                                õ
+                                ø
+                                9r 40                 tttr
+
+                               +                    * Unbetastet
+                               U
+                                     20
+                                                    -# Dauerbetastet
+                                       0
+                                           0          20    40       60                80   100
+
+                                                        Zuf luss, Anteil von Ozu (%l
+
+
+
+                               B¡ld E.l
+                                               - Darstellung des hydraulischen Wirkungsgrads
+
+        Prüfung der Filtertrennwirkung nach 6.5              Filtertrennwi
+
+
+
+
+o
+
+q
+6
+d)
+o
+6
+o
+N
+
+    o
+a
+o
+s
+a
+o
+a
+o
+o
+o
+b
+o
+þ
+tÀ
+o
+a
+o
+b
+s
+(J
+(J
+è
+a
+a
+o
+o
+6
+o?
+o
+'i
+{)
+o
+I
+I
+6
+ t
+È
+v
+ta
+È
+o
+è
+o
+o
+o
+a
+Ë
+ß
++
+o
+a
+È
+':
+!
+
+o
+o
+        26
+q
+
+¡å
+G
+
+
+õ
+

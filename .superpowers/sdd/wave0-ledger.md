@@ -1410,3 +1410,10 @@ FULL-TREATMENT BATCH 17 OPENED 2026-07-31 — FLL-TP-RHIZOM-2023(3eq/24cr), HOAI
   wf_799d72a6-81d / wxk4yjj30. NEXT (final DWA stretch): DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/
   179-1; DWA-A-125. Source-blocked (acquisition): DWA-A-131/226/201/M-229-1. PHANTOM-FIELD corpus survey
   candidate (enum-value-token fields, ruling-class delete).
+
+FULL-TREATMENT BATCH 17 CLOSED 2026-07-31 — FLL-TP-RHIZOM-2023 + HOAI-2021 → 43 guidelines full-treated.
+  Applied mig 20260731190000 (FLL REQ-01 enum tokens + label; HOAI objektart §18/§19 provenance), verified,
+  rollback -batch17. Equations 3/3 + 6/6 faithful. Rulings sheeted Section AM: FLL 9 dead block-mishomes +
+  is-not-null + modal + stuck-pending + 9 coverage gaps; HOAI CR-05 vacuous+mishome, CR-16/17 over-block,
+  CR-02/21/22/23 vacuous-TRUE, 3 held umbau-caps, Landschaftsplanung coverage gap. NO phantom/null-enum.
+  NEXT (final DWA stretch): DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1; DWA-A-125.

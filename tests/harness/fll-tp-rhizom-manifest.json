@@ -1,0 +1,592 @@
+{
+  "standard": {
+    "code": "FLL-TP-RHIZOM-2023",
+    "title_de": "Technische Prüfbestimmungen zur Bestimmung der Rhizomfestigkeit von Gewässerabdichtungen",
+    "version": "Dezember 2023"
+  },
+  "worksheets": [
+    {
+      "code": "FLLTP-RHZ-01",
+      "title_de": "Auftragsregistrierung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": null, "symbol": "attest_flltp_rhz_01_req_02", "label_de": "Nachweis: §2", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "auftraggeber_kontakt", "label_de": "Kontaktdaten Auftraggeber", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "auftraggeber_name", "label_de": "Name des Auftraggebers", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "pruefbericht_nr", "label_de": "Berichtsnummer", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "pruefinstitut_name", "label_de": "Name des Prüfinstituts", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "pruefung_enddatum", "label_de": "Ende der Prüfung", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "pruefung_startdatum", "label_de": "Start der Prüfung", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-01", "title_de": "Geltungsbereich erfüllt", "condition": "abdichtungsart IN {bitumen,kunststoff,elastomer,fluessig,gussasphalt,gup} AND scope_einzelprodukt_bestaetigt == true", "severity": "block" },
+        { "code": "REQ-02", "title_de": "Bambus-Hinweis dokumentiert", "condition": "attest_flltp_rhz_01_req_02 == True", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-02",
+      "title_de": "Produkt- und Herstellerangaben",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "abdichtungsart", "label_de": "Abdichtungsart", "data_type": "enum", "unit": null, "enum_values": [{"value": "bitumenbahn", "label_de": "Bitumenbahn", "label_en": "Bitumen sheet", "order_index": 1, "regulation_reference": "§2"}, {"value": "kunststoffbahn", "label_de": "Kunststoffbahn", "label_en": "Plastic sheet", "order_index": 2, "regulation_reference": "§2"}, {"value": "elastomerbahn", "label_de": "Elastomerbahn", "label_en": "Elastomer sheet", "order_index": 3, "regulation_reference": "§2"}, {"value": "fluessigabdichtung", "label_de": "Flüssigabdichtung", "label_en": "Liquid sealing", "order_index": 4, "regulation_reference": "§2"}, {"value": "gussasphalt", "label_de": "Gussasphalt", "label_en": "Mastic asphalt", "order_index": 5, "regulation_reference": "§2"}, {"value": "gup_beschichtung", "label_de": "GUP-Beschichtung", "label_en": "GUP coating (glass-reinforced polyester)", "order_index": 6, "regulation_reference": "§2"}], "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "fuegetechniken_angewandt", "label_de": "Angewandte Fügetechniken", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "gesonderte_lage_eingebaut", "label_de": "Gesonderte Lage unter Beschichtung?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "B", "symbol": "hersteller_name", "label_de": "Name des Herstellers", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "ist_bahnenartig", "label_de": "Bahnenartig?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "mehrschichtprodukt", "label_de": "Mehrschichtprodukt?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "produktbezeichnung", "label_de": "Produktbezeichnung", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "schutzschicht_definition", "label_de": "Definition der Schutzschicht", "data_type": "text", "unit": null, "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "B", "symbol": "wachstumshemmende_wirkstoffe", "label_de": "Mit wachstumshemmenden Wirkstoffen?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-03", "title_de": "Wachstumshemmende Wirkstoffe gekennzeichnet", "condition": "wachstumshemmende_wirkstoffe != null", "severity": "block" },
+        { "code": "REQ-04", "title_de": "Mehrschichtprodukt: Schutzschicht definiert", "condition": "mehrschichtprodukt == false OR (schutzschicht_definition != null)", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-03",
+      "title_de": "Geltungsbereichsprüfung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "C", "symbol": "scope_einzelprodukt_bestaetigt", "label_de": "Einzelprodukt (kein System)?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": null, "symbol": "scope_anwendungsbereich", "label_de": "Anwendungsbereich des Produkts", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "scope_geltung_validiert", "label_de": "Geltungsbereich validiert", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "scope_pruefer_name", "label_de": "Prüfer-Name", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "scope_pruefung_datum", "label_de": "Prüfdatum", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-04",
+      "title_de": "Standort & Gewächshausbedingungen",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "flaechenbedarf_pro_gefaess_m2", "label_de": "Flächenbedarf je Gefäß", "data_type": "number", "unit": "m²", "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "B", "symbol": "gewaechshaus_id", "label_de": "Gewächshaus-Kennung", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "temp_lueftung_schwelle_C", "label_de": "Lüftungsschwelle", "data_type": "number", "unit": "°C", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "temp_max_C", "label_de": "Maximal zulässige Innentemperatur", "data_type": "number", "unit": "°C", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "temp_nachts_C", "label_de": "Innentemperatur nachts", "data_type": "number", "unit": "°C", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "temp_tagsueber_C", "label_de": "Innentemperatur tagsüber", "data_type": "number", "unit": "°C", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-05", "title_de": "Gewächshausbedingungen eingehalten", "condition": "temp_tagsueber_C >= 15 AND temp_tagsueber_C <= 21 AND temp_nachts_C >= 13 AND temp_nachts_C <= 19 AND temp_lueftung_schwelle_C >= 19 AND temp_lueftung_schwelle_C <= 25 AND temp_max_C <= 35", "severity": "block" },
+        { "code": "REQ-10", "title_de": "Testpflanzen verwendet", "condition": "testpflanze_art == 'phragmites_australis' AND pflanzdichte_pro_gefaess == 8", "severity": "block" },
+        { "code": "REQ-06", "title_de": "Apparatur korrekt dimensioniert", "condition": "gefaess_innenmass_l_mm >= 800 AND gefaess_innenmass_b_mm >= 800 AND gefaess_innenmass_h_mm >= 250 AND anzahl_pruefgefaesse == 8 AND anzahl_kontrollgefaesse == 3 AND wasserablauf_durchmesser_mm == 40 AND widerlager_dicke_mm >= 9 AND widerlager_dicke_mm <= 11", "severity": "block" },
+        { "code": "REQ-07", "title_de": "Vegetationstragschicht entspricht Tab. 1", "condition": "vts_ph_cacl2 >= 6.0 AND vts_ph_cacl2 <= 7.5 AND vts_salz_h2o_g_l <= 1.0 AND vts_salz_caso4_g_l <= 0.5 AND vts_n_cat_mg_l <= 50 AND vts_p2o5_cat_mg_l <= 25 AND vts_k2o_cat_mg_l <= 100 AND vts_caco3_scheibler_prozent >= 1 AND vts_caco3_scheibler_prozent <= 10", "severity": "block" },
+        { "code": "REQ-08", "title_de": "Düngemittel-Anforderungen erfüllt", "condition": "duenger_chloridarm == true AND duenger_spurelemente_vorhanden == true", "severity": "block" },
+        { "code": "REQ-09", "title_de": "Gießwasser entspricht Tab. 2", "condition": "wasser_ammonium_mg_l <= 0.5 AND wasser_eisen_mg_l <= 0.2 AND wasser_p_gesamt_mg_l <= 0.03 AND wasser_haerte_mmol_l >= 1.0 AND wasser_leitfaehigkeit_uS_cm <= 1000.0 AND wasser_mangan_mg_l <= 0.05 AND wasser_nitrat_mg_l <= 50.0 AND wasser_ortho_phosphat_mg_l <= 0.01 AND wasser_ph >= 6.0 AND wasser_ph <= 9.0 AND wasser_saurekapazitaet_mmol_l >= 2.0", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-05",
+      "title_de": "Prüf- und Kontrollgefäße & Apparatur",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "anzahl_kontrollgefaesse", "label_de": "Anzahl Kontrollgefäße", "data_type": "number", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "anzahl_pruefgefaesse", "label_de": "Anzahl Prüfgefäße", "data_type": "number", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "gefaess_innenmass_b_mm", "label_de": "Innenmaß Breite", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "gefaess_innenmass_h_mm", "label_de": "Innenmaß Höhe", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "gefaess_innenmass_l_mm", "label_de": "Innenmaß Länge", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "gefaess_material", "label_de": "Material der Gefäße", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "trennlage_eingebaut", "label_de": "Trennlage eingebaut?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "trennlage_wasserdurchlaessig", "label_de": "Trennlage wasserdurchlässig?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "B", "symbol": "wasserablauf_durchmesser_mm", "label_de": "Wasserablauf-Durchmesser", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "widerlager_dicke_mm", "label_de": "Widerlager-Dicke", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "widerlager_material", "label_de": "Widerlager-Material", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-06",
+      "title_de": "Vegetationstragschicht-Eingangsprüfung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "C", "symbol": "vts_caco3_scheibler_prozent", "label_de": "VTS CaCO3 (Scheibler)", "data_type": "number", "unit": "M.-%", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "D", "symbol": "vts_gesamt_dicke_mm", "label_de": "Gesamtdicke VTS", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_k2o_cat_mg_l", "label_de": "VTS K2O (CAT)", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "vts_koernung", "label_de": "VTS-Körnung", "data_type": "text", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_n_cat_mg_l", "label_de": "VTS N (CAT)", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_p2o5_cat_mg_l", "label_de": "VTS P2O5 (CAT)", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_ph_cacl2", "label_de": "VTS pH (CaCl2)", "data_type": "number", "unit": "-", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_salz_caso4_g_l", "label_de": "VTS Salz (CaSO4)", "data_type": "number", "unit": "g/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_salz_h2o_g_l", "label_de": "VTS Salz (H2O)", "data_type": "number", "unit": "g/l", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-07",
+      "title_de": "Düngemittel & Gießwasser-Eingangsprüfung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "duenger_chloridarm", "label_de": "Chloridarm?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_k2o_prozent", "label_de": "Düngemittel K2O-Anteil", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_mgo_prozent", "label_de": "Düngemittel MgO-Anteil", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_n_prozent", "label_de": "Düngemittel N-Anteil", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_p2o5_prozent", "label_de": "Düngemittel P2O5-Anteil", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_spurelemente_vorhanden", "label_de": "Spurenelemente enthalten?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_ammonium_mg_l", "label_de": "Gießwasser Ammonium", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_eisen_mg_l", "label_de": "Gießwasser Eisen", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_haerte_mmol_l", "label_de": "Gießwasser Härte (Summe Erdalkalien)", "data_type": "number", "unit": "mmol/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_leitfaehigkeit_uS_cm", "label_de": "Gießwasser Leitfähigkeit", "data_type": "number", "unit": "µS/cm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_mangan_mg_l", "label_de": "Gießwasser Mangan", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_nitrat_mg_l", "label_de": "Gießwasser Nitrat", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_ortho_phosphat_mg_l", "label_de": "Gießwasser ortho-Phosphat (P)", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_p_gesamt_mg_l", "label_de": "Gießwasser P_gesamt", "data_type": "number", "unit": "mg/l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_ph", "label_de": "Gießwasser pH-Wert", "data_type": "number", "unit": "-", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasser_saurekapazitaet_mmol_l", "label_de": "Gießwasser Säurekapazität KS4,3", "data_type": "number", "unit": "mmol/l", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-08",
+      "title_de": "Testpflanzen-Qualität",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "testpflanze_art", "label_de": "Testpflanzenart", "data_type": "enum", "unit": null, "enum_values": [{"value": "phragmites_australis", "label_de": "Phragmites australis (Schilf)", "label_en": "Phragmites australis (Reed)", "order_index": 1, "regulation_reference": "§5.8, §3.6"}], "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "testpflanze_container_format", "label_de": "Container-Format", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-09",
+      "title_de": "Einbau der Abdichtung in Prüfgefäße",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "C", "symbol": "arbeitsfuge_zeitabstand_h", "label_de": "Mindest-Zeitabstand Arbeitsfuge", "data_type": "number", "unit": "h", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "naht_anzahl_boden_eck", "label_de": "Anzahl Boden-Eck-Nähte", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "naht_anzahl_laengs_2_pruefmuster", "label_de": "Anzahl Längsnähte (2. Prüfmuster)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "naht_anzahl_t_naht", "label_de": "Anzahl T-Nähte (1. Prüfmuster)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "naht_anzahl_wand_eck", "label_de": "Anzahl Wand-Eck-Nähte", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "pruefmuster_2_versatz_grad", "label_de": "Versatz 2. Prüfmuster", "data_type": "number", "unit": "°", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "standrohr_durchmesser_mm", "label_de": "Standrohr-Durchmesser", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_obere_schicht_dicke_mm", "label_de": "Dicke obere VTS", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "vts_untere_schicht_dicke_mm", "label_de": "Dicke untere VTS", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-11", "title_de": "Einbau-Nähte gemäß §7.1", "condition": "ist_bahnenartig == false OR (naht_anzahl_wand_eck >= 4 AND naht_anzahl_boden_eck >= 2 AND naht_anzahl_t_naht >= 1 AND naht_anzahl_laengs_2_pruefmuster >= 2 AND pruefmuster_2_versatz_grad == 45)", "severity": "block" },
+        { "code": "REQ-12", "title_de": "Arbeitsfuge bei Nicht-Bahnen", "condition": "ist_bahnenartig == true OR arbeitsfuge_zeitabstand_h >= 12", "severity": "block" },
+        { "code": "REQ-13", "title_de": "VTS-Schichtdicken eingehalten", "condition": "vts_untere_schicht_dicke_mm >= 15 AND vts_untere_schicht_dicke_mm <= 25 AND vts_obere_schicht_dicke_mm >= 145 AND vts_obere_schicht_dicke_mm <= 155", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-10",
+      "title_de": "Vorbereitung der Kontrollgefäße",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": null, "symbol": "kontroll_einbau_datum", "label_de": "Einbau-Datum Kontrollgefäße", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 10 },
+        { "sec": null, "symbol": "kontroll_vts_einbau_methode", "label_de": "VTS-Einbaumethode Kontrolle", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "kontroll_vts_dicke_unten_mm", "label_de": "Untere VTS-Schichtdicke Kontrolle", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "kontroll_vts_dicke_oben_mm", "label_de": "Obere VTS-Schichtdicke Kontrolle", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "kontroll_standrohr_eingebaut", "label_de": "Standrohr eingebaut Kontrolle", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-11",
+      "title_de": "Bepflanzung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "pflanzdichte_pro_gefaess", "label_de": "Pflanzen je Gefäß", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": null, "symbol": "bepflanzung_datum", "label_de": "Bepflanzungsdatum", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "pflanzung_methode", "label_de": "Pflanzungsmethode", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "pflanzen_initial_zustand", "label_de": "Pflanzen Anfangszustand", "data_type": "enum", "unit": null, "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "anzahl_pflanzen_total", "label_de": "Anzahl Pflanzen gesamt", "data_type": "number", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-12",
+      "title_de": "Pflege & Düngungsprotokoll",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "duenger_gabe_g", "label_de": "Düngergabe je Gefäß", "data_type": "number", "unit": "g", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_intervall_monate", "label_de": "Düngeintervall", "data_type": "number", "unit": "Monate / months", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "duenger_loesung_l", "label_de": "Düngerlösung Volumen", "data_type": "number", "unit": "l", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "ersatz_pflanzen_periode_mon", "label_de": "Ersatz abgestorbener Pflanzen - Periode", "data_type": "number", "unit": "Monate / months", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "halmschnitt_im_gruenen_zulaessig", "label_de": "Halmschnitt im grünen Zustand zulässig?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasserstand_max_ueber_vts_mm", "label_de": "Wasserstand max. über VTS", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "wasserstand_min_unter_vts_mm", "label_de": "Wasserstand max. unter VTS", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-16", "title_de": "Wuchsleistung 12 Monate ausreichend", "condition": "bestandsdichte_p_avg_12mon >= 120 AND dichte_relativ_prozent >= 80", "severity": "block" },
+        { "code": "REQ-17", "title_de": "Wuchsleistung 18 Monate ausreichend", "condition": "bestandsdichte_p_avg_18mon >= 160 AND dichte_relativ_prozent >= 80", "severity": "block" },
+        { "code": "REQ-14", "title_de": "Pflege & Düngung dokumentiert", "condition": "wasserstand_max_ueber_vts_mm == 20 AND wasserstand_min_unter_vts_mm == 50 AND duenger_intervall_monate == 1 AND duenger_gabe_g == 5 AND duenger_loesung_l == 20 AND ersatz_pflanzen_periode_mon <= 3 AND halmschnitt_im_gruenen_zulaessig == false", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-13",
+      "title_de": "Wuchsleistung Zwischenauswertung 6 Monate",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "D", "symbol": "bestandsdichte_k_avg", "label_de": "Ø Bestandsdichte Kontrollgefäße", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "D", "symbol": "bestandsdichte_p_avg_6mon", "label_de": "Ø Bestandsdichte Prüfgefäße 6 Mon.", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "D", "symbol": "dichte_relativ_prozent", "label_de": "Relative Bestandsdichte P/K", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "F", "symbol": "wuchsleistung_ausreichend", "label_de": "Wuchsleistung ausreichend?", "data_type": "enum", "unit": null, "enum_values": [{"value": "pass", "label_de": "bestanden", "label_en": "pass", "order_index": 1, "regulation_reference": "methodology"}, {"value": "fail", "label_de": "nicht bestanden", "label_en": "fail", "order_index": 2, "regulation_reference": "methodology"}], "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "P_1", "label_de": "Bestandsdichte Prüffeld P1", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 1 },
+        { "sec": "B", "symbol": "P_2", "label_de": "Bestandsdichte Prüffeld P2", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 2 },
+        { "sec": "B", "symbol": "P_3", "label_de": "Bestandsdichte Prüffeld P3", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 3 },
+        { "sec": "B", "symbol": "P_4", "label_de": "Bestandsdichte Prüffeld P4", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 4 },
+        { "sec": "B", "symbol": "P_5", "label_de": "Bestandsdichte Prüffeld P5", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 5 },
+        { "sec": "B", "symbol": "P_6", "label_de": "Bestandsdichte Prüffeld P6", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 6 },
+        { "sec": "B", "symbol": "P_7", "label_de": "Bestandsdichte Prüffeld P7", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 7 },
+        { "sec": "B", "symbol": "P_8", "label_de": "Bestandsdichte Prüffeld P8", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 8 },
+        { "sec": "B", "symbol": "K_1", "label_de": "Bestandsdichte Kontrollfeld K1", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 21 },
+        { "sec": "B", "symbol": "K_2", "label_de": "Bestandsdichte Kontrollfeld K2", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 22 },
+        { "sec": "B", "symbol": "K_3", "label_de": "Bestandsdichte Kontrollfeld K3", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 23 },
+        { "sec": "D", "symbol": "bestandsdichte_p_avg", "label_de": "Mittlere Bestandsdichte Prüffeld", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": false, "order_index": 71 }
+      ],
+      "equations": [
+        { "equation_number": "EQ-1", "formula": "bestandsdichte_p_avg = (P_1 + P_2 + P_3 + P_4 + P_5 + P_6 + P_7 + P_8) / 8", "output_symbol": "bestandsdichte_p_avg" },
+        { "equation_number": "EQ-2", "formula": "bestandsdichte_k_avg = (K_1 + K_2 + K_3) / 3", "output_symbol": "bestandsdichte_k_avg" },
+        { "equation_number": "EQ-3", "formula": "dichte_relativ_prozent = (bestandsdichte_p_avg / bestandsdichte_k_avg) * 100", "output_symbol": "dichte_relativ_prozent" }
+      ],
+      "compliance": [
+        { "code": "REQ-15", "title_de": "Wuchsleistung 6 Monate ausreichend", "condition": "bestandsdichte_p_avg_6mon >= 80 AND dichte_relativ_prozent >= 80", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-14",
+      "title_de": "Wuchsleistung Zwischenauswertung 12 Monate",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "D", "symbol": "bestandsdichte_p_avg_12mon", "label_de": "Ø Bestandsdichte Prüfgefäße 12 Mon.", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": null, "symbol": "kontrolle_p_avg_12mon", "label_de": "Kontroll-Bestandsdichte Mittelwert 12 Mon.", "data_type": "number", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "relativ_prozent_12mon", "label_de": "Relative Dichte 12 Mon.", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "wuchsleistung_12mon_ausreichend", "label_de": "Wuchsleistung 12 Mon. ausreichend", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "auswertungs_datum_12mon", "label_de": "Auswertungsdatum 12 Mon.", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-15",
+      "title_de": "Wuchsleistung Zwischenauswertung 18 Monate",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "D", "symbol": "bestandsdichte_p_avg_18mon", "label_de": "Ø Bestandsdichte Prüfgefäße 18 Mon.", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": null, "symbol": "kontrolle_p_avg_18mon", "label_de": "Kontroll-Bestandsdichte Mittelwert 18 Mon.", "data_type": "number", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "relativ_prozent_18mon", "label_de": "Relative Dichte 18 Mon.", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "wuchsleistung_18mon_ausreichend", "label_de": "Wuchsleistung 18 Mon. ausreichend", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "auswertungs_datum_18mon", "label_de": "Auswertungsdatum 18 Mon.", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-16",
+      "title_de": "Wuchsleistung Endauswertung 24 Monate",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "D", "symbol": "bestandsdichte_p_avg_24mon", "label_de": "Ø Bestandsdichte Prüfgefäße 24 Mon.", "data_type": "number", "unit": "Halme/Gefäß", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": null, "symbol": "kontrolle_p_avg_24mon", "label_de": "Kontroll-Bestandsdichte Mittelwert 24 Mon.", "data_type": "number", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "relativ_prozent_24mon", "label_de": "Relative Dichte 24 Mon.", "data_type": "number", "unit": "%", "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "wuchsleistung_24mon_ausreichend", "label_de": "Wuchsleistung 24 Mon. ausreichend (Endauswertung)", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "endauswertung_datum", "label_de": "Endauswertungsdatum", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-18", "title_de": "Wuchsleistung 24 Monate ausreichend", "condition": "bestandsdichte_p_avg_24mon >= 160 AND dichte_relativ_prozent >= 80", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-17",
+      "title_de": "Rhizomeindringung & -durchdringung Erfassung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "F", "symbol": "fotos_dokumentiert", "label_de": "Fotografische Dokumentation vorhanden?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "max_eindringtiefe_ueberlappung_mm", "label_de": "Max. Eindringtiefe Überlappung", "data_type": "number", "unit": "mm", "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "C", "symbol": "rhizomdurchdringung_flaeche_count", "label_de": "Rhizomdurchdringungen Fläche (gesamt)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "rhizomdurchdringung_naehte_count", "label_de": "Rhizomdurchdringungen Nähte (gesamt)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "D", "symbol": "rhizome_in_poren_count", "label_de": "Rhizome in vorhandene Poren (nicht gewertet)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "D", "symbol": "rhizome_unter_5mm_bei_hemmstoff_count", "label_de": "Rhizome ≤ 5 mm bei Hemmstoff (nicht gewertet)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "C", "symbol": "rhizomeindringung_arbeitsfuge_count", "label_de": "Rhizomeindringungen Arbeitsfuge", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "C", "symbol": "rhizomeindringung_flaeche_count", "label_de": "Rhizomeindringungen Fläche (gesamt)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "C", "symbol": "rhizomeindringung_naehte_count", "label_de": "Rhizomeindringungen Nähte (gesamt)", "data_type": "number", "unit": "Stk / pcs", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "F", "symbol": "rueckstellproben_entnommen", "label_de": "Rückstellproben entnommen?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-19", "title_de": "Keine gewerteten Rhizomeindringungen", "condition": "rhizomeindringung_flaeche_count == 0 AND rhizomeindringung_naehte_count == 0 AND rhizomeindringung_arbeitsfuge_count == 0", "severity": "block" },
+        { "code": "REQ-20", "title_de": "Keine Rhizomdurchdringungen", "condition": "rhizomdurchdringung_flaeche_count == 0 AND rhizomdurchdringung_naehte_count == 0", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-18",
+      "title_de": "Bewertung Rhizomfestigkeit (Gate)",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "F", "symbol": "abbruchsgrund", "label_de": "Grund für vorzeitigen Abbruch", "data_type": "text", "unit": null, "enum_values": null, "is_required": false, "order_index": 0 },
+        { "sec": "F", "symbol": "pruefergebnis_rhizomfest", "label_de": "Prüfergebnis Rhizomfestigkeit", "data_type": "enum", "unit": null, "enum_values": [{"value": "rhizomfest", "label_de": "rhizomfest", "label_en": "rhizome resistant", "order_index": 1, "regulation_reference": "§3.11"}, {"value": "nicht_rhizomfest", "label_de": "nicht rhizomfest", "label_en": "not rhizome resistant", "order_index": 2, "regulation_reference": "§3.11, §8"}, {"value": "vorzeitig_abgebrochen", "label_de": "vorzeitig abgebrochen", "label_en": "terminated early", "order_index": 3, "regulation_reference": "§3.12"}], "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-19",
+      "title_de": "Prüfbericht Erstellung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": null, "symbol": "attest_flltp_rhz_19_req_21", "label_de": "Nachweis: §9", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "F", "symbol": "bericht_datum", "label_de": "Datum des Berichts", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "F", "symbol": "bericht_seitenanzahl", "label_de": "Berichts-Seitenanzahl", "data_type": "number", "unit": "pages", "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "F", "symbol": "gueltigkeitsdauer_jahre", "label_de": "Gültigkeitsdauer", "data_type": "number", "unit": "Jahre / years", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": [
+        { "code": "REQ-22", "title_de": "Verlängerung Voraussetzungen", "condition": "pruefgrundlagen_unveraendert == true AND produkt_aktuell_im_lieferprogramm == true AND rueckstellmuster_erneut_hinterlegt == true AND eidesstattliche_erklaerung_vorhanden == true", "severity": "block" },
+        { "code": "REQ-21", "title_de": "Prüfbericht-Inhalt vollständig", "condition": "attest_flltp_rhz_19_req_21 == True", "severity": "block" }
+      ]
+    },
+    {
+      "code": "FLLTP-RHZ-20",
+      "title_de": "Umschreibung & Verlängerung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": "B", "symbol": "eidesstattliche_erklaerung_vorhanden", "label_de": "Eidesstattliche Erklärung vorhanden?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "produkt_aktuell_im_lieferprogramm", "label_de": "Produkt im Lieferprogramm?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "pruefgrundlagen_unveraendert", "label_de": "Prüfgrundlagen unverändert?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "rueckstellmuster_erneut_hinterlegt", "label_de": "Rückstellmuster erneut hinterlegt?", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 0 },
+        { "sec": "B", "symbol": "verlangerung_zeitabschnitt_jahre", "label_de": "Verlängerungszeitraum", "data_type": "number", "unit": "Jahre / years", "enum_values": null, "is_required": true, "order_index": 0 }
+      ],
+      "equations": null,
+      "compliance": null
+    },
+    {
+      "code": "FLLTP-RHZ-21",
+      "title_de": "Konformitäts-Gesamtbescheinigung",
+      "sections": [
+        { "code": "A", "title_de": "Zweck und Kontext", "order_index": 1 },
+        { "code": "B", "title_de": "Eingangsdaten", "order_index": 2 },
+        { "code": "C", "title_de": "Worksheet-spezifischer Inhalt", "order_index": 3 },
+        { "code": "D", "title_de": "Abgeleitete Werte / Berechnungen", "order_index": 4 },
+        { "code": "F", "title_de": "Ergebnis-Zusammenfassung", "order_index": 5 },
+        { "code": "J", "title_de": "Output-Übergabe", "order_index": 6 },
+        { "code": "K", "title_de": "Notizen und Annahmen", "order_index": 7 },
+        { "code": "L", "title_de": "Freigabe", "order_index": 8 },
+        { "code": "M", "title_de": "Workflow-Verknüpfung", "order_index": 9 }
+      ],
+      "fields": [
+        { "sec": null, "symbol": "final_rhizom_conformity", "label_de": "Endgültige Rhizomfestigkeit-Konformität", "data_type": "enum", "unit": null, "enum_values": [{"value": "rhizomfest", "label_de": "rhizomfest", "label_en": "rhizome resistant", "order_index": 1, "regulation_reference": "§3.11"}, {"value": "nicht_rhizomfest", "label_de": "nicht rhizomfest", "label_en": "not rhizome resistant", "order_index": 2, "regulation_reference": "§3.11, §8"}, {"value": "vorzeitig_abgebrochen", "label_de": "vorzeitig abgebrochen", "label_en": "terminated early", "order_index": 3, "regulation_reference": "§3.12"}], "is_required": true, "order_index": 10 },
+        { "sec": null, "symbol": "bescheinigung_gueltig_bis", "label_de": "Bescheinigung gültig bis", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 20 },
+        { "sec": null, "symbol": "bescheinigung_ausgestellt_durch", "label_de": "Ausstellungsinstitut", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 30 },
+        { "sec": null, "symbol": "bescheinigung_pruefnummer", "label_de": "Prüfnummer", "data_type": "text", "unit": null, "enum_values": null, "is_required": true, "order_index": 40 },
+        { "sec": null, "symbol": "bescheinigung_ausstellung_datum", "label_de": "Ausstellungsdatum", "data_type": "date", "unit": null, "enum_values": null, "is_required": true, "order_index": 50 },
+        { "sec": null, "symbol": "pruefer_signatur_eingeholt", "label_de": "Prüfer-Unterschrift eingeholt", "data_type": "boolean", "unit": null, "enum_values": null, "is_required": true, "order_index": 60 }
+      ],
+      "equations": null,
+      "compliance": null
+    }
+  ]
+}

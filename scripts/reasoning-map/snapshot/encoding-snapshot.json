@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-28T16:19:00.470Z",
+  "exported_at": "2026-07-31T08:51:11.025Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -2087,7 +2087,7 @@
             "n_determinations"
           ],
           "formula": "mean_value = SUM(single_result_i) / n_determinations",
-          "clause_reference": "IGC-Card 3",
+          "clause_reference": "IQC-Card 3",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c6b24603-07c3-4c5b-8f7a-da3d64e88e3f"
         },
@@ -2100,7 +2100,7 @@
             "mean_value"
           ],
           "formula": "deviation_single_pct = 100 * (single_result_i - mean_value) / mean_value",
-          "clause_reference": "IGC-Card 3",
+          "clause_reference": "IQC-Card 3",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c6b24603-07c3-4c5b-8f7a-da3d64e88e3f"
         },
@@ -2114,7 +2114,7 @@
             "measured_value_diluted_sample"
           ],
           "formula": "calculated_value = (total_volume / sample_volume) * measured_value_diluted_sample",
-          "clause_reference": "IGC-Card 5, Sheet 1",
+          "clause_reference": "IQC-Card 5, Sheet 1",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c6b24603-07c3-4c5b-8f7a-da3d64e88e3f"
         },
@@ -2129,7 +2129,7 @@
             "concentration_standard"
           ],
           "formula": "NSS = (volume_sample * measured_value_original_sample + volume_standard * concentration_standard) / (volume_sample + volume_standard)",
-          "clause_reference": "IGC-Card 5, Sheet 3",
+          "clause_reference": "IQC-Card 5, Sheet 3",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c6b24603-07c3-4c5b-8f7a-da3d64e88e3f"
         },
@@ -2142,7 +2142,7 @@
             "nominal_value_reference"
           ],
           "formula": "deviation_equivalency_pct = 100 * (measured_value_operating - nominal_value_reference) / nominal_value_reference",
-          "clause_reference": "IGC-Card 6",
+          "clause_reference": "IQC-Card 6",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "638fb0fa-9e92-4dec-b388-e31f68a853ef"
         },
@@ -2155,7 +2155,7 @@
             "measured_value_reference"
           ],
           "formula": "deviation_parallel_pct = 100 * (measured_value_operating - measured_value_reference) / measured_value_reference",
-          "clause_reference": "IGC-Card 7",
+          "clause_reference": "IQC-Card 7",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "638fb0fa-9e92-4dec-b388-e31f68a853ef"
         }
@@ -2170,28 +2170,6 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Besides the action on the practical application of operating methods, this Standard defines quality requirements that - if implemented - allow equal treatment. By taking into account these measures, the operating methods correspond to the requirements of § 4 AbwV (German Waste Water Ordinance); there are no reasons that oppose their application as equal methods in the determination in the discharge consent from a metrological point of view.",
-          "worksheet_template_id": "374f68fb-af7e-4552-afab-f969a390018a"
-        },
-        {
-          "id": "ae6e92a6-f766-45d5-8444-6e43ffb7dc06",
-          "code": "CR-005",
-          "condition": "attest_atv_a_704e_01_cr_005 == True",
-          "severity": "block",
-          "clause_reference": "3.2 Requirements on the Manufacturers of Analytical Devices and Reagents",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Advice on an appropriate function control (inspection equipment monitoring) must be given.",
-          "worksheet_template_id": "374f68fb-af7e-4552-afab-f969a390018a"
-        },
-        {
-          "id": "87f8bd72-c9f5-4aa2-92ef-fa3b141d399f",
-          "code": "CR-006",
-          "condition": "attest_atv_a_704e_01_cr_006 == True",
-          "severity": "block",
-          "clause_reference": "3.2 Requirements on the Manufacturers of Analytical Devices and Reagents",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Changes in the handling (e. g. factor alterations in the photometric determination) must be communicated up-to-date and clearly.",
           "worksheet_template_id": "374f68fb-af7e-4552-afab-f969a390018a"
         },
         {
@@ -2250,6 +2228,28 @@
           "worksheet_template_id": "374f68fb-af7e-4552-afab-f969a390018a"
         },
         {
+          "id": "ae6e92a6-f766-45d5-8444-6e43ffb7dc06",
+          "code": "CR-005",
+          "condition": "attest_atv_a_704e_01_cr_005 == True",
+          "severity": "block",
+          "clause_reference": "3.2 Requirements on the Manufacturers of Analytical Devices and Reagents",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Advice on an appropriate function control (inspection equipment monitoring) must be given.",
+          "worksheet_template_id": "374f68fb-af7e-4552-afab-f969a390018a"
+        },
+        {
+          "id": "87f8bd72-c9f5-4aa2-92ef-fa3b141d399f",
+          "code": "CR-006",
+          "condition": "attest_atv_a_704e_01_cr_006 == True",
+          "severity": "block",
+          "clause_reference": "3.2 Requirements on the Manufacturers of Analytical Devices and Reagents",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Changes in the handling (e. g. factor alterations in the photometric determination) must be communicated up-to-date and clearly.",
+          "worksheet_template_id": "374f68fb-af7e-4552-afab-f969a390018a"
+        },
+        {
           "id": "1de0e4a0-d098-4da4-9af7-377aa679bd24",
           "code": "CR-009",
           "condition": "attest_atv_a_704e_03_cr_009 == True",
@@ -2305,17 +2305,6 @@
           "worksheet_template_id": "344e3c9d-ff0c-49e0-9beb-e8a9a5740b46"
         },
         {
-          "id": "08aa1b11-63af-4c7a-ade0-d369b2d69c3f",
-          "code": "CR-029",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "Literature",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "09590739-3a09-4da6-a455-153932d5844c"
-        },
-        {
           "id": "a72564cd-2ffd-442e-954e-d22ee9574098",
           "code": "CR-014",
           "condition": "attest_atv_a_704e_05_cr_014 == True",
@@ -2338,15 +2327,15 @@
           "worksheet_template_id": "09590739-3a09-4da6-a455-153932d5844c"
         },
         {
-          "id": "126fbadd-257e-4ea6-85f2-9c036089ddba",
-          "code": "CR-028",
-          "condition": "manual",
+          "id": "08aa1b11-63af-4c7a-ade0-d369b2d69c3f",
+          "code": "CR-029",
+          "condition": "",
           "severity": "warn",
-          "clause_reference": "IGC-Card 11",
+          "clause_reference": "Literature",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "9f601e2f-f03d-45d6-9ac7-42b7b92bd081"
+          "worksheet_template_id": "09590739-3a09-4da6-a455-153932d5844c"
         },
         {
           "id": "65b335ec-5f70-4b36-8b8a-cb3cd220a4bf",
@@ -2379,6 +2368,17 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Within the scope of the documentation, a constant up-to-date overview of the staff's qualification as well as of the participation in regular training measures should be kept. This allows the proof that measurements or sampling were carried out by qualified staff.",
+          "worksheet_template_id": "9f601e2f-f03d-45d6-9ac7-42b7b92bd081"
+        },
+        {
+          "id": "126fbadd-257e-4ea6-85f2-9c036089ddba",
+          "code": "CR-028",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "IGC-Card 11",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "9f601e2f-f03d-45d6-9ac7-42b7b92bd081"
         },
         {
@@ -2439,23 +2439,12 @@
         {
           "id": "55a9b4b3-8828-41c3-830d-282c8fbd6532",
           "code": "CR-030",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Literature",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "f6bbe420-201a-47a3-8c43-a666fc33aebf"
-        },
-        {
-          "id": "0db28ced-aeb9-4bcd-af9d-22f30dd3fc07",
-          "code": "CR-021",
-          "condition": "attest_atv_a_704e_08_cr_021 == True",
-          "severity": "block",
-          "clause_reference": "Annex A, IQC-Card 2 - Internal Specifications, Sheet 1 (minimum frequency)",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Multiple determinations - 1x per month, person- and matrix-related; Measurement of standards - after each 10th sample, at least 1x per month, person-related; Plausibility checks (spiking, dilution) - if measuring results are implausible / if matrix changes, 1x per quarter; Equivalency measurements - 1x per year, person-related; Parallel measurements to the reference method - 1x per year, method-related.",
           "worksheet_template_id": "f6bbe420-201a-47a3-8c43-a666fc33aebf"
         },
         {
@@ -2467,6 +2456,17 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Monitoring of the photometer: Within the scope of testing equipment monitoring, the function of photometers must be tested regularly. The device must be checked annually according to the instructions manual. The test kit can be ordered as a test solution kit from the manufacturer of the photometer. The entire optical system of the photometers is checked. The monitoring must be documented on Sheet 1.",
+          "worksheet_template_id": "f6bbe420-201a-47a3-8c43-a666fc33aebf"
+        },
+        {
+          "id": "0db28ced-aeb9-4bcd-af9d-22f30dd3fc07",
+          "code": "CR-021",
+          "condition": "attest_atv_a_704e_08_cr_021 == True",
+          "severity": "block",
+          "clause_reference": "Annex A, IQC-Card 2 - Internal Specifications, Sheet 1 (minimum frequency)",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Multiple determinations - 1x per month, person- and matrix-related; Measurement of standards - after each 10th sample, at least 1x per month, person-related; Plausibility checks (spiking, dilution) - if measuring results are implausible / if matrix changes, 1x per quarter; Equivalency measurements - 1x per year, person-related; Parallel measurements to the reference method - 1x per year, method-related.",
           "worksheet_template_id": "f6bbe420-201a-47a3-8c43-a666fc33aebf"
         },
         {
@@ -54538,17 +54538,6 @@
           "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
         },
         {
-          "id": "211c138d-8029-4708-97e8-c1f4f7e349a6",
-          "code": "CR-033",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "4.3.7",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Vom Lieferanten/Ausrüster sollten Garantiewerte für die Sauerstoffzufuhr und Energieaufnahme angegeben werden. Die Werte sollten in der Praxis sowohl vor der Inbetriebnahme als auch vor Ablauf der Gewährleistungsfrist überprüft werden (siehe Merkblatt DWA-M 209).",
-          "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
-        },
-        {
           "id": "d69b8470-8247-4bab-a14c-4227e4fa5f8c",
           "code": "CR-035",
           "condition": "attest_a222_11_cr_035 == True",
@@ -54612,6 +54601,17 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Die Oberkante der Becken muss mindestens 30 cm über dem höchsten Betriebswasserstand liegen.",
+          "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
+        },
+        {
+          "id": "211c138d-8029-4708-97e8-c1f4f7e349a6",
+          "code": "CR-033",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "4.3.7",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Vom Lieferanten/Ausrüster sollten Garantiewerte für die Sauerstoffzufuhr und Energieaufnahme angegeben werden. Die Werte sollten in der Praxis sowohl vor der Inbetriebnahme als auch vor Ablauf der Gewährleistungsfrist überprüft werden (siehe Merkblatt DWA-M 209).",
           "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
         },
         {
@@ -66890,17 +66890,6 @@
           "worksheet_template_id": "b6684da3-9013-4f50-a6a6-df54398b9f4f"
         },
         {
-          "id": "c252ec93-6390-419f-9262-cd84349565ff",
-          "code": "COMP-13",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "9.1",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Performance monitoring of NASS needs to be adapted to the changed operating conditions and the lack of long-term experience with regard to new technical components.",
-          "worksheet_template_id": "19e66a2b-aa67-4d8c-aa38-35533f566110"
-        },
-        {
           "id": "6938c90f-54c9-4d7a-80b7-fcedef683a06",
           "code": "COMP-01",
           "condition": "project_name IS NOT EMPTY AND client_name IS NOT EMPTY AND project_location IS NOT EMPTY AND building_use_type IS NOT NULL AND E_population IS NOT NULL AND rationale_documented == true",
@@ -66909,6 +66898,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "At the beginning of the planning process, a detailed analysis of the problem situation and local framework conditions should be carried out.",
+          "worksheet_template_id": "19e66a2b-aa67-4d8c-aa38-35533f566110"
+        },
+        {
+          "id": "c252ec93-6390-419f-9262-cd84349565ff",
+          "code": "COMP-13",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "9.1",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Performance monitoring of NASS needs to be adapted to the changed operating conditions and the lack of long-term experience with regard to new technical components.",
           "worksheet_template_id": "19e66a2b-aa67-4d8c-aa38-35533f566110"
         },
         {
@@ -80067,7 +80067,7 @@
         {
           "id": "14f72eaf-dc10-41ba-95fd-3ed08f2a545e",
           "code": "REQ-15",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.1 (Kostenermittlung gemaess DIN 276)",
           "requires_attestation": true,
@@ -85074,20 +85074,9 @@
           "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
         },
         {
-          "id": "5709b31b-5784-4821-afdf-7cf81314ce31",
-          "code": "CR-14",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "5.1.3 Abstandsregelungen und Spritzschutz",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Im RMP sind die gegebenenfalls erforderlichen Abstaende fallspezifisch aufzufuehren. Sie sind Teil des Multibarrierenprinzips und dienen als eine der Grundlagen der Erlaubnis der Bewaesserung mit aufbereitetem Wasser.",
-          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
-        },
-        {
           "id": "fc191fa6-d8d7-447b-afa3-eb8dcffe47df",
           "code": "CR-15",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.6.5 Frostschutzberegnung",
           "requires_attestation": true,
@@ -85096,9 +85085,20 @@
           "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
         },
         {
+          "id": "5709b31b-5784-4821-afdf-7cf81314ce31",
+          "code": "CR-14",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "5.1.3 Abstandsregelungen und Spritzschutz",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Im RMP sind die gegebenenfalls erforderlichen Abstaende fallspezifisch aufzufuehren. Sie sind Teil des Multibarrierenprinzips und dienen als eine der Grundlagen der Erlaubnis der Bewaesserung mit aufbereitetem Wasser.",
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
           "id": "3cce7990-9d32-4ec0-b5a6-a40ebb322422",
           "code": "CR-17",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.1.6 Sonstige Vorkehrungen",
           "requires_attestation": true,
@@ -85109,7 +85109,7 @@
         {
           "id": "cf36c096-2e41-4b60-ae78-b97b45f78ea8",
           "code": "CR-18",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.1.6 Sonstige Vorkehrungen",
           "requires_attestation": true,
@@ -109688,7 +109688,7 @@
         {
           "id": "eb5ff2c7-4c9d-4991-9827-265bd7e68ab6",
           "code": "REQ-31",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8",
           "requires_attestation": true,
@@ -129484,7 +129484,7 @@
         {
           "id": "abd48db4-91ea-4e45-be58-675264c14c9d",
           "code": "REQ-M760-03",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.1",
           "requires_attestation": true,
@@ -129495,7 +129495,7 @@
         {
           "id": "658194a3-ffdc-4421-87ad-897bf9fad58f",
           "code": "REQ-M760-09",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9.1.2",
           "requires_attestation": true,
@@ -129539,7 +129539,7 @@
         {
           "id": "47a93795-375c-45e4-9631-9ce8454e2015",
           "code": "REQ-M760-12",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "12",
           "requires_attestation": true,
@@ -129550,7 +129550,7 @@
         {
           "id": "a0a612a4-c858-4d7a-8b38-c686c3411a79",
           "code": "REQ-M760-07",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "7",
           "requires_attestation": false,
@@ -129572,7 +129572,7 @@
         {
           "id": "03259476-c605-4d05-83d2-7d4eb948570a",
           "code": "REQ-M760-06",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.1",
           "requires_attestation": true,
@@ -166115,6 +166115,17 @@
       "equations": [],
       "compliance": [
         {
+          "id": "f1188207-82a6-4849-9b64-8229879f4957",
+          "code": "CR-003",
+          "condition": "life_cycle_perspective_applied == true",
+          "severity": "warn",
+          "clause_reference": "§1, §4.2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "0a008cf3-5ffd-429e-a350-1e2f637eb7f6"
+        },
+        {
           "id": "946644da-93a3-48b0-8305-a45350181bc4",
           "code": "CR-001",
           "condition": "iso14001_ems_in_place == true",
@@ -166131,17 +166142,6 @@
           "condition": "water_topic_area_scope IS NOT NULL",
           "severity": "block",
           "clause_reference": "§1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "0a008cf3-5ffd-429e-a350-1e2f637eb7f6"
-        },
-        {
-          "id": "f1188207-82a6-4849-9b64-8229879f4957",
-          "code": "CR-003",
-          "condition": "life_cycle_perspective_applied == true",
-          "severity": "warn",
-          "clause_reference": "§1, §4.2.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -166214,17 +166214,6 @@
           "worksheet_template_id": "f148d3e8-06f3-4a1a-9100-3a8460e120d3"
         },
         {
-          "id": "599032d2-aa2b-47c7-ad37-21f6a055510a",
-          "code": "CR-010",
-          "condition": "baseline_established == true",
-          "severity": "warn",
-          "clause_reference": "§4.2.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "85af6696-fcaa-42f0-8788-f497bf74bb01"
-        },
-        {
           "id": "d4234b6e-9ac5-4122-b735-facfd8bd0c3b",
           "code": "CR-011",
           "condition": "change_management_reviewed == true",
@@ -166236,26 +166225,15 @@
           "worksheet_template_id": "85af6696-fcaa-42f0-8788-f497bf74bb01"
         },
         {
-          "id": "e78c6808-0de4-4c5a-8a5e-28c8b6522a6b",
-          "code": "CR-012",
-          "condition": "appropriate_actions_determined == true",
-          "severity": "block",
-          "clause_reference": "§4.3, §5.1",
+          "id": "599032d2-aa2b-47c7-ad37-21f6a055510a",
+          "code": "CR-010",
+          "condition": "baseline_established == true",
+          "severity": "warn",
+          "clause_reference": "§4.2.4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "8f2a6139-7e94-4380-8742-30e747d344f9"
-        },
-        {
-          "id": "e4a855e4-6f1d-4231-bc9b-66fc9035f428",
-          "code": "CR-013",
-          "condition": "environmental_objective_set == true",
-          "severity": "block",
-          "clause_reference": "§5.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "8f2a6139-7e94-4380-8742-30e747d344f9"
+          "worksheet_template_id": "85af6696-fcaa-42f0-8788-f497bf74bb01"
         },
         {
           "id": "40a6c5ea-9636-4ced-9ae4-4b52a24cfe4b",
@@ -166296,6 +166274,28 @@
           "condition": "emergency_preparedness_planned == true",
           "severity": "block",
           "clause_reference": "§5.4.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "8f2a6139-7e94-4380-8742-30e747d344f9"
+        },
+        {
+          "id": "e78c6808-0de4-4c5a-8a5e-28c8b6522a6b",
+          "code": "CR-012",
+          "condition": "appropriate_actions_determined == true",
+          "severity": "block",
+          "clause_reference": "§4.3, §5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "8f2a6139-7e94-4380-8742-30e747d344f9"
+        },
+        {
+          "id": "e4a855e4-6f1d-4231-bc9b-66fc9035f428",
+          "code": "CR-013",
+          "condition": "environmental_objective_set == true",
+          "severity": "block",
+          "clause_reference": "§5.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -170171,6 +170171,17 @@
           "worksheet_template_id": "156c5f48-70f7-4f3f-9f5c-5c517525df3c"
         },
         {
+          "id": "6755466b-35b9-4492-bdb8-7b97d3b9d73b",
+          "code": "CR-016",
+          "condition": "information_gathering_method IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§5.3.6",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "0e890021-f75f-4397-853e-3de6d6c3ded2"
+        },
+        {
           "id": "8208a601-8ddc-49c0-992a-b529333f3b8a",
           "code": "CR-013",
           "condition": "scope_change_recorded IS NOT NULL",
@@ -170187,17 +170198,6 @@
           "condition": "feasibility_determined == true",
           "severity": "warn",
           "clause_reference": "§5.3.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "0e890021-f75f-4397-853e-3de6d6c3ded2"
-        },
-        {
-          "id": "6755466b-35b9-4492-bdb8-7b97d3b9d73b",
-          "code": "CR-016",
-          "condition": "information_gathering_method IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§5.3.6",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -170270,17 +170270,6 @@
           "worksheet_template_id": "b5da698b-eb94-4d59-977d-28fc4f1eaf08"
         },
         {
-          "id": "ff7807f8-b3eb-457a-9f72-6ceea518e784",
-          "code": "CR-022",
-          "condition": "safety_requirements_followed == true",
-          "severity": "warn",
-          "clause_reference": "5.4.3",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "The assessor should follow all applicable safety requirements when visiting/inspecting the asset.",
-          "worksheet_template_id": "b5da698b-eb94-4d59-977d-28fc4f1eaf08"
-        },
-        {
           "id": "9dae6048-2141-4de5-b869-410a1e64590e",
           "code": "CR-018",
           "condition": "information_gathered == true",
@@ -170336,9 +170325,20 @@
           "worksheet_template_id": "b5da698b-eb94-4d59-977d-28fc4f1eaf08"
         },
         {
-          "id": "9ea01ccf-b014-4a2a-806a-b43bd4b25497",
-          "code": "CR-027",
-          "condition": "business_consequences_determined IS NOT NULL",
+          "id": "ff7807f8-b3eb-457a-9f72-6ceea518e784",
+          "code": "CR-022",
+          "condition": "safety_requirements_followed == true",
+          "severity": "warn",
+          "clause_reference": "5.4.3",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "The assessor should follow all applicable safety requirements when visiting/inspecting the asset.",
+          "worksheet_template_id": "b5da698b-eb94-4d59-977d-28fc4f1eaf08"
+        },
+        {
+          "id": "a757a0b3-cee7-46e1-8b8b-ca0dc3c51fab",
+          "code": "CR-028",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.5.3",
           "requires_attestation": false,
@@ -170347,9 +170347,9 @@
           "worksheet_template_id": "4e4b5d20-3ba2-468f-8212-009c964f8dcf"
         },
         {
-          "id": "a757a0b3-cee7-46e1-8b8b-ca0dc3c51fab",
-          "code": "CR-028",
-          "condition": "manual",
+          "id": "9ea01ccf-b014-4a2a-806a-b43bd4b25497",
+          "code": "CR-027",
+          "condition": "business_consequences_determined IS NOT NULL",
           "severity": "warn",
           "clause_reference": "§5.5.3",
           "requires_attestation": false,
@@ -170402,6 +170402,17 @@
           "worksheet_template_id": "768e8bf7-25c7-4d0e-aa61-0d3d789b716e"
         },
         {
+          "id": "42e61fde-30fd-4c80-aff1-2e38f45824d2",
+          "code": "CR-034",
+          "condition": "competence_evaluation_documented == true",
+          "severity": "warn",
+          "clause_reference": "§7.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "27f9585c-c58a-46ef-a915-9323c2e6e5cc"
+        },
+        {
           "id": "1c9497d3-6954-4315-a11e-b14c51bc0f32",
           "code": "CR-032",
           "condition": "prerequisite_skills_present == true",
@@ -170418,17 +170429,6 @@
           "condition": "competence_process_applied == true",
           "severity": "warn",
           "clause_reference": "§7.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "27f9585c-c58a-46ef-a915-9323c2e6e5cc"
-        },
-        {
-          "id": "42e61fde-30fd-4c80-aff1-2e38f45824d2",
-          "code": "CR-034",
-          "condition": "competence_evaluation_documented == true",
-          "severity": "warn",
-          "clause_reference": "§7.3",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -172671,22 +172671,22 @@
           "worksheet_template_id": "c081151f-aeb7-46c5-b905-f4bd45b5d80f"
         },
         {
-          "id": "51842dd0-e51d-4718-a046-80899462a8f9",
-          "code": "CR-003",
-          "condition": "raw_data_access == true",
+          "id": "e957c5da-fbfe-4bdc-93eb-32d42aa3a944",
+          "code": "CR-004",
+          "condition": "vv_activity_applied IS NOT NULL",
           "severity": "warn",
-          "clause_reference": "§5.2.5",
+          "clause_reference": "§5.2.6",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "c081151f-aeb7-46c5-b905-f4bd45b5d80f"
         },
         {
-          "id": "e957c5da-fbfe-4bdc-93eb-32d42aa3a944",
-          "code": "CR-004",
-          "condition": "vv_activity_applied IS NOT NULL",
+          "id": "51842dd0-e51d-4718-a046-80899462a8f9",
+          "code": "CR-003",
+          "condition": "raw_data_access == true",
           "severity": "warn",
-          "clause_reference": "§5.2.6",
+          "clause_reference": "§5.2.5",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -172706,7 +172706,7 @@
         {
           "id": "f01ff61c-6d1f-4f80-84b5-f33ab33e182d",
           "code": "CR-006",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§4.2.3",
           "requires_attestation": false,
@@ -172880,31 +172880,9 @@
           "worksheet_template_id": "e3c2f660-4e58-4ccd-807a-29696f79c38b"
         },
         {
-          "id": "57572d42-8350-4c9b-a3a4-47dc23851579",
-          "code": "CR-020",
-          "condition": "methodology_identified == true",
-          "severity": "block",
-          "clause_reference": "§7.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "9a3f303f-894e-4491-89b3-57ed167be5cf"
-        },
-        {
           "id": "f22d698e-c2be-4aed-a673-59a9f1e757b0",
           "code": "CR-021",
           "condition": "team_competence_criteria IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§7.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "9a3f303f-894e-4491-89b3-57ed167be5cf"
-        },
-        {
-          "id": "02bfe97f-0095-4137-bf79-c2dfb263538d",
-          "code": "CR-022",
-          "condition": "body_requirements_met == true",
           "severity": "block",
           "clause_reference": "§7.5",
           "requires_attestation": false,
@@ -172918,6 +172896,28 @@
           "condition": "deliverable_category_selected IS NOT NULL",
           "severity": "block",
           "clause_reference": "§7.6.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "9a3f303f-894e-4491-89b3-57ed167be5cf"
+        },
+        {
+          "id": "57572d42-8350-4c9b-a3a4-47dc23851579",
+          "code": "CR-020",
+          "condition": "methodology_identified == true",
+          "severity": "block",
+          "clause_reference": "§7.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "9a3f303f-894e-4491-89b3-57ed167be5cf"
+        },
+        {
+          "id": "02bfe97f-0095-4137-bf79-c2dfb263538d",
+          "code": "CR-022",
+          "condition": "body_requirements_met == true",
+          "severity": "block",
+          "clause_reference": "§7.5",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -174649,6 +174649,17 @@
       ],
       "compliance": [
         {
+          "id": "6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27",
+          "code": "CR-003",
+          "condition": "comparison_application != true OR principle_comparability == true",
+          "severity": "warn",
+          "clause_reference": "§4.4, §6.2.2, §6.2.3, §5.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "3ebd246e-4d04-4ef3-ba68-28317b414706"
+        },
+        {
           "id": "ce8261c6-eb98-44e4-90e2-3c86f498dc99",
           "code": "CR-001",
           "condition": "system_identifier IS NOT NULL AND intended_application IS NOT NULL",
@@ -174671,17 +174682,6 @@
           "worksheet_template_id": "3ebd246e-4d04-4ef3-ba68-28317b414706"
         },
         {
-          "id": "6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27",
-          "code": "CR-003",
-          "condition": "comparison_application != true OR principle_comparability == true",
-          "severity": "warn",
-          "clause_reference": "§4.4, §6.2.2, §6.2.3, §5.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "3ebd246e-4d04-4ef3-ba68-28317b414706"
-        },
-        {
           "id": "569545ae-1698-4fb8-afbd-7a7f668b90b8",
           "code": "CR-004",
           "condition": "normative_reference_iso14050 == true",
@@ -174691,17 +174691,6 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "3ebd246e-4d04-4ef3-ba68-28317b414706"
-        },
-        {
-          "id": "6bb447d9-6438-46d4-b020-299221dd6735",
-          "code": "CR-005",
-          "condition": "data_origin_category IN {primary,secondary}",
-          "severity": "warn",
-          "clause_reference": "§6.1.2.2, §6.1.2.2.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "7c293982-3ada-4314-b8eb-8f58d553a5f9"
         },
         {
           "id": "a3eb3686-f69f-4c78-a6a7-a2d2435559fa",
@@ -174726,37 +174715,15 @@
           "worksheet_template_id": "7c293982-3ada-4314-b8eb-8f58d553a5f9"
         },
         {
-          "id": "abafcd88-fcea-4845-b6ff-0e656c916ec7",
-          "code": "CR-009",
-          "condition": "objective_requirements IS NOT NULL",
+          "id": "6bb447d9-6438-46d4-b020-299221dd6735",
+          "code": "CR-005",
+          "condition": "data_origin_category IN {primary,secondary}",
           "severity": "warn",
-          "clause_reference": "§6.1.1, §6.2",
+          "clause_reference": "§6.1.2.2, §6.1.2.2.4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "ef3106d7-50a4-4925-8839-2b3092b7b309"
-        },
-        {
-          "id": "b2e6b38c-91f9-41c1-bae9-f254a1eded9a",
-          "code": "CR-010",
-          "condition": "system_conceptualization IS NOT NULL AND system_boundaries IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§6.2.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ef3106d7-50a4-4925-8839-2b3092b7b309"
-        },
-        {
-          "id": "290394ae-e79c-45c6-9f9a-fdcd4bb0be38",
-          "code": "CR-011",
-          "condition": "system_components IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§6.2.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ef3106d7-50a4-4925-8839-2b3092b7b309"
+          "worksheet_template_id": "7c293982-3ada-4314-b8eb-8f58d553a5f9"
         },
         {
           "id": "e0fa504f-3f1f-48c3-88c7-fc88487daec0",
@@ -174797,6 +174764,39 @@
           "condition": "metrological_confirmation == true",
           "severity": "warn",
           "clause_reference": "§6.2.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ef3106d7-50a4-4925-8839-2b3092b7b309"
+        },
+        {
+          "id": "abafcd88-fcea-4845-b6ff-0e656c916ec7",
+          "code": "CR-009",
+          "condition": "objective_requirements IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§6.1.1, §6.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ef3106d7-50a4-4925-8839-2b3092b7b309"
+        },
+        {
+          "id": "b2e6b38c-91f9-41c1-bae9-f254a1eded9a",
+          "code": "CR-010",
+          "condition": "system_conceptualization IS NOT NULL AND system_boundaries IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§6.2.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ef3106d7-50a4-4925-8839-2b3092b7b309"
+        },
+        {
+          "id": "290394ae-e79c-45c6-9f9a-fdcd4bb0be38",
+          "code": "CR-011",
+          "condition": "system_components IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§6.2.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -174893,7 +174893,7 @@
         {
           "id": "395dc694-5418-437d-857a-fc9e2b4c4ce1",
           "code": "CR-025",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.4.3",
           "requires_attestation": false,
@@ -174904,7 +174904,7 @@
         {
           "id": "72fc15b8-1248-48e9-8f8f-fbb169c80083",
           "code": "CR-026",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.4.2.2",
           "requires_attestation": false,
@@ -180619,7 +180619,7 @@
         {
           "id": "83d9489b-1e30-46c0-9e9c-f92f1fce6c05",
           "code": "CR-002",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§3.4.32, §3.6.18, §3.8.11, §3.9.35, §3.5.9",
           "requires_attestation": false,
@@ -180630,7 +180630,7 @@
         {
           "id": "2a4c5081-1399-41a2-b9bd-7dce35d98be4",
           "code": "CR-001",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Introduction, §3",
           "requires_attestation": false,
@@ -180641,7 +180641,7 @@
         {
           "id": "af5ebc8b-8dc8-47f6-807a-6884ff24d36b",
           "code": "CR-005",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§3.4.48",
           "requires_attestation": false,
@@ -180652,7 +180652,7 @@
         {
           "id": "0b9ae8bf-428e-4a0e-aad3-0b4894d8ba8e",
           "code": "CR-003",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§3.9.35",
           "requires_attestation": false,
@@ -180663,7 +180663,7 @@
         {
           "id": "d30b8179-6bb6-4310-9789-699a83173954",
           "code": "CR-004",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§3.9.36",
           "requires_attestation": false,
@@ -180674,7 +180674,7 @@
         {
           "id": "abf104d6-5704-4674-961f-e613f94dba2d",
           "code": "CR-006",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§3.9.33",
           "requires_attestation": false,
@@ -190007,7 +190007,7 @@
         {
           "id": "2e9a0700-444c-43f1-96ad-4ce381797ac8",
           "code": "CR-016",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Sec.2.1 (p.14), 3.5 (p.43-44)",
           "requires_attestation": false,
@@ -192467,20 +192467,6 @@
           "worksheet_template_id": "5bbf2997-4f82-442e-8966-538fa658de79"
         },
         {
-          "id": "eeb0aca8-e669-43fc-9c5a-291b54b4eb45",
-          "equation_number": "C.3",
-          "output_symbol": "plant_recycling_rate",
-          "input_symbols": [
-            "Rp",
-            "Rnp",
-            "WD"
-          ],
-          "formula": "plant_recycling_rate = (Rp + Rnp) / (Rp + Rnp + WD) * 100",
-          "clause_reference": "AnnexC C.3",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "5bbf2997-4f82-442e-8966-538fa658de79"
-        },
-        {
           "id": "0b1026ab-9a89-4424-b9de-4ec01e6de1af",
           "equation_number": "C.5",
           "output_symbol": "process_recycling_rate",
@@ -192491,6 +192477,20 @@
           ],
           "formula": "process_recycling_rate = Rp / (Wp + Rpp) * 100",
           "clause_reference": "AnnexC C.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "5bbf2997-4f82-442e-8966-538fa658de79"
+        },
+        {
+          "id": "eeb0aca8-e669-43fc-9c5a-291b54b4eb45",
+          "equation_number": "C.3",
+          "output_symbol": "plant_recycling_rate",
+          "input_symbols": [
+            "Rp",
+            "Rnp",
+            "WD"
+          ],
+          "formula": "plant_recycling_rate = (Rp + Rnp) / (Rp + Rnp + WD) * 100",
+          "clause_reference": "AnnexC C.3",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "5bbf2997-4f82-442e-8966-538fa658de79"
         }
@@ -192521,7 +192521,7 @@
         {
           "id": "45fc1adf-8bc9-4cc2-a640-a20bc92fdeba",
           "code": "CR-040",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§2, §3",
           "requires_attestation": false,
@@ -192873,7 +192873,7 @@
         {
           "id": "0faa675f-aa23-40c5-9376-058765a33583",
           "code": "CR-036",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§9.1",
           "requires_attestation": false,
@@ -192884,7 +192884,7 @@
         {
           "id": "6b2c6486-ecf8-4938-9909-c38df73191a9",
           "code": "CR-039",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "A.12",
           "requires_attestation": false,
@@ -194488,7 +194488,7 @@
         {
           "id": "f34aad09-2214-4e3f-87f2-f04d31098e5c",
           "code": "CR-006",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.4",
           "requires_attestation": false,
@@ -194501,7 +194501,7 @@
           "code": "CR-003",
           "condition": "preliminary_survey_done == true",
           "severity": "block",
-          "clause_reference": "3",
+          "clause_reference": "§3",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Es necesario efectuar una visita previa para verificar los puntos de muestreo, recopilar información preliminar e información secundaria, definir los procedimientos y efectuar el muestreo preliminar y un programa de análisis antes de que se definan los objetivos finales.",
@@ -194512,7 +194512,7 @@
           "code": "CR-004",
           "condition": "normative_references_consulted == true",
           "severity": "warn",
-          "clause_reference": "2",
+          "clause_reference": "§2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Las siguientes normas contienen disposiciones que, mediante la referencia dentro de este texto, constituyen la integridad del mismo. ... los participantes, mediante acuerdos basados en esta norma, deben investigar la posibilidad de aplicar la ultima version de las normas mencionadas a continuacion.",
@@ -194523,7 +194523,7 @@
           "code": "CR-005",
           "condition": "boundary_sampling_avoided == true",
           "severity": "warn",
-          "clause_reference": "5.1",
+          "clause_reference": "§5.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Se debe evitar el muestreo en las fronteras de los sistemas o cerca de éstas, salvo que las condiciones sean de interés especial.",
@@ -194539,28 +194539,6 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "37a0541f-5a6c-4e03-b533-38d608c27cf9"
-        },
-        {
-          "id": "5649c92d-6bb9-400c-8db7-41c52e21f89d",
-          "code": "CR-008",
-          "condition": "hazardous_atmosphere_tested IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§7.8",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ada4dd5b-873e-45e1-8ff6-fd7ebd60cef6"
-        },
-        {
-          "id": "9e900a67-4ec6-4716-81e2-abefee793fcc",
-          "code": "CR-009",
-          "condition": "electrical_hazard_minimized IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§7.11",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ada4dd5b-873e-45e1-8ff6-fd7ebd60cef6"
         },
         {
           "id": "4d2e32f9-ab1e-4bdc-b34b-79c1080ca811",
@@ -194585,11 +194563,33 @@
           "worksheet_template_id": "ada4dd5b-873e-45e1-8ff6-fd7ebd60cef6"
         },
         {
+          "id": "5649c92d-6bb9-400c-8db7-41c52e21f89d",
+          "code": "CR-008",
+          "condition": "hazardous_atmosphere_tested IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "§7.8",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ada4dd5b-873e-45e1-8ff6-fd7ebd60cef6"
+        },
+        {
+          "id": "9e900a67-4ec6-4716-81e2-abefee793fcc",
+          "code": "CR-009",
+          "condition": "electrical_hazard_minimized IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "§7.11",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ada4dd5b-873e-45e1-8ff6-fd7ebd60cef6"
+        },
+        {
           "id": "2a2d4151-ec6a-4e94-8489-7a778b6031cc",
           "code": "CR-007",
           "condition": "safety_regulations_considered == true",
           "severity": "block",
-          "clause_reference": "7.1",
+          "clause_reference": "§7.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "El personal responsable de diseñar programas de muestreo y de efectuar operaciones de muestreo debe asegurarse de que se tengan en cuenta los requisitos de las regulaciones de seguridad pertinentes y de que el personal de muestreo esté informado de las precauciones necesarias que se deben tener en dichas operaciones.",
@@ -194607,22 +194607,22 @@
           "worksheet_template_id": "248e9581-f432-4a95-97f8-81823fc3b1c1"
         },
         {
-          "id": "1a0c6f63-f2a9-46ff-9f3d-2e62c5a79e98",
-          "code": "CR-010",
-          "condition": "sampling_location_identified == true",
+          "id": "09b73f91-f71d-4efd-973f-0f327217a69c",
+          "code": "CR-011",
+          "condition": "flow_character IS NOT NULL",
           "severity": "warn",
-          "clause_reference": "§8.2",
+          "clause_reference": "§8.3",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "248e9581-f432-4a95-97f8-81823fc3b1c1"
         },
         {
-          "id": "09b73f91-f71d-4efd-973f-0f327217a69c",
-          "code": "CR-011",
-          "condition": "flow_character IS NOT NULL",
+          "id": "1a0c6f63-f2a9-46ff-9f3d-2e62c5a79e98",
+          "code": "CR-010",
+          "condition": "sampling_location_identified == true",
           "severity": "warn",
-          "clause_reference": "§8.3",
+          "clause_reference": "§8.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -194717,25 +194717,25 @@
           "worksheet_template_id": "26b92cbb-52b9-4ac7-a81c-fc531a629a66"
         },
         {
-          "id": "0e8b605a-4c35-4a24-9bbd-adf379a58f9c",
-          "code": "CR-025",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "16.1",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Una vez que se ha decidido la frecuencia del muestreo, los datos obtenidos se deben revisar con regularidad de tal modo que se puedan hacer los cambios segun se requiera.",
-          "worksheet_template_id": "26b92cbb-52b9-4ac7-a81c-fc531a629a66"
-        },
-        {
           "id": "3cf16700-ca73-4f98-8219-d5aca3cab304",
           "code": "CR-020",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
-          "clause_reference": "17",
+          "clause_reference": "§14",
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Es posible que se necesite incrementar la frecuencia del muestreo mientras persistan condiciones anormales, por ejemplo durante la puesta en marcha de una planta por procesos, durante las condiciones de inundación en un río, o en tiempos de florecimiento de algas.",
+          "worksheet_template_id": "26b92cbb-52b9-4ac7-a81c-fc531a629a66"
+        },
+        {
+          "id": "0e8b605a-4c35-4a24-9bbd-adf379a58f9c",
+          "code": "CR-025",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§16.1",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Una vez que se ha decidido la frecuencia del muestreo, los datos obtenidos se deben revisar con regularidad de tal modo que se puedan hacer los cambios segun se requiera.",
           "worksheet_template_id": "26b92cbb-52b9-4ac7-a81c-fc531a629a66"
         },
         {
@@ -194763,7 +194763,7 @@
         {
           "id": "56d91495-ae5d-461b-8015-8ad676ea7038",
           "code": "CR-027",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§19.1, §21",
           "requires_attestation": false,
@@ -197234,7 +197234,7 @@
             "number_of_samples",
             "k"
           ],
-          "formula": "sampling_day_k = A + (365 * k) / number_of_samples   for k = 1, 2, ..., number_of_samples",
+          "formula": "sampling_day_k = A + (365 * k) / number_of_samples",
           "clause_reference": "§4.3.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
@@ -197248,7 +197248,7 @@
             "number_of_samples",
             "k"
           ],
-          "formula": "sampling_week_k = A + (52 * k) / number_of_samples   for k = 1, 2, ..., number_of_samples",
+          "formula": "sampling_week_k = A + (52 * k) / number_of_samples",
           "clause_reference": "§4.3.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
@@ -197336,6 +197336,28 @@
           "worksheet_template_id": "297672d3-ab6f-4452-8f6a-9a986109b1f2"
         },
         {
+          "id": "571e1790-2dc0-4e52-ac1f-99ee1c22e441",
+          "code": "CR-011",
+          "condition": "restriction_downstream_diameters >= 3",
+          "severity": "block",
+          "clause_reference": "§5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
+        },
+        {
+          "id": "b855b97c-6cb6-4c69-9b79-67fe39af3149",
+          "code": "CR-012",
+          "condition": "cooling_runoff_time >= 30",
+          "severity": "block",
+          "clause_reference": "§5.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
+        },
+        {
           "id": "ad68f79f-31cb-4be0-83ff-ce762140940f",
           "code": "CR-007",
           "condition": "number_of_samples > 0",
@@ -197380,28 +197402,6 @@
           "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
         },
         {
-          "id": "571e1790-2dc0-4e52-ac1f-99ee1c22e441",
-          "code": "CR-011",
-          "condition": "restriction_downstream_diameters >= 3",
-          "severity": "block",
-          "clause_reference": "§5.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
-        },
-        {
-          "id": "b855b97c-6cb6-4c69-9b79-67fe39af3149",
-          "code": "CR-012",
-          "condition": "cooling_runoff_time >= 30",
-          "severity": "block",
-          "clause_reference": "§5.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "aea7f13d-3d54-4b18-a589-9ef3a7796391"
-        },
-        {
           "id": "c893e6ce-5ce7-4f06-a195-fc41f07c84f8",
           "code": "CR-013",
           "condition": "main_sampling_type IS NOT NULL",
@@ -197410,6 +197410,28 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
+          "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
+        },
+        {
+          "id": "534d5360-e870-4214-bed4-466cca551118",
+          "code": "CR-014",
+          "condition": "sampling_objective_defined == true",
+          "severity": "block",
+          "clause_reference": "7.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "El cliente debe definir claramente el objetivo del muestreo para que el operario aplique las estrategias de muestreo adecuadas.",
+          "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
+        },
+        {
+          "id": "b041841a-7cfd-48dd-b08e-63fda4ee9798",
+          "code": "CR-022",
+          "condition": "material_compatible == true",
+          "severity": "block",
+          "clause_reference": "8.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "La naturaleza de los materiales del equipo de muestreo se elegirá en función de su compatibilidad con el parámetro objetivo y deberá garantizar la ausencia de interferencias físico-químicas con los parámetros a medir.",
           "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
         },
         {
@@ -197479,28 +197501,6 @@
           "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
         },
         {
-          "id": "534d5360-e870-4214-bed4-466cca551118",
-          "code": "CR-014",
-          "condition": "sampling_objective_defined == true",
-          "severity": "block",
-          "clause_reference": "7.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "El cliente debe definir claramente el objetivo del muestreo para que el operario aplique las estrategias de muestreo adecuadas.",
-          "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
-        },
-        {
-          "id": "b041841a-7cfd-48dd-b08e-63fda4ee9798",
-          "code": "CR-022",
-          "condition": "material_compatible == true",
-          "severity": "block",
-          "clause_reference": "8.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "La naturaleza de los materiales del equipo de muestreo se elegirá en función de su compatibilidad con el parámetro objetivo y deberá garantizar la ausencia de interferencias físico-químicas con los parámetros a medir.",
-          "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
-        },
-        {
           "id": "54506f66-2ce1-440f-865a-cf37a7597968",
           "code": "CR-019",
           "condition": "V_n >= 0",
@@ -197534,6 +197534,17 @@
           "worksheet_template_id": "dba3ab92-3ed4-4de5-ac2d-7386331b7f7e"
         },
         {
+          "id": "e714737e-d08b-4685-a999-ab1c3f633b41",
+          "code": "CR-025",
+          "condition": "homogenization_done == true",
+          "severity": "block",
+          "clause_reference": "9.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Este paso es esencial, incluso para las muestras con un bajo contenido de sólidos en suspensión.",
+          "worksheet_template_id": "375b5c46-a564-4f72-b00e-9e1f266f77aa"
+        },
+        {
           "id": "c76d3f7e-f0c9-4e68-aa73-b7b359599619",
           "code": "CR-027",
           "condition": "transport_temperature >= 2 AND transport_temperature <= 8",
@@ -197553,17 +197564,6 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "375b5c46-a564-4f72-b00e-9e1f266f77aa"
-        },
-        {
-          "id": "e714737e-d08b-4685-a999-ab1c3f633b41",
-          "code": "CR-025",
-          "condition": "homogenization_done == true",
-          "severity": "block",
-          "clause_reference": "9.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Este paso es esencial, incluso para las muestras con un bajo contenido de sólidos en suspensión.",
           "worksheet_template_id": "375b5c46-a564-4f72-b00e-9e1f266f77aa"
         },
         {
@@ -199379,6 +199379,17 @@
       ],
       "compliance": [
         {
+          "id": "c2544e30-d028-4ca1-8503-fdb3cf788363",
+          "code": "CR-001",
+          "condition": "safety_practices_established == true",
+          "severity": "block",
+          "clause_reference": "WARNING",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "WARNING -- Persons using this International Standard should be familiar with normal laboratory practice. This standard does not purport to address all of the safety problems, if any, associated with its use. It is the responsibility of the user to establish appropriate safety and health practices and to ensure compliance with any national regulatory conditions.",
+          "worksheet_template_id": "f67a47d8-e079-4736-ad4e-ba7fade08d24"
+        },
+        {
           "id": "816bdac6-c491-4ec0-bf3b-980de620390f",
           "code": "CR-002",
           "condition": "sludge_origin IS NOT NULL AND sampling_purpose_defined IS NOT NULL",
@@ -199394,7 +199405,7 @@
           "code": "CR-003",
           "condition": "normative_references_consulted == true",
           "severity": "block",
-          "clause_reference": "2",
+          "clause_reference": "§2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "The following referenced documents are indispensable for the application of this document. For dated references, only the edition cited applies. For undated references, the latest edition of the referenced document (including any amendments) applies.",
@@ -199403,23 +199414,12 @@
         {
           "id": "b1b9f0c5-ac86-44df-8524-3ed9b325f6cd",
           "code": "CR-005",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§4.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "f67a47d8-e079-4736-ad4e-ba7fade08d24"
-        },
-        {
-          "id": "c2544e30-d028-4ca1-8503-fdb3cf788363",
-          "code": "CR-001",
-          "condition": "safety_practices_established == true",
-          "severity": "block",
-          "clause_reference": "WARNING",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "WARNING -- Persons using this International Standard should be familiar with normal laboratory practice. This standard does not purport to address all of the safety problems, if any, associated with its use. It is the responsibility of the user to establish appropriate safety and health practices and to ensure compliance with any national regulatory conditions.",
           "worksheet_template_id": "f67a47d8-e079-4736-ad4e-ba7fade08d24"
         },
         {
@@ -199581,7 +199581,7 @@
           "code": "CR-018",
           "condition": "quartering_performed == true",
           "severity": "warn",
-          "clause_reference": "6.4",
+          "clause_reference": "§6.4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "When two or more laboratory samples are required from a bulk sample, the sample mass should be reduced by quartering. All of the excess bulk sample rejected should be recombined at the individual division stages, mixed thoroughly and reduced again to provide a second laboratory sample.",
@@ -199593,17 +199593,6 @@
           "condition": "time_dependent_analysis IS NOT NULL",
           "severity": "warn",
           "clause_reference": "§7.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "3fdd637d-238c-4567-aa5c-ca1d0302b830"
-        },
-        {
-          "id": "eca7dc10-812c-41e1-b33b-739d03e14f6a",
-          "code": "CR-021",
-          "condition": "storage_conditions_per_iso15 == true",
-          "severity": "warn",
-          "clause_reference": "§7.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -199625,10 +199614,21 @@
           "code": "CR-022",
           "condition": "safety_regulations_observed == true",
           "severity": "block",
-          "clause_reference": "8",
+          "clause_reference": "§8",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "However, these guidelines cannot be substituted for the provisions of local or national health and safety regulations, which should always be carefully studied and put into effect before sampling occurs.",
+          "worksheet_template_id": "3fdd637d-238c-4567-aa5c-ca1d0302b830"
+        },
+        {
+          "id": "eca7dc10-812c-41e1-b33b-739d03e14f6a",
+          "code": "CR-021",
+          "condition": "storage_conditions_per_iso15 == true",
+          "severity": "warn",
+          "clause_reference": "§7.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "3fdd637d-238c-4567-aa5c-ca1d0302b830"
         }
       ],
@@ -201634,7 +201634,7 @@
           "input_symbols": [
             "k_2"
           ],
-          "formula": "CT_50 = log_e2 / k_2",
+          "formula": "CT_50 = 0.6931 / k_2",
           "clause_reference": "§11.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "1036e063-2ad5-469b-86c6-7f4b2e0de1ef"
@@ -201719,6 +201719,17 @@
           "worksheet_template_id": "a25b9256-28c7-4101-8f42-2893b46ec705"
         },
         {
+          "id": "4995dada-7fba-43c3-84c5-8f6eec05a142",
+          "code": "CR-010",
+          "condition": "biocidal_preservative_excluded == true",
+          "severity": "warn",
+          "clause_reference": "§5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "db935b3c-5d8c-4da7-8951-7f0b974e64e2"
+        },
+        {
           "id": "844bbf73-37c6-4199-a814-5d073e14325a",
           "code": "CR-008",
           "condition": "storage_temperature >= -18 AND storage_temperature <= 25",
@@ -201733,17 +201744,6 @@
           "id": "b103ea72-1671-4a95-bfe4-92cad09d2d1c",
           "code": "CR-009",
           "condition": "ambient_storage_time <= 12",
-          "severity": "warn",
-          "clause_reference": "§5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "db935b3c-5d8c-4da7-8951-7f0b974e64e2"
-        },
-        {
-          "id": "4995dada-7fba-43c3-84c5-8f6eec05a142",
-          "code": "CR-010",
-          "condition": "biocidal_preservative_excluded == true",
           "severity": "warn",
           "clause_reference": "§5",
           "requires_attestation": false,
@@ -201884,17 +201884,6 @@
           "worksheet_template_id": "f2ff0173-7d37-4498-997e-250b4108eaeb"
         },
         {
-          "id": "a6ffc69f-68ee-4446-8901-cfc38113faf7",
-          "code": "CR-023",
-          "condition": "adsorption_equilibration_time >= 30",
-          "severity": "warn",
-          "clause_reference": "§10.1.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c2fd5bf6-e3e7-431a-853a-dce1aae39a1c"
-        },
-        {
           "id": "66d791f5-0f87-4be8-83bb-00d832465e45",
           "code": "CR-024",
           "condition": "removable_ingredient_loss IS NOT NULL",
@@ -201911,6 +201900,17 @@
           "condition": "colour_turbidity_correction IS NOT NULL",
           "severity": "warn",
           "clause_reference": "§10.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "c2fd5bf6-e3e7-431a-853a-dce1aae39a1c"
+        },
+        {
+          "id": "a6ffc69f-68ee-4446-8901-cfc38113faf7",
+          "code": "CR-023",
+          "condition": "adsorption_equilibration_time >= 30",
+          "severity": "warn",
+          "clause_reference": "§10.1.4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -201963,7 +201963,7 @@
         {
           "id": "8803d575-50d6-429a-ad39-abda2070330d",
           "code": "CR-030",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§12.1, §12.2",
           "requires_attestation": false,
@@ -204590,7 +204590,7 @@
         {
           "id": "15709f9c-fca9-4774-a25c-e4d069ac0139",
           "code": "CR-007",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.1.2",
           "requires_attestation": false,
@@ -204788,7 +204788,7 @@
         {
           "id": "e7d6388f-ce62-4f96-817e-e9899ee3db88",
           "code": "CR-028",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§14",
           "requires_attestation": false,
@@ -206472,9 +206472,9 @@
       "equations": [],
       "compliance": [
         {
-          "id": "7626291f-0baa-444c-8ec3-72484bee178c",
-          "code": "CR-001",
-          "condition": "organization_name IS NOT NULL AND organization_type IS NOT NULL AND value_chain_position IS NOT NULL",
+          "id": "4a95649c-bf91-41b9-b04b-e1a7a1d64ac9",
+          "code": "CR-002",
+          "condition": "ce_commitment == true",
           "severity": "warn",
           "clause_reference": "§1",
           "requires_attestation": false,
@@ -206483,9 +206483,9 @@
           "worksheet_template_id": "d8783583-55f5-4224-ab4e-fa6aace611e7"
         },
         {
-          "id": "4a95649c-bf91-41b9-b04b-e1a7a1d64ac9",
-          "code": "CR-002",
-          "condition": "ce_commitment == true",
+          "id": "7626291f-0baa-444c-8ec3-72484bee178c",
+          "code": "CR-001",
+          "condition": "organization_name IS NOT NULL AND organization_type IS NOT NULL AND value_chain_position IS NOT NULL",
           "severity": "warn",
           "clause_reference": "§1",
           "requires_attestation": false,
@@ -206527,55 +206527,11 @@
           "worksheet_template_id": "f5db7641-ae89-4694-b9c7-dca8cf542191"
         },
         {
-          "id": "6440b428-dded-4f72-be32-65d91c86376f",
-          "code": "CR-006",
-          "condition": "manual",
+          "id": "0e849844-e2a3-45ef-88d1-f1f4f1332164",
+          "code": "CR-014",
+          "condition": "",
           "severity": "warn",
-          "clause_reference": "§5.2.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
-        },
-        {
-          "id": "677f0076-8bb4-483e-bc7e-9763a3275629",
-          "code": "CR-007",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§5.2.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
-        },
-        {
-          "id": "b0f8d508-6722-47f5-858b-52ee03075f9b",
-          "code": "CR-008",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§5.2.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
-        },
-        {
-          "id": "222c8d71-aae0-472c-9421-fee6932b0d3c",
-          "code": "CR-009",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§5.2.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
-        },
-        {
-          "id": "bbd286fa-f7d3-4d42-a399-49983f7f3624",
-          "code": "CR-010",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§5.2.5",
+          "clause_reference": "§5.3.3",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -206584,7 +206540,7 @@
         {
           "id": "1617c244-11ec-487e-8672-10a60fcf1181",
           "code": "CR-011",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.2.6",
           "requires_attestation": false,
@@ -206595,7 +206551,7 @@
         {
           "id": "17c18f64-b562-4734-a6d2-f7da020bef0e",
           "code": "CR-012",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.3.2",
           "requires_attestation": false,
@@ -206604,20 +206560,9 @@
           "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
         },
         {
-          "id": "0e849844-e2a3-45ef-88d1-f1f4f1332164",
-          "code": "CR-014",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§5.3.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
-        },
-        {
           "id": "7983ae16-7909-4ad2-ba83-e574cc824c4a",
           "code": "CR-016",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.3.5",
           "requires_attestation": false,
@@ -206659,9 +206604,64 @@
           "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
         },
         {
+          "id": "6440b428-dded-4f72-be32-65d91c86376f",
+          "code": "CR-006",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§5.2.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
+        },
+        {
+          "id": "677f0076-8bb4-483e-bc7e-9763a3275629",
+          "code": "CR-007",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§5.2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
+        },
+        {
+          "id": "b0f8d508-6722-47f5-858b-52ee03075f9b",
+          "code": "CR-008",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§5.2.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
+        },
+        {
+          "id": "222c8d71-aae0-472c-9421-fee6932b0d3c",
+          "code": "CR-009",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§5.2.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
+        },
+        {
+          "id": "bbd286fa-f7d3-4d42-a399-49983f7f3624",
+          "code": "CR-010",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§5.2.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "e86ace5b-1a36-4d34-a730-bbfc88dafbd1"
+        },
+        {
           "id": "3482d344-2dc8-41a4-b242-95a0448043fe",
           "code": "CR-019",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.2.1",
           "requires_attestation": false,
@@ -206670,20 +206670,9 @@
           "worksheet_template_id": "072096a8-c15f-4ed4-bc93-28a1886dc0a3"
         },
         {
-          "id": "60ce08d1-4490-4f62-9693-0df315fff35e",
-          "code": "CR-020",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§6.2.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "072096a8-c15f-4ed4-bc93-28a1886dc0a3"
-        },
-        {
           "id": "6ef806c5-f052-48ed-9c42-728e34812336",
           "code": "CR-021",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.2.3",
           "requires_attestation": false,
@@ -206694,7 +206683,7 @@
         {
           "id": "5baf6b0d-243f-4e34-b1d6-daa4761f70f8",
           "code": "CR-022",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.3.1",
           "requires_attestation": false,
@@ -206705,7 +206694,7 @@
         {
           "id": "c6aa0894-a2b0-4d9e-b5ea-a5623be74f33",
           "code": "CR-023",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.4.1",
           "requires_attestation": false,
@@ -206716,7 +206705,7 @@
         {
           "id": "66195366-6c31-4480-8c1a-37aa10987cd2",
           "code": "CR-024",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.4.7",
           "requires_attestation": false,
@@ -206727,20 +206716,9 @@
         {
           "id": "481462f7-52ec-412a-878a-bed3566f6e29",
           "code": "CR-025",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "072096a8-c15f-4ed4-bc93-28a1886dc0a3"
-        },
-        {
-          "id": "0642889b-b3df-4a85-bfd4-100098e8384a",
-          "code": "CR-026",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§6.6.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -206780,6 +206758,116 @@
           "worksheet_template_id": "072096a8-c15f-4ed4-bc93-28a1886dc0a3"
         },
         {
+          "id": "60ce08d1-4490-4f62-9693-0df315fff35e",
+          "code": "CR-020",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§6.2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "072096a8-c15f-4ed4-bc93-28a1886dc0a3"
+        },
+        {
+          "id": "0642889b-b3df-4a85-bfd4-100098e8384a",
+          "code": "CR-026",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§6.6.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "072096a8-c15f-4ed4-bc93-28a1886dc0a3"
+        },
+        {
+          "id": "6e59b7ba-06e3-4f66-8368-01db94614c73",
+          "code": "CR-038",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§7.4.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "7dbbe7fa-b493-489e-968c-78d8af1924dc",
+          "code": "CR-040",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§7.5.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "666e27b2-7d03-479d-81bc-af7003e94eec",
+          "code": "CR-041",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§7.5.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "782225e5-fa85-48ab-b5fa-8449c184dae9",
+          "code": "CR-043",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§7.2.2, §7.6, §0.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "4c2331e6-c3f4-4010-8fb0-0d3e8c4b7063",
+          "code": "CR-044",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§7.4.4, §0.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "50a17d1d-b313-4697-ba65-0d367ac5402b",
+          "code": "CR-037",
+          "condition": "value_creation_model IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§7.4.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "f16b869a-954a-456f-ac72-b6ddcae84b2d",
+          "code": "CR-039",
+          "condition": "ce_action_plan IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§7.4.6",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
+          "id": "aaa9d35e-70cd-4f54-ba3e-6b20e6bed0f9",
+          "code": "CR-032",
+          "condition": "reference_situation_assessed == true AND baseline_circularity_assessment == true",
+          "severity": "warn",
+          "clause_reference": "§7.2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
+        },
+        {
           "id": "57bc7070-2821-4d55-bd46-4c77ff93eda3",
           "code": "CR-029",
           "condition": "implementation_stage IS NOT NULL",
@@ -206793,7 +206881,7 @@
         {
           "id": "6d7112d4-250c-4ef4-8de4-4574aea1d824",
           "code": "CR-030",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§7.1.2",
           "requires_attestation": false,
@@ -206815,7 +206903,7 @@
         {
           "id": "68478888-6361-4244-a493-3ee2ce9da1d5",
           "code": "CR-033",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§7.2.5",
           "requires_attestation": false,
@@ -206857,99 +206945,11 @@
           "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
         },
         {
-          "id": "50a17d1d-b313-4697-ba65-0d367ac5402b",
-          "code": "CR-037",
-          "condition": "value_creation_model IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§7.4.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "6e59b7ba-06e3-4f66-8368-01db94614c73",
-          "code": "CR-038",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§7.4.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "f16b869a-954a-456f-ac72-b6ddcae84b2d",
-          "code": "CR-039",
-          "condition": "ce_action_plan IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§7.4.6",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "7dbbe7fa-b493-489e-968c-78d8af1924dc",
-          "code": "CR-040",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§7.5.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "666e27b2-7d03-479d-81bc-af7003e94eec",
-          "code": "CR-041",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§7.5.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "782225e5-fa85-48ab-b5fa-8449c184dae9",
-          "code": "CR-043",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§7.2.2, §7.6, §0.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "4c2331e6-c3f4-4010-8fb0-0d3e8c4b7063",
-          "code": "CR-044",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§7.4.4, §0.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
           "id": "2e04f912-93fe-4640-acdf-ee4bf9e46ef6",
           "code": "CR-042",
           "condition": "monitoring_review_process == true",
           "severity": "warn",
           "clause_reference": "§7.6",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "6431bd65-abff-4fb5-b576-2ccb34b7ee69"
-        },
-        {
-          "id": "aaa9d35e-70cd-4f54-ba3e-6b20e6bed0f9",
-          "code": "CR-032",
-          "condition": "reference_situation_assessed == true AND baseline_circularity_assessment == true",
-          "severity": "warn",
-          "clause_reference": "§7.2.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -208921,22 +208921,22 @@
           "worksheet_template_id": "d4ab76e2-6e6c-4a2b-9170-772e54d7af19"
         },
         {
-          "id": "29c70e07-ab90-402a-b602-8df7c84b863d",
-          "code": "CR-002",
-          "condition": "goal_measurable == true",
+          "id": "c7369112-ae32-4189-a00f-7a5559cea802",
+          "code": "CR-003",
+          "condition": "enablers_identified == true",
           "severity": "warn",
-          "clause_reference": "§4.1",
+          "clause_reference": "§4.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "1e899e1b-5c55-4e0a-a4fe-1b634f3e19b6"
         },
         {
-          "id": "c7369112-ae32-4189-a00f-7a5559cea802",
-          "code": "CR-003",
-          "condition": "enablers_identified == true",
+          "id": "29c70e07-ab90-402a-b602-8df7c84b863d",
+          "code": "CR-002",
+          "condition": "goal_measurable == true",
           "severity": "warn",
-          "clause_reference": "§4.2",
+          "clause_reference": "§4.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -208965,17 +208965,6 @@
           "worksheet_template_id": "5811059b-3d05-49c4-b773-668f8913ceaa"
         },
         {
-          "id": "c9d94a5c-5a7e-454a-baa5-9ac2874e3ccd",
-          "code": "CR-008",
-          "condition": "preliminary_action_considered == true",
-          "severity": "warn",
-          "clause_reference": "§4.6.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "22b3a962-e4e3-4457-9565-a1ceeef27eaa"
-        },
-        {
           "id": "7712fa4d-f903-49c4-a1e1-c2a52970b96b",
           "code": "CR-009",
           "condition": "added_value_action IS NOT NULL AND value_retention_action IS NOT NULL AND value_recovery_action IS NOT NULL",
@@ -208992,6 +208981,17 @@
           "condition": "life_cycle_perspective_applied == true",
           "severity": "warn",
           "clause_reference": "§4.6.7",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "22b3a962-e4e3-4457-9565-a1ceeef27eaa"
+        },
+        {
+          "id": "c9d94a5c-5a7e-454a-baa5-9ac2874e3ccd",
+          "code": "CR-008",
+          "condition": "preliminary_action_considered == true",
+          "severity": "warn",
+          "clause_reference": "§4.6.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -209064,17 +209064,6 @@
           "worksheet_template_id": "8d2297dd-b1b3-47fc-8c80-189b15608b4b"
         },
         {
-          "id": "51827f3a-1180-4395-8db1-ffe33bf7060d",
-          "code": "CR-018",
-          "condition": "manual",
-          "severity": "warn",
-          "clause_reference": "§7.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "8d2297dd-b1b3-47fc-8c80-189b15608b4b"
-        },
-        {
           "id": "7d19ba04-6c58-4055-af96-08ec7aa2b63c",
           "code": "CR-017",
           "condition": "shared_objectives_defined == true AND consistency_verification_done == true",
@@ -209097,6 +209086,17 @@
           "worksheet_template_id": "fab89a76-65e3-4bcb-b209-7e6795615da2"
         },
         {
+          "id": "51827f3a-1180-4395-8db1-ffe33bf7060d",
+          "code": "CR-018",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§7.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "fab89a76-65e3-4bcb-b209-7e6795615da2"
+        },
+        {
           "id": "381ce520-c530-4c6e-a222-02466164d0ec",
           "code": "CR-020",
           "condition": "performance_measured == true AND measurement_meaningful == true",
@@ -209110,7 +209110,7 @@
         {
           "id": "06f58e11-b6b9-497a-83da-fdf53d386051",
           "code": "CR-021",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§8.1",
           "requires_attestation": false,
@@ -211285,50 +211285,6 @@
           "worksheet_template_id": "604f98db-e966-4ae1-815e-05baff280e17"
         },
         {
-          "id": "49b6a662-a6f3-4a33-9075-2f6ecaf4d80f",
-          "code": "CR-003",
-          "condition": "secondary_material_criteria_defined == true",
-          "severity": "block",
-          "clause_reference": "§6.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
-        },
-        {
-          "id": "c5535d88-d996-4f02-97b3-11ec2d4e1090",
-          "code": "CR-004",
-          "condition": "best_outcome_from_lifecycle_studies == true",
-          "severity": "block",
-          "clause_reference": "§6.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
-        },
-        {
-          "id": "5e2cd0d5-d37c-424f-81e0-797a17f9a997",
-          "code": "CR-006",
-          "condition": "recovery_targets_quant_qual == true",
-          "severity": "block",
-          "clause_reference": "§6.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
-        },
-        {
-          "id": "5d36ceab-1843-497d-a220-82894aea9790",
-          "code": "CR-007",
-          "condition": "attribute_list_maintained == true",
-          "severity": "block",
-          "clause_reference": "§6.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
-        },
-        {
           "id": "9ce76712-26b1-4ed1-a253-828db16fed68",
           "code": "CR-008",
           "condition": "recovery_pathway_methodology_applied == true",
@@ -211428,11 +211384,55 @@
           "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
         },
         {
+          "id": "49b6a662-a6f3-4a33-9075-2f6ecaf4d80f",
+          "code": "CR-003",
+          "condition": "secondary_material_criteria_defined == true",
+          "severity": "block",
+          "clause_reference": "§6.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
+        },
+        {
+          "id": "c5535d88-d996-4f02-97b3-11ec2d4e1090",
+          "code": "CR-004",
+          "condition": "best_outcome_from_lifecycle_studies == true",
+          "severity": "block",
+          "clause_reference": "§6.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
+        },
+        {
+          "id": "5e2cd0d5-d37c-424f-81e0-797a17f9a997",
+          "code": "CR-006",
+          "condition": "recovery_targets_quant_qual == true",
+          "severity": "block",
+          "clause_reference": "§6.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
+        },
+        {
+          "id": "5d36ceab-1843-497d-a220-82894aea9790",
+          "code": "CR-007",
+          "condition": "attribute_list_maintained == true",
+          "severity": "block",
+          "clause_reference": "§6.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "836c0c44-bfff-4f50-9882-e979a1b08948"
+        },
+        {
           "id": "860d6abf-2983-4b5c-9ee4-b08993eb7abd",
           "code": "CR-005",
           "condition": "lca_rationale_documented == true",
           "severity": "block",
-          "clause_reference": "6.1",
+          "clause_reference": "§6.1",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "If such studies do not provide sufficient information to define the best environmental outcome when identifying or defining the criteria, the organization shall consider conducting studies in accordance with ISO 14040, ISO 14044 and ISO 14075. If the latter were not applied, a rationale for the choice shall be documented.",
@@ -211530,17 +211530,6 @@
           "id": "2d85d0e8-c300-45b9-a747-0bbf32c3d144",
           "code": "CR-026",
           "condition": "decent_work_conditions == true",
-          "severity": "block",
-          "clause_reference": "§7.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "bb3c1ca8-f763-4064-bf1a-6a39ffdffec3"
-        },
-        {
-          "id": "c2e52bab-32e4-4476-af35-e030a194f559",
-          "code": "CR-027",
-          "condition": "child_forced_labour_prevented == true",
           "severity": "block",
           "clause_reference": "§7.5",
           "requires_attestation": false,
@@ -211659,17 +211648,6 @@
           "worksheet_template_id": "bb3c1ca8-f763-4064-bf1a-6a39ffdffec3"
         },
         {
-          "id": "6960b37c-2694-45e3-97ff-f37e5a251911",
-          "code": "CR-025",
-          "condition": "sa_enabling_environment == true",
-          "severity": "block",
-          "clause_reference": "§7.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Where applicable, the organization engaging or intending to engage with individuals involved in subsistence activities (SAs) shall create an enabling environment to work collaboratively with organizations or individuals involved in SAs that addresses their identified needs and interests with regards to their well-being and livelihoods.",
-          "worksheet_template_id": "bb3c1ca8-f763-4064-bf1a-6a39ffdffec3"
-        },
-        {
           "id": "a32700f7-0710-41e3-887b-0359df6df678",
           "code": "CR-036",
           "condition": "harmful_substances_removed == true",
@@ -211678,6 +211656,28 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Where the organization has identified that it is not properly managing harmful substances or is engaging in harmful practices, the organization shall remove the substances from the activities and processes or improve practices to make them safer.",
+          "worksheet_template_id": "bb3c1ca8-f763-4064-bf1a-6a39ffdffec3"
+        },
+        {
+          "id": "c2e52bab-32e4-4476-af35-e030a194f559",
+          "code": "CR-027",
+          "condition": "child_forced_labour_prevented == true",
+          "severity": "block",
+          "clause_reference": "§7.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "bb3c1ca8-f763-4064-bf1a-6a39ffdffec3"
+        },
+        {
+          "id": "6960b37c-2694-45e3-97ff-f37e5a251911",
+          "code": "CR-025",
+          "condition": "sa_enabling_environment == true",
+          "severity": "block",
+          "clause_reference": "§7.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Where applicable, the organization engaging or intending to engage with individuals involved in subsistence activities (SAs) shall create an enabling environment to work collaboratively with organizations or individuals involved in SAs that addresses their identified needs and interests with regards to their well-being and livelihoods.",
           "worksheet_template_id": "bb3c1ca8-f763-4064-bf1a-6a39ffdffec3"
         },
         {
@@ -214046,13 +214046,24 @@
         {
           "id": "16f87075-637f-44f2-a50f-01f5349ebcfc",
           "code": "CR-008",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.4.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "c153f605-ab93-4e08-840d-0ea5e4b7cc8c"
+        },
+        {
+          "id": "fbfde707-c383-4fdf-9b4b-21e6e4f1ead6",
+          "code": "CR-019",
+          "condition": "pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow == 100",
+          "severity": "block",
+          "clause_reference": "§A.3.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c2219d4-500d-4098-9d31-a2b54539e35d"
         },
         {
           "id": "3fb354cb-caa3-472b-9a2e-b6064d3ef0e1",
@@ -214068,7 +214079,7 @@
         {
           "id": "7db0523f-99a1-4703-9e99-520f20b9cd0b",
           "code": "CR-010",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§7.3.1",
           "requires_attestation": false,
@@ -214165,28 +214176,6 @@
           "worksheet_template_id": "5c2219d4-500d-4098-9d31-a2b54539e35d"
         },
         {
-          "id": "fbfde707-c383-4fdf-9b4b-21e6e4f1ead6",
-          "code": "CR-019",
-          "condition": "pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow == 100",
-          "severity": "block",
-          "clause_reference": "§A.3.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5c2219d4-500d-4098-9d31-a2b54539e35d"
-        },
-        {
-          "id": "605f2609-f6a4-49c6-9dea-7471bd932738",
-          "code": "CR-020",
-          "condition": "pct_ECONRE_X == ((EIRENE_X - EORENE_X) / (EITE_X - EOTE_X)) * 100",
-          "severity": "warn",
-          "clause_reference": "§A.4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5c2219d4-500d-4098-9d31-a2b54539e35d"
-        },
-        {
           "id": "613d3729-2288-4208-a5d1-bea32015e69c",
           "code": "CR-021",
           "condition": "pct_CWW == (VCIW / VAIW) * 100",
@@ -214242,11 +214231,33 @@
           "worksheet_template_id": "3ec340ac-745c-4808-a096-2613ada3d626"
         },
         {
+          "id": "605f2609-f6a4-49c6-9dea-7471bd932738",
+          "code": "CR-020",
+          "condition": "pct_ECONRE_X == ((EIRENE_X - EORENE_X) / (EITE_X - EOTE_X)) * 100",
+          "severity": "warn",
+          "clause_reference": "§A.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "3ec340ac-745c-4808-a096-2613ada3d626"
+        },
+        {
           "id": "039ccd78-914c-419a-9f23-e033af0970ba",
           "code": "CR-026",
           "condition": "system_breakdown_done == true",
           "severity": "warn",
           "clause_reference": "§7.6.1.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "aa57a979-f08b-4b40-b8d5-b0cd726480ac"
+        },
+        {
+          "id": "fd8d4b44-d6e4-4e76-84e4-0b1deb677e4f",
+          "code": "CR-029",
+          "condition": "data_traceability == true",
+          "severity": "warn",
+          "clause_reference": "§3.3.16",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -214269,17 +214280,6 @@
           "condition": "primary_data_preference == true AND data_traceability == true",
           "severity": "warn",
           "clause_reference": "§7.6.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "aa57a979-f08b-4b40-b8d5-b0cd726480ac"
-        },
-        {
-          "id": "fd8d4b44-d6e4-4e76-84e4-0b1deb677e4f",
-          "code": "CR-029",
-          "condition": "data_traceability == true",
-          "severity": "warn",
-          "clause_reference": "§3.3.16",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -214354,7 +214354,7 @@
         {
           "id": "fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68",
           "code": "CR-036",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§8.6.4",
           "requires_attestation": false,
@@ -214365,7 +214365,7 @@
         {
           "id": "eea527e5-67e4-4a38-ac6b-b9ce1d52e731",
           "code": "CR-037",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§8.4.6",
           "requires_attestation": false,
@@ -216307,7 +216307,7 @@
         {
           "id": "d6bab12f-c5a7-4ea3-846a-46bb51935199",
           "code": "CR-018",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§1",
           "requires_attestation": false,
@@ -216318,7 +216318,7 @@
         {
           "id": "adffda8c-2e0d-46d5-995d-777ecb557971",
           "code": "CR-001",
-          "condition": "manual",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§1, §2",
           "requires_attestation": false,
@@ -216371,9 +216371,9 @@
           "worksheet_template_id": "9114a138-0dfc-4db1-94a2-a6bc3edb6124"
         },
         {
-          "id": "89ce63dd-ff8f-4181-9583-c11a206f3d4a",
-          "code": "CR-006",
-          "condition": "participating_sector_count >= 2",
+          "id": "e28c6a51-dbaa-4a25-82c7-bd4eb2a68391",
+          "code": "CR-007",
+          "condition": "cross_sectoral_collaboration == true",
           "severity": "warn",
           "clause_reference": "§5.1",
           "requires_attestation": false,
@@ -216382,9 +216382,9 @@
           "worksheet_template_id": "cda32cad-07f7-4695-896e-86ed056b4f3b"
         },
         {
-          "id": "e28c6a51-dbaa-4a25-82c7-bd4eb2a68391",
-          "code": "CR-007",
-          "condition": "cross_sectoral_collaboration == true",
+          "id": "89ce63dd-ff8f-4181-9583-c11a206f3d4a",
+          "code": "CR-006",
+          "condition": "participating_sector_count >= 2",
           "severity": "warn",
           "clause_reference": "§5.1",
           "requires_attestation": false,

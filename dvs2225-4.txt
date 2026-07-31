@@ -1,0 +1,1653 @@
+                                                                                                                                                                                                                                                                                  September 2016
+
+
+
+
+                                                                                                                                                                                                                                                                                      Richtlinie
+                                                                                                                                                                            DVS − Deutscher Verband                                                                                  DVS 2225-4
+                                                                                                                                                                            für Schweißen und
+                                                                                                                                                                            verwandte Verfahren e. V.
+
+                                                                                                                                                                                                                                                                             Ersatz für Ausgabe
+                                                                                                                                                                                                                                                                                Dezember 2006
+
+
+
+
+                                                                                        Nachdruck und Kopie, auch auszugsweise, nur mit Genehmigung des Herausgebers
+                                                                                                                                                                           Richtlinie DVS 2225-4
+
+                                                                                                                                                                           Schweißen von Dichtungsbahnen aus Polyethylen
+                                                                                                                                                                           (PE) für die Abdichtung von Deponien und Altlasten
+
+
+                                                                                                                                                                           DVS, Ausschuss für Technik, Arbeitsgruppe "Fügen von Kunststoﬀen"
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                                                                                                           Diese Veröﬀentlichung wurde von einer Gruppe erfahrener Fachleute in ehrenamtlicher Gemeinschaftsarbeit erstellt und wird
+                                                                                                                                                                           zur Beachtung empfohlen. Der Anwender muss jeweils prüfen, wie weit der Inhalt auf seinen speziellen Fall anwendbar und
+                                                                                                                                                                           ob die ihm vorliegende Fassung noch gültig ist. Eine Haftung des Deutschen Verbandes für Schweißen und verwandte Ver-
+                                                                                                                                                                           fahren e.V. und derjenigen, die an der Ausarbeitung beteiligt waren, ist ausgeschlossen.
+
+
+
+                                                                                                                                                                       Bezug: DVS Media GmbH, Postfach 10 19 65, 40010 Düsseldorf, Telefon (0211) 1591-0, Telefax (0211) 1591-150
+                                                                                        September 2016                                                                  DVS 2225-4
+
+
+
+                                                                                        Inhalt:
+
+                                                                                        1.        Geltungsbereich
+
+                                                                                        2.        Dichtungsbahnen
+
+                                                                                        3.        Konstruktive Einzelheiten
+                                                                                        3.1.      Nahtformen
+                                                                                        3.2.      Verlegung der Dichtungsbahnen
+                                                                                        3.3.      Anschluss an Bauteile aus Polyethylen (PE80, PE100, im Weiteren PE)
+
+                                                                                        4.        Schweißverfahren
+                                                                                        4.1.      Allgemeine Hinweise
+                                                                                        4.2.      Schweißparameter
+                                                                                        4.3.      Ausführung der Schweißarbeiten
+                                                                                        4.3.1.    Allgemeine Hinweise
+                                                                                        4.3.2.    Heizkeilschweißen
+                                                                                        4.3.3.    Warmgasextrusionsschweißen
+
+                                                                                        5.        Schweißmaschinen und Schweißgeräte
+                                                                                        5.1.      Allgemeine Anforderungen
+                                                                                        5.2.      Anforderungen an Schweißmaschinen
+                                                                                        5.3.      Anforderungen an Schweißgeräte
+
+                                                                                        6.        Baustellenprüfungen
+                                                                                        6.1.      Art und Umfang der Prüfungen und Kontrollen
+                                                                                        6.2.      Prüfung der äußeren Beschaﬀenheit
+                                                                                        6.2.1.    Verfahren
+                                                                                        6.2.2.    Anwendungsbereich
+                                                                                        6.2.3.    Durchführung der Prüfung
+                                                                                        6.2.4.    Prüfergebnisse
+                                                                                        6.2.5.    Wertung der Prüfergebnisse
+                                                                                        6.2.6.    Grenzen des Prüfverfahrens
+                                                                                        6.3.      Prüfung der Abmessungen
+                                                                                        6.3.1.    Verfahren
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        6.3.2.    Anwendungsbereich
+                                                                                        6.3.3.    Durchführung der Prüfung
+                                                                                        6.3.4.    Prüfergebnisse
+                                                                                        6.3.5.    Wertung der Prüfergebnisse
+                                                                                        6.3.6.    Grenzen des Prüfverfahrens
+                                                                                        6.4.      Prüfung des Versagensverhaltens
+                                                                                        6.4.1.    Verfahren
+                                                                                        6.4.2.    Anwendungsbereich
+                                                                                        6.4.3.    Durchführung der Prüfung
+                                                                                        6.4.4.    Prüfergebnisse
+                                                                                        6.4.5.    Wertung der Prüfergebnisse
+                                                                                        6.4.6.    Grenzen des Prüfverfahrens
+                                                                                        6.5.      Prüfung auf Dichtigkeit
+                                                                                        6.5.1.    Allgemeines
+                                                                                        6.5.2.    Prüfung mit Druckluft
+                                                                                        6.5.3.    Prüfung mit Vakuum
+                                                                                        6.5.4.    Prüfung mit elektrischer Hochspannung
+                                                                                        6.6.      Prüfprotokolle
+
+                                                                                        7.        Hinweise zu Nachbesserungen
+                                                                                        DVS 2225-4                                                  September 2016
+
+
+
+                                                                                        8.       Schrifttum
+                                                                                        8.1.     Regelwerk
+
+                                                                                        9.         Anhang
+                                                                                        Blatt 1: Schweißprotokoll für Überlappnähte mit Prüfkanal
+                                                                                        Blatt 2: Schweißprotokoll für Auftragnähte
+                                                                                        Blatt 3: Prüfprotokoll für Überlappnähte mit Prüfkanal
+                                                                                        Blatt 4: Prüfprotokoll für Auftragnähte
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              September 2016                                                                        DVS 2225-4
+
+
+
+                                                                                              1.       Geltungsbereich
+
+                                                                                              Diese Richtlinie gilt für das Schweißen von Dichtungsbahnen aus Polyethylen (PE) bei großflächigen
+                                                                                              Dichtungssystemen.
+
+                                                                                              Im Einzelnen werden Dichtungsbahnen aus PE bei folgenden Maßnahmen eingesetzt:
+
+                                                                                              •    Basisabdichtungen von Deponien,
+                                                                                              •    Oberﬂächenabdichtungen von Deponien,
+                                                                                              •    Oberﬂächenabdichtungen von Altlasten,
+                                                                                              •    Umschließungen von Altlasten.
+
+
+                                                                                              Mit dieser Richtlinie soll den zuständigen Behörden, den Auftraggebern, den Ausführenden und dem
+                                                                                              Qualitätsmanagement eine Anleitung für die Durchführung der Fügearbeiten und Schweißnahtprüfun-
+                                                                                              gen auf der Baustelle gegeben werden.
+
+                                                                                              Die Richtlinie berücksichtigt besonders die hohen Anforderungen, die bei diesen Anwendungen an die
+                                                                                              Güte der Schweißverbindung und damit an die werkstoff- und fachgerechte Ausführung zu stellen sind.
+
+                                                                                              Sie gibt weiter Hinweise für die Verlegung der Dichtungsbahnen sowie für die konstruktive Gestaltung
+                                                                                              von Schweißverbindungen zwischen den Dichtungsbahnen und Bauteilen aus Polyethylen.
+
+                                                                                              Die Arbeiten dürfen nur von Fachbetrieben ausgeführt werden. Der Fachbetriebsnachweis muss durch
+                                                                                              eine Güteüberwachung erfolgen.
+
+                                                                                              2.       Dichtungsbahnen
+
+                                                                                              Dichtungsbahnen im Sinne dieser Richtlinie sind industriell gefertigte Kunststoffdichtungsbahnen aus
+                                                                                              PE nach DIN EN 13492 und DIN EN 13493.
+
+                                                                                              Die Lieferqualität der Dichtungsbahnen ist durch Abnahmeprüfzeugnisse DIN EN 10204-3.1 vom Her-
+                                                                                              steller/Lieferanten zu dokumentieren. Gleiches gilt für benötigte Schweißzusätze.
+
+                                                                                              Es dürfen nur Dichtungsbahnen verwendet werden, die für die jeweilige Verwendung zugelassen sind.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Zugelassene Dichtungsbahnen müssen entsprechend dem Zulassungsbescheid gekennzeichnet sein.
+
+                                                                                              Dichtungsbahnen aus PE bestehen aus unvernetzten Makromolekülen und weisen eine teilkristalline
+                                                                                              Molekülstruktur auf. Sie können durch Wärme plastifiziert werden und werden ausschließlich durch
+                                                                                              Schweißen gefügt.
+
+                                                                                              Für die in dieser Richtlinie beschriebenen Anwendungen ist eine Mindestdicke von 2,5 mm vorge-
+                                                                                              schrieben. Die Dichtungsbahnen sind homogen aus einem Werkstoff aufgebaut.
+
+                                                                                              An den Rändern der Dichtungsbahnen sind abziehbare Folienschutzstreifen werksseitig aufgebracht.
+                                                                                              Diese Folienstreifen sollen farblich abgegrenzt sein und die Fügebereiche vor Verunreinigungen schüt-
+                                                                                              zen.
+
+                                                                                              3.       Konstruktive Einzelheiten
+
+                                                                                              3.1.     Nahtformen
+
+                                                                                              Die Dichtungsbahnen werden grundsätzlich überlappt verlegt (Überlappstoß). Bei den Fügenähten
+                                                                                              wird entsprechend Bild 1 unterschieden in Überlappnähte mit Prüfkanal und in Auftragnähte.
+
+                                                                                              Die Überlappnähte mit Prüfkanal werden durch Heizkeilschweißen hergestellt. Die Breite der Teilnähte
+
+
+
+                                                                                        Seite 4
+                                                                                        DVS 2225-4                                                                    September 2016
+
+
+
+                                                                                        muss jeweils mindestens 15 mm, die Breite des Prüfkanals mindestens 10 mm betragen.
+
+                                                                                        Die Auftragnähte werden durch Warmgasextrusionsschweißen hergestellt. Die Breite der Auftragnaht
+                                                                                        muss mindestens 30 mm betragen. Die Lage der Nahtmitte darf, bezogen auf die Kante der oberen
+                                                                                        Dichtungsbahn, nicht mehr als 5 mm abweichen.
+
+                                                                                        3.2.   Verlegung der Dichtungsbahnen
+
+                                                                                        Die Dichtungsbahnen sind nach Verlegeplan einzubauen. Dieser Plan wird vor Aufnahme der Arbeiten
+                                                                                        vom Verlegefachbetrieb als Verlegekonzept erstellt.
+
+                                                                                        In den Bildern 2 bis 9 sind die für das Schweißen von Dichtungsbahnen wichtigen Grundsätze der
+                                                                                        Verlegung beispielhaft gezeigt.
+
+                                                                                        Die Dichtungsbahnen sind generell so zu verlegen, dass keine Kreuzstöße entstehen. T-Stöße sollen
+                                                                                        untereinander einen Abstand von mindestens 0,5 m aufweisen.
+
+                                                                                        Bei kurzen Böschungen (< 20 m), deren Flächen nahezu parallel zu den Sohlflächen verlaufen, emp-
+                                                                                        fiehlt es sich, die Dichtungsbahnen durchgehend zu verlegen (Bild 3).
+
+                                                                                        Auf den Böschungen sind die Dichtungsbahnen vornehmlich in Falllinie zu verlegen und die Schweiß-
+                                                                                        nähte in dieser Richtung anzuordnen.
+
+                                                                                        Quernähte sind nicht generell ausgeschlossen, sie sollten jedoch auf ein Mindestmaß reduziert wer-
+                                                                                        den. In jedem Fall ist besonderes Augenmerk auf die fachgerechte Ausführung (Nahtvorbereitung,
+                                                                                        Schweißen, Prüfen) zu legen.
+
+                                                                                        Nähte zwischen den Dichtungsbahnen in der Böschung und der Sohle sind im Regelfall mindestens
+                                                                                        1,5 m vor dem Böschungsfuß anzuordnen (Bilder 3 bis 6).
+
+                                                                                        Die Einbindung der Dichtungsbahnen sollte so ausgeführt werden,dass die Dichtungsbahnen bis zu
+                                                                                        ihrem Bahnenende auch mit Schweißmaschinen geschweißt werden können (Bild 9).
+
+                                                                                        Das Auflageplanum muss eben und frei von abrupten Höhenänderungen/Absätzen sowie standfest,
+                                                                                        homogen, feinkörnig und geschlossen sein.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        3.3.   Anschluss an Bauteile aus Polyethylen (PE80, PE100, im Weiteren PE)
+
+                                                                                        Der Anschluss der Dichtungsbahnen an vergleichsweise dickwandige Bauteile aus PE, wie Rohrdurch-
+                                                                                        führungsbauteile oder Schächte, erfolgt über Auftragnähte mittels Warmgasextrusionsschweißen über
+                                                                                        PE-Anschlussplatten. Da die Dichtungsbahn an PE-Anschlussplatten in einer Dicke von mind. 10 mm,
+                                                                                        geschweißt werden, die in der Regel aus einer Formmasse mit geringerer Schmelze-Massefließrate
+                                                                                        (MFR) als die Dichtungsbahnen bestehen, ist die Schweißeignung durch Kurzzeitschälversuche unter
+                                                                                        einem Winkel von 90° nachzuweisen. Es empfiehlt sich, als Schweißzusatz die Formmasse mit dem
+                                                                                        höheren MFR-Wert zu wählen. Um für beide Fügeteile gleiche Oberflächenzustände für den Schweiß-
+                                                                                        vorgang zu schaffen, kann es erforderlich sein, die PE-Platten mittels Warmgas gesondert thermisch
+                                                                                        vorzubehandeln.
+
+                                                                                        Es ist darauf zu achten, dass die Anschlüsse in der Ebene der Dichtungsbahnen liegen (Bilder 10 bis
+                                                                                        13).
+
+
+
+
+                                                                                                                                                                                          Seite 5
+                                                                                              September 2016                                                                         DVS 2225-4
+
+
+                                                                                                                                                   Überlappnaht mit Prüfkanal - ÜN
+
+
+
+
+                                                                                                  Bahnendicke (do, du)              ≥ 2,5 mm
+                                                                                                  Überlappung vorn (ü1)             ≥ 5 mm
+                                                                                                                                    < 15 mm
+                                                                                                  Überlappung hinten (ü2)           ≥ 40 mm
+                                                                                                  Breite der Teilnähte (bN1, bN2)   ≥ 15 mm
+                                                                                                  Breite des Prüfkanals (bP)        ≥ 10 mm
+                                                                                                  Dicke der Naht (dN1, dN2)         ≥ (do + du) - 0,8 mm
+                                                                                                                                    ≤ (do + du) - 0,4 mm
+
+
+
+                                                                                                                                                           Auftragnaht - AN
+
+
+
+
+                                                                                                  Bahnendicke (do, du)              ≥ 2,5 mm
+                                                                                                  Überlappung vorn (ü)              ≥ 40 mm
+                                                                                                  Breite der Naht (bN)              ≥ 30 mm
+                                                                                                  Außermittigkeit, Versatz (a)      ≤ 5 mm
+                                                                                                  Dicke der Naht (dN)               1,25 x (do + du)
+                                                                                                                                    1,75 x (do + du)
+                                                                                              Bild1. Nahtformen.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Bild 2. Grundriss einer Deponie mit verschiedenen Böschungen – schematisch.
+
+
+
+
+                                                                                        Seite 6
+                                                                                        DVS 2225-4                                                                                    September 2016
+
+
+
+
+                                                                                                                                                     B = Bahnbreite
+                                                                                                                                                     Maße in m
+                                                                                                                                                     Hinweis:
+                                                                                                                                                     1. Die Naht am Böschungsfuß kann als ÜN oder AN ausge-
+                                                                                                                                                        führt werden.
+                                                                                                                                                     2. Bei diesem Beispiel werden im unteren Teil die Dich-
+                                                                                                                                                        tungsbahnen durchgehend von der Böschung in die
+                                                                                                                                                        Sohle hinein verlegt.
+
+
+
+
+                                                                                        Bild 3. Verlegen der Dichtungsbahnen auf einer kurzen Böschung – Variante 1.
+
+
+
+
+                                                                                                                                                     B = Bahnbreite
+                                                                                                                                                     Maße in m
+
+                                                                                                                                                     Hinweis:
+                                                                                                                                                     1. Die Naht am Böschungsfuß kann als ÜN oder AN ausge-
+                                                                                                                                                        führt werden.
+                                                                                                                                                     2. Bei diesem Beispiel werden Böschungs- und Sohlbahnen
+                                                                                                                                                        getrennt verlegt.
+
+
+
+
+                                                                                        Bild 4. Verlegen der Dichtungsbahnen auf einer kurzen Böschung – Variante 2.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                                                                                     B = Bahnbreite
+                                                                                                                                                     Maße in m
+                                                                                                                                                     Hinweis:
+                                                                                                                                                     1. Die Naht am Böschungsfuß kann als ÜN oder AN ausge-
+                                                                                                                                                        führt werden.
+                                                                                                                                                     2. Die Naht in der Böschungskehle kann als ÜN oder AN
+                                                                                                                                                        ausgeführt werden.
+                                                                                                                                                     3. Die Verlegerichtung in der Böschungsecke kann von der
+                                                                                                                                                        Böschungsfalllinie abweichen.
+
+
+
+
+                                                                                        Bild 5. Verlegen der Dichtungsbahnen auf einer langen Böschung – Variante 1.
+
+
+
+
+                                                                                                                                                                                                                Seite 7
+                                                                                              September 2016                                                                                            DVS 2225-4
+
+
+
+
+                                                                                                                                                             B = Bahnbreite
+                                                                                                                                                             Maße in m
+                                                                                                                                                             Hinweis:
+                                                                                                                                                             1. Die Naht am Böschungsfuß kann als ÜN oder AN ausge-
+                                                                                                                                                                führt werden.
+                                                                                                                                                             2. Die Naht in der Böschungskehle kann als ÜN oder AN
+                                                                                                                                                                ausgeführt werden.
+                                                                                                                                                             3. Die Verlegerichtung in der Böschungsecke kann von der
+                                                                                                                                                                Böschungsfalllinie abweichen.
+                                                                                                                                                             4. In der Böschungskehle wird eine sogenannte Kopfbahn
+                                                                                                                                                                verlegt.
+
+
+                                                                                              Bild 6. Verlegen der Dichtungsbahnen auf einer langen Böschung – Variante 2.
+
+
+
+
+                                                                                                                                                             B = Bahnbreite
+                                                                                                                                                             Maße in m
+
+
+
+
+                                                                                                  Hinweis:
+                                                                                                  1. Die Naht am Böschungsfuß kann als ÜN oder AN ausgeführt werden.
+                                                                                                  2. In den Übergangsbereichen kann die Verlegerichtung von der Böschungsfalllinie abweichen.
+                                                                                              Bild 7. Verlegen der Dichtungsbahnen auf einer verzogenen Böschung.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                                                                                                                           Maße in m
+                                                                                                  Hinweis:
+                                                                                                  1. Die Richtung der Überlappung zwischen Böschungs- und Sohlbahnen hängt im Allgemeinen vom Bauablauf ab.
+                                                                                              Bild 8. Anschluss von Böschungsbahnen an Sohlbahnen.
+
+
+
+
+                                                                                                                                                                                            Maße in m
+                                                                                                  Hinweis:
+                                                                                                  1. Alle Ausrundungsradien und Neigungswechsel sind so zu wählen, dass die Naht durchgehend mit der Schweißmaschi-
+                                                                                                     ne als ÜN hergestellt werden kann.
+                                                                                              Bild 9. Einbinden der Dichtungsbahnen auf der Böschung – Bauzustand.
+
+
+
+
+                                                                                        Seite 8
+                                                                                        DVS 2225-4                                                                                    September 2016
+
+
+
+
+                                                                                        Bild 10. Anschluss der Dichtungsbahnen an eine Rohrdurchführung im Böschungsbereich.
+
+
+
+
+                                                                                         Maße in mm
+                                                                                        Bild 11. Anschluss der Dichtungsbahnen an eine Rohrdurchführung im Böschungsbereich – Detail A.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        Bild 12. Anbindung der Dichtungsbahnen an einen PE-Schacht im Sohlbereich – System.
+
+
+
+
+                                                                                                                                                                                                   Seite 9
+                                                                                              September 2016                                                                                    DVS 2225-4
+
+
+
+
+                                                                                              Bild 13. Anbindung der Dichtungsbahnen an einen PE-Schacht im Sohlbereich – Detail aus Bild 12.
+
+
+
+                                                                                              4.       Schweißverfahren
+
+                                                                                              4.1.     Allgemeine Hinweise
+
+                                                                                              Als baustellengerechte Fügeverfahren für Dichtungsbahnen aus PE werden das Heizkeil und das
+                                                                                              Warmgasextrusionsschweißen eingesetzt.
+
+                                                                                              Diese Verfahren unterscheiden sich prinzipiell in der Erwärmung des Fügebereiches (Plastifizierung),
+                                                                                              in der Aufbringung der Fügekraft und in der Schweißnahtgeometrie.
+
+                                                                                              Für das Heizkeilschweißen werden ausschließlich Schweißmaschinen, für das Warmgasextrusions-
+                                                                                              schweißen ausschließlich Handschweißgeräte verwendet.
+
+                                                                                              Diese DVS-Richtlinie geht grundsätzlich davon aus, dass Dichtungsbahnen der gleichen Formmasse
+                                                                                              miteinander geschweißt werden. Ist das nicht der Fall, so ist die Schweißeignung besonders nachzu-
+                                                                                              weisen.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Diese Richtlinie geht weiter grundsätzlich davon aus, dass beim Heizkeilschweißen die Dichtungsbah-
+                                                                                              nen im Fügebereich glatt sind und bei strukturierten Dichtungsbahnen die Oberflächenstrukturen im
+                                                                                              Fügebereich mechanisch entfernt werden.
+
+                                                                                              Auf das Entfernen der Strukturen kann beim Heizkeilschweißen nur dann verzichtet werden, wenn
+                                                                                              nachgewiesen wird, dass unter den gegebenen Baustellenbedingungen eine anforderungsgerechte
+                                                                                              Nahtqualität erreicht wird.
+
+                                                                                              4.2.     Schweißparameter
+
+                                                                                              Der Schweißvorgang lässt sich mit den folgenden drei Schweißparametern beschreiben:
+
+                                                                                              • Temperatur (Heizkeil, Warmgas, Extrudat)
+                                                                                              • Geschwindigkeit
+                                                                                              • Kraft
+
+
+                                                                                              Diese drei Parameter beeinflussen sich gegenseitig und sind daher aufeinander abzustimmen. Sie
+                                                                                              beschreiben nur mittelbar den tatsächlichen thermodynamischen und rheologischen Zustand der Fü-
+                                                                                              geflächen während des Schweißvorgangs.
+
+
+
+                                                                                        Seite 10
+                                                                                        DVS 2225-4                                                                      September 2016
+
+
+
+                                                                                        Die Schweißparameter müssen auf die Dichtungsbahn (Werkstoff, Dicke, Oberflächenstruktur, Tem-
+                                                                                        peratur) und auf die während des Schweißens herrschenden Umgebungsbedingungen abgestimmt
+                                                                                        werden.
+
+                                                                                        Für die Qualität der Schweißverbindung ist es entscheidend, die Schweißparameter richtig zu wählen.
+                                                                                        Vor dem Beginn der Schweißarbeiten sind daher die Parameter anhand von Probeschweißungen auf
+                                                                                        die aktuellen Baustellenbedingungen abzustimmen.
+
+                                                                                        4.3.   Ausführung der Schweißarbeiten
+
+                                                                                        4.3.1. Allgemeine Hinweise
+
+                                                                                        Für das Schweißen sind ausschließlich nach Richtlinie DVS 2212-3 UG III-1 bis III-3 ausgebildete und
+                                                                                        geprüfte Fachkräfte einzusetzen.
+
+                                                                                        Die Fügeflächen müssen trocken und frei von Verunreinigungen sein. Die durch Witterung und Oxidati-
+                                                                                        on beeinflusste Schicht muss mechanisch abgearbeitet werden, wenn sie nicht beim Schweißvorgang
+                                                                                        aus dem Bereich der Fügeflächen herausgedrückt wird. Die werksseitig aufgebrachten Folienstreifen
+                                                                                        sind zu entfernen. Bei Auftragnähten muss außerdem die Stirnfläche der oberen Dichtungsbahn an-
+                                                                                        geschrägt werden.
+
+                                                                                        Die Ausführung von T-Stößen mit Schweißmaschinen verlangt eine besondere Vorbereitung des
+                                                                                        Schweißnahtbereiches. An der bereits gefertigten Naht sind beide Überlappungen sowie die hintere
+                                                                                        Teilnaht sorgfältig abzuarbeiten. Der Übergang von der oberen auf die untere Bahn erfolgt in der vor-
+                                                                                        deren Teilnaht. Dieser Übergangsbereich soll durchgehend etwa die Dicke der Dichtungsbahn aufwei-
+                                                                                        sen.
+
+                                                                                        Die Umgebungsbedingungen können den Schweißvorgang und damit die Qualität der Verbindung
+                                                                                        wesentlich beeinflussen. Es ist Folgendes zu beachten:
+
+                                                                                        • Bei Niederschlägen und zu hoher Luftfeuchtigkeit darf nicht geschweißt werden.
+                                                                                        • Bei Temperaturen unterhalb von + 5 °C darf ohne besondere Vorkehrungen und Nachweise nicht
+                                                                                          geschweißt werden.
+                                                                                        • Ab einer relativen Luftfeuchtigkeit von 80 % muss die Oberﬂächentemperatur mindestens 3 K über
+                                                                                          dem Taupunkt liegen.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        • Beim Warmgasextrusionsschweißen muss der Untergrund so beschaﬀen sein, dass der erforderli-
+                                                                                          che Fügedruck aufgebracht werden kann.
+
+
+                                                                                        Beim Schweißen müssen generell die Fügeflächen und gegebenenfalls die Schweißzusätze auf die
+                                                                                        für den jeweiligen Werkstoff erforderliche Schweißtemperatur gebracht werden. Dabei sollen nur die
+                                                                                        oberflächennahen zu schweißenden Bereiche erwärmt werden, um die Wärmeausdehnung im Füge-
+                                                                                        bereich möglichst gering zu halten.
+
+                                                                                        Die Schweißparameter und die Umgebungsbedingungen sind in Schweißprotokollen festzuhalten. Mit
+                                                                                        diesen Protokollen muss eine Zuordnung zum Schweißer, zu den Schweißmaschinen und -geräten
+                                                                                        (Typ und Kennzeichnung) und zur Naht sichergestellt sein. Sie sind durch die Fremdüberwachung
+                                                                                        fachtechnisch und auf Vollständigkeit zu prüfen und gegenzuzeichnen. Die Blätter 1 und 2 im Anhang
+                                                                                        zeigen Muster für Schweißprotokolle.
+
+
+
+
+                                                                                                                                                                                           Seite 11
+                                                                                              September 2016                                                                           DVS 2225-4
+
+
+
+                                                                                              4.3.2. Heizkeilschweißen
+
+                                                                                              Mit dem maschinellen Heizkeilschweißen werden Überlappnähte mit Prüfkanal hergestellt. Es ist durch
+                                                                                              folgende Merkmale gekennzeichnet:
+
+                                                                                              • Es wird ohne Schweißzusatz geschweißt.
+                                                                                              • Der Heizkeil wird elektrisch oder mit Warmgas beheizt.
+                                                                                              • Das Andrucksystem besteht aus oberen und unteren Andruckrollen und bringt die Fügekraft unab-
+                                                                                                hängig vom Untergrund auf.
+                                                                                              • Die Dichtungsbahnen werden im Bereich der Fügeﬂächen durch direkten Kontakt mit dem Heizkeil
+                                                                                                auf Schweißtemperatur gebracht und bis zu einer deﬁnierten Dicke aufgeschmolzen (thermischer
+                                                                                                Vorgang).
+                                                                                              • Die Dichtungsbahnen werden unmittelbar nach dem Aufschmelzen durch ein Andrucksystem
+                                                                                                gefügt (rheologischer Vorgang).
+
+
+                                                                                              In der Praxis wird mit folgenden Maschineneinstellungen (Schweißparametern) geschweißt:
+
+                                                                                              • Heizkeiltemperatur 300 bis 420 °C
+                                                                                              • speziﬁsche Fügekraft 30 bis 40 N/mm eﬀektive Rollenbreite
+                                                                                              • Schweißgeschwindigkeit 0,8 bis 2,5 m/min
+
+                                                                                              4.3.3. Warmgasextrusionsschweißen
+
+                                                                                              Mit dem Warmgasextrusionsschweißen von Hand werden Auftragnähte hergestellt. Es ist durch fol-
+                                                                                              gende Merkmale gekennzeichnet:
+
+                                                                                              • Es wird mit einem Schweißzusatz aus artgleichen Formmassen geschweißt.
+                                                                                              • Der Schweißzusatz wird in einer Plastiﬁziereinheit (Extruder) plastiﬁziert und als Strang über die
+                                                                                                Düse und den Schweißschuh auf die Fügeﬂäche aufgebracht.
+                                                                                              • Die Fügeﬂächen werden durch Warmgas (Luft) erwärmt und aufgeschmolzen.
+                                                                                              • Der Fügedruck wird bei Aufbringen des Schweißzusatzes über den Schweißschuh aufgebracht.
+
+
+                                                                                              Das Warmgasextrusionsschweißen von Hand ist auf schwer zugängliche Nahtbereiche, spezielle An-
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              schlüsse und Nachbesserungsarbeiten zu beschränken. Bei Nähten am Böschungsfuß, bei der Häu-
+                                                                                              fung von T-Stößen und bei kurzen Nahtlängen kann es sinnvoll sein, dieses Verfahren einzusetzen.
+
+                                                                                              Der vom Extruder im Schweißschuh entwickelte Masseschub schiebt das Gerät vorwärts und be-
+                                                                                              stimmt die Schweißgeschwindigkeit. Das Gerät ist so zu führen und der Fügedruck so aufzubringen,
+                                                                                              dass möglichst kein Extrudat zur Seite austritt. Die Auftragnaht soll zu den Rändern hin nahezu ohne
+                                                                                              Wulst auslaufen.
+
+                                                                                              Als Schweißzusatz muss die gleiche Formmasse wie die der Dichtungsbahn verwendet werden. Bei
+                                                                                              Abweichungen ist die Schweißeignung nachzuweisen.
+
+                                                                                              Die Stirnfläche der oberen Dichtungsbahn ist im Winkel von etwa 45° anzuschrägen. Bei diesen Ar-
+                                                                                              beiten ist darauf zu achten, dass die Dichtungsbahn durch Kerben und Riefen nicht geschädigt wird.
+
+                                                                                              Vor dem Fügen sind die Dichtungsbahnen mit Warmgas zu heften, um die Fixierung während des
+                                                                                              Schweißvorgangs zu gewährleisten.
+
+                                                                                              Der plastifizierte Schweißzusatz wird, unmittelbar nachdem die Fügeflächen die Schweißtemperatur
+                                                                                              erreicht haben, kontinuierlich aufgebracht. Die Warmgastemperatur für die Vorwärmung der Fügeflä-
+                                                                                              chen wird in der Mitte des Luftaustrittsquerschnitts, die Massetemperatur in der Mitte des Austrittsquer-
+                                                                                              schnitts der Düse gemessen.
+
+
+
+                                                                                        Seite 12
+                                                                                        DVS 2225-4                                                                       September 2016
+
+
+
+                                                                                        Unmittelbar mit Zuführung des Schweißzusatzes wird der Fügedruck über den Schweißschuh von
+                                                                                        Hand aufgebracht. Die Schweißgeschwindigkeit ergibt sich aus dem Extrudatausstoß und den
+                                                                                        Schweißnahtabmessungen. Eine Nachbehandlung der Schweißnaht ist nicht erforderlich.
+
+                                                                                        In der Praxis wird mit folgenden Schweißparametern geschweißt:
+
+                                                                                        • Warmgastemperatur 230 bis 300 °C
+                                                                                        • Extrudattemperatur 190 bis 240 °C
+                                                                                        • Schweißgeschwindigkeit 0,2 bis 1,2 m/min
+
+
+                                                                                        5.     Schweißmaschinen und Schweißgeräte
+
+                                                                                        Als Schweißmaschinen bezeichnet man Vorrichtungen zum kontinuierlichen Schweißen, die selbst-
+                                                                                        fahrend sind und die Fügekraft maschinell aufbringen. Sie werden bei großen Nahtlängen eingesetzt.
+
+                                                                                        Schweißgeräte werden von Hand geführt. Die Fügekraft wird manuell aufgebracht. Die Geräte werden
+                                                                                        vornehmlich für kürzere Nahtlängen, in schwer zugänglichen Nahtbereichen sowie bei Nachbesse-
+                                                                                        rungsarbeiten eingesetzt.
+
+                                                                                        5.1.   Allgemeine Anforderungen
+
+                                                                                        Bei beiden Schweißverfahren müssen mit den Schweißmaschinen und -geräten unter Baustellenbe-
+                                                                                        dingungen durchgehend werkstoff- und anforderungsgerechte Nahtqualitäten erzielt werden können.
+
+                                                                                        Im Hinblick auf die Nahtqualität ist im Einzelnen sicherzustellen, dass:
+
+                                                                                        • die zu schweißenden Halbzeuge und Schweißzusätze thermisch nicht unzulässig beansprucht
+                                                                                          werden,
+                                                                                        • Kerben und Riefen vermieden werden,
+                                                                                        • eine ausreichende Fügefestigkeit bei guter Verformungsfähigkeit des Nahtbereichs erreicht wird,
+                                                                                        • die Schweißnahtabmessungen in den vorgegebenen Grenzen liegen.
+
+
+                                                                                        Das setzt voraus, dass die Schweißtemperatur, die Schweißgeschwindigkeit und die Fügekraft unab-
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        hängig voneinander auf Werkstoff und Dicke der Dichtungsbahn sowie auf die Witterungsbedingungen
+                                                                                        eingestellt, während des Schweißvorganges kontrolliert und innerhalb der zulässigen Toleranzen kon-
+                                                                                        stant gehalten werden.
+
+                                                                                        Im Hinblick auf die Gebrauchstauglichkeit unter Baustellenbedingungen sind folgende Anforderungen
+                                                                                        zu erfüllen:
+
+                                                                                        • Robustheit gegenüber den mechanischen Beanspruchungen, die sich aus dem Transport und
+                                                                                          dem Betrieb ergeben,
+                                                                                        • einfache Handhabung bei Inbetriebnahme und beim Betrieb,
+                                                                                        • leichte Zugänglichkeit aller Bauteile zur notwendigen Reinigung und Kontrolle,
+                                                                                        • Schutz gegenüber Feuchtigkeit und Schmutz,
+                                                                                        • sichere Funktionsfähigkeit im vorgesehenen Temperatureinsatzbereich/Umgebungsbedingungen,
+                                                                                        • Schutz der elektronischen Bauteile gegenüber elektromagnetischen Einﬂüssen.
+
+
+                                                                                        Geräte und Maschinen müssen den Europäischen Richtlinien entsprechen.
+
+                                                                                        Der Hersteller oder sein in der Gemeinschaft niedergelassener Bevollmächtigter ist für die Ausstellung
+                                                                                        der EG-Konformitätserklärung und die CE-Kennzeichnung verantwortlich. Der Marktüberwachungs-
+                                                                                        behörde sind auf Verlangen sämtliche relevanten Mess- und Prüfdokumente vorzulegen, welche die
+
+
+
+                                                                                                                                                                                            Seite 13
+                                                                                              September 2016                                                                                           DVS 2225-4
+
+
+
+                                                                                              Einhaltung der Konformität mit den Richtlinien bestätigen.
+
+                                                                                              5.2.        Anforderungen an Schweißmaschinen
+
+                                                                                              Die Schweißmaschinen bestehen aus dem Grundgerät und den Funktionselementen:
+
+                                                                                              •     Grundgerät zur Aufnahme der einzelnen Funktionselemente,
+                                                                                              •     Temperiersystem zum Einbringen der Wärmeenergie in die Fügeebene,
+                                                                                              •     Antriebsystem zum Vortrieb der Schweißmaschine,
+                                                                                              •     Andrucksystem zum Aufbringen der Fügekraft.
+
+
+                                                                                              Darüber hinaus müssen die Schweißmaschinen mit einer Einrichtung versehen sein, mit der die
+                                                                                              Schweißparameter zyklisch in Abständen ≤ 50 cm erfasst und aufgezeichnet werden.
+
+                                                                                              Für die Maschine muss eine Leistungscharakteristik des Herstellers vorliegen. In dieser Leistungscha-
+                                                                                              rakteristik ist anzugeben, in welchen Schweißparameterbereichen die Schweißmaschine betrieben
+                                                                                              werden muss, um die anforderungsgerechte Nahtqualität zu erreichen.
+
+                                                                                              Die Anforderungen an die Funktionselemente sind in der Tabelle 1 zusammengefasst.
+
+                                                                                              Die aktuellen Schweißparameter müssen während des Schweißens direkt ablesbar sein.
+
+                                                                                              Temperiersystem
+
+                                                                                              Das Temperiersystem muss so ausgelegt sein, dass es eine ausreichende Aufschmelzleistung im
+                                                                                              Fügebereich gewährleistet. Über die Breite der Fügefläche und die effektive Heizkeillänge sollte die
+                                                                                              Temperaturverteilung gleichmäßig sein.
+
+                                                                                              Warmgassystem
+
+                                                                                              Die Warmgastemperatur muss bis zu der Maximaltemperatur stufenlos einstellbar sein und mit einer
+                                                                                              maximalen Abweichung von ± 10 K geregelt werden können. Die Warmgasmenge muss unabhängig
+                                                                                              von den übrigen Verfahrensparametern ausreichend konstant gehalten und kontrolliert werden kön-
+                                                                                              nen.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Tabelle 1. Anforderungen an die Funktionselemente.
+                                                                                                  Funktionselement         Parameterbereich    Kontrolle durch          Genauigkeit             Bemerkung
+                                                                                                  Temperiersystem:
+                                                                                                  Heizkeiltemperatur       300 bis 420 °C      Anzeige und              ± 5 K (HH)              stufenlose Einstellung
+                                                                                                                                               Aufzeichnung
+                                                                                                                                                                                                Mittelwert ± 4 %, am
+                                                                                                                                                                                                Heizkeil Heizkeil oben/
+                                                                                                                                                                                                unten
+                                                                                                  eﬀektive Heizkeillänge   50 bis 100 mm       Prüfung der Funktions-   ± 10 % des angege-      Mittelwert ± 4 %, am
+                                                                                                                                               fähigkeit der Maschine   benen Längenwertes      Heizkeil für vordere und
+                                                                                                                                                                                                hintere Teilnaht
+                                                                                                  Antriebssystem           0,8 bis 2,5 m/min   Anzeige und              ± 0,05 m/min            lastunabhängig,
+                                                                                                                                               Aufzeichnung                                     stufenlose Einstellung
+                                                                                                  Geschwindigkeit
+                                                                                                  Andrucksystem
+                                                                                                  Andruckkraft             30 bis 40 N/mm      Anzeige und              ± 50 N                  im Arbeitsbereich stu-
+                                                                                                                           Rollenbreite        Aufzeichnung                                     fenlose Einstellung
+                                                                                                  Kraftverteilung auf                          Prüfung der Fügewege     Diﬀerenz der Füge-
+                                                                                                  vordere und hintere                          an vorderer und hinte-   wege ≤ 0,15 mm
+                                                                                                  Teilnaht N1 und N2                           rer Teilnaht N1 und N2
+                                                                                                  Nachgiebigkeit           Zunahme der                                  ≤ 1/3 der eingestell-   bei Dickenschwankung,
+                                                                                                                           Andruckkraft                                 ten Andruckkraft        z. B. bei T-Stößen
+
+
+
+
+                                                                                        Seite 14
+                                                                                        DVS 2225-4                                                                    September 2016
+
+
+
+                                                                                        Heizkeilsystem
+
+                                                                                        Die Heizkeiltemperatur muss im vorgegebenen Temperaturbereich stufenlos eingestellt und beim
+                                                                                        Schweißen auf ± 5 K geregelt werden können. Zum Zweck eines definierten Eintrags von Wärmeener-
+                                                                                        gie in den Schweißnahtbereich muss der Heizkeil mit ausreichend langen Kontaktflächen (effektive
+                                                                                        Heizkeillänge ± 10%) gestaltet sein, auf denen beide Dichtungsbahnen vollflächig geführt werden.
+
+                                                                                        Antriebsystem
+
+                                                                                        Das Antriebsystem muss so ausgelegt sein, dass die eingestellte Schweißgeschwindigkeit lastunab-
+                                                                                        hängig innerhalb von ± 0,05 m/min konstant bleibt. Die Schweißgeschwindigkeit muss stufenlos oder
+                                                                                        in ausreichend feiner Abstufung eingestellt und angezeigt werden können.
+
+                                                                                        Andrucksystem
+
+                                                                                        Die Fügekraft muss stufenlos oder in ausreichend feiner Abstufung eingestellt, innerhalb von ± 50 N
+                                                                                        konstant gehalten und kontrolliert werden können. Das Andrucksystem muss gegenüber Dicken-
+                                                                                        schwankungen der Dichtungsbahnen (z. B. im Bereich eines T-Stoßes) so nachgiebig sein, dass die
+                                                                                        Fügekraft während des Schweißens um nicht mehr als ein Drittel des eingestellten Wertes überschrit-
+                                                                                        ten wird.
+
+                                                                                        Das Andrucksystem muss eine gleichmäßige Verteilung der Fügekraft auf beide Teilnähte während
+                                                                                        des Schweißens soweit sichern, dass die Differenz der Fügewege der beiden Teilnähte auf maximal
+                                                                                        0,15 mm beschränkt bleibt.
+
+                                                                                        Datenerfassung
+
+                                                                                        Das Datenerfassungssystem hat ausschließlich dem Nachweis zu dienen, dass die gewählten
+                                                                                        Schweißparameter während des Schweißens in den vorgegebenen Toleranzfeldern konstant gehalten
+                                                                                        wurden. Es verwertet Kontrollgrößen an den Funktionselementen ohne Einfluss auf die Einstellgrößen.
+                                                                                        Die Messdaten und die äußeren Temperaturbedingungen sind in der Weise zu speichern, dass eine
+                                                                                        Zuordnung zur Nahtlänge möglich ist.
+
+                                                                                        Beim Verlassen vorgegebener Toleranzfelder haben eine akustische Signalgebung und eine Doku-
+                                                                                        mentation der Abweichung durch ein Fehlerprotokoll zu erfolgen.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        5.3.   Anforderungen an Schweißgeräte
+
+                                                                                        Schweißgeräte für das Warmgasextrusionsschweißen bestehen aus folgenden Funktionselementen:
+
+                                                                                        • Vorwärmsystem mit Regeleinheit zum Vorwärmen der Fügeﬂächen mittels Warmgas,
+                                                                                        • Plastiﬁziersystem mit Regeleinheit zum Plastiﬁzieren des Schweißzusatzes (Draht, Granulat),
+                                                                                        • Schweißschuh zum Aufbringen des Schweißzusatzes auf die Fügeﬂächen.
+
+
+                                                                                        Grundsätzlich gelten für Geräte die folgenden Anforderungen:
+
+                                                                                        Vorwärmsystem
+
+                                                                                        Die Regelung der Warmgastemperatur und die Einstellung der Warmgasmenge müssen unabhängig
+                                                                                        vom Temperiersystem für das Plastifiziersystem möglich sein. Die Warmgastemperatur muss stufenlos
+                                                                                        einstellbar sein und angezeigt werden. Die Temperaturschwankung bei unveränderter Sollwerteinstel-
+                                                                                        lung darf ± 10 K nicht überschreiten.
+
+
+
+
+                                                                                                                                                                                         Seite 15
+                                                                                              September 2016                                                                                         DVS 2225-4
+
+
+
+                                                                                              Plastifiziersystem
+
+                                                                                              Das Plastifiziersystem muss in der Lage sein, das Material vollständig aufzuschmelzen und zu homo-
+                                                                                              genisieren. Die Temperaturschwankung der Masse darf bei kontinuierlichem Betrieb und bei unverän-
+                                                                                              derter Sollwerteinstellung ± 3 K nicht überschreiten (gemessen im Zentrum der Masse)
+
+                                                                                              Schweißschuh
+
+                                                                                              Bei der konstruktiven Auslegung des Schweißschuhs ist besonders die Anforderung an die Nahtgeo-
+                                                                                              metrie und die aufzubringende Fügekraft zu berücksichtigen.
+
+                                                                                              6.          Baustellenprüfungen
+
+                                                                                              6.1.        Art und Umfang der Prüfungen und Kontrollen
+
+                                                                                              Alle Baustellenprüfungen sind im Rahmen der Eigenkontrolle durch den Verleger durchzuführen. Die
+                                                                                              Ergebnisse sind vollständig und prüfbar zu dokumentieren.
+
+                                                                                              Im Rahmen der Fremdprüfung ist die Eigenüberwachung durch qualifizierte Prüfinstitute zu überprüfen
+                                                                                              sowie durch Prüfungen auf der Baustelle und im Labor zu ergänzen.
+
+                                                                                              Die Baustellenprüfungen beziehen sich auf folgende Eigenschaften:
+
+                                                                                              •     äußere Beschaﬀenheit der Naht,
+                                                                                              •     Abmessungen der Naht,
+                                                                                              •     Versagensverhalten der Naht,
+                                                                                              •     Dichtigkeit der Naht.
+
+
+                                                                                              Die Nähte sind durchgehend auf äußere Beschaffenheit und Dichtigkeit sowie stichprobenartig auf
+                                                                                              Abmessungen und Versagensverhalten zu prüfen. Die Stichproben werden vorzugsweise aus den
+                                                                                              Probeschweißungen und den Nahtenden entnommen.
+
+                                                                                              Die in dieser Richtlinie beschriebenen Prüfungen ergänzen sich nach Art und Umfang gegenseitig.
+                                                                                              Eine Aussage über alle Eigenschaften der Naht mit einem Prüfverfahren allein ist nicht möglich.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Tabelle 2 zeigt Art und Umfang der verschiedenen Prüfverfahren für die unterschiedlichen Nahtformen.
+
+                                                                                              Tabelle 2. Übersicht der Prüfverfahren.
+                                                                                                  Qualitätskriterien       Prüfumfang                                            Nahtformen
+                                                                                                                                                      Überlappnaht mit Prüfkanal      Auftragnaht
+                                                                                                  Beschaﬀenheit            durchgehend                visuell, Schraubendreher        visuell, Schraubendreher
+                                                                                                                                                      (Teilnaht N1)
+                                                                                                  Abmessungen              Stichproben systematisch   mechanisch, Ultraschall         mechanisch
+                                                                                                  Versagensverhalten       Stichproben                Schälversuch                    Schälversuch
+                                                                                                  Dichtigkeit              durchgehend                Druckluft                       Vakuum, Hochspannung
+
+
+
+
+                                                                                        Seite 16
+                                                                                        DVS 2225-4                                                                      September 2016
+
+
+
+                                                                                        6.2.   Prüfung der äußeren Beschaﬀenheit
+
+                                                                                        6.2.1. Verfahren
+
+                                                                                        Die äußere Beschaffenheit der Nähte wird durch Inaugenscheinnahme geprüft. Insbesondere bei Auf-
+                                                                                        tragnähten können zusätzlich unter Zuhilfenahme eines Schraubendrehers ungefügte Bereiche, d. h.
+                                                                                        Fehlstellen im Bereich der Nahtkanten, nachgewiesen werden. Mit der äußeren Beschaffenheit wird in
+                                                                                        erster Linie die fachgerechte handwerkliche Ausführung der Naht beurteilt.
+
+                                                                                        6.2.2. Anwendungsbereich
+
+                                                                                        Alle Nahtbereiche einschließlich der T-Stöße und Anschlüsse an Rohrdurchdringungen und Festbau-
+                                                                                        werke werden unabhängig vom Fügeverfahren und von der Nahtform beurteilt
+
+                                                                                        6.2.3. Durchführung der Prüfung
+
+                                                                                        Die visuelle Prüfung erfolgt durchgehend auf voller Länge. Der Schraubendreher wird punktuell unter
+                                                                                        Druck an den Nahtkanten entlang geführt. An Fehlstellen im äußeren Nahtbereich dringt der Schrau-
+                                                                                        bendreher in ungenügend gefügte Bereiche ein.
+
+                                                                                        6.2.4. Prüfergebnisse
+
+                                                                                        Bei der Prüfung auf äußere Beschaffenheit wird die Naht auf Unregelmäßigkeiten und sichtbare Fehl-
+                                                                                        stellen untersucht. Im Einzelnen werden folgende Merkmale überprüft:
+
+                                                                                        • Form und Gleichmäßigkeit des Nahtverlaufs,
+                                                                                        • Wulstbildung an der vorderen Nahtkante bei Überlappnähten und im Randbereich bei Auftragnäh-
+                                                                                          ten,
+                                                                                        • mittige Lage und gleichmäßige Randbereiche bei Auftragsnähten,
+                                                                                        • glatte und schlierenfreie Oberﬂäche bei Auftragnähten,
+                                                                                        • Kerben und Riefen im Nahtbereich,
+                                                                                        • Fehlstellen, z. B. unverschweißte Bereiche und Quetschfalten.
+
+
+                                                                                        6.2.5. Wertung der Prüfergebnisse
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        Die äußere Beschaffenheit der Naht ist einwandfrei, wenn sie keine Unregelmäßigkeiten und Fehlstel-
+                                                                                        len aufweist. Weiter gilt:
+
+                                                                                        • Örtlich begrenzte Unregelmäßigkeiten in geringem Umfang mindern die Gebrauchsfähigkeit der
+                                                                                          Naht nicht.
+                                                                                        • Wülste an der vorderen Kante von Überlappnähten sind nicht zulässig. Wülste in den Randbe-
+                                                                                          reichen von Auftragnähten sind nur zulässig, wenn sie örtlich vereinzelt auftreten. Ihre Dicke darf
+                                                                                          50 % der Dichtungsbahnendicke nicht überschreiten.
+                                                                                        • Kerben und Riefen mit ﬂachen Übergängen sind bis zu einer Tiefe von 10 % der Bahndicke in
+                                                                                          begrenztem Umfang zulässig.
+                                                                                        • Bei größeren und häuﬁg auftretenden Unregelmäßigkeiten sind die entsprechenden Nahtbereiche
+                                                                                          nachzubessern.
+                                                                                        • Fehlstellen sind generell nachzubessern.
+
+
+                                                                                        Um im Einzelfall Unklarheiten während der Bauausführung zu vermeiden, empfiehlt es sich, die Kri-
+                                                                                        terien für die äußere Beschaffenheit jeweils vor Baubeginn an einer ausreichend langen Musternaht
+                                                                                        festzulegen.
+
+                                                                                        In Zweifelsfällen sind aus den gefügten Nähten Probestücke zu entnehmen, an denen dann weitere
+
+
+
+                                                                                                                                                                                           Seite 17
+                                                                                              September 2016                                                                       DVS 2225-4
+
+
+
+                                                                                              Eigenschaften untersucht werden.
+
+                                                                                              6.2.6. Grenzen des Prüfverfahrens
+
+                                                                                              Eine fachgerechte Beurteilung der äußeren Beschaffenheit erfordert besondere Fachkenntnis und Er-
+                                                                                              fahrung. Aussagen zur Dichtigkeit und Festigkeit der Naht können nur bedingt abgeleitet werden.
+
+                                                                                              6.2.7. Prüfung der Abmessungen
+
+                                                                                              6.2.8. Verfahren
+
+                                                                                              Es werden die kennzeichnenden Abmessungen der Naht an streifenförmigen Probekörpern aus der
+                                                                                              Naht oder an der Naht selbst ermittelt.
+
+                                                                                              6.2.9. Anwendungsbereich
+
+                                                                                              Es können alle Nahtformen geprüft werden. Die Nahtabmessungen geben Hinweise zur Einstellung
+                                                                                              der Schweißparameter im Rahmen der Probeschweißungen. Über die Nahtlänge gemessen, erlauben
+                                                                                              sie Rückschlüsse auf das gleichmäßige Einhalten der Schweißparameter beim Schweißen.
+
+                                                                                              6.2.10. Durchführung der Prüfung
+
+                                                                                              Die Nahtabmessungen werden vorzugsweise an Probenahmen aus den Probeschweißungen oder an
+                                                                                              den Nahtenden ermittelt. Diese Dickenmessungen werden nach DIN EN ISO 9863-1 mit Messgeräten
+                                                                                              nach DIN 878 (Skalenteilung 0,01 mm) mit Kugelkalotte vorgenommen.
+
+                                                                                              Zusätzlich können an den Überlappnähten mit Prüfkanal die Gleichmäßigkeit der Fügewege über der
+                                                                                              gesamten Nahtlänge mit Ultraschall bestimmt werden.
+
+                                                                                              Die Prüfung mit Ultraschall arbeitet nach dem Impuls-Echo-Verfahren. Das Prüfgerät besteht aus Prüf-
+                                                                                              kopf und Basisgerät. Im Prüfkopf (SE) sind Sender und Empfänger enthalten. Der Frequenzbereich
+                                                                                              liegt zwischen 4 und 6 MHz.
+
+                                                                                              Informationen über die fachgerechte Prüfung (z. B. die Ankopplung des Prüfkopfes auf der Naht) sowie
+                                                                                              die Prüfergebnisse werden optisch angezeigt.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Die Prüfung kann erst erfolgen, wenn sich die Naht nach dem Schweißen wieder den Umgebungsbe-
+                                                                                              dingungen angepasst hat. Diese Konditionierungszeit liegt bei etwa 1 Stunde.
+
+                                                                                              Die Naht muss breiter als der Prüfkopfdurchmesser, der Prüfbereich eben und sauber sein.
+
+                                                                                              Der Prüfkopf wird senkrecht zur Oberfläche der Naht (Prüffläche) geführt. Als Koppelmittel zwischen
+                                                                                              Prüfkopf und Prüffläche werden Wasser mit oder ohne Seife, dünnflüssiger Kleister oder spezielle
+                                                                                              Pasten verwendet.
+
+                                                                                              Vor Beginn der Prüfung wird das Gerät an planparallelen Platten aus dem gleichen Werkstoff nach
+                                                                                              Angaben des Geräteherstellers eingestellt, justiert und überprüft.
+
+                                                                                              Als Prüfergebnisse werden die Gleichmäßigkeit der Dichtungsbahn, der Schweißnähte und der Füge-
+                                                                                              wege digital ausgewertet und angezeigt. Diese Ergebnisse sind zu dokumentieren.
+
+                                                                                              Die Ultraschallprüfung wird üblicherweise nur von ausgebildeten Prüfern (Fachkräften) mit Erfahrung
+                                                                                              im Rahmen der Fremdprüfung durchgeführt.
+
+
+
+
+                                                                                        Seite 18
+                                                                                        DVS 2225-4                                                                   September 2016
+
+
+
+                                                                                        6.2.11. Prüfergebnisse
+
+                                                                                        Je nach Nahtform werden die in Bild 1 gezeigten Abmessungen ermittelt:
+
+                                                                                        ü =     gesamte Überlappung
+                                                                                        ü1 =    Überlappung vorn
+                                                                                        ü2 =    Überlappung hinten
+                                                                                        bN =    gesamte Breite der Naht
+                                                                                        bN1 =   Breite der vorderen Teilnaht
+                                                                                        bN2 =   Breite der hinteren Teilnaht
+                                                                                        bp =    Breite des Prüfkanals
+                                                                                        do =    Dicke der oberen Bahn
+                                                                                        du =    Dicke der unteren Bahn
+                                                                                        dN =    Dicke der Naht (Auftragnaht)
+                                                                                        dN1 =   Dicke der vorderen Naht (Überlappnaht mit Prüfkanal)
+                                                                                        dN2 =   Dicke der hinteren Naht (Überlappnaht mit Prüfkanal)
+
+                                                                                        Damit lassen sich die maßgebenden Beurteilungskriterien für die Nahtdicke bestimmen:
+
+                                                                                        ΔdN1/2 = Fügeweg (Dickenänderung) für die Überlappnaht
+                                                                                                = (do + du) dN1/2
+                                                                                        fNA     = Nahtdickenfaktor für die Auftragnaht
+                                                                                                = dN / (do + du)
+
+                                                                                        6.2.12. Wertung der Prüfergebnisse
+
+                                                                                        Es ist nachzuweisen, dass die Nahtabmessungen den folgenden Anforderungen entsprechen:
+
+                                                                                        • Bei Überlappnähten sollte die vordere Überlappung der Naht mindestens 5 mm betragen.
+                                                                                        • Bei Überlappnähten sind die Nahtbreiten von mindestens 15 mm und Prüfkanalbreiten von min-
+                                                                                          destens 10 mm einzuhalten.
+                                                                                        • die Breite der Auftragnähte muss mindestens 30 mm betragen. – Bei Auftragnähten darf die
+                                                                                          Außermittigkeit (Versatz) der Naht maximal 5 mm betragen.
+                                                                                        • Die Nahtdicken sollten über die Nahtlänge und Nahtbreite gleichmäßig sein und in den Bereichen
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                          liegen, die für die Werkstoﬀdicke und die Nahtform nach folgenden Kriterien einzuhalten sind:
+
+                                                                                        Überlappnähte
+                                                                                        0,40 mm ≤ ΔdN1/2 ≤ 0,80 mm
+                                                                                        | ΔdN1 – ΔdN2 | ≤ 0,15 mm
+
+                                                                                        Auftragnähte
+                                                                                        1,25 ≤ fNA ≤ 1,75
+
+                                                                                        6.2.13. Grenzen des Prüfverfahrens
+
+                                                                                        Die Prüfung der Abmessungen gibt Hinweise auf die Einstellung der Schweißparameter und auf die
+                                                                                        Einhaltung vorgegebener Bereiche für eine anforderungsgerechte Nahtqualität. Aussagen zur Dichtig-
+                                                                                        keit der Naht sind nicht, zum Versagensverhalten nur bedingt möglich.
+
+                                                                                        6.3.    Prüfung des Versagensverhaltens
+
+                                                                                        6.3.1. Verfahren
+
+                                                                                        Das Versagensverhalten wird an Stichproben unter zerstörender Zugschälbeanspruchung (Schälver-
+                                                                                        such) untersucht. Bei diesen Schälversuchen handelt es sich um Kurzzeitprüfungen zur qualitativen
+
+
+
+                                                                                                                                                                                        Seite 19
+                                                                                              September 2016                                                                      DVS 2225-4
+
+
+
+                                                                                              Beurteilung des Verformungs- und Versagensverhaltens der Naht.
+
+                                                                                              Die Schälversuche sind in Anlehnung an Richtlinie DVS 2226-3 an jeweils drei etwa 20 mm breiten
+                                                                                              Streifenproben durchzuführen.
+
+                                                                                              6.3.2. Anwendungsbereich
+
+                                                                                              Mit den Schälversuchen können beide Nahtformen geprüft werden. Die Versuche dienen sowohl zur
+                                                                                              Einstellung der Verfahrensparameter im Rahmen der Probeschweißungen als auch zur Überprüfung
+                                                                                              des Versagensverhaltens.
+
+                                                                                              6.3.3. Durchführung der Prüfung
+
+                                                                                              Als Probekörper werden Streifenproben senkrecht zur Naht entnommen. Die Streifenproben sind so
+                                                                                              zu entnehmen, dass jeweils ausreichende Einspannlängen entsprechend Bild 14 vorhanden sind. In
+                                                                                              besonderen Fällen kann es erforderlich sein, ergänzende Prüfungen, bei denen die Schälkraft von der
+                                                                                              Innenseite des Prüfkanals aufgebracht wird, durchzuführen.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Bild 14. Probenahme und Beanspruchung beim Schälversuch.
+
+                                                                                              Die Prüfungen erfolgen mit baustellengerechten Prüfgeräten nach dem Stand der Technik, die
+                                                                                              eine zügige Lastaufbringung und eine weitgehend gleichmäßige Verformungsgeschwindigkeit von
+                                                                                              50 mm/min ermöglichen. Verformungen und Kräfte müssen im Rahmen dieser Prüfungen nicht ge-
+                                                                                              messen werden. Soll der Schälwiderstand ermittelt werden, muss die Kraft gemessen und die Maxi-
+                                                                                              malkraft gespeichert werden.
+
+                                                                                              6.3.4. Prüfergebnisse
+
+                                                                                              Es wird ermittelt, ob die bei der Schälbeanspruchung wirkenden Kräfte zum Aufschälen der Naht oder
+                                                                                              zu einem Verstrecken des Grundmaterials führen.
+
+
+
+
+                                                                                        Seite 20
+                                                                                        DVS 2225-4                                                                      September 2016
+
+
+
+                                                                                        6.3.5. Wertung der Prüfergebnisse
+
+                                                                                        Die Ergebnisse dieser Prüfung dienen zur Festlegung der Schweißparameter im Rahmen der Probe-
+                                                                                        schweißungen und zur Beurteilung des Versagensverhaltens von Probenahmen. Sie werden anhand
+                                                                                        folgender Kriterien beurteilt:
+
+                                                                                        • Verstrecken des Grundmaterials, außerhalb der Naht, ohne Schälen der Naht. Die Naht weist ein
+                                                                                          gutes Versagensverhalten auf.
+                                                                                        • Verstrecken des Grundmaterials, neben der Naht oder im Nahtbereich nach begrenztem Schälen
+                                                                                          der Naht. Die Naht weist noch ein ausreichendes Versagensverhalten auf, wenn die Schweißpa-
+                                                                                          rameter bei der Herstellung der Naht und ihre Abmessungen im Toleranzbereich liegen, und
+                                                                                          – die verbleibende Restnahtbreite bei der überwiegenden Zahl der Einzelprüfungen größer ist als
+                                                                                              die geforderte Mindestbreite von 15 mm, oder
+                                                                                          – die Verstreckung Kräfte erfordert, die schon nahe an der Höchstzugkraft des Grundmaterials im
+                                                                                              Zugversuch liegen.
+                                                                                        • Schälen der Naht. Die Naht weist kein ausreichendes Versagensverhalten auf.
+                                                                                        • Verstrecken des Schweißzusatzes (Extrudat) bei Auftragnähten. Die Naht weist noch ein ausrei-
+                                                                                          chendes Versagensverhalten auf, wenn dieses Versagen vereinzelt auftritt und die Verstreckung
+                                                                                          Kräfte erfordert, die noch vergleichbar sind mit der Höchstkraft im Zugversuch an der Schweiß-
+                                                                                          naht.
+                                                                                        • Versagen des Grundmaterials neben oder im Nahtbereich ohne deutliches Verstrecken, d. h. plas-
+                                                                                          tisches Verformen. Die Naht weist kein ausreichendes Versagensverhalten auf.
+
+                                                                                        6.3.6. Grenzen des Prüfverfahrens
+
+                                                                                        Die Kurzzeitschälversuche werden grundsätzlich im Rahmen der Eigenüberwachung zur qualitativen
+                                                                                        Beurteilung der Naht, aber auch zur Überprüfung der Schweißparameterwahl durchgeführt. Sie müs-
+                                                                                        sen im Rahmen der Fremdüberwachung durch normgerechte Prüfungen im Labor ergänzt werden, um
+                                                                                        auch eine sichere und quantifizierte Aussage über die Fügefestigkeit treffen zu können.
+
+                                                                                        6.4.   Prüfung auf Dichtigkeit
+
+                                                                                        6.4.1. Allgemeines
+
+                                                                                        Bei der durchgehenden Prüfung der Nähte auf Dichtigkeit ist das Prüfverfahren auf die jeweilige Naht-
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        form abzustimmen. Es sind folgende Prüfverfahren anzuwenden:
+
+                                                                                        Überlappnähte mit Prüfkanal
+
+                                                                                        • Prüfung mit Druckluft
+
+                                                                                        Auftragnähte
+
+                                                                                        • Prüfung mit elektrischer Hochspannung
+                                                                                        • Prüfung mit Vakuum
+
+                                                                                        6.4.2. Prüfung mit Druckluft
+
+                                                                                        6.4.2.1.     Verfahren
+                                                                                        Die Druckluftprüfung dient zur Dichtigkeitsprüfung von Überlappnähten mit Prüfkanal (Doppelnähten)
+                                                                                        unter mechanischer Beanspruchung.
+
+                                                                                        Die Prüfgeräte (Manometer) nach DIN EN 837-1 müssen der Prüfgeräteklasse 1.0 entsprechen. Der
+                                                                                        Messbereich soll nicht größer als 10 bar und die Skalierung nicht größer als 0,2 bar sein.
+
+
+
+
+                                                                                                                                                                                           Seite 21
+                                                                                              September 2016                                                                        DVS 2225-4
+
+
+
+                                                                                              6.4.2.2.     Anwendungsbereich
+                                                                                              Mit der Druckluftprüfung können Überlappnähte mit Prüfkanal auf voller Länge in einem Prüfvorgang
+                                                                                              zerstörungsfrei auf Dichtigkeit geprüft werden.
+
+                                                                                              6.4.2.3.    Durchführung der Prüfung
+                                                                                              Die Prüfung sollte erst etwa 1 Stunde nach dem Schweißen erfolgen.
+
+                                                                                              An einem Ende der Naht (Nahtanfang) wird die Vorrichtung zur Druckluftaufbringung mit Manometer
+                                                                                              oder Druckschreiber montiert, die den Prüfkanal luftdicht verschließt. Hier wird die Druckluft einge-
+                                                                                              geben und zunächst die Durchgängigkeit der Naht geprüft. Danach wird das andere Ende der Naht
+                                                                                              (Nahtende) luftdicht z. B. durch Warmgasschweißen oder Klemmeinrichtungen verschlossen.
+
+                                                                                              Der eigentliche Prüfdruck von 5 bar wird erst nach etwa einminütiger Vorbeanspruchung bei 6 bar
+                                                                                              eingestellt, um Anfangsverformungen zu konditionieren.
+
+                                                                                              Die Prüfzeit für die Druckluftprüfung beträgt 10 Minuten. Nach Ablauf der Prüfzeit wird der Prüfkanal
+                                                                                              am Nahtende geöffnet. Der Druck (Anzeige auf dem Manometer) muss schlagartig abfallen.
+
+                                                                                              Bei nicht durchgängig prüfbaren Nähten sind die Nähte abschnittsweise zu prüfen. Bei nicht unmit-
+                                                                                              telbar feststellbaren Fehlern sind entsprechend kürzere Prüflängen zu wählen, um die fehlerhaften
+                                                                                              Bereiche einzugrenzen.
+
+                                                                                              6.4.2.4.    Prüfergebnisse
+                                                                                              Der Druckverlauf über die Prüfzeit ist mittels Druckschreiber aufzuzeichnen. In besonderen Ausnah-
+                                                                                              mefällen kann der Druck am Anfang und am Ende der Prüfzeit auch von Hand protokolliert werden.
+
+                                                                                              6.4.2.5.      Wertung der Prüfergebnisse
+                                                                                              Die Naht gilt als dicht, wenn der Druck im Prüfkanal innerhalb der vorgegebenen Prüfdauer um nicht
+                                                                                              mehr als 0,5 bar abfällt.
+
+                                                                                              6.4.2.6.       Grenzen des Prüfverfahrens
+                                                                                              Die Druckluftprüfung ist eine Dichtigkeitsprüfung unter mechanischer Beanspruchung. Sie beeinträch-
+                                                                                              tigt nicht die Nahtqualität und liefert keine Aussage zur Nahtfestigkeit.
+
+                                                                                              6.4.3. Prüfung mit Vakuum
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              6.4.3.1.    Verfahren
+                                                                                              Das Vakuumverfahren kann sowohl zur Prüfung der Dichtigkeit von Überlappnähten als auch von
+                                                                                              Auftragnähten eingesetzt werden.
+
+                                                                                              Die Prüfung erfolgt mit einer durchsichtigen Prüfglocke (z. B. aus PMMA), die mit einer Vakuumpumpe
+                                                                                              verbunden ist. Die Glocke weist am Rand einen Anpressdichtring auf, damit der Prüfbereich luftdicht
+                                                                                              abgeschlossen werden kann. Bei der Prüfung wird ein Unterdruck in der Glocke erzeugt.
+
+                                                                                              Die Prüfgeräte (Manometer) müssen nach DIN EN 472 der Prüfgeräteklasse 1.0 entsprechen. Der
+                                                                                              Messbereich soll nicht größer als der 2-fache Prüfdruck und die Skalierung nicht größer als 0,1 bar
+                                                                                              sein.
+
+                                                                                              6.4.3.2.    Anwendungsbereich
+                                                                                              Mit der Vakuumprüfung können zerstörungsfrei Dichtigkeitsprüfungen von Überlappnähten mit bündi-
+                                                                                              ger (geschlossener) Vorderkante und von Auftragnähten schrittweise ausgeführt werden.
+
+                                                                                              An Kehlen, Kanten und Ecken sind entsprechend geformte Vakuumglocken zu verwenden.
+
+
+
+
+                                                                                        Seite 22
+                                                                                        DVS 2225-4                                                                         September 2016
+
+
+
+                                                                                        6.4.3.3.    Durchführung der Prüfung
+                                                                                        Zwischen Schweißen und Prüfen sollte ein Konditionierungszeitraum von etwa einer Stunde liegen.
+                                                                                        Der zu prüfende Nahtbereich ist mit einer blasenbildenden Flüssigkeit, z. B. Seifenlauge, einzustrei-
+                                                                                        chen bzw. einzusprühen.
+
+                                                                                        Die Prüfung hat durchgehend und auf voller Länge zu erfolgen. Dabei ist die Vakuumglocke so aufzu-
+                                                                                        setzen und anzudrücken, dass die zu prüfende Naht etwa mittig zur Achse der Vakuumglocke liegt. Bei
+                                                                                        längeren Nahtabschnitten ist die Glocke entsprechend oft umzusetzen. Beim Versetzen der Glocke in
+                                                                                        längeren Prüfabschnitten ist eine Überschneidung der Prüfbereiche von etwa 10 cm einzuhalten. Die
+                                                                                        Nähte werden bei einem Unterdruck von 0,5 bar geprüft. Dieser Prüfdruck (Unterdruck) muss über
+                                                                                        einen Zeitraum von mindestens 10 s konstant gehalten werden.
+
+                                                                                        6.4.3.4.     Prüfergebnisse
+                                                                                        Der Unterdruck wird auf dem Manometer angezeigt. Im Falle einer Undichtigkeit bilden sich Blasen.
+                                                                                        Diese Stellen sind zu markieren.
+
+                                                                                        6.4.3.5.      Wertung der Prüfergebnisse
+                                                                                        Die Naht gilt als dicht, wenn sich der Unterdruck zügig aufbaut, über der Prüfzeit konstant bleibt und in
+                                                                                        der Naht keine Blasenbildung auftritt.
+
+                                                                                        6.4.3.6.    Grenzen des Prüfverfahrens
+                                                                                        Die Vakuumprüfung ist eine Dichtigkeitsprüfung unter mechanischer Beanspruchung. Sie lässt keine
+                                                                                        Rückschlüsse auf die Nahtfestigkeit zu. Die Vakuumprüfung dient in vielen Fällen (Ecken, Ausschnit-
+                                                                                        ten, T-Stößen) als Ergänzungsprüfung zu anderen Prüfungen.
+
+                                                                                        6.4.4. Prüfung mit elektrischer Hochspannung
+
+                                                                                        6.4.4.1.    Verfahren
+                                                                                        Dieses Prüfverfahren beruht auf dem Prinzip der Gasentladung beim Anlegen einer elektrischen Hoch-
+                                                                                        spannung an eine Entladungsstrecke. Die Prüfeinrichtung besteht aus einer Spannungsquelle und ei-
+                                                                                        ner Stabelektrode. Das Verfahren setzt eine Gegenelektrode aus leitendem Material an der Rückseite
+                                                                                        der Naht voraus.
+
+                                                                                        6.4.4.2.    Anwendungsbereich
+                                                                                        Grundsätzlich lassen sich mit diesem Verfahren alle Nahtformen durchgehend auf Porendichtigkeit
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                        prüfen. Vorzugsweise wird die Prüfung bei Auftragnähten zum Anschluss von Dichtungsbahnen an
+                                                                                        Bauteile aus PE eingesetzt, d. h. bei Schweißnähten, die keinen Prüfkanal und keine planparallelen
+                                                                                        Oberflächen aufweisen. Bei Auftragnähten an Dichtungsbahnen selbst empfiehlt sich die Prüfung nicht.
+
+                                                                                        6.4.4.3.       Durchführung
+                                                                                        Der Nahtbereich muss trocken und frei von Verunreinigungen sein. Schmutzpartikel können eine Iso-
+                                                                                        lierschicht bilden und damit die Prüfung beeinträchtigen. Die Prüfspannung ist auf die Dicke der Dich-
+                                                                                        tungsbahn sowie auf die Schweißnahtbreite abzustimmen.
+
+                                                                                        Für Dichtungsbahnen ab einer Dicke von 2,5 mm liegt die zulässige Prüfspannung bei etwa 60 kV.
+                                                                                        Bei einer Prüfspannung von 60 kV ergibt sich in trockener Luft eine Schlagweite von etwa 20 mm.
+                                                                                        Damit können z. B. etwa 30 mm breite Auftragnähte geprüft werden, wenn die Gegenelektrode in der
+                                                                                        Nahtmitte liegt, die Undichtigkeit durchgehend ist und nahezu waagerecht und rechtwinklig zur Naht
+                                                                                        verläuft. Bei höherer Luftfeuchte vergrößern sich die Schlagweiten.
+
+                                                                                        Die Stabelektrode wird mit einer Geschwindigkeit von etwa 10 m/min über die Naht geführt. Es muss
+                                                                                        sichergestellt sein, dass sich die für den Funkenüberschlag notwendige Feldstärke aufbauen kann.
+
+                                                                                        6.4.4.4.    Prüfergebnisse
+                                                                                        Bei durchgehenden Undichtigkeiten über die Prüflänge (halbe Schweißnahtbreite) tritt ein Funken-
+                                                                                        überschlag zwischen den Elektroden auf, der sichtbar und hörbar ist.
+
+
+
+                                                                                                                                                                                               Seite 23
+                                                                                              September 2016                                                                      DVS 2225-4
+
+
+
+                                                                                              6.4.4.5.      Wertung der Prüfergebnisse
+                                                                                              Die Naht gilt als dicht, wenn keine Funkenentladung auftritt.
+
+                                                                                              6.4.4.6.     Grenzen des Verfahrens
+                                                                                              Es werden nur Undichtigkeiten nachgewiesen, die durchgehend sind und dabei nahezu senkrecht zur
+                                                                                              Naht verlaufen. Die Prüflänge muss auf die Durchschlagspannung in der Luft abgestimmt sein.
+
+                                                                                              Es ist darauf zu achten, dass die Gegenelektrode nicht vollkommen im Schweißzusatz eingebettet ist.
+                                                                                              Sie muss so fixiert sein, dass eine Beeinträchtigung der Nahtqualität ausgeschlossen wird.
+
+                                                                                              6.5.   Prüfprotokolle
+
+                                                                                              Die Ergebnisse der Baustellenprüfungen sind in Prüfprotokollen festzuhalten. Im Anhang sind für die
+                                                                                              verschiedenen Nahtformen Prüfprotokolle gezeigt:
+
+                                                                                              Prüfprotokoll für Überlappnähte mit Prüfkanal – Anhang Blatt 3
+
+                                                                                              Prüfprotokoll für die Auftragnähte – Anhang Blatt 5
+
+                                                                                              Diese Protokolle sind im Rahmen der Eigenüberwachung durch den Verleger zu führen, durch die
+                                                                                              Fremdprüfung auf Vollständigkeit und fachtechnisch zu prüfen und gegenzuzeichnen.
+
+                                                                                              7.     Hinweise zu Nachbesserungen
+
+                                                                                              Im Rahmen dieser Richtlinie werden allgemeine Hinweise gegeben. Die Schweißarbeiten im Rahmen
+                                                                                              der Nachbesserungen sind generell entsprechend Abschnitt 4 dieser Richtlinie auszuführen.
+
+                                                                                              Bei den Nachbesserungsarbeiten ist größte Sorgfalt aufzuwenden, da eine Prüfung dieser Arbeiten
+                                                                                              nach allen Qualitätskriterien und eine weitere Nachbesserung nur in begrenztem Umfang möglich sind.
+
+                                                                                              Die Art der Nachbesserungen hängt von der Größe und Häufigkeit der Unregelmäßigkeiten und Fehler
+                                                                                              ab.
+
+                                                                                              Warmgasextrusionsschweißungen
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                              Warmgasextrusionsschweißungen (zusätzliche Auftragnähte) sind bei örtlich begrenzten Unregelmä-
+                                                                                              ßigkeiten und Fehlstellen anzuwenden:
+
+                                                                                              • bei Kerben und Riefen mit einer Tiefe von mehr als 10 % der Dichtungsbahnendicke auf einer
+                                                                                                Länge von maximal 1 m und maximal einer Fehlstelle auf 100 m² Dichtungsﬂäche,
+                                                                                              • bei mechanischen Beschädigungen der Dichtungsbahnen (keine Löcher) und maximal einer Fehl-
+                                                                                                stelle auf 100 m² Dichtungsﬂäche,
+                                                                                              • bei Undichtigkeiten in der vorderen Teilnaht von Überlappnähten mit Prüfkanal auf einer Länge
+                                                                                                von maximal 0,5 m und maximal einer Fehlstelle auf 20 m Nahtlänge.
+
+
+                                                                                              Die entsprechenden Naht- und Dichtungsbahnenbereiche sind sorgfältig abzuarbeiten. Der Schweiß-
+                                                                                              zusatz ist in möglichst geringer Dicke und mit flach auslaufenden Rändern nahezu ohne Wulst aufzu-
+                                                                                              bringen.
+
+                                                                                              Nachbessern mit Dichtungsbahnenzuschnitten
+
+                                                                                              Bei größeren Fehlerbereichen im Nahtbereich und durchgehenden Fehlstellen (Löchern) in den Dich-
+                                                                                              tungsbahnen sind Dichtungsbahnenstücke oder -streifen aufzubringen. Diese Dichtungsbahnenzu-
+                                                                                              schnitte müssen mindestens 10 cm über die jeweiligen Fehlerbereiche hinausgehen und sind mit
+                                                                                              Warmgasextrusionsschweißen (Auftragnaht) über dem Fehlstellenbereich aufzubringen.
+
+
+
+                                                                                        Seite 24
+                                                                                        DVS 2225-4                                                                   September 2016
+
+
+
+                                                                                        Nachbessern von Nähten auf voller Länge
+
+                                                                                        Durchgehend fehlerhafte Nähte und solche mit durchgehenden Unregelmäßigkeiten sind entweder zu
+                                                                                        entfernen oder auf voller Länge mit einem mindestens 0,6 m breiten Dichtungsbahnenstreifen abzude-
+                                                                                        cken und fachgerecht zu schweißen.
+
+                                                                                        8.     Schrifttum
+
+                                                                                        8.1.   Regelwerk
+                                                                                        DIN 878               Geometrische Produktspeziﬁkation (GPS) – Mechanische Messuhren –
+                                                                                                              Grenzwerte für messtechnische Merkmale
+                                                                                        DIN EN 472            Druckmessgeräte – Begriﬀe
+                                                                                        DIN EN 837-1          Druckmeßgeräte mit Rohrfedern; Maße, Meßtechnik, Anforderungen und
+                                                                                                              Prüfung
+                                                                                        DIN EN ISO 1043-1     Kunststoﬀe – Kennbuchstaben und Kurzzeichen
+                                                                                        DIN EN 10204          Metallische Erzeugnisse – Arten von Prüfbescheinigungen
+                                                                                        DIN EN 13492          Geosynthetische Dichtungsbahnen – Eigenschaften, die für die Anwendung
+                                                                                                              beim Bau von Deponien, Zwischenlagern und Auﬀangbecken für ﬂüssige
+                                                                                                              Abfallstoﬀe erforderlich sind
+                                                                                        DIN EN 13493          Geosynthetische Dichtungsbahnen – Eigenschaften, die für die Anwendung
+                                                                                                              beim Bau von Deponien und Zwischenlagern für feste Abfallstoﬀe erforder-
+                                                                                                              lich sind
+                                                                                        DIN EN ISO 9863-1     Geokunststoﬀe – Bestimmung der Dicke unter festgelegten Drücken – Teil 1:
+                                                                                                              Einzellagen
+                                                                                        Richtlinie            Prüfung von Kunststoﬀschweißern; Prüfgruppe III; Bahnen im Erd- und
+                                                                                        DVS 2212-3            Wasserbau
+                                                                                        BAM                   Richtlinie für die Zulassung von Kunststoﬀ-Dichtungsbahnen für Deponieab-
+                                                                                                              dichtungen
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+
+
+
+
+                                                                                                                                                                                         Seite 25
+                                                                                              September 2016                                                                                            DVS 2225-4
+
+
+
+                                                                                              9.         Anhänge
+
+                                                                                              Anhang Blatt 1: Schweißprotokoll für Überlappnähte mit Prüfkanal
+                                                                                               Schweißprotokoll für Überlappnähte mit Prüfkanal                                                         Nr.
+                                                                                               Bauvorhaben                                                          Dichtungsbahn
+                                                                                               Schweißverfahren       HH
+                                                                                               Verlegeﬁrma                                                          Hersteller
+                                                                                               Schweißer                                                            Nenndicke in
+                                                                                                                                                                    mm
+                                                                                               Schweißmaschine                                                      Rohstoﬀ
+                                                                                               Naht-Nr.
+                                                                                                                                                 Anfang   Ende      Anfang    Ende      Anfang   Ende   Anfang    Ende
+                                                                                               Uhrzeit
+                                                                                               Witterungsbedingungen
+                                                                                               allgemein (Bewölkung/Wind)
+                                                                                               Lufttemperatur in °C
+                                                                                               rel.Luftfeuchte in %
+                                                                                               Zustand der Dichtungsbahnen
+                                                                                               Oberﬂäche
+                                                                                               Fügebereiche
+                                                                                               Oberﬂächentemperatur in °C
+                                                                                               Schweißparameter
+                                                                                               Heizkeiltemperatur in °C /      Einstellung
+                                                                                               Warmgastemperatur
+                                                                                                                               Messung
+                                                                                               Geschwindigkeit in m/min        Einstellung
+                                                                                                                               Messung
+                                                                                               Fügekraft in N                  Einstellung
+                                                                                                                               Messung
+                                                                                               Schweißnahtprobe
+                                                                                               Probeschweißung                             Nr.
+                                                                                               Probenahme aus der Naht                     Nr.
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                               Bemerkung:
+
+
+
+
+                                                                                               Schweißer                                         Bauleiter/Vorarbeiter                  Bauüberwachung/Fremdprüfer
+                                                                                                                                                 (Fachverlegeﬁrma)
+
+
+                                                                                               Datum                        Unterschrift         Datum                   Unterschrift   Datum                 Unterschrift
+
+
+
+
+                                                                                        Seite 26
+                                                                                        DVS 2225-4                                                                                     September 2016
+
+
+
+                                                                                        Anhang Blatt 2: Schweißprotokoll für Auftragnähte
+                                                                                        Schweißprotokoll für Auftragnähte                                                                    Nr.
+                                                                                        Bauvorhaben                                                     Dichtungsbahn
+                                                                                        Verlegeﬁrma                                                     Hersteller
+                                                                                        Schweißer                                                       Nenndicke in mm
+                                                                                        Schweißgerät                                                    Rohstoﬀ
+                                                                                        Naht-Nr.
+                                                                                                                                    Anfang    Ende      Anfang       Ende   Anfang   Ende    Anfang     Ende
+                                                                                        Uhrzeit
+                                                                                        Witterungsbedingungen
+                                                                                        allgemein (Bewölkung/Wind)
+                                                                                        Lufttemperatur in °C
+                                                                                        rel. Luftfeuchte in %
+                                                                                        Zustand der Dichtungsbahnen
+                                                                                        Oberﬂäche
+                                                                                        Fügebereiche
+                                                                                        Oberﬂächentemperatur in °C
+                                                                                        Schweißzusatz
+                                                                                        Schweißparameter
+                                                                                        Extrudattemperatur in °C   Einstellung
+                                                                                                                   Messung
+                                                                                        Heißlufttemperatur in °C   Einstellung
+                                                                                                                   Messung
+                                                                                        Schweißnahtprobe
+                                                                                        Probeschweißung–Anfang                Nr.
+                                                                                        Probeschweißung–Ende                  Nr.
+                                                                                        Bemerkung:
+                                                                                        Schweißer                                   Bauleiter/Vorarbeiter                   Bauüberwachung/Fremdprüfer
+                                                                                                                                    (Fachverlegeﬁrma)
+
+                                                                                        Datum                      Unterschrift     Datum                   Unterschrift    Datum                  Unterschrift
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+
+
+
+
+                                                                                                                                                                                                                  Seite 27
+                                                                                              September 2016                                                                                                               DVS 2225-4
+
+
+
+                                                                                              Anhang Blatt 3: Prüfprotokoll für Überlappnähte mit Prüfkanal
+                                                                                               Prüfprotokoll für Überlappnähte mit Prüfkanal                                                                     Nr.
+                                                                                               Bauvorhaben:                                                      Verlegeﬁrma:
+                                                                                               Dichtungsbahn:                                                    Nenndicke:                  mm
+                                                                                               Fügeverfahren:                                                    Naht Nr.:
+                                                                                               I. Äußere Beschaﬀenheit
+                                                                                               Station          Nahtverlauf                      Wulstausbildung             Kerben und Riefen            Bemerkung
+
+
+
+
+                                                                                               II. Abmessungen(mm)
+
+
+                                                                                                   ∆dN1=(do+du)–dN1
+                                                                                                   ∆dN2=(do+du)–dN2
+
+
+
+
+                                                                                               Station   Ü1      Ü2        bN1       bN2         bP   do    du        do+ du     dN1         dN2   ∆dN1      ∆dN2         Bemerkung
+
+
+
+
+                                                                                               III. Versagensverhalten im Schälversuch                 ☐ mit Kraftanzeige               ☐ ohne Kraftanzeige
+                                                                                               Station    Probenbreite            Höchstzug-          Verformungs-und Versagensverhalten                     Beurteilung      Bemerkung
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                                         (mm)                    kraft (N)
+
+
+
+
+                                                                                               IV. Dichtigkeit – Druckluftprüfung
+                                                                                               Station   Prüfparameter: Druck:         bar       Dauer:    min        Temperatur der Bahn:          °C Druckabfall: <10 %
+                                                                                                         Breite bP        Prüfbeginn                  Prüfende                         Diﬀerenz                         Bemerkung
+                                                                                                                          Uhrzeit          bar        Uhrzeit        bar               bar         Zeit
+
+
+
+
+                                                                                               Prüfer                                      Bauleiter/Vorarbeiter                       Bauüberwachung/Fremdprüfer
+                                                                                                                                           (Fachverlegeﬁrma)
+
+
+                                                                                               Datum                  Unterschrift         Datum                  Unterschrift         Datum                           Unterschrift
+
+
+
+
+                                                                                        Seite 28
+                                                                                        DVS 2225-4                                                                                             September 2016
+
+
+
+                                                                                        Anhang Blatt 4: Prüfprotokoll für Auftragnähte
+                                                                                         Prüfprotokoll für Auftragnähte                                                                       Nr.
+                                                                                         Bauvorhaben:                                                     Verlegeﬁrma:
+                                                                                         Dichtungsbahn:                                                   Nenndicke:         mm
+                                                                                         Fügeverfahren:                                                   Naht Nr.:
+                                                                                         I. Äußere Beschaﬀenheit
+                                                                                         Station            Nahtverlauf            Wulstausbildung             Kerben und Riefen      Bemerkung
+
+
+
+
+                                                                                         II. Abmessungen (mm)
+
+
+                                                                                           fNA=dN/(do+du)
+
+
+
+
+                                                                                         Station   Ü              bN        bN/2   do                du         do+ du       dN       fNA            Bemerkung
+
+
+
+
+                                                                                         III. Versagensverhalten im Schälversuch mit Kraftanzeige ohne Kraftanzeige
+                                                                                         Station    Probenbreite (mm)      Höchstzugkraft(N)      Verformungs- und Versagensver-       Beurteilung       Bemerkung
+                                                                                                                                                  halten
+
+
+
+
+Normen-Download-Beuth-Kocks Consult GmbH-KdNr.297076-LfNr.8245480001-2018-01-16 11:53
+                                                                                         IV. Dichtigkeit
+                                                                                         Station   Vakuum                                Hochspannung                             Bemerkung
+                                                                                                   Unterdruck: bar Zeitdauer: s          Gerätetyp: Spannung: kV
+
+
+
+
+                                                                                         Prüfer                                    Bauleiter/Vorarbeiter (Fachverlegeﬁrma)        Bauüberwachung/Fremdprüfer
+
+
+
+                                                                                         Datum                     Unterschrift    Datum                      Unterschrift        Datum                    Unterschrift
+
+
+
+
+                                                                                                                                                                                                                      Seite 29
+

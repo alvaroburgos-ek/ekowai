@@ -1,0 +1,5562 @@
+[
+  {
+    "standard": "DIN-14071-1",
+    "node": "cr-din14071-cx01",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-14071-1",
+    "node": "cr-din14071-cx02",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-14071-1",
+    "node": "cr-din14071-cx03",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-18130-1",
+    "node": "cr-din18130-01",
+    "code": "DIN-18130-1-CR-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-18130-1",
+    "node": "cr-din18130-02",
+    "code": "DIN-18130-1-CR-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-18130-1",
+    "node": "cr-din18130-03",
+    "code": "DIN-18130-1-CR-03",
+    "severity": "warn"
+  },
+  {
+    "standard": "DIN-18130-1",
+    "node": "cr-din18130-07",
+    "code": "DIN-18130-1-CR-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-1",
+    "node": "cr-din-1989-1-12",
+    "code": "DIN-1989-1-CR-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-1",
+    "node": "cr-din-1989-1-13",
+    "code": "DIN-1989-1-CR-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-01",
+    "code": "DIN-1989-2-CR-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-02",
+    "code": "DIN-1989-2-CR-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-05",
+    "code": "DIN-1989-2-CR-05",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-06",
+    "code": "DIN-1989-2-CR-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-07",
+    "code": "DIN-1989-2-CR-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-09",
+    "code": "DIN-1989-2-CR-09",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-10",
+    "code": "DIN-1989-2-CR-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-11",
+    "code": "DIN-1989-2-CR-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-12",
+    "code": "DIN-1989-2-CR-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-13",
+    "code": "DIN-1989-2-CR-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-14",
+    "code": "DIN-1989-2-CR-14",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-15",
+    "code": "DIN-1989-2-CR-15",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-16",
+    "code": "DIN-1989-2-CR-16",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-1989-2",
+    "node": "cr-din-1989-2-17",
+    "code": "DIN-1989-2-CR-17",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-01",
+    "code": "REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-02",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-05",
+    "code": "REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-08",
+    "code": "REQ-08",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-09",
+    "code": "REQ-09",
+    "severity": "warn"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-12",
+    "code": "REQ-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-14",
+    "code": "REQ-14",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-15",
+    "code": "REQ-15",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-16",
+    "code": "REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-17",
+    "code": "REQ-17",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-19",
+    "code": "REQ-19",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-20",
+    "code": "REQ-20",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-21",
+    "code": "REQ-21",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-22",
+    "code": "REQ-22",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-23",
+    "code": "REQ-23",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-24",
+    "code": "REQ-24",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-25",
+    "code": "REQ-25",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-26",
+    "code": "REQ-26",
+    "severity": "warn"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-27",
+    "code": "REQ-27",
+    "severity": "warn"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-28",
+    "code": "REQ-28",
+    "severity": "warn"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-29",
+    "code": "REQ-29",
+    "severity": "warn"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-30",
+    "code": "REQ-30",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-31",
+    "code": "REQ-31",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-276",
+    "node": "cr-din-req-32",
+    "code": "REQ-32",
+    "severity": "block"
+  },
+  {
+    "standard": "DIN-EN-ISO-14044",
+    "node": "cr-14044-bundle",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-01",
+    "code": "REQ-01",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-02",
+    "code": "REQ-02",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-05",
+    "code": "REQ-05",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-08",
+    "code": "REQ-08",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-18",
+    "code": "REQ-18",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-19",
+    "code": "REQ-19",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-20",
+    "code": "REQ-20",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-21",
+    "code": "REQ-21",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-25",
+    "code": "REQ-25",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-26",
+    "code": "REQ-26",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-27",
+    "code": "REQ-27",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-28",
+    "code": "REQ-28",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-29",
+    "code": "REQ-29",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-102-2",
+    "node": "cr-req-30",
+    "code": "REQ-30",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-01",
+    "code": "A138-REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-04",
+    "code": "A138-REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-05",
+    "code": "A138-REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-09",
+    "code": "A138-REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-16",
+    "code": "A138-REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-18",
+    "code": "A138-REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-20",
+    "code": "A138-REQ-20",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-24",
+    "code": "A138-REQ-24",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-25",
+    "code": "A138-REQ-25",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-26",
+    "code": "A138-REQ-26",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-27",
+    "code": "A138-REQ-27",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-28",
+    "code": "A138-REQ-28",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-29",
+    "code": "A138-REQ-29",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-30",
+    "code": "A138-REQ-30",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-cov-01",
+    "code": "A138-REQ-COV-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-138-1",
+    "node": "cr-a138-req-cov-02",
+    "code": "A138-REQ-COV-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-01",
+    "code": "REQ-01",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-02",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-03",
+    "code": "REQ-03",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-04",
+    "code": "REQ-04",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-05",
+    "code": "REQ-05",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-06",
+    "code": "REQ-06",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-08",
+    "code": "REQ-08",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-09",
+    "code": "REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-12",
+    "code": "REQ-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-14",
+    "code": "REQ-14",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-15",
+    "code": "REQ-15",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-16",
+    "code": "REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-17",
+    "code": "REQ-17",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-19",
+    "code": "REQ-19",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-20",
+    "code": "REQ-20",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-21",
+    "code": "REQ-21",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-22",
+    "code": "REQ-22",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-23",
+    "code": "REQ-23",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-24",
+    "code": "REQ-24",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-25",
+    "code": "REQ-25",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-26",
+    "code": "REQ-26",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-27",
+    "code": "REQ-27",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-178",
+    "node": "cr-a178-req-28",
+    "code": "REQ-28",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-001",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-002",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-003",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-004",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-005",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-006",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-007",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-008",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-009",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-010",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-011",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-012",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-013",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-201",
+    "node": "cr-a201-014",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-01-cr-027",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-01-cr-041",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-01-cr-042",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-01-cr-043",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-02-cr-001",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-02-cr-002",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-02-cr-014",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-02-cr-017",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-02-cr-028",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-03-cr-003",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-03-cr-007",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-03-cr-008",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-03-cr-022",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-04-cr-004",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-06-cr-005",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-06-cr-015",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-07-cr-006",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-07-cr-030",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-08-cr-031",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-08-cr-032",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-09-cr-009",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-09-cr-016",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-10-cr-011",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-10-cr-012",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-10-cr-018",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-10-cr-019",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-013",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-020",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-021",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-023",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-024",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-025",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-033",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-034",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-035",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-036",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-037",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-038",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-039",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-11-cr-040",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-12-cr-010",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-14-cr-011",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-14-cr-012",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-14-cr-029",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-013",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-020",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-023",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-025",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-026",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-033",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-036",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-037",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-16-cr-038",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-18-cr-021",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-18-cr-026",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-20-cr-039",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-20-cr-040",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-21-cr-034",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-21-cr-035",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-21-cr-043",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-22-cr-042",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-24-cr-024",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-222",
+    "node": "cr-a222-24-cr-041",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-002",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-003",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-004",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-005",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-006",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-007",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-008",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-009",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-010",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-011",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-012",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-013",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-014",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-015",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-016",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-017",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-018",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-019",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-020",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-021",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-022",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-023",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-226",
+    "node": "cr-a226-cr-024",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-01",
+    "code": "REQ-01"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-02a",
+    "code": "REQ-02A"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-02c",
+    "code": "REQ-02C"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-03",
+    "code": "REQ-03"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-04a",
+    "code": "REQ-04A"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-04b",
+    "code": "REQ-04B"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-05",
+    "code": "REQ-05"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-06",
+    "code": "REQ-06"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-07",
+    "code": "REQ-07"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-08",
+    "code": "REQ-08"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-09",
+    "code": "REQ-09"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-10",
+    "code": "REQ-10"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-101",
+    "code": "REQ-101"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-102",
+    "code": "REQ-102"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-103",
+    "code": "REQ-103"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-104",
+    "code": "REQ-104"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-11",
+    "code": "REQ-11"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-110",
+    "code": "REQ-110"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-111",
+    "code": "REQ-111"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-112",
+    "code": "REQ-112"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-11b",
+    "code": "REQ-11B"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-12",
+    "code": "REQ-12"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-13",
+    "code": "REQ-13"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-130",
+    "code": "REQ-130"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-131",
+    "code": "REQ-131"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-14",
+    "code": "REQ-14"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-141",
+    "code": "REQ-141"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-142",
+    "code": "REQ-142"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-15",
+    "code": "REQ-15"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-150",
+    "code": "REQ-150"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-16",
+    "code": "REQ-16"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-17",
+    "code": "REQ-17"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-18a",
+    "code": "REQ-18A"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-18c",
+    "code": "REQ-18C"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-19eff-a",
+    "code": "REQ-19EFF-A"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-19eff-b",
+    "code": "REQ-19EFF-B"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-20",
+    "code": "REQ-20"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-20b",
+    "code": "REQ-20B"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-21",
+    "code": "REQ-21"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-22",
+    "code": "REQ-22"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-30",
+    "code": "REQ-30"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-33",
+    "code": "REQ-33"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-34",
+    "code": "REQ-34"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-35",
+    "code": "REQ-35"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-36",
+    "code": "REQ-36"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-40",
+    "code": "REQ-40"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-41",
+    "code": "REQ-41"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-50",
+    "code": "REQ-50"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-51",
+    "code": "REQ-51"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-60",
+    "code": "REQ-60"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-61",
+    "code": "REQ-61"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-70",
+    "code": "REQ-70"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-71",
+    "code": "REQ-71"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-81",
+    "code": "REQ-81"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-82",
+    "code": "REQ-82"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-83",
+    "code": "REQ-83"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-84",
+    "code": "REQ-84"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-90",
+    "code": "REQ-90"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-91",
+    "code": "REQ-91"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "cr-req-92",
+    "code": "REQ-92"
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "dp-req03-fixed-as-gate",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "dp-req07-modal-usually",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "dp-req09-10-attest",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "dp-req12-dead-gate",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "dp-req13-var-vs-var",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-262E",
+    "node": "dp-req18a-weld-branch",
+    "code": null
+  },
+  {
+    "standard": "DWA-A-272E",
+    "node": "cr-a272e-comp-13",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "node": "cr-m104-req-15",
+    "code": "REQ-15",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-102-4",
+    "node": "cr-m104-req-16",
+    "code": "REQ-16",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-01-cr001",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-01-cr002",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-04-cr004",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-05-cr005",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-05-cr014",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-06-cr010",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-06-cr011",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-06-cr015",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-07-cr007",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-07-cr009",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-07-cr017",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-07-cr020",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-08-cr003",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-08-cr006",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-08-cr008",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-08-cr016",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-08-cr018",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-08-cr021",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-09-cr013",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-15-cr019",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-1",
+    "node": "cr-m12001-20-cr012",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-01-req01",
+    "code": "REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-03-req02",
+    "code": "REQ-02",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-03-req05",
+    "code": "REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-03-req06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-05-req04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-06-req07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-08-req08",
+    "code": "REQ-08",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-08-req09",
+    "code": "REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-08-req10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-13-req03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-13-req11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-13-req12",
+    "code": "REQ-12",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-13-req13",
+    "code": "REQ-13",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-15-req14",
+    "code": "REQ-14",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-2",
+    "node": "cr-m12002-15-req15",
+    "code": "REQ-15",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-01-cr01",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-01-cr02",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-01-cr11",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-01-cr12",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-01-cr13",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-01-cr16",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-03-cr03",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-03-cr04",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr05",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr06",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr07",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr08",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr09",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr14",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr15",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr17",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-05-cr18",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-06-cr10",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-07-cr11",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-07-cr12",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-07-cr16",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr05",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr06",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr07",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr08",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr09",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr13",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr14",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr15",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr17",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-08-cr18",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-1200-3",
+    "node": "cr-m12003-19-cr10",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req01",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req02",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req03",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req04",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req05",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req06",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req07",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req08",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req09",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req10",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req11",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req12",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req13",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req14",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req15",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req16",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req17",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req18",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req19",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req20",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req21",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req22",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req23",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req24",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req25",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req26",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req27",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req28",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req29",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req30",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req31",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req32",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-179-1",
+    "node": "cr-m179-req33",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req02",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req05",
+    "code": "REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-187",
+    "node": "cr-m187-req08",
+    "code": "REQ-08",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-01",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-02",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-03",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-04",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-05",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-06",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-07",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-08",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-09",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-10",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-11",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-12",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-13",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-14",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-15",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-16",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-17",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-18",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-19",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-20",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-21",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-22",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-23",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-24",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-25",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-26",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-27",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-28",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-29",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-30",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-31",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-32",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-33",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-34",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-35",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-36",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-es1-04",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-205",
+    "node": "cr-m205-es1-11",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-01",
+    "code": "REQ-01",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-02",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-08",
+    "code": "REQ-08",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-09",
+    "code": "REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-12",
+    "code": "REQ-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-14",
+    "code": "REQ-14",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-15",
+    "code": "REQ-15",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-16",
+    "code": "REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-17",
+    "code": "REQ-17",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-19",
+    "code": "REQ-19",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-23",
+    "code": "REQ-23",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-25",
+    "code": "REQ-25",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-29",
+    "code": "REQ-29",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-30",
+    "code": "REQ-30",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-277E",
+    "node": "cr-m277e-req-32",
+    "code": "REQ-32",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-003",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-016",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-018",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-020",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-021",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-022",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-023",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-024",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-025",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-026",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-349",
+    "node": "cr-027",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c01",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c02",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c03",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c04",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c05",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c06",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c07",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c08",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c09",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c10",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c11",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c12",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c13",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c14",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c15",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c16",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c17",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c18",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c19",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c20",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c21",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c22",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c23",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c24",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c25",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c26",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c27",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c28",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-363",
+    "node": "cr-m363-c29",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-001",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-002",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-003",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-004",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-005",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-006",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-007",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-008",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-009",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-010",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-011",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-012",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-014",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-015",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-016",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-017",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-018",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-019",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-381E",
+    "node": "cr-020",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-01",
+    "code": "REQ-708-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-02",
+    "code": "REQ-708-02",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-03",
+    "code": "REQ-708-03",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-04",
+    "code": "REQ-708-04",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-05",
+    "code": "REQ-708-05",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-06",
+    "code": "REQ-708-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-07",
+    "code": "REQ-708-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-08",
+    "code": "REQ-708-08",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-09",
+    "code": "REQ-708-09",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-10",
+    "code": "REQ-708-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-11",
+    "code": "REQ-708-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-12",
+    "code": "REQ-708-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-13",
+    "code": "REQ-708-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-708",
+    "node": "cr-req-708-14",
+    "code": "REQ-708-14",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-01",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-02",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-03",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-04",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-05",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-06",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-07",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-08",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-09",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-10",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-11",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-12",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-13",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-14",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-732",
+    "node": "cr-m732-15",
+    "code": null
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-01",
+    "code": "REQ-01"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-02",
+    "code": "REQ-02"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-03",
+    "code": "REQ-03"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-04",
+    "code": "REQ-04"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-05",
+    "code": "REQ-05"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-06",
+    "code": "REQ-06"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-07",
+    "code": "REQ-07"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-08",
+    "code": "REQ-08"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-09",
+    "code": "REQ-09"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-10",
+    "code": "REQ-10"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-11",
+    "code": "REQ-11"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-12",
+    "code": "REQ-12"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-13",
+    "code": "REQ-13"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-14",
+    "code": "REQ-14"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-15",
+    "code": "REQ-15"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-16",
+    "code": "REQ-16"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-17",
+    "code": "REQ-17"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-18",
+    "code": "REQ-18"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-19",
+    "code": "REQ-19"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-20",
+    "code": "REQ-20"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-21",
+    "code": "REQ-21"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-22",
+    "code": "REQ-22"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-23",
+    "code": "REQ-23"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-24",
+    "code": "REQ-24"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-25",
+    "code": "REQ-25"
+  },
+  {
+    "standard": "DWA-M-816",
+    "node": "cr-m816-req-26",
+    "code": "REQ-26"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-01",
+    "code": "REQ-01"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-02",
+    "code": "REQ-02"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-03",
+    "code": "REQ-03"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-04",
+    "code": "REQ-04"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-05",
+    "code": "REQ-05"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-06",
+    "code": "REQ-06"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-07",
+    "code": "REQ-07"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-08",
+    "code": "REQ-08"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-09",
+    "code": "REQ-09"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-10",
+    "code": "REQ-10"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-11",
+    "code": "REQ-11"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-12",
+    "code": "REQ-12"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-13",
+    "code": "REQ-13"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-14",
+    "code": "REQ-14"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-15",
+    "code": "REQ-15"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-16",
+    "code": "REQ-16"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-17",
+    "code": "REQ-17"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-18",
+    "code": "REQ-18"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-19",
+    "code": "REQ-19"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-20",
+    "code": "REQ-20"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-21",
+    "code": "REQ-21"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-22",
+    "code": "REQ-22"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-23",
+    "code": "REQ-23"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-24",
+    "code": "REQ-24"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-25",
+    "code": "REQ-25"
+  },
+  {
+    "standard": "DWA-M-820-1",
+    "node": "cr-req-26",
+    "code": "REQ-26"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-01",
+    "code": "REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-02",
+    "code": "REQ-02",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-03",
+    "code": "REQ-03",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-05",
+    "code": "REQ-05",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-08",
+    "code": "REQ-08",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-09",
+    "code": "REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-12",
+    "code": "REQ-12",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-14",
+    "code": "REQ-14",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-15",
+    "code": "REQ-15",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-16",
+    "code": "REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-17",
+    "code": "REQ-17",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-19",
+    "code": "REQ-19",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-20",
+    "code": "REQ-20",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-21",
+    "code": "REQ-21",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-22",
+    "code": "REQ-22",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-23",
+    "code": "REQ-23",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-24",
+    "code": "REQ-24",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-25",
+    "code": "REQ-25",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-26",
+    "code": "REQ-26",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-27",
+    "code": "REQ-27",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-28",
+    "code": "REQ-28",
+    "severity": "block"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-29",
+    "code": "REQ-29",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-30",
+    "code": "REQ-30",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-31",
+    "code": "REQ-31",
+    "severity": "warn"
+  },
+  {
+    "standard": "DWA-M-820-3",
+    "node": "cr-8203-req-32",
+    "code": "REQ-32",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-01",
+    "code": "REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-05",
+    "code": "REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-06",
+    "code": "REQ-06",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-09",
+    "code": "REQ-09",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-11",
+    "code": "REQ-11",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-17",
+    "code": "REQ-17",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-19",
+    "code": "REQ-19",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-21",
+    "code": "REQ-21",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-22",
+    "code": "REQ-22",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-24",
+    "code": "REQ-24",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-26",
+    "code": "REQ-26",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-27",
+    "code": "REQ-27",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-28",
+    "code": "REQ-28",
+    "severity": "warn"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-29",
+    "code": "REQ-29",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-GAR-2023",
+    "node": "cr-gar-req-30",
+    "code": "REQ-30",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-01",
+    "code": "REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-02",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-05",
+    "code": "REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-08",
+    "code": "REQ-08",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-09",
+    "code": "REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-12",
+    "code": "REQ-12",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-14",
+    "code": "REQ-14",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-19",
+    "code": "REQ-19",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-20",
+    "code": "REQ-20",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-21",
+    "code": "REQ-21",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-22",
+    "code": "REQ-22",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-23",
+    "code": "REQ-23",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-24",
+    "code": "REQ-24",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-25",
+    "code": "REQ-25",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-26",
+    "code": "REQ-26",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-28",
+    "code": "REQ-28",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-29",
+    "code": "REQ-29",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-30",
+    "code": "REQ-30",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-Naturteich-2017",
+    "node": "cr-fllnt-req-33",
+    "code": "REQ-33",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-01",
+    "code": "REQ-01",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-02",
+    "code": "REQ-02",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-03",
+    "code": "REQ-03",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-04",
+    "code": "REQ-04",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-05",
+    "code": "REQ-05",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-06",
+    "code": "REQ-06",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-07",
+    "code": "REQ-07",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-08",
+    "code": "REQ-08",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-09",
+    "code": "REQ-09",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-10",
+    "code": "REQ-10",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-11",
+    "code": "REQ-11",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-12",
+    "code": "REQ-12",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-13",
+    "code": "REQ-13",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-14",
+    "code": "REQ-14",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-15",
+    "code": "REQ-15",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-16",
+    "code": "REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-17",
+    "code": "REQ-17",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-18",
+    "code": "REQ-18",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-19",
+    "code": "REQ-19",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-20",
+    "code": "REQ-20",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-21",
+    "code": "REQ-21",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-22",
+    "code": "REQ-22",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-conformity",
+    "code": "REQ-RHZ21-CONFORMITY",
+    "severity": "block"
+  },
+  {
+    "standard": "FLL-TP-RHIZOM-2023",
+    "node": "cr-rhz-req-verdict",
+    "code": "REQ-RHZ18-VERDICT",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-01",
+    "code": "HOAI-CR-01",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-02",
+    "code": "HOAI-CR-02",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-03",
+    "code": "HOAI-CR-03",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-04",
+    "code": "HOAI-CR-04",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-05",
+    "code": "HOAI-CR-05",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-06",
+    "code": "HOAI-CR-06",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-07",
+    "code": "HOAI-CR-07",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-08",
+    "code": "HOAI-CR-08",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-09",
+    "code": "HOAI-CR-09",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-10",
+    "code": "HOAI-CR-10",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-11",
+    "code": "HOAI-CR-11",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-12",
+    "code": "HOAI-CR-12",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-13",
+    "code": "HOAI-CR-13",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-14",
+    "code": "HOAI-CR-14",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-15",
+    "code": "HOAI-CR-15",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-16",
+    "code": "HOAI-CR-16",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-17",
+    "code": "HOAI-CR-17",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-18",
+    "code": "HOAI-CR-18",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-19",
+    "code": "HOAI-CR-19",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-20",
+    "code": "HOAI-CR-20",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-21",
+    "code": "HOAI-CR-21",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-22",
+    "code": "HOAI-CR-22",
+    "severity": "block"
+  },
+  {
+    "standard": "HOAI-2021",
+    "node": "cr-hoai-23",
+    "code": "HOAI-CR-23",
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14004",
+    "node": "cr-iso14004-catalogue",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-001",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-002",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-003",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-004",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-005",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-006",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-007",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-008",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-009",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-010",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-011",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-012",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-013",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-014",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-015",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-016",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-017",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-018",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-019",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-020",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-021",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-022",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-023",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-024",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-025",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-026",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-027",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-028",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14019-1",
+    "node": "cr-029",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-001",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-002",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-003",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-004",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-005",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-006",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-007",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-008",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-009",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-010",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-011",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-012",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-013",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-014",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-015",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-016",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-017",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-018",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-019",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-020",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-021",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-022",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-023",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-024",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-025",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-026",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14033",
+    "node": "cr-027",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req01",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req02",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req03",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req04",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req05",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req06",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req07",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req08",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req09",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req10",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req11",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req12",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req13",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req14",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req15",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req16",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req17",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req18",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req19",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req20",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req21",
+    "code": null
+  },
+  {
+    "standard": "ISO-14046",
+    "node": "cr-iso14046-req22",
+    "code": null
+  },
+  {
+    "standard": "ISO-14064-2",
+    "node": "cr-1642-13",
+    "code": "REQ-13",
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14064-2",
+    "node": "cr-1642-16",
+    "code": "REQ-16",
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-001",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-004",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-007",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-010",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-012",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-013",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-014",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-015",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-14097",
+    "node": "cr-iso14097-cr-016",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-001",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-002",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-003",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-004",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-005",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-006",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-007",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-008",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-009",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-010",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-011",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-012",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-013",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-014",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-015",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-016",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-017",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-018",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-019",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-020",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-021",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-022",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-023",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-024",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-025",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-026",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-1",
+    "node": "cr-iso5667-1-027",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-002",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-011",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-016",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-018",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-026",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-027",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-032",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-10",
+    "node": "cr-iso5667-10-index",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-5667-13",
+    "node": "cr-005-control-points",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-5667-16",
+    "node": "cr-iso567716-030",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-001",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-002",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-003",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-004",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-005",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-006",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-007",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-008",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-009",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-010",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-011",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-012",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-013",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-014",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-015",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-016",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-017",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-018",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-019",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-020",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-021",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-022",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-023",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-024",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-025",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-026",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-027",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-028",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-029",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-030",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-031",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-032",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-033",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-034",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-035",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-036",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-037",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-038",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-039",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-040",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-041",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-042",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-043",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-044",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-045",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-046",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-047",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-048",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-049",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-050",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-051",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-052",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-053",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59014",
+    "node": "cr-iso59014-054",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-001",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-002",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-003",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-004",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-005",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-006",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-007",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-008",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-009",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-010",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-011",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-012",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-013",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-014",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-015",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-016",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-017",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-018",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-019",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-020",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-021",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-022",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-023",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-024",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-025",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-026",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-027",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-028",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-029",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-030",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-031",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-032",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-033",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-034",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-035",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-036",
+    "code": null
+  },
+  {
+    "standard": "ISO-59020",
+    "node": "cr-iso59020-037",
+    "code": null
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-001",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-002",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-003",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-004",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-005",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-006",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-007",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-008",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-009",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-010",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-011",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-012",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-013",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-014",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-015",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-016",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-017",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "ISO-59032",
+    "node": "cr-iso59032-018",
+    "code": null,
+    "severity": "warn"
+  },
+  {
+    "standard": "VDI-3477",
+    "node": "cr-vdi-clean-gates",
+    "code": null,
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-01",
+    "code": "VDI-3814-2-1-CR-01",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-02",
+    "code": "VDI-3814-2-1-CR-02",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-03",
+    "code": "VDI-3814-2-1-CR-03",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-04",
+    "code": "VDI-3814-2-1-CR-04",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-05",
+    "code": "VDI-3814-2-1-CR-05",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-06",
+    "code": "VDI-3814-2-1-CR-06",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-07",
+    "code": "VDI-3814-2-1-CR-07",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-08",
+    "code": "VDI-3814-2-1-CR-08",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-09",
+    "code": "VDI-3814-2-1-CR-09",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-10",
+    "code": "VDI-3814-2-1-CR-10",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-11",
+    "code": "VDI-3814-2-1-CR-11",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-12",
+    "code": "VDI-3814-2-1-CR-12",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-13",
+    "code": "VDI-3814-2-1-CR-13",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-14",
+    "code": "VDI-3814-2-1-CR-14",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-15",
+    "code": "VDI-3814-2-1-CR-15",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-16",
+    "code": "VDI-3814-2-1-CR-16",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-17",
+    "code": "VDI-3814-2-1-CR-17",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-18",
+    "code": "VDI-3814-2-1-CR-18",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-19",
+    "code": "VDI-3814-2-1-CR-19",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-20",
+    "code": "VDI-3814-2-1-CR-20",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-21",
+    "code": "VDI-3814-2-1-CR-21",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-22",
+    "code": "VDI-3814-2-1-CR-22",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-23",
+    "code": "VDI-3814-2-1-CR-23",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-24",
+    "code": "VDI-3814-2-1-CR-24",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-25",
+    "code": "VDI-3814-2-1-CR-25",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-26",
+    "code": "VDI-3814-2-1-CR-26",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-27",
+    "code": "VDI-3814-2-1-CR-27",
+    "severity": "block"
+  },
+  {
+    "standard": "VDI-3814-Blatt-2-1",
+    "node": "cr-vdi-28",
+    "code": "VDI-3814-2-1-CR-28",
+    "severity": "block"
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-01",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-02",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-03",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-04",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-05",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-06",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-07",
+    "code": null
+  },
+  {
+    "standard": "VSME",
+    "node": "cr-b01-08",
+    "code": null
+  }
+]
