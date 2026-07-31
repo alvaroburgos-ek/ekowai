@@ -1435,3 +1435,11 @@ FULL-TREATMENT BATCH 18 CLOSED 2026-07-31 — DWA-M-229-2 + DWA-M-349 → 45 gui
 FULL-TREATMENT BATCH 19 OPENED 2026-07-31 — DWA-A-125(2eq/16cr pipe-jacking), DWA-M-179-1(6eq/33cr).
   wf_185c8229-4a7 / w24imzz8t. BRIEF HARDENED: added R-2/R-5 verbatim-proof clause + modal-quote rule
   (from batch-18 CR-019 near-miss). Remaining after: DWA-M-732/708/760/187/381E/1200-1/1200-2.
+
+FULL-TREATMENT BATCH 19 CLOSED 2026-07-31 — DWA-A-125 + DWA-M-179-1 → 47 guidelines full-treated.
+  Equations 2/2 + 5/6 faithful. Applied mig 20260731210000 (M179-1 Bild-4 Gl.13 formula symbol align),
+  verified, rollback -batch19. Rulings sheeted Section AO. FLYWHEEL: corpus phantom-field survey run →
+  ~40 candidates across 8 standards (DWA-M-363/179-1/FLL-GAR/ISO-59032/FLL-Naturteich/DWA-M-205/ISO-14033/
+  VDI-2163); spec'd as validator rule 16 (TOP [CODE] item next session, needs per-instance verify before
+  destructive delete). DWA-A-125 3 bare-symbol-RHS false-blocks (HIGH, 2 ws unusable) + M179-1 A_b_a m²/ha
+  10^4-risk are the highest-value rulings. NEXT: DWA-M-1200-1/1200-2 (siblings); then 732/708/760/187/381E.
