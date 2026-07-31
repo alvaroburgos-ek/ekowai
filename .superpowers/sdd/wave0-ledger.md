@@ -1342,3 +1342,9 @@ CONVERGENCE (batches 1-10): 29 guidelines full-treated coverage-verified. ~54 eq
   German-format-fix awareness. OWNER RATIFICATION QUEUE (sheet W..AF): BLOCK-mishome re-homes (~110),
   IS-NOT-NULL safety gates (~40), modal over-block (incl DWA-M-820-2 41, DWA-M-820-1), DWA materialization
   tables. One "approve block re-homes" = dozens of worksheets unblocked.
+
+APPLIED AC-1 (2026-07-31, while batch 11 runs) — DWA-A-262E 11 eq unit-in-formula strips (mig
+  20260731160000, reproduction-checked broken->computes each: Gl.1/2/3/4/7/9/10/11/12/17/18). Unit
+  annotations moved to output_unit. Gl.15 A_ANF excluded (div-by-zero test only). DWA-A-262E now has
+  ~16 computing equations. Remaining pending source-settled: VDI-3477/DIN CR condition fixes (AF),
+  DWA-M-820-1 3 SS (need exact CR ids from prod).
