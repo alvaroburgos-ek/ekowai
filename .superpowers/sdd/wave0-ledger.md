@@ -1231,3 +1231,7 @@ OWNER RATIFICATION QUEUE (sheet Sections W/X/Y/Z, biggest working-tool unblock):
   - BLOCK-mishome re-homes (~76) — approve batch => unblocks dozens of worksheets across ~15 guidelines.
   - IS-NOT-NULL-on-boolean safety gates (~24) — strengthen to ==true?
   - modal over-block downgrades; ATV CR-025 pipette-threshold bug; invented-enum corrections.
+
+FULL-TREATMENT BATCH 5 OPENED 2026-07-31 — ISO-14046(1eq), ISO-14064-1(4eq), ISO-14064-2(4eq),
+  ISO-14004. Only ISO-14064-2 is English (title_en sweep); 14046/14064-1/14004 German-encoded
+  (title_en=translation ruling). wf_54435206-b65 / w6ryzgdbc.
