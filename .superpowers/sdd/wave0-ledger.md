@@ -1360,3 +1360,8 @@ FULL-TREATMENT BATCH 12 OPENED 2026-07-31 — DIN-1989-2(9eq/17cr), DIN-276(53eq
   NEXT queue: DIN-14071-1, DIN-18130-1, DIN-EN-ISO-14044, VDI-2163, VDI-3814-Blatt-2-1; ISO-9001(Spanish);
   FLL-Naturteich/GAR-2023/TP-RHIZOM; HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1;
   DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
+
+FULL-TREATMENT BATCH 12 CLOSED 2026-07-31 — DIN-1989-2 (9/9 eq faithful), DIN-276 (10/10 spot faithful,
+  large cost-planning). No clean auto-apply (rulings: DIN-1989-2 dual-role F-4 symbols, DIN-276 block-
+  mishomes/modal) -> Section AH. NEXT: batch 13 (DIN-14071-1, DIN-18130-1).
+CONVERGENCE (batches 1-12): 33 guidelines full-treated coverage-verified.
