@@ -1302,3 +1302,9 @@ FULL-TREATMENT BATCH 8 OPENED 2026-07-31 — DWA-M-816(30eq/26cr), DWA-M-820-2(0
   DWA-A-131(78eq)/DWA-A-226/DWA-A-201/DWA-M-229-1 = source-blocked (no PDF) -> acquisition list.
 NEXT after batch 8: batch 9 = DWA-M-820-1, DWA-M-1200-3, then DIN/VDI German + Spanish (ISO-9001/14067)
   + FLL + HOAI + remaining. DWA-A-262E 12 eq unit-strips (AC-1) to apply.
+
+FULL-TREATMENT BATCH 8 CLOSED 2026-07-31 — DWA-M-816 (30 eq faithful, clean), DWA-M-820-2. APPLIED (mig
+  20260731150000): DWA-M-816 duration_method enum->text (un-approvable blocker fixed). RULINGS -> AD:
+  5 block-mishomes (M816 gate-dumping ground M816-19), DWA-M-820-2 ~41 modal-over-block (procurement
+  guidance), cosmetics. NEXT: batch 9 (DWA-M-820-1, DWA-M-1200-3).
+CONVERGENCE (batches 1-8): 25 guidelines full-treated.

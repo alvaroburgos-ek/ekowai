@@ -1,0 +1,1 @@
+DO $$ BEGIN UPDATE fields f SET data_type='enum' FROM worksheet_templates w, standards s WHERE f.worksheet_template_id=w.id AND w.standard_id=s.id AND s.code='DWA-M-816' AND f.symbol='duration_method'; END $$;
