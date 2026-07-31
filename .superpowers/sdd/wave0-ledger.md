@@ -1470,3 +1470,17 @@ FULL-TREATMENT BATCH 21 OPENED 2026-07-31 — DWA-M-760(6eq/20cr, _WD), DWA-M-70
 FULL-TREATMENT BATCH 21 CLOSED 2026-07-31 — DWA-M-760 (Weißdruck) + DWA-M-708 (GELBDRUCK/held) → 51 full-treated.
   ZERO source-settled auto-applies (760 no defect; 708 held-draft). Edition-check step CAUGHT 708 as draft.
   Rulings sheeted AQ. bare-symbol-RHS now ~9 instances. Next: reconcile full corpus (queue may be subset).
+
+=== CORPUS RECONCILIATION 2026-07-31 (R-4 join to batch record) ===
+All 71 real standards enumerated from prod (12 PC-/RA-/T-/VW- junk excluded). Treated set derived from
+ratification-sheet batch section headers + ledger CLOSED lines (authoritative, not memory):
+  TREATED = batches 1-21 (51) + waves 14-16 (ISO-14015, ISO-59004, ISO-14033) = 54.
+  REACHABLE-UNTOUCHED (never batch-treated, PDF available) = 7:
+    DWA-M-732, DWA-M-187, DWA-M-381E, DVS-2225-4, DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF unconfirmed).
+    → my prior "732/187/381E" queue was a SUBSET; +4 recovered (DVS-2225-4, DWA-A-272E, DWA-M-820-3, ISO-5667-6).
+  SOURCE-BLOCKED (no PDF, acquisition list, never dispatch) = 4: DWA-A-131, DWA-A-201, DWA-A-226, DWA-M-229-1.
+  PRIOR-TREATED under earlier/other mandate (re-touch for full 7-element proof at next opportunity) = 6:
+    DWA-A-138-1 (reference gold copy), DWA-A-102-2, DWA-A-178 (14/19 UNPROVEN), DWA-M-102-4, DWA-M-277E, VSME.
+  ARITHMETIC: 54 treated + 7 reachable-untouched + 4 source-blocked + 6 prior = 71. ✓
+  TRUE CONVERGENCE: 54/71 batch/wave-treated; 7 reachable remain (~4 batches); then 6 prior re-touch +
+  4 source-blocked (need PDFs) to reach 71/71. NEXT queue order: 732,187 → 381E,DVS-2225-4 → 272E,820-3 → 5667-6.
