@@ -1405,3 +1405,8 @@ FULL-TREATMENT BATCH 16 CLOSED 2026-07-31 — FLL-Naturteich (6 eq verify; PHANT
   rulings/destructive) -> Section AL. NEW class: phantom enum-value-token fields (corpus survey candidate).
   NEXT: batch 17 (FLL-TP-RHIZOM-2023, HOAI-2021).
 CONVERGENCE (batches 1-16): 41 guidelines full-treated.
+
+FULL-TREATMENT BATCH 17 OPENED 2026-07-31 — FLL-TP-RHIZOM-2023(3eq/24cr), HOAI-2021(6eq/23cr fee schedule).
+  wf_799d72a6-81d / wxk4yjj30. NEXT (final DWA stretch): DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/
+  179-1; DWA-A-125. Source-blocked (acquisition): DWA-A-131/226/201/M-229-1. PHANTOM-FIELD corpus survey
+  candidate (enum-value-token fields, ruling-class delete).
