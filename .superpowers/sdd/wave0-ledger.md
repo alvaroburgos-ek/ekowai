@@ -1235,3 +1235,11 @@ OWNER RATIFICATION QUEUE (sheet Sections W/X/Y/Z, biggest working-tool unblock):
 FULL-TREATMENT BATCH 5 OPENED 2026-07-31 — ISO-14046(1eq), ISO-14064-1(4eq), ISO-14064-2(4eq),
   ISO-14004. Only ISO-14064-2 is English (title_en sweep); 14046/14064-1/14004 German-encoded
   (title_en=translation ruling). wf_54435206-b65 / w6ryzgdbc.
+
+FULL-TREATMENT BATCH 5 CLOSED 2026-07-31 — ISO-14046/14064-1/14064-2/14004. Coverage COMPLETE (3/4;
+  14046 PARTIAL-defensible). APPLIED (mig 20260731100000): ISO-14064-1 3 eq units; ISO-14064-2 EQ-02/03
+  prose strip + title_en hygiene. RULINGS -> Section AA (block-mishome, is-not-null 12, modal, enum).
+  HONESTY CORRECTION: title_en NULL is NOT a blank-title render bug (UI falls back title_en??title_de);
+  backfills were valid hygiene; German/Spanish fallback-to-title_de = the real translation gap.
+CONVERGENCE (batches 1-5): 19 guidelines full-treated coverage-verified; ~47 equations verified;
+  source-settled applied each. NEXT: batch 6 = German DWA (DWA-M-205/A-222/A-262E/M-363).
