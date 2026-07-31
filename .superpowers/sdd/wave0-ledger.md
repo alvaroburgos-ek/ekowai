@@ -1386,3 +1386,8 @@ FULL-TREATMENT BATCH 14 CLOSED 2026-07-31 — DIN-EN-ISO-14044 (whole gate layer
   RULINGS -> Section AJ (biggest single under-enforcement: entire standard's gates decorative). NEXT:
   batch 15 (VDI-3814-Blatt-2-1, ISO-9001 Spanish).
 CONVERGENCE (batches 1-14): 37 guidelines full-treated.
+
+FULL-TREATMENT BATCH 15 OPENED 2026-07-31 — VDI-3814-Blatt-2-1(0eq/28cr German), ISO-9001(0eq/48cr
+  Spanish-encoded). wf_d44a8fc1-ff7 / wwowzyqca. ISO-9001 Spanish: title_en=translation ruling; watch
+  == 'si'/'no' boolean gates (si->True class). NEXT: FLL-Naturteich/GAR-2023/TP-RHIZOM; HOAI-2021;
+  DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1; DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
