@@ -1453,3 +1453,12 @@ FULL-TREATMENT BATCH 20 OPENED 2026-07-31 — DWA-M-1200-1(1eq/21cr), DWA-M-1200
   DWA-A-131/226/201/M-229-1. CONVERGENCE: 47/71 full-treated; 24 untouched (incl 4 source-blocked → ~20
   reachable). TOP [CODE] next session: validator rule 16 phantom-enum-value-field (spec in ratification
   Section AO); implement + corpus re-run before more deletes.
+
+FULL-TREATMENT BATCH 20 CLOSED 2026-07-31 — DWA-M-1200-1 + DWA-M-1200-2 → 49 guidelines full-treated.
+  Equations 1/1 + 4/4 faithful. ZERO source-settled auto-applies (all enforcement/severity/design rulings);
+  no migration. ⚠ DWA-M-1200-1 = GELBDRUCK/draft (do-not-touch). Rulings sheeted Section AP. HIGH items:
+  1200-1 CR-004 guard-chain parse bug (classes B/C/D vacuous-pass), 1200-2 REQ-04 bare-symbol-RHS permanent
+  block of the CORE validation gate. ACCUMULATING [CODE]/validator classes: rule 16 phantom-enum-field,
+  rule 17 bare-symbol-rhs (5 instances b19-20), rule 18 unparenthesised-guard-chain, unit-"None" survey.
+  NEXT: DWA-M-760(6eq/20cr)+DWA-M-708(5eq/14cr). Remaining after: DWA-M-732/187/381E. CONVERGENCE 49/71;
+  22 untouched (4 source-blocked → ~18 reachable).
