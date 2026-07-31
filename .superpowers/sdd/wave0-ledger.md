@@ -1505,3 +1505,10 @@ FULL-TREATMENT BATCH 23 CLOSED 2026-08-01 — DWA-M-381E + DVS-2225-4 (both Wei�
 FULL-TREATMENT BATCH 24 OPENED 2026-08-01 — DWA-A-272E(10eq/36cr, English), DWA-M-820-3(0eq/32cr, German).
   wf_c1b8af95-9ad / w2jbrnynx. Last reachable pair w/ confirmed PDFs. Remaining after: ISO-5667-6(PDF?).
   CONVERGENCE 58/71.
+
+FULL-TREATMENT BATCH 24 CLOSED 2026-08-01 — DWA-A-272E + DWA-M-820-3 (both Weißdruck) → 60 treated.
+  APPLIED mig 20260801110000 (A272E RULE-7 inline-unit strip, verified, rollback -batch24). A272E eq 9/10
+  faithful + RULE-7 now computes; 820-3 0 eq. Rulings sheeted AT (A272E 6 inert gates + engine gaps + modal
+  + dup codes; 820-3 systematic 8-gate phase-goal mis-home cluster + parse-fails + REQ-30 mix-up). NEW class:
+  dangling-rule-reference inert gate. REACHABLE-UNTOUCHED now 1: ISO-5667-6 (PDF unconfirmed — verify next).
+  CONVERGENCE 60/71.
