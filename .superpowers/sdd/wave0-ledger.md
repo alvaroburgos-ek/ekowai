@@ -1279,3 +1279,10 @@ GERMAN FORMULA-FIX FLYWHEEL 2026-07-31 — verified engine mechanisms (comma->ER
   APPLIED DWA-M-363 case-exact (mig 20260731120000): Gl(2)/Gl(3)/Gl(h2s-mg) broken->computes,
   Gl(k-half) normalized. Registered flywheel class. REMAINING short-symbol maps (Gl1/4a/4b/5-f3/5/6) +
   Gl(7) ruling + singletons -> sheet AB-1, apply next w/ reproduction check.
+
+FULL-TREATMENT BATCH 7 OPENED 2026-07-31 — DWA-A-262E(18eq/60cr), DWA-M-205(24eq/72cr). German, eq-heavy,
+  German-format-fix-aware. wf_b901afb2-1b0 / wiebzv3sh. SELF-SUSTAINING: on completion -> process + apply
+  source-settled (German-format eq fixes reproduction-checked, ja->True, enum-value) + sheet rulings +
+  commit + dispatch batch 8 (DWA-A-131 78eq / DWA-M-816 / DWA-M-820-x / DWA-A-226 / DIN / VDI ...).
+DWA-M-363 formula thread: 6 eq now compute (Gl2/3/6/h2s + Gl1/5-f3); Gl4a/4b/5 symbol-mapped but e^
+  engine-gap (manual); Gl(7) OR-ambiguity ruling. Committed 8b61eab + short-symbol commit.
