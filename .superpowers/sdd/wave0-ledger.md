@@ -1501,3 +1501,7 @@ FULL-TREATMENT BATCH 23 CLOSED 2026-08-01 — DWA-M-381E + DVS-2225-4 (both Wei�
   Equations M381E 3/4 faithful + CRF now computes; DVS 3/3 faithful. Rulings sheeted AS (M381E CR-013 logic
   inversion HIGH, CR-011/012 conflict; DVS CR-11/18 vacuous + CR-03 fabricated bounds). REACHABLE-UNTOUCHED
   now 3: DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF?). CONVERGENCE 58/71. NEXT: DWA-A-272E + DWA-M-820-3.
+
+FULL-TREATMENT BATCH 24 OPENED 2026-08-01 — DWA-A-272E(10eq/36cr, English), DWA-M-820-3(0eq/32cr, German).
+  wf_c1b8af95-9ad / w2jbrnynx. Last reachable pair w/ confirmed PDFs. Remaining after: ISO-5667-6(PDF?).
+  CONVERGENCE 58/71.
