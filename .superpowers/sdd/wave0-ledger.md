@@ -1399,3 +1399,9 @@ CONVERGENCE (batches 1-15): 39 guidelines full-treated coverage-verified.
 FULL-TREATMENT BATCH 16 OPENED 2026-07-31 — FLL-Naturteich(6eq/33cr English), FLL-GAR-2023(4eq/30cr
   German, prior revision pass). wf_3350d68e-ad7 / wypwvnima. NEXT: FLL-TP-RHIZOM-2023; HOAI-2021;
   DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1; DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
+
+FULL-TREATMENT BATCH 16 CLOSED 2026-07-31 — FLL-Naturteich (6 eq verify; PHANTOM-FIELDS new class,
+  nested-guard bug, many mis-homes), FLL-GAR-2023 (4/4 eq faithful, block-mishomes). No auto-apply (all
+  rulings/destructive) -> Section AL. NEW class: phantom enum-value-token fields (corpus survey candidate).
+  NEXT: batch 17 (FLL-TP-RHIZOM-2023, HOAI-2021).
+CONVERGENCE (batches 1-16): 41 guidelines full-treated.
