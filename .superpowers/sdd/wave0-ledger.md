@@ -1315,3 +1315,8 @@ FULL-TREATMENT BATCH 9 OPENED 2026-07-31 — DWA-M-1200-3(10eq/32cr), DWA-M-820-
   DIN-18130-1, DIN-EN-16941-2, DIN-EN-ISO-14044), Spanish (ISO-9001, ISO-14067 already done),
   FLL-Naturteich/FLL-GAR/FLL-TP-RHIZOM, HOAI-2021, DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/
   179-1, DWA-A-125. Source-blocked (no PDF): DWA-A-131/226/201/M-229-1 -> acquisition list.
+
+FULL-TREATMENT BATCH 9 CLOSED 2026-07-31 — DWA-M-1200-3 (all 15 tables materialized, 10 eq faithful,
+  STRONG), DWA-M-820-1. No clean auto-apply (gate bugs = block-condition/mis-home rulings). RULINGS -> AE:
+  CR-06/CR-14 severe enum-value/case + mis-home, bare-placeholder CRs, empty-dup gates, coverage gaps.
+CONVERGENCE (batches 1-9): 27 guidelines full-treated. NEXT: batch 10 (DIN/VDI German + remaining DWA).
