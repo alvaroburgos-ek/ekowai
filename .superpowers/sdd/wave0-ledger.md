@@ -1327,3 +1327,18 @@ FULL-TREATMENT BATCH 10 OPENED 2026-07-31 — DIN-EN-16941-2(2eq/19cr), VDI-3477
   NEXT queue: DIN-1989-1/-2, DIN-14021, DIN-276, VDI-2163/3814, DIN-14071-1, DIN-18130-1, DIN-EN-ISO-14044;
   ISO-9001 (Spanish); FLL-Naturteich/GAR/RHIZOM; HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/1200-1/2/
   179-1; DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
+
+FULL-TREATMENT BATCH 10 CLOSED 2026-07-31 — DIN-EN-16941-2 (coverage strong, 2 eq compute), VDI-3477
+  (18 eq, 10 faithful). Condition-rewrite source-settled PENDING (Section AF: DIN CR-07, VDI CR-04/11 —
+  apply next w/ reproduction check). RULINGS: IS-NOT-NULL, block-mishome, coverage (DIN Tab.D unmaterialized).
+CONVERGENCE (batches 1-10): 29 guidelines full-treated coverage-verified. ~54 equations verified faithful.
+=== CONTEXT-BOUNDARY 2026-07-31 (after batch 10) ===
+  Processed 10 full-treatment batches (29 guidelines) + corpus sweeps this multi-turn run. Batch 11 NOT
+  dispatched (clean boundary). NEXT: dispatch batch 11 = DIN-1989-1 + DIN-14021 (or next available DIN/VDI);
+  then DIN-276, VDI-2163/3814, DIN-14071-1, DIN-18130-1, DIN-EN-ISO-14044; ISO-9001 (Spanish); FLL-*;
+  HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/1200-1/2/179-1; DWA-A-125. Source-blocked (acquisition):
+  DWA-A-131/226/201, DWA-M-229-1. APPLY-PENDING source-settled: DWA-A-262E 12 eq unit-strips (AC-1),
+  VDI-3477/DIN CR condition fixes (AF), DWA-M-820-1 3 SS. All batch workflows use the inline template w/
+  German-format-fix awareness. OWNER RATIFICATION QUEUE (sheet W..AF): BLOCK-mishome re-homes (~110),
+  IS-NOT-NULL safety gates (~40), modal over-block (incl DWA-M-820-2 41, DWA-M-820-1), DWA materialization
+  tables. One "approve block re-homes" = dozens of worksheets unblocked.
