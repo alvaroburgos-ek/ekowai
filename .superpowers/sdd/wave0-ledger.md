@@ -1512,3 +1512,8 @@ FULL-TREATMENT BATCH 24 CLOSED 2026-08-01 — DWA-A-272E + DWA-M-820-3 (both Wei
   + dup codes; 820-3 systematic 8-gate phase-goal mis-home cluster + parse-fails + REQ-30 mix-up). NEW class:
   dangling-rule-reference inert gate. REACHABLE-UNTOUCHED now 1: ISO-5667-6 (PDF unconfirmed — verify next).
   CONVERGENCE 60/71.
+
+FULL-TREATMENT BATCH 25 OPENED 2026-08-01 — ISO-5667-6 (2eq/30cr, English) SOLO. wf_26f4a44b-91a / wvb4jqga4.
+  SOURCE = TEXT extraction only (ISO-5667-6-2015.txt); NO rendered PDF → VC-CAP: structural/engine fixes
+  applicable, value-contradiction fixes sheeted "needs PDF acquisition for VA". LAST reachable-untouched
+  standard. After this: 60→61 treated; only 6 prior re-touches + 4 source-blocked remain (of 71).
