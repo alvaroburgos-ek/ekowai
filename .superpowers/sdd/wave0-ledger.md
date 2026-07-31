@@ -1273,3 +1273,9 @@ FULL-TREATMENT BATCH 6 CLOSED 2026-07-31 — DWA-A-222, DWA-M-363 (German engine
   KEY LESSON: German standards' formulas are broken by decimal-commas + uppercase-symbols-vs-lowercase-
   fields, NOT by content — a rich source-settled parser-fix class (register as flywheel class next).
 CONVERGENCE (batches 1-6): 21 guidelines full-treated; DWA-A-222 31 gates fixed live.
+
+GERMAN FORMULA-FIX FLYWHEEL 2026-07-31 — verified engine mechanisms (comma->ERROR, uppercase symbol->
+  manual_required case-sensitive, ~=->error). Corpus comma survey small (DWA-M-363 12 + 3 singletons).
+  APPLIED DWA-M-363 case-exact (mig 20260731120000): Gl(2)/Gl(3)/Gl(h2s-mg) broken->computes,
+  Gl(k-half) normalized. Registered flywheel class. REMAINING short-symbol maps (Gl1/4a/4b/5-f3/5/6) +
+  Gl(7) ruling + singletons -> sheet AB-1, apply next w/ reproduction check.
