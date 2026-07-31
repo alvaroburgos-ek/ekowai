@@ -1395,3 +1395,7 @@ FULL-TREATMENT BATCH 15 OPENED 2026-07-31 — VDI-3814-Blatt-2-1(0eq/28cr German
 FULL-TREATMENT BATCH 15 CLOSED 2026-07-31 — VDI-3814-Blatt-2-1 (gate layer clean, coverage+vacuous-gate
   rulings), ISO-9001 Spanish (IS-NOT-NULL rulings). No auto-apply. -> Section AK. NEXT: batch 16 (FLL).
 CONVERGENCE (batches 1-15): 39 guidelines full-treated coverage-verified.
+
+FULL-TREATMENT BATCH 16 OPENED 2026-07-31 — FLL-Naturteich(6eq/33cr English), FLL-GAR-2023(4eq/30cr
+  German, prior revision pass). wf_3350d68e-ad7 / wypwvnima. NEXT: FLL-TP-RHIZOM-2023; HOAI-2021;
+  DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1; DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
