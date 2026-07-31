@@ -1494,3 +1494,10 @@ FULL-TREATMENT BATCH 22 CLOSED 2026-08-01 — DWA-M-732 (Weißdruck) + DWA-M-187
 FULL-TREATMENT BATCH 23 OPENED 2026-08-01 — DWA-M-381E(4eq/20cr, English), DVS-2225-4(3eq/18cr, German).
   wf_c5dd6f18-c48 / w6rue3uma. Agents resolve std_id by code (DVS id not pre-fetched). Remaining after:
   DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF?). CONVERGENCE 56/71.
+
+FULL-TREATMENT BATCH 23 CLOSED 2026-08-01 — DWA-M-381E + DVS-2225-4 (both Weißdruck) → 58 treated.
+  APPLIED mig 20260801100000 (7 fixes: M381E CRF **→^ [unblocks cost chain] + 3 output_units + CR-009
+  upstream→downstream[R-2 re-extracted]; DVS 2 output_units 'mm'), all verified, rollback -batch23.
+  Equations M381E 3/4 faithful + CRF now computes; DVS 3/3 faithful. Rulings sheeted AS (M381E CR-013 logic
+  inversion HIGH, CR-011/012 conflict; DVS CR-11/18 vacuous + CR-03 fabricated bounds). REACHABLE-UNTOUCHED
+  now 3: DWA-A-272E, DWA-M-820-3, ISO-5667-6(PDF?). CONVERGENCE 58/71. NEXT: DWA-A-272E + DWA-M-820-3.
