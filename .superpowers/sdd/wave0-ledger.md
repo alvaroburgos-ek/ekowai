@@ -1380,3 +1380,9 @@ FULL-TREATMENT BATCH 14 OPENED 2026-07-31 — DIN-EN-ISO-14044(1eq/17cr LCA), VD
   wf_f729d516-877 / wlqw497rg. NEXT: VDI-3814-Blatt-2-1; ISO-9001(Spanish); FLL-Naturteich/GAR-2023/
   TP-RHIZOM; HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1; DWA-A-125.
   Source-blocked: DWA-A-131/226/201/M-229-1.
+
+FULL-TREATMENT BATCH 14 CLOSED 2026-07-31 — DIN-EN-ISO-14044 (whole gate layer IS-NOT-NULL-on-boolean =
+  systematic under-enforcement, all rulings; EQ-01 SUM engine-gap), VDI-2163. No clean auto-apply.
+  RULINGS -> Section AJ (biggest single under-enforcement: entire standard's gates decorative). NEXT:
+  batch 15 (VDI-3814-Blatt-2-1, ISO-9001 Spanish).
+CONVERGENCE (batches 1-14): 37 guidelines full-treated.
