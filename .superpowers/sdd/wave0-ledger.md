@@ -1286,3 +1286,11 @@ FULL-TREATMENT BATCH 7 OPENED 2026-07-31 — DWA-A-262E(18eq/60cr), DWA-M-205(24
   commit + dispatch batch 8 (DWA-A-131 78eq / DWA-M-816 / DWA-M-820-x / DWA-A-226 / DIN / VDI ...).
 DWA-M-363 formula thread: 6 eq now compute (Gl2/3/6/h2s + Gl1/5-f3); Gl4a/4b/5 symbol-mapped but e^
   engine-gap (manual); Gl(7) OR-ambiguity ruling. Committed 8b61eab + short-symbol commit.
+
+FULL-TREATMENT BATCH 7 CLOSED 2026-07-31 — DWA-A-262E, DWA-M-205. APPLIED (mig 20260731140000):
+  DWA-M-205 24 dead attestation gates ja/nein->True/False. Equations verified. PENDING source-settled
+  (Section AC-1): DWA-A-262E 12 eq unit-in-formula strips (target formulas documented). COVERAGE: big
+  materialization gaps both (Tables unmaterialized; pretreatment sizing ungated). RULINGS: block-mishomes
+  ~24, tautology/dimension/title gate defects. NEXT: batch 8.
+CONVERGENCE (batches 1-7): 23 guidelines full-treated; DWA-A-222 31 + DWA-M-205 24 = 55 dead attestation
+  gates fixed live; DWA-M-363 6 eq compute. German attestation-gate fix (ja->True) = high-yield class.
