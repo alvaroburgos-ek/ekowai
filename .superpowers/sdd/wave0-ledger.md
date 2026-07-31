@@ -1370,3 +1370,8 @@ FULL-TREATMENT BATCH 13 OPENED 2026-07-31 — DIN-14071-1(0eq/17cr LCA critical 
   (8eq/7cr soil k_f). wf_58eb4da5-2d9 / wulen6sfm. NEXT: DIN-EN-ISO-14044, VDI-2163, VDI-3814-Blatt-2-1;
   ISO-9001(Spanish); FLL-Naturteich/GAR-2023/TP-RHIZOM; HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/
   1200-1/1200-2/179-1; DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
+
+FULL-TREATMENT BATCH 13 CLOSED 2026-07-31 — DIN-14071-1 (all rulings, REQ-14 un-completable), DIN-18130-1
+  (7/8 eq faithful). APPLIED (mig 20260731180000): DIN-18130-1 Gl.6 chained-equality->single RHS
+  (error->computed). RULINGS -> AI. NEXT: batch 14 (DIN-EN-ISO-14044, VDI-2163).
+CONVERGENCE (batches 1-13): 35 guidelines full-treated.
