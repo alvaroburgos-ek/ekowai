@@ -1462,3 +1462,7 @@ FULL-TREATMENT BATCH 20 CLOSED 2026-07-31 — DWA-M-1200-1 + DWA-M-1200-2 → 49
   rule 17 bare-symbol-rhs (5 instances b19-20), rule 18 unparenthesised-guard-chain, unit-"None" survey.
   NEXT: DWA-M-760(6eq/20cr)+DWA-M-708(5eq/14cr). Remaining after: DWA-M-732/187/381E. CONVERGENCE 49/71;
   22 untouched (4 source-blocked → ~18 reachable).
+
+FULL-TREATMENT BATCH 21 OPENED 2026-07-31 — DWA-M-760(6eq/20cr, _WD), DWA-M-708(5eq/14cr, verify edition).
+  wf_dc4a2b5d-34b / wvrtmdmtd. Schema gained bare-symbol-rhs + guard-chain ruling kinds + edition-check
+  step. Remaining after: DWA-M-732/187/381E. CONVERGENCE 49/71.
