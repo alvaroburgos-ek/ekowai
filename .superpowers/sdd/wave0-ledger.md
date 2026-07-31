@@ -1263,3 +1263,13 @@ OWNER RATIFICATION QUEUE (sheet W/X/Y/Z/AA — the biggest working-tool unblock)
   BLOCK-mishome re-homes (~86); IS-NOT-NULL safety-gate strengthenings (~36); modal over-block
   downgrades; ATV CR-025 pipette bug; invented-enum corrections. One "approve block re-homes" =>
   dozens of worksheets unblocked across ~19 guidelines.
+
+FULL-TREATMENT BATCH 6 CLOSED 2026-07-31 — DWA-A-222, DWA-M-363 (German engineering). Different profile:
+  eq correct but broken by German FORMATTING + big MATERIALIZATION gaps. APPLIED (mig 20260731110000):
+  DWA-A-222 31 dead attestation gates =='ja'->==True (boolean; were always-failing) + GK enum value fix.
+  PENDING source-settled (Section AB-1/2, apply next): DWA-M-363 ~11 eq comma->dot + symbol-lowercase +
+  ~=->= + prose-strip + units; DWA-A-222 28 eq units. COVERAGE: DWA-A-222 SEV-1 materialization gaps
+  (Tab.2-7 + 3 empty-stub worksheets) = big encode work (Section AB-3). RULINGS: block-mishomes.
+  KEY LESSON: German standards' formulas are broken by decimal-commas + uppercase-symbols-vs-lowercase-
+  fields, NOT by content — a rich source-settled parser-fix class (register as flywheel class next).
+CONVERGENCE (batches 1-6): 21 guidelines full-treated; DWA-A-222 31 gates fixed live.
