@@ -1354,3 +1354,9 @@ FULL-TREATMENT BATCH 11 CLOSED 2026-07-31 — DIN-1989-1, DIN-14021. APPLIED (mi
   RULINGS -> AG: coverage tables, is-not-null batch, block-mishome. NEXT: batch 12 (DIN-1989-2, DIN-276).
 CONVERGENCE (batches 1-11): 31 guidelines full-treated; German formula-fix class now spans DWA-M-363/
   A-262E/DIN-1989-1/DIN-14021 (comma/case/short-symbol/unit-strip all reproduction-checked).
+
+FULL-TREATMENT BATCH 12 OPENED 2026-07-31 — DIN-1989-2(9eq/17cr), DIN-276(53eq/32cr large cost-planning).
+  wf_3964bf0d-142 / w46e9gcyb. On completion -> process + apply + sheet + commit + dispatch batch 13.
+  NEXT queue: DIN-14071-1, DIN-18130-1, DIN-EN-ISO-14044, VDI-2163, VDI-3814-Blatt-2-1; ISO-9001(Spanish);
+  FLL-Naturteich/GAR-2023/TP-RHIZOM; HOAI-2021; DWA-M-732/708/760/187/349/229-2/381E/1200-1/1200-2/179-1;
+  DWA-A-125. Source-blocked: DWA-A-131/226/201/M-229-1.
