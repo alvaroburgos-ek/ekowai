@@ -52,15 +52,36 @@ export function WorksheetListSidebar({
 
   return (
     <nav className="space-y-4 sm:space-y-6 lg:sticky lg:top-6">
-      <a
-        href={`/api/projects/${projectId}/standards/${standardCode}/report`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
-      >
-        <FileDown className="size-3.5" aria-hidden />
-        Bericht als PDF
-      </a>
+      <div className="flex flex-col gap-1.5">
+        <a
+          href={`/api/projects/${projectId}/standards/${standardCode}/report`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+        >
+          <FileDown className="size-3.5" aria-hidden />
+          Bericht als PDF
+        </a>
+        <a
+          href={`/api/projects/${projectId}/standards/${standardCode}/conformity`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+          title="Nur verfügbar, wenn alle Arbeitsblätter genehmigt/final sind"
+        >
+          <FileDown className="size-3.5" aria-hidden />
+          Konformitätserklärung
+        </a>
+        <a
+          href={`/api/projects/${projectId}/standards/${standardCode}/valuetable`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+        >
+          <FileDown className="size-3.5" aria-hidden />
+          Wertetabelle (Zeichnung)
+        </a>
+      </div>
       {phases.map((phase) => (
         <div key={String(phase)} className="space-y-2">
           <div className="text-[10px] uppercase tracking-[0.25em] text-subtext">
