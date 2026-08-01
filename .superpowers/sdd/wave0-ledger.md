@@ -1557,3 +1557,9 @@ FULL-TREATMENT BATCH 27 OPENED 2026-08-01 — PRIOR RE-TOUCH: DWA-A-138-1(46eq/3
   re-check per continuous-improvement doctrine) + DWA-M-102-4(31eq/22cr). wf_93d02d7b-603 / wqhzjcvfo.
   Brief notes 138 known gaps (injected-D, cos_beta) to avoid re-flagging. Remaining prior after: DWA-A-102-2,
   VSME. Then 4 source-blocked + ISO-5667-6 PDF, then LEVEL-2 deployed-build proof.
+
+FULL-TREATMENT BATCH 27 CLOSED 2026-08-01 — DWA-A-138-1 (GOLD COPY, 46/46 faithful ZERO re-catch — class
+  library CONVERGED) + DWA-M-102-4 (6 source-settled applied) prior re-touch. APPLIED mig 20260801130000
+  (M102-4: Gl.10/11/12 inline-unit strip + Gl.1/5/6 self-output-in-input removal), verified, rollback
+  -batch27. NEW class: output-symbol-in-own-input-list. Rulings sheeted AW. Prior remaining: DWA-A-102-2,
+  VSME. NEXT: batch 28 = DWA-A-102-2 (+VSME, likely no-PDF). Then 4 source-blocked + ISO-5667-6 PDF, LEVEL-2.
