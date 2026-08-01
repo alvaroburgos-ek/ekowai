@@ -1,0 +1,35 @@
+# READY-TO-USE ERROR-EQUATION WORKLIST
+snapshot: 2026-08-01T08:49:35.831Z
+total: 31
+
+DWA-A-178	9	Unerwartetes Zeichen "<" an Position 2.	4 <= b_F <= b_krit = 7   [kg/(m^2*a)]
+DWA-A-178	10	Unerwartetes Zeichen "<" an Position 20.	B_RBFA_ab / A_E_b_a <= b_R_e_zul
+DWA-A-262E	8	Unerwartetes Zeichen ">" an Position 12.	Q_M >= SUM(Q_Dr_RU) >= SUM(Q_krit)  (l/s)
+DWA-A-272E	RULE-8	Unerwartetes Zeichen ">" an Position 31.	if favourable_conditions_count >= 1 then examine_NASS = true
+DWA-A-272E	RULE-9	Unerwartetes Zeichen "<" an Position 3.	30 <= T_plan <= 50
+DWA-A-272E	RULE-10	Unerwartetes Zeichen "{" an Position 26.	if material_flow_class in {yellowwater,brownwater,blackwater,faeces} then collection_technology in {UDT,UDDT,vacuum_toilet,dry_toilet}
+DWA-M-187	2	Unerwartetes Zeichen "<" an Position 22.	b_R_a / (A_F / A_b_a) <= b_krit
+DWA-M-187	2	Unerwartetes Zeichen "<" an Position 22.	b_R_a / (A_F / A_b_a) <= b_krit
+DWA-M-205	EQ-02	Unerwartetes Zeichen "<" an Position 17.	uv_dosis >= 300 AND uv_dosis <= 450
+DWA-M-205	EQ-02	Unerwartetes Zeichen "<" an Position 17.	uv_dosis >= 300 AND uv_dosis <= 450
+DWA-M-205	EQ-12	Unerwartetes Zeichen "<" an Position 17.	uv_dosis >= 400 AND uv_dosis <= 700
+DWA-M-205	EQ-06	Unerwartetes Zeichen "<" an Position 21.	spez_strom_uv >= 30 AND spez_strom_uv <= 60
+DWA-M-205	EQ-07	Unerwartetes Zeichen "<" an Position 29.	spez_energie_membran >= 0.1 AND spez_energie_membran <= 0.2
+DWA-M-205	EQ-09	Unerwartetes Zeichen "<" an Position 17.	clo2_dosis >= 5 AND clo2_dosis <= 10
+DWA-M-205	EQ-10	Unerwartetes Zeichen "<" an Position 19.	freies_chlor >= 1 AND freies_chlor <= 20
+DWA-M-205	EQ-06	Unerwartetes Zeichen "<" an Position 21.	spez_strom_uv >= 30 AND spez_strom_uv <= 60
+DWA-M-205	EQ-07	Unerwartetes Zeichen "<" an Position 29.	spez_energie_membran >= 0.1 AND spez_energie_membran <= 0.2
+DWA-M-205	EQ-09	Unerwartetes Zeichen "<" an Position 17.	clo2_dosis >= 5 AND clo2_dosis <= 10
+DWA-M-205	EQ-10	Unerwartetes Zeichen "<" an Position 19.	freies_chlor >= 1 AND freies_chlor <= 20
+DWA-M-205	EQ-12	Unerwartetes Zeichen "<" an Position 17.	uv_dosis >= 400 AND uv_dosis <= 700
+DWA-M-708	Gl-1	Unerwartetes Zeichen ">" an Position 48.	Mg^(2+) + NH4^(+) + HPO4^(2-) + OH^(-) + 5*H2O -> MgNH4PO4 * 6*H2O
+DWA-M-708	E-CH4-Yield	Unerwartetes Token am Ende des Ausdrucks.	Y_CH4 = 0.35 (Nm3 CH4 per kg CSB_el)
+DWA-M-708	E-CH4-Heizwert	Unerwartetes Zeichen "=" an Position 19.	H_CH4 = 36 (MJ per m3 CH4) = 10 (kWh per m3) = 12.6 (MJ per kg CSB_el)
+DWA-M-708	E-BHKW-El	Unerwartetes Token am Ende des Ausdrucks.	E_el = 1.4 (kWh per kg CSB_el)
+DWA-M-732	Gl-M732-03	Ungültige Zahl an Position 5: ".. 0.7"	n_CO2_neutral = 0.60 .. 0.70 * n_CO2
+DWA-M-760	EQ-M760-02	Unerwartetes Zeichen "#" an Position 3.	ns_fettabscheider >= NS  # NS_eff (gewaehlte Nenngroesse) >= berechnete NS, DIN EN 1825-2
+DWA-M-760	EQ-M760-02	Unerwartetes Zeichen "#" an Position 3.	ns_fettabscheider >= NS  # NS_eff (gewaehlte Nenngroesse) >= berechnete NS, DIN EN 1825-2
+DWA-M-816	6a	Unerwartetes Zeichen ":" an Position 3.	Z(t):  Z_1(t)  mit t = 1, ..., n_1  und nachfolgend  Z_2(t)  mit t = n_1+1, ..., n_1 + n_2
+DWA-M-816	6a_TR	Unerwartetes Zeichen ";" an Position 6.	Z_TR(t);  t = 1, ..., n_A - n_B  bei einem Vorlauf von n_B Jahren
+ISO-5667-6	A.1	Unerwartetes Token am Ende des Ausdrucks.	l = 0,13 * b^2 * c * (0,7*c + 2*g) / (g*d)
+VDI-3477	6	Unerwartetes Zeichen "<" an Position 10.	p_e / p_0 <= 0,95

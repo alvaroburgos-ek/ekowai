@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-08-01T08:11:45.792Z",
+  "exported_at": "2026-08-01T08:49:35.831Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -29422,19 +29422,6 @@
           "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
         },
         {
-          "id": "08d98c33-b401-44b3-ae04-d9193150c7d2",
-          "equation_number": "6",
-          "output_symbol": "eta_erf",
-          "input_symbols": [
-            "b_R_e_zul_AFS63",
-            "b_R_a_AFS63"
-          ],
-          "formula": "eta_erf = Max(0; 1 - b_R_e_zul_AFS63 / b_R_a_AFS63)  (-)  | eta_erf = Max(0; 1 - b_R_e_zul_AFS63 / b_R_a_AFS63) * 100  in %",
-          "clause_reference": "Section 5.2.3.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "8023ea91-44b5-41d4-ac92-8ef974824d7f"
-        },
-        {
           "id": "daef07a1-965b-4b4b-b1e4-7ba168a905fc",
           "equation_number": "7",
           "output_symbol": "B_R_e_AFS63_i",
@@ -29527,22 +29514,6 @@
           "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
         },
         {
-          "id": "626077ea-6c5a-4cf5-b10b-63836e0419b8",
-          "equation_number": "14",
-          "output_symbol": "B_R_e",
-          "input_symbols": [
-            "V_R_aM",
-            "e_0",
-            "C_e",
-            "C_KA",
-            "B_R_e_zul"
-          ],
-          "formula": "B_R_e = (V_R_aM * e_0 * C_e + V_R_aM * (100 - e_0) * C_KA) / 100 <= B_R_e_zul",
-          "clause_reference": "Section 7.3.2.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
-        },
-        {
           "id": "a5bd51eb-1d34-4970-b633-68f8935a8ce9",
           "equation_number": "15",
           "output_symbol": "e_0",
@@ -29585,18 +29556,6 @@
           "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
         },
         {
-          "id": "008a7bc7-43f2-4568-aa55-2f8431001c37",
-          "equation_number": "18",
-          "output_symbol": "e_0",
-          "input_symbols": [
-            "C_e_CSB"
-          ],
-          "formula": "e_0 <= (107 - 70) / (C_e_CSB - 70) * 100 = 3700 / (C_e_CSB - 70)",
-          "clause_reference": "Section 7.3.2.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
-        },
-        {
           "id": "7d065f24-3485-4cd3-bc56-a94d82fc5a03",
           "equation_number": "19",
           "output_symbol": "C_e_CSB",
@@ -29626,54 +29585,6 @@
           "worksheet_template_id": "f03dbb1a-7c50-4a3b-a481-bf3a15e2a428"
         },
         {
-          "id": "9a210010-2290-49f6-80e7-956680292ecb",
-          "equation_number": "21a",
-          "output_symbol": "a_R_AFS63",
-          "input_symbols": [
-            "b_R_a_AFS63"
-          ],
-          "formula": "a_R_AFS63 = 1.0  if b_R_a_AFS63 <= 478",
-          "clause_reference": "Section 7.3.2.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
-        },
-        {
-          "id": "53a5778f-0083-4743-95d0-93e681711b5f",
-          "equation_number": "21b",
-          "output_symbol": "a_R_AFS63",
-          "input_symbols": [
-            "b_R_a_AFS63"
-          ],
-          "formula": "a_R_AFS63 = Min(b_R_a_AFS63 / 478; 1.20)  if b_R_a_AFS63 > 478",
-          "clause_reference": "Section 7.3.2.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
-        },
-        {
-          "id": "d2d1bf8b-5e93-4ad8-963a-d297c89b2d14",
-          "equation_number": "22",
-          "output_symbol": "m",
-          "input_symbols": [
-            "C_T_aM_CSB"
-          ],
-          "formula": "m >= 7  if C_T_aM_CSB <= 600",
-          "clause_reference": "Section 7.3.4.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf"
-        },
-        {
-          "id": "70ebb0c4-2db9-4405-85ef-da863172666c",
-          "equation_number": "23",
-          "output_symbol": "m",
-          "input_symbols": [
-            "C_T_aM_CSB"
-          ],
-          "formula": "m >= (C_T_aM_CSB - 180) / 60  if C_T_aM_CSB > 600",
-          "clause_reference": "Section 7.3.4.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf"
-        },
-        {
           "id": "89404ab0-4b15-4544-a486-4d25a0f7edff",
           "equation_number": "24",
           "output_symbol": "m",
@@ -29684,30 +29595,6 @@
           ],
           "formula": "m = (Q_R_e + Q_R_Tr) / Q_T_aM",
           "clause_reference": "Section 7.3.4.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
-        },
-        {
-          "id": "9a8579c6-ed2b-4608-a10a-9475d041f1f0",
-          "equation_number": "25a",
-          "output_symbol": "r_krit",
-          "input_symbols": [
-            "t_f"
-          ],
-          "formula": "r_krit = 15 * 120 / (t_f + 120)  if t_f <= 120",
-          "clause_reference": "Section 7.3.4.5",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
-        },
-        {
-          "id": "3eea2a5a-f85a-46af-becb-bee4adc85bae",
-          "equation_number": "25b",
-          "output_symbol": "r_krit",
-          "input_symbols": [
-            "t_f"
-          ],
-          "formula": "r_krit = 7.5  if t_f > 120",
-          "clause_reference": "Section 7.3.4.5",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
         },
@@ -29737,6 +29624,21 @@
           "clause_reference": "Section 7.3.4.5",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "626077ea-6c5a-4cf5-b10b-63836e0419b8",
+          "equation_number": "14",
+          "output_symbol": "B_R_e",
+          "input_symbols": [
+            "V_R_aM",
+            "e_0",
+            "C_e",
+            "C_KA"
+          ],
+          "formula": "(V_R_aM * e_0 * C_e + V_R_aM * (100 - e_0) * C_KA) / 100",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
         },
         {
           "id": "0708808f-84f8-4b82-82f0-a8dda7977bee",
@@ -29871,18 +29773,6 @@
           "worksheet_template_id": "d07f3e88-096f-481c-b2a0-8f5d146e3d75"
         },
         {
-          "id": "1cd06fe2-0b67-447b-895c-0db16528edd1",
-          "equation_number": "B.10",
-          "output_symbol": "a_f",
-          "input_symbols": [
-            "t_f"
-          ],
-          "formula": "a_f = 0.50 + 50 / (t_f + 100)  if t_f <= 30  |  a_f = 0.885  if t_f > 30",
-          "clause_reference": "Section B.3.3.4",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15"
-        },
-        {
           "id": "aa0ed5ff-3b65-440b-8922-80c78e4dc84a",
           "equation_number": "B.11",
           "output_symbol": "Q_R_e",
@@ -29940,42 +29830,6 @@
           "worksheet_template_id": "cbef4e3e-e270-475c-b23a-b00bc0391989"
         },
         {
-          "id": "739e1f02-ad16-4410-80d8-dadf7173451a",
-          "equation_number": "B.15a",
-          "output_symbol": "a_c_CSB",
-          "input_symbols": [
-            "C_T_aM_CSB"
-          ],
-          "formula": "a_c_CSB = 1  if C_T_aM_CSB <= 600",
-          "clause_reference": "Section B.3.3.8",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
-        },
-        {
-          "id": "135015bc-ebf9-4818-844a-93dd9a2b853c",
-          "equation_number": "B.15b",
-          "output_symbol": "a_c_CSB",
-          "input_symbols": [
-            "C_T_aM_CSB"
-          ],
-          "formula": "a_c_CSB = C_T_aM_CSB / 600  if C_T_aM_CSB > 600",
-          "clause_reference": "Section B.3.3.8",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
-        },
-        {
-          "id": "89c13422-4fe9-423b-92a7-b59a00b9345d",
-          "equation_number": "B.16",
-          "output_symbol": "a_h",
-          "input_symbols": [
-            "h_Na"
-          ],
-          "formula": "a_h = h_Na/800 - 1  if 600 <= h_Na <= 1000  |  a_h = -0.25  if h_Na < 600  |  a_h = +0.25  if h_Na > 1000",
-          "clause_reference": "Section B.3.3.9",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
-        },
-        {
           "id": "c2ef6396-4394-4be5-9bd7-456b518deea8",
           "equation_number": "B.17",
           "output_symbol": "d_I",
@@ -30029,19 +29883,6 @@
           "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
         },
         {
-          "id": "51714be6-c070-42f2-8c0f-a8bec98b32d4",
-          "equation_number": "B.21",
-          "output_symbol": "a_a",
-          "input_symbols": [
-            "x_a",
-            "tau"
-          ],
-          "formula": "a_a = (24 / x_a)^2 * (2 - tau) / 10 ;  a_a >= 0",
-          "clause_reference": "Section B.3.3.10",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
-        },
-        {
           "id": "3fe9e932-5352-41cb-8212-ca5d7fcd6d8b",
           "equation_number": "B.22",
           "output_symbol": "b_R_a_AFS63",
@@ -30052,30 +29893,6 @@
           ],
           "formula": "b_R_a_AFS63 = (p_I * 280 + p_II * 530 + p_III * 760) / 100",
           "clause_reference": "Section B.3.3.11",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
-        },
-        {
-          "id": "517badbe-f603-483f-9d94-17b81d398834",
-          "equation_number": "B.23a",
-          "output_symbol": "a_R_AFS63",
-          "input_symbols": [
-            "b_R_a_AFS63"
-          ],
-          "formula": "a_R_AFS63 = 1.0  if b_R_a_AFS63 <= 478",
-          "clause_reference": "Section B.3.3.12",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
-        },
-        {
-          "id": "0cabf252-a613-4295-835b-3f005caa4dc1",
-          "equation_number": "B.23b",
-          "output_symbol": "a_R_AFS63",
-          "input_symbols": [
-            "b_R_a_AFS63"
-          ],
-          "formula": "a_R_AFS63 = Min(b_R_a_AFS63 / 478; 1.20)  if b_R_a_AFS63 > 478",
-          "clause_reference": "Section B.3.3.12",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
         },
@@ -30135,6 +29952,30 @@
           "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
         },
         {
+          "id": "1cd06fe2-0b67-447b-895c-0db16528edd1",
+          "equation_number": "B.10",
+          "output_symbol": "a_f",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "max(0.885, 0.50 + 50 / (t_f + 100))",
+          "clause_reference": "Section B.3.3.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15"
+        },
+        {
+          "id": "739e1f02-ad16-4410-80d8-dadf7173451a",
+          "equation_number": "B.15a",
+          "output_symbol": "a_c_CSB",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "max(1, C_T_aM_CSB / 600)",
+          "clause_reference": "Section B.3.3.8",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
           "id": "f24d3d57-1d4f-4bf4-8a2b-30978d188535",
           "equation_number": "REG-Bild4",
           "output_symbol": "q_A_Bem",
@@ -30157,6 +29998,67 @@
           "clause_reference": "Section 5.2.3.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "135015bc-ebf9-4818-844a-93dd9a2b853c",
+          "equation_number": "B.15b",
+          "output_symbol": "a_c_CSB",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "max(1, C_T_aM_CSB / 600)",
+          "clause_reference": "Section B.3.3.8",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "89c13422-4fe9-423b-92a7-b59a00b9345d",
+          "equation_number": "B.16",
+          "output_symbol": "a_h",
+          "input_symbols": [
+            "h_Na"
+          ],
+          "formula": "min(max(h_Na / 800 - 1, -0.25), 0.25)",
+          "clause_reference": "Section B.3.3.9",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "51714be6-c070-42f2-8c0f-a8bec98b32d4",
+          "equation_number": "B.21",
+          "output_symbol": "a_a",
+          "input_symbols": [
+            "x_a",
+            "tau"
+          ],
+          "formula": "max(0, (24 / x_a)^2 * (2 - tau) / 10)",
+          "clause_reference": "Section B.3.3.10",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2ad80cc0-b753-4256-93de-99526ec2b08a"
+        },
+        {
+          "id": "517badbe-f603-483f-9d94-17b81d398834",
+          "equation_number": "B.23a",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "min(max(b_R_a_AFS63 / 478, 1.0), 1.20)",
+          "clause_reference": "Section B.3.3.12",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "0cabf252-a613-4295-835b-3f005caa4dc1",
+          "equation_number": "B.23b",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "min(max(b_R_a_AFS63 / 478, 1.0), 1.20)",
+          "clause_reference": "Section B.3.3.12",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
         },
         {
           "id": "6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b",
@@ -30184,6 +30086,103 @@
           "clause_reference": "Tabelle 6",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
+        },
+        {
+          "id": "3eea2a5a-f85a-46af-becb-bee4adc85bae",
+          "equation_number": "25b",
+          "output_symbol": "r_krit",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "max(7.5, 15 * 120 / (t_f + 120))",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
+        },
+        {
+          "id": "008a7bc7-43f2-4568-aa55-2f8431001c37",
+          "equation_number": "18",
+          "output_symbol": "e_0",
+          "input_symbols": [
+            "C_e_CSB"
+          ],
+          "formula": "(107 - 70) / (C_e_CSB - 70) * 100",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ef8b5195-5fdc-4e61-b21d-ef5e685a8028"
+        },
+        {
+          "id": "08d98c33-b401-44b3-ae04-d9193150c7d2",
+          "equation_number": "6",
+          "output_symbol": "eta_erf",
+          "input_symbols": [
+            "b_R_e_zul_AFS63",
+            "b_R_a_AFS63"
+          ],
+          "formula": "max(0, 1 - b_R_e_zul_AFS63 / b_R_a_AFS63) * 100",
+          "clause_reference": "Section 5.2.3.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "8023ea91-44b5-41d4-ac92-8ef974824d7f"
+        },
+        {
+          "id": "9a210010-2290-49f6-80e7-956680292ecb",
+          "equation_number": "21a",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "min(max(b_R_a_AFS63 / 478, 1.0), 1.20)",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "53a5778f-0083-4743-95d0-93e681711b5f",
+          "equation_number": "21b",
+          "output_symbol": "a_R_AFS63",
+          "input_symbols": [
+            "b_R_a_AFS63"
+          ],
+          "formula": "min(max(b_R_a_AFS63 / 478, 1.0), 1.20)",
+          "clause_reference": "Section 7.3.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "cb183be9-c834-482a-a18c-d2e54d615772"
+        },
+        {
+          "id": "d2d1bf8b-5e93-4ad8-963a-d297c89b2d14",
+          "equation_number": "22",
+          "output_symbol": "m",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "max(7, (C_T_aM_CSB - 180) / 60)",
+          "clause_reference": "Section 7.3.4.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf"
+        },
+        {
+          "id": "70ebb0c4-2db9-4405-85ef-da863172666c",
+          "equation_number": "23",
+          "output_symbol": "m",
+          "input_symbols": [
+            "C_T_aM_CSB"
+          ],
+          "formula": "max(7, (C_T_aM_CSB - 180) / 60)",
+          "clause_reference": "Section 7.3.4.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2656d8d6-f442-475d-9381-f256ef0a74bf"
+        },
+        {
+          "id": "9a8579c6-ed2b-4608-a10a-9475d041f1f0",
+          "equation_number": "25a",
+          "output_symbol": "r_krit",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "max(7.5, 15 * 120 / (t_f + 120))",
+          "clause_reference": "Section 7.3.4.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "7142afef-e78a-4221-86b7-7d85f2db04a7"
         }
       ],
       "compliance": [
@@ -36517,7 +36516,7 @@
             "Q_K",
             "TS_BB"
           ],
-          "formula": "Q_RS * TS_RS = Q_SR * TS_BS + Q_K * TS_BB",
+          "formula": "TS_RS = (Q_SR * TS_BS + Q_K * TS_BB) / Q_RS",
           "clause_reference": "§B.1",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "b84c047c-4723-4b37-a763-7ce5cf69a84d"
@@ -53613,19 +53612,6 @@
       ],
       "equations": [
         {
-          "id": "d7c9d4f7-4561-4a00-a6be-b9b701a9969c",
-          "equation_number": "Gl.1",
-          "output_symbol": "Q_bem",
-          "input_symbols": [
-            "m",
-            "EZ"
-          ],
-          "formula": "Q_bem = Q_Tr_h_max = (1 + m) * EZ / 192",
-          "clause_reference": "§3.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "e46bcb5e-40bf-4852-bd39-d275321e7d98"
-        },
-        {
           "id": "7c3940fe-dd07-4d17-991f-c611be1f593a",
           "equation_number": "Gl.17",
           "output_symbol": "V_BB",
@@ -53637,21 +53623,6 @@
           "clause_reference": "§4.3.7",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "d91c0a26-f1b1-4931-ab7c-26c506bffb42"
-        },
-        {
-          "id": "8e180df0-8ab8-48b9-97a8-07ecc375f8fc",
-          "equation_number": "Gl.2",
-          "output_symbol": "Q_bem",
-          "input_symbols": [
-            "EZ",
-            "q_F",
-            "q_R_Tr",
-            "A_E_k"
-          ],
-          "formula": "Q_bem = Q_Tr_h_max = EZ / 192 + (q_F + q_R_Tr) * A_E_k",
-          "clause_reference": "§3.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "e46bcb5e-40bf-4852-bd39-d275321e7d98"
         },
         {
           "id": "c037b88b-7fda-4b9a-82d1-909b5003b925",
@@ -53984,6 +53955,34 @@
           "clause_reference": "§4.3.3",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "b67e9b8c-1e22-46d2-b091-c189a5d008b6"
+        },
+        {
+          "id": "d7c9d4f7-4561-4a00-a6be-b9b701a9969c",
+          "equation_number": "Gl.1",
+          "output_symbol": "Q_bem",
+          "input_symbols": [
+            "m",
+            "EZ"
+          ],
+          "formula": "Q_bem = (1 + m) * EZ / 192",
+          "clause_reference": "§3.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "e46bcb5e-40bf-4852-bd39-d275321e7d98"
+        },
+        {
+          "id": "8e180df0-8ab8-48b9-97a8-07ecc375f8fc",
+          "equation_number": "Gl.2",
+          "output_symbol": "Q_bem",
+          "input_symbols": [
+            "EZ",
+            "q_F",
+            "q_R_Tr",
+            "A_E_k"
+          ],
+          "formula": "Q_bem = EZ / 192 + (q_F + q_R_Tr) * A_E_k",
+          "clause_reference": "§3.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "e46bcb5e-40bf-4852-bd39-d275321e7d98"
         }
       ],
       "compliance": [
@@ -61459,25 +61458,10 @@
             "Q_S_d_aM",
             "x_Q_max"
           ],
-          "formula": "Q_F + Q_R_Tr = m * 24 * Q_S_d_aM / x_Q_max  (l/s)",
+          "formula": "m_multiplier * 24 * Q_S_d_aM / x_Q_max",
           "clause_reference": "§4.1.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
-        },
-        {
-          "id": "db6c259e-1f61-48a8-8ca1-ae4127feca17",
-          "equation_number": "6",
-          "output_symbol": "Q_M",
-          "input_symbols": [
-            "f_S_QM",
-            "Q_S_d_aM",
-            "Q_F",
-            "Q_Dr_RUB"
-          ],
-          "formula": "Q_M = f_S_QM * Q_S_d_aM + Q_F >= SUM(Q_Dr_RUB)  (l/s)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
         },
         {
           "id": "c99aba1c-ea82-4294-b136-9f9ce2f1f033",
@@ -61491,34 +61475,6 @@
           "clause_reference": "§4.1.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
-        },
-        {
-          "id": "cb011262-3770-41a8-bf27-293f19aafe90",
-          "equation_number": "13",
-          "output_symbol": "A_F_TKN_red",
-          "input_symbols": [
-            "B_d_TKN",
-            "A_F_CSB_red",
-            "B_A_TKN_zul"
-          ],
-          "formula": "for B_d_TKN / A_F_CSB_red >= B_A_TKN_zul  use: A_F_TKN_red = B_d_TKN / B_A_TKN_zul",
-          "clause_reference": "§4.3.4",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
-        },
-        {
-          "id": "7e28ed89-6c72-4058-b450-fe8d14f6e1c2",
-          "equation_number": "14",
-          "output_symbol": "A_F_TKN_red",
-          "input_symbols": [
-            "B_d_TKN",
-            "A_F_CSB_red",
-            "B_A_TKN_zul"
-          ],
-          "formula": "for B_d_TKN / A_F_CSB_red < B_A_TKN_zul  use: A_F_TKN_red = B_d_TKN / B_A_TKN_zul",
-          "clause_reference": "§4.3.4",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
         },
         {
           "id": "66f5a422-d422-48dc-b9aa-a01c195b958e",
@@ -61548,6 +61504,46 @@
           "clause_reference": "§4.5",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c724ad6d-f277-481f-9dd9-e4282f3b2dd8"
+        },
+        {
+          "id": "db6c259e-1f61-48a8-8ca1-ae4127feca17",
+          "equation_number": "6",
+          "output_symbol": "Q_M",
+          "input_symbols": [
+            "f_S_QM",
+            "Q_S_d_aM",
+            "Q_F"
+          ],
+          "formula": "f_S_QM * Q_S_d_aM + Q_F",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
+        },
+        {
+          "id": "cb011262-3770-41a8-bf27-293f19aafe90",
+          "equation_number": "13",
+          "output_symbol": "A_F_TKN_red",
+          "input_symbols": [
+            "B_d_TKN",
+            "B_A_TKN_zul"
+          ],
+          "formula": "B_d_TKN / B_A_TKN_zul",
+          "clause_reference": "§4.3.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
+        },
+        {
+          "id": "7e28ed89-6c72-4058-b450-fe8d14f6e1c2",
+          "equation_number": "14",
+          "output_symbol": "A_F_TKN_red",
+          "input_symbols": [
+            "B_d_TKN",
+            "B_A_TKN_zul"
+          ],
+          "formula": "B_d_TKN / B_A_TKN_zul",
+          "clause_reference": "§4.3.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
         },
         {
           "id": "88212dd3-8b60-430e-9937-cf1488027f99",
@@ -72530,14 +72526,13 @@
           "output_symbol": "a_F",
           "input_symbols": [
             "P",
-            "ET_p",
             "f_Fu",
             "Sp",
             "WK_max",
             "WP",
             "k_f"
           ],
-          "formula": "a_F = 0.0800734*ln(P) - 0.0582828*f_Fu - 0.0501693*Sp - 0.385767*(WK_max - WP) + 8.7040284/(11.9086896 + k_f) ; g_F = -0.2006 - 0.000253*ET_p + 0.05615*f_Fu - 0.0636*ln(1 + Sp) + 0.1596*ln(1 + k_f) + 0.2778*(WK_max - WP) ; v_F = 0.8529 - 0.1248*ln(P) + 0.00005057*ET_p + 0.002372*f_Fu + 0.1583*ln(1 + Sp)",
+          "formula": "a_F = 0.0800734*ln(P) - 0.0582828*f_Fu - 0.0501693*Sp - 0.385767*(WK_max - WP) + 8.7040284/(11.9086896 + k_f)",
           "clause_reference": "§A.6 (lines 830-834)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
@@ -72580,48 +72575,6 @@
           "clause_reference": "§5.1 (lines 564-567); referenced as Gl. (9) in §5.2.5, §C.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "edfe3c2d-277b-48b4-8988-339627205773",
-          "equation_number": "C.2",
-          "output_symbol": "a_F",
-          "input_symbols": [
-            "R_D_i",
-            "A_E_k_nb_i",
-            "P_korr"
-          ],
-          "formula": "a_F = sum_{i=1..n}(R_D,i * A_E,k,nb,i) / (P_korr * sum_{i=1..n}(A_E,k,nb,i))",
-          "clause_reference": "§C.6, Gl. (C.2) (line 1276)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
-        },
-        {
-          "id": "67341f0a-a6ea-4e4e-bd06-2d22ac19fd01",
-          "equation_number": "C.3",
-          "output_symbol": "g_F",
-          "input_symbols": [
-            "GWN_i",
-            "A_E_k_nb_i",
-            "P_korr"
-          ],
-          "formula": "g_F = sum_{i=1..n}(GWN_i * A_E,k,nb,i) / (P_korr * sum_{i=1..n}(A_E,k,nb,i))",
-          "clause_reference": "§C.6, Gl. (C.3) (line 1277)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
-        },
-        {
-          "id": "679cc49b-e869-4c5c-8de6-c92b40df29ee",
-          "equation_number": "C.4",
-          "output_symbol": "v_F",
-          "input_symbols": [
-            "ET_a_i",
-            "A_E_k_nb_i",
-            "P_korr"
-          ],
-          "formula": "v_F = sum_{i=1..n}(ET_a,i * A_E,k,nb,i) / (P_korr * sum_{i=1..n}(A_E,k,nb,i))",
-          "clause_reference": "§C.6, Gl. (C.4) (line 1278)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
         },
         {
           "id": "b81d9a54-ecbb-4eb8-84fb-5434af80af03",
@@ -72751,22 +72704,46 @@
           "worksheet_template_id": "bcee9138-b5af-4bfb-8f6b-67855e32897b"
         },
         {
-          "id": "25c75004-a856-492b-997d-c045cf422c46",
-          "equation_number": "A.7",
+          "id": "edfe3c2d-277b-48b4-8988-339627205773",
+          "equation_number": "C.2",
           "output_symbol": "a_F",
           "input_symbols": [
-            "P",
-            "ET_p",
-            "f_Fu",
-            "Sp",
-            "WK_max",
-            "WP",
-            "k_f"
+            "R_D_i",
+            "A_E_k_nb_i",
+            "P_korr"
           ],
-          "formula": "a_F = 0.05912*ln(P) - 0.02749*f_Fu - 0.03671*Sp - 0.30514*(WK_max - WP) + 4.97687/(4.7975 + k_f) ; g_F = 0.00004941*P - 0.0002817*ET_p + 0.02566*f_Fu - 0.03823*Sp + 0.691*exp(-6.465/k_f) ; v_F = 0.9012 - 0.1325*ln(P) + 0.00006661*ET_p + 0.002302*f_Fu + 0.1489*ln(1 + Sp)",
-          "clause_reference": "§A.7 (lines 848-850)",
+          "formula": "a_F = sum(R_D_i * A_E_k_nb_i) / (P_korr * sum(A_E_k_nb_i))",
+          "clause_reference": "§C.6, Gl. (C.2) (line 1276)",
           "verification_status": "imported_unverified",
-          "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
+          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
+        },
+        {
+          "id": "67341f0a-a6ea-4e4e-bd06-2d22ac19fd01",
+          "equation_number": "C.3",
+          "output_symbol": "g_F",
+          "input_symbols": [
+            "GWN_i",
+            "A_E_k_nb_i",
+            "P_korr"
+          ],
+          "formula": "g_F = sum(GWN_i * A_E_k_nb_i) / (P_korr * sum(A_E_k_nb_i))",
+          "clause_reference": "§C.6, Gl. (C.3) (line 1277)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
+        },
+        {
+          "id": "679cc49b-e869-4c5c-8de6-c92b40df29ee",
+          "equation_number": "C.4",
+          "output_symbol": "v_F",
+          "input_symbols": [
+            "ET_a_i",
+            "A_E_k_nb_i",
+            "P_korr"
+          ],
+          "formula": "v_F = sum(ET_a_i * A_E_k_nb_i) / (P_korr * sum(A_E_k_nb_i))",
+          "clause_reference": "§C.6, Gl. (C.4) (line 1278)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
         },
         {
           "id": "b1e3ec56-7e1c-4398-94f5-a3a5b204ead1",
@@ -72802,22 +72779,6 @@
           "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
         },
         {
-          "id": "d2beb25d-cd12-4a8c-b703-37932936fc13",
-          "equation_number": "A.10",
-          "output_symbol": "a_F",
-          "input_symbols": [
-            "P",
-            "ET_p",
-            "Sp",
-            "h_D",
-            "k_f"
-          ],
-          "formula": "a_F = 0.00004517*P - 0.03454*ln(Sp) + 0.1958/(0.2873 + k_f) ; g_F = 0.19761*ln(P) - 0.000506*ET_p + 0.016372*Sp - 0.001618*h_D - 0.327742*exp(0.346808/k_f) ; v_F = 0.2111 - 0.2544*ln(P) + 0.2073*ln(ET_p) + 0.0006249*Sp + 0.123*ln(h_D) - 0.000002806*k_f",
-          "clause_reference": "§A.10 (lines 888-890)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
-        },
-        {
           "id": "c8475112-e49b-4317-bb76-45449d2510a5",
           "equation_number": "B.2",
           "output_symbol": "a_A",
@@ -72830,21 +72791,6 @@
           "clause_reference": "§B.2 (lines 942-944)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "bc1e7262-38d0-4984-a58b-2a7eb37c0a20"
-        },
-        {
-          "id": "3e60661a-727f-42bb-addc-11fd4a1d53ba",
-          "equation_number": "B.3",
-          "output_symbol": "a_A",
-          "input_symbols": [
-            "P",
-            "ET_p",
-            "f_S_M",
-            "k_f"
-          ],
-          "formula": "a_A = 1 - g_A - v_A ; g_A = 0.8608 + 0.02385*ln(P) - 0.00005331*ET_p - 0.002827*f_S,M - 0.000002493*k_f + 0.0009514*ln(k_f / f_S,M) ; v_A = 0.000008562*ET_p + 2.611/(-64.35 + P) * f_S,M^0.9425 - 0.000001211*k_f",
-          "clause_reference": "§B.3 (lines 957-960)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "a2316355-cd70-4e8c-b8a2-20d3afc0d3fb"
         },
         {
           "id": "4a647c2c-cfd5-4056-abfc-d2853f91f41e",
@@ -72889,26 +72835,10 @@
             "h_Bw",
             "h_Nu"
           ],
-          "formula": "g_A = 0 ; a_A = 1 - v_A - e_A ; v_A = if(h_Bw == 0, 0, -0.0001927*P + 0.0001831*ET_p + 0.0006083*h_Bw - 0.0000003127*h_Bw^2 - 0.3092*exp(3.269/h_Sp) + 1.424/(2.782 + h_Br) + 0.0001885*h_Nu) ; e_A = if(h_Br == 0, 0, 0.4451 - 0.0003529*P - 0.00007728*ET_p + 0.06821*log10(h_Sp) - 0.0002507*h_Bw + 0.2349*log10(h_Br) + 0.0001738*h_Nu)",
+          "formula": "v_A = if(h_Bw == 0, 0, -0.0001927*P + 0.0001831*ET_p + 0.0006083*h_Bw - 0.0000003127*h_Bw^2 - 0.3092*exp(3.269/h_Sp) + 1.424/(2.782 + h_Br) + 0.0001885*h_Nu)",
           "clause_reference": "§B.6 (lines 1013, 1024-1025, 1037-1038)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "af7b291c-7ee3-41b0-b184-848af798d1e9"
-        },
-        {
-          "id": "44959aa9-9bd0-40c0-8889-ebe7e7fc36af",
-          "equation_number": "B.7",
-          "output_symbol": "v_A",
-          "input_symbols": [
-            "ET_p",
-            "A_W",
-            "P",
-            "A_b_a_i",
-            "a_F_i"
-          ],
-          "formula": "v_A = (ET_p * A_W) / (P * (A_W + sum_{i=1..n}(A_b,a,i * a_F,i))) ; a_A = 1 - v_A ; g_A = 0 ; check: 0 < v_A < 1 AND 0 < a_A < 1",
-          "clause_reference": "§B.7 (lines 1054-1056)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "253f0170-6e7e-4a1c-9a18-bf24bca3c2cb"
         },
         {
           "id": "681fdcea-c1f6-472d-9efb-1300e5bf1d4a",
@@ -72976,6 +72906,66 @@
           "clause_reference": "§C.4.2, Gl. (C.1) (line 1208)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "8c5aff13-5dff-4813-928f-c46a12aab1b4"
+        },
+        {
+          "id": "25c75004-a856-492b-997d-c045cf422c46",
+          "equation_number": "A.7",
+          "output_symbol": "a_F",
+          "input_symbols": [
+            "P",
+            "f_Fu",
+            "Sp",
+            "WK_max",
+            "WP",
+            "k_f"
+          ],
+          "formula": "a_F = 0.05912*ln(P) - 0.02749*f_Fu - 0.03671*Sp - 0.30514*(WK_max - WP) + 4.97687/(4.7975 + k_f)",
+          "clause_reference": "§A.7 (lines 848-850)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
+        },
+        {
+          "id": "d2beb25d-cd12-4a8c-b703-37932936fc13",
+          "equation_number": "A.10",
+          "output_symbol": "a_F",
+          "input_symbols": [
+            "P",
+            "Sp",
+            "k_f"
+          ],
+          "formula": "a_F = 0.00004517*P - 0.03454*ln(Sp) + 0.1958/(0.2873 + k_f)",
+          "clause_reference": "§A.10 (lines 888-890)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
+        },
+        {
+          "id": "3e60661a-727f-42bb-addc-11fd4a1d53ba",
+          "equation_number": "B.3",
+          "output_symbol": "a_A",
+          "input_symbols": [
+            "g_A",
+            "v_A"
+          ],
+          "formula": "a_A = 1 - g_A - v_A",
+          "clause_reference": "§B.3 (lines 957-960)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "a2316355-cd70-4e8c-b8a2-20d3afc0d3fb"
+        },
+        {
+          "id": "44959aa9-9bd0-40c0-8889-ebe7e7fc36af",
+          "equation_number": "B.7",
+          "output_symbol": "v_A",
+          "input_symbols": [
+            "ET_p",
+            "A_W",
+            "P",
+            "A_b_a_i",
+            "a_F_i"
+          ],
+          "formula": "v_A = (ET_p * A_W) / (P * (A_W + sum(A_b_a_i * a_F_i)))",
+          "clause_reference": "§B.7 (lines 1054-1056)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "253f0170-6e7e-4a1c-9a18-bf24bca3c2cb"
         }
       ],
       "compliance": [
@@ -109197,19 +109187,6 @@
           "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
         },
         {
-          "id": "b1d09312-e8b8-4087-bed6-35170514b298",
-          "equation_number": "Eq. (3)",
-          "output_symbol": "Q_GWT",
-          "input_symbols": [
-            "Q_GW",
-            "Q_SW"
-          ],
-          "formula": "Q_GWT = Q_GW, when Q_SW > Q_GW",
-          "clause_reference": "§9.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
-        },
-        {
           "id": "7e6180be-2e90-4172-ac9c-cf23fb533edb",
           "equation_number": "Ex. 9.3-A1",
           "output_symbol": "Q_GW",
@@ -109230,19 +109207,6 @@
           "worksheet_template_id": "6bfbb4e8-1a9c-4ef1-8611-20c7b742bec0"
         },
         {
-          "id": "5389af5f-a563-4401-9035-74223ec27f03",
-          "equation_number": "Eq. (4)",
-          "output_symbol": "Q_GWT",
-          "input_symbols": [
-            "Q_GW",
-            "Q_SW"
-          ],
-          "formula": "Q_GWT = Q_SW, when Q_GW > Q_SW",
-          "clause_reference": "§9.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
-        },
-        {
           "id": "554b0a01-3356-4a62-9780-fd727a569add",
           "equation_number": "QWB",
           "output_symbol": "Q_WB",
@@ -109256,19 +109220,6 @@
           "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         },
         {
-          "id": "7f92ffee-c3a3-461a-9dae-175a947c6676",
-          "equation_number": "Ex. 9.4",
-          "output_symbol": "Q_GWT",
-          "input_symbols": [
-            "Q_SW",
-            "Q_GW"
-          ],
-          "formula": "Q_GWT = Q_SW = 875 (l/d), since Q_GW (1625) > Q_SW (875)",
-          "clause_reference": "§9.4 Example calculation Part 3",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
-        },
-        {
           "id": "89340a0c-143a-4a2c-bba4-872906416e66",
           "equation_number": "Ex. 9.2",
           "output_symbol": "Q_SW",
@@ -109277,6 +109228,32 @@
           "clause_reference": "§9.2 Example calculation Part 1",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
+        },
+        {
+          "id": "5389af5f-a563-4401-9035-74223ec27f03",
+          "equation_number": "Eq. (4)",
+          "output_symbol": "Q_GWT",
+          "input_symbols": [
+            "Q_GW",
+            "Q_SW"
+          ],
+          "formula": "Q_GWT = min(Q_GW, Q_SW)",
+          "clause_reference": "§9.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
+        },
+        {
+          "id": "7f92ffee-c3a3-461a-9dae-175a947c6676",
+          "equation_number": "Ex. 9.4",
+          "output_symbol": "Q_GWT",
+          "input_symbols": [
+            "Q_GW",
+            "Q_SW"
+          ],
+          "formula": "Q_GWT = min(Q_GW, Q_SW)",
+          "clause_reference": "§9.4 Example calculation Part 3",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         },
         {
           "id": "8c9906c9-cc6e-4510-bda2-4e6a079ea912",
@@ -109329,6 +109306,32 @@
           "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
         },
         {
+          "id": "7bdc5484-3384-4105-8a4a-8e9bcda32008",
+          "equation_number": "Eq. (3)",
+          "output_symbol": "Q_GWT",
+          "input_symbols": [
+            "Q_GW",
+            "Q_SW"
+          ],
+          "formula": "Q_GWT = min(Q_GW, Q_SW)",
+          "clause_reference": "§9.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
+        },
+        {
+          "id": "f1ecf49d-6e05-4719-a3e8-0846b5148710",
+          "equation_number": "Eq. (4)",
+          "output_symbol": "Q_GWT",
+          "input_symbols": [
+            "Q_GW",
+            "Q_SW"
+          ],
+          "formula": "Q_GWT = min(Q_GW, Q_SW)",
+          "clause_reference": "§9.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
+        },
+        {
           "id": "1bf4c266-f2d8-4935-8239-270d8521fd0b",
           "equation_number": "Eq. (2)",
           "output_symbol": "Q_GW",
@@ -109342,40 +109345,14 @@
           "worksheet_template_id": "6bfbb4e8-1a9c-4ef1-8611-20c7b742bec0"
         },
         {
-          "id": "7bdc5484-3384-4105-8a4a-8e9bcda32008",
-          "equation_number": "Eq. (3)",
-          "output_symbol": "Q_GWT",
-          "input_symbols": [
-            "Q_GW",
-            "Q_SW"
-          ],
-          "formula": "Q_GWT = Q_GW, when Q_SW > Q_GW",
-          "clause_reference": "§9.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
-        },
-        {
-          "id": "f1ecf49d-6e05-4719-a3e8-0846b5148710",
-          "equation_number": "Eq. (4)",
-          "output_symbol": "Q_GWT",
-          "input_symbols": [
-            "Q_GW",
-            "Q_SW"
-          ],
-          "formula": "Q_GWT = Q_SW, when Q_GW > Q_SW",
-          "clause_reference": "§9.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
-        },
-        {
           "id": "dabf250c-2792-4deb-9700-4036e77a164b",
           "equation_number": "Ex. 9.4",
           "output_symbol": "Q_GWT",
           "input_symbols": [
-            "Q_SW",
-            "Q_GW"
+            "Q_GW",
+            "Q_SW"
           ],
-          "formula": "Q_GWT = Q_SW = 875 (l/d), since Q_GW (1625) > Q_SW (875)",
+          "formula": "Q_GWT = min(Q_GW, Q_SW)",
           "clause_reference": "§9.4",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
@@ -109431,6 +109408,19 @@
           "clause_reference": "§9.4",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
+        },
+        {
+          "id": "b1d09312-e8b8-4087-bed6-35170514b298",
+          "equation_number": "Eq. (3)",
+          "output_symbol": "Q_GWT",
+          "input_symbols": [
+            "Q_GW",
+            "Q_SW"
+          ],
+          "formula": "Q_GWT = min(Q_GW, Q_SW)",
+          "clause_reference": "§9.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         }
       ],
       "compliance": [
@@ -117304,19 +117294,6 @@
       ],
       "equations": [
         {
-          "id": "ea86e593-47c6-48e7-8354-cb85ba511843",
-          "equation_number": "Gl(7)",
-          "output_symbol": "ddoc_m_decomp_t",
-          "input_symbols": [
-            "ddoc_ma_t_minus_1",
-            "k_abbau"
-          ],
-          "formula": "DDOC_m_decomp_T = DDOC_ma_T_minus_1 - (1 - e^(-k))  [source verbatim]  OR  DDOC_m_decomp_T = DDOC_ma_T_minus_1 * (1 - e^(-k))  [IPCC 2006 Waste Model interpretation]",
-          "clause_reference": "§5.7 Gl. (7)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
           "id": "cfab7241-ba1b-40d9-8947-bf957e4542be",
           "equation_number": "Gl(4a)",
           "output_symbol": "g_t",
@@ -117448,37 +117425,6 @@
           "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
         },
         {
-          "id": "21202924-1835-4ed6-833b-10521265ce20",
-          "equation_number": "Gl(7)",
-          "output_symbol": "ddoc_m_decomp_t",
-          "input_symbols": [
-            "ddoc_ma_t_minus_1",
-            "k_abbau"
-          ],
-          "formula": "DDOC_m_decomp_T = DDOC_ma_T_minus_1 - (1 - e^(-k))  [source verbatim]  OR  DDOC_m_decomp_T = DDOC_ma_T_minus_1 * (1 - e^(-k))  [IPCC 2006 Waste Model interpretation]",
-          "clause_reference": "§5.7 Gl. (7)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
-        },
-        {
-          "id": "9c453ddb-2376-42c8-83be-9b2b8f849608",
-          "equation_number": "Gl(5)",
-          "output_symbol": "g_td",
-          "input_symbols": [
-            "c_ab",
-            "f_1_aerob",
-            "f_2_ausbeute",
-            "f_3",
-            "m_n_abfallmasse",
-            "k_abbau",
-            "t_jahr"
-          ],
-          "formula": "G_td = 1,868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
-          "clause_reference": "§5.7 Gl. (5)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
-        },
-        {
           "id": "905fe4b9-4926-4346-b9a0-92d9adde7df2",
           "equation_number": "Gl(5)",
           "output_symbol": "g_td",
@@ -117491,7 +117437,7 @@
             "k_abbau",
             "t_jahr"
           ],
-          "formula": "G_td = 1,868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
+          "formula": "G_td = 1.868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
           "clause_reference": "§5.7 Gl. (5)",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
@@ -117592,6 +117538,50 @@
           ],
           "formula": "ch4_erz_t = ddoc_m_decomp_t * f_methan * 16 / 12",
           "clause_reference": "§5.7 Gl. (6)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
+        },
+        {
+          "id": "9c453ddb-2376-42c8-83be-9b2b8f849608",
+          "equation_number": "Gl(5)",
+          "output_symbol": "g_td",
+          "input_symbols": [
+            "c_ab",
+            "f_1_aerob",
+            "f_2_ausbeute",
+            "f_3",
+            "m_n_abfallmasse",
+            "k_abbau",
+            "t_jahr"
+          ],
+          "formula": "G_td = 1.868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
+          "clause_reference": "§5.7 Gl. (5)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
+          "id": "21202924-1835-4ed6-833b-10521265ce20",
+          "equation_number": "Gl(7)",
+          "output_symbol": "ddoc_m_decomp_t",
+          "input_symbols": [
+            "ddoc_ma_t_minus_1",
+            "k_abbau"
+          ],
+          "formula": "DDOC_m_decomp_T = DDOC_ma_T_minus_1 - (1 - e^(-k))",
+          "clause_reference": "§5.7 Gl. (7)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
+          "id": "ea86e593-47c6-48e7-8354-cb85ba511843",
+          "equation_number": "Gl(7)",
+          "output_symbol": "ddoc_m_decomp_t",
+          "input_symbols": [
+            "ddoc_ma_t_minus_1",
+            "k_abbau"
+          ],
+          "formula": "DDOC_m_decomp_T = DDOC_ma_T_minus_1 - (1 - e^(-k))",
+          "clause_reference": "§5.7 Gl. (7)",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
         }
@@ -133759,20 +133749,6 @@
       ],
       "equations": [
         {
-          "id": "25bc8d41-e910-4bcb-bde6-e42fca403a8d",
-          "equation_number": "1a",
-          "output_symbol": "Z",
-          "input_symbols": [
-            "c_0",
-            "t",
-            "n"
-          ],
-          "formula": "Z(t) = c_0 * t^0  (= c_0)    t = 1, ..., n",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "45f5734c-9739-4db9-9f6d-d969642a2413"
-        },
-        {
           "id": "c204cc2f-8a40-4a1c-80a8-1e3510643af5",
           "equation_number": "1b",
           "output_symbol": "BW",
@@ -133821,6 +133797,18 @@
           "worksheet_template_id": "3007cdb5-6a2b-4465-9650-ac6b60bd8e40"
         },
         {
+          "id": "25bc8d41-e910-4bcb-bde6-e42fca403a8d",
+          "equation_number": "1a",
+          "output_symbol": "Z",
+          "input_symbols": [
+            "c_0"
+          ],
+          "formula": "Z = c_0",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "45f5734c-9739-4db9-9f6d-d969642a2413"
+        },
+        {
           "id": "6ae6ac64-456d-4bce-88df-857e6c19063b",
           "equation_number": "6b",
           "output_symbol": "BW",
@@ -133848,20 +133836,6 @@
           "clause_reference": "§4.4.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "a7884856-36ff-45e0-b09c-c4293ff8df45"
-        },
-        {
-          "id": "58f7825f-b1f9-40e0-87dd-3434a4b7ff58",
-          "equation_number": "4b",
-          "output_symbol": "BW",
-          "input_symbols": [
-            "c_k",
-            "RBF_k",
-            "q"
-          ],
-          "formula": "BW = SUM_{k=0..m} c_k * RBF_k(n; q)",
-          "clause_reference": "§4.1.5",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "ae247b86-26f2-44aa-a5a8-24143b5ea0fe"
         },
         {
           "id": "c099c43e-009d-4b85-bfbb-376265bd4de5",
@@ -133932,49 +133906,15 @@
           "worksheet_template_id": "a7884856-36ff-45e0-b09c-c4293ff8df45"
         },
         {
-          "id": "fb9faa7b-9c56-4188-b2a0-0d821c59a7bc",
-          "equation_number": "5c",
-          "output_symbol": "DUR",
-          "input_symbols": [
-            "c_k",
-            "RBF_k",
-            "q",
-            "p",
-            "n"
-          ],
-          "formula": "DUR = SUM_k c_k * RBF_{k+1}(n; q/p) / SUM_k c_k * RBF_k(n; q/p)",
-          "clause_reference": "§4.2.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "024dd070-d274-4efd-b06a-03c26877b7e8"
-        },
-        {
-          "id": "6249bd24-2a75-456d-8227-efa601cf5613",
-          "equation_number": "6c",
-          "output_symbol": "DUR_TR",
-          "input_symbols": [
-            "c_k",
-            "RBF_k",
-            "q",
-            "n_A",
-            "n_B",
-            "p"
-          ],
-          "formula": "DUR_TR = n_B + SUM_k c_k * RBF_{k+1}(n_A - n_B; q / p) / SUM_k c_k * RBF_k(n_A - n_B; q / p)",
-          "clause_reference": "§4.4.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "a7884856-36ff-45e0-b09c-c4293ff8df45"
-        },
-        {
           "id": "84c14fc4-f150-4383-ade7-43a6e6065a36",
           "equation_number": "2a",
           "output_symbol": "Z",
           "input_symbols": [
             "c_0",
             "c_1",
-            "t",
-            "n"
+            "t"
           ],
-          "formula": "Z(t) = c_0 * t^0 + c_1 * t^1  (= c_0 + c_1 * t)    t = 1, ..., n",
+          "formula": "Z = c_0 + c_1 * t",
           "clause_reference": "§4.1.3",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "a23571b2-36e8-4caa-8cb8-fcc6c6e0c920"
@@ -133987,10 +133927,9 @@
             "c_0",
             "c_1",
             "c_2",
-            "t",
-            "n"
+            "t"
           ],
-          "formula": "Z(t) = c_0 * t^0 + c_1 * t^1 + c_2 * t^2    t = 1, ..., n",
+          "formula": "Z = c_0 * t^0 + c_1 * t^1 + c_2 * t^2",
           "clause_reference": "§4.1.4",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "3007cdb5-6a2b-4465-9650-ac6b60bd8e40"
@@ -134002,58 +133941,12 @@
           "input_symbols": [
             "c_k",
             "t",
-            "p",
-            "n"
+            "p"
           ],
-          "formula": "Z(t) = SUM_k c_k * t^k * p^t    t = 1, ..., n  mit p = 1 + p%",
+          "formula": "Z = SUM_k c_k * t^k * p^t",
           "clause_reference": "§4.1.6, §4.2.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "7a77b540-766f-46a3-bb2a-06b3b72dd23b"
-        },
-        {
-          "id": "594f729c-02f9-46e7-a9b5-1c08226dd76f",
-          "equation_number": "8a",
-          "output_symbol": "Z_AFA",
-          "input_symbols": [
-            "AFA",
-            "p",
-            "t",
-            "n"
-          ],
-          "formula": "Z_AFA(t) = AFA * p^t * t^0    t = 1, ..., n",
-          "clause_reference": "§4.5.3",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
-        },
-        {
-          "id": "1c9610de-6f17-4e7a-bc56-78520eabf463",
-          "equation_number": "10b",
-          "output_symbol": "Z_ZINS",
-          "input_symbols": [
-            "a",
-            "AFA",
-            "z_K",
-            "n",
-            "t"
-          ],
-          "formula": "Z_ZINS(t) = (1 - a) * AFA * z_K * (n + 1) * t^0 - (1 - a) * AFA * z_K * t^1    t = 1, ..., n",
-          "clause_reference": "§4.5.3",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
-        },
-        {
-          "id": "9ee71c62-0245-4322-976c-6f7b730bf87a",
-          "equation_number": "9",
-          "output_symbol": "RBW_t",
-          "input_symbols": [
-            "AFA",
-            "n",
-            "t"
-          ],
-          "formula": "RBW_{t-1} = AFA * (n + 1 - t)    t = 1, ..., n",
-          "clause_reference": "§4.5.3",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
         },
         {
           "id": "18a04bf4-0b37-4bba-afec-579f3bd77ab2",
@@ -134085,22 +133978,6 @@
           "clause_reference": "Anhang A.1",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "d4077b1a-c8c9-419a-ac3d-9bed67dd2134"
-        },
-        {
-          "id": "b57e8227-2821-4cef-b4a6-39dee062ba52",
-          "equation_number": "4a",
-          "output_symbol": "Z",
-          "input_symbols": [
-            "c_0",
-            "c_m",
-            "t",
-            "n",
-            "m"
-          ],
-          "formula": "Z(t) = c_0*t^0 + c_1*t^1 + c_2*t^2 + ... + c_m*t^m = SUM_{k=0..m} c_k * t^k    t = 1, ..., n",
-          "clause_reference": "§4.1.5",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "ae247b86-26f2-44aa-a5a8-24143b5ea0fe"
         },
         {
           "id": "1681e612-af4e-44ec-b0e4-6308f36dcfba",
@@ -134163,6 +134040,19 @@
           "worksheet_template_id": "d4077b1a-c8c9-419a-ac3d-9bed67dd2134"
         },
         {
+          "id": "b57e8227-2821-4cef-b4a6-39dee062ba52",
+          "equation_number": "4a",
+          "output_symbol": "Z",
+          "input_symbols": [
+            "c_k",
+            "t"
+          ],
+          "formula": "Z = SUM_k c_k * t^k",
+          "clause_reference": "§4.1.5",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "ae247b86-26f2-44aa-a5a8-24143b5ea0fe"
+        },
+        {
           "id": "43f4db93-cba0-4bd2-a7f9-041e261e0c42",
           "equation_number": "RBF3_rec",
           "output_symbol": "RBF_3",
@@ -134196,22 +134086,18 @@
           "worksheet_template_id": "d4077b1a-c8c9-419a-ac3d-9bed67dd2134"
         },
         {
-          "id": "c1d04676-c630-4d10-94ac-1f520f30fe54",
-          "equation_number": "10a",
-          "output_symbol": "Z_ZINS",
+          "id": "58f7825f-b1f9-40e0-87dd-3434a4b7ff58",
+          "equation_number": "4b",
+          "output_symbol": "BW",
           "input_symbols": [
-            "a",
-            "RBW_t",
-            "z_K",
-            "t",
+            "c_k",
             "n",
-            "ABK",
-            "AHK"
+            "q"
           ],
-          "formula": "Z_ZINS(t) = (1 - a) * RBW_{t-1} * z_K    t = 1, ..., n  mit a = ABK / AHK",
-          "clause_reference": "§4.5.3",
+          "formula": "BW = SUM_k c_k * RBF_k(n; q)",
+          "clause_reference": "§4.1.5",
           "verification_status": "imported_unverified",
-          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
+          "worksheet_template_id": "ae247b86-26f2-44aa-a5a8-24143b5ea0fe"
         },
         {
           "id": "aeb15cc9-f182-46c4-bcfe-76ca8840f976",
@@ -134225,6 +134111,95 @@
           "clause_reference": "§4.5.4",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "6baa85d5-6257-42d7-a960-bb86ba056a43"
+        },
+        {
+          "id": "fb9faa7b-9c56-4188-b2a0-0d821c59a7bc",
+          "equation_number": "5c",
+          "output_symbol": "DUR",
+          "input_symbols": [
+            "c_k",
+            "n",
+            "q",
+            "p"
+          ],
+          "formula": "DUR = SUM_k c_k * RBF_kplus1(n; q/p) / SUM_k c_k * RBF_k(n; q/p)",
+          "clause_reference": "§4.2.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "024dd070-d274-4efd-b06a-03c26877b7e8"
+        },
+        {
+          "id": "6249bd24-2a75-456d-8227-efa601cf5613",
+          "equation_number": "6c",
+          "output_symbol": "DUR_TR",
+          "input_symbols": [
+            "c_k",
+            "n_A",
+            "n_B",
+            "q",
+            "p"
+          ],
+          "formula": "DUR_TR = n_B + SUM_k c_k * RBF_kplus1(n_A - n_B; q / p) / SUM_k c_k * RBF_k(n_A - n_B; q / p)",
+          "clause_reference": "§4.4.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "a7884856-36ff-45e0-b09c-c4293ff8df45"
+        },
+        {
+          "id": "594f729c-02f9-46e7-a9b5-1c08226dd76f",
+          "equation_number": "8a",
+          "output_symbol": "Z_AFA",
+          "input_symbols": [
+            "AFA",
+            "p",
+            "t"
+          ],
+          "formula": "Z_AFA = AFA * p^t * t^0",
+          "clause_reference": "§4.5.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
+        },
+        {
+          "id": "9ee71c62-0245-4322-976c-6f7b730bf87a",
+          "equation_number": "9",
+          "output_symbol": "RBW_t",
+          "input_symbols": [
+            "AFA",
+            "n",
+            "t"
+          ],
+          "formula": "RBW_t = AFA * (n + 1 - t)",
+          "clause_reference": "§4.5.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
+        },
+        {
+          "id": "c1d04676-c630-4d10-94ac-1f520f30fe54",
+          "equation_number": "10a",
+          "output_symbol": "Z_ZINS",
+          "input_symbols": [
+            "a",
+            "RBW_t",
+            "z_K"
+          ],
+          "formula": "Z_ZINS = (1 - a) * RBW_t * z_K",
+          "clause_reference": "§4.5.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
+        },
+        {
+          "id": "1c9610de-6f17-4e7a-bc56-78520eabf463",
+          "equation_number": "10b",
+          "output_symbol": "Z_ZINS",
+          "input_symbols": [
+            "a",
+            "AFA",
+            "z_K",
+            "n",
+            "t"
+          ],
+          "formula": "Z_ZINS = (1 - a) * AFA * z_K * (n + 1) * t^0 - (1 - a) * AFA * z_K * t^1",
+          "clause_reference": "§4.5.3",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "0e226bab-5a46-46f8-9ab5-196df3c9f3ff"
         }
       ],
       "compliance": [
@@ -201587,11 +201562,9 @@
           "output_symbol": "BCF",
           "input_symbols": [
             "c_1",
-            "c_2",
-            "k_1",
-            "k_2"
+            "c_2"
           ],
-          "formula": "BCF = c_1 / c_2 = k_1 / k_2",
+          "formula": "BCF = c_1 / c_2",
           "clause_reference": "§11.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "1036e063-2ad5-469b-86c6-7f4b2e0de1ef"
@@ -223235,21 +223208,6 @@
           "worksheet_template_id": "a1e4b7fe-8948-4b25-9304-c97a4e31f67a"
         },
         {
-          "id": "c133dd5e-65c2-488d-9eab-130075085a9a",
-          "equation_number": "11",
-          "output_symbol": "w_P",
-          "input_symbols": [
-            "V_dot",
-            "A",
-            "e_E",
-            "w"
-          ],
-          "formula": "w_P = V_dot / (A * e_E) = w / e_E",
-          "clause_reference": "Abschn.5.1.6.2 Gl.(11)",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "18b23008-81b2-4734-bce3-ab2cf95d1bf7"
-        },
-        {
           "id": "0158fa88-a63c-447a-80af-04519cc061e0",
           "equation_number": "A2",
           "output_symbol": "V_F",
@@ -223268,15 +223226,9 @@
           "output_symbol": "w",
           "input_symbols": [
             "V_dot",
-            "A",
-            "d_P",
-            "dp",
-            "nu",
-            "rho",
-            "l",
-            "A_P"
+            "A"
           ],
-          "formula": "w = V_dot / A = (d_P^2 * dp) / (32 * nu * rho * l) * (A_P / A)",
+          "formula": "w = V_dot / A",
           "clause_reference": "Abschn.5.1.6.3 Gl.(13)",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "18b23008-81b2-4734-bce3-ab2cf95d1bf7"
@@ -223312,12 +223264,10 @@
           "equation_number": "8",
           "output_symbol": "vel_ratio",
           "input_symbols": [
-            "W_1",
-            "W_2",
             "A_1",
             "A_2"
           ],
-          "formula": "W_1 / W_2 = A_2 / A_1",
+          "formula": "vel_ratio = A_2 / A_1",
           "clause_reference": "Abschn.5.1.6.2 Gl.(8)",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "18b23008-81b2-4734-bce3-ab2cf95d1bf7"
@@ -223349,6 +223299,20 @@
           ],
           "formula": "V_dot = (d_P^2 * dp) / (32 * nu * rho * l) * A_P",
           "clause_reference": "Abschn.5.1.6.3 Gl.(12)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "18b23008-81b2-4734-bce3-ab2cf95d1bf7"
+        },
+        {
+          "id": "c133dd5e-65c2-488d-9eab-130075085a9a",
+          "equation_number": "11",
+          "output_symbol": "w_P",
+          "input_symbols": [
+            "V_dot",
+            "A",
+            "e_E"
+          ],
+          "formula": "w_P = V_dot / (A * e_E)",
+          "clause_reference": "Abschn.5.1.6.2 Gl.(11)",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "18b23008-81b2-4734-bce3-ab2cf95d1bf7"
         },
@@ -223413,7 +223377,7 @@
             "V_P_dot",
             "V_N_dot"
           ],
-          "formula": "Z = (V_P_dot + V_N_dot) / V_P_dot = 1 + V_N_dot / V_P_dot",
+          "formula": "Z = (V_P_dot + V_N_dot) / V_P_dot",
           "clause_reference": "AnhangB Gl.(B2)",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "ba8a5bd8-b768-4936-bd8e-4b627a69829f"
@@ -223425,7 +223389,7 @@
           "input_symbols": [
             "c_G"
           ],
-          "formula": "Z_50 = |c_G|",
+          "formula": "Z_50 = max(c_G, -c_G)",
           "clause_reference": "AnhangB Gl.(B3)",
           "verification_status": "verified_via_cross_reference",
           "worksheet_template_id": "ba8a5bd8-b768-4936-bd8e-4b627a69829f"

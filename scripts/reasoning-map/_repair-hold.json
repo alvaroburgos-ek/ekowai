@@ -1,0 +1,152 @@
+[
+ {
+  "code": "VDI-3477",
+  "eq": "6",
+  "disp": "comparison-to-gate",
+  "note": "This row stores a comparison criterion (p_e/p_0 <= 0,95), not an equation; a comparison produces a boolean and ALWAYS errors. Real-engine reproduction: original 'p_e / p_0 <= 0,95' -> kind='error', message='Unerwartetes Zeichen \"<\" an Posit"
+ },
+ {
+  "code": "DWA-M-732",
+  "eq": "Gl-M732-03",
+  "disp": "sr2-ruling",
+  "note": "Drove all three cases through the real node_modules/.bin/tsx + src/lib/eval/formula.ts evaluateFormula, then deleted the probe (src/lib/eval/_probe_m732.ts, confirmed removed). BEFORE (current DB formula 'n_CO2_neutral = 0.60 .. 0.70 * n_CO"
+ },
+ {
+  "code": "DWA-M-760",
+  "eq": "EQ-M760-02",
+  "disp": "comparison-to-gate",
+  "note": "EQ-M760-02 is a comparison criterion, not an equation: 'ns_fettabscheider >= NS' produces a boolean and always errors in evaluateFormula (PROVEN above: kind 'error'). Per the COMPARISON-CRITERION rule, no numeric formula may be invented; th"
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-02",
+  "disp": "comparison-to-gate",
+  "note": "Comparison-criterion stored as an equation (boolean, not a value). Cannot be made into a faithful compute: output_symbol uv_dosis IS the measured/entered input, there is no derivable RHS. rhs() captures 'uv_dosis >= ' then leaves '300 AND u"
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-12",
+  "disp": "comparison-to-gate",
+  "note": "Same class as EQ-02: a uv_dosis range criterion stored as an equation. Already enforced by existing gate CR-07 'uv_dosis >= 300 AND uv_dosis <= 700' (block, §4.1.2.3) which subsumes this 400..700 band. Recommended fix: DELETE both equation "
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-06",
+  "disp": "comparison-to-gate",
+  "note": "Comparison-criterion stored as equation; boolean, no derivable value (spez_strom_uv is the input). NO existing gate references spez_strom_uv. Source text is DESCRIPTIVE operating data ('bewegt sich ... im Bereich von'), not a normative 'mus"
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-07",
+  "disp": "comparison-to-gate",
+  "note": "Comparison-criterion stored as equation; boolean, no derivable value. NO existing gate references spez_energie_membran. Source text is descriptive ('ca. 0,1 ... bis 0,2 kWh/m3'), not normative -> gate-creation/severity is a RULING for the s"
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-09",
+  "disp": "comparison-to-gate",
+  "note": "Comparison-criterion stored as equation; boolean, no derivable value. NO existing gate references clo2_dosis. Source is design GUIDANCE ('sind etwa 5 g bis 10 g ... notwendig') with a conditional lower band for sand-filtered feed -> gate-cr"
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-10",
+  "disp": "comparison-to-gate",
+  "note": "Comparison-criterion stored as equation; boolean, no derivable value. NO existing gate references freies_chlor (the Kontaktzeit 15..30 min part IS separately gated as CR-24). The 1..20 mg/l free-chlorine band is 'je nach ... erforderlich' -"
+ },
+ {
+  "code": "DWA-M-205",
+  "eq": "EQ-11",
+  "disp": "comparison-to-gate",
+  "note": "Included for completeness only — the task scope is the 6 crashing equations; EQ-11 does not crash. It is still a comparison-criterion masquerading as an equation (it always returns the threshold 0.2, not a meaningful computed value). It is "
+ },
+ {
+  "code": "DWA-A-178",
+  "eq": "9",
+  "disp": "comparison-to-gate",
+  "note": "Stored formula '4 <= b_F <= b_krit = 7   [kg/(m^2*a)]' is a range/chained-comparison criterion whose output_symbol 'b_F_im_bereich' is a BOOLEAN, not a numeric value. The in-tree arithmetic evaluator (src/lib/eval/arithmetic.ts) supports on"
+ },
+ {
+  "code": "DWA-A-178",
+  "eq": "10",
+  "disp": "comparison-to-gate",
+  "note": "Stored formula 'B_RBFA_ab / A_E_b_a <= b_R_e_zul' is a comparison criterion whose output_symbol 'emission_eingehalten' is a BOOLEAN. The '<=' operator is unsupported by the arithmetic evaluator → hard error. Proven broken via real tsx probe"
+ },
+ {
+  "code": "DWA-A-262E",
+  "eq": "8",
+  "disp": "comparison-to-gate",
+  "note": "NOT an equation. Eq (8) is a pure chained inequality 'Q_M >= SUM(Q_Dr,RUE) >= SUM(Q_krit)' — it defines no value for Q_M (Q_M is produced by Eq (6)); it only states a design constraint. It therefore always yields a boolean and can never be "
+ },
+ {
+  "code": "DWA-M-187",
+  "eq": "2",
+  "disp": "hold-draft-or-textonly",
+  "note": "CLASSIFICATION: comparison-criterion-stored-as-equation. output_symbol is literally 'ok_boolean' and the formula's top operator is '<=', so the row can only ever yield a boolean. In src/lib/eval/formula.ts the rhs() strip (line 117) matches"
+ },
+ {
+  "code": "DWA-M-708",
+  "eq": "E-CH4-Yield",
+  "disp": "hold-draft-or-textonly",
+  "note": "INLINE-UNIT constant. Fix-type = strip inline '(Nm3 CH4 per kg CSB_el)' to output_unit and clear the phantom input csb_elim_anaerob (not referenced by the printed coefficient). Printed value is a bare yield COEFFICIENT (0,35 Nm³/kg CSBel); "
+ },
+ {
+  "code": "DWA-M-708",
+  "eq": "E-BHKW-El",
+  "disp": "hold-draft-or-textonly",
+  "note": "INLINE-UNIT constant. Fix-type = strip inline '(kWh per kg CSB_el)' to output_unit, clear phantom input methan_ausbeute_anaerob. Printed figure is a fixed 'ca. 1,4 kWh/kg CSBel'; stored as constant, not multiplied (page prints only the figu"
+ },
+ {
+  "code": "DWA-M-708",
+  "eq": "E-CH4-Heizwert",
+  "disp": "hold-draft-or-textonly",
+  "note": "CHAINED unit-basis equality expressing ONE heating value in three DIFFERENT unit bases (36 MJ/m³ CH4 = 10 kWh/m³ = 12,6 MJ/kg CSBel - not equal numbers, different dimensions). Reduce to the first printed computable RHS (36, MJ/m³ CH4) per t"
+ },
+ {
+  "code": "DWA-M-708",
+  "eq": "Gl-1",
+  "disp": "hold-draft-or-textonly",
+  "note": "CHEMICAL REACTION ('->') = genuine ENGINE GAP (no numeric formula; the engine cannot represent a stoichiometric reaction). The row is ALSO syntactically broken (arrow + charge superscripts crash the tokenizer at '>'), so per the chemical-re"
+ },
+ {
+  "code": "DWA-A-272E",
+  "eq": "RULE-8",
+  "disp": "comparison-to-gate",
+  "note": "This is a recommendation rule producing a boolean (output_symbol=examine_NASS), not a numeric value. The rhs() helper only strips a leading `<ident> <op>` LHS; 'if favourable...' is not that shape, so the whole if/then string reaches the ar"
+ },
+ {
+  "code": "DWA-A-272E",
+  "eq": "RULE-9",
+  "disp": "comparison-to-gate",
+  "note": "Chained-comparison criterion producing a boolean (output_symbol=horizon_ok), not a numeric value — cannot be 'computed'. SR-2 applies: the printed source is a MULTI-CASE RANGE (typical 30-50a; 50-100a with sewers; 10-20a isolated) — 30..50 "
+ },
+ {
+  "code": "DWA-A-272E",
+  "eq": "RULE-10",
+  "disp": "comparison-to-gate",
+  "note": "Set-membership implication producing a boolean (output_symbol=consistency_ok), not a numeric value — never 'computed'. The row is only 'manual_required' today by accident (its categorical inputs are non-finite so it short-circuits before ev"
+ },
+ {
+  "code": "DWA-A-102-2",
+  "eq": "B.5",
+  "disp": "comparison-to-gate",
+  "note": "RULING / JUDGMENT ITEM — do NOT auto-apply. This row is NOT a value-producing equation: 'Σ Q_M,i ≤ Q_M' is a mass-balance comparison (boolean). It does not hard-error today only by accident — rhs() matches the whole 'Sum(Q_M_i)' as an LHS t"
+ },
+ {
+  "code": "DWA-M-816",
+  "eq": "6a",
+  "disp": "engine-feature-needed",
+  "note": "RULING — HOLD, do NOT auto-apply. This is prose defining Z(t) PIECEWISE by temporal concatenation: Z_1(t) over periods 1..n_1, then Z_2(t) over n_1+1..n_1+n_2. It is NOT a min/max form (the two branches are disjoint time ranges, no monotone"
+ },
+ {
+  "code": "DWA-M-816",
+  "eq": "6a_TR",
+  "disp": "hold-draft-or-textonly",
+  "note": "RULING — HOLD, do NOT auto-apply. This row carries NO computable RHS: it only declares the DOMAIN of the transfer payment function Z_TR(t) (t=1..n_A−n_B, with an n_B-year lead). The worked example (txt line 2121) shows Z_TR's coefficients a"
+ },
+ {
+  "code": "ISO-5667-6",
+  "eq": "A.1",
+  "disp": "hold-draft-or-textonly",
+  "note": "BROKEN-BEFORE (real evaluateFormula via node_modules/.bin/tsx, probe deleted): stored formula 'l = 0,13 * b^2 * c * (0,7*c + 2*g) / (g*d)' -> {kind:'error', message:'Unerwartetes Token am Ende des Ausdrucks.'} (message not in the recoverabl"
+ }
+]
