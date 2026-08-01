@@ -14,6 +14,7 @@ import {
   primaryKey,
   unique,
   index,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -133,6 +134,11 @@ export const standards = pgTable('standards', {
   titleEn: text('title_en'),
   version: text('version').notNull(),
   issuedYear: integer('issued_year'),
+  /** Stage-5 edition lifecycle: date this edition became valid. */
+  validFrom: date('valid_from'),
+  /** Stage-5 edition lifecycle: self-FK to the standard that replaces this
+   * edition (no cascade — superseded editions stay referenceable). */
+  supersededBy: uuid('superseded_by').references((): AnyPgColumn => standards.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

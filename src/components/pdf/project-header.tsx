@@ -31,6 +31,12 @@ export function ProjectHeader({
         {standard.code} · {standard.titleDe}{' '}
         <Text style={{ color: colors.subtext }}>(Version {standard.version})</Text>
       </Text>
+      {standard.supersededBy && (
+        <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: colors.warning, marginTop: 2 }}>
+          Norm ersetzt — Ausgabe prüfen: Dieser Bericht wurde unter einer inzwischen
+          ersetzten Ausgabe des Regelwerks erstellt.
+        </Text>
+      )}
       <View style={styles.projectMeta}>
         <Cell label="Projektnummer" value={project.projectCode ?? '—'} />
         <Cell label="Bauherr" value={project.clientName ?? '—'} />

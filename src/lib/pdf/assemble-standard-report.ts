@@ -160,7 +160,15 @@ export type StandardReportData = {
   generatedAt: string;
   project: ReportProjectHeader;
   letterhead: ReportLetterhead | null;
-  standard: { id: string; code: string; titleDe: string; version: string };
+  standard: {
+    id: string;
+    code: string;
+    titleDe: string;
+    version: string;
+    /** standards.id of the edition replacing this one; null = current edition.
+     * Assembler normalises absent fixture input to null (backward compat). */
+    supersededBy: string | null;
+  };
   siteProfile: ReportSiteProfile;
   worksheets: ReportWorksheet[];
   citationIndex: CitationIndexEntry[];
@@ -214,6 +222,8 @@ export type AssemblerStandard = {
   code: string;
   titleDe: string;
   version: string;
+  /** Optional so pre-edition fixtures stay valid; assembler emits null when absent. */
+  supersededBy?: string | null;
 };
 
 export type AssemblerTemplate = {
@@ -805,7 +815,13 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       aggregatedStatus: aggregatedStatusFromInstances(instances),
     },
     letterhead,
-    standard,
+    standard: {
+      id: standard.id,
+      code: standard.code,
+      titleDe: standard.titleDe,
+      version: standard.version,
+      supersededBy: standard.supersededBy ?? null,
+    },
     siteProfile: { rows: siteProfileRows },
     worksheets,
     citationIndex,

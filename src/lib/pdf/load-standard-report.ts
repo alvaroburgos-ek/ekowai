@@ -248,7 +248,13 @@ export async function loadStandardReportData(
           website: proj.org.website,
         }
       : null,
-    standard: { id: std.id, code: std.code, titleDe: std.titleDe, version: std.version },
+    standard: {
+      id: std.id,
+      code: std.code,
+      titleDe: std.titleDe,
+      version: std.version,
+      supersededBy: std.supersededBy,
+    },
     templates,
     instances,
     sections: allSections,

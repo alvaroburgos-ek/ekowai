@@ -114,6 +114,7 @@ describe('StandardReportDocument', () => {
       code: 'DWA-A 138-1',
       titleDe: 'Versickerung von Niederschlagswasser',
       version: '2024-08',
+      supersededBy: null,
     },
     siteProfile: {
       rows: [
