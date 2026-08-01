@@ -243,7 +243,9 @@ describe('buildVsmeWorkbook round-trip', () => {
 
     // Load into ExcelJS and parse with the real importer parser.
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buffer as unknown as ArrayBuffer);
     const parsed = parseWorkbookSync(wb);
 
     // Fields sanity: >90 fields, all valid owners, at least one vsme_ xbrl_element_id.
