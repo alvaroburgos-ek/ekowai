@@ -13,7 +13,7 @@
  * evaluate this expression", not "the result is the right number".
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,8 +24,12 @@ import { aggregators } from '../../src/lib/eval/aggregators';
 import { rewriteRules } from '../../src/lib/eval/rewrites';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = resolve(HERE, '../engine-rescan-data');
+// scripts/engine-rescan-data/ is gitignored (local-only prod pull) — absent on
+// CI. `ENGINE_RESCAN_DATA_DIR` overrides the default path (used to simulate
+// the fixture-absent CI case); when the dir is absent the suite skips honestly.
+const DATA_DIR = process.env.ENGINE_RESCAN_DATA_DIR ?? resolve(HERE, '../engine-rescan-data');
 const OUT_JSON = resolve(HERE, '../engine-rescan-2026-08-01.results.json');
+const DATA_AVAILABLE = existsSync(DATA_DIR);
 
 type Row = {
   id: string;
@@ -138,7 +142,7 @@ function classify(row: Row): Result {
   }
 }
 
-describe('engine-gap re-scan 2026-08-01', () => {
+describe.skipIf(!DATA_AVAILABLE)('engine-gap re-scan 2026-08-01', () => {
   it('re-scans the corpus and writes results JSON + prints the summary', () => {
     const rows = loadRows();
     const results = rows.map(classify);

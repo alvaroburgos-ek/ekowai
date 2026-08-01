@@ -1,11 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import ExcelJS from 'exceljs';
 import { buildVsmeRows, buildVsmeWorkbook, type ComplianceRow, type EquationsRow, type FieldsRow } from '../build-workbook';
 import { parseWorkbookSync } from '../../_pass3c-parsers';
-import { TAXONOMY_DIR } from '../_setup';
+import { TAXONOMY_DIR, TAXONOMY_AVAILABLE } from '../_setup';
 
-describe('buildVsmeRows', () => {
-  const r = buildVsmeRows(TAXONOMY_DIR);
+describe.skipIf(!TAXONOMY_AVAILABLE)('buildVsmeRows', () => {
+  let r: ReturnType<typeof buildVsmeRows>;
+  beforeAll(() => {
+    r = buildVsmeRows(TAXONOMY_DIR);
+  });
   it('one standard VSME', () => {
     expect(r.standards).toHaveLength(1);
     expect(r.standards[0].code).toBe('VSME');
@@ -171,8 +174,11 @@ describe('buildVsmeRows', () => {
   });
 });
 
-describe('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
-  const r = buildVsmeRows(TAXONOMY_DIR);
+describe.skipIf(!TAXONOMY_AVAILABLE)('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
+  let r: ReturnType<typeof buildVsmeRows>;
+  beforeAll(() => {
+    r = buildVsmeRows(TAXONOMY_DIR);
+  });
 
   // VSME para 31 (rendered PDF p.9): "The undertaking shall disclose its GHG
   // intensity calculated by dividing 'gross greenhouse gas (GHG) emissions'
@@ -237,7 +243,7 @@ describe('B03.300 GHG-intensity equations (VSME para 31, Task 5)', () => {
   });
 });
 
-describe('buildVsmeWorkbook round-trip', () => {
+describe.skipIf(!TAXONOMY_AVAILABLE)('buildVsmeWorkbook round-trip', () => {
   it('xlsx parses through the real pass3c parser', async () => {
     const buffer = await buildVsmeWorkbook(TAXONOMY_DIR);
 
