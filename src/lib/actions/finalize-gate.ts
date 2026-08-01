@@ -17,7 +17,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 
 /** Verification statuses that satisfy the finalize rule (shared pure module). */
 export { VERIFIED_OK } from '@/lib/verification-status';
-import { VERIFIED_OK } from '@/lib/verification-status';
+import { blocksVerificationGate } from '@/lib/verification-status';
 
 export type FinalizeGateResult = {
   ok: boolean;
@@ -35,7 +35,7 @@ export type FinalizeGateRow = {
 /** Pure decision core — unit-tested without a DB. */
 export function decideFinalizeGate(rows: FinalizeGateRow[]): FinalizeGateResult {
   const unverifiedFields = rows
-    .filter((r) => (r.isRequired || r.hasValue) && !VERIFIED_OK.has(r.verificationStatus))
+    .filter((r) => (r.isRequired || r.hasValue) && blocksVerificationGate(r.verificationStatus))
     .map((r) => ({
       symbol: r.symbol,
       labelDe: r.labelDe,

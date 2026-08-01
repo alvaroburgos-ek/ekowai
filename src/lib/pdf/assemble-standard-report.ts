@@ -1,7 +1,7 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
-import { VERIFIED_OK } from '@/lib/verification-status';
+import { blocksVerificationGate } from '@/lib/verification-status';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 
@@ -534,7 +534,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         // verified against the standard goes on the dossier's SR-1 list.
         if (
           typeof f.verificationStatus === 'string'
-          && !VERIFIED_OK.has(f.verificationStatus)
+          && blocksVerificationGate(f.verificationStatus)
           && (f.isRequired || displayValue != null)
         ) {
           unverifiedFields.push({

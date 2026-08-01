@@ -77,3 +77,30 @@ describe('formatFinalizeGateError', () => {
     expect(msg).toContain('Sickerfläche');
   });
 });
+
+describe('decideFinalizeGate — app-metadata exemption', () => {
+  const row = (over: Partial<{
+    symbol: string; labelDe: string; isRequired: boolean;
+    verificationStatus: string; hasValue: boolean;
+  }> = {}) => ({
+    symbol: 'project_name',
+    labelDe: 'Projektname',
+    isRequired: true,
+    verificationStatus: 'inferred_from_worksheet',
+    hasValue: true,
+    ...over,
+  });
+
+  it('inferred_from_worksheet (app-internal, no norm text) never blocks finalize', () => {
+    expect(decideFinalizeGate([row()]).ok).toBe(true);
+  });
+
+  it('but it is NOT a verified status', () => {
+    expect(VERIFIED_OK.has('inferred_from_worksheet')).toBe(false);
+  });
+
+  it('other non-verified statuses still block', () => {
+    expect(decideFinalizeGate([row({ verificationStatus: 'needs_engineer_review' })]).ok).toBe(false);
+    expect(decideFinalizeGate([row({ verificationStatus: 'verified_via_cross_reference' })]).ok).toBe(false);
+  });
+});
