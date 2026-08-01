@@ -1,0 +1,740 @@
+[
+ {
+  "code": "DIN-14021",
+  "cr": "REQ-11",
+  "id": "fe8947a8-ba07-4d79-afae-546d214bab8e",
+  "fromWs": "DIN-14021-03",
+  "toWsId": "54c32010-95e1-42eb-b53c-7e98ae817bdb",
+  "toWs": "DIN-14021-01",
+  "condition": "mobius_loop_used IS NOT NULL AND selected_claim_type IS NOT NULL"
+ },
+ {
+  "code": "DWA-A-102-2",
+  "cr": "REQ-07",
+  "id": "3b012613-e590-4b89-93ab-fe2a6b37c8ea",
+  "fromWs": "A1022-04",
+  "toWsId": "717a37f6-153f-4fbe-83a1-4f1d3a345033",
+  "toWs": "A1022-03",
+  "condition": "IF misch_active == True THEN (A_b_a_I > 0 AND A_b_a_II > 0 AND A_b_a_III > 0)"
+ },
+ {
+  "code": "DWA-A-178",
+  "cr": "REQ-16",
+  "id": "a7b8e509-3de5-4bf5-81b1-2fb7ce140796",
+  "fromWs": "A178-02",
+  "toWsId": "fa967545-18ee-4c83-9426-98d08fd143d1",
+  "toWs": "A178-11",
+  "condition": "IF system_type == 'strasse' THEN h_RR >= 0.5"
+ },
+ {
+  "code": "DWA-A-201",
+  "cr": "CR-014",
+  "id": "41596c7a-b3bb-40e9-ad3d-75eaa5bd5c16",
+  "fromWs": "A201-20",
+  "toWsId": "ac188e24-8868-4967-ac87-4878078f49ed",
+  "toWs": "A201-01",
+  "condition": "BSB5_ablauf <= BSB5_grenzwert AND CSB_ablauf <= CSB_grenzwert"
+ },
+ {
+  "code": "DWA-A-201",
+  "cr": "CR-010",
+  "id": "9dfaa022-0288-4065-8f64-356fc9df5030",
+  "fromWs": "A201-15",
+  "toWsId": "d22d1c0f-4d11-4bcd-8086-2639a4313482",
+  "toWs": "A201-06",
+  "condition": "IF (k_f_boden >= k_f_sealing_threshold OR klueftiger_untergrund == true) THEN dichtung_erforderlich == true"
+ },
+ {
+  "code": "DWA-A-222",
+  "cr": "CR-026",
+  "id": "7d5ca38a-daf2-499a-abc8-71f14725cca1",
+  "fromWs": "A222-16",
+  "toWsId": "87decd1d-3483-449d-a3a5-3435b00b443e",
+  "toWs": "A222-18",
+  "condition": "DN >= 150"
+ },
+ {
+  "code": "DWA-A-222",
+  "cr": "CR-020",
+  "id": "2467bef4-e117-45f9-a65a-b5da200274ae",
+  "fromWs": "A222-11",
+  "toWsId": "8b361422-e75d-464b-b60d-aa129b7301e4",
+  "toWs": "A222-04",
+  "condition": "A_TK_spez >= 90 AND A_TK_spez <= 150"
+ },
+ {
+  "code": "DWA-A-222",
+  "cr": "CR-021",
+  "id": "57a7c17b-b33e-494e-bc62-90455d018baa",
+  "fromWs": "A222-11",
+  "toWsId": "87decd1d-3483-449d-a3a5-3435b00b443e",
+  "toWs": "A222-18",
+  "condition": "h_OK >= h_Wasser + 0.30"
+ },
+ {
+  "code": "DWA-A-226",
+  "cr": "CR-006",
+  "id": "4fccc258-28d4-42f1-bf71-63e1688eebe3",
+  "fromWs": "A226-06",
+  "toWsId": "d2745d54-399f-47a7-9204-7cd0f0a3db2f",
+  "toWs": "A226-01",
+  "condition": "(stabilisierungsart == 'nitrifikation' AND O_B >= 3) OR (stabilisierungsart == 'nitrifikation_denitrifikation' AND O_B >= 2.5)"
+ },
+ {
+  "code": "DWA-M-102-4",
+  "cr": "REQ-04",
+  "id": "87d1402f-2d10-47a8-93b9-78a92c3e7dd6",
+  "fromWs": "M104-07",
+  "toWsId": "4d934739-d910-4757-ac2d-022ca21fd5c5",
+  "toWs": "M104-05",
+  "condition": "R_D IS NOT NULL AND GWN IS NOT NULL AND ET_a IS NOT NULL AND R IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-1200-2",
+  "cr": "REQ-13",
+  "id": "f88bb51e-b4fa-4974-b4f7-b67ce26bfba7",
+  "fromWs": "M12002-13",
+  "toWsId": "6320b289-1988-419d-82ff-f3971f53781a",
+  "toWs": "M12002-14",
+  "condition": "IF ausgleichsvolumen > 0 THEN speicherbauform IS NOT EMPTY AND notueberlauf IS NOT NULL AND reinigungskonzept IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-16",
+  "id": "cf9d7c41-88f2-4b12-98ad-75c062136bdc",
+  "fromWs": "M12003-01",
+  "toWsId": "91059385-04d4-49c9-93eb-a5575ab33d9d",
+  "toWs": "M12003-07",
+  "condition": "saison_reinigung_durchgefuehrt == True AND reinigung_dokumentiert == True AND (desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3))"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-06",
+  "id": "568ce4fa-f8e1-444a-940e-9de7c2cead37",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C', 'C-1', 'C-2', 'D'}) OR speichertyp == 'transportbehaelter'"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-17",
+  "id": "6a51cf59-c6be-4fda-b6f7-1ee634802ac3",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "volumenverlust_pct <= 1 AND (druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true)"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-18",
+  "id": "a7afb5c2-53b0-4263-9a8a-20b70bc7e0b7",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "schwermetall_fracht_pa <= bbodschv_anlage1_tab3 / 3"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-05",
+  "id": "1fbc0209-8311-4842-b690-58fd51f2ce6e",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "k_konz <= 200 AND na_konz <= 100 AND no3_konz <= 300 AND so4_konz <= 1200 AND ph_wert >= 5.0 AND ph_wert <= 9.5 AND pb_konz <= 100 AND cd_konz <= 2 AND cr_konz <= 100 AND fe_konz <= 1500 AND cu_konz <= 100 AND mn_konz <= 1500 AND ni_konz <= 40 AND hg_konz <= 0.5 AND zn_konz <= 300"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-07",
+  "id": "ab5f62a2-fc3a-45d4-8ba7-05ac967872aa",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND markierung_oberflaeche_anteil >= 60"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-09",
+  "id": "c9caaf89-aef1-408c-acdd-acf43bbb5516",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "gueteklasse != 'D' OR abstand_zu_sensitiv >= 2 * wurfweite"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-08",
+  "id": "20935a0a-ac2e-4916-8526-bb6ad06eb3fb",
+  "fromWs": "M12003-08",
+  "toWsId": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6",
+  "toWs": "M12003-05",
+  "condition": "rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True"
+ },
+ {
+  "code": "DWA-M-1200-3",
+  "cr": "CR-15",
+  "id": "de89e350-d2a8-46f9-beab-3620e749c830",
+  "fromWs": "M12003-08",
+  "toWsId": "694a33e0-3159-4e91-b143-d4bfdea9a566",
+  "toWs": "M12003-01",
+  "condition": "anwendungsbereich != 'frostschutzberegnung' OR (gueteklasse == 'D' AND schulung_durchgefuehrt == True)"
+ },
+ {
+  "code": "DWA-M-187",
+  "cr": "REQ-02",
+  "id": "17ec0451-4e15-40dc-928d-6e67cc3fde40",
+  "fromWs": "M187-07",
+  "toWsId": "4272d967-e2c2-48d1-b340-824eec90e0f3",
+  "toWs": "M187-05",
+  "condition": "beta_wert >= 4"
+ },
+ {
+  "code": "DWA-M-187",
+  "cr": "REQ-05",
+  "id": "025f8745-3556-4a91-9e9a-00c60359670b",
+  "fromWs": "M187-07",
+  "toWsId": "1535237f-3882-4220-b234-64a9da43575f",
+  "toWs": "M187-08",
+  "condition": "B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4"
+ },
+ {
+  "code": "DWA-M-187",
+  "cr": "REQ-06",
+  "id": "69015ae3-f9af-49f6-a9f1-a7fa8c142da7",
+  "fromWs": "M187-07",
+  "toWsId": "30a77450-7d83-443d-8938-25bcb1f87b9a",
+  "toWs": "M187-09",
+  "condition": "A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND h_Draen >= 0.1"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-28",
+  "id": "869c84ce-e0ff-41a3-a0e5-0895f2bee132",
+  "fromWs": "M205-03",
+  "toWsId": "d94c8822-eeb6-4aa7-be9f-f681630b9f59",
+  "toWs": "M205-11",
+  "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-06",
+  "id": "375741ec-a911-4c23-aa34-659bd44686cc",
+  "fromWs": "M205-08",
+  "toWsId": "d49b34c0-71ec-4e2b-a786-071150810038",
+  "toWs": "M205-03",
+  "condition": "afs <= 20"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-25",
+  "id": "323f359f-dfc8-4027-8c6b-8ec46c68d3cb",
+  "fromWs": "M205-08",
+  "toWsId": "adaf1855-3f47-4676-ade9-1198848cabc3",
+  "toWs": "M205-14",
+  "condition": "pilotierung == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-30",
+  "id": "836c0971-b9b6-4c71-8fe8-927d0086a879",
+  "fromWs": "M205-08",
+  "toWsId": "2c3578b4-624b-4792-a948-443de7da4103",
+  "toWs": "M205-09",
+  "condition": "chlorung_routine == False"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-31",
+  "id": "cf706693-1306-4877-b689-a4f8c48ee49e",
+  "fromWs": "M205-08",
+  "toWsId": "71235b9a-bcaf-498d-be58-0cef301d1bef",
+  "toWs": "M205-07",
+  "condition": "wiederverkeimungsbeurteilung == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-32",
+  "id": "58ba4c36-111f-476f-96b3-f6bc4a6d4786",
+  "fromWs": "M205-08",
+  "toWsId": "71235b9a-bcaf-498d-be58-0cef301d1bef",
+  "toWs": "M205-07",
+  "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-33",
+  "id": "c19c26ff-328e-42ff-9c09-47233c0de337",
+  "fromWs": "M205-09",
+  "toWsId": "bf9a96f6-5b92-4716-aa3a-5097c78bf8f2",
+  "toWs": "M205-12",
+  "condition": "hg_strahler_sonderentsorgung == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-23",
+  "id": "0e84f3e0-1138-4c2b-8f4c-796bbcab4460",
+  "fromWs": "M205-10",
+  "toWsId": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13",
+  "toWs": "M205-08",
+  "condition": "restchlor_betrieb >= 0.2"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-35",
+  "id": "9b44583d-1fa5-4134-9d6f-29e04024fc35",
+  "fromWs": "M205-10",
+  "toWsId": "25c0d5a2-ce6e-407a-95a2-b3beef7145ac",
+  "toWs": "M205-17",
+  "condition": "reaktor_gasdicht == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-36",
+  "id": "f00d50ca-5c4b-4b2f-bef7-e38730031d2b",
+  "fromWs": "M205-10",
+  "toWsId": "22d1707d-2fe8-420d-a72e-0f938e61e3bd",
+  "toWs": "M205-22",
+  "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-27",
+  "id": "d0c868ee-451d-4f78-b3a5-5f3c8b10b2b6",
+  "fromWs": "M205-12",
+  "toWsId": "2c3578b4-624b-4792-a948-443de7da4103",
+  "toWs": "M205-09",
+  "condition": "kalibrierintervall_sensor <= 6 AND reinigungsintervall_sensor <= 4"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-13",
+  "id": "ffa075f3-b392-4dc1-9fcf-6f2ef7e79520",
+  "fromWs": "M205-12",
+  "toWsId": "2c3578b4-624b-4792-a948-443de7da4103",
+  "toWs": "M205-09",
+  "condition": "monatlicher_nachweis == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "REQ-M205-ES1-04",
+  "id": "1d23c9fe-44e7-4767-b544-6027563a75e8",
+  "fromWs": "M205-17",
+  "toWsId": "71235b9a-bcaf-498d-be58-0cef301d1bef",
+  "toWs": "M205-07",
+  "condition": "ozon_pro_doc < 0.8"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-26",
+  "id": "7c147ff3-9496-45c6-a8ab-ce48d595a9f4",
+  "fromWs": "M205-18",
+  "toWsId": "71235b9a-bcaf-498d-be58-0cef301d1bef",
+  "toWs": "M205-07",
+  "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == True"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "REQ-M205-ES1-11",
+  "id": "8c8c0a13-a3f3-4fcd-8896-14781ee03987",
+  "fromWs": "M205-21",
+  "toWsId": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13",
+  "toWs": "M205-08",
+  "condition": "restchlor_betrieb >= 0.2"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-03",
+  "id": "ab98859a-a512-489b-bd9b-31d49a6ee4f0",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-04",
+  "id": "85c33f56-0637-4176-933d-506916835434",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf <= 250 AND enterokokken_ablauf <= 100"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-14",
+  "id": "1d2f5224-be95-4980-8cca-b7bcb1ff0983",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf <= 1000 AND enterokokken_ablauf <= 400"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-15",
+  "id": "2bc4cee8-c01d-41bc-91aa-80783344b386",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf <= 900 AND enterokokken_ablauf <= 330"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-16",
+  "id": "7632aa40-ac77-4abd-a411-902151dbdd8c",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-17",
+  "id": "86179325-4a53-4d53-b473-1c7cf55f0181",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 185"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-20",
+  "id": "7581d576-0ab4-4aee-9033-22bd134b59d7",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "log_reduktion >= 3"
+ },
+ {
+  "code": "DWA-M-205",
+  "cr": "CR-05",
+  "id": "9812fb5e-92f0-497d-979f-35664282c99b",
+  "fromWs": "M205-25",
+  "toWsId": "ccc715b7-292b-4f47-ba2b-7aed01b7d169",
+  "toWs": "M205-10",
+  "condition": "e_coli_ablauf == 0 AND enterokokken_ablauf == 0"
+ },
+ {
+  "code": "DWA-M-229-1",
+  "cr": "CR-007",
+  "id": "199d1e0a-7727-44be-a5e9-6ae76b2bcaea",
+  "fromWs": "M2291-03",
+  "toWsId": "2b5e075c-a7c1-4044-8138-ca14ab7601ab",
+  "toWs": "M2291-01",
+  "condition": "belueftungsart IS NOT NULL AND f_S_alpha IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-229-1",
+  "cr": "CR-021",
+  "id": "dd5e41bb-9794-4d74-baff-f1344735583b",
+  "fromWs": "M2291-09",
+  "toWsId": "fb70320b-6eaf-4bbe-859b-c33fbecf0228",
+  "toWs": "M2291-02",
+  "condition": "energiekosten IS NOT NULL AND OV_h_aM IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-03",
+  "id": "8f412cbc-e160-47ca-b491-0f31a5bede4e",
+  "fromWs": "M277E-02",
+  "toWsId": "1ce8fad3-3e41-40f8-895b-d5386f16178e",
+  "toWs": "M277E-04",
+  "condition": "(quality_category == C1 AND greywater_type IN {A1, A2}) OR quality_category == C2"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-09",
+  "id": "2ce99296-64f0-4773-a1b3-27d9fd420894",
+  "fromWs": "M277E-04",
+  "toWsId": "58b1615b-7bc4-4827-a6a9-eb36920c1b96",
+  "toWs": "M277E-08",
+  "condition": "IF quality_category == C2 THEN BOD5 < 5"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-02",
+  "id": "a136f374-f3dd-4d14-8828-8139b37ed60e",
+  "fromWs": "M277E-06",
+  "toWsId": "f16ece7c-c8d7-4ae4-a733-5e5f3a1bbc60",
+  "toWs": "M277E-02",
+  "condition": "greywater_type IN {A1, A2, B1, B2}"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-32",
+  "id": "81e65262-1d9c-42a2-9975-4843a01d6ab7",
+  "fromWs": "M277E-06",
+  "toWsId": "1ce8fad3-3e41-40f8-895b-d5386f16178e",
+  "toWs": "M277E-04",
+  "condition": "IF use_category == laundry_private THEN quality_category == C2"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-12",
+  "id": "2818e74b-fe56-4714-85b3-f87c216c4c9a",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "automatic_backfeed_present == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-16",
+  "id": "094ad722-6fa0-4671-a480-3016b7f8f63e",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "network_separation_per_DIN_EN_1717 == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-17",
+  "id": "e42705dc-fcd7-457c-99be-e39f1873b57f",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "service_water_labelled == true AND service_water_isolated_from_drinking_water == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-18",
+  "id": "b03eceab-b49e-4ff4-b4d7-9713409649f6",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "installation_frost_free == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-21",
+  "id": "a13a36da-615a-4a74-b246-7c68ed351b4a",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "auto_switch_to_backfeed == true AND auto_fault_report == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-26",
+  "id": "70430c31-962d-43c1-8236-caf63fe19411",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "automatic_backfeed_present == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-27",
+  "id": "0eb2d901-ca35-4eb5-b1be-f37806f1a290",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "automatic_backfeed_present == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-28",
+  "id": "b31ed0c2-7c3a-41e7-bd21-a3250345a182",
+  "fromWs": "M277E-19",
+  "toWsId": "5c5fe612-e085-49e0-a3ed-522c3f68afc5",
+  "toWs": "M277E-09",
+  "condition": "auto_switch_to_backfeed == true"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-10",
+  "id": "f568a86c-0941-4a4c-85c6-70a08724d2aa",
+  "fromWs": "M277E-23",
+  "toWsId": "351193d0-f576-44ef-9f94-f00a74a872cd",
+  "toWs": "M277E-10",
+  "condition": "o2_saturation_pct > 50"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-11",
+  "id": "ee3f8c34-cbf3-477c-b2b3-415378dcf5b2",
+  "fromWs": "M277E-23",
+  "toWsId": "58b1615b-7bc4-4827-a6a9-eb36920c1b96",
+  "toWs": "M277E-08",
+  "condition": "pH_value >= 6.5 AND pH_value <= 9.5"
+ },
+ {
+  "code": "DWA-M-277E",
+  "cr": "REQ-13",
+  "id": "904cf935-f27a-4ff5-8426-2fef8ff8dd51",
+  "fromWs": "M277E-23",
+  "toWsId": "ec719dce-ffd7-48c4-ab83-d83d70fa6d78",
+  "toWs": "M277E-11",
+  "condition": "authority_notification_sent == true"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-20",
+  "id": "8a11515a-82fe-462f-aa8a-b247dad9cfbf",
+  "fromWs": "M363-08",
+  "toWsId": "0a422fc5-906d-4b0e-9359-91d30a328707",
+  "toWs": "M363-07",
+  "condition": "IF verwertungsweg == tankstelle THEN speicherbetriebsdruck > 200000"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-08",
+  "id": "e1f35208-2b5a-4c1f-830c-7fed67919007",
+  "fromWs": "M363-16",
+  "toWsId": "40304142-4f30-4f66-a0ef-3c0c5296473a",
+  "toWs": "M363-08",
+  "condition": "verwertungsweg IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-10",
+  "id": "0c113a4c-e0cc-4558-82d8-753ee460fa26",
+  "fromWs": "M363-20",
+  "toWsId": "2314abb5-62f2-4d26-ba3a-824399a8018b",
+  "toWs": "M363-09",
+  "condition": "IF rohgas_kapazitaet >= 1.2 THEN anlagen_nr_4bimschv != keine"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-12",
+  "id": "1e1e4a5b-53ef-4909-ae90-0bf702299cbb",
+  "fromWs": "M363-20",
+  "toWsId": "2314abb5-62f2-4d26-ba3a-824399a8018b",
+  "toWs": "M363-09",
+  "condition": "IF feuerungswaermeleistung >= 1 THEN anlagen_nr_4bimschv != keine"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-26",
+  "id": "85719ad2-87e7-4402-974a-20a41151410b",
+  "fromWs": "M363-20",
+  "toWsId": "5bfb6f9e-c35f-4e1a-a53b-20e49bf0025d",
+  "toWs": "M363-23",
+  "condition": "co2_atemluft <= 0.5 AND h2s_atemluft <= 5"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-27",
+  "id": "439869f6-cc4d-464f-a647-e483339fa4bf",
+  "fromWs": "M363-20",
+  "toWsId": "230e19fe-197a-429a-9c1f-aba840110419",
+  "toWs": "M363-11",
+  "condition": "flammendurchschlagsicherung == true"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-28",
+  "id": "db10ebbc-2023-4df9-b684-70afb21bf685",
+  "fromWs": "M363-20",
+  "toWsId": "2314abb5-62f2-4d26-ba3a-824399a8018b",
+  "toWs": "M363-09",
+  "condition": "IF rohgas_kapazitaet > 2.3 THEN verfahrenstyp_bimschg != nicht_genehmigungsbeduerftig"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-11",
+  "id": "cd0d9a21-90a0-4235-901b-f585af0d24e7",
+  "fromWs": "M363-20",
+  "toWsId": "2314abb5-62f2-4d26-ba3a-824399a8018b",
+  "toWs": "M363-09",
+  "condition": "IF biogasmenge_total >= 10000 THEN privilegierung_baugb IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-25",
+  "id": "cd372329-a8d6-4136-87ff-fb78c0b7992c",
+  "fromWs": "M363-20",
+  "toWsId": "230e19fe-197a-429a-9c1f-aba840110419",
+  "toWs": "M363-11",
+  "condition": "o2_atemluft >= 17"
+ },
+ {
+  "code": "DWA-M-363",
+  "cr": "C363-24",
+  "id": "44a35358-cabe-4feb-969e-113ae6e90305",
+  "fromWs": "M363-20",
+  "toWsId": "b322cb1a-a58f-40d0-86f9-08c7af5d8a3d",
+  "toWs": "M363-10",
+  "condition": "messplatz_din_en_15259 == true"
+ },
+ {
+  "code": "DWA-M-708",
+  "cr": "REQ-708-01",
+  "id": "b954f37e-d67f-4889-a57f-f518946421f0",
+  "fromWs": "M708-06",
+  "toWsId": "1db1f869-b1e4-46e4-80c9-3cc829193dc0",
+  "toWs": "M708-04",
+  "condition": "c_bsb5 <= limit_bsb5_direkt AND c_csb <= limit_csb_direkt AND afs <= limit_afs_direkt AND c_nh4_n <= limit_nh4_n_direkt AND c_n_ges <= limit_nges_direkt AND c_p <= limit_pges_direkt AND ph_wert <= limit_ph_direkt"
+ },
+ {
+  "code": "DWA-M-760",
+  "cr": "REQ-M760-01",
+  "id": "0632e229-3535-4317-a5b3-0d5136060585",
+  "fromWs": "M760-01",
+  "toWsId": "68ad2af1-b5e1-4498-b47b-a3dae0ee81a6",
+  "toWs": "M760-08",
+  "condition": "branchentyp IS NOT NULL AND einleitungsart IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-760",
+  "cr": "REQ-M760-11",
+  "id": "a7401f2c-a192-403c-bde2-056ca352a905",
+  "fromWs": "M760-11",
+  "toWsId": "25f892d1-33dc-4324-a6bf-b5a004ec0366",
+  "toWs": "M760-24",
+  "condition": "analyseverfahren_sls == 'din_iso_11349_gravimetrisch' AND probenahmeart IS NOT NULL"
+ },
+ {
+  "code": "DWA-M-760",
+  "cr": "REQ-M760-08",
+  "id": "b70e673c-f23a-4ff8-aa0a-e6bd8491e3bb",
+  "fromWs": "M760-11",
+  "toWsId": "68ad2af1-b5e1-4498-b47b-a3dae0ee81a6",
+  "toWs": "M760-08",
+  "condition": "c_h2s_ppm <= 5"
+ },
+ {
+  "code": "DWA-M-760",
+  "cr": "REQ-M760-05",
+  "id": "3a9ed7a2-fe87-4340-847b-3d833a246807",
+  "fromWs": "M760-06",
+  "toWsId": "69f0549b-cd12-4e66-ad1a-0c756a78ce87",
+  "toWs": "M760-05",
+  "condition": "rho_fett >= 0.85 AND rho_fett <= 0.95"
+ },
+ {
+  "code": "FLL-GAR-2023",
+  "cr": "REQ-12",
+  "id": "1b2f1655-af3a-4cf4-a91f-f8d47d8b9827",
+  "fromWs": "FLL-GAR-10",
+  "toWsId": "9ded628f-9522-4841-aa29-aef6f19822b1",
+  "toWs": "FLL-GAR-09",
+  "condition": "IF abdichtungs_art == mineralisch_ohne_zusatzstoffe THEN kornanteil_unter_2micron >= 15 AND organische_substanz_VGL <= 5 AND kalkgehalt_VCA <= 15 AND kf_abdichtung <= 0.000000001 AND verdichtungsgrad_Dpr >= 97"
+ },
+ {
+  "code": "FLL-Naturteich-2017",
+  "cr": "REQ-10",
+  "id": "d1cacb11-3cbb-421a-8ea5-03980ce5e5f8",
+  "fromWs": "FLLNT-03",
+  "toWsId": "2d834d44-cbfb-462b-9e5a-8d6020b7a905",
+  "toWs": "FLLNT-04",
+  "condition": "swimming_test_ammonium <= 0.3 AND swimming_test_hardness >= 1.0 AND swimming_test_conductivity <= 1000 AND swimming_test_nitrate <= 30.0 AND swimming_test_nitrite <= 0.01 AND swimming_test_ph >= 7.0 AND swimming_test_ph <= 9.0 AND swimming_test_acid_capacity_ks43 >= 2 AND (IF natural_pool_type IN {type_I,type_II,type_III} THEN (swimming_test_p_total <= 0.03 AND swimming_test_orthophosphate <= 0.03)) AND (IF natural_pool_type IN {type_IV,type_V} THEN (swimming_test_p_total <= 0.01 AND swimming_test_orthophosphate <= 0.01))"
+ },
+ {
+  "code": "ISO-14033",
+  "cr": "CR-003",
+  "id": "6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27",
+  "fromWs": "ISO-14033-01",
+  "toWsId": "79a1599b-101b-431c-9d33-efefcdfd41b1",
+  "toWs": "ISO-14033-03",
+  "condition": "comparison_application != true OR principle_comparability == true"
+ },
+ {
+  "code": "ISO-14064-1",
+  "cr": "CR-009",
+  "id": "1cf13cb8-edd2-4153-a04e-52af6fd77380",
+  "fromWs": "ISO-14064-1-05",
+  "toWsId": "f4743acb-236f-47c9-b65e-1d7d36972f41",
+  "toWs": "ISO-14064-1-01",
+  "condition": "E_co2e_total IS NOT NULL AND berichtszeitraum IS NOT NULL"
+ }
+]

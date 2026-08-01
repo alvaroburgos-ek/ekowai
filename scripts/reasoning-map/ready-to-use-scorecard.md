@@ -1,5 +1,5 @@
 # CORPUS READY-TO-USE SCORECARD
-snapshot exported_at: 2026-08-01T09:22:38.047Z
+snapshot exported_at: 2026-08-01T09:41:40.406Z
 compute-ready (0 equation hard-errors): 67 / 71 standards
 
 | standard | eq | computed | manual(gap) | ERROR | gates | dead-gates | compute-ready |

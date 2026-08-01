@@ -1,0 +1,26 @@
+DO $$ BEGIN
+  UPDATE compliance_requirements SET worksheet_template_id='54c32010-95e1-42eb-b53c-7e98ae817bdb' WHERE id='fe8947a8-ba07-4d79-afae-546d214bab8e';
+  UPDATE compliance_requirements SET worksheet_template_id='717a37f6-153f-4fbe-83a1-4f1d3a345033' WHERE id='3b012613-e590-4b89-93ab-fe2a6b37c8ea';
+  UPDATE compliance_requirements SET worksheet_template_id='fa967545-18ee-4c83-9426-98d08fd143d1' WHERE id='a7b8e509-3de5-4bf5-81b1-2fb7ce140796';
+  UPDATE compliance_requirements SET worksheet_template_id='d22d1c0f-4d11-4bcd-8086-2639a4313482' WHERE id='9dfaa022-0288-4065-8f64-356fc9df5030';
+  UPDATE compliance_requirements SET worksheet_template_id='ac188e24-8868-4967-ac87-4878078f49ed' WHERE id='41596c7a-b3bb-40e9-ad3d-75eaa5bd5c16';
+  UPDATE compliance_requirements SET worksheet_template_id='d2745d54-399f-47a7-9204-7cd0f0a3db2f' WHERE id='4fccc258-28d4-42f1-bf71-63e1688eebe3';
+  UPDATE compliance_requirements SET worksheet_template_id='4d934739-d910-4757-ac2d-022ca21fd5c5' WHERE id='87d1402f-2d10-47a8-93b9-78a92c3e7dd6';
+  UPDATE compliance_requirements SET worksheet_template_id='6320b289-1988-419d-82ff-f3971f53781a' WHERE id='f88bb51e-b4fa-4974-b4f7-b67ce26bfba7';
+  UPDATE compliance_requirements SET worksheet_template_id='694a33e0-3159-4e91-b143-d4bfdea9a566' WHERE id='de89e350-d2a8-46f9-beab-3620e749c830';
+  UPDATE compliance_requirements SET worksheet_template_id='3a9d2273-d83e-4f2d-9378-8f6a23a9c7db' WHERE id='e327677d-06f2-403f-b006-f9be70cbc848';
+  UPDATE compliance_requirements SET worksheet_template_id='3a9d2273-d83e-4f2d-9378-8f6a23a9c7db' WHERE id='140195d4-cd38-45ba-9cd5-baec9e7bb79c';
+  UPDATE compliance_requirements SET worksheet_template_id='71235b9a-bcaf-498d-be58-0cef301d1bef' WHERE id='7c147ff3-9496-45c6-a8ab-ce48d595a9f4';
+  UPDATE compliance_requirements SET worksheet_template_id='d94c8822-eeb6-4aa7-be9f-f681630b9f59' WHERE id='869c84ce-e0ff-41a3-a0e5-0895f2bee132';
+  UPDATE compliance_requirements SET worksheet_template_id='2b5e075c-a7c1-4044-8138-ca14ab7601ab' WHERE id='199d1e0a-7727-44be-a5e9-6ae76b2bcaea';
+  UPDATE compliance_requirements SET worksheet_template_id='fb70320b-6eaf-4bbe-859b-c33fbecf0228' WHERE id='dd5e41bb-9794-4d74-baff-f1344735583b';
+  UPDATE compliance_requirements SET worksheet_template_id='1ce8fad3-3e41-40f8-895b-d5386f16178e' WHERE id='8f412cbc-e160-47ca-b491-0f31a5bede4e';
+  UPDATE compliance_requirements SET worksheet_template_id='58b1615b-7bc4-4827-a6a9-eb36920c1b96' WHERE id='2ce99296-64f0-4773-a1b3-27d9fd420894';
+  UPDATE compliance_requirements SET worksheet_template_id='0a422fc5-906d-4b0e-9359-91d30a328707' WHERE id='8a11515a-82fe-462f-aa8a-b247dad9cfbf';
+  UPDATE compliance_requirements SET worksheet_template_id='1db1f869-b1e4-46e4-80c9-3cc829193dc0' WHERE id='b954f37e-d67f-4889-a57f-f518946421f0';
+  UPDATE compliance_requirements SET worksheet_template_id='68ad2af1-b5e1-4498-b47b-a3dae0ee81a6' WHERE id='0632e229-3535-4317-a5b3-0d5136060585';
+  UPDATE compliance_requirements SET worksheet_template_id='9ded628f-9522-4841-aa29-aef6f19822b1' WHERE id='1b2f1655-af3a-4cf4-a91f-f8d47d8b9827';
+  UPDATE compliance_requirements SET worksheet_template_id='2d834d44-cbfb-462b-9e5a-8d6020b7a905' WHERE id='d1cacb11-3cbb-421a-8ea5-03980ce5e5f8';
+  UPDATE compliance_requirements SET worksheet_template_id='79a1599b-101b-431c-9d33-efefcdfd41b1' WHERE id='6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27';
+  UPDATE compliance_requirements SET worksheet_template_id='f4743acb-236f-47c9-b65e-1d7d36972f41' WHERE id='1cf13cb8-edd2-4153-a04e-52af6fd77380';
+END $$;
