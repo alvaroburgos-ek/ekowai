@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-07-31T08:51:11.025Z",
+  "exported_at": "2026-08-01T08:11:45.792Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -4260,7 +4260,7 @@
             "E_energy",
             "P_energy"
           ],
-          "formula": "(R - E) / ((R - E) + P) * 100",
+          "formula": "(R_energy - E_energy) / ((R_energy - E_energy) + P_energy) * 100",
           "clause_reference": "7.6.3",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
@@ -4273,7 +4273,7 @@
             "A_mass_recycled",
             "P_mass_product"
           ],
-          "formula": "A / P * 100",
+          "formula": "A_mass_recycled / P_mass_product * 100",
           "clause_reference": "7.8.4",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
@@ -4286,7 +4286,7 @@
             "I_resource_initial",
             "N_resource_new"
           ],
-          "formula": "(I - N) / I * 100",
+          "formula": "(I_resource_initial - N_resource_new) / I_resource_initial * 100",
           "clause_reference": "7.10.3",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "16564a57-d255-4b88-ab67-6aa3606e99ad"
@@ -7813,20 +7813,6 @@
           "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
         },
         {
-          "id": "21c8ff7a-28c2-46a2-bde3-7f5297d90977",
-          "equation_number": "6",
-          "output_symbol": "k_10",
-          "input_symbols": [
-            "T",
-            "k_T",
-            "alpha"
-          ],
-          "formula": "k_10 = (1.359 / (1 + 0.0337*T + 0.00022*T^2)) * k_T = alpha * k_T",
-          "clause_reference": "§5.7 Gl.(6)",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
-        },
-        {
           "id": "25ab35d0-8eab-4a21-99ee-ea9aad5193df",
           "equation_number": "8",
           "output_symbol": "k",
@@ -7855,6 +7841,20 @@
           ],
           "formula": "k = (a * l_0) / (A * t) * ln(h_1 / h_2)",
           "clause_reference": "§8.2 Gl.(9)",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
+        },
+        {
+          "id": "21c8ff7a-28c2-46a2-bde3-7f5297d90977",
+          "equation_number": "6",
+          "output_symbol": "k_10",
+          "input_symbols": [
+            "T",
+            "k_T",
+            "alpha"
+          ],
+          "formula": "k_10 = (1.359 / (1 + 0.0337*T + 0.00022*T^2)) * k_T",
+          "clause_reference": "§5.7 Gl.(6)",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "337b89eb-12f8-4f6c-966c-ae38beeea373"
         }
@@ -9558,7 +9558,7 @@
             "BW_a",
             "E_R"
           ],
-          "formula": "V_n = min(BW_a, E_R) * 0,06",
+          "formula": "V_n = min(BW_a, E_R) * 0.06",
           "clause_reference": "§16.3.8",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "713a873d-a192-4e74-89f7-51f0d748198b"
@@ -30121,21 +30121,6 @@
           "worksheet_template_id": "61568b1c-bc30-464d-b3f5-13ce56250c42"
         },
         {
-          "id": "a928532e-5aee-425a-afd1-e0044656039e",
-          "equation_number": "T6.Vs",
-          "output_symbol": "V_s",
-          "input_symbols": [
-            "H1",
-            "e_0",
-            "H2",
-            "V_S_min"
-          ],
-          "formula": "V_s = Max(H1 / (e_0 + 6) - H2; V_S_min)",
-          "clause_reference": "Tabelle 6",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
-        },
-        {
           "id": "57ff0b47-b91f-4729-9789-3cdef356fe83",
           "equation_number": "T6.V",
           "output_symbol": "V",
@@ -30148,18 +30133,6 @@
           "clause_reference": "Tabelle 6",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
-        },
-        {
-          "id": "6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b",
-          "equation_number": "T6.a_f",
-          "output_symbol": "a_f",
-          "input_symbols": [
-            "t_f"
-          ],
-          "formula": "a_f = Max(0.5 + 50 / (t_f + 100); 0.885)",
-          "clause_reference": "Tabelle 6",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15"
         },
         {
           "id": "f24d3d57-1d4f-4bf4-8a2b-30978d188535",
@@ -30184,6 +30157,33 @@
           "clause_reference": "Section 5.2.3.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b",
+          "equation_number": "T6.a_f",
+          "output_symbol": "a_f",
+          "input_symbols": [
+            "t_f"
+          ],
+          "formula": "a_f = max(0.5 + 50 / (t_f + 100), 0.885)",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "64c4e487-751e-4fec-8435-cf5438ea4d15"
+        },
+        {
+          "id": "a928532e-5aee-425a-afd1-e0044656039e",
+          "equation_number": "T6.Vs",
+          "output_symbol": "V_s",
+          "input_symbols": [
+            "H1",
+            "e_0",
+            "H2",
+            "V_S_min"
+          ],
+          "formula": "V_s = max(H1 / (e_0 + 6) - H2, V_S_min)",
+          "clause_reference": "Tabelle 6",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "40121900-e641-4a78-b810-1e12732a8479"
         }
       ],
       "compliance": [
@@ -43515,7 +43515,7 @@
         {
           "id": "385af5b3-142f-4f40-b210-fdbe41da9c69",
           "code": "A138-REQ-10",
-          "condition": "verify Gl. 2",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3.3.5",
           "requires_attestation": true,
@@ -43526,7 +43526,7 @@
         {
           "id": "fb14455c-80b6-4a30-8b3c-fa58ab296bf9",
           "code": "A138-REQ-11",
-          "condition": "verify Gl. 3",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3.3.5",
           "requires_attestation": true,
@@ -43537,7 +43537,7 @@
         {
           "id": "fe8712d6-10fc-40ea-b90d-e33c70cd24e2",
           "code": "A138-REQ-12",
-          "condition": "verify Gl. 5/6",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3.3.6",
           "requires_attestation": true,
@@ -43548,7 +43548,7 @@
         {
           "id": "9593003c-141a-4320-aa3d-6b8183eb8caa",
           "code": "A138-REQ-13",
-          "condition": "verify Gl. 4",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3.3.6",
           "requires_attestation": true,
@@ -43559,7 +43559,7 @@
         {
           "id": "eeb95384-da50-4669-b33e-2fccc6273674",
           "code": "A138-REQ-14",
-          "condition": "verify Gl. 8 iterated",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3.3.7",
           "requires_attestation": true,
@@ -46928,7 +46928,7 @@
             "B_RBF_ab",
             "VQ_RBF_zu"
           ],
-          "formula": "eta_F = ((C_RBF_zu * VQ_DR_RBF_zu) - (B_RBF_ab * 1000)) / (C_RBF_zu * VQ_RBF_zu)",
+          "formula": "eta_F = ((C_RBF_zu * VQ_Dr_RBF) - (B_RBF_ab * 1000)) / (C_RBF_zu * VQ_RBF_zu)",
           "clause_reference": "§6.2.2.3, Gl. (13)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "db79bc61-150d-489c-8093-35bae447a0df"
@@ -50258,11 +50258,157 @@
       ],
       "equations": [
         {
+          "id": "7ccc47c0-1fa7-4ee6-92e6-a6f80f0a3772",
+          "equation_number": "F-21",
+          "output_symbol": "B_A_BSB",
+          "input_symbols": [
+            "B_R_BSB",
+            "h"
+          ],
+          "formula": "B_A_BSB = B_R_BSB * h",
+          "clause_reference": "§7",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "b37f936a-ead9-4d54-b3a3-34535a076db3"
+        },
+        {
+          "id": "48ef9e99-ffc6-4b51-a911-88fb8e40101d",
+          "equation_number": "F-01",
+          "output_symbol": "V_erf_grobstoff",
+          "input_symbols": [
+            "Q_M",
+            "t_R_M"
+          ],
+          "formula": "V_erf_grobstoff >= Q_M * t_R_M",
+          "clause_reference": "§5.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "dc019548-7320-4e8c-b776-397de871ba71"
+        },
+        {
+          "id": "9595054e-f057-4cbb-8468-50913547d86b",
+          "equation_number": "F-02",
+          "output_symbol": "t_R_M",
+          "input_symbols": null,
+          "formula": "t_R_M = 0.5",
+          "clause_reference": "§5.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "dc019548-7320-4e8c-b776-397de871ba71"
+        },
+        {
+          "id": "e3c30a7d-c11e-4076-8f09-a0d4a590946e",
+          "equation_number": "F-04",
+          "output_symbol": "V_schlammraum_absetz",
+          "input_symbols": null,
+          "formula": "V_schlammraum_absetz >= 0.15",
+          "clause_reference": "§5.2",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
+        },
+        {
+          "id": "cd3b9207-ad53-43ad-bcf3-31c6028194d8",
+          "equation_number": "F-05",
+          "output_symbol": "schlammrate_absetz",
+          "input_symbols": null,
+          "formula": "schlammrate_absetz = 0.3",
+          "clause_reference": "§5.2",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
+        },
+        {
+          "id": "ba340cbf-9420-410d-bfc9-d4380dde9a6e",
+          "equation_number": "F-06",
+          "output_symbol": "t_R_absetz",
+          "input_symbols": null,
+          "formula": "t_R_absetz >= 1",
+          "clause_reference": "§5.2",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
+        },
+        {
+          "id": "792d1332-5ed4-4b16-a106-8132a1fa7bf7",
+          "equation_number": "F-03",
+          "output_symbol": "V_EW_absetz",
+          "input_symbols": null,
+          "formula": "V_EW_absetz >= 0.5",
+          "clause_reference": "§5.2",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
+        },
+        {
+          "id": "2c9d5018-004f-4f67-b40b-dcc8898d3171",
+          "equation_number": "F-07",
+          "output_symbol": "A_EW_unbelueftet",
+          "input_symbols": null,
+          "formula": "A_EW_unbelueftet >= 10",
+          "clause_reference": "§5.3",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
+        },
+        {
+          "id": "3f986494-9fae-4171-b602-ab106a8cd659",
+          "equation_number": "F-08",
+          "output_symbol": "A_EW_unbelueftet",
+          "input_symbols": null,
+          "formula": "A_EW_unbelueftet >= 8",
+          "clause_reference": "§5.3",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
+        },
+        {
+          "id": "907ca435-b41e-43f9-8811-ea85b6098956",
+          "equation_number": "F-09",
+          "output_symbol": "A_EW_Mi",
+          "input_symbols": null,
+          "formula": "A_EW_Mi = 5",
+          "clause_reference": "§5.3,§6",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
+        },
+        {
+          "id": "a69cfcaf-18a2-482e-a359-63848ffa00b9",
+          "equation_number": "F-10",
+          "output_symbol": "A_EW_nitrifikation",
+          "input_symbols": null,
+          "formula": "A_EW_nitrifikation >= 15",
+          "clause_reference": "§5.3",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
+        },
+        {
           "id": "2aa30964-75b6-4990-995e-58d16598fc2c",
           "equation_number": "F-11",
           "output_symbol": "B_R_BSB",
           "input_symbols": null,
           "formula": "B_R_BSB <= 25",
+          "clause_reference": "§5.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
+        },
+        {
+          "id": "f4ae9506-4dea-4835-89e2-5f98d23db308",
+          "equation_number": "F-14",
+          "output_symbol": "P_R",
+          "input_symbols": null,
+          "formula": "P_R between 1 and 3",
+          "clause_reference": "§5.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
+        },
+        {
+          "id": "c34e9132-0c2f-404a-bc06-c2673770c761",
+          "equation_number": "F-12",
+          "output_symbol": "t_R_belueftet",
+          "input_symbols": null,
+          "formula": "t_R_belueftet >= 5",
+          "clause_reference": "§5.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
+        },
+        {
+          "id": "74018e72-ea91-4a1e-bef9-2cb4f3782f8d",
+          "equation_number": "F-13",
+          "output_symbol": "OV_C_BSB",
+          "input_symbols": null,
+          "formula": "OV_C_BSB >= 1.5",
           "clause_reference": "§5.4",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
@@ -50322,152 +50468,6 @@
           "clause_reference": "§5.8",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "0274fb97-3d42-4647-8e71-b23b3c582b4e"
-        },
-        {
-          "id": "f4ae9506-4dea-4835-89e2-5f98d23db308",
-          "equation_number": "F-14",
-          "output_symbol": "P_R",
-          "input_symbols": null,
-          "formula": "P_R between 1 and 3",
-          "clause_reference": "§5.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
-        },
-        {
-          "id": "e3c30a7d-c11e-4076-8f09-a0d4a590946e",
-          "equation_number": "F-04",
-          "output_symbol": "V_schlammraum_absetz",
-          "input_symbols": null,
-          "formula": "V_schlammraum_absetz >= 0.15",
-          "clause_reference": "§5.2",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
-        },
-        {
-          "id": "cd3b9207-ad53-43ad-bcf3-31c6028194d8",
-          "equation_number": "F-05",
-          "output_symbol": "schlammrate_absetz",
-          "input_symbols": null,
-          "formula": "schlammrate_absetz = 0.3",
-          "clause_reference": "§5.2",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
-        },
-        {
-          "id": "ba340cbf-9420-410d-bfc9-d4380dde9a6e",
-          "equation_number": "F-06",
-          "output_symbol": "t_R_absetz",
-          "input_symbols": null,
-          "formula": "t_R_absetz >= 1",
-          "clause_reference": "§5.2",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
-        },
-        {
-          "id": "2c9d5018-004f-4f67-b40b-dcc8898d3171",
-          "equation_number": "F-07",
-          "output_symbol": "A_EW_unbelueftet",
-          "input_symbols": null,
-          "formula": "A_EW_unbelueftet >= 10",
-          "clause_reference": "§5.3",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
-        },
-        {
-          "id": "3f986494-9fae-4171-b602-ab106a8cd659",
-          "equation_number": "F-08",
-          "output_symbol": "A_EW_unbelueftet",
-          "input_symbols": null,
-          "formula": "A_EW_unbelueftet >= 8",
-          "clause_reference": "§5.3",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
-        },
-        {
-          "id": "907ca435-b41e-43f9-8811-ea85b6098956",
-          "equation_number": "F-09",
-          "output_symbol": "A_EW_Mi",
-          "input_symbols": null,
-          "formula": "A_EW_Mi = 5",
-          "clause_reference": "§5.3,§6",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
-        },
-        {
-          "id": "a69cfcaf-18a2-482e-a359-63848ffa00b9",
-          "equation_number": "F-10",
-          "output_symbol": "A_EW_nitrifikation",
-          "input_symbols": null,
-          "formula": "A_EW_nitrifikation >= 15",
-          "clause_reference": "§5.3",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "7eee02a5-9620-4b68-ab50-ad841a8d282a"
-        },
-        {
-          "id": "c34e9132-0c2f-404a-bc06-c2673770c761",
-          "equation_number": "F-12",
-          "output_symbol": "t_R_belueftet",
-          "input_symbols": null,
-          "formula": "t_R_belueftet >= 5",
-          "clause_reference": "§5.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
-        },
-        {
-          "id": "7ccc47c0-1fa7-4ee6-92e6-a6f80f0a3772",
-          "equation_number": "F-21",
-          "output_symbol": "B_A_BSB",
-          "input_symbols": [
-            "B_R_BSB",
-            "h"
-          ],
-          "formula": "B_A_BSB = B_R_BSB * h",
-          "clause_reference": "§7",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "b37f936a-ead9-4d54-b3a3-34535a076db3"
-        },
-        {
-          "id": "74018e72-ea91-4a1e-bef9-2cb4f3782f8d",
-          "equation_number": "F-13",
-          "output_symbol": "OV_C_BSB",
-          "input_symbols": null,
-          "formula": "OV_C_BSB >= 1.5",
-          "clause_reference": "§5.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "6f4303be-567b-4300-9443-5867412d3a3c"
-        },
-        {
-          "id": "48ef9e99-ffc6-4b51-a911-88fb8e40101d",
-          "equation_number": "F-01",
-          "output_symbol": "V_erf_grobstoff",
-          "input_symbols": [
-            "Q_M",
-            "t_R_M"
-          ],
-          "formula": "V_erf_grobstoff >= Q_M * t_R_M",
-          "clause_reference": "§5.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "dc019548-7320-4e8c-b776-397de871ba71"
-        },
-        {
-          "id": "9595054e-f057-4cbb-8468-50913547d86b",
-          "equation_number": "F-02",
-          "output_symbol": "t_R_M",
-          "input_symbols": null,
-          "formula": "t_R_M = 0.5",
-          "clause_reference": "§5.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "dc019548-7320-4e8c-b776-397de871ba71"
-        },
-        {
-          "id": "792d1332-5ed4-4b16-a106-8132a1fa7bf7",
-          "equation_number": "F-03",
-          "output_symbol": "V_EW_absetz",
-          "input_symbols": null,
-          "formula": "V_EW_absetz >= 0.5",
-          "clause_reference": "§5.2",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "c8e1b6ee-95f9-42fe-8ac0-166456e3a72f"
         }
       ],
       "compliance": [
@@ -53990,7 +53990,7 @@
         {
           "id": "74f61485-d904-478f-a46d-8803ba18b0cf",
           "code": "CR-041",
-          "condition": "betriebsanweisung_dwa_a_199_4 == 'ja'",
+          "condition": "betriebsanweisung_dwa_a_199_4 == True",
           "severity": "block",
           "clause_reference": "§6.1",
           "requires_attestation": false,
@@ -54001,7 +54001,7 @@
         {
           "id": "5d8bc25b-b6ce-47ca-9b13-10ad49cfa76f",
           "code": "CR-024",
-          "condition": "betrsichv_konformitaet == 'ja'",
+          "condition": "betrsichv_konformitaet == True",
           "severity": "block",
           "clause_reference": "§6.1",
           "requires_attestation": false,
@@ -54034,7 +54034,7 @@
         {
           "id": "051baae2-0667-4f03-a0b0-fc2ef3eb7ad0",
           "code": "CR-027",
-          "condition": "negativliste_geprueft == 'ja' AND (mischsystem_ausnahmefall == 'nein' OR mischsystem_ausnahmefall == 'ja')",
+          "condition": "negativliste_geprueft == True AND (mischsystem_ausnahmefall == False OR mischsystem_ausnahmefall == True)",
           "severity": "block",
           "clause_reference": "§1",
           "requires_attestation": false,
@@ -54133,7 +54133,7 @@
         {
           "id": "e14a7551-ef26-4744-9cb4-10f1d779debf",
           "code": "CR-022",
-          "condition": "GK == '1' AND mindestanforderungen_abwv_anh1 == 'ja'",
+          "condition": "GK == 'gk_1' AND mindestanforderungen_abwv_anh1 == True",
           "severity": "block",
           "clause_reference": "§4.3.1, §8",
           "requires_attestation": false,
@@ -54208,9 +54208,9 @@
           "worksheet_template_id": "a76f5a0f-bfab-4e48-a62c-fb2db4f02f71"
         },
         {
-          "id": "c83ed026-0f2c-4a70-89b9-52bfaf927f5c",
-          "code": "CR-031",
-          "condition": "versuchsbericht_a_sb_spez == 'ja'",
+          "id": "06fb98f7-c3cd-4856-a72e-cb9a55f064ab",
+          "code": "CR-032",
+          "condition": "rueckhaltenachweis_aufwuchskoerper == True",
           "severity": "block",
           "clause_reference": "§4.3.5",
           "requires_attestation": false,
@@ -54219,9 +54219,9 @@
           "worksheet_template_id": "d9ef23b6-b3e3-489c-9ab4-93f7c0e71024"
         },
         {
-          "id": "06fb98f7-c3cd-4856-a72e-cb9a55f064ab",
-          "code": "CR-032",
-          "condition": "rueckhaltenachweis_aufwuchskoerper == 'ja'",
+          "id": "c83ed026-0f2c-4a70-89b9-52bfaf927f5c",
+          "code": "CR-031",
+          "condition": "versuchsbericht_a_sb_spez == True",
           "severity": "block",
           "clause_reference": "§4.3.5",
           "requires_attestation": false,
@@ -54318,28 +54318,6 @@
           "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
         },
         {
-          "id": "50615194-47d4-476d-a17e-11a3bc5d40be",
-          "code": "CR-033",
-          "condition": "garantiewerte_dokumentiert == 'ja' AND verifikation_inbetriebnahme == 'ja'",
-          "severity": "warn",
-          "clause_reference": "4.3.7",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Vom Lieferanten/Ausrüster sollten Garantiewerte für die Sauerstoffzufuhr und Energieaufnahme angegeben werden. Die Werte sollten in der Praxis sowohl vor der Inbetriebnahme als auch vor Ablauf der Gewährleistungsfrist überprüft werden (siehe Merkblatt DWA-M 209).",
-          "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
-        },
-        {
-          "id": "b070fb31-6cc6-41b1-bbe7-98e4672dcbd4",
-          "code": "CR-036",
-          "condition": "stoermeldung_vorhanden == 'ja' AND stromausfallmeldung_netzunabhaengig == 'ja'",
-          "severity": "block",
-          "clause_reference": "§5.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
-        },
-        {
           "id": "3ff8d020-cbee-4d09-8520-0e050939f59f",
           "code": "CR-037",
           "condition": "attest_a222_16_cr_037 == True",
@@ -54359,6 +54337,28 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Die Belange des Explosionsschutzes müssen beachtet werden. Der Elektrosteuerungsteil der Kläranlage muss vom eigentlichen Abwasserbehandlungsteil strikt getrennt, Kabeldurchbrüche müssen gasdicht ausgeführt werden.",
+          "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
+        },
+        {
+          "id": "50615194-47d4-476d-a17e-11a3bc5d40be",
+          "code": "CR-033",
+          "condition": "garantiewerte_dokumentiert == True AND verifikation_inbetriebnahme == True",
+          "severity": "warn",
+          "clause_reference": "4.3.7",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Vom Lieferanten/Ausrüster sollten Garantiewerte für die Sauerstoffzufuhr und Energieaufnahme angegeben werden. Die Werte sollten in der Praxis sowohl vor der Inbetriebnahme als auch vor Ablauf der Gewährleistungsfrist überprüft werden (siehe Merkblatt DWA-M 209).",
+          "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
+        },
+        {
+          "id": "b070fb31-6cc6-41b1-bbe7-98e4672dcbd4",
+          "code": "CR-036",
+          "condition": "stoermeldung_vorhanden == True AND stromausfallmeldung_netzunabhaengig == True",
+          "severity": "block",
+          "clause_reference": "§5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
         },
         {
@@ -54397,7 +54397,7 @@
         {
           "id": "37ebcc23-017a-4b1b-b71d-8ad61e3e4773",
           "code": "CR-039",
-          "condition": "sbr_steuerung_variation_zykluszeiten == 'ja'",
+          "condition": "sbr_steuerung_variation_zykluszeiten == True",
           "severity": "block",
           "clause_reference": "§5.7",
           "requires_attestation": false,
@@ -54408,35 +54408,13 @@
         {
           "id": "ee3adf6a-7618-470f-9dcd-1c4381e58975",
           "code": "CR-040",
-          "condition": "doppelfuellstandsmessung_vorhanden == 'ja'",
+          "condition": "doppelfuellstandsmessung_vorhanden == True",
           "severity": "block",
           "clause_reference": "§5.7",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "7d537406-3dd5-4768-8549-336677546d9a"
-        },
-        {
-          "id": "003c896a-892d-4ddd-bbe7-9eec33f35b30",
-          "code": "CR-034",
-          "condition": "betriebsstundenzaehler_installiert == 'ja'",
-          "severity": "block",
-          "clause_reference": "§5.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "57545e1f-136f-4bc4-9a8b-0257cc16cf52"
-        },
-        {
-          "id": "66149838-2338-4f21-ace8-169e9f5a0390",
-          "code": "CR-035",
-          "condition": "durchflussmessung_vorhanden == 'ja'",
-          "severity": "block",
-          "clause_reference": "§5.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "57545e1f-136f-4bc4-9a8b-0257cc16cf52"
         },
         {
           "id": "a1c8f434-c52c-4933-a4bd-6b707c676be1",
@@ -54450,9 +54428,31 @@
           "worksheet_template_id": "57545e1f-136f-4bc4-9a8b-0257cc16cf52"
         },
         {
+          "id": "003c896a-892d-4ddd-bbe7-9eec33f35b30",
+          "code": "CR-034",
+          "condition": "betriebsstundenzaehler_installiert == True",
+          "severity": "block",
+          "clause_reference": "§5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "57545e1f-136f-4bc4-9a8b-0257cc16cf52"
+        },
+        {
+          "id": "66149838-2338-4f21-ace8-169e9f5a0390",
+          "code": "CR-035",
+          "condition": "durchflussmessung_vorhanden == True",
+          "severity": "block",
+          "clause_reference": "§5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "57545e1f-136f-4bc4-9a8b-0257cc16cf52"
+        },
+        {
           "id": "f425023e-d5f5-4ba7-a003-ad2a905ad25a",
           "code": "CR-042",
-          "condition": "betriebstagebuch_gefuehrt == 'ja'",
+          "condition": "betriebstagebuch_gefuehrt == True",
           "severity": "block",
           "clause_reference": "§6.1",
           "requires_attestation": false,
@@ -56771,7 +56771,7 @@
             "ISV",
             "t_E"
           ],
-          "formula": "TS_BS = 1000 / ISV * (t_E ** (1/3))",
+          "formula": "TS_BS = 1000 / ISV * (t_E ^ (1/3))",
           "clause_reference": "§3.4",
           "verification_status": "verified_via_cross_reference",
           "worksheet_template_id": "61e9570d-07d3-40a7-91bb-ff2067e1fc37"
@@ -56854,19 +56854,6 @@
           "worksheet_template_id": "61e9570d-07d3-40a7-91bb-ff2067e1fc37"
         },
         {
-          "id": "417681bd-808e-4277-9241-8786d8a95c93",
-          "equation_number": "26",
-          "output_symbol": "h_ges",
-          "input_symbols": [
-            "A_NB_theo",
-            "h_theo"
-          ],
-          "formula": "h_ges = (A_NB_theo * h_theo * 3) ** (1/3)",
-          "clause_reference": "§3.4 Gl.26",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "61e9570d-07d3-40a7-91bb-ff2067e1fc37"
-        },
-        {
           "id": "91ba2602-bd6e-4f15-97db-db275931b624",
           "equation_number": "27",
           "output_symbol": "h_t",
@@ -56901,6 +56888,19 @@
           ],
           "formula": "r_NB = (h_ges - h_z) / 1.7",
           "clause_reference": "§3.4 Gl.29",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "61e9570d-07d3-40a7-91bb-ff2067e1fc37"
+        },
+        {
+          "id": "417681bd-808e-4277-9241-8786d8a95c93",
+          "equation_number": "26",
+          "output_symbol": "h_ges",
+          "input_symbols": [
+            "A_NB_theo",
+            "h_theo"
+          ],
+          "formula": "h_ges = (A_NB_theo * h_theo * 3) ^ (1/3)",
+          "clause_reference": "§3.4 Gl.26",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "61e9570d-07d3-40a7-91bb-ff2067e1fc37"
         }
@@ -61465,60 +61465,6 @@
           "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
         },
         {
-          "id": "be085f8e-4173-4a10-9b6f-01cf6c972bbf",
-          "equation_number": "1",
-          "output_symbol": "Q_Tr_h_max",
-          "input_symbols": [
-            "Q_S_d_aM",
-            "x_Q_max",
-            "Q_F",
-            "Q_R_Tr"
-          ],
-          "formula": "Q_Tr_h_max = 24 * Q_S_d_aM / x_Q_max + Q_F + Q_R_Tr  (l/s)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
-        },
-        {
-          "id": "1c9b9469-362e-4c67-88e4-49257d89cce3",
-          "equation_number": "2",
-          "output_symbol": "Q_S_d_aM",
-          "input_symbols": [
-            "EZ",
-            "w_s_d"
-          ],
-          "formula": "Q_S_d_aM = EZ * w_s_d / 86400  (l/s)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
-        },
-        {
-          "id": "4cb4c503-5871-45b3-97f1-752512c9f60e",
-          "equation_number": "3",
-          "output_symbol": "Q_F",
-          "input_symbols": [
-            "q_F",
-            "A_E_k"
-          ],
-          "formula": "Q_F = q_F * A_E_k  (l/s)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
-        },
-        {
-          "id": "5c1e432e-184c-4ef5-940d-9f2987b20e87",
-          "equation_number": "4",
-          "output_symbol": "Q_R_Tr",
-          "input_symbols": [
-            "q_R_Tr",
-            "A_E_k"
-          ],
-          "formula": "Q_R_Tr = q_R_Tr * A_E_k  (l/s)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
-        },
-        {
           "id": "db6c259e-1f61-48a8-8ca1-ae4127feca17",
           "equation_number": "6",
           "output_symbol": "Q_M",
@@ -61529,19 +61475,6 @@
             "Q_Dr_RUB"
           ],
           "formula": "Q_M = f_S_QM * Q_S_d_aM + Q_F >= SUM(Q_Dr_RUB)  (l/s)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
-        },
-        {
-          "id": "5ab4ad64-320a-4789-bc7e-623dfa9ce1d2",
-          "equation_number": "7",
-          "output_symbol": "Q_F",
-          "input_symbols": [
-            "q_F",
-            "A_E_k"
-          ],
-          "formula": "Q_F = q_F * A_E_k  (l/s)",
           "clause_reference": "§4.1.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
@@ -61558,57 +61491,6 @@
           "clause_reference": "§4.1.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
-        },
-        {
-          "id": "2e702b45-d29b-45ea-90d9-7a43423e942a",
-          "equation_number": "9",
-          "output_symbol": "Q_T_d_aM",
-          "input_symbols": [
-            "Q_S_d_aM",
-            "Q_F_d_aM"
-          ],
-          "formula": "Q_T_d_aM = Q_S_d_aM + Q_F_d_aM  (m^3/d)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
-        },
-        {
-          "id": "83384e6e-a6c1-4209-9eb9-a4b14b407932",
-          "equation_number": "10",
-          "output_symbol": "Q_F_d_aM",
-          "input_symbols": [
-            "m_T_aM",
-            "Q_S_d_aM"
-          ],
-          "formula": "Q_F_d_aM = m_T_aM * Q_S_d_aM  (m^3/d)",
-          "clause_reference": "§4.1.2",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
-        },
-        {
-          "id": "395eceea-8b47-4a87-bc00-d51190fce646",
-          "equation_number": "11",
-          "output_symbol": "f_red",
-          "input_symbols": [
-            "t_Reg"
-          ],
-          "formula": "f_red = 1 - t_Reg / 12   with f_red >= 0.5",
-          "clause_reference": "§4.3.4",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
-        },
-        {
-          "id": "571c0451-aeec-4723-93cf-34d3346bb3ff",
-          "equation_number": "12",
-          "output_symbol": "A_F_CSB_red",
-          "input_symbols": [
-            "f_red",
-            "A_F_CSB"
-          ],
-          "formula": "A_F_CSB_red = f_red * A_F_CSB  [m^2]",
-          "clause_reference": "§4.3.4",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
         },
         {
           "id": "cb011262-3770-41a8-bf27-293f19aafe90",
@@ -61674,7 +61556,7 @@
           "input_symbols": [
             "d_10"
           ],
-          "formula": "k_fA = (d_10)^2 / 100   (m/s, with d_10 in mm)",
+          "formula": "k_fA = (d_10)^2 / 100",
           "clause_reference": "§5.4.1",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "0bb6299f-dca6-4378-9ab8-c9efc11d0f5b"
@@ -61687,10 +61569,128 @@
             "d_60",
             "d_10"
           ],
-          "formula": "U = d_60 / d_10   with U < 5",
+          "formula": "U = d_60 / d_10",
           "clause_reference": "§5.4.1",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "0bb6299f-dca6-4378-9ab8-c9efc11d0f5b"
+        },
+        {
+          "id": "395eceea-8b47-4a87-bc00-d51190fce646",
+          "equation_number": "11",
+          "output_symbol": "f_red",
+          "input_symbols": [
+            "t_Reg"
+          ],
+          "formula": "f_red = 1 - t_Reg / 12",
+          "clause_reference": "§4.3.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
+        },
+        {
+          "id": "4cb4c503-5871-45b3-97f1-752512c9f60e",
+          "equation_number": "3",
+          "output_symbol": "Q_F",
+          "input_symbols": [
+            "q_F",
+            "A_E_k"
+          ],
+          "formula": "Q_F = q_F * A_E_k",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
+        },
+        {
+          "id": "571c0451-aeec-4723-93cf-34d3346bb3ff",
+          "equation_number": "12",
+          "output_symbol": "A_F_CSB_red",
+          "input_symbols": [
+            "f_red",
+            "A_F_CSB"
+          ],
+          "formula": "A_F_CSB_red = f_red * A_F_CSB",
+          "clause_reference": "§4.3.4",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "f935ebaf-d3c9-40a9-a021-03fa349ddd6e"
+        },
+        {
+          "id": "5ab4ad64-320a-4789-bc7e-623dfa9ce1d2",
+          "equation_number": "7",
+          "output_symbol": "Q_F",
+          "input_symbols": [
+            "q_F",
+            "A_E_k"
+          ],
+          "formula": "Q_F = q_F * A_E_k",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
+        },
+        {
+          "id": "5c1e432e-184c-4ef5-940d-9f2987b20e87",
+          "equation_number": "4",
+          "output_symbol": "Q_R_Tr",
+          "input_symbols": [
+            "q_R_Tr",
+            "A_E_k"
+          ],
+          "formula": "Q_R_Tr = q_R_Tr * A_E_k",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
+        },
+        {
+          "id": "83384e6e-a6c1-4209-9eb9-a4b14b407932",
+          "equation_number": "10",
+          "output_symbol": "Q_F_d_aM",
+          "input_symbols": [
+            "m_T_aM",
+            "Q_S_d_aM"
+          ],
+          "formula": "Q_F_d_aM = m_T_aM * Q_S_d_aM",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
+        },
+        {
+          "id": "be085f8e-4173-4a10-9b6f-01cf6c972bbf",
+          "equation_number": "1",
+          "output_symbol": "Q_Tr_h_max",
+          "input_symbols": [
+            "Q_S_d_aM",
+            "x_Q_max",
+            "Q_F",
+            "Q_R_Tr"
+          ],
+          "formula": "Q_Tr_h_max = 24 * Q_S_d_aM / x_Q_max + Q_F + Q_R_Tr",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
+        },
+        {
+          "id": "1c9b9469-362e-4c67-88e4-49257d89cce3",
+          "equation_number": "2",
+          "output_symbol": "Q_S_d_aM",
+          "input_symbols": [
+            "EZ",
+            "w_s_d"
+          ],
+          "formula": "Q_S_d_aM = EZ * w_s_d / 86400",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "d7e721bf-6b36-4026-9527-eb91815a4059"
+        },
+        {
+          "id": "2e702b45-d29b-45ea-90d9-7a43423e942a",
+          "equation_number": "9",
+          "output_symbol": "Q_T_d_aM",
+          "input_symbols": [
+            "Q_S_d_aM",
+            "Q_F_d_aM"
+          ],
+          "formula": "Q_T_d_aM = Q_S_d_aM + Q_F_d_aM",
+          "clause_reference": "§4.1.2",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "2a2d14b8-735b-4083-9631-a1fa0f0b2927"
         }
       ],
       "compliance": [
@@ -66590,7 +66590,7 @@
           "equation_number": "RULE-7",
           "output_symbol": "Q_flush_avg",
           "input_symbols": null,
-          "formula": "Q_flush_avg = 33 l/(E*d)",
+          "formula": "Q_flush_avg = 33",
           "clause_reference": "§6.2 Table 5 footnote 3",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "43c91f98-55ce-422f-a920-54089b79c586"
@@ -72543,49 +72543,6 @@
           "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
         },
         {
-          "id": "681fdcea-c1f6-472d-9efb-1300e5bf1d4a",
-          "equation_number": "1",
-          "output_symbol": "P_korr",
-          "input_symbols": [
-            "P_korr",
-            "R",
-            "ET_a"
-          ],
-          "formula": "P_korr = R + ET_a",
-          "clause_reference": "§5.1, Gl. (1) (line 530)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "c8a7ab70-c4db-4b17-bf96-2ee0f1ca4858",
-          "equation_number": "5",
-          "output_symbol": "R_D",
-          "input_symbols": [
-            "R",
-            "GWN",
-            "R_D"
-          ],
-          "formula": "R_D = R - GWN",
-          "clause_reference": "§5.1, Gl. (5) (line 548)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "5cc33383-81ef-4d43-a5e8-02e6111bd7ac",
-          "equation_number": "6",
-          "output_symbol": "P_korr",
-          "input_symbols": [
-            "P_korr",
-            "R_D",
-            "GWN",
-            "ET_a"
-          ],
-          "formula": "P_korr = R_D + GWN + ET_a",
-          "clause_reference": "§5.1, Gl. (6) (line 556); §5.3.2.2 (line 635)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
           "id": "56a8fe84-7be5-4502-af62-ee36c3755e1b",
           "equation_number": "7",
           "output_symbol": "a",
@@ -72623,49 +72580,6 @@
           "clause_reference": "§5.1 (lines 564-567); referenced as Gl. (9) in §5.2.5, §C.2",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "84363b16-16cc-45b5-a983-6d9b2c2dfc65",
-          "equation_number": "10",
-          "output_symbol": "P_korr",
-          "input_symbols": [
-            "a_F",
-            "g_F",
-            "v_F",
-            "P_korr"
-          ],
-          "formula": "P_korr = a_F * P_korr + g_F * P_korr + v_F * P_korr   [mm/a]",
-          "clause_reference": "§5.3.2.2, Gl. (10) (line 636)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "551922aa-3b23-4c01-9b9f-99e17ebe7235"
-        },
-        {
-          "id": "6da086d8-b051-465f-bf45-7763f8b2fa01",
-          "equation_number": "11",
-          "output_symbol": "Z",
-          "input_symbols": [
-            "a_F",
-            "P_korr"
-          ],
-          "formula": "Z = a_F * P_korr   [mm/a]",
-          "clause_reference": "§5.3.2.3 (line 651); implied Gl. (11)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "bcee9138-b5af-4bfb-8f6b-67855e32897b"
-        },
-        {
-          "id": "2ab13f2f-5182-47dc-a0b7-1fec3330dbe9",
-          "equation_number": "12",
-          "output_symbol": "Z",
-          "input_symbols": [
-            "a_A",
-            "g_A",
-            "v_A",
-            "Z"
-          ],
-          "formula": "Z = a_A * Z + g_A * Z + v_A * Z   [mm/a]",
-          "clause_reference": "§5.3.2.3, Gl. (12) (line 652)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "bcee9138-b5af-4bfb-8f6b-67855e32897b"
         },
         {
           "id": "edfe3c2d-277b-48b4-8988-339627205773",
@@ -72792,6 +72706,49 @@
           "clause_reference": "§5.1, Gl. (2) (line 538)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
+        },
+        {
+          "id": "84363b16-16cc-45b5-a983-6d9b2c2dfc65",
+          "equation_number": "10",
+          "output_symbol": "P_korr",
+          "input_symbols": [
+            "a_F",
+            "g_F",
+            "v_F",
+            "P_korr"
+          ],
+          "formula": "P_korr = a_F * P_korr + g_F * P_korr + v_F * P_korr",
+          "clause_reference": "§5.3.2.2, Gl. (10) (line 636)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "551922aa-3b23-4c01-9b9f-99e17ebe7235"
+        },
+        {
+          "id": "6da086d8-b051-465f-bf45-7763f8b2fa01",
+          "equation_number": "11",
+          "output_symbol": "Z",
+          "input_symbols": [
+            "a_F",
+            "P_korr"
+          ],
+          "formula": "Z = a_F * P_korr",
+          "clause_reference": "§5.3.2.3 (line 651); implied Gl. (11)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "bcee9138-b5af-4bfb-8f6b-67855e32897b"
+        },
+        {
+          "id": "2ab13f2f-5182-47dc-a0b7-1fec3330dbe9",
+          "equation_number": "12",
+          "output_symbol": "Z",
+          "input_symbols": [
+            "a_A",
+            "g_A",
+            "v_A",
+            "Z"
+          ],
+          "formula": "Z = a_A * Z + g_A * Z + v_A * Z",
+          "clause_reference": "§5.3.2.3, Gl. (12) (line 652)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "bcee9138-b5af-4bfb-8f6b-67855e32897b"
         },
         {
           "id": "25c75004-a856-492b-997d-c045cf422c46",
@@ -72952,6 +72909,46 @@
           "clause_reference": "§B.7 (lines 1054-1056)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "253f0170-6e7e-4a1c-9a18-bf24bca3c2cb"
+        },
+        {
+          "id": "681fdcea-c1f6-472d-9efb-1300e5bf1d4a",
+          "equation_number": "1",
+          "output_symbol": "P_korr",
+          "input_symbols": [
+            "R",
+            "ET_a"
+          ],
+          "formula": "P_korr = R + ET_a",
+          "clause_reference": "§5.1, Gl. (1) (line 530)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
+        },
+        {
+          "id": "c8a7ab70-c4db-4b17-bf96-2ee0f1ca4858",
+          "equation_number": "5",
+          "output_symbol": "R_D",
+          "input_symbols": [
+            "R",
+            "GWN"
+          ],
+          "formula": "R_D = R - GWN",
+          "clause_reference": "§5.1, Gl. (5) (line 548)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
+        },
+        {
+          "id": "5cc33383-81ef-4d43-a5e8-02e6111bd7ac",
+          "equation_number": "6",
+          "output_symbol": "P_korr",
+          "input_symbols": [
+            "R_D",
+            "GWN",
+            "ET_a"
+          ],
+          "formula": "P_korr = R_D + GWN + ET_a",
+          "clause_reference": "§5.1, Gl. (6) (line 556); §5.3.2.2 (line 635)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
         },
         {
           "id": "e59eb085-4e3e-4071-99ce-46e1ca5262a8",
@@ -88048,7 +88045,7 @@
             "regression_a_AFS63",
             "regression_b_AFS63"
           ],
-          "formula": "eta_BV = a_AFS63 * exp(-b_AFS63 * q_A_max)",
+          "formula": "eta_BV = regression_a_AFS63 * exp(-regression_b_AFS63 * q_A_max)",
           "clause_reference": "§7.3.1, Bild 4",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "423f3ed0-dc61-466e-b7bf-86bce6722e8a"
@@ -97390,7 +97387,7 @@
         {
           "id": "50c79458-3a0c-4d36-8ba2-f739e34b4c8a",
           "code": "CR-01",
-          "condition": "biologische_vorbehandlung == 'ja'",
+          "condition": "biologische_vorbehandlung == True",
           "severity": "block",
           "clause_reference": "§1",
           "requires_attestation": false,
@@ -97401,7 +97398,7 @@
         {
           "id": "1a3bff29-af21-4296-9a4b-ee283a9866c8",
           "code": "CR-02",
-          "condition": "behoerdliche_freigabe == 'ja'",
+          "condition": "behoerdliche_freigabe == True",
           "severity": "block",
           "clause_reference": "§2.1",
           "requires_attestation": false,
@@ -97487,17 +97484,6 @@
           "worksheet_template_id": "5792b32a-f68c-4b7b-8deb-cae2c0b78a8d"
         },
         {
-          "id": "c6b630b8-2a71-4e2b-9154-5544ae1bbb19",
-          "code": "CR-22",
-          "condition": "entchlorungsstufe == 'ja'",
-          "severity": "block",
-          "clause_reference": "§4.4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5792b32a-f68c-4b7b-8deb-cae2c0b78a8d"
-        },
-        {
           "id": "a2973fe0-914f-4eb0-bed0-f6c324202a35",
           "code": "CR-23",
           "condition": "restchlor_betrieb >= 0.2",
@@ -97542,9 +97528,20 @@
           "worksheet_template_id": "5792b32a-f68c-4b7b-8deb-cae2c0b78a8d"
         },
         {
+          "id": "c6b630b8-2a71-4e2b-9154-5544ae1bbb19",
+          "code": "CR-22",
+          "condition": "entchlorungsstufe == True",
+          "severity": "block",
+          "clause_reference": "§4.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5792b32a-f68c-4b7b-8deb-cae2c0b78a8d"
+        },
+        {
           "id": "869c84ce-e0ff-41a3-a0e5-0895f2bee132",
           "code": "CR-28",
-          "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == 'ja'",
+          "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True",
           "severity": "block",
           "clause_reference": "§4.1.3.2",
           "requires_attestation": false,
@@ -97555,7 +97552,7 @@
         {
           "id": "6b8754ed-25fd-4b8f-97ae-a38c9012b50c",
           "code": "CR-31",
-          "condition": "wiederverkeimungsbeurteilung == 'ja'",
+          "condition": "wiederverkeimungsbeurteilung == True",
           "severity": "block",
           "clause_reference": "§3.5",
           "requires_attestation": false,
@@ -97566,7 +97563,7 @@
         {
           "id": "a93b3ed9-f65f-4d10-b6b7-080a6db59125",
           "code": "CR-32",
-          "condition": "gefaehrdungsbeurteilung_biostoffv == 'ja' AND betriebsanweisung_biostoffv == 'ja'",
+          "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
           "severity": "block",
           "clause_reference": "§3.5 (BioStoffV, TRBA 220, TRBA 400)",
           "requires_attestation": false,
@@ -97599,7 +97596,7 @@
         {
           "id": "323f359f-dfc8-4027-8c6b-8ec46c68d3cb",
           "code": "CR-25",
-          "condition": "pilotierung == 'ja'",
+          "condition": "pilotierung == True",
           "severity": "block",
           "clause_reference": "§4.2.3.5",
           "requires_attestation": false,
@@ -97610,7 +97607,7 @@
         {
           "id": "836c0971-b9b6-4c71-8fe8-927d0086a879",
           "code": "CR-30",
-          "condition": "chlorung_routine == 'nein'",
+          "condition": "chlorung_routine == False",
           "severity": "block",
           "clause_reference": "§4.4.2",
           "requires_attestation": false,
@@ -97621,7 +97618,7 @@
         {
           "id": "cf706693-1306-4877-b689-a4f8c48ee49e",
           "code": "CR-31",
-          "condition": "wiederverkeimungsbeurteilung == 'ja'",
+          "condition": "wiederverkeimungsbeurteilung == True",
           "severity": "block",
           "clause_reference": "§3.5",
           "requires_attestation": false,
@@ -97632,7 +97629,7 @@
         {
           "id": "58ba4c36-111f-476f-96b3-f6bc4a6d4786",
           "code": "CR-32",
-          "condition": "gefaehrdungsbeurteilung_biostoffv == 'ja' AND betriebsanweisung_biostoffv == 'ja'",
+          "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
           "severity": "block",
           "clause_reference": "§3.5 (BioStoffV, TRBA 220, TRBA 400)",
           "requires_attestation": false,
@@ -97652,17 +97649,6 @@
           "worksheet_template_id": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13"
         },
         {
-          "id": "26ab15df-399a-4918-aea7-6a454f7bbf56",
-          "code": "CR-13",
-          "condition": "monatlicher_nachweis == 'ja'",
-          "severity": "block",
-          "clause_reference": "§4.1.4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
-        },
-        {
           "id": "aef3ff67-ba5f-4059-97e9-51ab680123f3",
           "code": "CR-27",
           "condition": "kalibrierintervall_sensor <= 6 AND reinigungsintervall_sensor <= 4",
@@ -97674,9 +97660,20 @@
           "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
         },
         {
+          "id": "26ab15df-399a-4918-aea7-6a454f7bbf56",
+          "code": "CR-13",
+          "condition": "monatlicher_nachweis == True",
+          "severity": "block",
+          "clause_reference": "§4.1.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
+        },
+        {
           "id": "c19c26ff-328e-42ff-9c09-47233c0de337",
           "code": "CR-33",
-          "condition": "hg_strahler_sonderentsorgung == 'ja'",
+          "condition": "hg_strahler_sonderentsorgung == True",
           "severity": "block",
           "clause_reference": "§4.1.4.4",
           "requires_attestation": false,
@@ -97687,7 +97684,7 @@
         {
           "id": "ecd949c8-fa35-4caa-90b8-59db6e9a7d76",
           "code": "CR-30",
-          "condition": "chlorung_routine == 'nein'",
+          "condition": "chlorung_routine == False",
           "severity": "block",
           "clause_reference": "§4.4.2",
           "requires_attestation": false,
@@ -97907,7 +97904,7 @@
         {
           "id": "41159760-6ba1-48a5-96ca-df83168ac680",
           "code": "CR-22",
-          "condition": "entchlorungsstufe == 'ja'",
+          "condition": "entchlorungsstufe == True",
           "severity": "block",
           "clause_reference": "§4.4.2",
           "requires_attestation": false,
@@ -97918,7 +97915,7 @@
         {
           "id": "28589251-2af0-4301-a543-5fb9f60090ff",
           "code": "CR-26",
-          "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == 'ja'",
+          "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == True",
           "severity": "block",
           "clause_reference": "§4.3.3.4",
           "requires_attestation": false,
@@ -97929,7 +97926,7 @@
         {
           "id": "07515d2b-bca7-4e30-a955-a5ef85834518",
           "code": "CR-28",
-          "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == 'ja'",
+          "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True",
           "severity": "block",
           "clause_reference": "§4.1.3.2",
           "requires_attestation": false,
@@ -97940,7 +97937,7 @@
         {
           "id": "9b44583d-1fa5-4134-9d6f-29e04024fc35",
           "code": "CR-35",
-          "condition": "reaktor_gasdicht == 'ja'",
+          "condition": "reaktor_gasdicht == True",
           "severity": "block",
           "clause_reference": "§4.3.3.3",
           "requires_attestation": false,
@@ -97951,7 +97948,7 @@
         {
           "id": "f00d50ca-5c4b-4b2f-bef7-e38730031d2b",
           "code": "CR-36",
-          "condition": "bgv_b4_konformitaet == 'ja' AND sicherheitsdatenblatt_pes == 'ja'",
+          "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
           "severity": "block",
           "clause_reference": "§4.4.3 (BGV B4)",
           "requires_attestation": false,
@@ -97973,7 +97970,7 @@
         {
           "id": "ffa075f3-b392-4dc1-9fcf-6f2ef7e79520",
           "code": "CR-13",
-          "condition": "monatlicher_nachweis == 'ja'",
+          "condition": "monatlicher_nachweis == True",
           "severity": "block",
           "clause_reference": "§4.1.4.2",
           "requires_attestation": false,
@@ -97984,7 +97981,7 @@
         {
           "id": "a26dbf44-43f5-4979-9b43-a7fd6a5bf29f",
           "code": "CR-33",
-          "condition": "hg_strahler_sonderentsorgung == 'ja'",
+          "condition": "hg_strahler_sonderentsorgung == True",
           "severity": "block",
           "clause_reference": "§4.1.4.4",
           "requires_attestation": false,
@@ -97995,7 +97992,7 @@
         {
           "id": "c58748a6-3ead-4550-86ee-62e6d6604501",
           "code": "CR-25",
-          "condition": "pilotierung == 'ja'",
+          "condition": "pilotierung == True",
           "severity": "block",
           "clause_reference": "§4.2.3.5",
           "requires_attestation": false,
@@ -98006,7 +98003,7 @@
         {
           "id": "b065f968-9847-4819-9fc7-a8f295d74c9c",
           "code": "CR-35",
-          "condition": "reaktor_gasdicht == 'ja'",
+          "condition": "reaktor_gasdicht == True",
           "severity": "block",
           "clause_reference": "§4.3.3.3",
           "requires_attestation": false,
@@ -98028,7 +98025,7 @@
         {
           "id": "7c147ff3-9496-45c6-a8ab-ce48d595a9f4",
           "code": "CR-26",
-          "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == 'ja'",
+          "condition": "temperatur_ozonentfernung >= 350 OR katalytisch == True",
           "severity": "block",
           "clause_reference": "§4.3.3.4",
           "requires_attestation": false,
@@ -98050,7 +98047,7 @@
         {
           "id": "0fb46d01-6d30-4813-a0c9-17fc49cb108d",
           "code": "CR-36",
-          "condition": "bgv_b4_konformitaet == 'ja' AND sicherheitsdatenblatt_pes == 'ja'",
+          "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
           "severity": "block",
           "clause_reference": "§4.4.3 (BGV B4)",
           "requires_attestation": false,
@@ -102049,20 +102046,6 @@
           "worksheet_template_id": "fb70320b-6eaf-4bbe-859b-c33fbecf0228"
         },
         {
-          "id": "8bb44beb-bb59-4351-8c98-b3d49b5905a6",
-          "equation_number": "17",
-          "output_symbol": "OV_h_min",
-          "input_symbols": [
-            "OV_d_C_aM",
-            "t_TS",
-            "T_W"
-          ],
-          "formula": "OV_h_min = OV_d_C_aM / ((3.92 / (t_TS * 1.072 ** (T_W - 15)) + 1.66) * 24)",
-          "clause_reference": "§4.3.1 Gl.16",
-          "verification_status": "verified_via_cross_reference",
-          "worksheet_template_id": "fb70320b-6eaf-4bbe-859b-c33fbecf0228"
-        },
-        {
           "id": "117e1201-e18e-4908-9026-582ed4419649",
           "equation_number": "18",
           "output_symbol": "OV_h_min_ind",
@@ -102121,6 +102104,20 @@
           "worksheet_template_id": "fb70320b-6eaf-4bbe-859b-c33fbecf0228"
         },
         {
+          "id": "8bb44beb-bb59-4351-8c98-b3d49b5905a6",
+          "equation_number": "17",
+          "output_symbol": "OV_h_min",
+          "input_symbols": [
+            "OV_d_C_aM",
+            "t_TS",
+            "T_W"
+          ],
+          "formula": "OV_h_min = OV_d_C_aM / ((3.92 / (t_TS * 1.072 ^ (T_W - 15)) + 1.66) * 24)",
+          "clause_reference": "§4.3.1 Gl.16",
+          "verification_status": "verified_via_cross_reference",
+          "worksheet_template_id": "fb70320b-6eaf-4bbe-859b-c33fbecf0228"
+        },
+        {
           "id": "45bb1c58-6ade-49fc-bee8-61f7c4dca09e",
           "equation_number": "SOTRdef",
           "output_symbol": "SOTR_def",
@@ -102133,19 +102130,6 @@
           ],
           "formula": "SOTR_def = V * f_S_St * kLa20 * beta_St * C_S_20 / 1000",
           "clause_reference": "§3.2.2 Gl.1",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
-        },
-        {
-          "id": "2b23b131-69e2-4d80-ad74-12e62b7632f4",
-          "equation_number": "7",
-          "output_symbol": "kLa20",
-          "input_symbols": [
-            "kLaT",
-            "T_W"
-          ],
-          "formula": "kLa20 = kLaT * 1.024 ** (20 - T_W)",
-          "clause_reference": "§3.2 Gl.7",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
         },
@@ -102211,13 +102195,26 @@
           "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
         },
         {
+          "id": "2b23b131-69e2-4d80-ad74-12e62b7632f4",
+          "equation_number": "7",
+          "output_symbol": "kLa20",
+          "input_symbols": [
+            "kLaT",
+            "T_W"
+          ],
+          "formula": "kLa20 = kLaT * 1.024 ^ (20 - T_W)",
+          "clause_reference": "§3.2 Gl.7",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
+        },
+        {
           "id": "f230d2c6-c75f-4d8d-a1db-d03fdddcbd6c",
           "equation_number": "31",
           "output_symbol": "C_S_T",
           "input_symbols": [
             "T_W"
           ],
-          "formula": "C_S_T = 2234.34 / (T_W + 45.93) ** 1.31403",
+          "formula": "C_S_T = 2234.34 / (T_W + 45.93) ^ 1.31403",
           "clause_reference": "§3.2",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
@@ -102281,7 +102278,7 @@
             "T_W",
             "OV_h"
           ],
-          "formula": "SOTR_alt = (f_d * C_S_20) / (alpha * (f_d * C_S_T * p_atm / 1013 - C_x) * theta ** (T_W - 20)) * OV_h",
+          "formula": "SOTR_alt = (f_d * C_S_20) / (alpha * (f_d * C_S_T * p_atm / 1013 - C_x) * theta ^ (T_W - 20)) * OV_h",
           "clause_reference": "§4.3.2 Gl.21",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "cb08c016-5555-4105-a518-f47f08d7d2b4"
@@ -102340,25 +102337,6 @@
           "worksheet_template_id": "cb08c016-5555-4105-a518-f47f08d7d2b4"
         },
         {
-          "id": "16c436d2-c736-4529-a90b-601b61786e0d",
-          "equation_number": "22",
-          "output_symbol": "SOTR",
-          "input_symbols": [
-            "f_d",
-            "C_S_20",
-            "alpha",
-            "C_S_T",
-            "C_x",
-            "theta",
-            "T_W",
-            "OV_h"
-          ],
-          "formula": "SOTR = (f_d * C_S_20) / (alpha * (f_d * C_S_T - C_x) * theta ** (T_W - 20)) * OV_h",
-          "clause_reference": "§4.3.2 Gl.20",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "cb08c016-5555-4105-a518-f47f08d7d2b4"
-        },
-        {
           "id": "b9771787-48e1-4abf-ba6e-7027c9342b9d",
           "equation_number": "23",
           "output_symbol": "Q_L_N",
@@ -102398,6 +102376,25 @@
           "worksheet_template_id": "cb08c016-5555-4105-a518-f47f08d7d2b4"
         },
         {
+          "id": "16c436d2-c736-4529-a90b-601b61786e0d",
+          "equation_number": "22",
+          "output_symbol": "SOTR",
+          "input_symbols": [
+            "f_d",
+            "C_S_20",
+            "alpha",
+            "C_S_T",
+            "C_x",
+            "theta",
+            "T_W",
+            "OV_h"
+          ],
+          "formula": "SOTR = (f_d * C_S_20) / (alpha * (f_d * C_S_T - C_x) * theta ^ (T_W - 20)) * OV_h",
+          "clause_reference": "§4.3.2 Gl.20",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "cb08c016-5555-4105-a518-f47f08d7d2b4"
+        },
+        {
           "id": "1aaff78a-86d1-4249-8586-fb208114954e",
           "equation_number": "37",
           "output_symbol": "SOTR_salz",
@@ -102416,7 +102413,7 @@
             "T_W",
             "OV_h"
           ],
-          "formula": "SOTR_salz = (f_d * beta_St * C_S_20 * f_S_St) / (alpha * f_S_alpha * (f_d * beta_alpha * C_S_T * p_atm / 1013 - C_x) * theta ** (T_W - 20)) * OV_h",
+          "formula": "SOTR_salz = (f_d * beta_St * C_S_20 * f_S_St) / (alpha * f_S_alpha * (f_d * beta_alpha * C_S_T * p_atm / 1013 - C_x) * theta ^ (T_W - 20)) * OV_h",
           "clause_reference": "§4.3.2 Gl.22",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "cb08c016-5555-4105-a518-f47f08d7d2b4"
@@ -102431,18 +102428,6 @@
           ],
           "formula": "p_2_abs = p_1_abs + delta_p",
           "clause_reference": "§3.3",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
-        },
-        {
-          "id": "3d9d0643-e2c8-407d-9548-dbd0435c7358",
-          "equation_number": "25",
-          "output_symbol": "p_atm",
-          "input_symbols": [
-            "h_geo"
-          ],
-          "formula": "p_atm = 1013.25 * ((288 - 0.0065 * h_geo) / 288) ** 5.255",
-          "clause_reference": "§4.3.2 Gl.26",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
         },
@@ -102533,20 +102518,6 @@
           ],
           "formula": "P_N_el = P_K / eta_ges",
           "clause_reference": "§3.3",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
-        },
-        {
-          "id": "4b385bc0-3870-4916-a5c1-25d6faca11d9",
-          "equation_number": "39",
-          "output_symbol": "delta_p_Bel",
-          "input_symbols": [
-            "sum_zeta",
-            "rho",
-            "v"
-          ],
-          "formula": "delta_p_Bel = sum_zeta * rho * v ** 2 / 2",
-          "clause_reference": "Anhang C Gl.C.1",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
         },
@@ -102663,6 +102634,32 @@
           ],
           "formula": "Q_v = Q_v100 * SQRT(1.293 * delta_p / (100 * rho_1))",
           "clause_reference": "§3.3",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
+        },
+        {
+          "id": "3d9d0643-e2c8-407d-9548-dbd0435c7358",
+          "equation_number": "25",
+          "output_symbol": "p_atm",
+          "input_symbols": [
+            "h_geo"
+          ],
+          "formula": "p_atm = 1013.25 * ((288 - 0.0065 * h_geo) / 288) ^ 5.255",
+          "clause_reference": "§4.3.2 Gl.26",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
+        },
+        {
+          "id": "4b385bc0-3870-4916-a5c1-25d6faca11d9",
+          "equation_number": "39",
+          "output_symbol": "delta_p_Bel",
+          "input_symbols": [
+            "sum_zeta",
+            "rho",
+            "v"
+          ],
+          "formula": "delta_p_Bel = sum_zeta * rho * v ^ 2 / 2",
+          "clause_reference": "Anhang C Gl.C.1",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "cca35cf5-2bc5-47e9-8dc0-557dc18d8fd0"
         },
@@ -104990,7 +104987,7 @@
           "code": "CR-014",
           "condition": "energieverbrauch_abweichung >= -10 AND energieverbrauch_abweichung <= 10",
           "severity": "warn",
-          "clause_reference": "8.4",
+          "clause_reference": "§8.4",
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "Bei signifikanter Veränderung des Energieverbrauchs für Belüftung und Durchmischung im Vergleich zum Vorjahr (> 10 %) ist zunächst zu prüfen, ob dies mit einer Erhöhung der Schmutzfrachtbelastung korrespondiert.",
@@ -109216,11 +109213,8 @@
           "id": "7e6180be-2e90-4172-ac9c-cf23fb533edb",
           "equation_number": "Ex. 9.3-A1",
           "output_symbol": "Q_GW",
-          "input_symbols": [
-            "P",
-            "Q_GW_P"
-          ],
-          "formula": "Q_GW = 25*40 + 25*15 = 1375 (l/d)",
+          "input_symbols": [],
+          "formula": "Q_GW = 25*40 + 25*15",
           "clause_reference": "§9.3",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "6bfbb4e8-1a9c-4ef1-8611-20c7b742bec0"
@@ -109229,11 +109223,8 @@
           "id": "9a24e0c9-12da-473e-8a7c-220fce1f4129",
           "equation_number": "Ex. 9.3-A2",
           "output_symbol": "Q_GW",
-          "input_symbols": [
-            "P",
-            "Q_GW_P"
-          ],
-          "formula": "Q_GW = 25*40 + 25*15 + 25*10 = 1625 (l/d)",
+          "input_symbols": [],
+          "formula": "Q_GW = 25*40 + 25*15 + 25*10",
           "clause_reference": "§9.3",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "6bfbb4e8-1a9c-4ef1-8611-20c7b742bec0"
@@ -109265,47 +109256,6 @@
           "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         },
         {
-          "id": "89340a0c-143a-4a2c-bba4-872906416e66",
-          "equation_number": "Ex. 9.2",
-          "output_symbol": "Q_SW",
-          "input_symbols": [
-            "P",
-            "Q_SW_P",
-            "Q_SW_A",
-            "A"
-          ],
-          "formula": "Q_SW = 25*33 + 60*150/180 = 825 + 50 = 875 (l/d)",
-          "clause_reference": "§9.2 Example calculation Part 1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
-        },
-        {
-          "id": "8e434536-7820-4038-9691-bb37b6a9a653",
-          "equation_number": "Ex. 9.3-A1",
-          "output_symbol": "Q_GW",
-          "input_symbols": [
-            "P",
-            "Q_GW_P"
-          ],
-          "formula": "Q_GW = 25*40 + 25*15 = 1000 + 375 = 1375 (l/d)",
-          "clause_reference": "§9.3 Example calculation Part 1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "bd1b8d82-4c7e-4c51-adfe-b9798e5859c3"
-        },
-        {
-          "id": "dd0ccdaf-8fa5-4b04-973f-45604e1184df",
-          "equation_number": "Ex. 9.3-A2",
-          "output_symbol": "Q_GW",
-          "input_symbols": [
-            "P",
-            "Q_GW_P"
-          ],
-          "formula": "Q_GW = 25*40 + 25*15 + 25*10 = 1625 (l/d)",
-          "clause_reference": "§9.3 Example calculation Part 2",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "bd1b8d82-4c7e-4c51-adfe-b9798e5859c3"
-        },
-        {
           "id": "7f92ffee-c3a3-461a-9dae-175a947c6676",
           "equation_number": "Ex. 9.4",
           "output_symbol": "Q_GWT",
@@ -109319,29 +109269,14 @@
           "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         },
         {
-          "id": "8ed7e9e9-b247-482a-924c-d1e7f5a435fd",
-          "equation_number": "Ex. 9.4-WB",
-          "output_symbol": "Q_WB",
-          "input_symbols": [
-            "Q_GW",
-            "Q_SW"
-          ],
-          "formula": "Q_WB = 1625 - 875 = +750 (l/d)",
-          "clause_reference": "§9.4 Example calculation Part 3",
+          "id": "89340a0c-143a-4a2c-bba4-872906416e66",
+          "equation_number": "Ex. 9.2",
+          "output_symbol": "Q_SW",
+          "input_symbols": [],
+          "formula": "Q_SW = 25*33 + 60*150/180",
+          "clause_reference": "§9.2 Example calculation Part 1",
           "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
-        },
-        {
-          "id": "4df4256f-4098-4b6f-94bd-e5c67276d3a8",
-          "equation_number": "Buffer",
-          "output_symbol": "V_buffer",
-          "input_symbols": [
-            "Q_GWT"
-          ],
-          "formula": "V_buffer = Q_GWT * 1 d",
-          "clause_reference": "§7.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+          "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
         },
         {
           "id": "8c9906c9-cc6e-4510-bda2-4e6a079ea912",
@@ -109357,6 +109292,28 @@
           "clause_reference": "§9.2",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "5433b6dc-c4d1-4dfb-9ebb-9388e8c4d4e2"
+        },
+        {
+          "id": "4df4256f-4098-4b6f-94bd-e5c67276d3a8",
+          "equation_number": "Buffer",
+          "output_symbol": "V_buffer",
+          "input_symbols": [
+            "Q_GWT"
+          ],
+          "formula": "V_buffer = Q_GWT * 1",
+          "clause_reference": "§7.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "8ed7e9e9-b247-482a-924c-d1e7f5a435fd",
+          "equation_number": "Ex. 9.4-WB",
+          "output_symbol": "Q_WB",
+          "input_symbols": [],
+          "formula": "Q_WB = 1625 - 875",
+          "clause_reference": "§9.4 Example calculation Part 3",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         },
         {
           "id": "8a98dcc1-054d-4a93-83c2-aa72b650f079",
@@ -109411,21 +109368,6 @@
           "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
         },
         {
-          "id": "4cc17e46-f898-42b9-9836-2184a12f3c5f",
-          "equation_number": "Ex. 9.2",
-          "output_symbol": "Q_SW",
-          "input_symbols": [
-            "P",
-            "Q_SW_P",
-            "Q_SW_A",
-            "A"
-          ],
-          "formula": "Q_SW = 25*33 + 60*150/180 = 825 + 50 = 875 (l/d)",
-          "clause_reference": "§9.2",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "5433b6dc-c4d1-4dfb-9ebb-9388e8c4d4e2"
-        },
-        {
           "id": "dabf250c-2792-4deb-9700-4036e77a164b",
           "equation_number": "Ex. 9.4",
           "output_symbol": "Q_GWT",
@@ -109439,29 +109381,56 @@
           "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
         },
         {
-          "id": "66da37aa-60cd-4ee9-8bc2-6a1c030dff2e",
-          "equation_number": "Ex. 9.4-WB",
-          "output_symbol": "Q_WB",
-          "input_symbols": [
-            "Q_GW",
-            "Q_SW"
-          ],
-          "formula": "Q_WB = 1625 - 875 = +750 (l/d)",
-          "clause_reference": "§9.4",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
-        },
-        {
           "id": "0b9966ea-64bc-43ae-b410-476a19b5f4ea",
           "equation_number": "Buffer",
           "output_symbol": "V_buffer",
           "input_symbols": [
             "Q_GWT"
           ],
-          "formula": "V_buffer = Q_GWT * 1 d",
+          "formula": "V_buffer = Q_GWT * 1",
           "clause_reference": "§7.1",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "19e029a2-de23-441e-95b8-0b7cd45532e6"
+        },
+        {
+          "id": "4cc17e46-f898-42b9-9836-2184a12f3c5f",
+          "equation_number": "Ex. 9.2",
+          "output_symbol": "Q_SW",
+          "input_symbols": [],
+          "formula": "Q_SW = 25*33 + 60*150/180",
+          "clause_reference": "§9.2",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "5433b6dc-c4d1-4dfb-9ebb-9388e8c4d4e2"
+        },
+        {
+          "id": "8e434536-7820-4038-9691-bb37b6a9a653",
+          "equation_number": "Ex. 9.3-A1",
+          "output_symbol": "Q_GW",
+          "input_symbols": [],
+          "formula": "Q_GW = 25*40 + 25*15",
+          "clause_reference": "§9.3 Example calculation Part 1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "bd1b8d82-4c7e-4c51-adfe-b9798e5859c3"
+        },
+        {
+          "id": "dd0ccdaf-8fa5-4b04-973f-45604e1184df",
+          "equation_number": "Ex. 9.3-A2",
+          "output_symbol": "Q_GW",
+          "input_symbols": [],
+          "formula": "Q_GW = 25*40 + 25*15 + 25*10",
+          "clause_reference": "§9.3 Example calculation Part 2",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "bd1b8d82-4c7e-4c51-adfe-b9798e5859c3"
+        },
+        {
+          "id": "66da37aa-60cd-4ee9-8bc2-6a1c030dff2e",
+          "equation_number": "Ex. 9.4-WB",
+          "output_symbol": "Q_WB",
+          "input_symbols": [],
+          "formula": "Q_WB = 1625 - 875",
+          "clause_reference": "§9.4",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "27591e62-9951-4bcd-8677-c765efce0f23"
         }
       ],
       "compliance": [
@@ -117348,57 +117317,6 @@
           "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
         },
         {
-          "id": "7b245275-3055-40bc-a089-ecae7dde6ca9",
-          "equation_number": "Gl(3)",
-          "output_symbol": "g_e",
-          "input_symbols": [
-            "c_ab",
-            "wg"
-          ],
-          "formula": "G_e = C_ab * 1,868 * (100 - WG) / 100",
-          "clause_reference": "§5.7 Gl. (3)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
-        },
-        {
-          "id": "b6cc4ba5-552d-4a9e-baa0-328537026c35",
-          "equation_number": "Gl(3)",
-          "output_symbol": "g_e",
-          "input_symbols": [
-            "c_ab",
-            "wg"
-          ],
-          "formula": "G_e = C_ab * 1,868 * (100 - WG) / 100",
-          "clause_reference": "§5.7 Gl. (3)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
-          "id": "b0b59b76-b242-4fe0-aea0-bc6a6a841012",
-          "equation_number": "Gl(1)",
-          "output_symbol": "c_ab",
-          "input_symbols": [
-            "at4",
-            "c_konstante"
-          ],
-          "formula": "C_ab = 3,75 * AT4 - C   (mit C = 7,5 kg/Mg TM)",
-          "clause_reference": "§5.7 Gl. (1)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
-          "id": "b969f2eb-4648-49ea-83c2-2e6a32507878",
-          "equation_number": "Gl(2)",
-          "output_symbol": "c_ab",
-          "input_symbols": [
-            "at4"
-          ],
-          "formula": "C_ab = 3 * AT4",
-          "clause_reference": "§5.7 Gl. (2)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
           "id": "cfab7241-ba1b-40d9-8947-bf957e4542be",
           "equation_number": "Gl(4a)",
           "output_symbol": "g_t",
@@ -117427,42 +117345,17 @@
           "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
         },
         {
-          "id": "6e9fca7d-186d-4746-879b-c58579189926",
-          "equation_number": "Gl(6)",
-          "output_symbol": "ch4_erz_t",
-          "input_symbols": [
-            "ddoc_m_decomp_t",
-            "f_methan"
-          ],
-          "formula": "CH4_erz_T = DDOC_m_decomp_T * F * 16 / 12",
-          "clause_reference": "§5.7 Gl. (6)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
-          "id": "61157c49-b54e-4b92-9e2f-1f9294b1dcc5",
+          "id": "b0b59b76-b242-4fe0-aea0-bc6a6a841012",
           "equation_number": "Gl(1)",
           "output_symbol": "c_ab",
           "input_symbols": [
             "at4",
             "c_konstante"
           ],
-          "formula": "C_ab = 3,75 * AT4 - C   (mit C = 7,5 kg/Mg TM)",
+          "formula": "c_ab = 3.75 * at4 - c_konstante",
           "clause_reference": "§5.7 Gl. (1)",
           "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
-        },
-        {
-          "id": "df1f2bc1-0d90-4837-9163-f3a95eda8b82",
-          "equation_number": "Gl(2)",
-          "output_symbol": "c_ab",
-          "input_symbols": [
-            "at4"
-          ],
-          "formula": "C_ab = 3 * AT4",
-          "clause_reference": "§5.7 Gl. (2)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
         },
         {
           "id": "60097156-8b99-4eaa-9a62-f0e08eb13a22",
@@ -117493,40 +117386,41 @@
           "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
         },
         {
+          "id": "df1f2bc1-0d90-4837-9163-f3a95eda8b82",
+          "equation_number": "Gl(2)",
+          "output_symbol": "c_ab",
+          "input_symbols": [
+            "at4"
+          ],
+          "formula": "c_ab = 3 * at4",
+          "clause_reference": "§5.7 Gl. (2)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
+          "id": "61157c49-b54e-4b92-9e2f-1f9294b1dcc5",
+          "equation_number": "Gl(1)",
+          "output_symbol": "c_ab",
+          "input_symbols": [
+            "at4",
+            "c_konstante"
+          ],
+          "formula": "c_ab = 3.75 * at4 - c_konstante",
+          "clause_reference": "§5.7 Gl. (1)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
           "id": "165ae837-b05d-44d6-8872-714929bc0ddb",
           "equation_number": "Gl(5-f3)",
           "output_symbol": "f_3",
           "input_symbols": [
             "t_deponie"
           ],
-          "formula": "f_3 = 0,014 * T + 0,28",
+          "formula": "f_3 = 0.014 * t_deponie + 0.28",
           "clause_reference": "§5.7 Gl. (5) Definition f_3",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
-          "id": "13f32698-4844-449f-b0fc-6f142d32313c",
-          "equation_number": "Gl(k-half)",
-          "output_symbol": "k_abbau",
-          "input_symbols": [
-            "t_half"
-          ],
-          "formula": "k_abbau = -ln(0,5) / t_half",
-          "clause_reference": "§5.7 (Definition zu Gl. 4)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
-        },
-        {
-          "id": "2df30411-3305-4d78-857d-de9d57e4b838",
-          "equation_number": "Gl(h2s-mg)",
-          "output_symbol": "h2s_mg_per_m3",
-          "input_symbols": [
-            "h2s_ppm"
-          ],
-          "formula": "h2s_mg_per_m3 ~= 1,4 * h2s_ppm",
-          "clause_reference": "§9.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "b322cb1a-a58f-40d0-86f9-08c7af5d8a3d"
         },
         {
           "id": "6b8fdbae-9a32-4e45-af1e-a14a221bcdbf",
@@ -117535,7 +117429,7 @@
           "input_symbols": [
             "t_deponie"
           ],
-          "formula": "f_3 = 0,014 * T + 0,28",
+          "formula": "f_3 = 0.014 * t_deponie + 0.28",
           "clause_reference": "§5.7 Gl. (5) Definition f_3",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
@@ -117548,34 +117442,10 @@
             "ddoc_m_decomp_t",
             "f_methan"
           ],
-          "formula": "CH4_erz_T = DDOC_m_decomp_T * F * 16 / 12",
+          "formula": "ch4_erz_t = ddoc_m_decomp_t * f_methan * 16 / 12",
           "clause_reference": "§5.7 Gl. (6)",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
-        },
-        {
-          "id": "7420be92-286d-4635-aac3-d00f4827dbdf",
-          "equation_number": "Gl(k-half)",
-          "output_symbol": "k_abbau",
-          "input_symbols": [
-            "t_half"
-          ],
-          "formula": "k_abbau = -ln(0,5) / t_half",
-          "clause_reference": "§5.7 (Definition zu Gl. 4)",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
-        },
-        {
-          "id": "3bacfa98-939a-497c-b9b9-a300460e3704",
-          "equation_number": "Gl(h2s-mg)",
-          "output_symbol": "h2s_mg_per_m3",
-          "input_symbols": [
-            "h2s_ppm"
-          ],
-          "formula": "h2s_mg_per_m3 ~= 1,4 * h2s_ppm",
-          "clause_reference": "§9.1",
-          "verification_status": "needs_engineer_review",
-          "worksheet_template_id": "e967218c-9ff8-4c6e-bc4d-2b49df7f65ab"
         },
         {
           "id": "21202924-1835-4ed6-833b-10521265ce20",
@@ -117623,6 +117493,105 @@
           ],
           "formula": "G_td = 1,868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
           "clause_reference": "§5.7 Gl. (5)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
+        },
+        {
+          "id": "b969f2eb-4648-49ea-83c2-2e6a32507878",
+          "equation_number": "Gl(2)",
+          "output_symbol": "c_ab",
+          "input_symbols": [
+            "at4"
+          ],
+          "formula": "c_ab = 3 * at4",
+          "clause_reference": "§5.7 Gl. (2)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
+        },
+        {
+          "id": "7b245275-3055-40bc-a089-ecae7dde6ca9",
+          "equation_number": "Gl(3)",
+          "output_symbol": "g_e",
+          "input_symbols": [
+            "c_ab",
+            "wg"
+          ],
+          "formula": "g_e = c_ab * 1.868 * (100 - wg) / 100",
+          "clause_reference": "§5.7 Gl. (3)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
+          "id": "b6cc4ba5-552d-4a9e-baa0-328537026c35",
+          "equation_number": "Gl(3)",
+          "output_symbol": "g_e",
+          "input_symbols": [
+            "c_ab",
+            "wg"
+          ],
+          "formula": "g_e = c_ab * 1.868 * (100 - wg) / 100",
+          "clause_reference": "§5.7 Gl. (3)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
+        },
+        {
+          "id": "2df30411-3305-4d78-857d-de9d57e4b838",
+          "equation_number": "Gl(h2s-mg)",
+          "output_symbol": "h2s_mg_per_m3",
+          "input_symbols": [
+            "h2s_ppm"
+          ],
+          "formula": "h2s_mg_per_m3 = 1.4 * h2s_ppm",
+          "clause_reference": "§9.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "b322cb1a-a58f-40d0-86f9-08c7af5d8a3d"
+        },
+        {
+          "id": "3bacfa98-939a-497c-b9b9-a300460e3704",
+          "equation_number": "Gl(h2s-mg)",
+          "output_symbol": "h2s_mg_per_m3",
+          "input_symbols": [
+            "h2s_ppm"
+          ],
+          "formula": "h2s_mg_per_m3 = 1.4 * h2s_ppm",
+          "clause_reference": "§9.1",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "e967218c-9ff8-4c6e-bc4d-2b49df7f65ab"
+        },
+        {
+          "id": "13f32698-4844-449f-b0fc-6f142d32313c",
+          "equation_number": "Gl(k-half)",
+          "output_symbol": "k_abbau",
+          "input_symbols": [
+            "t_half"
+          ],
+          "formula": "k_abbau = -ln(0.5) / t_half",
+          "clause_reference": "§5.7 (Definition zu Gl. 4)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
+        },
+        {
+          "id": "7420be92-286d-4635-aac3-d00f4827dbdf",
+          "equation_number": "Gl(k-half)",
+          "output_symbol": "k_abbau",
+          "input_symbols": [
+            "t_half"
+          ],
+          "formula": "k_abbau = -ln(0.5) / t_half",
+          "clause_reference": "§5.7 (Definition zu Gl. 4)",
+          "verification_status": "needs_engineer_review",
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
+          "id": "6e9fca7d-186d-4746-879b-c58579189926",
+          "equation_number": "Gl(6)",
+          "output_symbol": "ch4_erz_t",
+          "input_symbols": [
+            "ddoc_m_decomp_t",
+            "f_methan"
+          ],
+          "formula": "ch4_erz_t = ddoc_m_decomp_t * f_methan * 16 / 12",
+          "clause_reference": "§5.7 Gl. (6)",
           "verification_status": "needs_engineer_review",
           "worksheet_template_id": "f1a8bc66-074e-4a8d-982b-8799bd8ba884"
         }
@@ -120547,7 +120516,7 @@
             "i",
             "n"
           ],
-          "formula": "CRF = i * (1 + i)**n / ((1 + i)**n - 1)",
+          "formula": "CRF = i * (1 + i)^n / ((1 + i)^n - 1)",
           "clause_reference": "§7 Eq.4",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "0252a566-e8e2-461a-a194-114f0811b046"
@@ -132552,7 +132521,7 @@
         {
           "id": "0cc69a34-a114-45b4-975b-2e7f10a6f5ac",
           "symbol": "duration_method",
-          "data_type": "enum",
+          "data_type": "text",
           "worksheet_template_id": "024dd070-d274-4efd-b06a-03c26877b7e8",
           "section_id": null,
           "verification_status": "imported_unverified",
@@ -161970,17 +161939,6 @@
       ],
       "compliance": [
         {
-          "id": "658cacf7-27d2-4f80-bba6-fe75535ab286",
-          "code": "REQ-01",
-          "condition": "abdichtungsart IN {bitumen,kunststoff,elastomer,fluessig,gussasphalt,gup} AND scope_einzelprodukt_bestaetigt == true",
-          "severity": "block",
-          "clause_reference": "§2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "991950b1-8c67-4387-a51c-c654caa89ff3"
-        },
-        {
           "id": "b0993f22-00c8-4512-95dc-8e5324aaff50",
           "code": "REQ-02",
           "condition": "attest_flltp_rhz_01_req_02 == True",
@@ -161989,6 +161947,17 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Das Ergebnis der geprüften Werkstoffe ist nicht übertragbar auf den Ein- und Durchdringungswiderstand gegen Pflanzen mit sehr starkem Rhizomwachstum, z. B. Bambus-Arten. Bei Verwendung derartiger Pflanzenarten sind über den befundenen Ein- und Durchdringungschutz hinausgehende bauliche Vorkehrungen zu treffen und besondere Pflegemaßnahmen vorzusehen.",
+          "worksheet_template_id": "991950b1-8c67-4387-a51c-c654caa89ff3"
+        },
+        {
+          "id": "658cacf7-27d2-4f80-bba6-fe75535ab286",
+          "code": "REQ-01",
+          "condition": "abdichtungsart IN {bitumenbahn,kunststoffbahn,elastomerbahn,fluessigabdichtung,gussasphalt,gup_beschichtung} AND scope_einzelprodukt_bestaetigt == true",
+          "severity": "block",
+          "clause_reference": "§2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "991950b1-8c67-4387-a51c-c654caa89ff3"
         },
         {
@@ -163159,87 +163128,6 @@
           }
         },
         {
-          "id": "468f5751-d537-45f4-969a-3b5479095b6e",
-          "symbol": "objektart",
-          "data_type": "enum",
-          "worksheet_template_id": "c8481784-747b-4a7f-ac38-1ce874fa10c7",
-          "section_id": "b46055fb-52f1-41a5-841e-ea892958a631",
-          "verification_status": "imported_unverified",
-          "owner": null,
-          "consumer_worksheets": [
-            "ALL"
-          ],
-          "enum_values": [
-            {
-              "value": "gebaeude",
-              "label_de": "Gebäude",
-              "label_en": "Buildings",
-              "order_index": 1,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "innenraeume",
-              "label_de": "Innenräume",
-              "label_en": "Interiors",
-              "order_index": 2,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "freianlagen",
-              "label_de": "Freianlagen",
-              "label_en": "Outdoor facilities",
-              "order_index": 3,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "ingenieurbauwerke",
-              "label_de": "Ingenieurbauwerke",
-              "label_en": "Engineering structures",
-              "order_index": 4,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "verkehrsanlagen",
-              "label_de": "Verkehrsanlagen",
-              "label_en": "Traffic facilities",
-              "order_index": 5,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "tragwerksplanung",
-              "label_de": "Tragwerksplanung",
-              "label_en": "Structural design",
-              "order_index": 6,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "technische_ausruestung",
-              "label_de": "Technische Ausrüstung",
-              "label_en": "Technical equipment",
-              "order_index": 7,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "flaechennutzungsplan",
-              "label_de": "Flächennutzungsplan",
-              "label_en": "Land-use plan",
-              "order_index": 8,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            },
-            {
-              "value": "bebauungsplan",
-              "label_de": "Bebauungsplan",
-              "label_en": "Development plan",
-              "order_index": 9,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            }
-          ],
-          "default_value": null,
-          "validation_rules": {
-            "raw": "objektart IN {gebaeude,innenraeume,freianlagen,ingenieurbauwerke,verkehrsanlagen,tragwerksplanung,technische_ausruestung,flaechennutzungsplan,bebauungsplan}"
-          }
-        },
-        {
           "id": "fe5e9e54-872b-4669-84b5-8d8be8c64c9a",
           "symbol": "hoai_anwendbar",
           "data_type": "boolean",
@@ -163339,6 +163227,87 @@
           "default_value": null,
           "validation_rules": {
             "raw": "len(projekt_bezeichnung) > 0"
+          }
+        },
+        {
+          "id": "468f5751-d537-45f4-969a-3b5479095b6e",
+          "symbol": "objektart",
+          "data_type": "enum",
+          "worksheet_template_id": "c8481784-747b-4a7f-ac38-1ce874fa10c7",
+          "section_id": "b46055fb-52f1-41a5-841e-ea892958a631",
+          "verification_status": "imported_unverified",
+          "owner": null,
+          "consumer_worksheets": [
+            "ALL"
+          ],
+          "enum_values": [
+            {
+              "value": "gebaeude",
+              "label_de": "Gebäude",
+              "label_en": "Buildings",
+              "order_index": 1,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "innenraeume",
+              "label_de": "Innenräume",
+              "label_en": "Interiors",
+              "order_index": 2,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "freianlagen",
+              "label_de": "Freianlagen",
+              "label_en": "Outdoor facilities",
+              "order_index": 3,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "ingenieurbauwerke",
+              "label_de": "Ingenieurbauwerke",
+              "label_en": "Engineering structures",
+              "order_index": 4,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "verkehrsanlagen",
+              "label_de": "Verkehrsanlagen",
+              "label_en": "Traffic facilities",
+              "order_index": 5,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "tragwerksplanung",
+              "label_de": "Tragwerksplanung",
+              "label_en": "Structural design",
+              "order_index": 6,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "technische_ausruestung",
+              "label_de": "Technische Ausrüstung",
+              "label_en": "Technical equipment",
+              "order_index": 7,
+              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+            },
+            {
+              "value": "flaechennutzungsplan",
+              "label_de": "Flächennutzungsplan",
+              "label_en": "Land-use plan",
+              "order_index": 8,
+              "regulation_reference": "§18"
+            },
+            {
+              "value": "bebauungsplan",
+              "label_de": "Bebauungsplan",
+              "label_en": "Development plan",
+              "order_index": 9,
+              "regulation_reference": "§19"
+            }
+          ],
+          "default_value": null,
+          "validation_rules": {
+            "raw": "objektart IN {gebaeude,innenraeume,freianlagen,ingenieurbauwerke,verkehrsanlagen,tragwerksplanung,technische_ausruestung,flaechennutzungsplan,bebauungsplan}"
           }
         },
         {
@@ -164700,6 +164669,61 @@
           ]
         },
         {
+          "field_id": "42beb5b4-823c-4727-a43a-6394b101c026",
+          "symbol": "massnahmenart",
+          "enum_values": [
+            {
+              "value": "neubau",
+              "label_de": "Neubau/Neuanlage",
+              "label_en": "New construction",
+              "order_index": 1,
+              "regulation_reference": "§2 Abs.2"
+            },
+            {
+              "value": "wiederaufbau",
+              "label_de": "Wiederaufbau",
+              "label_en": "Reconstruction",
+              "order_index": 2,
+              "regulation_reference": "§2 Abs.3"
+            },
+            {
+              "value": "erweiterungsbau",
+              "label_de": "Erweiterungsbau",
+              "label_en": "Extension",
+              "order_index": 3,
+              "regulation_reference": "§2 Abs.4"
+            },
+            {
+              "value": "umbau",
+              "label_de": "Umbau",
+              "label_en": "Conversion (substantial intervention)",
+              "order_index": 4,
+              "regulation_reference": "§2 Abs.5"
+            },
+            {
+              "value": "modernisierung",
+              "label_de": "Modernisierung",
+              "label_en": "Modernisation",
+              "order_index": 5,
+              "regulation_reference": "§2 Abs.6"
+            },
+            {
+              "value": "instandsetzung",
+              "label_de": "Instandsetzung",
+              "label_en": "Repair/restoration",
+              "order_index": 6,
+              "regulation_reference": "§2 Abs.8"
+            },
+            {
+              "value": "instandhaltung",
+              "label_de": "Instandhaltung",
+              "label_en": "Maintenance",
+              "order_index": 7,
+              "regulation_reference": "§2 Abs.9"
+            }
+          ]
+        },
+        {
           "field_id": "468f5751-d537-45f4-969a-3b5479095b6e",
           "symbol": "objektart",
           "enum_values": [
@@ -164757,69 +164781,14 @@
               "label_de": "Flächennutzungsplan",
               "label_en": "Land-use plan",
               "order_index": 8,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
+              "regulation_reference": "§18"
             },
             {
               "value": "bebauungsplan",
               "label_de": "Bebauungsplan",
               "label_en": "Development plan",
               "order_index": 9,
-              "regulation_reference": "§2 Abs.1 (Leistungsbilder)"
-            }
-          ]
-        },
-        {
-          "field_id": "42beb5b4-823c-4727-a43a-6394b101c026",
-          "symbol": "massnahmenart",
-          "enum_values": [
-            {
-              "value": "neubau",
-              "label_de": "Neubau/Neuanlage",
-              "label_en": "New construction",
-              "order_index": 1,
-              "regulation_reference": "§2 Abs.2"
-            },
-            {
-              "value": "wiederaufbau",
-              "label_de": "Wiederaufbau",
-              "label_en": "Reconstruction",
-              "order_index": 2,
-              "regulation_reference": "§2 Abs.3"
-            },
-            {
-              "value": "erweiterungsbau",
-              "label_de": "Erweiterungsbau",
-              "label_en": "Extension",
-              "order_index": 3,
-              "regulation_reference": "§2 Abs.4"
-            },
-            {
-              "value": "umbau",
-              "label_de": "Umbau",
-              "label_en": "Conversion (substantial intervention)",
-              "order_index": 4,
-              "regulation_reference": "§2 Abs.5"
-            },
-            {
-              "value": "modernisierung",
-              "label_de": "Modernisierung",
-              "label_en": "Modernisation",
-              "order_index": 5,
-              "regulation_reference": "§2 Abs.6"
-            },
-            {
-              "value": "instandsetzung",
-              "label_de": "Instandsetzung",
-              "label_en": "Repair/restoration",
-              "order_index": 6,
-              "regulation_reference": "§2 Abs.8"
-            },
-            {
-              "value": "instandhaltung",
-              "label_de": "Instandhaltung",
-              "label_en": "Maintenance",
-              "order_index": 7,
-              "regulation_reference": "§2 Abs.9"
+              "regulation_reference": "§19"
             }
           ]
         },
@@ -186225,13 +186194,27 @@
       ],
       "equations": [
         {
+          "id": "1946f6f0-ee76-4d4f-a0a0-b7240196e734",
+          "equation_number": "EQ-01",
+          "output_symbol": "ssr_emission_co2e",
+          "input_symbols": [
+            "activity_data",
+            "emission_factor",
+            "gwp"
+          ],
+          "formula": "ssr_emission_co2e = activity_data * emission_factor * gwp",
+          "clause_reference": "6.7",
+          "verification_status": "verified_against_standard",
+          "worksheet_template_id": "c5a1d6e6-6f1f-4faf-95d2-7425f2cb33be"
+        },
+        {
           "id": "a6559b54-578c-4ba8-b224-37345a1269fe",
           "equation_number": "EQ-02",
           "output_symbol": "E_project",
           "input_symbols": [
             "ssr_emission_co2e"
           ],
-          "formula": "E_project = SUM(ssr_emission_co2e) over project SSRs",
+          "formula": "E_project = SUM(ssr_emission_co2e)",
           "clause_reference": "6.7",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "c5a1d6e6-6f1f-4faf-95d2-7425f2cb33be"
@@ -186243,21 +186226,7 @@
           "input_symbols": [
             "ssr_emission_co2e"
           ],
-          "formula": "E_baseline = SUM(ssr_emission_co2e) over baseline SSRs",
-          "clause_reference": "6.7",
-          "verification_status": "verified_against_standard",
-          "worksheet_template_id": "c5a1d6e6-6f1f-4faf-95d2-7425f2cb33be"
-        },
-        {
-          "id": "1946f6f0-ee76-4d4f-a0a0-b7240196e734",
-          "equation_number": "EQ-01",
-          "output_symbol": "ssr_emission_co2e",
-          "input_symbols": [
-            "activity_data",
-            "emission_factor",
-            "gwp"
-          ],
-          "formula": "ssr_emission_co2e = activity_data * emission_factor * gwp",
+          "formula": "E_baseline = SUM(ssr_emission_co2e)",
           "clause_reference": "6.7",
           "verification_status": "verified_against_standard",
           "worksheet_template_id": "c5a1d6e6-6f1f-4faf-95d2-7425f2cb33be"
@@ -186277,17 +186246,6 @@
         }
       ],
       "compliance": [
-        {
-          "id": "0ed718a3-7494-444f-a147-2bccbdf5b18d",
-          "code": "REQ-01",
-          "condition": "recognized_source_used  ==  true",
-          "severity": "block",
-          "clause_reference": "6.1",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "§6.1: \"Der Projektantragsteller muss gängige Kriterien und Verfahren von einer anerkannten Quelle, falls verfügbar, auswählen und anwenden.\"",
-          "worksheet_template_id": "66390870-579d-4cb3-9d2f-a33856929a5b"
-        },
         {
           "id": "2dd8307b-11ea-4591-bd70-1728c16e3fbc",
           "code": "REQ-02",
@@ -186319,6 +186277,17 @@
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "§4.1: \"Die Anwendung von Grundsätzen ist wesentlich, um sicherzustellen, dass treibhausgasbezogene Angaben den tatsächlichen Verhältnissen entsprechend berücksichtigt werden.\" Grundsätze 4.2 Relevanz, 4.3 Vollständigkeit, 4.4 Konsistenz, 4.5 Genauigkeit, 4.6 Transparenz, 4.7 Konservativität.",
+          "worksheet_template_id": "66390870-579d-4cb3-9d2f-a33856929a5b"
+        },
+        {
+          "id": "0ed718a3-7494-444f-a147-2bccbdf5b18d",
+          "code": "REQ-01",
+          "condition": "recognized_source_used  ==  true",
+          "severity": "block",
+          "clause_reference": "6.1",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "§6.1: \"Der Projektantragsteller muss gängige Kriterien und Verfahren von einer anerkannten Quelle, falls verfügbar, auswählen und anwenden.\"",
           "worksheet_template_id": "66390870-579d-4cb3-9d2f-a33856929a5b"
         },
         {
