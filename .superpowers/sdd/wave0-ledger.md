@@ -1569,3 +1569,26 @@ FULL-TREATMENT BATCH 28 OPENED 2026-08-01 — FINAL PRIOR pair: DWA-A-102-2(62eq
   re-touched → every standard with a usable source audited at level-1 except the 4 source-blocked. Then
   REMAINING = 4 source-blocked PDFs (DWA-A-131/201/226, M-229-1) + ISO-5667-6 radical PDF (acquisition,
   needs owner) + LEVEL-2 deployed-build proof phase (needs campaign preview deployment).
+
+FULL-TREATMENT BATCH 28 CLOSED 2026-08-01 — DWA-A-102-2 + VSME (final priors). APPLIED mig 20260801140000
+  (A-102-2 2 capital-Max normalizations T6.a_f/T6.Vs), verified, rollback -batch28. A-102-2 = richest defect
+  set (62 eq: piecewise-if→min/max, compound-LHS, chained-relational, SUM/ln gaps, empty regulation_tables,
+  25 CR clause mis-numbering) — all held as rulings (structure/enforcement). VSME 10/10 eq faithful; 7 block
+  mis-homes + translation + shall/warn = rulings. Sheeted AX.
+
+════════════════════════════════════════════════════════════════════════════════════════════════
+=== MILESTONE 2026-08-01: REACHABLE CORPUS FULLY AUDITED (level-1) ===
+All 6 prior standards re-touched (batches 26-28). CONVERGENCE:
+  • 67 of 71 standards audited at LEVEL-1 (bidirectional coverage + real-engine execution + source-settled
+    applied + rulings sheeted): 60 batch/wave fully-VA + ISO-5667-6 (VC-cap) + 6 priors re-touched.
+  • 4 SOURCE-BLOCKED, never dispatched (no local PDF): DWA-A-131, DWA-A-201, DWA-A-226, DWA-M-229-1.
+  ★ Every standard with a usable local source has now had this campaign's full treatment. The gold-copy
+    DWA-A-138-1 re-checked 46/46 faithful ZERO re-catch → class library CONVERGED.
+OUTSTANDING (needs owner / setup, not fresh audit):
+  1. ACQUISITION: 4 source-blocked PDFs (DWA-A-131/201/226, M-229-1) + ISO-5667-6 rendered PDF (A.1 √g radical).
+  2. LEVEL-2 deployed-build harness proof + render spot-check for the whole corpus (needs campaign preview
+     deployment; confirm Vercel CLI first). All level-1 metrics are engine-execution, per agent caveats.
+  3. OWNER RATIFICATION: the sign-off sheet (Sections R..AX) — modal severities, block-mishome re-homes
+     (~130+), bare-symbol-RHS enforcement fixes, validator rules 16-20 ([CODE]).
+Total applied this campaign: 28 batches, ~30 source-settled migrations, all with rollbacks + effect-verified.
+════════════════════════════════════════════════════════════════════════════════════════════════
