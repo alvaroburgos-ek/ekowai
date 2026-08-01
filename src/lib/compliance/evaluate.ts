@@ -536,6 +536,38 @@ export function evaluateCondition(
 }
 
 /**
+ * Additive export surface for the gate explainer (`explain.ts`). The explainer
+ * walks the SAME AST and reuses the SAME leaf semantics — no logic fork.
+ */
+export type ConditionValue = Value;
+export type ConditionNode = Node;
+export type ConditionArithNode = ArithNode;
+
+/** Parse a condition to its AST, or null when it is not machine-evaluable. */
+export function parseCondition(condition: string): Node | null {
+  if (!condition || !condition.trim()) return null;
+  const toks = tokenize(condition);
+  if (!toks || toks.length === 0) return null;
+  return new Parser(toks).parse();
+}
+
+/** Evaluate a single node to the internal ternary — reused by the explainer. */
+export function evaluateNode(
+  n: Node,
+  lookup: (sym: string) => Value | undefined,
+): 'true' | 'false' | 'missing' {
+  return evalNode(n, lookup, { missing: new Set() });
+}
+
+/** Evaluate an arithmetic operand to a number (null = missing/non-finite). */
+export function evaluateArithNode(
+  n: ArithNode,
+  lookup: (sym: string) => Value | undefined,
+): number | null {
+  return evalArith(n, lookup, { missing: new Set() });
+}
+
+/**
  * Resolve a JSON carrier field's value FOR THE CONDITION DSL. The DSL only does
  * existence checks on carriers (`symbol IS NOT NULL` / `IS NOT EMPTY`), never
  * arithmetic — so map a carrier to a presence marker: a non-empty string when

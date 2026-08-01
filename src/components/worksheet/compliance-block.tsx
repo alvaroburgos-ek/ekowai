@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateCondition, jsonConditionValue, type EvalResult } from '@/lib/compliance/evaluate';
+import { explainCondition } from '@/lib/compliance/explain';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
@@ -186,6 +187,9 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                   </span>
                 )}
               </div>
+              {(result.kind === 'fail' || result.kind === 'pending') && (
+                <GateExplanationBlock condition={cr.condition} lookup={lookup} />
+              )}
               {result.kind === 'fail' && filteredSuggestions.length > 0 && (
                 <div className="ml-8 sm:ml-[140px] mt-2 space-y-2">
                   {filteredSuggestions.map((s) => (
@@ -206,6 +210,58 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
         })}
       </ul>
     </section>
+  );
+}
+
+/**
+ * Stage-3 explainable gates: for a failing/pending gate, show per-leaf
+ * actual value · required threshold · what would pass — derived from the
+ * SAME AST the evaluator uses (explainCondition), so it cannot disagree
+ * with the verdict badge above it.
+ */
+function GateExplanationBlock({
+  condition,
+  lookup,
+}: {
+  condition: string;
+  lookup: (sym: string) => number | string | boolean | null | undefined;
+}) {
+  const explanation = useMemo(
+    () => explainCondition(condition, lookup),
+    [condition, lookup],
+  );
+  if (explanation.kind !== 'explained' || explanation.leaves.length === 0) return null;
+  return (
+    <details className="ml-8 sm:ml-[140px] mt-1 text-xs">
+      <summary className="cursor-pointer text-subtext hover:text-ink select-none">
+        Warum?
+      </summary>
+      <ul className="mt-1.5 space-y-1.5 border-l-2 border-hairline pl-3">
+        {explanation.leaves.map((leaf, i) => (
+          <li key={i} className="space-y-0.5">
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className={
+                leaf.satisfied === true
+                  ? 'text-success'
+                  : leaf.satisfied === false
+                    ? 'text-accent-2'
+                    : 'text-subtext'
+              }>
+                {leaf.satisfied === true ? '✓' : leaf.satisfied === false ? '✗' : '○'}
+              </span>
+              {leaf.actual && <span className="text-ink">{leaf.actual}</span>}
+              {leaf.required && <span className="text-subtext">{leaf.required}</span>}
+              {!leaf.actual && !leaf.required && (
+                <span className="text-subtext">{leaf.text}</span>
+              )}
+            </div>
+            {leaf.wouldPass && (
+              <p className="text-subtext italic ml-5">→ {leaf.wouldPass}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 
