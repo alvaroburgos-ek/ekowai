@@ -1563,3 +1563,9 @@ FULL-TREATMENT BATCH 27 CLOSED 2026-08-01 — DWA-A-138-1 (GOLD COPY, 46/46 fait
   (M102-4: Gl.10/11/12 inline-unit strip + Gl.1/5/6 self-output-in-input removal), verified, rollback
   -batch27. NEW class: output-symbol-in-own-input-list. Rulings sheeted AW. Prior remaining: DWA-A-102-2,
   VSME. NEXT: batch 28 = DWA-A-102-2 (+VSME, likely no-PDF). Then 4 source-blocked + ISO-5667-6 PDF, LEVEL-2.
+
+FULL-TREATMENT BATCH 28 OPENED 2026-08-01 — FINAL PRIOR pair: DWA-A-102-2(62eq/30cr, German, main PDF found)
+  + VSME(10eq/31cr, English EFRAG sustainability). wf_06c14d72-df0 / wmujb062b. On close: all 6 priors
+  re-touched → every standard with a usable source audited at level-1 except the 4 source-blocked. Then
+  REMAINING = 4 source-blocked PDFs (DWA-A-131/201/226, M-229-1) + ISO-5667-6 radical PDF (acquisition,
+  needs owner) + LEVEL-2 deployed-build proof phase (needs campaign preview deployment).
