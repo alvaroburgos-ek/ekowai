@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { Plus, Trash2, Loader2, FileText } from 'lucide-react';
+import { useRef, useState, useTransition } from 'react';
+import { Plus, Trash2, Loader2, FileText, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addMonitoringEntry, deleteMonitoringEntry } from '@/lib/actions/monitoring';
+import { uploadDocument } from '@/lib/actions/documents';
+import {
+  PHOTO_ACCEPT,
+  isMonitoringPhotoTitle,
+  monitoringPhotoTitle,
+  photoUploadErrorMessage,
+  validatePhotoFile,
+} from '@/lib/monitoring/photo';
 import type {
   MaintenancePlanStandardView,
   MaintenanceTaskView,
@@ -89,28 +97,76 @@ export function MonitoringJournal({
   const [note, setNote] = useState('');
   const [documentId, setDocumentId] = useState('');
   const [standardId, setStandardId] = useState('');
+  /** Photo picked for upload — uploaded via the EXISTING document path on submit. */
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   /** Client-side list filter: '' = alle, else a standards.id. */
   const [filterStandardId, setFilterStandardId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const canAdd = entryDate !== '' && note.trim().length <= NOTE_MAX;
 
+  function clearPhoto() {
+    setPhotoFile(null);
+    if (photoInputRef.current) photoInputRef.current.value = '';
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      setPhotoFile(null);
+      return;
+    }
+    const msg = validatePhotoFile(file);
+    if (msg) {
+      setError(msg);
+      clearPhoto();
+      return;
+    }
+    setError(null);
+    setPhotoFile(file);
+  }
+
   function handleAdd() {
     if (!canAdd) return;
     setError(null);
     startTransition(async () => {
       try {
+        let linkedDocumentId = documentId !== '' ? documentId : undefined;
+
+        // Photo picked → upload it FIRST via the existing document path
+        // (same server action + storage bucket as the Documents tab), then
+        // link the fresh document to the journal entry.
+        if (photoFile) {
+          const title = monitoringPhotoTitle(entryDate);
+          const fd = new FormData();
+          fd.append('file', photoFile);
+          fd.append('projectId', projectId);
+          // The upload action's `kind` is a FIXED enum (no free text) —
+          // photos file under 'other'.
+          fd.append('kind', 'other');
+          fd.append('title', title);
+          fd.append('citationLabel', title);
+          const r = await uploadDocument(fd);
+          if (!r.ok) {
+            setError(photoUploadErrorMessage(r.error));
+            return;
+          }
+          linkedDocumentId = r.documentId;
+        }
+
         await addMonitoringEntry({
           projectId,
           entryDate,
           category,
           note: note.trim() !== '' ? note.trim() : undefined,
-          documentId: documentId !== '' ? documentId : undefined,
+          documentId: linkedDocumentId,
           standardId: standardId !== '' ? standardId : undefined,
         });
         setNote('');
         setDocumentId('');
         setStandardId('');
+        clearPhoto();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       }
@@ -279,8 +335,14 @@ export function MonitoringJournal({
           <select
             value={documentId}
             onChange={(e) => setDocumentId(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-hairline bg-paper px-3 py-2 text-sm text-ink"
+            className="mt-1 w-full rounded-lg border border-hairline bg-paper px-3 py-2 text-sm text-ink disabled:opacity-50"
             aria-label="Dokument"
+            disabled={photoFile !== null}
+            title={
+              photoFile !== null
+                ? 'Das Foto wird als neues Dokument angehängt'
+                : undefined
+            }
           >
             <option value="">— kein Dokument —</option>
             {documents.map((d) => (
@@ -289,6 +351,28 @@ export function MonitoringJournal({
               </option>
             ))}
           </select>
+        </label>
+        <label className="block flex-1">
+          <span className="text-xs font-medium text-subtext">
+            {category === 'foto' ? 'Foto aufnehmen/hochladen' : 'Foto anhängen (optional)'}
+          </span>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept={PHOTO_ACCEPT}
+            capture="environment"
+            onChange={handlePhotoChange}
+            disabled={isPending}
+            aria-label={
+              category === 'foto' ? 'Foto aufnehmen/hochladen' : 'Foto anhängen'
+            }
+            className="mt-1 w-full rounded-lg border border-hairline bg-paper px-3 py-1.5 text-sm text-ink file:mr-2 file:rounded-md file:border-0 file:bg-paper-2 file:px-2 file:py-1 file:text-xs file:font-medium file:text-ink disabled:opacity-50"
+          />
+          {photoFile && (
+            <span className="mt-1 block text-[11px] text-subtext break-words">
+              {`${photoFile.name} (${(photoFile.size / (1024 * 1024)).toFixed(1)} MB)`}
+            </span>
+          )}
         </label>
         <label className="block flex-1">
           <span className="text-xs font-medium text-subtext">Regelwerk (optional)</span>
@@ -383,7 +467,15 @@ export function MonitoringJournal({
                       <div className="text-xs text-subtext break-words">
                         {e.documentTitle && (
                           <span className="inline-flex items-center gap-1 mr-2">
-                            <FileText className="size-3 shrink-0" aria-hidden />
+                            {isMonitoringPhotoTitle(e.documentTitle) ? (
+                              <Camera
+                                className="size-3 shrink-0"
+                                aria-label="Foto"
+                                role="img"
+                              />
+                            ) : (
+                              <FileText className="size-3 shrink-0" aria-hidden />
+                            )}
                             {e.documentTitle}
                           </span>
                         )}
