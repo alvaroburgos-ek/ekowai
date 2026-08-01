@@ -176,9 +176,14 @@ describe('DWA-A-102-2 — NR boundary: arithmetic proven, but chain roots in h_N
 });
 
 describe('DWA-A-102-2 — ENGINE-GAP equations: the engine FAILS LOUD (never fabricates)', () => {
-  it('Gl.(REG-Bild4) q_A_Bem = −8.333·ln(eta_ges) − 1.6629  [PDF p.41] — ln() unsupported AND a graph-regression FIT (not a printed formula)', () => {
+  it('Gl.(REG-Bild4) q_A_Bem = −8.333·ln(eta_ges) − 1.6629  [PDF p.41] — ln() NOW computes (normalizeFormula clobber fixed)', () => {
+    // Previously ln(eta_ges) was mangled to `ln_eta_ges` by normalizeFormula's FN_LIKE
+    // (r_D(n) accessor rule) → unknown symbol → manual_required. That [CODE] bug is fixed;
+    // ln() reaches the evaluator, so this graph-regression now computes. (Whether the
+    // Bild-4 graph FIT is the canonical source form remains a separate content ruling.)
     const r = runEq('REG-Bild4', { eta_ges: 0.5 });
-    expect(r.kind).not.toBe('computed'); // ln() throws → manual_required/error, not a number
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBeCloseTo(-8.333 * Math.log(0.5) - 1.6629, 6);
   });
   it('Gl.(4) B_R_a_AFS63 = Sum(B_R_a_AFS63_i)  [PDF p.34] — Sum() unsupported', () => {
     const r = runEq('4', { B_R_a_AFS63_i: 100 });
@@ -255,20 +260,17 @@ describe('DWA-A-102-2 — block CR nodes through the REAL evaluateCondition (pas
     expect(evaluateCondition(cond('REQ-15'), lk({ a_R_AFS63: 1.3 })).kind).toBe('fail');
   });
   it('REQ-17 V_s >= V_S_min  [PDF p.51] — FINDING F-4: var-vs-var >= silently mis-evaluates (evaluateCondition bug)', () => {
-    // FINDING (gate-enforcement bug, REAL): a `<ident> >= <ident>` block CR does
-    // NOT resolve the RHS identifier. evaluate.ts operandToLiteral() converts a
-    // bare RHS ident to the STRING of its own name (legacy enum semantics), so
-    // `V_s >= V_S_min` compares the number V_s against the literal "V_S_min" and
-    // returns 'fail' regardless of the actual values. The harness asserts the
-    // ACTUAL (buggy) behaviour — doctrine forbids fabricating the pass. This
-    // affects REQ-17, REQ-22 and REQ-24 (all var-vs-var numeric gates). Staged
-    // for Alvaro (code fix: resolve aref RHS through lookup for numeric ops).
-    expect(evaluateCondition(cond('REQ-17'), lk({ V_s: 10, V_S_min: 5 })).kind).toBe('fail'); // SHOULD be pass
-    expect(evaluateCondition(cond('REQ-17'), lk({ V_s: 3, V_S_min: 5 })).kind).toBe('fail'); // correctly fail
+    // FINDING F-4 (var-vs-var ordering gate) is now FIXED in evaluate.ts (L244-258:
+    // an ordering op with a bare-ident RHS routes to numeric acompare and resolves
+    // the RHS through the lookup). So `V_s >= V_S_min` now enforces correctly.
+    // (Verified corpus-wide via the a1022b harness; these assertions updated from the
+    // pre-fix buggy 'fail' to the corrected truth.)
+    expect(evaluateCondition(cond('REQ-17'), lk({ V_s: 10, V_S_min: 5 })).kind).toBe('pass');
+    expect(evaluateCondition(cond('REQ-17'), lk({ V_s: 3, V_S_min: 5 })).kind).toBe('fail');
   });
-  it('REQ-22 eta_ges >= eta_erf  [PDF p.34] — same F-4 var-vs-var bug', () => {
-    expect(evaluateCondition(cond('REQ-22'), lk({ eta_ges: 0.8, eta_erf: 0.5 })).kind).toBe('fail'); // SHOULD be pass
-    expect(evaluateCondition(cond('REQ-22'), lk({ eta_ges: 0.4, eta_erf: 0.5 })).kind).toBe('fail'); // correctly fail
+  it('REQ-22 eta_ges >= eta_erf  [PDF p.34] — F-4 var-vs-var now enforces', () => {
+    expect(evaluateCondition(cond('REQ-22'), lk({ eta_ges: 0.8, eta_erf: 0.5 })).kind).toBe('pass');
+    expect(evaluateCondition(cond('REQ-22'), lk({ eta_ges: 0.4, eta_erf: 0.5 })).kind).toBe('fail');
   });
   it('REQ-23 V_s >= 5  [PDF p.51]', () => {
     expect(evaluateCondition(cond('REQ-23'), lk({ V_s: 5 })).kind).toBe('pass');
