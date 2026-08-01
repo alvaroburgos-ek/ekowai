@@ -327,7 +327,7 @@ export default async function WorksheetPage({
               dataType: f.dataType as 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json',
               isRequired: f.isRequired,
               enumValues: f.enumValues as Array<{ value: string; label_de: string | null; label_en: string | null }> | null,
-              validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; raw?: string } | null,
+              validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; extensible?: boolean; raw?: string } | null,
               clauseReference: f.clauseReference,
               description: f.description,
               verificationStatus: f.verificationStatus,

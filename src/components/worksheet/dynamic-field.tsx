@@ -23,7 +23,16 @@ type FieldDef = {
   enumValues:
     | Array<{ value: string; label_de: string | null; label_en: string | null; order_index?: number }>
     | null;
-  validationRules: { min?: number; max?: number; maxLength?: number; raw?: string } | null;
+  validationRules: {
+    min?: number;
+    max?: number;
+    maxLength?: number;
+    /** OPTIONS tranche 3: when true on a json+enumValues checklist, the
+     * engineer may append CUSTOM free-text entries alongside the seeded
+     * options (guideline prints its list as explicitly non-exhaustive). */
+    extensible?: boolean;
+    raw?: string;
+  } | null;
   clauseReference: string | null;
   verificationStatus: string;
   description: string | null;
@@ -108,6 +117,10 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   // entirely.
   const isDirty = useWorksheetStore((s) => s.pendingFieldIds.has(field.id));
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Draft text for the extensible-checklist "Eigener Eintrag…" input (OPTIONS
+  // tranche 3). Hoisted to the component top level (hooks cannot live inside
+  // the per-dataType render closures).
+  const [customDraft, setCustomDraft] = useState('');
   const inputId = useId();
 
   const label = locale === 'de' ? field.labelDe : field.labelEn ?? field.labelDe;
@@ -387,6 +400,22 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         const useTextarea = (maxLength ?? 0) > 200;
         const textLocked = isComputed || readOnly;
 
+        // SUGGESTED-TEXT mode (OPTIONS tranche 3): a text field that carries
+        // seeded enum_values renders a <datalist> of suggestions from the
+        // guideline — the standard prints its list as explicitly NON-exhaustive,
+        // so free entry stays fully allowed and the value is NEVER restricted.
+        // (Textarea path is unaffected: <datalist> only binds to <input>.)
+        const suggestions = field.enumValues ?? [];
+        const showSuggestions = suggestions.length > 0 && !textLocked && !useTextarea;
+        const datalistId = `${inputId}-suggestions`;
+        const sortedSuggestions = showSuggestions
+          ? [...suggestions].sort(
+              (a, b) =>
+                (a.order_index ?? Number.MAX_SAFE_INTEGER) -
+                (b.order_index ?? Number.MAX_SAFE_INTEGER),
+            )
+          : [];
+
         // a_s_m_provenance: when method='manual' this field is required.
         // Surface a German validation message via the title attribute so the
         // browser's built-in constraint UI shows the correct text.
@@ -425,6 +454,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               tabIndex={textLocked ? -1 : undefined}
               aria-readonly={textLocked || undefined}
               title={provenanceRequiredTitle}
+              list={showSuggestions ? datalistId : undefined}
               onChange={(e) => {
                 if (isComputed) return;
                 if (readOnly) return;
@@ -432,6 +462,21 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               }}
               className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
             />
+            {showSuggestions && (
+              <>
+                <datalist id={datalistId} data-testid="text-suggestions">
+                  {sortedSuggestions.map((o) => (
+                    <option key={o.value} value={pickEnumLabel(o, locale)} />
+                  ))}
+                </datalist>
+                <p
+                  data-testid="text-suggestions-hint"
+                  className="text-[11px] text-subtext mt-0.5"
+                >
+                  Vorschläge aus dem Regelwerk — eigene Eingabe möglich
+                </p>
+              </>
+            )}
             {asmProvenanceRequired && !v && (
               <p className="text-xs text-error mt-0.5">Herkunftsangabe erforderlich</p>
             )}
@@ -589,21 +634,60 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           (a, b) => (a.order_index ?? Number.MAX_SAFE_INTEGER) - (b.order_index ?? Number.MAX_SAFE_INTEGER),
         );
         const raw = value?.type === 'json' ? value.value : null;
-        const selected = new Set(
-          Array.isArray(raw) ? raw.filter((x): x is string => typeof x === 'string') : [],
-        );
+        const rawArr = Array.isArray(raw)
+          ? raw.filter((x): x is string => typeof x === 'string')
+          : [];
+        const selected = new Set(rawArr);
         const jsonLocked = isComputed || readOnly;
+        // EXTENSIBLE mode (OPTIONS tranche 3): when validation_rules carries
+        // extensible:true, the guideline prints its option list as explicitly
+        // NON-exhaustive, so the engineer may append CUSTOM free-text entries.
+        // Custom entries are the stored-array members that are not seeded
+        // option values; they persist appended AFTER the seeded selection.
+        // When extensible !== true the checklist stays exactly as before
+        // (closed: stored strays are ignored and dropped on the next toggle).
+        const isExtensible = field.validationRules?.extensible === true;
+        const seededValues = new Set(sorted.map((o) => o.value));
+        const customEntries = isExtensible
+          ? rawArr.filter((v) => !seededValues.has(v))
+          : [];
+        // Persist in the option list's own order so the stored array is
+        // stable/deterministic regardless of click order; custom entries
+        // follow in their insertion order.
+        const persist = (sel: Set<string>, customs: string[]) => {
+          setField(field.id, {
+            type: 'json',
+            value: [...sorted.map((o) => o.value).filter((v) => sel.has(v)), ...customs],
+          });
+        };
         const toggle = (optValue: string, checked: boolean) => {
           if (jsonLocked) return;
           const next = new Set(selected);
           if (checked) next.add(optValue);
           else next.delete(optValue);
-          // Persist in the option list's own order so the stored array is
-          // stable/deterministic regardless of click order.
-          setField(field.id, {
-            type: 'json',
-            value: sorted.map((o) => o.value).filter((v) => next.has(v)),
-          });
+          persist(next, customEntries);
+        };
+        const removeCustom = (entry: string) => {
+          if (jsonLocked) return;
+          persist(
+            selected,
+            customEntries.filter((c) => c !== entry),
+          );
+        };
+        const addCustom = () => {
+          if (jsonLocked) return;
+          const trimmed = customDraft.trim();
+          if (!trimmed) return;
+          if (seededValues.has(trimmed)) {
+            // Typed text equals a seeded option value — check that option
+            // instead of duplicating it as a custom entry.
+            const next = new Set(selected);
+            next.add(trimmed);
+            persist(next, customEntries);
+          } else if (!customEntries.includes(trimmed)) {
+            persist(selected, [...customEntries, trimmed]);
+          }
+          setCustomDraft('');
         };
         return (
           <div
@@ -630,6 +714,59 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
                 </label>
               );
             })}
+            {customEntries.map((entry) => (
+              <div
+                key={entry}
+                data-testid="custom-checklist-entry"
+                className={`flex items-center gap-2.5 px-3 py-2 text-sm text-ink ${jsonLocked ? 'bg-paper-2/40' : ''}`}
+              >
+                <input
+                  type="checkbox"
+                  checked
+                  disabled
+                  aria-label={entry}
+                  className="h-4 w-4 shrink-0 accent-[var(--accent,#2563eb)]"
+                />
+                <span className="flex-1">{entry}</span>
+                {!jsonLocked && (
+                  <button
+                    type="button"
+                    aria-label={`${entry} entfernen`}
+                    title="Eigenen Eintrag entfernen"
+                    onClick={() => removeCustom(entry)}
+                    className="shrink-0 px-1 text-subtext hover:text-accent-2 transition-colors"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+            {isExtensible && !jsonLocked && (
+              <div className="flex items-center gap-2 px-3 py-2">
+                <input
+                  type="text"
+                  value={customDraft}
+                  aria-label="Eigener Eintrag"
+                  placeholder="Eigener Eintrag…"
+                  onChange={(e) => setCustomDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addCustom();
+                    }
+                  }}
+                  className="block w-full rounded-md border border-hairline-strong px-2 py-1 text-sm text-ink bg-transparent focus:outline-none focus:ring-0 focus:border-accent"
+                />
+                <button
+                  type="button"
+                  onClick={addCustom}
+                  disabled={!customDraft.trim()}
+                  className="shrink-0 rounded border border-hairline-strong px-2 py-1 text-xs text-accent-2 hover:bg-accent-2/10 transition-colors disabled:opacity-50"
+                >
+                  Hinzufügen
+                </button>
+              </div>
+            )}
           </div>
         );
       })()}
