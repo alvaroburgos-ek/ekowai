@@ -24,13 +24,26 @@
  * evaluated.
  */
 
-/** The two numeric 2-arg functions the engine natively supports. */
-const SUPPORTED_FUNCTIONS = new Set<string>(['min', 'max']);
+/** 2-arg numeric functions the engine natively supports. */
+const FUNCTIONS_2ARG = new Set<string>(['min', 'max']);
+/** 1-arg numeric functions (natural log, base-10 log, exp, square root, absolute value). */
+const FUNCTIONS_1ARG: Record<string, (x: number) => number> = {
+  ln: Math.log,
+  log: Math.log, // natural log (DWA regressions write ln; a bare `log` is treated as ln)
+  log10: Math.log10,
+  exp: Math.exp,
+  sqrt: Math.sqrt,
+  abs: Math.abs,
+};
+/** Bare mathematical constants, used only as a FALLBACK when the name is not a
+ * provided field value (a field named `e`/`pi` always wins). Lets formulas like
+ * `e^(-k*t)` resolve without a rewrite. */
+const CONSTANTS: Record<string, number> = { e: Math.E, pi: Math.PI };
 
 type Token =
   | { kind: 'num'; value: number }
   | { kind: 'ident'; name: string }
-  | { kind: 'fn'; name: 'min' | 'max' }
+  | { kind: 'fn'; name: string }
   | { kind: 'op'; op: '+' | '-' | '*' | '/' | '^' | '(' | ')' | ',' };
 
 function tokenize(src: string): Token[] {
@@ -70,10 +83,10 @@ function tokenize(src: string): Token[] {
       let j = i + m[0].length;
       while (j < src.length && (src[j] === ' ' || src[j] === '\t')) j++;
       if (src[j] === '(') {
-        // Only min() and max() are natively supported as 2-arg numeric functions.
+        // min()/max() (2-arg) and ln/log/log10/exp/sqrt/abs (1-arg) are natively supported.
         // All other function calls throw so unsupported formulas fail loud.
-        if (SUPPORTED_FUNCTIONS.has(m[0])) {
-          toks.push({ kind: 'fn', name: m[0] as 'min' | 'max' });
+        if (FUNCTIONS_2ARG.has(m[0]) || m[0] in FUNCTIONS_1ARG) {
+          toks.push({ kind: 'fn', name: m[0] });
           i += m[0].length;
           continue;
         }
@@ -168,10 +181,10 @@ class Parser {
     if (t.kind === 'num') return t.value;
     if (t.kind === 'ident') {
       const v = this.values?.get(t.name);
-      if (v === undefined) {
-        throw new Error(`Unbekanntes Symbol "${t.name}" im Ausdruck.`);
-      }
-      return v;
+      if (v !== undefined) return v;
+      // Fallback to a bare mathematical constant (e, pi) only if no field of that name exists.
+      if (t.name in CONSTANTS) return CONSTANTS[t.name];
+      throw new Error(`Unbekanntes Symbol "${t.name}" im Ausdruck.`);
     }
     if (t.kind === 'fn') {
       // Consume '('
@@ -180,13 +193,21 @@ class Parser {
         throw new Error(`Erwarte '(' nach "${t.name}".`);
       }
       const a = this.parseExpr();
-      // Consume ','
+      // 1-arg functions (ln/log/log10/exp/sqrt/abs) — no comma, one close paren.
+      const oneArg = FUNCTIONS_1ARG[t.name];
+      if (oneArg) {
+        const close = this.toks[this.pos++];
+        if (close?.kind !== 'op' || close.op !== ')') {
+          throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);
+        }
+        return oneArg(a);
+      }
+      // 2-arg functions (min/max).
       const comma = this.toks[this.pos++];
       if (comma?.kind !== 'op' || comma.op !== ',') {
         throw new Error(`Erwarte ',' im ${t.name}(...)-Aufruf.`);
       }
       const b = this.parseExpr();
-      // Consume ')'
       const close = this.toks[this.pos++];
       if (close?.kind !== 'op' || close.op !== ')') {
         throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);

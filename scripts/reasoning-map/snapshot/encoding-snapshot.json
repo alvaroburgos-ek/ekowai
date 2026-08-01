@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-08-01T08:49:35.831Z",
+  "exported_at": "2026-08-01T09:22:38.047Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -72756,7 +72756,7 @@
             "h_D",
             "k_f"
           ],
-          "formula": "a_F = 0.000001969*P - 0.005116*ln(Sp) - 0.0001051*h_D + 0.01753*exp(4.576/k_f) ; g_F = 0.2468883*ln(P) - 0.0003938*ET_p + 0.0017083*Sp - 0.0015998*h_D - 0.6703502*exp(0.1122885/k_f) ; v_F = 0.2111 - 0.2544*ln(P) + 0.2073*ln(ET_p) + 0.0006249*Sp + 0.123*ln(h_D) - 0.000002806*k_f",
+          "formula": "a_F = 0.000001969*P - 0.005116*ln(Sp) - 0.0001051*h_D + 0.01753*exp(4.576/k_f)",
           "clause_reference": "§A.8 (lines 862-864)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
@@ -72773,7 +72773,7 @@
             "WK_max",
             "WP"
           ],
-          "formula": "a_F = 0.145704 - 0.059177*ln(f_Fu) - 0.007354*Sp - 0.050531*ln(WK_max - WP) ; g_F = -0.02927 + 0.1483*ln(P) - 0.000269*ET_p - 0.09913*ln(1 + Sp) + 0.05222*(WK_max - WP) ; v_F = 1.106 - 0.1625*ln(P) + 0.0001282*ET_p + 0.1131*ln(1 + Sp) + 0.2848*(WK_max - WP)",
+          "formula": "a_F = 0.145704 - 0.059177*ln(f_Fu) - 0.007354*Sp - 0.050531*ln(WK_max - WP)",
           "clause_reference": "§A.9 (lines 875-877)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "fb1d6358-c4a8-4986-a8af-42cb31e8a086"
@@ -72787,7 +72787,7 @@
             "ET_p",
             "f_S_F"
           ],
-          "formula": "a_A = 0.004264 + 0.001121*ln(P) - 0.002757*ln(f_S,F) ; g_A = 0.6207904 + 0.0899322*ln(P) - 0.0001152*ET_p - 0.0719723*ln(f_S,F) ; v_A = 0.3999 - 0.09317*ln(P) + 0.00009746*ET_p + 0.07474*ln(f_S,F)",
+          "formula": "a_A = 0.004264 + 0.001121*ln(P) - 0.002757*ln(f_S_F)",
           "clause_reference": "§B.2 (lines 942-944)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "bc1e7262-38d0-4984-a58b-2a7eb37c0a20"
@@ -72802,26 +72802,10 @@
             "f_S_M",
             "k_f"
           ],
-          "formula": "a_A = -0.03867 + 0.007684*ln(P) + 0.000003201*f_S,M + 0.0002564*k_f - 0.0001187*f_S,M*k_f + 0.004161*ln(k_f / f_S,M) ; g_A = 0.8803 + 0.01866*ln(P) - 0.00004867*ET_p - 0.001997*f_S,M + 0.0002365*k_f ; v_A = 0.000008879*ET_p + 2.528/(-81.65 + P) * f_S,M^0.9496 - 0.00007768*k_f",
+          "formula": "a_A = -0.03867 + 0.007684*ln(P) + 0.000003201*f_S_M + 0.0002564*k_f - 0.0001187*f_S_M*k_f + 0.004161*ln(k_f / f_S_M)",
           "clause_reference": "§B.4 (lines 975-978)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "821b8166-b521-49ff-92ca-f45d2035556b"
-        },
-        {
-          "id": "43a05b73-be06-4ba2-89e4-c59bbd73659a",
-          "equation_number": "B.5",
-          "output_symbol": "a_A",
-          "input_symbols": [
-            "P",
-            "ET_p",
-            "f_S_M",
-            "q_Dr",
-            "k_f"
-          ],
-          "formula": "a_A = 0.8112 + 0.0003473*P - 0.00001845*ET_p - 0.04793*f_S,M + 0.0007481*q_Dr - 0.4389*ln(k_f + 1) ; g_A = 1.669 - 0.3005*ln(P) - 0.00006933*ET_p + 0.3044*ln(f_S,M) + 0.4581*ln(k_f + 1) ; v_A = 0.1428 - 0.02661*ln(P) + 0.00005668*ET_p + 0.0288*ln(f_S,M) - 0.0001825*q_Dr - 0.01823*ln(k_f + 1)",
-          "clause_reference": "§B.5 (lines 993-996)",
-          "verification_status": "imported_unverified",
-          "worksheet_template_id": "92acbf38-30cd-4126-b20a-505dbb45808e"
         },
         {
           "id": "13d175b5-e886-4f94-a39c-3304dcc72bd9",
@@ -72966,6 +72950,22 @@
           "clause_reference": "§B.7 (lines 1054-1056)",
           "verification_status": "imported_unverified",
           "worksheet_template_id": "253f0170-6e7e-4a1c-9a18-bf24bca3c2cb"
+        },
+        {
+          "id": "43a05b73-be06-4ba2-89e4-c59bbd73659a",
+          "equation_number": "B.5",
+          "output_symbol": "a_A",
+          "input_symbols": [
+            "P",
+            "ET_p",
+            "f_S_M",
+            "q_Dr",
+            "k_f"
+          ],
+          "formula": "a_A = 0.8112 + 0.0003473*P - 0.00001845*ET_p - 0.04793*f_S_M + 0.0007481*q_Dr - 0.4389*ln(k_f + 1)",
+          "clause_reference": "§B.5 (lines 993-996)",
+          "verification_status": "imported_unverified",
+          "worksheet_template_id": "92acbf38-30cd-4126-b20a-505dbb45808e"
         }
       ],
       "compliance": [
