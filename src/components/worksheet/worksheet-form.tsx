@@ -146,6 +146,10 @@ type Props = {
    * for fields where prefillSourceByFieldId is 'site_profile'. Shown in the
    * field's tooltip so the engineer can find the source entry. */
   siteProfileKeyByFieldId?: Record<string, string>;
+  /** field_id → persisted project_parameters.client_supplied flag
+   * ("Kundenangabe" — value delivered by the client, AGB input-error
+   * carve-out). Only true entries need to be present. */
+  clientSuppliedByFieldId?: Record<string, boolean>;
   /** Standard code (e.g. "DWA-A-138-1"). Forwarded to DynamicField so the
    * inheritance badge can deep-link back to the source worksheet. */
   standardCode: string;
@@ -183,6 +187,7 @@ export function WorksheetForm({
   ambiguousSymbols,
   prefillSourceByFieldId,
   siteProfileKeyByFieldId,
+  clientSuppliedByFieldId,
   standardCode,
   docs,
   priorSnapshotCount,
@@ -576,6 +581,7 @@ export function WorksheetForm({
           isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
+          clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
           inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
           overridePill={
             overrideMeta ? (

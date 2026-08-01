@@ -7,6 +7,8 @@ import {
   worksheetTemplates,
   worksheetInstances,
   calculationSnapshots,
+  projectParameters,
+  fields,
 } from '@/lib/db/schema';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { checkApprovalGate } from '@/lib/actions/approval-gate';
@@ -66,6 +68,10 @@ export type ConformityData = ConformityDecision & {
   worksheets: ConformityWorksheetRow[];
   /** Latest approve-snapshot per worksheet — the frozen state the declaration refers to. */
   snapshots: Array<{ worksheetCode: string; snapshotId: string; takenAt: string }>;
+  /** Parameters of THIS standard flagged client_supplied ("Kundenangabe") —
+   * summarized on the declaration because the AGB carve out liability for
+   * client-supplied input errors. */
+  clientSuppliedFields: Array<{ worksheetCode: string; symbol: string; labelDe: string }>;
   letterhead: ReportLetterhead | null;
   generatedAt: string;
 };
@@ -181,6 +187,28 @@ export async function loadConformityData(
     takenAt: s.takenAt ? s.takenAt.toISOString() : '',
   }));
 
+  // Kundenangabe summary — every saved parameter of THIS standard flagged
+  // client_supplied, joined to its field + worksheet for a readable listing.
+  const clientSuppliedRows = templateIds.length === 0
+    ? []
+    : await db
+      .select({
+        worksheetCode: worksheetTemplates.code,
+        symbol: fields.symbol,
+        labelDe: fields.labelDe,
+      })
+      .from(projectParameters)
+      .innerJoin(fields, eq(fields.id, projectParameters.fieldId))
+      .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+      .where(
+        and(
+          eq(projectParameters.projectId, projectId),
+          eq(projectParameters.clientSupplied, true),
+          inArray(fields.worksheetTemplateId, templateIds),
+        ),
+      )
+      .orderBy(worksheetTemplates.orderIndex, fields.orderIndex);
+
   const decision = decideConformity(rows);
   return {
     ...decision,
@@ -199,6 +227,7 @@ export async function loadConformityData(
     },
     worksheets: rows,
     snapshots,
+    clientSuppliedFields: clientSuppliedRows,
     letterhead: proj.org && proj.org.id
       ? {
         orgName: proj.org.name ?? '',

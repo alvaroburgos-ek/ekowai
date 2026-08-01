@@ -1,7 +1,8 @@
 'use client';
-import { useState, useId, useMemo } from 'react';
+import { useState, useId, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
+import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Select } from '@/components/ui/select';
 import { CitationPicker } from '@/components/documents/citation-picker';
@@ -81,12 +82,23 @@ type Props = {
   /** Current value of the sibling `a_s_m_needs_reconfirmation` field. When
    * true, the AsmMethodStatus badge shows the amber "Typ geändert" state. */
   asmNeedsReconfirmation?: boolean | null;
+  /** Persisted "Kundenangabe" flag from project_parameters.client_supplied —
+   * the value was delivered by the client, not determined by EKOWAI (AGB
+   * input-error carve-out). Drives the amber chip next to the citation
+   * controls; toggled via the setClientSupplied server action. */
+  clientSupplied?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
+  // Kundenangabe toggle: optimistic local override on top of the server-loaded
+  // prop; reverted to the prop on a failed server call (e.g. no saved row yet,
+  // write-locked worksheet).
+  const [csOptimistic, setCsOptimistic] = useState<boolean | null>(null);
+  const [csPending, startCsTransition] = useTransition();
+  const isClientSupplied = csOptimistic ?? clientSupplied;
   // The prefill badges (Norm-Default / Projekt-Standort / ← {WS}) describe the
   // ORIGIN of the rendered value. Once the engineer touches the field, the
   // value in the store is theirs — keeping the badge visible would be a lie
@@ -642,14 +654,50 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         </div>
       )}
 
-      {/* Citation chips (0…n) */}
-      <CitationChips
-        citations={citations}
-        docs={docLookup}
-        projectId={projectId}
-        fieldId={field.id}
-        onAdd={() => setPickerOpen(true)}
-      />
+      {/* Citation chips (0…n) + Kundenangabe checkbox-chip */}
+      <div className="flex flex-wrap items-center gap-2">
+        <CitationChips
+          citations={citations}
+          docs={docLookup}
+          projectId={projectId}
+          fieldId={field.id}
+          onAdd={() => setPickerOpen(true)}
+        />
+        {/* Kundenangabe: only offered once the field carries a value (the
+            server action UPDATEs the existing project_parameters row only —
+            same source the citation seed comes from). Amber chip when set. */}
+        {hasStoreValue(value) && (
+          <button
+            type="button"
+            data-testid="client-supplied-toggle"
+            aria-pressed={isClientSupplied}
+            disabled={readOnly || csPending}
+            title={
+              isClientSupplied
+                ? 'Kundenangabe: Wert wurde vom Kunden beigestellt, nicht von EKOWAI ermittelt — Haftungsausschluss für Eingabefehler gemäß AGB. Klicken zum Entfernen.'
+                : 'Als Kundenangabe markieren (Wert vom Kunden beigestellt, nicht von EKOWAI ermittelt)'
+            }
+            onClick={() => {
+              if (readOnly || csPending) return;
+              const next = !isClientSupplied;
+              setCsOptimistic(next);
+              startCsTransition(async () => {
+                const r = await setClientSupplied(projectId, field.id, next);
+                // Revert the optimistic state on failure (no saved row yet,
+                // write-locked, no access) — falls back to the server prop.
+                if (!r.ok) setCsOptimistic(null);
+              });
+            }}
+            className={
+              isClientSupplied
+                ? 'inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 disabled:opacity-50'
+                : 'text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink underline disabled:opacity-50'
+            }
+          >
+            {isClientSupplied ? '✓ Kundenangabe' : 'Kundenangabe'}
+          </button>
+        )}
+      </div>
       <CitationPicker
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
@@ -708,6 +756,13 @@ function formatHintNumber(n: number): string {
     return n.toExponential(0);
   }
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(n);
+}
+
+/** True when the store holds a non-null value for the field — the gate for
+ * offering the Kundenangabe toggle (mirrors the citation UI: both act on the
+ * field's saved project_parameters row). */
+function hasStoreValue(value: StoreValue): boolean {
+  return value != null && value.value != null;
 }
 
 type StoreValue =

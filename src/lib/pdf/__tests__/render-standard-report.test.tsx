@@ -159,6 +159,7 @@ describe('StandardReportDocument', () => {
                   },
                 ],
                 clauseReference: '§5.3.3.6',
+                clientSupplied: false,
               },
               {
                 id: 'f-12-as',
@@ -171,6 +172,7 @@ describe('StandardReportDocument', () => {
                 valueSource: 'entered',
                 citations: [],
                 clauseReference: '§5.3.3.6',
+                clientSupplied: false,
               },
               {
                 id: 'f-12-asmin',
@@ -183,6 +185,7 @@ describe('StandardReportDocument', () => {
                 valueSource: null,
                 citations: [],
                 clauseReference: '§5.3.3.6',
+                clientSupplied: false,
               },
             ],
           },
@@ -299,6 +302,7 @@ describe('StandardReportDocument', () => {
                     note: 'Bemaßung aus PLN-Layer',
                   },
                 ],
+                clientSupplied: false,
                 clauseReference: '§6.2.2',
               },
             ],

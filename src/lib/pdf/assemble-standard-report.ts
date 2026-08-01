@@ -56,6 +56,10 @@ export type ReportField = {
   valueSource: 'entered' | 'inherited' | 'site_profile' | 'computed' | null;
   citations: ReportFieldCitation[];
   clauseReference: string | null;
+  /** Kundenangabe (project_parameters.client_supplied): the value was
+   * delivered by the client, not determined by EKOWAI — the dossier marks it
+   * so the AGB input-error carve-out is traceable. */
+  clientSupplied: boolean;
 };
 
 export type ReportSection = {
@@ -303,6 +307,9 @@ export type AssemblerParameter = {
   valueJson: unknown;
   sourceType: string;
   citationSources: unknown;
+  /** Kundenangabe flag — optional so pre-flag fixtures stay valid; assembler
+   * normalises absent input to false. */
+  clientSupplied?: boolean;
 };
 
 export type AssemblerDocument = {
@@ -553,6 +560,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           valueSource: resolved?.source ?? null,
           citations: citationsForField(f.id),
           clauseReference: f.clauseReference,
+          clientSupplied: param?.clientSupplied === true,
         });
         sectionMap.set(sid, arr);
         // Stage-1: a USED field (required or valued) whose definition is not

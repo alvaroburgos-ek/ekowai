@@ -137,6 +137,9 @@ function FieldRow({ field }: { field: ReportField }) {
       <Text style={hasValue ? styles.fieldRowValue : [styles.fieldRowValue, styles.fieldMissing]}>
         {hasValue ? field.value : '— fehlt'}
         {sourceMarker ? <Text style={{ color: colors.subtext }}> {sourceMarker}</Text> : null}
+        {field.clientSupplied ? (
+          <Text style={{ color: colors.warning, fontSize: 7.5 }}> · Kundenangabe</Text>
+        ) : null}
       </Text>
       <Text style={styles.fieldRowUnit}>{field.unit ?? ''}</Text>
       <Text style={styles.fieldRowCitations}>{citations || '—'}</Text>

@@ -62,6 +62,20 @@ export function ConformityDocument({ data }: { data: ConformityData }) {
           ))}
         </View>
 
+        {data.clientSuppliedFields.length > 0 ? (
+          <View style={{ marginTop: 14 }}>
+            <Text style={styles.h2}>Kundenseitig beigestellte Eingaben</Text>
+            {data.clientSuppliedFields.map((f, i) => (
+              <Text key={`${f.worksheetCode}-${f.symbol}-${i}`} style={styles.note}>
+                {`• ${f.worksheetCode} · ${f.labelDe} (${f.symbol})`}
+              </Text>
+            ))}
+            <Text style={styles.note}>
+              Für kundenseitig beigestellte Eingaben gilt der Haftungsausschluss für Eingabefehler gemäß AGB.
+            </Text>
+          </View>
+        ) : null}
+
         <View style={{ marginTop: 14 }}>
           <Text style={styles.h2}>Berechnungsstand (Snapshots)</Text>
           {data.snapshots.length === 0 ? (

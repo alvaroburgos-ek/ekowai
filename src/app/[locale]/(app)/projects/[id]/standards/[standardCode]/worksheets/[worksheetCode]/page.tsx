@@ -271,6 +271,14 @@ export default async function WorksheetPage({
     initialSources[f.id] = (p?.citationSource as { docId: string; page?: number; note?: string } | null) ?? null;
   }
 
+  // Kundenangabe flags — same source rows as citations (project_parameters);
+  // only true entries are threaded to keep the payload small.
+  const clientSuppliedByFieldId: Record<string, boolean> = {};
+  for (const f of mergedFields) {
+    const p = parameters.get(f.id);
+    if (p?.clientSupplied) clientSuppliedByFieldId[f.id] = true;
+  }
+
   return (
     <NormTextProvider standardCode={standardCode}>
     <div className="space-y-6">
@@ -366,6 +374,7 @@ export default async function WorksheetPage({
           ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
           prefillSourceByFieldId={prefillSourceByFieldId}
           siteProfileKeyByFieldId={siteProfileKeyByFieldId}
+          clientSuppliedByFieldId={clientSuppliedByFieldId}
           standardCode={standardCode}
           docs={docs}
           priorSnapshotCount={priorSnapshotCount}
