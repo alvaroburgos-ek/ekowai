@@ -1552,3 +1552,8 @@ FULL-TREATMENT BATCH 26 CLOSED 2026-08-01 — DWA-A-178 + DWA-M-277E (prior re-t
   continuous-improvement re-run value (earlier mandate never touched equations). Rulings sheeted AV. Prior
   remaining: DWA-A-138-1 (gold), DWA-A-102-2, DWA-M-102-4, VSME. NEXT: batch 27 = DWA-M-102-4 + DWA-A-102-2
   (or DWA-A-138-1 gold-copy re-check). Then 4 source-blocked + ISO-5667-6 PDF (acquisition), then LEVEL-2.
+
+FULL-TREATMENT BATCH 27 OPENED 2026-08-01 — PRIOR RE-TOUCH: DWA-A-138-1(46eq/35cr, GOLD-COPY reference,
+  re-check per continuous-improvement doctrine) + DWA-M-102-4(31eq/22cr). wf_93d02d7b-603 / wqhzjcvfo.
+  Brief notes 138 known gaps (injected-D, cos_beta) to avoid re-flagging. Remaining prior after: DWA-A-102-2,
+  VSME. Then 4 source-blocked + ISO-5667-6 PDF, then LEVEL-2 deployed-build proof.
