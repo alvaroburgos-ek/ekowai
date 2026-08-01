@@ -17,6 +17,8 @@ import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
 import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
+import { PollutantRegisterEditor } from './pollutant-register-editor';
+import { POLLUTANT_REGISTER_SYMBOL, POLLUTANT_OUTPUT_SYMBOLS } from '@/lib/eval/pollutant-register';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
@@ -167,7 +169,24 @@ type Props = {
    * A138-10). null when this worksheet IS the owner or the standard has no
    * surface_inventory field. */
   surfaceSource?: { status: string; carrier: unknown } | null;
+  /** Field ids whose persisted project_parameters row was written by a
+   * SERVER-side engine (source_type='computed', e.g. the VSME CO₂ engine;
+   * plus VSME 'derived' rows like the B04 per-medium sums). These render
+   * read-only with a provenance hint — single-source rule: derived values
+   * are never re-entered by hand. */
+  serverComputedFieldIds?: string[];
 };
+
+/** VSME-B03.200 symbols written by recomputeB3Co2 (kept in sync with
+ * OUTPUT_SYMBOLS in src/lib/actions/co2.ts — not imported because that
+ * module is 'use server'). Drives the CO₂-table provenance hint. */
+const VSME_CO2_ENGINE_SYMBOLS = new Set([
+  'GrossScope1GreenhouseGasEmissions',
+  'GrossLocationBasedScope2GreenhouseGasEmissions',
+  'TotalGrossLocationBasedScope1AndScope2GHGEmissions',
+]);
+
+const VSME_POLLUTANT_SUM_SYMBOLS = new Set<string>(Object.values(POLLUTANT_OUTPUT_SYMBOLS));
 
 export function WorksheetForm({
   locale,
@@ -194,6 +213,7 @@ export function WorksheetForm({
   diffHref,
   isPlatformEngineer = false,
   surfaceSource,
+  serverComputedFieldIds,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
@@ -472,6 +492,16 @@ export function WorksheetForm({
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
+  // VSME-B04.100 pollutant register: per-pollutant E-PRTR rows; the three
+  // AmountOfEmissionTo{Air,Water,Soil} scalars are derived per-medium sums.
+  const pollutantRegisterField = fields.find((f) => f.symbol === POLLUTANT_REGISTER_SYMBOL);
+
+  // Field ids whose persisted value was engine-written server-side → locked.
+  const serverComputedSet = useMemo(
+    () => new Set(serverComputedFieldIds ?? []),
+    [serverComputedFieldIds],
+  );
+
   // Upstream-cause state for consumer worksheets (A138-10). null when this
   // worksheet does not consume a surface-inventory source.
   const srcState = surfaceSource ? surfaceSourceState(surfaceSource.carrier, surfaceSource.status) : null;
@@ -496,6 +526,9 @@ export function WorksheetForm({
       // rainfall_table_ref is rendered by its dedicated RainfallTableSelector
       // section (table-id picker), not as a raw text input in the field grid.
       if (f.symbol === 'rainfall_table_ref') continue;
+      // pollutant_register is rendered by its dedicated PollutantRegisterEditor
+      // section, not as a raw json field in the grid.
+      if (f.symbol === POLLUTANT_REGISTER_SYMBOL) continue;
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
@@ -556,6 +589,25 @@ export function WorksheetForm({
     return fs.map((f) => {
       const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
 
+      // Server-engine-written value (source_type='computed' / VSME 'derived'):
+      // locked via the existing isComputed path + a provenance hint telling the
+      // engineer WHERE the value is produced (single-source rule).
+      const isServerComputed = serverComputedSet.has(f.id);
+      const computedHint =
+        isServerComputed && standardCode === 'VSME'
+          ? VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
+            ? {
+                label: 'Automatisch berechnet aus den CO₂-Aktivitätslinien.',
+                href: `/${locale}/projects/${projectId}/vsme/emissions`,
+                hrefLabel: '→ CO₂-Rechner öffnen',
+              }
+            : VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol)
+              ? { label: 'Summe aus dem Schadstoffregister (unten auf dieser Seite).' }
+              : { label: 'Serverseitig berechneter Wert.' }
+          : isServerComputed
+            ? { label: 'Serverseitig berechneter Wert.' }
+            : undefined;
+
       // For ac_as_ratio_check, resolve the sibling reason field's current
       // value and thread it in as statusReason so AcAsRatioCheckStatus can
       // display the distinguishing text (keine Anforderung vs behördlich).
@@ -578,7 +630,8 @@ export function WorksheetForm({
           sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
           inheritedFrom={inheritedFromBySymbol[f.symbol]}
           docs={docs}
-          isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')}
+          isComputed={(computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')) || isServerComputed}
+          computedHint={computedHint}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
           clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
@@ -775,6 +828,15 @@ export function WorksheetForm({
             Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)
           </h2>
           <SurfaceInventoryEditor fieldId={surfaceInventoryField.id} readOnly={locked} />
+        </section>
+      )}
+
+      {pollutantRegisterField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Schadstoffregister — Emissionen je Schadstoff (VSME Abs. 32)
+          </h2>
+          <PollutantRegisterEditor fieldId={pollutantRegisterField.id} readOnly={locked} />
         </section>
       )}
 

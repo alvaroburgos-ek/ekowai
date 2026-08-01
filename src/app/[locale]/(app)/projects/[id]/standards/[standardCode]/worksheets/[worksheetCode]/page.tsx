@@ -279,6 +279,19 @@ export default async function WorksheetPage({
     if (p?.clientSupplied) clientSuppliedByFieldId[f.id] = true;
   }
 
+  // Server-engine-written parameters render read-only (single-source rule):
+  // source_type='computed' is written only by server engines (VSME CO₂), and
+  // — scoped to VSME so DWA-A-138 behavior is untouched — 'derived' rows
+  // (B04 per-medium register sums) lock the same way.
+  const serverComputedFieldIds: string[] = [];
+  for (const f of mergedFields) {
+    const p = parameters.get(f.id);
+    if (!p) continue;
+    if (p.sourceType === 'computed' || (standardCode === 'VSME' && p.sourceType === 'derived')) {
+      serverComputedFieldIds.push(f.id);
+    }
+  }
+
   return (
     <NormTextProvider standardCode={standardCode}>
     <div className="space-y-6">
@@ -381,6 +394,7 @@ export default async function WorksheetPage({
           diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
           isPlatformEngineer={isPlatformEngineer}
           surfaceSource={surfaceSource}
+          serverComputedFieldIds={serverComputedFieldIds}
         />
       </main>
     </div>
