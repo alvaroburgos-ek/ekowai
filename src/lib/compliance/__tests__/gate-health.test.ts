@@ -74,7 +74,9 @@ for (const [code, b] of Object.entries(snap.standards)) {
       r.mishome++;
       rehome.push({ code, cr: cr.code, id: cr.id, fromWs: wsCodeById.get(cr.worksheet_template_id) ?? '?', toWsId, toWs: wsCodeById.get(toWsId) ?? '?', condition: cond });
     } else {
-      r.split++; decisions.push({ code, cr: cr.code, kind: 'split-multi-worksheet', detail: cond.slice(0, 80) });
+      r.split++;
+      const spanCodes = [...targetWss].map((id) => wsCodeById.get(id) ?? '?').sort();
+      decisions.push({ code, cr: cr.code, kind: 'split-multi-worksheet', detail: cond.slice(0, 80), wsSpan: targetWss.size, spanCodes });
     }
   }
   rows.push(r);

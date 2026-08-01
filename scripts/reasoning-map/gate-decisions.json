@@ -141,7 +141,12 @@
   "code": "DWA-A-102-2",
   "cr": "REQ-11",
   "kind": "split-multi-worksheet",
-  "detail": "IF trenn_active == True THEN (A_RKB > 0 AND V_RKB > 0)"
+  "detail": "IF trenn_active == True THEN (A_RKB > 0 AND V_RKB > 0)",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A1022-03",
+   "A1022-18"
+  ]
  },
  {
   "code": "DWA-A-102-2",
@@ -201,7 +206,12 @@
   "code": "DWA-A-102-2",
   "cr": "REQ-24",
   "kind": "split-multi-worksheet",
-  "detail": "m >= m_min_required"
+  "detail": "m >= m_min_required",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A1022-23",
+   "A1022-36"
+  ]
  },
  {
   "code": "DWA-A-102-2",
@@ -225,19 +235,35 @@
   "code": "DWA-A-138-1",
   "cr": "A138-REQ-03",
   "kind": "split-multi-worksheet",
-  "detail": "k_f IS NOT NULL AND permeability_test_method IS NOT NULL"
+  "detail": "k_f IS NOT NULL AND permeability_test_method IS NOT NULL",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A138-03",
+   "A138-05"
+  ]
  },
  {
   "code": "DWA-A-138-1",
   "cr": "A138-REQ-30",
   "kind": "split-multi-worksheet",
-  "detail": "phase_2_gate_result IN {PASS, CONDITIONAL} AND phase_3_gate_result IN {PASS, CON"
+  "detail": "phase_2_gate_result IN {PASS, CONDITIONAL} AND phase_3_gate_result IN {PASS, CON",
+  "wsSpan": 3,
+  "spanCodes": [
+   "A138-09",
+   "A138-14",
+   "A138-23"
+  ]
  },
  {
   "code": "DWA-A-138-1",
   "cr": "A138-REQ-15",
   "kind": "split-multi-worksheet",
-  "detail": "q_S_AC >= 2 AND (q_S_AC > 5 OR f_Z == 1.2)"
+  "detail": "q_S_AC >= 2 AND (q_S_AC > 5 OR f_Z == 1.2)",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A138-08",
+   "A138-13"
+  ]
  },
  {
   "code": "DWA-A-178",
@@ -285,31 +311,57 @@
   "code": "DWA-A-178",
   "cr": "REQ-18",
   "kind": "split-multi-worksheet",
-  "detail": "IF system_type == 'trenn' AND h_N_a_m > 1000 THEN A_F >= 100 * A_E_b_a"
+  "detail": "IF system_type == 'trenn' AND h_N_a_m > 1000 THEN A_F >= 100 * A_E_b_a",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A178-05",
+   "A178-10"
+  ]
  },
  {
   "code": "DWA-A-178",
   "cr": "REQ-09",
   "kind": "split-multi-worksheet",
-  "detail": "IF system_type == 'misch' THEN (e_0 <= 55 AND n_RBF >= 10)"
+  "detail": "IF system_type == 'misch' THEN (e_0 <= 55 AND n_RBF >= 10)",
+  "wsSpan": 3,
+  "spanCodes": [
+   "A178-02",
+   "A178-07",
+   "A178-17"
+  ]
  },
  {
   "code": "DWA-A-178",
   "cr": "REQ-10",
   "kind": "split-multi-worksheet",
-  "detail": "IF system_type IN {'trenn','strasse'} THEN v_spez_grobstoff >= 0.5"
+  "detail": "IF system_type IN {'trenn','strasse'} THEN v_spez_grobstoff >= 0.5",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A178-02",
+   "A178-07"
+  ]
  },
  {
   "code": "DWA-A-178",
   "cr": "REQ-12",
   "kind": "split-multi-worksheet",
-  "detail": "(IF system_type == 'misch' THEN h_FK_required >= 0.75) AND (IF system_type IN {'"
+  "detail": "(IF system_type == 'misch' THEN h_FK_required >= 0.75) AND (IF system_type IN {'",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A178-02",
+   "A178-07"
+  ]
  },
  {
   "code": "DWA-A-178",
   "cr": "REQ-21",
   "kind": "split-multi-worksheet",
-  "detail": "IF system_type == 'misch' THEN t_RR_E_n1 <= 48"
+  "detail": "IF system_type == 'misch' THEN t_RR_E_n1 <= 48",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A178-02",
+   "A178-17"
+  ]
  },
  {
   "code": "DWA-A-178",
@@ -321,7 +373,12 @@
   "code": "DWA-A-201",
   "cr": "CR-006",
   "kind": "split-multi-worksheet",
-  "detail": "IF absetz_vorstufe == true THEN A_EW_unbelueftet >= 8 AND IF absetz_vorstufe == "
+  "detail": "IF absetz_vorstufe == true THEN A_EW_unbelueftet >= 8 AND IF absetz_vorstufe == ",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A201-02",
+   "A201-10"
+  ]
  },
  {
   "code": "DWA-A-201",
@@ -345,13 +402,23 @@
   "code": "DWA-A-222",
   "cr": "CR-008",
   "kind": "split-multi-worksheet",
-  "detail": "V_SB <= 0.5 * V_R"
+  "detail": "V_SB <= 0.5 * V_R",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A222-07",
+   "A222-08"
+  ]
  },
  {
   "code": "DWA-A-222",
   "cr": "CR-022",
   "kind": "split-multi-worksheet",
-  "detail": "GK == 'gk_1' AND mindestanforderungen_abwv_anh1 == True"
+  "detail": "GK == 'gk_1' AND mindestanforderungen_abwv_anh1 == True",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A222-01",
+   "A222-24"
+  ]
  },
  {
   "code": "DWA-A-222",
@@ -363,37 +430,67 @@
   "code": "DWA-A-222",
   "cr": "CR-036",
   "kind": "split-multi-worksheet",
-  "detail": "stoermeldung_vorhanden == True AND stromausfallmeldung_netzunabhaengig == True"
+  "detail": "stoermeldung_vorhanden == True AND stromausfallmeldung_netzunabhaengig == True",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A222-18",
+   "A222-21"
+  ]
  },
  {
   "code": "DWA-A-226",
   "cr": "CR-002",
   "kind": "split-multi-worksheet",
-  "detail": "stabilisierungsart != 'nitrifikation' OR t_TS >= 20"
+  "detail": "stabilisierungsart != 'nitrifikation' OR t_TS >= 20",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A226-01",
+   "A226-05"
+  ]
  },
  {
   "code": "DWA-A-226",
   "cr": "CR-003",
   "kind": "split-multi-worksheet",
-  "detail": "stabilisierungsart != 'nitrifikation_denitrifikation' OR t_TS >= 25"
+  "detail": "stabilisierungsart != 'nitrifikation_denitrifikation' OR t_TS >= 25",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A226-01",
+   "A226-05"
+  ]
  },
  {
   "code": "DWA-A-226",
   "cr": "CR-004",
   "kind": "split-multi-worksheet",
-  "detail": "stabilisierungsart != 'nitrifikation' OR B_TS_BSB <= 0.05"
+  "detail": "stabilisierungsart != 'nitrifikation' OR B_TS_BSB <= 0.05",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A226-01",
+   "A226-05"
+  ]
  },
  {
   "code": "DWA-A-226",
   "cr": "CR-005",
   "kind": "split-multi-worksheet",
-  "detail": "stabilisierungsart != 'nitrifikation_denitrifikation' OR B_TS_BSB <= 0.04"
+  "detail": "stabilisierungsart != 'nitrifikation_denitrifikation' OR B_TS_BSB <= 0.04",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A226-01",
+   "A226-05"
+  ]
  },
  {
   "code": "DWA-A-226",
   "cr": "CR-022",
   "kind": "split-multi-worksheet",
-  "detail": "V_BB IS NOT NULL AND TS_BB IS NOT NULL AND q_A IS NOT NULL"
+  "detail": "V_BB IS NOT NULL AND TS_BB IS NOT NULL AND q_A IS NOT NULL",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A226-05",
+   "A226-07"
+  ]
  },
  {
   "code": "DWA-A-226",
@@ -417,7 +514,12 @@
   "code": "DWA-A-262E",
   "cr": "REQ-12",
   "kind": "split-multi-worksheet",
-  "detail": "if wastewater_type == greywater_only then w_s_d >= 75"
+  "detail": "if wastewater_type == greywater_only then w_s_d >= 75",
+  "wsSpan": 2,
+  "spanCodes": [
+   "A262-02",
+   "A262-04"
+  ]
  },
  {
   "code": "DWA-A-272E",
@@ -531,7 +633,12 @@
   "code": "DWA-M-1200-1",
   "cr": "CR-015",
   "kind": "split-multi-worksheet",
-  "detail": "flaechenverzeichnis_vorhanden == true AND anwendungsbereich_kategorie IS NOT NUL"
+  "detail": "flaechenverzeichnis_vorhanden == true AND anwendungsbereich_kategorie IS NOT NUL",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M12001-08",
+   "M12001-16"
+  ]
  },
  {
   "code": "DWA-M-1200-2",
@@ -543,7 +650,13 @@
   "code": "DWA-M-1200-2",
   "cr": "REQ-06",
   "kind": "split-multi-worksheet",
-  "detail": "IF wassergueteklasse == 'A' THEN perzentil_10_log10 >= leistungsziel_log10 AND I"
+  "detail": "IF wassergueteklasse == 'A' THEN perzentil_10_log10 >= leistungsziel_log10 AND I",
+  "wsSpan": 3,
+  "spanCodes": [
+   "M12002-02",
+   "M12002-04",
+   "M12002-05"
+  ]
  },
  {
   "code": "DWA-M-1200-2",
@@ -555,7 +668,12 @@
   "code": "DWA-M-1200-2",
   "cr": "REQ-09",
   "kind": "split-multi-worksheet",
-  "detail": "IF wassergueteklasse IN {'A','B-1','B-2','C-1','C-2'} THEN truebung_ablauf <= 2"
+  "detail": "IF wassergueteklasse IN {'A','B-1','B-2','C-1','C-2'} THEN truebung_ablauf <= 2",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M12002-02",
+   "M12002-06"
+  ]
  },
  {
   "code": "DWA-M-1200-3",
@@ -591,7 +709,12 @@
   "code": "DWA-M-1200-3",
   "cr": "CR-14",
   "kind": "split-multi-worksheet",
-  "detail": "NOT (desinfektion_methode IN {'Chlorung', 'H2O2', 'PES'}) OR abstand_oberflaeche"
+  "detail": "NOT (desinfektion_methode IN {'Chlorung', 'H2O2', 'PES'}) OR abstand_oberflaeche",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M12003-05",
+   "M12003-07"
+  ]
  },
  {
   "code": "DWA-M-179-1",
@@ -621,7 +744,12 @@
   "code": "DWA-M-179-1",
   "cr": "REQ-16",
   "kind": "split-multi-worksheet",
-  "detail": "IF treatment_method == sedimentation THEN sludge_storage_min >= 15"
+  "detail": "IF treatment_method == sedimentation THEN sludge_storage_min >= 15",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M179-05",
+   "M179-06"
+  ]
  },
  {
   "code": "DWA-M-179-1",
@@ -633,19 +761,34 @@
   "code": "DWA-M-179-1",
   "cr": "REQ-18",
   "kind": "split-multi-worksheet",
-  "detail": "IF treatment_method == filtration_oberflaeche THEN v_F >= 0.05 AND v_F <= 2.5"
+  "detail": "IF treatment_method == filtration_oberflaeche THEN v_F >= 0.05 AND v_F <= 2.5",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M179-05",
+   "M179-06"
+  ]
  },
  {
   "code": "DWA-M-179-1",
   "cr": "REQ-19",
   "kind": "split-multi-worksheet",
-  "detail": "IF treatment_method == filtration_oberflaeche THEN filter_thickness >= 0.2"
+  "detail": "IF treatment_method == filtration_oberflaeche THEN filter_thickness >= 0.2",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M179-05",
+   "M179-06"
+  ]
  },
  {
   "code": "DWA-M-179-1",
   "cr": "REQ-20",
   "kind": "split-multi-worksheet",
-  "detail": "IF treatment_method == filtration_oberflaeche THEN filter_AFS63_max_load <= 7"
+  "detail": "IF treatment_method == filtration_oberflaeche THEN filter_AFS63_max_load <= 7",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M179-05",
+   "M179-06"
+  ]
  },
  {
   "code": "DWA-M-179-1",
@@ -657,13 +800,23 @@
   "code": "DWA-M-179-1",
   "cr": "REQ-22",
   "kind": "split-multi-worksheet",
-  "detail": "IF flow_split_case == fall_4 THEN Q_krit >= 5"
+  "detail": "IF flow_split_case == fall_4 THEN Q_krit >= 5",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M179-05",
+   "M179-10"
+  ]
  },
  {
   "code": "DWA-M-179-1",
   "cr": "REQ-23",
   "kind": "split-multi-worksheet",
-  "detail": "IF Q_krit <= 5 THEN flow_split_case == vollstrom"
+  "detail": "IF Q_krit <= 5 THEN flow_split_case == vollstrom",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M179-05",
+   "M179-10"
+  ]
  },
  {
   "code": "DWA-M-179-1",
@@ -705,19 +858,34 @@
   "code": "DWA-M-205",
   "cr": "CR-34",
   "kind": "split-multi-worksheet",
-  "detail": "afs > 0 AND vorsiebung_erforderlich IN {ja, nein}"
+  "detail": "afs > 0 AND vorsiebung_erforderlich IN {ja, nein}",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M205-03",
+   "M205-06"
+  ]
  },
  {
   "code": "DWA-M-205",
   "cr": "CR-26",
   "kind": "split-multi-worksheet",
-  "detail": "temperatur_ozonentfernung >= 350 OR katalytisch == True"
+  "detail": "temperatur_ozonentfernung >= 350 OR katalytisch == True",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M205-07",
+   "M205-18"
+  ]
  },
  {
   "code": "DWA-M-205",
   "cr": "CR-28",
   "kind": "split-multi-worksheet",
-  "detail": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True"
+  "detail": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M205-03",
+   "M205-11"
+  ]
  },
  {
   "code": "DWA-M-277E",
@@ -729,7 +897,12 @@
   "code": "DWA-M-277E",
   "cr": "REQ-30",
   "kind": "split-multi-worksheet",
-  "detail": "IF building_type == rented_apartment THEN drinking_water_option_available == tru"
+  "detail": "IF building_type == rented_apartment THEN drinking_water_option_available == tru",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-01",
+   "M277E-09"
+  ]
  },
  {
   "code": "DWA-M-277E",
@@ -747,13 +920,23 @@
   "code": "DWA-M-277E",
   "cr": "REQ-07",
   "kind": "split-multi-worksheet",
-  "detail": "Q_WB == (Q_GW - Q_SW)"
+  "detail": "Q_WB == (Q_GW - Q_SW)",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-07",
+   "M277E-08"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-30",
   "kind": "split-multi-worksheet",
-  "detail": "IF building_type == rented_apartment THEN drinking_water_option_available == tru"
+  "detail": "IF building_type == rented_apartment THEN drinking_water_option_available == tru",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-01",
+   "M277E-09"
+  ]
  },
  {
   "code": "DWA-M-277E",
@@ -765,7 +948,12 @@
   "code": "DWA-M-277E",
   "cr": "REQ-23",
   "kind": "split-multi-worksheet",
-  "detail": "IF discharge_into_water_body == True THEN WHG_permit_present == True"
+  "detail": "IF discharge_into_water_body == True THEN WHG_permit_present == True",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-01",
+   "M277E-11"
+  ]
  },
  {
   "code": "DWA-M-277E",
@@ -789,19 +977,35 @@
   "code": "DWA-M-277E",
   "cr": "REQ-07",
   "kind": "split-multi-worksheet",
-  "detail": "Q_WB == (Q_GW - Q_SW)"
+  "detail": "Q_WB == (Q_GW - Q_SW)",
+  "wsSpan": 3,
+  "spanCodes": [
+   "M277E-06",
+   "M277E-07",
+   "M277E-08"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-03",
   "kind": "split-multi-worksheet",
-  "detail": "(quality_category == C1 AND greywater_type IN {A1, A2}) OR quality_category == C"
+  "detail": "(quality_category == C1 AND greywater_type IN {A1, A2}) OR quality_category == C",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-02",
+   "M277E-04"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-19",
   "kind": "split-multi-worksheet",
-  "detail": "V_buffer >= Q_GWT"
+  "detail": "V_buffer >= Q_GWT",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-08",
+   "M277E-09"
+  ]
  },
  {
   "code": "DWA-M-277E",
@@ -813,31 +1017,56 @@
   "code": "DWA-M-277E",
   "cr": "REQ-08",
   "kind": "split-multi-worksheet",
-  "detail": "IF quality_category == C2 THEN turbidity_NTU < 2"
+  "detail": "IF quality_category == C2 THEN turbidity_NTU < 2",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-04",
+   "M277E-10"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-09",
   "kind": "split-multi-worksheet",
-  "detail": "IF quality_category == C2 THEN BOD5 < 5"
+  "detail": "IF quality_category == C2 THEN BOD5 < 5",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-04",
+   "M277E-08"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-14",
   "kind": "split-multi-worksheet",
-  "detail": "IF quality_category == C2 THEN total_coliforms_treated < 10000"
+  "detail": "IF quality_category == C2 THEN total_coliforms_treated < 10000",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-04",
+   "M277E-10"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-15",
   "kind": "split-multi-worksheet",
-  "detail": "IF quality_category == C2 THEN p_aeruginosa < 100"
+  "detail": "IF quality_category == C2 THEN p_aeruginosa < 100",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-04",
+   "M277E-10"
+  ]
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-23",
   "kind": "split-multi-worksheet",
-  "detail": "IF discharge_into_water_body == true THEN WHG_permit_present == true"
+  "detail": "IF discharge_into_water_body == true THEN WHG_permit_present == true",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M277E-01",
+   "M277E-11"
+  ]
  },
  {
   "code": "DWA-M-363",
@@ -855,7 +1084,12 @@
   "code": "DWA-M-363",
   "cr": "C363-21",
   "kind": "split-multi-worksheet",
-  "detail": "IF anlagenstatus == neu THEN formaldehyd_abgas <= 20"
+  "detail": "IF anlagenstatus == neu THEN formaldehyd_abgas <= 20",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M363-10",
+   "M363-22"
+  ]
  },
  {
   "code": "DWA-M-363",
@@ -891,13 +1125,23 @@
   "code": "DWA-M-363",
   "cr": "C363-20",
   "kind": "split-multi-worksheet",
-  "detail": "IF verwertungsweg == tankstelle THEN speicherbetriebsdruck > 200000"
+  "detail": "IF verwertungsweg == tankstelle THEN speicherbetriebsdruck > 200000",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M363-07",
+   "M363-08"
+  ]
  },
  {
   "code": "DWA-M-363",
   "cr": "C363-21",
   "kind": "split-multi-worksheet",
-  "detail": "IF anlagenstatus == neu THEN formaldehyd_abgas <= 20"
+  "detail": "IF anlagenstatus == neu THEN formaldehyd_abgas <= 20",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M363-10",
+   "M363-22"
+  ]
  },
  {
   "code": "DWA-M-708",
@@ -921,13 +1165,23 @@
   "code": "DWA-M-760",
   "cr": "REQ-M760-09",
   "kind": "split-multi-worksheet",
-  "detail": "ns_fettabscheider IS NOT NULL AND bauform_fa IS NOT NULL"
+  "detail": "ns_fettabscheider IS NOT NULL AND bauform_fa IS NOT NULL",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M760-13",
+   "M760-15"
+  ]
  },
  {
   "code": "DWA-M-760",
   "cr": "REQ-M760-10",
   "kind": "split-multi-worksheet",
-  "detail": "entleerintervall_d <= 30 AND wartung_intervall_a <= 1 AND generalinspektion_inte"
+  "detail": "entleerintervall_d <= 30 AND wartung_intervall_a <= 1 AND generalinspektion_inte",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M760-22",
+   "M760-23"
+  ]
  },
  {
   "code": "DWA-M-760",
@@ -945,7 +1199,12 @@
   "code": "DWA-M-760",
   "cr": "REQ-M760-10",
   "kind": "split-multi-worksheet",
-  "detail": "entleerintervall_d <= 30 AND generalinspektion_intervall_a <= 5"
+  "detail": "entleerintervall_d <= 30 AND generalinspektion_intervall_a <= 5",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M760-22",
+   "M760-23"
+  ]
  },
  {
   "code": "DWA-M-760",
@@ -981,7 +1240,12 @@
   "code": "DWA-M-816",
   "cr": "REQ-11",
   "kind": "split-multi-worksheet",
-  "detail": "vorlauf_v >= 0 AND p_v_percent IS NOT NULL"
+  "detail": "vorlauf_v >= 0 AND p_v_percent IS NOT NULL",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M816-09",
+   "M816-21"
+  ]
  },
  {
   "code": "DWA-M-816",
@@ -993,7 +1257,13 @@
   "code": "DWA-M-816",
   "cr": "REQ-14",
   "kind": "split-multi-worksheet",
-  "detail": "IF n_a != n_b THEN partial_replication_flag == TRUE AND n_tr IS NOT NULL"
+  "detail": "IF n_a != n_b THEN partial_replication_flag == TRUE AND n_tr IS NOT NULL",
+  "wsSpan": 3,
+  "spanCodes": [
+   "M816-02",
+   "M816-08",
+   "M816-22"
+  ]
  },
  {
   "code": "DWA-M-816",
@@ -1059,13 +1329,23 @@
   "code": "DWA-M-820-1",
   "cr": "REQ-05",
   "kind": "split-multi-worksheet",
-  "detail": "risk_register IS NOT NULL AND risk_mitigation_plan IS NOT NULL"
+  "detail": "risk_register IS NOT NULL AND risk_mitigation_plan IS NOT NULL",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M820-06",
+   "M820-07"
+  ]
  },
  {
   "code": "DWA-M-820-1",
   "cr": "REQ-07",
   "kind": "split-multi-worksheet",
-  "detail": "(IF estimated_engineering_fee >= eu_threshold_value THEN threshold_status == 'ob"
+  "detail": "(IF estimated_engineering_fee >= eu_threshold_value THEN threshold_status == 'ob",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M820-01",
+   "M820-09"
+  ]
  },
  {
   "code": "DWA-M-820-1",
@@ -1143,13 +1423,23 @@
   "code": "DWA-M-820-3",
   "cr": "REQ-20",
   "kind": "split-multi-worksheet",
-  "detail": "qe63a_items_total + qe63b_items_total == 40"
+  "detail": "qe63a_items_total + qe63b_items_total == 40",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M8203-12",
+   "M8203-13"
+  ]
  },
  {
   "code": "DWA-M-820-3",
   "cr": "REQ-21",
   "kind": "split-multi-worksheet",
-  "detail": "qe64a_items_total + qe64b_items_total == 50"
+  "detail": "qe64a_items_total + qe64b_items_total == 50",
+  "wsSpan": 2,
+  "spanCodes": [
+   "M8203-14",
+   "M8203-15"
+  ]
  },
  {
   "code": "DWA-M-820-3",
@@ -1185,7 +1475,12 @@
   "code": "FLL-GAR-2023",
   "cr": "REQ-05",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art IN {bahn_bitumen,bahn_kunststoff_elastomer,fluessigkunststoff"
+  "detail": "IF abdichtungs_art IN {bahn_bitumen,bahn_kunststoff_elastomer,fluessigkunststoff",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-05",
+   "FLL-GAR-09"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
@@ -1209,43 +1504,78 @@
   "code": "FLL-GAR-2023",
   "cr": "REQ-18",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == bahn_kunststoff_elastomer THEN bahnendicke_mm >= 1.2"
+  "detail": "IF abdichtungs_art == bahn_kunststoff_elastomer THEN bahnendicke_mm >= 1.2",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-16"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
   "cr": "REQ-20",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == bahn_pe THEN peeh_dichte_g_cm3 > 0.940 AND peeh_mfr >= 1.0"
+  "detail": "IF abdichtungs_art == bahn_pe THEN peeh_dichte_g_cm3 > 0.940 AND peeh_mfr >= 1.0",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-18"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
   "cr": "REQ-22",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == alkalisilikat THEN schichtdicke_abdichtung_cm >= 25 AND fe"
+  "detail": "IF abdichtungs_art == alkalisilikat THEN schichtdicke_abdichtung_cm >= 25 AND fe",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-20"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
   "cr": "REQ-13",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == mineralisch_mit_zusatzstoffen THEN mz_durchlaessigkeit_kf "
+  "detail": "IF abdichtungs_art == mineralisch_mit_zusatzstoffen THEN mz_durchlaessigkeit_kf ",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-11"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
   "cr": "REQ-14",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == mineralisch_hydraulisch THEN ((bauteildicke_cm <= 40 AND w"
+  "detail": "IF abdichtungs_art == mineralisch_hydraulisch THEN ((bauteildicke_cm <= 40 AND w",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-12"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
   "cr": "REQ-15",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == mineralisch_bitumen THEN hohlraumgehalt_asphaltbeton_vol_p"
+  "detail": "IF abdichtungs_art == mineralisch_bitumen THEN hohlraumgehalt_asphaltbeton_vol_p",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-13"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
   "cr": "REQ-16",
   "kind": "split-multi-worksheet",
-  "detail": "IF abdichtungs_art == verbundwerkstoff_gtd THEN ((bentonit_type == \"Na\" AND bent"
+  "detail": "IF abdichtungs_art == verbundwerkstoff_gtd THEN ((bentonit_type == \"Na\" AND bent",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLL-GAR-09",
+   "FLL-GAR-14"
+  ]
  },
  {
   "code": "FLL-GAR-2023",
@@ -1263,49 +1593,89 @@
   "code": "FLL-Naturteich-2017",
   "cr": "REQ-08",
   "kind": "split-multi-worksheet",
-  "detail": "if filter_flow_type == 'slow' then p_binding_required == true"
+  "detail": "if filter_flow_type == 'slow' then p_binding_required == true",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLNT-03",
+   "FLLNT-10"
+  ]
  },
  {
   "code": "FLL-Naturteich-2017",
   "cr": "REQ-21",
   "kind": "split-multi-worksheet",
-  "detail": "IF filter_flow_direction IN {vertical_continuous_overflow,vertical_no_overflow} "
+  "detail": "IF filter_flow_direction IN {vertical_continuous_overflow,vertical_no_overflow} ",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLNT-05",
+   "FLLNT-10"
+  ]
  },
  {
   "code": "FLL-Naturteich-2017",
   "cr": "REQ-33",
   "kind": "split-multi-worksheet",
-  "detail": "IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * pool_under"
+  "detail": "IF rigid_overflow_used == true THEN splash_water_tank_volume >= 150 * pool_under",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLNT-06",
+   "FLLNT-11"
+  ]
  },
  {
   "code": "FLL-Naturteich-2017",
   "cr": "REQ-20",
   "kind": "split-multi-worksheet",
-  "detail": "(IF filter_flow_direction IN {vertical_continuous_overflow, vertical_no_overflow"
+  "detail": "(IF filter_flow_direction IN {vertical_continuous_overflow, vertical_no_overflow",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLNT-05",
+   "FLLNT-10"
+  ]
  },
  {
   "code": "FLL-TP-RHIZOM-2023",
   "cr": "REQ-01",
   "kind": "split-multi-worksheet",
-  "detail": "abdichtungsart IN {bitumenbahn,kunststoffbahn,elastomerbahn,fluessigabdichtung,g"
+  "detail": "abdichtungsart IN {bitumenbahn,kunststoffbahn,elastomerbahn,fluessigabdichtung,g",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLTP-RHZ-02",
+   "FLLTP-RHZ-03"
+  ]
  },
  {
   "code": "FLL-TP-RHIZOM-2023",
   "cr": "REQ-10",
   "kind": "split-multi-worksheet",
-  "detail": "testpflanze_art == 'phragmites_australis' AND pflanzdichte_pro_gefaess == 8"
+  "detail": "testpflanze_art == 'phragmites_australis' AND pflanzdichte_pro_gefaess == 8",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLTP-RHZ-08",
+   "FLLTP-RHZ-11"
+  ]
  },
  {
   "code": "FLL-TP-RHIZOM-2023",
   "cr": "REQ-16",
   "kind": "split-multi-worksheet",
-  "detail": "bestandsdichte_p_avg_12mon >= 120 AND dichte_relativ_prozent >= 80"
+  "detail": "bestandsdichte_p_avg_12mon >= 120 AND dichte_relativ_prozent >= 80",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLTP-RHZ-13",
+   "FLLTP-RHZ-14"
+  ]
  },
  {
   "code": "FLL-TP-RHIZOM-2023",
   "cr": "REQ-17",
   "kind": "split-multi-worksheet",
-  "detail": "bestandsdichte_p_avg_18mon >= 160 AND dichte_relativ_prozent >= 80"
+  "detail": "bestandsdichte_p_avg_18mon >= 160 AND dichte_relativ_prozent >= 80",
+  "wsSpan": 2,
+  "spanCodes": [
+   "FLLTP-RHZ-13",
+   "FLLTP-RHZ-15"
+  ]
  },
  {
   "code": "ISO-14002-2",
