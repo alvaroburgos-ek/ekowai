@@ -756,6 +756,42 @@ export const contractorBids = pgTable(
 );
 
 // =============================================================================
+// MONITORING-JOURNAL (interim — documentation-only precursor to Stage 8)
+// =============================================================================
+// Deliberately stores NO parameter values/units: the time-series schema is
+// frozen later from the owner's Messplan. Until then this journal only
+// documents THAT something happened (Laborbericht eingegangen, Begehung
+// durchgeführt …) and optionally links the uploaded document.
+export const monitoringEntries = pgTable(
+  'monitoring_entries',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    entryDate: date('entry_date').notNull(),
+    /**
+     * 'laborbericht' | 'messung' | 'begehung' | 'wartung' | 'foto' |
+     * 'sonstiges' — validated app-side (monitoring-core.ts), plain text in DB.
+     */
+    category: text('category').notNull(),
+    note: text('note'),
+    /** Link to an uploaded lab report / photo in project_documents. */
+    documentId: uuid('document_id').references(() => projectDocuments.id, {
+      onDelete: 'set null',
+    }),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectDateIdx: index('monitoring_entries_project_date_idx').on(
+      t.projectId,
+      t.entryDate,
+    ),
+  }),
+);
+
+// =============================================================================
 // LEADS (inbound contact-form submissions from ekowai-landing-page)
 // =============================================================================
 // Anonymous form submissions land here via the landing-page server action using

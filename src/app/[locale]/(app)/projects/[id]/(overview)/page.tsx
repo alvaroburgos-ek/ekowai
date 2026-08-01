@@ -8,6 +8,7 @@ import {
   Clock,
   Calculator,
   Coins,
+  Activity,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
@@ -23,6 +24,9 @@ import { OfferPanel } from '@/components/projects/offer-panel';
 import { listOffers } from '@/lib/actions/offers';
 import { CostEstimatePanel } from '@/components/projects/cost-estimate-panel';
 import { listEstimates } from '@/lib/actions/costs';
+import { MonitoringJournal } from '@/components/projects/monitoring-journal';
+import { listMonitoringEntries } from '@/lib/actions/monitoring';
+import { listProjectDocuments } from '@/lib/db/queries/documents';
 
 export default async function ProjectOverviewPage({
   params,
@@ -47,6 +51,16 @@ export default async function ProjectOverviewPage({
   const estimateData = sections.includes('cost-estimates')
     ? await listEstimates(id)
     : null;
+  const monitoringEntries = sections.includes('monitoring')
+    ? await listMonitoringEntries(id)
+    : null;
+  const monitoringDocs = sections.includes('monitoring')
+    ? (await listProjectDocuments(id)).map((d) => ({
+        id: d.id,
+        title: d.title,
+        citationLabel: d.citationLabel,
+      }))
+    : [];
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -137,6 +151,20 @@ export default async function ProjectOverviewPage({
             <h2 className="text-xl font-semibold text-ink">Kostenschätzung</h2>
           </div>
           <CostEstimatePanel projectId={id} locale={localeTyped} data={estimateData} />
+        </section>
+      )}
+
+      {sections.includes('monitoring') && monitoringEntries && (
+        <section className="space-y-4" data-testid="monitoring-section">
+          <div className="inline-flex items-center gap-2">
+            <Activity className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Monitoring-Journal</h2>
+          </div>
+          <MonitoringJournal
+            projectId={id}
+            entries={monitoringEntries}
+            documents={monitoringDocs}
+          />
         </section>
       )}
 
