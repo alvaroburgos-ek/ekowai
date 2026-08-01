@@ -1533,3 +1533,10 @@ Every standard with a usable source has now had full-treatment. CONVERGENCE:
   • 4 SOURCE-BLOCKED (no PDF, acquisition): DWA-A-131, DWA-A-201, DWA-A-226, DWA-M-229-1. (+ISO-5667-6 PDF.)
   61 + 6 + 4 = 71. Reachable-audit ceiling HIT. NEXT PHASE = prior re-touch (batch 26 = DWA-A-178 +
   DWA-A-102-2, both PDF-available); acquisition list for 5 PDFs handed to owner. Autonomous march continues.
+
+HONESTY NOTE 2026-08-01: the 61 audited standards are at LEVEL-1 proof (bidirectional coverage + real
+evaluate.ts/evaluateFormula engine execution + source-settled applied + rulings sheeted). LEVEL-2 =
+DEPLOYED-BUILD harness proof + render spot-check (PROOF/DEPLOYED-PRODUCT mandate) is a SEPARATE outstanding
+phase for ALL batch standards (agents caveated "engine-level, not deployed-build" every wave). True 71/71
+termination requires level-2. Level-2 needs the campaign preview deployment (confirm Vercel CLI first —
+standing CLI-absent risk). Flagged for owner + next session as the post-audit phase.
