@@ -9,6 +9,7 @@ import {
   Calculator,
   Coins,
   Activity,
+  FileCheck2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
@@ -24,6 +25,8 @@ import { OfferPanel } from '@/components/projects/offer-panel';
 import { listOffers } from '@/lib/actions/offers';
 import { CostEstimatePanel } from '@/components/projects/cost-estimate-panel';
 import { listEstimates } from '@/lib/actions/costs';
+import { DeliverableRegister } from '@/components/projects/deliverable-register';
+import { listDeliverables } from '@/lib/actions/deliverables';
 import { MonitoringJournal } from '@/components/projects/monitoring-journal';
 import { listMaintenancePlan, listMonitoringEntries } from '@/lib/actions/monitoring';
 import { listProjectDocuments } from '@/lib/db/queries/documents';
@@ -50,6 +53,9 @@ export default async function ProjectOverviewPage({
   const offerData = sections.includes('offers') ? await listOffers(id) : null;
   const estimateData = sections.includes('cost-estimates')
     ? await listEstimates(id)
+    : null;
+  const deliverableEntries = sections.includes('deliverables')
+    ? await listDeliverables(id)
     : null;
   const monitoringEntries = sections.includes('monitoring')
     ? await listMonitoringEntries(id)
@@ -163,6 +169,21 @@ export default async function ProjectOverviewPage({
             <h2 className="text-xl font-semibold text-ink">Kostenschätzung</h2>
           </div>
           <CostEstimatePanel projectId={id} locale={localeTyped} data={estimateData} />
+        </section>
+      )}
+
+      {sections.includes('deliverables') && deliverableEntries && (
+        <section className="space-y-4" data-testid="deliverables-section">
+          <div className="inline-flex items-center gap-2">
+            <FileCheck2 className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">
+              Leistungsregister (§3(2))
+            </h2>
+          </div>
+          <DeliverableRegister
+            entries={deliverableEntries}
+            totalHours={effort?.totalHours ?? 0}
+          />
         </section>
       )}
 

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { buildValuetablePdf, loadValuetableData } from '@/lib/pdf/build-valuetable';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
  * GET /api/projects/:id/standards/:standardCode/valuetable
@@ -36,6 +37,16 @@ export async function GET(
   try {
     const data = await loadValuetableData(id, standardCode);
     const buffer = await buildValuetablePdf(data);
+    // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      standardCode,
+      kind: 'wertetabelle',
+      title: `Wertetabelle ${standardCode}`,
+      snapshotId: data.snapshotId,
+      meta: data.snapshotId ? { snapshotId: data.snapshotId } : null,
+      userId: user.id,
+    });
     const safeCode = standardCode.replace(/[^a-zA-Z0-9_-]/g, '_');
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { buildConformityPdf, loadConformityData } from '@/lib/pdf/build-conformity';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
  * GET /api/projects/:id/standards/:standardCode/conformity
@@ -46,6 +47,15 @@ export async function GET(
       );
     }
     const buffer = await buildConformityPdf(data);
+    // Register the emission (AGB §3(2)) — 200 path only, never on the 409;
+    // recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      standardCode,
+      kind: 'konformitaetserklaerung',
+      title: `Konformitätserklärung ${standardCode}`,
+      userId: user.id,
+    });
     const safeCode = standardCode.replace(/[^a-zA-Z0-9_-]/g, '_');
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,

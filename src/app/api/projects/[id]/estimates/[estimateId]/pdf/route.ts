@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { buildCostEstimatePdf, loadCostEstimateData } from '@/lib/pdf/build-cost-estimate';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
  * GET /api/projects/:id/estimates/:estimateId/pdf
@@ -38,6 +39,15 @@ export async function GET(
   try {
     const data = await loadCostEstimateData(id, estimateId);
     const buffer = await buildCostEstimatePdf(data);
+    // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      standardCode: data.estimate.standardCode,
+      kind: 'kostenschaetzung',
+      title: data.estimate.title,
+      snapshotId: data.estimate.snapshotId,
+      userId: user.id,
+    });
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

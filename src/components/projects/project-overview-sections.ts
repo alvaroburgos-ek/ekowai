@@ -5,6 +5,7 @@ export type OverviewSection =
   | 'effort'
   | 'offers'
   | 'cost-estimates'
+  | 'deliverables'
   | 'monitoring'
   | 'audit';
 
@@ -27,6 +28,9 @@ export function projectOverviewSections(opts: { isVsme: boolean }): OverviewSect
   // Parametrische Kostenschätzung (Slice E2) — the client's build cost,
   // a deliverable; rendered AFTER Angebote (the two must stay separate).
   sections.push('cost-estimates');
+  // Leistungsregister (roadmap Stage 10, AGB §3(2)) — read-only, automatic
+  // record of every emitted deliverable; always shown.
+  sections.push('deliverables');
   // Monitoring-Journal (interim, documentation-only precursor to Stage 8) —
   // values/time series follow later from the owner's Messplan.
   sections.push('monitoring');

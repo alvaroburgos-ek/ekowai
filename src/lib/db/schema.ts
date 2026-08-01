@@ -803,6 +803,44 @@ export const monitoringEntries = pgTable(
 );
 
 // =============================================================================
+// DELIVERABLE REGISTER (roadmap Stage 10, AGB §3(2))
+// =============================================================================
+// First-class, automatic record of every emitted deliverable per project —
+// written by the PDF/export routes AFTER a successful buffer build (see
+// src/lib/deliverables/record.ts). Read-only in the UI (Leistungsregister
+// panel); a register failure must NEVER break a document emission.
+export const deliverables = pgTable(
+  'deliverables',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    /** Guideline the deliverable belongs to; NULL for project-level documents. */
+    standardCode: text('standard_code'),
+    /**
+     * 'bericht' | 'konformitaetserklaerung' | 'wertetabelle' |
+     * 'einreichungs_checkliste' | 'pruefmemo' | 'angebot' |
+     * 'kostenschaetzung' | 'vsme_export' | 'projektbericht' — validated
+     * app-side (src/lib/deliverables/kinds.ts), plain text in DB.
+     */
+    kind: text('kind').notNull(),
+    title: text('title').notNull(),
+    /** Approve-snapshot the emitted document was locked to (when it carries one). */
+    snapshotId: uuid('snapshot_id'),
+    emittedBy: uuid('emitted_by').references(() => profiles.id, { onDelete: 'set null' }),
+    emittedAt: timestamp('emitted_at', { withTimezone: true }).notNull().defaultNow(),
+    meta: jsonb('meta'),
+  },
+  (t) => ({
+    projectEmittedIdx: index('deliverables_project_emitted_idx').on(
+      t.projectId,
+      t.emittedAt,
+    ),
+  }),
+);
+
+// =============================================================================
 // MAINTENANCE SCHEDULES (library-level — verbatim maintenance duties per
 // standard)
 // =============================================================================

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { buildOfferPdf, loadOfferData } from '@/lib/pdf/build-offer';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
  * GET /api/projects/:id/offers/:offerId/pdf
@@ -36,6 +37,13 @@ export async function GET(
   try {
     const data = await loadOfferData(id, offerId);
     const buffer = await buildOfferPdf(data);
+    // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      kind: 'angebot',
+      title: data.offer.title,
+      userId: user.id,
+    });
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { buildChecklistPdf, loadConformityData } from '@/lib/pdf/build-checklist';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
  * GET /api/projects/:id/standards/:standardCode/checklist
@@ -33,6 +34,14 @@ export async function GET(
   try {
     const data = await loadConformityData(id, standardCode);
     const buffer = await buildChecklistPdf(data);
+    // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      standardCode,
+      kind: 'einreichungs_checkliste',
+      title: `Einreichungs-Checkliste ${standardCode}`,
+      userId: user.id,
+    });
     const safeCode = standardCode.replace(/[^a-zA-Z0-9_-]/g, '_');
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
