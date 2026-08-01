@@ -10,6 +10,7 @@ import {
   Pencil,
   ChevronDown,
   ChevronRight,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,8 @@ import {
   deleteOfferPosition,
   setOrgRates,
 } from '@/lib/actions/offers';
-import type { ListOffersResult, OfferView } from '@/lib/actions/offers';
+import type { ListOffersResult, OfferView, OfferRoleView } from '@/lib/actions/offers';
+import { addRateRole, deactivateRateRole } from '@/lib/actions/rate-roles';
 import { getOfferNachkalkulation } from '@/lib/actions/nachkalkulation';
 import type { OfferNachkalkulationView } from '@/lib/actions/nachkalkulation';
 import type { MarginVerdict } from '@/lib/offers/margin';
@@ -79,17 +81,166 @@ function MarginBadge({ offer }: { offer: OfferView }) {
   );
 }
 
-/** Inline org calibration (Stundensatz intern, Zielmarge %) — owner/admin only. */
+/**
+ * Role list under "Stundensätze": active paid roles (Ingenieur, Freelancer,
+ * Praktikant, …) with their €/h; add + deactivate are owner/admin only.
+ */
+function RoleRates({
+  orgId,
+  roles,
+  canSetRates,
+}: {
+  orgId: string;
+  roles: OfferRoleView[];
+  canSetRates: boolean;
+}) {
+  const [name, setName] = useState('');
+  const [rate, setRate] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const rateNum = parseDecimal(rate);
+  const canAdd =
+    name.trim() !== '' && rate.trim() !== '' && Number.isFinite(rateNum) && rateNum > 0;
+
+  function handleAdd() {
+    if (!canAdd) return;
+    setError(null);
+    startTransition(async () => {
+      try {
+        const res = await addRateRole({
+          orgId,
+          name: name.trim(),
+          hourlyRateEur: rateNum,
+        });
+        if (!res.ok) {
+          setError(
+            res.error === 'forbidden'
+              ? 'Nur Org-Owner/Admin dürfen Rollen anlegen.'
+              : res.error === 'duplicate_name'
+                ? 'Eine Rolle mit diesem Namen existiert bereits.'
+                : 'Ungültige Eingabe.',
+          );
+          return;
+        }
+        setName('');
+        setRate('');
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    });
+  }
+
+  function handleDeactivate(roleId: string) {
+    setError(null);
+    startTransition(async () => {
+      try {
+        const res = await deactivateRateRole({ roleId });
+        if (!res.ok) {
+          setError(
+            res.error === 'forbidden'
+              ? 'Nur Org-Owner/Admin dürfen Rollen deaktivieren.'
+              : 'Rolle konnte nicht deaktiviert werden.',
+          );
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    });
+  }
+
+  return (
+    <div className="space-y-2">
+      <span className="text-xs font-medium text-subtext">Rollen</span>
+      {roles.length === 0 ? (
+        <p className="text-[11px] text-subtext italic">
+          Keine Rollen — alle Positionen rechnen mit dem Standard-Stundensatz.
+        </p>
+      ) : (
+        <ul className="space-y-1">
+          {roles.map((r) => (
+            <li
+              key={r.id}
+              className="flex items-center gap-2 text-sm tabular-nums"
+            >
+              <span className="text-ink break-words">{r.name}</span>
+              <span className="text-subtext">{`${fmtNum(r.hourlyRateEur)} €/h`}</span>
+              {canSetRates && (
+                <button
+                  type="button"
+                  onClick={() => handleDeactivate(r.id)}
+                  disabled={isPending}
+                  className="rounded-lg p-0.5 text-subtext hover:bg-paper-2 hover:text-error transition-colors disabled:opacity-50"
+                  aria-label={`Rolle ${r.name} deaktivieren`}
+                  title="Rolle deaktivieren"
+                >
+                  <X className="size-3.5" aria-hidden />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {canSetRates && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <label className="block sm:w-44">
+            <span className="text-xs font-medium text-subtext">Rolle</span>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="z. B. Freelancer"
+              className="mt-1"
+              aria-label="Rollenname"
+            />
+          </label>
+          <label className="block sm:w-32">
+            <span className="text-xs font-medium text-subtext">€/h</span>
+            <Input
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.5"
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+              placeholder="z. B. 60"
+              className="mt-1 tabular-nums"
+              aria-label="Stundensatz der Rolle"
+            />
+          </label>
+          <Button
+            size="sm"
+            type="button"
+            variant="ghost"
+            onClick={handleAdd}
+            disabled={isPending || !canAdd}
+            className="shrink-0"
+          >
+            {isPending ? <Loader2 className="animate-spin" /> : <Plus aria-hidden />}
+            Rolle
+          </Button>
+        </div>
+      )}
+      {error && <p className="text-xs text-error">{error}</p>}
+    </div>
+  );
+}
+
+/**
+ * Stundensätze (Org): default rate + Zielmarge (owner/admin editable) plus
+ * the paid-role list — positions/entries without a role use the default.
+ */
 function RateSettings({
   orgId,
   internalHourlyRate,
   targetMarginPct,
   canSetRates,
+  roles,
 }: {
   orgId: string;
   internalHourlyRate: number | null;
   targetMarginPct: number | null;
   canSetRates: boolean;
+  roles: OfferRoleView[];
 }) {
   const unset = internalHourlyRate === null || targetMarginPct === null;
   const [editing, setEditing] = useState(false);
@@ -128,12 +279,12 @@ function RateSettings({
     <div className="rounded-xl border border-hairline bg-paper-2/40 p-3 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-xs font-medium text-subtext">
-          Kalkulationsbasis (Org)
+          Stundensätze
         </span>
         {!showForm && (
           <div className="flex items-center gap-3 text-sm text-ink tabular-nums">
             <span>
-              Stundensatz intern:{' '}
+              Standard:{' '}
               {internalHourlyRate !== null ? `${fmtNum(internalHourlyRate)} €/h` : '—'}
             </span>
             <span>
@@ -156,15 +307,15 @@ function RateSettings({
       </div>
       {unset && (
         <p className="text-xs text-warning">
-          Stundensatz nicht kalibriert — Margen bleiben gelb, bis Stundensatz
-          und Zielmarge gesetzt sind.
+          Stundensatz nicht kalibriert — Positionen ohne Rolle bleiben gelb,
+          bis Standard-Stundensatz und Zielmarge gesetzt sind.
         </p>
       )}
       {showForm && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <label className="block sm:w-44">
             <span className="text-xs font-medium text-subtext">
-              Stundensatz intern (€/h)
+              Standard-Stundensatz (€/h)
             </span>
             <Input
               type="number"
@@ -206,6 +357,8 @@ function RateSettings({
         </div>
       )}
       {error && <p className="text-xs text-error">{error}</p>}
+
+      <RoleRates orgId={orgId} roles={roles} canSetRates={canSetRates} />
     </div>
   );
 }
@@ -345,10 +498,12 @@ function OfferCard({
   offer,
   projectId,
   locale,
+  roles,
 }: {
   offer: OfferView;
   projectId: string;
   locale: string;
+  roles: OfferRoleView[];
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -357,6 +512,8 @@ function OfferCard({
   const [posName, setPosName] = useState('');
   const [posHours, setPosHours] = useState('');
   const [posExtern, setPosExtern] = useState('');
+  /** '' = Standard (org rate); otherwise a rate_roles id. */
+  const [posRoleId, setPosRoleId] = useState('');
 
   // Offer meta edits
   const [editingMeta, setEditingMeta] = useState(false);
@@ -393,10 +550,12 @@ function OfferCard({
         position: posName.trim(),
         estimatedHours: hoursNum,
         externalCostEur: externNum,
+        roleId: posRoleId !== '' ? posRoleId : undefined,
       });
       setPosName('');
       setPosHours('');
       setPosExtern('');
+      setPosRoleId('');
     });
   }
 
@@ -534,6 +693,9 @@ function OfferCard({
               <div className="sm:w-24 sm:shrink-0 tabular-nums text-ink">
                 {fmtNum(p.estimatedHours)} h
               </div>
+              <div className="sm:w-28 sm:shrink-0 text-xs text-subtext break-words">
+                {p.roleName ?? 'Standard'}
+              </div>
               <div className="sm:w-28 sm:shrink-0 tabular-nums text-subtext">
                 {`Extern ${fmtEur(p.externalCostEur)}`}
               </div>
@@ -577,6 +739,22 @@ function OfferCard({
             className="mt-1 tabular-nums"
             aria-label="Stunden"
           />
+        </label>
+        <label className="block sm:w-40">
+          <span className="text-xs font-medium text-subtext">Rolle</span>
+          <select
+            value={posRoleId}
+            onChange={(e) => setPosRoleId(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-hairline bg-paper px-3 py-2 text-sm text-ink"
+            aria-label="Rolle"
+          >
+            <option value="">Standard</option>
+            {roles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {`${r.name} (${fmtNum(r.hourlyRateEur)} €/h)`}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="block sm:w-36">
           <span className="text-xs font-medium text-subtext">Externe Kosten (€)</span>
@@ -665,6 +843,7 @@ export function OfferPanel({
         internalHourlyRate={data.internalHourlyRate}
         targetMarginPct={data.targetMarginPct}
         canSetRates={data.canSetRates}
+        roles={data.roles}
       />
 
       {/* Nachkalkulation hook */}
@@ -725,7 +904,13 @@ export function OfferPanel({
       ) : (
         <div className="space-y-3">
           {data.offers.map((o) => (
-            <OfferCard key={o.id} offer={o} projectId={projectId} locale={locale} />
+            <OfferCard
+              key={o.id}
+              offer={o}
+              projectId={projectId}
+              locale={locale}
+              roles={data.roles}
+            />
           ))}
         </div>
       )}

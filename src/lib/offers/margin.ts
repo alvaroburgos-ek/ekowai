@@ -18,6 +18,11 @@ export type MarginVerdict = 'red' | 'amber' | 'green';
 export type OfferPositionInput = {
   estimatedHours: number;
   externalCostEur: number;
+  /**
+   * Resolved role rate (rate_roles) for this position — overrides the org
+   * rate in the internal-cost math. null/absent → fall back to the org rate.
+   */
+  hourlyRateEur?: number | null;
 };
 
 export type OfferMarginInput = {
@@ -29,7 +34,10 @@ export type OfferMarginInput = {
 };
 
 export type OfferMarginResult = {
-  /** Σ estimated hours × internal rate (0 while the rate is uncalibrated). */
+  /**
+   * Σ estimated hours × (position role rate ?? org internal rate).
+   * Positions with neither rate contribute 0 — and flag the offer amber.
+   */
   internalCost: number;
   /** Σ external costs — passed through, never marked up. */
   externalTotal: number;
@@ -55,11 +63,13 @@ export function toNum(v: string | number | null | undefined): number | null {
 
 /**
  * Margin-first verdict:
- * - red   — marginPct strictly below the target margin (both rates set).
- * - amber — internalHourlyRate or targetMarginPct unset ("Stundensatz nicht
- *           kalibriert"), or any position has estimatedHours <= 0 — the
- *           number on screen is not yet trustworthy.
+ * - red   — marginPct strictly below the target margin (rates resolvable).
+ * - amber — some position has NEITHER a role rate NOR an org rate
+ *           ("Stundensatz nicht kalibriert"), targetMarginPct unset, or any
+ *           position has estimatedHours <= 0 — the number on screen is not
+ *           yet trustworthy.
  * - green — calibrated, plausible hours, margin at or above target.
+ * Internal cost is per position: hours × (position role rate ?? org rate).
  * Red wins over amber: a known-bad margin outranks a stale input.
  */
 export function computeOfferMargin(input: OfferMarginInput): OfferMarginResult {
@@ -73,14 +83,27 @@ export function computeOfferMargin(input: OfferMarginInput): OfferMarginResult {
     (sum, p) => sum + (Number.isFinite(p.externalCostEur) ? p.externalCostEur : 0),
     0,
   );
-  const internalCost = internalHourlyRate !== null ? totalHours * internalHourlyRate : 0;
+  /** Position rate wins; org rate is the fallback; neither → 0 (+ amber). */
+  const resolveRate = (p: OfferPositionInput): number | null => {
+    const rate = p.hourlyRateEur ?? internalHourlyRate;
+    return rate !== null && Number.isFinite(rate) ? rate : null;
+  };
+  const internalCost = positions.reduce((sum, p) => {
+    const hours = Number.isFinite(p.estimatedHours) ? p.estimatedHours : 0;
+    const rate = resolveRate(p);
+    return sum + (rate !== null ? hours * rate : 0);
+  }, 0);
   const margin = festpreisEur - internalCost - externalTotal;
   const marginPct = festpreisEur > 0 ? (margin / festpreisEur) * 100 : 0;
   const effectiveHourlyRate =
     totalHours > 0 ? (festpreisEur - externalTotal) / totalHours : null;
 
+  // Amber only when some position resolves to NO rate at all — a position
+  // role rate satisfies calibration even while the org rate is unset.
+  const rateMissing = positions.some((p) => resolveRate(p) === null);
+
   const amberReasons: string[] = [];
-  if (internalHourlyRate === null) {
+  if (rateMissing) {
     amberReasons.push('Stundensatz nicht kalibriert');
   }
   if (targetMarginPct === null) {
@@ -92,7 +115,7 @@ export function computeOfferMargin(input: OfferMarginInput): OfferMarginResult {
 
   const redReasons: string[] = [];
   if (
-    internalHourlyRate !== null
+    !rateMissing
     && targetMarginPct !== null
     && marginPct < targetMarginPct
   ) {
@@ -190,6 +213,8 @@ export const addOfferPositionSchema = z.object({
     .min(0, 'Stunden dürfen nicht negativ sein')
     .max(10_000, 'Stunden unplausibel hoch'),
   externalCostEur: eurSchema.optional(),
+  /** Optional rate_roles id — the server verifies it belongs to the org. */
+  roleId: uuidSchema.optional(),
   note: z.string().trim().max(1000).optional(),
 });
 export type AddOfferPositionInput = z.infer<typeof addOfferPositionSchema>;
@@ -210,3 +235,41 @@ export const setOrgRatesSchema = z.object({
     .nullable(),
 });
 export type SetOrgRatesInput = z.infer<typeof setOrgRatesSchema>;
+
+// --- Role-based rates (rate_roles) ------------------------------------------
+
+const roleNameSchema = z
+  .string()
+  .trim()
+  .min(1, 'Rollenname erforderlich')
+  .max(100, 'Rollenname zu lang');
+
+const roleRateSchema = z
+  .number('Stundensatz muss eine Zahl sein')
+  .finite()
+  .gt(0, 'Stundensatz muss größer als 0 sein')
+  .max(10_000, 'Stundensatz unplausibel hoch');
+
+export const addRateRoleSchema = z.object({
+  orgId: uuidSchema,
+  name: roleNameSchema,
+  hourlyRateEur: roleRateSchema,
+});
+export type AddRateRoleInput = z.infer<typeof addRateRoleSchema>;
+
+export const updateRateRoleSchema = z
+  .object({
+    roleId: uuidSchema,
+    name: roleNameSchema.optional(),
+    hourlyRateEur: roleRateSchema.optional(),
+  })
+  .refine(
+    (v) => v.name !== undefined || v.hourlyRateEur !== undefined,
+    'Nichts zu ändern',
+  );
+export type UpdateRateRoleInput = z.infer<typeof updateRateRoleSchema>;
+
+export const deactivateRateRoleSchema = z.object({
+  roleId: uuidSchema,
+});
+export type DeactivateRateRoleInput = z.infer<typeof deactivateRateRoleSchema>;

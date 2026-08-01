@@ -5,7 +5,7 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addEffortEntry, deleteEffortEntry } from '@/lib/actions/effort';
-import type { EffortEntryView } from '@/lib/actions/effort';
+import type { EffortEntryView, EffortRoleOption } from '@/lib/actions/effort';
 
 /** Local ISO date (yyyy-mm-dd) for the date input's default — not UTC-shifted. */
 function todayLocalIso(): string {
@@ -36,15 +36,20 @@ export function EffortLog({
   projectId,
   entries,
   totalHours,
+  roles,
 }: {
   projectId: string;
   entries: EffortEntryView[];
   totalHours: number;
+  /** Active paid roles (rate_roles) for the optional role select. */
+  roles: EffortRoleOption[];
 }) {
   const [isPending, startTransition] = useTransition();
   const [workDate, setWorkDate] = useState(todayLocalIso());
   const [hours, setHours] = useState('');
   const [position, setPosition] = useState('');
+  /** '' = no role (org default rate); otherwise a rate_roles id. */
+  const [roleId, setRoleId] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -67,10 +72,12 @@ export function EffortLog({
           workDate,
           hours: hoursNum,
           position: position.trim(),
+          roleId: roleId !== '' ? roleId : undefined,
           note: note.trim() !== '' ? note.trim() : undefined,
         });
         setHours('');
         setPosition('');
+        setRoleId('');
         setNote('');
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
@@ -136,6 +143,22 @@ export function EffortLog({
             aria-label="Position"
           />
         </label>
+        <label className="block sm:w-44">
+          <span className="text-xs font-medium text-subtext">Rolle (optional)</span>
+          <select
+            value={roleId}
+            onChange={(e) => setRoleId(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-hairline bg-paper px-3 py-2 text-sm text-ink"
+            aria-label="Rolle (optional)"
+          >
+            <option value="">— keine —</option>
+            {roles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="block flex-1">
           <span className="text-xs font-medium text-subtext">Notiz</span>
           <Input
@@ -181,6 +204,7 @@ export function EffortLog({
               <div className="flex-1 min-w-0">
                 <div className="text-ink break-words">{e.position}</div>
                 <div className="text-xs text-subtext break-words">
+                  {e.roleName ? `${e.roleName} · ` : ''}
                   {e.note ? `${e.note} · ` : ''}
                   {e.userName ?? '—'}
                 </div>

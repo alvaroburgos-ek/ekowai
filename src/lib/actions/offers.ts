@@ -9,6 +9,7 @@ import {
   orgMembers,
   projects,
   effortEntries,
+  rateRoles,
 } from '@/lib/db/schema';
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
@@ -36,8 +37,20 @@ export type OfferPositionView = {
   /** numeric columns — Drizzle returns them as strings */
   estimatedHours: string;
   externalCostEur: string;
+  /** Optional paid role (rate_roles) — null → org default rate. */
+  roleId: string | null;
+  roleName: string | null;
+  /** The role's rate (numeric string) — feeds the margin math + display. */
+  roleHourlyRateEur: string | null;
   orderIndex: number;
   note: string | null;
+};
+
+/** Active role for the panel's pickers + the Stundensätze list. */
+export type OfferRoleView = {
+  id: string;
+  name: string;
+  hourlyRateEur: number;
 };
 
 export type OfferView = {
@@ -57,8 +70,10 @@ export type ListOffersResult = {
   /** Org calibration (null until set — margin verdicts stay amber). */
   internalHourlyRate: number | null;
   targetMarginPct: number | null;
-  /** Whether the session user may call setOrgRates (owner/admin). */
+  /** Whether the session user may call setOrgRates / manage roles (owner/admin). */
   canSetRates: boolean;
+  /** Active paid roles (rate_roles) of the org, name-sorted. */
+  roles: OfferRoleView[];
   /** Nachkalkulation hook: real hours logged on the project so far. */
   totalLoggedHours: number;
   offers: OfferView[];
@@ -154,6 +169,7 @@ export async function addOfferPosition(input: {
   position: string;
   estimatedHours: number;
   externalCostEur?: number;
+  roleId?: string;
   note?: string;
 }): Promise<{ id: string }> {
   const parsed = addOfferPositionSchema.parse(input);
@@ -161,6 +177,24 @@ export async function addOfferPosition(input: {
   const userId = await requireSessionUserId();
   if (!(await userHasProjectAccess(projectId, userId))) {
     throw new Error('Forbidden: user is not a member of this project’s org');
+  }
+
+  // A referenced role must be an ACTIVE role of the project's own org —
+  // cross-org role ids (guessed or stale) are rejected.
+  if (parsed.roleId !== undefined) {
+    const [proj] = await db
+      .select({ orgId: projects.orgId })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+    const [role] = await db
+      .select({ orgId: rateRoles.orgId, active: rateRoles.active })
+      .from(rateRoles)
+      .where(eq(rateRoles.id, parsed.roleId))
+      .limit(1);
+    if (!proj || !role || role.orgId !== proj.orgId || !role.active) {
+      throw new Error('Ungültige Rolle für diese Organisation');
+    }
   }
 
   // Append at the end of the offer's position list.
@@ -176,6 +210,7 @@ export async function addOfferPosition(input: {
       position: parsed.position,
       estimatedHours: String(parsed.estimatedHours),
       externalCostEur: String(parsed.externalCostEur ?? 0),
+      roleId: parsed.roleId ?? null,
       orderIndex: Number(maxOrder) + 1,
       note: parsed.note && parsed.note !== '' ? parsed.note : null,
     })
@@ -302,10 +337,14 @@ export async function listOffers(projectId: string): Promise<ListOffersResult> {
         position: offerPositions.position,
         estimatedHours: offerPositions.estimatedHours,
         externalCostEur: offerPositions.externalCostEur,
+        roleId: offerPositions.roleId,
+        roleName: rateRoles.name,
+        roleHourlyRateEur: rateRoles.hourlyRateEur,
         orderIndex: offerPositions.orderIndex,
         note: offerPositions.note,
       })
       .from(offerPositions)
+      .leftJoin(rateRoles, eq(rateRoles.id, offerPositions.roleId))
       .where(inArray(offerPositions.offerId, offerIds))
       .orderBy(asc(offerPositions.orderIndex));
 
@@ -317,11 +356,30 @@ export async function listOffers(projectId: string): Promise<ListOffersResult> {
       position: p.position,
       estimatedHours: p.estimatedHours,
       externalCostEur: p.externalCostEur,
+      roleId: p.roleId,
+      roleName: p.roleName,
+      roleHourlyRateEur: p.roleHourlyRateEur,
       orderIndex: p.orderIndex,
       note: p.note,
     });
     positionsByOffer.set(p.offerId, list);
   }
+
+  // Active paid roles — feed the panel's pickers + the Stundensätze list.
+  const roleRows = await db
+    .select({
+      id: rateRoles.id,
+      name: rateRoles.name,
+      hourlyRateEur: rateRoles.hourlyRateEur,
+    })
+    .from(rateRoles)
+    .where(and(eq(rateRoles.orgId, proj.orgId), eq(rateRoles.active, true)))
+    .orderBy(asc(rateRoles.name));
+  const roles: OfferRoleView[] = roleRows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    hourlyRateEur: toNum(r.hourlyRateEur) ?? 0,
+  }));
 
   // Nachkalkulation hook — real hours logged on the project so far.
   const [logged] = await db
@@ -337,6 +395,8 @@ export async function listOffers(projectId: string): Promise<ListOffersResult> {
       positions: positions.map((p) => ({
         estimatedHours: toNum(p.estimatedHours) ?? 0,
         externalCostEur: toNum(p.externalCostEur) ?? 0,
+        // Resolved role rate — overrides the org rate per position.
+        hourlyRateEur: toNum(p.roleHourlyRateEur),
       })),
       internalHourlyRate,
       targetMarginPct,
@@ -349,6 +409,7 @@ export async function listOffers(projectId: string): Promise<ListOffersResult> {
     internalHourlyRate,
     targetMarginPct,
     canSetRates,
+    roles,
     totalLoggedHours,
     offers: offerViews,
   };

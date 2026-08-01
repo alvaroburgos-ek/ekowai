@@ -574,6 +574,33 @@ export const co2ActivityLines = pgTable(
 );
 
 // =============================================================================
+// ROLE-BASED RATES (cost layer — multiple paid roles per org)
+// =============================================================================
+// Org-level paid roles (Ingenieur, Freelancer, Praktikant, Coach, …), each
+// with its own hourly rate. Replaces the single-org-rate assumption: effort
+// entries and offer positions may reference a role; margin math resolves
+// position rate ?? org internal_hourly_rate. Writes are owner/admin-gated
+// (mirrors the setOrgRates gate), reads are org-member.
+export const rateRoles = pgTable(
+  'rate_roles',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    hourlyRateEur: numeric('hourly_rate_eur').notNull(),
+    /** Deactivated roles stay referenced by old rows but leave the pickers. */
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    orgNameUnique: unique('rate_roles_org_name_unique').on(t.orgId, t.name),
+    orgIdx: index('rate_roles_org_idx').on(t.orgId),
+  }),
+);
+
+// =============================================================================
 // EFFORT LOGGING (roadmap v2 §2.9 — dependency for the Angebots-Engine)
 // =============================================================================
 // Per-project work-time entries. `position` is free text for now — offer
@@ -589,6 +616,8 @@ export const effortEntries = pgTable(
     workDate: date('work_date').notNull(),
     hours: numeric('hours').notNull(),
     position: text('position').notNull(),
+    /** Optional paid role (rate_roles) — the rate the entry was worked at. */
+    roleId: uuid('role_id').references(() => rateRoles.id, { onDelete: 'set null' }),
     note: text('note'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -638,6 +667,8 @@ export const offerPositions = pgTable(
     position: text('position').notNull(),
     estimatedHours: numeric('estimated_hours').notNull(),
     externalCostEur: numeric('external_cost_eur').notNull().default('0'),
+    /** Optional paid role (rate_roles) — overrides the org rate in margin math. */
+    roleId: uuid('role_id').references(() => rateRoles.id, { onDelete: 'set null' }),
     orderIndex: integer('order_index').notNull().default(0),
     note: text('note'),
   },

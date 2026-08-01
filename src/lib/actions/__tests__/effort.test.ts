@@ -102,6 +102,20 @@ describe('parseAddEffortEntry — zod shapes', () => {
     const { hours: _hours, ...withoutHours } = valid();
     expect(() => parseAddEffortEntry(withoutHours)).toThrow(ZodError);
   });
+
+  it('accepts an optional roleId uuid (role-based rates)', () => {
+    const roleId = '99999999-8888-4777-8666-555555555555';
+    expect(
+      parseAddEffortEntry({ ...valid(), roleId }).roleId,
+    ).toBe(roleId);
+    expect(parseAddEffortEntry(valid()).roleId).toBeUndefined();
+  });
+
+  it('rejects a non-uuid roleId', () => {
+    expect(() =>
+      parseAddEffortEntry({ ...valid(), roleId: 'ingenieur' }),
+    ).toThrow(ZodError);
+  });
 });
 
 describe('computeTotalHours', () => {

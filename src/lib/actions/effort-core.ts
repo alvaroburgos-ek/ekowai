@@ -27,6 +27,8 @@ export const addEffortEntrySchema = z.object({
     .max(HOURS_MAX, `Maximal ${HOURS_MAX} Stunden pro Eintrag`),
   /** Free text for now — offer positions come with Slice E1. */
   position: z.string().trim().min(1, 'Position erforderlich').max(200),
+  /** Optional rate_roles id — the server verifies it belongs to the org. */
+  roleId: z.string().uuid().optional(),
   note: z.string().trim().max(1000).optional(),
 });
 

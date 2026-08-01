@@ -17,6 +17,9 @@ import {
   updateOfferSchema,
   addOfferPositionSchema,
   setOrgRatesSchema,
+  addRateRoleSchema,
+  updateRateRoleSchema,
+  deactivateRateRoleSchema,
 } from '../margin';
 
 const UUID = '11111111-2222-4333-8444-555555555555';
@@ -159,6 +162,96 @@ describe('computeOfferMargin — verdict matrix', () => {
   });
 });
 
+describe('computeOfferMargin — role-based rates (mixed)', () => {
+  it('a position role rate overrides the org rate; others keep the org rate', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 2000,
+      positions: [
+        { estimatedHours: 10, externalCostEur: 0, hourlyRateEur: 50 }, // Freelancer
+        { estimatedHours: 2, externalCostEur: 0 }, // Standard (org rate)
+      ],
+      ...calibrated, // org 80 €/h
+    });
+    expect(r.internalCost).toBe(660); // 10×50 + 2×80
+    expect(r.margin).toBe(1340);
+    expect(r.verdict).toBe('green'); // 67 % ≥ 30 %
+  });
+
+  it('null hourlyRateEur behaves like absent → org rate applies', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 1000,
+      positions: [{ estimatedHours: 5, externalCostEur: 0, hourlyRateEur: null }],
+      ...calibrated,
+    });
+    expect(r.internalCost).toBe(400); // 5 × 80
+  });
+
+  it('all positions carry role rates → calibrated even without an org rate', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 2000,
+      positions: [
+        { estimatedHours: 10, externalCostEur: 0, hourlyRateEur: 60 },
+        { estimatedHours: 5, externalCostEur: 0, hourlyRateEur: 20 }, // Praktikant
+      ],
+      internalHourlyRate: null,
+      targetMarginPct: 30,
+    });
+    expect(r.internalCost).toBe(700); // 600 + 100
+    expect(r.reasons).not.toContain('Stundensatz nicht kalibriert');
+    expect(r.verdict).toBe('green'); // 65 % ≥ 30 %
+  });
+
+  it('amber only when some position has NEITHER a role rate NOR an org rate', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 2000,
+      positions: [
+        { estimatedHours: 10, externalCostEur: 0, hourlyRateEur: 60 },
+        { estimatedHours: 5, externalCostEur: 0 }, // no rate anywhere
+      ],
+      internalHourlyRate: null,
+      targetMarginPct: 30,
+    });
+    expect(r.verdict).toBe('amber');
+    expect(r.reasons).toContain('Stundensatz nicht kalibriert');
+    // The rate-less position contributes 0 — never a silent guess.
+    expect(r.internalCost).toBe(600);
+  });
+
+  it('red threshold unchanged with mixed rates: strictly below target → red', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 1000,
+      positions: [
+        { estimatedHours: 10, externalCostEur: 0, hourlyRateEur: 60 }, // 600
+        { estimatedHours: 3, externalCostEur: 0 }, // 240 at org 80
+      ],
+      ...calibrated, // margin 160 → 16 % < 30 %
+    });
+    expect(r.verdict).toBe('red');
+    expect(r.reasons.some((s) => s.includes('unter Zielmarge'))).toBe(true);
+  });
+
+  it('red can fire on role rates alone (org rate unset, target set)', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 1000,
+      positions: [{ estimatedHours: 10, externalCostEur: 0, hourlyRateEur: 90 }],
+      internalHourlyRate: null,
+      targetMarginPct: 30, // margin 100 → 10 % < 30 %
+    });
+    expect(r.verdict).toBe('red');
+  });
+
+  it('green at exactly the target with a position rate (strict-below rule kept)', () => {
+    const r = computeOfferMargin({
+      festpreisEur: 1000,
+      positions: [{ estimatedHours: 10, externalCostEur: 0, hourlyRateEur: 70 }],
+      internalHourlyRate: null,
+      targetMarginPct: 30, // margin 300 → exactly 30 %
+    });
+    expect(r.marginPct).toBeCloseTo(30);
+    expect(r.verdict).toBe('green');
+  });
+});
+
 describe('foundingRateWarning — Gründungsreferenz-Leck', () => {
   it('warns when the effective rate is within 15 % of the reference', () => {
     expect(foundingRateWarning(50, 50)).toMatch(/Gründungsreferenz-Leck/);
@@ -258,6 +351,65 @@ describe('zod schemas', () => {
         offerId: UUID, position: 'x', estimatedHours: 1, externalCostEur: -5,
       }),
     ).toThrow(ZodError);
+  });
+
+  it('addOfferPositionSchema: optional roleId must be a uuid', () => {
+    const r = addOfferPositionSchema.parse({
+      offerId: UUID,
+      position: 'Nachweis',
+      estimatedHours: 4,
+      roleId: UUID,
+    });
+    expect(r.roleId).toBe(UUID);
+    expect(
+      addOfferPositionSchema.parse({
+        offerId: UUID, position: 'Nachweis', estimatedHours: 4,
+      }).roleId,
+    ).toBeUndefined();
+    expect(() =>
+      addOfferPositionSchema.parse({
+        offerId: UUID, position: 'x', estimatedHours: 1, roleId: 'nope',
+      }),
+    ).toThrow(ZodError);
+  });
+
+  it('addRateRoleSchema: trims the name; rejects empty name, 0/negative/absurd rates, bad org id', () => {
+    const r = addRateRoleSchema.parse({
+      orgId: UUID,
+      name: '  Freelancer  ',
+      hourlyRateEur: 60,
+    });
+    expect(r.name).toBe('Freelancer');
+    expect(() =>
+      addRateRoleSchema.parse({ orgId: UUID, name: '   ', hourlyRateEur: 60 }),
+    ).toThrow(ZodError);
+    expect(() =>
+      addRateRoleSchema.parse({ orgId: UUID, name: 'Coach', hourlyRateEur: 0 }),
+    ).toThrow(ZodError);
+    expect(() =>
+      addRateRoleSchema.parse({ orgId: UUID, name: 'Coach', hourlyRateEur: -5 }),
+    ).toThrow(ZodError);
+    expect(() =>
+      addRateRoleSchema.parse({ orgId: UUID, name: 'Coach', hourlyRateEur: 10_001 }),
+    ).toThrow(ZodError);
+    expect(() =>
+      addRateRoleSchema.parse({ orgId: 'nope', name: 'Coach', hourlyRateEur: 60 }),
+    ).toThrow(ZodError);
+  });
+
+  it('updateRateRoleSchema: partial patch, but an empty patch is rejected', () => {
+    const r = updateRateRoleSchema.parse({ roleId: UUID, hourlyRateEur: 75 });
+    expect(r.name).toBeUndefined();
+    expect(r.hourlyRateEur).toBe(75);
+    expect(() => updateRateRoleSchema.parse({ roleId: UUID })).toThrow(ZodError);
+    expect(() =>
+      updateRateRoleSchema.parse({ roleId: UUID, hourlyRateEur: 0 }),
+    ).toThrow(ZodError);
+  });
+
+  it('deactivateRateRoleSchema: requires a uuid roleId', () => {
+    expect(deactivateRateRoleSchema.parse({ roleId: UUID }).roleId).toBe(UUID);
+    expect(() => deactivateRateRoleSchema.parse({ roleId: 'nope' })).toThrow(ZodError);
   });
 
   it('setOrgRatesSchema: nullable rates; 0 rate rejected, >100 % target rejected', () => {

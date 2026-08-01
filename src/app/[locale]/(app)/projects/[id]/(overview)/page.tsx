@@ -148,6 +148,7 @@ export default async function ProjectOverviewPage({
             projectId={id}
             entries={effort.entries}
             totalHours={effort.totalHours}
+            roles={effort.roles}
           />
         </section>
       )}
