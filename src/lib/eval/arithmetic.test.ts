@@ -97,3 +97,21 @@ describe('evalExpression — 1-arg math functions (ln/log10/sqrt/exp/abs)', () =
     expect(() => evalExpression('min(1)', {})).toThrow();
   });
 });
+
+describe('evalExpression — case-insensitive function calls + lg alias', () => {
+  it('uppercase EXP/SQRT resolve (M-229-1 print style); symbols stay case-sensitive', () => {
+    expect(evalExpression('EXP(0)', {})).toBe(1);
+    expect(evalExpression('SQRT(9)', {})).toBe(3);
+    expect(evalExpression('Ln(1)', {})).toBe(0);
+  });
+
+  it('lg is the German log10 alias (VDI-3477)', () => {
+    expect(evalExpression('lg(100)', {})).toBe(2);
+    expect(evalExpression('lg(x)', { x: 1000 })).toBe(3);
+  });
+
+  it('unknown calls still fail loud (log without base stays unsupported)', () => {
+    expect(() => evalExpression('LOG(3)', {})).toThrow(/nicht unterstützt/);
+    expect(() => evalExpression('SUM(3)', {})).toThrow(/nicht unterstützt/);
+  });
+});

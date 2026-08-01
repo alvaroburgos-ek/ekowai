@@ -31,10 +31,10 @@ const FN_LIKE = /([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*([A-Za-z0-9_]+)\s*\)/g;
  * Names the arithmetic engine supports as REAL function calls (ln, sqrt, min, …)
  * must NOT be rewritten to `name_arg` — they are calls, not stringified symbols.
  */
-import { SUPPORTED_FUNCTIONS } from './arithmetic';
+import { canonicalFunctionName } from './arithmetic';
 
 function rewrite(match: string, name: string, arg: string): string {
-  return SUPPORTED_FUNCTIONS.has(name) ? match : `${name}_${arg}`;
+  return canonicalFunctionName(name) !== null ? match : `${name}_${arg}`;
 }
 
 export function normalizeFormula(s: string): string {

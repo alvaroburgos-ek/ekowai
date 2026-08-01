@@ -62,3 +62,5 @@ playwright-report/
 scripts/_rls-local-env.ps1
 
 .env.harness.local
+
+scripts/engine-rescan-data/

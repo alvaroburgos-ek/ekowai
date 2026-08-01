@@ -46,6 +46,20 @@ export const SUPPORTED_FUNCTIONS = new Set<string>([
   ...Object.keys(TWO_ARG_FUNCTIONS),
 ]);
 
+/** German/typographic aliases → canonical function names (lg = log10). */
+const FN_ALIASES: Record<string, string> = { lg: 'log10' };
+
+/**
+ * Resolve an identifier-before-'(' to its canonical supported function name,
+ * case-insensitively (standards print EXP/SQRT; symbols stay case-SENSITIVE —
+ * this applies only to call syntax). Returns null when not a supported call.
+ */
+export function canonicalFunctionName(name: string): string | null {
+  const lower = name.toLowerCase();
+  const canonical = FN_ALIASES[lower] ?? lower;
+  return SUPPORTED_FUNCTIONS.has(canonical) ? canonical : null;
+}
+
 type Token =
   | { kind: 'num'; value: number }
   | { kind: 'ident'; name: string }
@@ -90,10 +104,11 @@ function tokenize(src: string): Token[] {
       while (j < src.length && (src[j] === ' ' || src[j] === '\t')) j++;
       if (src[j] === '(') {
         // Only the natively supported numeric functions (ONE_ARG_FUNCTIONS /
-        // TWO_ARG_FUNCTIONS) are accepted. All other calls throw so unsupported
-        // formulas fail loud.
-        if (SUPPORTED_FUNCTIONS.has(m[0])) {
-          toks.push({ kind: 'fn', name: m[0] });
+        // TWO_ARG_FUNCTIONS, case-insensitive incl. the lg→log10 alias) are
+        // accepted. All other calls throw so unsupported formulas fail loud.
+        const canonical = canonicalFunctionName(m[0]);
+        if (canonical) {
+          toks.push({ kind: 'fn', name: canonical });
           i += m[0].length;
           continue;
         }
