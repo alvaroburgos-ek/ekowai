@@ -1643,3 +1643,8 @@ READY-TO-USE PHASE 2 CLOSED 2026-08-01 — 67/71 compute-ready (from 53).
   green; harness green (priority DWA-A-138-1 + DIN-18130-1 ready). Residual 4 UN-FABRICABLE: DWA-M-732 (SR-2
   range, owner picks), ISO-5667-6 (text-only √g, needs rendered PDF), DWA-M-708 (Gelbdruck + unit-basis ruling),
   DWA-M-816 6a/6a_TR (prose segment-descriptions, not equations). Harness wired into `npm test` (Stage-6 golden).
+
+GATE DECISION SHEET generated 2026-08-01 — _GATE-DECISION-SHEET.md (vault): 318 gate items grouped for
+one-pass owner sign-off (185 bulk-approvable at a stroke, 133 individual calls). Every remaining gate defect
+after the 224 mechanical re-homes, enriched with source_quote + severity + recommendation. Awaiting owner
+sign-off; on return I apply the surviving decisions with rollback + re-run the gate-health harness to green.
