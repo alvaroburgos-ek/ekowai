@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Plus, Trash2, Loader2, FileDown, Lock, Pencil } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  FileDown,
+  Lock,
+  Pencil,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,7 +21,10 @@ import {
   setOrgRates,
 } from '@/lib/actions/offers';
 import type { ListOffersResult, OfferView } from '@/lib/actions/offers';
+import { getOfferNachkalkulation } from '@/lib/actions/nachkalkulation';
+import type { OfferNachkalkulationView } from '@/lib/actions/nachkalkulation';
 import type { MarginVerdict } from '@/lib/offers/margin';
+import type { HoursCompareRow } from '@/lib/nachkalkulation/compare';
 
 /**
  * Angebote (intern) — Slice E1 panel on the project overview.
@@ -194,6 +206,137 @@ function RateSettings({
         </div>
       )}
       {error && <p className="text-xs text-error">{error}</p>}
+    </div>
+  );
+}
+
+/** Δ%-based text color: red above +10 %, green at/below 0, neutral between. */
+function deltaClass(deltaPct: number | null): string {
+  if (deltaPct === null) return 'text-subtext';
+  if (deltaPct > 10) return 'text-error';
+  if (deltaPct <= 0) return 'text-success';
+  return 'text-ink';
+}
+
+function fmtDeltaPct(deltaPct: number | null): string {
+  if (deltaPct === null) return '—';
+  return `${deltaPct >= 0 ? '+' : ''}${fmtNum(deltaPct, 1)} %`;
+}
+
+function HoursRow({ row, isTotals }: { row: HoursCompareRow; isTotals?: boolean }) {
+  return (
+    <tr className={isTotals ? 'font-medium text-ink border-t border-hairline' : ''}>
+      <td className="py-1 pr-3 text-ink break-words">{row.position}</td>
+      <td className="py-1 pr-3 text-right tabular-nums">{fmtNum(row.estimated)}</td>
+      <td className="py-1 pr-3 text-right tabular-nums">{fmtNum(row.actual)}</td>
+      <td className={`py-1 pr-3 text-right tabular-nums ${deltaClass(row.deltaPct)}`}>
+        {`${row.deltaHours >= 0 ? '+' : ''}${fmtNum(row.deltaHours)}`}
+      </td>
+      <td className={`py-1 text-right tabular-nums ${deltaClass(row.deltaPct)}`}>
+        {fmtDeltaPct(row.deltaPct)}
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * Nachkalkulation (Slice E3, YOUR side): Soll- vs. Ist-Stunden per position,
+ * loaded lazily on expand. Kalibrierungshinweise are SUGGESTIONS only —
+ * template hours change only when the owner edits them.
+ */
+function OfferNachkalkulation({
+  projectId,
+  offerId,
+}: {
+  projectId: string;
+  offerId: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [view, setView] = useState<OfferNachkalkulationView | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (!next) return;
+    setLoading(true);
+    setError(null);
+    getOfferNachkalkulation(projectId)
+      .then((res) => {
+        setView(res.offers.find((o) => o.offerId === offerId) ?? null);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setLoading(false));
+  }
+
+  return (
+    <div className="rounded-xl border border-hairline bg-paper-2/40 p-3 space-y-2">
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex items-center gap-1.5 text-xs font-medium text-subtext hover:text-accent-2 transition-colors"
+        aria-expanded={open}
+      >
+        {open ? (
+          <ChevronDown className="size-3.5 shrink-0" aria-hidden />
+        ) : (
+          <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+        )}
+        Nachkalkulation (Soll/Ist-Stunden)
+      </button>
+
+      {open && loading && (
+        <p className="text-xs text-subtext inline-flex items-center gap-1.5">
+          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+          Lade Ist-Stunden …
+        </p>
+      )}
+      {open && error && <p className="text-xs text-error">{error}</p>}
+
+      {open && !loading && !error && view && (
+        <>
+          {view.hours.rows.length === 0 ? (
+            <p className="text-xs text-subtext italic">
+              Keine Positionen und keine Ist-Stunden — nichts zu vergleichen.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-xs text-subtext text-left">
+                    <th className="py-1 pr-3 font-medium">Position</th>
+                    <th className="py-1 pr-3 font-medium text-right">Soll (h)</th>
+                    <th className="py-1 pr-3 font-medium text-right">Ist (h)</th>
+                    <th className="py-1 pr-3 font-medium text-right">Δ h</th>
+                    <th className="py-1 font-medium text-right">Δ %</th>
+                  </tr>
+                </thead>
+                <tbody className="text-subtext">
+                  {view.hours.rows.map((r) => (
+                    <HoursRow key={r.position} row={r} />
+                  ))}
+                  <HoursRow row={view.hours.totals} isTotals />
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {view.suggestions.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-subtext">Kalibrierungshinweise</p>
+              <ul className="text-xs text-subtext space-y-0.5">
+                {view.suggestions.map((s, i) => (
+                  <li key={i}>· {s}</li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-subtext italic">
+                Nur Hinweise — Vorlagen-Stunden werden nie automatisch geändert.
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -461,6 +604,9 @@ function OfferCard({
           Position
         </Button>
       </div>
+
+      {/* Nachkalkulation (Slice E3) — additive, loads on expand */}
+      <OfferNachkalkulation projectId={projectId} offerId={offer.id} />
 
       {error && <p className="text-xs text-error">{error}</p>}
     </div>

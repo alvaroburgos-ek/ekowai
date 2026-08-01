@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Plus, Trash2, Loader2, FileDown, Pencil, AlertTriangle } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  FileDown,
+  Pencil,
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,12 +20,15 @@ import {
   addEstimateLine,
   deleteEstimateLine,
   updateContingency,
+  addContractorBid,
 } from '@/lib/actions/costs';
 import type {
   ListEstimatesResult,
   EstimateView,
   CostItemView,
+  ContractorBidView,
 } from '@/lib/actions/costs';
+import { compareBids, type BidCompareRow } from '@/lib/nachkalkulation/compare';
 import {
   CONTINGENCY_MIN_PCT,
   CONTINGENCY_MAX_PCT,
@@ -76,16 +88,240 @@ function EstimateBadge({ estimate }: { estimate: EstimateView }) {
   );
 }
 
+/** Δ%-based text color: red above +10 %, green at/below 0, neutral between. */
+function deltaClass(deltaPct: number | null): string {
+  if (deltaPct === null) return 'text-subtext';
+  if (deltaPct > 10) return 'text-error';
+  if (deltaPct <= 0) return 'text-success';
+  return 'text-ink';
+}
+
+function fmtDeltaPct(deltaPct: number | null): string {
+  if (deltaPct === null) return '—';
+  return `${deltaPct >= 0 ? '+' : ''}${fmtNum(deltaPct, 1)} %`;
+}
+
+function BidRow({ row, isTotals }: { row: BidCompareRow; isTotals?: boolean }) {
+  return (
+    <tr className={isTotals ? 'font-medium text-ink border-t border-hairline' : ''}>
+      <td className="py-1 pr-3 text-ink break-words">{row.position}</td>
+      <td className="py-1 pr-3 text-right tabular-nums">{fmtEur(row.likely)}</td>
+      <td className="py-1 pr-3 text-right tabular-nums">
+        {row.bestBid !== null ? fmtEur(row.bestBid) : '—'}
+      </td>
+      <td className="py-1 pr-3 text-subtext break-words">{row.bidder ?? '—'}</td>
+      <td className={`py-1 pr-3 text-right tabular-nums ${deltaClass(row.deltaPct)}`}>
+        {row.deltaEur !== null
+          ? `${row.deltaEur >= 0 ? '+' : ''}${fmtEur(row.deltaEur)}`
+          : '—'}
+      </td>
+      <td className={`py-1 text-right tabular-nums ${deltaClass(row.deltaPct)}`}>
+        {fmtDeltaPct(row.deltaPct)}
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * Nachkalkulation (Slice E3, the CLIENT's side): real contractor bids
+ * entered against the estimate + best-bid vs. likely comparison per
+ * position — the feedback loop the catalog learns from. Bids without an
+ * estimate scope (entered project-wide) count against every estimate.
+ */
+function EstimateNachkalkulation({
+  estimate,
+  projectId,
+  bids,
+}: {
+  estimate: EstimateView;
+  projectId: string;
+  bids: ContractorBidView[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const [bidder, setBidder] = useState('');
+  const [bidPos, setBidPos] = useState('');
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidDate, setBidDate] = useState('');
+
+  const amountNum = parseDecimal(bidAmount);
+  const canAddBid =
+    bidder.trim() !== ''
+    && bidAmount.trim() !== ''
+    && Number.isFinite(amountNum)
+    && amountNum >= 0;
+
+  const relevantBids = bids.filter(
+    (b) => b.estimateId === estimate.id || b.estimateId === null,
+  );
+  const comparison = compareBids(
+    estimate.lines.map((l) => ({
+      position: l.position,
+      // Line likely TOTAL — bid amounts are absolute, never unit prices.
+      priceLikelyEur: Number(l.quantity) * Number(l.priceLikelyEur),
+    })),
+    relevantBids.map((b) => ({
+      position: b.position,
+      bidder: b.bidder,
+      amountEur: Number(b.amountEur),
+    })),
+  );
+
+  function handleAddBid() {
+    if (!canAddBid) return;
+    setError(null);
+    startTransition(async () => {
+      try {
+        await addContractorBid({
+          projectId,
+          estimateId: estimate.id,
+          bidder: bidder.trim(),
+          position: bidPos.trim() !== '' ? bidPos.trim() : undefined,
+          amountEur: amountNum,
+          bidDate: bidDate.trim() !== '' ? bidDate : undefined,
+        });
+        setBidder('');
+        setBidPos('');
+        setBidAmount('');
+        setBidDate('');
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    });
+  }
+
+  return (
+    <div className="rounded-xl border border-hairline bg-paper-2/40 p-3 space-y-2">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 text-xs font-medium text-subtext hover:text-accent-2 transition-colors"
+        aria-expanded={open}
+      >
+        {open ? (
+          <ChevronDown className="size-3.5 shrink-0" aria-hidden />
+        ) : (
+          <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+        )}
+        {`Nachkalkulation (Angebote der Ausführenden) — ${relevantBids.length} Angebote`}
+      </button>
+
+      {open && (
+        <>
+          {/* Bid entry form */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <label className="block flex-1">
+              <span className="text-xs font-medium text-subtext">Bieter</span>
+              <Input
+                value={bidder}
+                onChange={(e) => setBidder(e.target.value)}
+                placeholder="z. B. Fa. Mustermann Tiefbau"
+                className="mt-1"
+                aria-label="Bieter"
+              />
+            </label>
+            <label className="block flex-1">
+              <span className="text-xs font-medium text-subtext">
+                Position (optional — leer = Gesamtangebot)
+              </span>
+              <Input
+                value={bidPos}
+                onChange={(e) => setBidPos(e.target.value)}
+                placeholder="wie in der Schätzung benannt"
+                className="mt-1"
+                aria-label="Position des Angebots"
+              />
+            </label>
+            <label className="block sm:w-32">
+              <span className="text-xs font-medium text-subtext">Betrag (€)</span>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(e.target.value)}
+                placeholder="0"
+                className="mt-1 tabular-nums"
+                aria-label="Angebotsbetrag"
+              />
+            </label>
+            <label className="block sm:w-40">
+              <span className="text-xs font-medium text-subtext">Datum</span>
+              <Input
+                type="date"
+                value={bidDate}
+                onChange={(e) => setBidDate(e.target.value)}
+                className="mt-1"
+                aria-label="Angebotsdatum"
+              />
+            </label>
+            <Button
+              size="sm"
+              type="button"
+              variant="ghost"
+              onClick={handleAddBid}
+              disabled={isPending || !canAddBid}
+              className="shrink-0"
+            >
+              {isPending ? <Loader2 className="animate-spin" /> : <Plus aria-hidden />}
+              Angebot erfassen
+            </Button>
+          </div>
+
+          {error && <p className="text-xs text-error">{error}</p>}
+
+          {/* Comparison table */}
+          {comparison.rows.length === 0 && comparison.projectLevel === null ? (
+            <p className="text-xs text-subtext italic">
+              Keine Schätzpositionen und keine Angebote — nichts zu vergleichen.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-xs text-subtext text-left">
+                    <th className="py-1 pr-3 font-medium">Position</th>
+                    <th className="py-1 pr-3 font-medium text-right">
+                      Schätzung (wahrsch.)
+                    </th>
+                    <th className="py-1 pr-3 font-medium text-right">Bestes Angebot</th>
+                    <th className="py-1 pr-3 font-medium">Bieter</th>
+                    <th className="py-1 pr-3 font-medium text-right">Δ €</th>
+                    <th className="py-1 font-medium text-right">Δ %</th>
+                  </tr>
+                </thead>
+                <tbody className="text-subtext">
+                  {comparison.rows.map((r) => (
+                    <BidRow key={r.position} row={r} />
+                  ))}
+                  {comparison.projectLevel && (
+                    <BidRow row={comparison.projectLevel} />
+                  )}
+                  <BidRow row={comparison.totals} isTotals />
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 function EstimateCard({
   estimate,
   projectId,
   locale,
   catalog,
+  bids,
 }: {
   estimate: EstimateView;
   projectId: string;
   locale: string;
   catalog: CostItemView[];
+  bids: ContractorBidView[];
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -427,6 +663,9 @@ function EstimateCard({
         </Button>
       </div>
 
+      {/* Nachkalkulation (Slice E3) — additive */}
+      <EstimateNachkalkulation estimate={estimate} projectId={projectId} bids={bids} />
+
       {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );
@@ -767,6 +1006,7 @@ export function CostEstimatePanel({
               projectId={projectId}
               locale={locale}
               catalog={data.catalog}
+              bids={data.bids}
             />
           ))}
         </div>
