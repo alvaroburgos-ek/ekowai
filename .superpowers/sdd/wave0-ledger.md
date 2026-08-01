@@ -1628,3 +1628,10 @@ OUTSTANDING (needs owner / setup — not fresh audit; the autonomous audit march
      bare-symbol-RHS enforcement fixes, IS-NOT-NULL-on-boolean, validator rules 16-20 ([CODE]).
 CAMPAIGN TOTALS: 29 batches + waves 14-16; ~32 source-settled migrations, ALL with rollbacks + effect-verified.
 ════════════════════════════════════════════════════════════════════════════════════════════════
+
+READY-TO-USE COMPUTE LAYER CLOSED (safe ceiling) 2026-08-01 — 60/71 compute-ready.
+  Engine F-4 fix + harness + 55 PDF-verified eq repairs + A138 dead-gate cleanup. Priority standards
+  (DWA-A-138-1, DIN-18130-1) GREEN. Residual 11 sheeted AZ: comparison-criteria→gate rulings (DWA-M-205/
+  A-178/262E/760, VDI-3477, A-272E), 2 Gelbdruck held, ISO-5667-6 text-only, DWA-M-732 SR-2, SUM/integral/
+  if-then engine-feature gaps (DWA-M-816, A-272E). None safely fixable by formula rewrite without fabricating
+  a value, destructively deleting info, or adding engine features. Harness wired into `npm test` (Stage-6 golden).

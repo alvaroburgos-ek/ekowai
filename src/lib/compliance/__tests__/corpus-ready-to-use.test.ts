@@ -39,7 +39,9 @@ const PRIORITY = ['DWA-A-138-1', 'DIN-18130-1'];
 const TESTVAL = 2; // safe positive input for every symbol (avoids /0 and stays in log/exp domains)
 
 type EqClass = 'computed' | 'manual' | 'error';
-function classifyEquation(eq: StdBucket['equations'][number]): EqClass {
+const errorEqs: Array<{ code: string; eqNo: string; formula: string; msg: string }> = [];
+let currentStd = '';
+function classifyEquation(eq: StdBucket['equations'][number] & { equation_number?: string }): EqClass {
   const syms = eq.input_symbols ?? [];
   const inputs = syms.map((s) => ({ symbol: s, value: TESTVAL, unit: null }));
   try {
@@ -52,9 +54,11 @@ function classifyEquation(eq: StdBucket['equations'][number]): EqClass {
     });
     if (r.kind === 'computed') return 'computed';
     if (r.kind === 'manual_required') return 'manual';
+    errorEqs.push({ code: currentStd, eqNo: eq.equation_number ?? '?', formula: eq.formula, msg: (r as { message?: string }).message ?? '' });
     return 'error';
-  } catch {
+  } catch (e) {
     engineThrew++; // engine THREW instead of returning a structured result — invariant violation
+    errorEqs.push({ code: currentStd, eqNo: eq.equation_number ?? '?', formula: eq.formula, msg: 'THREW: ' + String(e) });
     return 'error';
   }
 }
@@ -81,6 +85,7 @@ type Row = {
 const rows: Row[] = [];
 
 for (const [code, bucket] of Object.entries(snap.standards)) {
+  currentStd = code;
   const eqs = bucket.equations ?? [];
   let eqComputed = 0, eqManual = 0, eqError = 0;
   for (const eq of eqs) {
@@ -119,6 +124,10 @@ for (const r of rows) {
 }
 const OUT = resolve(__dirname, '../../../../scripts/reasoning-map/ready-to-use-scorecard.md');
 writeFileSync(OUT, lines.join('\n') + '\n', 'utf8');
+// Dump the exact error-equation worklist (standard, equation, formula, engine message).
+const errLines = ['# READY-TO-USE ERROR-EQUATION WORKLIST', `snapshot: ${snap.exported_at}`, `total: ${errorEqs.length}`, ''];
+for (const e of errorEqs) errLines.push(`${e.code}\t${e.eqNo}\t${e.msg}\t${e.formula}`);
+writeFileSync(resolve(__dirname, '../../../../scripts/reasoning-map/ready-to-use-errors.tsv'), errLines.join('\n') + '\n', 'utf8');
 // eslint-disable-next-line no-console
 console.log(`\n[ready-to-use] ${readyCount}/${rows.length} compute-ready; scorecard → ${OUT}`);
 
