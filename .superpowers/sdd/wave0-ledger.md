@@ -1635,3 +1635,11 @@ READY-TO-USE COMPUTE LAYER CLOSED (safe ceiling) 2026-08-01 — 60/71 compute-re
   A-178/262E/760, VDI-3477, A-272E), 2 Gelbdruck held, ISO-5667-6 text-only, DWA-M-732 SR-2, SUM/integral/
   if-then engine-feature gaps (DWA-M-816, A-272E). None safely fixable by formula rewrite without fabricating
   a value, destructively deleting info, or adding engine features. Harness wired into `npm test` (Stage-6 golden).
+
+READY-TO-USE PHASE 2 CLOSED 2026-08-01 — 67/71 compute-ready (from 53).
+  [CODE] engine: (1) F-4 bare-symbol-RHS fix (var-vs-var gates enforce); (2) 1-arg functions ln/exp/log10/
+  sqrt/abs + e/pi constants (regressions/growth compute); (3) comparison-criterion formulas -> manual not
+  error. DATA: A138 dead-gate clear + 55 PDF-verified eq repairs + 5 M102-4 regressions. Full unit suite 1250
+  green; harness green (priority DWA-A-138-1 + DIN-18130-1 ready). Residual 4 UN-FABRICABLE: DWA-M-732 (SR-2
+  range, owner picks), ISO-5667-6 (text-only √g, needs rendered PDF), DWA-M-708 (Gelbdruck + unit-basis ruling),
+  DWA-M-816 6a/6a_TR (prose segment-descriptions, not equations). Harness wired into `npm test` (Stage-6 golden).
