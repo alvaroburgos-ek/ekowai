@@ -1601,3 +1601,8 @@ local PDFs for TWO of them (the "source-blocked" label was stale-memory, never v
 GENUINELY source-blocked (false-positive matches only) = 2: DWA-A-131, DWA-A-201.
 Vercel CLI PRESENT (v54.17.3) → level-2 deployed-build proof is startable when the campaign deployment is set up.
 REVISED: 67 audited + 2 reachable (batch 29) + 2 source-blocked = 71. Dispatching batch 29 = DWA-A-226 + DWA-M-229-1.
+
+FULL-TREATMENT BATCH 29 OPENED 2026-08-01 — RECOVERED pair: DWA-A-226(28eq/24cr) + DWA-M-229-1(47eq/29cr),
+  both German, both first-treatment (PDFs confirmed). wf_d7a1a645-dcc / wsf43dib5. On close: 69 audited + 2
+  genuinely source-blocked (DWA-A-131, DWA-A-201, need owner PDFs) = 71. Then only level-2 deployed-build +
+  DWA-A-131/201 PDF acquisition remain.
