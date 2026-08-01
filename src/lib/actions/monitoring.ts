@@ -2,8 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
-import { monitoringEntries, projectDocuments, profiles } from '@/lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import {
+  monitoringEntries,
+  projectDocuments,
+  profiles,
+  projectStandards,
+  standards,
+} from '@/lib/db/schema';
+import { and, desc, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { userHasProjectAccess } from '@/lib/db/queries/worksheet';
 import { parseAddMonitoringEntry } from './monitoring-core';
@@ -17,6 +23,9 @@ export type MonitoringEntryView = {
   documentId: string | null;
   documentTitle: string | null;
   documentCitationLabel: string | null;
+  standardId: string | null;
+  standardCode: string | null;
+  standardTitleDe: string | null;
   createdAt: Date;
   userName: string | null;
 };
@@ -47,6 +56,7 @@ export async function addMonitoringEntry(input: {
   category: string;
   note?: string;
   documentId?: string;
+  standardId?: string;
 }): Promise<{ id: string }> {
   const parsed = parseAddMonitoringEntry(input);
   const userId = await requireSessionUserId();
@@ -67,6 +77,25 @@ export async function addMonitoringEntry(input: {
     }
   }
 
+  // A linked guideline must be one of the project's ATTACHED standards
+  // (active row in project_standards) — never an arbitrary library standard.
+  if (parsed.standardId) {
+    const [attached] = await db
+      .select({ id: projectStandards.id })
+      .from(projectStandards)
+      .where(
+        and(
+          eq(projectStandards.projectId, parsed.projectId),
+          eq(projectStandards.standardId, parsed.standardId),
+          eq(projectStandards.status, 'active'),
+        ),
+      )
+      .limit(1);
+    if (!attached) {
+      throw new Error('Regelwerk ist diesem Projekt nicht zugeordnet');
+    }
+  }
+
   const [row] = await db
     .insert(monitoringEntries)
     .values({
@@ -75,6 +104,7 @@ export async function addMonitoringEntry(input: {
       category: parsed.category,
       note: parsed.note && parsed.note !== '' ? parsed.note : null,
       documentId: parsed.documentId ?? null,
+      standardId: parsed.standardId ?? null,
       createdBy: userId,
     })
     .returning({ id: monitoringEntries.id });
@@ -122,11 +152,15 @@ export async function listMonitoringEntries(
       documentId: monitoringEntries.documentId,
       documentTitle: projectDocuments.title,
       documentCitationLabel: projectDocuments.citationLabel,
+      standardId: monitoringEntries.standardId,
+      standardCode: standards.code,
+      standardTitleDe: standards.titleDe,
       createdAt: monitoringEntries.createdAt,
       userName: profiles.fullName,
     })
     .from(monitoringEntries)
     .leftJoin(projectDocuments, eq(projectDocuments.id, monitoringEntries.documentId))
+    .leftJoin(standards, eq(standards.id, monitoringEntries.standardId))
     .leftJoin(profiles, eq(profiles.id, monitoringEntries.createdBy))
     .where(eq(monitoringEntries.projectId, projectId))
     .orderBy(desc(monitoringEntries.entryDate), desc(monitoringEntries.createdAt));

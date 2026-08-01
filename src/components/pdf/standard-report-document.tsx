@@ -1,5 +1,6 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { styles } from './styles';
+import { MONITORING_CATEGORY_LABELS } from '@/lib/actions/monitoring-core';
 import { LetterheadHeader } from './letterhead-header';
 import { ProjectHeader } from './project-header';
 import { SiteProfileSection } from './site-profile-section';
@@ -75,9 +76,25 @@ export function StandardReportDocument({ data }: { data: StandardReportData }) {
         </Page>
       ))}
 
-      {/* Final page — citation index + audit excerpt. */}
+      {/* Final page — citation index + audit excerpt (+ monitoring journal). */}
       <Page size="A4" style={styles.page}>
         <LetterheadHeader letterhead={data.letterhead} />
+        {/* Betrieb & Monitoring: journal entries linked to THIS standard —
+            documentation evidence for Behörden, no parameter values. */}
+        {(data.monitoringEntries ?? []).length > 0 ? (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.h2}>Betrieb &amp; Monitoring (Journal)</Text>
+            {(data.monitoringEntries ?? []).map((m, i) => (
+              <View key={i} style={styles.siteRow} wrap={false}>
+                <Text style={styles.siteLabel}>
+                  {`${m.entryDate} · ${(MONITORING_CATEGORY_LABELS as Record<string, string>)[m.category] ?? m.category}`}
+                  {m.note ? ` — ${m.note}` : ''}
+                </Text>
+                <Text style={styles.siteValue}>{m.documentTitle ?? ''}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
         <CitationIndex entries={data.citationIndex} />
         <View style={{ marginTop: 12 }}>
           <AuditExcerpt entries={data.audit} />

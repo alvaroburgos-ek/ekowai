@@ -780,6 +780,12 @@ export const monitoringEntries = pgTable(
     documentId: uuid('document_id').references(() => projectDocuments.id, {
       onDelete: 'set null',
     }),
+    /** Optional link to the guideline (standards.id) this entry refers to —
+     * app-validated to be one of the project's attached standards
+     * (monitoring.ts). */
+    standardId: uuid('standard_id').references(() => standards.id, {
+      onDelete: 'set null',
+    }),
     createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

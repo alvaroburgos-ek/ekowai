@@ -177,6 +177,14 @@ export type StandardReportData = {
    * state this report refers to (empty = no approvals yet).
    * Optional so hand-built render fixtures stay valid; assembler always sets it. */
   approveSnapshots?: Array<{ worksheetCode: string; snapshotId: string; takenAt: string }>;
+  /** Monitoring-Journal entries linked to THIS standard (documentation layer,
+   * no parameter values). Optional for fixtures; assembler normalises to []. */
+  monitoringEntries?: Array<{
+    entryDate: string;
+    category: string;
+    note: string | null;
+    documentTitle: string | null;
+  }>;
 };
 
 // =============================================================================
@@ -341,6 +349,13 @@ export type AssemblerInput = {
   audits: AssemblerAuditRow[];
   /** Latest approve-snapshot rows (optional; loader supplies, fixtures may omit). */
   snapshots?: Array<{ worksheetInstanceId: string; id: string; takenAt: DateLike | null }>;
+  /** Monitoring-Journal rows for this standard (optional; loader supplies). */
+  monitoring?: Array<{
+    entryDate: DateLike;
+    category: string;
+    note: string | null;
+    documentTitle: string | null;
+  }>;
   /** Clock for `generatedAt`. Defaults to Date.now(). */
   now?: Date;
 };
@@ -827,6 +842,12 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
     citationIndex,
     audit: auditExcerpt,
     approveSnapshots: buildApproveSnapshots(input.snapshots ?? [], instances, templates),
+    monitoringEntries: (input.monitoring ?? []).map((m) => ({
+      entryDate: toDate(m.entryDate).toISOString().slice(0, 10),
+      category: m.category,
+      note: m.note,
+      documentTitle: m.documentTitle,
+    })),
   };
 }
 

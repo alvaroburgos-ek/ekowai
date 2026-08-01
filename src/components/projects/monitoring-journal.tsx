@@ -36,6 +36,13 @@ export type MonitoringDocumentOption = {
   citationLabel: string;
 };
 
+/** Lightweight guideline option (the project's attached standards). */
+export type MonitoringStandardOption = {
+  id: string;
+  code: string;
+  titleDe: string;
+};
+
 /**
  * Monitoring-Journal panel (interim — documentation-only precursor to
  * roadmap Stage 8). Deliberately captures NO parameter values/units; the
@@ -48,16 +55,22 @@ export function MonitoringJournal({
   projectId,
   entries,
   documents,
+  standards,
 }: {
   projectId: string;
   entries: MonitoringEntryView[];
   documents: MonitoringDocumentOption[];
+  /** The project's attached standards — feeds the optional guideline link. */
+  standards: MonitoringStandardOption[];
 }) {
   const [isPending, startTransition] = useTransition();
   const [entryDate, setEntryDate] = useState(todayLocalIso());
   const [category, setCategory] = useState<MonitoringCategory>('laborbericht');
   const [note, setNote] = useState('');
   const [documentId, setDocumentId] = useState('');
+  const [standardId, setStandardId] = useState('');
+  /** Client-side list filter: '' = alle, else a standards.id. */
+  const [filterStandardId, setFilterStandardId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const canAdd = entryDate !== '' && note.trim().length <= NOTE_MAX;
@@ -73,9 +86,11 @@ export function MonitoringJournal({
           category,
           note: note.trim() !== '' ? note.trim() : undefined,
           documentId: documentId !== '' ? documentId : undefined,
+          standardId: standardId !== '' ? standardId : undefined,
         });
         setNote('');
         setDocumentId('');
+        setStandardId('');
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       }
@@ -93,9 +108,21 @@ export function MonitoringJournal({
     });
   }
 
+  // Filter chips: one per standard that HAS entries (dedup by id), plus Alle.
+  const filterOptions: { id: string; code: string }[] = [];
+  for (const e of entries) {
+    if (e.standardId && e.standardCode && !filterOptions.some((f) => f.id === e.standardId)) {
+      filterOptions.push({ id: e.standardId, code: e.standardCode });
+    }
+  }
+  const filtered =
+    filterStandardId === ''
+      ? entries
+      : entries.filter((e) => e.standardId === filterStandardId);
+
   // Entries arrive newest-first; group consecutive rows by entry date.
   const groups: { date: string; items: MonitoringEntryView[] }[] = [];
-  for (const e of entries) {
+  for (const e of filtered) {
     const last = groups[groups.length - 1];
     if (last && last.date === e.entryDate) last.items.push(e);
     else groups.push({ date: e.entryDate, items: [e] });
@@ -157,6 +184,22 @@ export function MonitoringJournal({
             ))}
           </select>
         </label>
+        <label className="block flex-1">
+          <span className="text-xs font-medium text-subtext">Regelwerk (optional)</span>
+          <select
+            value={standardId}
+            onChange={(e) => setStandardId(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-hairline bg-paper px-3 py-2 text-sm text-ink"
+            aria-label="Regelwerk (optional)"
+          >
+            <option value="">— kein Regelwerk —</option>
+            {standards.map((s) => (
+              <option key={s.id} value={s.id}>
+                {`${s.code} — ${s.titleDe}`}
+              </option>
+            ))}
+          </select>
+        </label>
         <Button
           size="sm"
           type="button"
@@ -171,10 +214,35 @@ export function MonitoringJournal({
 
       {error && <p className="text-xs text-error">{error}</p>}
 
+      {/* Regelwerk filter chips — only standards that actually have entries */}
+      {filterOptions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Nach Regelwerk filtern">
+          {[{ id: '', code: 'Alle' }, ...filterOptions].map((f) => (
+            <button
+              key={f.id || 'alle'}
+              type="button"
+              onClick={() => setFilterStandardId(f.id)}
+              aria-pressed={filterStandardId === f.id}
+              className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+                filterStandardId === f.id
+                  ? 'border-accent-2 bg-paper-2 text-ink'
+                  : 'border-hairline bg-paper text-subtext hover:text-ink'
+              }`}
+            >
+              {f.code}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Entry list, grouped by date (newest first) */}
       {entries.length === 0 ? (
         <p className="text-[11px] text-subtext py-2 italic">
           Noch keine Journal-Einträge erfasst.
+        </p>
+      ) : filtered.length === 0 ? (
+        <p className="text-[11px] text-subtext py-2 italic">
+          Keine Einträge für dieses Regelwerk.
         </p>
       ) : (
         <div className="space-y-3">
@@ -194,6 +262,16 @@ export function MonitoringJournal({
                         {categoryLabel(e.category)}
                       </span>
                     </div>
+                    {e.standardCode && (
+                      <div className="sm:shrink-0">
+                        <span
+                          className="inline-flex items-center rounded-full border border-hairline px-2 py-0.5 text-[10px] font-medium text-subtext"
+                          title={e.standardTitleDe ?? undefined}
+                        >
+                          {e.standardCode}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       {e.note && <div className="text-ink break-words">{e.note}</div>}
                       <div className="text-xs text-subtext break-words">

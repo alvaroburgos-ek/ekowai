@@ -61,6 +61,13 @@ export default async function ProjectOverviewPage({
         citationLabel: d.citationLabel,
       }))
     : [];
+  // Lightweight guideline options for the journal's optional Regelwerk link —
+  // reuses the project-standards query already loaded for the layers above.
+  const monitoringStandards = standardsWithWs.map((s) => ({
+    id: s.standard.id,
+    code: s.standard.code,
+    titleDe: s.standard.titleDe,
+  }));
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -164,6 +171,7 @@ export default async function ProjectOverviewPage({
             projectId={id}
             entries={monitoringEntries}
             documents={monitoringDocs}
+            standards={monitoringStandards}
           />
         </section>
       )}

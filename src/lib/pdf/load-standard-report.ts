@@ -16,6 +16,7 @@ import {
   auditLog,
   profiles,
   calculationSnapshots,
+  monitoringEntries,
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
 import { assembleStandardReport, type StandardReportData } from './assemble-standard-report';
@@ -173,6 +174,25 @@ export async function loadStandardReportData(
         )
         .orderBy(desc(calculationSnapshots.takenAt));
 
+  // 6c. Monitoring-Journal entries linked to THIS standard (Betrieb & Monitoring
+  // section on the report's final page; documentation layer, no values).
+  const monitoringRows = await db
+    .select({
+      entryDate: monitoringEntries.entryDate,
+      category: monitoringEntries.category,
+      note: monitoringEntries.note,
+      documentTitle: projectDocuments.title,
+    })
+    .from(monitoringEntries)
+    .leftJoin(projectDocuments, eq(projectDocuments.id, monitoringEntries.documentId))
+    .where(
+      and(
+        eq(monitoringEntries.projectId, projectId),
+        eq(monitoringEntries.standardId, std.id),
+      ),
+    )
+    .orderBy(desc(monitoringEntries.entryDate));
+
   // 7. project_documents for citation resolution.
   const allDocs = await db
     .select()
@@ -266,6 +286,7 @@ export async function loadStandardReportData(
     approvals: approvalRows,
     audits: auditRows,
     snapshots: snapshotRows,
+    monitoring: monitoringRows,
     now: new Date(),
   });
 }

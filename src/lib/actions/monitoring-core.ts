@@ -48,6 +48,12 @@ export const addMonitoringEntrySchema = z.object({
   note: z.string().trim().max(NOTE_MAX, `Maximal ${NOTE_MAX} Zeichen`).optional(),
   /** Optional link to an uploaded document (project_documents.id). */
   documentId: z.string().uuid().optional(),
+  /**
+   * Optional link to a guideline (standards.id). Must be one of the project's
+   * attached standards — that cross-check needs the DB and lives in
+   * `monitoring.ts` (addMonitoringEntry); here only the uuid shape.
+   */
+  standardId: z.string().uuid().optional(),
 });
 
 export type AddMonitoringEntryInput = z.infer<typeof addMonitoringEntrySchema>;

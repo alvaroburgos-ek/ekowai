@@ -19,6 +19,7 @@ import {
 
 const valid = (over: Partial<{
   projectId: string; entryDate: string; category: string; note?: string; documentId?: string;
+  standardId?: string;
 }> = {}) => ({
   projectId: '11111111-2222-4333-8444-555555555555',
   entryDate: '2026-08-01',
@@ -108,6 +109,20 @@ describe('parseAddMonitoringEntry — ids', () => {
 
   it('rejects a non-uuid documentId', () => {
     expect(() => parseAddMonitoringEntry(valid({ documentId: 'not-a-uuid' }))).toThrow(ZodError);
+  });
+
+  it('standardId is optional (guideline link)', () => {
+    expect(parseAddMonitoringEntry(valid()).standardId).toBeUndefined();
+  });
+
+  it('accepts a uuid standardId', () => {
+    const standardId = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+    expect(parseAddMonitoringEntry(valid({ standardId })).standardId).toBe(standardId);
+  });
+
+  it('rejects a non-uuid standardId (a standard CODE is not accepted)', () => {
+    expect(() => parseAddMonitoringEntry(valid({ standardId: 'DWA-A-138' }))).toThrow(ZodError);
+    expect(() => parseAddMonitoringEntry(valid({ standardId: '' }))).toThrow(ZodError);
   });
 
   it('rejects missing required keys', () => {
