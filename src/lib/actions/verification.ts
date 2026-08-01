@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { eq, ne, and, sql } from 'drizzle-orm';
+import { eq, and, sql, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import {
   fields,
@@ -206,10 +206,10 @@ export async function verifyAllFieldsInWorksheet(
     .limit(1);
   if (!rows[0]) throw new Error('Worksheet template not found');
 
-  // Three-state contract: flip every row that is NOT engineer_verified —
-  // catches imported_unverified plus needs_engineer_review and any other
-  // non-verified state. Previous version only caught imported_unverified
-  // and silently skipped needs_engineer_review rows.
+  // Bulk verify flips ONLY genuinely-unverified rows. It must never touch:
+  // verified_against_standard (would downgrade an SR-1 quote-verification),
+  // corrected, disputed (needs an explicit note-carrying resolution),
+  // inferred_from_worksheet (app-internal — exempt, nothing to verify).
   const updated = await db
     .update(fields)
     .set({
@@ -221,7 +221,7 @@ export async function verifyAllFieldsInWorksheet(
     .where(
       and(
         eq(fields.worksheetTemplateId, id),
-        ne(fields.verificationStatus, VERIFIED),
+        inArray(fields.verificationStatus, ['imported_unverified', 'needs_engineer_review']),
       ),
     )
     .returning({ id: fields.id });

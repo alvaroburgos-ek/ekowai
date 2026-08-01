@@ -6,6 +6,8 @@ import {
   worksheetInstances,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
+import { projects } from '@/lib/db/schema';
+import { resolveFromSiteProfile } from '@/lib/site-profile/symbol-map';
 
 /**
  * Stage-1 verification blocking rule (SR-1, roadmap tracker):
@@ -110,15 +112,27 @@ export async function checkFinalizeGate(instanceId: string): Promise<FinalizeGat
       );
   const paramByFieldId = new Map(params.map((p) => [p.fieldId, p]));
 
+  // Site-profile-resolved values count as "used" too (review finding #4):
+  // a value flowing in from the site profile drives gates/equations exactly
+  // like an entered one, so it must not escape the Stage-1 rule — this keeps
+  // the gate's list identical to the dossier's SR-1 box.
+  const [proj] = await db
+    .select({ siteProfile: projects.siteProfile })
+    .from(projects)
+    .where(eq(projects.id, instance.projectId))
+    .limit(1);
+  const siteProfile = proj?.siteProfile ?? null;
+
   return decideFinalizeGate(
     tmplFields.map((f) => {
       const p = paramByFieldId.get(f.id);
+      const fromSite = resolveFromSiteProfile(siteProfile, f.symbol);
       return {
         symbol: f.symbol,
         labelDe: f.labelDe,
         isRequired: f.isRequired ?? false,
         verificationStatus: f.verificationStatus,
-        hasValue: p ? paramHasValue(f.dataType, p) : false,
+        hasValue: (p ? paramHasValue(f.dataType, p) : false) || fromSite?.value != null,
       };
     }),
   );

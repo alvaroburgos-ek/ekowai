@@ -180,11 +180,14 @@ export async function loadValuetableData(
     paramsByFieldId,
   );
 
-  // Footer stamp: most recent approve-snapshot across this standard's worksheets.
+  // Footer stamp: the snapshot id may only be printed when EVERY worksheet of
+  // the standard is approved/final — otherwise draft values would carry an
+  // approve-stamp they are not bound to (review finding #3). Any non-approved
+  // instance (or a template with no instance) ⇒ honest "Arbeitsstand" notice.
   const instances = templateIds.length === 0
     ? []
     : await db
-      .select({ id: worksheetInstances.id })
+      .select({ id: worksheetInstances.id, status: worksheetInstances.status })
       .from(worksheetInstances)
       .where(
         and(
@@ -192,7 +195,10 @@ export async function loadValuetableData(
           inArray(worksheetInstances.worksheetTemplateId, templateIds),
         ),
       );
-  const instanceIds = instances.map((i) => i.id);
+  const allApproved =
+    instances.length === templates.length
+    && instances.every((i) => i.status === 'engineer_approved' || i.status === 'final');
+  const instanceIds = allApproved ? instances.map((i) => i.id) : [];
   const [snap] = instanceIds.length === 0
     ? []
     : await db

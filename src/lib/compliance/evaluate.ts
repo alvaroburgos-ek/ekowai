@@ -422,7 +422,18 @@ function evalNode(n: Node, lookup: (sym: string) => Value | undefined, st: EvalS
     case 'compare': {
       const v = lookup(n.symbol);
       if (v === undefined || v === null || v === '') { st.missing.add(n.symbol); return 'missing'; }
-      const r = n.rhs.value;
+      let r = n.rhs.value;
+      // Var-vs-var equality (review finding #1): a bare-ident RHS that IS a
+      // project symbol WITH a value compares against that value — otherwise
+      // `IF n_a >= n_b THEN x == n_a` is unsatisfiable (x == "n_a" as string).
+      // Enum literals never resolve as symbols, so enum gates keep string
+      // semantics. Corpus-checked: no enum value shares a name with a field.
+      if (typeof r === 'string' && (n.op === '==' || n.op === '!=')) {
+        const resolved = lookup(r);
+        if (resolved !== undefined && resolved !== null && resolved !== '') {
+          r = resolved;
+        }
+      }
       return compare(v, n.op, r) ? 'true' : 'false';
     }
     case 'acompare': {

@@ -98,10 +98,31 @@ describe('evaluateCondition — F-4: relational var-vs-var resolves the RHS iden
     expect(evaluateCondition('V_s >= 15', lookup({ V_s: 10 })).kind).toBe('fail');
   });
 
-  it('== / != with a bare-ident RHS KEEP legacy enum string semantics', () => {
+  it('== / != with a bare-ident RHS keep enum string semantics when the ident is not a symbol', () => {
     expect(evaluateCondition('speichertyp == geschlossen', lookup({ speichertyp: 'geschlossen' })).kind).toBe('pass');
     expect(evaluateCondition('speichertyp == geschlossen', lookup({ speichertyp: 'offen' })).kind).toBe('fail');
-    // even when both symbols exist as numeric values, == stays the legacy literal compare
-    expect(evaluateCondition('a == b', lookup({ a: 3, b: 3 })).kind).toBe('fail');
+    // when the RHS ident IS a symbol with a value, it resolves (review finding #1)
+    expect(evaluateCondition('a == b', lookup({ a: 3, b: 3 })).kind).toBe('pass');
+  });
+});
+
+describe('== / != with a bare-ident RHS that IS a project symbol (review finding #1)', () => {
+  it('IF a >= b THEN x == a — satisfiable with correct values (M816 REQ-13 shape)', () => {
+    const cond = 'IF n_a >= n_b THEN n_observation_period == n_a';
+    expect(evaluateCondition(cond, lookup({ n_a: 5, n_b: 3, n_observation_period: 5 })).kind).toBe('pass');
+    expect(evaluateCondition(cond, lookup({ n_a: 5, n_b: 3, n_observation_period: 4 })).kind).toBe('fail');
+  });
+
+  it('x == sym resolves sym when it has a value; != inverts', () => {
+    expect(evaluateCondition('Win == Wout', lookup({ Win: 7, Wout: 7 })).kind).toBe('pass');
+    expect(evaluateCondition('Win == Wout', lookup({ Win: 7, Wout: 6 })).kind).toBe('fail');
+    expect(evaluateCondition('n_a != n_b', lookup({ n_a: 5, n_b: 5 })).kind).toBe('fail');
+    expect(evaluateCondition('n_a != n_b', lookup({ n_a: 5, n_b: 3 })).kind).toBe('pass');
+  });
+
+  it('enum literals that are NOT symbols keep legacy string semantics', () => {
+    expect(evaluateCondition('speichertyp == geschlossen', lookup({ speichertyp: 'geschlossen' })).kind).toBe('pass');
+    expect(evaluateCondition('speichertyp == geschlossen', lookup({ speichertyp: 'offen' })).kind).toBe('fail');
+    expect(evaluateCondition('pretreatment_selected != none', lookup({ pretreatment_selected: 'none' })).kind).toBe('fail');
   });
 });
