@@ -5,6 +5,7 @@ import {
   ArrowRight,
   ScrollText,
   Leaf,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
@@ -14,6 +15,8 @@ import { loadVsmeSummary } from '@/lib/db/queries/vsme-summary';
 import { ReportOverview } from '@/components/vsme/report-overview';
 import { VsmeExportButton } from '@/components/vsme/vsme-export-button';
 import { projectOverviewSections } from '@/components/projects/project-overview-sections';
+import { EffortLog } from '@/components/projects/effort-log';
+import { listEffortEntries } from '@/lib/actions/effort';
 
 export default async function ProjectOverviewPage({
   params,
@@ -33,6 +36,7 @@ export default async function ProjectOverviewPage({
   const sections = projectOverviewSections({ isVsme });
   const standardsWithWs = await listProjectStandardsWithWorksheets(id);
   const vsmeSummary = isVsme ? await loadVsmeSummary(id) : null;
+  const effort = sections.includes('effort') ? await listEffortEntries(id) : null;
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -89,6 +93,20 @@ export default async function ProjectOverviewPage({
           </div>
           <ReportOverview projectId={id} locale={localeTyped} summary={vsmeSummary} />
           <VsmeExportButton projectId={id} locale={localeTyped} />
+        </section>
+      )}
+
+      {sections.includes('effort') && effort && (
+        <section className="space-y-4" data-testid="effort-section">
+          <div className="inline-flex items-center gap-2">
+            <Clock className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Aufwandserfassung</h2>
+          </div>
+          <EffortLog
+            projectId={id}
+            entries={effort.entries}
+            totalHours={effort.totalHours}
+          />
         </section>
       )}
 

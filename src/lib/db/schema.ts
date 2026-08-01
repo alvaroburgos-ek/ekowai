@@ -559,6 +559,30 @@ export const co2ActivityLines = pgTable(
 );
 
 // =============================================================================
+// EFFORT LOGGING (roadmap v2 §2.9 — dependency for the Angebots-Engine)
+// =============================================================================
+// Per-project work-time entries. `position` is free text for now — offer
+// positions arrive with Slice E1 and will link entries to Angebot line items.
+export const effortEntries = pgTable(
+  'effort_entries',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    workDate: date('work_date').notNull(),
+    hours: numeric('hours').notNull(),
+    position: text('position').notNull(),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectDateIdx: index('effort_entries_project_date_idx').on(t.projectId, t.workDate),
+  }),
+);
+
+// =============================================================================
 // LEADS (inbound contact-form submissions from ekowai-landing-page)
 // =============================================================================
 // Anonymous form submissions land here via the landing-page server action using

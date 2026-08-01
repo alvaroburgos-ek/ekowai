@@ -1,5 +1,5 @@
 /** Ordered sections the project overview renders. */
-export type OverviewSection = 'standards' | 'vsme-report' | 'audit';
+export type OverviewSection = 'standards' | 'vsme-report' | 'effort' | 'audit';
 
 /**
  * Decide the project overview's section composition.
@@ -13,6 +13,8 @@ export type OverviewSection = 'standards' | 'vsme-report' | 'audit';
 export function projectOverviewSections(opts: { isVsme: boolean }): OverviewSection[] {
   const sections: OverviewSection[] = ['standards'];
   if (opts.isVsme) sections.push('vsme-report');
+  // Effort logging (roadmap v2 §2.9) — additional section, always shown.
+  sections.push('effort');
   sections.push('audit');
   return sections;
 }
