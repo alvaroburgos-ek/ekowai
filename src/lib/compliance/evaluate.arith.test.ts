@@ -72,3 +72,37 @@ describe('evaluateCondition — arithmetic operands', () => {
     expect(evaluateCondition('a + b', lookup({ a: 1, b: 2 })).kind).toBe('manual');
   });
 });
+
+describe('evaluateCondition — var-vs-var ordering gates (F-4 / bare-symbol-RHS fix)', () => {
+  // Regression for the corpus-wide "bare-symbol-RHS always-fail" class: `V_s >= V_S_min`
+  // (two number FIELDS, ordering operator) used to stringify the RHS to "V_S_min" and
+  // therefore FAIL for every input — the block gate fired but never enforced. It must now
+  // compare the two field values numerically, both ways, and go pending when the RHS is unfilled.
+  it('field >= field enforces both ways (was always-fail)', () => {
+    expect(evaluateCondition('V_s >= V_S_min', lookup({ V_s: 100, V_S_min: 80 })).kind).toBe('pass');
+    expect(evaluateCondition('V_s >= V_S_min', lookup({ V_s: 60, V_S_min: 80 })).kind).toBe('fail');
+  });
+  it('all four ordering operators resolve the RHS field', () => {
+    expect(evaluateCondition('eta_ges >= eta_erf', lookup({ eta_ges: 0.9, eta_erf: 0.8 })).kind).toBe('pass');
+    expect(evaluateCondition('m >= m_min', lookup({ m: 7, m_min: 7 })).kind).toBe('pass');
+    expect(evaluateCondition('c_bsb5 <= limit_bsb5', lookup({ c_bsb5: 10, limit_bsb5: 20 })).kind).toBe('pass');
+    expect(evaluateCondition('c_bsb5 <= limit_bsb5', lookup({ c_bsb5: 30, limit_bsb5: 20 })).kind).toBe('fail');
+    expect(evaluateCondition('a > b', lookup({ a: 5, b: 3 })).kind).toBe('pass');
+    expect(evaluateCondition('a < b', lookup({ a: 5, b: 3 })).kind).toBe('fail');
+  });
+  it('missing RHS field → pending, never a false block', () => {
+    const r = evaluateCondition('V_s >= V_S_min', lookup({ V_s: 100 }));
+    expect(r.kind).toBe('pending');
+    if (r.kind === 'pending') expect(r.missingSymbols).toContain('V_S_min');
+  });
+  it('literal-RHS ordering still works (unaffected)', () => {
+    expect(evaluateCondition('V_s >= 40', lookup({ V_s: 50 })).kind).toBe('pass');
+    expect(evaluateCondition('V_s >= 40', lookup({ V_s: 30 })).kind).toBe('fail');
+  });
+  it('enum equality with a bare-ident RHS is PRESERVED (not routed to numeric)', () => {
+    expect(evaluateCondition('abdichtungsart == bitumenbahn', lookup({ abdichtungsart: 'bitumenbahn' })).kind).toBe('pass');
+    expect(evaluateCondition('abdichtungsart == bitumenbahn', lookup({ abdichtungsart: 'kunststoffbahn' })).kind).toBe('fail');
+    expect(evaluateCondition('pretreatment_selected != none', lookup({ pretreatment_selected: 'klaergrube' })).kind).toBe('pass');
+    expect(evaluateCondition('pretreatment_selected != none', lookup({ pretreatment_selected: 'none' })).kind).toBe('fail');
+  });
+});

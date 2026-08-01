@@ -242,6 +242,18 @@ class Parser {
       // single literal/bare-ident on the right keeps the original string-literal RHS
       // semantics. Anything involving arithmetic uses the numeric acompare path.
       if (left.kind === 'aref' && isSimpleOperand(right)) {
+        // A bare-identifier RHS under an ORDERING operator (`<`, `<=`, `>`, `>=`) is a
+        // variable-vs-variable numeric comparison (e.g. `V_s >= V_S_min`, `eta_ges >= eta_erf`).
+        // Route it through the numeric acompare path so the RHS field is resolved via lookup
+        // (pending when unfilled) instead of being stringified as its own symbol name — the
+        // legacy string-literal RHS made such gates SILENTLY NEVER ENFORCE (always fail,
+        // regardless of the values). Equality operators (`==`/`!=`) keep the legacy enum
+        // string-literal semantics (`abdichtungsart == bitumenbahn`, `pretreatment != none`).
+        const isOrdering =
+          next.value === '<' || next.value === '<=' || next.value === '>' || next.value === '>=';
+        if (isOrdering && right.kind === 'aref') {
+          return { kind: 'acompare', left, op: next.value, right };
+        }
         return { kind: 'compare', symbol: left.symbol, op: next.value, rhs: operandToLiteral(right) };
       }
       return { kind: 'acompare', left, op: next.value, right };
