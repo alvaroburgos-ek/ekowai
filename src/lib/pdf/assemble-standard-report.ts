@@ -1,5 +1,7 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
+import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
+import { VERIFIED_OK } from '@/lib/verification-status';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 
@@ -82,6 +84,8 @@ export type ReportCompliance = {
   severity: string;
   clauseReference: string | null;
   result: ComplianceEval;
+  /** Per-leaf explanation (actual · required · wouldPass) — present on fail. */
+  explanation?: ExplainLeaf[];
 };
 
 export type ReportWorksheet = {
@@ -94,6 +98,11 @@ export type ReportWorksheet = {
   sections: ReportSection[];
   equations: ReportEquation[];
   compliance: ReportCompliance[];
+  /** Stage-1: used fields (required or valued) whose definition is not yet
+   * verified against the printed standard — the finalize gate's list,
+   * surfaced in the dossier so a reviewer sees it before signing.
+   * Optional so hand-built render fixtures stay valid; assembler always sets it. */
+  unverifiedFields?: Array<{ symbol: string; labelDe: string; status: string }>;
   /**
    * Present only when A138-12's A_S,m was specified manually by the engineer
    * (a_s_m_determination_method === 'manual' && a_s_m_provenance non-empty).
@@ -156,6 +165,10 @@ export type StandardReportData = {
   worksheets: ReportWorksheet[];
   citationIndex: CitationIndexEntry[];
   audit: AuditExcerptEntry[];
+  /** Latest approve-snapshot per worksheet — the reproducible calculation
+   * state this report refers to (empty = no approvals yet).
+   * Optional so hand-built render fixtures stay valid; assembler always sets it. */
+  approveSnapshots?: Array<{ worksheetCode: string; snapshotId: string; takenAt: string }>;
 };
 
 // =============================================================================
@@ -234,6 +247,10 @@ export type AssemblerField = {
   isRequired: boolean;
   clauseReference: string | null;
   orderIndex: number;
+  /** Stage-1 verification state — optional so fixtures stay lightweight;
+   * ABSENT means unknown and is never flagged (the production loader
+   * always supplies it). */
+  verificationStatus?: string;
 };
 
 export type AssemblerEquation = {
@@ -312,6 +329,8 @@ export type AssemblerInput = {
   documents: AssemblerDocument[];
   approvals: AssemblerApprovalRow[];
   audits: AssemblerAuditRow[];
+  /** Latest approve-snapshot rows (optional; loader supplies, fixtures may omit). */
+  snapshots?: Array<{ worksheetInstanceId: string; id: string; takenAt: DateLike | null }>;
   /** Clock for `generatedAt`. Defaults to Date.now(). */
   now?: Date;
 };
@@ -487,11 +506,17 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
 
       // Group fields by section id (null → 'unsectioned').
       const sectionMap = new Map<string | 'unsectioned', ReportField[]>();
+      const unverifiedFields: NonNullable<ReportWorksheet['unverifiedFields']> = [];
       for (const f of tplFields) {
         const sid = f.sectionId ?? 'unsectioned';
         const arr = sectionMap.get(sid) ?? [];
         const resolved = resolvedByFieldId.get(f.id);
         const param = paramByFieldId.get(f.id);
+        const displayValue =
+          coerceValueForDisplay(param, f.dataType) ??
+          (resolved?.source === 'site_profile' && resolved.value != null
+            ? String(resolved.value)
+            : null);
         arr.push({
           id: f.id,
           symbol: f.symbol,
@@ -499,16 +524,25 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           unit: f.unit,
           dataType: f.dataType,
           isRequired: f.isRequired,
-          value:
-            coerceValueForDisplay(param, f.dataType) ??
-            (resolved?.source === 'site_profile' && resolved.value != null
-              ? String(resolved.value)
-              : null),
+          value: displayValue,
           valueSource: resolved?.source ?? null,
           citations: citationsForField(f.id),
           clauseReference: f.clauseReference,
         });
         sectionMap.set(sid, arr);
+        // Stage-1: a USED field (required or valued) whose definition is not
+        // verified against the standard goes on the dossier's SR-1 list.
+        if (
+          typeof f.verificationStatus === 'string'
+          && !VERIFIED_OK.has(f.verificationStatus)
+          && (f.isRequired || displayValue != null)
+        ) {
+          unverifiedFields.push({
+            symbol: f.symbol,
+            labelDe: f.labelDe,
+            status: f.verificationStatus,
+          });
+        }
       }
 
       const wsSections: ReportSection[] = [];
@@ -588,11 +622,19 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
       });
 
       const evaluatedCompliance: ReportCompliance[] = tplCReqs.map((c) => {
-        const result = evaluateCondition(c.condition, (sym) => {
+        const gateLookup = (sym: string) => {
           const r = resolvedBySymbol.get(sym);
           if (!r || r.value == null) return undefined;
           return r.value as number | string | boolean;
-        });
+        };
+        const result = evaluateCondition(c.condition, gateLookup);
+        // Stage-3: failed gates carry the per-leaf explanation (same AST as
+        // the evaluator) so the dossier shows actual · required · wouldPass.
+        let explanation: ExplainLeaf[] | undefined;
+        if (result.kind === 'fail') {
+          const ex = explainCondition(c.condition, gateLookup);
+          if (ex.kind === 'explained' && ex.leaves.length > 0) explanation = ex.leaves;
+        }
         return {
           id: c.id,
           code: c.code,
@@ -601,6 +643,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           severity: c.severity,
           clauseReference: c.clauseReference,
           result,
+          ...(explanation ? { explanation } : {}),
         };
       });
 
@@ -635,6 +678,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         sections: wsSections,
         equations: evaluatedEquations,
         compliance: evaluatedCompliance,
+        unverifiedFields,
         aSmProvenanceLine,
       };
     });
@@ -766,7 +810,30 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
     worksheets,
     citationIndex,
     audit: auditExcerpt,
+    approveSnapshots: buildApproveSnapshots(input.snapshots ?? [], instances, templates),
   };
+}
+
+/** Latest approve-snapshot per worksheet (input ordered takenAt DESC; first per instance wins). */
+function buildApproveSnapshots(
+  snapshots: NonNullable<AssemblerInput['snapshots']>,
+  instances: AssemblerInstance[],
+  templates: AssemblerTemplate[],
+): NonNullable<StandardReportData['approveSnapshots']> {
+  const templateIdByInstance = new Map(instances.map((i) => [i.id, i.worksheetTemplateId]));
+  const codeByTemplateId = new Map(templates.map((t) => [t.id, t.code]));
+  const seen = new Set<string>();
+  const out: NonNullable<StandardReportData['approveSnapshots']> = [];
+  for (const s of snapshots) {
+    if (seen.has(s.worksheetInstanceId)) continue;
+    seen.add(s.worksheetInstanceId);
+    out.push({
+      worksheetCode: codeByTemplateId.get(templateIdByInstance.get(s.worksheetInstanceId) ?? '') ?? '?',
+      snapshotId: s.id,
+      takenAt: s.takenAt ? toDate(s.takenAt).toISOString() : '',
+    });
+  }
+  return out;
 }
 
 // =============================================================================

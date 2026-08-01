@@ -1,4 +1,4 @@
-import { Document, Page, View } from '@react-pdf/renderer';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { styles } from './styles';
 import { LetterheadHeader } from './letterhead-header';
 import { ProjectHeader } from './project-header';
@@ -36,6 +36,21 @@ export function StandardReportDocument({ data }: { data: StandardReportData }) {
           generatedAt={data.generatedAt}
         />
         <SiteProfileSection siteProfile={data.siteProfile} />
+        {/* Berechnungsstand: the approve-snapshot ids this report refers to. */}
+        <View style={{ marginTop: 12 }}>
+          <Text style={styles.h2}>Berechnungsstand</Text>
+          {(data.approveSnapshots ?? []).length === 0 ? (
+            <Text style={styles.note}>
+              Kein genehmigter Berechnungsstand — Werte sind Arbeitsstand.
+            </Text>
+          ) : (
+            (data.approveSnapshots ?? []).map((s) => (
+              <Text key={s.snapshotId} style={styles.mono}>
+                {`${s.worksheetCode}: ${s.snapshotId}${s.takenAt ? ` · ${s.takenAt.slice(0, 10)}` : ''}`}
+              </Text>
+            ))
+          )}
+        </View>
         <ReportFooter
           projectCode={data.project.projectCode}
           standardCode={data.standard.code}

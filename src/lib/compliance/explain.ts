@@ -206,7 +206,9 @@ function arithToText(n: ConditionArithNode): string {
 function fmt(v: ConditionValue): string {
   if (v === null) return 'NULL';
   if (typeof v === 'number') {
-    return Number.isInteger(v) ? String(v) : String(Math.round(v * 10000) / 10000);
+    // Significant digits, not fixed decimals — kf-scale values (1e-5) must
+    // survive instead of rounding to 0.
+    return Number.isInteger(v) ? String(v) : String(Number(v.toPrecision(6)));
   }
   return String(v);
 }

@@ -94,6 +94,31 @@ export function WorksheetSection({ worksheet }: { worksheet: ReportWorksheet }) 
           ))}
         </View>
       ) : null}
+
+      {/* Stage-1 (SR-1): used-but-unverified field definitions — the reviewer
+          must see this list before a signature rests on these values. */}
+      {(worksheet.unverifiedFields ?? []).length > 0 ? (
+        <View
+          style={{
+            marginTop: 6,
+            paddingVertical: 5,
+            paddingHorizontal: 8,
+            borderWidth: 0.75,
+            borderColor: '#c8a86b',
+            backgroundColor: '#fdf6e8',
+          }}
+          wrap={false}
+        >
+          <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: colors.warning }}>
+            Unverifizierte Felddefinitionen (SR-1) — gegen die Norm noch nicht bestätigt:
+          </Text>
+          {(worksheet.unverifiedFields ?? []).map((f) => (
+            <Text key={f.symbol} style={{ fontSize: 8.5, color: colors.warning, marginTop: 1 }}>
+              {`• ${f.labelDe} (${f.symbol}) — ${f.status}`}
+            </Text>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -135,15 +160,29 @@ function sourceMarkerFor(field: ReportField): string | null {
 function ComplianceRow({ req }: { req: ReportCompliance }) {
   const { label, style } = badgeFor(req);
   return (
-    <View style={styles.complianceRow} wrap={false}>
-      <Text style={styles.complianceCode}>{req.code}</Text>
-      <Text style={styles.complianceTitle}>
-        {req.titleDe}
-        {req.clauseReference ? (
-          <Text style={{ color: colors.subtext }}> · {req.clauseReference}</Text>
-        ) : null}
-      </Text>
-      <Text style={[styles.complianceBadge, style]}>{label}</Text>
+    <View wrap={false}>
+      <View style={styles.complianceRow}>
+        <Text style={styles.complianceCode}>{req.code}</Text>
+        <Text style={styles.complianceTitle}>
+          {req.titleDe}
+          {req.clauseReference ? (
+            <Text style={{ color: colors.subtext }}> · {req.clauseReference}</Text>
+          ) : null}
+        </Text>
+        <Text style={[styles.complianceBadge, style]}>{label}</Text>
+      </View>
+      {/* Stage-3: failed gates explain themselves — actual · required · wouldPass. */}
+      {req.explanation && req.explanation.length > 0 ? (
+        <View style={{ marginLeft: 42, marginBottom: 3 }}>
+          {req.explanation.map((leaf, i) => (
+            <Text key={i} style={{ fontSize: 8, color: colors.subtext }}>
+              {[leaf.actual, leaf.required, leaf.wouldPass ? `→ ${leaf.wouldPass}` : null]
+                .filter(Boolean)
+                .join(' · ') || leaf.text}
+            </Text>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }

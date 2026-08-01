@@ -15,12 +15,9 @@ import { and, eq, inArray } from 'drizzle-orm';
  * (owner decision 2026-08-01: finalize only).
  */
 
-/** Verification statuses that satisfy the finalize rule. */
-export const VERIFIED_OK = new Set<string>([
-  'engineer_verified',
-  'verified_against_standard',
-  'corrected',
-]);
+/** Verification statuses that satisfy the finalize rule (shared pure module). */
+export { VERIFIED_OK } from '@/lib/verification-status';
+import { VERIFIED_OK } from '@/lib/verification-status';
 
 export type FinalizeGateResult = {
   ok: boolean;

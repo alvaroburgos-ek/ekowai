@@ -468,3 +468,64 @@ describe('assembleStandardReport', () => {
     expect(ws12.aSmProvenanceLine).toBeNull();
   });
 });
+
+describe('dossier upgrade — unverified fields, gate explanations, approve snapshots', () => {
+  it('flags a used field with an unverified status; absent status is never flagged', () => {
+    const input = baseInput();
+    input.fields[0].verificationStatus = 'imported_unverified'; // f-ki, required → flagged
+    input.fields[1].verificationStatus = 'engineer_verified';   // f-as → verified, not flagged
+    // f-name keeps NO verificationStatus → unknown, never flagged
+    const data = assembleStandardReport(input);
+    const ws12 = data.worksheets.find((w) => w.code === 'A138-12')!;
+    const ws01 = data.worksheets.find((w) => w.code === 'A138-01')!;
+    expect(ws12.unverifiedFields).toEqual([
+      { symbol: 'k_i', labelDe: 'Durchlässigkeitsbeiwert', status: 'imported_unverified' },
+    ]);
+    expect(ws01.unverifiedFields).toEqual([]);
+  });
+
+  it('a failing block gate carries an explanation with actual/required', () => {
+    const input = baseInput();
+    input.parameters = [
+      ...input.parameters,
+      {
+        fieldId: 'f-ki', valueNumber: '0.000001', valueText: null, valueEnum: null,
+        valueDate: null, valueBoolean: null, valueJson: null,
+        sourceType: 'entered', citationSources: [],
+      },
+    ];
+    input.compliance = [
+      ...input.compliance,
+      {
+        id: 'cr-x', worksheetTemplateId: 'tpl-12', code: 'REQ-X',
+        titleDe: 'k_i Mindestwert', condition: 'k_i >= 0.00001',
+        severity: 'block', clauseReference: '§5.3.3.6',
+      },
+    ];
+    const data = assembleStandardReport(input);
+    const ws12 = data.worksheets.find((w) => w.code === 'A138-12')!;
+    const cr = ws12.compliance.find((c) => c.code === 'REQ-X')!;
+    expect(cr.result.kind).toBe('fail');
+    expect(cr.explanation).toBeDefined();
+    expect(cr.explanation![0].actual).toContain('k_i');
+    expect(cr.explanation![0].required).toContain('0.00001');
+  });
+
+  it('approveSnapshots maps latest-per-instance to worksheet codes', () => {
+    const input = baseInput();
+    input.snapshots = [
+      { worksheetInstanceId: 'inst-12', id: 'snap-new', takenAt: '2026-08-01T10:00:00Z' },
+      { worksheetInstanceId: 'inst-12', id: 'snap-old', takenAt: '2026-07-01T10:00:00Z' },
+      { worksheetInstanceId: 'inst-01', id: 'snap-01', takenAt: '2026-07-15T10:00:00Z' },
+    ];
+    const data = assembleStandardReport(input);
+    expect(data.approveSnapshots).toEqual([
+      { worksheetCode: 'A138-12', snapshotId: 'snap-new', takenAt: '2026-08-01T10:00:00.000Z' },
+      { worksheetCode: 'A138-01', snapshotId: 'snap-01', takenAt: '2026-07-15T10:00:00.000Z' },
+    ]);
+  });
+
+  it('no snapshots input → empty approveSnapshots (honest Arbeitsstand)', () => {
+    expect(assembleStandardReport(baseInput()).approveSnapshots).toEqual([]);
+  });
+});

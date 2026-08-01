@@ -15,6 +15,7 @@ import {
   approvalEvents,
   auditLog,
   profiles,
+  calculationSnapshots,
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
 import { assembleStandardReport, type StandardReportData } from './assemble-standard-report';
@@ -153,6 +154,25 @@ export async function loadStandardReportData(
           ),
         );
 
+  // 6b. Latest approve-snapshots (ordered DESC; assembler takes first per instance).
+  const instanceIds = instances.map((i) => i.id);
+  const snapshotRows = instanceIds.length === 0
+    ? []
+    : await db
+        .select({
+          id: calculationSnapshots.id,
+          worksheetInstanceId: calculationSnapshots.worksheetInstanceId,
+          takenAt: calculationSnapshots.takenAt,
+        })
+        .from(calculationSnapshots)
+        .where(
+          and(
+            inArray(calculationSnapshots.worksheetInstanceId, instanceIds),
+            eq(calculationSnapshots.trigger, 'approve'),
+          ),
+        )
+        .orderBy(desc(calculationSnapshots.takenAt));
+
   // 7. project_documents for citation resolution.
   const allDocs = await db
     .select()
@@ -239,6 +259,7 @@ export async function loadStandardReportData(
     documents: allDocs,
     approvals: approvalRows,
     audits: auditRows,
+    snapshots: snapshotRows,
     now: new Date(),
   });
 }
