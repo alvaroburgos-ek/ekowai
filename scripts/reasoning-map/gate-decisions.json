@@ -1,143 +1,5 @@
 [
  {
-  "code": "DIN-14021",
-  "cr": "REQ-05",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "claim_accurate_not_misleading IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-06",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "claim_substantiated_verified IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-08",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "lifecycle_considered IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-09",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "third_party_implication_avoided IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-10",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "claim_geographic_relevance IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-48",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "mobius_loop_used IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-03",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "sustainability_claim_present IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-01",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "vague_claim_present IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-02",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "free_claim_substance_level_ok IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-12",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "evaluation_documented IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-13",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "reliable_reproducible_results IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-16",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "product_packaging_separated IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-18",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "verifiable_without_confidential IS NOT NULL"
- },
- {
-  "code": "DIN-14021",
-  "cr": "REQ-19",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "info_documented_min IS NOT NULL"
- },
- {
-  "code": "DIN-276",
-  "cr": "REQ-09",
-  "kind": "field-missing",
-  "detail": "IF construction_activity == bestand THEN method_documented"
- },
- {
-  "code": "DIN-276",
-  "cr": "REQ-27",
-  "kind": "dead-prose",
-  "detail": "reference_units_match_Tab.2"
- },
- {
-  "code": "DIN-276",
-  "cr": "REQ-28",
-  "kind": "dead-prose",
-  "detail": "KG300_reference_units_match_Tab.3"
- },
- {
-  "code": "DIN-276",
-  "cr": "REQ-29",
-  "kind": "dead-prose",
-  "detail": "KG400_reference_units_match_Tab.4"
- },
- {
-  "code": "DIN-276",
-  "cr": "REQ-26",
-  "kind": "dead-prose",
-  "detail": "total_construction_costs == SUM(kg_100..kg_800)"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-05",
-  "kind": "dead-prose",
-  "detail": "values match Tabelle 4 entries (subject to Pass 3b lookup)"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-29",
-  "kind": "dead-prose",
-  "detail": "if B/S surfaces present then §5.2.3.3 handling documented"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-09",
-  "kind": "dead-prose",
-  "detail": "b_R_a_AFS63 = computed via Gl. 5"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-10",
-  "kind": "dead-prose",
-  "detail": "eta_erf computed; cap at >=0"
- },
- {
   "code": "DWA-A-102-2",
   "cr": "REQ-11",
   "kind": "split-multi-worksheet",
@@ -150,60 +12,6 @@
  },
  {
   "code": "DWA-A-102-2",
-  "cr": "REQ-12",
-  "kind": "dead-prose",
-  "detail": "m computed via Gl. B.13"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-13",
-  "kind": "dead-prose",
-  "detail": "C_b_CSB computed via Gl. B.14"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-14",
-  "kind": "dead-prose",
-  "detail": "e_0 computed via Gl. 18"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-30",
-  "kind": "dead-prose",
-  "detail": "Zusatzdatei use documented if applicable"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-16",
-  "kind": "dead-prose",
-  "detail": "H1, H2 > 0 computed via Tabelle 6"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-18",
-  "kind": "dead-prose",
-  "detail": "V_s <= 40 m³/ha OR alternative measures documented"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-19",
-  "kind": "dead-prose",
-  "detail": "A1022-31 consolidation complete"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-20",
-  "kind": "dead-prose",
-  "detail": "A1022-32 consolidation complete"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-21",
-  "kind": "dead-prose",
-  "detail": "if RÜB/SKO/SKU/RÜ exists then all structure criteria documented"
- },
- {
-  "code": "DWA-A-102-2",
   "cr": "REQ-24",
   "kind": "split-multi-worksheet",
   "detail": "m >= m_min_required",
@@ -212,24 +20,6 @@
    "A1022-23",
    "A1022-36"
   ]
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-25",
-  "kind": "dead-prose",
-  "detail": "(V_s · 10000 / q_R_Dr / 3600) <= 15  (units: m³/ha → s → h)"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-26",
-  "kind": "field-missing",
-  "detail": "if mess_proof then authority_coordination_documented"
- },
- {
-  "code": "DWA-A-102-2",
-  "cr": "REQ-27",
-  "kind": "field-missing",
-  "detail": "if q_R_Dr > 2 then Nachweisverfahren_triggered"
  },
  {
   "code": "DWA-A-138-1",
@@ -264,48 +54,6 @@
    "A138-08",
    "A138-13"
   ]
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-01",
-  "kind": "field-missing",
-  "detail": "manual_check"
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-03",
-  "kind": "field-missing",
-  "detail": "manual_check_against_bild_1"
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-04",
-  "kind": "field-missing",
-  "detail": "manual_check"
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-05",
-  "kind": "field-missing",
-  "detail": "manual_check"
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-06",
-  "kind": "field-missing",
-  "detail": "manual_check"
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-08",
-  "kind": "field-missing",
-  "detail": "manual_check"
- },
- {
-  "code": "DWA-A-178",
-  "cr": "REQ-17",
-  "kind": "field-missing",
-  "detail": "equation_1_evaluated"
  },
  {
   "code": "DWA-A-178",
@@ -364,12 +112,6 @@
   ]
  },
  {
-  "code": "DWA-A-178",
-  "cr": "REQ-28",
-  "kind": "field-missing",
-  "detail": "manual_check"
- },
- {
   "code": "DWA-A-201",
   "cr": "CR-006",
   "kind": "split-multi-worksheet",
@@ -379,24 +121,6 @@
    "A201-02",
    "A201-10"
   ]
- },
- {
-  "code": "DWA-A-201",
-  "cr": "CR-011",
-  "kind": "dead-prose",
-  "detail": "Documented per §6"
- },
- {
-  "code": "DWA-A-201",
-  "cr": "CR-012",
-  "kind": "dead-prose",
-  "detail": "All sludge-management fields populated"
- },
- {
-  "code": "DWA-A-201",
-  "cr": "CR-003",
-  "kind": "dead-prose",
-  "detail": "all values comply with §5.1"
  },
  {
   "code": "DWA-A-222",
@@ -499,18 +223,6 @@
   "detail": "reservepumpe IS NOT NULL"
  },
  {
-  "code": "DWA-A-226",
-  "cr": "CR-019",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "durchflussmessung IS NOT NULL"
- },
- {
-  "code": "DWA-A-226",
-  "cr": "CR-017",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "notstromversorgung IS NOT NULL"
- },
- {
   "code": "DWA-A-262E",
   "cr": "REQ-12",
   "kind": "split-multi-worksheet",
@@ -520,114 +232,6 @@
    "A262-02",
    "A262-04"
   ]
- },
- {
-  "code": "DWA-A-272E",
-  "cr": "COMP-26",
-  "kind": "dead-prose",
-  "detail": "VR-11"
- },
- {
-  "code": "DWA-A-272E",
-  "cr": "COMP-06",
-  "kind": "dead-prose",
-  "detail": "RULE-10"
- },
- {
-  "code": "DWA-A-272E",
-  "cr": "COMP-16",
-  "kind": "dead-prose",
-  "detail": "site_measurement_used eq true OR (Table 5 verbatim)"
- },
- {
-  "code": "DWA-A-272E",
-  "cr": "COMP-21",
-  "kind": "dead-prose",
-  "detail": "both populated"
- },
- {
-  "code": "DWA-A-272E",
-  "cr": "COMP-07",
-  "kind": "dead-prose",
-  "detail": "RULE-11"
- },
- {
-  "code": "DWA-A-272E",
-  "cr": "COMP-19",
-  "kind": "dead-prose",
-  "detail": "VR-40"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-05",
-  "kind": "dead-prose",
-  "detail": "abs(P_korr - (R + ET_a)) <= tol"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-15",
-  "kind": "dead-prose",
-  "detail": "lookup in Tab. C.3 valid"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-16",
-  "kind": "dead-prose",
-  "detail": "valid lookup"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-10",
-  "kind": "dead-prose",
-  "detail": "abs(a_F + g_F + v_F - 1) <= tol per surface"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-11",
-  "kind": "dead-prose",
-  "detail": "abs(a_A + g_A + v_A + e_A - 1) <= tol per facility"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-21",
-  "kind": "dead-prose",
-  "detail": "sum < 1 allowed when e_A > 0 per §B.6"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-06",
-  "kind": "dead-prose",
-  "detail": "abs(P_korr - (R_D + GWN + ET_a)) <= tol"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-07",
-  "kind": "dead-prose",
-  "detail": "abs(a + g + v - 1) <= tol"
- },
- {
-  "code": "DWA-M-102-4",
-  "cr": "REQ-17",
-  "kind": "dead-prose",
-  "detail": "max(|delta_a|,|delta_g|,|delta_v|) <= 0.10 (or fully justified)"
- },
- {
-  "code": "DWA-M-1200-1",
-  "cr": "CR-003",
-  "kind": "dead-prose",
-  "detail": "gueteklasse_zugeordnet matches strictest class for anwendungsbereich_kategorie"
- },
- {
-  "code": "DWA-M-1200-1",
-  "cr": "CR-006",
-  "kind": "dead-prose",
-  "detail": "all log10 values >= targets per class"
- },
- {
-  "code": "DWA-M-1200-1",
-  "cr": "CR-012",
-  "kind": "dead-prose",
-  "detail": "today - rmp_letzte_aktualisierung <= 6 years"
  },
  {
   "code": "DWA-M-1200-1",
@@ -642,12 +246,6 @@
  },
  {
   "code": "DWA-M-1200-2",
-  "cr": "REQ-02",
-  "kind": "dead-prose",
-  "detail": "alle Parameter <= Klassen-Grenzwert"
- },
- {
-  "code": "DWA-M-1200-2",
   "cr": "REQ-06",
   "kind": "split-multi-worksheet",
   "detail": "IF wassergueteklasse == 'A' THEN perzentil_10_log10 >= leistungsziel_log10 AND I",
@@ -657,12 +255,6 @@
    "M12002-04",
    "M12002-05"
   ]
- },
- {
-  "code": "DWA-M-1200-2",
-  "cr": "REQ-08",
-  "kind": "dead-prose",
-  "detail": "Anzahl(Aufbereitungsstufen) >= Klassen-Mindest"
  },
  {
   "code": "DWA-M-1200-2",
@@ -683,12 +275,6 @@
  },
  {
   "code": "DWA-M-1200-3",
-  "cr": "CR-02",
-  "kind": "field-missing",
-  "detail": "documented_compliance"
- },
- {
-  "code": "DWA-M-1200-3",
   "cr": "CR-11",
   "kind": "field-missing",
   "detail": "alle_hygieneanforderungen_erfuellt"
@@ -698,12 +284,6 @@
   "cr": "CR-12",
   "kind": "field-missing",
   "detail": "filter_und_desinfektion_gemaess_gueteklasse"
- },
- {
-  "code": "DWA-M-1200-3",
-  "cr": "CR-11",
-  "kind": "field-missing",
-  "detail": "alle_hygieneanforderungen_erfuellt"
  },
  {
   "code": "DWA-M-1200-3",
@@ -718,30 +298,6 @@
  },
  {
   "code": "DWA-M-179-1",
-  "cr": "REQ-03",
-  "kind": "dead-prose",
-  "detail": "lookup(Tab.3, catchment, target_compartment) matches selected rule"
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-10",
-  "kind": "dead-prose",
-  "detail": "abs(eta_hyd - eta_ges_required/eta_BV) < tol"
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-11",
-  "kind": "dead-prose",
-  "detail": "abs(r_krit - 0.1201*exp(0.0655*eta_hyd)) < tol  OR  r_krit matches Tab.5 lookup"
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-12",
-  "kind": "dead-prose",
-  "detail": "abs(Q_krit - A_b_a*Psi_s*r_krit/10000) < tol"
- },
- {
-  "code": "DWA-M-179-1",
   "cr": "REQ-16",
   "kind": "split-multi-worksheet",
   "detail": "IF treatment_method == sedimentation THEN sludge_storage_min >= 15",
@@ -750,12 +306,6 @@
    "M179-05",
    "M179-06"
   ]
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-17",
-  "kind": "dead-prose",
-  "detail": "abs(A_sed - 3.6*Q_krit/q_A_max) < tol"
  },
  {
   "code": "DWA-M-179-1",
@@ -792,12 +342,6 @@
  },
  {
   "code": "DWA-M-179-1",
-  "cr": "REQ-21",
-  "kind": "dead-prose",
-  "detail": "abs(A_F - A_b_a*0.01) < tol  OR  reduced per pre-treatment"
- },
- {
-  "code": "DWA-M-179-1",
   "cr": "REQ-22",
   "kind": "split-multi-worksheet",
   "detail": "IF flow_split_case == fall_4 THEN Q_krit >= 5",
@@ -817,36 +361,6 @@
    "M179-05",
    "M179-10"
   ]
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-29",
-  "kind": "dead-prose",
-  "detail": "Betriebsanweisung prepared"
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-31",
-  "kind": "dead-prose",
-  "detail": "Waste disposal pathway documented per DWA-M 369"
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-32",
-  "kind": "dead-prose",
-  "detail": "Dynamic cost-comparison performed per KVR-Leitlinien"
- },
- {
-  "code": "DWA-M-179-1",
-  "cr": "REQ-33",
-  "kind": "dead-prose",
-  "detail": "Climate classification noted in project record"
- },
- {
-  "code": "DWA-M-187",
-  "cr": "REQ-08",
-  "kind": "dead-prose",
-  "detail": "Engineer bestätigt"
  },
  {
   "code": "DWA-M-187",
@@ -886,12 +400,6 @@
    "M205-03",
    "M205-11"
   ]
- },
- {
-  "code": "DWA-M-277E",
-  "cr": "REQ-01",
-  "kind": "dead-prose",
-  "detail": "ALL required fields present"
  },
  {
   "code": "DWA-M-277E",
@@ -957,24 +465,6 @@
  },
  {
   "code": "DWA-M-277E",
-  "cr": "REQ-04",
-  "kind": "dead-prose",
-  "detail": "Q_SW = SUM(Q_SW_P_i * P_i) + SUM(Q_SW_A_j * A_j)"
- },
- {
-  "code": "DWA-M-277E",
-  "cr": "REQ-05",
-  "kind": "dead-prose",
-  "detail": "Q_GW = SUM(Q_GW_P_i * P_i)"
- },
- {
-  "code": "DWA-M-277E",
-  "cr": "REQ-06",
-  "kind": "dead-prose",
-  "detail": "Q_GWT eq MIN(Q_SW, Q_GW)"
- },
- {
-  "code": "DWA-M-277E",
   "cr": "REQ-07",
   "kind": "split-multi-worksheet",
   "detail": "Q_WB == (Q_GW - Q_SW)",
@@ -1006,12 +496,6 @@
    "M277E-08",
    "M277E-09"
   ]
- },
- {
-  "code": "DWA-M-277E",
-  "cr": "REQ-31",
-  "kind": "dead-prose",
-  "detail": "ALL required fields present"
  },
  {
   "code": "DWA-M-277E",
@@ -1093,36 +577,6 @@
  },
  {
   "code": "DWA-M-363",
-  "cr": "C363-04",
-  "kind": "dead-prose",
-  "detail": "standortspezifische Untersuchung oder Tab. 5-10"
- },
- {
-  "code": "DWA-M-363",
-  "cr": "C363-05",
-  "kind": "dead-prose",
-  "detail": "biogas_quelle eq deponie -> Modell ausgewaehlt"
- },
- {
-  "code": "DWA-M-363",
-  "cr": "C363-23",
-  "kind": "dead-prose",
-  "detail": "co_substrat eq true -> Hygiene-/Genehmigungsprozesse einschlaegig (DWA-M 380)"
- },
- {
-  "code": "DWA-M-363",
-  "cr": "C363-06",
-  "kind": "field-missing",
-  "detail": "rule_speichervolumen_per_verwertung"
- },
- {
-  "code": "DWA-M-363",
-  "cr": "C363-18",
-  "kind": "field-missing",
-  "detail": "IF verwertungsweg == mikrogasturbine AND h2s_konz >= 200 THEN Gasreinigung"
- },
- {
-  "code": "DWA-M-363",
   "cr": "C363-20",
   "kind": "split-multi-worksheet",
   "detail": "IF verwertungsweg == tankstelle THEN speicherbetriebsdruck > 200000",
@@ -1142,24 +596,6 @@
    "M363-10",
    "M363-22"
   ]
- },
- {
-  "code": "DWA-M-708",
-  "cr": "REQ-708-08",
-  "kind": "field-missing",
-  "detail": "mab_vorhanden"
- },
- {
-  "code": "DWA-M-708",
-  "cr": "REQ-708-09",
-  "kind": "field-missing",
-  "detail": "havariebecken_vorhanden"
- },
- {
-  "code": "DWA-M-732",
-  "cr": "CR-M732-13",
-  "kind": "field-missing",
-  "detail": "reinigungsmittel_edta_frei IS NOT NULL OR edta_substitutionsplan IS NOT NULL"
  },
  {
   "code": "DWA-M-760",
@@ -1191,12 +627,6 @@
  },
  {
   "code": "DWA-M-760",
-  "cr": "REQ-M760-02",
-  "kind": "field-missing",
-  "detail": "verwendete_normen IS NOT EMPTY"
- },
- {
-  "code": "DWA-M-760",
   "cr": "REQ-M760-10",
   "kind": "split-multi-worksheet",
   "detail": "entleerintervall_d <= 30 AND generalinspektion_intervall_a <= 5",
@@ -1205,36 +635,6 @@
    "M760-22",
    "M760-23"
   ]
- },
- {
-  "code": "DWA-M-760",
-  "cr": "REQ-M760-07",
-  "kind": "field-missing",
-  "detail": "q_spitz IS NOT NULL AND c_lipophil_roh IS NOT NULL AND c_csb_roh IS NOT NULL AND"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-06",
-  "kind": "dead-prose",
-  "detail": "for every process: type is set and c_k present per type"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-07",
-  "kind": "dead-prose",
-  "detail": "BW computed via RBF_k recursion per Anhang A"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-08",
-  "kind": "dead-prose",
-  "detail": "discounting_method consistent across all alternatives"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-10",
-  "kind": "dead-prose",
-  "detail": "duration computed via Gl. (5c) per process"
  },
  {
   "code": "DWA-M-816",
@@ -1249,12 +649,6 @@
  },
  {
   "code": "DWA-M-816",
-  "cr": "REQ-12",
-  "kind": "dead-prose",
-  "detail": "manual_review for processes with u > 1"
- },
- {
-  "code": "DWA-M-816",
   "cr": "REQ-14",
   "kind": "split-multi-worksheet",
   "detail": "IF n_a != n_b THEN partial_replication_flag == TRUE AND n_tr IS NOT NULL",
@@ -1264,66 +658,6 @@
    "M816-08",
    "M816-22"
   ]
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-15",
-  "kind": "dead-prose",
-  "detail": "subsidy_rate > 0 IMPLIES volkswirtsch. Rechnung performed"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-16",
-  "kind": "dead-prose",
-  "detail": "manual_review per project context"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-17",
-  "kind": "dead-prose",
-  "detail": "manual_review for revenue-generating projects"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-24",
-  "kind": "dead-prose",
-  "detail": "manual_review of USt treatment"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-25",
-  "kind": "dead-prose",
-  "detail": "manual_review per KAG"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-21",
-  "kind": "dead-prose",
-  "detail": "pbw_alternative == sum(bw) per alternative"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-22",
-  "kind": "dead-prose",
-  "detail": "vorteilhafteste_alternative == argmin(pbw_alternative)"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-23",
-  "kind": "dead-prose",
-  "detail": "annual Z(t) profile compiled per alternative"
- },
- {
-  "code": "DWA-M-816",
-  "cr": "REQ-20",
-  "kind": "dead-prose",
-  "detail": "manual_review for large/late reinvestments"
- },
- {
-  "code": "DWA-M-820-1",
-  "cr": "REQ-04",
-  "kind": "dead-prose",
-  "detail": "stakeholder_list covers all 5 §5 roles"
  },
  {
   "code": "DWA-M-820-1",
@@ -1348,78 +682,6 @@
   ]
  },
  {
-  "code": "DWA-M-820-1",
-  "cr": "REQ-24",
-  "kind": "dead-prose",
-  "detail": "IF loseausnahme_applicable THEN (lot_value <= 80000 services OR <= 1000000 const"
- },
- {
-  "code": "DWA-M-820-1",
-  "cr": "REQ-11",
-  "kind": "dead-prose",
-  "detail": "list documented (may be empty)"
- },
- {
-  "code": "DWA-M-820-1",
-  "cr": "REQ-13",
-  "kind": "dead-prose",
-  "detail": "both values per Tab. D.1 row"
- },
- {
-  "code": "DWA-M-820-1",
-  "cr": "REQ-14",
-  "kind": "dead-prose",
-  "detail": "min 6 E.2 categories present"
- },
- {
-  "code": "DWA-M-820-2",
-  "cr": "REQ-13",
-  "kind": "dead-prose",
-  "detail": "Engineer attestation"
- },
- {
-  "code": "DWA-M-820-2",
-  "cr": "REQ-32",
-  "kind": "dead-prose",
-  "detail": "Procurement schedule documented"
- },
- {
-  "code": "DWA-M-820-2",
-  "cr": "REQ-50",
-  "kind": "dead-prose",
-  "detail": "Process artefacts present"
- },
- {
-  "code": "DWA-M-820-2",
-  "cr": "REQ-55",
-  "kind": "dead-prose",
-  "detail": "(innovation_scope_defined == true) OR (project does not pursue innovation)"
- },
- {
-  "code": "DWA-M-820-2",
-  "cr": "REQ-59",
-  "kind": "dead-prose",
-  "detail": "(bim_basics_established == true) OR (BIM not in scope)"
- },
- {
-  "code": "DWA-M-820-3",
-  "cr": "REQ-02",
-  "kind": "dead-prose",
-  "detail": "all(anw_hinweis_*_confirmed) == true"
- },
- {
-  "code": "DWA-M-820-3",
-  "cr": "REQ-03",
-  "kind": "dead-prose",
-  "detail": "all(*_definition_acknowledged) == true"
- },
- {
-  "code": "DWA-M-820-3",
-  "cr": "REQ-05",
-  "kind": "dead-prose",
-  "detail": "if smaller_communal: grundsatz_two_step_followed == true"
- },
- {
   "code": "DWA-M-820-3",
   "cr": "REQ-20",
   "kind": "split-multi-worksheet",
@@ -1442,36 +704,6 @@
   ]
  },
  {
-  "code": "DWA-M-820-3",
-  "cr": "REQ-27",
-  "kind": "field-missing",
-  "detail": "all == true"
- },
- {
-  "code": "DWA-M-820-3",
-  "cr": "REQ-29",
-  "kind": "field-missing",
-  "detail": "all == true"
- },
- {
-  "code": "DWA-M-820-3",
-  "cr": "REQ-31",
-  "kind": "dead-prose",
-  "detail": "if any(pz_*_status) == not_achieved: projektstopp_required must be evaluated"
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-02",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "lbo_genehmigung_erforderlich IS NOT NULL"
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-03",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "whg_einleitung_genehmigung IS NOT NULL"
- },
- {
   "code": "FLL-GAR-2023",
   "cr": "REQ-05",
   "kind": "split-multi-worksheet",
@@ -1481,24 +713,6 @@
    "FLL-GAR-05",
    "FLL-GAR-09"
   ]
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-06",
-  "kind": "dead-prose",
-  "detail": "if eisbildung_moeglich == true: documented ice-pressure protection"
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-08",
-  "kind": "dead-prose",
-  "detail": "Slope per Tab.1 row for chosen abdichtungs_art"
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-09",
-  "kind": "dead-prose",
-  "detail": "Engineer-judged selection traceable to Sec.4.7 criteria"
  },
  {
   "code": "FLL-GAR-2023",
@@ -1576,18 +790,6 @@
    "FLL-GAR-09",
    "FLL-GAR-14"
   ]
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-11",
-  "kind": "dead-prose",
-  "detail": "If required and abdichtung not inherently resistant: separate Wurzelschutzbahn"
- },
- {
-  "code": "FLL-GAR-2023",
-  "cr": "REQ-24",
-  "kind": "dead-prose",
-  "detail": "Engineer-judged adequacy of protective layers"
  },
  {
   "code": "FLL-Naturteich-2017",
@@ -1690,54 +892,6 @@
   "detail": "lebensweg_betrachtung_angewendet IS NOT NULL"
  },
  {
-  "code": "ISO-14015",
-  "cr": "CR-010",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "provider_roles_addressed IS NOT NULL"
- },
- {
-  "code": "ISO-14015",
-  "cr": "CR-013",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "scope_change_recorded IS NOT NULL"
- },
- {
-  "code": "ISO-14015",
-  "cr": "CR-023",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "interviews_conducted IS NOT NULL"
- },
- {
-  "code": "ISO-14015",
-  "cr": "CR-027",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "business_consequences_determined IS NOT NULL"
- },
- {
-  "code": "ISO-14064-2",
-  "cr": "REQ-02",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "deviations_documented IS NOT NULL"
- },
- {
-  "code": "ISO-14064-2",
-  "cr": "REQ-06",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "baseline_revalidated IS NOT NULL"
- },
- {
-  "code": "ISO-14064-2",
-  "cr": "REQ-13",
-  "kind": "dead-prose",
-  "detail": "E_project = SUM(ssr_emission_co2e); E_baseline = SUM(ssr_emission_co2e)"
- },
- {
-  "code": "ISO-14064-2",
-  "cr": "REQ-20",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "verification_validation_iso14064_3 IS NOT NULL"
- },
- {
   "code": "ISO-14067",
   "cr": "ISO-14067-CR-26",
   "kind": "vacuous-isnotnull-boolean",
@@ -1748,30 +902,6 @@
   "cr": "ISO-14067-CR-27",
   "kind": "vacuous-isnotnull-boolean",
   "detail": "systematic_cfp_approach IS NOT NULL"
- },
- {
-  "code": "ISO-14097",
-  "cr": "CR-003",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "kpi_objective_specific IS NOT NULL"
- },
- {
-  "code": "ISO-5667-1",
-  "cr": "CR-014",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "weather_recorded IS NOT NULL"
- },
- {
-  "code": "ISO-5667-1",
-  "cr": "CR-008",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "hazardous_atmosphere_tested IS NOT NULL"
- },
- {
-  "code": "ISO-5667-1",
-  "cr": "CR-009",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "electrical_hazard_minimized IS NOT NULL"
  },
  {
   "code": "ISO-5667-1",
@@ -1798,42 +928,6 @@
   "detail": "abnormal_frequency_increase IS NOT NULL"
  },
  {
-  "code": "ISO-5667-10",
-  "cr": "CR-006",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "unusual_hydraulic_conditions_recorded IS NOT NULL"
- },
- {
-  "code": "ISO-5667-10",
-  "cr": "CR-023",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "sampler_refrigerated IS NOT NULL"
- },
- {
-  "code": "ISO-5667-10",
-  "cr": "CR-036",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "equipment_secured IS NOT NULL"
- },
- {
-  "code": "ISO-5667-13",
-  "cr": "CR-010",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "container_airtight IS NOT NULL"
- },
- {
-  "code": "ISO-5667-13",
-  "cr": "CR-014",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "replicate_ratio_met IS NOT NULL"
- },
- {
-  "code": "ISO-5667-13",
-  "cr": "CR-015",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "sample_volume_adequate IS NOT NULL"
- },
- {
   "code": "ISO-5667-13",
   "cr": "CR-019",
   "kind": "vacuous-isnotnull-boolean",
@@ -1844,24 +938,6 @@
   "cr": "CR-020",
   "kind": "vacuous-isnotnull-boolean",
   "detail": "time_dependent_analysis IS NOT NULL"
- },
- {
-  "code": "ISO-5667-16",
-  "cr": "CR-019",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "ph_controlled_during_test IS NOT NULL"
- },
- {
-  "code": "ISO-5667-16",
-  "cr": "CR-025",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "colour_turbidity_correction IS NOT NULL"
- },
- {
-  "code": "ISO-5667-16",
-  "cr": "CR-032",
-  "kind": "vacuous-isnotnull-boolean",
-  "detail": "concentration_response_curve_presented IS NOT NULL"
  },
  {
   "code": "ISO-9001",
@@ -1880,12 +956,6 @@
   "cr": "ISO-9001-CR-33",
   "kind": "vacuous-isnotnull-boolean",
   "detail": "propiedad_cliente IS NOT NULL"
- },
- {
-  "code": "VDI-3477",
-  "cr": "VDI-3477-CR-04",
-  "kind": "dead-prose",
-  "detail": "pH_filtermaterial >= 5,5 AND pH_filtermaterial <= 7,5"
  },
  {
   "code": "VSME",

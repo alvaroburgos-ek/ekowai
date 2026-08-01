@@ -1,5 +1,5 @@
 {
-  "exported_at": "2026-08-01T09:41:40.406Z",
+  "exported_at": "2026-08-01T10:20:07.816Z",
   "project_ref": "vadsmshzebefjreqcicl",
   "standards": {
     "ATV-A-704E": {
@@ -4525,6 +4525,72 @@
           "worksheet_template_id": "54c32010-95e1-42eb-b53c-7e98ae817bdb"
         },
         {
+          "id": "85ad3bd8-7af0-433c-b3ec-6ff0d116bdc9",
+          "code": "REQ-09",
+          "condition": "third_party_implication_avoided == True",
+          "severity": "block",
+          "clause_reference": "5.7 i)",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "i) shall be presented in a manner which does not imply that the product is endorsed or certified by an independent third-party organization when it is not;",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "6bb8175d-91ba-4af1-8596-2bbcf32e6eb4",
+          "code": "REQ-10",
+          "condition": "claim_geographic_relevance == True",
+          "severity": "block",
+          "clause_reference": "5.7 r)",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "r) shall be relevant to the area where the corresponding environmental impact occurs.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "8e1f3c48-bc8f-4566-bb4b-7406f7780b28",
+          "code": "REQ-48",
+          "condition": "mobius_loop_used == True",
+          "severity": "block",
+          "clause_reference": "5.10.2.1",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "5.10.2.1 The Mobius loop is a symbol in the shape of three twisted chasing arrows forming a triangle. Whenever it is used to make an environmental claim, the design shall meet the graphical requirements for ISO 7000-1135. There should, however, be enough contrast so that the symbol is clear and distinguishable. Some examples of the form of the Mobius loop are provided in Figure 1. Clause 7 provides detailed requirements concerning the use and applicability of the Mobius loop.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "e8148c1d-3cc4-400f-9aa8-98fc11095b50",
+          "code": "REQ-03",
+          "condition": "sustainability_claim_present == True",
+          "severity": "block",
+          "clause_reference": "5.5",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.5] Konzepte im Zusammenhang mit Nachhaltigkeit sind äußerst kompliziert und werden noch untersucht. Gegenwärtig gibt es keine bestimmten Verfahren zur Messung von Nachhaltigkeit oder zu ihrer Bestätigung. Deshalb darf keine Aussage über das Erreichen von Nachhaltigkeit gemacht werden.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "b2dd8d63-5014-4eee-b9ac-c4b3264cba62",
+          "code": "REQ-01",
+          "condition": "vague_claim_present == True",
+          "severity": "block",
+          "clause_reference": "5.3",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "[5.3] Eine unbestimmte oder unspezifische Umweltaussage oder eine, die allgemein darauf abzielt, dass ein Produkt günstig für die Umwelt oder umweltverträglich ist, darf nicht gemacht werden. Deshalb dürfen keine Umweltaussagen wie „umweltsicher“, „umweltfreundlich“, „freundlich zur Erde“, „ohne Emissionen“, „grün“, „naturfreundlich“ und „ozonfreundlich“ verwendet werden.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
+          "id": "4f6735dd-f0fd-49b1-814b-bdff844eed0a",
+          "code": "REQ-06",
+          "condition": "claim_substantiated_verified == True",
+          "severity": "block",
+          "clause_reference": "5.7 b)",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "b) shall be substantiated and verified;",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
+        },
+        {
           "id": "b6f892c8-ae95-45cb-aec1-e41ecd13f1d7",
           "code": "REQ-04",
           "condition": "explanatory_statement IS NOT NULL",
@@ -4538,56 +4604,12 @@
         {
           "id": "ebb27c67-b332-42ca-8a9e-0bff65778076",
           "code": "REQ-05",
-          "condition": "claim_accurate_not_misleading IS NOT NULL",
+          "condition": "claim_accurate_not_misleading == True",
           "severity": "block",
           "clause_reference": "5.7 a)",
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "a) shall be accurate and not misleading;",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "4f6735dd-f0fd-49b1-814b-bdff844eed0a",
-          "code": "REQ-06",
-          "condition": "claim_substantiated_verified IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.7 b)",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "b) shall be substantiated and verified;",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "20678119-cfe4-4ed2-be20-751996516b12",
-          "code": "REQ-08",
-          "condition": "lifecycle_considered IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.7 h)",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "h) shall be true not only in relation to the final product but also shall take into consideration all relevant aspects of the product life cycle in order to identify the potential for one impact to be increased in the process of decreasing another;",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "85ad3bd8-7af0-433c-b3ec-6ff0d116bdc9",
-          "code": "REQ-09",
-          "condition": "third_party_implication_avoided IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.7 i)",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "i) shall be presented in a manner which does not imply that the product is endorsed or certified by an independent third-party organization when it is not;",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "6bb8175d-91ba-4af1-8596-2bbcf32e6eb4",
-          "code": "REQ-10",
-          "condition": "claim_geographic_relevance IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.7 r)",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "r) shall be relevant to the area where the corresponding environmental impact occurs.",
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
@@ -4602,47 +4624,14 @@
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
-          "id": "8e1f3c48-bc8f-4566-bb4b-7406f7780b28",
-          "code": "REQ-48",
-          "condition": "mobius_loop_used IS NOT NULL",
+          "id": "20678119-cfe4-4ed2-be20-751996516b12",
+          "code": "REQ-08",
+          "condition": "lifecycle_considered == True",
           "severity": "block",
-          "clause_reference": "5.10.2.1",
+          "clause_reference": "5.7 h)",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "5.10.2.1 The Mobius loop is a symbol in the shape of three twisted chasing arrows forming a triangle. Whenever it is used to make an environmental claim, the design shall meet the graphical requirements for ISO 7000-1135. There should, however, be enough contrast so that the symbol is clear and distinguishable. Some examples of the form of the Mobius loop are provided in Figure 1. Clause 7 provides detailed requirements concerning the use and applicability of the Mobius loop.",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "e8148c1d-3cc4-400f-9aa8-98fc11095b50",
-          "code": "REQ-03",
-          "condition": "sustainability_claim_present IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.5",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[5.5] Konzepte im Zusammenhang mit Nachhaltigkeit sind äußerst kompliziert und werden noch untersucht. Gegenwärtig gibt es keine bestimmten Verfahren zur Messung von Nachhaltigkeit oder zu ihrer Bestätigung. Deshalb darf keine Aussage über das Erreichen von Nachhaltigkeit gemacht werden.",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "b2dd8d63-5014-4eee-b9ac-c4b3264cba62",
-          "code": "REQ-01",
-          "condition": "vague_claim_present IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.3",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[5.3] Eine unbestimmte oder unspezifische Umweltaussage oder eine, die allgemein darauf abzielt, dass ein Produkt günstig für die Umwelt oder umweltverträglich ist, darf nicht gemacht werden. Deshalb dürfen keine Umweltaussagen wie „umweltsicher“, „umweltfreundlich“, „freundlich zur Erde“, „ohne Emissionen“, „grün“, „naturfreundlich“ und „ozonfreundlich“ verwendet werden.",
-          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
-        },
-        {
-          "id": "c567fc09-2574-4a12-9efe-065dda27d766",
-          "code": "REQ-02",
-          "condition": "free_claim_substance_level_ok IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "5.4",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "[5.4] Eine Aussage von „... frei“ darf nur gemacht werden, wenn der Anteil des bestimmten Stoffes nicht größer ist als der, der als anerkannte Spurenverunreinigung oder natürliche Grundbelastung vorzufinden wäre.",
+          "source_quote": "h) shall be true not only in relation to the final product but also shall take into consideration all relevant aspects of the product life cycle in order to identify the potential for one impact to be increased in the process of decreasing another;",
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
@@ -4657,26 +4646,15 @@
           "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
-          "id": "b9a1b0ec-f48a-46bc-9d7b-1006267a87da",
-          "code": "REQ-12",
-          "condition": "evaluation_documented IS NOT NULL",
+          "id": "c567fc09-2574-4a12-9efe-065dda27d766",
+          "code": "REQ-02",
+          "condition": "free_claim_substance_level_ok == True",
           "severity": "block",
-          "clause_reference": "6.2.2",
+          "clause_reference": "5.4",
           "requires_attestation": false,
           "audit_status": "match",
-          "source_quote": "6.2.2 The evaluation shall be fully documented and the documentation retained by the claimant for the purpose of the information disclosure referred to in 6.5.2. This shall be for the period that the product is on the market, and for a reasonable period thereafter, taking into account the life of the product.",
-          "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
-        },
-        {
-          "id": "7960882d-0549-4aee-9730-0da98a72ba6a",
-          "code": "REQ-13",
-          "condition": "reliable_reproducible_results IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "6.2.1",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "6.2.1 Prior to making the claim, evaluation measures shall be implemented to achieve reliable and reproducible results necessary to verify the claim.",
-          "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
+          "source_quote": "[5.4] Eine Aussage von „... frei“ darf nur gemacht werden, wenn der Anteil des bestimmten Stoffes nicht größer ist als der, der als anerkannte Spurenverunreinigung oder natürliche Grundbelastung vorzufinden wäre.",
+          "worksheet_template_id": "ffc4e0ec-a064-44b2-8ade-c050e83b00ce"
         },
         {
           "id": "1eed592d-6f9a-4049-aed9-f604d70a2d41",
@@ -4703,7 +4681,7 @@
         {
           "id": "d784ce28-ada5-4594-812d-98afe8cb2ae9",
           "code": "REQ-16",
-          "condition": "product_packaging_separated IS NOT NULL",
+          "condition": "product_packaging_separated == True",
           "severity": "block",
           "clause_reference": "6.3.5",
           "requires_attestation": false,
@@ -4714,7 +4692,7 @@
         {
           "id": "87320174-d1cb-46f2-a755-be609e37f1ef",
           "code": "REQ-18",
-          "condition": "verifiable_without_confidential IS NOT NULL",
+          "condition": "verifiable_without_confidential == True",
           "severity": "block",
           "clause_reference": "6.5.1",
           "requires_attestation": false,
@@ -4725,7 +4703,7 @@
         {
           "id": "1f08067d-85ff-4e03-ad40-319be6a42cbd",
           "code": "REQ-19",
-          "condition": "info_documented_min IS NOT NULL",
+          "condition": "info_documented_min == True",
           "severity": "block",
           "clause_reference": "6.5.3",
           "requires_attestation": false,
@@ -4753,6 +4731,28 @@
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "[6.3.1] Vergleichende Aussagen müssen im Hinblick auf einen oder mehrere der folgenden Punkte bewertet werden: a) vorheriges Verfahren einer Organisation; b) vorheriges Produkt einer Organisation; c) Verfahren einer anderen Organisation; oder d) Produkt einer anderen Organisation.",
+          "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
+        },
+        {
+          "id": "b9a1b0ec-f48a-46bc-9d7b-1006267a87da",
+          "code": "REQ-12",
+          "condition": "evaluation_documented == True",
+          "severity": "block",
+          "clause_reference": "6.2.2",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "6.2.2 The evaluation shall be fully documented and the documentation retained by the claimant for the purpose of the information disclosure referred to in 6.5.2. This shall be for the period that the product is on the market, and for a reasonable period thereafter, taking into account the life of the product.",
+          "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
+        },
+        {
+          "id": "7960882d-0549-4aee-9730-0da98a72ba6a",
+          "code": "REQ-13",
+          "condition": "reliable_reproducible_results == True",
+          "severity": "block",
+          "clause_reference": "6.2.1",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "6.2.1 Prior to making the claim, evaluation measures shall be implemented to achieve reliable and reproducible results necessary to verify the claim.",
           "worksheet_template_id": "187258b8-f70a-4457-8384-5c6797ddb582"
         },
         {
@@ -20187,7 +20187,7 @@
         {
           "id": "febc9e47-2da7-4373-9006-53071cb3ec14",
           "code": "REQ-09",
-          "condition": "IF construction_activity == bestand THEN method_documented",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.2.9",
           "requires_attestation": true,
@@ -20264,7 +20264,7 @@
         {
           "id": "dc90603f-c616-41a7-ba41-e71bea523571",
           "code": "REQ-27",
-          "condition": "reference_units_match_Tab.2",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.2",
           "requires_attestation": true,
@@ -20275,7 +20275,7 @@
         {
           "id": "7d510503-2f39-499b-94f2-5384cd78a695",
           "code": "REQ-28",
-          "condition": "KG300_reference_units_match_Tab.3",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.3",
           "requires_attestation": true,
@@ -20286,7 +20286,7 @@
         {
           "id": "f355ec86-bc33-40ba-9738-84b045c58b55",
           "code": "REQ-29",
-          "condition": "KG400_reference_units_match_Tab.4",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.4",
           "requires_attestation": true,
@@ -20440,7 +20440,7 @@
         {
           "id": "7559df73-919c-4460-8545-e48a29492916",
           "code": "REQ-26",
-          "condition": "total_construction_costs == SUM(kg_100..kg_800)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.11",
           "requires_attestation": false,
@@ -30233,7 +30233,7 @@
         {
           "id": "0e34f47a-f555-4d68-b252-eb60b42d6563",
           "code": "REQ-05",
-          "condition": "values match Tabelle 4 entries (subject to Pass 3b lookup)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.2",
           "requires_attestation": false,
@@ -30253,17 +30253,6 @@
           "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
         },
         {
-          "id": "d37f13a4-b377-4b2a-8aaf-2c286bc832f7",
-          "code": "REQ-29",
-          "condition": "if B/S surfaces present then §5.2.3.3 handling documented",
-          "severity": "warn",
-          "clause_reference": "2.3.3.3",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Die stoffliche Belastung wird bei zentraler Behandlung vor Einleitung in Oberflaechengewaesser gemaess 5.2.3.3 in Arbeitsblatt DWA-A 102-2/BWK-A 3-2:2020 in Bezug auf AFS63 beruecksichtigt.",
-          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
-        },
-        {
           "id": "3b012613-e590-4b89-93ab-fe2a6b37c8ea",
           "code": "REQ-07",
           "condition": "IF misch_active == True THEN (A_b_a_I > 0 AND A_b_a_II > 0 AND A_b_a_III > 0)",
@@ -30272,6 +30261,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Angeschlossene befestigte Teilflaechen Belastungskategorie I & & $A_{\\mathrm{b}, \\mathrm{a}, \\mathrm{l}}$ & 23,85 & ha",
+          "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
+        },
+        {
+          "id": "d37f13a4-b377-4b2a-8aaf-2c286bc832f7",
+          "code": "REQ-29",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "2.3.3.3",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Die stoffliche Belastung wird bei zentraler Behandlung vor Einleitung in Oberflaechengewaesser gemaess 5.2.3.3 in Arbeitsblatt DWA-A 102-2/BWK-A 3-2:2020 in Bezug auf AFS63 beruecksichtigt.",
           "worksheet_template_id": "e1aadb78-c57c-458e-b6ed-a6fb1e5f5ae6"
         },
         {
@@ -30297,28 +30297,6 @@
           "worksheet_template_id": "710dfbfe-1f51-4d84-9cf8-56c68648f339"
         },
         {
-          "id": "2fccfeaa-e091-4fa4-b1ed-eae2149b3bf0",
-          "code": "REQ-09",
-          "condition": "b_R_a_AFS63 = computed via Gl. 5",
-          "severity": "warn",
-          "clause_reference": "2.4.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
-        },
-        {
-          "id": "eb9dd380-3c55-4907-8005-e97e97e662f5",
-          "code": "REQ-10",
-          "condition": "eta_erf computed; cap at >=0",
-          "severity": "warn",
-          "clause_reference": "2.3.3.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
-        },
-        {
           "id": "319afa46-9532-4829-920e-dd7453c0ec68",
           "code": "REQ-11",
           "condition": "IF trenn_active == True THEN (A_RKB > 0 AND V_RKB > 0)",
@@ -30330,20 +30308,9 @@
           "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
         },
         {
-          "id": "055149c4-3da4-4f6c-9000-76a754609060",
-          "code": "REQ-12",
-          "condition": "m computed via Gl. B.13",
-          "severity": "warn",
-          "clause_reference": "2.4.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
-        },
-        {
           "id": "ad1f8e9c-83df-4e6b-bff6-f3a1eed1c342",
           "code": "REQ-13",
-          "condition": "C_b_CSB computed via Gl. B.14",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.4.1",
           "requires_attestation": false,
@@ -30354,7 +30321,7 @@
         {
           "id": "471aaaa5-1258-4234-8077-df0b22e03611",
           "code": "REQ-14",
-          "condition": "e_0 computed via Gl. 18",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.4.1",
           "requires_attestation": false,
@@ -30365,12 +30332,45 @@
         {
           "id": "247bff9b-e897-465c-9218-3c5ae6e755ef",
           "code": "REQ-30",
-          "condition": "Zusatzdatei use documented if applicable",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.3.4.2",
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Die Tabelle steht als Berechnungshilfe „Bemessung Regenklaerbecken“ fuer den angegebenen Anwendungskontext unter DWAdirekt unter der Rubrik „Publikationen/Zusatzdateien“ zur Verfuegung.",
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "2fccfeaa-e091-4fa4-b1ed-eae2149b3bf0",
+          "code": "REQ-09",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "eb9dd380-3c55-4907-8005-e97e97e662f5",
+          "code": "REQ-10",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "2.3.3.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
+        },
+        {
+          "id": "055149c4-3da4-4f6c-9000-76a754609060",
+          "code": "REQ-12",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "2.4.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "729461b3-6c82-4401-a235-c1e04eb57b6c"
         },
         {
@@ -30387,7 +30387,7 @@
         {
           "id": "15955f28-3aa0-4404-9c1d-9eae9027f783",
           "code": "REQ-16",
-          "condition": "H1, H2 > 0 computed via Tabelle 6",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.4.1",
           "requires_attestation": false,
@@ -30398,7 +30398,7 @@
         {
           "id": "eacef0d2-78c6-4721-baa9-d64c0a560a67",
           "code": "REQ-18",
-          "condition": "V_s <= 40 m³/ha OR alternative measures documented",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.4.1",
           "requires_attestation": true,
@@ -30431,7 +30431,7 @@
         {
           "id": "de80f934-6e65-417c-ad00-089e204c3b4a",
           "code": "REQ-19",
-          "condition": "A1022-31 consolidation complete",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.5.2",
           "requires_attestation": false,
@@ -30442,7 +30442,7 @@
         {
           "id": "b0be149e-58f4-45ac-b6a3-13c54cb7f458",
           "code": "REQ-20",
-          "condition": "A1022-32 consolidation complete",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.5.3",
           "requires_attestation": false,
@@ -30453,7 +30453,7 @@
         {
           "id": "5274759c-ee50-40db-b315-fba824d9725a",
           "code": "REQ-21",
-          "condition": "if RÜB/SKO/SKU/RÜ exists then all structure criteria documented",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.5.4",
           "requires_attestation": true,
@@ -30486,7 +30486,7 @@
         {
           "id": "90002885-8305-47c3-bb82-2a7314cf3fcb",
           "code": "REQ-25",
-          "condition": "(V_s · 10000 / q_R_Dr / 3600) <= 15  (units: m³/ha → s → h)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.3.4.2",
           "requires_attestation": false,
@@ -30497,7 +30497,7 @@
         {
           "id": "236ae4f6-5fcc-4d61-9960-402ac516bcde",
           "code": "REQ-26",
-          "condition": "if mess_proof then authority_coordination_documented",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.5.3",
           "requires_attestation": true,
@@ -30508,7 +30508,7 @@
         {
           "id": "f9a2a753-e843-4ba6-9d8e-106ddd6c1afe",
           "code": "REQ-27",
-          "condition": "if q_R_Dr > 2 then Nachweisverfahren_triggered",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.5.5",
           "requires_attestation": true,
@@ -46962,17 +46962,6 @@
       ],
       "compliance": [
         {
-          "id": "525c1a19-ad97-4266-9f96-9db674adf8c4",
-          "code": "REQ-01",
-          "condition": "manual_check",
-          "severity": "warn",
-          "clause_reference": "§1.1",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Das Arbeitsblatt schließt im Pilotmaßstab umgesetzte Sonderanwendungen des Verfahrens explizit nicht ein. Es bezieht sich ausschließlich auf die Planung, die Grundanforderungen der Gestaltung, den Bau und den Betrieb von Retentionsbodenfilteranlagen zur Regenwasserbehandlung.",
-          "worksheet_template_id": "bf433bbe-d586-4ec9-b475-cfd848f302f8"
-        },
-        {
           "id": "7329266f-9ef4-4de5-8e97-00fee4e5027b",
           "code": "REQ-02",
           "condition": "treatment_need_confirmed == True",
@@ -46984,9 +46973,20 @@
           "worksheet_template_id": "bf433bbe-d586-4ec9-b475-cfd848f302f8"
         },
         {
+          "id": "525c1a19-ad97-4266-9f96-9db674adf8c4",
+          "code": "REQ-01",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "§1.1",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Das Arbeitsblatt schließt im Pilotmaßstab umgesetzte Sonderanwendungen des Verfahrens explizit nicht ein. Es bezieht sich ausschließlich auf die Planung, die Grundanforderungen der Gestaltung, den Bau und den Betrieb von Retentionsbodenfilteranlagen zur Regenwasserbehandlung.",
+          "worksheet_template_id": "bf433bbe-d586-4ec9-b475-cfd848f302f8"
+        },
+        {
           "id": "f4b11f5c-6de5-4eef-919c-f27f5f69240b",
           "code": "REQ-03",
-          "condition": "manual_check_against_bild_1",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.1/Bild 1",
           "requires_attestation": true,
@@ -47008,7 +47008,7 @@
         {
           "id": "e8503d63-0263-4df1-b644-ed1dc94737ec",
           "code": "REQ-04",
-          "condition": "manual_check",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.2.1",
           "requires_attestation": true,
@@ -47019,7 +47019,7 @@
         {
           "id": "528583bb-c7ee-455e-97fe-aa1c4a9c9370",
           "code": "REQ-05",
-          "condition": "manual_check",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.2.2",
           "requires_attestation": true,
@@ -47030,7 +47030,7 @@
         {
           "id": "146cfd37-afb7-457d-96a0-d8eea269c472",
           "code": "REQ-06",
-          "condition": "manual_check",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.2.3",
           "requires_attestation": true,
@@ -47041,7 +47041,7 @@
         {
           "id": "d9d62bf1-de9b-4b73-b939-24ea39910b20",
           "code": "REQ-08",
-          "condition": "manual_check",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§5.2.5",
           "requires_attestation": true,
@@ -47118,7 +47118,7 @@
         {
           "id": "44d1425b-8382-4bd7-b77e-9733a0bc2fac",
           "code": "REQ-17",
-          "condition": "equation_1_evaluated",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6.2.2.1 Gl.(1)",
           "requires_attestation": false,
@@ -47261,7 +47261,7 @@
         {
           "id": "12f8444a-daad-4b58-8a72-b7f593ee9e10",
           "code": "REQ-28",
-          "condition": "manual_check",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§8.3",
           "requires_attestation": true,
@@ -50561,7 +50561,7 @@
         {
           "id": "64fbce45-4b85-4ebf-82fa-0468933fa5a3",
           "code": "CR-011",
-          "condition": "Documented per §6",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6",
           "requires_attestation": true,
@@ -50583,7 +50583,7 @@
         {
           "id": "85fc6d39-f6f3-48d0-9241-659d3712f818",
           "code": "CR-012",
-          "condition": "All sludge-management fields populated",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.8",
           "requires_attestation": true,
@@ -50594,7 +50594,7 @@
         {
           "id": "189fb0ea-209e-4735-a866-3a1b9a25fdc7",
           "code": "CR-003",
-          "condition": "all values comply with §5.1",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.1",
           "requires_attestation": true,
@@ -54163,6 +54163,17 @@
           "worksheet_template_id": "8b361422-e75d-464b-b60d-aa129b7301e4"
         },
         {
+          "id": "2467bef4-e117-45f9-a65a-b5da200274ae",
+          "code": "CR-020-2",
+          "condition": "A_TK_spez >= 90 AND A_TK_spez <= 150",
+          "severity": "block",
+          "clause_reference": "5.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Die spezifische Oberfläche der Füllelemente muss sein: $90 \\mathrm{~m}^{2} / \\mathrm{m}^{3} \\leq A_{\\mathrm{TK}, \\text { spez }} \\leq 150 \\mathrm{~m}^{2} / \\mathrm{m}^{3}$.",
+          "worksheet_template_id": "8b361422-e75d-464b-b60d-aa129b7301e4"
+        },
+        {
           "id": "9516ad8d-73ff-4cfc-b65f-1805c3556730",
           "code": "CR-005",
           "condition": "d_Scheibe >= 18",
@@ -54295,17 +54306,6 @@
           "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
         },
         {
-          "id": "7d5ca38a-daf2-499a-abc8-71f14725cca1",
-          "code": "CR-026",
-          "condition": "DN >= 150",
-          "severity": "block",
-          "clause_reference": "§5.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
-        },
-        {
           "id": "edb11d8a-e33b-454b-9457-627b88dd3a15",
           "code": "CR-023",
           "condition": "attest_a222_16_cr_023 == True",
@@ -54372,8 +54372,19 @@
           "worksheet_template_id": "a6f3024d-1515-47b3-a97c-a23fdaee3e4f"
         },
         {
-          "id": "2e6a0c74-dfe1-4c7b-98a9-8aa748487375",
+          "id": "7d5ca38a-daf2-499a-abc8-71f14725cca1",
           "code": "CR-026",
+          "condition": "DN >= 150",
+          "severity": "block",
+          "clause_reference": "§5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "87decd1d-3483-449d-a3a5-3435b00b443e"
+        },
+        {
+          "id": "2e6a0c74-dfe1-4c7b-98a9-8aa748487375",
+          "code": "CR-026-2",
           "condition": "DN >= 150",
           "severity": "block",
           "clause_reference": "§5.1",
@@ -54386,6 +54397,17 @@
           "id": "a626f573-caae-40e8-9476-45b8964fef24",
           "code": "CR-021",
           "condition": "h_OK_freibord >= 0.30",
+          "severity": "block",
+          "clause_reference": "§5.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "87decd1d-3483-449d-a3a5-3435b00b443e"
+        },
+        {
+          "id": "57a7c17b-b33e-494e-bc62-90455d018baa",
+          "code": "CR-021-2",
+          "condition": "h_OK >= h_Wasser + 0.30",
           "severity": "block",
           "clause_reference": "§5.1",
           "requires_attestation": false,
@@ -54545,28 +54567,6 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Der Ausfall betriebswichtiger anlagentechnischer Einrichtungen muss optisch und/oder akustisch deutlich wahrnehmbar gemeldet werden. Störmeldungen sollten möglichst fernübertragen werden. Die Anlagen benötigen eine netzunabhängige Stromausfallmeldung.",
-          "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
-        },
-        {
-          "id": "2467bef4-e117-45f9-a65a-b5da200274ae",
-          "code": "CR-020",
-          "condition": "A_TK_spez >= 90 AND A_TK_spez <= 150",
-          "severity": "block",
-          "clause_reference": "5.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Die spezifische Oberfläche der Füllelemente muss sein: $90 \\mathrm{~m}^{2} / \\mathrm{m}^{3} \\leq A_{\\mathrm{TK}, \\text { spez }} \\leq 150 \\mathrm{~m}^{2} / \\mathrm{m}^{3}$.",
-          "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
-        },
-        {
-          "id": "57a7c17b-b33e-494e-bc62-90455d018baa",
-          "code": "CR-021",
-          "condition": "h_OK >= h_Wasser + 0.30",
-          "severity": "block",
-          "clause_reference": "§5.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
           "worksheet_template_id": "23002bb3-2df4-4d47-8443-f7248cf501ff"
         },
         {
@@ -57071,17 +57071,6 @@
           "worksheet_template_id": "9d9a3ca5-30df-42dc-a84e-31e55b37484c"
         },
         {
-          "id": "5d05add8-8b5e-4ee6-8d7c-71f054ca1ca9",
-          "code": "CR-019",
-          "condition": "durchflussmessung IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§4.3",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "Kläranlagen im Geltungsbereich dieses Arbeitsblattes müssen mit einer geeigneten Durchflussmesseinrichtung ausgerüstet werden. Eine Anordnung der Messeinrichtungen im Ablauf hat auch wegen verminderter Verstopfungsgefahr Vorteile. Ein sicherer Zugang zur Messstelle muss gewährleistet sein. Weitere Hinweise zur Ausführung und Anordnung von Messeinrichtungen sind der DIN 19559 „Durchflußmessung von Abwasser in offenen Gerinnen und Freispiegelleitungen\" zu entnehmen.",
-          "worksheet_template_id": "9d9a3ca5-30df-42dc-a84e-31e55b37484c"
-        },
-        {
           "id": "1d9cae01-d7f9-4605-be91-b79821eeaf6b",
           "code": "CR-020",
           "condition": "stapelzeit_schlamm >= 1",
@@ -57104,9 +57093,20 @@
           "worksheet_template_id": "9d9a3ca5-30df-42dc-a84e-31e55b37484c"
         },
         {
+          "id": "5d05add8-8b5e-4ee6-8d7c-71f054ca1ca9",
+          "code": "CR-019",
+          "condition": "durchflussmessung == True",
+          "severity": "block",
+          "clause_reference": "§4.3",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "Kläranlagen im Geltungsbereich dieses Arbeitsblattes müssen mit einer geeigneten Durchflussmesseinrichtung ausgerüstet werden. Eine Anordnung der Messeinrichtungen im Ablauf hat auch wegen verminderter Verstopfungsgefahr Vorteile. Ein sicherer Zugang zur Messstelle muss gewährleistet sein. Weitere Hinweise zur Ausführung und Anordnung von Messeinrichtungen sind der DIN 19559 „Durchflußmessung von Abwasser in offenen Gerinnen und Freispiegelleitungen\" zu entnehmen.",
+          "worksheet_template_id": "9d9a3ca5-30df-42dc-a84e-31e55b37484c"
+        },
+        {
           "id": "5a8b6456-1258-4402-8587-2f8986be07b9",
           "code": "CR-017",
-          "condition": "notstromversorgung IS NOT NULL",
+          "condition": "notstromversorgung == True",
           "severity": "block",
           "clause_reference": "§4.9",
           "requires_attestation": false,
@@ -66776,17 +66776,6 @@
           "worksheet_template_id": "1f49e47c-5753-4b99-9ab7-f408af5da07f"
         },
         {
-          "id": "c344cd86-cd73-43e1-9c44-c78be2453d70",
-          "code": "COMP-26",
-          "condition": "VR-11",
-          "severity": "warn",
-          "clause_reference": "7.1",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "The current Guidelines on Dynamic Cost Comparison Calculations (KVR Guidelines, DWA 2012) point to the restrictive condition of equality of benefits for alternatives.",
-          "worksheet_template_id": "1f49e47c-5753-4b99-9ab7-f408af5da07f"
-        },
-        {
           "id": "8bd53e00-02ed-4ce2-a9fa-55d011f213ba",
           "code": "COMP-11",
           "condition": "T_plan >= 10 AND T_plan <= 100",
@@ -66795,6 +66784,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
+          "worksheet_template_id": "1f49e47c-5753-4b99-9ab7-f408af5da07f"
+        },
+        {
+          "id": "c344cd86-cd73-43e1-9c44-c78be2453d70",
+          "code": "COMP-26",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "7.1",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "The current Guidelines on Dynamic Cost Comparison Calculations (KVR Guidelines, DWA 2012) point to the restrictive condition of equality of benefits for alternatives.",
           "worksheet_template_id": "1f49e47c-5753-4b99-9ab7-f408af5da07f"
         },
         {
@@ -66954,7 +66954,7 @@
         {
           "id": "208f92a7-b1b6-432a-9fff-dfbf1e6d7ab5",
           "code": "COMP-06",
-          "condition": "RULE-10",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.3",
           "requires_attestation": false,
@@ -66965,7 +66965,7 @@
         {
           "id": "5138a2ce-3f45-4305-97a4-995c78ce981d",
           "code": "COMP-16",
-          "condition": "site_measurement_used eq true OR (Table 5 verbatim)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.2",
           "requires_attestation": true,
@@ -67009,7 +67009,7 @@
         {
           "id": "be7087d4-78f2-4d7a-b17d-d97f35599e35",
           "code": "COMP-21",
-          "condition": "both populated",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9.1",
           "requires_attestation": true,
@@ -67064,7 +67064,7 @@
         {
           "id": "b9cdd82e-6827-404d-b2e8-aa552d854c33",
           "code": "COMP-07",
-          "condition": "RULE-11",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.3",
           "requires_attestation": false,
@@ -67097,7 +67097,7 @@
         {
           "id": "dad1b5dc-b5c1-4b96-9fca-5f6d328c7c8d",
           "code": "COMP-19",
-          "condition": "VR-40",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.2",
           "requires_attestation": true,
@@ -73069,31 +73069,9 @@
           "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
         },
         {
-          "id": "fa768865-e654-4d62-8a15-60ac68541615",
-          "code": "REQ-05",
-          "condition": "abs(P_korr - (R + ET_a)) <= tol",
-          "severity": "warn",
-          "clause_reference": "5.1, Gl. (1)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
-          "id": "5b2f1470-b947-461e-85ba-1b4363b72bdc",
-          "code": "REQ-15",
-          "condition": "lookup in Tab. C.3 valid",
-          "severity": "warn",
-          "clause_reference": "C.3, Tabelle C.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
-        },
-        {
           "id": "5232d641-4f46-4fbd-a164-c86e7dc4f29c",
           "code": "REQ-16",
-          "condition": "valid lookup",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "C.3, Tabelle C.3",
           "requires_attestation": false,
@@ -73113,15 +73091,26 @@
           "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
         },
         {
-          "id": "ea63e69c-8915-4e21-ba5c-e79a86ef81de",
-          "code": "REQ-10",
-          "condition": "abs(a_F + g_F + v_F - 1) <= tol per surface",
+          "id": "fa768865-e654-4d62-8a15-60ac68541615",
+          "code": "REQ-05",
+          "condition": "",
           "severity": "warn",
-          "clause_reference": "Anhang A, Hinweis zur Korrektur von Bilanzfehlern",
+          "clause_reference": "5.1, Gl. (1)",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "db94cbbe-8909-458d-b473-4dc1d74b17be"
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
+        },
+        {
+          "id": "5b2f1470-b947-461e-85ba-1b4363b72bdc",
+          "code": "REQ-15",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "C.3, Tabelle C.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "c4571a1b-39ef-4488-a1ec-fb6367a6ba2c"
         },
         {
           "id": "2a2ea0da-7d1c-4ecc-b6bf-f749db9b1924",
@@ -73135,9 +73124,20 @@
           "worksheet_template_id": "db94cbbe-8909-458d-b473-4dc1d74b17be"
         },
         {
+          "id": "ea63e69c-8915-4e21-ba5c-e79a86ef81de",
+          "code": "REQ-10",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "Anhang A, Hinweis zur Korrektur von Bilanzfehlern",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "db94cbbe-8909-458d-b473-4dc1d74b17be"
+        },
+        {
           "id": "3643a87c-db93-4742-a31a-2481bcff2c08",
           "code": "REQ-11",
-          "condition": "abs(a_A + g_A + v_A + e_A - 1) <= tol per facility",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Anhang B, Hinweis zur Korrektur von Bilanzfehlern",
           "requires_attestation": false,
@@ -73148,7 +73148,7 @@
         {
           "id": "5f7cf503-ab23-47dc-a896-c17037e12b7d",
           "code": "REQ-21",
-          "condition": "sum < 1 allowed when e_A > 0 per §B.6",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "B.6",
           "requires_attestation": false,
@@ -73168,9 +73168,20 @@
           "worksheet_template_id": "bc1e7262-38d0-4984-a58b-2a7eb37c0a20"
         },
         {
+          "id": "83692f72-1ac1-49d8-8c19-687fc298ec85",
+          "code": "REQ-19",
+          "condition": "attest_m104_29_req_19 == True",
+          "severity": "block",
+          "clause_reference": "5.3.3",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Die Abweichungen sind unter ökologischen, technischen und wirtschaftlichen Aspekten zu bewerten. Größere Abweichungen ... sind ausführlich fachlich zu begründen und ihre Berücksichtigung im Rahmen von Ersatz- und Ausgleichsregelungen zu prüfen.",
+          "worksheet_template_id": "7af076bd-779e-40a7-9369-c2954b74b044"
+        },
+        {
           "id": "047840e1-48b1-4259-9b9a-199708238e4a",
           "code": "REQ-06",
-          "condition": "abs(P_korr - (R_D + GWN + ET_a)) <= tol",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.1, Gl. (6)",
           "requires_attestation": false,
@@ -73181,7 +73192,7 @@
         {
           "id": "f5967fe8-2fd7-4308-a60b-e7048dcda5c4",
           "code": "REQ-07",
-          "condition": "abs(a + g + v - 1) <= tol",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.1",
           "requires_attestation": false,
@@ -73192,23 +73203,12 @@
         {
           "id": "6956719a-8a1a-4a4c-b3ce-d272ed6e6f4f",
           "code": "REQ-17",
-          "condition": "max(|delta_a|,|delta_g|,|delta_v|) <= 0.10 (or fully justified)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3.3",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "7af076bd-779e-40a7-9369-c2954b74b044"
-        },
-        {
-          "id": "83692f72-1ac1-49d8-8c19-687fc298ec85",
-          "code": "REQ-19",
-          "condition": "attest_m104_29_req_19 == True",
-          "severity": "block",
-          "clause_reference": "5.3.3",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Die Abweichungen sind unter ökologischen, technischen und wirtschaftlichen Aspekten zu bewerten. Größere Abweichungen ... sind ausführlich fachlich zu begründen und ihre Berücksichtigung im Rahmen von Ersatz- und Ausgleichsregelungen zu prüfen.",
           "worksheet_template_id": "7af076bd-779e-40a7-9369-c2954b74b044"
         }
       ],
@@ -76912,7 +76912,7 @@
         {
           "id": "080e27dc-007b-4e23-9fc0-ed146e967c49",
           "code": "CR-003",
-          "condition": "gueteklasse_zugeordnet matches strictest class for anwendungsbereich_kategorie",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Tabelle 4, Anmerkung (*)",
           "requires_attestation": false,
@@ -76923,7 +76923,7 @@
         {
           "id": "b958fc4e-49fd-4e3e-8dd2-6bf3188d681b",
           "code": "CR-006",
-          "condition": "all log10 values >= targets per class",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Tabelle 8 / Tabelle 6 (Log10-Reduktion); DWA-M 1200-2",
           "requires_attestation": false,
@@ -76945,7 +76945,7 @@
         {
           "id": "3c457e03-37b6-4777-b596-13c077d093ad",
           "code": "CR-012",
-          "condition": "today - rmp_letzte_aktualisierung <= 6 years",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.1 (Aktualisierung des RMP)",
           "requires_attestation": false,
@@ -79922,7 +79922,7 @@
         {
           "id": "89edda51-775c-4907-815b-bbf0ee7a4638",
           "code": "REQ-02",
-          "condition": "alle Parameter <= Klassen-Grenzwert",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.3 (Tabelle 3)",
           "requires_attestation": false,
@@ -79966,7 +79966,7 @@
         {
           "id": "8502aa21-f235-4146-8d6d-d8126084adf7",
           "code": "REQ-08",
-          "condition": "Anzahl(Aufbereitungsstufen) >= Klassen-Mindest",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.3.2 (Multibarrierenansatz)",
           "requires_attestation": false,
@@ -79997,6 +79997,17 @@
           "worksheet_template_id": "8a92f2ff-daa9-4baa-af7f-24d8a09e69a8"
         },
         {
+          "id": "f88bb51e-b4fa-4974-b4f7-b67ce26bfba7",
+          "code": "REQ-13",
+          "condition": "IF ausgleichsvolumen > 0 THEN speicherbauform IS NOT EMPTY AND notueberlauf IS NOT NULL AND reinigungskonzept IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "§7.3; §7.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "22ee1863-b4f4-40cb-b968-56194ecf7560"
+        },
+        {
           "id": "96461a18-731b-4b80-9055-ca992fc93b97",
           "code": "REQ-03",
           "condition": "perzentil_konformitaet >= 90",
@@ -80013,17 +80024,6 @@
           "condition": "messhauefigkeit == online AND alarm_verzoegerung_min <= 30",
           "severity": "block",
           "clause_reference": "§6.4; Tabelle 6",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "22ee1863-b4f4-40cb-b968-56194ecf7560"
-        },
-        {
-          "id": "f88bb51e-b4fa-4974-b4f7-b67ce26bfba7",
-          "code": "REQ-13",
-          "condition": "IF ausgleichsvolumen > 0 THEN speicherbauform IS NOT EMPTY AND notueberlauf IS NOT NULL AND reinigungskonzept IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "§7.3; §7.4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -84931,7 +84931,7 @@
         {
           "id": "61b7e84b-dd17-4f0d-b137-fbd811290a54",
           "code": "CR-02",
-          "condition": "documented_compliance",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "1 Anwendungsbereich",
           "requires_attestation": true,
@@ -84959,17 +84959,6 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Verwendung eines automatischen Scheibenfilters (180 µm) vor der Einspeisung in das Verteilungsnetz ... Verwendung eines 120-µm-Kontrollfilters hinter dem ersten Filter ... Spuelung und Hygienisierung (Reinigung und Desinfektion) des Systems vor Beginn und nach Ende der Bewaesserungssaison.",
-          "worksheet_template_id": "694a33e0-3159-4e91-b143-d4bfdea9a566"
-        },
-        {
-          "id": "cf9d7c41-88f2-4b12-98ad-75c062136bdc",
-          "code": "CR-16",
-          "condition": "saison_reinigung_durchgefuehrt == True AND reinigung_dokumentiert == True AND (desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3))",
-          "severity": "warn",
-          "clause_reference": "7.2.5 Anlagenreinigung und -hygienisierung von Speichern und Transportbehaeltern",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Eine Anlagendesinfektion (Speicher und Leitungen) kann analog zum Trinkwasserbereich ebenfalls chemisch oder thermisch erfolgen; fuer letztere muessen die verbauten Materialien Temperaturen von 70 °C ueber 3 min aushalten koennen, um die Mikroorganismen abzutoeten bzw. zu inaktivieren.",
           "worksheet_template_id": "694a33e0-3159-4e91-b143-d4bfdea9a566"
         },
         {
@@ -85105,6 +85094,83 @@
           "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
         },
         {
+          "id": "20935a0a-ac2e-4916-8526-bb6ad06eb3fb",
+          "code": "CR-08-2",
+          "condition": "rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True",
+          "severity": "warn",
+          "clause_reference": "§5.1.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
+          "id": "568ce4fa-f8e1-444a-940e-9de7c2cead37",
+          "code": "CR-06-2",
+          "condition": "speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C', 'C-1', 'C-2', 'D'}) OR speichertyp == 'transportbehaelter'",
+          "severity": "block",
+          "clause_reference": "§5.1.1 / Tab. 3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
+          "id": "6a51cf59-c6be-4fda-b6f7-1ee634802ac3",
+          "code": "CR-17-2",
+          "condition": "volumenverlust_pct <= 1 AND (druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true)",
+          "severity": "block",
+          "clause_reference": "§5.1.6",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
+          "id": "a7afb5c2-53b0-4263-9a8a-20b70bc7e0b7",
+          "code": "CR-18-2",
+          "condition": "schwermetall_fracht_pa <= bbodschv_anlage1_tab3 / 3",
+          "severity": "block",
+          "clause_reference": "§4.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
+          "id": "1fbc0209-8311-4842-b690-58fd51f2ce6e",
+          "code": "CR-05-2",
+          "condition": "k_konz <= 200 AND na_konz <= 100 AND no3_konz <= 300 AND so4_konz <= 1200 AND ph_wert >= 5.0 AND ph_wert <= 9.5 AND pb_konz <= 100 AND cd_konz <= 2 AND cr_konz <= 100 AND fe_konz <= 1500 AND cu_konz <= 100 AND mn_konz <= 1500 AND ni_konz <= 40 AND hg_konz <= 0.5 AND zn_konz <= 300",
+          "severity": "warn",
+          "clause_reference": "5.6.2 Wasserqualitaet aus pflanzenphysiologischer Sicht, Tabelle 11",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Kalium <= 200 mg/l; Natrium <= 100 mg/l; Nitrat <= 300 mg/l; Sulfat <= 1.200 mg/l; pH-Wert 5,0-9,5; Blei <= 100 µg/l; Cadmium <= 2 µg/l; Chrom <= 100 µg/l; Eisen <= 1.500 µg/l; Kupfer <= 100 µg/l; Mangan <= 1.500 µg/l; Nickel <= 40 µg/l; Quecksilber <= 0,5 µg/l; Zink <= 300 µg/l",
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
+          "id": "ab5f62a2-fc3a-45d4-8ba7-05ac967872aa",
+          "code": "CR-07-2",
+          "condition": "kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND markierung_oberflaeche_anteil >= 60",
+          "severity": "warn",
+          "clause_reference": "5.1.4 Kennzeichnung der Verteilungsinfrastruktur",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Farbgebung der technischen Bauteile ... in den Farben „Pantone Purple 522C“, „Pantone Purple 512C“ oder vergleichbaren Farben. ... Eine nachtraegliche Farbmarkierung muss dabei mindestens 60 % der Oberflaeche umfassen.",
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
+          "id": "c9caaf89-aef1-408c-acdd-acf43bbb5516",
+          "code": "CR-09-2",
+          "condition": "gueteklasse != 'D' OR abstand_zu_sensitiv >= 2 * wurfweite",
+          "severity": "warn",
+          "clause_reference": "5.2.4.2 Abstand zu geschlossenen Wohngebieten, Tabelle 7",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Gueteklasse A bis C: 1-fache Wurfweite; D: 2-fache Wurfweite (ohne Spritzschutz); mit Spritzschutz: 1-fache Wurfweite",
+          "worksheet_template_id": "074e17e2-54c2-4320-b6fb-3e4ae6ae4df6"
+        },
+        {
           "id": "3241e20c-24bc-4751-8afb-504af340c5b0",
           "code": "CR-10",
           "condition": "attest_m12003_06_cr_10 == True",
@@ -85116,9 +85182,20 @@
           "worksheet_template_id": "cf221392-ad7b-4f2b-99ab-b0c05a6e06d6"
         },
         {
+          "id": "cf9d7c41-88f2-4b12-98ad-75c062136bdc",
+          "code": "CR-16",
+          "condition": "saison_reinigung_durchgefuehrt == True AND reinigung_dokumentiert == True AND (desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3))",
+          "severity": "warn",
+          "clause_reference": "7.2.5 Anlagenreinigung und -hygienisierung von Speichern und Transportbehaeltern",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Eine Anlagendesinfektion (Speicher und Leitungen) kann analog zum Trinkwasserbereich ebenfalls chemisch oder thermisch erfolgen; fuer letztere muessen die verbauten Materialien Temperaturen von 70 °C ueber 3 min aushalten koennen, um die Mikroorganismen abzutoeten bzw. zu inaktivieren.",
+          "worksheet_template_id": "91059385-04d4-49c9-93eb-a5575ab33d9d"
+        },
+        {
           "id": "f9d55b0b-2884-4462-a3ab-34d5b88b9c86",
           "code": "CR-11",
-          "condition": "alle_hygieneanforderungen_erfuellt",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "7.1 Allgemeines / 7.3",
           "requires_attestation": true,
@@ -85129,7 +85206,7 @@
         {
           "id": "8bf0ba11-cec0-4aa9-a671-6809dc40007e",
           "code": "CR-12",
-          "condition": "filter_groesse_um <= 180 AND kontrollfilter_um <= 120",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "7.3.2 Oberirdische Tropfbewaesserungssysteme und Mikrospruehsysteme",
           "requires_attestation": false,
@@ -85139,7 +85216,7 @@
         },
         {
           "id": "d136638a-59ee-4725-a2f6-fec9e418f9ef",
-          "code": "CR-16",
+          "code": "CR-16-2",
           "condition": "saison_reinigung_durchgefuehrt == True AND reinigung_dokumentiert == True AND (desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3))",
           "severity": "warn",
           "clause_reference": "7.2.5 Anlagenreinigung und -hygienisierung von Speichern und Transportbehaeltern",
@@ -85151,20 +85228,9 @@
         {
           "id": "599ce477-e9dd-4181-8b41-b20437518f1d",
           "code": "CR-13",
-          "condition": "expositionspfade_dokumentiert == True AND schulung_durchgefuehrt == True",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§8 / Tab. 15",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "568ce4fa-f8e1-444a-940e-9de7c2cead37",
-          "code": "CR-06",
-          "condition": "speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C', 'C-1', 'C-2', 'D'}) OR speichertyp == 'transportbehaelter'",
-          "severity": "block",
-          "clause_reference": "§5.1.1 / Tab. 3",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -85176,72 +85242,6 @@
           "condition": "NOT (desinfektion_methode IN {'Chlorung', 'H2O2', 'PES'}) OR abstand_oberflaechengewaesser_eingehalten == true",
           "severity": "block",
           "clause_reference": "§5.2.4.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "6a51cf59-c6be-4fda-b6f7-1ee634802ac3",
-          "code": "CR-17",
-          "condition": "volumenverlust_pct <= 1 AND (druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true)",
-          "severity": "block",
-          "clause_reference": "§5.1.6",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "a7afb5c2-53b0-4263-9a8a-20b70bc7e0b7",
-          "code": "CR-18",
-          "condition": "schwermetall_fracht_pa <= bbodschv_anlage1_tab3 / 3",
-          "severity": "block",
-          "clause_reference": "§4.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "1fbc0209-8311-4842-b690-58fd51f2ce6e",
-          "code": "CR-05",
-          "condition": "k_konz <= 200 AND na_konz <= 100 AND no3_konz <= 300 AND so4_konz <= 1200 AND ph_wert >= 5.0 AND ph_wert <= 9.5 AND pb_konz <= 100 AND cd_konz <= 2 AND cr_konz <= 100 AND fe_konz <= 1500 AND cu_konz <= 100 AND mn_konz <= 1500 AND ni_konz <= 40 AND hg_konz <= 0.5 AND zn_konz <= 300",
-          "severity": "warn",
-          "clause_reference": "5.6.2 Wasserqualitaet aus pflanzenphysiologischer Sicht, Tabelle 11",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Kalium <= 200 mg/l; Natrium <= 100 mg/l; Nitrat <= 300 mg/l; Sulfat <= 1.200 mg/l; pH-Wert 5,0-9,5; Blei <= 100 µg/l; Cadmium <= 2 µg/l; Chrom <= 100 µg/l; Eisen <= 1.500 µg/l; Kupfer <= 100 µg/l; Mangan <= 1.500 µg/l; Nickel <= 40 µg/l; Quecksilber <= 0,5 µg/l; Zink <= 300 µg/l",
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "ab5f62a2-fc3a-45d4-8ba7-05ac967872aa",
-          "code": "CR-07",
-          "condition": "kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND markierung_oberflaeche_anteil >= 60",
-          "severity": "warn",
-          "clause_reference": "5.1.4 Kennzeichnung der Verteilungsinfrastruktur",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Farbgebung der technischen Bauteile ... in den Farben „Pantone Purple 522C“, „Pantone Purple 512C“ oder vergleichbaren Farben. ... Eine nachtraegliche Farbmarkierung muss dabei mindestens 60 % der Oberflaeche umfassen.",
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "c9caaf89-aef1-408c-acdd-acf43bbb5516",
-          "code": "CR-09",
-          "condition": "gueteklasse != 'D' OR abstand_zu_sensitiv >= 2 * wurfweite",
-          "severity": "warn",
-          "clause_reference": "5.2.4.2 Abstand zu geschlossenen Wohngebieten, Tabelle 7",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Gueteklasse A bis C: 1-fache Wurfweite; D: 2-fache Wurfweite (ohne Spritzschutz); mit Spritzschutz: 1-fache Wurfweite",
-          "worksheet_template_id": "d94c1798-c40c-462b-9e82-e8fe587048fc"
-        },
-        {
-          "id": "20935a0a-ac2e-4916-8526-bb6ad06eb3fb",
-          "code": "CR-08",
-          "condition": "rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True",
-          "severity": "warn",
-          "clause_reference": "§5.1.5",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -88120,7 +88120,7 @@
         {
           "id": "e21158aa-7ee4-43bc-87dc-e43e1f04ef83",
           "code": "REQ-03",
-          "condition": "lookup(Tab.3, catchment, target_compartment) matches selected rule",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.2 / Tabelle 3",
           "requires_attestation": true,
@@ -88241,31 +88241,9 @@
         {
           "id": "b541b4bb-b958-4769-baf5-317f1f0f40d8",
           "code": "REQ-10",
-          "condition": "abs(eta_hyd - eta_ges_required/eta_BV) < tol",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.2 / Gleichung (2)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
-        },
-        {
-          "id": "09552389-f716-49e3-bb98-e0b4d8cf86cb",
-          "code": "REQ-11",
-          "condition": "abs(r_krit - 0.1201*exp(0.0655*eta_hyd)) < tol  OR  r_krit matches Tab.5 lookup",
-          "severity": "warn",
-          "clause_reference": "7.2 / Gleichung (1)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
-        },
-        {
-          "id": "d812a5fd-9195-4e5d-9e6f-e9618a8bd267",
-          "code": "REQ-12",
-          "condition": "abs(Q_krit - A_b_a*Psi_s*r_krit/10000) < tol",
-          "severity": "warn",
-          "clause_reference": "8.2 / Gleichung (3)",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -88280,17 +88258,6 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Bei Sedimentationsanlagen ist zusätzlich zum Sedimentationsraum ein Schlammspeicher von >= 15 kg/(m^2 . a) AFS vorzusehen.",
-          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
-        },
-        {
-          "id": "a698028b-7b4f-4b24-a663-fe0a15d05c80",
-          "code": "REQ-17",
-          "condition": "abs(A_sed - 3.6*Q_krit/q_A_max) < tol",
-          "severity": "warn",
-          "clause_reference": "8.2 / Gleichung (4)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
           "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
         },
         {
@@ -88327,17 +88294,6 @@
           "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
         },
         {
-          "id": "6ce52cb6-11ba-4eb1-b065-baeb7f15d744",
-          "code": "REQ-21",
-          "condition": "abs(A_F - A_b_a*0.01) < tol  OR  reduced per pre-treatment",
-          "severity": "warn",
-          "clause_reference": "8.2 / Gleichung (5)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
-        },
-        {
           "id": "4b734f91-3e2b-4d52-aeb1-0bf0630ce04e",
           "code": "REQ-22",
           "condition": "IF flow_split_case == fall_4 THEN Q_krit >= 5",
@@ -88357,6 +88313,50 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Bei Zuflüssen <= 5 l/s ist keine Abflussaufteilung möglich (Vollstrombehandlung).",
+          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
+        },
+        {
+          "id": "09552389-f716-49e3-bb98-e0b4d8cf86cb",
+          "code": "REQ-11",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "7.2 / Gleichung (1)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
+        },
+        {
+          "id": "d812a5fd-9195-4e5d-9e6f-e9618a8bd267",
+          "code": "REQ-12",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "8.2 / Gleichung (3)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
+        },
+        {
+          "id": "a698028b-7b4f-4b24-a663-fe0a15d05c80",
+          "code": "REQ-17",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "8.2 / Gleichung (4)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
+        },
+        {
+          "id": "6ce52cb6-11ba-4eb1-b065-baeb7f15d744",
+          "code": "REQ-21",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "8.2 / Gleichung (5)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "a8cd23da-919d-4424-9355-26f7ca7caa84"
         },
         {
@@ -88415,9 +88415,20 @@
           "worksheet_template_id": "f5537211-c32b-4455-a233-fa1409b8a936"
         },
         {
+          "id": "28f79d53-16be-49d4-8fa2-8109df5dd6c8",
+          "code": "REQ-30",
+          "condition": "funktionspruefung_done == True AND betriebsanweisung_status == ready",
+          "severity": "block",
+          "clause_reference": "8.4.6",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Vor der Inbetriebnahme ist eine Funktionsprüfung durchzuführen und eine Betriebsanweisung zu erstellen (siehe 8.4.4).",
+          "worksheet_template_id": "f5537211-c32b-4455-a233-fa1409b8a936"
+        },
+        {
           "id": "16ac5b8a-2372-4f14-90d0-c7a8c717b5aa",
           "code": "REQ-29",
-          "condition": "Betriebsanweisung prepared",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.4.4",
           "requires_attestation": true,
@@ -88428,7 +88439,7 @@
         {
           "id": "a44a794e-ff7e-4b5b-b563-496255742465",
           "code": "REQ-31",
-          "condition": "Waste disposal pathway documented per DWA-M 369",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9",
           "requires_attestation": true,
@@ -88439,7 +88450,7 @@
         {
           "id": "f13df860-4e09-4a7b-a0f1-d03a65387342",
           "code": "REQ-32",
-          "condition": "Dynamic cost-comparison performed per KVR-Leitlinien",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.4.2",
           "requires_attestation": true,
@@ -88450,23 +88461,12 @@
         {
           "id": "58264465-9824-4a16-8f7f-be2098f7e54e",
           "code": "REQ-33",
-          "condition": "Climate classification noted in project record",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "10.2",
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Das vorliegende Merkblatt hat einen indirekten Bezug zur Klimaanpassung (KA1) und einen indirekten Bezug zu Klimaschutzparametern (KS1).",
-          "worksheet_template_id": "f5537211-c32b-4455-a233-fa1409b8a936"
-        },
-        {
-          "id": "28f79d53-16be-49d4-8fa2-8109df5dd6c8",
-          "code": "REQ-30",
-          "condition": "funktionspruefung_done == True AND betriebsanweisung_status == ready",
-          "severity": "block",
-          "clause_reference": "8.4.6",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Vor der Inbetriebnahme ist eine Funktionsprüfung durchzuführen und eine Betriebsanweisung zu erstellen (siehe 8.4.4).",
           "worksheet_template_id": "f5537211-c32b-4455-a233-fa1409b8a936"
         }
       ],
@@ -91770,6 +91770,17 @@
           "worksheet_template_id": "4272d967-e2c2-48d1-b340-824eec90e0f3"
         },
         {
+          "id": "17ec0451-4e15-40dc-928d-6e67cc3fde40",
+          "code": "REQ-02-2",
+          "condition": "beta_wert >= 4",
+          "severity": "block",
+          "clause_reference": "§5.1.3.1 a)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Basierend auf einer mittleren $\\mathrm{PO}_{4}$-Zulaufkonzentration von $S_{\\text {P04-P, aM }}=0,5 \\mathrm{mg} / \\mathrm{l}$ kann die Menge des Fällmittels (Eisen-III-Salz) mit einem Beta-Wert von $\\geqslant 4$ angesetzt werden.",
+          "worksheet_template_id": "4272d967-e2c2-48d1-b340-824eec90e0f3"
+        },
+        {
           "id": "e2e0fa89-c689-46ff-8ec7-7b8f61206067",
           "code": "REQ-04",
           "condition": "q_Dr_RBF == 0.01 AND h_FK >= 1.0",
@@ -91790,17 +91801,6 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "f8952cd9-1b32-4244-9fd0-ebc34d9520b0"
-        },
-        {
-          "id": "17ec0451-4e15-40dc-928d-6e67cc3fde40",
-          "code": "REQ-02",
-          "condition": "beta_wert >= 4",
-          "severity": "block",
-          "clause_reference": "§5.1.3.1 a)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Basierend auf einer mittleren $\\mathrm{PO}_{4}$-Zulaufkonzentration von $S_{\\text {P04-P, aM }}=0,5 \\mathrm{mg} / \\mathrm{l}$ kann die Menge des Fällmittels (Eisen-III-Salz) mit einem Beta-Wert von $\\geqslant 4$ angesetzt werden.",
-          "worksheet_template_id": "d8b0c113-0dc8-4f26-b19c-d47077426b29"
         },
         {
           "id": "68ffd495-3249-4827-8ca0-657d925daf50",
@@ -91833,7 +91833,18 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "d8b0c113-0dc8-4f26-b19c-d47077426b29"
+          "worksheet_template_id": "1535237f-3882-4220-b234-64a9da43575f"
+        },
+        {
+          "id": "7db4c2e0-20a3-457a-a0e2-31f91e1d12a5",
+          "code": "REQ-05-2",
+          "condition": "B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4",
+          "severity": "block",
+          "clause_reference": "§5.4.3, §5.4.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "1535237f-3882-4220-b234-64a9da43575f"
         },
         {
           "id": "69015ae3-f9af-49f6-a9f1-a7fa8c142da7",
@@ -91844,22 +91855,11 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "d8b0c113-0dc8-4f26-b19c-d47077426b29"
-        },
-        {
-          "id": "7db4c2e0-20a3-457a-a0e2-31f91e1d12a5",
-          "code": "REQ-05",
-          "condition": "B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4",
-          "severity": "block",
-          "clause_reference": "§5.4.3, §5.4.4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "1535237f-3882-4220-b234-64a9da43575f"
+          "worksheet_template_id": "30a77450-7d83-443d-8938-25bcb1f87b9a"
         },
         {
           "id": "1eeabd57-1efc-434e-acbc-6a23e02eea39",
-          "code": "REQ-06",
+          "code": "REQ-06-2",
           "condition": "A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND h_Draen >= 0.1",
           "severity": "block",
           "clause_reference": "§5.5.4, §5.5.3.2.2",
@@ -91882,7 +91882,7 @@
         {
           "id": "acadae66-788b-4458-a3d6-0bc1066eaf38",
           "code": "REQ-08",
-          "condition": "Engineer bestätigt",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§6",
           "requires_attestation": true,
@@ -97408,6 +97408,17 @@
           "worksheet_template_id": "d49b34c0-71ec-4e2b-a786-071150810038"
         },
         {
+          "id": "375741ec-a911-4c23-aa34-659bd44686cc",
+          "code": "CR-06-2",
+          "condition": "afs <= 20",
+          "severity": "block",
+          "clause_reference": "§4.1.2.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "d49b34c0-71ec-4e2b-a786-071150810038"
+        },
+        {
           "id": "869c84ce-e0ff-41a3-a0e5-0895f2bee132",
           "code": "CR-28",
           "condition": "durchfluss_max <= 1000 OR mehrstrassige_anlage == True",
@@ -97485,6 +97496,17 @@
           "worksheet_template_id": "71235b9a-bcaf-498d-be58-0cef301d1bef"
         },
         {
+          "id": "1d23c9fe-44e7-4767-b544-6027563a75e8",
+          "code": "REQ-M205-ES1-04-2",
+          "condition": "ozon_pro_doc < 0.8",
+          "severity": "warn",
+          "clause_reference": "§4.3.6",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Die Ozonung von bromidhaltigem Abwasser kann zur Bildung von Bromat führen, dessen Einleitung in Gewässer aufgrund seiner toxikologischen Eigenschaften grundsätzlich unerwünscht ist. … Die Bromatbildung kann minimiert werden, wenn Ozon proportional zum DOC (< 0,8 mg/mg) dosiert wird.",
+          "worksheet_template_id": "71235b9a-bcaf-498d-be58-0cef301d1bef"
+        },
+        {
           "id": "6b8754ed-25fd-4b8f-97ae-a38c9012b50c",
           "code": "CR-31",
           "condition": "wiederverkeimungsbeurteilung == True",
@@ -97498,6 +97520,28 @@
         {
           "id": "a93b3ed9-f65f-4d10-b6b7-080a6db59125",
           "code": "CR-32",
+          "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
+          "severity": "block",
+          "clause_reference": "§3.5 (BioStoffV, TRBA 220, TRBA 400)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "71235b9a-bcaf-498d-be58-0cef301d1bef"
+        },
+        {
+          "id": "cf706693-1306-4877-b689-a4f8c48ee49e",
+          "code": "CR-31-2",
+          "condition": "wiederverkeimungsbeurteilung == True",
+          "severity": "block",
+          "clause_reference": "§3.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "71235b9a-bcaf-498d-be58-0cef301d1bef"
+        },
+        {
+          "id": "58ba4c36-111f-476f-96b3-f6bc4a6d4786",
+          "code": "CR-32-2",
           "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
           "severity": "block",
           "clause_reference": "§3.5 (BioStoffV, TRBA 220, TRBA 400)",
@@ -97529,31 +97573,9 @@
           "worksheet_template_id": "71235b9a-bcaf-498d-be58-0cef301d1bef"
         },
         {
-          "id": "375741ec-a911-4c23-aa34-659bd44686cc",
-          "code": "CR-06",
-          "condition": "afs <= 20",
-          "severity": "block",
-          "clause_reference": "§4.1.2.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13"
-        },
-        {
-          "id": "323f359f-dfc8-4027-8c6b-8ec46c68d3cb",
-          "code": "CR-25",
-          "condition": "pilotierung == True",
-          "severity": "block",
-          "clause_reference": "§4.2.3.5",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13"
-        },
-        {
-          "id": "836c0971-b9b6-4c71-8fe8-927d0086a879",
-          "code": "CR-30",
-          "condition": "chlorung_routine == False",
+          "id": "0e84f3e0-1138-4c2b-8f4c-796bbcab4460",
+          "code": "CR-23-2",
+          "condition": "restchlor_betrieb >= 0.2",
           "severity": "block",
           "clause_reference": "§4.4.2",
           "requires_attestation": false,
@@ -97562,25 +97584,14 @@
           "worksheet_template_id": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13"
         },
         {
-          "id": "cf706693-1306-4877-b689-a4f8c48ee49e",
-          "code": "CR-31",
-          "condition": "wiederverkeimungsbeurteilung == True",
+          "id": "8c8c0a13-a3f3-4fcd-8896-14781ee03987",
+          "code": "REQ-M205-ES1-11-2",
+          "condition": "restchlor_betrieb >= 0.2",
           "severity": "block",
-          "clause_reference": "§3.5",
+          "clause_reference": "§4.4.2",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13"
-        },
-        {
-          "id": "58ba4c36-111f-476f-96b3-f6bc4a6d4786",
-          "code": "CR-32",
-          "condition": "gefaehrdungsbeurteilung_biostoffv == True AND betriebsanweisung_biostoffv == True",
-          "severity": "block",
-          "clause_reference": "§3.5 (BioStoffV, TRBA 220, TRBA 400)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
+          "source_quote": "In dem aus dem Behandlungsbecken abfließenden Abwasser muss noch ein Überschuss von freiem Chlor in der Größenordnung von 0,2 mg/l nachzuweisen sein, um die Desinfektionswirkung sicherzustellen. Dieser Restchlorgehalt muss vor Einleitung in ein Gewässer mit Hilfe einer Entchlorungsstufe entfernt werden.",
           "worksheet_template_id": "7a580c71-0ab4-4c26-a44c-ec3e8d94be13"
         },
         {
@@ -97661,6 +97672,28 @@
           "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
         },
         {
+          "id": "ffa075f3-b392-4dc1-9fcf-6f2ef7e79520",
+          "code": "CR-13-2",
+          "condition": "monatlicher_nachweis == True",
+          "severity": "block",
+          "clause_reference": "§4.1.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
+        },
+        {
+          "id": "836c0971-b9b6-4c71-8fe8-927d0086a879",
+          "code": "CR-30",
+          "condition": "chlorung_routine == False",
+          "severity": "block",
+          "clause_reference": "§4.4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
+        },
+        {
           "id": "26ab15df-399a-4918-aea7-6a454f7bbf56",
           "code": "CR-13",
           "condition": "monatlicher_nachweis == True",
@@ -97672,22 +97705,22 @@
           "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
         },
         {
-          "id": "c19c26ff-328e-42ff-9c09-47233c0de337",
-          "code": "CR-33",
-          "condition": "hg_strahler_sonderentsorgung == True",
+          "id": "ecd949c8-fa35-4caa-90b8-59db6e9a7d76",
+          "code": "CR-30-2",
+          "condition": "chlorung_routine == False",
           "severity": "block",
-          "clause_reference": "§4.1.4.4",
+          "clause_reference": "§4.4.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "2c3578b4-624b-4792-a948-443de7da4103"
         },
         {
-          "id": "ecd949c8-fa35-4caa-90b8-59db6e9a7d76",
-          "code": "CR-30",
-          "condition": "chlorung_routine == False",
+          "id": "d0c868ee-451d-4f78-b3a5-5f3c8b10b2b6",
+          "code": "CR-27-2",
+          "condition": "kalibrierintervall_sensor <= 6 AND reinigungsintervall_sensor <= 4",
           "severity": "block",
-          "clause_reference": "§4.4.2",
+          "clause_reference": "§4.1.4.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -97848,9 +97881,9 @@
           "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
         },
         {
-          "id": "0e84f3e0-1138-4c2b-8f4c-796bbcab4460",
-          "code": "CR-23",
-          "condition": "restchlor_betrieb >= 0.2",
+          "id": "b2ea5082-fc87-4d49-a8ec-9d6cd023f19c",
+          "code": "CR-24",
+          "condition": "kontaktzeit_chlor >= 15 AND kontaktzeit_chlor <= 30",
           "severity": "block",
           "clause_reference": "§4.4.2",
           "requires_attestation": false,
@@ -97859,11 +97892,22 @@
           "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
         },
         {
-          "id": "b2ea5082-fc87-4d49-a8ec-9d6cd023f19c",
-          "code": "CR-24",
-          "condition": "kontaktzeit_chlor >= 15 AND kontaktzeit_chlor <= 30",
+          "id": "ab98859a-a512-489b-bd9b-31d49a6ee4f0",
+          "code": "CR-03-2",
+          "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
           "severity": "block",
-          "clause_reference": "§4.4.2",
+          "clause_reference": "§3.2, Tab.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
+          "id": "7581d576-0ab4-4aee-9033-22bd134b59d7",
+          "code": "CR-20-2",
+          "condition": "log_reduktion >= 3",
+          "severity": "block",
+          "clause_reference": "§3.3 (WHO)",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -97892,8 +97936,74 @@
           "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
         },
         {
+          "id": "85c33f56-0637-4176-933d-506916835434",
+          "code": "CR-04-2",
+          "condition": "e_coli_ablauf <= 250 AND enterokokken_ablauf <= 100",
+          "severity": "block",
+          "clause_reference": "§3.2, Tab.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
+          "id": "1d2f5224-be95-4980-8cca-b7bcb1ff0983",
+          "code": "CR-14-2",
+          "condition": "e_coli_ablauf <= 1000 AND enterokokken_ablauf <= 400",
+          "severity": "block",
+          "clause_reference": "§3.2, Tab.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
+          "id": "2bc4cee8-c01d-41bc-91aa-80783344b386",
+          "code": "CR-15-2",
+          "condition": "e_coli_ablauf <= 900 AND enterokokken_ablauf <= 330",
+          "severity": "block",
+          "clause_reference": "§3.2, Tab.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
+          "id": "7632aa40-ac77-4abd-a411-902151dbdd8c",
+          "code": "CR-16-2",
+          "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
+          "severity": "block",
+          "clause_reference": "§3.2, Tab.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
+          "id": "86179325-4a53-4d53-b473-1c7cf55f0181",
+          "code": "CR-17-2",
+          "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 185",
+          "severity": "block",
+          "clause_reference": "§3.2, Tab.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
           "id": "8ce355c6-4bb7-456f-bf55-dc7718413de0",
           "code": "CR-05",
+          "condition": "e_coli_ablauf == 0 AND enterokokken_ablauf == 0",
+          "severity": "block",
+          "clause_reference": "§3.4 (TrinkwV Anlage 1 Teil I)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
+        },
+        {
+          "id": "9812fb5e-92f0-497d-979f-35664282c99b",
+          "code": "CR-05-2",
           "condition": "e_coli_ablauf == 0 AND enterokokken_ablauf == 0",
           "severity": "block",
           "clause_reference": "§3.4 (TrinkwV Anlage 1 Teil I)",
@@ -97936,51 +98046,7 @@
           "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
         },
         {
-          "id": "9b44583d-1fa5-4134-9d6f-29e04024fc35",
-          "code": "CR-35",
-          "condition": "reaktor_gasdicht == True",
-          "severity": "block",
-          "clause_reference": "§4.3.3.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
-        },
-        {
-          "id": "f00d50ca-5c4b-4b2f-bef7-e38730031d2b",
-          "code": "CR-36",
-          "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
-          "severity": "block",
-          "clause_reference": "§4.4.3 (BGV B4)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ccc715b7-292b-4f47-ba2b-7aed01b7d169"
-        },
-        {
-          "id": "d0c868ee-451d-4f78-b3a5-5f3c8b10b2b6",
-          "code": "CR-27",
-          "condition": "kalibrierintervall_sensor <= 6 AND reinigungsintervall_sensor <= 4",
-          "severity": "block",
-          "clause_reference": "§4.1.4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "bf9a96f6-5b92-4716-aa3a-5097c78bf8f2"
-        },
-        {
-          "id": "ffa075f3-b392-4dc1-9fcf-6f2ef7e79520",
-          "code": "CR-13",
-          "condition": "monatlicher_nachweis == True",
-          "severity": "block",
-          "clause_reference": "§4.1.4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "bf9a96f6-5b92-4716-aa3a-5097c78bf8f2"
-        },
-        {
-          "id": "a26dbf44-43f5-4979-9b43-a7fd6a5bf29f",
+          "id": "c19c26ff-328e-42ff-9c09-47233c0de337",
           "code": "CR-33",
           "condition": "hg_strahler_sonderentsorgung == True",
           "severity": "block",
@@ -97991,7 +98057,18 @@
           "worksheet_template_id": "bf9a96f6-5b92-4716-aa3a-5097c78bf8f2"
         },
         {
-          "id": "c58748a6-3ead-4550-86ee-62e6d6604501",
+          "id": "a26dbf44-43f5-4979-9b43-a7fd6a5bf29f",
+          "code": "CR-33-2",
+          "condition": "hg_strahler_sonderentsorgung == True",
+          "severity": "block",
+          "clause_reference": "§4.1.4.4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "bf9a96f6-5b92-4716-aa3a-5097c78bf8f2"
+        },
+        {
+          "id": "323f359f-dfc8-4027-8c6b-8ec46c68d3cb",
           "code": "CR-25",
           "condition": "pilotierung == True",
           "severity": "block",
@@ -98002,7 +98079,18 @@
           "worksheet_template_id": "adaf1855-3f47-4676-ade9-1198848cabc3"
         },
         {
-          "id": "b065f968-9847-4819-9fc7-a8f295d74c9c",
+          "id": "c58748a6-3ead-4550-86ee-62e6d6604501",
+          "code": "CR-25-2",
+          "condition": "pilotierung == True",
+          "severity": "block",
+          "clause_reference": "§4.2.3.5",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "adaf1855-3f47-4676-ade9-1198848cabc3"
+        },
+        {
+          "id": "9b44583d-1fa5-4134-9d6f-29e04024fc35",
           "code": "CR-35",
           "condition": "reaktor_gasdicht == True",
           "severity": "block",
@@ -98013,14 +98101,14 @@
           "worksheet_template_id": "25c0d5a2-ce6e-407a-95a2-b3beef7145ac"
         },
         {
-          "id": "1d23c9fe-44e7-4767-b544-6027563a75e8",
-          "code": "REQ-M205-ES1-04",
-          "condition": "ozon_pro_doc < 0.8",
-          "severity": "warn",
-          "clause_reference": "§4.3.6",
+          "id": "b065f968-9847-4819-9fc7-a8f295d74c9c",
+          "code": "CR-35-2",
+          "condition": "reaktor_gasdicht == True",
+          "severity": "block",
+          "clause_reference": "§4.3.3.3",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": "Die Ozonung von bromidhaltigem Abwasser kann zur Bildung von Bromat führen, dessen Einleitung in Gewässer aufgrund seiner toxikologischen Eigenschaften grundsätzlich unerwünscht ist. … Die Bromatbildung kann minimiert werden, wenn Ozon proportional zum DOC (< 0,8 mg/mg) dosiert wird.",
+          "source_quote": null,
           "worksheet_template_id": "25c0d5a2-ce6e-407a-95a2-b3beef7145ac"
         },
         {
@@ -98035,18 +98123,7 @@
           "worksheet_template_id": "ea9af14c-0a36-4795-9196-4572b980efdf"
         },
         {
-          "id": "8c8c0a13-a3f3-4fcd-8896-14781ee03987",
-          "code": "REQ-M205-ES1-11",
-          "condition": "restchlor_betrieb >= 0.2",
-          "severity": "block",
-          "clause_reference": "§4.4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "In dem aus dem Behandlungsbecken abfließenden Abwasser muss noch ein Überschuss von freiem Chlor in der Größenordnung von 0,2 mg/l nachzuweisen sein, um die Desinfektionswirkung sicherzustellen. Dieser Restchlorgehalt muss vor Einleitung in ein Gewässer mit Hilfe einer Entchlorungsstufe entfernt werden.",
-          "worksheet_template_id": "08b4bcf8-0362-4dd1-8710-f08f47d4a57b"
-        },
-        {
-          "id": "0fb46d01-6d30-4813-a0c9-17fc49cb108d",
+          "id": "f00d50ca-5c4b-4b2f-bef7-e38730031d2b",
           "code": "CR-36",
           "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
           "severity": "block",
@@ -98057,92 +98134,15 @@
           "worksheet_template_id": "22d1707d-2fe8-420d-a72e-0f938e61e3bd"
         },
         {
-          "id": "ab98859a-a512-489b-bd9b-31d49a6ee4f0",
-          "code": "CR-03",
-          "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
+          "id": "0fb46d01-6d30-4813-a0c9-17fc49cb108d",
+          "code": "CR-36-2",
+          "condition": "bgv_b4_konformitaet == True AND sicherheitsdatenblatt_pes == True",
           "severity": "block",
-          "clause_reference": "§3.2, Tab.2",
+          "clause_reference": "§4.4.3 (BGV B4)",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "85c33f56-0637-4176-933d-506916835434",
-          "code": "CR-04",
-          "condition": "e_coli_ablauf <= 250 AND enterokokken_ablauf <= 100",
-          "severity": "block",
-          "clause_reference": "§3.2, Tab.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "1d2f5224-be95-4980-8cca-b7bcb1ff0983",
-          "code": "CR-14",
-          "condition": "e_coli_ablauf <= 1000 AND enterokokken_ablauf <= 400",
-          "severity": "block",
-          "clause_reference": "§3.2, Tab.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "2bc4cee8-c01d-41bc-91aa-80783344b386",
-          "code": "CR-15",
-          "condition": "e_coli_ablauf <= 900 AND enterokokken_ablauf <= 330",
-          "severity": "block",
-          "clause_reference": "§3.2, Tab.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "7632aa40-ac77-4abd-a411-902151dbdd8c",
-          "code": "CR-16",
-          "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200",
-          "severity": "block",
-          "clause_reference": "§3.2, Tab.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "86179325-4a53-4d53-b473-1c7cf55f0181",
-          "code": "CR-17",
-          "condition": "e_coli_ablauf <= 500 AND enterokokken_ablauf <= 185",
-          "severity": "block",
-          "clause_reference": "§3.2, Tab.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "7581d576-0ab4-4aee-9033-22bd134b59d7",
-          "code": "CR-20",
-          "condition": "log_reduktion >= 3",
-          "severity": "block",
-          "clause_reference": "§3.3 (WHO)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
-        },
-        {
-          "id": "9812fb5e-92f0-497d-979f-35664282c99b",
-          "code": "CR-05",
-          "condition": "e_coli_ablauf == 0 AND enterokokken_ablauf == 0",
-          "severity": "block",
-          "clause_reference": "§3.4 (TrinkwV Anlage 1 Teil I)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ff9da560-b5c9-4fd8-98a2-e3740ea5e933"
+          "worksheet_template_id": "22d1707d-2fe8-420d-a72e-0f938e61e3bd"
         }
       ],
       "enum_values": [
@@ -102704,6 +102704,17 @@
           "worksheet_template_id": "fb70320b-6eaf-4bbe-859b-c33fbecf0228"
         },
         {
+          "id": "199d1e0a-7727-44be-a5e9-6ae76b2bcaea",
+          "code": "CR-007",
+          "condition": "belueftungsart IS NOT NULL AND f_S_alpha IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "§4.3.3",
+          "requires_attestation": false,
+          "audit_status": "match",
+          "source_quote": "Wie bei den Druckbelüftungssystemen erfolgt die Auslegung von Oberflächenbelüftern auf Basis der im Rahmen der Lastfallbetrachtung ermittelten Kennwerte für den Sauerstoffbedarf. Da der förderliche Effekt von Salzen auf den Belüftungskoeffizienten nur bei feinblasigen Druckbelüftungssystemen auftreten kann, dürfen die Salzfaktoren des Belüftungskoeffizienten bei Oberflächenbelüftungssystemen nicht angesetzt werden.",
+          "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
+        },
+        {
           "id": "f1bd6725-500b-4a67-8444-3411cd1087cc",
           "code": "CR-002",
           "condition": "h_BB <= 20",
@@ -102767,17 +102778,6 @@
           "requires_attestation": false,
           "audit_status": "match",
           "source_quote": "Die Eintauchtiefe von Walzenbelüftern sollte zur Vermeidung stehender Wellen bei etwa $0,25 \\mathrm{~m}$ bis $0,3 \\mathrm{~m}$ liegen. In diesem Bereich kann auch von einem Optimum in Bezug auf den Sauerstoffertrag ausgegangen werden. Bei Kreiselbelüftern sollte die Eintauchtiefe einen Wert von $0,5 \\mathrm{~m}$ nicht überschreiten.",
-          "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
-        },
-        {
-          "id": "199d1e0a-7727-44be-a5e9-6ae76b2bcaea",
-          "code": "CR-007",
-          "condition": "belueftungsart IS NOT NULL AND f_S_alpha IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§4.3.3",
-          "requires_attestation": false,
-          "audit_status": "match",
-          "source_quote": "Wie bei den Druckbelüftungssystemen erfolgt die Auslegung von Oberflächenbelüftern auf Basis der im Rahmen der Lastfallbetrachtung ermittelten Kennwerte für den Sauerstoffbedarf. Da der förderliche Effekt von Salzen auf den Belüftungskoeffizienten nur bei feinblasigen Druckbelüftungssystemen auftreten kann, dürfen die Salzfaktoren des Belüftungskoeffizienten bei Oberflächenbelüftungssystemen nicht angesetzt werden.",
           "worksheet_template_id": "88e32304-cca7-4dc7-a53e-290461a4c72d"
         },
         {
@@ -109427,7 +109427,7 @@
         {
           "id": "476ecbd2-17ea-478a-b2da-0613e1e5ce44",
           "code": "REQ-01",
-          "condition": "ALL required fields present",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§9.1",
           "requires_attestation": false,
@@ -109445,6 +109445,17 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "2b2a9e14-0571-49a9-91bb-e60cdf29818a"
+        },
+        {
+          "id": "a136f374-f3dd-4d14-8828-8139b37ed60e",
+          "code": "REQ-02-2",
+          "condition": "greywater_type IN {A1, A2, B1, B2}",
+          "severity": "block",
+          "clause_reference": "§5, Table 2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "f16ece7c-c8d7-4ae4-a733-5e5f3a1bbc60"
         },
         {
           "id": "555bff92-8201-4428-9783-d146bee0a9ad",
@@ -109496,6 +109507,17 @@
           "condition": "IF quality_category == C2 THEN BOD5 < 5",
           "severity": "block",
           "clause_reference": "Table 4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "1ce8fad3-3e41-40f8-895b-d5386f16178e"
+        },
+        {
+          "id": "81e65262-1d9c-42a2-9975-4843a01d6ab7",
+          "code": "REQ-32-2",
+          "condition": "IF use_category == laundry_private THEN quality_category == C2",
+          "severity": "block",
+          "clause_reference": "§6.2.2, Table 4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -109557,33 +109579,11 @@
           "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
         },
         {
-          "id": "a136f374-f3dd-4d14-8828-8139b37ed60e",
-          "code": "REQ-02",
-          "condition": "greywater_type IN {A1, A2, B1, B2}",
-          "severity": "block",
-          "clause_reference": "§5, Table 2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
-        },
-        {
           "id": "01913b1a-c3c4-4757-ab6b-c030b1f84d03",
           "code": "REQ-30",
           "condition": "IF building_type == rented_apartment THEN drinking_water_option_available == true",
           "severity": "block",
           "clause_reference": "§6.2.2 (BVerwG Az. 8 C 41.09)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
-        },
-        {
-          "id": "81e65262-1d9c-42a2-9975-4843a01d6ab7",
-          "code": "REQ-32",
-          "condition": "IF use_category == laundry_private THEN quality_category == C2",
-          "severity": "block",
-          "clause_reference": "§6.2.2, Table 4",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -109599,6 +109599,17 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "5a864fc8-e33a-48a5-a37c-934de08dbff1"
+        },
+        {
+          "id": "ee3f8c34-cbf3-477c-b2b3-415378dcf5b2",
+          "code": "REQ-11-2",
+          "condition": "pH_value >= 6.5 AND pH_value <= 9.5",
+          "severity": "block",
+          "clause_reference": "Table 4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "58b1615b-7bc4-4827-a6a9-eb36920c1b96"
         },
         {
           "id": "dbcd1a13-886f-47b4-975e-5754d5ccb8d1",
@@ -109700,6 +109711,94 @@
           "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
         },
         {
+          "id": "2818e74b-fe56-4714-85b3-f87c216c4c9a",
+          "code": "REQ-12-2",
+          "condition": "automatic_backfeed_present == true",
+          "severity": "block",
+          "clause_reference": "§7.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "094ad722-6fa0-4671-a480-3016b7f8f63e",
+          "code": "REQ-16-2",
+          "condition": "network_separation_per_DIN_EN_1717 == true",
+          "severity": "block",
+          "clause_reference": "§7.2, DIN EN 1717",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "e42705dc-fcd7-457c-99be-e39f1873b57f",
+          "code": "REQ-17-2",
+          "condition": "service_water_labelled == true AND service_water_isolated_from_drinking_water == true",
+          "severity": "block",
+          "clause_reference": "§4.4 (TrinkwV §17 Para. 6)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "b03eceab-b49e-4ff4-b4d7-9713409649f6",
+          "code": "REQ-18-2",
+          "condition": "installation_frost_free == true",
+          "severity": "block",
+          "clause_reference": "§7.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "a13a36da-615a-4a74-b246-7c68ed351b4a",
+          "code": "REQ-21-2",
+          "condition": "auto_switch_to_backfeed == true AND auto_fault_report == true",
+          "severity": "block",
+          "clause_reference": "§8",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "70430c31-962d-43c1-8236-caf63fe19411",
+          "code": "REQ-26-2",
+          "condition": "automatic_backfeed_present == true",
+          "severity": "block",
+          "clause_reference": "§7.2, DIN 1988-300, DVGW W 406",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "0eb2d901-ca35-4eb5-b1be-f37806f1a290",
+          "code": "REQ-27-2",
+          "condition": "automatic_backfeed_present == true",
+          "severity": "block",
+          "clause_reference": "§7.3, DIN EN 806-2, DIN 1988-200",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
+          "id": "b31ed0c2-7c3a-41e7-bd21-a3250345a182",
+          "code": "REQ-28-2",
+          "condition": "auto_switch_to_backfeed == true",
+          "severity": "block",
+          "clause_reference": "§7.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "5c5fe612-e085-49e0-a3ed-522c3f68afc5"
+        },
+        {
           "id": "60c1ecd3-016d-4343-8081-6c57d946b222",
           "code": "REQ-26",
           "condition": "attest_m277e_09_req_26 == True",
@@ -109758,6 +109857,17 @@
           "id": "f9f7bc0b-dd54-4905-af22-955b95d8f88f",
           "code": "REQ-15",
           "condition": "IF quality_category == C2 THEN p_aeruginosa < 100",
+          "severity": "block",
+          "clause_reference": "Table 4",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "351193d0-f576-44ef-9f94-f00a74a872cd"
+        },
+        {
+          "id": "f568a86c-0941-4a4c-85c6-70a08724d2aa",
+          "code": "REQ-10-2",
+          "condition": "o2_saturation_pct > 50",
           "severity": "block",
           "clause_reference": "Table 4",
           "requires_attestation": false,
@@ -109843,9 +109953,20 @@
           "worksheet_template_id": "ec719dce-ffd7-48c4-ab83-d83d70fa6d78"
         },
         {
+          "id": "904cf935-f27a-4ff5-8426-2fef8ff8dd51",
+          "code": "REQ-13-2",
+          "condition": "authority_notification_sent == true",
+          "severity": "block",
+          "clause_reference": "§4.4, §8",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "ec719dce-ffd7-48c4-ab83-d83d70fa6d78"
+        },
+        {
           "id": "3831eec3-1b4b-40d2-9a04-0bf30fd42f06",
           "code": "REQ-04",
-          "condition": "Q_SW = SUM(Q_SW_P_i * P_i) + SUM(Q_SW_A_j * A_j)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9.2 eq.(1)",
           "requires_attestation": false,
@@ -109856,7 +109977,7 @@
         {
           "id": "e35efc03-a719-42aa-a4ed-412d79c9b76d",
           "code": "REQ-05",
-          "condition": "Q_GW = SUM(Q_GW_P_i * P_i)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9.3 eq.(2)",
           "requires_attestation": false,
@@ -109867,7 +109988,7 @@
         {
           "id": "0a8051cd-e6d7-4b2e-a753-890b7396e4bd",
           "code": "REQ-06",
-          "condition": "Q_GWT eq MIN(Q_SW, Q_GW)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9.4 eq.(3)+(4)",
           "requires_attestation": false,
@@ -109909,97 +110030,9 @@
           "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
         },
         {
-          "id": "2818e74b-fe56-4714-85b3-f87c216c4c9a",
-          "code": "REQ-12",
-          "condition": "automatic_backfeed_present == true",
-          "severity": "block",
-          "clause_reference": "§7.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "094ad722-6fa0-4671-a480-3016b7f8f63e",
-          "code": "REQ-16",
-          "condition": "network_separation_per_DIN_EN_1717 == true",
-          "severity": "block",
-          "clause_reference": "§7.2, DIN EN 1717",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "e42705dc-fcd7-457c-99be-e39f1873b57f",
-          "code": "REQ-17",
-          "condition": "service_water_labelled == true AND service_water_isolated_from_drinking_water == true",
-          "severity": "block",
-          "clause_reference": "§4.4 (TrinkwV §17 Para. 6)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "b03eceab-b49e-4ff4-b4d7-9713409649f6",
-          "code": "REQ-18",
-          "condition": "installation_frost_free == true",
-          "severity": "block",
-          "clause_reference": "§7.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "a13a36da-615a-4a74-b246-7c68ed351b4a",
-          "code": "REQ-21",
-          "condition": "auto_switch_to_backfeed == true AND auto_fault_report == true",
-          "severity": "block",
-          "clause_reference": "§8",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "70430c31-962d-43c1-8236-caf63fe19411",
-          "code": "REQ-26",
-          "condition": "automatic_backfeed_present == true",
-          "severity": "block",
-          "clause_reference": "§7.2, DIN 1988-300, DVGW W 406",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "0eb2d901-ca35-4eb5-b1be-f37806f1a290",
-          "code": "REQ-27",
-          "condition": "automatic_backfeed_present == true",
-          "severity": "block",
-          "clause_reference": "§7.3, DIN EN 806-2, DIN 1988-200",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
-          "id": "b31ed0c2-7c3a-41e7-bd21-a3250345a182",
-          "code": "REQ-28",
-          "condition": "auto_switch_to_backfeed == true",
-          "severity": "block",
-          "clause_reference": "§7.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "c1fc252e-8823-4690-8d63-72874a4045bf"
-        },
-        {
           "id": "47154814-9bfc-422e-a126-e80e0145c610",
           "code": "REQ-31",
-          "condition": "ALL required fields present",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§9.5",
           "requires_attestation": false,
@@ -110022,28 +110055,6 @@
           "id": "8f2ce5a8-9ff0-46cd-9d59-158793eae0b3",
           "code": "REQ-09",
           "condition": "IF quality_category == C2 THEN BOD5 < 5",
-          "severity": "block",
-          "clause_reference": "Table 4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "cc1869fb-7ffb-4bcd-8307-836ded16957a"
-        },
-        {
-          "id": "f568a86c-0941-4a4c-85c6-70a08724d2aa",
-          "code": "REQ-10",
-          "condition": "o2_saturation_pct > 50",
-          "severity": "block",
-          "clause_reference": "Table 4",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "cc1869fb-7ffb-4bcd-8307-836ded16957a"
-        },
-        {
-          "id": "ee3f8c34-cbf3-477c-b2b3-415378dcf5b2",
-          "code": "REQ-11",
-          "condition": "pH_value >= 6.5 AND pH_value <= 9.5",
           "severity": "block",
           "clause_reference": "Table 4",
           "requires_attestation": false,
@@ -110079,17 +110090,6 @@
           "condition": "IF discharge_into_water_body == true THEN WHG_permit_present == true",
           "severity": "block",
           "clause_reference": "§4.3 (WHG §8)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "cc1869fb-7ffb-4bcd-8307-836ded16957a"
-        },
-        {
-          "id": "904cf935-f27a-4ff5-8426-2fef8ff8dd51",
-          "code": "REQ-13",
-          "condition": "authority_notification_sent == true",
-          "severity": "block",
-          "clause_reference": "§4.4, §8",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -117621,6 +117621,17 @@
           "worksheet_template_id": "0a422fc5-906d-4b0e-9359-91d30a328707"
         },
         {
+          "id": "8a11515a-82fe-462f-aa8a-b247dad9cfbf",
+          "code": "C363-20",
+          "condition": "IF verwertungsweg == tankstelle THEN speicherbetriebsdruck > 200000",
+          "severity": "block",
+          "clause_reference": "6.7",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Zur Verwendung des Biogases als Fahrzeugkraftstoff sind Drücke über 20 MPa erforderlich, da im Fahrzeug große Gasmengen in einem möglichst kleinen Volumen gespeichert werden müssen.",
+          "worksheet_template_id": "40304142-4f30-4f66-a0ef-3c0c5296473a"
+        },
+        {
           "id": "4fbd18fe-6e40-4b17-91e9-019d5fcb77c7",
           "code": "C363-18",
           "condition": "IF verwertungsweg == mikrogasturbine AND h2s_konz >= 200 THEN Gasreinigung",
@@ -117676,14 +117687,14 @@
           "worksheet_template_id": "40304142-4f30-4f66-a0ef-3c0c5296473a"
         },
         {
-          "id": "8a11515a-82fe-462f-aa8a-b247dad9cfbf",
-          "code": "C363-20",
-          "condition": "IF verwertungsweg == tankstelle THEN speicherbetriebsdruck > 200000",
+          "id": "e1f35208-2b5a-4c1f-830c-7fed67919007",
+          "code": "C363-08-2",
+          "condition": "verwertungsweg IS NOT NULL",
           "severity": "block",
-          "clause_reference": "6.7",
+          "clause_reference": "7.1",
           "requires_attestation": false,
           "audit_status": null,
-          "source_quote": "Zur Verwendung des Biogases als Fahrzeugkraftstoff sind Drücke über 20 MPa erforderlich, da im Fahrzeug große Gasmengen in einem möglichst kleinen Volumen gespeichert werden müssen.",
+          "source_quote": "Unter wirtschaftlichen und ökologischen Aspekten (insbesondere CO2-Emission) ist für den Einzelfall die geeignete Verwertungsmöglichkeit zu ermitteln.",
           "worksheet_template_id": "40304142-4f30-4f66-a0ef-3c0c5296473a"
         },
         {
@@ -117739,6 +117750,50 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "1.2.2.2 Abgasförmigen Brennstoffen (... Klärgas, Biogas) bei Verbrennungsmotoranlagen oder Gasturbinenanlagen, Feuerungswärmeleistung von 1 MW bis weniger als 10 MW",
+          "worksheet_template_id": "2314abb5-62f2-4d26-ba3a-824399a8018b"
+        },
+        {
+          "id": "0c113a4c-e0cc-4558-82d8-753ee460fa26",
+          "code": "C363-10-2",
+          "condition": "IF rohgas_kapazitaet >= 1.2 THEN anlagen_nr_4bimschv != keine",
+          "severity": "block",
+          "clause_reference": "8.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "1.15 Anlagen zur Erzeugung von Biogas, soweit nicht von Nummer 8.6 erfasst, Produktionskapazität von 1,2 Mio. Normkubikmetern je Jahr Rohgas oder mehr",
+          "worksheet_template_id": "2314abb5-62f2-4d26-ba3a-824399a8018b"
+        },
+        {
+          "id": "1e1e4a5b-53ef-4909-ae90-0bf702299cbb",
+          "code": "C363-12-2",
+          "condition": "IF feuerungswaermeleistung >= 1 THEN anlagen_nr_4bimschv != keine",
+          "severity": "block",
+          "clause_reference": "8.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "1.2.2.2 Abgasförmigen Brennstoffen (... Klärgas, Biogas) bei Verbrennungsmotoranlagen oder Gasturbinenanlagen, Feuerungswärmeleistung von 1 MW bis weniger als 10 MW",
+          "worksheet_template_id": "2314abb5-62f2-4d26-ba3a-824399a8018b"
+        },
+        {
+          "id": "db10ebbc-2023-4df9-b684-70afb21bf685",
+          "code": "C363-28-2",
+          "condition": "IF rohgas_kapazitaet > 2.3 THEN verfahrenstyp_bimschg != nicht_genehmigungsbeduerftig",
+          "severity": "block",
+          "clause_reference": "8.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "1.15 Anlagen zur Erzeugung von Biogas, soweit nicht von Nummer 8.6 erfasst, Produktionskapazität von 1,2 Mio. Normkubikmetern je Jahr Rohgas oder mehr",
+          "worksheet_template_id": "2314abb5-62f2-4d26-ba3a-824399a8018b"
+        },
+        {
+          "id": "cd0d9a21-90a0-4235-901b-f585af0d24e7",
+          "code": "C363-11-2",
+          "condition": "IF biogasmenge_total >= 10000 THEN privilegierung_baugb IS NOT NULL",
+          "severity": "block",
+          "clause_reference": "§8.1 (12. BImSchV; TRAS 120)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "2314abb5-62f2-4d26-ba3a-824399a8018b"
         },
         {
@@ -117808,28 +117863,6 @@
           "worksheet_template_id": "7d3d0011-3e16-465e-b227-b978b5d41304"
         },
         {
-          "id": "dd846174-76f6-48b8-8fca-a9fe77c5e005",
-          "code": "C363-04",
-          "condition": "standortspezifische Untersuchung oder Tab. 5-10",
-          "severity": "warn",
-          "clause_reference": "1",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Sollen in Einzelfällen deutlich abweichende Planungswerte zur Anwendung gelangen, wird empfohlen, diese projekt- bzw. standortbezogen durch entsprechende Versuche bzw. Analysen zu überprüfen.",
-          "worksheet_template_id": "b2684c7b-7659-430d-95bd-0da46c2d94c6"
-        },
-        {
-          "id": "16c44877-1ee8-424e-b53d-f99c9afee2e5",
-          "code": "C363-05",
-          "condition": "biogas_quelle eq deponie -> Modell ausgewaehlt",
-          "severity": "warn",
-          "clause_reference": "5.7",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "b2684c7b-7659-430d-95bd-0da46c2d94c6"
-        },
-        {
           "id": "eb254bbe-71a0-4b6e-9cf4-5b7f9d69306e",
           "code": "C363-22",
           "condition": "IF substrat_guelleanteil_pct < 100 THEN verweilzeit_gasdicht >= 150",
@@ -117843,13 +117876,46 @@
         {
           "id": "c679d90e-25ca-4d1e-9990-7a54e46e4963",
           "code": "C363-23",
-          "condition": "co_substrat eq true -> Hygiene-/Genehmigungsprozesse einschlaegig (DWA-M 380)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.8",
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Werden einer Biogasanlage Abfälle als Co-Substrate zugeführt, gilt sie unabhängig von der eingesetzten Abfallmenge genehmigungsrechtlich als Abfallanlage. Nähere Ausführungen zu den genehmigungsrechtlichen sowie technischen Aspekten der Co-Vergärung enthält das Merkblatt DWA-M 380.",
           "worksheet_template_id": "b2684c7b-7659-430d-95bd-0da46c2d94c6"
+        },
+        {
+          "id": "dd846174-76f6-48b8-8fca-a9fe77c5e005",
+          "code": "C363-04",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "1",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Sollen in Einzelfällen deutlich abweichende Planungswerte zur Anwendung gelangen, wird empfohlen, diese projekt- bzw. standortbezogen durch entsprechende Versuche bzw. Analysen zu überprüfen.",
+          "worksheet_template_id": "b2684c7b-7659-430d-95bd-0da46c2d94c6"
+        },
+        {
+          "id": "16c44877-1ee8-424e-b53d-f99c9afee2e5",
+          "code": "C363-05",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "5.7",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "b2684c7b-7659-430d-95bd-0da46c2d94c6"
+        },
+        {
+          "id": "44a35358-cabe-4feb-969e-113ae6e90305",
+          "code": "C363-24-2",
+          "condition": "messplatz_din_en_15259 == true",
+          "severity": "block",
+          "clause_reference": "§9.5 (DIN EN 15259:2008-01)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "b322cb1a-a58f-40d0-86f9-08c7af5d8a3d"
         },
         {
           "id": "02e0fac0-8ecd-4b85-a1be-2f7b796f81bb",
@@ -117861,6 +117927,28 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "b322cb1a-a58f-40d0-86f9-08c7af5d8a3d"
+        },
+        {
+          "id": "439869f6-cc4d-464f-a647-e483339fa4bf",
+          "code": "C363-27-2",
+          "condition": "flammendurchschlagsicherung == true",
+          "severity": "block",
+          "clause_reference": "§10.3.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
+        },
+        {
+          "id": "cd372329-a8d6-4136-87ff-fb78c0b7992c",
+          "code": "C363-25-2",
+          "condition": "o2_atemluft >= 17",
+          "severity": "block",
+          "clause_reference": "§10.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "230e19fe-197a-429a-9c1f-aba840110419"
         },
         {
           "id": "c63496cf-0020-4a3f-ab3c-56e924ac9849",
@@ -117898,7 +117986,7 @@
         {
           "id": "16d7de18-b350-44bc-9ea4-ea223497fe58",
           "code": "C363-06",
-          "condition": "rule_speichervolumen_per_verwertung",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.6",
           "requires_attestation": false,
@@ -117927,17 +118015,6 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "ebc19081-438a-4dcb-8835-4da5a4669d62"
-        },
-        {
-          "id": "e1f35208-2b5a-4c1f-830c-7fed67919007",
-          "code": "C363-08",
-          "condition": "verwertungsweg IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "7.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Unter wirtschaftlichen und ökologischen Aspekten (insbesondere CO2-Emission) ist für den Einzelfall die geeignete Verwertungsmöglichkeit zu ermitteln.",
-          "worksheet_template_id": "29fb9ada-1350-4a57-a5a9-62ab5178152e"
         },
         {
           "id": "fdb4fea1-bc6e-4f4e-9290-b136a7bf8d49",
@@ -117975,7 +118052,7 @@
         {
           "id": "aecbce1a-7c75-4e90-b8b5-b0a3e1f1df71",
           "code": "C363-18",
-          "condition": "IF verwertungsweg == mikrogasturbine AND h2s_konz >= 200 THEN Gasreinigung",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "9.3.3",
           "requires_attestation": true,
@@ -117993,28 +118070,6 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "29fb9ada-1350-4a57-a5a9-62ab5178152e"
-        },
-        {
-          "id": "0c113a4c-e0cc-4558-82d8-753ee460fa26",
-          "code": "C363-10",
-          "condition": "IF rohgas_kapazitaet >= 1.2 THEN anlagen_nr_4bimschv != keine",
-          "severity": "block",
-          "clause_reference": "8.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "1.15 Anlagen zur Erzeugung von Biogas, soweit nicht von Nummer 8.6 erfasst, Produktionskapazität von 1,2 Mio. Normkubikmetern je Jahr Rohgas oder mehr",
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
-        },
-        {
-          "id": "1e1e4a5b-53ef-4909-ae90-0bf702299cbb",
-          "code": "C363-12",
-          "condition": "IF feuerungswaermeleistung >= 1 THEN anlagen_nr_4bimschv != keine",
-          "severity": "block",
-          "clause_reference": "8.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "1.2.2.2 Abgasförmigen Brennstoffen (... Klärgas, Biogas) bei Verbrennungsmotoranlagen oder Gasturbinenanlagen, Feuerungswärmeleistung von 1 MW bis weniger als 10 MW",
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
         },
         {
           "id": "5a79289d-fca7-4704-b0ea-dca3e66bdffb",
@@ -118047,66 +118102,11 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
-        },
-        {
-          "id": "439869f6-cc4d-464f-a647-e483339fa4bf",
-          "code": "C363-27",
-          "condition": "flammendurchschlagsicherung == true",
-          "severity": "block",
-          "clause_reference": "§10.3.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
-        },
-        {
-          "id": "db10ebbc-2023-4df9-b684-70afb21bf685",
-          "code": "C363-28",
-          "condition": "IF rohgas_kapazitaet > 2.3 THEN verfahrenstyp_bimschg != nicht_genehmigungsbeduerftig",
-          "severity": "block",
-          "clause_reference": "8.1",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "1.15 Anlagen zur Erzeugung von Biogas, soweit nicht von Nummer 8.6 erfasst, Produktionskapazität von 1,2 Mio. Normkubikmetern je Jahr Rohgas oder mehr",
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
-        },
-        {
-          "id": "cd0d9a21-90a0-4235-901b-f585af0d24e7",
-          "code": "C363-11",
-          "condition": "IF biogasmenge_total >= 10000 THEN privilegierung_baugb IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§8.1 (12. BImSchV; TRAS 120)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
-        },
-        {
-          "id": "cd372329-a8d6-4136-87ff-fb78c0b7992c",
-          "code": "C363-25",
-          "condition": "o2_atemluft >= 17",
-          "severity": "block",
-          "clause_reference": "§10.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
-        },
-        {
-          "id": "44a35358-cabe-4feb-969e-113ae6e90305",
-          "code": "C363-24",
-          "condition": "messplatz_din_en_15259 == true",
-          "severity": "block",
-          "clause_reference": "§9.5 (DIN EN 15259:2008-01)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "8e861806-19d9-41b2-a315-70f6d356d8c2"
+          "worksheet_template_id": "5bfb6f9e-c35f-4e1a-a53b-20e49bf0025d"
         },
         {
           "id": "540b728c-6389-4177-8a30-7d5b6e262133",
-          "code": "C363-26",
+          "code": "C363-26-2",
           "condition": "co2_atemluft <= 0.5 AND h2s_atemluft <= 5",
           "severity": "block",
           "clause_reference": "§10.2 Tab. 16/17 (TRGS 900)",
@@ -123798,7 +123798,7 @@
         {
           "id": "20c12083-63ab-4bf1-a2b7-5e7a9e407fae",
           "code": "REQ-708-08",
-          "condition": "mab_vorhanden",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.3.6",
           "requires_attestation": true,
@@ -123809,7 +123809,7 @@
         {
           "id": "0665f405-35be-463d-b80e-6087276a5d7c",
           "code": "REQ-708-09",
-          "condition": "havariebecken_vorhanden",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.3.6",
           "requires_attestation": true,
@@ -123827,6 +123827,17 @@
           "audit_status": null,
           "source_quote": "Schliesslich ist zu beachten, dass, um den bei der Behandlung der betrieblichen Abwaesser anfallenden Schlamm auch zukuenftig landwirtschaftlich verwerten zu koennen, im Milchverarbeitungsbetrieb anfallende Sanitaerabwaesser nicht in die betriebliche Abwasserbehandlungsanlage eingeleitet werden duerfen.",
           "worksheet_template_id": "8c8830a2-0791-48da-b316-0fac863cdc9a"
+        },
+        {
+          "id": "b954f37e-d67f-4889-a57f-f518946421f0",
+          "code": "REQ-708-01",
+          "condition": "c_bsb5 <= limit_bsb5_direkt AND c_csb <= limit_csb_direkt AND afs <= limit_afs_direkt AND c_nh4_n <= limit_nh4_n_direkt AND c_n_ges <= limit_nges_direkt AND c_p <= limit_pges_direkt AND ph_wert <= limit_ph_direkt",
+          "severity": "block",
+          "clause_reference": "Tabelle 2 (3.5)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Tabelle 2: Emissionsgrenzwerte fuer Direkteinleitungen von Abwasser aus milchverarbeitenden Betrieben in Oberflaechengewaesser - geltend vor Einleitung in das Gewaesser bzw. im Ablauf der Abwasserbehandlungsanlage (nach Anhang 3 der AwV)",
+          "worksheet_template_id": "41ed0f17-200c-4efa-8b19-10820ff90c3e"
         },
         {
           "id": "057c1ba3-db77-474a-bd93-f579693826bf",
@@ -123859,17 +123870,6 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Phosphor, gesamt (Pges) & 2,0 & wenn IED-Anlage oder > 20 kg Pges (roh) je Tag",
-          "worksheet_template_id": "41ed0f17-200c-4efa-8b19-10820ff90c3e"
-        },
-        {
-          "id": "b954f37e-d67f-4889-a57f-f518946421f0",
-          "code": "REQ-708-01",
-          "condition": "c_bsb5 <= limit_bsb5_direkt AND c_csb <= limit_csb_direkt AND afs <= limit_afs_direkt AND c_nh4_n <= limit_nh4_n_direkt AND c_n_ges <= limit_nges_direkt AND c_p <= limit_pges_direkt AND ph_wert <= limit_ph_direkt",
-          "severity": "block",
-          "clause_reference": "Tabelle 2 (3.5)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Tabelle 2: Emissionsgrenzwerte fuer Direkteinleitungen von Abwasser aus milchverarbeitenden Betrieben in Oberflaechengewaesser - geltend vor Einleitung in das Gewaesser bzw. im Ablauf der Abwasserbehandlungsanlage (nach Anhang 3 der AwV)",
           "worksheet_template_id": "41ed0f17-200c-4efa-8b19-10820ff90c3e"
         },
         {
@@ -125714,7 +125714,7 @@
         {
           "id": "be8d88fc-8122-4777-98c7-a060aa8bb19e",
           "code": "CR-M732-13",
-          "condition": "reinigungsmittel_edta_frei IS NOT NULL OR edta_substitutionsplan IS NOT NULL",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.3 Hilfsstoffe",
           "requires_attestation": true,
@@ -129364,6 +129364,17 @@
           "worksheet_template_id": "68ad2af1-b5e1-4498-b47b-a3dae0ee81a6"
         },
         {
+          "id": "b70e673c-f23a-4ff8-aa0a-e6bd8491e3bb",
+          "code": "REQ-M760-08-2",
+          "condition": "c_h2s_ppm <= 5",
+          "severity": "block",
+          "clause_reference": "8.2.8",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "das bindende Schutzziel für Beschäftigte in Form des Arbeitsplatzgrenzwerts (AGW) mit einer Begrenzung der H2S-Belastung auf 5 ppm (über 8 h) bzw. 10 ppm (nicht mehr als 15 min).",
+          "worksheet_template_id": "68ad2af1-b5e1-4498-b47b-a3dae0ee81a6"
+        },
+        {
           "id": "6222ae5d-a199-4d1f-b3bd-e6eb8caaa3c3",
           "code": "REQ-M760-09",
           "condition": "ns_fettabscheider IS NOT NULL AND bauform_fa IS NOT NULL",
@@ -129384,6 +129395,17 @@
           "audit_status": null,
           "source_quote": "Gemäß DIN 4040-100 ist eine monatliche Eigenkontrolle und eine jährliche Wartung durch einen Sachkundigen vorgeschrieben ... [10.2.4] Nach den geltenden Normen (DIN EN 1825-2, DIN 4040-100) ist der Abscheider nach der monatlichen Entleerung zu reinigen ... [10.2.5] Der genaue Umfang einer alle fünf Jahre wiederkehrenden Generalinspektion ist in DIN 4040-100:2016 in 10.7.2 ausführlich beschrieben.",
           "worksheet_template_id": "9e6e13f0-9bab-4980-9b1f-16e5ec76d6aa"
+        },
+        {
+          "id": "a7401f2c-a192-403c-bde2-056ca352a905",
+          "code": "REQ-M760-11-2",
+          "condition": "analyseverfahren_sls == 'din_iso_11349_gravimetrisch' AND probenahmeart IS NOT NULL",
+          "severity": "warn",
+          "clause_reference": "11.5.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Für die Überwachung von fetthaltigen Indirekteinleitungen wird die Anwendung von DIN ISO 11349 herangezogen. ... Es handelt sich um ein gravimetrisches Verfahren. ... Im Hinblick auf das Erfordernis gerichtsfester Ergebnisse kann die Anwendung dieser zurückgezogenen Norm [DIN 38409-19] jedoch nicht empfohlen werden.",
+          "worksheet_template_id": "25f892d1-33dc-4324-a6bf-b5a004ec0366"
         },
         {
           "id": "3ae14390-0d65-4150-8c5f-f0e9b6380c0c",
@@ -129410,7 +129432,7 @@
         {
           "id": "90ddf688-edda-42d6-87b0-87e5e0ab83ea",
           "code": "REQ-M760-02",
-          "condition": "verwendete_normen IS NOT EMPTY",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2",
           "requires_attestation": true,
@@ -129474,28 +129496,6 @@
           "worksheet_template_id": "f32eb444-7cd6-4b0e-88b3-6c0042b1c185"
         },
         {
-          "id": "a7401f2c-a192-403c-bde2-056ca352a905",
-          "code": "REQ-M760-11",
-          "condition": "analyseverfahren_sls == 'din_iso_11349_gravimetrisch' AND probenahmeart IS NOT NULL",
-          "severity": "warn",
-          "clause_reference": "11.5.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Für die Überwachung von fetthaltigen Indirekteinleitungen wird die Anwendung von DIN ISO 11349 herangezogen. ... Es handelt sich um ein gravimetrisches Verfahren. ... Im Hinblick auf das Erfordernis gerichtsfester Ergebnisse kann die Anwendung dieser zurückgezogenen Norm [DIN 38409-19] jedoch nicht empfohlen werden.",
-          "worksheet_template_id": "acbef60a-070c-402b-b57d-120f16135512"
-        },
-        {
-          "id": "b70e673c-f23a-4ff8-aa0a-e6bd8491e3bb",
-          "code": "REQ-M760-08",
-          "condition": "c_h2s_ppm <= 5",
-          "severity": "block",
-          "clause_reference": "8.2.8",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "das bindende Schutzziel für Beschäftigte in Form des Arbeitsplatzgrenzwerts (AGW) mit einer Begrenzung der H2S-Belastung auf 5 ppm (über 8 h) bzw. 10 ppm (nicht mehr als 15 min).",
-          "worksheet_template_id": "acbef60a-070c-402b-b57d-120f16135512"
-        },
-        {
           "id": "47a93795-375c-45e4-9631-9ce8454e2015",
           "code": "REQ-M760-12",
           "condition": "",
@@ -129515,6 +129515,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
+          "worksheet_template_id": "69f0549b-cd12-4e66-ad1a-0c756a78ce87"
+        },
+        {
+          "id": "3a9ed7a2-fe87-4340-847b-3d833a246807",
+          "code": "REQ-M760-05-2",
+          "condition": "rho_fett >= 0.85 AND rho_fett <= 0.95",
+          "severity": "warn",
+          "clause_reference": "5.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Die Dichte der pflanzlichen und tierischen Fette liegt in einem Bereich von 0,85 g/ml bis 0,95 g/ml. Sie schwimmen daher in wässriger Umgebung auf und lassen sich mithilfe der Schwerkraftabtrennung aus der Wasserphase entfernen.",
           "worksheet_template_id": "69f0549b-cd12-4e66-ad1a-0c756a78ce87"
         },
         {
@@ -129540,17 +129551,6 @@
           "worksheet_template_id": "69f0549b-cd12-4e66-ad1a-0c756a78ce87"
         },
         {
-          "id": "3a9ed7a2-fe87-4340-847b-3d833a246807",
-          "code": "REQ-M760-05",
-          "condition": "rho_fett >= 0.85 AND rho_fett <= 0.95",
-          "severity": "warn",
-          "clause_reference": "5.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Die Dichte der pflanzlichen und tierischen Fette liegt in einem Bereich von 0,85 g/ml bis 0,95 g/ml. Sie schwimmen daher in wässriger Umgebung auf und lassen sich mithilfe der Schwerkraftabtrennung aus der Wasserphase entfernen.",
-          "worksheet_template_id": "72cbad0f-2c46-4e24-a42e-c3417b5f9f72"
-        },
-        {
           "id": "8ab94ee4-bec1-436d-abf1-5a54a9c42354",
           "code": "REQ-M760-06",
           "condition": "c_aox_grossküche <= 1",
@@ -129564,7 +129564,7 @@
         {
           "id": "dd4a52c7-f724-4f9f-9653-9bba13376217",
           "code": "REQ-M760-07",
-          "condition": "q_spitz IS NOT NULL AND c_lipophil_roh IS NOT NULL AND c_csb_roh IS NOT NULL AND anzahl_mahlzeiten IS NOT NULL",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.4",
           "requires_attestation": false,
@@ -134283,7 +134283,7 @@
         {
           "id": "cee46851-8d2a-484b-960e-684877549750",
           "code": "REQ-06",
-          "condition": "for every process: type is set and c_k present per type",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.1.6 / Anhang A",
           "requires_attestation": false,
@@ -134294,7 +134294,7 @@
         {
           "id": "68af3f30-81af-429a-8928-a68a7007d347",
           "code": "REQ-07",
-          "condition": "BW computed via RBF_k recursion per Anhang A",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Anhang A.1",
           "requires_attestation": false,
@@ -134303,20 +134303,9 @@
           "worksheet_template_id": "d4077b1a-c8c9-419a-ac3d-9bed67dd2134"
         },
         {
-          "id": "0d3ffeae-b589-459e-a47b-a63dcfa35412",
-          "code": "REQ-08",
-          "condition": "discounting_method consistent across all alternatives",
-          "severity": "warn",
-          "clause_reference": "3.2.4 / 4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "024dd070-d274-4efd-b06a-03c26877b7e8"
-        },
-        {
           "id": "6b570259-f1a5-469b-8139-d9b04be53540",
           "code": "REQ-10",
-          "condition": "duration computed via Gl. (5c) per process",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.2.2, Gl. (5c)",
           "requires_attestation": false,
@@ -134338,7 +134327,7 @@
         {
           "id": "ecacd750-fbf5-41e4-9134-8137faf92486",
           "code": "REQ-12",
-          "condition": "manual_review for processes with u > 1",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.3.1",
           "requires_attestation": true,
@@ -134360,7 +134349,7 @@
         {
           "id": "fbd3fc81-19c4-446c-8869-0abe6e1ce287",
           "code": "REQ-15",
-          "condition": "subsidy_rate > 0 IMPLIES volkswirtsch. Rechnung performed",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.2.7 (Volkswirtschaftliche Rechnung)",
           "requires_attestation": true,
@@ -134371,7 +134360,7 @@
         {
           "id": "f121df98-6b79-474a-81d1-03d976ab4c1c",
           "code": "REQ-16",
-          "condition": "manual_review per project context",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.2.7",
           "requires_attestation": true,
@@ -134382,7 +134371,7 @@
         {
           "id": "7fbde703-89a5-4949-8b70-804e67f9d16d",
           "code": "REQ-17",
-          "condition": "manual_review for revenue-generating projects",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.5 (Interne Rendite, Gl. 11)",
           "requires_attestation": true,
@@ -134393,7 +134382,7 @@
         {
           "id": "c0850984-9d13-40cd-8774-43f042672425",
           "code": "REQ-24",
-          "condition": "manual_review of USt treatment",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.2 Umsatzsteuern",
           "requires_attestation": true,
@@ -134404,7 +134393,7 @@
         {
           "id": "d5d29580-7f49-410c-a95e-8efc2e5146ff",
           "code": "REQ-25",
-          "condition": "manual_review per KAG",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3.2.7 (Gebührenrechnung)",
           "requires_attestation": true,
@@ -134413,9 +134402,20 @@
           "worksheet_template_id": "024dd070-d274-4efd-b06a-03c26877b7e8"
         },
         {
+          "id": "0d3ffeae-b589-459e-a47b-a63dcfa35412",
+          "code": "REQ-08",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "3.2.4 / 4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "024dd070-d274-4efd-b06a-03c26877b7e8"
+        },
+        {
           "id": "f06ec08d-27c2-4692-96ed-1c96f23e982f",
           "code": "REQ-21",
-          "condition": "pbw_alternative == sum(bw) per alternative",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.7 / 5.2 (Projektbarwert)",
           "requires_attestation": false,
@@ -134426,7 +134426,7 @@
         {
           "id": "02139dee-46f2-41ee-a874-550f9f61446e",
           "code": "REQ-22",
-          "condition": "vorteilhafteste_alternative == argmin(pbw_alternative)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.7 / 5 (Kostengegenüberstellung)",
           "requires_attestation": false,
@@ -134437,7 +134437,7 @@
         {
           "id": "442cd0c5-50f8-4ab9-9e9a-2a481ad56362",
           "code": "REQ-23",
-          "condition": "annual Z(t) profile compiled per alternative",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.1 (Zahlungsfunktionen Z(t))",
           "requires_attestation": false,
@@ -134470,7 +134470,7 @@
         {
           "id": "581bd79e-617c-4f69-8a03-0c08eff0fa3e",
           "code": "REQ-20",
-          "condition": "manual_review for large/late reinvestments",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.6.4 Weitere Parameter",
           "requires_attestation": true,
@@ -137256,17 +137256,6 @@
           "worksheet_template_id": "6e26b93c-421c-42fd-8ad8-e20a55881a2c"
         },
         {
-          "id": "a1e39e32-c3d3-4ded-8726-8d14ab4d100b",
-          "code": "REQ-04",
-          "condition": "stakeholder_list covers all 5 §5 roles",
-          "severity": "warn",
-          "clause_reference": "5",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "5.2 Auftraggeber ... 5.3 Auftragnehmer ... 5.4 Ausführende Firmen ... 5.5 Behörden ... 5.6 Öffentlichkeit",
-          "worksheet_template_id": "6e26b93c-421c-42fd-8ad8-e20a55881a2c"
-        },
-        {
           "id": "f6e65e69-e492-4342-97c0-7123aa3ceae7",
           "code": "REQ-06",
           "condition": "estimated_engineering_fee > 0",
@@ -137275,6 +137264,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
+          "worksheet_template_id": "6e26b93c-421c-42fd-8ad8-e20a55881a2c"
+        },
+        {
+          "id": "a1e39e32-c3d3-4ded-8726-8d14ab4d100b",
+          "code": "REQ-04",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "5",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "5.2 Auftraggeber ... 5.3 Auftragnehmer ... 5.4 Ausführende Firmen ... 5.5 Behörden ... 5.6 Öffentlichkeit",
           "worksheet_template_id": "6e26b93c-421c-42fd-8ad8-e20a55881a2c"
         },
         {
@@ -137313,7 +137313,7 @@
         {
           "id": "662aa41f-cce5-41c6-9d8c-31657c5433fa",
           "code": "REQ-24",
-          "condition": "IF loseausnahme_applicable THEN (lot_value <= 80000 services OR <= 1000000 construction) AND (sum_lots/Gesamtwert <= 0.20)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "B.2.4",
           "requires_attestation": true,
@@ -137344,20 +137344,9 @@
           "worksheet_template_id": "17b4ff3b-292c-4d8d-bce7-3fd79d06df8f"
         },
         {
-          "id": "142544f2-9d86-4d04-9311-c0555e4e0ce6",
-          "code": "REQ-11",
-          "condition": "list documented (may be empty)",
-          "severity": "warn",
-          "clause_reference": "E.1.2",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Dem Auftraggeber wird empfohlen, in den Vergabeunterlagen deutlich zu machen, ob er sich auf alle Ausschlussgründe gemäß § 124 GWB bezieht.",
-          "worksheet_template_id": "17b4ff3b-292c-4d8d-bce7-3fd79d06df8f"
-        },
-        {
           "id": "69fe64df-d33c-419c-8068-51b3332b75c5",
           "code": "REQ-13",
-          "condition": "both values per Tab. D.1 row",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Tabelle D.1",
           "requires_attestation": false,
@@ -137366,9 +137355,20 @@
           "worksheet_template_id": "17b4ff3b-292c-4d8d-bce7-3fd79d06df8f"
         },
         {
+          "id": "142544f2-9d86-4d04-9311-c0555e4e0ce6",
+          "code": "REQ-11",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "E.1.2",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Dem Auftraggeber wird empfohlen, in den Vergabeunterlagen deutlich zu machen, ob er sich auf alle Ausschlussgründe gemäß § 124 GWB bezieht.",
+          "worksheet_template_id": "17b4ff3b-292c-4d8d-bce7-3fd79d06df8f"
+        },
+        {
           "id": "02024276-7e86-4190-ab22-29b52f0950f9",
           "code": "REQ-14",
-          "condition": "min 6 E.2 categories present",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "E.2",
           "requires_attestation": true,
@@ -140480,7 +140480,7 @@
         {
           "id": "2d650cb1-142e-4785-87d7-0b6b2b2ffc83",
           "code": "REQ-13",
-          "condition": "Engineer attestation",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "4.3 Projektorganisation, Statusberichte (Allgemeines)",
           "requires_attestation": true,
@@ -140678,7 +140678,7 @@
         {
           "id": "e677668c-d15e-498e-97c9-dcee5ce54bec",
           "code": "REQ-32",
-          "condition": "Procurement schedule documented",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.2.4 Geaenderter Bedarf aus Gebietsentwicklungen wird nicht erkannt",
           "requires_attestation": true,
@@ -140898,7 +140898,7 @@
         {
           "id": "878fb456-f784-4608-a33e-1608e8d32869",
           "code": "REQ-50",
-          "condition": "Process artefacts present",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.6.4 Vermeintliche Planungsoptimierungen verursachen Stoerungen",
           "requires_attestation": true,
@@ -140986,7 +140986,7 @@
         {
           "id": "84d7fe78-4083-47c8-842e-71203915a7fa",
           "code": "REQ-55",
-          "condition": "(innovation_scope_defined == true) OR (project does not pursue innovation)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "7.1 Ideen, Innovationen - Allgemeines",
           "requires_attestation": false,
@@ -140997,7 +140997,7 @@
         {
           "id": "efc3b96a-b83a-4034-af94-e77195f3b29c",
           "code": "REQ-59",
-          "condition": "(bim_basics_established == true) OR (BIM not in scope)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "8.3.2 Grundlagen fuer Building Information Modeling (BIM) fehlen",
           "requires_attestation": false,
@@ -148254,7 +148254,7 @@
         {
           "id": "da1c0a1f-c33b-47ae-8574-b688544dda6a",
           "code": "REQ-02",
-          "condition": "all(anw_hinweis_*_confirmed) == true",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "1 Anwendungsbereich / Anwendungshinweise",
           "requires_attestation": true,
@@ -148265,7 +148265,7 @@
         {
           "id": "cef56c74-5ca2-4b61-8c12-0debdcbb2f2f",
           "code": "REQ-03",
-          "condition": "all(*_definition_acknowledged) == true",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "2.1 Definitionen",
           "requires_attestation": true,
@@ -148287,7 +148287,7 @@
         {
           "id": "0b2a9ed3-98e3-41f8-be28-4fbcb0c9607f",
           "code": "REQ-05",
-          "condition": "if smaller_communal: grundsatz_two_step_followed == true",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3 Grundsätze",
           "requires_attestation": true,
@@ -148529,7 +148529,7 @@
         {
           "id": "96bc2de9-c590-4b71-bcd0-a1c41e0c0588",
           "code": "REQ-27",
-          "condition": "all == true",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§7.3",
           "requires_attestation": false,
@@ -148540,7 +148540,7 @@
         {
           "id": "c7d18a70-5fe6-4df3-a8ea-5c63af022598",
           "code": "REQ-29",
-          "condition": "all == true",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "§7.5.2",
           "requires_attestation": false,
@@ -148573,7 +148573,7 @@
         {
           "id": "064de314-e704-4ebf-80ae-da1e28e5e7b3",
           "code": "REQ-31",
-          "condition": "if any(pz_*_status) == not_achieved: projektstopp_required must be evaluated",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "3 Grundsätze",
           "requires_attestation": false,
@@ -154497,28 +154497,6 @@
       ],
       "compliance": [
         {
-          "id": "0ab42efe-6862-4078-ade9-4d5be241f3fb",
-          "code": "REQ-02",
-          "condition": "lbo_genehmigung_erforderlich IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "Sec.4.1/4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Erfordernis von Genehmigungsverfahren (z. B. baurechtliche Genehmigungen gemäß LBO, Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG)",
-          "worksheet_template_id": "8f5a3c3a-15ec-46c3-9c9c-2dfaefa3df43"
-        },
-        {
-          "id": "328a10c6-e9ab-4bd0-8373-fd2d74103aa3",
-          "code": "REQ-03",
-          "condition": "whg_einleitung_genehmigung IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "Sec.4.10",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Die Einleitung von Wasser aus einem künstlich abgedichteten Gewässer in das angrenzende Gelände (Beeinträchtigung des Grundwassers) sowie in das öffentliche Kanalnetz können genehmigungspflichtig sein.",
-          "worksheet_template_id": "8f5a3c3a-15ec-46c3-9c9c-2dfaefa3df43"
-        },
-        {
           "id": "ba8e1b20-1a67-4a87-a537-dc0f6ee9837e",
           "code": "REQ-01",
           "condition": "gewaesser_in_scope == true",
@@ -154528,6 +154506,28 @@
           "audit_status": null,
           "source_quote": null,
           "worksheet_template_id": "1ee4baaa-432d-4f3c-b338-1da00fbbfc32"
+        },
+        {
+          "id": "0ab42efe-6862-4078-ade9-4d5be241f3fb",
+          "code": "REQ-02",
+          "condition": "lbo_genehmigung_erforderlich == True",
+          "severity": "block",
+          "clause_reference": "Sec.4.1/4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Erfordernis von Genehmigungsverfahren (z. B. baurechtliche Genehmigungen gemäß LBO, Einleitung von Überschusswasser in natürliche Gewässer gemäß WHG)",
+          "worksheet_template_id": "25c51316-c35c-4975-95a8-ea80c215cc3e"
+        },
+        {
+          "id": "328a10c6-e9ab-4bd0-8373-fd2d74103aa3",
+          "code": "REQ-03",
+          "condition": "whg_einleitung_genehmigung == True",
+          "severity": "block",
+          "clause_reference": "Sec.4.10",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Die Einleitung von Wasser aus einem künstlich abgedichteten Gewässer in das angrenzende Gelände (Beeinträchtigung des Grundwassers) sowie in das öffentliche Kanalnetz können genehmigungspflichtig sein.",
+          "worksheet_template_id": "25c51316-c35c-4975-95a8-ea80c215cc3e"
         },
         {
           "id": "4822d51e-5bb8-45a3-bc8d-95a6651c71be",
@@ -154554,7 +154554,7 @@
         {
           "id": "e62c903f-ea96-4d3f-9e57-c5e7a0ca9042",
           "code": "REQ-06",
-          "condition": "if eisbildung_moeglich == true: documented ice-pressure protection",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Sec.4.4",
           "requires_attestation": true,
@@ -154576,7 +154576,7 @@
         {
           "id": "66b9e6bd-3278-4b55-8bbc-b5dc754dad06",
           "code": "REQ-08",
-          "condition": "Slope per Tab.1 row for chosen abdichtungs_art",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Sec.4.5; Tab.1",
           "requires_attestation": false,
@@ -154587,7 +154587,7 @@
         {
           "id": "3a6b667c-6e8f-4920-a25d-9f81972a1c0e",
           "code": "REQ-09",
-          "condition": "Engineer-judged selection traceable to Sec.4.7 criteria",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Sec.4.7",
           "requires_attestation": true,
@@ -154673,6 +154673,17 @@
           "worksheet_template_id": "6d4bcfd9-a78d-45d6-9442-9cae7080e252"
         },
         {
+          "id": "1b2f1655-af3a-4cf4-a91f-f8d47d8b9827",
+          "code": "REQ-12",
+          "condition": "IF abdichtungs_art == mineralisch_ohne_zusatzstoffe THEN kornanteil_unter_2micron >= 15 AND organische_substanz_VGL <= 5 AND kalkgehalt_VCA <= 15 AND kf_abdichtung <= 0.000000001 AND verdichtungsgrad_Dpr >= 97",
+          "severity": "block",
+          "clause_reference": "Sec.5.1.1; Tab.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Kornanteil < 0,002 mm ≥ 15 Masse-%; organische Substanz VGL ≤ 5 Masse-%; Kalkgehalt VCA ≤ 15 Masse-%; Durchlässigkeitsbeiwert kf bei hydr. Gradient i = 30 ≤ 1 * 10-9 m/s; Verdichtungsgrad DPr ≥ 97 %",
+          "worksheet_template_id": "6d4bcfd9-a78d-45d6-9442-9cae7080e252"
+        },
+        {
           "id": "696ed9b0-d84b-413f-9937-2b348f440866",
           "code": "REQ-13",
           "condition": "IF abdichtungs_art == mineralisch_mit_zusatzstoffen THEN mz_durchlaessigkeit_kf <= 0.000000001 AND mz_dichtungswirkung_nachgewiesen == true",
@@ -154717,31 +154728,9 @@
           "worksheet_template_id": "6d4bcfd9-a78d-45d6-9442-9cae7080e252"
         },
         {
-          "id": "1b2f1655-af3a-4cf4-a91f-f8d47d8b9827",
-          "code": "REQ-12",
-          "condition": "IF abdichtungs_art == mineralisch_ohne_zusatzstoffe THEN kornanteil_unter_2micron >= 15 AND organische_substanz_VGL <= 5 AND kalkgehalt_VCA <= 15 AND kf_abdichtung <= 0.000000001 AND verdichtungsgrad_Dpr >= 97",
-          "severity": "block",
-          "clause_reference": "Sec.5.1.1; Tab.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Kornanteil < 0,002 mm ≥ 15 Masse-%; organische Substanz VGL ≤ 5 Masse-%; Kalkgehalt VCA ≤ 15 Masse-%; Durchlässigkeitsbeiwert kf bei hydr. Gradient i = 30 ≤ 1 * 10-9 m/s; Verdichtungsgrad DPr ≥ 97 %",
-          "worksheet_template_id": "6d4bcfd9-a78d-45d6-9442-9cae7080e252"
-        },
-        {
-          "id": "6b839233-a3cd-4f04-ab8a-81b785babdd5",
-          "code": "REQ-11",
-          "condition": "If required and abdichtung not inherently resistant: separate Wurzelschutzbahn",
-          "severity": "warn",
-          "clause_reference": "Sec.4.7",
-          "requires_attestation": true,
-          "audit_status": null,
-          "source_quote": "Bei nicht wurzelfesten Abdichtungen (z. B. mineralische Abdichtungen aus Ton) sind ggf. zusätzliche Maßnahmen des Durch- bzw. Einwurzelungsschutzes vorsehen, z. B. Einbau einer FLL-geprüften Wurzelschutzbahn.",
-          "worksheet_template_id": "969d527d-be79-4f80-9c19-d45a5cdf5e53"
-        },
-        {
           "id": "e05d1ef3-9a2c-4bdd-b701-55cfbd37039f",
           "code": "REQ-24",
-          "condition": "Engineer-judged adequacy of protective layers",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "Sec.8",
           "requires_attestation": true,
@@ -154758,6 +154747,17 @@
           "requires_attestation": true,
           "audit_status": null,
           "source_quote": "Bei intensiverer Beanspruchung durch die Bepflanzung (z. B. Vegetation für Pflanzenkläranlagen und Aufbereitungsbereiche von Schwimmteichen) ist eine Prüfung nach den „Technischen Prüfbestimmungen zur Bestimmung der Rhizomfestigkeit von Gewässerabdichtungen“ der FLL erforderlich.",
+          "worksheet_template_id": "969d527d-be79-4f80-9c19-d45a5cdf5e53"
+        },
+        {
+          "id": "6b839233-a3cd-4f04-ab8a-81b785babdd5",
+          "code": "REQ-11",
+          "condition": "",
+          "severity": "warn",
+          "clause_reference": "Sec.4.7",
+          "requires_attestation": true,
+          "audit_status": null,
+          "source_quote": "Bei nicht wurzelfesten Abdichtungen (z. B. mineralische Abdichtungen aus Ton) sind ggf. zusätzliche Maßnahmen des Durch- bzw. Einwurzelungsschutzes vorsehen, z. B. Einbau einer FLL-geprüften Wurzelschutzbahn.",
           "worksheet_template_id": "969d527d-be79-4f80-9c19-d45a5cdf5e53"
         },
         {
@@ -158533,17 +158533,6 @@
           "worksheet_template_id": "e48c94ce-ebac-4c2b-8d48-7d987f89a272"
         },
         {
-          "id": "fabaa982-e703-4080-b596-1b19025bd23f",
-          "code": "REQ-07",
-          "condition": "IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50 AND IF natural_pool_type == type_III THEN regeneration_area_share > 30",
-          "severity": "block",
-          "clause_reference": "§5 / Tab.1 (Dimension of the regeneration area compared to the total area)",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": "Dimension of the regeneration area compared to the total area > 50% > 50% > 30%",
-          "worksheet_template_id": "e48c94ce-ebac-4c2b-8d48-7d987f89a272"
-        },
-        {
           "id": "d1cacb11-3cbb-421a-8ea5-03980ce5e5f8",
           "code": "REQ-10",
           "condition": "swimming_test_ammonium <= 0.3 AND swimming_test_hardness >= 1.0 AND swimming_test_conductivity <= 1000 AND swimming_test_nitrate <= 30.0 AND swimming_test_nitrite <= 0.01 AND swimming_test_ph >= 7.0 AND swimming_test_ph <= 9.0 AND swimming_test_acid_capacity_ks43 >= 2 AND (IF natural_pool_type IN {type_I,type_II,type_III} THEN (swimming_test_p_total <= 0.03 AND swimming_test_orthophosphate <= 0.03)) AND (IF natural_pool_type IN {type_IV,type_V} THEN (swimming_test_p_total <= 0.01 AND swimming_test_orthophosphate <= 0.01))",
@@ -158552,6 +158541,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Ammonium ≤ 0.3 mg/l; Total phosphorus [Ptotal] ≤ 0.03 mg/l (type I-III) ≤ 0.01 mg/l (type IV, V); Hardness (total alkaline earth) ≥ 1.0 mmol/l; Conductivity ≤ 1000 μS/cm at 20°C; Nitrate ≤ 30.0 mg/l; Nitrite ≤ 0.01 mg/l; Orthophosphate (indicated as P) ≤ 0.03 mg/l (type I-III) ≤ 0.01 mg/l (type IV, V); pH value 7.0 – 9.0; Acid capacity KS 4.3 ≥ 2 mmol/l",
+          "worksheet_template_id": "e48c94ce-ebac-4c2b-8d48-7d987f89a272"
+        },
+        {
+          "id": "fabaa982-e703-4080-b596-1b19025bd23f",
+          "code": "REQ-07",
+          "condition": "IF natural_pool_type IN {type_I, type_II} THEN regeneration_area_share > 50 AND IF natural_pool_type == type_III THEN regeneration_area_share > 30",
+          "severity": "block",
+          "clause_reference": "§5 / Tab.1 (Dimension of the regeneration area compared to the total area)",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": "Dimension of the regeneration area compared to the total area > 50% > 50% > 30%",
           "worksheet_template_id": "e48c94ce-ebac-4c2b-8d48-7d987f89a272"
         },
         {
@@ -170095,7 +170095,7 @@
         {
           "id": "8f661a8e-7146-466f-ae27-266e1a143560",
           "code": "CR-010",
-          "condition": "provider_roles_addressed IS NOT NULL",
+          "condition": "provider_roles_addressed == True",
           "severity": "warn",
           "clause_reference": "§5.2.5",
           "requires_attestation": false,
@@ -170128,7 +170128,7 @@
         {
           "id": "8208a601-8ddc-49c0-992a-b529333f3b8a",
           "code": "CR-013",
-          "condition": "scope_change_recorded IS NOT NULL",
+          "condition": "scope_change_recorded == True",
           "severity": "warn",
           "clause_reference": "§5.3.3",
           "requires_attestation": false,
@@ -170205,7 +170205,7 @@
         {
           "id": "0a4dff89-ff78-4625-a33e-f73741db5daa",
           "code": "CR-023",
-          "condition": "interviews_conducted IS NOT NULL",
+          "condition": "interviews_conducted == True",
           "severity": "warn",
           "clause_reference": "§5.4.4",
           "requires_attestation": false,
@@ -170293,7 +170293,7 @@
         {
           "id": "9ea01ccf-b014-4a2a-806a-b43bd4b25497",
           "code": "CR-027",
-          "condition": "business_consequences_determined IS NOT NULL",
+          "condition": "business_consequences_determined == True",
           "severity": "warn",
           "clause_reference": "§5.5.3",
           "requires_attestation": false,
@@ -186224,7 +186224,7 @@
         {
           "id": "2dd8307b-11ea-4591-bd70-1728c16e3fbc",
           "code": "REQ-02",
-          "condition": "deviations_documented IS NOT NULL",
+          "condition": "deviations_documented == True",
           "severity": "block",
           "clause_reference": "6.1",
           "requires_attestation": false,
@@ -186279,7 +186279,7 @@
         {
           "id": "e4d69a0e-fff1-4f6d-bb5c-798a64063235",
           "code": "REQ-06",
-          "condition": "baseline_revalidated IS NOT NULL",
+          "condition": "baseline_revalidated == True",
           "severity": "block",
           "clause_reference": "6.2",
           "requires_attestation": false,
@@ -186356,7 +186356,7 @@
         {
           "id": "127152af-d9cd-4bea-adea-20fb82bc1221",
           "code": "REQ-13",
-          "condition": "E_project = SUM(ssr_emission_co2e); E_baseline = SUM(ssr_emission_co2e)",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "6.7",
           "requires_attestation": false,
@@ -186433,7 +186433,7 @@
         {
           "id": "d8b07e78-f7cb-4f7a-a93f-7b56a9a8bafa",
           "code": "REQ-20",
-          "condition": "verification_validation_iso14064_3 IS NOT NULL",
+          "condition": "verification_validation_iso14064_3 == True",
           "severity": "block",
           "clause_reference": "6.12",
           "requires_attestation": false,
@@ -189929,7 +189929,7 @@
         {
           "id": "6242e82a-481b-48c5-9fe8-293f6df54a8f",
           "code": "CR-003",
-          "condition": "kpi_objective_specific IS NOT NULL",
+          "condition": "kpi_objective_specific == True",
           "severity": "warn",
           "clause_reference": "1.3 (p.9)",
           "requires_attestation": false,
@@ -194485,20 +194485,9 @@
           "worksheet_template_id": "37a0541f-5a6c-4e03-b533-38d608c27cf9"
         },
         {
-          "id": "d39571a2-a89a-4ff8-a912-1c8c24a512f1",
-          "code": "CR-014",
-          "condition": "weather_recorded IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§8.13",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "ada4dd5b-873e-45e1-8ff6-fd7ebd60cef6"
-        },
-        {
           "id": "5649c92d-6bb9-400c-8db7-41c52e21f89d",
           "code": "CR-008",
-          "condition": "hazardous_atmosphere_tested IS NOT NULL",
+          "condition": "hazardous_atmosphere_tested == True",
           "severity": "block",
           "clause_reference": "§7.8",
           "requires_attestation": false,
@@ -194509,7 +194498,7 @@
         {
           "id": "9e900a67-4ec6-4716-81e2-abefee793fcc",
           "code": "CR-009",
-          "condition": "electrical_hazard_minimized IS NOT NULL",
+          "condition": "electrical_hazard_minimized == True",
           "severity": "block",
           "clause_reference": "§7.11",
           "requires_attestation": false,
@@ -194545,6 +194534,17 @@
           "condition": "flow_character IS NOT NULL",
           "severity": "warn",
           "clause_reference": "§8.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "248e9581-f432-4a95-97f8-81823fc3b1c1"
+        },
+        {
+          "id": "d39571a2-a89a-4ff8-a912-1c8c24a512f1",
+          "code": "CR-014",
+          "condition": "weather_recorded == True",
+          "severity": "block",
+          "clause_reference": "§8.13",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -197247,17 +197247,6 @@
           "worksheet_template_id": "cd6b4cc1-df10-4e00-912f-9514e8fdc06d"
         },
         {
-          "id": "fd5b3824-6cfe-4078-9ab4-39d20a6f8e14",
-          "code": "CR-006",
-          "condition": "unusual_hydraulic_conditions_recorded IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§4.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "cd6b4cc1-df10-4e00-912f-9514e8fdc06d"
-        },
-        {
           "id": "154665d9-bb10-46b8-9b7b-f59de432a547",
           "code": "CR-004",
           "condition": "well_mixed_section == true",
@@ -197266,6 +197255,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Es necesario realizar el muestreo en las secciones en las que el flujo está bien mezclado y es homogéneo.",
+          "worksheet_template_id": "297672d3-ab6f-4452-8f6a-9a986109b1f2"
+        },
+        {
+          "id": "fd5b3824-6cfe-4078-9ab4-39d20a6f8e14",
+          "code": "CR-006",
+          "condition": "unusual_hydraulic_conditions_recorded == True",
+          "severity": "block",
+          "clause_reference": "§4.2",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "297672d3-ab6f-4452-8f6a-9a986109b1f2"
         },
         {
@@ -197379,17 +197379,6 @@
           "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
         },
         {
-          "id": "dcae5213-19c8-4654-b0d9-11966c21a688",
-          "code": "CR-023",
-          "condition": "sampler_refrigerated IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§8.2",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "76e30179-117a-40a9-acbc-9924a26dddbb"
-        },
-        {
           "id": "a536d673-3d7f-4de7-9b45-f61a1127a9ae",
           "code": "CR-018",
           "condition": "unit_volume >= 25 AND sampling_bias <= 10 AND repeatability_cv <= 5 AND flow_uncertainty_k2 <= 15",
@@ -197472,6 +197461,17 @@
           "condition": "manual_min_volume >= 25 AND manual_repeatability_cv <= 5",
           "severity": "block",
           "clause_reference": "§8.3.1",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
+          "worksheet_template_id": "11f71616-8294-4a88-9336-68fbef5eed1f"
+        },
+        {
+          "id": "dcae5213-19c8-4654-b0d9-11966c21a688",
+          "code": "CR-023",
+          "condition": "sampler_refrigerated == True",
+          "severity": "block",
+          "clause_reference": "§8.2",
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": null,
@@ -197577,17 +197577,6 @@
           "worksheet_template_id": "bead3d98-07aa-449e-bdb1-8bdc68eee4a6"
         },
         {
-          "id": "5ddbb215-0c52-4949-a984-67b387aca47d",
-          "code": "CR-036",
-          "condition": "equipment_secured IS NOT NULL",
-          "severity": "block",
-          "clause_reference": "§12.3",
-          "requires_attestation": false,
-          "audit_status": null,
-          "source_quote": null,
-          "worksheet_template_id": "bead3d98-07aa-449e-bdb1-8bdc68eee4a6"
-        },
-        {
           "id": "ade3de4d-5d53-4e85-8245-2e7b26f9a5f0",
           "code": "CR-034",
           "condition": "risk_assessed_before_sampling == true",
@@ -197607,6 +197596,17 @@
           "requires_attestation": false,
           "audit_status": null,
           "source_quote": "Los equipos de protección personal que deben utilizarse sistemáticamente para realizar todas las operaciones de muestreo son: zapatos y/o botas de seguridad, cascos, gafas, guantes desechables y guantes de manipulación, para protegerse de los riesgos de exposición a materiales tóxicos o patógenos (ingestión, inhalación, contacto con la piel).",
+          "worksheet_template_id": "45b1225b-2a1e-49c5-a80d-155ebb790009"
+        },
+        {
+          "id": "5ddbb215-0c52-4949-a984-67b387aca47d",
+          "code": "CR-036",
+          "condition": "equipment_secured == True",
+          "severity": "block",
+          "clause_reference": "§12.3",
+          "requires_attestation": false,
+          "audit_status": null,
+          "source_quote": null,
           "worksheet_template_id": "45b1225b-2a1e-49c5-a80d-155ebb790009"
         }
       ],
@@ -199424,7 +199424,7 @@
         {
           "id": "e9cf8836-e881-4f06-9399-6e0edcf59a55",
           "code": "CR-010",
-          "condition": "container_airtight IS NOT NULL",
+          "condition": "container_airtight == True",
           "severity": "warn",
           "clause_reference": "§5.3",
           "requires_attestation": false,
@@ -199468,7 +199468,7 @@
         {
           "id": "293dd44c-efe4-4380-a7e3-072d73bdd2a3",
           "code": "CR-014",
-          "condition": "replicate_ratio_met IS NOT NULL",
+          "condition": "replicate_ratio_met == True",
           "severity": "warn",
           "clause_reference": "§6.2",
           "requires_attestation": false,
@@ -199490,7 +199490,7 @@
         {
           "id": "09d05802-2e4c-46bc-ba7a-04abc8211d82",
           "code": "CR-015",
-          "condition": "sample_volume_adequate IS NOT NULL",
+          "condition": "sample_volume_adequate == True",
           "severity": "warn",
           "clause_reference": "§6.3.2",
           "requires_attestation": false,
@@ -201784,7 +201784,7 @@
         {
           "id": "28d0e9e1-31ca-4de1-a726-4525ea660830",
           "code": "CR-019",
-          "condition": "ph_controlled_during_test IS NOT NULL",
+          "condition": "ph_controlled_during_test == True",
           "severity": "warn",
           "clause_reference": "§8.3",
           "requires_attestation": false,
@@ -201839,7 +201839,7 @@
         {
           "id": "8014b138-1f6e-438a-ab06-b283b08b1bdc",
           "code": "CR-025",
-          "condition": "colour_turbidity_correction IS NOT NULL",
+          "condition": "colour_turbidity_correction == True",
           "severity": "warn",
           "clause_reference": "§10.2",
           "requires_attestation": false,
@@ -201927,7 +201927,7 @@
         {
           "id": "d9887208-07a0-4a18-bc75-2cce8548c4fb",
           "code": "CR-032",
-          "condition": "concentration_response_curve_presented IS NOT NULL",
+          "condition": "concentration_response_curve_presented == True",
           "severity": "warn",
           "clause_reference": "§13.1",
           "requires_attestation": false,
@@ -223578,7 +223578,7 @@
         {
           "id": "27d99acf-44b6-4e2f-95eb-c052e742d53e",
           "code": "VDI-3477-CR-04",
-          "condition": "pH_filtermaterial >= 5,5 AND pH_filtermaterial <= 7,5",
+          "condition": "",
           "severity": "warn",
           "clause_reference": "5.2",
           "requires_attestation": true,
