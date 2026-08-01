@@ -81,6 +81,24 @@ export function WorksheetListSidebar({
           <FileDown className="size-3.5" aria-hidden />
           Wertetabelle (Zeichnung)
         </a>
+        <a
+          href={`/api/projects/${projectId}/standards/${standardCode}/checklist`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+        >
+          <FileDown className="size-3.5" aria-hidden />
+          Einreichungs-Checkliste
+        </a>
+        <a
+          href={`/api/projects/${projectId}/standards/${standardCode}/pruefmemo`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent-2 transition-colors"
+        >
+          <FileDown className="size-3.5" aria-hidden />
+          Prüf-Memo
+        </a>
       </div>
       {phases.map((phase) => (
         <div key={String(phase)} className="space-y-2">
