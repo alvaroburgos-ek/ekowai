@@ -1517,3 +1517,19 @@ FULL-TREATMENT BATCH 25 OPENED 2026-08-01 — ISO-5667-6 (2eq/30cr, English) SOL
   SOURCE = TEXT extraction only (ISO-5667-6-2015.txt); NO rendered PDF → VC-CAP: structural/engine fixes
   applicable, value-contradiction fixes sheeted "needs PDF acquisition for VA". LAST reachable-untouched
   standard. After this: 60→61 treated; only 6 prior re-touches + 4 source-blocked remain (of 71).
+
+FULL-TREATMENT BATCH 25 CLOSED 2026-08-01 — ISO-5667-6 (VC-capped) → 61 treated. ZERO applied: A.1 comma
+  fix HELD because same formula's "2*g" is almost certainly "2*√g" (2*(g^0.5) reproduces printed answers
+  83/683 m exactly; plain 2*g gives 149.68/904.77) — comma-only apply would compute silently-wrong values.
+  Bundled → PDF-acquisition. 4 block mis-homes (CR-010/011→ws05, CR-015→ws07, CR-030 SAFETY→ws12) rulings.
+  Sheeted AU.
+
+=== MILESTONE 2026-08-01: REACHABLE-UNTOUCHED QUEUE EXHAUSTED ===
+Every standard with a usable source has now had full-treatment. CONVERGENCE:
+  • 60 fully-VA-treated (batches 1-24 + waves 14-16).
+  • 1 VC-capped audited (ISO-5667-6; A.1 apply blocked on missing rendered PDF).  => 61 audited of 71.
+  • 6 PRIOR-treated (earlier mandates), need THIS campaign's full-treatment re-touch: DWA-A-138-1 (gold copy),
+    DWA-A-102-2, DWA-A-178 (14/19 UNPROVEN), DWA-M-102-4, DWA-M-277E, VSME.
+  • 4 SOURCE-BLOCKED (no PDF, acquisition): DWA-A-131, DWA-A-201, DWA-A-226, DWA-M-229-1. (+ISO-5667-6 PDF.)
+  61 + 6 + 4 = 71. Reachable-audit ceiling HIT. NEXT PHASE = prior re-touch (batch 26 = DWA-A-178 +
+  DWA-A-102-2, both PDF-available); acquisition list for 5 PDFs handed to owner. Autonomous march continues.
