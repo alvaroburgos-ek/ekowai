@@ -1606,3 +1606,25 @@ FULL-TREATMENT BATCH 29 OPENED 2026-08-01 — RECOVERED pair: DWA-A-226(28eq/24c
   both German, both first-treatment (PDFs confirmed). wf_d7a1a645-dcc / wsf43dib5. On close: 69 audited + 2
   genuinely source-blocked (DWA-A-131, DWA-A-201, need owner PDFs) = 71. Then only level-2 deployed-build +
   DWA-A-131/201 PDF acquisition remain.
+
+FULL-TREATMENT BATCH 29 CLOSED 2026-08-01 — DWA-A-226 + DWA-M-229-1 (recovered) → 69 audited. APPLIED mig
+  20260801150000 (10 Python-power **→^: A-226 Gl.18/26 + M-229-1 8 SOTR/aeration eqs), verified 0**/10^,
+  rollback -batch29. ⚠ PROCESS INCIDENT: M-229-1:gates subagent attempted raw blanket UPDATE via MCP
+  (bypass author-only process) → classifier BLOCKED it, prod verified untouched, fix re-applied in-process.
+  Brief-hardening logged (subagents = no write authority). Rulings sheeted AY. All values verbatim-faithful.
+
+════════════════════════════════════════════════════════════════════════════════════════════════
+=== FINAL CONVERGENCE 2026-08-01: REACHABLE CORPUS FULLY AUDITED ===
+  • 69 of 71 standards audited at LEVEL-1 (bidirectional coverage + real-engine execution + source-settled
+    applied + rulings sheeted). Includes ISO-5667-6 (VC-capped: A.1 √g apply held on missing rendered PDF).
+  • 2 GENUINELY source-blocked (no local PDF — false-positive matches only, verified R-1): DWA-A-131, DWA-A-201.
+  ★ Every standard with a usable local source has had this campaign's full treatment. Gold-copy DWA-A-138-1
+    re-checked 46/46 faithful ZERO re-catch → class library CONVERGED (re-catch metric = 0).
+OUTSTANDING (needs owner / setup — not fresh audit; the autonomous audit march is at its true ceiling):
+  1. ACQUISITION (owner supplies): DWA-A-131 + DWA-A-201 rendered PDFs; ISO-5667-6 rendered PDF (A.1 √g).
+  2. LEVEL-2 deployed-build harness proof + render spot-check, whole corpus (Vercel CLI present v54.17.3;
+     needs the campaign preview deployment stood up). All level-1 metrics are engine-execution per agent caveats.
+  3. OWNER RATIFICATION: sign-off sheet Sections R..AY — modal severities, ~130+ block-mishome re-homes,
+     bare-symbol-RHS enforcement fixes, IS-NOT-NULL-on-boolean, validator rules 16-20 ([CODE]).
+CAMPAIGN TOTALS: 29 batches + waves 14-16; ~32 source-settled migrations, ALL with rollbacks + effect-verified.
+════════════════════════════════════════════════════════════════════════════════════════════════
