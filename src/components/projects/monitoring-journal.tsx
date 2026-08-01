@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import { Plus, Trash2, Loader2, FileText, Camera } from 'lucide-react';
+import { Plus, Trash2, Loader2, FileText, Camera, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addMonitoringEntry, deleteMonitoringEntry } from '@/lib/actions/monitoring';
@@ -19,6 +19,8 @@ import type {
   MonitoringEntryView,
 } from '@/lib/actions/monitoring';
 import type { DueState } from '@/lib/monitoring/schedule';
+import { groupMaintenanceTasks } from '@/lib/monitoring/grouping';
+import type { MaintenanceTaskGroup } from '@/lib/monitoring/grouping';
 import {
   MONITORING_CATEGORIES,
   MONITORING_CATEGORY_LABELS,
@@ -102,6 +104,13 @@ export function MonitoringJournal({
   const photoInputRef = useRef<HTMLInputElement>(null);
   /** Client-side list filter: '' = alle, else a standards.id. */
   const [filterStandardId, setFilterStandardId] = useState('');
+  /**
+   * User toggles on Wartungsplan groups, keyed `${standardId}:${groupKey}`.
+   * Unset = the group's computed default (open when it matches the chosen
+   * Anlagentyp or already has journal-matched duties), so a server refresh
+   * keeps sensible defaults while explicit toggles win.
+   */
+  const [planGroupOverrides, setPlanGroupOverrides] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
   const canAdd = entryDate !== '' && note.trim().length <= NOTE_MAX;
@@ -228,63 +237,142 @@ export function MonitoringJournal({
           data-testid="maintenance-plan"
         >
           <h3 className="text-sm font-semibold text-ink">Wartungsplan</h3>
-          {maintenancePlan.map((s) => (
-            <div key={s.standardId} className="space-y-1">
-              <div className="text-xs font-medium text-subtext" title={s.standardTitleDe}>
-                {s.standardCode}
-              </div>
-              <ul className="divide-y divide-hairline border-t border-hairline">
-                {s.tasks.map((t) => {
-                  const badge = DUE_BADGE[t.status.state];
-                  return (
-                    <li
-                      key={t.id}
-                      className="py-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3 text-sm"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <span className="text-ink break-words" title={t.sourceQuote}>
-                          {t.title}
-                        </span>
-                        <span className="ml-2 text-xs text-subtext">
-                          {t.intervalText ?? 'ohne Intervallangabe'}
-                        </span>
-                        {t.clauseReference && (
-                          <span className="ml-2 inline-flex items-center rounded-full border border-hairline px-2 py-0.5 text-[10px] font-medium text-subtext">
-                            {t.clauseReference}
-                          </span>
+          {maintenancePlan.map((s) => {
+            // Fold the flat duty list into per-table sub-groups (E.1–E.6);
+            // §-titled duties fall into one fallback group. Grouping only
+            // reorganises — every duty stays reachable via expand.
+            const taskGroups = groupMaintenanceTasks(s.tasks);
+            const groupOpen = (
+              g: MaintenanceTaskGroup<MaintenanceTaskView>,
+            ): boolean => {
+              const overrideKey = `${s.standardId}:${g.key ?? 'other'}`;
+              const override = planGroupOverrides[overrideKey];
+              if (override !== undefined) return override;
+              // No Anlagentyp chosen yet → everything collapsed (the hint
+              // below points at the worksheet). Otherwise the matched group
+              // and groups with journal history start open.
+              if (s.facilityTypeValue === null) return false;
+              return (
+                (g.key !== null && g.key === s.matchedGroup) || g.hasJournalMatch
+              );
+            };
+            return (
+              <div key={s.standardId} className="space-y-1">
+                <div className="text-xs font-medium text-subtext" title={s.standardTitleDe}>
+                  {s.standardCode}
+                </div>
+                <div className="border-t border-hairline">
+                  {taskGroups.map((g) => {
+                    const overrideKey = `${s.standardId}:${g.key ?? 'other'}`;
+                    const open = groupOpen(g);
+                    const isMatched = g.key !== null && g.key === s.matchedGroup;
+                    const label =
+                      g.label ??
+                      (taskGroups.length === 1
+                        ? 'Alle Wartungspflichten'
+                        : 'Weitere Pflichten');
+                    return (
+                      <div key={overrideKey} className="border-b border-hairline">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPlanGroupOverrides((prev) => ({
+                              ...prev,
+                              [overrideKey]: !open,
+                            }))
+                          }
+                          aria-expanded={open}
+                          className="w-full py-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-left text-sm hover:bg-paper-2/60 transition-colors"
+                          data-testid="maintenance-plan-group"
+                        >
+                          {open ? (
+                            <ChevronDown className="size-3.5 shrink-0 text-subtext" aria-hidden />
+                          ) : (
+                            <ChevronRight className="size-3.5 shrink-0 text-subtext" aria-hidden />
+                          )}
+                          <span className="font-medium text-ink break-words">{label}</span>
+                          {isMatched && (
+                            <span className="inline-flex items-center rounded-full border border-accent-2 bg-paper-2 px-2 py-0.5 text-[10px] font-medium text-ink">
+                              passend zum gewählten Anlagentyp
+                            </span>
+                          )}
+                          {/* Due-state tally — the honest summary while collapsed */}
+                          {(['overdue', 'due', 'ok', 'unscheduled'] as const).map(
+                            (state) =>
+                              g.counts[state] > 0 && (
+                                <span
+                                  key={state}
+                                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${DUE_BADGE[state].className}`}
+                                >
+                                  {`${g.counts[state]} ${DUE_BADGE[state].label}`}
+                                </span>
+                              ),
+                          )}
+                        </button>
+                        {open && (
+                          <ul className="divide-y divide-hairline border-t border-hairline">
+                            {g.tasks.map((t) => {
+                              const badge = DUE_BADGE[t.status.state];
+                              return (
+                                <li
+                                  key={t.id}
+                                  className="py-2 pl-5 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3 text-sm"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-ink break-words" title={t.sourceQuote}>
+                                      {t.title}
+                                    </span>
+                                    <span className="ml-2 text-xs text-subtext">
+                                      {t.intervalText ?? 'ohne Intervallangabe'}
+                                    </span>
+                                    {t.clauseReference && (
+                                      <span className="ml-2 inline-flex items-center rounded-full border border-hairline px-2 py-0.5 text-[10px] font-medium text-subtext">
+                                        {t.clauseReference}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="shrink-0">
+                                    <span
+                                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${badge.className}`}
+                                      title={
+                                        t.status.dueDate
+                                          ? `Fällig am ${fmtDate(t.status.dueDate)}`
+                                          : t.status.lastDone
+                                            ? `Zuletzt am ${fmtDate(t.status.lastDone)}`
+                                            : 'Noch nie erfasst'
+                                      }
+                                    >
+                                      {badge.label}
+                                    </span>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => handlePrefillTask(s.standardId, t)}
+                                    disabled={isPending}
+                                    className="shrink-0 self-start sm:self-center"
+                                  >
+                                    <Plus aria-hidden />
+                                    Erfassen
+                                  </Button>
+                                </li>
+                              );
+                            })}
+                          </ul>
                         )}
                       </div>
-                      <div className="shrink-0">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${badge.className}`}
-                          title={
-                            t.status.dueDate
-                              ? `Fällig am ${fmtDate(t.status.dueDate)}`
-                              : t.status.lastDone
-                                ? `Zuletzt am ${fmtDate(t.status.lastDone)}`
-                                : 'Noch nie erfasst'
-                          }
-                        >
-                          {badge.label}
-                        </span>
-                      </div>
-                      <Button
-                        size="sm"
-                        type="button"
-                        variant="ghost"
-                        onClick={() => handlePrefillTask(s.standardId, t)}
-                        disabled={isPending}
-                        className="shrink-0 self-start sm:self-center"
-                      >
-                        <Plus aria-hidden />
-                        Erfassen
-                      </Button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          {maintenancePlan[0]?.facilityTypeValue == null && (
+            <p className="text-[11px] text-subtext italic">
+              Anlagentyp im Arbeitsblatt wählen, um den Plan zu fokussieren.
+            </p>
+          )}
           <p className="text-[11px] text-subtext italic">
             Wartungspflichten stammen wörtlich aus dem jeweiligen Regelwerk
             (Quelle je Eintrag hinterlegt).

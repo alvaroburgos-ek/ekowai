@@ -3,9 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import {
+  fields,
   maintenanceSchedules,
   monitoringEntries,
   projectDocuments,
+  projectParameters,
   profiles,
   projectStandards,
   standards,
@@ -15,6 +17,11 @@ import { createClient } from '@/lib/supabase/server';
 import { userHasProjectAccess } from '@/lib/db/queries/worksheet';
 import { parseAddMonitoringEntry } from './monitoring-core';
 import { dueStatus, type DueStatus } from '@/lib/monitoring/schedule';
+import {
+  FACILITY_TYPE_SYMBOLS,
+  facilityValueToGroup,
+  resolveFacilityTypeValue,
+} from '@/lib/monitoring/grouping';
 
 export type MonitoringEntryView = {
   id: string;
@@ -156,6 +163,18 @@ export type MaintenancePlanStandardView = {
   standardCode: string;
   standardTitleDe: string;
   tasks: MaintenanceTaskView[];
+  /**
+   * The project's stored facility-type value (project_parameters of the
+   * facility-type field symbols, value_enum/value_text) — null when the
+   * worksheet has no facility type yet. Same value for every standard of the
+   * plan; carried per row so the view type stays a flat array.
+   */
+  facilityTypeValue: string | null;
+  /**
+   * E-table group key matched from the facility type (e.g. 'E.2') or null.
+   * The UI auto-expands + tags this group; it never hides the others.
+   */
+  matchedGroup: string | null;
 };
 
 /**
@@ -225,6 +244,28 @@ export async function listMaintenancePlan(
     .from(monitoringEntries)
     .where(eq(monitoringEntries.projectId, projectId));
 
+  // The project's chosen facility type (Anlagentyp) — read from
+  // project_parameters via the field SYMBOLS (facility_type_dimensioned wins
+  // over a138_anlagentyp_gewaehlt; resolution is the pure grouping core).
+  // Maps onto an E-table group so the UI can focus the matching sub-group.
+  const facilityRows = await db
+    .select({
+      symbol: fields.symbol,
+      valueEnum: projectParameters.valueEnum,
+      valueText: projectParameters.valueText,
+      enteredAt: projectParameters.enteredAt,
+    })
+    .from(projectParameters)
+    .innerJoin(fields, eq(fields.id, projectParameters.fieldId))
+    .where(
+      and(
+        eq(projectParameters.projectId, projectId),
+        inArray(fields.symbol, [...FACILITY_TYPE_SYMBOLS]),
+      ),
+    );
+  const facilityTypeValue = resolveFacilityTypeValue(facilityRows);
+  const matchedGroup = facilityValueToGroup(facilityTypeValue);
+
   // Server-local ISO date — the core itself stays clock-free (deterministic
   // `today` param; mirrors todayLocalIso in monitoring-journal.tsx).
   const now = new Date();
@@ -237,6 +278,8 @@ export async function listMaintenancePlan(
       standardId: s.standardId,
       standardCode: s.code,
       standardTitleDe: s.titleDe,
+      facilityTypeValue,
+      matchedGroup,
       tasks: scheduleRows
         .filter((r) => r.standardId === s.standardId)
         .map((r) => {
