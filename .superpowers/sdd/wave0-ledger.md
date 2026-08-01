@@ -1545,3 +1545,10 @@ FULL-TREATMENT BATCH 26 OPENED 2026-08-01 — PRIOR RE-TOUCH phase begins. DWA-A
   was 14/19 UNPROVEN) + DWA-M-277E(22eq/62cr, English, prior regulation_tables swap). wf_565650c8-a34 /
   wbvvxerlu. Remaining prior after: DWA-A-138-1, DWA-A-102-2, DWA-M-102-4, VSME. Then 4 source-blocked +
   ISO-5667-6 PDF acquisition, then LEVEL-2 deployed-build proof phase.
+
+FULL-TREATMENT BATCH 26 CLOSED 2026-08-01 — DWA-A-178 + DWA-M-277E (prior re-touch) → 61 fully-VA + these 2
+  re-touched. APPLIED mig 20260801120000 (11 rows: A178 Gl.13 eta_F align [unblocks]; M277E 10 worked-example
+  chained-equality→single-RHS + V_buffer unit strip), verified, rollback -batch26. NEW catches confirm the
+  continuous-improvement re-run value (earlier mandate never touched equations). Rulings sheeted AV. Prior
+  remaining: DWA-A-138-1 (gold), DWA-A-102-2, DWA-M-102-4, VSME. NEXT: batch 27 = DWA-M-102-4 + DWA-A-102-2
+  (or DWA-A-138-1 gold-copy re-check). Then 4 source-blocked + ISO-5667-6 PDF (acquisition), then LEVEL-2.
