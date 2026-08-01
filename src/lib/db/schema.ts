@@ -642,6 +642,120 @@ export const offerPositions = pgTable(
 );
 
 // =============================================================================
+// PARAMETRISCHE KOSTENSCHÄTZUNG (Slice E2 — the CLIENT's build cost)
+// =============================================================================
+// Unit-price catalog. Ships EMPTY and grows only from real sources (BKI-type
+// references, contractor quotes, own project actuals) — prices are NEVER
+// invented, which is why `source` and `price_date` are NOT NULL: a price
+// without provenance cannot exist. Stale prices (> 365 d) are flagged in the
+// app and the PDF — the provenance doctrine applied to euros.
+export const costItems = pgTable(
+  'cost_items',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id, { onDelete: 'cascade' }),
+    position: text('position').notNull(),
+    unit: text('unit'),
+    priceLowEur: numeric('price_low_eur'),
+    priceLikelyEur: numeric('price_likely_eur'),
+    priceHighEur: numeric('price_high_eur'),
+    /** Where the price comes from (BKI, Angebot Fa. X, eigene Abrechnung …). */
+    source: text('source').notNull(),
+    /** Date the price was valid — staleness is computed from this. */
+    priceDate: date('price_date').notNull(),
+    /** DIN-276 Kostengruppe code, e.g. '41x'. */
+    din276Group: text('din276_group'),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    active: boolean('active').notNull().default(true),
+  },
+  (t) => ({
+    orgIdx: index('cost_items_org_idx').on(t.orgId),
+  }),
+);
+
+// One Kostenschätzung per deliverable (Wirtschaftlichkeits-Check, Vergabe,
+// Förderantrag). `snapshot_id` version-locks the estimate to the approve
+// snapshot the quantities came from; contingency is structural — NOT NULL,
+// default 10 %, bounded 5–15 in the app, and an estimate whose contingency
+// falls below 5 % renders WITH a warning (never silently without).
+export const costEstimates = pgTable(
+  'cost_estimates',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    standardCode: text('standard_code'),
+    title: text('title').notNull(),
+    contingencyPct: numeric('contingency_pct').notNull().default('10'),
+    /** Approve-snapshot the quantities came from (null = no approved state yet). */
+    snapshotId: uuid('snapshot_id'),
+    /** draft | issued — plain text, no workflow yet (YAGNI, mirrors offers). */
+    status: text('status').notNull().default('draft'),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('cost_estimates_project_idx').on(t.projectId),
+  }),
+);
+
+// Estimate line items. Prices are a FROZEN COPY taken from the catalog item at
+// add time (the catalog can move on; the issued estimate must not drift).
+// `source_symbol` records which design value the quantity came from
+// (e.g. 'V_storage' off the Wertetabelle) — quantity provenance.
+export const costEstimateLines = pgTable(
+  'cost_estimate_lines',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    estimateId: uuid('estimate_id')
+      .notNull()
+      .references(() => costEstimates.id, { onDelete: 'cascade' }),
+    costItemId: uuid('cost_item_id').references(() => costItems.id, { onDelete: 'set null' }),
+    position: text('position').notNull(),
+    quantity: numeric('quantity').notNull(),
+    unit: text('unit'),
+    /** Design-value symbol the quantity came from, e.g. 'V_storage'. */
+    sourceSymbol: text('source_symbol'),
+    priceLowEur: numeric('price_low_eur').notNull(),
+    priceLikelyEur: numeric('price_likely_eur').notNull(),
+    priceHighEur: numeric('price_high_eur').notNull(),
+    din276Group: text('din276_group'),
+    orderIndex: integer('order_index').notNull().default(0),
+  },
+  (t) => ({
+    estimateIdx: index('cost_estimate_lines_estimate_idx').on(t.estimateId),
+  }),
+);
+
+// Real contractor bids entered against an estimate (Vergabe / Slice E3
+// Nachkalkulation on the client's side) — the feedback loop the catalog
+// learns from. Projected vs. real, this time in the client's euros.
+export const contractorBids = pgTable(
+  'contractor_bids',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    estimateId: uuid('estimate_id').references(() => costEstimates.id, { onDelete: 'set null' }),
+    bidder: text('bidder').notNull(),
+    position: text('position'),
+    amountEur: numeric('amount_eur').notNull(),
+    bidDate: date('bid_date'),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('contractor_bids_project_idx').on(t.projectId),
+  }),
+);
+
+// =============================================================================
 // LEADS (inbound contact-form submissions from ekowai-landing-page)
 // =============================================================================
 // Anonymous form submissions land here via the landing-page server action using

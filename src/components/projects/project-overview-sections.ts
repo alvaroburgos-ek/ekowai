@@ -1,5 +1,11 @@
 /** Ordered sections the project overview renders. */
-export type OverviewSection = 'standards' | 'vsme-report' | 'effort' | 'offers' | 'audit';
+export type OverviewSection =
+  | 'standards'
+  | 'vsme-report'
+  | 'effort'
+  | 'offers'
+  | 'cost-estimates'
+  | 'audit';
 
 /**
  * Decide the project overview's section composition.
@@ -17,6 +23,9 @@ export function projectOverviewSections(opts: { isVsme: boolean }): OverviewSect
   sections.push('effort');
   // Angebots-Engine (Slice E1) — internal-only panel next to Aufwandserfassung.
   sections.push('offers');
+  // Parametrische Kostenschätzung (Slice E2) — the client's build cost,
+  // a deliverable; rendered AFTER Angebote (the two must stay separate).
+  sections.push('cost-estimates');
   sections.push('audit');
   return sections;
 }

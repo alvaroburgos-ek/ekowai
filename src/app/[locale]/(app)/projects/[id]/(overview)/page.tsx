@@ -7,6 +7,7 @@ import {
   Leaf,
   Clock,
   Calculator,
+  Coins,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
@@ -20,6 +21,8 @@ import { EffortLog } from '@/components/projects/effort-log';
 import { listEffortEntries } from '@/lib/actions/effort';
 import { OfferPanel } from '@/components/projects/offer-panel';
 import { listOffers } from '@/lib/actions/offers';
+import { CostEstimatePanel } from '@/components/projects/cost-estimate-panel';
+import { listEstimates } from '@/lib/actions/costs';
 
 export default async function ProjectOverviewPage({
   params,
@@ -41,6 +44,9 @@ export default async function ProjectOverviewPage({
   const vsmeSummary = isVsme ? await loadVsmeSummary(id) : null;
   const effort = sections.includes('effort') ? await listEffortEntries(id) : null;
   const offerData = sections.includes('offers') ? await listOffers(id) : null;
+  const estimateData = sections.includes('cost-estimates')
+    ? await listEstimates(id)
+    : null;
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -121,6 +127,16 @@ export default async function ProjectOverviewPage({
             <h2 className="text-xl font-semibold text-ink">Angebote (intern)</h2>
           </div>
           <OfferPanel projectId={id} locale={localeTyped} data={offerData} />
+        </section>
+      )}
+
+      {sections.includes('cost-estimates') && estimateData && (
+        <section className="space-y-4" data-testid="cost-estimates-section">
+          <div className="inline-flex items-center gap-2">
+            <Coins className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Kostenschätzung</h2>
+          </div>
+          <CostEstimatePanel projectId={id} locale={localeTyped} data={estimateData} />
         </section>
       )}
 
