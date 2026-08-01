@@ -118,6 +118,38 @@ describe('VSME-B04.100 pollutant register wiring', () => {
     expect(hints.some((h) => h.textContent?.includes('Schadstoffregister'))).toBe(true);
   });
 
+  it('shows the CO₂-Rechner hint on B03 engine fields BEFORE any computation (field stays editable)', () => {
+    const SCOPE1_ID = 'fld-scope1-empty';
+    const { getByLabelText, getByTestId } = render(
+      <WorksheetForm
+        {...baseProps}
+        worksheet={{ template: { code: 'VSME-B03.200', titleDe: 'Treibhausgasemissionen', titleEn: null } }}
+        fields={[makeField({ id: SCOPE1_ID, symbol: 'GrossScope1GreenhouseGasEmissions', labelDe: 'GrossScope1GreenhouseGasEmissions', unit: 'tCO2eq' })]}
+        initialValues={{}}
+      />,
+    );
+    const input = getByLabelText('GrossScope1GreenhouseGasEmissions', { exact: false }) as HTMLInputElement;
+    expect(input.readOnly).toBe(false); // empty project: still hand-enterable
+    const hint = getByTestId('computed-hint');
+    expect(hint.textContent).toContain('CO₂-Rechner');
+    expect(hint.querySelector('a')?.getAttribute('href')).toBe('/de/projects/p/vsme/emissions');
+  });
+
+  it('shows the register hint on B04 sum fields before first save when the register field exists', () => {
+    const { getByLabelText, getAllByTestId } = render(
+      <WorksheetForm
+        {...baseProps}
+        worksheet={{ template: { code: 'VSME-B04.100', titleDe: 'Umweltverschmutzung', titleEn: null } }}
+        fields={b04Fields}
+        initialValues={{}}
+      />,
+    );
+    const input = getByLabelText('Amount of emission to air', { exact: false }) as HTMLInputElement;
+    expect(input.readOnly).toBe(false);
+    const hints = getAllByTestId('computed-hint');
+    expect(hints.some((h) => h.textContent?.includes('Schadstoffregister'))).toBe(true);
+  });
+
   it('locks the CO₂-engine B03 fields and links to the emissions table', () => {
     const SCOPE1_ID = 'fld-scope1';
     const { getByLabelText, getByTestId } = render(

@@ -592,18 +592,27 @@ export function WorksheetForm({
       // Server-engine-written value (source_type='computed' / VSME 'derived'):
       // locked via the existing isComputed path + a provenance hint telling the
       // engineer WHERE the value is produced (single-source rule).
+      //
+      // The VSME hints render even BEFORE the engine has ever written a value
+      // (empty project): without them the CO₂ calculator / register is
+      // invisible from the worksheet and the engineer types the totals by
+      // hand. Pre-computation the field stays editable — only the hint shows.
       const isServerComputed = serverComputedSet.has(f.id);
-      const computedHint =
-        isServerComputed && standardCode === 'VSME'
-          ? VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
-            ? {
-                label: 'Automatisch berechnet aus den CO₂-Aktivitätslinien.',
-                href: `/${locale}/projects/${projectId}/vsme/emissions`,
-                hrefLabel: '→ CO₂-Rechner öffnen',
-              }
-            : VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol)
-              ? { label: 'Summe aus dem Schadstoffregister (unten auf dieser Seite).' }
-              : { label: 'Serverseitig berechneter Wert.' }
+      const isVsme = standardCode === 'VSME';
+      const computedHint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
+        ? {
+            label: isServerComputed
+              ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
+              : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
+            href: `/${locale}/projects/${projectId}/vsme/emissions`,
+            hrefLabel: '→ CO₂-Rechner öffnen',
+          }
+        : isVsme && VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol) && pollutantRegisterField
+          ? {
+              label: isServerComputed
+                ? 'Summe aus dem Schadstoffregister (unten auf dieser Seite).'
+                : 'Wird beim Speichern als Summe aus dem Schadstoffregister (unten) berechnet.',
+            }
           : isServerComputed
             ? { label: 'Serverseitig berechneter Wert.' }
             : undefined;
