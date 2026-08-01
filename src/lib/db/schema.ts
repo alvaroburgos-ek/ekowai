@@ -798,6 +798,52 @@ export const monitoringEntries = pgTable(
 );
 
 // =============================================================================
+// MAINTENANCE SCHEDULES (library-level — verbatim maintenance duties per
+// standard)
+// =============================================================================
+// Standard-scoped (NOT project-scoped) reference data, like standards/fields:
+// each row is one maintenance/inspection duty a guideline prescribes, with the
+// VERBATIM printed interval wording (SR-1 quote + page in source_quote). The
+// table ships EMPTY — rows are seeded exclusively by the extraction pack from
+// the standard's own text, never by hand. Projects inherit duties via their
+// attached standards; due-state is computed app-side against the project's
+// Monitoring-Journal (src/lib/monitoring/schedule.ts).
+export const maintenanceSchedules = pgTable(
+  'maintenance_schedules',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    standardId: uuid('standard_id')
+      .notNull()
+      .references(() => standards.id, { onDelete: 'cascade' }),
+    /** Short duty title, e.g. "Sichtkontrolle der Mulde". */
+    title: text('title').notNull(),
+    /**
+     * Same six-value vocabulary as monitoring_entries.category
+     * ('laborbericht' | 'messung' | 'begehung' | 'wartung' | 'foto' |
+     * 'sonstiges') — validated app-side (monitoring-core.ts); journal entries
+     * of this category tick the duty off.
+     */
+    category: text('category').notNull(),
+    /** VERBATIM printed interval wording, e.g. "halbjährlich". */
+    intervalText: text('interval_text').notNull(),
+    /**
+     * Numeric interpretation of interval_text in months; NULL when the source
+     * prints no fixed number (e.g. "bei Bedarf") → due-state 'unscheduled'.
+     */
+    intervalMonths: numeric('interval_months'),
+    /** Clause/table the duty comes from, e.g. "Abschn. 6.2". */
+    clauseReference: text('clause_reference'),
+    /** SR-1: verbatim quote from the standard's own text + page ref. */
+    sourceQuote: text('source_quote').notNull(),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    standardIdx: index('maintenance_schedules_standard_idx').on(t.standardId),
+  }),
+);
+
+// =============================================================================
 // LEADS (inbound contact-form submissions from ekowai-landing-page)
 // =============================================================================
 // Anonymous form submissions land here via the landing-page server action using

@@ -3,16 +3,18 @@
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import {
+  maintenanceSchedules,
   monitoringEntries,
   projectDocuments,
   profiles,
   projectStandards,
   standards,
 } from '@/lib/db/schema';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { userHasProjectAccess } from '@/lib/db/queries/worksheet';
 import { parseAddMonitoringEntry } from './monitoring-core';
+import { dueStatus, type DueStatus } from '@/lib/monitoring/schedule';
 
 export type MonitoringEntryView = {
   id: string;
@@ -132,6 +134,132 @@ export async function deleteMonitoringEntry(id: string): Promise<void> {
 
   await db.delete(monitoringEntries).where(eq(monitoringEntries.id, id));
   revalidateOverview();
+}
+
+export type MaintenanceTaskView = {
+  id: string;
+  title: string;
+  /** One of the six monitoring categories (monitoring-core.ts). */
+  category: string;
+  /** VERBATIM printed interval wording, e.g. "halbjährlich". */
+  intervalText: string;
+  /** Numeric interpretation in months; null = no fixed printed number. */
+  intervalMonths: number | null;
+  clauseReference: string | null;
+  /** SR-1: verbatim quote from the standard's own text + page ref. */
+  sourceQuote: string;
+  status: DueStatus;
+};
+
+export type MaintenancePlanStandardView = {
+  standardId: string;
+  standardCode: string;
+  standardTitleDe: string;
+  tasks: MaintenanceTaskView[];
+};
+
+/**
+ * The project's maintenance plan (read-only): the active maintenance_schedules
+ * rows of the project's ATTACHED standards, grouped per standard, each with
+ * its due-state computed against the project's Monitoring-Journal (pure core
+ * src/lib/monitoring/schedule.ts — a journal entry ticks a duty off only when
+ * category matches AND the entry is linked to the duty's standard). Standards
+ * without schedule rows are omitted, so the UI can render nothing when the
+ * library has no duties for this project.
+ */
+export async function listMaintenancePlan(
+  projectId: string,
+): Promise<MaintenancePlanStandardView[]> {
+  const userId = await requireSessionUserId();
+  if (!(await userHasProjectAccess(projectId, userId))) {
+    throw new Error('Forbidden: user is not a member of this project’s org');
+  }
+
+  // The project's attached (active) standards — the plan's grouping axis.
+  const attached = await db
+    .select({
+      standardId: projectStandards.standardId,
+      code: standards.code,
+      titleDe: standards.titleDe,
+    })
+    .from(projectStandards)
+    .innerJoin(standards, eq(standards.id, projectStandards.standardId))
+    .where(
+      and(
+        eq(projectStandards.projectId, projectId),
+        eq(projectStandards.status, 'active'),
+      ),
+    )
+    .orderBy(standards.code);
+  if (attached.length === 0) return [];
+
+  const standardIds = attached.map((s) => s.standardId);
+  const scheduleRows = await db
+    .select({
+      id: maintenanceSchedules.id,
+      standardId: maintenanceSchedules.standardId,
+      title: maintenanceSchedules.title,
+      category: maintenanceSchedules.category,
+      intervalText: maintenanceSchedules.intervalText,
+      intervalMonths: maintenanceSchedules.intervalMonths,
+      clauseReference: maintenanceSchedules.clauseReference,
+      sourceQuote: maintenanceSchedules.sourceQuote,
+    })
+    .from(maintenanceSchedules)
+    .where(
+      and(
+        inArray(maintenanceSchedules.standardId, standardIds),
+        eq(maintenanceSchedules.active, true),
+      ),
+    )
+    .orderBy(maintenanceSchedules.title);
+  if (scheduleRows.length === 0) return [];
+
+  // The journal slice the due-state rule needs (entryDate/category/standard).
+  const journal = await db
+    .select({
+      entryDate: monitoringEntries.entryDate,
+      category: monitoringEntries.category,
+      standardId: monitoringEntries.standardId,
+    })
+    .from(monitoringEntries)
+    .where(eq(monitoringEntries.projectId, projectId));
+
+  // Server-local ISO date — the core itself stays clock-free (deterministic
+  // `today` param; mirrors todayLocalIso in monitoring-journal.tsx).
+  const now = new Date();
+  const today = new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 10);
+
+  return attached
+    .map((s) => ({
+      standardId: s.standardId,
+      standardCode: s.code,
+      standardTitleDe: s.titleDe,
+      tasks: scheduleRows
+        .filter((r) => r.standardId === s.standardId)
+        .map((r) => {
+          // numeric comes back as string from Postgres; null = no fixed number.
+          const intervalMonths =
+            r.intervalMonths === null ? null : Number(r.intervalMonths);
+          return {
+            id: r.id,
+            title: r.title,
+            category: r.category,
+            intervalText: r.intervalText,
+            intervalMonths,
+            clauseReference: r.clauseReference,
+            sourceQuote: r.sourceQuote,
+            status: dueStatus(
+              { intervalMonths, category: r.category, standardId: r.standardId },
+              journal,
+              today,
+            ),
+          };
+        }),
+    }))
+    .filter((s) => s.tasks.length > 0);
 }
 
 /** List a project's monitoring entries, newest first. */

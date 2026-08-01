@@ -25,7 +25,7 @@ import { listOffers } from '@/lib/actions/offers';
 import { CostEstimatePanel } from '@/components/projects/cost-estimate-panel';
 import { listEstimates } from '@/lib/actions/costs';
 import { MonitoringJournal } from '@/components/projects/monitoring-journal';
-import { listMonitoringEntries } from '@/lib/actions/monitoring';
+import { listMaintenancePlan, listMonitoringEntries } from '@/lib/actions/monitoring';
 import { listProjectDocuments } from '@/lib/db/queries/documents';
 
 export default async function ProjectOverviewPage({
@@ -54,6 +54,11 @@ export default async function ProjectOverviewPage({
   const monitoringEntries = sections.includes('monitoring')
     ? await listMonitoringEntries(id)
     : null;
+  // Library maintenance duties of the attached standards (Wartungsplan) —
+  // empty when no attached standard has schedule rows, so the block hides.
+  const maintenancePlan = sections.includes('monitoring')
+    ? await listMaintenancePlan(id)
+    : [];
   const monitoringDocs = sections.includes('monitoring')
     ? (await listProjectDocuments(id)).map((d) => ({
         id: d.id,
@@ -172,6 +177,7 @@ export default async function ProjectOverviewPage({
             entries={monitoringEntries}
             documents={monitoringDocs}
             standards={monitoringStandards}
+            maintenancePlan={maintenancePlan}
           />
         </section>
       )}

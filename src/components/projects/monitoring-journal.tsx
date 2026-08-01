@@ -5,7 +5,12 @@ import { Plus, Trash2, Loader2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addMonitoringEntry, deleteMonitoringEntry } from '@/lib/actions/monitoring';
-import type { MonitoringEntryView } from '@/lib/actions/monitoring';
+import type {
+  MaintenancePlanStandardView,
+  MaintenanceTaskView,
+  MonitoringEntryView,
+} from '@/lib/actions/monitoring';
+import type { DueState } from '@/lib/monitoring/schedule';
 import {
   MONITORING_CATEGORIES,
   MONITORING_CATEGORY_LABELS,
@@ -43,6 +48,14 @@ export type MonitoringStandardOption = {
   titleDe: string;
 };
 
+/** Due-badge styling + German label per state (library due-state core). */
+const DUE_BADGE: Record<DueState, { label: string; className: string }> = {
+  ok: { label: 'OK', className: 'bg-success-soft text-success' },
+  due: { label: 'Fällig', className: 'bg-warning-soft text-warning' },
+  overdue: { label: 'Überfällig', className: 'bg-error-soft text-error' },
+  unscheduled: { label: 'Ohne Intervall', className: 'bg-paper-2 text-subtext' },
+};
+
 /**
  * Monitoring-Journal panel (interim — documentation-only precursor to
  * roadmap Stage 8). Deliberately captures NO parameter values/units; the
@@ -56,12 +69,19 @@ export function MonitoringJournal({
   entries,
   documents,
   standards,
+  maintenancePlan,
 }: {
   projectId: string;
   entries: MonitoringEntryView[];
   documents: MonitoringDocumentOption[];
   /** The project's attached standards — feeds the optional guideline link. */
   standards: MonitoringStandardOption[];
+  /**
+   * Library maintenance duties of the attached standards (grouped per
+   * standard, due-state precomputed server-side). Empty → no Wartungsplan
+   * block is rendered at all.
+   */
+  maintenancePlan: MaintenancePlanStandardView[];
 }) {
   const [isPending, startTransition] = useTransition();
   const [entryDate, setEntryDate] = useState(todayLocalIso());
@@ -97,6 +117,19 @@ export function MonitoringJournal({
     });
   }
 
+  /**
+   * "Erfassen" on a maintenance duty: PREFILL the existing add-form (date
+   * today, the duty's category, the duty's standard, note = duty title) —
+   * the user reviews and submits via the normal add flow.
+   */
+  function handlePrefillTask(taskStandardId: string, task: MaintenanceTaskView) {
+    setEntryDate(todayLocalIso());
+    setCategory(task.category as MonitoringCategory);
+    setStandardId(taskStandardId);
+    setNote(task.title);
+    setError(null);
+  }
+
   function handleDelete(id: string) {
     setError(null);
     startTransition(async () => {
@@ -130,6 +163,79 @@ export function MonitoringJournal({
 
   return (
     <div className="rounded-2xl border border-hairline bg-paper p-5 space-y-4">
+      {/* Wartungsplan — library duties of the attached standards, ABOVE the
+          journal. Rendered only when the standards actually have schedule
+          rows (the action already omits standards without duties). */}
+      {maintenancePlan.length > 0 && (
+        <div
+          className="rounded-xl border border-hairline bg-paper-2/40 p-4 space-y-4"
+          data-testid="maintenance-plan"
+        >
+          <h3 className="text-sm font-semibold text-ink">Wartungsplan</h3>
+          {maintenancePlan.map((s) => (
+            <div key={s.standardId} className="space-y-1">
+              <div className="text-xs font-medium text-subtext" title={s.standardTitleDe}>
+                {s.standardCode}
+              </div>
+              <ul className="divide-y divide-hairline border-t border-hairline">
+                {s.tasks.map((t) => {
+                  const badge = DUE_BADGE[t.status.state];
+                  return (
+                    <li
+                      key={t.id}
+                      className="py-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3 text-sm"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <span className="text-ink break-words" title={t.sourceQuote}>
+                          {t.title}
+                        </span>
+                        <span className="ml-2 text-xs text-subtext">
+                          {t.intervalText}
+                        </span>
+                        {t.clauseReference && (
+                          <span className="ml-2 inline-flex items-center rounded-full border border-hairline px-2 py-0.5 text-[10px] font-medium text-subtext">
+                            {t.clauseReference}
+                          </span>
+                        )}
+                      </div>
+                      <div className="shrink-0">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${badge.className}`}
+                          title={
+                            t.status.dueDate
+                              ? `Fällig am ${fmtDate(t.status.dueDate)}`
+                              : t.status.lastDone
+                                ? `Zuletzt am ${fmtDate(t.status.lastDone)}`
+                                : 'Noch nie erfasst'
+                          }
+                        >
+                          {badge.label}
+                        </span>
+                      </div>
+                      <Button
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => handlePrefillTask(s.standardId, t)}
+                        disabled={isPending}
+                        className="shrink-0 self-start sm:self-center"
+                      >
+                        <Plus aria-hidden />
+                        Erfassen
+                      </Button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+          <p className="text-[11px] text-subtext italic">
+            Wartungspflichten stammen wörtlich aus dem jeweiligen Regelwerk
+            (Quelle je Eintrag hinterlegt).
+          </p>
+        </div>
+      )}
+
       {/* Add-row form */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <label className="block sm:w-40">
