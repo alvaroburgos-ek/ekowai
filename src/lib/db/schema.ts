@@ -55,6 +55,10 @@ export const orgs = pgTable('orgs', {
   email: text('email'),
   website: text('website'),
   vatId: text('vat_id'),
+  // Angebots-Engine (Slice E1) — internal calibration, never client-visible.
+  // Mirrors the letterhead columns: org-level singletons, nullable until set.
+  internalHourlyRate: numeric('internal_hourly_rate'),
+  targetMarginPct: numeric('target_margin_pct'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -585,6 +589,55 @@ export const effortEntries = pgTable(
   },
   (t) => ({
     projectDateIdx: index('effort_entries_project_date_idx').on(t.projectId, t.workDate),
+  }),
+);
+
+// =============================================================================
+// ANGEBOTS-ENGINE (Slice E1 — margin-first, internal-only)
+// =============================================================================
+// EKOWAI's own fee offers. Margin math (Festpreis − hours×internal rate −
+// externals) lives in src/lib/offers/margin.ts and is NEVER persisted or
+// client-visible; the client PDF shows positions + Festpreis only.
+export const offers = pgTable(
+  'offers',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    /** draft | sent | accepted | rejected — plain text, no workflow yet (YAGNI). */
+    status: text('status').notNull().default('draft'),
+    festpreisEur: numeric('festpreis_eur').notNull(),
+    validUntil: date('valid_until'),
+    /** e.g. "10 Werktage ab vollständigen Unterlagen" — free text for the PDF. */
+    bearbeitungszeit: text('bearbeitungszeit'),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('offers_project_idx').on(t.projectId),
+  }),
+);
+
+// Offer line items. estimated_hours feeds the internal-cost side; external
+// costs (lab, Gutachter) are passed through, never marked up silently.
+export const offerPositions = pgTable(
+  'offer_positions',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    offerId: uuid('offer_id')
+      .notNull()
+      .references(() => offers.id, { onDelete: 'cascade' }),
+    position: text('position').notNull(),
+    estimatedHours: numeric('estimated_hours').notNull(),
+    externalCostEur: numeric('external_cost_eur').notNull().default('0'),
+    orderIndex: integer('order_index').notNull().default(0),
+    note: text('note'),
+  },
+  (t) => ({
+    offerIdx: index('offer_positions_offer_idx').on(t.offerId),
   }),
 );
 

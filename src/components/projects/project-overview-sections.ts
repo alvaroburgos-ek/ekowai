@@ -1,5 +1,5 @@
 /** Ordered sections the project overview renders. */
-export type OverviewSection = 'standards' | 'vsme-report' | 'effort' | 'audit';
+export type OverviewSection = 'standards' | 'vsme-report' | 'effort' | 'offers' | 'audit';
 
 /**
  * Decide the project overview's section composition.
@@ -15,6 +15,8 @@ export function projectOverviewSections(opts: { isVsme: boolean }): OverviewSect
   if (opts.isVsme) sections.push('vsme-report');
   // Effort logging (roadmap v2 §2.9) — additional section, always shown.
   sections.push('effort');
+  // Angebots-Engine (Slice E1) — internal-only panel next to Aufwandserfassung.
+  sections.push('offers');
   sections.push('audit');
   return sections;
 }
