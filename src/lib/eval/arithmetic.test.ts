@@ -54,3 +54,46 @@ describe('evalExpression', () => {
     expect(() => evalExpression('(1 + 2', {})).toThrow(/schließende Klammer/);
   });
 });
+
+describe('evalExpression — 1-arg math functions (ln/log10/sqrt/exp/abs)', () => {
+  it('ln is the natural logarithm', () => {
+    expect(evalExpression('ln(x)', { x: Math.E })).toBeCloseTo(1);
+    expect(evalExpression('ln(1)', {})).toBe(0);
+  });
+
+  it('log10, sqrt, exp, abs', () => {
+    expect(evalExpression('log10(100)', {})).toBe(2);
+    expect(evalExpression('sqrt(9)', {})).toBe(3);
+    expect(evalExpression('exp(0)', {})).toBe(1);
+    expect(evalExpression('abs(0 - 5)', {})).toBe(5);
+  });
+
+  it('composes with arithmetic — DIN-18130-1 Gl.9 falling-head shape', () => {
+    // k = (a*L/(A*t)) * ln(h1/h2)
+    const v = evalExpression('(a * L / (A * t)) * ln(h1 / h2)', {
+      a: 0.5, L: 10, A: 20, t: 100, h1: 100, h2: 50,
+    });
+    expect(v).toBeCloseTo((0.5 * 10 / (20 * 100)) * Math.log(2));
+  });
+
+  it('domain errors fail loud (non-finite)', () => {
+    expect(() => evalExpression('ln(0)', {})).toThrow(/Nicht-endliches/);
+    expect(() => evalExpression('ln(0 - 1)', {})).toThrow(/Nicht-endliches/);
+    expect(() => evalExpression('sqrt(0 - 4)', {})).toThrow(/Nicht-endliches/);
+  });
+
+  it('unknown function calls still throw (fail loud)', () => {
+    expect(() => evalExpression('foo(3)', {})).toThrow(/nicht unterstützt/);
+    expect(() => evalExpression('SUM(3)', {})).toThrow(/nicht unterstützt/);
+  });
+
+  it('min/max 2-arg regression', () => {
+    expect(evalExpression('min(2, 3)', {})).toBe(2);
+    expect(evalExpression('max(2, 3)', {})).toBe(3);
+  });
+
+  it('1-arg call with wrong arity fails loud', () => {
+    expect(() => evalExpression('ln(1, 2)', {})).toThrow();
+    expect(() => evalExpression('min(1)', {})).toThrow();
+  });
+});

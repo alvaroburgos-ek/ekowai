@@ -19,18 +19,37 @@
  * IDENT  is a letter-or-underscore followed by alphanumerics/underscores.
  *        Identifiers MUST be present in the substitution map — referencing
  *        a missing identifier throws, so the engine fails loud.
- * Function calls and `SUM(...)` are NOT supported — they throw, which is the
- * correct behaviour: such formulas need a rewrite rule before they can be
- * evaluated.
+ * Supported function calls: 1-arg `ln`, `log10`, `sqrt`, `exp`, `abs` and
+ * 2-arg `min`, `max`. Any other call — notably `SUM(...)` (needs aggregation
+ * semantics) — throws, which is the correct behaviour: such formulas need a
+ * rewrite rule before they can be evaluated.
  */
 
-/** The two numeric 2-arg functions the engine natively supports. */
-const SUPPORTED_FUNCTIONS = new Set<string>(['min', 'max']);
+/** 1-arg numeric functions the engine natively supports. */
+const ONE_ARG_FUNCTIONS: Record<string, (x: number) => number> = {
+  ln: Math.log,
+  log10: Math.log10,
+  sqrt: Math.sqrt,
+  exp: Math.exp,
+  abs: Math.abs,
+};
+
+/** 2-arg numeric functions the engine natively supports. */
+const TWO_ARG_FUNCTIONS: Record<string, (a: number, b: number) => number> = {
+  min: Math.min,
+  max: Math.max,
+};
+
+/** Every natively supported function name (consumed by the formula normaliser too). */
+export const SUPPORTED_FUNCTIONS = new Set<string>([
+  ...Object.keys(ONE_ARG_FUNCTIONS),
+  ...Object.keys(TWO_ARG_FUNCTIONS),
+]);
 
 type Token =
   | { kind: 'num'; value: number }
   | { kind: 'ident'; name: string }
-  | { kind: 'fn'; name: 'min' | 'max' }
+  | { kind: 'fn'; name: string }
   | { kind: 'op'; op: '+' | '-' | '*' | '/' | '^' | '(' | ')' | ',' };
 
 function tokenize(src: string): Token[] {
@@ -70,10 +89,11 @@ function tokenize(src: string): Token[] {
       let j = i + m[0].length;
       while (j < src.length && (src[j] === ' ' || src[j] === '\t')) j++;
       if (src[j] === '(') {
-        // Only min() and max() are natively supported as 2-arg numeric functions.
-        // All other function calls throw so unsupported formulas fail loud.
+        // Only the natively supported numeric functions (ONE_ARG_FUNCTIONS /
+        // TWO_ARG_FUNCTIONS) are accepted. All other calls throw so unsupported
+        // formulas fail loud.
         if (SUPPORTED_FUNCTIONS.has(m[0])) {
-          toks.push({ kind: 'fn', name: m[0] as 'min' | 'max' });
+          toks.push({ kind: 'fn', name: m[0] });
           i += m[0].length;
           continue;
         }
@@ -180,6 +200,15 @@ class Parser {
         throw new Error(`Erwarte '(' nach "${t.name}".`);
       }
       const a = this.parseExpr();
+      const oneArg = ONE_ARG_FUNCTIONS[t.name];
+      if (oneArg) {
+        // Consume ')'
+        const close = this.toks[this.pos++];
+        if (close?.kind !== 'op' || close.op !== ')') {
+          throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);
+        }
+        return oneArg(a);
+      }
       // Consume ','
       const comma = this.toks[this.pos++];
       if (comma?.kind !== 'op' || comma.op !== ',') {
@@ -191,7 +220,11 @@ class Parser {
       if (close?.kind !== 'op' || close.op !== ')') {
         throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);
       }
-      return t.name === 'min' ? Math.min(a, b) : Math.max(a, b);
+      const twoArg = TWO_ARG_FUNCTIONS[t.name];
+      if (!twoArg) {
+        throw new Error(`Funktionsaufruf "${t.name}(...)" wird nicht unterstützt — Rewrite-Regel erforderlich.`);
+      }
+      return twoArg(a, b);
     }
     if (t.kind === 'op' && t.op === '(') {
       const v = this.parseExpr();
