@@ -52,6 +52,10 @@ type Props = {
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
   isComputed?: boolean;
+  /** Provenance hint for server-engine-written values (source_type='computed'
+   * rows, e.g. the VSME CO₂ engine; VSME B04 register sums). Rendered under
+   * the label; `href`/`hrefLabel` add a deep link to the producing surface. */
+  computedHint?: { label: string; href?: string; hrefLabel?: string };
   /** Worksheet code that this value was inherited from (no local saved value).
    * When set, the field renders a small "← [code]" hint below the label. */
   inheritedFrom?: string;
@@ -98,7 +102,7 @@ type Props = {
   clientSupplied?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
@@ -264,6 +268,22 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         )}
         {rangeHintDe && (
           <p className="text-[11px] text-subtext mt-0.5 tabular-nums">{rangeHintDe}</p>
+        )}
+        {computedHint && (
+          <p data-testid="computed-hint" className="text-[11px] text-subtext mt-0.5">
+            {computedHint.label}
+            {computedHint.href && (
+              <>
+                {' '}
+                <Link
+                  href={computedHint.href}
+                  className="text-accent hover:underline underline-offset-2"
+                >
+                  {computedHint.hrefLabel ?? '→ öffnen'}
+                </Link>
+              </>
+            )}
+          </p>
         )}
       </div>
 
