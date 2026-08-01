@@ -72,3 +72,36 @@ describe('evaluateCondition — arithmetic operands', () => {
     expect(evaluateCondition('a + b', lookup({ a: 1, b: 2 })).kind).toBe('manual');
   });
 });
+
+describe('evaluateCondition — F-4: relational var-vs-var resolves the RHS identifier', () => {
+  it('>= between two symbols compares their values', () => {
+    expect(evaluateCondition('V_s >= V_S_min', lookup({ V_s: 20, V_S_min: 15 })).kind).toBe('pass');
+    expect(evaluateCondition('V_s >= V_S_min', lookup({ V_s: 10, V_S_min: 15 })).kind).toBe('fail');
+    expect(evaluateCondition('V_s >= V_S_min', lookup({ V_s: 15, V_S_min: 15 })).kind).toBe('pass');
+  });
+
+  it('<=, <, > between two symbols compare their values', () => {
+    expect(evaluateCondition('e_0 <= e_max', lookup({ e_0: 1, e_max: 2 })).kind).toBe('pass');
+    expect(evaluateCondition('e_0 <= e_max', lookup({ e_0: 3, e_max: 2 })).kind).toBe('fail');
+    expect(evaluateCondition('eta_ges > eta_erf', lookup({ eta_ges: 0.9, eta_erf: 0.8 })).kind).toBe('pass');
+    expect(evaluateCondition('m < m_min_required', lookup({ m: 2, m_min_required: 5 })).kind).toBe('pass');
+  });
+
+  it('missing RHS symbol → pending naming it (never a silent verdict)', () => {
+    const r = evaluateCondition('V_s >= V_S_min', lookup({ V_s: 20 }));
+    expect(r.kind).toBe('pending');
+    if (r.kind === 'pending') expect(r.missingSymbols).toContain('V_S_min');
+  });
+
+  it('literal RHS keeps working through the same operators', () => {
+    expect(evaluateCondition('V_s >= 15', lookup({ V_s: 20 })).kind).toBe('pass');
+    expect(evaluateCondition('V_s >= 15', lookup({ V_s: 10 })).kind).toBe('fail');
+  });
+
+  it('== / != with a bare-ident RHS KEEP legacy enum string semantics', () => {
+    expect(evaluateCondition('speichertyp == geschlossen', lookup({ speichertyp: 'geschlossen' })).kind).toBe('pass');
+    expect(evaluateCondition('speichertyp == geschlossen', lookup({ speichertyp: 'offen' })).kind).toBe('fail');
+    // even when both symbols exist as numeric values, == stays the legacy literal compare
+    expect(evaluateCondition('a == b', lookup({ a: 3, b: 3 })).kind).toBe('fail');
+  });
+});

@@ -240,8 +240,11 @@ class Parser {
       if (right === null) return null;
       // Backward-compatible simple comparison: a bare symbol on the left compared to a
       // single literal/bare-ident on the right keeps the original string-literal RHS
-      // semantics. Anything involving arithmetic uses the numeric acompare path.
-      if (left.kind === 'aref' && isSimpleOperand(right)) {
+      // semantics — EXCEPT for relational operators, where a bare-ident RHS is a value
+      // reference, not an enum literal (`V_s >= V_S_min` must resolve V_S_min). Enum
+      // equality (`status == some_value`) stays on the legacy literal path.
+      const relational = next.value === '>=' || next.value === '<=' || next.value === '>' || next.value === '<';
+      if (left.kind === 'aref' && isSimpleOperand(right) && !(relational && right.kind === 'aref')) {
         return { kind: 'compare', symbol: left.symbol, op: next.value, rhs: operandToLiteral(right) };
       }
       return { kind: 'acompare', left, op: next.value, right };
