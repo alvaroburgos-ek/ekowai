@@ -1592,3 +1592,12 @@ OUTSTANDING (needs owner / setup, not fresh audit):
      (~130+), bare-symbol-RHS enforcement fixes, validator rules 16-20 ([CODE]).
 Total applied this campaign: 28 batches, ~30 source-settled migrations, all with rollbacks + effect-verified.
 ════════════════════════════════════════════════════════════════════════════════════════════════
+
+=== CORRECTION 2026-08-01 (R-1 re-check): 2 "source-blocked" standards RECOVERED ===
+The MILESTONE note above was PREMATURE. R-1 re-verification of the 4 "source-blocked" standards found real
+local PDFs for TWO of them (the "source-blocked" label was stale-memory, never verified — the R-2 trap):
+  • DWA-A-226   → C:/Users/Ekowai/Desktop/Guidelines/DWA DIN Scribd/DWA-A-226/DWA-A-226.pdf   (9ws/28eq/24cr)
+  • DWA-M-229-1 → C:/Users/Ekowai/Desktop/Guidelines/DWA DIN Scribd/DWA-M-229-1/DWA-M-229-1.pdf (10ws/47eq/29cr)
+GENUINELY source-blocked (false-positive matches only) = 2: DWA-A-131, DWA-A-201.
+Vercel CLI PRESENT (v54.17.3) → level-2 deployed-build proof is startable when the campaign deployment is set up.
+REVISED: 67 audited + 2 reachable (batch 29) + 2 source-blocked = 71. Dispatching batch 29 = DWA-A-226 + DWA-M-229-1.
