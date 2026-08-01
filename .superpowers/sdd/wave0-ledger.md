@@ -1540,3 +1540,8 @@ DEPLOYED-BUILD harness proof + render spot-check (PROOF/DEPLOYED-PRODUCT mandate
 phase for ALL batch standards (agents caveated "engine-level, not deployed-build" every wave). True 71/71
 termination requires level-2. Level-2 needs the campaign preview deployment (confirm Vercel CLI first —
 standing CLI-absent risk). Flagged for owner + next session as the post-audit phase.
+
+FULL-TREATMENT BATCH 26 OPENED 2026-08-01 — PRIOR RE-TOUCH phase begins. DWA-A-178(13eq/28cr, German,
+  was 14/19 UNPROVEN) + DWA-M-277E(22eq/62cr, English, prior regulation_tables swap). wf_565650c8-a34 /
+  wbvvxerlu. Remaining prior after: DWA-A-138-1, DWA-A-102-2, DWA-M-102-4, VSME. Then 4 source-blocked +
+  ISO-5667-6 PDF acquisition, then LEVEL-2 deployed-build proof phase.
