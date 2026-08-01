@@ -190,7 +190,7 @@ export function MonitoringJournal({
                           {t.title}
                         </span>
                         <span className="ml-2 text-xs text-subtext">
-                          {t.intervalText}
+                          {t.intervalText ?? 'ohne Intervallangabe'}
                         </span>
                         {t.clauseReference && (
                           <span className="ml-2 inline-flex items-center rounded-full border border-hairline px-2 py-0.5 text-[10px] font-medium text-subtext">

@@ -142,7 +142,7 @@ export type MaintenanceTaskView = {
   /** One of the six monitoring categories (monitoring-core.ts). */
   category: string;
   /** VERBATIM printed interval wording, e.g. "halbjährlich". */
-  intervalText: string;
+  intervalText: string | null;
   /** Numeric interpretation in months; null = no fixed printed number. */
   intervalMonths: number | null;
   clauseReference: string | null;

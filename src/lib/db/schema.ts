@@ -377,6 +377,11 @@ export const projectParameters = pgTable(
     enteredBy: uuid('entered_by').notNull(),
     enteredAt: timestamp('entered_at', { withTimezone: true }).notNull().defaultNow(),
     isStale: boolean('is_stale').notNull().default(false),
+    /** Kundenangabe: value was delivered by the client, not determined by
+     * EKOWAI — the AGB liability carve-out for client-supplied input errors
+     * applies. Toggled via setClientSupplied (src/lib/actions/client-supplied.ts),
+     * never by saveWorksheet. */
+    clientSupplied: boolean('client_supplied').notNull().default(false),
   },
   (t) => ({ uniqProjectField: unique().on(t.projectId, t.fieldId) }),
 );
@@ -825,7 +830,9 @@ export const maintenanceSchedules = pgTable(
      */
     category: text('category').notNull(),
     /** VERBATIM printed interval wording, e.g. "halbjährlich". */
-    intervalText: text('interval_text').notNull(),
+    /** Verbatim printed frequency wording; NULL when the source prints none
+     * (inventing wording would violate SR-1). */
+    intervalText: text('interval_text'),
     /**
      * Numeric interpretation of interval_text in months; NULL when the source
      * prints no fixed number (e.g. "bei Bedarf") → due-state 'unscheduled'.
