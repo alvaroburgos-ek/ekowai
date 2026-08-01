@@ -20,7 +20,7 @@ type FieldDef = {
   dataType: 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json';
   isRequired: boolean;
   enumValues:
-    | Array<{ value: string; label_de: string | null; label_en: string | null }>
+    | Array<{ value: string; label_de: string | null; label_en: string | null; order_index?: number }>
     | null;
   validationRules: { min?: number; max?: number; maxLength?: number; raw?: string } | null;
   clauseReference: string | null;
@@ -551,15 +551,76 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         );
       })()}
 
-      {field.dataType === 'json' && (
-        <div
-          aria-disabled="true"
-          className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic cursor-not-allowed"
-          title="Mehrzeilige Eingabe — Phase 2"
-        >
-          Mehrzeilige Eingabe — Phase 2
-        </div>
-      )}
+      {field.dataType === 'json' && (() => {
+        // CHECKLIST mode (options-as-selection, tranche 2): a json-typed field
+        // that carries a populated enum_values option list is a MULTI-SELECT
+        // from the guideline's own printed list. The selection persists as a
+        // JSON string array (option values) through the existing json value
+        // plumbing (worksheet-store setField → saveWorksheet valueJson).
+        // Fields WITHOUT enumValues keep the legacy "Phase 2" placeholder;
+        // carrier/register symbols (surface_inventory, r_D_n_table, …) never
+        // reach this branch — worksheet-form dispatches them to dedicated
+        // editors and skips them in the field grid.
+        const options = field.enumValues ?? [];
+        if (options.length === 0) {
+          return (
+            <div
+              aria-disabled="true"
+              className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic cursor-not-allowed"
+              title="Mehrzeilige Eingabe — Phase 2"
+            >
+              Mehrzeilige Eingabe — Phase 2
+            </div>
+          );
+        }
+        const sorted = [...options].sort(
+          (a, b) => (a.order_index ?? Number.MAX_SAFE_INTEGER) - (b.order_index ?? Number.MAX_SAFE_INTEGER),
+        );
+        const raw = value?.type === 'json' ? value.value : null;
+        const selected = new Set(
+          Array.isArray(raw) ? raw.filter((x): x is string => typeof x === 'string') : [],
+        );
+        const jsonLocked = isComputed || readOnly;
+        const toggle = (optValue: string, checked: boolean) => {
+          if (jsonLocked) return;
+          const next = new Set(selected);
+          if (checked) next.add(optValue);
+          else next.delete(optValue);
+          // Persist in the option list's own order so the stored array is
+          // stable/deterministic regardless of click order.
+          setField(field.id, {
+            type: 'json',
+            value: sorted.map((o) => o.value).filter((v) => next.has(v)),
+          });
+        };
+        return (
+          <div
+            role="group"
+            aria-labelledby={`${inputId}-label`}
+            data-testid="json-checklist"
+            className="rounded-md border border-hairline-strong divide-y divide-hairline"
+          >
+            {sorted.map((o) => {
+              const checked = selected.has(o.value);
+              return (
+                <label
+                  key={o.value}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-sm text-ink ${jsonLocked ? 'cursor-default bg-paper-2/40' : 'cursor-pointer hover:bg-paper-2/60'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={jsonLocked}
+                    onChange={(e) => toggle(o.value, e.target.checked)}
+                    className="h-4 w-4 shrink-0 accent-[var(--accent,#2563eb)]"
+                  />
+                  <span>{pickEnumLabel(o, locale)}</span>
+                </label>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Same-symbol hint (cross-worksheet) — only shown when the value was
           NOT auto-inherited (i.e. engineer has their own local value). When
