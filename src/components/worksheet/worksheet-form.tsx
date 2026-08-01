@@ -676,7 +676,7 @@ export function WorksheetForm({
           data-testid="worksheet-lock-banner"
           className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
         >
-          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen“.
         </div>
       )}
 
