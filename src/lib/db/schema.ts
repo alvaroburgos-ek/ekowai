@@ -191,6 +191,9 @@ export const fields = pgTable(
     verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     verificationNote: text('verification_note'),
+    /** Verbatim quote from the standard's own text/table backing the
+     * verification (doctrine SR-1). Required for verified_against_standard. */
+    verificationQuote: text('verification_quote'),
     /** Soft-deactivation marker. Set false by the Pile-2 deprecation pass for
      * fields that have no source basis and no code consumer; their rows are
      * retained for audit trail but the worksheet form filters them out. */
@@ -231,6 +234,8 @@ export const equations = pgTable(
     verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     verificationNote: text('verification_note'),
+    /** Verbatim quote from the standard (SR-1) — see fields.verificationQuote. */
+    verificationQuote: text('verification_quote'),
   },
   (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
 );

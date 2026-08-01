@@ -15,8 +15,46 @@ import { requirePlatformEngineer } from '@/lib/auth/platform-engineer';
 const VERIFIED = 'engineer_verified';
 const UNVERIFIED = 'imported_unverified';
 
+/** Statuses a platform engineer may set explicitly (Stage-1 state machine:
+ * imported_unverified → engineer_verified/verified_against_standard →
+ * disputed → corrected). */
+const SETTABLE_STATUSES = new Set([
+  'engineer_verified',
+  'verified_against_standard',
+  'disputed',
+  'corrected',
+]);
+
 const idSchema = z.string().uuid();
 const noteSchema = z.string().trim().max(500).optional();
+const quoteSchema = z.string().trim().max(2000).optional();
+const statusSchema = z.string().optional();
+
+type VerifyOptions = {
+  note?: string;
+  /** Verbatim quote from the standard (SR-1). REQUIRED for verified_against_standard. */
+  quote?: string;
+  /** Target status; defaults to engineer_verified. */
+  status?: string;
+};
+
+function parseVerifyOptions(opts?: VerifyOptions) {
+  const note = noteSchema.parse(opts?.note) ?? null;
+  const quote = quoteSchema.parse(opts?.quote) ?? null;
+  const status = statusSchema.parse(opts?.status) ?? VERIFIED;
+  if (!SETTABLE_STATUSES.has(status)) {
+    throw new Error(`Unzulässiger Verifikationsstatus: ${status}`);
+  }
+  if (status === 'verified_against_standard' && !quote) {
+    throw new Error(
+      'verified_against_standard erfordert ein Verbatim-Zitat aus der Norm (SR-1).',
+    );
+  }
+  if (status === 'disputed' && !note) {
+    throw new Error('disputed erfordert eine Begründung (Notiz).');
+  }
+  return { note, quote, status };
+}
 
 /** Look up the standard code + worksheet code for a field, so we can
  * revalidate the right project-scoped + library-scoped paths. Returns null
@@ -57,9 +95,11 @@ function revalidateForWorksheet(standardCode: string, worksheetCode: string) {
   revalidatePath(`/[locale]/standards`, 'page');
 }
 
-export async function verifyField(fieldId: string, note?: string): Promise<void> {
+export async function verifyField(fieldId: string, opts?: VerifyOptions | string): Promise<void> {
   const id = idSchema.parse(fieldId);
-  const parsedNote = noteSchema.parse(note) ?? null;
+  // Backward-compatible: callers used to pass the note as a bare string.
+  const options = typeof opts === 'string' ? { note: opts } : opts;
+  const { note, quote, status } = parseVerifyOptions(options);
   const user = await requirePlatformEngineer();
 
   const paths = await lookupFieldPaths(id);
@@ -68,10 +108,11 @@ export async function verifyField(fieldId: string, note?: string): Promise<void>
   await db
     .update(fields)
     .set({
-      verificationStatus: VERIFIED,
+      verificationStatus: status,
       verifiedByUserId: user.id,
       verifiedAt: sql`now()`,
-      verificationNote: parsedNote,
+      verificationNote: note,
+      verificationQuote: quote,
     })
     .where(eq(fields.id, id));
 
@@ -92,15 +133,17 @@ export async function unverifyField(fieldId: string): Promise<void> {
       verifiedByUserId: null,
       verifiedAt: null,
       verificationNote: null,
+      verificationQuote: null,
     })
     .where(eq(fields.id, id));
 
   revalidateForWorksheet(paths.standardCode, paths.worksheetCode);
 }
 
-export async function verifyEquation(equationId: string, note?: string): Promise<void> {
+export async function verifyEquation(equationId: string, opts?: VerifyOptions | string): Promise<void> {
   const id = idSchema.parse(equationId);
-  const parsedNote = noteSchema.parse(note) ?? null;
+  const options = typeof opts === 'string' ? { note: opts } : opts;
+  const { note, quote, status } = parseVerifyOptions(options);
   const user = await requirePlatformEngineer();
 
   const paths = await lookupEquationPaths(id);
@@ -109,10 +152,11 @@ export async function verifyEquation(equationId: string, note?: string): Promise
   await db
     .update(equations)
     .set({
-      verificationStatus: VERIFIED,
+      verificationStatus: status,
       verifiedByUserId: user.id,
       verifiedAt: sql`now()`,
-      verificationNote: parsedNote,
+      verificationNote: note,
+      verificationQuote: quote,
     })
     .where(eq(equations.id, id));
 
@@ -133,6 +177,7 @@ export async function unverifyEquation(equationId: string): Promise<void> {
       verifiedByUserId: null,
       verifiedAt: null,
       verificationNote: null,
+      verificationQuote: null,
     })
     .where(eq(equations.id, id));
 

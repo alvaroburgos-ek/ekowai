@@ -624,6 +624,14 @@ const VERIFICATION_LABELS_DE: Record<string, { short: string; title: string }> =
     short: 'Wizard-intern',
     title: 'Aus Wizard-Logik abgeleitet, nicht direkt in der Norm.',
   },
+  disputed: {
+    short: 'Strittig',
+    title: 'Verifikation angefochten — Wert/Definition weicht mutmaßlich von der Norm ab.',
+  },
+  corrected: {
+    short: 'Korrigiert',
+    title: 'Nach Beanstandung gegen die Norm korrigiert und erneut verifiziert.',
+  },
 };
 
 function verificationStatusLabel(status: string): string {
