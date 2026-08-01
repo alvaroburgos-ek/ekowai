@@ -25,7 +25,14 @@
  * NOT rewritten — those formulas need a rewrite rule or aggregator.
  */
 
-const FN_LIKE = /([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*([A-Za-z0-9_]+)\s*\)/g;
+// Rewrite `ident(singletoken)` → `ident_singletoken` (the r_D(n) accessor class),
+// but NOT when `ident` is a real arithmetic function — ln/log/log10/exp/sqrt/abs (1-arg)
+// and min/max (2-arg) must reach the evaluator intact (else `ln(eta_ges)` → `ln_eta_ges`,
+// an unknown symbol, and the equation silently degrades to manual_required — DWA-A-102-2
+// Bild-4 regression class). The `(?<![A-Za-z0-9_])` lookbehind anchors the match to the
+// START of an identifier so the excluded `ln(` cannot be re-matched via its `n(` substring.
+const FN_LIKE =
+  /(?<![A-Za-z0-9_])(?!(?:ln|log10|log|exp|sqrt|abs|min|max)\s*\()([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*([A-Za-z0-9_]+)\s*\)/g;
 
 export function normalizeFormula(s: string): string {
   return s.replace(FN_LIKE, '$1_$2');
