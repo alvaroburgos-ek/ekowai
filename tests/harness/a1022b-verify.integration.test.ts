@@ -134,23 +134,16 @@ describe('DWA-A-102-2 (A) — min/max (comma-form) + power equations now compute
   it('Gl.(T6.Vs) V_s = max(H1/(e_0+6) − H2, V_S_min)', () => expectComputed('T6.Vs', { H1: 2756, e_0: 40, H2: 34.84, V_S_min: 5 }, Math.max(2756 / 46 - 34.84, 5), 6));
 });
 
-describe('DWA-A-102-2 (A) — ln() regression (Zusatzdatei Bild 4): FAILS LOUD today via a normalizeFormula [CODE] bug', () => {
-  it('FINDING [CODE] — Gl.(REG-Bild4) q_A_Bem = −8.333·ln(eta_ges) − 1.6629 does NOT compute: normalizeFormula clobbers ln(eta_ges)→ln_eta_ges', () => {
-    // arithmetic.ts DOES support ln(); the source (Anwendungsbeispiel md L634, MINUS
-    // form) yields q_A,Bem = 5,68 m/h for eta_ges = 0,414. BUT the value never
-    // reaches the arithmetic engine: normalize-formula.ts's FN_LIKE regex
-    //   ([A-Za-z_]\w*)\s*\(\s*([A-Za-z0-9_]+)\s*\)  →  $1_$2
-    // is meant for `r_D(n)`→`r_D_n`, yet it ALSO rewrites the supported 1-arg call
-    // `ln(eta_ges)` → the bare identifier `ln_eta_ges`, which is then unknown in
-    // scope → evalExpression throws → manual_required. Same clobber would hit any
-    // ln/log/log10/exp/sqrt/abs call whose argument is a lone identifier.
-    // The engine fails LOUD (never fabricates), which is safe — but the ln support
-    // is unreachable here. Draft [CODE] fix: exclude the known function names
-    // (ln|log|log10|exp|sqrt|abs|min|max) from FN_LIKE. Verified against current
-    // code — asserting the ACTUAL behaviour (doctrine R-5: no fabricated pass).
+describe('DWA-A-102-2 (A) — ln() regression (Zusatzdatei Bild 4): normalizeFormula [CODE] bug now FIXED', () => {
+  it('Gl.(REG-Bild4) q_A_Bem = −8.333·ln(eta_ges) − 1.6629 NOW computes (normalizeFormula clobber fixed, commit 58308de)', () => {
+    // The [CODE] bug this test originally documented is FIXED: normalize-formula.ts's
+    // FN_LIKE (r_D(n)→r_D_n accessor) no longer clobbers the supported 1-arg calls
+    // ln/log/log10/exp/sqrt/abs — so `ln(eta_ges)` reaches the evaluator and computes.
+    // Source (Anwendungsbeispiel md L634, MINUS form): q_A,Bem = 5,68 m/h for eta_ges=0,414.
     const r = runEq('REG-Bild4', { eta_ges: 0.414 });
-    expect(r.kind).toBe('manual_required');
-    // Isolate the bug to normalizeFormula: the RAW arithmetic engine (evalExpression,
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBeCloseTo(-8.333 * Math.log(0.414) - 1.6629, 6);
+    // Sanity: the RAW arithmetic engine (evalExpression,
     // which does NOT run normalizeFormula) computes ln() fine and yields the source
     // value 5,68 m/h. So arithmetic.ts is correct; only the pre-normalise step breaks it.
     const raw = evalExpression('-8.333 * ln(eta_ges) - 1.6629', { eta_ges: 0.414 });

@@ -95,14 +95,15 @@ describe('DIN-18130-1 — equation-node chains through the REAL evaluateFormula 
     if (r.kind === 'computed') expect(r.value).toBeCloseTo(2.0e-5, 12); // (1e-6·0.1)/(0.01·0.5)
   });
 
-  it('Gl.(9) k = (a·l_0)/(A·t)·ln(h_1/h_2)  [PDF Seite 16] falling-head — ENGINE GAP: ln() unsupported', () => {
-    // FINDING: the in-tree arithmetic parser supports only min()/max(); ln() throws.
-    // The engine therefore CANNOT compute the falling-head permeability and MUST
-    // fail loud (never fabricate a value) — doctrine-aligned. This node's formula
-    // transcription is VA (PDF Seite 16) but its COMPUTE chain is not engine-
-    // executable → surfaced to the decision batch for the next iteration.
+  it('Gl.(9) k = (a·l_0)/(A·t)·ln(h_1/h_2)  [PDF Seite 16] falling-head — NOW computes (ln() is engine-supported)', () => {
+    // CORRECTED: the in-tree arithmetic parser supports ln/log/log10/exp/sqrt/abs (not
+    // only min/max — arithmetic.ts FUNCTIONS_1ARG), and `ln(h_1/h_2)` (multi-token arg)
+    // was never touched by normalizeFormula's FN_LIKE. So the falling-head permeability
+    // computes end-to-end; VA per PDF Seite 16. (a·l_0)/(A·t)·ln(h_1/h_2) with the values
+    // below = 1e-5 · ln(2) ≈ 6.931e-6.
     const r = runEq('9', { a: 1.0e-4, l_0: 0.1, A: 0.01, t: 100, h_1: 0.5, h_2: 0.25 });
-    expect(r.kind).not.toBe('computed'); // error or manual_required — not a fake number
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBeCloseTo((1.0e-4 * 0.1) / (0.01 * 100) * Math.log(0.5 / 0.25), 12);
   });
 });
 
