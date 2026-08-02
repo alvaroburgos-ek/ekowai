@@ -1,6 +1,27 @@
-# Convergence — all 71 owned standards REVIEWED (2026-08-02)
+# Convergence — all 71 owned standards FULLY TREATED (2026-08-02)
 
 Session: claude-opus-4-8 · high · feat/fll-revision · prod vadsmshzebefjreqcicl.
+
+## ✅ 71/71 — ZERO UNTOUCHED (completion, 2026-08-02)
+Every owned standard now carries a committed execution-proof harness (`tests/harness/<std>-verify.integration.test.ts`)
+driving its block gates BOTH ways through the REAL `saveWorksheet → checkApprovalGate` path, plus per-equation
+symbol-verification through the real `evaluateFormula`, plus a bidirectional source↔encoding coverage walk. The serial
+march this run closed the final 15 (ISO-9001, VDI-2163, VDI-3477, VDI-3814-Blatt-2-1, HOAI-2021, ATV-A-704E,
+ISO-5667-1/6/10/13/16, ISO-59004/59014/59020, ISO-14002-2/14019-1/46001, DWA-M-179-1, VSME) one at a time.
+
+**Source-inventory: all 71 are source-verifiable.** Two "source-absent" beliefs were reversed this run:
+- **VSME** — the EFRAG `VSME Standard.pdf` EXISTS (`Desktop\environmental-reporting service\01_Referenz\`); treated VA-grade.
+- **VDI-2653** — a PHANTOM queue entry (0 rows in prod; the mislabeled folder held VDI-2163 source). Struck from the queue.
+
+**Source-settled defects found in the final 15: ZERO applied** (every finding was either a modal-severity ruling, a
+draft-edition/Gelbdruck deferral, a full-domain/empty no-op, or an OCR/render caveat — all on the sign-off sheet, none
+zero-interpretation). New engine/data class discovered + closed: **comma-decimals in equation formula strings** parse to
+`error` — corpus scan found only 2 instances (ISO-5667-6 Eq.A.1 [ruling], VDI-3477 Gl.6 [intentional NR]); no silent breakage.
+Notable execution-only finds (rulings, not applied): ATV-A-704E pH<0.2 is a REAL printed tolerance but UNENCODED (coverage
+omission); DWA-M-179-1 REQ-30 over-enforces (`==ready` unselectable → worksheet permanently blocked); ISO-46001 CR-005
+"dead gate" claim DISPROVEN (enforces via cross-ws fallback). All `== True` capital-boolean shapes verified fine (tokenizer lowercases).
+
+**Prior R-5/reversal count this run: 6** (VSME source, VDI-2653 phantom, ATV pH, M-179-1 TRUE-noop, VDI-2163 TRUE-noop, ISO-46001 CR-005) — all reported, none fabricated into a fix.
 
 ## Review-depth definition (honest, doctrine-bound)
 - **FULL TREATMENT** = bidirectional coverage (source↔encoding) + symbol-verified equations vs printed PDF +
@@ -76,5 +97,8 @@ M-820-1 REQ-01 · M-820-2 REQ-51 · FLL-Naturteich REQ-07 · FLL-TP-RHIZOM REQ-0
 4. Deeper execution-proof harnesses for source-absent standards would confirm gate ENFORCEMENT (not thresholds) —
    possible but not source-verifiable; can be built on request.
 
-**Bottom line: all 71 reviewed to the maximum honest depth their available source permits. 25 execution-proofed +
-document-compared; 46 structurally reviewed (scans clean) + content-blocked-on-source. 9 prod fixes applied, 3 staged.**
+**Bottom line (SUPERSEDED — see the 71/71 completion block at top): all 71 now execution-proofed + document-compared at
+full treatment. 10 prod fixes applied (9 prior + corpus `!= ''`), 3 staged (owner-gated new gates), 0 new source-settled
+defects in the final 15. Remaining work is entirely owner-gated: sign-off rulings (modal severities, mandatory-as-warn,
+no-op cleanups, REQ-30 enum fix, draft-edition re-diffs) + deployed-build render/browser passes — none of which the
+autonomous march may cross. The convergence table reads 71 fully-treated / 0 untouched.**
