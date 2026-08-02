@@ -2,6 +2,19 @@
 
 Session: claude-opus-4-8 · high · feat/fll-revision · prod vadsmshzebefjreqcicl.
 
+## ✅ 71/71 — JOIN-VERIFIED COMPLETE (2026-08-02, re-verified by roster join)
+After the serial march, a **roster join** (live `standards` list ↔ `tests/harness/*-verify` files, R-4 "join or invalid")
+was run against the completion claim itself — and caught **2 standards a ledger number would have hidden**:
+- **DWA-A-138-1** (gold copy, 28 ws / 29 block / 46 eqs) had NO consolidated both-ways harness — only scattered
+  `src/lib/actions/__tests__` unit tests. Closed: `a138-verify` drives 29/29 gates both-ways + 46/46 eqs (38/38 green, commit 1b97709).
+- **ISO-14033** was mis-filed "N/A" but has **1 equation** (`parameter_value = activity_data * emission_removal_factor`).
+  Closed: `iso14033-verify` proves it computes + persists (16/16 green, commit be58422).
+
+**Corrected honest breakdown (join-verified):** 71 owned standards = **65 execution-proofed** (block gates and/or
+equations, each with a committed both-ways/equation harness) + **6 genuinely N/A** (ISO-14004/14015/14050/14097/59010/59032
+— 0 block gates AND 0 equations, nothing to execution-prove; reviewed structurally + coverage). The earlier "7 N/A" was
+wrong: ISO-14033 has a compute surface. The 16 non-standard prod rows (PC-/RA-/RLS-/T-/TEST-/VW-) are test/junk, not owned.
+
 ## ✅ 71/71 — ZERO UNTOUCHED (completion, 2026-08-02)
 Every owned standard now carries a committed execution-proof harness (`tests/harness/<std>-verify.integration.test.ts`)
 driving its block gates BOTH ways through the REAL `saveWorksheet → checkApprovalGate` path, plus per-equation
