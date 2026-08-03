@@ -16,3 +16,22 @@ describe('R-CLAUSEREF', () => {
     expect(r.detector({ located_clause: '§4.2', clause_ref: '§4.2' }, {})).toBe(false);
   });
 });
+
+describe('R-MODAL-SEVERITY', () => {
+  const r = rule('R-MODAL-SEVERITY');
+  it('fires on a block gate governed by a soft modal', () => {
+    for (const m of ['soll','sollte','should','empfohlen','bevorzugt','present-indicative']) {
+      expect(r.detector({ modal_verb: m }, { severity: 'block' })).toBe(true);
+    }
+    expect(r.resolve({ modal_verb: 'sollte' }, { severity: 'block' }))
+      .toEqual({ column: 'severity', before: 'block', after: 'warn' });
+  });
+  it('does not fire on muss/shall or on a warn gate', () => {
+    expect(r.detector({ modal_verb: 'muss' }, { severity: 'block' })).toBe(false);
+    expect(r.detector({ modal_verb: 'sollte' }, { severity: 'warn' })).toBe(false);
+  });
+  it('escalates when the modal is mixed', () => {
+    expect(r.escalateIf({ modal_verb: 'mixed' }, { severity: 'block' })).toBe(true);
+    expect(r.escalateIf({ modal_verb: 'sollte' }, { severity: 'block' })).toBe(false);
+  });
+});

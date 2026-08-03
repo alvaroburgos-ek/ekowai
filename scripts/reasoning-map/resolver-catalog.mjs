@@ -16,4 +16,11 @@ export const RULES = [
     detector: (ev, t) => !!ev.located_clause && ev.located_clause !== ev.clause_ref,
     resolve: (ev, t) => ({ column: 'clause_reference', before: t.clause_reference, after: ev.located_clause }),
   },
+  {
+    id: 'R-MODAL-SEVERITY', kind: 'gate', risk: 'med',
+    detector: (ev, t) => t.severity === 'block' &&
+      ['soll','sollte','should','empfohlen','bevorzugt','present-indicative'].includes(ev.modal_verb),
+    escalateIf: (ev) => ev.modal_verb === 'mixed',
+    resolve: (ev, t) => ({ column: 'severity', before: t.severity, after: 'warn' }),
+  },
 ];
