@@ -22,7 +22,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'unit',
-          include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.{ts,tsx}'],
+          include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.{ts,tsx}', 'scripts/**/__tests__/**/*.test.mjs'],
           // DB-backed integration tests live under `integration` project — they need
           // a real Postgres and would fail with ECONNREFUSED in the unit CI job.
           exclude: [
