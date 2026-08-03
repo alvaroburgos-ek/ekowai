@@ -995,4 +995,6 @@ if (jsonOut) {
   console.log(`\n  machine-readable result -> ${jsonOut}`);
 }
 
+console.log('Next: node scripts/reasoning-map/resolve.mjs <evidence.json> <stamp> — stages resolver migrations (WRITTEN-NOT-APPLIED)');
+
 process.exit(Math.min(errors.length, 250));
