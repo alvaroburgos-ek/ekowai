@@ -30,10 +30,15 @@ fully determine is escalated to the human sign-off sheet instead of guessed.
 
 3. Output:
    - `scripts/migrations/<stamp>_resolve_<standard>_<rule>.sql` — one
-     migration per (standard, rule) group, in the `-- WRITTEN-NOT-APPLIED`
-     `DO $$…$$` idempotent format.
+     migration per (standard, rule) group: plain idempotent
+     `UPDATE compliance_requirements SET <col> = <val> WHERE id = '<id>';`
+     statements (idempotent via the `WHERE id=` predicate, not a PL/pgSQL
+     `DO $$` block — that pattern belongs to the sibling `_gen-*.mjs`
+     scripts, not this pipeline) under a `-- WRITTEN-NOT-APPLIED — owner
+     one-click apply` header.
    - `scripts/rollback-<stamp>_resolve_<standard>_<rule>.sql` — the paired
-     rollback for each migration.
+     rollback: the same `UPDATE … WHERE id = …;` statements setting each
+     column back to its `before` value.
    - `.superpowers/sdd/RESOLVER-DECISIONS.md` — one ledger entry per
      evidence record, staged or escalated, appended (never overwritten).
    - stdout: `migrations=<n> escalations=<n>`.
@@ -59,10 +64,16 @@ fully determine is escalated to the human sign-off sheet instead of guessed.
 - **Never delete a source value.** Every rule either widens (
   `R-ENUM-UNDERINCLUSIVE` only ever adds source-verified members, never
   removes), downgrades severity (`block` → `warn`, never the reverse), or
-  repoints a reference (`R-CLAUSEREF`). No rule drops a threshold, a field,
-  or an enum member that the encoding already carries — anything that
-  would require deleting a value is a judgment call and is not in this
-  catalog.
+  repoints a reference (`R-CLAUSEREF`). The one exception is
+  `R-ENUM-FULLDOMAIN`, which rewrites `X IN {full enum list}` to
+  `X IS NOT NULL` — dropping the explicit membership list from the
+  condition's text. This is safe only because it fires solely when the
+  evidence declares `enum_domain_coverage: 'full'`: the members it drops
+  are the *entire* domain the source defines, so the two conditions are
+  logically equivalent and nothing enforceable is lost. No rule drops a
+  threshold, a field, or a partial/under-inclusive enum member list — any
+  narrowing that could lose enforceable information is a judgment call and
+  is not in this catalog.
 - **No rule invents a value.** Every `resolve()` output is derived only
   from fields already present in the `Evidence` record (itself a verbatim
   transcription from the rendered PDF in the auditing session) or from the
