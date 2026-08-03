@@ -3,10 +3,10 @@ const q = (v) => (typeof v === 'number' ? String(v) : `'${String(v).replace(/'/g
 export function toMigrationSql(decisions) {
   const staged = decisions.filter(d => d.action === 'stage');
   const up = staged.map(d =>
-    `-- ${d.rule_id} (risk ${d.risk})\nUPDATE compliance_requirements SET ${d.change.column} = ${q(d.change.after)} WHERE id = ${q(d.target_id)};`
+    `-- ${d.rule_id} (risk ${d.risk})\nUPDATE ${d.change.table ?? 'compliance_requirements'} SET ${d.change.column} = ${q(d.change.after)} WHERE id = ${q(d.target_id)};`
   ).join('\n');
   const down = staged.map(d =>
-    `UPDATE compliance_requirements SET ${d.change.column} = ${q(d.change.before)} WHERE id = ${q(d.target_id)};`
+    `UPDATE ${d.change.table ?? 'compliance_requirements'} SET ${d.change.column} = ${q(d.change.before)} WHERE id = ${q(d.target_id)};`
   ).join('\n');
   return { up, down };
 }

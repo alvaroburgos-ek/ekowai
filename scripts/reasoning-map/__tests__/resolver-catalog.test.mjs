@@ -89,3 +89,20 @@ describe('enum rules', () => {
     expect(r.detector({ enum_domain_coverage: 'partial' }, {})).toBe(false);
   });
 });
+
+describe('R-EQ-GL13', () => {
+  const r = rule('R-EQ-GL13');
+  it('fires on a case-only symbol mismatch vs a declared field', () => {
+    const ev = { declared_symbols: ['e_E', 'V_dot', 'A'] };
+    const t = { formula: 'w_P = V_dot/(A*E_E)' };
+    expect(r.kind).toBe('equation');
+    expect(r.detector(ev, t)).toBe(true);
+    expect(r.resolve(ev, t)).toEqual({ column: 'formula', before: 'w_P = V_dot/(A*E_E)', after: 'w_P = V_dot/(A*e_E)', table: 'equations' });
+  });
+  it('does not fire when all formula symbols match declared casing', () => {
+    expect(r.detector({ declared_symbols: ['e_E'] }, { formula: 'x = e_E' })).toBe(false);
+  });
+  it('escalates when two declared symbols case-collide with the token', () => {
+    expect(r.escalateIf({ declared_symbols: ['e_e', 'E_E'] }, { formula: 'x = e_E' })).toBe(true);
+  });
+});
