@@ -43,7 +43,7 @@ export const RULES = [
   },
   {
     id: 'R-ENUM-UNDERINCLUSIVE', kind: 'gate', risk: 'med',
-    detector: (ev, t) => ev.enum_domain_coverage === 'partial',
+    detector: (ev, t) => ev.enum_domain_coverage === 'partial' && /([\w.]+)\s+IN\s*\{/.test(t.condition || ''),
     escalateIf: (ev) => ev.all_members_verbatim === false,
     resolve: (ev, t) => ({ column: 'condition', before: t.condition,
       after: `${t.condition.match(/([\w.]+)\s+IN\s*\{/)[1]} IN {${ev.source_enum_members.join(',')}}` }),

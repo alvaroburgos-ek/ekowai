@@ -66,7 +66,7 @@ describe('enum rules', () => {
   });
   it('R-ENUM-UNDERINCLUSIVE: fires on partial coverage, escalates on unverifiable member', () => {
     const r = rule('R-ENUM-UNDERINCLUSIVE');
-    expect(r.detector({ enum_domain_coverage: 'partial' }, {})).toBe(true);
+    expect(r.detector({ enum_domain_coverage: 'partial' }, { condition: 'x IN {a,b}' })).toBe(true);
     expect(r.escalateIf({ source_enum_members: ['a','b'], all_members_verbatim: true }, {})).toBe(false);
     expect(r.escalateIf({ source_enum_members: ['a','b'], all_members_verbatim: false }, {})).toBe(true);
   });
@@ -82,5 +82,10 @@ describe('enum rules', () => {
     const ev = { enum_domain_coverage: 'partial', source_enum_members: ['a','b','c'], all_members_verbatim: true };
     const t = { condition: 'x IN {a,b}' };
     expect(r.resolve(ev, t)).toEqual({ column: 'condition', before: 'x IN {a,b}', after: 'x IN {a,b,c}' });
+  });
+  it('R-ENUM-UNDERINCLUSIVE: does not fire (or crash) when the condition has no IN-clause', () => {
+    const r = rule('R-ENUM-UNDERINCLUSIVE');
+    expect(r.detector({ enum_domain_coverage: 'partial' }, { condition: 'x >= 5' })).toBe(false);
+    expect(r.detector({ enum_domain_coverage: 'partial' }, {})).toBe(false);
   });
 });
