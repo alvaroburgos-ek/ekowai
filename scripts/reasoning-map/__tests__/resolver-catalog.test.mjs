@@ -35,3 +35,22 @@ describe('R-MODAL-SEVERITY', () => {
     expect(r.escalateIf({ modal_verb: 'sollte' }, { severity: 'block' })).toBe(false);
   });
 });
+
+describe('threshold rules', () => {
+  it('R-THRESH-EXAMPLE: illustrative value (z.B./ca.) on a block gate -> warn', () => {
+    const r = rule('R-THRESH-EXAMPLE');
+    expect(r.detector({ threshold_in_source: 'example' }, { severity: 'block' })).toBe(true);
+    expect(r.detector({ threshold_in_source: 'approximate' }, { severity: 'block' })).toBe(true);
+    expect(r.detector({ threshold_in_source: 'true' }, { severity: 'block' })).toBe(false);
+    expect(r.resolve({ threshold_in_source: 'example' }, { severity: 'block' }))
+      .toEqual({ column: 'severity', before: 'block', after: 'warn' });
+  });
+  it('R-THRESH-UNSUPPORTED: value absent from source -> warn, condition untouched', () => {
+    const r = rule('R-THRESH-UNSUPPORTED');
+    expect(r.risk).toBe('high');
+    expect(r.detector({ threshold_in_source: 'false' }, { severity: 'block' })).toBe(true);
+    const change = r.resolve({ threshold_in_source: 'false' }, { severity: 'block', condition: 'x >= 50000' });
+    expect(change).toEqual({ column: 'severity', before: 'block', after: 'warn' });
+    expect(change.column).not.toBe('condition'); // never rewrites/deletes the number
+  });
+});

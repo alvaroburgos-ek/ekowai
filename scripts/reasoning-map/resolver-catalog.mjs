@@ -23,4 +23,14 @@ export const RULES = [
     escalateIf: (ev) => ev.modal_verb === 'mixed',
     resolve: (ev, t) => ({ column: 'severity', before: t.severity, after: 'warn' }),
   },
+  {
+    id: 'R-THRESH-EXAMPLE', kind: 'gate', risk: 'med',
+    detector: (ev, t) => t.severity === 'block' && ['example','approximate'].includes(ev.threshold_in_source),
+    resolve: (ev, t) => ({ column: 'severity', before: t.severity, after: 'warn' }),
+  },
+  {
+    id: 'R-THRESH-UNSUPPORTED', kind: 'gate', risk: 'high',
+    detector: (ev, t) => t.severity === 'block' && ev.threshold_in_source === 'false',
+    resolve: (ev, t) => ({ column: 'severity', before: t.severity, after: 'warn' }),
+  },
 ];
