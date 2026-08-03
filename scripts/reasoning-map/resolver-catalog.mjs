@@ -1,7 +1,7 @@
 /** @typedef {{located_clause?:string, clause_ref?:string, modal_verb?:string, threshold_in_source?:string,
  *  printed_value?:string|null, enum_domain_coverage?:string|null, field_type?:string,
  *  provenance_grade?:'VA'|'VC', edition?:string, source_quote?:string,
- *  source_enum_members?:string[]}} Evidence */
+ *  source_enum_members?:string[], all_members_verbatim?:boolean}} Evidence */
 /** @typedef {{id:string, severity?:string, condition?:string, clause_reference?:string,
  *  formula?:string, output_symbol?:string}} Target */
 /** @typedef {{column:string, before:any, after:any}} Change */
@@ -32,5 +32,20 @@ export const RULES = [
     id: 'R-THRESH-UNSUPPORTED', kind: 'gate', risk: 'high',
     detector: (ev, t) => t.severity === 'block' && ev.threshold_in_source === 'false',
     resolve: (ev, t) => ({ column: 'severity', before: t.severity, after: 'warn' }),
+  },
+  {
+    id: 'R-ENUM-FULLDOMAIN', kind: 'gate', risk: 'med',
+    detector: (ev, t) => ev.enum_domain_coverage === 'full' && /\bIN\s*\{/.test(t.condition || ''),
+    resolve: (ev, t) => {
+      const sym = (t.condition.match(/^\s*(\w+)\s+IN\s*\{/) || [,'value'])[1];
+      return { column: 'condition', before: t.condition, after: `${sym} IS NOT NULL` };
+    },
+  },
+  {
+    id: 'R-ENUM-UNDERINCLUSIVE', kind: 'gate', risk: 'med',
+    detector: (ev, t) => ev.enum_domain_coverage === 'partial',
+    escalateIf: (ev) => ev.all_members_verbatim === false,
+    resolve: (ev, t) => ({ column: 'condition', before: t.condition,
+      after: `${(t.condition.match(/^\s*(\w+)\s+IN/)||[,'value'])[1]} IN {${ev.source_enum_members.join(',')}}` }),
   },
 ];

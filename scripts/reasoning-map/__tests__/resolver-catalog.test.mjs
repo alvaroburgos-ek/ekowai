@@ -54,3 +54,20 @@ describe('threshold rules', () => {
     expect(change.column).not.toBe('condition'); // never rewrites/deletes the number
   });
 });
+
+describe('enum rules', () => {
+  it('R-ENUM-FULLDOMAIN: IN over whole domain -> IS NOT NULL', () => {
+    const r = rule('R-ENUM-FULLDOMAIN');
+    const t = { condition: "x IN {a,b,c}" };
+    expect(r.detector({ enum_domain_coverage: 'full' }, t)).toBe(true);
+    expect(r.detector({ enum_domain_coverage: 'partial' }, t)).toBe(false);
+    expect(r.resolve({ enum_domain_coverage: 'full' }, t))
+      .toEqual({ column: 'condition', before: "x IN {a,b,c}", after: 'x IS NOT NULL' });
+  });
+  it('R-ENUM-UNDERINCLUSIVE: fires on partial coverage, escalates on unverifiable member', () => {
+    const r = rule('R-ENUM-UNDERINCLUSIVE');
+    expect(r.detector({ enum_domain_coverage: 'partial' }, {})).toBe(true);
+    expect(r.escalateIf({ source_enum_members: ['a','b'], all_members_verbatim: true }, {})).toBe(false);
+    expect(r.escalateIf({ source_enum_members: ['a','b'], all_members_verbatim: false }, {})).toBe(true);
+  });
+});
