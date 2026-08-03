@@ -1,4 +1,5 @@
-const q = (v) => (typeof v === 'number' ? String(v) : `'${String(v).replace(/'/g, "''")}'`);
+const q = (v) => (v === null || v === undefined) ? 'NULL'
+  : (typeof v === 'number' ? String(v) : `'${String(v).replace(/'/g, "''")}'`);
 
 export function toMigrationSql(decisions) {
   const staged = decisions.filter(d => d.action === 'stage');
@@ -11,12 +12,15 @@ export function toMigrationSql(decisions) {
   return { up, down };
 }
 
+const sanitizeCell = (v) => String(v ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
+
 export function toLedgerRows(standardCode, decisions) {
   return decisions.map(d => {
     if (d.action === 'stage') {
       const c = d.change;
-      return `| ${standardCode} | ${d.target_id} | ${d.rule_id} | stage | ${c.column}: ${c.before} → ${c.after} | ${(d.evidence_quote||'').slice(0,80)} |`;
+      const change = `${sanitizeCell(c.column)}: ${sanitizeCell(c.before)} → ${sanitizeCell(c.after)}`;
+      return `| ${standardCode} | ${d.target_id} | ${d.rule_id} | stage | ${change} | ${sanitizeCell((d.evidence_quote||'').slice(0,80))} |`;
     }
-    return `| ${standardCode} | ${d.target_id} | ${d.rule_id||'—'} | escalate (${d.reason}) | — | — |`;
+    return `| ${standardCode} | ${d.target_id} | ${d.rule_id||'—'} | escalate (${sanitizeCell(d.reason)}) | — | — |`;
   }).join('\n');
 }

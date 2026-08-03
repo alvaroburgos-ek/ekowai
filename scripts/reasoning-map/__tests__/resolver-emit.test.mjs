@@ -29,4 +29,21 @@ describe('emitters', () => {
     expect(md).toContain('| DWA-M-820-2 | g1 | R-MODAL-SEVERITY | stage | severity: block → warn |');
     expect(md).toContain('| DWA-M-820-2 | g2 | R-MODAL-SEVERITY | escalate (rule-escalate) |');
   });
+  it('emits bare SQL NULL for a null before/after (no literal quotes)', () => {
+    const d = { target_id: 'x1', action: 'stage', rule_id: 'R-CLAUSEREF', risk: 'zero',
+      change: { column: 'clause_reference', before: null, after: '§5.1' } };
+    const { up, down } = toMigrationSql([d]);
+    expect(up).toContain("SET clause_reference = '§5.1' WHERE id = 'x1';");
+    expect(down).toContain('SET clause_reference = NULL WHERE id = \'x1\';');
+  });
+  it('escapes a pipe in free text so it does not produce an extra ledger cell', () => {
+    const withPipe = { target_id: 'g3', action: 'stage', rule_id: 'R-MODAL-SEVERITY', risk: 'med',
+      change: { column: 'severity', before: 'block', after: 'warn' }, evidence_quote: 'a | b' };
+    const md = toLedgerRows('DWA-M-820-2', [withPipe]);
+    const row = md.split('\n').find(l => l.includes('g3'));
+    // split on the markdown cell delimiter " | " (space-pipe-space); an escaped "\|" inside
+    // the quote has no space before the pipe, so it must NOT match this delimiter and must
+    // NOT add an extra cell beyond the 6 real columns.
+    expect(row.split(' | ')).toHaveLength(6);
+  });
 });

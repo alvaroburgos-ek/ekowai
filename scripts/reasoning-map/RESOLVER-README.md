@@ -78,6 +78,18 @@ fully determine is escalated to the human sign-off sheet instead of guessed.
   from fields already present in the `Evidence` record (itself a verbatim
   transcription from the rendered PDF in the auditing session) or from the
   existing `Target` — nothing is synthesized.
+- **`R-THRESH-UNSUPPORTED` "quarantine" is `severity → warn` + a `high`
+  risk tag, not a DB column.** When a numeric threshold has no support in
+  the source (`threshold_in_source === 'false'`), the rule is marked
+  `risk: 'high'` so it is always loud-flagged and, per the safety gate
+  above, still requires `VA` provenance and a non-draft edition to
+  auto-stage. There is no separate quarantine flag or table in the
+  schema — the effect on the row is exactly the same `severity: 'block' →
+  'warn'` change every other severity-downgrading rule makes, with the
+  `high` risk carried through to the staged decision and recorded against
+  that entry in `.superpowers/sdd/RESOLVER-DECISIONS.md` for the owner's
+  review. The value itself is never touched (`condition` stays untouched
+  — see `resolver-catalog.test.mjs`).
 
 ## Owner apply flow
 

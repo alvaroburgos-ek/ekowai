@@ -32,4 +32,14 @@ describe('resolve() engine', () => {
     const d = resolve({ ...base, modal_verb: 'mixed' }, { id: 'g1', severity: 'block' });
     expect(d).toMatchObject({ action: 'escalate', reason: 'rule-escalate' });
   });
+  it('escalates when more than one rule matches (multi-match)', () => {
+    const d = resolve({ ...base, modal_verb: 'sollte', located_clause: '§5.1', clause_ref: '§4.2' },
+                      { id: 'g1', severity: 'block', clause_reference: '§4.2' });
+    expect(d).toMatchObject({ action: 'escalate', reason: 'multi-match' });
+  });
+  it('escalates resolve-error instead of throwing on a malformed record', () => {
+    const d = resolve({ ...base, enum_domain_coverage: 'partial', all_members_verbatim: true },
+                      { id: 'g1', condition: 'x IN {a}' }); // source_enum_members missing -> resolve would throw
+    expect(d).toMatchObject({ action: 'escalate', reason: 'resolve-error' });
+  });
 });

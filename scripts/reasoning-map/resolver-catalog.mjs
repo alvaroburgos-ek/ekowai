@@ -37,17 +37,15 @@ export const RULES = [
   {
     id: 'R-ENUM-FULLDOMAIN', kind: 'gate', risk: 'med',
     detector: (ev, t) => ev.enum_domain_coverage === 'full' && /([\w.]+)\s+IN\s*\{/.test(t.condition || ''),
-    resolve: (ev, t) => {
-      const sym = t.condition.match(/([\w.]+)\s+IN\s*\{/)[1];
-      return { column: 'condition', before: t.condition, after: `${sym} IS NOT NULL` };
-    },
+    resolve: (ev, t) => ({ column: 'condition', before: t.condition,
+      after: t.condition.replace(/([\w.]+)\s+IN\s*\{[^}]*\}/, '$1 IS NOT NULL') }),
   },
   {
     id: 'R-ENUM-UNDERINCLUSIVE', kind: 'gate', risk: 'med',
     detector: (ev, t) => ev.enum_domain_coverage === 'partial' && /([\w.]+)\s+IN\s*\{/.test(t.condition || ''),
     escalateIf: (ev) => ev.all_members_verbatim === false,
     resolve: (ev, t) => ({ column: 'condition', before: t.condition,
-      after: `${t.condition.match(/([\w.]+)\s+IN\s*\{/)[1]} IN {${ev.source_enum_members.join(',')}}` }),
+      after: t.condition.replace(/([\w.]+)\s+IN\s*\{[^}]*\}/, `$1 IN {${ev.source_enum_members.join(', ')}}`) }),
   },
   {
     id: 'R-EQ-GL13', kind: 'equation', risk: 'low',

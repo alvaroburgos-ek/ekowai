@@ -70,18 +70,24 @@ describe('enum rules', () => {
     expect(r.escalateIf({ source_enum_members: ['a','b'], all_members_verbatim: true }, {})).toBe(false);
     expect(r.escalateIf({ source_enum_members: ['a','b'], all_members_verbatim: false }, {})).toBe(true);
   });
-  it('R-ENUM-FULLDOMAIN: extracts the symbol from a compound condition', () => {
+  it('R-ENUM-FULLDOMAIN: resolve preserves other conjuncts (in-place replace, not rebuild)', () => {
     const r = rule('R-ENUM-FULLDOMAIN');
     const t = { condition: "y = 1 AND status IN {a,b}" };
     expect(r.detector({ enum_domain_coverage: 'full' }, t)).toBe(true);
-    expect(r.resolve({ enum_domain_coverage: 'full' }, t))
-      .toEqual({ column: 'condition', before: "y = 1 AND status IN {a,b}", after: 'status IS NOT NULL' });
+    expect(r.resolve({ enum_domain_coverage: 'full' }, { condition: "y = 1 AND status IN {a,b}" }))
+      .toEqual({ column: 'condition', before: "y = 1 AND status IN {a,b}", after: 'y = 1 AND status IS NOT NULL' });
   });
   it('R-ENUM-UNDERINCLUSIVE: resolve adds the missing source-printed members', () => {
     const r = rule('R-ENUM-UNDERINCLUSIVE');
     const ev = { enum_domain_coverage: 'partial', source_enum_members: ['a','b','c'], all_members_verbatim: true };
     const t = { condition: 'x IN {a,b}' };
-    expect(r.resolve(ev, t)).toEqual({ column: 'condition', before: 'x IN {a,b}', after: 'x IN {a,b,c}' });
+    expect(r.resolve(ev, t)).toEqual({ column: 'condition', before: 'x IN {a,b}', after: 'x IN {a, b, c}' });
+  });
+  it('R-ENUM-UNDERINCLUSIVE: resolve preserves other conjuncts', () => {
+    const r = rule('R-ENUM-UNDERINCLUSIVE');
+    const ev = { enum_domain_coverage: 'partial', source_enum_members: ['a','b','c'], all_members_verbatim: true };
+    expect(r.resolve(ev, { condition: 'flag == true AND x IN {a,b}' }))
+      .toEqual({ column: 'condition', before: 'flag == true AND x IN {a,b}', after: 'flag == true AND x IN {a, b, c}' });
   });
   it('R-ENUM-UNDERINCLUSIVE: does not fire (or crash) when the condition has no IN-clause', () => {
     const r = rule('R-ENUM-UNDERINCLUSIVE');
