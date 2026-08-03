@@ -35,9 +35,9 @@ export const RULES = [
   },
   {
     id: 'R-ENUM-FULLDOMAIN', kind: 'gate', risk: 'med',
-    detector: (ev, t) => ev.enum_domain_coverage === 'full' && /\bIN\s*\{/.test(t.condition || ''),
+    detector: (ev, t) => ev.enum_domain_coverage === 'full' && /([\w.]+)\s+IN\s*\{/.test(t.condition || ''),
     resolve: (ev, t) => {
-      const sym = (t.condition.match(/^\s*(\w+)\s+IN\s*\{/) || [,'value'])[1];
+      const sym = t.condition.match(/([\w.]+)\s+IN\s*\{/)[1];
       return { column: 'condition', before: t.condition, after: `${sym} IS NOT NULL` };
     },
   },
@@ -46,6 +46,6 @@ export const RULES = [
     detector: (ev, t) => ev.enum_domain_coverage === 'partial',
     escalateIf: (ev) => ev.all_members_verbatim === false,
     resolve: (ev, t) => ({ column: 'condition', before: t.condition,
-      after: `${(t.condition.match(/^\s*(\w+)\s+IN/)||[,'value'])[1]} IN {${ev.source_enum_members.join(',')}}` }),
+      after: `${t.condition.match(/([\w.]+)\s+IN\s*\{/)[1]} IN {${ev.source_enum_members.join(',')}}` }),
   },
 ];
