@@ -19,7 +19,7 @@ export const RULES = [
   {
     id: 'R-MODAL-SEVERITY', kind: 'gate', risk: 'med',
     detector: (ev, t) => t.severity === 'block' &&
-      ['soll','sollte','should','empfohlen','bevorzugt','present-indicative'].includes(ev.modal_verb),
+      ['soll','sollte','should','empfohlen','bevorzugt','present-indicative','mixed'].includes(ev.modal_verb),
     escalateIf: (ev) => ev.modal_verb === 'mixed',
     resolve: (ev, t) => ({ column: 'severity', before: t.severity, after: 'warn' }),
   },
