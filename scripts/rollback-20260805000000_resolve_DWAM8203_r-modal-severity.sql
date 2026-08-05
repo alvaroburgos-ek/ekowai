@@ -1,0 +1,13 @@
+UPDATE compliance_requirements SET severity = 'block' WHERE id = 'e1a8b18e-45e1-4c8b-8dd2-2771c3a5784a';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '789326c2-0995-4901-98f4-d26a580824c1';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '22aeb359-9a62-415b-9fdd-3ffb1c7abf6d';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = 'bb41a340-2a47-42f6-ac8d-af3bca3e58e0';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = 'c356f580-d0ba-41ce-a129-bba630a0935a';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '30aa6d78-9d9b-4b64-926a-18077bab5513';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '12504d14-ac9b-4f3f-b23e-8bbea483d729';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '061f6853-94a4-4564-bd53-500ec3acc570';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '7a37ea42-e437-4dce-bb9c-e26fdd380799';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '8aa114e2-a830-420e-985d-73823d9b9a35';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = 'c4b753d1-0ed6-476e-8589-335fb625f7cb';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = 'f81cc06d-c6c3-4ddf-b9e7-6d77e6f8495f';
+UPDATE compliance_requirements SET severity = 'block' WHERE id = '38916040-f2f7-4a8b-a4d0-4317d5d4690f';
