@@ -27,6 +27,7 @@ import { getOfferNachkalkulation } from '@/lib/actions/nachkalkulation';
 import type { OfferNachkalkulationView } from '@/lib/actions/nachkalkulation';
 import type { MarginVerdict } from '@/lib/offers/margin';
 import type { HoursCompareRow } from '@/lib/nachkalkulation/compare';
+import { MarginGuard } from './margin-guard';
 
 /**
  * Angebote (intern) — Slice E1 panel on the project overview.
@@ -51,6 +52,12 @@ function fmtEur(v: string | number): string {
 
 function parseDecimal(s: string): number {
   return Number(s.replace(',', '.'));
+}
+
+/** Drizzle numeric-column string → finite number, 0 when unparsable. */
+function toNumOr0(v: string | number): number {
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
 }
 
 const BADGE_CLASSES: Record<MarginVerdict, string> = {
@@ -499,11 +506,15 @@ function OfferCard({
   projectId,
   locale,
   roles,
+  totalLoggedHours,
 }: {
   offer: OfferView;
   projectId: string;
   locale: string;
   roles: OfferRoleView[];
+  /** Real hours logged on the PROJECT (effort_entries) — feeds the Margin
+   * Guard. Per project, not per offer (Nachkalkulation honesty rule). */
+  totalLoggedHours: number;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -625,6 +636,14 @@ function OfferCard({
           ))}
         </ul>
       )}
+
+      {/* Margin Guard: LIVE €/h against the cash-cost floor (internal-only). */}
+      <MarginGuard
+        festpreisEur={toNumOr0(offer.festpreisEur)}
+        externalTotal={m.externalTotal}
+        estimatedHours={m.totalHours}
+        actualHours={totalLoggedHours}
+      />
 
       {editingMeta && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end rounded-xl border border-hairline bg-paper-2/40 p-3">
@@ -910,6 +929,7 @@ export function OfferPanel({
               projectId={projectId}
               locale={locale}
               roles={data.roles}
+              totalLoggedHours={data.totalLoggedHours}
             />
           ))}
         </div>
