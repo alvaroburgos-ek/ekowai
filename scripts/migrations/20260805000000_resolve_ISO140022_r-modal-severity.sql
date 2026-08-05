@@ -1,4 +1,4 @@
--- WRITTEN-NOT-APPLIED — owner one-click apply
+-- APPLIED 2026-08-05 (owner batch auth; PDF-verified per-gate 13/13 all "should"; effect re-queried)
 -- R-MODAL-SEVERITY (risk med)
 UPDATE compliance_requirements SET severity = 'warn' WHERE id = '946644da-93a3-48b0-8305-a45350181bc4';
 -- R-MODAL-SEVERITY (risk med)
