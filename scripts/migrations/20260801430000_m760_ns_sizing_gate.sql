@@ -1,6 +1,6 @@
 -- DWA-M-760 · ns >= NS separator-sizing sufficiency gate
 -- ============================================================================
--- STATUS: WRITTEN-NOT-APPLIED — ADDS ONE NEW BLOCK GATE → owner ratification
+-- STATUS: APPLIED 2026-08-05 AS WARN (owner ratified, DOWNGRADED from block — §7.2.6.3 source is descriptive "richtet sich nach", no binding "muss"; sizing delegated to DIN EN 1825-2; mechanics F-4-safe, m760-verify green; effect re-queried) — severity line above set to 'warn'
 -- (new gate / block-vs-warn severity = reserved judgment, stop-list).
 --
 -- DEFECT (execution-proven, harness m760-verify 14/14): the ns>=NS sizing-sufficiency
@@ -24,7 +24,7 @@ BEGIN
 
   INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, severity, clause_reference, source_quote)
   SELECT v_ws, 'CR-M760-NS', 'Abscheidernenngröße ausreichend (ns >= NS)',
-         'ns_fettabscheider - NS >= 0', 'block', '§7.2.6.3 (DIN EN 1825-2:2002 §6.1)',
+         'ns_fettabscheider - NS >= 0', 'warn', '§7.2.6.3 (DIN EN 1825-2:2002 §6.1)',
          'Die minimale Nenngröße richtet sich … nach dem maximal zu erwartenden Abwasservolumenstrom.'
    WHERE NOT EXISTS (SELECT 1 FROM compliance_requirements WHERE worksheet_template_id=v_ws AND code='CR-M760-NS');
 

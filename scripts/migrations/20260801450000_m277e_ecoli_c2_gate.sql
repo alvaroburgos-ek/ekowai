@@ -1,6 +1,6 @@
 -- DWA-M-277E · Table 4 C2 · E. coli < 1,000/100 ml — MISSING health gate
 -- ============================================================================
--- STATUS: WRITTEN-NOT-APPLIED — ADDS ONE NEW BLOCK GATE → owner ratification (stop-list).
+-- STATUS: APPLIED 2026-08-05 (owner ratified; BLOCK; Table-4 C2 limit verbatim-verified; grammar identical to live sibling REQ-14/15; effect re-queried) — ADDS ONE NEW BLOCK GATE
 -- DEFECT (coverage): Table 4 C2 gives limits for Total coliforms (<10,000 → REQ-14),
 -- P. aeruginosa (<100 → REQ-15) AND E. coli (<1,000) — but only E. coli has NO gate,
 -- though its field (e_coli, M277E-10) + TBL-4 row exist. Mirrors the sibling guard form exactly.

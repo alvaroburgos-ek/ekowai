@@ -1,6 +1,6 @@
 -- DWA-A-222 · §4.4.2 Gl.(22) + §4.4.3 Gl.(27) — clarifier-surface MINIMUM gates
 -- ============================================================================
--- STATUS: WRITTEN-NOT-APPLIED — this ADDS TWO NEW BLOCK GATES → owner ratification
+-- STATUS: APPLIED 2026-08-05 (owner ratified; both BLOCK; source-verified §4.4.2/§4.4.3 required minimums; a222-verify 64/64 re-run; effect re-queried) — ADDS TWO NEW BLOCK GATES
 -- required (new gate / block-vs-warn severity = reserved judgment per the stop-list).
 --
 -- DEFECT (execution-proven, harness a222-verify 64/64): the Weißdruck prints the
