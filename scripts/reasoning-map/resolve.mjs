@@ -1,5 +1,6 @@
 import { resolve } from './resolver-engine.mjs';
 import { toMigrationSql, toLedgerRows } from './resolver-emit.mjs';
+import { pathToFileURL } from 'node:url';
 
 export function runResolve(records) {
   const decisions = records.map(rec => ({ rec, d: resolve(rec, rec.target) }));
@@ -23,7 +24,7 @@ export function runResolve(records) {
 }
 
 // fs wrapper — only when run directly, keeps runResolve pure/testable
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const fs = await import('node:fs');
   const path = await import('node:path');
   const records = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
