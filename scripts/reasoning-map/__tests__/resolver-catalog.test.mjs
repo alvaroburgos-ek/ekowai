@@ -15,6 +15,30 @@ describe('R-CLAUSEREF', () => {
     const r = rule('R-CLAUSEREF');
     expect(r.detector({ located_clause: '§4.2', clause_ref: '§4.2' }, {})).toBe(false);
   });
+  it('splices only the wrong sub-clause in a multi-token field, preserving the others', () => {
+    const r = rule('R-CLAUSEREF');
+    const ev = { located_clause: '§8.10.2.4', wrong_subclause: '§8.7' };
+    const target = { id: 'g1', clause_reference: '§8.7, §58 Abs. 2 VgV' };
+    expect(r.detector(ev, target)).toBe(true);
+    expect(r.escalateIf(ev, target)).toBe(false);
+    expect(r.resolve(ev, target)).toEqual({ column: 'clause_reference',
+      before: '§8.7, §58 Abs. 2 VgV', after: '§8.10.2.4, §58 Abs. 2 VgV' });
+  });
+  it('single-token field still resolves (splice == overwrite)', () => {
+    const r = rule('R-CLAUSEREF');
+    const ev = { located_clause: '§1', clause_ref: '§3.1' };
+    const target = { id: 'g1', clause_reference: '§3.1' };
+    expect(r.detector(ev, target)).toBe(true);
+    expect(r.escalateIf(ev, target)).toBe(false);
+    expect(r.resolve(ev, target)).toEqual({ column: 'clause_reference', before: '§3.1', after: '§1' });
+  });
+  it('escalates (never overwrites) when the wrong sub-clause token is absent from the field', () => {
+    const r = rule('R-CLAUSEREF');
+    const ev = { located_clause: '§8.10.2.4', wrong_subclause: '§99', clause_ref: '§8.7' };
+    const target = { id: 'g1', clause_reference: '§8.7, §58 Abs. 2 VgV' };
+    expect(r.detector(ev, target)).toBe(true);
+    expect(r.escalateIf(ev, target)).toBe(true);
+  });
 });
 
 describe('R-MODAL-SEVERITY', () => {

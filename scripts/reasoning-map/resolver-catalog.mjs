@@ -1,4 +1,4 @@
-/** @typedef {{located_clause?:string, clause_ref?:string, modal_verb?:string, threshold_in_source?:string,
+/** @typedef {{located_clause?:string, clause_ref?:string, wrong_subclause?:string, modal_verb?:string, threshold_in_source?:string,
  *  printed_value?:string|null, enum_domain_coverage?:string|null, field_type?:string,
  *  provenance_grade?:'VA'|'VC', edition?:string, source_quote?:string,
  *  source_enum_members?:string[], all_members_verbatim?:boolean,
@@ -13,9 +13,19 @@
 /** @type {Rule[]} */
 export const RULES = [
   {
+    // The wrong sub-clause token to splice out. Falls back to the whole recorded
+    // clause_ref for the legacy single-token case (splice == overwrite there).
     id: 'R-CLAUSEREF', kind: 'gate', risk: 'zero',
     detector: (ev, t) => !!ev.located_clause && ev.located_clause !== ev.clause_ref,
-    resolve: (ev, t) => ({ column: 'clause_reference', before: t.clause_reference, after: ev.located_clause }),
+    escalateIf: (ev, t) => {
+      const token = ev.wrong_subclause ?? ev.clause_ref;
+      return !token || !String(t.clause_reference ?? '').includes(token);
+    },
+    resolve: (ev, t) => {
+      const token = ev.wrong_subclause ?? ev.clause_ref;
+      return { column: 'clause_reference', before: t.clause_reference,
+        after: String(t.clause_reference).replace(token, ev.located_clause) };
+    },
   },
   {
     id: 'R-MODAL-SEVERITY', kind: 'gate', risk: 'med',
