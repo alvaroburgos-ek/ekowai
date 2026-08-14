@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { addEffortEntry, deleteEffortEntry } from '@/lib/actions/effort';
 import type { EffortEntryView, EffortRoleOption } from '@/lib/actions/effort';
+import { hoursFromRange } from '@/lib/actions/effort-core';
 
 /** Local ISO date (yyyy-mm-dd) for the date input's default — not UTC-shifted. */
 function todayLocalIso(): string {
@@ -46,6 +47,8 @@ export function EffortLog({
 }) {
   const [isPending, startTransition] = useTransition();
   const [workDate, setWorkDate] = useState(todayLocalIso());
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [hours, setHours] = useState('');
   const [position, setPosition] = useState('');
   /** '' = no role (org default rate); otherwise a rate_roles id. */
@@ -53,14 +56,23 @@ export function EffortLog({
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const hoursNum = Number(hours.replace(',', '.'));
+  // Beginn+Ende set → Stunden derive from the range and the field locks;
+  // otherwise hours are typed manually as before.
+  const hasTimeRange = startTime !== '' && endTime !== '';
+  const timeRangeInvalid =
+    (endTime !== '' && startTime === '') || (hasTimeRange && endTime <= startTime);
+  const derivedHours = hasTimeRange && !timeRangeInvalid
+    ? hoursFromRange(startTime, endTime)
+    : null;
+  const hoursNum = derivedHours ?? Number(hours.replace(',', '.'));
   const canAdd =
     workDate !== ''
-    && hours.trim() !== ''
+    && (derivedHours !== null || hours.trim() !== '')
     && Number.isFinite(hoursNum)
     && hoursNum > 0
     && hoursNum <= 24
-    && position.trim() !== '';
+    && position.trim() !== ''
+    && !timeRangeInvalid;
 
   function handleAdd() {
     if (!canAdd) return;
@@ -75,6 +87,8 @@ export function EffortLog({
           roleId: roleId !== '' ? roleId : undefined,
           note: note.trim() !== '' ? note.trim() : undefined,
         });
+        setStartTime('');
+        setEndTime('');
         setHours('');
         setPosition('');
         setRoleId('');
@@ -119,6 +133,27 @@ export function EffortLog({
           />
         </label>
         <label className="block sm:w-28">
+          <span className="text-xs font-medium text-subtext">Beginn (optional)</span>
+          <Input
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="mt-1"
+            aria-label="Beginn (optional)"
+          />
+        </label>
+        <label className="block sm:w-28">
+          <span className="text-xs font-medium text-subtext">Ende</span>
+          <Input
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            className="mt-1"
+            aria-label="Ende"
+            aria-invalid={timeRangeInvalid || undefined}
+          />
+        </label>
+        <label className="block sm:w-28">
           <span className="text-xs font-medium text-subtext">Stunden</span>
           <Input
             type="number"
@@ -126,11 +161,17 @@ export function EffortLog({
             min="0"
             max="24"
             step="0.25"
-            value={hours}
+            value={derivedHours !== null ? String(derivedHours) : hours}
             onChange={(e) => setHours(e.target.value)}
             placeholder="0"
             className="mt-1 tabular-nums"
             aria-label="Stunden"
+            disabled={derivedHours !== null}
+            title={
+              derivedHours !== null
+                ? 'Automatisch aus Beginn/Ende berechnet'
+                : undefined
+            }
           />
         </label>
         <label className="block flex-1">
@@ -180,6 +221,14 @@ export function EffortLog({
           Erfassen
         </Button>
       </div>
+
+      {timeRangeInvalid && (
+        <p className="text-xs text-error">
+          {startTime === ''
+            ? 'Endzeit ohne Beginn ist nicht möglich.'
+            : 'Ende muss nach dem Beginn liegen.'}
+        </p>
+      )}
 
       {error && <p className="text-xs text-error">{error}</p>}
 

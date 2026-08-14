@@ -6,6 +6,7 @@
  * `'use server'` module (`effort.ts`) wraps these with auth + persistence.
  */
 import { z } from 'zod';
+import { durationMinutes } from './monitoring-core';
 
 /** Hard bounds for a single entry: more than 0, at most 24 hours per day. */
 export const HOURS_MIN_EXCLUSIVE = 0;
@@ -37,6 +38,12 @@ export type AddEffortEntryInput = z.infer<typeof addEffortEntrySchema>;
 /** Parse + validate an add-entry payload. Throws ZodError on invalid input. */
 export function parseAddEffortEntry(input: unknown): AddEffortEntryInput {
   return addEffortEntrySchema.parse(input);
+}
+
+/** Decimal hours (2 decimals) from a validated HH:MM range (end after
+ * start) — the same rounding the journal's als-Aufwand path uses. */
+export function hoursFromRange(start: string, end: string): number {
+  return Math.round((durationMinutes(start, end) / 60) * 100) / 100;
 }
 
 /**

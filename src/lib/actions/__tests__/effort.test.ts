@@ -12,8 +12,22 @@ import { ZodError } from 'zod';
 import {
   parseAddEffortEntry,
   computeTotalHours,
+  hoursFromRange,
   HOURS_MAX,
 } from '../effort-core';
+
+describe('hoursFromRange — decimal hours from a HH:MM time range', () => {
+  it('computes hours rounded to two decimals', () => {
+    expect(hoursFromRange('14:00', '16:15')).toBe(2.25);
+    expect(hoursFromRange('08:00', '08:50')).toBe(0.83);
+    expect(hoursFromRange('09:00', '09:01')).toBe(0.02);
+  });
+
+  it('stays within the per-entry bounds for a full day', () => {
+    expect(hoursFromRange('00:00', '23:59')).toBeLessThanOrEqual(HOURS_MAX);
+    expect(hoursFromRange('00:00', '23:59')).toBe(23.98);
+  });
+});
 
 const valid = (over: Partial<{
   projectId: string; workDate: string; hours: number; position: string; note?: string;
