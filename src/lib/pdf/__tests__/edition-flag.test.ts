@@ -91,12 +91,12 @@ describe('monitoring journal pass-through (Betrieb & Monitoring PDF section)', (
     const input = minimalInput({ id: 'std-1', code: 'X', titleDe: 'X', version: '1' });
     input.monitoring = [
       { entryDate: '2026-08-01T10:00:00Z', category: 'laborbericht', note: 'kf-Probe', documentTitle: 'Labor-2026-08.pdf' },
-      { entryDate: new Date('2026-07-15T00:00:00Z'), category: 'begehung', note: null, documentTitle: null },
+      { entryDate: new Date('2026-07-15T00:00:00Z'), category: 'begehung', note: null, documentTitle: null, startTime: '10:00:00', endTime: '12:30:00' },
     ];
     const data = assembleStandardReport(input);
     expect(data.monitoringEntries).toEqual([
-      { entryDate: '2026-08-01', category: 'laborbericht', note: 'kf-Probe', documentTitle: 'Labor-2026-08.pdf' },
-      { entryDate: '2026-07-15', category: 'begehung', note: null, documentTitle: null },
+      { entryDate: '2026-08-01', timeLabel: null, category: 'laborbericht', note: 'kf-Probe', documentTitle: 'Labor-2026-08.pdf' },
+      { entryDate: '2026-07-15', timeLabel: '10:00–12:30 · 2 h 30 min', category: 'begehung', note: null, documentTitle: null },
     ]);
   });
 

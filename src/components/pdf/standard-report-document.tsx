@@ -88,6 +88,7 @@ export function StandardReportDocument({ data }: { data: StandardReportData }) {
               <View key={i} style={styles.siteRow} wrap={false}>
                 <Text style={styles.siteLabel}>
                   {`${m.entryDate} · ${(MONITORING_CATEGORY_LABELS as Record<string, string>)[m.category] ?? m.category}`}
+                  {m.timeLabel ? ` · ${m.timeLabel}` : ''}
                   {m.note ? ` — ${m.note}` : ''}
                 </Text>
                 <Text style={styles.siteValue}>{m.documentTitle ?? ''}</Text>
