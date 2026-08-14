@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   date,
+  time,
   jsonb,
   numeric,
   bigint,
@@ -806,9 +807,14 @@ export const monitoringEntries = pgTable(
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
     entryDate: date('entry_date').notNull(),
+    /** Optional activity times (HH:MM) — duration is always derived, never
+     * stored. End-after-start is enforced app-side (monitoring-core.ts). */
+    startTime: time('start_time'),
+    endTime: time('end_time'),
     /**
      * 'laborbericht' | 'messung' | 'begehung' | 'wartung' | 'foto' |
-     * 'sonstiges' — validated app-side (monitoring-core.ts), plain text in DB.
+     * 'dokumentation' | 'sonstiges' — validated app-side (monitoring-core.ts),
+     * plain text in DB.
      */
     category: text('category').notNull(),
     note: text('note'),

@@ -15,11 +15,15 @@ import {
   MONITORING_CATEGORIES,
   MONITORING_CATEGORY_LABELS,
   NOTE_MAX,
+  durationMinutes,
+  formatDurationMinutes,
+  timeRangeLabel,
+  buildEffortFromJournal,
 } from '../monitoring-core';
 
 const valid = (over: Partial<{
   projectId: string; entryDate: string; category: string; note?: string; documentId?: string;
-  standardId?: string;
+  standardId?: string; startTime?: string; endTime?: string; logAsEffort?: boolean;
 }> = {}) => ({
   projectId: '11111111-2222-4333-8444-555555555555',
   entryDate: '2026-08-01',
@@ -28,11 +32,16 @@ const valid = (over: Partial<{
 });
 
 describe('parseAddMonitoringEntry — category enum', () => {
-  it('accepts each of the six categories', () => {
+  it('accepts each of the seven categories', () => {
     for (const c of MONITORING_CATEGORIES) {
       expect(parseAddMonitoringEntry(valid({ category: c })).category).toBe(c);
     }
-    expect(MONITORING_CATEGORIES).toHaveLength(6);
+    expect(MONITORING_CATEGORIES).toHaveLength(7);
+  });
+
+  it("includes 'dokumentation' with a German label", () => {
+    expect(MONITORING_CATEGORIES).toContain('dokumentation');
+    expect(MONITORING_CATEGORY_LABELS['dokumentation' as never]).toBe('Dokumentation');
   });
 
   it('rejects an unknown category', () => {
@@ -128,5 +137,125 @@ describe('parseAddMonitoringEntry — ids', () => {
   it('rejects missing required keys', () => {
     const { category: _category, ...withoutCategory } = valid();
     expect(() => parseAddMonitoringEntry(withoutCategory)).toThrow(ZodError);
+  });
+});
+
+describe('parseAddMonitoringEntry — start/end time', () => {
+  it('both times are optional (documentation-only entry)', () => {
+    const p = parseAddMonitoringEntry(valid());
+    expect(p.startTime).toBeUndefined();
+    expect(p.endTime).toBeUndefined();
+  });
+
+  it('accepts HH:MM times and keeps them', () => {
+    const p = parseAddMonitoringEntry(valid({ startTime: '08:30', endTime: '10:45' }));
+    expect(p.startTime).toBe('08:30');
+    expect(p.endTime).toBe('10:45');
+  });
+
+  it('accepts a start time without an end time (open-ended activity)', () => {
+    const p = parseAddMonitoringEntry(valid({ startTime: '14:00' }));
+    expect(p.startTime).toBe('14:00');
+    expect(p.endTime).toBeUndefined();
+  });
+
+  it('rejects an end time without a start time', () => {
+    expect(() => parseAddMonitoringEntry(valid({ endTime: '16:00' }))).toThrow(ZodError);
+  });
+
+  it('rejects malformed times', () => {
+    for (const t of ['8:30', '24:00', '10:60', '1030', '10:3', '']) {
+      expect(() => parseAddMonitoringEntry(valid({ startTime: t, endTime: '23:59' })))
+        .toThrow(ZodError);
+    }
+  });
+
+  it('rejects end before start and end equal to start', () => {
+    expect(() =>
+      parseAddMonitoringEntry(valid({ startTime: '10:00', endTime: '09:59' })),
+    ).toThrow(ZodError);
+    expect(() =>
+      parseAddMonitoringEntry(valid({ startTime: '10:00', endTime: '10:00' })),
+    ).toThrow(ZodError);
+  });
+});
+
+describe('parseAddMonitoringEntry — logAsEffort toggle', () => {
+  it('defaults to absent', () => {
+    expect(parseAddMonitoringEntry(valid()).logAsEffort).toBeUndefined();
+  });
+
+  it('accepts true only when both times are set', () => {
+    const p = parseAddMonitoringEntry(
+      valid({ startTime: '08:00', endTime: '10:00', logAsEffort: true }),
+    );
+    expect(p.logAsEffort).toBe(true);
+  });
+
+  it('rejects true without a complete time range', () => {
+    expect(() => parseAddMonitoringEntry(valid({ logAsEffort: true }))).toThrow(ZodError);
+    expect(() =>
+      parseAddMonitoringEntry(valid({ startTime: '08:00', logAsEffort: true })),
+    ).toThrow(ZodError);
+  });
+});
+
+describe('timeRangeLabel', () => {
+  it('renders range + duration, accepting Postgres HH:MM:SS values', () => {
+    expect(timeRangeLabel('14:00:00', '16:15:00')).toBe('14:00–16:15 · 2 h 15 min');
+    expect(timeRangeLabel('14:00', '16:15')).toBe('14:00–16:15 · 2 h 15 min');
+  });
+
+  it('renders an open-ended start and null for untimed entries', () => {
+    expect(timeRangeLabel('14:00:00', null)).toBe('ab 14:00');
+    expect(timeRangeLabel(null, null)).toBeNull();
+  });
+});
+
+describe('durationMinutes / formatDurationMinutes', () => {
+  it('computes the minutes between two HH:MM times', () => {
+    expect(durationMinutes('08:30', '10:45')).toBe(135);
+    expect(durationMinutes('00:00', '23:59')).toBe(1439);
+  });
+
+  it('formats German duration labels', () => {
+    expect(formatDurationMinutes(135)).toBe('2 h 15 min');
+    expect(formatDurationMinutes(60)).toBe('1 h');
+    expect(formatDurationMinutes(45)).toBe('45 min');
+  });
+});
+
+describe('buildEffortFromJournal', () => {
+  it('maps a timed entry onto an effort payload (hours from the duration)', () => {
+    const parsed = parseAddMonitoringEntry(
+      valid({
+        category: 'begehung',
+        startTime: '14:00',
+        endTime: '16:15',
+        note: 'Baustelle Nordufer',
+        logAsEffort: true,
+      }),
+    );
+    expect(buildEffortFromJournal(parsed)).toEqual({
+      projectId: parsed.projectId,
+      workDate: '2026-08-01',
+      hours: 2.25,
+      position: 'Journal: Begehung',
+      note: 'Baustelle Nordufer',
+    });
+  });
+
+  it('rounds hours to two decimals', () => {
+    const parsed = parseAddMonitoringEntry(
+      valid({ startTime: '08:00', endTime: '08:50', logAsEffort: true }),
+    );
+    expect(buildEffortFromJournal(parsed)?.hours).toBe(0.83);
+  });
+
+  it('returns null when the entry has no complete time range', () => {
+    expect(buildEffortFromJournal(parseAddMonitoringEntry(valid()))).toBeNull();
+    expect(
+      buildEffortFromJournal(parseAddMonitoringEntry(valid({ startTime: '09:00' }))),
+    ).toBeNull();
   });
 });

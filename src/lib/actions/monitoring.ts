@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import {
+  effortEntries,
   fields,
   maintenanceSchedules,
   monitoringEntries,
@@ -15,7 +16,7 @@ import {
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { userHasProjectAccess } from '@/lib/db/queries/worksheet';
-import { parseAddMonitoringEntry } from './monitoring-core';
+import { buildEffortFromJournal, parseAddMonitoringEntry } from './monitoring-core';
 import { dueStatus, type DueStatus } from '@/lib/monitoring/schedule';
 import {
   FACILITY_TYPE_SYMBOLS,
@@ -26,7 +27,10 @@ import {
 export type MonitoringEntryView = {
   id: string;
   entryDate: string;
-  /** One of the six app-side categories (monitoring-core.ts). */
+  /** Optional activity times, 'HH:MM:SS' from the Postgres time columns. */
+  startTime: string | null;
+  endTime: string | null;
+  /** One of the app-side categories (monitoring-core.ts). */
   category: string;
   note: string | null;
   documentId: string | null;
@@ -66,6 +70,9 @@ export async function addMonitoringEntry(input: {
   note?: string;
   documentId?: string;
   standardId?: string;
+  startTime?: string;
+  endTime?: string;
+  logAsEffort?: boolean;
 }): Promise<{ id: string }> {
   const parsed = parseAddMonitoringEntry(input);
   const userId = await requireSessionUserId();
@@ -110,6 +117,8 @@ export async function addMonitoringEntry(input: {
     .values({
       projectId: parsed.projectId,
       entryDate: parsed.entryDate,
+      startTime: parsed.startTime ?? null,
+      endTime: parsed.endTime ?? null,
       category: parsed.category,
       note: parsed.note && parsed.note !== '' ? parsed.note : null,
       documentId: parsed.documentId ?? null,
@@ -117,6 +126,23 @@ export async function addMonitoringEntry(input: {
       createdBy: userId,
     })
     .returning({ id: monitoringEntries.id });
+
+  // "als Aufwand erfassen": the timed activity additionally becomes ONE
+  // regular effort entry (hours = derived duration), so it feeds the
+  // Margin Guard. Validation guarantees a complete time range here.
+  if (parsed.logAsEffort) {
+    const effort = buildEffortFromJournal(parsed);
+    if (effort) {
+      await db.insert(effortEntries).values({
+        projectId: effort.projectId,
+        userId,
+        workDate: effort.workDate,
+        hours: String(effort.hours),
+        position: effort.position,
+        note: effort.note ?? null,
+      });
+    }
+  }
 
   revalidateOverview();
   return { id: row.id };
@@ -318,6 +344,8 @@ export async function listMonitoringEntries(
     .select({
       id: monitoringEntries.id,
       entryDate: monitoringEntries.entryDate,
+      startTime: monitoringEntries.startTime,
+      endTime: monitoringEntries.endTime,
       category: monitoringEntries.category,
       note: monitoringEntries.note,
       documentId: monitoringEntries.documentId,

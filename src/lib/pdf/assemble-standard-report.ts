@@ -4,6 +4,7 @@ import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
 import { blocksVerificationGate } from '@/lib/verification-status';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
+import { timeRangeLabel } from '@/lib/actions/monitoring-core';
 
 /**
  * Pure assembler for the per-standard PDF report data.
@@ -185,6 +186,8 @@ export type StandardReportData = {
    * no parameter values). Optional for fixtures; assembler normalises to []. */
   monitoringEntries?: Array<{
     entryDate: string;
+    /** Pre-rendered "14:00–16:15 · 2 h 15 min" label or null (untimed entry). */
+    timeLabel: string | null;
     category: string;
     note: string | null;
     documentTitle: string | null;
@@ -359,6 +362,9 @@ export type AssemblerInput = {
   /** Monitoring-Journal rows for this standard (optional; loader supplies). */
   monitoring?: Array<{
     entryDate: DateLike;
+    /** Optional activity times ('HH:MM:SS' from Postgres, or 'HH:MM'). */
+    startTime?: string | null;
+    endTime?: string | null;
     category: string;
     note: string | null;
     documentTitle: string | null;
@@ -852,6 +858,7 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
     approveSnapshots: buildApproveSnapshots(input.snapshots ?? [], instances, templates),
     monitoringEntries: (input.monitoring ?? []).map((m) => ({
       entryDate: toDate(m.entryDate).toISOString().slice(0, 10),
+      timeLabel: timeRangeLabel(m.startTime ?? null, m.endTime ?? null),
       category: m.category,
       note: m.note,
       documentTitle: m.documentTitle,

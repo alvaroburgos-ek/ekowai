@@ -179,6 +179,8 @@ export async function loadStandardReportData(
   const monitoringRows = await db
     .select({
       entryDate: monitoringEntries.entryDate,
+      startTime: monitoringEntries.startTime,
+      endTime: monitoringEntries.endTime,
       category: monitoringEntries.category,
       note: monitoringEntries.note,
       documentTitle: projectDocuments.title,
