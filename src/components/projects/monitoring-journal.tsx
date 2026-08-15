@@ -25,8 +25,6 @@ import {
   MONITORING_CATEGORIES,
   MONITORING_CATEGORY_LABELS,
   NOTE_MAX,
-  durationMinutes,
-  formatDurationMinutes,
   timeRangeLabel,
 } from '@/lib/actions/monitoring-core';
 import type { MonitoringCategory } from '@/lib/actions/monitoring-core';
@@ -99,9 +97,6 @@ export function MonitoringJournal({
 }) {
   const [isPending, startTransition] = useTransition();
   const [entryDate, setEntryDate] = useState(todayLocalIso());
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [logAsEffort, setLogAsEffort] = useState(false);
   const [category, setCategory] = useState<MonitoringCategory>('laborbericht');
   const [note, setNote] = useState('');
   const [documentId, setDocumentId] = useState('');
@@ -120,10 +115,7 @@ export function MonitoringJournal({
   const [planGroupOverrides, setPlanGroupOverrides] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
 
-  const hasTimeRange = startTime !== '' && endTime !== '';
-  const timeRangeInvalid =
-    (endTime !== '' && startTime === '') || (hasTimeRange && endTime <= startTime);
-  const canAdd = entryDate !== '' && note.trim().length <= NOTE_MAX && !timeRangeInvalid;
+  const canAdd = entryDate !== '' && note.trim().length <= NOTE_MAX;
 
   function clearPhoto() {
     setPhotoFile(null);
@@ -181,16 +173,10 @@ export function MonitoringJournal({
           note: note.trim() !== '' ? note.trim() : undefined,
           documentId: linkedDocumentId,
           standardId: standardId !== '' ? standardId : undefined,
-          startTime: startTime !== '' ? startTime : undefined,
-          endTime: endTime !== '' ? endTime : undefined,
-          logAsEffort: hasTimeRange && logAsEffort ? true : undefined,
         });
         setNote('');
         setDocumentId('');
         setStandardId('');
-        setStartTime('');
-        setEndTime('');
-        setLogAsEffort(false);
         clearPhoto();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
@@ -408,27 +394,6 @@ export function MonitoringJournal({
             aria-label="Datum"
           />
         </label>
-        <label className="block sm:w-28">
-          <span className="text-xs font-medium text-subtext">Beginn (optional)</span>
-          <Input
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            className="mt-1"
-            aria-label="Beginn (optional)"
-          />
-        </label>
-        <label className="block sm:w-28">
-          <span className="text-xs font-medium text-subtext">Ende</span>
-          <Input
-            type="time"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-            className="mt-1"
-            aria-label="Ende"
-            aria-invalid={timeRangeInvalid || undefined}
-          />
-        </label>
         <label className="block sm:w-44">
           <span className="text-xs font-medium text-subtext">Kategorie</span>
           <select
@@ -526,28 +491,6 @@ export function MonitoringJournal({
           Erfassen
         </Button>
       </div>
-
-      {timeRangeInvalid && (
-        <p className="text-xs text-error">
-          {startTime === ''
-            ? 'Endzeit ohne Beginn ist nicht möglich.'
-            : 'Ende muss nach dem Beginn liegen.'}
-        </p>
-      )}
-      {hasTimeRange && !timeRangeInvalid && (
-        <label className="flex items-center gap-2 text-xs text-subtext">
-          <input
-            type="checkbox"
-            checked={logAsEffort}
-            onChange={(e) => setLogAsEffort(e.target.checked)}
-            className="size-3.5 accent-current"
-            aria-label="als Aufwand erfassen"
-          />
-          <span>
-            {`als Aufwand erfassen (${formatDurationMinutes(durationMinutes(startTime, endTime))} → Aufwandserfassung / Margin Guard)`}
-          </span>
-        </label>
-      )}
 
       {error && <p className="text-xs text-error">{error}</p>}
 
