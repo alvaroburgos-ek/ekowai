@@ -255,6 +255,31 @@ describe('Pile-10 — gating fields ↔ compliance conditions match', () => {
         'fail',
       );
     });
+
+    // REQ-19 REPRODUCTION — block-severity gate on phase_4_gate_result (A138-23).
+    // Mirrors the REQ-09 shape (phase_2_gate_result, lines 164-186).
+    // Verifies: FAIL blocks Phase-5 handoff; NULL/absent does NOT silently pass.
+    it('REQ-19 REPRODUCTION — CONDITIONAL also passes (PASS and CONDITIONAL are both valid hand-off states)', () => {
+      expect(
+        evaluateCondition(COND_4, lookup({ phase_4_gate_result: 'CONDITIONAL' })).kind,
+      ).toBe('pass');
+    });
+
+    it('REQ-19 REPRODUCTION — FAIL makes the gate return fail (Phase-5 handoff is blocked)', () => {
+      expect(
+        evaluateCondition(COND_4, lookup({ phase_4_gate_result: 'FAIL' })).kind,
+      ).toBe('fail');
+    });
+
+    it('REQ-19 REPRODUCTION — NULL/absent phase_4_gate_result does NOT satisfy IN {PASS, CONDITIONAL} (unset gate must not silently pass Phase-5)', () => {
+      // Absent key → evaluator returns `pending` (missing symbol), not `pass`.
+      const resultAbsent = evaluateCondition(COND_4, lookup({}));
+      expect(resultAbsent.kind).toBe('pending');
+
+      // Explicit null → same: still resolves to `pending`, not `pass`.
+      const resultNull = evaluateCondition(COND_4, lookup({ phase_4_gate_result: null }));
+      expect(resultNull.kind).toBe('pending');
+    });
   });
 
   describe('facility_type_selected (A138-15) ↔ REQ-17', () => {

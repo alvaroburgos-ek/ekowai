@@ -13,6 +13,14 @@ import { createClient } from '@/lib/supabase/server';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
+import {
+  normalizePollutantCarrier,
+  summarizePollutants,
+  POLLUTANT_REGISTER_SYMBOL,
+  POLLUTANT_OUTPUT_SYMBOLS,
+  POLLUTANT_MEDIA,
+  type PollutantMedium,
+} from '@/lib/eval/pollutant-register';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
@@ -20,10 +28,18 @@ import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { BASIN_GL8_EQUATION_ID } from '@/lib/eval/governing-duration';
 import { materializeLoadingCheck } from '@/lib/eval/materialize-tab6-loading';
 import { A138_12_ASM_EQUATION_ID } from '@/lib/eval/tab6-loading';
-import { materializeAsm, computeMuldeGeometrySweep } from '@/lib/eval/materialize-asm';
+import { materializeAsm, computeMuldeGeometrySweep, facilityVolumeMaterialize, computeRigoleStorageCoefficient, computeSchachtHeadSweep } from '@/lib/eval/materialize-asm';
+import { GOVERNING_PROFILES } from '@/lib/eval/governing-duration';
 import { ASM_GL7_EQUATION_ID, type AsmMethod, type FacilityType, type Tab13Bodenart, validateGeometryAgainstMax, asmInvalidationOnTypeChange, resolveManualAsmReject } from '@/lib/eval/asm-source';
 import { normalizeRainfallCarrier, resolveSelectedTable, resolveColumn, FACILITY_FREQUENCY_SYMBOL } from '@/lib/eval/rainfall-tables';
-import { MATERIALIZE_REGISTRY, producerFiredEntries } from './materialize-registry';
+import { MATERIALIZE_REGISTRY, producerFiredEntries, PHASE4_SUMMARY_CONSUMER_CODE, phase4SummaryChainFires, shouldOpenTransaction } from './materialize-registry';
+import {
+  facilitySummaryInputs,
+  assemblePhase4Summary,
+  FACILITY_TYPE_TO_SUMMARY_WORKSHEET,
+  type FacilityType as Phase4FacilityType,
+  type Phase4SummaryGathered,
+} from '@/lib/eval/phase4-summary';
 
 /** Symbols the basin Gl.8 governing-iteration produces and persists.
  * These map to field symbols on the A138-13 worksheet template (same-symbol
@@ -151,14 +167,23 @@ export async function saveWorksheet(
   // consumer lookup by code alone could misfire into another guideline that shares
   // a code (e.g. a second standard with an 'A138-12'). Fail-closed: if unknown, skip.
   const [savedTemplateRow] = await db
-    .select({ standardId: worksheetTemplates.standardId })
+    .select({ standardId: worksheetTemplates.standardId, code: worksheetTemplates.code })
     .from(worksheetTemplates)
     .where(eq(worksheetTemplates.id, instance.worksheetTemplateId))
     .limit(1);
   const savedStandardId = savedTemplateRow?.standardId ?? null;
+  const savedTemplateCode = savedTemplateRow?.code ?? null;
+
+  // A138-23 Phase-4 summary owner: A138-23 owns NO equation (pure reconciliation
+  // worksheet), so its OWNER-path trigger cannot be an equation-topology flag like
+  // isBasinSave/isAsmSave. Gate on the template code instead — mirroring how the
+  // `surface` registry entry is a no-equation owner (see materialize-registry.ts).
+  // A save OF the A138-23 worksheet re-materializes its summary from the current
+  // cross-worksheet state.
+  const isPhase4SummarySave = savedTemplateCode === PHASE4_SUMMARY_CONSUMER_CODE;
 
   // Fast-path: nothing submitted AND no topology-triggered recompute needed.
-  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave && !isAsmSave) {
+  if (fieldIds.length === 0 && !isBasinSave && !isLoadingSave && !isAsmSave && !isPhase4SummarySave) {
     return { ok: true, saved: 0, warnings: [], derived: [] };
   }
 
@@ -509,7 +534,34 @@ export async function saveWorksheet(
   // the ownerFiredIds set is used to prevent double-fire in producerFiredEntries.
 
   // Registry entries that should fire as producers (changed input, not already firing).
-  const producerEntries = producerFiredEntries(changedSymbols, ownerFiredIds);
+  const producerEntriesBase = producerFiredEntries(changedSymbols, ownerFiredIds);
+
+  // A138-23 owner path: the phase4_summary entry has a no-equation ownerTrigger
+  // (() => false), so it never lands in ownerFiredIds and never producer-fires from
+  // its OWN save batch (A138-23 fields are the derived outputs, not inputs). When
+  // the SAVED worksheet IS A138-23, splice the phase4_summary entry into the fire
+  // list once (dedup-guarded) so an A138-23 save re-materializes its summary.
+  const phase4SummaryEntry = MATERIALIZE_REGISTRY.find((e) => e.id === 'phase4_summary');
+  const producerEntriesWithOwner =
+    isPhase4SummarySave &&
+    phase4SummaryEntry &&
+    !producerEntriesBase.some((e) => e.id === 'phase4_summary')
+      ? [...producerEntriesBase, phase4SummaryEntry]
+      : producerEntriesBase;
+
+  // Finding G1(a) — CHAIN-FIRE: when the asm/facility materialize fires (it writes
+  // A_S_m + Finding-F's V_M SERVER-side, values NEVER in the user batch), the summary
+  // must recompute in the SAME tx (mirror of the chained Tab.6 re-fire). Append the
+  // phase4_summary entry AFTER the asm entry so the branch reads the freshly-persisted
+  // A_S_m/V_M. Dedup-guarded via phase4SummaryChainFires. 138-SPECIFIC: keyed on 'asm'.
+  const firedEntryIds = new Set<string>([
+    ...ownerFiredIds,
+    ...producerEntriesWithOwner.map((e) => e.id),
+  ]);
+  const producerEntries =
+    phase4SummaryEntry && phase4SummaryChainFires(firedEntryIds)
+      ? [...producerEntriesWithOwner, phase4SummaryEntry]
+      : producerEntriesWithOwner;
 
   // Accumulated derived rows written by the materialize passes below.
   // Populated inside the transaction; returned to the client on ok=true.
@@ -522,11 +574,21 @@ export async function saveWorksheet(
   //   (b) this worksheet owns a topology-triggered materialize block that must
   //       recompute even on an empty save batch (upstream input changed on another
   //       worksheet → stale-verdict fix), OR
-  //   (c) a producer-side input symbol changed → a downstream materialize must fire.
+  //   (c) a producer-side input symbol changed → a downstream materialize must fire, OR
+  //   (d) isPhase4SummarySave — a deliberate no-dirty A138-23 re-save must re-run the
+  //       aggregator even with no dirty field (Finding G1 manual fallback).
   //   The SURFACE block is excluded from the guard because surface_inventory being
   //   in the save batch is what identifies a surface save — it only fires when
   //   savedCount > 0, so adding surfacePresence here would be redundant.
-  if (savedCount > 0 || isBasinSave || isLoadingSave || isAsmSave || producerEntries.length > 0) {
+  //   Predicate extracted to shouldOpenTransaction (materialize-registry) — unit-tested.
+  if (shouldOpenTransaction({
+    savedCount,
+    isBasinSave,
+    isLoadingSave,
+    isAsmSave,
+    isPhase4SummarySave,
+    producerEntriesLength: producerEntries.length,
+  })) {
     await db.transaction(async (tx) => {
       // Single timestamp for the entire save — all rows written in this call
       // share the same enteredAt so there is no skew from multiple new Date() calls.
@@ -611,6 +673,65 @@ export async function saveWorksheet(
             },
           });
           // Collect for client-side apply (Task B display-fix)
+          for (const r of derivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
+          }
+        }
+      }
+
+      // Materialize the VSME-B04.100 per-medium pollutant sums when the
+      // pollutant_register carrier was saved. Same in-batch presence pattern
+      // as the surface block above (producer == consumer on the same
+      // worksheet; normalizePollutantCarrier is the single parse path shared
+      // with the editor). The three AmountOfEmissionTo{Air,Water,Soil}
+      // scalars stay the taxonomy-faithful facts — derived sums of the
+      // register, never hand-entered (single-source rule).
+      const [pollutantPresence] = fieldIds.length > 0
+        ? await tx
+            .select({ id: fields.id })
+            .from(fields)
+            .where(
+              and(
+                inArray(fields.id, fieldIds),
+                eq(fields.symbol, POLLUTANT_REGISTER_SYMBOL),
+                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+              ),
+            )
+            .limit(1)
+        : [];
+
+      if (pollutantPresence) {
+        const wsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const carrierValue = input.values[pollutantPresence.id];
+        const carrier = normalizePollutantCarrier(
+          carrierValue?.type === 'json' ? carrierValue.value : null,
+        );
+        const summary = summarizePollutants(carrier);
+        const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
+        const derivedRows = POLLUTANT_MEDIA
+          .map((medium) => ({ medium, fieldId: idBySymbol.get(POLLUTANT_OUTPUT_SYMBOLS[medium]) }))
+          .filter((x): x is { medium: PollutantMedium; fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: summary[x.medium] == null ? null : String(summary[x.medium]),
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: now,
+          }));
+        if (derivedRows.length > 0) {
+          await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
           for (const r of derivedRows) {
             writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
           }
@@ -1490,6 +1611,15 @@ export async function saveWorksheet(
 
           // 3. Compute geometryValue when method==='geometry'.
           let geometryValueP: number | null = null;
+          // Finding F: the mulde depth h_M captured from the geometry read so the
+          // governing volume V_M = A_S,m · h_M can be materialized in step 6 (same tx).
+          let muldeHmForVolume: number | null = null;
+          // Fan-out (Rigole): capture the geometric-volume inputs (Gl.20 + Gl.21 s_R)
+          // so V_R = b_R·h_R·L_R·s_R can be materialized in step 6b (same tx).
+          let rigoleVolInputs: {
+            b_R: number | null; h_R: number | null; L_R: number | null;
+            s_F: number | null; az: number | null; d_i: number | null; d_a: number | null;
+          } | null = null;
 
           if (asmMethodP === 'geometry') {
             if (facilityTypeP === 'mulde') {
@@ -1613,6 +1743,9 @@ export async function saveWorksheet(
                       A_C: mAC, h_M: mhM, f_Z: mfZ, k_i: mki,
                     });
                     geometryValueP = muldeSwept.A_S_m;
+                    // Finding F: retain h_M so the governing volume V_M = A_S,m · h_M
+                    // is materialized alongside A_S_m in step 6 (same transaction).
+                    muldeHmForVolume = mhM;
                   }
                 }
               }
@@ -1621,7 +1754,7 @@ export async function saveWorksheet(
               // ── Rigole one-shot Gl.17 = (b_R + h_R) · L_R + b_R · h_R ──
               // Read b_R, h_R, L_R from the producer worksheet (A138-18).
               // Cross-worksheet by symbol — prefer current save batch, else persisted.
-              const RIGOLE_SYMS = ['b_R', 'h_R', 'L_R'] as const;
+              const RIGOLE_SYMS = ['b_R', 'h_R', 'L_R', 's_F', 'az', 'd_i', 'd_a'] as const;
               const rigoleCrossFields = await tx
                 .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
                 .from(fields)
@@ -1674,6 +1807,15 @@ export async function saveWorksheet(
                 // Gl.17: A_S,m = (b_R + h_R) · L_R + b_R · h_R
                 geometryValueP = (bR + hR) * lR + bR * hR;
               }
+              // Fan-out (Rigole): retain the Gl.20/Gl.21 inputs so V_R is materialized
+              // in step 6b (V_R = b_R·h_R·L_R·s_R; s_R via Gl.21/22 server compute).
+              rigoleVolInputs = {
+                b_R: bR, h_R: hR, L_R: lR,
+                s_F: rigoleNumBySymbol.get('s_F') ?? null,
+                az: rigoleNumBySymbol.get('az') ?? null,
+                d_i: rigoleNumBySymbol.get('d_i') ?? null,
+                d_a: rigoleNumBySymbol.get('d_a') ?? null,
+              };
             }
             // For other facility types with method='geometry', geometryValueP remains null →
             // materializeAsm returns indeterminate (geometry only valid for mulde/rigole).
@@ -1968,6 +2110,81 @@ export async function saveWorksheet(
               valueText: null,
             });
 
+            // 6b. Finding F — persist the facility GOVERNING VOLUME (a materialize).
+            //     The geometry sweep produced the footprint A_S,m; the governing storage
+            //     volume V_M = A_S,m · h_M (Gl.15, §6.3.2-verified) is a derived engine
+            //     output that was NEVER persisted → the A138-23 summary read null →
+            //     complete=false / recommendation stuck FAIL. Materialize it here (same
+            //     tx, source_type='derived') onto the facility worksheet's volume field,
+            //     resolved BY SYMBOL scoped to the saved standard (no bare by-symbol read).
+            //     NAMED BOUNDARY: only mulde is source-verified/auto-persisted now;
+            //     facilityVolumeMaterialize returns null for the others (fan-out).
+            if (facilityTypeP != null) {
+              // Fan-out (Rigole): compute s_R server-side (Gl.21 exact) then V_R via Gl.20.
+              const rigoleSR =
+                facilityTypeP === 'rigole' && rigoleVolInputs
+                  ? computeRigoleStorageCoefficient({
+                      s_F: rigoleVolInputs.s_F,
+                      b_R: rigoleVolInputs.b_R,
+                      h_R: rigoleVolInputs.h_R,
+                      az: rigoleVolInputs.az,
+                      d_i: rigoleVolInputs.d_i,
+                      d_a: rigoleVolInputs.d_a,
+                    })
+                  : null;
+              const volumeWrite = facilityVolumeMaterialize(facilityTypeP, {
+                A_S_m: asmOutP.A_S_m,
+                h_M: muldeHmForVolume,
+                b_R: rigoleVolInputs?.b_R ?? null,
+                h_R: rigoleVolInputs?.h_R ?? null,
+                L_R: rigoleVolInputs?.L_R ?? null,
+                s_R: rigoleSR,
+              });
+              if (volumeWrite) {
+                // Resolve the volume field id on the producer (saved) worksheet, scoped.
+                const volFieldRows = await tx
+                  .select({ id: fields.id })
+                  .from(fields)
+                  .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+                  .where(and(
+                    eq(fields.symbol, volumeWrite.volumeSymbol),
+                    eq(fields.active, true),
+                    eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                    savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+                  ))
+                  .limit(1);
+                const volumeFieldId = volFieldRows[0]?.id;
+                if (volumeFieldId) {
+                  await tx
+                    .insert(projectParameters)
+                    .values([{
+                      projectId: instance.projectId,
+                      fieldId: volumeFieldId,
+                      valueNumber: String(volumeWrite.value),
+                      valueText: null,
+                      sourceType: 'derived',
+                      enteredBy: userId,
+                      enteredAt: now,
+                    }])
+                    .onConflictDoUpdate({
+                      target: [projectParameters.projectId, projectParameters.fieldId],
+                      set: {
+                        valueNumber: sql`excluded.value_number`,
+                        valueText: sql`excluded.value_text`,
+                        sourceType: sql`excluded.source_type`,
+                        enteredBy: sql`excluded.entered_by`,
+                        enteredAt: now,
+                      },
+                    });
+                  writtenDerived.push({
+                    fieldId: volumeFieldId,
+                    valueNumber: String(volumeWrite.value),
+                    valueText: null,
+                  });
+                }
+              }
+            }
+
             // 7. Chained Tab.6 re-fire: A_S_m just changed → re-run materializeLoadingCheck
             //    with the fresh A_S_m so the Tab.6 verdict updates in the same save.
             //    We use asmOutP.A_S_m directly (no DB round-trip needed; the value is
@@ -2066,6 +2283,465 @@ export async function saveWorksheet(
               });
               for (const r of chainedLcRows) {
                 writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+              }
+            }
+          }
+        } else if (producerEntry.id === 'phase4_summary') {
+          // ── Phase-4 summary producer branch (A138-23) ─────────────────────
+          // Fires when a Phase-4 support symbol changes on ANY worksheet
+          // (PHASE4_SUMMARY_INPUT_SYMBOLS) OR when the A138-23 worksheet itself
+          // is saved (isPhase4SummarySave owner-marker path — the entry is
+          // spliced into producerEntries above). Mirrors the `asm` branch:
+          // resolve the A138-23 consumer template by code + savedStandardId
+          // (fail-closed), read cross-worksheet inputs SCOPED, write derived rows.
+
+          // 1. Resolve the A138-23 consumer template by code + standardId (fail-closed).
+          const [p4ConsumerTmpl] = savedStandardId
+            ? await tx
+                .select({ id: worksheetTemplates.id })
+                .from(worksheetTemplates)
+                .where(and(
+                  eq(worksheetTemplates.code, producerEntry.consumerTemplateCode),
+                  eq(worksheetTemplates.standardId, savedStandardId),
+                ))
+                .limit(1)
+            : [];
+
+          if (!p4ConsumerTmpl) {
+            // A138-23 not present in this standard — skip gracefully (migration not
+            // yet applied / different code / unknown standard). The save succeeded.
+            continue;
+          }
+
+          // Resolve output field ids from the CONSUMER (A138-23) template.
+          const p4CWsFields = await tx
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, p4ConsumerTmpl.id), eq(fields.active, true)));
+          const p4CIdBySymbol = new Map(p4CWsFields.map((f) => [f.symbol, f.id]));
+
+          // Scoped by-symbol readers — every cross-worksheet read routes through an
+          // innerJoin(worksheetTemplates)+eq(standardId, savedStandardId) (§10c rider).
+          // No bare inArray(fields.symbol, …). first-non-null-number / enum-or-text.
+          const readScopedNum = async (symbol: string): Promise<number | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              if (r.valueNumber != null) {
+                const v = Number(r.valueNumber);
+                if (Number.isFinite(v)) return v;
+              }
+            }
+            return null;
+          };
+          const readScopedEnumText = async (symbol: string): Promise<string | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueEnum: projectParameters.valueEnum, valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              const v = r.valueEnum ?? r.valueText ?? null;
+              if (v != null) return v;
+            }
+            return null;
+          };
+          // Reads an ENGINEER-ENTERED boolean override for `symbol`, scoped to the
+          // saved standard. IMPORTANT (summary self-reference guard): the summary
+          // DERIVES facility_meets_qsac and writes it back with source_type='derived'.
+          // If this read honoured that derived self-write, the first materialized value
+          // would pin `meetsQsacFlag` forever and the q_S,AC-derived value (Gl.9) could
+          // never change it on a later save. So we read ONLY entered rows — a true
+          // engineer override — matching the documented "explicit flag if set, else
+          // derive from q_S,AC" semantics (assemblePhase4Summary). Derived self-writes
+          // are ignored → meetsQsac falls through to the q_S,AC derivation.
+          const readScopedBool = async (symbol: string): Promise<boolean | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueBoolean: projectParameters.valueBoolean, sourceType: projectParameters.sourceType })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              // Only an engineer-entered override counts; skip the summary's own derived write.
+              if (r.sourceType === 'entered' && r.valueBoolean != null) return r.valueBoolean;
+            }
+            return null;
+          };
+
+          // 2. facility_type_selected (A138-15) — scoped. Map to the dimensioned
+          //    facility worksheet code (superset map incl. mre/mrs composites).
+          const rawFtP4 = await readScopedEnumText('facility_type_selected');
+          const facilityTypeP4: Phase4FacilityType | null =
+            rawFtP4 === 'flaeche' || rawFtP4 === 'mulde' || rawFtP4 === 'rigole' ||
+            rawFtP4 === 'mre' || rawFtP4 === 'mrs' || rawFtP4 === 'schacht' ||
+            rawFtP4 === 'becken'
+              ? rawFtP4
+              : null;
+
+          // Without a selected facility we cannot resolve the governing volume/
+          // footprint symbols — write an incomplete/FAIL summary so the summary
+          // never silently shows stale outputs from a previous facility.
+          const facilityWorksheetCodeP4 =
+            facilityTypeP4 != null ? FACILITY_TYPE_TO_SUMMARY_WORKSHEET[facilityTypeP4] : null;
+
+          // 3. Governing volume + footprint symbols for this facility.
+          const summaryInputs =
+            facilityTypeP4 != null ? facilitySummaryInputs(facilityTypeP4) : null;
+          const volumeSymbolP4 = summaryInputs?.volumeSymbol ?? null;
+          const footprintSymbolP4 = summaryInputs?.footprintSymbol ?? null;
+
+          // Read the governing volume + footprint persisted values (scoped by symbol).
+          const volumeValueP4 =
+            volumeSymbolP4 != null ? await readScopedNum(volumeSymbolP4) : null;
+          const footprintValueP4 =
+            footprintSymbolP4 != null ? await readScopedNum(footprintSymbolP4) : null;
+
+          // 4. q_S,AC (Phase-3 REQ-15 measured) + facility_meets_qsac + t_E (A138-17).
+          const qSacP4 = await readScopedNum('q_S_AC');
+          const meetsQsacFlagP4 = await readScopedBool('facility_meets_qsac');
+          const tEHoursP4 = await readScopedNum('t_E'); // above-ground emptying time; null = N/A
+
+          // 4b. Per-facility BLOCK-gate condition inputs (fan-out — scoped by-symbol).
+          //     Only read those relevant to the selected facility (cheap conditional reads).
+          //     REQ-31 flaeche (Gl.13): k_i, r_D(n) used on A138-16.
+          //     REQ-32 rigole (Gl.25): L_VS, q_VS, r_5(n), A_C.
+          //     REQ-33 schacht (Gl.38): shaft_type, A_S,FS, k_f,FS, A_S,Schacht, k_i.
+          const kiP4 =
+            facilityTypeP4 === 'flaeche' || facilityTypeP4 === 'schacht'
+              ? await readScopedNum('k_i')
+              : null;
+          const rDnUsedP4 = facilityTypeP4 === 'flaeche' ? await readScopedNum('r_D_n_used') : null;
+          const lVsP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('L_VS') : null;
+          const qVsP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('q_VS') : null;
+          const r5nP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('r_5_n') : null;
+          const acReqP4 = facilityTypeP4 === 'rigole' ? await readScopedNum('A_C') : null;
+          const shaftTypeP4 = facilityTypeP4 === 'schacht' ? await readScopedEnumText('shaft_type') : null;
+          const aSFsP4 = facilityTypeP4 === 'schacht' ? await readScopedNum('A_S_FS') : null;
+          const kfFsP4 = facilityTypeP4 === 'schacht' ? await readScopedNum('k_f_FS') : null;
+          const aSSchachtP4 = facilityTypeP4 === 'schacht' ? await readScopedNum('A_S_Schacht') : null;
+
+          // 5.–9. PURE ASSEMBLY. Everything after the scoped DB reads (complete,
+          //    meetsQsac, blockGate applicability, Tab.14, recommendation, reasons and
+          //    the 8-field write-set) is computed by the exported pure function
+          //    `assemblePhase4Summary` — the branch and the unit tests exercise the SAME
+          //    code (no mirror). The per-facility BLOCK-gate mapping + the UNCONDITIONAL-
+          //    gate fail-safe guard (flaeche/REQ-31 → never a silent non-FAIL) live in
+          //    phase4-summary.ts under the NAMED boundary PHASE4_SUMMARY_BLOCKGATE_FANOUT
+          //    (fan-out Tasks 5/8/11/13). Tab.14 freeboard/slope thresholds deferred under
+          //    PHASE4_SUMMARY_TAB14_SOURCE. phase_4_gate_result is ENGINEER-entered and is
+          //    NEVER in the write-set (D3 rider).
+          const gathered: Phase4SummaryGathered = {
+            facilityType: facilityTypeP4,
+            facilityWorksheetCode: facilityWorksheetCodeP4,
+            volumeSymbol: volumeSymbolP4,
+            footprintSymbol: footprintSymbolP4,
+            volumeValue: volumeValueP4,
+            footprintValue: footprintValueP4,
+            qSac: qSacP4,
+            meetsQsacFlag: meetsQsacFlagP4,
+            tEHours: tEHoursP4,
+            k_i: kiP4,
+            rDnUsed: rDnUsedP4,
+            L_VS: lVsP4,
+            q_VS: qVsP4,
+            r_5_n: r5nP4,
+            A_C: acReqP4,
+            shaftType: shaftTypeP4,
+            A_S_FS: aSFsP4,
+            k_f_FS: kfFsP4,
+            A_S_Schacht: aSSchachtP4,
+          };
+          const nowIsoDate = now.toISOString().slice(0, 10);
+          const assembled = assemblePhase4Summary(gathered, nowIsoDate);
+
+          // WRITE the 8 A138-23 support/recommendation fields BY SYMBOL. All are
+          // derived/read-only (source_type='derived').
+          type P4Row = {
+            projectId: string;
+            fieldId: string;
+            valueNumber: string | null;
+            valueText: string | null;
+            valueBoolean: boolean | null;
+            valueEnum: string | null;
+            valueDate: string | null;
+            sourceType: 'derived';
+            enteredBy: string;
+            enteredAt: Date;
+          };
+          const p4Writes = assembled.writes.map((w) => ({
+            symbol: w.symbol,
+            valueNumber: w.kind === 'number' ? (w.value != null ? String(w.value) : null) : undefined,
+            valueText: w.kind === 'text' ? w.value : undefined,
+            valueBoolean: w.kind === 'boolean' ? w.value : undefined,
+            valueEnum: w.kind === 'enum' ? w.value : undefined,
+            valueDate: w.kind === 'date' ? w.value : undefined,
+          }));
+
+          const p4Rows: P4Row[] = p4Writes
+            .map((w) => ({ ...w, fieldId: p4CIdBySymbol.get(w.symbol) }))
+            .filter((w): w is typeof w & { fieldId: string } => w.fieldId != null)
+            .map((w) => ({
+              projectId: instance.projectId,
+              fieldId: w.fieldId,
+              valueNumber: w.valueNumber ?? null,
+              valueText: w.valueText ?? null,
+              valueBoolean: w.valueBoolean ?? null,
+              valueEnum: w.valueEnum ?? null,
+              valueDate: w.valueDate ?? null,
+              sourceType: 'derived' as const,
+              enteredBy: userId,
+              enteredAt: now,
+            }));
+
+          if (p4Rows.length > 0) {
+            await tx.insert(projectParameters).values(p4Rows).onConflictDoUpdate({
+              target: [projectParameters.projectId, projectParameters.fieldId],
+              set: {
+                valueNumber: sql`excluded.value_number`,
+                valueText: sql`excluded.value_text`,
+                valueBoolean: sql`excluded.value_boolean`,
+                valueEnum: sql`excluded.value_enum`,
+                valueDate: sql`excluded.value_date`,
+                sourceType: sql`excluded.source_type`,
+                enteredBy: sql`excluded.entered_by`,
+                enteredAt: now,
+              },
+            });
+            for (const r of p4Rows) {
+              writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: r.valueText });
+            }
+          }
+        } else if (producerEntry.id === 'facility_volume') {
+          // ── Facility governing-volume producer (MRE/Schacht/Becken) ─────────
+          // Fan-out: mulde/rigole volumes ride the `asm` branch; these three get their
+          // OWN materialize, fired when a volume-driving input changes on their facility
+          // worksheet (FACILITY_VOLUME_INPUT_SYMBOLS). producer == consumer: the volume
+          // lands on the SAVED facility worksheet. Then the summary chain-fires (G1).
+          //
+          //   MRE (A138-19): V_MR = persisted V_M + persisted V_R (Gl.26, cross-ws sum).
+          //   Schacht (A138-21): V_S = π·d_i²/4·h_S (Gl.36; h_S swept via Gl.37).
+          //   Becken (A138-22): V_B via the Gl.41 governing sweep (GOVERNING_PROFILES).
+          const fvCode = savedTemplateCode;
+          const fvFacility: Phase4FacilityType | null =
+            fvCode === 'A138-19' ? 'mre'
+            : fvCode === 'A138-21' ? 'schacht'
+            : fvCode === 'A138-22' ? 'becken'
+            : null;
+          if (!fvFacility) continue; // not a facility-volume-owning worksheet
+
+          // Scoped by-symbol number reader (§10c: innerJoin + standardId).
+          const fvReadNum = async (symbol: string): Promise<number | null> => {
+            const cand = await tx
+              .select({ id: fields.id })
+              .from(fields)
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(fields.symbol, symbol),
+                eq(fields.active, true),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ));
+            const ids = cand.map((f) => f.id);
+            if (ids.length === 0) return null;
+            const rows = await tx
+              .select({ valueNumber: projectParameters.valueNumber })
+              .from(projectParameters)
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                inArray(projectParameters.fieldId, ids),
+              ));
+            for (const r of rows) {
+              if (r.valueNumber != null) {
+                const v = Number(r.valueNumber);
+                if (Number.isFinite(v)) return v;
+              }
+            }
+            return null;
+          };
+          // Prefer a value from the current save batch (on the SAVED facility ws) over
+          // the persisted one — so an in-batch geometry change is used immediately.
+          const savedFacilityFields = await tx
+            .select({ id: fields.id, symbol: fields.symbol })
+            .from(fields)
+            .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+          const fvBatchBySymbol = new Map<string, number | null>();
+          for (const f of savedFacilityFields) {
+            const saved = input.values[f.id];
+            if (saved?.type === 'number') fvBatchBySymbol.set(f.symbol, saved.value);
+          }
+          const fvNum = async (symbol: string): Promise<number | null> => {
+            if (fvBatchBySymbol.has(symbol)) {
+              const v = fvBatchBySymbol.get(symbol);
+              if (v != null && Number.isFinite(v)) return v;
+            }
+            return fvReadNum(symbol);
+          };
+
+          // Resolve the rainfall column governing D (schacht/becken need the sweep).
+          const fvResolveRows = async (): Promise<Array<{ D_min: number | null; r_D_n: number | null }>> => {
+            // Carrier lives on A138-04 (global symbol lookup like the mulde block).
+            const carrierRows = await tx
+              .select({ valueJson: projectParameters.valueJson })
+              .from(projectParameters)
+              .innerJoin(fields, eq(fields.id, projectParameters.fieldId))
+              .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(fields.symbol, 'r_D_n_table'),
+                savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+              ))
+              .limit(1);
+            const carrierRaw = carrierRows[0]?.valueJson ?? null;
+            const refRows = await tx
+              .select({ valueText: projectParameters.valueText })
+              .from(projectParameters)
+              .innerJoin(fields, eq(fields.id, projectParameters.fieldId))
+              .where(and(
+                eq(projectParameters.projectId, instance.projectId),
+                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                eq(fields.symbol, 'rainfall_table_ref'),
+              ))
+              .limit(1);
+            const carrier = normalizeRainfallCarrier(carrierRaw);
+            const table = resolveSelectedTable(carrier, refRows[0]?.valueText ?? null);
+            if (!table) return [];
+            // Resolve the facility's return period (local selector else project n).
+            const localSym = FACILITY_FREQUENCY_SYMBOL[fvCode!];
+            const nLocal = localSym ? await fvNum(localSym) : null;
+            const nProj = await fvReadNum('n');
+            const tnProj = await fvReadNum('T_n');
+            const T_n = facilityReturnPeriod(fvCode!, (s) =>
+              s === (localSym ?? '') ? nLocal : s === 'n' ? nProj : s === 'T_n' ? tnProj : null,
+            );
+            const col = resolveColumn(table, T_n);
+            return col.status !== 'missing' ? col.rows : [];
+          };
+
+          // Compute the governing volume per facility.
+          let fvInputs: Parameters<typeof facilityVolumeMaterialize>[1] | null = null;
+          if (fvFacility === 'mre') {
+            // Gl.26: V_MR = persisted V_M (A138-17) + persisted V_R (A138-18), scoped.
+            const vM = await fvReadNum('V_M');
+            const vR = await fvReadNum('V_R');
+            fvInputs = { A_S_m: null, h_M: null, V_M: vM, V_R: vR };
+          } else if (fvFacility === 'schacht') {
+            // Gl.36/37: V_S = π·d_i²/4·h_S, h_S swept via Gl.37 (governing D).
+            const A_C = await fvReadNum('A_C');
+            const d_a = await fvNum('d_S_aussen');
+            const d_i = await fvNum('d_S_innen');
+            const k_i = await fvReadNum('k_i');
+            const f_Z = await fvReadNum('f_Z');
+            let h_S: number | null = null;
+            if (A_C != null && d_a != null && d_i != null && k_i != null && f_Z != null) {
+              const rows = await fvResolveRows();
+              h_S = computeSchachtHeadSweep(rows, { A_C, d_a, d_i, k_i, f_Z }).h_S;
+            }
+            fvInputs = { A_S_m: null, h_M: null, d_i, h_S };
+          } else if (fvFacility === 'becken') {
+            // Gl.41 governing sweep (GOVERNING_PROFILES 'A138-22').
+            const beckenProfile = GOVERNING_PROFILES.find((p) => p.facility === 'A138-22');
+            const A_C = await fvReadNum('A_C');
+            const A_VA = await fvNum('A_VA_Becken');
+            const A_S_m = await fvReadNum('A_S_m');
+            const k_i = await fvReadNum('k_i');
+            const f_Z = await fvReadNum('f_Z');
+            const Q_Dr = (await fvReadNum('Q_Dr')) ?? 0; // optional drain
+            const f_A = (await fvReadNum('f_A')) ?? 1;    // optional reduction (§6.8.2)
+            let V_B_governing: number | null = null;
+            if (beckenProfile && A_C != null && A_VA != null && A_S_m != null && k_i != null && f_Z != null) {
+              const rows = await fvResolveRows();
+              const scalars = { A_C, A_VA, A_S_m, k_i, f_Z, Q_Dr, f_A };
+              let maxV = -Infinity;
+              for (const row of rows) {
+                if (row.D_min == null || row.r_D_n == null) continue;
+                const v = beckenProfile.sizing(row.D_min, row.r_D_n, scalars);
+                if (v != null && Number.isFinite(v) && v > maxV) maxV = v;
+              }
+              V_B_governing = maxV > -Infinity ? maxV : null;
+            }
+            fvInputs = { A_S_m: null, h_M: null, V_B_governing };
+          }
+
+          if (fvInputs) {
+            const volumeWrite = facilityVolumeMaterialize(fvFacility, fvInputs);
+            if (volumeWrite) {
+              // Resolve the volume field id on the SAVED facility worksheet, scoped.
+              const fvFieldRows = await tx
+                .select({ id: fields.id })
+                .from(fields)
+                .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
+                .where(and(
+                  eq(fields.symbol, volumeWrite.volumeSymbol),
+                  eq(fields.active, true),
+                  eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+                  savedStandardId ? eq(worksheetTemplates.standardId, savedStandardId) : undefined,
+                ))
+                .limit(1);
+              const fvFieldId = fvFieldRows[0]?.id;
+              if (fvFieldId) {
+                await tx
+                  .insert(projectParameters)
+                  .values([{
+                    projectId: instance.projectId,
+                    fieldId: fvFieldId,
+                    valueNumber: String(volumeWrite.value),
+                    valueText: null,
+                    sourceType: 'derived',
+                    enteredBy: userId,
+                    enteredAt: now,
+                  }])
+                  .onConflictDoUpdate({
+                    target: [projectParameters.projectId, projectParameters.fieldId],
+                    set: {
+                      valueNumber: sql`excluded.value_number`,
+                      valueText: sql`excluded.value_text`,
+                      sourceType: sql`excluded.source_type`,
+                      enteredBy: sql`excluded.entered_by`,
+                      enteredAt: now,
+                    },
+                  });
+                writtenDerived.push({ fieldId: fvFieldId, valueNumber: String(volumeWrite.value), valueText: null });
               }
             }
           }

@@ -20,7 +20,8 @@ import { useWorksheetStore } from '../worksheet-store';
 import type { SaveWorksheetResult } from '@/lib/actions/worksheet';
 
 // Mock saveWorksheet so we can control what the server returns
-const mockSaveWorksheet = vi.fn<Parameters<typeof import('@/lib/actions/worksheet').saveWorksheet>, ReturnType<typeof import('@/lib/actions/worksheet').saveWorksheet>>();
+// vitest 4: vi.fn takes a single function-type argument
+const mockSaveWorksheet = vi.fn<typeof import('@/lib/actions/worksheet').saveWorksheet>();
 
 function initStore(
   values: Record<string, { type: string; value: unknown }> = {},

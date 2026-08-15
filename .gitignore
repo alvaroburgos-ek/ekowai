@@ -60,3 +60,7 @@ playwright-report/
 .dev-server.log
 .sbenv.local
 scripts/_rls-local-env.ps1
+
+.env.harness.local
+
+scripts/engine-rescan-data/

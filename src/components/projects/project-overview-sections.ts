@@ -1,5 +1,13 @@
 /** Ordered sections the project overview renders. */
-export type OverviewSection = 'standards' | 'vsme-report' | 'audit';
+export type OverviewSection =
+  | 'standards'
+  | 'vsme-report'
+  | 'effort'
+  | 'offers'
+  | 'cost-estimates'
+  | 'deliverables'
+  | 'monitoring'
+  | 'audit';
 
 /**
  * Decide the project overview's section composition.
@@ -13,6 +21,19 @@ export type OverviewSection = 'standards' | 'vsme-report' | 'audit';
 export function projectOverviewSections(opts: { isVsme: boolean }): OverviewSection[] {
   const sections: OverviewSection[] = ['standards'];
   if (opts.isVsme) sections.push('vsme-report');
+  // Effort logging (roadmap v2 §2.9) — additional section, always shown.
+  sections.push('effort');
+  // Angebots-Engine (Slice E1) — internal-only panel next to Aufwandserfassung.
+  sections.push('offers');
+  // Parametrische Kostenschätzung (Slice E2) — the client's build cost,
+  // a deliverable; rendered AFTER Angebote (the two must stay separate).
+  sections.push('cost-estimates');
+  // Leistungsregister (roadmap Stage 10, AGB §3(2)) — read-only, automatic
+  // record of every emitted deliverable; always shown.
+  sections.push('deliverables');
+  // Monitoring-Journal (interim, documentation-only precursor to Stage 8) —
+  // values/time series follow later from the owner's Messplan.
+  sections.push('monitoring');
   sections.push('audit');
   return sections;
 }

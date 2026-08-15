@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 /**
  * GET /api/projects/:id/vsme/export?format=xlsx|pdf
@@ -46,6 +47,14 @@ export async function GET(
   try {
     if (format === 'pdf') {
       const buffer = await buildStandardReport(id, 'VSME');
+      // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+      await recordDeliverable({
+        projectId: id,
+        standardCode: 'VSME',
+        kind: 'vsme_export',
+        title: 'VSME-Export (PDF)',
+        userId: user.id,
+      });
       return new NextResponse(buffer as unknown as BodyInit, {
         status: 200,
         headers: {
@@ -59,6 +68,14 @@ export async function GET(
     // default: xlsx
     const data = await loadVsmeExportData(id);
     const buffer = await buildVsmeXlsx(data, locale);
+    // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      standardCode: 'VSME',
+      kind: 'vsme_export',
+      title: 'VSME-Export (XLSX)',
+      userId: user.id,
+    });
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

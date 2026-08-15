@@ -46,3 +46,20 @@ describe('normalizeFormula', () => {
     ]);
   });
 });
+
+describe('normalizeFormula — supported engine functions are NOT rewritten', () => {
+  it('leaves 1-arg function calls intact', () => {
+    expect(normalizeFormula('k = c * ln(x)')).toBe('k = c * ln(x)');
+    expect(normalizeFormula('sqrt(9) + abs(x)')).toBe('sqrt(9) + abs(x)');
+    expect(normalizeFormula('log10(h) - exp(y)')).toBe('log10(h) - exp(y)');
+  });
+
+  it('still rewrites symbol-style calls in the same formula', () => {
+    expect(normalizeFormula('ln(x) + r_D(n)')).toBe('ln(x) + r_D_n');
+  });
+
+  it('normalizeSymbol leaves function names intact too', () => {
+    expect(normalizeSymbol('ln(x)')).toBe('ln(x)');
+    expect(normalizeSymbol('r_D(n)')).toBe('r_D_n');
+  });
+});

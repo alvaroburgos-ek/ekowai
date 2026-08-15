@@ -34,21 +34,34 @@ export function VerifyButton({
   const [pending, startTransition] = useTransition();
   const [noteOpen, setNoteOpen] = useState(false);
   const [note, setNote] = useState('');
+  const [quote, setQuote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const isVerified = status === 'engineer_verified';
+  const isVerified =
+    status === 'engineer_verified'
+    || status === 'verified_against_standard'
+    || status === 'corrected';
 
   function runVerify() {
     setError(null);
     startTransition(async () => {
       try {
+        // A verbatim quote upgrades the verification to
+        // verified_against_standard (SR-1); without one it is the plain
+        // engineer confirmation.
+        const opts = {
+          note: note || undefined,
+          quote: quote || undefined,
+          status: quote ? 'verified_against_standard' : 'engineer_verified',
+        };
         if (target === 'field') {
-          await verifyField(id, note || undefined);
+          await verifyField(id, opts);
         } else {
-          await verifyEquation(id, note || undefined);
+          await verifyEquation(id, opts);
         }
         setNoteOpen(false);
         setNote('');
+        setQuote('');
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Fehler');
       }
@@ -74,7 +87,7 @@ export function VerifyButton({
     return (
       <span className="inline-flex items-center gap-2 flex-wrap text-[10px] uppercase tracking-[0.18em] text-subtext normal-case tracking-normal">
         <span className="text-success">
-          ✓ bestätigt
+          {status === 'verified_against_standard' ? '✓ norm-verifiziert' : status === 'corrected' ? '✓ korrigiert' : '✓ bestätigt'}
           {verifiedByLabel ? ` von ${verifiedByLabel}` : ''}
           {verifiedAt ? ` am ${formatDate(verifiedAt)}` : ''}
         </span>
@@ -114,6 +127,22 @@ export function VerifyButton({
             if (e.key === 'Escape') {
               setNoteOpen(false);
               setNote('');
+            }
+          }}
+        />
+        <input
+          type="text"
+          value={quote}
+          onChange={(e) => setQuote(e.target.value)}
+          placeholder="Verbatim-Zitat aus der Norm (SR-1) → norm-verifiziert"
+          maxLength={2000}
+          className="text-xs px-1.5 py-0.5 border border-hairline rounded bg-paper text-ink w-full sm:w-80 focus:outline-none focus:border-accent"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') runVerify();
+            if (e.key === 'Escape') {
+              setNoteOpen(false);
+              setNote('');
+              setQuote('');
             }
           }}
         />

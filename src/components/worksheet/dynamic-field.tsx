@@ -1,7 +1,8 @@
 'use client';
-import { useState, useId, useMemo } from 'react';
+import { useState, useId, useMemo, useTransition } from 'react';
 import Link from 'next/link';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
+import { setClientSupplied } from '@/lib/actions/client-supplied';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Select } from '@/components/ui/select';
 import { CitationPicker } from '@/components/documents/citation-picker';
@@ -20,9 +21,18 @@ type FieldDef = {
   dataType: 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json';
   isRequired: boolean;
   enumValues:
-    | Array<{ value: string; label_de: string | null; label_en: string | null }>
+    | Array<{ value: string; label_de: string | null; label_en: string | null; order_index?: number }>
     | null;
-  validationRules: { min?: number; max?: number; maxLength?: number; raw?: string } | null;
+  validationRules: {
+    min?: number;
+    max?: number;
+    maxLength?: number;
+    /** OPTIONS tranche 3: when true on a json+enumValues checklist, the
+     * engineer may append CUSTOM free-text entries alongside the seeded
+     * options (guideline prints its list as explicitly non-exhaustive). */
+    extensible?: boolean;
+    raw?: string;
+  } | null;
   clauseReference: string | null;
   verificationStatus: string;
   description: string | null;
@@ -42,6 +52,10 @@ type Props = {
   docs: Array<{ id: string; title: string; citationLabel: string }>;
   /** True if this field is the output of an equation (auto-computed sub-total or total). */
   isComputed?: boolean;
+  /** Provenance hint for server-engine-written values (source_type='computed'
+   * rows, e.g. the VSME CO₂ engine; VSME B04 register sums). Rendered under
+   * the label; `href`/`hrefLabel` add a deep link to the producing surface. */
+  computedHint?: { label: string; href?: string; hrefLabel?: string };
   /** Worksheet code that this value was inherited from (no local saved value).
    * When set, the field renders a small "← [code]" hint below the label. */
   inheritedFrom?: string;
@@ -81,12 +95,23 @@ type Props = {
   /** Current value of the sibling `a_s_m_needs_reconfirmation` field. When
    * true, the AsmMethodStatus badge shows the amber "Typ geändert" state. */
   asmNeedsReconfirmation?: boolean | null;
+  /** Persisted "Kundenangabe" flag from project_parameters.client_supplied —
+   * the value was delivered by the client, not determined by EKOWAI (AGB
+   * input-error carve-out). Drives the amber chip next to the citation
+   * controls; toggled via the setClientSupplied server action. */
+  clientSupplied?: boolean;
 };
 
-export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null }: Props) {
+export function DynamicField({ field, locale, projectId, standardCode, sameSymbolHints, docs, isComputed = false, computedHint, inheritedFrom, prefillSource, siteProfileKey, inlineEngineCard, overridePill, isPlatformEngineer = false, readOnly = false, statusReason = null, asmMethod = null, asmProvenance = null, asmNeedsReconfirmation = null, clientSupplied = false }: Props) {
   const value = useWorksheetStore((s) => s.values[field.id]);
   const citations = useWorksheetStore((s) => s.citations[field.id]) ?? [];
   const setField = useWorksheetStore((s) => s.setField);
+  // Kundenangabe toggle: optimistic local override on top of the server-loaded
+  // prop; reverted to the prop on a failed server call (e.g. no saved row yet,
+  // write-locked worksheet).
+  const [csOptimistic, setCsOptimistic] = useState<boolean | null>(null);
+  const [csPending, startCsTransition] = useTransition();
+  const isClientSupplied = csOptimistic ?? clientSupplied;
   // The prefill badges (Norm-Default / Projekt-Standort / ← {WS}) describe the
   // ORIGIN of the rendered value. Once the engineer touches the field, the
   // value in the store is theirs — keeping the badge visible would be a lie
@@ -96,6 +121,10 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
   // entirely.
   const isDirty = useWorksheetStore((s) => s.pendingFieldIds.has(field.id));
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Draft text for the extensible-checklist "Eigener Eintrag…" input (OPTIONS
+  // tranche 3). Hoisted to the component top level (hooks cannot live inside
+  // the per-dataType render closures).
+  const [customDraft, setCustomDraft] = useState('');
   const inputId = useId();
 
   const label = locale === 'de' ? field.labelDe : field.labelEn ?? field.labelDe;
@@ -240,6 +269,22 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         {rangeHintDe && (
           <p className="text-[11px] text-subtext mt-0.5 tabular-nums">{rangeHintDe}</p>
         )}
+        {computedHint && (
+          <p data-testid="computed-hint" className="text-[11px] text-subtext mt-0.5">
+            {computedHint.label}
+            {computedHint.href && (
+              <>
+                {' '}
+                <Link
+                  href={computedHint.href}
+                  className="text-accent hover:underline underline-offset-2"
+                >
+                  {computedHint.hrefLabel ?? '→ öffnen'}
+                </Link>
+              </>
+            )}
+          </p>
+        )}
       </div>
 
       {/* Input control by data_type */}
@@ -375,6 +420,22 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         const useTextarea = (maxLength ?? 0) > 200;
         const textLocked = isComputed || readOnly;
 
+        // SUGGESTED-TEXT mode (OPTIONS tranche 3): a text field that carries
+        // seeded enum_values renders a <datalist> of suggestions from the
+        // guideline — the standard prints its list as explicitly NON-exhaustive,
+        // so free entry stays fully allowed and the value is NEVER restricted.
+        // (Textarea path is unaffected: <datalist> only binds to <input>.)
+        const suggestions = field.enumValues ?? [];
+        const showSuggestions = suggestions.length > 0 && !textLocked && !useTextarea;
+        const datalistId = `${inputId}-suggestions`;
+        const sortedSuggestions = showSuggestions
+          ? [...suggestions].sort(
+              (a, b) =>
+                (a.order_index ?? Number.MAX_SAFE_INTEGER) -
+                (b.order_index ?? Number.MAX_SAFE_INTEGER),
+            )
+          : [];
+
         // a_s_m_provenance: when method='manual' this field is required.
         // Surface a German validation message via the title attribute so the
         // browser's built-in constraint UI shows the correct text.
@@ -413,6 +474,7 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               tabIndex={textLocked ? -1 : undefined}
               aria-readonly={textLocked || undefined}
               title={provenanceRequiredTitle}
+              list={showSuggestions ? datalistId : undefined}
               onChange={(e) => {
                 if (isComputed) return;
                 if (readOnly) return;
@@ -420,6 +482,21 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               }}
               className={`block w-full rounded-md border border-hairline-strong px-3 py-2 text-sm text-ink focus:outline-none focus:ring-0 ${textLocked ? 'bg-paper-2 cursor-default focus:border-hairline-strong' : 'bg-transparent focus:border-accent'}`}
             />
+            {showSuggestions && (
+              <>
+                <datalist id={datalistId} data-testid="text-suggestions">
+                  {sortedSuggestions.map((o) => (
+                    <option key={o.value} value={pickEnumLabel(o, locale)} />
+                  ))}
+                </datalist>
+                <p
+                  data-testid="text-suggestions-hint"
+                  className="text-[11px] text-subtext mt-0.5"
+                >
+                  Vorschläge aus dem Regelwerk — eigene Eingabe möglich
+                </p>
+              </>
+            )}
             {asmProvenanceRequired && !v && (
               <p className="text-xs text-error mt-0.5">Herkunftsangabe erforderlich</p>
             )}
@@ -430,6 +507,13 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
       {field.dataType === 'enum' && (() => {
         const v = value?.type === 'enum' ? value.value : null;
         const options = field.enumValues ?? [];
+        // G2 (Finding G2a/b): a derived/computed enum (e.g. recommended_phase_4_gate)
+        // is a READ-ONLY recommendation, not an editable verdict. It must not be a
+        // click-target (the #15b adjacency: selecting FAIL on it = no dirty → no save,
+        // which the user mistook for "my FAIL didn't persist"). Lock it (no onChange,
+        // disabled) and mark it visually distinct from the editable verdict beside it.
+        const enumLocked = isComputed || readOnly;
+        const isReadOnlyRecommendation = isComputed && !readOnly;
         if (options.length === 0) {
           // The field is an enum but its allowed values are not configured
           // (enum_values NULL/empty in the DB). The correct values are unknown
@@ -450,18 +534,34 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         }
         if (options.length <= 4) {
           return (
-            <div role="radiogroup" aria-labelledby={`${inputId}-label`} aria-required={required}>
+            <div
+              role="radiogroup"
+              aria-labelledby={`${inputId}-label`}
+              aria-required={required}
+              // G2b marker: a stable, fingerprint-able signal that this enum is a
+              // locked read-only recommendation (distinct from the editable verdict).
+              data-readonly-recommendation={isReadOnlyRecommendation || undefined}
+            >
+              {isReadOnlyRecommendation && (
+                <span
+                  data-testid="readonly-recommendation-lock"
+                  className="mb-1 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-subtext"
+                >
+                  <span aria-hidden="true">🔒</span>
+                  {locale === 'de' ? 'Empfehlung (schreibgeschützt)' : 'Recommendation (read-only)'}
+                </span>
+              )}
               <SegmentedControl
                 value={v ?? options[0]?.value ?? ''}
                 onChange={(val) => {
-                  if (readOnly) return;
+                  if (enumLocked) return;
                   setField(field.id, { type: 'enum', value: val });
                 }}
                 options={options.map((o) => ({
                   value: o.value,
                   label: pickEnumLabel(o, locale),
                 }))}
-                disabled={readOnly}
+                disabled={enumLocked}
               />
             </div>
           );
@@ -471,9 +571,10 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
             id={inputId}
             value={v ?? ''}
             required={field.isRequired}
-            disabled={readOnly}
+            disabled={enumLocked}
+            data-readonly-recommendation={isReadOnlyRecommendation || undefined}
             onChange={(e) => {
-              if (readOnly) return;
+              if (enumLocked) return;
               setField(field.id, { type: 'enum', value: e.target.value || null });
             }}
           >
@@ -527,15 +628,168 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         );
       })()}
 
-      {field.dataType === 'json' && (
-        <div
-          aria-disabled="true"
-          className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic cursor-not-allowed"
-          title="Mehrzeilige Eingabe — Phase 2"
-        >
-          Mehrzeilige Eingabe — Phase 2
-        </div>
-      )}
+      {field.dataType === 'json' && (() => {
+        // CHECKLIST mode (options-as-selection, tranche 2): a json-typed field
+        // that carries a populated enum_values option list is a MULTI-SELECT
+        // from the guideline's own printed list. The selection persists as a
+        // JSON string array (option values) through the existing json value
+        // plumbing (worksheet-store setField → saveWorksheet valueJson).
+        // Fields WITHOUT enumValues keep the legacy "Phase 2" placeholder;
+        // carrier/register symbols (surface_inventory, r_D_n_table, …) never
+        // reach this branch — worksheet-form dispatches them to dedicated
+        // editors and skips them in the field grid.
+        const options = field.enumValues ?? [];
+        if (options.length === 0) {
+          return (
+            <div
+              aria-disabled="true"
+              className="rounded-md border border-hairline-strong bg-paper-2/40 px-3 py-2 text-sm text-subtext italic cursor-not-allowed"
+              title="Mehrzeilige Eingabe — Phase 2"
+            >
+              Mehrzeilige Eingabe — Phase 2
+            </div>
+          );
+        }
+        const sorted = [...options].sort(
+          (a, b) => (a.order_index ?? Number.MAX_SAFE_INTEGER) - (b.order_index ?? Number.MAX_SAFE_INTEGER),
+        );
+        const raw = value?.type === 'json' ? value.value : null;
+        const rawArr = Array.isArray(raw)
+          ? raw.filter((x): x is string => typeof x === 'string')
+          : [];
+        const selected = new Set(rawArr);
+        const jsonLocked = isComputed || readOnly;
+        // EXTENSIBLE mode (OPTIONS tranche 3): when validation_rules carries
+        // extensible:true, the guideline prints its option list as explicitly
+        // NON-exhaustive, so the engineer may append CUSTOM free-text entries.
+        // Custom entries are the stored-array members that are not seeded
+        // option values; they persist appended AFTER the seeded selection.
+        // When extensible !== true the checklist stays exactly as before
+        // (closed: stored strays are ignored and dropped on the next toggle).
+        const isExtensible = field.validationRules?.extensible === true;
+        const seededValues = new Set(sorted.map((o) => o.value));
+        const customEntries = isExtensible
+          ? rawArr.filter((v) => !seededValues.has(v))
+          : [];
+        // Persist in the option list's own order so the stored array is
+        // stable/deterministic regardless of click order; custom entries
+        // follow in their insertion order.
+        const persist = (sel: Set<string>, customs: string[]) => {
+          setField(field.id, {
+            type: 'json',
+            value: [...sorted.map((o) => o.value).filter((v) => sel.has(v)), ...customs],
+          });
+        };
+        const toggle = (optValue: string, checked: boolean) => {
+          if (jsonLocked) return;
+          const next = new Set(selected);
+          if (checked) next.add(optValue);
+          else next.delete(optValue);
+          persist(next, customEntries);
+        };
+        const removeCustom = (entry: string) => {
+          if (jsonLocked) return;
+          persist(
+            selected,
+            customEntries.filter((c) => c !== entry),
+          );
+        };
+        const addCustom = () => {
+          if (jsonLocked) return;
+          const trimmed = customDraft.trim();
+          if (!trimmed) return;
+          if (seededValues.has(trimmed)) {
+            // Typed text equals a seeded option value — check that option
+            // instead of duplicating it as a custom entry.
+            const next = new Set(selected);
+            next.add(trimmed);
+            persist(next, customEntries);
+          } else if (!customEntries.includes(trimmed)) {
+            persist(selected, [...customEntries, trimmed]);
+          }
+          setCustomDraft('');
+        };
+        return (
+          <div
+            role="group"
+            aria-labelledby={`${inputId}-label`}
+            data-testid="json-checklist"
+            className="rounded-md border border-hairline-strong divide-y divide-hairline"
+          >
+            {sorted.map((o) => {
+              const checked = selected.has(o.value);
+              return (
+                <label
+                  key={o.value}
+                  className={`flex items-center gap-2.5 px-3 py-2 text-sm text-ink ${jsonLocked ? 'cursor-default bg-paper-2/40' : 'cursor-pointer hover:bg-paper-2/60'}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={jsonLocked}
+                    onChange={(e) => toggle(o.value, e.target.checked)}
+                    className="h-4 w-4 shrink-0 accent-[var(--accent,#2563eb)]"
+                  />
+                  <span>{pickEnumLabel(o, locale)}</span>
+                </label>
+              );
+            })}
+            {customEntries.map((entry) => (
+              <div
+                key={entry}
+                data-testid="custom-checklist-entry"
+                className={`flex items-center gap-2.5 px-3 py-2 text-sm text-ink ${jsonLocked ? 'bg-paper-2/40' : ''}`}
+              >
+                <input
+                  type="checkbox"
+                  checked
+                  disabled
+                  aria-label={entry}
+                  className="h-4 w-4 shrink-0 accent-[var(--accent,#2563eb)]"
+                />
+                <span className="flex-1">{entry}</span>
+                {!jsonLocked && (
+                  <button
+                    type="button"
+                    aria-label={`${entry} entfernen`}
+                    title="Eigenen Eintrag entfernen"
+                    onClick={() => removeCustom(entry)}
+                    className="shrink-0 px-1 text-subtext hover:text-accent-2 transition-colors"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+            {isExtensible && !jsonLocked && (
+              <div className="flex items-center gap-2 px-3 py-2">
+                <input
+                  type="text"
+                  value={customDraft}
+                  aria-label="Eigener Eintrag"
+                  placeholder="Eigener Eintrag…"
+                  onChange={(e) => setCustomDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addCustom();
+                    }
+                  }}
+                  className="block w-full rounded-md border border-hairline-strong px-2 py-1 text-sm text-ink bg-transparent focus:outline-none focus:ring-0 focus:border-accent"
+                />
+                <button
+                  type="button"
+                  onClick={addCustom}
+                  disabled={!customDraft.trim()}
+                  className="shrink-0 rounded border border-hairline-strong px-2 py-1 text-xs text-accent-2 hover:bg-accent-2/10 transition-colors disabled:opacity-50"
+                >
+                  Hinzufügen
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Same-symbol hint (cross-worksheet) — only shown when the value was
           NOT auto-inherited (i.e. engineer has their own local value). When
@@ -557,14 +811,50 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         </div>
       )}
 
-      {/* Citation chips (0…n) */}
-      <CitationChips
-        citations={citations}
-        docs={docLookup}
-        projectId={projectId}
-        fieldId={field.id}
-        onAdd={() => setPickerOpen(true)}
-      />
+      {/* Citation chips (0…n) + Kundenangabe checkbox-chip */}
+      <div className="flex flex-wrap items-center gap-2">
+        <CitationChips
+          citations={citations}
+          docs={docLookup}
+          projectId={projectId}
+          fieldId={field.id}
+          onAdd={() => setPickerOpen(true)}
+        />
+        {/* Kundenangabe: only offered once the field carries a value (the
+            server action UPDATEs the existing project_parameters row only —
+            same source the citation seed comes from). Amber chip when set. */}
+        {hasStoreValue(value) && (
+          <button
+            type="button"
+            data-testid="client-supplied-toggle"
+            aria-pressed={isClientSupplied}
+            disabled={readOnly || csPending}
+            title={
+              isClientSupplied
+                ? 'Kundenangabe: Wert wurde vom Kunden beigestellt, nicht von EKOWAI ermittelt — Haftungsausschluss für Eingabefehler gemäß AGB. Klicken zum Entfernen.'
+                : 'Als Kundenangabe markieren (Wert vom Kunden beigestellt, nicht von EKOWAI ermittelt)'
+            }
+            onClick={() => {
+              if (readOnly || csPending) return;
+              const next = !isClientSupplied;
+              setCsOptimistic(next);
+              startCsTransition(async () => {
+                const r = await setClientSupplied(projectId, field.id, next);
+                // Revert the optimistic state on failure (no saved row yet,
+                // write-locked, no access) — falls back to the server prop.
+                if (!r.ok) setCsOptimistic(null);
+              });
+            }}
+            className={
+              isClientSupplied
+                ? 'inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 disabled:opacity-50'
+                : 'text-[10px] uppercase tracking-[0.2em] text-subtext hover:text-ink underline disabled:opacity-50'
+            }
+          >
+            {isClientSupplied ? '✓ Kundenangabe' : 'Kundenangabe'}
+          </button>
+        )}
+      </div>
       <CitationPicker
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
@@ -600,6 +890,14 @@ const VERIFICATION_LABELS_DE: Record<string, { short: string; title: string }> =
     short: 'Wizard-intern',
     title: 'Aus Wizard-Logik abgeleitet, nicht direkt in der Norm.',
   },
+  disputed: {
+    short: 'Strittig',
+    title: 'Verifikation angefochten — Wert/Definition weicht mutmaßlich von der Norm ab.',
+  },
+  corrected: {
+    short: 'Korrigiert',
+    title: 'Nach Beanstandung gegen die Norm korrigiert und erneut verifiziert.',
+  },
 };
 
 function verificationStatusLabel(status: string): string {
@@ -615,6 +913,13 @@ function formatHintNumber(n: number): string {
     return n.toExponential(0);
   }
   return new Intl.NumberFormat('de-DE', { maximumFractionDigits: 4 }).format(n);
+}
+
+/** True when the store holds a non-null value for the field — the gate for
+ * offering the Kundenangabe toggle (mirrors the citation UI: both act on the
+ * field's saved project_parameters row). */
+function hasStoreValue(value: StoreValue): boolean {
+  return value != null && value.value != null;
 }
 
 type StoreValue =

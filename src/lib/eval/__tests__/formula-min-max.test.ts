@@ -143,14 +143,14 @@ describe('unsupported function calls are still rejected', () => {
     expect(['manual_required', 'error']).toContain(r.kind);
   });
 
-  it('SQRT(a) yields manual_required or error (NOT computed)', () => {
+  it('SQRT(a) now COMPUTES (case-insensitive fn calls, 2026-08-01 — M-229-1 print style)', () => {
     const r = evaluateFormula(
       req('x = SQRT(a)', ['a'], [
         { symbol: 'a', value: 4, unit: null },
       ]),
     );
-    expect(r.kind).not.toBe('computed');
-    expect(['manual_required', 'error']).toContain(r.kind);
+    expect(r.kind).toBe('computed');
+    if (r.kind === 'computed') expect(r.value).toBe(2);
   });
 });
 

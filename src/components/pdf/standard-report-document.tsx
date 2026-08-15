@@ -1,5 +1,6 @@
-import { Document, Page, View } from '@react-pdf/renderer';
+import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { styles } from './styles';
+import { MONITORING_CATEGORY_LABELS } from '@/lib/actions/monitoring-core';
 import { LetterheadHeader } from './letterhead-header';
 import { ProjectHeader } from './project-header';
 import { SiteProfileSection } from './site-profile-section';
@@ -36,6 +37,21 @@ export function StandardReportDocument({ data }: { data: StandardReportData }) {
           generatedAt={data.generatedAt}
         />
         <SiteProfileSection siteProfile={data.siteProfile} />
+        {/* Berechnungsstand: the approve-snapshot ids this report refers to. */}
+        <View style={{ marginTop: 12 }}>
+          <Text style={styles.h2}>Berechnungsstand</Text>
+          {(data.approveSnapshots ?? []).length === 0 ? (
+            <Text style={styles.note}>
+              Kein genehmigter Berechnungsstand — Werte sind Arbeitsstand.
+            </Text>
+          ) : (
+            (data.approveSnapshots ?? []).map((s) => (
+              <Text key={s.snapshotId} style={styles.mono}>
+                {`${s.worksheetCode}: ${s.snapshotId}${s.takenAt ? ` · ${s.takenAt.slice(0, 10)}` : ''}`}
+              </Text>
+            ))
+          )}
+        </View>
         <ReportFooter
           projectCode={data.project.projectCode}
           standardCode={data.standard.code}
@@ -60,9 +76,26 @@ export function StandardReportDocument({ data }: { data: StandardReportData }) {
         </Page>
       ))}
 
-      {/* Final page — citation index + audit excerpt. */}
+      {/* Final page — citation index + audit excerpt (+ monitoring journal). */}
       <Page size="A4" style={styles.page}>
         <LetterheadHeader letterhead={data.letterhead} />
+        {/* Betrieb & Monitoring: journal entries linked to THIS standard —
+            documentation evidence for Behörden, no parameter values. */}
+        {(data.monitoringEntries ?? []).length > 0 ? (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.h2}>Betrieb &amp; Monitoring (Journal)</Text>
+            {(data.monitoringEntries ?? []).map((m, i) => (
+              <View key={i} style={styles.siteRow} wrap={false}>
+                <Text style={styles.siteLabel}>
+                  {`${m.entryDate} · ${(MONITORING_CATEGORY_LABELS as Record<string, string>)[m.category] ?? m.category}`}
+                  {m.timeLabel ? ` · ${m.timeLabel}` : ''}
+                  {m.note ? ` — ${m.note}` : ''}
+                </Text>
+                <Text style={styles.siteValue}>{m.documentTitle ?? ''}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
         <CitationIndex entries={data.citationIndex} />
         <View style={{ marginTop: 12 }}>
           <AuditExcerpt entries={data.audit} />

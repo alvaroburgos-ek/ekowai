@@ -196,7 +196,13 @@ export const equationProfiles: Record<string, EquationProfile> = {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', b_R: 'm', h_R: 'm', L_R: 'm',
       k_i: 'm/s', D: 'min', f_Z: null,
     },
-    notes: '§6.5.2 Gl. (28): erforderliches MRE-Volumen. Schreibt V_MR (primär).',
+    // Fan-out (MRE): the "required" V_MR eq needs the server-swept governing D; the
+    // client cannot resolve D → its write-back enqueues V_MR=null, clobbering the
+    // server materialize (V_MR = persisted V_M + persisted V_R, Gl.26). Mark
+    // displayOnly so the client never enqueues V_MR — the SERVER cross-ws sum is
+    // authoritative. Gl.28 still renders + evaluates in the equation card.
+    displayOnly: true,
+    notes: '§6.5.2 Gl. (28): erforderliches MRE-Volumen. displayOnly — V_MR wird server-materialisiert als V_M + V_R (Gl.26); der maßgebende D stammt aus dem serverseitigen Sweep, der Client-Write-back darf V_MR nicht null-clobbern.',
   },
 
   // A138-19 · Gl. (29) · §6.5.2 — L_R required (MRE)
@@ -257,7 +263,12 @@ export const equationProfiles: Record<string, EquationProfile> = {
     expectedUnits: {
       A_C: 'm²', r_D_n: 'l/(s·ha)', A_S: 'm²', k_i: 'm/s', D: 'min', f_Z: null,
     },
-    notes: '§6.7.2 Gl. (35): erforderliches Schachtvolumen V_S.',
+    // Fan-out (Schacht): the "required" V_S eq needs the server-swept governing D →
+    // the client write-back enqueues V_S=null, clobbering the server materialize
+    // (V_S = π·d_i²/4·h_S, Gl.36, at the Gl.37-swept governing head). Mark displayOnly
+    // so the client never enqueues V_S — the SERVER materialize is authoritative.
+    displayOnly: true,
+    notes: '§6.7.2 Gl. (35): erforderliches Schachtvolumen V_S. displayOnly — V_S wird server-materialisiert (Gl.36 am Gl.37-Sweep-Einstau); der Client-Write-back darf V_S nicht null-clobbern.',
   },
 
   // A138-21 · Gl. (36) · §6.7.2 — V_S geometric (π·d_i²/4·h_S)
@@ -303,13 +314,19 @@ export const equationProfiles: Record<string, EquationProfile> = {
     notes: '§6.7.2 Gl. (40): alternative h_S-Berechnung (Filterschicht limitierend). displayOnly — Gl. (37) primär.',
   },
 
-  // A138-22 · Gl. (41) · §6.8.2 — V_VA Becken
+  // A138-22 · Gl. (41) · §6.8.2 — V_B Becken (field symbol is V_B, not V_VA)
   '433f7700-90cb-410d-8103-7b72f53db8fa': {
     expectedUnits: {
       A_C: 'm²', A_VA: 'm²', r_D_n: 'l/(s·ha)', A_S_m: 'm²',
       k_i: 'm/s', Q_Dr: 'l/s', D: 'min', f_Z: null, f_A: null,
     },
-    notes: '§6.8.2 Gl. (41): Becken-Speichervolumen. Schreibt V_VA auf A138-22 (separates Feld vs Gl. 8 V_VA auf A138-13).',
+    // Fan-out (Becken): Gl.41 is iterated over D (governing = max V) server-side
+    // (GOVERNING_PROFILES 'A138-22'); the client cannot resolve the governing D →
+    // its write-back enqueues V_B=null, clobbering the server materialize. Mark
+    // displayOnly so the client never enqueues V_B — the SERVER Gl.41 sweep is
+    // authoritative.
+    displayOnly: true,
+    notes: '§6.8.2 Gl. (41): Becken-Speichervolumen V_B. displayOnly — V_B wird server-materialisiert über den Gl.41-Dauerstufen-Sweep; der Client-Write-back darf V_B nicht null-clobbern.',
   },
 
   // A138-26 · Gl. (10) V_Rück flood-check · §5.3.4
@@ -341,8 +358,18 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // Finding H (§6.3.2): Gl.14 needs D — the GOVERNING Dauerstufe from the
+    // server-only Mulde geometry sweep (worksheet.ts computeMuldeGeometrySweep).
+    // The CLIENT engine cannot resolve D → client-side Gl.14 can't compute → its
+    // write-back enqueues V_M=null, which the autosave then persists, CLOBBERING
+    // the server-materialized governing volume (step-6b). Marking Gl.14
+    // displayOnly stops the client write-back loop (use-equation-engine.ts:527
+    // skips displayOnly equations) so the client never enqueues V_M — the SERVER
+    // materialize (V_M = A_S,m · h_M, Gl.15, §6.3.2-verified Speichervolumen) is
+    // authoritative. Gl.14 still renders in the equation card + evaluates purely.
+    displayOnly: true,
     notes:
-      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. Schreibt V_M (primärer Design-Wert).',
+      '§6.3.2 Gl. (14): erforderliches Muldenspeichervolumen aus Zufluss-Versickerungs-Bilanz. displayOnly — der maßgebende D stammt aus dem serverseitigen Dauerstufen-Sweep; die Persistierung von V_M erfolgt server-materialisiert (= A_S,m·h_M, Gl.15), damit der Client-Write-back kein null clobbert (Finding H).',
   },
 
   // A138-17 · Gl. (15) · §6.3.2 — V_M geometric
@@ -366,8 +393,14 @@ export const equationProfiles: Record<string, EquationProfile> = {
       D: 'min',
       f_Z: null,
     },
+    // Fan-out (Rigole): the "required" V_R eq needs the server-swept governing D →
+    // the client write-back enqueues V_R=null, clobbering the server materialize
+    // (V_R = b_R·h_R·L_R·s_R, Gl.20, with s_R computed server-side via Gl.21/22).
+    // Mark displayOnly so the client never enqueues V_R — the SERVER geometric
+    // materialize is authoritative.
+    displayOnly: true,
     notes:
-      '§6.4.2 Gl. (19): erforderliches Rigolenspeichervolumen. Schreibt V_R (primär). Das eingebettete ((b+h)·L+b·h)·k_i ist hier dimensional m³/s — intern konsistent (anders als die Gl. (18)-Standalone-Falle).',
+      '§6.4.2 Gl. (19): erforderliches Rigolenspeichervolumen. displayOnly — V_R wird server-materialisiert als b_R·h_R·L_R·s_R (Gl.20, s_R nach Gl.21/22); der Client-Write-back darf V_R nicht null-clobbern.',
   },
 
   // A138-18 · Gl. (20) · §6.4.2 — V_R geometric
@@ -421,5 +454,572 @@ export const equationProfiles: Record<string, EquationProfile> = {
     displayOnly: true,
     notes:
       'FLL-GAR-22 Gl. (2b): Mindestauflast-Bedingung g_prime ≥ …; displayOnly — Gl. (2a) ist der Produzent von g_prime, Gl. (2b) ist die Prüfbedingung.',
+  },
+
+  // ====================================================================
+  // DWA-M-205 · ES-1 (inequality-as-producer) neutralisation.
+  //   These "equations" are threshold BANDS extracted from prose, but their
+  //   output_symbol = the very entered input field being range-checked
+  //   (e.g. uv_dosis "produced" by both Gl. EQ-01 and the band EQ-02 → the
+  //   engine's multi-producer collision guard can BLANK the engineer's entry —
+  //   the same FLL-GAR-22:2b g_prime bug). displayOnly stops the write-back so
+  //   the band renders as a review aid without clobbering the input.
+  //   Every band + modal verb RENDER-confirmed against DWA-M_205.pdf (2013).
+  //   Each unique eq is encoded TWICE (S3 ×2, base M205-05/06/07/08 +
+  //   duplicate M205-10/13/15/17/21) — BOTH copies get the profile, identically.
+  //   Enforcement (where the source carries a modal) lives in the companion
+  //   compliance_requirement, NOT here — see
+  //   20260708260000_dwa_m_205_es1_disposition.sql.
+  // ====================================================================
+
+  // M205-05 · EQ-02 · §4.1.2.3 — uv_dosis 300–450 J/m² (Mindestbestrahlung)
+  'ba51e8f2-4c20-4c01-8f4d-9effcc262b37': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18, gerendert): "Danach beträgt die Mindestbestrahlung etwa 300 J/m² bis 450 J/m²…" — deskriptiver Richtwert (kein muss). ES-1: Band statt Produzent → displayOnly, kein Write-back auf das Eingabefeld uv_dosis.',
+  },
+  // M205-10 · EQ-02 (S3 ×2 Duplikat)
+  '31918a55-696c-4044-a398-1f1c5e36d1e1': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18): uv_dosis 300–450 J/m², "beträgt etwa" (Richtwert). ES-1 displayOnly. S3-Duplikat von M205-05 EQ-02.',
+  },
+
+  // M205-05 · EQ-12 · §4.1.2.3 — uv_dosis 400–700 J/m² (Schwankungsbreite)
+  '1a5e5b28-d9c1-4a49-8c5e-9d596e000ff9': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18): "…zeigt eine Schwankungsbreite … von 400 J/m² bis 600 J/m² und im Einzelfall bis zu 700 J/m²" — empirische Betriebsspanne (kein muss). ES-1 displayOnly. (Hinweis: DB-Band 400–700 verflacht die 400–600/Einzelfall-700-Qualifizierung — S9, separat.)',
+  },
+  // M205-10 · EQ-12 (S3 ×2 Duplikat)
+  'd55d6598-b169-469f-8e17-f7a1c9583bf2': {
+    expectedUnits: { uv_dosis: 'J/m²' },
+    displayOnly: true,
+    notes:
+      '§4.1.2.3 (PDF S. 18): uv_dosis Schwankungsbreite 400–600, Einzelfall bis 700 J/m². ES-1 displayOnly. S3-Duplikat von M205-05 EQ-12.',
+  },
+
+  // M205-05 · EQ-06 · §4.1.5.2 — spez_strom_uv 30–60 Wh/m³
+  '197122ba-f723-4b27-80c1-51a972ea8e12': {
+    expectedUnits: { spez_strom_uv: 'Wh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.1.5.2 (PDF S. 24, gerendert): "…bewegt sich der spezifische Stromverbrauch im Bereich von 30 Wh bis 60 Wh pro Kubikmeter…" — deskriptiver Betriebswert (kein muss). ES-1 displayOnly.',
+  },
+  // M205-13 · EQ-06 (S3 ×2 Duplikat)
+  '246ff465-b925-47a4-85eb-beb9932f9f65': {
+    expectedUnits: { spez_strom_uv: 'Wh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.1.5.2 (PDF S. 24): spez_strom_uv 30–60 Wh/m³, "bewegt sich im Bereich" (deskriptiv). ES-1 displayOnly. S3-Duplikat von M205-05 EQ-06.',
+  },
+
+  // M205-06 · EQ-07 · §4.2.2 — spez_energie_membran 0.1–0.2 kWh/m³
+  'b3126c0d-7940-413e-b3f0-b25b02ccbf38': {
+    expectedUnits: { spez_energie_membran: 'kWh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.2.2 (PDF S. 25, gerendert): "Bei einem spezifischen Energiebedarf von ca. 0,1 kWh/m³ bis 0,2 kWh/m³ Filtrat…" — deskriptiver Wert ("von ca.", kein muss). ES-1 displayOnly.',
+  },
+  // M205-15 · EQ-07 (S3 ×2 Duplikat)
+  'd399b7fd-e988-4499-a2a6-6af379ab0db5': {
+    expectedUnits: { spez_energie_membran: 'kWh/m³' },
+    displayOnly: true,
+    notes:
+      '§4.2.2 (PDF S. 25): spez_energie_membran 0,1–0,2 kWh/m³, "von ca." (deskriptiv). ES-1 displayOnly. S3-Duplikat von M205-06 EQ-07.',
+  },
+
+  // M205-07 · EQ-04 · §4.3.6 — ozon_pro_doc < 0.8 mg/mg
+  '5bc795dd-75f7-433c-a359-b2c1e58d7488': {
+    expectedUnits: { ozon_pro_doc: 'mg/mg' },
+    displayOnly: true,
+    notes:
+      '§4.3.6 (PDF S. 31, gerendert): "Die Bromatbildung kann minimiert werden, wenn Ozon proportional zum DOC (< 0,8 mg/mg) dosiert wird." — Betriebsempfehlung mit Sicherheitsbezug (Bromat-Minimierung), kein muss → warn-Kandidat. ES-1 displayOnly; Enforcement (warn) in der Migration.',
+  },
+  // M205-17 · EQ-04 (S3 ×2 Duplikat)
+  '30a51b8c-422f-411a-8c09-c728a393f433': {
+    expectedUnits: { ozon_pro_doc: 'mg/mg' },
+    displayOnly: true,
+    notes:
+      '§4.3.6 (PDF S. 31): ozon_pro_doc < 0,8 mg/mg, "kann minimiert werden, wenn … dosiert wird" (Empfehlung). ES-1 displayOnly. S3-Duplikat von M205-07 EQ-04.',
+  },
+
+  // M205-08 · EQ-09 · §4.4.2 — clo2_dosis 5–10 g/m³
+  '0e05ac69-c6c4-460a-80b0-7664370b08ca': {
+    expectedUnits: { clo2_dosis: 'g/m³' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 32, gerendert): "…sind etwa 5 g bis 10 g Chlordioxid pro Kubikmeter … notwendig, bei sandfiltriertem Abwasser … nur 1 g/m³ bis 5 g/m³." — deskriptive Dosierspanne (kein muss). ES-1 displayOnly. (DB-Band 5–10 lässt die sandfiltriert-Alternative 1–5 aus — S9, separat.)',
+  },
+  // M205-21 · EQ-09 (S3 ×2 Duplikat)
+  '0c258d85-0a1e-4456-b0df-12f529d11d2c': {
+    expectedUnits: { clo2_dosis: 'g/m³' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 32): clo2_dosis 5–10 g/m³ (sandfiltriert 1–5), "sind etwa … notwendig" (deskriptiv). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-09.',
+  },
+
+  // M205-08 · EQ-10 · §4.4.2 — freies_chlor 1–20 mg/l
+  '86f703b6-6348-4577-a624-029e1ce3c93b': {
+    expectedUnits: { freies_chlor: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 31, gerendert): "Je nach dem Gehalt an organischen Stoffen im Abwasser sind 1 mg bis 20 mg freies Chlor pro Liter … erforderlich." — kontextabhängige Betriebsspanne (kein muss auf feste Grenze). ES-1 displayOnly.',
+  },
+  // M205-21 · EQ-10 (S3 ×2 Duplikat)
+  '3f3b7237-8837-45ff-86a5-1582f7156cbd': {
+    expectedUnits: { freies_chlor: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 31): freies_chlor 1–20 mg/l, "sind … erforderlich" (kontextabhängig). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-10.',
+  },
+
+  // M205-08 · EQ-11 · §4.4.2 — restchlor_betrieb ≥ 0.2 mg/l (freies-Chlor-Überschuss)
+  'cb540d04-9822-4941-a6e2-12a9be184c8e': {
+    expectedUnits: { restchlor_betrieb: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 30/32, gerendert): "In dem aus dem Behandlungsbecken abfließenden Abwasser muss noch ein Überschuss von freiem Chlor in der Größenordnung von 0,2 mg/l nachzuweisen sein, um die Desinfektionswirkung sicherzustellen." — einziges ES-1-Item mit MUSS-Verb → block-Kandidat. ES-1 displayOnly (stoppt Collision-Blank); Enforcement (block, FÜR ALVARO) in der Migration. Hinweis: "in der Größenordnung von" mildert die harte ≥-Grenze → block/warn ist eine Modal-Ratifizierung.',
+  },
+  // M205-21 · EQ-11 (S3 ×2 Duplikat)
+  'b02ff29a-36a0-41b8-b466-0a3b701bd895': {
+    expectedUnits: { restchlor_betrieb: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (PDF S. 30/32): restchlor_betrieb ≥ 0,2 mg/l, "muss … nachzuweisen sein" (block-Kandidat). ES-1 displayOnly. S3-Duplikat von M205-08 EQ-11.',
+  },
+
+  // ====================================================================
+  // DWA-A-201 · ES-1 (inequality-as-producer) neutralisation.
+  //   Wie bei M-205 sind diese 12 "Gleichungen" Bemessungs-Schwellenwerte
+  //   aus Prosa (§5.1–5.5), deren output_symbol das GEPRÜFTE Eingabe-/
+  //   Bemessungsfeld selbst ist (V_erf_grobstoff, V_EW_absetz, …,
+  //   A_min_nachklaer). Damit ist jede Gleichung ein zweiter Produzent
+  //   ihres eigenen Symbols → der Multi-Producer-Collision-Guard der Engine
+  //   kann den vom Ingenieur eingegebenen Wert BLANKEN. displayOnly stoppt
+  //   den Write-back, sodass das Band als Review-Hilfe rendert, ohne die
+  //   Eingabe zu überschreiben.
+  //   KEIN S3 ×2 in A-201 — jede Gleichung existiert genau EINMAL (DB-Scan
+  //   F-01…F-21 bestätigt), daher genau ein Profil je ES-1-Gleichung.
+  //   Jeder Schwellenwert + jedes Modalverb RENDER-bestätigt gegen
+  //   "dwa_a_201 (1).pdf" (August 2005, korr. Dez. 2011), poppler pdftoppm
+  //   150 dpi S. 10 (§5.1–5.3) + S. 11 (§5.4–5.5).
+  //   Enforcement: die durchsetzbaren "muss"/"gilt"-Grenzwerte werden bereits
+  //   von den vorhandenen Gates CR-004/005/007/008 abgedeckt — hier werden
+  //   KEINE Gates dupliziert. Die Migration flaggt nur die pre-existing
+  //   Gate-Defekte (CR-006 kaputte doppelte IF-THEN + Cross-Worksheet-
+  //   Platzierung von CR-006/007) für Alvaro. Siehe
+  //   20260708270000_dwa_a_201_es1_disposition.sql.
+  // ====================================================================
+
+  // A201-08 · F-01 · §5.1 — V_erf_grobstoff ≥ Q_M · t_R,M
+  '48ef9e99-ffc6-4b51-a911-88fb8e40101d': {
+    expectedUnits: { V_erf_grobstoff: 'm³', Q_M: 'm³/h', t_R_M: 'h' },
+    displayOnly: true,
+    notes:
+      '§5.1 (PDF S. 10, gerendert): "Für die Bemessung der Grobstoffentnahme gilt: V_erf ≥ Q_M · t_R,M ; t_R,M = 0,5 h." — normative Bemessungsregel ("gilt"). ES-1: Ungleichung mit Feld-Symbolen auf der RHS → displayOnly (kein Write-back auf V_erf_grobstoff). Enforcement existiert bereits als CR-004 (`V_erf_grobstoff >= Q_M * t_R_M and t_R_M == 0.5`, arithmetischer RHS → acompare-Pfad, grammar-OK).',
+  },
+
+  // A201-09 · F-03 · §5.2 — V_EW_absetz ≥ 0,5 m³/E
+  '792d1332-5ed4-4b16-a106-8132a1fa7bf7': {
+    expectedUnits: { V_EW_absetz: 'm³/E' },
+    displayOnly: true,
+    notes:
+      '§5.2 (PDF S. 10, gerendert): "Absetzteiche werden auf V_EW ≥ 0,5 m³/E bemessen." — normativer Bemessungswert ("werden … bemessen"). ES-1 displayOnly. Enforcement bereits in CR-005.',
+  },
+
+  // A201-09 · F-04 · §5.2 — V_schlammraum_absetz ≥ 0,15 m³/E
+  'e3c30a7d-c11e-4076-8f09-a0d4a590946e': {
+    expectedUnits: { V_schlammraum_absetz: 'm³/E' },
+    displayOnly: true,
+    notes:
+      '§5.2 (PDF S. 10, gerendert): Schlammraum "≥ 0,15 m³/E … gewählt werden" (Bemessungswert). ES-1 displayOnly. Enforcement bereits in CR-005.',
+  },
+
+  // A201-09 · F-06 · §5.2 — t_R_absetz ≥ 1 d
+  'ba340cbf-9420-410d-bfc9-d4380dde9a6e': {
+    expectedUnits: { t_R_absetz: 'd' },
+    displayOnly: true,
+    notes:
+      '§5.2 (PDF S. 10, gerendert): "Es muss eine Durchflusszeit von mindestens einem Tag bei Trockenwetter eingehalten werden." — muss ≥ 1 d. ES-1 displayOnly. Enforcement bereits in CR-005.',
+  },
+
+  // A201-10 · F-07 · §5.3 — A_EW_unbelueftet ≥ 10 m²/E (Regelwert)
+  '2c9d5018-004f-4f67-b40b-dcc8898d3171': {
+    expectedUnits: { A_EW_unbelueftet: 'm²/E' },
+    displayOnly: true,
+    notes:
+      '§5.3 (PDF S. 10, gerendert): "Unbelüftete Abwasserteiche sind mit A_EW ≥ 10 m²/E zu bemessen." — normativer Regel-Bemessungswert ("sind … zu bemessen"). ES-1 displayOnly. Enforcement-Absicht in CR-006 vorhanden, aber CR-006 ist DEFEKT (doppeltes IF-THEN + auf falschem Worksheet A201-08) → in der Migration für Alvaro geflaggt, hier NICHT umgeschrieben (ES-1-Scope).',
+  },
+
+  // A201-10 · F-08 · §5.3 — A_EW_unbelueftet ≥ 8 m²/E (reduziert bei Vorschaltung Absetzteich)
+  '3f986494-9fae-4171-b602-ab106a8cd659': {
+    expectedUnits: { A_EW_unbelueftet: 'm²/E' },
+    displayOnly: true,
+    notes:
+      '§5.3 (PDF S. 10, gerendert): "Dieser Wert kann auf 8 m²/E vermindert werden, wenn nach Abschnitt 5.2 bemessene Absetzteiche vorgeschaltet sind." — bedingte Alternative ("kann … vermindert werden, wenn"). C9-Selektor-Partner zu F-07 (gleiches Symbol A_EW_unbelueftet, alternativer Wert). ES-1 displayOnly. Enforcement-Absicht in CR-006 (defekt, geflaggt).',
+  },
+
+  // A201-10 · F-10 · §5.3 — A_EW_nitrifikation ≥ 15 m²/E (deskriptive Beobachtung)
+  'a69cfcaf-18a2-482e-a359-63848ffa00b9': {
+    expectedUnits: { A_EW_nitrifikation: 'm²/E' },
+    displayOnly: true,
+    notes:
+      '§5.3 (PDF S. 10, gerendert): "Bei Bemessungswerten A_EW ≥ 15 m²/E ist im Sommer eine teilweise Nitrifikation festzustellen." — DESKRIPTIVE Beobachtung ("ist … festzustellen"), KEIN Bemessungs-Mindestwert. ES-1 displayOnly ONLY; ein Gate hier wäre eine erfundene Anforderung → unterlassen (never-invent).',
+  },
+
+  // A201-11 · F-11 · §5.4 — B_R_BSB ≤ 25 g/(m³·d) (Last-Grenzwert)
+  '2aa30964-75b6-4990-995e-58d16598fc2c': {
+    expectedUnits: { B_R_BSB: 'g/(m³·d)' },
+    displayOnly: true,
+    notes:
+      '§5.4 (PDF S. 11, gerendert): "Für die Bemessung von belüfteten Abwasserteichen muss eine BSB5-Raumbelastung von B_R,BSB ≤ 25 g/(m³·d) angesetzt werden." — muss ≤ 25 (Last-Grenzwert, block). ES-1 displayOnly. Enforcement bereits in CR-007 (`B_R_BSB <= 25`), aber CR-007 liegt auf A201-08 statt A201-11 → Cross-Worksheet-Platzierung geflaggt.',
+  },
+
+  // A201-11 · F-12 · §5.4 — t_R_belueftet ≥ 5 d
+  'c34e9132-0c2f-404a-bc06-c2673770c761': {
+    expectedUnits: { t_R_belueftet: 'd' },
+    displayOnly: true,
+    notes:
+      '§5.4 (PDF S. 11, gerendert): "Es muss eine Durchflusszeit von fünf Tagen bei Trockenwetter eingehalten werden." — muss ≥ 5 d (block). ES-1 displayOnly. Enforcement in CR-007 (Platzierung geflaggt).',
+  },
+
+  // A201-11 · F-13 · §5.4 — OV_C_BSB ≥ 1,5 kg/kg
+  '74018e72-ea91-4a1e-bef9-2cb4f3782f8d': {
+    expectedUnits: { OV_C_BSB: 'kg/kg' },
+    displayOnly: true,
+    notes:
+      '§5.4 (PDF S. 11, gerendert): "Als Sauerstoffverbrauch muss OV_C,BSB ≥ 1,5 kg/kg … angesetzt werden." — muss ≥ 1,5 (block). ES-1 displayOnly. Enforcement in CR-007 (Platzierung geflaggt).',
+  },
+
+  // A201-12 · F-15 · §5.5 — t_R_nachklaer ≥ 1 d
+  '05bc3636-53d6-4518-aa00-2f40fce08d5a': {
+    expectedUnits: { t_R_nachklaer: 'd' },
+    displayOnly: true,
+    notes:
+      '§5.5 (PDF S. 11, gerendert): "Das erforderliche gesamte Teichvolumen errechnet sich aus der erforderlichen Mindestdurchflusszeit t_R = 1 d …" — normative Mindest-Durchflusszeit (block). ES-1 displayOnly. Enforcement bereits in CR-008 (`t_R_nachklaer>=1`).',
+  },
+
+  // A201-12 · F-16 · §5.5 — A_min_nachklaer ≥ 20 m²
+  '4219cb5e-8ced-41b0-8eef-783e0d3fcfc5': {
+    expectedUnits: { A_min_nachklaer: 'm²' },
+    displayOnly: true,
+    notes:
+      '§5.5 (PDF S. 11, gerendert): "Bewährt haben sich Teiche mit einer Mindesttiefe von 1,2 m und einer Mindestfläche von 20 m²." — "Mindestfläche" = normativer Mindestwert (block), Verb "Bewährt haben sich" ist weicher (Erfahrungswert) → für Alvaro. ES-1 displayOnly. Enforcement bereits in CR-008 (`A_min_nachklaer>=20`, + h_nachklaer>=1.2 deckt die Mindesttiefe 1,2 m).',
+  },
+
+  // ====================================================================
+  // DWA-A-102-2 · ES-1 (inequality-as-producer) neutralisation.
+  //   8 "Gleichungen" sind in Wirklichkeit Ungleichungen (`<=` / `>=`),
+  //   deren output_symbol das GEPRÜFTE Symbol selbst ist → zweiter Produzent
+  //   ihres eigenen Symbols → der Multi-Producer-Collision-Guard der Engine
+  //   kann den echten Produzenten-Wert bzw. die Ingenieur-Eingabe BLANKEN.
+  //   displayOnly stoppt den Write-back; die Ungleichung rendert als
+  //   Review-/Bemessungshilfe.
+  //   ES-1-Instanzen (register S1/S7), UUIDs gegen equations.id verifiziert:
+  //     Q_M   B.5 (A1022-08)       · echter Produzent = B.4
+  //     e_0   Gl.15/17/18 (A1022-28) · echter Produzent = Gl.13
+  //     Q_Dr  Gl.26/28 (A1022-33)  · KEIN Produzent (beide sind `>=`-Minima)
+  //     m     Gl.22/23 (A1022-36)  · echter Produzent (Mittel-m) = B.13/Gl.24
+  //   KEINE neuen Gates: die vorhandene AFS63-Durchsetzung (REQ-22
+  //   eta_ges>=eta_erf) trägt die Kernanforderung; keine Quell-Modalverb-
+  //   Grenze verlangt hier ein zusätzliches, in evaluate.ts faithful
+  //   ausdrückbares Gate (never-invent). Alle Formeln render-confirmed vs
+  //   DWA-A_102-2 (3).pdf (Opus 4.8, poppler — DEEP-DWA-A-102-2.md).
+  //   Enforcement-Dispositionen: siehe
+  //   20260708280000_dwa_a_102_2_es1_invtag_disposition.sql.
+  //   HINWEIS m (Gl.22/23): die WRITTEN-NOT-APPLIED Migration 2803d00
+  //   (20260708240000) retaggt Gl.22/23 output_symbol m -> m_min_required und
+  //   re-homed REQ-24. Hier NUR displayOnly (kein Re-Fix) — die Retag-/Gate-
+  //   Arbeit bleibt in 2803d00. Sobald 2803d00 angewendet ist, produzieren
+  //   Gl.22/23 m_min_required und REQ-24 (`m - m_min_required >= 0`) prüft es;
+  //   displayOnly bleibt korrekt (Minimum ist Bemessungshilfe, kein Mittel-m).
+  // ====================================================================
+
+  // A1022-08 · B.5 · §B.3.2.3.3 — Q_M Plausibilitäts-/Massenbilanz-Check
+  '44d37420-9559-4b89-a305-e87cf516e488': {
+    expectedUnits: { Q_M: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§B.3.2.3.3 (Anh. B): `Σ Q_M,i ≤ Q_M` — Plausibilitäts-/Massenbilanz-Check der Teilgebiets-Mischwasserabflüsse gegen den Gesamt-Q_M. KEIN Produzent von Q_M (das ist B.4 `f_S_QM·Q_S_aM+Q_F`). ES-1 displayOnly (stoppt Collision-Blank am B.4-Wert). KEIN Gate: die Formel enthält `Sum(...)` — in evaluate.ts nicht faithful ausdrückbar (kein SUM-Support) → NR, nicht erfinden.',
+  },
+
+  // A1022-28 · Gl.15 · §7.3.2.2 — e_0 Obergrenze (B_R_e_zul-Umstellung)
+  'a5bd51eb-1d34-4970-b633-68f8935a8ce9': {
+    expectedUnits: { e_0: '%' },
+    displayOnly: true,
+    notes:
+      '§7.3.2.2 Gl. (15): `e_0 ≤ (B_R_e_zul − V_R_aM·C_KA)/(V_R_aM·C_e − V_R_aM·C_KA)·100` — Obergrenze der zulässigen Entlastungsrate, algebraische Umstellung der Frachtbedingung Gl. (14) (`B_R_e ≤ B_R_e_zul`). KEIN Produzent von e_0 (das ist Gl.13 `V_e_MWUe/V_R_aM·100`). ES-1 displayOnly. KEIN neues Gate: die echte Frachtdurchsetzung ist Gl.14/REQ-22 (AFS63-Nachweis); ein e_0-Gate hier wäre Feld-gegen-Feld-Division (nicht faithful gegen numerischen RHS ausdrückbar) und würde die Nachweis-Logik duplizieren → never-invent.',
+  },
+
+  // A1022-28 · Gl.17 · §7.3.2.2 — e_0 Obergrenze (CSB-Konzentrationsform)
+  '46fb523a-2e8f-4f8e-b61b-ff4888a76ea4': {
+    expectedUnits: { e_0: '%' },
+    displayOnly: true,
+    notes:
+      '§7.3.2.2 Gl. (17): `e_0 ≤ (C_R_CSB − C_KA_CSB)/(C_e_CSB − C_KA_CSB)·100` — CSB-Konzentrationsform der e_0-Obergrenze. KEIN Produzent von e_0 (Gl.13). ES-1 displayOnly. KEIN Gate (Feld-gegen-Feld, Nachweis-Duplikat).',
+  },
+
+  // A1022-28 · Gl.18 · §7.3.2.2 — e_0 Obergrenze (Referenzwerte 107/70/3700)
+  '008a7bc7-43f2-4568-aa55-2f8431001c37': {
+    expectedUnits: { e_0: '%' },
+    displayOnly: true,
+    notes:
+      '§7.3.2.2 Gl. (18): `e_0 ≤ (107−70)/(C_e_CSB−70)·100 = 3.700/(C_e_CSB−70)` — Spezialform mit den Referenzwerten 107/70 (render-confirmed VA). KEIN Produzent von e_0 (Gl.13). ES-1 displayOnly. KEIN Gate: die DB-Formel enthält zusätzlich ein `= 3700/(…)` (Doppel-Gleichheit, kein evaluate.ts-Ausdruck) und wäre ohnehin Feld-gegen-Feld → never-invent.',
+  },
+
+  // A1022-33 · Gl.26 · §7.3.4.5 — Q_Dr Mindest-Drosselabfluss (Summenform)
+  '29c268ef-33c1-4b28-8269-c06d8465729f': {
+    expectedUnits: { Q_Dr: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.5 Gl. (26): `Q_Dr ≥ Q_T_aM + Q_R_krit + Σ Q_Dr,i` — Mindestanforderung an den Gesamt-Drosselabfluss. KEIN Produzent (Minimum-Ungleichung). ES-1 displayOnly. KEIN Gate: Formel enthält `Sum(...)` (kein SUM in evaluate.ts) und die Quelle druckt hier keine „muss"-Grenze als hartes Einzel-Gate → NR, never-invent.',
+  },
+
+  // A1022-33 · Gl.28 · §7.3.4.5 — Q_Dr Mindest-Drosselabfluss (m_Rue-Form)
+  '0708808f-84f8-4b82-82f0-a8dda7977bee': {
+    expectedUnits: { Q_Dr: 'l/s', m_Rue: null, Q_T_aM: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.5 Gl. (28): `Q_Dr ≥ (m_Rue + 1)·Q_T_aM` — bauwerksbezogene Mindestanforderung an den Drosselabfluss. KEIN Produzent (Minimum-Ungleichung, Partner von Gl.26). ES-1 displayOnly. KEIN Gate: die Quelle druckt kein eigenständiges „muss"-Q_Dr-Gate (Bemessungsminimum, A-102-2 mid-consolidation — konservativ) → never-invent, für Alvaro falls Durchsetzung gewünscht.',
+  },
+
+  // A1022-36 · Gl.22 · §7.3.4.2 — m_min_required = 7 (C_T,aM,CSB ≤ 600)
+  //   [Retag/Gate liegt in 2803d00; hier NUR displayOnly, kein Re-Fix.]
+  'd2d1bf8b-5e93-4ad8-963a-d297c89b2d14': {
+    expectedUnits: { m: null, C_T_aM_CSB: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.2 Gl. (22): `m ≥ 7 für C_T,aM,CSB ≤ 600 mg/l` — Mindestmischverhältnis (Bemessungshilfe), NICHT Produzent des mittleren m (das ist B.13/Gl.24). ES-1 displayOnly. HINWEIS: die WRITTEN-NOT-APPLIED Migration 2803d00 retaggt output_symbol m -> m_min_required und durchsetzt via REQ-24 (`m - m_min_required >= 0`, re-homed A1022-36). Hier KEIN Re-Fix — Enforcement bleibt in 2803d00; displayOnly bleibt auch nach Retag korrekt. Piecewise `if` → ENGINE-blocked (E1) für Auto-Compute.',
+  },
+
+  // A1022-36 · Gl.23 · §7.3.4.2 — m_min_required = (C_T,aM,CSB − 180)/60 (> 600)
+  //   [Retag/Gate liegt in 2803d00; hier NUR displayOnly, kein Re-Fix.]
+  '70ebb0c4-2db9-4405-85ef-da863172666c': {
+    expectedUnits: { m: null, C_T_aM_CSB: 'mg/l' },
+    displayOnly: true,
+    notes:
+      '§7.3.4.2 Gl. (23): `m ≥ (C_T,aM,CSB − 180)/60 für C_T,aM,CSB > 600 mg/l` — erhöhtes Mindestmischverhältnis (Bemessungshilfe), NICHT Produzent des mittleren m. ES-1 displayOnly. HINWEIS: Retag output_symbol m -> m_min_required + Durchsetzung via REQ-24 liegen in 2803d00 (WRITTEN-NOT-APPLIED) — hier kein Re-Fix. Piecewise `if` → ENGINE-blocked (E1).',
+  },
+
+  // ====================================================================
+  // ES-1 TAIL — DWA-A-262E · DWA-A-222 · DWA-M-187 · DWA-M-760 · FLL-Naturteich
+  //   The last five standards carrying ES-1 (inequality-as-producer) instances:
+  //   the "equation's" output_symbol IS the very field being range-/minimum-
+  //   checked, so the equation is a second producer of its own symbol → the
+  //   engine's multi-producer collision-guard can BLANK the real producer's
+  //   value or the engineer's entry. displayOnly stops the write-back; the
+  //   inequality still renders as a review / sizing aid.
+  //   ALL-DISPLAYONLY, NO NEW GATES on this tail — verified per instance:
+  //     • A-262E: enforcement pre-exists (REQ-13 B_d_TKN<=B_A_TKN_zul, warn,
+  //       tied to Gl.13/14; commit 39f2291 gate layer) — do-not-rewrite-
+  //       enforcing. Q_M rows carry SUM(...) → not faithfully expressible in
+  //       evaluate.ts (no SUM) → NR, never-invent.
+  //     • A-222: A_NB_theo/A_NB are the REQUIRED-AREA minima themselves (the
+  //       output IS the minimum); A222-14 has no separate "chosen area" field
+  //       → a gate would compare a field to itself (circular). Modal is
+  //       "maßgebend/ergibt sich zu" (Gl.22) / "können … Bemessungsvorgaben"
+  //       (Gl.27, conditional basin type) — no hard muss on a fixed threshold.
+  //       → displayOnly only; a downstream chosen-vs-required gate is FLAGGED
+  //       for Alvaro, not invented.
+  //     • M-187: ok_boolean is a BOOLEAN CHECK output (b_R_a/(A_F/A_b_a) ≤
+  //       b_krit) → benign ES-1; displayOnly, NO gate (a gate = the invented
+  //       G9 Nachweis; boolean-check outputs never get a gate). DRAFT (P3).
+  //     • M-760: NS_eff (ns_fettabscheider ≥ NS) — the enforcing sizing gate
+  //       REQ-M760-13 (`ns_fettabscheider - NS >= 0`, block, subtraction form)
+  //       already exists (commit f9b93a4, WRITTEN-NOT-APPLIED) → displayOnly
+  //       only, do-not-duplicate.
+  //     • FLL-Naturteich (⚠ P5 VA-BLOCKED — markdown extraction only, NO PDF;
+  //       provenance ceiling = DS, NEVER VA): filter_50x_rule_met is a boolean
+  //       check → benign displayOnly; splash_water_tank_volume is a number →
+  //       harmful displayOnly. Pre-existing enforcing gate REQ-33 already
+  //       covers the 150 l/m² rule (block) → no new gate. F-area (wrong
+  //       reference area: pool_underwater_surface vs source's inundated water
+  //       surface) is a SEPARATE SEV-2/DS defect — NOT fixed here.
+  //   Every threshold/modal render- or DS-confirmed against the standard's own
+  //   source (A-262E/A-222/M-187/M-760 PDF+markdown; FLL markdown only).
+  //   All-displayOnly ⇒ NO migration for this tail (nothing to enforce/insert).
+  //   UUIDs verified against equations.id (prod read-only, 2026-07-18).
+  // ====================================================================
+
+  // --- DWA-A-262E (English, November 2017) --------------------------------
+
+  // A262-06 · Gl. (6) · Q_M — NOT ES-1 (assignment `Q_M = f_S,QM·Q_S,d,aM + Q_F`
+  // FUSED with a `≥ Σ Q_Dr,RUB` constraint tail). Left as the sole Q_M producer
+  // (Gl. 8 below is displayOnly → no collision). FLAGGED for re-encoding: split
+  // the assignment from the ≥-constraint (S7/malformed) — not masked with displayOnly.
+  // A262-06 · Gl. (8) · Q_M reine verkettete Ungleichung (SUM)
+  'c99aba1c-ea82-4294-b136-9f9ce2f1f033': {
+    expectedUnits: { Q_M: 'l/s' },
+    displayOnly: true,
+    notes:
+      '§ hydraulische Belastung (PDF/MD Z. 646): `Q_M ≥ Σ Q_Dr,RU ≥ Σ Q_krit (l/s)` — reine verkettete Ungleichung, produziert nichts (DEEP F-constraint-as-eq: Gl.8 pure chained inequality). C9-Mitproduzent von Q_M mit Gl. (6). ES-1 displayOnly. KEIN Gate: verkettetes `≥…≥` + SUM(...) → in evaluate.ts nicht ausdrückbar → NR, never-invent.',
+  },
+
+  // A262-25 · Gl. (13) · A_F_TKN_red piecewise (≥-Zweig)
+  'cb011262-3770-41a8-bf27-293f19aafe90': {
+    expectedUnits: { A_F_TKN_red: 'm²', B_d_TKN: 'g/(m²·d)', A_F_CSB_red: 'm²', B_A_TKN_zul: 'g/(m²·d)' },
+    displayOnly: true,
+    notes:
+      '§4.5 (PDF/MD Z. 1098-1101): "the dimensioning requirements according to Section 4.5 apply: for B_d,TKN/A_F,CSB,red ≥ B_A,TKN,zul use: A_F,TKN,red = B_d,TKN/B_A,TKN,zul" — Produzent der reduzierten TKN-Filterfläche (kein Grenzwert). ES-1 displayOnly (C9-Mitproduzent mit Gl.14, identische RHS = Quell-Quirk, DEEP-bestätigt VA p35 450 dpi). KEIN neues Gate: die bindende Bedingung `B_d_TKN ≤ B_A_TKN_zul` ist bereits als REQ-13 (warn, A262-25) gegatet → do-not-rewrite-enforcing.',
+  },
+  // A262-25 · Gl. (14) · A_F_TKN_red piecewise (<-Zweig, identische RHS)
+  '7e28ed89-6c72-4058-b450-fe8d14f6e1c2': {
+    expectedUnits: { A_F_TKN_red: 'm²', B_d_TKN: 'g/(m²·d)', A_F_CSB_red: 'm²', B_A_TKN_zul: 'g/(m²·d)' },
+    displayOnly: true,
+    notes:
+      '§4.5 (PDF/MD Z. 1102): "for B_d,TKN/A_F,CSB,red < B_A,TKN,zul use: A_F,TKN,red = B_d,TKN/B_A,TKN,zul" — <-Zweig des piecewise mit IDENTISCHER RHS wie Gl.13 (DEEP: Quell-Quirk, keine Encoder-Fehler, VA p35). Produzent von A_F_TKN_red, C9-Mitproduzent mit Gl.13. ES-1 displayOnly. KEIN Gate (Enforcement = REQ-13, pre-existing).',
+  },
+
+  // --- DWA-A-222 (Mai 2011, korr. Okt. 2018 · WD korr5) --------------------
+
+  // A222-14 · Gl. (22) · A_NB_theo erforderliche NB-Fläche (Trichterbecken)
+  'f5215c5e-172a-4151-8288-b4342bb9b4ca': {
+    expectedUnits: { A_NB_theo: 'm²', Q_bem: 'm³/h', RV: null },
+    displayOnly: true,
+    notes:
+      '§4.4.2 (MD Z. 818-821): "Für die Berechnung ist die theoretische Oberfläche maßgebend. Sie ergibt sich zu: A_NB,theo ≥ Q_bem·(1+RV)/2,2 (m²)" — die erforderliche Mindestfläche IST das Bemessungsergebnis (Constraint-as-Producer, DEEP C9). ES-1 displayOnly (stoppt Collision-Blank). KEIN Gate: A222-14 trägt kein separates "gewählte Fläche"-Feld (nur A_NB_theo + A_NB + nachklaerung_typ) → ein Gate vergliche das Feld mit sich selbst (zirkulär); Modal "maßgebend/ergibt sich zu" ist kein harter muss auf einen festen Schwellenwert. Ein downstream gewählt-vs-erforderlich-Gate ist FÜR ALVARO geflaggt, nicht erfunden.',
+  },
+  // A222-14 · Gl. (27) · A_NB erforderliche NB-Fläche (horizontal durchströmt)
+  '285e3568-0773-4177-821c-9bf2ea769553': {
+    expectedUnits: { A_NB: 'm²', Q_bem: 'm³/h', RV: null },
+    displayOnly: true,
+    notes:
+      '§4.4.3 (MD Z. 863-866): "… können auch horizontal durchströmte Nachklärbecken mit den nachstehenden Bemessungsvorgaben eingesetzt werden: A_NB ≥ Q_bem·(1+RV)/2,8 (m²)" — bedingte (Beckentyp-abhängige) erforderliche Mindestfläche; die Fläche IST das Bemessungsergebnis. ES-1 displayOnly. KEIN Gate: zirkulär (kein separates Wahl-Feld) + Modal "können … Bemessungsvorgaben" ist konditional/optional, kein muss → never-invent. Geflaggt für Alvaro (wie Gl.22).',
+  },
+
+  // --- DWA-M-187 GD (Entwurf September 2025 · P3 draft) --------------------
+
+  // M187-09 · Gl. (2) · ok_boolean AFS63-Flächenbelastungs-Nachweis
+  '6b3dc34c-a3da-4cfd-9e3a-803109b1bd12': {
+    expectedUnits: { b_R_a: 'kg/(m²·a)', A_F: 'm²', A_b_a: 'ha', b_krit: 'kg/(m²·a)' },
+    displayOnly: true,
+    notes:
+      '§5.5.4 (PDF p37, render-VA): "Nachweis der zulässigen … maximal zulässigen AFS63-Filterflächenbelastung b_krit = 7 kg/(m²·a) gemäß … DWA-A 178:2019" — `b_R_a/(A_F/A_b_a) ≤ b_krit` → output_symbol = ok_boolean (BOOLEAN Prüf-Flag, kein Produzent, DEEP S7). Benigne ES-1: displayOnly, KEIN Gate (ein Gate wäre die erfundene G9-Nachweis-Anforderung; Boolean-Check-Outputs bekommen nie ein Gate). P4-adoptiert aus DWA-A 178:2019. P3-Entwurf — bei Weißdruck re-verifizieren.',
+  },
+  // M187-22 · Gl. (2) · ok_boolean (S3 ×2 Duplikat)
+  '75d9844f-9f7f-45ba-a8fc-e2bf850be7a5': {
+    expectedUnits: { b_R_a: 'kg/(m²·a)', A_F: 'm²', A_b_a: 'ha', b_krit: 'kg/(m²·a)' },
+    displayOnly: true,
+    notes:
+      '§5.5.4 (PDF p37): `b_R_a/(A_F/A_b_a) ≤ b_krit` → ok_boolean (Boolean-Check). Benigne ES-1 displayOnly, KEIN Gate. S3-Duplikat von M187-09 Gl.2 (S3 ×2 dedup FÜR ALVARO geflaggt, nicht ausgeführt). P3-Entwurf.',
+  },
+
+  // --- DWA-M-760 WD (April 2025 · final) -----------------------------------
+
+  // M760-09 · EQ-M760-02 · NS_eff Fettabscheider-Nenngröße ns ≥ NS
+  '2ffe9ec8-e7d8-41bc-8546-6349881acb06': {
+    expectedUnits: { ns_fettabscheider: null, NS: null },
+    displayOnly: true,
+    notes:
+      '§7.2.6.3 + DIN EN 1825-2:2002 6.1 (VC, VA-blockiert): `ns_fettabscheider ≥ NS` → output NS_eff (Constraint-as-Producer, DEEP S7). ES-1 displayOnly (stoppt Collision-Blank). KEIN neues Gate: das durchsetzende Sizing-Gate REQ-M760-13 (`ns_fettabscheider - NS >= 0`, block, Subtraktionsform) existiert bereits (Commit f9b93a4, WRITTEN-NOT-APPLIED) → do-not-duplicate.',
+  },
+  // M760-15 · EQ-M760-02 · NS_eff (S3 ×2 Duplikat, Sizing-Worksheet)
+  '12244089-c454-4436-a855-6fba6946ea86': {
+    expectedUnits: { ns_fettabscheider: null, NS: null },
+    displayOnly: true,
+    notes:
+      '§7.2.6.3 + DIN EN 1825-2:2002 6.1: `ns_fettabscheider ≥ NS` → NS_eff. ES-1 displayOnly. S3-Duplikat von M760-09 EQ-M760-02 (S3 ×2 dedup FÜR ALVARO geflaggt). Enforcement = REQ-M760-13 auf M760-15 (pre-existing, Commit f9b93a4) → KEIN neues Gate.',
+  },
+
+  // --- FLL-Naturteich (2017 2. Aufl. · ⚠ P5 VA-BLOCKED, DS-Decke, KEIN PDF) --
+
+  // FLLNT-10 · EQ-01 · filter_50x_rule_met 50×-Regel (Boolean-Check)
+  '0a875bd8-1e8f-47f2-9a38-62396ea73c70': {
+    expectedUnits: { filter_colonized_surface_actual: 'm²', pool_underwater_surface: 'm²' },
+    displayOnly: true,
+    notes:
+      '⚠ DS (kein PDF, Provenienz-Decke DS, NIE VA). §10.3.1 / App.5 (MD Z. 1569/2770/4068): "at least 50-times all visible [underwater] surfaces" → `filter_colonized_surface_actual ≥ 50·pool_underwater_surface` → output filter_50x_rule_met (BOOLEAN Prüf-Flag, DEEP S7). Benigne ES-1: displayOnly, KEIN Gate (Boolean-Check bekommt nie ein Gate; never-invent).',
+  },
+  // FLLNT-11 · EQ-05 · splash_water_tank_volume 150 l/m² (Zahl, harmful)
+  '27f94c84-87bd-411e-a9e5-c7546c59f713': {
+    expectedUnits: { splash_water_tank_volume: 'l', pool_underwater_surface: 'm²' },
+    displayOnly: true,
+    notes:
+      '⚠ DS (kein PDF, DS-Decke, NIE VA). §10.3.1 (MD Z. 2936-2937): "The usable volume of the splash water tank must be dimensioned so that at least 150 l per square metre can be provided to the inundated water surface." → `splash_water_tank_volume ≥ 150·pool_underwater_surface` → produziert eine Zahl (harmful ES-1). displayOnly (stoppt Collision-Blank). KEIN neues Gate: das durchsetzende REQ-33 (`IF rigid_overflow_used THEN splash_water_tank_volume ≥ 150·pool_underwater_surface`, block, Guard-Grammatik evaluate.ts-unterstützt) existiert bereits → do-not-duplicate. HINWEIS F-area (SEV-2, DS): sowohl EQ-05 als auch REQ-33 nutzen pool_underwater_surface (Boden + Wandfläche) statt der Quell-Bezugsfläche inundated_water_surface (horizontale Wasserfläche) → überdimensioniert. NICHT hier gefixt (ES-1-Scope + DS-Decke + never-invent) → FÜR ALVARO geflaggt.',
+  },
+
+  // ====================================================================
+  // VSME · B03.300 GHG-intensity — VSME para 31 (Task 5, feat/vsme-gate-repair)
+  //
+  //   KEY-CONVENTION DEVIATION (documented, not silent): every key above is a
+  //   real `equations.id` (DB-generated `uuid ... defaultRandom()`, see
+  //   src/lib/db/schema.ts) — verified against a standard already imported to
+  //   prod. VSME has NOT been (re-)imported with these 4 hand-authored rows
+  //   yet (they are new in this task's build-workbook.ts output, still a
+  //   workbook, not a DB row) — so no real id exists to hardcode. Keyed here
+  //   by the equation_number the build script assigns deterministically
+  //   (VSME-EQ-11..14, continuing the linkbase sequence VSME-EQ-01..10 — see
+  //   scripts/vsme/build-workbook.ts section 7b), which is stable and
+  //   human-traceable. ⚠ ACTION REQUIRED AFTER IMPORT: once VSME (re-)imports
+  //   via scripts/import-pass3c.ts, query `equations.id` for
+  //   worksheet_template VSME-B03.300 equation_number VSME-EQ-11..14 and
+  //   REKEY these 4 entries to the real UUIDs (the engine looks up
+  //   `equationProfiles[eq.id]`, per formula.ts / use-equation-engine.ts — a
+  //   stale equation_number key here is a silent no-op profile in prod).
+  //
+  //   Source (rendered PDF, printed p.9, verbatim): "31. The undertaking
+  //   shall disclose its GHG intensity calculated by dividing 'gross
+  //   greenhouse gas (GHG) emissions' disclosed under paragraph 30 by
+  //   'turnover (in Euro)' disclosed under paragraph 24(e)(iv)." Turnover's
+  //   taxonomy-derived unit (scripts/vsme/units.ts buildUnitMap) is already
+  //   'EUR' — confirmed matching para 31, no drift to flag.
+  //
+  //   Cross-worksheet: dividends live on VSME-B03.200, Turnover on
+  //   VSME-B01.000, outputs on VSME-B03.300; consumer_worksheets declared
+  //   for all 5 (build-workbook.ts section 5). If those inputs still don't
+  //   resolve at runtime on B03.300, that is the pre-existing, OPEN
+  //   engine-output-materialization gap — not fixed here (KNOWN LIMIT).
+  // ====================================================================
+
+  // VSME-B03.300 · VSME-EQ-11 · VSME B3 para 31 — Scope1+2 intensity (location-based)
+  'VSME-EQ-11': {
+    expectedUnits: {
+      TotalGrossLocationBasedScope1AndScope2GHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'Scope1AndScope2GreenhouseGasEmissionsIntensityValueLocationBased = TotalGrossLocationBasedScope1AndScope2GHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
+
+  // VSME-B03.300 · VSME-EQ-12 · VSME B3 para 31 — Scope1+2 intensity (market-based)
+  'VSME-EQ-12': {
+    expectedUnits: {
+      TotalGrossMarketBasedScope1AndScope2GHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'Scope1AndScope2GreenhouseGasEmissionsIntensityValueMarketBased = TotalGrossMarketBasedScope1AndScope2GHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
+
+  // VSME-B03.300 · VSME-EQ-13 · VSME B3 para 31 — total GHG intensity (location-based)
+  'VSME-EQ-13': {
+    expectedUnits: {
+      TotalGrossLocationBasedGHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'TotalLocationBasedGreenhouseGasEmissionsIntensityValue = TotalGrossLocationBasedGHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
+  },
+
+  // VSME-B03.300 · VSME-EQ-14 · VSME B3 para 31 — total GHG intensity (market-based)
+  'VSME-EQ-14': {
+    expectedUnits: {
+      TotalGrossMarketBasedGHGEmissions: 'tCO2eq',
+      Turnover: 'EUR',
+    },
+    notes:
+      'VSME §31 (PDF p.9, verbatim): GHG intensity = gross GHG emissions (§30) ÷ turnover in Euro (§24(e)(iv)). ' +
+      'TotalMarketBasedGreenhouseGasEmissionsIntensityValue = TotalGrossMarketBasedGHGEmissions / Turnover. ' +
+      'Output unit tCO2eq/EUR. KEY = equation_number placeholder pending VSME import — see file-header note above; rekey to equations.id after import.',
   },
 };

@@ -154,6 +154,16 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
       errors.push({ sheet: 'Compliance_Requirements', row, message: `Duplicate requirement_code: ${cr.requirement_code}` });
     }
     crKeys.add(cr.requirement_code);
+    if (cr.worksheet_code && cr.worksheet_code.trim()) {
+      const known = parsed.worksheets.some((w) => w.worksheet_code === cr.worksheet_code!.trim());
+      if (!known) {
+        errors.push({
+          sheet: 'Compliance_Requirements',
+          row,
+          message: `Compliance_Requirements: unknown worksheet_code "${cr.worksheet_code}" on ${cr.requirement_code}`,
+        });
+      }
+    }
   });
 
   return errors;

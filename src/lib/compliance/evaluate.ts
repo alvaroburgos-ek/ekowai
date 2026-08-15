@@ -240,8 +240,11 @@ class Parser {
       if (right === null) return null;
       // Backward-compatible simple comparison: a bare symbol on the left compared to a
       // single literal/bare-ident on the right keeps the original string-literal RHS
-      // semantics. Anything involving arithmetic uses the numeric acompare path.
-      if (left.kind === 'aref' && isSimpleOperand(right)) {
+      // semantics — EXCEPT for relational operators, where a bare-ident RHS is a value
+      // reference, not an enum literal (`V_s >= V_S_min` must resolve V_S_min). Enum
+      // equality (`status == some_value`) stays on the legacy literal path.
+      const relational = next.value === '>=' || next.value === '<=' || next.value === '>' || next.value === '<';
+      if (left.kind === 'aref' && isSimpleOperand(right) && !(relational && right.kind === 'aref')) {
         return { kind: 'compare', symbol: left.symbol, op: next.value, rhs: operandToLiteral(right) };
       }
       return { kind: 'acompare', left, op: next.value, right };
@@ -419,7 +422,18 @@ function evalNode(n: Node, lookup: (sym: string) => Value | undefined, st: EvalS
     case 'compare': {
       const v = lookup(n.symbol);
       if (v === undefined || v === null || v === '') { st.missing.add(n.symbol); return 'missing'; }
-      const r = n.rhs.value;
+      let r = n.rhs.value;
+      // Var-vs-var equality (review finding #1): a bare-ident RHS that IS a
+      // project symbol WITH a value compares against that value — otherwise
+      // `IF n_a >= n_b THEN x == n_a` is unsatisfiable (x == "n_a" as string).
+      // Enum literals never resolve as symbols, so enum gates keep string
+      // semantics. Corpus-checked: no enum value shares a name with a field.
+      if (typeof r === 'string' && (n.op === '==' || n.op === '!=')) {
+        const resolved = lookup(r);
+        if (resolved !== undefined && resolved !== null && resolved !== '') {
+          r = resolved;
+        }
+      }
       return compare(v, n.op, r) ? 'true' : 'false';
     }
     case 'acompare': {
@@ -530,6 +544,38 @@ export function evaluateCondition(
   const result = evalNode(ast, valuesBySymbol, st);
   if (result === 'missing') return { kind: 'pending', missingSymbols: [...st.missing] };
   return result === 'true' ? { kind: 'pass' } : { kind: 'fail' };
+}
+
+/**
+ * Additive export surface for the gate explainer (`explain.ts`). The explainer
+ * walks the SAME AST and reuses the SAME leaf semantics — no logic fork.
+ */
+export type ConditionValue = Value;
+export type ConditionNode = Node;
+export type ConditionArithNode = ArithNode;
+
+/** Parse a condition to its AST, or null when it is not machine-evaluable. */
+export function parseCondition(condition: string): Node | null {
+  if (!condition || !condition.trim()) return null;
+  const toks = tokenize(condition);
+  if (!toks || toks.length === 0) return null;
+  return new Parser(toks).parse();
+}
+
+/** Evaluate a single node to the internal ternary — reused by the explainer. */
+export function evaluateNode(
+  n: Node,
+  lookup: (sym: string) => Value | undefined,
+): 'true' | 'false' | 'missing' {
+  return evalNode(n, lookup, { missing: new Set() });
+}
+
+/** Evaluate an arithmetic operand to a number (null = missing/non-finite). */
+export function evaluateArithNode(
+  n: ArithNode,
+  lookup: (sym: string) => Value | undefined,
+): number | null {
+  return evalArith(n, lookup, { missing: new Set() });
 }
 
 /**

@@ -4,6 +4,7 @@ import {
   text,
   timestamp,
   date,
+  time,
   jsonb,
   numeric,
   bigint,
@@ -14,6 +15,7 @@ import {
   primaryKey,
   unique,
   index,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -54,6 +56,10 @@ export const orgs = pgTable('orgs', {
   email: text('email'),
   website: text('website'),
   vatId: text('vat_id'),
+  // Angebots-Engine (Slice E1) — internal calibration, never client-visible.
+  // Mirrors the letterhead columns: org-level singletons, nullable until set.
+  internalHourlyRate: numeric('internal_hourly_rate'),
+  targetMarginPct: numeric('target_margin_pct'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -133,6 +139,11 @@ export const standards = pgTable('standards', {
   titleEn: text('title_en'),
   version: text('version').notNull(),
   issuedYear: integer('issued_year'),
+  /** Stage-5 edition lifecycle: date this edition became valid. */
+  validFrom: date('valid_from'),
+  /** Stage-5 edition lifecycle: self-FK to the standard that replaces this
+   * edition (no cascade — superseded editions stay referenceable). */
+  supersededBy: uuid('superseded_by').references((): AnyPgColumn => standards.id),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -191,6 +202,9 @@ export const fields = pgTable(
     verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     verificationNote: text('verification_note'),
+    /** Verbatim quote from the standard's own text/table backing the
+     * verification (doctrine SR-1). Required for verified_against_standard. */
+    verificationQuote: text('verification_quote'),
     /** Soft-deactivation marker. Set false by the Pile-2 deprecation pass for
      * fields that have no source basis and no code consumer; their rows are
      * retained for audit trail but the worksheet form filters them out. */
@@ -231,6 +245,8 @@ export const equations = pgTable(
     verifiedByUserId: uuid('verified_by_user_id').references(() => profiles.id, { onDelete: 'set null' }),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     verificationNote: text('verification_note'),
+    /** Verbatim quote from the standard (SR-1) — see fields.verificationQuote. */
+    verificationQuote: text('verification_quote'),
   },
   (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
 );
@@ -362,6 +378,11 @@ export const projectParameters = pgTable(
     enteredBy: uuid('entered_by').notNull(),
     enteredAt: timestamp('entered_at', { withTimezone: true }).notNull().defaultNow(),
     isStale: boolean('is_stale').notNull().default(false),
+    /** Kundenangabe: value was delivered by the client, not determined by
+     * EKOWAI — the AGB liability carve-out for client-supplied input errors
+     * applies. Toggled via setClientSupplied (src/lib/actions/client-supplied.ts),
+     * never by saveWorksheet. */
+    clientSupplied: boolean('client_supplied').notNull().default(false),
   },
   (t) => ({ uniqProjectField: unique().on(t.projectId, t.fieldId) }),
 );
@@ -551,6 +572,357 @@ export const co2ActivityLines = pgTable(
     createdBy: uuid('created_by'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
+);
+
+// =============================================================================
+// ROLE-BASED RATES (cost layer — multiple paid roles per org)
+// =============================================================================
+// Org-level paid roles (Ingenieur, Freelancer, Praktikant, Coach, …), each
+// with its own hourly rate. Replaces the single-org-rate assumption: effort
+// entries and offer positions may reference a role; margin math resolves
+// position rate ?? org internal_hourly_rate. Writes are owner/admin-gated
+// (mirrors the setOrgRates gate), reads are org-member.
+export const rateRoles = pgTable(
+  'rate_roles',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    hourlyRateEur: numeric('hourly_rate_eur').notNull(),
+    /** Deactivated roles stay referenced by old rows but leave the pickers. */
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    orgNameUnique: unique('rate_roles_org_name_unique').on(t.orgId, t.name),
+    orgIdx: index('rate_roles_org_idx').on(t.orgId),
+  }),
+);
+
+// =============================================================================
+// EFFORT LOGGING (roadmap v2 §2.9 — dependency for the Angebots-Engine)
+// =============================================================================
+// Per-project work-time entries. `position` is free text for now — offer
+// positions arrive with Slice E1 and will link entries to Angebot line items.
+export const effortEntries = pgTable(
+  'effort_entries',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => profiles.id, { onDelete: 'set null' }),
+    workDate: date('work_date').notNull(),
+    hours: numeric('hours').notNull(),
+    position: text('position').notNull(),
+    /** Optional paid role (rate_roles) — the rate the entry was worked at. */
+    roleId: uuid('role_id').references(() => rateRoles.id, { onDelete: 'set null' }),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectDateIdx: index('effort_entries_project_date_idx').on(t.projectId, t.workDate),
+  }),
+);
+
+// =============================================================================
+// ANGEBOTS-ENGINE (Slice E1 — margin-first, internal-only)
+// =============================================================================
+// EKOWAI's own fee offers. Margin math (Festpreis − hours×internal rate −
+// externals) lives in src/lib/offers/margin.ts and is NEVER persisted or
+// client-visible; the client PDF shows positions + Festpreis only.
+export const offers = pgTable(
+  'offers',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    /** draft | sent | accepted | rejected — plain text, no workflow yet (YAGNI). */
+    status: text('status').notNull().default('draft'),
+    festpreisEur: numeric('festpreis_eur').notNull(),
+    validUntil: date('valid_until'),
+    /** e.g. "10 Werktage ab vollständigen Unterlagen" — free text for the PDF. */
+    bearbeitungszeit: text('bearbeitungszeit'),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('offers_project_idx').on(t.projectId),
+  }),
+);
+
+// Offer line items. estimated_hours feeds the internal-cost side; external
+// costs (lab, Gutachter) are passed through, never marked up silently.
+export const offerPositions = pgTable(
+  'offer_positions',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    offerId: uuid('offer_id')
+      .notNull()
+      .references(() => offers.id, { onDelete: 'cascade' }),
+    position: text('position').notNull(),
+    estimatedHours: numeric('estimated_hours').notNull(),
+    externalCostEur: numeric('external_cost_eur').notNull().default('0'),
+    /** Optional paid role (rate_roles) — overrides the org rate in margin math. */
+    roleId: uuid('role_id').references(() => rateRoles.id, { onDelete: 'set null' }),
+    orderIndex: integer('order_index').notNull().default(0),
+    note: text('note'),
+  },
+  (t) => ({
+    offerIdx: index('offer_positions_offer_idx').on(t.offerId),
+  }),
+);
+
+// =============================================================================
+// PARAMETRISCHE KOSTENSCHÄTZUNG (Slice E2 — the CLIENT's build cost)
+// =============================================================================
+// Unit-price catalog. Ships EMPTY and grows only from real sources (BKI-type
+// references, contractor quotes, own project actuals) — prices are NEVER
+// invented, which is why `source` and `price_date` are NOT NULL: a price
+// without provenance cannot exist. Stale prices (> 365 d) are flagged in the
+// app and the PDF — the provenance doctrine applied to euros.
+export const costItems = pgTable(
+  'cost_items',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    orgId: uuid('org_id')
+      .notNull()
+      .references(() => orgs.id, { onDelete: 'cascade' }),
+    position: text('position').notNull(),
+    unit: text('unit'),
+    priceLowEur: numeric('price_low_eur'),
+    priceLikelyEur: numeric('price_likely_eur'),
+    priceHighEur: numeric('price_high_eur'),
+    /** Where the price comes from (BKI, Angebot Fa. X, eigene Abrechnung …). */
+    source: text('source').notNull(),
+    /** Date the price was valid — staleness is computed from this. */
+    priceDate: date('price_date').notNull(),
+    /** DIN-276 Kostengruppe code, e.g. '41x'. */
+    din276Group: text('din276_group'),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    active: boolean('active').notNull().default(true),
+  },
+  (t) => ({
+    orgIdx: index('cost_items_org_idx').on(t.orgId),
+  }),
+);
+
+// One Kostenschätzung per deliverable (Wirtschaftlichkeits-Check, Vergabe,
+// Förderantrag). `snapshot_id` version-locks the estimate to the approve
+// snapshot the quantities came from; contingency is structural — NOT NULL,
+// default 10 %, bounded 5–15 in the app, and an estimate whose contingency
+// falls below 5 % renders WITH a warning (never silently without).
+export const costEstimates = pgTable(
+  'cost_estimates',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    standardCode: text('standard_code'),
+    title: text('title').notNull(),
+    contingencyPct: numeric('contingency_pct').notNull().default('10'),
+    /** Approve-snapshot the quantities came from (null = no approved state yet). */
+    snapshotId: uuid('snapshot_id'),
+    /** draft | issued — plain text, no workflow yet (YAGNI, mirrors offers). */
+    status: text('status').notNull().default('draft'),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('cost_estimates_project_idx').on(t.projectId),
+  }),
+);
+
+// Estimate line items. Prices are a FROZEN COPY taken from the catalog item at
+// add time (the catalog can move on; the issued estimate must not drift).
+// `source_symbol` records which design value the quantity came from
+// (e.g. 'V_storage' off the Wertetabelle) — quantity provenance.
+export const costEstimateLines = pgTable(
+  'cost_estimate_lines',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    estimateId: uuid('estimate_id')
+      .notNull()
+      .references(() => costEstimates.id, { onDelete: 'cascade' }),
+    costItemId: uuid('cost_item_id').references(() => costItems.id, { onDelete: 'set null' }),
+    position: text('position').notNull(),
+    quantity: numeric('quantity').notNull(),
+    unit: text('unit'),
+    /** Design-value symbol the quantity came from, e.g. 'V_storage'. */
+    sourceSymbol: text('source_symbol'),
+    priceLowEur: numeric('price_low_eur').notNull(),
+    priceLikelyEur: numeric('price_likely_eur').notNull(),
+    priceHighEur: numeric('price_high_eur').notNull(),
+    din276Group: text('din276_group'),
+    orderIndex: integer('order_index').notNull().default(0),
+  },
+  (t) => ({
+    estimateIdx: index('cost_estimate_lines_estimate_idx').on(t.estimateId),
+  }),
+);
+
+// Real contractor bids entered against an estimate (Vergabe / Slice E3
+// Nachkalkulation on the client's side) — the feedback loop the catalog
+// learns from. Projected vs. real, this time in the client's euros.
+export const contractorBids = pgTable(
+  'contractor_bids',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    estimateId: uuid('estimate_id').references(() => costEstimates.id, { onDelete: 'set null' }),
+    bidder: text('bidder').notNull(),
+    position: text('position'),
+    amountEur: numeric('amount_eur').notNull(),
+    bidDate: date('bid_date'),
+    note: text('note'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectIdx: index('contractor_bids_project_idx').on(t.projectId),
+  }),
+);
+
+// =============================================================================
+// MONITORING-JOURNAL (interim — documentation-only precursor to Stage 8)
+// =============================================================================
+// Deliberately stores NO parameter values/units: the time-series schema is
+// frozen later from the owner's Messplan. Until then this journal only
+// documents THAT something happened (Laborbericht eingegangen, Begehung
+// durchgeführt …) and optionally links the uploaded document.
+export const monitoringEntries = pgTable(
+  'monitoring_entries',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    entryDate: date('entry_date').notNull(),
+    /** Optional activity times (HH:MM) — duration is always derived, never
+     * stored. End-after-start is enforced app-side (monitoring-core.ts). */
+    startTime: time('start_time'),
+    endTime: time('end_time'),
+    /**
+     * 'laborbericht' | 'messung' | 'begehung' | 'wartung' | 'foto' |
+     * 'dokumentation' | 'sonstiges' — validated app-side (monitoring-core.ts),
+     * plain text in DB.
+     */
+    category: text('category').notNull(),
+    note: text('note'),
+    /** Link to an uploaded lab report / photo in project_documents. */
+    documentId: uuid('document_id').references(() => projectDocuments.id, {
+      onDelete: 'set null',
+    }),
+    /** Optional link to the guideline (standards.id) this entry refers to —
+     * app-validated to be one of the project's attached standards
+     * (monitoring.ts). */
+    standardId: uuid('standard_id').references(() => standards.id, {
+      onDelete: 'set null',
+    }),
+    createdBy: uuid('created_by').references(() => profiles.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    projectDateIdx: index('monitoring_entries_project_date_idx').on(
+      t.projectId,
+      t.entryDate,
+    ),
+  }),
+);
+
+// =============================================================================
+// DELIVERABLE REGISTER (roadmap Stage 10, AGB §3(2))
+// =============================================================================
+// First-class, automatic record of every emitted deliverable per project —
+// written by the PDF/export routes AFTER a successful buffer build (see
+// src/lib/deliverables/record.ts). Read-only in the UI (Leistungsregister
+// panel); a register failure must NEVER break a document emission.
+export const deliverables = pgTable(
+  'deliverables',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    projectId: uuid('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    /** Guideline the deliverable belongs to; NULL for project-level documents. */
+    standardCode: text('standard_code'),
+    /**
+     * 'bericht' | 'konformitaetserklaerung' | 'wertetabelle' |
+     * 'einreichungs_checkliste' | 'pruefmemo' | 'angebot' |
+     * 'kostenschaetzung' | 'vsme_export' | 'projektbericht' — validated
+     * app-side (src/lib/deliverables/kinds.ts), plain text in DB.
+     */
+    kind: text('kind').notNull(),
+    title: text('title').notNull(),
+    /** Approve-snapshot the emitted document was locked to (when it carries one). */
+    snapshotId: uuid('snapshot_id'),
+    emittedBy: uuid('emitted_by').references(() => profiles.id, { onDelete: 'set null' }),
+    emittedAt: timestamp('emitted_at', { withTimezone: true }).notNull().defaultNow(),
+    meta: jsonb('meta'),
+  },
+  (t) => ({
+    projectEmittedIdx: index('deliverables_project_emitted_idx').on(
+      t.projectId,
+      t.emittedAt,
+    ),
+  }),
+);
+
+// =============================================================================
+// MAINTENANCE SCHEDULES (library-level — verbatim maintenance duties per
+// standard)
+// =============================================================================
+// Standard-scoped (NOT project-scoped) reference data, like standards/fields:
+// each row is one maintenance/inspection duty a guideline prescribes, with the
+// VERBATIM printed interval wording (SR-1 quote + page in source_quote). The
+// table ships EMPTY — rows are seeded exclusively by the extraction pack from
+// the standard's own text, never by hand. Projects inherit duties via their
+// attached standards; due-state is computed app-side against the project's
+// Monitoring-Journal (src/lib/monitoring/schedule.ts).
+export const maintenanceSchedules = pgTable(
+  'maintenance_schedules',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    standardId: uuid('standard_id')
+      .notNull()
+      .references(() => standards.id, { onDelete: 'cascade' }),
+    /** Short duty title, e.g. "Sichtkontrolle der Mulde". */
+    title: text('title').notNull(),
+    /**
+     * Same six-value vocabulary as monitoring_entries.category
+     * ('laborbericht' | 'messung' | 'begehung' | 'wartung' | 'foto' |
+     * 'sonstiges') — validated app-side (monitoring-core.ts); journal entries
+     * of this category tick the duty off.
+     */
+    category: text('category').notNull(),
+    /** VERBATIM printed interval wording, e.g. "halbjährlich". */
+    /** Verbatim printed frequency wording; NULL when the source prints none
+     * (inventing wording would violate SR-1). */
+    intervalText: text('interval_text'),
+    /**
+     * Numeric interpretation of interval_text in months; NULL when the source
+     * prints no fixed number (e.g. "bei Bedarf") → due-state 'unscheduled'.
+     */
+    intervalMonths: numeric('interval_months'),
+    /** Clause/table the duty comes from, e.g. "Abschn. 6.2". */
+    clauseReference: text('clause_reference'),
+    /** SR-1: verbatim quote from the standard's own text + page ref. */
+    sourceQuote: text('source_quote').notNull(),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    standardIdx: index('maintenance_schedules_standard_idx').on(t.standardId),
+  }),
 );
 
 // =============================================================================

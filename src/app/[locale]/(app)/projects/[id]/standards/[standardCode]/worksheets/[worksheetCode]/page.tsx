@@ -271,6 +271,27 @@ export default async function WorksheetPage({
     initialSources[f.id] = (p?.citationSource as { docId: string; page?: number; note?: string } | null) ?? null;
   }
 
+  // Kundenangabe flags — same source rows as citations (project_parameters);
+  // only true entries are threaded to keep the payload small.
+  const clientSuppliedByFieldId: Record<string, boolean> = {};
+  for (const f of mergedFields) {
+    const p = parameters.get(f.id);
+    if (p?.clientSupplied) clientSuppliedByFieldId[f.id] = true;
+  }
+
+  // Server-engine-written parameters render read-only (single-source rule):
+  // source_type='computed' is written only by server engines (VSME CO₂), and
+  // — scoped to VSME so DWA-A-138 behavior is untouched — 'derived' rows
+  // (B04 per-medium register sums) lock the same way.
+  const serverComputedFieldIds: string[] = [];
+  for (const f of mergedFields) {
+    const p = parameters.get(f.id);
+    if (!p) continue;
+    if (p.sourceType === 'computed' || (standardCode === 'VSME' && p.sourceType === 'derived')) {
+      serverComputedFieldIds.push(f.id);
+    }
+  }
+
   return (
     <NormTextProvider standardCode={standardCode}>
     <div className="space-y-6">
@@ -319,7 +340,7 @@ export default async function WorksheetPage({
               dataType: f.dataType as 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json',
               isRequired: f.isRequired,
               enumValues: f.enumValues as Array<{ value: string; label_de: string | null; label_en: string | null }> | null,
-              validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; raw?: string } | null,
+              validationRules: f.validationRules as { min?: number; max?: number; maxLength?: number; extensible?: boolean; raw?: string } | null,
               clauseReference: f.clauseReference,
               description: f.description,
               verificationStatus: f.verificationStatus,
@@ -366,12 +387,14 @@ export default async function WorksheetPage({
           ambiguousSymbols={Object.fromEntries(ambiguousSymbols)}
           prefillSourceByFieldId={prefillSourceByFieldId}
           siteProfileKeyByFieldId={siteProfileKeyByFieldId}
+          clientSuppliedByFieldId={clientSuppliedByFieldId}
           standardCode={standardCode}
           docs={docs}
           priorSnapshotCount={priorSnapshotCount}
           diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
           isPlatformEngineer={isPlatformEngineer}
           surfaceSource={surfaceSource}
+          serverComputedFieldIds={serverComputedFieldIds}
         />
       </main>
     </div>

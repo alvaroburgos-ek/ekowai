@@ -5,6 +5,11 @@ import {
   ArrowRight,
   ScrollText,
   Leaf,
+  Clock,
+  Calculator,
+  Coins,
+  Activity,
+  FileCheck2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { listProjectStandardsWithWorksheets } from '@/lib/db/queries/standards';
@@ -14,6 +19,17 @@ import { loadVsmeSummary } from '@/lib/db/queries/vsme-summary';
 import { ReportOverview } from '@/components/vsme/report-overview';
 import { VsmeExportButton } from '@/components/vsme/vsme-export-button';
 import { projectOverviewSections } from '@/components/projects/project-overview-sections';
+import { EffortLog } from '@/components/projects/effort-log';
+import { listEffortEntries } from '@/lib/actions/effort';
+import { OfferPanel } from '@/components/projects/offer-panel';
+import { listOffers } from '@/lib/actions/offers';
+import { CostEstimatePanel } from '@/components/projects/cost-estimate-panel';
+import { listEstimates } from '@/lib/actions/costs';
+import { DeliverableRegister } from '@/components/projects/deliverable-register';
+import { listDeliverables } from '@/lib/actions/deliverables';
+import { MonitoringJournal } from '@/components/projects/monitoring-journal';
+import { listMaintenancePlan, listMonitoringEntries } from '@/lib/actions/monitoring';
+import { listProjectDocuments } from '@/lib/db/queries/documents';
 
 export default async function ProjectOverviewPage({
   params,
@@ -33,6 +49,36 @@ export default async function ProjectOverviewPage({
   const sections = projectOverviewSections({ isVsme });
   const standardsWithWs = await listProjectStandardsWithWorksheets(id);
   const vsmeSummary = isVsme ? await loadVsmeSummary(id) : null;
+  const effort = sections.includes('effort') ? await listEffortEntries(id) : null;
+  const offerData = sections.includes('offers') ? await listOffers(id) : null;
+  const estimateData = sections.includes('cost-estimates')
+    ? await listEstimates(id)
+    : null;
+  const deliverableEntries = sections.includes('deliverables')
+    ? await listDeliverables(id)
+    : null;
+  const monitoringEntries = sections.includes('monitoring')
+    ? await listMonitoringEntries(id)
+    : null;
+  // Library maintenance duties of the attached standards (Wartungsplan) —
+  // empty when no attached standard has schedule rows, so the block hides.
+  const maintenancePlan = sections.includes('monitoring')
+    ? await listMaintenancePlan(id)
+    : [];
+  const monitoringDocs = sections.includes('monitoring')
+    ? (await listProjectDocuments(id)).map((d) => ({
+        id: d.id,
+        title: d.title,
+        citationLabel: d.citationLabel,
+      }))
+    : [];
+  // Lightweight guideline options for the journal's optional Regelwerk link —
+  // reuses the project-standards query already loaded for the layers above.
+  const monitoringStandards = standardsWithWs.map((s) => ({
+    id: s.standard.id,
+    code: s.standard.code,
+    titleDe: s.standard.titleDe,
+  }));
 
   return (
     <div className="space-y-8 sm:space-y-10">
@@ -89,6 +135,72 @@ export default async function ProjectOverviewPage({
           </div>
           <ReportOverview projectId={id} locale={localeTyped} summary={vsmeSummary} />
           <VsmeExportButton projectId={id} locale={localeTyped} />
+        </section>
+      )}
+
+      {sections.includes('effort') && effort && (
+        <section className="space-y-4" data-testid="effort-section">
+          <div className="inline-flex items-center gap-2">
+            <Clock className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Aufwandserfassung</h2>
+          </div>
+          <EffortLog
+            projectId={id}
+            entries={effort.entries}
+            totalHours={effort.totalHours}
+            roles={effort.roles}
+          />
+        </section>
+      )}
+
+      {sections.includes('offers') && offerData && (
+        <section className="space-y-4" data-testid="offers-section">
+          <div className="inline-flex items-center gap-2">
+            <Calculator className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Angebote (intern)</h2>
+          </div>
+          <OfferPanel projectId={id} locale={localeTyped} data={offerData} />
+        </section>
+      )}
+
+      {sections.includes('cost-estimates') && estimateData && (
+        <section className="space-y-4" data-testid="cost-estimates-section">
+          <div className="inline-flex items-center gap-2">
+            <Coins className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Kostenschätzung</h2>
+          </div>
+          <CostEstimatePanel projectId={id} locale={localeTyped} data={estimateData} />
+        </section>
+      )}
+
+      {sections.includes('deliverables') && deliverableEntries && (
+        <section className="space-y-4" data-testid="deliverables-section">
+          <div className="inline-flex items-center gap-2">
+            <FileCheck2 className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">
+              Leistungsregister (§3(2))
+            </h2>
+          </div>
+          <DeliverableRegister
+            entries={deliverableEntries}
+            totalHours={effort?.totalHours ?? 0}
+          />
+        </section>
+      )}
+
+      {sections.includes('monitoring') && monitoringEntries && (
+        <section className="space-y-4" data-testid="monitoring-section">
+          <div className="inline-flex items-center gap-2">
+            <Activity className="size-5 text-accent-2" aria-hidden />
+            <h2 className="text-xl font-semibold text-ink">Monitoring-Journal</h2>
+          </div>
+          <MonitoringJournal
+            projectId={id}
+            entries={monitoringEntries}
+            documents={monitoringDocs}
+            standards={monitoringStandards}
+            maintenancePlan={maintenancePlan}
+          />
         </section>
       )}
 

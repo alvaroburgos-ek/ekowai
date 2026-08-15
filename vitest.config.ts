@@ -28,6 +28,7 @@ export default defineConfig({
           exclude: [
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/worksheet-tab6-loading.integration.test.ts',
+            'src/lib/actions/__tests__/worksheet-phase4-summary.integration.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
             'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/actions/__tests__/co2.integration.test.ts',
@@ -59,8 +60,12 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: [
+            // Finding-H real-save-path harness — self-provided embedded Postgres
+            // (no external DB required; stands up its own PG binary).
+            'tests/harness/*.integration.test.ts',
             'src/lib/actions/__tests__/worksheet.test.ts',
             'src/lib/actions/__tests__/worksheet-tab6-loading.integration.test.ts',
+            'src/lib/actions/__tests__/worksheet-phase4-summary.integration.test.ts',
             'src/lib/actions/__tests__/documents.test.ts',
             'src/lib/actions/__tests__/overrides.test.ts',
             'src/lib/actions/__tests__/co2.integration.test.ts',

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { parseConcepts, mapXbrlType } from '../taxonomy';
-import { TAXONOMY_DIR } from '../_setup';
+import { TAXONOMY_DIR, TAXONOMY_AVAILABLE } from '../_setup';
 
 describe('mapXbrlType', () => {
   it('maps numeric XBRL item types to number', () => {
@@ -19,8 +19,11 @@ describe('mapXbrlType', () => {
   });
 });
 
-describe('parseConcepts', () => {
-  const concepts = parseConcepts(TAXONOMY_DIR);
+describe.skipIf(!TAXONOMY_AVAILABLE)('parseConcepts', () => {
+  let concepts: ReturnType<typeof parseConcepts>;
+  beforeAll(() => {
+    concepts = parseConcepts(TAXONOMY_DIR);
+  });
   it('finds a known concrete datapoint with its label and type', () => {
     const c = concepts.find((x) => x.name === 'WeightOfMaterialUsed');
     expect(c).toBeDefined();

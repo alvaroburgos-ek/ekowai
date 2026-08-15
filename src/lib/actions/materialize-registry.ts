@@ -67,6 +67,51 @@ const ASM_INPUT_SYMBOLS = [
   'a_s_m_provenance',                   // manual provenance (A138-12)
 ] as const;
 
+// ---- 138-SPECIFIC: Phase-4 summary (A138-23) refire inputs ----
+// The summary reconciles, per selected facility, the governing storage volume +
+// footprint + Phase-3 q_S,AC into the recommended Phase-4 gate. Any of these
+// symbols changing on ANY facility/support worksheet should refire the summary:
+//   facility_type_selected (A138-15)                       — governing-facility re-resolution
+//   V_M/V_R/V_MR/V_MUE/V_S/V_VA (per-facility storage vols) — governing volume value
+//   A_S/A_S_m (footprints; area-devices use A_S)            — governing footprint value
+//   q_S_AC (Phase-3 REQ-15 measured performance)           — meetsQsac + reason value
+//   t_E (A138-17 emptying time)                            — Tab.14 CONDITIONAL driver
+const PHASE4_SUMMARY_INPUT_SYMBOLS = [
+  'facility_type_selected',
+  'V_M', 'V_R', 'V_MR', 'V_MUE', 'V_S', 'V_VA', 'V_B',
+  'A_S', 'A_S_m',
+  // Fan-out: active facility footprint symbols (flaeche dimensioned area, schacht),
+  // so a footprint-only change on A138-16/21 refires the summary.
+  'a138_A_s_dim', 'A_S_Schacht',
+  // Fan-out: per-facility BLOCK-gate inputs — changing any must refire the summary
+  // so REQ-31/32/33 re-evaluate (flaeche Gl.13, rigole Gl.25, schacht Gl.38).
+  'r_D_n_used', 'k_i', 'L_VS', 'q_VS', 'r_5_n', 'A_C',
+  'shaft_type', 'A_S_FS', 'k_f_FS',
+  'q_S_AC',
+  't_E',
+] as const;
+
+// ---- 138-SPECIFIC: A138-23 has NO equation. ownerTrigger is a template-code
+// marker (`templateCode === 'A138-23'`) — mirroring how `surface` handles a
+// no-equation owner. The equation-topology predicate can never match A138-23, so
+// the registry entry exposes the template code and the dispatch loop gates the
+// owner-path on `savedTemplateCode === 'A138-23'` (see worksheet.ts). Here the
+// equation-based ownerTrigger returns false (identical shape to `surface`).
+export const PHASE4_SUMMARY_CONSUMER_CODE = 'A138-23';
+
+// ---- 138-SPECIFIC: facility governing-volume producer inputs (MRE/Schacht/Becken) ----
+// Volume-driving inputs on the facility worksheets whose change must re-materialize the
+// facility's governing storage volume (V_MR / V_S / V_B). mulde/rigole ride the `asm`
+// branch instead (geometry sweep), so their inputs are NOT here.
+const FACILITY_VOLUME_INPUT_SYMBOLS = [
+  // MRE (A138-19, Gl.26): sum of persisted component volumes.
+  'V_M_MRE', 'V_R_MRE', 'n_R', 'A_VA_MRE',
+  // Schacht (A138-21, Gl.36/37): inner/outer diameter drive the swept V_S.
+  'd_S_innen', 'd_S_aussen', 'n_S_Bemessung',
+  // Becken (A138-22, Gl.41): overregnete area + basin design inputs.
+  'A_VA_Becken', 'h_B', 'n_B_Bemessung', 'r_D_n_B',
+] as const;
+
 // ---- Type (general — no 138 references) ----
 export type MaterializeEntry = {
   /** Stable identifier for this materialize block. */
@@ -191,6 +236,42 @@ export const MATERIALIZE_REGISTRY: ReadonlyArray<MaterializeEntry> = [
     ownerTrigger: (eqs) => eqs.some((e) => e.id === ASM_GL7_EQUATION_ID),
     consumerTemplateCode: 'A138-12',
   },
+
+  // ── Phase-4 summary (A138-23) ─────────────────────────────────────────────
+  // 138-SPECIFIC data: inputSymbols + consumerTemplateCode. A138-23 owns NO
+  // equation (it is a pure reconciliation/summary worksheet), so its ownerTrigger
+  // CANNOT be an equation-id predicate. Like `surface`, the equation-based
+  // ownerTrigger is `() => false`; the OWNER path is driven in worksheet.ts by a
+  // template-code marker (savedTemplateCode === 'A138-23'). Producer-fire still
+  // works normally: any PHASE4_SUMMARY_INPUT_SYMBOLS change on another worksheet
+  // routes here via producerFiredEntries.
+  {
+    id: 'phase4_summary',
+    inputSymbols: new Set<string>(PHASE4_SUMMARY_INPUT_SYMBOLS),
+    ownerTrigger: () => false,
+    consumerTemplateCode: PHASE4_SUMMARY_CONSUMER_CODE,
+  },
+
+  // ── Facility governing-volume materialize (MRE/Schacht/Becken) ─────────────
+  // 138-SPECIFIC (fan-out). The mulde/rigole governing volumes are materialized in
+  // the `asm` producer branch (they ride the A_S,m geometry sweep). MRE/Schacht/Becken
+  // do NOT produce A_S,m via A138-12, so they get their OWN producer branch, fired when
+  // a volume-driving input changes on their facility worksheet:
+  //   MRE (A138-19): V_MR = persisted V_M + persisted V_R (Gl.26) — fired on V_M_MRE/
+  //     V_R_MRE/n_R change (or an A138-19 save touching any local field).
+  //   Schacht (A138-21): V_S = π·d_i²/4·h_S (Gl.36; h_S swept via Gl.37) — d_S_innen/
+  //     d_S_aussen change.
+  //   Becken (A138-22): V_B via Gl.41 sweep — A_VA_Becken/h_B change.
+  // The branch resolves the facility worksheet by the SAVED template code, reads the
+  // facility-local inputs + scoped cross-ws scalars, and materializes the volume onto
+  // the facility worksheet. consumerTemplateCode is unused (producer==consumer here);
+  // set to a sentinel that the branch ignores.
+  {
+    id: 'facility_volume',
+    inputSymbols: new Set<string>(FACILITY_VOLUME_INPUT_SYMBOLS),
+    ownerTrigger: () => false,
+    consumerTemplateCode: '(facility-local)',
+  },
 ] as const;
 
 /**
@@ -216,4 +297,63 @@ export function producerFiredEntries(
     }
     return false;
   });
+}
+
+/**
+ * Finding G1(a) — CHAIN-FIRE the Phase-4 summary after an upstream materialize.
+ *
+ * The summary's inputs (A_S_m, V_M, facility values) are materialized SERVER-side by
+ * OTHER save branches (asm/facility geometry sweep + Finding-F V_M). Those values are
+ * NEVER in the user's save batch → `producerFiredEntries` never sees them change →
+ * the summary would freeze at its Step-1 snapshot. So when an upstream materialize
+ * that produces a summary input has fired in this tx, chain-fire the summary in the
+ * SAME tx — the same shape as the existing chained Tab.6 re-fire (which re-runs the
+ * loading check after A_S_m materializes).
+ *
+ * Fires iff the 'asm' materialize fired (it produces A_S_m + Finding-F's V_M — the
+ * governing footprint/volume the summary consumes) AND the summary is not already
+ * scheduled (dedup — no double-fire). 138-SPECIFIC: keyed on the 'asm' entry id.
+ *
+ * @param firedEntryIds ids of the materialize entries already fired in this tx
+ *   (owner + producer).
+ * @returns true when phase4_summary must be chain-fired.
+ */
+export function phase4SummaryChainFires(firedEntryIds: ReadonlySet<string>): boolean {
+  if (firedEntryIds.has('phase4_summary')) return false; // already firing → no double-fire
+  // Fires after 'asm' (mulde/rigole V_M/V_R via the geometry sweep) OR after
+  // 'facility_volume' (MRE/Schacht/Becken V_MR/V_S/V_B) — both write a governing
+  // volume the summary must consume in the SAME tx.
+  return firedEntryIds.has('asm') || firedEntryIds.has('facility_volume');
+}
+
+/**
+ * Finding G1(b) — the tx-open predicate (extracted so it is unit-testable).
+ *
+ * The transaction opens when:
+ *   (a) there are actual parameter rows to write (savedCount > 0), OR
+ *   (b) a topology-triggered owner materialize must recompute on an empty batch
+ *       (isBasinSave / isLoadingSave / isAsmSave), OR
+ *   (c) a producer-side input changed → a downstream materialize must fire, OR
+ *   (d) isPhase4SummarySave — a deliberate no-dirty A138-23 re-save must re-run the
+ *       aggregator even with no dirty field (G1 manual fallback; the chain in (a)/(c)
+ *       is the primary mechanism).
+ *
+ * NOTE: mirror this list exactly at the worksheet.ts:558 call site.
+ */
+export function shouldOpenTransaction(args: {
+  savedCount: number;
+  isBasinSave: boolean;
+  isLoadingSave: boolean;
+  isAsmSave: boolean;
+  isPhase4SummarySave: boolean;
+  producerEntriesLength: number;
+}): boolean {
+  return (
+    args.savedCount > 0 ||
+    args.isBasinSave ||
+    args.isLoadingSave ||
+    args.isAsmSave ||
+    args.isPhase4SummarySave ||
+    args.producerEntriesLength > 0
+  );
 }
