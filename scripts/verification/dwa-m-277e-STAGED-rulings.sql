@@ -1,0 +1,287 @@
+-- ============================================================================
+-- DWA-M-277E — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-277E\DWA-M_277E (1).md (English mathpix
+--   LaTeX; NO page-number lines — "printed p.N" derived from the Content table, see the pack header; Table 4 = p.19 per the
+--   Content table, the mathpix image index suggests p.20 — PDF to settle).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Standard id 4ed1a6f6-52c0-40af-aed2-61b1bfacd8d2. Worksheet ids (prefix): 01 2b2a9e14 · 02 f16ece7c · 03 6f1c7cf1 ·
+--   04 1ce8fad3 · 05 c3b2ea2f · 06 5a864fc8 · 07 bd1b8d82 · 08 58b1615b · 09 5c5fe612 · 10 351193d0 · 11 ec719dce · 12 8b3d6de6 ·
+--   13 535c4812 · 14 abf7cf49 · 15 f5fcdd76 · 16 5433b6dc · 17 6bfbb4e8 · 18 27591e62 · 19 c1fc252e · 20 357e8068 · 21 19e029a2 ·
+--   22 c767ed10 · 23 cc1869fb · 24 5e5bedd2.
+-- Context: 63 gates (50 block / 13 warn); all 55 source_quotes re-checked against the md — every quoted sentence exists
+--   verbatim (REQ-14E's short "E. coli … < 1,000/100 ml" included; REQ-15 keeps the source's "aeroginosa" [sic]; REQ-17's two
+--   sentences are printed in the opposite order; REQ-07/REQ-28 use "..." elisions inside one paragraph). 8 gates carry NO
+--   quote (REQ-01, REQ-04/05/06 on ws 06 and ws 14, REQ-31 on ws 19) and 6 carry NO condition (REQ-01, REQ-04/05/06 ws 14,
+--   REQ-31 ×2). Nothing below disputes a quote; every item is a source-vs-encoding disagreement in COVERAGE (printed limit
+--   with no gate — the 2026-06-23 site audit's "material gaps" class), CONDITION (unconditional where the source is
+--   conditional), SEVERITY (block on "should/recommended"), ANCHOR (condition ≠ quote), REQUIRED-NESS, CLAUSE TAG, or the
+--   two-layer DUPLICATION of this standard's worksheets.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · E. COLI MIRROR on ws 23 (the 2026-08-05 follow-on "M277E-23 lacks E.coli copy"). ws 23 carries the Table 4 quartet
+--   REQ-08 (a611a15c) / REQ-09 (8f2ce5a8) / REQ-14 (d7e36526) / REQ-15 (d24feaa5) but no E. coli gate; ws 10 has REQ-14E
+--   (c8718f7c). Evidence Table 4 (p.19): "E. coli & & $<1,000 / 100 \mathrm{ml}$" under "Use category & C1 & C2" with C1 =
+--   "\multirow[t]{3}{*}{No requirement}".
+--   NOTE for the ruling: none of the five ws-23 Table-4 gates reads a ws-23 field (quality_category lives on ws 04/14; the
+--   parameters on ws 10/24) — see S-11. The mirror keeps the layer consistent; the re-home is the structural fix.
+-- Proposal: insert REQ-14E on ws 23 (cc1869fb-7ffb-4bcd-8307-836ded16957a), severity block, clause "Table 4",
+--   condition "IF quality_category == C2 THEN e_coli < 1000", source_quote = the Table 4 row above.
+-- ☐ RATIFIED
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+--   values ('cc1869fb-7ffb-4bcd-8307-836ded16957a', 'REQ-14E', 'block', 'IF quality_category == C2 THEN e_coli < 1000', 'Table 4',
+--   'Table 4: Quality requirements for treated greywater and the treatment processes — E. coli & & $<1,000 / 100 \mathrm{ml}$ (C1: No requirement) [DWA-M 277E Table 4, §6.3, printed p.19]');
+-- Rollback: delete from public.compliance_requirements where worksheet_template_id='cc1869fb-7ffb-4bcd-8307-836ded16957a' and code='REQ-14E';
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · REQ-29 (50321fbd, ws 01, BLOCK) encodes a > 50 m³ ⇒ authorisation branch the source never prints. Evidence §4.2
+--   (p.13): "According to the Building Law, the installation of a rainwater or greywater reuse system with a storage capacity
+--   up to $50 \mathrm{~m}^{3}$ usually requires a mere notification (Model Building Code: MBO 2002 § 61 Para. 5c)." and
+--   "The Federal State Building Order is a national law and therefore, the specifications of the respective State Building
+--   Regulations should be taken into account." The > 50 m³ consequence is inferred; the ≤ 50 m³ case is hedged ("usually").
+--   The fields MBO_authorisation_required / MBO_notification_only (ws 01 + duplicates on ws 05) carry the same inference in
+--   their descriptions.
+-- Proposal: REQ-29 severity block → warn; condition unchanged (it only checks the engineer's own flags for consistency).
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn' where id='50321fbd-e9f2-4f3a-a9cd-b2750131dc3c';
+-- Rollback: update public.compliance_requirements set severity='block' where id='50321fbd-e9f2-4f3a-a9cd-b2750131dc3c';
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · UNCONDITIONAL BLOCKS where the source is CONDITIONAL (over-enforcement).
+--   (a) REQ-12 (30ecc185) / REQ-12-2 (2818e74b) / REQ-26-2 (70430c31) / REQ-27-2 (0eb2d901), ws 09 — all "automatic_backfeed_present == true".
+--       Evidence §7.2 (p.23): "Greywater reuse systems must be provided with an automatic water backfeed system. [...] For greywater
+--       treatment with the sole purpose of disposal this is not required. For the reuse of the treated greywater solely outside the
+--       building, the automatic mode of the backfeed system is not required in some cases." A disposal-only system (treats_greywater
+--       = true, no reuse) is blocked today.
+--       Proposal: REQ-12 → "IF NOT (discharge_into_water_body == true AND use_category IS NULL) THEN automatic_backfeed_present == true"
+--       — GRAMMAR: evaluate.ts has no "reuse planned" predicate; the cleanest encoding needs a new boolean on ws 01
+--       `reuse_planned` (§1 "process and supply service water from greywater … or which treat the greywater and drain it") and
+--       "IF reuse_planned == true THEN automatic_backfeed_present == true". Field add = RULING.
+--   (b) REQ-25 (d46e21bd ws 10; ed10962e ws 23) — attestation blocks on §6.4 discharge coordination for EVERY project. Evidence
+--       §6.4 (p.21): "For the discharge of treated greywater into a receiving water body or for infiltration purposes, the
+--       requirements need to be coordinated with the responsible approval authorities."
+--       Proposal: "IF discharge_into_water_body == true THEN attest_m277e_10_req_25 == true" (and the ws-23 twin).
+--   (c) REQ-24 (ac5709f0 ws 03 attest; 55be9cf2 ws 04 boolean) — DIN 19650 class documented for EVERY project. Evidence §6.2.4
+--       (p.19): "Quality requirements for irrigation water are regulated by DIN 19650. [...] each of which must be verified
+--       depending on the intended use". Proposal: "IF use_category IN {irrigation_lawn, irrigation_crops} THEN
+--       DIN_19650_class_documented == true" (ws 04); ws 03 attest twin → same condition or delete (S-10).
+--   (d) REQ-30 (1cae2768 ws 03; 01913b1a ws 06) — rented apartment ⇒ drinking-water option, regardless of use. Evidence §6.2.2
+--       (p.18): "In rented apartments the user must also have the possibility to use drinking water for these purposes" —
+--       "these purposes" = laundry and building cleaning. Proposal: "IF building_type == rented_apartment AND use_category ==
+--       laundry_private THEN drinking_water_option_available == true".
+-- ☐ RATIFIED (a)   ☐ RATIFIED (b)   ☐ RATIFIED (c)   ☐ RATIFIED (d)
+-- update public.compliance_requirements set condition='IF discharge_into_water_body == true THEN attest_m277e_10_req_25 == True' where id='d46e21bd-2f07-4ef3-8ca6-1d7e4191bcb5';
+-- update public.compliance_requirements set condition='IF discharge_into_water_body == true THEN attest_m277e_23_req_25 == True' where id='ed10962e-1914-488e-8671-a541510be046';
+-- update public.compliance_requirements set condition='IF use_category IN {irrigation_lawn, irrigation_crops} THEN DIN_19650_class_documented == true' where id='55be9cf2-4a9f-40e5-a8a3-9fdb76703918';
+-- update public.compliance_requirements set condition='IF building_type == rented_apartment AND use_category == laundry_private THEN drinking_water_option_available == true' where id in ('1cae2768-bdca-4d7f-8009-38c0d3c2782e','01913b1a-c3c4-4757-ab6b-c030b1f84d03');
+-- Rollback: restore the prior conditions 'attest_m277e_10_req_25 == True' / 'attest_m277e_23_req_25 == True' / 'DIN_19650_class_documented == true' /
+--   'IF building_type == rented_apartment THEN drinking_water_option_available == true'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · MISSING GATES for printed requirements (coverage gaps; the reuse-quality layer is only half enforced).
+--   (a) C2-MANDATORY USES — Table 4 (p.19) use rows: "Toilet flushing (private) & + & + | Irrigation (private) lawn, ornamental
+--       plants & - & + | Irrigation crop plants (for consumption) & - & + | Laundry (private)* & - & + | Toilet flushing (public)
+--       & - & +" and §9.2 example (p.25) "Minimum service water quality: C2 due to the irrigation of the kitchen garden." Only
+--       laundry has a gate (REQ-32). Proposal NEW REQ-33 (ws 04 1ce8fad3, block, "Table 4"): "IF use_category IN {toilet_public,
+--       irrigation_lawn, irrigation_crops} THEN quality_category == C2". (Table 4 prints "-" = not admissible under C1.)
+--   (b) HYGIENISATION STAGE for C2 — Table 4 "Treatment method & Treatment/Stabilisation & Treatment and hygienisation" and §3
+--       (p.11) "If reuse of the treated greywater is planned, it is necessary that it undergoes biological stabilisation and
+--       disinfection." No gate requires a hygienisation stage when C2 is selected. Proposal NEW REQ-34 (ws 19 c1fc252e, block,
+--       "§6.3, Table 4"): "IF quality_category == C2 THEN selected_hygienisation IS NOT NULL" — GRAMMAR: MBR alone also
+--       satisfies C2 per Table 4 ("FB, SF, FLB, MBR + UV, UF, RO"); if IS NOT NULL on an enum is unsupported, use
+--       "IF quality_category == C2 THEN (selected_hygienisation IN {uv, uf, ro} OR treatment_method == mbr)".
+--   (c) UV TRANSMISSION — Table 4 note (p.19) "*UV Transmission > 60 \% is recommended." tied to "Laundry (private)*".
+--       Proposal NEW REQ-35 (ws 20 357e8068, WARN, "Table 4 note *"): "IF use_category == laundry_private AND
+--       uv_disinfection_used == true THEN UV_transmission_pct > 60".
+--   (d) TYPE ↔ SOURCE CONSISTENCY — §5 (p.15) "Type A: low grade greywater, i.e. greywater excluding drains from kitchen and
+--       washing machines". A project can select greywater_type = A1 with kitchen_sink in source_set. GRAMMAR: source_set is
+--       json (multi-select) — the condition grammar has no json-contains operator; RULING whether to add a derived boolean
+--       or leave to the engineer. No spec written.
+--   (e) TABLE 2 RANGES (SR-2, orientation values) — "The load values listed below serve as orientation values." (p.16).
+--       Proposal NEW REQ-37 (ws 07 bd1b8d82, WARN, "Table 2"): "Q_GW_P_shower >= 10 AND Q_GW_P_shower <= 50", and per source
+--       bathtub 0–30, hand_washbasin 10–15, washing_machine 10–15, kitchen_sink 5–10, dishwasher 5–10 (one warn gate each, or
+--       one combined). Warn only — the source calls them orientation values.
+--   (f) RATED CAPACITY ≥ Q_GWT — §9.4 (p.27) "the decisive dimensioning factor for a greywater reuse system is the necessary
+--       daily treatment capacity"; §9.1 "design a demand-oriented plant size, which would result in a quantitative treatment
+--       capacity". system_rated_capacity (d24401eb, ws 19) has no gate. Proposal NEW REQ-38 (ws 19, block, "§9.4"):
+--       "system_rated_capacity >= Q_GWT". Severity = RULING (the source states the design duty, not a pass/fail limit).
+--   (g) SAMPLING for C2 — Table 4 "sampling & - & Reservoir/Consumer": no gate; sampling_location (d7e2a640 ws 10) is optional.
+--       Proposal NEW REQ-39 (ws 10, WARN): "IF quality_category == C2 THEN sampling_location IS NOT NULL".
+--   Hydraulic retention time: DWA-M 277E prints NO retention-time limit; the only volume rule is the §7.1 one-day buffer
+--   recommendation, already covered by REQ-19 (warn). Nothing to add.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (e)  ☐ (f)  ☐ (g)   — (d) = ruling on mechanism only
+-- insert … REQ-33 / REQ-34 / REQ-35 / REQ-37 / REQ-38 / REQ-39 per the specs above (source_quote = the Table 4 / §3 / §5 / §9.4 sentences quoted here).
+-- Rollback: delete the inserted rows by (worksheet_template_id, code).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · SEVERITY — block gates anchored on "should / recommended" text (the source's own modal verb is advisory):
+--   REQ-32 (24e7cbc4) + REQ-32-2 (81e65262), ws 04: "For laundry, it is strongly recommended to apply the water quality of the
+--     use category C2" (§6.2.2 p.18). Note Table 4 prints "Laundry (private)* & - & +" — i.e. C1 is NOT admissible for laundry —
+--     so a block is defensible from Table 4 even though §6.2.2 says "recommended". → RULING: keep block, re-anchor the
+--     source_quote on the Table 4 row; or warn. Proposal: keep block, re-anchor (no severity change).
+--   REQ-21-2 (a13a36da, ws 09) block on "recommended to switch automatically … should be reported automatically" (§8 p.24)
+--     while its twin REQ-21 (7f104d7f) is warn → block→warn (or delete the twin, S-10).
+--   REQ-28-2 (b31ed0c2, ws 09) block on "should be dimensioned in a way, that the service water pumps do not run dry" (§7.2
+--     p.23); twin REQ-28 (45efbb02) is warn → block→warn.
+--   REQ-22 (638af171, ws 10 attest) and REQ-22 (5af2e8f2, ws 11 "maintenance_contract_present == true") block on "System
+--     maintenance should follow regularly … It is recommended to conclude a maintenance contract." (§8 p.24). The ws-11 field
+--     is is_required=false yet the gate blocks → block→warn on both.
+--   REQ-26 (60c1ecd3, ws 10 attest) block on "should be taken into consideration" (DIN 1988-300 / DVGW W 406, §7.2 p.23) → warn.
+--   REQ-27 (c4007a76, ws 10 attest) block on "the user is referred to DIN 1989-1 … should be taken into consideration" → warn.
+--   REQ-18 (b2c17b0e) / REQ-18-2 (b03eceab) block on "A trouble-free operation is only secured in a frost-free installation."
+--     (§7.1 p.22) — descriptive, no modal verb; de-facto requirement → keep block (note only).
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn' where id in ('a13a36da-615a-4a74-b246-7c68ed351b4a','b31ed0c2-7c3a-41e7-bd21-a3250345a182','638af171-96a5-40ff-9b0e-e3530d36d191','5af2e8f2-db0e-4c96-b7ca-d9a6c481a60c','60c1ecd3-016d-4343-8081-6c57d946b222','c4007a76-8274-4b23-a788-0a741d9ac7c7');
+-- update public.compliance_requirements set source_quote='Table 4: Quality requirements for treated greywater and the treatment processes — Laundry (private)* & - & + (C1 not admissible; C2 admissible) [DWA-M 277E Table 4, printed p.19]; §6.2.2: For laundry, it is strongly recommended to apply the water quality of the use category C2 for service water listed in Table 4 (Section 6.3). [printed p.18]' where id in ('24e7cbc4-f5f0-4820-8b7e-fc30cfb5ab61','81e65262-1d9c-42a2-9975-4843a01d6ab7');
+-- Rollback: set severity='block' on the six ids; restore the two REQ-32 source_quotes from the 2026-09-05 export.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · MIS-ANCHORED and DEAD gates.
+--   REQ-26-2 (70430c31, ws 09, block) condition "automatic_backfeed_present == true" but source_quote = the DIN 1988-300 / DVGW
+--     W 406 dimensioning sentence (§7.2) — condition and evidence do not match; it is a third copy of REQ-12 by condition.
+--   REQ-27-2 (0eb2d901, ws 09, block) condition "automatic_backfeed_present == true" but source_quote = the §7.3 multi-pump
+--     "recommended" sentence — same defect; fourth copy of REQ-12.
+--   Proposal: deactivate/delete REQ-26-2 and REQ-27-2 (their evidence is already carried by the attest gates REQ-26/REQ-27).
+--   DEAD (no condition, never evaluable): REQ-01 (476ecbd2 ws 01, warn, §9.1, no quote), REQ-04 (3831eec3) / REQ-05 (e35efc03) /
+--     REQ-06 (0a8051cd) on ws 14 (warn, empty condition), REQ-31 (eb5ff2c7 ws 09, warn, att=true, condition empty; its quote is
+--     the §8 "must hand over a user manual" — the enforced twin is ws 11 REQ-20) and REQ-31 (47154814 ws 19, warn, §9.5, no
+--     quote, no condition). The ws-06 REQ-04/05/06 carry FORMULAS as conditions ("Q_SW = SUM(...)") — not grammar, never fire.
+--   Proposal: delete the 9 dead rows (or set a real condition: REQ-04 "Q_SW IS NOT NULL", REQ-05 "Q_GW IS NOT NULL", REQ-06
+--     "Q_GWT IS NOT NULL", REQ-31 ws 19 "installation_location IS NOT NULL" — RULING).
+-- ☐ RATIFIED
+-- delete from public.compliance_requirements where id in ('70430c31-962d-43c1-8236-caf63fe19411','0eb2d901-ca35-4eb5-b1be-f37806f1a290');
+-- delete from public.compliance_requirements where id in ('476ecbd2-17ea-478a-b2da-0613e1e5ce44','51d19fbf-1bed-4f95-b7dc-d79c648997f6','b9901ea7-8a04-4844-915e-44d57ca5a6c6','f84f533e-0cb8-40f2-9bd3-f23edee074aa','3831eec3-1b4b-40d2-9a04-0bf30fd42f06','e35efc03-a719-42aa-a4ed-412d79c9b76d','0a8051cd-e6d7-4b2e-a753-890b7396e4bd','eb5ff2c7-4c9d-4991-9827-265bd7e68ab6','47154814-9bfc-422e-a126-e80e0145c610');
+-- Rollback: re-insert from the 2026-09-05 export (fields-DWA-M-277E.json, gates[]).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · CLAUSE_REFERENCE RETAGS (evidence in the pack notes; all VC).
+--   attest_m277e_03_req_24 (0aca622b) '' → '§6.2.4' | attest_m277e_09_req_26 (0fd09fe7) '' → '§7.2' | attest_m277e_09_req_27
+--   (629c609a) '' → '§7.2' | attest_m277e_10_req_22 (561775e5) '' → '§8' | attest_m277e_10_req_20 (ec4f1d34) '' → '§8' |
+--   attest_m277e_10_req_25 (1c3f7597) '' → '§6.4' | attest_m277e_23_req_25 (162c24a5) '' → '§6.4' |
+--   tapping_points_labelled (04bed99c) '§7.3' → '§4.4 (TrinkwV §17 Para. 6)' ("Service water collection points must be permanently
+--   labelled as such." is §4.4; §7.3 only says "For service water distribution, DIN 1989-1 should be applied.") |
+--   colour_coding_applied (79e4d9ed) '§7.3' → '§4.4 (TrinkwV §17 Para. 6)' ("should be colour-coded" is §4.4) |
+--   control_panel_included (b63122d9) '§8' → '§2.1 Control panel' | system_rated_capacity (d24401eb) '§6.3' → '§9.4; §9.1' |
+--   machinery_directive_conformity (731d5481) '§4' → '§4.1' | ce_conformity_present (21a51124) '§4.2' → '§4.1; §4.2'.
+--   Also the gate clause tags without "§" (REQ-24 '6.2.4', REQ-12 '7.2', REQ-19 '7.1', REQ-20/22 '8', REQ-23 '4.3', REQ-25 '6.4',
+--   REQ-13 '4.4', REQ-26/27 '7.2', REQ-31 '8') are the pre-2026-08 tagging style — cosmetic, listed for completeness.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§6.2.4' where id='0aca622b-2506-49d4-b0e6-0f9bc12c1ea6';
+-- update public.fields set clause_reference='§7.2' where id in ('0fd09fe7-e111-4dee-8b56-e23757d2281f','629c609a-0a0a-4a21-8fca-b1a29af7c753');
+-- update public.fields set clause_reference='§8' where id in ('561775e5-7da5-4e95-b537-c0012d1d65ee','ec4f1d34-4bb5-4008-bd79-dc7ca4a3c4f4');
+-- update public.fields set clause_reference='§6.4' where id in ('1c3f7597-e579-46f5-9101-82ce67bc5cdb','162c24a5-ed03-4127-94cb-ea46dcdeb856');
+-- update public.fields set clause_reference='§4.4 (TrinkwV §17 Para. 6)' where id in ('04bed99c-38af-4947-a928-558512f0548e','79e4d9ed-49bb-490d-850d-fa71421d7a96');
+-- update public.fields set clause_reference='§2.1 Control panel' where id='b63122d9-91f3-4645-9de8-3c2c81806489';
+-- update public.fields set clause_reference='§9.4; §9.1' where id='d24401eb-0679-4084-9388-438ea7bcaaa6';
+-- update public.fields set clause_reference='§4.1' where id='731d5481-ca69-431d-bf49-dab75df93118';
+-- update public.fields set clause_reference='§4.1; §4.2' where id='21a51124-a2d4-40b2-8d89-25230cb4d4f9';
+-- Rollback: restore the prior values ('' / '§7.3' / '§8' / '§6.3' / '§4' / '§4.2') from the 2026-09-05 export.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · IS_REQUIRED review — fields the source makes "should / recommended" or app-only, currently is_required = true:
+--   auto_switch_to_backfeed (f1801db9 ws 09; 1f8c75ed ws 23) — §8 "it is recommended to switch automatically" → false.
+--   auto_fault_report (af1303a2 ws 09; 538e4d03 ws 23) — §8 "The failure should be reported automatically." → false.
+--   attest_m277e_10_req_22 (561775e5) — §8 "should … recommended" → false.
+--   attest_m277e_09_req_26 (0fd09fe7), attest_m277e_09_req_27 (629c609a) — §7.2 "should be taken into consideration" → false.
+--   attest_m277e_10_req_25 (1c3f7597), attest_m277e_23_req_25 (162c24a5) — §6.4 applies to discharge projects only → false
+--     (the conditional gate of S-3(b) carries the obligation when it applies).
+--   inflow_type (9d9c83e7 ws 09; b539818f ws 21) — Annex A planning-sheet radio only, no obligation in the body → false.
+--   Kept true on evidence: automatic_backfeed_present ("must", §7.2), service_water_labelled ("must be permanently labelled",
+--     §4.4), authority_notification_sent ("obliged to notify", §4.4), handover_certificate_present / user_manual_handed_over
+--     ("must", §8), installation_location ("must be indicated", §9.5), pH_value / o2_saturation_pct (Table 4, both categories),
+--     treats_greywater (§1 scope), the Eq.(1)–(4) inputs/outputs.
+--   Conditional required-ness the schema cannot express: e_coli, total_coliforms_treated, p_aeruginosa, turbidity_NTU, BOD5 are
+--     is_required=false but their C2 gates block when empty-vs-limit is evaluated — behaviour depends on evaluate.ts null
+--     handling; noted, no change proposed.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('f1801db9-bc32-46ab-a1b6-9a1a08b9e554','1f8c75ed-b1e3-4c15-bae2-738c5b1ebfee','af1303a2-2db9-4782-b277-4fc3f2f2467b','538e4d03-4432-4ce6-95f0-6557bf7fa7a4','561775e5-7da5-4e95-b537-c0012d1d65ee','0fd09fe7-e111-4dee-8b56-e23757d2281f','629c609a-0a0a-4a21-8fca-b1a29af7c753','1c3f7597-e579-46f5-9101-82ce67bc5cdb','162c24a5-ed03-4127-94cb-ea46dcdeb856','9d9c83e7-cdeb-4b38-af3d-2d712c7d8c06','b539818f-b394-4585-b5ac-6abacd07300c');
+-- Rollback: update public.fields set is_required=true where id in (same 11 ids);
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · FIELDS WITH NO SOURCE VALUE / SAME-WORKSHEET DUPLICATES → active=false.
+--   turbidity_NTU_C1 (9bae9af6 ws 10; 1cd0a3ab ws 24) "Trübung (C1, nicht gefordert)" — Table 4 prints "Turbidity & - & < 2 NTU":
+--     the C1 cell is "-" (no requirement). A number field whose only source content is "no requirement" carries nothing;
+--     turbidity_NTU on the same worksheets already holds the C2 limit. No equation or gate references turbidity_NTU_C1.
+--   health_authority_notified (54934511 ws 24) duplicates authority_notification_sent (1621cc40 ws 24) on the SAME worksheet —
+--     both = §4.4 TrinkwV §13 Para. 4 notification. No gate references health_authority_notified (REQ-13/13-2 read
+--     authority_notification_sent).
+--   mbo_building_notification_filed (6f678fa2 ws 24) overlaps MBO_notification_only (ws 01/05) — cross-worksheet, listed in S-10.
+-- ☐ RATIFIED
+-- update public.fields set active=false where id in ('9bae9af6-0fca-4759-923e-a8efb6455c81','1cd0a3ab-75a8-442d-af41-2dac98ffe5ee','54934511-c58f-494e-943c-2cb4284acd50');
+-- Rollback: update public.fields set active=true where id in (same 3 ids);
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · TWO-LAYER DUPLICATION (single-owner principle; 2026-06-26 audit debt class). The standard is encoded twice:
+--   layer 1 = ws 01–11 (128 fields; titles do not match contents — ws 03 "Einordnung in NASS" = Table 1/2/3 + Annex B data,
+--   ws 04 "Rechtsrahmen" = use/quality selectors, ws 05 "MBO" = demand inputs, ws 08 "Qualitaetsdaten" = Q_GWT/Q_WB + Table 4,
+--   ws 09 "Mikrobiologische Belastung" = installation/backfeed/labelling, ws 10 "Toilettenspuelung" = Table 4 + §8 attests,
+--   ws 11 "Bewaesserung" = §8/§4 booleans) and layer 2 = ws 12–24 (70 fields, titles match contents).
+--   Duplicate FIELD pairs (symbol on both layers; 60 pairs): Q_GW_P, Q_GW_P_total, Q_GW_P_{shower,bathtub,hand_washbasin,
+--   washing_machine,kitchen_sink,dishwasher} (03↔07 — both layer 1!), SS/COD/TN/TP/TS/TOS (03↔08 — both layer 1),
+--   cryptosporidium/giardia/salmonella_sp/total_colony_counts/faecal_streptococci_untreated/faecal_coliforms_untreated/
+--   total_coliforms_untreated (03↔09), source_set + greywater_type (02↔06), A (01↔11), MBO_* (01↔05), discharge_into_water_body
+--   (01↔04), Q_SW_P/Q_SW_A (05↔15), Q_SW (06↔16), Q_GW (07↔17), Q_GWT/Q_WB (08↔18), pH_value/BOD5 (08↔10), quality_category
+--   (04↔14), use_category (04↔10), treatment_method (09↔19), UV_transmission_pct (09↔20), installation_location/room_*/
+--   smallest_door_dim_m/installation_frost_free (09↔22), inflow_type/pump_station_capacity/overflow_below_backed_up_water/
+--   booster_*/V_buffer/automatic_backfeed_present/network_separation_per_DIN_EN_1717/service_water_labelled/
+--   service_water_isolated_from_drinking_water (09↔21), auto_switch_to_backfeed/auto_fault_report (09↔23),
+--   drinking_water_option_available (09↔12), DIN_19650_class_documented (04↔11), maintenance_contract_present/
+--   user_manual_handed_over (11↔23), WHG_permit_present/owner_or_user_change/authority_notification_sent/
+--   handover_certificate_present (11↔24), sampling_location (10↔23), o2_saturation_pct/e_coli/total_coliforms_treated/
+--   p_aeruginosa/turbidity_NTU/turbidity_NTU_C1 (10↔24), attest_m277e_10_req_25↔attest_m277e_23_req_25.
+--   Duplicate GATE rows on the SAME worksheet ("-2" siblings, identical condition): REQ-02/-2 (ws 02), REQ-32/-2 (ws 04),
+--   REQ-11/-2 (ws 08), REQ-12/-2, REQ-16/-2, REQ-17/-2, REQ-18/-2, REQ-21/-2, REQ-28/-2 (ws 09), REQ-10/-2 (ws 10),
+--   REQ-13/-2 (ws 11) — 11 pairs; the "-2" rows carry the fuller quote with page refs, the originals the short one.
+--   Duplicate EQUATION rows: Eq.(1)+Ex.9.2 (06↔16), Eq.(2)+Ex.9.3-A1/A2 (07↔17), Eq.(3)/(4)/Ex.9.4/Ex.9.4-WB/QWB (08↔18),
+--   Buffer (09↔21) — 11 pairs, 22 rows for 11 formulas. Eq.(3) and Eq.(4) are ALSO the same min() formula twice per worksheet.
+--   Proposal (RULING, no SQL): declare layer 2 (ws 12–24) the single owner where a twin exists, retire the layer-1 twins
+--   (active=false) after the gates that read them are re-homed (S-11); collapse each "-2" gate pair to the row with the fuller
+--   quote; collapse Eq.(3)/(4) to one row per worksheet.
+-- ☐ RATIFIED (direction only — id lists to be generated from the export once ruled)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · GATE RE-HOMES — gates that read NO field of their own worksheet (cross-worksheet evaluation):
+--   REQ-03 (8f412cbc ws 02) reads quality_category (ws 04/14); REQ-03 (104eb24d ws 14) reads greywater_type (ws 02/06).
+--   REQ-30 (1cae2768 ws 03; 01913b1a ws 06) reads building_type (ws 01) + drinking_water_option_available (ws 09/12).
+--   REQ-09 (2ce99296 ws 04) reads BOD5 (ws 08/10). REQ-07 (b9648358 ws 06; 0f8cd9ec ws 14) reads Q_WB (ws 08/18), Q_GW (07/17).
+--   REQ-23 (6ca73695 ws 10) reads discharge_into_water_body (ws 01/04) + WHG_permit_present (ws 11/24).
+--   ws 23 (cc1869fb) REQ-08 / REQ-09 / REQ-14 / REQ-15 / REQ-23 read turbidity_NTU, BOD5, total_coliforms_treated, p_aeruginosa,
+--     quality_category, discharge_into_water_body, WHG_permit_present — none on ws 23 (ws 23 holds sampling_location,
+--     auto_switch_to_backfeed, auto_fault_report, maintenance_contract_present, user_manual_handed_over, attest_23_req_25).
+--   ws 24 (5e5bedd2) holds o2_saturation_pct, e_coli, total_coliforms_treated, p_aeruginosa, turbidity_NTU, WHG_permit_present,
+--     authority_notification_sent, handover_certificate_present … and has ZERO gates.
+--   Proposal: move the ws-23 Table-4 quartet (+ S-1's REQ-14E, + REQ-23) to ws 24 (worksheet_template_id =
+--   '5e5bedd2-1833-4091-ab6b-8fe831867cf1'); move REQ-09 (ws 04) to ws 10; REQ-03 to ws 14 only (with greywater_type re-read
+--   from ws 06 if the engine resolves by symbol across worksheets — if it does, every re-home here is cosmetic; RULING on the
+--   engine fact first).
+-- ☐ RATIFIED
+-- update public.compliance_requirements set worksheet_template_id='5e5bedd2-1833-4091-ab6b-8fe831867cf1' where id in ('a611a15c-84b4-4daa-a79b-51885877992f','8f2ce5a8-9ff0-46cd-9d59-158793eae0b3','d7e36526-1111-4262-9aad-97ce0156a65a','d24feaa5-f808-4507-9c0d-51a23e4264ed','309a590e-cf1e-4e84-9dd6-78965ad9b38c');
+-- update public.compliance_requirements set worksheet_template_id='351193d0-f576-44ef-9f94-f00a74a872cd' where id='2ce99296-64f0-4773-a1b3-27d9fd420894';
+-- Rollback: set worksheet_template_id back to 'cc1869fb-7ffb-4bcd-8307-836ded16957a' (five ids) / '1ce8fad3-3e41-40f8-895b-d5386f16178e' (REQ-09).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 · LABEL / UNIT content the source does not carry (data edits, staged because they change what the engineer is told):
+--   colour_coding_applied (79e4d9ed) label "Farbcodierung (grün) angewendet" — DWA-M 277E prints only "should be colour-coded"
+--     (§4.4); "grün" comes from DIN 1989-1 (NR here). Proposal: label_de 'Farbcodierung der Brauchwasserleitungen angewendet'.
+--   tapping_points_labelled (04bed99c) label 'Zapfstellen "Kein Trinkwasser" gekennzeichnet' — source: "Service water collection
+--     points must be permanently labelled as such." (no wording). Proposal: 'Zapfstellen dauerhaft als Brauchwasser gekennzeichnet'.
+--   service_water_meter_installed (7bad02e0) label "(DIN 1988-300)" — the meter is DVGW W 406 in §7.2; DIN 1988-300 = pipe sizing.
+--     Proposal: label_de 'Brauchwasserzähler installiert (DVGW W 406 / DIN 1988-300)'.
+--   ce_conformity_present (21a51124) label "CE-Konformität Bauproduktenverordnung (EU 305/2011)" — the CE-label sentence (§4.1)
+--     names the Machinery / Low-Voltage / EMC Directives; the CPR (§4.2) governs usability, not the CE-label. Proposal: label_de
+--     'CE-Konformität (Maschinen-/Niederspannungs-/EMV-Richtlinie) und Bauproduktenverordnung (EU 305/2011)'.
+--   UNITS the source never prints (encoding's choice, no correction possible from the md): weekly_plant_utilisation d/week,
+--     backfeed_switch_on_level l, backfeed_required_flow l/h, booster_pump_capacity l/h, maintenance_interval_months Monate.
+--   UNIT the source prints differently: Q_GW_P / Q_SW_P — §2.2 and the Eq. legends print "l/d", the worked examples and Table 5
+--     use per-person-per-day; the encoded l/(P*d) is the dimensionally consistent choice → keep, no change.
+--   Annex B microbes typed number (salmonella_sp, cryptosporidium, giardia ×2 each) — the source prints only "n.d." → RULING
+--     whether to retype as enum {n.d., detected} or leave number.
+-- ☐ RATIFIED
+-- update public.fields set label_de='Farbcodierung der Brauchwasserleitungen angewendet' where id='79e4d9ed-49bb-490d-850d-fa71421d7a96';
+-- update public.fields set label_de='Zapfstellen dauerhaft als Brauchwasser gekennzeichnet' where id='04bed99c-38af-4947-a928-558512f0548e';
+-- update public.fields set label_de='Brauchwasserzaehler installiert (DVGW W 406 / DIN 1988-300)' where id='7bad02e0-d2b3-4e11-b996-9d508569c14c';
+-- update public.fields set label_de='CE-Konformitaet (Maschinen-/Niederspannungs-/EMV-Richtlinie) und Bauproduktenverordnung (EU 305/2011)' where id='21a51124-a2d4-40b2-8d89-25230cb4d4f9';
+-- Rollback: restore the four prior label_de values from the 2026-09-05 export.
