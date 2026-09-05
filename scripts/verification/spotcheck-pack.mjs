@@ -10,9 +10,10 @@ const n = Number(nArg ?? 10);
 const all = flag === '--all' || nArg === '--all';
 const norm = (s) => s
   .replace(/\\/g, '')                              // md escapes (\= \- \[ …)
+  .replace(/&gt;|&lt;|&amp;/g, ' ')                // html entities in Musterbericht placeholders
   .replace(/^\s*(?:[•·▪●\-*]|\d{1,3})\s*$/gm, '')  // bullet-only / page-number-only lines
-  .replace(/^\s*[•·▪●]\s*/gm, '')                  // leading bullets
-  .replace(/(\w)[-‐‑]\s*\n\s*(\w)/g, '$1$2')       // dehyphenate line breaks
+  .replace(/^\s*(?:[•·▪●]|\d{1,2}\s)\s*/gm, '')    // leading bullets / line numbers
+  .replace(/(\p{L})[-‐‑]\s*\n\s*(\p{L})/gu, '$1$2') // dehyphenate line breaks (incl. ä ö ü ß)
   .replace(/\s+/g, ' ')
   .replace(/[„“”"]/g, '"').replace(/[‘’´`]/g, "'").replace(/­/g, '')
   .replace(/\s*[–—-]\s*/g, ' - ')                  // unify dashes

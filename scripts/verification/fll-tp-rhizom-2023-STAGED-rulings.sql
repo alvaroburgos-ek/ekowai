@@ -1,0 +1,170 @@
+-- ============================================================================
+-- FLL-TP-RHIZOM-2023 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement
+-- or required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (printed page numbers as in the pack). The md's own internal
+-- "Abschnitt x.y" cross-references carry the 2008 numbering (one below the 2023 headings) — see S-10.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE found on this standard (no enum value of abdichtungsart /
+-- testpflanze_art / pruefergebnis_rhizomfest / final_rhizom_conformity is materialised as a field).
+-- The prior "phantom" class does not apply here. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate / hand-entered derived twins (#22 class). Evidence: RHZ-13 carries both the EQ-1 output
+-- bestandsdichte_p_avg ("Ø P 1 – P 8", Anhang 2 Tab.1 p.30) and a REQUIRED hand-entered twin
+-- bestandsdichte_p_avg_6mon that REQ-15 reads; RHZ-21 re-enters three RHZ-01/RHZ-19 header values.
+-- ☐ RATIFIED  → soft-delete the orphan copies (active=false); rollback = set active=true on the same ids.
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: duplicate (md pass)'
+--  where id in ('5151f9ff-ed6b-41af-978d-4a4475e3f890',  -- RHZ-21 bescheinigung_ausgestellt_durch = RHZ-01 pruefinstitut_name
+--               'fb52e0b7-bc2e-4974-b9d6-6b40f10ab1ac',  -- RHZ-21 bescheinigung_pruefnummer      = RHZ-01 pruefbericht_nr
+--               '570849fc-41a1-4b0d-a55c-bc6149c730d4'); -- RHZ-21 bescheinigung_ausstellung_datum = RHZ-19 bericht_datum
+-- ☐ RATIFIED (needs the REQ-15 rewire below in the same batch) → deactivate the hand-entered twin and point REQ-15 at the EQ-1 output:
+-- update public.compliance_requirements set condition='bestandsdichte_p_avg >= 80 AND dichte_relativ_prozent >= 80' where id='78772867-c2b5-44ed-a110-7a8146c07daa' and condition='bestandsdichte_p_avg_6mon >= 80 AND dichte_relativ_prozent >= 80';
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: hand-entered twin of EQ-1 output (md pass)' where id='dd77b49a-9d70-45cd-b9fc-9096bcf00af5';
+-- rollback: restore the condition string above and set active=true.
+-- NOTE (no action): final_rhizom_conformity (RHZ-21, 07e8b6bf-b4f7-49d3-978d-dc434cd75745) duplicates pruefergebnis_rhizomfest (RHZ-18) with the
+--   same enum, but REQ-RHZ21-CONFORMITY reads it — keep until the roll-up design is decided.
+-- NOTE (no action): ist_bahnenartig (RHZ-02) is derivable from abdichtungsart (bitumenbahn/kunststoffbahn/elastomerbahn → true) and is
+--   read by REQ-11/REQ-12 — candidate for a derived field, decision batch.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference retags (zero-risk class). Evidence: pack notes. "§8" on report fields is the md's stale 2008
+-- number for the 2023 §9 Prüfbericht; "§Vorbereitung/§Bepflanzung/§Wuchsleistung/§Gesamtbescheinigung" are placeholders;
+-- "§6.1" in flaechenbedarf is the 2008 number for §7.1; "§5" on rueckstellproben is the 2008 number for §6.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§9; §11' where id='967f9cfa-d3fb-43d4-b7d8-65966ee9059e' and clause_reference='§8';  -- RHZ-01 pruefinstitut_name
+-- update public.fields set clause_reference='§9; Musterbericht' where id='8a3801c2-482e-496e-9e0a-605e469393fa' and clause_reference='§8';  -- RHZ-01 pruefbericht_nr
+-- update public.fields set clause_reference='§11; §9' where id='5e1982bd-6211-476e-8009-153ed3dc651f' and clause_reference='§8';  -- RHZ-01 auftraggeber_name
+-- update public.fields set clause_reference='§11; §9' where id='2e49e293-c64d-4043-9de1-885ba4b5b28f' and clause_reference='§8';  -- RHZ-01 auftraggeber_kontakt
+-- update public.fields set clause_reference='§6; §9' where id='ca4ba96d-b8ae-46a3-8bdf-0cddc7448f17' and clause_reference='§2, §8';  -- RHZ-02 produktbezeichnung
+-- update public.fields set clause_reference='§6; §10' where id='71c4ad79-bfe3-4399-aeb8-2937daf1c3fc' and clause_reference='§8';  -- RHZ-02 hersteller_name
+-- update public.fields set clause_reference='§6' where id='2ca0093b-733f-4296-8a56-b7ae67c19205' and clause_reference='§1';  -- RHZ-03 scope_anwendungsbereich
+-- update public.fields set clause_reference='§2' where id='f629afd7-29d0-40d0-81db-b1f4f833b783' and clause_reference='§1';  -- RHZ-03 scope_geltung_validiert
+-- update public.fields set clause_reference='§2' where id='12d15262-12aa-487f-9d67-6c0992209432' and clause_reference='§1';  -- RHZ-03 scope_pruefer_name
+-- update public.fields set clause_reference='§2' where id='3632c1ec-f094-4c91-9be4-fd37eee7e53b' and clause_reference='§1';  -- RHZ-03 scope_pruefung_datum
+-- update public.fields set clause_reference='§5.1; §7.1' where id='2e1577c5-2bb3-435b-bf52-eaad187d0c7a' and clause_reference='§5.1, §6.1';  -- RHZ-04 flaechenbedarf_pro_gefaess_m2
+-- update public.fields set clause_reference='§7.2' where id='9fa33fd4-7e3e-487f-8992-9cc1aa58a807' and clause_reference='§Vorbereitung';  -- RHZ-10 kontroll_einbau_datum
+-- update public.fields set clause_reference='§7.2' where id='0ac73828-df35-4789-b695-5ad7e5b2c765' and clause_reference='§Vorbereitung';  -- RHZ-10 kontroll_vts_einbau_methode
+-- update public.fields set clause_reference='§7.2' where id='c320c7f3-15d1-4fc7-8afc-b63c35851d33' and clause_reference='§Vorbereitung';  -- RHZ-10 kontroll_vts_dicke_unten_mm
+-- update public.fields set clause_reference='§7.2' where id='d1a9c153-95a5-4713-b1c1-f2493c38ce4b' and clause_reference='§Vorbereitung';  -- RHZ-10 kontroll_vts_dicke_oben_mm
+-- update public.fields set clause_reference='§7.2; §3.5' where id='46be1856-0e12-4193-ae46-2e9c9d610579' and clause_reference='§Vorbereitung';  -- RHZ-10 kontroll_standrohr_eingebaut
+-- update public.fields set clause_reference='§7.3' where id='eca1fe70-a6af-4593-9870-1a7f92279f02' and clause_reference='§Bepflanzung';  -- RHZ-11 bepflanzung_datum
+-- update public.fields set clause_reference='§7.1; §7.2' where id='7416fb98-bcce-4bdb-ad45-1091a54f78ee' and clause_reference='§Bepflanzung';  -- RHZ-11 pflanzung_methode
+-- update public.fields set clause_reference='§5.8' where id='b8eeaad3-3437-4f90-9ddf-d9a036deb215' and clause_reference='§Bepflanzung';  -- RHZ-11 pflanzen_initial_zustand
+-- update public.fields set clause_reference='§5.8; §7.1' where id='66979458-5940-4923-ad47-4123e276c294' and clause_reference='§Bepflanzung';  -- RHZ-11 anzahl_pflanzen_total
+-- update public.fields set clause_reference='§3.7; §8.1' where id='a9829bf8-85f2-4deb-a5fa-2324c9ddf651' and clause_reference='§Wuchsleistung';  -- RHZ-14 kontrolle_p_avg_12mon
+-- update public.fields set clause_reference='§3.7; Anhang 2 Tab. 3' where id='786460a7-869c-49ae-9ffa-221a41081100' and clause_reference='§Wuchsleistung';  -- RHZ-14 relativ_prozent_12mon
+-- update public.fields set clause_reference='§3.7; §3.12' where id='f38a3837-7c0e-4e9b-99ea-e8fed14bb289' and clause_reference='§Wuchsleistung';  -- RHZ-14 wuchsleistung_12mon_ausreichend
+-- update public.fields set clause_reference='§3.7; §8.1' where id='a21d8cbd-84f0-4e01-8e42-3013db227e7a' and clause_reference='§Wuchsleistung';  -- RHZ-14 auswertungs_datum_12mon
+-- update public.fields set clause_reference='§3.7; §8.1' where id='728c28f3-8ade-4868-8929-43a45a649ece' and clause_reference='§Wuchsleistung';  -- RHZ-15 kontrolle_p_avg_18mon
+-- update public.fields set clause_reference='§3.7; Anhang 2 Tab. 3' where id='da10db54-409f-4e99-83e8-f0807c9aadaf' and clause_reference='§Wuchsleistung';  -- RHZ-15 relativ_prozent_18mon
+-- update public.fields set clause_reference='§3.7; §3.12' where id='9f4a8d97-0568-4ed6-8e13-c49ebc53c164' and clause_reference='§Wuchsleistung';  -- RHZ-15 wuchsleistung_18mon_ausreichend
+-- update public.fields set clause_reference='§3.7; §8.1' where id='2e4e86ac-cb9a-4616-8b7b-206e6b5c883e' and clause_reference='§Wuchsleistung';  -- RHZ-15 auswertungs_datum_18mon
+-- update public.fields set clause_reference='§3.7; §8.2' where id='4b4cb830-db32-4ce2-8f1a-b6d4c5c69b97' and clause_reference='§Wuchsleistung';  -- RHZ-16 kontrolle_p_avg_24mon
+-- update public.fields set clause_reference='§3.7; Anhang 2 Tab. 3' where id='bc4d6eb2-8fc4-4777-8fd0-67a5b2a02989' and clause_reference='§Wuchsleistung';  -- RHZ-16 relativ_prozent_24mon
+-- update public.fields set clause_reference='§3.7; §3.11' where id='7f09373e-5be6-46ad-9c4e-648596309fc9' and clause_reference='§Wuchsleistung';  -- RHZ-16 wuchsleistung_24mon_ausreichend
+-- update public.fields set clause_reference='§8.2' where id='25e1eb12-2cfe-4a28-b392-60bfa95defb8' and clause_reference='§Wuchsleistung';  -- RHZ-16 endauswertung_datum
+-- update public.fields set clause_reference='§6; §8.2' where id='b1ecbd75-9459-4e93-bf02-a5157d927a47' and clause_reference='§5, §8.2';  -- RHZ-17 rueckstellproben_entnommen
+-- update public.fields set clause_reference='§9; Musterbericht' where id='5c1c9f97-1a9a-4467-81d9-caeafe08c06e' and clause_reference='§8, Anhang Musterbericht';  -- RHZ-19 bericht_datum
+-- update public.fields set clause_reference='§9' where id='e5b03e0f-23de-4334-b2e8-200355ed4909' and clause_reference='§8';  -- RHZ-19 bericht_seitenanzahl
+-- update public.fields set clause_reference='§9' where id='44fd3df4-59a1-4636-9432-53af8170f092' and clause_reference='§8, §9';  -- RHZ-19 gueltigkeitsdauer_jahre
+-- update public.fields set clause_reference='§3.11; §9' where id='07e8b6bf-b4f7-49d3-978d-dc434cd75745' and clause_reference='§Gesamtbescheinigung';  -- RHZ-21 final_rhizom_conformity
+-- update public.fields set clause_reference='§9' where id='25d46ade-ecf8-49d4-b511-3f6585a95341' and clause_reference='§Gesamtbescheinigung';  -- RHZ-21 bescheinigung_gueltig_bis
+-- update public.fields set clause_reference='§9' where id='5151f9ff-ed6b-41af-978d-4a4475e3f890' and clause_reference='§Gesamtbescheinigung';  -- RHZ-21 bescheinigung_ausgestellt_durch
+-- update public.fields set clause_reference='§9; Musterbericht' where id='fb52e0b7-bc2e-4974-b9d6-6b40f10ab1ac' and clause_reference='§Gesamtbescheinigung';  -- RHZ-21 bescheinigung_pruefnummer
+-- update public.fields set clause_reference='§9' where id='570849fc-41a1-4b0d-a55c-bc6149c730d4' and clause_reference='§Gesamtbescheinigung';  -- RHZ-21 bescheinigung_ausstellung_datum
+-- update public.fields set clause_reference='§9; Musterbericht' where id='3bf4aacb-46cb-4726-9bae-91a0712a7498' and clause_reference='§Gesamtbescheinigung';  -- RHZ-21 pruefer_signatur_eingeholt
+-- enum edit (same class): pruefergebnis_rhizomfest / final_rhizom_conformity value nicht_rhizomfest carries regulation_reference "§3.11, §8" → "§3.11, §9".
+-- rollback: restore the previous clause_reference strings (guarded in each statement).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Unit corrections. Evidence: Anhang 2 Tab.2 p.30 "Anzahl Halme / Gefäß"; the three control-mean fields have unit NULL.
+-- ☐ RATIFIED
+-- update public.fields set unit='Halme/Gefäß' where id in ('a9829bf8-85f2-4deb-a5fa-2324c9ddf651','728c28f3-8ade-4868-8929-43a45a649ece','4b4cb830-db32-4ce2-8f1a-b6d4c5c69b97') and unit is null;
+-- rollback: set unit=null on the same ids.
+-- NOTE (cosmetic, no action): wasser_leitfaehigkeit_uS_cm unit 'µS/cm' (U+00B5) vs printed 'μS/cm' (U+03BC).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · is_required review (source makes the field conditional, or it is app-only / a duplicate). Evidence:
+--   §7.1 p.17 — seams only "Bei bahnenartigen Abdichtungen"; Arbeitsunterbrechungsfuge only for "Nicht bahnenförmige Abdichtungen"
+--   (REQ-11/REQ-12 already branch on ist_bahnenartig, but the fields are unconditionally required);
+--   §8.2 p.21 — Nähte counted only "bei bahnenartigen Abdichtung";
+--   §3.2 p.9 — "Bei starrten Werkstoffen (z. B. Gussasphalt) kann auf ein Widerlager verzichtet werden.";
+--   app-only: scope_geltung_validiert / scope_pruefer_name / scope_pruefung_datum / kontroll_einbau_datum.
+-- ☐ RATIFIED  → rollback = set is_required=true on the same ids.
+-- update public.fields set is_required=false where id in (
+--   'be653965-c840-4914-900f-f15f88273038',  -- naht_anzahl_wand_eck (sheet only)
+--   '685bf705-c790-408e-9c9b-68f347e6f5a7',  -- naht_anzahl_boden_eck (sheet only)
+--   'c2f2af12-3d3f-4b56-ba61-5dbc90a70a78',  -- naht_anzahl_t_naht (sheet only)
+--   '34b1dc95-95be-4a0f-8de7-ef21c08c8a5a',  -- naht_anzahl_laengs_2_pruefmuster (sheet only)
+--   '45487093-00ea-4206-b0cf-f52706418cdc',  -- arbeitsfuge_zeitabstand_h (non-sheet only)
+--   '5059cdb1-dd03-4928-aec2-364c229ced50',  -- rhizomeindringung_naehte_count (sheet only)
+--   'f609cb01-803e-48ac-8fc7-97dc15c54f19',  -- rhizomdurchdringung_naehte_count (sheet only)
+--   '2741466d-7b73-4524-b8d2-fc1f26d55c65',  -- widerlager_dicke_mm (waived for rigid materials, §3.2)
+--   'b2e88354-968c-450c-8f1e-068d7a3ec9da',  -- widerlager_material (waived for rigid materials, §3.2)
+--   'f629afd7-29d0-40d0-81db-b1f4f833b783',  -- scope_geltung_validiert (app)
+--   '12d15262-12aa-487f-9d67-6c0992209432',  -- scope_pruefer_name (app)
+--   '3632c1ec-f094-4c91-9be4-fd37eee7e53b',  -- scope_pruefung_datum (app)
+--   '9fa33fd4-7e3e-487f-8992-9cc1aa58a807'); -- kontroll_einbau_datum (app)
+-- DECISION BATCH (not proposed): trennlage_eingebaut — §5.4 p.14 sentence 1 "zulässig" (conditional on Polystyrol-Unverträglichkeit),
+--   sentence 2 "Für die Prüfung ist der Einbau einer wasserdurchlässigen Trennlage erforderlich" (unconditional); §7.1 says "ggf. Trennlage".
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Gate re-homes (gate hosted on a worksheet that owns none of the fields it reads). Verified against this export:
+--   REQ-01 on RHZ-01 reads abdichtungsart (RHZ-02) + scope_einzelprodukt_bestaetigt (RHZ-03);
+--   REQ-10 on RHZ-04 reads testpflanze_art (RHZ-08) + pflanzdichte_pro_gefaess (RHZ-11);
+--   REQ-16 on RHZ-12 reads bestandsdichte_p_avg_12mon (RHZ-14); REQ-17 on RHZ-12 reads bestandsdichte_p_avg_18mon (RHZ-15).
+--   REFUTED (already on their owner worksheets in prod): REQ-06 → RHZ-05, REQ-07 → RHZ-06, REQ-08/REQ-09 → RHZ-07, REQ-22 → RHZ-20.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set worksheet_template_id='7a294fc9-dc07-4bbe-9ad8-35373effb127' where id='658cacf7-27d2-4f80-bba6-fe75535ab286'; -- REQ-01 → RHZ-03 Geltungsbereichsprüfung
+-- update public.compliance_requirements set worksheet_template_id='16424d90-66aa-4c3a-bd2b-1244cb22c6c3' where id='43ef43ea-493f-42a1-bc10-f7a249124fc1'; -- REQ-10 → RHZ-11 Bepflanzung
+-- update public.compliance_requirements set worksheet_template_id='3d3194e9-5c2c-44e1-9b7a-d621f29dd7d0' where id='faccb52d-fff7-48d9-9dff-5046c0a0dd0e'; -- REQ-16 → RHZ-14 (12 Monate)
+-- update public.compliance_requirements set worksheet_template_id='cae0dc25-c73b-4c19-bd27-7faaa5f9438a' where id='58683d0b-3d30-4a20-a186-838049acf7c3'; -- REQ-17 → RHZ-15 (18 Monate)
+-- rollback: REQ-01 → '991950b1-8c67-4387-a51c-c654caa89ff3' (RHZ-01); REQ-10 → '3df43d07-3461-460e-8731-3c24fb236a94' (RHZ-04); REQ-16/REQ-17 → '31238173-4fb8-4088-99f6-ec46dae0b1f9' (RHZ-12).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Gate condition / severity notes (enforcement changes — each needs a ruling).
+-- S-7a REQ-16/17/18 test the 6-month relative density (RHZ-13 dichte_relativ_prozent) for the 12/18/24-month verdicts.
+--   Evidence §3.7 p.10: "Die Bestandsdichte der Testpflanzen in den Prüfgefäßen muss mindestens 80 % der Bestandsdichte der Pflanzen in
+--   den Kontrollgefäßen betragen." (applies at every Auswertung; Anhang 2 Tab.3 p.31 prints one % column per date). CONFIRMED.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set condition='bestandsdichte_p_avg_12mon >= 120 AND relativ_prozent_12mon >= 80' where id='faccb52d-fff7-48d9-9dff-5046c0a0dd0e' and condition='bestandsdichte_p_avg_12mon >= 120 AND dichte_relativ_prozent >= 80';
+-- update public.compliance_requirements set condition='bestandsdichte_p_avg_18mon >= 160 AND relativ_prozent_18mon >= 80' where id='58683d0b-3d30-4a20-a186-838049acf7c3' and condition='bestandsdichte_p_avg_18mon >= 160 AND dichte_relativ_prozent >= 80';
+-- update public.compliance_requirements set condition='bestandsdichte_p_avg_24mon >= 160 AND relativ_prozent_24mon >= 80' where id='057c9d5e-ee15-4de5-b759-253a9140d274' and condition='bestandsdichte_p_avg_24mon >= 160 AND dichte_relativ_prozent >= 80';
+-- rollback: restore the guarded condition strings.
+-- S-7b REQ-19 (42d34746-29ed-4fa7-b381-62af9dfa5860) requires rhizomeindringung_arbeitsfuge_count == 0 on an OPTIONAL field; for sheet products the field is
+--   null (§8.2 p.21 counts the Arbeitsunterbrechungsfuge only "bei nicht bahnenförmigen Abdichtungen"). Proposal: branch on ist_bahnenartig:
+--   'rhizomeindringung_flaeche_count == 0 AND ((ist_bahnenartig == true AND rhizomeindringung_naehte_count == 0) OR (ist_bahnenartig == false AND rhizomeindringung_arbeitsfuge_count == 0))'
+--   (REQ-20 naehte_count has the mirror problem for non-sheet products.) ☐ RATIFIED — condition grammar check needed before applying.
+-- S-7c REQ-06 (d7724761-e5af-4fa6-909c-f7808336e32d) enforces widerlager_dicke_mm 9–11 unconditionally; §3.2 p.9 waives the Widerlager for rigid materials
+--   ("Bei starrten Werkstoffen (z. B. Gussasphalt) kann auf ein Widerlager verzichtet werden."). Proposal: guard with abdichtungsart != 'gussasphalt'
+--   or a widerlager_eingebaut boolean. ☐ RATIFIED (needs a field or an enum-aware condition).
+-- S-7d REQ-14 (a106c1af-ef20-411a-9c59-f750aacbc269) tests wasserstand_max_ueber_vts_mm == 20 AND wasserstand_min_unter_vts_mm == 50 — the two fields are
+--   standard_fixed values re-entered by hand (§7.3 p.20 "zwischen 20 mm über bzw. 50 mm unter"); equality gating on a UI-editable printed
+--   constant is the F-7/#22 pattern, not a measurement check. Note only; no severity change proposed.
+-- S-7e REQ-05 (d6d9b1c2-792e-4810-80e6-a8ae3ec6a663) temp_max_C <= 35 is anchored on "Eine anhaltende Innentemperatur > 35 °C ist zu vermeiden." (§5.1 p.13).
+--   "ist zu vermeiden" is the directive form (obligation), so block is defensible; the weakness is that the field is a configured cap, not a
+--   logged temperature. Note only.
+-- S-7f REQ-09 (efca0cac-83d1-4411-92d1-10cf1d7fa251) Tab.2 header reads "Richtwert" while §5.9 p.15 says "Die Wasserqualität muss den Anforderungen der Tabelle 2
+--   entsprechen." — keep block; note the mixed modal for the PDF check.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Printed hard values with NO gate (findings; adding a gate is an enforcement change → ruling):
+--   RHZ-10 kontroll_vts_dicke_unten_mm (20 ±5) / kontroll_vts_dicke_oben_mm (150 ±5) — §7.2 p.19; REQ-13 covers RHZ-09 only.
+--   RHZ-09 standrohr_durchmesser_mm — §3.5 p.9 "(∅ 50 mm, Länge 200 mm)".
+--   RHZ-06 vts_gesamt_dicke_mm — §5.6 p.14 "(170 ±10) mm".
+--   RHZ-19 gueltigkeitsdauer_jahre == 10 — §9 p.22; RHZ-20 verlangerung_zeitabschnitt_jahre == 5 — §9 p.22.
+--   RHZ-11 anzahl_pflanzen_total — not printed (8 × 11 = 88 derived).
+--   RHZ-07 duenger_*_prozent — "ca." composition (§5.7 p.15): no gate is the correct SR-2 outcome.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Missing equations (derived values hand-entered, #22 class): relativ_prozent_12mon / _18mon / _24mon and kontrolle_p_avg_12mon /
+--   _18mon / _24mon have no equation; EQ-1..EQ-3 exist only for the 6-month sheet (RHZ-13). Anhang 2 Tab.1–3 print one column per date.
+--   Design decision: per-period P_i/K_i inputs on RHZ-14/15/16 (+ EQ clones) or a period dimension on RHZ-13. Decision batch.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · Source finding (SR-3, needs the PDF): every internal cross-reference in the md ("s. Abschnitt 2.7 / 2.9 / 2.10 / 2.12 / 4.7 / 5 / 6.1 /
+--   6.2 / 6.3 / 7 / 7.1 / 8") is one section LOWER than the 2023 headings (§3.7 / §3.9 / … / §9). This is the origin of the encoded "§8" on
+--   report fields. If the rendered PDF prints the same numbers it is an FLL erratum; if not, the md is a mis-transcription.
