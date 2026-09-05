@@ -15,3 +15,4 @@ dwa-a-178-md-verification-pack.sql  DWA-A-178
 dwa-m-187-md-verification-pack.sql  DWA-M-187
 din-en-16941-2-md-verification-pack.sql  DIN-EN-16941-2
 dwa-m-277e-md-verification-pack.sql  DWA-M-277E
+dwa-m-1200-1-md-verification-pack.sql  DWA-M-1200-1

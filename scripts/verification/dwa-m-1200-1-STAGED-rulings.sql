@@ -1,0 +1,223 @@
+-- ============================================================================
+-- DWA-M-1200-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- DRAFT EDITION (Gelbdruck Juli 2025, Frist zur Stellungnahme 30.09.2025): EVERY block below is "draft-edition: escalate"
+--   — the Weißdruck may change the values; nothing here should be applied without the owner confirming the edition.
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-1\DWA-M_1200-1_GD.md (mathpix LaTeX;
+--   NO page-number lines — "printed p.N" derived from the Inhalt/Tabellenverzeichnis and cross-checked against the mathpix
+--   image indices, which equal the printed page; see the pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Standard id ece9feb6-41b9-4bc9-8109-513b5bb06285. Worksheet ids (prefix): 01 0e61f798 · 02 36bcaa8a · 03 c3f4905e ·
+--   04 356641e0 · 05 57ace43c · 06 39b148f0 · 07 675cd45a · 08 ccfe957d · 09 132a639f · 10 03b340b9 · 11 03f0b153 ·
+--   12 87527244 · 13 4978fb6e · 14 0a8bb031 · 15 9ab4e4d3 · 16 8dd9f27b · 17 ce575e83 · 18 02430a60 · 19 a84bbc08 · 20 641858ac.
+-- Context: 21 gates (14 block / 7 warn); all 18 source_quotes re-checked against the md — 16 exist verbatim (CR-014 spans a
+--   page break, CR-019 prints its two sentences in the opposite order, CR-020 uses "..." elisions, CR-013 writes "Richtlinie"
+--   where the md has the typo "Richtline"); CR-004 and CR-007 are PARAPHRASES of Tab. 8 / Tab. 27 (values correct; CR-007
+--   carries the md OCR artefact "D (B-1/B-2)"). 3 gates carry NO quote and NO condition (CR-003, CR-006, CR-012).
+--   The 2026-08-03 flag "CR-011/013 clause refs wrong" is confirmed: see S-1.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · CLAUSE_REFERENCE RETAGS (evidence: where the quoted sentence actually sits in the md).   draft-edition: escalate
+--   (a) CR-013 (ca8b3453, ws 09, block) clause "§5.2 DWA-M 1200-1; LAWA 2022" — its quote ("Darüber hinaus ist aufgrund des
+--       weitverbreiteten Einsatzes … weniger als 100 ng/l …") is §4.3.4 (printed p.26–27); the enforcing sentence is §6.3.3
+--       (p.66–67): "In allen Fällen muss regelmäßig nachgewiesen werden, dass der Beurteilungswert für die Summe der PFAS-20
+--       von $0,10 \mu \mathrm{~g} / \mathrm{l}$ sicher eingehalten werden kann." §5.2 (p.33) only "erwartet" the Orientierungswert.
+--       Proposal: clause_reference = '4.3.4 (quote) / 5.2 / 6.3.3 DWA-M 1200-1; LAWA 2022; Tab. 19'.
+--   (b) CR-011 (e6b73b55, ws 16, block) clause "§7.4 DWA-M 1200-1; §8/§9 WHG" — the clause matches its quote (§7.4 p.87), but
+--       the CONDITION "flaechenverzeichnis_vorhanden == true" is anchored on §7.2 (p.84): "den potenziellen Verbrauchsstellen
+--       linkl. eines Flächenverzeichnisses der zu bewässernden Flächen)" and Tab. 10 (p.50): "Führen eines Registers, das die
+--       Flächen enthält, auf die das aufbereitete Wasser aufgebracht wurde". Anchor ≠ quote.
+--       Proposal: clause_reference = '7.2 (Art. 6 Abs. 3 EU-WasserWVVO) / 7.4 / Tab. 10 DWA-M 1200-1; § 8, § 9 WHG' and
+--       append the §7.2 sentence to source_quote.
+--   (c) CR-016 (094bca8c, ws 08, attest block) clause "6.3.2 / 6.4 (manuelle Prüfung)" — its quote is §6.1 (p.41).
+--       Proposal: clause_reference = '6.1 (Prüfung durch die zuständige Behörde); 6.3.2 / 6.4'.
+--   (d) CR-008 (7836521a, ws 12, block) clause "§5.2 EU-WasserWVVO" — the quote is §5.2 of DWA-M 1200-1 (p.34), "In Anlehnung
+--       an die EU-WasserWVVO". Proposal: clause_reference = '5.2 DWA-M 1200-1 (in Anlehnung an EU-WasserWVVO Anhang I)'.
+--   (e) field spurenstoffentfernung_szenario (c59e5d6d, ws 10) clause "§6.6.1 / Tab. 19 / Bild 6" — the Szenario I/II text is
+--       §6.3.3 (p.66–67). Proposal: clause_reference = '6.3.3 / Tab. 19 / Bild 6 DWA-M 1200-1'.
+--   (f) field stoerfall_meldewege (465205f0, ws 14) clause "§6.7" — "Für verschiedene Fallkonstellationen … sind im RMP
+--       Meldewege und Gegenmaßnahmen festzulegen." is §6.2.2 (p.52); §6.7 (p.82) adds the Kommunikationspläne bullet.
+--       Proposal: clause_reference = '6.2.2 / 6.7 DWA-M 1200-1'.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)
+-- update public.compliance_requirements set clause_reference='4.3.4 (quote) / 5.2 / 6.3.3 DWA-M 1200-1; LAWA 2022; Tab. 19' where id='ca8b3453-b08a-4207-a266-9f7ac0564faa';
+-- update public.compliance_requirements set clause_reference='7.2 (Art. 6 Abs. 3 EU-WasserWVVO) / 7.4 / Tab. 10 DWA-M 1200-1; § 8, § 9 WHG' where id='e6b73b55-d525-443e-9baa-92eeeefde8cc';
+-- update public.compliance_requirements set clause_reference='6.1 (Prüfung durch die zuständige Behörde); 6.3.2 / 6.4' where id='094bca8c-0f14-46eb-b9aa-ca0d2376f6ab';
+-- update public.compliance_requirements set clause_reference='5.2 DWA-M 1200-1 (in Anlehnung an EU-WasserWVVO Anhang I)' where id='7836521a-2fa1-46a9-af9c-b365e9290ab1';
+-- update public.fields set clause_reference='6.3.3 / Tab. 19 / Bild 6 DWA-M 1200-1' where id='c59e5d6d-6154-4cc9-a601-6ef10e09f1c9';
+-- update public.fields set clause_reference='6.2.2 / 6.7 DWA-M 1200-1' where id='465205f0-52f7-425b-9843-ad4cb7017ca6';
+-- Rollback: restore '§5.2 DWA-M 1200-1; LAWA 2022' / '§7.4 DWA-M 1200-1; §8/§9 WHG' / '6.3.2 / 6.4 (manuelle Prüfung)' / '§5.2 EU-WasserWVVO' /
+--   '§6.6.1 / Tab. 19 / Bild 6 DWA-M 1200-1' / '§6.7 DWA-M 1200-1'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · DEAD GATES — three rows with NO condition and NO source_quote (they can never fire).   draft-edition: escalate
+--   (a) CR-003 (080e27dc, ws 08, warn, clause "Tabelle 4, Anmerkung (*)"). Evidence Tab. 4 Anm. (*) (p.31): "Wenn eine bewässerte
+--       Kulturpflanzenart in mehrere der oben genannten Kategorien fällt, gelten die Anforderungen der strengsten Kategorie."
+--       GRAMMAR: "strictest class" needs an ordering the condition grammar lacks; the seeded helper anwendungsbereich_count
+--       (511d950e) exists. Proposal: source_quote = the sentence above; condition = 'IF anwendungsbereich_count > 1 THEN
+--       attest_m12001_08_cr_003 == True' (new attest boolean on ws 08) — warn. Field add = RULING.
+--   (b) CR-006 (b958fc4e, ws 08, warn, clause "Tabelle 8 / Tabelle 6 (Log10-Reduktion); DWA-M 1200-2"). Evidence §5.2 (p.33):
+--       "Ausweitung der Leistungsziele für die $\log _{10}$-Reduktionen der Wassergüteklasse A (E. coli $\geqslant 5,0$; Coliphagen,
+--       insg. $\geqslant 6,0$; Clostridium-perfringens-Sporen $\geqslant 4,0$ bzw. sulfatreduzierende Sporenbildner $\geqslant 5,0$ )
+--       auch auf die Wassergüteklassen B-1 und C-1" and (p.34) "müssen … an der Stelle der Einhaltung erfüllt werden".
+--       Proposal: re-home to ws 09 (132a639f, where the log10 fields live), severity BLOCK (printed "müssen"), condition
+--       'IF gueteklasse_zugeordnet IN {A, B-1, C-1} THEN log10_e_coli >= 5.0 AND log10_coliphagen >= 6.0 AND
+--       (log10_clostridium >= 4.0 OR sulfat_sporenbildner_log10_value >= 5.0)'. Severity = RULING (warn→block).
+--   (c) CR-012 (3c457e03, ws 20, warn, clause "6.1 (Aktualisierung des RMP)"). Evidence §6.1 (p.42–43): "Der RMP sollte
+--       unabhängig von Veränderungen im Betrieb alle 6 Jahre aktualisiert werden." Proposal: source_quote = that sentence;
+--       condition = 'rmp_aktualisierungs_intervall_jahre <= 6' — warn ("sollte").
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)
+-- update public.compliance_requirements set condition='rmp_aktualisierungs_intervall_jahre <= 6', source_quote='Der RMP sollte unabhängig von Veränderungen im Betrieb alle 6 Jahre aktualisiert werden. [DWA-M 1200-1 §6.1, printed p.42–43]' where id='3c457e03-37b6-4777-b596-13c077d093ad';
+-- update public.compliance_requirements set worksheet_template_id='132a639f-213a-48e6-828f-ccee5a7806f9', severity='block', condition='IF gueteklasse_zugeordnet IN {A, B-1, C-1} THEN log10_e_coli >= 5.0 AND log10_coliphagen >= 6.0 AND (log10_clostridium >= 4.0 OR sulfat_sporenbildner_log10_value >= 5.0)', source_quote='Ausweitung der Leistungsziele für die log10-Reduktionen der Wassergüteklasse A (E. coli ≥ 5,0; Coliphagen, insg. ≥ 6,0; Clostridium-perfringens-Sporen ≥ 4,0 bzw. sulfatreduzierende Sporenbildner ≥ 5,0) auch auf die Wassergüteklassen B-1 und C-1 bei Bewässerung von Nahrungsmittelpflanzen und Futtermitteln (siehe LAWA 2022). [DWA-M 1200-1 §5.2 / Tab. 8, printed p.33 / p.39]' where id='b958fc4e-49fd-4e3e-8dd2-6bf3188d681b';
+-- (a) = spec only until the attest field is ruled.
+-- Rollback: set condition='' and source_quote=null on the two ids; CR-006 worksheet_template_id back to 'ccfe957d-c71a-4494-b166-1197f7f0e5e4', severity='warn'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · ATTESTATION GATES (CR-016 ws 08, CR-019 ws 15) — both quotes exist; both attest fields are workflow constructs.
+--   CR-016's quoted check is the AUTHORITY's ("erfolgt … durch die zuständige Behörde", §6.1 p.41), so an engineer attestation
+--   can only record that the authority review took place. CR-019 (§7.1 p.84) is the engineer's own duty ("sind vorab … abzustimmen")
+--   — fine as attest. Proposal: relabel attest_m12001_08_cr_016 (a916f88b) to "Behördliche Prüfung des RMP (KRM 3/6) erfolgt";
+--   severity unchanged. draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.fields set label_de='Behördliche Prüfung des RMP (Schutzgüter/Expositionswege, 6.3.2 / 6.4) erfolgt' where id='a916f88b-f0dd-41ff-a825-6e0ec317a922';
+-- Rollback: update public.fields set label_de='Nachweis: 6.3.2 / 6.4 (manuelle Prüfung)' where id='a916f88b-f0dd-41ff-a825-6e0ec317a922';
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · SEVERITY / ANCHOR notes on existing gates.   draft-edition: escalate
+--   (a) CR-017 (1113a7dc, ws 14, BLOCK) = 'notfall_verteiler_existent == true AND stoerfall_meldewege == true'. The Meldewege
+--       half is printed hard (§6.2.2 p.52 "sind im RMP Meldewege und Gegenmaßnahmen festzulegen"); the Verteiler half is
+--       advisory (p.52 "Die Einrichtung von Notfall-Verteilern … wird empfohlen"). Proposal: split — CR-017 condition =
+--       'stoerfall_meldewege == true' (block) + NEW CR-017b (ws 14, WARN, §6.2.2) 'notfall_verteiler_existent == true'.
+--   (b) CR-013 (ca8b3453, ws 09, BLOCK) pfas20_value < 100: §4.3.4 "empfohlen", §5.2 "Orientierungswert … erwartet", but §6.3.3
+--       (p.66–67) "muss regelmäßig nachgewiesen werden … sicher eingehalten" → block defensible; NOTE ONLY, no change proposed
+--       beyond the S-1(a) retag. The Bundes-WasserWVVO is unpublished (NR) — the value is the LAWA 2022 recommendation.
+--   (c) CR-002 (ad843ef1, ws 20, BLOCK) rmp_vollstaendig: §6.1 (p.41) "schreibt die EU-WasserWVVO … verbindlich vor" applies to
+--       agricultural irrigation; for urban-only use the same paragraph says "empfiehlt dieses Merkblatt". Proposal: keep block
+--       (the Merkblatt's whole method rests on the RMP); NOTE for the ruling only.
+--   (d) CR-007 (408a8dba, ws 12, BLOCK) source_quote carries the md OCR artefact "D (B-1/B-2) 1x pro Woche" (Tab. 27 p.80 row
+--       label for class B). Proposal: source_quote → 'Tabelle 27: Mindesthäufigkeit der Überwachung — E. coli: A 1x pro Woche;
+--       B (B-1/B-2) 1x pro Woche; C 2x pro Monat; D 2x pro Monat [DWA-M 1200-1 Tab. 27, printed p.80; C-row cell empty in the
+--       md — PDF to confirm]'. Text-only, but on the gate table → staged.
+--   (e) CR-004 (23adcbc3, ws 09, BLOCK) quote is a paraphrase of Tab. 8; values verified (A ≤10, B ≤100, C ≤100, D ≤10.000).
+--       NOTE ONLY.
+--   (f) CR-001 (58a8e209, ws 02, BLOCK) — Zone III: §6.3.2.2 (p.62) "Unter bestimmten Voraussetzungen kann eine
+--       Wasserwiederverwendung in der Schutzzone III genehmigt werden … ein zusätzliches Monitoring empfohlen." No field
+--       captures Zone III. Proposal: NEW enum value 'zone_iii' on schutzzone_status (341cb3f0) + NEW warn gate (ws 02, §6.3.2.2)
+--       'IF schutzzone_status == zone_iii THEN attest_m12001_02_zone3_monitoring == True'. Field/enum add = RULING.
+-- ☐ RATIFIED (a)  ☐ (d)  ☐ (f)   — (b)(c)(e) = notes
+-- update public.compliance_requirements set condition='stoerfall_meldewege == true' where id='1113a7dc-cef2-4825-834b-6f293d2d0aa3';
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote) values ('0a8bb031-3989-4260-aa18-50589e2c14b8', 'CR-017b', 'warn', 'notfall_verteiler_existent == true', '6.2.2 (Einbeziehung bei Vor-/Störfällen)', 'Die Einrichtung von Notfall-Verteilern, zum Beispiel als E-Mail-Verteiler mit Rufnummernlisten, wird empfohlen, mit denen jede verantwortliche Partei entsprechend der Fallkonstellation die anderen verantwortlichen Parteien informieren kann. [DWA-M 1200-1 §6.2.2, printed p.52]');
+-- Rollback: restore CR-017 condition 'notfall_verteiler_existent == true AND stoerfall_meldewege == true'; delete CR-017b by (worksheet_template_id, code).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · MISSING GATES for printed hard limits (coverage gaps).   draft-edition: escalate
+--   (a) Tab. 8 INTESTINALE ENTEROKOKKEN (p.39–40): A ≤100, B ≤100, C ≤400, D "-". Proposal NEW CR-022 (ws 09, block, "Tab. 8"):
+--       'IF gueteklasse_zugeordnet IN {A, B-1, B-2} THEN intestinale_enterokokken <= 100 AND IF gueteklasse_zugeordnet IN {C-1, C-2}
+--       THEN intestinale_enterokokken <= 400'.
+--   (b) Tab. 8 BSB5 / AFS (p.39): A: BSB5 ≤10 mg/l, AFS ≤10 mg/l; B, C: AFS ≤10 mg/l (BSB5 per RL 91/271/EWG). Proposal NEW CR-023
+--       (ws 09, block, "Tab. 8"): 'IF gueteklasse_zugeordnet == A THEN bsb5_value <= 10 AND IF gueteklasse_zugeordnet IN
+--       {A, B-1, B-2, C-1, C-2} THEN afs_value <= 10'.
+--   (c) Tab. 8 LEGIONELLA (p.39) "<1.000 KBE/L, wenn das Risiko der Aerosolbildung besteht". Proposal NEW CR-024 (ws 09, block):
+--       'IF aerosolrisiko == ja THEN legionella_value < 1000'.
+--   (d) Tab. 8 NEMATODEN (p.39) "≤ 1 Ei pro Liter für die Bewässerung von Weideflächen oder Futterpflanzen". Proposal NEW CR-025
+--       (ws 09, block): 'IF anwendung_weide_oder_futterpflanzen == ja THEN nematoden_value <= 1'.
+--   (e) Tab. 8 Anm. f) TRÜBUNG MAX (p.40, "sollten"): 10 NTU (Polstoff/Mikrosieb/Raumfilter) / 0,5 NTU (Membran) "zu keiner Zeit".
+--       Proposal NEW CR-026 (ws 09, WARN): 'IF filtration_typ IN {polstoff, mikrosieb, raumfilter} THEN truebung_max_value <= 10
+--       AND IF filtration_typ IN {membran, mikrofiltration, ultrafiltration, nanofiltration, umkehrosmose} THEN truebung_max_value <= 0.5'.
+--   (f) §5.2 MAX DEVIATION (p.34, "darf … nicht überschreiten"): 1 log10 (E. coli/Legionella), 100 % (Nematoden), 100 % (BSB5/AFS/
+--       Trübung). Proposal NEW CR-027 (ws 12, block, "5.2"): 'abweichung_log10_max <= 1 AND abweichung_nematoden_pct <= 100 AND
+--       abweichung_chempar_pct <= 100'.
+--   (g) §5.2 VALIDATION SHARE (p.34, "müssen"): A ≥90 %, B-1/C-1 ≥50 %. Proposal NEW CR-028 (ws 12, block): 'IF gueteklasse_zugeordnet
+--       == A THEN validierungs_compliance_pct >= 90 AND IF gueteklasse_zugeordnet IN {B-1, C-1} THEN validierungs_compliance_pct >= 50'.
+--   (h) Tab. 7 C-1 EMITTER DISTANCE (p.36): "mindestens 25 cm" (Tropf) / "mindestens 50 cm" (Mikrosprüh) for Dauerkulturen.
+--       Proposal NEW CR-029 (ws 11, block): 'IF bewaesserungsmethode == tropfbewaesserung THEN emitterabstand_dauerkulturen_cm >= 25
+--       AND IF bewaesserungsmethode == mikrospruehbewaesserung THEN emitterabstand_dauerkulturen_cm >= 50' — GRAMMAR: applies
+--       only to Dauerkulturen, which no field captures; the field being filled is the trigger. RULING on mechanism.
+--   (i) Tab. 7 C-1 LACTATING CATTLE (p.36): "Eine Beweidung durch laktierendes Vieh bei der Verwendung der Güteklasse C wird
+--       grundsätzlich ausgeschlossen." Proposal NEW CR-030 (ws 08, block): 'IF gueteklasse_zugeordnet IN {C-1, C-2} THEN
+--       laktierendes_milchvieh == nein'.
+--   (j) §6.3.2.2 ONE-THIRD LOAD (p.59, "dürfen maximal zu einem Drittel"): Proposal NEW CR-031 (ws 13, block, "6.3.2.2 / BBodSchV
+--       Anlage 1 Tab. 3"): 'max_zusatzfracht_anteil_pct <= 33.3'. (§4.5 p.28 says "sollte" — severity = RULING.)
+--   (k) KARENZZEIT per class (Tab. 7 p.36–37): C-1 ≥5 d (fodder), D ≥28 d (fodder) / ≥14 d (hay, oil, sugar beet, Arznei) / ≥30 d
+--       (seed). GRAMMAR: the printed minimum depends on the crop sub-case the enum booleans only partly capture; Proposal NEW CR-032
+--       (ws 11, WARN): 'IF gueteklasse_zugeordnet IN {C-1, C-2} AND anwendung_weide_oder_futterpflanzen == ja THEN karenzzeit_tage >= 5
+--       AND IF gueteklasse_zugeordnet == D AND anwendung_weide_oder_futterpflanzen == ja THEN karenzzeit_tage >= 28 AND IF
+--       anwendung_saatgut_oder_essbare_samen == ja THEN karenzzeit_tage >= 30 AND IF anwendung_heu_silage_oel_industrie == ja
+--       THEN karenzzeit_tage >= 14'. Warn until the crop cases are ruled.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)  ☐ (h)  ☐ (i)  ☐ (j)  ☐ (k)
+-- insert … CR-022 … CR-032 per the specs above (source_quote = the Tab. 8 / §5.2 / Tab. 7 / §6.3.2.2 sentences quoted in the pack).
+-- Rollback: delete the inserted rows by (worksheet_template_id, code).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · DUPLICATE / OVERLAPPING FIELDS.   draft-edition: escalate
+--   (a) log10_clostridium (76c7c977, ws 09, required, needs_engineer_review) vs clostridium_log10_value (edc2813b, ws 09, optional,
+--       imported_unverified 2026-08-01) — same quantity, same worksheet. Proposal: active=false on clostridium_log10_value;
+--       keep sulfat_sporenbildner_log10_value (442110fd) as the printed alternative indicator.
+--   (b) tss_value (2998570c) vs afs_value (17dd811a) — §5.2 (p.34): "Der Parameter TSS … wird durch … AFS ersetzt." The encoder
+--       kept TSS "for the EU-compat layer". Proposal: leave active, is_required stays false; NOTE ONLY.
+--   (c) zuckerruebe_kartoffel_industrie (1348d887) is one of the three uses inside anwendung_heu_silage_oel_industrie (0492b936).
+--       Proposal: active=false on zuckerruebe_kartoffel_industrie OR split the composite enum — RULING.
+--   (d) flaechenverzeichnis_vorhanden is enforced by CR-011 (ws 16) AND CR-015 (ws 15) — see S-9.
+-- ☐ RATIFIED (a)  ☐ (c)
+-- update public.fields set active=false where id='edc2813b-2582-480c-84fc-92e5605019b4';
+-- Rollback: update public.fields set active=true where id='edc2813b-2582-480c-84fc-92e5605019b4';
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · UNIT CORRECTIONS.   draft-edition: escalate
+--   (a) k_bio (319a7c33, ws 06) unit '1/d' — Tab. 3 (p.26) prints "$k_{\text {bio }}<0,1 \mathrm{l} /(\mathrm{g}$ TS ⋅ d)" i.e.
+--       l/(g TS·d). Proposal: unit = 'l/(g TS·d)'.
+--   (b) zuckerruebe_kartoffel_industrie (1348d887) and arzneipflanzen_industrie (1356e4f5) — booleans carrying the literal string
+--       'None' as unit (seed artefact 2026-08-01). Proposal: unit = null.
+--   (c) mq_value / hq_value / mnq_value 'm3/s' — the md prints NO unit (Tab. 1 p.17); conventional; NOTE ONLY.
+-- ☐ RATIFIED (a)  ☐ (b)
+-- update public.fields set unit='l/(g TS·d)' where id='319a7c33-ca02-4615-8b5d-7a4d9599d16a';
+-- update public.fields set unit=null where id in ('1348d887-66fe-4473-b589-e5a20000204d','1356e4f5-5d84-44b2-98a3-482ab937ef3d');
+-- Rollback: update public.fields set unit='1/d' where id='319a7c33-…'; update public.fields set unit='None' where id in ('1348d887-…','1356e4f5-…').
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · IS_REQUIRED REVIEW — required=true where the source is conditional or "sollte/empfohlen".   draft-edition: escalate
+--   Conditional (printed "wenn …" / class-specific): legionella_value (d5c608d8, only "wenn das Risiko der Aerosolbildung besteht"),
+--   nematoden_value (1b2f4bf7, only Weide/Futterpflanzen), log10_e_coli (24c97032), log10_coliphagen (dad1d639), log10_clostridium
+--   (76c7c977) (validation targets apply to A / B-1 / C-1 only; B-2, C-2, D print "-"), intestinale_enterokokken (c39100a9, D "-"),
+--   validierungs_compliance_pct (f7043885, A/B-1/C-1 only), karenzzeit_tage (9bd537dd, class A "ohne Karenzzeit vor der Ernte").
+--   Advisory ("sollte/empfohlen"): rmp_aktualisierungs_intervall_jahre (8aa5577f, §6.1 "sollte"), rmp_letzte_aktualisierung (cb644be5,
+--   app record of the same "sollte"), notfall_verteiler_existent (5b8e47e5, "wird empfohlen"), boden_vorbelastung_dokumentiert
+--   (df696c7f, "sollte"), gfs_orientierung (9b91d7d1, "sollte … orientieren").
+--   Proposal: is_required=false on all 13 (the S-5 gates carry the conditional enforcement instead).
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('d5c608d8-8cc6-4495-a40a-ab0ea6d7db2e','1b2f4bf7-6320-47e8-9d38-0a80dd50379c','24c97032-8b70-48f3-9e09-0bb6769d96fb','dad1d639-eda0-4644-b5bf-eae609d4621e','76c7c977-e0f0-412c-8f89-68c6a158b7a7','c39100a9-9186-4431-878c-606907735d89','f7043885-c9ce-49c3-811d-f2bca5d0396e','9bd537dd-3735-452b-a9a3-66dc23129226','8aa5577f-1a3d-405f-bc6b-782b57aab4d4','cb644be5-15fb-4976-8a79-53f1a2d38849','5b8e47e5-a3c2-459e-9425-421eebf8dad0','df696c7f-3c86-43b6-81ee-856b9d4435a3','9b91d7d1-71b2-4696-81e4-2883de736925');
+-- Rollback: update public.fields set is_required=true where id in (the same 13 ids).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · GATE RE-HOME.   draft-edition: escalate
+--   CR-015 (e7294b1a, ws 15 "Aufbereitungsgenehmigung") reads ONLY fields of other worksheets: flaechenverzeichnis_vorhanden (ws 16),
+--   anwendungsbereich_kategorie / gueteklasse_zugeordnet / bewaesserungsmethode (ws 08). ws 15 has no field of its own in the
+--   condition. Its quote (§7.2 p.84, Art. 6 Abs. 3 contents) is the Aufbereitungsgenehmigung content list, which genehmigungs_inhalt_
+--   komplett (606007c3, ws 15) + CR-010 already attest. Proposal: keep CR-015 on ws 15 but drop the ws-16 term (Flächenverzeichnis is
+--   CR-011's job on ws 16): condition = 'anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet IS NOT NULL AND
+--   bewaesserungsmethode IS NOT NULL' — OR re-home to ws 08 (ccfe957d). RULING on which.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set condition='anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet IS NOT NULL AND bewaesserungsmethode IS NOT NULL' where id='e7294b1a-bac4-4a2f-bdb7-947ed6be9837';
+-- Rollback: restore 'flaechenverzeichnis_vorhanden == true AND anwendungsbereich_kategorie IS NOT NULL AND gueteklasse_zugeordnet IS NOT NULL AND bewaesserungsmethode IS NOT NULL'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · STRUCTURE notes (no SQL until ruled).   draft-edition: escalate
+--   (a) Worksheet M12001-17 "Genehmigung Verteilungs-/Speicherinfrastruktur" (ce575e83) has ZERO active fields in the export, yet
+--       §7.3 (p.86) prints a document list incl. a hard UVPG trigger: "abhängig vom Speichervolumen (zwischen $5.000 \mathrm{~m}^{3}$
+--       und 2 Mio. $\mathrm{m}^{3}$ ) sowie auch für Transportleitungen ab 2 km bis weniger als 10 km ist eine standortbezogene
+--       Vorprüfung des Einzelfalls nach UVPG notwendig". Proposal: add speichervolumen_m3, transportleitung_km, uvp_vorpruefung_
+--       erforderlich (boolean) + warn gate 'IF speichervolumen_m3 >= 5000 OR transportleitung_km >= 2 THEN uvp_vorpruefung_erforderlich == true'.
+--   (b) aufbereitungsstufen (29115393, ws 10) is a SINGLE-select enum while Tab. 8 (p.39) prints a CHAIN ("Mechanisch-biologische
+--       Behandlung, Filtration, Desinfektion" for A/B/C; no Filtration for D). Proposal: json multi-select + gate 'IF
+--       gueteklasse_zugeordnet IN {A, B-1, B-2, C-1, C-2} THEN aufbereitungsstufen CONTAINS filtration AND CONTAINS desinfektion'
+--       — GRAMMAR: no json-contains operator in evaluate.ts. RULING on mechanism.
+--   (c) bewaesserungsmethode enum lacks Unterflurbewässerung (Tab. 7 C-1/D, p.36–37) and Überkopf-/Furchen-/Überstaubewässerung
+--       (Tab. 14 p.56); "andere_kein_kontakt" absorbs Unterflur. Proposal: add enum value 'unterflurbewaesserung'.
+--   (d) genehmigung_aktualisierung_trigger (3de488ce, ws 15) is free text for a printed 4-item list (§7.2 p.85) → selection widget
+--       per the 2026-08-01 "guideline options → selection" ruling.
+--   (e) Tab. 27 (p.80) C-row E. coli cell is EMPTY in the md and the row labels are lost; the enum beprobung_frequenz_e_coli assumes
+--       C = 2x pro Monat (matches gate CR-007's quote) — PDF to confirm before the enum is treated as VA.
+--   (f) Tab. B.1 Cadmium "Maximal zulässige Frachten" cell is garbled in the md ("1/3 ⋅ g g/(ha ⋅ a)") — PDF to settle.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)   — (e)(f) = PDF checks
