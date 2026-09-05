@@ -1,0 +1,20 @@
+-- Rollback for din-1989-1-md-verification-pack.sql (2026-09-05).
+-- Reverts ONLY rows this pack touched (identified by the verification_note tag) and ONLY for standard DIN-1989-1
+-- (joined through worksheet_templates → standards.code). Every Section A field carried the single prior status
+-- 'imported_unverified' (2026-09-05 export: 60/60 imported_unverified), so Section A rows return to exactly that
+-- status. Section B equations keep their status (verified_against_standard, encode-time); only the backfilled quote
+-- is nulled and the " | md-quote …" tag stripped. No Section A equation statements existed in the pack.
+
+-- ---- Section A: fields (status + quote + note + verified_at) — prior status = imported_unverified (60 rows) ----
+update public.fields f set verification_status='imported_unverified', verification_quote=null, verification_note=null, verified_at=null
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = f.worksheet_template_id and s.code = 'DIN-1989-1'
+   and f.id in ('241a2e31-4ac2-410d-9649-ede4f0e394b1','b565e781-8810-468d-ae6f-4a48dca31546','4d558b72-9741-41ea-953c-ff355d3b584f','a5a4e14f-ef20-4d67-8651-790eb9ce4abd','ee3c6617-24b4-42ba-878d-462f2530f72d','1c669262-ffd7-405b-8ffe-0d838fec1439','39328edd-8845-44e8-b648-57a4f32075f0','c1d39ba4-8f01-4abc-84b6-0a562a40c378','280292e9-662c-48e5-81a9-004edf287e46','2dd3064d-693e-4e34-a380-60d7c82a8123','723bd075-7960-4465-b8f6-e8e6ce85d478','43922ca0-13fa-40bd-9e67-7679b59141ea','e10c4313-e62a-4946-85e1-6c408b1ce4b1','64b21755-7e91-48e3-be8e-60d8e3001ba5','9136c382-9b10-4dcd-9c4a-842a50f7fad2','89c3ac86-792c-4264-af23-f17e38afa221','02762438-b57f-4b7d-9134-c6c997f9e534','5092ad20-ad8b-4159-a46d-942881faad88','281f770b-12ad-4c9b-bb59-a5fbdd67546d','6795e359-ee16-4c1a-a85c-7f424e105821','f27cb7f0-97cc-45fd-a5a3-f2cae0ac53f9','ca74c80d-0af3-498b-b995-42efbeacddbc','eb8f559f-891e-4ecf-aee3-9ed84285f68c','a71b07d1-6712-4528-be6e-985deaac91ee','46cd9779-30c8-42ee-a60f-771aad0c0a85','9393add3-cf2d-4f88-bf06-dc377ab6d7bb','c48b0cf7-188b-4960-a8c0-a0eceee268d1','449e896d-014c-41a7-ac0c-aaf81c5e9d06','d6e5de2e-eb79-4fb7-bb7c-5b0eb9dde5bb','aca75856-ea7c-4908-adb0-f1c75b7eadf9','aec5a393-6683-4171-8bc6-638352c0de3f','e7f2ad48-8a3f-4048-8b82-9b4d55f3d39a','ea87323d-cf31-47eb-8d61-026317fe4989','15d1195b-ac1d-418a-9dc0-400ac4a08bf7','e912a324-e247-4d88-b264-53330e926021','61c80f4b-5aa3-4d3c-b777-fee201a8504e','34e35eec-ed92-4ba9-8795-deda6f6c624e','35388ddc-8a75-40b5-a192-e24d0f4368e5','d1c212bb-b851-45e5-a2ac-1ac9f1058fb4','cb361e1a-1cca-4eba-bf15-3d7dbe41839f','35a65736-d8f0-49c6-a146-836a3b40322b','4c48dac1-b0ac-41d2-baf0-cfa6372e9a00','0bf17ca7-a14e-4d1e-89f4-6f5d191f75b6','8ed9145b-4e43-47a7-be3b-88560b59f02c','4d300cbc-f1f5-4c9b-a209-f97d90210379','a3316fa0-e618-43ab-9a6a-228074ef62b0','b4a11407-30a4-4b70-88bf-33bf7576d46e','32be0b5b-df70-453a-babf-edccbaffb25d','e579ba67-1b50-41f9-b4a6-69a59beeed7e','9efdcef3-d8d7-4a91-9a66-28f2efa8b5af','f758a5de-e4c6-4249-9ada-b3d40a4ed582','562b445e-e253-4408-b354-e93bbc401ee7','07c91b3d-c63e-485b-bf24-30750d024b4b','1acd4b0b-544a-4f74-a353-f8b15cfc9664','25eaaacb-85ea-4dfe-b202-069e0ac4196d','44944ccf-7fd9-4439-965a-9df95970f206','7d358cba-854e-42b4-954c-b55cd3b909eb','ea8c8069-636f-400e-9c87-10b6ad5af741','3678fde9-734b-4ddc-841e-26f3225652ca','2e98eeca-3e18-448f-871a-01d223ed0b6a')
+   and (f.verification_note like 'md-verified 2026-09-05%' or f.verification_note like 'md-pass 2026-09-05%');
+-- ---- Section B: equation quote backfill only (status unchanged; nulls the quote and strips the tag) ----
+update public.equations e set verification_quote=null,
+       verification_note=nullif(regexp_replace(e.verification_note, ' \| md-quote 2026-09-05 \(.*\) \[VC\]$', ''), '')
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = e.worksheet_template_id and s.code = 'DIN-1989-1'
+   and e.id in ('5c32f168-f50b-492b-bde8-bec4a909d676','8f516224-e4a7-46bf-a44e-6d571484f90a','4d57786c-99cd-400f-843e-93bb2d16166f','9f2b0686-05c4-46ac-90bc-73a7ad19dfe8')
+   and e.verification_note like '%md-quote 2026-09-05%';

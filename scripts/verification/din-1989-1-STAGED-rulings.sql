@@ -1,0 +1,199 @@
+-- ============================================================================
+-- DIN-1989-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (German mathpix LaTeX of DIN 1989-1:2002-04; no page lines).
+-- "printed p.N" = section start page per the Inhalt, cross-checked with the mathpix figure page indices (see pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Worksheet ids: 02 = 0cf5787a-3306-4744-92b6-5459a9502410 · 03 = 4a111b52-f272-418a-9090-768325f04b03 ·
+--   04 = 713a873d-a192-4e74-89f7-51f0d748198b · 05 = 19e8fec4-bb42-4f2f-ab91-a56cdb7758da · 06 = 1b75775a-636e-4c43-bad8-eaf9660bf595
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE. All 60 symbols carry label + clause + description; no enum token of the
+-- 12 enum fields is materialised as a field. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate fields: NONE. Overlap only (not duplicates): DIN-1989-1-06 filter_reinigung_jaehrlich /
+-- speicher_reinigung_jahre / wasserzaehler_austausch_jahre are per-component Tab. 5 rows while inspektion_intervall is
+-- an EKOWAI roll-up of the same table (see S-10). No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Gate source_quote corrections (evidence class, zero enforcement change). Spot-check of the 14 gates against the
+-- md: 12 verbatim (≥ 85 % of 6-word windows), CR-02 = 8 %, CR-04 = 0 % (paraphrases); CR-03 verbatim but anchored on the
+-- descriptive first paragraph of §6.2, which does not contain the obligation the gate enforces.
+--  • CR-02 (8ec06b7d…) attributes "Verbindungen zwischen Trinkwasserleitungen und Betriebswasserleitungen sind nicht
+--    zulässig." to §18 — it is a §17.3 Betriebsanleitung item (printed p.30). Verbatim §4.1 / §12.7 / §17.3 sentences:
+--    "Insbesondere ist sicherzustellen, dass Auswirkungen auf die Qualität des Trinkwassers ausgeschlossen werden." (p.9) |
+--    "In diesem Gebäude ist eine Regenwassernutzungsanlage installiert. Querverbindungen sind nicht zulässig." (p.19) |
+--    "Verbindungen zwischen Trinkwasserleitungen und Betriebswasserleitungen sind nicht zulässig." (p.30)
+--  • CR-03 (38f3522d…) enforces filter_genormt; the printed obligation is the §6.2 bullet
+--    "- Filter sind nach ihrer Reinigungsleistung (z. B. Wirkungsgrad, Standzeit, Durchlassweite) auszuwählen. Es sind
+--    genormte Filter zu verwenden ${ }^{4)}$." (p.11) + footnote "4) Eine Norm für Anforderungen und Prüfung von Filtern
+--    (DIN 1989-2) befindet sich in Vorbereitung." — NOTE: in 2002 "genormt" pointed at an unpublished norm; whether a
+--    block gate on "genormter Filter" is enforceable today is itself an owner question (severity note → warn?).
+--  • CR-04 (f8186aa7…) paraphrases Tab. 2; verbatim rows: "Tabelle 2 - Speicheröffnungen | Art des Speichers &
+--    Speicheröffnung mm | oberirdische Speicher $\leq 3000$ I Einzelvolumen & $\geq 200$ | oberirdische Speicher > 3000 I
+--    Einzelvolumen & $\geq 600$ | unterirdischen Speicher bis Domhöhe $\leq 450 \mathrm{~mm}$ & $\geq 600$ | unterirdischen
+--    Speicher ab Domhöhe $>450 \mathrm{~mm}$ mit Aufweitung des Domdurchmessers auf $\geq 800 \mathrm{~mm}$ (siehe Bild 1)
+--    & $\geq 600$" (p.14–15).
+-- ☐ RATIFIED
+-- update public.compliance_requirements set clause_reference='§4.1; §12.7; §17.3', source_quote='Insbesondere ist sicherzustellen, dass Auswirkungen auf die Qualität des Trinkwassers ausgeschlossen werden. | In diesem Gebäude ist eine Regenwassernutzungsanlage installiert. Querverbindungen sind nicht zulässig. | Verbindungen zwischen Trinkwasserleitungen und Betriebswasserleitungen sind nicht zulässig.' where id='8ec06b7d-a2ab-45d9-9d15-f38520f72efb';
+-- update public.compliance_requirements set source_quote='Filter sind grundsätzlich im Speicherzulauf einzubauen. | - Filter sind nach ihrer Reinigungsleistung (z. B. Wirkungsgrad, Standzeit, Durchlassweite) auszuwählen. Es sind genormte Filter zu verwenden ${ }^{4)}$. | 4) Eine Norm für Anforderungen und Prüfung von Filtern (DIN 1989-2) befindet sich in Vorbereitung.' where id='38f3522d-5ef7-4f1e-9639-6681cff3ff4a';
+-- update public.compliance_requirements set source_quote='Zur Durchführung von Inspektion und Wartung dürfen die Öffnungen der Speicher die folgenden Durchmesser nicht unterschreiten (siehe auch E DIN 1989-3): | Tabelle 2 - Speicheröffnungen | Art des Speichers & Speicheröffnung mm | oberirdische Speicher $\leq 3000$ I Einzelvolumen & $\geq 200$ | oberirdische Speicher > 3000 I Einzelvolumen & $\geq 600$ | unterirdischen Speicher bis Domhöhe $\leq 450 \mathrm{~mm}$ & $\geq 600$ | unterirdischen Speicher ab Domhöhe $>450 \mathrm{~mm}$ mit Aufweitung des Domdurchmessers auf $\geq 800 \mathrm{~mm}$ (siehe Bild 1) & $\geq 600$' where id='f8186aa7-6970-4328-b8e6-a9935c1d74b5';
+-- Rollback: restore the three prior source_quote / clause_reference values from the 2026-09-05 export (fields-DIN-1989-1.json, gates[]).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Clause-reference retags (zero-risk class; evidence = the md clause that carries the sentence quoted in the pack).
+--  • DIN-1989-1-05 betriebsanleitung_uebergeben "§17.3" → "§17.1; §17.3" — the hand-over obligation "Für den Betrieb einer
+--    Regenwassernutzungsanlage ist dem Betreiber eine Betriebs-, Wartungs- und Bedienungsanleitung zu übergeben." is §17.1 (p.29).
+--  • DIN-1989-1-01 trinkwasser_getrennt "§4.1" → "§4.1; §12.7; §17.3" (three anchors quoted in the pack).
+--  • DIN-1989-1-02 speicher_aufstellung "§7" → "§7; §14" (token "keller" = §14 Kellerspeicher case, p.20).
+--  • DIN-1989-1-03 nachspeisung_medium "§9" → "§3.28; §9" (Trink-/Nichttrinkwasser named in the §3.28 definition).
+--  • DIN-1989-1-04 mindestwasservolumen "§16.1" → "§3.11; §16.1" (definition §3.11).
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§17.1; §17.3'        where id='1acd4b0b-544a-4f74-a353-f8b15cfc9664' and clause_reference='§17.3';
+-- update public.fields set clause_reference='§4.1; §12.7; §17.3'  where id='ee3c6617-24b4-42ba-878d-462f2530f72d' and clause_reference='§4.1';
+-- update public.fields set clause_reference='§7; §14'             where id='64b21755-7e91-48e3-be8e-60d8e3001ba5' and clause_reference='§7';
+-- update public.fields set clause_reference='§3.28; §9'           where id='a71b07d1-6712-4528-be6e-985deaac91ee' and clause_reference='§9';
+-- update public.fields set clause_reference='§3.11; §16.1'        where id='8ed9145b-4e43-47a7-be3b-88560b59f02c' and clause_reference='§16.1';
+-- Rollback: set each clause_reference back to the guarded prior value on the same id.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Unit correction. DIN-1989-1-04 P_d unit "l/d" — Tab. 4 prints "$24 \mathrm{l} /$ Person $\times$ Tag" (p.28), i.e.
+-- litres per person AND day; "l/d" hides the per-person basis that Gl.(2) multiplies by n.
+-- ☐ RATIFIED
+-- update public.fields set unit='l/(Person·d)' where id='d1c212bb-b851-45e5-a2ac-1ac9f1058fb4' and unit='l/d';
+-- Rollback: set unit='l/d' on the same id.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Gate CR-04 UNDER-enforces Tab. 2 (block, "speicheroeffnung_dn >= 200"). The ≥200 mm floor holds ONLY for
+-- above-ground tanks ≤ 3000 l Einzelvolumen; above-ground > 3000 l and EVERY underground tank need ≥ 600 mm (Tab. 2, p.14–15,
+-- quoted in S-3). speicher_aufstellung distinguishes oberirdisch/unterirdisch/keller but NO field holds the Einzelvolumen.
+-- ☐ RATIFIED  → (1) add field DIN-1989-1-02 speicher_einzelvolumen (number, l, §7 Tab. 2, engineer_input); (2) re-condition CR-04:
+--    condition spec: (speicher_aufstellung == oberirdisch AND speicher_einzelvolumen <= 3000 AND speicheroeffnung_dn >= 200)
+--                    OR speicheroeffnung_dn >= 600
+--    Interim without the new field (still tighter than today): speicher_aufstellung != oberirdisch → speicheroeffnung_dn >= 600.
+-- -- update public.compliance_requirements set condition='(speicher_aufstellung == oberirdisch AND speicheroeffnung_dn >= 200) OR speicheroeffnung_dn >= 600' where id='f8186aa7-6970-4328-b8e6-a9935c1d74b5';
+-- Rollback: set condition='speicheroeffnung_dn >= 200' on the same id; drop/deactivate the new field.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Gate CR-10 OVER-enforces for the non-§16.3 methods (block, "V_n IS NOT NULL AND E_R IS NOT NULL AND BW_a IS NOT NULL").
+-- §16.1 (p.25): "ein verkürztes Verfahren für kleine Anlagen (z. B. Ein- und Zweifamilienhäuser), bei dem keine Berechnungen
+-- durchgeführt werden müssen" — the shortened method has no E_R/BW_a/V_n computation, and the differentiated method (§16.4) is a
+-- daily-step simulation, not Gl.(1)–(4). The §16.2 rules are printed hard bounds with NO fields/gates:
+-- "Niederschlagshöhen von 500 mm bis 800 mm je Jahr - ganzjährige häusliche Nutzung - konstante Personenzahl und Nutzung -
+-- Dachflächen als Auffangflächen" and "Das Nutzvolumen sollte einerseits $25 \mathrm{~V} / \mathrm{m}^{2}$ bis $50 \mathrm{~V} /
+-- \mathrm{m}^{2}$ angeschlossener Auffangfläche (nicht für Gründächer) betragen und andererseits sollten 800 l bis 1000 l Nutzvolumen
+-- je Nutzer vorgesehen werden." (p.26; "V" = OCR "l"). §16.4 (p.29): "mindestens über einen Zeitraum von 5 Jahren bis 10 Jahren zu simulieren".
+-- ☐ RATIFIED  → re-condition CR-10 to the simplified method only, and add method-specific gates:
+-- -- update public.compliance_requirements set condition='bemessungsverfahren != vereinfacht OR (V_n IS NOT NULL AND E_R IS NOT NULL AND BW_a IS NOT NULL)' where id='b752ecac-42c3-48e4-844f-8a81a54b552d';
+-- -- NEW gate DIN-1989-1-CR-15 (ws 04, §16.2, block): bemessungsverfahren != verkuerzt OR (h_N >= 500 AND h_N <= 800 AND auffangflaechen_art IN {geneigtes_hartdach,flachdach_unbekiest,flachdach_bekiest})
+-- --   ("wenn folgende Bedingungen vorliegen" = preconditions of the method; Gründach excluded by "(nicht für Gründächer)")
+-- -- NEW gate DIN-1989-1-CR-16 (ws 04, §16.2, warn): bemessungsverfahren != verkuerzt OR (V_n >= 25*A_A AND V_n <= 50*A_A AND V_n >= 800*n AND V_n <= 1000*n)  ("sollte" → warn)
+-- -- NEW gate DIN-1989-1-CR-17 (ws 04, §16.4, block): bemessungsverfahren != differenziert OR simulationsdauer_a >= 5  (needs new field simulationsdauer_a, number, a)
+-- Rollback: restore condition='V_n IS NOT NULL AND E_R IS NOT NULL AND BW_a IS NOT NULL' on CR-10; delete CR-15..17 by code.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Gate CR-12 is a TAUTOLOGY (block, "rueckstauschutz_art IN {rueckstaufrei,hebeanlage,rueckstauverschluss,nicht_erforderlich}" =
+-- every enum token → enforces only not-null). The printed rules (§14, §13, p.20) depend on the overflow destination and the tank location:
+--  "Falls der Überlauf von Regenwasserspeichern der Mischwasserkanalisation oder von in Kellerräumen aufgestellten Regenwasserspeichern der
+--  Regenwasserkanalisation zugeführt wird, ist dieser rückstaufrei (siehe Bild 2) oder über eine Hebeanlage (siehe Bild 3) auszuführen." |
+--  "Der Überlauf eines Erdspeichers kann durch einen Rückstauverschluss für fäkalienfreies Abwasser nach DIN 1997-1 an einen
+--  Regenwasserwasserkanal angeschlossen werden (siehe Bild 4). [...] Ein Anschluss an einen Mischwasserkanal über einen Rückstauverschluss
+--  ist nicht zulässig." | "Falls keine weiteren Flächen direkt in die Versickerungsanlage entwässert werden und diese nicht an die
+--  Kanalisation angeschlossen ist, kann auf eine Rückstausicherung für die Überlaufleitung des Regenwasserspeichers verzichtet werden."
+-- ☐ RATIFIED  → add field DIN-1989-1-05 ueberlauf_ziel (enum: mischwasserkanal | regenwasserkanal | versickerung_ohne_kanalanschluss |
+--    versickerung_mit_kanalanschluss; §13/§14) and re-condition CR-12 (block) as spec:
+--    (ueberlauf_ziel == mischwasserkanal AND rueckstauschutz_art IN {rueckstaufrei,hebeanlage})
+--    OR (ueberlauf_ziel == regenwasserkanal AND speicher_aufstellung == keller AND rueckstauschutz_art IN {rueckstaufrei,hebeanlage})
+--    OR (ueberlauf_ziel == regenwasserkanal AND speicher_aufstellung != keller AND rueckstauschutz_art IN {rueckstaufrei,hebeanlage,rueckstauverschluss})
+--    OR (ueberlauf_ziel == versickerung_ohne_kanalanschluss)
+--    OR (ueberlauf_ziel == versickerung_mit_kanalanschluss AND rueckstauschutz_art != nicht_erforderlich)
+--    (speicher_aufstellung lives on ws 02 → cross-worksheet read; the evaluate.ts grammar must support it or the gate re-homes.)
+-- Rollback: restore condition to the enum-list form; deactivate ueberlauf_ziel.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Gate CR-13 severity: block on "inbetriebnahme_fachkundig == true AND inbetriebnahmeprotokoll == true". The first conjunct is hard
+-- ("Die Inbetriebnahme ist durch einen Fachkundigen durchzuführen.", p.30); the second is advisory — "Über die durchgeführte Inbetriebnahme
+-- und die Übergabe der Unterlagen ist zweckmäßigerweise ein Inbetriebnahme- und Einweisungsprotokoll anzufertigen (siehe Anhang B)." and
+-- Anhang B is "(informativ)" (p.35). A block gate anchored on "zweckmäßigerweise" over-enforces.
+-- ☐ RATIFIED  → split: CR-13 keeps block with condition 'inbetriebnahme_fachkundig == true'; NEW gate DIN-1989-1-CR-18 (ws 05, §17.2, warn):
+--    'inbetriebnahmeprotokoll == true'.
+-- -- update public.compliance_requirements set condition='inbetriebnahme_fachkundig == true' where id='66b235ea-7c21-4e2e-aeef-b443028d3b88';
+-- Rollback: restore condition='inbetriebnahme_fachkundig == true AND inbetriebnahmeprotokoll == true'; delete CR-18.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · is_required review (source makes the field conditional / "sollte" / app-only → propose false; obligations left as is).
+--  • DIN-1989-1-03 sicherungseinrichtung_typ (required=true): applies only "Wenn Trinkwasser verwendet wird" (§9, p.16–17); CR-06 already
+--    conditions on nachspeisung_medium. → false.
+--  • DIN-1989-1-05 inbetriebnahmeprotokoll (required=true): "zweckmäßigerweise" (§17.2, p.30). → false.
+--  • DIN-1989-1-06 inspektion_intervall (required=true): the standard fixes intervals PER component (Tab. 5) and never defines a single
+--    "shortest interval"; EKOWAI roll-up. → false (or drop in favour of the per-component booleans).
+--  • Kept required, for the record: sedimentation_beruhigter_zulauf ("ist [...] zu ermöglichen" hard, design "sollte"); filter_bauart
+--    (classification the §6.2 selection rule presupposes); pumpenanzahl ("muss entschieden werden").
+--  • Not required today but printed as obligation (owner may want true): dachwerkstoff_bewertet ("sind [...] im Einzelfall zu bewerten",
+--    §5.2 p.10); rueckflussverhinderer is already true.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('46cd9779-30c8-42ee-a60f-771aad0c0a85','07c91b3d-c63e-485b-bf24-30750d024b4b','25eaaacb-85ea-4dfe-b202-069e0ac4196d') and is_required=true;
+-- Rollback: set is_required=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · Missing gates for printed obligations / limits (specs; codes continue after S-7/S-9 numbering).
+--  a) rueckflussverhinderer (ws 03, §8.3.2/§8.3.3 p.16, BLOCK): "In die Saugleitung der Pumpe ist ein Rückflussverhinderer einzusetzen" /
+--     "In die Druckleitung der Pumpe ist ein Rückflussverhinderer einzubringen." → condition 'rueckflussverhinderer == true'.
+--  b) betriebsanleitung_uebergeben (ws 05, §17.1 p.29, BLOCK): "ist dem Betreiber eine Betriebs-, Wartungs- und Bedienungsanleitung zu
+--     übergeben." → 'betriebsanleitung_uebergeben == true'.
+--  c) whg_erlaubnis (ws 05, §13 p.20, WARN — "grundsätzlich" + erlaubnisfrei exceptions): 'ueberlauf_versickerung != true OR whg_erlaubnis == true'.
+--  d) systemsteuerung_vorhanden (ws 03, §10 p.17, WARN): "Zur Steuerung und Überwachung sind genormte Geräte zu verwenden." →
+--     'systemsteuerung_vorhanden == true' (presence itself is implied by §3.25/§10, not printed as "muss" → warn).
+--  e) h_N (ws 04, §16.3.2 p.26, WARN — descriptive span): 'h_N >= 500 AND h_N <= 1600'.
+--  f) e (ws 04, §16.3.4 Tab. 3 p.27, WARN — planning basis, footnote a allows deviation): 'e >= 0.3 AND e <= 0.8'.
+--  g) hybridbehaelter_volumen (ws 03, §11 p.18, WARN — "sollte nicht größer als der halbe Tagesbedarf"): 'hybridbehaelter_volumen IS NULL OR
+--     hybridbehaelter_volumen <= 0.5 * P_d * n' (P_d, n on ws 04 → cross-worksheet read or re-home).
+--  h) wasserzaehler_austausch_jahre (ws 06, Tab. 5 p.31–32, WARN — applies "wenn sie im geschäftlichen Verkehr verwendet werden", no field for
+--     that condition): 'wasserzaehler_austausch_jahre IS NULL OR wasserzaehler_austausch_jahre <= 6'.
+--  i) speicher_reinigung_jahre: "≈ 10 Jahre" is approximate and explicitly adjustable ("Längere oder kürzere Zeitintervalle können sich [...]
+--     ergeben", p.33) → NO gate; info only.
+--  j) filter_reinigung_jaehrlich (ws 06, Tab. 5 p.31, WARN): "Filtersysteme & Wartung & Reinigung des Filters & 1 Jahr" under the §18 "müssen
+--     [...] in Zeitintervallen nach Tabelle 5" → 'filter_reinigung_jaehrlich == true' (CR-14 already blocks on wartung_fachkundig).
+--  k) dichtheitspruefung_speicher: obligation only for "Anlagen aus Segmenten oder Ortbeton" (§7 p.13) — no Bauart field → add field
+--     speicher_bauart (enum: werksgefertigt | segmente_ortbeton) before gating: 'speicher_bauart != segmente_ortbeton OR dichtheitspruefung_speicher == true' (BLOCK).
+--  l) Nennvolumen identity (§16.1 p.25): "Das vom Hersteller angegebene Nennvolumen besteht aus dem Mindestwasservolumen und dem Nutzvolumen" →
+--     add derived field V_nenn (l) + equation 'V_nenn = mindestwasservolumen + V_n' (derived, read-only per the derivation invariant).
+--  m) nachspeisung_volumenstrom ≥ Spitzendurchfluss nach DIN 1988-3 (§9 p.16): comparator value is NR (DIN 1988-3 not in library) → NOT
+--     gate-able; record as residue, no spec.
+-- ☐ RATIFIED  (each item individually; inserts into compliance_requirements as specs above; rollback = delete by code.)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 · Selection widgets (owner ruling 2026-08-01: fixed options ⇒ selection, never free-number/free-text) + enum edits.
+--  • P_d (number) — Tab. 4 fixes 24 / 12 / 6 l/(Person·d) by consumer type, "+10 Liter" with Waschmaschine (p.28) → selection
+--    (toiletten_haushalt=24 | toiletten_buero=12 | toiletten_schule=6) + boolean waschmaschine_angeschlossen (+10); P_d becomes derived.
+--  • BS_a (number) — Tab. 4: Garten 60 l/m²; Sportanlagen 200 l/m² (6 Monate); Grünland leichter Boden 100–200 l/m², schwerer Boden
+--    80–150 l/m² (6 Monate) (p.28; Grünland cell garbled in the md, PDF check advised) → selection with SR-2 range fields for Grünland.
+--  • e (number) — Tab. 3 keyed by auffangflaechen_art (p.27) → default from lookup, editable (footnote a), warn gate S-11f.
+--  • steuerung_funktionen (single enum) — §10 "können folgende Funktionen beinhalten" lists concurrent functions (p.17) → multi-select.
+--  • speicher_werkstoff — §7 "Geeignete Werkstoffe sind z. B.: Beton, Kunststoffe, Stahl [...]" (p.13) is exemplary → add token "sonstige"
+--    (free-text justification) or keep closed by owner decision.
+--  • nutzungsart already carries "sonstige" (§1 list is "z. B."). OK.
+-- ☐ RATIFIED  (data-model changes; migration to be written after the ruling.)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-13 · BW_a composition — equations 2 and 3 BOTH output BW_a. §16.3.7 (p.28): "Der Betriebswasserbedarf im Haushalt setzt sich zusammen
+-- aus personenbezogenen Angaben (z. B. Toilette) nach $B W_{\mathrm{a}}=P_{\mathrm{d}} \times n \times 365$ [...] und aus flächenbezogenen
+-- Angaben (Grünflächen und Garten) nach $B W_{\mathrm{a}}=A_{\text {Bew. }} \times B S_{\mathrm{a}}$" — the household demand is the SUM of
+-- both components, but the md prints no explicit sum equation, so the composition cannot be applied under SR-1 without a ruling.
+-- Also: "Der Betriebswasserbedarf für gewerbliche und industrielle Bereiche ist anwendungsbezogen zu ermitteln." → for
+-- anwendungsbereich = gewerbe_industrie BW_a is engineer_input, not Gl.(2)/(3).
+-- ☐ RATIFIED  → option A: keep Gl.(2)/(3) as component equations writing BW_a_person / BW_a_flaeche and add a registered sum equation
+--    'BW_a = BW_a_person + BW_a_flaeche' (derived, read-only); option B: owner confirms "either/or" semantics and documents which wins.
+-- Rollback: none (nothing applied).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-14 · md deficiencies needing a PDF check before any VA claim (SR-3):
+--  • Tab. 1 (p.13–14): the md multirow cells drop the Belastungsklasse numbers 2, 3 and 4 — enum tokens 2/3/4 rest on row order only.
+--  • Tab. 4 Grünland cell (p.28) garbled into one line (two ranges, two soils).
+--  • OCR: "3000 I" (l), "12 V"/"6 V"/"80 V"/"150 V" (l), "(I/a)" (l/a), "25 V/m²" (l/m²) — quoted as printed, named in the notes.
+--  • Anhang A (Berechnungsformular, p.34) is an IMAGE in the md — its printed worksheet layout is not transcribed.
+--  • Bild 1–7 are images; legends transcribed, drawings not.
+-- No SQL.
