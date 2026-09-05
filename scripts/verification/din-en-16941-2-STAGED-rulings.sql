@@ -1,0 +1,199 @@
+-- ============================================================================
+-- DIN-EN-16941-2 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-EN-16941-2\DIN-EN-16941-2.md
+--   (German mathpix LaTeX; NO page-number lines — "printed p.N" derived from the Inhalt table + mathpix figure indices
+--   (= printed page + 2), see the pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Standard id 0f58d951-35ea-4bf5-ba42-1f733d9e0600. Worksheet ids (prefix): 01 cd74f2f2 · 02 d8ff2f70 · 03 e5612dfc ·
+--   04 3535b4e6 · 05 70f91481.
+-- Context: 19 gates, ALL block; all 19 source_quotes re-checked against the md — every one anchors verbatim on a real md
+--   sentence. Nothing below disputes a quote; every item is a source-vs-encoding disagreement in COVERAGE (printed limit with
+--   no gate — the 2026-06-23 site audit's "material gap" class for this standard), CONDITION (presence-only or unconditional
+--   where the source is conditional), SEVERITY (block on "sollte"), REQUIRED-NESS, CLAUSE TAG, or an invented cross-reference.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · WATER-QUALITY RICHTWERTE (Tab. D.1 / D.2) — 8 numeric fields on ws 04, ZERO gates (the permissibility layer of a
+--   greywater REUSE standard is unenforced). Evidence: §10 "Grauwassernutzungsanlagen müssen unbedingt in der Art geplant und
+--   installiert werden, dass das NichtTrinkwasser für den vorgesehenen Gebrauch taugt und keine Gefährdung der Gesundheit
+--   darstellt. Die Beispiele in Anhang D sind Mindestanforderungen. Strengere nationale oder im Rahmen der Planung festgelegte
+--   Vorgaben müssen vor den Werten in Anhang D Vorrang haben." (p.23). Tab. D.1 (p.29), columns Sprüh-Anwendung | WC-Spülung |
+--   Gartenbewässerung | Reinigung, d. h. Waschmaschine: "Escherichia coli & Nicht nachweisbar & 250 & 250 & Nicht nachweisbar";
+--   "Intestinale Enterokokken & Nicht nachweisbar & 100 & 100 & Nicht nachweisbar"; "Legionella pneumophila & 10 & N/A & N/A &
+--   N/A"; "Gesamt Coliforme & 10 & 1000 & 1000 & 10". Tab. D.2 (p.29–30): "Trübung (NTU) & < 10 & < 10 & N/A & < 10";
+--   "pH & 5 bis 9,5 & 5 bis 9,5 & 5 bis 9,5 & 5 bis 9,5"; "Rest-Chlor (mg/l) & < 2,0 & < 2,0 & < 0,5 & < 2,0";
+--   "Rest-Brom (mg/l) & 0,0 & < 5,0 & 0,0 & < 5,0".
+--   AMBIGUITY for the ruling (never guessed): Anhang D is "(informativ)" and the table titles say "Beispiele für Richtwerte …
+--   nach der Normenreihe BS 8525", yet §10 declares the examples "Mindestanforderungen" and §5.1 "Die Anforderungen müssen mit
+--   örtlichen und/oder nationalen Bestimmungen übereinstimmen". → severity block vs warn is Alvaro's call; the values themselves
+--   are source-fixed (standard_fixed, Tab. D.1/D.2 p.29–30).
+--   GRAMMAR/STRUCTURE limits: (a) the use selector vorgesehene_nutzung (f7ea931c, ws 01) sits on another worksheet than the
+--   measurements (ws 04) — cross-worksheet conditions may need a re-home or a ws-04 copy of the selector; (b) the enum has NO
+--   spray token — Tab. D.1/D.2 split "Sprühanwendung (Hochdruckreinigung, Gartensprenger und Autowäsche)" from non-spray
+--   "Gartenbewässerung"; the encoded "gartenbewaesserung" cannot tell sprinkler from drip, and "reinigung" (Reinigung von
+--   Gegenständen, §1) maps to Hochdruckreinigung/Autowäsche = spray in Tab. D.1. (c) "Nicht nachweisbar" is encoded as 0.
+-- Proposal (specs, ws 04 = 3535b4e6-eaea-477c-a8d7-d513b95a5feb, clause "Tab. D.1"/"Tab. D.2", severity = RULING):
+--   CR-20  IF vorgesehene_nutzung IN {wc_spuelung, gartenbewaesserung} THEN ecoli_kbe <= 250
+--   CR-21  IF vorgesehene_nutzung IN {waesche, sprueh_anwendung} THEN ecoli_kbe == 0
+--   CR-22  IF vorgesehene_nutzung IN {wc_spuelung, gartenbewaesserung} THEN enterokokken_kbe <= 100
+--   CR-23  IF vorgesehene_nutzung IN {waesche, sprueh_anwendung} THEN enterokokken_kbe == 0
+--   CR-24  IF vorgesehene_nutzung IN {wc_spuelung, gartenbewaesserung} THEN gesamt_coliforme_kbe <= 1000
+--   CR-25  IF vorgesehene_nutzung IN {waesche, sprueh_anwendung} THEN gesamt_coliforme_kbe <= 10
+--   CR-26  IF vorgesehene_nutzung == sprueh_anwendung THEN legionella_kbe <= 10
+--   CR-27  IF vorgesehene_nutzung IN {wc_spuelung, waesche, sprueh_anwendung} THEN truebung_ntu < 10
+--   CR-28  ph_wert >= 5 AND ph_wert <= 9.5
+--   CR-29  IF vorgesehene_nutzung == gartenbewaesserung THEN rest_chlor < 0.5 ELSE rest_chlor < 2.0   (only "wenn verwendet")
+--   CR-30  IF vorgesehene_nutzung IN {sprueh_anwendung, gartenbewaesserung} THEN rest_brom == 0 ELSE rest_brom < 5.0
+--   + enum edit: add token sprueh_anwendung ("Sprühanwendung: Hochdruckreinigung, Gartensprenger, Autowäsche", Tab. D.1) to
+--     vorgesehene_nutzung f7ea931c-f8e9-492f-8a39-129d9eb6e1e3 (or split gartenbewaesserung into spray/non-spray).
+-- ☐ RATIFIED
+-- -- enum edit (jsonb append; exact shape per the existing enum_values rows):
+-- update public.fields set enum_values = enum_values || '[{"value":"sprueh_anwendung","label_de":"Spruehanwendung (Hochdruckreinigung, Gartensprenger, Autowaesche)","label_en":"Spray application (pressure washing, sprinklers, car wash)","order_index":5,"regulation_reference":"Tab. D.1"}]'::jsonb where id='f7ea931c-f8e9-492f-8a39-129d9eb6e1e3';
+-- -- gates CR-20 … CR-30: insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote) values (… per spec above, source_quote = the Tab. D.1/D.2 row quoted in the pack …);
+-- Rollback: delete the inserted CR-20…CR-30 rows; remove the appended enum token.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · CR-17 (fee8488b, ws 04, BLOCK) — condition "probenahmestelle_im_verteilsystem IS NOT NULL AND bewertung_status IS NOT NULL"
+--   tests PRESENCE on a boolean and on the traffic-light status: a project with probenahmestelle = false and status = rot PASSES.
+--   Evidence: "Die Probenahmestelle muss im Verteilungssystem für das behandelte Grauwasser eingebaut sein." (§11 p.23);
+--   Tab. D.3 (p.30): "$>10 \mathrm{G}^{\mathrm{b}}$ & rot & Nutzung des Grauwassers ausschließen, bis Problem gelöst ist".
+--   (The 2026-07 ratification batch AF-1 already flagged the IS-NOT-NULL-on-boolean pattern.)
+-- Proposal: CR-17 → "probenahmestelle_im_verteilsystem == true"; NEW CR-31 (ws 04, block, Tab. D.3):
+--   "bewertung_status != rot" (or IN {gruen, gelb}) — gelb stays a warning ("erneute Probenahme"), rot excludes use.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set condition='probenahmestelle_im_verteilsystem == true' where id='fee8488b-73c9-4221-9252-52fb40b12ab3';
+-- insert CR-31 per spec (source_quote = the Tab. D.3 rot row).
+-- Rollback: restore condition 'probenahmestelle_im_verteilsystem IS NOT NULL AND bewertung_status IS NOT NULL'; delete CR-31.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · §6.1 MIN-RULE not computed / CR-12 (7fa81ba8, ws 03, BLOCK) is presence-only ("Y_G IS NOT NULL AND D_G IS NOT NULL AND
+--   bemessungswert_massgebend IS NOT NULL"). bemessungswert_massgebend (f893ecb3) is a DERIVED quantity that is hand-enterable
+--   (the #22 class): no equation produces it. Evidence: "Für die Gesamtauslegung des Systems muss der niedrigste berechnete Wert
+--   für den Ertrag oder den Bedarf verwendet werden." (§6.1 p.18). Y_G and D_G are engine outputs of Gl.(1)/(2).
+-- Proposal: (a) equation Gl.(3, encoding label) bemessungswert_massgebend = min(Y_G, D_G) — engine has no min() → RULING
+--   (same engine gap as DIN-1989-1 Gl.4); (b) until then CR-12 → "bemessungswert_massgebend <= Y_G AND bemessungswert_massgebend <= D_G".
+--   The "bis zu 50 % des Tagesbedarfs" storage sentence is "wird normalerweise … ausreichend sein" → guidance, NO gate proposed.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set condition='bemessungswert_massgebend <= Y_G AND bemessungswert_massgebend <= D_G' where id='7fa81ba8-ed08-478c-8c26-dac2ee09bca1';
+-- Rollback: restore condition 'Y_G IS NOT NULL AND D_G IS NOT NULL AND bemessungswert_massgebend IS NOT NULL'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · CR-13 (f8a982cf, ws 04, BLOCK, "abstand_wurzeln_m >= 3") OVER-ENFORCES + abstand_wurzeln_m (dcbcca56) is_required=true.
+--   Evidence (§7 p.21): "Die Position der unterirdischen Speichereinrichtung muss einen Mindestabstand von 3 m von Bäumen oder
+--   Pflanzen einhalten, die ein größeres Wurzelsystem ausbilden. Eine Rasenfläche ist erlaubt. Pflanzen mit weniger als 3 m
+--   Abstand von der Speichereinrichtung können den Einbau von Wurzelschutz erfordern." → (i) applies to UNDERGROUND tanks only
+--   (§5.4.5 distinguishes unter-/oberirdisch; no field records which); (ii) the third sentence admits < 3 m with Wurzelschutz.
+--   AMBIGUITY: "muss … einhalten" vs "können … Wurzelschutz erfordern" — whether Wurzelschutz is an alternative or an addition
+--   is a reading → Alvaro.
+-- Proposal: add boolean speicher_unterirdisch (ws 02, §5.4.5) and boolean wurzelschutz_vorhanden (ws 04, §7);
+--   CR-13 → "IF speicher_unterirdisch == true AND wurzelschutz_vorhanden != true THEN abstand_wurzeln_m >= 3" (block) or keep
+--   the numeric gate and add a warn; abstand_wurzeln_m is_required → false (not applicable to above-ground tanks).
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id='dcbcca56-f563-4f90-971d-9ae5da488f14';
+-- update public.compliance_requirements set condition='IF speicher_unterirdisch == true AND wurzelschutz_vorhanden != true THEN abstand_wurzeln_m >= 3' where id='f8a982cf-367b-49fe-b3a4-cd2c99f97e9d';   -- after the two fields exist
+-- Rollback: is_required=true; condition 'abstand_wurzeln_m >= 3'; deactivate the two new fields.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · CR-02 (55ae3c26, ws 02, BLOCK, "bypass_vorhanden == true") anchors on "sollte": "Das Grauwassersystem sollte mindestens
+--   mit einem Bypass ausgestattet sein, …" (§5.2 p.9). Counter-evidence: §5.7 d) (p.17) "Die Anlagensteuerung muss … d) sicherstellen,
+--   dass der Bypass unbehandeltes Grauwasser in das Schmutzwassersystem ableitet," — the control-unit "muss" presupposes a bypass.
+-- Proposal: block → warn on the §5.2 anchor, OR keep block and re-anchor the source_quote/clause on §5.7 d). Ruling.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn' where id='55ae3c26-cde5-4a3f-9223-0668383cf2f0';
+-- Rollback: severity='block'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · MISSING GATES for printed "muss" requirements that already have a field (coverage). Evidence quotes are the pack's
+--   verification_quotes for the named fields:
+--   a) ueberlauf_vorhanden (53619e73, ws 02) — "Alle Speichereinrichtungen müssen mit einem Überlauf ausgestattet sein, …" (§5.4.9 p.12)
+--      → CR-32 block "ueberlauf_vorhanden == true".
+--   b) sammlung_bemessung_en12056 (317552d5, ws 02) — "Sammelrohrsysteme müssen … b) nach EN 12056-2 … bemessen und ausgelegt sein"
+--      (§5.2 p.9) → CR-33 block "sammlung_bemessung_en12056 == true".
+--   c) nachspeisung_steuerung_auto (bc58a37e, ws 02) — "… muss die Steuerung der Nachspeisung automatisch die Betriebssicherheit der
+--      Anlage sicherstellen." (§5.5.1 p.12–13) → CR-34 block "IF nachspeisung_vorhanden == true THEN nachspeisung_steuerung_auto == true".
+--   d) pumpensteuerung_handnot (8342abb3, ws 02) — "Pumpen müssen mit einer Pumpensteuerung … einschließlich einer Handnotbetätigung,
+--      ausgestattet sein." (§5.6.5 p.16) → CR-35 block "IF pumpe_erforderlich == true THEN pumpensteuerung_handnot == true".
+--   e) dichtheitspruefung_bestanden (df95fb4c, ws 04) — "Das Sammlungs- und Verteilungssystem muss gespült werden und auf
+--      Wasserdichtheit … untersucht werden." (§9 p.23) → CR-36 block "dichtheitspruefung_bestanden == true".
+--   f) zugang_oeffnung_mm (ef7da1f5, ws 02) — "Wenn kein Personenzugang vorgesehen ist, muss eine Öffnung … mit mindestens 400 mm
+--      vorhanden sein." (§5.4.8 p.11) → CR-37 block "IF zugang_oeffnung_mm IS NOT NULL THEN zugang_oeffnung_mm >= 400" (the
+--      field is only filled when there is no person access; a personenzugang boolean would make the condition explicit).
+--   g) warnsystem_ventilzulauf (0bfc824b, ws 02) — "muss eine Speichereinrichtung mit ventilgesteuerten Zuläufen ein Warnsystem haben"
+--      (§5.5.1 p.13) — conditional on valve-controlled inlets; NO field records that condition → needs boolean zulauf_ventilgesteuert
+--      first, then CR-38 "IF zulauf_ventilgesteuert == true THEN warnsystem_ventilzulauf == true".
+--   h) betriebssicherheit_gewaehrleistet (14aecb80) / ueberflutungsschutz (cbe025c5), ws 01 — §4 "müssen"/"dürfen keine" attestations
+--      with no gate → CR-39/CR-40 block "== true" (attestation class; ruling whether a registration-phase attestation should block).
+-- ☐ RATIFIED
+-- insert CR-32 … CR-40 into public.compliance_requirements per the specs above (source_quote = the quoted sentence, clause as given).
+-- Rollback: delete the inserted rows.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · clause_reference RETAGS (evidence in the pack quotes):
+--   a) anlagentyp (af8a8b3c, ws 01) "§4" → "Anhang B" — the five tokens are the Anhang B a)–e) list (p.26); §4 does not classify
+--      systems; §5.1 (p.8) says "Die verschiedenen Arten von Grauwassersystemen können nach Anhang B unterschieden werden."
+--   b) grauwasser_herkunft (6dc5b4ba, ws 01) "§4" → "§6.2.2" — the six tokens are the §6.2.2 e)–h) collection list (p.18);
+--      §4 only names Küchenspüle/Geschirrspüler as the more polluted sources.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='Anhang B' where id='af8a8b3c-21aa-44d4-a23e-8fad2965db9d';
+-- update public.fields set clause_reference='§6.2.2' where id='6dc5b4ba-281d-4f84-a6d8-f647ae8d716f';
+-- Rollback: both back to '§4'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · INVENTED CROSS-REFERENCE (the 2026-06-23 site audit's class C for the DIN/EN family): anlagensteuerung_bms_ausgang
+--   (3cc0e155, ws 02) description = "BMS-Anschluss wenn zweckdienlich (§5.7 h). Schnittstelle zu VDI 3814." — "VDI 3814" occurs
+--   NOWHERE in the md (normative references §2 and Literaturhinweise checked). Evidence: §5.7 h) (p.17) "über einen spannungsfreien
+--   Ausgang zum Anschluss des Grauwassersystems an ein Gebäudemanagementsystem (BMS) verfügen, wenn zweckdienlich."
+-- Proposal: strip the sentence.
+-- ☐ RATIFIED
+-- update public.fields set description='BMS-Anschluss ueber spannungsfreien Ausgang, wenn zweckdienlich (§5.7 h).' where id='3cc0e155-d925-414b-ad35-afccc9c13268';
+-- Rollback: description='BMS-Anschluss wenn zweckdienlich (§5.7 h). Schnittstelle zu VDI 3814.'
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · is_required REVIEW on ws 03 + the SIMPLIFIED METHOD gap.
+--   a) 15 source-specific Gl.(1) inputs are is_required=true: Q_S af06be67 · t_S f2f0a723 · u_S 18546339 · V_BT f97b0ce2 · u_BT 8bdd4176 ·
+--      Q_HWB 92070b3b · t_HWB 248451d1 · u_HWB a65cc090 · V_WM_y 432ae00f · u_WM_y 8328cfb1 · Q_KS 5601d520 · t_KS e188b063 · u_KS 67274155 ·
+--      V_DW 585e77d0 · u_DW 06e71115. The yield depends on WHICH sources are connected (grauwasser_herkunft, ws 01): §3.2 (p.7)
+--      "leicht verschmutztes Grauwasser — Grauwasser ohne Schmutzwasser aus Küchen und Waschmaschinen"; Tab. A.1 footnote a (p.25)
+--      "Ertrag von Dusche, Badewanne und/oder Waschbecken." A shower-only project is forced to enter kitchen-sink and dishwasher
+--      figures. Proposal: is_required=false for the 15 (engineer enters 0 / leaves blank for absent sources; the engine treats
+--      null as 0 — RULING on null handling in Gl.(1)), or conditional required-ness keyed on grauwasser_herkunft.
+--   b) berechnungsverfahren (1aa25f4c) offers "vereinfacht", but the worksheet holds NO fields for it: §6.2.3 (p.19) "Für die
+--      Berechnung der täglichen Behandlungskapazität des Grauwassersystems muss der durchschnittliche tägliche Ertrag und der
+--      Bedarf je Person berücksichtigt werden. Beispiele … in Anhang A (Tabelle A.1)"; Tab. A.1 (p.25) "1 Person & 60 & 35 & 15 & 10"
+--      (Ertrag / WC / Wäsche waschen / andere). Every Gl.(1)/(2) input stays required even when vereinfacht is chosen. Proposal:
+--      per-person fields y_p (60), d_wc_p (35), d_wm_p (15), d_misc_p (10) as standard_range/engineer_input (Tab. A.1 is informativ —
+--      SR-2: no auto-pick) + equations Y_G = n·y_p, D_G = n·(d_wc_p + d_wm_p + d_misc_p) gated on berechnungsverfahren. Structure → ruling.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('af06be67-70e5-4612-bf1e-e98c836ae2fd','f2f0a723-b87b-4893-a3b9-d3ba313436e8','18546339-60d5-47e8-bd61-7247d613d8ae','f97b0ce2-4d77-49a4-9a95-0ba22387d7ce','8bdd4176-3d14-4e02-9b4e-de74bcdd913b','92070b3b-223e-450a-8b9e-cb576d62bc41','248451d1-df05-4849-a65b-02f8f62f9b07','a65cc090-457e-42e0-b848-3b68c22f35ec','432ae00f-681d-4b7f-b68c-9f143c63af14','8328cfb1-3557-4428-ad48-a4d34ceeda7b','5601d520-4fd7-4d0c-b89d-c402ee36796f','e188b063-f594-4e3b-b917-6448b77db296','67274155-8e29-418c-8db0-ca0000601fa3','585e77d0-e1e3-42b6-8f2b-09b6382779ab','06e71115-5d5b-4d1a-abb9-672a57acb522');
+-- Rollback: is_required=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · anlagentyp token "direkt" (Anlage für direkte Nutzung, ohne Behandlung) is OUTSIDE the scope of the standard: §1 (p.6)
+--   "Vom Anwendungsbereich dieses Dokuments ausgenommen sind: … - direkte Anwendungssysteme ohne Aufbereitung;"; Anhang B a)
+--   (p.26) "Ist die Behandlung nicht Teil der Grauwassernutzugsanlage, sind Nutzungen auf unterirdische Bewässerung und
+--   Anwendungen ohne Versprühen beschränkt." A project registered as "direkt" walks through 19 treated-greywater gates that do
+--   not apply to it, and the §1 exclusion is silent.
+-- Proposal: CR-41 (ws 01, block or warn — ruling, §1) "anlagentyp != direkt" with the §1 sentence as source_quote; or drop the token.
+-- ☐ RATIFIED
+-- insert CR-41 per spec.
+-- Rollback: delete CR-41.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · NOTES (no SQL; for the ledger):
+--   a) CR-15 (bca3c017) condition "querverbindungstest_ergebnis == bestanden" — bare identifier on the cross-connection safety
+--      test (the 2026-07-03 DEEP audit's G10 item); if the grammar needs a quoted literal, "== 'bestanden'". Grammar check → orchestrator.
+--   b) §5.7 b) (p.17) "sicherstellen, dass behandeltes Grauwasser nicht über eine Zeitdauer gespeichert wird, die zu einer
+--      Verschlechterung der Wasserqualität … führt" — no field for a maximum storage duration (structure gap, no printed number).
+--   c) behandlungsstufen (67de9924) — source "einen oder mehrere der folgenden Teilschritte" is a MULTI-select; encoded as single enum.
+--   d) §8 (p.22) — three separate "muss" marking duties (outlets "Kein Trinkwasser"/ISO 7010-P005, pipe colour/marking, sign at the
+--      Hauptabsperrventil) sit behind ONE boolean kennzeichnung_nicht_trinkwasser / CR-14; a split into three attestations would
+--      make the permissibility record auditable.
+--   e) Tab. D.1 Legionella row prints "(siehe 5.10)" — the standard has no clause 5.10 (source quirk, presumably §10). Not fixable here.
+--   f) V_WM_y/u_WM_y vs V_WM_d/u_WM_d — the source reuses ONE symbol V_WM/u_WM in Gl.(1) and Gl.(2) for two physically different
+--      quantities; the encoding's split is faithful disambiguation (also ruled so in the 2026-07-03 DEEP audit), not a duplicate.
+--   g) Units the source never prints: nennkapazitaet "l", ueberlauf_kapazitaet / zufluss_kapazitaet "l/s" — encoding choices, plausible
+--      (§5.1 gives inflow examples in l/s); flagged in the pack notes, no change proposed.
+-- ============================================================================
