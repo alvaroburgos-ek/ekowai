@@ -1,0 +1,200 @@
+-- ============================================================================
+-- DWA-M-820-3 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (DWA-M_820-3.md); "printed p.N" = section start page per the Inhalt (the md has
+-- no page lines; offset PDF = printed + 2 confirmed via the Bild 1 mathpix index, see pack header). Gate rows live in
+-- compliance_requirements (evaluate.ts grammar) — condition/severity edits below are written as specs; gate ids are the
+-- prod uuids from the 2026-09-05 export (fields-DWA-M-820-3.json), field ids likewise.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-0 · Encoding-level observation (no SQL — owner policy question). The Merkblatt says of itself:
+-- "Jeder Person steht die Anwendung des Merkblatts frei. Eine Pflicht zur Anwendung kann sich aber aus Rechts- oder
+-- Verwaltungsvorschriften, Vertrag oder sonstigem Rechtsgrund ergeben." (Hinweis für die Benutzung p.7);
+-- "Das Erreichen der Phasenziele kann mit den in Teil 3 hinterlegten Qualitätselementen überprüft werden. Die in Anhang A
+-- und B angegebenen Qualitätselemente stellen eine Auswahl an Kriterien für die Projektabwicklung dar." (§1 p.7);
+-- "Dabei stellen die angegebenen Qualitätselemente nur eine projektübergeordnete Auswahl an Kriterien dar, die im
+-- Anwendungsfall projektspezifisch ausgewählt und ergänzt werden müssen." (Vorwort p.3).
+-- The encoding is 208 required fields (of 250) + 11 block gates. The Phasenziele are written in the indicative ("ist
+-- geklärt", "liegen vor"); the only "müssen" among them is PZ 5.2-3 (Prioritäten, p.12) and the only hard consequence in
+-- the text is §3 p.10: "Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps
+-- erforderlich." — a REVIEW duty, not a stop. 13 block gates were already downgraded to warn on 2026-08-05 on exactly this
+-- reading; S-6 below lists the 11 that remain at block. S-4 lists the required-ness proposals (150 of 208 in a–h, 50 more
+-- as an owner decision in i).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE found on DWA-M-820-3. All 250 fields carry a label; none of the enum values
+-- (erreicht/teilweise_erreicht/nicht_erreicht/nicht_zutreffend, gesamtsystem/einzelprojekt/both, lph_0…lph_9,
+-- gruen/gelb/rot) is materialised as a field. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicates.
+--  (a) GATES: REQ-26 (f81cc06d-c6c3-4ddf-b9e7-6d77e6f8495f) and REQ-30 (d51be29e-f075-4703-95f8-2c599825023f) are the same gate
+--      twice on M8203-19 — same condition "digital_twin_after_project == true", same clause §7.2.3, same sentence (REQ-26 adds
+--      the "(§7.2.3 …, S. 19)" suffix). ☐ RATIFIED → retire REQ-30 (spec; use the table's active flag if present, else delete):
+-- update public.compliance_requirements set active=false where id='d51be29e-f075-4703-95f8-2c599825023f' and code='REQ-30'; -- or: delete from public.compliance_requirements where id='d51be29e-…';
+--      Rollback: active=true (or re-insert from the export row).
+--  (b) FIELDS: M8203-02.projektstopp_review_triggered (4e5715ce-3bbc-45ad-8dce-7e11da5ec6cf, optional) and
+--      M8203-24.projektstopp_required (dc7fba6b-4534-4efe-bfd0-ccfbca9455f3, required) encode the one §3 sentence twice
+--      (review triggered vs stop required). The source has ONE duty (the review). Observation only — keep both if the
+--      owner wants "review triggered" (early) and "stop decided" (close-out) as two facts; otherwise retire the M8203-02 one.
+--  (c) The 14 "Bild 1 step" / "Grundsatz" / "Definition … verstanden" booleans on M8203-02/03 are acknowledgement
+--      checkboxes (read-and-understood), not project facts; none is read by a gate except bild1_acknowledged (REQ-04, warn).
+--      Observation — see S-4(e).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference retags / description corrections / gate page-suffix corrections (zero-risk class). Evidence in the
+-- pack notes of each field.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§4, §5.4' where id='13d46861-1b80-4a73-ab14-878c1d8bdef8' and clause_reference='§5,§6'; -- project_type: "Die Aufteilung in „Konzept für das Gesamtsystem“ und „Projekte“ ist dabei eine elementare Grundlage." (§4 p.11)
+-- S-3b · description correction (12 rows, evidence-only): the *_items_na descriptions say "Each requires brief justification per
+--   §1 Anwendungshinweise" — §1 p.7 contains no justification duty (it asks for "Vervollständigung … im Projektteam" and
+--   "projektspezifische Anpassung"). Proposed description: "Count of QE items rated N/A (de-selected project-specifically per Vorwort/§1)."
+-- update public.fields set description='Count of QE items rated N/A (de-selected project-specifically per Vorwort p.3 / §1 Anwendungshinweise).' where id in ('10cd4d5d-7e4b-4ba2-b6e9-6239c945dd34','13bdb4a9-c07e-4bf0-ac8d-d6f1a2e9538f','4d54d8d6-3b00-4f9f-8c66-3dac5cd0813b','8d12c81f-31a6-4e08-90c9-95a8a23ba2b1','30c11be1-0315-4100-a3fe-db839c3a0275','580d603a-8232-430e-b15c-654dbe5f600f','dfcc94e1-3ad6-4097-bbf9-7357801872b6','e3dec827-1caa-4593-b934-766475b22c6b','3e5bf023-b404-45be-a4f6-ff44ddcd51f0','093f78cc-a1fa-4731-9164-9fcd4b620b96','0216673c-cc6f-48d0-a2f1-d0b6369fec88','8d59bb8d-1c89-4ca2-a8b3-edb5192407e6');
+-- S-3c · gate source_quote page suffixes that disagree with the Inhalt (evidence-only; the sentences themselves are verbatim):
+--   REQ-26 + REQ-30 "(§7.2.3 …, S. 19)" → §7.2.3 starts p.20;  REQ-28 "(§7.4 …, S. 20)" → §7.4 starts p.21;
+--   REQ-16 "(§5.3 Phasenziele, S. 12)" → §5.3 starts p.13;  REQ-18 "(Anhang A Gesamtsystem, S. 23)" → A.4 starts p.24;
+--   REQ-24 "(Anhang B, S. 37)" → B.6 spans p.37–38.
+-- update public.compliance_requirements set source_quote=replace(source_quote,'S. 19)','S. 20)') where id='f81cc06d-c6c3-4ddf-b9e7-6d77e6f8495f';
+-- update public.compliance_requirements set source_quote=replace(source_quote,'S. 20)','S. 21)') where id='38916040-f2f7-4a8b-a4d0-4317d5d4690f';
+-- update public.compliance_requirements set source_quote=replace(source_quote,'S. 12)','S. 13)') where id='22aeb359-9a62-415b-9fdd-3ffb1c7abf6d';
+-- update public.compliance_requirements set source_quote=replace(source_quote,'S. 23)','S. 24)') where id='c356f580-d0ba-41ce-a129-bba630a0935a';
+-- S-3d · REQ-15..REQ-24 source_quotes are composed heading strings ("A.1 QE 5.2: … — Nr. Qualitätselemente/-kriterien / Hinweise
+--   (Anhang …). Qualitätselemente (Auswahl) siehe Anhang A.1 „…“"), not printed sentences: the md prints "A. 1" (space) and
+--   "&" between the header cells. Every fragment exists; the spot-checker scores them 0 only for that formatting. Evidence-only.
+-- S-3e · applicable_lph enum rows lph_1…lph_9 carry regulation_reference "HOAI 2021 § 43 Abs. 1" (NR — not in this Merkblatt);
+--   lph_0 cites "DWA-M 820-3 S. 3" (Vorwort: "von der Bedarfsplanung (LPH 0) bis zur Objektbetreuung (LPH 9)") — correct.
+-- Rollback: restore the previous clause_reference / description / source_quote values quoted in each guard.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · is_required review — 208 of 250 fields are is_required=true (the single biggest fill-out blocker in the library).
+-- The source makes the whole Merkblatt optional ("steht … frei", "kann … überprüft werden", "Auswahl … projektspezifisch
+-- ausgewählt"), and the fields below are additionally derived, printed constants, app-only, BIM-conditional, acknowledgement
+-- checkboxes or stream-conditional. Proposal (a)–(h): is_required=false for 150 ids. Evidence per group:
+--  (a) DERIVED roll-ups / verdicts hand-required (doctrine "derived that is hand-enterable = finding", the #22 class): the 12
+--      QE Erfüllungsgrad %, the 2 Anhang-level %, the 3 Grün/Gelb/Rot verdicts. The source prints no percentage and no
+--      traffic light; these are computed from the counts. 17 ids.
+--  (b) PRINTED CONSTANTS hand-entered (doctrine "standard_fixed that is UI-editable = finding"): the 12 *_items_total
+--      (15/8/12/3/15/21/19/17/33/34/10/6 — the last Nr. of each Anhang table) and the 2 aggregates (38, 155). Their values
+--      are fixed by the print; REQ-20/21 already assert 40 and 50. → is_required=false now; follow-up: seed default values or
+--      make them read-only. 14 ids.
+--  (c) APP METADATA required: 12 × assessment_date + 12 × assessor, registration_date, signoff_engineer, signoff_client —
+--      no "Bewerter", "Bewertungsdatum" or sign-off exists in the source. 27 ids. (project_title/number/location, client and
+--      contractor names stay required as registration basics; REQ-01 reads the two names.)
+--  (d) DIGITAL / BIM / communication (§7): "Die digitale Planung, hier insbesondere die BIM-Methodik, kristallisiert sich mehr
+--      und mehr als Arbeitsinstrument und Methode heraus." (§7.2.1 p.19); "Beim Einsatz der BIM-Planung stehen dafür Werkzeuge
+--      bereit" (§7.5.2 p.21); "Für unvollständig vorhandene Bestandsdaten sind die planungsrelevanten Anforderungen zwischen AG
+--      und AN geklärt." (§7.3 p.20 — incomplete data is foreseen); "Hierzu wird vom AG gegebenenfalls eine Rechtsberatung in
+--      Anspruch genommen." (§7.4 p.21); "über geeignete digitale Medien (bspw. Projektwebsite)" (§7.5.3 p.21). 13 ids.
+--  (e) ACKNOWLEDGEMENT checkboxes (read-and-understood): anw_hinweis_1..4, the four "Definition … verstanden", bild1_acknowledged
+--      ("vorgeschlagenen grundsätzlichen Ablauf", §4 p.11), grundsatz_two_step_followed ("Kleinere kommunale Betriebe haben die
+--      Möglichkeit …", §3 p.10 — scoped). The guideline never asks the user to confirm having read it. 10 ids.
+--  (f) SCOPE booleans: the four sector_* flags (REQ-01 already enforces "at least one"; a required boolean forces an answer per
+--      sector) and part1/part2_applicable (Teil 3 "ergänzt die Ausführungen der Teile 1 und 2", §1 p.7 — applying the other
+--      parts is a scoping choice). 6 ids.
+--  (g) QE RATING COUNTS (items_y/p/n/na × 12): the checklist itself is "kann … überprüft werden" + "Auswahl"; the warn gates
+--      REQ-15..24 already check sum consistency where the counts are filled. 48 ids.
+--  (h) STREAM-CONDITIONAL Phasenziele: the Gesamtsystem stream (PZ 5.2/5.3/5.4, 13 ids) applies only when project_type ∈
+--      {gesamtsystem, both} — "Dies können ein einziges Projekt oder mehrere einzelne Projekte sein." (§5.4 p.13), "Wurde im
+--      Vorfeld ein Konzept für das Gesamtsystem erstellt (siehe 5.3), so sind …" (§6.2 p.14); PZ 5.2-1 is "sollte" (p.12);
+--      plus the two explicitly conditional Projekt-PZ: pz_62_2 ("Wurde im Vorfeld …") and pz_64_11 ("Zugelassene
+--      Nebenangebote …", p.16). 15 ids.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in (
+--   '6ec51094-ae54-47f1-8931-fc9bef95918b','d275d9ee-a817-469f-9d09-7bb8cd8077bf','f7770ef4-dd64-4f58-9948-431b1db40f57','b03a6655-fb32-4a39-9f1d-63c1e488ecf8','54016351-c03e-4a6e-a061-57740d26436b','020fbf41-cd62-474d-b5c3-db94dca71673','9f213341-85c2-49dd-86b6-1d0ca8be86ee','a3dcb186-4134-47aa-bbc6-78e1fdc6aa42','1beb4d1c-005a-4b97-b483-cd99f4983ddd','8aa49d0d-3631-4746-a933-f88cac49883e','200867a3-f535-4695-9caf-488d07f7b6cd','3cc2f263-222a-4b8d-9e03-95322934c616','2b239309-a5e9-435c-9dae-3e8171626a4e','5aff926d-c3f9-4654-947c-16dd4534b198','349b00d1-3b8b-4d90-aeda-484762c8c2b2','4e7ee5f2-7fca-45c9-a5b9-500c491a7c3a','c4fe47c6-fc53-439f-ad28-f0819e5d6ee6', -- (a) 17
+--   '463cce2c-7bd9-4383-8449-21c23cb58b7c','d5cf1f4c-15e4-4066-9150-1fbc348886e3','0167bc27-0b91-4a10-959b-79312b6eae5e','6d423d70-7877-4e75-9c3a-7ac0a846b581','d76afa3e-9659-4427-a1d0-07830a499b1d','05ed82f2-012f-430e-8cd8-c09fa3d3ac4a','8dc022f7-94c6-4c64-abdb-738452ace3b7','e08b279b-a2f5-419f-bc06-391da8e64180','e35fa0b0-bdd4-4b31-af42-bc5af4717225','930d3f1d-4e1f-4206-bd8c-89db407041dd','304b4371-6a74-430c-94b6-1e7f872100b5','72e9631b-021d-4ff4-b21f-4d2992497b3a','33213e00-c131-4c83-94bc-b8ef13a6ef69','b4ced44f-89e1-4726-a368-b6a8717e57cf', -- (b) 14
+--   '0c73ae9e-aa40-43e3-809a-e4da38f21ef7','eafda68e-4fec-4234-90a5-d5138bafab27','3b1e444e-6f85-4f33-9d3b-33941529e5ac','df69bd47-f3a5-4559-9122-8c5e35297407','c2ee4494-d294-47dc-bd39-0dd88e00a2c2','a6a3c4ff-0c33-4697-ba02-ddd21a66121e','f9dabb38-9dea-47ae-8544-e234415b1d6f','62c09466-7faf-4c4e-bd93-39e00ec727e6','80eacb15-ddad-4ab5-84fe-f90617a292aa','0ff67095-0ee6-40aa-9840-251292781d22','1927b856-3529-4dd4-a71a-d59cbb09a646','281a84ae-3b05-4039-b605-540e90973ab8','f62deaca-e533-4f9c-9e27-5ddc5d9830a0','62a3bd39-f935-4ec8-b3c3-114fb0773559','8d6c329d-0393-4fb2-9555-e8bdbbfd4f4f','db9ae0ae-6d99-4791-ac85-dea9313520a8','80275212-4726-4afa-9357-4352e82419c2','852b8c26-c02c-470e-a2c8-23e2721d3ec7','b722e3f6-0eef-4dc8-954a-1400648f01c2','04c1d029-da3f-4543-b4c5-e0b96a8a5a84','7481bb13-c3bc-499d-8182-5dfe20548065','01ef5465-7f46-4c6d-be45-a2d58748c1c2','d3725586-15e1-467f-94e8-434a6b3dc42f','4a21924e-2346-407e-b16a-75b4e3002a63','bf0120be-4453-4aa1-87ad-b5d6a9fed3eb','9a86d3e9-b89d-4e2a-af54-5fb08d024fd0','da54adf8-7b11-44ac-8c5d-33d880bf242a', -- (c) 27
+--   '841636df-191f-4c3a-95d3-a6b5a6ae054e','0c401bd2-0b84-48e6-b579-7a59bfa3c13f','75b724fe-7b40-4b4c-b754-c59b50e74d8f','f7a18ba0-97b3-4f64-832a-86933fff84cb','52edaa23-ffb3-4288-807d-21555aae01c3','e05d5d64-4c3b-4657-9b2d-a91a6e4ff0a5','d2f115f4-68b0-4a46-8066-c3bbe1e8047a','7a10c183-e401-4e77-aaea-f6c2f439bcbc','9c45a943-1f9b-4b41-b796-77464ccb0259','4d1aa5db-2849-48d2-85ef-196f1d6dc0ab','b2467ccc-0947-4a60-8bcd-9874a7b2d846','60d02129-2c97-4fec-a191-08d06c4ea57c','681d5616-4491-47a2-a069-b9e73bd54a66', -- (d) 13
+--   '667d8699-d0e3-4f70-a3fc-4ff37397e0a0','5e5c6152-68d0-41b2-a0e4-2750ff153f57','e6115414-b864-4928-ab60-141a533ab41e','270d1183-2145-42c5-8377-5a2023871cd5','90cd91c2-1dea-4351-be4f-451dd94e158c','ce5c4efd-3cd3-47a5-911a-973779639904','0f9d7462-00fc-4552-892d-a38c176ad298','3e8836e3-d498-4a18-83d6-9b763821bc46','47ced3e9-7c92-47be-8fdd-95732fe14c08','2e874c62-550d-4fd2-9cc6-7ed3f6a66edb', -- (e) 10
+--   '479b02e2-805e-48dc-8e28-f37c1f4ef920','38724486-b06a-4567-95f7-a195e579074b','96b29bf5-0ad1-42bb-b64d-de2f8506f70c','6373dbc5-e5de-42fc-bb55-0593a9d17809','9fd10f0c-9c9d-426d-a5b8-dc3d5360df64','f3c71672-c0f1-4a4d-ad44-e52dc114c560', -- (f) 6
+--   '966b0d7b-4951-495f-8aa9-02644c772e4e','b6731d70-a58f-4656-bfd4-f27ce2cbc1e0','7b389de9-3cd9-415c-a568-8942940984d6','10cd4d5d-7e4b-4ba2-b6e9-6239c945dd34','2bf1e97e-ce98-413d-914f-000ae5fae152','1ac6a737-9730-420a-9111-66dbc6136d9d','38394565-203d-4f92-8b52-82db1003fc75','13bdb4a9-c07e-4bf0-ac8d-d6f1a2e9538f','03ac83bb-eec5-449d-9e4f-937d97c344c1','99c58b30-7f15-4d46-8d85-46cee23ccf02','654abd8d-2816-47dc-8a87-508d1a74c838','4d54d8d6-3b00-4f9f-8c66-3dac5cd0813b','4977468d-ce1e-45f9-8f54-a5c4d0813511','30e60126-a03f-4e6f-9cd5-3af0193d8974','9f34e899-2e75-43bb-8950-fa239b8b17f6','8d12c81f-31a6-4e08-90c9-95a8a23ba2b1','ec11ff6f-c339-41bf-a991-5bf80901bba1','f94ca7fd-0221-4e81-88b5-1660e1c3ae3e','470461c7-1d4b-4654-9bb8-92cc58ee8ef1','30c11be1-0315-4100-a3fe-db839c3a0275','88856177-1fcd-4aea-927a-d35788d05cd1','6d86777e-e63e-47a8-aca8-9afeff03d693','609f005c-d6da-45d7-965d-68df52692e0a','580d603a-8232-430e-b15c-654dbe5f600f','0fce08f0-94a0-4e1f-a3dd-bce478c22dc2','cb09263b-59da-4c05-9db5-604ed6c855b7','9f40e0e2-b27c-4599-b57b-df9a33c2af72','dfcc94e1-3ad6-4097-bbf9-7357801872b6','1e6bc639-64e4-4f73-b7a0-68e8f1a155dc','ee666859-064f-4f6d-a6b0-8be121ca9e73','df5bccc1-56fe-4c1e-bd40-fe8c2c0ee252','e3dec827-1caa-4593-b934-766475b22c6b','be9fecbd-4b42-4e68-ab8d-90370eda6738','35f00c87-a759-4140-92cc-9134221872d2','c09c118e-c0b5-4841-ab72-6664230ac52d','3e5bf023-b404-45be-a4f6-ff44ddcd51f0','70f9cbe5-36f4-4a14-ad3e-8e7964191037','e05c3c0f-d576-4cb3-9b01-300e51881f9a','68fa3410-acfc-41f9-9dc2-47ef69ce6a57','093f78cc-a1fa-4731-9164-9fcd4b620b96','bb9aa62a-fd0f-4210-996b-d6ea80a62580','dcee1c88-c416-4874-8ed4-a5d6f4d031e5','b1cea4e8-13dc-4916-82be-e3f669f97b56','0216673c-cc6f-48d0-a2f1-d0b6369fec88','58cd9f21-8303-4504-9b9f-db481239786b','1135856a-4b75-42be-93f3-241e33cd2533','38b63c71-9cfc-47dc-b5a7-9bfb21ba7b7a','8d59bb8d-1c89-4ca2-a8b3-edb5192407e6', -- (g) 48
+--   '7703bba9-dd7b-4ec9-b1cc-6f26c6e1343d','d5e22a63-5632-40ef-af41-c7fc853c8591','52d9afb9-0944-4761-8d24-1455aaa79e60','6a57f55b-35e7-48c3-98ae-6f3fef8130b6','4fcb5923-1b64-425f-a5d5-aad3c446e397','e471a5e9-f2fa-4c73-8290-ef0d625cb460','083b6227-c735-46f9-b7f7-c815d9a35136','1c9d8b85-bf3e-4c77-8c05-1e214b4c2447','50c2af70-1a0b-457e-b5c2-d2e079605712','2e317db4-162d-45cd-b263-fe7655a555fe','d4a07ab4-0ea0-4d7d-b485-2d763fc508c2','4b535ef0-e4ca-4456-9dba-9e8cb492693f','7763218d-6cd1-46da-9633-16f46df7034a','db4d09b7-f9a7-4c22-bf43-b148bc6f58fd','80ee92bb-11e8-4d91-97f8-e72b905cea22'  -- (h) 15
+-- ) and is_required=true;
+-- Rollback: update public.fields set is_required=true where id in (<same 150 ids>);
+--  (i) OWNER DECISION — the remaining 50 Projekt-stream Phasenziele (PZ 6.2-1/3/4/5, 6.3-1..8, 6.4-1..10, 6.5-1..12, 6.6-1..10,
+--      6.7-1..6). They ARE the checklist core, but (1) they are indicative sentences, not "muss"; (2) they depend on the
+--      commissioned LPH — "Die Hinweise sind gegliedert nach den … Leistungsphasen." (§1 p.7) and applicable_lph exists — a
+--      project scoped to LPH 1–4 cannot fill §6.5–§6.7; (3) a project_type=gesamtsystem project has no Projekt stream at all.
+--      Option (i-1) keep required and add conditional visibility by applicable_lph / project_type (app feature, not SQL);
+--      option (i-2) is_required=false for all 50:
+-- update public.fields set is_required=false where id in ('b60c1a1a-0115-4f77-925b-79fb4a9788f5','63166a42-7ed9-4d27-874c-a3cc9a4934d4','38754206-9513-43c8-8f83-26ac8a2ba381','a9264c77-609e-4d71-a074-5602d11db14c','79cb7874-628d-4ed7-a7fe-2351517c80dd','ad512b6f-d268-42a3-af5d-c9abd01e792c','856052d5-0280-4810-ab04-da748f87f81a','71416cb9-d818-44c1-9452-da6733ffd3f9','4ec7b345-aea0-4404-8e1b-236e372241e0','57db2c06-f7d8-45ad-ab2a-ad647a16b7bd','c5f62592-ff78-47db-b10a-2ca474978494','154aa940-7780-4d4a-891a-a6eb6b3f0a1e','b4ec40ba-8830-4cd7-9c41-57569e124b52','bd0c86a7-8dcd-466d-a080-9821e9999fba','e5e1729f-8674-4a9d-af9e-c2e8a291c1d6','6a543e28-03ff-4d8c-ac0f-294929bc0861','b12f8652-c816-418a-aae4-b3da9007a711','dd80d97a-7fd9-46c4-82af-1bcffbf5ab57','beb22b7e-d104-4f55-af66-39a3ec528f9c','7d19f05c-d6ba-4b2e-8b00-27e771332f50','dd1ddf81-6c2b-452e-80ad-b1183e653093','7020d386-198a-47d2-b2ed-ad4c188f52c6','f2e2799c-7372-4871-8897-7da17f15e4fc','600b5863-5950-4df0-88dd-542a64e2a544','6b0b1e65-71b1-46e1-bb62-ef4ab3de9f44','52138823-8772-476c-a20c-252f586c4be2','a7b5cd8c-4478-45d7-a41a-a1a485a65d54','a657f2ec-1352-4804-a8e0-7dd83189e861','eb8506c1-8264-40fd-a121-8e3075dd4e1c','ffbccb7b-528b-4107-9c66-bdfee5aaced1','c3650967-fbcf-468f-95ab-7af1e81e1ff5','e592cdbf-38e2-4aca-9d23-c64ab644c64d','6c3637b5-5bb2-4d2d-9743-04bbdebdc4ea','656be7e9-c017-4855-bf5c-7e9a22d4fc6c','139dfde1-98bb-4cf5-a43a-fe88cb668013','96348b91-5521-4738-b3bf-0624ae3a2c9d','6034ea1a-8ce1-4454-ba46-b02376962186','af2e9406-7bc1-4724-9e8c-cfd1eef4915a','5d86a84c-73b1-48df-975f-7e7a881b312e','ccb37abe-0a3e-4f01-b478-33e526398693','2fdcbd23-a31d-4bd5-b590-6d013a82b78b','16acf828-6158-42bb-b248-2c49e28de911','6bb0ee7e-6dce-4fe2-9052-7c0bdc50b0a8','88e95fc3-7227-4f59-8f5d-a2cdd9e5a0e0','0d372604-91b8-4681-9593-73e28fdd0fd3','38aa18ed-4dc0-4d3c-aab9-5f7c704c1a10','20b147f5-718f-4765-a53c-63f9a4a0a180','0648e634-6f5b-4d31-b297-061427682c9a','422fba49-cbdd-45f9-9f5c-a556e47d1f2e','a6502caf-2248-427d-b6d8-d875ab0f61a6') and is_required=true;
+--      Rollback: is_required=true on the same 50 ids.
+-- NOT proposed (stay required): project_title, project_number, project_location, client_auftraggeber, contractor_auftragnehmer
+-- (registration; REQ-01), project_type + applicable_lph (drive the streams), projektstopp_required (§3 "ist die Prüfung eines
+-- Projektstopps erforderlich" p.10 — the one "erforderlich" in the text).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gate re-homes / empty conditions / NULL quotes (SR-1: a gate without a printed sentence is not sourced).
+-- S-5a · REQ-27 (96bc2de9-c590-4b71-bcd0-a1c41e0c0588, warn, clause §7.3, source_quote NULL, condition EMPTY, requires_attestation
+--   false → never evaluates) sits on M8203-19 but the §7.3 fields live on M8203-20 (0e53e512-19ae-42e9-8c0f-13165c81f19c).
+-- ☐ RATIFIED → re-home + condition + quote (spec):
+-- update public.compliance_requirements set worksheet_template_id='0e53e512-19ae-42e9-8c0f-13165c81f19c', condition='bestandsdaten_complete_digital == true AND akz_in_place == true AND critical_infra_assessed == true', source_quote='Bestandsdaten sind in Bezug auf die bevorstehenden Planungsaufgaben vollständig, aktuell und digital (bspw. georeferenziert, vektorisiert, Bezugssystem) verfügbar. […] Grundlage dafür ist ein eindeutiges Anlagenkennzeichnungssystem (AKZ). […] Die Anforderungen der Gesetzgebung zur kritischen Infrastruktur wurden im Vorfeld abgeklärt und sind im Projekt berücksichtigt. (§7.3 Qualität Bestandsdaten, Ziele, S. 20–21)' where id='96bc2de9-c590-4b71-bcd0-a1c41e0c0588' and code='REQ-27';
+-- S-5b · REQ-29 (c7d18a70-5fe6-4df3-a8ea-5c63af022598, warn, clause §7.5.2, source_quote NULL, condition EMPTY) sits on M8203-19 but
+--   the §7.5.2 fields live on M8203-21 (733e0665-7abd-43ec-8ae3-e29566d04ea0).
+-- update public.compliance_requirements set worksheet_template_id='733e0665-7abd-43ec-8ae3-e29566d04ea0', condition='bim_communication_interfaces == true AND cde_used_for_communication == true', source_quote='Schnittstellen zwischen der rein digitalen Kommunikation (bspw. über das BIM-Modell) und der Kommunikation in Planungs- und Baubesprechungen sind geklärt. […] Eine CDE-BIM-Plattform als Kommunikationsplattform ist eingerichtet und wird genutzt. (§7.5.2 Projektkommunikation, Ziele, S. 21)' where id='c7d18a70-5fe6-4df3-a8ea-5c63af022598' and code='REQ-29';
+-- S-5c · REQ-31 (064de314-e704-4ebf-80ae-da1e28e5e7b3, warn, clause "3 Grundsätze", source_quote NULL, condition EMPTY) on M8203-22.
+--   The §3 duty is the Projektstopp review when Phasenziele are missed; the natural trigger on this summary sheet is the red verdict.
+-- update public.compliance_requirements set condition='gesamt_anhang_a_verdict != ''rot'' OR projektstopp_required IS NOT NULL', source_quote='Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps erforderlich. Im Rahmen einer Risikoanalyse muss bewertet werden, ob und wie das Projekt fortgeführt werden kann. (§3 Grundsätze, S. 10)' where id='064de314-e704-4ebf-80ae-da1e28e5e7b3' and code='REQ-31';
+--   (projektstopp_required lives on M8203-24 — if evaluate.ts cannot read across worksheets, re-home REQ-31 to M8203-24 c4e0b403-c661-47f6-b6f8-2f693cb4a52f and use 'projektstopp_required IS NOT NULL'.)
+-- S-5d · REQ-05 (0b2a9ed3-98e3-41f8-be28-4fbcb0c9607f, warn, attestation, §3 Zweistufigkeit) sits on M8203-04 (Phasenziele §5.2) while
+--   its field grundsatz_two_step_followed is on M8203-02 (398875e2-1e10-4887-ac9e-37229e86562f). Attestation gates carry no condition by
+--   design (REQ-02/03 likewise) — only the home is wrong:
+-- update public.compliance_requirements set worksheet_template_id='398875e2-1e10-4887-ac9e-37229e86562f' where id='0b2a9ed3-98e3-41f8-be28-4fbcb0c9607f' and code='REQ-05';
+-- S-5e · REQ-32 (block) on M8203-24 reads signoff_engineer / signoff_client / overall_quality_verdict — three app-only fields — but is
+--   anchored on the §6.7 "Abnahme der Ingenieurleistungen … Projektdokumentation" sentences, which describe the Abnahme, not a
+--   sign-off in this tool. Evidence-only: the quote does not define the fields it gates (see S-6).
+-- Rollback: restore worksheet_template_id / condition='' / source_quote=null as exported.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Severity: the 11 remaining block gates, checked against their anchor sentence.
+--  • REQ-06/07/08/09/10/11/12/13/14 (Phasenziele roll-ups; block when any PZ = nicht_erreicht): every anchor is an indicative
+--    Phasenziel ("Im Ergebnis entsteht …", "… ist abgeschlossen.", "… sind vertragskonform umgesetzt."). The text's own
+--    consequence for a missed Phasenziel is §3 p.10 "ist die Prüfung eines Projektstopps erforderlich" — a review, which the
+--    encoding already carries as projektstopp_required / projektstopp_review_triggered. Two inconsistencies: (1) the gates pass
+--    "teilweise_erreicht" although §3 names "nur unvollständig erreicht" as a trigger too; (2) they block a worksheet where the
+--    source asks for a risk review. Same class as the 13 gates downgraded 2026-08-05.
+-- ☐ RATIFIED → block→warn (one update per gate; rollback = severity='block' on the same row):
+-- update public.compliance_requirements set severity='warn' where id='bbcb791b-6619-4dc9-a5d7-995cd03e2ce4' and code='REQ-06' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='0a7ecd73-7ac4-49a8-87bc-9693527b50a5' and code='REQ-07' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='39e44cf0-d538-4bad-8c34-2ae835a05f01' and code='REQ-08' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='ce8dd8b8-c545-425f-a9e4-294da680690b' and code='REQ-09' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='d7dc4676-d5ce-4b3d-9cd2-169f9a8479f5' and code='REQ-10' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='2e4a9e3e-bfda-4e27-ba71-23bfa409bafb' and code='REQ-11' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='3e3f90d7-20fd-4ef4-a3fc-1b73d4fa365f' and code='REQ-12' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='60487869-3b04-4520-9cef-e3c057b78cea' and code='REQ-13' and severity='block';
+-- update public.compliance_requirements set severity='warn' where id='978ccf98-b0a6-424d-b697-e9ee1e83bc41' and code='REQ-14' and severity='block';
+--    Alternative the owner may prefer (keeps teeth where the text has them): keep REQ-06 at block ONLY for pz_52_3_status
+--    (PZ 5.2-3 "müssen … festgelegt und kommuniziert werden", p.12) and re-quote it with that sentence.
+--  • REQ-32 (block, app sign-off + verdict, S-5e): no sign-off in the source → block→warn, or keep as the app's finalize gate
+--    with an app-level (not standard) anchor. Owner decision:
+-- update public.compliance_requirements set severity='warn' where id='1f223a4a-43a1-4a60-8ea5-4a364c56a2d7' and code='REQ-32' and severity='block';
+--  • REQ-01 (block, sector ≥ 1 + both party names): anchored on the descriptive scope sentence "Das Merkblatt richtet sich an …"
+--    (§1 p.7). It is a registration sanity check, not a standard rule. Kept at block as an app gate — noted, no SQL.
+-- Under-enforcement noted (warn where the text is stronger): none — the source has no "muss" that is currently only warned.
+-- Re-quote (evidence-only, if the owner keeps any PZ gate at block): set source_quote to the §3 sentence above, which is the
+-- actual rule; the current quotes are the last Phasenziel of each list.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Gate source_quote NULL: REQ-27, REQ-29, REQ-31 — backfill proposed together with their conditions in S-5a/b/c.
+-- All other 29 quotes located in the md (REQ-25 joins three list items with "…"; REQ-26/30 carry the wrong page, S-3c).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Missing gates / fields for printed hard-ish rules (the encoding has no field for them):
+--  • §3 p.10 "Werden Phasenziele nicht oder nur unvollständig erreicht, ist die Prüfung eines Projektstopps erforderlich." —
+--    no gate ties ANY pz_*_status = nicht_erreicht/teilweise_erreicht to projektstopp_review_triggered/projektstopp_required.
+-- ☐ RATIFIED → insert spec: code='REQ-33', severity='warn', worksheet M8203-24, condition='projektstopp_required IS NOT NULL',
+--    clause_reference='§3', source_quote='<§3 sentence above> (S. 10)'; (a per-worksheet variant needs OR over the pz fields —
+--    evaluate.ts grammar permitting).
+--  • §5.2 PZ 3 p.12 "Die Prioritäten von Terminen, Kosten und Qualitäten müssen … festgelegt und kommuniziert werden." — the only
+--    "müssen" Phasenziel; candidate block gate on pz_52_3_status != 'nicht_erreicht' (see S-6 alternative).
+--  • Anhang B.5 Nr. 9 p.37 "Während der Gewährleistungsfristen darf die Wartung nur vom Anlagenerrichter durchgeführt werden" — a
+--    "darf nur" with no field (would need a boolean on M8203-17; is_required=false).
+--  • Anhang B.4 Nr. 19 p.34 "Zwischenfeststellungen gemäß § 4 Abs. 10 VOB/B: Bauteile, die verdeckt werden, sind festzustellen." —
+--    covered only indirectly by pz_65_5_status; no separate field.
+--  • §6.4 PZ 6 p.15 "… ist dies eine zusätzlich zu honorierende Leistung." — fee consequence, no field (belongs to DWA-M 820-1).
+-- Rollback: delete the inserted rows / fields.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Residue disposition: NONE — all 250 fields are written by the pack (188 quoted, 62 exempt). Partial-support caveats live
+-- in the verification_note of the 36 Y/P/N counts, 12 N/A counts, 12 Kritische-Lücken texts, applicable_lph and project_type.
