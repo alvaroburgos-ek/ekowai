@@ -1,0 +1,169 @@
+-- ============================================================================
+-- DWA-M-820-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (DWA-M_820-1.md); "printed p.N" = section start page per the Inhalt
+-- (the md has no page lines; offset PDF−2 confirmed via mathpix image indices). Gate rows live in
+-- compliance_requirements (evaluate.ts grammar) — condition/severity edits below are written as specs.
+-- Field ids are the prod uuids from the 2026-09-05 export (fields-DWA-M-820-1.json).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE found on DWA-M-820-1. All 120 fields carry a label; no enum value of the
+-- 8 enum fields (project_type, sector, facility_type, work_type, client_organization_type, risk_analysis_method,
+-- threshold_status, procurement_procedure, compliance_verdict) is materialised as a standalone field.
+-- No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate fields (same concept encoded twice; the source defines it once).
+-- Evidence: "Für jeden zu vergebenden Auftrag hat der Auftraggeber nach Festlegung des Leistungsumfangs eine Schätzung
+-- des Netto-Gesamtwerts der Planungsleistungen eines Projekts nach pflichtgemäßem Ermessen durchzuführen." (§8.5 p.33) —
+-- ONE Netto-Gesamtwert; encoded as M820-01.estimated_engineering_fee (read by REQ-06/REQ-07) AND M820-02.auftragswert_geschaetzt
+-- (read by nothing).
+-- "Der Auftraggeber hat also zunächst zu prüfen, ob der EU-Schwellenwert erreicht oder überschritten ist." (B.1.1 p.48) —
+-- ONE check; encoded as M820-09.threshold_status (enum, read by REQ-07) AND M820-09.oberschwellig_check (boolean, read by REQ-08).
+-- Tab. D.1 p.56 prints TWO Deckungssummen (Personenschäden / sonstige Schäden) = M820-13.liability_insurance_personenschaden +
+-- liability_insurance_sonstige; M820-22.haftpflicht_versicherungssumme is a third, single-number copy read by nothing.
+-- Observation (no proposal): M820-01.client_contact_person ≈ M820-03.project_manager_ag (§5.2 p.23 "Der Auftraggeber muss einen
+-- Projektleiter benennen"); M820-04.aufgabenbeschreibung_eindeutig ≈ M820-15.leistungsbeschreibung_complete (§8.2 p.32);
+-- M820-17.date_procurement_start ≈ M820-17.publication_date (Anh. F 5 p.66 asks for ONE "Datum der Veröffentlichung").
+-- ☐ RATIFIED → soft-delete the orphan copies (no gate reads them); rollback = set active=true on the same ids.
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: duplicate (md pass)'
+--  where id in ('2ae7522a-6987-4007-b8f5-a3399a64663a',  -- M820-02 auftragswert_geschaetzt = M820-01 estimated_engineering_fee
+--               'ec2f5db6-dbd6-4826-abbb-af33731203e5',  -- M820-22 haftpflicht_versicherungssumme = M820-13 pair
+--               '15b2e8b5-3abc-4baa-ac40-d4a6ea141eba'); -- M820-17 date_procurement_start = publication_date
+-- oberschwellig_check is read by REQ-08 → re-home REQ-08 onto threshold_status first (S-5b) before deactivating it:
+-- update public.fields set active=false where id='38bb9560-2771-4eec-9019-cf8aa7d104ed'; -- M820-09 oberschwellig_check (after S-5b)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference retags (zero-risk class).
+-- Evidence: the Inhalt (p.6–7) has "3 Begriffe" (definitions, p.11–13) and "4 Grundsätze" (p.15–22). Neither defines the
+-- Leistungsumfang/Auftragswert (that is §8.2 p.32 / §8.5 p.33 / Anh. F 1.3–1.4 p.65) nor the Bewertungskommission (§8.4 p.32–33,
+-- Anh. F 2 p.66). REQ-26 cites "§135 GWB (Anh. B.2.3)" and the field cites "§135 GWB (cited in Anh. B.2.3)" — consistent, no change.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§8.2, §8.5, Anh. F 1.4' where id='ffd38d29-40a3-4b73-8e57-56163ba13964' and clause_reference='§3'; -- M820-02 leistungsumfang_beschreibung
+-- update public.fields set clause_reference='§8.5, Anh. F 1.3'       where id='2ae7522a-6987-4007-b8f5-a3399a64663a' and clause_reference='§3'; -- M820-02 auftragswert_geschaetzt
+-- update public.fields set clause_reference='§8.5'                    where id='c1f44e61-8177-40c0-89b7-86a2d1805dea' and clause_reference='§3'; -- M820-02 umfang_definition_datum (exempt field)
+-- update public.fields set clause_reference='§8.4'                    where id='2798029b-c8e8-4b4d-b9a1-826f4c0c680c' and clause_reference='§4'; -- M820-16 bewertungskommission_constituted
+-- update public.fields set clause_reference='§8.4'                    where id='500d24b2-d2f5-4248-8d03-9a69a23898da' and clause_reference='§4'; -- M820-16 bewertungskommission_size
+-- update public.fields set clause_reference='§8.4, Anh. F 2'          where id='cdfa8727-6352-4673-b5d9-9acf646815f1' and clause_reference='§4'; -- M820-16 bewertungskommission_chairperson (residue)
+-- update public.fields set clause_reference='§8.4'                    where id='747b798c-b4c9-4ac5-a081-c77782bc23c8' and clause_reference='§4'; -- M820-16 kommission_constitution_date (exempt)
+-- Rollback: restore the previous clause_reference values quoted in each guard.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · is_required review — 99 of 120 fields are is_required=true; the source makes many of them optional ("kann",
+-- "sollte", "empfohlen", "Beispiel") or they are app-only. Proposal: is_required=false for the 29 ids below (25 currently required + 4 already-exempt dates kept in the list for completeness). Evidence per group:
+--  (a) Risikoanalyse is recommended, not mandated: "Risiken sollten im Rahmen der Planung systematisch erfasst werden" (§4.7 p.22);
+--      "Hierfür können einschlägige Methoden der Risikoanalyse verwendet werden. Ein Beispiel … ist in Anhang A dargestellt." (§4.7 p.22);
+--      "Zumindest sollten für diejenigen Risiken, welche einen hohen Schaden und eine hohe Eintrittswahrscheinlichkeit aufweisen,
+--      Maßnahmenpläne entwickelt werden." (Anh. A p.46)
+--      → risk_register, risk_analysis_method, risk_analysis_date, risk_mitigation_plan, mitigation_plan_approved, mitigation_plan_date
+--  (b) Eignungs-Mindestanforderungen are "kann": "Der Auftraggeber kann einen Mindestjahresumsatz vorgeben." (§8.7 p.35);
+--      "Dem Auftraggeber ist zu empfehlen, immer innerhalb der Bewerbungsphase Referenzen anzufordern." (§8.7 p.35);
+--      "Bei großen, langlaufenden Projekten sollte das geforderte Verhältnis … den Faktor 1,5 nicht überschreiten." (E.1.4.1 p.61)
+--      → min_annual_revenue_multiplier, reference_period_years, large_long_project
+--  (c) Price as a Zuschlagskriterium is optional: "Der Auftraggeber kann bei der Vergabe von Ingenieurleistungen auch den Preis
+--      werten, muss es jedoch nicht." (E.2.8 p.64) → price_weight_percent, preisbewertung_durchgefuehrt
+--  (d) VgV-F-only artefacts (Bekanntmachung, Verhandlungsrunde) — "Im unterschwelligen Bereich kann national ausgeschrieben werden
+--      (Suchverfahren, siehe 8.9) bzw. eine Direktvergabe (siehe 8.8) erfolgen." (§7.1 p.29); Suchverfahren: "Andernfalls kann er
+--      eine Bekanntmachung der Vergabeabsicht vornehmen" (§8.9 p.37), "Der Auftraggeber kann sich in einem Verhandlungsgespräch
+--      beispielsweise die Analyse der Aufgabenstellung darlegen lassen" (§8.9 p.37). REQ-18 already enforces publication for VgV-F.
+--      → publication_date, submission_deadline, negotiation_rounds, verhandlung_thema, verhandlung_ergebnis, verhandlung_datum, protokoll_signiert
+--  (e) App-only / no source concept: qualitaets_kriterien_anzahl (roll-up count), qualitaets_check_date, kommission_constitution_date,
+--      evaluation_summary_date, vertragspruefung_date, final_signoff_date, vergabeakte_unterzeichnet (no signature in §8.3/Anh. F),
+--      bewertungskommission_chairperson ("Alle Mitglieder haben gleiches Stimmrecht." §8.4 p.33 — no chair), verschuldensgrenzen_definiert
+--      (term absent; Anh. D p.55 names "Haftung" only), date_registration, umfang_definition_datum
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in (
+--   '777faf36-5289-4f8e-8df9-bc3f93acb193','1c43817c-2082-4878-b085-f78d8b0a651e','91ca8a6c-4bb4-4c99-b415-b17bf55cc80b', -- (a) M820-06
+--   '38ae4950-9d09-48c8-a520-06ed81f89e50','1b32e5a1-0999-4c1a-bece-b044533fc6f1','294e992f-7b16-4b44-95a1-97631bc603c1', -- (a) M820-07
+--   '0529c495-3ea1-457a-a6eb-ed1735a93e5f','05068b11-17d6-4f9a-9d59-387c46e8c5a6','db2fbb7c-3aab-4bf3-aa50-4a7b721ac17b', -- (b) M820-13
+--   '4e74b2e7-01a2-4fdc-8236-b4b071c16f8a','b831d563-472e-4293-9d8f-69472ea07fb6',                                        -- (c) M820-14 / M820-19
+--   '994c9462-a234-4776-9edb-c95e16bc879b','bc2d2fb0-638c-4eb7-b95a-953cbabb4507',                                        -- (d) M820-17
+--   '91541f1d-3e54-4868-a745-96a1b1b88ea4','d3a72553-ca9d-48d1-b009-3f69ed58cdae','badb10e4-bd98-4e32-8b9b-a845de268dd0',
+--   'bac3a82a-3df9-488c-9639-cb0413a368eb','12b276b1-d6a7-40d4-bef1-6f3f70e0236b',                                        -- (d) M820-20
+--   '7dd7230f-d66b-4f67-9c14-b43b32f8901f','2967be91-9481-4c9c-b4a5-37e5d66451a6','747b798c-b4c9-4ac5-a081-c77782bc23c8',
+--   'd450614a-4ab5-431f-b6e2-31a79b3c0b67','fae05a28-4685-4d5e-be88-e2a28ba3085f','d3caa4c7-6136-4e5a-9853-bea3ab623fee',
+--   'be24cc63-6656-4ecd-900d-34b5636294fe','cdfa8727-6352-4673-b5d9-9acf646815f1','b541bbff-467d-44aa-b0b5-8bfa7c058b2d',
+--   'f190d687-2521-4dcb-bace-09bc21cfed14','c1f44e61-8177-40c0-89b7-86a2d1805dea')                                        -- (e)
+--   and is_required=true;
+-- Rollback: update public.fields set is_required=true where id in (<same list>);
+-- NOT proposed (source says "muss"/"ist zu"): Bedarfsplanung flags (§4.1 p.16 "muss … aufgestellt werden"), aufgabenbeschreibung
+-- (§8.2 p.32 "hat … zu erstellen"), Projektleiter/Entscheidungswege (§4.5 p.21 "muss"), Bewertungskommission (§8.4 p.32 "muss …
+-- einsetzen"), §123-GWB check, Deckungssummen (E.1.4.2 p.62 "muss"), Vertragsentwurf (§8.10.3.5 p.41 "muss"), §134-GWB letters
+-- (§8.10.3.6 p.42 "hat … zu informieren"), Vergabevermerk (§8.3 p.32 "ist … anzufertigen" for VgV-F).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gate over-enforcement: VgV/GWB duties fire on EVERY procedure, but the source scopes them to the oberschwellig
+-- VgV-F-Verfahren. Evidence: "In § 106 GWB ist festgelegt, dass das GWB und in Folge die VgV nur gelten, soweit der geschätzte
+-- Auftragswert die EU-Schwellenwerte erreicht oder überschreitet." (B.2.3 p.49); "Bei einem Suchverfahren ist der Auftraggeber …
+-- an keine weiteren vergaberechtlichen Regeln gebunden." (§8.9 p.37); "Er kann sich dafür an den Regelungen des GWB und der VgV-F
+-- orientieren, muss es aber nicht." (§8.9 p.37); "Bei einer Direktvergabe oder einem Suchverfahren ist der Auftraggeber zwar nicht
+-- dazu verpflichtet [Vergabevermerk], sollte es aber" (§8.3 p.32). REQ-09 and REQ-18 already carry the correct
+-- "IF procurement_procedure == 'vgv_f'" guard — the six below do not.
+-- ☐ RATIFIED → prefix the condition with the VgV-F guard (spec; materialise via the compliance_requirements migration pattern):
+-- update public.compliance_requirements set condition='IF procurement_procedure == ''vgv_f'' THEN (' || condition || ')'
+--  where code in ('REQ-10',   -- §123 GWB check: "Grundsätzlich nicht geeignet … ist in einem VgV-F Verfahren" (§8.7 p.35)
+--                 'REQ-16',   -- Doppelbewertungsverbot §58 Abs. 2 VgV (§8.10.2.4 p.39, a VgV-F clause)
+--                 'REQ-20',   -- negotiation_rounds >= 1: "§ 17 Abs. 14 VgV" (§8.10.3.1 p.39) — Suchverfahren "kann" (§8.9 p.37)
+--                 'REQ-21',   -- Vertragsentwurf in Vergabeunterlagen (§8.10.3.5 p.41, VgV-F section)
+--                 'REQ-22',   -- §134 GWB standstill (GWB oberschwellig only, §106 GWB p.49)
+--                 'REQ-26')   -- §135 GWB invalidity (same)
+--    and standard_code='DWA-M-820-1';
+-- REQ-23 (Vergabevermerk): keep block for vgv_f, add a warn twin for the other procedures ("sollte es aber", §8.3 p.32):
+-- update public.compliance_requirements set condition='IF procurement_procedure == ''vgv_f'' THEN vergabevermerk_complete == true' where code='REQ-23';
+-- insert … code='REQ-23W', severity='warn', condition='IF procurement_procedure != ''vgv_f'' THEN vergabevermerk_complete == true', clause_reference='§8.3', source_quote='Bei einer Direktvergabe oder einem Suchverfahren ist der Auftraggeber zwar nicht dazu verpflichtet, sollte es aber bereits aus haushaltsrechtlichen Gründen oder bei dem Erhalt von Fördermitteln zwecks Dokumentation tun.';
+-- Rollback: restore the six original condition strings (captured in fields-DWA-M-820-1.json) and delete REQ-23W.
+-- S-5b · REQ-08 re-home: condition reads oberschwellig_check (boolean duplicate); rewrite to the enum the source defines
+-- (threshold_status) so oberschwellig_check can be retired (S-2):
+-- update public.compliance_requirements set condition='IF threshold_status == ''oberschwellig'' THEN procurement_procedure == ''vgv_f''' where code='REQ-08' and standard_code='DWA-M-820-1';
+-- Rollback: condition='IF oberschwellig_check == true THEN procurement_procedure == ''vgv_f'''.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Severity: block gate anchored on advisory text (the M-820-3 "kann/bewährt" class).
+-- REQ-15 (block): condition "price_weight_percent <= 20 OR festpreis_used=true"; source_quote "Bewährt hat sich ein
+-- Bewertungsgewicht für den Preis in Höhe von max. 20 %." (Hinweis, E.2.8 p.64). "Bewährt hat sich" is experience, not an
+-- obligation; the binding sentence is only "sollte seine Wertung aber nicht ein so hohes Gewicht erlangen, dass der Preis allein
+-- ausschlaggebend … wird" (E.2.8 p.64) — also "sollte". The 2026-06-23 audit already flagged the severity class.
+-- ☐ RATIFIED → block→warn.
+-- update public.compliance_requirements set severity='warn' where code='REQ-15' and standard_code='DWA-M-820-1' and severity='block';
+-- Rollback: set severity='block' on the same row.
+-- Checked and NOT proposed (block text is "muss"/"hat … zu"/"zwingend"): REQ-02 (§6.2 "ist … zu erarbeiten"), REQ-03 (§6.4
+-- "muss … vorliegen"), REQ-06 (§8.5 "hat … durchzuführen"), REQ-07/REQ-08 (§8.6 "ist … durchzuführen"), REQ-09 (§8.4 "hat …
+-- mindestens zwei Personen … einzusetzen"), REQ-10 (E.1.1 "führt zum Ausschluss"), REQ-12 (E.1.4.1 "darf … nicht mehr als das
+-- Zweifache"), REQ-16 (§8.10.2.4 "dürfen nicht"), REQ-17 (§8.7 "zwingend vorgeschrieben"), REQ-18 (§8.10.2.3 "muss"), REQ-19 (§8.10.2.4
+-- "darf … nur"), REQ-20 (§8.10.3.1 "zwingend"), REQ-21 (§8.10.3.5 "muss"), REQ-22 (§8.10.3.6 "darf … frühestens"), REQ-23 (§8 VgV
+-- "ist … anzufertigen" — VgV-F only, see S-5), REQ-25 (§4.1 "Voraussetzung"), REQ-26 (B.2.3 "von Anfang an unwirksam"),
+-- REQ-01 (enum membership, §1 scope). The 6 warn gates (REQ-04/05/11/13/14/24) are all "empfohlen/sollte/Beispiel" text — correct.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Gate source_quote NULL (SR-1: a gate without a printed sentence is not sourced). Backfill from the md:
+-- ☐ RATIFIED
+-- update public.compliance_requirements set source_quote='Risiken sollten im Rahmen der Planung systematisch erfasst werden und sind hinsichtlich ihrer Auswirkungen auf das Konzept oder die Projekte zu bewerten. Die Ergebnisse der Risikobewertung und der daraus resultierenden Maßnahmen sind in die Planungen einzubeziehen.' where code='REQ-05' and standard_code='DWA-M-820-1' and source_quote is null; -- §4.7 p.22
+-- update public.compliance_requirements set source_quote='Anhaltspunkt für die Höhe der geforderten Versicherungssumme kann Tabelle D. 1 in Anhang D geben. | Tabelle D.1: Deckungssummen für eine Haftpflichtversicherung in Abhängigkeit zu den Herstellungskosten' where code='REQ-13' and standard_code='DWA-M-820-1' and source_quote is null; -- E.1.4.2 p.62, Tab. D.1 p.56
+-- Also REQ-13 has an EMPTY condition (warn, "Tabelle D.1") — it never evaluates. A real check would be
+-- "liability_insurance_personenschaden >= <Tab. D.1 row for estimated_construction_cost>" (lookup; SR-2 table is guidance "kann").
+-- Rollback: set source_quote=null on the two rows.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Missing gates for printed recommendations (warn class, no block):
+--  • reference_period_years >= 5 — "sollte er einen Referenzzeitraum projektspezifisch von mindestens 5 Jahren, besser 10 Jahren,
+--    zulassen. Dies ist in der Vergabeakte zu begründen" (E.1.3.6 p.60). Currently no gate.
+--  • bewertungskommission_size odd — "sollte überwiegend fachkundig mit einer ungeraden Mitgliederzahl besetzt sein" (§8.4 p.33).
+--  • cost_estimate_near_threshold == true → warn — "±25 % … Dies ist bei Entscheidungen zu berücksichtigen." (§4.2 p.19); the
+--    field description promises a WARN that no compliance_requirements row implements.
+-- ☐ RATIFIED → insert three warn gates (specs):
+-- insert … code='REQ-27', severity='warn', condition='reference_period_years >= 5', clause_reference='Anh. E.1.3.6', source_quote='<E.1.3.6 sentence above>';
+-- insert … code='REQ-28', severity='warn', condition='bewertungskommission_size % 2 == 1', clause_reference='§8.4', source_quote='Die Bewertungskommission sollte überwiegend fachkundig mit einer ungeraden Mitgliederzahl besetzt sein.';
+-- insert … code='REQ-29', severity='warn', condition='cost_estimate_near_threshold == false', clause_reference='§4.2, §8.5', source_quote='<§4.2 sentence above>';
+-- (evaluate.ts grammar has no modulo today — REQ-28 needs an engine extension or a derived boolean; flagged, not silently dropped.)
+-- Rollback: delete the three rows.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · standard_fixed constants that are UI-editable (doctrine validator: "standard_fixed that is UI-editable = finding").
+-- M820-09.lot_value_threshold_services (80 000 €), lot_value_threshold_construction (1 Mio. €), lot_share_threshold_pct (20 %),
+-- eu_threshold_review_interval_years (2), M820-22.gewaehrleistungszeit_jahre (5 a, §634a BGB), M820-23.required_standstill_days (15/10)
+-- are printed constants entered by hand. eu_threshold_value (139.000 / 214.000 €) is printed for the März-2020 edition but revised
+-- biennially (B.1.1 p.47) — editable by design; the others have no such reason.
+-- ☐ RATIFIED → either lock them as read-only defaults (default_value + editable=false, if the schema carries it) or leave as
+-- engineer_input with the pack note. No SQL proposed until the owner picks the mechanism.
