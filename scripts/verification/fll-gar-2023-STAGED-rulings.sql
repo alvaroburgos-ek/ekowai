@@ -1,0 +1,183 @@
+-- ============================================================================
+-- FLL-GAR-2023 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement
+-- or required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (printed page numbers as in the pack).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields on FLL-GAR-10 (9 fields). The 12 abdichtungs_art enum tokens were
+-- materialised as standalone NUMBER fields on GAR-10 (9 of the 12; fluessigkunststoff/stahl/gup were not).
+-- They carry auto-generated labels ("Bahn Pe"), no clause, no description, no unit, and no equation reads
+-- them. Gate conditions compare abdichtungs_art == <token> as a VALUE, not as a field reference.
+-- RISK: if evaluate.ts resolves bare identifiers as field symbols, these null numeric fields shadow the
+-- enum tokens and every "abdichtungs_art == <token>" comparison silently evaluates false (REQ-12..22).
+-- ☐ RATIFIED  → soft-delete (active=false); rollback = set active=true on the same ids.
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: phantom enum-value token (md pass)'
+--  where id in ('b9bfe986-7824-4b1a-aac4-df6b60be3b32',  -- alkalisilikat
+--               '30fa7fac-6c13-407c-98ec-ab72c07e6c21',  -- mineralisch_bitumen
+--               'c0577c94-c340-45f5-917c-e4ba0b7ae06a',  -- verbundwerkstoff_gtd
+--               '890d53a4-2b58-4618-953d-480413dba1f8',  -- bahn_bitumen
+--               '68cda828-cf64-4576-a0c0-6206b5be24c0',  -- bahn_kunststoff_elastomer
+--               '0626fa4c-ea2f-4a67-a14a-c3eb28673cc7',  -- bahn_pe
+--               '729a7997-7981-4c33-ad77-c8aea316227b',  -- mineralisch_ohne_zusatzstoffe
+--               '1804755b-14dd-4646-a4f2-874750809100',  -- mineralisch_mit_zusatzstoffen
+--               '3398cd11-2cd5-4201-8608-21ca69861a76'); -- mineralisch_hydraulisch
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate fields (same concept encoded twice; the later copies have no description and are read by
+-- no equation/gate). Proposal: deactivate the orphan copy, keep the one referenced by gates/equations.
+-- ☐ RATIFIED  → rollback = set active=true on the same ids.
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: duplicate (md pass)'
+--  where id in ('bd84d4da-de50-4d60-ad5d-eb75575a0cab',  -- GAR-27 A_einzugsflaeche      = A (EQ-1 input)
+--               '1c4e3fa2-7dba-433e-985a-2f9aff9035f5',  -- GAR-28 inst_inspektionsintervall (text) = inspektion_intervall_jahr (REQ-29)
+--               '05758858-faec-4e8b-a810-01e8bc9a3e7d',  -- GAR-08 wassertiefe_max       = GAR-04 gewaesser_tiefe_m (REQ-04)
+--               '20571f6e-da0f-4b16-b8b5-b19893a0f775',  -- GAR-08 beckenvolumen         = GAR-04 gewaesser_volumen_m3 (REQ-04)
+--               'b2b6dda7-d05a-49d9-b2ba-a816b152689f',  -- GAR-15 bb_lagen_anzahl       = GAR-09 anzahl_lagen (REQ-17)
+--               'f38a7cdb-3bfb-4b00-a1ad-0790f2fdbb22'); -- GAR-24 bep_rhizomfestigkeit_erforderlich = GAR-09 wurzel_rhizomfestigkeit_required
+-- Note: the prior finding "C vs C_abflusswert" is REFUTED by this export — only C exists (active) on GAR-27.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference retags (zero-risk class). Evidence: pack notes; every "§9.x/§12/§15/§16" below names a
+-- section that does not exist in the 2023 edition (the guideline ends at §13 + Anhang) or the wrong topic.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='Sec.4.7'            where id='d63f352d-7464-4e67-8d19-5d25a08777dc' and clause_reference='§6';   -- GAR-08 beckenform
+-- update public.fields set clause_reference='Sec.4.1'            where id='05758858-faec-4e8b-a810-01e8bc9a3e7d' and clause_reference='§6';   -- GAR-08 wassertiefe_max
+-- update public.fields set clause_reference='Sec.4.10'           where id='a19844fa-bbf8-4cb0-a6c2-7bd550263b1a' and clause_reference='§6';   -- GAR-08 wasserspiegelflaeche
+-- update public.fields set clause_reference='Sec.4.1'            where id='20571f6e-da0f-4b16-b8b5-b19893a0f775' and clause_reference='§6';   -- GAR-08 beckenvolumen
+-- update public.fields set clause_reference='Sec.4.10'           where id='079fed2d-0004-46ba-9e95-8c97c8e5d4a3' and clause_reference='§6';   -- GAR-08 ueberlauf_position
+-- update public.fields set clause_reference='Sec.4.8; Sec.9.1'   where id='4d1effa1-6625-4520-bc46-f233407acacc' and clause_reference='§6';   -- GAR-08 zugang_wartung
+-- update public.fields set clause_reference='Sec.4.8; Sec.9.1'   where id='7a5cd0d0-9712-4045-9969-4d41f1e0ba25' and clause_reference='§6';   -- GAR-08 umfang_oberkante (residue; nearest topic)
+-- update public.fields set clause_reference='Sec.5.2'            where id='29e3c4d7-4a09-4339-93af-f24dba5bce62' and clause_reference='§9.3'; -- GAR-11 mz_zusatzstofftyp
+-- update public.fields set clause_reference='Sec.5.2.1.1'        where id='3c7cceb4-c186-4571-826c-13f7a740e2b8' and clause_reference='§9.3'; -- GAR-11 mz_zusatzstoff_anteil
+-- update public.fields set clause_reference='Sec.5.2.1.2; Tab.5' where id='e3f13923-3a00-4010-9360-0810aa4539d6' and clause_reference='§9.3'; -- GAR-11 mz_dicke
+-- update public.fields set clause_reference='Sec.5.2.1.1; Tab.3' where id='0098c4f9-76b6-47c1-9614-62d794eea2ed' and clause_reference='§9.3'; -- GAR-11 mz_durchlaessigkeit_kf
+-- update public.fields set clause_reference='Sec.5.2.2'          where id='3aac621c-74b7-4562-adb8-3b3a1f960316' and clause_reference='§9.3'; -- GAR-11 mz_einbau_verdichtung
+-- update public.fields set clause_reference='Sec.5.2.3.1'        where id='75110470-4523-4194-af14-ab9c1240b962' and clause_reference='§9.3'; -- GAR-11 mz_dichtungswirkung_nachgewiesen
+-- update public.fields set clause_reference='Sec.5.4.1.2; Tab.12' where id='7e9de606-dc00-4d02-83b4-0c820928ae88' and clause_reference='§9.5'; -- GAR-13 asph_dicke
+-- update public.fields set clause_reference='Sec.5.4'            where id='a82af633-211f-41d7-9fba-b2926d8cff99' and clause_reference='§9.5'; -- GAR-13 asph_bindemittel
+-- update public.fields set clause_reference='Sec.5.4.1'          where id='3bd2b9c0-4bcb-40d8-9d36-6dc449d661e1' and clause_reference='§9.5'; -- GAR-13 asph_kornverteilung
+-- update public.fields set clause_reference='Sec.5.4.2.1'        where id='be758abf-4186-4eb7-a185-bfd2905520de' and clause_reference='§9.5'; -- GAR-13 asph_verdichtungsgrad
+-- update public.fields set clause_reference='Sec.5.4.2.1'        where id='85371482-3f13-4957-b73a-40670f6938b5' and clause_reference='§9.5'; -- GAR-13 asph_nahttechnik
+-- update public.fields set clause_reference='Sec.6.1.1.1; Tab.19' where id='f3dbcaa2-3181-485c-9331-2315fea86b64' and clause_reference='§9.7'; -- GAR-15 bb_bahnentyp
+-- update public.fields set clause_reference='Sec.6.1.1.2'        where id='1b0f5c7a-8ba2-48f6-92cd-c64d9b0db498' and clause_reference='§9.7'; -- GAR-15 bb_dicke
+-- update public.fields set clause_reference='Sec.6.1.1.2'        where id='b2b6dda7-d05a-49d9-b2ba-a816b152689f' and clause_reference='§9.7'; -- GAR-15 bb_lagen_anzahl
+-- update public.fields set clause_reference='Sec.6.1.2'          where id='4364f769-a574-47f5-bd97-51339ef19b27' and clause_reference='§9.7'; -- GAR-15 bb_verlegeart
+-- update public.fields set clause_reference='Sec.6.1.2.1'        where id='dc7525ff-1374-4ceb-b495-de3428fcfb91' and clause_reference='§9.7'; -- GAR-15 bb_nahtverbindung
+-- update public.fields set clause_reference='Sec.6.1.3.2'        where id='22185728-36d3-48db-b2e9-a41a5b1b946f' and clause_reference='§9.7'; -- GAR-15 bb_zugfestigkeit (residue; nearest topic)
+-- update public.fields set clause_reference='Sec.6.3.1.1; Tab.23' where id='34d59006-73ef-421a-aab4-9e25f7b1d447' and clause_reference='§9.9'; -- GAR-17 fk_systemtyp
+-- update public.fields set clause_reference='Sec.6.3.1.2'        where id='251e7f4c-8c34-466c-8202-f0a9803b5011' and clause_reference='§9.9'; -- GAR-17 fk_trockenschichtdicke
+-- update public.fields set clause_reference='Sec.6.3.2'          where id='8c7fa93e-885b-4ca9-ad20-f09c6fd20466' and clause_reference='§9.9'; -- GAR-17 fk_armierung
+-- update public.fields set clause_reference='Sec.6.3.2'          where id='5dde1e35-6ab5-41c1-8408-20144a566245' and clause_reference='§9.9'; -- GAR-17 fk_auftragsverfahren
+-- update public.fields set clause_reference='Sec.6.3.2'          where id='8da120af-8701-4608-be64-735136a7bd73' and clause_reference='§9.9'; -- GAR-17 fk_haftung_untergrund
+-- update public.fields set clause_reference='Sec.6.3; Sec.4.11'  where id='392ab9ed-cfa2-4077-b7de-ed074a8230c5' and clause_reference='§9.9'; -- GAR-17 fk_uv_bestaendigkeit
+-- update public.fields set clause_reference='Sec.7.3.1.1'        where id='5c79fdf1-4032-4a6f-80d8-d42669f46271' and clause_reference='§9.13'; -- GAR-21 gup_harztyp
+-- update public.fields set clause_reference='Sec.7.3.1.1'        where id='575799f4-4543-47e5-8563-23d05eaedad7' and clause_reference='§9.13'; -- GAR-21 gup_glasfaser_anteil
+-- update public.fields set clause_reference='Sec.7.3.1.2'        where id='a937bf22-f1fb-4a99-8787-5ab43be82e82' and clause_reference='§9.13'; -- GAR-21 gup_laminatdicke
+-- update public.fields set clause_reference='Sec.7.3.1.1'        where id='ecbe919b-bfb1-4151-9feb-1a950657da49' and clause_reference='§9.13'; -- GAR-21 gup_biegefestigkeit (residue; nearest topic)
+-- update public.fields set clause_reference='Sec.7.3.2'          where id='263220d1-4fb6-4780-80b5-004a4b15a898' and clause_reference='§9.13'; -- GAR-21 gup_verarbeitung
+-- update public.fields set clause_reference='Sec.7.3.2.2'        where id='06a1e5b4-bc87-4155-8adb-d2880e29c4d8' and clause_reference='§9.13'; -- GAR-21 gup_topcoat
+-- update public.fields set clause_reference='Sec.8.2; Sec.8.3.2' where id='050ef5d1-f104-49e1-85c9-83c87b6eabc0' and clause_reference='§10'; -- GAR-22 sl_schutzlage_oben_typ
+-- update public.fields set clause_reference='Sec.8.3.2; Tab.27'  where id='7d15b97c-8294-470e-a251-839d7489b649' and clause_reference='§10'; -- GAR-22 sl_schutzlage_oben_flaechengewicht
+-- update public.fields set clause_reference='Sec.8.3.1; Tab.26'  where id='bd135929-088a-465b-a0d2-b0f746234f4d' and clause_reference='§10'; -- GAR-22 sl_schutzlage_unten_typ
+-- update public.fields set clause_reference='Sec.8.3.1; Tab.26'  where id='7ff77216-8a90-47fe-a5dc-b5d27e230919' and clause_reference='§10'; -- GAR-22 sl_schutzlage_unten_flaechengewicht
+-- update public.fields set clause_reference='Sec.8.3; Sec.4.6'   where id='9ee6bad7-a69a-4e59-8daa-0deefd0fede5' and clause_reference='§10'; -- GAR-22 sl_drainage_erforderlich
+-- update public.fields set clause_reference='Sec.8.2; Sec.10.1'  where id='b0201b99-0deb-455a-a478-d53803428088' and clause_reference='§10'; -- GAR-22 sl_substratschicht_dicke
+-- update public.fields set clause_reference='Anhang 2'           where id in ('36374878-400f-43c6-93e9-15229305164b','167eafad-a48f-4170-944e-b6f5c978d9d5') and clause_reference='§Gl.2a';
+-- update public.fields set clause_reference='Anhang 2'           where id in ('1f5573d8-e599-43d8-873f-5e7a1b1f65e2','07fdae04-951b-44ad-80bf-218c3c776c33','e1e56614-0197-486a-b2d5-43da73d555c0','652113c1-81a0-482d-923a-17a33cfc2f1e','f5f61a43-7d95-4922-8f89-1d3236727e16','68974fef-ab20-40c9-8f51-c395197346b5') and clause_reference='§Gl.2b';
+-- update public.fields set clause_reference='Anhang 2'           where id in ('3176a825-f138-486c-aa8d-463c9430a994','6cafd7a4-7c8a-48b8-89e1-96c44240cafc','7f89767c-853d-4920-97cd-c8439c22181e') and clause_reference='§Gl.2c';
+-- update public.fields set clause_reference='Sec.10.3; Tab.29'   where id='bd1614e0-6da3-4263-99f8-f6bdf3bd52f1' and clause_reference='§12'; -- GAR-24 bep_pflanzenarten
+-- update public.fields set clause_reference='Sec.10.3; Sec.10.4' where id='f38a7cdb-3bfb-4b00-a1ad-0790f2fdbb22' and clause_reference='§12'; -- GAR-24 bep_rhizomfestigkeit_erforderlich
+-- update public.fields set clause_reference='Sec.10.5'           where id='d2373428-0b78-48a1-85ab-b08ce8d67827' and clause_reference='§12'; -- GAR-24 bep_einbauten_typen
+-- update public.fields set clause_reference='Sec.4.12'           where id='123a5b5b-d85f-4321-9cba-affae16ceb44' and clause_reference='§12'; -- GAR-24 bep_durchdringungen_anzahl
+-- update public.fields set clause_reference='Sec.12'             where id in ('edb7cfd2-f5b9-4add-ae19-445f5c8c89f6','3d4e01f7-e73e-4022-873f-952a1416d5ca','59b3b2f3-13fa-4f1b-b29c-6a3c9e9cceff') and clause_reference='§15'; -- GAR-27 ibn_datum, ibn_befuellung_methode, ibn_befuellung_dauer
+-- update public.fields set clause_reference='Sec.11.1; Sec.13.3' where id='e8c1c0ce-5db1-430a-8175-8078f76854d8' and clause_reference='§15'; -- GAR-27 ibn_dichtheitspruefung_methode
+-- update public.fields set clause_reference='Sec.11.1; Sec.12'   where id='6b44a966-e05c-4507-957f-07efff986e81' and clause_reference='§15'; -- GAR-27 ibn_dichtheit_bestanden
+-- update public.fields set clause_reference='Anhang 1'           where id in ('bd84d4da-de50-4d60-ad5d-eb75575a0cab','82d666f2-a3a4-4744-9cd2-7963b9a7aecd','cc69d5e5-86d5-41c9-aa07-d0aa2547eaba','a16564d1-60d8-4bc4-bb5b-aab4041baa79') and clause_reference='§Gl.1';
+-- update public.fields set clause_reference='Sec.13.1'           where id in ('1c4e3fa2-7dba-433e-985a-2f9aff9035f5','4c8c841f-4b3f-49d8-b6e5-d06a4b48661c') and clause_reference='§16'; -- GAR-28 inst_inspektionsintervall, inst_protokollierung
+-- update public.fields set clause_reference='Sec.13.2'           where id='645ef5e8-3669-4bfb-8e14-8237a83fa625' and clause_reference='§16'; -- GAR-28 inst_wartungsintervall
+-- update public.fields set clause_reference='Sec.13.1'           where id='9743dcd8-aad0-4912-89b9-866731729e02' and clause_reference='§16'; -- GAR-28 inst_qualifikation_pruefer (residue; nearest topic)
+-- update public.fields set clause_reference='Sec.9.2'            where id='268a1a68-fa1d-45f6-a0f8-a53a4785e588' and clause_reference='Sec.9.1'; -- GAR-06 setzungen_zu_erwarten
+-- update public.fields set clause_reference='Sec.4.1; Sec.4.7'   where id='f1da3cc7-cc40-4c8c-bd21-69bc39b5a75d' and clause_reference='Sec.4.1; Sec.4.3'; -- GAR-05 frosteinwirkung (§4.3 has no frost text)
+-- update public.fields set clause_reference='Sec.5.3.3; Tab.6'   where id='8ff809d3-02d7-42f7-b309-ba3a58b27ba5' and clause_reference='Sec.5.3.1; Tab.6'; -- GAR-12 wassereindringtiefe_geprueft
+-- rollback: restore the previous clause_reference literal shown in each guard.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Anhang 2 label corrections (the encoder swapped Auflast ↔ Dichtung ↔ Drainschicht). Evidence, printed p.133:
+--   "dD Dicke der Auflast [m]" · "dDi Dicke der Dichtungsschicht [m]" · "g' Flächengewicht der Auflast [kN/m2]" ·
+--   "ɣ 'D Wichte der Auflast unter Auftrieb [kN/m3]" · "ɣ 'Di Wichte des Dichtungsmaterials unter Auftrieb [kN/m3]" ·
+--   "ɣ A Sicherheit gegen Auftrieb [-], ɣ A = 1,00"
+-- ☐ RATIFIED
+-- update public.fields set label_de='Flächengewicht der Auflast g''' where id='90f9b910-5c61-4df1-98b0-2868549a6434'; -- was "Effektives Eigengewicht Dichtungsschicht"
+-- update public.fields set label_de='Dicke der Auflast d_D'          where id='36374878-400f-43c6-93e9-15229305164b'; -- was "Dichtungsdicke d_D"
+-- update public.fields set label_de='Wichte der Auflast unter Auftrieb γ_D''' where id='167eafad-a48f-4170-944e-b6f5c978d9d5'; -- was "Auftrieb-Wichte Dichtung γ_D'"
+-- update public.fields set label_de='Dicke der Dichtungsschicht d_Di' where id='1f5573d8-e599-43d8-873f-5e7a1b1f65e2'; -- was "Drainschicht-Dicke d_Di"
+-- update public.fields set label_de='Wichte des Dichtungsmaterials unter Auftrieb γ_Di''' where id='652113c1-81a0-482d-923a-17a33cfc2f1e'; -- was "Drainschicht-Wichte γ_Di'"
+-- update public.fields set label_de='Sicherheit gegen Auftrieb γ_A (= 1,00)', unit='-' where id='68974fef-ab20-40c9-8f51-c395197346b5' and unit='kN/m³'; -- was "Auftriebswichte γ_A", kN/m³
+-- rollback: restore the "was" labels/unit quoted in the trailing comments.
+-- NOTE (SR-2/data_class): γ_A is printed as a FIXED value 1,00 — it should be standard_fixed/read-only, not an engineer input.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Unit corrections
+-- ☐ RATIFIED
+-- update public.fields set unit=''   where id='b2b6dda7-d05a-49d9-b2ba-a816b152689f' and unit='1';  -- GAR-15 bb_lagen_anzahl (count, unit "1")
+-- update public.fields set unit=''   where id='123a5b5b-d85f-4321-9cba-affae16ceb44' and unit='1';  -- GAR-24 bep_durchdringungen_anzahl (count, unit "1")
+-- update public.fields set unit='mm' where id='7e9de606-dc00-4d02-83b4-0c820928ae88' and unit='cm'; -- GAR-13 asph_dicke (Tab.12 prints 7–40 mm; a cm field would hold 0,7–4,0)
+-- rollback: restore the unit literal in each guard.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Required-flag review (source modal is conditional / "soll" / contract-dependent, or app-only) — enforcement change.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in (
+--   '281f5696-4b02-4793-8245-29c0c30008e3',  -- GAR-25 kontrollpruefung_dokumentiert — §5.3.3.3 "Kontrollprüfungen sind für Abdichtungen nicht erforderlich." (p.57); §5.5.3.3, §6.1.3.3, §6.2.3.3, §6.3.3.3, §6.4.3.3, §7.1.3.3, §7.3.3.3 likewise "nicht erforderlich/nicht durchführbar"
+--   '7dca4473-4115-4f4a-b581-3255435dba1b',  -- GAR-09 dichtigkeitsnachweis_required — §4.1 "Fordert der Auftraggeber einen Dichtigkeitsnachweis ..." (conditional, p.26)
+--   '4134953b-3f37-4f0e-95c9-326904bf1e73',  -- GAR-26 maengelfrist_5_jahre — §11.2 "fünf Jahre (vier Jahre bei VOB-Verträgen)" (p.128): contract-dependent
+--   '456d0d1e-aab0-4cc6-8155-426927a02c1b',  -- GAR-01 project_code (app)
+--   '327e221a-6a03-4b51-829e-aa81f19bc5bb'); -- GAR-01 project_date (app)
+-- rollback: set is_required=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Gate re-homes (gate hosted on worksheet A while its subject/fields live on worksheet B).
+-- Confirmed from the export: 8 of the 10 GAR-10 gates guard on abdichtungs_art (a GAR-09 field): REQ-12, 13, 14, 15, 16, 18, 20, 22;
+-- REQ-19/REQ-21 are attestation-only. REQ-13..22 read fields of GAR-11..GAR-20 exclusively (REQ-22 mixes GAR-20 + GAR-10).
+-- REFUTED prior findings: REQ-02/REQ-03 read lbo_genehmigung_erforderlich / whg_einleitung_genehmigung, which ARE GAR-03 fields;
+-- REQ-23 reads freibord_zu_gelaende_cm / freibord_zu_bauwerk_cm, which ARE GAR-23 fields. No re-home needed for those.
+-- ☐ RATIFIED  (worksheet_template_id targets from the export; rollback = set back to '6d4bcfd9-a78d-45d6-9442-9cae7080e252' (GAR-10) / the id noted)
+-- update public.compliance_requirements set worksheet_template_id='1ae09ca3-98f2-47e1-98fe-d7b1ef8b4412' where id='696ed9b0-d84b-413f-9937-2b348f440866'; -- REQ-13 → GAR-11 (mz_*)
+-- update public.compliance_requirements set worksheet_template_id='225d4b67-be67-4741-b906-c76faa6fdbd7' where id='1918d21c-f84e-462e-be7f-dc1c718a7b04'; -- REQ-14 → GAR-12 (Beton)
+-- update public.compliance_requirements set worksheet_template_id='621ba06b-152e-4256-a5fe-7c3bbc0b5da2' where id='8a503cd4-178d-4494-b00b-a0f07e1f7ca2'; -- REQ-15 → GAR-13 (Asphalt)
+-- update public.compliance_requirements set worksheet_template_id='ea4457a8-c88d-4f37-9072-effa0feb77a9' where id='5e2a7232-a69b-437d-b42d-a392ce525c65'; -- REQ-16 → GAR-14 (GTD)
+-- update public.compliance_requirements set worksheet_template_id='ee84b740-1a61-4554-8660-07e92cfdabc9' where id='a008b8e3-ca77-44e7-b8a9-7e6be12485a2'; -- REQ-18 → GAR-16 (Kunststoffbahnen)
+-- update public.compliance_requirements set worksheet_template_id='564c7e4f-02d7-4742-90c8-60b11096bcc7' where id='6dcd17ac-be84-4cca-bf15-bfd536d8d659'; -- REQ-19 → GAR-17 (Flüssigkunststoff) + move field 74f8a4ed-4aac-4d18-9761-9d55f31dd819
+-- update public.compliance_requirements set worksheet_template_id='67de72ff-6fec-427a-acdc-9cdd58cc8f4a' where id='ffb62b93-b294-4bd6-b700-e5887d0662c9'; -- REQ-20 → GAR-18 (PE)
+-- update public.compliance_requirements set worksheet_template_id='8de8df5b-69e5-43c7-bfc5-728b5306a583' where id='89d6a621-208b-4fbe-8650-5d1ad135ed6c'; -- REQ-21 → GAR-19 (Stahl) + move field 7c4a6b9d-b8d8-4010-8b00-3a3240667428
+-- update public.compliance_requirements set worksheet_template_id='c803c953-bd0d-4aec-9a0c-7675b2840db5' where id='3e442a48-91d4-403a-9dd2-e44c75eeb78d'; -- REQ-22 → GAR-20 (Alkalisilikate)
+-- update public.compliance_requirements set worksheet_template_id='af279097-5346-486a-a6aa-66fe7bcd5c90' where id='3744d416-399b-4053-a940-73520c5d4e83'; -- REQ-05 → GAR-05 (reads wassereinwirkungsklasse/rissklasse/standortklasse; currently on GAR-04 '0cb31398-bc37-49ef-bc59-8bbc85c6e07a')
+-- update public.compliance_requirements set worksheet_template_id='299c26b9-cce9-449d-9913-78dfc1768e68' where id='a2bc041d-85f1-4646-8b39-6541e5f80cc0'; -- REQ-25 (§10.4 Bepflanzung) → GAR-24 (currently GAR-22 '969d527d-be79-4f80-9c19-d45a5cdf5e53') + move field 8b9f4833-7596-4083-96c3-55feac548b15
+-- update public.fields set worksheet_template_id='564c7e4f-02d7-4742-90c8-60b11096bcc7' where id='74f8a4ed-4aac-4d18-9761-9d55f31dd819'; -- attest_fll_gar_10_req_19 → GAR-17
+-- update public.fields set worksheet_template_id='8de8df5b-69e5-43c7-bfc5-728b5306a583' where id='7c4a6b9d-b8d8-4010-8b00-3a3240667428'; -- attest_fll_gar_10_req_21 → GAR-19
+-- update public.fields set worksheet_template_id='299c26b9-cce9-449d-9913-78dfc1768e68' where id='8b9f4833-7596-4083-96c3-55feac548b15'; -- attest_fll_gar_22_req_25 → GAR-24
+-- Cross-sheet guard that remains after re-homing: every material gate still reads abdichtungs_art from GAR-09 (by design — the selector).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Severity / condition notes (block gates anchored on "i. d. R." / exception text, or under-enforcing gates)
+-- ☐ RATIFIED  REQ-16 (GTD): the overlap part is "i. d. R. 30 cm / 50 cm" (p.69) → split: Tab.13 material minima stay block, overlap ≥30/≥50 → warn.
+-- ☐ RATIFIED  REQ-18 (Kunststoffbahnen ≥ 1,2 mm): source allows "≥ 1,0 mm zulässig" for werkseitig vorkonfektionierte Bahnen / Gartenteiche (p.84) → condition needs the exception branch or block→warn.
+-- ☐ RATIFIED  REQ-23 (Freibord, warn): §9.1 "muss ... mind. 50 mm" (p.117) supports block for freibord_zu_gelaende_cm ≥ 5; the ≥ 30 cm Bauwerk part ignores the printed "≥ 15 cm nur mit geeigneter Randbefestigung" option → condition should read (≥30) OR (≥15 AND suitable Randbefestigung).
+-- ☐ RATIFIED  REQ-14 (Beton) under-enforces: Tab.6 also prints "fck ≥ C25/30" for d ≤ 40 cm (p.48) — not in the condition; druckfestigkeit_fck is a text field.
+-- ☐ RATIFIED  REQ-12 (mineral) under-enforces: Tab.4 "≥ 30 cm ... / ≥ 10 cm" and Auflast "≥ 30 cm / ≥ 20 cm" (p.38) are printed minima with no gate (schichtdicke_abdichtung_cm, schichtdicke_auflast_cm exist).
+-- ☐ RATIFIED  REQ-22 (Alkalisilikate, warn) is correctly "soll"-level; it reads schichtdicke_abdichtung_cm from GAR-10 — consider a GAR-20 thickness field.
+-- ☐ RATIFIED  REQ-08 (Tab.1 Böschungsneigung, warn) has an EMPTY condition and null source_quote → Tab.1 "Richtwerte" are not enforced at all; warn with a per-material lookup is the printed intent (p.29).
+-- ☐ RATIFIED  REQ-30 (compliance_verdict_final) is an app roll-up gate with null source_quote — no guideline anchor (exempt class).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Printed hard limits with NO gate (candidates for new compliance_requirements; listed, not authored)
+--   §4.6  Ev2 ≥ 45 MPa (Ev2/Ev1 ≤ 2,5); DPr ≥ 97 % (p.29-30) — no field.
+--   Tab.5 mz_dicke ≥ 30 cm (p.45); Tab.8 Beton Wände ≥ 240/240/200/240 mm, Bodenplatte ≥ 250/-/200/250 mm (p.50).
+--   §5.4.1.1 Asphaltbeton ≥ 40 mm + Hohlraumgehalt ≤ 3 Vol.-% (p.58) — only the Hohlraumgehalt half is gated (REQ-15); Tab.12 Asphaltmastix 7–15 mm, Gussasphalt 25–40 mm.
+--   §5.5.2.1 Größtkorn ≤ 16 mm / ≤ 32 mm bei U ≥ 5 (p.69); Tab.16 Auflast ≥ 0,30 / ≥ 0,60 m (p.66).
+--   §6.1.2 Bitumenbahn overlap ≥ 80 mm Nähte / ≥ 100 mm Stöße (p.79); §6.2.2.1 Kunststoffbahn overlap ≥ 40 mm / ≥ 60 mm PBS + Tab.22 Mindestfügebreiten (p.85).
+--   §6.3.1.2 Flüssigkunststoff ≥ 2,0 mm + Einlage ≥ 110 g/m2 (p.89). Tab.25 PE thickness by class (p.96, "Empfohlene" → warn).
+--   §7.1.1 verzinkung ≥ 100 μm ("soll"); §7.1.1.2 Stahl ≥ 1 mm / COR-TEN ≥ 5 mm / verzinkt ≥ 5 mm ("soll", p.102) — no thickness field on GAR-19.
+--   §7.3.1.2 GUP Laminat ≥ 4 mm ("soll", p.106). §8.2 Schutzlage ≥ 300 g/m2 GRK 5, Sand ≥ 50 mm (p.110); Tab.27 SWK 300/500/800 g (p.112).
+--   §9.1 Freibord Bauwerk 30 cm / 15 cm, Gelände 5 cm, Tab.28 (p.117-118) — partially in REQ-23 (warn).

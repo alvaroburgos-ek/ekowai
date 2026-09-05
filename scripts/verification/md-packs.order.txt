@@ -1,0 +1,4 @@
+# md-verification packs, applied in this order by apply-all-md-packs.mjs
+# <pack file>  <standard code for the form-guide regeneration>
+fll-naturteich-md-verification-pack.sql  FLL-Naturteich
+fll-gar-2023-md-verification-pack.sql  FLL-GAR-2023
