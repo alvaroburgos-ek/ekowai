@@ -1,0 +1,231 @@
+-- ============================================================================
+-- DWA-M-820-2 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (DWA-M_820-2.md); "printed p.N" = section start page per the Inhalt
+-- (the md has no page lines; offset PDF−2 confirmed via mathpix image indices, see pack header). Gate rows live in
+-- compliance_requirements (evaluate.ts grammar) — condition/severity edits below are written as specs.
+-- Field ids are the prod uuids from the 2026-09-05 export (fields-DWA-M-820-2.json).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-0 · Encoding-level observation (no SQL — owner policy question). The Merkblatt says of itself:
+-- "Deshalb wird in diesem Merkblatt darauf verzichtet, Checklisten in der Form vom Auftragnehmer abzuarbeitender Einzelpunkte
+-- bereitzustellen." (Vorwort p.3) and "Jeder Person steht die Anwendung des Merkblatts frei. Eine Pflicht zur Anwendung kann sich
+-- aber aus Rechts- oder Verwaltungsvorschriften, Vertrag oder sonstigem Rechtsgrund ergeben." (Hinweis für die Benutzung p.10).
+-- The encoding is 100 required fields + 43 block gates — i.e. exactly the per-point checklist the source declines to be. The
+-- Zielsetzung/Vorschläge paragraphs are written in the indicative ("wird … erstellt", "ist … geklärt"), not as "muss" rules;
+-- the genuine "muss/ist zu/darf nicht" sentences are the minority quoted in the pack. Same class as the M-820-3 downgrade:
+-- the owner may prefer a standard-wide block→warn policy for M-820-2 (with the handful of true "muss" gates kept at block).
+-- S-6 below lists the individual gates whose anchor is advisory or conditional; S-4 the fields the source makes optional.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE found on DWA-M-820-2. All 113 fields carry a label; no enum value of the 12 enum/json-enum
+-- fields (worksheet_status, client_type, primary_sector, project_category, project_size, complexity_level, contract_type,
+-- mgmt_cycle_frequency, status_report_frequency, discharge_permit_extension, leistungsbeschreibung_type,
+-- testbetrieb_vs_abnahme_choice, controlling_reports_frequency, gis_data_quality, lph_completed) is materialised as a field.
+-- No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate fields (same fact encoded twice). Note: the SOURCE duplicates deliberately — "Eventuell vorhandene Dopplungen sind
+-- gewollt und resultieren aus dem Ziel eine Art Nachschlagewerk bereitzustellen." (Einleitung p.11) — but a form asking the same
+-- yes/no twice is a usability cost, not a Nachschlagewerk. Observations, ☐ RATIFIED per pair:
+--  (a) 820-2-03.communication_concept (§5.3.5 p.42 "projektbezogenes Kommunikationskonzept … projektintern wie auch gegenüber der
+--      Öffentlichkeit") ≈ 820-2-14.public_relations_strategy (§5.3.10 p.44) ≈ 820-2-21.kommunikations_plan_dokumentiert (§5.6.5 p.53
+--      "Konzept für eine Öffentlichkeitsbeteiligung"). ONE concept in the source (internal + public). Read by REQ-33 only
+--      (public_relations_strategy). → soft-delete kommunikations_plan_dokumentiert (read by nothing):
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: duplicate of communication_concept (md pass)' where id='f6015d7a-180f-42cd-b9f5-e6073e5bc967';
+--  (b) 820-2-15.permitting_complete (roll-up, description null) ≈ 820-2-16.permit_inventory_complete (§5.4.1 p.45 register with Status).
+--      Read by nothing. → soft-delete permitting_complete:
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: roll-up duplicate of permit_inventory_complete (md pass)' where id='789c2922-b2df-4cd9-a851-551ca532053a';
+--  (c) 820-2-10.risk_register_present (boolean, REQ-20) ≈ 820-2-10.risk_register (json, optional) ≈ 820-2-14.risk_analysis_performed
+--      (boolean, REQ-30). §4.8.2 p.35 + §5.3.11 p.45 describe ONE Risikoanalyse "regelmäßig … fortgeschrieben". Observation only —
+--      REQ-20 and REQ-30 each read one of them; re-home REQ-20 onto risk_analysis_performed before retiring risk_register_present.
+--  (d) 820-2-05.decision_competencies_mapped (§4.3.3 p.23, REQ-05/REQ-06) ≈ 820-2-13.decision_competencies_clear (§5.3.6 p.42, REQ-29).
+--      Both sections exist in the source (Dopplung gewollt). Observation only — no proposal.
+--  (e) 820-2-07.master_schedule_present (§4.4.1 exists) vs 820-2-18.rahmenterminplan_attached (§5.5.4 attached to tender) — distinct facts, keep.
+-- Rollback for (a)/(b): set active=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference / unit retags (zero-risk class). Evidence in the pack notes of each field.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§4.1'                 where id='a3bcbb66-4311-4657-8bcb-a88d120d705a' and clause_reference='§3';               -- project_size: §4.1 p.19 "Abhängig von der Projektgröße und der Projektart"
+-- update public.fields set clause_reference='§4.3.5, §5.3.4'       where id='a4980e90-44e7-440e-b820-e61f476f0593' and clause_reference='§3';               -- complexity_level
+-- update public.fields set clause_reference='§2.1'                 where id='745c5f3c-f7d9-4676-a19c-8845a4882c2d' and clause_reference='§3';               -- client_organization (Auftraggeber definition pointer §2.1 p.12; exempt field)
+-- update public.fields set clause_reference='§2.1, §4.3.7'         where id='e9c6d385-1033-44c4-92b1-3af93d142284' and clause_reference='§2.1';             -- change_impact_documented
+-- update public.fields set clause_reference='§4.3.6, §4.3.1'       where id='25e15984-c9c2-4129-a1a1-811140919b97' and clause_reference='§4.3.6, Anhang A'; -- status_report_frequency: Anhang A p.84 has NO cadence ("Periode: von … bis")
+-- update public.fields set clause_reference='§1, §4.6.2'           where id='294b6b7d-1008-4294-8b2f-0f7d89ea110f' and clause_reference='§5.3, §5.4';       -- lph_completed
+-- update public.fields set clause_reference='§4.4.1'               where id='36965025-eca8-460c-97b9-d227a750ceb1' and clause_reference='§5.3, §5.4';       -- planning_milestones_met
+-- update public.fields set clause_reference='§4.5.2, §4.5.3'       where id='8dfdcc6b-c840-4683-98ea-8c099d334154' and clause_reference='§5.3, §5.4';       -- cost_estimation_phase_done
+-- update public.fields set clause_reference='§5.4.1'               where id='789c2922-b2df-4cd9-a851-551ca532053a' and clause_reference='§5.3, §5.4';       -- permitting_complete
+-- update public.fields set clause_reference='§5.5.3'               where id='19cb9a0a-71e3-4e75-b1ac-88862ceb0fb5' and clause_reference='§5.5';             -- vergabeverfahren_used
+-- update public.fields set clause_reference='§5.5.2, §5.3.2'       where id='adce2960-b7c7-448d-bdcd-df9c6aafc196' and clause_reference='§5.5';             -- auswahlentscheidung_dokumentiert
+-- update public.fields set clause_reference='§5.6.4, §4.3.7'       where id='ca8a829e-7f73-42fc-a3b0-5299c66742b8' and clause_reference='§5.6.4, §5.6.5';   -- change_orders (§5.6.5 is Öffentlichkeitsarbeit)
+-- update public.fields set clause_reference='§5.6.5'               where id='8fa75c93-3bdf-4b9c-85bf-3dcbc6b33016' and clause_reference='§5.6.4, §5.6.5';   -- oeffentlichkeitsarbeit_durchgefuehrt
+-- update public.fields set clause_reference='§5.6.5'               where id='f6015d7a-180f-42cd-b9f5-e6073e5bc967' and clause_reference='§5.6.4, §5.6.5';   -- kommunikations_plan_dokumentiert
+-- update public.fields set clause_reference='§5.6.5'               where id='2664d9d8-7119-414c-9972-1472940348cd' and clause_reference='§5.6.4, §5.6.5';   -- changes_record_date (exempt)
+-- S-3b · unit correction: "date" is a data_type, not a unit (every other date field on this standard has unit=null).
+-- update public.fields set unit=null where id in ('ff0266af-2af1-412e-9ecd-d4faaca720dd','4745fdc3-e710-4c8b-9009-8f7ba280bfef') and unit='date'; -- warranty_start_date / warranty_end_date
+-- S-3c · description/label wording (evidence-only, text fields):
+--  • 820-2-07.detailed_schedule_present description "Termindetailplan (Auftraggeber)": §4.4.1 p.26 makes "Detailterminpläne oder
+--    detaillierte Bauzeitenpläne … die finale Detaillierungsstufe der Auftragnehmer und der ausführenden Firmen"; the AG's levels are
+--    Rahmenterminplan / Generalablaufplan / Steuerungsterminpläne. Proposed label: "Steuerungsterminplan (phasenbezogen) vorhanden".
+--  • 820-2-05.project_handbook_complete description "follows Anhang B structure": Anhang B is "Ein erster Gliederungsvorschlag" (§2.1 p.13).
+--  • 820-2-08.cost_planning_din276 label: the rule is "Eine einheitliche und durchgängige Kostenstruktur ist im Projekt vereinbart
+--    (bspw. DIN 276)" (§4.5.1 p.29) → label "Einheitliche Kostenstruktur vereinbart (bspw. DIN 276)".
+--  • 820-2-20.controlling_reports_frequency enum values carry regulation_reference "§4.3.6" (Statusberichte) while the field is §5.6.1
+--    (Baustellen-Controlling, "zum Beispiel monatlich") — retag the enum rows to §5.6.1.
+-- Rollback: restore the previous clause_reference / unit values quoted in each guard.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · is_required review — 100 of 113 fields are is_required=true (the usability blocker). The source makes the fields below
+-- conditional ("Je nach Projekt", "Bei zugelassenen …", "bspw.", "vorgeschlagen", "In Einzelfällen") or they are app-only
+-- dates/roll-ups the guideline never asks for. Proposal: is_required=false for the 23 ids below. Evidence per group:
+--  (a) "Je nach Projekt" — communication/public participation: "Je nach Projekt wird ein projektbezogenes Kommunikationskonzept
+--      erarbeitet" (§5.3.5 p.42); "Je nach Projekt ist die Beteiligung der Öffentlichkeit frühzeitig erfolgt." (§5.3.10 p.44);
+--      "Je nach Größe des Projekts und Öffentlichkeitsinteresse werden … Fachleute für die Kommunikations- bzw. Medienberatung
+--      hinzugezogen." (§5.3.10 p.44); §5.6.5 p.53 is scoped "hier insbesondere Maßnahmen der Stadtentwässerung".
+--      → communication_concept, public_relations_strategy, kommunikations_plan_dokumentiert, oeffentlichkeitsarbeit_durchgefuehrt
+--  (b) Conditional procurement/commissioning artefacts: "Auf Nebenangebote sollte nicht generell verzichtet werden. Die Möglichkeit
+--      von Nebenangeboten sollte jedoch begrenzt werden. […] Bei zugelassenen Nebenangeboten sind … Mindestanforderungen … zu
+--      formulieren." (§5.5.1 p.48); "Der Regelfall ist der Testbetrieb mit anschließender Abnahmeprüfung. In Einzelfällen kann es
+--      sinnvoll sein, nur die Abnahmeprüfung … durchzuführen." (§5.7.1 p.55); "Die hier vorgeschlagene Abnahmeprüfung geht über eine
+--      reine Sichtprüfung hinaus" (§5.7.3 p.57) → nebenangebote_conditions, testbetrieb_planned, abnahme_per_bild4
+--  (c) Example-only method choices: "Eine einheitliche und durchgängige Kostenstruktur ist im Projekt vereinbart (bspw. DIN 276)."
+--      (§4.5.1 p.29); "Übergabeformate für die Projektergebnisse werden festgelegt. Es werden keine Software-Produkte vorgeschrieben."
+--      (§8.2.1 p.74) → cost_planning_din276, software_products_defined
+--  (d) Contract-basis determinations the guideline never mandates: HOAI is only the baseline to be delimited (§4.1 p.19, §4.4.2 p.27);
+--      VOB/A+B are presumed for construction lots (§6.2 p.64) but never required by this Merkblatt → hoai_compliance, vob_applicable
+--  (e) EKOWAI classifications with no source list (pack residue): client_type, project_category
+--  (f) App-only dates / roll-ups / M-820-1 artefacts: planning_summary_date, zuschlag_erteilt_datum, final_contract_value,
+--      vergabesumme_summary_date, changes_record_date (exempt class); planning_milestones_met, cost_estimation_phase_done,
+--      permitting_complete (phase roll-ups, description null); auswahlentscheidung_dokumentiert (Vergabevermerk = DWA-M 820-1 §8.3, NR);
+--      risk_register_present (duplicate of risk_analysis_performed + risk_register, S-2c)
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in (
+--   '4aea62fc-76c6-4c68-b4f1-2efd1e3dee75','61800f10-a697-45e4-a8fd-f858629959a3','f6015d7a-180f-42cd-b9f5-e6073e5bc967','8fa75c93-3bdf-4b9c-85bf-3dcbc6b33016', -- (a)
+--   '86a6424e-f3eb-4557-8938-4bece41c064f','c6f211f5-9e5d-4fcb-86e4-2edf6b898e6e','45ffac24-13a5-47e6-becf-0f91382839ee',                                        -- (b)
+--   '16a4a27c-37f1-4878-b316-def6145d5d0d','373d2b0d-a278-41ef-a77a-de4674e12502',                                                                               -- (c)
+--   '246799ae-34bb-46e3-a231-2deb39d4ef1c','2b9d2724-25fa-44f3-a39b-fece18727f52',                                                                               -- (d)
+--   'd062742e-6a02-4a2f-b185-ef8c56f01180','03d6ba8e-8dbe-491a-8738-3bc93fb95dab',                                                                               -- (e)
+--   'c4a9aabc-285a-4513-9ca4-9965150fbd4f','5f632a02-dc81-4a6c-ab6d-bc2ab20e4779','c5d271dc-dbfb-4efa-a111-575e9228372a','6bd85a93-8b74-4a3a-bd1b-328e5c16ba04',
+--   '2664d9d8-7119-414c-9972-1472940348cd','36965025-eca8-460c-97b9-d227a750ceb1','8dfdcc6b-c840-4683-98ea-8c099d334154','789c2922-b2df-4cd9-a851-551ca532053a',
+--   'adce2960-b7c7-448d-bdcd-df9c6aafc196','2ab0a082-91d7-40c4-972c-46d367f8d16d')                                                                               -- (f)
+--   and is_required=true;
+-- Rollback: update public.fields set is_required=true where id in (<same list>);
+-- NOT proposed (source says "muss"/"ist zu"/"darf nicht"/"zwingend"): Bedarfsplanung §5.2.2 ("Aufstellung einer umfassenden
+-- Bedarfsplanung gemäß Merkblatt DWA-M 820-1:2020" p.37; M 820-1 §4.1 "muss"), Zielstabilität (§5.3.3 "zwingend" p.41), Projektkultur
+-- (§3 "muss in allen Projekten geklärt werden" p.16), Bauherrenaufgaben (§4.3.2 "muss" p.22), Entscheidungskompetenzen (§4.3.3 "sind zu
+-- analysieren" p.23; §5.3.6 "muss" p.42), Projekthandbuch (§4.3.5 "muss … bekannt sein" p.24), Änderungsmanagement (§4.3.7 "müssen in
+-- Textform dokumentiert werden" p.26), Terminziele (§4.4.2 "müssen realistisch" p.27), Kostendokumentation (§4.5.4 "müssen" p.31),
+-- Vertragsfortschreibung (§4.6.1 "sind … festzuhalten" p.33), Risikoverteilung (§3 "darf keinen Einfluss" p.15), Besprechungen (§5.3.1
+-- "muss" p.40), Entscheidungsdokumentation (§5.3.2 "müssen" p.40), Terminpläne (§5.3.4 "sind … aufzustellen" p.41), Dritte (§5.3.5
+-- "sind … einzubinden" p.42), Grundstücke (§5.4.4 "Sie sind spätestens … geklärt" p.46), Rahmenterminplan in Vergabeunterlagen (§5.5.4
+-- p.50), Bauüberwachung (§5.6.2/§5.6.3 "muss" p.51–52), Schlussdokumentation (§5.7.2 "muss" p.56), Betriebsanleitungen (§5.7.4 "sind …
+-- aufzunehmen" p.58), Einweisung (§5.7.5 "ist es notwendig" p.59), Gewährleistungsfristen (§5.8.2 p.61), Mängelrüge (§5.8.3 "sind …
+-- zu rügen" p.62), Regelwerke (§6.1 "müssen" p.63), Datenqualität (§8.2.2 "muss" p.75), Datensicherheit (§8.8 "sind … zu
+-- berücksichtigen" p.83), Rechte an Daten (§3 "Geklärt werden muss" p.16), Testbetrieb/Abnahme-Wahl (§5.7.1 "muss … formulieren" p.55).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gate over-enforcement / re-homes.
+-- S-5a · REQ-46 (block, testbetrieb_planned == true) fires on every project, but §5.7.1 p.55 lets the AG choose: "… ob er sich für den
+-- Testbetrieb mit anschließender Abnahme, die Abnahmeprüfungen ohne Testbetrieb oder eine Mischform zwischen beiden entscheidet." and
+-- "In Einzelfällen kann es sinnvoll sein, nur die Abnahmeprüfung … durchzuführen." The choice field exists (820-2-18.testbetrieb_vs_abnahme_choice).
+-- ☐ RATIFIED → guard the gate (spec):
+-- update public.compliance_requirements set condition='IF testbetrieb_vs_abnahme_choice != ''abnahmepruefung'' THEN testbetrieb_planned == true' where code='REQ-46' and standard_code='DWA-M-820-2';
+-- Rollback: condition='testbetrieb_planned == true'.
+-- S-5b · REQ-38 (block, nebenangebote_conditions == true): "Bei zugelassenen Nebenangeboten sind … Mindestanforderungen an die Leistung
+-- zu formulieren." (§5.5.1 p.48) — conditional on Nebenangebote being admitted; no field records that. Options: (i) add a boolean
+-- 820-2-17.nebenangebote_zugelassen (is_required=false) and guard REQ-38 with it; (ii) block→warn (S-6). No SQL until the owner picks.
+-- S-5c · REQ-55 (warn, condition EMPTY, clause "7.1 Ideen, Innovationen - Allgemeines") and REQ-59 (warn, condition EMPTY, clause §8.3.2)
+-- sit on worksheet 820-2-25 (Richtlinienverwaltung, §6.3) but cite §7 / §8.3.2 — the worksheets for those sections are 820-2-26
+-- (Innovationsmanagement) and 820-2-27 (Digitale Planung und BIM). Both never evaluate (empty condition).
+-- ☐ RATIFIED → re-home + give them a condition (spec):
+-- update public.compliance_requirements set worksheet_template_id='27cf5933-b896-4b2a-b683-cbcaef2190f9', condition='innovation_scope_defined == true', clause_reference='§7.1, §7.3.5', source_quote='Es ist gewünscht, dass in den Planungsprozessen auch Innovationen (technisch und organisatorisch) stattfinden. Dies bedeutet auch, dass der Auftraggeber diese Anforderungen in den Verträgen formuliert und diese Leistungen auch vergütet.' where code='REQ-55' and standard_code='DWA-M-820-2'; -- §7.1 p.67
+-- update public.compliance_requirements set worksheet_template_id='2084198a-18e3-49b1-b0e8-0bd17c06d49f', condition='bim_basics_established == true', source_quote='Es ist geprüft, ob die BIM-Methode beim Auftraggeber angewendet werden kann, ob das Know-how und die Ressourcen zur Verfügung stehen.' where code='REQ-59' and standard_code='DWA-M-820-2'; -- §8.3.2 p.77
+-- Rollback: restore worksheet_template_id='d79d19f5-8415-4fda-8a01-4535f72575b0', condition='', clause_reference/source_quote as exported.
+-- S-5d · REQ-13 (warn, condition EMPTY, §4.3.1) and REQ-50 (warn, condition EMPTY, §5.6.4) never evaluate. Specs:
+-- update public.compliance_requirements set condition='project_handbook_complete == true' where code='REQ-13' and standard_code='DWA-M-820-2'; -- "Eine regelmäßige Überprüfung, ob sich die Elemente des Projekthandbuchs … bewähren, ist dringend zu empfehlen." (§4.3.1 p.21)
+-- update public.compliance_requirements set condition='change_orders IS EMPTY OR change_log_present == true' where code='REQ-50' and standard_code='DWA-M-820-2'; -- "Werden Änderungen aus besonderen Gründen erforderlich, ist das Änderungsmanagement konsequent zu führen." (§5.6.4 p.53) — needs evaluate.ts OR support; otherwise 'change_log_present == true'
+-- REQ-50 also belongs on 820-2-21 (Bauänderungen), not 820-2-20 → worksheet_template_id='e34e220a-b3d2-4aa2-8bab-cda461ffa609'.
+-- S-5e · REQ-45 (warn, ws 820-2-09, clause §5.6.4) reads approval_procedure_defined (§4.6.2). Clause is wrong, field is right:
+-- update public.compliance_requirements set clause_reference='§4.6.2' where code='REQ-45' and standard_code='DWA-M-820-2' and clause_reference='§5.6.4';
+-- S-5f · REQ-20 (block) condition risk_register_present is anchored on a Know-how sentence ("grundsätzliches Know-how muss beim
+-- Auftraggeber unbedingt vorhanden sein", §4.8.2 p.35); the register sentence is "Fundierte Risikoanalysen … werden durchgeführt."
+-- Re-quote (evidence-only) and re-home onto risk_analysis_performed if S-2c is ratified.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Severity: block gates anchored on advisory / conditional / proposal text (the M-820-3 "kann/bewährt/sollte" class).
+-- ☐ RATIFIED → block→warn for each row below (one update per gate; rollback = severity='block' on the same row).
+--  • REQ-12 (cost_planning_din276): the quoted rule is uniform cost structure; DIN 276 is "bspw." (§4.5.1 p.29) / "beispielsweise nach
+--    DIN 276" (§4.5.2 p.30, the gate's own quote). The gate blocks on the example, not the rule.
+-- update public.compliance_requirements set severity='warn' where code='REQ-12' and standard_code='DWA-M-820-2' and severity='block';
+--  • REQ-33 (public_relations_strategy): "Je nach Projekt ist die Beteiligung der Öffentlichkeit frühzeitig erfolgt." (§5.3.10 p.44) — conditional.
+-- update public.compliance_requirements set severity='warn' where code='REQ-33' and standard_code='DWA-M-820-2' and severity='block';
+--  • REQ-38 (nebenangebote_conditions): "Auf Nebenangebote sollte nicht generell verzichtet werden. Die Möglichkeit von Nebenangeboten
+--    sollte jedoch begrenzt werden." + "Bei zugelassenen Nebenangeboten …" (§5.5.1 p.48) — conditional (alternative: S-5b guard).
+-- update public.compliance_requirements set severity='warn' where code='REQ-38' and standard_code='DWA-M-820-2' and severity='block';
+--  • REQ-47 (abnahme_per_bild4): "Die Abnahme ist gesetzlich vorgeschrieben, jedoch nicht weiter ausgestaltet. […] Die hier
+--    vorgeschlagene Abnahmeprüfung geht über eine reine Sichtprüfung hinaus" (§5.7.3 p.57) — the Bild-4 procedure is a Vorschlag.
+-- update public.compliance_requirements set severity='warn' where code='REQ-47' and standard_code='DWA-M-820-2' and severity='block';
+--  • REQ-56 (ip_rights_defined): field is is_required=false (innovation block optional) yet the gate blocks; anchors: "Im Vertrag mit
+--    dem Auftraggeber sollten der Umfang der Nutzung … angemessen und klar geregelt werden." (§7.6.2 p.73); "Grundsätzlich sollte er
+--    deshalb die Vergütung der Idee oder Innovation im Vertrag in einer eigenen Position regeln." (§7.6.3 p.73). The quoted "Es ist dem
+--    Auftraggeber nicht erlaubt …" (§7.6.1 p.72) is a statement of law, not a field obligation.
+-- update public.compliance_requirements set severity='warn' where code='REQ-56' and standard_code='DWA-M-820-2' and severity='block';
+--  • REQ-20 (risk_register_present): §3 p.18 "eine faire angemessene Verteilung der Risiken sollte in jedem Projekt zum Standard
+--    werden"; §4.8.2 p.35 indicative "werden durchgeführt". Counter-evidence: §5.3.7 p.43 "Risikorelevante Planungsaspekte müssen
+--    erkannt … werden" (that is REQ-30, kept block). → owner decision; block→warn proposed for REQ-20 only.
+-- update public.compliance_requirements set severity='warn' where code='REQ-20' and standard_code='DWA-M-820-2' and severity='block';
+-- Checked and NOT proposed (block text is "muss"/"ist zu"/"darf nicht"/"zwingend"/"erforderlich"): REQ-01 (§1 scope), REQ-03 (§3 "darf
+-- keinen Einfluss"), REQ-04 (§4.3.2 "muss"), REQ-05 (§4.3.3 "sind zu"), REQ-07 (§4.3.5 "muss"), REQ-09 (§4.3.7 "müssen"), REQ-10 (§4.4.2
+-- "müssen"), REQ-11 (§4.4.3 "muss … mindestens"), REQ-14 (§4.5.4 "müssen"), REQ-16 (§4.6.1 "sind … festzuhalten"), REQ-22 (§5.2.3 "ist
+-- erforderlich"), REQ-24 (§5.3.1 "muss"), REQ-25 (§5.3.2 "müssen"), REQ-27 (§5.3.4 "sind … aufzustellen"), REQ-28 (§5.3.5 "sind …
+-- einzubinden"), REQ-29 (§5.3.6 "muss"), REQ-30 (§5.3.7 "müssen"), REQ-31 (§5.3.8 "dürfen … nur"), REQ-36 (§5.4.4 "sind spätestens …
+-- geklärt"), REQ-41 (§5.5.4 "ist Teil der Vergabeunterlagen"), REQ-43 (§5.6.2 "muss"), REQ-44 (§5.6.3 "muss"/"zwingend"), REQ-46 (§5.7.2
+-- "ist Teil der vertraglichen Leistung" — guard S-5a), REQ-48 (§5.7.4 "sind … aufzunehmen"), REQ-49 (§5.7.5 "in jedem Fall"), REQ-51
+-- (§5.8.2), REQ-52 (§5.8.3 "sind … zu rügen"), REQ-58 (§8.2.2 "muss"), REQ-53/REQ-54 (§6.1 "müssen Prozesse … vorhanden sein",
+-- §6.3.2 "Es besteht die Verpflichtung"). Indicative-only Zielsetzung anchors kept at block for want of a counter-sentence: REQ-17 (§4.6.2),
+-- REQ-18 (§4.7.1), REQ-19 (§4.7.2), REQ-21 (§5.2.2), REQ-34 (§5.4.2), REQ-37 (§5.4.5), REQ-39 (§5.5.2) — these fall under the S-0 policy question.
+-- Under-enforcement noted (warn where the source says "muss"): REQ-26 (warn) reads goals_stability_signoff — §5.3.3 p.41 "Ziele müssen
+-- eindeutig definiert sein … Eine umfassende Prüfung der Auswirkungen vor Änderung einer Zielvorgabe ist zwingend." → warn→block candidate.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Gate source_quote NULL (SR-1: a gate without a printed sentence is not sourced). Backfill from the md:
+-- ☐ RATIFIED
+-- update public.compliance_requirements set source_quote='Eine Analyse der Beteiligten und Betroffenen sowie der Umgang mit ihnen wird als wichtig angesehen (siehe Bild 1). Ein systematischer Umgang mit deren Interessen und Zielen in Relation zu den Projektzielen vermindert Störungen in den Projektabläufen und erhöht durch die Akzeptanz die Effizienz. (§3 Beteiligte und Betroffene, S. 16)' where code='REQ-02' and standard_code='DWA-M-820-2' and source_quote is null;
+-- update public.compliance_requirements set source_quote='Ziele müssen eindeutig definiert sein und dauerhaft Bestand haben. Voraussetzung ist eine ganzheitliche Betrachtung aller Auswirkungen. Eine umfassende Prüfung der Auswirkungen vor Änderung einer Zielvorgabe ist zwingend. (§5.3.3 Zieldefinition im Projekt unzureichend – Zielsetzung, Optimierungspotenzial, S. 41)' where code='REQ-26' and standard_code='DWA-M-820-2' and source_quote is null;
+-- update public.compliance_requirements set source_quote='In der Phase der Ausführungsplanung bzw. der Vorbereitung der Vergabe ist die Art der Vergabeverfahren für die Bauleistungen im konkreten Projekt zu definieren. […] Im Bereich Bauwerk ist die Leistungsbeschreibung mit Leistungsverzeichnis die geeignete Vorgehensweise. Für Teilbereiche kann die funktionale Leistungsbeschreibung auch hier ein geeigneter Lösungsansatz sein. (§5.5.3 Grenzen von funktionalen Leistungsbeschreibungen werden nicht beachtet, S. 49)' where code='REQ-40' and standard_code='DWA-M-820-2' and source_quote is null;
+-- update public.compliance_requirements set source_quote='Nach jeder abgeschlossenen Leistungsphase erfolgt eine Freigabe der Planungsleistungen. Passend zum Projektablauf und zur Projektlaufzeit wird auch die Abnahme der Planungsleistungen geregelt. (§4.6.2 Freigaben und Abnahmen von Planungsleistungen sind nicht geregelt – Zielsetzung und Optimierungspotenzial, S. 33)' where code='REQ-45' and standard_code='DWA-M-820-2' and source_quote is null;
+-- update public.compliance_requirements set source_quote='Software und Hardware, Modelltechnik und andere sind IT-technische Werkzeuge zur Umsetzung von Planungs- und Projektorganisationsprozessen. Die einzusetzenden Werkzeuge werden vor Projektbeginn zwischen Auftraggeber und Auftragnehmer beraten und festgelegt. […] Übergabeformate für die Projektergebnisse werden festgelegt. Es werden keine Software-Produkte vorgeschrieben. (§8.1 Allgemeines, S. 74; §8.2.1 Einzusetzende Softwareprodukte werden vorgegeben – Vorschläge zur Verbesserung, S. 74)' where code='REQ-57' and standard_code='DWA-M-820-2' and source_quote is null;
+-- update public.compliance_requirements set source_quote='Bei allen Lösungen sind Anforderungen aus technischen Standards und Sicherheitsstandards wie den BSI-Grundschutz und die DSGVO zu berücksichtigen. […] Genauso bedeutsam sind Fragen der Rechte an den digitalen Modellen und Daten, sowie der Urheber- und Verwertungsrechte. Geklärt werden muss auch, auf welchen Plattformen (Cloud oder Server) die Daten gehalten werden, wer der Eigentümer der Daten ist, wer die Daten sichert und archiviert. (§8.8 Datensicherheit, Virenschutz, S. 83; §3 Rahmenbedingungen im Projektkontext, S. 16)' where code='REQ-60' and standard_code='DWA-M-820-2' and source_quote is null;
+-- REQ-55 / REQ-59: quotes proposed together with their re-home in S-5c.
+-- Rollback: set source_quote=null on the same rows.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Missing gates for printed hard-ish limits (the encoding has no numeric gate at all):
+--  • testbetrieb_vs_abnahme_choice IS NOT NULL — "In den Vergabeunterlagen für die ausführenden Firmen muss der Auftraggeber
+--    formulieren, ob er sich für den Testbetrieb mit anschließender Abnahme, die Abnahmeprüfungen ohne Testbetrieb oder eine
+--    Mischform zwischen beiden entscheidet." (§5.7.1 p.55) — "muss" → block candidate, and it is the guard field for S-5a.
+--  • Besprechungsunterlagen "mit ausreichend Vorlauf, mindestens fünf Arbeitstage, im Vorfeld verteilt" (§5.3.1 p.40) — needs a
+--    numeric field (meeting_docs_lead_days >= 5); today only the boolean meeting_protocols_active exists.
+--  • Einleitungserlaubnis: "Mindestens zwei Jahre vor Ablauf der Frist sollte mit der Genehmigungsbehörde … geklärt werden" (§5.4.3 p.46) —
+--    warn; needs permit_expiry_date + today() arithmetic (evaluate.ts has no date math today — flagged, not dropped).
+--  • Bedarfsplanung start: "Spätestens jedoch 2 bis 3 Jahre vor Ablauf der technischen Nutzungsdauer von Anlagen (meist nach 15 Jahren)
+--    wird die Bedarfsplanung gestartet." (§5.2.3 p.38) — same date-math limitation.
+--  • Montageendkontrolle: "Ohne Montageendkontrolle darf kein Testbetrieb erfolgen." (§5.7.4 p.58) — "darf nicht" with no field.
+--  • Projekthandbuch review cadence: "regelmäßig (mindestens in jeder Planungsphase) auf Lücken zu prüfen" (§4.3.5 p.24).
+-- ☐ RATIFIED → insert specs:
+-- insert … code='REQ-61', severity='block', worksheet 820-2-18, condition='testbetrieb_vs_abnahme_choice IS NOT NULL', clause_reference='§5.7.1', source_quote='<§5.7.1 sentence above>';
+-- insert … code='REQ-62', severity='block', worksheet 820-2-22, condition='montageendkontrolle_done == true' (new boolean field 820-2-22.montageendkontrolle_done, is_required=false, guarded by testbetrieb_planned), clause_reference='§5.7.4', source_quote='Ohne Montageendkontrolle darf kein Testbetrieb erfolgen.';
+-- (the three date/number rules need new fields + engine date support — listed for the backlog, no SQL.)
+-- Rollback: delete the inserted rows / fields.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Residue disposition (pack left them imported_unverified): 820-2-01.client_type (municipality/utility/private/other) and
+-- 820-2-01.project_category (neubau/sanierung/erweiterung/optimierung/konzept). The md has no such typologies; nearest printed
+-- wording: "Große Verbände und Kommunen werden sich diesen Herausforderungen leichter stellen können als kleine." (§8.1 p.74),
+-- "neu errichteten oder umgebauten Anlage" (§5.7.5 p.59), "Sanierungs- und Werterhaltungsmaßnahmen" (§5.2.4 p.39). Options:
+-- (i) keep as engineer_input classification with verification_status='inferred_from_worksheet' (app classification, no fabricated quote);
+-- (ii) source the enums from DWA-M 820-1 (project_type / client_organization_type exist there) and cross-reference.
+-- No SQL until the owner picks; S-4(e) already proposes is_required=false for both.
