@@ -57,10 +57,21 @@ export function ConformityDocument({ data }: { data: ConformityData }) {
           {data.worksheets.map((w) => (
             <View key={w.code} style={styles.siteRow}>
               <Text style={styles.siteLabel}>{`${w.code} · ${w.titleDe}`}</Text>
-              <Text style={styles.siteValue}>{w.status ?? 'nicht begonnen'}</Text>
+              <Text style={styles.siteValue}>
+                {w.status === 'deactivated' ? 'nicht zutreffend' : (w.status ?? 'nicht begonnen')}
+              </Text>
             </View>
           ))}
         </View>
+
+        {data.notApplicable.length > 0 ? (
+          <View style={{ marginTop: 10 }}>
+            <Text style={styles.h2}>Nicht zutreffende Arbeitsblätter</Text>
+            <Text style={styles.note}>
+              {`Die folgenden Arbeitsblätter wurden vom Ingenieur als für dieses Projekt nicht zutreffend gekennzeichnet und sind nicht Gegenstand dieser Erklärung: ${data.notApplicable.join(', ')}.`}
+            </Text>
+          </View>
+        ) : null}
 
         {data.clientSuppliedFields.length > 0 ? (
           <View style={{ marginTop: 14 }}>

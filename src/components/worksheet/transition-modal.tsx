@@ -10,7 +10,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   instanceId: string;
-  eventType: Exclude<TransitionEvent, 'deactivate' | 'reactivate'>;
+  eventType: TransitionEvent;
   actionLabel: string;
   destructive?: boolean;
 };

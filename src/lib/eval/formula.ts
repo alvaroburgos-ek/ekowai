@@ -212,6 +212,22 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     return { kind: 'error', message: 'Konnte RHS nicht extrahieren.' };
   }
 
+  // A formula whose extracted RHS is fundamentally a COMPARISON / BOOLEAN CRITERION rather than a
+  // computable arithmetic value — a two-sided range (`a <= x <= b`), an `AND`/`OR` conjunction, a
+  // conditional (`when`/`then`), a multi-variant (`|`), or a chemical reaction (`->`) — is not an
+  // equation the engine can evaluate to a number; it is a check the engineer verifies (usually also
+  // enforced by a compliance gate / field validation). Classify it as manual_required (an actionable
+  // "manuell prüfen" badge) instead of a hard red "error" pill. A valid computable RHS never contains
+  // a comparison operator or a boolean/conditional keyword (min/max use `,`; powers use `^`).
+  // (Ported from feat/fll-revision, 2026-09-05.)
+  if (/[<>]|\bAND\b|\bOR\b|\bwhen\b|\bthen\b|\|/i.test(expression)) {
+    return {
+      kind: 'manual_required',
+      reason: 'Vergleichs-/Kriteriumsformel — kein berechenbarer Zahlenwert; manuell prüfen.',
+      rewrite: rewrite ?? undefined,
+    };
+  }
+
   // Constants (e.g. `pi`) are injected into the scope alongside the resolved
   // input values. They are NOT recorded as substituted inputs in the
   // returned state — the engineer-facing UI surfaces variable substitutions,

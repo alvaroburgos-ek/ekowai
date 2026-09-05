@@ -32,7 +32,7 @@ export function ApprovalBar({
 }: Props) {
   const actions = userActionsFor(status);
   const [modal, setModal] = useState<null | {
-    event: Exclude<TransitionEvent, 'deactivate' | 'reactivate'>;
+    event: TransitionEvent;
     label: string;
     destructive?: boolean;
   }>(null);
@@ -42,6 +42,13 @@ export function ApprovalBar({
       <div className="flex items-center gap-3">
         <div className="text-[10px] uppercase tracking-[0.2em] text-subtext">Status</div>
         <StatusPill status={status} />
+        {status === 'deactivated' && (
+          <span className="text-xs text-subtext">
+            {locale === 'de'
+              ? 'zählt nicht für die Konformitätserklärung'
+              : 'not counted for the declaration'}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
@@ -60,11 +67,7 @@ export function ApprovalBar({
 
       <div className="flex gap-2">
         {actions.length === 0 ? (
-          <span className="text-xs text-subtext italic">
-            {status === 'deactivated'
-              ? 'Standard entfernt — reaktivieren über Standards-Tab'
-              : '—'}
-          </span>
+          <span className="text-xs text-subtext italic">—</span>
         ) : (
           actions.map((a) => (
             <Button

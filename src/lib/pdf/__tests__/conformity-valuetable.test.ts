@@ -41,6 +41,29 @@ describe('decideConformity', () => {
   it('APPROVED_STATUSES is exactly engineer_approved + final', () => {
     expect([...APPROVED_STATUSES].sort()).toEqual(['engineer_approved', 'final']);
   });
+
+  it('a deactivated (not applicable) worksheet does not block and is listed as notApplicable', () => {
+    const r = decideConformity([ws(), ws({ code: 'A138-17', status: 'deactivated' })]);
+    expect(r.eligible).toBe(true);
+    expect(r.konform).toBe(true);
+    expect(r.blocking).toHaveLength(0);
+    expect(r.notApplicable).toEqual(['A138-17']);
+  });
+
+  it('a standard whose worksheets are ALL not applicable has nothing to declare', () => {
+    const r = decideConformity([ws({ status: 'deactivated' }), ws({ code: 'A138-02', status: 'deactivated' })]);
+    expect(r.eligible).toBe(false);
+    expect(r.konform).toBe(false);
+    expect(r.blocking.join(' ')).toMatch(/nicht zutreffend/i);
+    expect(r.notApplicable).toEqual(['A138-01', 'A138-02']);
+  });
+
+  it('gate failures on approved worksheets still count with a not-applicable sibling present', () => {
+    const r = decideConformity([ws({ failingBlockCodes: ['REQ-04'] }), ws({ code: 'A138-17', status: 'deactivated' })]);
+    expect(r.eligible).toBe(true);
+    expect(r.konform).toBe(false);
+    expect(r.blocking.join(' ')).toContain('REQ-04');
+  });
 });
 
 describe('buildValuetableRows', () => {

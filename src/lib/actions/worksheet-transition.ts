@@ -21,7 +21,10 @@ import { checkFinalizeGate, formatFinalizeGateError } from './finalize-gate';
 
 export type TransitionInput = {
   instanceId: string;
-  eventType: Exclude<TransitionEvent, 'deactivate' | 'reactivate'>;
+  /** All state-machine events, incl. `deactivate` (= engineer marks the
+   * worksheet "Nicht zutreffend") and `reactivate`. The comment is the
+   * audit-logged reason in every case. */
+  eventType: TransitionEvent;
   comment: string;
 };
 

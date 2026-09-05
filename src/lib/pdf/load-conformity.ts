@@ -34,18 +34,34 @@ export type ConformityWorksheetRow = {
   failingBlockCodes: string[];
 };
 
+/** Worksheets the engineer marked "Nicht zutreffend" (state-machine `deactivate`).
+ * They are listed on the declaration but never gate it. */
+export const NOT_APPLICABLE_STATUS = 'deactivated';
+
 export type ConformityDecision = {
   eligible: boolean;
   konform: boolean;
   blocking: string[];
+  /** Worksheet codes marked not applicable — excluded from the precondition, printed on the declaration. */
+  notApplicable: string[];
 };
 
 /** Pure decision core — unit-tested without a DB. */
 export function decideConformity(rows: ConformityWorksheetRow[]): ConformityDecision {
-  const statusBlocking = rows
+  const notApplicable = rows.filter((r) => r.status === NOT_APPLICABLE_STATUS).map((r) => r.code);
+  const applicable = rows.filter((r) => r.status !== NOT_APPLICABLE_STATUS);
+  if (applicable.length === 0) {
+    return {
+      eligible: false,
+      konform: false,
+      blocking: ['Alle Arbeitsblätter sind als „nicht zutreffend“ markiert — es gibt nichts zu erklären.'],
+      notApplicable,
+    };
+  }
+  const statusBlocking = applicable
     .filter((r) => !r.status || !APPROVED_STATUSES.has(r.status))
     .map((r) => `${r.code}: Status „${r.status ?? 'nicht begonnen'}“ (erfordert engineer_approved/final)`);
-  const gateBlocking = rows.flatMap((r) =>
+  const gateBlocking = applicable.flatMap((r) =>
     r.failingBlockCodes.map((c) => `${r.code}: Block-Anforderung ${c} verletzt`),
   );
   const eligible = statusBlocking.length === 0;
@@ -53,6 +69,7 @@ export function decideConformity(rows: ConformityWorksheetRow[]): ConformityDeci
     eligible,
     konform: eligible && gateBlocking.length === 0,
     blocking: [...statusBlocking, ...gateBlocking],
+    notApplicable,
   };
 }
 

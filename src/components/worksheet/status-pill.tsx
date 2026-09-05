@@ -6,7 +6,7 @@ const STATUS_STYLES: Record<WorksheetStatus, { label: string; className: string 
   submitted_for_review: { label: 'In Prüfung',  className: 'bg-accent-2/15 text-accent-2' },
   engineer_approved:    { label: 'Genehmigt',   className: 'bg-success/15 text-success' },
   final:                { label: 'Final',       className: 'bg-accent/15 text-accent' },
-  deactivated:          { label: 'Deaktiviert', className: 'bg-paper-2 text-subtext line-through' },
+  deactivated:          { label: 'Nicht zutreffend', className: 'bg-paper-2 text-subtext line-through' },
 };
 
 export function StatusPill({ status }: { status: WorksheetStatus }) {

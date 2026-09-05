@@ -63,16 +63,25 @@ export function isWorksheetEditable(status: WorksheetStatus): boolean {
 }
 
 /** What event labels does the engineer see for a given status?
- * Excludes system-only events (deactivate/reactivate). */
+ *
+ * `deactivate` is the engineer's "Nicht zutreffend" (not applicable) mark: a
+ * worksheet the project does not need (e.g. the six alternative facility-type
+ * sheets of DWA-A-138-1 when one facility is built). It is offered from draft
+ * only — approved work is never silently parked — and `reactivate` brings it
+ * back to draft. Not-applicable worksheets are excluded from the
+ * Konformitätserklärung precondition (see decideConformity). */
 export function userActionsFor(status: WorksheetStatus): Array<{
-  event: Exclude<TransitionEvent, 'deactivate' | 'reactivate'>;
+  event: TransitionEvent;
   labelDe: string;
   labelEn: string;
   destructive?: boolean;
 }> {
   switch (status) {
     case 'draft':
-      return [{ event: 'submit', labelDe: 'Zur Prüfung einreichen', labelEn: 'Submit for review' }];
+      return [
+        { event: 'submit', labelDe: 'Zur Prüfung einreichen', labelEn: 'Submit for review' },
+        { event: 'deactivate', labelDe: 'Nicht zutreffend', labelEn: 'Not applicable', destructive: true },
+      ];
     case 'submitted_for_review':
       return [
         { event: 'engineer_approve', labelDe: 'Genehmigen', labelEn: 'Approve' },
@@ -86,6 +95,6 @@ export function userActionsFor(status: WorksheetStatus): Array<{
     case 'final':
       return [{ event: 'reopen', labelDe: 'Wieder öffnen', labelEn: 'Reopen', destructive: true }];
     case 'deactivated':
-      return [];
+      return [{ event: 'reactivate', labelDe: 'Wieder aufnehmen', labelEn: 'Reactivate' }];
   }
 }
