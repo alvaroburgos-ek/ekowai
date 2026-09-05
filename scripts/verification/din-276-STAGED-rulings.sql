@@ -1,0 +1,161 @@
+-- ============================================================================
+-- DIN-276 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (ENGLISH machine translation of DIN 276:2018-12; no page lines).
+-- "printed p.N" = section start page per the Inhalt / Table-1 page-block count (see the pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE found on DIN-276. All 544 symbols checked against every enum_values
+-- token of the 9 enum fields; every field carries a label. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate fields (same concept encoded twice on neighbouring worksheets). Listed for awareness; the
+-- copies that no gate/equation reads are proposed for soft-delete, the rest are observations only.
+--  • Reference quantities: DIN-276-04 grundstuecksflaeche_GF = DIN-276-06 BU_GF; DIN-276-05 gross_floor_area_BGF
+--    (required) = DIN-276-06 BU_GFA; DIN-276-05 outdoor_area_AF (required) = DIN-276-06 BU_AF; DIN-276-05
+--    gross_volume_BRI = DIN-276-06 BU_BRI. Evidence: "Table 2 - Quantities and reference units of the first level of
+--    the cost breakdown | 100 & Property & m² & Plot area (GF) … | 300 & … Gross floor area (GFA) … | 500 & … Outdoor
+--    area (AF)" (printed p.35) — one quantity each; nothing reads the BU_* copies.
+--  • First-level totals: DIN-276-17 klassif_kg_100…klassif_kg_800 mirror kg_100_total…kg_800_total (worksheets 09–16);
+--    klassif_gesamtkosten = DIN-276-23 GK_total (IDENT-01 output); klassif_bauwerkskosten = DIN-276-23 GK_bauwerkskosten
+--    = DIN-276-25 BKO_bauwerkskosten = DIN-276-25 building_costs (IDENT-02 output, read by REQ-25); DIN-276-25
+--    BKO_KG_300/BKO_KG_400 = kg_300_total/kg_400_total.
+--  • Cost parameters: DIN-276-23 GK_kennwert_BGF = DIN-276-24 cost_parameter_per_BGF = DIN-276-24 KKW_analyse_eur_m2_BGF.
+--  • Cost control: DIN-276-26 KK_kosten_aktuell = current_stage_total, KK_kosten_vorher = previous_stage_total,
+--    KK_delta_abs = deviation_amount (IDENT-04 output); KK_delta_pct (26) = DIN-276-27 deviation_percentage.
+--  • Dates: DIN-276-22 KF_abnahme_datum = DIN-276-29 EA_abnahme_datum.
+-- ☐ RATIFIED  → soft-delete the orphan copies (no gate/equation reads them); rollback = set active=true on the same ids.
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: duplicate (md pass)'
+--  where id in ('77cfd298-1532-4483-a80b-97e09c490f1a',  -- DIN-276-06 BU_GF  = grundstuecksflaeche_GF
+--               '53c37421-3a81-491a-84d9-8316fe39f8f3',  -- DIN-276-06 BU_GFA = gross_floor_area_BGF
+--               '78f05b4e-7380-4b88-8023-b0b1fcc35f8d',  -- DIN-276-06 BU_AF  = outdoor_area_AF
+--               'b81cac95-45f3-4fbd-8b40-6ae1842ca2e1',  -- DIN-276-06 BU_BRI = gross_volume_BRI
+--               '7770fdab-e6bc-40c4-85b5-329b1b5112d0',  -- DIN-276-25 BKO_bauwerkskosten = building_costs
+--               '19a8a4c7-6441-41c4-b203-6eca95432741',  -- DIN-276-26 KK_delta_abs = deviation_amount
+--               'c926dfd8-58b3-45c9-8d8e-c28cba7c43f8',  -- DIN-276-26 KK_kosten_aktuell = current_stage_total
+--               '9f0a6a86-7473-47c3-8098-5b798a382ce7'); -- DIN-276-26 KK_kosten_vorher  = previous_stage_total
+-- Observation (no proposal): the klassif_* / GK_* / BKO_KG_* roll-up copies may be intentional per-worksheet displays.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Stage model: the md defines SIX stages of cost determination, the encoding models FIVE.
+-- Evidence (§3.3, printed p.4–5): "Determination of costs on the basis of requirements planning" (3.3.1) |
+-- "Determination of costs on the basis of preliminary planning" (3.3.2) | "Determination of costs on the basis of the
+-- design planning" (3.3.3) | "Determination of the costs on the basis of the implementation planning and the
+-- preparation of the contract award" (3.3.4) | "Determination of costs on the basis of awarding and execution" (3.3.5) |
+-- "Determination of the costs incurred" (3.3.6). §4.3.1 (p.8): "In 4.3.2 to 4.3.7, the stages of cost determination
+-- are defined". The English md renders both 3.3.4 and 3.3.5 as "Cost estimate", so the German names
+-- (3.3.4 = Kostenvoranschlag, 3.3.5 = Kostenanschlag in the 2018 edition) are NOT verifiable from the md — PDF check needed.
+-- Encoding: DIN-276-03 planning_stage_active and DIN-276-02 cost_breakdown_depth describe five stages (Kostenrahmen,
+-- Kostenschätzung, Kostenberechnung, Kostenanschlag, Kostenfeststellung); there is no worksheet for the §4.3.5 stage.
+-- Worksheet DIN-276-21 "Kostenanschlag" tags every field §4.3.5, its documents field describes §4.3.5 content
+-- ("Ausführungspläne, Leistungsverzeichnis" ↔ "Planning documents, e.g. execution, detail and construction drawings;
+-- - Service descriptions of the service areas;" p.9) while KA_kostenstatus ("Angebot|Auftrag|Rechnung") is §4.3.6 text
+-- ("…compiling the costs on the basis of the current cost status (offer, order or invoice)." p.10). Gate REQ-19 (4.3.5)
+-- quotes the §4.3.5 obligation ("third level … further subdivided according to technical characteristics or
+-- manufacturing aspects") — it is therefore a §4.3.5-stage gate, not a Kostenanschlag gate.
+-- ☐ RATIFIED  → owner decides the identity of DIN-276-21: (A) it IS the §4.3.5 stage → rename title_de to the 2018
+--    §3.3.4 name and add a §4.3.6 worksheet, or (B) it IS the §4.3.6 stage → retag KA_* to §4.3.6, move REQ-19 to the
+--    (new) §4.3.5 worksheet, and add the §3.3.4 stage to planning_stage_active / cost_breakdown_depth.
+-- Zero-risk retag independent of A/B (evidence above):
+-- update public.fields set clause_reference='§4.3.6' where id='b9ee678d-9a6d-465c-8031-907207d8d648' and clause_reference='§4.3.5'; -- DIN-276-21 KA_kostenstatus
+-- Rollback: set clause_reference='§4.3.5' on the same id.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Clause-reference retags (zero-risk class).
+--  • The 12 attest_* checkboxes carry clause_reference NULL although each mirrors one gate clause (labels "Nachweis: 5.1"
+--    etc.). Evidence: the gate rows (compliance_requirements) carry the clause; the attested sentences are quoted in the pack.
+--  • DIN-276-01 cadastral_reference is tagged "§3.1, KG 100" — §3.1 is the definition of "Construction costs" ("Expenses,
+--    in particular for goods, services, taxes and duties…", p.4) and has nothing to do with a cadastral reference; the
+--    supporting row is Table 1 KG 100 ("Cost of the area of one or more plots of land designated for the construction
+--    project in the land register and property register", p.14).
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§5.1'   where id='ce8a9276-f99f-4808-93e6-79a03a1ad89a' and clause_reference is null; -- attest_din_276_09_req_02
+-- update public.fields set clause_reference='§4.3.2' where id='3f6b7d73-1a6f-4645-a1fa-3e328571eeb6' and clause_reference is null; -- attest_din_276_18_req_16
+-- update public.fields set clause_reference='§4.3.3' where id='cb482f86-5348-49af-a645-db6d9e53044b' and clause_reference is null; -- attest_din_276_18_req_17
+-- update public.fields set clause_reference='§4.3.4' where id='c64f75b1-8413-4aee-b10f-c3de6a936293' and clause_reference is null; -- attest_din_276_18_req_18
+-- update public.fields set clause_reference='§4.3.5' where id='eaf89d12-5fa0-4b0c-9a7f-67d09e396a3f' and clause_reference is null; -- attest_din_276_18_req_19
+-- update public.fields set clause_reference='§4.3.7' where id='f1254bbd-9dbc-4123-a001-9a43649ec2fd' and clause_reference is null; -- attest_din_276_18_req_20
+-- update public.fields set clause_reference='§5.3'   where id='6c4a386c-b65e-42d1-bc67-5537d4adae3b' and clause_reference is null; -- attest_din_276_18_req_30
+-- update public.fields set clause_reference='§4.4.2' where id='0fa7669f-a967-4155-870b-3ddb47334fdf' and clause_reference is null; -- attest_din_276_26_req_21
+-- update public.fields set clause_reference='§4.4.3' where id='4a0069f1-8bc2-4ea9-af99-b67c9bda5f2b' and clause_reference is null; -- attest_din_276_26_req_22
+-- update public.fields set clause_reference='§4.5.3' where id='a32ea00c-70f9-477b-832f-338200773420' and clause_reference is null; -- attest_din_276_26_req_23
+-- update public.fields set clause_reference='§4.5.2' where id='bad6ff36-8dac-4190-b138-aebba5f8e477' and clause_reference is null; -- attest_din_276_26_req_31
+-- update public.fields set clause_reference='§4.3.1' where id='809e4434-4c92-4b23-943e-bd24eb1dd900' and clause_reference is null; -- attest_din_276_26_req_32
+-- update public.fields set clause_reference='§5.4 Tab.1 KG 100' where id='376ae6f2-6877-4d53-90c1-6923cee40ad5' and clause_reference='§3.1, KG 100'; -- DIN-276-01 cadastral_reference
+-- Rollback: restore the previous clause_reference values quoted in each guard (null / '§3.1, KG 100').
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · German KG labels that do not match the md row names (2018 edition) — several labels look like the
+-- DIN 276-1:2008 names carried over onto the 2018 numbering. The md is English, so the correct GERMAN 2018 names cannot
+-- be quoted verbatim here; this block records the evidence and asks for a PDF-confirmed label pass before any edit.
+--  • kg_324 "Unterböden, Bodenbeläge"  ↔ md "324 & Foundation coverings & Coverings on base, floor and foundation slabs (e.g.
+--    screeds, sealing, insulating, protective and wear layers)" (p.17)
+--  • kg_325 "Bauwerksabdichtungen"      ↔ md "325 & Sealing and cladding & Construction layers below the base, floor and
+--    foundation slab, waterproofing and cladding of the foundation including insulation…" (p.17)
+--  • kg_334 "Außentüren und -fenster"   ↔ md "334 & External wall openings & Doors, gates, windows, shop windows, glass facades
+--    and other openings…" (p.18)
+--  • kg_338 "Sonnenschutz zu KG 330", kg_347 "Sonnenschutz zu KG 340", kg_366 "Sonnenschutz zu KG 360" ↔ md "338 & Light
+--    protection for KG 330 & Constructions for sun, privacy and glare protection, darkening…" (p.18; 347 p.19; 366 p.20)
+--  • kg_344 "Innentüren und -fenster"   ↔ md "344 & Interior wall openings & Interior windows, shop windows, doors, gates and
+--    other openings…" (p.19)
+--  • kg_522 "Flachgründungen, Bodenplatten" ↔ md "522 & Foundations and floor slabs" (p.28); kg_523 "Unterböden, Bodenbeläge"
+--    ↔ "523 & Foundation coverings" (p.29); kg_524 "Bauwerksabdichtungen" ↔ "524 & Sealing and cladding" (p.29)
+--  Translation artefacts that are NOT label errors: 572 "Fuse construction methods" (= Sicherungsbauweisen ✓), 534 "Pitches"
+--  (= Stellplätze ✓), 711/713 both "Project management" (= Projektleitung / Projektsteuerung ✓), 581 "Attachments" (= Befestigungen ✓).
+-- ☐ RATIFIED  → after PDF confirmation of the German 2018 row names, update label_de on the 10 ids above; rollback =
+--    restore the current labels quoted here. No SQL proposed until the German text is quoted in-session (SR-1).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Gate re-homes (gate on worksheet A reading only fields of / concerning worksheet B).
+--  • REQ-17 (4.3.3 Kostenschätzung), REQ-18 (4.3.4 Kostenberechnung), REQ-19 (4.3.5), REQ-20 (4.3.7 Kostenfeststellung)
+--    all sit on DIN-276-18 "Kostenrahmen" with attest checkboxes on that worksheet, although each attests the level-of-
+--    detail obligation of a LATER stage (worksheets 19, 20, 21, 22). Evidence: "In the cost estimate, the total costs must
+--    be determined according to cost groups in the second level of the cost breakdown." (§4.3.3 p.8–9) etc.
+--  • REQ-30 (5.3) sits on DIN-276-18 but the choice it concerns lives on DIN-276-02 execution_oriented_breakdown.
+-- ☐ RATIFIED  → move REQ-17→DIN-276-19, REQ-18→DIN-276-20, REQ-19→DIN-276-21 (or the §4.3.5 worksheet per S-3),
+--    REQ-20→DIN-276-22, REQ-30→DIN-276-02, each with its attest_* field; rollback = move back to DIN-276-18.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Severity / condition notes on block gates anchored on optional or descriptive text.
+--  • REQ-30 (block, 5.3): the anchored sentence is conditional on an OPTIONAL path — "In suitable cases … the costs can be
+--    classified primarily according to execution." (p.13). Blocking every project on an attestation of the execution-
+--    oriented sub-division over-enforces; proposal: condition on execution_oriented_breakdown == true, else warn.
+--  • REQ-32 (block, 4.3.1): the anchored sentence is descriptive, not an obligation — "…are cost determinations that are
+--    carried out once and at a specific point in time…" (p.8). Proposal: block→warn (or drop; §4.3.2–4.3.7 carry the musts).
+--  • REQ-24 (block, §4.6.2, condition "cost_target_value IS NOT NULL AND feasibility_checked == true"): the md says "A cost
+--    target CAN be defined…" (p.12) — the feasibility check is mandatory only once a target is set. Proposal: condition
+--    "IF cost_target_value IS NOT NULL THEN feasibility_checked == true".
+--  • REQ-26 (warn, 3.11): source_quote NULL and condition EMPTY — the gate cannot fire. Proposal: source_quote = "Costs
+--    resulting from the sum of cost groups 100 to 800" (§3.11 p.5), condition "GK_total == kg_100_total + kg_200_total +
+--    kg_300_total + kg_400_total + kg_500_total + kg_600_total + kg_700_total + kg_800_total".
+--  • REQ-09 (warn, 4.2.9), REQ-27/28/29 (warn, 6.2/6.3/6.4): conditions EMPTY (attestation-only, requires_attestation=true
+--    but NO attest_* field exists for them on DIN-276-01 / DIN-276-04). They are inert; the 6.x quotes are "recommended"/"can"
+--    text, so warn is the right severity — proposal: add the attest fields or mark them informational.
+-- ☐ RATIFIED  → materialise via the compliance_requirements migration pattern; rollback = restore the current
+--    severity/condition values quoted here.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · is_required review (43 required).
+--  • DIN-276-01 cost_planning_principle (required, enum maximum/minimum): the md presents the two principles as
+--    alternatives that "can alternatively be pursued" (§4.1 p.6) — a choice, not an obligation. Propose is_required=false.
+--  • DIN-276-01 project_number, lead_engineer, client_name: app-only identifiers (exempt class) — kept required for the
+--    app's traceability; no proposal.
+--  • kg_100_total … kg_800_total all required: consistent with "The total costs must be recorded and documented in full."
+--    (§4.2.3 p.6) — a project without KG 600/800 costs enters 0, not null; keep.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id='959b5a07-9cf8-4830-8513-c951224f55fd' and is_required=true; -- cost_planning_principle
+-- Rollback: set is_required=true on the same id.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Gate source_quote page references vs the Inhalt (observation, PDF check).
+-- REQ-01 cites "§1 …, p.5" and REQ-25 "§3.12 …, p.5" while the md Inhalt lists "1 Scope of application ..... 4" and
+-- "3 Terms. ..... 4"; §4.2.x gates cite p.6/p.7 which is consistent. Either the gate pages are PDF page numbers (offset +1)
+-- or the Inhalt pages are. Resolve with the PDF; no action in this pass (pack notes use Inhalt-derived pages, marked derived).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · Units: no corrections found. EUR on every KG field, m²/m³ on quantities, EUR/m² on cost parameters match
+-- Table 2/3 ("m² & Gross floor area (GFA)", "m³ & Excavation space content", p.35–36). cost_parameter carries the
+-- generic unit "EUR/Bezugseinheit" (§3.13/§3.14) — acceptable.

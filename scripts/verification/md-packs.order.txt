@@ -7,3 +7,4 @@ dwa-a-138-1-md-verification-pack.sql  DWA-A-138-1
 dwa-m-820-1-md-verification-pack.sql  DWA-M-820-1
 dwa-m-820-2-md-verification-pack.sql  DWA-M-820-2
 dwa-m-820-3-md-verification-pack.sql  DWA-M-820-3
+din-276-md-verification-pack.sql  DIN-276
