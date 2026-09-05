@@ -1,0 +1,225 @@
+-- ============================================================================
+-- DWA-A-178 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (German mathpix LaTeX of DWA-A 178 Juni 2019, korr. Okt 2019; NO page-number
+-- lines — "printed p.N" derived from the Inhalt table + mathpix figure indices (printed+2), see pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Worksheet ids: 01 bf433bbe · 02 ce643024 · 03 cb7c1c49 · 04 3b5f4d7d · 05 41ba4b1c · 06 6de49f5c · 07 4bd2fafe · 08 d8cdae1f ·
+--   09 65ef19e1 · 10 8df009c1 · 11 fa967545 · 12 6a45b719 · 13 8d9359b4 · 14 fd0cba9b · 15 db79bc61 · 16 5f91c058 · 17 94d5c961 ·
+--   18 63d4b6ce · 19 825cb079
+-- Context: 20 block gates harness-proven — nothing below disputes the arithmetic; every item is a source-vs-encoding
+--   disagreement found on the md text. Open rulings D1b / D2 / D3 / D4 / D7 get their md evidence in S-8.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE. All 118 symbols carry a label; none of the 8 enum fields has a token materialised
+--   as a field. (28 fields carry an EMPTY description — A178-02/03/08/18/19 + the six a178_* fields — cosmetic, see S-5.)
+--   No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate / single-source clusters (derivation invariant: ONE atomic owner, the rest inherit by reference).
+--  a) System selector — TWO copies with the identical 3-token enum: A178-02.system_type (0bbf0248, owner; read by 7 gates) ·
+--     A178-02.einzugsgebiet_typ (296d1829, same worksheet, clause §4.1 = "Funktion", empty description). D4 class.
+--  b) Design area — FIVE fields for one source quantity: A178-04.A_E_b_a (26a5c694, owner; §3.2 "Summe aller befestigten,
+--     angeschlossenen Flächen eines Einzugsgebiets" p.11) · A178-02.einzugsgebiet_groesse_ha (9869a3bd, "Einzugsgebietsfläche",
+--     no §3.2 symbol) · A178-04.a178_A_E_k (7aa0d2c3, symbol A_E,k NOT in the source) · A178-04.a178_A_E_b (aea0a5ee, symbol A_E,b NOT
+--     in the source) · A178-08.A_E_b_a_summary (380c4fb7, echo).
+--  c) Frachtpotenzial — THREE: A178-06.b_R_a (c336216f, owner) · A178-06.b_R_a_default (3191ec80, holds the standard_fixed 530 as an
+--     editable number) · A178-08.b_R_a_summary (070d7281, echo, label "Stoffabtrag" is not the source's term).
+--     Evidence: "Als Rechenwert zur Vorbemessung der Bodenfilteroberfläche wird eine flächenspezifische Fracht von
+--     $b_{\mathrm{R}, \mathrm{a}}=530 \mathrm{~kg} /(\mathrm{ha} \cdot \mathrm{a})$ angesetzt." (§6.2.2.1 p.27)
+--  d) Drosselabflussspende — TWO: A178-07.q_Dr_RBF (72592f35, owner, REQ-14) · A178-10.a178_q_F_max (a2b492b2, "Max. Flächenbeschickung",
+--     same 0,05 l/(s·m²) limit, clause §5.3 wrong).
+--  e) Filterzulauffracht — TWO: A178-09.B_RBF_zu (02add476, owner, Gl. 2/3 output) · A178-09.a178_B_F_AFS (0ea84ade, same worksheet).
+--  f) Zulaufkonzentration — TWO: A178-12.C_RBFA_zu (dbab9d7e, owner, Gl. 8 output) · A178-09.a178_C_AFS_zulauf (136316b7, label "AFS"
+--     although the source works in AFS63 only: "Bei der Bemessung beziehen sich alle konzentrations- und frachtbezogenen Angaben
+--     auf AFS63." §6.2.2.1 p.26).
+--  g) Source-less fields (residue in the pack): A178-04.a178_psi_m (08f4caaa, "Abflussbeiwert" occurs only in the A 117 advert) ·
+--     A178-04.a178_belastungskategorie (30222e45) · A178-08.belastungs_kategorie_summary (d2d28103) — "Belastungskategorie" does
+--     NOT occur in the md (grep = 0; PRIOR FINDING CONFIRMED) · A178-02.gewaesserart (f1289ec5) · A178-02.vorfluter_kennzahl (74e5e35a).
+--  h) Summary echoes A178-08 (380c4fb7, 4b635d1e, 070d7281, db075cfc) — required=true hand-entered copies of 04/05/06/07 values.
+--  i) Verdict roll-ups A178-19: nachweis_b_F_compliant (a3a2f737) ↔ A178-16.nachweis_b_F (e9afc722) + b_F_im_bereich (a784d7b7);
+--     nachweis_einleitfracht_compliant (56e236e3) ↔ A178-16.nachweis_einleitfracht (34e395a6) + emission_eingehalten (d276ca9a);
+--     q_F_max_check (88ba45cd) ↔ REQ-14; filter_thickness_check (c41513cb) ↔ REQ-12.
+-- Proposal: deactivate the foreign-symbol / source-less / same-worksheet duplicates (10 rows below); convert the A178-08 echoes and
+--   A178-19 roll-ups to read-only derived (engine write-back); fold the 530 default into b_R_a's default_value.
+-- ☐ RATIFIED
+-- update public.fields set active=false where id in ('296d1829-a487-4fc7-8ef3-355d9bb714f3','7aa0d2c3-8b3e-4a2e-a4a0-ac7dc9a19f5c','aea0a5ee-1582-4407-9310-f2e67e7dfb98','08f4caaa-b0ef-448d-a06d-d42dde49c798','30222e45-39eb-45f1-8c5d-225a3065d6b4','d2d28103-7a75-4c3c-a374-3789bd8d8531','a2b492b2-7cc3-4c19-b77f-5da09c0e2cff','0ea84ade-0196-4d5d-a114-3288c6d198e2','136316b7-69e5-4bdf-84aa-3a3ebda1fe2d','3191ec80-451a-48cc-9950-5d000fd59968');
+-- Rollback: set active=true on the same ids.
+-- ☐ RATIFIED (separately — needs a decision whether a gross catchment area is wanted at all; the source has no such symbol)
+-- update public.fields set active=false where id in ('9869a3bd-05c7-488e-995f-cf5e9eef3896','f1289ec5-adb3-4e8e-84ed-9f896afbea08','74e5e35a-2723-4e56-b156-a9b3e3f0abec');
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Gate condition / enforcement findings (all 28 gate source_quotes checked against the md: 21 verbatim ≥85 %; REQ-13/REQ-09
+--   use "..." joins, REQ-14/19/20 render the formula in plain text, REQ-17 paraphrases the heading, REQ-22 is the short "≥ 10 a"
+--   sentence — every one anchors on a real md sentence; cosmetic re-quote optional).
+--  1) REQ-27 (3f48d791, ws 07, BLOCK, "pflanzdichte >= 4 AND pflanzdichte <= 8", §6.1.4.7) — D7 CONFIRMED: anchored on empirical wording
+--     "Als Pflanzdichte haben sich 4 bis 8 Pflanzen je Quadratmeter bewährt." (p.24). → severity block→warn.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn' where id='3f48d791-3d3a-4d01-b9ba-cdf8cb22795a';   -- rollback: severity='block'
+--  2) REQ-15 (b5ad025c, ws 11, BLOCK, "h_RR >= 0.3 AND h_RR <= 2", §6.1.4.3) — D7 REFUTED for this gate: the anchor "Nutzbare Einstauhöhen
+--     liegen zwischen $h_{R R}=0,3 \mathrm{~m}$ und 2 m ." (p.22) reads descriptive, but §6.2.2.1 step 3 binds it: "wird unter
+--     Berücksichtigung der örtlichen Gegebenheiten und innerhalb der in 6.1.4.3 definierten Grenzen gewählt." (p.28). → KEEP block.
+--  3) REQ-07 (bc2aec7d, ws 06, BLOCK, "feststoffeintrag_alarm == false", §5.2.4) — anchored on a risk statement ("erzeugt ein erhebliches
+--     Kolmationsrisiko", p.17) and §5.2.5 says "Hier ist im Einzelfall zu überprüfen, ob Retentionsbodenfilter eine geeignete
+--     Behandlungsmaßnahme darstellen." (p.17). → block→warn (D7 class), or keep block + add an attest bypass.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn' where id='bc2aec7d-35d6-416f-b7cb-61b642ea5b27';   -- rollback: severity='block'
+--  4) REQ-11 (c991cba7, ws 12, BLOCK, "attest_a178_12_req_11 == True", §6.2.1.3) fires UNCONDITIONALLY although the obligation is
+--     "Innerhalb von Wasserschutzgebieten ist zum Schutz gegen Havarien ein zusätzlicher Auffangraum für Leichtflüssigkeiten gemäß
+--     RiStWag vorzusehen." (p.26) — a project outside a WSG (A178-01.wasserschutzgebiet = zone_none) is blocked for nothing.
+--     → condition: 'IF system_type == ''strasse'' AND wasserschutzgebiet != ''zone_none'' THEN attest_a178_12_req_11 == True'.
+-- ☐ RATIFIED
+--  5) REQ-12 (07b40e36, ws 12, BLOCK, h_FK_required ≥ 0,75 / 0,50) is a TAUTOLOGY: the only operand A178-07.h_FK_required (354446c4) is
+--     labelled "Mindesthöhe Filterkörper" = the limit itself; NO field carries the PLANNED consolidated filter-body height. Evidence:
+--     "Die erforderliche Höhe des Filterkörpers beträgt im konsolidierten Zustand: l Mischsystem $h_{\mathrm{FK}} \geq 0,75 \mathrm{~m}$,
+--     1 Trennsystem und Straßenentwässerung $h_{\mathrm{FK}} \geq 0,50 \mathrm{~m}$." (§6.1.4.5 p.23); §3.2 defines h_FK (m) "Höhe/Tiefe des
+--     Filterkörpers". → relabel 354446c4 to symbol h_FK / "Höhe Filterkörper (konsolidiert)" (engineer_input) and let REQ-12 test it;
+--     also re-home REQ-12 to ws 07 (it reads only 02.system_type + 07.h_FK_required).
+-- ☐ RATIFIED
+-- update public.fields set symbol='h_FK', label_de='Höhe Filterkörper (konsolidiert)', description='h_FK — geplante Höhe des Filterkörpers im konsolidierten Zustand; Mindestwerte §6.1.4.5: Mischsystem ≥ 0,75 m, Trenn/Straße ≥ 0,50 m.' where id='354446c4-be6d-40d7-9dcd-27899bad0792';
+-- Rollback: symbol='h_FK_required', label_de='Mindesthöhe Filterkörper', description='Erforderliche Höhe des Filterkörpers (konsolidiert); abhängig vom Systemtyp.' (condition text of REQ-12 must follow the rename).
+--  6) REQ-16 (a7b8e509, ws 02, BLOCK, "IF system_type == 'strasse' THEN h_RR >= 0.5", §6.2.2.2) over-enforces: the 0,5 m applies only to
+--     the SIMPLIFIED road design — "Wurden durch die Aufsichtsbehörden keine spezifischen Behandlungsziele formuliert, kann die
+--     Bemessung [...] stark vereinfacht entsprechend den folgenden Vorgaben erfolgen:" (p.28); with targets "folgen die Bemessung und
+--     der Nachweis [...] den Vorgaben für das Trennsystem." (p.28) → then REQ-15 (0,3–2 m) governs. Needs a selector
+--     "behandlungsziel_formuliert" (boolean, ws 01/07) and condition 'IF system_type == strasse AND behandlungsziel_formuliert == False
+--     THEN h_RR >= 0.5' (plus A_F ≥ 100 m²/ha in the same case, see S-4 G-3). Also re-home ws 02 → ws 11 (h_RR lives on A178-11).
+-- ☐ RATIFIED
+--  7) REQ-09 (613892b0, ws 12, BLOCK, "IF misch THEN (e_0 <= 55 AND n_RBF >= 10)", §6.2.1.1): (i) exception not modelled — "In Einzelfällen
+--     kann im Bestand eine höhere Entlastungsrate zugelassen werden. Für Stauraumkanäle mit unten liegender Entlastung ist diese
+--     Ausnahme nicht zulässig" (p.26); (ii) it reads n_RBF (A178-17, phase 5) from a phase-4 worksheet — the ≥ 10 term is already
+--     enforced by REQ-22 on A178-17. → drop the n_RBF term from REQ-09; add optional attest "e_0_ausnahme_bestand" (not for
+--     Stauraumkanal unten liegend) as bypass; re-home to ws 07 (e_0 lives there).
+-- ☐ RATIFIED
+--  8) REQ-22 (33ad1e02, ws 17, BLOCK, "n_RBF >= 10", §6.2.2.3 c/§6.2.1.1) is UNCONDITIONAL: §6.2.1.1 "n ≥ 10 Entlastungen pro Jahr" sits
+--     in the Mischsystem sub-clause; the §6.2.2.3 c) sentence "Die Beschickungshäufigkeit muss im langjährigen Mittel $\geq 10$ a sein."
+--     (p.31–32; md unit garble "10 a") follows a Mischsystem-specific first sentence but is not itself restricted. Owner ruling:
+--     Misch-only or all systems. No SQL until ruled.
+-- ☐ RATIFIED
+--  9) REQ-10 (03bdeeb0, ws 12, BLOCK, "IF trenn/strasse THEN v_spez_grobstoff >= 0.5", §6.2.1.2): exception not modelled — "Bestehende
+--     Regenklärbecken können alternativ als Vorstufe genutzt werden. Sie sind jedoch grundsätzlich ohne Dauerstau zu betreiben." (p.26);
+--     and the operand A178-07.v_spez_grobstoff (70673e5f) is is_required=FALSE while block-gated. → is_required true (conditional on
+--     trenn/strasse) + optional "vorstufe_bestehendes_rkb" bypass; re-home ws 12 → ws 07.
+-- ☐ RATIFIED
+-- update public.fields set is_required=true where id='70673e5f-e245-4b58-ab48-832287987066';   -- rollback: is_required=false
+-- 10) REQ-13 (5fa37529, ws 07, BLOCK, grading + CaCO3, §6.1.4.6): exception not modelled — "Bei Abweichungen von der Korngrößenverteilung
+--     muss die Eignung des Filtermaterials durch Versuche belegt werden." (p.23). → optional attest "filtermaterial_eignung_versuch"
+--     that bypasses U/Feinanteil/Überkorn (NOT the CaCO3 ≥ 20 % term, which has no printed exception). Keep block.
+-- ☐ RATIFIED
+-- 11) Gate re-homes (gate on ws A reading no field of ws A):
+--     REQ-18 (269deecc) ws 09 → ws 10 (reads 02.system_type, 05.h_N_a_m, 10.A_F, 04.A_E_b_a);
+--     REQ-21 (cd323ef6) ws 16 → ws 17 (reads 02.system_type, 17.t_RR_E_n1);
+--     REQ-23 (a983201f) ws 12 → ws 05 (reads only 05.langzeitsimulation_dauer);
+--     REQ-12 (07b40e36) ws 12 → ws 07; REQ-09 (613892b0) ws 12 → ws 07; REQ-10 (03bdeeb0) ws 12 → ws 07; REQ-16 (a7b8e509) ws 02 → ws 11.
+--     REQ-20 (8b808afb) on ws 16 reads 14/04/07 only — by design (verification archetype, output emission_eingehalten lives there): keep.
+-- ☐ RATIFIED
+-- 12) REQ-28 (12f8444a, warn, attest, clause §8.3) — its source_quote "Es müssen Messstellen für den Wasserstand sowie
+--     Probeentnahmestellen vorgesehen werden." is the §6.1.1 sentence (p.19); §8.3.2 reads "Wasserstandmessungen sind im Retentionsraum
+--     und im Ablaufbauwerk vorzusehen." (p.37). → retag clause §8.3 → §6.1.1 (or swap the quote).
+-- ☐ RATIFIED
+-- update public.compliance_requirements set clause_reference='§6.1.1' where id='12f8444a-daad-4b58-8a72-b7f593ee9e10';   -- rollback: '§8.3'
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Missing gates for printed hard limits (spec form; fields exist unless noted).
+--  G-1 dauerhafter_einstau (16c119f5, ws 17) — printed prohibition TWICE, no gate: "Ein dauerhafter Teileinstau des Filterkörpers zur
+--      Verbesserung der Wasserversorgung der Schilfvegetation im Regelbetrieb ist nicht zulässig" (§6.1.4.7 p.24); "Ein dauerhafter
+--      Einstau des Filterkörpers ist nicht zulässig." (§8.2.3 p.35). → NEW gate ws 17, block, 'dauerhafter_einstau == False', §6.1.4.7/§8.2.3.
+-- ☐ RATIFIED
+--  G-2 k_f_b (a39ec412, ws 17) — "Werte $k_{\mathrm{f}, \mathrm{b}}<10^{-6} \mathrm{~m} / \mathrm{s}$ sind ein Hinweis auf Kolmation." (§8.3.2
+--      p.37). → NEW gate ws 17, warn, 'IF k_f_b IS NOT NULL THEN k_f_b >= 1e-6', §8.3.2 (operating indicator, never block).
+-- ☐ RATIFIED
+--  G-3 Simplified road design (§6.2.2.2 p.28): "spezifische Bodenfilteroberfläche $A_{\mathrm{F}}=100 \mathrm{~m}^{2} / \mathrm{ha}$
+--      angeschlossener befestigte Fläche" has NO gate (REQ-18 covers only Trennsystem >1.000 mm/a). → NEW gate ws 10, block,
+--      'IF system_type == strasse AND behandlungsziel_formuliert == False THEN A_F >= 100 * A_E_b_a' (pairs with S-3.6).
+-- ☐ RATIFIED
+--  G-4 eta_VS selection (1d75663c): Tab. 1 prints 0 with footnote "Bei vorhandenen RKB $\left(q_{\mathrm{A}} \leq 10 \mathrm{~m} /
+--      \mathrm{h}\right)$ oder RÜB-DB kann für AFS63 $\eta_{\mathrm{VS}}=0,2$ angesetzt werden." (p.30) — SR-2: a free number field lets any
+--      value in. → enum {0 (default), 0.2 (nur RKB q_A ≤ 10 m/h oder RÜB-DB)} or gate 'eta_VS IN {0, 0.2}' (block).
+-- ☐ RATIFIED
+--  G-5 Printed hard limits WITHOUT any field (catalogue only — fields would have to be created first; no SQL):
+--      §6.1.1 "dürfen im Nahbereich keine Sträucher und Bäume gepflanzt werden" (p.19) · §6.1.3.2 Grobstoffrückhalt "unbelüfteter Sandfang",
+--      RKB "ohne Dauerstau" (p.21) · §6.1.4.4 Deckschicht "5 cm starken Schicht [...] ( 2 mm bis 8 mm )" (p.22) · §6.1.4.5 "Der Filterkörper
+--      muss einschichtig mit ebener Oberfläche hergestellt werden." + Filterstabilität nachzuweisen (p.23) · §6.1.4.6 "Bindige Böden,
+--      organische Beimischungen und rezyklierte Gesteinskörnungen dürfen nicht verwendet werden." (p.23) · §6.1.4.8 Dränmaterial 2/8 mm,
+--      Dränsauger "ohne Gefälle unmittelbar auf dem Schutzvlies", "muss [...] befahrbar sein" (p.24) · §6.1.4.10 "Rückstau aus dem Gewässer
+--      muss [...] vermieden werden" (p.25) · §6.1.4.13 Notentleerung "müssen bei eingestautem Retentionsraum gewährleistet sein" (p.25) ·
+--      §7.2 "Die Höhenabweichungen dürfen maximal $\pm 2 \mathrm{~cm}$ betragen." (p.33) · §7.3 Einbauhöhe "ca. $5 \%$ größere" (p.33) ·
+--      §7.4 Bewässerung "innerhalb einer Frist von maximal 24 Stunden" (p.34) · §8.3.3 Depotuntersuchungen "im 5-jährlichen Turnus" (p.37).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · clause_reference retags (evidence = the pack quote on each row; §4.4, §5.5, §5.6, §5.7 do NOT exist in DWA-A 178 — §4 has
+--   only 4.1/4.2, §5 ends at 5.4; they look like DWA-A 138-1 clause numbers carried over).
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§6.1.2' where id='296d1829-a487-4fc7-8ef3-355d9bb714f3';            -- was §4.1 (einzugsgebiet_typ, if kept)
+-- update public.fields set clause_reference='§5.2.1' where id='9869a3bd-05c7-488e-995f-cf5e9eef3896';            -- was §4.1
+-- update public.fields set clause_reference='§5.4' where id='fb6e1ae3-4432-4df5-a3a6-7f31d97a64ff';              -- was §4.1
+-- update public.fields set clause_reference='§5.2.1, §6.2.2.3' where id='3f065702-36e7-444b-b6f8-d8fcd0b5a1a9';  -- was §4.4 (kostra_data_source)
+-- update public.fields set clause_reference='§5.3, §7.1' where id='e5ff02e3-7a52-435b-85ed-cbe31789d9be';        -- was §4.4 (soil_data_source)
+-- update public.fields set clause_reference='§5.1, §5.2.4' where id='217c302b-4985-4f85-84f8-dfb90ed8c672';      -- was §4.4
+-- update public.fields set clause_reference='§3.2' where id in ('380c4fb7-9e8e-4e95-9c0d-5f73d1d4a82d','4b635d1e-d3ab-4429-b961-18e970a62577','070d7281-f246-4a26-baed-787a0674ff8a','db075cfc-3d5b-40bd-ad6b-388e8595b09f');  -- A178-08 echoes, were §5.1/§4.4/§5.2/§5.3
+-- update public.fields set clause_reference='§3.2, §6.2.2.1' where id in ('136316b7-69e5-4bdf-84aa-3a3ebda1fe2d','0ea84ade-0196-4d5d-a114-3288c6d198e2');  -- were §5.2
+-- update public.fields set clause_reference='§6.2.2.3' where id in ('d1a52178-771d-454d-8d01-83fda4415017','4f299df4-7098-4ee5-b9bc-08953fdec466');       -- CSB fields, were §5.2
+-- update public.fields set clause_reference='§5.3, §6.2.2.2' where id='0b279978-4693-459b-9439-c5864e073e94';    -- was §5.3
+-- update public.fields set clause_reference='§6.1.4.10' where id='a2b492b2-7cc3-4c19-b77f-5da09c0e2cff';         -- was §5.3
+-- update public.fields set clause_reference='§6.2.2.1, §6.2.2.2' where id='482cdb0b-2e98-4f67-9621-2e0397b66df9'; -- was §5.3
+-- update public.fields set clause_reference='§6.2.1.3' where id='eb72b417-bf31-4676-b03a-7cca35b23db9';          -- was NULL (attest_a178_12_req_11)
+-- update public.fields set clause_reference='§6.2.2.4' where id in ('f150726d-9edd-44b3-84b2-edc9af2cc1e0','842b3c29-e039-49e8-87b6-5ae449fcac1d','186c1b8b-9bd0-4583-b083-7bb0e5586260','b4822b77-96be-4eeb-b8f5-b0c98c523ace','d9ff42e6-8eef-4e3b-a433-7c7244cd073f','cad666d3-03f3-4856-9316-4a4a6730b176','5f29a09f-cbe1-41ba-9c69-9194aaf89df5');  -- A178-18, were §5.5/§5.6/§5.7
+-- update public.fields set clause_reference='§6.2.2.3' where id in ('a3a2f737-ac01-40f9-8729-f9602aee6cba','56e236e3-d54d-4027-b4ea-30ae9a8a4e59');  -- were §5.6
+-- update public.fields set clause_reference='§6.1.4.10' where id='88ba45cd-433b-4565-b846-cb2a1074b572';         -- was §5.5
+-- update public.fields set clause_reference='§6.1.4.5' where id='c41513cb-7384-486f-8531-bf8d07e668ee';          -- was §6
+-- update public.fields set clause_reference='admin' where id in ('83804e04-978c-40db-85c5-eb6f3360de88','c4a4df8c-78a0-4b29-929e-9a7623c55053','bbb275e1-f34c-484d-9218-a9bf1e3d19e8','ef8ef510-1836-46fd-ad2c-f6e7bc4dd0fe','53beb92c-2a98-409a-ae6f-677a621a2a74','d929eabd-475f-402a-81b6-09eeddb045b2');  -- app fields tagged §4/§4.1 (Grundlagen)
+-- Rollback: restore the "was" values noted per line.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Unit corrections.
+--  a178_A_RBF_spez (0b279978) unit "m²/(ha·red)" — the source gives m² per ha A_E,b,a ("$A_{\mathrm{F}}=100 \mathrm{~m}^{2} / \mathrm{ha}$
+--  angeschlossener befestigte Fläche ( $A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$ )", §6.2.2.2 p.28); "red" (reduced area) is DWA-A 102/138 nomenclature.
+-- ☐ RATIFIED
+-- update public.fields set unit='m²/ha' where id='0b279978-4693-459b-9439-c5864e073e94';   -- rollback: unit='m²/(ha·red)'
+--  a178_belastungskategorie / einzugsgebiet_groesse_ha etc.: no unit issue. All §3.2 units match the encoding (kg/(ha*a) ≙ kg/(ha•a)).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · is_required review + standard_fixed values held in UI-editable fields.
+--  a) propose is_required=false: soil_data_source (e5ff02e3 — a tender document, §7.1, not a design input of a sealed basin) ·
+--     kostra_data_source (3f065702 — app label; the source needs a ≥10-year rainfall series, not KOSTRA) · eta_RR (ddc0bd42 — used only
+--     in Gl. 6/7, i.e. becken_typ = durchlauf) · C_RBF_zu (796004e6 — derived: "entspricht [...] der nach GL. (8) ermittelten
+--     Zulaufkonzentration" when η_VS = 0, p.31) · the four A178-08 echoes and four A178-19 roll-ups (derived, S-2 h/i).
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('e5ff02e3-7a52-435b-85ed-cbe31789d9be','3f065702-36e7-444b-b6f8-d8fcd0b5a1a9','ddc0bd42-feb1-4833-a653-22942dd9927f','796004e6-9f24-48d8-91cb-15551ada3499');  -- rollback: is_required=true
+--  b) propose is_required=true (conditional): v_spez_grobstoff (70673e5f) — see S-3.9.
+--  c) standard_fixed printed values sitting in editable number fields (validator class "standard_fixed that is UI-editable = finding"):
+--     b_krit (7780c33a) = 7 kg/(m²·a) "festgesetzt" (§6.2.2.1 p.26) · b_R_a_default (3191ec80) = 530 (§6.2.2.1 p.27) · eta_RR (ddc0bd42) = 0,50 ·
+--     eta_RRL (456d3ec9) = 0,60 · eta_F (f10f178c) = 0,95 (Tab. 1 p.30) · eta_VS (1d75663c) = 0 / 0,2 (Tab. 1 + footnote). → read-only with the
+--     printed default (η_VS as a 2-option selection, G-4); h_RR (a8b0302d) is standard_range 0,3–2 m (SR-2 selection — correct as is).
+--  d) derived values that are hand-enterable (the #22 class): b_F_im_bereich (a784d7b7), emission_eingehalten (d276ca9a) = gate outputs;
+--     V_RBF (97967ffd) = Retentionsraum + 15 % Porenvolumen with NO equation encoded ("Das Porenvolumen wird pauschal mit $15 \%$ des
+--     Filterkörpervolumens angesetzt." p.28); B_RBF_ab (8d679485) = B_Dr,RBF + B_FÜ + B_RRL ("Summe aus Restfracht filtriert, Entlastung
+--     über den Filterbeckenüberlauf und, wenn vorhanden, aus Regenrückhaltelamelle" p.31) with NO equation encoded. → add the two
+--     equations (needs a Filterkörpervolumen input: A_F · h_FK) and mark outputs read-only.
+-- ☐ RATIFIED
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · md evidence for the open rulings (no SQL — decision batch for Alvaro).
+--  D1b (η_F 0,95 table vs computed): the source carries TWO distinct η_F. (i) Rechenwert: Tab. 1 "Rechenwerte der mittleren
+--     Frachtrückhaltegrade [...] zur Anwendung in GI. (5) bis GL. (7)" → η_F = 0,95 is an INPUT to the b_F proof. (ii) Check value: §6.2.2.3
+--     "b) Frachtwirkungsgrad des Filterkörpers" Gl. (13) computes η_F from simulation results as a "Zusätzlicher Nachweis". The
+--     encoding has ONE field (f10f178c, ws 15, output of Gl. 13) that Gl. 5–7 on ws 13 also read → the computed value silently
+--     replaces the printed Rechenwert in the b_F proof. Proposal: split into eta_F (standard_fixed 0,95, ws 13, read-only) and
+--     eta_F_nachweis (derived Gl. 13, ws 15); no printed acceptance threshold exists for the Gl. 13 value.
+--  D2 (SUM_over_i): Gl. (2)/(3) print "\sum\left(A_{\mathrm{E}, \mathrm{~b}, \mathrm{a}, \mathrm{i}} \cdot b_{\mathrm{R}, \mathrm{a}}\right)" with
+--     A_E,b,a,i = "befestigte, angeschlossene Teilflächen" (plural, p.27). The encoded A_E_b_a_i (6d2a8ffb) is ONE scalar, so the sum
+--     collapses to A_E,b,a · b_R,a (exact only when b_R,a is uniform and Σ A_i = A_E,b,a). Either a repeating sub-area table or
+--     replace the operand by A_E_b_a (26a5c694) and drop A_E_b_a_i. Note e_0 is tabled in % (§3.2) — Gl. (3) needs the fraction.
+--  D3 (Gl. 9 form): the md prints Gl. (9) as the DOUBLE inequality "4 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right) \leq b_{F}
+--     \leq b_{\text {krit }}=7 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right) \tag{9}" under the heading "Zulässige AFS63-
+--     Bodenfilteroberflächenbelastung:" (p.30); the lead sentence names only the upper bound ("die zulässige [...] $b_{\text {krit }}$
+--     [...] einhält"); the 4 comes from the Vorwort: "aufwandsarmer Betrieb [...] erst ab einer AFS63-Filterflächenbelastung von
+--     $4 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right)$ möglich" (p.3) and §4.2 treats underload as a failure mode. REQ-19
+--     (444bc2df) blocks on both bounds = the literal printed equation; owner may downgrade the lower bound to warn.
+--  D4 (selectors): configuration is selected by becken_typ (fang|durchlauf) × rrl_vorhanden → Gl. 5/6/7, which mirrors the three
+--     printed headings (p.29); system_type (misch|trenn|strasse) → Gl. 2/3 and §6.2.1.x; the duplicate einzugsgebiet_typ (S-2 a) and
+--     the missing "behandlungsziel_formuliert" (S-3.6) are the only selector defects found.
+--  D7 (block-over-descriptive): REQ-15 KEEP block (binding cross-reference, S-3.2); REQ-27 → warn (S-3.1); additionally REQ-07 → warn
+--     (S-3.3). All other block gates anchor on "muss / ist sicherzustellen / darf nicht / festgelegt / festgesetzt / nicht zulässig".
