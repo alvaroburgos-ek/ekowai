@@ -1,0 +1,292 @@
+-- ============================================================================
+-- DWA-A-262E — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (English mathpix LaTeX of DWA-A 262E Nov 2017; NO page-number lines — "printed p.N"
+-- derived from the Content table + mathpix figure indices (printed+2), see pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Worksheet ids: 01 ef435a92 · 02 c03fa9e8 · 04 258fea42 · 05 d7e721bf · 06 2a2d14b8 · 07 d0887ee0 · 08 b72f96a6 · 10 d4b4afcc ·
+--   11 404137ee · 12 f2e0fa08 · 14 079dd0ea · 15 4c8e35a3 · 16 9fdcf752 · 18 9a125418 · 20 8a2723a6 · 21 0ced17ca · 22 4d0984d2 ·
+--   23 62b31b6b · 25 f935ebaf · 26 5f3ca9c3 · 27 53f22504 · 29 0bb6299f · 30 b418698c · 31 dbb68c68 · 32 61178ece · 33 5dc73d89
+-- Context: this standard was REBUILT 2026-06-23 and its 52 block gates harness-proven both ways — nothing below disputes the
+--   arithmetic; every item is a source-vs-encoding disagreement found on the md text.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE. Every one of the 215 symbols carries a label; no enum token of the 14 enum fields is
+--   materialised as a field. The two attest_* checkboxes (REQ-09/REQ-10) and 4 enum fields with label_de NULL are handled in S-4/S-8.
+--   No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate / single-source clusters (derivation invariant: ONE atomic owner, the rest inherit by reference, never re-entered).
+--  a) Design population — SIX copies: A262-01.EZ (ac823b70, owner) · A262-05.EZ (8d6133aa) · A262-09.EW (b63a58ac) ·
+--     A262-17.EW_bemessung_KA (607db6cf) · A262-24.EW_bemessung_KomKA (3f2e8b4e) · A262-26.EW_Grauwasser (7d8ced0c, legit split only
+--     if greywater P ≠ EZ). Evidence: "EZ & P & number of inhabitants" (§3.2 p.16); Eq.(2) uses EZ (p.19).
+--  b) Specific wastewater generation — FOUR copies: A262-04.w_s_d (7261671b, owner) · A262-05.w_s_d (b525423c) · A262-09.Q_T
+--     (9ac24c0c — symbol/label/unit mismatch: "Q_T" l/(EW·d) "Spez. häuslicher Abwasseranfall" IS w_s,d, not Q_T,d,aM) ·
+--     A262-26.Q_Grauwasser (49ae49df — greywater value ≥75 l/(P·d), §4.1.3 p.21; could stay as the greywater branch of w_s_d).
+--  c) Filter-type selector — FIVE copies with three different value sets: A262-10.filter_type (40e1d835, owner, 9 options incl.
+--     municipal-only lava + downstream HF) · A262-17.filtertyp_gewaehlt_KA (19a58a32, 6 opts, label_de NULL) · A262-18.filter_type_KomKA
+--     (083bba88, 5 opts, label_de NULL) · A262-24.filtertyp_KomKA (f656b0e7, 5 opts, label_de NULL) · A262-30.main_filter_type (798b903e, 9).
+--     Evidence: Tab.17 (p.37) lists 8 small-WWTS columns, Tab.18 (p.39) 11 municipal columns.
+--  d) Pretreatment selector — THREE copies: A262-07.pretreatment_selected (cc014804, owner) · A262-07.vorbehandlung_typ (a20766d0,
+--     SAME worksheet, label_de NULL, description lists a different set "rechen_sieb, sandfang, dreikammer") · A262-30.primary_treatment
+--     (3b525adb).
+--  e) Wastewater type: A262-02.wastewater_type (6940456d, owner) vs A262-04.abwasser_typ (1558c682, free text "haeuslich | mischwasser |
+--     grauwasser").
+--  f) Same-worksheet twins on A262-20: f_A_F01_CSB (db3818a8, carries REQ-112) vs f_A_F_CSB_VFKS_1_KomKA (a8f7096d).
+--  g) Summary echoes: A262-17.Q_T_KA (5ebd9b8f, l/d) ↔ A262-06.Q_T_d_aM; A262-24.Q_M_KomKA (23861b25) ↔ A262-06.Q_M;
+--     A262-24.B_CSB_KomKA (9bf65fbd, kg/d) ↔ A262-09.B_CSB × EZ.
+-- Proposal: deactivate the free-text / label-less duplicates (5 rows below), convert the summary echoes to read-only derived
+--   (engine write-back), keep (a)/(c) owner on the registration/inventory worksheet.
+-- ☐ RATIFIED
+-- update public.fields set active=false where id in ('a20766d0-9ac6-48ae-937a-8209e2bf9044','1558c682-23a9-4ebf-8d90-687b3696893b','9ac24c0c-40be-429d-a8f7-efbf193d3494','19a58a32-8ca5-4105-803d-2657509c3fb2','f656b0e7-7f64-4fb5-9820-b121fe8131b1','a8f7096d-b23b-4d6f-ac7d-eb5c45e33de2');
+-- Rollback: set active=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Gate condition / enforcement findings (all 60 gate source_quotes were checked against the md: 58 verbatim; REQ-08 quotes §5.2
+--   but is tagged §4.2.1; REQ-21 quote "Operating Instructions / Function Control (self-monitoring and maintenance plan required)" is a
+--   paraphrase of §6.1/§6.2/§6.4 headings, not a sentence — see S-4).
+--  1) REQ-30 (c47ead44, ws 07, block, "aufenthaltszeit >= 2", §4.2.5) fires UNCONDITIONALLY. Evidence: "The volume of the sedimentation
+--     chamber must be dimensioned for a hydraulic residence time of $\geq 2$ hours at a maximum inflow $Q_{\text {Tr, } h, \max }$ and a
+--     minimum volume of $75 \mathrm{l} / \mathrm{P}$." (§4.2.5 p.22, Imhoff tank) — Tab.1 (p.20) only PRESUMES "≥ 2 h" for septic tank /
+--     settling pond / Imhoff. A raw-wastewater-filter or aerated-pond project has no residence time to check.
+--     → condition: 'IF pretreatment_selected IN {imhoff_tank, multicompartment_septic_tank, settling_pond} THEN aufenthaltszeit >= 2'
+--       (owner may narrow to imhoff_tank, the only "must").
+--  2) REQ-103 (cb1b1b64) / REQ-104 (3ab91b19) (ws 18 inventory, block, f_A ≤ 20 / q_F,T ≤ 80, §4.3.3.2) enforce the SAND-filter values on
+--     every municipal type. Evidence: Tab.11 first stage "$\leq 80$" (p.29); Tab.18 coarse sand "$\leq 25$" (p.39); Tab.14 lava
+--     "$q_{\text {Fo, Betrieb }}$ … $\leq 240$" (p.32); §4.5 "$q_{\mathrm{F}, \mathrm{T}} \leq 120 \mathrm{l} /(\mathrm{m}^{2} \cdot \mathrm{~d})$
+--     can be selected" at ≥ 12 °C (p.44). → condition both on 'filter_type_KomKA == vf_sand_0_2' and add per-type gates (S-7).
+--  3) REQ-12 (04a5eaf6, block, "if wastewater_type == greywater_only then w_s_d >= 75", §4.1.3) — PRIOR FINDING CONFIRMED on both counts:
+--     (i) anchored on a permissive sentence "greywater production can be set at $\geq 75 \mathrm{l} /(\mathrm{P} \cdot \mathrm{d})$" (p.21),
+--     (ii) homed on A262-25 (Saisonbetrieb) while reading A262-02.wastewater_type and A262-04.w_s_d only. → re-home to A262-04, block→warn.
+--  4) REQ-02c (8a8539fe, ws 26, block, "Q_GW_taeglich >= 75") compares the DAILY TOTAL (l/d = EW × per-capita) with the per-capita
+--     75 l/(P·d): passes trivially for EW ≥ 1 and duplicates REQ-12. → operand Q_Grauwasser (49ae49df), severity warn (same permissive anchor).
+--  5) REQ-18a (311ad8e0, block, geomembrane ≥ 1.5 mm) ignores the printed exemption although both exemption fields exist. Evidence:
+--     "For liner installation without welds in small wastewater treatment systems, the thickness of the polyethylene-based liner can be
+--     $\geq 1 \mathrm{~mm}$." (§5.3 p.45). → 'IF lining_type == geomembrane THEN (geomembrane_thickness_mm >= 1.5 OR (system_size_category ==
+--     small_wwts AND geomembrane_is_polyethylene == True AND geomembrane_no_welds == True AND geomembrane_thickness_mm >= 1))'.
+--  6) REQ-17 (ba744793, block, "IF lining_type IN {mineral_seal_clay, unsealed_subsoil} THEN k_f_subsoil_m_s <= 1e-8") reads the WRONG field
+--     for the mineral seal and skips bentonite. Evidence: mineral seal / bentonite — "$\mathrm{A} k_{\mathrm{f}}$-value of $\leq 10^{-8}
+--     \mathrm{~m} / \mathrm{s}$ must be demonstrated." (of the seal); subsoil — "A subsoil with a permeability value $k_{\mathrm{f}} \leq
+--     10^{-8} \mathrm{~m} / \mathrm{s}$ does not require additional sealing." (§5.3 p.45). → split: 'IF lining_type IN {mineral_seal_clay,
+--     bentonite_base} THEN k_f_lining_m_s <= 1e-8' + 'IF lining_type == unsealed_subsoil THEN k_f_subsoil_m_s <= 1e-8'.
+--  7) REQ-15 (16830561, block, fines ≤ 2 %) is unconditional; lava sand is printed at "< 8 %" clay (§5.4.2.6 p.54; Tab.21 p.49 "<8").
+--     → exclude vf_lava_sand_0_4 from REQ-15 and add 'IF filter_type == vf_lava_sand_0_4 THEN lava_sand_clay_fraction_pct < 8' (block).
+--  8) REQ-08 (a6875f17, block, "pretreatment_selected != none") — the enum has no "none" token; the gate is a tautology for any selection
+--     and depends on null-handling for an empty field. → 'pretreatment_selected IS NOT NULL'; clause §4.2.1 → §5.2 (anchor sentence).
+--  9) REQ-13 (cd8e9cb7, ws 25, WARN, "B_d_TKN <= B_A_TKN_zul") — ruling pending "block?": REFUTED. §4.3.4 does not forbid B_d > B_A; it
+--     prescribes the TKN area for that case ("for $B_{\mathrm{d}, \mathrm{TKN}} / A_{\mathrm{F}, \mathrm{CSB}, \mathrm{red}} \geq B_{\mathrm{A},
+--     \mathrm{TKN}, \mathrm{zul}}$ use: $A_{\mathrm{F}, \mathrm{TKN}, \mathrm{red}}=B_{\mathrm{d}, \mathrm{TKN}} / B_{\mathrm{A}, \mathrm{TKN},
+--     \mathrm{zul}}$", p.33) and rules "the reduced area is determined by the larger area requirement" (p.33). §4.5 prints only "the TKN
+--     loading rate should be $<10 \mathrm{~g} /(\mathrm{m}^{2} \cdot \mathrm{~d})$" (p.43, "should", low-carbonate media). → keep WARN; the
+--     enforceable rule is the max() selection (new block gate, S-7 #12).
+-- ☐ RATIFIED  (1–9 individually)
+-- update public.compliance_requirements set condition='IF pretreatment_selected IN {imhoff_tank, multicompartment_septic_tank, settling_pond} THEN aufenthaltszeit >= 2' where id='c47ead44-7701-4e96-8e7e-93603bcd30eb';
+-- update public.compliance_requirements set condition='IF filter_type_KomKA == vf_sand_0_2 THEN f_A_F_CSB_KomKA_in <= 20' where id='cb1b1b64-e1b8-4b8f-8f46-f62ce81bd9cf';
+-- update public.compliance_requirements set condition='IF filter_type_KomKA == vf_sand_0_2 THEN q_F_T_KomKA_in <= 80' where id='3ab91b19-98b4-4495-9dbb-a8792babcfec';
+-- update public.compliance_requirements set worksheet_template_id='258fea42-2e8b-40aa-8060-f1c49a0a2f68', severity='warn' where id='04a5eaf6-5082-453a-93f7-91454d254f73';   -- REQ-12 → A262-04, warn
+-- update public.compliance_requirements set condition='IF wastewater_type == greywater_only THEN Q_Grauwasser >= 75', severity='warn' where id='8a8539fe-7b53-4920-ad9b-7757d002f896';
+-- update public.compliance_requirements set condition='IF lining_type == geomembrane THEN (geomembrane_thickness_mm >= 1.5 OR (system_size_category == small_wwts AND geomembrane_is_polyethylene == True AND geomembrane_no_welds == True AND geomembrane_thickness_mm >= 1))' where id='311ad8e0-b2b5-42e1-81bb-8f8cf8a7b08a';
+-- update public.compliance_requirements set condition='IF lining_type IN {mineral_seal_clay, bentonite_base} THEN k_f_lining_m_s <= 1e-8' where id='ba744793-c505-46e5-97a1-9d25c859b995';
+-- -- + insert REQ-17b (ws 29, block, §5.3): 'IF lining_type == unsealed_subsoil THEN k_f_subsoil_m_s <= 1e-8'
+-- update public.compliance_requirements set condition='IF filter_type != vf_lava_sand_0_4 THEN fines_fraction <= 2' where id='16830561-b246-490a-bc20-b7d11eda4546';
+-- -- + insert REQ-15b (ws 29, block, §5.4.2.6): 'IF filter_type == vf_lava_sand_0_4 THEN lava_sand_clay_fraction_pct < 8'
+-- update public.compliance_requirements set condition='pretreatment_selected IS NOT NULL', clause_reference='§5.2' where id='a6875f17-cff0-4f31-afd0-69e58c7b6c09';
+-- Rollback: restore the prior condition/severity/worksheet strings recorded in fields-DWA-A-262E.json (2026-09-05 export); delete the two inserts.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · clause_reference retags (zero-risk class; evidence = the md clause quoted in the pack for each field).
+--  A262-03: datenquelle_abwasser §3.1→§4.1.2 (17f9f8cc) · datenquelle_einwohner §3.2→§4.1.2 (05ede198) · datenquelle_hydraulik §3.2→§4.1.2
+--    (ed5c3b6c) · datenquelle_boden §3.1→§5.3 (c7d80561) · datenquelle_klima §3.1→"Foreword, §1" (5b972841).
+--  A262-04: C_CSB/BSB5/NH4_N/TKN/AFS/P_ges_zulauf §3.1→"§3.2, §4.1.2" (14443fe7, 1c90a4b2, 80ca550e, af139995, fa28cabe, 03acb441) ·
+--    abwasser_typ §3.1→§1 (1558c682).
+--  A262-05: EZ, w_s_d "§5, Gl.2"→"§4.1.2, Gl.2" (8d6133aa, b525423c) — §5 is Design and Construction.
+--  A262-10/18: attest_a262_10_req_09 NULL→§4.3.1 (e9629ee7) · attest_a262_18_req_10 NULL→§4.3.3 (48bdb207).
+--  A262-11: A_Fo_spez_VFS_KA "Tab. 3, §3.2"→"Tab. 4, §4.3.1.2" (0a93175a) · f_A_F_CSB_VFS_KA "Tab. 3, §3.2"→"§3.2, §4.1.1" (3b5d81f5) ·
+--    q_F_T_VFS_KA "Tab. 3, §3.2"→"§4.3.1.1, Tab. 10" (5ca00f71) · d_korn_VFS "Tab. 3"→"§4.3.1.2, Tab. 21" (21aab770) · A_Fo_min_VFS_KA
+--    "§4.3"→"Tab. 4, §4.3.1.2" (59072c0e) — Tab. 3 is the RAW WASTEWATER filter.
+--  A262-12: f_A_F_CSB_VFKS_1 "Tab. 5, §4.3.4"→"Tab. 11, §4.3.3.3" (ee92baa2) · f_A_F_CSB_VFKS_2 →"§3.2, §4.3.3.3" (2c86842f) · A_F_VFKS_total
+--    "§4.3.4"→"Tab. 5, §4.3.1.3" (1420d8ba) — §4.3.4 is SEASONAL operation.
+--  A262-13: d_korn_VFG "Tab. 6"→"§4.3.1.4, Tab. 21" (16fdc0e3) · A_Fo_min_VFG_KA "§4.3"→"Tab. 6, §4.3.1.4" (4cc7c084).
+--  A262-16: A_F_spez_HFK_KA "Tab. 9, §4.3.6.3"→"Tab. 9, §4.3.2" (6d0bb1e7) · h_F_HFK "Tab. 9"→"§5.4.3.3" (3505a3d8) · belueftungsrate_HFK
+--    "Tab. 9, §4.3.6.3"→"§4.3.2, §4.3.3.5" (e3c54cef) · A_F_HFK_KA "§4.3.6.3"→"Tab. 9, §4.3.2" (c5fe9b30) — §4.3.6.3 does not exist.
+--  A262-20: A_Fo1/2_spez_KomKA "Tab. 11, §4.3.4"→"Tab. 11, §4.3.3.3" (7d04acc8, 430b1745) · A_F_VFKS_KomKA_total "§4.3.4"→"§4.3.3.3" (8f36ffa7).
+--  A262-21: all five "Tab. 11, §4.3.5"→"Tab. 12, §4.3.3.4" (d4b9c4fc, a3a602f5, 011bc886, 3ffa8ebd; 677b949f "§3.2, §4.3.5"→"§3.2, §4.3.3.4")
+--    — Tab. 11 is the two-stage filter, §4.3.5 is greywater.
+--  A262-22: "§4.3.6.2"→"§4.3.3.5" (f1a28284, c7fd3757, 65f7da37, b9c1efb5, 020c2ec8) · h_F_VFK "Tab. 13"→"§5.4.2.5" (99238189) · d_korn_VFK
+--    "Tab. 13"→"§4.3.3.5, Tab. 21" (be9214e8) — §4.3.6.2 is the downstream HORIZONTAL filter.
+--  A262-26: "§4.5"→"§4.1.3" (49ae49df, 7d8ced0c, 5afc9779) · →"§4.1.3, §4.3.5" (e1cd2990) · →"§4.3.5" (8269d102, 26af4739) — §4.5 is
+--    effluent quality.
+--  A262-30: primary_treatment "§5"→"§4.2, §4.4" (3b525adb) · main_filter_type "§5"→"§4.3, §4.4" (798b903e) · post_treatment "§5"→"§4.3.6, §4.4" (c2bb7f92).
+--  A262-31: A_F/h_Beschickung/q_Beschickung/f_A_check_pass "§5"→"§4.4" (e95ab87f, 6ab7b5ae, 3ad5c303, cba249a8).
+--  A262-32: inspektionsintervall, wartungsintervall, beprobungsintervall, pruefer_qualifikation "§7"→"§6.2.2" (3e337610, 93ebb662, e2e2a193,
+--    1eedc1e6) — §7 is Costs.
+--  A262-33: CSB_target_met, NH4_target_met "§3"→"§1" (4afcc08b, d78094c0) · documentation_complete "§7"→"§6.1, §6.4" (c0747839).
+--  Gates: REQ-08 "§4.2.1"→"§5.2" (a6875f17); REQ-21 (e2ddc920) source_quote is a heading paraphrase → replace with "A comprehensive and
+--    simple-to-understand operation and maintenance manual [...] must be prepared by the designer/planner and given to the plant operator."
+--    (§6.1 p.63), clause "§6"→"§6.1, §6.4".
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§4.1.2' where id in ('17f9f8cc-5cf4-4625-ace5-12534ca7737b','05ede198-6079-44f5-a23b-c8bbf724ccf1','ed5c3b6c-11a9-4b7b-a133-46c867b7068f');
+-- update public.fields set clause_reference='§5.3' where id='c7d80561-d848-43f5-8220-a224ccec00a1';
+-- update public.fields set clause_reference='Foreword, §1' where id='5b972841-6330-41f2-a1c1-c560aea88f50';
+-- update public.fields set clause_reference='§3.2, §4.1.2' where id in ('14443fe7-d735-4c22-abd9-6441fa15a795','1c90a4b2-beae-4673-8aa5-48e68e86c985','80ca550e-bfd0-4dbd-82c8-b3c17baa0e46','af139995-5699-4b76-95eb-1b16be232650','fa28cabe-b80d-4c26-acb0-bf1e4cd164d8','03acb441-dcf3-441c-9467-fe9f5a061d83');
+-- update public.fields set clause_reference='§4.1.2, Gl.2' where id in ('8d6133aa-3633-4d45-9395-3f133a982a2a','b525423c-06d6-4b16-8cb0-dbbe767b10a8');
+-- update public.fields set clause_reference='§4.3.1' where id='e9629ee7-cfbe-4d12-8879-e1b8c0c96781';
+-- update public.fields set clause_reference='§4.3.3' where id='48bdb207-93a6-45c2-9fe8-934727d22dbb';
+-- update public.fields set clause_reference='Tab. 4, §4.3.1.2' where id in ('0a93175a-5090-42d0-808c-8c2da8a5228f','59072c0e-7fd8-4a2d-9b49-4a43606600bf');
+-- update public.fields set clause_reference='§3.2, §4.1.1' where id='3b5d81f5-e440-47d8-8cf1-9c18653a5158';
+-- update public.fields set clause_reference='§4.3.1.1, Tab. 10' where id='5ca00f71-ad97-46a3-b37a-798b6d405242';
+-- update public.fields set clause_reference='§4.3.1.2, Tab. 21' where id='21aab770-216f-4855-a5e8-93d6ba3be5d2';
+-- update public.fields set clause_reference='Tab. 11, §4.3.3.3' where id in ('ee92baa2-4355-491f-a9ac-0bffdc6bd4fd','7d04acc8-4545-4ddd-87d1-3d90a8faf3b5','430b1745-125c-4251-b5b4-33000f8de405');
+-- update public.fields set clause_reference='§3.2, §4.3.3.3' where id='2c86842f-cf83-4f91-914b-597b6aab9bdf';
+-- update public.fields set clause_reference='Tab. 5, §4.3.1.3' where id='1420d8ba-b89e-4cfe-9591-bce68fb9bc56';
+-- update public.fields set clause_reference='§4.3.3.3' where id='8f36ffa7-0556-4c14-89dc-2d0302770281';
+-- update public.fields set clause_reference='§4.3.1.4, Tab. 21' where id='16fdc0e3-98f3-4d8a-9cc6-ac8e2c29ab98';
+-- update public.fields set clause_reference='Tab. 6, §4.3.1.4' where id='4cc7c084-2ea3-4169-83f4-ec6932e221ba';
+-- update public.fields set clause_reference='Tab. 9, §4.3.2' where id in ('6d0bb1e7-488f-421d-8b6e-e645ac67d46b','c5fe9b30-cb60-45a7-8e78-a7e5f2fea7d9');
+-- update public.fields set clause_reference='§5.4.3.3' where id='3505a3d8-2071-42cf-ad9b-b6bf73e03dc7';
+-- update public.fields set clause_reference='§4.3.2, §4.3.3.5' where id='e3c54cef-ae86-472b-b7b5-11572ab07688';
+-- update public.fields set clause_reference='Tab. 12, §4.3.3.4' where id in ('d4b9c4fc-9b54-4de5-bc61-27523b0b5d3b','a3a602f5-4d4d-4eab-a0be-bb1a6106a947','011bc886-7f17-49a6-b255-69673a9b4311','3ffa8ebd-5f4f-43e1-ae5c-5c25194652ad');
+-- update public.fields set clause_reference='§3.2, §4.3.3.4' where id='677b949f-f9fd-4eec-83d4-21ad100f5652';
+-- update public.fields set clause_reference='Tab. 13, §4.3.3.5' where id in ('f1a28284-8109-4404-87e6-26a63a7ac826','c7fd3757-a9ba-477f-ab43-521da8cb160a');
+-- update public.fields set clause_reference='§4.3.3.5' where id in ('65f7da37-929e-4053-9784-90dc17836d3a','b9c1efb5-a2e5-4115-906b-656c80c0015f','020c2ec8-f9ad-4dd0-bb6f-c17f6aa11843');
+-- update public.fields set clause_reference='§5.4.2.5' where id='99238189-2877-4b5c-82cc-a9a34ee854c2';
+-- update public.fields set clause_reference='§4.3.3.5, Tab. 21' where id='be9214e8-b202-4882-8158-ebfb7743acad';
+-- update public.fields set clause_reference='§4.1.3' where id in ('49ae49df-669d-428e-9d9e-42de0dcbaec9','7d8ced0c-7482-4e43-a735-0727c8c41490','5afc9779-b755-4086-86b9-753ac06dad38');
+-- update public.fields set clause_reference='§4.1.3, §4.3.5' where id='e1cd2990-3b22-4390-a24f-db78486484dc';
+-- update public.fields set clause_reference='§4.3.5' where id in ('8269d102-4b11-4cca-827b-76ae83cbb8cc','26af4739-e4ba-43c7-8ca2-3348434ab50b');
+-- update public.fields set clause_reference='§4.2, §4.4' where id='3b525adb-a59f-44f0-9edd-d659fa6502ba';
+-- update public.fields set clause_reference='§4.3, §4.4' where id='798b903e-b0e1-4fff-b271-7f6254e7b140';
+-- update public.fields set clause_reference='§4.3.6, §4.4' where id='c2bb7f92-2b1f-4895-bbf0-7d3969ec3666';
+-- update public.fields set clause_reference='§4.4' where id in ('e95ab87f-c54c-452c-83e3-73e1a6cabb28','6ab7b5ae-e3a5-4de6-9e73-46399998ebff','3ad5c303-8170-431c-9a7c-37083bc85740','cba249a8-35b4-4b97-bdc2-eabf826934f0');
+-- update public.fields set clause_reference='§6.2.2' where id in ('3e337610-c32a-472d-9ae3-998b01fe88c8','93ebb662-d669-46b0-aee7-842f233cd46c','e2e2a193-56f0-4953-9f89-e3a9c007a48b','1eedc1e6-28b5-42f3-ada3-b9b602b3c803');
+-- update public.fields set clause_reference='§1' where id in ('4afcc08b-d03f-4fcc-9bd7-bf3bbe55a682','d78094c0-f0ae-4ce5-8bc7-792b043d3070');
+-- update public.fields set clause_reference='§6.1, §6.4' where id='c0747839-70d6-42e7-8e64-60b644e8995c';
+-- update public.compliance_requirements set clause_reference='§6.1, §6.4', source_quote='A comprehensive and simple-to-understand operation and maintenance manual for all operating conditions that occur in practice, especially during the different phases of vegetation growth and establishment, must be prepared by the designer/planner and given to the plant operator.' where id='e2ddc920-d04c-4116-849c-9bff263ce58b';
+-- Rollback: restore the prior clause_reference strings recorded in fields-DWA-A-262E.json (2026-09-05 export).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Severity notes (block gates anchored on advisory / descriptive text).
+--  • REQ-12 (04a5eaf6) BLOCK on "can be set at" → warn (S-3 #3).  • REQ-02c (8a8539fe) BLOCK on the same sentence → warn (S-3 #4).
+--  • REQ-19eff-a/b (e28e1949, 00950bdc) BLOCK on "Generally, the treatment plants described herein are able to meet the wastewater treatment
+--    requirements according to the Size Class \#1 [...] ( $\mathrm{BOD}_{5} \leq 40 \mathrm{mg} / \mathrm{l}, \mathrm{COD} \leq 150
+--    \mathrm{mg} / \mathrm{l}$ [...] four out of five samples must be within the limit)." (§1 p.10) — a CAPABILITY statement; the limits are
+--    AbwV Anhang 1 Teil C GK1 (law, NR in library). Keep block only if AbwV is treated as the governing table (then retag the gates to
+--    "AbwV Anh.1 C GK1 via §1"); the 4-of-5 rule is not enforced (samples_* fields unused).
+--  • REQ-20b (7732e7e7) BLOCK "effluent_temperature_C >= 12" when nitrification required — 12 °C is the applicability threshold of the
+--    nitrification claim ("suitable for further nitrification [...] at filter effluent water temperatures of at least $12^{\circ} \mathrm{C}$"),
+--    not a design obligation → warn, or convert to an applicability flag.
+--  • REQ-13 (cd8e9cb7) stays WARN — block upgrade refuted (S-3 #9).
+--  • Confirmed correct: REQ-04a/04b/06/07 warn (ranges, "should"/"usually"); REQ-14 warn ("experience shows"); REQ-16 warn ("should be");
+--    REQ-18c warn ("should"); REQ-03/05/11/11b/15/21 block ("must"); all Tab.3–16 numeric gates block (table values).
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn' where id in ('7732e7e7-9e38-4346-84c6-1f81d3bf5caa');   -- REQ-20b
+-- Rollback: severity='block'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Unit corrections / unit notes.
+--  • belueftungsrate (65f7da37, ws 22) and belueftungsrate_HFK (e3c54cef, ws 16): DB "m³/h" (total) — source prints a SPECIFIC rate
+--    "$\geq 0,6 \mathrm{~m}^{3} /\left(\mathrm{h} \cdot \mathrm{m}^{2}\right)$ on the bottom of the filter basin" (§4.3.3.5 p.31) → unit
+--    m³/(h·m²) + rename label "spez. Luftvolumenstrom", advisory ("has proven to be adequate") → warn gate ≥ 0.6 if wanted.
+--  • Q_T_KA (5ebd9b8f): "l/d" vs source Q_T,d,aM "$\mathrm{m}^{3} / \mathrm{d} ; \mathrm{l} / \mathrm{s}$" (§3.2 p.17).
+--  • eta_DN / eta_VF (bd3d1f61, ae04606e) are "%" while Eq.(16) is a fraction ("$\eta_{\mathrm{DN}}=1-\frac{1}{1+R V}+\eta_{\mathrm{VF}}$") —
+--    engine must divide/multiply by 100 consistently (harness-proven arithmetic assumed; note only).
+--  • A_Fo_min / A_Fu_min: §3.2 prints "m²/P" (p.14–15), every table prints "m²" — DB "m²" is right; source-internal inconsistency.
+--  • Cosmetic: "m²/EW" (11 fields) vs source "m²/P"; "EW" vs "P"; "l/(EW·d)" vs "l/(P·d)".
+-- ☐ RATIFIED
+-- update public.fields set unit='m³/(h·m²)' where id in ('65f7da37-929e-4053-9784-90dc17836d3a','e3c54cef-ae86-472b-b7b5-11572ab07688');
+-- update public.fields set unit='m³/d' where id='5ebd9b8f-3d7e-43b3-a3d5-691c9efd7e8f';
+-- Rollback: unit='m³/h' / 'l/d'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Missing gates for PRINTED hard limits ("must" / table values) — specs, worksheet, evidence. (F = field exists; NF = no field.)
+--   1  ws 06 block  'Q_M >= SUM(Q_Dr_RUB)'  — Eq.(6) "$\geq \sum Q_{\mathrm{Dr}, \mathrm{RUB}}$" (p.20); the encoded Eq6 keeps the equality only
+--      (08-03 "constraint-drop" CONFIRMED). F.  Also Eq.(8) is an inequality chain, not an assignment — engine output semantics to confirm.
+--   2  ws 07 block  pretreatment volumes: septic 'V_Vorbehandlung >= 0.3*EZ AND V_Vorbehandlung >= 3' ("at least $300 \mathrm{l} / \mathrm{P}$
+--      and a minimum volume of $3,000 \mathrm{l}$" §4.2.2 p.21) · Imhoff sedimentation ≥ 75 l/P + sludge ≥ 70 l/P (cone) / ≥ 100 l/P
+--      (non-cone) (§4.2.5 p.22) · settling pond ≥ 1.5 m²/P (§4.2.4 p.22) · aerated pond ≥ 1.2 m³/P (§4.2.7 p.25) · rotting tank ≥ 200 l/P and
+--      dosing ≤ 1,000 l/(m²·d) + mandatory downstream septic tank (§4.2.3 p.21). F (volume) / NF (per-type sub-volumes).
+--   3  ws 10 block  type-conditioned area: 'IF filter_type == vf_sand_0_2 THEN A_Fo_spez >= 4' (Tab.4), '== vf_coarse_sand_0_4 THEN >= 1' (Tab.6),
+--      '== raw_wastewater_filter AND sewer_system_type == separate_sewer THEN >= 1.2' / 'combined_sewer THEN >= 1.5' (Tab.3) + A_Fo_min 4.8 (Tab.3). F.
+--   4  ws 11 block  'q_F_T_VFS_KA <= 80' — §4.3.1.1 "The specific hydraulic loading requirements of Section 4.3.3 must be verified." + Tab.10. F.
+--   5  ws 12 block  'A_F_VFKS_total >= 8' — Tab.5 "$4+4$" (p.26). F.
+--   6  ws 14 block  'f_V_CSB <= 100' — Tab.17 (p.37) prints ≤ 100 for the aerated VF in small WWTS. F.
+--   7  ws 15 ----   B_Rieselr: Tab.8 "$\geq 0.5$" (p.27) vs Tab.17 "$\geq 1$" (p.37) — CONFLICT, PDF check first (S-9), then block.  F.
+--   8  ws 16 block  'A_F_HFK_KA >= 4' (Tab.9); 'h_F_HFK >= 0.95' (§5.4.3.3 "$\geq 95 \mathrm{~cm}$ filtration layer", p.58); f_V,CSB ≤ 100
+--      (Tab.9 end, p.27) NF on ws 16.
+--   9  ws 18 block  per-type q_Beschickung_Fo_KomKA (Tab.10/12 ≥ 6, Tab.11/14 ≥ 10) and h_Beschickung_Fo_KomKA (≥ 20; ≥ 10 only with
+--      ≤ 1 m²/orifice §5.5.2.3); A_Fo_spez_KomKA per type (Tab.10 ≥ 4*, Tab.14 ≥ 3). F.
+--  10  ws 21 block  'IF sewer_system_type == separate_sewer THEN A_Fo_spez_VFG_KomKA >= 0.8' / 'combined_sewer THEN >= 1' (Tab.12 p.30);
+--      'f_A_F_CSB_VFG_KomKA <= 25' (Tab.18 p.39 — absent from Tab.12, confirm on PDF); resting ≥ 3 days (§4.3.3.4) NF.
+--  11  ws 22 block  'h_F_VFK >= 0.95' (§5.4.2.5 p.53) + saturated depth ≥ 0.90 m NF; Tab.13 (p.31) "t_Sicker,min,aM ≤ 4" and
+--      "h_Beschickung,Fu ≥ 6" NF on ws 22 (fields exist only on ws 15/19).
+--  12  ws 23 block  'IF sewer_system_type == combined_sewer THEN A_AWF_spez >= 1' (Tab.14 p.32); Tab.14 main-filter rows A_Fo,spez ≥ 3,
+--      f_A ≤ 20, t_Sicker ≥ 4, q_Beschickung ≥ 10, h ≥ 20 — NF on ws 23 (only 3 fields).
+--  13  ws 25 block  larger-area rule: 'A_F_red_final == MAX(A_F_CSB_red, A_F_TKN_red)' ("the reduced area is determined by the larger area
+--      requirement" p.33) NF (result field); 'IF tkn_influent_high THEN nitrogen_balance_attested' ("must be proved by a calculated nitrogen
+--      balance" p.33) NF.
+--  14  ws 27 block  downstream HF cross-section loading 'f_A_ANF_CSB <= 40' (coarse sand) / '<= 200' (gravel) (Tab.16 p.35) — NF on ws 27
+--      (f_A_ANF_CSB lives on ws 16 with the aerated-HF ≤ 200 only); k_fB ≈ k_fA/10 presumption (§4.3.6.2) not encoded.
+--  15  ws 29 block  'IF lining_type == mineral_seal_clay THEN mineral_seal_proctor_density_pct >= 95' ("must be compacted to a minimum of $95
+--      \%$ Proctor density" p.45); 'IF lining_type == mineral_seal_clay AND subsoil_permeability_class == well_permeable THEN
+--      mineral_seal_layer_count >= 2'; 'IF lining_type == bentonite_base THEN bentonite_base_thickness_cm >= 60'; 'IF lining_type ==
+--      unsealed_subsoil THEN subsoil_evaluation_thickness_cm >= 60'; 'IF lining_type IN {mineral_seal_clay, bentonite_base, unsealed_subsoil}
+--      THEN permeability_samples_count >= 3'; leak test after lining ("After the lining has been installed, a leak test must be conducted." p.45)
+--      NF; Eq.(17) Beyer window "$0.10 \mathrm{~mm}<d_{10}<0.60 \mathrm{~mm}$" (Tab.21 note p.49) as warn on d_10. All F except leak test.
+--  16  ws 08 block  4-of-5 rule 'samples_within_limit_count >= 4 OR samples_total_count < 5' — fields exist, unused.
+--  17  NF (no fields) — §5.5.2.1 drainage-pipe spacing "$\leq 5 \mathrm{~m}$"; §5.5.2.2 RWF drainage spacing "$\leq 2 \mathrm{~m}$", density
+--      ≥ 0.25 m/m²; loaded area per orifice (Tab.18 last row; §5.5.2.4–5.5.2.6 "shall not be larger than $1 \mathrm{~m}^{2}$"); §4.2.6 RWF
+--      ≥ 3 cells, rest ≥ 7 days, ≤ 1/3 loaded; §4.3.3.2 ≥ 2 subsections; §5.5.1 sampling shaft "$d_{\mathrm{i}} \geq 400 \mathrm{~mm}$";
+--      §5.4.1 fines rule per layer; §5.4.2.x layer thicknesses (all "must be constructed according to").
+-- ☐ RATIFIED  (per item; migrations after the ruling — no SQL here because most need new fields/worksheets.)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Enum / label / description / widget notes (owner ruling 2026-08-01: fixed options ⇒ selection widget).
+--  • system_size_category (53051970) label "Kommunale Kläranlage (>50 PE)" and EW_bemessung_KomKA (3f2e8b4e) description ">50 EW" contradict
+--    §3.1 "municipal wastewater treatment plants [...] can refer to systems which treat flows from less than 50 P" (p.12) — the divider is
+--    extraneous water / sewer network, not size. → label "Kommunale Kläranlage (Kanalnetz / Fremdwasser)".
+--  • A_Fo_min_VFS_KA (59072c0e) description "A_Fo_min = EW · A_Fo_spez" is wrong — A_Fo,min is the printed 16 m² floor (Tab.4).
+--  • filter_type (40e1d835) on the KLEINANLAGE inventory offers vf_lava_sand_0_4 (municipal only, §4.3.3.6) and hf_coarse_sand_or_gravel_downstream
+--    (polishing) — restrict by system_size_category or move the polishing type to ws 27.
+--  • pretreatment_selected option rotting_tank: "rotting tanks are not sufficient as sole pretreatment; a downstream settling tank is required"
+--    (§3.1 p.13; §4.2.3 p.21 "must be used in conjunction with a downstream multicompartment septic tank") → cannot stand alone.
+--  • d_korn_VFS / d_korn_VFG / d_korn_VFK (21aab770, 16fdc0e3, be9214e8): single number for a printed sieve RANGE (0–2 / 0–4 / 8–16 mm) — SR-2:
+--    either two fields (min/max) or a fixed display value; Tab.21 also prints d_10 targets and U < 5 per type.
+--  • post_treatment (c2bb7f92) free text — Tab.19 prints exactly three polishing options → enum. inspektionsintervall / wartungsintervall /
+--    beprobungsintervall (ws 32) free text — Tab.22–24 print monthly / yearly / weekly / 1x per quarter → enum. abwasser_typ (S-2).
+--  • label_de NULL on every option of vorbehandlung_typ, filtertyp_gewaehlt_KA, filter_type_KomKA, filtertyp_KomKA (S-2 deactivation candidates).
+--  • wiederverwendungszweck (1eae6378, ws 26) — RESIDUE: no clause (reuse purpose is DWA-A 272; §3.1 "The Standard DWA-A 272 must also be
+--    respected.") → deactivate or keep as engineer_input with clause "DWA-A 272 (NR)".
+-- ☐ RATIFIED  (no SQL — label/description/widget edits after the ruling)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · PDF checks required (md-vs-PDF candidates; PDF wins per SR-3).
+--  1  Tab.8 B_Rieselr "$\geq 0.5$" (p.27) vs Tab.17 "$\geq 1$" (p.37).
+--  2  Eq.(13)/(14) print the SAME RHS "$A_{\mathrm{F}, \mathrm{TKN}, \mathrm{red}}=B_{\mathrm{d}, \mathrm{TKN}} / B_{\mathrm{A}, \mathrm{TKN},
+--     \mathrm{zul}}$" for both branches (p.33) — the "<" branch presumably reads A_F,TKN,red = A_F,CSB,red (transcription suspected; encoding
+--     already flags "[VC: reconstructed from 2-D print layout]").
+--  3  B_d,TKN unit "$\mathrm{g} /(\mathrm{m}^{2} \cdot \mathrm{~d})$" (§3.2 p.15) vs its use as a daily load in Eq.(13)/(14).
+--  4  Tab.13 "t_Sicker,min,aM ≤ 4" (p.31; Tab.18 repeats "≤ 4") — every other table prints "≥".
+--  5  §3.2 A_Fo,min / A_Fu,min unit "m²/P" vs tables "m²".
+--  6  Tab.18 coarse-sand f_A ≤ 25 (p.39) absent from Tab.12 (p.30); Tab.17 f_V ≤ 100 for the aerated VF absent from Tab.7.
+--  7  Tab.19 body (p.41–43) is largely mathpix IMAGES in the md — combination rows not fully transcribed.
+--  8  OCR artefacts quoted as printed: "lafter", "lunit for population)", "Class Size 1", "mulicompartment", "P_qes", "biolotical".
+-- ☐ RATIFIED  (PDF pass; results lift the affected rows VC → VA)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · is_required review + derived-but-hand-enterable (#22 class).
+--  • Derived values with no registered equation but engineer-enterable: A_F_CSB_VFS_KA (dc2148c1), A_F_CSB_VFG_KA (db56c408), A_F_CSB_VFG_KomKA
+--    (677b949f "A_F = B_CSB / f_A_F_CSB"), A_F_VFKS_total (1420d8ba), A_F_VFKS_KomKA_total (8f36ffa7), V_F_VFK_KomKA (020c2ec8 "A_Fu · h_F"),
+--    Q_GW_taeglich (5afc9779 "EW · Q_Grauwasser"), A_F_GW (26af4739), A_Fo_gesamt_KA/KomKA (72dfe0e5, 0eae009e), B_CSB_KomKA (9bf65fbd)
+--    → register equations, set read-only (derivation invariant).
+--  • k_fA (c1d50968) and U (5d28953f) are Eq.(17)/(18) outputs yet is_required=true and hand-enterable → is_required=false + read-only.
+--  • Workflow flags with is_required=true: A_F/h_Beschickung/q_Beschickung/f_A_check_pass (ws 31), CSB_target_met, NH4_target_met,
+--    documentation_complete (ws 33), treatment_combination_selected (ws 30, Tab.19 is "selected examples") → is_required=false (app roll-ups).
+--  • A262-10 f_A_F_CSB (c5064076) and q_F_T (29ba19da) is_required=true although only the raw-wastewater-filter branch prints a limit for the
+--    small-WWTS inventory (§4.1.1 "based exclusively on the specific area") → is_required=false.
+--  • Confirmed required: EZ, w_s_d, x_Q_max, q_F, q_R_Tr, A_E_k (Eq.1–5 inputs), f_S_QM, m_T_aM (Eq.6/10 inputs), t_Sicker_min_aM (Tab.10
+--    "must be respected"), f_A_F01_CSB (Tab.11), fines_fraction / lining_type / d_10 / d_60 (§5.4.1 "must"), maintenance_plan_documented (§6.1).
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('c1d50968-1453-4d28-b074-30c282bc6b9e','5d28953f-15b2-4e6f-9725-90fedfbcdac6','e95ab87f-c54c-452c-83e3-73e1a6cabb28','6ab7b5ae-e3a5-4de6-9e73-46399998ebff','3ad5c303-8170-431c-9a7c-37083bc85740','cba249a8-35b4-4b97-bdc2-eabf826934f0','4afcc08b-d03f-4fcc-9bd7-bf3bbe55a682','d78094c0-f0ae-4ce5-8bc7-792b043d3070','c0747839-70d6-42e7-8e64-60b644e8995c','c5064076-85f3-4117-acdd-827a925c2250','29ba19da-58a6-411d-8b34-ca2b757cb58e');
+-- Rollback: is_required=true on the same ids.

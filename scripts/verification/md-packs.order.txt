@@ -10,3 +10,4 @@ dwa-m-820-3-md-verification-pack.sql  DWA-M-820-3
 din-276-md-verification-pack.sql  DIN-276
 din-1989-1-md-verification-pack.sql  DIN-1989-1
 din-1989-2-md-verification-pack.sql  DIN-1989-2
+dwa-a-262e-md-verification-pack.sql  DWA-A-262E
