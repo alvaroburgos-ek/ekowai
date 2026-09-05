@@ -1,0 +1,245 @@
+-- ============================================================================
+-- DWA-M-187 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- *** DRAFT EDITION — EVERY BLOCK BELOW IS "draft-edition: escalate" ***
+--   Merkblatt DWA-M 187 is a GELBDRUCK (md line 12 "Entwurf", line 14 "Frist zur Stellungnahme: 30. November 2025", line 18
+--   "Entwurf einer Regelwerkspublikation, Gelbdruck"; prod standards.version = "September 2025 (Entwurf)"). Per doctrine, no
+--   enforcement change derived from a draft edition is staged as an apply — each block is an ESCALATION for Alvaro: ratify now
+--   against the Gelbdruck text, or park until the Weißdruck is published (values/wording may still change in the Einspruch phase).
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-187\DWA-M_187_GD.md (German mathpix LaTeX;
+--   NO page-number lines — "printed p.N" derived from the Inhalt table + mathpix figure indices (= printed page), see pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Worksheet ids (prefix): 01 35f2d63c · 02 7aa793fe · 03 788906d8 · 04 5b8c50a8 · 05 4272d967 · 06 f8952cd9 · 07 d8b0c113 ·
+--   08 1535237f · 09 30a77450 · 10 f33fab11 · 11 50c5a51d · 12 b0019c10 · 13 bf792923 · 14 d3d62265 · 15 36d0e978 · 16 535a6fa2 ·
+--   17 c3677bfa · 18 91333152 · 19 4c89b93a · 20 67bad0bd · 21 b58962ec · 22 20604efd · 23 613e3bba · 24 7a2a63ed · 25 2ecf6d20
+-- Context: 15 gates (13 block, 2 warn); all 15 source_quotes re-checked against the md — every one anchors on a real md sentence
+--   (REQ-03/04/05/06 render the LaTeX in plain text, REQ-05/06 join four clauses with "[…]"). Nothing below disputes a quote;
+--   every item is a source-vs-encoding disagreement in SCOPE (which worksheet), CONDITION (unconditional vs variant-bound),
+--   SEVERITY (block on "sollte/kann/empfohlen") or COVERAGE (printed "muss" with no gate).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · WORKSHEET MIS-SCOPING (the dominant finding). Worksheets M187-05…M187-10 are titled as the P-Rückhalt block (§5.1) but hold
+--   46 fields + 2 equations that belong to the OTHER Sonderanwendungen, each of which already has its own home worksheet (11–22):
+--   a) M187-06 "P-Rückhalt: Übersicht & Variantenvergleich" carries 9 Spurenstoffe fields (§5.2): q_Dr_RBF 84d81522 · verfahrensvariante_spurenstoffe
+--      cad7e906 · DT50 a1a059bd · Q_T_d_aM 77be6098 · GAK_volumenanteil_oben cc437008 · GAK_volumenanteil_unten 8f81d616 · CaCO3_massenanteil_GAK
+--      b9dc06af · beschickungsdauer_segment ba14d870 · trockenzeit_nach_vollbeschickung c22e80b8  → homes: 12/11/15/14/13/13/13/14/14 (all present there).
+--   b) M187-07 "P-Rückhalt Variante a: Fällung Filterzulauf" carries 6 Mikroorganismen fields (§5.3): uv_eingesetzt 89e8869b · KBE 29100c06 ·
+--      MPN 7e571d9c · PBE 58c1bbad · UV_dosis 16c417ea · logstufen_rueckhalt 0144ad68  → homes: 18/16/16/16/18/16 (all present there).
+--   c) M187-08 "P-Rückhalt Variante b: Melioration Filtermaterial" carries 15 hohe-organische-Belastung fields (§5.4): betriebsmodus 15c25673 ·
+--      q_A_max d7a21692 · q_krit 92291b3d · S_C_RBF_ab 86edc7b4 · S_C_RBF_zu a8c75171 · V_vorstufe_min bffd8594 · B_CSB d3222e72 · A_F_pro_AEb deb2ad84 ·
+--      foerderleistung_beschickung 034fc708 · beschickung_pro_ereignis c9fe11f1 · austritts_dichte c34041f7 · CSB_grenze_trennung a83b6dbe ·
+--      CSB_konzentration d4e7feb7 · wirkungsgrad_hydraulisch f08da7e8 · A_E_b 065809ba  → homes: 19/20 (all present there).
+--   d) M187-09 "P-Rückhalt Variante c: Nachgeschaltete Sorptionsstufe" carries 16 Klein-RBF fields (§5.5) + BOTH Klein-RBF equations:
+--      CaCO3_massenanteil_carbo b4d184bb · A_F_anteil_Aba e0e47030 · carbonatschicht_vorhanden aa0f425d · AFS63 86b0947a · b_krit a7f1126f · b_R_a 0bd652e0 ·
+--      h_Draen 06145c85 · h_RBF 21fa5c7a · h_RR 61328585 · h_FK_CaCO3 3db63626 · eta_AFS63 8dfe6c55 · CaCO3_massenanteil_filter 44b96310 ·
+--      deckschicht_staerke 648c0a64 · A_b_a c9266c02 · A_F 044afa9f · ok_boolean f20771de; equations Gl. 1 df181975 and Gl. 2 6b3dc34c
+--      → homes: 21/22 (fields present there; equations a9fa96f7 / 75d9844f present on M187-22; ok_boolean has NO copy on 22).
+--   Evidence: §5.1 (p.15–21) contains none of these quantities; §5.2.3.1 "Zu a) … Zu d)" (p.22), §5.3.3.1 (p.25), §5.4.3 (p.30–31),
+--   §5.5.3.2.2/§5.5.4 (p.34–37) are the chapters they come from. A P-Rückhalt project is asked for Klein-RBF depths and CSB loads.
+-- Proposal: deactivate the 46 foreign-chapter copies on 06/07/08/09 (their gates move in S-3); move ok_boolean + the two equations to M187-22.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.fields set active=false where id in (
+--   '84d81522-20fe-4399-ab72-a41cdb2338f5','cad7e906-1f5e-4dbd-872c-327feb7986a6','a1a059bd-f956-4ec4-956b-455667deeb59','77be6098-52e4-465a-8473-f2679de80976','cc437008-8509-4b4d-b933-25f631a1423e','8f81d616-611f-4ed9-8e33-90701b0b1b10','b9dc06af-9adb-4cc2-a464-ac7eb53fe9e0','ba14d870-8eb9-4caa-b9af-e64e9b07bb34','c22e80b8-f60b-4ddf-9b0e-b76baa99c5fc',
+--   '89e8869b-4763-4529-871f-5764a65f89f5','29100c06-4fb6-4e31-9836-f08cafb213fd','7e571d9c-3765-4c56-988c-6ab7f011efdc','58c1bbad-3238-4e8b-b63d-a64b1416ff9d','16c417ea-00cd-421a-a8ad-136023356b90','0144ad68-f146-4b77-ad72-578ec720adb8',
+--   '15c25673-2f82-498c-8cd8-f65f7be5e0a6','d7a21692-1075-4799-9431-5bf1c1bff506','92291b3d-67ac-45d8-b94b-3e21068b192c','86edc7b4-a50a-42b7-9e46-0aaabf2c109a','a8c75171-63b9-4f8b-ae6c-d9e2cb8f8feb','bffd8594-0b41-4380-a616-7f271e0d96fc','d3222e72-9d64-4bca-b7d6-5468b60209d9','deb2ad84-d140-4b3f-99c3-d90769b2f123','034fc708-1dd3-427b-bde7-8d7e0d9dacb3','c9fe11f1-3410-494c-bde7-3f04e98004eb','c34041f7-5e8b-4aef-993b-2bc0b2829c95','a83b6dbe-22bc-4338-aaad-dfe3873d4df4','d4e7feb7-0144-4f14-8f5c-d32f94c6cbe4','f08da7e8-cb12-4f32-af07-23f59556b5bb','065809ba-14e6-47b3-bf72-0e065401fb76',
+--   'b4d184bb-7c95-4445-89d1-db6b559d9e29','e0e47030-89bf-4573-bcfb-0770768a8298','aa0f425d-9c77-4471-ad2a-89c8ca160b10','86b0947a-b63e-47e6-8960-7b64c03194c9','a7f1126f-c1f7-42e4-b105-a87d7e460baa','0bd652e0-5617-4908-be68-9f16d7c1a5fa','06145c85-7660-435e-aa4c-294d0da38ce1','21fa5c7a-9523-4bf0-a334-5fc4b0dba812','61328585-7b69-465d-944f-dff02dd1f117','3db63626-77f2-46c5-ad1c-3bce620933c3','8dfe6c55-06d0-48f3-83be-f0eef238c364','44b96310-e92b-461e-a35b-217faf5e5878','648c0a64-9959-42f1-9d01-ce42fe9756d2','c9266c02-a423-47f8-aebe-04a848f07684','044afa9f-8f7e-453b-9dea-343377d03dd6');
+-- update public.fields set worksheet_template_id=(select id from public.worksheet_templates where code='M187-22' and standard_id='d165c02d-6f30-4185-8dda-06752dcfd891') where id='f20771de-530e-444d-ae2a-7fe45009df49';   -- ok_boolean → M187-22
+-- update public.equations set active=false where id in ('df181975-34ae-474a-b1bc-a62e1bfef98e','6b3dc34c-a3da-4cfd-9e3a-803109b1bd12');   -- M187-09 copies; the M187-22 copies stay
+-- Rollback: set active=true on the same ids; ok_boolean back to worksheet M187-09 (30a77450-7d83-443d-8938-25bcb1f87b9a).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Same-chapter duplicates (derivation invariant: ONE atomic owner, the rest inherit by reference).
+--  a) M187-05 "Verfahrenstechnische Grundlagen" duplicates the variant worksheets' P-inputs: beta_wert bc588e5a ↔ 07 5b48a47c · S_PO4P_aM 5dc21d2a ↔ 07 71aa114e ·
+--     Fe_gehalt e6a917fc ↔ 08 35f16301 · p_grund_beladung 1e517f6c ↔ 08 4fcf3e28 · Fe_massenanteil 047682a3 ↔ 08 e21e56b1 · feinmassenanteil 4defbf88 ↔ 08 5685ff8a ·
+--     fallhoehe_einbau dded9937 ↔ 08 c384009f · EBCT a7c3db2f ↔ 09 940faadd · v_filter_aufstrom 0eba7382 ↔ 09 3f7f5c18 · v_filter_abstrom 9e2fb446 ↔ 09 0dbeb99a ·
+--     h_FK_SS 6b974f8a ↔ 09 f925a51c · S_PO4P_RBF_ab bcc56333 ↔ 10 75afa004 · S_PO4P_RBF_zu e048c786 ↔ 10 9b38f804 · S_PO4P_SS_ab 929fb4b0 ↔ 10 9694ab6d ·
+--     S_PO4P_SS_zu 44b3ca00 ↔ 10 e84fe39e. Owner = the variant/operation worksheet (§5.1.3.1 a)/b)/c) are variant-specific, p.18); 05 keeps
+--     h_FK 2bcbe365, verfahrensvariante_p 8e356cc3 and the attest.
+--  b) M187-06.verfahrensvariante_p db1e7f44 ↔ 05 8e356cc3 (identical 3-token enum; owner 05, it is the selector).
+--  c) M187-04.attest_m187_04_req_07 d21ef90e ↔ M187-05.attest_m187_05_req_07 91cf6f9c — the same §4 attestation twice (gates REQ-07 ×2, S-3 g).
+--  d) M187-21.h_Draen_klein_rbf f76283a9 ↔ M187-21.h_Draen 531d8abd — same quantity, same worksheet, same sentence ("Die Schichtdicke des
+--     Dränmaterials sollte mindestens $h_{\text {Drän }} \geqslant 0,1 \mathrm{~m}$ betragen." §5.5.3.2.2 p.36).
+-- Proposal: deactivate the 15 M187-05 copies (a), 06.verfahrensvariante_p (b), 05.attest (c, with REQ-07 dedupe in S-3 g), 21.h_Draen_klein_rbf (d).
+--   REQ-02-2 (beta_wert, ws05) must be re-homed to M187-07 first (S-3 b) or it loses its operand.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.fields set active=false where id in ('bc588e5a-40cf-46a2-b182-ebdb379110dc','5dc21d2a-d283-472f-919b-53ff48655d7b','e6a917fc-d6ba-4e78-bca5-55e2948843e5','1e517f6c-bb33-4112-958e-6697b194a769','047682a3-7d18-4b42-9d34-9bab0ccb01b1','4defbf88-cc2d-45e0-8173-2583048d4be0','dded9937-1212-42a3-878f-c0fd4950e0a8','a7c3db2f-ebf4-4be3-ae21-b802a77cc6b8','0eba7382-b44f-4389-9813-e14ba8428e3e','9e2fb446-3fbd-4888-95ef-f96c68b2669e','6b974f8a-cff1-47ee-8581-e9589abf30bb','bcc56333-d7d0-48ca-b420-154e9da49795','e048c786-253a-4cbb-84fb-e92114c7995a','929fb4b0-1cfd-41af-a21c-31d9c168d8ab','44b3ca00-ff02-40ef-a75f-e5db9795a5cc','db1e7f44-7ba1-4faa-bebc-b020f2384f97','91cf6f9c-0e50-43b8-97db-acebc4355016','f76283a9-f6c8-4d08-bdeb-39d42f71e805');
+-- Rollback: set active=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Gate condition / scope / severity findings (13 block gates).
+--  a) REQ-02 (2fd5094c, ws05, BLOCK, "h_FK >= 1.0", §5.1.3.2 b)) — the anchor is a "muss" sentence, but for VARIANT b) ONLY:
+--     "Der Filterkörper muss in Abweichung von den Festlegungen in Arbeitsblatt DWA-A 178 unabhängig von der Art des Entwässerungssystems
+--     (Misch- oder Trennsystem) eine Höhe von $h_{F K} \geqslant 1,00 \mathrm{~m}$ haben." (p.18–19, under "b) Melioration Filtermaterial");
+--     variants a) and c): "Bezogen auf die Bemessung des RBF keine Änderungen zu Arbeitsblatt DWA-A 178:2019." (p.18) → A 178 heights 0,75/0,50 m
+--     apply. The gate fires for every P-Rückhalt project. → condition: 'IF verfahrensvariante_p == ''melioration_filtermaterial'' THEN h_FK >= 1.0'.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.compliance_requirements set condition='IF verfahrensvariante_p == ''melioration_filtermaterial'' THEN h_FK >= 1.0' where id='2fd5094c-ab25-4a01-8e51-0b30027a0a48';   -- rollback: condition='h_FK >= 1.0'
+--  b) REQ-02-2 (17ec0451, ws05, BLOCK, "beta_wert >= 4", §5.1.3.1 a)) — anchored on "kann … angesetzt werden" for a variant marked "(in Entwicklung)"
+--     with "Aktuell liegen keine ausreichenden Praxiserfahrungen für eine gesicherte Bemessung solcher Anlagen vor." (p.18); fires for every
+--     variant. → severity block→warn AND condition 'IF verfahrensvariante_p == ''faellung_filterzulauf'' THEN beta_wert >= 4'; re-home to
+--     M187-07 (d8b0c113) once S-2 a) deactivates 05.beta_wert.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.compliance_requirements set severity='warn', condition='IF verfahrensvariante_p == ''faellung_filterzulauf'' THEN beta_wert >= 4' where id='17ec0451-4e15-40dc-928d-6e67cc3fde40';   -- rollback: severity='block', condition='beta_wert >= 4'
+--  c) REQ-03 ×2 (a1ff96c6 ws06 · 68ffd495 ws07, BLOCK, "q_Dr_RBF <= 0.03", clause "§5.2") — a SPURENSTOFFE b)/c) limit ("Zu b) … Die Drosselabflussspende
+--     ist auf $q_{\mathrm{Dr}, \mathrm{RBF}} \leqslant 0,03 \mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)$ zu begrenzen." p.22) enforced on two P-RÜCKHALT
+--     worksheets; the ws07 copy reads a field of ws06 (gate re-home class). Variant a) needs 0,01 ("erfordert eine Begrenzung … auf $0,01$" p.22),
+--     variant d) has no limit ("bleibt der Aufbau des RBF unverändert" p.22). → delete the ws07 copy; re-home the ws06 copy to M187-13 (bf792923)
+--     with condition 'IF verfahrensvariante_spurenstoffe IN {gak, mitbehandlung_ka} THEN q_Dr_RBF <= 0.03' on 13.q_Dr_RBF (a copy on 13 is
+--     needed — today q_Dr_RBF exists on 06 and 12 only); clause_reference '§5.2.3.1 b), c)'. Add the a)-gate in S-4 c).
+-- draft-edition: escalate
+-- ☐ RATIFIED
+--  d) REQ-04 ×2 (e2e0fa89 ws06 · 7ecbff21 ws07, BLOCK, "q_Dr_RBF == 0.01 AND h_FK >= 1.0", §5.3.3.1) — a MIKROORGANISMEN requirement on the P-Rückhalt
+--     worksheets. Worse: together with REQ-03 on the SAME worksheet 06 a P-Rückhalt project can only pass with q_Dr_RBF == 0.01 exactly. Text: the
+--     0,01 half is binding ("ist jedoch sicherzustellen … begrenzt ist." p.25), the h_FK half is "sollte die Höhe des Filterkörpers $h_{\text {FK }}
+--     \geqslant 1,0 \mathrm{~m}$ betragen (Waldhoff 2008, Ruppelt et al. 2018)." (p.25) → warn class. → delete the ws07 copy; re-home the ws06 copy to
+--     M187-16 (535a6fa2) as TWO gates: block 'q_Dr_RBF == 0.01' and warn 'h_FK >= 1.0' (both operands need fields on 16 — today 16 has neither).
+-- draft-edition: escalate
+-- ☐ RATIFIED
+--  e) REQ-05 / REQ-05-2 (025f8745 · 7db4c2e0, ws08, BLOCK, identical condition "B_CSB <= 20 AND A_F_pro_AEb >= 750 AND q_krit == 60 AND q_A_max <= 4",
+--     §5.4.3/§5.4.4) — (1) exact duplicate; (2) hohe-organische-Belastung gate on the P-Variante-b worksheet (home = M187-20 67bad0bd, where all four
+--     operands exist); (3) "A_F_pro_AEb >= 750" is printed CONDITIONALLY: "Liegen keine Daten vor, muss die Gesamtfilterfläche mindestens $750
+--     \mathrm{~m}^{2} / \mathrm{ha} A_{\mathrm{E}, \mathrm{b}}$ betragen." (p.30–31) — with CSB data the B_CSB ≤ 20 rule governs and 750 must not block;
+--     (4) "q_krit == 60" is "Die Bemessung sollte für $q_{\text {krit }}=60 \mathrm{l} /(\mathrm{s} \cdot \mathrm{ha})$ erfolgen." (p.30) → warn;
+--     (5) q_A,max "muss … bemessen werden" (p.30) and B_CSB "ist so zu bemessen" (p.30–31) → block. → delete 7db4c2e0; re-home 025f8745 to M187-20 and split:
+--     block 'B_CSB <= 20 AND q_A_max <= 4'; warn 'q_krit == 60'; block 'IF B_CSB IS NULL THEN A_F_pro_AEb >= 750' (grammar permitting — else attest).
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- delete from public.compliance_requirements where id='7db4c2e0-20a3-457a-a0e2-31f91e1d12a5';   -- rollback: re-insert from the 2026-09-05 export (code REQ-05-2, ws 1535237f, block, same condition/quote)
+--  f) REQ-06 / REQ-06-2 (69015ae3 · 1eeabd57, ws09, BLOCK, identical "A_b_a < 1 AND A_F_anteil_Aba == 1.0 AND A_F >= 1.0 AND h_RR >= 0.2 AND h_RBF >= 0.6 AND
+--     h_Draen >= 0.1", §5.5.4/§5.5.3.2.2) — (1) exact duplicate; (2) Klein-RBF gate on the P-Variante-c worksheet (home = M187-22 20604efd / M187-21);
+--     (3) "A_F_anteil_Aba == 1.0" contradicts the source, which allows smaller areas with the b_krit proof: "… sind unter der Einhaltung der maximal
+--     zulässigen AFS63-Filterflächenbelastung von $b_{\text {krit }}=7 \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right)$ gemäß Arbeitsblatt
+--     DWA-A 178:2019 auch geringere spezifische Filterflächen von $A_{\mathrm{F}}<1,0 \%$ … möglich." (p.37) — that is exactly what Gl. 2 / ok_boolean
+--     encode; (4) "h_RBF >= 0.6" is not a requirement: "Mit diesem Aufbau sind Klein-RBF mit einer Einbautiefe von lediglich $h_{\text {RBF }}
+--     \geqslant 0,6 \mathrm{~m}$ möglich" (p.37) describes the achievable minimum of the Bild 8 build-up; (5) "A_F >= 1.0" and "h_Draen >= 0.1" are
+--     "sollte" (p.37, p.36) → warn; (6) A_b,a < 1 ha ("beschränkt sich auf" p.33) and h_RR ≥ 0,2 ("beträgt" p.35–36) → block.
+--     → delete 1eeabd57; re-home 69015ae3 to M187-22 and split: block 'A_b_a < 1 AND h_RR >= 0.2'; warn 'A_F >= 1.0 AND h_Draen >= 0.1';
+--     block 'A_F_anteil_Aba >= 1.0 OR ok_boolean == True' (grammar permitting); drop the h_RBF term.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- delete from public.compliance_requirements where id='1eeabd57-1efc-434e-acbc-6a23e02eea39';   -- rollback: re-insert from the 2026-09-05 export (code REQ-06-2, ws 30a77450, block, same condition/quote)
+--  g) REQ-07 ×2 (01d140e6 ws04 · 3a14dae5 ws05, BLOCK, attest, §4) — the same §4 attestation blocks twice (once on "Abkürzungen und Formelzeichen",
+--     once on "Grundlagen"). → keep 01d140e6 (move to M187-05, its §4 content), delete 3a14dae5 together with S-2 c).
+-- draft-edition: escalate
+-- ☐ RATIFIED
+--  h) REQ-08 ×2 (a056f2e4 ws10 warn, condition "engineer-verified" · acadae66 ws23 warn, condition "" (EMPTY)) — Klimakennung note (§6 p.38) as an
+--     attest; the ws10 copy sits on "P-Rückhalt: Betrieb und Anwendungsgrenzen". → delete a056f2e4; give acadae66 the grammar-valid attest condition.
+--     Low priority (warn only).
+-- draft-edition: escalate
+-- ☐ RATIFIED
+--  i) REQ-01 (16ca8c15, ws01, BLOCK, enum membership) — sound (the enum IS the §1 list, p.9). No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Missing gates for PRINTED hard limits (fields exist, nothing enforces). Specs for compliance_requirements inserts; wording class noted.
+--   a) M187-21 (Klein-RBF Komponenten): 'draen_dn >= 50' + 'draen_gedrosselt == False' — "Die Dränage muss mindestens in DN 50 ungedrosselt ausgeführt
+--      werden." (p.36) → block. 'abdichtung_vorhanden == True' — "Eine Abdichtung ist zwingend erforderlich." (p.36) → block. 'dauerhafter_teileinstau
+--      == False' — "Ein dauerhafter Teileinstau des Filterkörpers … ist nicht zulässig." (p.36) → block. 'filtervegetation NOT IN {gehoelze, schilf}' —
+--      "Nicht geeignet sind Gewächse … Hierzu gehören starke Wurzelbildner wie Gehölze oder Schilf." (p.36) → block. 'CaCO3_massenanteil_filter >= 20' —
+--      "ein $\mathrm{CaCO}_{3}$-Massenanteil von $\geqslant 20 \%$ einzuhalten ist" (p.36) → block. 'IF carbonatschicht_vorhanden == ''ja'' THEN
+--      h_FK_CaCO3 >= 0.10' (p.36) → block.
+--   b) Klein-RBF h_FK: NO field on 21/22 and no gate although "Die erforderliche Höhe des Filterkörpers beträgt im konsolidierten Zustand $h_{\mathrm{FK}}
+--      \geqslant 0,25 \mathrm{~m}$." (p.36) and "In diesem Fall kann die Filterstärke auf $h_{F K} 0,2 \mathrm{~m}$ verringert werden." (p.36) → add h_FK
+--      to M187-21 + gate 'IF carbonatschicht_vorhanden == ''ja'' THEN h_FK >= 0.2 ELSE h_FK >= 0.25' → block.
+--   c) M187-12 (Spurenstoffe a): 'q_Dr_RBF <= 0.01' — "erfordert eine Begrenzung der Drosselabflussspende … auf $0,01 \mathrm{l} /\left(\mathrm{s} \cdot
+--      \mathrm{m}^{2}\right)$" (p.22) → block. M187-13/14 (b/c): h_FK ≥ 1 m — "ist eine Filterschichtstärke von 1 m vorzusehen" / "Es ist eine
+--      Filterkörperhöhe von $h_{\mathrm{FK}} \geqslant 1 \mathrm{~m}$ vorzusehen." (p.22) → needs an h_FK field on 13/14 + block gate.
+--   d) M187-14 (Spurenstoffe c): 'trockenzeit_nach_vollbeschickung >= 24' — "ist eine Trockenzeit von 24 h einzuhalten" (p.22) → block;
+--      'beschickungsdauer_segment <= 24' — "sollte 24 h nicht überschreiten" (p.22) → warn.
+--   e) M187-08 (P b): 'Fe_gehalt > 35 AND p_grund_beladung < 0.2' — "ist ein Eisengehalt von $\mathrm{Fe}>35 \%$ und eine P-Grundbeladung von $<0,2
+--      \mathrm{~g} / \mathrm{kg}$ im Zuschlagstoff einzuhalten." (p.18–19) → block; 'fallhoehe_einbau <= 1.0' — "sind Fallhöhen von $\leqslant 1,0
+--      \mathrm{~m}$ einzuhalten" (p.20) → block; 'IF feinmassenanteil > 5 THEN <attest hydraulische Eignung durch Versuche>' — "muss die hydraulische
+--      Eignung … durch Versuche belegt werden" (p.18–19) → block attest.
+--   f) M187-09 (P c): 'EBCT >= 15 AND v_filter_aufstrom < 5.0' — "können … angesetzt werden" (p.18) → warn; 'anzahl_sorptionsstufen >= 2' — "wird eine
+--      Reihenschaltung von mindestens zwei Sorptionsstufen empfohlen" (p.18) → warn.
+--   g) M187-19/20 (hohe org. Belastung): 'IF CSB_konzentration > 3000 THEN <attest Stoffstromtrennung>' — "müssen die Abflüsse der Lagerflächen von denen
+--      der Verkehrsflächen getrennt werden" (p.29) → block; 'sickerwasser_in_rbf == False' — "darf daher nicht in die RBFA eingeleitet werden" (p.29) →
+--      block; 'betriebsmodus == ''vollstrom'' AND wirkungsgrad_hydraulisch == 100' — "muss der RBF auf eine Vollstrombehandlung mit $100 \%$
+--      hydraulischem Wirkungsgrad ausgelegt werden" (p.29–30) → block (the enum option "teilstrom" then only exists to be rejected);
+--      'foerderleistung_beschickung >= 6' — "muss eine Förderleistung von mindestens $6 \mathrm{l} /\left(\mathrm{m}^{2} \cdot \mathrm{~min}\right)$ …
+--      betragen" (p.30–31) → block; 'anzahl_teilfilter % 4 == 0' — "in vier (oder ein Vielfaches von vier) gleich große Teilfilterbecken" (p.30–31) →
+--      block (grammar permitting, else 'anzahl_teilfilter >= 4'); 'beschickung_pro_ereignis == 20' and 'austritts_dichte <= 1' — "sollten" / "sollte"
+--      (p.30–31, p.31) → warn; 'V_vorstufe_min >= 50' — "empfohlen" (p.30) → warn.
+--   h) M187-18 (UV): 'IF uv_eingesetzt == ''ja'' THEN UV_dosis >= 200' — "sollte … eine Mindestdosis von $200 \mathrm{~J} / \mathrm{m}^{2}$ nicht
+--      unterschritten werden" (p.27) → warn.
+-- draft-edition: escalate
+-- ☐ RATIFIED (per line; write the inserts after ratification — none authored here)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · is_required review on the HOME worksheets (fields the source makes "sollte/empfohlen/kann", outcome values, or standard_fixed constants
+--   that should not be mandatory engineer input). The 05–09 misplaced copies are handled by S-1/S-2 (deactivation makes their required-flag moot).
+--   Proposed is_required=false:
+--   M187-07: beta_wert 5b48a47c ("kann … angesetzt werden", in Entwicklung, p.18) · logstufen_rueckhalt 0144ad68 (measured outcome, p.24–25; also S-1 b).
+--   M187-14: beschickungsdauer_segment e24e431f ("sollte", p.22).
+--   M187-16: logstufen_rueckhalt 9220d8de (measured outcome "beträgt im Mittel $90 \%$ ( 1,0 Log-Stufe)", p.24–25 — not a design input).
+--   M187-19: V_vorstufe_min dfc5dd23 ("Es wird ein Mindestvolumen von $50 \mathrm{~m}^{3}$ empfohlen.", p.30) · q_krit cb99082c ("sollte", p.30; standard
+--            value 60 → default, not mandatory input) · CSB_grenze_trennung 17db634a (standard_fixed 3.000 mg/l, S-6).
+--   M187-20: beschickung_pro_ereignis ae7dbd0d ("sollten", p.30–31) · austritts_dichte df437719 ("sollte", p.31) · A_F_pro_AEb d81911a8 (only "Liegen keine
+--            Daten vor", p.30–31) · wirkungsgrad_hydraulisch 10ebd36c (standard_fixed 100 %, S-6).
+--   M187-21: h_Draen 531d8abd ("sollte mindestens", p.36) · deckschicht_staerke bedbbeb5 ("Die zuvor geschilderte Deckschicht kann in diesem Fall
+--            entfallen." p.36 — conditional on the Carbonatschicht).
+--   M187-22: b_krit b686518f (standard_fixed 7 kg/(m²·a) from A 178, S-6) · A_F_anteil_Aba d5a9b17d (1,0 % or Nachweis, p.37) · h_RBF bcc09b2b (not a
+--            requirement, p.37) · eta_AFS63 fde81f97 (outcome "können … behandelt werden", p.37).
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('5b48a47c-e025-4e64-b5b1-2cffd34a4166','0144ad68-f146-4b77-ad72-578ec720adb8','e24e431f-a8a0-49b5-bdb0-961af2475f87','9220d8de-36f0-4602-babd-827fce810c9a','dfc5dd23-b5cb-4f2d-a62b-4499ea8b1df5','cb99082c-fc01-4e4d-aeea-57c7a9962d16','17db634a-6cdf-4c55-8ef6-f342d4c3a4f2','ae7dbd0d-1229-46b2-bcfc-03f42950ac4d','df437719-9b52-44b7-90d1-efacbf056094','d81911a8-8bf4-4c6b-bb88-53db7780fe93','10ebd36c-17ad-4a9a-a811-302a3c8ca8c2','531d8abd-771c-4bbc-858c-6f04abfab501','bedbbeb5-a86d-4d9d-b65e-80c925f79e69','b686518f-ddf0-45ca-9b64-fca14a301b9d','d5a9b17d-4496-4b28-a456-115f90109209','bcc09b2b-98e8-47ff-b034-55d05bde21a9','fde81f97-46f1-4338-8f2c-20d81c37fb5f');
+-- Rollback: set is_required=true on the same ids.
+--   If S-1/S-2 are NOT ratified, the same review applies to the 05–09 copies (all required=true today): 05 bc588e5a a7c3db2f 5dc21d2a e6a917fc 1e517f6c
+--   047682a3 4defbf88 0eba7382 9e2fb446 6b974f8a dded9937 (variant-conditional inputs forced on every P project) · 06 84d81522 cad7e906 77be6098 ba14d870
+--   c22e80b8 · 07 89e8869b · 08 15c25673 d7a21692 92291b3d bffd8594 d3222e72 deb2ad84 034fc708 c9fe11f1 c34041f7 a83b6dbe d4e7feb7 f08da7e8 065809ba ·
+--   09 e0e47030 3f7f5c18 aa0f425d a7f1126f 940faadd 06145c85 21fa5c7a 61328585 8dfe6c55 44b96310 648c0a64 c9266c02 044afa9f 0dbeb99a f925a51c.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · standard_fixed values held as UI-editable numbers (doctrine: "standard_fixed that is UI-editable = finding"; derived that is hand-enterable =
+--   the #22 class). The engineer can overwrite the printed constant.
+--   CSB_grenze_trennung (19 17db634a; 08 a83b6dbe) = 3.000 mg/l (p.29) · wirkungsgrad_hydraulisch (20 10ebd36c; 08 f08da7e8) = 100 % (p.29–30) ·
+--   b_krit (22 b686518f; 09 a7f1126f) = 7 kg/(m²·a) (p.37) · A_F_anteil_Aba (22 d5a9b17d; 09 e0e47030) = 1,0 % (p.37) · CaCO3_massenanteil_carbo
+--   (21 f8ee16f0; 09 b4d184bb) = 80 % (p.36) · UV_dosis (18 1d478342; 07 16c417ea) = 200 J/m² (p.27) · h_FK_SS (09 f925a51c; 05 6b974f8a) = 1,25 m,
+--   DERIVED from EBCT ≥ 15 min and v < 5,0 m/h (p.18) · deckschicht_staerke (21 bedbbeb5; 09 648c0a64) = 5 cm (p.35–36) · pufferschicht_carbonatbrechsand
+--   (07 72d96425) = ca. 5 cm (p.18) · ok_boolean (09 f20771de) = Gl. 2 output entered by hand.
+-- Proposal: default_value = the printed constant + read-only (or delete the field and hard-code the constant in the gate); ok_boolean → engine write-back only.
+-- draft-edition: escalate
+-- ☐ RATIFIED (needs the read-only mechanism decision — no SQL authored)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Unit / label notes (no value is wrong; entry-trap risk).
+--   a) deckschicht_staerke (21 bedbbeb5, 09 648c0a64) unit "m" while the source prints "5 cm" (p.35–36) and the label/description say "5 cm"; the sibling
+--      pufferschicht_carbonatbrechsand (07 72d96425) is in cm. → either unit 'cm' (and default 5) or keep m with default 0.05. Rollback: unit='m'.
+--   b) q_Dr_RBF Tab. 2 unit prints "$\mathrm{l} /\left(\mathrm{s} \cdot \mathrm{m}^{2}\right)^{2}$" (p.13) — transcript artefact; encoded l/(s*m2) is right.
+--   c) S_PO4P_SS_ab / S_PO4P_SS_zu Tab. 2 unit prints "mg/" (p.13) — truncated mg/l in the transcript; encoded mg/l is right.
+--   d) b_R_a Tab. 2 says "bezogen auf die Einzugsgebietsfläche $A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$" — Tab. 2 defines A_E,b but not A_E,b,a (source
+--      inconsistency; PDF check advised).
+-- draft-edition: escalate
+-- ☐ RATIFIED (a only)
+-- update public.fields set unit='cm' where id in ('bedbbeb5-a86d-4d9d-b65e-80c925f79e69','648c0a64-9959-42f1-9d01-ce42fe9756d2');   -- rollback: unit='m'
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · clause_reference retags (evidence in the pack notes).
+--   REQ-03 (a1ff96c6, 68ffd495) '§5.2' → '§5.2.3.1 b), c)' (p.22).  h_FK (05 2bcbe365, 08 40e9337f) '§3.2' → '§3.2, §5.1.3.2 b)' (the limit REQ-02 tests,
+--   p.18–19).  q_krit (19 cb99082c, 08 92291b3d) '§3.2, §5.4.3, §5.4.4' — fine.  S_PO4P_aM (07 71aa114e, 05 5dc21d2a) '§5.1.3.1' → '§5.1.3.1 a)'.
+--   pufferschicht_carbonatbrechsand '§5.1.3.2 a' — fine.  ok_boolean '§5.5.4' — fine.  AFS63 '§3.2, §4, §5.4.2.1' — fine.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+-- update public.compliance_requirements set clause_reference='§5.2.3.1 b), c)' where id in ('a1ff96c6-228f-44e2-bd61-f69088489747','68ffd495-3249-4827-8ca0-657d925daf50');   -- rollback: '§5.2'
+-- update public.fields set clause_reference='§3.2, §5.1.3.2 b)' where id in ('2bcbe365-a2d7-4362-aaad-a29b33890538','40e9337f-7b7c-4e8e-9e10-2236e0e45687');   -- rollback: '§3.2'
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Empty worksheets (no fields, no gates): M187-02 Verweisungen · M187-03 Begriffe und Definitionen · M187-17 "Mikroorganismen: Filtermaterial,
+--   Vorstufe und Filterkörper" (§5.3.3.2–5.3.3.4 p.26 — the chapter says Vorstufe/Retentionsraum changes do NOT improve retention and vegetation has
+--   no influence; nothing to enter, but h_FK ≥ 1,0 m "sollte" (p.25) and "möglichst feinkörnig" (p.26) could live here) · M187-23 Klimakennung ·
+--   M187-24 Anhang A · M187-25 Konformitätsprüfung & Freigabe. Decide: keep as narrative worksheets or deactivate. No SQL authored.
+-- draft-edition: escalate
+-- ☐ RATIFIED
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · Phantom enum-token fields: NONE. All 139 symbols carry a label; none of the 10 enum fields has a token materialised as a field.
+--   (14 fields carry an EMPTY description: the two attest_* rows, pufferschicht_carbonatbrechsand, betriebsdauer_jahre, anzahl_sorptionsstufen,
+--   sickerwasser_in_rbf, anzahl_teilfilter, filtervegetation, dauerhafter_teileinstau, draen_dn, draen_gedrosselt, h_Draen_klein_rbf,
+--   abdichtung_vorhanden — cosmetic; the pack's verification_quote now documents each.) No action.
