@@ -3,3 +3,4 @@
 fll-naturteich-md-verification-pack.sql  FLL-Naturteich
 fll-gar-2023-md-verification-pack.sql  FLL-GAR-2023
 fll-tp-rhizom-2023-md-verification-pack.sql  FLL-TP-RHIZOM-2023
+dwa-a-138-1-md-verification-pack.sql  DWA-A-138-1

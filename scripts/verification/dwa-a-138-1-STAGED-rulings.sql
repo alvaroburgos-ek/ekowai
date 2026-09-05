@@ -1,0 +1,144 @@
+-- ============================================================================
+-- DWA-A-138-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement
+-- or required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript; "printed p.N" = section/table start page per the Inhalt (the md has
+-- no page lines; offset PDF−2 confirmed via mathpix image indices). Gate rows live in compliance_requirements
+-- (evaluate.ts grammar) — inserts below are written as specs, to be materialised via the migration pattern.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE found on DWA-A-138-1. Every field carries a label; no enum value of
+-- any A138 enum field is materialised as a standalone field (checked all 262 symbols against all enum_values).
+-- No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate fields (same concept encoded twice on the same or a neighbouring worksheet).
+-- Evidence: "In Abschnitt 6 werden für ausgewählte Anlagen systemspezifische Bemessungsvorgaben dokumentiert" (§6.1 p.52) —
+-- one facility-type selection is what the source describes; the encoding has three (A138-15 facility_type_selected
+-- [enum, read by REQ-17], A138-15 a138_anlagentyp_gewaehlt [data_type TEXT but carries enum_values — malformed],
+-- A138-15 a138_anlagentyp_kandidaten [json multi-select, exempt]). A_s: "A_s m² erforderliche Versickerungsfläche
+-- Flächenversickerung" (§6.2.2 p.54) is encoded as A138-16 A_S_flaeche AND a138_A_s_erf AND a138_A_s_dim.
+-- rainfall_table_ref exists on 8 worksheets (A138-13, 16, 17, 18, 19, 20, 21, 22) — per-worksheet provenance may
+-- be intentional; listed for awareness only, no proposal.
+-- ☐ RATIFIED  → soft-delete the orphan copies (no gate/equation reads them); rollback = set active=true on the same ids.
+-- update public.fields set active=false, audit_notes=coalesce(audit_notes,'')||' | deactivated 2026-09-05: duplicate (md pass)'
+--  where id in ('922e0c09-7372-43da-b258-baa729f95942',  -- A138-15 a138_anlagentyp_gewaehlt (text+enum_values) = facility_type_selected
+--               'feebf431-eea4-4c28-8e5b-d09788d9c8c2'); -- A138-16 a138_A_s_erf = A_S_flaeche (Gl. 12 output)
+-- Observation (no proposal): A138-13 a138_V_Sp_erforderlich = V_VA (Gl. 8); A138-24 q_S_AC_final = A138-25
+-- qsac_value_verified; A138-19 n_R = A138-18 n_R_Bemessung = A138-20 n_R_MRS (three copies of the Rigole design frequency).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference retags (zero-risk class). Evidence: the 2024 edition has §5.2.3.1–5.2.3.3 only (Inhalt p.6);
+-- "5.2.3.4" does not exist. The attested sentence is printed twice: §5.2.3.2 p.31 and §5.2.3.3 p.33 ("Die Anforderungen
+-- für die Versickerung des Niederschlagswassers aus dem Anliefer-/Verladebereich … bedürfen grundsätzlich der vorherigen
+-- Abstimmung mit der zuständigen Behörde."). §2 is "Verweisungen" (the normative-references list, p.11) — not a data-
+-- completeness clause; Tab. 4 p.25 ("Verwendung, Art und Herkunft von Grundlagendaten für die Ersteinschätzung") is.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set clause_reference='§5.2.3.2; §5.2.3.3' where code='A138-REQ-27' and clause_reference='5.2.3.4';
+-- update public.fields set clause_reference='§5.2.3.2; §5.2.3.3' where id='13efa8c3-87a8-4d27-ad89-cec6fda1db5c' and clause_reference is null; -- attest_a138_01_a138_req_27
+-- update public.fields set clause_reference='§5.1.2; Tab. 4'     where id='9a9cc984-d1d3-4b64-b3a4-0fd057bf4b67' and clause_reference='§2';     -- A138-03 data_completeness (exempt field)
+-- Rollback: restore the previous clause_reference values quoted in each guard.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Gate source_quote text that is NOT in the source (SR-1: a non-verbatim quote is not a source).
+--  • A138-REQ-25 and A138-REQ-29 (both "5.1", both condition attest_… == True) carry the identical sentence
+--    "Das Arbeitsblatt DWA-A 138-1 gilt fuer Planung, Bau und Betrieb von Anlagen zur Versickerung von Niederschlagswasser.
+--    Die Anwendbarkeit ist im Einzelfall durch den Planer zu pruefen." — no such sentence exists in the md. Printed
+--    equivalent: "Im Frühstadium der Planung sollte eine Ersteinschätzung erfolgen, ob eine Versickerung von
+--    Niederschlagswasser grundsätzlich möglich ist. Mit Tabelle 3 sind wesentliche Kriterien zur Überprüfung der
+--    Umsetzbarkeit einer entwässerungstechnischen Versickerung gegeben." (§5.1.1 p.22). REQ-25/REQ-29 are duplicates.
+--  • A138-REQ-18 ("6.1"): "Die Auswahl der Versickerungsanlage erfolgt anlagenspezifisch unter Beruecksichtigung der
+--    oertlichen Randbedingungen; die Eignung des gewaehlten Anlagentyps ist vom Planer nachzuweisen." — not in the md.
+--    Printed equivalent: "Für Varianten von Versickerungsanlagen müssen auf Grundlage von 5.3.3 anlagen-/systemspezifische
+--    Besonderheiten … berücksichtigt werden. Entsprechende Berechnungsansätze sind gegebenenfalls nachvollziehbar bei der
+--    Bemessung zu dokumentieren." (§6.1 p.52).
+--  • A138-REQ-20 ("5.3.3.7"): second sentence "die Bemessungsgroessen sind vom Planer zusammenzustellen und zu
+--    verifizieren" — not in the md (first sentence is verbatim, §5.3.3.7 p.47).
+-- ☐ RATIFIED → replace source_quote with the printed sentences above; deactivate REQ-29 + its attest field as a duplicate of REQ-25.
+-- update public.compliance_requirements set source_quote='<printed §5.1.1 p.22 text above>' where code in ('A138-REQ-25','A138-REQ-29');
+-- update public.compliance_requirements set source_quote='<printed §6.1 p.52 text above>'  where code='A138-REQ-18';
+-- update public.compliance_requirements set source_quote='<first sentence only, §5.3.3.7 p.47>' where code='A138-REQ-20';
+-- update public.compliance_requirements set active=false where code='A138-REQ-29';
+-- update public.fields set active=false where id='d151b9f8-c5c6-472b-aa9b-f4aaa7428074'; -- attest_a138_01_a138_req_29
+-- Rollback: restore the previous source_quote strings (kept in the 2026-09-05 export) and set active=true.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gate conditions that over-enforce the printed text (SR-2 range → never auto-pick).
+--  • A138-REQ-08 (block): "n IN {0.1, 0.2, 0.33, 0.5}". Source: Tab. 8 p.40 prints UPPER BOUNDS "(≤ 0,33/a) (≤ 0,5/a) …
+--    (≤ 0,2/a) … (≤ 0,1/a)" and Tab. 12 p.49 prints the admissible range "Bemessungshäufigkeit n (1/a) 0,02-0,5"; §5.3.3.2
+--    p.37 bounds the Einfaches Verfahren at "n ≥ 0,1/a bzw. T_n ≤ 10 a". A whitelist of four points rejects valid values
+--    (e.g. n = 0,05/a for Schutzkategorie 3–4, or any n ≤ 0,2 chosen below the bound).
+--    ☐ RATIFIED → condition: n >= 0.02 AND n <= 0.5  (the ≥ 0,1 Einfaches-Verfahren bound stays in simple_method_applicable).
+--    -- update public.compliance_requirements set condition='n >= 0.02 AND n <= 0.5' where code='A138-REQ-08' and condition='n IN {0.1, 0.2, 0.33, 0.5}';
+--  • A138-REQ-04 (block): "gw_clearance >= 1.0". Source: "Bei einem Abstand … zum maßgeblichen MHGW von ≥ 1 m kann in der
+--    Regel auf diese Abstimmung verzichtet werden" (§5.1.1 p.22, §5.2.1 p.25) and Tab. 3 p.24 lists "< 1 m" under
+--    "Versickerung ist potenziell möglich" (column 3), i.e. permissible with authority coordination — not a prohibition.
+--    ☐ RATIFIED → severity block → warn (or condition gw_clearance >= 1.0 OR authority_coordination_required == TRUE).
+--    -- update public.compliance_requirements set severity='warn' where code='A138-REQ-04' and severity='block';
+--  • A138-REQ-COV-01 (block, zones I/II): printed as "in der Regel nicht zulässig" (§4.3 p.21, §5.1.1 p.22) — "in der
+--    Regel" text under a block gate; documented-deviation path recommended rather than downgrade. Note only.
+-- Rollback: inverse of each statement (restore the quoted previous condition/severity).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Printed hard limits WITHOUT a gate (fields exist, nothing enforces). Specs for compliance_requirements rows:
+--  a) DN 1000: "Ein Mindestdurchmesser von DN 1000 darf nicht unterschritten werden." (§6.7.1 p.67) — "darf nicht".
+--     ☐ RATIFIED → A138-REQ-34 | A138-21 | block | IF facility_type_selected == schacht THEN d_S_innen >= 1.0 | §6.7.1
+--  b) Filter layer permeability: "Zum Schutz des Grundwassers darf die erforderliche Durchlässigkeit der Filterschicht erf.
+--     K_f,FS einen Wert von 1·10⁻³ m/s nicht überschreiten." (§6.7.2 p.69) + "Ein Durchlässigkeitsbeiwert von k_f ≤ 1·10⁻³ m/s
+--     muss für die Filterschicht gewährleistet sein." (§6.7.1 p.68) — "darf nicht"/"muss".
+--     ☐ RATIFIED → A138-REQ-35 | A138-21 | block | IF shaft_type == typ_B THEN k_f_FS <= 0.001 | §6.7.1; §6.7.2
+--  c) Filter layer thickness: "Als Material für diese Filterschicht (≥ 50 cm) ist carbonathaltiger Sand … zu verwenden." (§6.7.1 p.68)
+--     ☐ RATIFIED → A138-REQ-36 | A138-21 | block | IF shaft_type == typ_B THEN schacht_filter_thickness >= 50 | §6.7.1
+--  d) Mulde ponding depth: "Der maximale Bemessungseinstau der Mulde h_max ist in der Regel auf 30 cm zu begrenzen." (§6.3.1 p.55)
+--     + Tab. 14 p.73 "für Mulden i. d. R. ≤ 30" — "in der Regel" → warn.
+--     ☐ RATIFIED → A138-REQ-37 | A138-17 | warn | h_M <= 0.30 | §6.3.1; Tab. 14
+--  e) Building distance (§5.3.2 p.36): "sollte der Abstand der Versickerungsanlage vom Baugrubenfußpunkt gemäß Bild 4 das
+--     1,5-Fache der Baugrubentiefe a nicht unterschreiten." — "sollte" → warn; fields distance_to_building_actual /
+--     building_pit_depth_a / distance_to_building_check exist on A138-02 with no gate.
+--     ☐ RATIFIED → A138-REQ-38 | A138-02 | warn | distance_to_building_actual >= 1.5 * building_pit_depth_a | §5.3.2, Bild 4
+--  f) Residential water depth: "muss die Zugänglichkeit auf Bereiche beschränkt werden, bei denen … die Wassertiefe … maximal
+--     40 cm inklusive Freibord beträgt." (§5.3.5 p.51) — "muss"; residential_depth_check exists on A138-22 only.
+--     ☐ RATIFIED → A138-REQ-39 | A138-17/A138-22 | block | IF residential_accessibility == TRUE THEN h_M + freibord/100 <= 0.40 | §5.3.5
+--  g) Permeability method not admissible for design: Tab. A.1 p.81 marks "Abschätzung mit Boden- oder Geodaten-Karten /
+--     Bodenansprache" as "Ersteinschätzung; nicht für Bemessung"; enum token literaturwert maps to this class; REQ-03 only
+--     checks NOT NULL.
+--     ☐ RATIFIED → A138-REQ-40 | A138-04 | block | permeability_test_method != literaturwert | Anh. A, Tab. A.1
+--  h) Basin minimum infiltration rate: "In der Regel sind Infiltrationsraten von k_i ≥ 1·10⁻⁵ m/s vorauszusetzen." (§6.8.1 p.70)
+--     + Tab. 14 "Versickerungsbecken ≥ 1·10⁻⁵" — warn.
+--     ☐ RATIFIED → A138-REQ-41 | A138-22 | warn | IF facility_type_selected == becken THEN k_i >= 0.00001 | §6.8.1; Tab. 14
+-- Rollback for every gate above: delete from public.compliance_requirements where code = '<code>'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · is_required review.
+--  • A138-17 freibord (is_required=true, unit cm, on the Versickerungsmulde worksheet). Tab. 14 p.73 prints "Freibord Überlauf
+--    (2) cm: Versickerungsfläche -; Versickerungsmulde -; … ≥ 10 [MRE/MRS]; Rigole -; Versickerungsschacht -;
+--    Versickerungsbecken ≥ 35". The plain Mulde has NO printed freeboard requirement; the ≥ 10 cm belongs to MRE/MRS
+--    (md cell alignment: the ≥ 10 sits under MRS with the MRE cell empty — multicolumn lost; PDF check of the span
+--    recommended) and ≥ 35 cm to the Becken.
+--    ☐ RATIFIED → is_required=false on A138-17 freibord; add freibord fields (or reuse) on A138-19/20 (≥ 10) and A138-22 (≥ 35)
+--    with warn gates. -- update public.fields set is_required=false where id='835b0827-bdf8-4e88-9e36-4b6c1a6f1e98' and is_required=true;
+--  • A138-23 facility_footprint_m2 (is_required=true, NER): the source defines a footprint rule only for Mulden
+--    ("Der erforderliche Flächenbedarf für die Versickerungsmulde entspricht mindestens der maximalen Versickerungsfläche
+--    A_s,max", §6.3.2 p.56); for other types it is engineer_input. ☐ RATIFIED → is_required=false (keep as record).
+--  • Unit note (no change proposed): A138-06 bbz_thickness is in m while Tab. 6 prints "≥ 20 cm / ≥ 30 cm"; A138-08 A_E is
+--    in ha while Tab. 2 prints m² (the 200-ha bound in §5.3.3.2 justifies ha); A138-18 d_i/d_a are in m per the Gl. (21)
+--    legend p.59, while Tab. 2 p.18 prints mm — a source-internal inconsistency, encoding follows the equation legend.
+-- Rollback: set is_required=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Unsourced numbers inside field descriptions (SR-1: a value the standard does not print must not read as a default).
+--  • A138-18 s_F description: "Pore fraction of fill material; gravel ≈ 0.35 typical." — the source only says "Porenanteil des
+--    Füll-/ Schüttmaterials s_F" (§6.4.2 p.59) and, for prefab, "den Herstellerangaben zu entnehmen". No 0,35 is printed.
+--    ☐ RATIFIED → strip "gravel ≈ 0.35 typical" from the description.
+--    -- update public.fields set description='Pore fraction of fill material (Porenanteil des Füll-/Schüttmaterials s_F); from manufacturer data for prefab elements.' where id='d53b6ec2-b548-4788-a98e-42ac048a2b67';
+--  • A138-17 b_M / L_M labels say "Sohle" (b_min/L_min in Tab. 2) while the symbols b_M/L_M are printed as "Breite/Länge der
+--    Mulde bei Volleinstau" (Tab. 2 p.17–18). ☐ RATIFIED → either relabel to "bei Volleinstau" or resymbol to b_min/L_min.
+-- Rollback: restore the previous description/label strings (in the 2026-09-05 export).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Source-internal numbering slips (no encoding change; recorded so nobody "fixes" the encoding toward the typo):
+--  • §6.7.2 p.69: "iterative Anwendung der Gl. (38)" for h_S — the h_S equation is (37); (38) is the Typ-B filter condition.
+--  • §6.6.2 p.66: "iterative Anwendung der GL. (33)" for L_R — the L_R equation is (32); (33) is Q_Dr.
+--  • §5.3.3.7 p.48: Gl. (9) is introduced as "zur Überprüfung der Anwendungsbedingung gemäß 5.3.1" — the condition is in 5.3.3.2.
+-- Encoding uses the correct equation numbers (Gl.37 → h_S, Gl.32 → L_R). No action.
