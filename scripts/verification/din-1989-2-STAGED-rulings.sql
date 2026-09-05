@@ -1,0 +1,165 @@
+-- ============================================================================
+-- DIN-1989-2 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- Evidence quotes cite the md transcript (German mathpix LaTeX of DIN 1989-2:2004; one page line "8" only).
+-- "printed p.N" = section start page per the Inhalt, cross-checked with the mathpix figure page indices (see pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Worksheet ids: 01 = 33b038a5-b477-4104-ac12-5d112625396f · 02 = 437bd916-f40e-4ac9-8650-0242fb0361d4 ·
+--   03 = 8a69efad-cb7a-461c-8371-606daad848c5 · 04 = 70d2a76f-4ba2-4576-a719-e4a275806321
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE. All 42 symbols carry label + clause + description; no enum token of the
+-- 5 enum fields is materialised as a field. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicate / single-source candidates (three clusters; nothing deactivated here — owner picks the owner symbol).
+--  a) Q (ws 02, §5.3.2) · Q_max (ws 02, §5.4.2) · Q_Zu_max (ws 03, §6.4.6) all name the DIN EN 12056-3:2001-01 Tab. C.1 flow
+--     for the DN at 1 % Gefälle / 70 % Füllungsgrad: "Q der Volumenstrom in der planmäßigen Zulaufleitung zum Filter bei einem
+--     Füllungsgrad von $70 \%$ und einem Gefälle von 1 \% nach DIN EN 12056-3:2001-01, Tabelle C.1" (p.8) | "Bezugsgröße ist der
+--     maximal zufließende Volumenstrom $Q_{\text {max }}$, nach DIN EN 12056-3:2001-01, Tabelle C. 1 in Abhängigkeit von der
+--     Nennweite DN der Zulaufleitung bei $1 \%$ Gefälle (70 \% Füllungsgrad)." (p.10) | "das dem maximalen Volumenstrom
+--     $Q_{\mathrm{Zu}, \max }$ der jeweils vorgegebenen Nennweite des Querschnittes der Zulaufleitung bei $1 \%$ Gefälle" (p.14);
+--     Anhang A/B even write Gl.(1) with Q_zu,max. → ONE atomic field (Q on ws 02, keyed by DN, value NR from Tab. C.1) and the
+--     other two derived by identity (derivation invariant: inherit by reference, never re-enter).
+--  b) funktionsprinzip (ws 01) vs filtertyp (ws 01): §3.8/§3.9 bind Typ C ↔ Fremdstoffableitung and Typ A/B ↔ Fremdstoffrückhalt,
+--     so funktionsprinzip is derivable from filtertyp; BUT Tab. 1 (p.8) lists "mit Fremdstoffableitung & TYP A & TYP B & TYP C",
+--     i.e. Typ A/B filters can also discharge. Owner ruling needed: (i) keep both as independent inputs (Tab. 1 reading) or
+--     (ii) derive funktionsprinzip from filtertyp (§3.8/§3.9 reading) and set is_required=false. PDF check of Tab. 1 advised —
+--     its column-group header is an image in the md.
+--  c) eta_hydr_unbel_doku / eta_hydr_bel_doku (ws 02, manufacturer documentation values, §5.4.2/§5.4.3) vs eta_hydr / eta_hyd_bel
+--     (ws 03, computed Gl.(3)/(5)). Legitimately different roles (documented vs. tested) — keep both, but add a consistency
+--     warn gate: 'eta_hydr IS NULL OR eta_hydr_unbel_doku IS NULL OR abs(eta_hydr - eta_hydr_unbel_doku) <= 0.05' (tolerance is
+--     EKOWAI's — the standard prints none; owner to set).
+-- ☐ RATIFIED  (a/b/c individually; migrations to be written after the ruling.) Rollback: none (nothing applied).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Gate source_quote / anchor check. All 17 gate source_quotes are VERBATIM in the md (CR-03/CR-04 as LaTeX). No advisory
+-- ("sollte/kann/empfohlen") anchor carries a block gate. Two structural findings:
+--  • CR-16 (54a7c3d9…, ws 01, block, condition "TRUE", §3/§1) is a TAUTOLOGY: it is anchored on "Für die Anwendung dieser Norm
+--    gelten die in DIN 1989-1 angegebenen und die folgenden Begriffe." (p.4) — a definitions preamble, not a requirement — and
+--    enforces nothing. → deactivate (or convert to info severity).
+--  • CR-11 (fb165013…, ws 02, block) cites "§5.4.2; §5.4.3" but conditions only 'eta_hydr_unbel_doku IS NOT NULL'; the §5.4.3
+--    obligation (belastet, DN ≤ 200) is unenforced → split, see S-7b; retag CR-11 to "§5.4.2".
+-- ☐ RATIFIED
+-- update public.compliance_requirements set active=false where id='54a7c3d9-9f96-4fdf-b39f-257e940fe3e3';   -- CR-16 (or severity='info')
+-- update public.compliance_requirements set clause_reference='§5.4.2' where id='fb165013-0006-4628-8d29-1b00b8039445' and clause_reference='§5.4.2; §5.4.3';
+-- Rollback: set active=true on CR-16; restore clause_reference='§5.4.2; §5.4.3' on CR-11.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Clause-reference retags (zero-risk class; evidence = the md clause that carries the sentence quoted in the pack).
+--  • DIN-1989-2-03 filtertrennwirkung_nachgewiesen "§6.5.3" → "§5.5; §6.5.3" — the 0,7 threshold is printed in §5.5 (p.10):
+--    "Hinsichtlich der Abtrennung von Fremdstoffen müssen diese Filter einen Wirkungsgrad von mindestens 0,7 erreichen (siehe 6.5.3)."
+--  • DIN-1989-2-02 Q "§5.3.2" → "§4; §5.3.2; §5.3.3" (symbol table p.6 + both legends p.8/p.9).
+--  • DIN-1989-2-02 Q_max "§5.4.2" → "§4; §5.4.2" (symbol table p.6).
+--  • DIN-1989-2-03 Q_Zu "§6.4.5" → "§4; §6.4.5"; Q_Ab "§6.4.5" stays (the §4 wording contradicts, see S-9).
+--  • DIN-1989-2-03 m_verw "§6.5.3.2" → "§3.17; §6.5.2; §6.5.3.2" (definition p.5, measurement rule p.16).
+--  • DIN-1989-2-01 hersteller "§7" → "§7 b)"; DIN-1989-2-04 werkstoffbezeichnung "§7" → "§7 g)" (cosmetic, optional).
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§5.5; §6.5.3'            where id='590083e0-23a5-42bd-9feb-59ed5eeff427' and clause_reference='§6.5.3';
+-- update public.fields set clause_reference='§4; §5.3.2; §5.3.3'      where id='575f24b4-cad1-4be3-ad90-5afca26ee3b3' and clause_reference='§5.3.2';
+-- update public.fields set clause_reference='§4; §5.4.2'              where id='809aa64b-3d3d-4f8e-b5c5-a9f2f406a4bb' and clause_reference='§5.4.2';
+-- update public.fields set clause_reference='§4; §6.4.5'              where id='a475b605-1c9c-4593-946d-cf29f7514fab' and clause_reference='§6.4.5';
+-- update public.fields set clause_reference='§3.17; §6.5.2; §6.5.3.2' where id='9e519854-b82e-4a69-b187-a8202e8959c9' and clause_reference='§6.5.3.2';
+-- Rollback: set each clause_reference back to the guarded prior value on the same id.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gate SCOPING — five block gates enforce type-/installation-/DN-conditional rules unconditionally. Whether that
+-- over-enforces depends on the evaluate.ts null semantics (a null operand skipping the gate would hide it; a Typ C filter
+-- that enters V_Rueck_A would be blocked wrongly either way). Printed conditions:
+--  • CR-03 'V_Rueck_A >= Q * 25' — Typ A only ("Bei Filtern des Typs A [...] Einstauvolumen $V_{\text {Rück }}$ nach Gleichung 1", p.8).
+--  • CR-04 'V_Rueck_B >= Q * 2' · CR-05 'behaeltnis_masse <= 20' · CR-06 'tiefe_gok_griff <= 60' — Typ B only (§5.3.3, p.9);
+--    CR-06 additionally "Bei Erdeinbau".
+--  • CR-10 'standsicherheit_eingehalten == true' — "Separate Filtersysteme für den Erdeinbau müssen [...]" (§5.7, p.11).
+--  • CR-08 'filtertrennwirkung_nachgewiesen == true' — "Die Filtertrennwirkung ist für Filter mit Zulaufnennweiten $\leq$ DN 200
+--    nachzuweisen." (§5.5, p.10); for DN > 200 the manufacturer documents his own method (§5.1/§6.1).
+-- ☐ RATIFIED  → condition specs (filtertyp/einbausystem live on ws 01, DN on ws 01 — cross-worksheet reads; the grammar must
+--    support them or the gates re-home to ws 01):
+-- -- update public.compliance_requirements set condition='filtertyp != typ_a OR V_Rueck_A >= Q * 25' where id='db72ce05-6f8f-49e0-9c6e-28f3811fb5ef';
+-- -- update public.compliance_requirements set condition='filtertyp != typ_b OR V_Rueck_B >= Q * 2' where id='f4ff831a-4a20-459a-bbb3-476eadb8b723';
+-- -- update public.compliance_requirements set condition='filtertyp != typ_b OR behaeltnis_masse <= 20' where id='98622362-2605-45ce-b77c-76ca195c5678';
+-- -- update public.compliance_requirements set condition='filtertyp != typ_b OR einbausystem != separat_erdeinbau OR tiefe_gok_griff <= 60' where id='1c2f9e6a-6cbd-4108-a551-39c2e115210f';
+-- -- update public.compliance_requirements set condition='einbausystem != separat_erdeinbau OR standsicherheit_eingehalten == true' where id='c185fbb4-a6f6-4cb7-b799-9a6bb2b181d1';
+-- -- update public.compliance_requirements set condition='DN > 200 OR filtertrennwirkung_nachgewiesen == true' where id='f6d42d32-9738-4d7d-b210-b57382a4b478';
+-- Rollback: restore the six prior condition strings from the 2026-09-05 export (fields-DIN-1989-2.json, gates[]).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · is_required review (source makes the field conditional → propose false; obligations left as is).
+--  • DIN-1989-2-03 eta_Rueck_AB (required=true): Typ A/B only — "Für die Filter Typ A und Typ B ist die Filtertrennwirkung [...]
+--    zu ermitteln" (§6.5.3.1, p.16); Typ C uses eta_C. → false.
+--  • DIN-1989-2-03 filtertrennwirkung_nachgewiesen (required=true): DN ≤ 200 only (§5.5, p.10). → false (gate S-5 carries the rule).
+--  • DIN-1989-2-02 Q (required=true): feeds Gl.(1)/(2) for Typ A/B only; Anhang C prints "$V_{\text {Rück, }}$ entfällt" for Typ C
+--    (p.22). → false, OR keep true once S-2a makes Q the single owner of the Tab. C.1 flow (then it is needed for §5.4.2 anyway).
+--  • DIN-1989-2-01 funktionsprinzip (required=true): derivable from filtertyp under the §3.8/§3.9 reading (S-2b). → false if (ii).
+--  • DIN-1989-2-03 Q_Zu / Q_Ab (required=true): test-rig measurements; hard for the calc worksheet. Kept.
+--  • Kept required, for the record: hersteller (§7 b), DN (§5.1), werkstoff_filterelement (§6.2/§7 g record), werkstoff_eignung_nachgewiesen
+--    (§5.2.1 "müssen"), querschnitt_nicht_eingeengt (§5.4.1 "darf [...] nicht"), eta_hydr_unbel_doku (§5.4.2 "anzugeben"),
+--    dichtheit_eingehalten (§5.6), m_ges_festst / m_sp_verunr (all types), kennzeichnung_vollstaendig (§7), erstpruefung_bestanden (§8.2),
+--    wpk_eingerichtet (§8.3), anleitung_vorhanden (§9).
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('a07d8f93-3fa5-455e-a05a-26e4d3a3c3dd','590083e0-23a5-42bd-9feb-59ed5eeff427') and is_required=true;
+-- Rollback: set is_required=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Missing gates for printed obligations / limits (specs; new codes continue after CR-17).
+--  a) NUMERIC η ≥ 0,7 (ws 03, §5.5 p.10, BLOCK) — CR-08 blocks on a boolean attestation while the computed values exist:
+--     'DN > 200 OR (filtertyp IN {typ_a,typ_b} AND eta_Rueck_AB >= 0.7) OR (filtertyp == typ_c AND eta_C >= 0.7)'
+--     Evidence: "Hinsichtlich der Abtrennung von Fremdstoffen müssen diese Filter einen Wirkungsgrad von mindestens 0,7 erreichen
+--     (siehe 6.5.3)." — NOTE the standard prints NO efficiency classes; 0,7 is the only threshold.
+--  b) eta_hydr_bel_doku (ws 02, §5.4.3 p.10, BLOCK): 'DN > 200 OR eta_hydr_bel_doku IS NOT NULL' — "ist für Filter mit
+--     Zulaufnennweiten $\leq$ DN 200 der hydraulische Wirkungsgrad des belasteten Filters nach 6.4.6 zu ermitteln und in der
+--     Produktdokumentation anzugeben." (split from CR-11, see S-3).
+--  c) temperaturbestaendig_fallrohr (ws 02, §5.2.3 p.7, BLOCK) — needs a condition field: add DIN-1989-2-01 einbau_fallrohr (boolean,
+--     §5.2.3) or an einbausystem token "fallrohr"; then 'einbau_fallrohr != true OR temperaturbestaendig_fallrohr == true'.
+--     Evidence: "Für den Einbau in Fallrohre muss der Werkstoff zwischen $-20^{\circ} \mathrm{C}$ und $+80^{\circ} \mathrm{C}$ temperaturbeständig sein."
+--  d) rueckhalteraum_zugaenglich (ws 02, §5.3.2/§5.3.3 p.8–9, BLOCK): 'filtertyp == typ_c OR rueckhalteraum_zugaenglich == true' —
+--     "Das Einstauvolumen muss für Reinigungszwecke zugänglich sein." Also unfielded: "Diese Behältnisse müssen ohne Verwendung von
+--     Werkzeugen leicht herausnehmbar und übersichtlich angeordnet sein." (Typ B) → new boolean behaeltnis_werkzeugfrei + gate.
+--  e) pruefberichte_aufbewahrung_jahre (ws 04, §8.2/§8.3 p.18–19, BLOCK): 'pruefberichte_aufbewahrung_jahre IS NULL OR
+--     pruefberichte_aufbewahrung_jahre >= 10' — "jedoch mindestens 10 Jahre." / "mindestens 10 Jahre aufzubewahren."
+--  f) DN > 200 manufacturer documentation (ws 01, §5.1 p.7, BLOCK) — no field: add hersteller_verfahren_dokumentiert (boolean) and
+--     'DN <= 200 OR hersteller_verfahren_dokumentiert == true' — "Der Hersteller muss diese Werte angeben und nachvollziehbar
+--     dokumentieren, wie er diese Werte ermittelt hat."
+--  g) Erdeinbau housings (ws 02, §5.2.3 p.7, BLOCK, NR values): "Zusätzlich zu 5.2.2 sind für separate Filtersysteme für den Erdeinbau
+--     die Anforderungen nach DIN 1989-3:2003-08, 4.2 einzuhalten." → boolean gehaeuse_din1989_3_42 + 'einbausystem != separat_erdeinbau
+--     OR gehaeuse_din1989_3_42 == true' (comparator values live in DIN 1989-3, not in library → attestation only).
+--  h) Hydraulic TEST-PROTOCOL parameters are printed hard rules with NO fields (the calc worksheet holds results only). Candidates for
+--     a "Prüfaufbau/Prüfablauf konform" attestation block or per-parameter fields: §6.4.4 "Der Volumenstrom muss über eine Dauer von
+--     5 min ohne Rückstau in der Zulaufleitung den Filter passieren." (p.13) · Tab. 2 seven Q_Zu/Q_Zu,max steps 100/50/20/10/5/2,5/1 %
+--     with 2/2/3/4/8/8/8 min (p.13) · §6.4.6 "30 % des maximalen Volumenstroms [...] über eine Dauer von 4 min", "mindestens 10 min
+--     Pause", "100 Zyklen" (p.14) · §6.5.2 "30 % [...] für die Dauer von 10 min", flush "für 1 min" at max flow, sieve "250 µm nach
+--     DIN ISO 3310-1" (p.16) · §6.4.1 Auffangbehälter "mindestens $1 \mathrm{~m}^{3}$", drying "105 °C" over "1 h", weighing "auf 0,1 g",
+--     Zulaufleitung "Gefälle von 1 %" (p.11–12) · Tab. 3 masses 150/150/200 g per 1000 l, Tab. 4 Quarzsand 125–250 µm 0 % / >250 µm 100 % (p.15) ·
+--     §6.4.3 fixed test ORDER 6.4.4 → 6.4.5 → 6.5 → 6.4.6 (p.13). → owner decides scope (attestation vs fields); no SQL.
+-- ☐ RATIFIED  (each item individually; inserts into compliance_requirements as specs above; rollback = delete by code / deactivate new fields.)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Derived-but-hand-enterable (#22 class) and single-point simplifications — information, owner decides.
+--  • m_ges_festst (ws 03): Tab. 3 fixes the dosing at 0,15 + 0,15 + 0,20 = 0,50 g/l ("Die Menge, Masse und Konzentration des einzelnen
+--    Prüfstoffes je 1000 Liter Prüfmedium muss Tabelle 3 entsprechen", p.15). With the test-medium volume actually used (no field today:
+--    V_Prüf_used) it is derived: m_ges_festst = 0,5 g/l × V_used. → add V_pruef_verwendet (l) + equation, make m_ges_festst read-only; or keep
+--    as measured input with a warn gate 'm_ges_festst >= 0.5 * V_Pruef_trenn' (the tank minimum).
+--  • eta_hydr / eta_hyd_bel: Tab. 2 prescribes SEVEN flow steps; the standard reports η as a curve ("Darstellung in Diagrammform nach Bild
+--    E.1", p.25). The encoding holds one (Q_Zu, Q_Ab) pair → one η. Acceptable as a design-point value; a multi-row test table would be
+--    the faithful model. No SQL.
+--  • V_Pruef_leist / V_Pruef_trenn: equations compute the printed MINIMUM ("≥"); the actual tank volume is not fielded. OK as is.
+-- ☐ RATIFIED  (information; migration after ruling.)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · md deficiencies / source-internal inconsistencies needing a PDF check before any VA claim (SR-3):
+--  • Tab. 1 (p.8): the column-group header (Sedimentationsvolumen classes) is an IMAGE; only "kleines Sedimentationsvolumen" and
+--    "Filter mit mechanischer Filtration ohne Sedimentationsvolumen" survive as text. Row labels transcribed.
+--  • Anhang B (p.21) prints "$-V_{\text {Rück }} \geq Q_{\text {zu, } \max } \times 25 \mathrm{~s}$" as a Typ B criterion — the normative
+--    Gl.(2) prints "× 2". Normative wins; confirm in the PDF whether the Anhang really prints 25.
+--  • Q_Ab / Q_Zu legends disagree: §4 (p.6) Q_Ab = "in die Speicherzulaufleitung fließender Volumenstrom"; §6.4.5 (p.13) Q_Ab = "in den
+--    Ablauf (z. B. Kanal, Versickerungsanlage)"; §6.4.6 (p.14) Q_Zu = "dem Speicher zufließender Volumenstrom". §3.15 ANMERKUNG fixes the
+--    intended ratio (to-storage / DN flow) → the §6.4.5 reading used by the encoding is right.
+--  • Sieve mesh: §6.4.1 (p.12) "Maschenweite von $125 \mu \mathrm{~m}$ nach DIN ISO 3301-1" (typo for 3310-1) vs §6.5.2 (p.16)
+--    "Nennmaschenweite von $250 \mu \mathrm{~m}$ nach DIN ISO 3310-1". Two different mesh sizes printed for the wet sieving.
+--  • Tab. 3 (p.15) Polypropylenkugeln row split across md lines (aligned env) — quoted only in part.
+--  • Tab. 5 (p.18–19): only two rows (Werkstoff, Maße) transcribed — check the PDF for further rows.
+--  • OCR: "Sp. veruur" (Gl.(9)), "( z . B. Speicher)" (§3.11), "Ubereinstimmung" (§6.2), "Tell" for "Teil" (Vorwort/§2) — quoted as printed.
+--  • Anhang E (p.25–26) ends mid-form in the md ("Filtertrennwirkung $\eta=$"); Bild E.1 and Bild 1–4, A.1–C.1 are images (legends transcribed).
+--  • No page-number lines except "8" (md line 305); all other pages derived (see pack header).
+-- No SQL.
