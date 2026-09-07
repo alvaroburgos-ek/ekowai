@@ -1,0 +1,324 @@
+-- ============================================================================
+-- DWA-M-732 — STAGED, WRITTEN-NOT-APPLIED (owner rulings). Every block below changes structure,
+-- enforcement or required-ness, so it sits OUTSIDE the pre-authorised evidence-capture class of the
+-- verification pack. 2026-09-05, md pass [VC]. Apply only after Alvaro marks the block RATIFIED.
+-- Source: C:\Users\Ekowai\Desktop\Guidelines\DWA-M-732\DWA-M_732.md — Merkblatt DWA-M 732 „Abwasser aus
+-- Brauereien“, September 2010, korrigierte Fassung: Stand August 2022 (final Merkblatt / Weißdruck class,
+-- NOT a Gelbdruck). "printed p.N" = printed page per the document's own Inhalt + Tabellen-/Bilderverzeichnis,
+-- cross-checked against the mathpix image indices (PDF = printed + 2, constant across the document).
+-- Gate rows live in public.compliance_requirements (evaluate.ts grammar); field/gate/worksheet ids are the
+-- prod uuids from the 2026-09-05 export (fields-DWA-M-732.json). Each block carries its evidence quote and
+-- the rollback inverse. NOTHING here is in the pack.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-0 · Encoding-level observation (no SQL — owner policy question).
+-- This is a MERKBLATT (DWA-M), the advisory class of the DWA-Regelwerk, and it says so of itself:
+--   "Jedermann steht die Anwendung des Merkblattes frei. Eine Pflicht zur Anwendung kann sich aber aus Rechts-
+--    oder Verwaltungsvorschriften, Vertrag oder sonstigem Rechtsgrund ergeben." (Benutzerhinweis, printed p.8)
+--   "Das Merkblatt vermittelt einen fachspezifischen Überblick und wird Behörden, Verbänden, Planern von
+--    Abwasserableitungs- oder Abwasserreinigungsanlagen und den einschlägigen Betrieben als Arbeitshilfe
+--    empfohlen." (§1, printed p.8)
+-- The only genuinely binding numbers it carries are the ones it REPRODUCES from external law — Anhang 11 AbwV
+-- (Tabelle 14, p.25) and TA Lärm 1998 (§8.5, p.45) — plus the DWA-M 115-2 recommendations (Tabelle 13, p.25).
+-- Everything else is "üblich" / "in der Regel" / "hat sich bewährt" / "z. B.". The encoding currently carries
+-- 12 BLOCK gates. S-6 proposes downgrading four of them; S-5 fixes the conditions of the rest.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Mis-homed fields and gates (structure). The single biggest defect on this standard: worksheet
+-- M732-15 is titled "Beispielanlage Neutralisation" (§7.6.1, Tabelle 15, printed p.31) but carries NINE
+-- §8.5-Lärm fields and TWO §8.4/§8.5 gates, while the worksheet that should hold them, M732-22 "Weitere
+-- Emissionen: Dampf, Abluft, Geruch, Laerm", holds only three fields. Evidence: every one of the nine fields
+-- is quoted in the pack against §8.5 (printed p.45); not one of them appears anywhere near §7.6.1.
+-- ☐ RATIFIED  (a) re-home the nine Lärm fields M732-15 → M732-22
+-- update public.fields set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-22') where id in ('2f653bf5-9ad8-425f-852d-315ed69fdb06','3993735d-e68a-4d42-af1a-bc7aa6d9c502','e3c44469-75a8-4a02-aa39-57101d0f44cf','61f7d6e0-e45d-4d52-bf29-21292e89b464','b3cc2ac6-5422-4f8e-b90a-c2badb0edfd0','f8de14b5-4062-4b3d-b076-c5808ee7736a','fd0ed4b2-8078-41bb-9dfb-41d38ef426aa','5f36b0d6-0d2c-4ac3-be82-a2472c6fe97f','7c1f69c6-c2b7-4cef-b437-d3d58e724e55');
+--      Rollback: same statement with wt.code='M732-15'.
+-- ☐ RATIFIED  (b) re-home gates CR-M732-14 (§8.4 Olfaktometrie, p.45) and CR-M732-15 (§8.5 Lärm, p.45) M732-15 → M732-22
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-22') where id in ('5bc3c7dc-7951-45f5-9494-778a7b434f71','bdac0d3b-309d-4c2e-b2a3-007914bc2f5d');
+--      Evidence CR-M732-15 reads gebiet/schallpegel/abstand_* — all of which move with (a); a gate whose fields
+--      live on another worksheet cannot evaluate in the worksheet UI.
+--      Rollback: same statement with wt.code='M732-15'.
+-- ☐ RATIFIED  (c) CR-M732-12 (Brauwasser = Trinkwasserqualität) sits on M732-03 "Betriebsklassifikation nach
+--      Ausstoss". Evidence: "Brauwasser muss grundsätzlich Trinkwasserqualität aufweisen, d. h. alle Forderungen
+--      der Trinkwasserverordnung verbindlich einhalten." (§4 Wasseraufbereitung, printed p.14) and
+--      "Die Anforderungen der Trinkwasserverordnung (TrinkwV 2001; DIN 2000) sind einzuhalten" (§5.2 Pt. 1,
+--      printed p.17) → belongs on M732-04 "Wassereinsatz und Wasserqualitaeten".
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-04') where id='f2f0d22e-4fae-4c73-a9fc-eb004b2e6451';
+-- update public.fields set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-04') where id='cf2a9726-0a50-4ff4-a77e-476396238900'; -- its attest field moves with it
+--      Rollback: both with wt.code='M732-03'.
+-- ☐ RATIFIED  (d) CR-M732-13 (EDTA) sits on M732-03. Evidence: "Auf die Vermeidung des Einsatzes von EDTA wird
+--      hingewiesen. EDTA-haltige Reinigungssubstanzen lassen sich weitgehend durch EDTA-freie Reinigungskonzepte
+--      ersetzen." (§5.3 Hilfsstoffe, printed p.19) → belongs on M732-05 "Hilfsstoffe und Chemikalienverbrauch"
+--      (which today has ZERO fields, see S-9).
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-05') where id='be8d88fc-8122-4777-98c7-a060aa8bb19e';
+-- ☐ RATIFIED  (e) CR-M732-09 (Arbeitsschutz-Auszug) sits on M732-11 "Chemisch-physikalische Vorbehandlung".
+--      Evidence: the quoted list is §7.5 "Sicherheitstechnische Hinweise für Abwasseranlagen" (printed p.30) →
+--      belongs on M732-14 "Sicherheitstechnische Hinweise" (today ZERO fields, see S-9).
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-14') where id='48afa011-cb91-4b24-aea2-6f084693e2d1';
+-- update public.fields set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-14') where id='bf545d80-713e-4117-867a-0f6f9a8134b7';
+-- ☐ RATIFIED  (f) CR-M732-10 sits on M732-11. Evidence: "Bei einer anaeroben Vorstufe ist eine Abdeckung der
+--      entsprechenden Anlagenteile (Misch- und Ausgleichsbecken, Vorversäuerung, Anaerobreaktor) und eine
+--      Abluftabsaugung und -behandlung notwendig." (§8.4, printed p.45) — the trigger is an ANAEROBIC stage →
+--      M732-13 "Anaerobe biologische Behandlung" (or M732-22 if the owner prefers clause-home over process-home).
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-13') where id='e5ee85da-08c0-470e-af2d-d8cf4c7702eb';
+-- update public.fields set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-13') where id='6d790237-7acf-4278-b4c4-8256e2ea8afc';
+-- ☐ RATIFIED  (g) CR-M732-05 (Tabelle 14, Anhang 11 AbwV, Direkteinleiter) sits on M732-08 "Abwasseranfall,
+--      Konzentration und Schmutzfrachten" → belongs on M732-10 "Anforderungen Direkteinleiter (Anhang 11 AbwV)".
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-10') where id='29ce4d03-7afa-493b-beb2-0d8a1f6b5b9e';
+-- ☐ RATIFIED  (h) CR-M732-04 (Tabelle 13, Indirekteinleiter) sits on M732-08 → belongs on M732-09
+--      "Anforderungen Indirekteinleiter".
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-M-732' and wt.code='M732-09') where id='0caee2f2-05c4-40b2-9d68-bf80b19f5c3d';
+--      NOTE for (g)+(h): both gates read fields that live on M732-08 (CSB_durchmischt, BSB5_durchmischt, NH4_N,
+--      NH3_N, N_ges, P_ges, EW). Re-homing the gate WITHOUT giving M732-09/M732-10 their own measured-value
+--      fields only moves the cross-worksheet read to the other side — do (g)/(h) together with S-5(a).
+-- ☐ RATIFIED  (i) CR-M732-01 lives on M732-03 and its condition reads ausstoss_jahr, which lives on M732-01
+--      (Projekt-Registrierung). Either move ausstoss_jahr to M732-03 (it is the classifying quantity of §3,
+--      printed p.13) or accept the cross-worksheet read explicitly. Owner call.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicates.
+--  (a) FIELDS: M732-08.CSB "CSB-Konzentration (Bereich)" (bcd1403f-7547-43f4-bde4-9130ba386bc9, clause §7.2,
+--      unit mg/l, optional) encodes the SAME Tabelle-12 rows already held by M732-08.CSB_durchmischt
+--      (7c81b316-…) and M732-08.CSB_sedimentiert (6e16a433-…) on the same worksheet. Tabelle 12 (printed p.23)
+--      prints CSB only as those two rows — there is no third, generic "CSB-Bereich" row.
+--      ☐ RATIFIED → retire the generic field:
+-- update public.fields set active=false where id='bcd1403f-7547-43f4-bde4-9130ba386bc9';
+--      Rollback: active=true.
+--  (b) GATES: CR-M732-02 (pH) and CR-M732-03 (Temperatur) carry a BYTE-IDENTICAL source_quote (the one §7.3
+--      sentence, printed p.25) but different conditions. This is correct encoding, not a duplicate — observation
+--      only, no action. (Both are still in scope of S-5(b).)
+--  (c) No phantom enum-token fields exist on this standard: the two enums (einleitungsart indirekt/direkt;
+--      betriebsklasse grossbrauerei/mittelstaendische_brauerei/uebrige_brauerei/kleinstbrauerei/gasthausbrauerei)
+--      are NOT materialised as fields, and every one of the 95 fields carries a label. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Clause-reference retags (zero-risk class). Evidence is the quote in each field's pack note.
+-- ☐ RATIFIED
+-- update public.fields set clause_reference='§6' where id='2e3fd8e5-bb63-438b-80f8-c5ce4244ed55' and clause_reference='§4'; -- abwasserquellen: "Grundlage dieses Systems ist die Erfassung und Darstellung aller Wasserverbrauchs- und Abwasseranfallstellen in einem Lageplan …" (§6, printed p.20). §4 prints no source inventory.
+-- update public.fields set clause_reference='§7.2 Tab. 11' where id='ea2eea5a-a5e6-4693-aa73-2b98ec6afd32' and clause_reference='§6'; -- abwasser_rest_nach_massnahmen: "Für Brauereien mit Anwendung von innerbetrieblichen Maßnahmen wurden bei sorgfältiger Betriebsführung folgende Vergleichswerte gefunden (Tabelle 11)" (printed p.22). §6 prints no residual figure.
+-- update public.fields set clause_reference='§7.6.2 Tab. 17' where id='d9892d7f-fec9-411c-97cd-ae70011a3385' and clause_reference='§7.4.1'; -- Q_MA_becken: the only printed sizing flows are Tabelle 17 (max. Tagesmenge 9.260 m3/d, printed p.32). §7.4.1 prints no flow.
+-- update public.fields set clause_reference='§7.6.2 Tab. 16' where id='91cc29e7-d0f0-4cb7-b2ed-1707a0d94de3' and clause_reference='§7.4.1'; -- ablaufwert_MA_becken: "Tabelle 16: Vorgaben für die Ablaufwerte der Mischund Ausgleichsbecken" (printed p.31).
+-- update public.fields set clause_reference='Anh. 11 AbwV / Tab. 14' where id in ('69423f87-7cb1-4a4c-bbcf-41c47b48b21d','90ff20e1-f142-43fe-a31e-1ad48ecc0111','07350a55-2c1a-4dd1-aee2-77009dc45bcc') and clause_reference='§7.3'; -- NH4_N/N_ges/P_ges_grenzwert: same table as their two siblings BSB5_grenzwert/CSB_grenzwert, which already carry 'Anh. 11 AbwV / Tab. 14'.
+-- update public.fields set clause_reference='§2 Tab. 1' where id='9b2234bf-1034-4138-9c59-a23587e21ef9' and clause_reference='§2'; -- B_TS_CSB: the row is in Tabelle 1 (printed p.10).
+-- update public.fields set clause_reference='§7.2 Tab. 12' where id='bcd1403f-7547-43f4-bde4-9130ba386bc9' and clause_reference='§7.2'; -- CSB (only if S-2(a) is NOT ratified).
+-- update public.fields set clause_reference='§8.5 / TA Lärm 1998' where id in ('2f653bf5-9ad8-425f-852d-315ed69fdb06','3993735d-e68a-4d42-af1a-bc7aa6d9c502','e3c44469-75a8-4a02-aa39-57101d0f44cf','61f7d6e0-e45d-4d52-bf29-21292e89b464','b3cc2ac6-5422-4f8e-b90a-c2badb0edfd0','f8de14b5-4062-4b3d-b076-c5808ee7736a','fd0ed4b2-8078-41bb-9dfb-41d38ef426aa','5f36b0d6-0d2c-4ac3-be82-a2472c6fe97f') and clause_reference is null; -- the nine Lärm fields carry clause_reference NULL and label_de stubs ("Abstand Wa", "Gebiet", "Nachtzeit") with no description.
+--      Rollback: set the column back to the value in the `and clause_reference=…` guard of each statement.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · Unit corrections.
+-- ☐ RATIFIED  (a) HARD DEFECT — factor 1000. M732-04.V_spez_wasser_abteilung is encoded unit 'm3/hl VB'.
+--      Evidence (printed p.17): "Wassereinsatz für Brauereien $>200.000 \mathrm{hl} \mathrm{VB}$ & Min*). [1/hl VB]
+--      & Max. [l/hl VB]" with rows "Sudhaus & 159 & 187", "Abfüllung & 65 & 276", "Summe & 326 & 854".
+--      Tabelle 5 is in LITRES per hl VB, not cubic metres. (The Min. header is OCR'd as "[1/hl VB]"; the Max.
+--      header prints "[l/hl VB]" — both are litres, and 326–854 m3/hl VB would be physically absurd.)
+-- update public.fields set unit='l/hl VB' where id='40c1bd97-6622-4241-ac47-2bb04c6da653' and unit='m3/hl VB';
+--      Rollback: unit='m3/hl VB'.
+-- ☐ RATIFIED  (b) The nine §8.5 Lärm fields carry unit=NULL. Printed units (§8.5, p.45): distances in m,
+--      levels in dB(A), Nachtzeit as a clock window.
+-- update public.fields set unit='m' where id in ('e3c44469-75a8-4a02-aa39-57101d0f44cf','61f7d6e0-e45d-4d52-bf29-21292e89b464','b3cc2ac6-5422-4f8e-b90a-c2badb0edfd0') and unit is null;
+-- update public.fields set unit='dB(A)' where id in ('2f653bf5-9ad8-425f-852d-315ed69fdb06','fd0ed4b2-8078-41bb-9dfb-41d38ef426aa','5f36b0d6-0d2c-4ac3-be82-a2472c6fe97f') and unit is null;
+--      Rollback: unit=null.
+-- ☐ RATIFIED  (c) M732-21.K_ges / M732-21.Mg_ges carry unit 'mg/l' (the Tabelle 1 EXAMPLE unit, printed p.11)
+--      but the worksheet is the sludge/by-product worksheet and the only printed readings are Tabelle 31
+--      (printed p.44): "$\mathrm{K}_{\text {ges }}$ & 0,1 & 0,03" and "$\mathrm{Mg}_{\mathrm{ges}}$ & 0,34 & 0,1",
+--      whose column headers are "[\%] in Trockensubstanz" and "[\%] in Originalsubstanz".
+-- update public.fields set unit='% TS' where id in ('e49d3c4b-676f-40c7-9144-2f5b826e42f0','bc11861a-439f-4fc5-ad05-bda22b4a79d1') and unit='mg/l';
+--      Owner call: keep mg/l if the field is meant as a wastewater concentration rather than a sludge content —
+--      in that case it belongs on M732-08, not M732-21.
+-- ☐ RATIFIED  (d) Observation, no change proposed: M732-12.B_TS_CSB is encoded 'kg CSB/(kg TS*d)' while
+--      Tabelle 1 prints "g CSB/(gTS•d)" (p.10) — dimensionally identical, the encoding is fine.
+--      Likewise M732-21.TS is encoded '%' while Tabelle 1 prints "Konzentration z. B. g/l" (p.12); the % readings
+--      come from Tabelle 31 (TS ca. 30 %, p.44) and §7.6.6 (95 %, p.39). Fine as encoded.
+-- ☐ RATIFIED  (e) STRUCTURE: M732-11.ablaufwert_MA_becken is ONE number field in mg/l, but Tabelle 16
+--      (printed p.31) is a seven-row table in FOUR different units (Chrom_ges/Kupfer/Nickel/Zink/AOX in µg/l,
+--      pH-Wert dimensionless 6,5-10, BSB5,sed in kg/h). A single mg/l number cannot hold it. Proposal: replace
+--      with per-parameter fields on M732-16 "Beispielanlage Misch- und Ausgleichsbecken" (today empty, see S-9),
+--      or retire the field. Owner call — no SQL written until the shape is chosen.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gate conditions that over- or under-enforce (ENFORCEMENT class — the highest-risk block here).
+-- ☐ RATIFIED  (a) CR-M732-05 (29ce4d03-7afa-493b-beb2-0d8a1f6b5b9e, block) is
+--      "CSB_durchmischt <= 110 AND BSB5_durchmischt <= 25 AND NH4_N <= 10 AND N_ges <= 18 AND P_ges <= 2".
+--      CSB_durchmischt and BSB5_durchmischt are the RAW-wastewater fields of §7.2 Tabelle 12 (printed p.23):
+--      "CSB ${ }_{\text {durchmischt }}$ & [mg/l] & 1.800 bis 3.000 (4.000)" and
+--      "$\mathrm{BSB}_{5 \text {,durchmischt }}$ & [mg/l] & 1.100 bis 1.500 (2.200)".
+--      Tabelle 14 (printed p.25) is the EFFLUENT minimum requirement of Anhang 11 AbwV. The gate therefore
+--      compares influent against effluent and can never pass with correctly entered data — it is unsatisfiable
+--      by construction. FIX: add effluent fields (CSB_ablauf, BSB5_ablauf, NH4_N_ablauf, N_ges_ablauf,
+--      P_ges_ablauf) to M732-10 and point the condition at those. The same defect affects CR-M732-04
+--      (Tabelle 13 limits read against §7.2 raw values on M732-08).
+--      No SQL written: this needs new fields (ids do not exist yet) — spec only, plus the S-1(g)/(h) re-homes.
+-- ☐ RATIFIED  (b) CR-M732-02 (2fdae9af-26b6-41e2-b971-b987b61ae20a, block, "6.5 <= pH_wert AND
+--      pH_wert <= 10.0") and CR-M732-03 (175d316a-2b2e-4506-93d1-c82ea387b7f3, block, "T_abwasser < 35") fire
+--      for EVERY project. The source is doubly conditional (§7.3, printed p.25): "Sofern das Merkblatt DWAM
+--      115-2 angewendet wird, ist die Einhaltung der Temperatur ( $<35^{\circ} \mathrm{C}$ ) und der pH -Werte
+--      (6,5 bis 10,0) für Brauereien von Bedeutung." — DWA-M 115-2 governs INDIREKTeinleitung only, and the
+--      sentence itself is prefixed "Sofern … angewendet wird". §7.4.1.2 (printed p.26) goes further:
+--      "Bei entsprechendem „Schmutzausgleich“ können also pH -Werte über 10 zugelassen werden."
+-- update public.compliance_requirements set condition='einleitungsart <> ''indirekt'' OR (6.5 <= pH_wert AND pH_wert <= 10.0)' where id='2fdae9af-26b6-41e2-b971-b987b61ae20a';
+-- update public.compliance_requirements set condition='einleitungsart <> ''indirekt'' OR T_abwasser < 35' where id='175d316a-2b2e-4506-93d1-c82ea387b7f3';
+--      (einleitungsart lives on M732-01 — cross-worksheet read, same class as S-1(i).)
+--      Rollback: restore '6.5 <= pH_wert AND pH_wert <= 10.0' / 'T_abwasser < 35'.
+-- ☐ RATIFIED  (c) CR-M732-04 (0caee2f2-05c4-40b2-9d68-bf80b19f5c3d, block) likewise fires for Direkteinleiter,
+--      although Tabelle 13 is headed "… bei Indirekteinleitern" (printed p.25).
+-- update public.compliance_requirements set condition='einleitungsart <> ''indirekt'' OR (((EW <= 5000 AND (NH4_N + NH3_N) <= 100) OR (EW > 5000 AND (NH4_N + NH3_N) <= 200)) AND P_ges <= 50)' where id='0caee2f2-05c4-40b2-9d68-bf80b19f5c3d';
+-- ☐ RATIFIED  (d) CR-M732-07 (cd75788f-bfeb-4755-9a05-b2061109d0a7, block, "BSB5_elim_grad >= 50") enforces the
+--      aeration design rule on EVERY M+A basin. The source (§7.4.1.3, printed p.26) restricts it to aerated
+--      basins — "Bei belüfteten Misch- und Ausgleichsbecken (M+A-Becken) ist eine ausreichende Belüftung
+--      vorzusehen … Die Belüftung ist auf mindestens $50 \%$ … auszulegen." — and the SAME section forbids
+--      aeration upstream of an anaerobic stage: "Wenn M+A-Becken vor einer Anaerobanlage angeordnet werden,
+--      sollten sie ohne Belüftung betrieben werden." A project with an anaerobic stage is blocked by a rule the
+--      Merkblatt tells it not to follow. FIX: gate the condition on an "M+A-Becken belüftet" boolean (field does
+--      not exist yet) — spec only.
+-- ☐ RATIFIED  (e) CR-M732-13 (be8d88fc-8122-4777-98c7-a060aa8bb19e, warn) has an EMPTY condition ('') — it can
+--      never evaluate — AND requires_attestation=true with NO attest field anywhere on the standard (the other
+--      five attestation gates each have one). Either give it a condition + attest field or retire it.
+--      Evidence for the obligation it means to carry (§5.3, printed p.19): "Gemäß Richtlinie 2008/105/EG wird
+--      EDTA als Stoff aufgeführt, der einer Prüfung zur Einstufung als prioritärer oder prioritär gefährlicher
+--      Stoffe zu unterziehen ist. Auf die Vermeidung des Einsatzes von EDTA wird hingewiesen."
+--      Proposal (keep as warn — the source says "wird hingewiesen", not "ist zu vermeiden"): add
+--      M732-05.attest_m732_05_cr_m732_13 (boolean) and set condition='attest_m732_05_cr_m732_13 == True'.
+--      No SQL written (new field id needed).
+-- ☐ RATIFIED  (f) CR-M732-15 (bdac0d3b-309d-4c2e-b2a3-007914bc2f5d, block) compares `gebiet` (a FREE-TEXT
+--      field, enum_values NULL) against the literal tokens 'WR' / 'WA' / 'MI'. Any other spelling
+--      ("reines Wohngebiet", "wr", "Mischgebiet") silently satisfies the != tests and the gate passes. See S-8
+--      for the enum. It also compares immissionsrichtwert_nacht against immissionsrichtwert_tag - 15, but the
+--      Merkblatt prints only the 15 dB(A) DIFFERENCE (§8.5, p.45) — the absolute Immissionsrichtwerte are
+--      TA Lärm 1998 (NR). Owner call whether that half of the condition should stay.
+-- ☐ RATIFIED  (g) CR-M732-01 (8b87bbc5-ba83-4833-96e0-b070c23f77e3, warn) — see S-1(i): reads ausstoss_jahr
+--      from M732-01. Its 50000 threshold comes from §3 (printed p.13) while its source_quote is §1 (printed
+--      p.8); both are correct, but the quote does not evidence the number. Add the §3 bullet to the quote:
+-- update public.compliance_requirements set source_quote='§1 Anwendungsbereich (DWA-M 732, S. 8): "Die Empfehlungen gelten in der Regel für mittelständische und Großbrauereien; Gasthausbrauereien werden nicht erfasst." — §3 (S. 13): "Mittelständische Brauereien: ca. 13,0 % mit 50.000 hl bis 1.000.000 hl Bier/Jahr (167 Brauereien)"' where id='8b87bbc5-ba83-4833-96e0-b070c23f77e3';
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Severity: block gates anchored on soft text (block → warn). 12 of 15 gates are block today.
+-- ☐ RATIFIED  (a) CR-M732-04 — anchor word is "empfohlen": "Nach dem Merkblatt DWA-M 115-2 sind folgende
+--      Begrenzungen für Nährsalzgehalte von Indirekteinleitern empfohlen (Tabelle 13):" (§7.3, printed p.25).
+--      A recommendation of ANOTHER Merkblatt, reproduced here. block → warn.
+-- update public.compliance_requirements set severity='warn' where id='0caee2f2-05c4-40b2-9d68-bf80b19f5c3d' and severity='block';
+-- ☐ RATIFIED  (b) CR-M732-08 (bf5c022c-01b4-4472-a575-887bff72ca7b) hard-enforces 0,05 ≤ B_TS_BSB ≤ 0,08.
+--      Anchor (§7.4.2.2.1, printed p.27): "Mittlere Belastungsbereiche zwischen $B_{\text {TS }}=0,1 \mathrm{~kg}
+--      \mathrm{BSB}_{5}$ und $1,0 \mathrm{~kg} \mathrm{BSB}_{5} /(\mathrm{kg}$ TS ⋅ d) sind in der Regel für
+--      Brauereiabwässer wegen der Gefahr von Blähschlammbildung weniger geeignet, übliche Schlammbelastungen
+--      liegen zwischen … 0,05 … und 0,08 …" — "in der Regel … weniger geeignet" + "übliche … liegen zwischen"
+--      is descriptive, not prescriptive. block → warn.
+-- update public.compliance_requirements set severity='warn' where id='bf5c022c-01b4-4472-a575-887bff72ca7b' and severity='block';
+-- ☐ RATIFIED  (c) CR-M732-09 (48afa011-cb91-4b24-aea2-6f084693e2d1) block on the §7.5 safety list. The list is
+--      introduced (printed p.30) as "Eine Vermeidung von Gefahren kann durch organisatorische Maßnahmen erreicht
+--      werden (Auszug):" and the whole section as "Relevante Fundstellen sind u. a. (Auszug)". "kann" + "Auszug".
+--      NOTE: the underlying duties (ArbSchG, BetrSichV, GefStoffV) are binding LAW, just not by this Merkblatt —
+--      owner call whether to keep block on the law or downgrade to warn on the Merkblatt. Written as warn:
+-- update public.compliance_requirements set severity='warn' where id='48afa011-cb91-4b24-aea2-6f084693e2d1' and severity='block';
+-- ☐ RATIFIED  (d) CR-M732-15 (bdac0d3b-…) block on distances that the source expressly gives as an EXAMPLE:
+--      "Bei einem Schallleistungspegel von z. B. $100 \mathrm{~dB}(\mathrm{~A})$, muss der Abstand zu einem reinen
+--      Wohngebiet (WR) ca. 400 m , zu einem allgemeinen Wohngebiet (WA) ca. 250 m und zu einem Mischgebiet
+--      ca. 150 m betragen." (§8.5, printed p.45) — "z. B." and "ca." three times. block → warn.
+-- update public.compliance_requirements set severity='warn' where id='bdac0d3b-309d-4c2e-b2a3-007914bc2f5d' and severity='block';
+--      Rollback for (a)–(d): severity='block'.
+-- KEEP AS BLOCK (evidence is hard, no change proposed):
+--   CR-M732-12 "Brauwasser muss grundsätzlich Trinkwasserqualität aufweisen, d. h. alle Forderungen der
+--     Trinkwasserverordnung verbindlich einhalten." (§4, p.14)
+--   CR-M732-06 "Die Grobstoffe, wie Scherben, Etiketten, Treber, Kronenkorken sind durch eine Abscheidung,
+--     z. B. Siebung, aus dem Abwasser zu entfernen." (§7.2, p.22)
+--   CR-M732-07 "Die Belüftung ist auf mindestens 50 % … auszulegen." (§7.4.1.3, p.26) — after the S-5(d) scope fix
+--   CR-M732-10 "… ist eine Abdeckung … und eine Abluftabsaugung und -behandlung notwendig." (§8.4, p.45)
+--   CR-M732-11 "Abfälle müssen nach der Abfallverzeichnis-Verordnung (AVV) zugeordnet werden." (§8.2.1, p.41)
+--   CR-M732-14 "… sind die jeweiligen Geruchsstoffkonzentrationen aller Teilvolumenströme als Einzelquellen
+--     zu bestimmen." (§8.4, p.45)
+--   CR-M732-05 Anhang 11 AbwV — binding law; but see S-5(a): the condition must be fixed FIRST.
+--   CR-M732-02 / CR-M732-03 — see S-5(b): scope the condition, keep block for Indirekteinleiter.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Missing gates for printed HARD obligations (no gate exists today). Specs only — new gate rows.
+-- ☐ RATIFIED  (a) §7.4.1.5 Feststoffabscheidung (printed p.27): "Abhängig von den Anforderungen der
+--      nachgeschalteten Anlagentechnik (z. B. beim Einsatz des anaeroben Schlammbettverfahrens) ist der Grad der
+--      Feststoffabscheidung festzulegen. Mindestens notwendig ist eine Siebung zur Abtrennung von Spelzen,
+--      Etikettenresten und sonstigen Störstoffen." — "Mindestens notwendig". Propose a block attestation gate on
+--      M732-11 (Siebung vorgesehen). Today only the §7.2 Grobstoff gate CR-M732-06 exists, which is the
+--      coarse-material duty, not the screening minimum.
+-- ☐ RATIFIED  (b) §7.4.2.3 (printed p.29): "Neben der Feststoffabscheidung sind ein ausreichend dimensioniertes
+--      Misch- und Ausgleichsbecken und eine Vorversäuerung notwendige Verfahrensschritte zur Gewährleistung eines
+--      stabilen Anlagenbetriebes." — "notwendige Verfahrensschritte". M732-13 has NO gate at all today. Propose a
+--      block attestation gate on M732-13.
+-- ☐ RATIFIED  (c) §7.2 (printed p.22): "Sollte die Auswirkung von im Betrieb verwendeten Einsatzstoffen auf die
+--      biologische Stufe der Abwasserbehandlungsanlage unbekannt sein, so ist die Unbedenklichkeit der
+--      Einsatzstoffe durch Tests zur Abbaubarkeit und Toxizität vor Einleitung zu verifizieren." — conditional
+--      but hard ("ist … zu verifizieren"). Propose a block gate on M732-05/M732-08.
+-- ☐ RATIFIED  (d) §5.2 (printed p.17), Brau-/Betriebswasser: "Verschnittwasser für High Gravity, Vor- und
+--      Nachlaufwässer der Filtration: Dieses Wasser darf keinen höheren Calciumgehalt als das Brauwasser
+--      aufweisen. Zudem muss es keimfrei, frei von technologisch störenden Desinfektionsmittelresten sowie deren
+--      Nebenprodukten und entgast (sauerstofffrei) sein." and "Kalt-CIP-Wässer (Gär-, Lager- und Hefekeller)
+--      müssen keimfrei sein". M732-04 has NO field and NO gate for either. Propose fields + a block gate.
+-- ☐ RATIFIED  (e) §7.4.2.3 (printed p.28): "Mit einem anaeroben Verfahren können die Anforderungen an eine
+--      Direkteinleitung in Gewässer (insbesondere für $\mathrm{NH}_{4}-\mathrm{N}$ ) nicht erreicht werden."
+--      — a hard design exclusion (anaerobic-only + Direkteinleitung is not a valid combination). No gate today.
+-- NOT proposed as block (soft anchors, listed so the decision is on record):
+--   §8.4 dust "können … auf Reingasstaubkonzentrationen von <20 mg/m3 begrenzt werden" (p.44) — "können".
+--   §7.3 ASS "nur, wenn eine Schlammabscheidung erforderlich ist; dann sollte der Wert auf 1 ml/l bis 10 ml/l
+--     begrenzt werden" (p.25) — conditional + "sollte".
+--   §8.4 H2S "Eine Grenze für biologische Verfahren wird etwa bei >20 mg/m3 H2S … gesetzt" (p.45) — "etwa".
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Enum for M732-15(→22).gebiet (3993735d-e68a-4d42-af1a-bc7aa6d9c502), today data_type='text',
+-- enum_values NULL, read by gate CR-M732-15 as 'WR'/'WA'/'MI'. Owner ruling 2026-08-01: fixed options ⇒
+-- selection widget, never free text. Evidence: §2 Tabelle 1 (printed p.12) "WA & - & - & allgemeines
+-- Wohngebiet" and "WR & - & - & reines Wohngebiet"; §8.5 (printed p.45) names the third: "zu einem Mischgebiet
+-- ca. 150 m". NOTE: "MI" as an abbreviation is NOT printed in this Merkblatt (it comes from the BauNVO) —
+-- flagged so the owner decides whether to keep the gate token 'MI' or spell it 'Mischgebiet'.
+-- ☐ RATIFIED
+-- update public.fields set data_type='enum', enum_values='[{"value":"WR","label_de":"Reines Wohngebiet (WR)","label_en":"Purely residential area (WR)","order_index":1,"regulation_reference":"§2 Tab. 1 / §8.5"},{"value":"WA","label_de":"Allgemeines Wohngebiet (WA)","label_en":"General residential area (WA)","order_index":2,"regulation_reference":"§2 Tab. 1 / §8.5"},{"value":"MI","label_de":"Mischgebiet","label_en":"Mixed-use area","order_index":3,"regulation_reference":"§8.5"}]'::jsonb where id='3993735d-e68a-4d42-af1a-bc7aa6d9c502';
+--      Rollback: data_type='text', enum_values=null.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · Worksheets with ZERO fields (structure). Five of the 22 worksheets render empty in the app, although
+-- the Merkblatt prints tabulated data for every one of them:
+--   M732-05 "Hilfsstoffe und Chemikalienverbrauch"          — §5.3 Tabelle 6 (spez. Chemikalienverbrauch,
+--       Gesamt-R&D 650 / 305 / 1.240 g/hl, printed p.18), Tabelle 7 (NaOH-Anteile, p.19), Tabelle 8
+--       (Einsatzkonzentrationen Desinfektionsmittel, p.19), Kieselgur ca. 80–200 g/hl (p.18).
+--   M732-14 "Sicherheitstechnische Hinweise"                — §7.5 (printed p.30) — and CR-M732-09 is the gate
+--       that belongs here (S-1(e)).
+--   M732-16 "Beispielanlage Misch- und Ausgleichsbecken"    — §7.6.2 Tabelle 16/17/18 (printed p.31–32).
+--   M732-19 "Beispielanlage Anaerob-aerob (Direkteinleitung)" — §7.6.5 Tabelle 23/24 (printed p.37).
+--   M732-20 "Beispielanlage SBR + Membranfiltration"        — §7.6.6 Tabelle 25–29 (printed p.39–41).
+-- Meanwhile M732-08 carries 26 fields and M732-15 (the "Beispielanlage Neutralisation" worksheet) carries nine
+-- fields that belong to §8.5. Owner call: (i) populate the five worksheets from the printed tables, or
+-- (ii) deactivate the empty example-plant worksheets and keep the example data as reference text.
+-- No SQL written — the decision changes what the app renders.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · is_required review. 30 of 95 fields are required today. Proposal: the six standard_fixed LIMIT
+-- constants are not engineer input at all — they are values the guideline prints and the app should show
+-- read-only; requiring the engineer to "fill" them is the #22 class of the doctrine.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('5ddee811-98cf-4de8-b643-5fe3aadd22db','d0fb71dc-7918-4cc4-8be6-22b2fad692d9','8d0526dd-fd37-4639-a98e-6299381e2a75','8484ca62-a29c-49cd-b733-067021fad69c','1621d254-8651-4244-aad6-24321eb623b2') and is_required; -- NH4_grenzwert_indirekt_klein/gross, P_grenzwert_indirekt, BSB5_grenzwert, CSB_grenzwert: printed constants (Tabelle 13 / Tabelle 14, p.25), not project data.
+-- ☐ RATIFIED  route-dependent requirements — these four are required on every project, but each applies to ONE
+--      treatment route only, and the Merkblatt states all four descriptively ("übliche", "erreichbare", "ca.").
+-- update public.fields set is_required=false where id in ('3f5fb7a1-2e26-43ed-b9fa-62291f5a4f95','492e8414-7d87-4f57-8a93-e67b13005fc9','cdfe022e-70df-4b56-a1d3-141ae5dfc678','0671a917-65c1-40c4-9978-a74d14687a9c') and is_required; -- TS_BB + B_TS_BSB (aerobic only, §7.4.2.2.1 p.27), CSB_abbaugrad_anaerob + B_R_CSB (anaerobic only, §7.4.2.3 p.28).
+-- ☐ RATIFIED  M732-08.ASS is required, but the Merkblatt limits absetzbare Stoffe only conditionally:
+--      "Das Merkblatt DWA-M 115-2 fordert eine Begrenzung der absetzbaren Stoffe nur, wenn eine
+--      Schlammabscheidung erforderlich ist; dann sollte der Wert auf $1 \mathrm{ml} / \mathrm{l}$ bis
+--      $10 \mathrm{ml} / \mathrm{l}$ begrenzt werden." (§7.3, printed p.25).
+-- update public.fields set is_required=false where id='67c9e595-2092-4635-bdeb-033fcbf01841' and is_required;
+--      Rollback for all three: is_required=true.
+-- NO CHANGE proposed for the remaining required fields: einleitungsart, brauerei_name, ausstoss_jahr,
+--      betriebsklasse, V_spez_wasser, V_spez_abwasser, BSB5_spez_fracht, the six §7.2/§7.3 measured values
+--      (NH4_N, BSB5_durchmischt, T_abwasser, pH_wert, P_ges, N_ges, CSB_durchmischt) and the six attest booleans.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · Residue carried forward from the pack (three fields written NOWHERE — they have no md source).
+--  (a) M732-08.CSB_spez_fracht (844def25-8bb4-40c5-8163-6554d26996ee, clause §7.1, unit kg/hl VB) — §7.1
+--      prints no specific CSB load. The only printed spec. CSB loads are Tabelle 29 (one example plant,
+--      "spez. Fracht CSB & [g/hl] & 1.230", printed p.41) and Bild 3 (an image, printed p.23). Unit mismatch on
+--      top (kg/hl VB vs g/hl). ☐ RATIFIED → either retag to '§7.6.6 Tab. 29' + unit 'g/hl' and mark it
+--      example-plant data, or deactivate:
+-- update public.fields set active=false where id='844def25-8bb4-40c5-8163-6554d26996ee';
+--  (b) M732-09.N_ges_grenzwert_indirekt (0c4fa86c-fda2-450d-be90-5c0a2965b29e, clause §7.3) — INVENTED LIMIT.
+--      Tabelle 13 (printed p.25) has exactly three rows (NH4-N+NH3-N ≤5.000 EW, NH4-N+NH3-N >5.000 EW, P_ges);
+--      there is no N_ges limit for Indirekteinleiter anywhere in the Merkblatt. ☐ RATIFIED → deactivate:
+-- update public.fields set active=false where id='0c4fa86c-fda2-450d-be90-5c0a2965b29e';
+--  (c) M732-21.trub_spez (db97188e-86e1-4a57-bb6b-58cfd0bd7673, clause §8.2, unit kg/hl VB) — §8.2/§8.2.1
+--      print Treber (ca. 18 kg/hl) and Hefe (ca. 2,9 kg/hl) only; no Trub quantity is printed anywhere.
+--      §7.2 mentions Trub only qualitatively ("durch gezielte innerbetriebliche Maßnahmen, wie Trub- und
+--      Kieselgurentsorgung", printed p.22). ☐ RATIFIED → deactivate:
+-- update public.fields set active=false where id='db97188e-86e1-4a57-bb6b-58cfd0bd7673';
+--      Rollback for (a)–(c): active=true.
