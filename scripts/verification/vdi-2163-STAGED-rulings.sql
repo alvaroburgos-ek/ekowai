@@ -1,0 +1,408 @@
+-- =====================================================================================================
+-- VDI-2163 — STAGED rulings (WRITTEN, NOT APPLIED). Every statement below is COMMENTED OUT.
+-- Nothing in this file may be executed before the ☐ RATIFIED box on that block is ticked by Alvaro.
+-- Source: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\VDI-2653\VDI-2163-2006-03.md
+--         VDI 2163 "Innenraum-Lufthygiene in Abfallbehandlungsanlagen", März 2006, Weißdruck,
+--         bilingual DE/EN, German column authoritative. Page refs = the guideline's own running-head
+--         numbers, indexed via pdftotext over the sibling PDF (PDF page N = printed page N).
+-- Prod shape at time of writing: 8 worksheets / 69 fields / 0 equations / 32 compliance_requirements,
+--         ALL 32 with severity='block'.
+-- SCOPE NOTE (governs this whole file): VDI-Richtlinien are technical rules, not law. "muss"/"ist zu"
+--         is rare; most of VDI 2163 is "soll", "möglichst", "zu empfehlen", "z.B.". A block gate is only
+--         defensible on a genuine "muss"/"ist zu"/"darf nicht". 13 of the 32 gates are not.
+-- EVALUATOR NOTE: src/lib/compliance/evaluate.ts returns `pending` (not `fail`) when a referenced symbol
+--         is null/''; and it DOES support the guarded form `IF <cond> THEN <cond>` which "vacuously
+--         passes when the guard is false". Every scope-predicate fix proposed below is therefore
+--         expressible in the existing grammar — no schema or engine change is needed.
+-- No transaction control anywhere in this file (and every statement is a comment anyway).
+-- =====================================================================================================
+
+
+-- =====================================================================================================
+-- BLOCK 1 — GATE VDI-2163-CR-15 IS LOGICALLY INVERTED (highest severity finding)   ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current condition: anlagenstatus == neuanlage AND hygiene_erstinspektion_durchgefuehrt == true
+-- Evidence (§4.4.4, printed p.28, transcript line 1039):
+--   "Bei Neuanlagen (Ausführungstermin nach Erscheinungsdatum des Weißdruckes) ist diese Erstinspektion
+--    im Rahmen der Abnahme durchzuführen und zu dokumentieren."
+-- The printed obligation is CONDITIONAL: IF Neuanlage THEN Erstinspektion. Encoding it as a conjunction
+-- makes `anlagenstatus == neuanlage` itself a pass condition, so:
+--   * a Bestandsanlage can NEVER satisfy this gate — the enum value 'bestandsanlage' is uncovered and
+--     the gate is unsatisfiable for it (a compliant existing plant is blocked forever);
+--   * the guideline imposes no acceptance-test duty on existing plants at all, so the gate invents one.
+-- Fix (uses the evaluator's existing IF/THEN guard, vacuously passing for Bestandsanlagen):
+--   update public.compliance_requirements
+--      set condition = 'IF anlagenstatus == neuanlage THEN hygiene_erstinspektion_durchgefuehrt == true'
+--    where code = 'VDI-2163-CR-15';
+-- Rollback inverse:
+--   update public.compliance_requirements
+--      set condition = 'anlagenstatus == neuanlage AND hygiene_erstinspektion_durchgefuehrt == true'
+--    where code = 'VDI-2163-CR-15';
+
+
+-- =====================================================================================================
+-- BLOCK 2 — GATE VDI-2163-CR-11 IS AN EFFECTIVE NO-OP                              ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current condition: filterklasse_zuluft IN {F7,F8,F9}
+-- The enum_values of field filterklasse_zuluft (04ece70e-95c1-4859-a83c-1b449895df71) are EXACTLY
+-- F7, F8, F9. The membership test therefore enumerates the field's entire domain: once the field is
+-- filled it cannot fail. The rule "mindestens F7" is enforced by the enum, not by the gate.
+-- Evidence (§4.4.3, printed p.27, transcript line 996):
+--   "Die Außenluft soll möglichst mit einer Filterstufe F7, mindestens F5 und die Zuluft mit einer
+--    zweiten Filterstufe, möglichst F9, mindestens mit F7 gefiltert werden. Bei einstufiger Filterung
+--    ist mindestens die Filterstufe F7 einzusetzen."
+-- Two consistent options — ONE must be chosen, they are mutually exclusive:
+--   OPTION A (recommended): widen the domain so the gate actually tests something. A real plant can
+--   carry an F5/F6 second stage and the wizard should catch it.
+--     update public.fields
+--        set enum_values = enum_values || '[{"value":"F5","label_de":"Filterklasse F5","label_en":"Filter class F5","order_index":4,"regulation_reference":"Sec.4.4.3"},{"value":"F6","label_de":"Filterklasse F6","label_en":"Filter class F6","order_index":5,"regulation_reference":"Sec.4.4.3"}]'::jsonb
+--      where id = '04ece70e-95c1-4859-a83c-1b449895df71';
+--     -- rollback inverse: restore enum_values to the F7/F8/F9-only array captured in the pass export.
+--   OPTION B: keep the domain and delete CR-11 as redundant, recording the enum as the enforcement.
+--     update public.compliance_requirements set is_active = false where code = 'VDI-2163-CR-11';
+--     -- rollback inverse: update public.compliance_requirements set is_active = true where code = 'VDI-2163-CR-11';
+-- NOTE: whichever option is taken, see BLOCK 6 — the only HARD sentence in this clause
+--       ("Bei einstufiger Filterung ist mindestens die Filterstufe F7 einzusetzen") has NO gate at all.
+
+
+-- =====================================================================================================
+-- BLOCK 3 — MISSING SCOPE PREDICATES (3 gates fire outside their printed scope)     ☐ RATIFIED ______
+-- =====================================================================================================
+-- 3a) VDI-2163-CR-31 — current: aussenluftstrom_schwere_arbeit >= 65
+--     Evidence (§4.4.2, printed p.25, line 935): "…und bei körperlich schwerer Arbeit $65 \mathrm{~m}^{3} / \mathrm{h}$ je Person."
+--     The 65 m3/h figure applies ONLY "bei körperlich schwerer Arbeit". The gate carries no such
+--     predicate and there is no field recording whether the work is heavy, so it is evaluated on every
+--     project. The field is is_required=false, so in practice it is null -> the gate resolves `pending`
+--     on every project that has no heavy physical work.
+--     Fix (requires one new boolean field, e.g. koerperlich_schwere_arbeit on VDI-2163-06):
+--       update public.compliance_requirements
+--          set condition = 'IF koerperlich_schwere_arbeit == true THEN aussenluftstrom_schwere_arbeit >= 65'
+--        where code = 'VDI-2163-CR-31';
+--       -- rollback inverse: set condition = 'aussenluftstrom_schwere_arbeit >= 65'
+-- 3b) VDI-2163-CR-32 — current: aussenluftstrom_geruchszuschlag >= 20
+--     Evidence (§4.4.2, printed p.25, line 935): "Bei intensiver Geruchsverschlechterung sind zusätzlich
+--     $20 \mathrm{~m}^{3} / \mathrm{h}$ je Person vorzusehen."
+--     Same defect; needs a boolean, e.g. intensive_geruchsverschlechterung.
+--       update public.compliance_requirements
+--          set condition = 'IF intensive_geruchsverschlechterung == true THEN aussenluftstrom_geruchszuschlag >= 20'
+--        where code = 'VDI-2163-CR-32';
+--       -- rollback inverse: set condition = 'aussenluftstrom_geruchszuschlag >= 20'
+-- 3c) VDI-2163-CR-14 — current: verdraengungsstrom_querschnitt >= 1
+--     Evidence (§4.4.2, printed p.25, line 937): "Es erfordert einen laminaren Zuluftstrom mit einer
+--     großen Querschnittsfläche nicht kleiner als $1 \mathrm{~m}^{2}$, um den Bewegungsraum der
+--     Sortierkräfte abzudecken" — the sentence describes what turbulenzarme Verdrängungsströmung in a
+--     SORTIERKABINE requires; it is not a plant-wide obligation.
+--     Fix (predicate already available from the existing luftfuehrungsart enum):
+--       update public.compliance_requirements
+--          set condition = 'IF luftfuehrungsart == verdraengungsstroemung THEN verdraengungsstrom_querschnitt >= 1'
+--        where code = 'VDI-2163-CR-14';
+--       -- rollback inverse: set condition = 'verdraengungsstrom_querschnitt >= 1'
+-- 3d) Weaker cases, recorded but NOT proposed for change here (no field exists to key the predicate on):
+--     CR-21 (§5.2.9 applies only where a Rückkühlwerk exists), CR-24/CR-25 (§6.2.4 scopes them to
+--     "Bei Verwendung von Wasser", i.e. only where a humidifier is operated), CR-20 (Tabelle 4 applies
+--     to the RLT components actually installed).
+
+
+-- =====================================================================================================
+-- BLOCK 4 — 13 BLOCK GATES ANCHORED ON SOFT TEXT -> propose block -> warn           ☐ RATIFIED ______
+-- =====================================================================================================
+-- All 32 VDI-2163 gates are severity='block'. VDI 2163 is a technical rule; the sentences below carry
+-- "soll", "möglichst", "zu empfehlen", "z.B." or no modal at all. Each entry: gate — printed evidence.
+--  1. CR-01 (§1, p.2)   "Diese Richtlinie dient der Verbesserung einer hygienisch verträglichen Innenraum-
+--                        Luftqualität im Aufenthaltsbereich…" — a PURPOSE statement, zero obligation.
+--                        (See also BLOCK 5: this gate is a scope switch, not a compliance rule.)
+--  2. CR-07 (§4.2, p.20) "Organisatorische Schutzmaßnahmen sind z.B.:" — an EXAMPLE list.
+--  3. CR-09 (§4.3, p.20) "…staubförmige Emissionen möglichst vermieden werden." — "möglichst".
+--                        (the gate's SECOND conjunct, abgaserfassung, IS hard: "Abgase sind … zu erfassen".)
+--  4. CR-10 (§4.4.2,p.25)"Nach der Arbeitsstättenrichtlinie ASR5 soll der Außenluftstrom 40…60 m3/h … betragen".
+--  5. CR-11 (§4.4.3,p.27)"Die Außenluft soll möglichst…"; "Es ist zu empfehlen zwei Filterstufen einzusetzen."
+--  6. CR-14 (§4.4.2,p.25)"…hat sich das Prinzip … in der Praxis bewährt (Stand der Technik in TRBA 211)."
+--  7. CR-17 (§4.5, p.30) "Diese Forderung ist erfüllt, wenn für die Beschäftigten z.B. folgende … " — example.
+--  8. CR-20 (§5.3, p.36) "Die Intervallangaben in folgender tabellarischer Checkliste (Tabelle 4) sind
+--                        allgemeine Erfahrungswerte…" — the gate's OWN source_quote says the numbers are
+--                        empirical values, i.e. it argues against its own block severity.
+--  9. CR-21 (§5.2.9,p.35)"Die zulässige Gesamtkoloniezahl soll den Richtwert von 10000 KBE/ml nicht
+--                        überschreiten." — Richtwert + soll.
+-- 10. CR-22 (§6.2.4,p.44)"Wird der Wert … um mehr als das Doppelte überschritten, sind die technischen
+--                        Schutzmaßnahmen … zu überprüfen und dem Stand der Technik anzupassen." — the
+--                        obligation is to REVIEW/ADAPT, not "must not exceed" (see BLOCK 7).
+-- 11. CR-23 (§6.2.4,p.45)"…der weniger als 50 EU/m3 Luft [6] betragen soll" — DECOS Richtwert + soll.
+-- 12. CR-24 (§6.2.4,p.44)"Bei Verwendung von Wasser soll die Gesamtkeimzahl den Wert von 1000 KBE/ml … nicht
+--                        überschreiten." — soll.
+-- 13. CR-30 (§6.2.3,p.43)"Als Nährböden werden verwendet: …" — descriptive method text, no obligation
+--                        (and the field naehrboden_typ is is_required=false, see BLOCK 8).
+-- KEPT AS BLOCK (genuinely hard, listed so the negative is auditable): CR-03 ("muss … angeboten werden"),
+--   CR-04 ("hat … anzubieten"), CR-05 ("darf … nicht überschreiten"), CR-06 ("hat sich … zu beschaffen"),
+--   CR-08 ("ist vorgegeben" / "ist erst dann vorzusehen"), CR-12 ("ist zu verzichten"), CR-13 ("müssen …
+--   zu inspizieren … sein"), CR-15 ("ist … durchzuführen und zu dokumentieren"), CR-16 ("sind …
+--   durchzuführen"), CR-18 ("ist … zu erstellen"), CR-19 ("sind … zu dokumentieren"), CR-25 ("darf …
+--   nicht überschreiten"), CR-26 ("darf … nicht überschreiten"), CR-27 ("auf jeden Fall die
+--   Erträglichkeitsgrenzen einzuhalten"), CR-28 (§5.2.8 "dürfen nicht auftreten"), CR-29 ("sind …
+--   unterschiedliche Parameter zu messen"), CR-31/CR-32 ("sind zusätzlich … vorzusehen"), CR-02
+--   ("ist … eine Expositionsabschätzung notwendig").
+-- Proposed change (apply only to the 13 listed above):
+--   update public.compliance_requirements set severity = 'warn'
+--    where code in ('VDI-2163-CR-01','VDI-2163-CR-07','VDI-2163-CR-09','VDI-2163-CR-10','VDI-2163-CR-11',
+--                   'VDI-2163-CR-14','VDI-2163-CR-17','VDI-2163-CR-20','VDI-2163-CR-21','VDI-2163-CR-22',
+--                   'VDI-2163-CR-23','VDI-2163-CR-24','VDI-2163-CR-30');
+-- Rollback inverse:
+--   update public.compliance_requirements set severity = 'block'
+--    where code in ( … same 13 codes … );
+
+
+-- =====================================================================================================
+-- BLOCK 5 — CR-01 IS A SCOPE SWITCH, NOT A COMPLIANCE RULE                          ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: im_geltungsbereich == true, severity block, source_quote = the §1 purpose sentence.
+-- Evidence (§1, printed p.2): "Diese Richtlinie dient der Verbesserung einer hygienisch verträglichen
+--   Innenraum-Luftqualität im Aufenthaltsbereich durch Raumlufttechnik in Abfallbehandlungsanlagen. Als
+--   Aufenthaltsbereich werden hier „ständige Arbeitsplätze“ gemäß LV 15 verstanden (siehe Abschnitt 2)."
+-- A project whose workplace is NOT a ständiger Arbeitsplatz is simply out of scope of VDI 2163; blocking
+-- it as non-compliant is wrong. The correct behaviour is the "Nicht zutreffend" (N.A.) worksheet state.
+-- Proposed:
+--   update public.compliance_requirements set severity = 'warn' where code = 'VDI-2163-CR-01';
+--   -- and: route im_geltungsbereich == false to the N.A. path instead of to a gate (app change,
+--   --      not a data change — raised here so it is not lost).
+--   -- rollback inverse: update public.compliance_requirements set severity = 'block' where code = 'VDI-2163-CR-01';
+
+
+-- =====================================================================================================
+-- BLOCK 6 — MISSING GATES FOR PRINTED HARD OBLIGATIONS                              ☐ RATIFIED ______
+-- =====================================================================================================
+-- Hard ("ist"/"muss"/"dürfen nicht") sentences with NO gate. 6a has both fields already in prod and can
+-- be added as data alone; 6b-6g would each need a new field first.
+-- 6a) §4.4.3 (p.27): "Bei einstufiger Filterung ist mindestens die Filterstufe F7 einzusetzen."
+--     Both operands exist: filterstufen_anzahl (05ae69c5-…, enum einstufig|zweistufig) and
+--     filterklasse_aussenluft (46a7c666-…, enum F5..F9). Neither field is read by ANY gate today.
+--       insert into public.compliance_requirements (code, condition, severity, clause_reference, source_quote, …)
+--       values ('VDI-2163-CR-33',
+--               'IF filterstufen_anzahl == einstufig THEN filterklasse_aussenluft IN {F7,F8,F9}',
+--               'block', '§4.4.3',
+--               '§4.4.3: "Bei einstufiger Filterung ist mindestens die Filterstufe F7 einzusetzen."', …);
+--       -- rollback inverse: delete from public.compliance_requirements where code = 'VDI-2163-CR-33';
+-- 6b) §5.2.8 (p.34): "Dauerhafte Feuchteniederschläge dürfen nicht auftreten." — hard prohibition, no field.
+-- 6c) §5.2.5 (p.32): "Es muss sichergestellt werden, dass sich zu keinem Betriebszeitpunkt Wasser als
+--     Kondensat oder Tropfen hinter den Befeuchtungseinrichtungen niederschlagen kann." — no field.
+-- 6d) §5.2.5 (p.32): "Das zugespeiste Wasser muss mindestens die Anforderungen der Trinkwasserverordnung
+--     erfüllen." — no field.
+-- 6e) §4.4.3 (p.26): "So ist eine Rezirkulation zwischen Fort- und Außenluft sicher zu verhindern … In
+--     jedem Fall ist in der Planung zu dokumentieren, dass eine Beeinträchtigung vermieden wird." — no field.
+-- 6f) §4.4.2 (p.25): "Mittels Experimenten an ausgeführten oder Modellanlagen bzw. Strömungssimulation ist
+--     die Funktion der Anlage nachzuweisen." / "In allen Fällen ist die Einhaltung der Grenzwerte
+--     nachzuweisen." — a hard proof duty with no field and no gate.
+-- 6g) §5.1 (p.31): "Arbeiten an den RLT-Anlagen müssen durch qualifiziertes Personal erfolgen, welches
+--     mindestens entsprechend VDI 6022 geschult ist." — the FIELD exists
+--     (personal_qualifikation_vdi6022, 00a7476a-…, is_required=true) but NO gate reads it. This is a
+--     genuine "muss" left unenforced while 13 "soll" sentences are blocking.
+--       insert … values ('VDI-2163-CR-34','personal_qualifikation_vdi6022 == true','block','§5.1', …);
+--       -- rollback inverse: delete from public.compliance_requirements where code = 'VDI-2163-CR-34';
+-- 6h) §4.3.1 / §4.3.2 (p.20-21): aufgabebunker_getrennt (8c934990-…) and schleuse_unterdruck
+--     (4b71563b-…) both encode "sind … zu trennen" / "sind … zu errichten" duties and neither is read by
+--     any gate; both would need the plant-type scope predicate (anlagentyp) to be usable.
+
+
+-- =====================================================================================================
+-- BLOCK 7 — CR-22 SILENTLY REPLACES THE TKW WITH THE ESCALATION THRESHOLD           ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: tkw_schimmelpilzsporen <= 100000
+-- Evidence (§6.2.4, printed p.44, lines 1646/1648):
+--   "Er beträgt $5 \cdot 10^{4} \mathrm{KBE} / \mathrm{m}^{3}$ Luft." and
+--   "Wird der Wert von $5 \cdot 10^{4} \mathrm{KBE} / \mathrm{m}^{3}$ Luft um mehr als das Doppelte
+--    überschritten, sind die technischen Schutzmaßnahmen des Betriebes, insbesondere die Lüftungstechnik,
+--    zu überprüfen und dem Stand der Technik anzupassen."
+-- 100000 is arithmetically correct as 2 x 50 000, so the constant is NOT invented and the boundary
+-- (>100000 fails) is right for the escalation reading. The defect is that the printed control value
+-- itself — TKW = 5*10^4 KBE/m3 — produces no signal at all: a plant at 90 000 KBE/m3 is 80 % over the
+-- TKW and the wizard says nothing.
+-- Proposed: keep CR-22 (retitled to the escalation duty, severity warn per BLOCK 4) and add a second,
+-- lower-severity gate on the TKW itself:
+--   insert into public.compliance_requirements (code, condition, severity, clause_reference, source_quote, …)
+--   values ('VDI-2163-CR-35','tkw_schimmelpilzsporen <= 50000','warn','§6.2.4',
+--           '§6.2.4: "Er beträgt 5 · 10^4 KBE/m3 Luft."', …);
+--   -- rollback inverse: delete from public.compliance_requirements where code = 'VDI-2163-CR-35';
+
+
+-- =====================================================================================================
+-- BLOCK 8 — is_required REVIEW                                                      ☐ RATIFIED ______
+-- =====================================================================================================
+-- 8a) is_required=true on fields the source only gives as EXAMPLES ("z.B."). §4.2 (p.20):
+--     "Organisatorische Schutzmaßnahmen sind z.B.: - regelmäßige Unterweisungen … - Wartung … nach den
+--      Vorgaben eines Wartungsplanes - Hautreinigung und -pflege nach Hautschutzplan - Erstellen eines
+--      Hygieneplans - Anbringen von Kennzeichnungen"
+--     and §4.5 (p.30): "(2) Diese Forderung ist erfüllt, wenn für die Beschäftigten z.B. folgende
+--      persönliche Schutzausrüstungen zur Verfügung gestellt werden: …"
+--       update public.fields set is_required = false where id in (
+--         'ae1219de-c869-4d22-b7c8-77daebbaf0b7',  -- unterweisungen_durchgefuehrt
+--         'eb4bc08a-fb58-46ad-8855-c350687343b2',  -- wartungsplan_vorhanden
+--         '9fac1c95-6e08-4ec4-9b95-2af46bf69b17',  -- hautschutzplan_vorhanden
+--         '9fe7c43d-7cc8-4b86-a58c-742c2e1b9f67',  -- hygieneplan_vorhanden
+--         'e2394cc6-96f1-4273-946e-c00ce9c33dab',  -- kennzeichnung_angebracht
+--         'cb7afcad-5bac-4d6f-bad0-229c8297003e',  -- psa_koerperkleidung
+--         '7ae3e3b8-e47e-422d-9c5b-3f9296673673',  -- psa_handschutz
+--         'aee3350a-74be-4b03-80f8-86d3eca325ec',  -- psa_atemschutz_klasse
+--         '05ae69c5-40a7-4d71-9c36-443bf914d253'); -- filterstufen_anzahl ("Es ist zu empfehlen …")
+--       -- rollback inverse: update public.fields set is_required = true where id in ( … same 9 ids … );
+--     COUNTER-ARGUMENT to weigh before ticking: these are the operator-side hygiene basics; Alvaro may
+--     prefer to keep them required in the FORM (data completeness) while relaxing the GATE (BLOCK 4).
+--     The two are independent knobs — that is why they are separate blocks here.
+-- 8b) CONTRADICTION: is_required=false but read by an unconditional BLOCK gate (the gate makes the field
+--     de-facto mandatory in every project, while the form says it is optional):
+--       naehrboden_typ           (65d665ff-…, required=false) <- CR-30 block  IS NOT NULL
+--       luftfeuchte_zuluftleitung(c9e42545-…, required=false) <- CR-28 block  IS NOT NULL
+--       aussenluftstrom_schwere_arbeit   (d4eb2584-…, false)  <- CR-31 block  >= 65
+--       aussenluftstrom_geruchszuschlag  (066b4af1-…, false)  <- CR-32 block  >= 20
+--       verdraengungsstrom_querschnitt   (7f162cc0-…, false)  <- CR-14 block  >= 1
+--       rueckkuehlwerk_reinigung_intervall(98e0a42b-…, false)  <- CR-21 block  >= 2
+--     Resolving BLOCK 3 (scope predicates) and BLOCK 4 (severity) removes this contradiction for
+--     CR-14/CR-31/CR-32/CR-21/CR-30; CR-28 is handled in BLOCK 9.
+-- 8c) staubemission_vermieden (38663913-…, required=true) rests on "möglichst vermieden werden" —
+--     keep the field, but see BLOCK 4 item 3 for the gate.
+
+
+-- =====================================================================================================
+-- BLOCK 9 — CR-28 IS A PRESENCE-ONLY GATE THAT HIDES A PRINTED LIMIT + MIS-ANCHORED ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: luftfeuchte_zuluftleitung IS NOT NULL, severity block,
+--          source_quote = the §5.2.8 visual-inspection paragraph.
+-- Two separate defects:
+--   (i) the quoted §5.2.8 sentence DOES contain a hard rule — "Dauerhafte Feuchteniederschläge dürfen
+--       nicht auftreten." — but the condition tests none of it; it only asks that a number be entered.
+--  (ii) the FIELD's own printed threshold is in Tabelle 4 Pos.8.3 (printed p.39, line 1472):
+--       "bei Zuluftleitungen mit Luftfeuchte > 90 \% rel. F. mikrobiologische Kontrolle der Zuluft oder
+--        der Kanaloberflächen" — a 90 % trigger the gate does not encode.
+-- Proposed (the printed rule is a duty to MEASURE above 90 %, not a limit on the humidity itself, so a
+-- new boolean is needed to close it properly; recorded, not silently invented):
+--   update public.compliance_requirements
+--      set clause_reference = '§5.2.8 / Tabelle 4 Pos.8.3',
+--          source_quote     = 'Tabelle 4 Pos.8.3: "bei Zuluftleitungen mit Luftfeuchte > 90 % rel. F. mikrobiologische Kontrolle der Zuluft oder der Kanaloberflächen"',
+--          condition        = 'IF luftfeuchte_zuluftleitung > 90 THEN mikrobiologische_kontrolle_zuluft == true'
+--    where code = 'VDI-2163-CR-28';   -- requires new field mikrobiologische_kontrolle_zuluft
+--   -- rollback inverse: restore condition='luftfeuchte_zuluftleitung IS NOT NULL', clause_reference='§5.2.8'
+--   --                   and the original source_quote captured in the pass export.
+
+
+-- =====================================================================================================
+-- BLOCK 10 — GUIDELINE-INTERNAL CONFLICT: kammerzentrale water-check interval        ☐ RATIFIED ______
+-- =====================================================================================================
+-- §5.2.4 prose (printed p.32, line 1181):
+--   "Im weiteren Betrieb ist eine halbjährliche Prüfung auf Verschmutzung, Beschädigung und Korrosion
+--    sowie auf Wasserbildung (alle drei Monate) notwendig."
+--   -> Verschmutzung/Beschädigung/Korrosion = 6 months, Wasserbildung = 3 months.
+-- Tabelle 4 (printed p.37) marks the SAME two activities in different columns:
+--   Pos.4.1 "auf luftseitige Verschmutzung, Beschädigung und Korrosion prüfen" -> the 12-month column
+--   Pos.4.2 "auf Wasserniederschlag prüfen"                                    -> the  6-month column
+-- The guideline contradicts itself twice over (6 vs 12, and 3 vs 6). The encoding is split across the
+-- two readings: field kammerzentrale_wasser_intervall's description says "alle 3 Monate (Tab.4 Pos.4.2)"
+-- (prose value, table citation) while gate CR-20 tests `kammerzentrale_wasser_intervall <= 6` (table
+-- value). This is NOT an invented value — both 3 and 6 are printed — it is an unresolved SR-2-style
+-- choice between two printed numbers. Do NOT auto-pick.
+--   OPTION A (prose wins, stricter): update public.compliance_requirements
+--       set condition = 'aussenluftdurchlass_pruefintervall <= 12 AND kammerzentrale_wasser_intervall <= 3 AND filterwechsel_intervall_stufe1 <= 12'
+--     where code = 'VDI-2163-CR-20';
+--   OPTION B (table wins): leave the gate at <= 6 and correct the field description to say 6 months.
+--   -- rollback inverse for A: set condition back to
+--   --   'aussenluftdurchlass_pruefintervall <= 12 AND kammerzentrale_wasser_intervall <= 6 AND filterwechsel_intervall_stufe1 <= 12'
+-- A VA pass on the rendered print should confirm the Tabelle 4 column alignment before either option is
+-- applied (the transcript is a mathpix table conversion; a column shift cannot be ruled out from the md).
+
+
+-- =====================================================================================================
+-- BLOCK 11 — GATE source_quote REPAIRS (paraphrase / silent correction / invented completion)
+--                                                                                    ☐ RATIFIED ______
+-- =====================================================================================================
+-- All 32 gate source_quotes were scored against the transcript. 19 are verbatim-clean, 9 differ only by
+-- LaTeX/notation normalisation, 4 alter meaning. WORST = CR-17.
+-- 11a) CR-17 (WORST). Encoded quote:
+--        §4.5: "Diese Forderung ist erfüllt, wenn ... folgende persönliche Schutzausrüstungen zur
+--               Verfügung gestellt werden: Handschutz nach EN 420; körperbedeckende Kleidung
+--               (Kopfbedeckung, Arbeitsanzug oder Berufsmantel) gemäß EN 340."
+--      Print (printed p.30, lines 1102-1105):
+--        "(2) Diese Forderung ist erfüllt, wenn für die Beschäftigten z.B. folgende persönliche
+--         Schutzausrüstungen zur Verfügung gestellt werden:" / "- Handschutz nach EN 420 mit einer
+--         wirksamen Feuchteregulierung für die Hautoberfläche für Bodensortierung und Sortierkabine" /
+--        "- körperbedeckende Kleidung, bestehend aus Kopfbedeckung, Arbeitsanzug oder Berufsmantel
+--         gemäß EN 340"
+--      The "..." silently swallows "für die Beschäftigten z.B." — deleting the exemplary qualifier turns
+--      an illustrative list into a closed requirement, and CR-17 blocks on it. The bullet texts are also
+--      recomposed (scope clauses dropped, bullets re-punctuated as semicolons).
+--        update public.compliance_requirements set source_quote =
+--          '§4.5: "(2) Diese Forderung ist erfüllt, wenn für die Beschäftigten z.B. folgende persönliche Schutzausrüstungen zur Verfügung gestellt werden:" | "- Handschutz nach EN 420 mit einer wirksamen Feuchteregulierung für die Hautoberfläche für Bodensortierung und Sortierkabine" | "- körperbedeckende Kleidung, bestehend aus Kopfbedeckung, Arbeitsanzug oder Berufsmantel gemäß EN 340" — printed p.30'
+--        where code = 'VDI-2163-CR-17';
+-- 11b) CR-07. Keeps "z.B." (good) but silently drops 4 of the 9 printed bullets (Reinigungsarbeiten,
+--      Reinigung verschmutzter Arbeitsgeräte, Reinigung von Fahrzeugen, Schulungen) with no elision
+--      marker, and re-punctuates the list — an invented completion of an example list.
+--        update public.compliance_requirements set source_quote =
+--          '§4.2: "Organisatorische Schutzmaßnahmen sind z.B.:" | "- regelmäßige Unterweisungen anhand von Arbeitsund Betriebsanweisungen" | "- Reinigungsarbeiten" | "- Reinigung verschmutzter Arbeitsgeräte" | "- Reinigung von Fahrzeugen" | "- Schulungen" | "- Wartung von technischen Einrichtungen nach den Vorgaben eines Wartungsplanes" | "- Hautreinigung und -pflege nach Hautschutzplan" | "- Erstellen eines Hygieneplans" | "- Anbringen von Kennzeichnungen" — printed p.20'
+--        where code = 'VDI-2163-CR-07';
+-- 11c) CR-10. Print: "Nach der Arbeitsstättenrichtlinie ASR5 soll der Außenluftstrom 40 m3/h bis 60 m3/h
+--      je Person - bei überwiegend nicht sitzender Tätigkeit - betragen und bei körperlich schwerer
+--      Arbeit 65 m3/h je Person. Bei intensiver Geruchsverschlechterung sind zusätzlich 20 m3/h je Person
+--      vorzusehen. Der aus diesen Angaben resultierende Luftstrom muss bei der Auslegung der
+--      lüftungstechnischen Anlage als absolutes Minimum angesehen werden."
+--      Encoded quote writes "ASR 5" (print: "ASR5"), drops the 65 m3/h half-sentence with no marker, and
+--      shortens the last sentence to "Der resultierende Luftstrom muss bei der Auslegung als absolutes
+--      Minimum angesehen werden." — two silent deletions inside one sentence.
+--        update public.compliance_requirements set source_quote =
+--          '§4.4.2: "Nach der Arbeitsstättenrichtlinie ASR5 soll der Außenluftstrom 40 m3/h bis 60 m3/h je Person - bei überwiegend nicht sitzender Tätigkeit - betragen und bei körperlich schwerer Arbeit 65 m3/h je Person. Bei intensiver Geruchsverschlechterung sind zusätzlich 20 m3/h je Person vorzusehen. Der aus diesen Angaben resultierende Luftstrom muss bei der Auslegung der lüftungstechnischen Anlage als absolutes Minimum angesehen werden." — printed p.25'
+--        where code = 'VDI-2163-CR-10';
+-- 11d) CR-29. The parenthetical "(§6.2.2: Legionellen im Befeuchterwasser; Bakterien bei 20 °C und 36 °C;
+--      Bakterien/Actinomyceten/Schimmelpilze auf Oberflächen; luftgetragene Keime; Endotoxine)" is the
+--      encoder's SUMMARY of the §6.2.2 bullet list, not printed text — a paraphrase inside a source_quote.
+--        update public.compliance_requirements set source_quote =
+--          '§6.2.1: "Entsprechend den vielgestaltigen Messaufgaben sind in den einzelnen Bereichen unterschiedliche Parameter zu messen." | §6.2.2: "- Legionellen im Befeuchterwasser" | "- Endotoxine in der Zuluft oder in der Raumluft" — printed p.43'
+--        where code = 'VDI-2163-CR-29';
+-- 11e) Notation-only (recorded, no change proposed): CR-22 writes "5 x 10^4" where the print has
+--      "5 · 10^4"; CR-21/CR-24/CR-25 write "KBE/ml" where the transcript renders "KBE/m ℓ" (and, for
+--      CR-25, "KBE/m t"); CR-03/CR-08/CR-09/CR-11 use "..." elisions that do not change meaning.
+-- Rollback inverse for 11a-11d: restore each gate's original source_quote as captured in the pass export
+-- (scratchpad fields-VDI-2163.json).
+
+
+-- =====================================================================================================
+-- BLOCK 12 — FIELD METADATA REPAIRS (clause retags, missing metadata)               ☐ RATIFIED ______
+-- =====================================================================================================
+-- 12a) umluft_abluftreinigung_nachgewiesen (85ae8cbe-d71f-47a9-85f0-53419549c243) has an auto-generated
+--      label ("Umluft Abluftreinigung Nachgewiesen"), NO clause_reference, NO description, NO unit — yet
+--      it is a live operand of block gate CR-12. It is NOT a phantom field (phantoms are never referenced
+--      by a gate or equation), it is an under-specified one.
+--      Evidence (§4.4.3, printed p.26, line 965): "Auf Umluftbetrieb ist zu verzichten, es sei denn, eine
+--      geeignete Abluftreinigung führt nachweislich zu der erforderlichen Umluftqualität."
+--        update public.fields set clause_reference = '§4.4.3',
+--               label_de = 'Abluftreinigung erreicht nachweislich die erforderliche Umluftqualität',
+--               description = 'Nachweis, dass eine geeignete Abluftreinigung die erforderliche Umluftqualitaet erreicht (einzige Ausnahme vom Verzicht auf Umluftbetrieb, Sec.4.4.3).'
+--         where id = '85ae8cbe-d71f-47a9-85f0-53419549c243';
+--        -- rollback inverse: set clause_reference=null, description=null,
+--        --                   label_de='Umluft Abluftreinigung Nachgewiesen' for the same id.
+-- 12b) Clause retags — the value the field carries is printed in a clause other than the one tagged:
+--        c_schimmelpilze_luft   (927fa886-…) '§3.3.4'  -> '§3.3.4; §6.2.4'   (the TKW is in §6.2.4)
+--        raumluftfeuchte        (1e566cae-…) '§3.4'    -> '§3.4; §6.3'       (ranges are in §6.3)
+--        raumluftgeschwindigkeit(e81521f1-…) '§3.4'    -> '§3.4; §6.3'       (VDI 3802 Bild 2 cited in §6.3)
+--        raumlufttemperatur     (0f88468c-…) '§3.4'    -> '§3.4; §6.3'
+--        koloniezahl_befeuchterwasser_dipslide (39e07874-…) '§5.2.5' -> '§5.2.5 / Tabelle 4 Pos.5.1.3'
+--        belagstaerke_tropfenabscheider        (7c3d71f1-…) '§5.2.5' -> '§5.2.5 / Tabelle 4 Pos.5.2.1'
+--        luftfeuchte_zuluftleitung             (c9e42545-…) '§5.2.8' -> '§5.2.8 / Tabelle 4 Pos.8.3'
+--        (each with the evidence already quoted in the verification pack's verification_quote)
+--        -- rollback inverse: restore each clause_reference to the value listed on the left.
+-- 12c) Unit note, no change proposed: waermeleitwiderstand_kleidung (4841e3a9-…) carries unit 'clo' while
+--      §3.4 (printed p.14) gives BOTH "in $\mathrm{m}^{2}$ K/W oder in clo"; the guideline prints no
+--      conversion. rueckkuehlwerk_reinigung_intervall (98e0a42b-…) carries unit '1/Jahr' (a frequency)
+--      while every other interval field on VDI-2163-08 carries 'Monate' — correct but inconsistent.
+--      A dimensional check of the equations was NOT possible: VDI-2163 has 0 equations in prod and the
+--      guideline itself prints no formula.
+
+
+-- =====================================================================================================
+-- BLOCK 13 — ENUM NOTES (no change proposed, recorded so the ruling batch is complete)
+--                                                                                    ☐ RATIFIED ______
+-- =====================================================================================================
+-- 13a) anlagentyp (1e48e8ac-…): the 6 values are EKOWAI's own grouping. VDI 2163 §1 (p.2-3) defines the
+--      scope by activity ("gelagert, behandelt und/oder umgeschlagen"), and names plant types only as
+--      examples (Tabelle 1 p.7: Kompostwerke / Vergärungsanlagen / Sortierbetriebe / Altholzrecycling-
+--      Anlagen; §4.3.2 p.21: Anlagen zur mechanischen Behandlung). Not a defect, but the enum is not a
+--      printed closed list and should not be treated as one.
+-- 13b) abfallgruppe (f4696cc3-…): the 12 values mirror Tabelle 3 Pos.1-12 one-to-one — good — but §4.1
+--      (p.15) says Tabelle 3 "gibt einen beispielhaften Überblick", so the list is exemplary too.
+-- 13c) psa_atemschutz_klasse (aee3350a-…) adds a value 'keiner' ("Kein Atemschutz erforderlich") which is
+--      not a printed category; it is defensible because §4.5 (p.29) says "Für Wartungs- und
+--      Reinigungsarbeiten kann Atemschutz erforderlich sein" — i.e. it is conditional. Recorded only.
+-- 13d) filterklasse_zuluft — see BLOCK 2 (the enum IS the enforcement today).
