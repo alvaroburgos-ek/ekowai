@@ -41,22 +41,53 @@ for (const f of files) {
   const code = codeOf(f);
   const text = fs.readFileSync(path.join(here, f), 'utf8');
   const lines = text.split('\n');
-  // A block starts at a comment line naming S-<n>; its heading text runs to the end of that comment line.
+  // A block starts at a comment line naming its id. Agents across the pass used several id styles:
+  // S-1 / R-01 / A-3 / B-2 / C-7 / D-1 / E-4 / F-2 / G, and some used bare "1." numbering.
+  // Accept all of them, or 21 of the 52 standards' rulings silently drop out of this sheet.
+  // Four heading shapes occur across the 52 files, all with the tick-box in a different place:
+  //   -- S-1 · title            -- R-01: title            -- 1. title
+  //   -- ☐ RATIFIED  S1-01  title                  (tick first, then id)
+  //   -- BLOCK 1 — title  ☐ RATIFIED ______        (tick trailing)
+  //   -- 1.1  [ ] RATIFIED — title                 (dotted id, bracket tick)
+  const BLOCK_ID = new RegExp(
+    '^--\\s*(?:' +
+      '(?:[☐\\[(][ xX]?[\\])]?\\s*RATIFIED\\s+)?' +                       // optional leading tick
+      '(?:\\*\\*)?(?:BLOCK\\s+)?' +
+      '([A-Z]{1,2}[0-9]?-?[0-9]{1,3}(?:[.\\-][0-9]{1,3})?[a-z]?|[0-9]{1,2}(?:\\.[0-9]{1,2})?)' +
+      ')\\s*(?:\\*\\*)?\\s*(?:[·:.)\\-–—]|\\s)\\s*(.+?)\\s*$');
+  // ONE TICK-BOX = ONE BLOCK. Anchoring on the marker line (rather than scanning a window around a
+  // heading) is the only rule that holds across all four heading shapes without double-counting:
+  // a window lookahead lets neighbouring list items borrow the same tick.
+  const TICK = /[☐\[(][ xX]?[\])]?\s*RATIFIED/i;
   const blocks = [];
   for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].match(/^--\s*(S-[0-9]+[a-z]?)\s*[·:.\-]\s*(.+?)\s*$/i);
-    if (!m) continue;
-    // collect following comment lines until the first blank-ish separator or the next block
-    const detail = [];
-    for (let j = i + 1; j < lines.length && detail.length < 6; j++) {
-      if (/^--\s*S-[0-9]+/i.test(lines[j])) break;
-      if (/^--\s*=+\s*$/.test(lines[j])) break;
-      const d = lines[j].replace(/^--\s?/, '').trim();
-      if (d && !d.startsWith('update ') && !d.startsWith('--')) detail.push(d);
-      if (detail.length && !d) break;
+    if (!lines[i].startsWith('--') || !TICK.test(lines[i])) continue;
+    // File preambles explain the tick-box rather than offer a decision; they are not blocks. Match the
+    // explanatory words anywhere on the line, not only after the word RATIFIED.
+    if (/\b(marker|tick|box|only after|before the|un-?comment|may be executed|nothing in this file)\b/i.test(lines[i])) continue;
+    // Title: what is left of this line once id + tick are stripped; if that is empty, use the nearest
+    // preceding non-separator comment line (the "BLOCK n — title" / heading-above-tick shapes).
+    let id = null;
+    let title = lines[i].replace(/^--\s*/, '').replace(TICK, ' ').replace(/[☐\[(][ xX]?[\])]?\s*(REJECTED|DEFER)/gi, ' ')
+      .replace(/_{2,}/g, ' ').replace(/\s{2,}/g, ' ').trim().replace(/^[·:.)\-–—\s]+/, '');
+    const idm = title.match(/^(?:\*\*)?(?:BLOCK\s+)?([A-Z]{1,2}[0-9]?-?[0-9]{1,3}(?:[.\-][0-9]{1,3})?[a-z]?|[0-9]{1,2}(?:\.[0-9]{1,2})?)(?:\*\*)?\s*[·:.)\-–—]?\s*(.*)$/);
+    if (idm) { id = idm[1]; title = idm[2].trim(); }
+    for (let j = i - 1; j >= 0 && j >= i - 3 && title.length < 4; j--) {
+      const prev = lines[j].replace(/^--\s*/, '').replace(TICK, ' ').replace(/_{2,}/g, ' ').trim();
+      if (!prev || /^[=\-]{3,}$/.test(prev)) continue;
+      const pm = prev.match(/^(?:\*\*)?(?:BLOCK\s+)?([A-Z]{1,2}[0-9]?-?[0-9]{1,3}(?:[.\-][0-9]{1,3})?[a-z]?|[0-9]{1,2}(?:\.[0-9]{1,2})?)(?:\*\*)?\s*[·:.)\-–—]?\s*(.*)$/);
+      if (pm && pm[2].trim().length >= 4) { id ??= pm[1]; title = pm[2].trim(); } else if (prev.length >= 4) { title = prev; }
     }
-    const ratified = /☐\s*RATIFIED/i.test(lines.slice(i, i + 12).join(' '));
-    blocks.push({ id: m[1].toUpperCase(), title: m[2].replace(/\s*draft-edition:.*/i, '').trim(), detail: detail.slice(0, 3).join(' ').slice(0, 300), draft: /draft-edition/i.test(lines.slice(i, i + 12).join(' ')), ratified });
+    if (title.length < 4) continue;
+    const detail = [];
+    for (let j = i + 1; j < lines.length && detail.length < 3; j++) {
+      if (TICK.test(lines[j]) || /^--\s*[=\-]{3,}\s*$/.test(lines[j])) break;
+      const d = lines[j].replace(/^--\s?/, '').trim();
+      if (!d) break;
+      if (!/^(update|insert|delete|select)\b/i.test(d)) detail.push(d);
+    }
+    blocks.push({ id: (id ?? String(blocks.length + 1)).toUpperCase(), title: title.replace(/\s*draft-edition:.*/i, '').slice(0, 200),
+      detail: detail.join(' ').slice(0, 300), draft: /draft-edition/i.test(lines.slice(i, i + 6).join(' ')), ratified: true });
   }
   if (!blocks.length) continue;
   total += blocks.length;
