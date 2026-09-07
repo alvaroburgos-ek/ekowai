@@ -1,0 +1,284 @@
+-- ============================================================================
+-- DWA-M-1200-3 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-07, md pass [VC].
+-- DRAFT EDITION (Gelbdruck Juli 2025, Frist zur Stellungnahme 30.09.2025): EVERY block below is "draft-edition: escalate"
+--   — the Weißdruck may change values/tables (§5.6.1 says the Bundes-WasserWVVO "voraussichtlich weitere Anforderungen"
+--   will add to Tab. 10); nothing here should be applied without the owner confirming the edition.
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-3\DWA-M_1200-3_GD.md (mathpix LaTeX;
+--   NO page-number lines — "printed p.N" derived from the Inhalt/Tabellenverzeichnis and cross-checked against the mathpix
+--   image indices, which equal the printed page; see the pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Standard id d3d8fbe3-a2a0-480e-be10-c9cab95dd0fd. Worksheet ids (prefix): 01 694a33e0 · 02 eb1b59e9 (no fields) ·
+--   03 e2d58d06 · 04 8da5fab1 · 05 074e17e2 · 06 cf221392 · 07 91059385 · 08 d94c1798 · 09 24994bdb · 10 708d6d80 ·
+--   11 44118d68 · 12 8a80f910 · 13 12dd0e76 · 14 70caffba · 15 41a578a4 · 16 718e7bb9 · 17 aacbafc1 · 18 695b3b43 ·
+--   19 69b8617d · 20 aaeafa3a · 21 75fc995c · 22 2bd32d43 · 23 3862e6e7 · 24 ea417def · 25 0407ff74 (no fields).
+-- Context: 32 gates (8 block / 24 warn); all 30 source_quotes re-checked against the md — 22 exist verbatim or as ASCII
+--   transliterations with "..." elisions (CR-01 §1 p.10, CR-02, CR-03/CR-04 §3 p.13–14, CR-05/-2 Tab. 11 p.43, CR-06/-2
+--   §5.1.1+Tab. 3 p.22, CR-07/-2 §5.1.4 p.23, CR-08 §5.1.5 p.24, CR-09/-2 Tab. 7 p.30, CR-10 ×2 §6 p.45, CR-11 ×2 §7.1 p.48,
+--   CR-12 ×2 §7.3.2 p.54, CR-13 (ws01) §5.1.3/5.1.4 p.23, CR-14 (ws05) §5.1.3 p.23, CR-14 (ws08) §5.2.4.3 p.31, CR-15 ×2
+--   §5.6.5 p.44, CR-16/-2 §7.2.5 p.52, CR-17 + CR-17-2 §5.1.6 p.25, CR-18 §5.1.6 p.25, CR-18-2 §4.3 p.21) — values and
+--   wording correct; 2 gates carry NO quote (CR-08-2, CR-13 ws08). The encode-time gate page refs ("S. 10 / 22 / 25 / 21 / 31")
+--   all agree with the Inhalt-derived pages. 8 gates have an EMPTY condition (S-2). 6 gates are exact duplicates of a
+--   sibling on the same worksheet (S-3/S-6). 2 block gates can never be satisfied by any non-trivial project because their
+--   condition tokens do not exist in the enum they test (CR-06/-2, S-3); 1 block gate can never fail for the same reason
+--   (CR-14 ws08, S-5).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · CLAUSE_REFERENCE RETAGS, UNIT / ENUM / DESCRIPTION CORRECTIONS (evidence: where the sentence sits in the md).
+--   draft-edition: escalate
+--   (a) fields bewaesserungsbeduerftigkeit_nachgewiesen (caff03c8 ws03, e6939ef1 ws04) clause "§3 / §4.2" — the description's
+--       verbatim "Ableitung der Bewässerungsbedürftigkeit bzw. des Zusatzwasserbedarfs nach anerkanntem Verfahren" is the
+--       Tab. 12 Verteilungsgebiet bullet (md 1445, §6, p.46); §4.2 prints no such sentence. Proposal: '§3; Tabelle 12 (§6)'.
+--   (b) fields spritzschutz_vorhanden (4b4cbdb1 ws05, c78b1ed3 ws14) clause "§5.1.3 / Tab. 7,8,9" — the 2 m / 1 m hedge
+--       sentence ("Es wird empfohlen, Spitzschutzhecken … mindestens 2 m Höhe sowie mindestens 1 m Stärke") is §5.2.4.2
+--       (md 950, p.30–31) and the urban rule ("Mindesthöhe … ist die Höhe des Wasserstrahls") is §5.4.4 (md 1034, p.33).
+--       Proposal: '§5.1.3; §5.2.4.2; §5.4.4; Tab. 7,8,9'.
+--   (c) fields attest_m12003_06_cr_10 (b2d2ea2e ws06) and attest_m12003_19_cr_10 (7228c415 ws19) clause NULL — the
+--       attested obligation is §6 (md 1411, p.45): "sieht die Verordnung (EU) 2020/741 … in Artikel 5 die Erstellung eines
+--       Risikomanagementplans (RMP) vor". Proposal: '§6; EU 2020/741 Art. 5' on both.
+--   (d) unit spelling: kontrollfilter_um (c26537d5 ws07, 9775f7a3 ws21) stores unit 'um' while filter_groesse_um stores 'µm'
+--       (md 1712 prints "120-µm-Kontrollfilters"); frostschutz_volumen (cb9c23a8 ws17) stores 'm^3' while every other
+--       volume field stores 'm3'. Proposal: 'µm' and 'm3'.
+--   (e) field wasserquelle_typ (ce2146bd ws01) enum token 'hybrid' (regulation_reference §5.1.5) — §1 defines the SOURCE
+--       (kommunale Kläranlage vs. industriell/gewerblich, md 294/300); "hybride Wasserherkunft" is a §5.1.5 supply-mix
+--       concept already carried by field wasserherkunft (331d706f). With CR-01 (block) requiring 'kommunal_haeuslich', a
+--       user picking 'hybrid' is blocked for a wrong reason. Proposal: remove the 'hybrid' token from wasserquelle_typ.
+--   (f) field desinfektion_methode (2c9d8809 ws07, f2c5e5d4 ws22) enum token 'thermisch' (§7.2.5) — Tab. 13 (md 1553–1590,
+--       p.50) lists six WATER-disinfection measures (Chlorung, Ozonung, PES, Ultrafiltration, UV, H2O2); "thermisch" is the
+--       §7.2.5 ANLAGEN-desinfektion of Speicher/Leitungen (md 1664). One enum mixes two concepts; CR-16 relies on the token.
+--       Proposal (RULING): relabel the token 'Thermische Anlagendesinfektion (§7.2.5)' — or split into a separate
+--       anlagendesinfektion_verfahren enum {chemisch, thermisch}.
+--   (g) field leitungstyp (b3b0463c ws05, b2d14721 ws11) — the six enum tokens are the six EXAMPLE rows of Tab. 6 ("Beispiel
+--       ländlicher Raum Berlin-Brandenburg", md 838); §5.2.2 md 830 only says "Im Regelfall … PVC-Leitungen". Proposal
+--       (RULING on mechanism): mark the list non-exhaustive / allow a free-text "sonstige" token.
+--   (h) field ziel_bodenfeuchte_pct_nfk (f0f02b9e ws16) description NULL. Proposal: description = '§4.2 (z. B.): Wasserhaltekapazität
+--       des Bodens nicht vollständig auffüllen (z. B. etwa nur 80 % der nFK bei landwirtschaftlichen Kulturen), wenn
+--       Niederschläge innerhalb der Folgetage möglich sind (nach LWK 2021).'
+--   (i) note only: field abschaltung_automatisch label "Automatische Abschaltung vorhanden" narrows §5.1.6 "Hierfür sind
+--       geeignete technische Vorkehrungen zu treffen" (md 759) to one implementation; the sentence is hard, the mechanism open.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)  ☐ (h)
+-- update public.fields set clause_reference='§3; Tabelle 12 (§6)' where id in ('caff03c8-4f53-4bca-be58-fb73a1925552','e6939ef1-4fb3-4afa-a83b-b99af431d7f5');
+-- update public.fields set clause_reference='§5.1.3; §5.2.4.2; §5.4.4; Tab. 7,8,9' where id in ('4b4cbdb1-cc89-4188-bb07-713dbaad4783','c78b1ed3-f6a1-489f-8b73-4c9ac9a94a4a');
+-- update public.fields set clause_reference='§6; EU 2020/741 Art. 5' where id in ('b2d2ea2e-54fb-4e02-ba56-043fb7377a19','7228c415-cfad-410a-80dc-d32ef8a1163f');
+-- update public.fields set unit='µm' where id in ('c26537d5-427e-4601-ae16-88c49ba8f53b','9775f7a3-2718-4ae8-bbd8-1c409a6b0894');
+-- update public.fields set unit='m3' where id='cb9c23a8-c3ee-4eab-bc19-738cbd922a94';
+-- update public.fields set enum_values = (select jsonb_agg(e) from jsonb_array_elements(enum_values) e where e->>'value' <> 'hybrid') where id='ce2146bd-452f-4b9e-8850-5242f56021c6';
+-- update public.fields set description='§4.2 (z. B.): Wasserhaltekapazität des Bodens nicht vollständig auffüllen (z. B. etwa nur 80 % der nFK bei landwirtschaftlichen Kulturen), wenn Niederschläge innerhalb der Folgetage möglich sind (nach LWK 2021).' where id='f0f02b9e-0882-431e-84a0-99a4e72e8dd7';
+-- Rollback: restore '§3 / §4.2' (both) · '§5.1.3 / Tab. 7,8,9' (both) · NULL (both attest rows) · 'um' (both) · 'm^3' · re-insert
+--   the wasserquelle_typ token {"value":"hybrid","label_de":"Hybride Wasserherkunft","regulation_reference":"§5.1.5"} · description NULL.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · EMPTY-CONDITION GATES (8 rows; evaluate.ts cannot evaluate an empty condition).   draft-edition: escalate
+--   Attestation-only rows (requires_attestation=true, condition '') — these are the 2026-08-01 "maintenance duties": CR-02
+--   (61b7e84b ws01, §1 quote), CR-14 (5709b31b ws05, §5.1.3 md 696), CR-15 (fc191fa6 ws05, §5.6.5 md 1406–1407), CR-17
+--   (3cce7990 ws05, §5.1.6 md 755), CR-18 (cf36c096 ws05, §5.1.6 md 759), CR-11 (f9d55b0b ws07, §7.1 md 1511). Unlike CR-10
+--   they have NO attest_* field on their worksheet. RULING (as in the 1200-2 S-3 precedent): confirm the engine's
+--   requires_attestation path renders these without a condition; otherwise each needs an attest_<ws>_<code> boolean.
+--   DEAD rows (requires_attestation=false, condition ''): CR-12 (8bf0ba11 ws07, warn, §7.3.2 quote, no fields named) and
+--   CR-13 (599ce477 ws08, warn, clause "§8 / Tab. 15", NO quote). Proposal: (i) CR-12 ws07 → delete (its topic is CR-12 ws01
+--   attestation on filter_und_desinfektion_gemaess_gueteklasse; §7.3.2 md 1706 says the filters "können … angewendet werden,
+--   falls diese zweckdienlich sind" — nothing to enforce); (ii) CR-13 ws08 → condition 'expositionspfade_dokumentiert == True'
+--   (field b3f6bd8d is on ws08) with the §8 sentence as source_quote (md 1810, p.57).
+-- ☐ RATIFIED attestation path confirmed  ☐ (i)  ☐ (ii)
+-- delete from public.compliance_requirements where id='8bf0ba11-cec0-4aa9-a671-6809dc40007e';
+-- update public.compliance_requirements set condition='expositionspfade_dokumentiert == True', source_quote='Für den Menschen, und damit auch für die umsetzenden Betriebe, sind bei der Wiederverwendung von aufbereitetem Wasser für die Bewässerung in Landwirtschaft, Gartenbau, Grünanlagen sowie im GaLaBau folgende Expositionspfade zu berücksichtigen (Achtung: Exposition ist nicht gleichzusetzen mit real existenten Risiken) [DWA-M 1200-3 §8, printed p.57]' where id='599ce477-e9dd-4181-8b41-b20437518f1d';
+-- Rollback: re-insert CR-12 (ws 91059385, warn, clause '7.3.2 Oberirdische Tropfbewaesserungssysteme und Mikrospruehsysteme', condition '', quote as exported);
+--   CR-13 condition '' and source_quote NULL.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · CR-06 / CR-06-2 — BLOCK GATE WITH NON-EXISTENT ENUM TOKENS (29a28a7a + 568ce4fa, ws05, block, §5.1.1 / Tab. 3).
+--   draft-edition: escalate
+--   Condition: speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C','C-1','C-2','D'}) OR
+--   speichertyp == 'transportbehaelter'. The speichertyp enum (21dd1ce8 ws05, 4225d207 ws10) has the tokens
+--   offen_ortsfest_kurz, offen_ortsfest_lang, geschlossen_ortsfest_kurz, geschlossen_ortsfest_lang, transportbehaelter —
+--   'geschlossen' and 'offen' never match, so the ONLY passing value is transportbehaelter: every project with a fixed
+--   storage is blocked. Severity: the anchor sentence is a recommendation — md 655 (p.22): "Für die Speicherung von
+--   Bewässerungswasser werden in Abhängigkeit von der Güteklasse des aufbereiteten Wassers Speichertypen entsprechend
+--   Tabelle 3 empfohlen." — and §7.2.1 md 1541 (p.49) prints "Alle Speichersysteme dürfen mit Wasser höherer Qualität
+--   befüllt werden." (open storage with A/B water is allowed; §5.2.1 md 772: "Ort der Einhaltung der Parameter der
+--   Güteklassen ist die Anwendung an der Pflanze"). Tab. 3 itself: "Geschlossene Speicher & A, B | Offene Speicher & C, D |
+--   Transportbehälter & Nach Bedarf" (md 662–664). CR-06-2 is a byte-identical duplicate.
+--   Proposal: delete CR-06-2; CR-06 → severity 'warn', condition
+--   'NOT (speichertyp IN {offen_ortsfest_kurz,offen_ortsfest_lang} AND gueteklasse IN {A,B-1,B-2})'
+--   (warning text: Tab. 3 empfiehlt für A/B geschlossene Speicher; Einhaltung der Güteklasse an der Pflanze sicherstellen).
+-- ☐ RATIFIED delete CR-06-2  ☐ CR-06 tokens + warn
+-- delete from public.compliance_requirements where id='568ce4fa-f8e1-444a-940e-9de7c2cead37';
+-- update public.compliance_requirements set severity='warn', condition='NOT (speichertyp IN {offen_ortsfest_kurz,offen_ortsfest_lang} AND gueteklasse IN {A,B-1,B-2})' where id='29a28a7a-5f1b-44e0-aa53-869b5fe834a9';
+-- Rollback: re-insert CR-06-2 (identical to CR-06 as exported); CR-06 severity 'block' and the exported condition.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · DUPLICATE / PHANTOM-CLASS FIELDS AND HAND-ENTERABLE DERIVED VALUES.   draft-edition: escalate
+--   (a) ws20 belueftung (2515c2bf, "Belüftung vorhanden") and umwaelzung (ad5f2369, "Regelmäßige Umwälzung") duplicate
+--       belueftung_aktiv (9e8f736e) and umwaelzung_aktiv (ab6e25a0) on the SAME worksheet; both have no description and
+--       are referenced by no gate and no equation. Proposal: active=false.
+--   (b) ws13 faktor (b448a4c3, "Abstandsfaktor (Vielfaches der Wurfweite)", hand-entered number, no description) is a
+--       standard_fixed lookup: Tab. 7/9 (p.30/33) "A bis C & 1-fache Wurfweite | D & 2-fache Wurfweite | mit Spritzschutz
+--       1-fache", Tab. 8 (p.30) "D & 3-fache Wurfweite". Hand-enterable derived value (#22 class). Proposal (GRAMMAR RULING —
+--       no CASE in evaluate.ts): derive faktor = 1 if gueteklasse != 'D' or spritzschutz_vorhanden; else 3 if sprinkler_typ IN
+--       {kreis_ohne_endkanone,linear_ohne_endkanone,duesenwagen} (Tab. 8 systems, ≤ 2 m Wurfweite); else 2 — or make the
+--       field read-only with a three-token enum {1,2,3} + description quoting the tables.
+--   (c) bbodschv_anlage1_tab3 (f32b49fa ws05, 4728ac08 ws08) is a hand-entered copy of ANOTHER standard's fixed value
+--       (BBodSchV Anlage 1 Tabelle 3, per metal — NR, not printed in this md; §4.3 md 614 only references it). Proposal
+--       (RULING/acquisition): a per-metal lookup (BBodSchV Anl. 1 Tab. 3) instead of one free number for "Schwermetall".
+--   (d) karenzzeit_wochen (9f33c1b2 ws05, bcf344bf ws15, generic "Karenzzeit vor Ernte/Weidegang") overlaps the five
+--       class-specific fields karenzzeit_klasse_c / _klasse_d_weide / _klasse_d_ernte / _saatgut / _weide_laktierend that
+--       carry the printed Tab. 10 values. RULING: keep as the project's chosen Karenz (SR-2 selection record) or deactivate.
+--   (e) desinfektion_konzentration (063b3d1a ws07, f273df17 ws22, generic mg/l) overlaps restchlor_konz (mg/l),
+--       chlorung_stoss_konz (mg/l) and h2o2_stoss_konz (ml/l — different unit). RULING: deactivate the generic field.
+--   (f) INVENTORY, not a proposal: 208 rows = 113 unique symbols; 95 rows are second copies on another worksheet. ws05
+--       "Pflanzentyp und Kultur" (60 fields) holds copies of 19/21 ws08 fields, 5/5 ws11, 5/5 ws12, 10/10 ws15, 3/3 ws14,
+--       5/8 ws10, 3/5 ws13; ws04 duplicates ws16 (5), ws18 (2), ws09 (2), ws03 (2), ws07 (2); ws06 ≡ ws19 (rmp_dokument,
+--       storfall_plan, betriebsplan_dokument) and ws06/ws23 (monitoring_programm). Gates read the ws05 copies (CR-05..CR-18-2).
+--       RULING: which copy is the master (ws05 as intake vs. the topical worksheets), and whether the engine binds by symbol
+--       project-wide (then the copies are harmless views) or per worksheet (then the copies diverge).
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f) ruling recorded
+-- update public.fields set active=false where id in ('2515c2bf-71c4-4892-9249-19347362ef71','ad5f2369-b975-4e91-8159-0a9e894c5b3a');
+-- Rollback: active=true on both.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · CR-14 (ws08, bb4598c8, block, §5.2.4.3) — TOKEN CASE MISMATCH → GATE CAN NEVER FAIL; RE-HOME.   draft-edition: escalate
+--   Condition: NOT (desinfektion_methode IN {'Chlorung','H2O2','PES'}) OR abstand_oberflaechengewaesser_eingehalten == true.
+--   The desinfektion_methode enum tokens are lowercase (chlorung, h2o2, pes), so the NOT(...) branch is always true and the
+--   gate always passes (under-enforces). Two printed obligations: §5.2.4.3 md 964 (p.31) "Im RMP ist festzulegen, welche
+--   Abstände der bewässernden Fläche(n) zu Oberflächengewässern im konkreten Fall einzuhalten sind." (unconditional, hard)
+--   and §7.2.3 md 1604 (p.50–51) "Bei der Chlorung sowie Wasserstoffperoxid- und PES-Behandlung ist … ein Sicherheitsabstand
+--   zu Oberflächengewässern einzuhalten". ws08 (Bewässerungswasserqualität chemisch) carries neither field; the boolean lives
+--   on ws05 (dc9c03c3) and ws13 (54804750), desinfektion_methode on ws07/ws22.
+--   Proposal: condition 'abstand_oberflaechengewaesser_eingehalten == true' (block — the RMP-fixed distance "ist …
+--   einzuhalten"), worksheet → ws13 12dd0e76 (Abstandsregelungen), clause '§5.2.4.3; §7.2.3'.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set worksheet_template_id='12dd0e76-577d-4cff-aedb-1e77efe3929c' /* ws13 */, condition='abstand_oberflaechengewaesser_eingehalten == true', clause_reference='§5.2.4.3; §7.2.3' where id='bb4598c8-47c7-49f0-9ac1-957c99c4f699';
+-- Rollback: worksheet d94c1798 (ws08), exported condition, clause '§5.2.4.3'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · GATE LOGIC FIXES + DUPLICATE-GATE DELETIONS.   draft-edition: escalate
+--   (a) CR-15 (de89e350 ws08, warn, §5.6.5): 'anwendungsbereich != frostschutzberegnung OR (gueteklasse == D AND
+--       schulung_durchgefuehrt == True)'. md 1400 (p.44): "Das Bewässerungswasser muss mindestens der Güteklasse D
+--       entsprechen." — D is the LOWEST class, so A/B/C satisfy "mindestens D"; the gate fails every Frostschutz project using
+--       better water (over-enforces). Proposal: condition 'anwendungsbereich != frostschutzberegnung OR schulung_durchgefuehrt == True'.
+--   (b) CR-08 (a83090dc ws05, warn, §5.1.5) + CR-08-2 (20935a0a, same condition, NO quote): unconditional, but md 743
+--       (p.24) "Bei simultaner Einspeisung aus verschiedenen Quellen sind geeignete Sicherungseinrichtungen … zu verwenden"
+--       applies to hybride Wasserherkunft only; md 745 adds the Absperrschieber alternative for Wechselbetrieb systems not
+--       coupled to Trinkwasser (no field). Proposal: delete CR-08-2; CR-08 condition
+--       'wasserherkunft != hybrid OR rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True';
+--       RULING whether an absperrschieber_vorhanden boolean is added to the OR-list.
+--   (c) CR-07 (1c17c367 ws05, warn, §5.1.4) + CR-07-2 (ab5f62a2, identical): 'markierung_oberflaeche_anteil >= 60' is printed
+--       for nachträgliche Farbmarkierung of EXISTING systems only (md 712). Proposal: delete CR-07-2; CR-07 condition
+--       'kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND (markierung_oberflaeche_anteil IS NULL OR markierung_oberflaeche_anteil >= 60)'.
+--   (d) CR-09 (11e530f7 ws05, warn, Tab. 7) + CR-09-2 (c9caaf89, same without the spritzschutz term): both only test class D
+--       (2× Wurfweite); the printed 1× Wurfweite for A–C (Tab. 7/8/9) is never tested (under-enforces) and the Tab. 8 3× for
+--       ≤ 2 m-Wurfweite systems is missing. Proposal: delete CR-09-2; CR-09 condition
+--       '(gueteklasse != D AND abstand_zu_sensitiv >= wurfweite) OR (gueteklasse == D AND ((spritzschutz_vorhanden == True AND abstand_zu_sensitiv >= wurfweite) OR (sprinkler_typ IN {kreis_ohne_endkanone,linear_ohne_endkanone,duesenwagen} AND abstand_zu_sensitiv >= 3 * wurfweite) OR (NOT sprinkler_typ IN {kreis_ohne_endkanone,linear_ohne_endkanone,duesenwagen} AND abstand_zu_sensitiv >= 2 * wurfweite)))'
+--       — GRAMMAR RULING (nested NOT/IN); simpler alternative once S-4(b) derives faktor: 'abstand_zu_sensitiv >= min_abstand'.
+--       Severity warn is right ("werden … empfohlen", md 916).
+--   (e) CR-16 (cf9d7c41 ws07, warn) + CR-16-2 (d136638a, identical): delete CR-16-2. Note: the 70 °C / 3 min sentence (md 1664)
+--       is a MATERIAL-resistance requirement ("müssen die verbauten Materialien … aushalten können"); reading it as the
+--       process setpoint is defensible as a warn.
+--   (f) CR-05 (be03f15f ws05, warn, Tab. 11) + CR-05-2 (1fbc0209, identical): delete CR-05-2. Tab. 11 also prints the three
+--       pflanzentyp-dependent rows the gate omits — "Chlorid & 250/500(*) mg/l | Wasserhärte & 30/60(*) °dH | Leitfähigkeit &
+--       2.000/3.000(*) µS/cm | (*) salzempfindliche/salzunempfindliche Pflanzen." (md 1360/1364/1365/1369, p.43). Proposal: new
+--       warn gate CR-05-3 on ws05: '(pflanzentyp == salzempfindlich AND cl_konz <= 250 AND wasserhaerte <= 30 AND leitfaehigkeit <= 2000) OR (pflanzentyp == salzunempfindlich AND cl_konz <= 500 AND wasserhaerte <= 60 AND leitfaehigkeit <= 3000)'.
+--   (g) CR-11 (57d48612 ws01, warn, att, cond alle_hygieneanforderungen_erfuellt) duplicates the topic of CR-11 (f9d55b0b ws07,
+--       att, no condition); CR-12 (709b15f3 ws01) vs CR-12 (8bf0ba11 ws07, S-2); CR-14/CR-15 codes are reused on ws05 and ws08
+--       with DIFFERENT meanings (CR-14 ws05 = §5.1.3 attestation, CR-14 ws08 = §5.2.4.3 block; CR-15 ws05 = §5.6.5 attestation,
+--       CR-15 ws08 = Frostschutz gate). RULING: renumber the ws08 pair (CR-19, CR-20) to keep codes unique per standard.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)
+-- update public.compliance_requirements set condition='anwendungsbereich != frostschutzberegnung OR schulung_durchgefuehrt == True' where id='de89e350-d2a8-46f9-beab-3620e749c830';
+-- delete from public.compliance_requirements where id in ('20935a0a-ac2e-4916-8526-bb6ad06eb3fb','ab5f62a2-fc3a-45d4-8ba7-05ac967872aa','c9caaf89-aef1-408c-acdd-acf43bbb5516','d136638a-59ee-4725-a2f6-fec9e418f9ef','1fbc0209-8311-4842-b690-58fd51f2ce6e');
+-- update public.compliance_requirements set condition='wasserherkunft != hybrid OR rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True' where id='a83090dc-54c2-4354-9bd5-c5bc56c65e5d';
+-- update public.compliance_requirements set condition='kennzeichnung_farbe IN {pantone_purple_522c,pantone_purple_512c,vergleichbar_violett} AND (markierung_oberflaeche_anteil IS NULL OR markierung_oberflaeche_anteil >= 60)' where id='1c17c367-e3cb-4958-82e4-f37272b6f5e2';
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, clause_reference, condition, source_quote) values ('074e17e2-54c2-4320-b6fb-3e4ae6ae4df6' /* ws05 */, 'CR-05-3', 'warn', '5.6.2 Wasserqualitaet aus pflanzenphysiologischer Sicht, Tabelle 11 (*)', '(pflanzentyp == salzempfindlich AND cl_konz <= 250 AND wasserhaerte <= 30 AND leitfaehigkeit <= 2000) OR (pflanzentyp == salzunempfindlich AND cl_konz <= 500 AND wasserhaerte <= 60 AND leitfaehigkeit <= 3000)', 'Chlorid 250/500(*) mg/l; Wasserhaerte 30/60(*) °dH; Leitfaehigkeit 2.000/3.000(*) µS/cm; (*) salzempfindliche/salzunempfindliche Pflanzen [DWA-M 1200-3 Tabelle 11, printed p.43]');
+-- Rollback: restore the exported conditions; re-insert the five deleted -2 rows (identical to their siblings as exported); delete CR-05-3.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · SEVERITY NOTES — block gates anchored on "sollte/sollten" text.   draft-edition: escalate
+--   (a) CR-17-2 (6a51cf59 ws05, block, §5.1.6): 'volumenverlust_pct <= 1 AND (druckabfall_unbeabsichtigt == false OR
+--       abschaltung_automatisch == true)'. md 755 (p.25): "Der Volumenverlust während des Transports durch Druckleitungen
+--       SOLLTE 1 % des Volumens nicht überschreiten." (recommendation) vs md 759: "ist die weitere Zufuhr … unmittelbar zu
+--       unterbinden. Hierfür sind geeignete technische Vorkehrungen zu treffen." (hard). Proposal: split — CR-17-2 keeps block
+--       with 'druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true'; new warn gate CR-17-3 'volumenverlust_pct <= 1'.
+--   (b) CR-18-2 (a7afb5c2 ws05, block, §4.3): 'schwermetall_fracht_pa <= bbodschv_anlage1_tab3 / 3'. md 614 (p.21): "Jährliche
+--       Frachten aus dem Bewässerungswasser SOLLTEN 1/3 der zulässigen Frachten nach Anlage 1 Tabelle 3 BBodSchV nicht
+--       überschreiten (LAWA 2022)." Proposal: severity 'warn'.
+--   Kept as block with evidence: CR-01 (scope, §1 "gilt für"), CR-10 ×2 (§6 EU Art. 5 "sieht … vor" + WHG Erlaubnis md 1415),
+--   CR-14 ws08 after S-5 ("ist … einzuhalten").
+-- ☐ RATIFIED (a)  ☐ (b)
+-- update public.compliance_requirements set condition='druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true' where id='6a51cf59-c6be-4fda-b6f7-1ee634802ac3';
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, clause_reference, condition, source_quote) values ('074e17e2-54c2-4320-b6fb-3e4ae6ae4df6' /* ws05 */, 'CR-17-3', 'warn', '§5.1.6', 'volumenverlust_pct <= 1', 'Der Volumenverlust waehrend des Transports durch Druckleitungen sollte 1 % des Volumens nicht ueberschreiten. [DWA-M 1200-3 §5.1.6, printed p.25]');
+-- update public.compliance_requirements set severity='warn' where id='a7afb5c2-53b0-4263-9a8a-20b70bc7e0b7';
+-- Rollback: CR-17-2 exported condition; delete CR-17-3; CR-18-2 severity 'block'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · MISSING GATES FOR PRINTED LIMITS (encoded as fields, never enforced).   draft-edition: escalate
+--   (a) helminthen_eier ≤ 1 Ei/l — Bild 4/5 Anm. 3) md 583 (p.20): "Bei einer Bewässerung von Weideflächen oder
+--       Futterpflanzen ist nachzuweisen, dass intestinale Nematoden (Eier von Helminthen) mit ≤ 1 Ei je Liter … vorhanden
+--       sind." HARD, but the Weide/Futter predicate has no enum (kultur_typ is text). Proposal: warn on ws09 24994bdb:
+--       'helminthen_eier IS NULL OR helminthen_eier <= 1' — RULING on the predicate.
+--   (b) legionella_konz < 1000 KBE/l at sprinkler aerosol — Bild 4 Anm. 1) md 581 (p.20, EU-Leitlinien 2022/C 298/01).
+--       Proposal: warn on ws09: 'bewaesserungsverfahren != beregnung_sprinkler OR legionella_konz < 1000'.
+--   (c) parallel_desinfektion — §7.3.2 md 1726 (p.54–55): "Die Maßnahmen der Tabelle 14 DÜRFEN NICHT gleichzeitig ausgeführt
+--       werden." HARD prohibition. Proposal: block on ws22 2bd32d43: 'parallel_desinfektion != True'.
+--   (d) emitter_abstand_obst ≥ 25 cm (Tropf) / emitter_abstand_obst_mikro ≥ 50 cm (Mikrosprüh) for class C-1 Dauerkulturen
+--       (Tab. 10 C-1 md 1264–1265, p.40). Proposal: warn on ws15 41a578a4: 'gueteklasse != C-1 OR bewaesserungsverfahren
+--       != tropfbewaesserung OR emitter_abstand_obst IS NULL OR emitter_abstand_obst >= 25' and the mikrosprueh twin with 50 —
+--       RULING (Dauerkultur predicate not encodable; kultur_typ is text).
+--   (e) weidegang_laktierend — Tab. 10 C-1 md 1282 (p.41): "Eine Beweidung durch laktierendes Vieh bei der Verwendung der
+--       Güteklasse C wird grundsätzlich ausgeschlossen." and B-1 md 1236 (p.39): "muss eine vollständige Abtrocknung des
+--       Bestands vor dem Weidegang erfolgt sein". Proposal: block on ws15: 'weidegang_laktierend != True OR (gueteklasse IN
+--       {A,B-1,B-2} AND abtrocknung_erfolgt == True)'.
+--   (f) Karenzzeiten (Tab. 10, p.39–42): class D Weide ≥ 4 Wochen (md 1314), D Ernte/Industrie ≥ 2 Wochen (md 1315/1321),
+--       D Saatgut ≥ 30 Tage (md 1318–1319) — hard rows; C-1 Weide/Heu ≥ 5 Tage hard, "besser maximal 2 Wochen" (md 1278–1279);
+--       B-1 laktierend 2 Wochen "Empfohlen" (md 1236). Proposal: warn gates on ws15 per field, e.g. 'gueteklasse != D OR
+--       karenzzeit_klasse_d_weide IS NULL OR karenzzeit_klasse_d_weide >= 4' (and ≥ 2 / ≥ 30 / ≥ 5 / ≥ 2) — RULING on null
+--       handling (the fields are optional and culture-dependent) and on block vs warn for the hard D/C rows.
+--   (g) o2_saettigung_pct ≥ 50 % — §7.2.4 md 1622 (p.51) "sollte … 50 % relative Sättigung … nicht unterschreiten". Proposal:
+--       warn on ws20 aaeafa3a: 'o2_saettigung_pct IS NULL OR o2_saettigung_pct >= 50'.
+--   (h) verweilzeit_h ≥ 72 → Belüftung + Umwälzung — §7.2.4 md 1626–1635 (p.51) "werden folgende Maßnahmen vorgeschlagen".
+--       Proposal: warn on ws20: 'verweilzeit_h IS NULL OR verweilzeit_h < 72 OR (belueftung_aktiv == True AND umwaelzung_aktiv == True)'.
+--   (i) spuelung_vor_volumen / spuelung_nach_volumen ≥ bewaesserungsnetz_volumen — §7.3.3 md 1778/1780 (p.56) "mindestens dem
+--       einfachen Volumen" (Methodik "empfohlen"). Proposal: warn on ws21 75fc995c: 'spuelung_vor_volumen IS NULL OR
+--       (spuelung_vor_volumen >= bewaesserungsnetz_volumen AND spuelung_nach_volumen >= bewaesserungsnetz_volumen)'.
+--   (j) Spritzschutz dimensions — §5.2.4.2 md 950 (p.30–31) "Es wird empfohlen … mindestens 2 m Höhe sowie mindestens 1 m
+--       Stärke" (außerhalb geschlossener Ortschaften; urban = Wasserstrahlhöhe, md 1034). Proposal: warn on ws14 70caffba:
+--       'spritzschutz_vorhanden != True OR (spritzschutz_hoehe_m >= 2 AND spritzschutz_staerke_m >= 1)'.
+--   (k) restchlor_konz 0,2–1 mg/l for class A chlorination — §7.2.3 md 1600 (p.50) "kann auf Vorgaben nach ISO 16075-2:2020
+--       zurückgegriffen werden (0,2 mg/l bis 1 mg/l Restchlor nach 30 min Kontaktzeit)". SR-2 range. Proposal: warn on ws22:
+--       'gueteklasse != A OR desinfektion_methode != chlorung OR restchlor_konz IS NULL OR (restchlor_konz >= 0.2 AND restchlor_konz <= 1)'.
+--   Deliberately NOT proposed (no enforceable modal): filter sizes 180/120 µm ("können … falls zweckdienlich", md 1706),
+--   Frostschutz "mindestens Güteklasse D" (vacuous — D is the lowest class), wurfhoehe ≤ 1 m ("kann … entfallen"),
+--   bodenfeuchte 50/80 % nFK ("z. B."), Tab. 5/6 example values.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)  ☐ (h)  ☐ (i)  ☐ (j)  ☐ (k)
+-- (insert specs as written above; worksheet ids from prod; source_quote = the cited md sentence with "[DWA-M 1200-3 §, printed p.N]".)
+-- Rollback: delete the inserted rows by code.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · IS_REQUIRED REVIEW (fields the source makes "empfohlen / z. B. / gegebenenfalls" but the encoding requires).
+--   draft-edition: escalate
+--   → false: bodenfeuchte_pct_nfk (9d2ab955 ws04, 0dcc261c ws16) — §4.2 md 520 "z. B. frühestens ab etwa 50 % der nFK" (example);
+--     bodenfeuchte_messung (9382c4b0 ws04, 5284d545 ws16) — md 535 "Es wird empfohlen, digital erfassbare Daten … Bodenfeuchte
+--     vor der Bewässerung"; kennzeichnung_farbe (1eba1031 ws05, 5f53bb41 ws12) — md 708 "Es wird empfohlen, exponierte
+--     technische Elemente … auszurüsten" (the RMP-Kennzeichnung "muss" is carried by beide_punkte_dokumentiert);
+--     abstand_zu_sensitiv (5acc1dc9 ws05, ab50c701 ws13) — md 683 "sind GEGEBENENFALLS Abstände … einzuhalten";
+--     schulung_durchgefuehrt (47328a83 ws08, 0dd0605f ws24) — hard only in §5.6.5 (md 1406) and §5.5.5 (md 1168),
+--     "gegebenenfalls" in §5.4.5 (md 1134); CR-15 (S-6a) enforces the Frostschutz case; speichertyp (21dd1ce8 ws05, 4225d207
+--     ws10) — §5 md 628 "können unterschiedliche Systeme zum Einsatz kommen" (storage is optional).
+--   Keep true (hard text quoted in the pack): abschaltung_automatisch, abstand_oberflaechengewaesser_eingehalten, flaeche_groesse,
+--     zusatzwasserbedarf, zusatzwasserbedarfsverfahren, bewaesserungstagebuch + _gefuehrt (hard for landwirtschaftliche/
+--     gartenbauliche Kulturen — NOTE: for anwendungsbereich urban_galabau/sonstige the source asks only for "eine betrieblich
+--     und inhaltlich geeignete Form der Dokumentation", md 533 — conditional-required RULING), rmp_dokument, storfall_plan,
+--     betriebsplan_dokument, monitoring_programm, kultur_typ, bewaesserungsbeduerftigkeit_nachgewiesen, reinigung_dokumentiert,
+--     saison_reinigung_durchgefuehrt, expositionspfade_dokumentiert, anlagen_typ, attest_* ×2, gueteklasse, anwendungsbereich,
+--     wasserquelle_typ, wasserherkunft, bewaesserungsverfahren.
+-- ☐ RATIFIED
+-- update public.fields set is_required=false where id in ('9d2ab955-6014-47a2-82a1-c97f977fd4f3','0dcc261c-3de9-4884-bd86-c45f57454eeb','9382c4b0-852e-4fc4-968c-c99cb9fa083a','5284d545-2caa-4505-9e01-2b899bdfd144','1eba1031-d66b-4d77-911d-bd24c3af94df','5f53bb41-2783-4c1a-9ccd-7f6eb8380885','5acc1dc9-192d-4f36-b22c-2e36deca60cb','ab50c701-6b12-4852-8122-6008f910c687','47328a83-8226-42fb-b310-2853db07b748','0dd0605f-77c8-42d4-a3ea-1d90eb73ab4f','21dd1ce8-e79f-4a5b-93a0-33203a69b579','4225d207-d009-46ee-8429-eabe71ebbc81');
+-- Rollback: is_required=true on the same 12 ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · GATE SOURCE_QUOTE HYGIENE (evidence only — no enforcement change; listed so the owner can ratify the quote fill).
+--   CR-08-2 (20935a0a) and CR-13 (599ce477) carry NO source_quote (covered by S-6b delete and S-2ii). All other gate quotes
+--   agree with the md; encode-time page refs S. 10 / 21 / 22 / 25 / 31 match the Inhalt-derived pages. Note: CR-05/-2 quotes
+--   list 14 of the 17 Tab. 11 rows (the three (*) rows are S-6f).
+-- ☐ noted
