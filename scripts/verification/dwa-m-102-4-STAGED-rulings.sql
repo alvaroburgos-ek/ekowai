@@ -1,0 +1,461 @@
+-- ============================================================================
+-- STAGED rulings — DWA-M-102-4 (Merkblatt DWA-M 102-4/BWK-M 3-4, März 2022,
+-- "Wasserhaushaltsbilanz für die Bewirtschaftung des Niederschlagswassers")
+-- md pass 2026-09-05. NOTHING IN THIS FILE IS APPLIED. Every block is commented SQL with a
+-- ☐ RATIFIED marker; it changes structure, enforcement or required-ness and therefore needs an
+-- owner ruling (doctrine §0.3). Evidence quotes are verbatim from
+--   C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\DWA-M_102-4.md
+-- (LaTeX and pipe-table markup preserved). "printed p.N" = printed page per the document's own
+-- Inhalt / Bilder- / Tabellenverzeichnis (the transcript has no standalone page-number lines).
+-- The non-normative companion "DWA-M_102-4_BWK-M_3-4_Zusatzdatei.md" was NOT opened; no gate,
+-- field or equation in this standard is anchored on it (all 22 gate source_quotes checked).
+-- ============================================================================
+
+
+-- ############################################################################
+-- SECTION 1 — GATES
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-01  NINE gates have an EMPTY condition_expression and a NULL source_quote, i.e.
+-- they can never fire and carry no provenance. All nine are severity 'warn'.
+--   REQ-05 fa768865-e654-4d62-8a15-60ac68541615  (M104-07, clause "5.1, Gl. (1)")
+--   REQ-15 5b2f1470-b947-461e-85ba-1b4363b72bdc  (M104-07, clause "C.3, Tabelle C.3")
+--   REQ-16 5232d641-4f46-4fbd-a164-c86e7dc4f29c  (M104-07, clause "C.3, Tabelle C.3")
+--   REQ-10 ea63e69c-8915-4e21-ba5c-e79a86ef81de  (M104-16, "Anhang A, Hinweis zur Korrektur von Bilanzfehlern")
+--   REQ-11 3643a87c-db93-4742-a31a-2481bcff2c08  (M104-22, "Anhang B, Hinweis zur Korrektur von Bilanzfehlern")
+--   REQ-21 5f7cf503-ab23-47dc-a896-c17037e12b7d  (M104-22, clause "B.6")
+--   REQ-06 047840e1-48b1-4259-9b9a-199708238e4a  (M104-29, clause "5.1, Gl. (6)")
+--   REQ-07 f5967fe8-2fd7-4308-a60b-e7048dcda5c4  (M104-29, clause "5.1")
+--   REQ-17 6956719a-8a1a-4a4c-b3ce-d272ed6e6f4f  (M104-29, clause "5.3.3")
+-- The printed text these clauses point at DOES support real conditions, e.g.
+--   (§5.1, printed p.19-20) "Die Aufteilungswerte liegen zwischen 0 und 1 und ergeben in Summe den Wert 1."
+--   (Anhang A "Hinweis zur Korrektur von Bilanzfehlern", printed p.26) "Für die Aufteilungswerte gilt
+--    die Kontrollbedingung $a_{\mathrm{F}}+g_{\mathrm{F}}+v_{\mathrm{F}}=1$."
+--   (Anhang B, printed p.32) "Für die Aufteilungswerte gilt die Kontrollbedingung $a_{A}+g_{A}+v_{A}=1$."
+--   (§B.6, printed p.36) "Wird aus anderen Gebieten geliefertes Trinkwasser ersetzt, [...] In diesem Fall
+--    ist $a_{\mathrm{A}}+g_{\mathrm{A}}+v_{\mathrm{A}}<1$."
+-- Proposal: either fill in the conditions above, or deactivate the nine empty gates so the gate
+-- inventory stops over-reporting coverage. Decide per gate.
+-- update public.compliance_requirements set condition_expression = 'a + g + v == 1'
+--   where id = '047840e1-48b1-4259-9b9a-199708238e4a';
+-- ROLLBACK: update public.compliance_requirements set condition_expression = '' where id = '...';
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-02  REQ-02 (050f68c5-9bc9-456f-8433-483ac3ddfeac) and REQ-20
+-- (bb3d78d2-7d59-41d3-bd35-08b1774b82b4) are the SAME gate twice: same worksheet (M104-01), same
+-- clause ("Hinweis für die Benutzung"), byte-identical source_quote, same severity (block), each
+-- with its own attestation field (attest_m104_01_req_02 / attest_m104_01_req_20). The engineer is
+-- asked to tick the identical declaration twice.
+-- Evidence (Hinweis für die Benutzung, printed p.10): "Durch seine Anwendung entzieht sich niemand der
+--   Verantwortung für eigenes Handeln oder für die richtige Anwendung im konkreten Fall; dies gilt
+--   insbesondere für den sachgerechten Umgang mit den im Merkblatt aufgezeigten Spielräumen."
+-- Proposal: deactivate REQ-20 and its attestation field.
+-- update public.compliance_requirements set active = false where id = 'bb3d78d2-7d59-41d3-bd35-08b1774b82b4';
+-- update public.fields set active = false where id = '2229c165-1f46-4e92-b36b-1c947a7f8374';
+-- ROLLBACK: set active = true for both ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-03  REQ-22 (225773f7-f454-450e-9522-94a9ad950ce6, M104-01, severity BLOCK) is
+-- anchored on a recommendation, and its condition is a workflow-status check, not a guideline rule.
+-- Evidence (§5.3.4, printed p.23): "Im Interesse eines reibungslosen Planungsablaufs wird empfohlen,
+--   die Wasserbilanz für den Referenzzustand vor Beginn städtebaulicher Planungen zu erarbeiten und
+--   als Zielvorgabe festzulegen."
+-- "wird empfohlen" cannot carry a block. Proposal: demote block -> warn (or reclassify as a workflow
+-- rule that does not claim guideline provenance).
+-- update public.compliance_requirements set severity = 'warn' where id = '225773f7-f454-450e-9522-94a9ad950ce6';
+-- ROLLBACK: set severity = 'block' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-04  REQ-14 (a9168c5c-4ba5-4689-9dfb-3569aa9b6a30, M104-07, severity BLOCK,
+-- attestation) is anchored on permissive text.
+-- Evidence (§5.2.1, printed p.20): "Die Referenzgrößen können vorzugsweise gemäß 5.2.2 bestimmt
+--   werden oder je nach Verfügbarkeit der Daten und Modelle auch nach 5.2.3 bis 5.2.5."
+-- "können ... vorzugsweise" describes a preference order between four admissible routes; it forbids
+-- nothing. Proposal: demote block -> warn, keep the attestation.
+-- update public.compliance_requirements set severity = 'warn' where id = 'a9168c5c-4ba5-4689-9dfb-3569aa9b6a30';
+-- ROLLBACK: set severity = 'block' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-05  REQ-13 (9642ace3-d07c-494c-8cf7-3b332455d231) sits on M104-23
+-- "Aufteilungswerte Flächenversickerung" but is the check printed under Anhang B.7
+-- "Wasserfläche mit Dauerstau" — a different facility type on a different worksheet.
+-- Evidence (§B.7, printed p.37): "Prüfe: $0<v_{\mathrm{A}}<1$ und $0<a_{\mathrm{A}}<1$"
+-- §B.2 (Flächenversickerung, printed p.34) prints no such check. The condition also reads the
+-- generic a_A / v_A symbols, which exist on M104-23..M104-28 — a re-home is a gate-scope change.
+-- Proposal: re-home to the worksheet that carries the B.7 open-water case (M104-28
+-- "Anlagenkoeffizienten — Zusammenfassung", worksheet_template_id 253f0170-6e7e-4a1c-9a18-bf24bca3c2cb).
+-- update public.compliance_requirements set worksheet_template_id = '253f0170-6e7e-4a1c-9a18-bf24bca3c2cb'
+--   where id = '9642ace3-d07c-494c-8cf7-3b332455d231';
+-- ROLLBACK: set worksheet_template_id = 'bc1e7262-38d0-4984-a58b-2a7eb37c0a20' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-06  REQ-19 (83692f72-1ac1-49d8-8c19-687fc298ec85, M104-29, block) carries an
+-- ELLIPSIS inside its source_quote ("Größere Abweichungen ... sind ausführlich fachlich zu
+-- begründen"), i.e. the stored provenance is not a contiguous verbatim run.
+-- The printed sentence in full (§5.3.3, printed p.23) is: "Die Abweichungen sind unter ökologischen,
+--   technischen und wirtschaftlichen Aspekten zu bewerten. Größere Abweichungen, die aus
+--   unvermeidbaren Randbedingungen oder Zwängen herrühren, sind ausführlich fachlich zu begründen und
+--   ihre Berücksichtigung im Rahmen von Ersatz- und Ausgleichsregelungen zu prüfen."
+-- The obligation ("sind ... zu bewerten" / "sind ... zu begründen") does support a block gate; only
+-- the quote needs repair.
+-- update public.compliance_requirements set source_quote = '<the full sentence pair above> — DWA-M 102-4/BWK-M 3-4, §5.3.3, printed p.23'
+--   where id = '83692f72-1ac1-49d8-8c19-687fc298ec85';
+-- ROLLBACK: restore the previous source_quote string.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-07  REQ-18 (e81c412f-5fca-4214-ace3-2248ef5b272c, M104-02, block) enforces the
+-- identity  A_E_k_b + A_E_k_nb == A_E_k. Its source_quote is §5.3.1, which never prints that
+-- equation:
+-- Evidence (§5.3.1, printed p.21): "Die Wasserbilanz wird erstellt für die kanalisierte
+--   Einzugsgebietsfläche AE,k im Bilanzgebiet einschließlich zugehöriger nicht bebaubarer Flächen
+--   (z. B. Vegetationsflächen etc.)."
+-- The identity follows from Tab. 2 (printed p.13), where A_E,k,b and A_E,k,nb are defined as the
+-- befestigte / nicht befestigte parts of A_E,k, but it is an inference, and an exact-equality block
+-- on surveyed areas will fire on ordinary rounding.
+-- Proposal: keep the check but as a tolerance test, and re-quote onto Tab. 2.
+-- update public.compliance_requirements set condition_expression = 'abs(A_E_k_b + A_E_k_nb - A_E_k) <= 0.01 * A_E_k'
+--   where id = 'e81c412f-5fca-4214-ace3-2248ef5b272c';
+-- ROLLBACK: restore 'A_E_k_b + A_E_k_nb == A_E_k'.
+
+-- ---------------------------------------------------------------------------
+-- ☐ CONFIRMED (no change proposed)  S1-08  REQ-03 (b9857be5-c1e2-4910-b0f4-4278794390f8, M104-02)
+-- The 2026-08-05 downgrade block -> warn is CORRECT and is re-confirmed by this pass.
+-- Evidence (§5.3.3, printed p.23): "Der entsprechende Vergleich der Wasserbilanz im bebauten und
+--   unbebauten Zustand sollte für Bilanzgebiete ab einer befestigten Fläche $A_{E, k, b}$ von ca.
+--   $800 \mathrm{~m}^{2}$ (Relevanzgrenze analog DIN 1986-100 bzgl. dortigem Überflutungsnachweis zur
+--   Grundstücksentwässerung) geführt werden."
+-- "sollte" + "ca." = a relevance guide, not a threshold. warn is the right severity. No SQL.
+
+-- ---------------------------------------------------------------------------
+-- ☐ CONFIRMED (no change proposed)  S1-09  REQ-08 (fe0a06a3, P in [500, 1700]) and REQ-09
+-- (5c57d4ca, ET_p in [450, 700]) are correctly BLOCK: they are the printed validity domain of every
+-- Anhang-A/B regression, and outside it the encoded equations produce meaningless numbers.
+-- Evidence (§A.1, printed p.26; wortgleich §B.1, printed p.32): "Die Berechnungsansätze gelten für
+--   mittlere jährliche Niederschlagshöhen zwischen $500 \mathrm{~mm} / \mathrm{a}$ und $1.700
+--   \mathrm{~mm} / \mathrm{a}$ sowie mittlere jährliche potenzielle Verdunstungshöhen zwischen $450
+--   \mathrm{~mm} / \mathrm{a}$ und $700 \mathrm{~mm} / \mathrm{a}$." No SQL.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-10  REQ-12 (2a2ea0da-7d1c-4ecc-b6bf-f749db9b1924, M104-16) and REQ-04
+-- (87d1402f-2d10-47a8-93b9-78a92c3e7dd6, M104-07) store PARAPHRASED source_quotes: the symbols were
+-- re-rendered into plain text ("a_F + g_F + v_F = 1", "P_korr = R_D + GWN + ET_a") instead of the
+-- printed LaTeX. Content is right, provenance is not verbatim.
+-- Printed (Anhang A, printed p.26): "Werden zwei Aufteilungswerte mit Regressionsgleichungen und der
+--   dritte Wert anhand der Kontrollbedingung $a_{\mathrm{F}}+g_{\mathrm{F}}+v_{\mathrm{F}}=1$
+--   berechnet, so kann dieser im Einzelfall einmal negativ werden. Dann wird er zu Null gesetzt und die
+--   beiden anderen Werte anteilsproportional erhöht oder erniedrigt."
+-- Proposal: replace both source_quotes with the verbatim printed runs. No severity change.
+
+
+-- ############################################################################
+-- SECTION 2 — CLAUSE RETAGS (clause_reference points at clauses this Merkblatt does not have)
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S2-01  §5.4 DOES NOT EXIST. Section 5 of this Merkblatt is 5.1 / 5.2 (5.2.1-5.2.5) /
+-- 5.3 (5.3.1-5.3.4); section 6 follows. Evidence (Inhalt, printed p.3-4 of the front matter):
+--   "5.3.3 Vergleich der Wasserbilanz im bebauten und unbebauten Zustand ..... 23"
+--   "5.3.4 Hinweise zur Durchführung ..... 23"
+--   "6 Kosten- und Umweltauswirkungen ..... 24"
+-- 24 fields carry clause_reference '§5.4' (or '§5.4, Gl.C.2/C.3'). The content they describe
+-- (Zielvorgaben, Abweichungen bebaut<->Referenz) is §5.3.3; the two M104-20 fields are §C.5/§C.6.
+-- Proposal: retag to §5.3.3 (resp. §C.5, Gl. (C.2)/(C.3) for GWN_i and R_D_i).
+-- update public.fields set clause_reference = '§5.3.3' where id in (
+--   'adc3d894-ed2d-465f-a936-0d9fa9dfa105','b91a6dd2-27c7-474e-9f40-c103f12cc894',
+--   '1d993641-5287-4cd0-a2d3-2ea31b17105a','e03d6381-d72d-4142-93ff-80944a7d47ea',
+--   'f673f970-cf6a-4adc-88f5-599e156ddbf6','5c12523e-c7d4-4651-a7f9-2b153f552810',
+--   '4ee858b3-76f2-4133-a5f3-60d06a52594a','870986a4-0489-46ea-a1a2-72bc9d226a99',
+--   'ccb744c6-8608-4871-9b97-2f4238b0d0d9','a1c138d1-dd3b-47bc-b619-d9470e870fdf',
+--   '0e7b9742-0975-4393-921d-0662cf10b35d','06d25a54-7fbb-4ab9-9df2-7894fbc8498c',
+--   '5809bbbf-d5ba-4d7d-8092-c1def561ec97','88bf7205-9862-47be-ad38-fea6d521de96',
+--   'd29068f4-90ad-4d59-8496-e312cb067b81','9d2cb064-66d2-4621-abc2-77b356ebfdcd',
+--   '096bba8d-ff5c-4f14-b18d-d1dcf2cd3848','52b64425-4adf-47c4-a0f4-c3fff5a2fd44',
+--   'bb37d340-5ef7-466d-8908-2f087ee4f191','a6b9cca5-86e2-4bca-942e-723fc133214d',
+--   'a4a7d7cd-83a9-4e61-a936-903492b9b629','4b873dde-296c-4bc8-bf68-f236480b17b6');
+-- update public.fields set clause_reference = '§C.6, Gl. (C.3)' where id = '146fb0f2-fdd9-44ad-bbf3-464464b8af8c';
+-- update public.fields set clause_reference = '§C.6, Gl. (C.2)' where id = '6d667132-40ee-4996-86b0-1e504aaf10e5';
+-- ROLLBACK: restore '§5.4' (resp. '§5.4, Gl.C.3' / '§5.4, Gl.C.2') for the same ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S2-02  §4.4 DOES NOT EXIST (section 4 is 4.1 Fachliche Grundlagen / 4.2 Rechtliche
+-- Grundlagen und Zielvorgaben / 4.3 Maßnahmen). Three M104-09 fields carry '§4.4'. The land-use
+-- classification the fields describe is Anhang C.4.
+-- Evidence (§C.4.2, printed p.43): "Im vereinfachten Verfahren gemäß Abschnitt C. 3 werden die Anteile
+--   der Landnutzungseinheiten entsprechend Tabelle C. 5 festgelegt. Gemäß den örtlichen Gegebenheiten
+--   oder Festsetzungen zum Beispiel in Grünordnungsplänen können andere Flächenanteile angesetzt werden."
+-- update public.fields set clause_reference = '§C.4' where id in (
+--   '17c13284-ce68-4591-a995-814906d99f1d','4a0999a4-928a-42d1-b7d5-0b64e6d1031d',
+--   '7ed38adf-c0c4-4bf7-b553-4ac04ebedf1a');
+-- ROLLBACK: restore '§4.4' for the same ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S2-03  "Bild 5" DOES NOT EXIST. The Merkblatt has exactly two figures.
+-- Evidence (Bilderverzeichnis, front matter): "Bild 1: Prozesse des Bodenwasserhaushalts ..... 19"
+--   "Bild 2: Hydrologisches Dreieck zur (schematischen) Darstellung der Bilanzgrößen im unbebauten und
+--    bebauten Zustand ..... 23"
+-- All six M104-34 "Hydrologisches Dreieck" fields point at "Bild 5"; the figure they mean is Bild 2.
+-- update public.fields set clause_reference = '§5.3.3, Bild 2' where id in (
+--   'db5b728d-a0de-4030-8d69-a9f2858d4ea6','c780cafb-b9f1-4e59-bc3b-5422cc4ec854',
+--   '866221d6-21c3-4256-8dcf-1b4eb2f51867','c78f651e-5d30-4e3b-9567-81adb76cba04',
+--   '921e2428-bdd4-475f-9220-b72398a0f4d4','e485138c-f36f-4c38-b707-e749afc95a60');
+-- ROLLBACK: restore 'Bild 5' for the same ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S2-04  Five data-provenance fields carry '§4.2' (Rechtliche Grundlagen und
+-- Zielvorgaben), which says nothing about measurement data. The printed requirement for input time
+-- series is §5.3.2.1.
+-- Evidence (§5.3.2.1, printed p.22): "Als Eingangsdaten für Niederschlag und Verdunstung sollten
+--   möglichst standortnahe Zeitreihen des DWD von mindestens 20 Jahren verwendet werden."
+-- update public.fields set clause_reference = '§5.3.2.1' where id in (
+--   'e58ee54f-a9e1-42fa-88ae-a323ba622fcb','8b343507-784f-48c8-933e-e9df25b6f950',
+--   'bb424a84-8f53-4b98-b626-ec9b8fcf3cbc','f1b0c622-4588-40de-91f7-1145481ca6ff');
+-- update public.fields set clause_reference = '§3.3 Tab. 2, §5.1' where id = '5be4f79b-dd0b-4f51-bd24-5f850c7090f6';
+-- ROLLBACK: restore '§4.2' for the same five ids.
+
+
+-- ############################################################################
+-- SECTION 3 — UNIT / LABEL CORRECTIONS
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-01  M104-14.k_f (89d5cca4-c7e8-446f-a10b-a9494d1969b6) is encoded in m/s. Every
+-- k_f in this Merkblatt is mm/h, and the Anhang-A/B regressions are numerically calibrated to mm/h.
+-- Evidence (Tab. 2 Formelzeichen, printed p.13): "| $k_{\mathrm{f}}$ | mm/h | Durchlässigkeitsbeiwert |"
+-- Evidence (§B.2 Anmerkung (1), printed p.34): "Der $k_{\mathrm{f}}$-Wert wird in der Einheit mm/h
+--   eingegeben."
+-- A value entered in m/s and fed to e.g. §A.8 ("$+0,01753 \cdot e^{\frac{4,576}{k_{\mathrm{f}}}}$")
+-- is off by a factor of 3.6e6. M104-08.k_f (b19f372d) is already mm/h — the two disagree.
+-- update public.fields set unit = 'mm/h' where id = '89d5cca4-c7e8-446f-a10b-a9494d1969b6';
+-- ROLLBACK: set unit = 'm/s' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-02  M104-14.WK_max (bc4e2d22-a24d-4436-bd43-0529b593ea4e) and M104-14.WP
+-- (beae4d88-a220-4b42-8116-2e88893b334c) are encoded in mm. Both are dimensionless in the printed
+-- Formelzeichen table, and §A.4 uses their DIFFERENCE dimensionlessly.
+-- Evidence (Tab. 2, printed p.13): "| $W K_{\text {max }}$ | - | Maximale Wasserkapazität des Bodens |"
+--   and "| WP | - | Welkepunkt |"
+-- Evidence (§A.4 Parametertabelle, printed p.28): "| Differenz zwischen maximaler Wasserkapazität und
+--   Welkepunkt | $W K_{\text {max }}$ - WP | - | 0,3 | 0,8 | 0,5 |"
+-- Evidence (§A.4 note, printed p.28): "I Welkepunkt $W P=0,05$ (näherungsweise)."
+-- M104-08.WK_max / M104-08.WP already carry '-'; the two pairs disagree.
+-- update public.fields set unit = null where id in (
+--   'bc4e2d22-a24d-4436-bd43-0529b593ea4e','beae4d88-a220-4b42-8116-2e88893b334c');
+-- ROLLBACK: set unit = 'mm' for the same ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-03  M104-27.h_Br (b76f7a8b-9164-4f25-9cd2-1142be872fbd) is encoded in mm/a. The
+-- printed unit is mm/d, and the daily basis is load-bearing: h_Nu is defined as
+-- min(P; 365 * h_Br + h_Bw).
+-- Evidence (Tab. 2, printed p.13): "| $h_{\mathrm{Br}}$ | mm/d | Spezifisches Betriebswasservolumen
+--   bezogen auf die angeschlossene, abflusswirksame Fläche |"
+-- Evidence (§B.6 Parametertabelle, printed p.36): "| Spezifisches Betriebswasservolumen bezogen auf die
+--   angeschlossene, abflusswirksame Fläche | $h_{\mathrm{Br}}$ | mm/d | 0 | 5 | - |"
+-- M104-22.h_Br (e84aaa74) is already mm/d — the two duplicates disagree with each other.
+-- update public.fields set unit = 'mm/d' where id = 'b76f7a8b-9164-4f25-9cd2-1142be872fbd';
+-- ROLLBACK: set unit = 'mm/a' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-04  M104-20.f_L (0370b02c-b0df-4b19-a211-55ababfd6dfd) is labelled
+-- "Landschaftsfaktor f_L" and M104-20.f_W (02f2b822-91a0-4fce-9fe7-a149f4a04264) "Wasserhaushalts-
+-- faktor f_W". Neither name is printed; both are wrong about what the factor does.
+-- Evidence (Tab. 2, printed p.13): "| $f_{\mathrm{L}}$ | 1 | Lagefaktor |" and
+--   "| $f_{\mathrm{w}}$ | 1 | Bewässerungsfaktor |"
+-- Evidence (§C.4.2, printed p.43): "Dies kann mit dem Lagefaktor $f_{\mathrm{L}}$ und dem
+--   Bewässerungsfaktor $f_{\mathrm{W}}$ aus Tabelle C. 6 berücksichtigt werden [...]"
+-- M104-14.f_L / M104-14.f_W already carry the printed names.
+-- update public.fields set label_de = 'Lagefaktor' where id = '0370b02c-b0df-4b19-a211-55ababfd6dfd';
+-- update public.fields set label_de = 'Bewässerungsfaktor' where id = '02f2b822-91a0-4fce-9fe7-a149f4a04264';
+-- ROLLBACK: restore 'Landschaftsfaktor f_L' / 'Wasserhaushaltsfaktor f_W'.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-05  M104-01.A_total description reads "Total site area. Triggers 800 m²
+-- Relevanzgrenze." The printed relevance guide is on the BEFESTIGTE Fläche A_E,k,b, never on a
+-- Grundstücksfläche — see the S1-08 quote (§5.3.3, printed p.23). A gate wired to a site area will
+-- trigger the balance comparison for plots whose sealed area is far below the guide.
+-- update public.fields set description = 'Gesamtfläche des Grundstücks (Projektangabe). Die
+--   Relevanzgrenze von ca. 800 m² gilt nach §5.3.3 für die befestigte Fläche A_E,k,b, nicht für die
+--   Grundstücksfläche.' where id = 'f7c5b422-6d99-4565-ab87-af1300684e36';
+-- ROLLBACK: restore the previous description.
+
+
+-- ############################################################################
+-- SECTION 4 — DUPLICATE / PHANTOM FIELDS
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S4-01  EVERY calculation worksheet in phases 5 and 6 carries the Aufteilungswert
+-- TWICE: once as the generic equation-lift output (source_anchor = 'equation', symbols a_F/g_F/v_F,
+-- a_A/g_A/v_A) and once as a hand-named twin. The equations only bind the generic symbols, so the
+-- twins can never be filled by the engine (the "#22 derived-but-hand-enterable" class).
+--   M104-16  a_F 867ed555  <-> a_F_dach 2caeae87 (+ g_F_dach 763b60dd, v_F_dach 79388f2f: no lifted twin)
+--   M104-18  a_F 82e50f41 / g_F 412153d4 / v_F e366d56c  <-> a_F_belag fa5bf1b1 / g_F_belag 8dd30a4c / v_F_belag 1492dc14
+--   M104-19  a_F d52a18ad  <-> a_F_gd 9cfc7411 (+ v_F_gd 65aebbe2)
+--   M104-23  a_A b3673e49 / g_A f678f94b / v_A 8eec3f98  <-> a_A_FV c1fad1c3 / g_A_FV 251508f8 / v_A_FV 66a35f2c
+--   M104-24  a_A 4ec95ef3 / g_A b7c30990 / v_A 920949e1  <-> a_A_VM 5e002035 / g_A_VM 91e5fb16 / v_A_VM 738c4a85
+--   M104-25  a_A b4c25927 / g_A a124aaa5 / v_A f138e658  <-> a_A_MRE 84ed4dc6 / g_A_MRE 1aff305b / v_A_MRE b9b3994f
+--   M104-26  a_A 7f9b4c61 / g_A a0afe6f4 / v_A f81f1496  <-> a_A_MRS 8742d017 / g_A_MRS d14b1450 / v_A_MRS 3fe88270
+--   M104-27  a_A cba97797 / g_A 0c6c0677  <-> v_A 3ffd59bf (a third, is_required = true)
+-- The guideline prints ONE set of Aufteilungswerte per Anlagen-/Flächentyp.
+-- Evidence (§5.3.2.2, printed p.22): "Die Aufteilungswerte $a_{\mathrm{F}}, g_{\mathrm{F}}$ und
+--   $v_{\mathrm{F}}$ von Flächen werden gemäß Anhang A berechnet."
+-- Evidence (§5.3.2.3, printed p.22): "Die Aufteilungswerte $a_{\mathrm{A}}, g_{\mathrm{A}},
+--   v_{\mathrm{A}}$ werden gemäß Anhang B berechnet."
+-- Proposal (needs a ruling — this is a UI/engine-binding decision, not a source question): keep the
+-- lifted generic symbols as the single owner and deactivate the suffixed twins.
+-- update public.fields set active = false where id in ('2caeae87-3e97-45b2-a1bb-130197ab5a35', ... );
+-- ROLLBACK: set active = true for the same ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S4-02  CROSS-WORKSHEET duplicates of the same printed symbol (same Formelzeichen row,
+-- two independent fields the engineer must fill twice, with no derivation link):
+--   ET_a      M104-05 5be4f79b   <-> M104-07 ab871c00
+--   k_f       M104-08 b19f372d   <-> M104-14 89d5cca4  (units disagree, see S3-01)
+--   WK_max    M104-08 b89359fa   <-> M104-14 bc4e2d22  (units disagree, see S3-02)
+--   WP        M104-08 61ffef40   <-> M104-14 beae4d88  (units disagree, see S3-02)
+--   f_L       M104-14 14f58957   <-> M104-20 0370b02c  (labels disagree, see S3-04)
+--   f_W       M104-14 9bfb41f8   <-> M104-20 02f2b822  (labels disagree, see S3-04)
+--   h_D       M104-13 2e756678   <-> M104-18 26e82798
+--   f_Fu      M104-13 0b18b82d   <-> M104-18 fcbdb8e5
+--   f_S_F     M104-22 4f5ee162   <-> M104-23 f4cad61f
+--   q_Dr      M104-22 7c125819   <-> M104-26 0b894720
+--   h_Sp      M104-22 ffd1592d   <-> M104-27 f26c3fe0
+--   h_Br      M104-22 e84aaa74   <-> M104-27 b76f7a8b  (units disagree, see S3-03)
+--   h_Bw      M104-22 3afd8291   <-> M104-27 9b278ad6
+--   A_E_k     M104-02 773664a6   <-> M104-15 9fe68000
+--   A_E_k_b   M104-02 e6e2d437   <-> M104-15 4cf8c552  <-> M104-11 0820fb48 (A_befestigt_gesamt)
+--   A_E_k_nb  M104-02 8fa2e64a   <-> M104-15 31a064e0
+-- This is the single-source-derivation invariant (atomic once, everything else by reference).
+-- Proposal: designate one owner per symbol and make the others read-only mirrors.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S4-03  FIELDS WITH NO BASIS IN THIS MERKBLATT (the pack's residue list — they are
+-- deliberately left unverified rather than given a fabricated quote):
+--   M104-12.roof_psi_m      ed9e4149-757a-4dd8-85cb-24f4ca3868e2  "Mittlerer Abflussbeiwert Dach ψ_m"
+--   M104-13.street_psi_m    e23341e6-a557-48b5-8ba3-7f9cd5084985  "Mittlerer Abflussbeiwert ψ_m"
+--   M104-13.street_sealed_pct 23e88f57-066f-4b7e-84cf-8211b5c70aee "Versiegelter Anteil"
+--   M104-02.A_E_k_b_na      7d14f898-cd7d-46f0-aa91-e878def77835  "Nicht angeschlossene befestigte Fläche"
+--   M104-01.land_use_category c0a2349e-e5b9-47e6-865e-bb8a44265ba0 (BauNVO Baugebietstypen)
+-- ψ (Abflussbeiwert) is not a quantity of DWA-M 102-4 at all: the whole Merkblatt partitions the
+-- rainfall with the dimensionless Aufteilungswerte a/g/v and Tab. 2 (printed p.13-15) lists no ψ and
+-- no "versiegelter Anteil". A_E,k,b,na is a DWA-A 102-2 symbol (NR here). The land_use_category enum
+-- (Wohngebiet / Mischgebiet / Gewerbegebiet / Industriegebiet / Landwirtschaft) is BauNVO; this
+-- Merkblatt classifies land use by CORINE (Tab. C.4, printed p.43) and by Landnutzungsart/Maßnahme
+-- (Tab. C.5, printed p.44).
+-- Proposal: deactivate roof_psi_m / street_psi_m / street_sealed_pct, or retag them explicitly to the
+-- standard that does define them; keep A_E_k_b_na with clause_reference 'DWA-A 102-2 (NR)'; leave
+-- land_use_category as EKOWAI project metadata with no guideline claim.
+
+
+-- ############################################################################
+-- SECTION 5 — is_required REVIEW
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S5-01  Required fields the guideline makes CONDITIONAL, not mandatory:
+--   M104-27 h_Br b76f7a8b / h_Bw 9b278ad6 / h_Sp f26c3fe0 / v_A 3ffd59bf (is_required = true)
+--     — these exist only if the project has a Regenwassernutzungsanlage. §B.6 prints
+--       "wenn $h_{\mathrm{Bw}}=0 ; v_{\mathrm{A}}=0$" and "wenn $h_{\mathrm{Br}}=0 ; e_{\mathrm{A}}=0$",
+--       i.e. zero is an admissible state, and the parameter table (printed p.36) gives NO Standardwert.
+--   M104-20 f_L 0370b02c / f_W 02f2b822 (is_required = true) — Tab. C.6 is headed "Faktoren für
+--       Standortbedingungen" and its Anmerkung (printed p.45) reads "Bei Bodengruppe 5 ist eine
+--       Bewässerung unüblich, so dass gilt $f_{\mathrm{W}}=1$." They apply only where the vereinfachtes
+--       Verfahren is used with special site conditions.
+--   M104-20 ET_a_ET_p_ratio d01a58f6 (is_required = true) — only needed on the C.3 route; the BAGLUVA
+--       route computes ET_a directly (§C.2, printed p.38).
+--   M104-05 ET_a 5be4f79b (is_required = true on a data-collection worksheet) — ET_a is DERIVED
+--       (ET_a = (ET_a/ET_p) * ET_p, §C.2 step 4, printed p.38); hand-enterable derived value = the #22 class.
+--   M104-09 land_use_classified 17c13284 / land_use_methodology 4a0999a4 / land_use_reference_date
+--       7ed38adf and M104-33 deviation_analysis_date 4b873dde are app bookkeeping, required by no clause.
+-- update public.fields set is_required = false where id in ( ... );
+-- ROLLBACK: set is_required = true for the same ids.
+
+
+-- ############################################################################
+-- SECTION 6 — MISSING EQUATIONS (the printed g/v branches are not materialised)
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-01  Only 31 of the printed calculation rules are encoded, and for every
+-- three-component regression block ONLY THE a-BRANCH was lifted. The g and v branches are printed in
+-- full on the same page and are NOT in public.equations, although the fields that must hold them
+-- exist (g_F_belag, v_F_belag, g_A_FV, v_A_FV, ...). Consequence: those fields can only ever be
+-- hand-entered, and the Kontrollbedingung a+g+v = 1 cannot be evaluated by the engine.
+-- Missing, verbatim from the md (printed pages as noted):
+--   §A.6  p.29  "$g_{\mathrm{F}}= -0,2006-0,000253 \cdot E T_{p}+0,05615 \cdot f_{\mathrm{Fu}}-0,0636
+--                 \cdot \ln (1+S p)+0,1596 \cdot \ln \left(1+k_{\mathrm{f}}\right) +0,2778 \cdot
+--                 \left(W K_{\max }-W P\right)$"
+--         p.29  "$v_{\mathrm{F}}= 0,8529-0,1248 \cdot \ln P+0,00005057 \cdot E T_{\mathrm{p}}+0,002372
+--                 \cdot f_{\mathrm{Fu}}+0,1583 \cdot \ln (1+S p)$"
+--   §A.7  p.30  g_F and v_F (md lines 849-850)
+--   §A.8  p.30  g_F and v_F (md lines 863-864)
+--   §A.9  p.30  g_F and v_F (md lines 876-877)
+--   §A.10 p.31  g_F and v_F (md lines 889-890)
+--   §B.2  p.34  g_A and v_A (md lines 943-944)
+--   §B.3  p.34  g_A and v_A (md lines 958-960)
+--   §B.4  p.35  g_A and v_A (md lines 977-978)
+--   §B.5  p.35  g_A and v_A (md lines 994-996)
+--   §B.6  p.36  e_A (md lines 1037-1038), a_A = 1 - v_A - e_A and g_A = 0 (md line 1013)
+--   §B.7  p.37  a_A = 1 - v_A (Tab. B.1, printed p.33)
+--   Tab. A.1 p.27  g_F = 0 and v_F = 1 - a_F for all Dach / Asphalt / Pflaster rows
+--   Tab. B.1 p.33  the fixed triples: Rohr/Rinne/steiler Graben (1 / 0 / 0); flache Gräben mit Bewuchs
+--                  (0,7 / 0,1 / 0,2); Versickerungsschacht, -rohr, -rigole (0,1 / 0,9 / 0);
+--                  Regenbecken ohne Dauerstau (1 / 0 / 0); Retentionsbodenfilter (0,8 / 0 / 0,2);
+--                  geschlossenes Becken, begrünt (0,1 / 0,3 / 0,6)
+--   Anhang A/B/C "Hinweis zur Korrektur von Bilanzfehlern": the correction factor
+--                  1/(a_F + g_F + v_F) resp. 1/(a_A + g_A + v_A) (printed p.26, p.32, p.46)
+-- That is ~25 printed rules not encoded. Adding equations is a structural change -> staged.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-02  All 31 encoded equation FORMULAS were re-derived against the printed md and are
+-- CORRECT to every printed decimal (Gl. 1-12, A.2-A.10, B.2-B.7, C.1-C.4). No coefficient defect.
+-- However the stored `source_quote` PAGE NUMBERS are the mathpix SCAN page, not the printed page
+-- (scan = printed + 2). Examples: Gl. (1) stored "S. 21", printed p.19-20; Gl. (7)-(9) stored "S. 22",
+-- printed p.19-20; Gl. (10)-(12) stored "S. 24", printed p.22; A.7/A.8 stored "S. 29", printed p.30;
+-- A.10 stored "S. 30", printed p.31; B.2 stored "S. 36", printed p.34; B.4/B.5 stored "S. 37",
+-- printed p.35; B.6 stored "S. 38", printed p.36; B.7 stored "S. 39", printed p.37; C.1 stored
+-- "S. 45", printed p.43; C.2-C.4 stored "S. 48", printed p.46.
+-- The verification_quote written by this pass carries the corrected printed pages; the older
+-- source_quote strings still carry the scan pages.
+-- Proposal: rewrite the page suffix of all 31 equations.source_quote values to the printed pages.
+
+
+-- ############################################################################
+-- SECTION 7 — WORKSHEET / SEMANTIC MISMATCHES
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-01  Worksheet M104-17 is titled "Aufteilungswerte Verkehrsflächen" (phase 5, the
+-- Anhang-A Flächen phase) but ALL FOUR of its fields are the Anhang-B "Ableitung" row of Tab. B.1 —
+-- a drainage FACILITY, not a traffic surface. The traffic surfaces themselves are handled on M104-18.
+-- Evidence (Tab. B.1, printed p.33): "| Ableitung | Rohr, Rinne, steiler Graben |  | 1 | 0 | 0 |" and
+--   "| | Flache Gräben mit Bewuchs (Fläche des Grabens $A_{\text {Graben }}>2$ \% der angeschlossenen,
+--    abflusswirksamen befestigen Fläche $A_{\mathrm{b}, \mathrm{a}}$) |  | 0,7 | 0,1 | 0,2 |"
+-- Proposal: rename the worksheet to "Aufteilungswerte Ableitung (Tab. B.1)" and move it into phase 6
+-- with the other Anhang-B worksheets.
+-- update public.worksheet_templates set title_de = 'Aufteilungswerte Ableitung (Tabelle B.1)'
+--   where id = '09f6bd32-4f36-4316-a2dc-15d47c0a50c4';
+-- ROLLBACK: restore 'Aufteilungswerte Verkehrsflächen'.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-02  Tab. B.1 rows that have NO worksheet at all: "Versickerungsschacht, -rohr,
+-- -rigole" (0,1 / 0,9 / 0), "Regenbecken ohne Dauerstau" (1 / 0 / 0), "Offenes Regenbecken mit
+-- Dauerstau" (B.7), "Retentionsbodenfilter" (0,8 / 0 / 0,2) and "Teichanlage mit Zufluss von
+-- befestigten Flächen / Offene Wasserfläche" (B.7). §B.7 IS encoded as an equation
+-- (44959aa9-9bd0-40c0-8889-ebe7e7fc36af, on M104-28) but no worksheet collects its inputs A_W and
+-- the per-area a_F,i beyond the two lifted placeholder fields A_b_a_i / a_F_i.
+-- Evidence (Tab. B.1, printed p.33) and (§B.7, printed p.37): "| Oberfläche der Wasserfläche |
+--   $A_{w}$ | $\mathrm{m}^{2}$ | - | - | - |"
+-- Proposal: add a Dauerstau/Retentionsbodenfilter worksheet, or state explicitly that these facility
+-- types are out of scope for the encoded set.
+
+-- ---------------------------------------------------------------------------
+-- ☐ NOTED (no SQL)  S7-03  Gate REQ-01 (1d1bac90, M104-01, block) restricts project_type to
+-- {Neuerschließung, Konversion, Sanierung, Nachverdichtung}. §1 (printed p.10) names a fifth
+-- Veranlassung the gate omits: "Entwicklung geeigneter Maßnahmen im Rahmen von Maßnahmenprogrammen
+-- nach EG-WRRL zur Behebung festgestellter Defizite des Gewässerzustands, verursacht durch
+-- siedlungsbedingte Veränderungen der lokalen Wasserhaushaltsgrößen und des Abflussregimes."
+-- The field's enum also carries 'infrastruktur', 'gewerbe_industrie' and 'other', which the printed
+-- list does not — a project entered under any of those is blocked. §1 says "zielen vorrangig auf",
+-- i.e. the list is a priority list, not an exhaustive admissibility test.
+-- Proposal: add a WRRL-Maßnahmenprogramm enum token and demote the gate to warn.
