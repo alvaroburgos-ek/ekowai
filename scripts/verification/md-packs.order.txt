@@ -22,3 +22,4 @@ dwa-m-205-md-verification-pack.sql  DWA-M-205
 din-14021-md-verification-pack.sql  DIN-14021
 iso-14046-md-verification-pack.sql  ISO-14046
 din-18130-1-md-verification-pack.sql  DIN-18130-1
+dwa-a-102-2-md-verification-pack.sql  DWA-A-102-2

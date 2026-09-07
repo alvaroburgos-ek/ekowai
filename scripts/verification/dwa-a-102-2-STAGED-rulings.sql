@@ -1,0 +1,486 @@
+-- ============================================================================
+-- STAGED rulings — DWA-A-102-2 (Arbeitsblatt DWA-A 102-2/BWK-A 3-2, Dezember 2020,
+-- korrigierte Fassung: Stand August 2022)
+-- md pass 2026-09-05. NOTHING IN THIS FILE IS APPLIED. Every block is commented SQL with a
+-- ☐ RATIFIED marker; it changes structure, enforcement or required-ness and therefore needs an
+-- owner ruling (doctrine §0.3). Evidence quotes are verbatim from
+--   C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\DWA-A_102-2 (3).md
+-- (LaTeX preserved). "printed p.N" = printed page per the document's own Inhalt / Bilder- /
+-- Tabellenverzeichnis (the transcript has no standalone page-number lines).
+-- ============================================================================
+
+
+-- ############################################################################
+-- SECTION 1 — GATE OVER-ENFORCEMENT (block severity not supported by the printed text)
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-01  REQ-06 (A1022-04, block) demands that ALL THREE Belastungskategorien
+-- carry area > 0. The guideline never requires that; it explicitly contemplates a catchment made
+-- up of category-I surfaces only, for which no treatment is needed at all.
+-- Evidence (Tabelle 3, printed p.31):
+--   "\hline Oberflächengewässer & Einleitung grundsätzlich ohne Behandlung möglich &
+--    \multicolumn{2}{|c|}{Grundsätzlich geeignete technische Behandlung erforderlich} \\"
+-- Evidence (§5.2.1, printed p.31): "Diese Flächen werden - wie auch Flächen vergleichbarer
+--   Nutzungen und erwarteter Belastungen - gemäß Anhang A der Belastungskategorie I .,gering
+--   belastet" zugeordnet."
+-- A block gate here makes every single-category project un-submittable.
+-- Proposal: relax the condition to a sum test, or demote to warn.
+-- update public.compliance_requirements set condition_expression = 'A_b_a_I + A_b_a_II + A_b_a_III > 0'
+--   where id = '4fb4b210-d89c-4a87-a588-5b4929b77b87';
+-- ROLLBACK: update public.compliance_requirements set condition_expression =
+--   'A_b_a_I > 0 AND A_b_a_II > 0 AND A_b_a_III > 0' where id = '4fb4b210-d89c-4a87-a588-5b4929b77b87';
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-02  REQ-07 (A1022-04, block) is the same over-enforcement, conditioned on
+-- misch_active. Same evidence as S1-01. Its source_quote is a row of the Anwendungsbeispiel
+-- worked example ("Angeschlossene befestigte Teilflaechen Belastungskategorie I ... 23,85 ha"),
+-- i.e. one worked example's numbers used as a universal requirement.
+-- Proposal: relax as in S1-01, or deactivate as a duplicate of REQ-06.
+-- update public.compliance_requirements set condition_expression =
+--   'IF misch_active == True THEN (A_b_a_I + A_b_a_II + A_b_a_III > 0)'
+--   where id = '3b012613-e590-4b89-93ab-fe2a6b37c8ea';
+-- ROLLBACK: restore 'IF misch_active == True THEN (A_b_a_I > 0 AND A_b_a_II > 0 AND A_b_a_III > 0)'.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-03  REQ-28 (A1022-01, block) blocks unless regulation_edition equals the exact
+-- string 'Dez 2020, korr. Aug 2022'. The field is app metadata (exempt class); a block gate on a
+-- free-text app field will fire on any spelling variant and cannot be satisfied by the guideline.
+-- Proposal: demote block -> warn.
+-- update public.compliance_requirements set severity = 'warn'
+--   where id = '035eef93-0593-41b7-a1ab-8fa2ccdaaee2';
+-- ROLLBACK: set severity = 'block' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S1-04  REQ-08 (A1022-09, block) enforces 0 < f_D <= 1. The printed Tab. C.1 range
+-- is 0,4 .. 1,0, so values below 0,4 are outside the printed table but not blocked.
+-- Evidence (Tab. C.1, printed p.91): "\hline & Rasengittersteine & 0,4 \\" (lowest printed row);
+--   (Anh. B.3.2.2, printed p.84) "Sofern keine detaillierten Erhebungen der unterschiedlichen
+--   Flächenarten und -befestigungen bzw. entsprechende Abflussmessungen vorliegen, ist der
+--   Abminderungswert 1,0 zu verwenden."
+-- Proposal: tighten the lower bound to the printed table minimum (SR-2: outside the printed range
+-- the engineer must select explicitly, not the machine).
+-- update public.compliance_requirements set condition_expression = 'f_D >= 0.4 AND f_D <= 1'
+--   where id = 'ce1a02ff-c924-4d3d-82e6-96dbebb593f7';
+-- ROLLBACK: restore 'f_D > 0 AND f_D <= 1'.
+
+
+-- ############################################################################
+-- SECTION 2 — GATE RE-HOMES (gate sits on a worksheet whose fields it does not read)
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S2-01  REQ-11 (block) is homed on A1022-10 "Stoffabtrag-Bilanzierung AFS63" but its
+-- condition reads ONLY A_RKB and V_RKB, both of which live on A1022-18 "Bemessung Regenklärbecken
+-- (A_RKB, V_RKB) und Schrägklärer (A_eff)". Condition: 'IF trenn_active == True THEN (A_RKB > 0
+-- AND V_RKB > 0)'. On A1022-10 the gate can never see a value.
+-- Proposal: re-home to A1022-18 (worksheet_template id must be read from prod at apply time).
+-- update public.compliance_requirements set worksheet_template_id =
+--   (select id from public.worksheet_templates where code = 'A1022-18')
+--   where id = '319afa46-9532-4829-920e-dd7453c0ec68';
+-- ROLLBACK: set worksheet_template_id = (select id from public.worksheet_templates where code = 'A1022-10').
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S2-02  REQ-24 (block, 'm >= m_min_required') is homed on A1022-34 "Nachweis:
+-- Stoffabtrag AFS63 (Trennsystem)" but both symbols live on A1022-36 "Nachweis:
+-- Mindestmischverhältnis m". It also enforces a Mischsystem criterion on a Trennsystem worksheet.
+-- Evidence (§7.3.4.2, printed p.53): "Für jedes Regenüberlaufbecken ist zu überprüfen, ob im
+--   langjährigen Mittel ein Mindestmischverhältnis $m$ nach GL. (22) eingehalten wird."
+-- Proposal: re-home to A1022-36.
+-- update public.compliance_requirements set worksheet_template_id =
+--   (select id from public.worksheet_templates where code = 'A1022-36')
+--   where id = '738258a8-f39f-49e9-9c04-155d5ad43289';
+-- ROLLBACK: set worksheet_template_id = (select id from public.worksheet_templates where code = 'A1022-34').
+
+
+-- ############################################################################
+-- SECTION 3 — DUPLICATE / NON-ENFORCING GATES
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-01  REQ-17 (A1022-30, block, 'V_s >= V_S_min') and REQ-23 (A1022-30, block,
+-- 'V_s >= 5') are the same printed rule enforced twice on the same worksheet.
+-- Evidence (§7.3.2.3, printed p.50): "wird für das spezifische Gesamtspeichervolumen als
+--   Referenzwert für das fiktive Zentralbecken in Tabelle 6 ein Mindestwert $V_{\mathrm{S}, \text
+--   { min }}$ von $5 \mathrm{~m}^{3} /($ hal vorgegeben."
+-- Proposal: keep REQ-17 (symbolic, honours the V_S_min field) and deactivate REQ-23 (hard-coded 5).
+-- update public.compliance_requirements set active = false
+--   where id = '9dce8f56-2881-4940-9bfa-47c7a13b3991';
+-- ROLLBACK: set active = true for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S3-02  SIXTEEN warn gates carry an EMPTY condition_expression and therefore cannot
+-- fire at all — they are documentation rows sitting in the enforcement table:
+--   REQ-05  0e34f47a-f555-4d68-b252-eb60b42d6563  (A1022-04)
+--   REQ-29  d37f13a4-b377-4b2a-8aaf-2c286bc832f7  (A1022-04)
+--   REQ-09  2fccfeaa-e091-4fa4-b1ed-eae2149b3bf0  (A1022-10)
+--   REQ-10  eb9dd380-3c55-4907-8005-e97e97e662f5  (A1022-10)
+--   REQ-12  055149c4-3da4-4f6c-9000-76a754609060  (A1022-10)
+--   REQ-13  ad1f8e9c-83df-4e6b-bff6-f3a1eed1c342  (A1022-10)
+--   REQ-14  471aaaa5-1258-4234-8077-df0b22e03611  (A1022-10)
+--   REQ-30  247bff9b-e897-465c-9218-3c5ae6e755ef  (A1022-10)
+--   REQ-16  15955f28-3aa0-4404-9c1d-9eae9027f783  (A1022-29)
+--   REQ-18  eacef0d2-78c6-4721-baa9-d64c0a560a67  (A1022-29)
+--   REQ-19  de80f934-6e65-417c-ad00-089e204c3b4a  (A1022-31)
+--   REQ-20  b0be149e-58f4-45ac-b6a3-13c54cb7f458  (A1022-31)
+--   REQ-21  5274759c-ee50-40db-b315-fba824d9725a  (A1022-31)
+--   REQ-25  90002885-8305-47c3-bb82-2a7314cf3fcb  (A1022-34)
+--   REQ-26  236ae4f6-5fcc-4d61-9960-402ac516bcde  (A1022-34)
+--   REQ-27  f9a2a753-e843-4ba6-9d8e-106ddd6c1afe  (A1022-34)
+-- That is 16 of the 18 warn gates; only REQ-01 and REQ-02 actually evaluate. Real warn coverage of
+-- this standard is therefore 2 gates, not 18.
+-- Proposal (owner ruling needed — author conditions vs. deactivate):
+-- update public.compliance_requirements set active = false where id in (
+--   '0e34f47a-f555-4d68-b252-eb60b42d6563','d37f13a4-b377-4b2a-8aaf-2c286bc832f7',
+--   '2fccfeaa-e091-4fa4-b1ed-eae2149b3bf0','eb9dd380-3c55-4907-8005-e97e97e662f5',
+--   '055149c4-3da4-4f6c-9000-76a754609060','ad1f8e9c-83df-4e6b-bff6-f3a1eed1c342',
+--   '471aaaa5-1258-4234-8077-df0b22e03611','247bff9b-e897-465c-9218-3c5ae6e755ef',
+--   '15955f28-3aa0-4404-9c1d-9eae9027f783','eacef0d2-78c6-4721-baa9-d64c0a560a67',
+--   'de80f934-6e65-417c-ad00-089e204c3b4a','b0be149e-58f4-45ac-b6a3-13c54cb7f458',
+--   '5274759c-ee50-40db-b315-fba824d9725a','90002885-8305-47c3-bb82-2a7314cf3fcb',
+--   '236ae4f6-5fcc-4d61-9960-402ac516bcde','f9a2a753-e843-4ba6-9d8e-106ddd6c1afe');
+-- ROLLBACK: set active = true for the same id list.
+
+
+-- ############################################################################
+-- SECTION 4 — GATE CLAUSE RETAGS (clause_reference points at the wrong document)
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S4-01  Nineteen of the thirty gates carry clause_reference values of the shape
+-- "2.1", "2.2", "2.3.1", "2.3.3.3", "2.3.4.2", "2.4.1", "2.5.2", "2.5.3", "2.5.4", "2.5.5".
+-- The Arbeitsblatt has no such clauses (its §2 is "Verweisungen", a bare list of referenced
+-- documents; there is no 2.3.4.2). Those numbers are clauses of the SEPARATE companion file
+-- "Anwendungsbeispiel DWA-A 102-2/BWK-A 3-2 — Zusatzdatei", and the gates' source_quotes are
+-- verbatim rows of that worked example (e.g. REQ-07: "Angeschlossene befestigte Teilflaechen
+-- Belastungskategorie I & & $A_{\mathrm{b}, \mathrm{a}, \mathrm{l}}$ & 23,85 & ha").
+-- Evidence that the Anwendungsbeispiel is a separate, non-normative file (Vorwort, printed p.6):
+--   "Das Anwendungsbeispiel steht Käufern und Abonnenten auf der DWA-Homepage in einem geschützten
+--    Bereich (DWAdirekt) unter der Rubrik „Publikationen/Zusatzdateien“ kostenfrei zum Download
+--    zur Verfügung."
+-- Consequence: a worked example is being cited as the normative anchor of block gates.
+-- Proposal: retag each gate to the Arbeitsblatt clause it actually enforces, and record the
+-- Anwendungsbeispiel as a secondary reference. Mapping proposed (needs ratification):
+--   REQ-01 2.1      -> §1              REQ-02 2.2      -> §1 / §4.1
+--   REQ-05 2.2      -> §5.2.1          REQ-06 2.3.1    -> §5.2.1 + Anhang A
+--   REQ-07 2.4.1    -> §7.3.2.3        REQ-29 2.3.3.3  -> §5.2.3.3
+--   REQ-04 2.3.4.2  -> §4.2.2          REQ-09 2.4.1    -> §7.3.2
+--   REQ-10 2.3.3.3  -> §5.2.3.2        REQ-11 2.3.4.2  -> §6.2.3 / §6.2.4
+--   REQ-12/13/14 2.4.1 -> §7.3.2       REQ-30 2.3.4.2  -> §6.2.3
+--   REQ-16/18 2.4.1 -> §7.3.2.3        REQ-17 2.4.1    -> §7.3.2.3
+--   REQ-19 2.5.2 / REQ-20 2.5.3 / REQ-21 2.5.4 -> §8.4.4 / §8.4.5.1
+--   REQ-22 2.3.3.3  -> §5.2.3.2 + §6.2.2   REQ-24 2.5.4 -> §7.3.4.2
+--   REQ-25 2.3.4.2  -> §6.2.3         REQ-26 2.5.3    -> §8.4.1
+--   REQ-27 2.5.5    -> §7.3.2.2
+-- update public.compliance_requirements set clause_reference = '§5.2.1, Anhang A'
+--   where id = '4fb4b210-d89c-4a87-a588-5b4929b77b87';   -- REQ-06, one row per gate
+-- ROLLBACK: restore each gate's original clause_reference from the values listed above.
+
+
+-- ############################################################################
+-- SECTION 5 — MISSING GATES for printed criteria (feature gaps, not defects in existing rows)
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S5-01  §7.3.3.1 prints a 40 m³/ha guide value for V_s and A1022-35 already carries
+-- the fields V_s_max_economic (default 40) and nachweis_Vs_max_pass, but NO gate reads them.
+-- Evidence (§7.3.3.1, printed p.51): "Ein erforderliches spezifisches Gesamtspeichervolumen von
+--   $40 \mathrm{~m}^{3} /$ ha (bezogen auf $A_{\mathrm{b}, \mathrm{a}}$ bzw. den mit
+--   $f_{\mathrm{D}}$ abgeminderten Wert) stellt im Allgemeinen aus wasserwirtschaftlichen wie
+--   wirtschaftlichen Gründen eine Obergrenze dar."
+-- The wording is "im Allgemeinen ... eine Obergrenze", and §8.4.4.2 explicitly continues the
+-- calculation with the higher volume, so this is a WARN, never a block.
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity,
+--   condition_expression, clause_reference, source_quote)
+--   values ((select id from public.worksheet_templates where code = 'A1022-35'),
+--   'REQ-31', 'warn', 'V_s <= V_s_max_economic', '§7.3.3.1', '<quote above>');
+-- ROLLBACK: delete from public.compliance_requirements where code = 'REQ-31' and ...;
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S5-02  Gl. (B.12) — the empirical Q_R,e used by the whole Mischwasser chain — is
+-- printed with an explicit validity bound that is NOT encoded anywhere.
+-- Evidence (Anh. B.3.3.5, printed p.88): "Für Regenüberlaufbecken kann der mittlere
+--   Regenwasserabfluss $Q_{R, e}$ während der Entlastungen angenähert durch die empirische
+--   Gleichung (B.12) errechnet werden, solange die Regenabflussspende $q_{\mathrm{R}, \mathrm{Dr}}$
+--   kleiner ist als $2 \mathrm{l} /(\mathrm{s} \cdot \mathrm{ha})$" | "Bei Regenabflussspenden über
+--   $2 \mathrm{l} /(\mathrm{s} \cdot \mathrm{ha})$ [...] muss der mittlere Regenwasserabfluss
+--   $Q_{\text {R, } \mathrm{e}}$ während der Entlastungen durch ein Nachweisverfahren bestimmt werden."
+-- Without it the engine will silently apply Gl. (B.12) outside its printed domain.
+-- Proposed warn gate on A1022-22: 'q_R_Dr < 2'.
+-- ROLLBACK: delete the inserted row.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S5-03  Printed bauwerksbezogene criteria with NO field and NO gate in the encoding
+-- (feature gap; listed so the omission is recorded, not silently carried):
+--   §6.2.5 p.42  "Aufgrund der Verlegungsgefahr dürfen bei der Entleerung Drosselabflüsse von
+--                 $5 \mathrm{l} / \mathrm{s}$ nicht unterschritten werden." (mandatory "dürfen ... nicht")
+--   §6.3  p.43   "Ein flächenspezifisches Speichervolumen von $5 \mathrm{~m}^{3} / \mathrm{ha}\left(A_{\mathrm{b}, \mathrm{a}}\right)$ sollte nicht unterschritten werden." (Schrägklärer)
+--   §7.3.4.2 p.53 "Die rechnerische Entleerungsdauer von Regenüberlaufbecken als Quotient aus
+--                 spezifischem Speichervolumen $V_{S}$ und zugehöriger Regenabflussspende $q_{R, D r}$
+--                 sollte 10 bis 15 Stunden nicht überschreiten."
+--   §7.3.4.2 p.53 "Aus wirtschaftlichen Gründen und wegen des hohen Betriebsaufwands sind Becken mit
+--                 einem Volumen unter ca. $50 \mathrm{~m}^{3}$ nach Möglichkeit zu vermeiden."
+--   §7.3.4.4 p.54 "Deshalb wird für Stauraumkanäle mit unten liegender Entlastung das entsprechend
+--                 7.3.4.2 für Regenüberlaufbecken abgeschätzte Speichervolumen um pauschal $50 \%$ erhöht."
+--   §7.3.4.4 p.54 "Die rechnerische Entleerungsdauer von Stauraumkanälen sollte 15 Stunden nicht überschreiten."
+-- All are "sollte"/"nach Möglichkeit" except the 5 l/s one, which is "dürfen ... nicht unterschritten"
+-- and would justify a block gate once a Drosselabfluss-Entleerung field exists.
+
+
+-- ############################################################################
+-- SECTION 6 — EQUATIONS
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-01  Equation Gl.REG-Bild4 (A1022-17, id f24d3d57-1d4f-4bf4-8a2b-30978d188535,
+--   formula 'q_A_Bem = -8.333 * ln(eta_ges) - 1.6629') is NOT verbatim-attestable and is left as
+--   residue by the md pack. Two separate problems:
+--   (a) the guideline prints NO equation for this relation. Bild 4 is a graph; the only printed
+--       companions are the caption
+--       "\caption{Gesamtwirkungsgrade Stoffrückhalt AFS63 für Regenklärbecken $q_{\mathrm{A},
+--        \mathrm{Bem}}=2 . .4 . .6 . .8 . .10 \mathrm{~m} / \mathrm{h}$, Beckentiefe $2,0 \mathrm{~m}$}"
+--       and the qualitative reading (§6.2.2, printed p.41) "Bild 4 verdeutlicht, dass angemessene
+--       Gesamtwirkungsgrade des Stoffrückhalts > $40 \%$ bezogen auf AFS63 für Regenklärbecken eine
+--       Bemessung mit einer maximalen Oberflächenbeschickung von ca. $6 \mathrm{~m} / \mathrm{h}$
+--       erfordern." The coefficients -8.333 / -1.6629 are EKOWAI's curve fit, not printed values.
+--   (b) the direction is inverted against the printed design flow: §6.2.3 derives A_RKB FROM the
+--       q_A,Bem required per Bild 4 ("Die erforderliche sedimentationswirksame Oberfläche leitet sich
+--       aus dem Bemessungszufluss und der nach Bild 4 erforderlichen Oberflächenbeschickung
+--       $q_{\mathrm{A}, \mathrm{Bem}}$ ab"), so q_A,Bem is an engineer selection off the printed
+--       2/4/6/8/10 m/h series (SR-2), not a computed output of eta_ges.
+--   Also: §6.2.2 restricts Bild 4 to r_krit = 15 l/(s·ha) and 2 m depth — "Bei abweichenden
+--   Beckentiefen ist der Gesamtwirkungsgrad im Nachweisverfahren zu ermitteln." — a restriction the
+--   equation does not carry.
+--   Proposal: deactivate the equation and replace it with an SR-2 selection field on the printed
+--   series, or keep it flagged data_class='derived' + provenance 'EKOWAI regression fit to Bild 4'.
+-- update public.equations set active = false where id = 'f24d3d57-1d4f-4bf4-8a2b-30978d188535';
+-- ROLLBACK: set active = true for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-02  FIVE equations carry a RELATIONAL OPERATOR inside `formula`, so they are
+-- constraints, not evaluable expressions. An arithmetic evaluator cannot execute them:
+--   Gl.B.5  44d37420-9559-4b89-a305-e87cf516e488  'Sum(Q_M_i) <= Q_M'
+--   Gl.15   a5bd51eb-1d34-4970-b633-68f8935a8ce9  'e_0 <= (B_R_e_zul - V_R_aM * C_KA) / (...) * 100'
+--   Gl.17   46fb523a-2e8f-4f8e-b61b-ff4888a76ea4  'e_0 <= (C_R_CSB - C_KA_CSB) / (C_e_CSB - C_KA_CSB) * 100'
+--   Gl.26   29c268ef-33c1-4b28-8269-c06d8465729f  'Q_Dr >= Q_T_aM + Q_R_krit + Sum(Q_Dr_i)'
+--   Gl.28   0708808f-84f8-4b82-82f0-a8dda7977bee  'Q_Dr >= (m_Rue + 1) * Q_T_aM'
+-- The relational form is verbatim-correct (the standard does print "≤" / "≥" on all five), so this
+-- is an encoding-layer decision, not a source correction.
+-- NOTE the prior finding F-3 as stated does NOT reproduce: Gl.18 (008a7bc7-43f2-4568-aa55-2f8431001c37)
+-- stores the clean one-sided '(107 - 70) / (C_e_CSB - 70) * 100'. The two-sided printed line
+-- "e_0 ≤ (107-70)/(C_e,CSB-70) · 100 = 3.700/(C_e,CSB-70)" lives only in its source_quote, which is
+-- correct. The relational-operator problem is in the five rows above instead.
+-- Proposal: split each into an arithmetic equation (right-hand side) + a gate carrying the relation.
+-- ROLLBACK: restore the original formula strings listed above.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-03  Prior finding F-5 does NOT reproduce either. Prod stores comma-separated
+-- lowercase min()/max() in every one of the named rows:
+--   Gl.6      08d98c33-b401-44b3-ae04-d9193150c7d2  'max(0, 1 - b_R_e_zul_AFS63 / b_R_a_AFS63) * 100'
+--   Gl.T6.a_f 6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b  'a_f = max(0.5 + 50 / (t_f + 100), 0.885)'
+--   Gl.T6.Vs  a928532e-5aee-425a-afd1-e0044656039e  'V_s = max(H1 / (e_0 + 6) - H2, V_S_min)'
+--   Gl.21b    53a5778f-0083-4743-95d0-93e681711b5f  'min(max(b_R_a_AFS63 / 478, 1.0), 1.20)'
+--   Gl.B.23b  0cabf252-a613-4295-835b-3f005caa4dc1  'min(max(b_R_a_AFS63 / 478, 1.0), 1.20)'
+-- The semicolon appears ONLY in the German source notation, which is verbatim-correct:
+--   (§5.2.3.2, printed p.34)  "\eta_{\text {erf }}=\operatorname{Max}\left(0 ; 1-b_{R, e, z u l, A F S 63} / b_{R, a, A F S 63}\right)"
+--   (§7.3.2.2, printed p.49)  "a_{R, A F S 63}=\operatorname{Min}\left(b_{R, a, A F S 63} / 478 ; 1,20\right)"
+--   (Tab. 6 Zeile 40, p.51)   "$V_{\mathrm{s}}=\operatorname{MAX}\left(\mathrm{H} 1 /\left(e_{0}+6\right) \cdot \mathrm{H} 2 ; V_{\mathrm{s}, \min }\right)$"
+-- NO CHANGE PROPOSED — recorded so the finding is closed rather than re-opened next pass.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-04  MD-vs-ENCODING DISAGREEMENT, encoding wins (needs a PDF read to close, SR-3).
+-- Tabelle 6 Zeile 40 in the markdown reads
+--   "$V_{\mathrm{s}}=\operatorname{MAX}\left(\mathrm{H} 1 /\left(e_{0}+6\right) \cdot \mathrm{H} 2 ; V_{\mathrm{s}, \text { min }}\right)$ & $\boldsymbol{V}_{\mathbf{s}}$ & 24,84 & $\mathrm{m}^{3} / \mathrm{ha}$"
+-- i.e. an OPERATOR "\cdot" between H1/(e_0+6) and H2, while prod encodes a MINUS
+--   (a928532e-5aee-425a-afd1-e0044656039e: 'V_s = max(H1 / (e_0 + 6) - H2, V_S_min)').
+-- The same table's printed worked values decide it: H1 = 2.756, e_0 = 40,19, H2 = 34,84 give
+--   2756/(40,19+6) - 34,84 = 24,83  (printed V_s = 24,84)  vs
+--   2756/(40,19+6) * 34,84 = 2 079  (nowhere near the printed value).
+-- So the md "\cdot" is an OCR artifact and the encoded "-" is correct. NO DATA CHANGE.
+-- Action for ratification: read printed p.51 of the PDF to lift this row from VC to VA.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S6-05  DUPLICATE EQUATION ROWS — thirteen rows encode six distinct printed relations.
+--   (a) a_f: Gl.B.10 1cd06fe2-0b67-447b-895c-0db16528edd1 and Gl.T6.a_f
+--       6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b are the same relation on the same worksheet A1022-21.
+--   (b) a_c,CSB: Gl.B.15a 739e1f02-ad16-4410-80d8-dadf7173451a and Gl.B.15b
+--       135015bc-ebf9-4818-844a-93dd9a2b853c hold IDENTICAL merged formulas — the printed a/b
+--       branches were merged into one expression and then stored twice.
+--   (c) a_R,AFS63: FOUR rows for one relation — Gl.21a 9a210010-2290-49f6-80e7-956680292ecb,
+--       Gl.21b 53a5778f-0083-4743-95d0-93e681711b5f, Gl.B.23a 517badbe-f603-483f-9d94-17b81d398834,
+--       Gl.B.23b 0cabf252-a613-4295-835b-3f005caa4dc1, all on A1022-26, all identical.
+--       The guideline does print it twice (§7.3.2.2 Gl. 21a/b p.49 and Anh. B.3.3.12 Gl. B.23a/b
+--       p.90) — "Die Ermittlung des Einflusswerts $a_{\mathrm{R}, \mathrm{AFS} 63}$ ist in Anhang B,
+--       Unterabschnitt B.3.3.12 erläutert." — but that is one relation, not four.
+--   (d) r_krit: Gl.25a 9a8579c6-ed2b-4608-a10a-9475d041f1f0 and Gl.25b
+--       3eea2a5a-f85a-46af-becb-bee4adc85bae — identical merged formulas.
+--   (e) m_min: Gl.22 d2d1bf8b-5e93-4ad8-963a-d297c89b2d14 and Gl.23
+--       70ebb0c4-2db9-4405-85ef-da863172666c — identical merged formulas.
+--   (f) C_e,CSB: Gl.20 316f8622-ffef-47a7-829c-909dba3af623 and Gl.B.24
+--       adb9665b-6c15-4e3f-aa7f-923355af3832 — identical, BOTH on worksheet A1022-27.
+--   Gl.B.13 (A1022-23) vs Gl.24 (A1022-33) are also identical but sit on different worksheets and
+--   are both printed; leaving those alone is defensible.
+-- Proposal: keep one row per printed relation (prefer the Anhang-B numbering, which the Aug-2022
+-- correction renumbered) and deactivate the rest; the branch conditions belong in the formula, not
+-- in duplicate rows.
+-- update public.equations set active = false where id in (
+--   '6e412ae9-f9e5-462b-9cfb-8b5bdc854d3b','135015bc-ebf9-4818-844a-93dd9a2b853c',
+--   '9a210010-2290-49f6-80e7-956680292ecb','53a5778f-0083-4743-95d0-93e681711b5f',
+--   '0cabf252-a613-4295-835b-3f005caa4dc1','3eea2a5a-f85a-46af-becb-bee4adc85bae',
+--   '70ebb0c4-2db9-4405-85ef-da863172666c','adb9665b-6c15-4e3f-aa7f-923355af3832');
+-- ROLLBACK: set active = true for the same id list.
+
+
+-- ############################################################################
+-- SECTION 7 — UNIT CORRECTIONS
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-01  A1022-24.d_I (caee74ce-ba53-4ee4-a16b-2073eff2b1e8) carries unit '1'.
+-- Evidence (Tab. 2, printed p.24): "\hline $d \cdot I_{\mathrm{s}}$ & m & Einflussfaktor zur
+--   Bewertung von Kanalablagerungen \\"; (Anh. B.3.3.10, printed p.89) "$d \cdot I=\Sigma$
+--   (Durchmesser • Gefälle • Länge) / Gesamtlänge in m".
+-- The sibling field A1022-08.d_I (2a5c2295-79f8-4fbd-8fba-425947254cd2) already carries 'm'.
+-- update public.fields set unit = 'm' where id = 'caee74ce-ba53-4ee4-a16b-2073eff2b1e8';
+-- ROLLBACK: set unit = '1' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-02  A1022-28.V_R_aM_ref (7390d198-f194-435d-9394-a5ab6e92c1c7) carries unit 'm³'.
+-- Evidence (Tab. 2, printed p.22): "\hline $V_{\text {R,aM }}$ & $\mathrm{m}^{3} / \mathrm{a}$ &
+--   Jahresregenwasserabflussvolumen (langjähriger Mittelwert) \\"
+-- update public.fields set unit = 'm³/a' where id = '7390d198-f194-435d-9394-a5ab6e92c1c7';
+-- ROLLBACK: set unit = 'm³' for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-03  eta_sed / eta_ges carry unit '—' while the guideline prints them in %.
+--   A1022-16.eta_sed  e7a84075-c85a-4a35-9983-bf933cf80484
+--   A1022-17.eta_ges  7adbe3f4-f7f4-4c7e-a23c-f47dcc05aa8c
+-- Evidence (Tab. 2, printed p.24): "\hline $\eta_{\text {ges }}$ & \% & Gesamtwirkungsgrad des
+--   Stoffrückhalts in Behandlungsanlagen [...] \\ \hline $\eta_{\text {sed }}$ & \% &
+--   Sedimentationswirkungsgrad von Sedimentationsanlagen allgemein \\"
+-- Ambiguity to rule on: Tab. 5 and Tab. B.1 print the SAME quantities as fractions (0,50 / 0,95)
+-- and as percentages (61 %, 52 %, …) respectively, and Gl. (8) uses the fraction. A unit change
+-- without a matching engine change would silently rescale the calculation chain by 100 — hence
+-- staged, not applied.
+-- ROLLBACK: set unit = '—' for both ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-04  A1022-28.C_e (9ffb25df-529b-489a-82c6-f99b8b181bc7) and A1022-28.C_KA
+-- (8060aa9d-2524-40f6-83af-5aa7389376a3) carry mg/l, but the legend of the equation they belong to
+-- prints kg/m³.
+-- Evidence (§7.3.2.2 Gl. (14) legend, printed p.48): "\hline C $_{\text {e }}$ & $\mathrm{kg} /
+--   \mathrm{m}^{3}$ & mittlere Entlastungskonzentration \\ \hline $C_{\text {KA }}$ & $\mathrm{kg} /
+--   \mathrm{m}^{3}$ & Konzentration im Kläranlagenablauf \\"
+-- 1 kg/m³ = 1000 mg/l, so Gl. (14) as encoded is off by 10^3 unless the engine rescales. Same
+-- caution as S7-03: staged, not applied.
+-- ROLLBACK: set unit = 'mg/l' for both ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S7-05  A1022-28.B_R_e_zul_CSB (4ea5716f-5f25-4e4f-ac73-dd81f2f29ed9) carries kg/a,
+-- which matches the equation legend but NOT the unit printed on the equation line itself:
+--   (§7.3.2.2, printed p.49) "B_{\mathrm{R}, \mathrm{e}, \mathrm{zu}, \mathrm{CSB}}=V_{\mathrm{R},
+--    \mathrm{aM}} \cdot C_{\mathrm{R}, \mathrm{CSB}} \quad \text { in } \mathrm{kg} /(\mathrm{ha}
+--    \cdot \mathrm{a}) \tag{16}"  vs the legend two lines below
+--   "$B_{\mathrm{R}, \mathrm{e}, \mathrm{zu}, \mathrm{CSB}}$ & $\mathrm{kg} / \mathrm{a}$ &
+--    zulässiger jährlicher Stoffaustrag CSB durch Regenwasserabfluss".
+-- The standard contradicts itself on this line. Dimensional analysis (V_R,aM in m³/a × C_R,CSB in
+-- g/l) gives kg/a, and Tab. 2 p.22 also prints kg/a, so the encoding is right and Gl. (16)'s inline
+-- unit is a printing error carried into the corrected edition. NO CHANGE; PDF read of p.49 needed
+-- to confirm the md is not itself at fault (SR-3).
+
+
+-- ############################################################################
+-- SECTION 8 — FIELD STRUCTURE / is_required / enum
+-- ############################################################################
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S8-01  A1022-09.oberflaechentyp (bf4d8f57-4410-4198-80f4-3a53e4039975) is data_type
+-- 'text' although the guideline prints a CLOSED list of Flächentyp / Art der Befestigung pairs, each
+-- with its own f_D. Per the owner ruling of 2026-08-01 ("fixed options ⇒ selection widget, never
+-- free-text") this must become an enum.
+-- Evidence (Tab. C.1, printed p.91): "Schrägdach — Metall, Glas, Schiefer, Faserzement — 1,0 |
+--   Schrägdach — Ziegel, Dachpappe — 1,0 | Flachdach (Neigung bis 3° oder ca. 5 %) — Metall, Glas,
+--   Faserzement — 1,0 | ... — Kies — 0,9 | Gründach (Neigung bis 15° oder ca. 25 %) — humusiert
+--   < 10 cm Aufbau — 0,8 | ... — humusiert ≥ 10 cm Aufbau — 0,6 | Straßen, Wege und Plätze (flach)
+--   — Asphalt, fugenloser Beton — 1,0 | — Pflaster mit dichten Fugen — 0,9 | — fester Kiesbelag —
+--   0,8 | — Pflaster mit offenen Fugen — 0,7 | — lockerer Kiesbelag, Schotterrasen — 0,6 |
+--   — Verbundsteine mit Fugen, Sickersteine — 0,5 | — Rasengittersteine — 0,4"
+-- 14 printed rows -> 14 enum values, each carrying its printed f_D so A1022-09.f_D can be driven
+-- from the selection instead of typed twice.
+-- ROLLBACK: set data_type = 'text', enum_values = null for the same id.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S8-02  is_required review — A1022-04.A_b_a_I / A_b_a_II / A_b_a_III are all
+-- is_required = true (016eaca3-5add-4b09-84a1-8a542b9a594e / 5a81545d-78c7-436f-ba0e-15077873f17b /
+-- 26e84294-ec69-4ff0-91ff-76316a26315e). A catchment with no category-III area is normal and the
+-- guideline never demands all three. Same evidence as S1-01.
+-- Proposal: is_required = false on all three, with the sum enforced by the (relaxed) REQ-06 gate.
+-- ROLLBACK: set is_required = true for the three ids.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S8-03  SINGLE-SOURCE duplication — the same printed quantity is materialised as an
+-- independently editable field on more than one worksheet (this is the #22 "derived that is
+-- hand-enterable" class, not a phantom-field class; no true phantom fields were found):
+--   b_R_a_AFS63     A1022-10 2af6b99c-ecc5-43b6-8a03-3b0ef7700b27  +  A1022-26 2efaf1ce-eb5b-40f0-b6ce-620838e7c70d
+--   b_R_e_zul_AFS63 A1022-06 c869969d-018f-47f2-886b-13f01b7ac183  +  A1022-11 fef35d5a-9be7-4052-9a9d-d05065447ed9
+--   V_S_min         A1022-29 cfceceac-0e6f-4f3b-8181-b218ded64cab  +  A1022-30 d521792c-ffe8-4ab6-a904-3fa8efcbf552
+--   C_R_CSB         A1022-08 dd81269c-d507-4d93-9050-2f0f9c91a037  +  A1022-27 acc14378-1cfc-4cfa-a121-c595c5583880
+--   C_KA_CSB        A1022-08 fa947904-afc4-4e7c-b992-d65e9cedf30a  +  A1022-28 57da8a9c-b538-4dc4-afec-2f23b2c1b3ea
+--   V_R_aM          A1022-05 9bf49a02-e2b0-4f15-94ee-52bbad761abb  +  A1022-28 846ecde5-5146-4c50-beeb-2ed0d67dcbbc
+--   m               A1022-23 98480f2b-5937-4197-a1bc-8453a83e213c  +  A1022-33 67be9433-c73b-4a7c-a5aa-8fed964cb391
+--                                                                  +  A1022-36 70092079-5467-4691-a46e-f34c46207414
+--   r_krit          A1022-07 442e28a4-e203-4ec0-a66e-4a16e89d33c9  +  A1022-33 3468faab-eeac-4b4d-aed8-8c4cc54cb341
+--                                                                  +  A1022-33 9541b955-0f03-4f79-bcc3-9b84d8e96060 (r_krit_calc)
+--   q_A_Bem         A1022-15 27ab3670-164a-47e6-98cd-ea438385420c  +  A1022-17 a86325ba-af3e-41ba-af13-710742405bc8
+--                                                                  +  A1022-17 c21cb7a8-9809-4f1b-8d5e-14830f134119 (q_A_Bem_for_eta)
+--   A_b_a_i         A1022-10 6f97e508-5f90-4b61-a80f-89583f52e6dc  +  A1022-12 c049cf03-8041-4e38-be84-53b2b4239138
+--   b_R_a_AFS63_i   A1022-10 3dfa5d74-5505-4f9c-90f7-fd5d2b774416  +  A1022-12 b08f169e-8113-4615-86b5-e3d09e8bf083
+-- The properly-named "_ref" mirror fields (A_b_a_ref, Q_T_aM_ref, …) are a separate, deliberate
+-- pattern and are NOT listed here.
+-- Proposal: route each through the single-source consolidation playbook (one owner worksheet, the
+-- rest read-only accessors). No SQL proposed here — that is a per-symbol migration.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S8-04  DESCRIPTION CORRECTION — A1022-07.r_krit (442e28a4-e203-4ec0-a66e-4a16e89d33c9)
+-- is described as "Critical rain intensity for design (typ. 15 l/(s·ha) for r_krit = 15-min rain per
+-- §6.2.2)". The guideline defines r_krit as a Regenspende in l/(s·ha) and attaches NO 15-minute
+-- duration to it anywhere.
+-- Evidence (Anh. B.1.2, printed p.79): "Die kritische Regenspende $r_{\text {krit }}$ charakterisiert
+--   die Niederschlagsbelastung, für deren Regenwasserabfluss typischerweise zentrale
+--   Behandlungsanlagen hydraulisch ausgelegt werden. In der Vergangenheit wurde zumeist
+--   $r_{\text {krit }}=15 \mathrm{l} /(\mathrm{s} \cdot \mathrm{ha})$ angesetzt."
+-- The "15-min" reading conflates the value 15 with a duration and would mislead an engineer.
+-- update public.fields set description = 'Kritische Regenspende in l/(s·ha) für die hydraulische
+--   Auslegung zentraler Behandlungsanlagen; einheitlich 15 l/(s·ha) empfohlen (Anh. B.1.2), im
+--   Trennsystem sind geringere Werte zulässig. Keine Bezugsdauer im Arbeitsblatt.'
+--   where id = '442e28a4-e203-4ec0-a66e-4a16e89d33c9';
+-- ROLLBACK: restore the original description string quoted above.
+
+-- ---------------------------------------------------------------------------
+-- ☐ RATIFIED  S8-05  SR-2 RANGES — confirmed against the source, recorded so the selections are
+-- visible rather than silently defaulted:
+--   (a) q_A,Bem 2..10 m/h — CONFIRMED. Bild 4 caption, printed p.41:
+--       "q_{\mathrm{A}, \mathrm{Bem}}=2 . .4 . .6 . .8 . .10 \mathrm{~m} / \mathrm{h}$, Beckentiefe
+--        $2,0 \mathrm{~m}$". It is a five-point printed SERIES (2/4/6/8/10), not a continuous range,
+--       and it is valid only for r_krit = 15 l/(s·ha) and 2 m depth. A_1022-17 currently holds it as
+--       a free number. Proposal: SR-2 selection field over the five printed points, plus a warn when
+--       r_krit ≠ 15 or h_RKB ≠ 2.
+--   (b) V_s ≤ 40 m³/ha — CONFIRMED as a guide value, NOT a cap; see S5-01.
+--   (c) r_krit — printed as a recommendation with an explicit downward opening (Anh. B.1.2, p.79):
+--       "Im Trennsystem können geringere Werte für $r_{\text {krit }}$ sinnvoll sein, wenn
+--        Behandlungsanlagen mit hohen Wirkungsgraden eingesetzt werden". Currently a free number
+--       with no recorded selection — the F-7 class.
+--   (d) h_RKB 2 m — printed as "empfohlen" (§6.2.4, p.42), so a recommendation, not a minimum.
+
+
+-- ############################################################################
+-- SECTION 9 — CONFIRMED-CORRECT (no change; recorded so they are not re-opened)
+-- ############################################################################
+-- REQ-22 (block, 'eta_ges >= eta_erf') is correctly a BLOCK: §6.2.2 printed p.40 —
+--   "Der Gesamtwirkungsgrad $\eta_{\text {ges }}$ muss mindestens dem erforderlichen Wirkungsgrad
+--    $\eta_{\text {erf }}$ nach (GL. 6) entsprechen." ("muss")
+-- REQ-04 (block, 'A_b_a_I + A_b_a_II + A_b_a_III == A_b_a') is correctly a BLOCK — the printed
+--   Tab. 6 Zeile 14 defines exactly this identity.
+-- REQ-03 (block, 'balance_area_size > 0') is a sanity check, not a guideline rule; harmless.
+-- The 12 block gates and 18 warn severities were reviewed one by one; the only severity change
+--   proposed anywhere in this file is S1-03 (REQ-28 block -> warn).
