@@ -1,0 +1,412 @@
+-- HOAI-2021 — STAGED rulings (md pass 2026-09-05, written 2026-09-07)  [VC, markdown-verified]
+-- Source md: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\bayika-hoai-2021\bayika_hoai_2021.md
+--            PROVENANCE CLEAN — primary Verordnung text ("Textausgabe mit amtlicher Begründung", printed p.2),
+--            not a Kammer commentary; the Bayerische Ingenieurekammer-Bau is only the imprint (printed p.135).
+-- Pages    : 135 "===== PAGE N =====" markers, each matched by the page's own "- Seite N -" running head
+--            (135/135, 0 mismatches) => marker N = printed page N.
+--
+-- NOTHING IN THIS FILE IS APPLIED. Every block is commented-out SQL with a ☐ RATIFIED marker. Each block carries
+-- its verbatim evidence quote and the rollback inverse. Anything that changes structure, enforcement or
+-- required-ness lives here, never in the pack (owner ruling 2026-08-01 / 2026-09-05).
+--
+-- STANDING SCOPE NOTE FOR THIS STANDARD. The HOAI is a Verordnung, so its "sind zu ermitteln" / "ist zu
+-- vereinbaren" really is binding law. BUT since the 2021 amendment (Erste Verordnung zur Änderung der HOAI vom 2.
+-- Dezember 2020, BGBl. I S. 2636; § 57 Abs. 2, printed p.38) the Honorartafeln are ORIENTATION values, not binding
+-- minimum or maximum rates — the price-fixing was struck down by the ECJ (C-377/17) and the 2021 version made the
+-- rates non-binding. The Verordnung says so in its own words:
+--   § 2a Abs. 1 (printed p.6): "(1) Die Honorartafeln dieser Verordnung w eisen Orientierungswerte aus, die an der Art und dem Umfang der Aufgabe sowie an der Leistung ausgerichtet sind. Die Honorartafeln enthalten für jeden Leistungsbereich Honorarspannen vom Basishonorarsatz bis zum oberen Honorarsatz, gegliedert nach den"
+--   § 35 Abs. 1 (printed p.22): "(1) Für die in § 34 und der Anlage 10 Nummer 10.1 genannten Grundleistungen für Gebäude und Innenräume sind die in der nachstehenden Honorartafel aufgeführten Honorarspannen Orientierungswerte:"
+--   § 7 Abs. 2 (printed p.8): "(2) Der Auftragnehmer hat den Auftraggeber, sofern dieser Verbraucher ist, vor Abgabe von dessen verbindlicher Vertragserklärung zur Honorarvereinbarung in Textform darauf hinzuweisen, dass ein höheres oder niedrigeres Honorar als die in den Honorartafeln dieser Verordnung enthaltenen Werte vereinbart werden kann. Erfolgt"
+-- Consequence for gate design: a block gate that forces a fee into a Honorartafel band would enforce something the
+-- current law does not require. AUDIT RESULT ON THAT POINT — NEGATIVE: no such gate exists. No
+-- compliance_requirement constrains H_tafel to [H_basis, H_oben], none constrains s_satz to [0,1], and none
+-- inspects H_gesamt at all. The one gate carrying the § 2a / § 7 anchor text that WOULD host such a rule,
+-- HOAI-CR-02, has condition = 'TRUE' and enforces nothing (see S-4). The encoding therefore does NOT commit this
+-- over-enforcement. Three block gates are nevertheless anchored on text that is not a mandate: S-2 (CR-16), S-3
+-- (CR-17) and S-6 (CR-15).
+
+-- ==============================================================================================================
+-- S-1  HOAI-CR-05 — OR-COLLAPSE TAUTOLOGY + a Honorarzone restriction the source contradicts  [severity: HIGH]
+-- ==============================================================================================================
+-- As encoded: condition = "(objektart IN {flaechennutzungsplan,bebauungsplan,tragwerksplanung} AND honorarzone IN
+-- {I,II,III}) OR honorarzone IN {I,II,III,IV,V}". The right-hand disjunct enumerates the ENTIRE encoded domain of
+-- the honorarzone enum (exactly its five values I, II, III, IV, V), so the OR makes the whole gate a tautology for
+-- any project where honorarzone is set: the intended left-hand restriction can never decide the outcome. This is
+-- simultaneously the "membership test enumerating the whole enum domain" and the "OR-collapse" defect. The author
+-- plainly meant an implication: IF objektart IN {...} THEN honorarzone IN {I,II,III}.
+-- Underneath the collapse, the restriction itself is also wrong on two counts.
+-- (a) tragwerksplanung is listed as capped at I-III, but the Verordnung gives Tragwerksplanung the full five
+-- zones. § 52 Abs. 1's Honorartafel prints "Honorarzone I sehr geringe Anforderungen ... Honorarzone II geringe
+-- ... Honorarzone III durchschnittliche ... Honorarzone IV hohe ... Honorarzone V sehr hohe Anforderungen" and
+-- each Kosten row carries ten values, i.e. five von/bis pairs (printed p.34): "10 000 1 461 1 624 1 624 2 064 2
+-- 064 2 575 2 575 3 015 3 015 3 178". The encoded cap CONTRADICTS the printed table.
+-- (b) technische_ausruestung is NOT listed, yet it is the Leistungsbild that really is capped: § 56 Abs. 1's
+-- Honorartafel prints only three zones (printed p.36) — "Honorarzone I geringe Anforderungen von bis Euro
+-- Honorarzone II durchschnittliche Anforderungen von bis Euro Honorarzone III hohe Anforderungen von bis Euro" —
+-- and each Kosten row accordingly carries six values, i.e. three von/bis pairs: "5 000 2 132 2 547 2 547 2 990 2
+-- 990 3 405".
+-- The two Bauleitplanung entries are right: § 20 Abs. 5 (printed p.12) "(5) Der Flächennutzungsplan ist anhand der
+-- nach Absatz 4 ermittelten Bewertungspunkte einer der Honorarzonen zuzuordnen: 1. Honorarzone I: bis zu 9 Punkte,
+-- 2. Honorarzone II: 10 bis 14 Punkte, 3. Honorarzone III: 15 bis 18 Punkte." and § 21 likewise print zones I-III
+-- only.
+--
+-- ☐ RATIFIED — replace the tautology with the implication the source supports:
+-- update public.compliance_requirements set condition = 'IF objektart IN {flaechennutzungsplan,bebauungsplan,technische_ausruestung} THEN honorarzone IN {I,II,III}'
+--  where id = 'fce01881-06e8-41b9-919b-0da939a74d24';
+-- ROLLBACK: update public.compliance_requirements set condition = '(objektart IN {flaechennutzungsplan,bebauungsplan,tragwerksplanung} AND honorarzone IN {I,II,III}) OR honorarzone IN {I,II,III,IV,V}' where id = 'fce01881-06e8-41b9-919b-0da939a74d24';
+-- NOTE: the condition grammar in src/lib/compliance/evaluate.ts supports IF/THEN and IN {..}; confirm the
+--       IF-form parses before applying (evaluate.ts keyword table lines 48-54).
+
+-- ==============================================================================================================
+-- S-2  HOAI-CR-16 — INVERTED CONDITIONAL: blocks every non-consumer project  [severity: HIGH]
+-- ==============================================================================================================
+-- As encoded: condition = "auftraggeber_verbraucher == true AND hinweis_erteilt == true", severity = block, on
+-- HOAI-2021-07. Because the two tests are ANDed, the gate FAILS whenever auftraggeber_verbraucher is false — i.e.
+-- the encoding demands that the client BE a consumer. Every public-sector and commercial HOAI project is blocked.
+-- The source imposes the Hinweispflicht only IF the client is a consumer, and its sanction is a fee fallback, not
+-- illegality.
+-- § 7 Abs. 2 (printed p.8): "(2) Der Auftragnehmer hat den Auftraggeber, sofern dieser Verbraucher ist, vor Abgabe von dessen verbindlicher Vertragserklärung zur Honorarvereinbarung in Textform darauf hinzuweisen, dass ein höheres oder niedrigeres Honorar als die in den Honorartafeln dieser Verordnung enthaltenen Werte vereinbart werden kann. Erfolgt der Hinweis nach Satz 1 nicht oder nicht rechtzeitig, gilt für die zwischen den Vertragsparteien vereinbarten Grundleistungen anstelle eines höheren Honorars ein Honorar in Höhe des jeweiligen Basishonorarsatzes als vereinbart."
+--
+-- ☐ RATIFIED — make it the conditional the source states:
+-- update public.compliance_requirements set condition = 'IF auftraggeber_verbraucher == true THEN hinweis_erteilt == true'
+--  where id = 'c9a76dba-1f5f-4793-96fe-efa4e2b6d13e';
+-- ☐ RATIFIED — and consider severity block -> warn: the statutory consequence of a missing/late Hinweis is
+--    that the Basishonorarsatz counts as agreed instead of a higher fee, not that the contract is unlawful.
+-- update public.compliance_requirements set severity = 'warn' where id = 'c9a76dba-1f5f-4793-96fe-efa4e2b6d13e';
+-- ROLLBACK: update public.compliance_requirements set condition = 'auftraggeber_verbraucher == true AND hinweis_erteilt == true', severity = 'block' where id = 'c9a76dba-1f5f-4793-96fe-efa4e2b6d13e';
+
+-- ==============================================================================================================
+-- S-3  HOAI-CR-17 — block gate on a rule that has an express statutory fallback  [severity: MEDIUM]
+-- ==============================================================================================================
+-- As encoded: condition = "vereinbarung_textform == true", severity = block. The source's own § 7 Abs. 1 Satz 2
+-- provides for the case where NO Textform agreement exists: the Basishonorarsatz then counts as agreed. A project
+-- without a Honorarvereinbarung in Textform is therefore LAWFUL, and the encoding already models the fallback
+-- (H_basis, s_satz). The gate's source_quote stops at Satz 1 and so reads as a mandate; Satz 2 removes it.
+-- § 7 Abs. 1 (printed p.8, both Sätze): "(1) Das Honorar richtet sich nach der Vereinbarung, die die Vertragsparteien in Textform treffen. Sofern keine Vereinbarung über die Höhe des Honorars in Textform getroffen wurde, gilt für Grundleistungen der jeweilige Basishonorarsatz als vereinbart, der sich bei der Anwendung der Honorargrundlagen des § 6 ergibt."
+--
+-- ☐ RATIFIED — block -> warn (the fee simply defaults to the Basishonorarsatz):
+-- update public.compliance_requirements set severity = 'warn', source_quote = '(1) Das Honorar richtet sich nach der Vereinbarung, die die Vertragsparteien in Textform treffen. Sofern keine Vereinbarung über die Höhe des Honorars in Textform getroffen wurde, gilt für Grundleistungen der jeweilige Basishonorarsatz als vereinbart, der sich bei der Anwendung der Honorargrundlagen des § 6 ergibt. — printed p.8' where id = '10a76cd9-7f8f-4081-b67c-3f9e4ce9f37d';
+-- ROLLBACK: update public.compliance_requirements set severity = 'block', source_quote = '(1) Das Honorar richtet sich nach der Vereinbarung, die die Vertragsparteien in Textform treffen.' where id = '10a76cd9-7f8f-4081-b67c-3f9e4ce9f37d';
+
+-- ==============================================================================================================
+-- S-4  FOUR condition='TRUE' NO-OP GATES, all of them also mis-homed  [severity: MEDIUM]
+-- ==============================================================================================================
+-- evaluate.ts parses the bare keyword TRUE as a boolean literal (factor rule, lines 311 and 323), so these four
+-- block gates always pass and enforce nothing. Each also carries a verbatim source_quote that contains no testable
+-- requirement, and each sits on a worksheet that holds no field its clause speaks about:
+--   HOAI-CR-02  ws=HOAI-2021-03  clause=§2a; §7  condition='TRUE'
+--   HOAI-CR-21  ws=HOAI-2021-07  clause=§15  condition='TRUE'
+--   HOAI-CR-22  ws=HOAI-2021-02  clause=§17  condition='TRUE'
+--   HOAI-CR-23  ws=HOAI-2021-07  clause=§11  condition='TRUE'
+-- CR-22 (§ 17 Anwendungsbereich Bauleitplanung) sits on HOAI-2021-02 "Honorargrundlagen", which carries no
+-- Bauleitplanung field at all — mis-homed; § 17 belongs to Teil 2.
+-- CR-02 (§ 2a Abs. 2 + § 7 Abs. 1) sits on HOAI-2021-03; its § 7 Abs. 1 content is already the subject of
+-- HOAI-CR-17 on HOAI-2021-07 — duplicate home.
+-- CR-21 (§ 15 Fälligkeit, Abschlagszahlungen) and CR-23 (§ 11 Auftrag für mehrere Objekte) sit on HOAI-2021-07 but
+-- no field anywhere in the standard models payment timing or a multi-object commission — no home exists for
+-- either.
+--
+-- ☐ RATIFIED — deactivate the four no-ops (they give a false sense of enforcement in the gate count):
+-- update public.compliance_requirements set active = false where id in (
+--   '4c010995-585f-47d8-a4f0-05f9b9c558a2', 'daf517dc-5bb7-4d03-9c36-ca452cde0d75', '7686cfc9-be13-49d5-bace-57edc51518d0', 'acbc0905-6d65-4a62-8fbd-2bd33b8ed15c');  -- CR-02, CR-21, CR-22, CR-23
+-- ROLLBACK: update public.compliance_requirements set active = true where id in (
+--   '4c010995-585f-47d8-a4f0-05f9b9c558a2', 'daf517dc-5bb7-4d03-9c36-ca452cde0d75', '7686cfc9-be13-49d5-bace-57edc51518d0', 'acbc0905-6d65-4a62-8fbd-2bd33b8ed15c');
+-- ALTERNATIVE (if the reference text is worth keeping): leave them active but set severity='info'.
+-- NOTE: § 11 Abs. 3 IS a real, testable rule that nothing currently enforces — "Tragwerke, die im zeitlichen oder örtlichen Zusammenhang unter gleichen baulichen Verhältnissen geplant und errichtet werden sollen, oder mehrere Objekte nach Typenplanung oder Serienbauten, so sind die Prozentsätze der Leistungsphasen 1 bis 6 für die erste bis vierte Wiederholung um 50 Prozent, für die fünfte bis siebte Wiederholung um 60 Prozent und ab der achten Wiederholung um 90 Prozent zu mindern." (printed p.9).
+--       Encoding it would need a Wiederholungen field, which does not exist (see S-13).
+
+-- ==============================================================================================================
+-- S-5  HOAI-CR-20 is a STRICT SUBSET of HOAI-CR-04 — duplicate gate  [severity: LOW]
+-- ==============================================================================================================
+-- Both sit on HOAI-2021-02, both carry clause_reference § 4 Abs. 1, and CR-20's source_quote is literally the
+-- first sentence of CR-04's. CR-04 condition = "K > 0"; CR-20 condition = "K IS NOT NULL". Any state satisfying K
+-- > 0 satisfies K IS NOT NULL, so CR-20 can never fire when CR-04 passes and adds no coverage. HOAI-CR-06 repeats
+-- "K IS NOT NULL" a third time as one conjunct.
+--
+-- ☐ RATIFIED — deactivate the subsumed gate:
+-- update public.compliance_requirements set active = false where id = '5fc83ab8-8808-4b05-bbcb-5ca145a6b3b1';  -- HOAI-CR-20
+-- ROLLBACK: update public.compliance_requirements set active = true where id = '5fc83ab8-8808-4b05-bbcb-5ca145a6b3b1';
+
+-- ==============================================================================================================
+-- S-6  HOAI-CR-15 — presence-only condition that hides four printed ceilings  [severity: HIGH]
+-- ==============================================================================================================
+-- As encoded: condition = "z_umbau >= 0" — it only excludes a negative surcharge. The source prints a hard ceiling
+-- per Leistungsbild, and the encoding already HOLDS three of those ceilings as fields (z_umbau_gebaeude_max = 33,
+-- z_umbau_innenraum_max = 50, z_umbau_tragwerk_max = 50) — but no gate ever compares z_umbau against any of them.
+-- A 200 % Umbauzuschlag passes every gate in the standard. This is the sharpest under-enforcement found.
+-- § 36 Abs. 1 Gebäude (printed p.24): "(1) Für Umbauten und Modernisierungen von Gebäuden kann bei einem durchschnittlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 33 Prozent auf das ermittelte Honorar in Textform vereinbart werden."
+-- § 36 Abs. 2 Innenräume (printed p.25): "(2) Für Umbauten und Modernisierungen von Innenräumen in Gebäuden kann bei einem durchschnittlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 50 Prozent auf das ermittelte Honorar in Textform vereinbart werden."
+-- § 52 Abs. 4 Tragwerk (printed p.35): "(4) Für Umbauten und Modernisierungen kann bei einem durchschnittlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 50 Prozent in Textform vereinbart werden."
+-- § 6 Abs. 2 default when nothing is agreed (printed p.8): "Der Umbau- oder Modernisierungszuschlag ist unter Berücksichtigung des Schwierigkeitsgrads der Leistungen in Textform zu vereinbaren. Die Höhe des Zuschlags auf das Honorar ist in den jeweiligen Honorarregelungen der Leistungsbilder der Teile 3 und 4 und in Anlage 1 Nummer 1.2 geregelt. Sofern keine Vereinbarung in Textform getroffen wurde, gilt ein Zuschlag von 20 Prozent ab einem durchschnittlichen Schwierigkeitsgrad als vereinbart."
+--
+-- RATIFICATION QUESTION for Alvaro: is the ceiling a block or a warn? Argument for block — "bis 33 Prozent" is the
+-- Verordnung's own words and the Zuschlag rule (§ 6 Abs. 2) is NOT part of the Honorartafel-Orientierungswerte
+-- regime. Argument for warn — § 7 Abs. 1 lets the parties agree any fee in Textform, so an above-ceiling total is
+-- not itself unlawful. STAGED at warn; not auto-decided (SR-2).
+-- ☐ RATIFIED — add the missing ceiling gate (new row; adjust worksheet_template_id/code to house style):
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+-- values ('0ae57ed7-99bc-47ad-8ba9-b6964261b1e9', 'HOAI-CR-24', 'warn',
+--   'IF objektart == gebaeude THEN z_umbau <= z_umbau_gebaeude_max', '§36 Abs.1',
+--   '(1) Für Umbauten und Modernisierungen von Gebäuden kann bei einem durchschnittlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 33 Prozent auf das ermittelte Honorar in Textform vereinbart werden. — printed p.24');
+-- (and the analogous rows for innenraeume -> z_umbau_innenraum_max and tragwerksplanung -> z_umbau_tragwerk_max;
+--  the freianlagen / ingenieurbauwerke / verkehrsanlagen / technische_ausruestung ceilings need the fields in S-12 first)
+-- ROLLBACK: delete from public.compliance_requirements where code in ('HOAI-CR-24', ...) and worksheet_template_id = '0ae57ed7-99bc-47ad-8ba9-b6964261b1e9';
+
+-- ==============================================================================================================
+-- S-7  The seven "== 100" phase-sum gates are UNSATISFIABLE in lawful configurations  [severity: HIGH]
+-- ==============================================================================================================
+-- HOAI-CR-08/09/10/11/12/13/14 each demand that their nine (or six) Phasen-% fields sum to exactly 100. The base
+-- percentages do sum to 100 — verified against the source: Gebäude 2+7+15+3+25+10+4+32+2 = 100; Innenräume
+-- 2+7+15+2+30+7+3+32+2 = 100; Freianlagen 3+10+16+4+25+7+3+30+2 = 100; Ingenieurbauwerke 2+20+25+5+15+13+4+15+1 =
+-- 100; Verkehrsanlagen 2+20+25+8+15+10+4+15+1 = 100; Tragwerksplanung 3+10+15+30+40+2 = 100; Technische Ausrüstung
+-- 2+9+17+2+22+7+5+35+1 = 100. NO ENCODED PERCENTAGE DISAGREES WITH THE SOURCE.
+-- But the source itself prescribes derogations from those very percentages, and under any of them the sum is no
+-- longer 100 — so the block gate fires on a configuration the Verordnung expressly allows:
+--   § 43 Abs. 2 (printed p.28): "(2) Abweichend von Absatz 1 Nummer 2 wird die Leistungsphase 2 bei Objekten nach § 41 Nummer 6 und 7, die eine Tragwerksplanung erfordern, mit 10 Prozent bewertet."        => Ing. sum 90
+--   § 43 Abs. 3 (printed p.28): "(3) Die Vertragsparteien können abweichend von Absatz 1 in Textform vereinbaren, dass 1. die Leistungsphase 4 mit 5 bis 8 Prozent bewertet wird, wenn dafür ein eigenständiges Planfeststellungsverfahren erforderlich ist, 2. die Leistungsphase 5 mit 15 bis 35 Prozent bewertet wird, wenn ein überdurchschnittlicher Aufwand an Ausführungszeichnungen erforderlich wird."        => Ing. sum 100..128
+--   § 51 Abs. 2 (printed p.34): "(2) Die Leistungsphase 5 ist abweichend von Absatz 1 mit 30 Prozent der Honorare des § 52 zu bewerten 1. im Stahlbetonbau, sofern keine Schalpläne in Auftrag gegeben werden, 2. im Holzbau mit unterdurchschnittlichem Schwierigkeitsgrad."        => Tragwerk sum 90
+--   § 51 Abs. 3 (printed p.34): "(3) Die Leistungsphase 5 ist abweichend von Absatz 1 mit 20 Prozent der Honorare des § 52 zu bewerten, sofern nur Schalpläne in Auftrag gegeben werden."        => Tragwerk sum 80
+--   § 51 Abs. 4 (printed p.34): "(4) Bei sehr enger Bewehrung kann die Bewertung der Leistungsphase 5 um bis zu 4 Prozent erhöht werden."        => Tragwerk sum up to 104
+--   § 55 Abs. 2 (printed p.36): "(2) Die Leistungsphase 5 ist abweichend von Absatz 1 Satz 2 mit einem Abschlag von jeweils 4 Prozent zu bewerten, sofern das Anfertigen von Schlitz- und Durchbruchsplänen oder das Prüfen der Montage- und Werkstattpläne der ausführenden Firmen nicht in Auftrag gegeben wird."        => TGA sum 96
+--
+-- ☐ RATIFIED — block -> warn on all seven, so a lawful derogation is surfaced instead of blocked:
+-- update public.compliance_requirements set severity = 'warn' where id in (
+--   '592626f9-53ff-48ef-943f-37ad88b3afe7',
+--    'dd71ea50-927c-40ce-83e8-50360e2135cc',
+--    'c0ad84e6-210b-454f-8831-d27ccb06e455',
+--    '12effad6-35b9-405b-ae47-16e56d1d6442',
+--    '5c3fdc65-42c9-4ebd-9123-763c26e89fe2',
+--    'd131c5f3-b407-4701-9731-dca5bfe23739',
+--    'dc0e5976-9f57-4576-9a04-071255e5aa4b');
+-- ROLLBACK: update public.compliance_requirements set severity = 'block' where id in ( ...the same seven ids... );
+
+-- ==============================================================================================================
+-- S-8  HOAI-CR-07 "p_sum <= 100" is contradicted by the source  [severity: MEDIUM]
+-- ==============================================================================================================
+-- As encoded: condition = "p_sum > 0 AND p_sum <= 100", severity = block, clause § 8 Abs. 1. § 8 Abs. 1 itself
+-- prints no numeric bound; the 100 is inferred from a full Leistungsbild. Two printed rules let a lawful p_sum
+-- EXCEED 100:
+--   § 12 Abs. 2 (printed p.9): "(2) Für Grundleistungen bei Instandsetzungen und Instandhaltungen von Objekten kann in Textform vereinbart werden, dass der Prozentsatz für die Objektüberwachung oder Bauoberleitung um bis zu 50 Prozent der Bewertung dieser Leistungsphase erhöht wird."
+--   § 43 Abs. 3 Nr. 2 (printed p.28): "2. die Leistungsphase 5 mit 15 bis 35 Prozent bewertet wird, wenn ein überdurchschnittlicher Aufwand an Ausführungszeichnungen erforderlich wird."
+-- Conversely § 11 Abs. 3 MINDERT the LPH 1-6 percentages by 50/60/90 % on repeats, which the gate handles fine.
+-- The lower bound p_sum > 0 has no printed counterpart either, but excluding zero is harmless.
+--
+-- ☐ RATIFIED — drop the invented upper bound (or raise it and warn):
+-- update public.compliance_requirements set condition = 'p_sum > 0', severity = 'warn' where id = 'f49a7f18-1d72-465a-be3c-9cfc3962806a';
+-- ROLLBACK: update public.compliance_requirements set condition = 'p_sum > 0 AND p_sum <= 100', severity = 'block' where id = 'f49a7f18-1d72-465a-be3c-9cfc3962806a';
+
+-- ==============================================================================================================
+-- S-9  MISSING SCOPE PREDICATES on the seven phase-sum gates  [severity: MEDIUM]
+-- ==============================================================================================================
+-- None of HOAI-CR-08..CR-14 carries a predicate on leistungsbild or objektart, so all seven fire on every project:
+-- a Gebäude commission must still satisfy the Verkehrsanlagen and the Technische-Ausrüstung sums. Today that is
+-- masked because all 46 Phasen-% fields are is_required = true constants, but it makes the gate set structurally
+-- scope-less and it is why S-11 forces an engineer to fill 46 fields of which at most 9 are relevant.
+-- ☐ RATIFIED — scope each sum gate to its Leistungsbild, e.g. for HOAI-CR-08 (Gebäude):
+-- update public.compliance_requirements set condition = 'IF leistungsbild == gebaeude THEN (p_geb_lph1+p_geb_lph2+p_geb_lph3+p_geb_lph4+p_geb_lph5+p_geb_lph6+p_geb_lph7+p_geb_lph8+p_geb_lph9) == 100'
+--  where id = '592626f9-53ff-48ef-943f-37ad88b3afe7';   -- and the analogous six
+-- ROLLBACK: restore each condition from the export taken for this pass (scripts/verification export, 2026-09-07).
+
+-- ==============================================================================================================
+-- S-10  UNIT CORRECTION — flaeche carries unit "-" but the source measures it in Hektar  [severity: LOW]
+-- ==============================================================================================================
+-- Field a5c95c50-197c-434e-93f2-5f64126ff12a (HOAI-2021-02.flaeche), unit = '-', is_required = false.
+-- § 20 Abs. 2 (printed p.12): "(2) Das Honorar für die Aufstellung von Flächennutzungsplänen ist nach der Fläche des Plangebiets in Hektar und nach der Honorarzone zu berechnen."
+-- § 20 Abs. 1 Honorartafel column head (printed p.11): "Fläche in Hektar"
+-- ☐ RATIFIED — update public.fields set unit = 'ha' where id = 'a5c95c50-197c-434e-93f2-5f64126ff12a';
+-- ROLLBACK: update public.fields set unit = '-' where id = 'a5c95c50-197c-434e-93f2-5f64126ff12a';
+-- DIMENSIONAL CHECK of all six equations — CLEAN, no other unit mismatch. EQ-01/02 H[EUR] = H[EUR] +
+-- (K[EUR]-K_u[EUR])/(K_o[EUR]-K_u[EUR]) * (H[EUR]-H[EUR]): the ratio is dimensionless, result EUR. EQ-03
+-- H_tafel[EUR] = H_basis[EUR] + s_satz[-] * (H_oben[EUR]-H_basis[EUR]). EQ-04 H_phasen[EUR] = H_tafel[EUR] *
+-- (p_sum[%]/100). EQ-05 H_zuschlag[EUR] = H_phasen[EUR] * (1 + z_umbau[%]/100). EQ-06 H_gesamt[EUR] =
+-- (H_zuschlag[EUR] + NK[EUR]) * (1 + ust[%]/100). Every fee percentage carries unit '%' and is divided by 100
+-- before use; every Anrechenbare-Kosten and Honorar node carries 'EUR', matching the source's "Anrechenbare Kosten
+-- in Euro" table heads; the Umbauzuschlag nodes carry '%', matching "bis 33 Prozent" / "bis 50 Prozent"; s_satz
+-- and bewertungspunkte carry '-' correctly.
+
+-- ==============================================================================================================
+-- S-11  is_required REVIEW — 52 fields the engineer should never have to type  [severity: MEDIUM, #22 class]
+-- ==============================================================================================================
+-- (a) The 46 Phasen-% fields (p_geb_*, p_inn_*, p_fre_*, p_ing_*, p_ver_*, p_tra_*, p_tga_*) are all is_required =
+-- true, yet every one is a constant printed in the Verordnung — data_class standard_fixed. They are UI-editable
+-- AND mandatory, which is the validator's "standard_fixed that is UI-editable = finding" rule, and it forces an
+-- engineer to key 46 numbers of which at most 9 belong to the chosen Leistungsbild.
+-- (b) The six equation OUTPUTS H_basis, H_oben, H_tafel, H_phasen, H_zuschlag, H_gesamt are is_required = true,
+-- i.e. derived values that are hand-enterable — the #22 class exactly.
+-- ☐ RATIFIED — make the printed Phasen-% read-only defaults rather than required inputs:
+-- update public.fields set is_required = false where id in (
+--   'e73c9e4d-70b2-4667-9b23-5bba7836499c',
+--    'b0f6956a-1377-44ae-af4d-fc402c69e336',
+--    '4d3f1dc1-af40-4d81-a2b4-5e358e004ef8',
+--    '9e80ebfd-a5ac-4baf-9ce2-5ca65f3e4be9',
+--    '24c103e4-2c30-4f79-adef-724266e81ee4',
+--    '222d60ea-3f1c-4445-b3f9-70f8fac994bd',
+--    'd0688876-d20d-45e3-a970-2c68801aea3d',
+--    'bc93dba1-fa53-4b78-a92f-fabbbeaa82b0',
+--    'a054ea3e-7d50-421b-8dbd-97a46852eb8c',
+--    'a4abee1d-2635-4b28-b031-94132f61f57f',
+--    '7fc3011e-5772-4d4a-b157-fc4d2da4a3bc',
+--    '3b693928-21f9-431f-9e08-bf9891466e49',
+--    '701a9c37-7e4b-4ff0-98dc-eb9c5506c411',
+--    'bc494beb-889b-4274-b892-7729994d712a',
+--    'bfeaac52-7cde-45da-b2cd-0f921184060b',
+--    '9b10f768-6a84-4ebd-8698-f79f474b683c',
+--    '849c2633-3d16-40e8-8134-28820c946dd3',
+--    '63dc12f6-f768-43af-a389-0752bb387f3d',
+--    '4fc490cc-9697-4c78-913e-7871ab879e91',
+--    'fe847c74-7a2a-43d3-a2de-baa2108dc74b',
+--    '8fc3d16c-8698-41db-9398-6d642e0e9328',
+--    '86ca71a3-3c4b-4974-ad1e-287dd2df92e6',
+--    'a6f40104-485f-4cf3-a4ce-ca21a42974e2',
+--    'df2357ef-e9ae-4241-9d20-35959ecd4395',
+--    '1496da0b-50ca-4c85-8b62-2d8b1c6594cb',
+--    'b0ee525a-0542-45df-b23a-b0b6eb98236b',
+--    '63728b9a-c36c-4529-ab73-5c2c17a47eb2',
+--    '52e73e6a-c5a6-449c-b38a-e6baab1f4b42',
+--    '9cb87fbb-6ba8-46f3-a9aa-38b1b801e7ed',
+--    '811ab1a7-0d04-4e8c-b395-c6648ab5b281',
+--    '72c05214-7998-4fec-b97d-4cd0c786f3b6',
+--    '232ffbb0-f6a6-4990-977e-2ef09686f0ab',
+--    'c5644ea6-f26e-46f8-b114-179c5025ee1c',
+--    '90e5d3ca-8328-4105-bf5e-152c782b5139',
+--    '5a053d61-70a1-4b02-b000-7575b27572f7',
+--    '615758b9-ce14-4d27-8e59-4ac32644e717',
+--    '457e8efb-d235-4b5a-a50a-bb4f92820709',
+--    'd4580ca0-ebe1-46da-aa5f-4d0906f6b784',
+--    '21487a44-b7b9-41ba-b693-7848d808f719',
+--    '9a9bfcae-3a97-4e4d-af41-8e00c848f6f6',
+--    '7aa5bff0-2542-4e34-b2b6-b6285d330b17',
+--    '6ab8da59-80e9-4318-96c1-d7ca5ee3240a',
+--    '706b5e05-7a6f-4d39-946a-67f66232febb',
+--    '124dfeba-5f58-46c8-a952-a1d7833e3ffd',
+--    'ef1f383e-e52d-4387-a472-97f41774d4c0',
+--    '41ec50d9-d871-43a4-a734-87812e9b30e5',
+--    'be6c25a3-a7f7-4a55-bdfd-54e4835800ae',
+--    '8173c10e-3841-4f00-b9f5-697791900fd8',
+--    '16c8bb02-632a-467f-bda5-e24ce4f31b3e',
+--    '318f433a-4f75-470e-92d3-086feec315b2',
+--    '2a3890eb-9e69-4a42-ba29-c61c5f701e7c',
+--    'f03f62a7-6c61-4340-aeb0-d3e572bb09e4',
+--    '312f0f4a-641a-4c69-bfa4-0cbd5676607a',
+--    'cfe0b0cc-4caf-4cd8-b53c-8faea79a4dd3',
+--    '74dfdb61-70f6-48c1-b5ec-83878c9ddd42',
+--    'ee3e33d4-300c-40d0-ac69-35f964b58628',
+--    'f4acce7e-c4ee-4ac3-b249-b00e58957b54',
+--    '3ea83d6c-c1de-4848-b270-76ff5f796953',
+--    'd61f0f28-1953-45e4-821d-9f0592295f46',
+--    '6f9cc0c6-bde9-4114-bcac-147d6aaa9cec');
+-- ☐ RATIFIED — and for the six derived outputs:
+-- update public.fields set is_required = false where id in (
+--   '446690b8-71d7-411d-be1f-630e4769d515', '48b63524-cced-493c-9b80-e15e1fc4f3de', '3ad67ddc-c6cb-41c9-95fe-80167dad43af', 'cf28339b-74c1-4122-a4d7-62c80f24f91c', '4c0b4b5b-0baa-4e6c-b511-ee72551d059c', 'ff65e0dc-efec-4956-89fa-8a23bb62079f');
+-- ROLLBACK: update public.fields set is_required = true where id in ( ...the same 52 ids... );
+
+-- ==============================================================================================================
+-- S-12  MISSING FIELDS — four Umbauzuschlag ceilings the source prints but the encoding omits  [severity: MEDIUM]
+-- ==============================================================================================================
+-- Three of the seven per-Leistungsbild ceilings are encoded (Gebäude 33 %, Innenräume 50 %, Tragwerk 50 %). Four
+-- are missing, so S-6's ceiling gates cannot be written for them:
+--   § 40 Abs. 6 Freianlagen (printed p.27): "(6) § 36 Absatz 1 ist für Freianlagen entsprechend anzuwenden."  => § 36 Abs. 1 applies, i.e. bis 33 Prozent
+--   § 44 Abs. 6 Ingenieurbauwerke (printed p.30): "(6) Für Umbauten und Modernisierungen von Ingenieurbauwerken kann bei einem durchschnittlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 33 Prozent in Textform vereinbart werden."
+--   § 48 Abs. 6 Verkehrsanlagen (printed p.33): "(6) Für Umbauten und Modernisierungen von Verkehrsanlagen kann bei einem durchschni ttlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 33 Prozent in Textform vereinbart werden."
+--   § 56 Abs. 5 Technische Ausrüstung (printed p.36): "(5) Für Umbauten und Modernisierungen kann bei einem durchschnittlichen Schwierigkeitsgrad ein Zuschlag gemäß § 6 Absatz 2 Satz 3 bis 50 Prozent in Textform vereinbart werden."
+-- ☐ RATIFIED — add z_umbau_freianlagen_max (33, §40 Abs.6, ws HOAI-2021-04), z_umbau_ingbau_max (33, §44 Abs.6,
+--    ws HOAI-2021-05), z_umbau_verkehr_max (33, §48 Abs.6, ws HOAI-2021-05), z_umbau_tga_max (50, §56 Abs.5,
+--    ws HOAI-2021-06), all unit '%', is_required false, mirroring the three that exist.
+-- ROLLBACK: delete from public.fields where symbol in ('z_umbau_freianlagen_max','z_umbau_ingbau_max','z_umbau_verkehr_max','z_umbau_tga_max')
+--   and worksheet_template_id in (select wt.id from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id where s.code = 'HOAI-2021');
+
+-- ==============================================================================================================
+-- S-13  MISSING STRUCTURE — § 8 Abs. 1 cannot be enforced: p_sum is hand-entered  [severity: HIGH]
+-- ==============================================================================================================
+-- p_sum's own description reads "Summe der Prozentsätze der beauftragten Leistungsphasen (aus
+-- HOAI-2021-04/05/06)", but NO equation computes it: the encoded equation set is EQ-01..EQ-06 and none has p_sum
+-- as its output. There is also no field anywhere recording WHICH Leistungsphasen were commissioned — no per-phase
+-- boolean, no phase-selection enum. So the 46 Phasen-% fields feed only the seven "== 100" sum gates and nothing
+-- else, while the number that actually drives the fee (EQ-04: H_phasen = H_tafel * p_sum/100) is typed by hand and
+-- reconciled against nothing.
+-- § 8 Abs. 1 (printed p.8): "(1) Werden dem Auftragnehmer nicht alle Leistungsphasen eines Leistungsbildes übertragen, so dürfen nur die für die übertragenen Phasen vorgesehenen Prozentsätze berechnet und vereinbart werden. Die Vereinbarung hat in Textform zu erfolgen."
+-- Consequence: the Verordnung's central apportionment rule — only the commissioned phases' percentages may be
+-- charged — is not machine-enforced anywhere in this standard, and 46 of its 94 fields are effectively decorative.
+-- Related: § 9 (Einzelleistungen, höchstens-caps, printed p.8-9) and § 11 Abs. 3 (repeat reductions of 50/60/90 %,
+-- printed p.9) are likewise unencodable without phase flags.
+-- ☐ RATIFIED — add nine boolean "phase commissioned" fields (lph1_beauftragt .. lph9_beauftragt) and one
+--    equation p_sum = SUM(commissioned phase percentages for the selected Leistungsbild), then make p_sum derived
+--    and read-only. This is a structural change: not applied, ruling required.
+-- ROLLBACK: drop the added fields and the added equation.
+
+-- ==============================================================================================================
+-- S-14  MISSING GATE — massnahmenart governs the Umbauzuschlag but is referenced by nothing  [severity: MEDIUM]
+-- ==============================================================================================================
+-- massnahmenart (42beb5b4-823c-4727-a43a-6394b101c026) is is_required = true and its own description says it
+-- "bestimmt Anwendbarkeit des Umbauzuschlags", yet it appears in no gate condition and in no equation. Nothing
+-- therefore stops z_umbau being applied to a Neubau, which § 6 Abs. 2 confines to Umbauten und Modernisierungen
+-- gemäß § 2 Absatz 5 und 6.
+-- § 6 Abs. 2 Satz 1 (printed p.8): "(2) Honorare für Grundleistungen bei Umbauten und Modernisierungen gemäß § 2 Absatz 5 und 6 sind zu ermitteln nach"
+-- ☐ RATIFIED — insert a scope gate:
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+-- values ('0ae57ed7-99bc-47ad-8ba9-b6964261b1e9', 'HOAI-CR-25', 'warn',
+--   'IF z_umbau > 0 THEN massnahmenart IN {umbau,modernisierung}', '§6 Abs.2',
+--   '(2) Honorare für Grundleistungen bei Umbauten und Modernisierungen gemäß § 2 Absatz 5 und 6 sind zu ermitteln nach — printed p.8');
+-- ROLLBACK: delete from public.compliance_requirements where code = 'HOAI-CR-25';
+
+-- ==============================================================================================================
+-- S-15  CLAUSE RETAGS — two metadata fields carry a § they do not come from  [severity: LOW]
+-- ==============================================================================================================
+-- Both fields are in the pack's exempt class (app/project metadata, 2026-08-01 ruling) but still carry a
+-- clause_reference that implies the Verordnung defines them. § 1 defines the Anwendungsbereich, not a
+-- Projektbezeichnung; § 7 governs the Honorarvereinbarung, not an internal release flag.
+--   98bb9afb-ebe1-451b-90af-a31ecf91ee77  projekt_bezeichnung   clause_reference = '§1'
+--   aee2d473-b107-44e8-874d-75160839d777  honorar_freigegeben   clause_reference = '§7'
+-- ☐ RATIFIED — update public.fields set clause_reference = null where id in ('98bb9afb-ebe1-451b-90af-a31ecf91ee77', 'aee2d473-b107-44e8-874d-75160839d777');
+-- ROLLBACK: update public.fields set clause_reference = '§1' where id = '98bb9afb-ebe1-451b-90af-a31ecf91ee77';
+--           update public.fields set clause_reference = '§7' where id = 'aee2d473-b107-44e8-874d-75160839d777';
+
+-- ==============================================================================================================
+-- S-16  ORPHAN FIELDS — consumed by no equation and no gate  [severity: LOW, note only]
+-- ==============================================================================================================
+-- bewertungspunkte (§ 5 Abs. 2), flaeche (§ 6 Abs. 1 Nr. 1 / § 20 Abs. 2) and anlagengruppe_tga (§ 53 Abs. 2) are
+-- each read by nothing. flaeche is the Bezugsgröße for the whole of Teil 2 (Flächenplanung) and anlagengruppe_tga
+-- is the Bezugsgröße for § 54 Abs. 1, so the standard encodes the inputs for two fee paths it never computes:
+-- there is no Flächenplanung and no per-Anlagengruppe fee chain, only the anrechenbare-Kosten chain EQ-01..EQ-06.
+-- bewertungspunkte has no threshold gate either, although the source prints the thresholds per Leistungsbild (e.g.
+-- § 35 Abs. 6, printed p.24: "(6) Das Gebäude oder der Innenraum ist anhand der nach Absatz 5 ermittelten
+-- Bewertungspunkte einer der Honorarzonen zuzuordnen: 1. Honorarzone I: bis zu 10 Punkte, 2. Honorarzone II: 11
+-- bis 18 Punkte, 3. Honorarzone III: 19 bis 26 Punkte, 4. Honorarzone IV: 27 bis 34 Punkte,"; § 40 Abs. 4, printed
+-- p.27: "(4) Die Freianlage ist anhand der nach Absatz 3 ermittelten Bewertungspunkte einer der Honorarzonen
+-- zuzuordnen: 1. Honorarzone I: bis zu 8 Punkte, 2. Honorarzone II: 9 bis 15 Punkte, 3. Honorarzone III: 16 bis 22
+-- Punkte, 4. Honorarzone IV: 23 bis 29 Punkte, 5. Honorarzone V: 30 bis 36 Punkte.").
+-- No SQL proposed — recorded so the gap is auditable. Ratification: should Teil 2 (Flächenplanung) be a
+-- separate standard/worksheet, or should these three fields be deactivated?
+
+-- ==============================================================================================================
+-- S-17  EXPLICIT NEGATIVE RESULTS (checked, nothing found)
+-- ==============================================================================================================
+-- Recorded so their absence is auditable rather than merely unmentioned.
+--   • empty gate conditions ....................... NONE (all 23 gates carry a non-empty condition)
+--   • "IS NOT NULL" applied to a boolean .......... NONE (CR-03/CR-06/CR-20 apply it to enum/number fields only)
+--   • tautology over an equation output ........... NONE (no gate reads H_basis/H_oben/H_tafel/H_phasen/H_zuschlag/H_gesamt)
+--   • unsatisfiable gate (no state can pass) ...... NONE (S-7 is unsatisfiable only under a lawful derogation)
+--   • invented numeric limits ..................... NONE beyond S-1 and S-8; every other number in a gate
+--     (the seven "== 100" sums) is arithmetically identical to the printed Prozentsätze
+--   • boundary inclusivity errors ................. NONE: the only inclusive/exclusive choices are p_sum > 0 /
+--     p_sum <= 100 (S-8) and K > 0, and the source prints no boundary to compare either against
+--   • phantom fields (enum tokens materialised as fields) ... NONE — all 94 fields carry a label_de and a
+--     description; the three enum fields hold their values in enum_values JSONB as intended
+--   • worksheets with zero fields ................. NONE (4 / 11 / 11 / 29 / 18 / 17 / 4 = 94)
+--   • duplicate FIELDS ............................ NONE (94 distinct symbols; p_geb_* and p_inn_* legitimately
+--     differ because § 34 Abs. 3 gives Gebäude and Innenräume different values in LPH 4, 5, 6 and 7)
+--   • gate source_quote that is a PARAPHRASE ...... NONE. All 23 were machine-scored against the transcript
+--     with the spotcheck normaliser: 15 at 100 %, and the worst two at 85 % (HOAI-CR-04 and HOAI-CR-02).
+--     Both lose their windows to the transcript's own justification splits — the encoding wrote "allgemein"
+--     and "Honorartafel" where this pdftotext run produced "allgeme in" and "Hon orartafel" — i.e. the
+--     encoder repaired an extraction artefact, restoring the actually printed word. That is not a silent
+--     substantive correction. CR-02 also loses windows to its editorial clause labels "[§ 2a Abs. 2]" /
+--     "[§ 7 Abs. 1]" and CR-09 to its gloss "[Innenraum-Spalte desselben Absatzes]"; both are explicitly
+--     bracketed as editorial, so neither passes off as source text. WORST OFFENDER: none — 23/23 clean.
+--   • a gate whose constraint the source explicitly contradicts ... ONE: S-1(a), tragwerksplanung capped at
+--     I-III against § 52's printed five-zone Honorartafel. (S-8's p_sum <= 100 is contradicted by § 12 Abs. 2
+--     and § 43 Abs. 3 but is an inferred bound, not a printed one.)
+--   • block gate anchored on non-binding ORIENTATION values ... NONE. Explicitly re-checked because the
+--     Honorartafeln are Orientierungswerte since 2021: no gate constrains H_tafel to [H_basis, H_oben],
+--     none constrains s_satz to [0,1], none reads H_gesamt. See the scope note at the top of this file.
+--   • block gate anchored on soft text ............ THREE, all staged: CR-16 (S-2), CR-17 (S-3), CR-15 (S-6).
