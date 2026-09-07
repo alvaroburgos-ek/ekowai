@@ -1,0 +1,552 @@
+-- =====================================================================================================
+-- VDI-3477 — STAGED rulings (WRITTEN, NOT APPLIED). Every statement below is COMMENTED OUT.
+-- Nothing in this file may be executed before the ☐ RATIFIED box on that block is ticked by Alvaro.
+-- Source: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\VDI-3477\VDI-3477-2016-03.md
+--         VDI 3477 "Biologische Abgasreinigung — Biofilter", März 2016, WEISSDRUCK, bilingual DE/EN,
+--         German column authoritative. Page refs = the guideline's own running-head numbers, indexed via
+--         pdftotext -layout over the sibling PDF (PDF page N = printed page N). Grade [VC].
+-- Prod shape at time of writing: 9 worksheets / 89 fields / 18 equations / 19 compliance_requirements,
+--         18 of the 19 with severity='block', 1 with severity='warn'.
+--
+-- SCOPE NOTE (governs this whole file): VDI-Richtlinien are technical rules, not law. "muss"/"ist zu" is
+--         rare; most of VDI 3477 is "soll", "sollte", "kann", "empfiehlt sich", "in der Regel", "etwa",
+--         "z.B.". A block gate is only defensible on a genuine "muss"/"ist zu"/"darf nicht".
+--         Result of the pass: of the 18 block gates, 7 rest on soft or purely descriptive text
+--         (CR-01, CR-02, CR-03, CR-07, CR-09 in part, CR-11, CR-19) and 3 more are literal no-ops
+--         (CR-15, CR-16, CR-17 all carry condition='TRUE'). Only 6 block gates are cleanly defensible:
+--         CR-05, CR-06, CR-08, CR-10, CR-12, CR-14.
+--
+-- EVALUATOR NOTE (verified in src/lib/compliance/evaluate.ts this session, file header lines 8-23 and
+--         parser lines 165-169 / 471-475): the grammar supports `symbol IS NOT NULL`, `IS NOT EMPTY`,
+--         and the guarded form `IF <cond> THEN <cond>` which "vacuously pass[es] when the guard is
+--         false" and is `pending` when the guard symbol is missing. A condition referencing a symbol
+--         with no value returns `pending`, never a false `fail`. Every scope-predicate fix proposed
+--         below is therefore expressible in the existing grammar — no schema or engine change needed.
+--
+-- No transaction control anywhere in this file (and every statement is a comment anyway).
+-- =====================================================================================================
+
+
+-- =====================================================================================================
+-- BLOCK 1 — CR-19 ENCODES A CONDITIONAL AS AN UNCONDITIONAL CONJUNCTION (highest severity finding)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: severity=block, worksheet VDI-3477-05,
+--          condition = 'nh3_vor_biofilter < 5 AND h2s_vor_biofilter < 5'
+-- Evidence (§6.2.2.3, printed p.37, transcript line 1804):
+--   "Abhilfe schaffen hier Wäscher oder Absorber. Sie werden dem Biofilter vorgeschaltet und haben die
+--    Aufgabe, den Ammoniak- und H2S-Gehalt auf jeweils weniger als 5 mg/m3 zu reduzieren."
+-- The printed sentence describes the DUTY OF AN UPSTREAM SCRUBBER — it is conditional on a scrubber
+-- being fitted, and the guideline never says every biofilter must have one (§6.2.2.3 opens with
+-- "Sie können grundsätzlich mithilfe der biologischen Abgasreinigung auf die gewünschten Reingaswerte
+-- reduziert werden, verursachen aber trotzdem im Biofilter erhebliche Probleme"). Encoding it as an
+-- unconditional AND means:
+--   * a plant with NO pre-scrubber (both fields are is_required=false, so both are null) can never
+--     satisfy the gate — it sits permanently at `pending`, and the gate can never be cleared;
+--   * the guideline imposes no NH3/H2S pre-treatment duty on low-NH3/low-H2S waste gases at all,
+--     so the gate invents one.
+-- There is no "vorwaescher_vorhanden" boolean in prod, so the guard must be built on the carriers
+-- themselves (the evaluator's IF/THEN vacuously passes when the guard is false):
+--   update public.compliance_requirements
+--      set condition = 'IF nh3_vor_biofilter IS NOT NULL THEN nh3_vor_biofilter < 5',
+--          severity  = 'warn'
+--    where code = 'VDI-3477-CR-19';
+--   -- and add the H2S half as its own gate (see BLOCK 12, missing-gate list) rather than AND-ing them,
+--   -- so a plant that scrubs only H2S is not blocked on an unrelated NH3 value.
+-- Rollback inverse:
+--   update public.compliance_requirements
+--      set condition = 'nh3_vor_biofilter < 5 AND h2s_vor_biofilter < 5', severity = 'block'
+--    where code = 'VDI-3477-CR-19';
+
+
+-- =====================================================================================================
+-- BLOCK 2 — THREE GATES CARRY condition='TRUE' AND ENFORCE NOTHING (CR-15, CR-16, CR-17)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- All three are severity='block' with the literal condition 'TRUE'. They always pass, so they are
+-- documentation rows masquerading as enforcement. They are also the ONLY gates on their subject matter,
+-- so the app currently reports "block gate satisfied" for requirements it never checked.
+--
+-- CR-17 (worksheet VDI-3477-04, clause §6.2.2.1) is additionally a DUPLICATE and MIS-HOMED:
+--   * its source_quote is byte-identical to CR-05's (both quote the §6.2.2.1 humidification paragraph);
+--   * CR-05 already enforces that paragraph correctly (rel_feuchte_befeuchter_aus > 95) on worksheet
+--     VDI-3477-05, where the §6.2.2.1 fields actually live;
+--   * CR-17 sits on VDI-3477-04 (Auslegung/Dimensionierung) and references no field of that worksheet.
+--   Recommendation: deactivate CR-17 outright (it is a strict no-op superset of CR-05).
+--     update public.compliance_requirements set active = false where code = 'VDI-3477-CR-17';
+--     -- rollback: update public.compliance_requirements set active = true where code = 'VDI-3477-CR-17';
+--   (If `active` does not exist on compliance_requirements, delete is NOT proposed — surface instead.)
+--
+-- CR-15 (worksheet VDI-3477-08, clause_reference 'AnhangB; DIN EN 13725'):
+--   Its source_quote is from §8.2.3 (printed p.79), NOT from Anhang B — the clause_reference is wrong.
+--   Evidence (§8.2.3, printed p.79, transcript line 3686):
+--     "Geruchsintensive Stoffe können mithilfe olfaktometrischer Methoden beurteilt werden. Dies
+--      geschieht nach DIN EN 13725 in Verbindung mit VDI 3884 Blatt 1. [...] Für die Beurteilung der
+--      Geruchseigenschaften (Intensität – Hedonik) sind außerdem die Richtlinien VDI 3882 Blatt 1 und
+--      Blatt 2 anzuwenden."
+--   The last sentence IS binding ("sind ... anzuwenden"), but nothing in prod carries the fact that
+--   olfactometry per DIN EN 13725 was used, so there is no symbol to test. Proposal: make it an
+--   attestation row (like CR-04) instead of a fake block, and fix the clause:
+--     update public.compliance_requirements
+--        set clause_reference = '§8.2.3; Anhang B; DIN EN 13725', severity = 'warn',
+--            requires_attestation = true
+--      where code = 'VDI-3477-CR-15';
+--     -- rollback: set clause_reference='AnhangB; DIN EN 13725', severity='block',
+--     --           requires_attestation=false where code='VDI-3477-CR-15';
+--
+-- CR-16 (worksheet VDI-3477-08, clause '§8; §9.5; VDI 3951; TA Luft'):
+--   Beyond the no-op, its source_quote STARTS MID-SENTENCE — it opens with the dangling
+--   "werden können und eine Überwachung von Emissionsbegrenzungen ermöglichen. Dazu sind die Grundsätze
+--    zur Durchführung von Emissionsmessungen gemäß der Richtlinie VDI 3951 zu beachten."
+--   The sentence actually begins on the previous line of §8.1 (printed p.79/80, transcript line 3545):
+--     "Durch diese messtechnische Anleitung soll sichergestellt werden, dass die Emissionen der in dieser
+--      Richtlinie beschriebenen Anlagen unter Berücksichtigung der Anforderungen der TA Luft so ermittelt
+--      werden, dass die Ergebnisse repräsentativ und untereinander vergleichbar sind, einheitlich
+--      ausgewertet werden können und eine Überwachung von Emissionsbegrenzungen ermöglichen."
+--   Proposal: repair the quote and make it an attestation row rather than a fake block:
+--     update public.compliance_requirements
+--        set source_quote = 'Durch diese messtechnische Anleitung soll sichergestellt werden, dass die Emissionen der in dieser Richtlinie beschriebenen Anlagen unter Berücksichtigung der Anforderungen der TA Luft so ermittelt werden, dass die Ergebnisse repräsentativ und untereinander vergleichbar sind, einheitlich ausgewertet werden können und eine Überwachung von Emissionsbegrenzungen ermöglichen. Dazu sind die Grundsätze zur Durchführung von Emissionsmessungen gemäß der Richtlinie VDI 3951 zu beachten. Diese Grundsätze gelten sinngemäß auch für Rohgasmessungen.',
+--            severity = 'warn', requires_attestation = true
+--      where code = 'VDI-3477-CR-16';
+--     -- rollback: restore the original fragment + severity='block' + requires_attestation=false.
+
+
+-- =====================================================================================================
+-- BLOCK 3 — CR-04 HAS AN EMPTY CONDITION AND A TRUNCATED SOURCE QUOTE  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: severity='warn', requires_attestation=true, condition = '' (empty string),
+--          clause_reference = '5.2' (the only clause_reference in this standard printed WITHOUT the
+--          "§" prefix used by the other 18 gates).
+-- The empty condition is defensible as an attestation-only row, but it must be recorded as such rather
+-- than read as an oversight — nothing is programmatically enforced.
+-- The source_quote is TRUNCATED: it ends at the first bullet of a five-item list, with no ellipsis.
+-- Full printed text (§5.2, printed p.30, transcript lines 1550-1556):
+--   "Um ein funktionsfähiges Filtermaterial geliefert zu bekommen und/oder Veränderungen während des
+--    Betriebs festzustellen, sollten vor dem Einbau des Materials folgende Parameter analysiert werden
+--    (siehe auch Tabelle 3): - pH-Wert - Leitfähigkeit - N-P-Verhältnis - Glühverlust - Feuchtegehalt"
+-- Note the modal is "sollten" — warn is the correct severity; that part is already right.
+--   update public.compliance_requirements
+--      set clause_reference = '§5.2',
+--          source_quote = 'Um ein funktionsfähiges Filtermaterial geliefert zu bekommen und/oder Veränderungen während des Betriebs festzustellen, sollten vor dem Einbau des Materials folgende Parameter analysiert werden (siehe auch Tabelle 3): - pH-Wert - Leitfähigkeit - N-P-Verhältnis - Glühverlust - Feuchtegehalt'
+--    where code = 'VDI-3477-CR-04';
+--   -- rollback: set clause_reference='5.2', source_quote='Um ein funktionsfähiges Filtermaterial geliefert
+--   --           zu bekommen und/oder Veränderungen während des Betriebs festzustellen, sollten vor dem
+--   --           Einbau des Materials folgende Parameter analysiert werden (siehe auch Tabelle 3): - pH-Wert'
+--   --           where code='VDI-3477-CR-04';
+
+
+-- =====================================================================================================
+-- BLOCK 4 — CR-13 IS MIS-HOMED (a §9 requirement living on the calculation worksheet)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: severity='block', worksheet VDI-3477-04 (Auslegung und Dimensionierung),
+--          clause_reference='§9.1', condition='V_dot IS NOT NULL AND dp IS NOT NULL'.
+-- Evidence (§9.1, printed p.87, transcript line 3873):
+--   "Es sind neben dem Reingaswert folgende wichtige Parameter zu gewährleisten: Volumenstrom und
+--    Druckverlust, insbesondere über den Zeitraum zwischen gegebenenfalls erforderlichen
+--    Reinigungsintervallen."
+-- The modal IS binding ("sind ... zu gewährleisten") and presence-only is the right shape (the clause
+-- states no numeric limit — the values are contractual). Two structural problems remain:
+--   * the clause belongs to §9 "Beschaffenheitsvereinbarung", whose worksheet is VDI-3477-09, not -04;
+--   * the gate reads V_dot, which is a field of worksheet VDI-3477-02, and dp, a field of VDI-3477-04 —
+--     so wherever it is homed it reads across worksheets. Homing it on -09 at least matches its clause
+--     and puts it in the phase where the Gewährleistung is actually agreed.
+--   update public.compliance_requirements
+--      set worksheet_template_id = (select wt.id from public.worksheet_templates wt
+--                                     join public.standards s on s.id = wt.standard_id
+--                                    where s.code = 'VDI-3477' and wt.code = 'VDI-3477-09')
+--    where code = 'VDI-3477-CR-13';
+--   -- rollback: same update with wt.code = 'VDI-3477-04'.
+
+
+-- =====================================================================================================
+-- BLOCK 5 — CR-09 AND-s A "sollte" REQUIREMENT TO AN "ist zu" REQUIREMENT  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: severity='block', condition='anfahrkonzept_vorhanden == true AND abnahme_dokumentiert == true',
+--          clause_reference='§7.3.1; §7.3.2.1'.
+-- The stored source_quote covers ONLY the §7.3.2.1 half, and that half is SOFT
+--   (§7.3.2.1, printed p.70, transcript line 3085):
+--     "Vor Inbetriebnahme des Biofilters sollte ein Anfahrkonzept erstellt werden."
+-- The §7.3.1 half is BINDING and is not quoted at all
+--   (§7.3.1, printed p.69, transcript line 3044):
+--     "Bei der Übernahme wird dem Betreiber die Betriebsanleitung übergeben. Die Übernahme ist zu
+--      dokumentieren."
+-- Blocking a project because a "sollte" item is unticked over-enforces; dropping the block would
+-- under-enforce the "ist zu" item. Split:
+--   update public.compliance_requirements
+--      set condition = 'abnahme_dokumentiert == true',
+--          clause_reference = '§7.3.1',
+--          source_quote = 'Bei der Übernahme wird dem Betreiber die Betriebsanleitung übergeben. Die Übernahme ist zu dokumentieren.'
+--    where code = 'VDI-3477-CR-09';
+--   -- plus a NEW warn gate on worksheet VDI-3477-06:
+--   --   code 'VDI-3477-CR-20', severity 'warn',
+--   --   condition 'anfahrkonzept_vorhanden == true', clause_reference '§7.3.2.1',
+--   --   source_quote 'Vor Inbetriebnahme des Biofilters sollte ein Anfahrkonzept erstellt werden.'
+--   -- rollback: restore CR-09's original condition/clause/source_quote and delete CR-20.
+
+
+-- =====================================================================================================
+-- BLOCK 6 — BLOCK GATES ANCHORED ON SOFT OR PURELY DESCRIPTIVE TEXT (severity notes)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Each of the following is severity='block' but its evidence carries no obligation. Proposal for all:
+-- block -> warn. Listed worst-first.
+--
+-- (a) CR-11  condition 'c_rein <= c_roh'  clause '§2; §8'  — INVENTED CONSTRAINT, CONTRADICTED BY THE TEXT.
+--     Its source_quote is Gl.(5), a DEFINITION of η, not a requirement:
+--       "\eta=\frac{C_{\mathrm{roh}}-C_{\mathrm{rein}}}{C_{\mathrm{roh}}} \tag{5}"   (§2, printed p.12)
+--     The guideline explicitly states the OPPOSITE can occur (§7.4, printed p.79, transcript line 3513):
+--       "Bei Rohgasströmen mit schwankender Konzentration und wechselnder Zusammensetzung kann die
+--        Austrittskonzentration höher sein als die Eingangskonzentration an Geruchsstoffen (negativer
+--        Wirkungsgrad)."
+--     and again (§6.3, printed p.44, transcript line 2039): "eventuelle Strippeffekte aus dem
+--     Filtermaterial nachweisen zu können (schlechter oder sogar „negativer" Wirkungsgrad)".
+--     A block here forbids a state the standard says is real. Proposal: warn, and re-quote to the §7.4
+--     sentence so the gate carries its own counter-evidence.
+--       update public.compliance_requirements
+--          set severity='warn',
+--              clause_reference='§2 (Gl.5); §7.4',
+--              source_quote='Bei Rohgasströmen mit schwankender Konzentration und wechselnder Zusammensetzung kann die Austrittskonzentration höher sein als die Eingangskonzentration an Geruchsstoffen (negativer Wirkungsgrad). Durch langfristige Pilotversuche (mindestens drei Monate) muss die Eignung von Biofiltern getestet werden.'
+--        where code='VDI-3477-CR-11';
+--
+-- (b) CR-03  condition 'betriebstemperatur >= 20 AND betriebstemperatur <= 40'  clause '§4.1'
+--     Evidence (§4.1, printed p.15, transcript line 966):
+--       "Der bevorzugte Arbeitsbereich liegt im sogenannten mesophilen Temperaturbereich
+--        (etwa 20 °C bis 40 °C)."
+--     "bevorzugte" + "etwa" = a preferred, approximate range. Encoding it as a hard inclusive block
+--     silently drops both qualifiers, and the guideline elsewhere allows departures:
+--       §4.2 (printed p.17): "Die Reaktionsgeschwindigkeit nimmt mit steigender Temperatur im Bereich
+--         von etwa 5 °C bis etwa 40 °C zu."
+--       §6.2.2.4 Beispiel 2 (printed p.39): "Bei Anwendungen, in denen konstant höhere Temperaturen
+--         eingehalten werden und thermophile Prozesse ablaufen, sind auch höhere Abgastemperaturen
+--         akzeptabel [12; 23]."
+--       update public.compliance_requirements set severity='warn' where code='VDI-3477-CR-03';
+--
+-- (c) CR-01  condition 'biofilter_grundsaetzlich_geeignet == true'  clause '§1; §4.1'
+--     Evidence (§4.1, printed p.14): "Die biologische Reinigung von Abgasen durch Biofilter KANN dort
+--     angewendet werden, wo luftverunreinigende Stoffe vorliegen, die biologisch hinreichend schnell
+--     abbaubar sind." — an applicability statement, modal "kann". Verbatim, but it contains no
+--     requirement at all.
+--       update public.compliance_requirements set severity='warn' where code='VDI-3477-CR-01';
+--
+-- (d) CR-02  condition 'schadstoff_stoffgruppe IS NOT NULL AND eignungsklasse IS NOT NULL'  clause 'Tab.2'
+--     Its source_quote is a bare LaTeX caption — "\caption{Tabelle 2. Eignung von Biofiltern zur
+--     Elimination von Stoffen/Stoffgruppen}" — verbatim but carrying no requirement, and the condition is
+--     PRESENCE-ONLY, which hides the classification the table actually prints (see BLOCK 7).
+--       update public.compliance_requirements set severity='warn' where code='VDI-3477-CR-02';
+--
+-- (e) CR-07  condition 'freie_flaeche_anstroemboden > 20 AND loch_schlitzgroesse >= 5 AND loch_schlitzgroesse <= 20'
+--     The BOUNDARIES ARE CORRECT (checked against §6.5, printed p.45: ">20 % freier Fläche" is strict,
+--     "von 5 mm bis maximal 20 mm" is inclusive at both ends). The evidence is, however, a bullet in a
+--     list of "Hauptkonstruktionsmerkmale" — descriptive, with no modal verb. Lowest-priority of this
+--     block; the printed numbers are hard, so leaving it at block is arguable.
+--       -- update public.compliance_requirements set severity='warn' where code='VDI-3477-CR-07';
+--
+-- Rollback inverse for every statement in this block: set severity='block' (and restore CR-11's original
+-- clause_reference='§2; §8' and its Gl.(5) source_quote) for the listed codes.
+
+
+-- =====================================================================================================
+-- BLOCK 7 — PRESENCE-ONLY GATES THAT HIDE A PRINTED LIMIT  ☐ RATIFIED ______
+-- =====================================================================================================
+-- (a) CR-02 — Tabelle 2 classifies substances as "+ gut geeignet", "o bedingt geeignet",
+--     "– nicht geeignet" (printed p.8; the md transcript renders both "o" and "–" as "-", an OCR defect
+--     recorded in the pack header). Methane, pentane, hexane, dimethyl sulphide, methyl mercaptan, H2S,
+--     ammonia, carbon disulphide etc. are NOT in the "gut geeignet" class, and Pentan, Hexan and
+--     Schwefelkohlenstoff are explicitly "nicht geeignet". The gate merely checks that the two enum
+--     fields are non-null, so selecting 'nicht_geeignet' passes today. Proposal (warn, not block —
+--     §1 frames Table 2 as an "Entscheidungshilfe", not a prohibition):
+--       -- NEW gate on worksheet VDI-3477-02:
+--       --   code 'VDI-3477-CR-21', severity 'warn',
+--       --   condition 'eignungsklasse <> nicht_geeignet',
+--       --   clause_reference 'Tab.2; §1',
+--       --   source_quote 'Die Zusammenstellung beruht auf bisherigen Erfahrungen (z.B., nach [5 bis 7]),
+--       --     wobei die Grenzen der Unterscheidung fließend sind. Sie kann als Entscheidungshilfe für die
+--       --     Aufnahme von Abgasreinigungstests mit einer Biofilterversuchsanlage herangezogen werden
+--       --     (siehe Abschnitt 6.3).'
+--       -- rollback: delete the row with code='VDI-3477-CR-21'.
+--
+-- (b) CR-18 — condition 'pH_filtermaterial IS NOT NULL', clause '§8.4'. Its own source_quote prints a
+--     range that the condition ignores (§8.4, printed p.84, transcript line 3744):
+--       "In einer Schwankungsbreite von 5,5 bis 7,5 ist der pH-Wert tolerabel."
+--     Presence-only is the SAFE choice here, because the same paragraph licenses deliberate departures:
+--       "In besonderen Einzelfällen, z.B., beim Abbau von Schwefelwasserstoff, kann der pH-Wert aber
+--        bewusst deutlich sauer sein."
+--     (and §4.1, printed p.15: "Die Abweichung hin zu extremen pH-Werten kann bei speziellen
+--      Anwendungen, z.B., Schwefelwasserstoff-Elimination (pH-Wert 1 bis 2), toleriert werden.")
+--     So: keep CR-18 as-is, and ADD a warn gate carrying the printed range:
+--       -- NEW gate on worksheet VDI-3477-07:
+--       --   code 'VDI-3477-CR-22', severity 'warn',
+--       --   condition 'IF pH_filtermaterial IS NOT NULL THEN pH_filtermaterial >= 5,5 AND pH_filtermaterial <= 7,5'
+--       --   (decimal separator to be written in whatever form the parser accepts — verify before apply),
+--       --   clause_reference '§8.4',
+--       --   source_quote 'Beim Abbau organischer Kohlenstoffverbindungen stellt sich in der Regel ein
+--       --     neutraler bis schwach saurer pH -Wert ein. In einer Schwankungsbreite von 5,5 bis 7,5 ist der
+--       --     pH -Wert tolerabel.'
+--       -- rollback: delete the row with code='VDI-3477-CR-22'.
+
+
+-- =====================================================================================================
+-- BLOCK 8 — CR-08 QUOTES THE SOFT SENTENCE AND OMITS THE BINDING ONE  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: severity='block', condition 'feuchtegehalt_filterschicht >= 40 AND feuchtegehalt_filterschicht <= 60'.
+-- Bounds are CORRECT against the print ("zwischen 40 % und 60 %" = inclusive both ends).
+-- The stored source_quote is the "sollte" sentence, which on its own would not carry a block:
+--   "Der Feuchtegehalt in der Filterschicht sollte in Abhängigkeit vom Filtermaterial zwischen 40 % und
+--    60 % liegen."                                                    (§7.3.2.5, printed p.71)
+-- Two sentences later the SAME clause makes it binding, and that sentence is not quoted:
+--   "Befeuchtungseinrichtungen sind so zu bedienen, dass die Feuchtigkeit an jeder Stelle der
+--    Filterschicht innerhalb der angegebenen Grenzen liegt."          (§7.3.2.5, printed p.71)
+-- The block severity is therefore DEFENSIBLE — but only once the quote carries the obligation.
+--   update public.compliance_requirements
+--      set source_quote = 'Der Feuchtegehalt in der Filterschicht sollte in Abhängigkeit vom Filtermaterial zwischen 40 % und 60 % liegen. Die derzeit einzig praktikable Methode ist die gravimetrische Bestimmung gemäß DGVW (DIN EN 12880; VDI 2066 Blatt 1). | Befeuchtungseinrichtungen sind so zu bedienen, dass die Feuchtigkeit an jeder Stelle der Filterschicht innerhalb der angegebenen Grenzen liegt.'
+--    where code = 'VDI-3477-CR-08';
+--   -- rollback: restore the original single-sentence quote.
+
+
+-- =====================================================================================================
+-- BLOCK 9 — UNIT MISMATCHES: A FACTOR 3600 RUNS THROUGH THE FLOW CHAIN  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Dimensional check of all 18 equations was performed. Fourteen are clean. Four share one defect, which
+-- ORIGINATES IN THE PRINTED GUIDELINE and is faithfully reproduced by the encoding — but the engine will
+-- compute wrong numbers unless it is handled.
+-- §3 symbol table (printed p.13/14) prints:  V̇ in m3/h,  w in m/s,  w_P in m/s,  A in m2.
+-- The equations combine them directly:
+--   Gl.(7)  w · A = const. = V̇          -> (m/s)(m2) = m3/s, but V̇ is m3/h            (printed p.25)
+--   Gl.(11) w_P = V̇ / (A · e_E) = w/e_E -> (m3/h)/(m2)  = m/h,  but w_P is m/s         (printed p.27)
+--   Gl.(12) V̇ = (d_P2·Δp)/(32·ν·ρ·l)·A_P -> velocity(m/s)·m2 = m3/s, field is m3/h      (printed p.27)
+--   Gl.(13) w = V̇/A                     -> (m3/h)/(m2)  = m/h,  but w is m/s           (printed p.27)
+-- Encoded fields today: V_dot m^3/h, V_dot_cont m^3/h, V_dot_pore m^3/h, w m/s, w_P m/s. So every one of
+-- these four equations is out by 3600 as written. This is NOT an encoder error — the guideline is
+-- unit-loose — but it must be a DELIBERATE ruling, not a silent inheritance.
+-- Two consistent options; pick one, do not mix:
+--   OPTION A (keep printed units, add explicit conversion in the equation text):
+--     Gl.(7)  V_dot_cont = w * A * 3600
+--     Gl.(11) w_P        = V_dot / (A * e_E) / 3600
+--     Gl.(12) V_dot_pore = (d_P^2 * dp) / (32 * nu * rho * l) * A_P * 3600
+--     Gl.(13) w          = V_dot / A / 3600
+--   OPTION B (change w and w_P to m/h and leave the formulas alone):
+--     update public.fields set unit = 'm/h' where symbol in ('w','w_P') and ... (VDI-3477-04);
+--   OPTION A preserves the printed symbol table and is the conservative choice.
+--   Rollback inverse for either option: restore the current formula strings / unit values.
+--
+-- Separate, smaller unit finding — an internal contradiction IN THE PRINT (no fix proposed, record only):
+--   d_P: §3 symbol table (printed p.13) says "Porendurchmesser  mm"; the legend to Gl.(12) (printed p.27)
+--        says "d_P  Porendurchmesser in m". The encoding uses m, which is the equation-consistent choice.
+--   ν  : the GERMAN §3 table (printed p.14) says m2/s; the ENGLISH §3 table on the same page says m2/h.
+--        The German column is declared authoritative on the title page, so m2/s (as encoded) is right.
+
+
+-- =====================================================================================================
+-- BLOCK 10 — DERIVED FIELDS FLAGGED is_required=true (the #22 class)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Five fields are the OUTPUT of a registered equation and are simultaneously hand-enterable required
+-- inputs. Per the doctrine's data_class rules ("derived that is hand-enterable = finding"), each should
+-- be read-only/derived, not a required manual entry:
+--   VDI-3477-04.M_S   output of Gl.(A1)  M_S = V_dot * c_A
+--   VDI-3477-04.V_F   output of Gl.(A2)  V_F = M_S / m_S
+--   VDI-3477-04.w     output of Gl.(13)  w   = V_dot / A
+--   VDI-3477-08.eta   output of Gl.(5)   eta = (c_roh - c_rein) / c_roh
+--   VDI-3477-08.eta_G output of Gl.(1)   eta_G = (q_G_roh - q_G_rein) / q_G_roh
+--   update public.fields f set is_required = false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where wt.id = f.worksheet_template_id and s.code = 'VDI-3477'
+--      and f.symbol in ('M_S','V_F','w','eta','eta_G');
+--   -- rollback: same update with is_required = true.
+--
+-- Also is_required=true but source-soft or example-only (propose false, lower priority):
+--   VDI-3477-04.c_A  — "Mittlere Schadstoffkonzentration (Anhang A)". Anhang A is a worked EXAMPLE
+--                      ("z.B., Isopropanol ... c = 800 mg/m3", printed p.89) and c_A duplicates
+--                      VDI-3477-02.c_roh (same quantity, different worksheet). See BLOCK 11.
+--   VDI-3477-06.anfahrkonzept_vorhanden — "sollte" (§7.3.2.1, printed p.70); see BLOCK 5.
+
+
+-- =====================================================================================================
+-- BLOCK 11 — NEAR-DUPLICATE FIELD c_A vs c_roh  ☐ RATIFIED ______
+-- =====================================================================================================
+-- VDI-3477-02.c_roh  "Konzentration im Rohgas", unit mg/m^3, is_required=true
+-- VDI-3477-04.c_A    "Mittlere Schadstoffkonzentration (Anhang A)", unit g/m^3, is_required=true
+-- Both denote the raw-gas concentration of the component to be degraded; Anhang A itself writes the
+-- example value twice, once as "c = 800 mg/m3" and once as "0,8 g/m3" in the same calculation
+-- (printed p.89). Keeping two required fields for one quantity guarantees they will diverge, and the
+-- engine has no equation linking them.
+-- Proposal (structural, needs a ruling — NOT a strict subset, because the units differ):
+--   * either register the trivial conversion as an equation (c_A = c_roh / 1000) and set c_A read-only,
+--   * or drop c_A and point Gl.(A1) at c_roh with an inline /1000.
+-- No SQL proposed until the option is chosen; both touch a ratified equation.
+
+
+-- =====================================================================================================
+-- BLOCK 12 — MISSING GATES FOR PRINTED LIMITS (all proposed as warn)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Each carrier field EXISTS in prod, and each limit IS printed, but no compliance_requirement reads it.
+-- All the modals below are soft ("soll", "sollte nicht überschritten werden", "etwa"), so warn — not
+-- block — is what the text supports.
+--
+-- (a) VDI-3477-05.befeuchter_verweilzeit  > 1 s      §6.2.2.1, printed p.35
+-- (b) VDI-3477-05.befeuchter_stroemungsgeschw < 3 m/s §6.2.2.1, printed p.35
+-- (c) VDI-3477-05.wasser_luft_zahl 1..10 l/m3         §6.2.2.1, printed p.35
+--     One printed sentence carries all three (transcript line 1756):
+--       "Die Wasser-Luft-Zahl beträgt dabei 1 ℓ Wasser/m3 Abgas bis 10 ℓ Wasser/m3 Abgas, und die
+--        Verweilzeit soll bei > 1 s, die Strömungsgeschwindigkeit bei < 3 m/s liegen (VDI 3679 Blatt 1)."
+--     Note the guideline itself is the source of the CR-05 gate that already enforces the >95 % half of
+--     the SAME sentence at severity block — so these three limits are printed alongside an enforced one
+--     and are currently the only unenforced part of it.
+-- (d) VDI-3477-05.h2s_vor_biofilter < 5 mg/m3 as its OWN gate — see BLOCK 1.
+-- (e) VDI-3477-04.flaechenbelastung <= 150 m3/(m2·h)  §6.5.1, printed p.48:
+--       "Die hierfür verwendete Filterflächenbelastung von 100 m3/(m2·h) bis maximal 150 m3/(m2·h)
+--        sollte nicht überschritten werden."
+--     SCOPE PREDICATE REQUIRED: that sentence is explicitly about OPEN SURFACE FILTERS at abattoirs,
+--     composting plants etc.; the very next sentence says "Bei Anwendung von Biofiltern in der
+--     Landwirtschaft sind auch deutlich größere Filterbelastungen anzutreffen", and §6.5.2 (printed p.49)
+--     gives 100..350 m3/(m3·h) for ENCLOSED filters. There is no "bauart" field in prod to guard on, so
+--     this gate cannot be added correctly until such a field exists. RECORDED, NOT PROPOSED.
+-- (f) VDI-3477-04.volumenbelastung 40..100 m3/(m3·h)  §6.5.1, printed p.48 — same scope problem as (e).
+-- (g) VDI-3477-04.m_S 10..100 g/(m3·h)                §6.4, printed p.45:
+--       "Die Abbauleistungen liegen je nach Substanz etwa im Bereich von 10 g/(m3·h) und bei sehr gut
+--        abbaubaren und wasserlöslichen Substanzen bis maximal etwa 100 g/(m3·h)."
+--     Note "etwa" twice — a warn at most, and arguably an SR-2 range that should be surfaced as an
+--     engineer selection rather than gated at all.
+-- (h) VDI-3477-03.h >= 1 m                            §6.5.1, printed p.47:
+--       "Die Luft strömt aus der Anströmkammer durch das Filterbett, dessen Schütthöhe vom gewählten
+--        Material abhängig ist, die jedoch mindestens 1 m bei mittlerer Körnung im abgesetzten Zustand
+--        betragen soll (siehe Abschnitt 5)."
+--     Same scope caveat: the next sentence exempts agricultural biofilters
+--     ("Landwirtschaftliche Biofilter können ... auch geringere Schütthöhen aufweisen").
+-- (i) VDI-3477-01.pilotversuch_erforderlich — the ONE unambiguous "muss" in this area is unenforced
+--     (§7.4, printed p.79, transcript line 3513):
+--       "Bei Rohgasströmen mit schwankender Konzentration und wechselnder Zusammensetzung kann die
+--        Austrittskonzentration höher sein als die Eingangskonzentration an Geruchsstoffen (negativer
+--        Wirkungsgrad). Durch langfristige Pilotversuche (mindestens drei Monate) muss die Eignung von
+--        Biofiltern getestet werden."
+--     Again scope-bound ("bei schwankender Konzentration"), and prod has no field recording that
+--     condition, so it cannot be gated correctly today. RECORDED, NOT PROPOSED.
+--
+-- Only (a), (b), (c) can be added without inventing a scope field. Sketch:
+--   -- NEW warn gates on worksheet VDI-3477-05, sharing the §6.2.2.1 sentence as source_quote:
+--   --   'VDI-3477-CR-23'  condition 'IF befeuchter_verweilzeit IS NOT NULL THEN befeuchter_verweilzeit > 1'
+--   --   'VDI-3477-CR-24'  condition 'IF befeuchter_stroemungsgeschw IS NOT NULL THEN befeuchter_stroemungsgeschw < 3'
+--   --   'VDI-3477-CR-25'  condition 'IF wasser_luft_zahl IS NOT NULL THEN wasser_luft_zahl >= 1 AND wasser_luft_zahl <= 10'
+--   -- rollback: delete rows with those codes.
+
+
+-- =====================================================================================================
+-- BLOCK 13 — CLAUSE RETAGS  ☐ RATIFIED ______
+-- =====================================================================================================
+-- (a) VDI-3477-03.h — clause_reference '§5.1'. The field description quotes "typ. 1,20-1,75 m", which is
+--     printed in §6.5.2 (ENCLOSED biofilters, printed p.49, transcript line 2205):
+--       "Die Schütthöhe der einzelnen Filterschichten liegt je nach Filtermaterial im Bereich von
+--        1,20 m bis 1,75 m."
+--     while the minimum ("mindestens 1 m") is in §6.5.1 (open surface filters, printed p.47) and the
+--     symbol itself is defined in §3 (printed p.13). §5.1 states none of them.
+--       update public.fields f set clause_reference = '§3; §6.5.1; §6.5.2'
+--         from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--        where wt.id = f.worksheet_template_id and s.code='VDI-3477' and f.symbol='h';
+--       -- rollback: set clause_reference = '§5.1' for the same row.
+--
+-- (b) VDI-3477-03.standzeit — clause_reference '§5.4'. §5.4 does support the field ("ca. ein bis fünf
+--     Jahre", printed p.30), but the description's "z.B. Holzhackschnitzel max. 12 Monate" comes from
+--     §6.5.3.2.3 (livestock biofilters, printed p.60, transcript line 2630):
+--       "Vor dem Hintergrund einer langfristigen Betriebssicherheit wird insbesondere bei einstufigen
+--        Systemen, z. B., für Holzhackschnitzel, eine Nutzungsdauer von maximal zwölf Monaten empfohlen [51]."
+--     The description drops the scope ("insbesondere bei einstufigen Systemen", livestock context) and
+--     the modal ("empfohlen"). Retag and re-scope the description:
+--       update public.fields f set clause_reference = '§2; §5.4; §6.5.3.2.3'
+--         from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--        where wt.id = f.worksheet_template_id and s.code='VDI-3477' and f.symbol='standzeit';
+--       -- rollback: set clause_reference = '§5.4'.
+--
+-- (c) VDI-3477-05.p_D and p_DS — clause_reference 'Abschn.2', the only two fields using that spelling
+--     instead of '§2'. Cosmetic consistency only.
+--       update public.fields f set clause_reference = '§2 (Gl.4)'
+--         from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--        where wt.id = f.worksheet_template_id and s.code='VDI-3477' and f.symbol in ('p_D','p_DS');
+--       -- rollback: set clause_reference = 'Abschn.2'.
+--
+-- (d) CR-15 clause_reference — see BLOCK 2. (e) CR-04 clause_reference — see BLOCK 3.
+
+
+-- =====================================================================================================
+-- BLOCK 14 — GRAPH DEFECTS: OUTPUTS CONSUMED BY NOTHING, AND ONE MISSING EQUATION  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Reference graph built from the prod export (equation input_symbols/output_symbol + gate conditions):
+--   * 23 of 89 fields are referenced by NO equation and NO gate. Most are legitimate record-keeping
+--     values (standzeit, schuettdichte, CNP_verhaeltnis, CSB/BSB, Anlagenverfügbarkeit ...). Two are not:
+--       VDI-3477-04.W_1 and VDI-3477-04.W_2 — the guideline prints Gl.(8) as W_1/W_2 = A_2/A_1, but the
+--       encoded equation declares input_symbols [A_1, A_2] only and outputs 'vel_ratio' = A_2/A_1. So W_1
+--       and W_2 are collected from the engineer and then used by nothing at all. Either register the
+--       velocity-ratio direction that consumes them, or mark them display-only.
+--   * 14 equation outputs are consumed by no other equation: e, w_P, V_dot_pore, incompr_crit,
+--     V_dot_cont, vel_ratio, V_F, U, eta_G, eta_G_c, eta, I, Z_50, P_G. Most are legitimate terminal
+--     results. V_F is NOT: Anhang A continues one step further, and that step is not encoded.
+--   * MISSING EQUATION — Anhang A's final step is described only in the field description of
+--     VDI-3477-04.A ("A = V_F/h (Anhang A)") and is not a row in public.equations. Printed evidence
+--     (Anhang A, printed p.89, transcript line 3961):
+--       "bei einer geplanten Filterhöhe (Schütthöhe) von h = 1,8 m ergibt sich daraus eine Filterfläche
+--        von etwa 74 m2."
+--     (133 m3 / 1,8 m = 73,9 m2 — the arithmetic checks out.) Proposal: add
+--       -- equation_number 'A3', formula 'A = V_F / h', output_symbol 'A',
+--       -- input_symbols ['V_F','h'], clause_reference 'AnhangA (Bestimmung der Filterfläche)',
+--       -- worksheet VDI-3477-04, verification_status 'verified_against_standard' + the quote above.
+--     Note this makes A derived, which interacts with BLOCK 10 (A is currently is_required=true).
+--     -- rollback: delete the equation row with equation_number='A3' for VDI-3477.
+
+
+-- =====================================================================================================
+-- BLOCK 15 — SOURCE-QUOTE QUALITY SCORE (record only, no SQL)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- All 19 gate source_quotes were tested programmatically against the transcript: 19/19 are byte-exact
+-- verbatim substrings (whitespace-collapsed). None contains an ellipsis, so no exemplary qualifier
+-- ("z.B.") is swallowed inside one. Ranked worst-first by usefulness rather than fidelity:
+--   1. CR-16 — verbatim but a FRAGMENT starting mid-sentence ("werden können und eine Überwachung ...").
+--   2. CR-02 — verbatim but is only a LaTeX table caption; contains no requirement.
+--   3. CR-11 — verbatim but is a bare formula (Gl.5); contains no requirement, and the gate it justifies
+--              contradicts §7.4 (BLOCK 6a).
+--   4. CR-01 — verbatim but the modal is "kann"; an applicability statement, not an obligation.
+--   5. CR-04 — verbatim but TRUNCATED at the first of five bullets, with no ellipsis marker (BLOCK 3).
+--   6. CR-09 — verbatim but covers only the SOFT half of a two-part gate (BLOCK 5).
+--   7. CR-17 — verbatim but byte-identical to CR-05's quote (duplicate, BLOCK 2).
+-- Equation source_quotes: 16/18 verbatim. The two exceptions are honestly flagged inline in the data:
+--   Gl.(12) — the stored source_quote is a PARAPHRASE that silently corrects the printed formula and
+--             says so in a bracketed note ("[OCR-Stub korrigiert: mittleres '=' ... war Transkriptions-
+--             fehler]"). This is the worst source_quote in the standard: an editorially corrected string
+--             stored in a field whose contract is "verbatim". The md-pass verification_quote written
+--             today carries the UNCORRECTED printed text instead, so the two now disagree by design.
+--   Gl.(2)  — same pattern, but the defect is the guideline's own print error, not the transcript's.
+-- Proposal: leave both source_quotes as-is (they are load-bearing documentation of a real defect), but
+-- record that a VA pass on the print must settle both. No SQL.
+
+
+-- =====================================================================================================
+-- BLOCK 16 — EXPLICIT NEGATIVE RESULTS (so their absence is auditable)  ☐ RATIFIED ______
+-- =====================================================================================================
+-- Checked and NOT found in VDI-3477:
+--   * membership tests enumerating a field's whole enum domain — NONE (no gate uses IN/membership at all).
+--   * `IS NOT NULL` on a boolean field — NONE. All five boolean gates use `== true` (CR-01, CR-06, CR-09,
+--     CR-10, CR-14), which correctly fails on a stored `false`.
+--   * tautology over an equation output — the nearest case is CR-11 (`c_rein <= c_roh`, equivalent to
+--     eta >= 0 under Gl.5); handled in BLOCK 6a, and it is worse than a tautology because §7.4 says the
+--     inequality can genuinely be violated.
+--   * OR-collapse / AND-OR inversion — NONE. No gate condition contains OR; the four AND-conjunctions
+--     are CR-02, CR-07, CR-09, CR-13, CR-19 and none inverts an operator (CR-09 and CR-19 are handled
+--     above as scope problems, not operator errors).
+--   * boundary-inclusivity errors — NONE. Every numeric bound was compared to the printed wording:
+--       CR-05 "muss ... über 95 % liegen"          -> `> 95`          strict, correct.
+--       CR-07 ">20 % freier Fläche"                -> `> 20`          strict, correct.
+--       CR-07 "von 5 mm bis maximal 20 mm"         -> `>= 5 AND <= 20` inclusive, correct.
+--       CR-08 "zwischen 40 % und 60 %"             -> `>= 40 AND <= 60` inclusive, correct.
+--       CR-03 "etwa 20 °C bis 40 °C"               -> `>= 20 AND <= 40` inclusive; correct as arithmetic,
+--                                                     but see BLOCK 6b — "etwa" should not be a block.
+--       CR-19 "weniger als 5 mg/m3"                -> `< 5`           strict, correct.
+--   * unsatisfiable gates / uncovered enum values — NONE. Every enum value of anlagenart,
+--     schadstoff_stoffgruppe, eignungsklasse and materialart is reachable through every gate.
+--     (CR-19 is unsatisfiable-in-practice for plants with no pre-scrubber, but that is a null/scope
+--     problem, handled in BLOCK 1, not an enum-coverage problem.)
+--   * strict-subset duplicate gates — one: CR-17 vs CR-05 (BLOCK 2).
+--   * invented values or ranges — NONE. Every numeric value in every gate condition and every field
+--     description was located in the transcript, including the two that at first looked invented:
+--       "1,20 m bis 1,75 m" (field h)          -> §6.5.2, printed p.49  — real, but WRONG CLAUSE (13a).
+--       "Holzhackschnitzel max. 12 Monate"     -> §6.5.3.2.3, printed p.60 — real, but scope dropped (13b).
+--   * worksheets with zero fields — NONE. Field counts: -01: 3, -02: 8, -03: 10, -04: 25, -05: 10,
+--     -06: 4, -07: 6, -08: 17, -09: 6  (= 89).
+--   * phantom fields (enum-value tokens materialised as fields with no label/clause/description and no
+--     equation or gate reference) — NONE. All 89 fields carry a label, a clause_reference and a
+--     description. The two unreferenced-but-real fields W_1/W_2 are handled in BLOCK 14.
+--   * app-metadata fields needing the inferred_from_worksheet exemption — NONE (see pack header).
+-- =====================================================================================================
