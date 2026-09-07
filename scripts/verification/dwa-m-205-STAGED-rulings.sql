@@ -1,0 +1,203 @@
+-- ============================================================================
+-- DWA-M-205 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-07, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-205\DWA-M_205.md (mathpix LaTeX;
+--   NO page-number lines — "printed p.N" derived from the Inhalt/Tabellenverzeichnis and cross-checked against the
+--   mathpix image indices, which equal printed page + 2; see the pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — edits below are written as specs.
+-- Standard id 01c46e30-92cb-45c8-9a6e-96ea58be317c. Worksheet ids (prefix): 01 92501871 · 02 8d91149f · 03 d49b34c0 ·
+--   04 de3f8563 · 05 5792b32a · 06 f5add8d2 · 07 71235b9a · 08 7a580c71 · 09 2c3578b4 · 10 ccc715b7 · 11 d94c8822 ·
+--   12 bf9a96f6 · 13 ea50c890 · 14 adaf1855 · 15 0f3547cc · 16 57817b98 (no fields) · 17 25c0d5a2 · 18 ea9af14c ·
+--   19 2c37fdf0 · 20 fd48eb9a · 21 08b4bcf8 · 22 22d1707d · 23 bf805da4 · 24 9169219a · 25 ff9da560 · 26 6382a04b.
+-- Context: 72 gates (70 block / 2 warn). All 72 source_quotes re-checked against the md: every quoted sentence EXISTS
+--   verbatim (Tab. 2 rows rendered as prose, "…" elisions inside one clause). Five encode-time page refs slip by one
+--   page against the Inhalt (§4.1.2.3 "S. 15" → p.16; §4.1.3.2 "S. 16" → p.18; §4.3.3.3 "S. 27" → p.28; §4.3.6
+--   "S. 28" → p.29; §4.2.3.5 "S. 23" → p.24) — evidence only, no SQL.
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · DUPLICATE FIELDS ON THE SAME WORKSHEET (imported_unverified twin of a needs_engineer_review field carrying
+--   the same meaning; the twin has no label diacritics, no source_quote, anchor "package"). Proposal: active=false on
+--   the twin unless a gate/equation reads it. Evidence: the pack quotes the same md sentence for both rows.
+--   ☐ RATIFIED
+--   (a) M205-03 behandlungsziel (965b4fb2) ≙ nutzungsziel (7c1cab7f) — same four use classes (§2.1/§3, printed p.8–13).
+--   (b) M205-05 toc (63b0ab00) ≙ toc_bewaesserung (b9551350) — Tab. 3 "TOC mg/l" column (printed p.12).
+--   (c) M205-14 membran_porenweite (9029386e) ≙ porenweite (3d2f06ce) — §4.2.2 "0,01 µm bis 0,2 µm" (printed p.22).
+--   (d) M205-18 restozon_abgas (482b6795) ≙ restozon_abluft (f3924e2f) — §4.3.3.4 "maximal 0,02 mg/m³" (printed p.28);
+--       CR-08 reads restozon_abluft, so the twin is the dead one.
+--   (e) M205-21 restchlor_gewaesser (62cf1194) ≙ restchlor (b2178740); chlor_kontaktzeit (e60393a0) ≙ kontaktzeit_chlor
+--       (a051296b); chlor_ph (6468bfb4) ≙ ph_chlorung (a284d43a); chlormittel (5ae470ec) ≙ chlormittel_typ (0c837559) —
+--       all §4.4.2 (printed p.29); CR-11/12/24 read the needs_engineer_review names.
+--   (f) M205-22 paa_dosis (0ec4990d) ≙ pes_dosis (93a4e408) — Tab. 7 (printed p.31).
+--   (g) M205-04 gewaessertyp (bd9bfab0) + guetekategorie (c494c097) together ≙ gewaesserklasse (2685123b) — BUT the pair
+--       covers all six Tab. 2 cells while gewaesserklasse lacks "kueste_ausreichend" (Küstengewässer / Ausreichende
+--       Qualität 185 (90) / 500 (90), printed p.10). Ruling: keep the pair and retire gewaesserklasse, OR add the sixth
+--       enum value — owner choice, not proposed here.
+--   NOT duplicates (kept): M205-07 wiederverkeimungsbeurteilung (boolean, CR-31) vs brauchwasser_standzeit_h (number);
+--       M205-18 katalytisch (boolean, read by CR-26) vs verbrennung_typ (enum).
+-- update public.fields set active=false where id in ('965b4fb2-53f0-4203-983f-01958e03c4b6','63b0ab00-89e7-4efa-8ec5-9002616e1052','9029386e-5cf7-47a2-8957-1f84d9b487a5','482b6795-bf57-40de-bc92-67a4459f82d2','62cf1194-cfb3-4044-a9ac-8e9005df6e53','e60393a0-59b6-483e-93bb-a625ef34eba4','6468bfb4-06a2-4030-aab9-0f2b1e7af2cf','5ae470ec-fa8c-46c8-b1c9-290ce374de4c','0ec4990d-d94e-4149-a275-4f4bc947f1ee');
+-- rollback: update public.fields set active=true where id in (same nine ids);
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · STRUCTURAL FINDING — the same symbol is materialised on two worksheets 60+ times, and worksheet titles do not
+--   match their content: M205-05 "Bewässerung mit gereinigtem Abwasser" holds the UV design fields (uv_dosis,
+--   strahlertyp, Tab. 4 rows …); M205-06 "Trinkwassergewinnung" holds the membrane fields; M205-07 "Brauchwassernutzung
+--   und Arbeitsschutz" holds the ozone fields; M205-08 "Zulaufcharakterisierung" holds the chlorine/PES/H2O2 fields;
+--   M205-10 "UV-Bestrahlung — Bemessung" hosts every microbiological target gate. M205-16 (Ozonung — Allgemeines) is
+--   empty. No SQL proposed — needs an owner decision on the worksheet layout (retire the phase-1 twins on 05/06/07/08
+--   or the phase-3 twins on 10/14/17/21).   ☐ RATIFIED (decision only)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · DUPLICATE GATES (identical code+condition+quote twice, "-2" suffix or REQ-M205-ES1 twin). Proposal: deactivate
+--   the twin; keep the first. Rollback inverse.   ☐ RATIFIED
+--   CR-06-2 (375741ec) · CR-31-2 (cf706693) · CR-32-2 (58ba4c36) · CR-23-2 (0e84f3e0) + REQ-M205-ES1-11 (a359e40c) +
+--   REQ-M205-ES1-11-2 (8c8c0a13) [restchlor_betrieb >= 0.2 is enforced FOUR times on M205-08] · CR-13-2 (ffa075f3) ·
+--   CR-27-2 (d0c868ee) · CR-30-2 (ecd949c8) · CR-03-2 (ab98859a) · CR-04-2 (85c33f56) · CR-05-2 (9812fb5e) ·
+--   CR-14-2 (1d2f5224) · CR-15-2 (2bc4cee8) · CR-16-2 (7632aa40) · CR-17-2 (86179325) · CR-20-2 (7581d576) ·
+--   CR-33-2 (a26dbf44) · CR-25-2 (c58748a6) · CR-35-2 (b065f968) · CR-36-2 (0fb46d01) · REQ-M205-ES1-04-2 (1d23c9fe, warn).
+--   Also CR-21 exists on M205-07 (8fc3c2ef) AND M205-10 (06b2b87b) with the same condition; and the warn gate
+--   REQ-M205-ES1-04 (e6ba2255) duplicates CR-21 with the correct (advisory) severity — see S-4.
+-- update public.compliance_requirements set active=false where id in ('375741ec-a911-4c23-aa34-659bd44686cc','cf706693-1306-4877-b689-a4f8c48ee49e','58ba4c36-111f-476f-96b3-f6bc4a6d4786','0e84f3e0-1138-4c2b-8f4c-796bbcab4460','a359e40c-3553-4b20-bf60-5b28dbc9bece','8c8c0a13-a3f3-4fcd-8896-14781ee03987','ffa075f3-b392-4dc1-9fcf-6f2ef7e79520','d0c868ee-451d-4f78-b3a5-5f3c8b10b2b6','ecd949c8-fa35-4caa-90b8-59db6e9a7d76','ab98859a-a512-489b-bd9b-31d49a6ee4f0','85c33f56-0637-4176-933d-506916835434','9812fb5e-92f0-497d-979f-35664282c99b','1d2f5224-be95-4980-8cca-b7bcb1ff0983','2bc4cee8-c01d-41bc-91aa-80783344b386','7632aa40-ac77-4abd-a411-902151dbdd8c','86179325-4a53-4d53-b473-1c7cf55f0181','7581d576-0ab4-4aee-9033-22bd134b59d7','a26dbf44-43f5-4979-9b43-a7fd6a5bf29f','c58748a6-3ead-4550-86ee-62e6d6604501','b065f968-9847-4819-9fc7-a8f295d74c9c','0fb46d01-6d30-4813-a0c9-17fc49cb108d','1d23c9fe-44e7-4767-b544-6027563a75e8');
+-- rollback: update public.compliance_requirements set active=true where id in (same 22 ids);
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · SEVERITY NOTES — block gates anchored on advisory / empirical text. Proposal: severity='warn'. Rollback: 'block'.
+--   ☐ RATIFIED
+--   CR-06 (13e1a41d, afs <= 20): "Das Abwasser sollte vor der Bestrahlung … (< 20 mg/l, besser z. B. nach Filtration
+--       < 5 mg/l)" — sollte (§4.1.2.2, printed p.15).
+--   CR-28 (869c84ce + 07515d2b): "… ist die Aufteilung des Gesamtdurchflusses auf parallel angeordnete Gerinne
+--       zweckmäßig" — zweckmäßig (§4.1.3.2, printed p.18).
+--   CR-07 (d4be8eb8 + 16541376, uv_dosis 300..700): "Danach beträgt die Mindestbestrahlung etwa 300 J/m² bis 450 J/m²
+--       … Schwankungsbreite … 400 J/m² bis 600 J/m² und im Einzelfall bis zu 700 J/m²" — empirical bands (§4.1.2.3,
+--       p.16); the UPPER bound 700 over-enforces (a higher dose is not a deviation). Proposal: warn + drop "<= 700".
+--   CR-09 (6363f448 + 0d0317dc, ozon_konz 2..10) and CR-10 (0fb1ad7c + 483343b5): "können als Größenordnung für die
+--       wesentlichen Betriebsparameter genannt werden … Die dafür konkret erforderlichen Einstellungen müssen jedoch im
+--       Rahmen einer Pilotierung ermittelt werden" (§4.3.3.3, p.28) — orientation values from pilots.
+--   CR-21 (8fc3c2ef + 06b2b87b, ozon_pro_doc < 0.8): "Die Bromatbildung kann minimiert werden, wenn …" (§4.3.6, p.29)
+--       — kann; the warn twin REQ-M205-ES1-04 already carries the right severity → deactivate CR-21 instead.
+--   CR-13 (26ab15df, monatlicher_nachweis): "sind monatliche Nachweise in der Regel ausreichend" (§4.1.4.2, p.19–20).
+--   CR-27 (aef3ff67): "sollten erfahrungsgemäß alle vier Wochen gereinigt werden … Eine halbjährliche Kalibrierung
+--       sollte … vorgesehen werden" (§4.1.4.2, p.19) — sollte.
+--   CR-25 (323f359f, pilotierung): "wird eine Pilotierung empfohlen" (§4.2.3.5, p.24) — empfohlen.
+--   CR-20 (139658fe, log_reduktion >= 3): "wird eine Keimreduzierung um 6 bis 7 Log-Stufen empfohlen … um 3 Log-Stufen"
+--       (§3.3, p.11) — WHO recommendation; also the threshold ignores `nutzung` (restricted 3–4 vs unrestricted 6–7).
+--   CR-30 (836c0971, chlorung_routine == False): "kommt die Chlorung … als Routineverfahren … nicht zum Einsatz"
+--       (§4.4.2, p.29) is descriptive; §5 "als Dauerlösung abzulehnen" (p.31) is a consensus statement — warn.
+--   CR-23 (a2973fe0, restchlor_betrieb >= 0.2): "in der Größenordnung von 0,2 mg/l" (§4.4.2, p.29) — approximate.
+--   CR-24 (056030ac + b2ea5082, kontaktzeit_chlor 15..30): "eine Kontaktzeit von 15 bis 30 Minuten erforderlich"
+--       (§4.4.2, p.29) — keep block on the lower bound, drop the upper bound (longer contact is not a deviation).
+--   CR-12 (e997756a + 52e51dae, restchlor <= 0.005): "Die EGFischgewässerrichtlinie 2006/44/EG gibt z. B. einen
+--       Grenzwert … vor" (§4.4.2, p.29) — external directive quoted as example (NR); block only if the owner adopts it.
+--   CR-29 (dbb439fd + 089ca890, ip_schutzart IN {IP54,IP55,IP56,IP65,IP66,IP67}): "Sie sind in IP 54-67 auszuführen"
+--       (§4.1.3.2, p.18) — printed as a range; the set omits IP57, IP64 … Proposal: condition on the numeric part
+--       (54 <= n <= 67) or list all codes in the range.
+-- update public.compliance_requirements set severity='warn' where id in ('13e1a41d-838e-4d2f-bfbc-b6f10d3bbfe0','869c84ce-e0ff-41a3-a0e5-0895f2bee132','07515d2b-bca7-4e30-a955-a5ef85834518','d4be8eb8-c2ac-486f-be60-ed0bc6d07cf0','16541376-1bcd-4055-be9d-b421e51e62ba','6363f448-ed65-43aa-a051-999f4b653d9f','0d0317dc-81c3-4524-ae00-08babe61658c','0fb1ad7c-af5c-44f7-bdd0-713ce8389d6a','483343b5-e71b-4387-aef6-4ba79fd77962','26ab15df-399a-4918-aea7-6a454f7bbf56','aef3ff67-ba5f-4059-97e9-51ab680123f3','323f359f-dfc8-4027-8c6b-8ec46c68d3cb','139658fe-3d40-40f4-8155-5e397f2bd3ec','836c0971-b9b6-4c71-8fe8-927d0086a879','a2973fe0-914f-4eb0-bed0-f6c324202a35','e997756a-2c0b-4189-ba31-dc39bfba77b2','52e51dae-138b-41e5-9b6d-63b281cf0121');
+-- update public.compliance_requirements set active=false where id in ('8fc3c2ef-4de8-4ebc-aa6c-832a0e1fec34','06b2b87b-c196-4562-a69f-2564f3a0b1b2');  -- CR-21 twins of the warn gate
+-- rollback: severity='block' / active=true on the same ids.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · GATE APPLICABILITY — the seven microbiological target gates all sit on M205-10 and read e_coli_ablauf /
+--   enterokokken_ablauf WITHOUT a condition on gewaesserklasse / nutzungsziel: CR-03 (≤500/≤200 Binnen ausgezeichnet),
+--   CR-14 (≤1000/≤400 Binnen gut), CR-15 (≤900/≤330 Binnen ausreichend), CR-04 (≤250/≤100 Küste ausgezeichnet),
+--   CR-16 (≤500/≤200 Küste gut), CR-17 (≤500/≤185 Küste ausreichend), CR-05 (== 0 / == 0 TrinkwV, §3.4 p.13). If
+--   evaluate.ts has no applies_when outside the exported `condition`, the strictest (CR-05: not detectable) governs
+--   every project regardless of use — over-enforcement. Proposal: prefix each with the selection it belongs to, e.g.
+--   CR-03: `gewaesserklasse == binnen_ausgezeichnet AND e_coli_ablauf <= 500 AND enterokokken_ablauf <= 200`;
+--   CR-05: `nutzungsziel == trinkwassergewinnung AND …`. Evidence: Tab. 2 (printed p.10) prints one row PER class.
+--   CR-34 (fae8929a + 1c173520): `afs > 0 AND vorsiebung_erforderlich IN {ja, nein}` is tautological (any selection
+--   passes) — proposal: `vorsiebung_erforderlich == ja OR afs <= 5` or attestation-type gate.   ☐ RATIFIED
+-- (specs only — condition edits written after ratification)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · GATE RE-HOMES — M205-10 (UV-Bestrahlung — Bemessung) hosts gates that read only fields of other worksheets;
+--   each already has a same-code sibling on the field's home worksheet, so the M205-10 copy is a duplicate:
+--   CR-08 (3743076c → restozon_abluft on 07/18) · CR-09 (0d0317dc) / CR-10 (483343b5) (ozon_konz/ozon_aufenthaltszeit
+--   on 07/17) · CR-11 (04ad3958) / CR-12 (52e51dae) / CR-22 (41159760) / CR-24 (b2ea5082) (chlorine fields on 08/21) ·
+--   CR-21 (06b2b87b, 07/17) · CR-26 (28589251 → 18) · CR-28 (07515d2b → durchfluss_max on 03/08 + mehrstrassige_anlage
+--   on 11) · CR-29 (089ca890 → ip_schutzart on 05/11) · CR-34 (1c173520 → 06/14). Proposal: active=false on the twelve
+--   M205-10 copies (rollback active=true).   ☐ RATIFIED
+-- update public.compliance_requirements set active=false where id in ('3743076c-748e-43e6-8d90-581907e3e815','0d0317dc-81c3-4524-ae00-08babe61658c','483343b5-e71b-4387-aef6-4ba79fd77962','04ad3958-b8bc-4030-be3b-bf624bdd462f','52e51dae-138b-41e5-9b6d-63b281cf0121','41159760-6ba1-48a5-96ca-df83168ac680','b2ea5082-fc87-4d49-a8ec-9d6cd023f19c','06b2b87b-c196-4562-a69f-2564f3a0b1b2','28589251-2af0-4301-a543-5fb9f60090ff','07515d2b-bca7-4e30-a955-a5ef85834518','089ca890-720e-4b55-94a2-1e3b56f67932','1c173520-9618-471a-915d-5949c5934133');
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · MISSING GATES FOR PRINTED HARD LIMITS (insert specs; severity per modal verb).   ☐ RATIFIED
+--   (a) §4.1.3.3 (p.18): "Bei Unterschreiten eines Minimalwasserstandes ist die Anlage aus Sicherheitsgründen
+--       abzuschalten." — no field; needs a boolean (minimalwasserstand_abschaltung) + block gate == True.
+--   (b) §4.1.3.3 (p.18–19): "Je Bestrahlungsbank ist mindestens ein UV-Sensor … anzuordnen … sind mindestens zwei
+--       UV-Sensoren erforderlich" — field uv_sensor_anzahl_pro_bank exists (09/24) with NO gate: block
+--       `uv_sensor_anzahl_pro_bank >= 1`, and `>= 2` when gerinne_zuschaltbar == True (field exists on 24).
+--   (c) §4.1.3.2 (p.18): "Eine lichtdichte Abdeckung der Gerinne über den Strahlern ist aus Gründen des Arbeitsschutzes
+--       erforderlich." — enum gerinne_abdeckung_lichtdicht exists (05/11) with NO gate: block `== ja`.
+--   (d) §4.1.3.3 (p.19): "Vor und hinter jeder Bestrahlungsstraße sind Probennahmestellen einzurichten" — no field.
+--   (e) §4.3.3.4 (p.28): thermal path "über mindestens 2 Sekunden" — field verbrennung_haltezeit_s exists (18) but CR-26
+--       checks only the temperature: extend to `(temperatur_ozonentfernung >= 350 AND verbrennung_haltezeit_s >= 2) OR
+--       katalytisch == True`.
+--   (f) §4.4.2 (p.29–30): "in Konzentration über 30 Volumenprozent explosiv" — field clo2_konzentration exists (21), no
+--       gate: block `clo2_konzentration <= 30` when chlormittel_typ == chlordioxid.
+--   (g) §3.3 (p.11) + Tab. 3 note 3 (p.12): "Salmonellen … dürfen nicht nachweisbar sein (nicht nachweisbar in 1000 ml)"
+--       — field salmonellen exists (10/25), no gate: block `salmonellen == 0` when nutzungsziel == bewaesserung.
+--   (h) §3.3 (p.11): WHO log reductions per `nutzung` — CR-20 only enforces >= 3; spec `nutzung == unrestricted →
+--       log_reduktion >= 6`, `restricted → >= 3` (warn, "empfohlen").
+--   (i) Tab. 3 (p.12): Eignungsklasse rows for Fäkalstreptokokken / E. coli / TOC — fields fkstrep/toc exist (05) but no
+--       gate ties the class to the printed cell values (≤100/≤200/≤10 for class 2 …). Spec as warn (Richtwerte, note 4).
+--   (j) §4.1.4.4 (p.20): "Die ausrangierten Strahler müssen … gesondert entsorgt werden" — CR-33 exists, OK.
+--   No Legionella clause exists anywhere in DWA-M 205 (checked: the word does not occur in the md) — nothing to add.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · IS_REQUIRED REVIEW — required=true where the source is advisory / survey data / process-conditional.
+--   Proposal: is_required=false (rollback true).   ☐ RATIFIED
+--   spez_strom_uv (a0bfc02e on 05, d0510688 on 13): "bewegt sich … im Bereich von 30 Wh bis 60 Wh" (§4.1.5.2 p.22) —
+--       survey band, not an input the standard demands.
+--   restchlor (704dba77 on 08, b2178740 on 21): external directive value "z. B." (§4.4.2 p.29).
+--   pruefintervall_mikrobio (a927bf68 on 09, 90cadca4 on 24) + monatlicher_nachweis (5a4320ee on 09, af596b8c on 24):
+--       "in der Regel ausreichend" (§4.1.4.2 p.19–20).
+--   log_reduktion (ae3b39d5 on 10, 1047ab2b on 25): "empfohlen" (§3.3 p.11).
+--   doc (84ba505f on 03, e19b4d2b on 08): only meaningful for Ozonung (§4.3.3.3/§4.3.6) — process-conditional.
+--   uv_dosis_zielband (b4cb8163 on 05, b809196f on 10): EKOWAI construct, third value unprinted (see S-9).
+--   ozon_konz (29cf60ea on 07, 69f5782c on 17) + ozon_aufenthaltszeit (072060c4 on 07, ac4ff149 on 17): "Größenordnung"
+--       from pilots (§4.3.3.3 p.28) — required only when verfahren == ozon.
+--   ct_wert (f67c700f on 07, 65b159db on 17): derived output of EQ-03 — see S-10.
+-- update public.fields set is_required=false where id in ('a0bfc02e-ed3e-482d-96c3-27543c8b4e30','d0510688-edfa-47c9-be0a-24ac7267ff7f','704dba77-0b4f-4f6a-9031-1da8e7cea1ae','b2178740-0b3f-4348-8f40-fe362a83a4e4','a927bf68-5fd1-44f7-900e-ad4cc8f058ee','90cadca4-a7f0-4220-9ef3-ed6352286a0f','5a4320ee-b765-4ed9-8a56-78b790207caa','af596b8c-1c43-4e5c-8934-57c5c8e2136b','ae3b39d5-e5f5-4894-99ff-53eab0f3b799','1047ab2b-3f51-456a-9157-6703ff584947','84ba505f-e455-4d85-a624-e9ee97e9e612','e19b4d2b-f2f1-4ae2-9b0f-71789359e548','b4cb8163-a173-41f5-ac67-d3e72b685517','b809196f-5e89-43fc-a410-5aea8de4dcd7','29cf60ea-ff1e-4dc2-bbed-54c0c81d43b8','69f5782c-9d55-4fef-86aa-20450601f316','072060c4-24d6-4605-bbfa-2166868ba145','ac4ff149-a76c-41a6-bfd8-f33c3b95ac21','f67c700f-4b2e-47cb-8eab-4fe84b704fe3','65b159db-8e70-436d-9a23-8333da5ca7dc');
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · CLAUSE / UNIT / ENUM CORRECTIONS (evidence: where the value actually sits in the md).   ☐ RATIFIED
+--   (a) vergleich_e_coli_erreichbar (1d19721c on 09) unit "log" → 'cfu/100 ml' — Tab. 8 row "Einhaltbare Konzentration
+--       (E. coli/ 100 ml) … < 10 … < 10 … < 100" (printed p.32).
+--   (b) membran_porenweite (9029386e on 14) unit "um" → 'µm' (§4.2.2 "0,01 µm bis 0,2 µm", p.22) — moot if S-1(c) retires it.
+--   (c) restozon_abgas (482b6795 on 18) unit "mg/m3" → 'mg/m³' — moot if S-1(d) retires it.
+--   (d) doc (84ba505f, e19b4d2b) clause "§4.3.6" → '§4.3.3.3; §4.3.6' (DOC-gesteuerte Dosierung, p.28; Bromat, p.29).
+--   (e) strahler_nutzungsdauer (ee3b143a on 05, c992b863 on 12) clause "§4.1.4.4, Tab.4" → '§4.1.4.4; §4.1.5.2; Tab. 4' —
+--       the "8.000 bis 12.000 Betriebsstunden" sentence is §4.1.5.2 (p.22); Tab. 4 prints 8.000–16.000 / 4.000–12.000 (p.17).
+--   (f) uv_dosis_zielband (b4cb8163, b809196f) enum: value 3 "tab2_ausgezeichnet 400–700 J/m² (Tab.2 2006/7/EG)" is NOT
+--       printed — §4.1.2.3 (p.16) ties 300–450 J/m² to 76/160/EWG and 400–700 J/m² to operating plants / the Isar
+--       one-log target; no dose is linked to the 2006/7/EG classes anywhere. Proposal: remove value 3 or relabel it as
+--       EKOWAI-derived (SR-2: the engineer must see it is a choice, not a printed band).
+--   (g) gewaesserklasse (5058689d on 02, 2685123b on 04) enum lacks kueste_ausreichend (Tab. 2 p.10: 185 (90) / 500 (90)).
+--   (h) e_coli_ablauf / enterokokken_ablauf description says "Binnengewässer, ausgezeichnete Qualität" although the field
+--       carries the measured effluent value for ANY class — description retag only.
+-- update public.fields set unit='cfu/100 ml' where id='1d19721c-98bc-42a9-a67a-741e781d65ae';
+-- update public.fields set clause_reference='§4.3.3.3; §4.3.6' where id in ('84ba505f-e455-4d85-a624-e9ee97e9e612','e19b4d2b-f2f1-4ae2-9b0f-71789359e548');
+-- update public.fields set clause_reference='§4.1.4.4; §4.1.5.2; Tab. 4' where id in ('ee3b143a-fd96-4d8f-915e-4d5c0b563f06','c992b863-e771-4498-b08a-83ea071c3827');
+-- rollback: unit='log'; clause_reference='§4.3.6'; clause_reference='§4.1.4.4, Tab.4'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · DERIVED-BUT-HAND-ENTERABLE (#22 class): equation outputs materialised as editable inputs.   ☐ RATIFIED
+--   uv_dosis (6368dbb9 on 05, d7a49a13 on 10) = EQ-01 uv_intensitaet × verweildauer (§4.1.1 p.14) — required input AND
+--       equation output; ct_wert (f67c700f on 07, 65b159db on 17) = EQ-03 ozon_konz × ozon_aufenthaltszeit (§4.3.2 p.26);
+--       permeabilitaet (9afc8be1 on 06, 2b395426 on 14) = EQ-08 brutto_permeatfluss / transmembrandruck (§4.2.3.1 p.23).
+--   Proposal: mark derived / read-only (data_class='derived'); keep is_required=false. Also EQ-02/EQ-12 (uv_dosis range
+--   "equations") and EQ-06/07/09/10/11 are range checks, not formulas — they duplicate CR-07/CR-24/CR-23 etc. as
+--   equations with output_symbol = their own input; consider converting them to gates or dropping them.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · ENCODE-TIME source_quote LABELLED "Verbatim" BUT PARAPHRASED (evidence only, no SQL — the pack replaces them
+--   with the md sentence in verification_quote):
+--   ozon_einsatzgas ("Als Einsatzgas kommen Luft oder technisch reiner Sauerstoff in Betracht." — md: "Als Einsatzgase
+--   können technisch reiner Sauerstoff oder Luft verwendet werden.", §4.3.3.2 p.27) · ct_wert_zielorganismus ("Für eine
+--   99-%ige Inaktivierung … 500-fach höherer ct-Wert" — md: "So übersteigt der ct-Wert für CryptosporidienOozysten …
+--   um ca. das Fünfhundertfache", §4.3.2 p.26) · strahler_auslastung_pct ("Die Auslastung der UV-Strahler liegt zwischen
+--   50 % und 70 %" — md: "Die Strahlerauslastung … liegt in der Regel bei rund 50 % bis 70 %", §4.1.5.2 p.22) ·
+--   chlormittel_typ ("Als Chlorungsmittel kommen Chlorgas, Hypochloritlösung (NaOCl) und Chlordioxid (ClO2) in Frage."
+--   — md: "Eine Chlorung wird in der Regel unter Verwendung von Chlorgas …", §4.4.2 p.29) · uv_dosis_zielband and
+--   abwassertemperatur_bereich carry glosses, not quotes.

@@ -18,3 +18,4 @@ dwa-m-277e-md-verification-pack.sql  DWA-M-277E
 dwa-m-1200-1-md-verification-pack.sql  DWA-M-1200-1
 dwa-m-1200-2-md-verification-pack.sql  DWA-M-1200-2
 dwa-m-1200-3-md-verification-pack.sql  DWA-M-1200-3
+dwa-m-205-md-verification-pack.sql  DWA-M-205
