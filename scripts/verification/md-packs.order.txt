@@ -38,3 +38,4 @@ din-en-iso-14044-md-verification-pack.sql  DIN-EN-ISO-14044
 dvs-2225-4-md-verification-pack.sql  DVS-2225-4
 dwa-a-125-md-verification-pack.sql  DWA-A-125
 dwa-a-131-md-verification-pack.sql  DWA-A-131
+dwa-a-226-md-verification-pack.sql  DWA-A-226

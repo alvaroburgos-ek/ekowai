@@ -1,0 +1,495 @@
+-- ============================================================================
+-- STAGED RULINGS — DWA-A 226 "Grundsätze für die Abwasserbehandlung in Belebungsanlagen mit
+-- gemeinsamer aerober Schlammstabilisierung ab 1.000 Einwohnerwerte" (August 2009, Weißdruck).
+-- md pass 2026-09-07, source: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-226\DWA-A-226.md
+-- Grade VC (SR-3). Page refs = printed page (range) of the clause, derived from the guideline's own
+-- Inhalt + Bilder-/Tabellenverzeichnis and cross-checked against the mathpix per-page image indices
+-- (offset 0; 4/4 figures consistent: Bild 1/2 = p.15, Bild 3/4 = p.23, A.1 crops = p.25, A.1/A.2 = p.28).
+--
+-- NOTHING IN THIS FILE IS APPLIED. Every block is commented out and carries a "☐ RATIFIED" marker.
+-- Un-comment a block only after Alvaro ticks it. Each block states: evidence quote (verbatim from the
+-- md), the proposed change, and the rollback inverse.
+--
+-- Prod shape at export time (fields-DWA-A-226.json, this session):
+--   9 worksheets / 87 fields (ALL imported_unverified) / 28 equations (23 verified_against_standard +
+--   5 verified_via_cross_reference, ALL with verification_quote NULL) / 24 compliance_requirements,
+--   ALL severity='block', ALL requires_attestation=false.
+--
+-- STRUCTURAL SCAN — results that produced NO finding, recorded so their absence is auditable:
+--   · empty gate conditions: 0 — all 24 gates carry a condition string.
+--   · condition='TRUE' no-ops: 0.
+--   · duplicate gates: 0. CR-009 and CR-010 share one source_quote but constrain different fields
+--     (q_SV <= 650 vs q_A <= 2) and both limits are printed in that same sentence (§3.4, p.14).
+--   · unsatisfiable gates: 0. CR-006 uses the conjunctive form
+--     "(art=='nitrifikation' AND O_B>=3) OR (art=='nitrifikation_denitrifikation' AND O_B>=2.5)";
+--     `stabilisierungsart` is a required 2-value enum, so both limbs are reachable.
+--   · AND/OR inversions against the printed text: 0. CR-002..CR-005 use the correct implication form
+--     ("art != X OR limit"), CR-006 the correct conjunctive form; none inverts the printed logic.
+--   · boundary inclusivity errors: 0 — every boundary matches the printed operator. CR-014 encodes
+--     "ständig unter 1 mg/l" as strict `< 1` (NOT `<=`); CR-004/CR-005 encode "$\leq$ 0,05 / 0,04" as
+--     `<=`; CR-001 encodes "zwischen 1.000 E und 5.000 E" inclusively; CR-009/CR-010/CR-011 encode
+--     "maximal 650" / "nicht höher als 2 m/h" / "bis auf maximal RV = 1" as `<=`; CR-002/CR-003
+--     encode "$t_{TS} \geq 20/25$ d" as `>=`; CR-016 encodes "von 3 mm bis 8 mm" inclusively.
+--   · invented values: 0. Every number carried by a gate condition or a field description was grepped
+--     against the md and found printed there (1.000 E / 5.000 E §1 p.7; 60/120/70/11/1,8 g/(E·d)
+--     Tab.1 p.10; 150 l/(E·d) p.10; 8..11 and 6..9 p.10; 0,05–0,15 and 0,2–0,7 l/(s·ha) and m 0,1–1
+--     p.10–11; 1,0 kg/kg and 1,0/2,5/5,0 % TR with 6/2,4/1,2 l/(E·d) p.10–11; 10 % Fe / 8 % Al p.11;
+--     20 d / 25 d p.11–12; 0,05 / 0,04 kg/(kg·d) p.12; Tab.2/Tab.3 f_BB and TS_BB grids p.12;
+--     3 / 2,5 kg/kg and 0,12 / 0,1 p.13; 0,35 p.13; 65 % / 80 % p.13; 0,9 and 0,6–0,7 p.13–14;
+--     7–10 g/(m³·m), 5–7 Wh/(m³·m), ~10 m/s, 1–5 W/m³, 1,2–1,5 kg/kWh p.13–14; 100–150 / 125 ml/g
+--     p.14; 1,5 h / 2 h p.14; 0,7 / 1,0 p.14; RV max 1 p.14; 650 l/(m²·h) and 2 m/h p.14;
+--     Tab.4/5/6 grids p.15; h_z <= 1 m and 0,3 and 1,7 p.15–16; 100 / 70 m³/h and 10 m and 1/6..1/5
+--     p.16; 3–8 mm and 100 mm p.17; 0,2/0,1 mm and >95 % p.17; n >= 1,7 p.18; 3,50 m / 0,6 m p.18;
+--     >=1 Monat / >=6 Monate and 30–70 W/m³ p.20; 55 % p.22; 65–70 % / 1,5 mg/l / 1 mg/l p.22;
+--     1,5 mmol/l p.21–22; 12 °C / 2 °C / 5 % / 80 % p.21–22; 50–100 % / <65 % and 0,5× p.23;
+--     Tab.7 15 / 3,2 / 9 / 2,0 and Tab.8 1,5 / 1,15 / 1,9 / 1,4 p.26).
+--   · phantom fields (enum tokens materialised as fields — symbol without label/clause/description,
+--     never referenced by an equation or gate): 0. All 87 fields carry label_de + clause_reference +
+--     description.
+--   · worksheets with zero fields: 0 (6 / 13 / 12 / 4 / 6 / 15 / 17 / 7 / 7 = 87).
+--   · duplicate fields: 0. The apparent twins are the guideline's OWN alternative branches, each with
+--     exactly one producing equation: Q_bem (Gl.2, Trennsystem) vs Q_bem_misch (Gl.3, Mischsystem);
+--     V_BB (Gl.10) vs V_BB_spez (Gl.11, "Werden alle Standardvorgaben dieses Arbeitsblattes
+--     verwendet"); O_B_Nitr (Gl.13) vs O_B_Deni (Gl.14); alphaOC (Gl.12) vs alphaOC_int (Gl.15);
+--     TS_RS_rund (Gl.19) vs TS_RS_trichter (Gl.20); A_NB (Gl.24, Rundbecken) vs A_NB_theo (Gl.25,
+--     Trichterbecken). See block S-11 for the routing gap these branches leave open.
+--   · paraphrased / transliterated source_quotes on gates: 0 — all 24 gate source_quotes are verbatim
+--     md text (LaTeX preserved). BUT five are truncated to a lead-in that does NOT contain the limit
+--     the condition enforces (blocks S-3 and S-4), and one is a two-character line-break artifact.
+--     Field-level source_quote does not exist at all for this standard (0 of 87 fields carry one);
+--     the field *descriptions* are ASCII-transliterated ("Ueberschussschlamm", "0,05 kg/(kgxd)") —
+--     cosmetic, not a source claim, so not staged.
+--   · unit mismatch between fields feeding one equation: 2 (blocks S-1 and S-2). Both are real
+--     factor errors and are the most consequential findings in this standard.
+--   · mis-homed gates: 5 (block S-5).
+--   · presence-only gates that hide or replace a printed requirement: 5 (blocks S-3, S-6, S-7).
+--   · block gates anchored on soft/exemplary/descriptive text: 11 (block S-8).
+-- ============================================================================
+
+
+-- ----------------------------------------------------------------------------
+-- S-1  UNIT MISMATCH feeding Gl.17 — Q_L_St is off by a factor of 1.000.
+--      Equation 17 (id a4995d08-b2b9-4c41-b584-bd4931177bdb, A226-06):
+--        Q_L_St = alphaOC / (alphaOC_L_h * h_E)
+--      Field units in prod: alphaOC [kg/h], alphaOC_L_h [g/(m3*m)], h_E [m] -> the quotient is
+--      kg/h / (g/(m3*m) * m) = 1.000 x too small. The guideline's OWN worked example converts first:
+--      EVIDENCE (Anhang A.1.5, printed p.26):
+--        "aus Tabelle 7 für Belüftungselemente bei mittleren Verhältnissen:
+--         $\alpha O C_{\mathrm{L}, \mathrm{h}}=9 \mathrm{~g} /\left(\mathrm{m}^{3} \times
+--         \mathrm{m}\right)=0,009 \mathrm{~kg} /\left(\mathrm{m}^{3} \times \mathrm{m}\right)$
+--         und mit gewählt $h_{\mathrm{E}}=3 \mathrm{~m}$ [...]
+--         $Q_{\mathrm{L}, \mathrm{St}}=\frac{7,2}{0,009 \times 3}=267 \mathrm{~m}^{3} / \mathrm{h}$"
+--      With the encoded units the engine returns 7,2 / (9 * 3) = 0,27 m3/h instead of 267 m3/h.
+-- ☐ RATIFIED  (a) carry the conversion in the equation (keeps the field unit as the guideline prints it)
+-- update public.equations set formula = 'Q_L_St = alphaOC / (alphaOC_L_h / 1000 * h_E)'
+--   where id = 'a4995d08-b2b9-4c41-b584-bd4931177bdb';
+--   -- rollback: update public.equations set formula = 'Q_L_St = alphaOC / (alphaOC_L_h * h_E)'
+--   --           where id = 'a4995d08-b2b9-4c41-b584-bd4931177bdb';
+-- ☐ RATIFIED  (b) ALTERNATIVE — change the field unit instead (rejected here because the guideline,
+--                 Tab.7 and the Kurzzeichen table all print g/(m3*m); changing the unit would make the
+--                 form disagree with the printed table the engineer reads the value out of):
+-- update public.fields set unit = 'kg/(m3*m)' where id = '1e356546-1e65-4ced-9185-7a2c5148ba97';
+--   -- rollback: update public.fields set unit = 'g/(m3*m)' where id = '1e356546-1e65-4ced-9185-7a2c5148ba97';
+
+
+-- ----------------------------------------------------------------------------
+-- S-2  UNIT MISMATCH feeding Gl.24 / Gl.25 — A_NB and A_NB_theo are off by a factor of 3,6.
+--      Equations 24 (5c0d7b3c-9d78-4ba3-af58-a3016aa30542) and 25
+--      (59cf83be-1806-4996-8de5-8d9262903afe), both A226-07:  A_NB = Q_bem / q_A
+--      Field units in prod: Q_bem [l/s] (produced by Gl.2 / Gl.3, which the guideline prints in l/s),
+--      q_A [m/h] -> l/s / (m/h) is not m2. The guideline states the Nachklärung input in m3/h:
+--      EVIDENCE (§3.4, printed p.14):
+--        "Grundlagen der Bemessung der Nachklärung sind der maximale Zufluss bei Regenwetter
+--         $Q_{\text {bem }}\left(\mathrm{m}^{3} / \mathrm{h}\right)$, der Schlammindex ISV ( $1 / \mathrm{kg}$ )
+--         und der Trockensubstanzgehalt im Zulauf der Nachklärung $T S_{\mathrm{BB}}\left(\mathrm{kg} /
+--         \mathrm{m}^{3}\right)$ sowie das Rücklaufverhältnis $R V$."
+--      and the Kurzzeichen table (§2, printed p.8–9):
+--        "\hline $Q_{\text {bem }}$ & $\mathrm{m}^{3} / \mathrm{h}$ & maximaler Zufluss zur Kläranlage
+--         bei Regenwetter aus Misch- oder Trennsystem, der der Bemessung zugrunde gelegt wird \\"
+--      and the worked example (Anhang A.2.2/A.2.3, printed p.26–27):
+--        "$Q_{\mathrm{bem}}=6 \times 8,68+7,5=59,58 \mathrm{l} / \mathrm{s}=214 \mathrm{~m}^{3} / \mathrm{h}$"
+--        "$A_{\mathrm{NB}}=\frac{214}{1,5}\left[\mathrm{~m}^{2}\right]$ $A_{\mathrm{NB}}=142,7 \mathrm{~m}^{2}$"
+--      The guideline itself carries Q_bem in BOTH units (Gl.2/Gl.3 in l/s, §3.4 and the Kurzzeichen
+--      table in m3/h); the encoding took l/s and never converts. Preferred fix: add the 3,6 conversion
+--      inside Gl.24/Gl.25 so the printed l/s equations stay untouched.
+-- ☐ RATIFIED  (a)
+-- update public.equations set formula = 'A_NB = Q_bem * 3.6 / q_A'
+--   where id = '5c0d7b3c-9d78-4ba3-af58-a3016aa30542';
+--   -- rollback: update public.equations set formula = 'A_NB = Q_bem / q_A'
+--   --           where id = '5c0d7b3c-9d78-4ba3-af58-a3016aa30542';
+-- ☐ RATIFIED  (b)
+-- update public.equations set formula = 'A_NB_theo = Q_bem * 3.6 / q_A'
+--   where id = '59cf83be-1806-4996-8de5-8d9262903afe';
+--   -- rollback: update public.equations set formula = 'A_NB_theo = Q_bem / q_A'
+--   --           where id = '59cf83be-1806-4996-8de5-8d9262903afe';
+-- ☐ RATIFIED  (c) ALTERNATIVE — introduce an explicit Q_bem_m3h field (m3/h) produced by
+--                 Q_bem_m3h = Q_bem * 3.6 and let Gl.24/25 read it. Cleaner but adds a field and
+--                 changes the form, so it needs a ruling rather than a formula edit. (INSERT not
+--                 pre-written: needs worksheet_template_id + order_index decisions.)
+
+
+-- ----------------------------------------------------------------------------
+-- S-3  CR-023 (A226-03, §3.2, severity=block) — PRESENCE-ONLY CONDITION HIDES TWO PRINTED RANGES,
+--      and it presence-checks the wrong symbols. This is the recurring top defect for this pass.
+--      condition = 'Q_F IS NOT NULL AND Q_R_Tr IS NOT NULL'
+--      Its own source_quote states numeric ranges — but for q_F and q_R,Tr (the Abflussspenden,
+--      encoded as separate fields q_F / q_R_Tr), not for the flows Q_F / Q_R_Tr the condition names.
+--      EVIDENCE (§3.2, printed p.10–11):
+--        "Die Ermittlung des Fremd- und Regenwasserzuflusses sollte in Anlehnung an das Arbeitsblatt
+--         DWA-A 118 auf der Basis von $q_{\mathrm{F}}(0,05 \mathrm{l} /(\mathrm{s} \times \mathrm{ha})$
+--         bis $0,15 \mathrm{l} /(\mathrm{s} \times \mathrm{ha}))$ und $q_{\mathrm{R}, \mathrm{Tr}}
+--         (0,21 /(\mathrm{s} \times \mathrm{ha})$ bis $0,71 /(\mathrm{s} \times \mathrm{ha}))$ erfolgen."
+--        (md OCR: "0,21 /(s × ha)" = 0,2 l/(s×ha); "0,71 /(s × ha)" = 0,7 l/(s×ha) — the unit "l" is
+--         glued to the digit throughout this transcript; see the pack header.)
+--      NOTE the printed verb is "sollte", so the range is a recommendation, not a hard limit -> the
+--      replacement gates below are proposed at severity 'warn', and SR-2 forbids auto-picking a point
+--      value inside them.
+-- ☐ RATIFIED  (a) put the printed range on the field the sentence actually constrains
+-- update public.compliance_requirements set condition = 'q_F IS NULL OR (q_F >= 0.05 AND q_F <= 0.15)',
+--        severity = 'warn'
+--   where id = '9f8dd6a7-0401-42cf-bcee-790dec04bef1';
+--   -- rollback: update public.compliance_requirements
+--   --           set condition = 'Q_F IS NOT NULL AND Q_R_Tr IS NOT NULL', severity = 'block'
+--   --           where id = '9f8dd6a7-0401-42cf-bcee-790dec04bef1';
+-- ☐ RATIFIED  (b) add the second, currently unenforced printed range as its own gate
+--                 (INSERT deliberately not pre-written: needs a code + worksheet_template_id ruling)
+--                 proposed: code 'CR-025', A226-03, severity 'warn',
+--                 condition 'q_R_Tr IS NULL OR (q_R_Tr >= 0.2 AND q_R_Tr <= 0.7)', clause '§3.2'.
+
+
+-- ----------------------------------------------------------------------------
+-- S-4  TRUNCATED gate source_quotes — five block gates enforce a printed number that is NOT inside
+--      their own quote, so an auditor reading the gate cannot see what it enforces. Evidence-only
+--      repair: extend the source_quote to the line that carries the limit. No condition changes.
+--      (CR-005's quote is the two-character line-break artifact "Nitrifikation/".)
+-- ☐ RATIFIED  (a) CR-002 — §3.3.2, printed p.11–12
+-- update public.compliance_requirements set source_quote =
+--   'Das Bemessungsschlammalter für Anlagen mit gemeinsamer aerober Schlammstabilisierung und Nitrifikation beträgt: $t_{\mathrm{TS}} \geq 20 \mathrm{~d}$'
+--   where id = '2a7641e1-d57c-4f0f-9ea6-b38812b23372';
+--   -- rollback: restore source_quote =
+--   --   'Das Bemessungsschlammalter für Anlagen mit gemeinsamer aerober Schlammstabilisierung und Nitrifikation beträgt:'
+-- ☐ RATIFIED  (b) CR-003 — §3.3.2, printed p.11–12
+-- update public.compliance_requirements set source_quote =
+--   'Das Bemessungsschlammalter für Anlagen mit gemeinsamer aerober Schlammstabilisierung, Nitrifikation und gezielter Denitrifikation beträgt: $t_{\mathrm{TS}} \geq 25 \mathrm{~d}$'
+--   where id = '56ab59c1-6128-4a08-a768-aaaf7d8da686';
+--   -- rollback: restore source_quote = '…Denitrifikation beträgt:'
+-- ☐ RATIFIED  (c) CR-005 — §3.3.2, printed p.12 (current quote is the fragment "Nitrifikation/")
+-- update public.compliance_requirements set source_quote =
+--   'Bei üblicher kommunaler Abwasserzusammensetzung ergibt sich eine Schlammbelastung ( $B_{\mathrm{TS}, \mathrm{BSB}}$ ) von: Nitrifikation/ Denitrifikation: $\quad B_{\mathrm{TS}, \mathrm{BSB}} \leq 0,04 \mathrm{~kg} /(\mathrm{kg} \times \mathrm{d})$'
+--   where id = 'b36c2703-bab6-43bc-ab06-cd2ab44fc305';
+--   -- rollback: restore source_quote = 'Nitrifikation/'
+-- ☐ RATIFIED  (d) CR-007 — §3.3.3, printed p.13 (current quote is "Dabei sollte der Quotient")
+-- update public.compliance_requirements set source_quote =
+--   'Dabei sollte der Quotient \frac{t_{\mathrm{D}}}{t_{\mathrm{T}}} \leq 0,35 sein, um eine ausreichende Schlammstabilisierung zu gewährleisten und die Gefahr einer Blähschlammbildung zu vermindern.'
+--   where id = '387a489d-54fb-4ba4-a9c3-a25389a3d7dd';
+--   -- rollback: restore source_quote = 'Dabei sollte der Quotient'
+-- ☐ RATIFIED  (e) CR-020 — §5.2, printed p.20 (current quote stops before both Stapelzeiten)
+-- update public.compliance_requirements set source_quote =
+--   'Für die erwarteten Überschussschlammmengen sollte möglichst Speichervolumen für folgende Stapelzeiten bereitgestellt werden: - bei ganzjährig gesicherter Abfuhr, entsprechend des Entsorgungskonzeptes $\geq 1$ Monat - bei landwirtschaftlicher Verwertung zur Überbrückung einer Vegetationsperiode oder des Winters $\geq 6$ Monate'
+--   where id = '1d9cae01-d7f9-4605-be91-b79821eeaf6b';
+--   -- rollback: restore source_quote = 'Für die erwarteten Überschussschlammmengen sollte möglichst Speichervolumen für folgende Stapelzeiten bereitgestellt werden:'
+-- ☐ RATIFIED  (f) CR-006 — §3.3.3, printed p.13 (quote covers only the Nitrifikation limb; the
+--                 condition also enforces the 2,5 kg/kg Denitrifikation limb)
+-- update public.compliance_requirements set source_quote =
+--   'Sauerstofflast: $O_{\mathrm{B}} \geq 3 \mathrm{~kg} / \mathrm{kg}$ für Anlagen mit Nitrifikation $O_{\mathrm{B}} \geq 2,5 \mathrm{~kg} / \mathrm{kg}$ für Anlagen mit Denitrifikation'
+--   where id = '4fccc258-28d4-42f1-bf71-63e1688eebe3';
+--   -- rollback: restore source_quote = '$O_{\mathrm{B}} \geq 3 \mathrm{~kg} / \mathrm{kg}$ für Anlagen mit Nitrifikation'
+
+
+-- ----------------------------------------------------------------------------
+-- S-5  MIS-HOMED GATES — all five gates that live on A226-04 "Ueberschussschlammproduktion" read
+--      ZERO fields of that worksheet. Their clause is §3.3.2 (= worksheet A226-05 "Schlammalter und
+--      Belebungsbeckenvolumen") or §3.4 (A226-07). Symbol -> worksheet audit run this session:
+--        CR-002  home A226-04, reads stabilisierungsart (A226-01) + t_TS      (A226-05)
+--        CR-003  home A226-04, reads stabilisierungsart (A226-01) + t_TS      (A226-05)
+--        CR-004  home A226-04, reads stabilisierungsart (A226-01) + B_TS_BSB  (A226-05)
+--        CR-005  home A226-04, reads stabilisierungsart (A226-01) + B_TS_BSB  (A226-05)
+--        CR-022  home A226-04, reads V_BB/TS_BB (A226-05/A226-07) + q_A       (A226-07)
+--      Effect: the engineer is blocked on the Überschussschlamm sheet by values entered two sheets
+--      later. All other 19 gates are correctly homed (audit output recorded in the session report).
+-- ☐ RATIFIED  re-home the four §3.3.2 gates to A226-05 (611fee5f-c135-455c-adac-d71d451f6903)
+-- update public.compliance_requirements set worksheet_template_id = '611fee5f-c135-455c-adac-d71d451f6903'
+--   where id in ('2a7641e1-d57c-4f0f-9ea6-b38812b23372','56ab59c1-6128-4a08-a768-aaaf7d8da686',
+--                '1b78b172-3dd6-4d4e-871b-b76aa0bf167b','b36c2703-bab6-43bc-ab06-cd2ab44fc305');
+--   -- rollback: update public.compliance_requirements
+--   --           set worksheet_template_id = 'abd4abe8-8b87-49b2-843f-efb64d7b4b01' where id in (…same four…);
+-- ☐ RATIFIED  CR-022 spans A226-05 and A226-07; it can only be evaluated once the Nachklärung sheet
+--             is filled -> re-home to A226-07 (61e9570d-07d3-40a7-91bb-ff2067e1fc37).
+-- update public.compliance_requirements set worksheet_template_id = '61e9570d-07d3-40a7-91bb-ff2067e1fc37'
+--   where id = 'f8d398cc-03a6-4e26-b28d-4f0c58aaad8c';
+--   -- rollback: update public.compliance_requirements
+--   --           set worksheet_template_id = 'abd4abe8-8b87-49b2-843f-efb64d7b4b01'
+--   --           where id = 'f8d398cc-03a6-4e26-b28d-4f0c58aaad8c';
+
+
+-- ----------------------------------------------------------------------------
+-- S-6  CR-018 (A226-08, §4.2, severity=block) — A PRESENCE GATE ON A BOOLEAN THAT CAN NEVER FAIL,
+--      anchored on exemplary ("z. B.") text.
+--      condition = 'reservepumpe IS NOT NULL' on a boolean field: answering "nein" (false) PASSES.
+--      Its two sibling boolean gates use the right form ('notstromversorgung == True',
+--      'durchflussmessung == True'), and those two are anchored on real "müssen"-obligations.
+--      EVIDENCE (§4.2, printed p.16):
+--        "Diese möglichen Betriebsstörungen erfordern geeignete Einrichtungen, z. B. für die
+--         notwendigen Wartungs- und Reparaturarbeiten und eine Reservepumpe gleicher Baugröße.
+--         Betriebssicherheit geht vor Kosten- und Energieeinsparungen."
+--      The Reservepumpe is printed as an EXAMPLE ("z. B."), so a block gate over-enforces; but a
+--      gate that cannot fail under-enforces. Proposal: make it a real check at warn severity.
+-- ☐ RATIFIED
+-- update public.compliance_requirements set condition = 'reservepumpe == True', severity = 'warn'
+--   where id = '2f262038-02b0-45a2-af85-ab69e15f850b';
+--   -- rollback: update public.compliance_requirements
+--   --           set condition = 'reservepumpe IS NOT NULL', severity = 'block'
+--   --           where id = '2f262038-02b0-45a2-af85-ab69e15f850b';
+-- ☐ RATIFIED  and, consistently, drop is_required on the field the guideline only gives as an example
+-- update public.fields set is_required = false where id = 'a63e1146-3ea1-4d8b-b2a9-46691f39148d';
+--   -- rollback: update public.fields set is_required = true where id = 'a63e1146-3ea1-4d8b-b2a9-46691f39148d';
+
+
+-- ----------------------------------------------------------------------------
+-- S-7  THREE MORE PRESENCE-ONLY BLOCK GATES whose source_quote states no requirement at all —
+--      they are anchored on cross-reference / narrative sentences and duplicate the is_required flag.
+--      · CR-021 (A226-02, §3.2)  condition 'B_d_BSB IS NOT NULL'
+--        quote: "Zur Ermittlung der Bemessungsgrundlagen wird auf das Arbeitsblatt ATV-DVWK-A 198
+--                „Vereinheitlichung und Herleitung von Bemessungswerten für Abwasseranlagen" verwiesen."
+--        -> a pointer to another Arbeitsblatt, not an obligation. B_d_BSB is already is_required=true,
+--           so the gate adds nothing. A gate that WOULD carry content here is Tab.1 (§3.2, p.10):
+--           "\caption{Tabelle 1: Einwohnerspezifische Frachten in $[\mathrm{g} /(\mathrm{E} \times
+--            \mathrm{d})]$, die an $85 \%$ der Tage unterschritten werden} \hline $\mathrm{BSB}_{5}$ & 60 \\"
+--      · CR-022 (A226-04 -> A226-07 per S-5, §3.3.2) condition
+--        'V_BB IS NOT NULL AND TS_BB IS NOT NULL AND q_A IS NOT NULL' — all three are equation
+--        OUTPUTS, so this gate blocks on the engine having run, not on a printed requirement.
+--      · CR-024 (A226-06, §6.2)  condition 't_T IS NOT NULL'
+--        quote: "…dass die Mindestbelüftungszeiten eingehalten werden. Bezüglich der Regelung des
+--                Sauerstoffeintrags und der Taktzeiten wird auf das Merkblatt DWA-M 268 […] verwiesen.
+--                Es sollte auf einfach zu bedienende und betriebssichere Steuerungen und Regelungen
+--                zurückgegriffen werden."
+--        -> "sollte" + a pointer to DWA-M 268. Worse, t_T only exists for INTERMITTENT operation
+--           ("Taktdauer bei intermittierenden Verfahren", §2 Kurzzeichen, p.8–9) and the field is
+--           is_required=false, yet this block gate demands it for every plant — including simultaneous
+--           denitrification and nitrification-only plants, which have no Taktdauer.
+-- ☐ RATIFIED  (a) CR-021 -> warn (evidence is a cross-reference, not an obligation)
+-- update public.compliance_requirements set severity = 'warn'
+--   where id = 'bf024a6b-a022-4922-96f2-0ea0872068f6';
+--   -- rollback: update public.compliance_requirements set severity = 'block' where id = 'bf024a6b-a022-4922-96f2-0ea0872068f6';
+-- ☐ RATIFIED  (b) CR-022 -> warn
+-- update public.compliance_requirements set severity = 'warn'
+--   where id = 'f8d398cc-03a6-4e26-b28d-4f0c58aaad8c';
+--   -- rollback: update public.compliance_requirements set severity = 'block' where id = 'f8d398cc-03a6-4e26-b28d-4f0c58aaad8c';
+-- ☐ RATIFIED  (c) CR-024 -> restrict to the operating mode the Taktdauer belongs to, and warn
+-- update public.compliance_requirements
+--   set condition = 'betriebsweise_deni != ''intermittierend'' OR t_T IS NOT NULL', severity = 'warn'
+--   where id = '58ab41cf-7158-41e2-9ef3-f254273a2f02';
+--   -- rollback: update public.compliance_requirements set condition = 't_T IS NOT NULL', severity = 'block'
+--   --           where id = '58ab41cf-7158-41e2-9ef3-f254273a2f02';
+-- ☐ RATIFIED  (d) CR-007 divides by t_T ('t_D / t_T <= 0.35') while both t_D and t_T are optional —
+--                 evaluating it with t_T NULL/0 is undefined. Guard it the same way.
+-- update public.compliance_requirements
+--   set condition = 'betriebsweise_deni != ''intermittierend'' OR t_T IS NULL OR t_D / t_T <= 0.35',
+--       severity = 'warn'
+--   where id = '387a489d-54fb-4ba4-a9c3-a25389a3d7dd';
+--   -- rollback: update public.compliance_requirements set condition = 't_D / t_T <= 0.35', severity = 'block'
+--   --           where id = '387a489d-54fb-4ba4-a9c3-a25389a3d7dd';
+
+
+-- ----------------------------------------------------------------------------
+-- S-8  SEVERITY REVIEW — 11 of the 24 gates are severity='block' but are anchored on soft
+--      ("sollte(n)", "kann/können", "empfohlen"), exemplary ("z. B.") or purely DESCRIPTIVE text.
+--      Under the doctrine a block gate must rest on a "muss / darf nicht / ist erforderlich"
+--      obligation. Evidence per gate, all verbatim md:
+--      · CR-007 §3.3.3 p.13   "Dabei sollte der Quotient … $\leq 0,35$ sein"                     -> warn (handled in S-7d)
+--      · CR-012 §6.2  p.22    "Wird ein Glühverlust von ca. 55 \% überschritten, sollte die
+--                              Betriebsweise der Anlage überprüft werden."   ("ca." + "sollte";
+--                              the printed consequence is a review, not non-compliance)          -> warn
+--      · CR-013 §6.2  p.22    bullet under "…können folgende Vorgaben zielführend sein:"          -> warn
+--      · CR-014 §6.2  p.22    same bullet list                                                    -> warn
+--      · CR-008 §6.2  p.22    same bullet list — AND §6.3 (p.23) explicitly ALLOWS going below:
+--                              "Der belüftete Anteil des Belebungsbeckens, bzw. die anteilige
+--                               Belüftungszeit können grundsätzlich zwischen mindestens $50 \%$ und
+--                               maximal $100 \%$ variiert werden, wobei bei < $65 \%$ die Gefahr der
+--                               Blähschlammbildung besteht."  A block at 65 % contradicts §6.3.      -> warn
+--      · CR-015 §6.2 p.21–22  "Zudem ist bei einer derartigen Auslegung auch die Gefahr einer
+--                              Restsäurekapazitätsunterschreitung von $1,5 \mathrm{mmol} / \mathrm{l}$
+--                              im Ablauf der Kläranlage deutlich geringer."  — a DESCRIPTIVE remark
+--                              about reduced risk; the guideline nowhere requires >= 1,5 mmol/l.     -> warn
+--      · CR-016 §4.5.1 p.17   "Eingesetzt werden Rechen oder Siebe mit Durchtrittsweiten von 3 mm
+--                              bis 8 mm ." — indicative practice, not "muss"                         -> warn
+--      · CR-020 §5.2  p.20    "sollte möglichst Speichervolumen … bereitgestellt werden"            -> warn
+--      · CR-018 §4.2  p.16    "z. B. … eine Reservepumpe gleicher Baugröße" (see S-6)               -> warn
+--      · CR-021 §3.2  p.10    cross-reference only (see S-7a)                                      -> warn
+--      · CR-023 §3.2 p.10–11  "sollte in Anlehnung an … erfolgen" (see S-3)                        -> warn
+--      Gates that CORRECTLY stay 'block' (recorded for the audit trail): CR-001 (§1 "gilt für"),
+--      CR-002..CR-005 (§3.3.2 "beträgt", "$\geq$", "$\leq$"), CR-006 (§3.3.3 "$\geq$"),
+--      CR-009/CR-010 (§3.4 "kann … maximal … gewählt werden. Dabei DARF … NICHT höher … liegen"),
+--      CR-011 (§3.4 "bis auf maximal RV = 1"), CR-017 (§4.9 "müssen Vorkehrungen getroffen werden"),
+--      CR-019 (§4.3 "müssen … ausgerüstet werden"), CR-022 (structural, see S-7b).
+-- ☐ RATIFIED  block -> warn for the seven not already covered by S-3/S-6/S-7
+-- update public.compliance_requirements set severity = 'warn'
+--   where id in ('33b3cf2a-55cd-4f08-afe1-9c6bfc8c8946',  -- CR-012 Glühverlust
+--                'a2f30486-b47b-457c-a1c4-05f9b64ef364',  -- CR-013 O2-Gehalt
+--                'd5935403-18bd-4931-8f73-4ccc3ea3f099',  -- CR-014 NH4 Ablauf
+--                '7a3e8d28-632a-4557-ab53-edd5b1df3e82',  -- CR-008 belüfteter Anteil
+--                '05f2ff3a-fa85-4ff4-81b0-0af62f5a0449',  -- CR-015 Restsäurekapazität
+--                '32bcf5c7-8e75-4df6-8b9b-f71bdd721ddb',  -- CR-016 Durchtrittsweite
+--                '1d9cae01-d7f9-4605-be91-b79821eeaf6b'); -- CR-020 Stapelzeit
+--   -- rollback: update public.compliance_requirements set severity = 'block' where id in (…same seven…);
+
+
+-- ----------------------------------------------------------------------------
+-- S-9  CR-001 (A226-02, §1, severity=block) — the UPPER bound over-enforces the guideline's own text.
+--      condition = 'EW_BSB5_60 >= 1000 AND EW_BSB5_60 <= 5000'
+--      EVIDENCE (§1, printed p.7):
+--        "Dieses Arbeitsblatt gilt für Planung, Bau und Betrieb von Kläranlagen nach dem
+--         Belebungsverfahren mit gemeinsamer aerober Schlammstabilisierung bei Ausbaugrößen zwischen
+--         1.000 E und 5.000 E ."
+--      immediately followed by:
+--        "Der mit 1.000 E bis 5.000 E angegebene Geltungsbereich stellt nicht die obere
+--         Anwendungsgrenze für diese Verfahren dar. Belebungsanlagen mit gemeinsamer aerober
+--         Schlammstabilisierung sind auch für Ausbaugrößen über 5.000 E zweckmäßig. Sie kommen nach
+--         derzeitigem Entwicklungsstand bis ca. 50.000 E zur Anwendung, wobei dann grundsätzlich eine
+--         Bemessung nach dem Arbeitsblatt ATV-DVWK-A 131 erfolgen sollte."
+--      The 1.000 E floor is a hard scope boundary (below it, DWA-A 222 applies); the 5.000 E ceiling
+--      is explicitly NOT an application limit. Proposal: keep the floor blocking, split the ceiling
+--      out as a warn that names the A 131 hand-off.
+-- ☐ RATIFIED  (a)
+-- update public.compliance_requirements set condition = 'EW_BSB5_60 >= 1000'
+--   where id = 'c81a164a-e1a8-48cd-b0b5-a9d3db270faa';
+--   -- rollback: update public.compliance_requirements
+--   --           set condition = 'EW_BSB5_60 >= 1000 AND EW_BSB5_60 <= 5000'
+--   --           where id = 'c81a164a-e1a8-48cd-b0b5-a9d3db270faa';
+-- ☐ RATIFIED  (b) new warn gate 'CR-026' (A226-02, §1): 'EW_BSB5_60 <= 5000', message referencing
+--                 ATV-DVWK-A 131 for the >5.000 E case. (INSERT not pre-written — code/order ruling.)
+
+
+-- ----------------------------------------------------------------------------
+-- S-10  MISSING GATES for requirements the guideline prints but nothing enforces.
+--       (a) h_z <= 1 m — the field h_z EXISTS (A226-07, b18db483-bdd8-44a0-b362-313c86ba4547) and the
+--           limit is printed as a design requirement, but no gate reads it.
+--           EVIDENCE (§3.4, printed p.15–16):
+--             "Die erforderlichen Beckentiefen betragen: & h_{\mathrm{z}} \quad \leq 1 \mathrm{~m} \\"
+--           -> proposed gate 'CR-027', A226-07, severity 'block',
+--              condition 'nachklaerbeckenart != ''trichterbecken'' OR h_z IS NULL OR h_z <= 1'.
+--       (b) Trichterbecken applicability limit on Q_bem — printed, unenforced.
+--           EVIDENCE (§3.4, printed p.16):
+--             "Dieser Ansatz zur Bemessung von Trichterbecken gilt im Mischsystem bis zu einem
+--              $Q_{\text {bem }}$ von ca. $100 \mathrm{~m}^{3} / \mathrm{h}$; im Trennsystem bis zu
+--              einem $Q_{\text {bem }}$ von ca. $70 \mathrm{~m}^{3} / \mathrm{h}$."
+--           -> proposed gate 'CR-028', A226-07, severity 'warn' ("ca."), condition keyed on
+--              entwaesserungssystem; note this needs Q_bem in m3/h (see S-2).
+--       (c) Trichterbecken diameter — printed, unenforced, and there is no d_NB field although §2
+--           lists the symbol ("\hline $d_{\mathrm{NB}}$ & M & Durchmesser des Nachklärbeckens \\").
+--           EVIDENCE (§3.4, printed p.16): "Trichterbecken werden aus bautechnischen und
+--           wirtschaftlichen Gründen mit Durchmessern bis etwa 10 m ausgeführt."  -> warn, needs a field.
+--       (d) Sohlneigung n >= 1,7 — NO field exists although §2 lists the symbol
+--           ("\hline $n$ & - & Sohlneigung von Trichterbecken \\", p.8–9).
+--           EVIDENCE (§4.7, printed p.18): "Die im unteren Geltungsbereich dieses Arbeitsblattes
+--           errechneten Nachklärbecken können bei einem Durchmesser von bis zu 10 m als Trichterbecken
+--           ausgeführt werden. Aufgrund der starken Sohlneigung von $n \geq 1,7$ sind bewegliche
+--           Schlammräumeinrichtungen nicht erforderlich."  (Gl.29 already divides by 1,7.)
+--       (e) Abscheidegrad Sandfang — field EXISTS (dc1b3260-20a5-446d-9ae2-964f19d925ef), no gate.
+--           EVIDENCE (§4.5.2, printed p.17): "Es sollte ein Abscheidegrad von größer $95 \%$ für die
+--           Korngröße $0,2 \mathrm{~mm}$ erreicht werden."  -> warn gate 'abscheidegrad_sandfang > 95'.
+--       (f) Leistungsdichte Schlammsilo — field EXISTS (910dd6e4-6011-4b4e-82cf-cccfe1f204fb), no gate.
+--           EVIDENCE (§5.2, printed p.20): "Umwälzeinrichtungen sollten eine Leistungsdichte von
+--           $30 \mathrm{~W} / \mathrm{m}^{3}$ bis $70 \mathrm{~W} / \mathrm{m}^{3}$ je nach
+--           Behältergröße und Schlammbeschaffenheit aufweisen."  -> warn range gate.
+--       (g) Stapelzeit >= 6 Monate for agricultural use — CR-020 only enforces >= 1 Monat; the second,
+--           stricter printed case has no field for the Entsorgungsweg, so it is unrepresentable.
+--           EVIDENCE (§5.2, printed p.20): "- bei landwirtschaftlicher Verwertung zur Überbrückung
+--           einer Vegetationsperiode oder des Winters $\geq 6$ Monate".
+--       (h) Leistungsdichte Umwälzung Belebungsbecken 1–5 W/m3 — NO field.
+--           EVIDENCE (§3.3.3, printed p.13–14): "Hierzu ist eine Leistungsdichte der
+--           Umwälzeinrichtungen bei getrennter Umwälzung bezogen auf das Beckenvolumen von rd.
+--           $1 \mathrm{~W} / \mathrm{m}^{3}$ bis $5 \mathrm{~W} / \mathrm{m}^{3}$ notwendig."
+--           ("notwendig" — the only hard-worded of the missing ones.)
+-- ☐ RATIFIED  (INSERTs deliberately not pre-written: each needs a code, a worksheet_template_id and an
+--              order_index decision, and (c)/(d)/(h) additionally add fields, which changes the form.)
+
+
+-- ----------------------------------------------------------------------------
+-- S-11  BRANCH-ROUTING GAP (engine-output materialization class) — the guideline's alternative
+--       branches are encoded as parallel fields, but nothing routes the selector enum to the
+--       consumer, so the engineer has to hand-copy a computed value into a second field:
+--         · TS_RS (required, consumed by Gl.21) vs TS_RS_rund (Gl.19) / TS_RS_trichter (Gl.20),
+--           selected by raeumertyp_nb / nachklaerbeckenart.
+--           EVIDENCE (§3.4, printed p.14): "Für den Trockensubstanzgehalt des Rücklaufschlammes
+--           ( $T S_{\mathrm{RS}}$ ) kann vereinfacht angenommen werden: - $T S_{\mathrm{RS}} \approx
+--           0,7 \times T S_{\mathrm{BS}}$ bei Rundbecken mit Schildräumern - $T S_{\mathrm{RS}}
+--           \approx 1,0 \times T S_{\mathrm{BS}}$ bei Trichterbecken"
+--         · Q_bem (required, Gl.2, Trennsystem) vs Q_bem_misch (Gl.3, Mischsystem), selected by
+--           entwaesserungssystem — a Mischsystem project must fill the required Q_bem by hand.
+--         · O_B (required) vs O_B_Nitr (Gl.13) / O_B_Deni (Gl.14), selected by stabilisierungsart.
+--         · V_BB (required, Gl.10) vs V_BB_spez (Gl.11).
+--         · A_NB (required, Gl.24, Rundbecken) vs A_NB_theo (optional, Gl.25, Trichterbecken) — for a
+--           Trichterbecken project the REQUIRED field is the one the guideline does not produce.
+-- ☐ RATIFIED  (a) minimum repair — drop is_required on the branch-specific fields that only apply to
+--                  one arm, so a project on the other arm is not blocked on an inapplicable value:
+-- update public.fields set is_required = false
+--   where id in ('6dd66ebc-23fb-43e1-b519-19c359b58e0c');  -- A_NB (Rundbecken only)
+--   -- rollback: update public.fields set is_required = true where id = '6dd66ebc-23fb-43e1-b519-19c359b58e0c';
+-- ☐ RATIFIED  (b) proper repair — add selector equations (e.g. TS_RS = if(raeumertyp_nb=='schildraeumer',
+--                  TS_RS_rund, TS_RS_trichter)) so the chain is single-sourced end to end. Needs an
+--                  engine-capability ruling (conditional equations), therefore not pre-written.
+
+
+-- ----------------------------------------------------------------------------
+-- S-12  is_required REVIEW — fields the guideline states only as a recommendation, an example or a
+--       descriptive remark, but which prod marks required:
+--         · restsaeurekapazitaet (0fa934ff-6f62-469a-9496-d07e665c66f7) — the guideline never asks for
+--           this value; §6.2 (p.21–22) only observes that the RISK of falling below 1,5 mmol/l is
+--           lower with targeted denitrification (quote in S-8).
+--         · sauerstoffgehalt_bb (a16d9479-b4ab-4be2-a501-ca3c984ac467) and
+--           ammonium_ablauf (8ceace60-76ed-4f18-b514-4b82c893e63f) — both come from the §6.2 list
+--           introduced by "Zur Sicherstellung der Schlammstabilisierung und Minimierung der Blähschlamm-
+--           und Schwimmschlammgefahr können folgende Vorgaben zielführend sein:" (p.22) — operating
+--           advice, not a design input.
+--         · reservepumpe — handled in S-6.
+--       Fields whose required=true is CORRECT and stays (recorded): EW_BSB5_60, EZ, B_d_BSB,
+--       frachtspez_BSB5, US_C_BSB, ISV, w_s_d, Q_bem, A_E_k, x_Qmax, Q_S_aM, US_d_C, US_d, t_TS,
+--       M_TS_BB, V_BB, O_B, alphaOC, t_E, TS_BB, RV, TS_RS, q_SV, q_A, notstromversorgung,
+--       durchflussmessung, durchtrittsweite_rechen, T, belueftungsanteil, gluehverlust.
+-- ☐ RATIFIED
+-- update public.fields set is_required = false
+--   where id in ('0fa934ff-6f62-469a-9496-d07e665c66f7',
+--                'a16d9479-b4ab-4be2-a501-ca3c984ac467',
+--                '8ceace60-76ed-4f18-b514-4b82c893e63f');
+--   -- rollback: update public.fields set is_required = true where id in (…same three…);
+
+
+-- ----------------------------------------------------------------------------
+-- S-13  DESCRIPTION MIS-ATTRIBUTIONS (cosmetic, evidence-only — no value is wrong).
+--       · alphaOC_L_h (1e356546-1e65-4ced-9185-7a2c5148ba97) description credits "7-10 g/(m3xm) …
+--         (Tab.7)". The 7–10 range is §3.3.3 running text (p.13–14); Tabelle 7 (p.26) gives a single
+--         Betriebswert alphaOC_L,h = 9 g/(m3·m) at alpha = 0,6 (and 15 for Reinwasser).
+--       · alphaOP (2c1ffa2b-6f98-43d1-a16d-253e287cf7ba) description credits "1,2-1,5 kg/kWh (Tab.8)".
+--         The 1,2–1,5 range is §3.3.3 running text (p.13–14); Tabelle 8 (p.26) gives 1,5/1,15 (Kreisel
+--         in Mischbecken), 1,9/1,4 (Kreisel in Umlaufbecken), 1,5/1,15 (Walzen in Umlaufbecken).
+--       · TS_BB_betrieb (6ff07a28-3c47-45a9-8154-03427bbdab7b) is stored in kg/m3, but Bild 4 (p.23)
+--         reads out a PERCENTAGE of TS_BB,Bemessung ("In Bild 4 ist der Mindest- $T S_{\text{BB,Betrieb}}$
+--         als $[\%]$ vom $T S_{\text{BB,Bemessung}}$ … dargestellt"). The description says so; a
+--         second, %-typed field would make the read-out direct. Ruling needed (adds a field).
+-- ☐ RATIFIED  (text-only fixes; no behaviour change)
+-- update public.fields set description = 'Sauerstoffausnutzung feinblasige Belueftung 7-10 g/(m3xm) nach Sec.3.3.3; hoehere Werte nur bei flaechiger Anordnung. Tab.7 gibt den Betriebswert 9 g/(m3xm) bei alpha=0,6.'
+--   where id = '1e356546-1e65-4ced-9185-7a2c5148ba97';
+-- update public.fields set description = 'Sauerstoffertrag Oberflaechenbelueftung unter Betriebsbedingungen 1,2-1,5 kg/kWh nach Sec.3.3.3; Tab.8 gibt geraetebezogene Werte 1,15-1,9 kg/kWh.'
+--   where id = '2c1ffa2b-6f98-43d1-a16d-253e287cf7ba';
+--   -- rollback: restore the previous description strings (recorded in fields-DWA-A-226.json, this session).
+
+
+-- ----------------------------------------------------------------------------
+-- S-14  SR-2 RANGE REGISTER — values the guideline gives as a RANGE and where the point selection
+--       must stay an explicit, visible engineer choice (never auto-picked). No change proposed; this
+--       block exists so the ranges are on the record for the selection-widget workstream.
+--         x_Qmax 8 … 11 (§3.2 p.10, "Zwischenwerte können interpoliert werden")
+--         f_S_Qm 6 … 9 (§3.2 p.10)          m 0,1 … 1 (§3.2 p.10–11)
+--         q_F 0,05 … 0,15 l/(s·ha) and q_R_Tr 0,2 … 0,7 l/(s·ha) (§3.2 p.10–11)
+--         ISV 100 … 150 ml/g with printed default 125 ml/g (§3.4 p.14 — "Liegen keine anderen
+--           Erkenntnisse vor, sollte er mit $125 \mathrm{ml} / \mathrm{g}$ angesetzt werden.")
+--         alpha 0,9 (Oberflächenbelüftung) / 0,6 … 0,7 (Druckluft) (§3.3.3 p.13–14)
+--         alphaOC_L_h 7 … 10 g/(m3·m) · P_L_h 5 … 7 Wh/(m3·m) · alphaOP 1,2 … 1,5 kg/kWh (p.13–14)
+--         Leistungsdichte Belebungsbecken 1 … 5 W/m3 (p.13–14) · Schlammsilo 30 … 70 W/m3 (p.20)
+--         belueftungsanteil 65 … 70 % (§6.2 p.22) inside the §6.3 envelope 50 … 100 % (p.23)
+--         durchtrittsweite_rechen 3 … 8 mm (§4.5.1 p.17)
+--         f_BB and TS_BB from Tab.2/Tab.3 (p.12) and q_A/h_ges/h_e/h_theo from Tab.4/5/6 (p.15) are
+--         TABLE LOOK-UPS keyed on ISV, RV and Beckenart — not free ranges; they are correctly encoded
+--         as engineer-entered table values.
+-- ☐ RATIFIED  (register only — nothing to apply)
