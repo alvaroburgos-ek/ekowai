@@ -1,0 +1,319 @@
+-- ============================================================================
+-- DIN-14071-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+-- NOTHING IN THIS FILE WAS APPLIED. It contains no executable statement — every proposal is commented out.
+--
+-- Evidence quotes cite the md transcript
+--   C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-14071-1\DIN-CEN-ISO-14071-1.md
+--   (892 lines, bilingual German/English mathpix LaTeX transcript of DIN CEN ISO/TS 14071:2016; NO page-number
+--   lines — grep ^[0-9]{1,3}$ returns 0 hits — so "printed p.N" is derived from the document's own Inhalt table,
+--   md lines 82-139; see the pack header for the full clause→page map).
+-- Gate rows live in compliance_requirements (columns seen in this repo: worksheet_template_id, code, title_de,
+--   severity, condition, clause_reference, source_quote, requires_attestation) and are evaluated by
+--   src/lib/compliance/evaluate.ts. Semantics that matter below:
+--     · a condition that evaluates TRUE is a PASS, FALSE is a FAIL; only a definite `fail` on a severity='block'
+--       row blocks approval (src/lib/actions/approval-gate.ts:229-256).
+--     · a referenced symbol with no value yields `pending`, not `fail`.
+--     · the bare keyword TRUE parses to a boolean literal → the gate ALWAYS passes and enforces nothing.
+--     · symbols are resolved first from THIS worksheet, then from a conflict-free project-wide fallback
+--       (approval-gate.ts:168-205), so a cross-worksheet symbol does resolve — but only once the other
+--       worksheet instance exists in the project and holds a conflict-free value.
+-- Standard id 2eb3e188-d202-4c98-be1b-c90bf4eed3e0 (version "CEN ISO/TS 14071:2016 (ISO/TS 14071:2014)").
+-- Worksheet ids:
+--   01 Untersuchungsrahmen & Bestellung der Kritischen Prüfung   392fd1ff-1b71-4d94-8508-f8a7b83a742b
+--   02 Prozess, Bericht & Prüfaussage der Kritischen Prüfung     6e77c7e3-fda6-4b74-9f6c-41fb2b089180
+--   03 Kompetenzen des/der Prüfer(s)                             ea9e80d1-e719-41b7-90a9-9a74d45a6f7b
+--   04 Konformitätsfeststellung & Unterzeichnung                 88a9eb37-68da-48bc-9c42-24f9f1c6f760
+-- Context: 60 fields on 4 worksheets, 0 equations, 17 gates — ALL 17 severity='block'. No phantom fields (every
+--   field carries label + description + clause_reference), no worksheet with zero fields, no duplicate gate code,
+--   no empty condition, no gate whose right operand falls outside its enum. The defects are of a different kind:
+--   three block gates that enforce nothing, two that enforce more than the printed text, several source_quotes
+--   attached to the wrong sentence, and one is_required that contradicts a printed "sollte".
+-- MODAL NOTE (ISO/CEN): a block gate is defensible only on a "muss/müssen" (shall). "sollte/sollten" (should),
+--   "darf/dürfen" (may), "kann/können" (can) are recommendations/permissions and must not block.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · OVER-ENFORCEMENT — REQ-14 blocks EVERY project on duties that apply only when an EXISTING
+--   critical review is being revised.
+--   REQ-14 (d6e6c427-5356-404a-a88f-8d32dc2a39cb, ws 02, block)
+--     condition "revision_justified_documented == true AND original_commissioner_informed == true"
+--   §4.6 is entirely conditional. Printed lead-in (md line 651, printed p.18):
+--     "Falls technische Mängel der Studie erkannt werden, die die Konformität mit ISO 14040, ISO 14044 oder dieser
+--      Technischen Spezifikation beeinträchtigen, die jedoch nicht in der ursprünglichen Kritischen Prüfung erkannt
+--      wurden, kann eine Überarbeitung der Kritischen Prüfung gerechtfertigt sein."
+--   Only THEN do the two "shall" sentences apply (same line / md line 653):
+--     "Die Gründe für die Überarbeitung der Kritischen Prüfung sind in der neuen Prüfaussage zur Kritischen Prüfung
+--      zu dokumentieren und zu begründen." | "Der Auftraggeber der neuen Kritischen Prüfung, die die bestehende
+--      Kritische Prüfung überarbeiten soll, muss angemessene Anstrengungen unternehmen, den Auftraggeber der
+--      ursprünglichen Ökobilanzstudie und der Kritischen Prüfung über die erkannten Probleme und die Absicht in
+--      Kenntnis zu setzen, die bestehende Kritische Prüfung zu überarbeiten."
+--   Both referenced fields are is_required=false, i.e. the encoding itself says they need not be filled — yet a
+--   block gate demands they be TRUE. On a first-time (non-revision) critical review the two booleans are left
+--   blank → `pending` (no block today), but the moment an engineer answers "nein" the project is blocked on a
+--   clause that does not apply to it.
+--   Proposal: guard the gate. evaluate.ts supports "IF … THEN …" (vacuous pass when the guard is false). This
+--   needs a new boolean on ws 02 that records whether this review revises an existing one.
+-- ☐ RATIFIED
+-- -- new field (ws 02): symbol is_revision_of_existing_review, boolean, is_required=false, clause_reference='§4.6',
+-- --   label_de='Überarbeitung einer bestehenden Kritischen Prüfung', column set per the fields table at apply time.
+-- -- update public.compliance_requirements set condition='IF is_revision_of_existing_review == True THEN (revision_justified_documented == true AND original_commissioner_informed == true)' where id='d6e6c427-5356-404a-a88f-8d32dc2a39cb';
+-- Rollback: restore condition='revision_justified_documented == true AND original_commissioner_informed == true';
+--   delete the new field row.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · BLOCK-SEVERITY NO-OPS AND ONE INVENTED REFERENCE — three of the 17 gates enforce nothing.
+--   (a) CX-01 (9fe5cc17-7eff-4280-8cca-101968044287, ws 04, block) condition "TRUE"
+--   (b) CX-02 (b4727857-0373-469a-ab9c-3d3dd758dc7f, ws 04, block) condition "TRUE"
+--   (c) CX-03 (d19c30f6-6a80-4246-be89-7ee249f45883, ws 04, block) condition "TRUE"
+--   evaluate.ts parses the bare TRUE keyword to a boolean literal → always `pass`. Three block-severity rows that
+--   can never fail; they only inflate the gate count on the Konformitätsfeststellung worksheet (3 of its 5 gates).
+--   Worse, their source_quotes are not quotations at all — they are EKOWAI prose ("(Kontextmarker)"), and CX-01
+--   attributes a designation the document never prints:
+--     CX-01 source_quote: "… DIN CEN ISO/TS 14071 (DIN SPEC 35803) legt zusaetzliche Anforderungen … fest."
+--     `grep -c "35803"` over the md returns 0. The transcript's Nationales Vorwort says only "Eine DIN SPEC nach
+--     dem Vornorm-Verfahren …" (md lines 9-17) and never carries a DIN SPEC number. INVENTED REFERENCE.
+--   (d) partial tautology — REQ-12 (79a1beeb-8646-4916-ba94-c37f32563e13, ws 04, block) condition
+--     "conformance_result IN {conformant,non_conformant} AND review_process_description IS NOT EMPTY".
+--     conformance_result's enum contains exactly {conformant, non_conformant}, so the IN clause can never be
+--     false; only the second conjunct does any work. Harmless, but it is not the check it appears to be.
+--   Proposal: demote the three context markers to severity='info' (or deactivate them) and strip the invented
+--   DIN SPEC number from CX-01's source_quote; simplify REQ-12's condition to the conjunct that enforces.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set severity='info' where id in ('9fe5cc17-7eff-4280-8cca-101968044287','b4727857-0373-469a-ab9c-3d3dd758dc7f','d19c30f6-6a80-4246-be89-7ee249f45883');
+-- -- update public.compliance_requirements set source_quote='§1 (printed p.7): "Diese Technische Spezifikation stellt zusätzliche Spezifikationen zu ISO 14040:2006 und ISO 14044:2006 bereit. Sie stellt Anforderungen und Anleitungen für die Durchführung einer Kritischen Prüfung jeder Art von Ökobilanzstudie, sowie für die Kompetenzen, die für die Prüfung erforderlich sind, zur Verfügung."' where id='9fe5cc17-7eff-4280-8cca-101968044287';
+-- -- update public.compliance_requirements set condition='review_process_description IS NOT EMPTY' where id='79a1beeb-8646-4916-ba94-c37f32563e13';
+-- Rollback: restore severity='block' on the three CX rows, restore CX-01's previous source_quote (recorded in the
+--   2026-09-05 export at scratchpad/fields-DIN-14071-1.json), restore REQ-12's two-conjunct condition.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · GATE WIDER THAN THE PRINTED SCOPE — two block gates enforce a conditional obligation unconditionally.
+--   (a) REQ-05 (08326a5f-0ff3-4bb6-9de0-6b8b1728da68, ws 01, block) condition "independence_maintained == true".
+--       The quoted sentence is scoped to CONCURRENT reviews (md line 411, §4.1, printed p.10-11):
+--         "Unabhängige Sachverständige, die eine begleitende Kritische Prüfung durchführen, müssen ihre
+--          Unabhängigkeit das gesamte Prüfungsverfahren hindurch bewahren und ihre Rolle auf die Prüfungsaufgaben
+--          beschränken."
+--       For a review performed at the END of the study (review_timing == at_end) the standard states no such
+--       through-the-process obligation in §4.1; independence there follows from the §3.1/§3.2 definitions.
+--       Judgment: the gate's SUBSTANCE is defensible (independence is definitional), but its quote does not
+--       support the unconditional form. Minimum fix = re-quote on §3.2 (md line 274, printed p.8); stronger fix =
+--       guard on review_timing.
+--   (b) REQ-03 (5ccfdef5-0860-49a0-945e-12aa3def62bb, ws 01, block) condition
+--       "external_reviewer_contracted == true AND contract_no_predetermination == true".
+--       §4.2.2 (md line 446, printed p.12) does say "Mit unabhängigen externen Sachverständigen müssen Verträge
+--       abgeschlossen werden." — but §4.2.1 (md line 419, printed p.11) permits a review with NO external expert:
+--         "Im Fall einer Prüfung durch Sachverständige (siehe ISO 14044:2006, 6.2) darf der Auftraggeber oder der
+--          Ersteller der ursprünglichen Ökobilanzstudie den internen oder externen unabhängigen Sachverständigen
+--          für die Durchführung der Prüfung auswählen."
+--       An expert review carried out by an independent INTERNAL expert has no external contract to produce, yet
+--       the gate blocks it. (Note the worksheet title itself says "Auswahl, Vertragsabschluss und Ersetzen von
+--       EXTERNEN Prüfern" — §4.2 heading, printed p.11.)
+--   Proposal: guard both.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='IF review_timing == concurrent THEN independence_maintained == true' where id='08326a5f-0ff3-4bb6-9de0-6b8b1728da68';
+-- -- new field (ws 01): symbol external_reviewer_used, boolean, is_required=true, clause_reference='§4.2.1',
+-- --   label_de='Externer unabhängiger Sachverständiger eingesetzt'.
+-- -- update public.compliance_requirements set condition='IF external_reviewer_used == True THEN (external_reviewer_contracted == true AND contract_no_predetermination == true)' where id='5ccfdef5-0860-49a0-945e-12aa3def62bb';
+-- Rollback: restore condition='independence_maintained == true' / 'external_reviewer_contracted == true AND
+--   contract_no_predetermination == true'; delete the new field row.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · SOURCE_QUOTE ATTACHED TO THE WRONG SENTENCE (three gates; one is a straight swap).
+--   (a) REQ-09 (ac9e2a64-fbe2-4ecb-955c-dd3cf178b262, ws 02) condition
+--       "includes_data_sets == false OR sampling_methods_disclosed == true" carries the §4.5 REPORT-CONTENT
+--       sentence ("… muss der Bericht der Kritischen Pruefung alle Stellungnahmen und Empfehlungen … enthalten"),
+--       which is the sentence that supports REQ-06's field, not this one. The sentence that actually governs
+--       REQ-09 is md line 581 (§4.5, printed p.16):
+--         "Im Fall einer Datenprüfung, können während des Prozesses der Kritischen Prüfung Stichprobenprüfungen
+--          durchgeführt werden. Daher muss/müssen der/die Prüfer angeben, welche Stichprobenverfahren angewendet
+--          wurden und alle Einschränkungen der Datenprüfung (z. B. Nichtverfügbarkeit von Daten) erwähnen."
+--   (b) REQ-06 (bfd8a659-09e3-4d91-8305-df11fc663cea, ws 02) condition
+--       "report_comments_recommendations_responses == true" is quoted from §4.3.3 ("Der Bericht der Kritischen
+--       Pruefung muss den vollstaendigen Prozess der Pruefung dokumentieren.") — a true "shall", but the field it
+--       gates (report contains comments + recommendations + responses) is defined in §4.5, md lines 559/575
+--       (printed p.15): "Um alle während des Prozesses der Kritischen Prüfung behandelten Belange zu dokumentieren,
+--       muss der Bericht der Kritischen Prüfung alle | Stellungnahmen und Empfehlungen des/der Prüfer(s) und die
+--       entsprechenden Reaktionen des Erstellers der Ökobilanzstudie enthalten."
+--   (c) REQ-08 (d37a46e3-b1f4-4e89-a9db-944e7e53d500, ws 02) condition "statement_in_lca_report == true" is quoted
+--       as the element-list LEAD-IN plus an EKOWAI parenthetical gloss ("(Bericht/Pruefaussage in den
+--       Oekobilanzbericht aufzunehmen)"). The printed sentence is md line 575 / line 626 (§4.5, printed p.15/p.17):
+--         "Die Prüfaussage zur Kritischen Prüfung und entsprechende Reaktionen sind in den Bericht der Ökobilanz
+--          aufzunehmen, entsprechend ISO 14044." | "Die Prüfaussage zur der Kritischen Prüfung sowie die
+--          Stellungnahmen und jegliche Reaktion auf Empfehlungen des/der Prüfer(s) müssen Bestandteil des
+--          Abschlussberichts der Ökobilanz sein."
+--   No condition changes here — evidence only, but on the GATE row (source_quote), which is enforcement-adjacent
+--   documentation and therefore staged rather than packed.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set source_quote='§4.5 (printed p.16): "Im Fall einer Datenprüfung, können während des Prozesses der Kritischen Prüfung Stichprobenprüfungen durchgeführt werden. Daher muss/müssen der/die Prüfer angeben, welche Stichprobenverfahren angewendet wurden und alle Einschränkungen der Datenprüfung (z. B. Nichtverfügbarkeit von Daten) erwähnen."', clause_reference='§4.5' where id='ac9e2a64-fbe2-4ecb-955c-dd3cf178b262';
+-- -- update public.compliance_requirements set source_quote='§4.5 (printed p.15): "Um alle während des Prozesses der Kritischen Prüfung behandelten Belange zu dokumentieren, muss der Bericht der Kritischen Prüfung alle | Stellungnahmen und Empfehlungen des/der Prüfer(s) und die entsprechenden Reaktionen des Erstellers der Ökobilanzstudie enthalten."', clause_reference='§4.5' where id='bfd8a659-09e3-4d91-8305-df11fc663cea';
+-- -- update public.compliance_requirements set source_quote='§4.5 (printed p.15/p.17): "Die Prüfaussage zur Kritischen Prüfung und entsprechende Reaktionen sind in den Bericht der Ökobilanz aufzunehmen, entsprechend ISO 14044." | "Die Prüfaussage zur der Kritischen Prüfung sowie die Stellungnahmen und jegliche Reaktion auf Empfehlungen des/der Prüfer(s) müssen Bestandteil des Abschlussberichts der Ökobilanz sein."' where id='d37a46e3-b1f4-4e89-a9db-944e7e53d500';
+-- Rollback: restore the three previous source_quote / clause_reference values (recorded verbatim in the
+--   2026-09-05 export at scratchpad/fields-DIN-14071-1.json).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · CROSS-WORKSHEET CONDITIONS (gate on worksheet A reads a field that lives on worksheet B).
+--   (a) REQ-04 (1b86da6c-7423-488d-9c3d-af4e817ac177) sits on ws 03 (Kompetenzen) and reads
+--       self_declaration_submitted (4d114806-22f2-4ad0-95a9-b746fc60e160), which is a field of ws 01.
+--   (b) REQ-09 (ac9e2a64-fbe2-4ecb-955c-dd3cf178b262) sits on ws 02 and reads includes_data_sets
+--       (705bbfb2-16ef-4762-a912-abbccd009d32), a field of ws 01.
+--   Both resolve today through the project-wide fallback in approval-gate.ts (lines 168-205), so neither is
+--   broken — but each silently depends on the ws 01 instance existing in the project and holding a conflict-free
+--   value; without it the gate reports `pending` rather than enforcing. Worth a ruling because it makes ws 02/03
+--   approvable-or-not on data the engineer entered on a different sheet.
+--   Note both homes are arguably intentional: §4.2.1's self-declaration belongs to reviewer selection (ws 01) but
+--   is evidence of competence (ws 03), and the data-review scope option is set in the scope worksheet. No change
+--   is proposed by default; recorded so the dependency is explicit.
+-- ☐ RATIFIED (as "leave as is" or "re-home")
+-- -- Option A (re-home REQ-04 to ws 01): update public.compliance_requirements set worksheet_template_id='392fd1ff-1b71-4d94-8508-f8a7b83a742b' where id='1b86da6c-7423-488d-9c3d-af4e817ac177';
+-- -- Option B (leave as is): no statement.
+-- Rollback: update … set worksheet_template_id='ea9e80d1-e719-41b7-90a9-9a74d45a6f7b' where id='1b86da6c-…'.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · is_required REVIEW (modal verb vs. required flag).
+--   (a) comment_iterations (c1972ae9-ca3f-4409-a88f-9f37963be5d2, ws 02, number, unit "count") is
+--       is_required=TRUE, but the only printed sentence behind it is a recommendation — §4.3.3, md line 518
+--       (printed p.14): "Mindestens eine weitere Durchsprache der Kommentare zur Prüfung und damit verbundene
+--       Änderungen der Studie sollten durchgeführt und im Bericht der Kritischen Prüfung dokumentiert werden."
+--       "sollten" = should. A required field forces an entry the standard does not demand (and approval-gate.ts
+--       blocks approval on any unfilled required field, lines 208-226). Propose is_required=false.
+--   (b) chairperson_signature (f152a074-e069-4f00-a118-9b007c655cdf, ws 04) is is_required=FALSE, but §4.5
+--       (md line 583, printed p.16) prints a shall: "Der Vorsitzende muss die Prüfaussage zur Kritischen Prüfung
+--       unterzeichnen." The shall is conditional on a PANEL review (there is no chairperson in an expert review),
+--       so is_required=false is the right flag — the missing piece is a guarded gate, see S-9(e). No flag change.
+--   (c) Consistency note, no change proposed: the three Annex-B self-declaration checkboxes on ws 03 are flagged
+--       inconsistently — not_employed_by_parties is_required=false, not_involved_in_study and no_vested_interest
+--       is_required=true. Defensible: Annex B scopes the first to "(ausschließlich externe fachliche Prüfer)"
+--       (md line 842, printed p.24) while the other two restate the normative Anmerkung 1 zu §3.2 (md line 276,
+--       printed p.8), which applies to internal and external experts alike.
+-- ☐ RATIFIED
+-- -- update public.fields set is_required=false where id='c1972ae9-ca3f-4409-a88f-9f37963be5d2';
+-- Rollback: update public.fields set is_required=true where id='c1972ae9-ca3f-4409-a88f-9f37963be5d2';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · BLOCK GATE PARTLY ANCHORED ON "sollte" — REQ-13 (0afdd28e-5ef0-4c27-8bfa-fc59f4e05a84, ws 04, block)
+--   condition "reviewer_signatures IS NOT EMPTY". Its source_quote is §4.5 md line 583 (printed p.16):
+--     "Der Vorsitzende muss die Prüfaussage zur Kritischen Prüfung unterzeichnen. Der/die andere(n) Prüfer
+--      sollte/sollten die Prüfaussage zur Kritischen Prüfung unterzeichnen."
+--   The second sentence — the one that concerns the OTHER reviewers, i.e. this field — is a "sollte" and cannot
+--   carry a block. A hard anchor does exist one sentence later, md line 585 (§4.5, printed p.16):
+--     "Der/die unabhängige(n) Sachverständige(n) muss/müssen die Prüfaussage zur Kritischen Prüfung als
+--      Einzelperson(en) unterzeichnen, die keine Organisation repräsentiert/repräsentieren."
+--   Proposal: keep severity='block' but re-quote on the shall sentence, so the enforcement matches its evidence.
+--   (If the owner reads reviewer_signatures as "the co-reviewers' signatures" rather than "the independent
+--   experts' signatures", the correct action is severity='warn' instead — flagged, not decided.)
+-- ☐ RATIFIED (choose: re-quote, or demote to warn)
+-- -- update public.compliance_requirements set source_quote='§4.5 (printed p.16): "Der/die unabhängige(n) Sachverständige(n) muss/müssen die Prüfaussage zur Kritischen Prüfung als Einzelperson(en) unterzeichnen, die keine Organisation repräsentiert/repräsentieren."' where id='0afdd28e-5ef0-4c27-8bfa-fc59f4e05a84';
+-- -- alternative: update public.compliance_requirements set severity='warn' where id='0afdd28e-5ef0-4c27-8bfa-fc59f4e05a84';
+-- Rollback: restore the previous source_quote / severity='block'.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · clause_reference RETAGS (fields tagged with a clause that does not print their defining sentence).
+--   (a) lca_study_title (c6f9cc46-fd28-4a8d-9d20-8c7a2f445701) tagged §4.1 → the defining sentence is §4.4,
+--       md line 553 (printed p.15): "Der Bericht und die Prüfaussage zur Kritischen Prüfung müssen die zu
+--       prüfende, spezifische Ökobilanzstudie eindeutig identifizieren (z. B. durch Beifügen des Titels, des
+--       Auftraggebers sowie des Erstellers der Ökobilanzstudie usw.)". §4.1 prints no title requirement.
+--   (b) lca_study_version (571680e2-72c8-446f-a3a1-5ecd66be5f90) tagged §4.1 → §4.4 (same sentence, "zusammen,
+--       mit der eindeutigen Fassung des Ökobilanz-Abschlussberichts …") and §4.5 element list, md line 593
+--       (printed p.16): "- die genaue Fassung des Berichts, zu der die Prüfaussage zur Kritischen Prüfung gehört;".
+--   (c) completed_on_final_report (3f68df30-38de-4751-924c-5e2cbbe3b8b3) tagged §4.4 → §4.3.1, md line 482
+--       (printed p.13): "Bericht und Prüfaussage zur Kritischen Prüfung sind auf der Grundlage des
+--       Abschlussberichts zur Ökobilanz abzuschließen." and §4.3.4, md line 549 (printed p.14-15): "Die
+--       Prüfaussage zur Kritischen Prüfung muss für die finale Fassung des Berichtes der Ökobilanz erstellt werden."
+--   (d) chairperson_signs_statement (47c769e4-9be3-4214-8ae4-5828e12b2dd7) tagged §4.7.1 → the signing duty is
+--       §4.5 (md line 583); §4.7.1's last bullet (md line 687, printed p.18-19) covers generation/approval, not
+--       signing: "- sicherstellen, dass der Bericht und die Prüfaussage zur Kritischen Prüfung durch den Ausschuss
+--       erstellt und angenommen werden."
+--   Everything else checked out: the §3.x, §4.2.x, §4.3.x, §4.5, §4.6, §4.7.2, §5 and Anhang-A/B tags all match
+--   the clause that prints the sentence.
+-- ☐ RATIFIED
+-- -- update public.fields set clause_reference='§4.4' where id='c6f9cc46-fd28-4a8d-9d20-8c7a2f445701';
+-- -- update public.fields set clause_reference='§4.4; §4.5' where id='571680e2-72c8-446f-a3a1-5ecd66be5f90';
+-- -- update public.fields set clause_reference='§4.3.1; §4.3.4' where id='3f68df30-38de-4751-924c-5e2cbbe3b8b3';
+-- -- update public.fields set clause_reference='§4.5; §4.7.1' where id='47c769e4-9be3-4214-8ae4-5828e12b2dd7';
+-- Rollback: restore '§4.1', '§4.1', '§4.4', '§4.7.1' respectively.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · MISSING GATES for printed "shall" requirements that already have a field but no enforcement.
+--   (a) nonconformance_basis_6_1 (296db75c-19f1-42ec-ac8a-71ccb85fd050, ws 04) — §4.5, md line 647 (printed
+--       p.17): "Eine Erklärung der Nichtkonformität muss ausschließlich auf der Nichterfüllung einer oder
+--       mehrerer Anforderungen nach ISO 14044:2006, 6.1 beruhen." REQ-12 QUOTES this sentence but does not read
+--       the field. Conditional shall (only when conformance_result == non_conformant).
+--   (b) replacement_documented (ec9a44b2-9752-42b9-8383-80ef3f4c2b8c, ws 01) — §4.2.3, md line 470 (printed
+--       p.12-13): "Jegliches Ersetzen von Prüfern während des Prozesses, ist im Bericht und in der Prüfaussage
+--       zur Kritischen Prüfung zu dokumentieren." Conditional shall (only if a reviewer was replaced) — needs the
+--       same kind of guard field as S-1.
+--   (c) minority_statement (2d02b016-19c3-4e17-b0f6-2d583555b724, ws 04) — §4.5, md lines 630/647 (printed p.17):
+--       "… kann/können der/die widersprechende(n) Prüfer ein Minderheitsgutachten … hinzufügen, und der |
+--       Vorsitzende muss dieses Minderheitsgutachten in die Prüfaussage zur Kritischen Prüfung aufnehmen."
+--       The reviewer's act is "kann" (may); the chairperson's inclusion is "muss" — enforceable only once a
+--       minority statement exists, i.e. a guarded gate, not a required field.
+--   (d) draft_lca_report_provided (df5200b5-2367-439b-b53b-c1f7d98f3f04, ws 02, is_required=true) — §4.3.1,
+--       md line 476 (printed p.13): "Der/die Prüfer muss/müssen zum Entwurf des Ökobilanzberichts Stellung nehmen
+--       und dem Ersteller der Ökobilanzstudie erforderlichenfalls die Möglichkeit zur Verbesserung der Arbeit
+--       geben." Unconditional shall; currently only the is_required flag enforces it.
+--   (e) chairperson_signature (f152a074-e069-4f00-a118-9b007c655cdf, ws 04) — §4.5, md line 583 (printed p.16):
+--       "Der Vorsitzende muss die Prüfaussage zur Kritischen Prüfung unterzeichnen." Shall, conditional on a
+--       panel review (review_type == panel_review). See S-6(b).
+--   Proposal: add four guarded gates (a, c, d, e) now; (b) waits on the S-1 guard field.
+--   NOTE: confirm the full NOT NULL column set of compliance_requirements at apply time — the inserts below list
+--   only the columns this repo reads.
+-- ☐ RATIFIED
+-- -- insert into public.compliance_requirements (worksheet_template_id, code, title_de, severity, condition, clause_reference, source_quote, requires_attestation) values
+-- --  ('88a9eb37-68da-48bc-9c42-24f9f1c6f760','REQ-15','Nichtkonformität nur auf Basis ISO 14044:2006, 6.1','block','IF conformance_result == non_conformant THEN nonconformance_basis_6_1 == true','§4.5','§4.5 (printed p.17): "Eine Erklärung der Nichtkonformität muss ausschließlich auf der Nichterfüllung einer oder mehrerer Anforderungen nach ISO 14044:2006, 6.1 beruhen."',false),
+-- --  ('88a9eb37-68da-48bc-9c42-24f9f1c6f760','REQ-16','Unterschrift des Vorsitzenden bei Ausschussprüfung','block','IF review_type == panel_review THEN chairperson_signature IS NOT EMPTY','§4.5','§4.5 (printed p.16): "Der Vorsitzende muss die Prüfaussage zur Kritischen Prüfung unterzeichnen."',false),
+-- --  ('88a9eb37-68da-48bc-9c42-24f9f1c6f760','REQ-17','Minderheitsgutachten in die Prüfaussage aufgenommen','block','IF minority_statement IS NOT EMPTY THEN statement_in_lca_report == true','§4.5','§4.5 (printed p.17): "Können Widersprüche nicht geklärt werden, kann/können der/die widersprechende(n) Prüfer ein Minderheitsgutachten zur Prüfaussage zur Kritischen Prüfung hinzufügen, und der | Vorsitzende muss dieses Minderheitsgutachten in die Prüfaussage zur Kritischen Prüfung aufnehmen."',false),
+-- --  ('6e77c7e3-fda6-4b74-9f6c-41fb2b089180','REQ-18','Stellungnahme zum Entwurf des Ökobilanzberichts','block','draft_lca_report_provided == true','§4.3.1','§4.3.1 (printed p.13): "Der/die Prüfer muss/müssen zum Entwurf des Ökobilanzberichts Stellung nehmen und dem Ersteller der Ökobilanzstudie erforderlichenfalls die Möglichkeit zur Verbesserung der Arbeit geben."',false);
+-- Rollback: delete from public.compliance_requirements where code in ('REQ-15','REQ-16','REQ-17','REQ-18') and
+--   worksheet_template_id in ('88a9eb37-68da-48bc-9c42-24f9f1c6f760','6e77c7e3-fda6-4b74-9f6c-41fb2b089180');
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · ALL 17 ENCODE-TIME GATE source_quotes ARE ASCII-TRANSLITERATED, AND SEVERAL PARAPHRASE.
+--   Every source_quote renders German umlauts as digraphs ("Kritischen Pruefung", "muessen", "ausschliesslich",
+--   "Oekobilanzstudie"), so none of the 17 is byte-verbatim against the printed text. That alone is a fidelity
+--   defect under SR-1 (the value must be quoted verbatim), even where the substance is right.
+--   Two go further and paraphrase:
+--     · REQ-02 (c98ece6b-ab25-4653-a0f1-61c1be221039) says "die angewendeten Methoden mit ISO 14044
+--       uebereinstimmen"; the printed §4.1 bullet (md line 365, printed p.10) reads "die bei der Durchführung der
+--       Ökobilanz angewendeten Verfahren mit dieser Internationalen Norm übereinstimmen" — "Verfahren", not
+--       "Methoden", and "dieser Internationalen Norm", not "ISO 14044".
+--     · REQ-10 (b4a38b39-426c-4add-8307-2cf8b40402e5) compresses the four §4.7.2 bullets into one sentence and
+--       drops the very clause its condition enforces (md lines 695/711, printed p.19): "muss angeben, ob in Bezug
+--       auf die Prüfaussage zur Kritischen Prüfung Einigkeit oder Uneinigkeit herrscht, und die Gründe für die
+--       Uneinigkeit angeben: Begründungen müssen ausschließlich auf den Anforderungen nach | ISO 14040 oder
+--       ISO 14044 beruhen."
+--   Proposal: re-quote all 17 gate source_quotes from the md, verbatim with umlauts, in one batch. The 59 field
+--   quotes in din-14071-1-md-verification-pack.sql are already verbatim (spotcheck 59/59, mean 100%) and can be
+--   reused as the source text for most of them.
+-- ☐ RATIFIED
+-- -- (batch of 17 update public.compliance_requirements set source_quote='…' where id='…'; written at ratification
+-- --  time from the md, so the quotes are produced in the same session they are applied — SR-1.)
+-- Rollback: restore the 17 previous source_quote values (recorded verbatim in the 2026-09-05 export at
+--   scratchpad/fields-DIN-14071-1.json).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · DATA-TYPE / UNIT HYGIENE — statement_date (744e411c-7c2e-400a-8b94-42d0815bbc7f, ws 04) is
+--   data_type='text' with unit='date'. The schema has a real 'date' data type (approval-gate.ts reads
+--   p.valueDate for it, line 224), so this field stores a date as free text and the unit column is being used
+--   to carry a type. Cosmetic today, but it defeats date validation and any future date comparison in a gate.
+--   Same pattern check across the standard: comment_iterations uses unit='count' on a number field (fine); every
+--   other field carries unit='-' (fine for booleans/text/enums).
+--   Note this field is the one row the pack marks 'inferred_from_worksheet' (app/workflow metadata): the
+--   guideline prints "Datum:" only in the informative Annex B self-declaration (md line 873, printed p.24-25) and
+--   a "Berichtsdatum" only as an EXAMPLE of how to identify the LCA report version (§4.4, md line 553) — it never
+--   requires a date on the critical review statement itself.
+-- ☐ RATIFIED
+-- -- update public.fields set data_type='date', unit='-' where id='744e411c-7c2e-400a-8b94-42d0815bbc7f';
+-- -- (migration note: any existing project_parameters.value_text for this field must be moved to value_date first.)
+-- Rollback: update public.fields set data_type='text', unit='date' where id='744e411c-7c2e-400a-8b94-42d0815bbc7f';

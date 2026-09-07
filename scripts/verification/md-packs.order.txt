@@ -33,3 +33,4 @@ dwa-m-179-1-md-verification-pack.sql  DWA-M-179-1
 dwa-m-708-md-verification-pack.sql  DWA-M-708
 dwa-m-732-md-verification-pack.sql  DWA-M-732
 dwa-m-760-md-verification-pack.sql  DWA-M-760
+din-14071-1-md-verification-pack.sql  DIN-14071-1
