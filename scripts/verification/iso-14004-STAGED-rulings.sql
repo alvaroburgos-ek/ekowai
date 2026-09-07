@@ -1,0 +1,384 @@
+-- ============================================================================
+-- ISO-14004 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript
+--   C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\ISO-14004\ISO-14004.md (mathpix LaTeX of the DIN EN
+--   ISO 14004:2016 D/E bilingual print; GERMAN is an official CEN version, so quotes are not back-translations).
+--   No page-number lines in the transcript: "printed p.N" is derived from the standard's own Inhalt index
+--   (md 112-277), clause spans as documented in the pack header of iso-14004-md-verification-pack.sql.
+-- Gate rows live in compliance_requirements (columns: worksheet_template_id, code, severity, condition,
+--   clause_reference, source_quote, requires_attestation) and are evaluated by src/lib/compliance/evaluate.ts —
+--   a condition that evaluates TRUE is a PASS, FALSE is a FAIL; a missing referenced symbol yields "pending".
+-- Standard id d52ffd83-a016-4591-a1ee-fe44f347e9f7. Worksheet ids:
+--   01 Anmeldung, Anwendungsbereich und Kontext der Organisation   c297380c-9801-43a4-a546-1672ed5d59c3  (8 fields)
+--   02 Fuehrung, Umweltpolitik und Rollen                          932aa409-9f76-4847-ba1f-03a29703b9cd  (5 fields)
+--   03 Planung - Umweltaspekte sowie Risiken und Chancen           bb96d1f0-49df-40c4-8cfb-bd6e32801aa4 (10 fields)
+--   04 Planung - Bindende Verpflichtungen                          babc5125-43b8-4595-a1bb-41a224e4da3c  (5 fields)
+--   05 Planung - Massnahmen, Umweltziele und Leistungskennzahlen   f341160d-c105-4979-b2ca-484741f32a6f  (8 fields)
+--   06 Unterstuetzung                                              f2ef3c9e-1580-44ae-a040-29d55cd3fbb8  (9 fields)
+--   07 Betrieb - Steuerung sowie Notfallvorsorge und Gefahrenabw.  147384e3-bd89-43c2-99d1-7ee5eb4bc561  (6 fields)
+--   08 Leistungsbewertung                                          a8558733-16a3-4c1f-8172-c12ed8505aab  (7 fields)
+--   09 Verbesserung                                                c25ab137-ab66-4551-b5a0-edb9f1595d8f  (7 fields)
+--
+-- CONTEXT — the one fact that governs every block below: ISO 14004 is GUIDANCE. Its own §1 says
+--   "Diese Internationale Norm enthaelt Leitlinien fuer den Aufbau, die Verwirklichung, die Aufrechterhaltung und
+--   die Verbesserung eines widerstandsfaehigen, glaubwuerdigen und zuverlaessigen Umweltmanagementsystems." and
+--   "Die Anleitung in dieser Internationalen Norm kann im Ganzen oder in Teilen fuer die systematische Verbesserung
+--   des Umweltmanagements genutzt werden. Sie dient der Bereitstellung zusaetzlicher Erlaeuterungen zu den
+--   Konzepten und Anforderungen." and "Die Leitlinien in der vorliegenden Internationalen Norm stimmen zwar mit dem
+--   Modell eines Umweltmanagementsystems nach ISO 14001 ueberein, sind jedoch nicht dafuer vorgesehen, die
+--   Anforderungen von ISO 14001 zu interpretieren." (printed p.14-15). The body's modal verb is "sollte"/"kann"
+--   throughout; ISO 14001 holds the "muss". HONEST CORRECTION TO THE BRIEF'S PREMISE: the 2016 edition's §1 does
+--   NOT contain a sentence of the form "does not contain requirements / is not intended for certification" —
+--   that wording is not in this document and is therefore not quoted anywhere in this pass. The three sentences
+--   above are what the scope actually prints, and they carry the same consequence.
+-- Nothing in this file was applied. 65 fields on 9 worksheets, 0 equations, 38 gates.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · HEADLINE, AND IT IS A NEGATIVE RESULT: THERE IS NO BLOCK GATE ON THIS STANDARD.
+--   All 38 compliance_requirements rows for ISO-14004 carry severity='warn' (export 2026-09-05, verified by
+--   count: 38 warn / 0 block). A block gate on a guidance document would be indefensible under the §1 text
+--   quoted in the header, and the encoding does not have one. No change is proposed here; this block exists so
+--   the property is recorded and any future migration that raises an ISO-14004 gate to 'block' is caught.
+-- Read-back used:  select severity, count(*) from compliance_requirements cr join worksheet_templates wt on
+--   wt.id=cr.worksheet_template_id join standards s on s.id=wt.standard_id where s.code='ISO-14004' group by 1;
+-- Proposal: none. Standing rule: ISO-14004 gates stay severity='warn'.
+-- ☐ RATIFIED (acknowledgement only — no SQL)
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · TAUTOLOGICAL / NO-OP GATE CONDITIONS — two gates enforce nothing.
+--   (a) CR-033 (f235f084-3c90-4bd4-a674-6692fa3dc909, ws 01, warn) condition is the literal "TRUE".
+--       evaluate.ts parses a bare TRUE to a boolean literal that always returns pass, so the gate can never fire.
+--       Its source_quote IS verbatim (§1: "Diese Internationale Norm ist auf alle Organisationen anwendbar,
+--       unabhaengig von ihrer Groesse, Art und Beschaffenheit." — printed p.14) but it is an applicability
+--       statement, not a checkable project datum. The encoder already labelled it "(Kontextmarker)".
+--   (b) CR-038 (264efe96-e783-44ac-bff8-24cf17a7e287, ws 01, warn) condition is likewise "TRUE", and its
+--       source_quote is a BARE HEADING with no requirement in it at all: "Anhang B (informativ): Stufenkonzept
+--       zur Verwirklichung eines Umweltmanagementsystems (auf der Grundlage von ISO 14005)." (printed p.125).
+--       An informative annex title is not an obligation.
+-- Proposal: retire both, or keep them as explicitly documentation-only markers. If they are kept, CR-038 should
+--   at least quote text rather than a heading — the annex's own opening sentence would do: "Eine Organisation
+--   kann ein umfassendes Umweltmanagementsystem entwickeln, wenn der Anwendungsbereich des
+--   Umweltmanagementsystems saemtliche Taetigkeiten, Produkte und Dienstleistungen der Organisation umfasst"
+--   (printed p.125).
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set source_quote = source_quote || ' [documentation-only marker: no project datum to check]' where id in ('f235f084-3c90-4bd4-a674-6692fa3dc909','264efe96-e783-44ac-bff8-24cf17a7e287');
+-- -- rollback: restore the previous source_quote values (strip the appended bracket).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · DUPLICATE AND STRICT-SUBSET GATES — three pairs, six rows, no added enforcement.
+--   (a) CR-001 (3359f30b-0280-42ba-b3ae-21de7e680906, ws 01) and CR-004 (d2a69a95-bd2f-481a-9bd1-5c6998658003,
+--       ws 01) have the IDENTICAL condition "anwendungsbereich IS NOT NULL". CR-004 is the correct one: it
+--       quotes §4.3 ("Eine Organisation sollte die Grenzen und die Anwendbarkeit des Umweltmanagementsystems
+--       bestimmen, um dessen Anwendungsbereich festzulegen." — printed p.33), the clause that actually asks for
+--       a scope. CR-001 hangs the same check on the §1 scope-of-the-STANDARD sentence, which is about the
+--       document, not about the project.
+--   (b) CR-022 (24655ddf-0408-47dd-90bf-22535fc7846b, ws 06) and CR-036 (766b7481-dedf-47e8-9b08-54020255ce96,
+--       ws 06) are a full duplicate: same worksheet, same condition "kommunikationsprozess IS NOT NULL", same
+--       clause_reference §7.4.1. The encoder even wrote "(vgl. CR-022)" into CR-036's quote. CR-036's quote is
+--       additionally NOT verbatim (see S-5).
+--   (c) CR-035 (cccac61f-0718-4476-9d25-11c426e9a1d5, ws 08) condition "auditprogramm IS NOT NULL" is a STRICT
+--       SUBSET of CR-028 (b41d63bf-f0e3-4ac6-8bc3-44d96ee298af, ws 08) "auditprogramm IS NOT NULL AND
+--       auditergebnis IS NOT NULL": CR-035 can never fail without CR-028 failing too. Its quote is a truncation
+--       of CR-028's, marked "(vgl. CR-028)".
+-- Proposal: retire CR-001, CR-036, CR-035 (deactivate, do not delete — they carry encode-time provenance).
+--   Note: compliance_requirements has no `active` column in prod; the reversible way to retire a gate today is
+--   to neutralise the condition and flag it. Decide which mechanism the owner wants before applying.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='TRUE', source_quote = source_quote || ' [RETIRED 2026-09-05: duplicate of CR-004 / CR-022 / CR-028]' where id in ('3359f30b-0280-42ba-b3ae-21de7e680906','766b7481-dedf-47e8-9b08-54020255ce96','cccac61f-0718-4476-9d25-11c426e9a1d5');
+-- -- rollback: condition back to 'anwendungsbereich IS NOT NULL' (CR-001), 'kommunikationsprozess IS NOT NULL'
+-- --           (CR-036), 'auditprogramm IS NOT NULL' (CR-035); strip the appended bracket from source_quote.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · MIS-HOMED GATE — CR-037 sits on worksheet 03 but reads only a worksheet 01 field.
+--   CR-037 (087d8326-654e-4eed-978c-362e5b808963) is attached to ws 03 "Planung - Umweltaspekte sowie Risiken
+--   und Chancen" (bb96d1f0-49df-40c4-8cfb-bd6e32801aa4) and its condition is
+--   "lebensweg_betrachtung_angewendet IS NOT NULL". That field (d03d5cfe-565e-4ce4-a289-b76633cb7f27) lives on
+--   worksheet 01 "Anmeldung, Anwendungsbereich und Kontext der Organisation". It is the ONLY cross-worksheet
+--   gate in the standard (checked mechanically: every other gate reads only fields of its own worksheet).
+--   Consequence: worksheet 03 shows a finding whose only remedy is on worksheet 01.
+-- Evidence for where the concept belongs: the Lebenswegbetrachtung is DEFINED in §4.1 ("Eine Betrachtung des
+--   Lebenswegs umfasst die Beruecksichtigung der Steuerung und Einflussnahme der Organisation im Hinblick auf
+--   die Phasen des Lebenswegs ihrer Produkte und Dienstleistungen." — printed p.23-28) and APPLIED in §6.1.2.3
+--   ("sollte die Organisation den Lebensweg in Betracht ziehen" — printed p.54-55).
+-- Proposal: either move CR-037 to worksheet 01 (where its field is), or move the field to worksheet 03 (where
+--   the encoder put the gate). Moving the GATE is the smaller change and matches the field's §4.1 home.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set worksheet_template_id='c297380c-9801-43a4-a546-1672ed5d59c3', clause_reference='§4.1' where id='087d8326-654e-4eed-978c-362e5b808963';
+-- -- rollback: update public.compliance_requirements set worksheet_template_id='bb96d1f0-49df-40c4-8cfb-bd6e32801aa4', clause_reference='§6.1.2.3' where id='087d8326-654e-4eed-978c-362e5b808963';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · NON-VERBATIM GATE source_quote VALUES — 18 of 38 fail a word-by-word check against the md.
+--   Method: every gate's quoted run was normalised the same way spotcheck-pack.mjs normalises (dehyphenate,
+--   collapse whitespace, drop ; : , ( ) . , unify dashes) and scored in 6-word windows against the whole
+--   transcript. 20 gates score 100% (verbatim). The 18 below do not. Grouped by kind:
+--
+--   (i) MEANING CHANGED — the rewrite says something the standard does not:
+--       CR-003 (6af41bfb-a916-47ae-98a4-07d403cabe46) 81%. Encoded: "... und sie sollten beruecksichtigt werden,
+--         wenn die Organisation ihre Erfordernisse und Erwartungen bestimmt." md §4.2.1 prints "... und sie
+--         sollten beruecksichtigt werden, wenn die Organisation ihren Kontext ueberprueft." (printed p.29).
+--       CR-036 (766b7481-dedf-47e8-9b08-54020255ce96) 6% — a wholesale paraphrase. Encoded: "Eine Organisation
+--         sollte Prozesse fuer die relevante Kommunikation festlegen. Diese Prozesse sollten ermitteln,
+--         worueber, wann, mit wem und wie kommuniziert wird." md §7.4.1 prints "Eine Organisation sollte
+--         Prozesse fuer die fuer das Umweltmanagementsystem relevante Kommunikation unter Beruecksichtigung der
+--         bindenden Verpflichtungen der Organisation festlegen. Diese Prozesse sollten ermitteln: - welche
+--         Informationen kommuniziert werden muessen; - wann oder unter welchen Umstaenden sie kommuniziert
+--         werden muessen; - an wen sie kommuniziert werden muessen; - wie sie kommuniziert werden."
+--         (printed p.76-78). (CR-036 is also the duplicate in S-3(b).)
+--       CR-015 (3dd05227-8345-4564-8e92-b74d17e737a8) 21%. Encoded: "Eine Organisation sollte beruecksichtigen
+--         und planen, wie Massnahmen zu ergreifen sind, um die bedeutenden Umweltaspekte ... zu behandeln."
+--         md §6.1.4 prints "Eine Organisation sollte ueberlegen und planen, wie sie Massnahmen ergreifen kann,
+--         um bedeutende Umweltaspekte, bindende Verpflichtungen sowie Risiken und Chancen zu behandeln, die zu
+--         beruecksichtigen sind, wie in 6.1.1 festgelegt." (printed p.63-64).
+--       CR-016 (987e261f-22f0-4065-9c11-c39c15cb1472) 50%. Encoded: "Beim Festlegen von Umweltzielen sollte eine
+--         Organisation Eingaben beruecksichtigen, einschliesslich der Grundsaetze und Verpflichtungen in ihrer
+--         Umweltpolitik." md §6.2.2 prints "Beim Festlegen von Umweltzielen sollte eine Organisation Eingaben
+--         beruecksichtigen, einschliesslich: - Grundsaetze und Verpflichtungen in ihrer Umweltpolitik; ..."
+--         (printed p.65-66) — the encoder flattened a list into a sentence.
+--       CR-034 (d92662d5-8199-44cc-bed2-7826bc74f921) 83%. Encoded: "... praktisch und kostenwirksam sein."
+--         md §6.2.4 prints "... praktisch, kostensparend und technisch durchfuehrbar sein." (printed p.68) —
+--         one criterion (technische Durchfuehrbarkeit) was DROPPED and another renamed.
+--       CR-024 (1b0888c0-007a-4266-acc9-508fd101de85) 80%. Encoded: "... um den Verpflichtungen ihrer
+--         Umweltpolitik gerecht zu werden." md §8.1.1 prints "... um den Verpflichtungen ihrer Umweltpolitik
+--         nachzugehen, ihre Umweltziele zu erreichen und ihre bedeutenden Umweltaspekte, bindenden
+--         Verpflichtungen sowie ihre Risiken und Chancen, die zu beruecksichtigen sind, zu steuern."
+--         (printed p.85) — the quote stops before two thirds of the obligation.
+--       CR-031 (3deb0863-61a3-46a5-a2f0-85bc9ac88377) 67%. Encoded: "... systematisches Verfahren zur Ermittlung
+--         einer Nichtkonformitaet und zum Ergreifen von Massnahmen verfuegen." md §10.2 prints "... systematisches
+--         Verfahren zur Ermittlung einer Nichtkonformitaet, zum Ergreifen von Massnahmen zur Minderung von
+--         negativen Umweltauswirkungen, zur Analyse der Ursache der Nichtkonformitaet und zum Ergreifen von
+--         Korrekturmassnahmen verfuegen." (printed p.102-103).
+--       CR-028 (b41d63bf-f0e3-4ac6-8bc3-44d96ee298af) 59% and CR-035 (cccac61f-...) 20%. Encoded: "Interne Audits
+--         eines Umweltmanagementsystems sollten in geplanten Zeitabstaenden durchgefuehrt werden, um Informationen
+--         darueber bereitzustellen, ob ...". md §9.2 prints "Interne Audits eines Umweltmanagementsystems einer
+--         Organisation sollten in geplanten Zeitabstaenden durchgefuehrt werden, um Informationen darueber zu
+--         erhalten und fuer das Management bereitzustellen, ob ..." (printed p.97-98).
+--       CR-008 (e13f15cd-4507-401e-9efb-756bd005b22d) 50%. Encoded: "mit ausreichender Befugnis, Bewusstsein,
+--         Kompetenz und Ressourcen"; md §5.3 prints "mit ausreichender Befugnis, ausreichendem Bewusstsein,
+--         ausreichender Kompetenz und Ressourcen" and continues "... zuteilen, um a) ... b) ..." (printed p.44-45).
+--       CR-013 (bb44742d-0ccb-46e1-874e-ff986b1c8556) 89%. Encoded ends "... mit dem bindende Verpflichtungen
+--         ermittelt werden."; md §6.1.3.1 prints "... mit dem bindende Verpflichtungen, die auf die Umweltaspekte
+--         ihrer Taetigkeiten, Produkte und Dienstleistungen zutreffen, ermittelt werden und Zugang zu ihnen
+--         hergestellt wird." (printed p.60-61).
+--       CR-027 (58503b1f-ccef-40e1-8a33-e4ab0edcb48a) 82%. Encoded drops "hinsichtlich ihrer bindenden
+--         Verpflichtungen" and parenthesises the trailing clause; md §9.1.2 printed p.94-96.
+--       CR-005 (e9c0685a-36c5-4f1f-9a03-22853e201e0b) 75%. Encoded: "Die oberste Leitung sollte Verantwortung
+--         fuer die Wirksamkeit ... uebernehmen"; md §5.1 prints "Die oberste Leitung sollte daher Verantwortung
+--         fuer die Wirksamkeit des Umweltmanagementsystems der Organisation uebernehmen ..." (printed p.37-39).
+--       CR-029 (d962b60d-e8f2-440d-8b23-d87b9a5828ae) 85%. Encoded drops "einer Organisation" from "Die oberste
+--         Leitung einer Organisation sollte in von ihr festgelegten Zeitabstaenden ..." (md §9.3, printed p.99-100).
+--       CR-030 (aceaeecf-f4fa-4d7e-9549-f4e90d96ff78) 89%. Encoded: "Die Organisation sollte Moeglichkeiten zur
+--         Verbesserung ermitteln."; md §10.1 prints "Die Organisation sollte Moeglichkeiten zur Verbesserung
+--         anhand folgender Massnahmen ermitteln:" followed by the three sources 9.1 / 9.2 / 9.3 (printed p.101) —
+--         truncated without an ellipsis, which turns a sourced duty into a bare one.
+--       CR-006 (7fca0ed9-6fb2-4150-bdad-47dd7f094c7d) 89%, CR-007 (b810b371-d266-4bea-b19b-64aeac1b8476) 95%,
+--         CR-025 (c1d196b2-d186-45ea-a7d1-bc7cc52b2e57) 84%: smaller drops — CR-006 ends "...den Schutz der
+--         Umwelt zu erfuellen" where the md continues "..., das Verhindern von Umweltbelastungen und die
+--         fortlaufende Verbesserung zu erfuellen"; CR-007 drops ", sofern zutreffend,"; CR-025 drops "auf eine
+--         anfaengliche Umweltauswirkung".
+--
+--   THE 20 THAT PASS (100% verbatim, ellipses honoured): CR-001, CR-002, CR-004, CR-009, CR-010, CR-011,
+--     CR-012, CR-014, CR-017, CR-018, CR-019, CR-020, CR-021, CR-022, CR-023, CR-026, CR-032, CR-033, CR-037,
+--     CR-038. (Being verbatim is not the same as being on point — CR-010, CR-012, CR-020 and CR-038 are
+--     verbatim AND mis-anchored; see S-6.)
+-- Proposal: replace each of the 18 source_quote values with the printed run (the corrected text is written out
+--   above for each). Not applied: source_quote is encode-time provenance, and rewriting it is a provenance
+--   change, not evidence capture.
+-- ☐ RATIFIED  (per-row UPDATEs to be generated from the corrected texts above once ratified)
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · GATE QUOTES THAT ARE VERBATIM BUT CARRY NO OBLIGATION (mis-anchored), 4 rows.
+--   (a) CR-010 (14c5b545-3cc9-4faf-a723-c7c86eb0951d, ws 03) checks "notfallsituation IS NOT NULL" but quotes
+--       §6.1.1 "Der Prozess beginnt mit dem Verstehen des Kontextes, in dem die Organisation taetig ist,
+--       einschliesslich der Belange, die die beabsichtigten Ergebnisse des Umweltmanagementsystems beeinflussen
+--       koennen (siehe 4.1)." (printed p.46-51) — that sentence never mentions Notfallsituationen. The printed
+--       text that does is §6.1.2.3 "In allen Faellen sollte die Organisation normale und abweichende
+--       Betriebsbedingungen, einschliesslich Einschalt- und Ausschaltbedingungen, Wartungsbedingungen sowie
+--       vernuenftigerweise vorhersehbare Notfallsituationen beruecksichtigen." (printed p.54-55), plus the §8.2
+--       back-reference "Siehe 6.1.1 fuer die Bestimmung von Notfallsituationen." (printed p.90-91).
+--   (b) CR-012 (b6a6f91b-8ebb-46b2-87c4-37becd190261, ws 03) checks "bedeutungskriterien IS NOT NULL AND
+--       bedeutender_umweltaspekt IS NOT NULL" but quotes the definitional opener "Bedeutung ist ein Begriff, der
+--       im Verhaeltnis zu einer Organisation und ihrem Kontext steht. ..." (§6.1.2.5, printed p.58-59). The duty
+--       is two sentences later: "Da die Organisation eine Vielzahl von Umweltaspekten und damit verbundenen
+--       Umweltauswirkungen haben kann, sollte sie Kriterien festlegen und eine Methode einfuehren, um diejenigen
+--       Aspekte zu bestimmen, die fuer sie bedeutend sind."
+--   (c) CR-020 (8fd19734-203d-4054-b466-6c97f92c9e3d, ws 06) checks "kompetenznachweis == true" but quotes
+--       §7.2 "Wissen, Verstaendnis, Faehigkeiten oder Fertigkeiten ermoeglichen einer Person, die notwendige
+--       Kompetenz im Hinblick auf die Umweltleistung zu erlangen." (printed p.71-74) — a definition, not a
+--       records duty. The records duty is "Es sollten zumindest geeignete dokumentierte Informationen als
+--       Nachweis fuer die Kompetenzen aufrechterhalten werden." (same clause).
+--   (d) CR-038 — bare annex heading, see S-2(b).
+-- Proposal: re-anchor (a)-(c) on the sentences quoted here; clause_reference for (a) becomes §6.1.2.3.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set clause_reference='§6.1.2.3', source_quote='§6.1.2.3: "In allen Faellen sollte die Organisation normale und abweichende Betriebsbedingungen, einschliesslich Einschalt- und Ausschaltbedingungen, Wartungsbedingungen sowie vernuenftigerweise vorhersehbare Notfallsituationen beruecksichtigen."' where id='14c5b545-3cc9-4faf-a723-c7c86eb0951d';
+-- -- rollback: clause_reference='§6.1.1' and the previous source_quote.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · GATE-vs-is_required MISMATCH — a warn gate demands a field the encoding itself marks optional.
+--   (a) CR-002 (1340cd70-954b-4d94-87f7-c1573d96daa5, ws 01) requires "umweltzustaende IS NOT NULL", but
+--       umweltzustaende (8994ce84-8979-4493-b546-61a0a11a429e) has is_required=false.
+--   (b) CR-015 (3dd05227-8345-4564-8e92-b74d17e737a8, ws 05) requires "massnahme_wirksamkeit IS NOT NULL", but
+--       massnahme_wirksamkeit (433c5589-549b-4a13-b5f6-4abb897f6a44) has is_required=false.
+--   (c) CR-016 (987e261f-22f0-4065-9c11-c39c15cb1472, ws 05) requires "ziel_messbar IS NOT NULL", but
+--       ziel_messbar (ebdfd5c1-15f6-4efd-aa16-d086de06b459) has is_required=false — AND the source makes the
+--       duty conditional: "Wenn Einzelziele festgelegt werden, sollten sie messbar sein." (§6.2.2, printed
+--       p.65-66). The gate has NO scope predicate for "Einzelziele wurden festgelegt", so a project that sets
+--       an Umweltziel without Einzelziele is nagged for a datum the standard does not ask of it.
+--   (d) CR-034 (d92662d5-8199-44cc-bed2-7826bc74f921, ws 05) requires "leistungskennzahl_typ IS NOT NULL", but
+--       leistungskennzahl_typ (1e3f1361-913b-4304-bfe9-808fd500b9a8) has is_required=false and the source says
+--       "Die Organisation KANN die Verwendung von Umweltzustandskennzahlen (ECIs), Managementleistungskennzahlen
+--       (MPIs) und Betriebsleistungskennzahlen (OPIs) in Betracht ziehen" (§6.2.4, printed p.68).
+-- Proposal: either raise the four fields to is_required=true, or relax the four gate conditions. Consistent with
+--   the source: keep is_required=false and add the missing scope predicate to CR-016; drop the
+--   massnahme_wirksamkeit / leistungskennzahl_typ / umweltzustaende conjuncts.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='umweltziel IS NOT NULL AND (einzelziel IS NULL OR ziel_messbar IS NOT NULL)' where id='987e261f-22f0-4065-9c11-c39c15cb1472';
+-- -- update public.compliance_requirements set condition='kontext_externe_themen IS NOT NULL AND kontext_interne_themen IS NOT NULL' where id='1340cd70-954b-4d94-87f7-c1573d96daa5';
+-- -- update public.compliance_requirements set condition='geplante_massnahme IS NOT NULL' where id='3dd05227-8345-4564-8e92-b74d17e737a8';
+-- -- update public.compliance_requirements set condition='leistungskennzahl IS NOT NULL' where id='d92662d5-8199-44cc-bed2-7826bc74f921';
+-- -- rollback: restore the four original conditions recorded in this block.
+-- -- NOTE: the "(einzelziel IS NULL OR ...)" form uses OR + parentheses; confirm evaluate.ts accepts it before
+-- --       applying (the current 38 ISO-14004 conditions contain no OR and no parentheses at all).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · is_required REVIEW ON FIELDS THE SOURCE LEAVES OPTIONAL — 2 rows.
+--   (a) verpflichtung_verzeichnis (efe4fa8d-920f-4a34-bedb-a9a374334e26, ws 04, boolean, is_required=true, and
+--       CR-014 demands "verpflichtung_verzeichnis == true"). The source obliges DOCUMENTED INFORMATION but
+--       leaves the register FORM optional: "Eine Organisation sollte dokumentierte Informationen ueber ihre
+--       bindenden Verpflichtungen aufrechterhalten, die in Form eines Verzeichnisses oder einer Liste gestaltet
+--       werden koennten." (§6.1.3.4, printed p.63). The encoder itself wrote "(Verzeichnis = 'koennten',
+--       optional)" into CR-014's quote and then encoded it as a hard true.
+--   (b) lebensweg_betrachtung_angewendet (d03d5cfe-565e-4ce4-a289-b76633cb7f27, ws 01, boolean,
+--       is_required=false) is fine as optional, but see S-4 / S-9 for its clause home.
+-- Proposal: (a) keep is_required=true on the documented-information fact but relax CR-014 from "== true" to
+--   "IS NOT NULL", so an organization that documents its obligations in another form is not nagged.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='verpflichtung_verzeichnis IS NOT NULL' where id='2846e591-6d5d-49bd-b896-fc515769a6c0';
+-- -- rollback: update public.compliance_requirements set condition='verpflichtung_verzeichnis == true' where id='2846e591-6d5d-49bd-b896-fc515769a6c0';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · CLAUSE RETAGS (fields and gates), with evidence.
+--   (a) FIELD lebensweg_betrachtung_angewendet (d03d5cfe-565e-4ce4-a289-b76633cb7f27) carries
+--       clause_reference='§4.3'. §4.3 mentions the Lebensweg only in passing ("... sowie den Lenkungs- und
+--       Einflussbereich der Organisation unter Beruecksichtigung des Lebenswegs umfassen"). The clause that
+--       DEFINES the concept is §4.1: "Eine Betrachtung des Lebenswegs umfasst die Beruecksichtigung der
+--       Steuerung und Einflussnahme der Organisation im Hinblick auf die Phasen des Lebenswegs ihrer Produkte
+--       und Dienstleistungen." (printed p.23-28). Propose §4.1.
+--   (b) FIELD notfallsituation (3c6972d0-8a91-42da-bd32-7e770f193c26) carries clause_reference='§6.1.1'.
+--       §6.1.1's printed text never names Notfallsituationen; the tag survives only because §8.2 says
+--       "Siehe 6.1.1 fuer die Bestimmung von Notfallsituationen." (printed p.90-91). Propose keeping §6.1.1 and
+--       adding §6.1.2.3 as the text-bearing clause, or retagging to §6.1.2.3.
+--   (c) GATE CR-003 (6af41bfb-...) clause_reference='§4.2' -> the quoted sentence is §4.2.1 (printed p.29).
+--   (d) GATE CR-023 (a184f259-3674-454f-89fd-970d508ae090) clause_reference='§7.5' -> the quoted sentence is the
+--       §7.5.1 opener (printed p.81-83). The gate checks dokument_lenkung, whose own field clause is §7.5.3.
+--   (e) GATE CR-024 (1b0888c0-...) clause_reference='§8.1' -> the quoted sentence is §8.1.1 (printed p.85).
+--   (f) GATE CR-032 (f4dc3acb-1817-4c6c-b9dc-e9db3b375238) clause_reference='§10.3' -> the quoted sentence is
+--       §10.3.1 (printed p.104).
+-- ☐ RATIFIED
+-- -- update public.fields set clause_reference='§4.1' where id='d03d5cfe-565e-4ce4-a289-b76633cb7f27';
+-- -- update public.compliance_requirements set clause_reference='§4.2.1' where id='6af41bfb-a916-47ae-98a4-07d403cabe46';
+-- -- update public.compliance_requirements set clause_reference='§7.5.1' where id='a184f259-3674-454f-89fd-970d508ae090';
+-- -- update public.compliance_requirements set clause_reference='§8.1.1' where id='1b0888c0-007a-4266-acc9-508fd101de85';
+-- -- update public.compliance_requirements set clause_reference='§10.3.1' where id='f4dc3acb-1817-4c6c-b9dc-e9db3b375238';
+-- -- rollback: §4.3 / §4.2 / §7.5 / §8.1 / §10.3 respectively.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · ENUM REVIEW — one closed list where the source leaves the scale to the organization (SR-2).
+--   bedeutung_stufe (27f1029f-2067-4667-8e58-1a8d77e05693, ws 03, is_required=false) is encoded as a closed
+--   4-value enum {hoch, mittel, niedrig, vernachlaessigbar}. The md prints those four as ONE EXAMPLE of ONE of
+--   TWO alternatives: "Eine Art Massstab oder Rangfolge kann hilfreich fuer die Einstufung der Bedeutung sein,
+--   zum Beispiel quantitativ in Form eines Zahlenwertes oder qualitativ in Form von Stufen, wie z. B. hoch,
+--   mittel, niedrig oder vernachlaessigbar." (§6.1.2.5, printed p.58-59) — and §6.1.2.5 explicitly leaves the
+--   threshold to the organization ("Sie sollte entscheiden, welche Umweltaspekte bedeutend sind, z. B. durch
+--   die Anwendung eines Schwellenwertes. ... sollte die Organisation jedoch den Schwellenwert begruenden
+--   koennen."). Encoding the example as the only choice removes the quantitative option.
+-- Proposal: add an "eigene Skala / Zahlenwert" option (or a free-text companion) so the engineer's own scale is
+--   representable, per the enum null-option widget pattern already used elsewhere.
+-- OTHER ENUMS — CHECKED, NO FINDING: aspekt_lenkbarkeit {gesteuert, beeinflusst} = §6.1.2.3 lenken/beeinflussen;
+--   auswirkung_art {schaedlich, nuetzlich} = §6.1.2.4 "positive (nuetzliche) ... sowie negative (schaedliche)";
+--   risiko_chance {risiko, chance} = Begriff 3.2.11; verpflichtung_art {rechtlich, weitere_anforderung} =
+--   §6.1.3.2 / §6.1.3.3; leistungskennzahl_typ {ECI, MPI, OPI} = §6.2.4; kommunikation_richtung {intern, extern}
+--   = §7.4.2 / §7.4.3; steuerungshierarchie {beseitigung, ersatz, technische_steuerung,
+--   verwaltungstechnische_steuerung} = the four printed hierarchy steps in §8.1.1; konformitaet_status
+--   {konform, nicht_konform} = Begriffe 3.4.2 / 3.4.3; nichtkonformitaet_art {ums_leistung, umweltleistung} =
+--   the two printed example classes in §10.2. All match the source list exactly.
+-- ☐ RATIFIED
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · FIELD DESCRIPTION NOT SUPPORTED BY THE 2016 TEXT — 1 row.
+--   einhaltungsbewertung_haeufigkeit (c389dc74-505f-4c6b-a909-8d256f18e312, ws 08) is described as
+--   "Haeufigkeit/zeitliche Abstimmung je bindender Verpflichtung kann variieren; geeignet, um Wissen ueber den
+--   Einhaltungsstatus aktuell zu halten (Sec.9.1.2)". The second half IS in the md ("Die Haeufigkeit von
+--   Bewertungen der Einhaltung von Verpflichtungen sollte geeignet sein, um dieses Wissen und Verstaendnis auf
+--   dem neuesten Stand zu halten.", §9.1.2, printed p.94-96). The first half — frequency varying PER individual
+--   compliance obligation — has no counterpart anywhere in the 2016 German text (checked by full-text search on
+--   "Haeufigkeit"). It looks carried over from the 2010 edition or from ISO 14001 guidance.
+-- Proposal: drop the unsupported half of the description.
+-- ☐ RATIFIED
+-- -- update public.fields set description='Die Haeufigkeit der Bewertungen sollte geeignet sein, um das Wissen und Verstaendnis ueber den Einhaltungsstatus auf dem neuesten Stand zu halten (Sec.9.1.2).' where id='c389dc74-505f-4c6b-a909-8d256f18e312';
+-- -- rollback: restore the previous description string.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 · GATE COVERAGE — 19 of 65 fields are referenced by no gate. NOT proposed as a defect.
+--   Unreferenced: organisation_name, taetigkeiten_produkte_dienstleistungen, aspekt_lenkbarkeit,
+--   auswirkung_art, bedeutung_stufe, verpflichtung_ursprung, verpflichtung_bezug_aspekt, einzelziel,
+--   kompetenzbedarf, schulungsplan, kommunikation_richtung, dokumentierte_information, steuerungshierarchie,
+--   ablaufkriterien, notfalluebung_durchgefuehrt, gefahrstoff_liste, einhaltungsbewertung_haeufigkeit,
+--   konformitaet_status, nichtkonformitaet_art.
+--   Every one of them is optional in the source ("kann", "z. B.", "soweit erforderlich"), so leaving them
+--   ungated is the CORRECT reading of a guidance document. The two arguable ones are
+--   dokumentierte_information (§7.5.1 "sollte ... erfassen und aufbewahren", is_required=true) and
+--   kompetenzbedarf (§7.2 "Die Organisation sollte die notwendigen Kompetenzen ermitteln", is_required=true) —
+--   both carry a "sollte" and could take a warn gate if the owner wants symmetry with CR-019/CR-022.
+-- Proposal: no change unless the owner wants the two symmetry gates.
+-- ☐ RATIFIED
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-13 · CHECKS RUN THAT FOUND NOTHING (recorded so the absence is auditable).
+--   - empty conditions:                 none. All 38 conditions are non-empty.
+--   - condition='TRUE' no-ops:          2 (CR-033, CR-038) — S-2.
+--   - presence-only condition hiding a printed limit: none possible. The normative body of ISO 14004 prints NO
+--     numeric limit, threshold, factor or range — a full-text search for value+unit patterns and for
+--     "mindestens / hoechstens / nicht mehr als / Grenzwert" returns only (i) clause and ISO document numbers,
+--     (ii) three generic references to legally set limits with no value ("Grenzwertueberschreitung" in Kasten 15,
+--     "Vergleich mit gesetzlichen Grenzwerten" in §9.1.1, "zulaessige Grenzwerte" in §10.2), and (iii) two
+--     "6 Monate" programme durations inside the INFORMATIVE worked example Tabelle A.2 (md 3706-3707,
+--     Anhang A, printed p.106-124). There is no printed limit for a presence check to hide.
+--   - AND/OR inversions:                none. Every condition is a pure AND chain; the word OR does not occur
+--     in any of the 38 conditions, so no AND/OR inversion is possible.
+--   - inverted conditions (blocks unless a TEST PASSES where the source only obliges it to be PERFORMED):
+--     none. No condition compares a result to a criterion; all are IS NOT NULL / == true presence checks.
+--   - boundary inclusivity:             not applicable. No condition contains >, >=, <, <= or any numeric
+--     comparison at all.
+--   - duplicate gates and strict subsets: 3 pairs — S-3.
+--   - gate combinations making a printed case unreachable: none. Conditions are independent presence checks on
+--     distinct fields; no two of them can contradict, so no printed case is made unreachable.
+--   - mis-homed gates:                  1 (CR-037) — S-4.
+--   - unsatisfiable gates, incl. uncovered enum values: none. No condition tests an enum value at all, so no
+--     enum member is excluded; every referenced symbol resolves to an existing field of this standard (checked
+--     mechanically: 0 dangling symbols).
+--   - invented values or ranges:        none. The only literals in any condition are TRUE and true.
+--   - missing scope predicates:         1 (CR-016 / ziel_messbar) — S-7(c).
+--   - worksheets with zero fields:      none. 8/5/10/5/8/9/6/7/7 = 65 fields across the 9 worksheets.
+--   - source_quotes verbatim but carrying no requirement (bare heading, list opener, table opener,
+--     bibliography line):               4 — S-6 (CR-010, CR-012, CR-020 mis-anchored; CR-038 bare heading).
+--   - block gates anchored on soft text: none, because there are NO block gates at all — S-1.
+--   - equations:                        0 in prod, and the md prints no formula and no worked calculation
+--     anywhere in the body or in Anhang A/B. Nothing to lift, nothing to backfill, no residue.
+-- ☐ RATIFIED (acknowledgement only — no SQL)
