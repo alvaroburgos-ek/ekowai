@@ -1,0 +1,433 @@
+-- ============================================================================
+-- DWA-A-222 — STAGED rulings (WRITTEN, NOT APPLIED).
+-- Everything here changes STRUCTURE, ENFORCEMENT or REQUIRED-NESS and therefore may not enter the
+-- verification pack (owner ruling 3, 2026-09-05). Every block is commented-out SQL carrying its
+-- evidence quote (verbatim from C:\Users\Ekowai\Desktop\Guidelines\DWA-A-222\DWA-A_222.md, grade VC)
+-- and its rollback inverse. Un-comment a block ONLY after Alvaro marks it [X] RATIFIED.
+-- Standard: DWA-A 222, Mai 2011 / korrigierte Fassung Oktober 2018 (id 891ab6f3-f7ba-4097-b52d-7e0045299b95).
+-- Page convention as in dwa-a-222-md-verification-pack.sql (derived from the printed Inhalt).
+-- Compiled 2026-09-07 during the md-verification pass.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------
+-- 0. CONFIRMATIONS — prior rulings re-read against the md (no SQL, evidence only)
+-- ---------------------------------------------------------------------------
+-- 0.1  CR-A222-22 (e0542f0a-61ab-4c9f-8af4-43fa9d4a42f3, A222-14, block) and
+--      CR-A222-27 (a951d1ea-4153-44d1-95eb-eb848c67740a, A222-14, block), ratified + applied 2026-08-05
+--      as §4.4.2 / §4.4.3 required minimums — CONFIRMED. The md prints both as ">=" minima:
+--      §4.4.2: "Für die Berechnung ist die theoretische Oberfläche maßgebend. Sie ergibt sich zu:
+--      $$ \begin{equation*} A_{\mathrm{NB}, \text { theo }} \geq \frac{Q_{\mathrm{bem}} \times(1+R V)}{2,2}\left(\mathrm{~m}^{2}\right) \tag{22} \end{equation*} $$"  (printed p.19)
+--      §4.4.3: "$$ \begin{equation*} A_{\mathrm{NB}} \geq \frac{Q_{\mathrm{bem}} \times(1+R V)}{2,8}\left(\mathrm{~m}^{2}\right) \tag{27} \end{equation*} $$"  (printed p.20)
+--      CAVEAT: the stored compliance_requirements.source_quote for both is a NORMALISED re-rendering
+--      ("A_NB,theo >= (Q_bem × (1+RV)) / 2,2 (m²)"), not md-verbatim. See block 4.1.
+-- 0.2  CR-006 (61c4cc3b-92ec-4592-952a-0ad3be285f71, A222-07, block, V_FB <= 0.85 * V_R). The anchor
+--      sentence is "sollte": "Das Festbettvolumen sollte maximal $85 \%$ des Reaktorvolumens einnehmen."
+--      The 2026-08-05 reversal that KEPT it block on the "85 % is load-bearing" reading is CONFIRMED by
+--      the §4.3.4 worked example, which uses 0,85 as a hard divisor:
+--      "Daraus wird das Volumen des Festbetts errechnet $V_{\mathrm{FB}}= 95,2 \mathrm{l} / \mathrm{E} \times 18 \mathrm{E}=1,7 \mathrm{~m}^{3}$, bzw. wenn maximal $85 \%$ des Reaktorinhalts mit Festbettmaterial gefüllt sind ein Reaktormindestvolumen von $1,7 \mathrm{~m}^{3} / 0,85=2 \mathrm{~m}^{3}$."  (printed p.14–15)
+--      -> no change proposed.
+-- 0.3  CR-040 on A222-11 (43f5220b-3e8e-4022-a563-db6974480b71, block) / CR-042 on A222-22
+--      (f425023e-d5f5-4ba7-a003-ad2a905ad25a, block) — Betriebstagebuch. CONFIRMED as an obligation:
+--      "Der Betreiber der Anlage hat ein Betriebstagebuch zu führen, in dem durchgeführte Routinearbeiten, Wartungsmaßnahmen und die Betriebsergebnisse sowie besondere Vorkommnisse im Einzelnen aufzuführen sind."  (§6.1, printed p.24)
+--      -> block kept; but see block 2.1 (the two rows are the same rule under two different codes).
+-- 0.4  The ten block->warn downgrades of 2026-08-05 all still match non-mandatory md text and are
+--      CONFIRMED: CR-028 ("kann … ermittelt werden" / "sollten grundsätzlich"), CR-008 ("sollte nur
+--      maximal 50 %"), CR-007 (Gl. 12 is introduced with "kann mit folgender Gleichung ermittelt
+--      werden"), CR-011 x2 ("Es ist zweckmäßig"), CR-019 ("sollte … erreichen können"), CR-010
+--      ("Dabei sollte der Quotient"), CR-033 x2 ("sollten Garantiewerte"), CR-040/A222-20 ("wird
+--      empfohlen"). -> no change proposed.
+-- 0.5  PHANTOM FIELDS: none. Every one of the 153 fields carries a label; no enum-value token is
+--      materialised as a field. Nothing to deactivate under that heading.
+
+
+-- ---------------------------------------------------------------------------
+-- 1. SEVERITY — block anchored on non-mandatory md text
+-- ---------------------------------------------------------------------------
+-- 1.1  [ ] RATIFIED — CR-026 / CR-026-2 (A222-18, block, "DN >= 150"): REFUTES the recorded anchor.
+--      The 2026-08-05 batch kept these block on the reading "DN >= 150 sind anzulegen". The md does NOT
+--      say that. Verbatim (§5.1, printed p.21):
+--        "Bei Einsatz der Anlagen im öffentlichen Bereich sind Zuund Ablaufleitungen nach den Regeln der Bemessung öffentlicher Kanäle anzulegen. Es sollten Nennweiten $\geq 150 \mathrm{~mm}$ gewählt werden."
+--      "anzulegen" governs laying the pipes to public-sewer rules; the nominal width itself is
+--      "Es sollten … gewählt werden". A block gate on DN >= 150 over-enforces.
+-- update public.compliance_requirements set severity='warn' where id in ('7d5ca38a-daf2-499a-abc8-71f14725cca1','2e6a0c74-dfe1-4c7b-98a9-8aa748487375');
+--      ROLLBACK: update public.compliance_requirements set severity='block' where id in ('7d5ca38a-daf2-499a-abc8-71f14725cca1','2e6a0c74-dfe1-4c7b-98a9-8aa748487375');
+--
+-- 1.2  [ ] RATIFIED — CR-022 (e14a7551-ef26-4744-9cb4-10f1d779debf, A222-03, block,
+--      "GK == 'gk_1' AND mindestanforderungen_abwv_anh1 == True"). Evidence (§4.3.1, printed p.13):
+--        "Für die in diesem Arbeitsblatt behandelten Kläranlagen gelten in der Regel die Mindestanforderungen nach Anhang 1 der Abwasserverordnung ( AbwV ) für die Größenklasse 1. Darauf stellen die Bemessungsvorgaben ab."
+--      "in der Regel" is not absolute, and the very next sentence foresees the opposite case
+--        "Sind an die Kläranlagen weitergehende Anforderungen z. B. hinsichtlich Nährstoffelimination gestellt, sind die jeweiligen spezifischen Arbeits- und Merkblätter zu beachten und anzuwenden."
+--      A block on GK == gk_1 forbids a case the standard explicitly anticipates.
+-- update public.compliance_requirements set severity='warn' where id='e14a7551-ef26-4744-9cb4-10f1d779debf';
+--      ROLLBACK: update public.compliance_requirements set severity='block' where id='e14a7551-ef26-4744-9cb4-10f1d779debf';
+
+
+-- ---------------------------------------------------------------------------
+-- 2. DUPLICATE GATES (same rule encoded twice) — propose deactivating one row of each pair
+-- ---------------------------------------------------------------------------
+-- 2.1  [ ] RATIFIED — exact duplicates: identical condition, clause and source_quote.
+--        CR-020   = 76320499-4ec7-4392-915c-711ea17ebe9d (A222-04)     keep
+--        CR-020-2 = 2467bef4-e117-45f9-a65a-b5da200274ae (A222-04)  <- deactivate the "-2" twin
+--        CR-026   = 7d5ca38a-daf2-499a-abc8-71f14725cca1 (A222-18)
+--        CR-026-2 = 2e6a0c74-dfe1-4c7b-98a9-8aa748487375 (A222-18)  <- deactivate the "-2" twin
+--      Evidence CR-020: "Die spezifische Oberfläche der Füllelemente muss sein: $90 \mathrm{~m}^{2} / \mathrm{m}^{3} \leq A_{\mathrm{TK}, \text { spez }} \leq 150 \mathrm{~m}^{2} / \mathrm{m}^{3}$."  (§5.3, printed p.22)
+-- update public.compliance_requirements set active=false where id in ('2467bef4-e117-45f9-a65a-b5da200274ae','2e6a0c74-dfe1-4c7b-98a9-8aa748487375');
+--      ROLLBACK: update public.compliance_requirements set active=true where id in ('2467bef4-e117-45f9-a65a-b5da200274ae','2e6a0c74-dfe1-4c7b-98a9-8aa748487375');
+--
+-- 2.2  [ ] RATIFIED — CR-021 (a626f573-caae-40e8-9476-45b8964fef24) and CR-021-2
+--      (57a7c17b-b33e-494e-bc62-90455d018baa), both A222-18, both block, encode the SAME §5.1 sentence
+--      twice through two different field paths ("h_OK_freibord >= 0.30" vs "h_OK >= h_Wasser + 0.30"):
+--        "Die Oberkante der Becken muss mindestens 30 cm über dem höchsten Betriebswasserstand liegen."  (§5.1, printed p.21)
+--      A project can satisfy one and fail the other. Keep ONE (proposal: keep CR-021-2, which uses the
+--      two-field form h_OK / h_Wasser and therefore states the datum explicitly) and retire the other,
+--      together with the redundant field h_OK_freibord (block 5.3).
+-- update public.compliance_requirements set active=false where id='a626f573-caae-40e8-9476-45b8964fef24';
+--      ROLLBACK: update public.compliance_requirements set active=true where id='a626f573-caae-40e8-9476-45b8964fef24';
+--
+-- 2.3  [ ] RATIFIED — cross-worksheet duplicates: the same requirement is enforced twice, once on a
+--      worksheet where it does not belong (see block 3). Pairs (keep the row on the correct worksheet,
+--      deactivate the other):
+--        CR-013  A222-11 cf5de771-eb39-456e-ae28-4597fa8cb7be   <- deactivate (Schlammspeicher rule on the "Belebungsbecken gewerblich" sheet)
+--                A222-16 9c7362d6-edf0-4913-9439-65ede0d4680a      keep
+--        CR-023  A222-11 87c342ed-c479-43fe-9267-df658d158569   <- deactivate
+--                A222-16 edb11d8a-e33b-454b-9457-627b88dd3a15   <- also wrong home (see 3.2)
+--        CR-025  A222-11 8f0dbdd8-afac-41bc-bd3f-2e0044af2673   <- deactivate
+--                A222-16 20a2e7d2-c0cd-41b4-a81c-501a456697eb   <- also wrong home
+--        CR-033  A222-11 211c138d-8029-4708-97e8-c1f4f7e349a6   <- deactivate (EMPTY condition, see 4.4)
+--                A222-16 50615194-47d4-476d-a17e-11a3bc5d40be      keep
+--        CR-037  A222-11 2bfbbc3e-6afc-4364-b1b6-f79e08f0ff4e   <- deactivate
+--                A222-16 3ff8d020-cbee-4d09-8520-0e050939f59f      keep until 3.2 re-homes it to A222-18
+--        CR-038  A222-11 5c023e85-a53e-47ae-85d5-fee46d34f947   <- deactivate
+--                A222-16 fe12228e-b3d5-4353-865e-596392134400      keep
+--        CR-011  A222-10 b7b22fc4-251f-4862-8b91-28e308a35de0   <- deactivate (§4.4.1 rule on the Belebungsbecken sheet)
+--                A222-14 19f7c726-5182-45b6-9a5b-2e494f9505d0      keep
+--        CR-012  A222-10 bda608e2-c1f8-4d76-8e4f-466e3864acb1   <- deactivate (§4.4.3 rule on the Belebungsbecken sheet)
+--                A222-14 772b2fad-f81f-4418-bc4f-ec916d8f48d2      keep
+--        CR-043  A222-01 b84e3a18-1917-434f-885b-49c6131b8f1c   <- deactivate (Wartungsvertrag belongs to A222-23 Wartung)
+--                A222-21 a1c8f434-c52c-4933-a4bd-6b707c676be1      keep until A222-23 is populated
+-- update public.compliance_requirements set active=false where id in ('cf5de771-eb39-456e-ae28-4597fa8cb7be','87c342ed-c479-43fe-9267-df658d158569','8f0dbdd8-afac-41bc-bd3f-2e0044af2673','211c138d-8029-4708-97e8-c1f4f7e349a6','d69b8470-8247-4bab-a14c-4227e4fa5f8c','5c023e85-a53e-47ae-85d5-fee46d34f947','b7b22fc4-251f-4862-8b91-28e308a35de0','bda608e2-c1f8-4d76-8e4f-466e3864acb1','b84e3a18-1917-434f-885b-49c6131b8f1c');
+--      ROLLBACK: update public.compliance_requirements set active=true where id in (… same nine ids …);
+--
+-- 2.4  [ ] RATIFIED — CR-029 (756f2c19-bc19-4737-b713-0714e7d0bc6d, A222-14, block, "RV >= 1") and
+--      CR-011 (19f7c726-5182-45b6-9a5b-2e494f9505d0, A222-14, warn, "RV >= 1") sit on the SAME worksheet
+--      with the SAME condition and CONTRADICTORY severities. They come from two different sentences:
+--        block:  "Die Tropfkörperbeschickung muss auf ein Rückführverhältnis $R V \geq 1$ ausgelegt werden."  (§4.3.2, printed p.13)
+--        warn:   "Es ist zweckmäßig, für das Rückführverhältnis $R V$ mindestens $100 \%$ anzusetzen ( $R V \geq 1$ )."  (§4.4.1, printed p.19)
+--      The §4.3.2 obligation is process-conditional (Tropfkörper only). Proposal: re-condition CR-029 to
+--      "IF verfahren == 'tropfkoerper' THEN RV >= 1" and re-home it to A222-04.
+-- update public.compliance_requirements set condition_expression='IF verfahren == ''tropfkoerper'' THEN RV >= 1' where id='756f2c19-bc19-4737-b713-0714e7d0bc6d';
+--      ROLLBACK: update public.compliance_requirements set condition_expression='RV >= 1' where id='756f2c19-bc19-4737-b713-0714e7d0bc6d';
+--
+-- 2.5  [ ] RATIFIED — GATE-CODE COLLISIONS (structural). Seventeen codes are reused inside this one
+--      standard, and eight of them denote DIFFERENT obligations under the same number, which makes the
+--      code useless as an identifier in reports and audit trails:
+--        CR-024  A222-11 = "Wichtige Armaturen und Aggregate müssen … beschriftet werden"  vs  A222-24 = BetrSichV
+--        CR-034  A222-11 = Durchflussmessung                                                vs  A222-21 = Betriebsstundenzähler
+--        CR-035  A222-11 = Störmeldung/Stromausfall                                         vs  A222-21 = Durchflussmessung
+--        CR-036  A222-11 = "standsicher, wasserdicht und korrosionsbeständig"               vs  A222-16 = Störmeldung/Stromausfall
+--        CR-037  A222-11 = "vor unbefugtem Zutritt gesichert"                               vs  A222-16 = same text (dup, 2.3)
+--        CR-039  A222-11 = Freibord 30 cm                                                   vs  A222-20 = SBR-Steuerung Zykluszeiten
+--        CR-040  A222-11 = Betriebstagebuch (block)                                         vs  A222-20 = Doppel-Füllstandsmessung (warn)
+--        CR-041  A222-01 = Mischsystem-Ausnahme                                             vs  A222-24 = Betriebsanweisung DWA-A 199-4
+--        CR-042  A222-01 = Negativliste-Attest                                              vs  A222-22 = Betriebstagebuch
+--      Proposal: renumber the A222-11 block into a dedicated range (CR-A222-101 …) once block 3.1 has
+--      re-homed those rows, so no two live requirements of DWA-A 222 share a code. SQL deliberately not
+--      drafted until the re-home decision (3.1) is taken.
+
+
+-- ---------------------------------------------------------------------------
+-- 3. GATE RE-HOMES (gate on worksheet A reading only fields of worksheet B)
+-- ---------------------------------------------------------------------------
+-- 3.1  [ ] RATIFIED — A222-11 "Belebungsbecken gewerblich" carries 12 gates, ELEVEN of which have
+--      nothing to do with a commercial-load aeration tank: ten §5.1 Bauausführung attestations
+--      (CR-023, CR-024, CR-025, CR-034, CR-035, CR-036, CR-037, CR-038, CR-039) plus CR-040 (§6.1
+--      Betriebstagebuch) and CR-013 (§4.5 Schlammspeicher). All ten §5.1 rows also carry their own
+--      attest_a222_11_cr_* checkbox field, so the whole §5.1 attestation block lives on the wrong sheet.
+--      Correct homes: §5.1 -> A222-18 "Bauausführung Allgemein" (or A222-21 "Betriebskontrolle" for the
+--      metering/alarm items), §6.1 -> A222-22 "Eigenüberwachung"/A222-24 "Dokumentation",
+--      §4.5 -> A222-16 "Schlammspeicher".
+--      Evidence for the §5.1 home, e.g.: "Die Kläranlagen müssen standsicher, wasserdicht und korrosionsbeständig hergestellt sein."  (§5.1 Baugrundsätze/Allgemeines, printed p.21)
+--      A222-11 §5.1 rows (CR-023 87c342ed, CR-024 c4ab255b, CR-025 8f0dbdd8, CR-034 5cac2bb1,
+--      CR-035 d69b8470, CR-036 9b7734b4, CR-037 2bfbbc3e, CR-038 5c023e85, CR-039 88092be8):
+-- update public.compliance_requirements set worksheet_template_id='87decd1d-3483-449d-a3a5-3435b00b443e' where id in ('87c342ed-c479-43fe-9267-df658d158569','c4ab255b-63cf-4702-8c2d-6e808558cc99','8f0dbdd8-afac-41bc-bd3f-2e0044af2673','5cac2bb1-e500-4631-9ecf-333d5022e3e9','d69b8470-8247-4bab-a14c-4227e4fa5f8c','9b7734b4-1836-4544-b298-321101330aeb','2bfbbc3e-6afc-4364-b1b6-f79e08f0ff4e','5c023e85-a53e-47ae-85d5-fee46d34f947','88092be8-b3d0-4420-8802-24c465da0b7c');
+-- update public.compliance_requirements set worksheet_template_id='d91c0a26-f1b1-4931-ab7c-26c506bffb42' where id='211c138d-8029-4708-97e8-c1f4f7e349a6';  -- CR-033, §4.3.7
+-- update public.compliance_requirements set worksheet_template_id='a6f3024d-1515-47b3-a97c-a23fdaee3e4f' where id='cf5de771-eb39-456e-ae28-4597fa8cb7be';
+-- update public.compliance_requirements set worksheet_template_id='db890ef3-6074-4010-a29a-21684e8ce3a0' where id='43f5220b-3e8e-4022-a563-db6974480b71';
+--      (the attest_a222_11_cr_* fields must move with their gates — see block 5.5)
+--      ROLLBACK: update public.compliance_requirements set worksheet_template_id='23002bb3-2df4-4d47-8443-f7248cf501ff' where id in (… the twelve ids …);
+--
+-- 3.2  [ ] RATIFIED — A222-16 "Schlammspeicher" carries six gates that belong elsewhere: CR-023
+--      (edb11d8a…, §5.1 Probenahme), CR-025 (20a2e7d2…, §5.1 Hochwasserschutz), CR-033
+--      (50615194…, §4.3.7 Garantiewerte Sauerstoffzufuhr), CR-036 (b070fb31…, §5.1 Störmeldung +
+--      netzunabhängige Stromausfallmeldung), CR-037 (3ff8d020…, §5.1 Zutrittssicherung),
+--      CR-038 (fe12228e…, §5.1 Explosionsschutz).
+--      Only CR-013 (9c7362d6…, §4.5 "muss aber mindestens 100 l/E betragen") is correctly homed.
+--      Evidence: "Das erforderliche Speichervolumen richtet sich nach den Entsorgungsmöglichkeiten, muss aber mindestens 100 1/E betragen."  (§4.5, printed p.21)
+--      Proposal: move the §5.1 rows to A222-18, the §4.3.7 row to A222-10.
+-- update public.compliance_requirements set worksheet_template_id='87decd1d-3483-449d-a3a5-3435b00b443e' where id in ('edb11d8a-e33b-454b-9457-627b88dd3a15','20a2e7d2-c0cd-41b4-a81c-501a456697eb','b070fb31-6cc6-41b1-bbe7-98e4672dcbd4','3ff8d020-cbee-4d09-8520-0e050939f59f','fe12228e-b3d5-4353-865e-596392134400');
+-- update public.compliance_requirements set worksheet_template_id='d91c0a26-f1b1-4931-ab7c-26c506bffb42' where id='50615194-47d4-476d-a17e-11a3bc5d40be';
+--      ROLLBACK: update public.compliance_requirements set worksheet_template_id='a6f3024d-1515-47b3-a97c-a23fdaee3e4f' where id in (… the five ids …);
+--
+-- 3.3  [ ] RATIFIED — further mis-homed gates:
+--        CR-008 (ee4b65df…, A222-03 "Vorbehandlung Absetzeinrichtung") enforces §4.3.5 "Das Schüttvolumen der Aufwuchskörper sollte nur maximal $50 \%$ des Reaktorvolumens einnehmen." (printed p.15) on V_SB/V_R, both of which live on A222-08/A222-07  -> move to A222-08 (d9ef23b6-b3e3-489c-9ab4-93f7c0e71024).
+--        CR-022 (e14a7551…, A222-03) enforces §4.3.1/§8 GK-1 minimum requirements  -> move to A222-01 (8f46b85c-b3ce-45b4-b4af-7f46c387488a), where the GK field lives.
+--        CR-017 (79306e8d…, A222-02) enforces §4.3.2–§4.3.5 TKN/BSB5  -> the field TKN_BSB5 is on A222-02, so the home is consistent; only the condition is wrong (see 4.2).
+-- update public.compliance_requirements set worksheet_template_id='d9ef23b6-b3e3-489c-9ab4-93f7c0e71024' where id='ee4b65df-0721-451a-814e-5abbf4bc43c0';
+-- update public.compliance_requirements set worksheet_template_id='8f46b85c-b3ce-45b4-b4af-7f46c387488a' where id='e14a7551-ef26-4744-9cb4-10f1d779debf';
+--      ROLLBACK: update public.compliance_requirements set worksheet_template_id='5c7edc3a-12c8-4d82-a41d-d4d8706d3cc2' where id in ('ee4b65df-0721-451a-814e-5abbf4bc43c0','e14a7551-ef26-4744-9cb4-10f1d779debf');
+
+
+-- ---------------------------------------------------------------------------
+-- 4. CONDITIONS THAT OVER- OR UNDER-ENFORCE THE PRINTED RULE
+-- ---------------------------------------------------------------------------
+-- 4.1  [ ] RATIFIED — CR-A222-22 / CR-A222-27 source_quote is not md-verbatim (see 0.1). Replace with
+--      the printed LaTeX so the gate passes a verbatim spot-check like every other row.
+-- update public.compliance_requirements set source_quote='$$ \begin{equation*} A_{\mathrm{NB}, \text { theo }} \geq \frac{Q_{\mathrm{bem}} \times(1+R V)}{2,2}\left(\mathrm{~m}^{2}\right) \tag{22} \end{equation*} $$ — printed p.19' where id='e0542f0a-61ab-4c9f-8af4-43fa9d4a42f3';
+-- update public.compliance_requirements set source_quote='$$ \begin{equation*} A_{\mathrm{NB}} \geq \frac{Q_{\mathrm{bem}} \times(1+R V)}{2,8}\left(\mathrm{~m}^{2}\right) \tag{27} \end{equation*} $$ — printed p.20' where id='a951d1ea-4153-44d1-95eb-eb848c67740a';
+--      ROLLBACK: restore the current strings 'A_NB,theo >= (Q_bem × (1+RV)) / 2,2 (m²)' and 'A_NB >= (Q_bem × (1+RV)) / 2,8 (m²)'.
+--
+-- 4.2  [ ] RATIFIED — CR-017 (79306e8d-5e0c-4d2c-8a3a-ce40d0c09091, A222-02, block, "TKN_BSB5 <= 0.25")
+--      OVER-ENFORCES. The standard does not forbid a ratio > 0,25; it routes the design elsewhere:
+--        "Ist das $\mathrm{TKN} / \mathrm{BSB}_{5}$-Verhältnis größer als 0,25 , muss für eine gesicherte Nitrifikation die Bemessung nach Arbeitsblatt ATV-DVWK-A 281 vorgenommen werden."  (§4.3.2 and §4.3.3, printed p.13/14)
+--        "Ist das $\mathrm{TKN} / \mathrm{BSB}_{5}$-Verhältnis größer als 0,25 , ist für eine gesicherte Nitrifikation der vorstehende vereinfachte Bemessungsansatz nicht anwendbar."  (§4.3.4 and §4.3.5, printed p.15)
+--      Correct encoding: block only when nitrification is required AND the ratio > 0,25 AND the project
+--      still uses the simplified A 222 approach; otherwise warn + route to ATV-DVWK-A 281.
+-- update public.compliance_requirements set severity='warn', condition_expression='IF nitrifikation_gefordert == True AND TKN_BSB5 > 0.25 THEN bemessung_nach_a281 == True' where id='79306e8d-5e0c-4d2c-8a3a-ce40d0c09091';
+--      (needs a new boolean field bemessung_nach_a281 on A222-02 — see block 6.3)
+--      ROLLBACK: update public.compliance_requirements set severity='block', condition_expression='TKN_BSB5 <= 0.25' where id='79306e8d-5e0c-4d2c-8a3a-ce40d0c09091';
+--
+-- 4.3  [ ] RATIFIED — CR-030 (7d3deb8a-a7c9-40e7-a61a-b314078b7e3b, A222-07, block, "n_FB_Kaskaden >= 2")
+--      OVER-ENFORCES: the obligation is expressly limited to plants above 50 E, and rises to three
+--      cascades when nitrification is required.
+--        "Das erforderliche Festbettvolumen muss bei Anlagen > 50 E auf mindestens zwei hintereinander durchflossene Kaskaden aufgeteilt werden. Ist eine gesicherte Nitrifikation erforderlich, muss die erforderliche theoretische Oberfläche auf mindestens drei hintereinander durchflossene Kaskaden aufgeteilt werden. Alternativ ist eine Gestaltung als Becken mit Pfropfenströmung möglich."  (§4.3.4, printed p.15)
+-- update public.compliance_requirements set condition_expression='IF EW > 50 THEN (n_FB_Kaskaden >= 2 AND (nitrifikation_gefordert == False OR n_FB_Kaskaden >= 3))' where id='7d3deb8a-a7c9-40e7-a61a-b314078b7e3b';
+--      ROLLBACK: update public.compliance_requirements set condition_expression='n_FB_Kaskaden >= 2' where id='7d3deb8a-a7c9-40e7-a61a-b314078b7e3b';
+--
+-- 4.4  [ ] RATIFIED — CR-033 on A222-11 (211c138d-8029-4708-97e8-c1f4f7e349a6) has an EMPTY
+--      condition_expression while requires_attestation = true: a dead gate that can never fire.
+--      Its twin on A222-16 (50615194-47d4-476d-a17e-11a3bc5d40be) carries the real condition.
+-- update public.compliance_requirements set active=false where id='211c138d-8029-4708-97e8-c1f4f7e349a6';
+--      ROLLBACK: update public.compliance_requirements set active=true where id='211c138d-8029-4708-97e8-c1f4f7e349a6';
+--
+-- 4.5  [ ] RATIFIED — CR-012 (772b2fad-f81f-4418-bc4f-ec916d8f48d2, A222-14, block, "t_NB >= 2.5")
+--      UNDER-ENFORCES the lower range, where the printed minimum is 3,5 h:
+--        "Die Durchflusszeit $t_{\mathrm{NB}}$ muss im unteren Geltungsbereich bis 50 E mindestens 3,5 Stunden, im oberen Geltungsbereich mindestens 2,5 Stunden betragen."  (§4.4.3, printed p.20)
+-- update public.compliance_requirements set condition_expression='IF geltungsbereich == ''unterer'' THEN t_NB >= 3.5 ELSE t_NB >= 2.5' where id='772b2fad-f81f-4418-bc4f-ec916d8f48d2';
+--      ROLLBACK: update public.compliance_requirements set condition_expression='t_NB >= 2.5' where id='772b2fad-f81f-4418-bc4f-ec916d8f48d2';
+--
+-- 4.6  [ ] RATIFIED — CR-016 (e2014b2c-6cd9-432b-b116-ab7511aeaf63, A222-09, block) hard-codes ONE of
+--      the eight Tabelle-6 columns (unterer Geltungsbereich / häuslich / ohne Vorklärung:
+--      h_max 2,3–4,2 m, H_W,e 1,4–2,5 m) and applies it to every project. Verbatim Tabelle 6
+--      (§4.3.6, printed p.17):
+--        "\hline $h_{\text {max }} \quad(\mathrm{m})$ & 2,3-4,2 & 2,8-3,8 & 2,3-4,2 & 2,6-3,6 \\"   (unterer Geltungsbereich)
+--        "\hline $h_{\text {max }}$ & (m) & 2,9-3,4 & 2,9-3,2 & 2,5-4,8 & 2,1-4,0 \\"                (oberer Geltungsbereich)
+--      For an upper-range domestic plant without primary clarification the printed window is 2,9–3,4 m,
+--      so the live gate both blocks legal designs and passes illegal ones. Needs a table lookup keyed on
+--      (geltungsbereich, abwasser_charakter, vorklaerung) — SR-2 applies: the point value inside each
+--      window stays an explicit engineer selection.
+-- update public.compliance_requirements set severity='warn' where id='e2014b2c-6cd9-432b-b116-ab7511aeaf63';  -- interim, until the lookup exists
+--      ROLLBACK: update public.compliance_requirements set severity='block' where id='e2014b2c-6cd9-432b-b116-ab7511aeaf63';
+--
+-- 4.7  [ ] RATIFIED — CR-009 (e0e7f61e-11cd-41c5-b16d-78e18c36afb8, A222-09, block,
+--      "(H_W_e - H_W_0) >= 0.40") uses the WRONG symbol. §2.2 defines
+--        "\hline $H_{\mathrm{W}, 0}$ & m & Schlammspiegelhöhe zu Beginn des Absetzens \\"  (printed p.7–9)
+--      but the rule speaks of the FINAL sludge level:
+--        "Dann wird der Schlammspiegel am Ende der Abzugsphase ermittelt. Der Endwasserspiegel muss stets mindestens 40 cm über dem Endschlammspiegel liegen."  (§4.3.6, printed p.16)
+--      The standard gives no symbol for the Endschlammspiegel; a new field (H_Schlamm_e) is required.
+--      Until then the gate compares the end water level against the level at the START of settling.
+-- (no SQL drafted — needs the new field first; see block 6.4)
+--
+-- 4.8  [ ] RATIFIED — CR-027 (051baae2-0667-4f03-a0b0-fc2ef3eb7ad0, A222-01, block) contains a
+--      tautology: "negativliste_geprueft == True AND (mischsystem_ausnahmefall == False OR
+--      mischsystem_ausnahmefall == True)". The second conjunct is always true and adds nothing;
+--      CR-041 (7f9ebc44…) already carries the real Mischsystem condition.
+-- update public.compliance_requirements set condition_expression='negativliste_geprueft == True' where id='051baae2-0667-4f03-a0b0-fc2ef3eb7ad0';
+--      ROLLBACK: restore the original expression.
+
+
+-- ---------------------------------------------------------------------------
+-- 5. DUPLICATE / REDUNDANT FIELDS
+-- ---------------------------------------------------------------------------
+-- 5.1  [ ] RATIFIED — entwaesserungssystem (db4d0df3-01ad-400b-ab5c-c8d3d6ae2af8, A222-01) and
+--      system_typ (317c5016-ded6-4f23-9d0c-daf656f43d8e, A222-02) are the same two-value enum
+--      (trennsystem / mischsystem-Ausnahme) from the same clauses (§1, §3.1). CR-041 reads
+--      entwaesserungssystem; nothing reads system_typ.
+-- update public.fields set active=false where id='317c5016-ded6-4f23-9d0c-daf656f43d8e';
+--      ROLLBACK: update public.fields set active=true where id='317c5016-ded6-4f23-9d0c-daf656f43d8e';
+--
+-- 5.2  [ ] RATIFIED — abwasserart (99dcdfec-8c00-44e1-bc7b-50eb75d2b59c, A222-02) and
+--      abwasser_charakter (1721949a-a873-4bfe-8268-59a3957768a4, A222-09) are the same enum
+--      (häuslich / mit nennenswertem gewerblichen Anteil) driving the same Tabelle 6 + Tabelle 7 lookup.
+--      Keep abwasser_charakter (it carries the regulation_reference on both tables).
+-- update public.fields set active=false where id='99dcdfec-8c00-44e1-bc7b-50eb75d2b59c';
+--      ROLLBACK: update public.fields set active=true where id='99dcdfec-8c00-44e1-bc7b-50eb75d2b59c';
+--
+-- 5.3  [ ] RATIFIED — three fields for the ONE §5.1 freeboard rule on A222-18: h_OK
+--      (8a8fa806-5a50-4144-bea4-10cddad0da97), h_Wasser (b9c7c060-6b14-49b8-abc9-eaeee268144c) and
+--      h_OK_freibord (8802a0ae-631b-49e6-958e-d36d9427875e). Paired with the duplicate gates in 2.2.
+--      Proposal: keep the h_OK / h_Wasser pair, retire h_OK_freibord.
+-- update public.fields set active=false where id='8802a0ae-631b-49e6-958e-d36d9427875e';
+--      ROLLBACK: update public.fields set active=true where id='8802a0ae-631b-49e6-958e-d36d9427875e';
+--
+-- 5.4  [ ] RATIFIED — further duplicate pairs (evidence: both members carry the SAME md sentence):
+--        ue_schlamm_spez (d4f9f184-2c03-42b3-bdbf-1773ab0024e0) == spez_US (832c4cd3-d84e-4bf4-89a0-d493c45f7a96), both A222-16, both §4.5:
+--          "Die tägliche Überschussschlammproduktion kann im Falle fehlender Messwerte für Tropfkörper, Rotationstauchkörper, Festbettanlagen und Anlagen mit frei beweglichen Aufwuchskörpern mit $0,03 \mathrm{~kg}$ TS pro angeschlossenem Einwohnerwert und Tag, für Belebungsanlagen mit gemeinsamer aerober Stabilisierung, SBR und Kombinationsanlagen mit $0,06 \mathrm{~kg}$ TS pro angeschlossenem Einwohnerwert und Tag angenommen werden."  (printed p.21)
+--        V_VK_speicher_EWspez (e66396f9-6e00-4287-9890-c0677ef8addc) duplicates the ">= 375 l/E" half of V_speicher_EWspez (c8e7d4ef-17e2-4a5d-82c5-ea198b7a54c8):
+--          "Im unteren Geltungsbereich sollten Vorklärung und Schlammspeicherung in einem gemeinsamen Behälter erfolgen. Dieser muss ein Mindestvolumen von $\geq 375$ 1/E einschließlich Vorklärung aufweisen."  (§4.5, printed p.21)
+--          -> keep BOTH but narrow V_speicher_EWspez's description to the 100 l/E rule, so the two limits are single-sourced.
+--        aOC (df8c6cd6-86f3-4ab4-afad-e35645e0f8c4) and OC (3407a28d-f613-4523-b6ba-0391af9fc3c6), both A222-10: the md calls the quantity αOC in Gl. (18) AND Gl. (19); the encoding stores it twice, and Gl. 19 in prod already writes back to aOC.
+--        fb_anteil_reaktor (0ea2b762-6a17-4719-a818-2bf2e1136d76) restates the V_FB/V_R 85 % relation that CR-006 already enforces.
+-- update public.fields set active=false where id in ('d4f9f184-2c03-42b3-bdbf-1773ab0024e0','3407a28d-f613-4523-b6ba-0391af9fc3c6','0ea2b762-6a17-4719-a818-2bf2e1136d76');
+--      ROLLBACK: update public.fields set active=true where id in ('d4f9f184-2c03-42b3-bdbf-1773ab0024e0','3407a28d-f613-4523-b6ba-0391af9fc3c6','0ea2b762-6a17-4719-a818-2bf2e1136d76');
+--
+-- 5.5  [ ] RATIFIED — the 17 gate-attestation checkbox fields (attest_a222_01_cr_042/043,
+--      attest_a222_11_cr_023/024/025/034/035/036/037/038/039/040, attest_a222_16_cr_023/025/037/038,
+--      attest_a222_21_cr_043) are duplicated with the plain boolean fields that carry the same
+--      obligation (betriebstagebuch_gefuehrt, durchflussmessung_vorhanden, stoermeldung_vorhanden,
+--      betriebsstundenzaehler_installiert, negativliste_geprueft, …). Two mechanisms enforce the same
+--      §5.1/§6.1 clauses. They must move with their gates (3.1/3.2) or be retired in favour of the
+--      plain booleans. Marked exempt (inferred_from_worksheet) in the pack; the merge decision is here.
+-- (no SQL drafted — depends on the 3.1/3.2 re-home decision)
+
+
+-- ---------------------------------------------------------------------------
+-- 6. MISSING GATES FOR PRINTED HARD LIMITS ("muss" / "darf nicht" with no enforcement)
+-- ---------------------------------------------------------------------------
+-- 6.1  [ ] RATIFIED — printed obligations with an encoded field but NO gate at all:
+--      (a) q_A_TK (00c38c4a-79b9-4d48-ab98-0b46980339f6, A222-04) — "Zu Spülzwecken muss eine Flächenbeschickung $q_{\text {A,TK }}$ von mindestens $1,6 \mathrm{~m}^{3} /\left(\mathrm{m}^{2} \cdot \mathrm{~h}\right)$ bei Tropfkörpern mit Kunst-stoff-Füllmaterial bzw. $0,8 \mathrm{~m}^{3} /\left(\mathrm{m}^{2} \cdot \mathrm{~h}\right)$ bei brockengefüllten Tropfkörpern sichergestellt werden."  (§4.3.2, printed p.13)  -> block, füllmaterial-conditional.
+--      (b) V_VK_speicher_EWspez — ">= 375 1/E einschließlich Vorklärung" in the lower range (§4.5, printed p.21)  -> block IF geltungsbereich == 'unterer'.
+--      (c) feinstrechen_sieb (c821f308-b7a1-471d-af75-3373f8b28d2c) — "Belebungsanlagen mit gemeinsamer aerober Stabilisierung müssen mit einem Feinstrechen oder -sieb ausgestattet werden."  (§4.2, printed p.12)  -> block IF verfahren == 'belebung_durchlauf'.
+--      (d) Q_bem >= 10 l/s behind a combined system — "In diesen Fällen muss dann $Q_{\text {bem }} \geq 10 \mathrm{l} / \mathrm{s}$ sein (kleinster Drosselabfluss nach Arbeitsblatt ATV-A 166)."  (§3.1, printed p.10–11)  -> block IF entwaesserungssystem == 'mischsystem'.
+--      (e) luftmengen_regelbereich (0c084e8b-9ad4-4f4b-a9c9-ebf160cac8bc) — "Die Luftmengen müssen in einem ausreichend weiten Bereich $(1: 10)$ variierbar sein"  (§5.5, printed p.22–23)  -> block >= 10.
+--      (f) h_KWA_unter_WSP (18a82ae0-5f1b-49d8-bd43-64fcf44669ed) — "Das Mitziehen von Schwimmschlamm beim Klarwasserabzug muss verhindert werden. […] mindestens 30 cm unterhalb der Wasserspiegeloberfläche."  (§5.7, printed p.23–24)  -> block >= 0.30.
+--      (g) h_klar (203bf07b-e793-4d97-999f-0326d68d78e3) — "Eine Mindestwassertiefe von 1 m gemäß DIN EN 12255-5 über dem Schlammspiegel ist einzuhalten."  (§6.2.2, printed p.25)  -> block >= 1.
+--      (h) h_m / Tiefe_Mitte (b228f864-…, 2cc462c5-…) — the "runde Nachklärbecken" table: "Tiefe in der Beckenmitte & $\geq 3 \mathrm{~m}$ \\ (ohne Trichter) $h_{\mathrm{m}}$ & $\geq 2 \mathrm{~m}$ \\ Mindestwassertiefe bei 2/3 Radius $h_{\text {ges }}$ & $\geq 1,5 \mathrm{~m}$"  (§4.4.3, printed p.20–21)  -> block.
+--      (i) h_r (8ef2636e-4587-4f85-a0b3-5e509788cf57) — "Randwassertiefe $h_{\mathrm{r}} \quad \geq 2 \mathrm{~m}$"  (§4.4.3, printed p.21)  -> block for Rechteckbecken.
+--      (j) V_Wanne_spez (68091255-cece-4efa-96f5-11274d4e1527) — "darf ein Wannenvolumen von mindestens $41 / \mathrm{m}^{2}$ theoretische Oberfläche nicht unterschritten werden."  (§4.3.3, printed p.14; the md mangles "4 l/m²" into "41 / m²")  -> block >= 4.
+--      (k) d_Scheibe nitrification variant — "Ist eine gesicherte Nitrifikation erforderlich, muss die erforderliche theoretische Oberfläche auf mindestens drei hintereinander durchflossene Rotationstauchkörper aufgeteilt werden. Dann kann der Abstand der Scheiben beim zweiten und den weiteren Rotationstauchkörpern auf mindestens 15 mm reduziert werden."  (§4.3.3, printed p.14)  -> CR-015 needs the ">= 3 if nitrification" branch.
+-- (SQL deliberately not drafted — new compliance_requirements rows need codes assigned after 2.5.)
+--
+-- 6.2  [ ] RATIFIED — TS_BB has a gate only for the domestic column. Tabelle 7 (§4.3.7, printed p.18):
+--        "\hline $T S_{\text {BB }} \quad\left(\mathrm{kg} / \mathrm{m}^{3}\right)$ & $\leq 4,9$ & $\leq 3,3$ \\"
+--        "\hline $V_{\mathrm{BB}, \mathrm{EW} \text { spez }}$ (l/EW) & $\geq 245$ & $\geq 370$ \\"
+--      CR-018 (838fd508-fb2c-4da3-a460-2d58a4718d5f) enforces only "TS_BB <= 4.9"; the commercial-load
+--      limit <= 3,3 kg/m³ and BOTH V_BB,EWspez minima are unenforced, and worksheet A222-11
+--      "Belebungsbecken gewerblich" holds no data field at all.
+-- update public.compliance_requirements set condition_expression='IF abwasser_charakter == ''gewerblich'' THEN TS_BB <= 3.3 ELSE TS_BB <= 4.9' where id='838fd508-fb2c-4da3-a460-2d58a4718d5f';
+--      ROLLBACK: update public.compliance_requirements set condition_expression='TS_BB <= 4.9' where id='838fd508-fb2c-4da3-a460-2d58a4718d5f';
+--
+-- 6.3  [ ] RATIFIED — new field needed on A222-02: bemessung_nach_a281 (boolean, §4.3.2/§4.3.3) so that
+--      4.2 can route a TKN/BSB5 > 0,25 project to ATV-DVWK-A 281 instead of blocking it.
+-- 6.4  [ ] RATIFIED — new field needed on A222-09: H_Schlamm_e (m, "Schlammspiegel am Ende der
+--      Abzugsphase", §4.3.6) so that CR-009 can compare the right two levels (see 4.7).
+-- 6.5  [ ] RATIFIED — §5.1 obligations with NO field and NO gate:
+--        "Eine rückstaufreie Ausmündung der Ablaufleitung muss gewährleistet sein."  (printed p.21)
+--        "Starke Zuflussschwankungen müssen vergleichmäßigt werden. […] Es ist nachzuweisen, dass von dem Bemessungszufluss bei der größten und kleinsten Förderhöhe nicht wesentlich abgewichen wird."  (printed p.21–22)
+--      and §5.3: "Kunststoff-Füllmaterial mit hoher vertikaler Durchgängigkeit darf nur eingesetzt werden, wenn die Tropfkörperhöhe oder die Rückführungsrate entsprechend vergrößert werden."  (printed p.22)
+
+
+-- ---------------------------------------------------------------------------
+-- 7. is_required REVIEW (76 of 153 fields are required=true)
+-- ---------------------------------------------------------------------------
+-- 7.1  [ ] RATIFIED — required=true on values the standard itself calls indicative only:
+--        A_SB_EWspez (3e869db4-9532-4614-a3db-609d27d134b9, A222-08) — Tabelle 5 is captioned
+--        "(nur Anhaltswerte, daher eingeklammert)" and the text says
+--          "Es liegen zurzeit keine verallgemeinerungsfähigen Bemessungswerte für Anlagen mit frei beweglichen Aufwuchskörpern vor. Daher sind die folgenden Bemessungsvorgaben nur als Anhaltswerte zu verstehen (siehe Tabelle 5)."  (§4.3.5, printed p.15)
+--        -> keep required (it feeds Gl. 13) but the value must be an explicit SR-2 selection, never a default.
+-- 7.2  [ ] RATIFIED — process-specific fields are required=true unconditionally, so a Tropfkörper
+--      project is asked for SBR/Festbett/MBBR inputs and vice versa: V_TK/V_TK_EWspez/h_TK/A_TK/q_A_TK,
+--      V_FB/V_FB_EWspez/Q_L/u_L/A_R_FB, A_RT/A_RT_EWspez/n_RT/d_Scheibe, V_SB/A_SB/A_SB_spez,
+--      V_SBR/V_SBR_EWspez/TS_SBR/h_max/H_W_e/t_z/t_F/n/t_Sed/V_Sp, V_BB/V_BB_EWspez/TS_BB/aOC.
+--      Proposal: make each conditional on `verfahren` rather than globally required.
+-- (SQL deliberately not drafted — one update per field, to be generated once the conditional-required
+--  mechanism is chosen.)
+-- 7.3  [ ] RATIFIED — fields the standard never assigns a value to, currently required=true:
+--        x_Qmax (51b4616b-be07-40d0-857b-da728c183a9b) — §2.2 defines the symbol; Gl. (3) collapses it
+--          into the constant EZ/192 and no value is printed. NR for the value.
+--        alphaOC_L_h (04d7e72c-3680-4d37-a517-5bb40a138682) — §2.2 defines it; the value comes from the
+--          aeration supplier ("Vom Lieferanten/Ausrüster sollten Garantiewerte für die Sauerstoffzufuhr und Energieaufnahme angegeben werden.", §4.3.7, printed p.18–19). engineer_input, NR for the value.
+--        b_xxx_85 — printed in Tabelle 1 but sourced "(nach Arbeitsblatt ATV-DVWK-A 198)": standard_fixed
+--          here, NR one level up.
+-- 7.4  [ ] RATIFIED — t_TS (2b9c4867-4723-4c3c-a812-bfd49bd1d72f, A222-10) is required=false and
+--      hand-enterable, but the standard FIXES it: "Das erforderliche Belebungsbeckenvolumen wird bei einem Bemessungsschlammalter von 25 Tagen, bei betrieblicher Denitrifikation und Verwendung der Standardvorgaben nach Gleichung (17) errechnet"  (§4.3.7, printed p.18).
+--      -> data_class standard_fixed, value 25 d, read-only (the #22 class: derived/fixed but hand-enterable).
+
+
+-- ---------------------------------------------------------------------------
+-- 8. CLAUSE / LABEL / UNIT RETAGS
+-- ---------------------------------------------------------------------------
+-- 8.1  [ ] RATIFIED — A_TK_spez (40f4f2ec-9c08-4b7b-9dc2-5a218bc49f27) is tagged "§4.3.2, Tab.2" but the
+--      90–150 m²/m³ window it carries is printed in §5.3:
+--        "Für Tropfkörpermaterial gilt DIN 19557. Die spezifische Oberfläche der Füllelemente muss sein: $90 \mathrm{~m}^{2} / \mathrm{m}^{3} \leq A_{\mathrm{TK}, \text { spez }} \leq 150 \mathrm{~m}^{2} / \mathrm{m}^{3}$."  (printed p.22)
+-- update public.fields set clause_reference='§4.3.2, Tab. 2, §5.3' where id='40f4f2ec-9c08-4b7b-9dc2-5a218bc49f27';
+--      ROLLBACK: update public.fields set clause_reference='§4.3.2, Tab.2' where id='40f4f2ec-9c08-4b7b-9dc2-5a218bc49f27';
+--
+-- 8.2  [ ] RATIFIED — TKN_BSB5 (21fee06f-f79a-4a89-a7ab-d8579b366b14) is tagged "§4.3.2" only; the same
+--      threshold is restated in §4.3.3, §4.3.4 and §4.3.5 (the last two in the "nicht anwendbar" form).
+-- update public.fields set clause_reference='§4.3.2, §4.3.3, §4.3.4, §4.3.5' where id='21fee06f-f79a-4a89-a7ab-d8579b366b14';
+--      ROLLBACK: update public.fields set clause_reference='§4.3.2' where id='21fee06f-f79a-4a89-a7ab-d8579b366b14';
+--
+-- 8.3  [ ] RATIFIED — alphaOC_L_h (04d7e72c-3680-4d37-a517-5bb40a138682) carries label_de
+--      "Sauerstoffzufuhrfaktor", which is the label of the DIFFERENT field alpha
+--      (f3093a2e-b9e4-4e9f-b676-d630d6232655). §2.2 (printed p.7–9) prints:
+--        "\hline $\alpha$ & - & Sauerstoffzufuhrfaktor, Quotient von Sauerstoffzufuhr in belebtem Schlamm und in Reinwasser \\"
+--        "\hline $\alpha O C_{\mathrm{L}, \mathrm{h}}$ & $\mathrm{g} /\left(\mathrm{m}^{3} \cdot \mathrm{~m}\right)$ & Sauerstoffzufuhrvermögen unter Betriebsbedingungen bezogen auf die Luftmenge und die Einblastiefe \\"
+-- update public.fields set label_de='Sauerstoffzufuhrvermögen bezogen auf Luftmenge und Einblastiefe' where id='04d7e72c-3680-4d37-a517-5bb40a138682';
+--      ROLLBACK: update public.fields set label_de='Sauerstoffzufuhrfaktor' where id='04d7e72c-3680-4d37-a517-5bb40a138682';
+--
+-- 8.4  [ ] RATIFIED — A_TK (6e624c5d-0fa9-4102-b1ae-37e9fcc1f68a) is labelled "Tropfkörperoberfläche",
+--      but Gl. (9) computes the FOOTPRINT: "Die erforderliche Grundfläche $A_{\mathrm{TK}}$ des Tropfkörpers wird nach Gleichung (9) errechnet" (§4.3.2, printed p.13), while §2.2 lists
+--      "$A_{\text {TK }}$ & $\mathrm{m}^{2}$ & theoretische Oberfläche des Tropfkörpers". The standard
+--      itself uses the one symbol for two quantities — flagged, not silently fixed.
+--
+-- 8.5  [ ] RATIFIED — clause_reference formatting is inconsistent across this standard: 46 fields use
+--      "§4.3.4" style, 12 use bare "4.3.4"; the gates mix "§4.4.2, Gl. (22)", "4.3.4" and "§5.1".
+--      Cosmetic, but it breaks clause-based grouping in the audit views. Normalise to "§x.y.z".
+--
+-- 8.6  [ ] RATIFIED — Q_bem (3c663d0f-51d6-4857-9294-2a564f4b5966) carries unit 'm3/h', but §2.2 prints
+--      "$Q_{\text {bem }}$ & $\mathrm{m}^{3} / \mathrm{h}, \mathrm{l} / \mathrm{s}$" and Gl. (1)/(3)/(4)
+--      all yield l/s while Gl. (22)/(27) divide by 2,2 / 2,8 m/h (i.e. expect m³/h). A unit-conversion
+--      trap sitting between the equations — needs an explicit conversion in the engine, not a relabel.
+
+
+-- ---------------------------------------------------------------------------
+-- 9. EMPTY / UNSOURCED WORKSHEETS
+-- ---------------------------------------------------------------------------
+-- 9.1  [ ] RATIFIED — seven of the 25 worksheets hold ZERO fields and ZERO gates:
+--        A222-05 Tropfkörperbemessung Nitrifikation (43880de8-c607-401c-9ba7-95d8b9c2a816)
+--        A222-13 Kombinationsanlagen              (cfb65607-b386-492a-a6ad-a1eaa6ce3c20)
+--        A222-15 Nachklärbecken Bauformen         (6e5bdca0-847a-434c-a29c-88e2a77bc20d)
+--        A222-17 Notüberlauf                      (8e15ac9f-0a12-465b-b5d2-875619b6af79)
+--        A222-19 Pumpen und Rohrleitungen         (64809fbb-01a5-4df8-883f-2867d515137c)
+--        A222-23 Wartung                          (763d69f6-dfc6-448b-a036-5f8f2e7fe345)
+--        A222-25 Ergebniszusammenfassung Gesamt   (51e60dc7-d1da-4761-84f3-e124e9ab3527)
+--      Five of them DO have printed source material that is simply not encoded (§4.3.2 Nitrifikation,
+--      §4.3.8/§5.9 Kombinationsanlagen, §4.4.2/§4.4.3 + Bild 2–4 Bauformen, §5.1 Pumpen/Rohrleitungen,
+--      §6.1 Wartung) -> populate, do not delete.
+-- 9.2  [ ] RATIFIED — A222-17 "Notüberlauf" has NO basis in DWA-A 222: the words "Notüberlauf" and
+--      "Überlauf" do not occur anywhere in the document (the only related term is §5.2 "Bei Einsatz eines
+--      Feinstrechens oder -siebs ist ein Notumlauf unerlässlich."  printed p.22 — a bypass around the
+--      screen, not an emergency overflow). Either retitle it to "Notumlauf Rechen/Sieb" and encode that
+--      §5.2 obligation, or deactivate the worksheet.
+-- update public.worksheet_templates set active=false where id='8e15ac9f-0a12-465b-b5d2-875619b6af79';
+--      ROLLBACK: update public.worksheet_templates set active=true where id='8e15ac9f-0a12-465b-b5d2-875619b6af79';
+-- 9.3  [ ] RATIFIED — A222-11 "Belebungsbecken gewerblich" holds only the ten attest_* checkboxes and no
+--      data field; the commercial-load design values (V_BB,EWspez >= 370 l/EW, TS_BB <= 3,3 kg/m³,
+--      ISV 150 ml/g, Tabelle 7, printed p.18) are encoded only on A222-10 "Belebungsbecken häuslich".
+--      After 3.1 has emptied it of foreign gates, this worksheet must either be populated with the
+--      Tabelle-7 commercial column or merged into A222-10 with abwasser_charakter as the switch.
+
+
+-- ---------------------------------------------------------------------------
+-- 10. TRANSCRIPT DEFECTS (md only — nothing to apply, but the PDF must settle these before VA)
+-- ---------------------------------------------------------------------------
+-- 10.1 §3.1 (printed p.10): the md renders the lower bound of q_F as "$q_{\mathrm{F}}(0,051 /(\mathrm{s} \cdot \mathrm{ha})$ bis $0,15 \mathrm{l} /(\mathrm{s} \cdot \mathrm{ha})$ )" — mathpix has glued the unit "l" onto "0,05". Intended: 0,05 l/(s·ha).
+-- 10.2 §4.2 (printed p.12): "mindestens aber 75 1/E betragen" — "1/E" is "l/E".
+-- 10.3 §4.3.3 (printed p.14): "ein Wannenvolumen von mindestens $41 / \mathrm{m}^{2}$" — intended 4 l/m².
+-- 10.4 §4.5 (printed p.21): "muss aber mindestens 100 1/E betragen" and "$\geq 375$ 1/E" — both "l/E".
+-- 10.5 Tabelle 6 (printed p.17): the lower-range block prints TS_SBR without a unit; only the
+--      upper-range block prints "( $\mathrm{kg} / \mathrm{m}^{3}$ )". Same quantity, so kg/m³ applies to both.
+-- 10.6 The md carries no page markers at all; every "printed p.N" in the pack is derived from the
+--      printed Inhalt and cross-checked against the mathpix image indices (= printed page + 1).
+-- ============================================================================
