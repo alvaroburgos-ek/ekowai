@@ -1,0 +1,467 @@
+-- =====================================================================================================
+-- VDI-3814-Blatt-2-1 — STAGED rulings (WRITTEN, NOT APPLIED). Every statement below is COMMENTED OUT.
+-- Nothing in this file may be executed before the ☐ RATIFIED box on that block is ticked by Alvaro.
+-- Source: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\VDI-3814-Blatt-2\VDI-3814-Blatt-2.md
+--         VDI 3814 Blatt 2.1 / Part 2.1, "Gebäudeautomation (GA); Planung; Bedarfsplanung,
+--         Betreiberkonzept und Lastenheft", Januar 2019, WEISSDRUCK, bilingual DE/EN, German column
+--         authoritative ("Die deutsche Version dieser Richtlinie ist verbindlich.").  Grade [VC].
+--         FOLDER-vs-CONTENT NOTE: the containing folder is named "VDI-3814-Blatt-2" (no ".1"), but the
+--         file's own title block and every running head read "VDI 3814 Blatt 2.1 / Part 2.1", and the
+--         sibling PDF one level up is named VDI-3814-Blatt-2-1.pdf. Content = Blatt 2.1. The folder name
+--         is the only mismatch; no re-source needed.
+--         Page refs = the transcript's "===== PAGE N =====" markers, which coincide 1:1 with the printed
+--         running-head page numbers and with the printed table of contents.
+-- Prod shape at time of writing: 7 worksheets / 69 fields / 0 equations / 28 compliance_requirements,
+--         ALL 28 with severity='block'. 0 fields verified before this pass.
+--
+-- SCOPE NOTE (governs this whole file): VDI-Richtlinien are technical rules, not law. In Blatt 2.1 the
+--         normative register is unusually soft — the document is a CHECKLIST for a Bedarfsplanung, and
+--         large parts are "sollte", "kann", "empfiehlt sich", "sinnvollerweise", "z. B.", or purely
+--         descriptive prose. A block gate is only defensible on a genuine "muss" / "ist zu" /
+--         "sind zu ..." / "hat ... zu erfolgen".
+--
+--         *** THE TWO UMBRELLA SENTENCES (read BLOCK 4 before judging any individual §6 or §8 gate) ***
+--         §6.1 makes the whole of §6.2-§6.7 binding; §8.1 makes the whole of §8.2-§8.14 OPTIONAL.
+--         That single asymmetry decides most of the severity questions in this standard, and it is the
+--         reason this file proposes far fewer block->warn downgrades than the two sibling VDI standards.
+--
+--         Result of the pass over all 28 block gates:
+--           * 1 is a LITERAL no-op ....................... CR-28 (condition='TRUE')            -> BLOCK 1
+--           * 1 is an EFFECTIVE no-op .................... CR-12 (whole-enum-domain membership) -> BLOCK 2
+--           * 1 is contradicted by its own clause ........ CR-15                                -> BLOCK 3
+--           * 3 rest on soft text with no umbrella cover . CR-09, CR-26 (+ CR-15)               -> BLOCK 5
+--           * 3 are conjunctions with one soft half ...... CR-04, CR-16, CR-21                  -> BLOCK 6
+--           * 2 are missing a printed scope predicate .... CR-05, CR-13                         -> BLOCK 7
+--           * 9 carry a defective source_quote ........... CR-06, CR-08, CR-11, CR-13, CR-14,
+--                                                          CR-17, CR-18, CR-23, CR-25          -> BLOCK 8
+--           * the remaining gates are clean as they stand: CR-01, CR-07, CR-10, CR-19, CR-20,
+--             CR-22, CR-24, CR-27.
+--
+-- EVALUATOR NOTE (read in src/lib/compliance/evaluate.ts this session, header lines 1-24): the grammar
+--         supports comparisons, arithmetic, `symbol IS NOT NULL`, `symbol IS NOT EMPTY`,
+--         `x IN {a, b, c}`, `flag == true`, AND/OR/parentheses, and the guarded form
+--         `IF <cond> THEN <cond>` which vacuously passes when the guard is false. A condition
+--         referencing a symbol with no value returns `pending`, never a false `fail`. Every condition
+--         rewrite proposed below is expressible in the existing grammar — no schema or engine change.
+--
+-- No transaction control anywhere in this file (and every statement is a comment anyway).
+-- =====================================================================================================
+
+
+-- =====================================================================================================
+-- BLOCK 1 — CR-28 IS A LITERAL NO-OP *AND* IS MIS-HOMED (highest severity finding)      ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: code=VDI-3814-2-1-CR-28, severity=block, worksheet VDI-3814-Blatt-2-1-02 (Bedarfsplanung),
+--          condition = 'TRUE', clause_reference '§6.1'.
+-- Two defects in one gate:
+--   (a) condition='TRUE' can never fail — the gate is enforcement theatre; and
+--   (b) the requirement it quotes HAS a carrier, but that carrier lives on a different worksheet:
+--       field `anforderungen_pruefbar` (boolean, is_required=true) sits on VDI-3814-Blatt-2-1-07
+--       ("Vollstaendigkeit, Pflege & Uebergabe der Planungsdokumente"), not on -02.
+-- Evidence (§6.1, printed p.6):
+--   "Im Lastenheft sind sämtliche Anforderungen aus Anwendersicht einschließlich aller Randbedingungen
+--    zu beschreiben. Die Anforderungen müssen quantifizierbar und prüfbar sein."
+-- A genuine "müssen" — block severity is correct; only the homing and the condition are wrong.
+--   update public.compliance_requirements
+--      set condition = 'anforderungen_pruefbar == true',
+--          worksheet_template_id = (select id from public.worksheet_templates
+--                                    where code = 'VDI-3814-Blatt-2-1-07')
+--    where code = 'VDI-3814-2-1-CR-28';
+-- Rollback:
+--   update public.compliance_requirements
+--      set condition = 'TRUE',
+--          worksheet_template_id = (select id from public.worksheet_templates
+--                                    where code = 'VDI-3814-Blatt-2-1-02')
+--    where code = 'VDI-3814-2-1-CR-28';
+
+
+-- =====================================================================================================
+-- BLOCK 2 — CR-12 IS AN EFFECTIVE NO-OP (membership over the whole enum domain)         ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: condition = 'betreibermodell IN {eigenbetreiben,fremdbetreiben,kombination}'.
+-- Field `betreibermodell` has EXACTLY those three enum_values and no others, so the membership test can
+-- never exclude a stored value: it degenerates to an existence check while reading as a constraint.
+-- The printed obligation is hard and correctly encoded in spirit (§7.6, printed p.15):
+--   "Dabei ist für die Betreiberorganisation zu unterscheiden zwischen: | Betreiben mit eigenem Personal
+--    (Eigenbetreiben) | Betreiben mit fremdem Personal (Fremdbetreiben) | Kombinationen von
+--    Eigenbetreiben und Fremdbetreiben"
+-- Proposal: state the honest semantics (severity stays block).
+--   update public.compliance_requirements
+--      set condition = 'betreibermodell IS NOT NULL'
+--    where code = 'VDI-3814-2-1-CR-12';
+-- Rollback:
+--   update public.compliance_requirements
+--      set condition = 'betreibermodell IN {eigenbetreiben,fremdbetreiben,kombination}'
+--    where code = 'VDI-3814-2-1-CR-12';
+
+
+-- =====================================================================================================
+-- BLOCK 3 — CR-15 IS CONTRADICTED BY ITS OWN CLAUSE (block on an opt-out-able duty)     ☐ RATIFIED ______
+-- =====================================================================================================
+-- Current: severity=block, condition = 'lastenheft_erstellt == true', clause '§8.1; §6.1'.
+-- The gate's own quote is soft ("sinnvollerweise"), and §8.1 explicitly provides for NOT producing a
+-- GA-Lastenheft at all (§8.1, printed p.20 and p.21):
+--   "Ein GA-Lastenheft stellt die Anforderungen des AG hinsichtlich Bedarf, Nutzung, Liefer- und
+--    Leistungsplanung dar und wird sinnvollerweise im Rahmen der Bedarfsplanung oder parallel dazu
+--    erstellt." | "Beim Verzicht auf die Erstellung/Verwendung von GA-Lastenheften müssen die Lasten des
+--    AG an eine Planung/Ausführung der GA in einer anderen Form durch den AG dokumentiert werden."
+-- A block gate that cannot be satisfied by a project which legitimately dispenses with the Lastenheft
+-- enforces something the source expressly permits. Downgrade to warn.
+--   update public.compliance_requirements set severity = 'warn' where code = 'VDI-3814-2-1-CR-15';
+-- Rollback:
+--   update public.compliance_requirements set severity = 'block' where code = 'VDI-3814-2-1-CR-15';
+
+
+-- =====================================================================================================
+-- BLOCK 4 — THE TWO UMBRELLA SENTENCES (§6.1 binding, §8.1 permissive)                  ☐ RATIFIED ______
+-- =====================================================================================================
+-- This block proposes NO write. It records the finding that decides the severity of most other gates,
+-- because reading §6.2-§6.7 and §8.2-§8.14 clause-by-clause gives the WRONG answer in both directions.
+--
+-- (a) §6.1 (printed p.6) makes the whole of §6.2-§6.7 a duty, even where the individual sub-clause has
+--     no modal verb of its own:
+--       "Abschnitt 6.2 bis Abschnitt 6.7 beschreiben die relevanten Aspekte der Bedarfsplanung, die
+--        durch den Bauherrn, gegebenenfalls mit Unterstützun g eines Beraters, festzulegen sind."
+--     CONSEQUENCE: CR-02, CR-03, CR-05, CR-06 and CR-07 all sit on §6.x clauses whose own text is
+--     descriptive or a recommendation, and a clause-local reading would downgrade all five. Under the
+--     §6.1 umbrella their block severity is DEFENSIBLE at the level of the aspect, and this file
+--     therefore proposes NO downgrade for CR-03, CR-06 and CR-07. (CR-05 still has a scope defect —
+--     BLOCK 7; CR-06 still has a paraphrased quote — BLOCK 8.)
+--
+-- (b) §8.1 (printed p.21) makes the whole of §8.2-§8.14 explicitly OPTIONAL:
+--       "In den nachfolgenden Abschnitten sind Themen der GA dargestellt, die im Rahmen einer
+--        Bedarfsplanung behandelt werden können."
+--     The hard "sind festzulegen" sentences inside §8.2-§8.14 therefore read as conditional on the topic
+--     being in scope for the project, not as an unconditional duty on every project.
+--     CONSEQUENCE / OPEN QUESTION FOR ALVARO (SR-2, not auto-decided): eleven §8 gates are encoded as
+--     unconditional blocks — CR-16, CR-17, CR-18, CR-19, CR-20, CR-21, CR-22, CR-23, CR-24, CR-25,
+--     CR-26. Each is anchored on a genuine hard sentence, so each is individually correct; the question
+--     is whether the §8.1 "können" umbrella should make them all conditional on an in-scope flag (which
+--     prod does not currently carry). The alternative reading — that a GA-Lastenheft, once written, must
+--     cover all of §8.2-§8.14 — is equally available from the text. This is a reading call, not a
+--     machine call: no change is proposed here, only the record that the umbrella exists.
+--
+-- (c) The AG-Angaben sub-case (CR-02). The §6.1 umbrella covers "Angaben zum AG" as an ASPECT, but the
+--     four fields the gate hard-requires come from an enumeration that is explicitly exemplary
+--     (§6.2, printed p.6 — the clause contains no modal verb at all):
+--       "Grundlegende Informationen zum AG, z. B.: | Name, Adresse | Organisationsform |
+--        Vertreter/Bevollmächtigter | Projektleiter und dessen Verantwortungsbe- reich, Befugnisse und
+--        Kompetenzen | gegebenenfalls weitere wichtige Informationen [...]"
+--     Requiring all four to be NOT NULL over-enforces a "z. B." list. Proposal: keep the aspect blocking
+--     on the identity of the AG, and move the other three to the is_required review in BLOCK 10.
+--       update public.compliance_requirements
+--          set condition = 'ag_name IS NOT NULL'
+--        where code = 'VDI-3814-2-1-CR-02';
+--     Rollback:
+--       update public.compliance_requirements
+--          set condition = 'ag_name IS NOT NULL AND ag_organisationsform IS NOT NULL AND ag_vertreter IS NOT NULL AND ag_projektleiter IS NOT NULL'
+--        where code = 'VDI-3814-2-1-CR-02';
+
+
+-- =====================================================================================================
+-- BLOCK 5 — BLOCK GATES ON SOFT TEXT WITH NO UMBRELLA COVER (block -> warn)             ☐ RATIFIED ______
+-- =====================================================================================================
+-- Both gates below sit outside the §6.1 umbrella and rest on text that carries no obligation.
+--
+-- CR-09 (§7.3, printed p.14) — the quote is a DEFINITION; §7.3 contains no obligation whatsoever, and
+--   §7 has no umbrella sentence equivalent to §6.1:
+--   "Nutzer des Betreiberkonzepts sind alle, die innerhalb einer Liegenschaft oder eines Projekts auf
+--    die über die Strukturen der GA erfassten und bereitgestellten Daten oder auf die Ergebnisse der
+--    Auswertungen dieser Daten zugreifen. Das sind beispielsweise: | Gebäudeeigentümer | ..."
+--
+-- CR-26 (§8.14, printed p.32) — an explicit recommendation, and §8.1's umbrella is permissive, so the
+--   gate is soft twice over:
+--   "Im Rahmen der Bedarfsplanung empfiehlt es sich, detaillierte einheitliche Spezifizierungen der
+--    gewerkespezifischen Schnittstellen gemeinsam mit dem AG vorzunehmen und diese im weiteren
+--    Planungsprozess verfeinern zu lassen."
+--
+--   update public.compliance_requirements set severity = 'warn'
+--    where code in ('VDI-3814-2-1-CR-09','VDI-3814-2-1-CR-26');
+-- Rollback:
+--   update public.compliance_requirements set severity = 'block'
+--    where code in ('VDI-3814-2-1-CR-09','VDI-3814-2-1-CR-26');
+
+
+-- =====================================================================================================
+-- BLOCK 6 — CONJUNCTIONS WHERE ONLY ONE HALF IS HARD (split the gate)                   ☐ RATIFIED ______
+-- =====================================================================================================
+-- CR-04: condition = 'ziel_beschreibung IS NOT NULL AND prioritaeten_matrix IS NOT NULL'.
+--   The first conjunct is hard (§6.4.1, printed p.7): "Die Ziele des AG sind zu beschreiben ."
+--   The second is not. The "müssen" in the gate's own stored quote governs the INTERDEPENDENCIES between
+--   targets, not the production of a matrix; the matrix is only recommended (§6.4.2, printed p.7-8):
+--     "Hierzu empfiehlt es sich, die wichtigsten Parameter für die Bewertung der Qualitäts-, Kosten- und
+--      Terminziele strukturiert zu erfassen (z. B. in Form einer Matrix) und mit Prioritäten zu versehen."
+--   Proposal: block keeps only the hard half.
+--     update public.compliance_requirements
+--        set condition = 'ziel_beschreibung IS NOT NULL', clause_reference = '§6.4.1'
+--      where code = 'VDI-3814-2-1-CR-04';
+--     -- optional follow-up once ratified: a NEW warn gate (code VDI-3814-2-1-CR-04b) on worksheet -02,
+--     -- clause §6.4.2, condition 'prioritaeten_matrix IS NOT NULL'. Insert deferred to a migration.
+--   Rollback:
+--     update public.compliance_requirements
+--        set condition = 'ziel_beschreibung IS NOT NULL AND prioritaeten_matrix IS NOT NULL',
+--            clause_reference = '§6.4.1; §6.4.2'
+--      where code = 'VDI-3814-2-1-CR-04';
+--
+-- CR-16: condition = 'datenkommunikationsprotokoll IS NOT NULL AND datenschnittstellen IS NOT NULL'.
+--   The protocol half is soft (§8.2.1, printed p.22): "... erfolgt mittels Kommunikationseinrichtungen,
+--   für die genormte Datenkommunikationsprotokolle vorgegeben werden sollen." The interface half is hard
+--   (§8.2.2, printed p.22): "Die Art und Anzahl der zu verwendenden Datenschnittstellen sind zu
+--   spezifizieren. Insbesondere ist die erforderliche Interoperabilität der beteiligten Teilsysteme
+--   eindeutig festzulegen."
+--     update public.compliance_requirements
+--        set condition = 'datenschnittstellen IS NOT NULL', clause_reference = '§8.2.2'
+--      where code = 'VDI-3814-2-1-CR-16';
+--   Rollback:
+--     update public.compliance_requirements
+--        set condition = 'datenkommunikationsprotokoll IS NOT NULL AND datenschnittstellen IS NOT NULL',
+--            clause_reference = '§8.2'
+--      where code = 'VDI-3814-2-1-CR-16';
+--
+-- CR-21: condition = 'it_netzwerk_anforderungen IS NOT NULL AND it_sicherheit IS NOT NULL'.
+--   The network half is hard (§8.8, printed p.26): "Es ist zu klären, ob ein separates GA-Netzwerk
+--   aufgebaut/genutzt wird oder ob eine Integration in ein vorhandenes Unternehmensnetzwerk erfolgen
+--   soll. [...] Daraus folgend sind Vorgaben für die GA-relevanten IT-Systeme und Netzwerke
+--   festzulegen, z. B.:". IT-Sicherheit appears ONLY as a bullet INSIDE that "z. B." list (p.27):
+--   "IT-Sicherheit (siehe auch VDMA 24774) | Herstellerebene | Projektierungsebene | Inbetriebnahme-
+--   ebene | Wartungsebene | Fernservice | Benutzerebene".
+--     update public.compliance_requirements
+--        set condition = 'it_netzwerk_anforderungen IS NOT NULL'
+--      where code = 'VDI-3814-2-1-CR-21';
+--   Rollback:
+--     update public.compliance_requirements
+--        set condition = 'it_netzwerk_anforderungen IS NOT NULL AND it_sicherheit IS NOT NULL'
+--      where code = 'VDI-3814-2-1-CR-21';
+
+
+-- =====================================================================================================
+-- BLOCK 7 — MISSING PRINTED SCOPE PREDICATE (CR-05, CR-13)                              ☐ RATIFIED ______
+-- =====================================================================================================
+-- CR-05: 'projektschnittstellen IS NOT NULL', unconditional. The print makes the duty conditional
+--   TWICE (§6.5, printed p.8 and p.9):
+--     "Werden zum Projekt weitere Parallelprojekte durchgeführt oder Eigenleistungen vom AG erbracht,
+--      entstehen Schnittstellen." | "Die Projektschnittstellen sind jeweils einzeln und im Detail zu
+--      definieren und zu beschreiben, sofern diese nicht bereits auf andere Weise dokumentiert sind
+--      (z. B. in einem Projekt- oder Organisationshandbuch)."
+--   The §6.1 umbrella keeps the ASPECT binding, so a downgrade is not proposed; but a project with no
+--   parallel projects and no Eigenleistungen, or one whose interfaces are already documented in a
+--   Projekthandbuch, is blocked by a duty the print does not impose on it.
+--   Prod carries no boolean for either predicate ("Parallelprojekte/Eigenleistungen vorhanden",
+--   "anderweitig dokumentiert"), so the scope cannot be expressed with an IF/THEN guard today.
+--   PROPOSAL (needs a new field, hence staged as an encoding change, not a one-line update):
+--     add field `schnittstellen_relevant` (boolean, §6.5) to worksheet VDI-3814-Blatt-2-1-02, then
+--       update public.compliance_requirements
+--          set condition = 'IF schnittstellen_relevant == true THEN projektschnittstellen IS NOT NULL'
+--        where code = 'VDI-3814-2-1-CR-05';
+--   Rollback: drop the field, restore condition = 'projektschnittstellen IS NOT NULL'.
+--
+-- CR-13: 'gebaeude_prioritaet IS NOT NULL AND anlagen_prioritaet IS NOT NULL', unconditional, and the
+--   stored source_quote is the SOFTEST sentence in §7.7.1 ("... ist eine Zuordnung von Prioritäten ...
+--   sinnvoll."), which is itself scoped to multi-building properties. Two HARD sentences exist in the
+--   same clause and are the correct anchor (§7.7.1, printed p.17 and p.18):
+--     "Die Vergabe der Gebäudeprio ritäten hat einvernehmlich in Abstimmung zwischen den
+--      Gebäudeeigentümern und/oder den Betreibern/Nutzern vor oder spätestens mit dem Beginn der
+--      technischen Planung zu erfolgen." | "Die Anlagenprioritäten sind vor oder spätestens mit Beginn
+--      einer Planung mit dem AG abzustimmen."
+--   Proposal: keep severity=block, swap the quote (BLOCK 8).
+--   OPEN QUESTION FOR ALVARO (SR-2): the p.17 "sinnvoll" sentence scopes the sub-clause to
+--   "Liegenschaften mit mehreren Gebäuden ... oder bei der Unterteilung einzelner Gebäude in
+--   unterschiedliche Funktionsbereiche". Whether a single-building project must still set priorities is
+--   a reading call — not auto-decided here.
+
+
+-- =====================================================================================================
+-- BLOCK 8 — SOURCE_QUOTE REPLACEMENTS (no severity or condition change)                 ☐ RATIFIED ______
+-- =====================================================================================================
+-- Scoring of every stored gate source_quote against the print (worst first):
+--   * PARAPHRASE (worst offender) — CR-06 stores "Es wird empfohlen, jeden Nutzungsprozess zu
+--     beschreiben."; the print reads "Es wird empfohlen, jeden Nutzungsprozess mittels einer
+--     Prozessbeschre ibung zu dokumentieren." Two words changed, one dropped: not verbatim.
+--   * SILENT TRUNCATION — CR-23 stops at "...historische Speicherdauer gibt." with no ellipsis; the
+--     printed sentence continues "... gibt oder die Daten gegen jegliche Veränderung zu schützen sind
+--     (Audit Trail)."
+--   * WRONG SENTENCE FOR THE GATE — CR-11 enforces `betreiberstruktur` but quotes "Die Ziele des
+--     Betreiberkonzepts für die organisatorische Umsetzung sind festzulegen."; the sentence that
+--     actually mandates the field is "Hierfür ist mindestens di e Betreiberstruktur darzustellen."
+--     Same class, milder: CR-13 quotes the soft sentence while two hard ones sit in the same clause.
+--   * QUOTE CONTAINS NO REQUIREMENT — CR-08 (bare list of objectives), CR-09 (definition, BLOCK 5),
+--     CR-14 (descriptive), CR-17 (bare purpose statement). CR-08, CR-14 and CR-17 all have a genuinely
+--     hard sentence available in the same clause, so they are quote-swaps and keep severity=block.
+--   * UNDER-QUOTED CONJUNCTION — CR-18 (3 carriers, quote covers 2), CR-25 (7 carriers, quote covers 2).
+--   * EXEMPLARY QUALIFIER SWALLOWED INSIDE AN ELLIPSIS — NONE FOUND. Every stored quote containing a
+--     "z. B." keeps it visible; no gate hides one behind "[...]". CR-14 keeps the "z. B." before the
+--     99,98 % availability figure, so that figure is not presented as a limit.
+--   * NO stored quote is a bare caption, and none starts mid-sentence.
+--
+-- Replacement quotes (all verbatim from the transcript; the transcript's own column-break word splits
+-- — "Prozessbeschre ibung", "di e", "na chfolgenden", "f ür", "Gebäudeprio ritäten" — are reproduced as
+-- printed rather than silently repaired, matching the pack's convention):
+--   update public.compliance_requirements set source_quote =
+--     'Es wird empfohlen, jeden Nutzungsprozess mittels einer Prozessbeschre ibung zu dokumentieren. | In den Prozessbeschreibu ngen ist z. B. zu dokumentieren: | Beschreibung des Prozessablaufs | Nutzungszeiten/Ausführungszeiten des Prozesses | Schnittstellen zu anderen Prozessen (Logistik) | erforderliche Ausstattung und technische Ausrüstung für den Prozess — printed p.9-10'
+--    where code = 'VDI-3814-2-1-CR-06';
+--   update public.compliance_requirements set source_quote =
+--     'Im Betreiberkonzept müssen u. a. folgende Fragen beantwortet werden: | Welche Art von technischen Anlagen gibt es? | Wie ist die GA in das übergeordnete Betreiberkonzept integriert? | Wer bedient die GA? | Wie detailliert werden Informationen benötigt? | Was soll mit den Informationen geschehen? — printed p.12'
+--    where code = 'VDI-3814-2-1-CR-08';
+--   update public.compliance_requirements set source_quote =
+--     'Hierfür ist mindestens di e Betreiberstruktur darzustellen. Dies ist nach Möglichkeit mit Nennung der Anzahl der Mitarbeiter in den jeweiligen Zuständigkeitsbereichen und Namen der verantwortlichen Mitarbeiter oder der durch Aufträge gebundenen Fremdfirmen für die na chfolgenden Bereiche zu spezifizieren, z. B.: — printed p.14'
+--    where code = 'VDI-3814-2-1-CR-11';
+--   update public.compliance_requirements set source_quote =
+--     'Die Vergabe der Gebäudeprio ritäten hat einvernehmlich in Abstimmung zwischen den Gebäudeeigentümern und/oder den Betreibern/Nutzern vor oder spätestens mit dem Beginn der technischen Planung zu erfolgen. | Die Anlagenprioritäten sind vor oder spätestens mit Beginn einer Planung mit dem AG abzustimmen. — printed p.17, p.18'
+--    where code = 'VDI-3814-2-1-CR-13';
+--   update public.compliance_requirements set source_quote =
+--     'Folgende Inhalte und Ziele sind in Bezug auf die Erfüllung der vereinbarten Dienstleistungen zwischen AG und AN festzulegen und beeinflussen mittelbar den Einsatz und das Ausmaß der GA: | Rollen, Leistungsbeiträge und Verantwortlichkeiten der Beteiligten | Parameter zur Beurteilung der Dienstleistungsqualität | Prozedur zur Schlichtung von Meinungsunterschieden zwischen den Vertragspartnern — printed p.19'
+--    where code = 'VDI-3814-2-1-CR-14';
+--   update public.compliance_requirements set source_quote =
+--     'Die Meldungen innerhalb des GA-Systems sind je nach Ursache, Art und/oder Auswirkung in verschiedene Gruppen zu unterteilen, z. B.: | Gefahrmeldungen | Sicherheitsmeldungen | Systemmeldungen | Störungsmeldungen | Warn-/Wartungsmeldungen | Handmeldungen | Trendlogmeldungen | Die erforderlichen Meldungsempfänger sind mit dem AG zu definieren und die Übertragungswege zu spezifizieren. | Hierbei sind mindestens die Prioritäten für die verschiedenen Zustandsübergänge zu spezifizieren. | Die Quittierungserfordernisse durch die Meldungsempfänger sind eindeutig festzulegen. — printed p.22-23'
+--    where code = 'VDI-3814-2-1-CR-17';
+--   update public.compliance_requirements set source_quote =
+--     'Die Arten der zu verwendenden Sensoren und Aktoren sowie deren Merkmale sind gemäß den Anforderungen zu spezifizieren, z. B.: | kombinierte Sensoren | Genauigkeit | Bauform | Größe | Für diese sind neben dem zu verwendenden Datenkommunikationsprotokoll und der notwendigen Datenschnittstelleneinheiten eventuell zusätzlich notwendige Speicheranforderungen und die Art der manuellen Übersteuerungsmöglichkeiten festzulegen. | Alle Folgen und Reaktionen im GA-System, die sich aus einem Versorgungsspannungsausfall und Wiederkehr ergeben, sind festzulegen, z. B.: — printed p.24'
+--    where code = 'VDI-3814-2-1-CR-18';
+--   update public.compliance_requirements set source_quote =
+--     'Die notwendigen Vorgaben bezüglich der Historisierung der Datenspeicherung sind festzulegen, insbesondere wenn es Anforderungen an die historische Speicherdauer gibt oder die Daten gegen jegliche Veränderung zu schützen sind (Audit Trail). Dabei ist mindestens die Art der Speicherung unter Beachtung eventueller Datenbegrenzungen und der zu verwendenden Speichermedien zu definieren. — printed p.28'
+--    where code = 'VDI-3814-2-1-CR-23';
+--   update public.compliance_requirements set source_quote =
+--     'Für jedes Projekt sind Anforderungen an die Funktionen der Systemselbstüberwachung und an die Systemreaktionen von Feldgeräten, Automations- sowie Management- und Bedieneinrichtungen im Fehlerfall festzulegen. | Die Verwaltungsmethoden hinsichtlich Uhrzeit, Datum, Kalender und Zeitzonen sind f ür das gesamte GA-System einheitlich anzugeben. | Die notwendigen Datenimport funktionen und Datenexportfunktionen sind eindeutig für alle relevanten Schnittstellen des GA-Systems festzulegen. | Die Anzahl und Bedeutung dieser Zugriffsebenen sind festzulegen, z. B.: | Es ist festzulegen, in welcher Form System-, Ereignis- sowie Bedieneraktivitäten und gegebenenfalls zusätzliche Nutzerdaten aufzuzeichnen und zu speichern sind. | Die Art und die Zykluszeiten der erforderlichen Sicherungen sind zu definieren. | Alle Einrichtungen und Funktionen, die zur Fernbedienung des GA-Systems eingesetzt werden sollen, sind vorzugeben. — printed p.30-32'
+--    where code = 'VDI-3814-2-1-CR-25';
+-- Rollback: restore the prior source_quote values from the prod export taken for this pass
+--   (scratchpad fields-VDI-3814-Blatt-2-1.json, gates[].source_quote).
+
+
+-- =====================================================================================================
+-- BLOCK 9 — CLAUSE RETAG + ENUM: datenkommunikationsprotokoll                           ☐ RATIFIED ______
+-- =====================================================================================================
+-- Field `datenkommunikationsprotokoll` (id 28082bd0-c433-411e-b104-1dc1e4e6cf4d) carries
+-- clause_reference '§8.2.1' and the closed enum {bacnet, knx, dali}. §8.2.1 (printed p.22) does NOT name
+-- a single protocol — it only says protocols "vorgegeben werden sollen" and points at DIN EN ISO 16484-5.
+-- The three names come from a §7.2 checklist question (printed p.13) and that list is explicitly OPEN:
+--   "Welche Datenkommunikationsprotokolle sind eingesetzt/sollen eingesetzt werden (BACnet, KNX,
+--    Dali usw.)?"
+-- Two consequences: the clause tag points at a clause that does not print the values, and the closed
+-- enum makes a project using e.g. Modbus, M-Bus or LON unrepresentable.
+--   update public.fields set clause_reference = '§8.2.1; §7.2'
+--    where id = '28082bd0-c433-411e-b104-1dc1e4e6cf4d';
+--   update public.fields set enum_values = enum_values || '[{"value":"sonstige","label_de":"Sonstige (projektspezifisch)","label_en":"Other (project-specific)","order_index":4,"regulation_reference":"§7.2"}]'::jsonb
+--    where id = '28082bd0-c433-411e-b104-1dc1e4e6cf4d';
+-- Rollback:
+--   update public.fields set clause_reference = '§8.2.1', enum_values = enum_values - 3
+--    where id = '28082bd0-c433-411e-b104-1dc1e4e6cf4d';
+--
+-- SAME OPEN-LIST PATTERN, NO ACTION PROPOSED (recorded so the residue is visible): the enums for
+-- `meldungsart` (§8.3.1 "z. B."), `meldung_zustandsuebergang` (§8.3.3 "z. B."), `zugriffsebene`
+-- (§8.13.4 "z. B."), `nutzungsprozess_typ` (§6.6 "kann z. B."), `betreiberkonzept_nutzer`
+-- (§7.3 "Das sind beispielsweise") and `gebaeude_prioritaet` / `anlagen_prioritaet` (§7.7.1 "kann wie
+-- folgt geschehen" / "kann z . B. in drei Stufen") all close an explicitly exemplary printed list.
+-- NO INVENTED VALUE WAS FOUND IN ANY OF THE 12 ENUM FIELDS — every encoded option is printed verbatim.
+
+
+-- =====================================================================================================
+-- BLOCK 10 — is_required REVIEW (source is soft, exemplary, or defers to another Blatt) ☐ RATIFIED ______
+-- =====================================================================================================
+-- Fields currently is_required=true whose printed basis is a recommendation, an exemplary "z. B."
+-- bullet, or a pointer to a different document:
+--   ag_organisationsform, ag_vertreter, ag_projektleiter — §6.2 "z. B." list, no modal verb (p.6);
+--                                see also BLOCK 4(c)
+--   prioritaeten_matrix        — §6.4.2 "Hierzu empfiehlt es sich ... (z. B. in Form einer Matrix)" (p.7-8)
+--   nutzungsprozess_beschreibung — §6.6 "Es wird empfohlen ..." (p.9)
+--   betreiben_teilleistungen   — §7.2 "Für das Betreiben mittels GA sind im Allgemeinen folgende
+--                                Teilleistungen relevant" (p.12) — descriptive, not a duty
+--   gewerke_anlagen_systeme    — §7.6.5 "kann Tabelle 1 aus VDI 3814 Blatt 2.2 genutzt werden" (p.16);
+--                                the table itself is NOT in this Blatt (NR)
+--   lastenheft_erstellt        — §8.1 "sinnvollerweise", with an explicit opt-out (p.20-21); BLOCK 3
+--   it_sicherheit              — §8.8, a bullet inside a "z. B." list (p.26-27); BLOCK 6
+--   ga_funktionen              — §8.9 defers the function catalogue to VDI 3814 Blatt 3.1/3.2 (p.27)
+--   gewerkespezifische_schnittstellen — §8.14 "empfiehlt es sich" (p.32); BLOCK 5
+--   update public.fields set is_required = false
+--    where id in ('7b4d8a18-fa5d-4be8-acb1-b34385aef2d3','a65194f9-987a-4e1a-942c-3ca7c5ca7692',
+--                 '1f9d268f-9aa8-4b8c-bfe4-e47c9913cef8','a861774c-0a3f-4816-b080-49110f831c72',
+--                 'a40abf3f-d093-4e60-bb28-e65ec5466fc6','3867c2ec-0c3f-4ba1-957c-3e340c5953a7',
+--                 'e9dfcd63-58f7-424f-9a25-78aa24a2b651','fc9978b0-ef39-4a9c-8aa5-b54ec69f2e3e',
+--                 'd2a2e9fc-3070-44ae-b61c-035edcc34991','c3de2a94-b86a-4fd4-b247-756857b79aa6',
+--                 'ee0c29e7-e977-4717-9058-b5378bf11870');
+-- Rollback:
+--   update public.fields set is_required = true where id in ( ...the same 11 ids... );
+--
+-- ag_freigabe (VDI-3814-Blatt-2-1-07, is_required=true) is a pure app workflow flag — the words
+-- "Freigabe"/"freigeben" do not occur ANYWHERE in the transcript (grep, 0 hits). The pack sets it to
+-- verification_status='inferred_from_worksheet'. Whether an app-only flag should be is_required=true is
+-- an app decision, not a source decision, so no change is proposed here.
+
+
+-- =====================================================================================================
+-- BLOCK 11 — EXPLICIT NEGATIVE RESULTS (checked, nothing found — recorded so absence is auditable)
+-- =====================================================================================================
+-- * EMPTY CONDITIONS ........................ none. All 28 gates carry a non-empty condition string.
+-- * condition='TRUE' NO-OPS ................. exactly one, CR-28 (BLOCK 1).
+-- * EFFECTIVE NO-OPS ........................ exactly one, CR-12 (BLOCK 2, whole-domain membership).
+--                                             No `IS NOT NULL` on a boolean exists: the boolean carriers
+--                                             used in gates (lastenheft_erstellt, dokumente_gepflegt, and
+--                                             the proposed anforderungen_pruefbar) are all tested with
+--                                             `== true`, which "false" does not pass. No tautology over
+--                                             an equation output (the standard encodes 0 equations).
+-- * PRESENCE-ONLY CONDITION HIDING A PRINTED LIMIT ... none. The standard prints exactly two numeric
+--                                             families — the 99,98 % SLA availability (§7.7.2, explicit
+--                                             "z. B.") and the Tabelle 1 resolutions (§8.11, caption
+--                                             reads "Beispiele für Auflösungen zu erfassender Größen").
+--                                             Both are exemplary, neither is a limit, and correctly
+--                                             NEITHER is encoded as a threshold anywhere.
+-- * AND/OR INVERSIONS, OR-COLLAPSE .......... none possible: no gate in this standard uses OR. Every
+--                                             multi-symbol gate is a pure conjunction.
+-- * INVERTED CONDITIONALS ................... one near-miss, CR-05: the printed "Werden ... Parallel-
+--                                             projekte durchgeführt ... entstehen Schnittstellen" is
+--                                             encoded unconditionally (BLOCK 7). No gate encodes a
+--                                             printed "Bei X ist Y zu tun" as the conjunction `X AND Y`.
+-- * BOUNDARY INCLUSIVITY .................... not applicable: no gate contains a numeric comparison
+--                                             (all 28 conditions scanned for < > <= >= and for digits).
+-- * DUPLICATE GATES / STRICT SUBSETS ........ none. All 28 conditions are pairwise distinct and no
+--                                             condition is a strict subset of another (CR-28's 'TRUE' is
+--                                             trivially implied but is handled as a no-op in BLOCK 1).
+-- * MIS-HOMED GATES ......................... one, CR-28 (BLOCK 1). Every other gate references only
+--                                             symbols that live on its own worksheet_template (verified
+--                                             symbol-by-symbol against the prod export).
+-- * UNSATISFIABLE GATES / UNCOVERED ENUM VALUES ... none. The single membership gate (CR-12) covers its
+--                                             field's entire domain. The closed-enum concern for
+--                                             `datenkommunikationsprotokoll` is a data-model gap
+--                                             (BLOCK 9), not an unsatisfiable gate.
+-- * INVENTED VALUES OR RANGES ............... none. No gate encodes a number at all, and every option in
+--                                             all 12 enum fields is printed verbatim in the source. No
+--                                             gate constraint is contradicted by the source EXCEPT
+--                                             CR-15, where §8.1 expressly permits the opt-out (BLOCK 3).
+-- * MISSING GATES FOR A PRINTED HARD LIMIT ... the standard prints no hard numeric limit. Two hard
+--                                             obligations do lack a gate, both on worksheet -07:
+--                                             `anforderungen_pruefbar` (§6.1 "müssen quantifizierbar und
+--                                             prüfbar sein" — fixed by BLOCK 1) and
+--                                             `lastenheft_vollstaendig` (§8.1 "wird ... vollständig und
+--                                             widerspruchsfrei erstellt", printed p.20). The latter is
+--                                             descriptive-normative ("wird ... erstellt") and sits under
+--                                             the permissive §8.1 umbrella, so a warn — not a block —
+--                                             would be the defensible encoding; proposed as a NEW gate,
+--                                             deferred to a migration once ratified.
+-- * CROSS-REFERENCE RESIDUE (NR from THIS Blatt, never invented) ... `funktionale_einheit` and
+--                                             `zu_betreibende_objekte` rest on the Schalenmodell of
+--                                             VDI 3814 Blatt 1 §5.5; `gewerke_anlagen_systeme` on
+--                                             Tabelle 1 of VDI 3814 Blatt 2.2 and the cost groups of
+--                                             DIN 276-1; `ga_funktionen` on VDI 3814 Blatt 3.1/3.2 (tools
+--                                             in Blatt 4.3); `energieeffizienzklasse` on the class list
+--                                             of DIN EN 15232; `mbe_anforderungen` partly on Blatt 2.3;
+--                                             `datenkommunikationsprotokoll` on DIN EN ISO 16484-5;
+--                                             `automationseinrichtungen_spez` on DIN EN ISO 16484-2 §5.3;
+--                                             `it_sicherheit` on VDMA 24774. In every case the DUTY is
+--                                             printed here and quoted; only the referenced content is NR.
+-- * WORKSHEETS WITH ZERO FIELDS ............. none. Field counts per worksheet: -01:2, -02:18, -03:13,
+--                                             -04:10, -05:9, -06:13, -07:4 (= 69).
+-- * PHANTOM FIELDS (enum tokens materialised as fields) ... none. All 69 fields carry a label_de, a
+--                                             clause_reference and a description; none is a bare enum
+--                                             token, so no `active=false` proposal is made.
+-- * UNIT MISMATCHES / DIMENSIONAL CHECK ..... not applicable in the usual sense: all 69 fields carry
+--                                             unit '-' (this Blatt is a requirements checklist, not a
+--                                             calculation standard) and the standard encodes 0
+--                                             equations, so there is no equation to dimension-check and
+--                                             no equation output consumed by nothing.
+-- * SOURCE-QUALITY / MACHINE-TRANSLATION CHECK ... CLEAN. grep over the transcript for "Traducido",
+--                                             "Translated from", "onlinedoctranslator", "traducci",
+--                                             "machine transl" returns 0 hits. The apparent stray
+--                                             non-German tokens ("con-", "Las-", "el-") are all
+--                                             line-break hyphenation of the English column or of German
+--                                             words; the document is a genuine bilingual VDI print with
+--                                             the German column declared authoritative.
+-- =====================================================================================================
