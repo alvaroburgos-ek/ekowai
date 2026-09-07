@@ -1,0 +1,303 @@
+-- ============================================================================
+-- DVS-2225-4 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement,
+-- required-ness or a label, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block ☐ RATIFIED. Rollback = the inverse statement noted per block.
+--
+-- Source: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DVS-2225-4\DVS-2225-4.md (mathpix LaTeX transcript of
+--   Richtlinie DVS 2225-4, September 2016; Ersatz für Ausgabe Dezember 2006). "printed p.N" = the page carrying the
+--   footer "Seite N" in the sibling PDF; mathpix image index = PDF page = printed page (verified page by page with
+--   pdftotext). Uuids are the prod ids from the 2026-09-05 export (fields-DVS-2225-4.json). Gate rows live in
+--   public.compliance_requirements (evaluate.ts condition grammar); condition/severity edits are written as specs
+--   because the grammar's exact capabilities (abs(), IF/THEN, cross-worksheet reads) need confirming before an apply.
+--
+-- Prod shape at export time: 5 worksheets / 59 fields (all imported_unverified) / 3 equations (all already
+-- verified_against_standard) / 18 gates (all severity='block'). No worksheet has zero fields.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-0 · SCOPE OBSERVATION (no SQL — owner awareness; matters for the Blumen Forscheln liner work).
+-- §1 Geltungsbereich, printed p.4:
+--   "Diese Richtlinie gilt für das Schweißen von Dichtungsbahnen aus Polyethylen (PE) bei großflächigen
+--    Dichtungssystemen. Im Einzelnen werden Dichtungsbahnen aus PE bei folgenden Maßnahmen eingesetzt:
+--    - Basisabdichtungen von Deponien, - Oberflächenabdichtungen von Deponien, - Oberflächenabdichtungen von
+--    Altlasten, - Umschließungen von Altlasten."
+-- and §2, printed p.4: "Für die in dieser Richtlinie beschriebenen Anwendungen ist eine Mindestdicke von 2,5 mm
+--   vorgeschrieben."
+-- and §1, printed p.4: "Die Arbeiten dürfen nur von Fachbetrieben ausgeführt werden. Der Fachbetriebsnachweis muss
+--   durch eine Güteüberwachung erfolgen."
+-- => A natural-pool / Schwimmteich liner is NOT inside this guideline's stated Geltungsbereich (that is FLL-GAR
+--    territory), and the 2,5 mm minimum + Fachbetrieb/Güteüberwachung duties come with the landfill scope. If
+--    DVS-2225-4 is attached to a pool project, the worksheet set imports landfill-grade duties wholesale. No SQL
+--    proposed; flagged so the project-level decision is made consciously.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · Phantom enum-token fields: NONE on DVS-2225-4. All 59 fields carry label_de + clause_reference +
+-- description; neither enum's tokens (ueberlappnaht_pruefkanal/auftragnaht, gut/ausreichend/nicht_ausreichend)
+-- is materialised as a field. No action.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · Duplicates: NONE. 18 gates = 18 distinct codes with 18 distinct conditions; no two fields encode the same
+-- quantity. Mis-homed gates: NONE — every symbol named in every gate condition exists on that gate's own worksheet.
+-- Empty conditions / condition='TRUE': NONE. Unsatisfiable enum operands: NONE (CR-14 names 'gut' and 'ausreichend',
+-- both present in versagensverhalten.enum_values). Invented values: NONE — every number any field or gate claims was
+-- grepped in the md and found printed (2,5 / 5 / 10 / 15 / 30 / 40 mm; 0,5 m; +5 °C; 80 %; 3 K; 300–420 °C;
+-- 30–40 N/mm; 0,8–2,5 m/min; 230–300 °C; 190–240 °C; 0,2–1,2 m/min; ≤50 cm; 50–100 mm; ±10 K; ±3 K; 0,40–0,80 mm;
+-- 0,15 mm; 1,25–1,75; 50 %; 10 %; 3 × 20 mm; 50 mm/min; 5/6 bar; 10 min; 0,5 bar; 10 s; 60 kV; 10 m/min;
+-- 10 cm; 0,6 m). Unit mismatches: NONE — every encoded unit matches the printed unit.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · Label / description typo (evidence: §2, printed p.4 — "Die Lieferqualität der Dichtungsbahnen ist durch
+-- Abnahmeprüfzeugnisse DIN EN 10204-3.1 vom Hersteller/Lieferanten zu dokumentieren."). The encoded label and
+-- description both read "Abnahmeprüzeugnis" (the f is missing). Cosmetic, but it is the string the engineer reads.
+-- ☐ RATIFIED →
+-- update public.fields set label_de='Abnahmeprüfzeugnis 3.1 vorhanden',
+--        description='Lieferqualität durch Abnahmeprüfzeugnis DIN EN 10204-3.1 zu dokumentieren (auch Schweißzusätze).'
+--  where id='c511db0b-e70c-4d03-a9f4-07e8d2963156';
+-- Rollback: set label_de='Abnahmeprüzeugnis 3.1 vorhanden', description='Lieferqualität durch Abnahmeprüzeugnis DIN EN 10204-3.1 zu dokumentieren (auch Schweißzusätze).'
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · clause_reference / source_quote retags (evidence per item).
+--
+-- (a) d_o (9a25dcaf-2a25-4324-a373-26c4c02a22d9) and d_u (5a6b7ecd-c315-4beb-ac1b-91c5185dbd04) are tagged
+--     "§2; §3.3; §6.2.11". §3.3 (printed p.5) is "Anschluss an Bauteile aus Polyethylen" and defines nothing about
+--     Bahnendicke — its only thickness is the PE-Anschlussplatte: "Da die Dichtungsbahn an PE-Anschlussplatten in
+--     einer Dicke von mind. 10 mm , geschweißt werden…". The Bahnendicke bound is Bild 1 (printed p.6):
+--     "Bahnendicke $\left(\mathrm{d}_{\mathrm{o}}, \mathrm{d}_{\mathrm{u}}\right)$ & $\geq 2,5 \mathrm{~mm}$".
+--     ☐ RATIFIED →
+--     update public.fields set clause_reference='§2; §6.2.11; Bild 1'
+--      where id in ('9a25dcaf-2a25-4324-a373-26c4c02a22d9','5a6b7ecd-c315-4beb-ac1b-91c5185dbd04');
+--     Rollback: set clause_reference='§2; §3.3; §6.2.11'.
+--
+-- (b) ue_1 (9b0eb202-1d7c-470a-9005-485f4d3eab0d) is tagged "§3.3; §6.2.12; Bild 1" and ue_2
+--     (3b7f18e9-352c-425f-9f32-638b8499b324) "§3.3; Bild 1". Same problem: §3.3 does not mention Überlappung.
+--     ü1 is printed in Bild 1 (p.6) and in §6.2.12 (p.19); ü2 ONLY in Bild 1.
+--     ☐ RATIFIED →
+--     update public.fields set clause_reference='§3.1; §6.2.12; Bild 1' where id='9b0eb202-1d7c-470a-9005-485f4d3eab0d';
+--     update public.fields set clause_reference='Bild 1' where id='3b7f18e9-352c-425f-9f32-638b8499b324';
+--     Rollback: '§3.3; §6.2.12; Bild 1' and '§3.3; Bild 1'.
+--
+-- (c) Gate source_quotes that do not state the value the gate enforces (all four quotes ARE in the md — they are
+--     mis-anchored, not fabricated):
+--     · CR-03 (31f0f334-4876-426e-9146-d861ea15420f) enforces b_N1/b_N2 ≥ 15, b_P ≥ 10, ü1 ≥ 5/<15, ü2 ≥ 40 but quotes
+--       only the Bild-1 row for ü1. Correct anchor (§3.1, printed p.5): "Die Breite der Teilnähte muss jeweils
+--       mindestens 15 mm , die Breite des Prüfkanals mindestens 10 mm betragen." + Bild 1 (p.6) for ü1/ü2.
+--     · CR-10 (4024767f-b616-4a10-817c-4828bf090506) enforces 0,40–0,80 mm but quotes the bare heading "Überlappnähte".
+--       Correct anchor (§6.2.12, printed p.19): "Es ist nachzuweisen, dass die Nahtabmessungen den folgenden
+--       Anforderungen entsprechen: [...] Überlappnähte $0,40 \mathrm{~mm} \leq \Delta \mathrm{d}_{\mathrm{N} 1 / 2}
+--       \leq 0,80 \mathrm{~mm}$".
+--     · CR-12 (13d62e4c-2b7d-4210-85ea-ca4719e1c5ed) enforces 1,25–1,75 but quotes the bare heading "Auftragnähte".
+--       Correct anchor (§6.2.12, printed p.19): "Auftragnähte $1,25 \leq f_{N A} \leq 1,75$".
+--     · CR-16 (6387f62c-0d9d-4b19-80a6-5f58b53d6be4) enforces dichtigkeit_iO but quotes the §6.1 property-list bullet
+--       "- Dichtigkeit der Naht.". Correct anchors are the three Wertung sentences (printed p.22/23/24):
+--       "Die Naht gilt als dicht, wenn der Druck im Prüfkanal innerhalb der vorgegebenen Prüfdauer um nicht mehr als
+--       0,5 bar abfällt." | "Die Naht gilt als dicht, wenn sich der Unterdruck zügig aufbaut, über der Prüfzeit
+--       konstant bleibt und in der Naht keine Blasenbildung auftritt." | "Die Naht gilt als dicht, wenn keine
+--       Funkenentladung auftritt."
+--     ☐ RATIFIED → update public.compliance_requirements set source_quote='<the anchor above>' where id='<uuid>';
+--     Rollback: restore the source_quote strings recorded in fields-DVS-2225-4.json (2026-09-05 export).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · Gates that under-enforce, and printed hard requirements with no gate at all.
+--
+-- (a) Wulst limits (§6.2.5, printed p.17): "Wülste an der vorderen Kante von Überlappnähten sind nicht zulässig.
+--     Wülste in den Randbereichen von Auftragnähten sind nur zulässig, wenn sie örtlich vereinzelt auftreten. Ihre
+--     Dicke darf 50 % der Dichtungsbahnendicke nicht überschreiten."
+--     Field wulst_dicke_anteil (7548d624-acd2-40b5-94ac-151e31eb88a6, %) exists; NO gate reads it.
+--     ☐ RATIFIED → new gate DVS-2225-4-CR-19 on worksheet DVS-2225-4-04 (6ad1d194-ef27-4761-80cb-ecd404e585c9),
+--       condition 'wulst_dicke_anteil <= 50', severity 'block', clause '§6.2.5', source_quote = the sentence above.
+--     Rollback: delete the inserted row (or active=false).
+--
+-- (b) Kerben/Riefen limit (§6.2.5, printed p.17): "Kerben und Riefen mit flachen Übergängen sind bis zu einer Tiefe
+--     von 10 % der Bahndicke in begrenztem Umfang zulässig." Field kerben_tiefe_anteil
+--     (e2eb295d-55ec-4abb-923a-19978d4376a0, %) exists; NO gate reads it. §7 (printed p.24) makes the same 10 % the
+--     Nachbesserung trigger: "bei Kerben und Riefen mit einer Tiefe von mehr als 10 % der Dichtungsbahnendicke auf
+--     einer Länge von maximal 1 m und maximal einer Fehlstelle auf 100 m² Dichtungsfläche".
+--     ☐ RATIFIED → new gate DVS-2225-4-CR-20 on DVS-2225-4-04, 'kerben_tiefe_anteil <= 10', severity 'block'.
+--     Note the phrasing is "in begrenztem Umfang zulässig" — if the owner reads that as conditional, use 'warn'.
+--     Rollback: delete the inserted row.
+--
+-- (c) Dew-point rule (§4.3.1, printed p.11): "Ab einer relativen Luftfeuchtigkeit von 80 % muss die
+--     Oberflächentemperatur mindestens 3 K über dem Taupunkt liegen."
+--     This is a hard "muss" and it is NOT encoded at all: rel_luftfeuchte (ec32444f-3c5d-4e44-8495-12e82d93a90d)
+--     records the humidity, but there is no field for the surface temperature and none for the dew point, so the
+--     rule cannot be evaluated. The Anhang Schweißprotokolle print exactly these rows ("rel. Luftfeuchte in %",
+--     "Oberflächentemperatur in °C", printed p.26/27), so the source expects both to be recorded.
+--     ☐ RATIFIED → add to DVS-2225-4-02: oberflaechentemperatur (number, °C, §4.3.1) and taupunkt (number, °C,
+--       §4.3.1), then gate DVS-2225-4-CR-21 'rel_luftfeuchte < 80 OR (oberflaechentemperatur - taupunkt) >= 3'
+--       (severity 'block'; if the grammar has no arithmetic in conditions, add a derived field
+--       taupunktabstand = oberflaechentemperatur - taupunkt via an equation and gate 'taupunktabstand >= 3').
+--     Rollback: delete the two fields, the equation and the gate.
+--
+-- (d) CR-11 (265441f8-5f2a-4f97-b1f3-385e8d9fbf5b) is a PRESENCE-ONLY NO-OP:
+--       condition = 'delta_d_N1 IS NOT NULL AND delta_d_N2 IS NOT NULL'
+--     while its own source_quote is the printed limit (§6.2.12, printed p.19):
+--       "$\left|\Delta \mathrm{d}_{\mathrm{N} 1}-\Delta \mathrm{d}_{\mathrm{N} 2}\right| \leq 0,15 \mathrm{~mm}$"
+--     The same 0,15 mm is a machine requirement in §5.2/Tabelle 1 (printed p.14–15): "dass die Differenz der
+--     Fügewege der beiden Teilnähte auf maximal 0,15 mm beschränkt bleibt." So the guideline's single most specific
+--     seam-QA tolerance is currently unenforced. This is the most consequential finding on this standard.
+--     ☐ RATIFIED → add derived field delta_d_N_diff (number, mm, §6.2.12) on DVS-2225-4-04 + equation #4
+--       'delta_d_N_diff = abs(delta_d_N1 - delta_d_N2)' (if abs() is unavailable, encode the two-sided form), then
+--       update public.compliance_requirements set condition='delta_d_N_diff <= 0.15'
+--        where id='265441f8-5f2a-4f97-b1f3-385e8d9fbf5b';
+--     Rollback: restore condition='delta_d_N1 IS NOT NULL AND delta_d_N2 IS NOT NULL'; drop the field + equation.
+--
+-- (e) CR-18 (713c0e9e-cf5f-43b1-b81e-f712c805b92d) is the same class of no-op:
+--       condition = 'nachbesserung_zuschnitt_ueberstand IS NOT NULL AND nachbesserung_streifenbreite IS NOT NULL'
+--     while §7 prints hard minima (printed p.24 / p.25): "Diese Dichtungsbahnenzuschnitte müssen mindestens 10 cm
+--     über die jeweiligen Fehlerbereiche hinausgehen" and "auf voller Länge mit einem mindestens 0,6 m breiten
+--     Dichtungsbahnenstreifen abzudecken".
+--     Second defect: both fields are optional and only apply IF a Nachbesserung happens, yet the gate is a block that
+--     demands both be filled on every project — a project with no repairs can never satisfy it.
+--     ☐ RATIFIED → add a boolean nachbesserung_erforderlich on DVS-2225-4-05 and set
+--       condition='nachbesserung_erforderlich == false OR (nachbesserung_zuschnitt_ueberstand >= 10 AND
+--                  nachbesserung_streifenbreite >= 0.6)'
+--        where id='713c0e9e-cf5f-43b1-b81e-f712c805b92d';
+--     Rollback: restore the presence-only condition; drop the boolean.
+--
+-- (f) Dichtigkeit sub-methods have fields but no gate: vakuum_unterdruck (ab0c3565-d5c3-412b-9cf9-b8d295a02045),
+--     vakuum_haltezeit (f5ab6b87-c576-4666-bc6a-87b39f413e0f), hochspannung_pruefspannung
+--     (469b0e79-2153-42b7-8c71-1204a6857c75). Printed (§6.4.3.3, p.23): "Die Nähte werden bei einem Unterdruck von
+--     0,5 bar geprüft. Dieser Prüfdruck (Unterdruck) muss über einen Zeitraum von mindestens 10 s konstant gehalten
+--     werden." Printed (§6.4.4.3, p.23): "Für Dichtungsbahnen ab einer Dicke von 2,5 mm liegt die zulässige
+--     Prüfspannung bei etwa 60 kV ."
+--     ☐ RATIFIED → CR-22 'vakuum_unterdruck >= 0.5 AND vakuum_haltezeit >= 10' (block, §6.4.3.3).
+--     The 60 kV is printed as "etwa" and must be matched to sheet thickness and seam width — SR-2 applies: surface it
+--     as an engineer selection with the printed reference value, do NOT gate it to == 60. No gate proposed for it.
+--     Rollback: delete CR-22.
+--
+-- (g) Schälversuch parameters have fields but no gate: schaelversuch_anzahl (263cb01c-b809-4d13-a3c8-c34644db9698),
+--     verformungsgeschwindigkeit (2af90bc7-80f8-486c-9363-f70530da6d8c), restnahtbreite
+--     (d4962457-6897-4e38-80d2-dae2eca04636). Printed (§6.3.1, p.20): "Die Schälversuche sind in Anlehnung an
+--     Richtlinie DVS 2226-3 an jeweils drei etwa 20 mm breiten Streifenproben durchzuführen." (hard).
+--     Printed (§6.3.3, p.20): "…eine weitgehend gleichmäßige Verformungsgeschwindigkeit von 50 mm/min ermöglichen."
+--     ☐ RATIFIED → CR-23 'schaelversuch_anzahl >= 3' (block, §6.3.1). Leave verformungsgeschwindigkeit and
+--       restnahtbreite ungated: the first constrains the test rig ("ermöglichen"), the second is one branch of the
+--       §6.3.5 judgement already carried by CR-14.
+--     Rollback: delete CR-23.
+--
+-- (h) T-Stoß spacing (§3.2, printed p.5): "T-Stöße sollen untereinander einen Abstand von mindestens 0,5 m
+--     aufweisen." Soft modal → if a gate is wanted it must be 'warn', never 'block'.
+--     ☐ RATIFIED → CR-24 't_stoss_abstand >= 0.5', severity 'warn', §3.2. Rollback: delete CR-24.
+--
+-- (i)–(n) Hard duties whose field exists but which no gate reads (all "muss/müssen/sind … zu"; each would be a
+--     one-condition block gate; grouped because they are the same shape):
+--     (i) kreuzstoesse_vermieden (0afc991e-fad1-40be-891d-9f1b4ad47664) — §3.2 p.5: "Die Dichtungsbahnen sind
+--         generell so zu verlegen, dass keine Kreuzstöße entstehen."
+--     (j) auflageplanum_ok (69c070ea-cd3c-4046-a2f8-aae019930de8) — §3.2 p.5: "Das Auflageplanum muss eben und frei
+--         von abrupten Höhenänderungen/Absätzen sowie standfest, homogen, feinkörnig und geschlossen sein."
+--     (k) fuegeflaechen_sauber (ccd55cb3-e598-4ead-8231-3eba424f036f) — §4.3.1 p.11: "Die Fügeflächen müssen trocken
+--         und frei von Verunreinigungen sein."
+--     (l) schweisszusatz_artgleich (eb2042ba-7a64-4475-a137-cdf5f9880dbf) — §4.3.3 p.12: "Als Schweißzusatz muss die
+--         gleiche Formmasse wie die der Dichtungsbahn verwendet werden. Bei Abweichungen ist die Schweißeignung
+--         nachzuweisen." (the "Bei Abweichungen…" half is an attestation path, not a pass).
+--     (m) probeschweissung_durchgefuehrt (64e016ed-cc7c-4847-8011-9b07711b2e23) — §4.2 p.11: "Vor dem Beginn der
+--         Schweißarbeiten sind daher die Parameter anhand von Probeschweißungen auf die aktuellen
+--         Baustellenbedingungen abzustimmen."
+--     (n) ws-03 machine tolerances eff_heizkeillaenge (fc307dc7-88de-498d-90bc-a3cf825e3fcb, 50–100 mm),
+--         fuegeweg_differenz_grenze (312d8517-92d3-47fd-afd9-8b102149ece3, ≤0,15 mm),
+--         warmgas_regelabweichung (a9733b08-d8eb-462c-831d-57b35f2bc15b, ±10 K),
+--         masse_regelabweichung (b17c19b3-3cec-4d07-bb59-44452ae39f2b, ±3 K) — Tabelle 1 p.14 and §5.3 p.15–16.
+--     ☐ RATIFIED → CR-25…CR-31 as listed. Rollback: delete the inserted rows.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · Severity / enforcement notes (block gates whose anchor is softer than 'block' implies).
+--
+-- (a) CR-03 (31f0f334-…) blocks on 'ue_1 >= 5 AND ue_1 < 15 AND ue_2 >= 40'. The only running-text statement of the
+--     ü1 minimum is soft (§6.2.12, printed p.19): "Bei Überlappnähten sollte die vordere Überlappung der Naht
+--     mindestens 5 mm betragen." The <15 mm cap and the ü2 ≥40 mm are printed ONLY in the Bild-1 dimension table
+--     (p.6) with no accompanying modal. The 15 mm / 10 mm halves of the same gate ARE hard ("muss", "einzuhalten").
+--     ☐ RATIFIED → split CR-03: keep 'b_N1 >= 15 AND b_N2 >= 15 AND b_P >= 10' at block, move
+--       'ue_1 >= 5 AND ue_1 < 15 AND ue_2 >= 40' into a new 'warn' gate CR-32 — OR rule that the Bild-1 table is
+--       normative and keep all six at block. Owner decision; do not auto-pick.
+--     Rollback: restore the single block condition.
+--
+-- (b) CR-06 (13c51c2f-5149-4c81-a507-bbaa320e355a) blocks on 'umgebungstemperatur >= 5'. The source (§4.3.1,
+--     printed p.11) reads: "Bei Temperaturen unterhalb von +5 °C darf ohne besondere Vorkehrungen und Nachweise
+--     nicht geschweißt werden." — welding below +5 °C IS permitted with special measures and proofs. The gate
+--     removes that escape route.
+--     ☐ RATIFIED → add boolean vorkehrungen_nachweise_kaelte on DVS-2225-4-02 and set
+--       condition='kein_niederschlag == true AND (umgebungstemperatur >= 5 OR vorkehrungen_nachweise_kaelte == true)'
+--       (or set requires_attestation=true on CR-06).
+--     Rollback: restore condition='kein_niederschlag == true AND umgebungstemperatur >= 5'; drop the boolean.
+--
+-- (c) CR-08 (0031086b-d028-4204-9d67-c6da82d3a6fa) blocks the Warmgasextrusion parameter bands (230–300 °C /
+--     190–240 °C / 0,2–1,2 m/min). Unlike the Heizkeil bands — which Tabelle 1 (p.14, "Anforderungen an die
+--     Funktionselemente") states as requirements — these three are printed only as a description of practice
+--     (§4.3.3, p.13): "In der Praxis wird mit folgenden Schweißparametern geschweißt:". §4.2 (p.11) makes the actual
+--     duty a matching duty, not a band: "Vor dem Beginn der Schweißarbeiten sind daher die Parameter anhand von
+--     Probeschweißungen auf die aktuellen Baustellenbedingungen abzustimmen."
+--     ☐ RATIFIED → update public.compliance_requirements set severity='warn'
+--        where id='0031086b-d028-4204-9d67-c6da82d3a6fa';
+--     Rollback: severity='block'.
+--     (CR-07, the Heizkeil equivalent, keeps 'block': Tabelle 1 states 300–420 °C, 0,8–2,5 m/min and
+--      30–40 N/mm Rollenbreite as Anforderungen. Only its source_quote should gain the Tabelle-1 row — see S-4c.)
+--
+-- (d) CR-10 (4024767f-…) blocks 0,40 ≤ Δd ≤ 0,80 mm. §6.2.12 (p.19) mixes modals: the lead-in is hard ("Es ist
+--     nachzuweisen, dass die Nahtabmessungen den folgenden Anforderungen entsprechen:") but the bullet itself reads
+--     "Die Nahtdicken sollten … in den Bereichen liegen, die … nach folgenden Kriterien einzuhalten sind:".
+--     Bild 1 (p.6) states the same band without a modal, as (do+du)−0,8 mm ≤ dN1/2 ≤ (do+du)−0,4 mm.
+--     Recommendation: keep 'block' (the Bild-1 table and the "einzuhalten" tail carry it). Note only, no change.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · Nahtform conditioning and the required-ness that follows from it. STRUCTURAL — biggest usability defect.
+--
+-- The standard splits almost every dimension and every leak test by Nahtform (§3.1 p.5; Tabelle 2 p.16;
+-- §6.4.1 p.21: "Bei der durchgehenden Prüfung der Nähte auf Dichtigkeit ist das Prüfverfahren auf die jeweilige
+-- Nahtform abzustimmen. Es sind folgende Prüfverfahren anzuwenden: Überlappnähte mit Prüfkanal - Prüfung mit
+-- Druckluft | Auftragnähte - Prüfung mit elektrischer Hochspannung - Prüfung mit Vakuum").
+-- The encoding has the discriminator — nahtform (40034a9c-4529-4e83-8ee9-c3583487e20b, enum on DVS-2225-4-01) —
+-- but NO gate and NO field is conditioned on it. Consequences today:
+--   · CR-03 (Überlappnaht dims) and CR-04 (Auftragnaht dims) both fire on every project;
+--   · CR-10 + CR-11 (Überlappnaht Fügewege) and CR-12 (Auftragnaht f_NA) both fire on every project;
+--   · CR-15 (Druckluftprüfung 5 bar / 10 min / ≤0,5 bar) fires even on an Auftragnaht-only project, although
+--     §6.4.1 restricts Druckluft to Überlappnähte mit Prüfkanal;
+--   · required=true on BOTH mutually exclusive measurement sets — d_N1/d_N2/delta_d_N1/delta_d_N2 (Überlappnaht)
+--     and d_N/f_NA (Auftragnaht) — so on any single-Nahtform project one required set is unfillable by construction;
+--   · likewise druckluft_pruefdruck/_pruefzeit/_druckabfall are required=true while vakuum_* and
+--     hochspannung_pruefspannung are required=false, which is only right for an Überlappnaht project.
+-- ☐ RATIFIED → prefix the Nahtform-specific gates with the discriminator, e.g.
+--   update public.compliance_requirements set condition='nahtform != ''auftragnaht'' AND (' || <old condition> || ')'
+--    where code in ('DVS-2225-4-CR-03','DVS-2225-4-CR-10','DVS-2225-4-CR-11','DVS-2225-4-CR-15');
+--   update public.compliance_requirements set condition='nahtform != ''ueberlappnaht_pruefkanal'' AND (' || <old> || ')'
+--    where code in ('DVS-2225-4-CR-04','DVS-2225-4-CR-12');
+--   and make the two measurement sets conditionally required rather than always required:
+--   update public.fields set is_required=false
+--    where id in ('3287f121-5a2c-4fc9-9ca3-503201888f71','f6448996-6e67-4325-b1bd-12469fb70995',
+--                 '9381e70f-8377-4f46-91a4-f7a5f7945c26','d12959e0-e916-46c8-9eff-2e8f6902a95a',
+--                 '44596da6-46d7-465f-9938-8b242aed3cd3','d5a84aad-3471-44b0-8b3d-aa2f2152691a',
+--                 'b591b930-def4-47fb-8b85-9a05618efd04','38249e0d-443f-4906-88b2-cec971208172',
+--                 '3493b40e-29db-462d-b4af-8c16c4151fa6');
+--   Rollback: is_required=true for those nine ids; restore the original gate conditions from the export.
+-- NOTE: a project may legitimately contain BOTH Nahtformen (Tabelle 2 lists both). nahtform is a single-value enum
+--   on ws-01, so the clean fix is per-seam instances rather than a project-level enum — flagged, owner's call.
+--
+-- Also in scope of the required-ness review (source makes them soft or conditional; currently is_required=true):
+--   · ue_1 (9b0eb202-…) — "sollte" in §6.2.12 (see S-6a). Proposal: keep true if the Bild-1 table is ruled normative.
+-- And currently is_required=false although the source is hard:
+--   · rel_luftfeuchte (ec32444f-…) — §4.3.1 p.11 "muss die Oberflächentemperatur mindestens 3 K über dem Taupunkt
+--     liegen" is unevaluable without it (see S-5c). ☐ RATIFIED → is_required=true. Rollback: false.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · Equations — OBSERVATIONS ONLY, no change proposed.
+--  (a) All three equations are already verification_status='verified_against_standard'; the pack does not touch them.
+--      Re-checked this session: formulas match Anhang Blatt 3 (printed p.28) and Blatt 4 (printed p.29) exactly.
+--  (b) SOURCE DEFECT: the §6.2.11 body (printed p.19) prints the Fügeweg definition without its minus sign —
+--      "ΔdN1/2 = Fügeweg (Dickenänderung) für die Überlappnaht = (do + du) dN1/2" — while Anhang Blatt 3 prints
+--      "Δd_N1 = (d_o+d_u) − d_N1". The encoding follows the Anhang (correct); the arithmetic is also confirmed by
+--      Bild 1 (p.6), where dN1 lies between (do+du)−0,8 mm and (do+du)−0,4 mm, i.e. Δd ∈ [0,40; 0,80] mm.
+--      No change; recorded so the discrepancy is not "re-discovered" as an encoding error.
+--  (c) Equations #1–#3 live on worksheet DVS-2225-4-04 but read d_o and d_u from DVS-2225-4-01 — a cross-worksheet
+--      input chain. It is correct per the source (one pair of sheet thicknesses feeds every seam evaluation), but it
+--      is the xref class that has blocked finalize elsewhere. Flagged for the xref workstream, no change here.
+--  (d) verification_quote is NULL on all three equations (only source_quote is populated, as raw LaTeX with a stray
+--      leading "&" and trailing "\\" on #1/#2 from the mathpix aligned-environment). Cosmetic; a future pass could
+--      normalise them, but the guard in the md pack ('verification_status <> verified') deliberately leaves them.
+-- ============================================================================
