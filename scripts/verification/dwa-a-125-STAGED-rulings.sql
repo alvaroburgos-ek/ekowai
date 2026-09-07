@@ -1,0 +1,401 @@
+-- ============================================================================
+-- DWA-A-125 — STAGED, WRITTEN-NOT-APPLIED (owner rulings). Every block below changes structure, enforcement,
+-- required-ness, a clause tag or a unit, so it sits OUTSIDE the pre-authorised evidence-capture class that the
+-- md-verification pack carries. 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block ☐ RATIFIED. Rollback = the inverse statement noted per block.
+-- NOTHING IN THIS FILE IS EXECUTABLE AS-IS: every statement is commented out.
+--
+-- Source: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-125\DWA-A-125.md — mathpix LaTeX transcript of
+--   Arbeitsblatt DWA-A 125 "Rohrvortrieb und verwandte Verfahren", Dezember 2008, korrigierte Fassung September
+--   2020 (3. Auflage; ISBN 978-3-941089-30-3). WEISSDRUCK (published Arbeitsblatt), not a Gelbdruck/Entwurf.
+--   "printed p.N" is derived from the guideline's own Inhalt / Bilder- / Tabellenverzeichnis and cross-checked
+--   against the mathpix image indices (image index = printed page + 2 throughout). See the pack header.
+-- Uuids are the prod ids from this session's export (fields-DWA-A-125.json).
+-- Gate rows live in public.compliance_requirements (condition grammar interpreted by evaluate.ts); condition
+--   and severity edits are written as SPECS because the grammar's exact capabilities (cross-worksheet symbol
+--   reads, table lookups, IF/THEN) must be confirmed against evaluate.ts before any apply.
+--
+-- Prod shape at export time: 7 worksheets / 70 fields (all imported_unverified) / 2 equations (both already
+-- verified_against_standard, quote NULL) / 16 gates (ALL severity='block'). No worksheet has zero fields.
+-- Field counts per worksheet: A125-01 = 3, A125-02 = 23, A125-03 = 13, A125-04 = 11, A125-05 = 8,
+-- A125-06 = 7, A125-07 = 5.
+-- Worksheet ids: A125-01 6211b3ba-e3f3-45ea-885f-0ff7b630a30c · A125-02 e699a257-93ff-43ad-b3ef-3bafaebc0f13 ·
+-- A125-03 eedfab31-4a11-4109-9503-be561ee376e0 · A125-04 0fd99f58-0802-4e60-8b41-b7c206567158 ·
+-- A125-05 9060d34d-e019-4f00-b595-a6c27e3ff778 · A125-06 e3d1b371-450b-4a8d-9388-300949239734 ·
+-- A125-07 d4444af6-5221-4889-aea7-beff3c78ab40
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-0 · CLEAN FINDINGS (no SQL — recorded so the absence is a result, not a gap).
+--   · Phantom enum-token fields: NONE. All 70 fields carry label_de + clause_reference + description; no
+--     enum token (rohrvortrieb, bahngelaende, beton, lockergestein, …) is materialised as its own field.
+--   · Duplicate gates: NONE. 16 gates = 16 distinct codes (CR-001…CR-016) with 16 distinct conditions.
+--   · Duplicate fields: NONE. No two symbols encode the same printed quantity.
+--   · Empty conditions / condition='TRUE': NONE.
+--   · Unsatisfiable gates: NONE — every enum literal named in a condition exists in that field's enum_values
+--     (CR-014 names ral_gz_961 / dvgw_gw_301 / dvgw_gw_302 / gleichwertig, all four present).
+--   · Invented values: NONE. Every number a field description or a gate condition claims was grepped in the md
+--     and found printed (full list in the pack header).
+--   · Worksheets with zero fields: NONE.
+--   · Fabricated source_quotes: NONE. All 16 gate source_quotes were located verbatim in the md.
+--   · App/project-metadata fields: NONE — so the 2026-08-01 metadata-exemption class is empty here and no field
+--     received 'inferred_from_worksheet'.
+-- Defects that DO exist are S-1…S-11 below.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · CR-008 — PRESENCE-ONLY GATE THAT HIDES A PRINTED NUMERIC LIMIT (the recurring defect class), AND a
+-- block gate anchored on "sollte" text. Gate id 288874a4-a8af-422a-b447-3baea68257f6, worksheet A125-04,
+-- clause §7.1.7, severity='block'.
+-- Encoded condition:  abweichung_vertikal_zul > 0 AND abweichung_horizontal_zul > 0
+-- Evidence — §7.1.7, printed p.48:
+--   "Für den grabenlosen Neubau von Abwasserleitungen und -kanälen sollten nur steuerbare Vortriebsverfahren
+--    eingesetzt werden. Die in Tabelle 10 aufgeführten Werte der maximalen Abweichungen von der Soll-Lage
+--    gelten aus betrieblichen Gründen und sollten nicht überschritten werden."
+-- and Tabelle 10 (printed p.48): DN < 600 → ±20 / ±25 mm · ≥600 bis ≤1000 → ±25 / ±40 mm ·
+--   >1000 bis <1400 → ±30 / ±100 mm · ≥1400 → ±50 / ±200 mm (vertikal / horizontal).
+-- TWO defects:
+--   (a) the condition only checks that the engineer typed a positive number. The printed table values are in the
+--       source_quote but are never compared to anything, so the gate passes on abweichung_vertikal_zul = 900 mm.
+--   (b) severity='block' on a sentence whose modal verb is "sollten", i.e. a recommendation. Per the Arbeitsblatt's
+--       own Benutzerhinweis the "sollte" statements are Spielräume, not duties.
+-- PROPOSAL (a): make the condition a DN-keyed comparison against Tabelle 10. Needs confirmation that evaluate.ts
+--   supports the chained form and can read DN from worksheet A125-02 (see S-5 on cross-worksheet reads).
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set condition='(DN<600 AND abweichung_vertikal_zul<=20 AND abweichung_horizontal_zul<=25) OR (DN>=600 AND DN<=1000 AND abweichung_vertikal_zul<=25 AND abweichung_horizontal_zul<=40) OR (DN>1000 AND DN<1400 AND abweichung_vertikal_zul<=30 AND abweichung_horizontal_zul<=100) OR (DN>=1400 AND abweichung_vertikal_zul<=50 AND abweichung_horizontal_zul<=200)'
+--  where id='288874a4-a8af-422a-b447-3baea68257f6';
+-- Rollback: set condition='abweichung_vertikal_zul > 0 AND abweichung_horizontal_zul > 0' where id='288874a4-…'.
+-- PROPOSAL (b): block → warn, because the printed modal verb is "sollten".
+-- ☐ RATIFIED →
+-- update public.compliance_requirements set severity='warn' where id='288874a4-a8af-422a-b447-3baea68257f6';
+-- Rollback: set severity='block' where id='288874a4-a8af-422a-b447-3baea68257f6';
+-- NOTE for the decision: (a) and (b) are independent. If only (a) is ratified the gate becomes correct but
+--   harder than the guideline; if only (b) is ratified the gate stays a no-op but stops blocking. The
+--   doctrine-consistent pair is (a)+(b): enforce the printed numbers, at the printed strength.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · CR-011 — OVER-ENFORCEMENT: the guideline's OR is encoded as AND.
+-- Gate id 52577eaa-de53-45fd-ab45-310b839646da, worksheet A125-06, clause §7.2.6, severity='block'.
+-- Encoded condition: (verfahren_steuerbar==false) OR (aufzeichnungsintervall_laenge<=100 AND aufzeichnungsintervall_zeit<=90)
+-- Evidence — §7.2.6, printed p.53 (the gate's own source_quote):
+--   "Bei steuerbaren Verfahren müssen nachfolgend genannte Vortriebsparameter kontinuierlich gemessen und in
+--    Vortriebsintervallen von max. 100 mm Länge ODER max. 90 s Dauer automatisch aufgezeichnet werden:"
+--   (emphasis added; the printed word is "oder").
+-- The guideline lets the contractor satisfy EITHER interval criterion. The encoding demands BOTH, so a compliant
+-- 100-mm-triggered logger that records every 120 s is failed by the Wizard although the Arbeitsblatt accepts it.
+-- Severity may stay 'block' — the sentence is a hard "müssen".
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set condition='(verfahren_steuerbar==false) OR (aufzeichnungsintervall_laenge<=100 OR aufzeichnungsintervall_zeit<=90)'
+--  where id='52577eaa-de53-45fd-ab45-310b839646da';
+-- Rollback: set condition='(verfahren_steuerbar==false) OR (aufzeichnungsintervall_laenge<=100 AND aufzeichnungsintervall_zeit<=90)' where id='52577eaa-…';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · CR-001 — UNDER-ENFORCEMENT: the DN>1200 branch carries no limit, so a printed row of Tabelle 1 is
+-- silently unenforced. Gate id 21defadc-9760-49b7-a0b2-dd111c5e7f01, worksheet A125-02, clause §5.2.3.1.
+-- Encoded condition: (DN<=800 AND baulaengentoleranz<=5) OR (DN>800 AND DN<=1200 AND baulaengentoleranz<=8) OR (DN>1200)
+-- Evidence — §5.2.3.1, printed p.19: "Die Baulängentoleranzen laut Tabelle 1 dürfen nicht überschritten werden.
+--   Bei geschweißten Rohrverbindungen kann von dieser Anforderung abgewichen werden."
+-- Tabelle 1 (printed p.19): "\hline$\leq 800$ & $\pm 5$ \\ \hline$>800$ bis $\leq 1200$ & $\pm 8$ \\
+--   \hline$>1200$ & +25 \\ & -10 \\"
+-- The third branch "OR (DN>1200)" is unconditionally true for DN>1200 — the printed +25/−10 mm row is not
+-- enforced at all. The tolerance is also asymmetric there, which a single "<=" cannot express against a field
+-- that stores one signed number.
+-- PROPOSAL: enforce the printed asymmetric bounds on the DN>1200 branch.
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set condition='(DN<=800 AND baulaengentoleranz<=5 AND baulaengentoleranz>=-5) OR (DN>800 AND DN<=1200 AND baulaengentoleranz<=8 AND baulaengentoleranz>=-8) OR (DN>1200 AND baulaengentoleranz<=25 AND baulaengentoleranz>=-10)'
+--  where id='21defadc-9760-49b7-a0b2-dd111c5e7f01';
+-- Rollback: restore the original condition quoted above.
+-- OPEN QUESTION for Alvaro: the guideline prints "±5" / "±8" / "+25 −10", i.e. a two-sided tolerance band, while
+--   the encoded field A125-02.baulaengentoleranz (26de0ef3-473f-4984-a109-ec924c33cb12) is a single number in mm.
+--   If the engineer is meant to enter the manufacturer's declared tolerance as a magnitude, the negative-bound
+--   half of the condition is meaningless and the field should instead be split into an upper and a lower
+--   tolerance. That is a data-model change and is NOT proposed here — it needs a ruling.
+-- ALSO: the source_quote on this gate is the bare table row "\hline$\leq 800$ & $\pm 5$ \\" — one row out of
+--   three, with no sentence. Retag proposed in S-9.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · CR-006 — BLOCK GATE ON A "SOLLTEN" SENTENCE.
+-- Gate id 025cf81c-b6b3-4b17-8988-0dd10d9a6001, worksheet A125-03, clause §7.1.3, severity='block',
+-- condition 'aufschluss_abstand <= 50'.
+-- Evidence — §7.1.3, printed p.45 (the gate's own source_quote): "Die Aufschlüsse SOLLTEN in einem Abstand von
+--   max. 50 m in der Vortriebstrasse ausgeführt werden. In Sonderfällen müssen die Abstände verringert werden."
+-- The 50 m value is right and the comparison is right; only the strength is wrong — "sollten" is a
+-- recommendation, and the guideline's Benutzerhinweis explicitly reserves those Spielräume to the engineer.
+-- (The following sentence "Die Aufschlüsse müssen mindestens: - bis 2 m …" IS a "müssen" and is separately
+--  encoded in A125-03.aufschlusstiefe_unter_sohle, which has no gate at all — see S-6.)
+-- ☐ RATIFIED →
+-- update public.compliance_requirements set severity='warn' where id='025cf81c-b6b3-4b17-8988-0dd10d9a6001';
+-- Rollback: set severity='block' where id='025cf81c-b6b3-4b17-8988-0dd10d9a6001';
+-- Also: the stored source_quote ends with the dangling fragment "Die Aufschlüsse müssen mindestens:" (the
+--   bullet list that completes it was not captured). Retag proposed in S-9.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · CROSS-WORKSHEET GATES (mis-homed reads) — CR-015 and CR-012.
+-- (i) CR-015, id d1804010-5520-4ef2-88bb-8a283189637e, homed on worksheet A125-07, clause §8.1, severity='block',
+--     condition 'sondergelaende IS NOT NULL AND sondergelaende_genehmigung IS NOT NULL'.
+--     `sondergelaende` (32b0ecfc-305e-4631-b12d-7fbfd4dd5fc1) lives on worksheet A125-01, NOT on A125-07. Only
+--     `sondergelaende_genehmigung` (f0582651-c0e3-402a-ab7d-77974e4bcc6b) is on A125-07.
+--     SECOND defect: the condition demands a Genehmigung even when sondergelaende='keines' ("Kein
+--     Sondergelaende"), i.e. it forces an answer on every project that crosses nothing. The guideline attaches
+--     the approval duty ONLY to the special-ground cases:
+--       §8.1, printed p.56: "In bestimmten Fällen … wird eine besondere Unternehmensinterne Genehmigung (UiG)
+--         durch die Zentrale des jeweiligen Eisenbahn-Infrastrukturunternehmens (EIU) erforderlich. Darüber
+--         hinaus kann zusätzlich eine Zustimmung im Einzelfall (ZiE) durch die Zentrale des EBA erforderlich
+--         werden."
+--       §9.1, printed p.60: "Die Benutzung der Bundesfernstraße durch Leitungen der öffentlichen und
+--         gewerblichen Ver- und Entsorgung erfordert eine privatrechtliche Regelung durch einen
+--         Straßenbenutzungsvertrag - auch Gestattungsvertrag genannt …"
+--       §10.1, printed p.63: "Nach § 31 Bundeswasserstraßengesetz (WaStrG) benötigen Kreuzungen von Leitungen
+--         mit Bundeswasserstraßen eine strom- und schifffahrtspolizeiliche Genehmigung (SSG) und einen
+--         Gestattungs- bzw. Nutzungsvertrag."
+--     THIRD defect: the field sondergelaende_genehmigung is is_required=false while this block gate demands it —
+--     a required-ness contradiction (see S-8).
+-- ☐ RATIFIED (condition) →
+-- update public.compliance_requirements
+--    set condition='(sondergelaende==''keines'') OR (sondergelaende_genehmigung IS NOT NULL AND sondergelaende_genehmigung <> ''keine'')'
+--  where id='d1804010-5520-4ef2-88bb-8a283189637e';
+-- Rollback: set condition='sondergelaende IS NOT NULL AND sondergelaende_genehmigung IS NOT NULL' where id='d1804010-…';
+-- ☐ RATIFIED (source_quote — the stored quote covers only §8/Bahn; the gate also governs road and waterway) →
+-- update public.compliance_requirements
+--    set source_quote='In bestimmten Fällen, die in den folgenden Abschnitten und in den betreffenden Regelwerken genannt sind, wird eine besondere Unternehmensinterne Genehmigung (UiG) durch die Zentrale des jeweiligen Eisenbahn-Infrastrukturunternehmens (EIU) erforderlich. Darüber hinaus kann zusätzlich eine Zustimmung im Einzelfall (ZiE) durch die Zentrale des EBA erforderlich werden. | Nach § 31 Bundeswasserstraßengesetz (WaStrG) benötigen Kreuzungen von Leitungen mit Bundeswasserstraßen eine strom- und schifffahrtspolizeiliche Genehmigung (SSG) und einen Gestattungs- bzw. Nutzungsvertrag. — printed p.56, p.63'
+--  where id='d1804010-5520-4ef2-88bb-8a283189637e';
+-- Rollback: restore the original §8.1 lead-in quote.
+-- PREREQUISITE for both: confirm that evaluate.ts can read a symbol from a DIFFERENT worksheet of the same
+--   project. If it cannot, this gate has never actually fired and the correct fix is to re-home it to A125-01
+--   (update public.compliance_requirements set worksheet_template_id='6211b3ba-e3f3-45ea-885f-0ff7b630a30c'
+--    where id='d1804010-…') — which then breaks the read of sondergelaende_genehmigung instead. In that case the
+--   two symbols must live on one worksheet; that is a data-model decision, not an encoding fix.
+--
+-- (ii) CR-012, id dba8f302-6e96-48ee-b211-174486cde2e2, homed on worksheet A125-06, clause §7.2.6,
+--      severity='block', condition 'vorpresskraft_gemessen <= zul_vorpresskraft'.
+--      `vorpresskraft_gemessen` (3c48d301-c69e-45f6-80eb-047fc9133ee8) is on A125-06 (correct), but
+--      `zul_vorpresskraft` (43ece15f-8b55-4262-a66a-f292d31d468f) is on A125-05 — same cross-worksheet read.
+--      The comparison itself is sound and is the operative safety check of the whole standard; the guideline
+--      states the two halves separately:
+--        §7.2.4, printed p.53: "Die zulässige Vorpresskraft muss in Abhängigkeit von der räumlichen Abwinklung
+--          der Rohrverbindungen angegeben werden."
+--        §7.2.1, printed p.51: "Bei Abweichungen von der geplanten Vortriebstrasse muss die zulässige
+--          Vorpresskraft der Vortriebsrohre überprüft und ggf. herabgesetzt werden."
+--        §5.4.4, printed p.27: "Zwischenpressstationen werden in den Rohrstrang integriert, wenn die
+--          Vortriebskraft die Kapazität der Hauptpressstation, die zulässige Vorpresskraft der Vortriebsrohre
+--          oder des Widerlagers im Startschacht überschreiten könnte."
+--      NOTE: the guideline never prints the inequality "gemessene ≤ zulässige" as a sentence; it is the obvious
+--      engineering meaning of "zulässig". The gate is therefore a defensible derivation, but it is NOT a
+--      verbatim printed rule and should be labelled as derived rather than quoted.
+-- ☐ RATIFIED (clause retag — the stored source_quote is the §7.2.4 sentence, the clause_reference says §7.2.6) →
+-- update public.compliance_requirements set clause_reference='§7.2.4' where id='dba8f302-6e96-48ee-b211-174486cde2e2';
+-- Rollback: set clause_reference='§7.2.6' where id='dba8f302-6e96-48ee-b211-174486cde2e2';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · PRINTED HARD LIMITS THAT HAVE A FIELD BUT NO GATE AT ALL (six). Each is a "muss/darf … nicht"
+-- statement, i.e. exactly the class the brief says a block gate is defensible for on an Arbeitsblatt.
+-- No SQL is written for these because creating compliance_requirements rows needs the id/ordering convention
+-- and the evaluate.ts grammar confirmed; they are specified so the decision batch is complete.
+--
+--   (1) §5.2.3.3 Abweichung von der Geraden, printed p.20 — "Unabhängig von der Baulänge des Vortriebsrohres
+--       DARF die Mantellinie von der Geraden MAXIMAL um den Wert gemäß Tabelle 3 abweichen. […] Für
+--       Stahlvortriebsrohre dürfen 1,5 mm je Meter Baulänge nicht überschritten werden."
+--       Tabelle 3: ≤ DN 1000 → 5 mm · > DN 1000 bis ≤ DN 2000 → 10 mm · > DN 2000 → 15 mm.
+--       Field: A125-02.geradheitsabweichung_zul (b2ef3541-b497-4b28-8ee7-8e5621862911). Proposed gate condition:
+--       (DN<=1000 AND geradheitsabweichung_zul<=5) OR (DN>1000 AND DN<=2000 AND geradheitsabweichung_zul<=10)
+--       OR (DN>2000 AND geradheitsabweichung_zul<=15); plus a rohrwerkstoff=='stahl' branch for 1,5 mm/m.
+--   (2) §5.2.3.5 Sohlengleichheit, printed p.21 — "Die zulässige Abweichung von der Sohlengleichheit
+--       (Sohlsprung) IST BEGRENZT AUF - 3 mm für Vortriebsrohre ≤ DN 300 und - 0,01 × DN für größere
+--       Vortriebsrohre, - höchstens jedoch 30 mm ."
+--       Field: A125-02.sohlsprung (8cb5f6be-fbcc-41aa-b73d-0b7714010629). Proposed condition:
+--       (DN<=300 AND sohlsprung<=3) OR (DN>300 AND sohlsprung<=0.01*DN AND sohlsprung<=30).
+--   (3) §5.2.3.4 + Tabelle 4, printed pp.20-21 — the maximum outside-diameter tolerances are minus-only
+--       (+0/−8 … +0/−36 mm, material- and DN-dependent) and sit under the heading "5.2.3 Allgemein verbindliche
+--       Maße und Toleranzen" (printed p.19), i.e. they are binding. Field:
+--       A125-02.aussendurchmesser_toleranz (c90709eb-5941-422c-888e-0c039248c9b3). No gate.
+--   (4) §5.3.3.2 + Tabelle 5, printed p.22 — "Steckverbindungen MÜSSEN … bei der maximal zulässigen Abwinklung
+--       max a nach Tabelle 5 … dicht sein" (≤200 → 25 · >200…≤500 → 15 · >500…≤2000 → 10 · >2000…≤2800 → 7 ·
+--       >2800 → 5 mm je m). Field: A125-02.max_abwinklung (9cbad52c-c446-469c-9cf8-853467e604b1). No gate.
+--   (5) §7.1.3, printed p.44 — "Rohrvortriebe SIND als Hohlraumbaumaßnahmen der geotechnischen Kategorie 3
+--       gemäß DIN 4020 ZUGEORDNET." Field: A125-03.geotechnische_kategorie
+--       (0a80dca3-9746-4580-ab24-12994be98531) offers 1/2/3 with no gate, so a Rohrvortrieb project can be
+--       filed as Kategorie 1. Proposed condition: (anwendungsfall<>'rohrvortrieb') OR (geotechnische_kategorie=='3').
+--       (Cross-worksheet read of anwendungsfall from A125-01 — same prerequisite as S-5.)
+--   (6) §5.3.6, printed p.24 — "Der Außendurchmesser des Führungsrings DARF den kleinsten Rohraußendurchmesser
+--       NICHT ÜBERSCHREITEN. Der Führungsring darf auch während des Vortriebs in keinem Fall in
+--       Vortriebsrichtung überstehen." Not encoded at all — no field, no gate.
+--
+-- Also NOT ENCODED (hard "muss", printed p.46, §7.1.4, Druckluft): "Bei bemannten Verfahren mit offenem Schild
+--   und Druckluftbeaufschlagung der Ortsbrust müssen die Schleusen eine lichte Höhe von mind. 1,60 m, die
+--   Arbeitskammer eine lichte Höhe von mind. 1,80 m aufweisen. Der vorzutreibende Rohrstrang muss im
+--   atmosphärischen Teil ein Mindestlichtmaß (MLM) von 1,40 m aufweisen, bzw. der Innendurchmesser (DN) muss
+--   mind. 1,60 m betragen." — A safety limit with no field on any worksheet. Proposed: add
+--   `druckluftbeaufschlagung` (boolean) to A125-04 plus a gate MLM ≥ 1400 mm / DN ≥ 1600 mm when it is true.
+--   FLAGGED as the highest-consequence gap on this standard (it is a personnel-safety clause tied to the
+--   Druckluftverordnung).
+-- ☐ RATIFIED (create the seven gates/fields above, SQL to be written once evaluate.ts grammar is confirmed)
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · MIS-ANCHORED gate source_quotes (the quote does not state the enforced rule). No value changes.
+--   (i) CR-002, id f327b6cc-ee6c-4946-b5be-55a8c66bd4ac, §5.2.3.2, condition 'delta_a <= rechtwinkligkeit_zul'.
+--       Stored source_quote: "Die Rechtwinkligkeit der Stirnflächen wird gemäß Bild 1 an jedem Rohrende
+--       definiert als" — a sentence TRUNCATED immediately before its formula, and in any case a definition,
+--       not the limit. The limit is Tabelle 2.
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set source_quote='Die Rechtwinkligkeit der Stirnflächen wird gemäß Bild 1 an jedem Rohrende definiert als $\Delta a=a_{\max }-a_{\min }$. | Die Anforderungen gemäß Tabelle 2 gelten sinngemäß auch für Vortriebsrohre mit nicht planmäßig rechtwinkligen Stirnflächen (z. B. für Kurvenfahrten). | Tabelle 2: Zulässige Abweichung von der Rechtwinkligkeit in [mm] — printed p.19, p.20'
+--  where id='f327b6cc-ee6c-4946-b5be-55a8c66bd4ac';
+-- Rollback: set source_quote='Die Rechtwinkligkeit der Stirnflächen wird gemäß Bild 1 an jedem Rohrende definiert als' where id='f327b6cc-…';
+--
+--   (ii) CR-001, id 21defadc-9760-49b7-a0b2-dd111c5e7f01, §5.2.3.1. Stored source_quote is one bare table row
+--        ("\hline$\leq 800$ & $\pm 5$ \\") out of Tabelle 1's three.
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set source_quote='Die Baulängentoleranzen laut Tabelle 1 dürfen nicht überschritten werden. Bei geschweißten Rohrverbindungen kann von dieser Anforderung abgewichen werden. | Tabelle 1: Baulängentoleranzen in [mm] | \hline DN & Baulängentoleranzen \\ \hline$\leq 800$ & $\pm 5$ \\ \hline$>800$ bis $\leq 1200$ & $\pm 8$ \\ \hline$>1200$ & +25 \\ & -10 \\ — printed p.19'
+--  where id='21defadc-9760-49b7-a0b2-dd111c5e7f01';
+-- Rollback: set source_quote='\hline$\leq 800$ & $\pm 5$ \\' where id='21defadc-…';
+--
+--   (iii) CR-006, id 025cf81c-b6b3-4b17-8988-0dd10d9a6001, §7.1.3. Stored source_quote ends on the dangling
+--         fragment "Die Aufschlüsse müssen mindestens:" whose bullet list was not captured.
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set source_quote='Die Aufschlüsse sollten in einem Abstand von max. 50 m in der Vortriebstrasse ausgeführt werden. In Sonderfällen müssen die Abstände verringert werden. — printed p.45'
+--  where id='025cf81c-b6b3-4b17-8988-0dd10d9a6001';
+-- Rollback: restore the original quote incl. the trailing "Die Aufschlüsse müssen mindestens:".
+--
+--   (iv) CR-010, id 7efc86c8-20ea-489e-b35e-3381b0130734, §7.2.7, condition
+--        'ortsbrust_standsicherheit == true AND baugrube_standsicherheit == true'. The stored source_quote covers
+--        only the Ortsbrust half ("Die Standsicherheit der Ortsbrust muss entsprechend dem gewählten Verfahren
+--        nachgewiesen werden." — §7.2.7, printed p.54). The Baugrube half is §7.2.4, printed p.53.
+-- ☐ RATIFIED →
+-- update public.compliance_requirements
+--    set source_quote='Die Standsicherheit der Ortsbrust muss entsprechend dem gewählten Verfahren nachgewiesen werden. | Für Baugruben müssen Standsicherheits- und Gebrauchstauglichkeitsnachweise geführt werden. Ferner müssen Nachweise gegen hydraulischen Grundbruch während der Baugrubenherstellung vor dem Einbringen einer grundwassersperrenden Baugrubensohle sowie der Auftriebssicherheit nach Einbau der grundwassersperrenden Baugrubensohle geführt werden. — printed p.53, p.54',
+--        clause_reference='§7.2.4 + §7.2.7'
+--  where id='7efc86c8-20ea-489e-b35e-3381b0130734';
+-- Rollback: restore source_quote='Die Standsicherheit der Ortsbrust muss entsprechend dem gewählten Verfahren nachgewiesen werden.', clause_reference='§7.2.7'.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · CR-016 — presence-only condition, and a printed hard duty with nowhere to record it.
+-- Gate id 688b2010-2432-45b6-a0d7-7387c5a4266d, worksheet A125-05, clause §7.2.5, severity='block',
+-- condition 'ueberschnitt IS NOT NULL'.
+-- Evidence — §7.2.5, printed p.53 (the gate's own source_quote): "Der Überschnitt (siehe Abschnitt 3.1.19) KANN
+--   je nach Bodenart und Nennweite, insbesondere bei Kurvenfahrten, BIS 20 mm BETRAGEN, in Sonderfällen (z. B.
+--   Fels, Quellton) AUCH MEHR. Der gewählte Überschnitt MUSS BEGRÜNDET WERDEN."
+-- ASSESSMENT: unlike CR-008 this is NOT a mis-encoded numeric limit — 20 mm is explicitly not a cap ("in
+--   Sonderfällen auch mehr"), so a value comparison would over-enforce and a presence-only condition is the
+--   honest encoding. What IS missing is the hard duty in the last sentence: there is no field to hold the
+--   Begründung, so "muss begründet werden" is unenforceable and unrecordable.
+-- PROPOSAL: add a text field A125-05.ueberschnitt_begruendung and extend the gate to require it whenever
+--   ueberschnitt > 20 (the guideline's own threshold for "Sonderfall").
+-- ☐ RATIFIED (new field + condition; SQL deferred to the same batch as S-6, same grammar prerequisite)
+--   proposed condition: 'ueberschnitt IS NOT NULL AND (ueberschnitt<=20 OR ueberschnitt_begruendung IS NOT NULL)'
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · is_required REVIEW. Three fields whose required flag contradicts the printed modal verb or another gate.
+--   (a) A125-02.fuehrungsring_werkstoff (525e7c5e-1ce1-42cd-863c-40cbffcd6a77) is is_required=false.
+--       §5.3.7, printed p.26: "Die Führungsringe der Vortriebsrohre MÜSSEN aus einem der folgenden Werkstoffe
+--       oder Werkstoffkombinationen bestehen: […] | Führungsringe aus Stahl mit galvanischem Oberflächenschutz
+--       oder mit polymeren Beschichtungen DÜRFEN NICHT verwendet werden." Hard duty, closed list.
+-- ☐ RATIFIED →
+-- update public.fields set is_required=true where id='525e7c5e-1ce1-42cd-863c-40cbffcd6a77';
+-- Rollback: set is_required=false where id='525e7c5e-1ce1-42cd-863c-40cbffcd6a77';
+--   (b) A125-02.aussendurchmesser_toleranz (c90709eb-5941-422c-888e-0c039248c9b3) is is_required=false, but it
+--       sits under §5.2.3 "Allgemein verbindliche Maße und Toleranzen" (printed p.19) and §5.2.3.4 (p.20) reads
+--       "Die zulässigen Toleranzen für den maximalen Rohraußendurchmesser sind in Tabelle 4 zusammengestellt."
+--       Every OTHER field of that binding block (baulaengentoleranz, rechtwinkligkeit_zul,
+--       geradheitsabweichung_zul, sohlsprung) is is_required=true — this one is the odd one out.
+-- ☐ RATIFIED →
+-- update public.fields set is_required=true where id='c90709eb-5941-422c-888e-0c039248c9b3';
+-- Rollback: set is_required=false where id='c90709eb-5941-422c-888e-0c039248c9b3';
+--   (c) A125-07.sondergelaende_genehmigung (f0582651-c0e3-402a-ab7d-77974e4bcc6b) is is_required=false while the
+--       BLOCK gate CR-015 refuses to pass without it (S-5). Either the flag or the gate must move. The
+--       guideline makes the Genehmigung conditional on the special ground, so the coherent pair is:
+--       keep is_required=false AND fix CR-015 per S-5 (recommended), or set is_required=true and accept that
+--       every project must answer it. Recommended option needs NO SQL here; it is delivered by S-5.
+-- ☐ RATIFIED (choose: [S-5 fix only, recommended] / [is_required=true])
+--   NOT proposed: A125-03.aufschluss_abstand stays is_required=true even though §7.1.3 says "sollten" — the
+--   value must still be planned and recorded; only the GATE strength is wrong (S-4).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · UNIT INCONSISTENCY — A125-06.raeumliche_abwinklung (76659dd2-6295-42d4-b341-439d107862c6) is encoded
+-- with unit='grad'. The guideline expresses Abwinklung dimensionally, not angularly:
+--   §5.3.3.2 / Tabelle 5, printed p.22: "Tabelle 5: Abwinklung in [mm] je [m] Baulänge" (max a = 25/15/10/7/5).
+--   §7.2.6, printed p.54: "räumliche Abwinklung in der maßgeblichen Rohrfuge, erfahrungsgemäß die zweite oder
+--     dritte" — stated without a unit.
+-- The measured value on A125-06 can therefore not be compared against the encoded limit A125-02.max_abwinklung
+-- (unit mm/m) without a conversion the guideline never prints. Two consistent resolutions:
+--   (i) change the measured field's unit to 'mm/m' to match Tabelle 5 (recommended — it makes the comparison
+--       possible and matches the printed dimension), or
+--   (ii) keep 'grad' and record explicitly that the two are NOT comparable, and that §7.2.4's "zulässige
+--       Vorpresskraft … in Abhängigkeit von der räumlichen Abwinklung" is an engineer-side calculation.
+-- ☐ RATIFIED (i) →
+-- update public.fields set unit='mm/m' where id='76659dd2-6295-42d4-b341-439d107862c6';
+-- Rollback: set unit='grad' where id='76659dd2-6295-42d4-b341-439d107862c6';
+-- ALSO (units the guideline never prints, recorded not proposed): A125-03.wichte_boden unit='kN/m3' and
+--   A125-03.kohaesion unit='kN/m2' — Tabelle 8 (printed p.45) names "Wichte" and "Scherparameter, Reibungswinkel
+--   und Kohäsion" with NO units. The encoded units are the standard geotechnical SI ones and are not disputed;
+--   they are simply EKOWAI's addition and are flagged here so the provenance is honest. No change proposed.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · CLAUSE RETAGS on fields (labels/values unchanged).
+--   (a) A125-07.sondergelaende_genehmigung (f0582651-c0e3-402a-ab7d-77974e4bcc6b) carries
+--       clause_reference='§8.7'. §8.7 (printed p.60) is "Dokumentation" — it is about Abschlussberichte and
+--       Bauakten and says nothing about approvals. The approval classes the enum encodes (ZiE, UiG, SSG,
+--       Gestattungsvertrag) come from §8.1 (p.56), §9.1 (p.60) and §10.1/§10.2 (p.63/p.64).
+-- ☐ RATIFIED →
+-- update public.fields set clause_reference='§8.1 / §9.1 / §10.1' where id='f0582651-c0e3-402a-ab7d-77974e4bcc6b';
+-- Rollback: set clause_reference='§8.7' where id='f0582651-c0e3-402a-ab7d-77974e4bcc6b';
+--   (b) A125-07.bestandsunterlagen (f8579d4e-d5f7-44b2-9db3-9cf976827551) carries clause_reference='§10.5'
+--       (Bundeswasserstraßen only), but its own description already says "bei Sondergelaende zusaetzlich
+--       Abschnitte 8.7/9.6/10.5" and the field is used for every project. Evidence: §8.7 p.60, §9.6 p.63,
+--       §10.5 p.67 each impose a documentation duty.
+-- ☐ RATIFIED →
+-- update public.fields set clause_reference='§8.7 / §9.6 / §10.5' where id='f8579d4e-d5f7-44b2-9db3-9cf976827551';
+-- Rollback: set clause_reference='§10.5' where id='f8579d4e-d5f7-44b2-9db3-9cf976827551';
+--   (c) A125-02.DN (c45e5dd4-219d-4738-a605-18741446126a) carries clause_reference='§5.2.3'. That is the right
+--       home (the binding Maße-und-Toleranzen block that DN keys), but the guideline never DEFINES DN itself —
+--       §3.1.12 defines Innendurchmesser and §5.9 (p.28) only requires the Nennweite as a marking. Recorded so
+--       the [VC] quote on that row is read with the right expectation. No change proposed.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 · EQUATION OBSERVATION (no SQL). E2 (cd0b71c6-d17e-4f96-8bfa-39414a01d767) is encoded as the equality
+-- 'R_min = 200 * D_a'. The printed form is an INEQUALITY offered as an estimate — §7.1.6, printed p.48:
+--   "Als eine erste grobe Abschätzung kann bei 3,00 m langen Vortriebsrohren für die Höhe und Seite von einem
+--    zulässigen Mindestradius von R_min ≥ 200 × D_a ausgegangen werden."
+-- Encoding the boundary value as an equality is the correct way to materialise a lower bound as a computed
+-- minimum, and the field A125-04.R_min is is_required=false, which matches "erste grobe Abschätzung". Two
+-- caveats belong in the app text rather than in the formula: the 200 × D_a figure holds for 3,00 m long pipes
+-- (E2 does not read baulaenge), and the guideline's own governing sentence is "müssen in Abhängigkeit von der
+-- Baulänge, der Fügekonstruktion und dem Außendurchmesser der Rohre Mindestradien eingehalten werden".
+-- ☐ RATIFIED (optional: extend the field description with the 3,00-m validity caveat)
+-- update public.fields set description='R_min = 200 x D_a (erste grobe Abschaetzung nach §7.1.6 fuer 3,00 m lange Vortriebsrohre, Hoehe und Seite; die massgebenden Mindestradien haengen zusaetzlich von Baulaenge und Fuegekonstruktion ab).' where id='573f465d-8694-4fcc-b0ff-564ac224176a';
+-- Rollback: restore description='R_min = 200 x D_a (erste grobe Abschaetzung fuer 3,00 m lange Rohre, Hoehe und Seite).'
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-13 · TRANSCRIPT GAP (no SQL — an honest-residue entry, not a defect of the encoding).
+-- Anhang B "(informativ): Erfahrungswerte für den Anwendungsbereich", printed p.73, exists in the md ONLY as a
+-- mathpix image reference (".../c9751f39-…-75.jpg") with no extracted text. It is the source §7.1.5 (printed
+-- p.47) names for the Mindestüberdeckungen of the STEERABLE methods and §7.1.9 (p.49) names for the
+-- Ortsbruststützung Einsatzbereiche. Consequently:
+--   · A125-04.mindestueberdeckung is verified [VC] from the §7.1.5 sentence and from Tabelle 7 (p.32, readable),
+--     but the steerable-method half of its value set is NR from the markdown.
+--   · A125-05.ortsbruststuetzung_prinzip is fully verified from §7.1.9's own sentence (the four principles are
+--     printed there); only the Anwendungsbereich table behind it is unreadable.
+-- Anhang A (normativ) is a special case and is NOT a gap: §Anhang A, printed p.71, states "Der Anhang A ist mit
+--   Erscheinen des Arbeitsblatts DWA-A 127-10:2020-09 'Statische Berechnung von Entwässerungsanlagen - Teil 10:
+--   Werkstoffkennwerte' nicht mehr gültig." — the encoded description of A125-02.rohrwerkstoff already points at
+--   DWA-A 127-10, which is CORRECT for the September-2020 korrigierte Fassung. No action.
+-- TO CLOSE: read Anhang B from the sibling PDF (C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-A-125\
+--   DWA-A-125.pdf, printed p.73) with scoop pdftotext -layout -f 75 -l 75 and upgrade that half to VA.
+-- ============================================================================
