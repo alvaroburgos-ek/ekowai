@@ -1,0 +1,350 @@
+-- ============================================================================
+-- DIN-14021 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-14021\DIN-EN-ISO-14021.md
+--   (bilingual German/English mathpix LaTeX; NO page-number lines — "printed p.N" derived from the Inhalt table and
+--   cross-checked against the encode-time REQ-27 PDF pages, PDF = printed + 6; see the pack header).
+-- Gate rows live in compliance_requirements (columns: worksheet_template_id, code, severity, condition, clause_reference,
+--   source_quote, requires_attestation) and are evaluated by src/lib/compliance/evaluate.ts — where a condition that
+--   evaluates TRUE is a PASS and FALSE is a FAIL; a missing referenced symbol yields "pending", not a fail.
+-- Standard id 9af88a00-6c10-4e60-867f-4705f34d05b2. Worksheet ids:
+--   01 Aussagenregistrierung & Geltungsbereich       54c32010-95e1-42eb-b53c-7e98ae817bdb
+--   02 Begriffe & Definitionen                       391ac803-77e4-4af6-a8a7-6d20c1bf7049
+--   03 Allgemeine Anforderungen an alle Aussagen     ffc4e0ec-a064-44b2-8ade-c050e83b00ce
+--   04 Bewertung & Ueberpruefung                     187258b8-f70a-4457-8384-5c6797ddb582
+--   05 Spezifische Anforderungen an ausgewaehlte A.  16564a57-d255-4b88-ab67-6aa3606e99ad
+--   06 Konformitaetsurteil & Freigabe                d064e6e4-9507-4203-b45c-ae7f0d566bb5
+-- Context: 47 fields on 5 of the 6 worksheets, 3 equations, 50 gates — ALL 50 severity=block. 50 gates on 47 fields is a
+--   high ratio, and the reason is structural: 21 of the 50 sit on worksheet 01 carrying the SAME condition
+--   "selected_claim_type IS NOT NULL" (S-4), and a further six pairs are duplicates (S-3). Only 48 of the 50 source_quotes
+--   are verbatim; the two that are not are S-6. Nothing in this file was applied.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · INVERTED POLARITY — three BLOCK gates pass only when the PROHIBITED state is present.
+--   evaluate.ts: condition true = pass, false = fail. So "X == True" on a field that records a violation inverts the rule.
+--   (a) REQ-01 (b2dd8d63-5014-4eee-b9ac-c4b3264cba62, ws 03, block) condition "vague_claim_present == True".
+--       Field vague_claim_present (659ac4cd) label "Unbestimmte/unspezifische Aussage vorhanden". §5.3 (p.16):
+--       "Eine unbestimmte oder unspezifische Umweltaussage oder eine, die allgemein darauf abzielt, dass ein Produkt günstig
+--       für die Umwelt oder umweltverträglich ist, darf nicht gemacht werden." → today the gate BLOCKS every conforming
+--       project (no vague claim) and PASSES every non-conforming one.
+--   (b) REQ-03 (e8148c1d-3cc4-400f-9aa8-98fc11095b50, ws 03, block) condition "sustainability_claim_present == True".
+--       Field sustainability_claim_present (0c916657) label "Aussage zum Erreichen von Nachhaltigkeit". §5.5 (p.16):
+--       "Deshalb darf keine Aussage über das Erreichen von Nachhaltigkeit gemacht werden." Same inversion.
+--   (c) REQ-48 (8e1f3c48-bc8f-4566-bb4b-7406f7780b28, ws 03, block) condition "mobius_loop_used == True".
+--       §5.8.1 (p.19) "ist die Verwendung eines Symbols freigestellt" and §7.7.3.1/§7.8.3.1 repeat "freigestellt" — the
+--       Drei-Pfeile-Symbol is OPTIONAL, so a block gate demanding it be used forces an optional symbol on every project.
+--       The clause the gate quotes (§5.10.2.1, p.20) is CONDITIONAL: "Sobald es als Umweltaussage verwendet wird, muss dessen
+--       Ausführung die graphischen Anforderungen an ISO 7000-1135 erfüllen."
+-- Proposal: rewrite the three conditions to match the printed polarity (evaluate.ts supports IF … THEN guards).
+--   REQ-01  vague_claim_present == False
+--   REQ-03  sustainability_claim_present == False
+--   REQ-48  IF mobius_loop_used == True THEN mobius_loop_iso7000_1135_ok == True   (needs a new boolean field on ws 03,
+--           symbol mobius_loop_iso7000_1135_ok, clause 5.10.2.1 — or, without a new field, drop REQ-48 and fold ISO
+--           7000-1135 conformity into REQ-11, see S-8(c))
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='vague_claim_present == False' where id='b2dd8d63-5014-4eee-b9ac-c4b3264cba62';
+-- -- update public.compliance_requirements set condition='sustainability_claim_present == False' where id='e8148c1d-3cc4-400f-9aa8-98fc11095b50';
+-- -- update public.compliance_requirements set condition='IF mobius_loop_used == True THEN mobius_loop_iso7000_1135_ok == True' where id='8e1f3c48-bc8f-4566-bb4b-7406f7780b28';
+-- Rollback: restore condition='vague_claim_present == True' / 'sustainability_claim_present == True' / 'mobius_loop_used == True'.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · TAUTOLOGICAL CONDITION — REQ-26 (da592ff5-47cb-45d1-ac51-6060f963217b, ws 03, block) has condition "TRUE".
+--   evaluate.ts parses a bare TRUE keyword to a boolean literal node which always returns 'true' → the gate ALWAYS passes and
+--   enforces nothing; it is a block-severity no-op that inflates the gate count. Its quote is §5.2 (p.15) "Zusätzlich zu den
+--   Anforderungen dieser Internationalen Norm gelten die in ISO 14020 aufgestellten Prinzipien. Dort, wo diese Internationale
+--   Norm spezifischere Anforderungen stellt als ISO 14020, müssen diese spezifischeren Anforderungen erfüllt werden." — an
+--   NR obligation (ISO 14020 is not in the library), so it cannot be machine-enforced from this standard alone.
+-- Proposal: either DELETE REQ-26 (it is also a duplicate of REQ-47, see S-3(b)), or convert it to
+--   requires_attestation=true with severity 'warn' and a condition naming an explicit ISO-14020 attestation field.
+-- ☐ RATIFIED
+-- -- delete from public.compliance_requirements where id='da592ff5-47cb-45d1-ac51-6060f963217b';
+-- Rollback: re-insert (ws 03, code REQ-26, severity block, condition 'TRUE', clause_reference '5.2', source_quote as exported).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · DUPLICATE / NEAR-DUPLICATE GATES — six pairs, all block, all in prod today.
+--   (a) REQ-25 (26ae9ce0-cbcf-4c7c-8042-9bdfb004ccea) and REQ-49 (d145272f-698e-4679-986e-4f667ec9e95c) — IDENTICAL:
+--       same ws (05), same clause 7.17.2.2, same condition "carbon_footprint_value IS NOT NULL", byte-identical source_quote
+--       ("[7.17.2.2] Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067
+--       durchgeführt werden.", md line 1845, printed p.47). → delete one.
+--   (b) REQ-26 (ws 03) and REQ-47 (c0d3dc96-d982-48f7-88b2-787ead3fa73e, ws 01) — same clause 5.2, byte-identical
+--       source_quote, different worksheets and conditions ("TRUE" vs "selected_claim_type IS NOT NULL"). Neither enforces
+--       §5.2. → keep at most one (see S-2).
+--   (c) REQ-14 (1eed592d-6f9a-4049-aed9-f604d70a2d41) and REQ-46 (a325c518-9105-4c0f-af62-0a69168940f2) — both ws 04,
+--       both §6.3.1; REQ-14 quotes the English lead-in ("6.3.1 Comparative claims shall be evaluated against one or more of
+--       the following:"), REQ-46 the German list a)–d); REQ-46 condition is a strict superset of REQ-14. → keep REQ-46
+--       (whose quote actually carries the four alternatives), delete REQ-14.
+--   (d) REQ-29 (1f3c1651-b9c1-43ab-b57b-a0e6c23a1711) and REQ-50 (9b29e7d1-d313-4c7d-84ba-3bbb413d99a7) — both ws 01,
+--       identical condition, both §7.3.2.1: REQ-29 the German a), REQ-50 the English lead-in sentence with no obligation in
+--       it ("The following qualifications refer to all types of degradation…"). → delete REQ-50, keep REQ-29.
+--   (e) REQ-22 (5959aabf-e977-4d66-83b9-ec6936e7f20a, ws 05) and REQ-41 (09fcb3a0-b6f8-401d-b4fe-f512601c681c, ws 01) —
+--       byte-identical source_quote (§7.14.2 first paragraph, md line 1717). → one is redundant; see also S-14.
+--   (f) REQ-23 (6127dacd-f26e-41c3-a24a-40b1476a955c, ws 05) and REQ-42 (60167137-3e7f-44a1-8151-71592700a1f0, ws 01) —
+--       byte-identical source_quote (§7.15.2, md lines 1763+1765). → one is redundant.
+-- ☐ RATIFIED
+-- -- delete from public.compliance_requirements where id in ('d145272f-698e-4679-986e-4f667ec9e95c','1eed592d-6f9a-4049-aed9-f604d70a2d41','9b29e7d1-d313-4c7d-84ba-3bbb413d99a7');
+-- -- (b)/(e)/(f): the survivor depends on the S-4 re-home ruling — do not delete before S-4 is decided.
+-- Rollback: re-insert each deleted row with its exported worksheet_template_id/code/severity/condition/clause_reference/source_quote.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · THE 21-GATE "selected_claim_type IS NOT NULL" BLOCK ON WORKSHEET 01 — the single largest encoding defect here.
+--   These 21 block gates all live on ws 01 and ALL carry the identical condition "selected_claim_type IS NOT NULL":
+--     REQ-28 70ab21c4 (7.2) · REQ-29 1f3c1651 (7.3) · REQ-30 c8a266f1 (7.4) · REQ-31 a3226816 (7.5) · REQ-32 d2851137 (7.6)
+--     REQ-33 02a16df5 (7.7) · REQ-34 109b97e2 (7.8) · REQ-35 2ff95419 (7.9) · REQ-36 391df0ce (7.10) · REQ-37 e6c654f0 (7.11)
+--     REQ-38 cffa56ed (7.12.1.1) · REQ-39 4950267a (7.12.1.2) · REQ-40 bb3ed37c (7.13) · REQ-41 09fcb3a0 (7.14)
+--     REQ-42 60167137 (7.15) · REQ-43 97b3f082 (7.16) · REQ-44 b0bfc06b (7.17.2) · REQ-45 4917d4f9 (7.17.3)
+--     REQ-47 c0d3dc96 (5.2) · REQ-50 9b29e7d1 (7.3.2.1)  [+ REQ-07 08919459, which is the one correct ws-01 gate]
+--   Two independent problems:
+--   (1) UNDER-ENFORCEMENT. Every one of them quotes a substantive Abschnitt-7 obligation but tests only that a claim type has
+--       been picked. Twenty different printed requirements collapse to one non-null check, which passes as soon as the user
+--       selects anything — e.g. REQ-33 quotes §7.7.2 (p.33) "Falls keine Sammelstellen oder Sammeleinrichtungen für das
+--       Recycling des Produktes oder der Verpackung … zur Verfügung stehen, gilt Folgendes: a) Es muss eine konkrete Aussage
+--       zur Recyclingfähigkeit erfolgen." — nothing about collection facilities is captured or checked anywhere.
+--   (2) GATE RE-HOME. The obligations belong to worksheet 05 "Spezifische Anforderungen an ausgewaehlte Aussagen", where the
+--       clause-7 fields actually live; on ws 01 they read a ws-01 selector only. §7.1.1 (p.25): "Abschnitt 7 gibt Erklärungen
+--       und Anwendungshinweise für ausgewählte, häufig in umweltbezogenen Anbietererklärungen verwendete Begriffe. […]
+--       Abschnitt 7 ergänzt, ersetzt jedoch nicht die Anforderungen in anderen Abschnitten."
+-- Proposal (specs; each becomes a claim-type-guarded gate on ws 05 = 16564a57-d255-4b88-ab67-6aa3606e99ad):
+--   pattern:  IF selected_claim_type == <token> THEN <the attestation/limit the clause prints>
+--   e.g. REQ-32 → IF selected_claim_type == recovered_energy THEN recovered_energy_waste_type_stated == True   (§7.6.2 c)
+--        "Art und Menge des zur Energierückgewinnung eingesetzten Abfalls müssen angegeben werden.", p.31)
+--        REQ-34 → IF selected_claim_type == recycled_content THEN recycled_content_pct IS NOT NULL AND product_packaging_separated == True
+--        (§7.8.2.1/.2, p.36)
+--        REQ-42 → IF selected_claim_type == renewable_energy THEN renewable_energy_pct IS NOT NULL   (§7.15.2, p.45)
+--   Each of the 20 needs one attestation field it can actually read; those fields do not exist yet (ws 05 has 14 fields, all
+--   numeric or the CO2 boolean). This is a field-model change, not a condition edit → full spec + field inserts required
+--   before anything is applied.
+-- ☐ RATIFIED  (ruling needed on scope: re-home + guard all 20, or delete the 20 and re-encode ws 05 from §7 in one pass)
+-- Rollback: restore worksheet_template_id='54c32010-95e1-42eb-b53c-7e98ae817bdb' and condition='selected_claim_type IS NOT NULL'
+--   on each of the 20 rows; drop any newly inserted attestation fields.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · UNCONDITIONAL CLAUSE-7 GATES ON OPTIONAL ws-05 FIELDS — six block gates fire for every project regardless of which
+--   claim is actually made, while the fields they read are all is_required=false:
+--     REQ-20 5306d73e  "R_energy - E_energy > 0"                      (§7.6.3 a), p.32)
+--     REQ-21 5afe212b  "recycled_content_pct IS NOT NULL"             (§7.8.2.1, p.36)
+--     REQ-22 5959aabf  "renewable_material_pct IS NOT NULL"           (§7.14.2, p.44)
+--     REQ-23 6127dacd  "renewable_energy_pct IS NOT NULL"             (§7.15.2, p.45)
+--     REQ-24 e484c778  "carbon_neutral_offset_declared IS NOT NULL AND carbon_footprint_value IS NOT NULL"  (§7.17.3.2, p.47)
+--     REQ-25/49        "carbon_footprint_value IS NOT NULL"           (§7.17.2.2, p.47)
+--   Every one of these clauses is conditional on the claim being made. §7.8.2.1 (p.36): "Erfolgt eine Aussage zum
+--   Recyclatgehalt, muss der prozentuale Anteil an recyceltem Material angegeben werden." §7.6.3 a) (p.32): "Die Aussage darf
+--   nur erfolgen, wenn $R-E>0$." §7.17.3.2 (p.47): "Eine uneingeschränkte Aussage zu „CO2-neutral“ darf nicht gemacht werden."
+--   As encoded, a project claiming only "recyclingfähig" is blocked for not stating a carbon footprint. (In practice the null
+--   values make evaluate.ts report "pending" rather than "fail", so the block never resolves and the worksheet can never be
+--   completed — the same dead-end.)
+-- Proposal: guard each with the claim type it belongs to.
+--   REQ-20  IF selected_claim_type == recovered_energy THEN R_energy - E_energy > 0
+--   REQ-21  IF selected_claim_type == recycled_content THEN recycled_content_pct IS NOT NULL
+--   REQ-22  IF selected_claim_type == renewable_material THEN renewable_material_pct IS NOT NULL
+--   REQ-23  IF selected_claim_type == renewable_energy THEN renewable_energy_pct IS NOT NULL
+--   REQ-24  IF selected_claim_type == carbon_neutral THEN carbon_neutral_offset_declared == True AND carbon_footprint_value IS NOT NULL
+--   REQ-25  IF selected_claim_type IN {product_carbon_footprint, carbon_neutral} THEN carbon_footprint_value IS NOT NULL
+--   NOTE: selected_claim_type lives on ws 01 and these gates on ws 05 — cross-worksheet reads; confirm the evaluator resolves
+--   symbols project-wide before applying, otherwise the selector needs a ws-05 mirror (same class as the 16941-2 S-1 note).
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='IF selected_claim_type == recovered_energy THEN R_energy - E_energy > 0' where id='5306d73e-cfc7-467a-b751-10e9df889d17';
+-- -- … one per row, ids above.
+-- Rollback: restore each exported condition verbatim.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · TWO GATE source_quotes ARE NOT VERBATIM (48 of 50 are). Evidence-integrity, must be corrected before the gates are
+--   shown to a user as the reason for a block.
+--   (a) REQ-43 (97b3f082-3c5b-41d6-b56e-28dcd163c4b4, ws 01, §7.16) source_quote reads
+--       "… Im vorliegenden Unterabschnitt wird nochmals betont, dass Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit“
+--       nicht verwendet werden dürfen."
+--       PRINTED (md line 1801, §7.16.1, p.46): "Wie in 5.5 angeführt, darf keine Anbietererklärung über das Erreichen von
+--       Nachhaltigkeit abgegeben werden. Im vorliegenden Unterabschnitt wird nochmals betont, dass UNEINGESCHRÄNKTE
+--       Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit" nicht verwendet werden dürfen."
+--       The word "uneingeschränkte" was dropped. That turns a ban on UNQUALIFIED sustainability claims into a blanket ban —
+--       and §7.16.1 second paragraph (p.46) expressly permits a qualified one: "Wenn eine eingeschränkte Anbietererklärung zu
+--       „nachhaltig“, „Nachhaltigkeit“ oder „nachhaltige Entwicklung" verwendet wird (siehe 3.1.17), muss jeder Teil der
+--       Anbietererklärung, der sich auf Umweltaspekte bezieht, dieser Internationalen Norm entsprechen." (English twin,
+--       md line 1824: "unqualified claims of "sustainable" and "sustainability" shall not be used.")
+--   (b) REQ-28 (70ab21c4-f508-4f75-9754-1bccde86e1c5, ws 01, §7.2) source_quote paraphrases §7.2.2.1 b):
+--       encoded "…zu irgendeinem Zeitpunkt der Zersetzung oder danach Stoffe in gefährlichen Konzentrationen FREISETZT"
+--       PRINTED (md line 1106, p.26) "…zu irgendeinem Zeitpunkt der Zersetzung oder danach Stoffe in gefährlichen
+--       Konzentrationen AN DIE UMWELT ABGIBT; oder".
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set source_quote='[7.16.1] Wie in 5.5 angeführt, darf keine Anbietererklärung über das Erreichen von Nachhaltigkeit abgegeben werden. Im vorliegenden Unterabschnitt wird nochmals betont, dass uneingeschränkte Anbietererklärungen zu „nachhaltig“ und „Nachhaltigkeit" nicht verwendet werden dürfen.' where id='97b3f082-3c5b-41d6-b56e-28dcd163c4b4';
+-- -- update public.compliance_requirements set source_quote='[7.2.2.1] Eine Aussage zur Kompostierbarkeit darf nicht erfolgen, wenn ein Produkt, eine Verpackung oder ein Produkt- oder Verpackungsbestandteil: a) den Gesamtnutzen des Komposts als Bodenverbesserungsmittel negativ beeinflusst; b) zu irgendeinem Zeitpunkt der Zersetzung oder danach Stoffe in gefährlichen Konzentrationen an die Umwelt abgibt; oder c) die Zersetzungsgeschwindigkeit in derartigen Systemen, in denen das Produkt oder der Bestandteil möglicherweise kompostiert wird, beträchtlich verringert.' where id='70ab21c4-f508-4f75-9754-1bccde86e1c5';
+-- Rollback: restore the exported source_quote strings.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · OVER-ENFORCEMENT OF CONDITIONAL OBLIGATIONS — four block gates make a conditional printed duty unconditional.
+--   (a) REQ-04 (b6f892c8-ae95-45cb-aec1-e41ecd13f1d7, ws 03) "explanatory_statement IS NOT NULL" demands an ergänzende
+--       Erklärung on every claim. §5.6 (p.16): "Umweltbezogene Anbietererklärungen müssen mit einer ergänzenden Erklärung
+--       verbunden sein, WENN die Aussage allein möglicherweise zu Missverständnissen führen kann. Eine Umweltaussage darf nur
+--       dann ohne ergänzende Erklärung erfolgen, wenn sie unter allen vorhersehbaren Umständen ohne Einschränkungen gültig
+--       ist." → needs a boolean carrier for "gilt unter allen vorhersehbaren Umständen ohne Einschränkungen".
+--       Proposal: IF claim_valid_all_circumstances == False THEN explanatory_statement IS NOT NULL (new ws-03 boolean field
+--       claim_valid_all_circumstances, clause 5.6).
+--   (b) REQ-02 (c567fc09-2574-4a12-9efe-065dda27d766, ws 03) "free_claim_substance_level_ok == True" fires for every project,
+--       including those making no "... frei" claim. §5.4 (p.16) applies only to such a claim.
+--       Proposal: IF free_claim_made == True THEN free_claim_substance_level_ok == True (new ws-03 boolean free_claim_made,
+--       clause 5.4) — or reuse selected_claim_type once S-4 is settled.
+--   (c) REQ-14 / REQ-46 (ws 04) require comparative_claim and comparison_basis to be non-null on EVERY project, though both
+--       fields are is_required=false and §6.3 applies only "Vergleichende Aussagen" (p.22).
+--       Proposal: IF comparative_claim == True THEN comparison_basis IS NOT NULL.
+--   (d) REQ-15 (2a8288a6-f558-4efd-88d2-7d774ad1cf7e, ws 04) "comparison_same_functional_unit IS NOT NULL AND
+--       comparison_time_interval IS NOT NULL" is presence-only AND unconditional. §6.3.2 (p.22) applies only to
+--       "Vergleichende Aussagen, die Umweltaspekte des Produktlebensweges enthalten" and requires b) "auf derselben
+--       Funktionseinheit beruhen", not merely that the box was filled.
+--       Proposal: IF comparative_claim == True THEN comparison_same_functional_unit == True AND comparison_time_interval IS NOT NULL.
+-- ☐ RATIFIED
+-- Rollback: restore the exported conditions; drop any newly inserted carrier fields.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · MISSING GATES FOR PRINTED HARD LIMITS (coverage gaps — a printed "muss/darf nur" with no gate at all).
+--   (a) §7.14.2 (p.44): "Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 \% aus
+--       erneuerbarem Material besteht…" — nothing binds renewable_material_pct (9b1b1b89) to 100 for an unqualified claim.
+--   (b) §7.15.2 (p.45): "Eine uneingeschränkte Aussage zur erneuerbaren Energie ist nur zulässig, wenn 100 \% der Energie
+--       erneuerbar ist." — same gap for renewable_energy_pct (d1a4be17).
+--       Both need a "claim is unqualified/qualified" carrier: IF claim_unqualified == True THEN renewable_material_pct == 100.
+--   (c) §5.10.2.4 (p.20): "Das Drei-Pfeile-Symbol darf nur für Aussagen von Recyclatgehalt und Recyclingfähigkeit verwendet
+--       werden, wie es in 7.7 und 7.8 festgelegt ist." REQ-11 (fe8947a8-ba07-4d79-afae-546d214bab8e) quotes this restriction
+--       but its condition ("mobius_loop_used IS NOT NULL AND selected_claim_type IS NOT NULL") tests presence only and never
+--       checks the claim type. Proposal: IF mobius_loop_used == True THEN selected_claim_type IN {recyclable, recycled_content}.
+--   (d) §7.8.3.2 (p.36): "…es das Drei-Pfeile-Symbol mit zugehörigem Prozentwert sein, angegeben als „ $X \%$ “, wobei $X$
+--       der nach 7.8.4 berechnete, als ganze Zahl angegebene Recyclatgehalt ist." — no gate requires recycled_content_pct to
+--       be a whole number when the symbol is used.
+--   (e) §5.8.5 (p.19): "Gegenstände aus der Natur dürfen nur abgebildet werden, wenn ein direkter und überprüfbarer Bezug
+--       zwischen Gegenstand und erklärtem Nutzen besteht." — field natural_object_link (8c7299a2) exists, ZERO gates on it.
+--   (f) §6.3.2 a) (p.22) "in denselben Maßeinheiten gemessen und berechnet sein" and c) "über einen angemessenen Zeitraum,
+--       gewöhnlich 12 Monate" — no unit check, and no range check on comparison_time_interval. SR-2: "gewöhnlich 12 Monate"
+--       is a typical value, NOT a fixed limit, so any gate here must surface the choice rather than hard-code 12.
+-- ☐ RATIFIED
+-- -- inserts into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+-- --   with the quotes above; new carrier fields (claim_unqualified on ws 01, clause 7.14.2/7.15.2) inserted first.
+-- Rollback: delete the inserted gate rows and carrier fields.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · CLAUSE RETAGS — clause_reference one level coarser than the sentence that carries the obligation. Evidence = the
+--   gate own source_quote, which in every case names the sub-clause the tag omits.
+--   gates: REQ-28 "7.2"→"7.2.2.1" · REQ-29 "7.3"→"7.3.2.1 a)" · REQ-30 "7.4"→"7.4.2.1" · REQ-31 "7.5"→"7.5.2.1" ·
+--          REQ-32 "7.6"→"7.6.2" · REQ-33 "7.7"→"7.7.2" · REQ-34 "7.8"→"7.8.2.1, 7.8.2.2" · REQ-35 "7.9"→"7.9.2.1" ·
+--          REQ-36 "7.10"→"7.10.2.2, 7.10.2.3" · REQ-37 "7.11"→"7.11.2.2" · REQ-40 "7.13"→"7.13.2.1" · REQ-41 "7.14"→"7.14.2" ·
+--          REQ-42 "7.15"→"7.15.2" · REQ-43 "7.16"→"7.16.1" · REQ-46 "6.3"→"6.3.1" · REQ-21 "7.8.2"→"7.8.2.1" ·
+--          REQ-24 "7.17.3.2"→"7.17.3.2, 7.17.3.3"
+--   fields: mobius_loop_used (c6f16e9d) "5.10.2"→"5.10.2.3, 5.10.2.4" · carbon_footprint_value (800f9d17) "7.17.2"→
+--           "7.17.2.1, 7.17.2.2" · comparison_basis (3f449e53) "6.3.1"→"6.3.1 a) bis d)".
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set clause_reference='7.2.2.1' where id='70ab21c4-f508-4f75-9754-1bccde86e1c5';  -- … one per row
+-- -- update public.fields set clause_reference='5.10.2.3, 5.10.2.4' where id='c6f16e9d-4941-4899-a771-86d7249ba8ba';
+-- Rollback: restore the exported clause_reference values.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · UNIT CORRECTIONS — three groups of units are EKOWAI choices, not printed values.
+--   (a) R_energy (f4c868bd), E_energy (a5b14d69), P_energy (4df1d896) carry unit 'MJ'. §7.6.3 (p.32) prints no unit at all:
+--       "$P$ Energiemenge aus Primärquellen, die beim Herstellungsverfahren zum Herstellen des Produktes eingesetzt wird;
+--       $R$ Energiemenge, die sich aus dem Prozess der Energierückgewinnung ergibt; $E$ Energiemenge aus Primärquellen, die
+--       für den Prozess der Energierückgewinnung eingesetzt wird…". The formula is a ratio, so any consistent unit is valid.
+--       Proposal: unit 'MJ (frei waehlbar, muss fuer R, E, P gleich sein)' or an explicit engineer-chosen unit selector.
+--   (b) A_mass_recycled (9d1257d4), P_mass_product (45dab36f) carry unit 'kg'. §7.8.4.1 (p.37) prints "A Masse des recycelten
+--       Materials; $P$ Produktmasse." with no unit; X = A/P is a ratio.
+--   (c) carbon_footprint_value (800f9d17) carries unit 'kg CO2e'. DIN EN ISO 14021 prints NEITHER a unit NOR a method:
+--       §7.17.2.2 (p.47) "Die Quantifizierung und Kommunikation von „Carbon Footprints“ von Produkten muss nach ISO/TS 14067
+--       durchgeführt werden." → NR (ISO/TS 14067 not in the library). Proposal: keep the unit but mark the field NR/derived
+--       from the referenced standard, so it is never presented as a DIN-14021-fixed value.
+-- ☐ RATIFIED
+-- -- update public.fields set unit='-' where id in ('f4c868bd-d189-427c-8cb2-9be78e77d15b','a5b14d69-a416-47dc-9e9f-92d827772677','4df1d896-b84a-4638-a66a-e5d9cfdd2ff9','9d1257d4-0e72-48f2-acdf-4afe530d3d6d','45dab36f-156c-47bb-8132-00b5c7379209');
+-- Rollback: restore unit='MJ' on the three energy fields and unit='kg' on the two mass fields.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · is_required REVIEW.
+--   CORRECT as encoded (no change proposed, recorded so the review is not repeated):
+--     symbol_used (40fe9752) false — §5.8.1 (p.19) "ist die Verwendung eines Symbols freigestellt".
+--     symbol_distinguishable (c3652d7e) false — §5.8.3 (p.19) "SOLLTEN … leicht zu unterscheiden sein" (recommendation).
+--     natural_object_link (8c7299a2) false — §5.8.5 conditional on a natural object being depicted.
+--     explanatory_statement (83910123) false — §5.6 conditional (see S-7 a).
+--     all 14 ws-05 numeric/boolean fields false — every Abschnitt-7 obligation is conditional on the claim being made.
+--   TO REVIEW:
+--     free_claim_substance_level_ok (c938c92b) is_required=false but REQ-02 blocks unconditionally on "== True" (S-7 b) —
+--       the flag and the gate disagree; whichever way Alvaro rules, both must move together.
+--     comparative_claim (a15413f5), comparison_basis (3f449e53), comparison_same_functional_unit (366a3df2),
+--       comparison_time_interval (9317fab5) all is_required=false but REQ-14/REQ-15/REQ-46 block on their presence (S-7 c/d).
+--     mobius_loop_used (c6f16e9d) is_required=false but REQ-48 blocks unless it is True (S-1 c).
+--   NO phantom fields were found: every one of the 47 symbols has a label, a clause_reference and a description, and none is
+--   an orphaned enum token materialised as a field.
+-- ☐ RATIFIED
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 · EMPTY WORKSHEET — DIN-14021-02 "Begriffe & Definitionen" (391ac803-77e4-4af6-a8a7-6d20c1bf7049) has ZERO active
+--   fields and ZERO gates; the export returns nothing for it. §3 of the standard (p.10–14) is 19 general terms plus the §3.2
+--   selected-terms table, all of it definitional — nothing an engineer enters. Either the worksheet should be deactivated,
+--   or it should become a read-only glossary surface (the §3.1.x definitions are already quoted, one per field, in the pack).
+--   It is also the only worksheet without a gate, so a user reaching it has nothing to do and nothing to complete.
+-- ☐ RATIFIED
+-- -- update public.worksheet_templates set active=false where id='391ac803-77e4-4af6-a8a7-6d20c1bf7049';   -- (confirm the column exists before applying)
+-- Rollback: set active=true.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-13 · ENUM EDITS.
+--   (a) selected_claim_type (a8420fa9) has 23 tokens. The printed §3.2 table (p.14) lists SEVENTEEN, and the §7.1.2 ANMERKUNG
+--       list (p.25) repeats the same seventeen ("7.2 kompostierbar … 7.13 Abfallminderung"). The five extra tokens
+--       (renewable_material 7.14.1, renewable_energy 7.15.1, sustainable 7.16.1, product_carbon_footprint 7.17.2,
+--       carbon_neutral 7.17.3) are real Abschnitt-7 subclauses added by the 2016 revision but are NOT in either printed list —
+--       flagging them so the divergence is a recorded decision, not an accident.
+--       SUBSTANTIVE: the token "sustainable" is offered as a selectable claim type while §7.16.1 (p.46) says unqualified
+--       "nachhaltig"/"Nachhaltigkeit" claims "nicht verwendet werden dürfen" and §5.5 (p.16) forbids any claim of achieving
+--       sustainability. Proposal: either remove the token, or keep it and add a gate
+--       IF selected_claim_type == sustainable THEN sustainability_claim_qualified == True (new ws-03 boolean, clause 7.16.1).
+--       ALSO: four tokens (pre_consumer_material, post_consumer_material, recycled_material, recovered_reclaimed_material)
+--       are §7.8.1.1 DEFINITIONS of terms inside the Recyclatgehalt claim, not claim types a claimant selects.
+--   (b) communication_channel (7fd849d3) has 6 tokens; §3.1.4 Anmerkung 1 (p.10–14) lists SEVEN: "…durch Aufschriften auf dem
+--       Produkt oder der Verpackung, durch Produktliteratur, technische Bulletins, Werbung, REKLAME, Telemarketing als auch
+--       durch digitale oder elektronische Medien…". The missing one is "Reklame" (EN "publicity").
+--       Proposal: append {"value":"publicity","label_de":"Reklame","label_en":"publicity","order_index":7,"regulation_reference":"3.1.4"}.
+--   (c) comparison_basis (3f449e53) is single-select, but §6.3.1 (p.22) reads "im Hinblick auf EINEN ODER MEHRERE der
+--       folgenden Punkte" — multi-select is what the source describes.
+-- ☐ RATIFIED
+-- -- update public.fields set enum_values = enum_values || '[{"value":"publicity","label_de":"Reklame","label_en":"publicity","order_index":7,"regulation_reference":"3.1.4"}]'::jsonb where id='7fd849d3-cb9a-4792-a324-43e554a03a4f';
+-- Rollback: strip the appended token; restore single-select on comparison_basis.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-14 · MIS-ANCHORED GATE QUOTE — REQ-22 (5959aabf-e977-4d66-83b9-ec6936e7f20a, ws 05) enforces
+--   "renewable_material_pct IS NOT NULL" but quotes §7.14.2 FIRST paragraph (p.44), which is about the replenishment rate of
+--   virgin materials and says nothing about a percentage: "Wenn bei Primärrohstoffen Aussagen zur Erneuerbarkeit gemacht
+--   werden, müssen diese Materialien aus Quellen stammen, die sich mit einer Geschwindigkeit regenerieren, die gleich oder
+--   höher als die Geschwindigkeit des Abbaus ist."
+--   The sentence that constrains the field is the SECOND/THIRD paragraph of the same subclause: "Eine uneingeschränkte Aussage
+--   zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 \% aus erneuerbarem Material besteht… a) wenn eine Aussage
+--   zum Gehalt an erneuerbarem Material gemacht wird, muss der prozentuale Massenanteil von erneuerbarem Material angegeben
+--   werden; b) der prozentuale Anteil von erneuerbarem Material (Massenanteil) in Produkten und in Verpackungen muss getrennt
+--   angegeben werden und darf nicht zusammengefasst werden." (p.44)
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set source_quote='[7.14.2] Eine uneingeschränkte Aussage zur Erneuerbarkeit ist nur zulässig, wenn das Produkt zu 100 % aus erneuerbarem Material besteht, wobei nur geringfügige Anteile an nicht erneuerbarem Material in diesem Material erlaubt sind. Andernfalls müssen Aussagen zur Erneuerbarkeit wie folgt eingeschränkt werden: a) wenn eine Aussage zum Gehalt an erneuerbarem Material gemacht wird, muss der prozentuale Massenanteil von erneuerbarem Material angegeben werden; b) der prozentuale Anteil von erneuerbarem Material (Massenanteil) in Produkten und in Verpackungen muss getrennt angegeben werden und darf nicht zusammengefasst werden.' where id='5959aabf-e977-4d66-83b9-ec6936e7f20a';
+-- Rollback: restore the exported source_quote.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-15 · SEVERITY NOTES — all 50 gates are severity='block'; the standard has no graduated severities, so block is the right
+--   default for a "muss/darf nur" clause. Two exceptions found, both already covered above:
+--   (a) REQ-48 quotes §5.10.2.1 (p.20), whose second sentence is a recommendation: "Die Ausführung SOLLTE jedoch ausreichend
+--       kontrastreich sein, damit das Symbol deutlich zu erkennen und unterscheidbar ist." The first sentence IS a "muss"
+--       ("Sobald es als Umweltaussage verwendet wird, muss dessen Ausführung die graphischen Anforderungen an ISO 7000-1135
+--       erfüllen"), so block stays appropriate — but only once the polarity is fixed (S-1 c). The contrast requirement itself
+--       must NOT be enforced at block.
+--   (b) REQ-26 at block enforces nothing (S-2). Nothing else in this standard anchors a block gate on "sollte/should".
+--   NOT a severity issue but recorded here: §7.3.2.1 a) diverges between the two printed language columns — German
+--   "das den zu erreichenden Abbaugrad und die Testdauer einschließt" (p.28, md line 1156) vs English "that includes maximum
+--   level of degradation and test duration" (md line 1178). "zu erreichender" (to be achieved) and "maximum" are not the same
+--   requirement. Both are official versions of EN ISO 14021:2016. No EKOWAI field carries this value today, so nothing is
+--   wrong in the encoding — but if a degradation-level field is ever added, the divergence needs a ruling.
+-- ☐ RATIFIED
