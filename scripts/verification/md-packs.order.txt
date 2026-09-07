@@ -45,3 +45,4 @@ dwa-m-349-md-verification-pack.sql  DWA-M-349
 dwa-m-381e-md-verification-pack.sql  DWA-M-381E
 iso-14004-md-verification-pack.sql  ISO-14004
 iso-14064-1-md-verification-pack.sql  ISO-14064-1
+iso-14064-2-md-verification-pack.sql  ISO-14064-2
