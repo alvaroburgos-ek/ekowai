@@ -1,0 +1,417 @@
+-- ============================================================================
+-- DWA-M-179-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings). 2026-09-07.
+-- Apply only after Alvaro marks a block RATIFIED. Evidence quoted VERBATIM from the md transcript named
+-- in dwa-m-179-1-md-verification-pack.sql (C:\Users\Ekowai\Desktop\Guidelines\DWA-M-179-1\DWA-M_179-1_GD.md);
+-- page convention identical to the pack header (Inhalt + Bilder-/Tabellenverzeichnis, cross-checked
+-- against mathpix image indices, which equal the printed page 1:1 on this document).
+-- Standard is a GELBDRUCK (Entwurf, September 2024, Frist 30. November 2024) — everything below is
+-- staged against a draft that can still change.
+-- ============================================================================
+
+-- S-1 · PHANTOM FIELDS — enum-value tokens materialised as stand-alone number fields.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Seven rows have a symbol that is an enum VALUE of another field, no label beyond the token, no
+-- clause_reference, no description, and are referenced by no equation and no gate condition as an
+-- operand in their own right. The guideline defines no such quantity, so no verbatim quote can exist —
+-- they are the residue of this pass.
+--   M179-03.II                     7c17d909-a490-4886-9e68-55e58f248594  (value of belastungskategorie)
+--   M179-03.III                    c86a571d-d7d5-49de-ae28-5b5809617982  (value of belastungskategorie)
+--   M179-08.sedimentation          a9b0c8d8-6e6b-4684-8179-8c2466ad0369  (value of treatment_method)
+--   M179-08.filtration_oberflaeche 66a33431-73cc-43a3-a14f-2a0c8096c951  (value of treatment_method)
+--   M179-08.fall_4                 d5d5fcf0-d72d-4c0c-ba72-bd3820779f58  (value of flow_split_case)
+--   M179-08.vollstrom              f9ba5e4a-24f2-4474-93d9-a04d615f9729  (value of flow_split_case)
+--   M179-16.ready                  df8e334f-4a73-4991-bf78-c7ecb637625e  (right operand of gate REQ-30)
+-- Evidence that these are enum values, not quantities — the guideline names them only as cases:
+--   §1 Bild 1 (Belastungskategorie row):
+--   Belastungskategorie & I & I oder II oder III & \multicolumn{2}{|c|}{I bis III} & alle I oder alle II oder 
+--     alle III — printed p.9
+--   §7.2 (the Fall-/Vollstrom cases):
+--   Sofern beabsichtigt ist, eine Abflussaufteilung durch technische Einbauten vor der Behandlungsanlage 
+--     (Fall 4 in Bild 3) zu realisieren, muss ein Mindestabfluss von $5 \mathrm{l} / \mathrm{s}$ (Vermeidung 
+--     von Verlegung) realisiert werden (Arbeitsblatt DWA-A 166). Dafür wurden in Bild 3, Fall 4, 
+--     Orientierungswerte für anzuschließende Mindestflächen ( $A_{\mathrm{b}, \mathrm{a}}$ ) aufgeführt. Bei 
+--     Zuflüssen $\leqslant 5 \mathrm{l} / \mathrm{s}$ ist keine Abflussaufteilung möglich 
+--     (Vollstrombehandlung). — printed p.18
+-- NOTE on M179-16.ready: it is ALSO the literal in gate REQ-30 (see S-3) and "ready" is not a member of
+--   the betriebsanweisung_status enum (not_started / in_progress / draft / final). Deactivating the field
+--   does NOT fix REQ-30 — do S-3 as well.
+-- update public.fields set active=false
+--  where id in ('7c17d909-a490-4886-9e68-55e58f248594','c86a571d-d7d5-49de-ae28-5b5809617982',
+--               'a9b0c8d8-6e6b-4684-8179-8c2466ad0369','66a33431-73cc-43a3-a14f-2a0c8096c951',
+--               'd5d5fcf0-d72d-4c0c-ba72-bd3820779f58','f9ba5e4a-24f2-4474-93d9-a04d615f9729',
+--               'df8e334f-4a73-4991-bf78-c7ecb637625e');
+-- rollback: set active=true on the same seven ids.
+-- PRE-CHECK before applying: no project_parameters rows may hold values for these ids.
+
+-- S-2 · UNSOURCED REGRESSION INPUTS (the #22 / data_class class).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- M179-06.regression_a_AFS63 (22f7a74e-36f3-4995-8048-6a2cd1a6b968) and
+-- M179-06.regression_b_AFS63 (1caf61e2-11a7-4ad1-86f2-5ee054bc187c) feed the encoded equation
+--   eta_BV = regression_a_AFS63 * exp(-regression_b_AFS63 * q_A_max)   (equation id d929851f-…)
+-- The guideline prints NO regression. eta_BV is READ OFF Bild 4 (a diagram), and the md carries only the
+-- two worked-example anchor points:
+--   §7.3.1 (validity range of Bild 4):
+--   Bild 4 zeigt auf der Basis von Untersuchungen an Großanlagen Orientierungswerte zum erreichbaren 
+--     Sedimentationswirkungsgrad für AFS und AFS63 (entspricht $\eta_{\mathrm{BV}}$ ) für unterschiedliche 
+--     $q_{\mathrm{A}, \max }$ (Bemessungswerte) (FUCHS \& KEMPER 2018). Die dargestellten Zusammenhänge 
+--     werden unter anderem durch aktuelle Arbeiten von UHL et al. 2024 bestätigt. Der Anwendungsbereich von 
+--     Bild 4 bezieht sich auf die durch Feld- und Laboruntersuchungen abgedeckten Oberflächenbeschickungen 
+--     von $1 \mathrm{~m} / \mathrm{h}$ bis $10 \mathrm{~m} / \mathrm{h}$. — printed p.20
+--   Anhang A.2.2 (anchor 1):
+--   Bei der Festsetzung der maximalen Oberflächenbeschickung $q_{\mathrm{A}, \max }=4 \mathrm{~m} / 
+--     \mathrm{h}$ ergibt sich aus Bild 4 der Wirkungsgrad des Behandlungsverfahrens $\eta_{\mathrm{BV}}=40 
+--     \%$. — printed p.32
+--   Anhang A.2.3 (anchor 2):
+--   Bei der Festsetzung der maximalen Oberflächenbeschickung $q_{\mathrm{A}, \max }=2 \mathrm{~m} / 
+--     \mathrm{h}$ ergibt sich aus Bild 4 der Wirkungsgrad des Behandlungsverfahrens $\eta_{\mathrm{BV}}=52 
+--     \%$. — printed p.32
+--   §7.3.1 (the 40 %/4 m/h pairing again):
+--   Um für die Feststofffraktion der AFS63 beispielsweise einen mittleren Wirkungsgrad von $\geqslant 40 \%$ 
+--     erreichen zu können, muss die maximale Oberflächenbeschickung $q_{\mathrm{A}, \max }$ von reinen 
+--     Sedimentationsanlagen auf $\leqslant 4 \mathrm{~m} / \mathrm{h}$ begrenzt werden. — printed p.20
+--   Anhang A.2.1 (lower bound of the design loading):
+--   Als untere Grenze der Bemessungsoberflächenbeschickung wird hierbei ein Wert von $1 \mathrm{~m} / 
+--     \mathrm{h}$ festgelegt. — printed p.31
+-- Under SR-1 neither a nor b is verifiable: a proven computation is not a proven input. Options:
+--  (a) keep the curve fit but declare a and b data_class=derived with an explicit provenance note
+--      "Kurvenfit durch die zwei gedruckten Stützpunkte (4 m/h → 40 %; 2 m/h → 52 %), nicht im
+--      Merkblatt gedruckt". The arithmetic consequence of those two points is b = ln(52/40)/2 ≈ 0,1312
+--      and a = 52·e^(2·0,1312) ≈ 67,6 — DERIVED HERE, NOT PRINTED ANYWHERE IN THE GUIDELINE.
+--  (b) replace the regression with an SR-2 selection field: the engineer reads eta_BV off Bild 4 and
+--      enters it, with the two printed anchor points shown as guidance and REQ-14 (1–10 m/h) as range.
+--  (c) leave a/b unverified — then every sedimentation project carries an unverified input into A_sed.
+-- RECOMMENDATION (not applied): (b). Bild 4 is a diagram in the source; SR-2 says a curve the engineer
+-- must read is an explicit human selection, not a silently fitted constant.
+-- No SQL is proposed until one option is chosen; (b) would deactivate both coefficient fields, drop the
+-- Bild-4 equation row and set M179-06.eta_BV is_required=true.
+
+-- S-3 · GATE REQ-30 CAN NEVER PASS (block).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Gate 28f79d53-16be-49d4-8fa2-8109df5dd6c8, worksheet M179-16, severity=block,
+--   condition: funktionspruefung_done == True AND betriebsanweisung_status == ready
+-- 'ready' is NOT a value of the betriebsanweisung_status enum, whose members are
+--   not_started / in_progress / draft / final. The right-hand comparison can therefore never be true and
+--   the block gate permanently blocks finalize on every project that reaches M179-16.
+--   §8.4.6 (the actual obligation):
+--   Vor der Inbetriebnahme ist eine Funktionsprüfung durchzuführen und eine Betriebsanweisung zu erstellen 
+--     (siehe 8.4.4). — printed p.27
+--   §8.4.4 (what the Betriebsanweisung is):
+--   Für eine dezentrale Anlage zur Niederschlagswasserbehandlung sind bereits in der Planungsphase eine 
+--     Betriebs- und gegebenenfalls eine Dienstanweisung zu erstellen. — printed p.26
+-- update public.compliance_requirements
+--    set condition = 'funktionspruefung_done == True AND betriebsanweisung_status == final'
+--  where id = '28f79d53-16be-49d4-8fa2-8109df5dd6c8';
+-- rollback: set condition = 'funktionspruefung_done == True AND betriebsanweisung_status == ready'.
+
+-- S-4 · MIS-HOMED GATES — six gates live on M179-08 but read no field of M179-08.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- M179-08 ("Hydraulischer Wirkungsgrad") owns eta_hyd, eta_BV, eta_ges_target, eta_ges. These six gates
+-- read only fields of M179-05 / M179-06 / M179-10, so they fire on the wrong sheet:
+--   REQ-16 01240223-80b8-4005-8044-6b1473701e93  treatment_method(05) + sludge_storage_min(06) -> M179-06 or M179-11
+--   REQ-18 42f1b607-8bb9-4405-af85-6655df4cfc76  treatment_method(05) + v_F(06)                -> M179-06
+--   REQ-19 492971c5-46b4-4007-b904-4b53e629b14f  treatment_method(05) + filter_thickness(06)   -> M179-06
+--   REQ-20 af8651ec-66cb-4e20-9b54-57e9611256ae  treatment_method(05) + filter_AFS63_max_load(06) -> M179-06 or M179-12
+--   REQ-22 4b734f91-3e2b-4d52-aeb1-0bf0630ce04e  flow_split_case(05) + Q_krit(10)               -> M179-10
+--   REQ-23 934f9cb6-b466-4a08-ba6b-2259056dd474  Q_krit(10) + flow_split_case(05)               -> M179-10
+-- Worksheet ids: M179-06 = 423f3ed0-dc61-466e-b7bf-86bce6722e8a, M179-10 = 67ae1698-478f-43c1-9b59-2454614e2a45,
+--                M179-11 = 7970f100-817f-4aff-b28f-2117c0fb3811, M179-12 = 37fbafc7-efa5-4a11-84b3-a4ccd3baead5.
+-- update public.compliance_requirements set worksheet_template_id = '423f3ed0-dc61-466e-b7bf-86bce6722e8a'
+--  where id in ('42f1b607-8bb9-4405-af85-6655df4cfc76','492971c5-46b4-4007-b904-4b53e629b14f');
+-- update public.compliance_requirements set worksheet_template_id = '67ae1698-478f-43c1-9b59-2454614e2a45'
+--  where id in ('4b734f91-3e2b-4d52-aeb1-0bf0630ce04e','934f9cb6-b466-4a08-ba6b-2259056dd474');
+-- REQ-16 and REQ-20 need a decision first (M179-06 = where the parameter is entered, vs M179-11/12 =
+-- where the dimensioning result lives). rollback: set worksheet_template_id back to
+-- 'a8cd23da-919d-4424-9355-26f7ca7caa84' (M179-08) on all six ids.
+
+-- S-5 · EMPTY-CONDITION GATES.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Ten of the 33 gates carry an empty condition string. Two distinct classes:
+--  (i) DEAD ROWS — empty condition AND source_quote IS NULL AND requires_attestation = false. They
+--      enforce nothing, attest nothing and only duplicate the equations they point at:
+--        REQ-10 b541b4bb-b958-4769-baf5-317f1f0f40d8  clause '8.2 / Gleichung (2)'
+--        REQ-11 09552389-f716-49e3-bb98-e0b4d8cf86cb  clause '7.2 / Gleichung (1)'
+--        REQ-12 d812a5fd-9195-4e5d-9e6f-e9618a8bd267  clause '8.2 / Gleichung (3)'
+--        REQ-17 a698028b-7b4f-4b24-a663-fe0a15d05c80  clause '8.2 / Gleichung (4)'
+--        REQ-21 6ce52cb6-11ba-4eb1-b065-baeb7f15d744  clause '8.2 / Gleichung (5)'
+--      Gleichungen (1)-(5) are already encoded as equations and are verified by this pass. Propose
+--      deactivation (or deletion) of the five rows.
+--  (ii) ATTESTATION GATES — empty condition is by design (requires_attestation = true); they carry a
+--      real source_quote and are legitimate: REQ-03 (Tab. 3), REQ-29 (§8.4.4), REQ-31 (§9 / DWA-M 369),
+--      REQ-32 (§8.4.2 Kostenvergleichsrechnung), REQ-33 (§10.2 Klimakennung). No change proposed.
+-- update public.compliance_requirements set active=false
+--  where id in ('b541b4bb-b958-4769-baf5-317f1f0f40d8','09552389-f716-49e3-bb98-e0b4d8cf86cb',
+--               'd812a5fd-9195-4e5d-9e6f-e9618a8bd267','a698028b-7b4f-4b24-a663-fe0a15d05c80',
+--               '6ce52cb6-11ba-4eb1-b065-baeb7f15d744');
+-- rollback: set active=true on the same five ids.
+
+-- S-6 · BLOCK GATES ANCHORED ON SOFT TEXT (block -> warn).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-01 a5af750c-0389-4de0-bd0f-56527f8c64ba  (A_b_a <= 5000, block)
+--   §1 — the anchor says "üblicherweise", not a limit:
+--   Die angeschlossene Fläche $A_{\mathrm{b}, \mathrm{a}}$ beträgt üblicherweise bis $5.000 \mathrm{~m}^{2}$. 
+--     — printed p.8
+--   The 5.000 m² is a description of the typical application range of dezentrale Anlagen, not a
+--   permissible maximum. A block gate here refuses lawful designs. Propose severity block -> warn.
+-- REQ-08 3ec8dfec-5a35-4f0f-a6fe-0d72051ea70c  (eta_hyd >= 50, block)
+--   §6.1 — "wird als nicht sinnvoll angesehen":
+--   Der Anteil des zu behandelnden Jahresniederschlags wird über den hydraulischen Wirkungsgrad 
+--     $\left(\eta_{\text {hyd }}\right)$ beschrieben (siehe Bild 2). Ein Anteil von weniger als $50 \%$ wird 
+--     als nicht sinnvoll angesehen. — printed p.15
+--   An opinion clause ("nicht sinnvoll"), not a prohibition. Propose block -> warn.
+-- REQ-25 6b6539b3-4fe4-4bba-8eee-8fbcaeb46334  (site_factor_sum <= 1, block)
+--   §8.3 after Tab. 6 — the sum > 1 case is regulated, not forbidden:
+--   Unter Standardbedingungen (Summe der standortspezifischen Einflüsse $\leqslant 1$ ) wird eine Standzeit 
+--     der Anlagen von mindestens einem Jahr bzw. ein Reinigungsintervall von maximal einmal pro Jahr 
+--     vorausgesetzt. Für höhere Summenwerte gilt: | Summenwert 1: Erhöhter Schlammanfall → erhöhter Aufwand 
+--     im Betrieb (z. B. häufigere Reinigungsintervalle notwendig), | Summenwert $\geqslant 3$ : Sehr hoher 
+--     Schlammanfall → mangelnde Betriebssicherheit der Anlage. — printed p.24–25
+--   The guideline prescribes CONSEQUENCES for sums > 1 (shorter cleaning intervals, larger sludge
+--   chamber); it does not forbid them. A block at <= 1 over-enforces and also makes REQ-26 (< 3)
+--   unreachable (see S-10). Propose block -> warn, keeping REQ-26 as the real block at >= 3.
+-- update public.compliance_requirements set severity='warn' where id in
+--   ('a5af750c-0389-4de0-bd0f-56527f8c64ba','3ec8dfec-5a35-4f0f-a6fe-0d72051ea70c',
+--    '6b6539b3-4fe4-4bba-8eee-8fbcaeb46334');
+-- rollback: set severity='block' on the same three ids.
+
+-- S-7 · REQ-09 IS CORRECT BUT MIS-ANCHORED.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-09 81f946dc-3d71-4e9b-b9b9-a90716b7a1dc  (eta_hyd <= 100, block). Its source_quote is the
+-- Abflussaufteilung sentence, which only says when a flow split is POSSIBLE — it does not support a block:
+--   §8.2 (current anchor):
+--   Der hydraulische Wirkungsgrad der Anlage beschreibt den Anteil des Niederschlagsabflusses, der in der 
+--     Anlage zu behandeln ist. Eine Abflussaufteilung ist möglich, wenn der hydraulische Wirkungsgrad $<100 
+--     \%$ ist. — printed p.23
+-- The sentence that actually makes eta_hyd > 100 % a hard exclusion is in Anhang A.2.1:
+--   Anhang A.2.1 (proposed anchor):
+--   Bei einigen Anwendungsfällen wird sich beim $\eta_{\text {hyd }}$ ein Wert $>100 \%$ ergeben, was zum 
+--     Ausschluss der gewählten Behandlungsmaßnahme führt (siehe Beispiel A.2.2). — printed p.31
+--   worked example confirming it, A.2.2:
+--   Die gewählte Sedimentation mit $4 \mathrm{~m} / \mathrm{h}$ reicht demnach für das Behandlungsziel nicht 
+--     aus. — printed p.32
+-- Propose: keep severity=block, re-anchor source_quote to the A.2.1 sentence (+ the A.2.2 example) and
+-- retag clause_reference from '§8.2' to '§8.2; Anhang A.2.1'. No condition change.
+
+-- S-8 · WARN GATES ANCHORED ON HARD TEXT (warn -> block).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-16 01240223-80b8-4005-8044-6b1473701e93  (sludge_storage_min >= 15, warn)
+--   §8.2 — "ist … vorzusehen":
+--   Bei Sedimentationsanlagen ist zusätzlich zum Sedimentationsraum ein Schlammspeicher von $\geqslant 15 
+--     \mathrm{~kg} /\left(\mathrm{m}^{2} \cdot \mathrm{a}\right)$ AFS vorzusehen. — printed p.23
+--   Anhang A.2.1 — "werden … festgelegt":
+--   Bei der Sedimentation werden maximale Rückhaltemengen an AFS von $15 \mathrm{~kg} /\left(\mathrm{m}^{2} 
+--     \cdot \mathrm{a}\right)$ bezogen auf die Sedimentationsfläche festgelegt, um einen sachgemäßen Betrieb 
+--     zu ermöglichen (Entleerung ca. 1-mal pro Jahr). — printed p.31
+-- REQ-15 39ffa8e3-c9dc-4cec-9e9e-9ca5e0041a19  (throughput_deviation_pct <= 20, warn)
+--   §7.3.1 — a stated precondition of the achievable eta_BV:
+--   Die in Bild 4 dargestellten, über eine entsprechende Bemessung erreichbaren Sedimentationswirkungsgrade 
+--     (entspricht $\eta_{\mathrm{BV}}$ ) setzen voraus, dass eine Reihe konstruktiver Vorgaben eingehalten 
+--     werden. Wesentlich ist, dass | der Anlagendurchsatz vor der Anlage auf den zu behandelnden Abfluss 
+--     begrenzt wird (Abweichung maximal $20 \%$ ) — printed p.20
+-- REQ-05 34700fe6-1dc8-47ba-a070-07f7015e4961  (IF cat_II_III_mixing THEN eta_ges_required >= 63, warn)
+--   §8.2 — the avoidance is soft ("sollte"), the consequence is hard ("gelten"):
+--   Aus gleichem Grund sollte eine Vermischung unterschiedlich stark belasteter Abflüsse (Kategorie II mit 
+--     III) vermieden werden. Sollte eine Vermischung nicht vermeidbar sein, gelten die Anforderungen der 
+--     jeweils am stärksten belasteten Fläche. — printed p.22
+--   Anhang A.2.1 confirms the consequence:
+--   Bei Mischflächen mit den Kategorien II und III erfolgt die Dimensionierung der Behandlungsanlagen der 
+--     gesamten Fläche gemäß den Anforderungen für die Kategorie III, siehe 8.2. — printed p.31
+--   The ENCODED condition is the hard half only (if mixed, apply the Kat.-III requirement), so warn
+--   under-enforces a "gelten"/"erfolgt … gemäß den Anforderungen für die Kategorie III" rule.
+-- update public.compliance_requirements set severity='block' where id in
+--   ('01240223-80b8-4005-8044-6b1473701e93','39ffa8e3-c9dc-4cec-9e9e-9ca5e0041a19',
+--    '34700fe6-1dc8-47ba-a070-07f7015e4961');
+-- rollback: set severity='warn' on the same three ids.
+-- NOT proposed for change: REQ-13 (q_A_max <= 4). Its "muss … begrenzt werden" is conditioned on the
+--   "beispielsweise ≥ 40 %" target, so warn is defensible; note kept for the record.
+
+-- S-9 · REQ-27 OVER-ENFORCES A RECOMMENDATION.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-27 2f77c4b0-24f5-4118-9e0c-1d71f93fe896, condition
+--   'fachkundige_person_assigned == True AND wartungsvertrag_present == True'
+--   §9 — first half is "müssen", second half is "wird … empfohlen":
+--   Kontrolle, Reinigung und Wartung müssen durch fachkundige Personen durchgeführt werden, die 
+--     gegebenenfalls durch den Anlagenhersteller eingewiesen werden. Bei komplizierten Anlagen, insbesondere 
+--     bei privaten Betreibern, wird der Abschluss von Wartungsverträgen empfohlen. — printed p.27
+-- The maintenance contract is a recommendation limited to "komplizierte Anlagen, insbesondere bei
+-- privaten Betreibern"; the gate demands it unconditionally. It also contradicts
+-- M179-16.wartungsvertrag_present being is_required=false (see S-13).
+-- update public.compliance_requirements
+--    set condition = 'fachkundige_person_assigned == True'
+--  where id = '2f77c4b0-24f5-4118-9e0c-1d71f93fe896';
+-- rollback: restore the two-term condition. (Alternative: keep the contract term but raise a separate
+-- warn gate for it, so the printed recommendation is still surfaced.)
+
+-- S-10 · TAUTOLOGY AND SUBSUMPTION.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (a) REQ-28 e906215e-4d63-4e51-ba62-d13dd5ae8848, condition 'monitoring_planned IN {True, False}' is
+--     always true for a boolean field — a no-op gate. Its source is a recommendation:
+--   §9:
+--   Ist beabsichtigt Erkenntnisse zur Wirksamkeit des Anlagerns zu erheben, empfiehlt sich ein Monitoring von 
+--     mindestens einem Jahr. — printed p.28
+--     Propose either deactivation, or a real condition tied to the trigger the source names
+--     ('IF monitoring_planned == True THEN monitoring_duration_months >= 12' — needs a new field).
+-- (b) REQ-25 (site_factor_sum <= 1, block) subsumes REQ-26 (site_factor_sum < 3, block): no project can
+--     ever reach REQ-26 while REQ-25 blocks. Doing S-6 (REQ-25 -> warn) resolves this; if S-6 is
+--     rejected, REQ-26 should be deactivated instead as unreachable.
+
+-- S-11 · MISSING GATES FOR PRINTED HARD LIMITS.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Five printed constraints have a field but no compliance_requirement:
+-- (a) Filterflächenverhältnis A_F >= 1 % of A_b,a — encoded only as equation (5), never enforced:
+--   §7.3.2:
+--   Diese Empfehlungen werden eingehalten, wenn die Anlage mindestens $1 \%$ Filterfläche $A_{\mathrm{F}}$ 
+--     pro angeschlossener Fläche $A_{\mathrm{b}, \mathrm{a}}$ aufweist. — printed p.21
+--   Anhang A.1:
+--   Ist die Filtration das alleinige Verfahren, wird ein Wert von $A_{\mathrm{F}} \geqslant 1 \%$ von 
+--     $A_{\mathrm{b}, \mathrm{a}}$ empfohlen. Wird die Filtration nach einer Vorbehandlung, zum Beispiel 
+--     durch Sedimentation eingesetzt, kann der Wert entsprechend der nachgewiesenen Wirksamkeit der 
+--     Erstbehandlung reduziert werden. — printed p.31
+--     proposed gate: IF treatment_method IN {filtration_oberflaeche, filtration_raum} THEN A_F >= 0.01 * A_b_a  (warn — the source says 'empfohlen'/'festgelegt', and §8.2 permits reduction after effective pre-treatment)
+-- (b) Emissionsziel 280 kg/(ha·a) — field M179-04.emission_target_AFS63 exists, no gate:
+--   §8.2:
+--   Das emissionsorientierte Behandlungsziel ist die Begrenzung des flächenspezifischen Stoffaustrags für 
+--     AFS63 auf $280 \mathrm{~kg} /(\mathrm{ha} \cdot \mathrm{a})$ (Arbeitsblatt DWA-A 102-2). — printed p.22
+--     proposed gate: emission_target_AFS63 <= 280 (block; the value is DWA-A 102-2's, so tag it NR/
+--     cross-standard in the note).
+-- (c) Untere Grenze der Bemessungsoberflächenbeschickung q_A,max = 1 m/h:
+--   Anhang A.2.1:
+--   Als untere Grenze der Bemessungsoberflächenbeschickung wird hierbei ein Wert von $1 \mathrm{~m} / 
+--     \mathrm{h}$ festgelegt. — printed p.31
+--     REQ-14 covers 1–10 m/h but only as warn; "festgelegt" is hard for the lower bound.
+-- (d) eta_BV = 95 % for Oberflächenfiltration at v_F <= 2,5 m/h — nothing binds M179-06.eta_BV:
+--   §7.3.2:
+--   Für die Oberflächenfiltration kann ein mittlerer langjähriger Wirkungsgrad $\eta_{\mathrm{Bv}}$ von $95 
+--     \%$ für AFS63 angenommen werden. — printed p.21
+--   Anhang A.3.1:
+--   Bei der Festsetzung des Verfahrenswirkungsgrads $\left(\eta_{\mathrm{BV}}\right)$ wird von einer 
+--     Oberflächenfiltration mit einer Filtergeschwindigkeit $v_{F}<2,5 \mathrm{~m} / \mathrm{h}$ ausgegangen. 
+--     Unter diesen Randbedingungen wird mit einem Verfahrenswirkungsgrad $\eta_{\mathrm{BV}}=95 \%$ 
+--     gerechnet. — printed p.33
+--     proposed gate: IF treatment_method == filtration_oberflaeche AND v_F <= 2.5 THEN eta_BV <= 95 (warn).
+-- (e) Filterflächenbelastung AFS63 <= 7 kg/(m²·a) is covered by REQ-20 but that gate is mis-homed (S-4).
+-- No SQL drafted: new compliance_requirements rows must come through the importer, not a hand-insert.
+
+-- S-12 · UNIT CORRECTIONS.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (a) A_b,a is encoded in THREE different units across the sheets that feed one equation:
+--       M179-02.A_b_a       28447dc9-391b-46f3-b091-aaffafab6db6  unit m²   (correct)
+--       M179-07.A_b_a_summary 60702cc9-bf0a-4da0-a057-6a40c7ffabb7 unit ha  (WRONG)
+--       M179-10.A_b_a_ref     3447fa1f-cee7-4bd0-889f-6acd6f1a2a8a  unit ha  (WRONG)
+--     The source legend for Gleichung (3) is explicit, and Gl. (3) divides by 10.000 precisely because
+--     A_b,a is in m² — feeding hectares gives Q_krit too small by 10^4:
+--   §8.2, Gl. (3) legend:
+--   Q_{\text {krit }}=A_{\mathrm{b}, \mathrm{a}} \cdot \Psi_{\mathrm{s}} \cdot r_{\text {krit }} / 10.000 
+--     \tag{3} | $A_{\mathrm{b}, \mathrm{a}} \quad$ angeschlossene befestigte Fläche in $\mathrm{m}^{2}$ — 
+--     printed p.23
+--   Tab. 2:
+--   $A_{\mathrm{b}, \mathrm{a}}$ & ha bzw. $\mathrm{m}^{2}$ & angeschlossene, befestigte Fläche im 
+--     kanalisierten Einzugsgebiet — printed p.11
+-- update public.fields set unit='m²'
+--  where id in ('60702cc9-bf0a-4da0-a057-6a40c7ffabb7','3447fa1f-cee7-4bd0-889f-6acd6f1a2a8a');
+-- rollback: set unit='ha' on the same two ids.
+-- PRE-CHECK: any project_parameters value already stored against these two ids was entered under the
+--   'ha' label and must be re-entered (or multiplied by 10.000) — flipping the unit alone silently
+--   changes the meaning of data already in the database.
+-- (b) percentage fields typed as unitless while Tab. 2 prints %:
+--       M179-08.eta_BV          c80d4d19-e074-43c2-be2e-d0c0ebe39bd2  unit '-'  -> %
+--       M179-08.eta_ges_target  7983f861-1cf7-4d18-9479-e6863201559d  unit '-'  -> %
+--       M179-13.eta_hyd_summary 33d80294-fede-4288-9749-0f0717a7aa83  unit '-'  -> %
+--       M179-17.eta_ges_achieved e6dedacc-c11e-4b57-9215-8e1d52ef8aec unit '-'  -> %
+--   Tab. 2:
+--   $\eta_{\mathrm{BV}}$ & \% & spezifischer Wirkungsgrad des Behandlungsverfahrens | $\eta_{\text {hyd }}$ & 
+--     \% & hydraulischer Wirkungsgrad | $\eta_{\text {ges }}$ & \% & Gesamtwirkungsgrad des Stoffrückhalts 
+--     der Behandlungsanlage — printed p.11
+-- update public.fields set unit='%' where id in ('c80d4d19-e074-43c2-be2e-d0c0ebe39bd2',
+--   '7983f861-1cf7-4d18-9479-e6863201559d','33d80294-fede-4288-9749-0f0717a7aa83',
+--   'e6dedacc-c11e-4b57-9215-8e1d52ef8aec');
+-- (c) M179-14: the eight Tabelle-6 booleans carry unit '(+1)'/'(-1)' and site_factor_sum carries
+--     '(integer)'. Those are the table WEIGHTS, not units. Propose unit=null and moving the weight into
+--     the description/label. Cosmetic; no calculation depends on it.
+
+-- S-13 · is_required REVIEW.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (a) The actual design limits are optional while their summary copies are mandatory:
+--       M179-06.q_A_max (00cd9747-…) opt, M179-06.v_F (a8086881-…) opt, M179-06.filter_thickness
+--       (0c1a3124-…) opt, M179-06.filter_AFS63_max_load (85ef3eb1-…) opt, M179-06.sludge_storage_min
+--       (fad7af95-…) opt, M179-11.A_sed (db2007e2-…) opt, M179-12.A_F (da17762e-…) opt
+--     — but M179-13.A_sed_summary / A_F_summary and M179-15.A_sed_final / A_F_final are is_required=true.
+--     Recommendation: make each of them conditionally required on treatment_method rather than flipping
+--     a global flag (a filtration-only project has no A_sed and vice versa). Needs the conditional-
+--     required mechanism; no blind is_required=true.
+-- (b) M179-16.wartungsvertrag_present (8dce678e-…) is_required=false but gate REQ-27 demands it True —
+--     resolve together with S-9.
+-- (c) M179-02.h_Na (f5c74823-…) and M179-02.Psi_m (96ca5365-…) are optional but are the only inputs of
+--     V_R,aM:
+--   Anhang A.2.1:
+--   Zur Berechnung der jährlichen Regenabflusssumme $V_{R, a m}\left(\mathrm{~m}^{3} / \mathrm{a}\right)$ 
+--     werden die Jahresniederschlagshöhe $h_{\mathrm{Na}}(\mathrm{mm} / \mathrm{a})$ sowie die befestigten 
+--     Flächen $A_{\mathrm{b}, \mathrm{a}}\left(\mathrm{m}^{2}\right)$ mit ihren jeweiligen Abflussbeiwerten 
+--     $\Psi_{\mathrm{m}}(-)$ herangezogen. — printed p.31
+--     If V_R,aM is to be reported at all, both become required.
+
+-- S-14 · CLAUSE RETAGS (evidence: the clause named does not contain the definition).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- §5 of this Merkblatt is "Stoffliche Belastung niederschlagsbedingter Abflüsse" (printed p.13) and §4 is
+-- "Vorgaben" (p.12) — neither contains any of the equations or symbols tagged to them.
+--   M179-07.* are tagged '§4'                -> '§1; Tab. 2' / '§8.2, Gl. (3)' / '§1, Bild 1'
+--   M179-08.eta_BV, eta_ges_target '§5, Gl.2' -> '§8.2, Gl. (2)'   (Gl. 2 is printed in §8.2, p.23)
+--   M179-09.eta_hyd_ref, r_krit_target '§5, Gl.1' -> '§7.2, Gl. (1)' / '§8.2'
+--   M179-10.A_b_a_ref, Psi_s_ref '§5, Gl.3'  -> '§8.2, Gl. (3)';  r_krit_ref -> '§7.2, Gl. (1)'
+--   M179-13.* are tagged '§5'                -> '§7.2' / '§8.2'
+--   M179-15.* are tagged '§6'                -> '§6.2; §8.2'
+--   M179-17.eta_ges_achieved, eta_ges_target_met '§6' -> '§7.1; §8.2'; documentation_complete '§7' -> '§8.4.3'
+--   M179-17.final_signoff_date/-engineer '§1' -> no clause (app metadata; verified as exempt in the pack)
+-- (b) ENUM METADATA: M179-06.filter_type (4123b9c0-…) carries md LINE NUMBERS as regulation_reference —
+--     '§7.3.2 line 580' and '§7.3.2 line 578'. A transcript line number leaked into production metadata.
+--     Propose regulation_reference='§7.3.2' on both enum values.
+-- (c) M179-05.treatment_method and M179-15.treatment_method_final reference 'Anh. A.3.3' for the
+--     combination case. See S-15: the guideline itself is inconsistent there.
+-- SQL deliberately not drafted per-row: clause_reference is free text and the retags should be applied as
+-- one reviewed batch after Alvaro picks the target strings above.
+
+-- S-15 · SOURCE DEFECTS IN THE GELBDRUCK ITSELF (observation, no SQL).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (a) The body text twice points at an Anhang section "A.3.3" that the Anhang does not contain; the
+--     combination example is printed as "A. 4":
+--   §8.2:
+--   Bei wirksamer Vorbehandlung (z. B. Sedimentation) kann das Filterflächenverhältnis entsprechend der 
+--     Wirksamkeit der Vorbehandlung verkleinert werden (siehe Beispiel A.3.3). — printed p.23
+--   Anhang A.1:
+--   Neben der Auswahl der Sedimentation und Filtration als alleinige Behandlungsverfahren wird in A.3.3 ein 
+--     Beispiel für eine mögliche Kombination von Sedimentation und Filtration beschrieben. — printed p.31
+--   what the Anhang actually prints:
+--   A. 4 Verkehrsfläche (V3) (Kategorie III; $830 \mathbf{m}^{\mathbf{2}}$ ) (Kombination Sedimentation und 
+--     Filtration) — printed p.34
+-- (b) Anhang A.4 contradicts itself on A_sed. The calculation gives 7,47 m² (and 3,6·8,3/4 = 7,47
+--     confirms it), the closing sentence of the same example prints 4,48 m²:
+--   A.4 calculation:
+--   Aus der maximalen Oberflächenbeschickung ( $q_{\mathrm{A}, \max }$ ) und dem Bemessungsabflusses ( 
+--     $Q_{\text {krit }}$ ) wird die notwendige Sedimentationsfläche $A_{\text {sed }}=7,47 \mathrm{~m}^{2}$ 
+--     berechnet. — printed p.34
+--   A.4 closing sentence:
+--   Bei Kategorie III ( $830 \mathrm{~m}^{2}$ ) ist eine kombinierte Behandlungsanlage durch Aufteilung in 
+--     eine Sedimentationsstufe ( $A_{\text {sed }}=4,48 \mathrm{~m}^{2}, q_{A, \max }=4 \mathrm{~m} / 
+--     \mathrm{h}$ ) und eine anschließende Filtrationsstufe ( $A_{F}=5 \mathrm{~m}^{2}$ ) möglich. — printed 
+--     p.34
+--     Nothing is encoded from either number, so no field is affected — but if a worked-example
+--     regression test is ever built from A.4, use 7,47 m² and record the discrepancy. This is a
+--     candidate for a DWA Stellungnahme (the Frist was 30. November 2024 and has passed).
+-- (c) OCR artefacts in the transcript that were preserved verbatim in the pack quotes and are NOT
+--     encoding errors: "behandeInder" (l.519/619), "$A_{\text {ов }}$" with Cyrillic "ов" (Tab. 2, l.357),
+--     "n_{\text {hyd}}" instead of eta in Gleichung (1) (l.514), "werde" for "werden" (§6.2.1, l.466),
+--     "Anlagerns" for "Anlagen" (§9, l.804), "lonenaustausch" with lowercase L (§6.2.4).
+
+-- S-16 · DUPLICATE FIELD LAYER (13 rows).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The summary/final worksheets re-declare quantities that already exist upstream, each with its own id,
+-- unit and clause_reference — the single-source-derivation invariant says a derived value is read by
+-- reference, never re-entered:
+--   M179-07.A_b_a_summary <- M179-02.A_b_a            M179-07.Psi_s_summary <- M179-02.Psi_s
+--   M179-07.belastungs_kategorie <- M179-03.belastungskategorie (different symbol spelling!)
+--   M179-08.eta_BV <- M179-06.eta_BV                  M179-08.eta_ges_target / eta_ges <- one η_ges
+--   M179-09.eta_hyd_ref <- M179-08.eta_hyd            M179-09.r_krit_target <- M179-09.r_krit
+--   M179-10.A_b_a_ref / Psi_s_ref / r_krit_ref <- M179-02 / M179-09
+--   M179-13.{eta_hyd,r_krit,Q_krit,A_sed,A_F}_summary <- M179-08/09/10/11/12
+--   M179-15.{treatment_method,A_F,A_sed}_final <- M179-05/12/11
+--   M179-17.eta_ges_achieved <- M179-08.eta_ges
+-- Also η_ges alone exists FOUR times: M179-04.eta_ges_required (%), M179-08.eta_ges_target (-),
+-- M179-08.eta_ges (%), M179-17.eta_ges_achieved (-).
+-- All 13 were verified in this pass against the same source sentence as their originals, with the
+-- duplication recorded in verification_note — they are correct, just redundant. Consolidation is a
+-- single-source cutover (accessor + migration), not a verification fix; staged here for the roadmap.
+
+-- S-17 · POSITIVE CHECKS (no action; recorded so they are not re-derived).
+-- Gleichung (1) and Tabelle 5 agree: eta_hyd=50 -> 0,1201·e^(3,275) = 3,2 (Tab. 5: 3); eta_hyd=90 ->
+--   43,6 (Tab. 5: 44). The encoded formula r_krit = 0.1201*exp(0.0655*eta_hyd) reproduces the table.
+-- The worked examples reproduce the encoded chain: A.2.3 eta_hyd=91 % -> r_krit 46 -> Q_krit 19 l/s ->
+--   A_sed = 3,6·19/2 = 34,2 m² (printed 34,2); A.3.2 eta_hyd=66 % -> r_krit 9,3 -> Q_krit 0,78 l/s,
+--   A_F = 0,01·830 = 8,3 m² (printed 8,3). Equations (1)-(5) are therefore verified as encoded AND as
+--   arithmetically consistent with the guideline's own examples.
+
+-- ============================================================================
+-- END — nothing in this file has been applied.
+-- ============================================================================
