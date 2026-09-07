@@ -30,3 +30,4 @@ dwa-a-272e-md-verification-pack.sql  DWA-A-272E
 dwa-m-816-md-verification-pack.sql  DWA-M-816
 dwa-m-363-md-verification-pack.sql  DWA-M-363
 dwa-m-179-1-md-verification-pack.sql  DWA-M-179-1
+dwa-m-708-md-verification-pack.sql  DWA-M-708

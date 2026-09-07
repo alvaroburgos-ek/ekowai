@@ -1,0 +1,392 @@
+-- ============================================================================
+-- DWA-M-708 — STAGED, WRITTEN-NOT-APPLIED (owner rulings). 2026-09-07.
+-- Apply only after Alvaro marks a block RATIFIED. Nothing in this file has been executed.
+-- Evidence quoted VERBATIM from the md transcript named in dwa-m-708-md-verification-pack.sql
+-- (C:\Users\Ekowai\Desktop\Guidelines\DWA-M-708\DWA-M_708_GD.md); page convention identical to the
+-- pack header (Inhalt + Bilder-/Tabellenverzeichnis, cross-checked against the mathpix image indices,
+-- which equal the printed page 1:1 on this document).
+--
+-- *** The source is a GELBDRUCK (Entwurf): "Merkblatt DWA-M 708 · Abwasser aus der Milchverarbeitung ·
+--     Entwurf · Frist zur Stellungnahme: 31. Januar 2026", © DWA, 1. Auflage, Hennef 2025.
+--     "Ersetzt bei Erscheinen des Weißdrucks das Merkblatt DWA-M 708 (10/2011)". Every value in the
+--     encoding — and every block below — rests on a draft that can still change before the Weißdruck.
+--     prod standards.version already records "Gelbdruck (Entwurf), 1. Auflage, Hennef 2025". ***
+-- ============================================================================
+
+
+-- S-1 · FIVE ENCODED WORKSHEETS CARRY ZERO FIELDS.                        ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- This is the structural mismatch flagged on the "Package vs Prod reconciliation" open list. Prod holds
+-- 27 worksheet_templates for DWA-M-708 but only 22 of them have any field rows:
+--   M708-07 f1e8278e-fa02-4367-9047-55cf9edaef93  Weitergehende Immissionsanforderungen        (0 fields)
+--   M708-08 04b01469-4b9c-4bb2-b027-8d1747627a0a  Indirekteinleitung u. Starkverschmutzerzuschl.(0 fields)
+--   M708-10 7f39f6db-0375-4d7b-8b6a-8e42354ac29f  Anaerobe Verwertung Produktionsrueckstaende  (0 fields)
+--   M708-18 c7c56c8a-93eb-4464-aed7-7045c62accf3  Mitbehandlung in kommunaler Klaeranlage      (0 fields)
+--   M708-26 909cdb58-b784-4557-8eb1-8638ca07dbac  Querverweise und nationale/EU-Vorschriften   (0 fields)
+-- All five have printed source material that WAS NOT encoded, so the gap is a missing-import, not a
+-- spurious worksheet. Evidence that each has content to carry:
+--   M708-07 ← Tabelle 3 (§3.5): "Strengere oder weitergehende Anforderungen sind einzuhalten, wenn die
+--     Abwassereinleitung nur dann mit den Gütezielen, vor allem denen nach EU-Wasserrahmenrichtlinie, und
+--     den Schutz- bzw. Nutzungsansprüchen, zum Beispiel Entnahmen für die Trinkwassernutzung bzw.
+--     Naturschutz, des jeweiligen Gewässers vereinbar ist (siehe Tabelle 3)." — printed p.23
+--     Tabelle 3 prints 7 parameter rows (Temperatur; BSB5/CSB/NH4-N/org.N-TNb; Chlorid/Hydrogencarbonat;
+--     P/NO3-N; AFS; NH3-N(pH>8)/NO2-N/Biozide; Abwassermenge in l/s) — none is encoded anywhere.
+--   M708-08 ← §3.4: "Wirtschaftlich relevant können die zu zahlenden Starkverschmutzerzuschläge auf die
+--     kommunalen Gebühren sein, denen mittels Abwasservorbehandlungsanlagen, Wiederaufbereitung bzw.,
+--     wenn zulässig, mit einer Direkteinleitung begegnet werden kann." — printed p.21
+--   M708-10 ← Tabelle 18 (§7.3.2.3), 15 substrate rows with TR / GV / Gasertrag / CH4 — none encoded.
+--   M708-18 ← §8.5, incl. the printed operating caution: "Darüber hinaus ist der Chloridgehalt zu
+--     beachten. Falls dieser im Abwasser aus der Milchverarbeitung übermäßig hoch ist, können im Zulauf
+--     zur kommunalen Kläranlage Chlorid-Konzentrationen auftreten, die selbst bei Edelstahl-Elementen zu
+--     Korrosion führen können." — printed p.66
+--   M708-26 ← the "Quellen und Literaturhinweise" chapter (Europäisches Recht / Bundes- und Landesrecht /
+--     DIN-Normen / DWA-Regelwerk / Weitere technische Regeln) — printed pp.97 ff.
+-- NO SQL IS PROPOSED. Filling these five worksheets is an IMPORTER job (a corrected Pass3c workbook),
+-- not a hand-edit; per the project rule data enters only through the importer. Decision needed:
+--   (a) re-issue the DWA-M-708 Pass3c workbook with the five sheets populated and re-import, or
+--   (b) deactivate the five empty worksheet_templates until the Weißdruck.
+-- PRE-CHECK for (b): no worksheet instances / project rows may reference these five template ids.
+
+
+-- S-2 · THE DISCHARGE PATH IS ENCODED THREE TIMES.                        ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Three fields carry the same fact with the same three options:
+--   M708-01.einleitungsart    2d598014-852d-4a4b-8f9f-670ad26972f2  enum direkt / indirekt / mitbehandlung_kommunal  (is_required = true)
+--   M708-02.einleitungspfad   76c8ace9-aeae-4fdd-bf36-59eb67a4d724  enum direkt / indirekt / mitbehandlung            (is_required = false)
+--   M708-01.anlagentyp_code   313e1075-3620-4676-93d7-dcf0680ef380  enum MV-D / MV-I / MV-K                           (is_required = false)
+-- The guideline names the three paths once each and never assigns them codes:
+--   §3.4: "Indirekteinleitung meint eine indirekte Gewässerbenutzung über die vorherige Ableitung des
+--     Abwassers und Behandlung in einer anderen Abwasseranlage, die in der Regel eine kommunale Kläranlage
+--     ist." — printed p.21
+--   §3.5: "Für die direkte Abwassereinleitung in ein Gewässer ist eine wasserbehördliche Erlaubnis
+--     (§§ 8, 9 Absatz 1 Nr. 4, § 10 WHG) erforderlich." — printed p.21
+--   §8.5: "Bei der direkten Übernahme von Abwasser aus der Milchverarbeitung durch eine kommunale
+--     Kläranlage über eine eigene Leitung ist grundsätzlich keine nennenswerte Vorbehandlung außer einer
+--     Neutralisation erforderlich, falls die Kapazität der kommunalen Kläranlage ausreicht." — printed p.66
+-- Three independently editable copies of one fact can disagree in a project; gate REQ-708-03/-04 read
+-- ied_anlage but nothing reads einleitungspfad or anlagentyp_code at all.
+-- Proposal: keep M708-01.einleitungsart as the single owner, deactivate the other two.
+-- update public.fields set active=false
+--  where id in ('76c8ace9-aeae-4fdd-bf36-59eb67a4d724','313e1075-3620-4676-93d7-dcf0680ef380');
+-- rollback: set active=true on the same two ids.
+-- PRE-CHECK before applying: no project_parameters rows may hold values for these ids; no gate condition
+--   may reference einleitungspfad / anlagentyp_code (none does as of the 2026-09-07 export).
+
+
+-- S-3 · GATE REQ-708-01 OVER-ENFORCES TABELLE 2.                         ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Gate b954f37e-d67f-4889-a57f-f518946421f0 (M708-06, severity=block), condition:
+--   c_bsb5 <= limit_bsb5_direkt AND c_csb <= limit_csb_direkt AND afs <= limit_afs_direkt
+--   AND c_nh4_n <= limit_nh4_n_direkt AND c_n_ges <= limit_nges_direkt AND c_p <= limit_pges_direkt
+--   AND ph_wert <= limit_ph_direkt
+-- Three defects, all against the printed table:
+--  (a) Tabelle 2 has NO pH row and NO row for lipophile Stoffe. The full printed parameter list is
+--      BSB5 / CSB / TOC / AFS / NH4-N / Nges / TNb / Pges — nothing else. The last conjunct therefore
+--      enforces a limit the standard does not print (see S-4).
+--  (b) It applies EVERY limit unconditionally, but Tabelle 2's third column makes each row conditional:
+--      "Abfiltrierbare Stoffe (AFS) & 30 & wenn IED-Anlage" — printed p.22
+--      "Phosphor, gesamt ( $\mathrm{P}_{\text {ges }}$ ) & 2,0 & wenn IED-Anlage oder $>20 \mathrm{~kg}
+--       \mathrm{P}_{\text {ges }}$ (roh) je Tag" — printed p.22
+--      "Ammoniumstickstoff ( $\mathrm{NH}_{4}-\mathrm{N}$ ) & 5,0 | wenn IED-Anlage oder > $100 \mathrm{~kg}
+--       \mathrm{~N}_{\text {ges }}$ (roh) je Tag, | $\geqslant 12^{\circ} \mathrm{C}$ Ablauf biologischer
+--       Reaktor" — printed p.22
+--      A plant below 3 kg BSB5 (roh)/d, or a non-IED plant, is blocked by REQ-708-01 although Anhang 3
+--      AbwV does not apply the value to it.
+--  (c) It duplicates REQ-708-02 / -03 / -04, which encode exactly those conditions correctly
+--      (057c1ba3-…, 4964a5a5-…, c2e79312-…). Two gates on one worksheet now evaluate the same rows with
+--      different logic; the stricter (wrong) one wins.
+-- Proposal: retire REQ-708-01 and keep the three conditional gates (plus a new TOC/TNb gate, S-11).
+-- update public.compliance_requirements set active=false where id='b954f37e-d67f-4889-a57f-f518946421f0';
+-- rollback: set active=true on the same id.
+
+
+-- S-4 · TWO LIMIT FIELDS HAVE NO SOURCE IN TABELLE 2.                     ☐ RATIFIED ☐ REJECTED ☐ DEFER
+--   M708-06.limit_ph_direkt        4534248f-2108-49b3-9af1-93ab0e7ce2b6  (clause_reference "Tab. 2", no value, no description)
+--   M708-06.limit_lipophile_direkt e90fadf6-b21f-4e68-bdcf-034d5c492fa9  (clause_reference "Tab. 2", no value, no description)
+-- Tabelle 2 prints neither parameter (see S-3(a)); they are this pass's residue and were NOT verified.
+-- The only pH and lipophile figures in the document are Tabelle 9 RICHTWERTE for the RAW wastewater
+-- (i.e. an input range, not a discharge limit):
+--   "Tabelle 9: Richtwerte zur Einschätzung des spezifischen Abwasseranfalls, der Abwasserfrachten und
+--    -konzentrationen im Abwasser aus der Milchverarbeitung | pH-Wert & - & 4-12 & 2-13 | Lipophile
+--    Stoffe & mg/l & 50-400 & $\leqslant 1.000$" — printed p.44
+-- …and the Anhang-A worked examples, which are plant permits, not the standard:
+--   §A.2.2: "Der pH -Wert des eingeleiteten Abwassers muss zwischen 6,5 und 9 liegen." — printed p.88
+-- Under SR-1/SR-2 a permit value from a Praxisbeispiel may NOT be promoted into a standard_fixed limit.
+-- Proposal: deactivate both, or re-home them as engineer_input "Erlaubniswert lt. wasserrechtlicher
+-- Zulassung" (pH is a two-sided band, so the current single upper-bound shape is wrong either way).
+-- update public.fields set active=false
+--  where id in ('4534248f-2108-49b3-9af1-93ab0e7ce2b6','e90fadf6-b21f-4e68-bdcf-034d5c492fa9');
+-- rollback: set active=true on the same two ids.
+-- DEPENDENCY: do S-3 first — REQ-708-01 reads limit_ph_direkt.
+
+
+-- S-5 · TWO GATES HAVE AN EMPTY CONDITION AND SIT ON THE WRONG WORKSHEET. ☐ RATIFIED ☐ REJECTED ☐ DEFER
+--   REQ-708-08 20c12083-63ab-4bf1-a2b7-5e7a9e407fae  M708-12  severity=warn  condition = ''  requires_attestation=true
+--   REQ-708-09 0665f405-35be-463d-b80e-6087276a5d7c  M708-12  severity=warn  condition = ''  requires_attestation=true
+-- Both carry clause_reference "8.3.6" — the Misch- und Ausgleichsbecken clause — but are homed on
+-- M708-12 "Vorbehandlung — Rechen, Siebe, Sandfang" (§8.3.3/8.3.4), whose fields are lochweite_sieb,
+-- q_max, siebflaeche, anzahl_siebe. The MAB worksheet is M708-13 (174b5904-3d45-43a5-953e-5aaf1a3cb520),
+-- which carries exactly the fields these two gates are about (aufenthaltszeit_mab, v_mab,
+-- mischleistung_mab, notbecken_volumen). Both also have requires_attestation=true but M708-12 has only
+-- ONE attestation field (attest_m708_12_req_708_10, bound to REQ-708-10) — so nothing can satisfy them.
+-- Evidence for the correct home:
+--   §8.3.6/8.2: "Generell wird wegen des stark schwankenden Abwasseranfalls und der schwankenden
+--     Abwasserzusammensetzung die Anordnung eines Misch- und Ausgleichsbeckens dringend empfohlen."
+--     — printed p.58
+--   §8.3.6: "Zusätzlich zum Misch- und Ausgleichsbecken ist die Errichtung eines getrennten
+--     Havariebeckens oder -tanks zu empfehlen; bei Direkteinleitern ist dies dringend anzuraten."
+--     — printed p.60–62
+-- severity=warn is CORRECT for both ("dringend empfohlen" / "zu empfehlen … dringend anzuraten" — soft
+-- modal verbs; no block). The defect is the empty condition + the wrong home + the missing attestation
+-- field. A gate with an empty condition never fires, so today neither warning ever reaches an engineer.
+-- Proposal (needs two new attestation fields on M708-13 first — importer job, ids not yet known):
+-- update public.compliance_requirements set worksheet_template_id='174b5904-3d45-43a5-953e-5aaf1a3cb520',
+--        condition='attest_m708_13_req_708_08 == True'
+--  where id='20c12083-63ab-4bf1-a2b7-5e7a9e407fae';
+-- update public.compliance_requirements set worksheet_template_id='174b5904-3d45-43a5-953e-5aaf1a3cb520',
+--        condition='attest_m708_13_req_708_09 == True'
+--  where id='0665f405-35be-463d-b80e-6087276a5d7c';
+-- rollback: worksheet_template_id='8c8830a2-0791-48da-b316-0fac863cdc9a', condition='' on both ids.
+
+
+-- S-6 · GATE REQ-708-10 IS MIS-HOMED AND MIS-TAGGED.                      ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-708-10 0dd2cde4-c782-46c0-8aff-dfb29e5399d3  M708-12  severity=block
+--   condition: attest_m708_12_req_708_10 == True     clause_reference: "8.4.1 / 3.8"
+-- The quoted sentence is neither in 8.4.1 nor in 3.8 — it is the CLOSING paragraph of 8.4.2:
+--   "Schließlich ist zu beachten, dass, um den bei der Behandlung der betrieblichen Abwässer anfallenden
+--    Schlamm auch zukünftig landwirtschaftlich verwerten zu können, im Milchverarbeitungsbetrieb
+--    anfallende Sanitärabwässer nicht in die betriebliche Abwasserbehandlungsanlage eingeleitet werden
+--    dürfen." — printed p.65
+-- (8.4.1 "Vorbemerkung" is three lines long and says only that treatment is aerobic or anaerobic.)
+-- severity=block is CORRECT — "dürfen … nicht … eingeleitet werden" is a hard prohibition, and 8.2 and
+-- 8.5 repeat it ("sofern keine Sanitärabwässer der Abwasserbehandlungsanlage zugeleitet werden",
+-- printed p.58). Only the home and the clause tag are wrong: the rule is about the biological stage /
+-- sludge route (M708-16 93a671c4-0d07-47b1-aa11-8bfc82af018e, or M708-19 46dac118-…), not about screens.
+-- update public.compliance_requirements set clause_reference='8.4.2'
+--  where id='0dd2cde4-c782-46c0-8aff-dfb29e5399d3';
+-- update public.fields set clause_reference='8.4.2'
+--  where id='0a84811a-43c4-4b30-b0aa-10d53e764ea8';   -- M708-12.attest_m708_12_req_708_10
+-- rollback: clause_reference='8.4.1 / 3.8' on the gate; clause_reference=null on the field.
+-- The re-home (gate + its attestation field to M708-16) is NOT staged as SQL: moving the attestation
+-- field between worksheets changes its symbol contract and is an importer job.
+
+
+-- S-7 · GATE REQ-708-07 CONFLATES TWO DIFFERENT DUST RULES.               ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-708-07 f8be1e02-993d-4b9e-a3b5-82822b178486  M708-11  severity=block
+--   condition: IF staub_massenstrom > 0.4 THEN staub_konzentration <= 10 AND staub_konzentration_trocknung <= 10
+-- §6.3.1 prints THREE independent rules; the gate collapses them into one:
+--   "Für IEDAnlagen gelten die Anforderungen der Allgemeine Verwaltungsvorschrift zur Reduzierung von
+--    Emissionen und anderer Umweltauswirkungen in der Nahrungsmittel-, Getränke- und Milchindustrie
+--    (NaGeMiVwV ), für Trocknungsanlagen eine Massenkonzentration von $10 \mathrm{mg} / \mathrm{m}^{3}$.
+--    Für die Trocknung von entmineralisiertem Molkepulver, Casein und Laktose gilt grundsätzlich
+--    entsprechend den Anforderungen der TA Luft (Nummer 5.2.1) ein Grenzwert von $20 \mathrm{mg} /
+--    \mathrm{m}^{3}$. Für Anlagen, die im vereinfachten Verfahren zugelassen oder geändert werden, gilt
+--    der allgemeine Staubgrenzwert von $20 \mathrm{mg} / \mathrm{m}^{3}$ gemäß Ziffer 5.2.1 der TA Luft.
+--    Bei relevanten Quellen mit einem Massenstrom größer $0,4 \mathrm{~kg} / \mathrm{h}$ gilt ein
+--    Grenzwert von $10 \mathrm{mg} / \mathrm{m}^{3}$." — printed p.47
+-- i.e.  (1) IED-Trocknungsanlage (4. BImSchV 7.32.1, Verfahrensart G) → 10 mg/m³ ALWAYS, regardless of
+--           mass flow; the gate only enforces it above 0,4 kg/h, so an IED dryer at 0,3 kg/h passes.
+--       (2) vereinfachtes Verfahren (7.32.2 / 7.32.3, Verfahrensart V) → 20 mg/m³ baseline; the gate
+--           never enforces the 20 mg/m³ value at all.
+--       (3) Massenstrom > 0,4 kg/h → 10 mg/m³ (the TA-Luft tightening the gate does encode).
+-- Tabelle 15 (printed p.47) states the same split per 4. BImSchV number.
+-- Proposal: split into two gates, keyed on the 4. BImSchV class (which prod already holds as
+-- M708-01.eingehende_milchmenge + M708-02.ied_anlage):
+--   REQ-708-07a  IF ied_anlage THEN staub_konzentration_trocknung <= 10
+--   REQ-708-07b  IF staub_massenstrom > 0.4 THEN staub_konzentration <= 10 ELSE staub_konzentration <= 20
+-- update public.compliance_requirements
+--    set condition='IF staub_massenstrom > 0.4 THEN staub_konzentration <= 10 ELSE staub_konzentration <= 20'
+--  where id='f8be1e02-993d-4b9e-a3b5-82822b178486';
+-- (the new REQ-708-07a is an INSERT and is deliberately not written here — new gate rows go through the
+--  importer.)
+-- rollback: restore the original condition string quoted above.
+
+
+-- S-8 · FOUR GATES READ FIELDS THAT LIVE ON ANOTHER WORKSHEET.            ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- REQ-708-01 / -02 / -03 / -04 are homed on M708-06 (41ed0f17-200c-4efa-8b19-10820ff90c3e), which owns
+-- only the limit_* and *_roh fields. Every measured operand they compare lives on M708-04
+-- (1db1f869-b1e4-46e4-80c9-3cc829193dc0): c_bsb5, c_csb, afs, c_nh4_n, c_n_ges, c_p, ph_wert.
+-- REQ-708-03 additionally reads ied_anlage, which lives on M708-02 (f2e4b4c7-…).
+-- Whether that evaluates at all depends on the gate engine's scope: if conditions resolve only within
+-- the owning worksheet instance, all four gates are silently inert in production — which would mean the
+-- Tabelle-2 limits are not enforced anywhere today. This is a HARNESS question, not a source question,
+-- and must be answered before S-3 is applied (retiring REQ-708-01 is pointless if none of them fire).
+-- NO SQL. Required check: run one project through M708-04 + M708-06 with a deliberately failing
+-- c_csb and confirm REQ-708-02 actually blocks.
+
+
+-- S-9 · CLAUSE RETAGS (evidence in the pack's verification_quote for each id).
+--                                                                        ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Each row below was verified in this pass against a clause OTHER than the one it is tagged with.
+--   M708-01.einleitungsart          2d598014-…  "WHG; Anhang 3 AbwV"  →  "3.4 / 3.5 / 8.5"
+--   M708-03.milchdurchsatz_tag      67f4cd5d-…  "Sec. 4"              →  "3.2"   (§4 is the market-statistics chapter;
+--       the daily annual-average throughput is defined only in §3.2 / 4. BImSchV Anhang 1 Nr. 7.32)
+--   M708-03.milchdurchsatz_jahr     29e26663-…  "Sec. 4"              →  "3.2"   (residue — see S-15)
+--   M708-11.spez_wasserverbrauch    c324d78b-…  "Sec. 6.4"            →  "9.1"
+--       §6.4 "Energieeinsatz" prints no water figure. The only printed water-per-milk figure is:
+--       "Die Milchverarbeitung benötigt jedoch in diesem Kontext relativ große Wassermengen
+--        (durchschnittlich etwa Faktor 2 in Relation zur verarbeiteten Rohmilchmenge) zur Reinigung der
+--        Anlagen bzw. auch zur direkten Zugabe in Milchprodukte (z. B. Bruchwaschwasser bei der
+--        Käseherstellung)." — printed p.74
+--   M708-04.q_d                     884f61e6-…  "Tab. 9"              →  "Tabelle 1 (2.2)"
+--       Tabelle 9 gives the specific arising in m³/1.000 kg Milch; there is no m³/d row. Q_d exists only
+--       as a symbol: "$Q_{\mathrm{d}, \text { konz }}$ & Täglicher Abfluss/Durchfluss" — printed p.15
+-- update public.fields set clause_reference='3.4 / 3.5 / 8.5' where id='2d598014-852d-4a4b-8f9f-670ad26972f2';
+-- update public.fields set clause_reference='3.2'             where id='67f4cd5d-c739-486b-923e-4558aaf9b3cb';
+-- update public.fields set clause_reference='3.2'             where id='29e26663-0021-45a6-a72c-e1ec4bce7870';
+-- update public.fields set clause_reference='9.1'             where id='c324d78b-1f7b-4b3c-9f4f-84ad663bcfed';
+-- update public.fields set clause_reference='Tabelle 1 (2.2)' where id='884f61e6-78a8-4d20-979d-13df420d14e9';
+-- rollback: restore 'WHG; Anhang 3 AbwV' / 'Sec. 4' / 'Sec. 4' / 'Sec. 6.4' / 'Tab. 9' respectively.
+
+
+-- S-10 · LABEL AND UNIT CORRECTIONS.                                      ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (a) M708-16.br_bsb5  953a972b-0b2b-49c9-8b80-0222492d5d71
+--     label_de = "Schlammbelastung BR,BSB5", unit = kg/(m3*d). Tabelle 1 defines the symbol as a
+--     RAUMbelastung, not a Schlammbelastung (which would be kg BSB5/(kg TS·d)):
+--       "$B_{\mathrm{R}, \text { BSB5 }}$ & $\mathrm{BSB}_{5}$-Raumbelastung in $\mathrm{kg} /\left(
+--        \mathrm{m}^{3} \cdot \mathrm{~d}\right) \mathrm{BSB}_{5}$" — printed p.15
+--     The unit is right; only the German label is wrong, and the wrong word will mislead an engineer.
+-- update public.fields set label_de='BSB5-Raumbelastung BR,BSB5'
+--  where id='953a972b-0b2b-49c9-8b80-0222492d5d71';
+-- rollback: label_de='Schlammbelastung BR,BSB5'.
+--
+-- (b) M708-20.mol_verhaeltnis_mg_n_p  b4d68188-f06a-493d-a248-978d3b00c691
+--     label_de reads "Molares Verhaeltnis Mg:N:P fuer MAP"; the guideline writes the order Mg:P:N:
+--       "Für das optimale Mg:P:N-Verhältnis in der Ausgangslösung werden in der Literatur verschiedene
+--        Werte angegeben, allerdings lässt sich ein ungefähres molares Verhältnis von $1: 1: 1$
+--        resümieren." — printed p.69–71
+--     Numerically identical at 1:1:1, so this is cosmetic — staged only so the label matches the source.
+-- update public.fields set label_de='Molares Verhaeltnis Mg:P:N fuer MAP'
+--  where id='b4d68188-f06a-493d-a248-978d3b00c691';
+-- rollback: label_de='Molares Verhaeltnis Mg:N:P fuer MAP'.
+--
+-- (c) M708-19.biogas_ertrag  2b2fe9de-080b-405c-b52b-98991b76f622  unit = Nm3/d
+--     The guideline never prints a plant-level daily gas yield. It prints a SPECIFIC yield and says so:
+--       "Die Biogaserträge werden (bezogen auf den Normzustand) in l/kg oTR angegeben, um die
+--        verschiedenen Einsatzstoffe bezüglich der theoretischen Gasausbeute vergleichen zu können."
+--        — printed p.54
+--     Tabelle 18 tabulates l/kg oTR and m³/t FM. Nm³/d is therefore a DERIVED plant quantity, and its
+--     data_class should be 'derived' with a trace (Substratmenge × Gasertrag), not standard_fixed.
+--     NO unit change proposed — the field is a plant output and Nm³/d is the right unit for it; what is
+--     staged is the data_class + a note that no printed value exists.
+-- update public.fields set description='Anlagenbezogener Biogasertrag; abgeleitet aus Substratmenge und dem in Tabelle 18 tabellierten spezifischen Gasertrag (l/kg oTR bzw. m3/t FM). M 708 druckt keinen Nm3/d-Wert.'
+--  where id='2b2fe9de-080b-405c-b52b-98991b76f622';
+-- rollback: description=null.
+
+
+-- S-11 · PRINTED HARD LIMITS WITH NO GATE.                                ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Five limits are printed with hard modal verbs and are encoded as FIELDS but enforced by nothing.
+-- (New compliance_requirements rows go through the importer, so no INSERT is written here; this block
+--  is the specification for the workbook fix.)
+--  (1) M708-19.nh4_n_anaerob_max  a0847f83-3cfe-4a89-bbe8-7482727a1a40  → warn at 1.500, BLOCK at 2.000
+--      "Die NH4-N-Konzentration im Anaerobreaktor sollte $1.500 \mathrm{mg} / \mathrm{l}$ nicht wesentlich
+--       überschreiten, jedenfalls unter $2.000 \mathrm{mg} / \mathrm{L}$ liegen." — printed p.68
+--      ("sollte … nicht wesentlich überschreiten" = warn; "jedenfalls unter … liegen" = block.)
+--  (2) M708-19.afs_schlammwasser  aa0ed10c-0b12-46a9-bf43-92ab828a771c  → block > 200 mg/l when a
+--      Deammonifikation is planned
+--      "Für den Fall, dass eine Schlammwasserbehandlung zur Stickstoffelimination geplant ist, ist im
+--       Falle einer Deammonifikation bei der Wahl des Aggregats zur Schlammentwässerung auch darauf zu
+--       achten, dass der Feststoffgehalt im Schlammwasser aus der Entwässerung möglichst gering ist,
+--       jedenfalls unter $200 \mathrm{mg} / \mathrm{L}$ liegt." — printed p.68–69
+--  (3) M708-14.q_a_flotation  7c6cfc8b-81ab-4f80-8514-f06224b8b0e1  → warn outside 3–6, BLOCK above 8
+--      "In der milchverarbeitenden Industrie kommen fast ausschließlich Druckentspannungsflotationen zum
+--       Einsatz, wobei eine Oberflächenbeschickung zwischen $3 \mathrm{~m}^{3} /\left(\mathrm{m}^{2}
+--       \cdot \mathrm{~h}\right)$ und $6 \mathrm{~m}^{3} /\left(\mathrm{m}^{2} \cdot \mathrm{~h}\right)$
+--       zu empfehlen ist. Ein Wert für die Oberflächenbeschickung größer als $8 \mathrm{~m}^{3} /\left(
+--       \mathrm{m}^{2} \cdot \mathrm{~h}\right)$ ist zu vermeiden." — printed p.62–64
+--      (SR-2: 3–6 is a RANGE and must stay an engineer selection; only the ">8 vermeiden" bound is a gate.)
+--  (4) M708-15.lipophile_eliminiert  fe7fc684-6522-4bed-beff-55b73ee6fd97  → block when an anaerobic or
+--      aerobic biological stage is present
+--      "I Es muss sichergestellt sein, dass die lipophilen Stoffe (Fette) vor der biologischen Stufe
+--       weitestgehend entfernt sind." — printed p.64–65
+--      ("Es muss sichergestellt sein" — the hardest modal verb in the whole document; today there is no
+--       gate at all on M708-15.)
+--  (5) §8.3.6 — un-aerated MAB upstream of an anaerobic reactor. NO FIELD EXISTS for it:
+--      "Vor Anaerobanlagen muss das Misch- und Ausgleichsbecken unbelüftet sein." — printed p.60–62
+--      and "Weil Nitrit toxisch auf die Anaerobbakterien wirkt, dürfen Abwässer mit erhöhten
+--       Nitrat-Konzentrationen ohne Vorbehandlung nicht in Anaerobreaktoren eingeleitet werden."
+--       — printed p.65
+--      Needs a boolean mab_unbelueftet_vor_anaerob on M708-13 plus a block gate keyed on M708-17.
+--  Also unenforced: Tabelle 2's TOC (35 mg/l) and TNb (18 mg/l) rows — limit_toc_direkt and
+--  limit_tnb_direkt are encoded but appear in no gate condition, and no measured c_toc / c_tnb field
+--  exists on M708-04 to compare them against.
+
+
+-- S-12 · is_required REVIEW — NO CHANGE PROPOSED.                         ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Nine fields carry is_required=true: einleitungsart, eingehende_milchmenge, haupterzeugnis, betreiber,
+-- standort (M708-01); ied_anlage (M708-02); pius_geprueft (M708-09); attest_m708_12_req_708_10 (M708-12);
+-- attest_m708_25_req_708_11 (M708-25). Every one is either app/registration metadata or is anchored on a
+-- hard printed obligation, e.g.
+--   §8.2: "Innerbetriebliche Vermeidungsmaßnahmen müssen primär aus Gründen der Minimierung von
+--     Produktverlusten unbedingt Priorität vor abwassertechnischer Behandlung als End-of-Pipe-Lösung
+--     haben." — printed p.58   (pius_geprueft)
+-- No field is required on the strength of a "sollte / kann / in der Regel / zum Beispiel" sentence.
+-- The single caveat is S-2: einleitungsart is required while its two duplicates are optional, which is
+-- the right way round but only works once the duplicates are gone.
+-- NO SQL. Recorded so the review is on the record as performed, not skipped.
+
+
+-- S-13 · SEVERITY / SOURCE-QUOTE NOTES.                                   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- (a) REQ-708-13 2e651f74-758b-499e-b17c-a215fd34692c (M708-02, block) enforces
+--     "(NOT awsv_anwendbar) OR (awsv_anzeige_eingereicht AND eignungsfeststellung_vorliegend)".
+--     The Eignungsfeststellung limb is printed with an explicit exception route the gate ignores:
+--       "Einer Zulassung in Form einer wasserrechtlichen Eignungsfeststellung (§ 63 Absatz 1 WHG) ist
+--        grundsätzlich für Anlagen zum Lagern, Abfüllen oder Umschlagen wassergefährdender Stoffe
+--        erforderlich. Ausnahmen davon, gestuft nach Gefährdungsstufe bzw. -potenzial der Anlage sind
+--        möglich, wenn eine der Voraussetzungen des § 63 Absatz 2 WHG oder des § 41 AwSV zutrifft bzw.
+--        die Behörde das ihr gesetzlich gegebene Ermessen so ausübt. […] Keiner
+--        Eignungsfeststellungspflicht unterliegen Anlagen zum Herstellen, Behandeln und Verwenden
+--        wassergefährdender Stoffe." — printed p.24
+--     Keep severity=block, but the condition needs an exemption operand
+--     (e.g. eignungsfeststellung_vorliegend OR eignungsfeststellung_ausnahme_dokumentiert) — otherwise a
+--     lawfully exempt plant can never clear the gate. New field ⇒ importer job.
+-- (b) REQ-708-06 6634db8f-1ef8-4fa1-a1d2-058983a7fbaa (M708-01, block) — the condition (three NOT NULL
+--     checks) is fine, but its source_quote is a mathpix-garbled splice of §3.1 and §3.2
+--     ("… folgt bei Uberschreitung bestimmter Produktionskapazitaeten … Nach Anhang 1 der Verordnung …")
+--     taken from the duplicated/OCR-damaged block at md lines 620-635 rather than the clean §3.2 text at
+--     lines 590-598. Replace with the clean printed bullets:
+-- update public.compliance_requirements set source_quote='I Anlagen zur Behandlung oder Verarbeitung von ausschließlich Milch mit einer Kapazität der ein－ gehenden Milchmenge als Jahresdurchschnittswert von 200 t oder mehr Milch je Tag | I Anlagen zur Behandlung oder Verarbeitung von ausschließlich Milch in Sprühtrocknern mit einer Kapazität der eingehenden Milchmenge als Jahresdurchschnittswert von 5 t bis weniger als 200 t je Tag — printed p.19'
+--  where id='6634db8f-1ef8-4fa1-a1d2-058983a7fbaa';
+-- rollback: restore the previous source_quote (captured in the 2026-09-07 export).
+-- (c) REQ-708-08 / REQ-708-09 severity=warn is confirmed correct against "dringend empfohlen" /
+--     "zu empfehlen … dringend anzuraten" — see S-5. No severity change anywhere in this standard.
+
+
+-- S-14 · EQUATION INPUT LISTS ARE DECORATIVE.                             ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- All five encoded equations are CONSTANTS lifted from §8.4.3.1 / §8.7.2, but each carries an
+-- input_symbols list that does not enter its formula:
+--   E-CH4-Yield     Y_CH4 = 0.35            inputs [csb_elim_anaerob]
+--   E-CH4-Heizwert  H_CH4 = 36 …            inputs [methan_ausbeute_anaerob]
+--   E-BHKW-El       E_el = 1.4              inputs [methan_ausbeute_anaerob]
+--   E-MAP-Stoich    ratio = 2.2             inputs [c_p, c_nh4_n]
+--   Gl-1            Mg²⁺ + NH4⁺ + HPO4²⁻ …  inputs [c_p, c_nh4_n, ph_map_min, mol_verhaeltnis_mg_n_p]
+-- Under the single-source derivation invariant these are standard_fixed CONSTANTS with no requires::
+-- edges, not derived nodes. Two consequences worth a ruling:
+--   (i) E-MAP-Stoich reads M708-04.c_p (Gesamt-Phosphor of the raw wastewater) while §8.7.2 keys the MAP
+--       process on PO4-P of an anaerobic-dewatering return stream — the encoding already holds the right
+--       field for that, M708-20.po4_p_schwelle_map. Wrong input, harmless today only because the formula
+--       ignores it.
+--  (ii) None of the five produces a plant-level result. The useful derivations the guideline supports
+--       (CH4 yield = 0,35 × eliminated COD load; electrical yield = 1,4 kWh/kg CSB_el) are NOT encoded.
+-- NO SQL — clearing input_symbols or adding the real chains is an importer job.
+
+
+-- S-15 · RESIDUE (verified NOTHING; recorded so it is not silently lost).
+--   M708-03.milchdurchsatz_jahr  29e26663-0021-45a6-a72c-e1ec4bce7870  t/a
+--       No clause defines an annual milk throughput. The guideline's only throughput threshold is a
+--       DAILY annual average (§3.2, "Jahresdurchschnittswert von … je Tag"); the annual tonnages in
+--       Anhang A are plant descriptions, not requirements.
+--   M708-04.q_spec_ferm_milch    c986439c-3e73-4a0f-a362-65597d92d37e  m3/1000 kg Milch
+--       Tabelle 9 prints Marktmilch / Käse / Pulver only — there is no "Fermentierte Milch" row:
+--       "Haupterzeugnis (80 \% Produktion): | Marktmilch & $\mathrm{m}^{3} / 1.000 \mathrm{~kg}$ Milch &
+--        0,3-3,0 | Käse & $\mathrm{m}^{3} / 1.000 \mathrm{~kg}$ Milch & 0,75-2,5 | Pulver & $\mathrm{m}^{3}
+--        / 1.000 \mathrm{~kg}$ Milch & 1,2-2,7" — printed p.44
+--       The fourth class exists only in Tabelle 19 (energy). The field is a deliberate symmetry gap and
+--       must stay engineer_input; do NOT interpolate a value.
+--   M708-06.limit_ph_direkt        4534248f-…   see S-4
+--   M708-06.limit_lipophile_direkt e90fadf6-…   see S-4
+--   M708-16.t_ts   a35581c1-8fc9-4581-bdc6-4c434ee596b2  d      (Schlammalter)
+--   M708-16.v_deni 761e5e59-48ab-48a2-8d58-fa68c73bc3f8  m3     (Denitrifikationsvolumen)
+--       M 708 prints no activated-sludge dimensioning at all — it delegates:
+--       "Zur Dimensionierung eines aeroben Selektors wird auf das Arbeitsblatt DWA-A 131:2016
+--        verwiesen." — printed p.66
+--       "Die verfahrenstechnische Berechnung der Belebung erfolgte in Anlehnung an das Arbeitsblatt
+--        DWAA 131:2016." — printed p.95
+--       Grade NR (not reachable from this standard); they cap at NR until DWA-A 131 is in the library.
