@@ -1,0 +1,501 @@
+-- ============================================================================
+-- STAGED RULINGS — DWA-M 229-2 "Systeme zur Belüftung und Durchmischung von Belebungsanlagen —
+-- Teil 2: Betrieb" (September 2017, 1. Ausgabe, "Kein Vorgängerdokument").
+-- md pass 2026-09-07, source:
+--   C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-M-229-2\DWA-M-229-2.md  (1.660 lines, read
+--   completely). Grade VC (SR-3). Page refs derived from the guideline's own Inhalt (md lines 105-214),
+--   Bilderverzeichnis (216-232) and Tabellenverzeichnis (234-235) — the md carries NO page markers
+--   whatsoever (0 standalone-number lines in the entire file).
+--
+-- NOTHING IN THIS FILE IS APPLIED. Every block is commented out and carries a "☐ RATIFIED" marker.
+-- Un-comment a block only after Alvaro ticks it. Each block states: evidence quote (verbatim from the
+-- md), the proposed change, and the rollback inverse.
+--
+-- Prod shape at export time (fields-DWA-M-229-2.json, this session):
+--   8 worksheets / 65 fields (ALL imported_unverified, 0 verified) / 12 equations (ALL already
+--   verified_against_standard, ALL with verification_quote NULL) / 20 compliance_requirements
+--   (19 severity='block', 1 severity='warn' = CR-014; ALL requires_attestation=false).
+--
+-- ============================================================================
+-- STRUCTURAL SCAN RESULTS THAT PRODUCED **NO** FINDING (recorded so the absence is auditable)
+-- ============================================================================
+--   · gates with an EMPTY condition: 0 of 20.
+--   · gates with condition='TRUE' (no-op): 0 of 20.
+--   · AND/OR inversions: 0. NO gate in this standard uses OR at all; every AND-chain matches the
+--     conjunctive sense of the printed list it encodes (CR-003 = "Mindestens folgende Größen",
+--     CR-013/CR-015 = all inputs of a calculation).
+--   · UNSATISFIABLE gates: 0 of 20. Every range gate has low < high (CR-001 2..5, CR-004 15..40,
+--     CR-010 0,8..5, CR-014 -10..10) and every comparison is satisfiable.
+--   · MIS-HOMED gates (a gate that reads NO field of its own host worksheet): 0 of 20. Exactly one
+--     gate reads a foreign field IN ADDITION to host fields — CR-003 (M2292-02) reads T@M2292-01
+--     alongside four M2292-02 fields — so it is a cross-worksheet dependency, not a re-home.
+--   · duplicate gate CODES: 0 (CR-001..CR-020, all distinct). Duplicate gate LOGIC: 1 — see S-2.
+--   · duplicate FIELD symbols: 0 (65 distinct symbols across the 8 worksheets).
+--   · worksheets with ZERO fields: 0 — 01:6, 02:10, 03:7, 04:6, 05:4, 06:14, 07:11, 08:7 = 65.
+--   · PHANTOM fields (enum token materialised as a field: a symbol without label/clause/description,
+--     never referenced by an equation or a gate): 0. All 65 fields carry label_de, clause_reference
+--     AND description; every enum field carries a populated enum_values array.
+--   · EQUATION OUTPUTS WITHOUT A FIELD (orphans): 0 of 12. Every output symbol (e_Bel, e_Bel_OV,
+--     p_spez_p, p_spez_h, e_Ruehr, DV, f_p, dp_pct, f_s, dSSOTR, dE, Q_V) exists as a field, and
+--     every input symbol of every equation exists as a field as well.
+--   · PRESENCE-ONLY gates concealing a printed NUMERIC limit: 0. The seven presence gates (CR-003,
+--     CR-006, CR-008, CR-013, CR-015, CR-016, CR-017) all anchor on clauses that print no limit value;
+--     the two clauses that do print numbers (Anhang C for CR-015) print worked-example values, not
+--     limits. (CR-003 hides no number: the §4.2.1 list contains no figures.)
+--   · BOUNDARY INCLUSIVITY: correct in all 6 comparison gates. CR-005 uses strict "<" for the printed
+--     "(<15 hPa)"; CR-011 strict ">" for ">0,5 mg/l"; CR-012 strict ">" for ">1 mg/l"; CR-007 "<=50"
+--     for "bis auf ... minus 50 hPa" (inclusive, correct); CR-001 ">=2 AND <=5" for "zwischen 2 g/l
+--     und 5 g/l" (inclusive reading, the usual DWA convention); CR-014 "-10..10" passes at exactly
+--     ±10 while the printed trigger is a strict "> 10 %" — consistent.
+--   · PARAPHRASED / TRANSLITERATED gate source_quotes: 0 — all 20 are byte-verbatim substrings of the
+--     md. TWO are verbatim but VOID of the requirement they enforce (CR-003, CR-020) and TWO are
+--     verbatim but anchored on the wrong clause (CR-008, CR-016) — see S-1, S-5, S-2, S-11.
+--   · INVENTED VALUES: exactly ONE (see S-7). Every other number in a gate condition was grepped
+--     against the md and found printed there: 2 and 5 g/l (line 249), 15 and 40 hPa (line 402),
+--     15 hPa (line 435), 50 hPa (line 612), 0,5 mg/l (line 964), 1 mg/l (line 981), 10 % (line 1112).
+--     Every constant carried by an equation is likewise printed: 8.760 (line 1028), 8,76 (line 1071),
+--     10 and 9,81 (line 1084), 100 (lines 1288/1293/1296), 2,79 (line 1272). Every constant carried
+--     by a field description is printed too: 8:1 / 12:1 / 15:1 (line 386), >50 cm (line 746), 20 %
+--     (line 787), 2..5 and 0,8..1,5 W/m3 (lines 866/1077), 1,2 (line 1088), 120 g/(E*d) (lines
+--     309/1021), 30 °C (line 433), 490/50/120/19,0/17,5/1,13/13/0,921/-7,9/22,7 (lines 1284-1314).
+--   · UNIT MISMATCHES / DIMENSIONAL CHECK of all 12 equations: 10 dimensionally consistent
+--     (Gl.3, Gl.4, Gl.7, DV, C.1..C.5, B.1 — each re-derived by hand, see the pack notes; B.1's
+--     constant 2,79 was reproduced independently as (pi/4)*3600/1013 = 2,791, confirming the printed
+--     mN3/h output and ruling out the per-minute/per-hour factor found in DWA-M 229-1). 2 findings:
+--     Gl.5 and Gl.6 — see S-8.
+--   · APP-METADATA fields (client/project/planning-date/workflow flags): 0 of 65. Every field is a
+--     guideline-domain quantity, so the 2026-08-01 metadata exemption applies to nothing here and the
+--     pack contains no 'inferred_from_worksheet' statement.
+--   · FIELD-LEVEL RESIDUE (fields the md cannot support at all): 0 of 65.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------
+-- S-1  ☐ RATIFIED   CR-003: source_quote is verbatim but carries NO requirement (bare list opener)
+-- ---------------------------------------------------------------------------
+-- CURRENT source_quote (M2292-02, §4.2.1, severity='block'):
+--   "Mindestens folgende Größen sollten kontinuierlich überwacht und im Prozessleitsystem erfasst
+--    werden:"
+-- The gate enforces presence of o2_gehalt, T, P_Gebl, p_R and laufzeit_drucklufterzeuger, but the
+-- quote stops at the colon — the five items it enforces are not in the quote, so a reviewer cannot
+-- check the gate against its own evidence.
+-- EVIDENCE (md lines 445-451, printed p.16 — verbatim, the opener plus all five items):
+--   "Mindestens folgende Größen sollten kontinuierlich überwacht und im Prozessleitsystem erfasst
+--    werden: | I Sauerstoffgehalt im belüfteten Teil des Belebungsbeckens, | I Wassertemperatur im
+--    Belebungsbecken, | I Leistungsaufnahme der Drucklufterzeuger (Wirkleistung), | I Druck,
+--    mindestens der manometrische Druck auf der Druckseite des Drucklufterzeugers, meist in der
+--    Sammelleitung, | I Laufzeit und Frequenz (Sollwert Frequenzumformer) der Drucklufterzeuger,"
+-- The five encoded fields map 1:1 onto the five printed items — the gate LOGIC is correct.
+-- PROPOSED (quote replacement only, no logic change):
+-- update public.compliance_requirements set source_quote='Mindestens folgende Größen sollten kontinuierlich überwacht und im Prozessleitsystem erfasst werden: | I Sauerstoffgehalt im belüfteten Teil des Belebungsbeckens, | I Wassertemperatur im Belebungsbecken, | I Leistungsaufnahme der Drucklufterzeuger (Wirkleistung), | I Druck, mindestens der manometrische Druck auf der Druckseite des Drucklufterzeugers, meist in der Sammelleitung, | I Laufzeit und Frequenz (Sollwert Frequenzumformer) der Drucklufterzeuger, — printed p.16' where id='5ed55068-36df-4a79-b58b-81ffbbb4d42b';
+-- ROLLBACK: restore the single-sentence opener quoted under "CURRENT" above.
+
+
+-- ---------------------------------------------------------------------------
+-- S-2  ☐ RATIFIED   CR-016: duplicate of CR-015 + wrong clause + discretionary anchor
+-- ---------------------------------------------------------------------------
+-- CR-016 (M2292-07, clause_reference '§4.3.4', severity='block'):
+--   condition = "SSOTR_alt IS NOT NULL"
+-- CR-015 on the SAME worksheet already requires
+--   "dp_Bel_neu IS NOT NULL AND dp_Bel_alt IS NOT NULL AND SSOTR_neu IS NOT NULL AND SSOTR_alt IS NOT NULL"
+-- so CR-016 is a strict logical subset of CR-015: it can never fire without CR-015 firing.
+-- Two further defects:
+--   (a) CLAUSE MIS-TAG. Its source_quote is not from §4.3.4 at all — it is md line 538, which sits in
+--       §4.2.3 (printed p.20): "Zur Ermittlung der Leistungsfähigkeit eignen sich auch
+--       Sauerstoffzufuhrmessungen entsprechend dem Merkblatt DWA-M 209, wie sie in der Regel zur
+--       Leistungsabnahme nach Neuinstallation des Belüftungssystems durchgeführt werden."
+--   (b) DISCRETIONARY ANCHOR. The very next printed sentence relativises it: "Allerdings ist im
+--       Betrieb aufgrund des sehr hohen Aufwands solcher Sauerstoffzufuhrmessungen die
+--       Verhältnismäßigkeit abzuwägen." (md line 538, printed p.20) — and §4.2.3 closes with
+--       "im späteren Betrieb zur Überprüfung der Leistungsfähigkeit auch aufgrund des hohen Aufwands
+--       nur in Ausnahmefällen empfehlenswert." (md line 547). A block gate on text the guideline
+--       itself calls "nur in Ausnahmefällen empfehlenswert" over-enforces.
+-- PROPOSED (deactivate the duplicate):
+-- update public.compliance_requirements set is_active=false where id='f492db4b-6e43-4d81-b956-3ef4851aebb6';
+-- ROLLBACK: update public.compliance_requirements set is_active=true where id='f492db4b-6e43-4d81-b956-3ef4851aebb6';
+-- ALTERNATIVE, if the gate is to be kept: retag clause_reference '§4.3.4' -> '§4.2.3' and lower
+-- severity 'block' -> 'warn'.
+
+
+-- ---------------------------------------------------------------------------
+-- S-3  ☐ RATIFIED   CR-018 over-enforces: obligation-to-TEST encoded as obligation-to-PASS
+-- ---------------------------------------------------------------------------
+-- CR-018 (M2292-08, clause_reference 'Anhang B', severity='block'):
+--   condition = "dichtheit_ok == true"  -> the project cannot proceed unless the air main is leak-free.
+-- What the guideline actually obliges (md line 470, §4.2.2, printed p.17 — this IS the gate's own
+-- source_quote, so the clause_reference 'Anhang B' is also a mis-tag):
+--   "In regelmäßigen Abständen ist das System auf Dichtheit zu prüfen. Speziell die elastischen
+--    Anschlüsse unmittelbar nach dem Drucklufterzeuger sind nach Erstinstallation häufig undicht.
+--    Anhang B erläutert eine entsprechende Überprüfung der Dichtheit eines Druckbelüftungssystems."
+-- The obligation is to PERFORM the test periodically. Anhang B then treats a leak as an economic
+-- quantity, not a failure state (md lines 1257/1269-1276, printed p.49): "Fällt der Druck stetig
+-- weiter ab, ist die Leitung undicht. Aus der Steigung der Kurve unmittelbar nach dem Abschalten der
+-- Belüfter kann überschläglich die im Betrieb ständig entweichende Luftmenge bestimmt werden." — and
+-- the worked example explicitly reports that 3 of 4 basins ARE leaking without calling that
+-- non-compliant (md line 1261): "Nur die Leitung zu Becken 4 ist dicht, die anderen Leitungen weisen
+-- unterschiedlich große Undichtheiten auf."
+-- PROPOSED (retag + de-escalate; the field stays):
+-- update public.compliance_requirements set clause_reference='§4.2.2', severity='warn' where id='c9e52622-ccdd-4475-95f3-6ae316010090';
+-- ROLLBACK: update public.compliance_requirements set clause_reference='Anhang B', severity='block' where id='c9e52622-ccdd-4475-95f3-6ae316010090';
+-- BETTER (needs a new field): add a boolean "dichtheitspruefung_durchgefuehrt" and block on THAT,
+-- keeping dichtheit_ok as the recorded result driving a warn.
+
+
+-- ---------------------------------------------------------------------------
+-- S-4  ☐ RATIFIED   CR-004: descriptive range enforced as a block, inconsistent with the
+--                   guideline's own component breakdown on the same page
+-- ---------------------------------------------------------------------------
+-- CR-004 (M2292-02, §4.1.3, severity='block'): "druckverlust_rohrleitung >= 15 AND <= 40".
+-- EVIDENCE, printed p.14 (md line 402 — verbatim, this is the gate's own source_quote):
+--   "Der Druckverlust des Rohrleitungssystems liegt im Normalbetrieb zwischen 15 hPa und 40 hPa ."
+-- The sentence is DESCRIPTIVE ("liegt ... zwischen"), not an obligation; the obligation in the same
+-- paragraph is only "dass der Druckverlust durch das Rohrleitungssystem so niedrig wie möglich
+-- gehalten wird".
+-- INTERNAL INCONSISTENCY OF THE STANDARD (md lines 404-411, printed p.14 — verbatim):
+--   "Weiter differenziert werden kann der Druckverlust des Leitungssystems in: | I 5 hPa bis 30 hPa
+--    für den inneren Verlust des Drucklufterzeugers - saug- und druckseitig [...] | I 5 hPa bis 15 hPa
+--    für den Verlust in Transportleitungen vom Drucklufterzeuger zu den Becken, | I 5 hPa bis 50 hPa
+--    für Regelarmaturen im Regelbetrieb, | I 1 hPa bis 10 hPa für den Verlust in den Fallleitungen von
+--    der Beckenkrone zu den Belüfterelementen, | I dazu können im Einzelfall noch Verluste für
+--    Messeinrichtungen für die Luftvolumenstrommessung mit bis zu 50 hPa kommen."
+--   Component sum: minimum 5+5+5+1 = 16 hPa, maximum 30+15+50+10 = 105 hPa (+50 hPa for flow
+--   measurement). A plant whose every component sits inside its own printed range can therefore
+--   legitimately exceed 40 hPa and would be BLOCKED by CR-004. The two printed statements cannot
+--   both be hard limits.
+-- PROPOSED:
+-- update public.compliance_requirements set severity='warn' where id='586edff0-20c7-4c71-b7d9-61490956538b';
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id='586edff0-20c7-4c71-b7d9-61490956538b';
+
+
+-- ---------------------------------------------------------------------------
+-- S-5  ☐ RATIFIED   CR-008: clause retag — gate enforces §4.3.3.1, quote is from §4.3.3.4
+-- ---------------------------------------------------------------------------
+-- CR-008 (M2292-03, clause_reference '§4.3.3.4', severity='block'):
+--   condition = "reinigungsverfahren IS NOT NULL"  (presence of the chosen cleaning method)
+-- Its source_quote is the ACID precondition (md line 634, §4.3.3.4, printed p.24): "Voraussetzung für
+-- die Wirksamkeit der Säureeindüsung ist, dass die Verstopfungen säurelöslich sind. Für EPDM und
+-- Silikon wird in der Regel Ameisensäure (Deutsches Patent 1983) und für PU Essigsäure verwendet."
+-- That sentence says nothing about having to choose a cleaning method — it is the wrong anchor.
+-- The clause that lists the methods is §4.3.3.1 (md lines 600-606, printed p.22 — verbatim):
+--   "Häufig angewendete Methoden sind: | I Dehnung und Entspannung der Membran durch Variation des
+--    Luftdurchsatzes (Flexing), | I Einsatz einer automatisierten Luftspülung bei starrporösen
+--    Belüfterelementen, | I mechanische Reinigung mit einem rotierenden Hochdruck-Wasserstrahl, |
+--    I Eindüsen von Säure in den Luftstrom, | I Fluten mit Reinigungslösung."
+-- Note the modal is "Häufig angewendete Methoden sind" — descriptive, so the block severity is also
+-- questionable (see S-12).
+-- PROPOSED:
+-- update public.compliance_requirements set clause_reference='§4.3.3.1', source_quote='Häufig angewendete Methoden sind: | I Dehnung und Entspannung der Membran durch Variation des Luftdurchsatzes (Flexing), | I Einsatz einer automatisierten Luftspülung bei starrporösen Belüfterelementen, | I mechanische Reinigung mit einem rotierenden Hochdruck-Wasserstrahl, | I Eindüsen von Säure in den Luftstrom, | I Fluten mit Reinigungslösung. — printed p.22' where id='41059096-a239-4578-ab19-1d1d99588bfe';
+-- ROLLBACK: restore clause_reference='§4.3.3.4' and the §4.3.3.4 acid sentence as source_quote.
+
+
+-- ---------------------------------------------------------------------------
+-- S-6  ☐ RATIFIED   CR-009: unconditional gate for a conditional requirement (Walzenbelüfter only)
+-- ---------------------------------------------------------------------------
+-- CR-009 (M2292-04, §5.1.6, severity='block'): "leitwand_montiert == true", no guard.
+-- EVIDENCE (md line 787, printed p.30 — verbatim, the gate's own source_quote):
+--   "Bei Betrieb von Walzenbelüftern ist sicherzustellen, dass an ihrer Abstromseite Leitschilde
+--    entsprechend den Herstellerangaben montiert sind, da diese für einen ordnungsgemäßen Betrieb der
+--    Walzen notwendig sind."
+-- The obligation is hard ("ist sicherzustellen") but conditional on "Bei Betrieb von Walzenbelüftern".
+-- As encoded, a plant with Kreiselbelüfter — or a pure Druckluftbelüftung plant that never touches
+-- §5 at all — is blocked for a missing Leitwand. The guard field already exists
+-- (oberflaechenbeluefter_typ, enum walzenbeluefter|kreiselbeluefter, id 5a1739d7-...).
+-- PROPOSED:
+-- update public.compliance_requirements set condition='oberflaechenbeluefter_typ != ''walzenbeluefter'' OR leitwand_montiert == true' where id='d0ce04b5-8f24-47bb-a853-402a79f96041';
+-- ROLLBACK: update public.compliance_requirements set condition='leitwand_montiert == true' where id='d0ce04b5-8f24-47bb-a853-402a79f96041';
+-- NOTE: the condition grammar of evaluate.ts must be confirmed to support OR / != before applying.
+
+
+-- ---------------------------------------------------------------------------
+-- S-7  ☐ RATIFIED   CR-010: INVENTED composite interval 0,8..5 W/m3 (SR-2 violation)
+-- ---------------------------------------------------------------------------
+-- CR-010 (M2292-04, §6.1.3, severity='block'): "leistungsdichte_ruehrwerk >= 0.8 AND <= 5".
+-- The md prints TWO SEPARATE ranges and nowhere prints 0,8..5 as one interval:
+--   (a) md line 866, §6.1.3, printed p.33 — verbatim: "Die Leistungsdichte, definiert als die
+--       Leistungsaufnahme der Rühraggregate bezogen auf das zu durchmischende Volumen, wird häufig
+--       mit $2 \mathrm{~W} / \mathrm{m}^{3}$ bis $5 \mathrm{~W} / \mathrm{m}^{3}$ angegeben, wobei
+--       jedoch dieses Maß nur einen Anhaltspunkt für den Betreiber bei der Auswahl und Bewertung der
+--       Aggregate liefern kann."
+--   (b) same line, later: "Umgekehrt kann bei einem Rühraggregat mit einer hohen spezifischen
+--       Schubleistung, einer geeigneten Anordnung des Rühraggregats und einer günstigen Beckenform
+--       auch eine Leistungsdichte von $0,8 \mathrm{~W} / \mathrm{m}^{3}$ bis $1,5 \mathrm{~W} /
+--       \mathrm{m}^{3}$ ausreichend sein."
+--   (c) confirmed again for the Kennzahl in §8.2.5, md line 1077, printed p.41: "wobei bei günstigen
+--       Beckengeometrien, effizienten Rührwerken und optimaler Anordnung durchaus Leistungsdichten von
+--       $0,8 \mathrm{~W} / \mathrm{m}^{3}$ bis $1,5 \mathrm{~W} / \mathrm{m}^{3}$ erreicht werden können."
+-- The encoded 0,8..5 is the UNION of the two ranges — a value the guideline never prints. On top of
+-- that, the guideline itself calls the figure "nur einen Anhaltspunkt", i.e. explicitly non-normative,
+-- so a block gate on it is wrong twice over. Under SR-2 the choice between "üblich 2..5" and
+-- "effizient 0,8..1,5" is an engineer selection, never an auto-picked union.
+-- PROPOSED (de-escalate now, surface the selection later):
+-- update public.compliance_requirements set severity='warn' where id='fc34d9bc-ad69-486a-b5e9-851d8fdb6730';
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id='fc34d9bc-ad69-486a-b5e9-851d8fdb6730';
+-- FOLLOW-UP (needs a schema decision): add an SR-2 selection field
+-- "leistungsdichte_referenzband" with the two printed options (2..5 W/m3 "häufig angegeben" /
+-- 0,8..1,5 W/m3 "bei effizienten Rührwerken ausreichend") and gate against the SELECTED band.
+
+
+-- ---------------------------------------------------------------------------
+-- S-8  ☐ RATIFIED   UNIT FINDING, Gl. 5 and Gl. 6 — three incompatible unit systems
+-- ---------------------------------------------------------------------------
+-- This is the "unit factor" class that DWA-M 229-1 also produced. It is NOT corrected in the pack.
+-- (1) The GUIDELINE contradicts itself. §3.2 symbol table (md lines 330-331, printed p.11-13):
+--       "$p_{\text {spez,h }}$ & $\mathrm{W} /\left(\left(\mathrm{m}_{\mathrm{N}}^{3} / \mathrm{h}\right) \cdot \mathrm{m}\right)$ & Spezifische Leistung für den Drucklufterzeuger bezogen auf die Einblastiefe"
+--       "$p_{\text {spez.p }}$ & $\mathrm{W} /\left(\left(\mathrm{m}_{\mathrm{N}}^{3} / \mathrm{h}\right) \cdot \mathrm{hPa}\right)$ & Spezifische Leistung für den Drucklufterzeuger bezogen auf die Druckdifferenz"
+--     but Gl. 5/6 (md lines 1045-1046, §8.2.4, printed p.40) declare
+--       "... & \left(\mathrm{Ws} /\left(\mathrm{m}_{\mathrm{N}}^{3} \cdot \mathrm{~Pa}\right)\right)"  and
+--       "... & \left(\mathrm{Ws} /\left(\mathrm{m}_{\mathrm{N}}^{3} \cdot \mathrm{~m}\right)\right)"
+--     with the inputs annotated as P_Gebl (W), Q_L,N (m3/s), dp (Pa), h_D (m).
+--     Dimensional check: W/((mN3/h)*hPa) = W*h/(mN3*hPa) = 3600 Ws/(mN3*100 Pa) = 36 * Ws/(mN3*Pa)
+--                        W/((mN3/h)*m)   = 3600 * Ws/(mN3*m).
+--     So the guideline's own two declarations differ by a factor 36 (Gl.5) and 3600 (Gl.6).
+--     The guideline is aware of the trap — md line 1042 (printed p.40): "wird als betriebliche
+--     Kennzahl der spezifische Leistungsbedarf für den Drucklufterzeuger neu definiert (Einheiten
+--     beachten)."
+-- (2) The ENCODING adds a third system. Fields: P_Gebl in kW (§3.2 line 325 also says kW), Q_L_N in
+--     mN3/h (§3.2 line 332), dp in hPa (§3.2 line 345), h_D in m — while the OUTPUT fields p_spez_p
+--     and p_spez_h carry the §3.2 units W/((mN3/h)*hPa) and W/((mN3/h)*m). Evaluating the encoded
+--     formulas "P_Gebl / (Q_L_N * dp)" and "P_Gebl / (Q_L_N * h_D)" with those inputs yields
+--     kW/((mN3/h)*hPa) and kW/((mN3/h)*m) — i.e. a factor 1000 off the declared output units, and
+--     36 000 / 3 600 000 off the Gl.5/Gl.6 declarations.
+-- NOTHING IS PROPOSED AS AN AUTO-FIX: this is a value/enforcement class change and needs a ruling
+-- (SR-2 / stop-condition). The two candidate resolutions are:
+--   (A) keep the §3.2 output units and scale P_Gebl kW -> W inside the equation
+--       (p_spez_p = P_Gebl * 1000 / (Q_L_N * dp)); or
+--   (B) adopt the Gl.5/Gl.6 output units Ws/(mN3*Pa) and Ws/(mN3*m) and convert the inputs
+--       (Q_L_N /3600 to m3/s, dp *100 to Pa, P_Gebl *1000 to W).
+-- Both must be confirmed against the RENDERED PDF first (SR-3) — the md may have garbled a unit.
+-- No statement is written here on purpose.
+
+
+-- ---------------------------------------------------------------------------
+-- S-9  ☐ RATIFIED   CR-011: conditional obligation with no guard field
+-- ---------------------------------------------------------------------------
+-- CR-011 (M2292-05, §7.2, severity='block'): "o2_min_p_elimination > 0.5".
+-- EVIDENCE (md line 964, printed p.37 — verbatim): "Bei Anlagen mit erhöhter biologischer
+-- Phosphatelimination ist zudem zu beachten, dass im gesamten aeroben Bereich eine ausreichende
+-- Sauerstoffkonzentration ( $>0,5 \mathrm{mg} / \mathrm{l} \mathrm{O}_{2}$ ) vorhanden sein muss, um
+-- eine ungewollte P -Rücklösung in der Nitrifikationszone zu verhindern."
+-- The limit and the modal are correct ("muss", strict >0,5). What is missing is the printed
+-- CONDITION "Bei Anlagen mit erhöhter biologischer Phosphatelimination": there is no boolean field
+-- for that plant type, and the field itself is is_required=false, so on a plant without enhanced
+-- bio-P the gate evaluates against a NULL.
+-- PROPOSED (needs a new field — schema change, SR-4 class once the mandate is ticked):
+--   add field M2292-05.bio_p_elimination (boolean, "Anlage mit erhöhter biologischer
+--   Phosphatelimination", clause §7.2) and change the condition to
+--   "bio_p_elimination == false OR o2_min_p_elimination > 0.5".
+-- ROLLBACK: drop the field and restore condition='o2_min_p_elimination > 0.5'.
+
+
+-- ---------------------------------------------------------------------------
+-- S-10 ☐ RATIFIED   Symbol collision: encoded "dp" vs the guideline's "d p"
+-- ---------------------------------------------------------------------------
+-- The encoding uses the symbol "dp" for the guideline's Delta-p (Druckdifferenz, hPa; §3.2 md line
+-- 345: "$\Delta p$ & hPa & Druckdifferenz") and "dp_pct" for the guideline's "d p" (§3.2 md line 303:
+-- "$d p$ & \% & Prozentuale Veränderung des Drucks (Beispiel in Anhang C)").
+-- So the DB symbol "dp" means something DIFFERENT from the printed symbol "dp" in the same standard.
+-- No value or formula is wrong (the equations use the right quantities), but any engineer reading
+-- the form against the printed §3.2 table will read "dp" as the percentage.
+-- PROPOSED (cosmetic rename, breaks equation input_symbols — apply as one migration or not at all):
+--   fields.symbol 'dp' -> 'delta_p' and 'dp_pct' -> 'dp', with equations 5/6/DV and C.2 updated.
+-- ROLLBACK: the inverse rename.
+-- RECOMMENDATION: leave as-is and instead put the printed symbol in label_de; the risk of touching
+-- equation input_symbols outweighs the readability gain.
+
+
+-- ---------------------------------------------------------------------------
+-- S-11 ☐ RATIFIED   §8.4 gates: CR-020 has no requirement in its quote; CR-014's lower bound is
+--                   not printed; the two overlap
+-- ---------------------------------------------------------------------------
+-- (a) CR-020 (M2292-06, §8.4, severity='block'): "energieverbrauch_abweichung IS NOT NULL".
+--     Its source_quote is md line 1120 (printed p.42) about commissioning an Energieanalyse per
+--     DWA-A 216 — verbatim, but it states no obligation to record a year-on-year deviation, so the
+--     gate's evidence does not support the gate. It is also 'block' on a "sollte" sentence, and it
+--     targets a field that is is_required=false.
+-- (b) CR-014 (same field, severity='warn'): "energieverbrauch_abweichung >= -10 AND <= 10".
+--     EVIDENCE (md line 1112, printed p.42 — verbatim): "Bei signifikanter Veränderung des
+--     Energieverbrauchs für Belüftung und Durchmischung im Vergleich zum Vorjahr (> 10 %) ist
+--     zunächst zu prüfen, ob dies mit einer Erhöhung der Schmutzfrachtbelastung korrespondiert."
+--     The printed trigger is "> 10 %"; the symmetric -10 % floor is an interpretation of
+--     "Veränderung" (the follow-up sentence only discusses an increase). Defensible, but not printed.
+-- PROPOSED:
+-- update public.compliance_requirements set severity='warn', source_quote='Bei signifikanter Veränderung des Energieverbrauchs für Belüftung und Durchmischung im Vergleich zum Vorjahr (> 10 %) ist zunächst zu prüfen, ob dies mit einer Erhöhung der Schmutzfrachtbelastung korrespondiert. — printed p.42', clause_reference='§8.4' where id='16a8fd7a-199f-4541-aef5-1f75c13890ec';
+-- ROLLBACK: restore severity='block' and the DWA-A 216 Energieanalyse sentence as source_quote.
+-- OPEN QUESTION for Alvaro: keep the -10 % floor (symmetric reading of "Veränderung") or make the
+-- gate one-sided at > +10 %?
+
+
+-- ---------------------------------------------------------------------------
+-- S-12 ☐ RATIFIED   SEVERITY NOTES — block gates anchored on soft / descriptive text
+-- ---------------------------------------------------------------------------
+-- 19 of the 20 gates are severity='block'. The following anchor on text whose printed modal is
+-- "sollte(n)" / "häufig" / "liegt" / "kann" / an exemplary annex, i.e. block over-enforces:
+--   · CR-003  §4.2.1  "Mindestens folgende Größen SOLLTEN kontinuierlich überwacht ... werden"  (p.16)
+--   · CR-004  §4.1.3  "Der Druckverlust ... LIEGT im Normalbetrieb zwischen 15 hPa und 40 hPa" (p.14)  [also S-4]
+--   · CR-005  §4.1.4  "Diese Rückschlagsicherungen SOLLTEN im Normalbetrieb einen geringen
+--                      Druckverlust (<15 hPa) haben."                                            (p.15-16)
+--   · CR-008  §4.3.3.1 "HÄUFIG ANGEWENDETE Methoden sind:"                                        (p.22)  [also S-5]
+--   · CR-010  §6.1.3  "wird HÄUFIG mit 2 W/m3 bis 5 W/m3 angegeben, wobei jedoch dieses Maß NUR
+--                      EINEN ANHALTSPUNKT ... liefern kann"                                       (p.33)  [also S-7]
+--   · CR-012  §7.3    "SOLLTE im Winter-Dauerbetrieb eine Sauerstoffsollkonzentration von >1 mg/l
+--                      O2 ANGESTREBT werden."                                                     (p.37)
+--   · CR-013  §8.4    "Die energetische Bewertung ... SOLLTE regelmäßig für ein Kalenderjahr ...
+--                      erfolgen."                                                                 (p.42)
+--   · CR-015  Anhang C — the whole annex is titled "BEISPIEL zur Entscheidungsfindung, ob Wartung
+--                      oder Austausch von Belüfterelementen wirtschaftlicher ist" (Inhalt, p.50);
+--                      its opener is "NÄHERUNGSWEISE kann zur Berechnung des Energiemehrbedarfs,
+--                      wie im folgenden BEISPIEL dargestellt, vorgegangen werden."                (p.50)
+--   · CR-016  §4.2.3  "nur in Ausnahmefällen empfehlenswert"                                      (p.20)  [also S-2]
+--   · CR-020  §8.4    "SOLLTE eine Energieanalyse ... durchgeführt werden."                       (p.42)  [also S-11]
+-- Gates whose block severity IS carried by a hard printed modal (no change proposed):
+--   CR-001/CR-002 (scope: "Dieses Merkblatt GILT für ..." / "Eine Abgrenzung besteht"), CR-006
+--   ("sind Instandhaltungsmaßnahmen ERFORDERLICH"), CR-007 ("DARF NUR ... erfolgen"), CR-009
+--   ("IST SICHERZUSTELLEN", but see S-6 for its missing guard), CR-011 ("MUSS", see S-9),
+--   CR-017 ("Zielsetzung IST IMMER"), CR-019 ("Das Personal MUSS ... unterrichtet werden").
+-- PROPOSED (one statement, all ten at once):
+-- update public.compliance_requirements set severity='warn' where id in ('5ed55068-36df-4a79-b58b-81ffbbb4d42b','586edff0-20c7-4c71-b7d9-61490956538b','9f03f560-63b4-4d84-91fd-a3bc36eb1b9d','41059096-a239-4578-ab19-1d1d99588bfe','fc34d9bc-ad69-486a-b5e9-851d8fdb6730','72d27787-0fc8-41e7-9bbd-31245d849fae','e5e80267-4bd9-49ee-b2a1-242f6bb5cf6f','00bfc8c0-699d-42cf-9525-a47ebe246e64','f492db4b-6e43-4d81-b956-3ef4851aebb6','16a8fd7a-199f-4541-aef5-1f75c13890ec');
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id in (... same ten ...);
+
+
+-- ---------------------------------------------------------------------------
+-- S-13 ☐ RATIFIED   MISSING GATES for printed hard limits that already have a field
+-- ---------------------------------------------------------------------------
+-- (a) §4.1.2, printed p.13 (md line 386 — verbatim): "Zur Lastfallabdeckung für den maximalen und den
+--     minimalen Lastfall ist eine Abstufung der Drucklufterzeuger in einer Spanne zwischen $8: 1$ bis
+--     hin zu $12: 1$ notwendig. In Ausnahmefällen (Stoßbelastungen, Sonderlastfälle) kann eine Spanne
+--     von bis zu 15:1 erforderlich sein (GÜNKELLange 2012)."
+--     Field abstufung_drucklufterzeuger (86293d6b-...) exists; NO gate references it.
+--     PROPOSED: new CR "abstufung_drucklufterzeuger >= 8" severity='warn'
+--     (the upper bound 12:1 / 15:1 is an SR-2 selection, not an auto-pick).
+-- (b) §4.4.1.8, printed p.28 (md line 746 — verbatim): "Üblicherweise ist bei
+--     Membranbelüfterelementen eine Wasserüberdeckung von Wasser mit hoher UV-Absorption („trübes
+--     Wasser“) erforderlich ( $>50 \mathrm{~cm}$ )."
+--     Field membranbeluefter_wasserueberdeckung (9e3efecb-...) exists; NO gate references it.
+--     PROPOSED: new CR "membranbeluefter_wasserueberdeckung > 50" severity='warn' (modal is
+--     "Üblicherweise ist ... erforderlich"), guarded on beluefterelement_typ being a Membran type.
+-- (c) §4.1.4, printed p.15 (md line 433 — verbatim): "Hinsichtlich der Dauertemperaturbeständigkeit
+--     bei Membranbelüfterelementen und $T \geq 30^{\circ} \mathrm{C}$ liegen derzeit keine
+--     ausreichenden Erfahrungen vor."
+--     Field T (489b7a3e-...) exists; NO gate references it.
+--     PROPOSED: new CR "T < 30" severity='warn' — this is a knowledge gap the guideline declares,
+--     not a prohibition, so it must never be a block.
+-- ROLLBACK for each: delete the newly inserted compliance_requirements row by its code.
+
+
+-- ---------------------------------------------------------------------------
+-- S-14 ☐ RATIFIED   MISSING GATE: the acid <-> membrane-material mapping is printed but not enforced
+-- ---------------------------------------------------------------------------
+-- EVIDENCE (md lines 634 and 638, §4.3.3.4, printed p.24 — verbatim):
+--   "Voraussetzung für die Wirksamkeit der Säureeindüsung ist, dass die Verstopfungen säurelöslich
+--    sind. Für EPDM und Silikon wird in der Regel Ameisensäure (Deutsches Patent 1983) und für PU
+--    Essigsäure verwendet."
+--   "Sind die Membranen schon soweit verstopft, dass nur noch sehr wenig bzw. keine Luft mehr
+--    austritt, kann durch das Eindüsen von Säure keine Verbesserung erzielt werden."
+-- Both fields exist (membranwerkstoff df4eea0b-..., reinigungsverfahren ca45fd60-...) but no gate
+-- links them: a project may select reinigungsverfahren='saeure' with any membrane material and with
+-- no record that the deposits are acid-soluble.
+-- PROPOSED: (i) a new boolean field "ablagerungen_saeureloeslich" (§4.3.3.4) and a gate
+--   "reinigungsverfahren != 'saeure' OR ablagerungen_saeureloeslich == true" severity='warn';
+--   (ii) surface the printed acid choice (Ameisensäure for EPDM/Silikon, Essigsäure for PU) as an
+--   SR-2 selection field rather than free text.
+-- ROLLBACK: drop the field and the gate.
+
+
+-- ---------------------------------------------------------------------------
+-- S-15 ☐ RATIFIED   COMPUTED VALUES THAT ARE NEVER APPLIED DOWNSTREAM
+-- ---------------------------------------------------------------------------
+-- This is the second defect class carried over from DWA-M 229-1. Eight equation outputs are computed
+-- and then consumed by NOTHING — no gate reads them and no other equation takes them as input:
+--   e_Bel (Gl.3), e_Bel_OV (Gl.4), p_spez_p (Gl.5), p_spez_h (Gl.6), e_Ruehr (Gl.7), DV (§8.2.6),
+--   dE (Gl.C.5) and Q_V (Gl.B.1).
+--   (f_p, f_s, dp_pct, dSSOTR ARE consumed — f_p and f_s by Gl.C.5; dp_pct and dSSOTR are pure
+--    reporting figures in Tabelle C.1, which matches the guideline, so they are not a finding.)
+-- The two cases where the guideline DOES print a comparison value, and the encoding therefore leaves
+-- a real gap:
+--   (a) DV, §8.2.6, printed p.41 (md line 1088 — verbatim): "Ein typischer Wert für das
+--       Druckverhältnis DV bei feinblasigen Belüftungssystemen beträgt 1,2. Das bedeutet, dass ca.
+--       $20 \%$ der Drucksteigerung (und damit der Belüftungsenergie) aufzuwenden sind, um die
+--       Strömungsverluste abzudecken. Je größer das Druckverhältnis, desto größer sind die Verluste
+--       in den Rohrleitungen, den Rohrleitungseinbauten und den Belüfterelementen."
+--       PROPOSED: new CR "DV <= 1.2" severity='warn' — "typischer Wert", never a limit, so warn only.
+--   (b) dE, Anhang C, printed p.50: dE is the decision figure of the whole Wirtschaftlichkeits-
+--       worksheet ("Auf Basis der Ergebnisse kann mit einer Kostenvergleichsrechnung ermittelt
+--       werden, ob der Austausch der Belüfter sinnvoll ist.", md line 1300) yet the field
+--       entscheidung_wartung_austausch (2eed0e3c-...) is a free enum with no link to dE at all.
+--       The guideline prints no dE threshold, so NO auto-gate is proposed; the honest fix is to
+--       display dE next to the decision field and require a written justification.
+-- e_Bel / e_Bel_OV / e_Ruehr / p_spez_p / p_spez_h / Q_V: the guideline deliberately gives NO target
+-- values for these ("Diese Kennzahl ist nicht zur direkten Einordnung der energetischen Effizienz ...
+-- geeignet", md line 1010, printed p.38; "Für die energetische Beurteilung und den Vergleich
+-- unterschiedlicher Aggregate sind in den Regelwerken keine Kennwerte definiert.", md line 1040,
+-- printed p.40). Their being ungated is therefore CORRECT and is recorded here only so the absence
+-- is auditable — no change proposed.
+
+
+-- ---------------------------------------------------------------------------
+-- S-16 ☐ RATIFIED   is_required REVIEW
+-- ---------------------------------------------------------------------------
+-- (a) FOUR fields are is_required=true although their only printed support is the WORKED EXAMPLE of
+--     Anhang C ("Beispiel zur Entscheidungsfindung ...", Inhalt printed p.50):
+--       dp_Bel_neu (e61319c2-...), dp_Bel_alt (bcffa945-...), SSOTR_neu (fd82fd45-...),
+--       SSOTR_alt (b8c8df75-...).
+--     They are genuine inputs of Gl. C.1/C.3, so required=true is defensible IF the
+--     Wirtschaftlichkeitsvergleich worksheet is used at all; it is wrong if the worksheet is
+--     optional. PROPOSED: make the whole M2292-07 worksheet conditional instead of the fields
+--     mandatory, or set is_required=false on all four.
+--     -- update public.fields set is_required=false where id in ('e61319c2-a943-4533-8fc1-c1e5338289a3','bcffa945-0554-4ff1-9771-096e18d44304','fd82fd45-3d63-4ad5-96f0-4c3d3a28f78e','b8c8df75-0a40-4821-a2c2-3cfeb3d2340f');
+--     -- ROLLBACK: set is_required=true on the same four ids.
+-- (b) THREE fields are is_required=true on the strength of a "sollten" list (§4.2.1, printed p.16):
+--     o2_gehalt (b5610e84-...), P_Gebl (695fea50-...), p_R (53e71d93-...). The list opener is
+--     "Mindestens folgende Größen SOLLTEN kontinuierlich überwacht ... werden" — a recommendation.
+--     Kept as-is is defensible (they are the inputs of the energy Kennzahlen); flagged only.
+-- (c) THE OPPOSITE INCONSISTENCY — 14 fields carry a severity='block' gate yet are is_required=false:
+--     anlagentyp_membranbelebung, druckverlust_rohrleitung, rueckschlag_druckverlust,
+--     instandhaltungsart, flexing_druckabsenkung, reinigungsverfahren, leitwand_montiert,
+--     leistungsdichte_ruehrwerk, o2_sollkonzentration, o2_min_p_elimination,
+--     o2_min_winter_stabilisierung, energieverbrauch_abweichung, dichtheit_ok,
+--     personal_sicherheitsunterweisung.
+--     A block gate makes them de facto mandatory while the form marks them optional. PROPOSED: after
+--     S-3/S-4/S-6/S-7/S-11/S-12 are ratified, set is_required=true on exactly those fields whose gate
+--     REMAINS severity='block', and leave the rest optional.
+-- ROLLBACK for each: the inverse is_required value.
+
+
+-- ---------------------------------------------------------------------------
+-- S-17 ☐ RATIFIED   MISSING FIELDS — printed operating constraints with no encoding at all
+-- ---------------------------------------------------------------------------
+-- (a) §4.3.4.4 Shoptest boundary conditions, printed p.25 (md line 682 — verbatim): "Die Messungen
+--     sollten so nah wie möglich an der realen Anlagenkonstellation durchgeführt werden, d. h.
+--     angelehnt an die reale Einblastiefe (für Sauerstoffzufuhrmessungen werden mindestens 3 m
+--     empfohlen), die reale Belegungsdichte, die reale spezifische Luftbeaufschlagung
+--     $\left(0,7 \mathrm{~m}^{3}\right.$ bis $1,0 \mathrm{~m}^{3} \mathrm{Luft} /\left(\mathrm{m}^{3}\right.$
+--     Becken $\left.\cdot \mathrm{h}\right)$ ) und die reale Beaufschlagung der einzelnen
+--     Belüfterelemente".
+--     The enum option messort='testbecken_shoptest' exists, but NO field carries the >= 3 m depth or
+--     the 0,7..1,0 m3/(m3*h) loading, so a Shoptest can be recorded with no validity conditions.
+--     PROPOSED: add "shoptest_einblastiefe" (m) and "shoptest_luftbeaufschlagung" (m3/(m3*h)) on
+--     M2292-07 with warn gates guarded on messort='testbecken_shoptest'.
+-- (b) §5.4, printed p.31 (md line 840 — verbatim): "Bei Anlagen mit weniger als drei Einzelaggregaten
+--     wird empfohlen, eine zustandsorientierte Instandhaltung durchzuführen, da sonst bei
+--     unvorhergesehenen Ausfällen die erforderliche Sauerstoffzufuhr nicht erreicht werden kann."
+--     No field records the number of surface-aeration units. PROPOSED: add
+--     "anzahl_oberflaechenbeluefter" (integer) on M2292-04, warn gate at < 3.
+-- (c) §4.3.4.1, printed p.24 (md line 656 — verbatim): "Bezüglich des Druckverlusts von neuen
+--     Belüftungselementen ist zu beachten, dass der Druck nach der Installation in der Regel ansteigt
+--     und sich nach 3 bis 4 Monaten auf einen höheren Wert einstellt als direkt nach Inbetriebnahme."
+--     Not encoded anywhere; relevant because dp_Bel_neu is measured against it. PROPOSED: carry the
+--     sentence into the dp_Bel_neu description (no gate).
+-- ROLLBACK for each: drop the added fields/gates.
+
+
+-- ---------------------------------------------------------------------------
+-- S-18 ☐ RATIFIED   CR-001 / CR-002: scope boundaries encoded as compliance blocks
+-- ---------------------------------------------------------------------------
+-- CR-001 ("TS_BB >= 2 AND TS_BB <= 5") and CR-002 ("anlagentyp_membranbelebung == false") are
+-- severity='block'. Their evidence is the Anwendungsbereich (§1, printed p.9), i.e. they define
+-- WHERE THE MERKBLATT APPLIES, not what the plant must achieve. Blocking is arguably the right
+-- behaviour (the wizard should refuse to apply DWA-M 229-2 outside its scope) but the user-facing
+-- message should read "outside the scope of this Merkblatt", not "non-compliant".
+-- No SQL change proposed — flagged for the UX/messaging layer only.
+-- UNIT NOTE (no change): CR-001 compares TS_BB in kg/m3 against the printed 2 g/l and 5 g/l.
+-- 1 g/l = 1 kg/m3, so the numbers are identical and the gate is correct as written.
