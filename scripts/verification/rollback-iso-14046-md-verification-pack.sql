@@ -1,0 +1,23 @@
+-- Rollback for iso-14046-md-verification-pack.sql (2026-09-05).
+-- Reverts ONLY rows this pack touched (identified by the verification_note tag) and ONLY for standard ISO-14046
+-- (joined through worksheet_templates -> standards.code). Prior status was UNIFORM in the 2026-09-05 export: all 73
+-- fields imported_unverified (73 quoted -> verified_against_standard, 0 app-metadata, 0 residue), so every field returns
+-- to imported_unverified; quote/note/verified_at were null before the pack and are nulled again. Section B is a quote
+-- backfill only: EQ-01 keeps its status (verified_via_cross_reference); only the backfilled quote is nulled and the
+-- " | md-quote 2026-09-05 …" tag stripped. Gates untouched by the pack; the STAGED file was never applied; the
+-- encode-time source_quote column is separate and stays.
+
+-- ---- fields: 73 rows — prior status = imported_unverified ----
+update public.fields f set verification_status='imported_unverified', verification_quote=null, verification_note=null, verified_at=null
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = f.worksheet_template_id and s.code = 'ISO-14046'
+   and f.id in ('82351643-deac-4aaf-8813-874148abedf6','8f3c9da4-519d-41f5-82b0-8a9c6da9a173','5328263e-b3fb-49a6-9628-34016ee60b72','398c4516-ea7d-4b8f-b308-f467cc06ef9d','35de4319-19e2-4376-9e99-38e2aac7db5b','0584055d-071f-4dad-a956-046b961b0922','d83fbda1-6168-4de6-a5de-2e5fd3cf3fbc','41903319-92ed-4b95-bf44-ef70d4751e01','5225c7ca-b10e-4257-b750-d9a781caefc0','b1d52745-91d5-4e00-9fae-71143f65303a','fa361c5a-4387-4377-9039-eaead1c94b4e','8ea270f0-c471-4a11-908e-3ffbb4e025d6','8fbc9424-f2f4-4171-8c0f-012df57240db','8301ed6d-aedc-4a4c-bd7a-4b470680b7d3','65480b53-0443-4e7f-9963-87b2a83af8f6','993a23a5-a9b0-49e6-8b4f-e2739eddbb34','97f4b916-b0d7-4bc9-a90e-56cf4d63e5ab','f5a6c92d-1519-4817-a7e7-aeea58f339e9','2597d1f5-d0fc-43a7-8fd2-a531771f20bf','219877f5-3b4b-4024-895f-366dbd108143','7f7223a5-d933-463b-913d-4221ee5bf7b9','1b4d1d5a-c3dd-41c1-bd17-68284387ac27','16dcc3a1-17c6-464a-8b41-37bdcd391478','f3342599-2003-4c6e-abf1-a3bea77cf1ca','b8f66ce9-69c9-489a-aada-60042cab4295','48070532-7007-4af8-9b91-220467ecbb1c','36800877-e51a-4b9c-8235-74c609a6722f','8de39fb8-7566-4636-8edb-ced4588da840','8eed86c4-b3ac-4ddc-b7c5-8800bc2e81a9','0c03810a-0e36-4772-a3fb-1493c681c79e','01528e32-dfef-426a-bab4-2ffdbeac5f9f','f28a33a6-3e3e-49e8-868e-d9b16e296f6c','d94b4f09-749c-491e-aacb-c09a4f44e6e9','92dab3b4-cca4-41f6-afe3-cca907e58e64','d77e0e38-3735-4964-bdf1-214135606a91','10d470ce-12b6-48c3-953b-08ba4a4f9965','c0e5ce88-936a-4f43-a8ce-c3aa4bdb95eb','ccebc649-6cfc-4600-9696-ef361454064f','9c3c451f-3cdb-41fb-9780-01f46913851d','d6434952-bdb1-4e21-943c-14a96b19e4f4','9986413e-2a5b-4afe-9d0d-79ea7004f275','c2509f77-5e58-4519-803c-24159ff863f2','8d248258-fc9f-4937-9c55-3fba11106544','ff05f4d5-0ba0-485a-be0f-a00b5cc62eaf','c5b20bd3-81d2-4294-83f1-26b6ff279b07','3dbfc9d0-45a7-4e68-b221-bca84a434b33','864087c2-0499-4850-a8cc-c6019bb72516','ae5fa1d0-8acd-4711-a05a-1a33f436effa','127f3def-d07e-4529-8c5a-faf654f35bab','bdff0fef-8172-494b-a7ad-47292b658df6','9d3eb64d-f29d-496f-b4db-a43edf83c172','cd312bae-5668-4e35-9d11-1056aa04adb3','fdf0e6b1-b185-4dcb-9154-ab88ba9ef4af','9efd94c6-6b6c-430f-a077-5a216f92b0bb','c04230d6-02b1-46cc-bd7a-1483828fab14','97e30065-1449-482a-a5d5-324b4bd9d79e','e7163937-aa16-4077-9ac3-95e606ed9abf','beefe1e6-f9b0-4489-aa21-4aea1a7b2bf4','488dbdb7-2ba6-4085-878c-617f1dff141d','4949d890-9e76-49df-b802-95a0ebb9cc04','c3fe05e1-7937-48b3-a19f-10b848e75792','e2618ba7-303e-4ac8-bb0a-c54c718229d6','d83090ef-6450-4ab8-8f70-1fbc28454ee4','3b86deee-ee9b-488b-85c7-b53ef2328fa3','59a49975-19d0-4722-a166-2bf0552b9b3e','dd4bb34f-9876-4113-b256-4b59a77f9ed2','a6bdeba5-04b6-42e6-b3ad-7028745c3ea8','3a3d3bff-0c05-4451-aadd-dbd4fe959282','0d73ddee-20a8-42f9-b255-d9a1b2cb8d3c','df94ce75-ea63-4428-a271-3188a719dcc8','40e9aeb2-8982-4750-9c7d-1435044a9742','fe7947ae-7087-45cb-8f1f-9b954a24ed1d','e3f0f872-272a-49dd-95e4-df4a546f8ca8')
+   and (f.verification_note like 'md-verified 2026-09-05%' or f.verification_note like 'md-pass 2026-09-05%');
+
+-- ---- equations: 1 row (EQ-01) — quote backfill only (status stays verified_via_cross_reference) ----
+update public.equations e set verification_quote=null,
+       verification_note=nullif(regexp_replace(e.verification_note, ' \| md-quote 2026-09-05 \(.*$', ''), '')
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = e.worksheet_template_id and s.code = 'ISO-14046'
+   and e.id = 'db1f6227-b23a-4d7e-b0c1-56a80b1977da'
+   and e.verification_note like '%md-quote 2026-09-05%';

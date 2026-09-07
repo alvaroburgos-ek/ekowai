@@ -1,0 +1,371 @@
+-- ============================================================================
+-- ISO-14046 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\ISO-14046\ISO-14046.md
+--   (mathpix LaTeX of NTC-ISO 14046, ICONTEC — declared "una adopción idéntica (IDT) por traducción de la norma
+--   ISO 14046:2014"; SPANISH, not the English ISO original, so everything here caps at VC). NO page-number lines:
+--   "printed p.N" is derived from the CONTENIDO index (md 123–176) and cross-checked against the mathpix figure
+--   indices (= printed page + 10 at all five figures). Third-level sub-clauses have no index entry and are cited as
+--   their parent clause span: §5.2.x p.11–15 · §5.3.x p.16–21 · §5.4.x p.22–26 · §6.3.x p.32 · Anexo A p.35–37.
+--   See the pack header for the full convention.
+-- Gate rows live in compliance_requirements (columns: worksheet_template_id, code, severity, condition,
+--   clause_reference, source_quote, requires_attestation) and are evaluated by src/lib/compliance/evaluate.ts — a
+--   condition that evaluates TRUE is a PASS, FALSE is a FAIL; a missing referenced symbol yields "pending", not a fail.
+-- Standard id fccd0cd2-ef64-4424-a7ab-057e621ec6f4. Worksheet ids:
+--   01 Registrierung & Allgemeine Anforderungen              1eb8eb3f-2a2d-492e-bb59-a9c8107384a8
+--   02 Festlegung des Ziels und des Untersuchungsrahmens     dd6f9f92-f323-4a74-9593-00f026db63f5
+--   03 Analyse des Wasser-Fussabdruck-Inventars              4ee6e0d5-1081-439e-a34a-08cf91d114a8
+--   04 Wirkungsabschaetzung des Wasser-Fussabdrucks          06ddb8e5-819e-4407-8a80-007eedb23252
+--   05 Auswertung der Ergebnisse                             9053f203-4f5f-48f9-928f-97abb1d781f3
+--   06 Berichterstattung                                     c9cdb1b3-2d9c-484d-90d4-0af4cb846361
+--   07 Kritische Pruefung                                    6141098f-5218-45a9-a264-7c2550495c8e
+--
+-- Context: 73 fields on 7 worksheets, 1 equation, 22 gates (21 block, 1 warn). ISO 14046 is an LCA-family standard:
+--   almost every "debe/deben" in it is a duty ON THE STUDY AND ITS REPORT (document it, describe it, justify it,
+--   report it), and the standard prints exactly ONE numeric threshold in its whole body — "al menos tres miembros"
+--   for a review panel (§7.4), itself under "debería". That is why 21 block gates are all presence/attestation checks:
+--   there are no limit values to check. The doctrinal risk therefore is not a wrong number, it is a gate that BLOCKS a
+--   conforming project — and several below do exactly that. Nothing in this file was applied.
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · TAUTOLOGICAL / NO-OP GATE CONDITIONS — two gates enforce nothing.
+--   (a) REQ-21 (8cc2cc60-47f9-4708-a0f5-67dffe5d1afe, ws 01, severity WARN) condition is the literal "TRUE".
+--       evaluate.ts parses a bare TRUE to a boolean literal that always returns pass -> the gate can never fire.
+--       Its quote is the §2 normative reference: "Los documentos indicados a continuación, en su totalidad o en
+--       parte, son normas para consulta indispensables para la aplicación de este documento. [...] ISO 14044:2006,
+--       Gestión Ambiental. Análisis del ciclo de vida. Requisitos y directrices." (printed p.1) — a statement of
+--       dependency, not a checkable requirement. It is the only warn gate in the standard.
+--   (b) REQ-01 (05fc78e6-f56a-448b-a2bf-d3361698c9df, ws 01, BLOCK) condition
+--       "study_type IN {water_footprint_assessment,water_footprint_inventory_study}" enumerates BOTH members of the
+--       field's complete enum, so it is equivalent to "study_type IS NOT NULL" and duplicates is_required=true.
+--       The clause it quotes (§5.1, p.10) actually carries a checkable rule that is NOT encoded — see S-9(a).
+-- Proposal: (a) leave REQ-21 as a documentation-only warn but say so in its condition, or retire it; (b) restate
+--   REQ-01 as the presence check it is, and move the real §5.1 rule into the new gate proposed in S-9(a).
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='study_type IS NOT NULL' where id='05fc78e6-f56a-448b-a2bf-d3361698c9df';
+-- -- update public.compliance_requirements set condition='TRUE' , source_quote = source_quote || ' [documentation-only: no project datum to check]' where id='8cc2cc60-47f9-4708-a0f5-67dffe5d1afe';
+-- Rollback: restore condition='study_type IN {water_footprint_assessment,water_footprint_inventory_study}' on REQ-01
+--   and the original source_quote on REQ-21.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · is_required REVIEW — fields the app makes mandatory that the source states as "debería" (should),
+--   "por ejemplo" or with no modal at all. Under the doctrine a should never becomes a hard app requirement.
+--   (a) life_cycle_perspective (35de4319-19e2-4376-9e99-38e2aac7db5b, ws 01, is_required=true). §4.2 (p.8) has NO
+--       modal — "La evaluación de la huella de agua de un producto considera todas las etapas del ciclo de vida del
+--       producto, según sea apropiado" — and expressly allows restriction: "Si es apropiado, y se justifica, la
+--       evaluación de la huella de agua puede restringirse a una o a varias etapas del ciclo de vida."
+--   (b) data_quality_requirements (d94b4f09-749c-491e-aacb-c09a4f44e6e9, ws 02, is_required=true). §5.2.4.2
+--       (p.11–15): "Los requisitos para la calidad de los datos deberían tratar lo siguiente: a) … j) …"
+--   (c) primary_data_preference (92dab3b4-cca4-41f6-afe3-cca907e58e64, ws 02, is_required=true). §5.2.4.2
+--       (p.11–15): "Los datos primarios se deberían recopilar cuando sea factible."
+--   (d) the whole §5.3.2 per-flow attribute list, introduced by "En general, la información de cada flujo elemental,
+--       donde sea pertinente debería incluir:" (p.16–21) — elementary_flow_quantity (c0e5ce88), flow_water_resource_type
+--       (c2509f77), flow_quality_parameters (8d248258), flow_form_of_use (ff05f4d5), flow_geographic_location
+--       (c5b20bd3), flow_releases_to_environment (864087c2) are all is_required=true. The ONE shall in §5.3.2 is
+--       "El inventario de la huella de agua debe incluir entradas y salidas para cada proceso unitario que forme
+--       parte del sistema en estudio. Cualquier discrepancia en el balance del inventario debe explicarse." — which
+--       is inventory_balance_explained, correctly required.
+-- Proposal: set is_required=false on (a)–(d) and let the block gates carry whatever enforcement survives S-6.
+-- ☐ RATIFIED
+-- -- update public.fields set is_required=false where id in ('35de4319-19e2-4376-9e99-38e2aac7db5b','d94b4f09-749c-491e-aacb-c09a4f44e6e9','92dab3b4-cca4-41f6-afe3-cca907e58e64','c0e5ce88-936a-4f43-a8ce-c3aa4bdb95eb','c2509f77-5e58-4519-803c-24159ff863f2','8d248258-fc9f-4937-9c55-3fba11106544','ff05f4d5-0ba0-485a-be0f-a00b5cc62eaf','c5b20bd3-81d2-4294-83f1-26b6ff279b07','864087c2-0499-4850-a8cc-c6019bb72516');
+-- Rollback: update public.fields set is_required=true where id in (same list);
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · REQ-05 OVER-ENFORCES §5.2.4.1 — the standard allows a documented exclusion, the gate does not.
+--   REQ-05 (7a19cf97-81e3-4953-8907-ba2e94a85225, ws 02, BLOCK) condition
+--   "water_quantities IS NOT EMPTY AND water_resource_types IS NOT EMPTY AND water_quality_data IS NOT EMPTY AND
+--    forms_of_water_use IS NOT EMPTY AND water_use_locations IS NOT EMPTY".
+--   §5.2.4.1 (p.11–15) reads "Entre otros datos por recopilar, los siguientes datos relacionados con el agua se deben
+--   considerar para su recopilación:" — a duty to CONSIDER — and then, verbatim: "Cuando se hayan considerado
+--   cualquiera de estos elementos, pero no se hayan incluido, se debe documentar la base para la exclusión."
+--   So a project that considered item c) and documented why it is excluded is CONFORMING, and REQ-05 blocks it.
+--   There is no field anywhere in the encoding to record that exclusion basis.
+-- Proposal: add one text field on ws 02, symbol data_exclusion_basis, clause §5.2.4.1, is_required=false, label
+--   "Begruendung fuer ausgeschlossene Datenelemente", and relax the gate to allow the documented-exclusion path.
+-- ☐ RATIFIED
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description)
+-- --   values ('dd6f9f92-f323-4a74-9593-00f026db63f5','data_exclusion_basis','Begruendung fuer ausgeschlossene Datenelemente','text','-',false,'§5.2.4.1','Basis for excluding any of the §5.2.4.1 a)-h) data elements that were considered but not included (§5.2.4.1).');
+-- -- update public.compliance_requirements set condition='(water_quantities IS NOT EMPTY AND water_resource_types IS NOT EMPTY AND water_quality_data IS NOT EMPTY AND forms_of_water_use IS NOT EMPTY AND water_use_locations IS NOT EMPTY) OR data_exclusion_basis IS NOT EMPTY' where id='7a19cf97-81e3-4953-8907-ba2e94a85225';
+-- Rollback: delete the field; restore the original REQ-05 condition (the five-way AND above).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · UNCONDITIONAL BLOCK GATES ON CONDITIONAL DUTIES — two gates block projects the standard exempts.
+--   (a) REQ-22 (1623bba7-9897-49da-bb28-ca81e189598f, ws 02, BLOCK) condition
+--       "is_organization_assessment IS NOT NULL AND consolidation_method IS NOT NULL AND organization_boundary IS NOT NULL".
+--       Anexo A applies only to organizations: §5.1 (p.10) "Para las organizaciones se deben aplicar los requisitos
+--       adicionales y las directrices proporcionadas en el Anexo A." and §5.2.3 (p.11–15) "Cuando se realice una
+--       evaluación de la huella de agua de una organización se deben determinar los límites de la organización y los
+--       límites del sistema." A PRODUCT or PROCESS water footprint — the Blumen Forscheln case — has no consolidation
+--       method and no organization boundary, and is blocked today.
+--   (b) REQ-11 (7525cdcb-277e-469e-9d17-f2ce73603760, ws 03, BLOCK) condition
+--       "allocation_procedure IS NOT NULL AND allocation_balance_preserved IS NOT NULL AND allocation_sensitivity_done IS NOT NULL".
+--       §5.3.3.1 (p.16–21): "La asignación es necesaria cuando los sistemas o procesos producen múltiples productos o
+--       servicios (coproductos), y cuando otras opciones no son posibles (por ejemplo: ampliación de los límites del
+--       sistema)." and the sensitivity duty is itself conditional: "Cada vez que diversos procedimientos de asignación
+--       alternativos parezcan posibles de aplicar, se debe efectuar un análisis de sensibilidad …". A single-output
+--       system needs no allocation at all.
+-- Proposal: make both gates conditional implications (evaluate.ts supports IF … THEN guards). (b) additionally needs a
+--   boolean trigger field on ws 03, symbol allocation_required, clause §5.3.3.1.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='IF is_organization_assessment == True THEN (consolidation_method IS NOT NULL AND organization_boundary IS NOT NULL)' where id='1623bba7-9897-49da-bb28-ca81e189598f';
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description)
+-- --   values ('4ee6e0d5-1081-439e-a34a-08cf91d114a8','allocation_required','Allokation erforderlich (Koppelprodukte vorhanden)','boolean','-',true,'§5.3.3.1','Allocation is necessary when systems or processes yield multiple products or services (co-products) and other options are not possible (§5.3.3.1).');
+-- -- update public.compliance_requirements set condition='IF allocation_required == True THEN (allocation_procedure IS NOT NULL AND allocation_balance_preserved IS NOT NULL)' where id='7525cdcb-277e-469e-9d17-f2ce73603760';
+-- Rollback: restore both original conditions; delete the allocation_required field.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · GATE source_quote NOT VERBATIM — 2 of 22. All other 20 were re-checked word by word against the md and are
+--   verbatim (with ellipsis). These two are re-typings, and one of them changes the rule.
+--   (a) REQ-13 (01df7d7a-64e6-409f-a707-304a7ec92bb5, ws 01, BLOCK, §5.1). Stored quote:
+--       "Los resultados de una evaluación de la huella de agua no integral se deben expresar en el informe, como huella
+--        de agua con un calificativo (p.ej. 'huella de agua según escasez'). El término 'huella de agua' sin calificativo
+--        se debe utilizar solamente si se consideraron los inventarios directos e indirectos en una evaluación integral."
+--       The md prints (p.10): "Los resultados de una evaluación de la huella de agua no integral se deben expresar en el
+--        informe, como huella de agua con un calificativo; por ejemplo: "huella de agua según disponibilidad"; "huella de
+--        agua según la escasez", …" and — CRUCIALLY — "El término "huella de agua" de una organización, sin el
+--        calificativo, se debe utilizar solamente si se consideraron los inventarios directos e indirectos de la
+--        organización en una evaluación de la huella de agua integral."
+--       The stored quote DROPS "de una organización" / "de la organización", turning an organization-only rule into a
+--       universal one. The gate condition itself (comprehensive_assessment == True OR water_footprint_qualifier IS NOT
+--       EMPTY) is nonetheless correct — it rests on the FIRST sentence, which is universal.
+--   (b) REQ-04 (f8b8d02c-7e30-4784-8ea3-5e7852ec3f53, ws 02, BLOCK, §5.2.2). Stored quote opens "El alcance de la
+--       evaluación de la huella de agua debe ser coherente con el objetivo (5.2.1)."; the md prints "… debe ser coherente
+--       con el objetivo de la evaluación de la huella de agua (véase 5.2.1)." Condensation only, no rule change.
+-- Proposal: replace both source_quotes with the verbatim md text (given below), leaving conditions and severity alone.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set source_quote='§5.1: "Los resultados de una evaluación de la huella de agua no integral se deben expresar en el informe, como huella de agua con un calificativo; por ejemplo: "huella de agua según disponibilidad"; "huella de agua según la escasez", "huella de agua según la eutrofización"; "huella de agua según la ecotoxicidad"; "huella de agua según la acidificación", "huella de agua no integral"." | "El término "huella de agua" de una organización, sin el calificativo, se debe utilizar solamente si se consideraron los inventarios directos e indirectos de la organización en una evaluación de la huella de agua integral." (printed p.10)' where id='01df7d7a-64e6-409f-a707-304a7ec92bb5';
+-- -- update public.compliance_requirements set source_quote='§5.2.2: "El alcance de la evaluación de la huella de agua debe ser coherente con el objetivo de la evaluación de la huella de agua (véase 5.2.1). Al definir el alcance del estudio, los siguientes elementos se deben de considerar y describir claramente, tomando en cuenta los requisitos y la orientación dada en los capítulos pertinentes:" (lista a-p) (printed p.11-15)' where id='f8b8d02c-7e30-4784-8ea3-5e7852ec3f53';
+-- Rollback: restore the two original source_quote strings recorded above.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · SEVERITY NOTES — block gates anchored on "debería" (should) text. Under the doctrine a should does not block.
+--   (a) REQ-02 (507adbd8-4f4d-41a1-9f69-66a691223906, ws 01, BLOCK) "principles_applied == true AND
+--       life_cycle_perspective == true". §4.1 (p.8) is a shall ("deben utilizarse como orientación"), so the
+--       principles_applied half stands; §4.2 (p.8) has NO modal and permits restriction (see S-2 a), so the
+--       life_cycle_perspective half blocks a conforming single-stage study. -> split, or drop the second conjunct.
+--   (b) REQ-06 (5c6ae9c8-056d-44cc-88c5-d85a5caba5a7, ws 02, BLOCK) "data_quality_requirements IS NOT NULL AND
+--       primary_data_preference IS NOT NULL". Both fields rest on "deberían" text (§5.2.4.2, p.11–15). -> warn.
+--   (c) REQ-10 (2f6cad58-04cf-4ebf-b251-64418abc53df, ws 03, BLOCK) "flow_water_resource_type IS NOT EMPTY AND
+--       flow_quality_parameters IS NOT EMPTY AND flow_form_of_use IS NOT EMPTY AND flow_geographic_location IS NOT EMPTY
+--       AND inventory_balance_explained == true". Only the LAST conjunct rests on the §5.3.2 shall; the four flow
+--       attributes rest on "donde sea pertinente debería incluir" (see S-2 d). -> keep block for
+--       inventory_balance_explained, move the four attributes to a warn gate.
+-- Proposal (block stays only where the source says shall):
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='principles_applied == true' where id='507adbd8-4f4d-41a1-9f69-66a691223906';
+-- -- update public.compliance_requirements set severity='warn' where id='5c6ae9c8-056d-44cc-88c5-d85a5caba5a7';
+-- -- update public.compliance_requirements set condition='inventory_balance_explained == true' where id='2f6cad58-04cf-4ebf-b251-64418abc53df';
+-- -- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- --   values ('4ee6e0d5-1081-439e-a34a-08cf91d114a8','REQ-23','warn','flow_water_resource_type IS NOT EMPTY AND flow_quality_parameters IS NOT EMPTY AND flow_form_of_use IS NOT EMPTY AND flow_geographic_location IS NOT EMPTY','§5.3.2','§5.3.2: "En general, la información de cada flujo elemental, donde sea pertinente debería incluir: a) cantidades de agua utilizada: masa, o volumen …; b) recursos tipo de agua utilizada …; c) parámetros y/o características de calidad del agua …; d) formas de uso del agua …; e) ubicación geográfica del uso del agua o de su afectación …" (printed p.16-21)',false);
+-- Rollback: restore REQ-02 / REQ-10 conditions, REQ-06 severity='block', delete REQ-23.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · GATE RE-HOMES — gates whose condition reads fields that live on another worksheet. The wizard shows a gate on
+--   the worksheet it is homed on, so a gate reading only foreign symbols is invisible where its data is entered.
+--   REQ-19 (efb1b147-6f35-4b59-b643-a999840f0bd4, ws 06 Berichterstattung, BLOCK) condition
+--     "comparative_assertion_public IS NOT NULL AND critical_review_performed IS NOT NULL" — BOTH symbols are foreign
+--     (comparative_assertion_public @ ws 02, critical_review_performed @ ws 07). Zero own fields. This is the clear
+--     re-home case: it belongs on ws 07 next to REQ-20, or should be retired outright (see S-8 c).
+--   Partial cases (majority own, one foreign) — recorded, no move proposed:
+--     REQ-22 ws 02, foreign is_organization_assessment + consolidation_method @ ws 01 (2 of 3 foreign) -> see S-4 a;
+--            arguably belongs on ws 01, where both organization switches live.
+--     REQ-11 ws 03, foreign allocation_procedure @ ws 02.
+--     REQ-15 ws 04, foreign comparative_assertion_public @ ws 02.
+--     REQ-18 ws 06, foreign report_type @ ws 02.
+--     REQ-20 ws 07, foreign comparative_assertion_public @ ws 02 — intentional and correct (§7.1 conditions the review
+--            on the goal-stage declaration).
+-- Proposal: move REQ-19 to ws 07 (or retire it per S-8 c); move REQ-22 to ws 01.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set worksheet_template_id='6141098f-5218-45a9-a264-7c2550495c8e' where id='efb1b147-6f35-4b59-b643-a999840f0bd4';
+-- -- update public.compliance_requirements set worksheet_template_id='1eb8eb3f-2a2d-492e-bb59-a9c8107384a8' where id='1623bba7-9897-49da-bb28-ca81e189598f';
+-- Rollback: set worksheet_template_id back to 'c9cdb1b3-2d9c-484d-90d4-0af4cb846361' (REQ-19) and
+--   'dd6f9f92-f323-4a74-9593-00f026db63f5' (REQ-22).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · GATE / QUOTE MISMATCH AND A DUPLICATE — three gates do not enforce what they cite.
+--   (a) REQ-15 (fe2e5d39-4597-4e5b-ae4f-becd446bc879, ws 04, BLOCK) condition "weighting_applied IS NOT NULL AND
+--       comparative_assertion_public IS NOT NULL". Its quote is the §5.4.7 PROFILE duty ("Los impactos ambientales
+--       potenciales cubiertos por el perfil de la huella de agua se deben describir …", p.22–26) — which maps to
+--       water_footprint_profile, a field the gate never reads. Meanwhile the printed PROHIBITION on the same page,
+--       "Si se aplica la ponderación, los resultados no deben utilizarse como base de una aseveración comparativa
+--       prevista para su divulgación al público." (§5.4.7, echoed in §5.4.1), is enforced NOWHERE. Two null-checks
+--       stand in for a real rule.
+--   (b) REQ-06 (5c6ae9c8, ws 02) quotes "Las razones para utilizar datos secundarios para procesos significativos deben
+--       justificarse y documentarse." (§5.2.4.2, p.11–15) — the one shall in that clause — but no field records that
+--       justification, so the quoted duty is unenforceable as encoded.
+--   (c) REQ-19 (efb1b147, ws 06) is a weaker DUPLICATE of REQ-20 (f2094d90, ws 07): both key on
+--       comparative_assertion_public + critical_review_performed; REQ-20 encodes the real implication
+--       ("comparative_assertion_public == false OR critical_review_performed == true"), REQ-19 only checks both are
+--       non-null. REQ-19 adds no enforcement REQ-20 does not already give.
+-- Proposal: (a) rewrite REQ-15 as the printed prohibition and add a separate profile-description check;
+--   (b) add the secondary-data justification field; (c) retire REQ-19.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='NOT (weighting_applied == true AND comparative_assertion_public == true)', source_quote='§5.4.7: "Si se aplica la ponderación, los resultados no deben utilizarse como base de una aseveración comparativa prevista para su divulgación al público." (printed p.22-26)' where id='fe2e5d39-4597-4e5b-ae4f-becd446bc879';
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description)
+-- --   values ('dd6f9f92-f323-4a74-9593-00f026db63f5','secondary_data_justification','Begruendung fuer Sekundaerdaten bei signifikanten Prozessen','text','-',false,'§5.2.4.2','Reasons for using secondary data for significant processes shall be justified and documented (§5.2.4.2).');
+-- -- update public.compliance_requirements set active=false where id='efb1b147-6f35-4b59-b643-a999840f0bd4';   -- if compliance_requirements has no active column, delete the row instead
+-- Rollback: restore REQ-15 condition/source_quote; delete secondary_data_justification; re-activate REQ-19.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · MISSING GATES FOR PRINTED RULES — three checkable rules with no gate at all.
+--   (a) §5.1 (p.10), verbatim: "Se puede realizar el informe de los resultados del análisis del inventario de la huella
+--       de agua, pero no debe realizar el informe como huella de agua." An inventory study (study_type =
+--       water_footprint_inventory_study) must NOT be reported as a water footprint. No field records the reporting
+--       label, so this needs a boolean on ws 06 first.
+--   (b) §7.4 (p.34), the ONLY numeric threshold in the standard: "quien encarga el estudio original debería seleccionar
+--       un experto externo independiente para presidir un panel de revisión constituido por al menos tres miembros."
+--       Field review_panel_members (e3f0f872, ws 07, number) exists and is read by NO gate. Because the clause is
+--       "debería", the gate must be WARN, never block (SR-2 / doctrine on modal verbs).
+--   (c) the §5.4.7 weighting prohibition — folded into S-8 (a).
+-- Proposal:
+-- ☐ RATIFIED
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description)
+-- --   values ('c9cdb1b3-2d9c-484d-90d4-0af4cb846361','reported_as_water_footprint','Ergebnisse als "Wasser-Fussabdruck" berichtet','boolean','-',false,'§5.1','Results of a water footprint inventory analysis may be reported, but shall not be reported as a water footprint (§5.1).');
+-- -- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- --   values ('c9cdb1b3-2d9c-484d-90d4-0af4cb846361','REQ-24','block','IF study_type == water_footprint_inventory_study THEN reported_as_water_footprint == false','§5.1','§5.1: "Se puede realizar el informe de los resultados del análisis del inventario de la huella de agua, pero no debe realizar el informe como huella de agua." (printed p.10)',false);
+-- -- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- --   values ('6141098f-5218-45a9-a264-7c2550495c8e','REQ-25','warn','IF critical_review_type == panel_review THEN review_panel_members >= 3','§7.4','§7.4: "En este caso, quien encarga el estudio original debería seleccionar un experto externo independiente para presidir un panel de revisión constituido por al menos tres miembros." (printed p.34)',false);
+-- Rollback: delete REQ-24, REQ-25 and the reported_as_water_footprint field.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · REQUIRED FIELDS NO GATE READS — 11 of the 44 is_required=true fields are referenced by no gate condition, so
+--   the wizard marks them mandatory but the compliance layer never checks them. Recorded as a coverage finding; the
+--   only one that is a clear omission INSIDE an existing gate is uncertainty_assessment.
+--     ws 01 assessment_mode                      (§5.1, p.10)
+--     ws 02 lcia_methodology                     (§5.2.2 h, p.11–15)
+--     ws 02 results_type                         (§5.2.2 i, p.11–15)
+--     ws 02 critical_review_type                 (§5.2.2 p + §7.1, p.11–15 / p.33)
+--     ws 03 elementary_flow_quantity             (§5.3.2 a, p.16–21 — "debería", see S-2 d)
+--     ws 03 sensitivity_analysis_boundary        (§5.3.1 e, p.16–21 — a genuine shall, uncovered)
+--     ws 03 flow_releases_to_environment         (§5.3.2 g, p.16–21 — "debería", see S-2 d)
+--     ws 04 characterization_factor              (§5.4.4.1 / §5.4.5, p.22–26 — engine input)
+--     ws 04 lci_result                           (§5.4.3, p.22–26 — engine input)
+--     ws 04 category_indicator_result            (§5.4.4.1, p.22–26 — EQ-01 output)
+--     ws 05 uncertainty_assessment               (§5.5 f, p.27 — inside the SAME shall-list REQ-16 enforces for a)-e))
+--   §5.5 (p.27) prints "La fase de interpretación de la huella de agua debe incluir lo siguiente:" and lists a) to g);
+--   REQ-16 (94dccfd4-61de-4fe2-96f0-6fdfa9d13575, ws 05, BLOCK) enforces a)–e) but silently drops f) uncertainty.
+-- Proposal: extend REQ-16 to the uncertainty item; add a block gate on ws 03 for the §5.3.1 e) shall.
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set condition='significant_issues IS NOT EMPTY AND completeness_check == true AND sensitivity_check == true AND consistency_check == true AND conclusions IS NOT EMPTY AND limitations IS NOT EMPTY AND uncertainty_assessment IS NOT EMPTY' where id='94dccfd4-61de-4fe2-96f0-6fdfa9d13575';
+-- -- update public.compliance_requirements set condition='calculation_procedures_documented == true AND data_validation_done == true AND sensitivity_analysis_boundary == true' where id='94c55cd1-8d86-43c0-ad9b-5e92dfb219e5';   -- REQ-09, §5.3.1 a/b/e all shall
+-- Rollback: restore the two original conditions (REQ-16 without uncertainty_assessment; REQ-09 without
+--   sensitivity_analysis_boundary).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 · ONE PRINTED OBLIGATION SPLIT INTO SEVERAL FIELDS, AND A DUPLICATED DATA LAYER. No phantom fields exist in this
+--   standard (every one of the 73 has a label, a clause and a description, and none is an orphaned enum token), but
+--   three groups are EKOWAI granularity rather than the standard's:
+--   (a) §5.2.2 c) prints ONE item — "c) definición y cobertura geográfica y temporal del estudio;" (p.11–15) — encoded
+--       as geographic_coverage (97f4b916) + temporal_coverage (f5a6c92d).
+--   (b) §5.5 b) prints ONE item — "b) evaluación que considera las verificaciones de los análisis de integridad,
+--       sensibilidad y coherencia;" (p.27) — encoded as completeness_check (c3fe05e1) + sensitivity_check (e2618ba7) +
+--       consistency_check (d83090ef).
+--   (c) LAYER DUPLICATION: the five ws 02 fields water_quantities (48070532), water_resource_types (36800877),
+--       water_quality_data (8de39fb8), forms_of_water_use (8eed86c4), water_use_locations (0c03810a) are the
+--       §5.2.4.1 a)–f) planning-stage restatements of the ws 03 per-flow fields elementary_flow_quantity,
+--       flow_water_resource_type, flow_quality_parameters, flow_form_of_use, flow_geographic_location — every
+--       §5.2.4.1 item literally ends "(véase 5.3.2)". Not duplicates in the DB sense (different clause, different
+--       stage), but the engineer types the same content twice, and BOTH layers carry block gates (REQ-05 and REQ-10).
+-- Proposal: (a) and (b) are harmless and arguably better UX — record only, no change. For (c), keep the ws 02 layer as
+--   the scoping decision but drop it to is_required=false once S-3 lands, so the per-flow ws 03 data is the single
+--   source and the ws 02 fields record only the scoping intent.
+-- ☐ RATIFIED
+-- -- update public.fields set is_required=false where id in ('48070532-7007-4af8-9b91-220467ecbb1c','36800877-e51a-4b9c-8235-74c609a6722f','8de39fb8-7566-4636-8edb-ced4588da840','8eed86c4-b3ac-4ddc-b7c5-8800bc2e81a9','0c03810a-0e36-4772-a3fb-1493c681c79e');
+-- Rollback: update public.fields set is_required=true where id in (same five).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 · results_type IS SINGLE-SELECT WHERE THE STANDARD PRINTS "y/o".
+--   results_type (1b4d1d5a-c3dd-41c1-bd17-68284387ac27, ws 02, data_type=enum) offers impact_indicator_result /
+--   water_footprint_profile / weighted_water_footprint. §5.2.2 i) (p.11–15): "considerar si los resultados de la
+--   evaluación de la huella de agua van a incluir un resultado del indicador del impacto (y especificar cuál), un
+--   perfil de la huella de agua, y/o una huella de agua después de la ponderación (véase 5.4.1);" — "y/o" makes these
+--   combinable, and §5.4.1 confirms a study may report both an indicator result and a profile. A single-value enum
+--   forces a false exclusive choice.
+-- Proposal: replace with three booleans on ws 02 (results_include_indicator, results_include_profile,
+--   results_include_weighted), or switch the field to a multi-select type if the schema supports one.
+-- ☐ RATIFIED
+-- -- (schema-dependent; author the migration once Alvaro picks booleans vs multi-select)
+-- Rollback: restore the single enum field with the three tokens above.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-13 · UNIT CORRECTION — elementary_flow_quantity is locked to m3 where the standard allows mass OR volume.
+--   elementary_flow_quantity (c0e5ce88-936a-4f43-a8ce-c3aa4bdb95eb, ws 03, number, unit='m3'). §5.3.2 a) (p.16–21):
+--   "a) cantidades de agua utilizada: masa, o volumen (por ejemplo entradas de agua y salidas de agua);" — the choice
+--   between mass and volume is the engineer's (SR-2: where the standard leaves a choice, the choice is visible and
+--   human), and locking the field to m3 silently picks one.
+-- Proposal: add a unit-selection enum field on ws 03 (symbol elementary_flow_quantity_unit, tokens m3 / kg,
+--   clause §5.3.2) and leave the numeric field unit-agnostic. NOTE the two other numeric fields, characterization_factor
+--   (9efd94c6) and category_indicator_result (97e30065), carry unit='-'; the standard prints no unit for either (they
+--   take "la unidad común del indicador de categoría", §3.3.14), so '-' is a placeholder, not an error — record only.
+-- ☐ RATIFIED
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, enum_values, description)
+-- --   values ('4ee6e0d5-1081-439e-a34a-08cf91d114a8','elementary_flow_quantity_unit','Einheit der Elementarflussmenge','enum','-',false,'§5.3.2','[{"value":"m3","label_de":"Volumen (m3)","label_en":"Volume (m3)","order_index":1,"regulation_reference":"§5.3.2"},{"value":"kg","label_de":"Masse (kg)","label_en":"Mass (kg)","order_index":2,"regulation_reference":"§5.3.2"}]','Quantities of water used are recorded as mass OR volume (§5.3.2 a); this field records which.');
+-- -- update public.fields set unit='-' where id='c0e5ce88-936a-4f43-a8ce-c3aa4bdb95eb';
+-- Rollback: delete elementary_flow_quantity_unit; update public.fields set unit='m3' where id='c0e5ce88-936a-4f43-a8ce-c3aa4bdb95eb';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-14 · ATTESTATION-BOOLEAN COMPRESSION — two booleans stand in for content the standard spells out.
+--   (a) third_party_report (0d73ddee-20a8-42f9-b255-d9a1b2cb8d3c, ws 06, boolean). §6.2 (p.29) prints a mandatory
+--       contents list a)–g) roughly 60 sub-items deep (md lines 909–984): general aspects, goal, scope (function,
+--       functional unit, system boundaries, cut-off criteria), inventory analysis, impact assessment, interpretation,
+--       critical review. One tick-box asserts all of it; nothing in the app checks any sub-item.
+--   (b) allocation_balance_preserved (ae5fa1d0-8acd-4711-a05a-1a33f436effa, ws 03, boolean). §5.3.3.1 (p.16–21): "La
+--       suma de las entradas y salidas asignadas de un proceso unitario deben ser iguales a las entradas y salidas del
+--       proceso unitario antes de la asignación." — a checkable identity encoded as a self-declaration. Same pattern as
+--       inventory_balance_explained for §5.3.2 "Cualquier discrepancia en el balance del inventario debe explicarse."
+-- Proposal: record only for (a) — a 60-item report checklist is a product decision, not an encoding defect, and the
+--   §6.2 list is what a Musterbericht template covers. For (b), flag as a candidate for an engine check once the
+--   inventory holds per-unit-process input/output rows (today it does not: the inventory worksheet holds a single
+--   elementary_flow_quantity, not a table).
+-- ☐ RATIFIED (record-only; no SQL)
+-- Rollback: n/a.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-15 · CLAUSE RETAGS — small, evidence-backed.
+--   (a) REQ-22 (1623bba7) clause_reference is "Annex A"; the duty it quotes is Anexo A.2 "LOS LÍMITES DE LA
+--       ORGANIZACIÓN" (md line 1047, heading prefix lost by mathpix; p.35–37). The field consolidation_method already
+--       carries the finer "Annex A.2".
+--   (b) REQ-11 (7525cdcb) clause_reference is "§5.3.3"; both duties it enforces (allocation defined/described, and the
+--       sensitivity analysis) are printed in §5.3.3.1 "Generalidades" (p.16–21), and the stepwise procedure the
+--       allocation_procedure enum encodes is §5.3.3.2.
+--   (c) characterization_factor (9efd94c6) clause_reference is "§5.4.4.1"; the scarcity-CF sentence its description
+--       leans on is §5.4.5 (p.22–26), and the definition is §3.3.14 (p.3). Proposal: "§5.4.4.1 (Def. §3.3.14, §5.4.5)".
+--   No other clause_reference disagreed with the md. All ISO 14044 / ISO 14025 / ISO 14040 cross-references in the
+--   descriptions are correct as printed but point OUTSIDE the library (NR).
+-- ☐ RATIFIED
+-- -- update public.compliance_requirements set clause_reference='Anexo A.2' where id='1623bba7-9897-49da-bb28-ca81e189598f';
+-- -- update public.compliance_requirements set clause_reference='§5.3.3.1' where id='7525cdcb-277e-469e-9d17-f2ce73603760';
+-- -- update public.fields set clause_reference='§5.4.4.1 (Def. §3.3.14, §5.4.5)' where id='9efd94c6-6b6c-430f-a077-5a216f92b0bb';
+-- Rollback: restore clause_reference 'Annex A' (REQ-22), '§5.3.3' (REQ-11), '§5.4.4.1' (characterization_factor).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-16 · PROVENANCE — the library holds no English ISO 14046:2014.
+--   The only source available is the ICONTEC Spanish adoption NTC-ISO 14046 ("una adopción idéntica (IDT) por
+--   traducción de la norma ISO 14046:2014", md lines 13–15). Every row in the pack is therefore VC and CANNOT be
+--   lifted to VA from this document, no matter how carefully it is read — SR-3 requires the authoritative rendered
+--   PDF, and an identical-adoption TRANSLATION is not the original text. Additionally every substantive method
+--   requirement defers to ISO 14044:2006 (§5.3.1 a/b/e, §5.4.1, §5.4.7, §6.1, §6.3.1, §7.1), which is not in the
+--   library at all -> those chains cap at NR/VC, visibly.
+-- Proposal: acquire (1) ISO 14046:2014 (EN) and (2) ISO 14044:2006 before this standard is used on a real project.
+--   Until then the ISO-14046 worksheets should not be presented as source-verified to a client.
+-- ☐ RATIFIED (acquisition item; no SQL)
+-- Rollback: n/a.
