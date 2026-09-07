@@ -1,0 +1,460 @@
+-- ============================================================================
+-- ISO-14067 — STAGED RULINGS (WRITTEN, NOT APPLIED)
+-- Everything here changes STRUCTURE, ENFORCEMENT or REQUIRED-NESS and therefore may NOT go into the
+-- verification pack (owner ruling 2026-09-05, brief §0.3). Each block carries its verbatim evidence
+-- quote from the transcript, the proposed SQL (commented out) and its rollback inverse.
+-- Standard: UNE-EN ISO 14067:2019 (official Spanish version of EN ISO 14067:2018 / ISO 14067:2018).
+-- Source md: C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\ISO-14067\iso-14067-2019-af-peru.md
+-- Pages via the document's own Índice (transcript lines 60-129); see the pack header for the convention.
+-- Nothing in this file has been executed. Mark ☐ -> ☑ RATIFIED per block before anything is applied.
+--
+-- ISO 14067 is a REQUIREMENTS standard, so block gates are defensible — but only on an unconditional
+-- "se debe". It builds on ISO 14040/14044; anything it defers to those is a cross-reference (NR from
+-- THIS document) and is NOT invented here.
+-- ============================================================================
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-1  ☐ RATIFIED — SIX GATES ARE EFFECTIVE NO-OPS (membership test over the COMPLETE domain)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Six block gates test a field for membership in a set that IS the field's entire domain. They can
+-- therefore only ever fire on a NULL/empty value, i.e. they are presence checks wearing the costume of
+-- a rule, and none of them enforces the printed requirement its own source_quote cites.
+--
+--   ISO-14067-CR-02  rcp_pcr_used              IN {true,false}      <- boolean: complete domain
+--   ISO-14067-CR-07  data_type_hierarchy       IN {site_specific,primary,secondary}   <- all 3 enum values
+--   ISO-14067-CR-10  use_stage_included        IN {true,false}      <- boolean: complete domain
+--   ISO-14067-CR-11  eol_stage_included        IN {true,false}      <- boolean: complete domain
+--   ISO-14067-CR-14  timing_emissions_over_10y IN {true,false}      <- boolean: complete domain
+--   ISO-14067-CR-17  electricity_treatment     IN {internal,direct_supplier,supplier_specific_grid,grid_average}  <- all 4 enum values
+--
+-- The same fact is the reason there is NO unsatisfiable gate and NO uncovered enum value in this
+-- standard: every enum gate enumerates its field's full enum.
+--
+-- What the printed text actually requires, in each case, is a CONSEQUENT that fires only in one branch;
+-- those are proposed individually in S-2, S-5, S-7 and S-10. Recommended handling: keep these six as
+-- presence checks but demote them to a presence predicate that says so (`... IS NOT NULL`), so the
+-- encoding stops claiming to enforce a rule it does not enforce.
+--
+-- Proposed (all six):
+--   update public.compliance_requirements set condition='rcp_pcr_used IS NOT NULL'
+--     where code='ISO-14067-CR-02';
+--   update public.compliance_requirements set condition='data_type_hierarchy IS NOT NULL'
+--     where code='ISO-14067-CR-07';
+--   update public.compliance_requirements set condition='use_stage_included IS NOT NULL'
+--     where code='ISO-14067-CR-10';
+--   update public.compliance_requirements set condition='eol_stage_included IS NOT NULL'
+--     where code='ISO-14067-CR-11';
+--   update public.compliance_requirements set condition='timing_emissions_over_10y IS NOT NULL'
+--     where code='ISO-14067-CR-14';
+--   update public.compliance_requirements set condition='electricity_treatment IS NOT NULL'
+--     where code='ISO-14067-CR-17';
+-- Rollback: restore the six original conditions listed verbatim above.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-2  ☐ RATIFIED — MISSING SCOPE-PREDICATED GATE: RCP/HCP-RCP justification (§6.2)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Evidence (§6.2, printed p.26):
+--   "Si existe más de un conjunto de RCP o HCP-RCP pertinente, la organización que aplica este documento
+--    debe revisar el RCP o HCP-RCP pertinente (por ejemplo, para los límites del sistema, la modularidad,
+--    la asignación, la calidad de los datos). La elección del RCP o HCP-RCP adoptado debe estar justificada."
+-- "debe estar justificada" is HARD, but conditional on a RCP/HCP-RCP having been adopted. In prod,
+-- rcp_pcr_reference is is_required=false and no gate binds it to rcp_pcr_used=true.
+--
+-- Proposed:
+--   insert into public.compliance_requirements (worksheet_template_id, code, severity, condition,
+--     clause_reference, source_quote)
+--   select wt.id, 'ISO-14067-CR-31', 'block',
+--     'rcp_pcr_used == true IMPLIES rcp_pcr_reference IS NOT NULL', '§6.2',
+--     'La elección del RCP o HCP-RCP adoptado debe estar justificada.'
+--     from public.worksheet_templates wt join public.standards s on s.id=wt.standard_id
+--    where s.code='ISO-14067' and wt.code='ISO-14067-01';
+-- Rollback: delete from public.compliance_requirements where code='ISO-14067-CR-31';
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-3  ☐ RATIFIED — OR-COLLAPSE ON THE UNIT PAIR + MIS-ANCHORED CR-04 (§6.3.3)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Evidence (§6.3.3, printed p.28):
+--   "Un estudio de HCP debe especificar claramente la unidad funcional o declarada del sistema en estudio."
+--   "La unidad declarada sólo se debe utilizar en una HCP parcial."
+--   "Habiendo elegido la unidad funcional o declarada, se debe definir el flujo de referencia asociado."
+-- Three separate defects sit on this clause:
+--   (a) OR-COLLAPSE: the printed obligation is "funcional O declarada", discriminated by study_type.
+--       Prod encodes functional_unit is_required=true UNCONDITIONALLY and declared_unit is_required=false,
+--       so an HCP parcial study is forced to fill a functional unit the standard does not ask it for,
+--       and the declared unit it DOES need is optional.
+--   (b) The exclusivity rule ("sólo ... en una HCP parcial") has NO gate at all.
+--   (c) MIS-ANCHORED QUOTE: gate ISO-14067-CR-04 tests `reference_flow IS NOT NULL` but its source_quote
+--       is the functional/declared-unit sentence. The sentence that mandates the reference flow is the
+--       third one above.
+--
+-- Proposed:
+--   update public.fields set is_required=false where id='ba9aab71-fb05-4a1a-b16a-554370857de6';  -- functional_unit
+--   update public.compliance_requirements set source_quote=
+--     '§6.3.3: "Habiendo elegido la unidad funcional o declarada, se debe definir el flujo de referencia asociado."'
+--     where code='ISO-14067-CR-04';
+--   insert into public.compliance_requirements (worksheet_template_id, code, severity, condition,
+--     clause_reference, source_quote)
+--   select wt.id, 'ISO-14067-CR-32', 'block',
+--     'study_type == hcp IMPLIES functional_unit IS NOT NULL', '§6.3.3',
+--     'Un estudio de HCP debe especificar claramente la unidad funcional o declarada del sistema en estudio.'
+--     from public.worksheet_templates wt join public.standards s on s.id=wt.standard_id
+--    where s.code='ISO-14067' and wt.code='ISO-14067-02'
+--   union all
+--   select wt.id, 'ISO-14067-CR-33', 'block',
+--     'study_type == hcp_parcial IMPLIES declared_unit IS NOT NULL', '§6.3.3',
+--     'La unidad declarada sólo se debe utilizar en una HCP parcial.'
+--     from public.worksheet_templates wt join public.standards s on s.id=wt.standard_id
+--    where s.code='ISO-14067' and wt.code='ISO-14067-02';
+-- NOTE: study_type lives on ISO-14067-01 and the unit fields on ISO-14067-02, so CR-32/CR-33 as written
+--   would be CROSS-WORKSHEET gates. Ratify the home worksheet explicitly before applying.
+-- Rollback: is_required=true on functional_unit; restore CR-04 source_quote to
+--   '§6.3.3: "Un estudio de HCP debe especificar claramente la unidad funcional o declarada del sistema en estudio. La unidad funcional o declarada debe ser coherente con el objetivo y alcance del estudio de la HCP."';
+--   delete from public.compliance_requirements where code in ('ISO-14067-CR-32','ISO-14067-CR-33');
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-4  ☐ RATIFIED — CR-06 SOURCE_QUOTE IS VERBATIM BUT CARRIES NO REQUIREMENT FOR ITS FIELD (§6.3.4.3)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- CR-06 tests `cutoff_criteria IS NOT NULL`. Its source_quote is
+--   "En general, se deben incluir todos los procesos y flujos que sean atribuibles al sistema analizado."
+-- — verbatim, but that sentence mandates INCLUSION of all processes; it says nothing about defining
+-- cut-off criteria. The sentence that does is two sentences later in the same paragraph:
+--   "Se deben definir criterios de corte coherentes que permitan la exclusión de ciertos procesos de
+--    menor importancia dentro de la fase de definición de objetivos y alcance."
+--
+-- Proposed:
+--   update public.compliance_requirements set source_quote=
+--     '§6.3.4.3: "Se deben definir criterios de corte coherentes que permitan la exclusión de ciertos procesos de menor importancia dentro de la fase de definición de objetivos y alcance."'
+--     where code='ISO-14067-CR-06';
+-- Rollback: restore
+--   '§6.3.4.3: "En general, se deben incluir todos los procesos y flujos que sean atribuibles al sistema analizado."'
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-5  ☐ RATIFIED — SECONDARY-DATA JUSTIFICATION HAS NO GATE; CR-08 QUOTE MIS-ANCHORED (§6.3.5)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Evidence (§6.3.5, printed p.30):
+--   "Los datos secundarios deben estar justificados y documentados con referencias en el informe de
+--    estudio de la HCP."
+-- HARD, conditional on secondary data being used. Prod: secondary_data_justification is_required=false,
+-- no gate. Separately, gate ISO-14067-CR-08 tests `data_quality_characterized == true` but quotes the
+-- SECONDARY-DATA sentence ("Los datos secundarios sólo se deben utilizar para entradas y productos en
+-- los que no sea factible la recopilación de datos primarios o para procesos de menor importancia.").
+-- The sentence that mandates CR-08's field is:
+--   "La calidad de los datos se debe caracterizar por aspectos cuantitativos y cualitativos."
+--
+-- Proposed:
+--   update public.compliance_requirements set source_quote=
+--     '§6.3.5: "La calidad de los datos se debe caracterizar por aspectos cuantitativos y cualitativos."'
+--     where code='ISO-14067-CR-08';
+--   insert into public.compliance_requirements (worksheet_template_id, code, severity, condition,
+--     clause_reference, source_quote)
+--   select wt.id, 'ISO-14067-CR-34', 'block',
+--     'data_type_hierarchy == secondary IMPLIES secondary_data_justification IS NOT NULL', '§6.3.5',
+--     'Los datos secundarios deben estar justificados y documentados con referencias en el informe de estudio de la HCP.'
+--     from public.worksheet_templates wt join public.standards s on s.id=wt.standard_id
+--    where s.code='ISO-14067' and wt.code='ISO-14067-03';
+-- Rollback: restore CR-08 source_quote to the secondary-data sentence;
+--   delete from public.compliance_requirements where code='ISO-14067-CR-34';
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-6  ☐ RATIFIED — data_quality_characterized LABEL READS A SOFT LIST AS MANDATORY (§6.3.5 a-j)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Evidence (§6.3.5, printed p.30), the two printed modals side by side:
+--   "La calidad de los datos se debe caracterizar por aspectos cuantitativos y cualitativos."   <- HARD
+--   "La caracterización de la calidad de los datos DEBERÍA abordar lo siguiente:"               <- SOFT
+--     a) cobertura relacionada con el tiempo ... j) incertidumbre de la información.
+-- The field's label is "Datenqualitaet charakterisiert (a-j)" and its description enumerates a)-j) as
+-- if all ten were required. The umbrella is required; the ten aspects are recommended. Only the
+-- two-stage evaluation (S-11) re-hardens a) to d), and only as REQUIREMENTS to be characterised.
+--
+-- Proposed:
+--   update public.fields set label_de='Datenqualitaet charakterisiert'
+--     where id='f2c96c47-691d-4590-a104-23f2ca55ad3d';
+-- Rollback: label_de='Datenqualitaet charakterisiert (a-j)'.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-7  ☐ RATIFIED — MISSING SCOPE PREDICATES: use stage and end-of-life (§6.3.7, §6.3.8)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Evidence (§6.3.7, printed p.32):
+--   "Cuando se incluya la etapa de uso en el ámbito del estudio de la HCP (véase 6.3.2), se deben incluir
+--    las emisiones y remociones de GEI derivadas de la etapa de uso del producto. El usuario del producto
+--    y el perfil de uso en que se utilice el producto se deben especificar en el estudio de la HCP."
+-- Evidence (§6.3.8, printed p.33):
+--   "Los escenarios de fin de vida deben reflejar el mercado actual y ser representativos de una de las
+--    alternativas más probables o se puede evaluar más de un escenario (incluyendo escenarios futuros)."
+-- Both consequents are HARD under a printed "Cuando ..." predicate. Prod has use_profile and eol_scenario
+-- at is_required=false with no gate; CR-10/CR-11 (see S-1) do not carry the consequent.
+--
+-- Proposed:
+--   insert into public.compliance_requirements (worksheet_template_id, code, severity, condition,
+--     clause_reference, source_quote)
+--   select wt.id, 'ISO-14067-CR-35', 'block',
+--     'use_stage_included == true IMPLIES use_profile IS NOT NULL', '§6.3.7',
+--     'El usuario del producto y el perfil de uso en que se utilice el producto se deben especificar en el estudio de la HCP.'
+--     from public.worksheet_templates wt join public.standards s on s.id=wt.standard_id
+--    where s.code='ISO-14067' and wt.code='ISO-14067-03'
+--   union all
+--   select wt.id, 'ISO-14067-CR-36', 'block',
+--     'eol_stage_included == true IMPLIES eol_scenario IS NOT NULL', '§6.3.8',
+--     'Los escenarios de fin de vida deben reflejar el mercado actual y ser representativos de una de las alternativas más probables o se puede evaluar más de un escenario (incluyendo escenarios futuros).'
+--     from public.worksheet_templates wt join public.standards s on s.id=wt.standard_id
+--    where s.code='ISO-14067' and wt.code='ISO-14067-03';
+-- Rollback: delete from public.compliance_requirements where code in ('ISO-14067-CR-35','ISO-14067-CR-36');
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-8  ☐ RATIFIED — FOUR MORE MIS-ANCHORED GATE QUOTES (CR-13, CR-22, CR-23; see also S-3, S-4, S-5)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Each of these gates quotes a verbatim printed requirement that is NOT the requirement its condition
+-- enforces. In every case the correct sentence is one or two sentences away in the same clause.
+--
+-- CR-13  condition: allocation_mass_balance == true
+--        quoted   : "Las entradas y salidas se deben asignar a los diferentes productos de acuerdo con el
+--                    procedimiento de asignación claramente indicado y justificado."   <- that is allocation_procedure
+--        correct  : "La suma de las entradas y salidas asignadas de un proceso unitario debe ser igual a
+--                    las entradas y salidas del proceso unitario antes de la asignación."   (§6.4.6.1, p.36)
+--        also     : clause_reference is '§6.4.6' but the sentence sits in 6.4.6.1 — retag.
+--
+-- CR-22  condition: uncertainty_evaluation == true
+--        quoted   : "La fase de interpretación del ciclo de vida de un estudio de la HCP debe comprender
+--                    las siguientes etapas:"   <- that is the a)/b)/c) list (three other fields)
+--        correct  : "La interpretación debe: - incluir una evaluación de la incertidumbre, incluida la
+--                    aplicación de reglas o intervalos de redondeo;"   (§6.6, p.45)
+--
+-- CR-23  condition: ghg_values_separate == true
+--        quoted   : "Los resultados de la cuantificación de la HCP o la HCP parcial se deben documentar en
+--                    el informe del estudio de la HCP en masa de CO2e por unidad funcional o declarada."
+--                    <- that is results_per_functional_unit
+--        correct  : "Los siguientes valores de GEI se deben documentar por separado en el informe de
+--                    estudio de la HCP:"   (§7.2, p.47)
+--
+-- Proposed:
+--   update public.compliance_requirements set clause_reference='§6.4.6.1', source_quote=
+--     '§6.4.6.1: "La suma de las entradas y salidas asignadas de un proceso unitario debe ser igual a las entradas y salidas del proceso unitario antes de la asignación."'
+--     where code='ISO-14067-CR-13';
+--   update public.compliance_requirements set source_quote=
+--     '§6.6: "La interpretación debe: - incluir una evaluación de la incertidumbre, incluida la aplicación de reglas o intervalos de redondeo;"'
+--     where code='ISO-14067-CR-22';
+--   update public.compliance_requirements set source_quote=
+--     '§7.2: "Los siguientes valores de GEI se deben documentar por separado en el informe de estudio de la HCP:"'
+--     where code='ISO-14067-CR-23';
+-- Rollback: restore the three original clause_reference/source_quote values quoted above.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-9  ☐ RATIFIED — CR-30 IS A BLOCK GATE ANCHORED ON NON-NORMATIVE PRINCIPLE TEXT (§5.12)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Evidence (§5.1, printed p.24): "Estos principios son fundamentales y constituyen la base de los
+-- requisitos posteriores de este documento." — i.e. clause 5 states principles, from which the later
+-- requirements derive; it is not itself the requirement layer. Accordingly every sentence in clause 5
+-- is printed in the INDICATIVE, never as "se debe":
+--   §5.12 "Se evita la doble contabilidad de las emisiones y remociones de GEI dentro del sistema
+--          producto estudiado cuando la asignación de las mismas emisiones y remociones de GEI ocurre
+--          una sola vez (véase 6.4.6.1)."
+-- CR-30 is severity='block' on exactly that sentence. The operative HARD rule it points at lives in
+-- 6.4.6.1 and is already gated by CR-13 (see S-8). Proposal: demote CR-30 to warn.
+--
+-- Proposed:
+--   update public.compliance_requirements set severity='warn' where code='ISO-14067-CR-30';
+-- Rollback: update public.compliance_requirements set severity='block' where code='ISO-14067-CR-30';
+--
+-- Explicit negative for the same class: the other five clause-5 principle fields on ISO-14067-01
+-- (life_cycle_perspective, functional_or_declared_relative, iterative_approach, scientific_priority,
+-- completeness_principle) carry NO gate at all, so CR-30 is the only block-on-soft-text instance.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-10 ☐ RATIFIED — THREE GATES UNDER-ENFORCE A PRINTED "SE DEBE" (CR-17, CR-18, CR-19)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- The converse of S-9: here the printed modal is HARD but the encoding is soft, and in two of the three
+-- the field's is_required=false contradicts its own gate's severity.
+--
+-- CR-18 severity=warn, luc_direct_ghg is_required=false. Printed (§6.4.9.5, pp.38-44):
+--   "Las emisiones y remociones de GEI que ocurren como resultado del cambio directo de uso del suelo
+--    (CUS) en las últimas décadas (véase la NOTA 1) SE DEBEN evaluar de acuerdo con métodos
+--    internacionalmente reconocidos ... e incluido en la HCP."
+-- CR-19 severity=warn, aircraft_ghg is_required=false. Printed (§6.4.9.7, pp.38-44):
+--   "Las emisiones de GEI del transporte aéreo SE DEBEN incluir en la HCP y se deben documentar por
+--    separado en el informe del estudio de la HCP."
+-- CR-17 severity=block but electricity_treatment is_required=false — a block gate on an optional field.
+--
+-- CAUTION before ratifying CR-18/CR-19 to block: both obligations are unconditional in the printed
+-- text, but a study whose product involves no land-use change and no air transport still has to be able
+-- to record a zero. Preferred shape is therefore a scope predicate (an explicit "not applicable"
+-- selection) rather than a bare NOT NULL at block severity. That design decision is NOT taken here.
+--
+-- Proposed (severity + required alignment only; the scope-predicate design stays open):
+--   update public.compliance_requirements set severity='block' where code in ('ISO-14067-CR-18','ISO-14067-CR-19');
+--   update public.fields set is_required=true where id in
+--     ('43e4fd27-b63f-4af9-8160-61ad5ae99ccb',   -- luc_direct_ghg
+--      '87cce471-9dc0-4cf2-909b-f8760772a940',   -- aircraft_ghg
+--      'afd2a2ae-f19d-444d-96d7-694baddf593c');  -- electricity_treatment (align with CR-17 block)
+-- Rollback: severity='warn' for CR-18/CR-19; is_required=false for the three field ids.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-11 ☐ RATIFIED — PRINTED HARD OBLIGATIONS WITH NO GATE AT ALL
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Eleven fields are is_required=true and rest on an unconditional printed "se debe", yet no
+-- compliance_requirement references them. They are listed here rather than silently gated, because
+-- adding a block gate changes enforcement.
+--
+--   §6.3.2 a) product_system_function             "se deben considerar y describirán claramente" (p.27)
+--   §6.3.2 c) geographic_scope                    same sentence, bullet c)                        (p.27)
+--   §6.3.5    data_quality_two_stage              "Para la evaluación de la calidad de los datos se debe
+--                                                  adoptar un enfoque en dos etapas:"             (p.30)
+--   §6.4.3    data_validation_done                gated? NO — CR gates 6.4.2 only                 (p.35)
+--   §6.4.4    data_related_to_reference_flow      "El cálculo debe relacionar los datos ..."      (p.35)
+--   §6.4.6.2  allocation_procedure                "El estudio de la HCP debe incluir la identificación
+--                                                  de los procesos compartidos ..."               (p.36)
+--   §6.5.1    ghg_mass, gwp_100                   the multiplication inputs of EQ-01              (p.45)
+--   §6.6 a)   significant_issues_identified       "debe comprender las siguientes etapas:"        (p.45)
+--   §6.6 b)   completeness_consistency_eval       same list, b)                                   (p.45)
+--   §6.6 c)   conclusions_recommendations         same list, c)                                   (p.45)
+--   §7.2      results_per_functional_unit         "se deben documentar ... en masa de CO2e por unidad
+--                                                  funcional o declarada"                         (p.47)
+-- (data_validation_done: CR-12 covers §6.4.2 data collection; §6.4.3 validation is separate and ungated.)
+--
+-- Proposed: add one block gate per row above, each with the printed sentence as source_quote, homed on
+-- the worksheet that owns the field (ISO-14067-01/03/04/05/06/07 respectively). NOT written out as SQL
+-- here because eleven new block gates materially change what finalisation refuses — this is a single
+-- ratification decision, not eleven independent ones.
+-- Rollback: delete the inserted codes.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-12 ☐ RATIFIED — CR-20 IS A TAUTOLOGY OVER EQ-01 (§6.5.1)
+-- ─────────────────────────────────────────────────────────────────────────────
+-- CR-20 condition: `cfp_result IS NOT EMPTY`. cfp_result is the OUTPUT of EQ-01
+-- (`cfp_result = SUM(ghg_mass * gwp_100)`), so the gate cannot fail independently of its inputs: it is
+-- satisfied exactly when the engine has produced a value, i.e. it duplicates the equation instead of
+-- constraining anything. The inputs it really depends on — ghg_mass and gwp_100, both is_required=true —
+-- have no gate of their own (see S-11).
+-- Evidence (§6.5.1, printed p.45):
+--   "En la fase AICV de un estudio HCP, el impacto potencial del cambio climático de cada GEI emitido y
+--    eliminado por el sistema producto se debe calcular multiplicando la masa de GEI liberada o eliminada
+--    por el PCG a 100 años proporcionado por el IPCC en unidades de kg CO2e por kg de emisión ..."
+--
+-- Proposed:
+--   update public.compliance_requirements set condition='ghg_mass IS NOT NULL AND gwp_100 IS NOT NULL'
+--     where code='ISO-14067-CR-20';
+-- Rollback: update public.compliance_requirements set condition='cfp_result IS NOT EMPTY'
+--     where code='ISO-14067-CR-20';
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-13 ☐ RATIFIED — SIX ANNEX-D EQUATIONS COMPUTE THE SAME QUANTITY WITH NO SCENARIO DISCRIMINATOR
+-- ─────────────────────────────────────────────────────────────────────────────
+-- EQ-02..EQ-07 all compute the printed quantity E_M ("emisiones de GEI ligadas a la adquisición de
+-- materias primas y operaciones de fin de vida") from overlapping inputs. The encoding disambiguates
+-- them only by inventing six distinct OUTPUT symbols (E_M, E_M_D2 .. E_M_D6); there is no field that
+-- says which case applies, so all six are computed and all six outputs are consumed by nothing.
+-- The printed text DOES carry the discriminators:
+--   §D.3  closed loop                          -> fórmula (D.1)
+--   §D.4  "Cuando un producto se compone al 100 % de material primario"    -> fórmula (D.2)
+--   §D.4  "Cuando un producto se compone al 100 % de material reciclado"   -> fórmula (D.3) o (D.4)
+--   §D.4  "Cuando un producto consiste tanto de material primario y reciclado" -> fórmula (D.5) o (D.6)
+-- Note also that within each pair the printed alternatives are ALGEBRAICALLY IDENTICAL
+--   (D.3) E_V·A + E_PP + E_EoL − R·A·E_V   ==   (D.4) E_PP + E_EoL + (1−R)·A·E_V
+--   (D.5) C·A·E_V + C·E_PP + (1−C)·E_V + E_EoL − R·A·E_V == (D.6) C·E_PP + (1−C)·E_V + E_EoL + (C−R)·A·E_V
+-- so the pairs are faithful transcriptions of the standard, not encoding duplicates.
+-- Anexo D is INFORMATIVE, so none of this may become a block gate.
+--
+-- Proposed: add one enum field `recycling_allocation_case` on ISO-14067-04 with the four printed cases
+--   (closed_loop / open_loop_100_primary / open_loop_100_recycled / open_loop_mixed) as an SR-2 engineer
+--   selection, and gate each equation's applicability on it. NOT written as SQL: adding a field and
+--   rewiring six equations is a structural change requiring the importer, not a hand-edit.
+-- Rollback: n/a until written.
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- S-14 ☐ RATIFIED — TRANSCRIPT DEFECT: TABLA 1 (§6.4.9.8) IS GARBLED — DO NOT ENCODE FROM IT
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Tabla 1 ("Tratamiento específico de emisiones y remociones de GEI ...") is transcribed with its clause
+-- column and its label column mis-shifted by one row, so the table as it reads in the md is WRONG:
+--   "6.4.9.6 | Emisiones de GEI y                 |   | X |   |   | X"
+--   "6.4.9.3 | Remociones del uso del suelo       |   |   |   |   | X"
+--   "6.4.9.7 | Carbono biogénico en productos     | X |   |   | X |  "
+-- i.e. "uso del suelo" (really 6.4.9.6) is split across two rows, "Carbono biogénico en productos"
+-- (really 6.4.9.3) is labelled 6.4.9.7, and the aircraft row (6.4.9.7) is missing entirely. The shifted
+-- table also marks biogenic carbon in products as "Debe estar incluido", which directly CONTRADICTS the
+-- body text of 6.4.9.3: "no se debe incluir en el resultado de la HCP o de la HCP parcial."
+-- Consequence: no field in the pack is verified against a Tabla 1 row; every 6.4.9.x quote is taken from
+-- the BODY clause instead. Two prod field descriptions do cite the table
+--   fossil_ghg_net  "(6.4.9.2; Tabla 1: X debe estar incluido)"
+--   luc_direct_ghg  "(6.4.9.5; Tabla 1: X debe estar incluido)"
+--   luc_indirect_considered "(6.4.9.5; Tabla 1)"
+-- — those two claims happen to be CORRECT (rows 6.4.9.2 and 6.4.9.5 are the two rows that did NOT shift),
+-- but the citation should not stand on a table this transcript cannot render.
+-- Tabla 1 is in any case declared informative: "La tabla 1 proporciona un resumen INFORMATIVO de los
+-- requisitos y la orientación que se proporcionan en el apartado 6.4.9."
+--
+-- Proposed: strip the "Tabla 1" citations from the three field descriptions and cite the body clause only.
+--   update public.fields set description=replace(description,'; Tabla 1: X debe estar incluido','')
+--     where id in ('6e850f60-5fdf-47ac-a176-2d970fd56c51','43e4fd27-b63f-4af9-8160-61ad5ae99ccb');
+--   update public.fields set description=replace(description,'; Tabla 1','')
+--     where id in ('d42f83b5-b48d-4a70-a2ae-fdced2b7eae1','856f5660-315e-4801-834f-83913482b0e7');
+-- Rollback: restore the original description strings.
+-- ACTION FOR A LATER VA PASS: re-read Tabla 1 from the RENDERED PDF (SR-3) before anything is encoded
+--   from it. The transcript cannot support it.
+
+
+-- ============================================================================
+-- EXPLICIT NEGATIVE RESULTS — checked, and NOT present in ISO-14067
+-- ============================================================================
+-- * EMPTY CONDITIONS ......... none. All 30 gates carry a non-empty condition.
+-- * condition='TRUE' NO-OPS .. none. No gate has a literal TRUE condition.
+-- * INVERTED CONDITIONS ...... none. No gate asserts the negation of the sentence it cites.
+-- * AND/OR INVERSION ......... none at gate level. CR-15 is the only multi-term gate
+--     (fossil_ghg_net IS NOT NULL AND biogenic_ghg IS NOT NULL) and AND is correct: §6.4.9.2 prints
+--     "se deben incluir" for BOTH. The one OR-collapse in the encoding is at the required-flag level,
+--     on the functional/declared unit pair — see S-3.
+-- * BOUNDARY INCLUSIVITY ..... no defect, because NO gate contains a numeric comparison at all. The
+--     standard prints exactly two numbers that could carry a boundary: the ">10 years" rule (§6.4.8,
+--     "durante más de diez años" — strict) and the "80 %" figure in §6.3.5 NOTA 1 (non-normative note).
+--     Neither is encoded as a comparison; the 10-year rule is an engineer-set boolean.
+-- * DUPLICATE / SUBSET GATES . none. No two of the 30 gates share a condition, and none is a strict
+--     subset of another. (CR-20 ⊂ EQ-01 is a gate-over-equation tautology — S-12 — not a gate pair.)
+-- * MIS-HOMED GATES .......... none. Every one of the 30 gates references ONLY fields belonging to its
+--     own worksheet; verified field-by-field across all seven worksheets.
+-- * UNSATISFIABLE GATES / UNCOVERED ENUM VALUES ... none. All four enum gates enumerate their field's
+--     complete enum, so every enum value is reachable — the same fact that makes them no-ops (S-1).
+-- * INVENTED VALUES OR RANGES  none. No gate contains a numeric literal. The only numeric literals in
+--     the whole encoding are the Anexo D formulas and the ±1 kg CO2e/kg CO2 biogenic characterisation,
+--     and both were read verbatim from the transcript this session.
+-- * UNIT MISMATCHES .......... none. The complete unit inventory of this standard is
+--     '-' (dimensionless), 'kg', 'kg CO2e', 'kg CO2e/kg'. THERE IS NO TONNE-DECLARED FIELD ANYWHERE, so
+--     the "emission factor in kg feeding a field declared in tonnes" case cannot arise. Dimensional
+--     check of every equation:
+--       EQ-01  kg × (kg CO2e/kg) = kg CO2e  = unit of cfp_result                                ✓
+--       EQ-02  kg CO2e + kg CO2e − (dimensionless R)·kg CO2e = kg CO2e                          ✓
+--       EQ-03..EQ-07  identical shape; R, A, C all dimensionless (unit '-')                      ✓
+--     biogenic_carbon_content is 'kg' (carbon mass) not 'kg CO2e' — correct, and consistent with
+--     §6.4.9.3 excluding it from the CFP result.
+-- * WORKSHEETS WITH ZERO FIELDS ... none. 18 / 7 / 10 / 27 / 5 / 5 / 11 fields across WS 01-07.
+-- * APP-METADATA / PHANTOM FIELDS . none. This standard has no client-name, project-id, planning-date,
+--     phase-gate or workflow field, so the 2026-08-01 metadata exempt class is EMPTY here; and no field
+--     is an enum-value token materialised as a field (every one of the 83 has a label, a clause
+--     reference and a description). No field is proposed for active=false.
+-- * EQUATION OUTPUTS CONSUMED BY NOTHING ... six: E_M, E_M_D2, E_M_D3, E_M_D4, E_M_D5, E_M_D6. This is
+--     by construction (Anexo D is informative and its six formulas are mutually exclusive scenario
+--     alternatives), not an encoding error — but it is why S-13 matters.
+-- * SOURCE_QUOTE FIDELITY (all 30 scored against the printed sentence):
+--     22 verbatim and correctly anchored;
+--      6 mis-anchored (verbatim, wrong sentence for the condition): CR-04, CR-06, CR-08, CR-13, CR-22,
+--        CR-23 — S-3/S-4/S-5/S-8;
+--      4 verbatim but SILENTLY COMPRESSED (elision not marked): CR-01 drops "véase" four times;
+--        CR-15 renders "(véase la figura 3)" as "(figura 3)"; CR-18 drops "(véase la NOTA 1)" and the
+--        "[17]" reference marker; CR-20 drops ", según IPCC" inside the closing parenthesis.
+--     WORST OFFENDER: ISO-14067-CR-06 — its quote is verbatim and contains a real requirement, but not
+--       the one the gate enforces, so a reader auditing the gate is shown a sentence that appears to
+--       justify it and does not. Nothing is FABRICATED anywhere: no gate quote invents a completion, a
+--       value, or a sentence that is not in the document. Score: 0 fabrications / 4 silent compressions
+--       / 6 mis-anchors out of 30.
+-- ============================================================================
