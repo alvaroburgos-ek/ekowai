@@ -20,6 +20,21 @@ const text = fs.readFileSync(file, 'utf8');
 // statements = non-comment chunks ending in ";" (comments stripped line-wise first)
 const stripped = text.split('\n').filter((l) => !l.trim().startsWith('--')).join('\n');
 const stmts = stripped.split(/;\s*(?:\n|$)/).map((s) => s.trim()).filter(Boolean);
+
+// SAFETY (added 2026-09-07 after a real incident): a pack must NEVER carry its own transaction control.
+// This runner wraps the whole file in one transaction and relies on throwing to roll back a --dry-run.
+// An inline `commit;` ends that transaction early, so the remaining statements — and everything already
+// executed — are committed for real and the dry run silently becomes an apply. That happened once, to
+// the DWA-A-201 pack, and wrote 171 rows to prod. Refuse such a file outright, in both modes.
+const offenders = stmts.filter((s) => /^\s*(begin|commit|rollback|start\s+transaction|end)\b/i.test(s));
+if (offenders.length) {
+  console.error(`REFUSED: ${path.basename(file)} contains ${offenders.length} transaction-control statement(s) — ` +
+    `${offenders.map((s) => `"${s.split('\n')[0].slice(0, 30)}"`).join(', ')}.`);
+  console.error('A pack must contain only its UPDATE/INSERT statements; this runner supplies the transaction.');
+  console.error('Remove the begin/commit lines and re-run. (Inline COMMIT defeats --dry-run: see the comment above.)');
+  await sql.end();
+  process.exit(2);
+}
 console.log(`${path.basename(file)}: ${stmts.length} statements${dry ? ' (DRY RUN — will roll back)' : ''}`);
 
 let total = 0;

@@ -29,6 +29,10 @@ try {
     if (!fs.existsSync(p)) { summary.push(`${file}: MISSING`); continue; }
     const text = fs.readFileSync(p, 'utf8').split('\n').filter((l) => !l.trim().startsWith('--')).join('\n');
     const stmts = text.split(/;\s*(?:\n|$)/).map((s) => s.trim()).filter(Boolean);
+    // Same guard as apply-pack.mjs: inline transaction control would defeat the batch's rollback and turn
+    // a --dry-run into a real apply (this bit us once, on the DWA-A-201 pack — 171 rows written to prod).
+    const bad = stmts.filter((s) => /^\s*(begin|commit|rollback|start\s+transaction|end)\b/i.test(s));
+    if (bad.length) { summary.push(`${file}: REFUSED — ${bad.length} transaction-control statement(s); strip begin/commit and re-run`); console.log(summary.at(-1)); continue; }
     let rows = 0, zero = 0;
     try {
       await sql.begin(async (tx) => {

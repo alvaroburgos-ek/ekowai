@@ -1,0 +1,340 @@
+-- ============================================================================
+-- DWA-A-201 — STAGED rulings (WRITTEN, NOT APPLIED)
+-- Arbeitsblatt DWA-A 201, August 2005 / korrigierte Fassung Dezember 2011,
+-- "Grundsätze für Bemessung, Bau und Betrieb von Abwasserteichanlagen" (German).
+--
+-- Everything in this file changes STRUCTURE, ENFORCEMENT or REQUIRED-NESS and therefore never enters the
+-- md-verification pack (owner ruling 2026-09-05, brief §0.3). Each block carries its verbatim evidence
+-- quote from the md, the proposed SQL (commented out), and the rollback inverse.
+--
+-- Source md: C:\Users\Ekowai\Desktop\Guidelines\DWA-A-201\dwa_a_201.md (669 lines, mathpix LaTeX, read in
+-- full). Page convention: printed pages from the guideline's own "Inhalt" (md lines 66-119) — the page on
+-- which the quoted clause begins; the md has NO per-page markers. Grade [VC] throughout.
+--
+-- Nothing here is applied until the ☐ RATIFIED box is ticked by Alvaro.
+-- ============================================================================
+
+
+-- ----------------------------------------------------------------------------
+-- S-01  GATE RE-HOME — CR-006 sits on A201-08 (Grobstoffentnahme) but enforces §5.3
+--       (unbelüftete Teiche). CONFIRMS the 2026-08-01 mis-homing flag.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- Prior ruling under review: CR-006 was FIXED and applied on 2026-08-01 (the A_EW >= 10 enforcement bug)
+-- and flagged as possibly mis-homed. BOTH halves are confirmed against the md:
+--   (a) the ANCHOR reads exactly as recorded — md line 317, §5.3, printed p.10:
+--       "Unbelüftete Abwasserteiche sind mit $A_{E W} \geq 10 \mathrm{~m}^{2} / \mathrm{E}$ zu bemessen.
+--        Dieser Wert kann auf $8 \mathrm{~m}^{2} / \mathrm{E}$ vermindert werden, wenn nach Abschnitt 5.2
+--        bemessene Absetzteiche vorgeschaltet sind."
+--       -> the encoded source_quote and the encoded condition (>=8 with settling stage, >=10 without) are
+--          faithful to the printed text. No value change is proposed.
+--   (b) the HOME is wrong. A201-08 is "Bemessung Grobstoffentnahme" and carries only §5.1 fields
+--       (V_erf_grobstoff, t_R_M, Q_design_grobstoff, V_adopted_grobstoff, volumen_angerechnet). CR-006
+--       reads A_EW_unbelueftet (A201-10) and absetz_vorstufe (A201-02) — NOT ONE field of its host
+--       worksheet. §5.1 (Grobstoffentnahme, printed p.9) and §5.3 (unbelüftete Teiche, printed p.10) are
+--       different clauses of the guideline.
+-- Proposal: move CR-006 to A201-10 "Bemessung unbelueftete Teiche" (id 7eee02a5-9620-4b68-ab50-ad841a8d282a)
+-- and retag clause_reference '5.3' -> '§5.3'. absetz_vorstufe stays a cross-worksheet read from A201-02
+-- (unavoidable: the pond-train selection lives on the Verfahrensauswahl sheet).
+--
+-- update public.compliance_requirements
+--   set worksheet_template_id = '7eee02a5-9620-4b68-ab50-ad841a8d282a', clause_reference = '§5.3'
+--   where id = '4555a13e-eaac-4aeb-99e2-6b182d4b2c0b';
+-- ROLLBACK:
+-- update public.compliance_requirements
+--   set worksheet_template_id = 'dc019548-7320-4e8c-b776-397de871ba71', clause_reference = '5.3'
+--   where id = '4555a13e-eaac-4aeb-99e2-6b182d4b2c0b';
+
+
+-- ----------------------------------------------------------------------------
+-- S-02  CR-008 ANCHOR RE-VERIFIED — the 2026-08-05 reversal (kept at block) is CORRECT.
+-- ☐ RATIFIED (no change proposed — record only)
+-- ----------------------------------------------------------------------------
+-- md line 353, §5.5 Nachklärteiche, printed p.11 — verbatim:
+--   "Das erforderliche gesamte Teichvolumen errechnet sich aus der erforderlichen Mindestdurchflusszeit
+--    $t_{R}=1 d$, bezogen auf den maximalen Zufluss zuzüglich dem Volumenanteil für die notwendige
+--    Schlammspeicherung bis zur Räumung. Bewährt haben sich Teiche mit einer Mindesttiefe von 1,2 m und
+--    einer Mindestfläche von $20 \mathrm{~m}^{2}$."
+-- The "erforderliche Mindestdurchflusszeit t_R = 1 d" reads exactly as recorded on 2026-08-05 and is
+-- mandatory ("erforderliche"), so the t_R_nachklaer >= 1 term justifies severity=block. CONFIRMED.
+-- Residual note (no downgrade proposed): the two other terms of the same gate (h_nachklaer >= 1.2,
+-- A_min_nachklaer >= 20) rest on "Bewährt haben sich" — proven-practice wording, not a mandate. They are
+-- nevertheless carried as design values in the §7 table (md lines 495 and 500, printed p.17):
+--   "\hline Mindestgröße & $\mathrm{m}^{2}$ & & & & 20 & \\"
+--   "\hline Wassertiefe h & m & $\geq 1,5$ & $\sim 1,0$ & 1,5 bis 3,5 & $\geq 1,2$ & 1 bis 2 \\"
+-- so block is defensible for the whole gate. Flagged only so the tie between §5.5 prose and the §7 table
+-- is on record.
+
+
+-- ----------------------------------------------------------------------------
+-- S-03  GATE RE-HOME — CR-011 (§6 Mischwasserbehandlung) sits on A201-15 (Wasserdichtheit).
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- Evidence, md line 446, §6, printed p.15:
+--   "Für die Mischwasserentlastung ist der Nachweis zu führen, dass die Anforderungen des ATV-A 128
+--    eingehalten werden."
+-- The gate's clause_reference is already '6', but its worksheet is A201-15 "Wasserdichtheit /
+-- Dichtungsanforderungen" (§5.8). The Mischwasserbehandlung worksheet is A201-16
+-- (id 9361b5b8-69ef-4ec2-9327-8d9051b57be4). Attestation gate, condition empty.
+--
+-- update public.compliance_requirements
+--   set worksheet_template_id = '9361b5b8-69ef-4ec2-9327-8d9051b57be4', clause_reference = '§6'
+--   where id = '64fbce45-4b85-4ebf-82fa-0468933fa5a3';
+-- ROLLBACK:
+-- update public.compliance_requirements
+--   set worksheet_template_id = '0274fb97-3d42-4647-8e71-b23b3c582b4e', clause_reference = '6'
+--   where id = '64fbce45-4b85-4ebf-82fa-0468933fa5a3';
+
+
+-- ----------------------------------------------------------------------------
+-- S-04  SEVERITY NOTE — CR-014 (block) is anchored on a PERMISSION, not on a limit.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- Evidence, md line 575, §8.9, printed p.19:
+--   "Gemäß der „Verordnung über Anforderungen an das Einleiten von Abwasser in Gewässer (AbwV), Anhang 1:
+--    Häusliches und kommunales Abwasser" dürfen deshalb die Ablaufwerte für den $\mathrm{BSB}_{5}$ und den
+--    CSB aus der algenfreien (filtrierten) Probe bestimmt werden."
+-- The sentence PERMITS determination from the filtered sample ("dürfen ... bestimmt werden"); it prints no
+-- BSB5/CSB limit. CR-014 nevertheless blocks on "BSB5_ablauf <= BSB5_grenzwert AND CSB_ablauf <=
+-- CSB_grenzwert", where both threshold fields (A201-01.BSB5_grenzwert / .CSB_grenzwert) are optional and
+-- carry values that come from AbwV Anhang 1 (NR — not in the library), not from DWA-A 201. As encoded the
+-- gate over-enforces on a limit the guideline never states, and it blocks whenever the optional thresholds
+-- are empty. Proposal: block -> warn, and reword the requirement text so it enforces the METHOD (filtered
+-- sample) that §8.9 actually governs.
+--
+-- update public.compliance_requirements set severity = 'warn'
+--   where id = '41596c7a-b3bb-40e9-ad3d-75eaa5bd5c16';
+-- ROLLBACK:
+-- update public.compliance_requirements set severity = 'block'
+--   where id = '41596c7a-b3bb-40e9-ad3d-75eaa5bd5c16';
+
+
+-- ----------------------------------------------------------------------------
+-- S-05  SEVERITY / CONDITION NOTE — CR-004 (block) fires even when no Grobstoffentnahme is planned.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- Evidence, md lines 290 and 292-298, §5.1, printed p.9:
+--   "Die Vorschaltung einer Grobstoffentnahme kann zur Entlastung der Teiche sinnvoll sein, wenn die
+--    regelmäßige Entsorgung gesichert ist."
+--   "Für die Bemessung der Grobstoffentnahme gilt: $$ \begin{aligned} \mathrm{V}_{\text {erf. }} & \geq
+--    \mathrm{Q}_{\mathrm{M}} \cdot \mathrm{t}_{\mathrm{R}, \mathrm{M}} \\ \mathrm{t}_{\mathrm{R}, \mathrm{M}}
+--    & =0,5 \mathrm{~h} \end{aligned} $$"
+-- The coarse-solids stage itself is OPTIONAL ("kann ... sinnvoll sein"); only ONCE chosen is its sizing
+-- binding ("Für die Bemessung ... gilt"). CR-004's condition carries no selection predicate, so the block
+-- fires on projects that legitimately have no Grobstoffentnahme. A201-02.vorbehandlung_gewaehlt
+-- (id 85cc371e-4c5d-48ca-a14c-8e120019b040) is exactly the selection flag.
+-- Proposal: gate the condition on the selection (severity stays block once selected).
+--
+-- update public.compliance_requirements
+--   set condition = 'IF vorbehandlung_gewaehlt == true THEN (V_erf_grobstoff >= Q_M * t_R_M and t_R_M == 0.5)'
+--   where id = 'ff1a44a8-a107-43b1-a669-28a8357531d1';
+-- ROLLBACK:
+-- update public.compliance_requirements
+--   set condition = 'V_erf_grobstoff >= Q_M * t_R_M and t_R_M == 0.5'
+--   where id = 'ff1a44a8-a107-43b1-a669-28a8357531d1';
+
+
+-- ----------------------------------------------------------------------------
+-- S-06  CLAUSE RETAG inside CR-005's source_quote — the velocity sentence is §5.2, not §5.1.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- CR-005's stored source_quote labels the drosselung sentence "[§5.1] ... (DWA-A 201, Abschnitte 5.2 / 5.1,
+-- S. 10 / S. 9)". In the md that sentence sits on line 309, INSIDE §5.2 Absetzteiche (§5.2 = lines 302-311;
+-- §5.1 ends at line 300; §5.3 starts at line 313), printed p.10:
+--   "Der Durchfluss durch die Absetzteiche muss soweit gedrosselt werden, dass die Fließgeschwindigkeit
+--    zwischen Tauchwand und höchstem Schlammspiegel $0,05 \mathrm{~m} / \mathrm{s}$ nicht überschreitet."
+-- The gate's own clause_reference ('§5.2') is already correct; only the bracket label + page inside the
+-- quoted evidence is wrong. Proposal: restate the source_quote with both sentences attributed to §5.2, p.10.
+--
+-- update public.compliance_requirements
+--   set source_quote = '[§5.2] Absetzteiche werden auf VEW ≥ 0,5 m³/E bemessen; darin ist ein Schlammraum von 0,15 m3/E enthalten. Es muss eine Durchflusszeit von mindestens einem Tag bei Trockenwetter eingehalten werden. [§5.2] Der Durchfluss durch die Absetzteiche muss soweit gedrosselt werden, dass die Fließgeschwindigkeit zwischen Tauchwand und höchstem Schlammspiegel 0,05 m/s nicht überschreitet. (DWA-A 201, Abschnitt 5.2, S. 10)'
+--   where id = 'b6e1bf1d-8e3b-42cd-9e1f-7dde72e198ca';
+-- ROLLBACK: restore the previous source_quote (recorded in fields-DWA-A-201.json, gate CR-005).
+
+
+-- ----------------------------------------------------------------------------
+-- S-07  MISSING GATE — §5.8's "mindestens drei Proben je Teich" is printed but unenforced.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- Evidence, md line 442, §5.8, printed p.14:
+--   "Die Bestimmung des $\mathrm{k}_{\mathrm{f}}$-Wertes erfolgt nach DIN 18130-1 vor der Befüllung an
+--    mindestens drei Proben je Teich."
+-- The value IS encoded as A201-15.k_f_probe_count (id 0d68ea7f-9d55-4cc1-b640-2585d3e8d52f) but that field
+-- is is_required=false, and CR-012 — the gate that quotes exactly this sentence — has an EMPTY condition
+-- (attestation only). The printed minimum is therefore never checked.
+-- Proposal: give CR-012 a real condition (and keep the attestation).
+--
+-- update public.compliance_requirements set condition = 'k_f_probe_count >= 3'
+--   where id = '85fc6d39-f6f3-48d0-9241-659d3712f818';
+-- update public.fields set is_required = true where id = '0d68ea7f-9d55-4cc1-b640-2585d3e8d52f';
+-- ROLLBACK:
+-- update public.compliance_requirements set condition = '' where id = '85fc6d39-f6f3-48d0-9241-659d3712f818';
+-- update public.fields set is_required = false where id = '0d68ea7f-9d55-4cc1-b640-2585d3e8d52f';
+
+
+-- ----------------------------------------------------------------------------
+-- S-08  EMPTY-CONDITION GATES — CR-003, CR-011, CR-012 carry condition = ''.
+-- ☐ RATIFIED (record + one action, see S-07)
+-- ----------------------------------------------------------------------------
+-- All three have requires_attestation = true, so the empty condition is deliberate, not a defect:
+--   CR-003 (A201-01, warn, §5.1, md line 269, p.9):
+--     "Bei der Bemessung von Abwasserteichanlagen sollte vom tatsächlichen Abwasseranfall und von der
+--      tatsächlich anfallenden Schmutzfracht, samt einem realistischen Zuschlag für zu erwartende
+--      Entwicklungen ausgegangen werden." — "sollte" -> warn is correct.
+--   CR-011 (see S-03) — the deliverable is a proof under ATV-A 128 (NR); attestation is the only honest
+--     enforcement, but the verb is mandatory ("ist der Nachweis zu führen"), so warn is a deliberate
+--     under-enforcement. Recorded, no change proposed while ATV-A 128 is outside the library.
+--   CR-012 (see S-07) — has a machine-checkable limit and SHOULD get a condition.
+-- CR-003's home is also loose: it is the §5.1 design-basis rule but sits on A201-01 (Projektregistrierung)
+-- while the flows/loads it governs live on A201-04 (id 0b1bd49f-83ee-443f-b38c-131b53683fb5).
+-- Optional re-home:
+-- update public.compliance_requirements
+--   set worksheet_template_id = '0b1bd49f-83ee-443f-b38c-131b53683fb5', clause_reference = '§5.1'
+--   where id = '189fb0ea-209e-4735-a866-3a1b9a25fdc7';
+-- ROLLBACK:
+-- update public.compliance_requirements
+--   set worksheet_template_id = 'ac188e24-8868-4967-ac87-4878078f49ed', clause_reference = '5.1'
+--   where id = '189fb0ea-209e-4735-a866-3a1b9a25fdc7';
+
+
+-- ----------------------------------------------------------------------------
+-- S-09  MISSING EQUATION — the F-numbering skips F-17.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- The encoded set runs F-01..F-16, then F-18..F-21. F-17 does not exist. The §5.5 rule that has no equation
+-- is the minimum depth, md line 353, printed p.11:
+--   "Bewährt haben sich Teiche mit einer Mindesttiefe von 1,2 m und einer Mindestfläche von
+--    $20 \mathrm{~m}^{2}$."
+-- (F-16 encodes only the 20 m2 area half of that sentence; h_nachklaer >= 1.2 is enforced by CR-008 but has
+-- no equation row.) Proposal: add F-17 "h_nachklaer >= 1.2" on A201-12 so the gate term has an engine
+-- counterpart, or record deliberately that the numbering gap is cosmetic.
+--
+-- insert into public.equations (worksheet_template_id, equation_number, formula, output_symbol,
+--   clause_reference, source_quote)
+-- values ('4c6afd71-f8b0-4f6f-8d02-43936cd183fc', 'F-17', 'h_nachklaer >= 1.2', 'h_nachklaer', '§5.5',
+--   'Verbatim §5.5: ''Bewährt haben sich Teiche mit einer Mindesttiefe von 1,2 m und einer Mindestfläche von 20 m2.'' Unit: m.');
+-- ROLLBACK:
+-- delete from public.equations where equation_number = 'F-17'
+--   and worksheet_template_id = '4c6afd71-f8b0-4f6f-8d02-43936cd183fc';
+
+
+-- ----------------------------------------------------------------------------
+-- S-10  DUPLICATE FIELDS — seven pairs encode the same printed quantity twice.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- Each pair carries the SAME source sentence; the second member is a re-entry of the first on another
+-- worksheet, so a project can hold two contradicting values for one printed quantity.
+--   (a) A201-02.A_verfuegbar (7e2fc2b2-828d-4d77-aab7-ea16dfd5197f)
+--       vs A201-06.A_verfuegbar_standort (80c1dad8-b2bd-4cdd-9106-277c51234dd5) — both "Verfügbare
+--       Grundstücksfläche", m2.
+--   (b) A201-04.Q_f (ee3e4da2-993e-4e93-ae22-c5e9424ba147)
+--       vs A201-06.Q_f_standort (312e2550-13f3-4bc6-a0f2-3e1010fc5ac9) — both "Fremdwasserabfluss", l/s,
+--       both governed by md line 271: "Fremdwasser muss nach örtlichen Gegebenheiten zusätzlich einbezogen
+--       werden."
+--   (c) A201-06.mischwasser_fall_standort (beeb43cd-2644-49b3-95c9-894df8dea4a9)
+--       vs A201-16.mischwasser_fall (0664353a-c29a-442e-be2e-7b774449b0f7) — the same Fall I/II/III enum
+--       (§6, printed p.15) with different value tokens (fall_i/fall_ii/fall_iii vs fall_I/fall_II/fall_III).
+--   (d) A201-03.h_belueftet_ref (e73f3730-316b-4974-8880-e2e551da400a) vs A201-11.h_belueftet
+--       (5605eb1d-bcc4-4e1a-8684-1d00e1aadb3d) — §7 row "Wassertiefe h ... 1,5 bis 3,5".
+--   (e) A201-03.h_schoenung_ref (b5b9e7d5-8e37-49a3-9c98-4b1aef2a5f0b) vs A201-14.h_schoenung
+--       (9db070ca-3bf9-427b-b785-c42afe6430aa) — §7 row "Wassertiefe h ... 1 bis 2".
+--   (f) A201-03.v_max_auslauf (31489783-3256-4859-a15a-3a996b308750) vs A201-09.v_strom_absetz
+--       (e481617f-246b-41d4-8a8c-de0d65e0d859) — both the 0,05 m/s limit of md line 309.
+--   (g) A201-12.h_w_min_nachklaer (175c4571-56a9-4e3a-b74b-b36253642f62)
+--       vs A201-19.min_wasser_ueber_schlamm_nachklaer (3ec0ca4a-899f-4f75-882e-7b840f658572) — both the
+--       0,9 m of md line 538 (§8.5, printed p.18).
+--   (h) A201-10.A_EW_ohne_absetz (951e43dd-8bca-480e-85fe-c8845eaa912d) and A201-10.A_EW_mit_absetz
+--       (cf3016e2-5b5b-49a7-8a48-f9ad51da77ef) restate the two branches of A201-10.A_EW_unbelueftet
+--       (7528851f-4916-4c15-8df1-23ab4b1d06b3), which F-07/F-08 already govern.
+-- Proposal: keep the member that an equation or gate references, deactivate the other, and migrate any
+-- stored values. Example for (b):
+-- update public.fields set active = false where id = '312e2550-13f3-4bc6-a0f2-3e1010fc5ac9';
+-- ROLLBACK:
+-- update public.fields set active = true where id = '312e2550-13f3-4bc6-a0f2-3e1010fc5ac9';
+-- (the same shape applies to a, c, d, e, f, g, h — do NOT apply blindly; the survivor must be chosen per
+--  pair against the worksheet order the engineer fills in.)
+
+
+-- ----------------------------------------------------------------------------
+-- S-11  standard_fixed VALUES EXPOSED AS EDITABLE INPUTS (the "#22" class).
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+-- These fields hold constants PRINTED in the guideline; the engineer can currently overtype them, which the
+-- doctrine classes as a finding (standard_fixed that is UI-editable). Each is already governed by an
+-- equation, so the value should be engine-supplied and read-only:
+--   A201-08.t_R_M            b91265dd-4080-47eb-9a4c-f052829a8ee3  = 0,5 h    (F-02, md line 296, p.9)
+--   A201-09.V_EW_absetz      c2324018-c2a9-4579-b49b-3b15a786c1f1  >= 0,5 m3/E (F-03, md line 304, p.10)
+--   A201-09.V_schlammraum_absetz 049af922-5144-4a28-b4f1-5538fd0a6d97 = 0,15 m3/E (F-04, md line 304, p.10)
+--   A201-09.schlammrate_absetz   68241712-ff73-4788-9237-bd61a0003357 = 0,3 l/d (F-05, md line 304, p.10)
+--   A201-09.v_strom_absetz   e481617f-246b-41d4-8a8c-de0d65e0d859  <= 0,05 m/s (md line 309, p.10)
+--   A201-10.A_EW_Mi          0bcdfa66-c016-4413-b00f-6b9ab371f0c7  = 5 m2/E   (F-09, md line 317, p.10)
+--   A201-15.k_f_sealing_threshold b55597d6-0270-4331-b00d-da0a39a2683f = 10^-8 m/s (F-18/F-19, md 424/426, p.14)
+--   A201-15.k_f_polishing_threshold 969bde77-b483-445b-a2d3-aea31c829eed = 10^-7 m/s (F-20, md line 428, p.14)
+--   A201-17.rechen_stababstand  72b6a4dd-3072-4616-8d43-a83ecb4428bf = 10 mm  (md line 565, §8.8, p.18 —
+--                                value belongs to DIN EN 12255-3, NR)
+-- Separately, A201-15.sealing_required (28468279-3b99-4e40-9936-743a60e94d54), .no_sealing
+-- (8927b764-371b-4d90-9f6f-104e912ba789) and .polishing_sealing_ok (28cfb8f1-848f-40ac-ae7d-19c34fa7978c)
+-- are the OUTPUTS of F-18/F-19/F-20 materialised as hand-enterable booleans — same class.
+-- Proposal (per field): mark read-only / derived so the engine writes them.
+-- update public.fields set is_readonly = true where id = 'b91265dd-4080-47eb-9a4c-f052829a8ee3';
+-- ROLLBACK:
+-- update public.fields set is_readonly = false where id = 'b91265dd-4080-47eb-9a4c-f052829a8ee3';
+-- (NOTE: confirm the column name against the live schema before applying — this block is a finding list,
+--  not a ready migration.)
+
+
+-- ----------------------------------------------------------------------------
+-- S-12  is_required REVIEW — fields the source makes optional/approximate but the app marks required.
+-- ☐ RATIFIED
+-- ----------------------------------------------------------------------------
+--   A201-03.freibord (91bc07fc-8af8-459d-9b96-bddb18be9b68) — is_required=true. md line 283, §5.1, p.9:
+--     "Freibord & $\sim 0,3 \mathrm{~m}$" — the source prints an APPROXIMATE value ("~"), not a limit.
+--     Keep required (it is part of the "Für die Ausführung ist zu beachten" list, md line 275) but the
+--     value must not be gate-enforced as an exact number.
+--   A201-16.mischwasser_fall (0664353a-c29a-442e-be2e-7b774449b0f7) — is_required=true, yet §6 applies only
+--     to combined-sewer catchments (md line 446, p.15: "Kleine, im Mischverfahren entwässerte Orte ..."). On
+--     a separate-sewer project (A201-06.kanalisationsart = 'trenn', md line 228, §4.2, p.8) the field has no
+--     answer. Proposal: conditional requirement on kanalisationsart = 'misch'.
+--   A201-01.groessenklasse (a8bdf156-b1ad-4781-bdfc-22113e05355d) — is_required=true, but the enum values
+--     GK1..GK5 come from AbwV Anhang 1 (NR); §1 only says "in der Regel nicht die Größenklasse 2 ...
+--     EW_BSB5 = 5000 E" (md line 135, p.6). The field is a scoping input, not an A 201 value — keep, but
+--     record the NR dependency on its enum.
+--   A201-10.A_EW_nitrifikation (900f2403-f4cf-436b-9fc4-8dc6c085b8ab) — is_required=false and correctly so:
+--     md line 319 ("Bei Bemessungswerten A_EW >= 15 m2/E ist im Sommer eine teilweise Nitrifikation
+--     festzustellen") is descriptive, not a duty. No change.
+-- update public.fields set is_required = false where id = '0664353a-c29a-442e-be2e-7b774449b0f7';
+-- ROLLBACK:
+-- update public.fields set is_required = true where id = '0664353a-c29a-442e-be2e-7b774449b0f7';
+
+
+-- ----------------------------------------------------------------------------
+-- S-13  ENUM NOTES — value granularity that is EKOWAI's, not the guideline's.
+-- ☐ RATIFIED (record only)
+-- ----------------------------------------------------------------------------
+--   A201-06.vorfluter_empfindlichkeit (40d67876-05ff-4cc9-b354-0c4d8f06bc0a): the three steps
+--     gering/mittel/hoch are an EKOWAI construction. §4.5 (md lines 256/258, p.9) names only
+--     "leistungsschwache Gewässer oder besonders hohe Ansprüche an die Gewässergüte" — a two-state
+--     condition, not a three-step scale. Flagged, no change proposed (the widget is a selection, per the
+--     2026-08-01 options-as-selection ruling).
+--   A201-06.mischwasser_fall_standort vs A201-16.mischwasser_fall: different value tokens for the same
+--     three printed cases (see S-10c). Whichever field survives, the tokens must agree.
+--   A201-15.dichtungs_typ (03b84407-fb47-47b4-9dc1-35a7cd654e37): the six options map 1:1 onto the sealing
+--     systems §5.8 actually names (Beton/Asphalt md line 430, Kunststoff 432-434, bindiger Boden 436,
+--     Bentonitmatten 438, plus "keine" from md line 426). Correct as encoded — recorded as verified.
+
+
+-- ----------------------------------------------------------------------------
+-- S-14  NR DEPENDENCIES — values this standard defers to documents outside the library.
+-- ☐ RATIFIED (record only)
+-- ----------------------------------------------------------------------------
+--   ATV-A 128 (Q_krit, CR-011, md lines 446/448 p.15) — the critical combined-water flow is dimensioned
+--     there, not here.
+--   ATV-DVWK-A 198 (md line 269, §5.1, p.9) — derivation of design values.
+--   ATV-DVWK-A 281 (md lines 379 / 389, §5.6.2 / §5.6.4, p.12) — trickling filter / RBC and Zwischenklärung
+--     sizing; this is why A201-13 carries no dimensioning equation.
+--   DIN EN 12255-5 (md lines 432-434 liner thickness 3 mm, line 524 minimum 1 m water over sludge).
+--   DIN EN 12255-3 (md line 565, rake bar spacing 10 mm) and DIN EN 12255-8 (md line 306, two parallel
+--     settling ponds).
+--   DIN 18130-1 (md line 442, k_f determination) — encoded separately in prod as DIN-18130-1.
+--   AbwV Anhang 1 (md lines 135 and 575) — Größenklassen and the effluent limits behind CR-014 (see S-04).
+-- These are the reason six fields land in the pack's residue list rather than getting a quote.

@@ -4,7 +4,7 @@
 -- worksheet_templates -> standards.code. The pre-pass status was MIXED (84 needs_engineer_review +
 -- 69 imported_unverified), so the two classes are restored separately by explicit id list.
 
-begin;
+-- (transaction control removed 2026-09-07: apply-pack.mjs supplies the transaction; an inline COMMIT defeats --dry-run)
 
 update public.fields f
 set verification_status='needs_engineer_review', verification_quote=null, verification_note=null, verified_at=null
@@ -181,4 +181,4 @@ from public.worksheet_templates wt, public.standards s
 where e.worksheet_template_id = wt.id and wt.standard_id = s.id and s.code = 'DWA-A-222'
   and e.verification_note like 'md-verified 2026-09-05%';
 
-commit;
+-- (transaction control removed 2026-09-07: apply-pack.mjs supplies the transaction; an inline COMMIT defeats --dry-run)
