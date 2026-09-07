@@ -1,0 +1,249 @@
+-- ============================================================================
+-- DIN-EN-ISO-14044 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = the inverse statements noted per block.
+--
+-- Evidence quotes are the GERMAN column of the bilingual (D/E) transcript
+--   C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-EN-ISO-14044\DIN-EN-ISO-14044-D.md (3111 lines, mathpix
+--   LaTeX; German and English run as alternating blocks). "printed p.N" is derived from the standard's own Inhalt
+--   index (md 113–140), cross-checked against the mathpix figure indices (PDF page = printed page + 4 at all four
+--   Bilder) and, for third-level sub-clauses, read off the rendered PDF's page footers. See the pack header.
+-- Gate rows live in compliance_requirements (columns: worksheet_template_id, code, severity, condition,
+--   clause_reference, source_quote, requires_attestation) and are evaluated by src/lib/compliance/evaluate.ts — a
+--   condition that evaluates TRUE is a PASS, FALSE is a FAIL; a missing referenced symbol yields "pending", not a fail.
+-- Standard id bd42b6db-884c-46d3-98b5-120c73076269. Worksheet ids:
+--   01 Festlegung des Ziels und des Untersuchungsrahmens  c11b4a84-8be1-4e9b-8436-03a7386e91b5  (28 fields)
+--   02 Sachbilanz (LCI)                                   1f269fc2-46d2-406d-8e9c-cf49b0041054  (13 fields)
+--   03 Wirkungsabschaetzung (LCIA)                        3b084c9e-30c1-431d-87de-03a4efcb4041  (10 fields)
+--   04 Auswertung                                         bdbe6390-714a-46a1-95da-9fa0fca00446  ( 7 fields)
+--   05 Berichterstattung                                  e289472c-0ff1-44b0-8497-77ecb2bf1b57  ( 4 fields)
+--   06 Kritische Pruefung                                 396d2828-cb58-4945-9a0a-1e4235a31bf4  ( 5 fields)
+--
+-- Context: 67 fields, 1 equation, 17 gates (16 block, 1 warn). ISO 14044 prints essentially NO limit values — its
+--   normative content is duties on the STUDY and its REPORT, and the ONLY number in the whole body is "mindestens
+--   drei Mitgliedern" for a review panel (§6.3), itself under "sollte". So all 16 block gates are presence/attestation
+--   checks and the doctrinal risk is not a wrong number, it is a gate that BLOCKS a conforming study, or a printed
+--   PROHIBITION that no gate enforces. Both occur below. Nothing in this file was applied.
+--
+-- Clean bill for the things the brief asks to be looked for and that are NOT present:
+--   · no empty conditions, no condition = 'TRUE' no-op, no duplicate gate conditions (all 17 distinct);
+--   · no worksheet with zero fields; no phantom fields (every one of the 67 symbols carries a label, a clause and a
+--     description, and none is an orphan enum token);
+--   · no gate reads ONLY foreign-worksheet fields — the four cross-worksheet reads (REQ-09/14/16 on
+--     comparative_assertion_public, REQ-16/17 on critical_review_type) each also read a field of their own sheet,
+--     which is legitimate: comparative_assertion_public is set once on sheet 01 and gates the whole study;
+--   · no invented references — the only documents cited in field descriptions are ISO 14040, ISO/TR 14047 and
+--     ISO/TR 14049, and all three are printed in the md (normative reference §2; §4.4.2.2.1 ANMERKUNG; §4.3.4.3.4).
+-- ============================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · REQ-10 OVER-ENFORCES §4.5.3.1 — a block gate on "erwogen werden" (shall be CONSIDERED).   ☐ RATIFIED
+--   REQ-10 (8091f4c3-94e5-4b2d-a47d-401072d53aad, ws 04, severity BLOCK) condition:
+--     completeness_check_done == true AND sensitivity_check_done == true AND consistency_check_done == true
+--   i.e. it refuses to let the worksheet through unless ALL THREE checks were performed. What the standard prints:
+--     "Die Beurteilung muss in Übereinstimmung mit dem Ziel und dem Untersuchungsrahmen der Studie durchgeführt
+--      werden. Während der Beurteilung muss die Anwendung der folgenden drei Methoden erwogen werden:
+--      - Vollständigkeitsprüfung (siehe 4.5.3.2); - Sensitivitätsprüfung (siehe 4.5.3.3);
+--      - Konsistenzprüfung (siehe 4.5.3.4)." (§4.5.3.1, printed p.51)
+--   The obligation is that their APPLICATION "muss erwogen werden" — the evaluation must consider applying them,
+--   not that all three are always carried out. A study that documents why one check was not applicable is
+--   conforming, and this gate blocks it. Two options, ONE to be chosen by Alvaro:
+--     (a) keep BLOCK but move the duty to the recorded consideration (needs a new "erwogen" attestation field), or
+--     (b) demote to WARN, which is the reality-consistent minimal change and is written below.
+-- update public.compliance_requirements set severity='warn',
+--   source_quote='§4.5.3.1: "Die Beurteilung muss in Übereinstimmung mit dem Ziel und dem Untersuchungsrahmen der Studie durchgeführt werden. Während der Beurteilung muss die Anwendung der folgenden drei Methoden erwogen werden: - Vollständigkeitsprüfung (siehe 4.5.3.2); - Sensitivitätsprüfung (siehe 4.5.3.3); - Konsistenzprüfung (siehe 4.5.3.4)." (printed p.51) — the duty is that their APPLICATION be CONSIDERED, hence warn, not block.'
+--   where id='8091f4c3-94e5-4b2d-a47d-401072d53aad';
+-- ROLLBACK: set severity='block' and restore the previous source_quote (see the 2026-09-05 export).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · REQ-05 UNDER-ENFORCES §4.2.3.6.2 for public comparative assertions.                        ☐ RATIFIED
+--   REQ-05 (dd8a1875-ac69-4bdf-9b85-f8922f400b9d, ws 01, severity WARN) requires all ten data-quality descriptors
+--   plus comparative_assertion_public to be non-null, at WARN. The standard has TWO modal levels here:
+--     "Bei den Anforderungen an die Datenqualität sollte Folgendes berücksichtigt werden:" (a–j)  → sollte
+--     "Wenn eine Studie für die Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt
+--      ist, müssen die in a) bis j) festgelegten Anforderungen an die Datenqualität berücksichtigt werden."
+--                                                                                (§4.2.3.6.2, printed p.21) → müssen
+--   WARN is right for the general case and WRONG for the comparative-assertion case, which is a hard "müssen".
+--   Proposal: keep REQ-05 as the warn-level general gate and ADD a conditional block gate REQ-18. NOTE: this needs
+--   the condition grammar to support implication; evaluate.ts's grammar is limited (see reference_wizard_compliance_gates)
+--   — encode as a disjunction, which the parser does support.
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- values ('c11b4a84-8be1-4e9b-8436-03a7386e91b5','REQ-18','block',
+--   'comparative_assertion_public == false OR (dq_time_coverage IS NOT EMPTY AND dq_geo_coverage IS NOT EMPTY AND dq_tech_coverage IS NOT EMPTY AND dq_precision IS NOT EMPTY AND dq_completeness IS NOT NULL AND dq_representativeness IS NOT EMPTY AND dq_consistency IS NOT EMPTY AND dq_reproducibility IS NOT EMPTY AND dq_data_sources IS NOT EMPTY AND dq_uncertainty IS NOT EMPTY)',
+--   '§4.2.3.6.2',
+--   '§4.2.3.6.2: "Wenn eine Studie für die Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt ist, müssen die in a) bis j) festgelegten Anforderungen an die Datenqualität berücksichtigt werden." (printed p.21)', false);
+-- ROLLBACK: delete from public.compliance_requirements where code='REQ-18' and worksheet_template_id='c11b4a84-8be1-4e9b-8436-03a7386e91b5';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · THREE PRINTED "darf nicht / muss" RULES THAT NO GATE ENFORCES (missing gates).             ☐ RATIFIED
+--   These are the only three absolute rules in the standard, and all three are currently unenforced. REQ-09 looks
+--   like it covers the first one but does not: its condition is
+--     comparative_assertion_public IS NOT NULL AND weighting_applied IS NOT NULL AND lcia_dq_technique IS NOT NULL
+--   — three presence checks. A study that ticks "public comparative assertion = yes" AND "weighting applied = yes"
+--   passes REQ-09 today, although the standard forbids exactly that combination.
+--
+--   (a) §4.4.5, printed p.45 — weighting is FORBIDDEN for public comparative assertions:
+--       "Die Gewichtung, wie in 4.4.3.4 beschrieben, darf nicht in Ökobilanz-Studien angewendet werden, die für die
+--        Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt sind."
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- values ('3b084c9e-30c1-431d-87de-03a4efcb4041','REQ-19','block',
+--   'comparative_assertion_public == false OR weighting_applied == false','§4.4.5',
+--   '§4.4.5: "Die Gewichtung, wie in 4.4.3.4 beschrieben, darf nicht in Ökobilanz-Studien angewendet werden, die für die Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt sind." (printed p.45)', false);
+--
+--   (b) §4.1, printed p.15 — an LCI-only study may NOT support a public comparative assertion:
+--       "Eine Sachbilanz-Studie allein darf nicht für Vergleiche benutzt werden, die für die Verwendung in zur
+--        Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt sind."
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- values ('c11b4a84-8be1-4e9b-8436-03a7386e91b5','REQ-20','block',
+--   'comparative_assertion_public == false OR study_type == lca','§4.1',
+--   '§4.1: "Eine Sachbilanz-Studie allein darf nicht für Vergleiche benutzt werden, die für die Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt sind." (printed p.15)', false);
+--
+--   (c) §4.2.3.7, printed p.22 — for a public comparative assertion the equivalence evaluation is a MANDATORY
+--       critical review by interested parties, and an LCIA is mandatory:
+--       "Wenn die Studie für die Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt
+--        ist, muss diese Beurteilung von interessierten Kreisen als Kritische Prüfung durchgeführt werden. | Bei
+--        Studien, die zur Verwendung in zur Veröffentlichung vorgesehenen Aussagen bestimmt sind, muss eine
+--        Wirkungsabschätzung durchgeführt werden."
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- values ('c11b4a84-8be1-4e9b-8436-03a7386e91b5','REQ-21','block',
+--   'comparative_assertion_public == false OR (systems_equivalence_evaluated == true AND critical_review_type == panel_review)','§4.2.3.7',
+--   '§4.2.3.7: "Bei einer vergleichenden Studie muss vor der Auswertung der Ergebnisse die Vergleichbarkeit der Systeme beurteilt werden. [...] Wenn die Studie für die Verwendung in zur Veröffentlichung vorgesehenen vergleichenden Aussagen bestimmt ist, muss diese Beurteilung von interessierten Kreisen als Kritische Prüfung durchgeführt werden." (printed p.22)', false);
+-- ROLLBACK: delete from public.compliance_requirements where code in ('REQ-19','REQ-20','REQ-21') and worksheet_template_id in ('3b084c9e-30c1-431d-87de-03a4efcb4041','c11b4a84-8be1-4e9b-8436-03a7386e91b5');
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · REQ-16 OVER-ENFORCES the review panel, and review_panel_members is mis-described.          ☐ RATIFIED
+--   REQ-16 (a84365df-ca43-4156-a5ab-a81b407d4474, ws 06, BLOCK) requires review_panel_members IS NOT NULL on EVERY
+--   project. §6.1 only makes a panel mandatory for public comparative assertions:
+--     "Um die Möglichkeit von Missverständnissen oder negativen Wirkungen auf außenstehende interessierte Kreise zu
+--      verringern, muss ein Ausschuss von interessierten Kreisen bei Ökobilanz-Studien, die als Grundlage für zur
+--      Veröffentlichung vorgesehene vergleichende Aussagen bestimmt sind, Kritische Prüfungen vornehmen."
+--                                                                                        (§6.1, printed p.59)
+--   and the panel's SIZE is only a recommendation:
+--     "In einem derartigen Fall sollte vom Auftraggeber der Studie ein externer, unabhängiger Sachverständiger
+--      ausgewählt werden, der als Vorsitzender eines Prüfungsausschusses mit mindestens drei Mitgliedern fungiert."
+--                                                                                        (§6.3, printed p.60)
+--   Two consequences:
+--   (a) a study with no critical review at all (a legitimate internal, non-public study) cannot finish this sheet;
+--   (b) the encoded field description reads "an external independent chairperson PLUS at least three members".
+--       The German says the chair "fungiert als Vorsitzender eines Prüfungsausschusses MIT mindestens drei
+--       Mitgliedern" — a panel OF at least three members, chaired by that expert. "plus" invents a fourth person.
+-- update public.compliance_requirements set condition='comparative_assertion_public == false OR (critical_review_type == panel_review AND review_panel_members >= 3)'
+--   where id='a84365df-ca43-4156-a5ab-a81b407d4474';
+-- update public.fields set description='Bei einer Prüfung durch einen Ausschuss interessierter Kreise sollte ein externer, unabhängiger Sachverständiger als Vorsitzender eines Prüfungsausschusses mit mindestens drei Mitgliedern fungieren (§6.3, printed p.60; "sollte" — Empfehlung, keine Mussbestimmung).'
+--   where id='3cd5dc5d-8486-4241-99ea-d4692674ead6';
+--   NOTE for the ruling: ">= 3" is a "sollte" value, so a BLOCK on it would itself over-enforce. If Alvaro wants
+--   the number enforced, SR-2 says surface it as an explicit engineer selection with the recommendation printed —
+--   do not silently make the recommendation a hard minimum.
+-- ROLLBACK: restore the prior condition
+--   'comparative_assertion_public IS NOT NULL AND critical_review_type IS NOT NULL AND review_panel_members IS NOT NULL'
+--   and the prior English description (see the 2026-09-05 export).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · GATE source_quote FIDELITY — three quotes are abridged or paraphrased without elision marks. ☐ RATIFIED
+--   Evidence-only correction of the encode-time source_quote column (no severity or condition change).
+--   (a) REQ-15 (4b45e7ed-f9ab-4de9-93bd-d192a18d4545, §6.1). Encoded quote compresses the five bullets and writes
+--       "dieser Norm" where the print reads "dieser Internationalen Norm", with no [...] marks. Verbatim German:
+-- update public.compliance_requirements set source_quote='§6.1: "Das Kritische Prüfungsverfahren muss sicherstellen, dass: - die bei der Durchführung der Ökobilanz angewendeten Methoden mit dieser Internationalen Norm übereinstimmen; - die bei der Durchführung der Ökobilanz angewendeten Methoden wissenschaftlich begründet und technisch gültig sind; - die verwendeten Daten in Bezug auf das Ziel der Studie hinreichend und zweckmäßig sind; - die Auswertungen die erkannten Einschränkungen und das Ziel der Studie berücksichtigen und - der Bericht transparent und in sich stimmig ist." (printed p.59)'
+--   where id='4b45e7ed-f9ab-4de9-93bd-d192a18d4545';
+--   (b) REQ-03 (6626d997-fdaa-44b7-8022-112f89c8d2cd, §4.2.3.2) silently drops "(Leistungsmerkmale)":
+-- update public.compliance_requirements set source_quote='§4.2.3.2: "Der Untersuchungsrahmen einer Ökobilanz muss die Funktionen (Leistungsmerkmale) des untersuchten Systems eindeutig festlegen. Die funktionelle Einheit muss dem Ziel und dem Untersuchungsrahmen der Studie entsprechen. [...] Deshalb muss die funktionelle Einheit eindeutig definiert und messbar sein. | Nach der Auswahl der funktionellen Einheit muss der Referenzfluss festgelegt werden." (printed p.17)'
+--   where id='6626d997-fdaa-44b7-8022-112f89c8d2cd';
+--   (c) REQ-16 (a84365df-…) appends an UNQUOTED German paraphrase ("Art der Prüfung muss in der Vorbereitungsphase
+--       festgelegt und die Entscheidung aufgezeichnet werden.") after the quoted sentence. Verbatim replacement:
+-- update public.compliance_requirements set source_quote='§6.1: "Um die Möglichkeit von Missverständnissen oder negativen Wirkungen auf außenstehende interessierte Kreise zu verringern, muss ein Ausschuss von interessierten Kreisen bei Ökobilanz-Studien, die als Grundlage für zur Veröffentlichung vorgesehene vergleichende Aussagen bestimmt sind, Kritische Prüfungen vornehmen." | §6.3: "In einem derartigen Fall sollte vom Auftraggeber der Studie ein externer, unabhängiger Sachverständiger ausgewählt werden, der als Vorsitzender eines Prüfungsausschusses mit mindestens drei Mitgliedern fungiert." (printed p.59 / p.60)'
+--   where id='a84365df-ca43-4156-a5ab-a81b407d4474';
+-- ROLLBACK: restore the three prior source_quote strings from the 2026-09-05 export.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · SYSTEMIC: 6 BLOCK GATES DEMAND FIELDS THE FORM MARKS OPTIONAL (is_required=false).         ☐ RATIFIED
+--   The gate layer and the required-ness layer disagree on 15 field/gate pairs. Every one of these fields is
+--   is_required=false, yet a block gate refuses the worksheet unless it is filled:
+--     REQ-07  allocation_procedure · allocation_documented · allocation_balance_preserved · allocation_sensitivity_done
+--     REQ-09  weighting_applied · lcia_dq_technique
+--     REQ-13  third_party_report_prepared · iso_conformance_statement
+--     REQ-14  grouping_value_choice_statement
+--     REQ-16  critical_review_type · review_panel_members
+--     REQ-17  critical_review_type · reviewer_independent
+--   The source says which way each pair should be resolved, and it is NOT uniform:
+--   · §4.3.4.1 (printed p.28) is unconditional "muss" for the three allocation attestations —
+--       "Die Inputs und Outputs müssen den verschiedenen Produkten nach eindeutig festgelegten Verfahren, die
+--        zusammen mit dem Allokationsverfahren dokumentiert und erläutert sein müssen, zugeordnet werden. | Die
+--        Summe der durch Allokation zugeordneten Inputs und Outputs eines Prozessmoduls muss gleich den Inputs und
+--        Outputs des Prozessmoduls vor der Allokation sein."
+--     BUT the whole allocation clause only applies where a process is shared (§4.3.4.2: "Im Rahmen der Studie müssen
+--     die Prozesse gekennzeichnet werden, die mit anderen Produktsystemen gemeinsam benutzt werden") — so these are
+--     CONDITIONALLY required, and neither is_required=true nor an unconditional block is faithful.
+--   · §5.2 (printed p.55) is conditional on communication to a third party ("Falls die Ergebnisse der Ökobilanz
+--     einem Dritten mitzuteilen sind …") — REQ-13 blocking unconditionally over-enforces.
+--   · §5.3.2 (printed p.58) is conditional on grouping being used ("Wenn der Verfahrensschritt der Ordnung in der
+--     Ökobilanz enthalten ist, ist Folgendes hinzuzufügen") — REQ-14 blocking unconditionally over-enforces.
+--   · §6.2 (printed p.60) IS unconditional once a review happens: "Dabei muss die Prüfung durch von der Ökobilanz
+--     unabhängige Sachverständige durchgeführt werden." — but §4.2.3.8 leaves "ob eine Kritische Prüfung notwendig
+--     ist" open, so again conditional.
+--   PROPOSAL for the ruling batch: this is one decision, not fifteen — either
+--     (a) make every one of these gates conditional on its own trigger (the pattern used in S-2/S-3), leaving
+--         is_required=false, or
+--     (b) set is_required=true only where the standard is unconditional and demote the rest of the gates to warn.
+--   Nothing is written here because either answer changes enforcement. Example statement, option (b), if chosen:
+-- update public.fields set is_required=true where id in ('e868fb9c-c9d9-4da2-b71a-798af892a685','f028bff4-c1be-4713-b0d3-2225dcbb7668','f89ce2f4-64e5-41b4-a41b-68dda0c632a0');
+--   (= allocation_documented, allocation_balance_preserved, allocation_sensitivity_done)
+-- ROLLBACK: set is_required=false for the same ids / restore the prior gate severities.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · CLAUSE RETAGS — clause_reference points at a parent clause, not the sentence actually cited. ☐ RATIFIED
+--   Evidence-only metadata correction; no enforcement change. Every target below was read in the md this session.
+--   Gates:
+-- update public.compliance_requirements set clause_reference='§4.3.3.1, §4.3.3.2' where id='b150b581-2bde-4ee6-863d-3cc43399436f'; -- REQ-06 was '§4.3.3'
+-- update public.compliance_requirements set clause_reference='§4.3.4.1'           where id='35b7dfdd-7b87-4793-b112-110d94d9c52e'; -- REQ-07 was '§4.3.4'
+-- update public.compliance_requirements set clause_reference='§4.4.2.1'           where id='65d76617-2e5b-4615-9fc7-83e0ab1d50a7'; -- REQ-08 was '§4.4.2'
+-- update public.compliance_requirements set clause_reference='§4.5.3.1'           where id='8091f4c3-94e5-4b2d-a47d-401072d53aad'; -- REQ-10 was '§4.5.3'
+-- update public.compliance_requirements set clause_reference='§5.1.1'             where id='326a938e-511f-498f-b895-145ff98d0be2'; -- REQ-12 was '§5.1'
+-- update public.compliance_requirements set clause_reference='§5.3.1'             where id='2cd2b97a-f7aa-489b-9a1c-5ba90109f24e'; -- REQ-14 was '§5.3'; the quoted sentence is 5.3.1
+-- update public.compliance_requirements set clause_reference='§4.2.3.3.1'         where id='9816c304-7ee0-42f7-9ac4-1e4ba8db47e0'; -- REQ-04 was '§4.2.3.3'
+-- update public.compliance_requirements set clause_reference='§4.2.3.6.2'         where id='dd8a1875-ac69-4bdf-9b85-f8922f400b9d'; -- REQ-05 was '§4.2.3.6'
+-- update public.compliance_requirements set clause_reference='§6.1, §6.3'         where id='a84365df-ca43-4156-a5ab-a81b407d4474'; -- REQ-16 was '§6.1'; panel size is §6.3
+--   Fields (the 2026-09-05 pack's verification_note already carries the precise clause on every row; this block
+--   makes the clause_reference column agree with it):
+-- update public.fields set clause_reference='§4.2.3.3.3 a)' where id='2e20b8e5-be61-40c9-ae2f-71eaf01ceaee'; -- cutoff_mass_pct   was '§4.2.3.3'
+-- update public.fields set clause_reference='§4.2.3.3.3 b)' where id='c8f53d66-1d51-46f3-baad-ba5b02341f97'; -- cutoff_energy_pct was '§4.2.3.3'
+-- update public.fields set clause_reference='§4.2.3.6.2'    where id in ('80faf351-d975-417f-857b-046501de8836','04d30391-5ee6-4489-9806-ea61984f2925','0c841e9b-5904-41e8-8824-7396647e75cf','ca18195e-b1bc-4564-a58a-5c3f4951a787','82b906a1-9bf5-4dea-b455-d5280e29dfd8','0ce7876f-dd87-4bae-b010-955467d22291','5f2f70a4-204a-4758-a466-e8a1f2eca818','90d40510-fd6f-48a8-9349-1db3f0129eac','f0e3a655-77e1-4738-964f-7280fb417f47','a2074390-11e1-4756-be08-50ad2fc128e9'); -- the ten dq_* fields, were '§4.2.3.6'
+-- update public.fields set clause_reference='§4.2.3.6.3'    where id='9292a211-d02a-46d1-92b8-6f9eb2ea7d1a'; -- missing_data_treatment was '§4.2.3.6'
+-- update public.fields set clause_reference='§4.3.2.1'      where id in ('35061916-a4df-4b94-8062-2d24e1a29ce5','5643143b-5233-4338-8766-a70136a6465a','d0e9c369-c511-40a6-99e5-c3b96846ad49'); -- unit_process_data/-_description/data_source_referenced, were '§4.3.2'
+-- update public.fields set clause_reference='§4.3.2.3'      where id='1035f8ad-9174-4b63-8911-626126544f5e'; -- data_category was '§4.3.2'
+-- update public.fields set clause_reference='§4.3.4.3.3'    where id='5237e9c1-3137-4346-bbc5-ed78863e401a'; -- recycling_allocation_type was '§4.3.4.3'
+-- update public.fields set clause_reference='§4.4.2.2.1'    where id in ('5ab35630-775c-42a8-b1b3-e77bdde77ae6','d32ad612-b320-47cd-bfcc-f0d0ebd21f85','1716666b-6a17-4924-bdc1-0250c3a1c82a'); -- impact_categories/category_indicators/characterization_model, were '§4.4.2.2'
+-- update public.fields set clause_reference='§4.4.2.3'      where id='4725287e-066d-4d7a-9722-ba04c16d6abb'; -- lci_result: classification is 4.4.2.3, was '§4.4.2.4'
+-- update public.fields set clause_reference='§4.4.3.2.2'    where id='7ce75b64-fecf-4f10-bffa-bbfddca6a633'; -- normalization_reference was '§4.4.3.2'
+-- update public.fields set clause_reference='§4.4.3.4, §4.4.5' where id='76fbc899-0638-403a-a691-ed6301ff8faf'; -- weighting_applied: the prohibition lives in 4.4.5, was '§4.4.3.4'
+-- update public.fields set clause_reference='§4.4.4.2'      where id='b15953db-71e8-491f-b311-0fb1e0344f78'; -- lcia_dq_technique was '§4.4.4'
+-- update public.fields set clause_reference='§4.5.2.1'      where id='4caffcee-5615-49b7-975b-15ca6f420897'; -- significant_issues was '§4.5.2'
+-- update public.fields set clause_reference='§4.5.1.2, §4.5.4' where id='9318f4df-e18b-417b-9a59-f3f16d191036'; -- limitations: defined in 4.5.1.2, was '§4.5.4'
+-- update public.fields set clause_reference='§5.2 a) 3)'    where id='ad3226c1-eee9-4eda-b0b0-f0b4e801dd93'; -- iso_conformance_statement was '§5.2'
+-- update public.fields set clause_reference='§6.2, §6.3'    where id='1cb84ead-c30e-4493-b694-b09fc0080991'; -- review_statement_in_report was '§6.2'
+-- ROLLBACK: restore each prior clause_reference from the 2026-09-05 export (values given in the trailing comments).
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · SOURCE-DOCUMENT DEFECTS AND TRANSCRIPT GAPS — recorded, no action proposed.                ☐ RATIFIED
+--   (a) The PRINT ITSELF mis-numbers two English-column headings: the English text of §4.2.3.6 is headed
+--       "4.3.2.6 Data quality requirements" and the English text of §4.2.3.7 is headed "4.3.2.7 Comparisons between
+--       systems" (md lines 1093 and 1135), while the German column numbers both correctly (4.2.3.6 / 4.2.3.7) and
+--       the Inhalt agrees with the German. The encoding uses the German numbering — correct, no change.
+--   (b) The print also diverges between columns in a cross-reference: German §4.2.3.3.2 says the inputs/outputs
+--       "sollten … einer Sensitivitätsanalyse (siehe 4.5.3.3) unterzogen werden"; the English column of the same
+--       paragraph says "(see 4.3.3.4)". Both targets exist; §4.3.3.4 (Anpassung der Systemgrenze) is the one that
+--       actually describes that sensitivity analysis. Nothing in the encoding depends on it. Recorded only.
+--   (c) TRANSCRIPT GAP: the German column of §5.3.2 breaks off after item a) in this md — items b) to e), including
+--       the two verbatim statements ISO 14044 requires a grouping report to carry, survive only in the English
+--       column. The grouping_value_choice_statement row in the pack quotes German a) plus English d)/e) and says so.
+--       Lifting that row to a pure-German quote requires the PDF (§5.3.2, printed p.58).
+--   (d) The md carries no page markers at all; the whole "printed p.N" convention of this pass is derived — see the
+--       pack header for the three-step derivation. Any later VA lift must re-read each sentence in the PDF.
+-- (no SQL — recorded for the ledger)
