@@ -1,0 +1,426 @@
+-- ============================================================================
+-- STAGED rulings — DWA-A-272E (DWA-A 272E, June 2014, English edition, NASS)
+-- Written 2026-09-05 during the md-verification pass. NOTHING HERE IS APPLIED.
+-- Every block is COMMENTED SQL and carries: the evidence quote (verbatim from
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA-A-272E\DWA-A_272E (1).md), the proposal, and the rollback inverse.
+-- Each block needs Alvaro's ☐ RATIFIED tick before it may be moved into a pack.
+-- Page refs are derived from the printed Content table (see the pack header for the convention).
+-- ============================================================================
+
+
+-- ############################################################################
+-- S-01  EIGHT WORKSHEETS WITH ZERO FIELDS (structure)                    ☐ RATIFIED
+-- ############################################################################
+-- Prod read-back 2026-09-05 (read-only): A272E-17 Monitoring-Programm, A272E-19 Foerderbedingungs-Katalog,
+-- A272E-20 Erschwerende Bedingungen, A272E-21 Annex A Standards-Beruecksichtigung, A272E-22 Umweltbewertung,
+-- A272E-23 Hygiene- und Gesundheitsbewertung, A272E-24 Wirtschaftlichkeitsbewertung, A272E-25 Soziale und
+-- technische Bewertung  ->  total=0 fields each (not "inactive": no rows at all). 8 of 25 worksheets are shells.
+-- They are also the eight worksheets that carry NO gate. The content they are named for IS printed:
+--   §9.1(8)  "(8) Program for operation and performance monitoring (monitoring) [...] Performance monitoring of NASS
+--            needs to be adapted to the changed operating conditions and the lack of long-term experience with regard
+--            to new technical components." — printed p.31            (would populate A272E-17)
+--   Table 4  "Table 4: Promoting and aggravating conditions for the integration of NASS | & Favorable conditions &
+--            Aggravating conditions" — printed p.15                  (would populate A272E-19 / A272E-20)
+--   Annex A  "Table A.1: Overview of rules and standards regarding sewer and drainage networks outside of buildings"
+--            — printed p.35                                          (would populate A272E-21)
+--   Table 6  "1 Protection of the environment and resources" / "2 Hygiene/health and safety" / "3 Economic objectives" /
+--            "4 Social objectives" / "5 Technical objectives" — printed p.23-24  (would populate A272E-22..A272E-25)
+-- The Table-6 checklist that the 2026-08-01 tranche-2 sweep seeded landed on A272E-13 instead (criteria_env /
+-- criteria_hygiene / criteria_economic / criteria_social / criteria_technical), so A272E-22..25 stayed empty.
+-- PROPOSAL — one of: (a) encode the missing fields onto the eight worksheets, or (b) deactivate the shells so the
+-- wizard stops showing empty steps. (b), the reversible half, is written out below; (a) is an encoding job.
+-- update public.worksheet_templates set active=false
+--  where standard_id=(select id from standards where code='DWA-A-272E')
+--    and code in ('A272E-17','A272E-19','A272E-20','A272E-21','A272E-22','A272E-23','A272E-24','A272E-25');
+-- ROLLBACK: update public.worksheet_templates set active=true where ... same codes ...;
+-- NOTE: verify that worksheet_templates has an `active` column before applying (fields does; worksheets may not).
+
+
+-- ############################################################################
+-- S-02  DUPLICATE GATE CODE  COMP-13  (two rows)                         ☐ RATIFIED
+-- ############################################################################
+-- Prod: select code, count(*) ... having count(*)>1  ->  COMP-13 = 2 rows.
+--   c252ec93-6390-419f-9262-cd84349565ff  A272E-01  severity=warn   condition=''  requires_attestation=true
+--   f46cf1d0-3cdd-4539-b1c1-30a184700bd1  A272E-18  severity=block  condition='monitoring_program_defined == true'
+-- Both quote the same §9.1(8) monitoring sentence. The A272E-01 (Projektregistrierung) copy is BOTH mis-homed
+-- (monitoring is §9.1 step 8, i.e. the closing worksheet) AND unevaluable (empty condition).
+-- EVIDENCE: "(8) Program for operation and performance monitoring (monitoring) [...] Performance monitoring of NASS
+-- needs to be adapted to the changed operating conditions and the lack of long-term experience with regard to new
+-- technical components." — printed p.31
+-- PROPOSAL: retire the A272E-01 copy; the A272E-18 block gate is the real one.
+-- delete from public.compliance_requirements where id='c252ec93-6390-419f-9262-cd84349565ff';
+-- ROLLBACK: re-insert (code COMP-13, worksheet A272E-01, severity warn, condition '', requires_attestation true,
+--   clause_reference '9.1', source_quote 'Performance monitoring of NASS needs to be adapted to the changed operating
+--   conditions and the lack of long-term experience with regard to new technical components.').
+-- SAFER ALTERNATIVE if compliance_requirements has an `active` flag: set active=false instead of deleting.
+
+
+-- ############################################################################
+-- S-03  SEVEN GATES WITH AN EMPTY CONDITION (can never fire)             ☐ RATIFIED
+-- ############################################################################
+-- condition = '' (empty string) — evaluate.ts has nothing to evaluate:
+--   c252ec93  A272E-01  COMP-13  warn  attest=true   (also S-02)
+--   208f92a7  A272E-04  COMP-06  warn  attest=false  source_quote ALSO EMPTY, clause '4.3'
+--   5138a2ce  A272E-04  COMP-16  warn  attest=true   clause '6.2'
+--   be7087d4  A272E-04  COMP-21  warn  attest=true   clause '9.1'
+--   dad1b5dc  A272E-11  COMP-19  warn  attest=true   clause '5.2'
+--   b9cdd82e  A272E-11  COMP-07  warn  attest=false  source_quote ALSO EMPTY, clause '4.3'
+--   c344cd86  A272E-13  COMP-26  warn  attest=true   clause '7.1'
+-- (all seven are warn; no block gate has an empty condition — COMP-35's condition is non-empty but sourceless, see S-06)
+-- The four attest=true ones have no attest_* field to bind to either (only A272E-04 COMP-24/COMP-25 and
+-- A272E-11 COMP-18 have one). COMP-06 and COMP-07 have neither condition nor quote: pure dead rows.
+-- PROPOSAL: (a) delete COMP-06 and COMP-07 (no condition, no quote, no clause text to recover);
+--           (b) give COMP-16 / COMP-19 / COMP-21 / COMP-26 an attestation field + condition, e.g.
+-- -- COMP-16 (Table 5 as fallback):  "If measurements are not possible, Table 5 can be used as a guide for the
+-- --   estimation of loads and volumes." — printed p.21  -> condition 'site_measurement_used IS NOT NULL' on A272E-07
+-- -- COMP-19 (dry-toilet additives): "The use of dry toilets usually requires the addition of additives to faecal
+-- --   matter or faeces." — printed p.18  -> condition 'IF collection_technology IN {dry_toilet,UDDT} THEN
+-- --   dry_toilet_additives_considered == true' on A272E-08
+-- -- COMP-21 (Annex A):              "Existing rules to consider when using NASS are listed in Appendix A."
+-- --   — printed p.31  -> condition 'annex_A1_applies IS NOT NULL AND annex_A2_applies IS NOT NULL' on A272E-08
+-- -- COMP-26 (KVR benefit equality): "The current Guidelines on Dynamic Cost Comparison Calculations (KVR Guidelines,
+-- --   DWA 2012) point to the restrictive condition of equality of benefits for alternatives." — printed p.22
+-- --   -> condition 'IF evaluation_method == KVR_dynamic_cost_comparison THEN kvr_equality_check_done == true'
+-- delete from public.compliance_requirements where id in ('208f92a7-b1b6-432a-9fff-dfbf1e6d7ab5','b9cdd82e-6827-404d-b2e8-aa552d854c33');
+-- update public.compliance_requirements set condition='site_measurement_used IS NOT NULL' where id='5138a2ce-3f45-4305-97a4-995c78ce981d';
+-- update public.compliance_requirements set condition='annex_A1_applies IS NOT NULL AND annex_A2_applies IS NOT NULL' where id='be7087d4-78f2-4d7a-b17d-d97f35599e35';
+-- update public.compliance_requirements set condition='IF collection_technology IN {dry_toilet,UDDT} THEN dry_toilet_additives_considered == true' where id='dad1b5dc-b5c1-4b96-9fca-5f6d328c7c8d';
+-- update public.compliance_requirements set condition='IF evaluation_method == KVR_dynamic_cost_comparison THEN kvr_equality_check_done == true' where id='c344cd86-cd73-43e1-9c44-c78be2453d70';
+-- ROLLBACK: update public.compliance_requirements set condition='' where id in ('5138a2ce-…','be7087d4-…','dad1b5dc-…','c344cd86-…');
+--           re-insert the two deleted rows (COMP-06 / COMP-07, A272E-04 / A272E-11, warn, condition '', clause '4.3').
+-- NOTE (b) also requires the gates to be re-homed to the worksheets that own those fields — see S-05.
+
+
+-- ############################################################################
+-- S-04  THREE DUPLICATE GATE PAIRS (identical condition, same worksheet) ☐ RATIFIED
+-- ############################################################################
+--  (i)  A272E-05  COMP-04 (3ada7098, block) and COMP-15 (91e72abc, block)
+--       both: condition 'system_group IN {one_material_flow,two_material_flows_greyblack,two_material_flows_UDT,
+--       three_material_flows_UDT,two_material_flows_drytoilet,three_material_flows_UDDT}', clause 4.2.
+--       EVIDENCE (one requirement, quoted twice): "Depending on the utilization or treatment goal, there are a large
+--       number of different concepts of NASS. These can be assigned to basic system groups (see Table 1)."
+--       — printed p.10 · "Table 1: Subdivision of wastewater infrastructure systems into system groups" — printed p.11
+--  (ii) A272E-13  COMP-11 (8bd53e00, block) and COMP-22 (b135fb42, warn)
+--       both: condition 'T_plan >= 10 AND T_plan <= 100', clause §7.3 / 7.3. Same rule at two severities — the warn
+--       copy can never add information the block copy has not already produced.
+--  (iii) A272E-13 COMP-10 (60f8ab93, warn) and COMP-23 (2d304361, warn)
+--       both: condition 'criteria_env IS NOT EMPTY AND criteria_hygiene IS NOT EMPTY AND criteria_economic IS NOT EMPTY
+--       AND criteria_social IS NOT EMPTY AND criteria_technical IS NOT EMPTY', clause 7.2.
+-- PROPOSAL: keep the first of each pair, retire the second.
+-- delete from public.compliance_requirements where id in ('91e72abc-2f33-484f-82f4-ae8f07e46904','b135fb42-db1f-4ef7-b5ab-bba099e5a0c8','2d304361-3f6a-4813-b22f-d15fe805a7ee');
+-- ROLLBACK: re-insert COMP-15 / COMP-22 / COMP-23 with the conditions, clauses and source_quotes recorded above.
+
+
+-- ############################################################################
+-- S-05  MIS-HOMED GATES (gate on worksheet A reads only worksheet B's clause) ☐ RATIFIED
+-- ############################################################################
+-- A272E-04 is "Terminologie und Definitionen" and owns exactly 5 fields (term_products_definition,
+-- material_flow_class, term_NASS_definition, attest_a272e_04_comp_24, attest_a272e_04_comp_25).
+-- Yet it hosts SEVEN gates, five of which are anchored on other chapters:
+--   208f92a7 COMP-06  clause 4.3  (empty)            -> §4.3 belongs to A272E-08 / A272E-11
+--   5138a2ce COMP-16  clause 6.2  (empty)            -> §6.2 Table 5 belongs to A272E-07
+--   ac344e37 COMP-20  clause 4.3, condition 'material_flow_class IS NOT NULL',
+--            quote "For faeces and faeces from dry systems, a non-sewer based transport system is generally used."
+--            — printed p.13                          -> §4.3 transport belongs to A272E-08 (transport_system)
+--   be7087d4 COMP-21  clause 9.1  (empty)            -> Annex A belongs to A272E-08 (annex_A1/A2_applies) or A272E-21
+--   c829c49c COMP-14  clause 4.1, condition 'material_flow_class IS NOT NULL',
+--            quote "NASS is therefore based on the separate collection of domestic/municipal material flows directly
+--            at the point of origin." — printed p.9  -> §4.1/§4.2 belongs to A272E-05 (separation_at_source)
+-- COMP-20 and COMP-14 additionally UNDER-ENFORCE: their printed requirement is about transport-system choice and
+-- source separation, but the condition only checks that material_flow_class is non-null.
+-- PROPOSAL (re-home + tighten):
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-A-272E' and wt.code='A272E-08'),
+--        condition='IF material_flow_class IN {faeces,faecal_matter} THEN transport_system == no_sewer_collecting_tank', clause_reference='§4.3'
+--   where id='ac344e37-1d26-4987-a431-072a5e7f2648';   -- COMP-20
+-- update public.compliance_requirements set worksheet_template_id=(select id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-A-272E' and wt.code='A272E-05'),
+--        condition='separation_at_source IS NOT NULL', clause_reference='§4.1'
+--   where id='c829c49c-f830-4161-a850-fe2a98ee1e7f';   -- COMP-14
+-- (COMP-06/16/21 re-homing is folded into S-03.)
+-- ROLLBACK: set worksheet_template_id back to A272E-04, condition back to 'material_flow_class IS NOT NULL',
+--   clause_reference back to '4.3' / '4.1' for the two ids above.
+
+
+-- ############################################################################
+-- S-06  COMP-35 — BLOCK GATE WITH NO QUOTABLE REQUIREMENT (§10)          ☐ RATIFIED
+-- ############################################################################
+-- CONFIRMS the 2026-08-03 gate-quote finding. 1941f2d3-04fa-44fb-b23b-e8965bede7b0, A272E-18, severity=block,
+-- condition 'compliance_decision == approved', clause_reference '§10', source_quote = EMPTY.
+-- §10 is a conclusion chapter. Read in full (md lines 898-904) it contains no obligation — only recommendations:
+--   "Especially when there are favourable conditions le.g. approaching of functional limits of existing infrastructure
+--   facilities, high renovation requirements, new capacity bottlenecks), the planning and implementation of new
+--   sanitation systems should be examined." — printed p.34
+--   "Comprehensive assessment approaches should be used in the evaluation of NASS." — printed p.34
+-- Furthermore `compliance_decision` is an APP verdict (this pass set it to inferred_from_worksheet, exempt class):
+-- the gate blocks on the app's own output, not on anything DWA-A 272E requires.
+-- PROPOSAL: block -> warn, and attach the §10 "should" sentence as the source_quote so the gate is at least honest.
+-- update public.compliance_requirements set severity='warn',
+--        source_quote='Comprehensive assessment approaches should be used in the evaluation of NASS. The resource-oriented approach of NASS hampers the direct comparison different systems since an equality of benefits cannot be expected.'
+--   where id='1941f2d3-04fa-44fb-b23b-e8965bede7b0';
+-- ROLLBACK: update public.compliance_requirements set severity='block', source_quote='' where id='1941f2d3-…';
+
+
+-- ############################################################################
+-- S-07  BLOCK GATES ANCHORED ON "should / may / can" (severity notes)    ☐ RATIFIED
+-- ############################################################################
+-- Under the doctrine a block gate must rest on an obligation. These eight block gates rest on recommendations.
+-- Proposal for all eight: block -> warn (one statement at the end of the block).
+--   6938c90f  COMP-01  A272E-01  "At the beginning of the planning process, a detailed analysis of the problem situation
+--             and local framework conditions SHOULD be carried out." — printed p.28
+--   e08c9cf7  COMP-02  A272E-03  "If several of the favourable conditions are met in a specific case, the implementation
+--             of NASS SHOULD be examined in the planning process." — printed p.17
+--             (double defect: the condition also reads "several" as ">= 1" — see S-09)
+--   8bd53e00  COMP-11  A272E-13  "Typical planning horizons SHOULD be 30 to 50 years, but MAY also be 50 to 100 years if
+--             sewer systems are included. However, for isolated applications, the planning horizon MAY be only a period
+--             of 10 to 20 years." — printed p.24
+--   a42e0f52  COMP-27  A272E-13  "Classical methods such as sensitivity analysis CAN BE APPLIED to assess and integrate
+--             these uncertainties into the analysis. [...] By applying scenario and foresight processes, such
+--             uncertainties CAN BE systematically included in the evaluation process." — printed p.25
+--   42d8a7d5  COMP-29  A272E-15  "Depending on the NASS concepts, it MAY BE NECESSARY for rooms for decentralized
+--             treatment plants (e.g. technical or operating room in the building basement) to be accessible from outside
+--             for external purposes (e.g. for maintenance work)." — printed p.32
+--   9430b7df  COMP-31  A272E-15  "From a technical point of view the co-treatment of organic household waste IS POSSIBLE
+--             or even advantageous for the implementation of NASS." — printed p.33
+--   69fd2023  COMP-32  A272E-15  "Agriculture PLAYS AN IMPORTANT ROLE in the planning of new sanitation systems." (no
+--             modal obligation anywhere in §9.2.6) — printed p.33
+--   4d187804  COMP-33  A272E-15  "There IS CONSIDERABLE POTENTIAL for recovering energy from wastewater, especially if
+--             the different mate- rial flows are separate." (no modal obligation in §9.2.7) — printed p.33
+-- KEPT AS BLOCK (obligation is printed — no action needed, recorded for the audit trail):
+--   COMP-28 §9.2.2 "Urban and open space planners MUST coordinate in good time…" — printed p.32
+--   COMP-30 §9.2.4 "…the specifications of the Drinking Water Ordinance (TrinkwV) and other legal and technical
+--           regulations (e.g. fbr H 201) MUST BE OBSERVED." — printed p.32
+--   COMP-08 §8    "…MUST therefore be taken into account in planning." — printed p.26
+--   COMP-18 §5.2  "…possible ammonium stripping, increased corrosiveness or precipitation MUST BE TAKEN INTO ACCOUNT."
+--           — printed p.18
+--   COMP-24/COMP-25 §8 KrWG / DüngG attestations ("…MUST BE MET…") — printed p.26-27
+--   COMP-34 §9.1(3)-(4) "…it WILL GENERALLY BE NECESSARY to quantitatively expand and qualitatively differentiate…"
+--           — printed p.30
+--   COMP-13(A272E-18) §9.1(8) "Performance monitoring of NASS NEEDS TO BE ADAPTED…" — printed p.31
+--   COMP-03/COMP-04 enum-domain checks on §3 / Table 1 (structural, not modal)
+-- update public.compliance_requirements set severity='warn' where id in
+--   ('6938c90f-54c9-4d7a-80b7-fcedef683a06','e08c9cf7-4fe0-488c-9b2c-cfd2f217b09a','8bd53e00-02ed-4ce2-a9fa-55d011f213ba',
+--    'a42e0f52-7cf2-4bf1-a244-77f88898e1e2','42d8a7d5-10ed-4a1e-852b-144a32b4302c','9430b7df-45d5-477d-af98-cd183403e193',
+--    '69fd2023-43ff-4244-896d-10780801193e','4d187804-7d9b-4698-9612-5f41bc2ff224');
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id in ( … same eight ids … );
+
+
+-- ############################################################################
+-- S-08  COMP-17 — CONDITION AND SOURCE_QUOTE DO NOT MATCH                ☐ RATIFIED
+-- ############################################################################
+-- 474bca9e-6b3f-4c43-863d-0724e88e7e9c, A272E-11, warn, clause '5.2',
+--   condition 'IF salt_concentration_high == true THEN treatment_inhibitor_flag IS NOT NULL'
+--   source_quote "By separating wastewater streams, especially greywater, the wastewater discharge is reduced, so that
+--   in dry weather reduced flow rates can occur in gravity sewer systems."
+-- That quote is about dry-weather flow in the EXISTING sewer (it belongs to A272E-12.dry_weather_flow_reduction, which
+-- this pack verified with exactly that sentence). The condition's real anchor is the §6.1 dimensioning list:
+--   "For the dimensioning of the respective treatment processes, the following aspects for individual, separate
+--   collected wastewater streams must be taken into account: I high concentrations of individual substances (in
+--   particular nitrogen in black/yellowwater) can inhibit biodegradation; [...] I high conductivity (salt
+--   concentrations);" — printed p.20
+-- update public.compliance_requirements set clause_reference='§6.1',
+--        source_quote='For the dimensioning of the respective treatment processes, the following aspects for individual, separate collected wastewater streams must be taken into account: I high concentrations of individual substances (in particular nitrogen in black/yellowwater) can inhibit biodegradation; [...] I high conductivity (salt concentrations);'
+--   where id='474bca9e-6b3f-4c43-863d-0724e88e7e9c';
+-- ROLLBACK: restore clause_reference='5.2' and the dry-weather source_quote quoted above.
+
+
+-- ############################################################################
+-- S-09  COMP-02 / RULE-8 — "several" ENCODED AS ">= 1"                   ☐ RATIFIED
+-- ############################################################################
+-- Gate e08c9cf7 (A272E-03, block) condition 'favourable_conditions_count>=1' and equation
+-- 2578b9fe-f9ff-4899-b7ed-f7cd2abf6c70 RULE-8 'if favourable_conditions_count >= 1 then examine_NASS = true'.
+-- EVIDENCE: "If several of the favourable conditions are met in a specific case, the implementation of NASS should be
+-- examined in the planning process." — printed p.17
+-- "Several" is not 1 and the Standard never numbers it. SR-1: no verbatim source reads the target value, so the
+-- threshold cannot be applied; SR-2: the choice must be visible and human. RULE-8 is therefore left as residue by the
+-- md pack (verification_status unchanged).
+-- PROPOSAL: make the threshold an explicit engineer-selected field (default unset), or state it as ">= 2" only if
+-- Alvaro rules that "several" means "more than one". Do NOT auto-pick.
+-- -- e.g.  update public.equations set formula='if favourable_conditions_count >= favourable_threshold then examine_NASS = true' where id='2578b9fe-f9ff-4899-b7ed-f7cd2abf6c70';
+-- --       update public.compliance_requirements set condition='favourable_conditions_count >= favourable_threshold' where id='e08c9cf7-4fe0-488c-9b2c-cfd2f217b09a';
+-- --       (requires a new field A272E-03.favourable_threshold, data_class standard_range / engineer selection)
+-- ROLLBACK: restore formula 'if favourable_conditions_count >= 1 then examine_NASS = true' and condition
+--   'favourable_conditions_count>=1'; drop the new field.
+
+
+-- ############################################################################
+-- S-10  RULE-9 vs COMP-11 — TWO DIFFERENT PLANNING-HORIZON BANDS         ☐ RATIFIED
+-- ############################################################################
+-- equation cb470046-e5f5-46fd-9953-f9f96db20ad5 RULE-9 : '30 <= T_plan <= 50'
+-- gate     8bd53e00-02ed-4ce2-a9fa-55d011f213ba COMP-11: 'T_plan >= 10 AND T_plan <= 100'
+-- EVIDENCE: "Typical planning horizons should be 30 to 50 years, but may also be 50 to 100 years if sewer systems are
+-- included. However, for isolated applications, the planning horizon may be only a period of 10 to 20 years."
+-- — printed p.24
+-- The source prints THREE bands selected by case; A272E-14.planning_horizon_case already models exactly that
+-- (general 30-50 / with_sewer_systems 50-100 / isolated_application 10-20). RULE-9 silently picks the first band
+-- (SR-2 violation) while the gate accepts the union 10-100. RULE-9 is left as residue by the md pack.
+-- PROPOSAL: make RULE-9 case-driven off planning_horizon_case instead of hard-coding one band.
+-- -- update public.equations set formula='horizon_ok = (planning_horizon_case == general AND 30 <= T_plan <= 50) OR (planning_horizon_case == with_sewer_systems AND 50 <= T_plan <= 100) OR (planning_horizon_case == isolated_application AND 10 <= T_plan <= 20)'
+-- --   where id='cb470046-e5f5-46fd-9953-f9f96db20ad5';
+-- ROLLBACK: update public.equations set formula='30 <= T_plan <= 50' where id='cb470046-…';
+-- NOTE: planning_horizon_case lives on A272E-14 while T_plan and horizon_ok live on A272E-13 — a cross-worksheet
+-- read. Either move planning_horizon_case to A272E-13 or confirm the engine can read across worksheets.
+
+
+-- ############################################################################
+-- S-11  COMP-08 — OVER- AND UNDER-ENFORCES §8 AT THE SAME TIME           ☐ RATIFIED
+-- ############################################################################
+-- 6283c402-1fb5-47df-91ed-b7c451879eaa, A272E-09, block,
+--   condition 'legal_WHG_ok == true AND legal_KrWG_ok == true AND legal_TrinkwV_ok == true AND legal_DuengG_ok == true'
+-- (a) OVER: legal_DuengG_ok is is_required=false in prod and §8 makes fertilizer law CONDITIONAL on producing a
+--     fertilizer substrate — "NASS produce substrates that can be used as fertilizers. The use of such a product is
+--     THEN subject to the requirements of the fertilizer regulations." — printed p.27. A project with no fertilizer
+--     product is blocked today for a law that does not apply to it.
+-- (b) UNDER: the gate's own source_quote names six regulations — "The most important regulations include: I Federal
+--     Water Act, I Closed Substance Cycle Waste Management Act, I Communal law, I Drinking Water Ordinance,
+--     l Construction Law, l Fertilizer Act/Fertilizers Application Ordinance." — printed p.26 — but the condition
+--     checks only four; legal_Communal_ok, legal_BauGB_ok and legal_BioAbfV_ok are never enforced.
+-- PROPOSAL:
+-- update public.compliance_requirements set condition='legal_WHG_ok == true AND legal_KrWG_ok == true AND legal_TrinkwV_ok == true AND legal_Communal_ok == true AND legal_BauGB_ok == true AND (product_target NOT IN {nutrient_rich_fertilizer,soil_conditioner} OR legal_DuengG_ok == true) AND (bio_waste_integration != true OR legal_BioAbfV_ok == true)'
+--   where id='6283c402-1fb5-47df-91ed-b7c451879eaa';
+-- ROLLBACK: restore condition 'legal_WHG_ok == true AND legal_KrWG_ok == true AND legal_TrinkwV_ok == true AND legal_DuengG_ok == true'.
+-- NOTE: product_target lives on A272E-06 and bio_waste_integration on A272E-06 — cross-worksheet read, see S-10 note.
+
+
+-- ############################################################################
+-- S-12  MISSING GATES FOR PRINTED HARD REQUIREMENTS                      ☐ RATIFIED
+-- ############################################################################
+-- (a) §4.2 rainwater — a printed "is required" with a field but no gate:
+--     "In all NASS concepts, a straight drainage of rainwater or its separate management IS REQUIRED, which may be
+--     limited by existing settlement structures. In any case, a sensible integration of semi-natural rainwater
+--     management into the flow-oriented concepts for domestic/municipal wastewater le.g. discharge of rainwater with
+--     greywater) IS NECESSARY." — printed p.11
+--     Field A272E-05.rainwater_integration (d621c67e-cd27-4d19-ae94-c12e78adda20, enum, is_required=FALSE) exists;
+--     no compliance_requirement references it.
+-- -- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- --   values ((select wt.id from worksheet_templates wt join standards s on s.id=wt.standard_id where s.code='DWA-A-272E' and wt.code='A272E-05'),
+-- --   'COMP-36','block','rainwater_integration IN {separate_management,integrated_with_greywater}','§4.2',
+-- --   'In all NASS concepts, a straight drainage of rainwater or its separate management is required, which may be limited by existing settlement structures.',false);
+-- -- update public.fields set is_required=true where id='d621c67e-cd27-4d19-ae94-c12e78adda20';
+-- (b) §9.2.4 TrinkwV / fbr H 201 — a printed "must be observed" with two fields but no gate:
+--     "…the specifications of the Drinking Water Ordinance (TrinkwV) and other legal and technical regulations
+--     (e.g. fbr H 201) MUST BE OBSERVED." — printed p.32
+--     Fields A272E-15.TrinkwV_attested (bb117bf1-9d25-46d7-a1bb-bc1ff63091fd) and A272E-15.fbr_H201_attested
+--     (bc1113bf-9daa-4fda-bb35-1d83e207a9a9) exist; COMP-30 only checks 'stakeholder_water == true'.
+-- -- update public.compliance_requirements set condition='stakeholder_water == true AND (service_water_reuse_planned != true OR (TrinkwV_attested == true AND fbr_H201_attested == true))'
+-- --   where id='f7cfd58c-f5a3-47f5-bccc-734b8f07f467';
+-- ROLLBACK: delete the inserted COMP-36; set rainwater_integration.is_required=false;
+--   restore COMP-30 condition 'stakeholder_water == true'.
+
+
+-- ############################################################################
+-- S-13  clause_reference RETAGS (fields)                                 ☐ RATIFIED
+-- ############################################################################
+-- (a) A272E-06.greywater_differentiation (6b21ebc3-ab44-4b29-b0b2-a4267a6f7e13) — prod says '§6.2'; the high/low
+--     strength split is printed in §3 Terms: "Greywater | Material flow from the domestic area without faecal matter,
+--     sometimes differentiated between highstrength (kitchen area, washing machine) and low-strength (bath, shower,
+--     washbasin etc.)." — printed p.8
+-- (b) A272E-02.groundwater_level (ffaaceaa-c98d-4f3c-aee5-1f01390bd15a) — prod says '§5.2'; no §5.2 sentence mentions
+--     groundwater level (nor does any other clause). Retag to NULL and treat as engineer_input, or drop the field.
+-- (c) A272E-02.precipitation_annual (19502783-f797-4dda-bf0b-1af3557e95af) — prod says '§9.1(2)'; the Standard defers
+--     rainwater dimensioning: "Corresponding planning guidelines for systems for semi-natural rainwater management are
+--     not indicated in this Standard, however the current regulations are illustrated for example Standard DWA-A 138
+--     or technical document DWA-M 153." — printed p.31. Retag to '§9.2.1 -> DWA-A 138 / DWA-M 153' (NR).
+-- (d) A272E-07.share_BOD5 / share_COD / share_TS / share_N / share_P (90a17e17, e8d5e526, 99805f15, 75509fb7, c03bc870)
+--     — prod says '§6.2 Table 5 footnote 3'; the percentages are Table 5 COLUMNS. Footnote 3 only explains their
+--     dependence on toilet technology. Retag to '§6.2 Table 5'.
+-- (e) A272E-16.selected_variant_name / selected_variant_score (97f84f82, 3e3471ae) — prod says 'Step(6)'; retag '§9.1(6)'.
+-- (f) A272E-04.attest_a272e_04_comp_24 (bd26a831) / _comp_25 (eb287a92) and A272E-11.attest_a272e_11_comp_18
+--     (431eaf67) — clause_reference is NULL. Retag '§8 KrWG', '§8 DüngG/DüMV', '§5.2' respectively.
+-- update public.fields set clause_reference='§3'                              where id='6b21ebc3-ab44-4b29-b0b2-a4267a6f7e13';
+-- update public.fields set clause_reference=null                              where id='ffaaceaa-c98d-4f3c-aee5-1f01390bd15a';
+-- update public.fields set clause_reference='§9.2.1 (DWA-A 138 / DWA-M 153)'  where id='19502783-f797-4dda-bf0b-1af3557e95af';
+-- update public.fields set clause_reference='§6.2 Table 5'                    where id in ('90a17e17-e28e-4e99-939a-44f5be20a72f','e8d5e526-d940-4300-ab12-55dfb26aaae0','99805f15-af7c-4bed-b6a7-064bb6ed028c','75509fb7-81ae-4727-8cc4-01ed4c452763','c03bc870-7e97-4938-b0cd-64b76dbc458d');
+-- update public.fields set clause_reference='§9.1(6)'                         where id in ('97f84f82-4e38-4110-806f-a0f5c8858bb7','3e3471ae-e5af-440d-aadf-57d3c59ffc51');
+-- update public.fields set clause_reference='§8 KrWG'                         where id='bd26a831-4de9-45e9-b593-769a205edae9';
+-- update public.fields set clause_reference='§8 DüngG/DüMV'                    where id='eb287a92-8682-4617-86e9-faf5d3685908';
+-- update public.fields set clause_reference='§5.2'                            where id='431eaf67-1907-406c-93ee-84bcd6c0f40a';
+-- ROLLBACK: restore '§6.2', '§5.2', '§9.1(2)', '§6.2 Table 5 footnote 3' (x5), 'Step(6)' (x2), null (x3) respectively.
+
+
+-- ############################################################################
+-- S-14  is_required REVIEW (source makes them optional / descriptive)    ☐ RATIFIED
+-- ############################################################################
+-- Proposed is_required=true -> false, with the sentence that makes them non-obligatory:
+--   809a56b0 A272E-01.nass_rationale        — §5.1 only states that NASS "CAN BE USED as a planning alternative";
+--            no clause obliges a written rationale text. — printed p.15
+--   4f6258c4 A272E-02.planning_area_classification — the urban/peri-urban/rural/mixed granularity is EKOWAI's; §9.1
+--            only obliges delineation ("…to consolidate and delineate the planning area…"). — printed p.28
+--   908cc2a5 A272E-03.aggravating_conditions_count and b23b775a A272E-03.favourable_conditions_count — Table 4 is a
+--            summary of conditions ("Table 4 summarizes both important favourable conditions and aggravating
+--            conditions for the integration of NASS"), not a scored tally. — printed p.15
+--   888e65b8 A272E-06.product_target        — Table 2 lists what is OBTAINABLE ("Table 2: MAIN PRODUCTS OBTAINABLE from
+--            NASS and relevant feedstock flows"); nothing obliges a product choice. — printed p.12
+--   8e4877f3/b160257a/1ede39d1/d21b12b4/a79e4815 A272E-13.criteria_economic/hygiene/env/social/technical — §7.2 is
+--            descriptive: "Table 6 summarizes relevant evaluation criteria, including information on their possible
+--            specification." and "A more detailed aggregation of the individual criteria DEPENDS ON the evaluation
+--            method used." — printed p.22. Requiring all five contradicts §7.1's method-dependent choice.
+-- Proposed is_required=false -> true (a printed obligation with an optional field):
+--   d621c67e A272E-05.rainwater_integration — see S-12(a), "…is required […] is necessary." — printed p.11
+-- KEPT REQUIRED (obligation printed): E_population, building_use_type (§6.1 "These are recorded with the population
+--   equivalent of an object"), material_flow_class (§3), system_group (Table 1), collection_technology /
+--   transport_system (§4.3), treatment_objective / treatment_process (Table 3), legal_WHG_ok / legal_KrWG_ok /
+--   legal_TrinkwV_ok (§8 "must therefore be taken into account"), monitoring_program_defined (§9.1(8)),
+--   preferred_variant_selected (§9.1(6)), T_plan and planning_horizon_case (SR-2 explicit selection).
+-- update public.fields set is_required=false where id in ('809a56b0-4572-406d-bef5-ff137fa57006','4f6258c4-c847-4549-aeaf-0636ca48e92d','908cc2a5-d229-4c23-9ba1-55167b3268ed','b23b775a-cbe4-421c-aa83-0f45de333438','888e65b8-80ee-4410-9c68-1362156b6ab4','8e4877f3-fbc7-4151-bfd8-f91074ef392f','b160257a-6bfa-4c26-83f1-1d4e19d3cb80','1ede39d1-b112-499b-9d97-266859b14980','d21b12b4-3238-4db1-a973-780a502fec22','a79e4815-72a3-4145-966d-7cc661909772');
+-- update public.fields set is_required=true  where id='d621c67e-cd27-4d19-ae94-c12e78adda20';
+-- ROLLBACK: invert both statements (all ten back to true, rainwater_integration back to false).
+-- CAUTION: dropping criteria_* to optional weakens COMP-10/COMP-23 — ratify S-04(iii) and this block together.
+
+
+-- ############################################################################
+-- S-15  ORPHAN EQUATION OUTPUTS AND A MISSING RULE-6                     ☐ RATIFIED
+-- ############################################################################
+-- (a) A272E-07.consistency_ok (41a5b156-7331-4c62-9a0e-e1a2d47b9dee) has description "Berechneter Prüf-Output
+--     (RULE-6)" but NO equation RULE-6 exists for DWA-A-272E (prod has RULE-1..5, 7, 8, 9, 10, 11 = 10 rows).
+--     The field is a derived output nothing computes — the #22 class (derived that is hand-enterable).
+-- (b) equations RULE-10 (da12ce07, A272E-08) and RULE-11 (75d8f64a, A272E-11) both declare output_symbol
+--     'consistency_ok', but neither A272E-08 nor A272E-11 owns a field with that symbol. Two engine outputs have no
+--     home; the only consistency_ok in the standard sits on A272E-07.
+-- (c) The invariant the A272E-07 field claims ("Stoffstrom-Anteile konsistent (Summe = 100 %)") is refuted by the
+--     source: "N & $\mathrm{g} /(\mathrm{E} \cdot \mathrm{d})$ & 11 & 85 \% & 12 & 92 \% & 1 & 8 \% & 11"
+--     — printed p.21 — 85 + 92 + 8 = 185 %, because urine is a SUBSET of blackwater. Table 5's percentage columns are
+--     per-fraction shares of raw sewage for three OVERLAPPING fractions, not a partition.
+-- PROPOSAL: give RULE-10 and RULE-11 their own output fields on their own worksheets (e.g.
+--   A272E-08.collection_consistent_ok, A272E-11.treatment_lookup_ok) and either delete A272E-07.consistency_ok or
+--   redefine it as the non-overlapping check (greywater % + blackwater % = 100 % per parameter, urine excluded).
+-- -- update public.equations set output_symbol='collection_consistent_ok' where id='da12ce07-4e9c-449d-9dd0-c0595dfd0c31';
+-- -- update public.equations set output_symbol='treatment_lookup_ok'      where id='75d8f64a-b888-4752-8b54-391f7cfaca24';
+-- -- update public.fields set active=false where id='41a5b156-7331-4c62-9a0e-e1a2d47b9dee';
+-- ROLLBACK: restore output_symbol='consistency_ok' on both equations; set the field active=true.
+
+
+-- ############################################################################
+-- S-16  BROKEN LABELS ON THE ATTESTATION FIELDS                          ☐ RATIFIED
+-- ############################################################################
+-- bd26a831 A272E-04.attest_a272e_04_comp_24  label_de = 'Nachweis: 8'
+-- eb287a92 A272E-04.attest_a272e_04_comp_25  label_de = 'Nachweis: 8'   <- IDENTICAL to the row above
+-- 431eaf67 A272E-11.attest_a272e_11_comp_18  label_de = 'Nachweis: 5.2'
+-- The clause number leaked into the label; two checkboxes on the same worksheet are indistinguishable in the UI.
+-- EVIDENCE for the intended wording (§8, printed p.26-27):
+--   COMP-24: "An essential practical application prerequisite for NASS is the clarification of whether the substance
+--            streams or derivatives to be treated are subject to wastewater law or recycling and waste legislation."
+--   COMP-25: "NASS produce substrates that can be used as fertilizers. The use of such a product is then subject to the
+--            requirements of the fertilizer regulations."
+--   COMP-18 (§5.2, printed p.18): "Especially in the case of collecting blackwater via a vacuum system, possible
+--            ammonium stripping, increased corrosiveness or precipitation must be taken into account."
+-- update public.fields set label_de='Nachweis §8 KrWG: Einstufung der Stoffströme (Abwasser- vs. Abfallrecht) geklärt' where id='bd26a831-4de9-45e9-b593-769a205edae9';
+-- update public.fields set label_de='Nachweis §8 DüngG/DüMV: Düngemittelrechtliche Anforderungen an NASS-Produkte erfüllt' where id='eb287a92-8682-4617-86e9-faf5d3685908';
+-- update public.fields set label_de='Nachweis §5.2: Ammoniak-Strippung/Korrosion/Ausfällung bei Vakuum-Schwarzwasser berücksichtigt' where id='431eaf67-1907-406c-93ee-84bcd6c0f40a';
+-- ROLLBACK: restore 'Nachweis: 8', 'Nachweis: 8', 'Nachweis: 5.2'.
+
+
+-- ############################################################################
+-- S-17  criteria_social — ALL FOUR ENUM ENTRIES HAVE label_de = null     ☐ RATIFIED
+-- ############################################################################
+-- d21b12b4-3238-4db1-a973-780a502fec22, A272E-13.criteria_social, data_type=json (the Table-6 social-criteria
+-- checklist the 2026-08-01 tranche-2 sweep seeded — CONFIRMED present, on A272E-13 rather than on the empty
+-- A272E-25 "Soziale und technische Bewertung", see S-01). All four enum_values carry label_en but label_de=null,
+-- so the German UI renders four blank options.
+-- EVIDENCE (Table 6 (End), printed p.24, quoted verbatim in the label_en values):
+--   "a) Acceptance | & end-user convenience/well-being lease of operation and handling) & qualitative"
+--   "& perceived safety lalso in case of disasters, extreme events; cf. 5a) & qualitative"
+--   "b) Creation of qualified jobs & number of jobs created (international competitiveness; cf. 5a)) & number"
+--   "c) Creation of environmental awareness & environmentally aware approach to water, energy, resources & qualitative"
+-- PROPOSAL: fill label_de for the four tokens (acceptance_end_user_convenience, acceptance_perceived_safety,
+--   qualified_jobs_number_created, environmental_awareness_approach) — jsonb_set per element, written out when ratified.
+-- ROLLBACK: set the four label_de values back to null.
+-- NOTE: check the other json/enum fields of this standard for the same defect before applying.
