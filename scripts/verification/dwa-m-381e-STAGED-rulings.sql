@@ -1,0 +1,483 @@
+-- ============================================================================
+-- STAGED RULINGS — DWA-M-381E (Advisory Leaflet DWA-M 381E "Sewage Sludge Thickening", October 2007,
+--   English edition printed 2010, ISBN 978-3-941897-43-4; standard id
+--   23f7b102-1a7f-450f-aadf-e2510d384aac).
+-- WRITTEN, NOT APPLIED. Every block below is commented-out SQL carrying its evidence quote (verbatim from
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-M-381E\DWA-M-381E.md) and its rollback inverse.
+-- Nothing here may be applied until the ☐ RATIFIED box is ticked by Alvaro.
+-- Companion pack (evidence only, safe): dwa-m-381e-md-verification-pack.sql.
+-- Page convention identical to the pack: the md has no page markers; "printed p.N" is derived from the
+-- printed Content list + List of Figures/Tables and independently confirmed by the mathpix image indices
+-- (offset 0 — the image index IS the printed page, verified on all 15 figures).
+--
+-- SHAPE OF THE PROBLEM. 20 compliance_requirements exist, ALL severity='block'. Of those:
+--   * 2 carry condition='TRUE' (CR-017, CR-018) — they can never fail and enforce nothing;
+--   * 6 are presence-only "IS NOT NULL"/no-op checks (CR-001, CR-015, CR-016, CR-019, CR-010, CR-020),
+--     three of which sit on top of a printed numeric the gate does not read;
+--   * 3 form a subset chain on one field (CR-010 ⊂ CR-011 ⊂ CR-012), and CR-012 makes a printed case
+--     unreachable;
+--   * 2 mis-encode a printed implication / a printed declaration duty as a hard conjunction / cap
+--     (CR-013, CR-014);
+--   * 1 enforces a union range the guideline never prints (CR-002);
+--   * and this being the ENGLISH edition, the modal test is "shall". Only CR-005 (H_R >= 0,3 m), CR-006
+--     (total height) and CR-009 (flocculation unit) rest on genuine "shall"/"definitely need" text; every
+--     other block gate rests on "should", "is recommended", "about", "can", or a descriptive survey table.
+-- None of that is touched by the pack.
+-- ============================================================================
+
+
+-- ===========================================================================
+-- R-1  ☐ RATIFIED — condition='TRUE' no-op block gates (CR-017, CR-018).
+-- Encoded: both severity='block', condition='TRUE', requires_attestation=false — evaluate.ts can never
+--   fail them, so they occupy a block slot and enforce nothing.
+-- CR-017 (M381E-07, clause §6.1.2). Its source_quote is also a TRUNCATED FRAGMENT that starts mid-sentence
+--   and carries no requirement of its own:
+--   "as well. This leads to a worsening of the thickening behaviour. High-speed centrifugal pumps are to be
+--    avoided for sludge transport. Eccentric screw pumps or rotary piston pumps are more suitable."
+--   (printed p.31) — and it is MIS-HOMED: this is sludge-conveyance text, parked on the conditioning /
+--   polymer-dosing worksheet.
+-- CR-018 (M381E-07, clause §8; §2.1.13). Its source_quote is a BIBLIOGRAPHIC cross-reference — verbatim,
+--   but containing no requirement at all:
+--   "Since thickening is the first step of water removal and optimum results can often only be achieved by
+--    conditioning methods, it is recommended to also regard the closelyrelated Advisory Leaflet
+--    "Maschinelle Schlammentwässerung (Mechanical Sludge Dewatering)" [10] elaborated by the same DWA
+--    Committee as well as the working report "Auswahl und Einsatz von organischen Flockungshilfsmitteln -
+--    Polyelektrolyten - bei der Klärschlammentwässerung ..." [11]." (printed p.34)
+-- Proposal (variant chosen for ratification: keep the printed reminder, stop pretending it is enforcement):
+-- update public.compliance_requirements set severity='info', requires_attestation=true
+--  where code in ('CR-017','CR-018') and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', requires_attestation=false
+--  where code in ('CR-017','CR-018') and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-2  ☐ RATIFIED — CR-002 (M381E-03) enforces a UNION RANGE the guideline never prints, with an
+--       INVENTED lower bound and NO sludge-type scope.
+-- Encoded: severity='block', condition='SLR > 0 AND SLR <= 100', clause §4.1.2 Tab.1.
+-- Evidence (§4.1.2 Tab.1, printed p.16) — the table is keyed on settleability and prints THREE bands:
+--   "Table 1: Dimensioning parameters for continuous-flow gravity thickeners"
+--   "\hline hardly settleable & waste activated sludge & 20-50 \\"
+--   "\hline averagely settleable & mixed primary sludge, digested sludge & 40-80 \\"
+--   "\hline easily settleable & primary sludge, mineral sludges, non-digestible sludges & up to 100 \\"
+--   The gate's own source_quote is only the THIRD row ("up to 100"), yet the gate fires on all sludge
+--   types. Consequences: waste activated sludge at SLR = 90 kgTSS/(m2.d) passes although Tab.1 prints
+--   20-50 for it; and the lower bound "> 0" appears nowhere in the leaflet (the smallest printed value is
+--   20). SR-2 also applies: the point value inside a printed band must stay an explicit engineer
+--   selection, keyed on thickenability_class.
+-- NOTE on scope: Tab.1 and Eq.2/Eq.3 are printed for CONTINUOUS-FLOW gravity thickeners only ("Table 1:
+--   Dimensioning parameters for continuous-flow gravity thickeners"). The encoding has NO batch/continuous
+--   discriminator field on M381E-03, so CR-002..CR-006 also fire for batch-operated thickeners, whose
+--   printed dimensioning basis is different: "Generally batch-operated gravity thickeners are dimensioned
+--   according to the following parameters: - Daily sludge quantity" (§4.1.1, printed p.14). Adding that
+--   discriminator field is part of this ruling.
+-- Proposal (three type-scoped gates replacing one union gate; requires the new discriminator to exist):
+-- update public.compliance_requirements set condition='thickenability_class != ''hardly'' OR (SLR >= 20 AND SLR <= 50)'
+--  where code='CR-002' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- -- plus two new rows CR-002b (averagely: SLR >= 40 AND SLR <= 80) and CR-002c (easily: SLR <= 100).
+-- Rollback inverse:
+-- update public.compliance_requirements set condition='SLR > 0 AND SLR <= 100'
+--  where code='CR-002' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- -- delete from public.compliance_requirements where code in ('CR-002b','CR-002c') and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-3  ☐ RATIFIED — CR-012 (M381E-08) makes a PRINTED CASE UNREACHABLE and blocks better-than-typical
+--       results; CR-011 and CR-010 are strict subsets of it.
+-- Encoded: CR-012 severity='block', condition='eta >= 92 AND eta <= 96', clause §5.2.
+--          CR-011 severity='block', condition='eta >= 85', clause §6.2.
+--          CR-010 severity='block', condition='eta IS NOT NULL', clause §4.3.1.
+-- Evidence (§5.2, printed p.28) — the 92-96 band is DESCRIPTIVE ("generally lies between ca."), and the
+--   very next sentence prints a SECOND case that CR-012 forbids:
+--   "The solids-related degree of separation of the various processes generally lies between ca. $92 \%$
+--    and $96 \%$ in dependency on sludge characteristics, degree of thickening, and specific flocculant
+--    quantities. Only for the operation of thickening centrifuges without the addition of flocculants, a
+--    degree of separation between $85 \%$ and $92 \%$ is to be expected in dependency on quantityrelated
+--    utilisation of the aggregate and the rotational speed of the bowl."
+--   So a centrifuge without flocculant at eta = 88 % is printed-legitimate and is blocked today. The upper
+--   bound eta <= 96 additionally blocks any result BETTER than the typical band.
+-- Evidence (§6.2, printed p.31) — CR-011's anchor is a "should", not a "shall":
+--   "A degree of separation between $85 \%$ and $90 \%$ should be realised - if need be with addition of
+--    flocculants - in order not to impair operation and treatment efficiency of the wastewater treatment
+--    plant [26]."
+--   CR-011 also takes only the lower bound of that 85-90 band.
+-- CR-010 (eta IS NOT NULL) is satisfied by every value that satisfies CR-011 or CR-012, so it is a strict
+--   subset that adds nothing; its source_quote is descriptive centrifuge-construction text from §4.3.1
+--   (printed p.25) that never mentions a degree-of-separation requirement — a MIS-HOMED anchor.
+-- Proposal: keep one floor gate on the "should" band as a warning, drop the descriptive upper band, and
+--   retire the redundant presence gate.
+-- update public.compliance_requirements set severity='warn', condition='eta >= 85' where code='CR-012' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- delete from public.compliance_requirements where code in ('CR-010','CR-011') and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', condition='eta >= 92 AND eta <= 96' where code='CR-012' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- -- re-insert CR-010 (block, 'eta IS NOT NULL', §4.3.1) and CR-011 (block, 'eta >= 85', §6.2) on M381E-08.
+
+
+-- ===========================================================================
+-- R-4  ☐ RATIFIED — CR-013 (M381E-07) encodes a printed IMPLICATION as a CONJUNCTION, making one printed
+--       enum value unsatisfiable.
+-- Encoded: severity='block', condition='reuse_pathway == ''agricultural'' AND pam_used == false', §6.3.
+-- Evidence (§6.3, printed p.32):
+--   "According to the ordinance, if sludge is to be reused in agriculture, then PAM shall neither be used
+--    in wastewater treatment (e. g. to prevent uncontrolled sludge discharge from the secondary settling
+--    tank) nor for thickening and dewatering in sludge treatment. For sludge incineration, no restrictions
+--    for polymer conditioning are known at the moment [19]."
+--   The printed rule is "agricultural => not PAM". Encoded as a conjunction it demands that the reuse
+--   pathway BE agricultural, so every incineration project fails — although the same clause expressly
+--   states there are no restrictions for incineration. The enum value 'incineration' is therefore never
+--   satisfiable under the current gate set.
+-- Proposal (implication form):
+-- update public.compliance_requirements set condition='reuse_pathway != ''agricultural'' OR pam_used == false'
+--  where code='CR-013' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.compliance_requirements set condition='reuse_pathway == ''agricultural'' AND pam_used == false'
+--  where code='CR-013' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-5  ☐ RATIFIED — CR-014 (M381E-07) turns a printed DECLARATION duty into an INVENTED CAP.
+-- Encoded: severity='block', condition='conditioner_fraction <= 0.5', clause §6.3.
+-- Evidence (§6.3, printed p.32):
+--   "In addition, it shall be noted, that Annex 3 regulates the labelling of fertilizers which are not
+--    classified as EC-fertilizers, i.e. if a conditioning agent for fertilizer production exceeds a
+--    percentage of $0,5 \%$, it shall be declared separately."
+--   The obligation is to DECLARE above 0,5 %, not to stay below it. The gate blocks the very case the
+--   source contemplates. This is the "blocks unless a test passes, where the source only obliges the test
+--   to be performed" class.
+-- Proposal (attestation that the separate declaration was made, instead of a cap):
+-- update public.compliance_requirements set severity='warn', condition='conditioner_fraction <= 0.5', requires_attestation=true
+--  where code='CR-014' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', requires_attestation=false
+--  where code='CR-014' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-6  ☐ RATIFIED — block gates anchored on SOFT text ("should" / "is recommended" / "about" /
+--       "existing systems" survey data). English edition, so the block test is "shall".
+-- (a) CR-003 (M381E-03, 't_d <= 1.5'). Evidence (§4.1.2, printed p.16-17):
+--     "For raw sludges a detention time or mean cell residence time of no more than 1,5 days should be
+--      chosen, since otherwise formation of biogas interferes with the settling process."
+--     Two defects: the modal is "should", AND the printed SCOPE is "For raw sludges" only while the gate
+--     fires on every sludge type. §6.1.2 (printed p.30-31) prints a broader operating statement for the
+--     general case: "On account of varying sludge characteristics, thickening time may range between one
+--     and two days. Optimum retention time in the thickener shall be determined separately for each
+--     application." — i.e. 2 days is printed-legitimate for non-raw sludge and is blocked today.
+-- (b) CR-004 (M381E-03, 'H_W >= 1.0'). Evidence (§4.1.2, printed p.16-17): "For the supernatant zone a
+--     height $H_{\mathrm{w}}$ of about 1.0 m is necessary." — "about", enforced as an exact floor.
+-- (c) CR-007 (M381E-04, 'q_A >= 1 AND q_A <= 7.5') and CR-008 (M381E-04, 'SLR_fl >= 5 AND SLR_fl <= 20').
+--     Evidence (§4.1.3, printed p.19): the table is a SURVEY of built plants, not a specification —
+--     "Table 2: Operating and dimensioning data for existing dissolved air flotation systems according to
+--      [12]" — and §4.1.3 introduces it as "Table 2 presents operating and dimensioning data for existing
+--     dissolved air flotation systems according to [12]." Values match the print; only the severity is at
+--     issue.
+-- (d) CR-019 (M381E-07, 'specific_flocculant_demand IS NOT NULL'). Evidence (§5.3, printed p.28-29):
+--     "a regulation/control of the sludge feed quantity or the flocculant dosage on the basis of a
+--      continuous measuring of the solids content and the thus calculated solids load is recommended."
+--     Presence-only gate on "is recommended" text; the only numeric in its source_quote (4 gTSS/l to
+--     8 gTSS/l) describes WAS solids fluctuation, not flocculant demand at all.
+-- (e) CR-001 (M381E-01) and CR-015 (M381E-02) — presence-only gates whose source_quotes carry no
+--     obligation. CR-001's quote is descriptive §4.1 gravity-thickening prose ("Operating costs for
+--     gravity thickening are comparably low. ... As an average value, $50 \%$ to 75 $\%$ of the maximum
+--     value can be assumed.", printed p.13) parked on the registration worksheet — MIS-HOMED. CR-015's
+--     quote is a method statement, not a duty: "For determination of the solids content, the total solids
+--     concentration (\% TS) and the concentration of total suspended solids (gTSS/l) are analysed
+--     according to DIN EN 12880 [5]." (printed p.7). The nearest genuine "shall" in that clause is
+--     "In order to prevent disagreements, analytical methods and evaluations shall be defined in detail
+--     for operational tests or for the invitation of tenders." — an attestation, not a presence check.
+-- Proposal:
+-- update public.compliance_requirements set severity='warn'
+--  where code in ('CR-003','CR-004','CR-007','CR-008','CR-019','CR-001','CR-015')
+--    and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- -- and, for CR-003, additionally scope it: condition='sludge_type != ''raw'' OR t_d <= 1.5'
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block'
+--  where code in ('CR-003','CR-004','CR-007','CR-008','CR-019','CR-001','CR-015')
+--    and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- update public.compliance_requirements set condition='t_d <= 1.5' where code='CR-003' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-7  ☐ RATIFIED — CR-016 (M381E-03) is presence-only over a printed numeric that is stated in TWO
+--       DIFFERENT DIMENSIONS, and the numeric it hides is permissive, not mandatory.
+-- Encoded: severity='block', condition='floor_slope IS NOT NULL', clause §4.1.2.
+-- Evidence (§4.1.2, printed p.15) — a RATIO, and only "possible more than":
+--   "Continuous-flow gravity thickeners with mechanical sludge removal equipment have sloped floors,
+--    similar to round primary sedimentation tanks, with a slope of possible more than 1,7 in 1 (according
+--    to DIN 19552 [6]) and a central sludge hopper."
+-- Evidence (§4.1.1, printed p.14) — an ANGLE, for the batch case:
+--   "Thickeners which are not equipped with scrapers generally are emptied sufficiently at a floor slope
+--    above 60 degrees."
+--   One encoded field (unit "-") is asked to hold both a 1,7:1 ratio and a 60-degree angle. No numeric gate
+--   is defensible on the continuous value (permissive wording, and the binding geometry is deferred to
+--   DIN 19552, which is not in the library -> NR).
+-- Proposal (split the field by operating mode; keep the gate as a warn/attestation):
+-- update public.fields set unit='-' , description='Floor slope. Continuous-flow (§4.1.2, p.15): ratio, more than 1,7 in 1 per DIN 19552. Batch without scrapers (§4.1.1, p.14): angle, above 60 degrees. Enter the RATIO here; the angle case belongs to the batch field below.'
+--  where id='7ec3ddc5-f380-4398-8268-dd6829bf7b75';
+-- -- plus a new field floor_slope_batch_deg (unit 'deg') on M381E-03.
+-- update public.compliance_requirements set severity='warn', requires_attestation=true
+--  where code='CR-016' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', requires_attestation=false
+--  where code='CR-016' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- -- delete from public.fields where symbol='floor_slope_batch_deg' and worksheet_template_id=(the M381E-03 template);
+
+
+-- ===========================================================================
+-- R-8  ☐ RATIFIED — CR-020 (M381E-09) is a no-op on a boolean AND uses a condition syntax the grammar
+--       does not parse.
+-- Encoded: severity='block', condition='separate_liquor_treatment IN {true,false}', clause §6.4.
+--   A boolean field can only ever be true, false or NULL, so the set membership adds nothing beyond a
+--   presence check; and the brace form "IN {…}" is not the SQL/evaluate.ts "IN (…)" grammar, so this gate
+--   is a NON_PARSING candidate on top of being a no-op.
+-- Evidence (§6.4, printed p.32) — the printed rule is conditional and descriptive:
+--   "A separate treatment of sludge liquor from the thickening process is only necessary if partial
+--    degradation or conversion or extensive hydrolysis of organic substances takes place during the
+--    thickening process. This is the case e.g. for disintegration."
+-- Proposal:
+-- update public.compliance_requirements set severity='warn', condition='separate_liquor_treatment IS NOT NULL'
+--  where code='CR-020' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', condition='separate_liquor_treatment IN {true,false}'
+--  where code='CR-020' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-9  ☐ RATIFIED — Eq.2 (A_thickener) is DIMENSIONALLY INCONSISTENT AS PRINTED (factor 24).
+-- Encoded: equations row 2389029e-58e8-4174-a79e-ab3fbab89e7a, formula 'A_thickener = Q_s * TSS_In / SLR',
+--   with Q_s in m3/h (field d5c7970a-…) and SLR in kgTSS/(m2.d) (field 130dc8fb-…).
+-- Evidence (§4.1.2, printed p.16-17) — the leaflet itself states both units in the sentence that
+--   introduces the equation:
+--   "When dimensioning continuous-flow gravity thickeners, the required surface $A_{\text {thickener }}
+--    \left[\mathrm{m}^{2}\right]$ is calculated by the added sludge quantity $Q_{\mathrm{s}}\left[
+--    \mathrm{m}^{3} / \mathrm{h}\right]$, the influent solids content $T S S_{\text {IN }}\left[
+--    \mathrm{kgTSS} / \mathrm{m}^{3}\right]$ and the solids loading rate SLR $\left[\mathrm{kgTSS} /
+--    \left(\mathrm{m}^{2} \cdot \mathrm{~d}\right)\right]$ selected from Table 1."
+--   "A_{\text {thickener }}=\frac{Q_{\mathrm{S}} \cdot T S S_{\mathrm{In}}}{\mathrm{SLR}} \quad\left[
+--    \mathrm{~m}^{2}\right] \tag{2}"
+--   Dimensional check: (m3/h)(kg/m3) / (kg/(m2.d)) = m2 * d/h. The printed result [m2] holds only if the
+--   sludge quantity is a DAILY volume (m3/d) or SLR is per hour. With Q_s entered in the printed m3/h the
+--   engine under-sizes the thickener area by a factor 24 — a safety-relevant under-design.
+--   SR-1: no factor may be inserted silently. Two defensible readings, both requiring a ruling:
+--     (i) redefine Q_s as m3/d (matching Tab.1's per-day loading basis and §4.1.1's "Daily sludge
+--         quantity"), or
+--    (ii) keep m3/h and encode 'A_thickener = Q_s * 24 * TSS_In / SLR' with the 24 h/d conversion made
+--         explicit and traced.
+-- Proposal (variant (ii) shown; (i) is the alternative):
+-- update public.equations set formula='A_thickener = Q_s * 24 * TSS_In / SLR'
+--  where id='2389029e-58e8-4174-a79e-ab3fbab89e7a';
+-- Rollback inverse:
+-- update public.equations set formula='A_thickener = Q_s * TSS_In / SLR'
+--  where id='2389029e-58e8-4174-a79e-ab3fbab89e7a';
+
+
+-- ===========================================================================
+-- R-10 ☐ RATIFIED — printed formulas / conversions NOT encoded as equations (H stays hand-enterable,
+--       the %TS <-> gTSS/l bridge is missing).
+-- (a) H. Evidence (§4.1.2, printed p.16-17): "The total height of the con-tinuous-flow gravity thickener
+--     thus amounts to $H=H_{\mathrm{W}}+H_{\mathrm{S}}+H_{\mathrm{R}}$, measured at the outer
+--     circumference of the thickener." The print gives an EQUALITY; the encoding holds only gate CR-006
+--     ('H >= H_W + H_S + H_R'), so H is required, fully derived, and hand-enterable — the #22 class — and
+--     the gate permits any H greater than the sum.
+-- (b) %TS -> gTSS/l. Evidence (§2.1.10, printed p.7): "the solids-related degree of separation ... is
+--     calculated by converting the total solids content in \% TS to gTSS/l by multiplication with a factor
+--     of 10 ( $1 \% \mathrm{TS}=10 \mathrm{gTSS} / \mathrm{l}$ ) without regarding the differences in
+--     density." TS_percent (%), TSS_In (kgTSS/m3) and TSS_Dis/TSS_Ce (gTSS/l) all exist as separate
+--     required fields with NO equation linking them, so the same physical quantity can be entered twice
+--     inconsistently.
+-- Proposal:
+-- -- insert into public.equations (…, formula, output_symbol, input_symbols, clause_reference) values
+-- --   (…, 'H = H_W + H_S + H_R', 'H', array['H_W','H_S','H_R'], '§4.1.2');
+-- -- insert into public.equations (…, 'TSS_Dis = 10 * discharge_TS', 'TSS_Dis', array['discharge_TS'], '§2.1.10');
+-- update public.fields set is_required=false where id='7cabaf87-9e49-4903-a0ea-41dfa934bb11'; -- H becomes derived
+-- Rollback inverse:
+-- update public.fields set is_required=true where id='7cabaf87-9e49-4903-a0ea-41dfa934bb11';
+-- -- delete the two inserted equations rows.
+
+
+-- ===========================================================================
+-- R-11 ☐ RATIFIED — ORPHAN OUTPUTS / computed factor never applied downstream (M381E-10).
+-- Evidence (§7, printed p.33): "Investment costs were converted to annual costs using the equivalent
+--   annuity method and the capital recovery factor CRF" + Eq.4
+--   "\mathrm{CRF}=\frac{i \cdot(1+i)^{\mathrm{n}}}{(1+i)^{\mathrm{n}}-1} \tag{4}"
+--   CRF is computed and then consumed by NOTHING: no equation multiplies investment_cost by CRF, no gate
+--   reads it, and none of energy_cost / labour_cost / flocculant_cost / maintenance_cost_pct feeds any
+--   equation. The worksheet therefore collects every Tab.10 cost factor and produces no annual cost —
+--   the comparison Fig.15 (printed p.33) illustrates is never assembled.
+--   A_thickener (Eq.2 output) is likewise consumed by no gate, but it is the legitimate terminal design
+--   output of M381E-03, so it is reported, not flagged.
+-- Proposal:
+-- -- insert into public.equations (…, 'annual_capital_cost = investment_cost * CRF', 'annual_capital_cost',
+-- --   array['investment_cost','CRF'], '§7') and add the output field on M381E-10.
+-- Rollback inverse:
+-- -- delete that equation row and the annual_capital_cost field.
+
+
+-- ===========================================================================
+-- R-12 ☐ RATIFIED — DUPLICATE FIELD: interest_rate (%) and i (-) are the same printed quantity.
+-- Encoded: b917d04d-4cf3-4d19-a338-36d79056d3df (interest_rate, unit '%', is_required=true) and
+--          c721bc08-4d36-494b-975b-b717862207d8 (i, unit '-', is_required=true).
+-- Evidence (§7 Tab.10, printed p.33): the leaflet prints ONE entry — "\hline INTEREST RATE i & \% \\" —
+--   and Eq.4 consumes i as a dimensionless factor. Two required fields for one printed value, with no
+--   /100 conversion encoded, is a guaranteed double-entry/unit trap: entering 4 in both makes Eq.4 compute
+--   with i = 4 (400 %).
+-- Proposal (keep the % field as the single owner, derive the factor):
+-- -- insert into public.equations (…, 'i = interest_rate / 100', 'i', array['interest_rate'], '§7');
+-- update public.fields set is_required=false where id='c721bc08-4d36-494b-975b-b717862207d8';
+-- Rollback inverse:
+-- update public.fields set is_required=true where id='c721bc08-4d36-494b-975b-b717862207d8';
+-- -- delete that equation row.
+
+
+-- ===========================================================================
+-- R-13 ☐ RATIFIED — SINGLE FIELD holding TWO printed cost/period splits (M381E-10).
+-- Evidence (§7 Tab.10, printed p.33) — the table splits four entries in two:
+--   "\hline INVESTMENT COSTS & \\" / "Mechanical and electrical engineering & €" / "Structural engineering & €"
+--   "\hline UTILISATION PERIOD & \\" / "Mechanical and electrical engineering n & years" / "Structural engineering n & years"
+--   "\hline CAPITAL RECOVERY FACTOR & \\" / "Mechanical and electrical engineering CRF & factor" / "Structural engineering CRF & factor"
+--   "\hline MAINTENACE AND SPARE PARTS & \\" / "Mechanical and electrical engineering & \% of investment costs"
+--   The encoding holds ONE investment_cost, ONE n, ONE CRF and ONE maintenance_cost_pct, so the
+--   mechanical/electrical annuity and the structural annuity cannot both be represented, although the
+--   leaflet requires both to compare economic efficiency.
+-- Proposal: add the _struct counterparts (investment_cost_struct, n_struct, CRF_struct) on M381E-10.
+-- Rollback inverse: delete those three fields.
+
+
+-- ===========================================================================
+-- R-14 ☐ RATIFIED — is_required review (fields the source makes optional, exemplary or manufacturer-
+--       dependent, but which are encoded is_required=true).
+-- (a) machine_capacity (7b78d75b-…) and solids_feed_capacity (686d2598-…) on M381E-05, and
+--     centrifuge_capacity (116e2da3-…) / centrifuge_solids_feed (77c0d43b-…) on M381E-06. Evidence: their
+--     source is "Manufactured sizes of …" (Tab.3-Tab.8, printed p.21-26) — MARKET AVAILABILITY at the time
+--     of print (2007), explicitly framed as such: "Various sizes of drum screens are offered by various
+--     manufacturers." (printed p.20) and "Centrifuges are offered by various manufacturers in varying
+--     sizes (see Table 8)." (printed p.26). Not a design requirement.
+-- (b) TSS_thick (cf82b396-…) is required on M381E-03 but is printed only as a planning assumption ("a mean
+--     solids content SHOULD be used that amounts to about $75 \%$ …", printed p.16-17).
+-- (c) discharge_TS (9410f6a1-…) and eta (78c6a10b-…) are required on M381E-08, yet Tab.9 (printed p.28)
+--     is introduced as expectation, not obligation: "the following mean results for the performance
+--     parameters ... can be expected".
+-- Proposal:
+-- update public.fields set is_required=false
+--  where id in ('7b78d75b-e046-4ff0-93dd-4c2bb62490c8','686d2598-04b5-4315-8e2e-c1b71f595a68',
+--               '116e2da3-faf3-4162-a96a-29e7f460561a','77c0d43b-27e1-4d0f-8270-fc2546a93bbb');
+-- Rollback inverse:
+-- update public.fields set is_required=true
+--  where id in ('7b78d75b-e046-4ff0-93dd-4c2bb62490c8','686d2598-04b5-4315-8e2e-c1b71f595a68',
+--               '116e2da3-faf3-4162-a96a-29e7f460561a','77c0d43b-27e1-4d0f-8270-fc2546a93bbb');
+
+
+-- ===========================================================================
+-- R-15 ☐ RATIFIED — clause_reference retags (gate/field anchored on the wrong clause).
+-- (a) CR-001 clause_reference='§3; §4' but its source_quote is §4.1 gravity-thickening prose (printed
+--     p.13). If the gate survives R-6(e), retag to '§4.1'.
+-- (b) CR-010 clause_reference='§4.3.1' on a degree-of-separation gate; the definition is §2.1.10 (printed
+--     p.7) and the operating band is §5.2/§6.2. If the gate survives R-3, retag to '§5.2; §6.2'.
+-- (c) CR-017 clause_reference='§6.1.2' sits on worksheet M381E-07 (conditioning); the text is sludge
+--     conveyance and belongs on the process worksheets. Re-home or retire per R-1.
+-- (d) CR-018 clause_reference='§8; §2.1.13' — §8 is the Summary and the quote is a bibliographic pointer;
+--     there is no requirement at either clause. Retire per R-1.
+-- (e) specific_flocculant_demand (0bf991c7-…) carries clause_reference='§6.3' (the fertilizer-ordinance
+--     clause) although its printed values are in §5.2 Tab.9 (printed p.28). Retag to '§5.2'.
+-- Proposal:
+-- update public.fields set clause_reference='§5.2' where id='0bf991c7-4b16-4370-a626-b1b717bd4ec9';
+-- update public.compliance_requirements set clause_reference='§4.1' where code='CR-001' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- update public.compliance_requirements set clause_reference='§5.2; §6.2' where code='CR-010' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- Rollback inverse:
+-- update public.fields set clause_reference='§6.3' where id='0bf991c7-4b16-4370-a626-b1b717bd4ec9';
+-- update public.compliance_requirements set clause_reference='§3; §4' where code='CR-001' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+-- update public.compliance_requirements set clause_reference='§4.3.1' where code='CR-010' and standard_id='23f7b102-1a7f-450f-aadf-e2510d384aac';
+
+
+-- ===========================================================================
+-- R-16 ☐ RATIFIED — description-level INVENTED RANGES (unions of two printed Tab.9 cells).
+-- Evidence (§5.2 Tab.9, printed p.28): the table prints separate cells per process column; the encoded
+--   descriptions union them into bands the guideline never states.
+--   * discharge_TS (9410f6a1-…) says "WAS: gravity 2-4" — the print has TWO gravity-continuous cells,
+--     "2-3" and "3-4"; and "centrifuge 5-8" unions the printed "5-7" (without flocculant) and "6-8" (with).
+--     Printed row: "Waste activated sludge & [\% TS] & 2-3 & 3-4 & 2-3 & 3-5 & 5-7 & 5-7 & 6-8".
+--   * specific_energy_demand_vol (4cc962d2-…) says "centrifuge 0,6-1,4"; printed row:
+--     "Specific. energy demand & [ kWh/m3 ] & < 0,1 & < 0,1 & - & 0,6-1,2 & < 0,2 & 1-1,4 & 0,6-1".
+--   * specific_energy_demand_mass (a548c655-…) says "centrifuge 100-220"; printed row:
+--     "Specific. energy demand & [kWh/MgTSS] & < 20 & < 20 & - & 100-140 & < 30 & 180 220 & 100 140"
+--     (the md loses the dashes in the last two cells — PDF confirmation owed).
+--   No gate is built on these three fields, so the impact is display/guidance only — but a user reading
+--   "5-8 %" as a printed band is reading an EKOWAI construct.
+-- Proposal: rewrite the three descriptions cell-by-cell (with/without flocculant kept apart).
+-- Rollback inverse: restore the current description strings (recorded in the 2026-09-05 export).
+
+
+-- ===========================================================================
+-- R-17 ☐ RATIFIED — missing scope discriminators and missing printed fields.
+-- (a) No batch/continuous discriminator on M381E-03 (see R-2 note) — Tab.1, Eq.2 and Eq.3 are printed for
+--     CONTINUOUS-flow thickeners only, and §4.1.1 (printed p.13-14) prints a separate batch basis:
+--     "The volume of a batch-operated gravity thickener equals sludge production of one day plus a safety
+--      margin." — that batch volume has no field at all.
+-- (b) No tank-shape discriminator on M381E-04, although §4.1.3 (printed p.17) prints "Dissolved air
+--     flotation systems can be constructed as circular or rectangular tanks (see Figure 8)." and Tab.2
+--     gives length/depth for the rectangular case and diameter for the circular case.
+-- (c) No machine-type scoping on M381E-05: machine_capacity, solids_feed_capacity and rotational_speed
+--     each hold the union of three to five printed device ranges.
+-- (d) Printed geometry rows with no field: "Drum diameter & mm & 600 & 1200", "Drum length & mm & 1500 &
+--     3500" (Tab.3, p.21), "Diameter of the wedge wire drum & mm & 300 & 1200", "Length of the wedge wire
+--     & mm & 1200 & 1900" (Tab.4, p.21), "Disk diameter & mm & 1500 to 1800" (Tab.6, p.24).
+-- (e) §4.1.2 prints a criterion with no encodable counterpart: "The solids loading rate shall be smaller
+--     than the particle settling velocity of the sludge solids." — no settling-velocity field exists and
+--     the leaflet gives no value, so this is NR (it also notes "This is generally the case, if solids
+--     loading rates from Table 1 are used.").
+-- Proposal: add gravity_operating_mode (enum batch/continuous) on M381E-03, flotation_tank_shape (enum
+--   circular/rectangular) on M381E-04, batch_thickener_volume (m3) on M381E-03; scope the M381E-05 fields
+--   by mechanical_machine_type; leave (e) documented as NR.
+-- Rollback inverse: delete the added fields; restore the unscoped conditions.
+
+
+-- ===========================================================================
+-- R-18 ☐ RATIFIED — unit corrections / two-unit declarations by the guideline itself.
+-- (a) EC (e539d79f-…), unit 'mS/cm'. Evidence (§2.2, printed p.9): "\hline EC & LF & mS/cm or S/m &
+--     Electrical conductivity \\" — the two printed units differ by a factor 10 (1 S/m = 10 mS/cm). The
+--     encoded unit picks one; the field label/description does not warn about the other.
+-- (b) Q_air_TSS (3aeaf96e-…), unit 'g air/kgTSS'. Evidence: §2.2 (printed p.9) declares
+--     "\hline $Q_{\text {air/TSS }}$ & $L_{\text {TS }}$ & $1 / \mathrm{m}^{3}$ & Specific air feed \\"
+--     (litres of air per m3), while Tab.2 (printed p.19) declares "Specific air feed & $Q_{\mathrm{air} /
+--     \mathrm{TSS}}$ & g air/kgTSS & 5-40". These are NOT interconvertible without air density and solids
+--     concentration. The encoding follows Tab.2 (the one that carries the numbers) — correct choice,
+--     but it should be recorded on the field.
+-- (c) SLR. Evidence: Tab.1 (p.16) "Solids loading rate SLR [kg TSS/(m².d)]" vs Tab.2 (p.19) "Solids
+--     loading rate & SLR & kgTSS/( m2 h ) & 5-20" — the SAME symbol, two units, factor 24. The encoding
+--     already splits them into SLR and SLR_fl; NO defect, recorded as a positive finding.
+-- (d) TSS_In. §4.1.2 (p.16-17) kgTSS/m3 vs §2.1.10 legend (p.7-8) gTSS/l — numerically identical, no
+--     defect.
+-- (e) SVI (4079b56a-…): "$\mathrm{ml} / \mathrm{g}$ or 1/kg" (p.9) — numerically identical, no defect.
+-- Proposal: append the alternative printed unit to the description of (a) and (b); no unit VALUE changes.
+-- Rollback inverse: restore the current description strings.
+
+
+-- ===========================================================================
+-- R-19 ☐ RATIFIED — attestation candidates: printed "shall" obligations with no numeric to gate on.
+--   * §2.1.9 (printed p.7-8): "In order to prevent disagreements, analytical methods and evaluations shall
+--     be defined in detail for operational tests or for the invitation of tenders."
+--   * §3.2 (printed p.11-13): "In order to prevent operational problems, viscosity shall be taken into
+--     consideration for friction loss in pipes, selection of pumps for the conveyance of thickened sludge
+--     and for the design of agitation devices in sludge stabilisation plants."
+--   * §4.1.2 (printed p.14-15): "Unavoidable scum formation shall be counteracted by adequate scum removal
+--     or flushing equipment or the installation of scum boards should be dispensed with. Scum shall be
+--     returned to an appropriate point in the treatment system e.g. before the bar rack."
+--   * §6.1.2 (printed p.30-31): "Optimum retention time in the thickener shall be determined separately
+--     for each application."
+--   * §8 (printed p.34): "At longer retention times of the sludge in the primary sedimentation tank or the
+--     thickener, methane, which is harmful to climate, strong-smelling substances (e.g. organic acids),
+--     and hydrogen sulphide can be generated due to starting pre-acidification or digestion. This fact
+--     shall be evaluated carefully, taking into account explosion protection guidelines [7]."
+--   * §4.2.1 (printed p.20): "When using such a thickening device, aerosol generation caused by
+--     atomisation of spray water for cleaning machines and filter units, shall be taken into
+--     consideration. Operating personnel shall be protected adequately."
+--   These are the leaflet's real obligations, and NONE of them is represented in the gate set today
+--   (the 20 existing gates are numeric bands and presence checks). They cannot become numeric gates;
+--   the honest encoding is requires_attestation=true rows at severity 'warn'.
+-- Proposal: insert six attestation rows (CR-021 … CR-026) on the matching worksheets.
+-- Rollback inverse: delete those rows.
+
+
+-- ============================================================================
+-- END — 19 staged rulings. Nothing above has been applied.
+-- ============================================================================
