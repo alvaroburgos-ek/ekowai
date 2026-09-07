@@ -1,0 +1,311 @@
+-- ============================================================================
+-- STAGED rulings — DWA-M-363 (Merkblatt DWA-M 363, Februar 2022). Written 2026-09-05 by the
+-- md-verification pass. NOTHING HERE IS APPLIED. Every block is commented SQL and carries a
+-- ☐ RATIFIED marker, its verbatim evidence quote from the md transcript, and the rollback inverse.
+-- Source md: C:\Users\Ekowai\Desktop\Guidelines\DWA-M-363\DWA-M_363.md (2,586 lines).
+-- Page convention as in the pack header (Inhalt/Bilder-/Tabellenverzeichnis; mathpix image index = printed + 2).
+-- Grade of every evidence quote below: VC (markdown only, no PDF page confirmed) — SR-3.
+-- ============================================================================
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-1  PHANTOM FIELDS — enum-value tokens materialised as stand-alone number fields   ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- Evidence: each of these seven symbols is a VALUE of an existing enum field, not a field the
+--   guideline defines. They carry no label beyond the capitalised token, no clause_reference, no
+--   description, and no equation or gate references them.
+--     M363-02.klaergas / M363-02.faulgas          -> enum values of M363-01.biogas_quelle
+--     M363-06.gewichtsbelastet                    -> enum value of speichertyp
+--     M363-08.tankstelle                          -> enum value of verwertungsweg
+--     M363-09.keine / .nicht_genehmigungsbeduerftig -> enum values of anlagen_nr_4bimschv / verfahrenstyp_bimschg
+--     M363-09.neu                                 -> enum value of M363-22.anlagenstatus
+--   The md defines the underlying choices as enumerations, never as separate quantities, e.g. §1
+--   (printed p.9): "Das Merkblatt bezieht sich auf Biogase aus folgenden Herkunftsbereichen: |
+--   I Klärschlammfaulung (Faulgas), | I anaerobe Behandlung organisch hochbelasteter Abwässer (Klärgas), ..."
+-- Proposed:
+-- update public.fields set active=false where id in ('7c241733-fd7b-4426-b91a-f047963ac2cf','e301b45e-38a0-4d4c-a0f5-31b4e4ac7043','4a9435f3-8b86-4e3a-bd9a-cb55c43ab02f','e4704fc9-1cd0-4505-8511-afb14cab57fc','54aec43c-3f4f-46a4-ad1e-5059b7d87524','57c69bdf-f6e2-4c35-bdde-04f8573207c4','0d8d6ca8-10a5-478b-9b45-ceb1b4f2f0fe');
+-- Rollback inverse:
+-- update public.fields set active=true  where id in ('7c241733-fd7b-4426-b91a-f047963ac2cf','e301b45e-38a0-4d4c-a0f5-31b4e4ac7043','4a9435f3-8b86-4e3a-bd9a-cb55c43ab02f','e4704fc9-1cd0-4505-8511-afb14cab57fc','54aec43c-3f4f-46a4-ad1e-5059b7d87524','57c69bdf-f6e2-4c35-bdde-04f8573207c4','0d8d6ca8-10a5-478b-9b45-ceb1b4f2f0fe');
+-- These 7 rows are the pack's residue: they were NOT written by the pack and keep their prior status.
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-2  DUPLICATE FIELD MATERIALISATION — 71 symbols exist twice                       ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- Evidence (structural, from the export): 71 of the 209 field rows are a second copy of a symbol that
+--   already exists on the worksheet whose TITLE matches the subject. Six worksheets hold zero fields
+--   while their own subject-matter fields sit on the substrate worksheets M363-04..M363-11:
+--     M363-03 Verunreinigungen und Deponiegastypen        = 0 fields
+--     M363-12 Gasentstehung — Methangehalt/Qualitätsprüfung = 0 fields
+--     M363-15 Gasreinigung Entfeuchtung und Entschwefelung = 0 fields
+--     M363-18 Gasaufbereitung und Einspeisung Biomethan    = 0 fields
+--     M363-19 Sonstige Verwertung                          = 0 fields
+--     M363-24 Wartung und Ergebniszusammenfassung          = 0 fields
+--   Off-home copies (subject does not belong to that worksheet at all):
+--     M363-05 "Substrate Industrieabwasser (Klärgas)"  holds the complete §5.7 landfill-gas model (22 fields)
+--                                                      that also lives on M363-11 "Deponiegasausbeute"
+--     M363-06 "Substrate Wirtschaftsdünger"            holds §6.4/§6.6 gas-storage sizing (3)  -> M363-13
+--     M363-07 "Substrate NawaRo"                       holds §6.7/§6.8 storage type & compressor (4) -> M363-14
+--     M363-08 "Substrate Bioabfall"                    holds §7 utilisation route & efficiencies (3) -> M363-17
+--     M363-09 "Cofermentation und Mischsubstrate"      holds §8 BImSchG permitting (8)        -> M363-20/-21
+--     M363-10 "Fermenter Bemessung und Biogasausbeute" holds §9 flue-gas fields (14)          -> M363-22
+--     M363-11 "Deponiegasausbeute"                     holds §10/§11 safety & gas-detection (10) -> M363-23
+-- Proposed (keep the topical home, deactivate the off-home copy; 64 rows):
+-- update public.fields set active=false where id in ('af22569f-e144-4b3f-a824-9ccd6af589ce','7918f89c-d993-4f99-b9d6-d22439a2c18b','756144ec-6863-4dd6-ba2f-01e65e97d277','b70b7d1d-49f9-4f97-912e-9f234dd91808','89680630-f067-4f7b-be93-4205bff3f2f8','ad145689-0945-4f50-b136-d3ee850a3d5b','b519605d-6b41-4dcc-874d-83eb33b25a69','f8191462-5cb0-43dd-a4f3-1f06ecb74a0f','10a42092-315b-4010-a956-d0850f25bc09','e4354825-1309-4ceb-9162-ea629038ba48','44be4ed9-3085-4430-9c7d-a3821cc7fe23','5f5e2c0f-b45a-4108-9215-848021a1879b','ed11f723-46cd-4a1e-8c0f-2f47fc8a9352','b3252a03-1958-4bd7-9718-fd4497919d75','3ac0d71f-61d7-4efd-8433-1e631c97c36c','3e1cdec2-cc9c-4d62-a042-b00e4d230939','eb391f39-b12c-4ad8-91c2-997f896c4de0','0a1bbfe4-a8cd-43a7-ba60-dd163975c156','cf00fdd1-766f-4f0b-be88-39b0ea80b03b','6a7f21bf-2d6f-4f88-8a79-11c44bdc90b8','e9e82ef2-1b8e-46e3-adb0-2a4dde4b58fe','1d950a97-429c-4739-87d5-7e03d5a4a040','4c8bee8e-7bc9-489e-87a6-bf19cfd35103','7705caa3-4125-4473-b442-2a6efb00bbff','761bd6bb-1256-4303-a9b7-c1e2a4eba7b9','9857508a-d419-4366-846e-7c51cbf40a8e','27faa151-9eea-492c-a68e-12ce326887a9','d30f04cb-616d-4e02-bae0-18cfb322e638','1381b03b-c64e-43dd-b519-ffe98853021b','3243884a-3c21-49af-b609-2cca941edb2c','88b533f3-ff7e-4b85-ac98-260f6cbf7ad0','22a8ab84-7d16-423d-ab5d-7757353fab52','2f0917be-23e8-47e3-b1bb-dbfc1046963b','71e7daaa-f95b-45ef-9bc7-2cf62d1aa9cf','78db71df-85f0-44a4-bd46-2ca551864e72','a156cb95-90ca-432a-b1e9-97723356ee07','9ebf04de-07e7-4d6c-9338-8d7c77a26535','c509f322-9437-434e-8518-89ae0509ed0f','90a00c2f-9539-4616-8a48-3923d438d4ad','3f3d5861-29cd-4c0f-b8c7-203151c81c4b','36a9d55c-5bb2-46c4-a18d-5fdb141de78c','f964ddad-5f94-419b-820a-49d5b0425fde','9d776ae6-d0ff-4a69-be32-8f011fd6b51e','8c977e19-c3bb-4e30-9686-522ee222fe30','7b1c1b74-76d5-4a34-ac85-80db4198c082','7359dae2-06ad-4448-8ce1-3e8668efac07','1bf16810-fba6-4c30-9a81-0e30b4428874','c2f78444-0edb-4f39-aa6b-a24f9250c7e3','d0abbdf6-e131-45d7-a61e-8f7af51f9885','49d3fabf-01a2-4820-8e5c-755a4dd27fb2','43b75e31-6147-404d-928f-23972ed1c6dc','80a61c65-c9be-410d-8b62-6d9a024efe74','651bee56-9e46-4862-9590-72de1581c8fb','0ad20c0c-c4cb-428d-828e-abf71fe2a0f0','0f766104-dc05-46f4-9e7d-f6192e68cb67','0c8e38a4-78c1-4423-b3bc-03a860d2ba15','20f8ffd9-0c62-4057-b4b1-2bc6365bad98','ae45a5f6-c7df-4e3f-b563-deafbef8f4ef','8ce204ec-3dce-4f54-9ab5-a22779a0e0d2','00af9122-e4b8-4aa4-ae29-f4e43d0c6d0c','8bf2a9ca-fb9a-4957-a355-17b621d26fc7','5235b20a-04a8-414f-8fd4-65521841343b','72d072db-14b8-46b1-bc4b-cff12e4cc690','3dc1b9fd-0935-49d9-bcb1-7c767a95fb61');
+-- Rollback inverse:
+-- update public.fields set active=true  where id in ('af22569f-e144-4b3f-a824-9ccd6af589ce','7918f89c-d993-4f99-b9d6-d22439a2c18b','756144ec-6863-4dd6-ba2f-01e65e97d277','b70b7d1d-49f9-4f97-912e-9f234dd91808','89680630-f067-4f7b-be93-4205bff3f2f8','ad145689-0945-4f50-b136-d3ee850a3d5b','b519605d-6b41-4dcc-874d-83eb33b25a69','f8191462-5cb0-43dd-a4f3-1f06ecb74a0f','10a42092-315b-4010-a956-d0850f25bc09','e4354825-1309-4ceb-9162-ea629038ba48','44be4ed9-3085-4430-9c7d-a3821cc7fe23','5f5e2c0f-b45a-4108-9215-848021a1879b','ed11f723-46cd-4a1e-8c0f-2f47fc8a9352','b3252a03-1958-4bd7-9718-fd4497919d75','3ac0d71f-61d7-4efd-8433-1e631c97c36c','3e1cdec2-cc9c-4d62-a042-b00e4d230939','eb391f39-b12c-4ad8-91c2-997f896c4de0','0a1bbfe4-a8cd-43a7-ba60-dd163975c156','cf00fdd1-766f-4f0b-be88-39b0ea80b03b','6a7f21bf-2d6f-4f88-8a79-11c44bdc90b8','e9e82ef2-1b8e-46e3-adb0-2a4dde4b58fe','1d950a97-429c-4739-87d5-7e03d5a4a040','4c8bee8e-7bc9-489e-87a6-bf19cfd35103','7705caa3-4125-4473-b442-2a6efb00bbff','761bd6bb-1256-4303-a9b7-c1e2a4eba7b9','9857508a-d419-4366-846e-7c51cbf40a8e','27faa151-9eea-492c-a68e-12ce326887a9','d30f04cb-616d-4e02-bae0-18cfb322e638','1381b03b-c64e-43dd-b519-ffe98853021b','3243884a-3c21-49af-b609-2cca941edb2c','88b533f3-ff7e-4b85-ac98-260f6cbf7ad0','22a8ab84-7d16-423d-ab5d-7757353fab52','2f0917be-23e8-47e3-b1bb-dbfc1046963b','71e7daaa-f95b-45ef-9bc7-2cf62d1aa9cf','78db71df-85f0-44a4-bd46-2ca551864e72','a156cb95-90ca-432a-b1e9-97723356ee07','9ebf04de-07e7-4d6c-9338-8d7c77a26535','c509f322-9437-434e-8518-89ae0509ed0f','90a00c2f-9539-4616-8a48-3923d438d4ad','3f3d5861-29cd-4c0f-b8c7-203151c81c4b','36a9d55c-5bb2-46c4-a18d-5fdb141de78c','f964ddad-5f94-419b-820a-49d5b0425fde','9d776ae6-d0ff-4a69-be32-8f011fd6b51e','8c977e19-c3bb-4e30-9686-522ee222fe30','7b1c1b74-76d5-4a34-ac85-80db4198c082','7359dae2-06ad-4448-8ce1-3e8668efac07','1bf16810-fba6-4c30-9a81-0e30b4428874','c2f78444-0edb-4f39-aa6b-a24f9250c7e3','d0abbdf6-e131-45d7-a61e-8f7af51f9885','49d3fabf-01a2-4820-8e5c-755a4dd27fb2','43b75e31-6147-404d-928f-23972ed1c6dc','80a61c65-c9be-410d-8b62-6d9a024efe74','651bee56-9e46-4862-9590-72de1581c8fb','0ad20c0c-c4cb-428d-828e-abf71fe2a0f0','0f766104-dc05-46f4-9e7d-f6192e68cb67','0c8e38a4-78c1-4423-b3bc-03a860d2ba15','20f8ffd9-0c62-4057-b4b1-2bc6365bad98','ae45a5f6-c7df-4e3f-b563-deafbef8f4ef','8ce204ec-3dce-4f54-9ab5-a22779a0e0d2','00af9122-e4b8-4aa4-ae29-f4e43d0c6d0c','8bf2a9ca-fb9a-4957-a355-17b621d26fc7','5235b20a-04a8-414f-8fd4-65521841343b','72d072db-14b8-46b1-bc4b-cff12e4cc690','3dc1b9fd-0935-49d9-bcb1-7c767a95fb61');
+--
+-- S-2b  AMBIGUOUS PAIR — owner decision required, NO statement proposed:
+--   M363-04 "Substrate Klärschlamm (Faulgas)" and M363-10 "Fermenter Bemessung und Biogasausbeute"
+--   both carry the §3.2 Tab. 1 mass symbols (fm, tm, tr, otr, otm_zu, otm_abgebaut, ts, q_t) plus
+--   ch4_pro_csb (a §5.3 INDUSTRIAL value that belongs on M363-05) and co_substrat. Both homes are
+--   defensible; the encoding must pick one. Candidate ids on M363-04:
+--     'fc3d5bc4-1d7d-4074-a709-3e0bb6d0ca97','eb5cf2f4-b3c1-4cc5-9379-89fabec5de05','f0bfec24-8c68-4c0b-9e19-0e941aa2d4be','ab5a2d39-ebcd-47b9-a214-09e39852d635','5e279209-e01e-4d52-ac43-161488183e98','58966e09-3886-4176-936e-8842ef516c46','2393e078-0499-4cdc-9edb-86d2c2d1bc5c','7232451b-ec23-4383-9416-07799be0d3ec','948177cc-249f-498d-9f3d-26064281420b','2eb7bad4-77a3-41e6-bf02-c2538c5c9969'
+--   biogasausbeute_spez exists SIX times (M363-04, -06, -07, -08, -09, -10), once per substrate class;
+--   that one is arguably intentional (each worksheet quotes its own Tabelle 5-10 row) — flagged, not proposed.
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-3  DUPLICATE GATE ROWS — nine literal "-2" clones on the SAME worksheet           ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- Evidence (structural): C363-08/C363-08-2, C363-10/-2, C363-11/-2, C363-12/-2, C363-24/-2,
+--   C363-25/-2, C363-27/-2, C363-28/-2, C363-26/-2 are byte-identical in condition and severity and
+--   sit on the same worksheet. Each therefore fires twice against the same project data.
+-- Proposed:
+-- update public.compliance_requirements set active=false where id in ('e1f35208-2b5a-4c1f-830c-7fed67919007','0c113a4c-e0cc-4558-82d8-753ee460fa26','cd0d9a21-90a0-4235-901b-f585af0d24e7','1e1e4a5b-53ef-4909-ae90-0bf702299cbb','db10ebbc-2023-4df9-b684-70afb21bf685','44a35358-cabe-4feb-969e-113ae6e90305','cd372329-a8d6-4136-87ff-fb78c0b7992c','439869f6-cc4d-464f-a647-e483339fa4bf','540b728c-6389-4177-8a30-7d5b6e262133');
+-- Rollback inverse:
+-- update public.compliance_requirements set active=true  where id in ('e1f35208-2b5a-4c1f-830c-7fed67919007','0c113a4c-e0cc-4558-82d8-753ee460fa26','cd0d9a21-90a0-4235-901b-f585af0d24e7','1e1e4a5b-53ef-4909-ae90-0bf702299cbb','db10ebbc-2023-4df9-b684-70afb21bf685','44a35358-cabe-4feb-969e-113ae6e90305','cd372329-a8d6-4136-87ff-fb78c0b7992c','439869f6-cc4d-464f-a647-e483339fa4bf','540b728c-6389-4177-8a30-7d5b6e262133');
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-4  EMPTY GATE CONDITIONS — six rows enforce nothing                               ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+--   M363-04.C363-04  warn, attest=true, condition=''  (§1)
+--   M363-04.C363-05  warn,             condition=''  (§5.7) — also NULL source_quote, see S-5
+--   M363-04.C363-23  warn, attest=true, condition=''  (§5.8)
+--   M363-06.C363-06  warn,             condition=''  (§6.6) — also NULL source_quote
+--   M363-13.C363-06  warn,             condition=''  (§6.6) — also NULL source_quote
+--   M363-16.C363-18  warn, attest=true, condition=''  (§9.3.3)
+-- The three attest=true rows are at least enforceable through their attestation field; the other three
+-- (C363-05, C363-06 x2) have neither a condition nor an attestation field and are inert.
+-- Proposed condition backfill for the inert ones (attestation-free, so a real predicate is needed):
+-- update public.compliance_requirements set condition='biogasausbeute_spez IS NOT NULL' where id='16c44877-1ee8-424e-b53d-f99c9afee2e5';
+-- update public.compliance_requirements set condition='speichervolumen_anteil IS NOT NULL' where id in ('b8ede41c-08c1-4c80-a081-ee9ceb230bfd','16d7de18-b350-44bc-9ea4-ea223497fe58');
+-- Rollback inverse:
+-- update public.compliance_requirements set condition='' where id in ('16c44877-1ee8-424e-b53d-f99c9afee2e5','b8ede41c-08c1-4c80-a081-ee9ceb230bfd','16d7de18-b350-44bc-9ea4-ea223497fe58');
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-5  NULL GATE source_quote — four rows carry no source at all                      ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+--   M363-04.C363-05 (§5.7), M363-06.C363-06 (§6.6), M363-13.C363-06 (§6.6), M363-13.C363-07 (§6.7)
+-- Verbatim md backfills (VC):
+--   §5.7 (printed p.30): "Als Biogasausbeute (in der Deponieliteratur auch als Deponiegasbildungspotenzial
+--     bezeichnet, siehe VDI 3790 Blatt 2) wird diejenige Biogasmenge bezeichnet, die aus einer definierten
+--     Abfallmasse/abbaubarem Kohlenstoff unter Deponiebedingungen insgesamt über lange Zeiträume gebildet wird."
+--   §6.6 (printed p.37): "Nachfolgend werden in Tabelle 12 Empfehlungen für die Auslegung des
+--     Biogasspeichervolumens in Abhängigkeit von der Anlagenart und Energieverwertung/-erzeugung aufgeführt.
+--     Sie können als Richtwert dienen, insbesondere dann, wenn keine ausreichenden anlagenspezifischen
+--     Kenntnisse zu Ganglinien von Gasanfall und -verbrauch vorliegen."
+--   §6.7 (printed p.39): "In der Regel werden gewichtsbelastete Biogasspeicher in einem Druckbereich von
+--     20 hPa bis 100 hPa betrieben. Es sind auch Ausführungen bis 200 hPa bekannt."
+-- Proposed (one update per row, quotes as above); rollback inverse = set source_quote=null on the same ids:
+-- update public.compliance_requirements set source_quote='<§5.7 quote>'  where id='16c44877-1ee8-424e-b53d-f99c9afee2e5';
+-- update public.compliance_requirements set source_quote='<§6.6 quote>'  where id in ('b8ede41c-08c1-4c80-a081-ee9ceb230bfd','16d7de18-b350-44bc-9ea4-ea223497fe58');
+-- update public.compliance_requirements set source_quote='<§6.7 quote>'  where id='1bae4c22-f0e6-40dd-b98e-f38a893605b2';
+-- update public.compliance_requirements set source_quote=null where id in ('16c44877-1ee8-424e-b53d-f99c9afee2e5','b8ede41c-08c1-4c80-a081-ee9ceb230bfd','16d7de18-b350-44bc-9ea4-ea223497fe58','1bae4c22-f0e6-40dd-b98e-f38a893605b2');
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-6  BLOCK GATES ANCHORED ON SOFT / EXEMPLARY TEXT — severity notes (block -> warn) ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- a) C363-19 (block) on M363-07 and M363-13 — "IF speichertyp == gewichtsbelastet THEN speicherbetriebsdruck <= 500"
+--    §6.7 (printed p.39): "Formal stellt der Geltungsbereich der Druckgeräterichtlinie (Richtlinie 2014/68/EU)
+--    eine Grenze von 500 hPa dar, die mit Biogasspeichern mit gewichtsbelasteter Membran nicht überschritten
+--    werden SOLLTE." -> modal "sollte", not "muss/darf nicht". block over-enforces.
+--    -- update public.compliance_requirements set severity='warn' where id in ('ceab42f7-0bcd-4297-a555-e2b5e84fce10','cfe2f73f-cfae-4a08-bd0d-022c583e54e0');
+--    -- rollback: set severity='block' on the same ids.
+-- b) C363-09 (block, attest) on M363-08 and M363-16 — source_quote is the §10.1 list item (printed p.65)
+--    "I DVGW-Regeln, ZUM BEISPIEL Arbeitsblatt DVGW G 260 (A) „Gasbeschaffenheit“ ..." — an exemplary list.
+--    The real §7.4.1 obligation is at printed p.48: "Die Einspeisung in das öffentliche Gasnetz wird durch die
+--    Gasnetzzugangsverordnung (GasNZV) geregelt. Sie fordert, dass das Gas am Einspeisepunkt und während der
+--    Einspeisung den Voraussetzungen des Arbeitsblatts DVGW G 260 entspricht". -> keep block, RE-QUOTE (S-9).
+-- c) C363-13 (block, attest) on M363-09 and M363-20 — source_quote is the §10.1 list item (printed p.65)
+--    "I ATEX-Produktrichtlinie 2014/34/EU bzw. Explosionsschutzprodukteverordnung (11. ProdSV)," — a bare
+--    reference in an enumeration introduced by "Hierbei sind vor allem zu nennen:". No obligation is stated
+--    at the cited §10.3. -> keep block only if re-anchored on §10.3.2 (printed p.70): "Zur Festlegung der
+--    Schutzmaßnahmen ist eine Ex-Schutz-Gefährdungsbeurteilung zu erstellen." (real obligation).
+-- d) C363-17 (block, attest) on M363-08 and M363-16 — §9.2.1 (printed p.57, gate says §9.2.2):
+--    "Wegen der häufig hohen Anteile an Schwefelwasserstoff ist hier IN DER REGEL eine gezielte
+--    Entschwefelung unumgänglich." -> "in der Regel" softens it; note block -> warn, or keep block and
+--    re-anchor on §9.2.3 (printed p.58): "Gemäß 1. BlmSchV ist bei Überschreitung dieses Werts im Biogas
+--    eine derartige Nutzung nicht mehr zulässig" (hard, see S-10a).
+-- e) C363-02 (block) on M363-02 — condition "ch4_anteil IS NOT NULL AND co2_anteil IS NOT NULL AND
+--    h2s_konz IS NOT NULL" is anchored on the DESCRIPTIVE §4.1 sentence "In Tabelle 2 sind die für die
+--    Verwertung relevanten Gasqualitätsparameter ... tabellarisch aufgeführt." The real obligation is
+--    §11.3 (printed p.73): "Die Biogasqualität ist durch Messung des Methan- und Sauerstoffgehalts zu
+--    überwachen." -> keep block, re-quote (and note that the printed duty covers CH4 + O2, not CO2/H2S).
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-7  GATE CONDITION <-> SOURCE MISMATCH                                             ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- a) C363-11 / C363-11-2 (block) — "IF biogasmenge_total >= 10000 THEN privilegierung_baugb IS NOT NULL".
+--    The source (§8.1, printed p.54) is the Störfall-Verordnung threshold: "Biogasanlagen ab einer Menge von
+--    10.000 kg Biogas den Grundpflichten und ab 50.000 kg den erweiterten Pflichten der Stör-fall-Verordnung
+--    unterliegen." The consequent (BauGB §35 outdoor-area privileging) is an unrelated planning test from
+--    §8.2. The 50.000 kg tier is not encoded at all. -> condition must be rewritten; no field currently
+--    records Störfall Grund-/erweiterte Pflichten.
+-- b) C363-28 / C363-28-2 (block) — "IF rohgas_kapazitaet > 2.3 THEN verfahrenstyp_bimschg != nicht_genehmigungsbeduerftig"
+--    but source_quote is the Tab. 13 Nr. 1.15 row (1,2 Mio. Nm³/a). The 2,3 Mio. figure comes from §8.2
+--    (printed p.55): "wenn die Kapazität einer Anlage zur Erzeugung von Biogas 2,3 Mio. Normkubikmeter Biogas
+--    pro Jahr überschreitet" — which is the BauGB §35 privileging limit, NOT a BImSchG permit threshold.
+--    -> either re-quote to §8.2 and change the consequent to privilegierung_baugb, or change the threshold
+--    to 1.2 and keep the BImSchG consequent. Two different printed rules are conflated.
+-- c) C363-18 (warn, attest) on M363-08 — "IF verwertungsweg == mikrogasturbine AND h2s_konz >= 200 THEN
+--    Gasreinigung" (the consequent is prose, not a predicate -> non-enforcing). Its source_quote is the
+--    §9.3.3 SILOXANE sentence, but the printed 200 ppm rule is §7.3.3 (printed p.45): "Die Empfindlichkeit
+--    einer Mikrogasturbine gegen Schwefelwasserstoff ist im Vergleich zu Gas-Otto- oder Zündstrahlmotoren
+--    gering. Ab 200 ppm wird eine Gasreinigung erforderlich." -> re-quote + clause retag + real predicate.
+-- d) C363-21 (block) on M363-09 — "IF anlagenstatus == neu THEN formaldehyd_abgas <= 20". Neither field
+--    exists on M363-09: anlagenstatus lives on M363-22, formaldehyd_abgas on M363-10/M363-22. The M363-20
+--    copy of C363-21 has the same problem. The gate belongs on M363-22 "Abgas und Emissionsminderung".
+--    -- update public.compliance_requirements set worksheet_template_id=(select id from public.worksheet_templates where code='M363-22') where id in ('33013d67-7b21-48a1-9038-7ef6afc438b5','7403ea3a-3927-4842-a703-5fcca46aefb6');
+--    -- rollback: restore worksheet_template_id to the M363-09 / M363-20 templates respectively.
+-- e) C363-20 (block) on M363-08 and M363-16 — reads speicherbetriebsdruck, which lives on M363-07/M363-14.
+--    Threshold itself is correct: §6.7 (printed p.39) "Zur Verwendung des Biogases als Fahrzeugkraftstoff sind
+--    Drücke über 20 MPa erforderlich" = 200 000 hPa, matching the encoded ">200000". Cross-worksheet read only.
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-8  GATE OVER-ENFORCEMENT vs the printed scope                                     ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- a) C363-22 (block, M363-04) — "IF substrat_guelleanteil_pct < 100 THEN verweilzeit_gasdicht >= 150".
+--    §5.5 (printed p.28) prints THREE rules, only the first is encoded:
+--    "Weiterhin schreibt die TA Luft (2021) vor, dass ein- oder mehrstufige Biogasanlagen eine Verweilzeit im
+--    gasdichten System (inkl. Gärrestlagern) von insgesamt mindestens 150 Tage einzuhalten haben. Für
+--    MEHRSTUFIGE Biogasanlagen mit einem Gülleanteil am Substratmix beträgt die Mindestverweilzeit mindestens
+--    50 Tage zuzüglich je zwei Tage pro Masseprozentpunkt anderer Substrate als Gülle, maximal jedoch 150 Tage."
+--    and "Alternativ dazu gibt die TA Luft vor, dass Biogasanlagen nur dann geringere Verweilzeiten aufweisen
+--    dürfen, wenn das Restmethanpotenzial der Gärreste ... nachweislich nicht mehr als 3,7 % des gesamten
+--    Gaspotenzials der Einsatzstoffe beträgt."
+--    -> the gate blocks every multi-stage manure plant that legitimately sits between 50 d and 150 d, and the
+--       3,7 % alternative route has neither field nor gate. verfahrensstufen exists but is unused by the gate.
+-- b) C363-24 / -24-2 (block, M363-10) — "messplatz_din_en_15259 == true" unconditionally, but §9.5
+--    (printed p.64) scopes it: "Zur Überwachung der Abgasemissionen, INSBESONDERE BEI ÜBERWACHUNGSBEDÜRFTIGEN,
+--    STATIONÄREN ANLAGEN, ist ein Messplatz nach DIN EN 15259:2008-01 ... erforderlich".
+-- c) C363-29 (warn, M363-11) — "alarm_voralarm == 20 AND alarm_hauptalarm == 40" is an equality on a
+--    default: §11.4 (printed p.73) "wird durch Auslösen eines Voralarms (IN DER REGEL bei 20 % der UEG)
+--    bzw. Hauptalarm bei 40 % der UEG begegnet." warn is the right severity; equality should be a range.
+-- d) C363-25 / -25-2 (block) — "o2_atemluft >= 17" matches §10.2 (printed p.66) "Bei Unterschreitung von
+--    17 Vol.-% ist mit Gesundheitsgefährdungen zu rechnen", but the printed life-threat threshold
+--    "Sinkt der Sauerstoffanteil der eingeatmeten Luft unter 14 Vol.-% besteht Erstickungsgefahr und damit
+--    akute Lebensgefahr" has no second, harder gate.
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-9  CLAUSE RETAGS (evidence = the md section that actually contains the quoted text) ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+--   C363-17: clause_reference '9.2.2' -> '9.2.1'  (the quoted sentence is md l.1692, §9.2.1, printed p.57)
+--   C363-13: clause_reference '10.3'  -> '10.1'   (the quoted ATEX list item is md l.1886, §10.1, printed p.65)
+--   C363-09: clause_reference '7.4.1' -> '10.1'   (the quoted DVGW list item is md l.1884, §10.1, printed p.65)
+--             — or keep '7.4.1' and re-quote to md l.1440 (§7.4.1, printed p.48). Preferred: re-quote.
+--   C363-18: clause_reference '9.3.3' -> '7.3.3'  (the 200 ppm rule is md l.1387, §7.3.3, printed p.45)
+-- -- update public.compliance_requirements set clause_reference='9.2.1' where id in ('a15178d0-9748-4da0-a887-23bba9034da9','938bc987-311e-4b48-900e-573a3540f9bc');
+-- -- update public.compliance_requirements set clause_reference='10.1'  where id in ('fa2e4c76-d21d-4654-9121-86e6002f6fe2','5a79289d-fca7-4704-b0ea-dca3e66bdffb');
+-- -- update public.compliance_requirements set clause_reference='7.3.3' where id in ('4fbd18fe-6e40-4b17-91e9-019d5fcb77c7','aecbce1a-7c75-4e90-b8b5-b0a3e1f1df71');
+-- -- rollback: restore '9.2.2' / '10.3' / '9.3.3' on the same ids.
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-10  MISSING GATES for printed hard limits                                          ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- a) §9.2.3 (printed p.58) — hard legal limit for boiler use, NO gate exists on M363-16:
+--    "Die Verwertung in Heizkesselanlagen ist in der Regel unproblematisch, soweit der Schwefelwasserstoffanteil
+--    nicht über 1.000 ppm beträgt. Gemäß 1. BlmSchV ist bei Überschreitung dieses Werts im Biogas eine derartige
+--    Nutzung nicht mehr zulässig beziehungsweise in diesem Fall eine Gasreinigung/Entschwefelung notwendig."
+--    -> proposed: block gate on M363-16, "IF verwertungsweg == heizkessel THEN h2s_konz <= 1000".
+-- b) §8.1 (printed p.53) — hard legal limit, NO gate exists:
+--    "Somit ist der Einsatz von Klärgas mit einem Gehalt an Schwefelverbindungen über 1 %, von Biogas aus
+--    Abfallbehandlungsanlagen und von Deponiegas in immissionsschutzrechtlich nicht genehmigungsbedürftigen
+--    Anlagen unzulässig."
+--    -> proposed: block gate on M363-20 keyed on anlage_nicht_genehmigungspflichtig + biogas_quelle.
+-- c) §5.5 (printed p.28) — the 3,7 % Restmethanpotenzial alternative has no field and no gate (see S-8a).
+-- d) §10.2 (printed p.66) — the 14 Vol.-% O2 acute-danger threshold has no gate (see S-8d).
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-11  EQUATION Gl(7) — printed operator is a MINUS where IPCC uses a product         ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- The transcript prints (md l.1046, §5.7, printed p.32):
+--   \mathrm{DDOC}_{\mathrm{m}, \text { decomp }, \mathrm{T}}=\mathrm{DDOC}_{\mathrm{ma}, \mathrm{~T}-1}-\left(1-\mathrm{e}^{-\mathrm{k}}\right)
+-- The encoding reproduces that literally: ddoc_m_decomp_t = ddoc_ma_t_minus_1 - (1 - e^(-k_abbau)).
+-- FINDING: the result is dimensionally inconsistent (a Gg mass minus a dimensionless factor); IPCC 2006
+--   Vol. 5 Ch. 3 defines DDOCm_decomp,T = DDOCma,T-1 * (1 - e^-k). This is either a printing error in the
+--   Merkblatt or a mathpix mis-read of "·". Under SR-3 the RENDERED PDF must decide — a PDF-vs-markdown
+--   disagreement is itself a finding and the PDF wins. NOT changed by this pass (VC only).
+-- Affected equation ids: 'ea86e593-47c6-48e7-8354-cb85ba511843','21202924-1835-4ed6-833b-10521265ce20'
+-- -- If the PDF shows a product: update public.equations set formula='ddoc_m_decomp_t = ddoc_ma_t_minus_1 * (1 - e^(-k_abbau))' where id in ('ea86e593-47c6-48e7-8354-cb85ba511843','21202924-1835-4ed6-833b-10521265ce20');
+-- -- rollback: restore formula='ddoc_m_decomp_t = ddoc_ma_t_minus_1 - (1 - e^(-k_abbau))' on the same ids.
+--
+-- S-11b  §5.7 (printed p.30) prints the worked-example result as "ein Wert von $219 \mathrm{~m}^{3} / \mathrm{kg}$ FM"
+--   while G_e is defined as m³/Mg FM in Gl. (3) and in its own variable table. 219 m³/kg is three orders of
+--   magnitude out; the intended unit is m³/Mg FM. Printed-source defect — PDF check required, nothing changed.
+--
+-- S-11c  CONFIRMATION of the 2026-07-31 "case-exact" migration (mig 20260731120000): all 11 unique formulas
+--   were re-read against the printed ones today. Gl. (1) 3,75·AT4 - C; Gl. (2) 3·AT4; Gl. (3) C_ab·1,868·
+--   (100-WG)/100; Gl. (4) G_e·(1-e^-kt) and G_e·k·e^-kt; Gl. (5) 1,868·C_ab·f1·f2·f3·M_n·k·e^-kt; f3 =
+--   (0,014·T + 0,28); Gl. (6) DDOC_m,decomp,T·F·16/12; k = -ln(0,5)/t_1/2; and §9.1 100 ppm ≈ 140 mg/m³
+--   (factor 1,4) — every operator, constant and operand ORDER matches the print. The only divergence is
+--   symbol casing normalised to the repo's snake_case field symbols (at4, c_ab, g_td, ...), which is the
+--   encoding convention, not a formula defect. Gl. (7) is the sole open item (S-11 above).
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-12  data_class — standard_fixed constant exposed as a hand-enterable field         ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- c_konstante ("Empirische Konstante C") is printed as a fixed value, §5.7 (printed p.30):
+--   "$C$ & $\mathrm{~kg} / \mathrm{Mg}$ TM & Konstante mit dem empirischen Wert $7,5 \mathrm{~kg} / \mathrm{Mg}$ TM"
+-- It is encoded as an optional, UI-editable number field feeding Gl. (1) -> the "standard_fixed that is
+-- UI-editable" validator class. Proposed: pin the default and make it read-only, or inline 7.5 into Gl. (1).
+-- Affected ids: '1d950a97-429c-4739-87d5-7e03d5a4a040','79305603-3b60-4616-b230-73eb67f77be1'
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-13  UNIT / SOURCE-GRANULARITY review                                               ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+--   gb_21 — encoded unit "Nl/kg TS". §3.2 Tab. 1 (printed p.12) prints only
+--     "$\mathrm{GB}_{21}$ & Gasbildung, bestimmt über 21 Tage im Laborversuch" — no unit; §5.7 defers the
+--     determination to "DepV, Anhang 4", which is NOT in the library -> the unit is NR (not reachable from
+--     this Merkblatt). The pack verifies the field on the Tab. 1 definition and the unit stays unverified.
+--   at4  — encoded "m^3/Mg TM" matches Tab. 1 (printed p.12) verbatim. OK.
+--   g_e / g_t — encoded "m^3/Mg FM" matches the Gl. (4) variable table. OK (see S-11b for the print's own
+--     m³/kg slip in the worked example).
+--   biogasausbeute_spez — encoded "l/kg oTM"; §3.1 (printed p.11) allows l/kg CSB_zu, l/kg CSB_abgebaut,
+--     m³/Mg oTM_zu and m³/Mg oTM_abgebaut. Single-unit encoding of a four-way printed choice (SR-2 class).
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-14  is_required REVIEW — REQ on fields the guideline never obliges                 ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+-- The following are is_required=true but their only printed basis is a symbol definition in §3.2 Tab. 1 or
+-- a descriptive range in Tabelle 2 — the Merkblatt states no duty to determine them for every project:
+--   M363-02.hs_n, M363-02.hl_n, M363-02.wobbeindex_w_l_n, M363-02.rho_norm  (Tab. 2/Tab. 3 ranges)
+--   M363-04.ts, .q_t, .tr, .otr and the M363-10 copies                       (Tab. 1 symbol definitions)
+--   M363-05/M363-11.gb_21, .sigma_deponiegas                                 (alternative lab parameters,
+--     "Sie lässt sich mittels Faulversuchen (siehe VDI 4630 ODER aus dem GB_21 ... ermitteln", printed p.30)
+-- Proposed:
+-- update public.fields set is_required=false where id in ('092f0504-3439-4b15-ac5a-f0ef0bb1e8eb','08d854f1-e1d7-425c-a820-d3ed808f52c0','01dd9a32-cb55-4ef6-aa5f-5358c3e8c69e','80e0af42-ce53-4da2-bbcd-ceb0079bb15b','2393e078-0499-4cdc-9edb-86d2c2d1bc5c','7232451b-ec23-4383-9416-07799be0d3ec','f0bfec24-8c68-4c0b-9e19-0e941aa2d4be','ab5a2d39-ebcd-47b9-a214-09e39852d635','cd6e79df-1e68-4a34-84af-99800100d9f9','ca101207-fb49-4741-bebb-41d94d030620','d5326bf9-fa78-4911-8402-9bc6024d09cd','0e6439c9-a551-466b-a59f-23dc02087519','02f38c88-dac9-4c2c-bc2e-861712456556','0b0fd41d-6397-444c-ac29-1b8405e7d10b','b3252a03-1958-4bd7-9718-fd4497919d75','6a7f21bf-2d6f-4f88-8a79-11c44bdc90b8');
+-- Rollback inverse:
+-- update public.fields set is_required=true  where id in ('092f0504-3439-4b15-ac5a-f0ef0bb1e8eb','08d854f1-e1d7-425c-a820-d3ed808f52c0','01dd9a32-cb55-4ef6-aa5f-5358c3e8c69e','80e0af42-ce53-4da2-bbcd-ceb0079bb15b','2393e078-0499-4cdc-9edb-86d2c2d1bc5c','7232451b-ec23-4383-9416-07799be0d3ec','f0bfec24-8c68-4c0b-9e19-0e941aa2d4be','ab5a2d39-ebcd-47b9-a214-09e39852d635','cd6e79df-1e68-4a34-84af-99800100d9f9','ca101207-fb49-4741-bebb-41d94d030620','d5326bf9-fa78-4911-8402-9bc6024d09cd','0e6439c9-a551-466b-a59f-23dc02087519','02f38c88-dac9-4c2c-bc2e-861712456556','0b0fd41d-6397-444c-ac29-1b8405e7d10b','b3252a03-1958-4bd7-9718-fd4497919d75','6a7f21bf-2d6f-4f88-8a79-11c44bdc90b8');
+
+
+-- ----------------------------------------------------------------------------------------------
+-- S-15  EMPTY WORKSHEETS — six templates carry no fields, no gates, no equations       ☐ RATIFIED
+-- ----------------------------------------------------------------------------------------------
+--   M363-03, M363-12, M363-15, M363-18, M363-19, M363-24 (see S-2 for where their content went).
+--   Either re-home the off-home duplicates onto them (S-2) or deactivate the empty templates.
+--   No statement proposed — it depends on the S-2 decision.
+-- ============================================================================
+-- End of STAGED rulings. Nothing above has been applied.
+-- ============================================================================
