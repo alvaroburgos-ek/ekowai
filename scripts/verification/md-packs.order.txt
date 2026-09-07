@@ -41,3 +41,4 @@ dwa-a-131-md-verification-pack.sql  DWA-A-131
 dwa-a-226-md-verification-pack.sql  DWA-A-226
 dwa-m-229-1-md-verification-pack.sql  DWA-M-229-1
 dwa-m-229-2-md-verification-pack.sql  DWA-M-229-2
+dwa-m-349-md-verification-pack.sql  DWA-M-349

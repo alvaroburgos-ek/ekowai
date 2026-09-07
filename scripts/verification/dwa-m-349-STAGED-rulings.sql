@@ -1,0 +1,354 @@
+-- ============================================================================
+-- STAGED RULINGS — DWA-M-349 (Merkblatt DWA-M 349, Mai 2019, 1. Auflage)
+-- WRITTEN, NOT APPLIED. Every block below is commented-out SQL carrying its evidence quote (verbatim from
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DWA-M-349\DWA-M-349.md) and its rollback inverse.
+-- Nothing here may be applied until the ☐ RATIFIED box is ticked by Alvaro.
+-- Companion pack (evidence only, safe): dwa-m-349-md-verification-pack.sql.
+-- Page convention identical to the pack: no page markers in the md; "printed p.N" derived from the Inhalt
+-- + Bilder-/Tabellenverzeichnis, cross-checked against the mathpix image indices (constant offset +2).
+--
+-- SHAPE OF THE PROBLEM (why this file is long): 27 compliance_requirements exist, ALL severity='block',
+-- and 11 of them carry condition='TRUE' — i.e. 41 % of the gate set can never fail and enforces nothing,
+-- while several of the 16 real conditions over-enforce recommendations or invent a limit. None of that is
+-- touched by the pack.
+-- ============================================================================
+
+
+-- ===========================================================================
+-- R-1  ☐ RATIFIED — condition='TRUE' no-op gates (11 of 27). Decision needed: delete, or convert to
+--       attestation gates (requires_attestation=true), or downgrade to 'info'.
+-- Evidence: every one of these rows has condition='TRUE' and requires_attestation=false, so evaluate.ts
+--   can never fail them; they occupy a block slot without enforcing anything.
+--   CR-003 (M349-02) · CR-026 (M349-02) · CR-021 (M349-04) · CR-023 (M349-04) · CR-020 (M349-06) ·
+--   CR-024 (M349-06) · CR-027 (M349-06) · CR-016 (M349-07) · CR-018 (M349-07) · CR-025 (M349-07) ·
+--   CR-022 (M349-08).
+-- Proposal (variant chosen for ratification: attestation, so the printed obligation survives):
+-- update public.compliance_requirements set requires_attestation=true, severity='warn'
+--  where code in ('CR-003','CR-026','CR-021','CR-023','CR-020','CR-024','CR-027','CR-016','CR-018','CR-025','CR-022')
+--    and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse:
+-- update public.compliance_requirements set requires_attestation=false, severity='block'
+--  where code in ('CR-003','CR-026','CR-021','CR-023','CR-020','CR-024','CR-027','CR-016','CR-018','CR-025','CR-022')
+--    and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+
+
+-- ===========================================================================
+-- R-2  ☐ RATIFIED — CR-013 (M349-03) enforces an INVENTED limit.
+-- Encoded: severity='block', condition='c_O2_reaktor <= 1', clause §5.4.1.
+-- Evidence (§5.4.1 "Kontinuierliche Belüftung", printed p.30–32) — the source expressly REFUSES a limit:
+--   "Ein allgemeingültiger Grenzwert dafür, was zu hoch bedeutet, kann hingegen gegenwärtig nicht
+--    angegeben werden: bei guter AOB-Leistung kann eine Nitratation bei $>1,5 \mathrm{mg} / \mathrm{l}$
+--    stabil verhindert werden, während bei schlechter AOB-Leistung NOB auch bei $<0,2 \mathrm{mg} /
+--    \mathrm{l}$ einwachsen können."
+--   The "<1 mg/l" that appears two sentences later is about which CONTROL PARAMETER is reliable, not a
+--   limit: "Besonders bei $\mathrm{O}_{2}$-Konzentrationen $<1 \mathrm{mg} / \mathrm{l}$ hat sich dabei
+--   die Belüftungsrate ... als deutlich zuverlässigerer Kontrollparameter erwiesen".
+--   The gate additionally CONTRADICTS three printed operating points: §4.5.2 p.22 "bis zu $6 \mathrm{mg} /
+--   \mathrm{l}$ in Biofilmsystemen"; §5.4.1 p.32 granular systems "meist im Bereich von $0,5 \mathrm{mg} /
+--   \mathrm{l}$ bis $2 \mathrm{mg} / \mathrm{l}$"; §7.2.3.2 p.55–56 "$1 \mathrm{mg} / \mathrm{l}$ bis
+--   $2 \mathrm{mg} / \mathrm{l}$ bei intermittierender Belüftung". A project at 2 mg/l is printed-legitimate
+--   and is blocked today.
+-- Proposal: drop the invented numeric limit; keep an information-grade reminder.
+-- update public.compliance_requirements set severity='warn', condition='TRUE', requires_attestation=true
+--  where code='CR-013' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', condition='c_O2_reaktor <= 1', requires_attestation=false
+--  where code='CR-013' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+
+
+-- ===========================================================================
+-- R-3  ☐ RATIFIED — CR-006 is UNSATISFIABLE for schlammsystem='hybrid'.
+-- Encoded: condition='(schlammsystem == ''suspendiert'' AND N_raumbelastung >= 0.2 AND N_raumbelastung <= 0.5)
+--          OR (schlammsystem IN {biofilm,granula} AND N_raumbelastung >= 0.5 AND N_raumbelastung <= 2.0)'
+-- The enum schlammsystem has FOUR values (biofilm, suspendiert, granula, hybrid). 'hybrid' satisfies
+-- neither branch, so any project with a Hybridsystem can never clear this block gate.
+-- Evidence that hybrid systems are printed and legitimate:
+--   §3.1 p.11 "Hybridverfahren, Hybridsystem — Verfahren mit sowohl suspendiertem Schlamm als auch Biofilm
+--   oder Granula"; §5.4.1 p.30 "Biofilmsysteme mit suspendierten Aufwuchskörpern können als Schwebebett,
+--   Wirbelbettverfahren ohne suspendierten Schlamm sowie auch als Hybridsysteme gefahren werden".
+-- The printed design values (§5.4.2, p.33) are only two bands and say nothing about hybrids:
+--   "l suspendierter Schlamm (Flocken): 0,2 kg/(m3·d) bis 0,5 kg/(m3·d) NH4-N
+--    l Biofilmsysteme/granulierter Schlamm: 0,5 kg/(m3·d) bis 2,0 kg/(m3·d) NH4-N"
+-- Proposal: add the missing branch as the union of the printed bands (0,2–2,0) and require an explicit
+-- engineer justification, OR (safer) let hybrid fall through to a warn. Ratify which.
+-- update public.compliance_requirements set condition='(schlammsystem == ''suspendiert'' AND N_raumbelastung >= 0.2 AND N_raumbelastung <= 0.5) OR (schlammsystem IN {biofilm,granula} AND N_raumbelastung >= 0.5 AND N_raumbelastung <= 2.0) OR (schlammsystem == ''hybrid'' AND N_raumbelastung >= 0.2 AND N_raumbelastung <= 2.0)'
+--  where code='CR-006' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse: restore the two-branch condition exactly as quoted above.
+--
+-- R-3b  ☐ RATIFIED — CR-006's source_quote is a LIST OPENER with no requirement in it.
+--   Current source_quote = "Für einstufige Systeme sind für die Stickstoffraumbelastung die nachfolgend
+--   aufgeführten und im Vergleich zum zweistufigen System abgeminderten Werte (für $T>25^{\circ}
+--   \mathrm{C}$ ) anzusetzen:" — it ends in a colon and contains NONE of the four numbers the gate
+--   enforces; the numbers live in the two bullet lines that were not captured.
+-- update public.compliance_requirements set source_quote='Für einstufige Systeme sind für die Stickstoffraumbelastung die nachfolgend aufgeführten und im Vergleich zum zweistufigen System abgeminderten Werte (für $T>25^{\circ} \mathrm{C}$ ) anzusetzen: l suspendierter Schlamm (Flocken): $\quad 0,2 \mathrm{~kg} /\left(\mathrm{m}^{3} \cdot \mathrm{~d}\right)$ bis $0,5 \mathrm{~kg} /\left(\mathrm{m}^{3} \cdot \mathrm{~d}\right) \mathrm{NH}_{4}-\mathrm{N}$ l Biofilmsysteme/granulierter Schlamm: $\quad 0,5 \mathrm{~kg} /\left(\mathrm{m}^{3} \cdot \mathrm{~d}\right)$ bis $2,0 \mathrm{~kg} /\left(\mathrm{m}^{3} \cdot \mathrm{~d}\right) \mathrm{NH}_{4}-\mathrm{N}$ — printed p.33'
+--  where code='CR-006' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+--
+-- R-3c  ☐ RATIFIED — the printed precondition "für T > 25 °C" of those design values is NOT encoded
+--   anywhere. Proposal: add T>25 to the condition, or add a warn-grade companion gate. Needs a ruling
+--   because M349-05 has no temperature field of its own (T sits on M349-03).
+
+
+-- ===========================================================================
+-- R-4  ☐ RATIFIED — CR-007 duplicates/conflicts with CR-006 and its source_quote is TRUNCATED.
+-- Encoded: severity='block', condition='schlammsystem == ''suspendiert'' AND N_raumbelastung < 0.5'.
+-- (a) Truncated quote: the stored source_quote ends mid-sentence at "... wird für dieses Verfahren eine
+--     eher konservative" — the value it enforces is in the NEXT printed line, which was not captured:
+--     "Dimensionierung $\left(<0,5 \mathrm{~kg} /\left(\mathrm{m}^{3} \cdot \mathrm{~d}\right) \mathrm{N}\right)$
+--      empfohlen, sofern nicht langfristige Pilotversuche (mindestens 2 Monate Betrieb bei Sollleistung)
+--      vorliegen, die eine höhere Umsatzrate bestätigen." (§5.4.1, printed p.30–32)
+--     As stored, the gate enforces a number that its own quote does not contain.
+-- (b) Boundary conflict with CR-006: for suspendierter Schlamm, CR-006 admits 0,2 <= x <= 0,5 while CR-007
+--     requires x < 0,5. Both are block. The value x = 0,5 kg/(m3·d) — printed explicitly in §5.4.2 as the
+--     upper end of the suspended band — is therefore unreachable in the product.
+-- (c) Missing documented-deviation path: the source allows exceeding 0,5 when "langfristige Pilotversuche
+--     (mindestens 2 Monate Betrieb bei Sollleistung)" exist; the gate has no such escape.
+-- Proposal: repair the quote, downgrade to warn, and carry the Pilotversuch escape as an attestation.
+-- update public.compliance_requirements set severity='warn', requires_attestation=true,
+--        source_quote='Dementsprechend wird für dieses Verfahren eine eher konservative Dimensionierung $\left(<0,5 \mathrm{~kg} /\left(\mathrm{m}^{3} \cdot \mathrm{~d}\right) \mathrm{N}\right)$ empfohlen, sofern nicht langfristige Pilotversuche (mindestens 2 Monate Betrieb bei Sollleistung) vorliegen, die eine höhere Umsatzrate bestätigen. — printed p.30–32'
+--  where code='CR-007' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse: severity='block', requires_attestation=false, source_quote = the truncated original.
+
+
+-- ===========================================================================
+-- R-5  ☐ RATIFIED — gates that over-enforce because a printed SCOPE PREDICATE is missing.
+-- (a) CR-004 (M349-03, block, 'T > 23'). Evidence (§5.1.2 "Nitritation im Ausschwemmreaktor", p.26):
+--     "Da die Wachstumsgeschwindigkeit der AOB erst bei Temperaturen $>23^{\circ} \mathrm{C}$ sicher über
+--      der der NOB liegt, ist eine entsprechende Temperatur Verfahrensvoraussetzung und ist auch in kalten
+--      Jahreszeiten einzuhalten."
+--     The obligation belongs to the Ausschwemmreaktor variant of the Nitritation, not to every process.
+--     Today it blocks a pure Nitrifikation/Denitrifikation or a Biofilm-Deammonifikation project too.
+--     Proposal: condition='reaktortyp != ''cstr_ausschwemm'' OR T > 23'.
+-- (b) CR-005 (M349-05, block, 'verhaeltnis_no2_nh4 == 1.3'). Evidence (§5.3.1, p.29): "Wichtig im
+--     ZWEISTUFIGEN Betrieb ... notwendigen Verhältnis von NO2-N : NH4-N = 1,3 : 1". Value correct, scope
+--     is not. Proposal: condition='stufigkeit != ''zweistufig'' OR verhaeltnis_no2_nh4 == 1.3'.
+-- (c) CR-009 (M349-04, block, 'c_quelle_typ IS NOT NULL'). Evidence (§6.4.7, p.47–48): "muss bei den
+--     Verfahren Nitrifikation/Denitrifikation und Nitritation/Denitritation eine Dosieranlage für externen
+--     Kohlenstoff vorgesehen werden. ... Für die Deammonifikation ist keine Dosierung von externem
+--     Kohlenstoff erforderlich." The source EXEMPTS the Deammonifikation; the gate does not.
+--     Proposal: condition='verfahren_n_elimination IN {deammonifikation_einstufig,deammonifikation_zweistufig} OR c_quelle_typ IS NOT NULL'.
+-- Rollback inverse for each: restore the unconditional condition quoted above.
+
+
+-- ===========================================================================
+-- R-6  ☐ RATIFIED — severity notes: block gates anchored on soft / permissive text (block -> warn).
+-- (a) CR-001 (M349-02): blocks unless 600 <= S_NH4_N <= 1300 AND 7 <= pH_wert <= 8. Its own quote is the
+--     SCOPE BASIS of §1 (p.9), and the very next printed sentence permits transfer beyond it:
+--     "Nichtsdestotrotz können die Verfahrensbeschreibungen ebenso wie eine Vielzahl der Empfehlungen auch
+--      auf andere hochkonzentrierte Stickstoff-Teilströme übertragen werden."
+--     A scope description is not a compliance limit — proposal: warn + attestation.
+-- (b) CR-008 (M349-04, HRT_denitritation >= 0.3): "Jedoch wird EMPFOHLEN, eine Mindestaufenthaltszeit im
+--     Reaktor von $0,3 \mathrm{~d}$ nicht zu unterschreiten." (§5.2.2, p.28). Value correct, verb is a
+--     recommendation.
+-- (c) CR-010 (M349-04, 1 <= c_O2_nitritation_soll <= 1.5): "wird eine Sauerstoffkonzentration von
+--     $1 \mathrm{mg} / \mathrm{l}$ bis $1,5 \mathrm{mg} / \mathrm{l}$ EMPFOHLEN." (§5.1.2, p.26).
+-- (d) CR-012 (M349-03, c_NO2_reaktor < 5): the printed statement is descriptive AND conditional —
+--     "bei kontinuierlicher Belüftung wird der Reaktor MEIST bei Konzentrationen $<5 \mathrm{mg} / \mathrm{l}
+--      \mathrm{NO}_{2}-\mathrm{N}$ betrieben" (§5.4.1, p.32); the same bullet names 20 mg/l as the level
+--     "meist nicht überschritten". Blocking at <5 for every operating mode over-enforces.
+-- (e) CR-014 (M349-05, 10 <= nh4_betriebsbereich <= 200): the sentence immediately after the band
+--     explicitly permits leaving it — "Der Betrieb außerhalb dieses Bereichs ist möglich, jedoch ist mit
+--     Leistungseinbußen zu rechnen." (§5.4.1, p.30–32).
+-- (f) CR-011 (M349-07, nitrat_anteil_zulauffracht < 15): the quoted sentence is a CONFIRMATORY indicator —
+--     "Eine Nitrat-Bildung < $15 \%$ der abgebauten N-Fracht BESTÄTIGT, dass keine überhöhte Aktivität der
+--      NOB im Reaktor vorliegt." (§5.4.1, p.32) — not a limit value.
+-- update public.compliance_requirements set severity='warn', requires_attestation=true
+--  where code in ('CR-001','CR-008','CR-010','CR-012','CR-014','CR-011')
+--    and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block', requires_attestation=false
+--  where code in ('CR-001','CR-008','CR-010','CR-012','CR-014','CR-011')
+--    and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- NOTE: CR-015 (leistungssteigerung_rate <= 3.5) is deliberately NOT in this list — §7.2.3.2 p.55–56 uses
+-- "Die Luftzufuhr wird um MAXIMAL 3,5 %/d gesteigert", which carries block grade. Verified, left alone.
+-- Likewise CR-019 (Ex-Schutz implication) is correct as encoded and is left alone.
+
+
+-- ===========================================================================
+-- R-7  ☐ RATIFIED — duplicate gates / strict no-op subsets. Proposal: deactivate the duplicate.
+-- (a) CR-021 (M349-04) carries the SAME source_quote as CR-010 (the §5.1.2 Wirkungsgrad/O2 paragraph) with
+--     condition='TRUE' — it adds nothing CR-010 does not already enforce.
+-- (b) CR-016 (M349-07) carries the SAME source_quote as CR-015 (the §7.2.3.1 Inbetriebnahme paragraph)
+--     with condition='TRUE' — strict subset of CR-015.
+-- update public.compliance_requirements set active=false
+--  where code in ('CR-021','CR-016') and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse:
+-- update public.compliance_requirements set active=true
+--  where code in ('CR-021','CR-016') and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+
+
+-- ===========================================================================
+-- R-8  ☐ RATIFIED — mis-homed gates + clause retags (evidence = the clause the quote actually comes from).
+-- (a) CR-023: worksheet M349-04 "Auslegung Nitritation, Denitritation und N/DN", clause_reference '§6.4.3',
+--     quote is the §6.4.3 SBR paragraph — a Bau-/Anlagentechnik topic. Home is M349-06.
+-- (b) CR-022: worksheet M349-08 "Nachweis und Zusammenstellung", clause_reference '§6.3.1', but the stored
+--     quote is verbatim from §6.4.3 (p.44–45): "Für die Bemessung des erforderlichen biologischen Volumens
+--     für die Teilstrombehandlung des Schlammwassers können die Ansätze aus dem Arbeitsblatt DWA-A 131
+--     nicht übertragen werden, weil diese vom Kohlenstoffabbau dominiert sind." §6.3.1 (p.41) is about
+--     Einbindung in die Gesamtanlage and contains no such sentence. WRONG CLAUSE REF + wrong home
+--     (should be M349-06 §6.4.3).
+-- (c) CR-027: worksheet M349-06, clause_reference '§2', source_quote = "DIN EN 12255-1, Kläranlagen -
+--     Teil 1: Allgemeine Baugrundsätze" — a bare bibliography line from the Verweisungen list (p.9). It is
+--     verbatim but contains NO requirement of any kind. Proposal: delete, or replace with the §6.4.1/6.4.3
+--     obligation it was presumably meant to carry.
+-- (d) CR-011: worksheet M349-07, clause_reference '§5.4.1', but the field it guards
+--     (nitrat_anteil_zulauffracht, "Anteil der N-Zulauffracht") matches §7.2.3.2 p.55–56 exactly:
+--     "- $\mathrm{NO}_{3}$-Bildung < $15 \%$ der N-Fracht im Zulauf." The §5.4.1 wording the gate quotes
+--     uses a DIFFERENT denominator ("der abgebauten N-Fracht"). Retag to §7.2.3.2 and swap the quote.
+-- (e) CR-004: clause_reference is the compound '§5.1.2 / §4.5.1'; the enforceable sentence is in §5.1.2
+--     only (p.26). Retag to '§5.1.2'.
+-- (f) CR-012 / CR-013: sit on M349-03 fields but quote §5.4.1 (an M349-05 clause). Either retag to §4.5.2
+--     (p.20–22, which is the M349-03 clause that states the same NO2/O2 thresholds) or re-home to M349-05.
+-- update public.compliance_requirements set clause_reference='§6.4.3' where code='CR-022' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- update public.compliance_requirements set clause_reference='§5.1.2' where code='CR-004' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- update public.compliance_requirements set clause_reference='§7.2.3.2', source_quote='- $\mathrm{NO}_{3}$-Bildung < $15 \%$ der N-Fracht im Zulauf. — printed p.55–56' where code='CR-011' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- update public.compliance_requirements set clause_reference='§4.5.2' where code in ('CR-012','CR-013') and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- (re-homing CR-023/CR-022 to M349-06 requires a worksheet_template_id change — hold until R-1/R-7 are ruled.)
+-- Rollback inverse: restore clause_reference '§6.3.1' (CR-022), '§5.1.2 / §4.5.1' (CR-004), '§5.4.1'
+--   (CR-011 + its original quote, CR-012, CR-013).
+
+
+-- ===========================================================================
+-- R-9  ☐ RATIFIED — CR-017's source_quote is a table row stripped of the legend that gives it meaning.
+-- Stored quote: "\hline 1-stufige Deammonifikation & ++ & ++ & + & + & ++ & ++ & + & + & ++ &
+--   $\mathrm{NH}_{4}$-N-Messung nur für Kontrolle \\" — the "++" marks are unreadable without Tabelle 7's
+--   own legend, which is a separate printed line: "+ im Einzelfall sinnvolle Messungen, ++ notwendige
+--   Messungen." (§7.1.1, p.52). The row also covers only ONE of the three Verfahrenstypen while the gate
+--   fires for all of them (which happens to be correct — Temperatur and pH are "++" in all three rows).
+-- update public.compliance_requirements set source_quote='Tabelle 7: Zusammenstellung eingesetzter Online-Messungen nach Verfahrenstyp | Nitri/Deni & ++ & ++ & & & & & + & + & + & $\mathrm{NO}_{\mathrm{x}}$-Messung ist sinnvoll für die C-Quellen-Dosierung | 2-stufige Deammonifikation & ++ & ++ & + & + & & + & + & & + & | 1-stufige Deammonifikation & ++ & ++ & + & + & ++ & ++ & + & + & ++ & $\mathrm{NH}_{4}$-N-Messung nur für Kontrolle | + im Einzelfall sinnvolle Messungen, ++ notwendige Messungen. — printed p.52'
+--  where code='CR-017' and standard_id='5ae4beb8-ede4-4c1f-9bd4-0a7b50c20df2';
+-- Rollback inverse: restore the single-row quote.
+
+
+-- ===========================================================================
+-- R-10 ☐ RATIFIED — missing gates for printed obligations (all proposed at warn, none at block).
+-- (a) §5.4.1 p.30–32, C_NH4,max: "die maximale NH4-Konzentration im Reaktor bevor NH3-Hemmung beobachtet
+--     wird ($200 \mathrm{mg} / \mathrm{l} \mathrm{NH}_{4}-\mathrm{N}$)" — the field C_NH4_max exists, no gate.
+-- (b) §5.2.2 p.28: "für die Denitritation ca. $3 \mathrm{~g} \mathrm{CSB}_{\text {ext }}$ pro Gramm
+--     NO2 $-\mathrm{N}_{\mathrm{DN}}$ verbraucht" — the field csb_bedarf_denitritation exists, no gate.
+-- (c) §6.4.4 p.45–46, f_end: 1,3 (N/DN), 1,0 (Ausschwemmreaktor) or 1,25 (sonst) — fields exist, no gate.
+-- (d) §4.5.2 p.20–22: NH3-N < 10 mg/l and HNO2-N < 1 mg/l "für den Regelbetrieb ... unkritisch", and
+--     Anammox O2 inhibition "ab $0,05 \mathrm{mg} / \mathrm{l}$" — fields c_NH3_reaktor, c_HNO2_reaktor,
+--     c_O2_reaktor exist, only c_O2 is gated (and gated wrongly, see R-2).
+-- (e) §7.2.3.4 p.57, Impfschlamm transport: "Der Schlamm sollte mit mindestens $50 \mathrm{mg} / \mathrm{l}
+--     \mathrm{NH} 4-\mathrm{N}$ transportiert werden" and "sollte in jedem Fall eine Nitratkonzentration
+--     $>1 \mathrm{mg} / \mathrm{L} \mathrm{N}$ vorliegen" — NO fields and NO gates exist for either.
+-- (f) §5.4.2 p.33: the "T > 25 °C" precondition on the Raumbelastung bands (see R-3c).
+-- No SQL proposed yet: (e) needs two new fields first, which is a structure change and must be ruled.
+
+
+-- ===========================================================================
+-- R-11 ☐ RATIFIED — unit corrections (all three are the SAME symbol declared twice in the guideline).
+-- (a) S_x (M349-02, encoded unit 'g/l'). §6.2.2 Gl.8 nomenclature p.39: "$S_{x}$ & (g/l) & Konzentration
+--     des Nährstoffs x". §3.2 Symboltabelle p.13: "$S_{x}$ & $\mathrm{g} / \mathrm{m}^{3}$ &
+--     Substratkonzentration". g/m3 = mg/l, a factor 1000 from g/l.
+--     CONSEQUENCE, not cosmetic: the same field is an input to Gl. (3) (Monod term S_x/(k_S,x+S_x)) whose
+--     partner k_S_x is encoded in mg/l. As encoded, the Monod ratio is wrong by 1000x for every project.
+--     Proposal: split into two fields (S_x_schlammwasser in g/l for Gl.8, S_x_substrat in mg/l for Gl.3),
+--     or convert inside the engine. Structure change — must be ruled.
+-- (b) TR_PS / TR_UES (encoded '%'). §6.2.2 Gl.8 nomenclature p.39 offers "(g/l) oder (\%)"; §3.2 p.13/14
+--     gives only "\%". Gl. (8) only closes dimensionally with TR in g/l (kg/d ÷ (kg/d)/(g/l) = g/l).
+--     Proposal: unit -> 'g/l' for TR_PS and TR_UES (TR_Duees/TR_DS may stay % — Gl.6 uses them as a ratio).
+-- update public.fields set unit='g/l' where id in ('8b9a5ab0-cdef-47d6-906b-a0209951d8a1','9f52c2db-a0cd-4862-a6e6-671dc5550bd9');
+-- Rollback inverse: update public.fields set unit='%' where id in ('8b9a5ab0-cdef-47d6-906b-a0209951d8a1','9f52c2db-a0cd-4862-a6e6-671dc5550bd9');
+-- (c) i_x_PS / i_x_UES (encoded 'kg/kg'). Three printed declarations: §3.2 p.12 "kg/kg TR"; §6.2.2 Gl.7
+--     nomenclature p.39 "(kg/kg)"; Tab.5/Tab.6 p.40 "mg N/g oTS" and "mg P/g oTS". Gl. (7) multiplies
+--     i_x by GV (Glühverlust), so the reference base MUST be oTS — §3.2's "TR" base is wrong, and the
+--     Tab.5/6 values (25–50, 90–120 mg/g) are 1000x the kg/kg magnitude. Proposal: keep kg/kg but state
+--     the oTS base in the label, and have the importer/engine convert Tab.5/6 defaults by /1000.
+-- (d) ENGINE-SIDE, no schema change: Gl. (7) is printed with eta and GV in %, so B_d,x,Rück is 10^4 too
+--     large unless the engine divides both by 100. The guideline states no conversion. Needs a ruling on
+--     where the /100 lives (field unit vs. equation).
+
+
+-- ===========================================================================
+-- R-12 ☐ RATIFIED — is_required review (fields the source makes recommended / conditional / derived).
+-- (a) DERIVED-BUT-REQUIRED (#22 class): Q_SW is the output of Gl. (6), B_d_x_Rueck the output of Gl. (7),
+--     S_x the output of Gl. (8) — all three are is_required=true and hand-enterable. Proposal: false +
+--     read-only, value from the registered equation.
+-- update public.fields set is_required=false where id in ('c89cee44-16b9-49ac-8407-8d28bc8d3e26','7e0f15ad-bf33-415c-b8ab-534961782d24','bcb1b9a0-ffce-407e-995e-fa323ebc3c4f');
+-- (b) RECOMMENDATION, not obligation: HRT_denitritation ("wird empfohlen", §5.2.2 p.28) and
+--     csb_bedarf_denitritation ("ca. 3 g CSB_ext", §5.2.2 p.28 — an estimate) are is_required=true.
+-- update public.fields set is_required=false where id in ('adf9315a-5f70-48aa-b107-e94999911275','83cf0661-7c50-443c-8dde-d79df1a24921');
+-- (c) CONDITIONAL: verhaeltnis_no2_nh4 is is_required=true but §5.3.1 p.29 imposes it only for the
+--     zweistufige Deammonifikation. Proposal: false (or conditional-required on stufigkeit).
+-- update public.fields set is_required=false where id='fe528ac5-4a63-4cf8-b1f9-b7169f1eafab';
+-- (d) INCONSISTENCY the other way: c_quelle_typ is is_required=false while gate CR-009 blocks on
+--     'c_quelle_typ IS NOT NULL'. Ruling needed on which of the two moves (see R-5c).
+-- Rollback inverse: set is_required=true again for the ids in (a), (b), (c).
+
+
+-- ===========================================================================
+-- R-13 ☐ RATIFIED — field DESCRIPTION carries invented ranges (mu_max).
+-- Encoded description: "mu_max ohne Substratlimitierung; Tab.1 (AOB 0,3-2,3; NOB 0,45-1,7; AAO 0,008-0,16
+--   je nach Temperatur)". None of those three intervals is printed. Tabelle 1 (p.20) prints FOUR separate
+--   values per organism at TWO temperatures:
+--   "max. Wachstumsrate bei $12^{\circ} \mathrm{C}^{\prime \prime}$ & 1/d & 0,3-0,4 & 0,45-0,7 & 0,008-0,04 & > 3 (3)"
+--   "max. Wachstumsrate bei $30^{\circ} \mathrm{C}$ & 1/d & 1,8-2,3 & 1,2-1,7 & 0,06-0,16 & > 6 (6)"
+--   "0,3-2,3", "0,45-1,7" and "0,008-0,16" are UNIONS of the 12 °C and 30 °C rows (grep of the md: 0 hits
+--   each). This is the "invented range formed by unioning two printed intervals" class.
+-- update public.fields set description='mu_max ohne Substratlimitierung; Tab.1 (p.20) gibt getrennte Bandbreiten je Temperatur: bei 12 °C AOB 0,3-0,4, NOB 0,45-0,7, AAO 0,008-0,04; bei 30 °C AOB 1,8-2,3, NOB 1,2-1,7, AAO 0,06-0,16 (1/d). Zwischenwerte ueber den Temperaturkoeffizienten theta.'
+--  where id='ee2aadf4-1c2a-4bfd-98ee-3a54693afbd3';
+-- Rollback inverse: restore 'mu_max ohne Substratlimitierung; Tab.1 (AOB 0,3-2,3; NOB 0,45-1,7; AAO 0,008-0,16 je nach Temperatur).'
+
+
+-- ===========================================================================
+-- R-14 ☐ RATIFIED — enum option the guideline calls unsuitable.
+-- Field impfschlamm_quelle offers 'anreicherung' = "Anreicherung aus belebtem Schlamm/Bodenproben".
+-- Evidence (§7.2.3.2, printed p.55–56): "Falls kein Anammox-Schlamm zur Verfügung steht, kann die
+--   Anammox-Aktivität auch aus normalem belebten Schlamm oder aus Bodenproben angereichert werden. Die
+--   Anreicherungsprozedur ist aber sehr aufwendig (die Dauer der Inbetriebnahme bis zur Volllast ist
+--   erwartungsgemäß deutlich länger als sechs Monate) und somit als UNGEEIGNET zu betrachten."
+-- Proposal: keep the option but label it as the source does, so the picker does not present it as equal.
+-- update public.fields set enum_values = <same array with label_de of 'anreicherung' changed to
+--   'Anreicherung aus belebtem Schlamm/Bodenproben (laut M 349 ungeeignet, >6 Monate)'>
+--  where id='e86cbed8-132a-484d-b043-6357a9d11b80';
+-- Rollback inverse: restore the original label_de.
+
+
+-- ===========================================================================
+-- R-15 ☐ RATIFIED — equation outputs consumed by nothing (orphans) and a missing sizing equation.
+-- Of the 10 registered equation outputs, only 2 are consumed downstream (B_d_x_Rueck -> Gl.8;
+-- S_x -> Gl.3, and that link is the unit-broken one of R-11a). The other 8 are orphans: Q_SW, K_S43, v,
+-- dV_Batch_max, V_Teil, OV_d_NDN, OV_d_NiDi, OV_d_Deam — no equation and no gate reads them, and M349-08
+-- (Nachweis) has no field that reports them.
+-- The three OV_d values are the point of §6.4.4 (Belüftungsauslegung) and the whole of Tabelle 1's
+-- kinetics feeds v — computing them and dropping them on the floor is the "computed factor never applied
+-- downstream" class.
+-- Also MISSING: the guideline makes the reactor volume derivable — §6.4.3 p.44–45 "Die Bemessung der
+-- biologischen Volumina erfolgt entweder über die hydraulische Aufenthaltszeit oder über die
+-- Stickstoffraumbelastungen ..." and §5.4.2 p.33 gives the Raumbelastung bands — yet V_Reaktor is a
+-- hand-entered number with no equation behind it.
+-- Proposal: (i) surface OV_d_* and v on M349-08 as read-only Nachweis outputs; (ii) register
+-- V_Reaktor = B_d_N / N_raumbelastung as a derived equation with N_raumbelastung as the SR-2 selection.
+-- Both are structure changes — no SQL staged until ruled.
+
+
+-- ===========================================================================
+-- NEGATIVE RESULTS (checked, nothing found — recorded so their absence is auditable)
+--  * Empty gate conditions: NONE. All 27 rows have a non-empty condition string.
+--  * AND/OR inversions: NONE. CR-001 (4-way AND of bounds), CR-006 (OR of two schlammsystem branches),
+--    CR-017 (AND of two booleans) and CR-019 all evaluate in the printed direction.
+--  * Inverted conditions (gate firing on the complement of the printed case): NONE. CR-019 was checked
+--    explicitly — §6.4.8 obliges the CHECK to be PERFORMED ("ist der Speicher im Hinblick auf
+--    Ex-Schutz-Maßnahmen zu prüfen"), and the gate requires exactly that flag, not a passed test.
+--  * Presence-only conditions hiding a printed numeric limit: NONE. The two IS NOT NULL gates are CR-002
+--    (§6.2.1 prints no number for the 2-Wochen-Mittel) and CR-009 (§6.4.7 prints no number either — the
+--    3 g CSB/g NO2-N figure lives in §5.2.2 and belongs to a different field, see R-10b).
+--  * Phantom fields (enum-value tokens materialised as fields): NONE. All 92 fields carry a label_de, a
+--    description and a clause_reference.
+--  * Worksheets with zero fields: NONE. M349-01 6 · M349-02 24 · M349-03 17 · M349-04 8 · M349-05 12 ·
+--    M349-06 12 · M349-07 10 · M349-08 3 = 92.
+--  * Duplicate FIELDS (same symbol twice on one worksheet): NONE.
+--  * Invented values in field descriptions other than mu_max (R-13): NONE — every other numeric claim in
+--    a description was grepped against the md and found printed (theta 1,05-1,10/1,05-1,06/1,07-1,10/
+--    1,03-1,12; Y 0,12-0,14/0,02-0,09/0,11-0,16/0,45-0,75; k_S 0,7/2/0,1/1; Tab.5 70-90/75, 25-50/35,
+--    7-13/10, 45-65/55; Tab.6 55-75/72, 90-120/100, 25-80, 30-40/35; 0,2-0,5 and 0,5-2,0; >2/>6/10;
+--    1,3:1; 0,3 d; 3 and 5 g CSB; 20/40 min; 1-1,5 mg/l; 50-53 %; 1,2 d and >2 d; 2-50 mg/l; 200 mg/l;
+--    10-200 mg/l; 80 % and 8 kg/m3; >4 m; 3,5 %/d and 20 d; 15 %; 1,3/1,0/1,25; 4,33/3,24/1,94;
+--    25-35 °C; 0,05 and 6 mg/l; <5 and >20 mg/l NO2-N; <10 mg/l NH3-N; <1 mg/l HNO2-N).
+--  * Unit mismatch inside an equation, engine-independent: only the three of R-11 — Gl.4, Gl.5, Gl.6,
+--    Gl.9, Gl.10, Gl.11 and Gl.12 all close dimensionally as encoded (worked in the pack's per-equation
+--    verification_note).
+--  * Gates referencing a non-existent field or enum value: NONE (except the coverage hole of R-3, where
+--    an EXISTING enum value is covered by no branch).
+-- ============================================================================
