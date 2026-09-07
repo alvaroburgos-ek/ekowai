@@ -47,3 +47,4 @@ iso-14004-md-verification-pack.sql  ISO-14004
 iso-14064-1-md-verification-pack.sql  ISO-14064-1
 iso-14064-2-md-verification-pack.sql  ISO-14064-2
 iso-14067-md-verification-pack.sql  ISO-14067
+iso-9001-md-verification-pack.sql  ISO-9001

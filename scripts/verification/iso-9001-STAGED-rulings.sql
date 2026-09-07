@@ -1,0 +1,316 @@
+-- ============================================================================================
+-- ISO-9001 — STAGED rulings (WRITTEN, NOT APPLIED).  md-verification pass 2026-09-05 [VC]
+-- Source md : C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\ISO-9001\ISO-9001.md
+--             ISO 9001:2008 (cuarta edicion), OFFICIAL ISO Spanish translation. Source-quality CLEAN.
+-- Nothing in this file is in the apply pack.  Every block needs Alvaro's mark before it may run.
+-- Mark a block  ☑ RATIFIED  (and uncomment it) to release it; leave  ☐ RATIFIED  to hold it.
+-- No transaction control in this file by design (apply-pack.mjs owns BEGIN/COMMIT).
+-- ============================================================================================
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-01  ☐ RATIFIED — EDITION / PREMISE MISMATCH (no SQL; ruling only)
+-- --------------------------------------------------------------------------------------------
+-- The dispatch brief for this pass described ISO 9001 as a standard whose "clause 4.3 permits
+-- documented exclusions ('Nichtanwendbarkeit')".  That is ISO 9001:2015.  The transcript in the
+-- library, AND prod's own standards.version, are the 2008 fourth edition:
+--   standards.version = 'ISO 9001:2008 (cuarta edicion; traduccion oficial al espanol)'
+-- In the 2008 edition there is no clause 4.3.  The exclusion clause is 1.2 "Aplicacion" and the
+-- scope of exclusion is limited to Chapter 7:
+--   evidence (md line 185, printed p.1):
+--   "Cuando se realicen exclusiones, no se podra alegar conformidad con esta Norma Internacional a
+--    menos que dichas exclusiones queden restringidas a los requisitos expresados en el Capitulo 7
+--    y que tales exclusiones no afecten a la capacidad o responsabilidad de la organizacion para
+--    proporcionar productos que cumplan con los requisitos del cliente y los legales y reglamentarios
+--    aplicables."
+-- Encoding and transcript AGREE; the brief's premise does not.  Per SR-4 the reality-consistent path
+-- was taken and the pass was run against 2008.  RULING NEEDED: is 2008 the intended edition of record
+-- for this product?  ISO 9001:2008 was withdrawn in September 2018; a certifiable QMS today is audited
+-- against ISO 9001:2015.  If 2015 is wanted, this is a NEW encoding (new clause numbering 4-10, risk-based
+-- thinking, "informacion documentada" replacing the six documented procedures), not a fix to this one.
+-- Rollback inverse: none (no SQL).
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-02  ☐ RATIFIED — HOW CLAUSE 1.2 EXCLUSIONS MUST INTERACT WITH THE CHAPTER-7 BLOCK GATES
+--                    (the single largest enforcement defect in this encoding)
+-- --------------------------------------------------------------------------------------------
+-- The standard permits an organisation to exclude Chapter 7 requirements (md 183 + 185, p.1):
+--   "Cuando uno o varios requisitos de esta Norma Internacional no se puedan aplicar debido a la
+--    naturaleza de la organizacion y de su producto, pueden considerarse para su exclusion."
+-- The encoding HAS the register for this — field ISO-9001-01.exclusiones_cap7 ("Ausschluesse (nur Kap.7)")
+-- and ISO-9001-01.justificacion_exclusiones — but NO gate reads either field.  Meanwhile fourteen
+-- Chapter-7 gates are severity='block' with no exclusion predicate:
+--   CR-22 (7.1)  CR-23 (7.2.1)  CR-24 (7.2.2)  CR-25 (7.2.3)  CR-26 (7.3)   CR-27 (7.4.1)
+--   CR-28 (7.4.2) CR-29 (7.4.3) CR-30 (7.5.1)  CR-31 (7.5.2)  CR-32 (7.5.3) CR-33 (7.5.4)
+--   CR-34 (7.5.5) CR-35 (7.6)
+-- Consequence in production: an organisation that legitimately excludes 7.3 (no design authority),
+-- 7.5.2 (no special processes), 7.5.3 (no traceability requirement), 7.5.4 (no customer property) or
+-- 7.6 (no monitoring/measuring equipment) can never reach a conformity verdict, even though ISO 9001:2008
+-- expressly allows those exclusions.  The app over-enforces the standard.
+-- The reverse defect is also present: because nothing reads exclusiones_cap7, an engineer can declare an
+-- exclusion OUTSIDE Chapter 7 (e.g. "we exclude 8.2.2 internal audit") and the system will not object,
+-- although md 185 forbids exactly that.
+--
+-- PROPOSED DESIGN (needs ratification; it changes enforcement, so it is not in the pack):
+--   (a) every Chapter-7 gate gains a scope predicate of the form
+--         "<clause> NOT IN exclusiones_cap7 AND <existing condition>"
+--       i.e. the gate is inert for a clause the engineer has formally excluded;
+--   (b) a NEW block gate on ISO-9001-01 enforcing md 185 — an entry in exclusiones_cap7 whose clause is
+--       not under Chapter 7 is a conformity failure;
+--   (c) a NEW block gate on ISO-9001-01 enforcing 4.2.2 a) — if exclusiones_cap7 is non-empty then
+--       justificacion_exclusiones must be non-empty
+--       (md 247-248, p.3: "...que incluya: a) el alcance del sistema de gestion de la calidad, incluyendo
+--        los detalles y la justificacion de cualquier exclusion (vease 1.2),").
+--   The exclusion register is currently a free-text field, so (a) and (b) additionally require
+--   exclusiones_cap7 to become a structured multi-select over the Chapter-7 clause list.  That is a
+--   data-model change and is itself part of this ruling.
+-- Rollback inverse for (a): restore each gate's condition to the string recorded in the audit table below.
+--
+-- Recorded current conditions (rollback source of truth for R-02a):
+--   CR-22 'planificacion_realizacion_producto == true'
+--   CR-23 'requisitos_producto_determinados == true'
+--   CR-24 'revision_requisitos_producto == true'
+--   CR-25 'comunicacion_cliente == true'
+--   CR-26 'planificacion_diseno_desarrollo IS NOT NULL AND entradas_diseno IS NOT NULL AND resultados_diseno IS NOT NULL AND revision_diseno IS NOT NULL AND verificacion_diseno IS NOT NULL AND validacion_diseno IS NOT NULL AND control_cambios_diseno IS NOT NULL'
+--   CR-27 'proceso_compras == true'
+--   CR-28 'informacion_compras == true'
+--   CR-29 'verificacion_productos_comprados == true'
+--   CR-30 'control_produccion == true'
+--   CR-31 'validacion_procesos_produccion IS NOT NULL'
+--   CR-32 'identificacion_trazabilidad IS NOT NULL'
+--   CR-33 'propiedad_cliente IS NOT NULL'
+--   CR-34 'preservacion_producto == true'
+--   CR-35 'control_equipos_medicion == true'
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-03  ☐ RATIFIED — TEN BOOLEAN FIELDS GATED WITH "IS NOT NULL": the gate passes when the answer is NO
+-- --------------------------------------------------------------------------------------------
+-- Four block gates test boolean fields for presence rather than for truth.  A boolean set to FALSE
+-- satisfies "IS NOT NULL", so the gate fires green when the engineer has recorded that the duty was
+-- NOT discharged.  These gates enforce "the box was answered", not "the standard was met".
+--   CR-26 (block, 7.3)   — planificacion_diseno_desarrollo, entradas_diseno, resultados_diseno,
+--                          revision_diseno, verificacion_diseno, validacion_diseno, control_cambios_diseno
+--   CR-31 (block, 7.5.2) — validacion_procesos_produccion
+--   CR-32 (block, 7.5.3) — identificacion_trazabilidad
+--   CR-33 (block, 7.5.4) — propiedad_cliente
+-- Every one of those ten fields is data_type='boolean' (verified against the 2026-09-07 prod export).
+-- The 38 other block gates correctly use "== true", so this is an inconsistency inside one encoding,
+-- not a house convention.
+-- The printed duties are unconditional "debe" once in scope, e.g. md 472 (p.9):
+--   "Los resultados del diseno y desarrollo deben proporcionarse de manera adecuada para la verificacion
+--    respecto a los elementos de entrada para el diseno y desarrollo, y deben aprobarse antes de su liberacion."
+-- PROPOSED (hold together with R-02 — fixing this without R-02 makes over-enforcement worse):
+-- update public.compliance_requirements set condition = replace(condition, ' IS NOT NULL', ' == true')
+--   where code in ('ISO-9001-CR-26','ISO-9001-CR-31','ISO-9001-CR-32','ISO-9001-CR-33');
+-- Rollback inverse:
+-- update public.compliance_requirements set condition = replace(condition, ' == true', ' IS NOT NULL')
+--   where code in ('ISO-9001-CR-26','ISO-9001-CR-31','ISO-9001-CR-32','ISO-9001-CR-33');
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-04  ☐ RATIFIED — CR-02: block gate on a conditional duty, tested by presence, over a non-required field
+-- --------------------------------------------------------------------------------------------
+-- CR-02 (ws ISO-9001-01, severity=block) reads:
+--   condition = 'procesos_contratados_externamente IS NOT NULL'
+-- Three defects in one gate:
+--  (1) MISSING SCOPE PREDICATE — the printed duty is conditional (md 215, printed p.2):
+--      "En los casos en que la organizacion opte por contratar externamente cualquier proceso que afecte
+--       a la conformidad del producto con los requisitos, la organizacion debe asegurarse de controlar
+--       tales procesos."
+--      An organisation that outsources nothing owes nothing here, yet the gate blocks it.
+--  (2) PRESENCE-ONLY — the field is free text; typing "n/a" satisfies a block gate whose quote demands
+--      that the type and degree of control "debe estar definido dentro del sistema de gestion de la calidad".
+--  (3) FIELD/GATE INCONSISTENCY — fields.is_required = false for procesos_contratados_externamente while a
+--      block gate makes it mandatory in practice.
+-- PROPOSED: re-home the duty behind an "outsourcing exists?" boolean, or drop to severity='warn' until such a
+-- field exists.  Interim (severity only):
+-- update public.compliance_requirements set severity='warn' where code='ISO-9001-CR-02';
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='block' where code='ISO-9001-CR-02';
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-05  ☐ RATIFIED — THREE PERMANENT NO-OP GATES (condition = 'TRUE')
+-- --------------------------------------------------------------------------------------------
+-- CR-46 (ws-01, warn, §2;§3), CR-47 (ws-01, warn, §0.3) and CR-48 (ws-06, warn, §8.2.2 NOTA) all carry
+-- condition='TRUE'.  They can never fail, reference no field, and their source_quotes carry no requirement:
+--   CR-46 quotes the normative-reference list and the vocabulary sentence — no "debe".
+--   CR-47 quotes §0.3, an informative introduction clause — "pueden utilizarse de manera independiente".
+--   CR-48 quotes a NOTA — guidance, expressly non-normative per md 112 ("La informacion identificada como
+--         'NOTA' se presenta a modo de orientacion para la comprension o clarificacion del requisito").
+-- They are the only three duplicate conditions in the encoding (all three are the literal 'TRUE').
+-- Severity is correctly 'warn' (not block) in all three cases, so the harm is noise, not over-enforcement.
+-- NOTE ON THE MECHANISM: compliance_requirements has no `active` column (base DDL
+-- supabase/migrations/20260520120000_db_driven_rebuild.sql:101-111; the only later ALTER adds `description`).
+-- So a gate is retired here either by DELETE or by dropping severity to 'info' (the third value allowed by the
+-- severity CHECK).  'info' is proposed — it keeps the reference text visible without implying a check.
+-- PROPOSED: re-home the content as worksheet guidance text; interim severity downgrade:
+-- update public.compliance_requirements set severity='info'
+--   where code in ('ISO-9001-CR-46','ISO-9001-CR-47','ISO-9001-CR-48');
+-- Rollback inverse:
+-- update public.compliance_requirements set severity='warn'
+--   where code in ('ISO-9001-CR-46','ISO-9001-CR-47','ISO-9001-CR-48');
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-06  ☐ RATIFIED — CR-48 source_quote is a FABRICATED VERBATIM (worst quote defect in this standard)
+-- --------------------------------------------------------------------------------------------
+-- CR-48 presents inside quotation marks: "Vease la Norma ISO 19011 a modo de orientacion."
+-- The standard prints (md 621, printed p.14):  "NOTA Vease la Norma ISO 19011 para orientacion."
+-- The phrase "a modo de orientacion" appears nowhere in §8.2.2.  It exists at md 112 (Introduction 0.1,
+-- about NOTAs generally) and in a garbled Anexo B row (md 1231); it has been carried into a quotation-marked
+-- citation of a different clause.  This is an invented completion under SR-1, not an elision.
+-- PROPOSED (quote correction only — no enforcement change; still staged because it edits a gate row):
+-- update public.compliance_requirements
+--    set source_quote = '§8.2.2 NOTA: "Véase la Norma ISO 19011 para orientación." (nota/orientación)'
+--  where code = 'ISO-9001-CR-48';
+-- Rollback inverse:
+-- update public.compliance_requirements
+--    set source_quote = '§8.2.2 NOTA: "Véase la Norma ISO 19011 a modo de orientación." (nota/orientación)'
+--  where code = 'ISO-9001-CR-48';
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-07  ☐ RATIFIED — CR-19 source_quote deletes the standard's own applicability qualifier
+-- --------------------------------------------------------------------------------------------
+-- CR-19 (block, §6.2.2) quotes item b) as: "b) proporcionar formacion o tomar otras acciones,"
+-- The standard prints (md 374, printed p.7):
+--   "b) cuando sea aplicable, proporcionar formacion o tomar otras acciones para lograr la competencia necesaria,"
+-- The words "cuando sea aplicable" — the qualifier that makes the duty conditional — were removed without an
+-- elision marker from the justification of a BLOCK gate.  (The gate's condition happens to be correct: it does
+-- NOT test formacion_proporcionada, and that field is is_required=false, both consistent with the real text.
+-- The defect is the quote, which would mislead the next reader into tightening the gate.)
+-- PROPOSED: restore the qualifier in the source_quote.  Rollback inverse = re-store the current string.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-08  ☐ RATIFIED — 34 of 48 gate source_quotes are paraphrases, not verbatim
+-- --------------------------------------------------------------------------------------------
+-- Every gate source_quote was scored against the transcript (6-word-window match).  Result: 14 VERBATIM
+-- (CR-01, 02, 06, 08, 12, 20, 21, 26, 27, 29, 30, 35, 40, 45, 47) and 34 with at least one fragment that
+-- does not exist in the standard.  Dominant, systematic defects:
+--   * "SGC" substituted for the printed "sistema de gestion de la calidad" (CR-04, 07, 11, 15, 17, 18, 19,
+--     22, 26, 37, 38, 42, 43 …) — the abbreviation is never used in the normative text of this edition;
+--   * sub-item lists silently compressed, e.g. CR-09 renders §5.3 c) "proporciona un marco de referencia
+--     para establecer y revisar los objetivos de la calidad" as "c) proporciona un marco de referencia para
+--     los objetivos" — a shorter completion invented inside quotation marks;
+--   * grammar rewritten, e.g. CR-24 "antes de comprometerse a proporcionar un producto" for the printed
+--     "antes de que la organizacion se comprometa a proporcionar un producto al cliente" (md 424);
+--   * CR-33 rewrites §7.5.4 twice: "mientras esten bajo su control o uso" for "mientras esten bajo el control
+--     de la organizacion o esten siendo utilizados por la misma" (md 561);
+--   * CR-05 joins two non-adjacent paragraphs (md 254 and md 256) with a full stop and no ellipsis, dropping
+--     the intervening sentence about records;
+--   * CR-40 elides "de otra manera por una autoridad pertinente y, cuando corresponda," from §8.2.4 (md 634);
+--     the elision IS marked, but it changes the meaning — it makes customer approval look like the only
+--     release route, when the standard also allows a "autoridad pertinente".
+-- Ranked worst: CR-48 (fabricated wording, R-06) > CR-19 b) (deleted applicability qualifier, R-07) >
+--               CR-09 c) (invented shorter completion) > CR-40 (meaning-changing elision) > CR-33/CR-24 (rewrites)
+--               > the SGC-abbreviation class (cosmetic but pervasive).
+-- PROPOSED: replace all 34 source_quotes with byte-exact transcript spans (the same generator that produced the
+-- apply pack can emit them).  Held here because source_quote is the evidence of record for enforcement.
+-- Rollback inverse: restore from the 2026-09-07 export (fields-ISO-9001.json), which retains every current string.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-09  ☐ RATIFIED — CR-01 source_quote does not justify what CR-01 enforces
+-- --------------------------------------------------------------------------------------------
+-- CR-01 (block, §4.1) tests   procesos_qms_determinados == true AND secuencia_interaccion_procesos == true
+-- i.e. §4.1 a) and b).  Its source_quote is the §4.1 chapeau (md 204):
+--   "La organizacion debe establecer, documentar, implementar y mantener un sistema de gestion de la calidad ..."
+-- which is a different (broader) obligation.  The sentence that licenses the condition is md 206-208:
+--   "La organizacion debe: a) determinar los procesos necesarios para el sistema de gestion de la calidad y su
+--    aplicacion a traves de la organizacion (vease 1.2), b) determinar la secuencia e interaccion de estos procesos,"
+-- Separately: §4.1 prints SIX items a)-f); only a) and b) are encoded as fields at all.  c) criteria and methods,
+-- d) availability of resources and information, e) monitoring/measurement/analysis, f) actions to achieve planned
+-- results are NOT captured anywhere in this standard's 69 fields.  MISSING FIELDS + MISSING GATE COVERAGE.
+-- PROPOSED: retarget the quote, and add fields + gate terms for §4.1 c)-f).  Rollback inverse = current string.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-10  ☐ RATIFIED — MISSING GATES for printed "debe" obligations (orphan required fields)
+-- --------------------------------------------------------------------------------------------
+-- Eight of 69 fields are referenced by no gate.  Three of them carry an unconditional printed duty and
+-- is_required=true, so the obligation exists in the form but nothing enforces it:
+--   ISO-9001-01.alcance_qms (req=true, §4.2.2 a))
+--     md 247-248 p.3: "La organizacion debe establecer y mantener un manual de la calidad que incluya:
+--     a) el alcance del sistema de gestion de la calidad, incluyendo los detalles y la justificacion de
+--     cualquier exclusion (vease 1.2),"   — CR-04 only tests 'manual_calidad IS NOT EMPTY'.
+--   ISO-9001-01.procedimientos_documentados_requeridos (req=true, §4.2.1 c))
+--     md 233 p.3: "c) los procedimientos documentados y los registros requeridos por esta Norma Internacional, y"
+--   ISO-9001-07.tratamiento_no_conformidad (req=true, §8.3 a)-d))  — see R-11.
+-- Correctly ungated (no action needed, recorded so their absence is auditable):
+--   nombre_organizacion (app metadata), producto_servicio (scope), exclusiones_cap7 + justificacion_exclusiones
+--   (subject of R-02), formacion_proporcionada (§6.2.2 b) is scoped "cuando sea aplicable" — the encoding is right).
+-- PROPOSED: three new gates.  Held because adding a block gate changes enforcement.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-11  ☐ RATIFIED — §8.3 says "una o mas"; the encoded enum is single-select
+-- --------------------------------------------------------------------------------------------
+-- Field ISO-9001-07.tratamiento_no_conformidad is data_type='enum' with exactly the four printed options
+-- (eliminar / concesion / impedir_uso / accion_post_entrega).  The four values match §8.3 a)-d) faithfully —
+-- no invented value, no missing value.  But the standard prints (md 640, printed p.15):
+--   "Cuando sea aplicable, la organizacion debe tratar los productos no conformes mediante una o mas de las
+--    siguientes maneras:"
+-- A single-select cannot express "una o mas".  An organisation that both eliminates the nonconformity and takes
+-- post-delivery action cannot record that.
+-- PROPOSED: convert to multi-select; then gate it (non-empty selection required whenever a nonconformity is
+-- recorded).  Data-model change -> staged.  Rollback inverse: revert data_type to 'enum'.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-12  ☐ RATIFIED — is_required review (no changes proposed; recorded so the review is auditable)
+-- --------------------------------------------------------------------------------------------
+-- All 69 fields were checked against the modal verb of their clause.  Findings:
+--   * The 12 fields with is_required=false are exactly the ones the standard itself scopes:
+--     formacion_proporcionada (6.2.2 b) "cuando sea aplicable"), the seven 7.3.x design fields (excludable
+--     under 1.2), validacion_procesos_produccion (7.5.2, conditional), identificacion_trazabilidad (7.5.3
+--     "Cuando sea apropiado"), propiedad_cliente (7.5.4, conditional), exclusiones_cap7 +
+--     justificacion_exclusiones (1.2, conditional), procesos_contratados_externamente (4.1, conditional).
+--     NO is_required change is proposed — the flags already track the printed modality.
+--   * The contradiction is not in the flags but in the gates: four of those non-required fields are
+--     nevertheless made mandatory by block gates (R-02, R-03, R-04).  Fix the gates, not the flags.
+--   * No field in this standard rests on "should/recommended/for example" text, so no is_required=false
+--     proposal on soft-modality grounds arises.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-13  ☐ RATIFIED — clause_reference retags (two, both cosmetic)
+-- --------------------------------------------------------------------------------------------
+--   CR-46.clause_reference = '2; 3'  — a composite value; every other row carries a single clause.
+--     Split into two rows or retag to '3' (the vocabulary sentence it actually quotes).
+--   CR-26.clause_reference = '7.3'   — the only gate pointing at a 2nd-level clause while its seven operands
+--     live on 7.3.1-7.3.7.  Consistent with the "one gate for the whole excludable block" design; recorded,
+--     not proposed for change, because R-02 may replace the gate wholesale.
+-- No mis-homed gate was found: every gate that references fields references only fields of its own worksheet
+-- (checked mechanically across all 48).  ISO-9001-06 legitimately hosts the §5.6 management-review fields and
+-- their gates CR-15/16/17 — gate and fields agree, so this is a worksheet-design choice, not a re-home.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-14  ☐ RATIFIED — severity notes (block gates anchored on scoped text)
+-- --------------------------------------------------------------------------------------------
+-- No block gate in this standard is anchored on non-normative text: every block gate quotes a "debe" sentence,
+-- and the only three gates quoting NOTAs / informative clauses are already severity='warn' (R-05).  That part of
+-- the encoding is sound.
+-- The block gates that DO deserve a severity note are those whose "debe" is scoped by the standard itself, so
+-- that blocking is right in scope and wrong out of scope:
+--   CR-02 (4.1, "En los casos en que ... contratar externamente")     -> see R-04
+--   CR-31 (7.5.2, "cuando los productos resultantes no pueden verificarse mediante seguimiento o medicion posteriores")
+--   CR-32 (7.5.3, "Cuando sea apropiado" / "Cuando la trazabilidad sea un requisito")
+--   CR-33 (7.5.4, applies only where customer property is under the organisation's control)
+--   CR-26 (7.3, excludable in full under 1.2)
+-- The correct remedy is a scope predicate (R-02), not block->warn; a plain downgrade would under-enforce a real
+-- "debe" for the organisations that ARE in scope.  Recorded so the choice is deliberate.
+
+
+-- --------------------------------------------------------------------------------------------
+-- R-15  ☐ RATIFIED — no phantom fields; nothing proposed for active=false
+-- --------------------------------------------------------------------------------------------
+-- Checked for the phantom class (enum-value tokens materialised as fields: symbol with no label, no clause,
+-- no description, referenced by no equation and no gate).  NONE found — all 69 fields carry a label_de, a
+-- description and a clause_reference, and the four §8.3 treatment options live correctly inside the
+-- enum_values JSONB of tratamiento_no_conformidad rather than as separate field rows.
+-- No field deactivation is proposed for this standard.
