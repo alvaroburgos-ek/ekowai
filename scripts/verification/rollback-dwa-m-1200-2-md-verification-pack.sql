@@ -1,0 +1,28 @@
+-- Rollback for dwa-m-1200-2-md-verification-pack.sql (2026-09-05).
+-- Reverts ONLY rows this pack touched (identified by the verification_note tag) and ONLY for standard DWA-M-1200-2
+-- (joined through worksheet_templates → standards.code). Prior status was MIXED in the 2026-09-05 export, so each group is
+-- restored to its own prior value: 62 fields needs_engineer_review, 22 fields imported_unverified (incl. the one exempt row
+-- project_id, which the pack set to inferred_from_worksheet). verification_quote / verification_note / verified_at were null
+-- before the pack on every field and on every equation and are nulled again. The 4 equations were needs_engineer_review and
+-- return to it. Gates untouched; STAGED file never applied; the encode-time source_quote column is separate and stays.
+
+-- ---- fields group: prior status = needs_engineer_review (62 rows) ----
+update public.fields f set verification_status='needs_engineer_review', verification_quote=null, verification_note=null, verified_at=null
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = f.worksheet_template_id and s.code = 'DWA-M-1200-2'
+   and f.id in ('07c1546d-ebd7-4421-a1f9-8e30c1e227ba','ebb5b614-50ee-4417-9b3c-aff4b5c6708a','fd771138-32ea-419b-b562-684b24b9a84c','84bbe890-36ed-4b0d-9f52-514b844fb034','63ca9016-3141-4273-8c0c-5be30a3d2d47','2bcfc2b2-93e1-4646-a48b-3b97c59d8149','d95e6288-85e9-4166-8dbc-e31dcf8469c5','06e58631-7516-45ff-a85f-3ff845688535','492b9e0d-cf57-45ec-95bc-d83b3fea0427','14c4e332-767a-4f0c-b8aa-b4682767b027','a4cc85e2-8a0d-4164-95ce-1d9ab181df64','87344f00-68df-4bee-9c15-5170ebe501d0','29b26c65-d926-46f4-a19d-6e0e12d0f3bb','00657934-0b75-4720-a732-90890d0b05b1','2ae37094-fbbd-45a8-b1d2-c169da6bcbda','a4030ba5-1d36-43d3-92d0-f0c4b3bca362','404517eb-4b7e-49f9-913b-62104b61a97d','69160003-0a55-4598-bc3f-f69b05797d6a','99daef14-0b1c-41d1-85a8-cd978f5e3a9d','ab3ac65b-602a-479a-889f-745f2f6f214c','253e733d-ca69-4cfe-ab5e-a372a52a4fda','9e838a05-17fd-461e-8e8f-76a6c4c9f519','50801cba-9cb2-48ec-bb0e-2175c2468c99','56a0f534-1407-4b66-928c-f920cf176aa1','135c5574-a010-4f20-9d12-f0a7f6253abf','ac39e979-eda5-45f0-80b9-bff8fe236af7','43e38d07-667f-4129-9fe7-597f4371f267','cb83df8a-3ad0-49ef-8d6d-9df16aa1ba37','069e9f4b-6362-4bc5-b6a3-d0e8889232d7','e4ff0ac2-956e-448e-9f19-1b0e7e8ccec7','f60f4fce-6497-48d3-bfaf-2a2d02243a5a','d1c3dcf3-5577-405b-871d-4d558aed7934','199a742b-8a14-431d-979d-d1e33d2a6839','e855a7cf-08fd-4993-bd8a-05d614248f26','096a7a4c-f045-4cf8-ac21-67f4ec120708','10cd832e-ea38-48e7-b810-8bd218e56c95','8e9a7d67-d59b-44db-bedb-6ca1dda5c49e','92b774ce-18b7-4bef-9859-63fd8438ddc0','e8bb586a-a6c0-429a-b5f4-e1b092a13771','bc999811-619f-49d3-81b3-7207b0c57e12','75493198-1c44-4994-98f1-705b77e8c00e','c40016d6-65a3-459b-b466-fd09d56b1579','71a10f4e-5e86-4fa4-95c7-2f195b2608a5','e523c073-5bb5-48e3-83b1-9577e018689d','bb9e4de7-3f22-4d7e-992c-e45d2e49f137','8cf0df0a-9ca4-4f70-a933-fa0ee6cafb6c','b9dfeb45-db1f-442e-81ed-a1a4ba79c638','5aabf687-6325-49a9-8fd5-a7796e0bc38e','74a4e385-b121-449d-abbb-ecaf41a1d1ff','44e8491f-b0ce-412e-b143-51db33952dd8','b6236b56-58fd-472b-a136-230937d76854','fe143fcf-165e-465b-a0a2-6f513d9692aa','cfd48aff-b6e0-41f7-b5e2-1754c6cd421c','173bbce9-5f73-4d5f-b305-2c6cd2a0bacf','d95a643f-43a4-4064-a021-674895351325','58d5d015-f3b3-4ed6-bfa5-dd0f4623d6eb','5e203da0-a355-44b0-a9c7-cf8309419273','900ea80a-ec7c-441f-a8e6-b75e94664a61','6eb4906c-15d0-4d9f-85f3-782fc3f32877','9b7748e2-5bb5-48a3-92d8-8bae21a32b32','8302e520-a5f4-4a84-95b7-90d78e344a52','deed98af-3806-4a61-ae5b-e9a8954ac2ed')
+   and (f.verification_note like 'md-verified 2026-09-05%' or f.verification_note like 'md-pass 2026-09-05%');
+
+-- ---- fields group: prior status = imported_unverified (22 rows; includes the exempt project_id row) ----
+update public.fields f set verification_status='imported_unverified', verification_quote=null, verification_note=null, verified_at=null
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = f.worksheet_template_id and s.code = 'DWA-M-1200-2'
+   and f.id in ('3917616f-70c7-4065-8381-1a1d7994af21','1fe418ca-640b-4754-a796-daf3f15a260f','6d45fb3b-45e8-46e6-9735-d678489bd218','fda53b81-3a19-4b56-a70a-846c87882b3f','4646b040-51b1-48d5-88eb-25722d4a501c','57a4444b-f43d-4394-a44d-4eb883364602','2071c626-1efd-4475-a1ef-3009ee57900a','d4a33a80-03f4-4c14-a677-79617b6f6177','83ae33fd-8f1b-4844-9e7a-fe5b8b7838c5','5b647bfc-7a8f-4292-9aae-c77415f0d5d0','35b12960-adbc-4e2e-8550-665acb8ed126','e8c23f61-df2b-4e53-a244-3dff18abb89a','96e705f1-4422-4ece-8a48-c91c4c9f0453','9ac3c53f-de43-4a56-be3c-af1fed36d682','5d066d07-2d87-44db-83b3-222f13eb2f2b','d9992106-a5ce-43fe-aac4-163f8080f5f7','ee41092b-cf9c-40b9-af0e-3f80fe72c444','81d37c77-61a9-4bca-937a-a965e996f180','29ddd819-bfed-4043-8460-807caf187e78','0e90661c-0af6-4a11-bef6-c50ce85b8b46','a66370c5-2688-4273-9856-8fc883818156','ce41428b-0fd9-441f-8f67-118471a5536e')
+   and (f.verification_note like 'md-verified 2026-09-05%' or f.verification_note like 'md-pass 2026-09-05%');
+
+-- ---- equations: 4 rows — prior status = needs_engineer_review ----
+update public.equations e set verification_status='needs_engineer_review', verification_quote=null, verification_note=null, verified_at=null
+  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+ where wt.id = e.worksheet_template_id and s.code = 'DWA-M-1200-2'
+   and e.id in ('0ad3e66f-58bc-4869-9dc6-f5e888345f06','e872edf5-09d1-4d27-9238-08a6dc519392','0f237c28-2fc3-451a-b557-9dfe44231ef2','93bc49a5-c3f8-4aa1-9226-85bc436ec4ef')
+   and e.verification_note like 'md-verified 2026-09-05%';

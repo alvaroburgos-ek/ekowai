@@ -1,0 +1,298 @@
+-- ============================================================================
+-- DWA-M-1200-2 — STAGED, WRITTEN-NOT-APPLIED (owner rulings; each block changes structure, enforcement or
+-- required-ness, so it sits outside the pre-authorised evidence-capture class). 2026-09-05, md pass [VC].
+-- DRAFT EDITION (Gelbdruck Juli 2025, Frist zur Stellungnahme 30.09.2025): EVERY block below is "draft-edition: escalate"
+--   — the Weißdruck may change the values (Tab. E.1 says so explicitly); nothing here should be applied without the owner
+--   confirming the edition.
+-- Apply only after Alvaro marks each block RATIFIED. Rollback = inverse statements noted per block.
+--
+-- Evidence quotes cite the md transcript C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-2\DWA-M_1200-2_GD.md (mathpix LaTeX;
+--   NO page-number lines — "printed p.N" derived from the Inhalt/Tabellenverzeichnis and cross-checked against the mathpix
+--   image indices, which equal the printed page; see the pack header).
+-- Gate rows live in compliance_requirements (evaluate.ts grammar) — inserts/edits below are written as specs.
+-- Standard id 89c47ec6-eee8-45e7-aa98-d23a404550d3. Worksheet ids (prefix): 01 f48b51ef · 02 27de2f44 · 03 073edc9d ·
+--   04 66ea224c · 05 0d06f719 · 06 4bf0af6c · 07 290a573c · 08 fd596f8c · 09 dcc0f089 · 10 86ea0c60 · 11 8a92f2ff ·
+--   12 7c94694b · 13 22ee1863 · 14 6320b289 · 15 f855cf73 · 20 6bd7d64e · 21 53956ab9 · 23 d38520b2 · 25 2453173b.
+-- Context: 15 gates (9 block / 6 warn); all 12 source_quotes re-checked against the md — 6 exist verbatim (REQ-01 §1 p.10,
+--   REQ-04 §3.3.2 p.19, REQ-07 §3.3.4 p.23–24, REQ-03 §3.1 p.15, REQ-11 §6.4 p.51, REQ-06 C.1 p.74 in ASCII), 5 are ASCII
+--   transliterations with "..." elisions (REQ-05 §3.3.3 p.21, REQ-09 §5.2 p.34, REQ-10 §5.4.3 p.40, REQ-12 §5.4.2/§7.3,
+--   REQ-14/REQ-15 §8.1 p.57) — values and wording correct. 3 gates carry NO quote and NO condition (REQ-02, REQ-08) or NO quote
+--   (REQ-13). The encode-time gate page refs ("gedr. S. 10/19/23–24/14/51") agree with the Inhalt-derived pages (§3.1 prose
+--   sits on p.15, not p.14 — one-page slip).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1 · CLAUSE_REFERENCE RETAGS (evidence: where the quoted sentence actually sits in the md).   draft-edition: escalate
+--   (a) REQ-05 (c3097c01, ws 05, block) clause "3.3.4 (vereinfachtes Validierungsmonitoring)" — its quote ("Abweichend von der
+--       Mindestanzahl gemäß EU-WasserWVVO … je 16 korrespondierende Proben im Zulauf und Ablauf zu nehmen") is §3.3.3
+--       Inbetriebnahmephase (md 679, printed p.21); §3.3.4 is the analytics/sampling clause.
+--       Proposal: clause_reference = '3.3.3 (vereinfachtes Validierungsmonitoring); Anhang C.2 / C.3'.
+--   (b) field uv_dosis_referenz (44e8491f, ws 11) clause "§5.4.3; DVGW W 294-1" — "Nachweis einer Referenzdosis ≥ 40 mJ/cm²"
+--       is Tab. 4 UV row (md 785, p.27); §5.4.3 (md 1070, p.41) only prints the photoreactivation threshold "größer als
+--       40 mJ/cm² (=400 J/m²)". The encode-time source_quote fuses both. Proposal: clause_reference = 'Tabelle 4 (UV-Desinfektion,
+--       §3.3.6); §5.4.3; DVGW W 294-1'.
+--   (c) field reaktor_hydraulik_charakterisiert (35b12960, ws 11) clause "§5.4.1" — the sentence "Der Reaktor muss hydraulisch
+--       charakterisiert sein durch Strömungssimulationen und/oder Tracer-Versuche" is Tab. 4 Ozon row (md 804, p.27); the Chlor
+--       row (md 791) prints the same for Ct proof. §5.4.1 has no such text. Proposal: clause_reference = 'Tabelle 4 (§3.3.6,
+--       Ozon-/Chlorbasierte Desinfektion)'.
+--   (d) field bettvolumen_durchgesetzt (c40016d6, ws 10) clause "§5.3; Anhang E" — Tab. E.1 prints no Bettvolumen; the
+--       "0 bis 35000 Bettvolumen" is Tab. B.1 Ozon/BAK Schweinfurt row (md 1641). Proposal: clause_reference = '§5.3; Tabelle B.1
+--       (Schweinfurt Ozon/BAK)'.
+--   (e) fields reinigungskonzept (96e705f1) and notueberlauf (5d066d07), both ws 13, clause_reference NULL — both sentences are
+--       §7.3 Bauformen bullets (md 1410–1411, p.56). Proposal: clause_reference = '§7.3' on both.
+--   (f) field permeatfluss (58d5d015, ws 13) clause "Tabelle 6; Tabelle 4" + description "Online-Durchfluss MF/UF gemäß
+--       Tabelle 6" — Tab. 6 MF/UF row (md 1304–1310) prints "Trübung / Integritätsmessung (z. B. Druckhaltetest)" only; Durchfluss
+--       is in the MBR, Medienfiltration and UV rows. Permeatfluss is printed in Tab. 4 (md 805) and Tab. E.1 (Flux). Proposal:
+--       clause_reference = 'Tabelle 4 (MF/UF); Tabelle E.1' and description = 'Permeatfluss MF/UF (Betriebsbedingung gemäß
+--       Tabelle 4; Referenzwert Tabelle E.1)'.
+--   (g) field sekundaerdesinfektion_verfahren (29ddd819, ws 14) clause "§5.4.2; §7.3" — the method choice ("Chlordioxid das
+--       Desinfektionsmittel der Wahl" for Restdesinfektion) is §5.4.3 (md 1135, p.43). Proposal: clause_reference = '§5.4.2; §5.4.3
+--       (Restdesinfektion); §7.3'.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)
+-- update public.compliance_requirements set clause_reference='3.3.3 (vereinfachtes Validierungsmonitoring); Anhang C.2 / C.3' where id='c3097c01-d430-4ccc-8f6a-6010aa7db3c4';
+-- update public.fields set clause_reference='Tabelle 4 (UV-Desinfektion, §3.3.6); §5.4.3; DVGW W 294-1' where id='44e8491f-b0ce-412e-b143-51db33952dd8';
+-- update public.fields set clause_reference='Tabelle 4 (§3.3.6, Ozon-/Chlorbasierte Desinfektion)' where id='35b12960-adbc-4e2e-8550-665acb8ed126';
+-- update public.fields set clause_reference='§5.3; Tabelle B.1 (Schweinfurt Ozon/BAK)' where id='c40016d6-65a3-459b-b466-fd09d56b1579';
+-- update public.fields set clause_reference='§7.3' where id in ('96e705f1-4422-4ece-8a48-c91c4c9f0453','5d066d07-2d87-44db-83b3-222f13eb2f2b');
+-- update public.fields set clause_reference='Tabelle 4 (MF/UF); Tabelle E.1', description='Permeatfluss MF/UF (Betriebsbedingung gemäß Tabelle 4; Referenzwert Tabelle E.1)' where id='58d5d015-f3b3-4ed6-bfa5-dd0f4623d6eb';
+-- update public.fields set clause_reference='§5.4.2; §5.4.3 (Restdesinfektion); §7.3' where id='29ddd819-bfed-4043-8460-807caf187e78';
+-- Rollback: restore '3.3.4 (vereinfachtes Validierungsmonitoring)' · '§5.4.3; DVGW W 294-1' · '§5.4.1' · '§5.3; Anhang E' · NULL (both) ·
+--   'Tabelle 6; Tabelle 4' + description 'Online-Durchfluss MF/UF gemäß Tabelle 6; Validierungsgrundlage Tabelle 4 Zeile 6.' · '§5.4.2; §7.3'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2 · DEAD GATES — rows with NO condition (they can never fire).   draft-edition: escalate
+--   REQ-02 (89edda51, ws 03, warn, clause "3.3 (Tabelle 3)", no quote, no condition) and REQ-08 (8502aa21, ws 08, warn, clause
+--   "3.3.2 (Multibarrierenansatz)", no quote, no condition). evaluate.ts cannot evaluate an empty condition. Both topics are
+--   printed hard: §3.3.1 (md 614, p.19) "Durch die Überwachung zur Validierung ist vor dem regulären Betrieb … nachzuweisen, dass
+--   die in Tabelle 3 genannten Leistungsziele … zuverlässig und beständig erreicht werden." and §3.3.2 (md 640, p.19) "werden die
+--   … ermittelten log10-Reduktionen für einzelne Aufbereitungsstufen jeweils zu einer Gesamtreduktion addiert (Mehrfachbehandlung,
+--   Multibarrierenansatz)". No field on ws 03 / ws 08 can carry either (ws 08 has NO fields at all).
+--   Proposal: (i) REQ-02 → condition 'validierungsmonitoring_typ IS NOT NULL AND leistungsziel_log10 IS NOT NULL', re-home to
+--   ws 04 (66ea224c), source_quote = the §3.3.1 sentence; (ii) REQ-08 → delete, OR add a json field aufbereitungsstufen_log10
+--   (stage-wise LRV list) on ws 04 with an engine sum — GRAMMAR: no array-sum in evaluate.ts; RULING on mechanism.
+-- ☐ RATIFIED (i)  ☐ (ii)
+-- update public.compliance_requirements set worksheet_template_id='66ea224c-bf6a-4d01-8aed-a1f15140d97d', condition='validierungsmonitoring_typ IS NOT NULL AND leistungsziel_log10 IS NOT NULL', source_quote='Durch die Überwachung zur Validierung ist vor dem regulären Betrieb von Einrichtungen zur Aufbereitung des wiederzuverwendenden Wassers nachzuweisen, dass die in Tabelle 3 genannten Leistungsziele zur Reduktion von mikrobiellen Indikatororganismen zuverlässig und beständig erreicht werden. [DWA-M 1200-2 §3.3.1, printed p.19]' where id='89edda51-775c-4907-815b-bbf0ee7a4638';
+-- delete from public.compliance_requirements where id='8502aa21-f235-4146-8d6d-d8126084adf7';
+-- Rollback: restore REQ-02 worksheet 073edc9d, condition '' and source_quote NULL; re-insert REQ-08 (ws fd596f8c, warn, clause '3.3.2 (Multibarrierenansatz)', condition '', quote NULL).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3 · ATTESTATION GATE (REQ-15, 14f72eaf, ws 15, warn, requires_attestation=true, no condition).
+--   Quote exists (§8.1 md 1442, p.57, ASCII). "Eine belastbare Kostenermittlung ist eine wichtige Voraussetzung … gemäß DIN 276"
+--   is the engineer's own duty — fine as attest, warn severity fits ("üblicherweise … herangezogen"). NOTE ONLY: no attest field
+--   is exported for ws 15, so the attestation has no carrier; verify in the browser pass. No SQL.
+-- ☐ RATIFIED (note)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4 · SEVERITY / CONDITION notes on existing gates.   draft-edition: escalate
+--   (a) REQ-11 (92e88c19, ws 13, BLOCK) = 'messhauefigkeit == online AND alarm_verzoegerung_min <= 30'. Both halves are printed as
+--       "sollte(n)": §6.4 (md 1289, p.51) "Abweichungen vom zulässigen Betriebsfenster sollten je nach System nach 5 min bis 30 min
+--       eine Alarmierung auslösen." and Tab. 6 (p.52) is a "Beispiel" that itself prints Täglich/Wöchentlich for some parameters.
+--       Proposal: severity block → warn; keep condition.
+--   (b) REQ-07 (b3c91902, ws 06, BLOCK) = 'analytisches_labor_akkreditiert == true AND probenstabilitaet_h <= 72 AND
+--       probennahme_typ == mischprobe_24h'. Term 1 is hard (§3.3.4 md 702 "ist … zu beauftragen"). Term 3 OVER-ENFORCES: §3.3.4
+--       (md 721, p.24) "Dies erfolgt bevorzugt durch Mischproben über 24 h … Alternativ können qualifizierte Stichproben oder
+--       einfache Stichproben verwendet werden" — the printed alternatives are blocked. Term 2 is an expectation, not a limit
+--       (md 723 "ist bis zu 72 h … zu erwarten"). Proposal: split — REQ-07 condition = 'analytisches_labor_akkreditiert == true'
+--       (block) + NEW REQ-07b (ws 06, WARN, §3.3.4) 'probenstabilitaet_h <= 72 AND probennahme_typ IS NOT NULL'.
+--   (c) REQ-05 (c3097c01, ws 05, BLOCK) = 'validierungsmonitoring_typ == ''vereinfacht'' AND probenanzahl_zulauf >= 16'. With AND
+--       semantics the gate FAILS for every umfängliches Validierungsmonitoring (typ ≠ vereinfacht). Printed minima are keyed on the
+--       variant: vereinfacht 16 (§3.3.3 p.21), umfänglich Basisvariante 16 (C.2 p.75), Monte-Carlo ≥ 10 (C.3 p.76).
+--       Proposal: condition = 'IF validierungsmonitoring_typ IN {vereinfacht, umfaenglich_basis} THEN probenanzahl_zulauf >= 16
+--       AND IF validierungsmonitoring_typ == umfaenglich_montecarlo THEN probenanzahl_zulauf >= 10' — GRAMMAR: nested IF/IN as in
+--       REQ-06; bare 'umfaenglich' needs S-6(b) first.
+--   (d) REQ-04 (42ddfeee, ws 05, BLOCK) = 'log10_reduktion >= leistungsziel_log10' — a single-value test. The print is a
+--       sample-set rule: Klasse A ≥ 90 % of samples (§3.3.2 md 633), vereinfacht "In mindestens 15 der 16 Proben … um nicht mehr
+--       als 1,0 log10-Stufen unterschritten" (A) / "8 der 16 Proben … 2,0 log10-Stufen" (B-1, C-1) (md 681–683, p.21–22); umfänglich
+--       is REQ-06's percentile rule. The gate is stricter than the print for a single failing sample and has no 15/16 or 8/16
+--       carrier. Proposal: keep as block on the MEAN/percentile output only after (e); add fields anzahl_proben_ziel_erreicht
+--       (int) + max_unterschreitung_log10 (number) and a NEW block gate 'IF validierungsmonitoring_typ == vereinfacht AND
+--       wassergueteklasse == A THEN anzahl_proben_ziel_erreicht >= 15 AND max_unterschreitung_log10 <= 1.0' + the B-1/C-1 twin
+--       (>= 8, <= 2.0). Field adds = RULING.
+--   (e) REQ-06 (e08aa02a, ws 03, BLOCK) percentile rule is Anhang C (umfänglich) only (C.1 md 1798 "In Abhängigkeit der
+--       Qualitätsklasse werden die folgenden Validierungskriterien angesetzt"); for typ == vereinfacht the 10./50. Perzentil fields
+--       stay empty and the gate blocks. Proposal: prefix 'IF validierungsmonitoring_typ IN {umfaenglich, umfaenglich_basis,
+--       umfaenglich_montecarlo} THEN (…)'; also re-home (S-9).
+--   (f) REQ-03 (96461a18, ws 13, BLOCK) 'perzentil_konformitaet >= 90' — the operand is a hand-entered copy of the printed constant
+--       (§3.1 p.15 / §6.4 p.51), so the gate is a tautology; the real check needs the monitoring sample set (anteil_proben_konform,
+--       engineer-entered % from the Routineüberwachung). Proposal: rename field → anteil_proben_konform_pct (label
+--       'Anteil konformer Proben (Routineüberwachung)', description 'Anteil der Proben, die die Mindestanforderungen nach Tabelle 3
+--       einhalten; gefordert ≥ 90 %'), keep gate. Text-only on the field but semantics change → RULING.
+--   (g) REQ-09 (f8796c51, ws 08, BLOCK) ≤ 2 NTU for A–C: matches §5.2 (p.34) and Tab. 3; block defensible ("müssen … eingehalten
+--       werden", §3.1). NOTE ONLY (+ re-home S-9).
+--   (h) REQ-10 (d4039574, ws 11, BLOCK) 'desinfektionsverfahren IS NOT EMPTY': supported by §5.1 Erläuterung 4 (p.32) "Gemäß
+--       EU-WasserWVVO ist für alle Wassergüteklassen eine Desinfektion gefordert." — stronger anchor than the quoted §5.4.3
+--       sentence. Proposal: prepend that sentence to source_quote. Text-only on the gate table → staged.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (h)   — (g) = note
+-- update public.compliance_requirements set severity='warn' where id='92e88c19-d945-4a07-908b-8e62f68b023d';
+-- update public.compliance_requirements set condition='analytisches_labor_akkreditiert == true' where id='b3c91902-9da8-48a3-8e3a-7241a32d3f5d';
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote) values ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5', 'REQ-07b', 'warn', 'probenstabilitaet_h <= 72 AND probennahme_typ IS NOT NULL', '§3.3.4 (Probenahme und -transport)', 'Dies erfolgt bevorzugt durch Mischproben über 24 h [...] Alternativ können qualifizierte Stichproben oder einfache Stichproben verwendet werden, die um die hydraulische Verweilzeit versetzt sind (als korrespondierende Proben von Zuund Ablauf). [...] Eine ausreichende Stabilität der mikrobiologischen Proben ist bis zu 72 h nach Beginn der Probenahme zu erwarten (SEIS et al. 2024). [DWA-M 1200-2 §3.3.4, printed p.24]');
+-- update public.compliance_requirements set condition='IF validierungsmonitoring_typ IN {vereinfacht, umfaenglich_basis} THEN probenanzahl_zulauf >= 16 AND IF validierungsmonitoring_typ == umfaenglich_montecarlo THEN probenanzahl_zulauf >= 10' where id='c3097c01-d430-4ccc-8f6a-6010aa7db3c4';
+-- update public.compliance_requirements set condition='IF validierungsmonitoring_typ IN {umfaenglich, umfaenglich_basis, umfaenglich_montecarlo} THEN (IF wassergueteklasse == ''A'' THEN perzentil_10_log10 >= leistungsziel_log10 AND IF wassergueteklasse IN {''B-1'',''C-1''} THEN perzentil_50_log10 >= leistungsziel_log10)' where id='e08aa02a-faa9-42f6-93d7-027a390673fc';
+-- update public.compliance_requirements set source_quote='Desinfektion: Gemäß EU-WasserWVVO ist für alle Wassergüteklassen eine Desinfektion gefordert. Erläuterungen zu Desinfektionsverfahren siehe 5.4. [DWA-M 1200-2 §5.1, printed p.32] | Grundsätzlich ist der Einsatz verschiedener Desinfektionsverfahren möglich, sofern mit diesen die gemäß Tabelle 3 vorgegebenen Anforderungen und Leistungsziele über die gesamte Aufbereitungskette erreicht werden. [§5.4.3, printed p.40]' where id='d4039574-c19f-4ddd-b311-9bb363b6d16f';
+-- Rollback: REQ-11 severity 'block'; REQ-07 condition 'analytisches_labor_akkreditiert == true AND probenstabilitaet_h <= 72 AND probennahme_typ == mischprobe_24h'; delete REQ-07b by (worksheet_template_id, code);
+--   REQ-05 condition 'validierungsmonitoring_typ == ''vereinfacht'' AND probenanzahl_zulauf >= 16'; REQ-06 condition as exported; REQ-10 source_quote as exported.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5 · MISSING GATES for printed hard limits (coverage gaps).   draft-edition: escalate
+--   The core Tab. 3 quality limits ("müssen in mindestens 90 % der Proben eingehalten werden", §3.1 md 534–536, p.15) have NO gate
+--   on the ws-06 measurement fields. Evidence: Tab. 3 (p.16–17) E. coli A ≤ 10 / B ≤ 100 / C ≤ 100 / D ≤ 10.000 KBE/100 ml;
+--   Intestinale Enterokokken A ≤ 100 / B ≤ 100 / C ≤ 400; Legionella spp. < 1.000 KBE/L "wenn das Risiko der Aerosolbildung
+--   besteht"; intestinale Nematoden ≤ 1 Ei pro Liter "für die Bewässerung von Weideflächen oder Futterpflanzen"; BSB5 ≤ 10 mg/l
+--   (A only, §6.2 md 1212 p.48); AFS ≤ 10 mg/l (A–C). NOTE: the print is a 90-%-of-samples rule with a 1-log / 100 % tolerance
+--   on the remaining samples; a single-value gate on the entered concentration is the closest evaluate.ts form (same shape as
+--   REQ-09 for Trübung) and should be read as "value entered = representative/percentile value" — RULING on that reading.
+--   (a) NEW block, ws 06 (4bf0af6c), 'IF wassergueteklasse == A THEN e_coli <= 10 AND IF wassergueteklasse IN {B-1,B-2,C-1,C-2} THEN
+--       e_coli <= 100 AND IF wassergueteklasse == D THEN e_coli <= 10000', clause 'Tabelle 3; §3.1'.
+--   (b) NEW block, ws 06, 'IF wassergueteklasse IN {A,B-1,B-2} THEN intest_enterokokken <= 100 AND IF wassergueteklasse IN {C-1,C-2}
+--       THEN intest_enterokokken <= 400', clause 'Tabelle 3'.
+--   (c) NEW block, ws 06, 'IF aerosol_risk == true THEN legionella < 1000', clause 'Tabelle 3 (fallspezifisch)'.
+--   (d) NEW block, ws 06, 'IF weide_oder_futter == true THEN intest_nematoden <= 1', clause 'Tabelle 3 (fallspezifisch)'.
+--   (e) NEW block, ws 06, 'IF wassergueteklasse == A THEN bsb5_ablauf <= 10', clause 'Tabelle 3; §6.2'.
+--   (f) NEW block, ws 06, 'IF wassergueteklasse IN {A,B-1,B-2,C-1,C-2} THEN afs_ablauf <= 10', clause 'Tabelle 3; §5.1' — with the
+--       §5.1 relief (AFS-Messung "nicht notwendig" when Trübung continuously ≤ 2 NTU) → RULING whether warn.
+--   (g) NEW block, ws 06, 'coliphagen_separat_gemessen == true', clause '§3.3.4' — md 708 (p.23) "Für Coliphagen müssen abweichend
+--       zur EU-WasserWVVO sowohl somatische Coliphagen als auch F-spezifische Coliphagen separat gemessen und beurteilt werden."
+--   (h) NEW warn, ws 05, 'IF coliphagen_spiking == true THEN validierungsmonitoring_typ == umfaenglich_montecarlo', clause 'Anhang C.5'
+--       — md 1913 (p.78) "Die statistische Auswertung ist in diesem Fall auf das Monte-Carlo-Verfahren (Anhang C.3) festgelegt."
+--   (i) NEW warn, ws 05, 'validierungsdauer_wochen >= 2', clause '§3.3.3' — md 674 (p.21) "sollte sich über mindestens zwei Wochen
+--       erstrecken" (sollte → warn).
+--   (j) NEW warn, ws 07, 'begutachtung_unabhaengig == true', clause '§3.3.3 / §3.3.5' — hard for the Alternativvariante only
+--       (md 659 "Diese Daten müssen durch eine unabhängige Einrichtung oder die Genehmigungsbehörde nach 3.3.5 begutachtet
+--       werden"); no field records the Planungsphase variant (Vorzugs-/Alternativvariante) → add enum planungsvariante on ws 04
+--       first, then block 'IF planungsvariante == alternativ THEN begutachtung_unabhaengig == true'. Field add = RULING.
+--   (k) NOTE (no gate proposed): §6.6 "ist … zu informieren" (arbeitsschutz_unterweisung) and §6.7 "hat … sicherzustellen"
+--       (schulungsnachweis) are hard operator duties; ws 25 booleans exist, attest-style warn gates would fit — RULING.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)  ☐ (h)  ☐ (i)  ☐ (j)  ☐ (k)
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote) values
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-16','block','IF wassergueteklasse == A THEN e_coli <= 10 AND IF wassergueteklasse IN {B-1,B-2,C-1,C-2} THEN e_coli <= 100 AND IF wassergueteklasse == D THEN e_coli <= 10000','Tabelle 3; §3.1','Tabelle 3: E. coli KBE/100 ml — A ≤ 10; B (B-1/B-2) ≤ 100; C (C-1/C-2) ≤ 100; D ≤ 10.000 | Die vorgegebenen Werte für E. coli, Legionella spp. und intestinale Nematoden in Tabelle 3 müssen in mindestens 90 % der Proben eingehalten werden. [DWA-M 1200-2 Tab. 3 p.16–17; §3.1 p.15 — class labels are md-glyph-lost, PDF to confirm]'),
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-17','block','IF wassergueteklasse IN {A,B-1,B-2} THEN intest_enterokokken <= 100 AND IF wassergueteklasse IN {C-1,C-2} THEN intest_enterokokken <= 400','Tabelle 3','Tabelle 3: Intestinale Enterokokken KBE/100 ml — A ≤ 100; B ≤ 100; C ≤ 400; D – [DWA-M 1200-2 Tab. 3 p.16–17]'),
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-18','block','IF aerosol_risk == true THEN legionella < 1000','Tabelle 3 (fallspezifisch)','Legionella spp.: < 1.000 KBE/L, wenn das Risiko der Aerosolbildung besteht [DWA-M 1200-2 Tab. 3 p.16–17]'),
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-19','block','IF weide_oder_futter == true THEN intest_nematoden <= 1','Tabelle 3 (fallspezifisch)','intestinale Nematoden (Eier von Helminthen): ≤ 1 Ei pro Liter für die Bewässerung von Weideflächen oder Futterpflanzen [DWA-M 1200-2 Tab. 3 p.16–17]'),
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-20','block','IF wassergueteklasse == A THEN bsb5_ablauf <= 10','Tabelle 3; §6.2','Für die höchste Wassergüteklasse A werden diese BSB5-Anforderungen mit einem Wert von ≤ 10 mg/l gemäß der EU-WasserWVVO verschärft. [DWA-M 1200-2 §6.2 p.48; Tab. 3 p.16]'),
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-21','block','IF wassergueteklasse IN {A,B-1,B-2,C-1,C-2} THEN afs_ablauf <= 10','Tabelle 3; §5.1','Tabelle 3: AFS ≤ 10 mg/l (A bis C) | Wenn diese Anforderungen an die Trübung kontinuierlich überwacht und eingehalten werden, kann auch davon ausgegangen werden, dass die Anforderungen zu AFS mit Werten von ≤ 10 mg/l eingehalten werden [DWA-M 1200-2 Tab. 3 p.16–17; §5.1 p.32]'),
+--   ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','REQ-22','block','coliphagen_separat_gemessen == true','§3.3.4','Für Coliphagen müssen abweichend zur EU-WasserWVVO sowohl somatische Coliphagen als auch F-spezifische Coliphagen separat gemessen und beurteilt werden. [DWA-M 1200-2 §3.3.4 p.23]'),
+--   ('0d06f719-8df4-46f0-9ecb-30c27e0d8b46','REQ-23','warn','IF coliphagen_spiking == true THEN validierungsmonitoring_typ == umfaenglich_montecarlo','Anhang C.5','Die statistische Auswertung ist in diesem Fall auf das Monte-Carlo-Verfahren (Anhang C.3) festgelegt. [DWA-M 1200-2 Anhang C.5 p.78]'),
+--   ('0d06f719-8df4-46f0-9ecb-30c27e0d8b46','REQ-24','warn','validierungsdauer_wochen >= 2','§3.3.3','Die Dauer der Validierungsuntersuchungen an der Aufbereitungseinrichtung sollte sich über mindestens zwei Wochen erstrecken. [DWA-M 1200-2 §3.3.3 p.21]');
+-- Rollback: delete from public.compliance_requirements where code in ('REQ-16','REQ-17','REQ-18','REQ-19','REQ-20','REQ-21','REQ-22','REQ-23','REQ-24') and worksheet_template_id in ('4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5','0d06f719-8df4-46f0-9ecb-30c27e0d8b46');
+--   (coliphagen_spiking is on ws 06 while REQ-23 sits on ws 05 — cross-worksheet read, same class as S-9; alternatively home REQ-23 on ws 06.)
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6 · DUPLICATE / OVERLAPPING FIELDS + ENUM OVERLAPS.   draft-edition: escalate
+--   (a) flux_membran (92b774ce, ws 09, l/m2/h, "Permeatfluss Membran") vs permeatfluss (58d5d015, ws 13, l/m2/h, "Permeatfluss
+--       (Online-Durchfluss MF/UF)") — same quantity, same unit, both anchored on Tab. 4/Tab. 6/Tab. E.1. Proposal: keep both only if
+--       ws 09 = design value and ws 13 = monitored value; relabel ws 13 → 'Permeatfluss (Betriebswert, online)'. Else deactivate ws 13.
+--   (b) validierungsmonitoring_typ (9e838a05) enum: 'umfaenglich' overlaps its own sub-variants 'umfaenglich_basis' and
+--       'umfaenglich_montecarlo' (Anhang C.1 md 1804–1806 prints exactly the two sub-variants). Proposal: remove bare 'umfaenglich'
+--       (after migrating any stored value to umfaenglich_basis). Enum edit = RULING.
+--   (c) filtrationsverfahren (83ae33fd) enum: 'raumfilter' is labelled "Raumfilter (Schnellsand)" AND 'schnellsand' "Schnellsandfilter"
+--       exist side by side; §5.2 (md 937) prints Raumfilter as the class ("schnelle" und "langsame") and Schnellsand as a kind.
+--       Proposal: relabel raumfilter → 'Raumfilter (allgemein, DWA-A 203)' or drop 'schnellsand'.
+--   (d) helmintheneier_konz (8e9a7d67, ws 09, Ei/L) vs intest_nematoden (e855a7cf, ws 06, Ei/L) — the ws-09 value is the §5.2
+--       capability statement ("kann … erzielen … ≤ 1 Ei je Liter"), the ws-06 value is the Tab. 3 limit. Proposal: relabel ws 09 →
+--       'Helmintheneier-Rückhalt Filtration (Auslegungsannahme)' to stop it reading as the compliance value.
+--   (e) schlammalter (d95e6288) and hrt_belebung (06e58631) sit on ws 03 "Weitergehende Anforderungen & RMP-Schnittstelle" but are
+--       biology/MBR operating parameters (Tab. 6 MBR row; Tab. E.1). Worksheet M12002-20 "Aufbereitungs-Track: MBR" (6bd7d64e) has
+--       NO fields. Proposal: move both to ws 20 (update worksheet_template_id) — see S-9.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)
+-- update public.fields set label_de='Permeatfluss (Betriebswert, online)' where id='58d5d015-f3b3-4ed6-bfa5-dd0f4623d6eb';
+-- update public.fields set label_de='Helmintheneier-Rückhalt Filtration (Auslegungsannahme)' where id='8e9a7d67-d59b-44db-bedb-6ca1dda5c49e';
+-- update public.fields set worksheet_template_id='6bd7d64e-c5ed-4512-879a-3b011b8017e4' where id in ('d95e6288-85e9-4166-8dbc-e31dcf8469c5','06e58631-7516-45ff-a85f-3ff845688535');
+-- Rollback: labels 'Permeatfluss (Online-Durchfluss MF/UF)' / 'Helmintheneier Konzentration Ablauf'; worksheet_template_id 073edc9d-683d-4ea1-991f-0609b665d830 for both ws-03 fields. (b)(c) enum edits: restore the exported enum_values json.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7 · UNIT CORRECTIONS.   draft-edition: escalate
+--   None wrong. Checked against the md: uv_transmission %/cm (md 1673 "94 %/cm") ✓ · ct_wert (mg·min)/l (md 1040) ✓ · ozon_dosis_spez
+--   g O3/g DOC (md 1099) ✓ · pak_dosis mg PAK/mg DOC (md 1005) ✓ · flux l/m2/h (md 2173) ✓ · kostenkennwert €/m3 SW (md 1450) ✓ ·
+--   uv_dosis mJ/cm2 (md 1070; Tab. E.1 prints J/m² — 400 J/m² = 40 mJ/cm²) ✓ · legionella KBE/L ✓ · nematoden Ei/L ✓ ·
+--   e_coli/enterokokken KBE/100ml ✓ · validierungsdauer Wochen ✓ · probenvolumen l ✓ · elutionsvolumen ml ✓.
+--   (a) MINOR: baupreisindex_bezugsjahr (0e90661c) unit 'a' (years, a duration) for a calendar-year label. Proposal: unit NULL,
+--       data_type stays number.
+-- ☐ RATIFIED (a)
+-- update public.fields set unit=null where id='0e90661c-0af6-4a11-bef6-c50ce85b8b46';
+-- Rollback: unit 'a'.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8 · IS_REQUIRED REVIEW — required=true where the source is conditional, derived, or "sollte/Beispiel".   draft-edition: escalate
+--   (a) log10_reduktion (ab3ac65b, ws 05) — derived output of Gl. 1; required + hand-enterable (#22 class). Proposal: is_required=false
+--       (engine fills it).
+--   (b) log10_reduktionen (1fe418ca, ws 05, json) — needed only for the umfängliche Basisvariante (C.2); the vereinfachte variant
+--       works with the 15/16 count. Proposal: is_required=false.
+--   (c) truebung_ablauf (ac39e979, ws 06) — Tab. 3 prints no Trübung requirement for class D (row D: "BSB5 und AFS gemäß Richtlinie
+--       91/271/EWG"). Proposal: is_required=false (REQ-09 already enforces A–C).
+--   (d) afs_ablauf (10cd832e, ws 06) — §5.1 (md 894, p.32): AFS-Messung "nicht notwendig" when Trübung is continuously ≤ 2 NTU.
+--       Proposal: is_required=false.
+--   (e) begutachtung_unabhaengig (d4a33a80, ws 07) — hard only for the Alternativvariante (§3.3.3 md 659). Proposal: is_required=false
+--       until S-5(j) adds the variant field.
+--   (f) messhauefigkeit (9ac3c53f, ws 13) — Tab. 6 is "Beispiel"; §6.4 prints no mandatory single frequency. Proposal: is_required=false.
+--   (g) perzentil_konformitaet (fe143fcf, ws 13) — a printed constant should not be a required input (see S-4(f)). Proposal:
+--       is_required=false pending the rename.
+--   (h) anwendungsbereich (07c1546d, ws 01) — required=true is right (scope), but enum value 'industrie_ausgeschlossen' offers the
+--       printed EXCLUSION as a selectable option; REQ-01 then blocks. Acceptable as an explicit out-of-scope exit; NOTE ONLY.
+--   Required=true rows confirmed hard by the md: haeusliches_sw_anteil_ueberwiegend (§1), wassergueteklasse (Tab. 2/3),
+--   leistungsziel_log10 (Tab. 3), probenanzahl_zulauf (§3.3.3/C.2/C.3), validierungsmonitoring_typ (§3.3.3), c_zulauf/c_ablauf (Gl. 1),
+--   bsb5_ablauf (Tab. 3), e_coli (Tab. 3), analytisches_labor_akkreditiert (§3.3.4 "zu beauftragen"), probennahme_typ (§3.3.4),
+--   desinfektionsverfahren (§5.1 "gefordert"), verfahrenskette (§5.5).
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)   — (h) = note
+-- update public.fields set is_required=false where id in ('ab3ac65b-602a-479a-889f-745f2f6f214c','1fe418ca-640b-4754-a796-daf3f15a260f','ac39e979-eda5-45f0-80b9-bff8fe236af7','10cd832e-ea38-48e7-b810-8bd218e56c95','d4a33a80-03f4-4c14-a677-79617b6f6177','9ac3c53f-de43-4a56-be3c-af1fed36d682','fe143fcf-165e-465b-a0a2-6f513d9692aa');
+-- Rollback: update public.fields set is_required=true where id in (same seven ids).
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9 · GATE / FIELD RE-HOMES (gate on worksheet A reading only fields of worksheet B).   draft-edition: escalate
+--   (a) REQ-06 (e08aa02a) sits on ws 03 (073edc9d) but reads wassergueteklasse (ws 02), perzentil_10/50_log10 (ws 05) and
+--       leistungsziel_log10 (ws 04). Proposal: worksheet_template_id → ws 05 (0d06f719).
+--   (b) REQ-09 (f8796c51) sits on ws 08 (fd596f8c, NO fields) but reads wassergueteklasse (ws 02) and truebung_ablauf (ws 06).
+--       Proposal: worksheet_template_id → ws 06 (4bf0af6c).
+--   (c) REQ-13 (f88bb51e, warn, no quote) sits on ws 13 and reads ausgleichsvolumen + speicherbauform (ws 14) and notueberlauf +
+--       reinigungskonzept (ws 13). Both ws-13 operands are §7.3 storage fields. Proposal: move notueberlauf (5d066d07) and
+--       reinigungskonzept (96e705f1) to ws 14 (6320b289), move REQ-13 to ws 14, and give it the §7.3 quote.
+--   (d) messhauefigkeit_integritaet (ee41092b, ws 13) — worksheet M12002-23 "Membranintegritätsprüfung" (d38520b2) has NO fields.
+--       Proposal: move the field to ws 23.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)
+-- update public.compliance_requirements set worksheet_template_id='0d06f719-8df4-46f0-9ecb-30c27e0d8b46' where id='e08aa02a-faa9-42f6-93d7-027a390673fc';
+-- update public.compliance_requirements set worksheet_template_id='4bf0af6c-635a-4cd6-9c3c-324ff89bf8f5' where id='f8796c51-6d2b-4b37-b88e-910d6e20ef0c';
+-- update public.fields set worksheet_template_id='6320b289-1988-419d-82ff-f3971f53781a' where id in ('5d066d07-2d87-44db-83b3-222f13eb2f2b','96e705f1-4422-4ece-8a48-c91c4c9f0453');
+-- update public.compliance_requirements set worksheet_template_id='6320b289-1988-419d-82ff-f3971f53781a', source_quote='Unter anderem folgende Aspekte sollten bei der Ausgestaltung des Speichers berücksichtigt werden: bei allen Bauformen sollte ein Notüberlauf oder/und eine Umgehung vorgesehen werden, | die Möglichkeit einer Reinigung ist insbesondere für einen langfristigen Betrieb wesentlich [DWA-M 1200-2 §7.3, printed p.56] | Das erforderliche Ausgleichsvolumen ist von dem Zeitraum, über den beabsichtigt ist, den Ausgleich vorzunehmen (Tages-, Wochen-, Monatsausgleich), dem Wasserzufluss, und der Wasserentnahme abhängig. [§7.4, printed p.56–57]' where id='f88bb51e-b4fa-4974-b4f7-b67ce26bfba7';
+-- update public.fields set worksheet_template_id='d38520b2-0f8c-4cac-a2a2-ec8f232c8e2b' where id='ee41092b-cf9c-40b9-af0e-3f80fe72c444';
+-- Rollback: REQ-06 → 073edc9d; REQ-09 → fd596f8c; the two fields → 22ee1863; REQ-13 → 22ee1863 with source_quote NULL; ee41092b → 22ee1863.
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 · STRUCTURE notes (no SQL until ruled).   draft-edition: escalate
+--   (a) Four worksheets have ZERO fields in the export: M12002-08 Systemgrenzen & Stelle der Einhaltung (fd596f8c) — §4.1 (p.29)
+--       "Für die Einhaltung … ist der Übergabepunkt „Stelle der Einhaltung" maßgeblich, der meist unmittelbar nach der
+--       Aufbereitungseinrichtung liegt, aber … auch nach einem folgenden Speicher liegen kann" → propose enum stelle_der_einhaltung
+--       {nach_aufbereitung, nach_speicher, anderer_uebergabepunkt} + text; M12002-20 MBR track (6bd7d64e) — carrier for S-6(e);
+--       M12002-21 Ozon/AOP track (53956ab9) — ozon_dosis_spez / delta_sak254 / ct_wert could move here; M12002-23 Membranintegrität
+--       (d38520b2) — carrier for S-9(d). RULING on population vs deactivation.
+--   (b) standard_fixed constants that are hand-enterable (#22 class): k_faktor_normal (87344f00) = 1,282 — ALSO hard-coded inside
+--       Gl. C.2-1's formula, so the field is redundant; confidence_alpha (2ae37094) = 0,1 / 0,5 keyed on N; perzentil_konformitaet
+--       (fe143fcf) = 90 %. Proposal: k_faktor_normal → active=false (equation carries the constant); confidence_alpha → derived
+--       'IF probenanzahl_zulauf >= 16 THEN 0.5 ELSE 0.1' (needs a tiny equation); perzentil_konformitaet → see S-4(f).
+--   (c) leistungsziel_log10 (14c4e332, ws 04) is a single hand-entered number for a printed class × indicator LOOKUP (Tab. 3 p.16:
+--       E. coli ≥ 5,0; somatische Coliphagen ≥ 6,0; F-spez. Coliphagen ≥ 6,0; C.-perfringens-Sporen ≥ 4,0 bzw. sulfatreduzierende
+--       Sporenbildner ≥ 5,0 for A / B-1 / C-1; "–" for B-2, C-2, D). No field records WHICH Indikatororganismus the validation row is
+--       for, so REQ-04/REQ-06 compare one LRV against one target per project. Proposal: add enum indikatororganismus {e_coli,
+--       somat_coliphagen, f_spez_coliphagen, c_perfringens_sporen, sulfatred_sporenbildner} on ws 04/05 and derive
+--       leistungsziel_log10 = lookup(wassergueteklasse, indikatororganismus) — GRAMMAR: lookup() exists (DWA-M 1200-1 EQ-001
+--       pattern). RULING.
+--   (d) mw_log10 / sd_log10 (a4030ba5 / 404517eb) are hand-entered although the md derives them from log10_reduktionen (Bild C.1);
+--       no equation materialises mean/sd from the json array. Proposal: two equations mw_log10 = mean(log10_reduktionen),
+--       sd_log10 = stddev_sample(log10_reduktionen) — GRAMMAR: engine has median(); mean/stddev availability to be confirmed.
+--   (e) Gl. 1 and Gl. C.2-3 omit the printed NWG branch (C.2 md 1819, p.75: "ist die log10-Reduktion mit der Nachweisgrenze zu
+--       ermitteln"; Bild C.1 y_3 < 0,05 → LRV_3 > 7,16). Proposal: lrv_i = log10(x_i / max(y_i, nachweisgrenze_ablauf)) — RULING
+--       (changes an equation).
+--   (f) verfahrenskette (e8c23f61, ws 12) and sekundaerdesinfektion_verfahren (29ddd819, ws 14) are free text for printed option
+--       lists (Bild 4 stages; §5.4.3 ClO2 "Desinfektionsmittel der Wahl" / Persäuren / H2O2) → selection widgets per the 2026-08-01
+--       "guideline options → selection" ruling.
+--   (g) kostenkennwert_aufbereitung (deed98af, ws 15) is ONE number for a printed per-stage list (§8.2 p.57–58: Mech.-biol. 0,7–1,6;
+--       Sandfiltration +0,15–0,2; UV +0,03–0,06; Ozon-Desinfektion +0,03–0,06; Ozon-Spurenstoff +0,08–0,22; Aktivkohle +0,08–0,35;
+--       MBR 0,85–1,7; MBR+Aktivkohle +0,05–0,20 €/m³ SW, Bezugsjahr 2020). Proposal: json per-stage table or one field per stage.
+--   (h) bewaesserungsmethode (84bbe890) enum lacks the printed C-1 alternative "eine andere Bewässerungsmethode, bei der ein
+--       unmittelbarer Kontakt mit dem essbaren Teil der Pflanze vermieden wird" (Tab. 2 p.15). Proposal: add enum value
+--       'andere_kein_kontakt' (mirrors the DWA-M 1200-1 enum).
+--   (i) Tab. 3 (p.16–17) class-row labels are image glyphs in the md ("く", "ம", "ن نコ نコ", "ロ"); every class-keyed value quoted from
+--       Tab. 3 in the pack is inferred from row ORDER + the "(B－1／B－2)" / "B－1：" / "C－1：" cell text — PDF to confirm before VA.
+--       §3.3.4 md 713 drops the "1" in "< 1 KBE/100 ml" — PDF to confirm.
+--   (j) Tab. E.1 (p.85–86) is printed as "vorläufig … wird im Weißdruck durch finale Werte … ergänzt": every Schweinfurt reference
+--       value (schlammalter 24 d, hrt 20,4 h, flux 90–120, EBCT 25 min, UV-Transmission 94–99 %/cm, UV-Dosis 400–500 J/m²) is
+--       draft data; D.3 (p.82) prints EBCT "ca. 30 min" and Flux "100–150" for the same plant — internal inconsistency.
+-- ☐ RATIFIED (a)  ☐ (b)  ☐ (c)  ☐ (d)  ☐ (e)  ☐ (f)  ☐ (g)  ☐ (h)   — (i)(j) = PDF / Weißdruck checks
