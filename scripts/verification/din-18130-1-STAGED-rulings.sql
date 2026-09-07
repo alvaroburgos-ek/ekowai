@@ -1,0 +1,45 @@
+-- ============================================================================
+-- DIN-18130-1 — STAGED, WRITTEN-NOT-APPLIED (owner rulings). 2026-09-07.
+-- Apply only after Alvaro marks a block RATIFIED. Evidence quoted from the md transcripts named in
+-- din-18130-1-md-verification-pack.sql.
+-- ============================================================================
+
+-- S-1 · k_f SYMBOL GROUNDING (the one field left unverified on this standard).   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Field: DIN-18130-1-05.k_f, id 544cbf1c-5adb-4655-a2d5-1f9449ec34f4, is_required=true, unit m/s,
+--   clause_reference '§8.4', description "Ergebnisgröße k_f = k_10; wird an die DWA-A-138 Versickerungs-
+--   bemessung übergeben (separate Norm)."
+-- Evidence: DIN 18130-1 prints three symbols and none of them is k_f —
+--   "3.6 Durchlässigkeitsbeiwert $k$ — Quotient aus Filtergeschwindigkeit $v$ und dem hydraulischen
+--    Gefälle $i$ …" (§3.6, printed p.3);
+--   "$k_{\mathrm{T}}$ der ermittelte Durchlässigkeitsbeiwert bei der Temperatur $T$, in $\mathrm{m}/\mathrm{s}$"
+--   and "$k_{10}=\frac{1,359}{1+0,0337 \cdot T+0,00022 \cdot T^{2}} k_{\mathrm{T}}=\alpha \cdot k_{\mathrm{T}}$"
+--   (§5.7, printed p.5).
+--   k_f is DWA-A-138-1's name for the value handed over. Under SR-1 the symbol cannot be grounded in THIS
+--   standard, so the field stays imported_unverified until you choose one of:
+--   (a) rename the field to k_10 and verify it against §5.7 (the value it actually is);
+--   (b) keep the name and verify against §5.7 with a recorded alias caveat ("k_f = k_10, alias of
+--       DWA-A-138-1"), accepting a symbol the source never prints;
+--   (c) leave it unverified — then the finalize gate lists it whenever a project uses it.
+-- (a) would read:
+-- update public.fields set symbol='k_10', label_de='Wasserdurchlässigkeitsbeiwert k_10 (Transfer)',
+--        clause_reference='§5.7'
+--  where id='544cbf1c-5adb-4655-a2d5-1f9449ec34f4' and symbol='k_f';
+--   NOTE: renaming the symbol is NOT safe on its own — DWA-A-138-1 consumes k_f by name. Check
+--   fields.consumer_worksheets and every equation/gate condition referencing k_f before applying.
+-- rollback for (a): set symbol='k_f', label_de='Wasserdurchlässigkeitsbeiwert k_f (Transfer)',
+--   clause_reference='§8.4' on the same id.
+
+-- S-2 · CLAUSE RETAG for the same field, whichever option S-1 takes.   ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The field is tagged §8.4 (Versuchsbericht). §8.4 is the reporting duty; the value itself is defined in
+-- §5.7 / §8.1 / §8.2. Retag to the defining clause once S-1 is decided.
+
+-- S-3 · OBSERVATION, no SQL — the 2026-08-01 fidelity audit recorded two source equations that are NOT
+-- encoded: Gl. (5) k_r = f(i) (descriptive, non-computable) and Gl. (7)'s companion procedural values.
+-- Gl. (7) itself IS encoded and is quoted in this pass. Nothing to do unless you want Gl. (5) as an
+-- informational row.
+
+-- S-4 · OBSERVATION, no SQL — printed procedural control values with no field anywhere:
+--   rubber-sleeve pressure 10–50 kN/m² above the highest pore-water pressure (§6.4);
+--   downstream level constant to ±1 % of the head difference (§6.1.1, quoted in this pass);
+--   filter-stone permeability ≥ 10× the specimen k (§7.3.2.2 / Bild 8).
+-- These are apparatus-design limits; encode only if you want the Wizard to gate the laboratory itself.
