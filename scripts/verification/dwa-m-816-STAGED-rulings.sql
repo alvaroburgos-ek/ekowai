@@ -1,0 +1,580 @@
+-- ============================================================================
+-- STAGED RULINGS — DWA-M-816 (Merkblatt DWA-M 816, Oktober 2021; standard id 474fdd9b-d351-4472-b2e8-c2c5f52e1f1b)
+-- Written 2026-09-07 by the md-verification pass. NOTHING IN THIS FILE IS APPLIED.
+-- Every block is COMMENTED SQL carrying (a) the verbatim md evidence, (b) the proposed change, (c) the rollback
+-- inverse, and (d) a "☐ RATIFIED" marker for Alvaro. Anything that changes structure, enforcement, required-ness,
+-- clause tagging, units, enums or gate severity lives here and NOT in dwa-m-816-md-verification-pack.sql.
+-- Evidence source: C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\DWA-M_816.md (4,088 lines).
+-- Page refs derived from the printed Inhaltsverzeichnis (see the pack header for the full § -> page map).
+-- ============================================================================
+
+
+-- ----------------------------------------------------------------------------
+-- S-01  DUPLICATE FIELD LAYER: 30 symbol-layer fields duplicate an existing snake_case field
+--       (or a field on another worksheet). This is systematic, not incidental: the encoder materialised the
+--       §2 "Kurzzeichen" (Formelzeichen) table as a second field layer alongside the hand-written snake_case
+--       layer. Nothing in the guideline demands two fields per quantity.
+-- ☐ RATIFIED  (owner decision needed: which layer is canonical)
+--
+-- Evidence (md 417-463, §2 "Abkürzungen und Formelzeichen", printed pp.13-16): the guideline defines each
+-- quantity ONCE, e.g.
+--   "\hline $q$ & - & Abzinsungszinsfaktor für die Barwertermittlung $q=1+i$ \\"
+--   "\hline BW & Währung & Barwert = Summe der abgezinsten Zahlungen eines Zahlungsprozesses im
+--    Betrachtungszeitraum (in der Formelnummerierung durch .,a" gekennzeichnet) \\"
+--
+-- Same-worksheet duplicate pairs (snake_case  <->  Formelzeichen):
+--   M816-11.rbf_0     6701639a-56f1-4184-837e-396cab8bf21f  <->  M816-11.RBF_0   90227f0b-35dc-4e58-bf7f-f6c86dd513e0
+--   M816-12.bw        b0071d8f-02bd-4e62-b8b5-0f1add536fa2  <->  M816-12.BW      d17b2848-d8b6-4e81-8f80-2226040e7535
+--   M816-12.z_t       10b21ebd-876a-4eb2-a59a-21c1b266bd2e  <->  M816-12.Z       78669c4c-dcbe-4b5f-aacd-fc8ec2a75cf1
+--   M816-13.Z_t_linear    40273312-8c01-4490-ac6d-a84750351781  <->  M816-13.Z    39deb1f7-1bbc-4ef7-8220-a10c118fafa9
+--   M816-13.BW_linear     49d973ec-3c0b-480d-8e24-c094a01e756e  <->  M816-13.BW   a74094cc-507d-473d-bf1d-8b361feaa0af
+--   M816-13.c_0_lin       fe57665c-5eef-42e0-a8c5-4082f4ca4759  <->  M816-12.c_0  b97a50ab-27bc-422a-a832-b6a708e7cafc
+--   M816-14.Z_t_quadratic dc48a226-9937-492b-8bad-e9e2bb505b40 <->  M816-14.Z    42e7a031-320b-4b32-9ac3-358de48a052d
+--   M816-14.BW_quadratic  e8a6f9d5-d1e2-454e-9617-646fc3de4746 <->  M816-14.BW   bf81257a-0a4e-4843-9a7c-352414f4f38a
+--   M816-14.c_0_quad      8355ec60-6d16-4f74-873f-9465d8d42cf5 <->  M816-12.c_0
+--   M816-14.c_1_quad      5120d6a6-7f65-4a3c-b57c-0066a91e0404 <->  M816-13.c_1  727a8eb7-aef0-4b7c-8ebb-cc3187cef300
+--   M816-16.Z_t_inflation 3a773012-6497-4323-a47e-eb745066e2fa <->  M816-16.Z    22a1f5af-4936-4473-8e85-889df968f055
+--   M816-16.BW_inflation  8e75a36f-4e96-4501-98cd-af533b4d3c66 <->  M816-16.BW   1e927a29-9f1e-425a-97dd-7dea9d2e6f0d
+--   M816-16.c_k_inflation 27cbefef-cb44-49ff-9629-9a2bec870b85 <->  M816-15.c_k  1bade021-740a-47e3-b41d-26a9219ee575
+--   M816-16.inflation_rate_p ed978dbe-2c1f-4959-9081-33c02edcb438 <-> M816-09.p_percent 6d362fe7-a424-466a-813e-96e0fbfadcee
+--                                                                 and M816-10.inflation_rate_p 2aa8d48a-5dc5-4e46-98a3-352d97a2184a
+--   M816-16.n_period_years 2db12dfe-3ae0-4be5-a5fd-cf38b73dce3d <->  M816-08.n_observation_period d1d035ad-c90d-493e-a00d-78c92c353596
+--   M816-16.q_DUR      efc98c13-a82c-4927-a3f1-7254539cab7d  <->  M816-20.q_dur   126cabb9-30f1-4c9d-8b06-8706003a95f7
+--   M816-17.bw_1       eb768dae-0b54-4e30-81f7-6cb078f73f66  <->  M816-17.BW_1    7311a773-8ee3-4014-8536-21d1d6bbb21f
+--   M816-17.bw_2       4a153d94-d402-434e-b572-ea8dc486c978  <->  M816-17.BW_2    6ad7f76c-5e0e-4cad-8d16-1b07c79db724
+--   M816-19.duration   01f08146-2459-46ac-b7f1-7b1ca70f9abe  <->  M816-19.duration_years a7481b86-2465-4ed0-b45b-bf4ecb0825f7
+--                                                             <->  M816-19.DUR     b4207e71-258b-4c58-949e-73b95d121f19   (3-way)
+--   M816-22.n_tr       9c7476bf-ee9b-49d7-885a-4767a036fe2d  <->  M816-22.n_TR    36cba155-3a4f-4e7e-ba35-f8f4a3e01ff1
+--   M816-22.dur_tr     40e14ce2-60dd-44c9-b083-d123bbdd9d18  <->  M816-22.DUR_TR  c9e201b5-d70a-4a1c-909d-9abfb1494939
+--   M816-22.bw_tr      5c123748-98bd-4a61-81f7-8fd5a387efc6  <->  M816-22.BW_TR   9dd80618-5f7a-4e69-8430-95e2ceb68e07
+--   M816-22.n_A        009a0c5a-1574-4ac0-8b0d-f615e1214a52  <->  M816-08.n_a     eafa0e4c-7ab9-463f-b770-329268f03996
+--   M816-22.n_B        c245397e-0ea5-4171-a85d-155fbabebca6  <->  M816-08.n_b     23ee0c69-ab6e-4b9c-ae04-620d21402e16
+--   M816-22.n_Fin      eb74451e-e1de-4c4a-8d8a-3cb528bcbc58  <->  M816-06.n_fin   64c8561c-cd55-4cc5-b6bf-08202e5679cd
+--   M816-23.afa        487d0245-9f2a-430c-b4d1-d9e63c55e76a  <->  M816-23.AFA     d99ee410-5352-4bd4-beef-a0e59a66c1e1
+--   M816-23.rbw_t      8c752910-7c0d-416a-8285-b3775b9d70b4  <->  M816-23.RBW_t   440348c5-e5ce-4241-9b7a-dd1656475954
+--   M816-23.kalk_zinssatz_zk 6b9aa5f0-0e58-42a8-b507-da5a7f593940 <-> M816-23.z_K 3041cf5b-0a27-43b8-8533-abb4d56cffcd
+--   M816-23.abzugskapital_a  0bca30b9-1acc-4f79-a723-e709234df17d <-> M816-23.a   58281876-e083-410f-99e7-1062f2603677
+--   M816-24.irr_q_star 25a841d4-3128-4a66-83bd-8b5652a859c3  <->  M816-24.q_star  bdd68677-e3f0-465b-a19f-87b05d03a582
+--   M816-25.pbw_alternative 8f00afd4-36af-4e21-bcb4-f3a2450af314 <-> M816-25.PBW_total 1ceac226-7069-47d3-8181-6415f2283a52
+--   M816-26.preferred_variant e0d88da3-87b8-4b54-9be1-5736e380b89b <-> M816-27.vorteilhafteste_alternative 17aff213-1acd-4e72-b146-64d696befe67
+--
+-- Cross-worksheet symbol repeats of the SAME §2 quantity (one instance per calculation worksheet):
+--   n  on M816-11/12/13/14/15/16/19/23 (8x) · t on M816-12/13/14/15/16/17/22/23 (8x) ·
+--   q  on M816-11/17/22/23/24 (5x) · p on M816-16/19/22/23 (4x) · BW on M816-12/13/14/15/16/17 (6x) ·
+--   Z  on M816-12/13/14/15/16/17 (6x) · RBF_k on M816-15/16/19/22 (4x).
+--   These are engine wiring copies, not phantoms: each IS referenced by that worksheet's equation.
+--
+-- NOTE: NO field on M816 meets the phantom test of the brief (symbol with no label AND no clause AND no
+-- description AND unreferenced by any equation or gate) — every field carries a label and a clause_reference.
+-- So no `active=false` proposal is made here; the issue is duplication, not phantom enum tokens.
+--
+-- Proposal A (preferred): keep the Formelzeichen layer (it matches equations.input_symbols/output_symbol and
+--   is what the engine wires), deactivate the redundant snake_case twin on the SAME worksheet, and repoint any
+--   UI reference. Proposal B: the inverse. Either way this is a structural cutover, not a data fix.
+-- Proposed SQL (Proposal A — same-worksheet twins only, 22 rows; cross-worksheet repeats untouched):
+--   update public.fields set active=false
+--    where id in ('6701639a-56f1-4184-837e-396cab8bf21f','b0071d8f-02bd-4e62-b8b5-0f1add536fa2',
+--                 '10b21ebd-876a-4eb2-a59a-21c1b266bd2e','40273312-8c01-4490-ac6d-a84750351781',
+--                 '49d973ec-3c0b-480d-8e24-c094a01e756e','fe57665c-5eef-42e0-a8c5-4082f4ca4759',
+--                 'dc48a226-9937-492b-8bad-e9e2bb505b40','e8a6f9d5-d1e2-454e-9617-646fc3de4746',
+--                 '8355ec60-6d16-4f74-873f-9465d8d42cf5','5120d6a6-7f65-4a3c-b57c-0066a91e0404',
+--                 '3a773012-6497-4323-a47e-eb745066e2fa','8e75a36f-4e96-4501-98cd-af533b4d3c66',
+--                 '27cbefef-cb44-49ff-9629-9a2bec870b85','ed978dbe-2c1f-4959-9081-33c02edcb438',
+--                 '2db12dfe-3ae0-4be5-a5fd-cf38b73dce3d','efc98c13-a82c-4927-a3f1-7254539cab7d',
+--                 'eb768dae-0b54-4e30-81f7-6cb078f73f66','4a153d94-d402-434e-b572-ea8dc486c978',
+--                 'a7481b86-2465-4ed0-b45b-bf4ecb0825f7','9c7476bf-ee9b-49d7-885a-4767a036fe2d',
+--                 '40e14ce2-60dd-44c9-b083-d123bbdd9d18','5c123748-98bd-4a61-81f7-8fd5a387efc6');
+-- Rollback inverse:  update public.fields set active=true where id in (<same list>);
+--
+-- WARNING: 3 of the fields in that list are is_required=true today (rbf_0, bw, z_t and the Z_t_*/BW_* group);
+-- deactivating a required field must be paired with S-08 (required-flag review) in the SAME migration.
+
+
+-- ----------------------------------------------------------------------------
+-- S-02  RBW_t vs the printed RBW_{t-1}  — CONFIRMS the 2026-08-03 provenance flag.
+-- ☐ RATIFIED
+-- Evidence (md 1320-1323, §4.5.3, printed p.40):
+--   "Im Allgemeinen wird dabei der Restbuchwert RBW ${ }_{\mathrm{t}-1}$ des Vorjahres $t-1$ zugrunde gelegt
+--    (alternativ könnte auch der mittlere Restbuchwert (RBW ${ }_{t-1}+\mathrm{RBW}_{t}$ ) / 2 verwendet werden),
+--    der sich bei Abschreibungen von jeweils AFA über $n$ Nutzungsjahren ergibt zu:"
+--   "\mathrm{RBW}_{\mathrm{t}-1}=\mathrm{AFA} \cdot(n+1-\mathrm{t}) \tag{9}"
+--   and Gl. (10a), md 1332: "Z_{\text {ZINS }}(t)=(1-\mathrm{a}) \cdot \mathrm{RBW}_{t-1} \cdot Z_{\mathrm{K}}"
+-- Finding: the printed quantity is the PRIOR year's residual book value RBW_{t-1}. The encoding names it
+--   RBW_t (field 440348c5, label "Restbuchwert im Jahr t"; equation 9ee71c62 output_symbol RBW_t; equation
+--   10a c1d04676 input RBW_t). The right-hand side AFA·(n+1−t) is IDENTICAL to the print, so the arithmetic is
+--   correct — only the symbol/label misstate WHICH year's book value it is, and the guideline explicitly
+--   contrasts it with an alternative mean (RBW_{t-1}+RBW_t)/2 that would need both. Renaming the symbol would
+--   break equations.input_symbols, so the minimal, engine-safe fix is label + description.
+-- Proposed SQL:
+--   update public.fields set label_de='Restbuchwert des Vorjahres RBW(t-1)',
+--     description='Restbuchwert auf AHK-Basis am Ende des Vorjahres t-1, RBW_{t-1} = AFA*(n+1-t) (Gl. 9, §4.5.3).
+--       Der Datenbank-Symbolname lautet aus Kompatibilitaetsgruenden RBW_t; gemeint ist das gedruckte RBW_{t-1}.'
+--    where id='440348c5-e5ce-4241-9b7a-dd1656475954';
+--   update public.equations set formula='RBW_t = AFA * (n + 1 - t)   [gedruckt: RBW_{t-1}]'
+--    where id='9ee71c62-0245-4322-976c-6f7b730bf87a';
+-- Rollback inverse:
+--   update public.fields set label_de='Restbuchwert im Jahr t',
+--     description='Berechneter Output (Engineer: Einheit Waehrung pruefen). Ersetzt Phantom-Symbol RBW_.'
+--    where id='440348c5-e5ce-4241-9b7a-dd1656475954';
+--   update public.equations set formula='RBW_t = AFA * (n + 1 - t)' where id='9ee71c62-0245-4322-976c-6f7b730bf87a';
+-- (The sibling field M816-23.rbw_t 8c752910 already carries the correct label "Restbuchwert RBW(t-1)" —
+--  see S-01: the two are duplicates of one quantity.)
+
+
+-- ----------------------------------------------------------------------------
+-- S-03  REQ-02 clause_reference does not match the quote it carries.
+-- ☐ RATIFIED
+-- Gate 68e776ab-42f9-4f12-b08a-d0e73adfa761, M816-01, block, condition
+--   "methodology_confirmation == dyn_cost_comp_arbf", clause_reference='§1'.
+-- Its source_quote is the §3.1 sentence (md 473, printed p.17):
+--   "Die Wirtschaftlichkeitsrechnung unterscheidet hinsichtlich des Zeitfaktors zwischen der stark
+--    vereinfachten statischen Kostenvergleichsrechnung und der den zeitlichen Anfall von Zahlungen
+--    berücksichtigenden dynamischen Kostenvergleichsrechnung."
+-- The §1 sentence that WOULD anchor it (md 345, printed p.12) is already used by REQ-01:
+--   "Das Merkblatt ist eine Weiterentwicklung der KVR-Leitlinien mit der Projektbewertung betrieblicher
+--    Er-satz- und Erneuerungsinvestitionen auf Basis der dynamischen Kostenvergleichsrechnung mittels
+--    Allgemeiner Rentenbarwertfaktoren."
+-- Finding: the 2026-08-05 "clause reference corrected" note left quote and clause pointing at different
+--   sections. Retag the clause to the section the quote is actually from.
+-- Proposed SQL:
+--   update public.compliance_requirements set clause_reference='§3.1'
+--    where id='68e776ab-42f9-4f12-b08a-d0e73adfa761';
+-- Rollback inverse:
+--   update public.compliance_requirements set clause_reference='§1'
+--    where id='68e776ab-42f9-4f12-b08a-d0e73adfa761';
+--
+-- SEPARATE, LARGER QUESTION on the same gate (needs its own ruling): REQ-02 is a BLOCK gate that forbids the
+--   enum value `kvr_leitlinien_classic` which methodology_confirmation itself offers. The md never forbids the
+--   KVR method — md 63 (§Vorwort): "Das vorliegende Merkblatt steht damit nicht im Wettbewerb mit den allseits
+--   akzeptierten [...] „Leitlinien zur Durchführung dynamischer Kostenvergleichsrechnungen (KVR-Leitlinien)"".
+--   Either the enum value should be removed, or the gate should be warn. Do not leave both.
+
+
+-- ----------------------------------------------------------------------------
+-- S-04  14 of 26 gates have an EMPTY condition — they can never evaluate, so they enforce nothing.
+-- ☐ RATIFIED
+-- All 14 are severity='warn' (no block gate is empty), so nothing is silently under-blocking, but the
+-- worksheet advertises 26 checks and runs 12.
+--   REQ-06 cee46851-8d2a-484b-960e-684877549750  M816-11  cl 4.1.6 / Anhang A   (also: source_quote NULL)
+--   REQ-07 68af3f30-81af-429a-8928-a68a7007d347  M816-11  cl Anhang A.1         (also: source_quote NULL)
+--   REQ-08 0d3ffeae-b589-459e-a47b-a63dcfa35412  M816-19  cl 3.2.4 / 4.2        (also: source_quote NULL)
+--   REQ-10 6b570259-f1a5-469b-8139-d9b04be53540  M816-19  cl 4.2.2, Gl. (5c)    (also: source_quote NULL)
+--   REQ-12 ecacd750-fbf5-41e4-9134-8137faf92486  M816-19  cl 4.3.1
+--   REQ-15 fbd3fc81-19c4-446c-8869-0abe6e1ce287  M816-19  cl 3.2.7 (Volkswirtschaftliche Rechnung)
+--   REQ-16 f121df98-6b79-474a-81d1-03d976ab4c1c  M816-19  cl 3.2.7
+--   REQ-17 7fbde703-89a5-4949-8b70-804e67f9d16d  M816-19  cl 4.5 (Interne Rendite, Gl. 11)
+--   REQ-24 c0850984-9d13-40cd-8774-43f042672425  M816-19  cl 6.2 Umsatzsteuern
+--   REQ-25 d5d29580-7f49-410c-a95e-8efc2e5146ff  M816-19  cl 3.2.7 (Gebührenrechnung)
+--   REQ-20 581bd79e-617c-4f69-8a03-0c08eff0fa3e  M816-28  cl 4.6.4
+--   REQ-21 f06ec08d-27c2-4692-96ed-1c96f23e982f  M816-25  cl 4.7 / 5.2          (also: source_quote NULL)
+--   REQ-22 02139dee-46f2-41ee-a874-550f9f61446e  M816-25  cl 4.7 / 5             (also: source_quote NULL)
+--   REQ-23 442cd0c5-50f8-4ab9-9e9a-2a481ad56362  M816-25  cl 4.1                 (also: source_quote NULL)
+-- Six of them additionally carry NO source_quote at all (REQ-06/07/08/10/21/22/23) and so have no provenance.
+-- Proposed conditions where the md supports one (each with its md evidence):
+--   REQ-06  md 854 (§4.1.6, p.28): "die Substitution der einzelnen, nun zusätzlich inflationsbeeinflussten
+--           Zeitterme $t^{k} p^{t}$ durch entsprechende Inflation berücksichtigende $\mathrm{ARBF} \mathrm{RBF}_{\mathrm{k}}(n ; q / p)$"
+--           -> condition: IF p_factor <> 1 THEN rbf_inflation_arg IS NOT NULL
+--   REQ-07  md 3744 (Anhang A.1, p.100): "\operatorname{RBF}_{0}(n ; q)=\left(1-1 / q^{n}\right) /(q-1) \quad q \neq 1"
+--           -> condition: q <> 1     (see S-07: this is a hard printed precondition with no gate today)
+--   REQ-08  md 507 (§3.2.4, p.18) + md 999 (§4.2.2, p.33) -> condition:
+--           IF discounting_method == "duration_dep" THEN i_dur IS NOT NULL
+--   REQ-10  md 1013 Gl. (5c) -> condition: duration > 0
+--   REQ-12  md 1151 (§4.3.1, p.36) -> condition: payment_takt_u >= 1
+--   REQ-15  md 1297 (§4.5.2, p.40) -> condition: IF subsidy_rate > 0 THEN supplementary_calc_required == "volkswirtschaftlich"
+--   REQ-17  md 1372 (§4.5.4, p.42) -> condition: IF irr_q_star IS NOT NULL THEN hurdle_rate IS NOT NULL
+--   REQ-24  md 1363 (§4.5.4, p.42) -> condition: ust_treatment IS NOT NULL
+--   REQ-25  md 549 (§3.2.7, p.20) -> condition: IF supplementary_calc_required == "gebuehrenrechnung"
+--                                              THEN kalk_zinssatz_zk IS NOT NULL AND abzugskapital_a IS NOT NULL
+--   REQ-20  md 1400 (§4.6.4, p.43) -> condition: sensitivity_scenario IS NOT NULL
+--   REQ-21  md 1450 (§4.7, p.44) -> condition: PBW_total IS NOT NULL
+--   REQ-22  md 2196 (§5.2.6, p.59) -> condition: BW_difference IS NOT NULL
+--   REQ-23  md 574 (§4.1.1, p.21) -> condition: payment_process_count >= 1
+--   REQ-16  no distinct testable obligation beyond REQ-15/25 — propose DELETE or merge, not a condition.
+-- Rollback inverse for each:  update public.compliance_requirements set condition='' where id='<id>';
+
+
+-- ----------------------------------------------------------------------------
+-- S-05  Two BLOCK gates whose condition is the full enum domain — they cannot fail.
+-- ☐ RATIFIED
+--   REQ-01 d5959f39-303b-4f13-979f-ab7948c6004a  block  "investment_type IN {ersatz, erneuerung}"
+--          investment_type's enum_values are EXACTLY {ersatz, erneuerung} -> tautology.
+--   REQ-03 1946801a-9f5e-4e11-835f-bf0a608e7f43  block  "evaluation_basis IN {nominal, real}"
+--          evaluation_basis's enum_values are EXACTLY {nominal, real} -> tautology.
+-- Both read as "the standard applies only to Ersatz-/Erneuerungsinvestitionen" (md 333/345, §1, p.12) and
+-- "Nominal- vs Realprinzip" (md 488, §3.2.1, p.18) — real obligations, but the encoded condition cannot
+-- express them because the enum already excludes everything else. The scope check M816 actually implies
+-- (md 333, p.12: "Aktuelle Investitionen sind zumeist auf den Ersatz- und die Erneuerung vorhandener
+-- wasserwirtschaftlicher Anlagen fokussiert.") is "not an Erstinvestition" — which is not representable
+-- without an `erstinvestition` enum value.
+-- Proposal: EITHER add the out-of-scope enum value so the gate can bite:
+--   update public.fields set enum_values = enum_values || '[{"value":"erstinvestition","label_de":"Erstinvestition (nicht im Anwendungsbereich)","label_en":"First investment (out of scope)","order_index":3,"regulation_reference":"§1"}]'::jsonb
+--    where id='5d1c25f9-8d47-478a-a5f8-3e920c0e9431';
+-- OR demote both gates to a presence check:
+--   update public.compliance_requirements set condition='investment_type IS NOT NULL' where id='d5959f39-303b-4f13-979f-ab7948c6004a';
+--   update public.compliance_requirements set condition='evaluation_basis IS NOT NULL' where id='1946801a-9f5e-4e11-835f-bf0a608e7f43';
+-- Rollback inverse: restore the two original conditions / drop the added enum entry.
+
+
+-- ----------------------------------------------------------------------------
+-- S-06  MIS-HOMED GATES: worksheet M816-19 "Durationsberechnung" hosts 10 gates, 8 of which read no
+--       M816-19 field at all. M816-19's own fields are duration / duration_method / duration_years / DUR /
+--       p / n / RBF_k / duration_calc_date — none of these appears in any of the 8 conditions or subjects.
+-- ☐ RATIFIED
+--   REQ-11 c4b07ade-edce-42b4-9a17-1f2fdde7d30f  block  "vorlauf_v >= 0 AND p_v_percent IS NOT NULL"
+--          vorlauf_v lives on M816-21, p_v_percent on M816-09        ->  re-home to M816-21
+--   REQ-12 ecacd750-fbf5-41e4-9134-8137faf92486  warn   (§4.3.1 Zahltakt u; payment_takt_u is on M816-21)
+--                                                                     ->  re-home to M816-21
+--   REQ-14 338d8e97-a22f-4e71-9018-a8d46d58d577  block  "IF n_a - n_b != 0 THEN partial_replication_flag == TRUE
+--                                                        AND n_tr IS NOT NULL"
+--          n_a/n_b on M816-08, partial_replication_flag on M816-02, n_tr on M816-22  ->  re-home to M816-22
+--   REQ-15 fbd3fc81-19c4-446c-8869-0abe6e1ce287  warn   (§4.5.2 Volkswirtschaftliche Rechnung)  ->  M816-29
+--   REQ-16 f121df98-6b79-474a-81d1-03d976ab4c1c  warn   (§3.2.7 Zusatzrechnungen)               ->  M816-29
+--   REQ-17 7fbde703-89a5-4949-8b70-804e67f9d16d  warn   (§4.5.4 IRR, Gl. 11)                    ->  M816-24
+--   REQ-24 c0850984-9d13-40cd-8774-43f042672425  warn   (§6.2 Umsatzsteuern; ust_treatment is on M816-01) -> M816-01
+--   REQ-25 d5d29580-7f49-410c-a95e-8efc2e5146ff  warn   (§4.5.3 Gebührenrechnung)               ->  M816-23
+--   (REQ-08 and REQ-10 DO belong on M816-19 — both are duration/discounting checks.)
+-- Worksheet ids: M816-01 7d18e3cb-4b92-4828-a777-baedc4aae668 · M816-21 3993f4dc-669c-48a8-ba7c-6d0b1732b0ab ·
+--   M816-22 a7884856-36ff-45e0-b09c-c4293ff8df45 · M816-23 0e226bab-5a46-46f8-9ab5-196df3c9f3ff ·
+--   M816-24 6baa85d5-6257-42d7-a960-bb86ba056a43 · M816-29 4110f60a-3094-47ae-bafd-94502faaf06c ·
+--   M816-19 (current home) 024dd070-d274-4efd-b06a-03c26877b7e8
+-- Proposed SQL:
+--   update public.compliance_requirements set worksheet_template_id='3993f4dc-669c-48a8-ba7c-6d0b1732b0ab'
+--    where id in ('c4b07ade-edce-42b4-9a17-1f2fdde7d30f','ecacd750-fbf5-41e4-9134-8137faf92486');
+--   update public.compliance_requirements set worksheet_template_id='a7884856-36ff-45e0-b09c-c4293ff8df45'
+--    where id='338d8e97-a22f-4e71-9018-a8d46d58d577';
+--   update public.compliance_requirements set worksheet_template_id='4110f60a-3094-47ae-bafd-94502faaf06c'
+--    where id in ('fbd3fc81-19c4-446c-8869-0abe6e1ce287','f121df98-6b79-474a-81d1-03d976ab4c1c');
+--   update public.compliance_requirements set worksheet_template_id='6baa85d5-6257-42d7-a960-bb86ba056a43'
+--    where id='7fbde703-89a5-4949-8b70-804e67f9d16d';
+--   update public.compliance_requirements set worksheet_template_id='7d18e3cb-4b92-4828-a777-baedc4aae668'
+--    where id='c0850984-9d13-40cd-8774-43f042672425';
+--   update public.compliance_requirements set worksheet_template_id='0e226bab-5a46-46f8-9ab5-196df3c9f3ff'
+--    where id='d5d29580-7f49-410c-a95e-8efc2e5146ff';
+-- Rollback inverse:
+--   update public.compliance_requirements set worksheet_template_id='024dd070-d274-4efd-b06a-03c26877b7e8'
+--    where id in ('c4b07ade-edce-42b4-9a17-1f2fdde7d30f','ecacd750-fbf5-41e4-9134-8137faf92486',
+--                 '338d8e97-a22f-4e71-9018-a8d46d58d577','fbd3fc81-19c4-446c-8869-0abe6e1ce287',
+--                 'f121df98-6b79-474a-81d1-03d976ab4c1c','7fbde703-89a5-4949-8b70-804e67f9d16d',
+--                 'c0850984-9d13-40cd-8774-43f042672425','d5d29580-7f49-410c-a95e-8efc2e5146ff');
+-- CAUTION: re-homing a BLOCK gate (REQ-11, REQ-14) moves where it blocks. Sequence with S-07.
+
+
+-- ----------------------------------------------------------------------------
+-- S-07  BLOCK gates that over-enforce relative to the printed text.
+-- ☐ RATIFIED
+--
+-- (a) REQ-11 c4b07ade-edce-42b4-9a17-1f2fdde7d30f  block  "vorlauf_v >= 0 AND p_v_percent IS NOT NULL"
+--     Evidence (md 1171, §4.3.3, printed p.37):
+--       "Bei Zahlungsprozessen mit Vorlauf muss in vielen Fällen auch die Inflation innerhalb der Vorlaufphase
+--        berücksichtigt werden. Der Barwert des Zahlungsprozesses muss also entsprechend der Jahresanzahl der
+--        Vorlaufphase inflationiert und abgezinst werden."
+--     "in vielen Fällen", not always. The gate demands p_v_percent UNCONDITIONALLY (there is no IF), and
+--     vorlauf_v (28285c78, M816-21) is is_required=false — so a project that has no Vorlauf at all is blocked
+--     on a Vorlauf-inflation rate. Worked counter-example in the guideline itself: Tabelle 2 (md 1435-1441,
+--     §4.7, printed p.44) has rows with "Vorlauf v = 0" and "p_v% = 0,0%".
+--     Proposed SQL:
+--       update public.compliance_requirements
+--          set condition='IF vorlauf_v > 0 THEN p_v_percent IS NOT NULL'
+--        where id='c4b07ade-edce-42b4-9a17-1f2fdde7d30f';
+--     Rollback inverse:
+--       update public.compliance_requirements
+--          set condition='vorlauf_v >= 0 AND p_v_percent IS NOT NULL'
+--        where id='c4b07ade-edce-42b4-9a17-1f2fdde7d30f';
+--
+-- (b) REQ-14 338d8e97-a22f-4e71-9018-a8d46d58d577  block
+--     "IF n_a - n_b != 0 THEN partial_replication_flag == TRUE AND n_tr IS NOT NULL"
+--     Evidence (md 1255, §4.4.2, printed p.39):
+--       "Bei teilreplizierten Finanzierungszahlungsprozessen ist die Besonderheit zu berücksichtigen, dass die
+--        Finanzierungsdauer $n_{\text {Fin }}$ regelmäßig kürzer als die Nutzungsdauern der finanzierten
+--        Investitionen ist. Daher ist die Nutzungsdauerdifferenz in den obigen Gln. (6a) bis (6c) durch eine mit
+--        dem Faktor $n_{\text {Fin }} / n_{\mathrm{B}}$ proportionalisierte Laufzeit $n_{\text {TR }}$ zu ersetzen:"
+--     and (md 1253, same page):
+--       "Alternativ kann man die betrieblichen Zahlungsprozesse einfach bis zur Nutzungsdauer der längeren
+--        Alternative, hier $n_{\mathrm{A}}$, verlängern, wenn der Barwert der Verlängerung der kürzeren
+--        Alternative gemäß Gl. (6b) nicht von Interesse ist."
+--     n_TR is required ONLY for teilreplizierte FINANZIERUNGS-Zahlungsprozesse; operating processes replicate
+--     over (n_A − n_B) directly, and §4.4.2 explicitly allows simply extending them. The gate demands n_tr for
+--     every life mismatch. Also: partial_replication_flag is one of several permitted approaches — §3.2.5
+--     (md 519, printed p.19) names the Proportionalitätsfaktorverfahren and the Gutschriftverfahren as
+--     alternatives ("Realitätsnähere Lösungsansätze sind hier zum Beispiel das Proportionalitätsfaktorverfahren
+--     (Orth, Grunwald) oder das Gutschriftverfahren (Betriebswirtschaftlicher Standard).").
+--     Proposed SQL:
+--       update public.compliance_requirements
+--          set condition='IF n_a - n_b != 0 AND partial_replication_flag == TRUE THEN n_tr IS NOT NULL'
+--        where id='338d8e97-a22f-4e71-9018-a8d46d58d577';
+--     Rollback inverse:
+--       update public.compliance_requirements
+--          set condition='IF n_a - n_b != 0 THEN partial_replication_flag == TRUE AND n_tr IS NOT NULL'
+--        where id='338d8e97-a22f-4e71-9018-a8d46d58d577';
+--
+-- (c) SATISFIABILITY — CHECKED, NO CHANGE NEEDED (refutes the pre-F-4 report):
+--     REQ-13 8515755e-c02f-4a63-b89f-f06ae7b7d65f, block, M816-08:
+--       "(IF n_a - n_b >= 0 THEN n_observation_period - n_a == 0) AND (IF n_b - n_a >= 0 THEN n_observation_period - n_b == 0)"
+--     This is the SYMMETRIC max() form and IS satisfiable: when n_a > n_b only the first branch fires
+--     (n_obs = n_a); when n_b > n_a only the second (n_obs = n_b); when n_a == n_b both fire and agree.
+--     It matches md 1228 (§4.4.1, p.38): "Diese versucht durch eine Teilwiederholung der kürzeren Alternative
+--     bis zum Ende der längeren Alternative wirtschaftlich einen gemeinsamen Planungshorizont herzustellen."
+--     REQ-14 (same class) is likewise satisfiable as encoded. The pre-F-4 "unsatisfiable" report no longer
+--     describes the rows in prod. NO SQL PROPOSED — recorded so the finding is not re-raised.
+
+
+-- ----------------------------------------------------------------------------
+-- S-08  SEVERITY NOTES: block gates anchored on non-mandatory ("sollte / kann / empfohlen / Sinn machen") text.
+-- ☐ RATIFIED
+--
+-- (a) REQ-05 c1c64de7-3f0e-48d3-89ab-cc32f9da8cb2  block + requires_attestation, M816-01, clause "3.1 (5-Schritt-Ablauf)"
+--     Evidence (md 473-478, §3.1, printed p.17):
+--       "Der Ablauf einer Kostenvergleichsrechnung im engeren Sinn lässt sich dabei in folgende 5 Schritte
+--        unterteilen: 1. Kostenermittlung 2. Finanzmathematische Aufbereitung 3. Kostengegenüberstellung
+--        4. Empfindlichkeitsprüfungen 5. Gesamtbeurteilung"
+--     "lässt sich unterteilen" is DESCRIPTIVE, not a mandate. It is however reinforced in §7 (md 3698,
+--     printed p.98): "Insoweit ist die in den KVR-Leitlinien gewählte Unterteilung von 5 Arbeitsschritten
+--     [...] weiterhin aktuell." — reinforced, still not "muss".
+--     Note: block -> warn is defensible. Recorded, no auto-decision.
+--       update public.compliance_requirements set severity='warn' where id='c1c64de7-3f0e-48d3-89ab-cc32f9da8cb2';
+--     Rollback inverse: set severity='block' for the same id.
+--
+-- (b) REQ-09 fd1772cd-1659-4e7c-9319-8d0845aba7d5  block, M816-04
+--     "IF discounting_method == "duration_dep" THEN bundesbank_reference_date IS NOT NULL"
+--     Its anchor is a recommendation (md 507, §3.2.4, printed p.18): "Es wird empfohlen, diesen offiziellen,
+--     extern vorgegebenen, jederzeit nachvollziehbaren Zinssatz auch für die Abzinsung in der Regel langfristig
+--     orientierter Investitionsmaßnahmen zu verwenden."
+--     NO CHANGE PROPOSED: the gate does not enforce the recommendation — it enforces data completeness once the
+--     engineer has CHOSEN duration_dep, and md 985 (§4.2.1, printed p.31) does fix a reference date for every
+--     calculation ("Nachfolgend werden bei allen Berechnungen jeweils die Bundesbank-Abzinsungs-Zinssätze zum
+--     31.12.2017 verwendet."). Block is correct. Recorded so it is not re-raised.
+--
+-- (c) REQ-18 cda42e9f / REQ-19 4710b406, M816-28, both warn — correctly warn, both anchored on "Es macht
+--     daher/also Sinn ... zu prüfen" (md 1390 / 1394, §4.6.2 / §4.6.3, printed p.43). NO CHANGE.
+
+
+-- ----------------------------------------------------------------------------
+-- S-09  MISSING GATES for printed hard constraints (no compliance_requirements row exists today).
+-- ☐ RATIFIED
+--
+-- (a) q ≠ 1 — a division-by-zero precondition printed with the equation itself.
+--     Evidence (md 3744, Anhang A.1, Gl. (A.1), printed p.100):
+--       "\operatorname{RBF}_{0}(n ; q)=\left(1-1 / q^{n}\right) /(q-1) \quad q \neq 1 \tag{A.1}"
+--     Every ARBF recursion divides by (q-1) (md 3759-3764), so q = 1 breaks the whole chain. Nothing guards it.
+--     Proposed (or reuse the empty REQ-07, see S-04):
+--       insert into public.compliance_requirements (worksheet_template_id, code, severity, condition,
+--         clause_reference, source_quote)
+--       values ('d4077b1a-c8c9-419a-ac3d-9bed67dd2134','REQ-27','block','q != 1','Anhang A.1, Gl. (A.1)',
+--         'RBF0(n;q) = (1 - 1/q^n) / (q - 1)   q != 1   [Gl. A.1, Anhang A, printed p.100]');
+--     Rollback inverse: delete from public.compliance_requirements where code='REQ-27'
+--                        and worksheet_template_id='d4077b1a-c8c9-419a-ac3d-9bed67dd2134';
+--
+-- (b) Nominalwertberechnung must use a near-zero, NOT zero, rate — same division-by-zero class.
+--     Evidence (md 991, §4.2.1, printed p.31):
+--       "statt der aktuellen Bundesbank-Abzinsungszinssätze ist dann jeweils ein Null-Zinssatz - aus
+--        mathematischen Gründen nicht exakt Null, sondern z.B. 0,001 \% anzusetzen."
+--     and (md 3839, Anhang B, printed p.102): "die normalerweise über die Duration errechneten Zinssätze
+--        jeweils durch einen nahe bei Null liegenden Zinssatz, etwa 0,0001\% zu ersetzen."
+--     NOTE FOR THE OWNER: the two printed example values differ (0,001 % in §4.2.1 vs 0,0001 % in Anhang B).
+--     Per SR-2 the system must NOT silently pick one. Proposed gate enforces only "not exactly zero":
+--       insert into public.compliance_requirements (worksheet_template_id, code, severity, condition,
+--         clause_reference, source_quote)
+--       values ('f018b0a8-17e2-4719-aecb-8549ab8c06f6','REQ-28','block',
+--         'IF discounting_method == "nominal_zero" THEN i_dur != 0','§4.2.1',
+--         'statt der aktuellen Bundesbank-Abzinsungszinssaetze ist dann jeweils ein Null-Zinssatz - aus mathematischen Gruenden nicht exakt Null, sondern z.B. 0,001 % anzusetzen. [§4.2.1, printed p.31]');
+--     Rollback inverse: delete from public.compliance_requirements where code='REQ-28'
+--                        and worksheet_template_id='f018b0a8-17e2-4719-aecb-8549ab8c06f6';
+--
+-- (c) Same discounting rule for ALL alternatives — a printed "Wesentlich ist" obligation with no gate.
+--     Evidence (md 947, §4.2.1, printed p.31): "Wesentlich ist hier, dass für alle in Betracht gezogenen
+--       Projektalternativen die gleiche Diskontierungsregel zur Anwendung kommt."
+--     Not representable against the current single-project field model (there is no per-alternative
+--     discounting_method field). Flagged, no SQL proposed — needs a data-model decision first.
+
+
+-- ----------------------------------------------------------------------------
+-- S-10  CLAUSE RETAGS — fields tagged with a bare "§5" (or with Anhang A) that the md places elsewhere.
+-- ☐ RATIFIED
+-- "§5" is the 47-page Praxisteil; as a clause_reference it is not actionable. Retag to the clause the
+-- verification quote in the pack was taken from:
+--   M816-07.personnel_costs_annual   3d67f9c6-3b03-4f6d-88f5-623c83f38360  '§5' -> '§5.2.5 (Tabelle 13)'
+--   M816-07.energy_costs_annual      9b724256-6525-4d3b-94d2-1961e89a7aa7  '§5' -> '§5.2.5 (Tabelle 12)'
+--   M816-07.material_costs_annual    ea80cbe6-1217-4bbd-add5-b2a7685fddae  '§5' -> '§5.2.5 (Tabelle 10)'
+--   M816-07.maintenance_costs_annual d34882b7-3961-4976-9cf2-851109e4d1d4  '§5' -> '§5.2.5 (Tabelle 14)'
+--   M816-07.other_operating_costs_annual bcab01ca-2bad-41d2-8eef-986a8b54634d '§5' -> '§5.4.5.7'
+--   M816-07.total_operating_costs_annual 32193d06-7cbe-4c90-978d-588dc7aef63f '§5' -> '§5.2.5'
+--   M816-10.lifetime_years_n     683a58c7-e902-4071-979a-c1ec2d0fa1be  '§5' -> '§4.4.1'
+--   M816-10.interest_rate        ef0a199b-acf9-42b8-b0e9-c90483573082  '§5' -> '§2 Formelzeichen, §4.1.1'
+--   M816-10.inflation_rate_p     2aa8d48a-5dc5-4e46-98a3-352d97a2184a  '§5' -> '§2 Formelzeichen, §4.1.6'
+--   M816-13.c_0_lin/Z_t_linear/BW_linear  '§5, Gl.2a' / '§5, Gl.2b' -> '§4.1.3, Gl. (2a)' / '§4.1.3, Gl. (2b)'
+--   M816-14.c_0_quad/c_1_quad/Z_t_quadratic/BW_quadratic '§5, Gl.3a|3b' -> '§4.1.4'
+--       (NB the md numbers these equations 1a/1b, 2a/2b, 4a/4b, 5a/5b, 6a/6b, 7-11 — there is NO printed
+--        "Gl. 3a/3b"; the quadratic pair at md 727-728 is UNNUMBERED. Retag to '§4.1.4 (unnumbered)'.)
+--   M816-16.* '§5, Gl.5a|5b' -> '§4.1.6, Gl. (5a)' / '§4.2.2, Gl. (5b)'
+--   M816-18.coefficient_set_used eec88d64 / highest_order_polynomial acb6b61b / coefficient_review_complete 939d1c1c
+--       '§5' -> 'Anhang B' / '§4.1.5' / (app metadata, null)
+--   M816-19.duration_method 0cc69a34 / duration_years a7481b86 / duration_calc_date 030c1c69
+--       '§5, Gl.5c' -> '§4.2.2, Gl. (5c)' ; duration_calc_date -> null (app metadata)
+--   M816-23.RBW_t 440348c5  'Anhang A' -> '§4.5.3, Gl. (9)'   (Anhang A contains no RBW formula)
+--   M816-24.q_star bdd68677 'Anhang A' -> '§4.5.4, Gl. (11)'  (Anhang A contains no IRR formula)
+--   M816-25.PBW_total 1ceac226 / PBW_components_summary f889e1db / PBW_calc_date 38cab829  '§5' -> '§4.7'
+--   M816-26.* (profile_a_name, profile_b_name, BW_profile_a, BW_profile_b, BW_difference, preferred_variant)
+--       '§5' -> '§5.2.6'
+--   M816-29.supplementary_calc_completed 971887bc / sensitivity_analysis_done 1da1d448 / risk_assessment_done 5c9b7e7c
+--       '§7' -> '§4.5.1' / '§4.6.1' / '§4.2.1'   (§7 Schlussfolgerungen defines none of them)
+--   M816-30.final_signoff_date 083d7433 / final_signoff_engineer 1e8cadd9  '§1' -> null (app metadata; §1 is
+--       the Anwendungsbereich and says nothing about sign-off)
+-- Proposed SQL pattern:  update public.fields set clause_reference='<new>' where id='<id>';
+-- Rollback inverse:      update public.fields set clause_reference='<old>' where id='<id>';
+
+
+-- ----------------------------------------------------------------------------
+-- S-11  UNIT / LABEL corrections.
+-- ☐ RATIFIED
+-- (a) M816-10.interest_rate ef0a199b-acf9-42b8-b0e9-c90483573082, label_de='Zinssatz q', unit=null.
+--     §2 (md 435 and 451, printed p.13) separates the two: "$i$ & \% p. a. & Abzinsungszinssatz für die
+--     Barwertermittlung pro Jahr" vs "$q$ & - & Abzinsungszinsfaktor für die Barwertermittlung $q=1+i$".
+--     q is a dimensionless FAKTOR, not a Zinssatz.
+--       update public.fields set label_de='Abzinsungszinsfaktor q (q = 1 + i)', unit='-' where id='ef0a199b-acf9-42b8-b0e9-c90483573082';
+--     Rollback: set label_de='Zinssatz q', unit=null for the same id.
+-- (b) M816-23.abzugskapital_a 0bca30b9-1acc-4f79-a723-e709234df17d, unit='None'.
+--     §2 (md 422, printed p.13): "a & \% & Prozentanteil des Abzugskapitals an den Anschaffungs- und
+--     Herstellungskosten" -> unit is %.
+--       update public.fields set unit='%' where id='0bca30b9-1acc-4f79-a723-e709234df17d';
+--     Rollback: set unit='None' for the same id.
+--     (Sibling M816-23.a 58281876 already carries unit='%' — see S-01.)
+-- (c) M816-03.price_year 762a3bec-6c56-45d2-8e7d-7ca0312e2e86, unit='a'.
+--     'a' is the unit for a DURATION in years; a Preisstand-Jahr is a calendar year label. Also see the
+--     residue entry: the md defines no price-base year at all (§4.1.6 indexes each process with its own p%).
+--       update public.fields set unit=null where id='762a3bec-6c56-45d2-8e7d-7ca0312e2e86';
+--     Rollback: set unit='a' for the same id.
+
+
+-- ----------------------------------------------------------------------------
+-- S-12  DESCRIPTION claims that the source does not carry (numeric bounds invented in the encoding).
+-- ☐ RATIFIED — this is the SR-1 class: a bound presented as a requirement without a verbatim source.
+-- (a) M816-23.kalk_zinssatz_zk 6b9aa5f0-0e58-42a8-b507-da5a7f593940,
+--     description = "... OVG guidance typically bounds zK at 5-7% p.a."
+--     The md gives ONLY an upper bound and two worked values, never a lower bound:
+--       md 2634 (§5.3.8.1, printed p.72): "Gebührenrechtlich kann gemäß 4.5.3 statt der tatsächlichen
+--         Verzinsung (hier 1,5 \%) eine kalkulatorische Verzinsung derzeit bis zu 7 \% nach vielen
+--         landesrechtlichen KAG angesetzt werden."
+--       md 2634 (same paragraph): "Bei Annahme einer kalkulatorischen Verzinsung von $5 \%$ p. a. ..."
+--       md 1474 (§4.7, printed p.44): "... kalkulatorischen Zinsen mit einem kalkulatorischen Zinssatz
+--         $Z_{\mathrm{K}}=6 \%$ ..."
+--       md 1327 (§4.5.3, printed p.40): "Auf dieses verbleibende sogenannte Zinskapital ist dann der durch die
+--         Kommune festgelegte kalkulatorische Zinssatz $Z_{\mathrm{K}}$ anzuwenden. Zur Fortentwicklung des
+--         kalkulatorischen Zinssatzes bieten Urteile der Oberverwaltungsgerichte eine Hilfestellung."
+--     Per SR-2 the rate is a municipal choice bounded above by the KAG; the "5-7 %" band is not printed.
+--       update public.fields set description='Kalkulatorischer Zinssatz zK, von der Kommune nach dem jeweiligen KAG festgelegt (§4.5.3). Die Merkblatt-Quelle nennt eine Obergrenze "derzeit bis zu 7 % nach vielen landesrechtlichen KAG" (§5.3.8.1) sowie die Rechenbeispiele 6 % (§4.7) und 5 % (§5.3.8.1); eine Untergrenze ist NICHT gedruckt. OVG-Urteile geben laut §4.5.3 nur eine Hilfestellung.'
+--        where id='6b9aa5f0-0e58-42a8-b507-da5a7f593940';
+--     Rollback: restore 'Calculatory interest rate set by municipality per KAG. OVG guidance typically bounds zK at 5-7% p.a.'
+-- (b) M816-23.abzugskapital_a 0bca30b9-1acc-4f79-a723-e709234df17d,
+--     description = "... Typical: 0.20-0.30."
+--     The md prints exactly ONE worked value (md 1474, §4.7, printed p.44): "... und einem Abzugskapitalanteil
+--     von $a=30 \%$ ausgegangen." The band 0,20-0,30 has no source.
+--       update public.fields set description='Prozentanteil a des Abzugskapitals ABK an den urspruenglichen AHK, nach der Prozentmethode ermittelt (§4.5.3, a = ABK/AHK). Der einzige gedruckte Wert ist a = 30 % im Musterprojekt (§4.7); die Quelle nennt KEINE Bandbreite.'
+--        where id='0bca30b9-1acc-4f79-a723-e709234df17d';
+--     Rollback: restore 'Share of investment funded by ABK (subsidies/contributions) - reduces base for kalkulatorische Verzinsung. Typical: 0.20-0.30.'
+
+
+-- ----------------------------------------------------------------------------
+-- S-13  is_required REVIEW — 46 fields are is_required=true although the guideline makes them optional,
+--       conditional, engine-derived, or purely app-side.
+-- ☐ RATIFIED
+--
+-- (a) ENGINE OUTPUTS marked required (the #22 class: derived values that must not be hand-enterable and must
+--     not block a worksheet). All are outputs of an encoded equation or a direct function of one:
+--       M816-11.rbf_0 6701639a · M816-11.rbf_k 4c5985e4 · M816-12.z_t 10b21ebd · M816-12.bw b0071d8f ·
+--       M816-13.Z_t_linear 40273312 · M816-13.BW_linear 49d973ec · M816-14.Z_t_quadratic dc48a226 ·
+--       M816-14.BW_quadratic e8a6f9d5 · M816-16.Z_t_inflation 3a773012 · M816-16.BW_inflation 8e75a36f ·
+--       M816-16.q_DUR efc98c13 · M816-19.duration 01f08146 · M816-19.duration_years a7481b86 ·
+--       M816-20.i_dur 320eae47 · M816-20.q_dur 126cabb9 · M816-25.pbw_alternative 8f00afd4 ·
+--       M816-25.PBW_total 1ceac226 · M816-26.BW_profile_a 1e00fc7a · M816-26.BW_profile_b c3166768 ·
+--       M816-26.BW_difference e3afde50 · M816-27.delta_pbw d6b52a7c
+--     Evidence that these are machine outputs, not inputs (md 3851, Anhang B, printed p.102):
+--       "Die Berechnung der Duration, also die mittlere Dauer des Zahlungsprozesses, der
+--        durationsentsprechenden Abzinsung mit den Abzinsungszinssätzen der Deutschen Bundesbank und
+--        schließlich die Bewertung des Zahlungsprozesses in Form eines Barwerts erfolgt völlig automatisiert."
+--     and (md 1145, §4.2.2, printed p.35): "Bis auf den ersten Schritt (Ermittlung der Koeffizienten) laufen
+--        alle weiteren Schritte, insbesondere auch die Berechnung der für Schritt 2 und 3 benötigten ARBF,
+--        automatisiert über die EXCELBerechnungshilfe gemäß Anhang B ab."
+--       update public.fields set is_required=false where id in (<the 21 ids above>);
+--     Rollback: set is_required=true for the same ids.
+--
+-- (b) CONDITIONAL / process-shape-dependent fields marked required. A constant Zahlungsprozess has no c_1
+--     and no c_2; a project without Inflation has no p; a single-alternative check has no Teilreplikation:
+--       M816-13.c_0_lin fe57665c · M816-14.c_0_quad 8355ec60 · M816-14.c_1_quad 5120d6a6 ·
+--       M816-16.c_k_inflation 27cbefef · M816-16.inflation_rate_p ed978dbe · M816-16.n_period_years 2db12dfe ·
+--       M816-09.p_percent 6d362fe7 · M816-09.p_factor 9e8f8369
+--     Evidence (md 578, §4.1.2, printed p.22): "Konstante Zahlungsprozesse werden durch konstante
+--       Zahlungsfunktionen abgebildet. Diese weisen einen in jeder Periode gleichhohen Zahlungsbetrag $c_{0}$
+--       auf." — i.e. Grad 0 has c_0 only. Tabelle 2 (md 1435-1441, §4.7, printed p.44) shows rows with
+--       c_1 = 0, c_2 = 0 and p% = 0,0%.
+--       update public.fields set is_required=false where id in (<the 8 ids above>);
+--
+-- (c) §5-EXAMPLE-SPECIFIC operating cost categories marked required. The cost breakdown is example-specific,
+--     and §5.4.5.7 explicitly drops categories that do not differ between alternatives:
+--       M816-07.personnel_costs_annual 3d67f9c6 · energy_costs_annual 9b724256 ·
+--       material_costs_annual ea80cbe6 · maintenance_costs_annual d34882b7
+--     Evidence (md 3395, §5.4.5.7, printed p.88): "Bei den Betriebskosten werden aufgrund der Delta-Betrachtung
+--       der beiden Alternativen nur solche Kostenarten betrachtet, bei denen Unterschiede gegeben sind."
+--     Keep total_operating_costs_annual 32193d06 required.
+--       update public.fields set is_required=false where id in ('3d67f9c6-3b03-4f6d-88f5-623c83f38360',
+--         '9b724256-6525-4d3b-94d2-1961e89a7aa7','ea80cbe6-1217-4bbd-add5-b2a7685fddae',
+--         'd34882b7-3961-4976-9cf2-851109e4d1d4');
+--
+-- (d) APP-SIDE workflow flags/dates marked required — the guideline defines none of them, so they must not
+--     gate a compliance verdict:
+--       M816-03.method_selection_date c09f5ad4 · M816-10.data_collection_complete 13b7005f ·
+--       M816-10.summary_date c5aa9400 · M816-18.coefficient_review_complete 939d1c1c ·
+--       M816-19.duration_calc_date 030c1c69 · M816-25.PBW_calc_date 38cab829 ·
+--       M816-29.supplementary_eval_date 2b9e549c · M816-30.documentation_complete 1c3577c3 ·
+--       M816-30.final_signoff_date 083d7433 · M816-30.final_signoff_engineer 1e8cadd9 ·
+--       M816-01.project_number 91fdd250 · M816-01.project_name 8d5c41e8 · M816-01.project_location 31c2762c ·
+--       M816-01.responsible_organisation 438227f1
+--     (These are the 16 fields the pack marks 'inferred_from_worksheet'; the required flag is an app/UX
+--      decision, not a compliance one — listed so the two decisions are taken together.)
+--
+-- (e) M816-03.cost_index_reference 5ca3a14c and M816-03.price_year 762a3bec are is_required=true but the md
+--     defines neither concept (see the pack residue list). Propose false pending the S-11(c) decision.
+
+
+-- ----------------------------------------------------------------------------
+-- S-14  ENUM hygiene.
+-- ☐ RATIFIED
+-- (a) M816-28.ranking_stability 9a521257-764c-4d45-81fe-7f0fa93e3337 — all three enum entries have
+--     label_de=null, label_en=null and regulation_reference=null; only raw tokens (robust /
+--     conditionally_robust / sensitive) would render. The three-step granularity is EKOWAI's; the guideline
+--     states only the criterion (md 1384, §4.6.1, printed p.42): "Werte bzw. die Umkehrung der
+--     Vorteilhaftigkeit zu vergleichender Investitionsalternativen können so auch unter Einbezug ungünstiger
+--     Parameterwerte ermittelt werden." and shows a live reversal (md 2609, §5.3.7.2, printed p.71):
+--     "Bei einer stärkeren Inflation als in der Basis-Preisentwicklung angenommen tauschen Alternative 1 und
+--      Alternative 3 im Vorteilhaftigkeitsranking die Plätze."
+--     Propose adding German/English labels and marking regulation_reference as EKOWAI-derived.
+-- (b) M816-29.supplementary_calc_required 36ef12dd-8b13-4f86-b1ec-883de796415e — two entries share
+--     order_index = 3 ("volkswirtschaftlich" and "none"), so the option order is non-deterministic.
+--       update public.fields set enum_values = <same list with "none".order_index = 4>
+--        where id='36ef12dd-8b13-4f86-b1ec-883de796415e';
+--     Rollback: restore the stored jsonb verbatim.
+
+
+-- ----------------------------------------------------------------------------
+-- S-15  ENGINE RE-SCAN OF 2026-08-01 ("~17 RBF_k-family equations uncomputable, M-816 blocked") — RESOLVED
+--       AS AN ENGINE-GRAMMAR ISSUE, NOT A SOURCE GAP. No SQL. Recorded so it is not re-raised as a data defect.
+-- ☐ RATIFIED
+-- The md prints every formula the encoding claims:
+--   Gl. (A.1) and the full recursion for k = 0..5 (md 3744 and 3759-3764, Anhang A.1, printed p.100), incl.
+--     "\operatorname{RBF}_{5}(n ; q)=\left(\operatorname{RBF}_{0}(n ; q)+5 \operatorname{RBF}_{1}(n ; q)+10 \operatorname{RBF}_{2}(n ; q)+10 \operatorname{RBF}_{3}(n ; q)+5 \operatorname{RBF}_{4}(n ; q)+1-(n+1)^{5} / q^{n}\right) /(q-1)"
+--   and the guideline states the recursion is the intended implementation (md 3768, printed p.100):
+--     "Die oben genannten Rekursionsformeln können in jedem gängigen Tabellenkalkulationsprogramm wie zum
+--      Beispiel in EXCEL als sogenannte „benutzerdefinierte Funktionen“ hinterlegt werden."
+-- What the engine cannot evaluate is (i) the RECURSIVE chain RBF_k -> RBF_0..RBF_{k-1} (6 equations:
+--   18a04bf4, fb728a50, 2f40bcaa, 43f4db93, 52f8c9ef, ce041fd9) and (ii) the open SUM-over-k forms
+--   Gl. (4a)/(4b)/(5a)/(5b)/(5c)/(6b_TR)/(6c) (b57e8227, 58f7825f, 8c53d0a6, c099c43e, fb9faa7b, 1907cd42,
+--   6249bd24) plus the piecewise Gl. (6a) forms (1681e612, 49f9a2b6) and the implicit IRR Gl. (11)
+--   (aeb15cc9) — 16 rows, matching the "~17" of the re-scan. Every one is a GRAMMAR limitation (recursion,
+--   unbounded Σ, piecewise definition, implicit solve), not a missing or wrong source value.
+-- Recommendation: track these as an engine capability item (Σ_k with a bounded k from polynomial_degree_m,
+--   memoised RBF recursion, a root-finder for Gl. 11) — not as a DWA-M-816 encoding defect.
+
+
+-- ============================================================================
+-- END — 15 staged blocks, none applied. Sequencing note: S-01 (duplicate layer) must be decided BEFORE
+-- S-13 (required flags) and S-10 (clause retags), because deactivating a twin changes which row those touch.
+-- ============================================================================

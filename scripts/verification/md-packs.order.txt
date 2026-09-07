@@ -27,3 +27,4 @@ dwa-m-102-4-md-verification-pack.sql  DWA-M-102-4
 dwa-a-222-md-verification-pack.sql  DWA-A-222
 dwa-a-201-md-verification-pack.sql  DWA-A-201
 dwa-a-272e-md-verification-pack.sql  DWA-A-272E
+dwa-m-816-md-verification-pack.sql  DWA-M-816
