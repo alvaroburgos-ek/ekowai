@@ -1,0 +1,476 @@
+-- ISO-14002-2 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, ISO 14002-2:2023, printed page + PDF page) and its rollback inverse. Mark a
+-- block "RATIFIED" only after Alvaro decides; nothing here may be applied on a subagent's
+-- judgement.
+--
+-- SOURCE: ISO 14002-2:2023(E), "INTERNATIONAL STANDARD", Environmental management systems -
+--   Guidelines for using ISO 14001 to address environmental aspects and conditions within an
+--   environmental topic area - Part 2: Water. FIRST EDITION 2023-05, (c) ISO 2023.
+--   PUBLISHED STANDARD - not a Draft/DIS/FDIS, not a Technical Report, not a scoping report.
+--   English. Licensed copy "Provided by Accuris under license with AENOR".
+--   PDF: C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 14002-2\
+--        ISO-14002-2-2023.pdf (61 pages). Text layer: pdftotext -layout -enc UTF-8, form feeds
+--        preserved, 0 undecodable characters, 150 945 bytes.
+--   PAGE CONVENTION: the licensed copy interleaves BLANK filler pages (PDF 12, 19, 26, 31, 35, 37,
+--        39, 41, 44, 50, 53, 57-60) so PDF page /= printed page and the footer digits are
+--        displaced (PDF 19 is blank yet renders "7"; PDF 20, which carries §4.3, renders none).
+--        Skipping the blanks gives PDF 13-18 -> printed 1-6, PDF 20-25 -> 7-12, PDF 27-30 ->
+--        13-16, PDF 32-34 -> 17-19, PDF 36 -> 20, PDF 43 -> 24, PDF 48 -> 28; this map reproduces
+--        EVERY entry of the printed Contents list. Citations give "printed p.N (PDF p.M)".
+--
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--   "condition_expression") and has NO "active" column - the statements below reflect that.
+--   The evaluator accepts "== True" as well as "== true" (src/lib/compliance/evaluate.ts),
+--   so that casing is cosmetic and is NOT staged as a defect.
+--   public.fields DOES have an "active" column (export-fields.mjs reads coalesce(f.active, true)).
+--
+-- ============================================================================
+-- MODALITY CENSUS - the arithmetic every severity judgement below rests on
+-- ============================================================================
+--   Normative body, Clauses 1-7 (PDF 13-35):    shall = 0   should = 34   can = 99   may = 0
+--   Informative Annexes A-D    (PDF 36-55):     shall = 0   should =  1   can = 32   may = 0
+--   Front matter (cover/Foreword/Introduction): shall = 1   should =  4   can = 17   may = 5
+--   Bibliography / back matter:                 shall = 0   should =  0   can =  0   may = 0
+--
+--   The ONE "shall" in the whole document is ISO boilerplate in the Foreword:
+--     "ISO shall not be held responsible for identifying any or all such patent rights."
+--       - printed p.iv (PDF p.6)
+--   It binds ISO, not the user of the standard.
+--
+--   ==> THERE IS NO "shall" IN THE NORMATIVE BODY. NO BLOCK GATE IS DEFENSIBLE ANYWHERE IN
+--       ISO 14002-2:2023. Clause 1 reads "This document gives general guidelines for
+--       organizations seeking to address water-related environmental aspects [...]"
+--       - printed p.1 (PDF p.13). The title word is "Guidelines". The strongest modality in
+--       Clauses 4-7 is "should".
+--   ==> THE ENCODING ALREADY DOES THIS CORRECTLY: all 26 compliance_requirements rows carry
+--       severity='warn'; not one carries severity='block'. NOTHING IN THIS FILE PROPOSES
+--       RAISING ANY SEVERITY. The two severity-shaped blocks below (S-04, S-05) propose the
+--       opposite direction - relaxing or removing a gate that over-enforces "can"/"where
+--       appropriate" text.
+--
+-- ============================================================================
+-- S-01  MIS-HOMED GATE: CR-007 sits on worksheet -02 but reads only a field of -03
+-- ============================================================================
+-- Evidence (encoding, prod export 2026-09-08):
+--   compliance_requirements CR-007  id=458f265a-ab28-443b-bea2-d35d70fecafc
+--     worksheet = ISO-14002-2-02 "Wasserbezogene Überprüfung & Kontext"
+--     condition = significant_aspect IS NOT NULL
+--     clause_reference = §4.2.2
+--   fields.significant_aspect  id=469b264f-adca-4e91-b5ff-46f4e17faaae
+--     worksheet = ISO-14002-2-03 "Umweltaspekte, -auswirkungen & Abhängigkeiten"
+--     clause_reference = §4.2.2
+--   Worksheet -02 encodes §4.2.1 (the water-related review); worksheet -03 encodes §4.2.2.
+--   The gate's own clause_reference (§4.2.2) matches worksheet -03, not worksheet -02.
+-- Evidence (source): "When deciding on the appropriate actions, an organization should review the
+--   environmental aspects of its activities that can have an impact on water (use, quality,
+--   conditions) and aquatic ecosystems, and identify those that that are significant and that it
+--   will address in its environmental management system." - §4.2.2, printed p.4 (PDF p.16)
+--   (the doubled "that that" is a genuine printed typo, confirmed on the rendered page).
+-- Consequence: the gate evaluates a field the engineer never sees on the worksheet it fires on.
+-- ☐ RATIFIED - re-home CR-007 to worksheet ISO-14002-2-03
+-- update public.compliance_requirements set worksheet_template_id = 'f148d3e8-06f3-4a1a-9100-3a8460e120d3'
+--  where id = '458f265a-ab28-443b-bea2-d35d70fecafc';
+-- ROLLBACK:
+-- update public.compliance_requirements set worksheet_template_id = '2c676600-ddac-4c84-a2d0-c414abcc9357'
+--  where id = '458f265a-ab28-443b-bea2-d35d70fecafc';
+--
+-- ============================================================================
+-- S-02  EFFECTIVE NO-OP: CR-007 is "IS NOT NULL" on a BOOLEAN that is already is_required=true
+-- ============================================================================
+-- Evidence (encoding): fields.significant_aspect is data_type='boolean', is_required=true.
+--   CR-007 condition = "significant_aspect IS NOT NULL". A required boolean can only be NULL
+--   while the worksheet is incomplete, which the required-flag already blocks; once the engineer
+--   answers either true OR false the gate passes. The gate therefore adds no constraint the
+--   required-flag does not already impose, and in particular it does NOT check that a significant
+--   aspect was actually identified.
+-- Evidence (source): the standard leaves the significance criteria wholly to the organization -
+--   "Note 2 to entry: Significant environmental aspects are determined by the organization
+--   applying one or more criteria." - §3.2, printed p.2 (PDF p.14).
+--   So NO stronger condition (e.g. "== true") is defensible either: the standard does not require
+--   that any aspect BE significant. The honest options are (a) delete the gate as redundant, or
+--   (b) keep it as documentation. This needs a ruling; nothing is proposed as obvious.
+-- ☐ RATIFIED - option (a): delete the redundant gate
+-- delete from public.compliance_requirements where id = '458f265a-ab28-443b-bea2-d35d70fecafc';
+-- ROLLBACK (re-insert with the exact prod values, worksheet as it was BEFORE S-01):
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   values ('458f265a-ab28-443b-bea2-d35d70fecafc','2c676600-ddac-4c84-a2d0-c414abcc9357','CR-007','warn','significant_aspect IS NOT NULL','§4.2.2','"When deciding on the appropriate actions, an organization should review the environmental aspects of its activities that can have an impact on water (use, quality, conditions) and aquatic ecosystems, and identify those that that are significant and that it will address in its environmental management system." [§4.2.2 Review water-related environmental aspects and impacts, p.4]', false);
+--
+-- ============================================================================
+-- S-03  REDUNDANT PRESENCE-ONLY GATES over fields that are already is_required=true
+-- ============================================================================
+-- Evidence (encoding):
+--   CR-002  id=7b7f90a8-89a1-4a9a-968d-51cdeaf429ab  condition = water_topic_area_scope IS NOT NULL
+--           field water_topic_area_scope  is_required = true
+--   CR-005  id=128774a3-51b3-4e08-a991-592389f5f930  condition = compliance_obligations_water IS NOT NULL
+--           field compliance_obligations_water  is_required = true
+--   Both restate the field's own required-flag and hide no printed limit - because there IS no
+--   printed limit: ISO 14002-2:2023 states no numeric threshold, range or value anywhere in
+--   Clauses 1-7 (a mechanical search for "formula|equation|is calculated|calculated as" over the
+--   full text layer returns ZERO hits; every number in the document sits in an INFORMATIVE worked
+--   example - Salmo Papers "reduce water consumption by 10 %", "reduced [...] by 54 %", Annex A
+--   "Inspection of distribution pipeline 10 % of pipeline per" year).
+-- Evidence (source, for what the gates DO rest on):
+--   CR-002: "This document gives general guidelines for organizations seeking to address
+--     water-related environmental aspects, environmental impacts, environmental conditions, and
+--     the associated risks and opportunities within an environmental management system in
+--     accordance with ISO 14001." - §1 Scope, printed p.1 (PDF p.13). NOTE this sentence states
+--     what the DOCUMENT does; it imposes nothing on the organization. It is a scope statement,
+--     not a requirement, and should not be a gate's only anchor.
+--   CR-005: "specific compliance obligations (e.g. permits, licences, voluntary agreements)"
+--     - §4.2.1, printed p.4 (PDF p.16).
+-- Proposal: keep both (they are warn-level and harmless) but retag CR-002's clause_reference so
+--   it does not rest on a scope statement alone. No deletion is proposed.
+-- ☐ RATIFIED - retag CR-002 clause_reference
+-- update public.compliance_requirements set clause_reference = '§1, §4.2.1'
+--  where id = '7b7f90a8-89a1-4a9a-968d-51cdeaf429ab';
+-- ROLLBACK:
+-- update public.compliance_requirements set clause_reference = '§1'
+--  where id = '7b7f90a8-89a1-4a9a-968d-51cdeaf429ab';
+--
+-- ============================================================================
+-- S-04  OVER-ENFORCEMENT: CR-020 demands an OPTIONAL field, on the weakest printed modality
+-- ============================================================================
+-- Evidence (encoding): CR-020 id=59919b50-a81e-4761-b136-2090ca94a8df, severity=warn,
+--   condition = "control_hierarchy_type IS NOT NULL", clause_reference §5.4.2, source_quote NULL.
+--   fields.control_hierarchy_type is_required = FALSE. The gate therefore contradicts the field's
+--   own optionality: the form says "optional", the gate says "missing".
+-- Evidence (source): "When planning action (see 4.3), including measures to achieve environmental
+--   objectives, the organization CAN CONSIDER a hierarchy of control approach to minimize its
+--   actual and potential adverse impacts its water use and discharge has on the environment,
+--   including water resources and ecosystems, and to minimize actual and potential adverse
+--   effects from dependencies on water." - §5.4.2, printed p.12 (PDF p.25). (emphasis added)
+--   Annex D (informative), printed p.33 (PDF p.55): "The word 'consider' means it is necessary to
+--   think about the topic but IT CAN BE EXCLUDED".
+--   "can consider" + "can be excluded" is the weakest construction in the document. A gate that
+--   fires when the field is empty over-enforces it.
+-- ☐ RATIFIED - option (a): delete the gate
+-- delete from public.compliance_requirements where id = '59919b50-a81e-4761-b136-2090ca94a8df';
+-- ROLLBACK:
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   values ('59919b50-a81e-4761-b136-2090ca94a8df','665b991d-1cdd-4b35-ae4c-3f15f7ed770a','CR-020','warn','control_hierarchy_type IS NOT NULL','§5.4.2',null,false);
+-- ☐ RATIFIED - option (b) instead: keep the gate but scope it to the case where controls are applied
+-- update public.compliance_requirements set condition = 'operational_controls_applied == true AND control_hierarchy_type IS NOT NULL'
+--  where id = '59919b50-a81e-4761-b136-2090ca94a8df';
+-- ROLLBACK:
+-- update public.compliance_requirements set condition = 'control_hierarchy_type IS NOT NULL'
+--  where id = '59919b50-a81e-4761-b136-2090ca94a8df';
+--
+-- ============================================================================
+-- S-05  is_required REVIEW: fields the standard qualifies with "where appropriate" / "consider"
+-- ============================================================================
+-- (A) baseline_established  id=10b4527c-4bd8-4a9d-b8e5-d121953904a5  is_required = true
+--   Evidence: "The organization should establish baselines WHERE APPROPRIATE for water-related
+--     environmental aspects, environmental impacts and environmental conditions using the
+--     information available from its review, as a reference point for comparison of performance."
+--     - §4.2.4, printed p.6 (PDF p.18). (emphasis added)
+--     Annex D (informative), printed p.33 (PDF p.55): "'Appropriate' means suitable (for, to) and
+--     implies SOME DEGREE OF FREEDOM".
+--   Gate CR-010 (id=599032d2-aa2b-47c7-ad37-21f6a055510a) demands baseline_established == true
+--   unconditionally - i.e. it drops the printed "where appropriate" scope predicate.
+-- (B) water_dependency_assessed  id=1523510c-247e-4793-9c16-559b5e1ea03a  is_required = true
+--   Evidence: "An organization should CONSIDER the potential effects originating from the
+--     dependency on and vulnerability to water." - §4.2.2, printed p.5 (PDF p.17).
+--     Annex D: "The word 'consider' means it is necessary to think about the topic but it can be
+--     excluded" - printed p.33 (PDF p.55).
+-- (C) The same "should" (never "shall") modality carries every other required boolean on this
+--   standard - 20 of the 51 fields are is_required=true booleans that attest a "should".
+--   Whether EKOWAI's house rule treats "should" as required-in-our-workflow is a policy question
+--   for Alvaro, not a source question. Only (A) and (B), where the standard adds an explicit
+--   escape ("where appropriate" / "consider"), are proposed for change.
+-- ☐ RATIFIED - relax (A) and (B) to optional
+-- update public.fields set is_required = false
+--  where id in ('10b4527c-4bd8-4a9d-b8e5-d121953904a5','1523510c-247e-4793-9c16-559b5e1ea03a');
+-- ROLLBACK:
+-- update public.fields set is_required = true
+--  where id in ('10b4527c-4bd8-4a9d-b8e5-d121953904a5','1523510c-247e-4793-9c16-559b5e1ea03a');
+--
+-- ============================================================================
+-- S-06  MISSING ENUM VALUE: water_review_information_category covers 2 of 3 printed categories
+-- ============================================================================
+-- Evidence: "Important information for a review related to water should include OPERATIONAL and
+--   WATERSHED-RELATED information, AND INFORMATION RELATED TO THE ORGANIZATION'S ENVIRONMENTAL
+--   ASPECTS AND IMPACTS. This can include, for example: [...]" - §4.2.1, printed p.4 (PDF p.16).
+--   (emphasis added) The printed sentence names THREE kinds. The encoded enum on
+--   fields.water_review_information_category (id=991aa116-1f44-4171-9c5b-701836d0e2a1) has TWO:
+--   'watershed_information' and 'operations_information'. The third is absent, so a review record
+--   about aspects/impacts cannot be categorised.
+-- ☐ RATIFIED - add the printed third category
+-- update public.fields set enum_values = enum_values || jsonb_build_array(jsonb_build_object(
+--     'value','aspects_impacts_information',
+--     'label_de','Information zu Umweltaspekten und -auswirkungen',
+--     'label_en','Information related to the organization''s environmental aspects and impacts',
+--     'order_index',3,'regulation_reference','§4.2.1'))
+--  where id = '991aa116-1f44-4171-9c5b-701836d0e2a1';
+-- ROLLBACK:
+-- update public.fields set enum_values = '[{"value":"watershed_information","label_de":"Einzugsgebiets-/Gewässerinformation","label_en":"Watershed / water source / water body information","order_index":1,"regulation_reference":"§4.2.1"},{"value":"operations_information","label_de":"Betriebsinformation","label_en":"Organization operations information","order_index":2,"regulation_reference":"§4.2.1"}]'::jsonb
+--  where id = '991aa116-1f44-4171-9c5b-701836d0e2a1';
+--
+-- ============================================================================
+-- S-07  ENUMS THAT CLOSE AN OPEN PRINTED LIST ("can include" / "such as" / "for example")
+-- ============================================================================
+-- Four enums reproduce the printed items 1:1 but the printed lead-in is OPEN, so an engineer
+-- with a case the standard did not enumerate has nowhere to put it:
+--   (a) water_input_output_category   id=9fda22fc-6f6f-4230-90c5-39bd11b79b7b   5 values
+--       "Information related to water inputs and outputs CAN INCLUDE:" - §4.2.2, printed p.4
+--       (PDF p.16).
+--   (b) emergency_situation_type      id=8e2eadb0-a2a0-4240-b26b-37c48c84ee0e   4 values
+--       "Emergency preparedness and response with regard to water-related environmental
+--       conditions SUCH AS floods, drought, supply and discharge disruptions, and impacts on
+--       water quality such as spills and contaminations" - §5.4.4, printed p.14 (PDF p.28).
+--       The same clause also names a fifth kind not in the enum: "Extreme weather events,
+--       including storms and droughts, are expected to be more likely under climate change."
+--   (c) performance_action_type       id=806f1ec4-f710-4875-8971-f71f532325f6   3 values
+--       "Performance action CAN INCLUDE, FOR EXAMPLE:" - §5.5, printed p.15 (PDF p.29).
+--   (d) kpi_measurement_type          id=ee514d8e-d867-4f0f-8f1d-3bad963f5751   3 values
+--       "KPIs can involve simple or complex measurements, FOR EXAMPLE:" - §6.2.2, printed p.17
+--       (PDF p.32).
+--   (e) action_type                   id=ded35312-dcaa-4ea8-81e6-7031d35de8eb   4 values
+--       "Actions can be applied singularly, or in combination, and CAN INCLUDE setting
+--       environmental objectives [...]" - §4.3, printed p.7 (PDF p.20).
+-- By contrast the following enums are correctly CLOSED because the printed list is closed and
+--   must NOT be reopened: risk_opportunity_type (§3.5 definition), baseline_type ("can be
+--   absolute or can be normalized", §4.2.4), objective_level ("can be strategic, tactical or
+--   operational", §5.2), control_hierarchy_type ("described as follows", §5.4.2),
+--   indicator_type (§3.10/§3.11 defined terms), environmental_concern_type (§3.2-§3.4 + §4.2.2).
+-- ☐ RATIFIED - append an "other / sonstige" value to the five open enums (per-field statement,
+--   shown for (a); repeat with the right order_index for (b) 5, (c) 4, (d) 4, (e) 5)
+-- update public.fields set enum_values = enum_values || jsonb_build_array(jsonb_build_object(
+--     'value','other','label_de','Sonstige','label_en','Other (the printed list is open: "can include" / "such as")',
+--     'order_index',6,'regulation_reference','§4.2.2'))
+--  where id = '9fda22fc-6f6f-4230-90c5-39bd11b79b7b';
+-- ROLLBACK: remove the appended element
+-- update public.fields set enum_values = (select jsonb_agg(e) from jsonb_array_elements(enum_values) e where e->>'value' <> 'other')
+--  where id in ('9fda22fc-6f6f-4230-90c5-39bd11b79b7b','8e2eadb0-a2a0-4240-b26b-37c48c84ee0e','806f1ec4-f710-4875-8971-f71f532325f6','ee514d8e-d867-4f0f-8f1d-3bad963f5751','ded35312-dcaa-4ea8-81e6-7031d35de8eb');
+--
+-- ============================================================================
+-- S-08  target_type FLATTENS TWO ORTHOGONAL PRINTED AXES INTO ONE SINGLE-SELECT
+-- ============================================================================
+-- Evidence: "Targets related to the environmental objectives can be QUALITATIVE OR QUANTITATIVE,
+--   AND can involve ABSOLUTE OR RELATIVE targets or measures of performance. An absolute target is
+--   not normalized or measured in relation to the activity, and can be expressed as a desired
+--   level, number or state to be achieved." - §5.2, printed p.11 (PDF p.24). (emphasis added)
+--   fields.target_type (id=50e19d65-5c1c-4728-99f2-304d1352657b) is ONE enum with the four values
+--   qualitative / quantitative / absolute / relative. The printed text gives two INDEPENDENT
+--   axes joined by "and", so a target that is both quantitative AND absolute - the ordinary case,
+--   and exactly the printed Salmo Papers example "Reduce water consumption by 10 % over the next
+--   year [...] compared to last year's baseline" (Table 7, printed p.17, PDF p.32, INFORMATIVE) -
+--   cannot be recorded.
+-- ☐ RATIFIED - split into two fields (target_nature: qualitative|quantitative; target_reference:
+--   absolute|relative). Requires an importer/workbook change, so it is a schema-shaped decision
+--   for Alvaro rather than a one-line update; the minimal in-place alternative is:
+-- update public.fields set data_type = 'multi_enum' where id = '50e19d65-5c1c-4728-99f2-304d1352657b';
+-- ROLLBACK:
+-- update public.fields set data_type = 'enum' where id = '50e19d65-5c1c-4728-99f2-304d1352657b';
+--   (NOTE: 'multi_enum' must be confirmed to exist in the app's data_type vocabulary before this
+--    is applied - it is NOT confirmed by this pass and is listed as a candidate only.)
+--
+-- ============================================================================
+-- S-09  action_type IS SINGLE-SELECT BUT THE STANDARD SAYS ACTIONS COMBINE
+-- ============================================================================
+-- Evidence: "Actions CAN BE APPLIED SINGULARLY, OR IN COMBINATION, and can include setting
+--   environmental objectives, as well as implementing operational controls, support actions
+--   related to internal interested parties, or performance evaluation mechanisms." - §4.3,
+--   printed p.7 (PDF p.20). (emphasis added) The encoded field description itself says "may be
+--   combined", but the field is data_type='enum' (single-select).
+--   The printed Table 2 (Salmo Papers, INFORMATIVE, printed pp.10-11, PDF pp.23-24) shows rows
+--   with an X in two or three of the four action columns at once, confirming the combination case
+--   is the normal one.
+-- ☐ RATIFIED - same shape as S-08; see the data_type note there.
+-- update public.fields set data_type = 'multi_enum' where id = 'ded35312-dcaa-4ea8-81e6-7031d35de8eb';
+-- ROLLBACK:
+-- update public.fields set data_type = 'enum' where id = 'ded35312-dcaa-4ea8-81e6-7031d35de8eb';
+--
+-- ============================================================================
+-- S-10  UNIT / TYPE: water_quantity_used is a QUANTITY encoded as unit-less free text
+-- ============================================================================
+-- Evidence: "the quantity of water used (water withdrawn, consumed, lost or returned to the
+--   original water source)" - §4.2.1, printed p.4 (PDF p.16).
+--   fields.water_quantity_used (id=1ce4935f-e375-40fe-a813-745988beaf62) is data_type='text',
+--   unit='-'. The standard prints NO unit and NO limit for it (correct - nothing numeric may be
+--   invented), but as free text with no unit the value cannot be compared against the baseline
+--   the same standard asks for (§4.2.4) or normalized per §6.2.2. Note that §4.2.1 asks for FOUR
+--   distinct quantities (withdrawn / consumed / lost / returned), which one text field conflates.
+-- ☐ RATIFIED - give the field a unit and a numeric type (the unit is EKOWAI's engineering choice,
+--   NOT the standard's - it must be recorded as such)
+-- update public.fields set data_type = 'number', unit = 'm³/a' where id = '1ce4935f-e375-40fe-a813-745988beaf62';
+-- ROLLBACK:
+-- update public.fields set data_type = 'text', unit = '-' where id = '1ce4935f-e375-40fe-a813-745988beaf62';
+--
+-- ============================================================================
+-- S-11  CLAUSE RETAG: life_cycle_perspective_applied is anchored on a SCOPE STATEMENT
+-- ============================================================================
+-- Evidence: fields.life_cycle_perspective_applied (id=52690e16-1945-4639-ba00-c2ac3dc92cb5) has
+--   clause_reference = '§1'. What §1 says is: "This document is applicable to organizations
+--   irrespective of their size, type, financial resources, location and sector. It is applicable
+--   to all types of water and CONSIDERS A LIFE CYCLE PERSPECTIVE." - printed p.1 (PDF p.13).
+--   That describes the DOCUMENT, not an obligation on the organization. The obligation is:
+--   "An organization SHOULD ALSO CONSIDER its water-related environmental aspects and impacts
+--   from all applicable stages of the life cycle of its products and services, including those
+--   resulting from the use of its products and services." - §4.2.2, printed p.5 (PDF p.17),
+--   with §5.4.3 Life cycle perspective, printed p.13 (PDF p.27).
+--   (Gate CR-003, id=f1188207-82a6-4849-9b64-8229879f4957, already carries '§1, §4.2.2'.)
+-- ☐ RATIFIED - retag the field
+-- update public.fields set clause_reference = '§1, §4.2.2, §5.4.3' where id = '52690e16-1945-4639-ba00-c2ac3dc92cb5';
+-- ROLLBACK:
+-- update public.fields set clause_reference = '§1' where id = '52690e16-1945-4639-ba00-c2ac3dc92cb5';
+--
+-- ============================================================================
+-- S-12  ENUM VALUE ANCHORED ON THE INTRODUCTION (informative) INSTEAD OF §4.2.2
+-- ============================================================================
+-- Evidence: fields.environmental_concern_type (id=61919831-5678-4c1b-b227-170e3900f3df) carries
+--   the value 'water_dependency' with regulation_reference "§0.2, §4.2.2". §0.2 is inside the
+--   Introduction, which is informative under the ISO/IEC Directives and is NOT part of the
+--   normative body. The value is nevertheless SOUND, because §4.2.2 alone carries it:
+--   "An organization should consider the potential effects originating from the dependency on and
+--   vulnerability to water." - §4.2.2, printed p.5 (PDF p.17).
+--   Only the informative half of the anchor should go.
+-- ☐ RATIFIED - drop the §0.2 anchor from that one enum element
+-- update public.fields set enum_values = (
+--   select jsonb_agg(case when e->>'value' = 'water_dependency'
+--                         then jsonb_set(e, '{regulation_reference}', '"§4.2.2"')
+--                         else e end)
+--   from jsonb_array_elements(enum_values) e)
+--  where id = '61919831-5678-4c1b-b227-170e3900f3df';
+-- ROLLBACK:
+-- update public.fields set enum_values = (
+--   select jsonb_agg(case when e->>'value' = 'water_dependency'
+--                         then jsonb_set(e, '{regulation_reference}', '"§0.2, §4.2.2"')
+--                         else e end)
+--   from jsonb_array_elements(enum_values) e)
+--  where id = '61919831-5678-4c1b-b227-170e3900f3df';
+--
+-- ============================================================================
+-- S-13  GATE source_quote BACKFILL: 13 of 26 gates carry NO source_quote at all
+-- ============================================================================
+-- The following gates have source_quote IS NULL. Every one of them IS supportable - the quotes
+-- below were read from the rendered PDF in this session and are the same ones the pack writes
+-- onto the corresponding fields. Backfilling them is a documentation change only; no condition,
+-- severity or homing is touched.
+--   CR-003 f1188207-82a6-4849-9b64-8229879f4957  §1, §4.2.2   -> §4.2.2 life-cycle sentence, p.5
+--   CR-004 8789e73c-8e50-49b7-a4d9-903886c155a0  §4.1, §4.2.1 -> §4.2.1 first sentence, p.3
+--   CR-006 f5d167c2-e08a-4b71-b113-2a1607e74229  §4.2.2       -> §4.2.2 first sentence, p.4
+--   CR-008 a65ecf2b-a970-48f7-a463-8d8e93f16ece  §4.2.2       -> §4.2.2 dependency sentence, p.5
+--   CR-010 599032d2-aa2b-47c7-ad37-21f6a055510a  §4.2.4       -> §4.2.4 baseline sentence, p.6
+--   CR-011 d4234b6e-9ac5-4122-b735-facfd8bd0c3b  §4.2.5       -> §4.2.5 review sentence, p.6
+--   CR-014 40a6c5ea-9636-4ced-9ae4-4b52a24cfe4b  §5.2         -> §5.2 targets sentence, p.11
+--   CR-016 0db1fdf0-d13e-4528-aff9-188089e0ba6b  §5.3         -> §5.3 competence bullet, p.12
+--   CR-017 cb7e317b-048a-4cae-903b-c0cadd5f48cc  §5.3         -> §5.3 awareness bullet, p.12
+--   CR-018 4dca991c-ae8e-4f16-87e9-c4972bd19317  §5.3         -> §5.3 documented-info bullet, p.12
+--   CR-020 59919b50-a81e-4761-b136-2090ca94a8df  §5.4.2       -> see S-04 (gate itself is disputed)
+--   CR-022 9a238071-1a5b-4138-8060-b4e1a69cb78d  §5.6         -> §5.6 "All actions taken should be
+--                                                                 reviewed in a timely manner", p.15
+--   CR-025 b6fb7046-9a9e-424f-bc8e-04c745a8710c  §6.2.2       -> §6.2.2 KPI sentence, p.17
+-- ☐ RATIFIED - backfill (shown for CR-004; the other twelve follow the same shape)
+-- update public.compliance_requirements set source_quote = '"When deciding on appropriate actions, an organization should review and consider its internal and external issues and circumstances in relation to water use, dependency, vulnerabilities and related compliance obligations to be addressed in its environmental management system." [§4.2.1 Conduct a water-related review, printed p.3 (PDF p.15)]'
+--  where id = '8789e73c-8e50-49b7-a4d9-903886c155a0';
+-- ROLLBACK:
+-- update public.compliance_requirements set source_quote = null
+--  where id in ('f1188207-82a6-4849-9b64-8229879f4957','8789e73c-8e50-49b7-a4d9-903886c155a0','f5d167c2-e08a-4b71-b113-2a1607e74229','a65ecf2b-a970-48f7-a463-8d8e93f16ece','599032d2-aa2b-47c7-ad37-21f6a055510a','d4234b6e-9ac5-4122-b735-facfd8bd0c3b','40a6c5ea-9636-4ced-9ae4-4b52a24cfe4b','0db1fdf0-d13e-4528-aff9-188089e0ba6b','cb7e317b-048a-4cae-903b-c0cadd5f48cc','4dca991c-ae8e-4f16-87e9-c4972bd19317','59919b50-a81e-4761-b136-2090ca94a8df','9a238071-1a5b-4138-8060-b4e1a69cb78d','b6fb7046-9a9e-424f-bc8e-04c745a8710c');
+--
+-- ============================================================================
+-- S-14  TWO GATE source_quotes REST ON THE SCOPE STATEMENT, WHICH IS NOT A REQUIREMENT
+-- ============================================================================
+-- CR-001 (946644da-93a3-48b0-8305-a45350181bc4) and CR-002 (7b7f90a8-89a1-4a9a-968d-51cdeaf429ab)
+-- both quote §1: "This document gives general guidelines for organizations seeking to address
+-- water-related environmental aspects [...] within an environmental management system in
+-- accordance with ISO 14001." - printed p.1 (PDF p.13). That sentence describes the document's
+-- scope; it places no obligation on anyone. CR-001 additionally quotes §2 ("ISO 14001,
+-- Environmental management systems - Requirements with guidance for use", printed p.1), which is
+-- a normative reference, not a requirement either.
+-- Both gates are warn-level and their subject matter is right; the finding is recorded so the
+-- provenance is honest. No change is proposed beyond the CR-002 retag already in S-03.
+-- ☐ RATIFIED - no action (record only)
+--
+-- ============================================================================
+-- NEGATIVE RESULTS (checked, none found - recorded so their absence is auditable)
+-- ============================================================================
+--   empty conditions .......................................... 0 (all 26 gates have a condition)
+--   condition = 'TRUE' ........................................ 0
+--   membership over the whole enum domain ..................... 0
+--   IS NOT NULL on a boolean .................................. 1  -> S-02 (CR-007)
+--   tautology over an equation output ......................... 0 (there are no equations)
+--   ">= 0" floor on a non-negative quantity ................... 0 (no numeric condition exists)
+--   gate restating a formula the engine computes .............. 0 (there are no equations)
+--   presence-only condition hiding a printed limit ............ 0 (the standard prints NO limit)
+--   AND / OR inversion, OR-collapse ........................... 0 (every condition is one atom;
+--                                                                  no boolean operator appears in
+--                                                                  any of the 26 conditions)
+--   inverted condition ........................................ 0
+--   boundary inclusivity error ................................ n/a (no comparison operator exists)
+--   exact float equality ...................................... 0
+--   duplicate gates / strict subsets .......................... 0 (26 gates over 26 distinct fields)
+--   mis-homed gate ............................................ 1  -> S-01 (CR-007)
+--   unsatisfiable gate / uncovered enum value ................. 0
+--   gate demanding a record of a change that never occurred ... 0
+--   invented value or range ................................... 0 (no field carries any numeric
+--                                                                  value; nothing was invented)
+--   enum closing a printed "e.g." / "such as" / "can include" .. 5  -> S-07
+--   enum missing a printed value .............................. 1  -> S-06
+--   missing scope predicate ................................... 1  -> S-05(A), CR-010 drops the
+--                                                                  printed "where appropriate"
+--   is_required off an INFORMATIVE annex ...................... 0 (NO field and NO gate cites
+--                                                                  Annex A, B, C or D; all clause
+--                                                                  references are §1-§7 / §3.x)
+--   unit mismatch ............................................. 1  -> S-10 (all other units are
+--                                                                  '-', correct for text/bool/enum)
+--   equation output consumed by nothing ....................... n/a (0 equations, 0 printed
+--                                                                  formulas in the whole document)
+--   worksheet with zero fields ................................ 0 (6/5/8/6/6/10/5/5 = 51)
+--   source_quote carrying no requirement ...................... 2  -> S-14 (CR-001, CR-002)
+--   gate with no source_quote at all .......................... 13 -> S-13
+--   stitched quote with no elision marker ..................... 0 (all 13 non-null gate quotes
+--                                                                  that stitch use "[...]", " / "
+--                                                                  or an explicit "(cf. ...)")
+--   quote cropped past its obligation ......................... 0
+--   wrong page ref in an existing gate source_quote ........... 0 (the encode-time quotes cite
+--                                                                  p.1, 3, 4, 5, 9, 11, 12, 14,
+--                                                                  16, 18 - every one matches the
+--                                                                  Contents-list map above)
+--   block gate on soft text ................................... 0 (there are NO block gates; see
+--                                                                  the modality census - correct)
+--
+-- ============================================================================
+-- S-15  COVERAGE GAP IN THE §4.2.1 REVIEW LISTS (EKOWAI-domain relevant; workbook, not SQL)
+-- ============================================================================
+-- §4.2.1 prints two explicit lists of review information. The encoding represents the CATEGORY
+-- (enum water_review_information_category) but gives a dedicated field to only 3 of the 11
+-- printed items. Nothing here can be fixed by an UPDATE - new fields must come through the
+-- Pass3c importer, never a hand-edit - so this block is RECORD ONLY.
+--
+--   "information related to the watershed, water source or water body, including:" - §4.2.1,
+--   printed p.4 (PDF p.16). FIVE printed sub-items, ZERO dedicated fields:
+--     - "the status of water availability, extraction and limits on access to water (e.g. over
+--        withdrawal from water catchment, water conflicts)"          -> no field
+--     - "geographic features or characteristics of the site (e.g. drainage, river basin)" -> none
+--     - "sensitivity of ecosystems to changes in water quantity and quality"              -> none
+--     - "local water sources, river basin and catchment information (e.g. water balance, water
+--        quality, important water-related areas, other water users, governance framework),
+--        considering national and transboundary situations"                               -> none
+--     - "situations that can lead to over-exploitation of aquatic ecosystems (e.g. overfishing,
+--        mass tourism, energy production)"                                                -> none
+--
+--   "information related to the organization's operations, including:" - §4.2.1, printed p.4
+--   (PDF p.16). SIX printed sub-items, THREE dedicated fields:
+--     - "the quantity of water used (water withdrawn, consumed, lost or returned to the original
+--        water source)"                                    -> water_quantity_used            OK
+--     - "characteristics of wastewater generated (e.g. the level of treatment, treatment
+--        capacity, and effluent quality)"                  -> no field
+--     - "the quality of water required for the organization's activities"  -> no field
+--     - "identified water-related events or conditions that can affect the organization (e.g.
+--        floods, drought, threats to water quality, consequences of climate change)"
+--                                                          -> no field (the related
+--                                                             emergency_situation_type on ws-06
+--                                                             covers §5.4.4, not this review item)
+--     - "interested parties and their relevant needs or expectations" -> interested_parties_needs OK
+--     - "specific compliance obligations (e.g. permits, licences, voluntary agreements)"
+--                                                          -> compliance_obligations_water   OK
+--
+--   Net effect for EKOWAI's own domain: WATER QUANTITY is represented (water_quantity_used,
+--   water_consumption, water_balance_chart_used); WATERSHED CONTEXT is representable only as an
+--   enum LABEL with no field to carry the content; WATER QUALITY has NO field of its own at all -
+--   it appears only inside descriptions and enum labels. A workbook revision adding free-text /
+--   numeric fields for the watershed block and for wastewater/required-water-quality would close
+--   the gap. Because §4.2.1 is "should include [...] This can include, for example", these would
+--   be is_required=false.
+-- ☐ RATIFIED - record only; route to a Pass3c workbook revision, never a hand-edit.

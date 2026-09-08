@@ -57,3 +57,4 @@ iso-59014-md-verification-pack.sql  ISO-59014
 iso-59020-md-verification-pack.sql  ISO-59020
 iso-14019-1-md-verification-pack.sql  ISO-14019-1
 iso-14015-md-verification-pack.sql  ISO-14015
+iso-14002-2-md-verification-pack.sql  ISO-14002-2
