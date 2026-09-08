@@ -1,0 +1,380 @@
+-- ISO-14097 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, with a printed/PDF page) and its rollback inverse. Mark a block "RATIFIED"
+-- only after Alvaro decides; nothing here may be applied on a subagent's judgement.
+--
+-- Source: ISO14097-Scoping-Report.pdf =
+--   "ISO STANDARD FOR INVESTMENT, FINANCING AND CLIMATE CHANGE (ISO 14097) -
+--    WORKING GROUP SCOPING DOCUMENT - NOV 2017", 2° Investing Initiative, supported by the
+--   EU LIFE programme. 48 pages, English, no ISO cover, no ISO copyright page, no clause
+--   numbering of the ISO kind. pdftotext -layout -enc UTF-8; rendered pages 3, 5, 27, 40, 42,
+--   43, 44, 45 and 47 read as page images (SR-3).
+--   Page convention: text page N = PDF page N = printed page N (1:1).
+--
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--   "condition_expression") and has NO "active" column - the statements below reflect that.
+--   The evaluator (src/lib/compliance/evaluate.ts) accepts "== True" as well as "== true", so
+--   CR-003's casing is cosmetic and is NOT staged as a defect.
+--
+-- ############################################################################################
+-- ## R-0 (GOVERNS EVERYTHING BELOW) - THE SOURCE IS NOT THE STANDARD ISO 14097.              ##
+-- ############################################################################################
+--   The document held under standard code ISO-14097 is a WORKING-GROUP SCOPING REPORT written
+--   by 2° Investing Initiative in November 2017, four years before ISO 14097:2021 was published.
+--   Its own words (printed p.4, PDF p.4):
+--     "This report provides the options for standardizations examined by the working group of
+--      ISO 14097."
+--   and (printed p.3, PDF p.3):
+--     "USE CASE. The  specific scope of ISO 14097, to be clarified during the project scoping
+--      period, includes:"
+--   A scoping report precedes and informs a standard. It contains no requirements, nothing that
+--   can be conformed to, and its section numbering (1, 1.1, 1.2, 1.3, 2 ... 4) has NO
+--   relationship to the clause numbering of the published ISO 14097:2021.
+--
+--   MECHANICAL MODALITY CENSUS over all 48 pages (whole-word, case-insensitive):
+--       shall 3 | must 1 | should 57 | may 16 | required 8 | recommended 3
+--   Every one of the 3 "shall" is a QUOTATION OF ANOTHER DOCUMENT:
+--     printed p.29: "...the general transition objectives shall be assessed using..." (a criterion
+--                   of the French 2° Invest Award / Art. 173 grid being reviewed)
+--     printed p.34: "The registrant shall identify specific industries (or sectors) in which it
+--                   has exposure to risks..."                                (SASB, being reviewed)
+--     printed p.34: "The registrant shall identify specific geographies (e.g., regions, countries,
+--                   states, etc.) and/or demographic segments..."            (SASB, being reviewed)
+--   The 1 "must" is descriptive of one fund's mandate (printed p.7):
+--     "LGS invests in a mandate in which all international listed companies must derive 50% of
+--      revenue from resource efficiency and environmental markets"
+--   All 57 "should" are either (a) the report saying what TCFD / Art. 173 / GBP / SASB / the
+--   2° Invest Award recommend, or (b) advice addressed to the future working group ("The WG
+--   should then...", "The WG should consider...", "the WG should explore...").
+--   => ZERO obligations are imposed by this document on any user of the Wizard.
+--
+--   WHAT THE ENCODING DID WITH THAT: 16 compliance_requirements rows, ALL severity='warn',
+--   NONE 'block'. That is the single most important fact in this file and it is a PASS: because
+--   no gate is 'block', a wrong source document cannot hard-fail a real project today. 11 of the
+--   16 are presence-only ("X IS NOT NULL"), 4 are boolean self-attestations ("X == true"), and
+--   1 has an empty condition. None of the 16 enforces a value, a limit, a bound or a unit -
+--   correctly, because the document prints none.
+--   4 fields carry is_required=true: reporting_entity (app metadata), user_type,
+--   climate_objective, objective_clarified. The last three have NO mandatory verb behind them
+--   anywhere in the document.
+--
+--   THE RULING NEEDED (R-0): does EKOWAI keep standard code ISO-14097 pointing at a 2017
+--   scoping report, or does it acquire ISO 14097:2021 ("Greenhouse gas management and related
+--   activities - Framework including principles and requirements for assessing and reporting
+--   investments and financing activities related to climate change") and re-encode against it?
+--   Nothing else in this file matters until R-0 is answered: every clause_reference on every one
+--   of the 30 fields cites a document that is not the standard whose code it sits under.
+--   Mitigating fact: prod already records this honestly -
+--     standards.version = 'WG10 Scoping Document, November 2017 (pre-standard / informative)'
+--   so the encoding does not CLAIM to be the standard. The exposure is that an engineer opening
+--   the picker sees "ISO-14097" and a set of clause refs, and nothing on the form says the
+--   references point at a preparatory committee document.
+--   ☐ RATIFIED  (option A: keep as an informative worksheet set, re-label the standard in the
+--                          picker so the "not a standard" fact is visible on the form itself)
+--   ☐ RATIFIED  (option B: acquire ISO 14097:2021 and re-encode; retire this encoding)
+--   ☐ RATIFIED  (option C: deactivate the standard until the real document is in the library)
+--   -- No SQL is staged for R-0: each option is a different piece of work, and picking one is
+--   -- exactly the class the doctrine says a subagent must never decide.
+--
+-- ############################################################################################
+-- ## R-1  INVENTED SPECIFICATION - impact_potential_category (THE ONE RESIDUE FIELD)         ##
+-- ############################################################################################
+--   Field ISO-14097-06.impact_potential_category (232873ba-23e5-4f48-bac8-00dfaa8d38d5)
+--     enum        : high / medium / low, each tagged regulation_reference '3.4.2 (p.42)'
+--     description : "Pre-defined category of an action's climate-impact potential (high/medium/
+--                    low), based on order-of-magnitude outcomes and conditions for success."
+--   EVIDENCE - the ONLY sentence at §3.4.2, printed p.42 / PDF p.42 (read as a rendered image):
+--     "The way forward will probably involve pre-defining the order of magnitude associated with
+--      different types of actions, and the conditions for potential success, in order to create
+--      categories of actions, with more or less 'climate impact potential.'"
+--   The source names NO categories. "high/medium/low" appears nowhere in the 48 pages, and the
+--   description asserts it as if printed. This is the invented-specification class: the field's
+--   substance, not just its wording, is EKOWAI's. It was therefore left OUT of the verification
+--   pack (residue) rather than papered over with a quote.
+--   Proposed (needs a ruling because it changes an enum AND a description):
+--     -- update public.fields set description='EKOWAI classification. The source only states that
+--     --   the future working group will "probably" pre-define orders of magnitude and conditions
+--     --   for success "in order to create categories of actions, with more or less climate impact
+--     --   potential" (WG scoping document, §3.4.2, printed p.42). It names no categories; the
+--     --   three-level high/medium/low scale is not printed anywhere in the document.'
+--     --  where id='232873ba-23e5-4f48-bac8-00dfaa8d38d5';
+--   Rollback inverse:
+--     -- update public.fields set description='Pre-defined category of an action''s climate-impact
+--     --   potential (high/medium/low), based on order-of-magnitude outcomes and conditions for
+--     --   success.' where id='232873ba-23e5-4f48-bac8-00dfaa8d38d5';
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-2  EMPTY-CONDITION GATE CR-016 - AN EFFECTIVE NO-OP, AND MIS-HOMED                    ##
+-- ############################################################################################
+--   compliance_requirements CR-016 (2e9a0700-444c-43f1-96ad-4ce381797ac8)
+--     worksheet_template : ISO-14097-03 "Konzept- & Aktionskatalog (Landscape)"
+--     condition          : ''  (empty string)
+--     clause_reference   : 'Sec.2.1 (p.14), 3.5 (p.43-44)'
+--     severity           : warn      source_quote : NULL
+--   evaluate.ts line 538: `if (!condition || !condition.trim()) return { kind: 'manual' };`
+--   => the gate can never pass and never fail. It is an effective no-op that only adds a row to
+--   the engineer's checklist. It is ALSO mis-homed: its clause_reference points at §3.5
+--   (metrics, printed pp.42-44), whose fields all live on worksheet ISO-14097-07
+--   "Metriken: Klimawirkung & Risiko", not on ISO-14097-03. And §3.5 begins on printed p.42,
+--   not p.43, so the page ref is off by one section start.
+--   Proposed (deletion of a gate = structural, needs a ruling):
+--     -- delete from public.compliance_requirements where id='2e9a0700-444c-43f1-96ad-4ce381797ac8';
+--   Rollback inverse:
+--     -- insert into public.compliance_requirements (id, worksheet_template_id, code, severity,
+--     --   condition, clause_reference, requires_attestation)
+--     -- values ('2e9a0700-444c-43f1-96ad-4ce381797ac8','986247df-0841-4a43-ab57-21725030a244',
+--     --   'CR-016','warn','','Sec.2.1 (p.14), 3.5 (p.43-44)',false);
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-3  MIS-HOMED GATE CR-011 - READS A FIELD OF ANOTHER WORKSHEET                         ##
+-- ############################################################################################
+--   CR-011 (bc349140-a653-4a4e-97b0-827cb99b7a53) sits on ISO-14097-07 and reads
+--     "value_at_risk IS NOT NULL AND risk_type IS NOT NULL"
+--   value_at_risk is a field of ISO-14097-07 (c7735a9b), but risk_type is a field of
+--   ISO-14097-05 "Verknuepfung Aktionen <-> Risikomanagement" (d9b6ba9d). The gate therefore
+--   fires on worksheet 07 for something the engineer fills on worksheet 05.
+--   Both symbols DO exist, so the gate is satisfiable - this is a homing defect, not a broken
+--   gate. Two clean options:
+--     (a) split it -- update public.compliance_requirements set condition='value_at_risk IS NOT NULL'
+--         -- where id='bc349140-a653-4a4e-97b0-827cb99b7a53';   (+ a new CR on ws-05 for risk_type)
+--     (b) move risk_type onto ISO-14097-07 (it is a metric-side classification, and §3.5.2 -
+--         printed p.44 - is where "policy risks, litigation risks, technology risks, physical
+--         risks" is printed).
+--   Rollback inverse for (a):
+--     -- update public.compliance_requirements set condition='value_at_risk IS NOT NULL AND
+--     --   risk_type IS NOT NULL' where id='bc349140-a653-4a4e-97b0-827cb99b7a53';
+--   ☐ RATIFIED (a)      ☐ RATIFIED (b)
+--
+-- ############################################################################################
+-- ## R-4  MISSING SCOPE PREDICATE - OBJECTIVE-SPECIFIC GATES FIRE UNCONDITIONALLY            ##
+-- ############################################################################################
+--   EVIDENCE, §3.1, printed p.39 / PDF p.39:
+--     "Each of these objectives fundamentally require different approaches, metrics, tools and
+--      types of actions"
+--   Yet four gates fire for every project regardless of the value of climate_objective
+--   (risk_management / climate_contribution / both):
+--     CR-007 risk_linkage_mechanism IS NOT NULL              (risk objective only)
+--     CR-008 contribution_linkage_mechanism IS NOT NULL      (contribution objective only)
+--     CR-009 impact_pathway_defined AND impact_potential_category (contribution objective only)
+--     CR-010 accounting_effect_controlled == true            (§3.5.1 impact metrics = contribution)
+--   The evaluator supports guards ("IF cond THEN cond", vacuously pass when the guard is false -
+--   evaluate.ts header), so the fix is expressible today.
+--   Proposed:
+--     -- update public.compliance_requirements set condition='IF climate_objective IN
+--     --   {risk_management, both} THEN risk_linkage_mechanism IS NOT NULL'
+--     --  where id='ce6cf7f3-4c66-443f-80c7-05e70f286c36';   -- CR-007 (illustrative shape only)
+--     (gate ids: CR-007 ce6cf7f3-4c66-443f-80c7-05e70f286c36 | CR-008 0d7a2075-2b8e-4cd7-b29c-3b6bacd42547
+--      | CR-009 fb28155f-1e25-403c-81fb-deac1833921a | CR-010 c3a022a8-00e7-4228-ae63-87820df91d8f)
+--   NOTE: the exact per-gate rewrite is left blank on purpose. Writing four guarded conditions
+--   changes enforcement for four gates at once and needs Alvaro's sign-off on the guard shape
+--   (IN {..} membership vs two OR'd equalities) before any of them is drafted as final SQL.
+--   Rollback inverse: restore each condition to the literal string quoted above.
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-5  ENUMS THAT CLOSE A PRINTED OPEN LIST                                               ##
+-- ############################################################################################
+--   (a) financial_function (fb7bba85) - 6 values. Printed §3.2, p.40:
+--       "...they notably include:" followed by the six bullets, and immediately after:
+--       "These core functions are associated with hundreds of support services such as advisory,
+--        legal and marketing at each stage, construction of indexes, equity research and credit
+--        ratings, clearing, custody of securities, etc."
+--       "notably include" + "etc." = an open list. The enum closes it.
+--   (b) risk_type (d9b6ba9d) - 6 values. BOTH printed lists are open:
+--       §2.1, printed p.17: "It examines risk factors such as policy and legal, technology,
+--        market and economic, and reputational;"   ("such as")
+--       §3.5.2, printed p.44: "...the financial value-at-risk related to climate factors (policy
+--        risks, litigation risks, technology risks, physical risks, etc.)"   ("etc.")
+--       And the p.17 list is the PCI Carbon Asset Risk framework's (WRI/UNEP FI 2015), not this
+--       document's - that governing document is NOT in the library (NR).
+--   (c) climate_action (bd9df002) - 13 values from a table the source labels, printed p.40:
+--       "The table below lists these core actions for illustrative purposes. The standardization
+--        work will involve further developing and documenting this list and turning it into a
+--        'library' of climate-related actions."
+--       i.e. an explicitly illustrative, explicitly not-yet-complete list.
+--   (d) scenario_type (2f17f267) - the p.47 "Standard scenarios" cell prints
+--       "Production of 'standard scenarios' (2°C or a range) that can be directly used by
+--        financial institutions." - "(2°C or a range)" is an SR-2 RANGE. The enum offers points.
+--   Proposed for (a)-(c): add an explicit open-list marker value, or record the openness in each
+--   field's description. Both are enum/description edits => ruling required.
+--   Rollback inverse: remove the added value / restore the prior description text.
+--   ☐ RATIFIED (a)   ☐ RATIFIED (b)   ☐ RATIFIED (c)   ☐ RATIFIED (d)
+--
+-- ############################################################################################
+-- ## R-6  SINGLE-SELECT ENUMS OVER PRINTED CONJUNCTIONS                                      ##
+-- ############################################################################################
+--   Four enum fields are single-select (data_type='enum') over lists the source presents as
+--   things that hold TOGETHER, not as alternatives:
+--   (a) support_function (c40a225b). Printed p.3: "The standard will support investors' work on
+--       climate-related issues by: 1. Harmonizing definitions... 2. Identifying relevant climate
+--       actions... 3. Provide reporting and communication requirements and guidance... and
+--       4. Provide a measurement framework..." - a conjunction of four, joined by "and".
+--   (b) priority_topic (7f80574a). The §4 tables (printed pp.45-47) list all nine topics as
+--       "The main points to be addressed during the development of the standard" - all of them.
+--   (c) concept_category (22a23dee). Figure 1 (printed p.5) has an eighth bar labelled
+--       "Multiple" precisely because institutions fall into more than one category.
+--   (d) climate_action (bd9df002) and asset_class (7ff08c3d) - an institution runs several
+--       actions across several asset classes; the p.40 table is a matrix, not a choice.
+--   Changing any of these to multi-select is a data_type change => ruling required.
+--   Proposed: -- update public.fields set data_type='multi_enum' where id in (...);
+--     (subject to the app supporting that type - confirm before drafting the final statement)
+--   Rollback inverse: -- update public.fields set data_type='enum' where id in (...);
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-7  risk_transfer_player - DROPS A PRINTED ROW AND MISLABELS ANOTHER                   ##
+-- ############################################################################################
+--   The rendered §3.5.2 table, printed p.44 / PDF p.44, has SIX rows in its "Who ?" column:
+--     Society | Physical assets | The owner of the physical asset | The security issued by the
+--     owner (e.g. bond) | The owner of the security | The financial system as a whole /
+--     Financial stability
+--   The enum has FIVE values: society, physical_asset_owner, security_issuer, security_owner,
+--   financial_system. Two defects:
+--     (i)  the printed row "Physical assets" (the asset itself - where the risk originates) has
+--          no enum value;
+--     (ii) "The security issued by the owner (e.g. bond)" - a row about the SECURITY - is encoded
+--          as security_issuer / "Wertpapier-Emittent" (the ISSUER). Those are different positions
+--          in the very transfer chain the table is about.
+--   (The column cannot be quoted contiguously from the text layer: pdftotext -layout interleaves
+--   it with column 2, which is why the pack's quote for this field is the prose sentence above
+--   the table. The row list here was read off the rendered page image.)
+--   Proposed: add value 'physical_asset' and re-label 'security_issuer' -> 'security' /
+--     "Wertpapier (vom Eigentuemer emittiert)". Enum edit => ruling required.
+--   Rollback inverse: restore the five-value enum_values JSONB exactly as exported 2026-09-08.
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-8  WRONG clause_reference ON TWO FIELDS                                               ##
+-- ############################################################################################
+--   (a) starting_point_defined (4f37f594) - clause_reference 'Sec.4 (p.47)'.
+--       "starting point" is defined on printed pp.9, 41 and 42 and appears NOWHERE on p.47:
+--         §3.4.1, printed p.41: "...develop genuine risk metrics to measure the 'starting point'
+--          and the outcomes."
+--         §3.4.2, printed p.42: "This work will involve defining metrics to assess the 'starting
+--          point', set targets, and estimate the outcomes of actions."
+--       Proposed: -- update public.fields set clause_reference='3.4.1-3.4.2 (p.41-42)'
+--                 --  where id='4f37f594-d8ff-4122-936a-8df595f9ad7c';
+--       Rollback: -- update public.fields set clause_reference='Sec.4 (p.47)' where id='4f37f594-...';
+--       ☐ RATIFIED
+--   (b) benchmark_translation_done (105fd3f4) - clause_reference 'Sec.4 (p.47)'.
+--       The "translate the well below 2°C macro-economic target" cell is printed on p.45, not
+--       p.47 (the field's own description already says "p.45/p.47"):
+--         §4 table, printed p.45: "Guidance on how to 'translate' the well below 2°C
+--          macro-economic target from a scenario into an indicative benchmark/target for
+--          financial assets, including: burden sharing rules,  time frames, etc."
+--       Proposed: -- update public.fields set clause_reference='Sec.4 (p.45)'
+--                 --  where id='105fd3f4-c43b-4c1d-9cb9-3c60c8e9a4c3';
+--       Rollback: -- update public.fields set clause_reference='Sec.4 (p.47)' where id='105fd3f4-...';
+--       ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-9  is_required=true WITH NO MANDATORY VERB IN THE SOURCE                              ##
+-- ############################################################################################
+--   Three non-metadata fields are required:
+--     user_type          (bdc37a68)  clause 'Scope&Objective (p.3)'
+--     climate_objective  (2f6ad359)  clause '3.1 (p.39)'
+--     objective_clarified(c53847d8)  clause '3.1 (p.39)'
+--   The document contains zero requirements (see R-0). p.4's "Clarify the objective(s) addressed
+--   by the standard..." is advice to the WORKING GROUP about the future standard, not a duty on
+--   a reporting entity. If R-0 is answered "keep as informative", these three should arguably be
+--   is_required=false so the form never insists on something the source never demands.
+--   Proposed:
+--     -- update public.fields set is_required=false where id in
+--     --   ('bdc37a68-67c6-448e-b491-6e4342eaf806','2f6ad359-d09d-42ec-97ce-6741d8dabf2a',
+--     --    'c53847d8-57ed-4f82-a5e1-759e546002fb');
+--   Rollback inverse:
+--     -- update public.fields set is_required=true where id in (same three ids);
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-10  scenario_time_frame - UNIT 'year' IS NOT PRINTED                                  ##
+-- ############################################################################################
+--   Field 4c57ad63, data_type='number', unit='year', clause_reference 'Sec.2.4 (p.27)'.
+--   The document prints no number, no bound and no unit for a scenario time frame. The nearest
+--   own-text support is §3.5.1, printed p.43:
+--     "The timeframe (past or forward-looking, number of years, etc.) of the consolidation rules,"
+--   - which is about consolidation rules, not scenarios - and the Introduction, printed p.4:
+--     "Value at risk metrics for the assessment of climate-related risks should include a
+--      relevant forward-looking time frame and account for the adaptive capacity of investees in
+--      a portfolio."
+--   The p.27 criterion the field actually cites ("The scenario should also reflect a time frame
+--   that is consistent with financial exposure.") is printed under the heading "The PCI Carbon
+--   Asset Risk framework:" - it belongs to WRI/UNEP FI 2015, a document NOT in the library (NR).
+--   Proposed: retag the clause and record the unit's provenance in the description.
+--     -- update public.fields set clause_reference='3.5.1 (p.43) + Introduction (p.4); the p.27
+--     --   criterion is quoted from the PCI Carbon Asset Risk framework (WRI/UNEP FI 2015), not
+--     --   from this document' where id='4c57ad63-77ac-4365-8a05-4480aec48c06';
+--   Rollback inverse:
+--     -- update public.fields set clause_reference='Sec.2.4 (p.27)'
+--     --  where id='4c57ad63-77ac-4365-8a05-4480aec48c06';
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## R-11  ALL 16 GATES HAVE source_quote = NULL                                             ##
+-- ############################################################################################
+--   Every compliance_requirements row for ISO-14097 (CR-001..CR-016) has source_quote NULL, so
+--   no gate can tell an engineer WHY it fires. That is normally a defect to fix by backfilling.
+--   Here it cannot be fixed honestly: there is no requirement sentence in the document to put in
+--   the column (R-0). The correct backfill would be a disclosure, not a quote, e.g.
+--     -- update public.compliance_requirements c set source_quote='No requirement exists behind
+--     --   this check. The source is the November 2017 ISO 14097 working-group SCOPING DOCUMENT,
+--     --   which contains no "shall" of its own (see the standard''s verification notes). This is
+--     --   a completeness prompt, not a compliance rule.'
+--     --  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--     -- where wt.id = c.worksheet_template_id and s.code='ISO-14097' and c.source_quote is null;
+--   Rollback inverse:
+--     -- update public.compliance_requirements c set source_quote=null
+--     --  from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--     -- where wt.id = c.worksheet_template_id and s.code='ISO-14097';
+--   ☐ RATIFIED
+--
+-- ############################################################################################
+-- ## EXPLICIT NEGATIVE RESULTS (checked, nothing found - recorded so their absence is audita- ##
+-- ## ble rather than merely unmentioned)                                                     ##
+-- ############################################################################################
+--   condition='TRUE' literal .................. NONE (0 of 16)
+--   presence-only condition hiding a printed limit  NONE - the document prints no limit, no
+--                                                bound and no threshold anywhere, so the 11
+--                                                "IS NOT NULL" gates hide nothing.
+--   number lifted from an example and enforced  NONE. The whole 48-page report contains exactly
+--                                                two numeric figures: "reduce by 20%" (Fig 1,
+--                                                printed p.42 - presented as the BAD example the
+--                                                report argues against) and "must derive 50% of
+--                                                revenue" (printed p.7 - one fund's mandate).
+--                                                Neither appears in any field, enum value,
+--                                                description, unit or gate condition.
+--   AND/OR inversion .......................... NONE. 7 gates use AND (CR-001, 005, 006, 009,
+--                                                011, 013, 014), 0 use OR; each AND pairs fields
+--                                                the source presents jointly.
+--   inverted condition ........................ NONE. The 4 boolean gates (CR-002, 003, 010,
+--                                                012) all assert the affirmative, matching the
+--                                                source's direction.
+--   boundary inclusivity ...................... N/A. No >=, <=, < or > appears in any of the 16
+--                                                conditions - there is no boundary to get wrong.
+--   duplicate gate / strict subset ............ NONE. All 16 conditions are pairwise distinct and
+--                                                no condition's symbol set is a subset of another's.
+--   unsatisfiable gate ........................ NONE. Every symbol referenced by a condition
+--                                                (22 distinct) exists as a field of this standard.
+--   equation output consumed by nothing ....... N/A. 0 equations in prod, and the source contains
+--                                                no formula, inequality or computed quantity at
+--                                                all. Rendered pages 42 and 43 (the only
+--                                                figure-bearing pages in the encoded range) were
+--                                                read as images to rule out a Symbol-font drop.
+--   worksheet with zero fields ................ NONE. 3/3/2/4/2/3/5/5/3 fields over ws 01..09.
+--   phantom field (enum token as a field) ..... NONE. All 30 fields carry a label, a description
+--                                                and a clause_reference.
+--   source_quote carrying no requirement ...... N/A in the usual sense: all 30 fields and all 16
+--                                                gates have source_quote NULL (see R-11).
+--   block gate on soft text ................... NONE - and this is the encoding's one clear win:
+--                                                0 of 16 gates are severity='block'. A wrong
+--                                                source document therefore cannot hard-fail a
+--                                                project on this standard today.
+--
+-- ############################################################################################
+-- ## SOURCE-DOCUMENT DEFECT (not an encoding defect, recorded for completeness)              ##
+-- ############################################################################################
+--   The report's own Table of Contents (printed p.2) lists "2.4 Gap Analysis .... 36", but §2.4
+--   GAP ANALYSIS is printed on p.26. Section 2.5 in the TOC carries no page number at all.
+--   Noted so a later reader does not mistake a correct clause_reference for a wrong one.
