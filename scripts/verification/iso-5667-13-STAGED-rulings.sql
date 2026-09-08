@@ -1,0 +1,475 @@
+-- =====================================================================================================
+-- ISO-5667-13 — STAGED RULINGS (commented SQL, NOTHING APPLIED)
+-- Written 2026-09-08 by the VA verification pass.
+-- Source: ISO 5667-13:2011(E), INTERNATIONAL STANDARD, Second edition 2011-05-01, issued by ISO
+--   (TC 147/SC 6). Published ISO original in English — not a national adoption, not a DIS/FDIS, not a TR.
+--   PDF: C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-13\ISO-5667-13-2011.pdf
+--   Page convention: printed page N = PDF page N+6 (linear, no blank interleaves; verified footer-by-footer
+--   and against the printed Contents).
+-- Every block below carries its evidence quote and its rollback inverse. Nothing here is in the pack.
+-- Each block needs a ruling. Mark the box when ratified:  [ ] -> [x]
+-- SCHEMA NOTE: public.compliance_requirements has a column `condition` (NOT condition_expression) and
+--   NO `active` column. The evaluator accepts both `== True` and `== true`.
+-- NO transaction control statements in this file by design.
+-- =====================================================================================================
+
+-- =====================================================================================================
+-- DOCUMENT-LEVEL CONTEXT that governs every severity block below
+-- =====================================================================================================
+-- Title, cover (PDF p.1, read as a rendered image 2026-09-08):
+--   "Water quality — Sampling — Part 13: Guidance on sampling of sludges".
+-- Mechanical English modality census over the full text layer, split body vs informative annexes:
+--     NORMATIVE BODY (printed p.1-13 / PDF p.7-19):
+--         shall 0 · shall not 0 · must 0 · may 0 · should 73 · should not 1 · can 74
+--         (plus "is required" 3, "it is necessary" 3, "need to" 3, "have to" 1, "has to" 1)
+--     INFORMATIVE ANNEXES A-D + Bibliography (printed p.14-24 / PDF p.20-30):
+--         shall 0 · must 0 · should 9 · can 9
+--     FRONT MATTER (PDF p.1-6): the ONLY "shall" in the whole document is the ISO Foreword patent
+--         boilerplate "ISO shall not be held responsible for identifying any or all such patent rights."
+-- Ratio shall:should in the normative body = 0 : 74. THERE IS NOT ONE MANDATORY VERB IN THIS STANDARD.
+-- WHAT THE ENCODING USED: 23 gates — 4 severity='block' (CR-001, CR-003, CR-017, CR-022), 19 'warn';
+--   24 of 46 fields is_required=true, 22 not.
+-- CONCLUSION: the encoding does NOT match the source modality. Every block gate on this standard is
+--   anchored on "should"/"can"/boilerplate. CR-017 admits it in its own source_quote.
+-- ☐ RATIFIED  R-0: rule on whether ISO-5667-13 may carry severity='block' gates AT ALL, or whether the
+--                  whole standard is severity='warn' (it is a pure guidance document with zero "shall").
+--                  This ruling is a precondition for R-1, R-2, R-3 and R-4 below.
+
+-- =====================================================================================================
+-- R-1  CR-001: block gate on the WARNING notice
+-- =====================================================================================================
+-- Encoding: gate CR-001 (id c2544e30-d028-4ca1-8503-fdb3cf788363), ws ISO-5667-13-01,
+--           severity='block', condition='safety_practices_established == true', clause_reference='WARNING'.
+-- Printed text, WARNING notice above §1, printed p.1 / PDF p.7 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "WARNING — Persons using this International Standard should be familiar with normal laboratory
+--    practice. This standard does not purport to address all of the safety problems, if any, associated
+--    with its use. It is the responsibility of the user to establish appropriate safety and health
+--    practices and to ensure compliance with any national regulatory conditions."
+-- Assessment: the modal is "should be familiar", followed by a RESPONSIBILITY DISCLAIMER. This is the
+--   strongest ground any block gate has in this document (it points at national regulation), but it is
+--   still not a "shall". Of the four block gates this is the one most defensible to KEEP.
+-- PROPOSAL: keep severity='block' if R-0 permits block gates at all; otherwise -> 'warn'.
+-- update public.compliance_requirements set severity='warn' where id='c2544e30-d028-4ca1-8503-fdb3cf788363';
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id='c2544e30-d028-4ca1-8503-fdb3cf788363';
+-- ☐ RATIFIED  R-1
+
+-- =====================================================================================================
+-- R-2  CR-003: BLOCK gate whose source_quote carries no requirement at all
+-- =====================================================================================================
+-- Encoding: gate CR-003 (id 6d2f13bc-8b7f-4288-a7c9-f85703042b83), ws ISO-5667-13-01,
+--           severity='block', condition='normative_references_consulted == true', clause_reference='§2'.
+-- Its source_quote is, verbatim, §2 printed p.1 / PDF p.7 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "The following referenced documents are indispensable for the application of this document. For dated
+--    references, only the edition cited applies. For undated references, the latest edition of the
+--    referenced document (including any amendments) applies."
+-- Assessment: this is the ISO/IEC Directives Part 2 STANDING SENTENCE about how to READ dated vs undated
+--   references. It imposes no duty on the sampler; it contains no modal verb directed at the user at all.
+--   A production project cannot be finalised until an engineer ticks a box attesting to a sentence that
+--   asks nothing of them. This is the weakest of the four block gates.
+--   Compounding: the field description names only two of the NINE references §2 actually lists
+--   (ISO 5667-1, ISO 5667-10:1992, ISO 5667-12, ISO 5667-14, ISO 5667-15:2009, ISO 6107 (all parts),
+--   ISO/TR 8363, ISO 18283, CEN/TR 13097).
+-- PROPOSAL (choose one at ratification):
+--   (a) severity block -> warn; or (b) drop the gate and keep the attestation as an untriggered field.
+-- update public.compliance_requirements set severity='warn' where id='6d2f13bc-8b7f-4288-a7c9-f85703042b83';
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id='6d2f13bc-8b7f-4288-a7c9-f85703042b83';
+-- ☐ RATIFIED  R-2
+
+-- =====================================================================================================
+-- R-3  CR-017: the worst gate on this standard — BLOCK, soft modal, AND no scope predicate
+-- =====================================================================================================
+-- Encoding: gate CR-017 (id c3ca324b-b1bd-4b91-adb4-50ebf77102ae), ws ISO-5667-13-06,
+--           severity='block', condition='n_sp >= 4 AND n_sp <= 30', clause_reference='§6.3.6'.
+-- Printed text, §6.3.6, printed p.9 / PDF p.15 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "If, after assessment of safety requirements, no concerns are apparent and equipment is available,
+--    core sampling can be considered as a means of obtaining samples. [...] A composite sample can then be
+--    prepared from a statistically significant number, nsp, of such cores. [...] The value of nsp, rounded
+--    to the nearest whole number, should lie between 4 and 30."
+--   And the clause OPENS with: "In general, sampling of sludge cake from heaps and stockpiles is prohibited
+--    by safety requirements, and is not technically required."
+-- THREE defects stacked on one gate:
+--   (1) BLOCK ON SOFT TEXT. The modal is "should lie". The gate's own source_quote ends with the string
+--       "[ruling: modal is \"should\", enforced as block]" — the encoder recorded the override and shipped
+--       it anyway. NOTE: the numbers 4 and 30 themselves are SOUND — they are printed in the normative
+--       body, not inside an example or an "e.g.". This is not the e.g.-parenthetical defect.
+--   (2) NO SCOPE PREDICATE. The gate fires on EVERY project. The clause applies only when the engineer is
+--       core-sampling a heap or stockpile — a procedure the standard calls "prohibited by safety
+--       requirements" in general, permits only "can be considered", and gates behind two conditions. The
+--       encoding HAS the predicates available and uses neither: sludge_source has value 'heap_stockpile'
+--       (id eaa1dd83-5da0-4538-a742-2bcc685e5478) and core_sampling_used is a boolean
+--       (id 2db65cb4-3f80-48b8-b1e3-602627650550). A project sampling from a pipe is blocked on n_sp.
+--   (3) UNSATISFIABLE BY DEFAULT. n_sp is is_required=false, so on a project that never touches a stockpile
+--       it is NULL, and 'NULL >= 4 AND NULL <= 30' cannot evaluate true. The block can never be cleared
+--       except by entering a fictitious core count.
+--   Boundary note: "between 4 and 30" does not state inclusivity; the encoding chose inclusive. Reasonable,
+--   but it is an unrecorded choice, not a printed one.
+-- PROPOSAL (choose one at ratification):
+--   (a) severity block -> warn AND add the scope predicate; or
+--   (b) keep block but scope it and make it vacuously true when out of scope.
+-- update public.compliance_requirements set severity='warn',
+--        condition='core_sampling_used IS NOT True OR (n_sp >= 4 AND n_sp <= 30)'
+--  where id='c3ca324b-b1bd-4b91-adb4-50ebf77102ae';
+-- ROLLBACK: update public.compliance_requirements set severity='block', condition='n_sp >= 4 AND n_sp <= 30'
+--            where id='c3ca324b-b1bd-4b91-adb4-50ebf77102ae';
+-- ☐ RATIFIED  R-3
+
+-- =====================================================================================================
+-- R-4  CR-022: block gate on §8, and the is_required=true set that has no mandatory verb behind it
+-- =====================================================================================================
+-- Encoding: gate CR-022 (id 2e3d5ff6-abe8-4774-94fd-d47ed0850cba), ws ISO-5667-13-08, severity='block',
+--           condition='safety_regulations_observed == true', clause_reference='§8'.
+-- Printed text, §8, printed p.13 / PDF p.19 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "However, these guidelines cannot be substituted for the provisions of local or national health and
+--    safety regulations, which should always be carefully studied and put into effect before sampling
+--    occurs."
+-- Assessment: modal "should always be carefully studied", but it defers to STATUTORY law. Like CR-001,
+--   this is defensible to keep as block if R-0 permits block gates at all.
+-- SECOND HALF OF THIS RULING — required flags off non-mandatory text. 24 of 46 fields are
+--   is_required=true, and since the document has zero "shall", every one of them rests on "should"/"can".
+--   Three are actively wrong in scope and should be reviewed first:
+--     (a) mass_reduction_required  (d5ac269b-d38e-4fed-a6cd-a20f8c3a589c) and
+--         quartering_performed     (7ff66f5b-0cae-4b97-9959-ebdf6634335a)
+--         §6.4 is headed "Sample homogenization and sub-sampling for sludge cakes (quartering)" — CAKES
+--         ONLY (printed p.11 / PDF p.17). Both are required for liquid-sludge projects too.
+--     (b) n (41c84966-d850-4f16-b01c-217947548c6a), s (e904d368-03f3-42ae-ba9f-9a99ec7fffcf) and
+--         E (d3d77d1b-6e94-4312-b7ec-6f2e2f3ba06a) are required, but §6.1.4.2 is the COMPOSITE-sample
+--         sub-sample count. On a project with sample_type = 'grab' the engineer must still supply a
+--         standard deviation and a maximum permitted error.
+--     (c) sample_record_field (0bf83eef-0dbd-4e14-a64f-230c3d6f74e5) is required, but §9 prints the
+--         weakest modal in the document: "Details which should be CONSIDERED for inclusion are:".
+-- PROPOSAL: set is_required=false on (a), (b) and (c), replacing the hard requirement with conditional
+--   relevance; leave CR-022 severity to R-0.
+-- update public.fields set is_required=false where id in
+--   ('d5ac269b-d38e-4fed-a6cd-a20f8c3a589c','7ff66f5b-0cae-4b97-9959-ebdf6634335a',
+--    '41c84966-d850-4f16-b01c-217947548c6a','e904d368-03f3-42ae-ba9f-9a99ec7fffcf',
+--    'd3d77d1b-6e94-4312-b7ec-6f2e2f3ba06a','0bf83eef-0dbd-4e14-a64f-230c3d6f74e5');
+-- ROLLBACK: update public.fields set is_required=true where id in
+--   ('d5ac269b-d38e-4fed-a6cd-a20f8c3a589c','7ff66f5b-0cae-4b97-9959-ebdf6634335a',
+--    '41c84966-d850-4f16-b01c-217947548c6a','e904d368-03f3-42ae-ba9f-9a99ec7fffcf',
+--    'd3d77d1b-6e94-4312-b7ec-6f2e2f3ba06a','0bf83eef-0dbd-4e14-a64f-230c3d6f74e5');
+-- ☐ RATIFIED  R-4
+
+-- =====================================================================================================
+-- R-5  Effective no-op gates: IS NOT NULL over fields that are ALREADY is_required, plus one empty gate
+-- =====================================================================================================
+-- Eight gates test only for presence. Six of them test fields that are already is_required=true, so the
+-- form cannot be submitted with them empty and the gate can never fire — they are pure no-ops:
+--   CR-002 816bdac6-c491-4ec0-bf3b-980de620390f  'sludge_origin IS NOT NULL AND sampling_purpose_defined IS NOT NULL'
+--          (both required)   ws -01
+--   CR-004 bb5ba502-83ba-4c08-8fb0-aab514222553  'monitoring_objective IS NOT NULL'          (required) ws -03
+--   CR-006 cacc091b-2080-47ff-8963-9d60198e2d54  'variability_type IS NOT NULL AND concentration_target IS NOT NULL'
+--          (both required)   ws -03
+--   CR-009 fa947ec5-d071-424f-adfc-5c4007f8288d  'container_material IS NOT NULL'            (required) ws -04
+--   CR-011 7e9348a1-a76e-4541-9940-097f96be68aa  'sample_type IS NOT NULL AND sampling_mode IS NOT NULL'
+--          (both required)   ws -05
+--   CR-016 44aff6d3-43d5-471f-901f-827f0de94d24  'sludge_source IS NOT NULL'                 (required) ws -06
+-- Two more are presence-only over OPTIONAL booleans, so they carry no requirement content either:
+--   CR-019 742ae8c5-a765-4810-873a-edeaac97db49  'multiple_subsamples_required IS NOT NULL'  ws -07
+--   CR-020 1d8efacc-0519-4127-bc03-9fe88944c501  'time_dependent_analysis IS NOT NULL'       ws -08
+-- AND one gate has an EMPTY condition and no source_quote at all, and is additionally MIS-HOMED:
+--   CR-005 b1b9f0c5-ac86-44df-8524-3ed9b325f6cd  condition='' (empty string), severity='warn',
+--          clause_reference='§4.1', sitting on ws ISO-5667-13-01 "Registrierung & Anwendungsbereich".
+--          §4.1s fields (monitoring_objective, monitoring_stage) live on ws ISO-5667-13-03. So CR-005 is
+--          a gate on worksheet A tagged to a clause whose fields are all on worksheet B, and it references
+--          no field at all. It duplicates CR-004s clause anchor with nothing in it.
+-- Related, not a no-op but worth the same ruling: the 11-value sludge_source enum drives NO branching
+--   anywhere — no gate and no equation reads its value; only its presence is tested (CR-016).
+-- PROPOSAL: delete CR-005 outright; convert the eight presence-only gates into gates that carry the
+--   printed obligation (see R-6) or delete them.
+-- delete from public.compliance_requirements where id='b1b9f0c5-ac86-44df-8524-3ed9b325f6cd';
+-- ROLLBACK: re-insert CR-005 (ws ISO-5667-13-01, code 'CR-005', severity 'warn', condition '',
+--            clause_reference '§4.1', source_quote null) — capture the full row before deleting.
+-- ☐ RATIFIED  R-5
+
+-- =====================================================================================================
+-- R-6  Presence-only booleans that HIDE the only three printed numbers in the document
+-- =====================================================================================================
+-- The normative body contains exactly two hard numeric limits and one hard ratio. All three are carried by
+-- a boolean checkbox or by an ungated field, so none of them is enforced anywhere:
+--   (1) 5 % mass fraction — §6.3.5, printed p.9 / PDF p.15, CONFIRMED BY RENDERED PAGE IMAGE:
+--       "When using a pump to sample from an open channel, a solids content of up to 5 % mass fraction can
+--        be sampled, provided the velocity in the suction pipe is sufficient to keep all the particulates
+--        in suspension."
+--       Encoding: field solids_content (c3ba7f13-65bf-42e7-9ec0-72f83ad05c2b), unit '%', is_required=false.
+--       NO GATE references this field at all. Note the printed limit is doubly scoped (pump AND open
+--       channel) and is permissive ("can be sampled"), so a gate must carry both predicates.
+--       Unit correction: '%' should read '% mass fraction'.
+--   (2) 5 mm screen — §7.1, printed p.12 / PDF p.18, CONFIRMED BY RENDERED PAGE IMAGE:
+--       "For some types of liquid sludge, particularly raw sewage sludge, gross atypical solids, e.g. rags,
+--        can be removed by passing the sample through a stainless steel or plastics screen of nominal size
+--        of openings not less than 5 mm."
+--       Encoding: boolean gross_solids_screened (f985cc17-0524-4ba7-a445-42c48f0198c8). No aperture field,
+--       no gate. The 5 mm figure exists nowhere in the encoding except inside the field description text.
+--   (3) 10 paired replicates per 40 ordinary samples — §6.2, printed p.7 / PDF p.13, CONFIRMED BY RENDER:
+--       "This should be achieved by taking a run of 10 paired replicate samples (i.e. 20 samples) after
+--        every 40 ordinary samples."
+--       Encoding: boolean replicate_ratio_met (da97e85e-0baf-46ac-9b38-9a59269040bc) + gate CR-014
+--       (293dd44c-efe4-4380-a7e3-072d73bdd2a3, warn, 'replicate_ratio_met == True'). No numeric fields.
+-- PROPOSAL: add a scoped warn gate for (1); add an aperture number field + scoped gate for (2); leave (3)
+--   as an attestation but fix the description (see R-13).
+-- update public.compliance_requirements set condition='sludge_source <> ''open_channel'' OR solids_content IS NULL OR solids_content <= 5' where id='<new or existing gate id>';
+-- ROLLBACK: revert the condition to its prior value / delete the added gate and field.
+-- ☐ RATIFIED  R-6
+
+-- =====================================================================================================
+-- R-7  Tautologies over equation outputs, and the #22 class (derived values that are hand-enterable)
+-- =====================================================================================================
+-- Equation graph (3 equations, NO cycle):  s,E -> [Eq2] -> n -> [Eq1, with m,q] -> t ;  V -> [Eq3] -> n_sp
+-- Two gates are tautologies over an equation output:
+--   CR-012 7ffc57e5-de7f-41b5-a570-095a2a7c5117  't > 0'  ws -05.
+--          t = (60 x m)/(qn) with m, q, n all positive quantities, so t > 0 whenever it is defined. The
+--          gate can only fail on a hand-entered value, i.e. it polices the operator, not the standard.
+--          It also carries no scope predicate: §6.1.3 applies only when sampling_mode = 'time_basis'.
+--   CR-013 3340d7f1-c4e7-4708-98d4-8f4ecce5b14c  'n > 0'  ws -05.
+--          n = ((1,96 x s)/E)^2 is a square, so n >= 0 always and n > 0 whenever s is non-zero.
+-- #22 class (doctrine: "derived that is hand-enterable = finding"). All THREE equation outputs are plain
+-- hand-enterable number fields with no read-only binding:
+--   t     d32d3718-668a-4cc7-af9d-b574270f0b35  output_symbol of Eq 1
+--   n     41c84966-d850-4f16-b01c-217947548c6a  output_symbol of Eq 2 AND input_symbol of Eq 1, is_required=true
+--   n_sp  f2117d08-ce9e-4fbe-bede-bb68ee11c5bf  output_symbol of Eq 3, and the anchor of block gate CR-017
+-- n is the sharpest case: it is simultaneously derived (from Eq 2) and a required manual input (to Eq 1).
+-- NEGATIVE RESULTS recorded here so their absence is auditable: there is NO circular equation pair; no gate
+-- uses exact float equality; no gate applies a '>= 0' floor to a quantity that could legitimately be
+-- negative (every numeric field on this standard is non-negative by definition).
+-- PROPOSAL: mark t, n and n_sp derived/read-only per the single-source derivation invariant; delete or
+--   rewrite CR-012 and CR-013 as scope-carrying gates.
+-- delete from public.compliance_requirements where id in ('7ffc57e5-de7f-41b5-a570-095a2a7c5117','3340d7f1-c4e7-4708-98d4-8f4ecce5b14c');
+-- ROLLBACK: re-insert CR-012 ('t > 0', warn, §6.1.3, ws -05) and CR-013 ('n > 0', warn, §6.1.4.2, ws -05).
+-- ☐ RATIFIED  R-7
+
+-- =====================================================================================================
+-- R-8  Enums that CLOSE a printed OPEN list, and one that drops a printed member
+-- =====================================================================================================
+-- Four enums close a list the standard leaves open, and one silently loses an item:
+--   (a) sludge_origin (58e9114b-...), §1 printed p.1 / PDF p.7:
+--       "It is applicable to all types of sludge arising from these works and also to sludges of similar
+--        characteristics, e.g. septic tank sludges."  -> open class, closed to 4 values.
+--   (b) monitoring_stage (8ef92cc4-...), §4.1 printed p.3 / PDF p.9:
+--       "A sampling programme MIGHT INCLUDE: influent monitoring; in-process monitoring; effluent
+--        monitoring; equipment inspection and testing."  -> "might include", closed to exactly those 4.
+--   (c) variability_type (4cdd8718-...), §4.2 printed p.4 / PDF p.10:
+--       "EXAMPLES of variation in wastewater due to process variability INCLUDE: daily and weekly
+--        variation [...] seasonal variation [...] event variation".  -> explicit "Examples ... include".
+--   (d) sampling_equipment_type (67cb94d1-...), §5.2 printed p.4 / PDF p.10: the four values map to
+--       Annexes A/B/C, which are marked "(informative)" on their own title pages, and Table A.1 enumerates
+--       about 25 generic tool types. The 4-value granularity is EKOWAI, not printed.
+--   (e) concentration_target (e204d056-...) DROPS A PRINTED MEMBER. §4.2 printed p.4 / PDF p.10 —
+--       CONFIRMED BY RENDERED PAGE IMAGE: "...depends upon the objective of monitoring, e.g. to determine
+--       the maximum concentrations of a pollutant, THE VARIABILITY OF DISCHARGE or the average
+--       concentration." Three members; the enum encodes maximum and average only.
+-- Counter-examples recorded so the ruling is calibrated — these enums are FAITHFUL and need no change:
+--   sample_type (§6.1.2, "The basic types of sample which can be required ARE" — genuinely closed);
+--   sludge_source (11 values = the printed §6.3.3-§6.3.10 sub-clause headings);
+--   container_material (§5.3, "are satisfactory" — a closed material list);
+--   sample_record_field values (§9 a)-h) — the LIST is right; the widget is wrong, see R-10).
+-- PROPOSAL: add an "other / not listed" value with a free-text companion to (a)-(d), per the 2026-08-01
+--   options-as-selection ruling; add the missing "variability of discharge" value to (e).
+-- update public.fields set enum_values = enum_values || '[{"value":"variability_of_discharge", ...}]'::jsonb where id='e204d056-c30a-4229-a3c1-067b1b633fd8';
+-- ROLLBACK: restore the prior enum_values JSONB for each field (capture before applying).
+-- ☐ RATIFIED  R-8
+
+-- =====================================================================================================
+-- R-9  monitoring_objective: the enum label does not match the printed alternative
+-- =====================================================================================================
+-- Encoding: field monitoring_objective (449a53e8-0566-4609-b27b-58d8f9bbdb16), values
+--   'process_control' / "Prozesssteuerung" and 'quality_control' / "Qualitaetslenkung" / "Quality control".
+-- Printed text, §4.1, printed p.3 / PDF p.9 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "The type of sampling that is undertaken depends upon whether the objective of the sampling programme
+--    is monitoring for process control or for EFFLUENT QUALITY."
+-- The printed alternative is "effluent quality". "Quality control" is a different thing in this document:
+--   §3.12 defines "quality control point" as a control point, not a monitoring objective. The substitution
+--   makes the second option mean something the standard did not offer. The string "effluent quality"
+--   occurs exactly once in the document, in this sentence.
+-- PROPOSAL: relabel the value to "effluent quality" / "Ablaufqualitaet" (token may stay for stability).
+-- update public.fields set enum_values = ... where id='449a53e8-0566-4609-b27b-58d8f9bbdb16';
+-- ROLLBACK: restore the prior enum_values JSONB.
+-- ☐ RATIFIED  R-9
+
+-- =====================================================================================================
+-- R-10  Single-select widgets where the source prints a CONJUNCTION
+-- =====================================================================================================
+-- (a) sample_record_field (0bf83eef-0dbd-4e14-a64f-230c3d6f74e5), §9 printed p.13 / PDF p.19 — CONFIRMED
+--     BY RENDERED PAGE IMAGE: "The detailed form of sample report depends on the objectives of sampling.
+--     Details which should be considered for inclusion are: a) the name of the plant; b) the sampling site
+--     [...]; c) the date and time of sample collection; d) the name of the sample collector; e) the weather
+--     conditions at the time of sampling; f) the appearance of the sample; g) information on any sample
+--     preservation technique used; h) information on any specific sample storage requirements".
+--     ONE sample report contains ALL EIGHT. The field is a single-select enum, so the engineer picks one of
+--     the eight and the other seven are simply lost. This is the sharpest STRUCTURAL defect on the
+--     standard: the encoding cannot represent the printed deliverable at all.
+--     Sub-defect: enum value token 'sample_identification' is labelled "Name der Anlage" / "Name of the
+--     plant" — the label is right for item a), the token is not.
+-- (b) monitoring_stage (8ef92cc4-...), §4.1: a programme routinely covers influent AND in-process AND
+--     effluent AND equipment inspection. Single-select.
+-- (c) variability_type (4cdd8718-...), §4.2: daily/weekly, seasonal and event variation co-occur in the
+--     same works. Single-select.
+-- PROPOSAL: convert (a) to a multi-select / repeated sub-form (one row per printed item a-h, all eight
+--   present by default); convert (b) and (c) to multi-select.
+-- update public.fields set data_type='enum_multi' where id in
+--   ('0bf83eef-0dbd-4e14-a64f-230c3d6f74e5','8ef92cc4-9dc7-44f6-a986-5d8b459802c6','4cdd8718-20f6-4a3e-abb6-3b3a39ec4fbc');
+-- ROLLBACK: update public.fields set data_type='enum' where id in (the same three ids);
+-- NOTE: confirm the app supports a multi-select data_type before ratifying; if not, the fix is a repeated
+--   sub-form, which is a bigger change and should be its own ruling.
+-- ☐ RATIFIED  R-10
+
+-- =====================================================================================================
+-- R-11  clause_reference retags and description over-statements
+-- =====================================================================================================
+-- (a) sampling_purpose_defined (e94ff1c3-b5b7-4f14-b774-10d9f482eb97) is tagged §1, but §1 is the Scope
+--     and states no obligation about defining objectives. The obligation is §4.1, printed p.3 / PDF p.9:
+--     "Definition of the objectives of the sampling programme is an essential step towards defining the
+--      type and quality of information that is to be obtained through sampling."
+--     -> retag §1 to §4.1 (the field would then belong on ws -03, which is a bigger move; retag only).
+-- (b) full_depth_sampling (57915de2-8411-421f-8d1f-6fbdbc911f1c) is tagged §6.3.5, whose sentence is about
+--     the OPEN CHANNEL only ("across the width and depth of the CHANNEL", printed p.9 / PDF p.15), but the
+--     description generalises to "channel/heap". §6.3.6 carries the parallel heap obligation, so the honest
+--     tag is "§6.3.5, §6.3.6".
+-- (c) core_sampling_used (2db65cb4-3f80-48b8-b1e3-602627650550): the description says core sampling is
+--     "preferred where it can be safely undertaken". The printed modal, §6.3.6 printed p.9 / PDF p.15, is
+--     "core sampling CAN BE CONSIDERED as a means of obtaining samples", gated behind "If, after assessment
+--     of safety requirements, no concerns are apparent and equipment is available", in a clause that opens
+--     "In general, sampling of sludge cake from heaps and stockpiles is prohibited by safety requirements".
+--     "Preferred" inverts a permission into a recommendation.
+-- (d) container_airtight (332032fe-31ed-4b93-9a5f-08bf188f984d): the description extends the obligation to
+--     "trace-metals & moisture determination". The printed scope, §5.3 printed p.4 / PDF p.10, is
+--     "SAMPLES FOR TOTAL MOISTURE DETERMINATION should be collected and stored in containers that are both
+--      leak-tight [...] and airtight". Trace metals are not mentioned in that sentence.
+-- update public.fields set clause_reference='§4.1' where id='e94ff1c3-b5b7-4f14-b774-10d9f482eb97';
+-- update public.fields set clause_reference='§6.3.5, §6.3.6' where id='57915de2-8411-421f-8d1f-6fbdbc911f1c';
+-- ROLLBACK: update public.fields set clause_reference='§1' where id='e94ff1c3-b5b7-4f14-b774-10d9f482eb97';
+--           update public.fields set clause_reference='§6.3.5' where id='57915de2-8411-421f-8d1f-6fbdbc911f1c';
+-- (descriptions for (c) and (d) need a wording ruling before an UPDATE is written)
+-- ☐ RATIFIED  R-11
+
+-- =====================================================================================================
+-- R-12  INVENTED SPECIFICATION in a field description, plus one unit correction
+-- =====================================================================================================
+-- (a) riffle_box_used (f43c4359-26a3-4db4-aa25-ae4aa849d847). Its description reads:
+--     "For gelatinous/heavy material or to obtain multiple sub-samples, riffle boxes / spinning rifflers
+--      used; riffle-box openings of nominal size at least 4x the largest material particle (Figure 1)."
+--     NONE OF THAT IS IN THIS STANDARD. Evidence:
+--       - grep over the full text layer: "4x" = 0 hits, "four times" = 0 hits, "largest particle" = 0 hits,
+--         "largest material" = 0 hits, "spinning" = 0 hits.
+--       - Figure 1 read as a RENDERED PAGE IMAGE (printed p.12 / PDF p.18): an undimensioned line drawing
+--         captioned "Figure 1 — Typical riffle box used for subdivision of samples in the laboratory".
+--         No aperture rule appears on the figure or anywhere near it.
+--     The printed text, §6.4.2, printed p.12 / PDF p.18, is the whole of what the standard says:
+--       "When samples have been dried and homogenized, devices such as riffle boxes (see Figure 1) can be
+--        used for sub-division if sufficient material exists. Where riffle boxes are used, the material
+--        should be distributed evenly across the width to ensure the sample is divided representatively.
+--        If wet samples are treated in this manner, they do not divide properly and can cause clogging."
+--     Worse, the description INVERTS the scope. The printed scope is DRIED AND HOMOGENIZED samples; the
+--     description scopes it to "gelatinous/heavy material". §6.4.1 (printed p.11 / PDF p.17) says of
+--     gelatinous sludges: "Sludges that have a gelatinous appearance [...] are unlikely to be suitably
+--     homogenized by this technique." The 4x rule most likely leaked in from a coal/mineral sampling
+--     standard (ISO 18283 is cited in §2) — it must not stay attached to ISO 5667-13.
+--     This is the single most serious content defect found on this standard.
+-- (b) solids_content (c3ba7f13-65bf-42e7-9ec0-72f83ad05c2b) carries unit '%'. The printed quantity, §6.3.5,
+--     is "5 % MASS FRACTION" (printed p.9 / PDF p.15). A bare '%' is ambiguous (mass vs volume).
+-- NEGATIVE RESULT recorded for audit: apart from (b) there are NO invented units on this standard. Units
+--   in use are '-', 't', 't/h', 'min', '%' and 'm3', and each of t/t-per-hour/min/m3 is printed verbatim in
+--   the symbol lists. "mg/l" returns ZERO hits in both the encoding and the document. "mg/kg dry mass"
+--   appears in the source only in the Annex D worked example and is correctly NOT carried as a field unit.
+-- update public.fields set description='Riffle boxes may be used for sub-division only when samples have been dried and homogenized and sufficient material exists; the material should be distributed evenly across the width. Wet samples do not divide properly and can cause clogging (Figure 1, §6.4.2).' where id='f43c4359-26a3-4db4-aa25-ae4aa849d847';
+-- update public.fields set unit='% mass fraction' where id='c3ba7f13-65bf-42e7-9ec0-72f83ad05c2b';
+-- ROLLBACK: restore the prior description verbatim for f43c4359-... and unit='%' for c3ba7f13-...
+-- ☐ RATIFIED  R-12
+
+-- =====================================================================================================
+-- R-13  Factual errors in encoded prose: a wrong ratio and a wrong page reference
+-- =====================================================================================================
+-- (a) replicate_ratio_met (da97e85e-0baf-46ac-9b38-9a59269040bc). Description says:
+--     "10 replicate samples taken for every 40 ordinary samples (1 in 20 sampled)".
+--     Printed, §6.2, printed p.7 / PDF p.13 — CONFIRMED BY RENDERED PAGE IMAGE:
+--     "taking a run of 10 PAIRED replicate samples (i.e. 20 samples) after every 40 ordinary samples".
+--     Two errors: "paired" is dropped (10 pairs = 20 samples, not 10), and the parenthetical "(1 in 20
+--     sampled)" is arithmetically wrong — the printed ratio is 20 replicates per 40 ordinary, i.e. 1 in 2.
+--     The string "1 in 20" occurs ZERO times in the document.
+-- (b) Equation 2 (53384ff5-d097-4d02-a69d-7a053a9ef8ba) source_quote places the Annex D worked example at
+--     "p.9". The worked example (s = 39,7 mg/kg dry mass; E = +/-30; n = 2,60^2 = 6,73, rounded up to 7) is
+--     on printed p.23 / PDF p.29 — CONFIRMED BY RENDERED PAGE IMAGE. Printed p.9 is §6.3.5/§6.3.6.
+--     The formula page ref in the same quote ("p.6") is CORRECT. Equations 1 and 3 page refs are correct.
+--     This is the only wrong page reference found in the encoding.
+-- update public.fields set description='Replicate sampling regime: a run of 10 PAIRED replicate samples (i.e. 20 samples) after every 40 ordinary samples, with a further set of 10 pairs if sampling conditions are believed to have changed; two sets of 10 paired results are needed before any change in sampling behaviour can be assessed (§6.2).' where id='da97e85e-0baf-46ac-9b38-9a59269040bc';
+-- (the Equation 2 source_quote page ref is corrected in prose only; source_quote is not rewritten by this pass)
+-- ROLLBACK: restore the prior description verbatim for da97e85e-...
+-- ☐ RATIFIED  R-13
+
+-- =====================================================================================================
+-- R-14  Structural: a "calculation" worksheet with no equation, and definition-only fields
+-- =====================================================================================================
+-- (a) ws ISO-5667-13-07 (4457415f-0047-4d43-afc6-60403902b0bf) "Homogenisierung & Teilung (Vierteln)" has
+--     archetype='calculation' but carries NO equation and no number field — only four booleans
+--     (mass_reduction_required, quartering_performed, riffle_box_used, multiple_subsamples_required).
+--     §6.4 prints no formula, so the archetype is simply wrong; 'data_collection' fits.
+--     By contrast ws -05 and ws -06 are correctly 'calculation' (Eq 1+2 and Eq 3 respectively).
+-- (b) ws ISO-5667-13-02 (7471c49c-1a6a-4cdb-aced-f7852efdc65c) "Begriffe & Definitionen" carries
+--     critical_control_point (9bd8acb2-...) and quality_control_point (18982fea-...) as booleans over
+--     §3.3 and §3.12, which are DEFINITIONS. A definitions clause imposes no obligation, so these two
+--     booleans ask the engineer to attest to a vocabulary entry. They are is_required=false, so nothing
+--     is enforced, but they are noise on the form. §4.1 does say a programme "targets the critical control
+--     points and quality control points", so a re-home to ws -03 with a §4.1 tag would make them meaningful.
+-- NEGATIVE RESULTS recorded for audit: NO worksheet on this standard has zero fields (4/3/5/7/10/7/4/6
+--   across ws -01..-08 = 46); there are no duplicate gates and no gate is a strict subset of another
+--   (CR-005 is the only degenerate case, see R-5); no gate is unsatisfiable through an uncovered enum
+--   value, because NO gate performs enum membership at all — every enum field is tested only IS NOT NULL.
+-- update public.worksheet_templates set archetype='data_collection' where id='4457415f-0047-4d43-afc6-60403902b0bf';
+-- ROLLBACK: update public.worksheet_templates set archetype='calculation' where id='4457415f-0047-4d43-afc6-60403902b0bf';
+-- ☐ RATIFIED  R-14
+
+-- =====================================================================================================
+-- R-15  Gates with no source_quote — 18 of 23
+-- =====================================================================================================
+-- Only 5 of the 23 gates carry a source_quote: CR-001, CR-003, CR-017, CR-018, CR-022. The other 18 have
+-- source_quote = NULL: CR-002, CR-004, CR-005, CR-006, CR-007, CR-008, CR-009, CR-010, CR-011, CR-012,
+-- CR-013, CR-014, CR-015, CR-016, CR-019, CR-020, CR-021, CR-023.
+-- Under SR-1 a gate without a quoted printed obligation is not verifiable at all. The pack above now
+-- supplies a VA quote for the FIELD each of these gates reads, so the evidence exists in the database and
+-- can be lifted into the gate rows; that lift is a structural change and is therefore staged, not applied.
+-- NEGATIVE RESULT recorded for audit: of the 5 gates that DO carry a source_quote, all 5 quote real printed
+--   sentences (checked word-for-word against the rendered pages), none is stitched from separate clauses
+--   without an elision marker (CR-017 uses "[...]" correctly), and none has a wrong page reference.
+-- PROPOSAL: backfill source_quote on the 18 gates from the corresponding field verification_quote.
+-- update public.compliance_requirements set source_quote='<the field VA quote>' where id='<gate id>';
+-- ROLLBACK: update public.compliance_requirements set source_quote=null where id='<gate id>';
+-- ☐ RATIFIED  R-15
+
+-- =====================================================================================================
+-- CHECKLIST NEGATIVES — recorded explicitly so their absence is auditable
+-- =====================================================================================================
+-- The following defect classes were searched for on ISO-5667-13 and NOT FOUND:
+--   * condition='TRUE' or any literal-true condition — none (CR-005 is empty-string, see R-5).
+--   * a '>= 0' floor on a quantity that can legitimately be negative — no such gate exists.
+--   * a number lifted from inside an "e.g." / example parenthetical and enforced as a hard limit — NONE.
+--     This was the top defect on ISO-5667-1 and it was specifically hunted here. Every numeric candidate
+--     inside an example or an informative annex was checked and NONE reached a gate or a field limit:
+--       - Annex B (informative), printed p.18 / PDF p.24: "a pipe of 25 mm bore", "up to a maximum of five
+--         2 m sections", "a 10 l bottle", "not less than 6 mm diameter", "dry solids contents greater than
+--         a mass fraction of 6 % to 8 %" — none encoded anywhere.
+--       - Annex C (informative), printed p.21 / PDF p.27: "pipe, 15 mm outside diameter", "PVC pipe, 30 mm
+--         outside diameter" — none encoded.
+--       - Annex D (informative) worked example, printed p.22-23 / PDF p.28-29: 30 test samples, average
+--         276,3 mg/kg dry mass, s = 39,7, E = +/-30 mg/kg dry mass, result 7 samples — the E field
+--         description cites these AND correctly labels them "Annex D example"; no gate enforces any of them.
+--       - Table A.1 (informative), printed p.15-17 / PDF p.21-23: the whole dimension table (40 to 200 mm
+--         openings, 10 cm to 15 cm lengths, 500 ml volumes, etc.) — none encoded.
+--     The only enforced numbers on this standard (4 and 30 in CR-017) come from the NORMATIVE body, §6.3.6.
+--     The defect there is the modal and the missing scope, not the provenance of the numbers (see R-3).
+--   * AND/OR inversion or OR-collapse — no gate on this standard uses OR at all; the four compound gates
+--     (CR-002, CR-006, CR-011, CR-017) are all AND, so there is nothing to collapse.
+--   * inverted conditions — every boolean gate asserts '== true', matching the affirmative printed
+--     obligation; CR-017 asserts the band in the printed direction.
+--   * exact float equality — no numeric field is compared with '='; all '==' comparisons are on booleans.
+--   * duplicate gates / strict subsets — none (CR-005 is degenerate, not a duplicate).
+--   * unsatisfiable gates from uncovered enum values — impossible here: no gate tests enum membership.
+--   * enum values with no corresponding printed item — none; every enum value traces to printed text (the
+--     defects are the opposite direction: printed items MISSING from enums, see R-8e and R-10).
+--   * invented units — none except the '%' vs '% mass fraction' imprecision in R-12b. No 'mg/l' anywhere.
+--   * stitched quotes with no elision marker — none in the 5 gate source_quotes or the 3 equation
+--     source_quotes.
+--   * worksheets with zero fields — none.
+--   * circular equation pairs — none; the graph is a tree.
+--   * equation outputs consumed by nothing — none: t is the deliverable and is read by CR-012, n feeds
+--     Equation 1 and is read by CR-013, n_sp is read by CR-017.
+--   * blank pages interleaved in the licensed copy displacing footers — none; the page map is linear.
+-- =====================================================================================================

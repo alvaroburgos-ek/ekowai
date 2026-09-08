@@ -61,3 +61,4 @@ iso-14002-2-md-verification-pack.sql  ISO-14002-2
 iso-14033-md-verification-pack.sql  ISO-14033
 iso-59032-md-verification-pack.sql  ISO-59032
 iso-5667-1-md-verification-pack.sql  ISO-5667-1
+iso-5667-13-md-verification-pack.sql  ISO-5667-13
