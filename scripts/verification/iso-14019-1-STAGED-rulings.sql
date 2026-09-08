@@ -1,0 +1,607 @@
+-- ISO-14019-1 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, ISO 14019-1:2026, printed page) and its rollback inverse. Mark a block
+-- "RATIFIED" only after Alvaro decides; nothing here may be applied on a subagent's judgement.
+--
+-- SOURCE: ISO-14019-1-2026.txt = ISO 14019-1:2026(en), "International Standard", Sustainability
+--   information - Part 1: General principles and requirements for validation and verification,
+--   FIRST EDITION 2026-02, (c) ISO 2026, prepared by ISO/TC 207/SC 2 with CEN/CLC/JTC 1 and
+--   ISO/CASCO. PUBLISHED STANDARD - not a Draft/DIS/FDIS, not a Technical Report, not a scoping
+--   report; no ballot notice or draft-stage marking anywhere in the 59-page text layer. English.
+--   pdftotext -layout -enc UTF-8, form feeds preserved, 0 undecodable characters.
+--   PAGE CONVENTION: printed page = PDF page - 6 (PDF p.7 = printed p.1 Scope; PDF p.57 =
+--   printed p.51, the last page). Front matter is roman (PDF p.2 = ii ... PDF p.6 = vi).
+--
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--   "condition_expression") and has NO "active" column - the statements below reflect that.
+--   The evaluator accepts "== True" as well as "== true" (src/lib/compliance/evaluate.ts),
+--   so that casing is cosmetic and is NOT staged as a defect.
+--   public.fields DOES have an "active" column (export-fields.mjs reads coalesce(f.active, true)).
+--
+-- ============================================================================
+-- MODALITY CENSUS - the arithmetic every severity judgement below rests on
+-- ============================================================================
+-- Counted mechanically over the whole text layer:
+--   Normative body (Clauses 1-8):   15 substantive "shall"  vs   3 "should".
+--   Informative Annexes A-H:         2 "shall"              vs  19 "should".
+--   Whole document: 19 "shall", 25 "should", 8 "may", 163 "can".
+-- The 15 body "shall" sentences - the COMPLETE set on which a block gate can rest:
+--   printed p.16  sect.6.2.1  The assurance opinion shall be based on validation activities or
+--                             verification activities, or a mixture [...]           -> CR-023
+--   printed p.16  sect.6.2.2  assurance opinions shall be provided on the basis of a level of
+--                             assurance [...]                                       -> CR-024
+--   printed p.17  sect.6.3.2  When a mixed engagement is undertaken, the following shall apply:
+--                                                                                   -> CR-025
+--   printed p.17  sect.6.4    [...] the validation/verification body and its client shall agree on
+--                             the process used to establish the deliverable and its format. This
+--                             shall include, but is not limited to, the following:  -> CR-026
+--   printed p.18  sect.7.1.1  shall operate validation/verification programmes [...] -> CR-001
+--   printed p.18  sect.7.1.2  shall evaluate the suitability of validation/verification programmes
+--                                                                                   -> CR-014
+--   printed p.18  sect.7.1.3  bodies shall decide whether to proceed [...]           -> NO GATE (S-8a)
+--   printed p.18  sect.7.2    shall ensure that the declared sustainability information [...] is
+--                             clearly described in terms of:                        -> CR-015
+--   printed p.19  sect.7.3.1  shall ensure that the specified requirements and criteria [...] are
+--                             identified in terms of:                               -> CR-016
+--   printed p.19  sect.7.3.2  shall clarify whether the responsible party has made available [...]
+--                                                                                   -> CR-017
+--   printed p.19  sect.7.3.3  shall determine whether the specified requirements and criteria are
+--                             suitable [...]                                        -> CR-018
+--   printed p.19  sect.7.4.1  shall agree with the client the scope of validation/verification [...]
+--                                                                                   -> CR-019
+--   printed p.20  sect.7.4.2  shall ensure that the applicable requirements and criteria and
+--                             principles [...] are identified and suitable [...]     -> CR-018 (2nd ref)
+--   printed p.20  sect.7.5    shall identify a suitable methodology [...] including: -> CR-020,
+--                             and its items d)/e) -> CR-021/CR-022; items a)/b) -> NO GATE (S-8b)
+--   printed p.20  sect.7.6.1  shall ensure that the category of deliverable [...] is specified [...]
+--                                                                                   -> CR-027
+--   (A 16th "shall" is the ISO patent-rights boilerplate in the Foreword, printed p.iv, and
+--    carries no technical duty. Two further "shall" sit in INFORMATIVE annexes: Annex A "Caution
+--    shall be taken in comparing the terms included in Table A.1" (printed p.22) and Annex F "The
+--    body's mark shall not be used on declared sustainability information which contains
+--    information that has not been validated/verified." (printed p.43).)
+-- The 3 body "should": sect.3.2.31 Note 1 (a trainer "should not provide client-specific advice"),
+--   sect.8.1 and sect.8.2. There is NO "shall" anywhere in Clauses 1-5 or in Clause 8.
+-- => 15 of the 29 encoded gates are severity='block'. 13 of those rest on one of the 15 body
+--    "shall" sentences. TWO do not (CR-010 sect.4.6, CR-011 sect.4.7) - see S-2.
+
+
+-- ============================================================================
+-- S-1  EMPTY CONDITION: CR-006 enforces nothing at all            [ ] RATIFIED
+-- ============================================================================
+-- CR-006 (id f01ff61c-6d1f-4f80-84b5-f33ab33e182d, ws ISO-14019-1-03, severity='warn',
+-- clause sect.4.2.3) has condition = '' (the empty string). This is not a stylistic issue:
+--   src/lib/compliance/evaluate.ts:538
+--     if (!condition || !condition.trim()) return { kind: 'manual' };
+-- so the row can never pass or fail - it is reported as 'manual', neither. And
+-- requires_attestation is FALSE on this row (as it is on all 29 gates of this standard), so it is
+-- not even surfaced as an attestation the engineer must sign. CR-006 is inert.
+-- EVIDENCE (the clause it claims to enforce):
+--   "Evidence can be based on sampling of information. Sampling is undertaken appropriately to
+--    ensure confidence in the assurance opinion and the level of assurance."   [sect.4.2.3, printed p.12]
+-- Note the modality: "can be based on" / "is undertaken" - Clause 4 contains no "shall" at all, so
+-- warn is the correct severity; only the empty condition is the defect.
+-- The field it should read is sampling_applied (47888f16-ebb0-4793-9500-cd423cabbe2d, is_required
+-- =false). Because sampling is OPTIONAL under the printed text, the honest condition is a
+-- guarded one - "if you sampled, the appropriateness attestation must be present" - which this
+-- encoding cannot express against a single boolean. Two candidate repairs, BOTH need a ruling:
+-- OPTION A (make the row demand an explicit yes/no on sampling, keep warn):
+--   update public.compliance_requirements set condition='sampling_applied IS NOT NULL'
+--     where id='f01ff61c-6d1f-4f80-84b5-f33ab33e182d';
+-- OPTION B (keep it a human attestation and label it as one):
+--   update public.compliance_requirements set requires_attestation=true
+--     where id='f01ff61c-6d1f-4f80-84b5-f33ab33e182d';
+-- ROLLBACK (either option):
+--   update public.compliance_requirements set condition='', requires_attestation=false
+--     where id='f01ff61c-6d1f-4f80-84b5-f33ab33e182d';
+
+
+-- ============================================================================
+-- S-2  BLOCK GATES ON NON-"shall" TEXT: CR-010, CR-011            [ ] RATIFIED
+-- ============================================================================
+-- Clause 4 ("Principles for the validation/verification process") is written entirely in the
+-- present indicative and contains NO "shall" - verified mechanically, see the census above.
+-- Twelve gates (CR-005 .. CR-013) sit on Clause 4. TEN are severity='warn'. TWO are 'block':
+--   CR-010 (e6f6a4d7-84db-400a-be64-82f2e8c11360) "confidentiality_safeguarded == true", sect.4.6
+--   CR-011 (34ddf3f2-4b82-4b4e-a45a-1415637760ae) "integrity_demonstrated == true",      sect.4.7
+-- There is nothing in the printed text that distinguishes sect.4.6/sect.4.7 from sect.4.2-sect.4.5 or
+-- sect.4.8-sect.4.10 in strength - all ten are the same grammatical form.
+-- EVIDENCE, sect.4.6 (printed p.13):
+--   "4.6.1 Confidential and sensitive information obtained or created during validation/verification
+--    activities is safeguarded and not inappropriately or carelessly handled or disclosed.
+--    4.6.2 Information is not used inappropriately for personal gain by those involved in the
+--    validation/verification process or in a manner detrimental to the legitimate interest of the
+--    client or responsible party."
+-- EVIDENCE, sect.4.7 (printed p.13):
+--   "Integrity is demonstrated through behaviour, trust, honesty, working with diligence and
+--    responsibility, observing the legal provisions (regulatory and contractual), maintaining
+--    confidentiality and making disclosures expected by the legal provisions (regulatory and
+--    contractual) and the profession throughout the validation or verification process."
+-- Neither passage is a requirement sentence. A block gate on either is not defensible under the
+-- doctrine, and the inconsistency (2 block / 10 warn on identical grammar) makes the encoding's
+-- severity signal unreadable.
+-- APPLY (align the two outliers with the other ten Clause-4 gates):
+--   update public.compliance_requirements set severity='warn'
+--     where id in ('e6f6a4d7-84db-400a-be64-82f2e8c11360','34ddf3f2-4b82-4b4e-a45a-1415637760ae');
+-- ROLLBACK:
+--   update public.compliance_requirements set severity='block'
+--     where id in ('e6f6a4d7-84db-400a-be64-82f2e8c11360','34ddf3f2-4b82-4b4e-a45a-1415637760ae');
+-- COUNTER-ARGUMENT to put to Alvaro: confidentiality and integrity are the two principles a
+-- professional-liability policy actually turns on, so a house rule may WANT them blocking. That is
+-- a business decision, not a reading of the standard - which is exactly why it is staged, not applied.
+
+
+-- ============================================================================
+-- S-3  MISSING PRINTED SCOPE PREDICATE - two block gates make every
+--      non-assurance engagement impossible: CR-023, CR-024        [ ] RATIFIED
+-- ============================================================================
+-- This is the most consequential finding in this standard.
+-- CR-023 (20991d8e-059a-4bc7-b393-5f2d062a6067, block) condition "assurance_opinion IS NOT NULL"
+-- CR-024 (13c1440c-36d3-44eb-a437-f647ffa21836, block) condition "assurance_conclusion IS NOT NULL"
+-- Both fire unconditionally. But the standard prints TWO deliverable categories, and the second one
+-- produces NO assurance opinion at all:
+--   "6.1.1 The categories of deliverables (outputs) provided to the client after validation/
+--    verification of declared sustainability information using the ISO 14019 series include:
+--    a) assurance statements and opinions; b) non-assurance deliverables."   [sect.6.1.1, printed p.16]
+--   "D.1.3 The process for non-assurance deliverables includes as a minimum the pre-engagement,
+--    engagement, planning and execution steps of the validation/verification process."
+--                                                                            [sect.D.1.3, printed p.31]
+--   "D.2.2 The validator/verifier provides in a report only the results of the AUP and no assurance
+--    opinion."                                                               [sect.D.2.2, printed p.32]
+-- Also note the modality CR-024 leans on: sect.6.2.2's own opening is a printed scope predicate that
+-- the gate drops, and its verb for the conclusion list is "may", not "shall":
+--   "Subject to the validation/verification programme, assurance opinions shall be provided on the
+--    basis of a level of assurance [...] Assurance opinions may be issued with conclusions that
+--    are: - unmodified [...]"                                                [sect.6.2.2, printed p.16]
+-- The encoding already HAS the discriminator - ws-07.deliverable_type (7f02a5a3-c1d0-4c62-b65c-
+-- 81557285622c, enum 'assurance' / 'non_assurance', sourced to sect.6.1.1 a)/b)) - and no gate reads
+-- it. The encoder also demonstrably knows the idiom: CR-025 is written
+-- "mixed_engagement_separation == true OR validation_verification_mode != 'mixed'".
+-- APPLY:
+--   update public.compliance_requirements
+--      set condition='assurance_opinion IS NOT NULL OR deliverable_type != ''assurance'''
+--    where id='20991d8e-059a-4bc7-b393-5f2d062a6067';
+--   update public.compliance_requirements
+--      set condition='assurance_conclusion IS NOT NULL OR deliverable_type != ''assurance'''
+--    where id='13c1440c-36d3-44eb-a437-f647ffa21836';
+-- ROLLBACK:
+--   update public.compliance_requirements set condition='assurance_opinion IS NOT NULL'
+--    where id='20991d8e-059a-4bc7-b393-5f2d062a6067';
+--   update public.compliance_requirements set condition='assurance_conclusion IS NOT NULL'
+--    where id='13c1440c-36d3-44eb-a437-f647ffa21836';
+-- COUPLED is_required REVIEW (same ruling): for the same printed reason, these two fields should
+-- not be unconditionally required.
+--   assurance_opinion    1c7df519-3c96-410c-a5aa-cc0e293c6f67  is_required=true
+--   assurance_conclusion b523aa76-672c-4d24-8e2a-c53b6269ebaa  is_required=true
+-- APPLY:   update public.fields set is_required=false where id in
+--            ('1c7df519-3c96-410c-a5aa-cc0e293c6f67','b523aa76-672c-4d24-8e2a-c53b6269ebaa');
+-- ROLLBACK: update public.fields set is_required=true  where id in
+--            ('1c7df519-3c96-410c-a5aa-cc0e293c6f67','b523aa76-672c-4d24-8e2a-c53b6269ebaa');
+
+
+-- ============================================================================
+-- S-4  UNSATISFIABLE BLOCK GATE / UNCOVERED OUTCOME: CR-017       [ ] RATIFIED
+-- ============================================================================
+-- CR-017 (4563f030-d615-4205-9929-f96884f6830b, block) condition "criteria_availability IS NOT NULL".
+-- The printed duty is NOT "the criteria must have been made available". It is "clarify WHETHER":
+--   "7.3.2 The validation/verification body shall clarify whether the responsible party has made
+--    available to intended users the specified requirements and criteria. Specified requirements
+--    and criteria can be made available to the intended users in one or more of the following
+--    ways: a) publicly; b) through inclusion in a clear manner in the presentation of the
+--    sustainability information; c) through inclusion in a clear manner in the assurance opinion."
+--                                                                            [sect.7.3.2, printed p.19]
+-- Two defects follow:
+--  (a) UNCOVERED OUTCOME. The enum criteria_availability (d82fa261-5c03-40b3-8caf-f59fec96f831) has
+--      exactly the three printed channels and NO "not made available" member. The answer the clause
+--      explicitly contemplates - "no, the responsible party did not make them available" - cannot be
+--      recorded, so a body in that (legitimate, printable) situation can only clear this BLOCK gate
+--      by entering a channel that did not happen.
+--  (b) SINGLE-SELECT vs "one or more". The clause permits more than one channel simultaneously;
+--      the field is a single-select enum, so "publicly AND in the assurance opinion" is unrecordable.
+-- APPLY (a): add the missing member; enum_values is JSONB on public.fields.
+--   update public.fields
+--      set enum_values = enum_values || '[{"value":"not_made_available","label_de":"Nicht zur Verfuegung gestellt","label_en":"Not made available to intended users","order_index":4,"regulation_reference":"sect.7.3.2"}]'::jsonb
+--    where id='d82fa261-5c03-40b3-8caf-f59fec96f831';
+-- ROLLBACK (a):
+--   update public.fields
+--      set enum_values = (select jsonb_agg(e) from jsonb_array_elements(enum_values) e
+--                          where e->>'value' <> 'not_made_available')
+--    where id='d82fa261-5c03-40b3-8caf-f59fec96f831';
+-- (b) is a widget/data-model question (multi-select enum), NOT a value change - it is recorded here
+--     as a finding for the 2026-08-01 "fixed options => selection widget" workstream, with no SQL,
+--     because a single-to-multi select change is a schema decision for Alvaro.
+
+
+-- ============================================================================
+-- S-5  MIS-HOMED GATE: CR-001                                     [ ] RATIFIED
+-- ============================================================================
+-- CR-001 (82d5207b-9e80-43bf-8fbc-7a26a9b54f56, block) is homed on worksheet ISO-14019-1-04
+-- (169f0dc8-5fcf-49b6-9c8d-9cc69cf80835, "Eignung des V/V-Programms") but its condition
+-- "iso17029_conformance == true" reads a field that lives on ISO-14019-1-01
+-- (0c9cd1c8-4f7d-487b-8473-c7007dd0ecde, worksheet 072885e4-9498-4c0c-9585-fb94ba5501ef).
+-- It is the ONLY gate in this standard whose every referenced field is on a different worksheet.
+-- (CR-025 also reads across worksheets - validation_verification_mode is on ws-01 - but it ALSO
+--  reads mixed_engagement_separation on its own ws-07, so it is a legitimate cross-read, not a
+--  mis-home; no change is proposed for CR-025.)
+-- The underlying duty is real and blocking-defensible:
+--   "7.1.1 The validation/verification body shall operate validation/verification programmes that
+--    are consistent with the requirements of ISO/IEC 17029 and do not exclude any of the
+--    requirements in that document."                                        [sect.7.1.1, printed p.18]
+-- Note that sect.7.1.1 IS a Clause-7 duty, so an argument exists for leaving the gate on ws-04 and
+-- moving the FIELD instead. That is why this is staged: pick one direction, do not do both.
+-- APPLY (option 1 - move the gate to the worksheet that owns its field):
+--   update public.compliance_requirements set worksheet_template_id='072885e4-9498-4c0c-9585-fb94ba5501ef'
+--     where id='82d5207b-9e80-43bf-8fbc-7a26a9b54f56';
+-- ROLLBACK:
+--   update public.compliance_requirements set worksheet_template_id='169f0dc8-5fcf-49b6-9c8d-9cc69cf80835'
+--     where id='82d5207b-9e80-43bf-8fbc-7a26a9b54f56';
+
+
+-- ============================================================================
+-- S-6  PRESENCE-ONLY GATE HIDING A PRINTED PAIRING: CR-004        [ ] RATIFIED
+-- ============================================================================
+-- CR-004 (e957c5da-fbfe-4bdc-93eb-32d42aa3a944, warn) condition "vv_activity_applied IS NOT NULL".
+-- The printed clause does not merely require that SOME activity be named - it makes the admissible
+-- activity DEPEND on the information type:
+--   "5.2.6 The validation/verification activities that are applied to declared sustainability
+--    information depend on the type of information (quantitative or qualitative, computer- or
+--    AI-system-generated information) and include: a) in the case of quantitative information:
+--    application of statistics, re-measurement or re-calculation, and comparison with target or
+--    threshold values; b) in the case of qualitative information: application of hypothesis
+--    testing, evaluation of consistency between underlying supporting qualitative information,
+--    review of external resources and professional judgement; c) in the case of computer/AI
+--    systems: confirming that the software's functionality is correct and meets the intended
+--    users' purposes."                                                 [sect.5.2.6, printed pp.15-16]
+-- Today "information_type = quantitative" together with "vv_activity_applied = hypothesis_testing"
+-- passes CR-004 cleanly. The encoding already holds both symbols on the same worksheet (ws-02:
+-- information_type b0b39d00-76b6-4a62-886f-673b853f9935, vv_activity_applied
+-- 7fed1a24-8520-49f6-80ee-a77f816ce582), so the pairing IS expressible in the condition grammar
+-- (IF ... THEN ..., which the evaluator supports and treats as vacuously passing when the guard is
+-- false). sect.5.2.6 has no "shall", so it must stay severity='warn'.
+-- APPLY (example for the quantitative branch; the qualitative and AI branches need the same
+--   treatment and are omitted here deliberately - the full rewrite is a design decision):
+--   update public.compliance_requirements
+--      set condition='IF information_type == ''quantitative'' THEN vv_activity_applied IN {statistics_remeasurement_recalculation, threshold_comparison}'
+--    where id='e957c5da-fbfe-4bdc-93eb-32d42aa3a944';
+-- ROLLBACK:
+--   update public.compliance_requirements set condition='vv_activity_applied IS NOT NULL'
+--    where id='e957c5da-fbfe-4bdc-93eb-32d42aa3a944';
+
+
+-- ============================================================================
+-- S-7  DROPPED PRINTED CONDITIONAL: CR-026                        [ ] RATIFIED
+-- ============================================================================
+-- CR-026 (baddf599-1260-42fb-87c8-7036fe91147f, block) condition "deliverable_format_agreed == true".
+-- The printed duty is conditional and the gate drops the condition:
+--   "6.4 [...] If not otherwise specified in the validation/verification programme, the validation/
+--    verification body and its client shall agree on the process used to establish the deliverable
+--    and its format. This shall include, but is not limited to, the following: [...]"
+--                                                                             [sect.6.4, printed p.17]
+-- Where the programme DOES specify the deliverable process and format, no separate client agreement
+-- is required by the standard, yet the block gate still demands the attestation. There is no encoded
+-- symbol for "the programme specifies it", so the repair needs a new field - a structure change,
+-- hence staged with no SQL for the field itself. Low practical harm (the box can be ticked), but it
+-- is a printed predicate the encoding silently deletes, and it is recorded so its absence is not
+-- mistaken for fidelity.
+-- APPLY (only after a "programme_specifies_deliverable_format" boolean exists on ws-07):
+--   update public.compliance_requirements
+--      set condition='deliverable_format_agreed == true OR programme_specifies_deliverable_format == true'
+--    where id='baddf599-1260-42fb-87c8-7036fe91147f';
+-- ROLLBACK:
+--   update public.compliance_requirements set condition='deliverable_format_agreed == true'
+--    where id='baddf599-1260-42fb-87c8-7036fe91147f';
+
+
+-- ============================================================================
+-- S-8  PRINTED "shall" CLAUSES WITH NO GATE AT ALL                [ ] RATIFIED
+-- ============================================================================
+-- Three of the 15 body "shall" duties are encoded as required FIELDS but no compliance_requirement
+-- reads them, so nothing enforces them:
+-- (a) sect.7.1.3, printed p.18 - field decision_to_proceed (038301cb-cee6-407b-93ac-f302fe5f4b4d,
+--     ws-04, is_required=true):
+--       "7.1.3 After evaluating the suitability of a validation/verification programme, validation/
+--        verification bodies shall decide whether to proceed with validation or verification
+--        activities."
+--     Note CR-014 (d0a8997b-960d-492b-bfad-8c28863d6156) NAMES "sect.7.1.2, sect.7.1.3" in its
+--     clause_reference but its condition is only "programme_suitability_confirmed == true" - the
+--     sect.7.1.3 half of that reference is not enforced by anything. This is a clause_reference that
+--     over-claims what the row tests.
+-- (b) sect.7.5 a), printed p.20 - field process_steps_defined (3246dc63-6b73-4e08-a15b-028c93c1a743,
+--     ws-06, is_required=true):
+--       "a) rules and procedures for the process steps to be completed, such as pre-engagement,
+--        engagement, planning, execution, review, decisions on nonconformities or facts discovered
+--        after issue of the assurance opinion;"
+-- (c) sect.7.5 b), printed p.20 - field evidence_gathering_plan (fc52a902-15c7-4ae5-a0ba-ad3f0d010431,
+--     ws-06, is_required=true):
+--       "b) evidence-gathering activities, including activities and techniques used remotely such as
+--        drone surveys;"
+--     sect.7.5 c), d) and e) ARE gated (CR-027, CR-021, CR-022). Items a) and b) of the same "shall"
+--     sentence are not - an asymmetry with no basis in the printed text.
+-- APPLY (three new rows; codes assume CR-030..CR-032 are free - VERIFY BEFORE APPLYING):
+--   insert into public.compliance_requirements
+--     (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+--   values
+--    ('169f0dc8-5fcf-49b6-9c8d-9cc69cf80835','CR-030','block','decision_to_proceed == true','sect.7.1.3',
+--     'After evaluating the suitability of a validation/verification programme, validation/verification bodies shall decide whether to proceed with validation or verification activities.'),
+--    ('9a3f303f-894e-4491-89b3-57ed167be5cf','CR-031','block','process_steps_defined == true','sect.7.5 a)',
+--     'a) rules and procedures for the process steps to be completed, such as pre-engagement, engagement, planning, execution, review, decisions on nonconformities or facts discovered after issue of the assurance opinion;'),
+--    ('9a3f303f-894e-4491-89b3-57ed167be5cf','CR-032','block','evidence_gathering_plan IS NOT NULL','sect.7.5 b)',
+--     'b) evidence-gathering activities, including activities and techniques used remotely such as drone surveys;');
+-- ROLLBACK:
+--   delete from public.compliance_requirements where code in ('CR-030','CR-031','CR-032')
+--     and worksheet_template_id in ('169f0dc8-5fcf-49b6-9c8d-9cc69cf80835','9a3f303f-894e-4491-89b3-57ed167be5cf');
+-- ALSO in this block, the clause_reference correction for CR-014 (evidence above):
+--   APPLY:    update public.compliance_requirements set clause_reference='sect.7.1.2'
+--               where id='d0a8997b-960d-492b-bfad-8c28863d6156';
+--   ROLLBACK: update public.compliance_requirements set clause_reference='sect.7.1.2, sect.7.1.3'
+--               where id='d0a8997b-960d-492b-bfad-8c28863d6156';
+
+
+-- ============================================================================
+-- S-9  ENUMS THAT CLOSE AN EXPLICITLY OPEN PRINTED LIST           [ ] RATIFIED
+-- ============================================================================
+-- Five encoded enums present a closed option set where the standard prints an open one. Under the
+-- 2026-08-01 owner ruling ("fixed options => selection widget, never free text") the widget choice is
+-- right; what is staged here is that the option SET is narrower than the printed text.
+-- (a) information_transformation_method (9c169e74-52ce-4af7-9e82-7285bfe22cdb, ws-02, 8 values):
+--       "5.2.4 Ways by which quantitative and qualitative information can be transformed include,
+--        but are not limited to, the following: [...]"                    [sect.5.2.4, printed p.15]
+-- (b) impartiality_threat_identified (76e5d475-93e4-4427-a029-4a7ac0991bd6, ws-03, 4 printed + 'none'):
+--       "4.4.2 Threats to impartiality can include but are not limited to the following: [...]"
+--                                                                          [sect.4.4.2, printed p.12]
+-- (c) level_of_assurance (c4bc518b-a7f5-4ea8-8c1c-5199ab40ca9a, ws-05, 2 values):
+--       "Note 1 to entry: The levels of assurance and the conditions to achieve them can be
+--        specified in the programme (e.g. reasonable, limited)."          [sect.3.2.8, printed p.5]
+--       "Subject to the validation/verification programme, assurance opinions shall be provided on
+--        the basis of a level of assurance (often referred to as a 'reasonable level of assurance'
+--        or 'limited level of assurance')."                               [sect.6.2.2, printed p.16]
+--     Both passages are illustrative ("e.g.", "often referred to as"), and BOTH say the levels are
+--     set by the PROGRAMME - so a programme may define others. This is the most load-bearing of the
+--     five, because the level of assurance drives the wording of the opinion (sect.E.3.4, printed p.34).
+-- (d) vv_activity_applied (7fed1a24-8520-49f6-80ee-a77f816ce582, ws-02, 7 values):
+--       "5.2.6 [...] and include: a) [...]"                          [sect.5.2.6, printed pp.15-16]
+-- (e) deliverable_category_selected (e2ce8caf-3ef6-4106-86c8-6f065210c126, ws-06, 4 values) and
+--     non_assurance_deliverable_type (066b4a85-ff98-4bb0-9e0c-19fd274b70eb, ws-07, 3 values):
+--       "NOTE 2 Examples of non-assurance deliverables include AUP reports, evidence reports and
+--        findings reports."                                              [sect.6.1.1, printed p.16]
+--     The printed TOP-LEVEL split is only two-valued ("a) assurance statements and opinions;
+--     b) non-assurance deliverables"); the three sub-types are printed as EXAMPLES.
+-- APPLY (pattern - add an "other (specify)" member to each; shown for one, repeat per field):
+--   update public.fields
+--      set enum_values = enum_values || '[{"value":"other","label_de":"Sonstige (bitte angeben)","label_en":"Other (specify)","order_index":99,"regulation_reference":"open printed list"}]'::jsonb
+--    where id in ('9c169e74-52ce-4af7-9e82-7285bfe22cdb','76e5d475-93e4-4427-a029-4a7ac0991bd6',
+--                 'c4bc518b-a7f5-4ea8-8c1c-5199ab40ca9a','7fed1a24-8520-49f6-80ee-a77f816ce582',
+--                 'e2ce8caf-3ef6-4106-86c8-6f065210c126','066b4a85-ff98-4bb0-9e0c-19fd274b70eb');
+-- ROLLBACK:
+--   update public.fields
+--      set enum_values = (select jsonb_agg(e) from jsonb_array_elements(enum_values) e
+--                          where e->>'value' <> 'other')
+--    where id in ('9c169e74-52ce-4af7-9e82-7285bfe22cdb','76e5d475-93e4-4427-a029-4a7ac0991bd6',
+--                 'c4bc518b-a7f5-4ea8-8c1c-5199ab40ca9a','7fed1a24-8520-49f6-80ee-a77f816ce582',
+--                 'e2ce8caf-3ef6-4106-86c8-6f065210c126','066b4a85-ff98-4bb0-9e0c-19fd274b70eb');
+-- CAUTION: sustainability_matter_category already carries "other" and is NOT in this list - its
+--   printed source ("Sustainability can include environmental, social, economic, governance and
+--   other aspects.", sect.3.1.1 Note 2, printed p.2) is already covered by that member. Likewise
+--   declared_information_format is NOT in this list: sect.3.1.4 Note 7 (printed p.3) names its eight
+--   forms in a closed "or" construction, and the encoded enum matches it exactly.
+
+
+-- ============================================================================
+-- S-10 DUPLICATE FIELD: information_nature vs information_type    [ ] RATIFIED
+-- ============================================================================
+-- ws-01.information_nature   (650384ee-0b9a-4a7b-9b49-e9a227eeaeb6, is_required=true,
+--                             enum quantitative/qualitative/mixed, clause sect.1)
+-- ws-02.information_type     (b0b39d00-76b6-4a62-886f-673b853f9935, is_required=true,
+--                             enum quantitative/qualitative,       clause sect.5.2.1, sect.5.2.2)
+-- These record the same fact about the same object and can contradict each other (nothing stops
+-- information_nature='qualitative' with information_type='quantitative'). Only information_type is
+-- read by a gate (CR-002); information_nature is read by none.
+-- The printed source for BOTH is the same distinction:
+--   "This document is applicable to quantitative and qualitative information."   [sect.1, printed p.1]
+--   "5.2.1 Declared sustainability information can be based on quantitative information [...]
+--    5.2.2 Declared sustainability information can be based on qualitative information [...]"
+--                                                                            [sect.5.2, printed p.15]
+-- Note the third value of information_nature ("mixed") has NO normative source - it rests on
+--   "C.6.5 Declared sustainability information can be: a) qualitative or quantitative or both;"
+--                                                            [sect.C.6.5, INFORMATIVE, printed p.29]
+-- APPLY (deactivate the duplicate that no gate reads; the surviving field keeps the gate):
+--   update public.fields set active=false where id='650384ee-0b9a-4a7b-9b49-e9a227eeaeb6';
+-- ROLLBACK:
+--   update public.fields set active=true  where id='650384ee-0b9a-4a7b-9b49-e9a227eeaeb6';
+-- ALTERNATIVE for Alvaro: keep information_nature (it carries the "mixed" case sect.6.3 needs) and
+--   deactivate information_type instead - but that orphans CR-002. Decide, do not do both.
+
+
+-- ============================================================================
+-- S-11 is_required REVIEW: 50 of 70 fields are required           [ ] RATIFIED
+-- ============================================================================
+-- (a) TEN Clause-4 booleans are is_required=true although Clause 4 contains no "shall" anywhere
+--     (census above). They are principles, stated in the present indicative:
+--       evidence_based_approach       5cd5b766-b2b7-4d57-b1b3-7adc33b789da  sect.4.2
+--       consistent_approach           180df9cc-a9aa-4e19-968e-b7c1ce8cd250  sect.4.3.1
+--       process_documented            226e56ae-371e-4ec4-861e-3af4b2939cf7  sect.4.3.3
+--       impartiality_maintained       e2c49504-7e70-4c00-8be3-0517a76b5e35  sect.4.4.1
+--       competence_capacity_confirmed eecd52e2-c8e3-4e13-b236-044daf75b155  sect.4.5
+--       confidentiality_safeguarded   f92a99ee-da48-45b1-88b0-f986a0110fd0  sect.4.6
+--       integrity_demonstrated        0972f1f3-70a1-4135-a65b-b19d8492a351  sect.4.7
+--       fair_presentation             6a68ad6c-9674-4ff6-aeda-92d5f535e89d  sect.4.8
+--       due_professional_care         f1ccd7a8-6640-43db-b009-755dba3762e3  sect.4.9
+--       professional_judgement        611af43e-c24a-44c5-9739-23d1e894f724  sect.4.10
+--     COUNTER-ARGUMENT: sect.4.1 says "Principles provide the basis for and guide the application of
+--     the requirements in the ISO 14019 series." (printed p.12) - a house rule may reasonably want
+--     every principle attested. That is a business decision; hence staged, not applied.
+-- (b) body_conformance_14019_4 (b59e8edb-f865-4192-bef2-33a02cd43c1d, ws-08, is_required=true) rests
+--     on "should" text only:
+--       "8.1 Validation of declared sustainability information should be undertaken by a validation
+--        body that uses ISO 14019-3 and conforms with ISO 14019-4."          [sect.8.1, printed p.20]
+--       "8.2 Verification of sustainability information should be undertaken by a verification body
+--        that uses ISO 14019-2 and conforms with ISO 14019-4."               [sect.8.2, printed p.21]
+--     Its gate CR-028 is already severity='warn', which is the CORRECT reading - the is_required
+--     flag is the part that outruns the printed modality.
+-- APPLY:
+--   update public.fields set is_required=false where id in
+--     ('5cd5b766-b2b7-4d57-b1b3-7adc33b789da','180df9cc-a9aa-4e19-968e-b7c1ce8cd250',
+--      '226e56ae-371e-4ec4-861e-3af4b2939cf7','e2c49504-7e70-4c00-8be3-0517a76b5e35',
+--      'eecd52e2-c8e3-4e13-b236-044daf75b155','f92a99ee-da48-45b1-88b0-f986a0110fd0',
+--      '0972f1f3-70a1-4135-a65b-b19d8492a351','6a68ad6c-9674-4ff6-aeda-92d5f535e89d',
+--      'f1ccd7a8-6640-43db-b009-755dba3762e3','611af43e-c24a-44c5-9739-23d1e894f724',
+--      'b59e8edb-f865-4192-bef2-33a02cd43c1d');
+-- ROLLBACK:
+--   update public.fields set is_required=true where id in ( ...the same 11 ids... );
+-- NEGATIVE RESULT worth recording: NO field in this standard has its is_required flag resting on an
+--   INFORMATIVE annex. Every field's clause_reference points into Clauses 1-8. The only annex
+--   material used anywhere is supporting context inside two verification_quotes (sect.C.6.5 for the
+--   "mixed" value, sect.E.4.1 for assurance_statement), both flagged in the pack's own notes.
+
+
+-- ============================================================================
+-- S-12 ONE-OPTION "SELECTION" FIELDS + AN NR POINTER              [ ] RATIFIED
+-- ============================================================================
+-- validation_process_standard   (32072cbc-6362-4a11-afd0-7ae25d45e875, ws-08) - enum with exactly
+--   ONE value, "ISO_14019-3". A selection widget with one option is a no-op: it cannot record a
+--   choice, only a tick. Worse, the referenced document does not exist yet:
+--     "1) Under preparation. Stage at the time of publication: ISO/AWI 14019-3:2025."
+--                                                        [footnote to sect.8.1, printed pp.vi and 49]
+--   So the field is NR (not reachable): the substance lives in a document that was not published
+--   when ISO 14019-1 was.
+-- verification_process_standard (79391a77-cd3b-4726-b820-41c523d3f182, ws-08) - same shape, one
+--   value "ISO_14019-2". ISO 14019-2:2026 IS published (Bibliography [8], printed p.49) but is not
+--   in the EKOWAI library, so this field is likewise NR beyond the pointer.
+-- Both are is_required=false, so nothing is currently blocked; the finding is that they present as
+--   choices when they are constants.
+-- APPLY (convert to boolean attestations - a data_type change, so this needs Alvaro's word):
+--   -- no SQL proposed: data_type migration + UI implications. Recorded as a finding only.
+-- Related: team_competence_criteria (ws-06) points at ISO 14019-4:2026, Annex A for the actual
+--   competence criteria. ISO 14019-4 is a NORMATIVE reference of this standard (sect.2, printed p.1)
+--   and is not in the library => that field is NR for its substance too. It is quoted in the pack at
+--   its pointer only, and the note says so.
+
+
+-- ============================================================================
+-- S-13 GATES WITH NO source_quote, AND A GATE ANCHORED ON DEFINITIONS
+-- ============================================================================                [ ] RATIFIED
+-- 14 of the 29 gates carry NO encode-time source_quote at all: CR-002..CR-013, CR-028, CR-029.
+--   Every one of those 14 sits on Clause 3 (definitions), Clause 4 (principles), Clause 5
+--   (descriptive) or Clause 8 ("should") - i.e. on text that contains no requirement sentence to
+--   quote. So the absence is honest rather than sloppy, but it means 14 rows have no traceability
+--   at all in the compliance_requirements table itself.
+-- CR-029 (6b143ac4-907e-4c54-9ee2-ac23c1460614, warn) has clause_reference "sect.3.2.10, sect.3.2.16" -
+--   both are DEFINITIONS in Clause 3, which state no obligation:
+--     "3.2.10 materiality concept that misstatements (3.2.11), individually or aggregated, can
+--      influence the reliability of the declared sustainability information (3.1.4) and hence
+--      decisions made by the intended user (3.3.4)"                       [sect.3.2.10, printed p.6]
+--     "3.2.16 risk assessment overall process for risk identification, risk analysis, risk
+--      evaluation and risk mitigation"                                    [sect.3.2.16, printed p.6]
+--   The nearest thing to a duty for these two concepts is sect.7.4.2 d) "planning, evidence gathering,
+--   review and decision" (printed p.20), which is inside a "shall". severity='warn' is correct as
+--   encoded; only the clause_reference is weak.
+-- APPLY:
+--   update public.compliance_requirements set clause_reference='sect.7.4.2 d) (concepts defined at sect.3.2.10, sect.3.2.16)'
+--     where id='6b143ac4-907e-4c54-9ee2-ac23c1460614';
+-- ROLLBACK:
+--   update public.compliance_requirements set clause_reference='sect.3.2.10, sect.3.2.16'
+--     where id='6b143ac4-907e-4c54-9ee2-ac23c1460614';
+
+
+-- ============================================================================
+-- S-14 CLAUSE RETAG: sustainability_matter_category                [ ] RATIFIED
+-- ============================================================================
+-- Field 5f... sustainability_matter_category carries clause_reference "sect.3.1.2", but sect.3.1.2 defines
+-- the TERM "sustainability matter"; the five encoded categories come from sect.3.1.1 Note 2:
+--   "Note 2 to entry: Sustainability can include environmental, social, economic, governance and
+--    other aspects."                                                     [sect.3.1.1, printed p.2]
+-- APPLY:
+--   update public.fields set clause_reference='sect.3.1.1 Note 2 (term defined at sect.3.1.2)'
+--     where symbol='sustainability_matter_category'
+--       and worksheet_template_id='072885e4-9498-4c0c-9585-fb94ba5501ef';
+-- ROLLBACK:
+--   update public.fields set clause_reference='sect.3.1.2'
+--     where symbol='sustainability_matter_category'
+--       and worksheet_template_id='072885e4-9498-4c0c-9585-fb94ba5501ef';
+
+
+-- ============================================================================
+-- S-15 FORM_TEMPLATE CLASSIFICATION - the encoding does NOT reflect it
+-- ============================================================================                [ ] RATIFIED
+-- ISO-14019-1 sits on this project's FORM_TEMPLATE list (guidelines that mostly prescribe a
+-- reporting FORM rather than computed values). Checked against the document:
+--  - The classification is HALF right and the encoding follows the OTHER half. ISO 14019-1 prints
+--    no formula, no limit value, no numeric threshold and no unit in Clauses 1-8 (see the pack
+--    header), so "not a calculation standard" is correct.
+--  - But it does not prescribe a form either. Its normative content is 15 duties on the
+--    VALIDATION/VERIFICATION BODY, and the encoding faithfully models them as 8 clause-walk
+--    worksheets of attestations (35 booleans, 19 enums, 16 free-text) - a compliance CHECKLIST,
+--    not a form template.
+--  - The only form-shaped artefact in the whole document is Table G.1 "Example of an agreed-upon
+--    procedures report content" (printed p.45), which lists the Title / Content and roles /
+--    Methodology / Procedures and results / Caveats / Body elements of an AUP report. It is in
+--    Annex G, INFORMATIVE, and it is explicitly an EXAMPLE:
+--      "G.1.5 Verifiers who use this agreement type should ensure that the elements given in
+--       Table G.1 are included in each AUP report."                       [sect.G.1.5, printed p.45]
+--    "should", informative, and applicable only to AUP engagements. Nothing in the encoding
+--    represents Table G.1, and given the modality that is defensible.
+--  - Annex F Tables F.1/F.2 (printed pp.42-43) print exact SHORT-FORM and LONG-FORM reference
+--    wordings a responsible party may use ("Verified at the reasonable level of assurance", and the
+--    matching long form). These ARE templated text and are also unrepresented in the encoding. They
+--    are informative and governed by "should", so no gate is proposed - but if the FORM_TEMPLATE
+--    label is meant to buy anything for this standard, Annex F Table F.1 is the one thing worth
+--    materialising, because it is where a wrong wording creates real market-claim exposure.
+-- APPLY: none. Recorded as a classification finding for Alvaro: either drop ISO-14019-1 from the
+--   FORM_TEMPLATE list, or scope the label to Annex F Table F.1 / Annex G Table G.1 explicitly.
+
+
+-- ============================================================================
+-- NEGATIVE RESULTS - checked and NOT found, so their absence is auditable
+-- ============================================================================
+-- condition='TRUE' or any literal tautology .................. NONE (0 of 29 gates)
+-- membership test spanning the whole enum domain ............. NONE (no IN {...} condition exists
+--                                                              anywhere in this standard's gates)
+-- IS NOT NULL on a BOOLEAN field ............................. NONE. The 7 IS NOT NULL conditions
+--   (CR-002 x3, CR-004, CR-017, CR-021, CR-023, CR-024, CR-027) all target text or enum fields;
+--   every one of the 35 booleans is tested with "== true".
+-- tautology over an equation output .......................... STRUCTURALLY IMPOSSIBLE - 0 equations
+-- gate that merely restates a formula the engine computes .... STRUCTURALLY IMPOSSIBLE - 0 equations
+-- ">= 0" floor on a non-negative quantity .................... NONE - there is not a single numeric
+--   field in this standard (16 text / 19 enum / 35 boolean) and not one comparison operator
+--   (<, >, <=, >=) in any of the 29 conditions.
+-- exact float equality on a computed quantity ................ NONE - no numeric fields, no equations
+-- boundary inclusivity errors ................................ NOT APPLICABLE - no comparisons exist
+-- unguarded zero denominator ................................. NOT APPLICABLE - no equations exist
+-- unit mismatch .............................................. NONE - all 70 fields carry unit '-';
+--   the standard states no quantity and no unit in Clauses 1-8.
+-- equation output consumed by nothing ........................ NOT APPLICABLE - 0 equations, and the
+--   source prints no formula to lift, so no equation row was created by the pack either.
+-- AND/OR inversion or OR-collapse ............................ NONE. Four conjunctions (CR-002,
+--   CR-007, CR-013, CR-029) each join independently-required facts; the single disjunction (CR-025)
+--   is the correct guarded form and is NOT collapsed.
+-- inverted condition (sense reversed) ........................ NONE
+-- duplicate gate or strict subset ............................ NONE. All 29 conditions are distinct;
+--   no gate's condition is implied by another's. (CR-020/CR-021/CR-022 SHARE a source_quote stem
+--   because they enforce three items of the same sect.7.5 sentence, but their conditions differ and
+--   CR-021/CR-022 each append their own printed sub-item d)/e) after a "[...]" elision marker.)
+-- invented values or ranges .................................. NONE. Every one of the 19 enums'
+--   members traces to a printed list; the only non-printed member anywhere is the "none" option on
+--   impartiality_threat_identified, which is the null case, not an invented threat type.
+-- phantom fields (enum tokens materialised as fields) ........ NONE. All 70 fields carry a label, a
+--   clause_reference and a description; none is a bare token.
+-- worksheet with zero fields ................................. NONE (10 / 11 / 12 / 7 / 9 / 8 / 8 / 5)
+-- gate source_quote carrying no requirement .................. NONE. All 15 gates that HAVE a
+--   source_quote quote a sentence containing "shall". (14 gates have no source_quote - see S-13.)
+-- stitched quote presented as continuous, no elision marker .. NONE. Two gate quotes are stitched
+--   (CR-021, CR-022) and BOTH carry an explicit "[...]" marker at the join.
+-- quote cropped past its shall ............................... NONE. Every gate quote contains its
+--   full "shall" clause; the four that end in a colon (CR-014, CR-015, CR-016, CR-020) end at the
+--   printed colon that introduces the enumerated list, which is the natural sentence end.
+-- WRONG PAGE REF IN A GATE source_quote ...................... NONE POSSIBLE - and this is the
+--   defect that IS present: not ONE of the 15 gate source_quotes carries a page reference at all.
+--   They cannot be wrong because they are absent. Verified mechanically instead: all 15 were
+--   re-searched against the PDF text layer with whitespace removed and ALL 15 matched the source
+--   exactly (CR-015 and CR-027 only appear to differ because the PDF wraps "validated/verified" and
+--   "pre-engagement" across a line break). Their true printed pages are, in gate order:
+--     CR-001 p.18 | CR-014 p.18 | CR-015 p.18 | CR-016 p.19 | CR-017 p.19 | CR-018 p.19 |
+--     CR-019 p.19 | CR-020 p.20 | CR-021 p.20 | CR-022 p.20 | CR-027 p.20 | CR-023 p.16 |
+--     CR-024 p.16 | CR-025 p.17 | CR-026 p.17
+--   Adding those refs is a cosmetic improvement, not a correction, and is not staged as SQL.
+-- fields read by NO gate ..................................... 36 of 70. Not staged as a defect:
+--   most are descriptive registration/definition fields the standard never makes conditional. The
+--   three that DO sit under a printed "shall" are staged separately at S-8.

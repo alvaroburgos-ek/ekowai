@@ -55,3 +55,4 @@ hoai-2021-md-verification-pack.sql  HOAI-2021
 iso-46001-md-verification-pack.sql  ISO-46001
 iso-59014-md-verification-pack.sql  ISO-59014
 iso-59020-md-verification-pack.sql  ISO-59020
+iso-14019-1-md-verification-pack.sql  ISO-14019-1
