@@ -1,0 +1,403 @@
+-- =====================================================================================================
+-- ISO-5667-1 — STAGED RULINGS (commented SQL, NOTHING APPLIED)
+-- Written 2026-09-08 by the VA verification pass.
+-- Source: NTC-ISO 5667-1 (ICONTEC, Colombia), ratified 1995-05-10, identical to ISO 5667/1:1980.
+--   PDF: C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-1\ISO-5667-1.pdf
+--   Page convention: printed page N = PDF page N+1.
+-- Every block below carries its evidence quote and its rollback inverse. Nothing here is in the pack.
+-- Each block needs a ruling. Mark the box when ratified:  [ ] -> [x]
+-- NO transaction control statements in this file by design.
+-- =====================================================================================================
+
+-- =====================================================================================================
+-- DOCUMENT-LEVEL CONTEXT that governs every severity block below
+-- The document is titled "DIRECTRICES PARA EL DISEÑO DE PROGRAMAS DE MUESTREO" / "GUIDANCE ON THE
+-- DESING [sic] OF SAMPLING PROGRAMMES" (cover, PDF p.1 — read as a rendered image 2026-09-08).
+-- Mechanical Spanish modality census over the full text layer:
+--     shall-class   "debe" 68 + "deben" 56                                        = 124
+--     should-class  "debería" 1, "recomiend*" 1, "preferiblemente" 3,
+--                   "de preferencia" 2, "es deseable" 2, "idealmente" 3           =  12
+--     "conviene que" 0, "se recomienda" 0, "deberá/deberán" 0
+--     permissive/descriptive: "puede/pueden" 103, "es posible que" 11,
+--                   "generalmente" 24, "a menudo" 7, "por ejemplo" 29
+-- Ratio shall:should = 124:12 ~ 10:1. The encoding treated the document as predominantly normative
+-- (11 of 27 gates are severity='block'), which MATCHES the literal Spanish modality.
+-- BUT: this is a 1980 ISO *guidance* document translated into Spanish before ISO/IEC Directives Part 2
+-- modal discipline; "se debe" here renders the English "should" throughout. The literal text and the
+-- document's own self-description disagree.
+-- ☐ RATIFIED  R-0: rule on whether ISO-5667-1 gates may be severity='block' at all, or whether the whole
+--                  standard is severity='warn' (a design guidance document). This ruling is a
+--                  precondition for R-1, R-4, R-5 and R-8 below.
+
+-- =====================================================================================================
+-- R-1  CR-012: a number lifted out of a "por ejemplo" parenthetical and enforced as a hard BLOCK limit
+-- =====================================================================================================
+-- Encoding: gate CR-012 (id 4d2e32f9-ab1e-4bdc-b34b-79c1080ca811), ws ISO-5667-1-04,
+--           severity='block', condition='pipe_nominal_bore >= 25'.
+-- Printed text, §8.6 "MUESTREO EN TUBOS", printed p.4 / PDF p.5 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "Los líquidos se deben bombear a través de tubos de tamaño adecuado (por ejemplo, al muestrear
+--    líquidos heterogéneos, de conducto nominal mínimo de 25 mm) a velocidades lineales suficientemente
+--    altas para mantener las características de flujo turbulento."
+-- The 25 mm sits INSIDE a parenthetical opened by "por ejemplo". The printed requirement is
+-- "tubos de tamaño adecuado" + "velocidades lineales suficientemente altas"; 25 mm is an illustration
+-- of one case (heterogeneous liquids), not a limit the standard sets. The gate's OWN source_quote
+-- contains the words "por ejemplo" and is therefore self-refuting.
+-- Consequence in production: a project sampling a homogeneous liquid through a 20 mm line cannot be
+-- finalised, on a limit the standard never imposed.
+-- PROPOSAL (choose one at ratification):
+--   (a) severity block -> warn, and reword to the printed obligation; or
+--   (b) delete the numeric gate and keep 25 mm only as guidance in the field description.
+-- update public.compliance_requirements set severity='warn',
+--        condition='pipe_nominal_bore IS NULL OR pipe_nominal_bore >= 25'
+--  where id='4d2e32f9-ab1e-4bdc-b34b-79c1080ca811';
+-- ROLLBACK: update public.compliance_requirements set severity='block', condition='pipe_nominal_bore >= 25'
+--            where id='4d2e32f9-ab1e-4bdc-b34b-79c1080ca811';
+-- ☐ RATIFIED  R-1
+
+-- =====================================================================================================
+-- R-2  CR-016: presence-only gate hides the printed obligation, AND has no scope predicate
+-- =====================================================================================================
+-- Encoding: gate CR-016 (id 6263b2f4-6e7c-4960-a999-4fb1f06f2232), ws ISO-5667-1-05, severity='block',
+--           condition='groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL'.
+-- Printed text, §9.6.2 "Agua en un depósito acuífero", printed p.6 / PDF p.7:
+--   "el pozo debe bombearse antes de efectuar el muestreo para así asegurarse de que se extrae agua
+--    nueva del depósito." … "Siempre se debe registrar la profundidad por debajo del nivel del suelo a
+--    la cual se toma la muestra."
+-- TWO defects:
+--  (i) PRESENCE-ONLY HIDES THE OBLIGATION. The printed rule is that purging HAPPENS. The gate only
+--      checks the flag is non-null, so groundwater_purged = false ("well not purged") PASSES a BLOCK
+--      gate. The gate enforces that a box was touched, not that the standard was met.
+-- (ii) MISSING SCOPE PREDICATE. §9.6.2 applies only to groundwater. The gate is unconditional, so a
+--      stormwater or boiler-water project is blocked until it supplies a groundwater purge flag and a
+--      groundwater sampling depth that the standard never asks it for.
+-- update public.compliance_requirements
+--    set condition='water_situation_type != ''groundwater'' OR (groundwater_purged == True AND sampling_depth IS NOT NULL)'
+--  where id='6263b2f4-6e7c-4960-a999-4fb1f06f2232';
+-- ROLLBACK: update public.compliance_requirements
+--             set condition='groundwater_purged IS NOT NULL AND sampling_depth IS NOT NULL'
+--            where id='6263b2f4-6e7c-4960-a999-4fb1f06f2232';
+-- ☐ RATIFIED  R-2
+
+-- =====================================================================================================
+-- R-3  CR-017: correct limit, missing scope predicate
+-- =====================================================================================================
+-- Encoding: gate CR-017 (id 86a35bbe-7aef-4916-8f7d-b4b3a803b935), severity='block',
+--           condition='sludge_pipe_diameter >= 50'.
+-- Printed text, §12.1.2, printed p.9 / PDF p.10 — CONFIRMED BY RENDERED PAGE IMAGE:
+--   "Si el muestreo va a ser de una tubería, el conducto del muestreo debe tener al menos 50 mm de
+--    diámetro para así garantizar que la ocurrencia de bloqueos sea mínima"
+-- The VALUE and the BOUNDARY INCLUSIVITY are both correct ("al menos 50 mm" -> >= 50). This is the one
+-- genuine printed hard minimum in the whole standard and it is encoded faithfully.
+-- The defect is scope only: the printed rule is conditioned on "Si el muestreo va a ser de una tubería"
+-- within §12.1.2 (domestic wastewater sludge). The gate applies to every project.
+-- update public.compliance_requirements
+--    set condition='sludge_pipe_diameter IS NULL OR sludge_pipe_diameter >= 50'
+--  where id='86a35bbe-7aef-4916-8f7d-b4b3a803b935';
+-- ROLLBACK: update public.compliance_requirements set condition='sludge_pipe_diameter >= 50'
+--            where id='86a35bbe-7aef-4916-8f7d-b4b3a803b935';
+-- ☐ RATIFIED  R-3
+
+-- =====================================================================================================
+-- R-4  CR-008: dropped printed scope condition ("cuando … entrar en atmósferas peligrosas")
+-- =====================================================================================================
+-- Encoding: gate CR-008 (id 5649c92d-6bb9-400c-8db7-41c52e21f89d), severity='block',
+--           condition='hazardous_atmosphere_tested == True'; the field is_required = false.
+-- Printed text, §7.8, printed p.4 / PDF p.5:
+--   "Cuando el personal tenga que entrar en atmósferas peligrosas, debe disponer de equipo de protección
+--    contra gases … Además, antes de que el personal entre en espacios cerrados, se debe medir la
+--    concentración de oxígeno y de cualquier vapor o gas tóxico que pueda estar presente."
+-- The obligation is doubly conditional ("Cuando … tenga que entrar", "antes de que … entre"). The gate
+-- is unconditional, so a river-bank grab-sampling programme that never enters a confined space can
+-- never be finalised. Also inconsistent: a BLOCK gate anchored on a field flagged is_required = false.
+-- There is currently no field expressing "confined-space entry is part of this programme"; adding one
+-- is a structural change and is therefore staged, not packed.
+-- ☐ RATIFIED  R-4  (add scope field `confined_space_entry` + rescope CR-008, or downgrade to warn)
+
+-- =====================================================================================================
+-- R-5  CR-005: dropped printed exemption
+-- =====================================================================================================
+-- Encoding: gate CR-005 (id 3672bcda-7e04-43d1-a557-cf1b33539de5), severity='warn',
+--           condition='boundary_sampling_avoided == true'.
+-- Printed text, §5.1, printed p.3 / PDF p.4:
+--   "Se debe evitar el muestreo en las fronteras de los sistemas o cerca de éstas, salvo que las
+--    condiciones sean de interés especial."
+-- The printed exemption "salvo que las condiciones sean de interés especial" has no encoded escape:
+-- a programme that deliberately samples a boundary because that boundary is the object of study is
+-- flagged, with no way to record the printed justification. Severity is only 'warn', so impact is low.
+-- ☐ RATIFIED  R-5  (add a justification text field, or accept the warn as an attestation prompt)
+
+-- =====================================================================================================
+-- R-6  FOUR gates with an EMPTY condition (no-ops)
+-- =====================================================================================================
+--   f34aad09-2214-4e3f-87f2-f04d31098e5c  CR-006  ws-01  warn  condition=''  clause §5.4  source_quote NULL  attestation=false
+--   3cf16700-ca73-4f98-8219-d5aca3cab304  CR-020  ws-06  warn  condition=''  clause §14   quote present     attestation=TRUE
+--   0e8b605a-4c35-4a24-9bbd-adf379a58f9c  CR-025  ws-06  warn  condition=''  clause §16.1 quote present     attestation=TRUE
+--   56d91495-ae5d-461b-8015-8ad676ea7038  CR-027  ws-08  warn  condition=''  clause §19.1,§21 source_quote NULL attestation=false
+-- CR-020 and CR-025 carry requires_attestation = true, so an empty condition is arguably the intended
+-- "sign this off" pattern. CR-006 and CR-027 have an empty condition AND a NULL source_quote AND no
+-- attestation: they cannot fire, cannot be evidenced, and do nothing at all.
+-- Also note CR-020's clause_reference is §14 but its quote is §17 (see R-11).
+-- ☐ RATIFIED  R-6  (give CR-006/CR-027 a condition + source quote, or set them inactive)
+
+-- =====================================================================================================
+-- R-7  FIVE gates that are EFFECTIVE NO-OPS: IS NOT NULL on a field that is already is_required = true
+-- =====================================================================================================
+--   975913ce-…  CR-002  BLOCK  'programme_purpose IS NOT NULL'    field programme_purpose    is_required=true
+--   09b73f91-…  CR-011  warn   'flow_character IS NOT NULL'       field flow_character       is_required=true
+--   81d5b080-…  CR-015  BLOCK  'water_situation_type IS NOT NULL' field water_situation_type is_required=true
+--   14332bbc-…  CR-021  BLOCK  'programme_type IS NOT NULL'       field programme_type       is_required=true
+--   d61ba878-…  CR-026  BLOCK  'flow_aspect IS NOT NULL'          field flow_aspect          is_required=true
+-- The required-field check already prevents these from ever being null, so the gate can never fire.
+-- FOUR of the five are severity='block' — i.e. 4 of the 11 block gates in this standard are decorative.
+-- A second, weaker class (presence-only on OPTIONAL booleans, which accept "false" as compliant):
+--   CR-013 isokinetic_sampling IS NOT NULL, CR-018 automatic_sampler_protection IS NOT NULL,
+--   CR-019 flow_proportional_sampling IS NOT NULL, CR-022 abnormal_frequency_increase IS NOT NULL.
+--   If booleans default to false in the UI these are no-ops too; if they are nullable tri-state they
+--   only force an answer, never a compliant one.
+-- ☐ RATIFIED  R-7  (replace with conditions that test the printed obligation, or drop the gates)
+
+-- =====================================================================================================
+-- R-8  CR-023: MIS-HOMED + tautology over an equation output + DAMAGED FORMULA in its evidence quote
+-- =====================================================================================================
+-- Encoding: gate CR-023 (id c5314ff6-f473-4d6e-87cd-3005415ea21f), ws ISO-5667-1-06, severity='block',
+--           condition='n > 0'.
+-- THREE defects:
+--  (i) MIS-HOMED. The gate sits on worksheet ISO-5667-1-06 but the only field it reads, `n`, lives on
+--      worksheet ISO-5667-1-07 (Statistische Probenahmehäufigkeit).
+-- (ii) TAUTOLOGY OVER AN EQUATION OUTPUT + PRESENCE-ONLY OVER A PRINTED FORMULA. `n` is the output of
+--      registered Eq.3, n = (2*K*sigma/L)^2, and is_required = true. A sample count is > 0 by
+--      construction, so the gate always passes; meanwhile the printed rule it claims to enforce is the
+--      formula, which the gate does not check at all. n = 1 passes a BLOCK gate.
+--(iii) DAMAGED EVIDENCE. Its stored source_quote reads
+--      "el número de muestras necesarias es (2K/L)²" — the sigma has been lost, making the stored
+--      formula mathematically WRONG. The printed text (printed p.12 / PDF p.13) and the current text
+--      extraction both read "(2Kσ/L)2". This is OCR/glyph damage that was propagated into production
+--      rather than repaired. (Confirmed against the rendered page image 2026-09-08.)
+-- update public.compliance_requirements set source_quote='Para estimar la media aritmética X para un intervalo de confianza dado L en el nivel de confianza seleccionado, el número de muestras necesarias es (2Kσ/L)2. Esto es estrictamente cierto únicamente cuando se conoce σ. [NTC-ISO 5667-1, §16.4, impresa p.12 / PDF p.13]'
+--  where id='c5314ff6-f473-4d6e-87cd-3005415ea21f';
+-- ROLLBACK: restore the prior source_quote verbatim (recorded in the 2026-09-08 export).
+-- ☐ RATIFIED  R-8  (fix quote; re-home to ws-07; replace 'n > 0' with the Eq.3 consistency check or drop)
+
+-- =====================================================================================================
+-- R-9  CR-024: tautology over an equation output
+-- =====================================================================================================
+-- Encoding: gate CR-024 (id 0aa104a1-dae0-4d13-85ab-6848b2b041ee), ws-07, severity='warn',
+--           condition='L > 0', source_quote NULL.
+-- `L` is the output of registered Eq.2 (L = 2*K*sigma/sqrt(n)) and is_required = true. A confidence
+-- interval width is > 0 by construction, so the gate can never fire. It also carries no source quote.
+-- ☐ RATIFIED  R-9
+
+-- =====================================================================================================
+-- R-10 TEN gates with source_quote = NULL (no evidence at all)
+-- =====================================================================================================
+--   CR-001 c7d91d41 (ws-02 warn)  CR-006 f34aad09 (ws-01 warn)  CR-010 1a0c6f63 (ws-04 warn)
+--   CR-011 09b73f91 (ws-04 warn)  CR-013 62b68d94 (ws-04 warn)  CR-018 ab448330 (ws-05 warn)
+--   CR-019 0ffcf32b (ws-05 warn)  CR-022 266c19f4 (ws-06 warn)  CR-024 0aa104a1 (ws-07 warn)
+--   CR-027 56d91495 (ws-08 warn)
+-- All ten are severity='warn' (no block gate is unevidenced — that part is clean). Candidate quotes for
+-- each are already in this pass's field rows; backfilling them is a mechanical follow-up.
+-- ☐ RATIFIED  R-10
+
+-- =====================================================================================================
+-- R-11 Gate source_quote QUALITY defects (composed, accent-stripped, mis-clause'd)
+-- =====================================================================================================
+-- (a) CR-015 (81d5b080) — its source_quote is not printed prose. After one real sentence from §6 the
+--     encoder appended "Situaciones enumeradas: 9. SITUACIONES INDIVIDUALES DE MUESTREO. AGUAS
+--     NATURALES; 10. …; 13. …" — a list of CLAUSE HEADINGS concatenated by the encoder, presented
+--     inside the quote field with no elision or composition marker. It reads as a printed sentence and
+--     is not one.
+-- (b) CR-004 (8ed91117) — quote is accent-stripped: "ultima version", "publicacion". The printed text
+--     reads "última versión", "publicación". The stored quote is not byte-identical to the source.
+-- (c) CR-025 (0e8b605a) — same defect: "segun se requiera" vs printed "según se requiera".
+-- (d) CR-020 (3cf16700) — clause_reference is '§14' but the stored quote is the §17 sentence
+--     ("Es posible que se necesite incrementar la frecuencia … condiciones anormales"). Mis-clause'd.
+-- (e) CR-006 (f34aad09) — clause_reference '§5.4' (composite samples) sits on worksheet ISO-5667-1-01
+--     (Registrierung & Anwendungsbereich); §5 content belongs to worksheet ISO-5667-1-02. Mis-homed.
+-- NEGATIVE result worth recording: every page reference in every gate and equation quote was checked
+-- against the printed footers and ALL ARE CORRECT. No wrong page refs found.
+-- ☐ RATIFIED  R-11
+
+-- =====================================================================================================
+-- R-12 INVENTED UNIT: five statistical fields carry unit 'mg/l', which the standard never prints
+-- =====================================================================================================
+--   bd3aec17 x_i, 4462894b x_mean, dd00f03e s, 34719e36 sigma, 79095d10 L   -> unit = 'mg/l'
+-- The ONLY dimensioned numeric values anywhere in the 15 printed pages are "25 mm" (§8.6) and
+-- "50 mm" (§12.1.2) — mechanically verified over the full text layer. The strings "mg", "mg/l",
+-- "litro", "ml" do not occur at all.
+-- §16 works on "un factor determinante" generically; §16.5 expresses both L and sigma as PERCENTAGES of
+-- the mean ("el intervalo de confianza requerido fuera el 10 % de la media aritmética … la desviación
+-- estándar el 20 % de la media aritmética"). The determinand may be pH, °C, CFU/100 ml or a load.
+-- Hard-coding mg/l silently mis-labels every non-concentration determinand.
+-- update public.fields set unit=null where id in
+--   ('bd3aec17-f34a-42be-8c31-c45971377c21','4462894b-4ee4-4b4e-8151-ec3815b6ee31',
+--    'dd00f03e-8c98-4aa8-b00e-83b3211fd60d','34719e36-a501-472b-9147-0d61f2a36232',
+--    '79095d10-a410-4520-b1fc-b4abd91142d2');
+-- ROLLBACK: update public.fields set unit='mg/l' where id in (…the same five ids…);
+-- NEGATIVE results in the same sweep: no field carries a TYPE NAME in place of a unit; 'pipe_nominal_bore'
+-- and 'sludge_pipe_diameter' are correctly 'mm' as printed; 'confidence_level' is correctly '%' as
+-- printed; 'K' is correctly dimensionless. 'sampling_depth' (m), 'flow_velocity' (m/s) and
+-- 'discharge_rate' (m3/s) carry sensible SI units that the standard does not print — acceptable, noted.
+-- ☐ RATIFIED  R-12
+
+-- =====================================================================================================
+-- R-13 DERIVED VALUES THAT ARE HAND-ENTERABLE AND REQUIRED (#22 class), plus a CIRCULAR derivation
+-- =====================================================================================================
+-- Registered equations on ws-07:
+--   Eq.2  L = 2*K*sigma/sqrt(n)     inputs K, sigma, n     output L
+--   Eq.3  n = (2*K*sigma/L)^2       inputs K, sigma, L     output n
+-- These are algebraic inverses and each consumes the other's output: L derives n and n derives L.
+-- Under the standing single-source derivation invariant exactly one of them may be the derivation.
+-- §16.4 settles the direction: the engineer selects a target L and a confidence level, and the number
+-- of samples is derived — "Para estimar la media aritmética X para un intervalo de confianza dado L en
+-- el nivel de confianza seleccionado, el número de muestras necesarias es (2Kσ/L)2" (printed p.12).
+-- So `L` is engineer_input (a target) and `n` is derived; Eq.2 is the inverse/check, not a derivation.
+-- Both `n` and `L` are currently is_required = true AND both are equation outputs -> both are
+-- hand-enterable derived values.
+-- Separately, `K` (is_required = true) is fully determined by `confidence_level` through the printed
+-- §16.4 table, but NO equation or lookup is registered for it — the printed table is encoded only as
+-- prose in the field description, so an engineer can enter a K that contradicts the chosen level.
+-- PROPOSAL: register the §16.4 table as a lookup K = f(confidence_level); make K and n read-only
+-- derived; keep L as the engineer's target (data_class engineer_input).
+-- ☐ RATIFIED  R-13
+
+-- =====================================================================================================
+-- R-14 Eq.1 output `s` is consumed by nothing
+-- =====================================================================================================
+-- Eq.1 (d42f576c) computes s = sqrt(SUM((x_i - x_mean)^2)/(n-1)). No equation and no gate reads `s`:
+-- Eq.2 and Eq.3 both take `sigma`. The standard states the substitution explicitly — "Cuando n es
+-- grande (véase el numeral 16.1), s difiere poco del valor verdadero σ" (§16.4, printed p.11) — but the
+-- encoding never wires s into sigma, so the whole Eq.1 chain is a dead end and `sigma` (is_required)
+-- must be hand-entered even when s has just been computed.
+-- ☐ RATIFIED  R-14  (wire s -> sigma fallback, or mark s display-only and say so)
+
+-- =====================================================================================================
+-- R-15 DUPLICATE FIELDS + duplicate BLOCK gates: programme_purpose vs programme_type
+-- =====================================================================================================
+--   7724c1c4 programme_purpose (ws-01, clause §1, is_required=true)  enum: quality_control /
+--            quality_characterization / pollution_source_identification
+--   c68f7e2a programme_type    (ws-06, clause §15, is_required=true) enum: quality_control /
+--            quality_characterization / pollution_source_investigation
+-- Same three-way choice, encoded twice, each with its own BLOCK gate (CR-002, CR-021). The standard
+-- itself says they are the same list: §15 reads "Existen tres tipos principales de programa. Estos se
+-- pueden describir como control de calidad, caracterización de la calidad, e identificación de las
+-- fuentes de contaminación (véase el numeral 3)." — the "(véase el numeral 3)" is the standard pointing
+-- back at the §3 list that ws-01 encodes. Two fields can be set to contradictory values with nothing
+-- detecting it.
+-- PROPOSAL: keep one owner (ws-01 programme_purpose, the earlier worksheet), make ws-06 programme_type
+-- a read-only inherited reference, and drop one of the two block gates.
+-- ☐ RATIFIED  R-15
+
+-- =====================================================================================================
+-- R-16 ENUMS: closed list over a printed OPEN list; a dropped printed option; single-select over a
+--      printed conjunction
+-- =====================================================================================================
+-- (a) specific_objective (fef789e1) — 15 values, exactly covering §4.2 a) b) c) d) e) f) g) h) j) k) m)
+--     n) p) q) r) with none missing (checked item by item). BUT the printed list is explicitly OPEN:
+--     "Estas razones para el muestreo se pueden subdividir adicionalmente en objetivos más específicos,
+--      tales como los siguientes:" (§4.2, printed p.2). "tales como" = such as. The enum closes it with
+--     no "otro" option, so a legitimate objective outside the 15 cannot be recorded.
+--     Sub-note: §4.2 r) reads "Identificación y/o actualización de las líneas base" — the only "y/o" in
+--     the whole standard — and is collapsed into the single value environmental_baseline, losing the
+--     identification-vs-update distinction.
+-- (b) flow_measurement_method (6219d1a8) — 15 values covering §21.2 a)-e), §21.3 a)-d) and §21.4 b)-e).
+--     §21.4 a) is DROPPED: "Mediciones de la velocidad, tales como las mencionadas en el numeral 21.3
+--     efectuadas en un canal cuya área de sección transversal sea conocida" (printed p.14 / PDF p.15) —
+--     the velocity-area method, the standard's first-listed way of determining discharge, cannot be
+--     selected.
+-- (c) flow_aspect (84a546f0) — single-select enum + BLOCK gate CR-026, but §19.1 states the three
+--     aspects CONJUNCTIVELY: "Hay tres aspectos del flujo que es necesario medir, a saber, a) Dirección
+--     del flujo. b) Velocidad del flujo. c) Tasa de flujo." (printed p.13 / PDF p.14). The encoding
+--     forces the engineer to pick ONE of three things the standard says all need measuring.
+-- (d) water_situation_type (5c1227a6) — 16 values covering §9.1-9.9, §10.1, §10.2, §10.2.4, §11, §12,
+--     §12.1.2, §13. Two printed situations have no value: §9.8.4 "Lodos derivados del tratamiento del
+--     agua potable" and §11.3 "Agua industrial y lodos de tratamiento de efluentes" — both are sludges
+--     distinct from the §12.1.2 wastewater sludge. Also single-select, while §12 contemplates sampling
+--     "cuando en una planta de tratamiento entran aguas residuales y también después de diversas etapas
+--     de tratamiento" — several situations in one programme.
+-- (e) matrix_type (f12dc5d6) — single-select over §1's inclusive "del agua, incluyendo los sedimentos y
+--     los lodos"; a programme covering water AND sediment must pick one.
+-- ☐ RATIFIED  R-16
+
+-- =====================================================================================================
+-- R-17 REQUIRED-NESS: worksheet ISO-5667-1-07 makes an explicitly EXEMPLARY method mandatory
+-- =====================================================================================================
+--   n (8e17b978), sigma (34719e36), K (85996c78), confidence_level (91abb053), L (79095d10)
+--   are all is_required = true, and CR-023 blocks on ws-07 output.
+-- But §16 introduces itself as an example, twice:
+--   §12.1.2 / §13 area: "En todas estas situaciones es deseable un enfoque estadístico para determinar
+--     la frecuencia del muestreo. En el numeral 16 se incluye un ejemplo de tal enfoque." (printed p.10)
+--   §16.1: "En los numerales 16.2 a 16.5 se presenta un ejemplo del enfoque anterior, utilizando un
+--     método estadístico aplicado a un parámetro estadístico, la media aritmética; se supone que se
+--     aplica la distribución normal." (printed p.11)
+-- So the entire statistical apparatus is one worked example resting on an assumed normal distribution.
+-- Making it required on every project — and blocking on it — enforces an exemplary method as mandatory.
+-- Related, opposite-direction item: sampling_depth (b147ad8a) is is_required = false although §9.6.2
+-- prints "Siempre se debe registrar la profundidad por debajo del nivel del suelo a la cual se toma la
+-- muestra." — the requirement is unconditional WITHIN groundwater sampling, i.e. conditionally required
+-- (see R-2).
+-- Correctly handled and worth recording: prior_data_reviewed is_required = false matches the soft "Es
+-- importante tener en cuenta" of §3; and confidence_level is a proper SR-2 selection widget whose seven
+-- values reproduce the §16.4 table exactly (99/98/95/90/80/68/50 -> 2,58/2,33/1,96/1,64/1,28/1,00/0,67,
+-- confirmed against the rendered table image, printed p.11 / PDF p.12).
+-- ☐ RATIFIED  R-17
+
+-- =====================================================================================================
+-- R-18 SOURCE-DOCUMENT quality observations (no encoding change proposed; recorded so they are auditable)
+-- =====================================================================================================
+-- (a) The PDF is not a scan of the ICONTEC print run: pdfinfo reports Title "Microsoft Word - norma
+--     muestreo.doc", Author "juanc", Producer "Acrobat Distiller 6.0", created 2007-02-06, 17 pages,
+--     RC4-encrypted with copy disallowed. It is a 2007 Word re-keying of the 1995 standard. The text
+--     layer is therefore clean (no OCR noise) but its fidelity rests on whoever re-typed it.
+-- (b) The printed English cover title contains a typo: "GUIDANCE ON THE DESING OF SAMPLING PROGRAMMES"
+--     (confirmed on the rendered cover image — it is in the source, not in the extraction).
+-- (c) §2 lists "ISO 2662 Statistical Interpretation of Test Results" but §16.1 refers to "la norma ISO
+--     2602". ISO 2602 is the correct number; the normative-reference list is wrong in the source.
+-- (d) §19.3 a) reads "Para calcular la tasa de descarga (véase el numeral 9.1)". §9.1 is
+--     "PRECIPITACIÓN"; the intended target is §19.4 / §21.4. Broken cross-reference in the source.
+-- (e) §16.4 prints the confidence interval inline as "X ± K/n", which contradicts §16.5's
+--     "L = 2Kσ/√n". The inline form is missing sigma and the radical. Both were read from the rendered
+--     page image, so this is a defect of the printed standard, not of the extraction. The encoding
+--     correctly follows the §16.5 form.
+-- (f) EXTRACTION DAMAGE (named, not silently repaired): pdftotext drops the Symbol-font glyphs, so the
+--     displayed formulas lose their radicals — printed "√n = 7,84" extracts as "n = 7,84" and the
+--     s-formula loses its radical and Sigma bars. Inline sigma characters DO survive. Every formula
+--     claim in this pass was therefore read from a rendered page image (pdftoppm, 165 dpi) rather than
+--     from the text layer, and the pack's equation rows quote the surrounding PROSE, which is intact.
+-- (g) EDITION AGE — not a defect of the encoding, a fact the picker should surface: this is ISO
+--     5667/1:1980. ISO has since replaced it (5667-1:2006, and again in 2020/2023) and the 1980 edition
+--     is withdrawn internationally. prod.standards.version already records
+--     "1980 (ISO 5667/1:1980; adopted as NTC-ISO 5667-1:1995)", which is accurate.
+-- ☐ RATIFIED  R-18
+
+-- =====================================================================================================
+-- CHECKLIST ITEMS WITH EXPLICIT NEGATIVE RESULTS (searched for, NOT found — recorded so the absence is
+-- auditable rather than assumed)
+-- =====================================================================================================
+--  * condition = 'TRUE' literal ................................. none (0 of 27 gates)
+--  * AND/OR inversion, OR-collapse .............................. none — only ONE compound condition
+--        exists in the whole standard (CR-016, an AND); no gate contains OR at all
+--  * inverted condition (gate true when the standard says false)   none found; CR-005's field is phrased
+--        affirmatively ("boundary_sampling_avoided") so true = compliant, correct
+--  * exact float equality on a numeric field .................... none (no '==' on any number field)
+--  * boundary inclusivity errors ................................ none — the two printed limits are
+--        "mínimo de 25 mm" -> '>= 25' and "al menos 50 mm" -> '>= 50', both correctly inclusive
+--  * '>= 0' floor on a legitimately-negative quantity ........... none (no such gate)
+--  * unsatisfiable gates / uncovered enum values ................ none — no gate constrains an enum to a
+--        value set, so no enum value is unreachable
+--  * duplicate gates / strict subsets ........................... no two gates share a condition; the
+--        only duplication is at FIELD level (R-15)
+--  * worksheets with zero fields ................................ none (3/8/4/7/10/5/8/6 = 51)
+--  * phantom fields (enum tokens materialised as fields) ........ none — all 51 fields have a label, a
+--        clause_reference and a description
+--  * wrong page refs in existing gate/equation quotes ........... none — all 14 checked, all correct
+--  * INVENTED FREQUENCY / VOLUME / HOLDING TIME / PRESERVATION VALUE ... NONE, and this is the notable
+--        result for a sampling standard. ISO 5667-1 prints NO holding time, NO sample volume, NO
+--        preservation temperature and NO required sampling frequency anywhere — §0 and §2 defer all of
+--        that to ISO 5667/2 (techniques) and ISO 5667/3 (preservation and handling). The only frequency
+--        figures printed are inside the §16.5 worked example ("una frecuencia de muestreo de 2 muestras
+--        por día, si el período de interés fuera 1 mes, o de entre 1 y 2 muestras por semana, si el
+--        período de interés fuera 1 año", printed p.12) and the encoding correctly does NOT hard-code
+--        them — they appear only in the description of `n` as "Worked example -> n approx 61", which is
+--        accurate. The one example-as-limit defect in this standard is the 25 mm of R-1.
+--  * block gate with no source_quote ............................ none — all 10 unevidenced gates are warn
+-- =====================================================================================================
