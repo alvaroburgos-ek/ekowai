@@ -1,0 +1,526 @@
+-- ============================================================================================
+-- ISO-14015 - STAGED RULINGS (WRITTEN, NOT APPLIED)
+-- ============================================================================================
+-- Everything in this file is COMMENTED OUT. Nothing here has been run against prod, and this file
+-- is NOT in md-packs.order.txt. Each block carries its verbatim evidence, the proposed SQL, and the
+-- rollback inverse. Un-comment only after Alvaro marks the block [X] RATIFIED.
+--
+-- Source of every quote below: the rendered PDF's own text layer, SR-3 ground truth.
+--   C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\
+--     ISO 14015-2022-BS-EN-ISO-Environmental-Management-Guidelines.pdf
+--   pdftotext -layout -enc UTF-8, 39 pages / 111 521 bytes, form feeds preserved.
+--   PAGE CONVENTION: printed p.N = PDF p.N+10 (arabic body, constant); roman front matter
+--   PDF p.8 = vi, PDF p.9 = vii. PDF p.10 (Figure 1) holds all 6 undecodable characters and is
+--   never quoted.
+--   Grade [VA].
+--
+-- SCHEMA NOTE: public.compliance_requirements has a column `condition` (NOT `condition_expression`)
+-- and NO `active` column. The evaluator accepts both `== True` and `== true`.
+--
+-- ############################################################################################
+-- ## THE GOVERNING FACT FOR THIS WHOLE FILE
+-- ############################################################################################
+-- ISO 14015:2022 contains ZERO occurrences of "shall" in its body (printed pp.1-26).
+--   Body census: shall=0, should=84, may=39, can=41, must=1.
+--   Clauses 4-7 (the normative body): shall=0, should=84, may=26, can=30, must=1.
+--   Clauses 1-3: shall=0, should=0. Annex A: shall=0, should=0. Annex B: shall=0, should=0.
+--   The only 4 "shall" hits in the whole 39-page file are CEN/ISO front-matter boilerplate about
+--   national adoption and patent rights (PDF pp.4 and 7). The single "must" is inside an example on
+--   printed p.15: "time period within which costs must be met (e.g. related to likelihood of
+--   enforcement activities or establishment of new legislation)".
+-- => NO BLOCK GATE IS DEFENSIBLE ON THIS STANDARD, and none exists: all 34 encoded gates are
+--    severity='warn', 0 are 'block'. THIS FILE PROPOSES NO SEVERITY PROMOTION, AND NO FUTURE PASS
+--    SHOULD PROPOSE ONE. The corollary is a product fact worth stating plainly: an ISO-14015
+--    worksheet can never hard-fail a conformity check. That is not an encoding gap - it is what
+--    a guidelines document is.
+-- The blocks below are therefore about gates that fire a WARNING when they should not fire at
+-- all (a conforming assessment being nagged, or worse, being pushed to answer untruthfully), and
+-- about enums that close lists the standard left open.
+--
+-- ============================================================================================
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-01  CR-028 HAS AN EMPTY CONDITION - it can never evaluate            [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: compliance_requirements id='a757a0b3-cee7-46e1-8b8b-ca0dc3c51fab',
+--   code='CR-028', worksheet ISO-14015-06, severity='warn', clause_reference='§5.5.3',
+--   condition='' (the empty string), source_quote=NULL, requires_attestation=false.
+-- This is the only gate of the 34 with no condition. It is dead weight: it can neither pass nor
+-- fail, it contributes nothing to the conformity roll-up, and it makes the gate count look one
+-- higher than the enforcement surface actually is.
+-- §5.5.3 is already covered by CR-027 (business_consequences_determined). The only §5.5.3
+-- obligation CR-028 could carry that CR-027 does not is the closing "qualify the finding" duty:
+--   EVIDENCE (printed p.15, PDF p.25, §5.5.3):
+--     "Where conclusions are restricted because of insufficient information, this should be stated
+--      and any finding should be qualified accordingly."
+--   but that obligation is ALREADY gated on ws-07 by CR-030 (findings_qualified), and ws-06 has no
+--   field that could carry it. So the honest options are (a) give CR-028 the ws-06 enum-presence
+--   duty it was probably meant to have, or (b) retire it.
+--
+-- OPTION A - make it the consequence-factor presence check, scoped to the branch actually being run:
+-- update public.compliance_requirements
+--    set condition = 'business_consequences_in_scope == false or consequence_judgement_factor IS NOT NULL'
+--  where id = 'a757a0b3-cee7-46e1-8b8b-ca0dc3c51fab';
+--   ROLLBACK: update public.compliance_requirements set condition = '' where id = 'a757a0b3-cee7-46e1-8b8b-ca0dc3c51fab';
+--
+-- OPTION B - retire it. There is no `active` column on this table, so retirement means deletion;
+-- that is irreversible in the doctrine's sense and therefore needs an explicit ruling, not a tick:
+-- delete from public.compliance_requirements where id = 'a757a0b3-cee7-46e1-8b8b-ca0dc3c51fab';
+--   ROLLBACK: re-insert with code='CR-028', worksheet_template_id='4e4b5d20-3ba2-468f-8212-009c964f8dcf',
+--             severity='warn', clause_reference='§5.5.3', condition=''.
+-- RECOMMENDATION: Option A. It costs nothing and turns a dead row into a real (warn-level) check.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-02  CR-027 HAS NO SCOPE PREDICATE - it demands a step the standard makes optional
+--                                                                        [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='9ea01ccf-b014-4a2a-806a-b43bd4b25497', code='CR-027', ws ISO-14015-06,
+--   severity='warn', condition='business_consequences_determined == True', clause_reference='§5.5.3'.
+-- EVIDENCE (printed p.14, PDF p.24, §5.5.3, first sentence):
+--   "The determination of business consequences is only performed if it has been included in the
+--    objectives and scope of the assessment."
+-- EVIDENCE (printed p.9, PDF p.19, §5.3.3):
+--   "At the discretion of the client, the scope may include the determination of business
+--    consequences."
+-- The predicate already exists as a field: ws-01.business_consequences_in_scope
+--   (id='2ef81485-8b7c-43f7-b435-fe2f7f5a48fc', boolean, is_required=true).
+-- As encoded, an assessment whose client did NOT commission business consequences is warned for
+-- correctly skipping a step the standard says is optional - i.e. the only way to silence the gate
+-- is to assert something untrue. That is the same defect class as an uncovered enum value.
+--
+-- update public.compliance_requirements
+--    set condition = 'business_consequences_in_scope == false or business_consequences_determined == true'
+--  where id = '9ea01ccf-b014-4a2a-806a-b43bd4b25497';
+--   ROLLBACK: update public.compliance_requirements set condition = 'business_consequences_determined == True'
+--             where id = '9ea01ccf-b014-4a2a-806a-b43bd4b25497';
+-- NOTE: the predicate lives on ws-01 and the gate on ws-06. That is a legitimate cross-worksheet
+-- read (the scope decision is taken at registration), not a mis-homing.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-03  CR-013 IS UNSATISFIABLE FOR AN ASSESSMENT WHOSE SCOPE NEVER CHANGED
+--                                                                        [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='8208a601-8ddc-49c0-992a-b529333f3b8a', code='CR-013', ws ISO-14015-04,
+--   severity='warn', condition='scope_change_recorded == True', clause_reference='§5.3.3'.
+-- EVIDENCE (printed p.10, PDF p.20, §5.3.3):
+--   "The scope may establish or limit any related assets to be included in the assessment. At the
+--    discretion of the client, the scope may be amended after the assessment has begun. Any change
+--    should be recorded and communicated to the relevant parties."
+-- The printed obligation is conditional on a change having occurred ("Any change should be
+-- recorded"). The encoded gate demands the flag be true unconditionally. A textbook assessment that
+-- ran to its original scope can only clear this warning by claiming a change was recorded.
+-- There is no "no change occurred" field to test, so the honest fix is to stop gating a
+-- conditional duty and let the field stand as a record:
+--
+-- delete from public.compliance_requirements where id = '8208a601-8ddc-49c0-992a-b529333f3b8a';
+--   ROLLBACK: re-insert code='CR-013', worksheet_template_id='0e890021-f75f-4397-853e-3de6d6c3ded2',
+--             severity='warn', condition='scope_change_recorded == True', clause_reference='§5.3.3'.
+-- ALTERNATIVE (non-irreversible, preferred if a new field is acceptable): add a boolean
+--   ws-04.scope_amended ("Anwendungsbereich nachtraeglich geaendert", §5.3.3, is_required=false) and
+--   set condition = 'scope_amended == false or scope_change_recorded == true'.
+--   That is an SR-4 schema addition in service of an approved mandate, but it changes the form the
+--   engineer sees, so it is staged rather than taken.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-04  CR-023 MAKES A PERMISSIVE ACTIVITY MANDATORY                     [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='0a4dff89-ff78-4625-a33e-f73741db5daa', code='CR-023', ws ISO-14015-05,
+--   severity='warn', condition='interviews_conducted == True', clause_reference='§5.4.4'.
+-- EVIDENCE (printed p.13, PDF p.23, §5.4.4.2):
+--   "With the approval of the client and of the representative of the assessee, assessee personnel
+--    responsible for or engaged in the activities and processes being assessed may be interviewed.
+--    Interviews may also be undertaken, if appropriate, with individuals or groups inside or outside
+--    the asset, where their information can be of value to the assessment."
+-- EVIDENCE (printed p.13, PDF p.23, §5.4.4.1):
+--   "The interview is a means of collecting information to corroborate or augment information
+--    derived from examining existing documents and records and observing physical conditions and
+--    activities."
+-- Interviewing is described as A MEANS and is permissive throughout ("may be interviewed", "may
+-- also be undertaken, if appropriate"). §5.4.1 lists it as one of three techniques and adds "Other
+-- information gathering techniques (e.g. surveys and questionnaires) may also be used." The field
+-- itself is correctly is_required=false; the gate contradicts that.
+--
+-- delete from public.compliance_requirements where id = '0a4dff89-ff78-4625-a33e-f73741db5daa';
+--   ROLLBACK: re-insert code='CR-023', worksheet_template_id='b5da698b-eb94-4d59-977d-28fc4f1eaf08',
+--             severity='warn', condition='interviews_conducted == True', clause_reference='§5.4.4'.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-05  CR-022 HAS NO SITE-VISIT PREDICATE                               [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='ff7807f8-b3eb-457a-9f72-6ceea518e784', code='CR-022', ws ISO-14015-05,
+--   severity='warn', condition='safety_requirements_followed == true', clause_reference='5.4.3',
+--   requires_attestation=true, source_quote already stored (verbatim and correct).
+-- EVIDENCE (printed p.13, PDF p.23, §5.4.3):
+--   "The assessor should follow all applicable safety requirements when visiting/inspecting the asset."
+-- The obligation is expressly scoped to a visit. §5.3.6 (printed p.11) states
+--   "Information gathering can be performed on-site, remotely or as a combination."
+-- and ws-04.remote_assessment_used (id='920c246d-7f71-4ad8-9021-dd88576431e8') records exactly that.
+-- A fully remote assessment is asked to attest to site-safety compliance it never had occasion to
+-- exercise. Low harm (the attestation is cheap and true-by-vacuity) but it is a presence-only
+-- condition hiding a printed scope predicate, so it is recorded.
+--
+-- update public.compliance_requirements
+--    set condition = 'remote_assessment_used == true or safety_requirements_followed == true'
+--  where id = 'ff7807f8-b3eb-457a-9f72-6ceea518e784';
+--   ROLLBACK: update public.compliance_requirements set condition = 'safety_requirements_followed == true'
+--             where id = 'ff7807f8-b3eb-457a-9f72-6ceea518e784';
+-- CAVEAT: remote_assessment_used is a ws-04 field and is_required=false, so it can be NULL; the
+-- proposed condition then falls through to the safety flag, which is the safe direction.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-06  CR-016 IS A PRESENCE-ONLY CONDITION ON AN OPTIONAL FIELD, OVER AN EXEMPLARY LIST
+--                                                                        [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='6755466b-35b9-4492-bdb8-7b97d3b9d73b', code='CR-016', ws ISO-14015-04,
+--   severity='warn', condition='information_gathering_method IS NOT NULL', clause_reference='§5.3.6'.
+-- Two separate problems in one row:
+-- (a) The field ws-04.information_gathering_method (id='14fb098a-77de-4278-987f-3cc17bad372b') is
+--     is_required=false, yet the gate makes it de-facto mandatory. Either the flag or the gate is
+--     wrong; the source supports keeping the flag false and dropping the gate, because -
+-- (b) EVIDENCE (printed p.11, PDF p.21, §5.3.6):
+--       "The assessor(s) should select and determine the methods to be used for effectively and
+--        efficiently gathering information for the EDD, depending on the specified objectives, scope
+--        and criteria." | "Examples of methods that can be used for gathering information are as
+--        follows: questionnaires, surveys and checklists; personal interviews; documentation review;
+--        observation; focus group discussions."
+--     The duty is to SELECT AND DETERMINE methods - not to pick one of five named examples. The
+--     five enum values are the five printed EXAMPLES; an assessor using a sixth legitimate method
+--     (§5.4.1 explicitly contemplates "Other information gathering techniques (e.g. surveys and
+--     questionnaires)") cannot record it, so a presence gate over the closed enum is an
+--     enforcement of EKOWAI's list, not the standard's.
+--   See S-11 for the enum itself.
+--
+-- delete from public.compliance_requirements where id = '6755466b-35b9-4492-bdb8-7b97d3b9d73b';
+--   ROLLBACK: re-insert code='CR-016', worksheet_template_id='0e890021-f75f-4397-853e-3de6d6c3ded2',
+--             severity='warn', condition='information_gathering_method IS NOT NULL',
+--             clause_reference='§5.3.6'.
+-- ALTERNATIVE if the check is wanted at all: keep it but move it onto the sentence that does carry
+-- an obligation - the plan content list - which is already gated by nothing:
+--   condition = 'assessment_plan_prepared == true'   (see S-16).
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-07  CR-008 IGNORES THE "EXTERNAL ASSESSOR" SCOPE OF ITS OWN CLAUSE    [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='9d102dc9-54a2-4836-8eb3-156ec4b56f01', code='CR-008', ws ISO-14015-03,
+--   severity='warn', condition='roles_responsibilities_established == true', clause_reference='§5.2.1'.
+-- EVIDENCE (printed p.6, PDF p.16, §5.2.1):
+--   "Where an external assessor is undertaking an EDD assessment on behalf of a client, roles and
+--    responsibilities should be established formally, considering the guidance provided in 5.2.2 to
+--    5.2.4. Where an EDD assessment is undertaken internally, this guidance can assist."
+-- The FORMAL establishment duty applies to the external case; internally the standard drops to
+-- "this guidance can assist". ws-01.assessment_type (id='98808251-f2b4-462d-ae6b-8db04946d8a5',
+-- enum self_internal | external) and ws-03.self_assessment (id='85e0c89a-15c8-4e2f-9ae4-4c428533210c')
+-- both carry the distinction already.
+--
+-- update public.compliance_requirements
+--    set condition = 'assessment_type != ''external'' or roles_responsibilities_established == true'
+--  where id = '9d102dc9-54a2-4836-8eb3-156ec4b56f01';
+--   ROLLBACK: update public.compliance_requirements set condition = 'roles_responsibilities_established == true'
+--             where id = '9d102dc9-54a2-4836-8eb3-156ec4b56f01';
+-- CAVEAT: the condition grammar's support for string comparison on an enum must be confirmed
+-- against evaluate.ts before this is applied; if it is not supported, prefer
+--   'self_assessment == true or roles_responsibilities_established == true'
+-- which uses only boolean operators. Flagged, not guessed.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-08  CR-010 DEMANDS PROVIDER-ROLE CLOSURE FROM AN ASSESSMENT WITH NO PROVIDER
+--                                                                        [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Prod row: id='8f661a8e-7146-466f-ae27-266e1a143560', code='CR-010', ws ISO-14015-03,
+--   severity='warn', condition='provider_roles_addressed == True', clause_reference='§5.2.5'.
+-- EVIDENCE (printed p.8, PDF p.18, §5.2.5):
+--   "The roles and responsibilities of an assessment provider are distinct from those of an
+--    assessor. An assessor may address their roles and responsibilities as well as those of the
+--    assessment provider, e.g. as a sole practitioner. For self-assessments, the organization should
+--    ensure that these roles and responsibilities have been addressed."
+-- The duty is real but the field is is_required=false, and the subclause is written around a case
+-- distinction (sole practitioner / self-assessment / separate provider) that the encoding does not
+-- represent. Lowest-risk correction is to align the gate with the field's own optionality rather
+-- than invent the case distinction:
+--
+-- delete from public.compliance_requirements where id = '8f661a8e-7146-466f-ae27-266e1a143560';
+--   ROLLBACK: re-insert code='CR-010', worksheet_template_id='156c5f48-70f7-4f3f-9f5c-5c517525df3c',
+--             severity='warn', condition='provider_roles_addressed == True', clause_reference='§5.2.5'.
+-- NR NOTE: the §5.2.5 duties are "informed by ISO 19011", which is not in the library. Any deeper
+-- encoding of this subclause caps at NR and must say so.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-09  31 OF 34 GATES CARRY NO source_quote                             [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Only CR-005 (§4.2.4), CR-022 (§5.4.3) and CR-031 (§6.2) have a source_quote - and all three are
+-- verbatim-correct against the PDF text layer, and all three are exactly the three gates with
+-- requires_attestation=true. The other 31 gates enforce a clause with nothing on the row to show
+-- the reader WHY. Under SR-1 that is not a wrong value, but it is an unattested one.
+-- The verbatim sentence for each of the 31 now exists on the corresponding FIELD row
+-- (verification_quote, written by iso-14015-md-verification-pack.sql). Backfilling gate.source_quote
+-- from those field quotes is mechanical and lossless, but source_quote is an encode-time column the
+-- md/VA pass has never written, so it is staged rather than taken.
+-- Example of the proposed shape (one of 31; the full set is generable from the pack):
+-- update public.compliance_requirements set source_quote =
+--   'A risk-based approach should be applied to the planning, conducting and reporting of the EDD assessment, to ensure that it is focused on material matters and achieving the objectives of the EDD assessment.'
+--  where id = '15e4cb86-22c6-4afa-8237-000b4ce69371';   -- CR-003, §4.2.2, printed p.5
+--   ROLLBACK: update public.compliance_requirements set source_quote = null where id = '15e4cb86-22c6-4afa-8237-000b4ce69371';
+-- ALSO NOTE: the three existing source_quotes carry no page reference. If the backfill is ratified,
+-- append " - printed p.N (PDF p.M)" to all 34 for consistency with the field rows.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-10  criteria_type CLOSES AN EXPLICITLY OPEN LIST                     [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Field ws-04.criteria_type, id='de7026ac-7ab6-4f6f-b0c8-91c80e4cb042', enum, is_required=false,
+--   5 values: legal_requirements | client_environmental_requirements | interested_party_requirements
+--             | technological_requirements | material_issues.
+-- EVIDENCE (printed p.10, PDF p.20, §5.3.4):
+--   "Criteria may include, but are not limited to:" followed by exactly those five bullets.
+-- The standard says IN SO MANY WORDS that the list is not exhaustive. The encoding closes it.
+-- An assessor whose criterion is, say, a lender's covenant or a site-specific consent order has no
+-- enum member for it.
+-- PROPOSED (add an open "other" member; the null-option widget already exists in the product):
+-- update public.fields set enum_values = enum_values || '[{"value":"other","label_de":"Sonstige (nicht abschliessende Liste)","label_en":"Other (the printed list is expressly not exhaustive)","order_index":6,"regulation_reference":"§5.3.4"}]'::jsonb
+--  where id = 'de7026ac-7ab6-4f6f-b0c8-91c80e4cb042';
+--   ROLLBACK: restore the 5-element array captured in the 2026-09-08 export
+--             (scripts/verification/export-fields.mjs ISO-14015).
+-- This is an enum edit and therefore a ratification item by the 2026-09-05 rule, not a fix.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-11  information_gathering_method CLOSES AN "Examples of ..." LIST     [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Field ws-04.information_gathering_method, id='14fb098a-77de-4278-987f-3cc17bad372b', 5 values.
+-- EVIDENCE (printed p.11, PDF p.21, §5.3.6):
+--   "Examples of methods that can be used for gathering information are as follows: questionnaires,
+--    surveys and checklists; personal interviews; documentation review; observation; focus group
+--    discussions."
+-- EVIDENCE (printed p.12, PDF p.22, §5.4.1):
+--   "Other information gathering techniques (e.g. surveys and questionnaires) may also be used."
+-- Same defect as S-10, with a second sentence in the standard explicitly contemplating methods
+-- outside the list. Same proposed remedy (add an "other" member), same rollback.
+-- update public.fields set enum_values = enum_values || '[{"value":"other","label_de":"Sonstige Methode","label_en":"Other method (the printed list is exemplary; §5.4.1 allows others)","order_index":6,"regulation_reference":"§5.3.6, §5.4.1"}]'::jsonb
+--  where id = '14fb098a-77de-4278-987f-3cc17bad372b';
+-- See also S-06: the gate over this enum should go regardless.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-12  sampling_technique CLOSES A "can include" LIST                    [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Field ws-04.sampling_technique, id='60565176-3786-4d5d-a8dc-46ae9e26c51d', 2 values
+--   (judgement_based | statistical), is_required=false, ungated.
+-- EVIDENCE (printed p.11, PDF p.21, §5.3.6):
+--   "Sampling techniques can include judgement based or statistical sampling."
+-- "can include" is open. The two values ARE the only two the standard names, so the risk is lower
+-- than S-10/S-11 and no invented value is present. Recorded for completeness; adding "other" here
+-- is optional and is the same edit shape.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-13  TWO ENUMS REST ON PERMISSIVE LISTS - recorded, NO change proposed [ ] RATIFIED (as noted)
+-- --------------------------------------------------------------------------------------------
+-- (a) ws-06.consequence_judgement_factor, id='ee6da654-e0eb-44fd-93f1-ab9c7e3ec21f', 10 values.
+--     EVIDENCE (printed p.14, PDF p.24, §5.5.3): "In exercising judgement, the following may be
+--     considered:" followed by exactly ten bullets running to printed p.15. The 10 encoded values
+--     match the 10 printed bullets 1:1 - no value is invented and none is missing. The list is
+--     permissive but not declared open, so it is left as encoded.
+-- (b) ws-06.environmental_issue_outcome, id='ab9894b3-f42a-4c67-9d78-237da7bf5d7f', 5 values.
+--     EVIDENCE (printed p.14, PDF p.24, §5.5.2): "...can result in identification of: liabilities or
+--     benefits to the organization; effects on the assessee's or the client's public image; other
+--     risks and opportunities."
+--     The encoding splits three printed bullets into five values (liability/benefit from bullet 1;
+--     public_image_effect from bullet 2; risk/opportunity from bullet 3). The split is EKOWAI
+--     granularity, not standard wording, but it does NOT widen or narrow the printed domain and it
+--     leaves no printed outcome uncovered. Left as encoded; recorded so the provenance is visible.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-14  clause_reference RETAGS                                          [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- (a) ws-01.asset_identified, id='1de21901-696e-424e-9689-5fbd4e342389', clause_reference='§1, §3.4'.
+--     Clause 1 is Scope and imposes nothing; §3.4 is the term definition of "asset". The actual
+--     obligation is EVIDENCE (printed p.13, PDF p.23, §5.4.3):
+--       "The assessor should confirm the physical boundaries of the asset and the limits of any
+--        associated operations in accordance with the assessment scope and plan."
+--     update public.fields set clause_reference = '§5.4.3 (terms: §3.4)' where id = '1de21901-696e-424e-9689-5fbd4e342389';
+--       ROLLBACK: update public.fields set clause_reference = '§1, §3.4' where id = '1de21901-696e-424e-9689-5fbd4e342389';
+--
+-- (b) Three ws-01 fields are tagged to Introduction subclauses:
+--       assessment_purpose  id='c7b86d1a-25cb-440e-90fa-d30a1b05e5e9'  clause_reference='§0.1'
+--       assessment_type     id='98808251-f2b4-462d-ae6b-8db04946d8a5'  clause_reference='§0.2'
+--       evaluation_basis    id='8e5fe5fe-7fab-4d8a-858e-fe879dcbed10'  clause_reference='§0.3'
+--     The Introduction (printed pp.vi-vii) is real printed text and the quotes are verbatim, but it
+--     is not a numbered normative clause of an ISO deliverable. Proposal is to make that visible in
+--     the tag rather than to move the field:
+--     update public.fields set clause_reference = 'Introduction §0.1 (non-normative)' where id = 'c7b86d1a-25cb-440e-90fa-d30a1b05e5e9';
+--     update public.fields set clause_reference = 'Introduction §0.2 (non-normative)' where id = '98808251-f2b4-462d-ae6b-8db04946d8a5';
+--     update public.fields set clause_reference = 'Introduction §0.3 (non-normative); see §5.4.5' where id = '8e5fe5fe-7fab-4d8a-858e-fe879dcbed10';
+--       ROLLBACK: restore '§0.1' / '§0.2' / '§0.3' respectively.
+--
+-- (c) Three gates carry an unprefixed clause_reference where every sibling uses "§":
+--       CR-005 id='2e0190dd-4293-48ac-9a8b-0ace7aef3c07' = '4.2.4'
+--       CR-022 id='ff7807f8-b3eb-457a-9f72-6ceea518e784' = '5.4.3'
+--       CR-031 id='43b4a42f-a3ad-4b03-90af-3e53863e72c7' = '6.2'
+--     Cosmetic only (they are the three gates that carry a source_quote, so they were clearly
+--     hand-entered on a different pass). Normalise if the backfill in S-09 is ratified.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-15  is_required REVIEW - three flags that outrun their printed qualifier
+--                                                                        [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- (a) ws-05.safety_requirements_followed, id='bd8ed115-69f3-4c49-b1cb-75016ddccb84', is_required=true.
+--     "...when visiting/inspecting the asset" (printed p.13). Conditional. See S-05; if S-05 is taken
+--     the flag can stay, since the gate then carries the predicate.
+-- (b) ws-05.activities_observed, id='a03c09a7-2607-458d-8cbf-100fcbefa545', is_required=true.
+--     EVIDENCE (printed p.12, PDF p.22, §5.4.3): "The assessor should, where practicable, support
+--     observations with photographic and/or written records in accordance with the assessment plan."
+--     and (printed p.13, §5.4.3): "Where the assessor is unable to gain access to any part of the
+--     asset subject to the assessment, this limitation should be recorded in the assessment report."
+--     The standard anticipates observation being impossible. is_required=true is defensible for the
+--     top-level flag (the assessor must say yes or no) but CR-021 warns on a legitimately-blocked
+--     assessment. Prefer pairing with access_limitation_recorded:
+--     update public.compliance_requirements
+--        set condition = 'access_limitation_recorded == true or activities_observed == true'
+--      where id = '4c2c1025-d2d0-454f-b840-c50f603c267b';   -- CR-021
+--       ROLLBACK: update public.compliance_requirements set condition = 'activities_observed == true'
+--                 where id = '4c2c1025-d2d0-454f-b840-c50f603c267b';
+-- (c) ws-04.assessment_plan_prepared, id='0fc1ff1c-209e-4f7d-9468-88635ddb350b', is_required=true,
+--     description enumerates the twelve plan items. EVIDENCE (printed p.11, PDF p.21, §5.3.7):
+--     "The assessment plan should include the following, where applicable:". The ITEMS are
+--     "where applicable"; the PLAN itself is not qualified ("Once it has been agreed that an
+--     assessment will be conducted, it should be planned", §5.3.1, printed p.8). is_required=true is
+--     CORRECT for the flag. NO CHANGE - recorded as an explicit negative.
+-- (d) ws-03.assessee_access_provided, id='708e494a-8329-4d3d-ade9-7fd8ce29e607', is_required=false.
+--     CORRECT: "The role of the representative of the assessee does not apply if the assessment is
+--     undertaken without the knowledge of the assessee, or if the asset is one for which no
+--     responsible party can be identified." (printed p.7, §5.2.3). NO CHANGE - explicit negative.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-16  ENFORCEMENT COVERAGE - 21 of 54 fields are ungated, 8 of them is_required=true
+--                                                                        [ ] RATIFIED
+-- --------------------------------------------------------------------------------------------
+-- Ungated fields (no gate names them in any condition):
+--   ws-01 assessment_purpose [REQ], assessment_type [REQ], business_consequences_in_scope [REQ],
+--         evaluation_basis [REQ]
+--   ws-03 assessee_access_provided, party_role [REQ], self_assessment
+--   ws-04 criteria_type, remote_assessment_used, sampling_technique, assessment_plan_prepared [REQ],
+--         scope_boundary_type, priority_areas_identified
+--   ws-05 observation_category, access_limitation_recorded, interviewee_category
+--   ws-06 environmental_issue_outcome, consequence_judgement_factor
+--   ws-07 report_provided [REQ]
+--   ws-08 competence_area, competence_class
+-- Two of these are structurally odd rather than merely uncovered:
+--   * ws-04.assessment_plan_prepared is ungated while ws-04.plan_approved_by_client IS gated
+--     (CR-017). The encoding enforces approval of a plan whose existence it never checks.
+--   * ws-07.report_provided is ungated while its two dependants (mandatory_content_included CR-029,
+--     findings_qualified CR-030) are gated. Same inversion.
+-- The rest are enum detail fields or genuinely optional records, and leaving them ungated is
+-- consistent with the standard's modality.
+-- PROPOSED (two gates, both warn - block remains undefensible, see the governing fact above):
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, requires_attestation)
+--   values ('0e890021-f75f-4397-853e-3de6d6c3ded2','CR-035','warn','assessment_plan_prepared == true','§5.3.1, §5.3.7',false),
+--          ('768e8bf7-25c7-4d0e-aa61-0d3d789b716e','CR-036','warn','report_provided == true','§6.1',false);
+--   ROLLBACK: delete from public.compliance_requirements where code in ('CR-035','CR-036')
+--             and worksheet_template_id in ('0e890021-f75f-4397-853e-3de6d6c3ded2','768e8bf7-25c7-4d0e-aa61-0d3d789b716e');
+-- NOTE: the exact insert column list must be checked against the live table before use; this block
+-- shows intent, not a ready statement.
+
+
+-- --------------------------------------------------------------------------------------------
+-- S-17  INFORMATIVE-ANNEX SOURCING - recorded, NO required flag rests on one
+--                                                                        [ ] RATIFIED (as noted)
+-- --------------------------------------------------------------------------------------------
+-- Annexes A, B, C and D are each printed with "(informative)" directly under the annex letter
+-- (printed pp.19, 22, 24, 25). Three encoded artefacts draw on them:
+--   ws-05.observation_category   (Annex B members)   is_required=FALSE, ungated  -> OK
+--   ws-05.interviewee_category   (Annex C members)   is_required=FALSE, ungated  -> OK
+--   ws-05.documents_reviewed     (Annex A examples)  is_required=true, gated CR-019
+--     but its obligation comes from the NORMATIVE §5.4.2 sentence ("The assessor should collect and
+--     review documents and records..."), not from Annex A; Annex A only supplies examples. -> OK
+-- No required flag and no gate on this standard rests on an informative annex. Explicit negative.
+
+
+-- ============================================================================================
+-- AUDIT CHECKLIST - RESULTS CLOSED AS EXPLICIT NEGATIVES (so their absence is auditable)
+-- ============================================================================================
+-- empty conditions .................. 1 FOUND (CR-028) -> S-01
+-- condition = 'TRUE' ................ NONE. No gate has a literal-true condition.
+-- membership over the whole enum domain .. NONE. No gate performs an IN/membership test at all;
+--                                    the only non-boolean condition in the whole set is CR-016's
+--                                    IS NOT NULL.
+-- IS NOT NULL on a boolean .......... NONE. The single IS NOT NULL (CR-016) is on an enum. It is
+--                                    still a presence-only condition on an optional field -> S-06.
+-- tautology over an equation output . NONE POSSIBLE. 0 equations exist and the source prints no
+--                                    formula (see the pack header).
+-- ">= 0" floor on a non-negative quantity .. NONE POSSIBLE. 0 numeric fields; all 54 are boolean
+--                                    (40) or enum (14); every unit is '-'.
+-- gate restating an engine formula .. NONE POSSIBLE. Same reason.
+-- presence-only condition hiding a printed limit .. NONE. There is no printed limit anywhere in
+--                                    ISO 14015:2022 to hide. CR-016 hides a list, not a limit -> S-06.
+-- AND/OR inversion, OR-collapse ..... NONE POSSIBLE. Not one of the 34 conditions contains an
+--                                    AND, an OR or a negation; 32 are a bare `x == true/True`,
+--                                    1 is IS NOT NULL, 1 is empty.
+-- inverted conditions ............... NONE. Every boolean gate asserts the affirmative sense that
+--                                    its field's label and description describe.
+-- boundary inclusivity .............. NONE POSSIBLE. No comparison operator appears in any condition.
+-- exact float equality on computed quantities .. NONE POSSIBLE. No numeric field, no equation.
+-- duplicate gates / strict subsets .. NONE. All 34 conditions are pairwise distinct (checked
+--                                    mechanically); no condition is a subset of another because
+--                                    none is a conjunction.
+-- mis-homed gates ................... NONE. Every gate reads only fields belonging to its own
+--                                    worksheet (checked mechanically, field->worksheet map).
+--                                    The cross-worksheet read PROPOSED in S-02 would be the first,
+--                                    and is deliberate.
+-- unsatisfiable gates / uncovered enum values .. 1 CLASS FOUND: CR-013 (S-03), CR-027 (S-02) and
+--                                    CR-023 (S-04) can each only be cleared by asserting something
+--                                    the standard says need not be true. No enum has an uncovered
+--                                    printed outcome: every enum's values were checked 1:1 against
+--                                    the printed list (party_role 4/4, criteria_type 5/5,
+--                                    information_gathering_method 5/5, sampling_technique 2/2,
+--                                    scope_boundary_type 3/3, observation_category 4/4,
+--                                    interviewee_category 3/3, environmental_issue_outcome 3 printed
+--                                    bullets -> 5 values (S-13b), consequence_judgement_factor 10/10,
+--                                    competence_area 12/12 Table 1 rows, competence_class 2/2
+--                                    Table 1 columns, assessment_purpose 4/4, assessment_type 2/2,
+--                                    evaluation_basis 2/2).
+-- invented values or ranges ......... NONE. No enum member, label or description asserts a value,
+--                                    limit or range that is not printed. Nothing to invent: the
+--                                    standard prints no numbers.
+-- enums closing an "e.g."/"not limited to" list .. 3 FOUND: criteria_type (S-10, the list is
+--                                    EXPRESSLY "not limited to"), information_gathering_method
+--                                    (S-11, "Examples of methods"), sampling_technique (S-12,
+--                                    "can include"). Two more are permissive but complete (S-13).
+-- missing scope predicates .......... 4 FOUND: CR-027 (S-02), CR-013 (S-03), CR-022 (S-05),
+--                                    CR-008 (S-07). Plus CR-023 (S-04) and CR-010 (S-08) which are
+--                                    the same defect seen from the optionality side.
+-- required flags off an INFORMATIVE annex .. NONE -> S-17.
+-- unit mismatches ................... NONE POSSIBLE. Every unit is '-'; no quantity is encoded.
+-- equation outputs consumed by nothing .. NONE POSSIBLE. 0 equations.
+-- worksheets with zero fields ....... NONE. 8 worksheets, field counts 5/6/6/13/11/4/4/5 = 54.
+-- source_quotes carrying no requirement .. NONE of the 3 that exist. CR-005, CR-022 and CR-031 each
+--                                    quote a sentence containing an explicit "should". But 31 of
+--                                    34 gates carry NO source_quote at all -> S-09.
+-- stitched quotes with no elision marker .. NONE in the pack: every multi-fragment quote joins its
+--                                    runs with " | " and every trimmed list says so in
+--                                    verification_note.
+-- quotes cropped past their obligation .. NONE. Every quote in the pack retains its modal verb and
+--                                    its object; where a printed run had to be cut (OCR damage or
+--                                    length), the cut is at a list-item boundary and the
+--                                    verification_note names what was left out and why.
+-- wrong page refs ................... NONE FOUND. The printed-to-PDF offset was verified at both
+--                                    ends of the arabic body (PDF p.11 footer "1", PDF p.36 footer
+--                                    "26") and every quote's page was read off the page it was
+--                                    taken from.
+-- block gates on soft text .......... NONE POSSIBLE AND NONE PRESENT. 0 block gates exist, and the
+--                                    document contains no "shall" in its body that could justify
+--                                    one. This is the headline finding, not a footnote.
+-- phantom fields (enum tokens materialised as fields) .. NONE. All 54 fields have a label_de, a
+--                                    description and a clause_reference (checked mechanically).
+-- ============================================================================================
