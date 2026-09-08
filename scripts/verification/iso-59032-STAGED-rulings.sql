@@ -1,0 +1,534 @@
+-- ISO-59032 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, ISO/TR 59032:2024, printed + PDF page) and its rollback inverse. Mark a block
+-- "RATIFIED" only after Alvaro decides; nothing here may be applied on a subagent's judgement.
+--
+-- Source: ISO-TR-59032-2024-Circular-Economy-Review-of-Existing-Value.txt
+--         = PD ISO/TR 59032:2024, the BSI Published Document implementing ISO/TR 59032:2024,
+--         Technical Report, First edition 2024-05, English (pdftotext -layout -enc UTF-8, 51 pp).
+--         Page convention: printed page = PDF page - 8 (body); no blank filler pages in the body.
+--
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--         "condition_expression") and has NO "active" column - the statements below reflect that.
+--         The evaluator accepts "== True" as well as "== true" (src/lib/compliance/evaluate.ts),
+--         so that casing is cosmetic and is NOT staged as a defect.
+--
+-- ##########################################################################################
+-- ## THE "shall" INVENTORY OF THE NORMATIVE PART: IT IS EMPTY. THERE IS NO NORMATIVE PART. ##
+-- ##########################################################################################
+--   Clauses 1-5 are the entire body; there are no annexes. Mechanical census over all 51 pages:
+--       shall 1 | should 2 | must 0 | may 10 | can 40 | need to / ought to / it is necessary /
+--       mandatory: 0.
+--   The 1 "shall" and both "should" occurrences are in the BOILERPLATE ISO FOREWORD (printed
+--   p.iv / PDF p.6) and none is a duty on a reader:
+--       "ISO shall not be held responsible for identifying any or all such patent rights."
+--       "...the different approval criteria needed for the different types of ISO document
+--        should be noted."
+--       "Any feedback or questions on this document should be directed to the user's national
+--        standards body."
+--   The three body-text "required" sentences (printed pp.37, 37, 39) are descriptive findings of
+--   the authors' survey about what a value network needs in order to work, carry no modal verb,
+--   and place no duty on a reader. Under ISO/IEC Directives Part 2 they are not requirements:
+--   a Technical Report cannot contain any.
+--   => THERE IS NO SENTENCE ANYWHERE IN THIS DOCUMENT ON WHICH A BLOCK GATE COULD REST, AND NO
+--      SENTENCE ON WHICH A "warn" GATE CAN REST AS A COMPLIANCE RULE RATHER THAN A PROMPT.
+--
+-- Encoding-vs-source summary for the modality question the brief asks:
+--   WHAT THE SOURCE HAS : 0 requirements, 0 recommendations, 0 permissions addressed to a reader.
+--                         What it has is 15 case studies and a 7-page discussion of them.
+--   WHAT THE ENCODING DID: 18 compliance_requirements rows, all severity='warn'. 16 of them carry
+--                         a machine-evaluable condition; 2 carry an empty one. NONE is 'block'.
+--   DO THEY MATCH?        Partly. Getting zero block gates right is the one thing this encoding
+--                         got right, and it should be said plainly: no block gate exists, so the
+--                         worst outcome (a TR hard-failing a real project) does not occur today.
+--                         But 16 machine conditions asserting "X must be true" over an informative
+--                         review still overstate the source, and 13 of the 16 are conditions on
+--                         properties the TR merely OBSERVED in its own 15 examples.
+--
+-- ==========================================================================================
+-- S-1  HEADLINE  A TECHNICAL REPORT IS CARRIED IN A COMPLIANCE TOOL AS IF IT WERE A STANDARD
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- EVIDENCE (all verbatim):
+--   Cover, PDF p.3 (rendered and read as an image): "Technical Report" / "ISO/TR 59032" /
+--     "First edition 2024-05". Running header on every body page: "Technical Report".
+--   BSI national foreword, PDF p.2: "This publication is not to be regarded as a British
+--     Standard." and "Compliance with a Published Document cannot confer immunity from legal
+--     obligations."
+--   Clause 2, printed p.1 (PDF p.9): "There are no normative references in this document."
+--   Clause 1, printed p.1 (PDF p.9): "This document reviews the characteristics and structures of
+--     some existing value networks as examples in accelerating a circular economy transition
+--     process."
+--
+-- WHAT IT MEANS. A Technical Report is informative from cover to cover. It states no requirements,
+-- so there is nothing to conform to, nothing to certify against, and nothing an auditor can hold a
+-- project to. A compliance tool that lists ISO/TR 59032 beside DWA-A-138-1 or ISO 9001 is telling
+-- its user something false by placement alone: that this document can be complied with. The
+-- concrete harms, in order of seriousness:
+--   (1) A "conformity" statement naming ISO/TR 59032 would be unfounded. The Konformitaets-
+--       erklaerung machinery treats every attached standard alike; the TR would appear in it as a
+--       standard the project conforms to. No such conformity is possible.
+--   (2) An engineer answering these 47 questions can reasonably believe they are discharging an
+--       obligation. They are filling in a survey questionnaire the ISO/TC 323 authors used in 2023
+--       to collect case studies for a review published in 2024.
+--   (3) The 16 evaluable gates report pass/fail against properties the TR observed in 15 examples.
+--       A "fail" here means "your project is unlike the 15 cases ISO/TC 323 happened to collect" -
+--       which is not a defect, and must never be presented as one.
+--
+-- WHAT PROD CLAIMS TODAY (checked, 2026-09-08):
+--   standards.version = 'First edition 2024-05 (ISO/TR 59032:2024)'  <- HONEST. The version string
+--       does carry the TR designation and the correct edition/date. This is right and should stay.
+--   standards.code    = 'ISO-59032'                                  <- the "TR" marker is DROPPED.
+--       In the picker this is indistinguishable from a conformable standard. Everywhere the UI
+--       shows the code rather than the version, the document presents as a standard.
+--
+-- PROPOSED (needs Alvaro; this is a classification and enforcement change, so it is staged, not
+-- applied). Three options, cheapest first; option B is the recommended minimum:
+--   A. Label only - rename the code so the document type travels with it everywhere:
+--        update public.standards set code = 'ISO-TR-59032' where code = 'ISO-59032';
+--        -- rollback: update public.standards set code = 'ISO-59032' where code = 'ISO-TR-59032';
+--        -- WARNING: the code is the join key used by every pack, export and order file in
+--        -- scripts/verification/. Renaming it invalidates those references. Prefer a separate
+--        -- document_type / is_normative column over renaming the key.
+--   B. Label + de-enforce - keep the code, carry the type as data, and stop the 18 rows from
+--      reading as compliance rules:
+--        -- (schema, SR-4 auto-approved as infrastructure for an approved mandate:)
+--        -- alter table public.standards add column if not exists document_type text;
+--        update public.standards set document_type = 'technical_report'
+--          where code = 'ISO-59032';
+--        -- rollback: update public.standards set document_type = null where code = 'ISO-59032';
+--      plus the per-gate treatment in S-2..S-7 below.
+--   C. Withdraw - remove ISO-59032 from the attachable library and keep it as reference reading.
+--      Rollback = re-attach. This is the only option that fully removes harm (1).
+--
+-- WHATEVER IS CHOSEN: the finalize/Konformitaetserklaerung path must not be able to name this
+-- document as one the project conforms to. That is the load-bearing part of this block.
+
+-- ==========================================================================================
+-- S-2  TWO GATES HAVE AN EMPTY CONDITION AND CAN NEVER FIRE
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: CR-001 (adffda8c-2e0d-46d5-995d-777ecb557971, ws ISO-59032-01, clause '§1, §2') and
+--   CR-018 (d6bab12f-c5a7-4ea3-846a-46bb51935199, ws ISO-59032-01, clause '§1') both have
+--   condition = '' (empty string). Both have requires_attestation = false.
+-- VERIFIED IN CODE, not assumed: src/lib/compliance/evaluate.ts line 538 reads
+--   "if (!condition || !condition.trim()) return { kind: 'manual' };"
+--   so an empty condition never machine-evaluates. With requires_attestation=false these two rows
+--   also demand no attestation. They are dead entries that sit at 'manual' forever, contributing
+--   nothing but two permanently unresolved items on the registration worksheet.
+-- They are also duplicates of each other in every respect that matters: same worksheet, same empty
+--   condition, overlapping clause refs (§1,§2 and §1).
+-- NOTE: clause §2 is "There are no normative references in this document." - there is nothing there
+--   to gate on, which is very likely why the condition was left empty.
+-- PROPOSED: delete both, or (if rows must be preserved) leave them empty and exclude empty-
+--   condition rows from the outstanding-items count.
+--   -- delete from public.compliance_requirements
+--   --  where id in ('adffda8c-2e0d-46d5-995d-777ecb557971','d6bab12f-c5a7-4ea3-846a-46bb51935199');
+--   -- rollback: re-insert with severity='warn', condition='', clause_reference='§1, §2' / '§1',
+--   --           worksheet_template_id='369a9a81-169b-4a57-a6c7-11afe01e6f2b',
+--   --           requires_attestation=false, source_quote=null.
+
+-- ==========================================================================================
+-- S-3  CR-005 IS AN EFFECTIVE NO-OP: IS NOT NULL OVER SIX FIELDS THAT ARE ALREADY is_required
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: CR-005 (807e3a0a-027c-45be-8546-1b8a4eaa07b8, ws ISO-59032-03) is
+--   "facilitators_designers IS NOT NULL AND participating_companies IS NOT NULL AND
+--    motivation_of_participants IS NOT NULL AND methodology_creating_maintaining IS NOT NULL AND
+--    common_infrastructures IS NOT NULL AND case_source IS NOT NULL"
+--   All six referenced fields already carry is_required = true in public.fields:
+--     facilitators_designers f2f63e34 req=true | participating_companies a371b38d req=true
+--     motivation_of_participants b224544c req=true | methodology_creating_maintaining acdfa5be req=true
+--     common_infrastructures 0dfc9aa3 req=true | case_source ef80a79f req=true
+--   So the gate can only fail in a state the required-field validation already blocks. It adds no
+--   constraint whatsoever - it is a presence-only conjunction restating is_required six times.
+-- It is ALSO a presence-only condition standing in for a printed limit that does not exist: the
+--   source prescribes no content for any of these six, so there is nothing stronger to encode.
+-- PROPOSED: delete CR-005 (the required-field validation already does its job), or keep it purely
+--   as a worksheet-completeness prompt and say so in its description.
+--   -- delete from public.compliance_requirements where id='807e3a0a-027c-45be-8546-1b8a4eaa07b8';
+--   -- rollback: re-insert with the condition text above, severity='warn', clause_reference='§4.2',
+--   --           worksheet_template_id='9114a138-0dfc-4db1-94a2-a6bc3edb6124',
+--   --           requires_attestation=false, source_quote=null.
+
+-- ==========================================================================================
+-- S-4  CR-006 ENCODES A NUMBER LIFTED OUT OF A CASE-STUDY SAMPLE AS A THRESHOLD
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: CR-006 (89ce63dd-ff8f-4181-9583-c11a206f3d4a, ws ISO-59032-04) is
+--   "participating_sector_count >= 2", clause_reference '§5.1'.
+-- EVIDENCE, printed p.33 (PDF p.41), verbatim:
+--   "All the examples have at least two participating sectors and achieve a flow modification of
+--    products and materials (see Table 17)."
+-- This is an OBSERVATION about the 15 examples ISO/TC 323 collected, in the past-looking voice of
+--   a review ("All the examples have"). It is not a printed minimum. The "2" in the gate is the
+--   smallest per-example sector count in Table 17's own summary row, i.e. a number read off a
+--   sample of 15 case studies and promoted to a limit a user's project must clear. This is exactly
+--   the defect class the brief names: a number lifted out of a worked example / case study and
+--   encoded as a limit.
+-- (Table 17's summary row is layout-damaged in the extraction - the fifteen per-example counts
+--  landed on the "Other services" line as the digit run "446884447322643", min 2, max 8. It is
+--  named here only to explain where the "2" came from; no cell is quoted anywhere in the pack.)
+-- PROPOSED: delete CR-006, or convert it to a non-enforcing note.
+--   -- delete from public.compliance_requirements where id='89ce63dd-ff8f-4181-9583-c11a206f3d4a';
+--   -- rollback: re-insert condition='participating_sector_count >= 2', severity='warn',
+--   --           clause_reference='§5.1',
+--   --           worksheet_template_id='cda32cad-07f7-4695-896e-86ed056b4f3b',
+--   --           requires_attestation=false, source_quote=null.
+
+-- ==========================================================================================
+-- S-5  OBSERVATION-AS-REQUIREMENT: CR-007, CR-010 (and the same class in CR-008, CR-009, CR-013)
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: gates that require a project to exhibit a property whose only warrant is that the TR's
+--   authors saw it in all or most of their 15 collected examples.
+--   CR-007 e28c6a51 ws-04 "cross_sectoral_collaboration == true"
+--       printed p.33: "Cross-sectoral collaboration is found in all of the examples."
+--   CR-010 b493f456 ws-06 "facilitator_present == true"
+--       printed p.35: "All of the examples have facilitators or designers of a business ecosystem
+--       for the value network."
+--   CR-008 db736f64 ws-05 "information_exchange_system == true"
+--       printed p.34: "A distinctive point of the examples is that they have an information
+--       exchange system as a common infrastructure between organizations."
+--   CR-009 c20360db ws-05 "ce_business_balance == true"
+--       printed p.34: "A good balance between the circular economy and business perspectives is
+--       the condition of compatibility for the value network model."
+--   CR-013 35595c2d ws-08 "information_sharing_platform == true"
+--       printed p.38: "An information sharing/exchange platform is a critical methodology for
+--       creating and maintaining a value network, as shown in Table 20."
+--   Every one of these sentences describes the sample. None addresses a reader. None has a modal
+--   verb. CR-009's sentence is the closest the whole body comes to a condition, and even it is a
+--   conclusion of the review, not an instruction.
+-- PROPOSED: with S-1 option B, none of these should evaluate as compliance rules; render them as
+--   informational prompts ("the TR observed this in its 15 examples - does your network do it?").
+--   Whatever mechanism S-1 settles on for de-enforcement covers all five; no per-row SQL is
+--   proposed here so that the five stay consistent with each other and with S-6.
+
+-- ==========================================================================================
+-- S-6  CATEGORY ERROR: THE AUTHORS' OWN CASE-SELECTION CRITERIA ENCODED AS PROJECT GATES
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: CR-002 (f4313422 "mutually_beneficial_collaboration == true"), CR-003 (96bd1d3a
+--   "commercial_flow_modification == true") and CR-004 (3c197c58 "multi_org_business_alliance ==
+--   true"), all ws ISO-59032-02, clause_reference '§4.1.4'.
+-- EVIDENCE, printed p.4 (PDF p.12), verbatim:
+--   "Fifteen examples were selected from the collected value network cases using the following
+--    criteria:
+--    a) Does the case have a mutually beneficial collaboration?
+--    b) Does the case achieve the flow modification of products and materials commercially?
+--    c) Does the case form a business alliance between multiple organizations?"
+-- §4.1.4 is titled "Selecting the examples". These are the editorial screening questions the TC
+--   applied, in the past tense, to decide which of the 99 submitted cases to write up in clause 4.2.
+--   They are a methodology note about how the report was assembled. Encoding them as gates makes a
+--   user's project answer an admissions test for a survey that closed before the TR was published
+--   in May 2024. This is a category error, not merely an over-strict gate.
+-- PROPOSED: covered by S-1's de-enforcement; additionally consider whether worksheet ISO-59032-02
+--   ("Ueberpruefungsmethode & Erhebungsprozess") should exist as a fillable worksheet at all - it
+--   asks the user to restate the TR's own survey method (see also S-9).
+
+-- ==========================================================================================
+-- S-7  FIVE GATES DEMAND == true ON FIELDS THAT ARE is_required = false
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: the field may legitimately be left empty, but the gate insists on the value true.
+--   CR-011 d1480b8c ws-07 "long_term_management_plan == true"      field bf25f4d2 is_required=false
+--   CR-012 3777870d ws-07 "long_term_financing_scheme == true"     field 9c463c68 is_required=false
+--   CR-015 d0096d3f ws-08 "evaluation_methods_present == true"     field 06f63a4e is_required=false
+--   CR-016 07d2219c ws-08 "government_cooperation == true"         field 00360bdb is_required=false
+--   CR-017 9c893799 ws-08 "iso59010_governance_alignment == true"  field f3be4570 is_required=false
+--   These are internally inconsistent: the encoding says "you need not answer" and simultaneously
+--   "the answer must be yes". In practice the gate sits pending forever on an unanswered optional
+--   field, or fails the moment an honest "no" is entered.
+--   NOTE this is NOT unsatisfiable - the boolean domain covers true - but it is contradictory.
+-- SOURCE CHECK on the anchoring text - every one is soft or observational, so even as a warn gate
+--   the strength is wrong:
+--   CR-011  printed p.37 "Therefore, in the value network, it is key to determine long-term
+--           management plans by collaborating with the participating organizations."  ("it is key")
+--   CR-012  printed p.37 "Therefore, a long-term financing scheme is required to develop
+--           sustainable finance."  (descriptive; what a value network needs, not a reader duty)
+--   CR-015  printed p.39 "...some indicators and evaluation methods for the impacts, values and
+--           costs of the implementation are required to create and maintain the value network."
+--   CR-016  printed p.38 "In that sense, cooperation with national and local governments matters
+--           and promotes future symbiosis."  ("matters and promotes")
+--   CR-017  printed p.39 Table 21 NOTE, and see S-15 - the criterion lives in a document we do not
+--           hold.
+-- PROPOSED: resolve the contradiction in one direction. Either set is_required=true on the five
+--   fields (NOT defensible - the source recommends at most), or drop the "== true" insistence:
+--   -- update public.fields set is_required = true
+--   --  where id in ('bf25f4d2-04df-4279-9a7c-6225504e068f','9c463c68-bb5e-4028-b9cd-0dd1511859aa',
+--   --               '06f63a4e-7398-4375-ae2c-d09593991fd6','00360bdb-558b-499f-8f7f-19d8c12176b4',
+--   --               'f3be4570-3fdc-44ad-92e7-26876ee1652a');
+--   -- rollback: the same update setting is_required = false.
+--   RECOMMENDED instead: leave is_required=false and de-enforce the five gates per S-1, because
+--   no sentence in a Technical Report can make a field required.
+
+-- ==========================================================================================
+-- S-8  NO GATE IN THIS STANDARD CARRIES A SOURCE QUOTE
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: all 18 rows in public.compliance_requirements for ISO-59032 have source_quote = NULL.
+--   18 of 18. Not one gate can show the reader the sentence it claims to enforce.
+--   The same is true of the 47 fields: every one has source_quote = NULL as imported. (The pack
+--   fills verification_quote, which is a different column; source_quote stays untouched.)
+-- This is what let S-4, S-5 and S-6 pass unnoticed at encode time: with no quote attached, nobody
+--   had to look at whether the anchoring sentence was a requirement or an observation.
+-- PROPOSED: backfill source_quote on the 16 evaluable gates from the verification_quote values the
+--   pack writes onto their consequent fields (they are the same sentences, already page-referenced),
+--   and leave CR-001/CR-018 without one because there is nothing to quote (see S-2).
+--   Staged rather than applied because a source_quote implies the gate is legitimate, and S-1 has
+--   to settle whether these gates should exist at all before they are given citations.
+
+-- ==========================================================================================
+-- S-9  TWO FIXED FACTS OF THE TR'S OWN SURVEY ARE EXPOSED AS EDITABLE PROJECT INPUTS
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: on worksheet ISO-59032-02,
+--   cases_collected_count    2b78a3be  data_type=number, is_required=false
+--       printed p.4:  "There were 99 cases collected that fulfilled the questionnaire requirements
+--                      for further analysis."
+--   examples_selected_count  d386e867  data_type=number, is_required=false
+--       printed p.4:  "Fifteen examples were selected from the collected value network cases using
+--                      the following criteria:"
+--       printed p.5:  "...were selected as examples of value networks from the 99 worldwide
+--                      examples collected."
+-- 99 and 15 are constants of a survey ISO/TC 323 completed before publication. They are not, and
+--   can never become, data about a user's project. Presenting them as blank number fields invites
+--   an engineer to type something - and whatever they type is meaningless.
+-- Under the doctrine's data_class these are standard_fixed (PDF page present, immutable), and a
+--   standard_fixed value that is UI-editable is a finding by the validator rule.
+-- PROPOSED: either deactivate the two fields, or make them read-only reference values pre-filled
+--   with 99 and 15 and labelled as facts of the TR's survey.
+--   -- update public.fields set is_required = false, description = description ||
+--   --   ' [reference constant of the ISO/TR 59032 survey - not project data]'
+--   --  where id in ('2b78a3be-b5af-4503-9c8f-c6eb1dc519f3','d386e867-13b9-4721-b1d9-303622642fe2');
+--   -- rollback: restore the two description strings recorded in the 2026-09-08 export:
+--   --   2b78a3be 'Number of cases collected that fulfilled questionnaire requirements (TR reports 99).'
+--   --   d386e867 'Number of examples selected for analysis (TR reports 15).'
+--   NOTE the encoder already wrote "(TR reports 99)" / "(TR reports 15)" into the descriptions, so
+--   it knew these were the report's own numbers and materialised them as inputs anyway.
+
+-- ==========================================================================================
+-- S-10  vn_term_defined IS A GLOSSARY PICKER MATERIALISED AS A DATA FIELD
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: ISO-59032-01.vn_term_defined (9dd386df, enum, is_required=false) offers the six
+--   clause-3 terms as selectable values, its own description reading "Selector over the six
+--   clause-3 terms & definitions." Selecting one records nothing about the project; the field
+--   captures no datum. It is a definitions list rendered as a question.
+--   It is not a phantom field in the usual sense (it has a label, a clause and a description, and
+--   its enum carries the definition texts), so no deactivation is proposed on those grounds - but
+--   it should be reviewed as a reference widget, not a field.
+-- The enum's label_en strings PARAPHRASE rather than quote clause 3 - e.g. prod has
+--   "Organization - person or group of people with own functions, responsibilities, authorities and
+--    relationships to achieve its objectives"
+--   where printed p.2 (PDF p.10) reads
+--   "person or group of people that has its own functions with responsibilities, authorities, and
+--    relationships to achieve its objectives".
+--   Harmless in a label, but it means the enum must not be treated as a source of definition text.
+-- PROPOSED: move the six definitions into worksheet help/reference content and drop the field, or
+--   keep it and mark it non-participating in completeness counts. Rollback = re-create the field
+--   with the enum_values JSONB recorded in the 2026-09-08 export.
+
+-- ==========================================================================================
+-- S-11  governance_dimension FLATTENS TWO ORTHOGONAL AXES INTO ONE FIELD
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: ISO-59032-08.governance_dimension (c2468260, enum, is_required=true, clause 'Tab. 21')
+--   offers four values: benefit_increase, impartiality, inclusivity, transparency_accountability.
+-- EVIDENCE - Table 21's printed header, printed p.39 (PDF p.47), read from the rendered page:
+--   the caption is "Table 21 - Classification of methodologies in terms of benefits increase AND
+--   governance in the value network", and the header has "Benefit increase" as a standalone column
+--   with a separate spanning header "Governance" over the remaining three (Impartiality,
+--   Inclusivity, Transparency and accountability). The extraction preserves that structure:
+--       "                                                            Governance
+--        Types of methodology                    Benefit                          Transparency
+--                                                increase Impartiality Inclusivity        and
+--                                                                                  accountability"
+--   So "Benefit increase" is NOT a governance dimension. The field name says governance_dimension
+--   and the value set mixes a benefit axis with a governance axis - two orthogonal axes in one
+--   field, which also makes the field's own name wrong for a quarter of its domain.
+-- PROPOSED: split into two fields (benefit_increase boolean; governance_dimension over the three
+--   real governance columns), or rename the field to match its actual domain.
+--   -- rollback for a rename: update public.fields set symbol='governance_dimension' where id=
+--   --   'c2468260-a35f-4f9e-a1a9-15ffa0dcd2ca';   (record the new symbol before applying)
+
+-- ==========================================================================================
+-- S-12  TWO ENUMS CLOSE A LIST THE SOURCE LEAVES OPEN
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING (a): ISO-59032-07.motivation_type (345f9a80) is a closed 12-value enum over Table 18's
+--   rows. The source frames Table 18 as a sample, not a taxonomy - printed p.36 (PDF p.44):
+--     "Some of the typical motivations related to the examples are shown in Table 18."
+--   "Some of the typical" is explicitly open. A closed enum tells the engineer these twelve are
+--   all there is.
+-- FINDING (b): ISO-59032-05.common_infrastructure_type (7cf57274) is a closed 6-value enum built
+--   from one sentence, printed p.34 (PDF p.42), that enumerates what was observed across the 15
+--   examples ("In addition to the information exchange system, common schemes exist for ... "),
+--   closing with "These systems can be recognized as a common structure for building value
+--   networks." - "can be recognized as" is a permissive characterisation of a sample of 15, not an
+--   exhaustive classification.
+-- NOT A FINDING, stated so its absence is auditable: sector_category (Table 17, 45 values) carries
+--   its own catch-alls ("Other" in Manufacturing, "Other services", "Extra-territorial") and is
+--   effectively closed by design; questionnaire_item_provided (a-i) and selection_criterion_met
+--   (a-c) close lists the source itself closes; motivation_horizon (2) and governance_dimension (4)
+--   match printed table columns exactly; impact_category (3) matches the Impacts sub-rows.
+-- PROPOSED: add an "other (specify)" value to motivation_type and common_infrastructure_type, or
+--   pair each with a free-text field. Rollback = remove the added enum value from enum_values JSONB.
+
+-- ==========================================================================================
+-- S-13  EIGHT OF THE NINE ENUMS ARE SINGLE-SELECT OVER AXES THAT ARE MULTI-VALUED IN THE SOURCE
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- VERIFIED IN CODE, not assumed: src/components/worksheet/dynamic-field.tsx renders data_type
+--   'enum' as a SegmentedControl (a radiogroup) when there are <= 4 options and as a single
+--   <Select> otherwise, and the stored value is the scalar { type: 'enum', value: string }. There
+--   is NO multi-select field type in this app. So every 'enum' field here holds exactly one value.
+-- The source, however, records several values at once on every one of these axes:
+--   questionnaire_item_provided c320af88  §4.1.2 collected ALL NINE items a)-i) for each case.
+--   selection_criterion_met     23a8580d  §4.1.4's three criteria were applied together (see S-14).
+--   sector_category             efddfee2  Table 17 shows 2-8 sectors ticked per example.
+--   impact_category             98e7b5ff  each case table lists social AND environmental AND
+--                                         economic impacts.
+--   common_infrastructure_type  7cf57274  a network can run several of the six schemes at once.
+--   motivation_type             345f9a80  Table 18 ticks several motivations per example.
+--   methodology_type            57615cd5  Table 20 ticks several methodologies per example.
+--   governance_dimension        c2468260  Table 21 maps one methodology to several columns.
+--   (the ninth, motivation_horizon c8d1bb5e, is genuinely one-of-two and is CORRECT as single-select.)
+-- Each of these eight forces the engineer to pick one of several true answers and silently discard
+--   the rest. This is a data-loss defect, not a cosmetic one.
+-- PROPOSED (needs a schema decision, so staged): introduce a multi-select data_type, or replace
+--   each of the eight with a set of booleans (one per enum value) mirroring the printed tick grid,
+--   which is what the tables actually are. Rollback = restore the enum field from the 2026-09-08
+--   export (enum_values JSONB recorded there).
+-- ADJACENT UI NOTE (app-wide, not ISO-59032-specific, recorded because it affects this standard's
+--   data honesty): for <= 4 options the SegmentedControl renders
+--   value={v ?? options[0]?.value ?? ''}, i.e. it DISPLAYS the first option when the stored value
+--   is null. Four fields here have <= 4 options - impact_category (3), selection_criterion_met (3),
+--   motivation_horizon (2), governance_dimension (4) - so all four look answered before anyone has
+--   answered them. Raise separately; do not fix inside a standard's data pack.
+
+-- ==========================================================================================
+-- S-14  DUPLICATE ENCODING: §4.1.4 IS ENCODED TWICE ON THE SAME WORKSHEET
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: worksheet ISO-59032-02 encodes the three §4.1.4 criteria twice over:
+--   as three booleans - mutually_beneficial_collaboration e9a5251e, commercial_flow_modification
+--     963f127a, multi_org_business_alliance 15e65d84 (all is_required=true, each with its own gate
+--     CR-002/003/004);
+--   AND as the single-select enum selection_criterion_met 23a8580d (is_required=true), whose three
+--     values are the same three criteria, its label_en strings being the criteria questions
+--     verbatim ("Does the case have a mutually beneficial collaboration? (4.1.4 a)" etc.).
+--   The enum is a strict subset of what the booleans already capture, and worse: because the
+--   criteria are conjunctive, the enum cannot express the state the booleans can.
+-- PROPOSED: drop selection_criterion_met and keep the three booleans (which match the conjunctive
+--   reading), subject to S-6 - if S-6 removes the §4.1.4 gates as a category error, both encodings
+--   should go together.
+--   -- rollback: re-create the field from the 2026-09-08 export (enum_values JSONB recorded there).
+
+-- ==========================================================================================
+-- S-15  iso59010_governance_alignment IS NOT REACHABLE FROM ANY DOCUMENT WE HOLD (NR)
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- FINDING: ISO-59032-08.iso59010_governance_alignment (f3be4570, boolean) asks whether the project
+--   aligns with ISO 59010's transparency and accountability provisions, and gate CR-017 requires
+--   the answer true.
+-- The Table 21 NOTE is verified verbatim, printed p.39 (PDF p.47):
+--   "NOTE Transparency and accountability correspond to clear member rights, clear roles and
+--    responsibilities of members, transparent decision-making processes, traceability mechanisms,
+--    and the fostering of trust-building and engagement in ISO 59010."
+--   That is the whole of what ISO/TR 59032 says on the subject. What alignment actually demands is
+--   defined in ISO 59010, which is NOT in the library. Per the doctrine's grades this half is NR:
+--   it depends on a document we do not hold and caps there, visibly.
+--   (§1 Scope, printed p.1, confirms the dependency: "This document complements ISO 59010 by
+--    providing further information on value networks." - and §2: "There are no normative
+--    references in this document.", so even the TR does not normatively invoke ISO 59010.)
+-- PROPOSED: acquire ISO 59010, or mark the field NR in the UI so the engineer is not asked to
+--   attest alignment with a document neither they nor the tool can read. Either way CR-017 must
+--   not require true. Rollback: none needed for a labelling change.
+
+-- ==========================================================================================
+-- S-16  MINOR: unit AND TYPING
+-- ==========================================================================================
+-- ☐ RATIFIED
+-- All 47 fields carry unit = '-'. For this standard that is CORRECT and is recorded here as a
+--   negative result: every field is text, boolean, enum or a dimensionless count, so there is no
+--   unit mismatch anywhere, and no field carries a type name (e.g. "number") in place of a unit.
+-- One typing nit: ISO-59032-03.year_of_implementation (b7ebb463) is data_type='number', unit='-'.
+--   It holds a calendar year (Table 2 shows "2020"), and the source itself prints "-" where the
+--   year is unknown (e.g. Example 11), so a null must remain legal. is_required=false is correct.
+--   PROPOSED: no change; recorded so the reviewer does not re-derive it.
+
+-- ==========================================================================================
+-- CHECKLIST ITEMS WITH AN EXPLICIT NEGATIVE RESULT (looked for, NOT found - auditable absence)
+-- ==========================================================================================
+--   block gates on soft text ........ NONE. 0 of 18 gates are severity='block'; all 18 are 'warn'.
+--                                     (Which is the right outcome for a TR, even if it was not
+--                                     arrived at for that reason - see S-1.)
+--   condition = 'TRUE' .............. NONE. No gate has a literal-true condition.
+--   membership over the whole enum
+--     domain .......................  NONE. No gate references an enum field at all; all 16
+--                                     evaluable conditions are over booleans (14), a count (1) and
+--                                     a presence conjunction (1).
+--   tautology over an equation output NONE, and it cannot occur: the standard has 0 equations.
+--   ">= 0 floor" on a quantity that
+--     can legitimately be negative ..  NONE. The only numeric gate is CR-006 (>= 2 on a sector
+--                                     count, which cannot be negative). The two other numeric
+--                                     fields have no gate. The signed-factor defect seen on the
+--                                     previous standard does not occur here.
+--   AND/OR inversion, OR-collapse ...  NONE. Only one gate uses a connective (CR-005, six AND
+--                                     terms); there is no OR anywhere in the 18 conditions, so
+--                                     there is nothing to invert or collapse.
+--   inverted condition ..............  NONE. Every boolean gate asserts "== true" and every one of
+--                                     the anchoring sentences is positively phrased; no gate
+--                                     asserts the opposite of its source.
+--   boundary inclusivity ............  Only CR-006 has a boundary. ">= 2" matches "at least two"
+--                                     inclusively, so the operator is right even though the
+--                                     threshold itself should not exist (S-4).
+--   exact float equality ............  NONE. No "==" on a numeric field anywhere.
+--   duplicate gates / strict subsets   CR-001 and CR-018 duplicate each other (both empty, same
+--                                     worksheet) - covered by S-2. No other gate pair overlaps.
+--                                     A duplicate FIELD pair exists - covered by S-14.
+--   mis-homed gates .................  NONE. Every one of the 16 evaluable gates references only
+--                                     fields that live on its own worksheet. Checked all 16:
+--                                     CR-002/003/004 -> ws-02 fields; CR-005 -> ws-03; CR-006/007
+--                                     -> ws-04; CR-008/009 -> ws-05; CR-010 -> ws-06; CR-011/012
+--                                     -> ws-07; CR-013..017 -> ws-08. CR-001/018 reference nothing.
+--   unsatisfiable gates, uncovered
+--     enum values ...................  NONE. No enum-valued gate exists, so no enum value is left
+--                                     uncovered; every boolean gate is satisfiable (S-7 is a
+--                                     contradiction with is_required, not unsatisfiability).
+--   invented values or ranges .......  NONE beyond CR-006 (S-4). No range, tolerance, percentage or
+--                                     limit appears anywhere in the encoding, because none appears
+--                                     anywhere in the source.
+--   missing scope predicate / dropped
+--     printed exemption .............  NONE dropped. The one printed exemption in the discussion -
+--                                     "except for Examples 2, 3, 5, 14 and 15" (printed p.33, on
+--                                     the waste-management sector) - is correctly honoured: the
+--                                     field includes_waste_management_sector is is_required=false
+--                                     and carries NO gate. That is the right call and is recorded
+--                                     so the reviewer can see it was checked.
+--   required flags on informative
+--     text ..........................  PRESENT, but it is the whole document, not a stray field:
+--                                     26 of 47 fields are is_required=true and every sentence in
+--                                     the source is informative. This is not fixable field by
+--                                     field; it is S-1.
+--   worksheets with zero fields .....  NONE. All 8 worksheets carry fields
+--                                     (4 / 7 / 14 / 4 / 3 / 3 / 4 / 8 = 47).
+--   equation outputs consumed by
+--     nothing .......................  N/A - 0 equations, correctly, since the source contains no
+--                                     formula or calculation anywhere.
+--   source_quotes carrying no
+--     requirement ...................  Not applicable in the usual sense: source_quote is NULL on
+--                                     all 18 gates and all 47 fields (S-8). Worth stating that had
+--                                     they been filled, NONE of them could have carried a
+--                                     requirement, because the document has none.
+--   gates with no source_quote ......  ALL 18. See S-8.
+--   stitched quotes with no elision
+--     marker ........................  NONE in the pack. Every multi-clause quote joins with " | "
+--                                     and every join is explained in that row's note. No quote in
+--                                     the pack straddles a page break (see the governance_secured
+--                                     note, where a page-spanning sentence was deliberately NOT
+--                                     stitched).
+--   wrong page refs .................  NONE found. The printed-to-PDF offset (+8) was reconstructed
+--                                     from footers and then confirmed against three independent
+--                                     Contents entries before any citation was written.
