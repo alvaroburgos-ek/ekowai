@@ -1,0 +1,466 @@
+-- ISO-14050 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, ISO 14050:2020(E), printed page + PDF page) and its rollback inverse. Mark a
+-- block "RATIFIED" only after Alvaro decides; nothing here may be applied on a subagent's judgement.
+--
+-- SOURCE: ISO 14050:2020(E), "INTERNATIONAL STANDARD", Environmental management - Vocabulary /
+--   Management environnemental - Vocabulaire. FOURTH EDITION 2020-07, (c) ISO 2020. English.
+--   PUBLISHED International Standard - not a Draft/DIS/FDIS, not a national adoption, not a
+--   Technical Report, not a scoping report. Identity read from the RENDERED cover page (PDF p.1)
+--   as an image, not from the text layer.
+--   PDF: C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 14050-2020\
+--        ISO-14050-2020-en.pdf (81 pages). Text layer: pdftotext -layout -enc UTF-8, form feeds
+--        preserved, 155 579 bytes, 0 undecodable characters.
+--   PAGE CONVENTION: uniform, no filler pages. printed p.N = PDF page N + 6 (PDF p.7 = printed
+--        p.1 Scope ... PDF p.79 = printed p.73). Front matter PDF p.2-5 = printed ii-v, PDF p.6
+--        = blank vi. CONFIRMED against the printed Contents (printed p.iii / PDF p.3), all twelve
+--        subclause entries reproducing exactly: 3.1->1, 3.2->3, 3.3->6, 3.4->6, 3.5->10, 3.6->12,
+--        3.7->17, 3.8->19, 3.9->21, 3.10->25, 3.11->27, 3.12->27. Citations give
+--        "printed p.N / PDF p.M".
+--   RENDERED-PAGE CHECK: PDF p.1 (cover), p.27 (printed 21), p.36 (printed 30) and p.39 (printed
+--        33, Annex A figures) opened as page IMAGES and compared line by line to the extraction.
+--        Faithful throughout. The only difference found is subscript flattening (printed CO2e
+--        with a typographic subscript 2 -> extracted "CO2e"), which is not load-bearing here.
+--        The Symbol-font dropout risk that removed square roots and a ">=" on two other standards
+--        CANNOT apply: this document has no formula, no inequality, no table and no numeric limit
+--        anywhere, so there is no such glyph to lose. Nothing was silently repaired.
+--
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--   "condition_expression") and has NO "active" column - the statements below reflect that.
+--   The evaluator accepts "== True" as well as "== true". public.fields DOES have an "active"
+--   column.
+--
+-- ============================================================================
+-- MODALITY CENSUS - the arithmetic every judgement below rests on
+-- ============================================================================
+--   Normative body, Clauses 1-3 (printed p.1-31 / PDF 7-37):
+--        shall = 0   should = 0   must = 0   may = 0   can = 13 (all inside definitions)
+--   Annex A "(informative)"    (printed p.32-54 / PDF 38-60):
+--        shall = 0   should = 0   must = 0   may = 1 (mouse example)   can = 1
+--   Whole 81-page document:    shall = 1   should = 2   must = 0
+--
+--   The ONE "shall" and BOTH "should" in the whole document are ISO boilerplate in the Foreword
+--   (printed p.iv / PDF p.4):
+--     "ISO shall not be held responsible for identifying any or all such patent rights."
+--     "In particular, the different approval criteria needed for the different types of ISO
+--      documents should be noted."
+--     "Any feedback or questions on this document should be directed to the user's national
+--      standards body."
+--   They bind ISO and describe ISO's own process; none of them binds a user of the standard.
+--
+--   The document further contains: ZERO tables, ZERO equations, ZERO "=" characters, ZERO numeric
+--   limits, ZERO ranges. 27 figures, all inside the informative Annex A, all concept-relation
+--   diagrams (generic / partitive / associative), illustrated with a computer-mouse example taken
+--   from ISO 704:2009. 4 NOTEs and 1 EXAMPLE in the entire text.
+--
+--   >>> ISO 14050:2020 IMPOSES NO DUTY OF ANY KIND. NO GATE OF ANY SEVERITY IS DEFENSIBLE. <<<
+--   >>> Not "no block gate" - NO GATE. There is nothing in this standard for a machine, or   <<<
+--   >>> for an engineer, to be compliant or non-compliant WITH.                              <<<
+--
+-- ============================================================================
+-- R-1  (HEADLINE)  Is a fillable, gated worksheet set the right shape for a VOCABULARY at all?
+-- ============================================================================
+-- FINDING: no. ISO 14050 is a terms-and-definitions standard. Its own Scope (printed p.1 / PDF
+--   p.7) says what it does and does not do:
+--     "This document defines terms used in documents in the fields of environmental management
+--      systems and tools in support of sustainable development."
+--   and Clause 2, in full (printed p.1 / PDF p.7):
+--     "There are no normative references in this document."
+--   and the Introduction (printed p.v / PDF p.5) states its purpose:
+--     "Communication is important in the implementation and operation of environmental management
+--      systems. This communication will be most effective if there is a common understanding of
+--      the terms used."
+--   A vocabulary is consulted, not filled in. Its unit of use is "what does this term mean",
+--   which is a lookup, not a project datum, and never a pass/fail.
+--
+-- CURRENT SHAPE IN PROD, measured:
+--     13 worksheets (1 registration + 12, one per vocabulary subclause 3.1-3.12)
+--     78 sections, of which 65 hold ZERO fields; every worksheet gets the same fixed A/B/C/J/K/M
+--        skeleton and only section C ("Core - Defined Terms") is ever populated
+--     25 fields, of which 12 are "pick a term" enum selectors (one per subclause) and 13 are
+--        quantities lifted out of individual definitions
+--      0 of 25 fields is_required (correct - there is no mandatory verb behind any of them)
+--      0 equations (correct - the standard contains none)
+--      6 compliance_requirements, ALL severity='warn', ALL with condition = '' (empty string)
+--   So the 13:25 worksheet-to-field ratio the orchestrator flagged is NOT an import artefact of a
+--   dropped sheet: the importer faithfully materialised what the workbook asked for. It is a
+--   MODELLING artefact - the encoder mapped a table of contents onto worksheets. Worksheet
+--   ISO-14050-01 "Registrierung und Anwendungsbereich" has six sections and zero fields in all of
+--   them: it is an empty page carrying two of the six gates.
+--
+-- WHAT IS ACTUALLY GOOD HERE, and must not be thrown away with the framing: the term data is
+--   excellent. The source defines 354 terms across 3.1-3.12; the 12 enum families carry 354
+--   values; every printed clause number 3.x.y appears in the matching family, each with the
+--   definition text, admitted terms, deprecated terms and abbreviations. 354/354. No invented
+--   entry, no dropped entry, no printed open list closed. That is a complete, faithful, machine-
+--   readable ISO 14050 glossary - and it is exactly what the twelve other ISO 14000-family
+--   standards already in this library (14002-2, 14004, 14015, 14019-1, 14033, 14044, 14046,
+--   14064-1, 14064-2, 14067, 46001, 59014/59020/59032) borrow their vocabulary from.
+--
+-- PROPOSAL (structural; needs Alvaro, and needs a product decision, not a SQL statement):
+--   reclassify ISO 14050 from "standard with worksheets" to "reference glossary" - a lookup
+--   surface (search a term, see its definition, its subclause, its cross-references), attachable
+--   to a project as a reference rather than as work. Concretely that means: no worksheet
+--   instances, no gates, no conformity contribution, no progress-panel weight. The 354-value term
+--   library stays exactly as it is and becomes the data behind the lookup.
+--   NO SQL is staged for this block: the change is a product/schema decision (SR-4 auto-approval
+--   covers infrastructure for an APPROVED mandate; there is no approved mandate to make ISO 14050
+--   a glossary yet, so this stops here and is put to Alvaro).
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-2  All six gates have an EMPTY condition and therefore render as DEFECTS in the app
+-- ============================================================================
+-- EVIDENCE (prod read-back, vadsmshzebefjreqcicl, 2026-09-08):
+--   CR-001 ISO-14050-01 warn  condition='' (length 0)  "Use defined terms consistently"
+--   CR-002 ISO-14050-01 warn  condition='' (length 0)  "Term scope respected"
+--   CR-003 ISO-14050-09 warn  condition='' (length 0)  "GHG verification per the term definition"
+--   CR-004 ISO-14050-09 warn  condition='' (length 0)  "GHG validation per the term definition"
+--   CR-005 ISO-14050-05 warn  condition='' (length 0)  "Certification definition adopted from ISO/IEC 17000"
+--   CR-006 ISO-14050-09 warn  condition='' (length 0)  "Deprecated synonym not used"
+--   All six also carry requires_attestation = false.
+-- CODE PATH (why this is not harmless):
+--   src/lib/compliance/evaluate.ts:538   if (!condition || !condition.trim()) return { kind: 'manual' };
+--   src/lib/eval/attestation.ts:24       if (!condition) return false;   // empty string is NOT an attestation
+--   src/components/worksheet/compliance-block.tsx:422
+--        title="Bedingung nicht auswertbar - Regel reparieren"
+--   src/lib/pdf/sections/compliance.tsx:85
+--        return { badge: '!', verdict: 'Bedingung nicht auswertbar - Regel reparieren' };
+--   An empty condition is classified as case (b) in attestation.ts's own comment - "the condition
+--   is broken ... a real bug" - not as case (a) "engineer is meant to sign off manually". So every
+--   ISO-14050 project displays six permanent defect rows, in the worksheet UI and in the issued
+--   PDF, instructing the engineer to repair rules that cite a document containing no rules.
+-- NOTE ON THE OBVIOUS WRONG FIX: do NOT write conditions for these. There is no printed
+--   obligation to encode. Writing any condition here would be inventing enforcement, which SR-1
+--   forbids. The two honest options are (i) delete the six rows, or (ii) if the intent was to
+--   surface definitional guidance, move that text out of compliance_requirements entirely (it is
+--   guidance, not a gate) - which is R-1's glossary reshaping.
+-- PROPOSED SQL (option (i), delete; NOT APPLIED):
+--   -- delete from public.compliance_requirements cr
+--   --  using public.worksheet_templates wt, public.standards s
+--   --  where cr.worksheet_template_id = wt.id and wt.standard_id = s.id and s.code = 'ISO-14050'
+--   --    and cr.code in ('CR-001','CR-002','CR-003','CR-004','CR-005','CR-006');
+-- ROLLBACK INVERSE: re-import the ISO-14050 Pass3c workbook
+--   (C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\Structured Guidelines\
+--    ISO-14050\ISO-14050_Structured_Workbook_Pass3c.xlsx); the importer UPSERTs compliance rows
+--   and preserves verification_status, so the six rows return with their original text.
+--   Do NOT hand-INSERT them back (no prod hand-edits).
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-3  Every one of the six source_quotes carries a DEFINITION, never a requirement
+-- ============================================================================
+-- This is the substantive half of R-2 and is stated separately so it can be ratified separately.
+-- Each gate's source_quote was traced to its printed entry; all six are real, none is fabricated,
+-- and none contains an obligation:
+--   CR-001 <- Introduction (printed p.v / PDF p.5): "Communication is important in the
+--            implementation and operation of environmental management systems. This communication
+--            will be most effective if there is a common understanding of the terms used."
+--            -> a statement about why the document exists. "is important" / "will be most
+--            effective" is not a duty; there is no addressee and no verifiable act.
+--   CR-002 <- the domain qualifiers, e.g. printed p.8 / PDF p.14, 3.4.32 objective evidence:
+--            "<audit> data supporting the existence or verity of something"; printed p.14 / PDF
+--            p.20, 3.6.18 impact category: "<life cycle assessment> class representing
+--            environmental issues of concern to which life cycle inventory analysis results
+--            (3.6.4) can be assigned"; printed p.11 / PDF p.17, 3.5.9 product environmental
+--            criteria: "<environmental labelling> environmental requirements (3.1.15) that the
+--            product (3.5.12) has to meet in order to be awarded an environmental label (3.7.1)"
+--            -> ISO 704 domain-qualifier notation. It tells a READER which sub-domain a
+--            definition applies in. It is not an instruction to the engineer.
+--            (Note: the "has to meet" inside 3.5.9 is part of the DEFINED CONCEPT - it describes
+--            what product environmental criteria are - not a duty this standard places on anyone.)
+--   CR-003 <- printed p.24 / PDF p.30, 3.9.35 verification: "<greenhouse gas> process (3.1.9) to
+--            evaluate a statement of historical data and information to determine if the statement
+--            is materially correct and conforms to criteria"
+--   CR-004 <- printed p.24 / PDF p.30, 3.9.36 validation: "<greenhouse gas> process (3.1.9) to
+--            evaluate the reasonableness of the assumptions, limitations and methods that support
+--            a statement about the outcome of future activities"
+--   CR-005 <- printed p.10 / PDF p.16, 3.4.48 certification: "third-party attestation related to
+--            an object of conformity assessment, with the exception of accreditation (3.4.30)"
+--            followed by the printed provenance line "[SOURCE: ISO/IEC 17000:2020, 7.6]"
+--            -> the gate's own text about the ISO/IEC 17000 adoption is CORRECT and matches the
+--            printed SOURCE line exactly. It is still a definition.
+--   CR-006 <- printed p.24 / PDF p.30, 3.9.33: "greenhouse gas statement / GHG statement /
+--            DEPRECATED: GHG assertion - factual and objective declaration related to greenhouse
+--            gas (3.9.1) made by the responsible party (3.9.39) including statements related to
+--            greenhouse gas that provide the subject matter for the verifier (3.4.5) or
+--            validator's (3.4.25) opinion"
+--            -> the DEPRECATED marker is genuine and correctly read. But an ISO deprecation is a
+--            terminological status, not a compliance duty, and the encoded source_quote TRUNCATES
+--            the printed definition after "made by the responsible party", dropping "(3.9.39)
+--            including statements ... opinion". Truncated, not falsified; recorded for accuracy.
+-- No SQL is staged separately here - the disposition of these six rows is R-2.
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-4  Three gates are MIS-HOMED: CR-003 / CR-004 / CR-006 cite 3.9.x but sit on the 3.8 worksheet
+-- ============================================================================
+-- EVIDENCE: worksheet ISO-14050-09 is "Begriffe zu Klimawandel und Klimaschutz" and its only field
+--   term__3_8 carries clause_reference '3.8'; the printed heading is "3.8 Terms relating to climate
+--   change and climate action" (printed p.19 / PDF p.25). The three gates cite 3.9.35, 3.9.36 and
+--   3.9.33, all under the printed heading "3.9 Terms relating to greenhouse gases" (printed p.21 /
+--   PDF p.27), which is worksheet ISO-14050-10 "Begriffe zu Treibhausgasen".
+--   The 3.9 worksheet is the correct home; ISO-14050-10 also holds the seven 3.9.x quantity fields,
+--   so the encoder DID know the mapping and applied it correctly for the fields.
+--   CR-002 is separately homed on ISO-14050-01, the fieldless registration worksheet, while citing
+--   3.4.32, 3.6.18, 3.8.11, 3.9.35 and 3.5.9 - five different worksheets at once. There is no
+--   single correct home for it, which is itself an argument for R-2 option (i).
+-- PROPOSED SQL (only meaningful if R-2 is NOT ratified, i.e. the rows are kept; NOT APPLIED).
+--   Target worksheet ISO-14050-10 "Begriffe zu Treibhausgasen" =
+--   worksheet_template id '59d9d207-6d02-4454-bacb-c2f2f66e0ea0' (verified in the prod read-back):
+--   -- update public.compliance_requirements cr
+--   --    set worksheet_template_id = '59d9d207-6d02-4454-bacb-c2f2f66e0ea0'
+--   --  where cr.id in ('0b9ae8bf-428e-4a0e-aad3-0b4894d8ba8e',   -- CR-003
+--   --                  'd30b8179-6bb6-4310-9789-699a83173954',   -- CR-004
+--   --                  'abf104d6-5704-4674-961f-e613f94dba2d');  -- CR-006
+-- ROLLBACK INVERSE:
+--   -- update public.compliance_requirements cr
+--   --    set worksheet_template_id = 'c25e4cda-62d5-445a-8267-e324e3d13bb6'   -- back to ISO-14050-09
+--   --  where cr.id in ('0b9ae8bf-428e-4a0e-aad3-0b4894d8ba8e',
+--   --                  'd30b8179-6bb6-4310-9789-699a83173954',
+--   --                  'abf104d6-5704-4674-961f-e613f94dba2d');
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-5  Six units are EKOWAI conventions, not quotable from ISO 14050
+-- ============================================================================
+-- EVIDENCE (raw grep over the full 81-page text layer, and confirmed on the rendered printed p.30
+--   for the "%" case): the strings "kg", "%" and "currency" occur ZERO times in the entire
+--   document. Counts: kg = 0, % = 0, currency = 0.
+--   Affected: co2_equivalent 'kg CO2e', ghg_emission_reduction 'kg CO2e',
+--             ghg_removal_enhancement 'kg CO2e', carbon_footprint_of_a_product 'kg CO2e',
+--             material_distribution_percentage '%', monetary_value 'currency'.
+--   The CO2e family is defensible in SUBSTANCE - 3.11.1 prints "expressed as carbon dioxide
+--   equivalents (3.9.3)" (printed p.27 / PDF p.33) - but the mass prefix "kg" is added by EKOWAI.
+--   "%" is NOT defensible in substance: 3.12.32 prints "proportion of the material inputs that
+--   flow into products (3.5.12) or material losses" (printed p.30 / PDF p.36); a proportion may be
+--   a fraction 0-1 or a percentage 0-100, and the source does not choose. Under SR-2 that is a
+--   choice the standard leaves open and the machine must not silently make.
+--   "currency" is an app placeholder; 3.12.7 prints only "amount of money" (printed p.28 / PDF p.34).
+-- PROPOSAL: do NOT delete the units (they are useful and, for CO2e, substantively right). Record
+--   their provenance instead, so no downstream reader mistakes them for printed values. That is
+--   already done in this pass's verification_note on each of the six fields. The open decision is
+--   only material_distribution_percentage: keep '%' or switch to a dimensionless fraction.
+-- PROPOSED SQL (NOT APPLIED, and only if Alvaro picks the fraction reading):
+--   -- update public.fields set unit = null
+--   --  where id = '334d5e4b-c596-44f9-824a-0b2731fc52b7';
+-- ROLLBACK INVERSE:
+--   -- update public.fields set unit = '%'
+--   --  where id = '334d5e4b-c596-44f9-824a-0b2731fc52b7';
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-6  co2_equivalent encodes a UNIT as a MEASURAND
+-- ============================================================================
+-- EVIDENCE, printed p.21 / PDF p.27, 3.9.3 verbatim:
+--   "carbon dioxide equivalent / CO2e / CO2 equivalent - unit for comparing the radiative forcing
+--    of a greenhouse gas (3.9.1) to that of carbon dioxide"
+--   The defined concept IS a unit. The encoding makes it a number field labelled
+--   "CO2-Aequivalent (CO2e)" with unit 'kg CO2e', i.e. "a quantity of the unit CO2e, measured in
+--   kg CO2e". That is a category confusion, and it is the kind that produces a field an engineer
+--   cannot answer.
+-- PROPOSAL: if the field is kept at all after R-1, deactivate it as a quantity - the concept
+--   belongs in the term__3_9 glossary family (where it already is, as value
+--   carbon_dioxide_equivalent__3_9_3), not as a fillable number.
+-- PROPOSED SQL (NOT APPLIED):
+--   -- update public.fields set active = false
+--   --  where id = '757b07ed-48ae-4ac2-936b-95630022bfdd';
+-- ROLLBACK INVERSE:
+--   -- update public.fields set active = true
+--   --  where id = '757b07ed-48ae-4ac2-936b-95630022bfdd';
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-7  water_footprint collapses a printed PLURAL ("metric(s)") into one scalar
+-- ============================================================================
+-- EVIDENCE, printed p.25 / PDF p.31, 3.10.1 verbatim:
+--   "water footprint - metric(s) that quantifies the potential environmental impacts (3.2.22)
+--    related to water"
+--   The parenthetical "(s)" is printed and is deliberate: ISO 14046 treats a water footprint as a
+--   PROFILE of impact metrics, not a single number. The encoding is data_type=number, unit=null,
+--   which forces one scalar answer.
+-- PROPOSAL: no fix inside ISO 14050 - the standard defines the term and stops. If a water
+--   footprint is to be captured as data anywhere in the Wizard, it belongs on ISO 14046
+--   (already in the library), not here. Note only; deactivate if R-1's glossary reshaping is taken.
+-- PROPOSED SQL (NOT APPLIED):
+--   -- update public.fields set active = false
+--   --  where id = '04b550df-9c1e-44fc-80a5-f028c6c2554c';
+-- ROLLBACK INVERSE:
+--   -- update public.fields set active = true
+--   --  where id = '04b550df-9c1e-44fc-80a5-f028c6c2554c';
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-8  All 13 quantity fields are consumed by nothing
+-- ============================================================================
+-- EVIDENCE: prod holds 0 equations for ISO-14050 (correct - the source contains no formula and
+--   zero "=" characters), and all six compliance_requirements carry an EMPTY condition, so no
+--   gate references any symbol. Therefore maturity_level, product_system_value_indicator,
+--   global_warming_potential, co2_equivalent, ghg_emission_factor, ghg_removal_factor,
+--   ghg_activity_data, ghg_emission_reduction, ghg_removal_enhancement, water_footprint,
+--   carbon_footprint_of_a_product, monetary_value and material_distribution_percentage are all
+--   write-only: an engineer can type a number into each and nothing anywhere reads it.
+--   They are not phantom fields in the usual sense - each has a label, a real clause_reference and
+--   a description that matches its printed definition - but they are inert.
+--   Every one of the thirteen names a quantity that another standard in this library actually
+--   quantifies: GWP / CO2e / emission + removal factors / activity data / emission reduction /
+--   removal enhancement -> ISO 14064-1 and 14064-2; carbon footprint of a product -> ISO 14067;
+--   water footprint -> ISO 14046; monetary value + material distribution percentage -> the
+--   material-flow-cost-accounting family. The right home for the DATA is there, not in the
+--   vocabulary.
+-- PROPOSAL: deactivate all 13 as part of R-1's glossary reshaping (the 354-term enum library is
+--   what ISO 14050 contributes; the quantities are duplicates of other standards' inputs).
+-- PROPOSED SQL (NOT APPLIED):
+--   -- update public.fields set active = false
+--   --  where id in ('6dd8e361-cdf1-40e1-974a-b3ca07e734eb','50d5ba20-f736-4cfc-9444-e8327644657d',
+--   --               '9b9b9bae-9db3-4c79-893c-a2f21f593790','757b07ed-48ae-4ac2-936b-95630022bfdd',
+--   --               'e4536264-fe7f-401b-a774-fc0f589fdb8e','a4328313-b1ab-4d06-baae-94a3632cd492',
+--   --               '43b307a4-0c9e-401e-a1c6-acf575668cb8','b8f1e765-ff5f-416c-b582-0c1aec3f12b4',
+--   --               'e131b4af-7e87-44e6-85ac-a544f07a544c','04b550df-9c1e-44fc-80a5-f028c6c2554c',
+--   --               '0832994c-2e17-4b79-8799-9e44952a7c8b','2a14c93c-b895-4da2-b04b-f8a9478c02bf',
+--   --               '334d5e4b-c596-44f9-824a-0b2731fc52b7');
+-- ROLLBACK INVERSE: the same statement with active = true (all 13 are active = true today).
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-9  Worksheet ISO-14050-01 has zero fields, and 65 of 78 sections are empty shells
+-- ============================================================================
+-- EVIDENCE (prod read-back): ISO-14050-01 "Registrierung und Anwendungsbereich" has 6 sections
+--   (A Purpose / Regulatory Context, B Input Parameters / Registration, C Core - Defined Terms,
+--   J Output / Transfer, K Notes / Assumptions, M Workflow Connection) and 0 fields in all six.
+--   Across all 13 worksheets the same six-section skeleton is materialised (78 sections) and only
+--   section C is ever populated - 13 populated sections, 65 empty.
+--   This is NOT an import artefact: the importer created what the workbook's Sections sheet
+--   declared. It is the encoder applying a fixed worksheet template to a document that has no
+--   inputs, no outputs and no workflow to connect.
+--   Note also that ISO-14050-01 is the home of CR-001 and CR-002 - two gates on a worksheet with
+--   no fields, hence unreachable by any condition that could ever be written.
+-- PROPOSAL: subsumed by R-1. If ISO 14050 becomes a glossary, all 78 sections and the empty
+--   registration worksheet go with the worksheet framing. No standalone SQL is staged, because
+--   deleting sections without deciding R-1 would leave a half-shaped standard.
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- R-10  TEN enum definitions carry the NEXT subclause's HEADING appended to them
+-- ============================================================================
+-- HOW FOUND: all 354 enum definition strings were compared against the source text, exhaustively,
+--   not sampled. 344 are byte-exact. Ten are not, and the ten form a perfect pattern: they are the
+--   LAST entry of ten of the twelve subclauses. The encoder's definition-end boundary runs to the
+--   next "3.x.y" number line, and at a subclause boundary the intervening "3.x <Heading>" line is
+--   swallowed into the preceding definition.
+--   (Note: a naive "is this string a substring of the source?" check does NOT catch this - for 8 of
+--   the 10 the contaminated string IS a contiguous substring of the page, because the heading
+--   physically follows the definition. Only 2 failed that test, because a running footer intervened.
+--   The defect was found by looking at the terminal entry of every family, not by the substring test.)
+--
+-- THE TEN, with the printed definition (verbatim) and what was appended:
+--   §3.1.21  monitoring
+--            printed (p.2 / PDF p.8): "determining the status of a system, a process (3.1.9) or an
+--            activity"   + appended "3.2 General terms relating to environmental management"
+--   §3.2.35  trade-off
+--            printed (p.5 / PDF p.11): "decision-making actions that select from various
+--            requirements (3.1.15) and alternative solutions on the basis of net benefit to
+--            interested parties (3.1.2)"
+--            + appended "3.3 Terms relating to environmental management systems"
+--   §3.3.6   procedure
+--            printed (p.6 / PDF p.12): "specified way to carry out an activity or a process (3.1.9)"
+--            + appended "3.4 Terms relating to verification, validation and audit"
+--   §3.4.51  environmental information statement
+--            printed (p.10 / PDF p.16): "declaration of environmental information"
+--            + appended "3.5 Terms relating to product systems"
+--   §3.5.28  value chain
+--            printed (p.12 / PDF p.18): "entire sequence of activities or parties that create or
+--            receive value through the provision of a product (3.5.12)"
+--            + appended "3.6 Terms relating to life cycle assessment"
+--   §3.6.51  comparative eco-efficiency assertion
+--            printed (p.17 / PDF p.23): "claim in eco-efficiency (3.6.48) regarding the superiority
+--            or equivalence of one product (3.5.12) versus a competitor's product that performs the
+--            same function"
+--            + appended "3.7 Terms relating to environmental labelling, declarations and communication"
+--   §3.7.23  environmental communication strategy
+--            printed (p.19 / PDF p.25): "organization's (3.1.1) framework for implementing its
+--            environmental communication policy (3.7.20) and for the setting of environmental
+--            communication objectives (3.7.21) and environmental communication targets (3.7.22)"
+--            + appended "3.8 Terms relating to climate change and climate action"
+--   §3.8.26  transformation
+--            printed (p.21 / PDF p.27): "change in the fundamental attributes of natural and human
+--            systems"   + appended "3.9 Terms relating to greenhouse gases"
+--   §3.9.39  responsible party
+--            printed (p.25 / PDF p.31): "person or persons responsible for the provision of the
+--            greenhouse gas statement (3.9.33) and the supporting greenhouse gas (3.9.1) information"
+--            + appended "3.10 Terms relating to water footprint"
+--   §3.10.24 elementary water flow
+--            printed (p.27 / PDF p.33): "water entering the system being studied that has been drawn
+--            from the environment (3.2.2), or water leaving the system being studied that is released
+--            into the environment"   + appended "3.11 Terms relating to carbon footprint"
+--   The terminal entries of §3.11 (3.11.5 carbon offsetting) and §3.12 (3.12.45 quantity centre) are
+--   CLEAN - checked individually, full text, nothing appended and nothing truncated.
+--
+-- SEVERITY: cosmetic-looking, but it is wrong text shown to an engineer as the definition of a term,
+--   in a document whose ENTIRE purpose is to state definitions exactly. It is also the class of
+--   defect that survives a substring spot-check, so it should be added to the encoder's own tests.
+--
+-- FIX ROUTE: NOT by hand-editing enum_values JSONB in prod (no prod hand-edits). The correct route
+--   is to fix the parser's subclause-boundary handling and RE-IMPORT the workbook
+--   (C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\Structured Guidelines\
+--    ISO-14050\ISO-14050_Structured_Workbook_Pass3c.xlsx) - the import is an idempotent UPSERT and
+--   preserves verification_status, so a re-import is safe and is the sanctioned path.
+--   Worth checking the SAME pattern on every other subclause-structured standard in the library
+--   before the re-import, since the off-by-one is in the shared encoder, not in this workbook.
+-- [ ] RATIFIED  ____________________  (Alvaro)
+--
+-- ============================================================================
+-- EXPLICIT NEGATIVE RESULTS (checked, and NOT found - recorded so their absence is auditable)
+-- ============================================================================
+--   condition='TRUE' or other literal-true no-ops ......... 0  (all six conditions are EMPTY - R-2)
+--   presence-only conditions ("x is not null") ............ 0  (no condition has any content)
+--   AND/OR inversions .................................... 0  (no boolean expression exists)
+--   inverted conditions (>= where <= is printed) ......... 0  (no comparison exists)
+--   boundary-inclusivity errors (> vs >=) ................ 0  (no comparison exists)
+--   a number lifted from an EXAMPLE and enforced ......... 0  (no gate carries any number; the
+--                                                            document's single EXAMPLE is the
+--                                                            ISO 704 mouse illustration in the
+--                                                            informative Annex A)
+--   duplicate gates / strict subsets ..................... 0  (the six cite six distinct clauses)
+--   unsatisfiable gates .................................. 0  (none can ever evaluate at all)
+--   block gates on soft text ............................. 0  (there are no block gates; all six
+--                                                            are 'warn', which is correct given a
+--                                                            zero-"shall" normative body)
+--   gates with no source_quote ........................... 0  (all six carry one; all six were
+--                                                            traced to a real printed entry)
+--   wrong page refs ...................................... 0  (gates carry clause refs, no page
+--                                                            refs; all 25 field clause_references
+--                                                            were checked against the printed
+--                                                            entry and all 25 are correct)
+--   invented VALUES in field descriptions ................ 0  (all 25 descriptions were read; each
+--                                                            is a faithful paraphrase of its
+--                                                            printed definition. No "4x largest
+--                                                            particle"-class fabrication. The only
+--                                                            unsourced content is the 6 UNIT
+--                                                            strings of R-5)
+--   invented SPECIFICATIONS in field descriptions ........ 0
+--   enums closing a printed OPEN list .................... 0  (a vocabulary subclause is a closed
+--                                                            list by construction; 354/354 terms
+--                                                            present, no "e.g." list truncated)
+--   missing enum values .................................. 0  (354 printed / 354 encoded)
+--   CONTAMINATED enum definitions ........................ 10 of 354 - see R-10 (this is NOT a
+--                                                            negative result; it is a positive
+--                                                            finding, listed here so the enum line
+--                                                            above is not read as "enums are clean")
+--   single-select over a printed CONJUNCTION ............. 0  (the printed subclauses are lists of
+--                                                            independent definitions, not "A and B"
+--                                                            conjunctions; single-select is not an
+--                                                            inversion here - it is simply not a
+--                                                            source concept at all, which is R-1)
+--   missing scope predicates ............................. n/a (no gate has a condition to scope)
+--   required flags with no mandatory verb behind them .... 0  (0 of 25 fields is_required, matching
+--                                                            a zero-"shall" document exactly - the
+--                                                            encoding got this right)
+--   missing gate for a printed hard limit ................ 0  (the document prints no limit)
+--   equation outputs consumed by nothing ................. n/a (0 equations)
+--   FIELDS consumed by nothing ........................... 13 of 25 - see R-8
+--   worksheets with zero fields .......................... 1 of 13 - see R-9
+--   source_quotes carrying no requirement ................ 6 of 6 - see R-3
+--   phantom fields (enum tokens materialised as fields) .. 0  (all 25 have label + clause + description)
+--   clause_reference retags needed ....................... 0  (all 25 verified correct)
+-- ============================================================================
