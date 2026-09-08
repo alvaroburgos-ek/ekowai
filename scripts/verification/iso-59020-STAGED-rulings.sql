@@ -1,0 +1,391 @@
+-- ISO-59020 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, ISO 59020:2024, printed page) and its rollback inverse. Mark a block
+-- "RATIFIED" only after Alvaro decides; nothing here may be applied on a subagent's judgement.
+-- Source: ISO-59020-Unlocked.txt = ISO 59020:2024(en), PUBLISHED First edition 2024-05
+--         (pdftotext -layout -enc UTF-8). printed page = PDF page - 8.
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--         "condition_expression") and has NO "active" column - the statements below reflect that.
+--         The evaluator accepts "== True" as well as "== true" (src/lib/compliance/evaluate.ts),
+--         so that casing is cosmetic and is NOT staged as a defect.
+--
+-- THE COMPLETE "shall" INVENTORY of the normative part (Clauses 1-8 + normative Annex A),
+-- 11 sentences, counted mechanically over the text layer - this is the whole set of sentences on
+-- which a block gate can rest:
+--   printed p.6  All resource inflows and outflows of the system in focus shall be quantified, when applicable.        -> CR-005
+--   printed p.8  To achieve a balanced measurement, the measurement shall include the mandatory core circularity
+--                indicators when measuring the resource inflows and outflows (see 7.3, Table 3, and Clauses A.2
+--                and A.3).                                                                                            -> CR-009
+--   printed p.17 The resource inflows and resource outflows of the system in focus shall be quantified and fully
+--                balanced with the use of the mandatory indicators in Clauses A.2 and A.3, taking changes in
+--                stocks into account.                                                                                 -> CR-011..014
+--   printed p.31 A list and description of core circularity indicators that shall be considered for circularity
+--                measurement and assessment are provided in this annex.                                               -> CR-009 (same duty)
+--   printed p.31 All resource inflows except water and energy (which are addressed in separate categories) shall be
+--                accounted for in this category.                                                                      -> CR-014
+--   printed p.31 For a material to be described as a "renewable material", it shall adhere to the specific
+--                conditions described in A.2.4.                                                                       -> NO GATE  (S-9a)
+--   printed p.34 The resource outflow circularity indicators specified in A.3.3, A.3.4 and A.3.5 shall be calculated
+--                and documented.                                                                                      -> CR-015..019
+--   printed p.35 If any of these resource outflows are known to be recycled, reused or subject to renewable
+--                recirculation, then the applicable core circularity indicators described in A.3.3, A.3.4 and
+--                A.3.5 shall be calculated.                                                                           -> CR-015..017
+--   printed p.35 All resource inflows required for maintenance, repair and updates to achieve the specified
+--                durability shall be measured or estimated and accounted for in the circularity measurement and
+--                assessment.                                                                                          -> NO GATE  (S-9b)
+--   printed p.36 When a predicted reuse amount (or reuse rate) is used in the calculation for outflows [...] it
+--                shall represent realistic expectations of reuse to avoid overstating the reuse amount.               -> NO GATE  (S-9c)
+--   printed p.39 A common suitable measurement unit (e.g. MJ, kWh) shall be selected for the quantification of all
+--                relevant energies (e.g. thermal, electrical) that are involved in the measurement.                   -> NO GATE  (S-9d)
+-- Plus one shall-equivalent under ISO/IEC Directives Part 2, Table 3 ("is required to" = "shall"):
+--   printed p.23 In conducting the assessment, the organization is required to review the application of: a) ...     -> CR-031
+
+
+-- ============================================================================
+-- S-1  BLOCK GATE ON "should" TEXT: CR-006          [ ] RATIFIED
+-- ============================================================================
+-- CR-006 is severity='block' on condition "resource_balance_applied == true", clause §6.3.
+-- Its own encode-time source_quote is verbatim and contiguous, and it says "should" TWICE:
+--   "The boundaries should be set to allow a resource balance to be achieved such that resource
+--    inflow is equal to resource outflow. The 100 % formulae on resource inflow and resource
+--    outflow should be applied, as explained in Annex A."   [§6.3, printed p.12]
+-- There is no "shall" anywhere in §6.3 (see the inventory above). A block gate is therefore not
+-- defensible on this clause; the duty that IS a shall - "shall be quantified and fully balanced"
+-- (§7.3.1, printed p.17) - is already enforced by CR-011..CR-014 and CR-019, so downgrading
+-- CR-006 loses no printed obligation.
+-- APPLY:
+--   update public.compliance_requirements set severity='warn' where id='3022babe-9932-4677-b69b-aecbdc11b7ea';
+-- ROLLBACK:
+--   update public.compliance_requirements set severity='block' where id='3022babe-9932-4677-b69b-aecbdc11b7ea';
+
+
+-- ============================================================================
+-- S-2  WRONG PRINTED PAGE IN FOUR GATE source_quotes             [ ] RATIFIED
+-- ============================================================================
+-- (a) CR-006 cites "printed p.11" for §6.3. The sentence is on printed p.12 (PDF p.20). Printed
+--     p.11 (PDF p.19) ends inside the Figure 6 explanation list; §6.3's resource-balance paragraph
+--     begins further down PDF p.20.
+-- (b) CR-011, CR-012, CR-013 each cite "printed p.16" for the §7.3.1 sentence "The resource inflows
+--     and resource outflows of the system in focus shall be quantified and fully balanced...".
+--     That sentence is the FIRST line of printed p.17 (PDF p.25). Printed p.16 (PDF p.24) ends with
+--     "These core circularity indicators are in active use ...".
+-- The quoted TEXT of all four is verbatim and contiguous; only the page number is wrong. Under
+-- SR-3 a VA claim needs a correct PDF-page ref, so these are staged rather than left standing.
+-- APPLY:
+--   update public.compliance_requirements set source_quote=replace(source_quote,'printed p.11','printed p.12') where id='3022babe-9932-4677-b69b-aecbdc11b7ea';
+--   update public.compliance_requirements set source_quote=replace(source_quote,'printed p.16','printed p.17') where id in ('1ecf3625-34f0-4a08-9f44-235af8e40954','4daf7c18-fd49-4269-9e51-6a447fe2ffea','02e4e690-7d7a-401f-a6e7-2eac23109be2');
+-- ROLLBACK:
+--   update public.compliance_requirements set source_quote=replace(source_quote,'printed p.12','printed p.11') where id='3022babe-9932-4677-b69b-aecbdc11b7ea';
+--   update public.compliance_requirements set source_quote=replace(source_quote,'printed p.17','printed p.16') where id in ('1ecf3625-34f0-4a08-9f44-235af8e40954','4daf7c18-fd49-4269-9e51-6a447fe2ffea','02e4e690-7d7a-401f-a6e7-2eac23109be2');
+
+
+-- ============================================================================
+-- S-3  FOUR GATES WITH AN EMPTY condition                        [ ] RATIFIED
+-- ============================================================================
+-- CR-008 (ws 03, §6.4.2, warn), CR-010 (ws 04, §7.3.1, warn), CR-036 (ws 09, §8.6.4, warn),
+-- CR-037 (ws 09, §8.4.6, warn) all carry condition = '' (empty string), so they can never fire and
+-- never inform. Each has a real printed recommendation behind it and a field already in prod, so
+-- the honest repair is to fill the condition, not to delete the row. Proposed conditions and the
+-- printed text each rests on:
+--   CR-008 §6.4.2 printed p.12: "Shorter timescales that do not consider an entire life cycle
+--          should be documented in the assessment report."
+--          -> temporal_boundary_shortened IS NOT NULL          (field exists on ws 03, boolean, optional)
+--   CR-010 §7.3.1 printed p.17: "If a core circularity indicator is not applicable, the
+--          organization should explain why and can count the indicator value as zero."
+--          -> indicator_not_applicable_justified IS NOT NULL   (field exists on ws 04, boolean, optional)
+--   CR-036 §8.6.4 printed p.30: "Organizations responsible for recycling, recovery and
+--          recirculation should request information on the chemical composition of materials
+--          received or collected in order to ensure correct handling and treatment and lower the
+--          risk of mismanagement."
+--          -> hazardous_substances_reported IS NOT NULL        (field exists on ws 09, boolean, optional)
+--   CR-037 §8.4.6 printed p.27: "To determine changes over time, the organization should repeat
+--          the measurement and assessment periodically, using the same methodologies over a
+--          similar time interval."
+--          -> periodic_monitoring IS NOT NULL  -- NOTE: periodic_monitoring lives on ws 03, while
+--             CR-037 is homed on ws 09. Filling CR-037 this way would make it the standard's only
+--             CROSS-WORKSHEET gate. Alvaro's call: either re-home CR-037 to ws 03, or add a
+--             ws-09-local boolean, or drop CR-037 as redundant with CR-032.
+-- All four are severity='warn' and every source sentence is a "should", so warn is correct; only
+-- the empty condition is the defect.
+-- APPLY (CR-008 / CR-010 / CR-036 only; CR-037 needs the homing decision first):
+--   update public.compliance_requirements set condition='temporal_boundary_shortened IS NOT NULL' where id='16f87075-637f-44f2-a50f-01f5349ebcfc';
+--   update public.compliance_requirements set condition='indicator_not_applicable_justified IS NOT NULL' where id='7db0523f-99a1-4703-9e99-520f20b9cd0b';
+--   update public.compliance_requirements set condition='hazardous_substances_reported IS NOT NULL' where id='fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68';
+-- ROLLBACK:
+--   update public.compliance_requirements set condition='' where id in ('16f87075-637f-44f2-a50f-01f5349ebcfc','7db0523f-99a1-4703-9e99-520f20b9cd0b','fc338d7e-e9fd-4a1d-9a3d-5f6b42b5af68');
+
+
+-- ============================================================================
+-- S-4  CR-029 IS A STRICT SUBSET OF CR-028                       [ ] RATIFIED
+-- ============================================================================
+-- CR-028 (ws 08, §7.6.2, warn): "primary_data_preference == true AND data_traceability == true"
+-- CR-029 (ws 08, §3.3.16, warn): "data_traceability == true"
+-- CR-029 can never fail without CR-028 also failing: it is a strict subset, on the same worksheet,
+-- at the same severity, so it only ever duplicates a warning the user has already been shown.
+-- Its clause anchor §3.3.16 is a TERMS AND DEFINITIONS entry ("data traceability - ability of data
+-- to be tracked to original and verifiable sources", printed p.5), which states no obligation at
+-- all, so there is no separate printed duty for it to carry.
+-- Two options; Alvaro picks:
+--   (i) drop the duplicate:
+--       delete from public.compliance_requirements where id='fd8d4b44-d6e4-4e76-84e4-0b1deb677e4f';
+--       -- rollback would need a full re-insert; the row is:
+--       --   code CR-029, ws ISO-59020-08, severity warn, condition 'data_traceability == true',
+--       --   clause_reference '§3.3.16', source_quote NULL, requires_attestation false.
+--   (ii) keep it but split CR-028 so the two gates stop overlapping (preferred - reversible):
+--       update public.compliance_requirements set condition='primary_data_preference == true' where id='2873c0a7-aeb6-4d79-965c-b72c9cb9a0b9';
+-- ROLLBACK for (ii):
+--   update public.compliance_requirements set condition='primary_data_preference == true AND data_traceability == true' where id='2873c0a7-aeb6-4d79-965c-b72c9cb9a0b9';
+
+
+-- ============================================================================
+-- S-5  EXACT-EQUALITY BLOCK ON A SUM OF MEASURED PERCENTAGES     [ ] RATIFIED
+-- ============================================================================
+-- CR-014 (block): pct_REUI_X + pct_RECI_X + pct_RENI_X + pct_linear_inflow == 100
+-- CR-019 (block): pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow == 100
+-- The 100 % balance IS printed and IS mandated ("shall be quantified and fully balanced", §7.3.1,
+-- printed p.17; "The sum of the circular outflows and the remaining non-circular outflows represent
+-- 100 % of the resource outflows from the system in focus", §A.3.1, printed p.34), so both gates
+-- are legitimate in substance. The defect is the operator: each addend is a percentage the engine
+-- derives from two measured masses via Formulae A.1-A.3 / A.5-A.7, so the four terms are binary
+-- floats. An engineer whose flows balance exactly will still be blocked whenever the four values
+-- sum to 99,999999999999986 - a hard finalize block produced purely by float representation.
+-- The standard prints no tolerance, so the tolerance is an EKOWAI engineering decision (SR-2:
+-- surfaced, never auto-picked). Proposal, using the same rounding the UI already shows (2 dp):
+--   update public.compliance_requirements set condition='abs(pct_REUI_X + pct_RECI_X + pct_RENI_X + pct_linear_inflow - 100) <= 0.01' where id='22291c1e-6e8f-4d3d-b5af-7c1b0d339c38';   -- CR-014
+--   update public.compliance_requirements set condition='abs(pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow - 100) <= 0.01' where id='fbfde707-c383-4fdf-9b4b-21e6e4f1ead6';   -- CR-019
+-- PREREQUISITE: the condition grammar in src/lib/compliance/evaluate.ts must be confirmed to
+--   support abs()/<=; if it does not, the equivalent two-sided form
+--   "sum >= 99.99 AND sum <= 100.01" must be used instead. Verify before ratifying.
+-- ROLLBACK:
+--   update public.compliance_requirements set condition='pct_REUI_X + pct_RECI_X + pct_RENI_X + pct_linear_inflow == 100' where id='22291c1e-6e8f-4d3d-b5af-7c1b0d339c38';
+--   update public.compliance_requirements set condition='pct_REUO_X + pct_RECO_X + pct_RENO_X + pct_linear_outflow == 100' where id='fbfde707-c383-4fdf-9b4b-21e6e4f1ead6';
+
+
+-- ============================================================================
+-- S-6  TWELVE GATES THAT RESTATE AN EQUATION THE ENGINE ALREADY OWNS  [ ] RATIFIED
+-- ============================================================================
+-- CR-011 pct_REUI_X == (mREUI_X / mTI_X) * 100                    block   = Formula A.1
+-- CR-012 pct_RECI_X == (mRECI_X / mTI_X) * 100                    block   = Formula A.2
+-- CR-013 pct_RENI_X == (mRENI_X / mTI_X) * 100                    block   = Formula A.3
+-- CR-015 pct_REUO_X == (mREUO_X / mTO_X) * 100                    block   = Formula A.5
+-- CR-016 pct_RECO_X == (mRECO_X / mTO_X) * 100                    block   = Formula A.6
+-- CR-017 pct_RENO_X == (mRENO_X / mTO_X) * 100                    block   = Formula A.7
+-- CR-020 pct_ECONRE_X == ((EIRENE_X - EORENE_X)/(EITE_X - EOTE_X))*100   warn = Formula A.8
+-- CR-021 pct_CWW == (VCIW / VAIW) * 100                           warn    = Formula A.9
+-- CR-022 pct_CDW == (VCDW / VAIW) * 100                           warn    = Formula A.10
+-- CR-023 RWRR == VTWU / VTWW                                      warn    = Formula A.11
+-- CR-024 RMP == C / D                                             warn    = Formula A.12
+-- CR-025 IRII == E / F                                            warn    = Formula A.13
+-- Each of these twelve conditions is character-for-character the formula that public.equations
+-- already registers for the SAME output symbol on the SAME worksheet. Two readings, both defective:
+--   (a) if the engine computes the output from the equation, the gate compares the engine's result
+--       with the engine's own formula - a tautology that can never fail, i.e. 6 BLOCK gates that
+--       look like enforcement in the compliance report but enforce nothing;
+--   (b) if the output is ever hand-entered, the gate is an exact float equality on a quantity
+--       derived from measured masses/volumes and will fire on representation error alone.
+-- Under the standing single-source derivation invariant, a derived value is read-only via its one
+-- registered equation and must not be re-checked by a gate. The printed duties these gates are
+-- meant to carry are already carried elsewhere: §7.3.1 "shall be quantified and fully balanced"
+-- (printed p.17) by CR-014, and §A.3.1 "shall be calculated and documented" (printed p.34) by
+-- CR-018 and CR-019. Proposal: retire the twelve restatements, keep the balance and presence gates.
+-- APPLY (needs Alvaro; deletion is irreversible, so the reversible form is offered first):
+--   -- reversible: demote the six blocks to warn, leaving all twelve rows in place
+--   update public.compliance_requirements set severity='warn' where id in ('1ecf3625-34f0-4a08-9f44-235af8e40954','4daf7c18-fd49-4269-9e51-6a447fe2ffea','02e4e690-7d7a-401f-a6e7-2eac23109be2','aa5768dd-b687-4764-b28d-f4e61d8870ba','e5623abb-cfe5-4f2c-a445-8489cdaee9be','4f102b24-0959-44c2-8557-595a8e332104');
+-- ROLLBACK:
+--   update public.compliance_requirements set severity='block' where id in ('1ecf3625-34f0-4a08-9f44-235af8e40954','4daf7c18-fd49-4269-9e51-6a447fe2ffea','02e4e690-7d7a-401f-a6e7-2eac23109be2','aa5768dd-b687-4764-b28d-f4e61d8870ba','e5623abb-cfe5-4f2c-a445-8489cdaee9be','4f102b24-0959-44c2-8557-595a8e332104');
+
+
+-- ============================================================================
+-- S-7  MISSING SCOPE PREDICATE ON CR-005                         [ ] RATIFIED
+-- ============================================================================
+-- Printed (§4.2.3, printed p.6): "All resource inflows and outflows of the system in focus shall be
+-- quantified, WHEN APPLICABLE." CR-005 encodes "all_flows_quantified == true" as a block with no
+-- carve-out for the printed "when applicable", and Annex A repeats the carve-out twice:
+--   "In cases where an indicator is not applicable, it can be counted as zero or declared as
+--    'not applicable (N/A)', explaining why it is not applicable."          [§A.1, printed p.31]
+--   "In cases where the resource inflow circularity indicator is not relevant, it can be counted
+--    at a value of zero."                                                    [§A.2.1, printed p.32]
+-- The field is an engineer attestation, so an organisation with a legitimately inapplicable flow
+-- can still tick it - the gate does not hard-block a conforming organisation the way an
+-- unconditional numeric test would. It is nevertheless an unscoped encoding of a scoped shall.
+-- Minimal, reversible repair: keep the gate, make the carve-out visible in its own quote.
+-- APPLY:
+--   update public.compliance_requirements set source_quote='All resource inflows and outflows of the system in focus shall be quantified, when applicable. [ISO 59020:2024, §4.2.3 "Ensure meaningful outcome", printed p.6 - the printed scope predicate is "when applicable"; §A.1 (printed p.31) and §A.2.1 (printed p.32) allow an inapplicable indicator to be counted as zero or declared N/A with a reason, so the attestation may be given on that basis]' where id='dcec9f38-a346-4ff4-b103-44dbd0b0c847';
+-- ROLLBACK:
+--   update public.compliance_requirements set source_quote='All resource inflows and outflows of the system in focus shall be quantified, when applicable. [ISO 59020:2024, §4.2.3 "Ensure meaningful outcome", printed p.6]' where id='dcec9f38-a346-4ff4-b103-44dbd0b0c847';
+
+
+-- ============================================================================
+-- S-8  CLOSED ENUM OVER A PRINTED "e.g." LIST: energy_unit_common  [ ] RATIFIED
+-- ============================================================================
+-- Printed (§A.4.2, printed p.39): "A common suitable measurement unit (E.G. MJ, kWh) shall be
+-- selected for the quantification of all relevant energies (e.g. thermal, electrical) that are
+-- involved in the measurement."
+-- The encoded field ISO-59020-07.energy_unit_common (id 3bf241ae-788d-4de7-9374-0b05b10bd49f) is an
+-- enum whose only values are MJ and kWh, i.e. it closes an open printed example list. The shall is
+-- about SELECTING ONE COMMON UNIT, not about which unit. An engineer working in GJ, therms or
+-- kcal cannot record the truth. Two other fields have the same shape and are noted, not staged,
+-- because their lists sit in the printed text as examples that the encoding already labels as
+-- such: ISO-59020-02.application_purpose (§5.2 "e.g." list, printed p.8) and
+-- ISO-59020-03.circularity_aspect (§3.1.4 EXAMPLE list, printed p.2).
+-- APPLY (schema-level; enum_values is JSONB on public.fields):
+--   -- add an "other (state the unit)" option so the printed openness survives:
+--   update public.fields set enum_values = enum_values || '[{"value":"other","label_de":"Andere (Einheit angeben)","label_en":"Other (state the unit)","order_index":3,"regulation_reference":"§A.4.2"}]'::jsonb where id='3bf241ae-788d-4de7-9374-0b05b10bd49f';
+-- ROLLBACK:
+--   update public.fields set enum_values = '[{"value":"MJ","label_de":"Megajoule","label_en":"Megajoule (MJ)","order_index":1,"regulation_reference":"§A.4.2"},{"value":"kWh","label_de":"Kilowattstunde","label_en":"Kilowatt-hour (kWh)","order_index":2,"regulation_reference":"§A.4.2"}]'::jsonb where id='3bf241ae-788d-4de7-9374-0b05b10bd49f';
+
+
+-- ============================================================================
+-- S-9  FOUR PRINTED "shall" OBLIGATIONS THAT NO GATE ENFORCES     [ ] RATIFIED
+-- ============================================================================
+-- Of the 11 printed shalls, 7 are enforced. These 4 are not encoded at all - neither as a field
+-- nor as a gate - so the encoding under-enforces the standard here. Each needs a field before a
+-- gate can exist, which is why this block is a design proposal, not a runnable statement.
+-- (a) §A.2.4, printed p.31: "For a material to be described as a 'renewable material', it shall
+--     adhere to the specific conditions described in A.2.4." The three printed conditions
+--     (§A.2.4, printed p.33) are: replenished at a rate equal to or greater than the rate that it
+--     is extracted; sourced or managed in a manner compatible with sustainable development;
+--     produced with regenerative practices, at a minimum sustainably grown or managed.
+--     mRENI_X is collected with no attestation that these three hold.
+--     PROPOSAL: add boolean ISO-59020-05.renewable_criteria_met (required when mRENI_X > 0) plus a
+--     block gate on §A.2.4.
+-- (b) §A.3.2, printed p.35: "All resource inflows required for maintenance, repair and updates to
+--     achieve the specified durability shall be measured or estimated and accounted for in the
+--     circularity measurement and assessment."
+--     PROPOSAL: add boolean ISO-59020-06.maintenance_inflows_accounted, gated only when the
+--     optional lifetime indicator A.3.2 is used (tLP_X IS NOT NULL) - the scope predicate matters,
+--     because A.3.2 is Optional in Table 3 and §A.3.1 (printed p.35) says it "is not mandatory to
+--     calculate".
+-- (c) §A.3.3, printed p.36: "When a predicted reuse amount (or reuse rate) is used in the
+--     calculation for outflows [...], it shall represent realistic expectations of reuse to avoid
+--     overstating the reuse amount."
+--     PROPOSAL: add boolean ISO-59020-06.reuse_forecast_realistic, gated only when the reuse figure
+--     is a forecast rather than measured (needs a "measured / forecast" selector first).
+-- (d) §A.4.2, printed p.39: the common-energy-unit shall. The field energy_unit_common EXISTS but
+--     no gate reads it. It is correctly optional, because Table 3 marks the whole Energy category
+--     Optional, so the gate must be scoped:
+--     PROPOSAL: warn gate on ws 07, condition
+--       "EITE_X IS NULL OR energy_unit_common IS NOT NULL"
+--     i.e. only demand the unit once an energy figure is being recorded. NOTE: this standard's 37
+--     gates currently contain ZERO "OR" operators, so this would be the first; confirm the
+--     evaluator's OR handling in src/lib/compliance/evaluate.ts before ratifying.
+-- No APPLY/ROLLBACK statements are given: all four need new field rows, which is an importer job
+-- (workbook change), not a hand-edit - "data enters via the importer or a gated migration".
+
+
+-- ============================================================================
+-- S-10  CR-004 IS A warn ON A shall-EQUIVALENT                   [ ] RATIFIED
+-- ============================================================================
+-- CR-004 (ws 02, §5.1, warn): "all_stages_documented == true", source_quote NULL.
+-- Printed (§5.1, printed p.7): "To enable interpretation, transparency and verification of results,
+-- it IS NECESSARY THAT all stages are properly documented."
+-- ISO/IEC Directives Part 2, Table 3 lists "it is necessary" among the expressions equivalent to
+-- "shall". On that reading CR-004 is a warn on a requirement. The encoded field description already
+-- words it as "shall be properly documented". Two staged changes, the first uncontroversial:
+-- APPLY (a) - backfill the missing source_quote (no enforcement change):
+--   update public.compliance_requirements set source_quote='To enable interpretation, transparency and verification of results, it is necessary that all stages are properly documented. [ISO 59020:2024, §5.1 "Framework introduction", printed p.7 - "it is necessary" is a shall-equivalent under ISO/IEC Directives Part 2, Table 3]' where id='29e41319-c350-4cea-a2d7-db0149917d24';
+-- APPLY (b) - enforcement change, needs an explicit ruling:
+--   update public.compliance_requirements set severity='block' where id='29e41319-c350-4cea-a2d7-db0149917d24';
+-- ROLLBACK:
+--   update public.compliance_requirements set source_quote=null, severity='warn' where id='29e41319-c350-4cea-a2d7-db0149917d24';
+
+
+-- ============================================================================
+-- S-11  EQUATION OUTPUT CONSUMED BY NOTHING: RLP_X (Formula A.4)  [ ] RATIFIED
+-- ============================================================================
+-- Twelve of the 13 registered equation outputs are read by at least one gate. RLP_X (Formula A.4,
+-- §A.3.2, printed p.36) is the only one no gate reads, which makes ws 06 asymmetric: every other
+-- indicator on it has a consistency gate. This is defensible - A.3.2 is Optional in Table 3 and
+-- §A.3.1 (printed p.35) states it "is not mandatory to calculate" - and given S-6 the right repair
+-- is NOT to add a thirteenth formula-restatement gate. Recorded here so its absence is auditable
+-- rather than accidental; recommendation is NO CHANGE.
+-- (No APPLY / no ROLLBACK - this block is a finding, not a proposed edit.)
+
+
+-- ============================================================================
+-- S-12  UNIT LABELS NARROWER THAN THE PRINTED UNIT                [ ] RATIFIED
+-- ============================================================================
+-- Three unit labels pick one printed example and present it as the unit. None changes a number;
+-- all three are cosmetic-but-misleading in a report header.
+--   ISO-59020-07.C   (id 92e932f7-e959-4238-8dad-5bb2cb7e1fb1) unit 'EUR'
+--        printed: "C is the total revenue generated in monetary units (e.g. $, EUR)"      [p.43]
+--   ISO-59020-07.RMP (id e5686712-827e-431d-bf5b-5812ca67cf73) unit 'EUR/kg'
+--        printed: "RMP is the MP ratio, in monetary units per kg (e.g. $/kg, EUR/kg)"     [p.43]
+--   ISO-59020-06.tLP_X  (id 3791f8e5-822f-4e38-87ee-9dff715b2ed0) and
+--   ISO-59020-06.tIALP_X(id e58b4452-d163-49a1-a8af-315e476f5318) unit 'a'
+--        printed: "in, for example, years"                                                 [p.36]
+-- Formula A.12 is a ratio, so any consistent currency works and the derived RMP unit follows C;
+-- Formula A.4 is a ratio of two times, so any consistent time unit works. Since a currency and a
+-- time unit must be CHOSEN, this is an SR-2 selection, not a printed fact - it belongs in front of
+-- the engineer, not baked into the unit column. Cheapest honest fix is to say so in the label:
+-- APPLY:
+--   update public.fields set unit='monetary unit' where id='92e932f7-e959-4238-8dad-5bb2cb7e1fb1';
+--   update public.fields set unit='monetary unit/kg' where id='e5686712-827e-431d-bf5b-5812ca67cf73';
+-- ROLLBACK:
+--   update public.fields set unit='EUR' where id='92e932f7-e959-4238-8dad-5bb2cb7e1fb1';
+--   update public.fields set unit='EUR/kg' where id='e5686712-827e-431d-bf5b-5812ca67cf73';
+-- tLP_X / tIALP_X: recommendation is NO CHANGE - years is the overwhelmingly common practice and
+--   the ratio is unit-invariant; recorded so the narrowing is auditable.
+
+
+-- ============================================================================
+-- S-13  A.8 HAS AN UNGUARDED ZERO DENOMINATOR                    [ ] RATIFIED
+-- ============================================================================
+-- Formula (A.8), §A.4.2, printed p.39:
+--   "PECONRE(X) = [(EIRENE(X) - EORENE(X)) / (EITE(X) - EOTE(X))] x 100"
+-- The denominator is a DIFFERENCE of two total energies, so it is zero whenever a system's total
+-- energy inflow equals its total energy outflow - a real case for a pure transit/utility system.
+-- The standard prints no guard. The other twelve formulae divide by a single positive quantity
+-- (mTI, mTO, VAIW, VTWW, D, F, tIALP), so A.8 is the only one exposed this way. Nothing in the
+-- encoding prevents the division. This is an engine/UI concern, not a data value: the number would
+-- have to be invented to fix it in data, which SR-1 forbids.
+-- PROPOSAL: handle it in the calculation layer (surface "not computable: EITE = EOTE" instead of a
+-- division result); no compliance_requirements or fields row changes.
+-- (No APPLY / no ROLLBACK - engine work, raised for the backlog.)
+
+
+-- ============================================================================
+-- NEGATIVE RESULTS - checked and NOT found, recorded so their absence is auditable
+-- ============================================================================
+-- condition='TRUE' or any always-true literal condition ............... 0 (4 conditions are EMPTY - see S-3)
+-- membership tests over an entire enum domain ......................... 0 (no gate references any enum field)
+-- IS NOT NULL applied to a boolean .................................... 0 (all 12 IS NOT NULL are on text/number fields;
+--                                                                          every boolean gate uses "== true")
+-- ">= 0" floor on a quantity that cannot be negative .................. 0 (no >=, <=, >, < operator exists in ANY of the
+--                                                                          37 conditions; operator census: IS NOT NULL x12,
+--                                                                          AND x9, == x30, OR x0, comparisons x0)
+-- boundary-inclusivity errors ......................................... n/a - no inequality operators exist to be wrong
+-- AND/OR inversions and OR-collapse ................................... 0 - not possible: zero OR operators in the standard
+-- inverted conditions (== true where the field means the negation) .... 0 - all 15 boolean conditions read affirmative fields
+-- presence-only condition hiding a printed numeric limit .............. 0 - ISO 59020 prints no numeric limit at all except
+--                                                                          the 100 % balance, which CR-014/CR-019 do test
+-- invented values or ranges in a condition ............................ 0 - the only numeric literal anywhere is 100, which is
+--                                                                          printed (§A.2.1 p.31, §A.3.1 p.34)
+-- mis-homed gates (gate on ws A reading fields of ws B) ............... 0 of 37 - every gate reads only its own worksheet's
+--                                                                          symbols; 0 unresolved symbols
+-- unsatisfiable gates / uncovered enum values ......................... 0 - no gate constrains an enum
+-- duplicate gates ..................................................... 0 exact duplicates; 1 strict subset (S-4)
+-- required flag resting on an INFORMATIVE annex ....................... 0 - every is_required=true field traces to Clauses 4-8
+--                                                                          or to normative Annex A; the four fields sourced
+--                                                                          from Annexes B/C/G (additional_indicator,
+--                                                                          aggregation_method, complementary_method) are all
+--                                                                          optional
+-- is_required vs Table 3 mandatory/optional ........................... 0 mismatches - all 8 inflow and 8 outflow mandatory-
+--                                                                          indicator fields are required; every Energy, Water,
+--                                                                          Economic and A.3.2 field is optional, exactly as
+--                                                                          Table 3 marks them (printed pp.17-18)
+-- unit mismatches between a field and its formula's where-list ........ 0 (3 narrowings of an example unit - see S-12)
+-- worksheets with zero fields ......................................... 0 - 3/7/11/7/8/11/20/8/8 = 83
+-- source_quote verbatim but carrying no requirement ................... 1 - CR-006 (S-1); the other 12 gate quotes all carry
+--                                                                          a shall or a shall-equivalent
+-- STITCHED quotes (non-contiguous text presented as continuous) ....... 0 of 13 - every gate source_quote was searched as a
+--                                                                          single normalised run in the PDF text layer and
+--                                                                          found intact, in BOTH extractions
+-- source_quote cropped so the "shall" falls outside ................... 0 - each of the 12 shall-bearing quotes contains its
+--                                                                          own modal verb
+-- block gates on soft text ............................................ 1 of 13 (CR-006, S-1); CR-031 rests on "is required
+--                                                                          to", which IS a shall-equivalent, so it stands
+-- phantom fields (enum tokens materialised as fields) ................. 0 - all 83 fields carry a label, a clause reference
+--                                                                          and a description
+-- clause_reference retags needed ...................................... 0 - all 83 clause references resolve to a real clause
+--                                                                          of ISO 59020:2024 that says what the field means
