@@ -1,0 +1,592 @@
+-- =====================================================================================================
+-- ISO-59014 — STAGED RULINGS (written, NOT applied)
+-- Companion to iso-59014-md-verification-pack.sql. Everything below is COMMENTED OUT by design.
+-- Nothing here may be applied without an explicit ☐ RATIFIED tick from Alvaro.
+-- Every block changes structure, enforcement or required-ness, so per the 2026-09-05 owner ruling it
+-- belongs here and never in the pack.
+--
+-- DO NOT ADD begin/commit/rollback ANYWHERE IN THIS FILE. apply-pack.mjs supplies the transaction and
+-- implements --dry-run by rolling it back; an inline commit silently turns a dry run into a real apply.
+--
+-- SOURCE (SR-3 ground truth): the rendered PDF's own text layer.
+--   C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO-59014-Unlocked.pdf
+--   pdftotext -layout -enc UTF-8, 38 PDF pages, 0 undecodable characters.
+--   Body printed page = PDF page - 8 (PDF p.9 = printed p.1 ... PDF p.37 = printed p.29).
+-- Grade of every evidence quote below: [VA].
+--
+-- SCHEMA NOTE (learned this session, load-bearing): public.compliance_requirements has a column named
+--   `condition`, NOT `condition_expression`, and it has NO `active` column. Statements below use
+--   `condition`. Anything written against `condition_expression`/`active` is unrunnable.
+--
+-- =====================================================================================================
+-- PROVENANCE FINDING OF THE FIRST ORDER — read before ratifying anything below
+-- =====================================================================================================
+-- The document behind this encoding is NOT the published ISO 59014. It is a DRAFT INTERNATIONAL
+-- STANDARD circulated for ballot:
+--
+--   "DRAFT INTERNATIONAL STANDARD  ISO/DIS 59014
+--    ISO/TC 207/SC 5    Secretariat: AFNOR
+--    Voting begins on: 2023-10-16   Voting terminates on: 2024-01-08"                (printed title page, PDF p.1)
+--
+--   "THIS DOCUMENT IS A DRAFT CIRCULATED | FOR COMMENT AND APPROVAL. IT IS | THEREFORE SUBJECT TO CHANGE
+--    AND MAY | NOT BE REFERRED TO AS AN INTERNATIONAL | STANDARD UNTIL PUBLISHED AS SUCH."   (PDF p.1)
+--    NOTE ON THAT QUOTE: the title page is two-column and `pdftotext -layout` interleaves the columns,
+--    so this sentence is NOT contiguous in the text layer — right-column matter ("Reference number",
+--    "ISO/DIS 59014:2023(E)") falls between its lines. The ' | ' marks are the line breaks of the left
+--    column; each fragment between them is verbatim. Reading the rendered page, the sentence is one
+--    continuous block-capital paragraph.
+--
+--   "This document is circulated as received from the committee secretariat."           (PDF p.1)
+--
+-- Title (English, single language, no German/French text anywhere in the file):
+--   "Environmental management and circular economy — Sustainability and traceability of secondary
+--    materials recovery — Principles and requirements"                                  (PDF p.1)
+--
+-- What this means, plainly:
+--   * It IS the standard proper in shape — a requirements document, not a Technical Report and not a
+--     guidance document. It carries 87 occurrences of "shall" against 13 of "should", so block gates
+--     are defensible IN PRINCIPLE. That is the opposite of the TR/guidance case.
+--   * It is NOT the published edition (ISO 59014:2024). Clause numbering, wording and the exact set of
+--     "shall" statements can and routinely do change between DIS and IS. Every clause reference in this
+--     encoding (§6.1 … §8 a)…p)) is a DIS reference.
+--   * prod already records this honestly: standards.version = 'Draft International Standard
+--     (ISO/DIS 59014:2023(E))'. The pack does not change that, and neither does this file.
+--   * RECOMMENDATION: acquire the published ISO 59014 and re-run this pass against it before any
+--     ISO-59014 worksheet is used on a live client deliverable. Until then every ISO-59014 conformity
+--     statement produced by the Wizard is a statement about a withdrawn ballot draft.
+--
+-- ☐ RATIFIED (R-0) — acknowledge the DIS provenance; decide whether ISO-59014 may be offered to
+--    clients at all before the published edition is acquired.
+--
+--
+-- =====================================================================================================
+-- A. SCOPE-PREDICATE DEFECTS — printed "Where X …" / "If X …" encoded as an UNCONDITIONAL block gate
+-- =====================================================================================================
+-- This is the dominant defect class in ISO-59014: seven block gates enforce a requirement the source
+-- makes conditional. Two of them (R-1, R-2) are worse than over-enforcement — they are unsatisfiable
+-- for a conforming organization, because the source owes the artefact only in the NEGATIVE case.
+--
+-- The evaluator already supports the fix shape. src/lib/compliance/evaluate.ts documents
+--   "guarded:  IF cond THEN cond (vacuously pass when guard is false)"
+-- and implements it (parser + 'IF guard THEN body' returning 'true' when the guard is false).
+-- So each guard below is runnable against the existing grammar; no engine change is needed.
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-1  CR-054 — UNSATISFIABLE for a conforming organization (inverted scope). Severity: HIGH.
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'traceability_data_inaccessible_justified == true', severity = block, §8
+-- Source (§8, printed p.16):
+--   "A justification shall be provided if traceability data cannot be accessed."
+-- and (§8, printed p.17):
+--   "If data upstream or data downstream cannot be collected, justification shall be provided."
+-- The obligation exists ONLY when data cannot be accessed. An organization whose traceability data is
+-- fully accessible owes NO justification — yet the gate blocks it forever, because the boolean can
+-- never legitimately be set true. The gate punishes the compliant case.
+-- The guard field does not exist yet; it must be created. Proposed new field on ISO-59014-10:
+--   symbol 'traceability_data_inaccessible', boolean, is_required = true,
+--   label_de 'Rueckverfolgbarkeitsdaten nicht zugaenglich', clause_reference '§8'.
+-- Two changes, both needed together:
+-- (a) create the guard field   (b) guard the gate
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('a1247696-9524-4ad8-86f8-b65acea4622e', 'traceability_data_inaccessible', 'Rueckverfolgbarkeitsdaten nicht zugaenglich', 'boolean', '-', true, '§8',
+-- --           'Whether traceability data cannot be accessed / upstream or downstream data cannot be collected — the scope predicate for the justification duty in §8.', 'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'IF traceability_data_inaccessible == true THEN traceability_data_inaccessible_justified == true' where id = '1c884772-fd69-448e-bf5b-fd14ec59c810';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'traceability_data_inaccessible_justified == true' where id = '1c884772-fd69-448e-bf5b-fd14ec59c810';
+-- -- delete from public.fields where worksheet_template_id = 'a1247696-9524-4ad8-86f8-b65acea4622e' and symbol = 'traceability_data_inaccessible';
+-- ☐ RATIFIED (R-1)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-2  CR-005 — UNSATISFIABLE for a conforming organization (same inverted shape). Severity: HIGH.
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'lca_rationale_documented == true', severity = block, §6.1
+-- Source (§6.1, printed p.9):
+--   "If such studies do not provide sufficient information to define the best environmental outcome when
+--    identifying or defining the criteria, the organization shall consider conducting studies in
+--    accordance with ISO 14040, ISO 14044 and ISO 14075. If the latter were not applied, a rationale for
+--    the choice shall be documented."
+-- The rationale is owed ONLY where ISO 14040/14044/14075 were NOT applied. An organization that DID
+-- conduct those studies owes no rationale and can never satisfy the gate. Note the field is already
+-- is_required = false — the block gate contradicts the field's own required-ness.
+-- Proposed new guard field on ISO-59014-04:
+--   symbol 'lca_studies_applied', boolean, is_required = true, clause_reference '§6.1'.
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('836c0c44-bfff-4f50-9882-e979a1b08948', 'lca_studies_applied', 'Studien nach ISO 14040/14044/14075 durchgefuehrt', 'boolean', '-', true, '§6.1',
+-- --           'Whether studies in accordance with ISO 14040, ISO 14044 and ISO 14075 were applied — the scope predicate for the rationale duty in §6.1.', 'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'IF lca_studies_applied == false THEN lca_rationale_documented == true' where id = '860d6abf-2983-4b5c-9ee4-b08993eb7abd';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'lca_rationale_documented == true' where id = '860d6abf-2983-4b5c-9ee4-b08993eb7abd';
+-- -- delete from public.fields where worksheet_template_id = '836c0c44-bfff-4f50-9882-e979a1b08948' and symbol = 'lca_studies_applied';
+-- ☐ RATIFIED (R-2)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-3  CR-025 — missing scope predicate, AND THE PREDICATE FIELD ALREADY EXISTS AND IS UNUSED.
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'sa_enabling_environment == true', severity = block, §7.4
+-- Source (§7.4, printed p.12):
+--   "Where applicable, the organization engaging or intending to engage with individuals involved in
+--    subsistence activities (SAs) shall create an enabling environment to work collaboratively with
+--    organizations or individuals involved in SAs that addresses their identified needs and interests
+--    with regards to their well-being and livelihoods."
+-- The encoding already carries the exact predicate as a field — ISO-59014-03.subsistence_activities_present
+-- (boolean, is_required = true, §5.4) — and NO gate references it. An organization that engages no
+-- individuals in subsistence activities is blocked on a clause the standard does not apply to it.
+-- -- update public.compliance_requirements set condition = 'IF subsistence_activities_present == true THEN sa_enabling_environment == true' where id = '6960b37c-2694-45e3-97ff-f37e5a251911';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'sa_enabling_environment == true' where id = '6960b37c-2694-45e3-97ff-f37e5a251911';
+-- ☐ RATIFIED (R-3)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-4  CR-011 — missing scope predicate ("Where the organization has an influence …").
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'attest_iso_59014_04_cr_011 == True', severity = block, §6.3
+-- Source (§6.3, printed p.10):
+--   "Where the organization has an influence on collection systems design, it shall support the separate
+--    collection of recoverable resources (e.g., through the provision of separate containers or separate
+--    collection points)."
+-- The duty is conditional on the organization having influence on collection-system design; a pure
+-- re-processor with no such influence is blocked on a clause that does not reach it. Needs a guard
+-- field ('influence_on_collection_design', boolean) on ISO-59014-05. See also R-8 (this gate is
+-- additionally mis-homed) and R-9 (it duplicates an ungated real field).
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('957cedab-85c0-435e-bfbc-2562cb08aaf7', 'influence_on_collection_design', 'Einfluss auf Sammelsystem-Gestaltung', 'boolean', '-', true, '§6.3',
+-- --           'Whether the organization has an influence on collection systems design / on collection or return of recoverable resources — the scope predicate for both duties in §6.3.', 'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'IF influence_on_collection_design == true THEN attest_iso_59014_04_cr_011 == true' where id = 'ca38658f-d616-49a4-a488-a1d3406d2ab8';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'attest_iso_59014_04_cr_011 == True' where id = 'ca38658f-d616-49a4-a488-a1d3406d2ab8';
+-- -- delete from public.fields where worksheet_template_id = '957cedab-85c0-435e-bfbc-2562cb08aaf7' and symbol = 'influence_on_collection_design';
+-- ☐ RATIFIED (R-4)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-5  CR-036 — missing scope predicate ("Where the organization has identified that it is not …").
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'harmful_substances_removed == true', severity = block, §7.6.2
+-- Source (§7.6.2, printed p.14):
+--   "Where the organization has identified that it is not properly managing harmful substances or is
+--    engaging in harmful practices, the organization shall remove the substances from the activities and
+--    processes or improve practices to make them safer."
+-- The duty arises only on a self-identified failure. As encoded, an organization that manages harmful
+-- substances correctly must still tick "harmful substances removed" to pass. Field is is_required = false,
+-- again contradicting the block gate. Needs a guard field ('harmful_practice_identified', boolean) on
+-- ISO-59014-08.
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('0b51d7ce-8d4f-418c-a9db-e6e5c6e9c004', 'harmful_practice_identified', 'Unsachgemaesser Umgang mit Schadstoffen festgestellt', 'boolean', '-', true, '§7.6.2',
+-- --           'Whether the organization has identified that it is not properly managing harmful substances or is engaging in harmful practices — the scope predicate for the removal duty in §7.6.2.', 'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'IF harmful_practice_identified == true THEN harmful_substances_removed == true' where id = 'a32700f7-0710-41e3-887b-0359df6df678';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'harmful_substances_removed == true' where id = 'a32700f7-0710-41e3-887b-0359df6df678';
+-- -- delete from public.fields where worksheet_template_id = '0b51d7ce-8d4f-418c-a9db-e6e5c6e9c004' and symbol = 'harmful_practice_identified';
+-- ☐ RATIFIED (R-5)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-6  CR-050 — missing scope predicate ("Where depollution is carried out …").
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'depollution_info_accompanies == true', severity = block, §8
+-- Source (§8, printed p.17):
+--   "Where depollution is carried out, the recoverable resources that have been depolluted shall be
+--    accompanied by the following related information when receiving them from upstream or delivering
+--    them downstream:"
+-- An organization that performs no depollution is blocked on a depollution record. Needs a guard field
+-- ('depollution_carried_out', boolean) on ISO-59014-05 — which would also serve CR-017/CR-018 (R-8/R-9).
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('957cedab-85c0-435e-bfbc-2562cb08aaf7', 'depollution_carried_out', 'Depollution durchgefuehrt', 'boolean', '-', true, '§6.5 / §8',
+-- --           'Whether depollution (§3.5) is carried out at all — the scope predicate for the depollution duties in §6.5 and for the accompanying-information duty in §8.', 'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'IF depollution_carried_out == true THEN depollution_info_accompanies == true' where id = '621c52da-8473-49db-8edb-68c45b5ee15f';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'depollution_info_accompanies == true' where id = '621c52da-8473-49db-8edb-68c45b5ee15f';
+-- -- delete from public.fields where worksheet_template_id = '957cedab-85c0-435e-bfbc-2562cb08aaf7' and symbol = 'depollution_carried_out';
+-- ☐ RATIFIED (R-6)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-7  CR-051 — missing scope predicate ("Where the organization intends to communicate …").
+-- ---------------------------------------------------------------------------------------------------
+-- Encoded:  condition = 'traceability_claims_recognized_model == true', severity = block, §8
+-- Source (§8, printed p.17):
+--   "Where the organization intends to communicate about the traceability of the materials, the claims of
+--    the organization shall adhere to a recognized model (such as ISO 22095 or an equivalent one)."
+-- An organization that makes no public traceability claim is blocked on the claim-model duty.
+-- Needs a guard field ('intends_traceability_communication', boolean) on ISO-59014-10.
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('a1247696-9524-4ad8-86f8-b65acea4622e', 'intends_traceability_communication', 'Kommunikation ueber Rueckverfolgbarkeit beabsichtigt', 'boolean', '-', true, '§8',
+-- --           'Whether the organization intends to communicate about the traceability of the materials — the scope predicate for the recognized-model duty in §8.', 'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'IF intends_traceability_communication == true THEN traceability_claims_recognized_model == true' where id = '35cb0947-3194-4d61-88f1-ac3fe0ca979a';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'traceability_claims_recognized_model == true' where id = '35cb0947-3194-4d61-88f1-ac3fe0ca979a';
+-- -- delete from public.fields where worksheet_template_id = 'a1247696-9524-4ad8-86f8-b65acea4622e' and symbol = 'intends_traceability_communication';
+-- ☐ RATIFIED (R-7)
+--
+--
+-- =====================================================================================================
+-- B. MIS-HOMED GATES
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-8  Three gates sit on the wrong worksheet — clause vs. worksheet scope.
+-- ---------------------------------------------------------------------------------------------------
+-- Worksheet ISO-59014-04 is titled "Betriebliche Anforderungen - Kriterien & Klassifizierung" and its
+-- own fields all carry §6.1 / §6.2 / §3.3. Worksheet ISO-59014-05 is "Sammlung, Sortierung,
+-- Materialrueckgewinnung & Logistik" and carries §6.3 / §6.4 / §6.5 / §6.6.
+-- These three gates cite §6.3 and §6.5 but are homed on ISO-59014-04:
+--   CR-011  ca38658f-d616-49a4-a488-a1d3406d2ab8  §6.3  (collection)
+--   CR-017  128491b9-aef3-4220-ac24-b5a8a5df8fcd  §6.5  (depollution)
+--   CR-018  baf4ca12-7b11-453e-bbe4-34ed68e70435  §6.5  (routing of hazardous substances)
+-- Their attestation carrier fields are homed on ISO-59014-04 with them, which is why an automated
+-- gate-vs-field worksheet check comes back clean — the mis-home is at the CLAUSE level, not the field
+-- level. The reader sees a collection and a depollution question on the classification sheet.
+-- Re-homing means moving BOTH the gate and its attestation field:
+-- -- update public.compliance_requirements set worksheet_template_id = '957cedab-85c0-435e-bfbc-2562cb08aaf7' where id in ('ca38658f-d616-49a4-a488-a1d3406d2ab8','128491b9-aef3-4220-ac24-b5a8a5df8fcd','baf4ca12-7b11-453e-bbe4-34ed68e70435');
+-- -- update public.fields set worksheet_template_id = '957cedab-85c0-435e-bfbc-2562cb08aaf7' where id in ('d1e3629d-31ac-4602-8795-ef0ebac08426','54f3903f-1b4f-4d7c-980c-07b915fce8fa','84177f85-b197-4c1d-8a9a-13cb1851f896');
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set worksheet_template_id = '836c0c44-bfff-4f50-9882-e979a1b08948' where id in ('ca38658f-d616-49a4-a488-a1d3406d2ab8','128491b9-aef3-4220-ac24-b5a8a5df8fcd','baf4ca12-7b11-453e-bbe4-34ed68e70435');
+-- -- update public.fields set worksheet_template_id = '836c0c44-bfff-4f50-9882-e979a1b08948' where id in ('d1e3629d-31ac-4602-8795-ef0ebac08426','54f3903f-1b4f-4d7c-980c-07b915fce8fa','84177f85-b197-4c1d-8a9a-13cb1851f896');
+-- ☐ RATIFIED (R-8)
+--
+--
+-- =====================================================================================================
+-- C. DOUBLE-ENCODING: the same "shall" enforced twice, once by an attestation and once not at all
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-9  §6.3 and §6.5 are each carried by TWO field families — one gated, one ungated.
+-- ---------------------------------------------------------------------------------------------------
+-- Attestation carriers on ISO-59014-04 (gated, block):
+--   attest_iso_59014_04_cr_011  d1e3629d-31ac-4602-8795-ef0ebac08426  <- gate CR-011, §6.3
+--   attest_iso_59014_04_cr_017  54f3903f-1b4f-4d7c-980c-07b915fce8fa  <- gate CR-017, §6.5 depollution
+--   attest_iso_59014_04_cr_018  84177f85-b197-4c1d-8a9a-13cb1851f896  <- gate CR-018, §6.5 routing
+-- Semantically identical real fields on ISO-59014-05 (NO gate at all):
+--   separate_collection_supported  14691850-622c-428a-ad8e-c4806f021bb9  §6.3
+--   depollution_prevents_release   4f7ac477-7951-4b8f-a6ce-8bb9ef285d6a  §6.5
+--   hazardous_substances_routed    dad9735b-3a3b-4831-abfb-42ddeb82172c  §6.5
+-- The engineer answers the same question twice on two different sheets, and only the attestation copy
+-- is enforced. Pick ONE mechanism. Proposed: keep the descriptive fields on WS-05 (they carry the real
+-- clause_reference and description), point the gates at them, and deactivate the attestation carriers.
+-- NOTE: there is no `active` column on public.fields either in this schema; removal would have to be a
+-- delete, which is why this block is a proposal and not a staged statement — it needs a design decision
+-- on how a superseded field is retired. Do NOT delete rows on ratification alone.
+-- -- update public.compliance_requirements set condition = 'separate_collection_supported == true', requires_attestation = false where id = 'ca38658f-d616-49a4-a488-a1d3406d2ab8';
+-- -- update public.compliance_requirements set condition = 'depollution_prevents_release == true',  requires_attestation = false where id = '128491b9-aef3-4220-ac24-b5a8a5df8fcd';
+-- -- update public.compliance_requirements set condition = 'hazardous_substances_routed == true',   requires_attestation = false where id = 'baf4ca12-7b11-453e-bbe4-34ed68e70435';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'attest_iso_59014_04_cr_011 == True', requires_attestation = true where id = 'ca38658f-d616-49a4-a488-a1d3406d2ab8';
+-- -- update public.compliance_requirements set condition = 'attest_iso_59014_04_cr_017 == True', requires_attestation = true where id = '128491b9-aef3-4220-ac24-b5a8a5df8fcd';
+-- -- update public.compliance_requirements set condition = 'attest_iso_59014_04_cr_018 == True', requires_attestation = true where id = 'baf4ca12-7b11-453e-bbe4-34ed68e70435';
+-- ☐ RATIFIED (R-9)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-10  The three attestation carriers cite the WRONG clause in their own label.
+-- ---------------------------------------------------------------------------------------------------
+-- attest_iso_59014_04_cr_011  label_de = 'Nachweis: 6.1'  but gate CR-011 cites §6.3
+-- attest_iso_59014_04_cr_017  label_de = 'Nachweis: 6.2'  but gate CR-017 cites §6.5
+-- attest_iso_59014_04_cr_018  label_de = 'Nachweis: 6.2'  but gate CR-018 cites §6.5
+-- All three also have clause_reference = NULL and description = NULL, so the engineer sees a bare
+-- checkbox labelled with a clause number that does not match the requirement it attests. The pack
+-- verifies these three against the clause the GATE cites (§6.3 / §6.5 / §6.5) and records the label
+-- mismatch as a CAVEAT in verification_note rather than silently blessing the wrong number.
+-- Superseded entirely if R-9 is ratified.
+-- -- update public.fields set label_de = 'Nachweis: 6.3 - Getrennte Sammlung unterstuetzt', clause_reference = '§6.3', description = 'Attestation that, where the organization has an influence on collection systems design, it supports the separate collection of recoverable resources (§6.3).' where id = 'd1e3629d-31ac-4602-8795-ef0ebac08426';
+-- -- update public.fields set label_de = 'Nachweis: 6.5 - Depollution ohne Freisetzung, ohne Verduennung', clause_reference = '§6.5', description = 'Attestation that depollution is undertaken so as to prevent the release of any substances or mixtures to be removed, and that dilution is not used as part of depollution (§6.5).' where id = '54f3903f-1b4f-4d7c-980c-07b915fce8fa';
+-- -- update public.fields set label_de = 'Nachweis: 6.5 - Gefaehrliche Stoffe weitergeleitet', clause_reference = '§6.5', description = 'Attestation that any resulting hazardous substances and components are routed to proper further treatment (§6.5).' where id = '84177f85-b197-4c1d-8a9a-13cb1851f896';
+-- ROLLBACK INVERSE:
+-- -- update public.fields set label_de = 'Nachweis: 6.1', clause_reference = null, description = null where id = 'd1e3629d-31ac-4602-8795-ef0ebac08426';
+-- -- update public.fields set label_de = 'Nachweis: 6.2', clause_reference = null, description = null where id = '54f3903f-1b4f-4d7c-980c-07b915fce8fa';
+-- -- update public.fields set label_de = 'Nachweis: 6.2', clause_reference = null, description = null where id = '84177f85-b197-4c1d-8a9a-13cb1851f896';
+-- ☐ RATIFIED (R-10)
+--
+--
+-- =====================================================================================================
+-- D. UNDER-ENFORCEMENT: a printed "shall" with no gate at all
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-11  Three unconditional "shall" clauses carry a field but no compliance requirement.
+-- ---------------------------------------------------------------------------------------------------
+-- (a) adequate_infrastructure_maintained  df435326-5868-42f9-9986-ef606c936dac  §6.5, is_required = true
+--     "When preparing for recovering material, the organization shall operate and maintain an adequate
+--      infrastructure, technologies and practices that facilitates achieving the criteria defined for
+--      secondary materials to be recovered."                                     (§6.5, printed p.10)
+-- (b) depollution_by_competent_personnel  a911d0f6-31ec-4058-b10b-ded8298e6b7d  §6.5, is_required = false
+--     "Depollution shall be undertaken by personnel who are competent based on appropriate education,
+--      training or experience regarding depollution."                            (§6.5, printed p.11)
+--     (conditional on depollution occurring — pair with the R-6 guard field)
+-- (c) return_collection_measures_supported 20b35ae5-ddf3-4099-bf32-f5af3658ba07 §6.3, is_required = false
+--     "Where the organization has an influence on collection or return of recoverable resources, it shall
+--      support the development and implementation of measures to facilitate the return or collection of
+--      recoverable resources returned or collected (e.g., by supporting collectors with materials lists,
+--      communication campaigns, and take-back scheme in place)."                 (§6.3, printed p.10)
+--     (conditional — pair with the R-4 guard field)
+-- Adding gates needs new compliance_requirements rows; codes CR-055..CR-057 are free.
+-- -- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+-- --   values ('957cedab-85c0-435e-bfbc-2562cb08aaf7','CR-055','block','adequate_infrastructure_maintained == true','§6.5','When preparing for recovering material, the organization shall operate and maintain an adequate infrastructure, technologies and practices that facilitates achieving the criteria defined for secondary materials to be recovered.',false),
+-- --          ('957cedab-85c0-435e-bfbc-2562cb08aaf7','CR-056','block','IF depollution_carried_out == true THEN depollution_by_competent_personnel == true','§6.5','Depollution shall be undertaken by personnel who are competent based on appropriate education, training or experience regarding depollution.',false),
+-- --          ('957cedab-85c0-435e-bfbc-2562cb08aaf7','CR-057','block','IF influence_on_collection_design == true THEN return_collection_measures_supported == true','§6.3','Where the organization has an influence on collection or return of recoverable resources, it shall support the development and implementation of measures to facilitate the return or collection of recoverable resources returned or collected (e.g., by supporting collectors with materials lists, communication campaigns, and take-back scheme in place).',false);
+-- ROLLBACK INVERSE:
+-- -- delete from public.compliance_requirements where worksheet_template_id = '957cedab-85c0-435e-bfbc-2562cb08aaf7' and code in ('CR-055','CR-056','CR-057');
+-- ☐ RATIFIED (R-11)  — CR-056 depends on R-6, CR-057 depends on R-4 (both create the guard field)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-12  ecosystem_recovery_measures — a "shall" with no gate; correctly conditional, so note only.
+-- ---------------------------------------------------------------------------------------------------
+-- 7b034533-cd48-49e5-bcba-182359c5bd56, §7.6.2, is_required = false, referenced by no gate.
+--   "Where applicable, the organization shall implement protocols, activities, processes and mechanisms
+--    that aid and accelerate the recovery of ecosystems that have been degraded or destroyed by its
+--    activities (see, for example, land degradation cases in ISO 14055-1) and should ensure financing
+--    for preventive and restorative measure."                                    (§7.6.2, printed p.14)
+-- The clause mixes a conditional "shall" with a "should" in one sentence and has no clean machine
+-- predicate ("Where applicable" is not operationalised anywhere in the document). Leaving it ungated is
+-- the honest reading; a block gate here would not be defensible. NO CHANGE PROPOSED — recorded so the
+-- omission is deliberate rather than accidental.
+-- ☐ RATIFIED (R-12) — accept as deliberate non-enforcement
+--
+--
+-- =====================================================================================================
+-- E. FIELD-GRANULARITY DEFECT: two source data items collapsed into one field
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-13  §8 f)/o) and §8 g)/p) each share a single field across upstream and downstream.
+-- ---------------------------------------------------------------------------------------------------
+-- Source (§8, printed p.16 and p.17) states these as four separate minimum data items:
+--   upstream   "f) classification system used for classifying products, components or materials;"
+--   upstream   "g) assigned attributes for sorting;"
+--   downstream "o) classification system used for classifying products, components or materials;"
+--   downstream "p) assigned attributes for sorting."
+-- The encoding materialises only two fields:
+--   classification_system_used   80055082-95b8-4904-932d-034898320543   label "(f/o)"
+--   assigned_sorting_attributes  22bbdae2-fe4f-414f-8156-976c2770ba10   label "(g/p)"
+-- Both CR-047 (upstream) and CR-049 (downstream) test the SAME two fields. Consequence: filling in the
+-- upstream classification system alone satisfies the downstream requirement as well — the downstream
+-- half of the minimum data set can never be found missing. This is the only true gate-overlap in the
+-- standard; CR-047 and CR-049 share exactly these two conjuncts.
+-- Fix = split into four fields and re-point the two gates. Structural, so staged.
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status)
+-- --   values ('a1247696-9524-4ad8-86f8-b65acea4622e','downstream_classification_system','Downstream Klassifizierungssystem (o)','text','-',true,'§8 o)','Downstream data o): classification system used for classifying products, components or materials (§8 o).','imported_unverified'),
+-- --          ('a1247696-9524-4ad8-86f8-b65acea4622e','downstream_sorting_attributes','Downstream Sortierattribute (p)','text','-',true,'§8 p)','Downstream data p): assigned attributes for sorting (§8 p).','imported_unverified');
+-- -- update public.fields set symbol = 'upstream_classification_system', label_de = 'Upstream Klassifizierungssystem (f)', clause_reference = '§8 f)' where id = '80055082-95b8-4904-932d-034898320543';
+-- -- update public.fields set symbol = 'upstream_sorting_attributes', label_de = 'Upstream Sortierattribute (g)', clause_reference = '§8 g)' where id = '22bbdae2-fe4f-414f-8156-976c2770ba10';
+-- -- update public.compliance_requirements set condition = 'upstream_org_name_address IS NOT NULL AND upstream_coc_confirmation IS NOT NULL AND upstream_receipt_release_dates IS NOT NULL AND upstream_consignment_origin IS NOT NULL AND upstream_unique_reference IS NOT NULL AND upstream_classification_system IS NOT NULL AND upstream_sorting_attributes IS NOT NULL' where id = '2fcc0dbe-29f5-4525-ba74-6a89c77c7c46';
+-- -- update public.compliance_requirements set condition = 'downstream_receiver_name_address IS NOT NULL AND downstream_shipment_address IS NOT NULL AND outputs_routing_percentage IS NOT NULL AND downstream_unique_reference IS NOT NULL AND downstream_classification_system IS NOT NULL AND downstream_sorting_attributes IS NOT NULL' where id = 'e48c3274-5982-427a-925b-2c510b996cd8';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'upstream_org_name_address IS NOT NULL AND upstream_coc_confirmation IS NOT NULL AND upstream_receipt_release_dates IS NOT NULL AND upstream_consignment_origin IS NOT NULL AND upstream_unique_reference IS NOT NULL AND classification_system_used IS NOT NULL AND assigned_sorting_attributes IS NOT NULL' where id = '2fcc0dbe-29f5-4525-ba74-6a89c77c7c46';
+-- -- update public.compliance_requirements set condition = 'downstream_receiver_name_address IS NOT NULL AND downstream_shipment_address IS NOT NULL AND outputs_routing_percentage IS NOT NULL AND downstream_unique_reference IS NOT NULL AND classification_system_used IS NOT NULL AND assigned_sorting_attributes IS NOT NULL' where id = 'e48c3274-5982-427a-925b-2c510b996cd8';
+-- -- update public.fields set symbol = 'classification_system_used', label_de = 'Verwendetes Klassifizierungssystem (f/o)', clause_reference = '§8' where id = '80055082-95b8-4904-932d-034898320543';
+-- -- update public.fields set symbol = 'assigned_sorting_attributes', label_de = 'Zugewiesene Sortierattribute (g/p)', clause_reference = '§8' where id = '22bbdae2-fe4f-414f-8156-976c2770ba10';
+-- -- delete from public.fields where worksheet_template_id = 'a1247696-9524-4ad8-86f8-b65acea4622e' and symbol in ('downstream_classification_system','downstream_sorting_attributes');
+-- ☐ RATIFIED (R-13)
+--
+--
+-- =====================================================================================================
+-- F. UNIT / SR-2 SELECTION GAP
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-14  §8 h)/j) offer a CHOICE of measurement basis; the encoding buries it under unit = '-'.
+-- ---------------------------------------------------------------------------------------------------
+-- Source (§8, printed p.17):
+--   "h) inputs by mass or volume (in SI units) or number of units, preferably categorized by product,
+--    component or material types, according to the Harmonized System (HS code);"
+--   "j) outputs by mass or volume (in SI units) or number of units, preferably categorized by product,
+--    component or material types, according to the Harmonized System Codes (HS Codes);"
+-- Encoded: processing_inputs_quantity  95df4e62-329b-4572-8b13-9c7da36f9b76  number, unit '-'
+--          processing_outputs_quantity 332a14d5-8f8e-4ac7-9764-e0ba1d606974  number, unit '-'
+-- A bare dimensionless number cannot be read back: 1 200 could be kg, m3 or pieces, and inputs and
+-- outputs could silently be recorded on different bases. Under SR-2 the choice the standard leaves
+-- open must be surfaced as an explicit engineer selection, not defaulted or hidden. Proposed: add one
+-- enum basis field per side (mass / volume / number of units) alongside the quantity.
+-- -- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, enum_values, verification_status)
+-- --   values ('a1247696-9524-4ad8-86f8-b65acea4622e','processing_inputs_basis','Basis der Eingangsmenge (h)','enum','-',true,'§8 h)','Measurement basis selected for the input quantity: mass or volume (in SI units) or number of units (§8 h). SR-2 selection — the standard leaves the choice to the organization.','[{"value":"mass","label_de":"Masse (SI)","label_en":"Mass (SI units)","order_index":1,"regulation_reference":"§8 h)"},{"value":"volume","label_de":"Volumen (SI)","label_en":"Volume (SI units)","order_index":2,"regulation_reference":"§8 h)"},{"value":"units","label_de":"Stueckzahl","label_en":"Number of units","order_index":3,"regulation_reference":"§8 h)"}]'::jsonb,'imported_unverified'),
+-- --          ('a1247696-9524-4ad8-86f8-b65acea4622e','processing_outputs_basis','Basis der Ausgangsmenge (j)','enum','-',true,'§8 j)','Measurement basis selected for the output quantity: mass or volume (in SI units) or number of units (§8 j). SR-2 selection — the standard leaves the choice to the organization.','[{"value":"mass","label_de":"Masse (SI)","label_en":"Mass (SI units)","order_index":1,"regulation_reference":"§8 j)"},{"value":"volume","label_de":"Volumen (SI)","label_en":"Volume (SI units)","order_index":2,"regulation_reference":"§8 j)"},{"value":"units","label_de":"Stueckzahl","label_en":"Number of units","order_index":3,"regulation_reference":"§8 j)"}]'::jsonb,'imported_unverified');
+-- -- update public.compliance_requirements set condition = 'processing_inputs_quantity IS NOT NULL AND processing_inputs_basis IS NOT NULL AND inputs_routing_percentage IS NOT NULL AND processing_outputs_quantity IS NOT NULL AND processing_outputs_basis IS NOT NULL' where id = 'a6aff50a-bc72-4754-ba14-1081f70f84fb';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set condition = 'processing_inputs_quantity IS NOT NULL AND inputs_routing_percentage IS NOT NULL AND processing_outputs_quantity IS NOT NULL' where id = 'a6aff50a-bc72-4754-ba14-1081f70f84fb';
+-- -- delete from public.fields where worksheet_template_id = 'a1247696-9524-4ad8-86f8-b65acea4622e' and symbol in ('processing_inputs_basis','processing_outputs_basis');
+-- ☐ RATIFIED (R-14)
+--
+--
+-- =====================================================================================================
+-- G. SOURCE_QUOTE FIDELITY ON THE GATES (SR-1)
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-15  Twelve gate source_quotes stitch non-contiguous source text with no elision marker.
+-- ---------------------------------------------------------------------------------------------------
+-- Every fragment in each of these IS verbatim — machine-checked, word-run by word-run, against the PDF
+-- text layer — but the fragments are not contiguous in the source and are presented as one continuous
+-- quotation. Under SR-1 a quote must be verbatim; a silent stitch is a fidelity defect even when it
+-- changes no meaning. The pack format's own convention (' | ' between clauses, '[...]' inside one
+-- clause) exists precisely for this. Affected, with the seam:
+--   CR-017  §6.5  seam after "…mixtures to be removed."      (two consecutive paragraphs)
+--   CR-019  §6.6  seam after "…best environmental outcome."  (SKIPS the intervening paragraph on
+--                 non-recovered resources — the largest omission of the twelve)
+--   CR-027  §7.5  lead-in "…the organization shall:" + item b)   (items a)…f) intervene)
+--   CR-028  §7.5  same shape, item c)
+--   CR-029  §7.5  same shape, item d)
+--   CR-030  §7.5  same shape, item e)
+--   CR-031  §7.5  same shape, item f)
+--   CR-038  §7.6.3 seam after "…other stakeholders of the organization." (SKIPS the protocols paragraph)
+--   CR-047  §8    "Data shall cover at a minimum:" + Upstream a)…g); ALSO alters the source's
+--                 "g) assigned attributes for sorting;" to "… sorting." (semicolon changed to period)
+--   CR-048  §8    "Data shall cover at a minimum:" + During the processing h)…j)
+--   CR-049  §8    "Data shall cover at a minimum:" + Downstream k)…p)
+--   CR-050  §8    drops the "—" bullet markers of the three sub-items
+-- Only CR-047 alters a character; the rest are pure joins. Recommended remedy is editorial: insert
+-- ' | ' at each seam so the quote is honest about being composed, and restore CR-047's semicolon.
+-- Low risk, no enforcement change — but it edits source_quote, which is encode-time provenance, so it
+-- is staged rather than packed. One example statement; the other eleven follow the same shape.
+-- -- update public.compliance_requirements set source_quote = 'The organization shall handle, transport and store recoverable resources in a way that facilitates their subsequent recovery as whole products, components or materials, ensuring the best environmental outcome. | The organization shall use adequate transport, storage, packaging methods and packaging materials to prevent environmental and human health risks, damage to recoverable resources and reduce resource use.' where id = 'afa245a3-a1ef-4194-ad64-3a095f4c7800';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set source_quote = 'The organization shall handle, transport and store recoverable resources in a way that facilitates their subsequent recovery as whole products, components or materials, ensuring the best environmental outcome. The organization shall use adequate transport, storage, packaging methods and packaging materials to prevent environmental and human health risks, damage to recoverable resources and reduce resource use.' where id = 'afa245a3-a1ef-4194-ad64-3a095f4c7800';
+-- ☐ RATIFIED (R-15)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-16  CR-001 and CR-002 carry source_quote = NULL.
+-- ---------------------------------------------------------------------------------------------------
+-- 3669a9b7-1771-4e17-b252-58384ceda095  CR-001  warn  §4.1  'principles_applied_true_fair_consistent == true'
+-- ec153f1f-386f-4707-8961-79757e4a1473  CR-002  warn  §4.2  'principle_considered IS NOT NULL'
+-- These are the only two gates in the standard with no source_quote at all — an SR-1 gap. Their
+-- SEVERITY is correct and should not change: §4.1 and §4.2 contain no "shall" whatsoever (the whole of
+-- Clause 4 is written in the present indicative — "Organizations respect…", "Organizations enable…"),
+-- so warn is the defensible ceiling and a block gate there would NOT be defensible. Backfill only.
+-- -- update public.compliance_requirements set source_quote = 'The application of principles is fundamental to ensure that the achievement and demonstration of the sustainability and traceability of the secondary materials recovery is undertaken in a true, fair and consistent manner. The principles are the basis for the requirements and guidance in this document.' where id = '3669a9b7-1771-4e17-b252-58384ceda095';
+-- -- update public.compliance_requirements set source_quote = 'The principles are the basis for the requirements and guidance in this document.' where id = 'ec153f1f-386f-4707-8961-79757e4a1473';
+-- ROLLBACK INVERSE:
+-- -- update public.compliance_requirements set source_quote = null where id in ('3669a9b7-1771-4e17-b252-58384ceda095','ec153f1f-386f-4707-8961-79757e4a1473');
+-- ☐ RATIFIED (R-16)
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-17  CR-002 is an EFFECTIVE no-op.
+-- ---------------------------------------------------------------------------------------------------
+-- condition = 'principle_considered IS NOT NULL' on field 479918eb-9d88-4fb3-9b31-bff7c3defc2e, which is
+-- already is_required = true. The form's required flag already enforces presence, so the gate can never
+-- fire on a submittable worksheet — it adds no enforcement over the field definition. Severity is warn,
+-- so the practical harm is nil; the cost is a compliance line that always reads green regardless of
+-- content. Options: (a) leave as a visible-but-inert marker, (b) remove. NOT auto-decided.
+-- CR-041 ('recycling_rate IS NOT NULL', block, field is_required = true) has the same duplication, but
+-- there presence-only is the CORRECT enforcement ceiling: §7.8 says only "The recycling rate shall be
+-- part of the monitoring and evaluation process." and the standard prints NO threshold anywhere, so
+-- there is no limit for the gate to hide. No change proposed for CR-041.
+-- -- delete from public.compliance_requirements where id = 'ec153f1f-386f-4707-8961-79757e4a1473';
+-- ROLLBACK INVERSE:
+-- -- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, requires_attestation)
+-- --   values ('ec153f1f-386f-4707-8961-79757e4a1473','604f98db-e966-4ae1-815e-05baff280e17','CR-002','warn','principle_considered IS NOT NULL','§4.2',false);
+-- ☐ RATIFIED (R-17)
+--
+--
+-- =====================================================================================================
+-- H. is_required REVIEW
+-- =====================================================================================================
+-- ---------------------------------------------------------------------------------------------------
+-- R-18  Six BLOCK gates demand '== true' on fields whose is_required is false.
+-- ---------------------------------------------------------------------------------------------------
+--   CR-005 -> lca_rationale_documented                 5c00c14f-a40b-47fd-924b-ac966e086576  §6.1
+--   CR-025 -> sa_enabling_environment                  209078d1-afd0-4369-8da5-4eba7ec5df2a  §7.4
+--   CR-036 -> harmful_substances_removed               1ec2c977-08ee-4a00-845c-f0dc646bab10  §7.6.2
+--   CR-050 -> depollution_info_accompanies             21d1aeb2-c748-435c-9946-788ce7614baf  §8
+--   CR-051 -> traceability_claims_recognized_model     49f94ac7-7d65-4d11-ac23-c76fb36fe916  §8
+--   CR-054 -> traceability_data_inaccessible_justified a34d92ba-29c3-4fe8-8cd9-2572e737cd96  §8
+-- A block gate is strictly stronger than a required flag, so the two disagree on every one of these
+-- rows. Note what the six have in common: they are EXACTLY the six conditional-scope clauses of A above
+-- (R-2, R-3, R-5, R-6, R-7 and R-1). The encoder correctly read the modality as conditional at the
+-- FIELD level and then lost it at the GATE level.
+-- Therefore: do NOT flip is_required to true. Ratify R-1..R-7 instead; once each gate is guarded, the
+-- existing is_required = false becomes the correct and consistent setting. Recorded here so the
+-- inconsistency is visibly resolved by the guards rather than left unexplained.
+-- ☐ RATIFIED (R-18) — resolve via R-1..R-7; no is_required change
+--
+-- ---------------------------------------------------------------------------------------------------
+-- R-19  Three "should" fields are correctly is_required = false — confirmed, no change.
+-- ---------------------------------------------------------------------------------------------------
+--   collaborative_structure          fbc06ad7-ee26-484f-b499-21bde531f595  §7.2
+--     "The organization should design and implement a collaborative structure or join an existing one…"
+--   procurement_criteria_established 923e0a2e-5b35-4dcb-b017-14a6fdf62514  §7.3
+--     "The organization should establish procurement criteria in accordance with the value chain code of
+--      conduct developed."
+--   sa_support_mechanisms            e946f2d4-2970-4cbe-8204-4d873ae81cc9  §7.4
+--     "Where applicable, the organization should develop mechanisms for supporting any individuals
+--      involved in subsistence activities (SAs)…"
+-- All three are is_required = false and carry NO gate. That is the correct handling of a "should" and it
+-- is the one thing this encoding gets right consistently. NO CHANGE. Recorded as a positive result.
+-- ☐ RATIFIED (R-19) — confirm, no change
+--
+--
+-- =====================================================================================================
+-- I. NEGATIVE RESULTS — checks run, defect NOT present. Recorded so their absence is auditable.
+-- =====================================================================================================
+-- All 54 gates were parsed and each item below was tested mechanically over the full set.
+--
+--  1. Empty conditions ............................. NONE. All 54 gates carry a non-empty condition.
+--  2. Literal condition = 'TRUE' no-ops ............ NONE.
+--  3. Membership test over the whole enum domain ... NONE. Only three enum fields exist
+--     (recovery_activity_in_focus, principle_considered, organization_type) and NO gate performs a
+--     membership test on any of them; the IN operator does not appear in this standard at all.
+--  4. IS NOT NULL on a boolean ..................... NONE. The four IS NOT NULL gates (CR-002, CR-041,
+--     CR-047/048/049) test enum, number and text fields only — never a boolean.
+--  5. Tautology over an equation output ............ NOT APPLICABLE. ISO/DIS 59014 contains no formula
+--     and prod carries 0 equations for this standard.
+--  6. '>= 0' floor on a non-negative quantity ...... NONE, and structurally impossible here: the
+--     operator inventory across all 54 conditions is exactly { == , IS NOT NULL , AND }. There is no
+--     >, <, >=, <= anywhere in the standard's gates. This was the top defect on the previous standard;
+--     it does not occur here.
+--  7. Presence-only hiding a printed limit ......... NONE. The normative text (Clauses 1-8) prints NO
+--     numeric limit, threshold, rate, range or tolerance of any kind. The only percentages in the whole
+--     document are "~10 %" and "~100 %" in Table C.1 of the INFORMATIVE Annex C, and the table's own
+--     footnote b reads "Percentages are proxy values." They are correctly NOT encoded as limits.
+--  8. AND/OR inversion and OR-collapse ............. NONE. The word OR does not appear in any condition;
+--     the only connective used is AND, in CR-019, CR-047, CR-048 and CR-049, and in each case the source
+--     lists the conjuncts as jointly required ("Data shall cover at a minimum: …"). Correct.
+--  9. Inverted conditions .......................... NONE. Every boolean test is positive-sense
+--     ('== true' / '== True'); no negation appears.
+-- 10. Boundary inclusivity ......................... NOT APPLICABLE — no comparison operator exists in
+--     any gate (see 6), so no boundary can be mis-set.
+-- 11. Exact float equality on a measured quantity .. NONE. Every '==' compares against a boolean literal;
+--     no numeric equality anywhere.
+-- 12. Duplicate gates / strict subsets ............. NONE, with one qualified exception recorded as
+--     R-13: CR-047 and CR-049 share two conjuncts because the encoding collapsed §8 f)/o) and g)/p)
+--     into one field each. Neither gate is a strict subset of the other (each has 5 and 4 unique
+--     conjuncts respectively). No pair of gates has an identical condition.
+-- 13. Mis-homed gates (gate reading only another worksheet's fields) ... NONE by the mechanical test:
+--     every gate's referenced symbols resolve to fields on the gate's own worksheet. But see R-8 — three
+--     gates ARE mis-homed at the CLAUSE level (§6.3 / §6.5 gates sitting on the §6.1/§6.2 worksheet),
+--     and the mechanical test misses it because their attestation fields moved with them.
+-- 14. Unsatisfiable gates .......................... TWO, both recorded above as R-1 (CR-054) and R-2
+--     (CR-005) — unsatisfiable for a CONFORMING organization because the source owes the artefact only
+--     in the negative case. No gate is unsatisfiable for structural reasons (unknown symbol, impossible
+--     comparison, uncovered enum value): all 84 referenced symbols resolve to existing fields, and every
+--     enum value in the three enum fields is reachable because no gate constrains an enum's value.
+-- 15. '== True' vs '== true' casing ................ CHECKED, NOT A DEFECT. CR-011, CR-017 and CR-018
+--     use the Python-style capital 'True' while the other 49 use lowercase. src/lib/compliance/evaluate.ts
+--     lowercases the word before keyword lookup (`const kw = KEYWORDS[word.toLowerCase()]`) and its own
+--     header comment lists "boolean equality: flag == true, x == True" as supported. These three gates
+--     therefore parse and evaluate correctly. Cosmetic inconsistency only — NO change proposed.
+-- 16. Invented values or ranges ................... NONE. Because the standard prints no numeric value in
+--     its normative text, there is nothing that could have been invented, and nothing numeric is encoded
+--     beyond three unit-carrying fields (recycling_rate %, inputs_routing_percentage %,
+--     outputs_routing_percentage %) whose % unit follows directly from the source's own word
+--     "percentage". See R-14 for the two quantity fields where the unit is genuinely under-specified.
+-- 17. Required flags set off an INFORMATIVE annex ... NONE. Annexes A, B and C are all marked
+--     "(informative)" on their own title lines. Three fields mention Annex B in their DESCRIPTION
+--     (recovery_pathway_methodology_applied, inputs_routing_percentage, outputs_routing_percentage) but
+--     in every case the "shall" that makes them required is in normative §6.2 or §8 i)/m), not in the
+--     annex. No field, gate or required flag rests on Annex A, B or C alone. Conversely, nothing from
+--     the annexes is encoded at all — the Annex B decision trees (Figures B.1-B.3) and Table B.1
+--     collection-system taxonomy exist only as prose in the source and as no field in the Wizard.
+-- 18. Unit mismatches / dimensional check .......... NO EQUATION EXISTS to dimension-check. Field-level
+--     units are consistent with the source except the two flagged in R-14.
+-- 19. Equation outputs consumed by nothing ......... NOT APPLICABLE — 0 equations.
+-- 20. Worksheets with zero fields .................. NONE. Field counts: WS-01 3, WS-02 2, WS-03 3,
+--     WS-04 12, WS-05 13, WS-06 7, WS-07 8, WS-08 8, WS-09 8, WS-10 20 = 84.
+--     Two worksheets carry zero GATES — WS-01 (registration, 3 fields) and WS-03 (activities and
+--     organizations, 3 fields). Both are descriptive/registration sheets whose fields the source defines
+--     but imposes no "shall" on (§1, §3.17, §3.20, §5.1, §5.3, §5.4 are all definitional or descriptive),
+--     so the absence of gates there is correct, not an omission.
+-- 21. source_quote verbatim but containing no requirement ... NONE among the block gates. All 52 block
+--     gates carry a source_quote containing "shall". The two gates without a "shall" in scope (CR-001,
+--     CR-002) are both warn — see R-16.
+-- 22. source_quote cropped so the "shall" falls outside it ... NONE. Checked every block gate: the
+--     governing "shall" is inside the quoted text in all 52 cases. CR-027..CR-031 quote a bare list item
+--     ("d) Provide personal protective equipment (PPE);") but each includes the lead-in "…the
+--     organization shall:" that carries the modality — which is exactly why they are stitched (R-15).
+-- 23. Block gates anchored on soft ("should") text ... NONE. Two block quotes CONTAIN the word "should"
+--     (CR-047 and CR-049), but in both cases only inside sub-items e) and n) — "if not available, the
+--     organization should assign one" — while the governing modality of the same quote is "Data shall
+--     cover at a minimum". The block severity is correct. The three genuinely "should"-only obligations
+--     in the standard carry no gate at all (R-19).
+--
+-- =====================================================================================================
+-- END — nothing in this file has been applied. 19 ratification items open (R-0 … R-19, R-12/R-19 are
+-- confirm-no-change). Ratification order suggested: R-0 first (it may moot the rest), then R-1 and R-2
+-- (unsatisfiable gates, highest client-visible harm), then R-3..R-7, then R-8..R-11, then the rest.
+-- =====================================================================================================
