@@ -1,0 +1,336 @@
+-- ============================================================================================
+-- ISO-59004 — STAGED rulings (WRITTEN, NOT APPLIED)
+-- ============================================================================================
+-- Everything in this file changes structure, enforcement or required-ness and therefore needs a
+-- ratification decision. Nothing here is in the verification pack. Every block carries its evidence
+-- quote and its rollback inverse. Mark ☑ RATIFIED to release a block; it stays commented until then.
+--
+-- SOURCE FOR EVERY QUOTE BELOW: ISO/FDIS 59004:2024 — a FINAL DRAFT International Standard,
+-- reproduced inside the Moroccan DRAFT "Projet de Norme Marocaine PNM ISO/FDIS 59004" (IMANOR,
+-- 2024, unfilled approval line, watermarked on every page). This is NOT the published
+-- ISO 59004:2024 and its clause numbering can differ from the published edition.
+-- Printed p.N = PDF p.(N+7) for the body.
+--
+-- SCHEMA NOTE: public.compliance_requirements has a column `condition` (NOT `condition_expression`)
+-- and NO `active` column. All statements below are written against that shape.
+-- No transaction control anywhere in this file.
+-- ============================================================================================
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-1  ☐ RATIFIED — record the draft provenance on the standard row
+-- ---------------------------------------------------------------------------------------------
+-- prod standards.version already reads 'FDIS 2024 (ISO/FDIS 59004:2024)', so the FDIS/draft status
+-- IS recorded. What is NOT recorded is that the only copy in the library is a Moroccan national
+-- DRAFT adoption, watermarked "Projet de Norme Marocaine" on all 63 pages, with the homologation
+-- decision left blank.
+-- EVIDENCE (cover, PDF p.1): "Projet de Norme Marocaine — PNM ISO/FDIS 59004 — IC 00.1.016 — 2024";
+--   "Correspondance: La présente norme est identique à l'ISO/FDIS 59004:2024.";
+--   "Norme Marocaine homologuée — Par décision du Directeur de l'Institut Marocain de Normalisation
+--   N°........... du ............ 2024, publiée au B.O. N° ............ du ............ 2024."
+--   Running head, PDF p.8 (printed p.1): "FINAL DRAFT International Standard".
+-- WHY IT MATTERS: an engineer citing this standard in a deliverable would be citing an unpublished
+--   draft. Published ISO 59004:2024 exists; the library does not hold it.
+--
+-- update public.standards set version='FDIS 2024 (ISO/FDIS 59004:2024, as reproduced in the Moroccan draft PNM ISO/FDIS 59004, IMANOR 2024) — DRAFT, not the published ISO 59004:2024' where id='98737198-0988-49c6-80cb-bb077ff29fb1';
+-- ROLLBACK: update public.standards set version='FDIS 2024 (ISO/FDIS 59004:2024)' where id='98737198-0988-49c6-80cb-bb077ff29fb1';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-2  ☐ RATIFIED — 24 of 44 gates carry an EMPTY condition
+-- ---------------------------------------------------------------------------------------------
+-- CR-006, CR-007, CR-008, CR-009, CR-010, CR-011, CR-012, CR-014, CR-016, CR-019, CR-020, CR-021,
+-- CR-022, CR-023, CR-024, CR-025, CR-026, CR-030, CR-033, CR-038, CR-040, CR-041, CR-043, CR-044
+-- all have condition = '' (empty string, not NULL, not 'TRUE').
+-- EFFECT (verified in src/lib/compliance/evaluate.ts:538): `if (!condition || !condition.trim())
+--   return { kind: 'manual' };` — an empty condition degrades the requirement to a manual checklist
+--   item. It is not a silent pass, but it enforces nothing. 55 % of this standard's gate surface is
+--   inert. All 24 are severity='warn', so nothing is being blocked by them either.
+-- ASSESSMENT: for a document with zero "shall" this is arguably the right end state, but it should
+--   be a DECISION, not an artefact of an incomplete encode. Two options, one ruling needed:
+--     (a) leave them as manual checklist items and say so in each source_quote (recommended, matches
+--         the document's guidance character), or
+--     (b) give each a real condition over a field that the worksheet actually collects.
+--   Option (b) is impossible today for most of them: 24 gates reference no field at all, and only
+--   23 fields exist across the whole standard. Not staged as SQL because the target text depends on
+--   which option is chosen.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-3  ☐ RATIFIED — 43 of 44 gates have source_quote = NULL
+-- ---------------------------------------------------------------------------------------------
+-- Every gate except CR-015 carries source_quote = NULL. A gate with no source quote cannot be
+-- audited and cannot be shown to an engineer as a reason. CR-015 is the sole exception and its
+-- quote is correct and verbatim (checked against the rendered PDF p.24 = printed p.17).
+-- The 20 gates that DO have a condition and could be quoted straight away, with the printed
+-- sentence each should carry, are:
+--   CR-001 §1  p.1  "It is applicable to organizations seeking to understand and commit or contribute to a circular economy while contributing to sustainable development."
+--   CR-002 §1  p.1  same sentence — but see S-10, this is a scope predicate, not an obligation
+--   CR-003 §4  p.14 "The long-term vision of a circular economy is, by design, to provide appropriate solutions for the reduced, efficient and effective use of resources, ..."
+--   CR-004 §4  p.15 "Systems thinking should be applied to circular economy activities, which supports progress towards sustainable development."
+--   CR-005 §4  p.15 "The six principles described in Clause 5 should be integrated into organizational strategies and objectives ..."
+--   CR-013 §5.3.2 p.16 "Considering the integration of all the circular economy principles is important, as focusing on only one or two principles can undermine the achievements ..."
+--   CR-017 §5.3.6 p.17 "There is inevitably loss of resources (e.g. material and energy) over time that should be monitored in terms of type, final disposition and effects."
+--   CR-018 §6.1 p.18 "Organizations should consider refuse and rethink as preliminary actions."
+--   CR-027 §6.7 p.27 "A life cycle perspective should guide the organization in the identification of the best action for their value creation model and to avoid unwanted trade-offs."
+--   CR-028 §6.7 p.28 "In general, products should be repaired before they are remanufactured, and remanufactured before they are recycled."
+--   CR-029 §7.1.4 p.30 "The proposed stages that an organization can undertake in order to implement a circular economy are discussed in 7.2 to 7.6."
+--   CR-031 §7.1.3 p.29 "This guidance is applicable to organizations operating at all system levels, as follows: ..."
+--   CR-032 §7.2.2 p.31 "As an initial step, the organization should determine their reference situation with regards to a circular economy." + "the selected circularity indicators should be calculated and a baseline circularity assessment performed."
+--   CR-034 §7.3.1 p.32 "Organizations should develop their purpose, mission and vision for a circular economy in alignment with the circular economy principles (see 5.2)."
+--   CR-035 §7.3.2 p.33 "The organization should develop goals with an aim to create structured and lasting change ..."
+--   CR-036 §7.4.3 p.33 "An organization's strategy should link its mission, vision, goals, priorities, targets and respective actions or projects followed by a measuring framework."
+--   CR-037 §7.4.4 p.33 "The organization should align its actions with the strategy and address identified opportunities to create value ..."
+--   CR-039 §7.4.6 p.34 "Once the circular economy strategic priorities are established, the organization should develop an action plan for how the circular economy strategy will be implemented."
+--   CR-042 §7.6  p.36 "The organization should often review these indicators and circularity performance."
+-- Not staged as SQL: writing 19 UPDATEs to compliance_requirements is an enforcement-surface change
+-- and should go in one batch after the S-2 ruling settles what the empty-condition gates become.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-4  ☐ RATIFIED — is_required=true on 24 of 33 fields, with zero mandatory verbs behind them
+-- ---------------------------------------------------------------------------------------------
+-- MECHANICAL CENSUS over the whole 63-page document: body clauses 1-7 contain 0 "shall" and 128
+-- "should"; informative Annexes A/B/C contain 0 "shall" and 3 "should". The only "shall" in the
+-- entire document is the ISO patent boilerplate on printed p.vi: "ISO shall not be held responsible
+-- for identifying any or all such patent rights."
+-- The title of the document is "Vocabulary, principles and guidance for implementation", and §1
+-- says it "gives guidance, including possible actions, for an organization to implement".
+-- CONSEQUENCE: no field in this standard has a printed obligation behind it. The encoding marks 24
+-- of 33 fields is_required=true.
+-- PROPOSAL: relax is_required on the fields whose source verb is "should" / "can" / "is important",
+-- keeping true only for the identity fields the app itself needs. The 22 candidates are listed
+-- below; the two identity fields (organization_name, organization_type) stay required as app data.
+--
+-- update public.fields set is_required=false where id in (
+--   '863cdc93-3d43-46fc-8462-a0f5ad081ca9',  -- value_chain_position  §6.1 "should have an understanding"
+--   'cfe85257-2334-47eb-ac71-dbb8af526cc8',  -- ce_commitment         §1 applicability statement, no verb
+--   'b2436626-4bea-4bd3-a198-fffb9348edf0',  -- ce_vision_statement   §4 descriptive ("The long-term vision ... is")
+--   '2930b494-3154-4d09-941f-c57e67407085',  -- systems_thinking_applied  §4 "should be applied"
+--   'f5d68a9c-2e5a-45b6-937c-b2dbf06242af',  -- principles_integrated §4 "should be integrated"
+--   '86c49ff8-ff8d-4971-b571-5e361b00e84b',  -- all_principles_considered §5.3.2 "is important" / "can undermine"
+--   'bf42aa68-b9ad-48c4-af29-e61557c912ec',  -- hazardous_substance_risk_approach §5.3.4 "should be used", "When possible"
+--   '140e3977-fce7-409e-ba5a-d135103c831b',  -- selected_principle    §5.1 "should be considered"
+--   '152afe33-75b1-4e24-889a-46e524630cf6',  -- preliminary_action_refuse_rethink §6.1 "should consider"
+--   'f2078636-0072-4f7b-ac72-cd518bd16fc1',  -- life_cycle_perspective_applied §6.7 "should guide"
+--   'f301f926-4f37-4df9-9b3b-ee3801cb4753',  -- selected_action       §6.7 "suggests", "should seek"
+--   '2084eca2-b592-4c8d-a63e-23e5a3125b24',  -- implementation_stage  §7.1.4 "can undertake", "sequence can differ"
+--   '9d1e60c3-cf6c-4d33-bd9a-8462f2f9f114',  -- implementation_level  §7.1.3 "is applicable to", no obligation
+--   'ed937302-ec3e-4590-8932-50a10b60190c',  -- reference_situation_assessed §7.2.2 "should determine"
+--   'e2831e54-13ae-4a10-8bc7-0e80b4dd6eb9',  -- baseline_circularity_assessment §7.2.2 "should be calculated"
+--   '1a37d6cb-2e64-4062-b556-52b808543b34',  -- selected_circularity_indicator §7.6 "should choose"
+--   '4a0d089d-1395-4bf6-9997-518d08be3d2d',  -- ce_purpose_mission_vision §7.3.1 "should develop"
+--   '8ffe261f-1527-4051-a397-5a53fdd0b068',  -- ce_goals              §7.3.2 "should develop"
+--   'f34c2fab-d2a7-4e41-8340-af9b9ff40f7e',  -- ce_strategy           §7.4.3 "should link"
+--   '1fb9879b-24b0-4cd0-8424-c854ffdb72c4',  -- ce_action_plan        §7.4.6 "should develop"
+--   '82b7680e-b5c0-4ee1-a9d6-bb1746a25f17',  -- value_creation_model  §7.4.4 "should align"
+--   'c66ed4f7-d3d6-46ca-af8e-8a933ea7cae1'   -- monitoring_review_process §7.6 "should often review"
+-- );
+-- ROLLBACK: update public.fields set is_required=true where id in ( ...the same 22 ids... );
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-5  ☐ RATIFIED — CR-015 is a BLOCK gate anchored on "should" text
+-- ---------------------------------------------------------------------------------------------
+-- CR-015 (id 810c45d0-6cee-4041-8ec6-d1a46e14f4ae, worksheet ISO-59004-04) is the only
+-- severity='block' gate in this standard. Its own source_quote is the evidence against it:
+-- EVIDENCE (§5.3.4, printed p.17 = PDF p.24, verbatim):
+--   "A circular economy should not harm the health of people, wildlife or the environment.
+--    Therefore, a risk-based approach should be used to avoid exposure to hazardous substances.
+--    When possible, organizations should avoid their use."
+-- Three "should", one printed carve-out ("When possible"), zero "shall" — and the document contains
+-- no "shall" at all. A block gate stops a project from being finalized; nothing in this draft
+-- authorizes that. The printed exception is also ignored by the condition
+-- `hazardous_substance_risk_approach == true`, which admits no exception path.
+--
+-- update public.compliance_requirements set severity='warn' where id='810c45d0-6cee-4041-8ec6-d1a46e14f4ae';
+-- ROLLBACK: update public.compliance_requirements set severity='block' where id='810c45d0-6cee-4041-8ec6-d1a46e14f4ae';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-6  ☐ RATIFIED — CR-017 asserts a "can" statement as a true/false obligation
+-- ---------------------------------------------------------------------------------------------
+-- CR-017 (id a359f05b-47a4-43cf-9148-af5111b1ac70) condition: `stocks_flows_monitored == true`.
+-- EVIDENCE (§5.3.6, printed p.17 = PDF p.24): the identify/measure/trace half is permissive —
+--   "To efficiently manage the resource utilization in a circular way, the organization CAN identify
+--    and measure the use of all types of resources ... and trace the mass and value over time";
+--   only the loss half carries an obligation — "There is inevitably loss of resources (e.g. material
+--   and energy) over time that SHOULD be monitored in terms of type, final disposition and effects."
+-- The field is correctly is_required=false, but the gate demands it be true. Either narrow the gate
+-- to loss monitoring, or drop it. Proposed source_quote so the gate at least states its warrant:
+--
+-- update public.compliance_requirements set source_quote='There is inevitably loss of resources (e.g. material and energy) over time that should be monitored in terms of type, final disposition and effects. — ISO/FDIS 59004:2024 §5.3.6, printed p.17 = PDF p.24. NOTE: the identify/measure/trace activity in the same paragraph is printed with "can", not "should".' where id='a359f05b-47a4-43cf-9148-af5111b1ac70';
+-- ROLLBACK: update public.compliance_requirements set source_quote=null where id='a359f05b-47a4-43cf-9148-af5111b1ac70';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-7  ☐ RATIFIED — CR-028 enforces a rule whose printed exception it ignores
+-- ---------------------------------------------------------------------------------------------
+-- CR-028 (id 4830f731-57bb-4361-9448-6a793f1ef7d6) condition:
+--   `repair_before_remanufacture_before_recycle == true`
+-- EVIDENCE (§6.7, printed p.28 = PDF p.35, verbatim):
+--   "In general, products should be repaired before they are remanufactured, and remanufactured
+--    before they are recycled. However, in cases where applying this guidance does not lead to the
+--    best outcome, organizations should consider applying a life cycle perspective to determine the
+--    best action."
+-- Two softeners ("In general", "However, in cases where ...") and the gate offers no exception path.
+-- Severity is warn, so it advises rather than blocks — the fix is a source_quote that carries the
+-- exception, so the engineer sees why a "false" answer can be legitimate:
+--
+-- update public.compliance_requirements set source_quote='In general, products should be repaired before they are remanufactured, and remanufactured before they are recycled. However, in cases where applying this guidance does not lead to the best outcome, organizations should consider applying a life cycle perspective to determine the best action. — ISO/FDIS 59004:2024 §6.7, printed p.28 = PDF p.35' where id='4830f731-57bb-4361-9448-6a793f1ef7d6';
+-- ROLLBACK: update public.compliance_requirements set source_quote=null where id='4830f731-57bb-4361-9448-6a793f1ef7d6';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-8  ☐ RATIFIED — implementation_level offers a 4th level the clause does not print as a level
+-- ---------------------------------------------------------------------------------------------
+-- Field 9d1e60c3-cf6c-4d33-bd9a-8462f2f9f114, enum has 4 values. §7.1.3 (printed p.29 = PDF p.36)
+-- prints THREE: "This guidance is applicable to organizations operating at all system levels, as
+-- follows: — Global, regional, country, local level ... — Interorganizational level ...
+-- — Organizational level ...". The fourth comes from the next sentence: "ISO 59020 covers these
+-- three levels and also includes a system level focusing on products. This fourth system level is
+-- indirectly covered in this document by the goals, strategies and activities of the organizations
+-- that provide products."
+-- The value is defensible, but it is offered at the same rank as the three printed levels with no
+-- hint that it belongs to ISO 59020 and is only indirect here. Proposal: relabel it so the picker
+-- says so. (enum_values is JSONB; the exact patch is left to the ratification batch because the
+-- label wording is an editorial choice.)
+-- SUGGESTED label_en for value 'product': "Product level (covered by ISO 59020; only indirectly
+--   covered in this document)".
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-9  ☐ RATIFIED — selected_principle and selected_circularity_indicator are single-valued over
+--                    printed plurals
+-- ---------------------------------------------------------------------------------------------
+-- (a) selected_principle (140e3977-fce7-409e-ba5a-d135103c831b) is a single-select enum over six
+--     principles. EVIDENCE (§5.1, printed p.15 = PDF p.22): "The set of principles given in 5.2,
+--     which are interlinked and complementary, should be considered by an organization to transition
+--     towards a circular economy." and (§5.3.2, printed p.16 = PDF p.23) "Considering the integration
+--     of all the circular economy principles is important, as focusing on only one or two principles
+--     can undermine the achievements that would otherwise occur if all the principles were
+--     considered." — the source prescribes a conjunction; the widget forces a choice of one.
+--     PROPOSAL: multi-select. This is a data_type / widget change and needs the app-side decision.
+-- (b) selected_circularity_indicator (1a37d6cb-2e64-4062-b556-52b808543b34) is a single text value.
+--     EVIDENCE (§7.6, printed p.36 = PDF p.43): "the organization should choose circularity
+--     indicatorS"; (§7.4.3, printed p.33 = PDF p.40): "the establishment of a SET of circularity
+--     indicators". PROPOSAL: repeatable field.
+-- Both left unstaged as SQL: a data_type change alters how existing project answers are read.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-10 ☐ RATIFIED — CR-002 turns a scope predicate into a compliance check
+-- ---------------------------------------------------------------------------------------------
+-- CR-002 (id 4a95649c-bf91-41b9-b04b-e1a7a1d64ac9) condition: `ce_commitment == true`.
+-- EVIDENCE (§1 Scope, printed p.1 = PDF p.8): "It is applicable to organizations seeking to
+-- understand and commit or contribute to a circular economy while contributing to sustainable
+-- development." That sentence says WHO the document is for. An organization that answers "no" is
+-- outside the document's scope; it is not non-compliant. Encoding it as a requirement means the
+-- worksheet reports a compliance warning for a scope mismatch.
+-- PROPOSAL: keep the field (it is a useful applicability switch) but retire the gate, or reword its
+-- source_quote to say it is an applicability check. Left to the ratification batch.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-11 ☐ RATIFIED — clause_reference retag on value_chain_position
+-- ---------------------------------------------------------------------------------------------
+-- Field 863cdc93-3d43-46fc-8462-a0f5ad081ca9 carries clause_reference '§1'. §1 mentions "position
+-- within a specific value chain or value network" only as an applicability statement. The sentence
+-- that actually creates the field's obligation is in §6.1 (printed p.18 = PDF p.25): "Prior to
+-- implementing any of the identified actions in this clause, an organization should have an
+-- understanding of where their solutions fit in the value chain." The field description already
+-- cites 6.1; the clause_reference does not.
+--
+-- update public.fields set clause_reference='§6.1 (Anwendungsbereich §1)' where id='863cdc93-3d43-46fc-8462-a0f5ad081ca9';
+-- ROLLBACK: update public.fields set clause_reference='§1' where id='863cdc93-3d43-46fc-8462-a0f5ad081ca9';
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-12 ☐ RATIFIED — unit='-' placeholder on all 33 fields
+-- ---------------------------------------------------------------------------------------------
+-- All 33 fields carry the literal string '-' in the unit column. ISO/FDIS 59004 is entirely
+-- dimensionless (13 text, 13 boolean, 7 enum fields; no numeric or date field anywhere; no numeric
+-- limit, formula or unit printed in the document at all). A literal '-' renders as a unit label
+-- beside a free-text box. Proposal: null it out.
+--
+-- update public.fields f set unit=null from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id where wt.id = f.worksheet_template_id and s.code='ISO-59004' and f.unit='-';
+-- ROLLBACK: update public.fields f set unit='-' from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id where wt.id = f.worksheet_template_id and s.code='ISO-59004' and f.unit is null;
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-13 ☐ RATIFIED — organization_type is free text over a printed closed pair
+-- ---------------------------------------------------------------------------------------------
+-- Field f7c980f0-4f03-44eb-98fe-757e6b2343c7, data_type='text'. EVIDENCE (§1, printed p.1 = PDF p.8):
+-- "These organizations can be either private or public, acting individually or collectively,
+-- regardless of type or size, and located in any jurisdiction, or position within a specific value
+-- chain or value network." Per the 2026-08-01 owner ruling (fixed options => selection widget, never
+-- free text) this should be two selections (private|public, individually|collectively) rather than a
+-- text box. Left unstaged as SQL: it is a data_type + enum_values change.
+
+
+-- ---------------------------------------------------------------------------------------------
+-- S-14 ☐ RATIFIED — worksheet ISO-59004-02 collects data that nothing consumes
+-- ---------------------------------------------------------------------------------------------
+-- ISO-59004-02 "Begriffe & Definitionen (Vokabular)" holds 3 fields (system_in_focus,
+-- circularity_aspect, defined_term) and is the only worksheet with ZERO gates. No gate and no
+-- equation anywhere in the standard reads any of its three fields. It is a vocabulary lookup
+-- rendered as a data-collection worksheet, so an engineer is asked to fill three boxes whose
+-- answers are never read. (No worksheet has zero fields — that class does not occur here.)
+-- PROPOSAL: reclassify the worksheet archetype from 'data_collection' to a reference archetype,
+-- or drop the three fields to optional-informational. Needs the app-side decision on archetypes.
+-- FOR REFERENCE, fields referenced by no gate at all (10 of 33):
+--   jurisdiction, system_in_focus, circularity_aspect, defined_term, selected_principle,
+--   action_category, selected_action, selected_circularity_indicator, feasibility_dimension,
+--   pilot_project.
+
+
+-- ============================================================================================
+-- NEGATIVE RESULTS — checked and NOT found (recorded so their absence is auditable)
+-- ============================================================================================
+--   condition='TRUE' ......................................... 0
+--   effective no-ops of the "IS NOT NULL on an already-required field" kind ... 11 (CR-001 x3,
+--       CR-003, CR-029, CR-031, CR-034, CR-035, CR-036, CR-037, CR-039). These are redundant rather
+--       than wrong: the field is already is_required=true, so the gate can only fire in states the
+--       form already refuses. If S-4 relaxes is_required, they stop being no-ops — so this class is
+--       deliberately NOT "fixed" here; it is downstream of the S-4 ruling.
+--   tautology over an equation output ........................ 0 (no equations exist)
+--   ">= 0" floor on a legitimately negative quantity ......... 0 (no numeric fields exist)
+--   presence-only condition hiding a printed limit ........... 0 (the document prints no limits)
+--   number lifted from an example parenthetical and enforced .. 0 (no numbers are enforced anywhere)
+--   AND/OR inversion ......................................... 0 (only 2 gates use a boolean
+--       operator at all: CR-001 = 3x AND, CR-032 = 1x AND; both are conjunctions of things the same
+--       worksheet collects and both read correctly)
+--   inverted condition ....................................... 0
+--   boundary inclusivity / two-sided tolerance encoded one-sided ... 0 (no boundaries printed)
+--   duplicate gates / strict subsets ......................... 0 (all 20 non-empty conditions distinct;
+--       no condition is a subset of another)
+--   mis-homed gates (operand field on another worksheet) ..... 0 (every operand of every gate lives
+--       on that gate's own worksheet — checked mechanically across all 44)
+--   unsatisfiable gates ...................................... 0
+--   conditional obligation enforced unconditionally .......... 1 (CR-028 — see S-7)
+--   printed exception ignored by a BLOCK gate ................ 1 (CR-015 — see S-5)
+--   invented values, units or specifications ................. 0 in field descriptions. All 33
+--       descriptions were read against the source; every claim traces to printed text. The only
+--       drift found is wording, not substance: hazardous_substance_risk_approach says "where
+--       possible" where §5.3.4 prints "When possible". No description asserts a specification,
+--       figure, threshold or method that the document does not contain.
+--   enum closing a printed open list ......................... 0. All 7 enums were checked against
+--       their printed lists: defined_term = 23 terms vs printed 3.1.1-3.1.23 (exact);
+--       selected_principle = 6 vs printed 5.2.1-5.2.6 (exact); action_category = 5 vs printed
+--       6.2-6.6 (exact); selected_action = 13 vs Table 1 (exact, printed order preserved);
+--       implementation_stage = 5 vs Figure 4 (exact); feasibility_dimension = 6 vs the printed
+--       closed list in 7.4.5 (exact); implementation_level = 4 vs 3 printed + 1 from the follow-on
+--       sentence (see S-8). No enum truncates a list the source leaves open.
+--   single-select over a printed conjunction ................. 2 (see S-9)
+--   missing scope predicate .................................. 0
+--   required flag with no mandatory verb behind it ........... 24 of 24 (see S-4 — this is the
+--       standard's defining defect, not an exception)
+--   equation outputs consumed by nothing ..................... n/a (0 equations)
+--   worksheets with zero fields .............................. 0 (5 / 3 / 3 / 4 / 5 / 13)
+--   source_quote carrying no requirement ..................... 0 of the 1 gate that has a source_quote
+--       (CR-015's quote is a real, if soft, obligation)
+--   gates with no source_quote ............................... 43 of 44 (see S-3)
+--   wrong page ref in an existing gate quote ................. 0 (CR-015 carries a clause reference
+--       "5.3.4 Risk and opportunity management" and no page number; the clause is correct)
+--   block gate on soft text .................................. 1 of 1 block gates (see S-5)
+-- ============================================================================================
