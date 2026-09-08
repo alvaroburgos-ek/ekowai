@@ -1,0 +1,575 @@
+-- ISO-14033 - STAGED rulings (WRITTEN, NOT APPLIED). 2026-09-08.
+-- Every block below is COMMENTED SQL. Nothing in this file executes. Each carries its evidence
+-- quote (verbatim, ISO 14033:2019, printed page + PDF page) and its rollback inverse. Mark a
+-- block "RATIFIED" only after Alvaro decides; nothing here may be applied on a subagent's
+-- judgement.
+--
+-- SOURCE: ISO 14033:2019(E), "INTERNATIONAL STANDARD", Environmental management - Quantitative
+--   environmental information - Guidelines and examples. FIRST EDITION 2019-02, (c) ISO 2019.
+--   PUBLISHED STANDARD - not a Draft/DIS/FDIS, not a Technical Report, not a scoping report.
+--   English. No licensee stamp on this copy.
+--   PDF: C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 14033\
+--        ISO-14033-2019.pdf (3 204 845 bytes, 75 pages). Text layer: pdftotext -layout -enc UTF-8,
+--        form feeds preserved, 233 671 bytes, 0 undecodable characters (0 x U+FFFD).
+--   PAGE CONVENTION: this copy interleaves NO blank filler pages - every text page carries its own
+--        footer, so the map is uniform: PDF p.2-6 -> printed p.ii-vi and PDF p.N -> printed
+--        p.(N-6) for the arabic pages. Confirmed against the printed Contents list (printed
+--        p.iii): Scope p.1 = PDF 7, Clause 6 p.7 = PDF 13, Annex A p.19 = PDF 25, Annex B p.28 =
+--        PDF 34, Annex C p.33 = PDF 39, Annex D p.50 = PDF 56, Annex E p.64 = PDF 70,
+--        Bibliography p.65 = PDF 71 - all eight entries reproduce exactly.
+--        Citations give "printed p.N (PDF p.M)".
+--   RENDERED-PAGE CHECK: PDF p.13 and p.29 opened as images and compared word for word against
+--        the extraction. Faithful. No OCR damage found in the normative body.
+--
+-- Schema note: public.compliance_requirements has the column "condition" (NOT
+--   "condition_expression") and has NO "active" column - the statements below reflect that.
+--   The evaluator accepts "== True" as well as "== true", so casing is cosmetic and is NOT staged.
+--   public.fields DOES have an "active" column, and holds numeric/text bounds in the JSONB column
+--   "validation_rules" (there are no min_value/max_value columns).
+--
+-- ============================================================================
+-- MODALITY CENSUS - the arithmetic every severity judgement below rests on
+-- ============================================================================
+--   Normative body, Clauses 1-6 (printed p.1-18 / PDF 7-24): shall = 0  should = 10  may = 4  can = 37  must = 0
+--   Informative Annexes A-E  (printed p.19-64 / PDF 25-70):  shall = 0  should = 88  may = 1  can = 69
+--   Whole 75-page document:                                  shall = 1
+--
+--   The ONE "shall" in the whole document is ISO boilerplate in the Foreword:
+--     "ISO shall not be held responsible for identifying any or all such patent rights."
+--       - printed p.v (PDF p.5)
+--   It binds ISO, not the user of the standard. The normative body therefore contains ZERO
+--   requirement-bearing "shall", all five annexes are printed "(informative)", and the document's
+--   own title is "Guidelines and examples".
+--
+--   >>> NO BLOCK GATE IS DEFENSIBLE ANYWHERE IN THIS STANDARD. <<<
+--   >>> AND THE ENCODING ALREADY AGREES: all 27 compliance_requirements rows are severity='warn',
+--       zero are severity='block'. NOTHING IS STAGED FOR SEVERITY. This is a clean match and is
+--       recorded as a positive finding. <<<
+--
+-- ============================================================================
+-- NEGATIVE RESULTS - checks that were RUN and came back CLEAN (auditable absence)
+-- ============================================================================
+--   * block gates on soft text ............ NONE. 0 of 27 gates are severity='block'.
+--   * invented numeric limits in gates .... NONE. Not one of the 27 gate conditions contains a
+--                                           numeric literal. The normative body prints no limit,
+--                                           no threshold and no table of values, so there was
+--                                           nothing to invent - and nothing was.
+--   * numbers lifted from a worked example
+--     and encoded as a limit .............. NONE in the gates or in enum_values. (Annexes B, C and
+--                                           D are full of case-study figures - e.g. tonnes of CO2,
+--                                           IEA emission factors - and NOT ONE of them appears in
+--                                           the encoding. The three unsourced ">= 0" floors in
+--                                           validation_rules are a separate matter: see S-5; they
+--                                           are not example numbers, they are invented floors.)
+--   * exact float equality ................ ONE instance, CR-019 - see S-2.
+--   * boundary inclusivity errors ......... N/A. No gate compares against a bound.
+--   * unit mismatches ..................... TWO fields carry the literal string "number" in the
+--                                           unit column - see S-6. No other unit is wrong; the
+--                                           remaining 46 fields carry unit='-' (boolean/text/enum),
+--                                           which is correct because the standard states no
+--                                           quantity for any of them.
+--   * unsatisfiable gates / uncovered
+--     enum values ......................... NONE. Every enum member named in a gate exists in that
+--                                           field's enum_values, and every gate is satisfiable.
+--   * mis-homed gates ..................... ONE partial instance, CR-003 - see S-3. The other 26
+--                                           gates read only fields of their own worksheet.
+--   * worksheets with zero fields ......... NONE. 5/7/9/10/7/3/5/2 fields across WS-01..WS-08.
+--   * duplicate fields .................... ONE functional duplicate pair - see S-4.
+--   * inverted conditions / AND-OR
+--     inversions / OR-collapse ............ NONE found. CR-003 and CR-024 both use the correct
+--                                           "guard != true OR consequent == true" implication
+--                                           shape; CR-008's eight-way AND is a true conjunction of
+--                                           eight independent principles, not a collapsed OR.
+--   * stitched quotes with no elision
+--     marker .............................. NONE. Every omitted run in the pack is marked "[...]"
+--                                           and every clause join is marked " | ".
+--   * wrong page refs in the pack ......... NONE. Every ref was produced from the footer map and
+--                                           re-checked against the Contents list.
+--   * gates with condition='TRUE' ......... NONE (no gate has the literal TRUE).
+--   * IS NOT NULL tautologies over an
+--     equation output ..................... NONE (the equation output parameter_value is not
+--                                           guarded by an IS NOT NULL gate; it is guarded by the
+--                                           tautological equality CR-019, which is S-2).
+--   * required flags off an INFORMATIVE
+--     annex ............................... NONE of the 33 is_required=true fields is anchored
+--                                           only in an annex; all 33 trace to Clauses 1-6 (the 46
+--                                           pack quotes show it field by field). The one
+--                                           annex-only field, emission_removal_factor, is
+--                                           correctly is_required=false, and so are the other two
+--                                           WS-06 fields. Split: 33 required / 15 optional.
+--
+-- ============================================================================
+-- S-1  EQUATION 1 IS NOT A PRINTED FORMULA, AND ITS CLAUSE REF IS WRONG
+-- ============================================================================
+-- SEVERITY OF FINDING: high. This is the only equation in the standard's encoding.
+--
+-- Encoded (equations, id 792a1536-3a74-4bb7-8756-d55212945d28, ws ISO-14033-06):
+--   equation_number   = '1'
+--   formula           = 'parameter_value = activity_data * emission_removal_factor'
+--   output_symbol     = 'parameter_value'
+--   input_symbols     = ['activity_data','emission_removal_factor']
+--   clause_reference  = '§6.1.2.2.4, Annex A.2.4 c) 1)'
+--
+-- EVIDENCE 1 - the clause the encoding names FIRST contains no formula. §6.1.2.2.4 in full:
+--   "The calculation method is a strict mathematical operation. Any parameters or variables, such
+--    as emission factors needed to perform the calculation, are either primary data or secondary
+--    data. | A defined calculation method can be an algorithm or a mathematical function, without
+--    any secondary data factors or parameters. | An undefined calculation method can be any
+--    unknown algorithm or a mathematical function, or a known algorithm or mathematical function
+--    with secondary data factors or parameters."
+--      - printed p.11 (PDF p.17)
+--   That clause defines what "defined" and "undefined" calculation methods ARE. It prints no
+--   formula, names no emission factor as a multiplier, and gives no worked example.
+--
+-- EVIDENCE 2 - the only text in the whole standard that resembles the formula is in Annex A,
+--   which the printed Contents list marks "Annex A (informative) Illustrative examples of the
+--   framework". Under heading "A.2.4 Select parameters and consolidate parameters":
+--   "c) Examples of detailed characteristics to consider during consolidation are as follows:
+--    1) calculations based on activity data multiplied by emission or removal factors, i.e.
+--    i) the use of models, ii) facility-specific correlations, and [...] iii) mass balance
+--    approach; 2) measurement, either i) continuous, or ii) intermittent; 3) a combination of
+--    measurement and calculation."
+--      - printed p.23-24 (PDF p.29-30)
+--   This page was opened as a RENDERED IMAGE and confirmed: there is no equation display, no
+--   symbol definition and no numbering anywhere on it. The multiplication exists only as English
+--   prose, inside a list of "Examples", inside an informative annex, and it is one of THREE
+--   listed alternatives - the other two being measurement (2) and a combination (3).
+--
+-- CONSEQUENCE: 'parameter_value = activity_data * emission_removal_factor' is an EKOWAI
+--   formalization of one illustrative alternative, not a printed equation of ISO 14033. Under
+--   SR-1 there is no verbatim printed formula to quote, so the equation row was left as residue
+--   (verification_status untouched) rather than being marked verified. Under the doctrine's
+--   data_class rules this is exactly the "normative binding table vs. exemplary Anhang worked
+--   example" case that goes to Alvaro's decision batch and is never guessed.
+--
+-- OPTION A (recommended) - keep the equation but tell the truth about its provenance:
+-- ☐ RATIFIED  (uncomment to apply)
+-- update public.equations set clause_reference = 'Annex A.2.4 c) 1) (informative)'
+--   where id = '792a1536-3a74-4bb7-8756-d55212945d28';
+-- ROLLBACK:
+-- update public.equations set clause_reference = '§6.1.2.2.4, Annex A.2.4 c) 1)'
+--   where id = '792a1536-3a74-4bb7-8756-d55212945d28';
+--
+-- OPTION B - if Alvaro rules that an informative example may not drive an engine equation at all,
+--   the equation and its three fields are retired instead. Not written out here, because retiring
+--   an engine equation is a structural change that needs its own migration and its own decision.
+--
+-- ============================================================================
+-- S-2  CR-019 IS A TAUTOLOGY OVER AN EQUATION OUTPUT, AND USES EXACT FLOAT EQUALITY
+-- ============================================================================
+-- Encoded (compliance_requirements, id 5cf4ef3f-15ac-497a-ae75-43beda6d2287, ws ISO-14033-06):
+--   code '19', severity 'warn', source_quote NULL,
+--   condition = 'parameter_value == activity_data * emission_removal_factor'
+--   clause_reference = '§6.1.2.2.4, Annex A.2.4 c) 1)'
+--
+-- THREE defects in one row:
+--   (a) It restates, character for character, the formula the engine already computes
+--       (equations row 1, same worksheet, same three symbols). A gate that asserts the engine's
+--       own output equals the engine's own expression can only fail if the engine is broken; it
+--       can never tell an engineer anything about the project.
+--   (b) It is an EXACT FLOAT EQUALITY on a product of two user-entered decimals. Even when the
+--       engine is right, binary rounding can make the two sides differ in the last bit.
+--   (c) Its first clause_reference is wrong for the same reason as S-1: §6.1.2.2.4 prints no
+--       formula.
+-- EVIDENCE: the two quotes in S-1 above are the complete printed basis for this condition.
+--
+-- ☐ RATIFIED  (uncomment to apply - drop the tautological gate)
+-- delete from public.compliance_requirements where id = '5cf4ef3f-15ac-497a-ae75-43beda6d2287';
+-- ROLLBACK (recreates the row exactly as found on 2026-09-08; worksheet_template_id resolved by
+-- code so the statement is self-contained):
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '5cf4ef3f-15ac-497a-ae75-43beda6d2287', wt.id, 'CR-019', 'warn',
+--          'parameter_value == activity_data * emission_removal_factor',
+--          '§6.1.2.2.4, Annex A.2.4 c) 1)', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-06';
+--
+-- ============================================================================
+-- S-3  CR-003 IS PARTLY MIS-HOMED (reads a field of another worksheet)
+-- ============================================================================
+-- Encoded (id 6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27, ws ISO-14033-01):
+--   condition = 'comparison_application != true OR principle_comparability == true'
+-- comparison_application lives on ISO-14033-01, but principle_comparability lives on
+-- ISO-14033-03 ("Prinzipien"). The implication itself is sound and its logic is NOT inverted -
+-- the standard really does condition comparability on a comparison application:
+--   "This document gives specific guidelines when the quantitative environmental information is
+--    intended for comparisons, such as: [...] When acquiring and providing data intended for
+--    comparison, it is important to consider not only the application at hand, but also that any
+--    decisions are generalizable and repeatable when acquiring the same or similar data for the
+--    other system(s) for comparison."
+--      - printed p.5 (PDF p.11)
+--   "The quantitative environmental information is generated, selected and provided in a
+--    consistent way, with consistent measurement units, thereby allowing for comparisons."
+--      - printed p.6 (PDF p.12)
+-- Only the HOME is wrong: a gate that fires on WS-01 cannot be satisfied there, because the field
+-- that satisfies it is entered two worksheets later. Re-home it to ISO-14033-03, where both the
+-- consequent lives and the principles are decided.
+--
+-- ☐ RATIFIED  (uncomment to apply)
+-- update public.compliance_requirements c set worksheet_template_id = wt.id
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where c.id = '6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27'
+--    and s.code = 'ISO-14033' and wt.code = 'ISO-14033-03';
+-- ROLLBACK:
+-- update public.compliance_requirements c set worksheet_template_id = wt.id
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where c.id = '6a8fed5e-9e76-4fdd-bf2c-6c2cd5ed0b27'
+--    and s.code = 'ISO-14033' and wt.code = 'ISO-14033-01';
+--
+-- ============================================================================
+-- S-4  verification_validation_external HAS NO CLAUSE AND DUPLICATES AN ENUM MEMBER
+-- ============================================================================
+-- Encoded (fields, id 08ab03f4-6e47-44e0-9c67-fa82296d8e39; ws ISO-14033-07, boolean,
+--   is_required=false, clause_reference '§6.4', label_de "Externe Verifizierung/Validierung",
+--   validation_rules {"raw":"verification_validation_external IN {true,false}"}).
+-- The whole of Clause 6.4 (printed p.16-18 / PDF p.22-24) was read line by line. It contains NO
+-- clause on external verification or validation of the quantitative information. The two nearest
+-- printed sentences are:
+--   "The framework provides systematic approaches to check of quantitative environmental
+--    information. Check might be, for example, in the form of peer data quality check, peer review
+--    or third-party review."
+--      - printed p.8 (PDF p.14)   [this is §6.1.1, NOT §6.4]
+--   "Part of the definition of the measuring method is the data quality assurance associated with
+--    the metrological confirmation, which includes establishing baselines, calibration, validation
+--    of measuring system and verification of data collected."
+--      - printed p.15 (PDF p.21)  [this is §6.2.5 in PLAN - metrological validation of the
+--                                  MEASURING SYSTEM, a different concept from an external review]
+-- So the field is (a) mis-tagged to §6.4, and (b) a boolean restatement of exactly one member of
+-- the review_type enum that sits on the SAME worksheet ("third_party_review"). Two controls, one
+-- fact, no clause. It was left as RESIDUE by the pack rather than given a fabricated quote.
+--
+-- ☐ RATIFIED  (uncomment to apply - retire the duplicate, keep review_type as the single owner)
+-- update public.fields set active = false
+--   where id = (select f.id from public.fields f
+--                 join public.worksheet_templates wt on wt.id = f.worksheet_template_id
+--                 join public.standards s on s.id = wt.standard_id
+--                where s.code = 'ISO-14033' and f.symbol = 'verification_validation_external');
+-- ROLLBACK:
+-- update public.fields set active = true
+--   where id = (select f.id from public.fields f
+--                 join public.worksheet_templates wt on wt.id = f.worksheet_template_id
+--                 join public.standards s on s.id = wt.standard_id
+--                where s.code = 'ISO-14033' and f.symbol = 'verification_validation_external');
+--
+-- ALTERNATIVE (if Alvaro prefers to keep the field): retag it to its real clause instead -
+-- update public.fields set clause_reference = '§6.1.1'
+--   where ... same subselect ... ;   -- rollback: set clause_reference = '§6.4'
+--
+-- ============================================================================
+-- S-5  THREE UNSOURCED ">= 0" FLOORS - AND ONE OF THEM IS SUBSTANTIVELY WRONG
+-- ============================================================================
+-- Encoded in fields.validation_rules (JSONB), worksheet ISO-14033-06:
+--   activity_data           {"raw":"activity_data >= 0"}
+--   emission_removal_factor {"raw":"emission_removal_factor >= 0"}
+--   parameter_value         {"raw":"parameter_value >= 0"}
+--
+-- The standard states no sign convention, no floor and no range for any of the three. Searching
+-- the whole 75-page text layer returns no sentence constraining any quantity to be non-negative.
+-- So all three floors are invented. For activity_data the invention is at least harmless
+-- (an "activity" quantity is conventionally non-negative). For the other two it is NOT:
+--
+--   "c) Examples of detailed characteristics to consider during consolidation are as follows:
+--    1) calculations based on activity data multiplied by emission or REMOVAL factors"
+--      - printed p.23 (PDF p.29)   [emphasis added]
+--
+-- A REMOVAL factor is signed opposite to an emission factor - that is the entire reason the
+-- standard names the two together. A greenhouse-gas removal is entered as a negative factor, and
+-- a system that is a net sink produces a negative parameter_value. The encoded floors would
+-- reject both. This is the one place in this standard where the encoding could give an engineer a
+-- wrong answer rather than merely a noisy one.
+--
+-- ☐ RATIFIED  (uncomment to apply - drop the two indefensible floors, keep activity_data's)
+-- update public.fields set validation_rules = null
+--   where id in (select f.id from public.fields f
+--                  join public.worksheet_templates wt on wt.id = f.worksheet_template_id
+--                  join public.standards s on s.id = wt.standard_id
+--                 where s.code = 'ISO-14033'
+--                   and f.symbol in ('emission_removal_factor','parameter_value'));
+-- ROLLBACK (restores the exact prior JSONB, per-symbol):
+-- update public.fields f set validation_rules = '{"raw":"emission_removal_factor >= 0"}'::jsonb
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where wt.id = f.worksheet_template_id and s.code = 'ISO-14033'
+--    and f.symbol = 'emission_removal_factor';
+-- update public.fields f set validation_rules = '{"raw":"parameter_value >= 0"}'::jsonb
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where wt.id = f.worksheet_template_id and s.code = 'ISO-14033'
+--    and f.symbol = 'parameter_value';
+--
+-- ============================================================================
+-- S-6  TWO NUMERIC FIELDS CARRY THE STRING "number" IN THE UNIT COLUMN
+-- ============================================================================
+-- Encoded: ISO-14033-05.acquired_basic_data  data_type='number'  unit='number'
+--          ISO-14033-05.aggregated_result    data_type='number'  unit='number'
+-- (all 46 other fields carry unit='-', which is correct - they are boolean/text/enum and the
+--  standard states no quantity for them.)
+-- The data_type value has been copied into the unit column. That is not merely cosmetic here,
+-- because this standard makes the unit part of the datum:
+--   "quantitative data numerical data item that includes its unit, or context for non-dimensional
+--    data"
+--      - printed p.2 (PDF p.8)
+--   "Note 1 to entry: Basic data consist of one or several values and units, depending on the
+--    nature of the item that the basic data represent. Some basic data can be dimensionless and
+--    have no units, e.g. an index or ratio."
+--      - printed p.2 (PDF p.8)
+--   "The quantitative environmental information is generated, selected and provided in a
+--    consistent way, with consistent MEASUREMENT UNITS, thereby allowing for comparisons."
+--      - printed p.6 (PDF p.12)   [emphasis added]
+-- Because ISO 14033 lets basic data be dimensionless (an index or a ratio), no fixed unit can be
+-- encoded - the unit is project data. So the correct encoding is a unit the engineer supplies,
+-- not the literal word "number". Minimum fix = stop asserting a false unit:
+--
+-- ☐ RATIFIED  (uncomment to apply)
+-- update public.fields f set unit = '-'
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where wt.id = f.worksheet_template_id and s.code = 'ISO-14033'
+--    and f.symbol in ('acquired_basic_data','aggregated_result');
+-- ROLLBACK:
+-- update public.fields f set unit = 'number'
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where wt.id = f.worksheet_template_id and s.code = 'ISO-14033'
+--    and f.symbol in ('acquired_basic_data','aggregated_result');
+--
+-- FURTHER (needs a decision, not staged as SQL): the same two fields carry a STRING rule
+--   {"raw":"acquired_basic_data != ''"} / {"raw":"aggregated_result != ''"} on a numeric field.
+--   A per-standard "unit" companion field would be the source-faithful design, but adding fields
+--   is a workbook change and belongs in a re-import, not a patch.
+--
+-- ============================================================================
+-- S-7  TWO GATES HAVE AN EMPTY CONDITION
+-- ============================================================================
+-- CR-025 (id 395dc694-5418-437d-857a-fc9e2b4c4ce1, ws ISO-14033-07, clause '§6.4.3')  condition = ''
+-- CR-026 (id 72fc15b8-1248-48e9-8f8f-fbb169c80083, ws ISO-14033-07, clause '§6.4.2.2') condition = ''
+-- Both are severity='warn' with source_quote NULL. An empty condition is not a gate; it is a row
+-- that the evaluator can never evaluate. Both clauses DO carry printed text that could be
+-- encoded, and both are "should"/descriptive, so warn remains the right severity if they are
+-- given conditions:
+--   §6.4.3: "The review process can be done by different experts, at different stages of the work.
+--    When this is the case, the expert who will do the final review should ensure that the overall
+--    review process is consistent and answers the overall purpose of the review. | The data and
+--    the calculation process to set the data should be reviewed."
+--      - printed p.17-18 (PDF p.23-24)
+--   §6.4.2.2: "Each step of the framework provides a viewpoint and a clear scope for a reviewer.
+--    At the highest level, a reviewer can focus on whether the scope of the information meets the
+--    requirements of the objective."
+--      - printed p.17 (PDF p.23)
+-- Note both are "should" / "can" - so NEITHER may become a block gate under the census above.
+-- No field currently exists to carry either obligation (there is no "final reviewer" field and no
+-- "review depth" field), so no condition can be written without adding fields. Two honest options:
+--
+-- OPTION A - retire the two empty rows until the workbook grows the fields:
+-- ☐ RATIFIED  (uncomment to apply)
+-- delete from public.compliance_requirements
+--  where id in ('395dc694-5418-437d-857a-fc9e2b4c4ce1','72fc15b8-1248-48e9-8f8f-fbb169c80083');
+-- ROLLBACK:
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '395dc694-5418-437d-857a-fc9e2b4c4ce1', wt.id, 'CR-025', 'warn', '', '§6.4.3', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-07';
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '72fc15b8-1248-48e9-8f8f-fbb169c80083', wt.id, 'CR-026', 'warn', '', '§6.4.2.2', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-07';
+--
+-- OPTION B - keep them and add the two fields in a re-import. Preferred if the Check worksheet is
+-- meant to carry the §6.4.3 "final reviewer" obligation at all. Not written as SQL: adding fields
+-- is an importer job, per the standing rule that data enters only through the importer.
+--
+-- ============================================================================
+-- S-8  TWO ENUM-MEMBERSHIP GATES ARE EFFECTIVE NO-OPS
+-- ============================================================================
+-- CR-002 (id 7e3af080-3478-4fd7-8e90-c19dbf29f74b, ws ISO-14033-01):
+--   condition = 'application_scope IN {internal,external,comparison}'
+--   application_scope.enum_values = exactly {internal, external, comparison}
+-- CR-005 (id 6bb447d9-6438-46d4-b020-299221dd6735, ws ISO-14033-02):
+--   condition = 'data_origin_category IN {primary,secondary}'
+--   data_origin_category.enum_values = exactly {primary, secondary}
+-- In both cases the gate's membership set is the WHOLE enum domain, so the gate cannot fail for
+-- any value the widget can produce. They restate the field definition; they enforce nothing.
+-- The same pattern also sits in fields.validation_rules for six further enums
+-- (data_type_classification, foreground_background_category, specific_generic_category,
+--  calculation_method_type, parameter_category, review_type) and for four booleans written as
+-- "x IN {true,false}" (comparison_application, deviation_from_plan, consecutive_check_applied,
+--  verification_validation_external) - the same no-op, one layer down.
+-- Harmless but noise: they inflate the gate count and dilute the real warnings.
+--
+-- ☐ RATIFIED  (uncomment to apply - drop the two no-op gates)
+-- delete from public.compliance_requirements
+--  where id in ('7e3af080-3478-4fd7-8e90-c19dbf29f74b','6bb447d9-6438-46d4-b020-299221dd6735');
+-- ROLLBACK:
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '7e3af080-3478-4fd7-8e90-c19dbf29f74b', wt.id, 'CR-002', 'warn',
+--          'application_scope IN {internal,external,comparison}', '§4.2', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-01';
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '6bb447d9-6438-46d4-b020-299221dd6735', wt.id, 'CR-005', 'warn',
+--          'data_origin_category IN {primary,secondary}', '§6.1.2.2, §6.1.2.2.4', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-02';
+--
+-- ============================================================================
+-- S-9  NINE "IS NOT NULL" GATES ON FIELDS THAT ARE ALREADY is_required=true
+-- ============================================================================
+-- These gates re-assert the required flag and can therefore never fire independently of it:
+--   CR-006  measurement_method IS NOT NULL                          (is_required=true)
+--   CR-009  objective_requirements IS NOT NULL                      (true)
+--   CR-010  system_conceptualization AND system_boundaries NOT NULL (both true)
+--   CR-012  selected_parameters IS NOT NULL                         (true)
+--   CR-014  measuring_method_plan IS NOT NULL                       (true)
+--   CR-017  acquired_basic_data AND data_uncertainty NOT NULL       (both true)
+--   CR-018  consolidated_parameters IS NOT NULL                     (true)
+--   CR-020  synthesized_components IS NOT NULL                      (true)
+--   CR-021  aggregated_result IS NOT NULL                           (true)
+-- Also CR-027's first conjunct, "improvement_actions != ''", on a required field.
+-- They are not wrong, they are redundant - the presence check happens twice. NOT staged for
+-- deletion: unlike S-8 these do express a real printed obligation, and the second layer is
+-- harmless. Recorded so the redundancy is auditable and so a future "why do I get two warnings
+-- for one empty box" report has an answer. NO SQL PROPOSED.
+--
+-- SEPARATE from those, and NOT redundant: CR-011 and CR-013 demand fields the encoding itself
+-- marks OPTIONAL - see S-10.
+--
+-- ============================================================================
+-- S-10  TWO GATES DROP A PRINTED SCOPE PREDICATE ("this step can be omitted")
+-- ============================================================================
+-- CR-011 (id 290394ae-e79c-45c6-9f9a-fdcd4bb0be38, ws ISO-14033-04):
+--   condition = 'system_components IS NOT NULL'   [system_components.is_required = FALSE]
+--   The standard prints an explicit exemption:
+--     "NOTE If the system identified in 6.2.1 is simple and easy to overview, this step can be
+--      omitted."
+--       - printed p.14 (PDF p.20)
+-- CR-013 (id 179c652a-44e0-48de-ae8a-001cfd2d3e8d, ws ISO-14033-04):
+--   condition = 'basic_data_definition IS NOT NULL AND precision_scale IS NOT NULL'
+--   [basic_data_definition.is_required = FALSE; precision_scale.is_required = TRUE]
+--   The standard prints an explicit exemption for the first conjunct:
+--     "NOTE If the parameter can be directly measured or acquired from a data source, defining
+--      basic data is not needed; one can continue directly to identify the measuring method
+--      (see 6.2.5)."
+--       - printed p.14 (PDF p.20)
+-- Both gates warn unconditionally on a step the standard says may be skipped, and both contradict
+-- the is_required=false flag the SAME encoding assigns those fields. Because the condition grammar
+-- has no field for "is the system simple" or "is the parameter directly measurable", the exemption
+-- cannot be expressed as a predicate today. Minimum honest fix = drop the conjuncts that target
+-- the optional fields, leaving CR-013 to enforce only precision_scale, which carries no exemption:
+--
+-- ☐ RATIFIED  (uncomment to apply)
+-- delete from public.compliance_requirements where id = '290394ae-e79c-45c6-9f9a-fdcd4bb0be38';
+-- update public.compliance_requirements set condition = 'precision_scale IS NOT NULL'
+--   where id = '179c652a-44e0-48de-ae8a-001cfd2d3e8d';
+-- ROLLBACK:
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '290394ae-e79c-45c6-9f9a-fdcd4bb0be38', wt.id, 'CR-011', 'warn',
+--          'system_components IS NOT NULL', '§6.2.2', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-04';
+-- update public.compliance_requirements
+--    set condition = 'basic_data_definition IS NOT NULL AND precision_scale IS NOT NULL'
+--  where id = '179c652a-44e0-48de-ae8a-001cfd2d3e8d';
+--
+-- ============================================================================
+-- S-11  CR-024 IS A STRICT SUBSET OF CR-022 (dead gate)
+-- ============================================================================
+-- CR-022 (id 86b7f078-aade-4055-b4f1-d339f65dbb12, ws ISO-14033-07):
+--   condition = 'plan_do_correspondence == true'                       [UNCONDITIONAL]
+-- CR-024 (id 10f95add-2d35-4a16-8b0d-bbffd88e0e3e, ws ISO-14033-07):
+--   condition = 'consecutive_check_applied != true OR plan_do_correspondence == true'
+-- CR-024's consequent is identical to CR-022's whole condition, and CR-022 demands it in every
+-- case. So CR-024 can only fail in situations where CR-022 has already failed: it is strictly
+-- weaker and can never produce a warning of its own. Its logic is NOT inverted and the OR is NOT
+-- collapsed - the implication shape is correct; it is simply subsumed.
+-- Its clause DOES say something CR-022 does not, and says it with "can", not "shall":
+--   "If a consecutive Check is applied throughout a quantification procedure, it will be possible
+--    to stop the work to perform corrective measures before spending resources on incorrect data
+--    and decisions."
+--      - printed p.17 (PDF p.23)
+-- That sentence promises a BENEFIT of consecutive Check; it imposes no requirement at all. So the
+-- right resolution is to drop CR-024 rather than to strengthen it.
+--
+-- ☐ RATIFIED  (uncomment to apply)
+-- delete from public.compliance_requirements where id = '10f95add-2d35-4a16-8b0d-bbffd88e0e3e';
+-- ROLLBACK:
+-- insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   select '10f95add-2d35-4a16-8b0d-bbffd88e0e3e', wt.id, 'CR-024', 'warn',
+--          'consecutive_check_applied != true OR plan_do_correspondence == true',
+--          '§6.4.2.1', null, false
+--     from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--    where s.code = 'ISO-14033' and wt.code = 'ISO-14033-07';
+--
+-- ============================================================================
+-- S-12  application_scope IS A SINGLE-SELECT WHERE THE SOURCE SAYS "and/or",
+--       AND IT FLATTENS TWO ORTHOGONAL AXES INTO ONE ENUM
+-- ============================================================================
+-- Encoded: ISO-14033-01.application_scope, data_type='enum', is_required=true,
+--   enum_values = {internal (§4.2), external (§4.3), comparison (§4.4)} - single select.
+--   Gate CR-002 asserts membership over that whole domain (see S-8, a no-op).
+-- The printed Scope is explicit that the two are combinable:
+--   "This document gives guidelines for organizations on the general principles, policies,
+--    strategies and activities necessary to obtain quantitative environmental information for
+--    internal and/or external purposes."
+--      - printed p.1 (PDF p.7)
+-- An organization that reports the same figures to its own management AND to a GHG trading scheme
+-- has no correct answer in this widget. Under the 2026-08-01 owner ruling ("fixed options ⇒
+-- selection widget"), an "and/or" list is a MULTI-select, not a single-select.
+--
+-- Worse, "comparison" is not a peer of the other two. §4.4 is a use that sits ON TOP of an
+-- internal or external application:
+--   "This document gives specific guidelines when the quantitative environmental information is
+--    intended for comparisons"
+--      - printed p.5 (PDF p.11)
+--   "c) different organizational and operational boundaries internally or externally."
+--      - printed p.5 (PDF p.11)   [comparison spanning BOTH of the other two members]
+-- And the encoding ALREADY carries that axis separately, as the boolean comparison_application on
+-- the same worksheet (used by CR-003). So "comparison" is encoded twice: once as a boolean and
+-- once as a mutually-exclusive alternative to the very scopes it is meant to qualify.
+--
+-- Changing an enum's cardinality is a workbook/importer change, not a patch, so no SQL is written
+-- here. The decision Alvaro is asked for is:
+--   (a) make application_scope multi-select {internal, external} and let comparison_application
+--       remain the single owner of the §4.4 axis  [recommended - matches "and/or" and removes the
+--       duplication]; or
+--   (b) keep single-select and accept that combined-purpose projects cannot be recorded.
+-- ☐ RATIFIED  - decision recorded, then executed as a Pass3c re-import.
+--
+-- ============================================================================
+-- S-13  TWO ENUMS CLOSE A PRINTED OPEN LIST
+-- ============================================================================
+-- (a) ISO-14033-07.review_type, enum {peer_data_quality_check, peer_review, third_party_review}:
+--   "Check might be, for example, in the form of peer data quality check, peer review or
+--    third-party review."
+--      - printed p.8 (PDF p.14)
+--   "might be, for example" is an open list. The enum closes it to exactly three and has no
+--   "other" member, so a review form the standard permits cannot be recorded. Mitigating: the
+--   field is is_required=false and NO gate constrains its value (the membership rule lives only in
+--   validation_rules), so today the closure costs expressiveness, not compliance.
+-- (b) ISO-14033-04.parameter_category, enum {technical, ecological, socio_economic, other}:
+--   "Different types of parameters can be chosen from system characteristics, for example:
+--    - technical: activity data, production data, geographical data, energy data and emission
+--    data; - ecological: biodiversity data, habitat data, nutrient data and biological data;
+--    - socio-economic: demographic data, health data, development status data and economic data;
+--    - other factors."
+--      - printed p.14 (PDF p.20)
+--   Also an open list, but here the standard ITSELF prints "other factors" as the fourth item and
+--   the enum reproduces it, so the list stays effectively open. NOT a defect - recorded as the
+--   contrast case that shows (a) is one.
+-- Additionally parameter_category is single-select while the printed sentence lets a project draw
+-- parameters from several characteristics at once ("Different types of parameters can be chosen").
+--
+-- Enum membership is a workbook change; no SQL written. Proposal for (a): add an "other" member
+-- with a free-text companion, executed as a Pass3c re-import.
+-- ☐ RATIFIED
+--
+-- ============================================================================
+-- S-14  ALL 27 GATES HAVE source_quote = NULL
+-- ============================================================================
+-- Every compliance_requirements row for this standard carries source_quote NULL. Under SR-1 a
+-- gate with no quoted source cannot be defended when a client asks "which sentence makes you
+-- warn me?". This pass has now produced the governing sentence for every gate that survives the
+-- blocks above (they are the evidence quotes in S-1..S-13 and the 46 field quotes in the pack).
+-- Backfilling them is mechanical but it is an ENFORCEMENT-ADJACENT write on 27 rows, so it is
+-- staged rather than packed. Proposed as one batch AFTER the delete/re-home decisions above are
+-- ratified, so the quotes are written only to the rows that remain.
+-- ☐ RATIFIED  - then generate the 27 updates from the ratified set.
+--
+-- ============================================================================
+-- END. Nothing in this file has been applied. 14 blocks: S-1..S-14.
+-- ============================================================================
