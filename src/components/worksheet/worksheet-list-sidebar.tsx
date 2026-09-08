@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { FileDown } from 'lucide-react';
 import { StandardProgressPanel } from './standard-progress-panel';
+import { RegulationTablesPanel } from './regulation-tables-panel';
+import type { RegulationTable } from '@/lib/db/queries/regulation-tables';
 
 const STATUS_DOT: Record<string, string> = {
   draft: 'bg-ink/20',
@@ -29,6 +31,8 @@ type Props = {
   worksheets: WorksheetEntry[];
   locale: 'de' | 'en';
   activeWorksheetCode?: string;
+  /** The guideline's own printed tables, for look-up beside the form. */
+  regulationTables?: RegulationTable[];
 };
 
 export function WorksheetListSidebar({
@@ -37,6 +41,7 @@ export function WorksheetListSidebar({
   worksheets,
   locale,
   activeWorksheetCode,
+  regulationTables,
 }: Props) {
   // Group by phase
   const byPhase = new Map<number | null, WorksheetEntry[]>();
@@ -157,6 +162,9 @@ export function WorksheetListSidebar({
           </ul>
         </div>
       ))}
+      {regulationTables && regulationTables.length > 0 ? (
+        <RegulationTablesPanel tables={regulationTables} locale={locale} />
+      ) : null}
     </nav>
   );
 }

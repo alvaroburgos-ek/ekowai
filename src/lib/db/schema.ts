@@ -964,3 +964,52 @@ export const leads = pgTable(
     statusCreatedIdx: index('leads_status_created_idx').on(t.status, t.createdAt),
   }),
 );
+
+/**
+ * Printed reference tables lifted from the guidelines: limits, coefficients,
+ * classifications. 5 382 rows across 35 standards were imported long ago and
+ * nothing in the app ever read them — `regulation_tables` occurred exactly once
+ * in the whole codebase, inside a comment in `lib/eval/tab9.ts` saying a future
+ * DB table "can replace the accessor body". This binding is what finally makes
+ * them reachable; before it, an engineer filling a form could not see the table
+ * a value has to come from.
+ *
+ * One row per printed cell: `tableName` is the printed caption,
+ * `parameterLabel`/`parameterSymbol` the row, `variantDimension` +
+ * `variantValue` the column axis (e.g. treatment_stage = "raw wastewater"),
+ * and `valueNumeric`/`valueText` with `unit` the cell. `sourceQuote` and
+ * `clauseReference` carry the same provenance the fields do.
+ */
+export const regulationTables = pgTable(
+  'regulation_tables',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    standardId: uuid('standard_id')
+      .notNull()
+      .references(() => standards.id, { onDelete: 'cascade' }),
+    tableId: text('table_id'),
+    tableName: text('table_name'),
+    rowNumber: integer('row_number'),
+    parameterLabel: text('parameter_label'),
+    parameterSymbol: text('parameter_symbol'),
+    variantDimension: text('variant_dimension'),
+    variantValue: text('variant_value'),
+    valueText: text('value_text'),
+    valueNumeric: numeric('value_numeric'),
+    unit: text('unit'),
+    comparison: text('comparison'),
+    clauseReference: text('clause_reference'),
+    verificationStatus: text('verification_status'),
+    sourceQuote: text('source_quote'),
+    sourceFile: text('source_file'),
+    auditStatus: text('audit_status'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (t) => ({
+    byStandardIdx: index('regulation_tables_standard_idx').on(
+      t.standardId,
+      t.tableId,
+      t.rowNumber,
+    ),
+  }),
+);

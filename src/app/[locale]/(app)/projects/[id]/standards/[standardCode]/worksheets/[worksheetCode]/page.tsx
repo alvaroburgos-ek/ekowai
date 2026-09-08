@@ -12,6 +12,7 @@ import {
   loadSurfaceSource,
 } from '@/lib/db/queries/worksheet';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
+import { listRegulationTablesByStandardId } from '@/lib/db/queries/regulation-tables';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { surfaceSourceState, surfaceWithholdFieldIds } from '@/lib/eval/surface-source-state';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
@@ -55,7 +56,7 @@ export default async function WorksheetPage({
   const fieldSymbols = mergedFields.map((f) => f.symbol);
 
   // Parallelise all queries that depend on ws.template.id but not on each other
-  const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts] = await Promise.all([
+  const [instance, parameters, sameSymbol, sidebarWorksheets, docs, fieldCounts, regTables] = await Promise.all([
     ensureWorksheetInstance(projectId, ws.template.id),
     loadProjectParameters(projectId, fieldIds),
     loadSameSymbolValues(projectId, ws.template.id, fieldSymbols),
@@ -117,6 +118,9 @@ export default async function WorksheetPage({
       WHERE wt.standard_id = ${ws.template.standard.id}
       GROUP BY wt.id
     `),
+    // The guideline's own printed tables. Imported long ago, never read by the
+    // app until now, so a limit or coefficient could only be found in the PDF.
+    listRegulationTablesByStandardId(ws.template.standard.id),
   ]);
 
   // Count prior snapshots — drives the "Änderungen seit letzter Version"
@@ -318,6 +322,7 @@ export default async function WorksheetPage({
           })}
           locale={localeTyped}
           activeWorksheetCode={worksheetCode}
+          regulationTables={regTables}
         />
       </aside>
       <main>
