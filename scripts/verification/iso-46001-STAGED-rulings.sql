@@ -1,0 +1,399 @@
+-- ============================================================================
+-- ISO-46001 — STAGED RULINGS (WRITTEN, NOT APPLIED)
+-- Standard: BS ISO 46001:2019 / ISO 46001:2019(E), First edition 2019-07, English. The document is the
+--   STANDARD ITSELF (cover: "INTERNATIONAL STANDARD ... First edition 2019-07"; BSI foreword: "This British
+--   Standard is the UK implementation of ISO 46001:2019", published 31 August 2019) — not a scoping report,
+--   not a Technical Report, not a draft/DIS/FDIS.
+-- Source  : rendered PDF text layer, pdftotext -layout -enc UTF-8, 51 pages, zero undecodable characters.
+--   Printed page N = PDF page N + 10 (PDF p.11 prints "1", PDF p.48 prints "38"). Grade [VA].
+-- Prod    : 10 worksheets · 97 fields · 4 equations · 40 gates (35 with a source_quote, 5 without).
+--
+-- NOTHING IN THIS FILE IS APPLIED. Every statement is commented out and carries a ☐ RATIFIED marker.
+-- Each block states its evidence quote (verbatim, with printed page) and its rollback inverse.
+-- MODALITY RULE USED THROUGHOUT: in ISO management-system grammar "shall" = requirement, "should" =
+--   recommendation. A block gate is defensible only on a "shall". Annexes A, B, C and D are each printed
+--   "(informative)".
+-- SCHEMA NOTE (verified this session): public.compliance_requirements has a column named `condition`
+--   (NOT `condition_expression`) and has NO `active` column. Statements below use `condition` only.
+-- ============================================================================
+
+
+-- ============================================================================
+-- R-1  ☐ RATIFIED — THREE GATES WITH AN EMPTY CONDITION AND NO SOURCE QUOTE  (CR-036, CR-039, CR-040)
+-- ============================================================================
+-- FINDING. Three compliance_requirements rows carry condition = '' (empty string) and source_quote = NULL:
+--     CR-040  ws ISO-46001-01  severity=warn  clause_reference='§2, §3'
+--     CR-036  ws ISO-46001-09  severity=warn  clause_reference='§9.1'
+--     CR-039  ws ISO-46001-09  severity=warn  clause_reference='A.12'
+-- An empty condition can never evaluate, so these three rows are inert: they enforce nothing, warn nobody,
+-- and carry no evidence of what they were meant to say. They are also the ONLY three gates in the standard
+-- with no source_quote besides the two Annex-C warns (CR-037, CR-038, handled in R-3).
+-- CR-040 cites "§2, §3" — Normative references and Terms and definitions. Neither clause states any duty:
+--   §2 lists one normative reference and §3 is a vocabulary. There is no requirement there to encode.
+-- CR-039 cites A.12, which is INFORMATIVE and modal. The only near-quantitative sentence in the whole
+--   document sits there and is doubly hedged:
+--     "For water meters, the organization should ensure that verification/validation tests are carried out
+--      periodically (e.g. once every 5 years) or per frequency recommended by the meter manufacturer or
+--      supplier, whichever is more stringent, to ensure the accuracy of water meters (e.g. within ± 3 %)."
+--      (A.12, printed p.27)
+--   "should" + "e.g." twice: this is a recommendation with illustrative numbers, not a limit. It may be
+--   encoded as a warn with that quote, never as a block, and never as a hard 5-year / ±3 % threshold.
+-- CR-036 cites §9.1, which is already covered by CR-030 (attestation) and CR-031 (compliance_evaluation).
+--
+-- DECISION NEEDED: (a) delete the three inert rows, or (b) author real conditions + source quotes.
+-- Option (b) is only available for CR-039; CR-036 is redundant and CR-040 has no requirement behind it.
+--
+-- (a) delete the two rows that have no requirement behind them:
+-- delete from public.compliance_requirements where id in ('45fc1adf-8bc9-4cc2-a640-a20bc92fdeba','0faa675f-aa23-40c5-9376-058765a33583');
+--   rollback: re-insert from the 2026-09-08 export (CR-040: ws ISO-46001-01, warn, condition='', clause '§2, §3';
+--             CR-036: ws ISO-46001-09, warn, condition='', clause '§9.1').
+--
+-- (b) give CR-039 the A.12 recommendation as an evidenced warn (needs a meter-verification field first —
+--     see R-8; leave inert until that field exists):
+-- update public.compliance_requirements
+--    set source_quote = 'For water meters, the organization should ensure that verification/validation tests are carried out periodically (e.g. once every 5 years) or per frequency recommended by the meter manufacturer or supplier, whichever is more stringent, to ensure the accuracy of water meters (e.g. within ± 3 %). Full documented information of the measurements should be maintained. — ISO 46001:2019, A.12, printed p.27 [informative, modal "should", figures given as "e.g."]'
+--  where id = '6b2c6486-ecf8-4938-9909-c38df73191a9';
+--   rollback: update public.compliance_requirements set source_quote = null where id = '6b2c6486-ecf8-4938-9909-c38df73191a9';
+
+
+-- ============================================================================
+-- R-2  ☐ RATIFIED — TWO BLOCK GATES THAT ARE EFFECTIVE NO-OPS  (CR-017, CR-018)
+-- ============================================================================
+-- FINDING. Two BLOCK gates test only that a physically non-negative quantity is non-negative:
+--     CR-017  ws ISO-46001-04  block  condition: water_efficiency_indicator >= 0            clause §6.2.6
+--     CR-018  ws ISO-46001-04  block  condition: baseline_water_efficiency_indicator >= 0   clause §6.2.7
+-- Both operands are "amount of water used per unit of business activity indicator" (3.33 / 3.2, printed
+-- pp.7, 2) — a ratio of two non-negative quantities. The predicate is therefore a tautology for every
+-- physically meaningful input: the gate can only fire when the field is empty. It is a presence check
+-- wearing the costume of a threshold, and the ">= 0" floor is EKOWAI-invented: the standard prints no
+-- numeric bound for either indicator anywhere.
+-- The cited clauses do not oblige a VALUE at all; they oblige a METHODOLOGY and a COMPARISON:
+--   "The methodology for determining and updating the water efficiency indicator(s) shall be maintained as
+--    documented information and regularly reviewed. Water efficiency indicator(s) shall be reviewed and
+--    compared with the baseline water efficiency indicator(s) as appropriate and periodically updated as
+--    appropriate." (§6.2.6, printed p.13)
+--   "The organization shall identify baseline water efficiency indicator(s) appropriate for monitoring and
+--    measuring its water efficiency programme achievements. Changes in water efficiency performance shall be
+--    measured against the baseline water efficiency indicator(s)." (§6.2.7, printed p.13)
+-- Both ARE "shall" duties, so a block gate on §6.2.6/§6.2.7 is legitimate in principle — but it should test
+-- that the indicator and baseline are PRESENT (which is what the condition really does), and the condition
+-- should say so honestly rather than pretend to be a limit.
+--
+-- update public.compliance_requirements set condition = 'water_efficiency_indicator IS NOT NULL' where id = 'f1f8b6c5-190d-4aa5-bdff-4a16ddbf3991';
+-- update public.compliance_requirements set condition = 'baseline_water_efficiency_indicator IS NOT NULL' where id = '207c2547-bcb7-411c-99a2-2fd3dcabf9cd';
+--   rollback: set condition back to 'water_efficiency_indicator >= 0' / 'baseline_water_efficiency_indicator >= 0'.
+--   NOTE: check the condition grammar actually supports IS NOT NULL before ratifying (see
+--   reference_wizard_compliance_gates — the grammar is limited). If it does not, the honest alternative is
+--   to delete the numeric pretence and rely on is_required=true, which both fields already carry.
+
+
+-- ============================================================================
+-- R-3  ☐ RATIFIED — WARN GATE CR-038 IS A TAUTOLOGY OVER TWO EQUATION OUTPUTS
+-- ============================================================================
+-- FINDING. CR-038 (ws ISO-46001-08, warn, source_quote NULL):
+--     condition: plant_recycling_rate >= 0 AND process_recycling_rate >= 0
+-- Both operands are OUTPUTS of registered equations:
+--     C.3  plant_recycling_rate  = (Rp + Rnp) / (Rp + Rnp + WD) * 100
+--     C.5  process_recycling_rate = Rp / (Wp + Rpp) * 100
+-- Every input is a non-negative water volume in m3, so both outputs are >= 0 by construction. The gate can
+-- never fire on a computed value; it is the "tautology over an equation output" class. It is also the ONLY
+-- consumer of those two equation outputs, so in practice C.3 and C.5 feed nothing that can act on them.
+-- It carries no source_quote. Annex C is INFORMATIVE ("Annex C (informative) — Guidance on the development
+-- of a water balance chart", printed p.33), so warn is the correct severity — the defect is the predicate.
+-- A meaningful warn would be an upper bound: both rates are percentages of a total and cannot exceed 100.
+--
+-- update public.compliance_requirements
+--    set condition = 'plant_recycling_rate <= 100 AND process_recycling_rate <= 100',
+--        source_quote = 'The plant/premises recycling rate (%) calculated by Formula (C.3) looks at all reused/reclaimed streams within the premises. | The process recycling rate (%) shown in Formula (C.5) only looks at reused/reclaimed streams within the process. — ISO 46001:2019, Annex C (informative), printed p.35'
+--  where id = 'fdbce5e8-11fb-431d-b77b-cd0bc713dd18';
+--   rollback: set condition back to 'plant_recycling_rate >= 0 AND process_recycling_rate >= 0', source_quote back to null.
+--   CAUTION: 100 % is not a printed bound either — it follows from the fractions' own construction, not from
+--   a sentence of the standard. If a source-free bound is unacceptable under SR-1, delete CR-038 instead.
+
+
+-- ============================================================================
+-- R-4  ☐ RATIFIED — WARN GATE CR-037 USES EXACT EQUALITY ON MEASURED VOLUMES
+-- ============================================================================
+-- FINDING. CR-037 (ws ISO-46001-08, warn, source_quote NULL): condition "Win == Wout".
+-- Evidence (Annex C, INFORMATIVE, printed p.33):
+--   "The water balance equation can be represented by Formula (C.1): Win = Wout (C.1) where Win is total
+--    water input; Wout is total water output."
+--   "Should total water input exceed total water output, the difference could be due to leaks and
+--    uncontrolled losses."
+-- The intent — flag an unbalanced water balance — is right, and warn is the right severity for an
+-- informative annex. Two defects:
+--   (i) exact float equality on two sums of measured m3 values will essentially never hold, so the warn
+--       fires on every real dataset; the standard itself treats a difference as informative, not as an error.
+--  (ii) the standard's own sentence is DIRECTIONAL ("Should total water input EXCEED total water output"),
+--       which the symmetric equality does not express.
+-- It also has no source_quote, although a verbatim one exists.
+--
+-- update public.compliance_requirements
+--    set condition = 'Win - Wout <= 0.05 * Win',
+--        source_quote = 'The water balance equation can be represented by Formula (C.1): Win = Wout (C.1) where Win is total water input; Wout is total water output. | Should total water input exceed total water output, the difference could be due to leaks and uncontrolled losses. — ISO 46001:2019, Annex C (informative), printed p.33'
+--  where id = 'af0eea7f-00da-4c60-93a2-31f5b3e48ec8';
+--   rollback: set condition back to 'Win == Wout', source_quote back to null.
+--   SR-2 STOP: the 5 % tolerance above is NOT printed in ISO 46001 — the standard gives no tolerance at all.
+--   It must NOT be applied as written. Either (a) Alvaro selects a tolerance explicitly and it is recorded
+--   as an engineer selection, or (b) the condition is restated source-faithfully and directionally as
+--   'Win <= Wout' (fires exactly when input exceeds output, which is the printed sentence), or (c) CR-037
+--   is deleted. Option (b) is the only one this pass can defend from the text.
+
+
+-- ============================================================================
+-- R-5  ☐ RATIFIED — NINE MIS-HOMED GATES (clause lands on a worksheet that holds none of its fields)
+-- ============================================================================
+-- FINDING (systematic, not incidental). The attestation gates were bulk-assigned to the FIRST worksheet of
+-- each phase instead of to the worksheet that holds the clause's own fields. Every one of these gates reads
+-- only its own attest_* boolean, which does live on the same worksheet, so none of them is unsatisfiable —
+-- the defect is a workflow one: the engineer is asked to attest to a clause on a worksheet where the data
+-- for that clause is not visible, several worksheets before it is even collected.
+--
+--   gate    clause  homed on         but the clause's fields live on
+--   CR-006  5.2     ISO-46001-01     ISO-46001-02 (water_efficiency_policy)
+--   CR-007  5.3     ISO-46001-01     ISO-46001-02 (roles_responsibilities, management_representative)
+--   CR-014  6.2.4   ISO-46001-03     ISO-46001-04 (water_use_review, water_sources, significant_water_use, …)
+--   CR-015  6.2.4   ISO-46001-03     ISO-46001-04 (significant_water_use)
+--   CR-016  6.2.5   ISO-46001-03     ISO-46001-04 (business_activity_indicator[_value])
+--   CR-019  6.3     ISO-46001-03     ISO-46001-05 (water_efficiency_target, target_time_frame)
+--   CR-020  6.3     ISO-46001-03     ISO-46001-05 (action_plan, improvement_verification_method)
+--   CR-026  8.1     ISO-46001-06     ISO-46001-07 (operational_planning_control, process_criteria)
+--   CR-028  8.3     ISO-46001-06     ISO-46001-07 (procurement_criteria, supplier_informed)
+--
+-- Consequence in the app: worksheet ISO-46001-05 ("Zielwerte & Aktionsplaene") has FOUR fields and ZERO
+-- gates of its own; ISO-46001-02 has one; ISO-46001-04 has two (both the no-ops of R-2); ISO-46001-07 has
+-- two. Meanwhile ISO-46001-03 carries ten gates, five of which belong elsewhere.
+-- A re-home is a two-part change: move the compliance_requirements row AND move the attest_* field with it,
+-- otherwise the gate's own operand leaves its worksheet and the gate becomes unsatisfiable. Both halves are
+-- staged together below for one pair; the remaining eight follow the identical shape and are deliberately
+-- NOT expanded until the pattern is ratified once.
+--
+-- -- CR-019 (§6.3) ISO-46001-03 -> ISO-46001-05, with its attestation field:
+-- update public.compliance_requirements set worksheet_template_id = '9e4db11b-0fa7-4d68-a37b-595f421146de' where id = '7a30f6a1-2651-459b-a61e-a078d6da0829';
+-- update public.fields set worksheet_template_id = '9e4db11b-0fa7-4d68-a37b-595f421146de' where symbol = 'attest_iso_46001_03_cr_019' and worksheet_template_id = '9d0defe7-b50e-4427-9f37-3e79f5297257';
+--   rollback: set both worksheet_template_id back to '9d0defe7-b50e-4427-9f37-3e79f5297257' (ISO-46001-03).
+--   NOTE: the attest_* symbol encodes its old worksheet ("…_03_…"); after a re-home the symbol lies. Decide
+--   whether symbols are renamed (touches saved answers) or left as historical names. NOT auto-decidable.
+
+
+-- ============================================================================
+-- R-6  ☐ RATIFIED — DUPLICATE / STRICT-SUBSET GATE PAIR ON §6.2.2  (CR-011 ⊂ CR-012)
+-- ============================================================================
+-- FINDING. Two BLOCK gates enforce the same sentence of §6.2.2:
+--   CR-011  ws ISO-46001-03  block  condition: planning_process_documented == true
+--           source_quote: "The organization shall implement and document its water efficiency planning
+--           process(es)." (§6.2.2, printed p.11)
+--   CR-012  ws ISO-46001-03  block  condition: attest_iso_46001_03_cr_012 == True
+--           source_quote begins with the IDENTICAL sentence and then adds the §6.2.2 management-plan list.
+-- CR-011's obligation is a strict subset of CR-012's. The engineer must satisfy the same printed sentence
+-- twice, once as a checkbox and once as a boolean field. Both are legitimate "shall" duties, so neither is
+-- wrong — the redundancy is.
+--
+-- -- keep the broader attestation gate, drop the subset:
+-- delete from public.compliance_requirements where id = '4812585a-b981-4c73-96d9-e08db26539e9';
+--   rollback: re-insert CR-011 (ws ISO-46001-03, severity block, condition 'planning_process_documented == true',
+--             clause_reference '§6.2.2', source_quote as exported 2026-09-08).
+--   ALTERNATIVE (preferred if attestation checkboxes are to be reduced): keep CR-011, which tests a real
+--   field, and drop CR-012 — but CR-012 additionally covers §6.2.2 a)-d), which CR-011 does not, so the
+--   management-plan content would then need its own gate on water_efficiency_management_plan.
+
+
+-- ============================================================================
+-- R-7  ☐ RATIFIED — THREE BLOCK GATES WITH A MISSING SCOPE PREDICATE
+-- ============================================================================
+-- FINDING. Three clauses are TRIGGERED conditionally by their own opening words, but their gates block
+-- unconditionally, so a project to which the clause never applies cannot be finalised.
+--
+-- (a) CR-027 · ws ISO-46001-07 · block · condition "design_consideration == true" · clause §8.2
+--     "When designing new, modified and renovated facilities, equipment, systems or processes that have a
+--      significant impact on its water efficiency performance, the organization shall consider, among other
+--      possibilities or options, the water efficiency performance improvement opportunities and operational
+--      control of the resulting design changes." (§8.2, printed p.17)
+--     A water efficiency management system for an existing, unmodified site owes nothing under §8.2.
+--
+-- (b) CR-028 · ws ISO-46001-06 · block · condition "attest_iso_46001_06_cr_028 == True" · clause §8.3
+--     "When procuring water services, products and equipment that have, or may have, a significant impact on
+--      water use, the organization shall inform suppliers that procurement is partly evaluated on the basis
+--      of water efficiency performance." (§8.3, printed p.17)
+--     No such procurement in the period => no duty.
+--
+-- (c) CR-034 · ws ISO-46001-10 · block · condition "attest_iso_46001_10_cr_034 == True" · clause §10.1
+--     "When a nonconformity occurs, the organization shall: a) react to the nonconformity …" (§10.1, p.19)
+--     This is the clearest case: the encoding already treats the outcome fields `nonconformity` and
+--     `corrective_action` as is_required=false (correctly), yet the gate still forces an attestation even
+--     when no nonconformity has occurred. Gate and fields contradict each other.
+--
+-- Each needs an applicability predicate (a scope switch field per clause), e.g. design_activity_present,
+-- procurement_in_scope, nonconformity_occurred, with the gate reading "predicate == false OR <duty>".
+-- Adding those fields is a structural change and is therefore staged, not applied:
+--
+-- -- example for (c); the other two follow the same shape:
+-- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, is_required, clause_reference, description)
+--   values ('e39d8c27-d29a-4f64-87f8-a993c2be6803', 'nonconformity_occurred', 'Nichtkonformitaet ist aufgetreten', 'boolean', true, '§10.1',
+--           'Applicability switch for §10.1: the clause obliges action only "When a nonconformity occurs".');
+-- update public.compliance_requirements set condition = 'nonconformity_occurred == false OR attest_iso_46001_10_cr_034 == True' where id = '32925d72-8b0e-47c8-965a-42785d66ad61';
+--   rollback: delete the inserted field; set condition back to 'attest_iso_46001_10_cr_034 == True'.
+--   NOTE: verify the condition grammar supports OR before ratifying — there is currently exactly ONE
+--   compound condition in this whole standard (CR-038, an AND) and no OR anywhere, so OR support is unproven
+--   here (see reference_wizard_compliance_gates: the grammar is limited).
+
+
+-- ============================================================================
+-- R-8  ☐ RATIFIED — is_required REVIEW: TEN ANNEX-C FIELDS REQUIRED OFF AN INFORMATIVE ANNEX
+-- ============================================================================
+-- FINDING. Worksheet ISO-46001-08 ("Wasserbilanz & Recyclingrate (Annex C)") marks ten fields
+-- is_required=true: WD, Win, Wout, Rp, Rnp, Wp, Rpp, plant_recycling_rate, process_recycling_rate
+-- (and WD again as the shared denominator term). Annex C is INFORMATIVE and its own opening sentence is
+-- modal throughout:
+--   "Annex C (informative) — Guidance on the development of a water balance chart" (printed p.33)
+--   "After carrying out a water use review, an organization should be able to develop its own water balance
+--    chart. […] In order to develop an accurate water balance chart, it is desirable to measure the amount
+--    of water use." (Annex C, printed p.33)
+--   "In order to develop an accurate water balance chart, it is desirable to measure the amount of water use
+--    [see Annex C for a guide on the development of a water balance chart and Formula (C.1)]." (§6.2.4,
+--    printed p.13 — the ONLY reference to Annex C from the normative body, and it says "desirable")
+-- No "shall" anywhere requires a water balance chart, a recycling rate, or any of these ten quantities.
+-- Making them required forces every ISO 46001 project through an optional annex calculation.
+-- By contrast §9.1 DOES print a hard duty that is correctly encoded elsewhere:
+--   "As a minimum, the water use shall be metered." (§9.1, printed p.17)  -> field water_use_metered.
+--
+-- update public.fields set is_required = false
+--  where worksheet_template_id = '5bbf2997-4f82-442e-8966-538fa658de79'
+--    and symbol in ('WD','Win','Wout','Rp','Rnp','Wp','Rpp','plant_recycling_rate','process_recycling_rate');
+--   rollback: update public.fields set is_required = true where worksheet_template_id = '5bbf2997-4f82-442e-8966-538fa658de79' and symbol in ('WD','Win','Wout','Rp','Rnp','Wp','Rpp','plant_recycling_rate','process_recycling_rate');
+
+
+-- ============================================================================
+-- R-9  ☐ RATIFIED — #22 CLASS: TWO EQUATION OUTPUTS ARE HAND-ENTERABLE FIELDS (Win, Wout)
+-- ============================================================================
+-- FINDING. Win and Wout are the declared output_symbols of registered equations C.1 and C.2b:
+--     C.1   Win  = WD + R1 + R2 + R3
+--     C.2b  Wout = O1 + O2 + O3 + O4
+-- yet both are stored as ordinary required number fields on ISO-46001-08, i.e. derived values that an
+-- engineer can type over — the #22 class named in the doctrine ("derived that is hand-enterable = finding").
+-- Gate CR-037 then compares two values that may have been typed rather than computed, so the balance check
+-- can be satisfied by hand.
+-- Evidence (Annex C, printed pp.33-34):
+--   "The water balance equation can be represented by Formula (C.1): Win = Wout (C.1) where Win is total
+--    water input; Wout is total water output."
+--   "The water balance can be computed using Formula (C.2). Win = Wout   WD + R1 + R2 + R3 = O1 + O2 + O3 + O4"
+-- The same applies to plant_recycling_rate and process_recycling_rate (outputs of C.3 and C.5).
+--
+-- -- mark the four as derived/read-only once the schema flag for that exists (see the engine-output
+-- -- materialization workstream); shape only, column name to be confirmed before ratifying:
+-- update public.fields set is_required = false
+--  where worksheet_template_id = '5bbf2997-4f82-442e-8966-538fa658de79'
+--    and symbol in ('Win','Wout','plant_recycling_rate','process_recycling_rate');
+--   rollback: set is_required = true for the same four symbols.
+
+
+-- ============================================================================
+-- R-10 ☐ RATIFIED — TWO GATE SOURCE_QUOTES ARE TRUNCATED SO THE "shall" IS OFF THE FACE OF THE QUOTE
+-- ============================================================================
+-- FINDING. All 35 quote-carrying gates were checked word-for-word against the PDF text layer. 33 are
+-- verbatim. Two are verbatim but CROPPED so that the governing modal verb was left behind:
+--
+-- (a) CR-015 (ws ISO-46001-03, block, clause 6.2.4). Its quote starts at
+--       "identify, based on the water use analysis, the activities and functions of significant water use,
+--        including: the facilities, equipment, systems, processes and personnel …"
+--     The printed text is a numbered item under a lead-in that carries the obligation:
+--       "To develop the water use review, the organization shall: […] 2) identify, based on the water use
+--        analysis, the activities and functions of significant water use, including: — the facilities,
+--        equipment, systems, processes and personnel working for or on behalf of the organization that
+--        significantly affect water use;" (§6.2.4, printed p.12)
+--     The quote also silently drops the list bullets ("—"), which is the only textual deviation found in the
+--     entire gate set.
+--
+-- (b) CR-030 (ws ISO-46001-09, block, clause 9.1). Same defect class: the bullet dashes of the §9.1 1) list
+--     were dropped. Its lead-in modal IS present ("As a minimum, the water use shall be metered. In addition,
+--     the following shall be undertaken:"), so this one is cosmetic only.
+--
+-- update public.compliance_requirements
+--    set source_quote = 'To develop the water use review, the organization shall: [...] 2) identify, based on the water use analysis, the activities and functions of significant water use, including: — the facilities, equipment, systems, processes and personnel working for or on behalf of the organization that significantly affect water use; — other relevant variables affecting water use; — the current performance of facilities, equipment and systems and processes related to identified significant water use. — ISO 46001:2019, §6.2.4, printed pp.12-13'
+--  where id = '27925449-c445-48b6-89d7-0742e362208b';
+--   rollback: restore the 2026-09-08 exported source_quote for CR-015.
+
+
+-- ============================================================================
+-- R-11 ☐ RATIFIED — CLAUSE_REFERENCE FORMAT IS INCONSISTENT ACROSS THE GATE SET
+-- ============================================================================
+-- FINDING (cosmetic, listed so it is not rediscovered). The 18 attestation gates store clause_reference
+-- without the section sign ("4.1", "6.2.4", "9.2") while the 17 field gates store it with one ("§4.4",
+-- "§9.1 4)"). Fields use the "§" form throughout. Nothing depends on the format today, but any future
+-- clause-based join or roll-up will silently miss half the rows.
+--
+-- update public.compliance_requirements cr set clause_reference = '§' || cr.clause_reference
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--  where wt.id = cr.worksheet_template_id and s.code = 'ISO-46001' and cr.clause_reference not like '§%' and cr.clause_reference <> '';
+--   rollback: strip the leading '§' from the same 18 rows
+--             (update … set clause_reference = ltrim(clause_reference, '§') … same predicate).
+
+
+-- ============================================================================
+-- R-12 ☐ RATIFIED — COVERAGE GAP: §7.5.2 IS A "shall" CLAUSE WITH NO FIELD AND NO GATE
+-- ============================================================================
+-- FINDING. Every normative clause of ISO 46001 carries at least one gate EXCEPT two, and one of those two
+-- has no encoding at all:
+--   §7.5.1 "General" — has a field (documented_information, is_required=true) but NO gate:
+--     "The organization’s water efficiency management system shall include: a) documented information
+--      required by this document; b) documented information determined by the organization as being
+--      necessary for the effectiveness of the water efficiency management system." (§7.5.1, printed p.15)
+--   §7.5.2 "Creating and updating" — NO field and NO gate anywhere in prod:
+--     "When creating and updating documented information the organization shall ensure appropriate
+--      a) identification and description (e.g. a title, date, author or reference number);
+--      b) format (e.g. language, software version, graphics) and media (e.g. paper, electronic);
+--      c) review and approval for suitability and adequacy." (§7.5.2, printed p.15)
+-- §7.5.3 by contrast IS gated (CR-025). So the documented-information trio is encoded 2 of 3, with the
+-- middle clause missing entirely. This is a genuine under-enforcement against a printed "shall".
+--
+-- insert into public.fields (worksheet_template_id, symbol, label_de, data_type, is_required, clause_reference, description)
+--   values ('e278eb02-0086-420f-a709-853a03d2e3b2', 'doc_creation_update_control', 'Erstellung und Aktualisierung dokumentierter Information', 'boolean', true, '§7.5.2',
+--           'Identification/description, format/media, and review and approval for suitability and adequacy are ensured when documented information is created or updated (§7.5.2 a)-c)).');
+-- -- then a block gate on it, with the §7.5.2 quote above as source_quote.
+--   rollback: delete the inserted field (and the gate, if inserted).
+
+
+-- ============================================================================
+-- NEGATIVE RESULTS — checked and NOT found (recorded so their absence is auditable)
+-- ============================================================================
+-- · condition = 'TRUE' literal no-ops:        NONE.
+-- · OR-collapse / AND-OR inversion:            NONE — the standard has exactly ONE compound condition in
+--     40 gates (CR-038, an AND) and no OR anywhere, so there is nothing to invert or collapse.
+-- · membership test spanning a whole enum domain: NONE — no gate references an enum field at all. The only
+--     enum in the standard (baseline_adjustment_trigger, 3 values) is consumed by no gate, and its three
+--     values map 1:1 onto printed §6.2.7 a), b), c) — no invented option, no uncovered value.
+-- · unsatisfiable gates / dangling operands:   NONE — every symbol named in a condition exists as a field on
+--     the same worksheet as its gate (checked for all 40).
+-- · presence-only condition hiding a printed limit: NONE, because the standard prints NO numeric limit in
+--     any "shall". The only figures in the whole document are (i) A.12's doubly-hedged "e.g. once every
+--     5 years" / "e.g. within ± 3 %" (informative, "should"), and (ii) Annex B's worked scenario numbers
+--     ("50 000 m3/month", "2 m3/unit/day", "37,5 %", printed pp.31-32), which are examples, not requirements.
+--     Correspondingly, no numeric gate exists — the right outcome.
+-- · block gates anchored on soft text ("should"/"may"/"can"): NONE. All 35 quote-carrying gates rest on a
+--     printed "shall". The two Annex-C gates that rest on informative text (CR-037, CR-038) are correctly
+--     severity='warn'.
+-- · source_quote verbatim but containing no requirement: ONE, CR-015 — see R-10 (the "shall" was cropped).
+-- · source_quote paraphrases: NONE. Word-for-word check against the PDF text layer: 33/35 exactly verbatim;
+--     the worst deviation in the whole set is CR-015/CR-030 dropping the em-dash list bullets, with every
+--     word intact. No gate quote invents, reorders or reworders anything.
+-- · invented values or ranges: only the ">= 0" floors of R-2/R-3, which are not printed. No other number
+--     appears in any condition.
+-- · boundary inclusivity errors: NOT ASSESSABLE — the standard prints no boundary to be inclusive or
+--     exclusive of. The only boundaries in the encoding are the invented ">= 0" of R-2/R-3.
+-- · unit mismatches: NONE. All four equations are dimensionally consistent — C.1 and C.2b are m3 sums
+--     yielding m3; C.3 and C.5 are m3/m3 x 100 yielding %, and both output fields are declared '%'. The
+--     unitless ('-') declaration of water_efficiency_indicator and baseline_water_efficiency_indicator is
+--     CORRECT, not a defect: 3.33 makes them ratios whose unit follows the chosen business activity
+--     indicator ("m3 of water/kg of product; l/person supplied; m3 of water/guestroom", 3.4 Note 1, p.2).
+-- · equation outputs consumed by nothing: STRUCTURALLY none — Win/Wout feed CR-037, the two rates feed
+--     CR-038. EFFECTIVELY, the two rates feed only a tautology (R-3), so nothing can act on them.
+-- · worksheets with zero fields: NONE — all 10 worksheets carry fields (4 to 20 each).
+-- · worksheets with zero gates: ONE — ISO-46001-05 ("Zielwerte & Aktionsplaene", 4 fields), because its two
+--     §6.3 gates are homed on ISO-46001-03 (R-5).
+-- · duplicate fields: NONE — all 97 symbols are distinct and every one is referenced by a gate, an equation
+--     or its own clause. No phantom fields (no symbol without label/clause/description).
+-- · missing gate for a printed hard limit: NONE OWED — there is no printed hard limit (see above). Missing
+--     gates for printed OBLIGATIONS: two, both in §7.5 — see R-12.
+-- · §9.1's "The organization should define, periodically review and update/revise its measurement needs" is
+--     a "should" and is correctly ungated and un-fielded — recorded so it is not mistaken for a gap.
+-- ============================================================================

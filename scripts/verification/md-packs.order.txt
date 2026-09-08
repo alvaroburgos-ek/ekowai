@@ -52,3 +52,4 @@ vdi-2163-md-verification-pack.sql  VDI-2163
 vdi-3477-md-verification-pack.sql  VDI-3477
 vdi-3814-blatt-2-1-md-verification-pack.sql  VDI-3814-Blatt-2-1
 hoai-2021-md-verification-pack.sql  HOAI-2021
+iso-46001-md-verification-pack.sql  ISO-46001
