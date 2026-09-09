@@ -69,3 +69,4 @@ iso-14097-md-verification-pack.sql  ISO-14097
 atv-a-704e-md-verification-pack.sql  ATV-A-704E
 iso-5667-16-md-verification-pack.sql  ISO-5667-16
 iso-59010-md-verification-pack.sql  ISO-59010
+iso-5667-6-md-verification-pack.sql  ISO-5667-6

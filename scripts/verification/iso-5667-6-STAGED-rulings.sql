@@ -1,0 +1,679 @@
+-- ============================================================================================================
+-- ISO-5667-6 - STAGED RULINGS (written, NOT applied). 2026-09-09, [VA] pass.
+--
+-- EVERYTHING IN THIS FILE IS COMMENTED OUT. Nothing here runs. Each block carries its evidence quote, the
+-- proposed SQL, and the rollback inverse. A block is applied only after Alvaro ticks its RATIFIED marker.
+--
+-- Source: NCh-ISO 5667/6:2015 (INN, Chile) - an IDENTICAL national adoption of ISO 5667-6:2014,
+--   "Calidad del agua - Muestreo - Parte 6: Guia para el muestreo de rios y cursos de agua".
+--   File: C:\Users\Ekowai\Desktop\Ciruclar economy, sustanability and water test\ISO 5667-6\ISO-5667-6-2015.txt
+--   Real embedded text layer (270 639 bytes, zero undecodable characters) - NOT OCR. Grade [VA].
+--   Body language is SPANISH throughout; every evidence quote below is the Spanish verbatim, untranslated.
+-- Page convention: each printed page ends with the running footer "(c) INN 2015 - Para la adopcion nacional"
+--   carrying the page number; 38 parsable footers run ii,iii,iv,v,vi,1..33 with no gaps (cover prints
+--   "33 paginas"). Confirmed against the Contenido: "Preambulo ... v" and "Tabla 1 ... 14" both resolve.
+-- Schema note: public.compliance_requirements has a column "condition" (NOT "condition_expression") and has
+--   NO "active" column. All proposed gate SQL below uses "condition".
+--
+-- WHY SO MANY BLOCKS: this is a GUIDANCE part and the title says so ("Guia para el muestreo"). Mechanical
+--   modality census over the normative body (clauses 1-15, printed pp.1-27):
+--     debe = 10, deben = 0, debera/deberan = 0  ->  SHALL total 10
+--     deberia/deberian = 168, se recomienda/recomendado/recomendacion = 9, se sugiere = 3, conviene que = 0
+--                                                ->  SHOULD/RECOMMEND total 180
+--     es esencial/imperativo/fundamental/primordial = 11 ; puede/pueden/podria = 124
+--     RATIO shall : should = 10 : 168 = 1 : 16,8   (10 : 180 = 1 : 18 counting every soft form)
+--   The encoding nevertheless marks 34 of 76 fields is_required=true and 6 of 30 gates severity=block.
+--   Exactly TWO of those rest on a printed "debe": CR-011 (5.2) and CR-015 (7.2). That drives R-3, R-4, R-7.
+--
+-- NEGATIVE RESULTS (checked, explicitly NOT found - recorded so their absence is auditable):
+--   * condition = 'TRUE' or any tautological literal:            NONE.
+--   * a ">= 0" floor on a legitimately-negative quantity:        NONE (no gate has a >= 0 floor at all).
+--   * INVERTED BOUNDARY (a printed ceiling encoded as a floor, the ISO-5667-16 defect): NONE. All four
+--     numeric gates carry the printed direction - CR-016 >= 30 for "al menos 30 cm" (floor), CR-020 <= 3 for
+--     "hasta tres veces" (ceiling), CR-017 0,5..3,0 for "no menor ... ni mayor" (two-sided), CR-014 2..8 degC
+--     for "(5 +/- 3) degC" (two-sided).
+--   * boundary inclusivity / two-sided tolerance encoded one-sided: NONE. CR-017 and CR-014 are both encoded
+--     two-sided and both inclusive, matching "no ... menor que / ni mayor que" and "+/-". CR-021 encodes
+--     "menor que 5 min" as a STRICT "< 5" - the printed strictness is preserved.
+--   * a number lifted from a "por ejemplo" parenthetical and enforced as a hard limit (the ISO-5667-1 25 mm
+--     defect): NONE. Every enforced number - 2 sites, 6 samples, 5 flows, 5 min, 3 washes, 30 cm, 0,5/3,0 m/s,
+--     2..8 degC - traces to running normative text, not to an example. (The one approximation issue is the
+--     word "aproximadamente" in front of "seis" - see R-9 - which is a different defect class.)
+--   * AND/OR inversion: NONE. The five scope-guarded gates all use the correct "scope != X OR requirement"
+--     idiom (CR-008, CR-009, CR-011, CR-015, CR-021) and the four conjunctive gates correctly use AND
+--     (CR-010, CR-025, CR-029, CR-030).
+--   * duplicate gates or strict subsets: NONE. All 30 gate conditions are distinct and none subsumes another.
+--   * mis-homed gate (a gate on worksheet A reading only fields of worksheet B): NONE. Every one of the 30
+--     gates reads only fields that live on its own worksheet.
+--   * unsatisfiable gate: NONE outright, though CR-009's scope predicate is written against the wrong field
+--     and can behave as one - see R-14.
+--   * phantom fields (enum-value tokens materialised as fields): NONE. All 76 symbols carry a label, a clause
+--     reference and a description; the five Annex A symbols (l, b, c, g, d) are all referenced by Eq. A.1.
+--   * worksheet with zero fields: NONE. The 13 worksheets carry 4 to 10 fields each.
+--   * wrong clause_reference: NONE except sampling_purpose (R-6). All other 75 clause tags were checked
+--     against the clause the quoted text actually sits in and all 75 resolve correctly.
+--   * invented VALUES or UNITS anywhere, including in field descriptions: NONE. Every printed figure and unit
+--     in the encoding (30 cm, 100 m, 90%, 6, 3, 5, 10%, 5 min, 50 ml, 3 L, 0,5/3,0 m/s, (5+/-3) degC, m, m/s2,
+--     %) is present verbatim in the source. The only description defects are MODAL, not numeric - see R-11.
+--     (Contrast ISO-5667-1, where mg/l was invented on five statistical fields.)
+--   * app/project-metadata fields needing the 2026-08-01 exempt class: NONE. All 76 fields map to guideline
+--     content, so the pack contains no 'inferred_from_worksheet' group.
+-- ============================================================================================================
+
+
+-- ============================================================================================================
+-- R-0  EDITION CURRENCY - owner action, no SQL
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- PROVENANCE IS SETTLED AND MATCHES PROD. The document is a Chilean national adoption, established from its
+-- own front matter, not inferred:
+--   Cover, printed p.ii:      "NORMA CHILENA / NCh ISO 5667/6 / Primera edicion 2015.02.24"
+--   Issuing body:             Instituto Nacional de Normalizacion (INN), Comite Tecnico CL007 Calidad del agua
+--   Adoption date, p.v:       "Esta norma ha sido aprobada por el Consejo del Instituto Nacional de
+--                              Normalizacion, en sesion efectuada el 24 de febrero de 2015."
+--   ADOPTED EDITION, p.v:     "Esta norma es identica a la version en ingles de la Norma Internacional
+--                              ISO 5667-6:2014 Water quality - Sampling - Part 6: Guidance on sampling of
+--                              rivers and streams."
+--   Deltas vs the ISO text:   Anexo D Tabla D.1 (printed p.33) lists three changes, ALL editorial (a heading
+--                              rename, a national Explanatory Note, an annex heading rename). No technical delta.
+--   prod standards.version =  "2014 (ISO 5667-6:2014; NCh-ISO 5667/6:2015 declared identical)"  -> MATCHES.
+-- THE ONE OPEN QUESTION: whether ISO has superseded the 2014 edition since. That cannot be established from
+-- the document (a 2015 adoption cannot know its own successor) and was NOT looked up online in this pass.
+-- The adoption gap here is ONE YEAR, so this is NOT the ISO-5667-1 situation (a 1995 Colombian adoption of the
+-- 1980 ISO edition, two editions stale). Still worth one catalogue check before a project relies on it.
+-- ACTION: check the ISO catalogue for ISO 5667-6. If a later edition exists, re-source before use.
+-- NO SQL. Nothing to roll back.
+
+
+-- ============================================================================================================
+-- R-1  *** EQUATION A.1 IS WRONG *** - the encoded formula fails the standard's OWN worked example
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Equation id 1ba62e5b-4490-4071-95e4-706d57bf2593, worksheet ISO-5667-6-13, equation_number "A.1",
+--   output l (complete-mixing distance, m), inputs b, c, g, d.
+-- ENCODED formula:  l = 0,13 * b^2 * c * (0,7*c + 2*g) / (g*d)
+-- The PDF text layer renders the printed formula as a flattened, radical-less run (Anexo A, printed p.28):
+--     "l=  (  0,13b 2c 0,7c + 2 g   )   (A.1)
+--            gd"
+-- The encoder read "2 g" literally. In the printed formula that g sits UNDER A SQUARE-ROOT SIGN, and the
+-- radical is exactly the kind of glyph a text layer drops. The correct relation (as published in ISO 555-2,
+-- which Anexo A itself cites as the origin) is:
+--     l = 0,13 * b^2 * c * (0,7*c + 2*SQRT(g)) / (g*d)
+-- THIS IS NOT AN INFERENCE - THE STANDARD SETTLES IT ITSELF. Anexo A prints a worked example, printed p.28:
+--   "EJEMPLO Considerar dos cursos de agua, ambos de 5 m de ancho y 1 m de profundidad, pero con valores
+--    extremos del coeficiente de Chezy; uno de 15 (fondo muy irregular, es decir, el curso de agua es muy
+--    rapido y turbulento) y el otro de 50 (fondo muy liso, es decir, un curso de agua muy tranquilo, de
+--    movimiento lento). Cuando se calcula segun Ecuacion (A.1), los antiguos confines completan la
+--    homogeneidad despues de 83 m, mientras que el ultimo no es homogeneo hasta que haya recorrido 683 m."
+-- Round-trip with b = 5 m, d = 1 m, g = 9,81 m/s2 (raw output, 2026-09-09):
+--     c=15  ENCODED l = 0,13*b^2*c*(0,7*c + 2*g)/(g*d)       = 149.7 m     printed says 83 m   -> WRONG
+--     c=15  SQRT    l = 0,13*b^2*c*(0,7*c + 2*sqrt(g))/(g*d) =  83.3 m     printed says 83 m   -> MATCHES
+--     c=50  ENCODED l = 0,13*b^2*c*(0,7*c + 2*g)/(g*d)       = 904.8 m     printed says 683 m  -> WRONG
+--     c=50  SQRT    l = 0,13*b^2*c*(0,7*c + 2*sqrt(g))/(g*d) = 683.5 m     printed says 683 m  -> MATCHES
+-- The sqrt form reproduces BOTH printed figures to the printed precision; the encoded form misses both, by
+-- +80% at c=15 and +32% at c=50. The engine would tell an engineer to place the downstream sampling site
+-- roughly twice as far downstream as the standard's own example says - a systematic overestimate of the
+-- complete-mixing distance across the whole Chezy range.
+-- BECAUSE THIS IS WRONG, EQUATION A.1 IS DELIBERATELY *NOT* VERIFIED BY THE PACK. It stays
+-- 'imported_unverified' with a NULL verification_quote; marking it verified would assert that the encoding
+-- matches the source, which it does not. It is this pass's only residue item.
+-- CAVEAT the owner must weigh before ratifying: Anexo A is INFORMATIVE ("Los Anexos A, B, C y D no forman
+--   parte de la norma, se insertan solo a titulo informativo.", Preambulo, printed p.v), and Anexo A itself
+--   warns the relation "puede subestimar la longitud de mezcla para cursos de agua pequenos de
+--   aproximadamente 5 m de ancho, y sobreestimar la longitud de mezcla para los rios de mas de
+--   aproximadamente 50 m de ancho." So the fix restores the printed relation; it does not make the output
+--   authoritative. Worksheet 13 exists only to carry this informative calculation.
+-- PROPOSED (formula correction; verification of the row should follow in a later pack, not here):
+-- update public.equations
+--    set formula = 'l = 0,13 * b^2 * c * (0,7*c + 2*sqrt(g)) / (g*d)'
+--  where id = '1ba62e5b-4490-4071-95e4-706d57bf2593';
+-- ROLLBACK:
+-- update public.equations
+--    set formula = 'l = 0,13 * b^2 * c * (0,7*c + 2*g) / (g*d)'
+--  where id = '1ba62e5b-4490-4071-95e4-706d57bf2593';
+-- SECOND ACTION (independent of the formula): the engine must be able to evaluate sqrt(). If the expression
+--   grammar has no sqrt, the equivalent printed-faithful form is (0,7*c + 2*g^0,5). Pick whichever the engine
+--   parses; do NOT approximate 2*sqrt(9,81) to a constant, because g is an encoded input field, not a literal.
+
+
+-- ============================================================================================================
+-- R-2  TWO GATES WITH AN EMPTY CONDITION - CR-007 and CR-028
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate 15709f9c-fca9-4774-a25c-e4d069ac0139, code CR-007, worksheet ISO-5667-6-03, severity=warn,
+--   clause_reference "§5.1.2", source_quote NULL, condition = '' (the EMPTY STRING).
+-- Gate e7d6388f-ce62-4f96-817e-e9899ee3db88, code CR-028, worksheet ISO-5667-6-11, severity=warn,
+--   clause_reference "§14",    source_quote NULL, condition = '' (the EMPTY STRING).
+-- Neither can ever evaluate; both are dead rows in the requirement set. Each clause DOES carry a real (soft)
+-- obligation and each already has a field on the same worksheet expressing it, so the honest repair is to give
+-- each gate a condition, not to delete it.
+-- Evidence for CR-007, §5.1.2, printed p.7: "Cuando la mezcla es relevante para el regimen de muestreo, la
+--   ubicacion de muestreo y otros parametros asociados, de preferencia, se deberian definir claramente antes
+--   de comenzar la toma de muestras."  -> field mixing_relevant (206ebc83-8689-47d5-9f1d-f79beeddb33e,
+--   worksheet 03, boolean, is_required=true) is the field this clause is about.
+-- Evidence for CR-028, §14, printed p.26: "En muchas partes del mundo, se han desarrollado o adoptado, y
+--   aplicado sistemas de gestion de calidad al muestreo de la calidad del agua." and "Estos requerimientos se
+--   deberian especificar por el usuario de los datos antes del muestreo."  -> field quality_management_system
+--   (0cc66d07-944c-441f-94c9-14743789083d, worksheet 11, boolean, is_required=false).
+-- NOTE the modality: both clauses are "deberia" text, so severity stays warn in both proposals.
+-- PROPOSED:
+-- update public.compliance_requirements set condition = 'mixing_relevant IS NOT NULL',
+--        source_quote = 'Cuando la mezcla es relevante para el regimen de muestreo, la ubicacion de muestreo y otros parametros asociados, de preferencia, se deberian definir claramente antes de comenzar la toma de muestras. (§5.1.2, printed p.7)'
+--  where id = '15709f9c-fca9-4774-a25c-e4d069ac0139';
+-- update public.compliance_requirements set condition = 'quality_management_system IS NOT NULL',
+--        source_quote = 'Estos requerimientos se deberian especificar por el usuario de los datos antes del muestreo. (§14, printed p.26)'
+--  where id = 'e7d6388f-ce62-4f96-817e-e9899ee3db88';
+-- ROLLBACK:
+-- update public.compliance_requirements set condition = '', source_quote = null
+--  where id in ('15709f9c-fca9-4774-a25c-e4d069ac0139','e7d6388f-ce62-4f96-817e-e9899ee3db88');
+
+
+-- ============================================================================================================
+-- R-3  REQUIRED FLAGS WITH NO MANDATORY VERB BEHIND THEM - 34 of 76 fields are is_required=true
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- See the census in this file's header: 10 shall against 180 should/recommend forms. Yet 34 fields are marked
+-- is_required=true. Exactly ONE of those (cycle_coincidence_avoided) rests on a printed "debe".
+-- The clearest cases, where the field is required but the source carries no obligation AT ALL - not even a
+-- "deberia" - because the clause is a definitions list or an example list:
+--   cc8bd60a-e3ee-4bb5-84f8-7cb783909cfd  sampling_type    §3  - clause 3 DEFINES eight sampling techniques;
+--     it nowhere obliges anyone to declare which one is used. "Para los propositos de esta norma, se aplican
+--     los terminos y definiciones incluidos en ISO 5667-11 e ISO 6107-2 y adicionalmente los siguientes:"
+--     (§3, printed p.2).
+--   ab7331cb-768f-4fbc-a620-0e0278787a42  water_body_type  §3  - same; 3.9 "rio" and 3.12 "curso de agua" are
+--     vocabulary entries, not a required declaration.
+--   6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db  sampling_purpose - see R-6; the list is printed as "ejemplos".
+--   f9cdb9b8-c119-49f8-bcd1-d4dbe5beb8fd  normative_references_consulted - see R-4.
+-- The remaining ~29 required fields rest on "se deberia"/"es esencial" text. That is a defensible house rule
+-- for a guidance standard IF it is a deliberate, recorded policy - but it is not currently recorded anywhere,
+-- and a user cannot tell a printed obligation from an EKOWAI one by looking at the form.
+-- OWNER DECISION NEEDED (do not auto-pick):
+--   OPTION A - narrow: drop is_required only on the four fields above, whose clauses carry no obligation at all.
+--   OPTION B - broad: drop is_required on every field not behind a printed "debe", leaving the required set at
+--     one field. This makes the form honest but effectively unenforced.
+--   OPTION C - policy: keep the current required set and record, in the standard's notes, that for guidance
+--     standards EKOWAI treats "deberia" as required-to-answer (not required-to-comply). Recommended, because
+--     it preserves the workflow while making the basis visible.
+-- PROPOSED (OPTION A only - the narrow, defensible slice):
+-- update public.fields set is_required = false
+--  where id in ('cc8bd60a-e3ee-4bb5-84f8-7cb783909cfd','ab7331cb-768f-4fbc-a620-0e0278787a42',
+--               '6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db','f9cdb9b8-c119-49f8-bcd1-d4dbe5beb8fd');
+-- ROLLBACK:
+-- update public.fields set is_required = true
+--  where id in ('cc8bd60a-e3ee-4bb5-84f8-7cb783909cfd','ab7331cb-768f-4fbc-a620-0e0278787a42',
+--               '6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db','f9cdb9b8-c119-49f8-bcd1-d4dbe5beb8fd');
+
+
+-- ============================================================================================================
+-- R-4  CR-002 - A BLOCK GATE WHOSE source_quote CARRIES NO REQUIREMENT
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate c68c914a-8871-4be6-9c81-330e24244f93, code CR-002, worksheet ISO-5667-6-01, severity=BLOCK,
+--   condition "normative_references_consulted == true", clause_reference "2".
+-- Its source_quote is, verbatim, clause 2's dated/undated-reference boilerplate (§2, printed p.1):
+--   "Los documentos siguientes son indispensables para la aplicacion de esta norma. Para referencias con
+--    fecha, solo se aplica la edicion citada. Para referencias sin fecha se aplica la ultima edicion del
+--    documento referenciado (incluyendo cualquier enmienda)."
+-- That sentence tells the reader WHICH EDITION of a reference applies. It does not require anyone to consult
+-- the references, and it certainly does not require an attestation checkbox. There is no "debe" and no
+-- "deberia" in the whole of clause 2. A BLOCK gate - which stops a worksheet from being finalised - is
+-- anchored on text that carries no obligation whatsoever. This is the single most over-enforced row here.
+-- Note also that clause 2's references are genuinely load-bearing (ISO 5667-3 governs preservation, ISO
+-- 5667-14 governs QA), so the attestation is not useless - it is just not a printed requirement, and not a
+-- blocking one.
+-- PROPOSED (demote block -> warn; keep the gate and the field):
+-- update public.compliance_requirements set severity = 'warn'
+--  where id = 'c68c914a-8871-4be6-9c81-330e24244f93';
+-- ROLLBACK:
+-- update public.compliance_requirements set severity = 'block'
+--  where id = 'c68c914a-8871-4be6-9c81-330e24244f93';
+-- SEE ALSO R-3: the same clause is the basis for normative_references_consulted being is_required=true.
+
+
+-- ============================================================================================================
+-- R-5  CR-006 - A CONDITIONAL OBLIGATION ENFORCED UNCONDITIONALLY
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate 00060fb8-640f-4e0a-bd0e-d5dc928e3e38, code CR-006, worksheet ISO-5667-6-03, severity=warn,
+--   condition "confluence_sites_count >= 2", clause_reference "§5.1.2, §7.1", source_quote NULL.
+-- The printed obligation is explicitly conditional (§5.1.2, printed p.6):
+--   "Cuando los efectos de un afluente o un efluente sobre la calidad en un particular tramo de rio
+--    identificado, o el curso de agua principal son de interes, se deberian elegir al menos dos sitios de
+--    muestreo; uno deberia estar justo aguas arriba de la confluencia y el otro deberia estar lo
+--    suficientemente alejado aguas abajo para asegurar que la mezcla este completa."
+-- The "al menos dos" (>= 2) threshold is encoded correctly, including its inclusivity. What is missing is the
+-- antecedent: "Cuando los efectos de un afluente o un efluente ... son de interes". As written, CR-006 fires
+-- on every project, including a single-station baseline survey nowhere near a confluence, where two sites are
+-- not required by anything. Worse, confluence_sites_count is is_required=false and therefore normally NULL, so
+-- the gate raises a warning on a field the form does not even ask for.
+-- There is NO field on worksheet 03 (or anywhere in this standard) that captures "tributary/effluent effect is
+-- of interest", so the gate cannot be scope-guarded against existing data. Two options:
+--   OPTION A (recommended): add the missing scope field and guard the gate with it.
+--   OPTION B (minimal): guard on the value being present, so the threshold only bites once an engineer has
+--     declared a confluence study. Weaker, but needs no schema change.
+-- PROPOSED (OPTION B - the no-schema-change form):
+-- update public.compliance_requirements
+--    set condition = 'confluence_sites_count IS NULL OR confluence_sites_count >= 2',
+--        source_quote = 'Cuando los efectos de un afluente o un efluente sobre la calidad en un particular tramo de rio identificado, o el curso de agua principal son de interes, se deberian elegir al menos dos sitios de muestreo; uno deberia estar justo aguas arriba de la confluencia y el otro deberia estar lo suficientemente alejado aguas abajo para asegurar que la mezcla este completa. (§5.1.2, printed p.6)'
+--  where id = '00060fb8-640f-4e0a-bd0e-d5dc928e3e38';
+-- ROLLBACK:
+-- update public.compliance_requirements set condition = 'confluence_sites_count >= 2', source_quote = null
+--  where id = '00060fb8-640f-4e0a-bd0e-d5dc928e3e38';
+
+
+-- ============================================================================================================
+-- R-6  sampling_purpose - CLAUSE RETAG (§1 -> Introduccion) AND AN ENUM THAT CLOSES A PRINTED EXAMPLE LIST
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field 6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db, symbol sampling_purpose, worksheet ISO-5667-6-01, enum,
+--   is_required=true, clause_reference "§1".
+-- (a) WRONG CLAUSE. The a)/b) purpose list the enum mirrors is NOT in clause 1 (Alcance y campo de
+--     aplicacion, printed p.1). It is in the Introduccion, printed p.vi. The field's own description already
+--     says "(Introduction examples a/b)", so the encoding contradicts itself. This is the ONLY wrong clause
+--     tag among the 76 fields.
+-- (b) THE LIST IS EXPLICITLY EXEMPLARY. Introduccion, printed p.vi, verbatim:
+--     "La comprension del proposito del muestreo es un prerrequisito fundamental para identificar los
+--      principios que se aplicaran a un problema de muestreo en particular. A continuacion se encuentran
+--      ejemplos de los propositos de los programas de muestreo comunmente ideados para rios y cursos de
+--      agua: a) determinar la idoneidad de la calidad del agua de un rio o curso de agua dentro de una cuenca
+--      hidrografica para un uso particular, como: ... b) evaluar el impacto de las actividades humanas en la
+--      calidad del agua, como: ..."
+--     "ejemplos ... comunmente ideados" - examples of commonly devised purposes. The two-value enum turns an
+--     open example list into an exhaustive choice, so a legitimate third purpose (say, a regulatory
+--     compliance-monitoring programme, or a post-incident investigation) has no representable value.
+-- PROPOSED:
+-- update public.fields set clause_reference = 'Introduccion'
+--  where id = '6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db';
+-- -- and add an open "other" option to the enum (JSONB append; exact syntax per the importer's enum shape):
+-- update public.fields
+--    set enum_values = enum_values || '[{"value":"other","label_de":"Anderer Zweck (Freitext)","label_en":"Other purpose (free text)","order_index":3,"regulation_reference":"Introduccion (lista de ejemplos, no exhaustiva)"}]'::jsonb
+--  where id = '6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db';
+-- ROLLBACK:
+-- update public.fields set clause_reference = '§1',
+--        enum_values = enum_values - 2
+--  where id = '6ac8c9ec-e07b-4a5a-b8ca-0e030af1b1db';
+-- SEE ALSO R-3 for the is_required=true half of this field.
+
+
+-- ============================================================================================================
+-- R-7  analytical_report_complete / CR-027 - A COMPLETENESS OBLIGATION OVER "se podrian considerar" TEXT
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field c6ddb694-266e-47a9-afaa-b02028f85306, analytical_report_complete, worksheet ISO-5667-6-11, boolean,
+--   is_required=TRUE, clause_reference "§13.1"; its description says the report "includes the applicable
+--   §13.1 items (a-q)".
+-- Gate e1022250-20dc-4748-8d80-fef5f69076b4, code CR-027, severity=warn, condition
+--   "analytical_report_complete == true", source_quote NULL.
+-- The printed lead-in is as soft as this document gets (§13.1, printed p.24):
+--   "El formulario detallado del informe del muestreo depende de los objetivos de este. Todas las condiciones
+--    que pueden influenciar los resultados analiticos, se deberian tener en cuenta. Los asuntos que se
+--    podrian considerar para su inclusion son:"
+-- "El formulario ... depende de los objetivos" plus "se podrian considerar" = the seventeen a)..q) items are
+-- candidates whose applicability depends on the study's objectives. The encoding turns them into a required
+-- completeness attestation. The field label ("Analysebericht vollstaendig" / report complete) additionally
+-- implies all seventeen, which the source never asks for.
+-- PROPOSED (drop the required flag; the warn gate can stay, since answering the question is reasonable):
+-- update public.fields set is_required = false
+--  where id = 'c6ddb694-266e-47a9-afaa-b02028f85306';
+-- update public.compliance_requirements
+--    set source_quote = 'El formulario detallado del informe del muestreo depende de los objetivos de este. ... Los asuntos que se podrian considerar para su inclusion son: (§13.1, printed p.24)'
+--  where id = 'e1022250-20dc-4748-8d80-fef5f69076b4';
+-- ROLLBACK:
+-- update public.fields set is_required = true where id = 'c6ddb694-266e-47a9-afaa-b02028f85306';
+-- update public.compliance_requirements set source_quote = null
+--  where id = 'e1022250-20dc-4748-8d80-fef5f69076b4';
+
+
+-- ============================================================================================================
+-- R-8  ENUMS THAT CLOSE A PRINTED OPEN LIST, AND ONE SINGLE-SELECT OVER A PRINTED CONJUNCTION
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- (a) SINGLE-SELECT OVER A CONJUNCTION - mixing_dimension.
+--   Field 220c5dd9-68b4-48fb-8a15-cdb26097fc94, worksheet 03, enum {vertical, lateral, longitudinal}.
+--   §5.1.2, printed p.6: "En un curso de agua, los efluentes se mezclan en tres dimensiones, es decir,
+--     a) verticalmente (de arriba hacia abajo); b) lateralmente (de un lado al otro); y c) longitudinalmente
+--     (nivelando las maximas y minimas en la concentracion de los componentes del efluente, cuando el agua
+--     pasa aguas abajo)."
+--   §5.1.2, printed p.7: "Las distancias sobre las cuales los efluentes se mezclan en estas tres dimensiones,
+--     deberian ser consideradas en la seleccion de los sitios y puntos de muestreo".
+--   Note the "y" before c) and "estas TRES dimensiones ... deberian ser consideradas" - the standard requires
+--   ALL THREE to be considered. A single-select forces the engineer to pick one and silently drop two.
+--   REPAIR: this must become a multi-select (or three booleans). Which one depends on whether the field
+--   renderer supports multi-select for enum fields - that is an engine question, not a data question, so it
+--   is named here rather than proposed as a one-line UPDATE.
+-- (b) ENUM CLOSING AN EXPLICITLY OPEN LIST - heterogeneity_determinant.
+--   Field 850878c4-2676-4e56-b51d-bc8f971d7a60, worksheet 03, enum with 11 determinants.
+--   §5.1.4, printed p.10: "Se sugiere que los siguientes determinantes (siempre que sean requeridos para el
+--     programa de rutina) deberian ser comprobados en cada ubicacion de muestreo que se va a testear: pH,
+--     conductividad, cloro, amoniaco, solidos en suspension, oxigeno disuelto, color, hierro, clorofila,
+--     carbono organico total, y la demanda bioquimica de oxigeno. Se deberian incluir otros determinantes si
+--     son de interes especial o si son indicados por circunstancias locales."
+--   The last sentence explicitly opens the list. The 11 values are right; what is missing is an "other" entry.
+--   Also note this is the weakest modality in the document ("Se sugiere que ... deberian"), and it is also a
+--   conjunction (all eleven are to be checked), so it has the (a) problem too.
+-- (c) ENUM CLOSING A PERMISSIVE LIST - report_item.
+--   Field 2dfc3e21-86ea-44ac-bb78-d4fc6d4e498f, worksheet 11, enum with the 17 §13.1 a)..q) items.
+--   The seventeen values match the print exactly. The problem is the same pair: single-select over a list
+--   where many items apply at once, and closed over "se podrian considerar" text (see R-7 for the quote).
+-- PROPOSED (part (b) only - the one repair that is a pure data edit):
+-- update public.fields
+--    set enum_values = enum_values || '[{"value":"other","label_de":"Weitere Bestimmungsgroesse (Freitext)","label_en":"Other determinand (free text)","order_index":12,"regulation_reference":"§5.1.4 - lista abierta: Se deberian incluir otros determinantes si son de interes especial"}]'::jsonb
+--  where id = '850878c4-2676-4e56-b51d-bc8f971d7a60';
+-- ROLLBACK:
+-- update public.fields set enum_values = enum_values - 11
+--  where id = '850878c4-2676-4e56-b51d-bc8f971d7a60';
+-- Parts (a) and (c) need the multi-select decision first and carry no SQL here.
+
+
+-- ============================================================================================================
+-- R-9  CR-008 - "aproximadamente seis" ENFORCED AS A HARD FLOOR >= 6
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate ffa13112-9794-4543-bf87-a47c8d911005, code CR-008, worksheet ISO-5667-6-03, severity=warn,
+--   condition "homogeneity_status != 'non_homogeneous' OR heterogeneity_samples_count >= 6", source_quote NULL.
+-- The scope guard is correct. The threshold is not, quite. §5.1.4, printed p.9:
+--   "Idealmente, las muestras se deberian tomar de muchos puntos diferentes, sin embargo, se sugiere el
+--    siguiente enfoque para limitar la cantidad de trabajo que esto implica. La parte de la seccion
+--    transversal a traves de la cual una gran parte (alrededor del 90%) de los pasos totales de flujo, se
+--    decide aproximadamente. Dentro de esa parte, se deberian tomar aproximadamente seis muestras repartidas
+--    a traves de la parte. Los grandes rios podrian requerir mas muestras laterales y verticales."
+-- "se SUGIERE el siguiente enfoque" + "APROXIMADAMENTE seis" - a suggested approach with an approximate count.
+-- Encoded as ">= 6", a plan with five well-placed samples fails a gate the standard never set; and because
+-- ">= 6" is a floor, the "Los grandes rios podrian requerir mas" half is harmlessly satisfied.
+-- Severity is already warn, so the blast radius is small - but the row should say what it enforces.
+-- PROPOSED (keep the threshold, record the approximation, attach the missing quote):
+-- update public.compliance_requirements
+--    set source_quote = 'Dentro de esa parte, se deberian tomar aproximadamente seis muestras repartidas a traves de la parte. Los grandes rios podrian requerir mas muestras laterales y verticales. (§5.1.4, printed p.9) - NOTA: el texto impreso dice "aproximadamente seis"; la condicion codificada >= 6 es una lectura estricta de un valor aproximado.'
+--  where id = 'ffa13112-9794-4543-bf87-a47c8d911005';
+-- ROLLBACK:
+-- update public.compliance_requirements set source_quote = null
+--  where id = 'ffa13112-9794-4543-bf87-a47c8d911005';
+
+
+-- ============================================================================================================
+-- R-10  DUPLICATE DEPTH FIELDS AND A PASS-THROUGH EQUATION (Eq. 2)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Two fields on worksheet ISO-5667-6-07 encode the SAME printed value, in the same unit, from the same clause:
+--   bd3e0ab5-b323-426e-8f18-23394c7f2e4c  sampling_depth_below_surface  number, cm, §7.3, is_required=false
+--   fa45871c-b23e-4a88-bbfd-92ca49e08474  preferred_subsurface_depth    number, cm, §7.3, is_required=false
+-- and Equation 2 (7e099928-b002-453a-9109-e620c5091337) joins them with the identity
+--   sampling_depth_below_surface = preferred_subsurface_depth
+-- which computes nothing. The single printed sentence behind both (§7.3, printed p.15):
+--   "Siempre que sea posible, las muestras de agua se deberian recoger a alrededor de 30 cm por debajo de la
+--    superficie, o de otra manera, a media altura entre el lecho y la superficie."
+-- One value, two fields, one no-op relation. The second field's own description gives the game away: "Verbatim
+-- recommendation that samples be collected about 30 cm below the surface; input to the recommended-depth
+-- relation (Eq.2)" - it exists only to feed the identity.
+-- A THIRD representation of the same quantity exists on a different worksheet, in a different unit:
+--   c4c01fcc-5646-4b83-a572-f5cb6f24f0de  sampling_depths  number, m, §4, worksheet ISO-5667-6-02.
+-- That one is legitimately different (it is the §4 plan-level "la(s) profundidad(es) del muestreo"), but the
+-- cm/m split across worksheets is a trap for whoever fills the form.
+-- ALSO NOTE the printed value is "alrededor de 30 cm" (about 30 cm) and no gate enforces it - correctly, given
+-- the "Siempre que sea posible" antecedent. Nothing to add there.
+-- PROPOSED (deactivate the duplicate and retire the identity; only after the engine confirms nothing else
+--   reads preferred_subsurface_depth - as of this pass, only Eq.2 does):
+-- delete from public.equations where id = '7e099928-b002-453a-9109-e620c5091337';
+-- update public.fields set is_required = false, description = description || ' [DEPRECATED 2026-09-09: duplicate of sampling_depth_below_surface; kept only for historical worksheet instances]'
+--  where id = 'fa45871c-b23e-4a88-bbfd-92ca49e08474';
+-- ROLLBACK: re-insert the equation from the 2026-09-09 export
+--   (worksheet ISO-5667-6-07, equation_number '2', formula 'sampling_depth_below_surface = preferred_subsurface_depth',
+--    output_symbol 'sampling_depth_below_surface', input_symbols {preferred_subsurface_depth}, clause_reference '§7.3')
+--   and strip the appended description marker.
+-- NOTE: the pack DOES verify Eq. 2, with a verification_note recording that it is a pass-through identity and
+--   not a computation. If this block is ratified the row disappears anyway.
+
+
+-- ============================================================================================================
+-- R-11  MODAL INFLATION IN FIELD DESCRIPTIONS - two fields say "shall" where the source says "deberia"
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- No VALUE or UNIT is invented anywhere in this encoding (see the negative-results list in the header). Two
+-- DESCRIPTIONS, however, upgrade the printed modality, which is the same defect class as an invented value:
+-- (a) 694593a2-278b-4a22-a291-4d4a5843de14  inlet_velocity, worksheet 08, m/s.
+--     Description reads: "... the linear flow velocity within the inlet tube SHALL be not less than 0,5 m/s
+--     nor greater than 3,0 m/s."
+--     §8.2, printed p.16, verbatim: "Idealmente, el muestreo se deberia llevar a cabo en condiciones
+--     isocineticas, pero cuando esto no es posible, la velocidad de flujo lineal dentro del tubo de entrada no
+--     DEBERIA ser menor que 0,5 m/s ni mayor que 3,0 m/s."
+--     The numbers and the inclusive two-sided gate CR-017 are correct; only the verb is wrong.
+-- (b) 0e57a443-5a2d-4067-b203-f044615e5112  legal_purpose_sample, worksheet 10, boolean.
+--     Description reads: "... the (potentially far more complex) regulations of the applicable jurisdiction
+--     SHALL be followed and all involved persons fully familiar with the local legislation."
+--     §11.3.2, printed p.23, verbatim: "Los reglamentos que se DEBERIAN seguir si las muestras se van a
+--     utilizar para propositos legales, pueden ser mucho mas complicados dependiendo del sistema legal que
+--     funciona en una jurisdiccion en particular." and the ATENCION box: "Cabe destacar la existencia, en
+--     algunos paises de legislacion local, con la que todas las personas implicadas ... DEBERIA estar
+--     completamente familiarizado."
+-- CHECKED AND CLEAN, for the record: unsafe_condition_present's description says sampling "shall not be
+--   attempted", and that one IS backed - not by "debe", but by a bare imperative in a warning box (§15,
+--   printed p.26: "ADVERTENCIA - Si se considera que las condiciones para realizar el muestreo no son seguras,
+--   no intentar realizar el muestreo."). Left alone.
+-- PROPOSED:
+-- update public.fields set description = replace(description, 'shall be not less than', 'should be not less than')
+--  where id = '694593a2-278b-4a22-a291-4d4a5843de14';
+-- update public.fields set description = replace(description, 'shall be followed', 'should be followed')
+--  where id = '0e57a443-5a2d-4067-b203-f044615e5112';
+-- ROLLBACK:
+-- update public.fields set description = replace(description, 'should be not less than', 'shall be not less than')
+--  where id = '694593a2-278b-4a22-a291-4d4a5843de14';
+-- update public.fields set description = replace(description, 'should be followed', 'shall be followed')
+--  where id = '0e57a443-5a2d-4067-b203-f044615e5112';
+
+
+-- ============================================================================================================
+-- R-12  CR-020 - A CEILING WHERE THE OBLIGATION IS THE ACT: zero washes currently passes
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate 26973f43-898a-4c51-a2e3-3be2932ebde3, code CR-020, worksheet ISO-5667-6-09, severity=warn,
+--   condition "equipment_washes <= 3", clause_reference "§10.3", source_quote NULL.
+-- §10.3, printed p.20, verbatim: "Todo el equipamiento que entra en contacto con el agua, se deberia lavar,
+--   preferiblemente, hasta tres veces."
+-- The printed "hasta tres veces" IS a ceiling and the direction of the encoded comparator is therefore
+-- CORRECT - this is not the ISO-5667-16 inverted-boundary defect. The problem is what the gate leaves out:
+-- the obligation in that sentence is "se deberia lavar" (wash the equipment). "<= 3" is satisfied by 0, by
+-- NULL-treated-as-0, and by 1. A sampling run that never rinsed the equipment passes the only gate the
+-- standard's rinsing clause has.
+-- Note the field is is_required=false, so it is normally empty; how an empty numeric evaluates against "<= 3"
+-- in the gate grammar decides whether this fires at all. Either way it does not enforce the washing.
+-- PROPOSED (add the floor that carries the obligation, keep the printed ceiling):
+-- update public.compliance_requirements
+--    set condition = 'equipment_washes >= 1 AND equipment_washes <= 3',
+--        source_quote = 'Todo el equipamiento que entra en contacto con el agua, se deberia lavar, preferiblemente, hasta tres veces. (§10.3, printed p.20)'
+--  where id = '26973f43-898a-4c51-a2e3-3be2932ebde3';
+-- ROLLBACK:
+-- update public.compliance_requirements set condition = 'equipment_washes <= 3', source_quote = null
+--  where id = '26973f43-898a-4c51-a2e3-3be2932ebde3';
+-- CAVEAT for the owner: adding the >= 1 floor makes the gate fire on every project that leaves the optional
+--   field blank. If that is unwanted, the guarded form is
+--   'equipment_washes IS NULL OR (equipment_washes >= 1 AND equipment_washes <= 3)'.
+
+
+-- ============================================================================================================
+-- R-13  Chezy coefficient c - A PRINTED STRICT TWO-SIDED BOUND WITH NO GATE (SR-2 selection)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field 8faf0f0e-ece4-4e88-8cc9-2d586fe87e5a, symbol c, worksheet ISO-5667-6-13, number, unitless,
+--   is_required=false. Anexo A, printed p.28, verbatim:
+--   "c = coeficiente de Chezy para el tramo (15 < c < 50);"
+-- Note the bound is STRICT on both sides (15 < c < 50), not inclusive. Nothing in the encoding enforces it,
+-- so an engineer can drive Eq. A.1 with c = 5 or c = 200 and the engine will happily return a mixing distance.
+-- This is also an SR-2 situation: the standard gives a range and the point value is an explicit engineer
+-- choice. The field is already an engineer_input, which satisfies SR-2's "visible and human" half; what is
+-- missing is the bound check.
+-- PROPOSED (new gate; CR-031 is the next free code on this standard):
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+-- values ('c767d5a6-ad32-433f-94b4-351154f89ac6', 'CR-031', 'warn',
+--         'c IS NULL OR (c > 15 AND c < 50)', 'Anexo A',
+--         'c = coeficiente de Chezy para el tramo (15 < c < 50); (Anexo A, printed p.28)');
+-- ROLLBACK:
+-- delete from public.compliance_requirements
+--  where worksheet_template_id = 'c767d5a6-ad32-433f-94b4-351154f89ac6' and code = 'CR-031';
+-- CAVEAT: Anexo A is INFORMATIVE (Preambulo, printed p.v), so severity must stay warn, never block.
+
+
+-- ============================================================================================================
+-- R-14  CR-009 - SCOPE PREDICATE WRITTEN AGAINST THE WRONG FIELD
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate 5a77cbfa-2947-4485-bfeb-2c410e50eaba, code CR-009, worksheet ISO-5667-6-04, severity=warn,
+--   condition "travel_time_method = '' OR travel_time_flows_count >= 5", clause_reference "§5.1.3".
+-- The threshold half is right. §5.1.3, printed p.9: "Las mediciones se deberian realizar en un minimo de
+--   cinco caudales diferentes y los tiempos de viaje resultantes trazados en relacion con los caudales
+--   correspondientes, permitiendo asi que se obtengan otros tiempos de viaje mediante la extrapolacion o
+--   interpolacion."  -> "un minimo de cinco" -> ">= 5". Correct, inclusive, correct direction.
+-- The SCOPE half is wrong in two ways:
+--   (i) It tests travel_time_method, an ENUM whose value set is {surface_floats, tracers,
+--       discharge_cross_section}. There is no empty-string member, and an unanswered enum is NULL, not ''.
+--       Depending on the grammar's NULL handling, "travel_time_method = ''" is either always false or NULL -
+--       in both cases the guard never opens, and the gate degenerates to a bare "travel_time_flows_count >= 5"
+--       that fires on every project that has not done a travel-time study.
+--   (ii) The field that actually expresses the scope is right there on the same worksheet:
+--       500d71c2-6639-4012-aef7-50a5799af1bc  travel_time_required (boolean, §5.1.3).
+-- PROPOSED:
+-- update public.compliance_requirements
+--    set condition = 'travel_time_required != true OR travel_time_flows_count >= 5',
+--        source_quote = 'Las mediciones se deberian realizar en un minimo de cinco caudales diferentes y los tiempos de viaje resultantes trazados en relacion con los caudales correspondientes. (§5.1.3, printed p.9)'
+--  where id = '5a77cbfa-2947-4485-bfeb-2c410e50eaba';
+-- ROLLBACK:
+-- update public.compliance_requirements
+--    set condition = 'travel_time_method = '''' OR travel_time_flows_count >= 5', source_quote = null
+--  where id = '5a77cbfa-2947-4485-bfeb-2c410e50eaba';
+
+
+-- ============================================================================================================
+-- R-15  bridge_checks_passed IS OPTIONAL THOUGH IT CARRIES A BLOCK GATE AND A PRINTED "debe"
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field 14030e31-9532-46bc-bb51-5fe2c206e25d, bridge_checks_passed, worksheet ISO-5667-6-07, boolean,
+--   is_required=FALSE.
+-- Gate bfc3f1e3-49f2-4dde-b036-c9ba8f38fae2, code CR-015, severity=BLOCK, condition
+--   "sampling_location_type != 'bridge' OR bridge_checks_passed == true".
+-- §7.2, printed p.13, verbatim - one of only ten "debe" (shall) obligations in the whole document:
+--   "Al seleccionar el lugar en un puente del cual tomar la muestra, se DEBE asegurar que: a) exista la
+--    profundidad de agua suficiente para sumergir el recipiente de muestreo; b) cuando este sumergido, el
+--    recipiente no perturbe los depositos del fondo; c) haya suficiente claridad en el puente cuando se
+--    suspenda el recipiente para evitar que se desprenda, posiblemente contaminando el material de la
+--    estructura del puente; y d) al momento de tomar la muestra en el lado aguas arriba del puente, el
+--    operador de muestreo no quede sin vision, es decir, el recipiente no sea llevado bajo el puente por la
+--    corriente."
+-- The gate is exemplary: real shall, correct scope guard, block severity, source_quote present. THE FIELD IT
+-- READS IS THE PROBLEM - it is optional. Meanwhile 34 other fields, almost all of them "deberia" text, ARE
+-- required (R-3). The one place where this standard genuinely commands, the form does not insist.
+-- PROPOSED:
+-- update public.fields set is_required = true
+--  where id = '14030e31-9532-46bc-bb51-5fe2c206e25d';
+-- ROLLBACK:
+-- update public.fields set is_required = false
+--  where id = '14030e31-9532-46bc-bb51-5fe2c206e25d';
+-- CAVEAT: is_required is unconditional in the schema, so this makes the four bridge checks mandatory even for
+--   a bank or boat survey. If the form supports conditional requiredness, that is the better shape; if not,
+--   the owner may prefer to leave the field optional and rely on the block gate, which already only bites when
+--   sampling_location_type = 'bridge'. Named, not auto-decided.
+
+
+-- ============================================================================================================
+-- R-16  CR-004 - AN EFFECTIVE NO-OP: "IS NOT NULL" ON AN ALREADY-REQUIRED FIELD
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate b5714b56-81b0-42dd-8877-1edd930eb4a0, code CR-004, worksheet ISO-5667-6-02, severity=warn,
+--   condition "parameters_to_analyse IS NOT NULL", clause_reference "§4", source_quote NULL.
+-- Field 18a587e0-bc06-4ec7-b7af-0b0601915f1e, parameters_to_analyse, is_required=TRUE.
+-- The form already refuses to submit without a value, so the gate can never fail - it restates the required
+-- flag. It is the only pure no-op among the 30 gates (the other presence gates read boolean fields where
+-- "== true" is a real test, not a presence test).
+-- The clause it points at DOES carry more than presence (§4, printed p.4):
+--   "El plan de muestreo deberia considerar, al menos, los aspectos siguientes: ... b) parametros que se van
+--    a analizar para cada punto de muestreo; c) las mediciones que se van a llevar a cabo en el punto de
+--    muestreo (con la especificacion de los metodos que se van a utilizar), como la temperatura, oxigeno
+--    disuelto, grado de acidez, o la descarga;"
+-- ("como la temperatura, oxigeno disuelto, ..." is an example list and is NOT enforced anywhere - correctly.)
+-- OWNER DECISION: either delete the redundant row, or keep it and attach the quote so the form shows the user
+-- what §4 b)/c) actually asks for. The second is recommended - the gate then earns its place as the carrier of
+-- the clause text even though its condition is trivially true.
+-- PROPOSED (keep + document):
+-- update public.compliance_requirements
+--    set source_quote = 'El plan de muestreo deberia considerar, al menos, los aspectos siguientes: b) parametros que se van a analizar para cada punto de muestreo; c) las mediciones que se van a llevar a cabo en el punto de muestreo (con la especificacion de los metodos que se van a utilizar), como la temperatura, oxigeno disuelto, grado de acidez, o la descarga; (§4, printed p.4)'
+--  where id = 'b5714b56-81b0-42dd-8877-1edd930eb4a0';
+-- ALTERNATIVE (delete):
+-- delete from public.compliance_requirements where id = 'b5714b56-81b0-42dd-8877-1edd930eb4a0';
+-- ROLLBACK for the recommended path:
+-- update public.compliance_requirements set source_quote = null
+--  where id = 'b5714b56-81b0-42dd-8877-1edd930eb4a0';
+
+
+-- ============================================================================================================
+-- R-17  22 OF 30 GATES CARRY NO source_quote
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Only 8 gates have a source_quote: CR-001, CR-002, CR-005, CR-010, CR-011, CR-015, CR-029, CR-030.
+-- The other 22 - CR-003, 004, 006, 007, 008, 009, 012, 013, 014, 016, 017, 018, 019, 020, 021, 022, 023, 024,
+-- 025, 026, 027, 028 - have source_quote = NULL. Among them are ALL FOUR numeric-threshold gates
+-- (CR-014 2..8 degC, CR-016 >= 30 cm, CR-017 0,5..3,0 m/s, CR-021 < 5 min), i.e. every gate that enforces a
+-- printed number does so without recording where the number came from. Under SR-1 an enforced value with no
+-- in-file source is exactly the class this campaign exists to close.
+-- All 22 quotes were located and read in this pass; the six that repair a defect at the same time are proposed
+-- individually above (R-2, R-5, R-9, R-12, R-14, R-16). The remaining 16 are pure documentation.
+-- Rather than 16 more blocks, here are the four numeric ones, which are the ones that matter:
+-- update public.compliance_requirements set source_quote = 'En el vehiculo, deberia estar disponible un dispositivo de enfriamiento capaz de mantener las muestras a una temperatura de (5 +/- 3)°C para el transporte. (§6, printed p.11)'
+--  where id = '56d4f8fb-2fbd-4b3f-94ed-44ca332a4e21';   -- CR-014, 2..8 degC
+-- update public.compliance_requirements set source_quote = 'Siempre que sea posible, las muestras obtenidas de posiciones al menos 30 cm por encima del fondo de un curso de agua y a una distancia similar debajo de la superficie, suelen ser satisfactorias. (§7.1, printed p.13)'
+--  where id = 'cb53a188-3d62-49ca-b61b-56b3626f9868';   -- CR-016, >= 30 cm
+-- update public.compliance_requirements set source_quote = 'Idealmente, el muestreo se deberia llevar a cabo en condiciones isocineticas, pero cuando esto no es posible, la velocidad de flujo lineal dentro del tubo de entrada no deberia ser menor que 0,5 m/s ni mayor que 3,0 m/s. (§8.2, printed p.16)'
+--  where id = 'bed92dff-07d5-47da-b3ce-b86ac37709f2';   -- CR-017, 0,5..3,0 m/s
+-- update public.compliance_requirements set source_quote = 'Para la muestra que se considera como simple y discreta, el tiempo total para todos los incrementos que se adopten deberian ser tal que no se esperaria ningun cambio en la composicion del rio. Si esto no se conoce, el tiempo para todos los incrementos que se adopten deberia ser menor que 5 min. (§10.8, printed p.22)'
+--  where id = '57dd363d-53c7-45e1-a024-fa9d2513899c';   -- CR-021, < 5 min
+-- ROLLBACK:
+-- update public.compliance_requirements set source_quote = null
+--  where id in ('56d4f8fb-2fbd-4b3f-94ed-44ca332a4e21','cb53a188-3d62-49ca-b61b-56b3626f9868',
+--               'bed92dff-07d5-47da-b3ce-b86ac37709f2','57dd363d-53c7-45e1-a024-fa9d2513899c');
+-- NOTE: all four of those thresholds were re-read against the source in this pass and ALL FOUR ARE CORRECT -
+--   correct value, correct direction, correct inclusivity. The defect is provenance, not arithmetic.
+
+
+-- ============================================================================================================
+-- R-18  bottle_volume - A PRINTED RANGE WITH NO GATE (SR-2 selection)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field 097c7f4e-b0c3-4c98-b6e1-ee0f26ddf057, bottle_volume, worksheet ISO-5667-6-08, number, unit ml,
+--   is_required=false. §9.1, printed p.17, verbatim:
+--   "Para facilitar la recoleccion de muestras, se deberia emplear un rango de frascos de muestreo desde
+--    50 ml a 3 L. Con el fin de lograr los limites analiticos de deteccion que a menudo se requieren para los
+--    rios limpios, incluso podrian ser necesarios grandes volumenes de muestra, por lo tanto, podrian surgir
+--    problemas fisicos de manipulacion."
+-- Nothing enforces 50 ml .. 3 L. Note the mixed printed units (ml and L) against the field's single ml unit -
+-- 3 L = 3000 ml, an arithmetic conversion, not an invention.
+-- Note also that the SECOND sentence explicitly contemplates volumes ABOVE the range ("incluso podrian ser
+-- necesarios grandes volumenes de muestra"), so an upper bound must NOT be a block and arguably must not be a
+-- hard ceiling at all. This is precisely SR-2: the standard gives a range, the point value is the engineer's.
+-- PROPOSED (a soft floor only; the printed text defeats a hard ceiling):
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote)
+-- values ('2702bd04-d0b2-4d65-8935-55c96d8252ed', 'CR-032', 'warn',
+--         'bottle_volume IS NULL OR bottle_volume >= 50', '§9.1',
+--         'Para facilitar la recoleccion de muestras, se deberia emplear un rango de frascos de muestreo desde 50 ml a 3 L. ... incluso podrian ser necesarios grandes volumenes de muestra (§9.1, printed p.17)');
+-- ROLLBACK:
+-- delete from public.compliance_requirements
+--  where worksheet_template_id = '2702bd04-d0b2-4d65-8935-55c96d8252ed' and code = 'CR-032';
+
+
+-- ============================================================================================================
+-- R-19  EQUATION OUTPUTS CONSUMED BY NOTHING
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Both equations in this standard produce an output that no gate and no other equation reads:
+--   Eq. A.1 -> l  (b33c24f3-c597-4c39-9b32-7d63e659efdb, complete-mixing distance, m, worksheet 13)
+--   Eq. 2   -> sampling_depth_below_surface (bd3e0ab5-..., worksheet 07)
+-- For sampling_depth_below_surface that is correct: the printed value is "alrededor de 30 cm" under "Siempre
+-- que sea posible", so there is nothing hard to gate (and R-10 proposes retiring the equation anyway).
+-- For l it is a real gap. l is the whole point of worksheet 13, and §5.1.2 (printed p.6) already states the
+-- obligation the number is supposed to serve:
+--   "se deberian elegir al menos dos sitios de muestreo; uno deberia estar justo aguas arriba de la
+--    confluencia y el otro deberia estar lo suficientemente alejado aguas abajo para asegurar que la mezcla
+--    este completa."
+-- l is exactly "lo suficientemente alejado aguas abajo", but there is no field holding the actual downstream
+-- distance of the chosen site, so l cannot be compared to anything. Closing this needs a new field
+-- (downstream_site_distance, m, worksheet 03) plus a gate "downstream_site_distance >= l". That is a schema
+-- addition beyond a data repair, and Anexo A is informative, so it is NAMED here and not proposed as SQL.
+-- DO NOT ACT ON THIS BEFORE R-1: while the encoded A.1 formula is wrong, any gate built on l would enforce a
+-- distance roughly 1,3x to 1,8x the standard's own figure.
+-- NO SQL. Nothing to roll back.
