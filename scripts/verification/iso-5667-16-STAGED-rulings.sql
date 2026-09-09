@@ -1,0 +1,572 @@
+-- ============================================================================================================
+-- ISO-5667-16 - STAGED RULINGS (written, NOT applied). 2026-09-09, [VA-OCR] pass.
+--
+-- EVERYTHING IN THIS FILE IS COMMENTED OUT. Nothing here runs. Each block carries its evidence quote, the
+-- proposed SQL, and the rollback inverse. A block is applied only after Alvaro ticks its RATIFIED marker.
+--
+-- Source: ISO 5667-16:1998(E), Water quality - Sampling - Part 16: Guidance on biotesting of samples,
+--   First edition 1998-10-01, ISO/TC 147/SC 6. The PDF is a SCAN WITH NO TEXT LAYER; every evidence quote
+--   below was RE-READ ON THE RENDERED PAGE IMAGE (PDF page named per block). PRINTED p.N = PDF p.(N+6).
+-- Schema note: public.compliance_requirements has a column "condition" (NOT "condition_expression") and has
+--   NO "active" column. All proposed gate SQL below uses "condition".
+--
+-- WHY SO MANY BLOCKS: the document is a GUIDANCE standard. Mechanical modality census over the whole text:
+--   shall = 3, should = 128, may = 39, must = 0. The encoding nevertheless marks 17 of 60 fields
+--   is_required=true and raises 2 gates to severity=block. Only ONE required field (dilution_water_type) and
+--   ONE block gate (CR-020) sit behind a printed "shall"; the other two printed "shall" obligations are not
+--   encoded at all. That mismatch drives blocks R-6 .. R-9.
+-- ============================================================================================================
+
+
+-- ============================================================================================================
+-- R-0  EDITION CURRENCY - owner action, no SQL
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- The library holds the 1998 FIRST EDITION. Cover (PDF p.1) prints verbatim:
+--   "INTERNATIONAL STANDARD  ISO 5667-16 / First edition 1998-10-01 / Water quality - Sampling - Part 16:
+--    Guidance on biotesting of samples / Reference number ISO 5667-16:1998(E)"
+-- prod standards.version = "First edition 1998-10-01 (ISO 5667-16:1998(E))" - MATCHES the cover exactly, and
+-- standards.code "ISO-5667-16" matches the printed designation. There is no code/version mismatch to fix.
+-- WHAT IS OPEN: nothing in the document or in prod evidences that the 1998 first edition is still the CURRENT
+-- edition of ISO 5667-16. The copy carries a Thomson Reuters/techstreet watermark dated May-29-2015, so it has
+-- been on the shelf for a decade at least. ISO 5667 parts are periodically revised. Whether a later edition
+-- exists was NOT looked up in this pass and cannot be established from the document itself.
+-- ACTION: check the ISO catalogue for ISO 5667-16. If a later edition exists, this whole encoding is against a
+-- superseded text and the standard should be re-sourced before any project uses it.
+-- NO SQL. Nothing to roll back.
+
+
+-- ============================================================================================================
+-- R-1  CR-030 - EMPTY CONDITION *and* MIS-HOMED
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate id 8803d575-50d6-429a-ad39-abda2070330d, code CR-030, worksheet ISO-5667-16-07
+-- ("Spezielle biologische Pruefungen"), severity=warn, clause_reference "§12.1, §12.2", source_quote NULL,
+-- condition = '' (the EMPTY STRING).
+-- TWO defects in one row:
+--   (a) EMPTY CONDITION. The gate can never evaluate to anything; it is dead weight in the requirement set.
+--   (b) MIS-HOMED. §12.1 and §12.2 are "12 Evaluation" (printed p.20, PDF p.26) and belong to worksheet
+--       ISO-5667-16-08 ("Auswertung & Ergebnisdarstellung"), not to ISO-5667-16-07. Worksheet 07 holds
+--       §11 (special biological assays); no field on worksheet 07 relates to §12.1/§12.2.
+-- Evidence, §12.2, printed p.20 / PDF p.26 (image-confirmed): "Every evaluation should begin with a critical
+--   examination of the test results obtained. All data, primary readings or transformed data deduced from the
+--   measurements, are checked for plausibility, especially in the case of outliers."
+-- The clause DOES carry a real (soft) obligation, so the honest repair is to give the gate a condition and a
+-- home on worksheet 08, not to delete it. The nearest existing field is af4203e2-... (worksheet 08,
+-- concentration_response_curve_presented, §13.1) - but §12.2 is about data inspection, not the curve, so there
+-- is NO field on worksheet 08 that expresses "data checked for plausibility". Two options, owner picks one:
+--   OPTION A (minimal, recommended): re-home the gate to worksheet 08 and give it the presence condition over
+--   the evaluation fields that DO exist there.
+--   OPTION B: add a new boolean field "data_plausibility_checked" to worksheet 08 (§12.2) and condition on it.
+--   That is a schema/content addition and is therefore listed but not written out here.
+--
+-- OPTION A SQL:
+-- update public.compliance_requirements
+--    set worksheet_template_id = '658df938-00d6-4261-a095-d89cd2c38c59',
+--        condition = 'effect_concentration_metric IS NOT NULL'
+--  where id = '8803d575-50d6-429a-ad39-abda2070330d';
+-- ROLLBACK:
+-- update public.compliance_requirements
+--    set worksheet_template_id = '1036e063-2ad5-469b-86c6-7f4b2e0de1ef', condition = ''
+--  where id = '8803d575-50d6-429a-ad39-abda2070330d';
+
+
+-- ============================================================================================================
+-- R-2  CR-008 - INVERTED BOUNDARY ON A SIGNED QUANTITY (the worst defect in this standard)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate id 844bbf73-37c6-4199-a814-5d073e14325a, code CR-008, worksheet ISO-5667-16-03, severity=warn,
+-- clause_reference "§5", source_quote NULL,
+-- condition = 'storage_temperature >= -18 AND storage_temperature <= 25'
+-- Evidence, §5 Preservation and storage, printed p.3 / PDF p.9 (image-confirmed, all three sentences):
+--   "The maximum duration of storage should not exceed 12 h at ambient temperature (maximum 25 °C)."
+--   "The most common and recommended way of preserving waste water samples is to cool to between 0 °C and
+--    5 °C. When cooled to this range and stored in the dark, most samples are normally stable for up to 24 h
+--    (see ISO 5667-10)."
+--   "Deep freezing below -18 °C in accordance with ISO 5667-10 allows in general an increase in conservation.
+--    A few weeks up to 2 months, depending on the stability of samples, are generally the maximum storage
+--    periods."
+-- THE DEFECT: the page prints THREE DISJOINT REGIMES, and -18 °C is a CEILING for the deep-freezing regime
+--   ("deep freezing BELOW -18 °C"). The gate turns it into a FLOOR. Consequences on a signed quantity:
+--     * a sample correctly deep-frozen at -25 °C FAILS the gate although the standard endorses it;
+--     * "storage at 15 °C", which corresponds to no printed regime at all, PASSES.
+--   The gate also silently drops the printed 0 °C..5 °C cooled band and the 24 h cooled-storage figure, and it
+--   conflates the ambient-temperature qualifier (25 °C, which belongs with the 12 h limit already carried by
+--   CR-009) with a storage-temperature limit.
+-- PROPOSED REPAIR: replace the single band with the disjunction of the three printed regimes.
+-- update public.compliance_requirements
+--    set condition = '(storage_temperature <= -18) OR (storage_temperature >= 0 AND storage_temperature <= 5) OR (storage_temperature <= 25)'
+--  where id = '844bbf73-37c6-4199-a814-5d073e14325a';
+-- NOTE FOR THE OWNER: written that way the third disjunct swallows the other two, which makes the gate a
+--   near-no-op. The regimes are only separable if the worksheet also records WHICH regime was chosen. The
+--   clean fix is therefore a new enum field "preservation_mode" (ambient | cooled | deep_frozen) on worksheet
+--   ISO-5667-16-03 with the gate conditioned per mode. That is a content addition; flagged, not written.
+-- ROLLBACK:
+-- update public.compliance_requirements
+--    set condition = 'storage_temperature >= -18 AND storage_temperature <= 25'
+--  where id = '844bbf73-37c6-4199-a814-5d073e14325a';
+
+
+-- ============================================================================================================
+-- R-3  CR-020 + dilution_water_type enum - UNDER-INCLUSIVE ENUM BEHIND A BLOCK GATE
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field id 1a791638-3d22-469f-8060-8c9a0d40eabc (dilution_water_type, worksheet ISO-5667-16-05, §9.1).
+-- Gate id 01aec93c-3818-4d8c-88c5-1314e08ac681, code CR-020, severity=BLOCK,
+-- condition = 'dilution_water_type IN {chlorine_free_tapwater,synthetic_fresh_water,natural_sea_water}'
+-- Evidence, §9.1 Preparation of dilutions, printed p.11 / PDF p.17 (image-confirmed):
+--   "For physiological reasons, biological tests using aquatic organisms cannot be carried out using deionized
+--    water as the medium. Depending on the nature of the analysis, chlorine-free tapwater, synthetic fresh
+--    water or sea water (possibly with nutrient additives), ground or surface water shall be used."
+-- THE DEFECT: the page permits FIVE media - chlorine-free tapwater, synthetic fresh water, sea water, GROUND
+--   water, SURFACE water. The enum encodes three and omits ground water and surface water, with no "other"
+--   escape. Because CR-020 is severity=BLOCK, an engineer who (lawfully) dilutes with surface water cannot
+--   record it and cannot pass the gate. This is the one gate in the standard that rests on a genuine printed
+--   "shall", so the block severity is defensible - the enum under it is not.
+--   Secondary point: the page prints "sea water"; the enum labels the value "natural sea water". "Natural sea
+--   water" is a NARROWER term the page uses only in a different sentence ("For some tests with marine
+--   organisms, the use of natural sea water is essential.").
+-- PROPOSED REPAIR (enum extension; the gate condition then follows the enum):
+-- update public.fields
+--    set enum_values = '[{"value":"chlorine_free_tapwater","label_de":"Chlorfreies Leitungswasser","label_en":"Chlorine-free tapwater","order_index":1,"regulation_reference":"§9.1"},{"value":"synthetic_fresh_water","label_de":"Synthetisches Suesswasser","label_en":"Synthetic fresh water","order_index":2,"regulation_reference":"§9.1"},{"value":"sea_water","label_de":"Meerwasser","label_en":"Sea water","order_index":3,"regulation_reference":"§9.1"},{"value":"ground_water","label_de":"Grundwasser","label_en":"Ground water","order_index":4,"regulation_reference":"§9.1"},{"value":"surface_water","label_de":"Oberflaechenwasser","label_en":"Surface water","order_index":5,"regulation_reference":"§9.1"}]'::jsonb
+--  where id = '1a791638-3d22-469f-8060-8c9a0d40eabc';
+-- update public.compliance_requirements
+--    set condition = 'dilution_water_type IN {chlorine_free_tapwater,synthetic_fresh_water,sea_water,ground_water,surface_water}'
+--  where id = '01aec93c-3818-4d8c-88c5-1314e08ac681';
+-- MIGRATION WARNING: renaming "natural_sea_water" -> "sea_water" orphans any project_parameters row already
+--   holding the old token. Either keep "natural_sea_water" as the token and only extend, or ship a data
+--   migration alongside. Owner picks.
+-- ROLLBACK: restore the 3-value enum shown in the 2026-09-09 export and
+-- update public.compliance_requirements
+--    set condition = 'dilution_water_type IN {chlorine_free_tapwater,synthetic_fresh_water,natural_sea_water}'
+--  where id = '01aec93c-3818-4d8c-88c5-1314e08ac681';
+
+
+-- ============================================================================================================
+-- R-4  CR-002 - BLOCK GATE ON BOILERPLATE THAT CARRIES NO REQUIREMENT
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate id 1a12f522-dbf9-4a0d-b530-dc911947b4f2, code CR-002, worksheet ISO-5667-16-01, severity=BLOCK,
+-- condition = 'normative_references_consulted == true', clause_reference "2 Normative references".
+-- Its source_quote is the ISO normative-references BOILERPLATE, quoted in prod in full. Evidence, §2,
+-- printed p.1 / PDF p.7 (image-confirmed): "The following standards contain provisions which, through
+--   reference in this text, constitute provisions of this part of ISO 5667. At the time of publication, the
+--   editions indicated were valid. All standards are subject to revision, and parties to agreements based on
+--   this part of ISO 5667 are ENCOURAGED TO INVESTIGATE the possibility applying the most recent editions of
+--   the standards indicated below."
+-- THE DEFECT: this is a source_quote carrying no requirement. Its only modal is "are encouraged to
+--   investigate" - the weakest verb in the document. Blocking a worksheet on a self-attested checkbox against
+--   ISO front-matter is enforcement invented by the encoding. Downgrade to warn.
+-- update public.compliance_requirements set severity = 'warn'
+--  where id = '1a12f522-dbf9-4a0d-b530-dc911947b4f2';
+-- ROLLBACK:
+-- update public.compliance_requirements set severity = 'block'
+--  where id = '1a12f522-dbf9-4a0d-b530-dc911947b4f2';
+
+
+-- ============================================================================================================
+-- R-5  CONDITIONAL OBLIGATIONS ENFORCED UNCONDITIONALLY (CR-017, CR-019, CR-025, CR-032, CR-012)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+--
+-- R-5a  CR-017  id 21806c73-726e-4d37-ac55-20b20760c852, worksheet 04, warn,
+--       condition = 'ph_adjustment_value >= 6 AND ph_adjustment_value <= 9'
+--   Evidence, §7.6 pH adjustment, printed p.6 / PDF p.12 (image-confirmed):
+--     "The selection of the pH value to which the sample is to be adjusted is governed by the objective of the
+--      test:  - adjustment to the pH of the receiving water will produce results more representative of the
+--      effect of toxicants once in the environment;  - adjustment to a defined pH between 6 and 9 (which is
+--      usually tolerable for aquatic biota) will permit the expression of ionizable toxicants that would
+--      otherwise be masked by pH conditions outside this range."
+--     and: "Neutralization should be omitted if the effect of the pH is to be reflected in the test result or
+--      if physical modification or chemical reactions (e.g. precipitation) are observed due to pH adjustment."
+--   DEFECT: 6..9 is ONE OF TWO printed alternatives, and the standard also names cases where NO adjustment
+--   should happen. Enforced unconditionally, a lawful adjustment to a receiving water at pH 5,4 fails.
+--   The scope predicate is missing; there is no field recording WHICH of the two strategies was chosen.
+--   Proposal: add an enum field "ph_adjustment_strategy" (receiving_water | defined_range | none) on
+--   worksheet 04 and condition CR-017 on it. Content addition - flagged, not written. Interim minimal fix:
+--   -- update public.compliance_requirements set severity = 'warn', condition = 'ph_adjustment_value IS NULL OR (ph_adjustment_value >= 0 AND ph_adjustment_value <= 14)'
+--   --  where id = '21806c73-726e-4d37-ac55-20b20760c852';
+--   (that interim is a domain check only and should NOT be applied without the strategy field, or the printed
+--   6..9 guidance disappears from the system entirely.)
+--   ROLLBACK: set condition back to 'ph_adjustment_value >= 6 AND ph_adjustment_value <= 9'.
+--
+-- R-5b  CR-019  id 28d0e9e1-31ca-4de1-a726-4525ea660830, worksheet 05, warn,
+--       condition = 'ph_controlled_during_test == True'
+--   Evidence, §8.3, printed p.10 / PDF p.16 (image-confirmed): "The adjustment and control of the pH during
+--     the test SHOULD BE DECIDED according to the cause of pH drift and the objective of the test."
+--   and printed p.11 / PDF p.17 (image-confirmed): "If, however, the change in pH during the test is an effect
+--     of fundamental vital processes such as photosynthesis in algal growth, which is necessarily accompanied
+--     by CO2 consumption, IT IS REASONABLE NOT TO ADJUST pH."
+--   DEFECT: the gate demands pH control be TRUE; the standard expressly permits FALSE. The gate contradicts
+--   the source. Proposal: presence, not truth.
+--   -- update public.compliance_requirements set condition = 'ph_controlled_during_test IS NOT NULL'
+--   --  where id = '28d0e9e1-31ca-4de1-a726-4525ea660830';
+--   ROLLBACK: set condition back to 'ph_controlled_during_test == True'.
+--
+-- R-5c  CR-025  id 8014b138-1f6e-438a-ab06-b283b08b1bdc, worksheet 06, warn,
+--       condition = 'colour_turbidity_correction == True'
+--   Evidence, §10.2, printed p.15 / PDF p.21 (image-confirmed): "IN THE CASE OF highly coloured or turbid
+--     samples, the inhibiting effect produced cannot be determined reliably. The following steps MAY be taken
+--     to overcome this situation:"
+--   DEFECT: printed obligation is conditional on the sample being coloured/turbid AND permissive ("may").
+--   Enforced unconditionally a clear sample fails. Missing scope predicate.
+--   -- update public.compliance_requirements set condition = 'colour_turbidity_correction IS NOT NULL'
+--   --  where id = '8014b138-1f6e-438a-ab06-b283b08b1bdc';
+--   ROLLBACK: set condition back to 'colour_turbidity_correction == True'.
+--
+-- R-5d  CR-032  id d9887208-07a0-4a18-bc75-2cce8548c4fb, worksheet 08, warn,
+--       condition = 'concentration_response_curve_presented == True'
+--   Evidence, §13.1, printed p.23 / PDF p.29 (image-confirmed): "WHERE POSSIBLE, the concentration response
+--     curve SHOULD be presented together with the test results in a graph".
+--   DEFECT: printed qualifier "Where possible" dropped.
+--   -- update public.compliance_requirements set condition = 'concentration_response_curve_presented IS NOT NULL'
+--   --  where id = 'd9887208-07a0-4a18-bc75-2cce8548c4fb';
+--   ROLLBACK: set condition back to 'concentration_response_curve_presented == True'.
+--
+-- R-5e  CR-012  id 80f4272a-eb89-456d-bdd5-7d5bfef9b5a3, worksheet 03, warn,
+--       condition = 'silanization_concentration == 5'
+--   Evidence, §6.2, printed p.3 / PDF p.9 (image-confirmed): "...glassware or plasticsware CAN BE silanized
+--     (siliconized) by soaking or rinsing in a 5 % mass fraction solution of dichlorodimethylsilane in
+--     chloroform or heptane. ... Silanization SHOULD ONLY BE USED IF highly adsorbable substances or water
+--     ingredients are to be tested and suitable inert material (e.g. PTFE) is not available."
+--   DEFECT: silanization is optional (there is a separate boolean silanization_done, id
+--   7adb6e48-1a5c-48ba-9b76-85fe622f6ee5, which this gate does not reference). A strict equality on a value
+--   that is NULL whenever the lab did not silanize is a conditional obligation enforced unconditionally.
+--   -- update public.compliance_requirements set condition = 'silanization_done != true OR silanization_concentration == 5'
+--   --  where id = '80f4272a-eb89-456d-bdd5-7d5bfef9b5a3';
+--   (Verify the evaluator grammar supports "!=" / OR before applying - see R-10.)
+--   ROLLBACK: set condition back to 'silanization_concentration == 5'.
+
+
+-- ============================================================================================================
+-- R-6  NUMBERS LIFTED FROM EXAMPLES AND ENFORCED AS LIMITS (CR-015, CR-005, CR-016)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+--
+-- R-6a  CR-015  id b6443fba-077e-4f64-a37b-0babca7770b0, worksheet 04, warn,
+--       condition = 'membrane_pore_size <= 0.2'
+--   Evidence, §7.4, printed p.5 / PDF p.11 (image-confirmed): "Available sterilization methods, such as
+--     thermal or UV-treatment or MEMBRANE FILTRATION (0,2 µm), all involve a high risk of side effects."
+--   and §7.7.3.2, printed p.7 / PDF p.13 (image-confirmed): "...the undissolved phase is fully separated by
+--     filtration (where necessary using a membrane filter, PORE SIZE 0,2 µm) or by centrifuging."
+--   DEFECT: 0,2 µm is printed twice as a POINT value inside a parenthetical example, never as a maximum. The
+--   gate manufactures a ceiling. Proposal: downgrade to a presence check, or delete the gate and keep the
+--   value only in the field description.
+--   -- update public.compliance_requirements set condition = 'membrane_pore_size IS NULL OR membrane_pore_size > 0'
+--   --  where id = 'b6443fba-077e-4f64-a37b-0babca7770b0';
+--   ROLLBACK: set condition back to 'membrane_pore_size <= 0.2'.
+--
+-- R-6b  CR-005  id f9f21e0e-791e-4ba1-8fbb-479ae48e062e, worksheet 02, warn,
+--       condition = 'sample_volume > 0 AND sample_volume <= 10'
+--   Evidence, §3.2, printed p.2 / PDF p.8 (image-confirmed): "The time required for freezing and thawing
+--     should be minimized by reducing the sample volume, i.e. THE SIZE OF THE VESSEL. In general it is
+--     appropriate to use one-litre vessels for freezing. For tests requiring larger volumes, the sample should
+--     be divided INTO VESSELS holding not more than 10 l." and, on the TOTAL volume: "The total sample volume
+--     taken should be SUFFICIENT TO COVER any supplementary or repeated testing."
+--   DEFECT: the printed 10 l bounds EACH VESSEL. The printed rule for the TOTAL volume is a sufficiency FLOOR
+--   with no ceiling. The gate (and the field description of a9069940-0fa4-4d79-8275-459da85144f3) transplant
+--   the vessel ceiling onto the total volume, so a legitimate 40 l composite in five 8 l vessels fails.
+--   Proposal: split the concept - keep sample_volume as the total with only a positivity check, and add a
+--   separate "vessel_volume" field carrying the 10 l ceiling. Content addition - flagged. Minimal fix:
+--   -- update public.compliance_requirements set condition = 'sample_volume > 0'
+--   --  where id = 'f9f21e0e-791e-4ba1-8fbb-479ae48e062e';
+--   -- update public.fields set description = 'Total sample volume taken; it should be sufficient to cover any supplementary or repeated testing (§3.2). NOTE: the printed 10 l limit applies to the size of EACH VESSEL, not to the total volume.'
+--   --  where id = 'a9069940-0fa4-4d79-8275-459da85144f3';
+--   ROLLBACK: restore condition 'sample_volume > 0 AND sample_volume <= 10' and the original description
+--   ("Total sample volume taken, sufficient for supplementary or repeated testing; small volumes preferred to
+--    minimize freezing/thawing time -- generally no more than 10 l.").
+--
+-- R-6c  CR-016  id 04fba4ba-2df8-4ba9-8f4f-50626f5085fd, worksheet 04, warn,
+--       condition = 'centrifugation_force >= 3000 AND centrifugation_force <= 6000'
+--   Evidence, §7.4, printed p.5 / PDF p.11 (image-confirmed): "Centrifugation, e.g. 10 min at 4500 g +/- 1500
+--     g, is, in general, preferable to filtration."  (the page prints the PLUS-MINUS glyph; the OCR read a
+--     plain "+", so the OCR alone would NOT have supported the two-sided reading.)
+--   NOT A BOUNDARY DEFECT: 3000..6000 is the arithmetically correct two-sided expansion of 4500 +/- 1500, and
+--   the encoding is two-sided as the page is. Recorded here only because the whole figure is an "e.g." example
+--   enforced as a band, and because the printed 10 min duration has no field. No SQL proposed; owner may
+--   choose to downgrade to a note. NOTHING TO ROLL BACK.
+
+
+-- ============================================================================================================
+-- R-7  EFFECTIVE NO-OP GATES (CR-004, CR-026, CR-027, CR-033)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- These four gates cannot fail for any value the widget can produce. They inflate the requirement count
+-- without enforcing anything. Listed for a single owner decision: keep as documentation, or delete.
+--   CR-004  id 83508274-f2fa-4424-9f59-aff0b7dde12b, ws 02: 'vessel_material IN {glass,polyethene,ptfe,other}'
+--           - that IS the complete enum domain of field 364e24b4-...; every selectable value passes.
+--   CR-026  id 7b5bd7f6-fe13-4aac-8b36-4ddf9c80bae6, ws 07: 'BCF >= 0'
+--           - BCF is the quotient of two concentrations (§11.2, printed p.18); it cannot be negative.
+--           WHAT IS MISSING INSTEAD: §11.2, printed p.18 / PDF p.24 (image-confirmed) prints a real numeric
+--           validity criterion - "A plateau or steady state has been achieved when three subsequent analyses
+--           at intervals of at least two days do not differ by +/- 20 %." - which has NO field and NO gate.
+--   CR-027  id 37448cc0-7d0f-4965-a130-3b2a788edbf6, ws 07: 'CT_50 > 0'
+--           - CT_50 = loge2/k_2 is positive whenever k_2 is; cannot fail.
+--   CR-033  id 5ce778f2-cddc-4c08-be59-fb13f1958690, ws 08: 'biodegradation_degree >= 0 AND <= 100'
+--           - a tautological domain check on a percentage, not a rule from the standard.
+--           WHAT IS MISSING INSTEAD: §12.3.3, printed p.22 / PDF p.28 (image-confirmed) - "In such cases it is
+--           recommended to indicate the test result in a 10 %-range, e.g. biodegradation degree 70 % to 80 %
+--           DOC removal."
+-- NO SQL PROPOSED (deleting requirements is irreversible in the audit trail; the owner decides whether these
+-- become documentation-only rows or are replaced by the two real criteria named above).
+
+
+-- ============================================================================================================
+-- R-8  is_required=true WITH NO MANDATORY VERB BEHIND IT  (16 of 17 required fields)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- The document contains exactly THREE "shall" statements (census in the pack header). Of the 17 fields marked
+-- is_required=true, exactly ONE (dilution_water_type, §9.1) sits behind one of them. The verb actually printed
+-- behind each of the other sixteen, all image-confirmed on the pages named:
+--   study_objective                 §3.1 p.1  "is dependent on the objective of the study"   (descriptive)
+--   biotest_type                    §1   p.1  "Special emphasis is laid on..."               (descriptive)
+--   normative_references_consulted  §2   p.1  "are encouraged to investigate"                (encouragement)
+--   sampling_point_representative   §3.1 p.1  "is dependent on"                              (descriptive)
+--   vessel_material                 §3.2 p.2  "are recommended"                              (recommendation)
+--   container_filling_status        §3.3 p.2  "It should be decided whether..."              (should)
+--   transport_protected             §4   p.2  "should be protected"                          (should)
+--   ambient_storage_time*           §5   p.3  "should not exceed"    (*is_required=false, listed for the modal)
+--   biocidal_preservative_excluded  §5   p.3  "should be excluded"                           (should)
+--   apparatus_material_inert        §6.1 p.3  "should be such that"                          (should)
+--   storage_temperature             §5   p.3  "is to cool to between"/"allows in general"    (descriptive)
+--   preparation_step                §7.1 p.5  "e.g. by dissolving, homogenizing..."          (example)
+--   replicate_count                 §9.5.3 p.13 "Two replicates ... are the minimum"         (declarative min)
+--   test_report_complete            §14  p.24 "The following data should be recorded"        (should)
+--   test_method_reference           §14c p.24 "should be recorded"                           (should)
+--   investigator_signature          §14m p.24 "should be recorded"                           (should)
+--   qa_measures_documented          §15  p.25 "should be incorporated"/"are to be documented" (should)
+--   sop_documented                  §15.4 p.26 "It is essential that ... are described"      (essential - strong)
+-- PROPOSAL: keep is_required=true only where the printed verb is at least "essential"/"shall" -
+--   dilution_water_type (shall), sop_documented (essential), and arguably replicate_count (declarative
+--   minimum). Set the remaining 14 to is_required=false and let the warn-severity gates carry the guidance.
+-- -- update public.fields set is_required = false where id in (
+-- --   '83ab9a11-ef46-450a-b243-b154e36fbfc5',  -- study_objective
+-- --   '8317a7e8-3693-4b75-8d0e-6a60b86cc412',  -- biotest_type
+-- --   '14663224-b0b7-4387-8680-7bb01d19507d',  -- normative_references_consulted
+-- --   '6bcf35d6-d45a-42ba-ace9-45e34ff82f6a',  -- sampling_point_representative
+-- --   '364e24b4-8528-4ef3-8e7e-fd468b257dea',  -- vessel_material
+-- --   'bbbb0b91-41f2-4f1b-9b40-eb514891a1f2',  -- container_filling_status
+-- --   'ffc25b0c-3ff6-4247-9939-fbf3b8bbeb8f',  -- transport_protected
+-- --   'b0964036-794d-4334-beac-2c9c78a5a453',  -- biocidal_preservative_excluded
+-- --   '75ffdf19-daa7-47a0-8277-f9c1c4c27e39',  -- apparatus_material_inert
+-- --   'fd9711d0-5f14-4b6c-9351-d09ce3b72137',  -- storage_temperature
+-- --   '9660faa1-930c-40c0-9650-f8a930a97474',  -- preparation_step
+-- --   '59254f41-f566-4d94-a870-fdeaf1af755f',  -- test_report_complete
+-- --   '5c5d023b-5033-4722-b7ff-d107f6e3da16',  -- test_method_reference
+-- --   'd9e3b46d-392a-4010-acf0-38b8c33bc67f',  -- investigator_signature
+-- --   '93ce404a-4ac8-4a93-9d92-9b5a2bb5f176'   -- qa_measures_documented
+-- -- );
+-- ROLLBACK: update public.fields set is_required = true where id in ( ...same 15 ids... );
+
+
+-- ============================================================================================================
+-- R-9  PRINTED "shall" OBLIGATIONS WITH NO FIELD AT ALL (2 of 3)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Both are on worksheet ISO-5667-16-04 territory (§7.7.3.2, preparation of stock solutions).
+--   (1) printed p.7 / PDF p.13 (image-confirmed): "The weighed portion for preparing the stock liquor SHALL be
+--       indicated."  -> proposed field: stock_liquor_weighed_portion (number, mg, worksheet 04, §7.7.3.2),
+--       is_required=true, plus a warn gate 'stock_liquor_weighed_portion IS NOT NULL'.
+--   (2) printed p.8 / PDF p.14 (image-confirmed): "Filters for collecting of undissolved constituents SHALL be
+--       annealed (inorganic filters). Organic, e.g. polycarbonate, filters require repeated treatment in
+--       boiling distilled water in order to ensure that no constituents of the filter material are transferred
+--       into the test solution. Cellulose acetate filters are not recommended."
+--       -> proposed field: filter_pretreatment (enum: annealed_inorganic | boiled_organic | none, worksheet
+--       04, §7.7.3.2), plus a warn gate 'filter_pretreatment IS NOT NULL'.
+-- Content additions (new fields + new compliance_requirements rows). Written as a description here rather than
+-- as SQL because new rows need order_index/section placement decided against the live worksheet layout.
+-- ALSO MISSING, same class, non-"shall" but printed numeric:
+--   * §7.7.3.2 e), printed p.8 / PDF p.14 (image-confirmed): "The solubilizing agents (concentration: < 0,1
+--     g/l) initially remain for a certain time in the test batch." - a printed strict-inequality ceiling with
+--     no field and no gate. (Note the STRICT "<" here, in contrast to the "<=" at §7.7.3.3 d).)
+--   * §9.5.2, printed p.13 / PDF p.19 (image-confirmed): "It is generally recommended that the number of
+--     control batches should be at least twice that of replicates per concentration/dilution level or
+--     increased by sqrt(p), where p is the number of test concentrations." - no control_batch_count field.
+--   * §11.2, printed p.18 / PDF p.24 (image-confirmed): the steady-state criterion (three analyses, >= 2 days
+--     apart, differing by no more than +/- 20 %) - no field, no gate. See R-7.
+
+
+-- ============================================================================================================
+-- R-10  BOOLEAN LITERAL CASING - possible parser risk
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Three gates use the capitalised literal "True" while the other seven boolean gates use lowercase "true":
+--   CR-019 id 28d0e9e1-31ca-4de1-a726-4525ea660830  'ph_controlled_during_test == True'
+--   CR-025 id 8014b138-1f6e-438a-ab06-b283b08b1bdc  'colour_turbidity_correction == True'
+--   CR-032 id d9887208-07a0-4a18-bc75-2cce8548c4fb  'concentration_response_curve_presented == True'
+-- versus CR-002/003/007/010/011/034/035 which all use 'true'. This pass did NOT read the evaluator grammar,
+-- so whether "True" parses is UNVERIFIED. If it does not, these three are unsatisfiable (or silently skipped)
+-- rather than merely over-enforcing. R-5b/R-5c/R-5d rewrite all three anyway; if the owner declines those,
+-- the casing should still be normalised:
+-- -- update public.compliance_requirements set condition = replace(condition, '== True', '== true')
+-- --  where id in ('28d0e9e1-31ca-4de1-a726-4525ea660830','8014b138-1f6e-438a-ab06-b283b08b1bdc','d9887208-07a0-4a18-bc75-2cce8548c4fb');
+-- ROLLBACK: replace '== true' with '== True' on the same three ids.
+
+
+-- ============================================================================================================
+-- R-11  ENUMS THAT CLOSE A PRINTED OPEN LIST, AND SINGLE-SELECTS OVER PRINTED CONJUNCTIONS
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- (a) CLOSED-OVER-OPEN. The printed list is introduced by "e.g."; the enum offers no "other" value:
+--   reference_substance      id 386a421f-902a-4104-9b44-22bbe5f04597  §9.4  p.12/PDF 18 (image-confirmed):
+--     "Often-used reference substances in toxicity tests are E.G. sodium dichromate, 3,5-dichlorophenol."
+--     -> add {"value":"other","label_de":"Sonstige","label_en":"Other reference substance"}.
+--   preparation_step         id 9660faa1-930c-40c0-9650-f8a930a97474  §7.1  p.5/PDF 11 (image-confirmed):
+--     "...various preparatory steps specific to the sample and the test, E.G. by dissolving, homogenizing,
+--      sedimenting, filtering, neutralizing or aerating."   -> add "other".
+--   degradation_test_method  id 29648137-ca84-43f8-ab26-c1267c82f05c  §11.1 p.17/PDF 23 (image-confirmed):
+--     the page prints FIVE groups across two lists (ready; potential/inherent; then "Biodegradation can
+--     further be determined by: a) Simulation tests b) Other methods c) Measurements"). The enum encodes
+--     three and drops "Other methods" and "Measurements".
+--   threshold_concentration_method id f310c94b-3757-4ad3-a1eb-84e7ad63ae42  §12.3.4.1 p.22/PDF 28: the page
+--     also names FOEC ("First/Lowest Observed Effect Concentration"); the enum has NOEC and LOEC only.
+--   NEGATIVE RESULT for vessel_material (id 364e24b4-...): it already carries an "other" escape - correct.
+--   NEGATIVE RESULT for mutation_type (id d726926a-...): §11.3 prints "Mutations are divided into three
+--     types" - a genuinely CLOSED list, faithfully encoded. degradation_type and response_variable_type
+--     likewise closed by the page ("A distinction is made between: a) ... b) ...").
+--
+-- (b) SINGLE-SELECT OVER A PRINTED CONJUNCTION. The page describes items applied TOGETHER; the widget forces
+--     one. All would need a multi-select data_type (schema change) or a set of booleans:
+--   preparation_step            §7.1  p.5  - the steps are sequential (dissolve AND homogenize AND filter...).
+--   solubilizing_aid            §7.7.3.3 d) p.9/PDF 15 (image-confirmed): "it is recommended that the test
+--     substance be mixed with the emulsifying agent prior to its introduction into water. Should an ADDITIONAL
+--     non water-miscible volatile solvent (e.g. n-hexane or petroleum ether) be used..." - two aids at once.
+--     The enum also merges §7.7.3.2 (within the solubility range) with §7.7.3.3 (above the solubility limit),
+--     two regimes the page keeps separate.
+--   removable_ingredient_loss   §10.1.1 p.13 - the seven loss paths co-occur (§10.1.6 p.15).
+--   effect_concentration_metric §13.1 p.23/PDF 29 (image-confirmed): "Toxicity tests mainly give the effective
+--     or threshold concentrations, e.g. NOEC/LOEC, EC10, EC50 AND EC90 or LC" - reported together.
+--   biotest_type                §1 p.1: "apply as well to biodegradation AND/OR bioaccumulation studies".
+-- NO SQL: all of (b) needs a widget/data_type decision first.
+
+
+-- ============================================================================================================
+-- R-12  FIELD DESCRIPTIONS THAT INVENT OR INVERT A SPECIFICATION
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+--
+-- R-12a  silanization_done  id 7adb6e48-1a5c-48ba-9b76-85fe622f6ee5 - DESCRIPTION INVERTS THE SOURCE.
+--   Current description: "Surfaces silanized to minimize adsorption: 5 % dimethyldichlorosilane solution in
+--     chloroform or n-heptane, solvent evaporated, heated to 180 C for 2 h; NOT USED FOR HIGHLY ADSORBABLE
+--     SUBSTANCES OR PTFE."
+--   Evidence, §6.2, printed p.3 / PDF p.9 (image-confirmed): "Silanization SHOULD ONLY BE USED IF highly
+--     adsorbable substances or water ingredients ARE TO BE TESTED and suitable inert material (e.g. PTFE) IS
+--     NOT AVAILABLE."
+--   The description states the exact opposite of the printed condition. Also two naming errors against the
+--   page: the page prints "heptane" (not "n-heptane") and "dichlorodimethylsilane" (not
+--   "dimethyldichlorosilane").
+--   -- update public.fields set description = 'Surfaces silanized to minimize adsorption of test material: soaking or rinsing in a 5 % MASS FRACTION solution of dichlorodimethylsilane in chloroform or heptane, then rinsed many times with water or heated at 180 C for 2 h before use. Silanization should ONLY be used if highly adsorbable substances or water ingredients are to be tested AND no suitable inert material (e.g. PTFE) is available (§6.2, printed p.3).'
+--   --  where id = '7adb6e48-1a5c-48ba-9b76-85fe622f6ee5';
+--   ROLLBACK: restore the original description quoted above.
+--
+-- R-12b  silanization_concentration  id a11b1873-a058-45b7-972c-8049316a25ae - INVENTED UNIT BASIS.
+--   Current description: "Silanizing solution: dimethyldichlorosilane at a VOLUME FRACTION of 5 % in
+--     chloroform or n-heptane."   The page prints a 5 % MASS FRACTION (§6.2, printed p.3 / PDF p.9,
+--     image-confirmed). The number 5 is right; "volume fraction" is fabricated.
+--   -- update public.fields set description = 'Silanizing solution: a 5 % MASS FRACTION solution of dichlorodimethylsilane in chloroform or heptane (§6.2, printed p.3).'
+--   --  where id = 'a11b1873-a058-45b7-972c-8049316a25ae';
+--   ROLLBACK: restore the original description quoted above.
+--
+-- R-12c  ambient_storage_time  id 34deb03d-1fb1-4b78-adf9-272b01d3d4e9 - MODAL UPGRADE.
+--   Current description says "...SHALL not exceed 12 h". The page (§5, printed p.3 / PDF p.9,
+--   image-confirmed) prints "The maximum duration of storage SHOULD not exceed 12 h at ambient temperature
+--   (maximum 25 °C)." The document contains only three "shall" statements and this is not one of them.
+--   -- update public.fields set description = 'Maximum storage time at ambient temperature (maximum 25 C): the standard states it should not exceed 12 h; samples processed preferably without delay and kept in the dark (§5, printed p.3).'
+--   --  where id = '34deb03d-1fb1-4b78-adf9-272b01d3d4e9';
+--   ROLLBACK: restore "Maximum storage time at ambient temperature (max 25 C) shall not exceed 12 h; samples
+--   processed preferably without delay."
+--
+-- R-12d  centrifugation_force  id 20a61af8-5e00-4173-8fcc-b0df3ab9976d - DERIVED BAND PRESENTED AS PRINTED.
+--   Description reads "e.g. 10 min at 4500 g +/- 1500 g (i.e. 3000-6000 g)". The "(i.e. 3000-6000 g)" is an
+--   EKOWAI derivation, not printed. Harmless arithmetic but it should be labelled as derived. Low priority.
+--
+-- R-12e  sample_volume  id a9069940-0fa4-4d79-8275-459da85144f3 - see R-6b (vessel ceiling on total volume).
+
+
+-- ============================================================================================================
+-- R-13  BCF UNIT BASIS CONTRADICTS THE PRINTED "dimensionless" REQUIREMENT
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Fields: c_1 id 6d6cf383-a286-407c-94b4-07d97d653f43 (unit "mg/kg"), c_2 id 9b4ab469-d840-457e-bf0c-8c4dd41ebd52
+-- (unit "mg/l"), BCF id 821cf78f-9854-40fa-b15b-dccf45ff0b3a (unit "-").
+-- Evidence, §11.2, printed p.18 / PDF p.24 (image-confirmed): "BCF = c1/c2 = k1/k2 ...(1)" with c1 the
+--   concentration in the organism and c2 that in the medium; and §13.3, printed p.24 / PDF p.30
+--   (image-confirmed): "The BCF should be reported as A DIMENSIONLESS FIGURE rounded to not more than three
+--   significant figures."
+-- DEFECT: mg/kg divided by mg/l yields l/kg, not a dimensionless number. Either both concentrations must
+--   carry the same unit basis, or BCF must be declared l/kg and the §13.3 "dimensionless" requirement is not
+--   met. The page prints NO units for c1/c2, so this is EKOWAI's choice and must be an explicit one.
+--   -- update public.fields set unit = 'mg/l' where id = '6d6cf383-a286-407c-94b4-07d97d653f43';  -- c_1
+--   ROLLBACK: update public.fields set unit = 'mg/kg' where id = '6d6cf383-a286-407c-94b4-07d97d653f43';
+-- RELATED (no SQL): the page prints no unit for k1/k2 either; the encoded "1/d" (and CT_50 in "d") is an
+--   EKOWAI convention. §13.3 also requires "The basis of BCF (e.g. whole body, organ, fresh or dry mass) and
+--   its experimental design (static, semistatic, dynamic) should be stated" - neither has a field.
+
+
+-- ============================================================================================================
+-- R-14  EQUATION COVERAGE - the k1/k2 branch and the loge2 constant
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Evidence, §11.2, printed p.18 / PDF p.24 (image-confirmed): "BCF = c1/c2 = k1/k2 ...(1)" and
+--   "CT50 = loge2 / k2 ...(2)".
+-- (a) Prod equation 1 (id 786bb31e-ba90-4513-a97a-20af1deac310) encodes only "BCF = c_1 / c_2". The printed
+--     SECOND branch k1/k2 is not encoded, which leaves field k_1 (id f50c1af9-57f6-4bc9-8861-508dd0e24a0e)
+--     feeding NO equation and NO gate - an input consumed by nothing. Options: add a second equation
+--     "BCF = k_1 / k_2" (needs a variant/selection mechanism, since two equations cannot both own BCF), or
+--     deactivate k_1. Owner decides; not written.
+-- (b) Prod equation 2 (id 415979e4-9949-4a6e-a54f-3b5da5e16fa9) encodes "CT_50 = 0.6931 / k_2". The page
+--     prints the numerator SYMBOLICALLY as loge2 (= ln 2 = 0,693147...). 0.6931 is a 4-decimal truncation
+--     that appears nowhere in the standard; it introduces a ~2e-5 relative error. Prefer the symbolic form if
+--     the engine supports LN, else document the constant as derived.
+--   -- update public.equations set formula = 'CT_50 = LN(2) / k_2'
+--   --  where id = '415979e4-9949-4a6e-a54f-3b5da5e16fa9';
+--   ROLLBACK: update public.equations set formula = 'CT_50 = 0.6931 / k_2' where id = '415979e4-...';
+--   DO NOT APPLY without confirming the formula engine parses LN().
+-- (c) NOT ENCODED AS AN EQUATION: the printed screening relation "In the range of log10 Pow 3 to 6, a relation
+--     of BCF = 0,1 Pow is often observed for fish" (§11.2, printed p.18). log_pow
+--     (id 75ef37a8-5c17-4ab3-ac09-1a422b2431c8) is likewise a field consumed by nothing. It is a "is often
+--     observed" statement, not a rule, so encoding it as a binding equation would over-state the source -
+--     recorded as an option, not a recommendation.
+
+
+-- ============================================================================================================
+-- EXPLICIT NEGATIVE RESULTS (checked, nothing found - recorded so the absence is auditable)
+-- ============================================================================================================
+-- * condition='TRUE' literals ............................ NONE. No gate carries the literal TRUE as its
+--     whole condition. (One gate carries the EMPTY string - see R-1.)
+-- * DUPLICATE GATES ...................................... NONE. All 35 conditions over the 60 fields are
+--     pairwise distinct; no two gates express the same predicate on the same field.
+-- * STRICT-SUBSET GATES .................................. NONE. No gate's condition is implied by another's.
+--     The two conjunctions (CR-001, CR-028, CR-031, CR-035) each pair fields no other gate touches.
+-- * UNSATISFIABLE GATES .................................. NONE numerically. Every band is non-empty
+--     (3000..6000; 6..9; -18..25; <=12; <=25; <=0.2; <=100; >=2; >=30; 0..100) and the one equality (==5) is
+--     reachable. The only satisfiability RISK is the "True" literal casing - see R-10, unverified.
+--     A separate note: CR-008 as written is satisfiable but semantically wrong - see R-2.
+-- * MIS-HOMED GATES ...................................... ONE, CR-030 (see R-1). All other 34 gates reference
+--     only fields that live on their own worksheet; checked field-by-field against the 2026-09-09 export.
+-- * WORKSHEETS WITH ZERO FIELDS .......................... NONE. Field counts per worksheet:
+--     01=3, 02=6, 03=6, 04=11, 05=8, 06=4, 07=10, 08=5, 09=7  (total 60).
+-- * GATES WITH NO source_quote ........................... 32 of 35. Only CR-002, CR-020 and (as
+--     source_quote on the two equations) the §11.2 rows carry one. This is a coverage gap, not a defect in
+--     any individual gate; the pack's verification_quote column now carries the evidence for every FIELD, but
+--     compliance_requirements.source_quote remains empty for 32 gates. Backfilling it is a separate job.
+-- * source_quote CARRYING NO REQUIREMENT ................. ONE, CR-002 (see R-4).
+-- * WRONG PAGE REFS ...................................... NONE. Only three rows carry page refs at all:
+--     CR-020 cites "printed p.11" for §9.1 - CORRECT (§9.1 begins on printed p.11 / PDF p.17);
+--     both equations cite "§11.2 (p.18)" - CORRECT (Eqs. (1) and (2) are both on printed p.18 / PDF p.24).
+-- * BLOCK GATES ON SOFT TEXT ............................. ONE, CR-002 (see R-4). The other block gate,
+--     CR-020, rests on a genuine printed "shall" - severity correct, enum wrong (see R-3).
+-- * BLOCK GATES SOURCED FROM AN INFORMATIVE ANNEX ........ NONE. Annexes A and B are declared "for
+--     information only" (Foreword, PDF p.4) and no field or gate references them. The pattern found on the
+--     previous standard does not occur here.
+-- * AND/OR INVERSIONS .................................... No gate contains OR at all; every conjunction is
+--     correctly a conjunction. The OR-shaped defects are of the opposite kind - places where the page prints
+--     ALTERNATIVES and the encoding forced a single band: CR-017 (R-5a) and CR-008 (R-2).
+-- * INVENTED VALUES / UNITS / SPECIFICATIONS ............. FOUR, all in field descriptions, all in R-12
+--     (silanization "volume fraction"; silanization "not used for highly adsorbable substances"; "shall not
+--     exceed 12 h"; "generally no more than 10 l" for the total volume), plus the unit basis in R-13 and the
+--     0.6931 constant in R-14. No invented value was found in any GATE condition.
+-- * FIELDS WITH NO SOURCE (residue) ...................... NONE. All 60 fields are supported by printed text.
+-- * APP-METADATA (exempt) FIELDS ......................... NONE. This standard's 60 fields are all technical;
+--     there is no client/project/workflow metadata field in the set.
+-- ============================================================================================================
