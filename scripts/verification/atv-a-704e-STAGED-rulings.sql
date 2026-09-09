@@ -1,0 +1,649 @@
+-- ============================================================================================================
+-- STAGED RULINGS - ATV-A-704E  (printed designation: Standard DWA-A 704E, April 2007)
+--
+-- WRITTEN, NOT APPLIED. Every statement below is COMMENTED OUT. Nothing here runs until the owner ticks
+-- the corresponding [ ] RATIFIED box. This file holds everything the verification pack deliberately did NOT
+-- touch: structure, enforcement, required-ness, enums, gates, clause references, descriptions, and the
+-- standards.code itself.
+--
+-- Source grade for every evidence quote below: [VA-OCR]. The PDF is a SCAN WITH NO TEXT LAYER; the base
+-- transcript is tesseract OCR. Every numeric limit, unit, formula and gate threshold cited here was RE-READ
+-- ON THE RENDERED PAGE IMAGE - the PDF page is named in each block. Page mapping (the scan is double-page
+-- spreads): PDF 3..9 = printed 2N-4 | 2N-3 ; PDF 10 is a duplicate scan of the 14|15 spread ; PDF 11..37 =
+-- printed 2N-6 | 2N-5.
+--
+-- THE ONE FACT THAT COLOURS EVERYTHING BELOW - Annex A.1, printed p.16 (image-confirmed PDF p.11):
+--   "The following details are not of a regulating kind but of a recommending one. In practice, not all
+--    single measures must be taken."
+-- The Standard declares its OWN Annex A non-regulating. Six BLOCK gates and 46 of the 91 fields live in
+-- Annex A. See R-08.
+--
+-- MODALITY CENSUS (mechanical, de-duplicated transcript): shall 0 | must 137 | should 69 | may 10 | can 63.
+--   Body (printed 6-15) must 32 : should 12. Annex A (printed 16-69) must 105 : should 57. Ratio 2.0:1.
+--   The translation never uses "shall"; "must" is mandatory, "should" is recommending.
+--
+-- Rollback inverses are given inline with each block.
+-- NO transaction control statements in this file by design.
+-- ============================================================================================================
+
+
+-- ============================================================================================================
+-- R-01  standards.code says ATV-, the document says DWA-
+-- ============================================================================================================
+-- EVIDENCE (cover, image-confirmed PDF p.1 and p.2; running head on every page; imprint printed p.2):
+--   "GERMAN / DWA Rules and Standards | Standard DWA-A 704E | Operating Methods for Wastewater Analysis |
+--    April 2007". ISBN 978-3-940173-20-1. Published by DWA, Hennef.
+-- EVIDENCE (Authors, printed p.4, image-confirmed PDF p.4):
+--   "The DWA-Working Group IG-4.3 ... has revised the Advisory Leaflets ATV-M 704E ... and ATV-DVWK-M 704,
+--    Part 2 ... and has converted them into the Standard DWA-A 704E in an updated version."
+-- So "ATV-" belongs to the SUPERSEDED predecessor Advisory Leaflets, not to this Standard.
+-- prod standards.version = 'April 2007' MATCHES the cover exactly - no change proposed there.
+-- RISK: standards.code is referenced by the importer, by scripts/verification/*.mjs, by md-packs.order.txt and
+--   by any project already using this standard. A rename is NOT evidence-only and must be sequenced with a
+--   code migration, not applied from a verification pack.
+--
+-- [ ] RATIFIED  R-01
+-- update public.standards set code = 'DWA-A-704E' where id = '96347572-1a8c-408d-afa5-6a99edc1b579';
+-- ROLLBACK: update public.standards set code = 'ATV-A-704E' where id = '96347572-1a8c-408d-afa5-6a99edc1b579';
+
+
+-- ============================================================================================================
+-- R-02  CR-009 and CR-010 are the same gate; CR-010 is a strict subset
+-- ============================================================================================================
+-- EVIDENCE (printed p.11, image-confirmed PDF p.7, the whole of §4.2 first paragraph):
+--   "By referring to the criteria mentioned in Sections 3.1 and 3.2, the operator must decide for the
+--    operating method that is suitable for his specific case of application. In doing so, especially the
+--    measuring range must be selected in such way that preferably the expected result can be found in the
+--    20 % to 80 % interval of the measuring range. From experience, this range shows the greatest analytical
+--    reliability. Suitable dilution steps are permitted."
+-- CR-009's stored source_quote is that whole paragraph. CR-010's stored source_quote is its second half,
+-- verbatim, with nothing added. Two BLOCK gates and two is_required attestation fields for one passage.
+-- Also note the quote drift in BOTH: they read "pre-eminently" where the page prints "preferably".
+--
+-- [ ] RATIFIED  R-02a  retire the duplicate gate
+-- delete from public.compliance_requirements where id = '76eba033-bc51-4646-a1f9-ec52abbc42fb'; -- CR-010
+-- [ ] RATIFIED  R-02b  retire its orphaned attestation field
+-- update public.fields set is_required = false where id = '2cba182f-bb9b-4e11-bce0-12702999966d'; -- attest_..._03_cr_010
+-- [ ] RATIFIED  R-02c  fix the quote drift on the surviving gate
+-- update public.compliance_requirements set source_quote = 'By referring to the criteria mentioned in Sections 3.1 and 3.2, the operator must decide for the operating method that is suitable for his specific case of application. In doing so, especially the measuring range must be selected in such way that preferably the expected result can be found in the 20 % to 80 % interval of the measuring range. From experience, this range shows the greatest analytical reliability. Suitable dilution steps are permitted.' where id = '1de0e4a0-d098-4da4-9af7-377aa679bd24'; -- CR-009
+-- ROLLBACK: re-insert CR-010 from the 2026-09-09 export; set is_required = true on 2cba182f; restore the
+--   prior source_quote on CR-009 ("...pre-eminently the expected result...").
+
+
+-- ============================================================================================================
+-- R-03  Mis-homed gates - eleven gates sit on a worksheet that holds none of their fields
+-- ============================================================================================================
+-- The worksheet titles are unambiguous, so the intended home is not in doubt in any of these cases.
+--   ws -01 "Registrierung & Anwendungsbereich"   ws -02 "Anforderungen an Methoden, Hersteller & Anwender"
+--   ws -03 "Anwendung & Methodenauswahl"          ws -04 "Einweisung & Ueberwachung des Personals"
+--   ws -05 "Qualitaetskontrolle & Plausibilitaet" ws -06 "Probenahme & Konservierung"
+--   ws -07 "Dokumentation"                        ws -08 "IGC-Rahmen & QS-Spezifikationen"
+--   ws -11 "Ueberwachung der Pruefmittel"         ws -12 "Personal- & Abweichungsnachweise"
+--
+--   CR-003 (§3.1)   on ws-01 -> ws-02   (method_evaluated, method_validated_vs_reference live there)
+--   CR-004 (§3.2)   on ws-01 -> ws-02
+--   CR-005 (§3.2)   on ws-01 -> ws-02   (manufacturer_function_control lives there)
+--   CR-006 (§3.2)   on ws-01 -> ws-02   (manufacturer_change_notification lives there)
+--   CR-007 (§3.3)   on ws-01 -> ws-02   (user_applies_per_leaflet, user_iqc_performed live there)
+--   CR-008 (§3.3)   on ws-01 -> ws-02
+--   CR-011 (§4.3.1) on ws-03 -> ws-04   (basic_instruction_done lives there)
+--   CR-012 (§4.3.2/3) on ws-03 -> ws-04 (successive_supervision_interval, training_courses_attended)
+--   CR-015 (§4.5)   on ws-05 -> ws-06   (the whole sampling/preservation field set lives there)
+--   CR-027 (IQC-Card 9 photometer) on ws-08 -> ws-11  (photometer_check_done lives there)
+--   CR-028 (IQC-Card 11) on ws-07 -> ws-12 (deviation_feature/cause/measure/iqc_card_ref live there)
+-- CONSEQUENCE: worksheet -02, the worksheet whose title IS §3, carries ZERO gates while worksheet -01
+--   carries eight; worksheet -12 carries zero.
+-- NOTE: each attestation field would have to move with its gate, or the gate must be re-pointed at the real
+--   fields of the target worksheet. That is a design decision, hence staged.
+--
+-- [ ] RATIFIED  R-03  (worksheet_template_id targets, both gate and its attestation field)
+-- update public.compliance_requirements set worksheet_template_id='f0f2e3b2-fdc8-4c2f-8a08-ea92cbec259a' where id in ('69ce76e3-7bb6-487c-8f3e-f39d2d754f69','f8ecc7f9-4b7f-4985-82b1-367e9408e95d','ae6e92a6-f766-45d5-8444-6e43ffb7dc06','87f8bd72-c9f5-4aa2-92ef-fa3b141d399f','d0378888-db5d-4391-8466-738f241894a1','303204f9-b91c-4828-bf9d-03e8e6ad1d4b');
+-- update public.compliance_requirements set worksheet_template_id='344e3c9d-ff0c-49e0-9beb-e8a9a5740b46' where id in ('a45d66d5-18f2-41d8-81bf-846cf2cf7b78','0fa537be-3f70-4c67-8580-24f0da6c3e26');
+-- update public.compliance_requirements set worksheet_template_id='173fb4e3-fba9-45dd-89a0-61a2c5c1b98d' where id = 'f2fa9ae3-439b-4a36-9366-7df5ad776183';
+-- update public.compliance_requirements set worksheet_template_id='422b2b90-0d71-46db-a0a8-d5e35addf0cb' where id = '55e20532-c41b-4a54-8f45-7546844e8a72';  -- CR-027 -> ws-11
+-- update public.compliance_requirements set worksheet_template_id='2b31b936-e3f6-4af0-9a15-05514d3dc945' where id = '126fbadd-257e-4ea6-85f2-9c036089ddba';  -- CR-028 -> ws-12 (only if R-04b is declined)
+-- ROLLBACK: restore worksheet_template_id per the 2026-09-09 export (ws-01 for CR-003..008, ws-03 for
+--   CR-011/012, ws-05 for CR-015, ws-08 for CR-027, ws-07 for CR-028).
+
+
+-- ============================================================================================================
+-- R-04  Three gates have an EMPTY condition and no source_quote; two are homed on "Literature"
+-- ============================================================================================================
+--   CR-028  ws-07  severity=warn  condition=''  clause_reference='IGC-Card 11'  source_quote=NULL
+--   CR-029  ws-05  severity=warn  condition=''  clause_reference='Literature'   source_quote=NULL
+--   CR-030  ws-08  severity=warn  condition=''  clause_reference='Literature'   source_quote=NULL
+-- "Literature" (printed p.14-15) is the bibliography. It lists WHG, AbwV, AbwAG, DWA-M 115, ATV-DVWK-M 256/
+-- 265E/269, DIN 38402-1/-11/-30/-51/-71, DIN 38414, DIN EN 25667-2, DIN EN ISO 5667-3, DIN EN ISO 5667-13 and
+-- ISO 17381. It states no requirement of its own. A gate cannot be anchored there.
+-- An empty condition evaluates to nothing: these three gates can neither pass nor fail, so they are inert
+-- rows that still appear in the compliance list.
+--
+-- [ ] RATIFIED  R-04a  delete the two bibliography gates
+-- delete from public.compliance_requirements where id in ('08aa1b11-63af-4c7a-ade0-d369b2d69c3f','55a9b4b3-8828-41c3-830d-282c8fbd6532');  -- CR-029, CR-030
+-- [ ] RATIFIED  R-04b  give CR-028 a real condition and a real home (see R-03), or delete it
+-- delete from public.compliance_requirements where id = '126fbadd-257e-4ea6-85f2-9c036089ddba';  -- CR-028
+-- ROLLBACK: re-insert the three rows from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-05  CR-019 / CR-022 / CR-023 compare a SIGNED deviation against a one-sided ceiling
+-- ============================================================================================================
+-- EVIDENCE 1 - IQC-Card 2, printed p.22 (image-confirmed PDF p.14), Sheet 2 - Measures:
+--   "In the random error of multiple determinations +- 10 % in the central measuring range (20 % to 80 % -
+--    interval of the measuring range) should not be exceeded, otherwise the entire measurement is repeated."
+--   "Equivalency measurements between operating methods should not exceed a deviation from the mean value by
+--    +- 20 % in the central measuring range."
+--   "Parallel analyses to reference methods should generally not exceed a deviation to the reference value of
+--    +- 20 % in the central measuring range."
+-- EVIDENCE 2 - the Standard's OWN worked example, IQC-Card 6, printed p.45 (image-confirmed PDF p.25),
+--   "Defined permissible deviation in %: 20". Column 8 "Deviation relative [%]" and column 9
+--   "Interpretation: Quality target achieved?" read, row by row:
+--       -5.3 yes | 6.7 yes | -5.3 yes | 3.0 yes | 16.7 yes | -8.0 yes | -23.3 no! | 12.2 yes |
+--       -4.4 yes | -10.8 yes | -20.7 no!
+--   The two rows the Standard marks "no!" are NEGATIVE (-23.3 % and -20.7 %).
+-- ENCODED:  CR-019  deviation_single_pct      <= qa_quality_target_pct
+--           CR-022  deviation_equivalency_pct <= qa_quality_target_pct
+--           CR-023  deviation_parallel_pct    <= qa_quality_target_pct
+-- EQ-02/EQ-05/EQ-06 all produce SIGNED percentages, so -23.3 <= 20 is TRUE and -20.7 <= 20 is TRUE: the two
+-- rows the Standard itself fails would PASS the encoded gates. Arbitrarily large negative deviations pass.
+-- The printed tolerance is two-sided; it is encoded one-sided. The printed comparator is also STRICT
+-- ("< 10 %", "< 20 %" on Sheet 1, printed p.23) where the gates use <=, so exactly 20 % passes too.
+--
+-- [ ] RATIFIED  R-05a  make the comparison a magnitude
+-- update public.compliance_requirements set condition = 'abs(deviation_single_pct) < qa_quality_target_pct' where id = '22f9df00-7368-4855-94a1-e68dff901654';  -- CR-019
+-- update public.compliance_requirements set condition = 'abs(deviation_equivalency_pct) < qa_quality_target_pct' where id = '49b280e6-801c-4a93-98df-02e2d6c0e6cc';  -- CR-022
+-- update public.compliance_requirements set condition = 'abs(deviation_parallel_pct) < qa_quality_target_pct' where id = 'beabf464-e506-4e73-8176-8f29164136e4';  -- CR-023
+-- [ ] RATIFIED  R-05b  confirm the evaluator's condition grammar supports abs(); if not, encode as
+--   '(deviation_X_pct < qa_quality_target_pct) AND (deviation_X_pct > -qa_quality_target_pct)'
+-- ROLLBACK: restore the three conditions to 'deviation_X_pct <= qa_quality_target_pct'.
+
+
+-- ============================================================================================================
+-- R-06  CR-026 encodes a two-sided +- 3 degC tolerance one-sided
+-- ============================================================================================================
+-- EVIDENCE - IQC-Card 9, printed p.55 (image-confirmed PDF p.30):
+--   "Monitoring of heating device/thermoblock: Within the scope of testing equipment monitoring, the function
+--    of thermoblocks must be checked annually. Check of the required temperatures of 100 degC and/or 148 degC
+--    (+- 3 degC)."
+-- EVIDENCE - IQC-Card 2 Sheet 1, printed p.23 (image-confirmed PDF p.14):
+--   "Heating device/thermoblock check | Verification of the temperature of the reaction | 1x per year |
+--    Deviation < 3 degC"
+-- EVIDENCE - the Standard's own example, IQC-Card 9 Sheet 2, printed p.59: a thermoblock reading 138 degC
+--   against 148 degC (i.e. -10) is marked "QT* not achieved, customer service".
+-- ENCODED: CR-026  heating_device_deviation <= 3   (severity = block)
+--   A deviation of -5 degC passes. Exactly 3 degC passes although the printed target is strict "< 3 degC".
+-- ALSO: heating_device_deviation is is_required = false, so the operand of a BLOCK gate is optional.
+-- ALSO: no scope predicate - the gate fires even when testing_equipment is 'photometer' or 'ph_meter'.
+--
+-- [ ] RATIFIED  R-06a  two-sided, strict, scoped
+-- update public.compliance_requirements set condition = 'testing_equipment != ''heating_device_thermoblock'' OR abs(heating_device_deviation) < 3' where id = '907c09f6-a679-484e-aacb-c5c2a69a5046';
+-- [ ] RATIFIED  R-06b  make the operand required when the scope predicate is true (UI-level conditional required)
+-- ROLLBACK: update public.compliance_requirements set condition = 'heating_device_deviation <= 3' where id = '907c09f6-a679-484e-aacb-c5c2a69a5046';
+
+
+-- ============================================================================================================
+-- R-07  CR-025 pipette gate: an unsatisfiable band, a missing scope predicate, and an SR-2 source conflict
+-- ============================================================================================================
+-- ENCODED: (pipette_tested_volume <= 0.5 AND pipette_deviation_pct <= 2)
+--       OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)      severity = block
+--
+-- DEFECT 1 - UNSATISFIABLE BAND. Any tested volume strictly between 0.5 ml and 1.0 ml satisfies neither
+--   branch, so the gate is FALSE and a BLOCK fires no matter what deviation is entered. A 0.7 ml pipette can
+--   never pass. The same is true when either operand is NULL - and BOTH operands are is_required = false.
+--
+-- DEFECT 2 - MISSING SCOPE PREDICATE. The gate fires for every worksheet instance regardless of
+--   testing_equipment; monitoring a pH-meter or a drying cabinet trips a pipette gate.
+--
+-- DEFECT 3 - SR-2: THE TWO PRINTED TABLES DISAGREE. NOT auto-picked.
+--   IQC-Card 2 Sheet 1, printed p.23 (image-confirmed PDF p.14):
+--     "Pipettes 100-1000 ul volume check | Verification of trueness | 4x per year | Deviation < 2 %"
+--     "Pipettes > 1000 ul volume check   |                          |             | Deviation < 1 %"
+--     -> 1000 ul (= 1.000 ml) falls in the FIRST row, i.e. < 2 %.
+--   IQC-Card 9, printed p.55 (image-confirmed PDF p.30):
+--     "Tested volume [ml] / Deviation [%] / Tolerance range [g]:
+--      0.100 / <= 2 / 0.098 - 0.102 | 0.200 / <= 2 / 0.196 - 0.204 | 0.500 / <= 2 / 0.490 - 0.510 |
+--      1.000 / <= 1 / 0.990 - 1.010 | 2.000 / <= 1 / 1.980 - 2.020 | 5.000 / <= 1 / 4.950 - 5.050"
+--     -> 1.000 ml is <= 1.
+--   The two printed tables give different limits for exactly 1000 ul, and they also differ in strictness
+--   (Card 2 "< 2 %"/"< 1 %" vs Card 9 "<= 2"/"<= 1"). An engineer must choose; the machine must not.
+--   The Standard's own example (IQC-Card 9 Sheet 3, printed p.61) applies "Quality target in %: 2" to the
+--   0.500/2.500/5.000 ml tests of a 5 ml pipette and "1" to the 1.000 ml tests of a 1 ml pipette, i.e. the
+--   example keys the target off the pipette's MAXIMUM volume, not off the tested volume - a third reading.
+--
+-- [ ] RATIFIED  R-07a  choose the governing table:  [ ] IQC-Card 2 Sheet 1   [ ] IQC-Card 9   [ ] example p.61
+-- [ ] RATIFIED  R-07b  close the band and add the scope predicate (shown for the IQC-Card 9 reading)
+-- update public.compliance_requirements set condition = 'testing_equipment != ''piston_stroke_pipettes'' OR (pipette_tested_volume < 1.0 AND pipette_deviation_pct <= 2) OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)' where id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623';
+-- ROLLBACK: update public.compliance_requirements set condition = '(pipette_tested_volume <= 0.5 AND pipette_deviation_pct <= 2) OR (pipette_tested_volume >= 1.0 AND pipette_deviation_pct <= 1)' where id = 'c548fbde-1dfb-49a9-8ac1-d436dee7d623';
+
+
+-- ============================================================================================================
+-- R-08  Ten BLOCK gates anchored on text that is descriptive, definitional, or expressly recommending
+-- ============================================================================================================
+-- EVIDENCE - Annex A.1, printed p.16 (image-confirmed PDF p.11):
+--   "The following details are not of a regulating kind but of a recommending one. In practice, not all
+--    single measures must be taken. Furthermore, the IQC-measures should be adapted to the needs of the
+--    respective wastewater system."
+-- EVIDENCE - IQC-Card 2 Sheet 1 is HEADED "Recommendations by the DWA-Working Group IG-4.3" (printed p.23).
+-- EVIDENCE - IQC-Card 2 body, printed p.22: "The DWA Working Group IG-4.3 recommends minimum frequency,
+--   tolerances and quality targets ... The internal specifications should match the recommendations and could
+--   certainly be tightened."
+--
+--   CR-020  block  IQC-Card 2                    -> "recommends" / "should match" / "could certainly"
+--   CR-021  block  IQC-Card 2 Sheet 1 frequency  -> a table titled "Recommendations"
+--   CR-024  block  IQC-Card 2 Sheet 1 targets    -> the same "Recommendations" table
+--   CR-025  block  IQC-Card 9 pipettes           -> Annex A
+--   CR-026  block  IQC-Card 9 thermoblock        -> Annex A
+--   CR-027  block  IQC-Card 9 photometer         -> Annex A ("must be tested regularly" inside a
+--                                                    self-declared recommending annex)
+--   CR-018  block  §5.3                          -> "a constant up-to-date overview ... should be kept"
+--   CR-020's quote also ends on "could certainly be tightened"
+--   CR-001  block  §1 Scope                      -> descriptive: states what the Standard does
+--   CR-002  block  §2.1                          -> a DEFINITION of AQA, no obligation at all
+--   CR-015  block  §4.5                          -> its stored quote is "In most cases, the user of operating
+--                                                    methods will carry out the sampling ... him-/herself",
+--                                                    a statement of fact. The obligations are the NEXT two
+--                                                    sentences ("...must be given", "...must be documented").
+--
+-- [ ] RATIFIED  R-08a  block -> warn for the Annex-A and "should" gates
+-- update public.compliance_requirements set severity = 'warn' where id in ('5284c13d-79fe-4f9f-ae0b-5ec3f0adb495','0db28ced-aeb9-4bcd-af9d-22f30dd3fc07','dbf31510-c6ac-4076-94d7-4763adb0d169','55e20532-c41b-4a54-8f45-7546844e8a72','4e769f71-8c62-43d7-bc42-e017fa200431');
+--   (CR-020, CR-021, CR-024, CR-027, CR-018 - CR-025/026 carry printed numeric tolerances and may stay block
+--    once R-06/R-07 are settled; that is a separate call.)
+-- [ ] RATIFIED  R-08b  retire the two gates that quote non-obligations
+-- delete from public.compliance_requirements where id in ('3595d9ff-f666-4a73-a3d4-45469955b1d3','07e68d4a-bc11-480b-94af-eb680999d496');  -- CR-001, CR-002
+-- [ ] RATIFIED  R-08c  re-quote CR-015 onto the actual obligation
+-- update public.compliance_requirements set source_quote = 'This is why an introduction to the importance of sampling, the problems related to it, the selection of suitable sampling equipment and the sample containers as well as the transport of samples and pre-treatment of samples must be given. If it can be assumed that within a certain time the samples cannot be analysed on-site, an instruction to the suitable preservation must be given. The sampling and pre-treatment must be documented (e. g. in the operation log).' where id = 'f2fa9ae3-439b-4a36-9366-7df5ad776183';
+-- ROLLBACK: restore severity='block' on the five ids; re-insert CR-001 and CR-002; restore CR-015's prior
+--   source_quote from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-09  The plausibility check is the one printed QA measure with NO gate at all
+-- ============================================================================================================
+-- IQC-Card 2 Sheet 1 (printed p.23, image-confirmed PDF p.14) lists five measure rows. Four of them are
+-- gated: multiple determinations (CR-019), equivalency (CR-022), parallel (CR-023), and the standards
+-- measurement is at least attested (CR-014). The fifth - "Plausibility checks (spiking, dilution) ...
+-- deviation < 20 % *" - has no gate.
+-- EVIDENCE - IQC-Card 5 Sheet 1, printed p.35 (image-confirmed PDF p.20):
+--   "4. Interpretation: If the variation between CALCULATED VALUE and MEASURED VALUE ORIGINAL SAMPLE is
+--    smaller than given in the internal specification (IQC-Card 2), there is no error in the matrix. If it is
+--    greater, an error in the matrix is likely."
+-- EVIDENCE - IQC-Card 5 Sheet 3, printed p.36 (image-confirmed PDF p.21):
+--   "4. Interpretation: If the measured value MEASURED VALUE SPIKED SAMPLE deviates from the NOMINAL VALUE
+--    SPIKED SAMPLE by more than the tolerance given in the internal specification (IQC-Card 2), a matrix
+--    error is likely."
+-- The fields exist (calculated_value, measured_value_original_sample, NSS, measured_value_spiked_sample) but
+-- nothing consumes them.
+--
+-- [ ] RATIFIED  R-09  add two gates on worksheet ATV-A-704E-09 (id c6b24603-07c3-4c5b-8f7a-da3d64e88e3f)
+-- insert into public.compliance_requirements (worksheet_template_id, code, severity, condition, clause_reference, source_quote, requires_attestation)
+--   values ('c6b24603-07c3-4c5b-8f7a-da3d64e88e3f','CR-031','warn','abs(deviation_dilution_pct) < qa_quality_target_pct','IQC-Card 5, Sheet 1','If the variation between CALCULATED VALUE and MEASURED VALUE ORIGINAL SAMPLE is smaller than given in the internal specification (IQC-Card 2), there is no error in the matrix. If it is greater, an error in the matrix is likely. [VA-OCR, printed p.35]',false),
+--          ('c6b24603-07c3-4c5b-8f7a-da3d64e88e3f','CR-032','warn','abs(deviation_spike_pct) < qa_quality_target_pct','IQC-Card 5, Sheet 3','If the measured value MEASURED VALUE SPIKED SAMPLE deviates from the NOMINAL VALUE SPIKED SAMPLE by more than the tolerance given in the internal specification (IQC-Card 2), a matrix error is likely. [VA-OCR, printed p.36]',false);
+-- DEPENDS ON R-10 (the two deviation outputs do not exist yet).
+-- ROLLBACK: delete from public.compliance_requirements where code in ('CR-031','CR-032') and worksheet_template_id = 'c6b24603-07c3-4c5b-8f7a-da3d64e88e3f';
+
+
+-- ============================================================================================================
+-- R-10  Two printed formulas are not encoded; two equation outputs are consumed by nothing
+-- ============================================================================================================
+-- EVIDENCE - IQC-Card 5 Sheet 1 form, printed p.37 (image-confirmed PDF p.21), column headers:
+--   "3 Measured value original sample [mg/l] | 4 Dilution factor | 5 Measured value diluted sample [mg/l] |
+--    6 Nominal value original sample = Col5 x Col4 [mg/l] | 7 Deviation absolute = Col6 - Col3 [mg/l] |
+--    8 Deviation relative = Col7 x 100 / Col3 [%] | 9 Interpretation: Quality target achieved?"
+-- EVIDENCE - IQC-Card 5 Sheet 3 form, printed p.41: "... relative = Col11 x 100 / Col8 [%]".
+-- MISSING EQ-07: deviation_dilution_pct = 100 * (calculated_value - measured_value_original_sample) / measured_value_original_sample
+-- MISSING EQ-08: deviation_spike_pct    = 100 * (measured_value_spiked_sample - NSS) / NSS
+-- Without them, EQ-03's output calculated_value and EQ-04's output NSS feed nothing - 2 of the 6 encoded
+-- equation outputs are dead ends.
+--
+-- [ ] RATIFIED  R-10  add EQ-07 and EQ-08 plus their two output fields on worksheet -09
+-- (statements omitted - inserting a field and an equation is an importer job, not a hand-edit; the correct
+--  route is a Pass3c workbook revision, per CLAUDE.md "Data only enters through the importer".)
+-- ROLLBACK: n/a until authored.
+
+
+-- ============================================================================================================
+-- R-11  EQ-02 computes a different statistic from the one the Standard prints
+-- ============================================================================================================
+-- EVIDENCE - IQC-Card 3 form, printed p.30 and its worked example p.31 (image-confirmed PDF p.18):
+--   "7 Mean [mg/l] | 8 Greatest spread: Difference [mg/l] | 9 Greatest spread: Col 8 x 100% / Col 7 [%] |
+--    10 Interpretation: Quality target achieved?"
+-- EVIDENCE - IQC-Card 3 text, printed p.29:
+--   "The greatest difference in the single measured values is entered into the IQC-Card in mg/l (column 8)
+--    and in % (greatest difference of the single measured values divided by the mean value; column 9)."
+--   "The greatest difference is decisive for the interpretation of the multiple determination."
+-- ENCODED EQ-02: deviation_single_pct = 100 * (single_result_i - mean_value) / mean_value
+--   That is one value's deviation from the mean. The printed metric is the MAXIMUM SPREAD across the single
+--   values divided by the mean - for a symmetric pair it is roughly twice as large. CR-019 gates on the
+--   encoded (smaller) number, so it under-enforces the printed rule.
+-- CHECK ON THE PRINTED EXAMPLE (p.31, row 1): values 37 / 39 / 38, mean 38, col 8 "Difference" = 2,
+--   col 9 = 2 x 100 / 38 = 5.3 %. The encoded formula on single_result_i = 37 gives (37-38)/38 = -2.6 %.
+--
+-- [ ] RATIFIED  R-11a  restate EQ-02 as the printed greatest spread
+-- update public.equations set formula = 'deviation_single_pct = 100 * greatest_difference / mean_value', input_symbols = array['greatest_difference','mean_value'] where id = 'a4287f3a-2d8f-4d0e-8f51-8ce6843496cf';
+-- [ ] RATIFIED  R-11b  add the field greatest_difference (mg/l) on worksheet -09 - importer route, see R-10
+-- [ ] RATIFIED  R-11c  the two-tier quality target the p.30 footer prints has no encoding:
+--   "NOTE! Enter defined permissible spread! Defined permissible spread for values >= ___ mg/l : ___ % |
+--    Defined permissible spread for values < ___ mg/l : ___ mg/l"
+--   The % branch and the mg/l branch are both printed; only the % branch exists (qa_quality_target_pct).
+-- ROLLBACK: update public.equations set formula = 'deviation_single_pct = 100 * (single_result_i - mean_value) / mean_value', input_symbols = array['single_result_i','mean_value'] where id = 'a4287f3a-2d8f-4d0e-8f51-8ce6843496cf';
+
+
+-- ============================================================================================================
+-- R-12  Invented values and specifications in field descriptions
+-- ============================================================================================================
+-- Each of these asserts something the Standard does not print. Verified by full-text search over the
+-- de-duplicated transcript plus the rendered page named.
+--
+-- (a) validation_range_coverage_pct (c6dfbb6d-7a52-409d-b4b9-0989e5a99391), unit %, is_required = true
+--     ENCODED: "Method should be selected such that at least 80 % of the measuring range is covered when
+--               validating against the reference method (§4.2)."
+--     PRINTED §4.2 (p.11, image-confirmed PDF p.7): "especially the measuring range must be selected in such
+--       way that preferably the expected result can be found in the 20 % to 80 % interval of the measuring
+--       range." That is a two-sided window on WHERE THE EXPECTED RESULT FALLS. There is no coverage rule and
+--       no "at least 80 %" anywhere. The number 80 has been lifted out of an interval and re-used as a
+--       one-sided minimum for a different quantity.
+--
+-- (b) blank_and_standard_controlled (61869740-fe2d-4faf-a4a3-c33d1c8e2594)
+--     ENCODED symbol/label/description all invoke a BLANK VALUE ("Blindwert & Standard kontrolliert",
+--       "Control (plausibility) by blank value and standard addition").
+--     PRINTED §4.4 e) (p.12, image-confirmed PDF p.8): "check of plausibility by dilution and standard
+--       addition of the wastewater sample". Search over the whole transcript: "blank" occurs three times and
+--       never as an analytical control (Foreword "fields which will remain blank", A.3 "fields that will stay
+--       blank", IQC-Card 4 "blank IQC-cards"). The encoding also DROPS "dilution".
+--
+-- (c) qa_quality_target_pct (54a8027e-aac1-4208-88bd-79c65309ac03)
+--     ENCODED: "... plausibility <20% / <25% lower range; parallel <20%; pipettes 100-5000ul <2%, >1000ul <1%"
+--     PRINTED IQC-Card 2 Sheet 1 (p.23, image-confirmed PDF p.14): "Pipettes 100-1000 ul ... < 2 %".
+--       Neither "5000" nor "25 %" occurs anywhere in DWA-A 704E. The printed lower-range rule is NOT a wider
+--       percentage: "* For measuring results in the lower concentration range (e. g. Ptotal < 1 mg/l) greater
+--       percental tolerances are possible. In this case their permissible deviations should be defined in
+--       mg/l." - i.e. the branch switches UNIT, not value.
+--
+-- (d) method_evaluated (68780ecc-bd15-4db3-9b10-99c241942030)
+--     ENCODED: "evaluated for the whole working range and validated where possible (§3.1)". §3.1 (p.10)
+--     contains neither "working range" nor "validated".
+--
+-- (e) user_applies_per_leaflet (1bc01a65-c3d1-4915-958d-c4bc1fdc27eb)
+--     ENCODED: "User applies the method exactly as described in the operating instruction leaflet (§3.3)."
+--     §3.3 says no such thing. The nearest printed obligation is §3.3 d) "provision of written operating
+--     instructions for all important working steps".
+--
+-- (f) storage_temperature (51ccb057-80bb-4234-9b35-db48cb902a4f)
+--     ENCODED: "sample stored as cold as possible, e.g. refrigerator" - not printed, and it OMITS the one
+--     printed value. PRINTED IQC-Card 8 (p.49, image-confirmed PDF p.27): "The wastewater sample should be
+--     stored at temperatures around 4 degC for a short time."
+--
+-- (g) manufacturer_change_notification (f0bb35b6-45f7-47c2-afac-2e2d547c5877)
+--     ENCODED: "factor alterations in the production / determination". PRINTED §3.2: "factor alterations in
+--     the photometric determination".
+--
+-- (h) max_storage_time (2bd018cd-8540-4de6-b8e8-4e335cd0b68f)
+--     The Standard prints NO maximum holding time - only "for a short time" (p.49) and the §5.1 duty to
+--     document "type and duration of the storage". The field name asserts a maximum the source never defines.
+--
+-- [ ] RATIFIED  R-12  rewrite the eight descriptions to the printed text
+-- update public.fields set description = 'The measuring range must be selected so that the expected result preferably falls in the 20 % to 80 % interval of the measuring range (§4.2, printed p.11). Record where the expected result falls.' where id = 'c6dfbb6d-7a52-409d-b4b9-0989e5a99391';
+-- update public.fields set description = 'Check of plausibility by dilution and standard addition of the wastewater sample (§4.4 e), printed p.12).', label_de = 'Plausibilitaet (Verduennung & Standardaddition) geprueft' where id = '61869740-fe2d-4faf-a4a3-c33d1c8e2594';
+-- update public.fields set description = 'Quality target per IQC-Card 2 Sheet 1 (printed p.23): multiple determinations random error < 10 %; plausibility checks deviation < 20 %; equivalency < 20 %; parallel to reference < 20 %; pipettes 100-1000 ul < 2 %, > 1000 ul < 1 %. For results in the lower concentration range (e.g. Ptotal < 1 mg/l) the permissible deviation should be defined in mg/l instead.' where id = '54a8027e-aac1-4208-88bd-79c65309ac03';
+-- update public.fields set description = 'The operating method meets the seven requirements of §3.1 (printed p.10).' where id = '68780ecc-bd15-4db3-9b10-99c241942030';
+-- update public.fields set description = 'Written operating instructions are provided for all important working steps (§3.3 d), printed p.10).' where id = '1bc01a65-c3d1-4915-958d-c4bc1fdc27eb';
+-- update public.fields set description = 'Storage temperature. The wastewater sample should be stored at temperatures around 4 degC for a short time, which suppresses e.g. the bacterial conversion of ammonium to nitrate (IQC-Card 8, printed p.49).' where id = '51ccb057-80bb-4234-9b35-db48cb902a4f';
+-- update public.fields set description = 'Changes in the handling (e.g. factor alterations in the photometric determination) are communicated up-to-date and clearly (§3.2, printed p.10).' where id = 'f0bb35b6-45f7-47c2-afac-2e2d547c5877';
+-- update public.fields set description = 'Duration of storage before analysis, to be documented with the other boundary conditions (§5.1, printed p.13). The Standard prints no maximum holding time, only "for a short time" (IQC-Card 8, printed p.49).' where id = '2bd018cd-8540-4de6-b8e8-4e335cd0b68f';
+-- ROLLBACK: restore the eight descriptions (and the one label_de) from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-13  precipitation_influence: an invented three-value enum over a printed yes/no checkbox
+-- ============================================================================================================
+-- EVIDENCE - IQC-Card 8 Sampling Log, printed p.51 (image-confirmed PDF p.28):
+--   "Influence of precipitation:   yes [ ]   no [ ]"
+-- ENCODED enum on 6db12eeb-5b19-4aff-af84-5a9cef4bec58: none / partial / full, each carrying
+--   regulation_reference '§A.4'. "partial" and "full" are not printed anywhere; "none" is a rename of "no".
+--
+-- [ ] RATIFIED  R-13
+-- update public.fields set enum_values = '[{"value":"yes","label_de":"Ja","label_en":"yes","order_index":1,"regulation_reference":"IQC-Card 8 Sampling Log, printed p.51"},{"value":"no","label_de":"Nein","label_en":"no","order_index":2,"regulation_reference":"IQC-Card 8 Sampling Log, printed p.51"}]'::jsonb where id = '6db12eeb-5b19-4aff-af84-5a9cef4bec58';
+-- ROLLBACK: restore the {none, partial, full} enum_values from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-14  sampling_method: a single-select over a printed conjunction of two axes
+-- ============================================================================================================
+-- EVIDENCE - IQC-Card 8 Sampling Log, printed p.51 (image-confirmed PDF p.28):
+--   "Method of sampling:   manual sampling [ ]        automatic sampling [ ]
+--                                                     time proportional  [ ]
+--                                                     volume proportional[ ]
+--                                                     flow proportional  [ ]"
+--   Five independent checkboxes: manual/automatic is one axis, the proportionality mode is a second axis
+--   belonging to the automatic branch.
+-- EVIDENCE - the filled example, printed p.53: automatic sampling is ticked TOGETHER WITH a proportionality
+--   box; the two are not alternatives.
+-- ENCODED: one single-select enum with all five as siblings (ce0015fe-7560-4ba3-a931-53e6fbaeae4c), so the
+--   Standard's own example cannot be recorded.
+--
+-- [ ] RATIFIED  R-14  split into sampling_mode (manual|automatic) and sampling_proportionality
+--   (time|volume|flow, applicable when sampling_mode = automatic). Field creation is an importer job, see R-10.
+-- ROLLBACK: n/a until authored.
+
+
+-- ============================================================================================================
+-- R-15  sample_pretreatment: enum drawn from a different clause than the one cited, and a closed open list
+-- ============================================================================================================
+-- ENCODED clause_reference '§A.4' with enum {homogenisation, filtration, digestion, dilution}
+--   (b79ca86b-0030-4908-8581-5847b05ccf1c).
+-- The Sampling Log the clause points at prints a DIFFERENT taxonomy (p.51, image-confirmed PDF p.28):
+--   "Pre-treatment:   none [ ]   cooled [ ]   added: ______"
+--   - "none" is a printed option the enum lacks, and "added: ____" is free text the enum cannot hold.
+-- The four encoded values come instead from the p.49-50 narrative questions (homogenisation per DIN 38402-30,
+--   filtration, thermal-chemical digestion, dilution), which is a defensible source but not §A.4's log.
+--
+-- [ ] RATIFIED  R-15a  retag clause_reference to the narrative
+-- update public.fields set clause_reference = 'IQC-Card 8, Pre-treatment of the samples (printed p.49-50)' where id = 'b79ca86b-0030-4908-8581-5847b05ccf1c';
+-- [ ] RATIFIED  R-15b  add the printed "none" option
+-- ROLLBACK: update public.fields set clause_reference = '§A.4' where id = 'b79ca86b-0030-4908-8581-5847b05ccf1c';
+
+
+-- ============================================================================================================
+-- R-16  application_mode: an invented three-way taxonomy
+-- ============================================================================================================
+-- ENCODED (18a2e2ea-bac0-49f2-b652-a0169313a048), clause_reference §4.1:
+--   parallel_to_reference / single_substitute / self_monitoring
+-- §4.1 (printed p.11, image-confirmed PDF p.7) prints four bullets, none of which defines a mode taxonomy.
+-- Full-text search: the word "substitute" does not occur anywhere in DWA-A 704E.
+--
+-- [ ] RATIFIED  R-16  either drop the field or re-source the enum from §4.1's actual bullets
+-- ROLLBACK: n/a until decided.
+
+
+-- ============================================================================================================
+-- R-17  is_required flags with no mandatory verb behind them, and the converse
+-- ============================================================================================================
+-- OVER-REQUIRED (is_required = true on a "should" / on something the Standard never states):
+--   successive_supervision_interval (118d561d-2848-49a4-95c4-47714f2e1b83) - §4.3.2 prints no interval at all
+--   validation_range_coverage_pct   (c6dfbb6d-...) - the rule itself is invented, see R-12(a)
+--   qa_minimum_frequency            (9ee02f74-41df-4110-a248-234e2e4e288e) - a "Recommendations" table
+--   qa_quality_target_pct           (54a8027e-...) - same table
+--   employee_qualification          (eb9dcc18-af8e-4634-9b90-290e549e1bf6) - p.62 "should be listed here"
+--   instruction_training_record     (d49bbbd8-a4753-adf9-a7df807f57a3) - §5.3 "should be kept"
+--   attest_..._03_cr_010            (2cba182f-...) - duplicate, see R-02
+-- UNDER-REQUIRED (is_required = false although the clause is a "must"):
+--   training_courses_attended       (ef889e28-2cd7-4c7d-bbac-eab7a7a350bf) - §3.3 "the operator must take or
+--                                     organise ... c) regular training measures"; §4.3.3 "are necessary"
+--   parallel_analysis_performed     (65b56c25-a42c-4c67-ae25-5b91c1e70f2e) - §4.4 bullet c), same must-clause
+--                                     as its siblings which ARE required
+--   equivalency_check_performed     (c13c4553-6799-4be9-8c1b-64851355f670) - §4.4 bullet d), likewise
+--   heating_device_deviation        (bc460338-0d82-4948-bf3a-44989434e95c) - operand of BLOCK gate CR-026
+--   pipette_tested_volume           (8909a6d7-43e0-4bfb-9c6e-00311216790c) - operand of BLOCK gate CR-025
+--   pipette_deviation_pct           (d97d389e-0670-4ba2-a5c8-6b17c5aceed4) - operand of BLOCK gate CR-025
+--
+-- [ ] RATIFIED  R-17a  drop is_required on the "should"-backed fields
+-- update public.fields set is_required = false where id in ('118d561d-2848-49a4-95c4-47714f2e1b83','9ee02f74-41df-4110-a248-234e2e4e288e','eb9dcc18-af8e-4634-9b90-290e549e1bf6');
+-- [ ] RATIFIED  R-17b  raise is_required on the must-backed §4.4 siblings
+-- update public.fields set is_required = true where id in ('65b56c25-a42c-4c67-ae25-5b91c1e70f2e','c13c4553-6799-4be9-8c1b-64851355f670');
+-- [ ] RATIFIED  R-17c  the three block-gate operands need conditional-required, not blanket required
+--   (a BLOCK gate whose operands are optional is decidable only by accident; see R-06, R-07)
+-- ROLLBACK: restore is_required per the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-18  Wrong column references in field descriptions
+-- ============================================================================================================
+-- (a) deviation_parallel_pct (b614440a-dd7d-404d-b640-cffadefa6942)
+--     ENCODED: "in % (IGC-Card 7 column 9); also recorded as absolute deviation (column 10)".
+--     PRINTED IQC-Card 7 example, p.48 (image-confirmed PDF p.27): "9 Deviation absolute Col8-Col7 [mg/l] |
+--       10 Deviation relative Col9 x 100/Col7 [%]" - the two are the other way round. The equation EQ-06's own
+--       stored source_quote gets it right ("absolute (column 9) as well as percental value (column 10)"), so
+--       the field description contradicts the equation on the same worksheet.
+-- (b) IQC-Card 11 columns, printed p.67 (image-confirmed PDF p.36):
+--     "the type of distinctive features (column 3) and in which IQC-Card they are documented (column 4) ...
+--      As soon as the cause is known, it is documented in column 5 with the measured taken (column 6)."
+--     ENCODED: deviation_feature "column 2" (printed 3), deviation_cause "column 4" (printed 5),
+--              deviation_measure "column 5" (printed 6). A consistent off-by-one across all three.
+--
+-- [ ] RATIFIED  R-18
+-- update public.fields set description = 'Deviation between operating-method and reference-method values, relative in % (IQC-Card 7 column 10 = Col9 x 100/Col7); the absolute deviation is column 9.' where id = 'b614440a-dd7d-404d-b640-cffadefa6942';
+-- update public.fields set description = 'Distinctive feature in which a deviation was detected (IQC-Card 11 column 3, printed p.67).' where id = 'e9cae4bd-0835-45ea-8447-5248e86f1d49';
+-- update public.fields set description = 'Determined cause of the deviation (IQC-Card 11 column 5, printed p.67).' where id = '93393c6f-40d9-45c9-84b4-fd01949ac1a7';
+-- update public.fields set description = 'Measure taken to eliminate the cause (IQC-Card 11 column 6, printed p.67).' where id = '214becc5-abde-4f54-8d72-1e78a3e7c0b1';
+-- ROLLBACK: restore the four descriptions from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-19  §4.4 bullets a) and b) are crossed, and bullet f) has no field
+-- ============================================================================================================
+-- PRINTED §4.4 (p.12, image-confirmed PDF p.8), seven bullets:
+--   a) check of the reproducibility of a sample by multiple determination
+--   b) measuring of standard solutions to check the procedure, the measurement equipment and reagents
+--   c) parallel analyses as a comparison to reference methods
+--   d) equivalency measurements ... and/or participation in interlaboratory tests
+--   e) check of plausibility by dilution and standard addition of the wastewater sample
+--   f) control and maintenance of the testing medium (adjustment, calibration) including the sampling devices
+--      according to the manufacturer's information
+--   g) control of the reagents' storage life
+-- ENCODED on worksheet -05:
+--   sample_suitability_checked       symbol says "sample suitability", description quotes bullet a)
+--   multiple_determination_performed symbol says "multiple determination", description quotes bullet b)
+--   -> bullet a) (reproducibility by multiple determination) is named by one field and described by the other;
+--      bullet b) (the IQC-Card 4 measurement of standards) has no correctly named field.
+--   bullet f) has no field on worksheet -05 at all (worksheet -11 covers equipment monitoring, but the §4.4
+--      obligation is not represented on the quality-control worksheet).
+--
+-- [ ] RATIFIED  R-19a  rename to match the printed bullets
+-- update public.fields set label_de = 'Reproduzierbarkeit durch Mehrfachbestimmung geprueft', description = 'Check of the reproducibility of a sample by multiple determination (§4.4 a), printed p.12).' where id = 'f0ca0816-39a7-4d13-8561-f90749071c21';
+-- update public.fields set label_de = 'Messung von Standardloesungen durchgefuehrt', description = 'Measuring of standard solutions to check the procedure, the measurement equipment and reagents (§4.4 b), printed p.12).' where id = 'e4582093-3bc7-4666-a220-64fdae15f25e';
+-- [ ] RATIFIED  R-19b  add a field for bullet f) - importer route, see R-10
+-- ROLLBACK: restore both labels and descriptions from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-20  Closed enums over printed open lists
+-- ============================================================================================================
+-- (a) parameter_name (1f62e770-87f3-4dff-86c0-7eef600b04c0), 9 values from the §2.2 abbreviation table.
+--     The Standard's OWN example, IQC-Card 1 example 2, printed p.21, records the parameters "Chrome VI" and
+--     "Cyanide"; IQC-Card 2 Sheet 3 example (printed p.28) adds conductivity and oxygen devices. So the
+--     printed list is open and the enum closes it: an industrial plant cannot enter its own parameters.
+-- (b) testing_equipment (1a88d0f6-7b24-45c1-9437-c368adafecf1), 16 values from the IQC-Card 9 table.
+--     Printed p.54 (image-confirmed PDF p.30): "Testing equipment includes all devices and reagents that are
+--     used in operating analysis. Testing equipment monitoring ... can be defined according to the needs of
+--     the user." and "Recommendations for control- and monitoring frequencies can be taken from the table."
+-- (c) sample_pretreatment - see R-15.
+-- (d) qa_measure (47a1e4dc-056a-4cda-8758-8a76a24c4ba8) - IQC-Card 2 Sheet 3 (printed p.27): "If there are
+--     special working regulations for the testing equipment, they can be listed in column 4 of Sheet 3."
+--
+-- [ ] RATIFIED  R-20  add an "other (specify)" branch to (a), (b) and (d), per the 2026-08-01 owner ruling
+--   that fixed printed options become a selection widget - here the printed list is expressly NOT fixed.
+-- ROLLBACK: restore the enum_values from the 2026-09-09 export.
+
+
+-- ============================================================================================================
+-- R-21  The printed abbreviation is IQC; the encoding writes IGC throughout
+-- ============================================================================================================
+-- PRINTED §2.1 (p.8, image-confirmed PDF p.6): "Internal Quality Control (IQC)" and "IQC-Cards".
+-- PRINTED §2.2 table (p.9, image-confirmed PDF p.6): "IQC [IQK] Integrated quality control" - note the
+--   Standard itself is inconsistent here ("Internal" in §2.1 vs "Integrated" in §2.2); that is a printed
+--   defect, not an encoding one, and no ruling is proposed.
+-- The DB uses "IGC" - a third spelling, in neither place - across worksheet titles (-08 "IGC-Rahmen &
+--   QS-Spezifikationen", -09 "IGC-Berechnungen", -10 "IGC-Aequivalenz"), field labels (iqc_card_module
+--   "IGC-Karte (Modul)", "IGC durch Anwender durchgefuehrt", "Anzahl durchgefuehrter IGC-Massnahmen",
+--   "Bezug IGC-Karte (Abweichung)"), roughly 30 clause_reference values ("IGC-Card 3", "IGC-Card 5, Sheet 1",
+--   "IGC-Card 6", "IGC-Card 7", "IGC-Card 9", "IGC-Card 11") and many descriptions.
+--   The gates and the equations use the correct "IQC" in their source_quote, so the two spellings coexist.
+--
+-- [ ] RATIFIED  R-21  global IGC -> IQC across labels, descriptions, clause_reference and worksheet titles
+-- update public.fields set clause_reference = replace(clause_reference,'IGC-','IQC-') where clause_reference like '%IGC-%' and worksheet_template_id in (select id from public.worksheet_templates where standard_id = '96347572-1a8c-408d-afa5-6a99edc1b579');
+-- update public.fields set label_de = replace(label_de,'IGC','IQC'), description = replace(description,'IGC','IQC') where worksheet_template_id in (select id from public.worksheet_templates where standard_id = '96347572-1a8c-408d-afa5-6a99edc1b579') and (label_de like '%IGC%' or description like '%IGC%');
+-- update public.compliance_requirements set clause_reference = replace(clause_reference,'IGC-','IQC-') where clause_reference like '%IGC-%' and worksheet_template_id in (select id from public.worksheet_templates where standard_id = '96347572-1a8c-408d-afa5-6a99edc1b579');
+-- update public.worksheet_templates set title_de = replace(title_de,'IGC','IQC') where standard_id = '96347572-1a8c-408d-afa5-6a99edc1b579' and title_de like '%IGC%';
+-- ROLLBACK: the inverse replace('IQC','IGC') is NOT safe (it would also hit the correct IQC in gate quotes).
+--   Restore the affected rows from the 2026-09-09 export instead.
+
+
+-- ============================================================================================================
+-- R-22  Printed constraints with no field and no gate
+-- ============================================================================================================
+-- Catalogued for completeness. None is applied; each would need a field, and fields enter via the importer.
+--   1. Qualified random sample (p.49, image-confirmed PDF p.27): "at least five random samples that are taken
+--      within a period of maximally two hours in intervals of not less than two minutes". Three numbers, no
+--      fields. sample_type merely names the type.
+--   2. Equality test (§4.2, p.11, image-confirmed PDF p.7): "(a) typical sample(s) is/are measured six times
+--      each by the reference and operating method; then the results are compared by using ordinary statistic
+--      means (DIN 38402-71, item 6.4)". The number six is not encoded, and DIN 38402-71 is NR (not in the
+--      library) - the equality verdict is unreachable from inside the Wizard.
+--   3. Reporting precision (§5.1, p.13, image-confirmed PDF p.8): "Generally, two significant digits are
+--      quoted, e. g. 0.24; 2.4; 24, 240; 2400."
+--   4. Interference threshold (p.50, image-confirmed PDF p.28): "a high concentration of chloride (> 1 g/l)
+--      pretends a high COD. A concentration of nitrite disturbs the determination of nitrate."
+--   5. Reagent storage life (p.55, image-confirmed PDF p.30): "the reagents have a storage life of 2 years if
+--      stored in a dry, dark and cool place. Only few tests have a reduced storage life, 12 and/or 18
+--      months". reagent_storage_life_controlled is a bare boolean.
+--   6. Scales precision for pipette checks (p.54, image-confirmed PDF p.30): "A prerequisite is the use of
+--      scales with a precision of 0.001 g." and "Pipettes with variable volume must be checked with three
+--      different volumes (10 %, 50 % and 100 % of the maximum volume)" and "The results of five weightings".
+--   7. Control limits for standards (IQC-Card 4, p.32): "The standard deviation is calculated from around 20
+--      independent measurements of the standard. The upper control limit is the nominal value plus three
+--      standard deviations, the lower control limit the nominal value minus three standard deviations. Often,
+--      in practice, also the simplification of nominal value plus 10 % and of nominal value minus 10 %
+--      suffices."  NOTE: printed p.32 was NOT image-confirmed - these figures rest on the OCR alone and must
+--      be re-read on the rendered page before any of them is encoded.
+--   8. pH-meter target (IQC-Card 2 Sheet 1, p.23, image-confirmed PDF p.14): "Deviation < 0.2 pH", monthly.
+--      No field, no gate; qa_quality_target_pct carries unit % and cannot hold it.
+--   9. The two-tier quality target on IQC-Card 3 (p.30) and IQC-Card 5 Sheet 1/3 - a % branch and an mg/l
+--      branch. Only the % branch exists. See R-11c.
+--
+-- [ ] RATIFIED  R-22  triage which of the nine become fields (importer route, see R-10)
+
+
+-- ============================================================================================================
+-- R-23  Structural observations, no change proposed - recorded so their absence is auditable
+-- ============================================================================================================
+--   * NO worksheet has zero fields. Field counts: -01 12, -02 7, -03 8, -04 3, -05 8, -06 7, -07 6, -08 8,
+--     -09 15, -10 5, -11 6, -12 6 = 91.
+--   * Worksheet -02 has ZERO gates although it is the §3 worksheet (all eight §3 gates sit on -01, see R-03).
+--     Worksheets -06 and -12 also have zero gates.
+--   * NO gate uses condition = 'TRUE'. NO gate uses an IS NOT NULL test on a field that is already
+--     is_required. NO gate is a tautology over an equation output. NO gate applies a '>= 0' floor to a
+--     quantity that can legitimately be negative - the opposite defect is present instead (R-05: a signed
+--     quantity with no lower bound at all).
+--   * NO gate is unsatisfiable outright; CR-025 is unsatisfiable over a BAND (R-07) and over NULL operands.
+--   * 20 of the 30 gates are attestation gates of the form 'attest_X == True' over a boolean field that
+--     exists only to satisfy them. That is the house pattern, not a defect of this standard, but it means
+--     two thirds of this standard's enforcement is a self-declaration rather than a check of entered data.
+--   * expected_concentration_range (b54bae59-2316-4b50-9dea-bb155f5c7e73) is data_type number with unit mg/l
+--     and cannot hold the interval §4.2 is about. Either two fields (min/max) or a text range.
+--   * PAGE REFS IN THE EXISTING ENCODING ARE CORRECT. All five page refs embedded in the equations'
+--     source_quote were checked against the printed pages: EQ-01/02 "(p. 29)" IQC-Card 3 text - correct;
+--     EQ-03 "(p. 35)" - correct; EQ-04 "(p. 36)" - correct; EQ-05 "(p. 43)" IQC-Card 6 text - correct;
+--     EQ-06 "(p. 46)" IQC-Card 7 text - correct. The enum regulation_reference page refs on iqc_card_module
+--     ("Contents pp.5-6, A.2 survey table p.17"), parameter_name ("p.9") and sample_pretreatment
+--     ("pp.49-50") are also correct. No wrong page ref was found anywhere in this encoding.
+--   * FOUR gates carry source_quote = NULL: CR-013, CR-028, CR-029, CR-030.
+--   * Printed internal inconsistencies (source defects, NOT encoding defects, no ruling proposed):
+--     - §2.1 "Internal Quality Control (IQC)" vs §2.2 table "IQC [IQK] Integrated quality control".
+--     - IQC-Card 3 text (p.29) puts "the result of the control measure" in column 10; the form (p.30/31)
+--       prints column 10 as "Interpretation: Quality target achieved?".
+--     - IQC-Card 9 body (p.55) says the pipette weighings are recorded "in Sheet 4 'Pipettes'"; the Contents
+--       and the sheet itself say Sheet 3.
+--     - The Sampling Log footnote reads "DIN 38402, Part 11 ff and DIN EN ISO 5667-13" on the blank form
+--       (p.51) but "DIN 38402, Part 11 ff and DIN 38414, Part 1" on both examples (p.52, p.53).
+--     - IQC-Card 2 Sheet 1 "Pipettes 100-1000 ul < 2 %" vs IQC-Card 9 "1.000 ml <= 1" (see R-07).
+-- ============================================================================================================
