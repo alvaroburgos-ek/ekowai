@@ -1,0 +1,489 @@
+-- ============================================================================================================
+-- ISO-59010 - STAGED RULINGS (written, NOT applied). 2026-09-09, [VA-OCR] pass.
+--
+-- EVERYTHING IN THIS FILE IS COMMENTED OUT. Nothing here runs. Each block carries its evidence quote, the
+-- proposed SQL, and the rollback inverse. A block is applied only after Alvaro ticks its RATIFIED marker.
+--
+-- SOURCE: ISO/FDIS 59010:2024(en), "FINAL DRAFT International Standard", Circular economy - Guidance on the
+--   transition of business models and value networks, ISO/TC 323, Secretariat AFNOR, ballot 2024-02-20 to
+--   2024-04-16. *** THIS IS A BALLOT DRAFT, NOT A PUBLISHED STANDARD. *** It may not be cited as
+--   ISO 59010:2024 and its clause numbering can differ from the published edition (block R-0).
+--   The PDF is a SCAN WITH NO TEXT LAYER; every evidence quote below was RE-READ ON THE RENDERED PAGE IMAGE
+--   (the PDF page is named per block). PRINTED p.N = PDF p.(N+8).
+--
+-- SCHEMA NOTE: public.compliance_requirements has a column "condition" (NOT "condition_expression") and has
+--   NO "active" column. All proposed gate SQL below uses "condition".
+--
+-- WHY THIS FILE IS MOSTLY ABOUT REQUIREDNESS, NOT ABOUT NUMBERS: mechanical modality census over the whole
+--   OCR transcript (word-bounded, case-insensitive): shall = 1, should = 96, must = 0, may = 6, can = 211.
+--   The one "shall" is ISO Foreword boilerplate ("ISO shall not be held responsible for identifying any or
+--   all such patent rights", PDF p.4). THE NORMATIVE BODY CONTAINS ZERO "shall". Clause 1 (printed p.1)
+--   prints: "This document gives guidance for an organization seeking to transition its value creation
+--   models and value networks from linear to circular."
+--   The document also prints NO numeric limit, NO threshold, NO unit and NO formula anywhere - not one. The
+--   encoding correspondingly holds 0 equations and no numeric field, so the entire "wrong limit / inverted
+--   boundary / boundary inclusivity / example-number-as-limit / unit invention" family of defects is
+--   STRUCTURALLY ABSENT here (see R-12 for the item-by-item negative results).
+--   WHAT THE ENCODING GOT RIGHT: all 23 compliance_requirements rows are severity='warn'. NOT ONE block gate
+--   exists. For a zero-shall guidance document that is the correct call and nothing below proposes changing
+--   it. WHAT IT GOT WRONG: 36 of the 51 fields are is_required=true (blocks R-5, R-6, R-7, R-9).
+-- ============================================================================================================
+
+
+-- ============================================================================================================
+-- R-0  DRAFT CITABILITY - owner action, optional label SQL
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Cover, PDF p.1 (image-confirmed), prints verbatim: "FINAL DRAFT / International / Standard" and
+--   "ISO/FDIS 59010", "Voting begins on: 2024-02-20", "Voting terminates on: 2024-04-16",
+--   "Reference number ISO/FDIS 59010:2024(en)". Every body page runs the head "ISO/FDIS 59010:2024(en)".
+-- The cover further warns, verbatim: "DRAFT INTERNATIONAL STANDARDS MAY ON OCCASION HAVE TO BE CONSIDERED IN
+--   THE LIGHT OF THEIR POTENTIAL TO BECOME STANDARDS TO WHICH REFERENCE MAY BE MADE IN NATIONAL REGULATIONS."
+-- WHAT PROD ALREADY GETS RIGHT: standards.version = "2024 (Final Draft International Standard,
+--   ISO/FDIS 59010:2024)". The draft status IS recorded, and recorded accurately. No fix is needed there.
+-- WHAT IS OPEN:
+--   (a) standards.code is "ISO-59010", which in the picker reads as the published standard. A user who picks
+--       it from a list of codes has no way to see that the underlying document is an FDIS unless they open
+--       the version string.
+--   (b) The FDIS balloted in early 2024. ISO 59010 was published in 2024. The library therefore very likely
+--       holds a SUPERSEDED PRE-PUBLICATION TEXT, and clause numbers cited in 51 fields (§4.1 ... §8.3) are
+--       the DRAFT's numbers. Whether they survived into the published edition was NOT looked up in this pass
+--       and cannot be established from the document itself.
+--   (c) Normative reference ISO 59004 is itself marked "Under preparation" in this draft (footnote 4,
+--       PDF p.9), as are ISO 59020, ISO 59014, ISO 59040, ISO/TR 59031 and ISO/TR 59032. Everything this
+--       encoding defers to (indicator taxonomy, core indicators, circular economy principles) is therefore
+--       NR-capped against documents that did not exist when the draft was written.
+-- ACTION (owner): re-source ISO 59010 against the PUBLISHED edition before any project relies on it. If the
+--   draft is kept in the meantime, make the draft visible where the standard is chosen.
+-- PROPOSED SQL (optional, cosmetic only - does not change any encoded value):
+--   update public.standards set name_de = name_de || ' (ENTWURF / FDIS)' where code = 'ISO-59010';
+-- ROLLBACK INVERSE:
+--   update public.standards set name_de = replace(name_de, ' (ENTWURF / FDIS)', '') where code = 'ISO-59010';
+
+
+-- ============================================================================================================
+-- R-1  CR-018 - EMPTY CONDITION (§7.3, worksheet ISO-59010-08)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate id 51827f3a-1180-4395-8db1-ffe33bf7060d, code CR-018, worksheet ISO-59010-08
+-- ("Wertschoepfungsnetzwerk auf Zirkularitaet umstellen"), severity=warn, clause_reference "§7.3",
+-- source_quote NULL, condition = '' (the EMPTY STRING). The gate can never evaluate; it is dead weight.
+-- The clause DOES carry a real (soft) obligation, so the honest repair is to give the gate a condition, not
+-- to delete it. Evidence, §7.3, printed p.26 = PDF p.34 (image-confirmed):
+--   "A governance structure should be implemented in a value network. Depending on the network objectives
+--    and strategy, the governance structures can take diverse forms."
+--   "The following elements should be considered for governance: - clear roles and responsibilities of
+--    members; [...] - reporting processes to interested parties, community and key partners, especially
+--    non-financial disclosure."
+-- Both §7.3 fields already exist on worksheet ISO-59010-08: governance_structure (8a776108-..., text,
+--   is_required=true) and governance_element (fbbf9b4e-..., enum, is_required=true). The gate is correctly
+--   HOMED; it is simply empty.
+-- PROPOSED SQL:
+--   update public.compliance_requirements
+--      set condition = 'governance_structure IS NOT NULL AND governance_element IS NOT NULL',
+--          source_quote = 'A governance structure should be implemented in a value network. | The following elements should be considered for governance: - printed p.26 (ISO/FDIS 59010:2024(en), FINAL DRAFT)'
+--    where id = '51827f3a-1180-4395-8db1-ffe33bf7060d';
+-- NOTE: with both fields already is_required=true this condition is a presence NO-OP (see R-4). If R-5 is
+--   ratified and these fields drop to is_required=false, the gate becomes the thing that carries the "should"
+--   as a warning - which is the correct place for it. R-1 and R-5 should be ratified TOGETHER or not at all.
+-- ROLLBACK INVERSE:
+--   update public.compliance_requirements set condition = '', source_quote = null
+--    where id = '51827f3a-1180-4395-8db1-ffe33bf7060d';
+
+
+-- ============================================================================================================
+-- R-2  CR-021 - EMPTY CONDITION (§8.1, worksheet ISO-59010-09)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate id 06f58e11-b6b9-497a-83da-fdf53d386051, code CR-021, worksheet ISO-59010-09
+-- ("Pruefung & Ueberwachung zur kontinuierlichen Verbesserung"), severity=warn, clause_reference "§8.1",
+-- source_quote NULL, condition = '' (the EMPTY STRING). Same defect class as R-1.
+-- NOTE that worksheet 09 ALREADY has CR-020 on §8.1 with condition
+--   "performance_measured == true AND measurement_meaningful == true".
+-- So CR-021 is an empty DUPLICATE slot on the same clause. §8.1 does however contain a second, distinct
+-- obligation that CR-020 does not cover. Evidence, §8.1, printed p.27 = PDF p.35 (image-confirmed):
+--   "The measurement should include all resource inflows and outflows (including emissions and losses) by
+--    applying the core circularity indicators of ISO 59020."
+-- There is NO field on worksheet 09 expressing "all inflows and outflows included" - the closest is
+--   measurement_meaningful (e0ec4881-...), which CR-020 already tests. Two options, owner picks one:
+--   OPTION A (minimal, recommended): delete the empty duplicate.
+--     update public.compliance_requirements set condition = 'performance_measured == true'
+--      where id = '06f58e11-b6b9-497a-83da-fdf53d386051';        -- makes it a strict subset of CR-020: BAD
+--     -- better, actually delete:
+--     delete from public.compliance_requirements where id = '06f58e11-b6b9-497a-83da-fdf53d386051';
+--     ROLLBACK INVERSE (re-insert with the exact prior row - capture it with a select before deleting):
+--       insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition,
+--         clause_reference, source_quote, requires_attestation)
+--       select '06f58e11-b6b9-497a-83da-fdf53d386051', wt.id, 'CR-021', 'warn', '', '§8.1', null, false
+--         from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--        where s.code = 'ISO-59010' and wt.code = 'ISO-59010-09';
+--   OPTION B: add a new boolean field "all_flows_included" to worksheet ISO-59010-09 (§8.1) carrying the
+--     printed "should include all resource inflows and outflows" and condition CR-021 on it. This is a
+--     STRUCTURE change (new field) and is staged here, not applied.
+-- PICK ONE. Do not apply both.
+
+
+-- ============================================================================================================
+-- R-3  ALL 23 GATES AND ALL 51 FIELDS CARRY source_quote = NULL
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Verified on the 2026-09-09 export: every one of the 23 compliance_requirements rows for ISO-59010 has
+--   source_quote = NULL, and no field carries a source_quote either. So no gate in this standard can show a
+--   user WHY it fires, and F-7/#22-style provenance checks have nothing to read.
+-- This pack writes verification_quote (a different column) on 50 fields. It does NOT write source_quote,
+--   because populating source_quote changes what the app displays and is therefore a structure/UX change.
+-- PROPOSED (per gate, after the R-1/R-2 conditions are settled): fill source_quote on all 23 gates from the
+--   printed clause each cites. The 23 clause refs are §1, §4.1 (x1), §4.2, §4.3, §4.4, §4.5 (x2), §4.6,
+--   §4.6.1, §4.6.7, §5.1, §5.2, §5.3, §6.1, §6.2, §6.2.4, §7.2, §7.3, §7.4, §8.1 (x2), §8.2, §8.3 - every
+--   one of which is quoted verbatim in iso-59010-md-verification-pack.sql and can be lifted from there.
+-- NOT DRAFTED AS SQL HERE: 23 statements of prose would triple this file and none of them is contested;
+--   they are mechanical once the owner says yes. Ratify this block and the next pass writes them.
+-- ROLLBACK INVERSE: update public.compliance_requirements cr set source_quote = null
+--   from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--   where wt.id = cr.worksheet_template_id and s.code = 'ISO-59010';
+
+
+-- ============================================================================================================
+-- R-4  EFFECTIVE NO-OP GATES - CR-001, CR-007, CR-012
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Three gates test IS NOT NULL over fields that are ALREADY is_required=true. A required field cannot be
+-- null when the worksheet is submitted, so the gate can never fire and adds nothing:
+--   CR-001 (19f44532-8a7d-4eb6-8264-602c4ae09bb2, ws 01, §1):
+--     "organization_name IS NOT NULL AND current_value_creation_model IS NOT NULL AND
+--      position_in_value_chain IS NOT NULL"  - all three fields is_required=true.
+--     Additionally: its clause is §1, whose entire printed text (printed p.1 = PDF p.9, image-confirmed) is
+--     "This document gives guidance for an organization seeking to transition its value creation models and
+--      value networks from linear to circular." and "This document is applicable to any organization
+--      regardless of size, sector or region." - a SCOPE statement. It carries no obligation at all, so this
+--      gate has no requirement behind it in any case.
+--   CR-007 (fae5bacc-74cc-4151-a1c6-870f2f1e4798, ws 04, §4.5): "indicator_category IS NOT NULL"
+--     - indicator_category is is_required=true.
+--   CR-012 (ea40cfe0-e06a-4bf9-a4bd-a0990d98270f, ws 06, §5.2):
+--     "circular_economy_strategy IS NOT NULL AND circular_economy_principle IS NOT NULL" - both required.
+-- These are not harmful, they are noise: they inflate the requirement count without enforcing anything.
+-- OPTION A (recommended, and it composes with R-5): leave the gates alone and drop the is_required flags per
+--   R-5. The gates then become the real (warn-level) enforcement, which is the right severity for "should".
+-- OPTION B: delete the three no-op gates and keep is_required=true. This makes the gate list honest but
+--   leaves 36 hard-required fields behind zero "shall" - the worse of the two.
+-- NO SQL IS PROPOSED IN THIS BLOCK. Ratify R-5 and this resolves itself; if the owner prefers OPTION B, say
+--   so and the deletes will be drafted with their re-insert inverses.
+
+
+-- ============================================================================================================
+-- R-5  is_required=true ON 36 OF 51 FIELDS, WITH ZERO "shall" IN THE DOCUMENT
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- The document contains no normative "shall" (census at the head of this file). 36 of 51 fields are
+-- nevertheless is_required=true. Every one of them therefore rests on "should", on "can", or on nothing.
+-- The four clearest over-requirements, each with its printed modality (all image-confirmed):
+--
+--   (a) goal_measurable (c23ee82a-861e-427b-92a9-2cc8efcfb6b9, ws 02, §4.1) - is_required=true, and gate
+--       CR-002 tests it == true. Printed, §4.1, printed p.5 = PDF p.13:
+--         "To help set measurable goals, an organization CAN conduct an assessment by reviewing and mapping
+--          all its activities and interactions within and between its value chains and broader value
+--          network."   (emphasis added; the printed word is "can")
+--       A permission is encoded as a mandatory boolean AND as a gate. This is the single strongest
+--       over-enforcement in the standard.
+--
+--   (b) business_element (8e62c6da-5ec1-460e-b48e-eabe014e1fa8, ws 02, §4.2) - is_required=true. Printed,
+--       §4.2, printed p.5 = PDF p.13: "Typical business elements and examples are listed below. However,
+--       each organization CAN have unique value creation models and associated elements."
+--       A "typical ... can" list is encoded as mandatory.
+--
+--   (c) value_model_element_reviewed (3abade2e-151b-4498-bda3-cc326195479b, ws 07, §6.2.1) -
+--       is_required=true, and gate CR-015 tests it == true. Printed, §6.2.1, printed p.22 = PDF p.30:
+--       "The organization should consider changes to its value creation model that are consistent with the
+--        developed plan. EXAMPLES of such considerations are given in 6.2.2 to 6.2.11."
+--
+--   (d) shared_strategy_plan (808e1c49-47af-4262-aebb-8e3ddd910810, ws 08, §7.2) - is_required=true, one
+--       text field covering two printed statements of DIFFERENT strength, printed p.25 = PDF p.33:
+--       "The members CAN DECIDE to create a shared circular economy strategy based on those shared
+--        objectives" (permissive) vs "Value network members SHOULD break down the shared objectives into
+--        actions and create a shared plan with timelines" (soft obligation).
+--       The required flag forces the permissive half too.
+--
+-- PROPOSED SQL (drop the required flag on the four clearest; the field stays, the gate stays at warn):
+--   update public.fields set is_required = false
+--    where id in ('c23ee82a-861e-427b-92a9-2cc8efcfb6b9',   -- goal_measurable      (§4.1 "can")
+--                 '8e62c6da-5ec1-460e-b48e-eabe014e1fa8',   -- business_element     (§4.2 "typical ... can")
+--                 '3abade2e-151b-4498-bda3-cc326195479b',   -- value_model_element_reviewed (§6.2.1 "Examples")
+--                 '808e1c49-47af-4262-aebb-8e3ddd910810');  -- shared_strategy_plan (§7.2 "can decide")
+-- ROLLBACK INVERSE:
+--   update public.fields set is_required = true
+--    where id in ('c23ee82a-861e-427b-92a9-2cc8efcfb6b9','8e62c6da-5ec1-460e-b48e-eabe014e1fa8',
+--                 '3abade2e-151b-4498-bda3-cc326195479b','808e1c49-47af-4262-aebb-8e3ddd910810');
+--
+-- THE WIDER QUESTION (owner ruling needed, no SQL drafted): the remaining 32 required fields all sit behind
+--   a plain "should". Is "should" in a zero-shall ISO guidance document enough to make a Wizard field
+--   MANDATORY? A defensible house rule would be: in a document whose Clause 1 says "gives guidance",
+--   is_required=true is reserved for fields the ENGINEER'S OWN process needs, and every source-derived field
+--   is optional with a warn gate. That rule would move ~32 more fields. It is a policy decision about the
+--   product, not a reading of the text, so it is NOT drafted here.
+-- The 36 required field ids, for whoever executes that ruling: b76337ef, 10fae041, 1157f2e4, cde447ec,
+--   c23ee82a, 1d797b75, 006399e7, 8e62c6da, e56affce, 243dda47, 5cab4447, 934e36a6, bfc64e0c, 79ed1c19,
+--   a2408657, 23051059, 895cb205, 1abc8c85, 647b0e21, d50cae27, 0e84e7dc, 6cff7fff, 5982a448, 20698e1e,
+--   1fbd291b, 18f18c4b, 3abade2e, b407c511, 808e1c49, 13e3aca8, 8a776108, fbbf9b4e, 88291662, e0ec4881,
+--   4232be61, b02ae10a.
+
+
+-- ============================================================================================================
+-- R-6  SINGLE-SELECT ENUM OVER A PRINTED CONJUNCTION (5 fields)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Five enum fields are single-select, but the printed text treats their whole list as a set to be worked
+-- through, not as a menu to pick one from. A user can only ever record one of them, so the worksheet cannot
+-- represent what the clause actually asks for.
+--
+--   (1) business_element (8e62c6da-..., ws 02, §4.2, 10 values). Printed lead-in, printed p.5 = PDF p.13:
+--       "Understanding the organization's current value creation model is the basis to determining the
+--        goals. For this purpose, assessing business elements that constitute its current value creation
+--        model is useful."  - ALL the elements a) to j) constitute the model; assessing one is not the task.
+--   (2) circular_economy_principle (d50cae27-..., ws 06, §5.2, 6 values). Printed, printed p.20 = PDF p.28:
+--       "The SIX circular economy principles (system thinking, value creation, value sharing, resource
+--        stewardship, resource traceability and ecosystem resilience) AND THEIR INTERCONNECTION provide the
+--        basis for this strategy."  - explicitly all six, explicitly interconnected.
+--   (3) governance_element (fbbf9b4e-..., ws 08, §7.3, 10 values). Printed, printed p.26 = PDF p.34:
+--       "The FOLLOWING ELEMENTS should be considered for governance:" then ten dashes. All ten.
+--   (4) indicator_category (79ed1c19-..., ws 04, §4.5, 5 values). §8.1, printed p.27 = PDF p.35:
+--       "The measurement should include ALL resource inflows and outflows (including emissions and losses)
+--        by applying the core circularity indicators of ISO 59020."
+--   (5) resource_management_action (895cb205-..., ws 05, Table 2, 13 values). Table 2 is a PRIORITY LADDER,
+--       not a menu. §4.6.7, printed p.19 = PDF p.27: "In general, products should be repaired before they
+--       are remanufactured, and remanufactured before they are recycled." A single pick cannot express a
+--       sequence, and the field is is_required=true, so the user is forced to pick exactly one rung.
+--
+-- PROPOSED (STRUCTURE CHANGE - multi-select): change data_type from 'enum' to the project's multi-select
+--   type for these five fields, keeping enum_values untouched. The exact target type must match what the
+--   renderer supports; that is an SR-4 infrastructure decision for the implementer, so the literal is left
+--   as a placeholder rather than guessed here:
+--     update public.fields set data_type = '<multi_select_type>'
+--      where id in ('8e62c6da-5ec1-460e-b48e-eabe014e1fa8','d50cae27-bbe3-4a97-a697-ddb0cee6644d',
+--                   'fbbf9b4e-f676-44df-aa65-7f4ccdac416a','79ed1c19-22d5-4209-9463-500d8c7657a1',
+--                   '895cb205-e9cd-498f-a264-7dfedda53705');
+--   ROLLBACK INVERSE:
+--     update public.fields set data_type = 'enum'
+--      where id in ('8e62c6da-5ec1-460e-b48e-eabe014e1fa8','d50cae27-bbe3-4a97-a697-ddb0cee6644d',
+--                   'fbbf9b4e-f676-44df-aa65-7f4ccdac416a','79ed1c19-22d5-4209-9463-500d8c7657a1',
+--                   '895cb205-e9cd-498f-a264-7dfedda53705');
+-- NOTE the interaction with R-5: if resource_management_action stays single-select it must NOT stay
+--   is_required=true. Either fix removes the trap; ratify at least one.
+-- COUNTER-CASE (deliberately NOT proposed): stakeholder_analysis_type (c5fd5a85-..., §4.3) IS correctly a
+--   single-select - printed p.7 = PDF p.15 reads "through qualitative OR quantitative stakeholder analysis".
+--   That "or" is genuine, and the 2-value enum reproduces it exactly. Left alone.
+
+
+-- ============================================================================================================
+-- R-7  ENUMS CLOSING A LIST THE SOURCE PRINTS AS OPEN OR EXEMPLARY (6 fields + gate CR-019)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- §4.6.1, printed p.9 = PDF p.17 (image-confirmed), governs the whole action taxonomy of Clause 4.6:
+--   "The actions are NOT EXHAUSTIVE, nor necessarily independent and mutually exclusive. They can be
+--    implemented individually or combined in any configuration which helps to enable the organization's
+--    circular economy value creation models in accordance with the circular economy principles."
+-- Four enums nevertheless present the Clause 4.6 subclause headings as a CLOSED option set:
+--   added_value_action (9613a0f5-..., 5 values, §4.6.2), value_retention_action (591f547a-..., 6 values,
+--   §4.6.3), value_recovery_action (45d1cb97-..., 7 values, §4.6.4), transition_support_action
+--   (22ff0fea-..., 7 values, §4.6.6).
+-- Two more close explicitly EXEMPLARY lists:
+--   shared_infrastructure (4b9a482c-..., 3 values, §7.4). Printed, printed p.26 = PDF p.34:
+--     "EXAMPLE COMPONENTS of such an infrastructure INCLUDE:" then three dashes.
+--   other_consideration (d2181237-..., 6 values, §6.2.12). Printed, printed p.24 = PDF p.32:
+--     "an organization CAN identify potential risks and opportunities by exploring:" then six dashes.
+-- AND gate CR-019 (811333f6-63f5-4fa0-b46a-3bd7da2c382e, ws 08, §7.4) enforces the exemplary one:
+--     condition "shared_infrastructure IS NOT NULL" - i.e. the worksheet warns unless the user picks one of
+--     three items the standard prints as examples. Presence enforcement over an "e.g." list.
+-- PROPOSED: add a free-text "other / sonstige" escape to the six enums (the standard's own "not exhaustive"
+--   is the authority for it), OR pair each enum with a companion text field. Both are STRUCTURE changes and
+--   both touch the renderer, so no literal SQL is guessed here; per the 2026-08-01 "fixed options => selection
+--   widget" ruling the escape hatch is the smaller change and is recommended.
+-- SEPARATELY PROPOSED (this one is unambiguous - drop the enforcement of an example list):
+--   update public.compliance_requirements set condition = ''
+--    where id = '811333f6-63f5-4fa0-b46a-3bd7da2c382e';       -- NO: this recreates the R-1/R-2 empty-gate
+--                                                             -- defect. Delete it instead:
+--   delete from public.compliance_requirements where id = '811333f6-63f5-4fa0-b46a-3bd7da2c382e';
+--   ROLLBACK INVERSE:
+--     insert into public.compliance_requirements (id, worksheet_template_id, code, severity, condition,
+--       clause_reference, source_quote, requires_attestation)
+--     select '811333f6-63f5-4fa0-b46a-3bd7da2c382e', wt.id, 'CR-019', 'warn',
+--            'shared_infrastructure IS NOT NULL', '§7.4', null, false
+--       from public.worksheet_templates wt join public.standards s on s.id = wt.standard_id
+--      where s.code = 'ISO-59010' and wt.code = 'ISO-59010-08';
+
+
+-- ============================================================================================================
+-- R-8  indicator_category - §4.5 LIST vs FIGURE 4 LIST DISAGREE INSIDE THE SOURCE
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Field indicator_category (79ed1c19-22d5-4209-9463-500d8c7657a1, ws 04) carries 5 values:
+--   resource_inflows / resource_outflows / energy / water / economic.
+-- That reproduces §4.5 EXACTLY. Printed, §4.5, printed p.8 = PDF p.16 (image-confirmed):
+--   "ISO 59020 categorizes these indicators as follows: - Resource inflows: [...] - Resource outflows: [...]
+--    - Energy: [...] - Water: [...] - Economic: [...]"
+-- BUT Figure 4 ("Framework to determine a circular economy strategy"), printed p.20 = PDF p.28
+--   (image-confirmed), prints a DIFFERENT set in its "Circularity performance to identify gaps and
+--   opportunities" box, under the heading "Categories":
+--   "Resource (inflows/outflows) | Waste and emissions | Energy | Water | Economic and other indicators"
+--   - i.e. it splits out "Waste and emissions" as its own category (§4.5 folds waste/emissions into resource
+--   outflows) and widens "Economic" to "Economic and other indicators".
+-- THIS IS THE SOURCE DISAGREEING WITH ITSELF, not an encoding error, and the encoding picked the normative
+--   prose over the figure - which is the right call. It is logged so nobody "fixes" the field toward the
+--   figure later.
+-- NO SQL. Nothing to roll back. Owner may wish to note it in the FDIS ballot comments if the draft is still
+--   open (it is not - voting terminated 2024-04-16), or verify which list survived into the published
+--   edition when R-0 is executed.
+
+
+-- ============================================================================================================
+-- R-9  CR-009 - CONDITIONAL OBLIGATION ENFORCED UNCONDITIONALLY
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- Gate id 7712fa4d-f903-49c4-a1e1-c2a52970b96b, code CR-009, worksheet ISO-59010-05, severity=warn,
+--   clause_reference "§4.6", condition:
+--     "added_value_action IS NOT NULL AND value_retention_action IS NOT NULL AND
+--      value_recovery_action IS NOT NULL"
+-- All three fields are is_required=FALSE, so this gate is NOT a no-op - it is the thing that actually forces
+--   the user to name one action from EACH of the three categories. The source says the opposite. Printed,
+--   §4.6.1, printed p.9 = PDF p.17 (image-confirmed):
+--     "The actions are not exhaustive, nor necessarily independent and mutually exclusive. They can be
+--      implemented INDIVIDUALLY or combined IN ANY CONFIGURATION which helps to enable the organization's
+--      circular economy value creation models [...]"
+-- An organization that legitimately transitions by value retention alone (e.g. a repair-and-lease business)
+--   is warned by the Wizard for a configuration the standard explicitly permits.
+-- PROPOSED SQL (turn the AND into an OR - at least one action of any kind, which is what §4.6 supports):
+--   update public.compliance_requirements
+--      set condition = 'added_value_action IS NOT NULL OR value_retention_action IS NOT NULL OR value_recovery_action IS NOT NULL',
+--          source_quote = 'The actions are not exhaustive, nor necessarily independent and mutually exclusive. They can be implemented individually or combined in any configuration - printed p.9 (ISO/FDIS 59010:2024(en), FINAL DRAFT)'
+--    where id = '7712fa4d-f903-49c4-a1e1-c2a52970b96b';
+-- ROLLBACK INVERSE:
+--   update public.compliance_requirements
+--      set condition = 'added_value_action IS NOT NULL AND value_retention_action IS NOT NULL AND value_recovery_action IS NOT NULL',
+--          source_quote = null
+--    where id = '7712fa4d-f903-49c4-a1e1-c2a52970b96b';
+-- NOTE: ecosystem_regeneration_action (§4.6.5) and transition_support_action (§4.6.6) are the two Clause 4.6
+--   action categories the gate does NOT mention at all. If the OR form is adopted they should be added to it
+--   for symmetry; that is included in the proposed condition only if the owner asks, since adding them makes
+--   the gate weaker still.
+
+
+-- ============================================================================================================
+-- R-10  FIELD DESCRIPTIONS THAT HARDEN OR GLOSS THE PRINTED TEXT (2 fields)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- All 51 descriptions were read against the printed clause. NO invented value, unit, threshold or
+--   specification was found in any of them (the document prints none to invent). Two descriptions
+--   nevertheless restate the source more firmly than the source states itself:
+--
+--   (a) goal_measurable (c23ee82a-861e-427b-92a9-2cc8efcfb6b9). Current description:
+--         "To set measurable goals, the organization CONDUCTS an assessment by reviewing and mapping all its
+--          activities and interactions within and between its value chains and broader value network (§4.1)."
+--       Printed, §4.1, printed p.5 = PDF p.13: "To HELP set measurable goals, an organization CAN CONDUCT an
+--          assessment by reviewing and mapping all its activities and interactions within and between its
+--          value chains and broader value network."
+--       The description drops "help" and turns "can conduct" into "conducts".
+--       PROPOSED SQL:
+--         update public.fields set description = 'To help set measurable goals, an organization can conduct an assessment by reviewing and mapping all its activities and interactions within and between its value chains and broader value network (§4.1).'
+--          where id = 'c23ee82a-861e-427b-92a9-2cc8efcfb6b9';
+--       ROLLBACK INVERSE:
+--         update public.fields set description = 'To set measurable goals, the organization conducts an assessment by reviewing and mapping all its activities and interactions within and between its value chains and broader value network (§4.1).'
+--          where id = 'c23ee82a-861e-427b-92a9-2cc8efcfb6b9';
+--
+--   (b) preliminary_action_considered (23051059-67fb-4f4a-8a4c-cb08c803a2de). Current description:
+--         "Organizations should consider refuse and rethink as preliminary actions BEFORE OTHER ACTIONS
+--          (§4.6.1)."
+--       Printed, §4.6.1, printed p.9 = PDF p.17, in full: "Organizations should consider refuse and rethink
+--          as preliminary actions." The trailing "before other actions" is a gloss - defensible from the word
+--          "preliminary" and from Table 2's ordering, but it is not printed.
+--       PROPOSED SQL:
+--         update public.fields set description = 'Organizations should consider refuse and rethink as preliminary actions (§4.6.1).'
+--          where id = '23051059-67fb-4f4a-8a4c-cb08c803a2de';
+--       ROLLBACK INVERSE:
+--         update public.fields set description = 'Organizations should consider refuse and rethink as preliminary actions before other actions (§4.6.1).'
+--          where id = '23051059-67fb-4f4a-8a4c-cb08c803a2de';
+
+
+-- ============================================================================================================
+-- R-11  SOURCE'S OWN CROSS-REFERENCE INCONSISTENCY (4.5 vs 4.6 for the SAME KPIs) - NO FIX, LOG ONLY
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________
+-- The KPI selection clause is §4.5 ("Understanding current circularity performance ... by selecting
+--   circularity key performance indicators (KPIs)", printed p.8 = PDF p.16). §4.6 is "Considering actions
+--   that contribute to a circular economy" and defines no KPIs. Yet the document points at 4.6 twice and at
+--   4.5 once for the same KPIs (all three image-confirmed):
+--     §6.1, printed p.22 = PDF p.30: "The objectives and interim results should be expressed in KPIs used to
+--       assess the status of circularity as described in 4.6."
+--     §7.2, printed p.26 = PDF p.34: "The members should resolve trade-offs potentially arising from
+--       individual optimization of the KPIs described in 4.6."
+--     §8.1, printed p.26 = PDF p.34: "an organization should measure and assess the results of those actions
+--       as its circularity performance, which aligns with the KPIs described in 4.5."
+-- The encoding reproduces the source faithfully in both directions (plan_objectives_in_kpis cites 4.6,
+--   performance_measured cites 4.5), so there is NOTHING TO FIX in prod. It is logged because it looks like
+--   an encoding error and will be "corrected" by someone otherwise, and because it is exactly the class of
+--   defect an FDIS ballot exists to catch - another reason to execute R-0.
+-- NO SQL. Nothing to roll back.
+
+
+-- ============================================================================================================
+-- R-12  AUDIT CHECKLIST - EXPLICIT NEGATIVE RESULTS (so their absence is auditable)
+-- ============================================================================================================
+-- ☐ RATIFIED  ______________________  (nothing to apply; this block records what was looked for and NOT found)
+-- All 23 gates and all 51 fields were read individually against the printed clauses.
+--   Empty conditions ................................ FOUND 2: CR-018 (R-1), CR-021 (R-2).
+--   condition = 'TRUE' literal ...................... NOT FOUND. No gate carries a tautological literal.
+--   Effective no-ops (IS NOT NULL on a required field) FOUND 3: CR-001, CR-007, CR-012 (R-4).
+--   Tautology over an equation output ............... NOT APPLICABLE. ISO-59010 has 0 equations.
+--   ">= 0" floor on a legitimately negative quantity . NOT APPLICABLE. No numeric field exists; all 51
+--     fields are text (11), boolean (28) or enum (12). No gate contains a numeric comparison of any kind.
+--   Presence-only condition hiding a printed limit ... NOT FOUND, and CANNOT EXIST: the document prints no
+--     limit, threshold, tolerance, range or numeric value anywhere in Clauses 1-8 or Annex A. Presence is the
+--     only thing there is to test.
+--   Number lifted from an example and enforced ....... NOT FOUND. The only numbers in the document are
+--     clause/figure references, the ballot dates, the ICS codes and "about 190 member companies" in the
+--     informative §A.1 example - none of which is encoded anywhere.
+--   AND/OR inversion ................................. FOUND 1: CR-009 (R-9). All other gates use AND over
+--     obligations the source states conjunctively (CR-005 §4.4 boundary defined AND aligned; CR-006 §4.5 KPI
+--     selected AND performance assessed; CR-012 §5.2; CR-017 §7.2; CR-020 §8.1) - those ANDs are correct.
+--     No gate uses OR at all, which is why CR-009 could not be caught by inspection of the operator mix.
+--   Inverted condition / INVERTED BOUNDARY ........... NOT FOUND, and CANNOT EXIST: no boundary value is
+--     printed or encoded, so a ceiling cannot have been encoded as a floor.
+--   Boundary inclusivity (< vs <=) ................... NOT APPLICABLE. No inequality appears in any gate.
+--   Duplicate gates / strict subsets ................. FOUND 1 near-duplicate: CR-021 is a SECOND, EMPTY gate
+--     on §8.1 alongside CR-020 on the same clause and worksheet (R-2). No strict-subset pair exists among
+--     the 21 gates that do have conditions.
+--   Mis-homed gates .................................. NOT FOUND. Every one of the 21 conditioned gates
+--     references only fields that live on its own worksheet, and every clause_reference matches the clause
+--     range its worksheet covers (ws01 §1/§3; ws02 §4.1-§4.2; ws03 §4.3-§4.4; ws04 §4.5; ws05 §4.6;
+--     ws06 §5; ws07 §6; ws08 §7; ws09 §8). CR-018 and CR-021 are empty but are homed on the right worksheet.
+--   Unsatisfiable gates .............................. NOT FOUND. Every condition is satisfiable by filling
+--     the worksheet.
+--   Enum offering fewer options than a printed obligation permits ... FOUND (the open-list class): 6 enums
+--     close lists the source prints as non-exhaustive or exemplary (R-7). No enum was found that omits a
+--     printed option WITHIN the list it claims to reproduce - all 12 enums were counted against the printed
+--     items and match item-for-item (10/10 §4.2, 2/2 §4.3, 5/5 §4.5, 5/5 §4.6.2, 6/6 §4.6.3, 7/7 §4.6.4,
+--     7/7 §4.6.6, 13/13 Table 2, 6/6 §5.2, 6/6 §6.2.12, 10/10 §7.3, 3/3 §7.4).
+--   Conditional obligation enforced unconditionally .. FOUND 1: CR-009 (R-9).
+--   Invented values / units / specifications ......... NOT FOUND anywhere, INCLUDING in descriptions. All 51
+--     descriptions were read against their clause. Two restate the source too firmly (R-10); none invents a
+--     value, unit or specification. unit='-' on all 51 fields, correctly: nothing is a quantity.
+--   Single-select over a printed conjunction ......... FOUND 5 (R-6).
+--   Missing scope predicate .......................... NOT FOUND. Clause 1 prints no conditional scope to
+--     encode: "This document is applicable to any organization regardless of size, sector or region."
+--     (printed p.1 = PDF p.9). There is no size/sector/region gate to be missing.
+--   Required flag with no mandatory verb behind it ... FOUND 36 of 36 (R-5). Zero "shall" exists.
+--   Equation outputs consumed by nothing ............. NOT APPLICABLE. 0 equations, and correctly so: the
+--     document prints no formula, no worked calculation and no numeric example. Nothing is missing.
+--   Worksheets with zero fields ...................... NOT FOUND. All 9 worksheets carry fields
+--     (01:4, 02:5, 03:6, 04:4, 05:8, 06:5, 07:6, 08:7, 09:6 = 51).
+--   source_quote carrying no requirement ............. NOT APPLICABLE in the usual sense: all 23 gate
+--     source_quote values and all 51 field source_quote values are NULL (R-3). Nothing carries anything.
+--   Gates with no source_quote ....................... FOUND 23 of 23 (R-3).
+--   Wrong page refs .................................. NOT FOUND. No field or gate carries a page reference
+--     at all; clause_reference is used throughout, and all 51 field clause refs and all 23 gate clause refs
+--     were checked against the printed clause structure and are correct. (One is worth naming as CORRECT and
+--     surprising: plan_objectives_in_kpis cites §6.1, whose printed text really does point to 4.6 - R-11.)
+--   Block gates on soft text ......................... NOT FOUND, and the reason is worth recording: there
+--     are NO block gates in this standard. All 23 rows are severity='warn'. For a document with zero "shall"
+--     that is the correct encoding, and nothing in this file proposes raising any of them.
+--   Phantom fields (enum tokens materialised as fields) NOT FOUND. Every one of the 51 fields has a label, a
+--     clause_reference and a description; none is an orphaned enum token.
+-- ============================================================================================================
