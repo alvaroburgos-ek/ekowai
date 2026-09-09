@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/select';
 import { CitationPicker } from '@/components/documents/citation-picker';
 import { CitationChips } from '@/components/documents/citation-chips';
 import { ClauseChip } from '@/components/norm-text/clause-chip';
+import { SourceQuoteDisclosure } from './source-quote-disclosure';
 import { VerifyButton } from './verify-button';
 import { AcAsRatioCheckStatus } from './ac-as-ratio-check-status';
 import { AsmMethodStatus, type AsmMethodBadgeState } from './asm-method-status';
@@ -21,7 +22,16 @@ type FieldDef = {
   dataType: 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json';
   isRequired: boolean;
   enumValues:
-    | Array<{ value: string; label_de: string | null; label_en: string | null; order_index?: number }>
+    | Array<{
+        value: string;
+        label_de: string | null;
+        label_en: string | null;
+        order_index?: number;
+        /** Where this option comes from in the guideline, as written at encode
+         * time (e.g. "Tab. 8", "§4.4.2"). 3 946 options carry one and none of
+         * them was ever shown to the engineer until now. */
+        regulation_reference?: string | null;
+      }>
     | null;
   validationRules: {
     min?: number;
@@ -39,6 +49,10 @@ type FieldDef = {
   verifiedByLabel?: string | null;
   verifiedAt?: string | null;
   verificationNote?: string | null;
+  /** The sentence from the guideline this field was verified against, word for
+   * word. 7 100 fields now carry one; before this it was stored and never
+   * shown, so the engineer had to trust the label or open the PDF. */
+  verificationQuote?: string | null;
 };
 
 type Props = {
@@ -263,6 +277,14 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
           )}
           {overridePill}
         </div>
+        {field.verificationQuote && (
+          <SourceQuoteDisclosure
+            quote={field.verificationQuote}
+            clauseReference={field.clauseReference}
+            verificationStatus={field.verificationStatus}
+            locale={locale}
+          />
+        )}
         {field.description && (
           <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>
         )}
@@ -585,6 +607,28 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
               </option>
             ))}
           </Select>
+        );
+      })()}
+
+      {/* Where the CHOSEN option comes from in the guideline. This is the half of
+          the DWA-A 138-1 surface picker that every other enum was missing: there,
+          picking a surface type shows "Tab. 9: 0,9 / 1,0" so the engineer sees the
+          origin of what they just selected. 3 946 options across the library carry
+          such a reference and none of it was ever rendered. A native <option>
+          cannot hold it, so it is shown under the control, for the current pick. */}
+      {field.dataType === 'enum' && (() => {
+        const v = value?.type === 'enum' ? value.value : null;
+        if (!v || !field.enumValues) return null;
+        const chosen = field.enumValues.find((o) => o.value === v);
+        const ref = chosen?.regulation_reference?.trim();
+        // "workflow" marks an app-process option, not a guideline citation —
+        // showing it would imply a source the guideline never printed.
+        if (!ref || ref.toLowerCase() === 'workflow') return null;
+        return (
+          <p className="mt-1 text-[11px] text-ink/50">
+            {locale === 'de' ? 'Quelle der Auswahl: ' : 'Source of this option: '}
+            <span className="text-ink/70">{ref}</span>
+          </p>
         );
       })()}
 
