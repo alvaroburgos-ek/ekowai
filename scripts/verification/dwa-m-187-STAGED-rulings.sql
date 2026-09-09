@@ -43,10 +43,16 @@
 -- Proposal: deactivate the 46 foreign-chapter copies on 06/07/08/09 (their gates move in S-3); move ok_boolean + the two equations to M187-22.
 -- draft-edition: escalate
 -- ☐ RATIFIED
+-- CORRECTION 2026-09-09 (claims audit, audit-staged-claims.mjs): the id
+-- 'c34041f7-5e8b-4aef-993b-2bc0b2829c95' was listed below and exists in NO table in
+-- production — not fields, not equations, not compliance_requirements. It has been
+-- removed. The list now names 45 field ids, every one of which resolves. The prose above
+-- says "46 foreign-chapter copies"; the true figure is 45. Nothing else changed. This was
+-- the ONLY unresolvable id found across all 833 staged blocks.
 -- update public.fields set active=false where id in (
 --   '84d81522-20fe-4399-ab72-a41cdb2338f5','cad7e906-1f5e-4dbd-872c-327feb7986a6','a1a059bd-f956-4ec4-956b-455667deeb59','77be6098-52e4-465a-8473-f2679de80976','cc437008-8509-4b4d-b933-25f631a1423e','8f81d616-611f-4ed9-8e33-90701b0b1b10','b9dc06af-9adb-4cc2-a464-ac7eb53fe9e0','ba14d870-8eb9-4caa-b9af-e64e9b07bb34','c22e80b8-f60b-4ddf-9b0e-b76baa99c5fc',
 --   '89e8869b-4763-4529-871f-5764a65f89f5','29100c06-4fb6-4e31-9836-f08cafb213fd','7e571d9c-3765-4c56-988c-6ab7f011efdc','58c1bbad-3238-4e8b-b63d-a64b1416ff9d','16c417ea-00cd-421a-a8ad-136023356b90','0144ad68-f146-4b77-ad72-578ec720adb8',
---   '15c25673-2f82-498c-8cd8-f65f7be5e0a6','d7a21692-1075-4799-9431-5bf1c1bff506','92291b3d-67ac-45d8-b94b-3e21068b192c','86edc7b4-a50a-42b7-9e46-0aaabf2c109a','a8c75171-63b9-4f8b-ae6c-d9e2cb8f8feb','bffd8594-0b41-4380-a616-7f271e0d96fc','d3222e72-9d64-4bca-b7d6-5468b60209d9','deb2ad84-d140-4b3f-99c3-d90769b2f123','034fc708-1dd3-427b-bde7-8d7e0d9dacb3','c9fe11f1-3410-494c-bde7-3f04e98004eb','c34041f7-5e8b-4aef-993b-2bc0b2829c95','a83b6dbe-22bc-4338-aaad-dfe3873d4df4','d4e7feb7-0144-4f14-8f5c-d32f94c6cbe4','f08da7e8-cb12-4f32-af07-23f59556b5bb','065809ba-14e6-47b3-bf72-0e065401fb76',
+--   '15c25673-2f82-498c-8cd8-f65f7be5e0a6','d7a21692-1075-4799-9431-5bf1c1bff506','92291b3d-67ac-45d8-b94b-3e21068b192c','86edc7b4-a50a-42b7-9e46-0aaabf2c109a','a8c75171-63b9-4f8b-ae6c-d9e2cb8f8feb','bffd8594-0b41-4380-a616-7f271e0d96fc','d3222e72-9d64-4bca-b7d6-5468b60209d9','deb2ad84-d140-4b3f-99c3-d90769b2f123','034fc708-1dd3-427b-bde7-8d7e0d9dacb3','c9fe11f1-3410-494c-bde7-3f04e98004eb','a83b6dbe-22bc-4338-aaad-dfe3873d4df4','d4e7feb7-0144-4f14-8f5c-d32f94c6cbe4','f08da7e8-cb12-4f32-af07-23f59556b5bb','065809ba-14e6-47b3-bf72-0e065401fb76',
 --   'b4d184bb-7c95-4445-89d1-db6b559d9e29','e0e47030-89bf-4573-bcfb-0770768a8298','aa0f425d-9c77-4471-ad2a-89c8ca160b10','86b0947a-b63e-47e6-8960-7b64c03194c9','a7f1126f-c1f7-42e4-b105-a87d7e460baa','0bd652e0-5617-4908-be68-9f16d7c1a5fa','06145c85-7660-435e-aa4c-294d0da38ce1','21fa5c7a-9523-4bf0-a334-5fc4b0dba812','61328585-7b69-465d-944f-dff02dd1f117','3db63626-77f2-46c5-ad1c-3bce620933c3','8dfe6c55-06d0-48f3-83be-f0eef238c364','44b96310-e92b-461e-a35b-217faf5e5878','648c0a64-9959-42f1-9d01-ce42fe9756d2','c9266c02-a423-47f8-aebe-04a848f07684','044afa9f-8f7e-453b-9dea-343377d03dd6');
 -- update public.fields set worksheet_template_id=(select id from public.worksheet_templates where code='M187-22' and standard_id='d165c02d-6f30-4185-8dda-06752dcfd891') where id='f20771de-530e-444d-ae2a-7fe45009df49';   -- ok_boolean → M187-22
 -- update public.equations set active=false where id in ('df181975-34ae-474a-b1bc-a62e1bfef98e','6b3dc34c-a3da-4cfd-9e3a-803109b1bd12');   -- M187-09 copies; the M187-22 copies stay
