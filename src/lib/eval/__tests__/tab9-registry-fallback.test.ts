@@ -24,6 +24,15 @@ describe('tab9 accessor over the registry', () => {
     expect(getTab9Entries()).toHaveLength(30);
     expect(lookupTab9('park_flach')?.cm).toBe(0.1);
   });
+  it('minor fix: registry-backed entries carry the REGISTERED table\'s own standard_code/edition, not a hardcoded literal', () => {
+    const t = tab9AsTable();
+    t.standard_code = 'DWA-A-138-1';
+    t.edition = '2099-01'; // a hypothetical future edition, distinct from the TS-fallback literal
+    registerTables([t]);
+    const entry = lookupTab9('park_flach');
+    expect(entry?.standard).toBe('DWA-A-138-1');
+    expect(entry?.edition).toBe('2099-01');
+  });
   it('a registered row that fails validation is skipped — the rest still come from the registry', () => {
     const t = tab9AsTable();
     t.rows.find((r) => r.row_key === 'park_flach')!.values.cm = 'x'; // malformed jsonb row

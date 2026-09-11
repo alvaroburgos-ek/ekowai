@@ -358,10 +358,10 @@ export default async function WorksheetPage({
               verifiedByLabel: verifiedByUserId ? verifierLabels.get(verifiedByUserId) ?? null : null,
               verifiedAt: verifiedAt ? verifiedAt.toISOString() : null,
               verificationNote,
-              widget: (f as typeof f & { widget?: string | null }).widget ?? null,
-              uiConfig: (f as typeof f & { uiConfig?: unknown }).uiConfig ?? null,
-              lookup: (f as typeof f & { lookup?: unknown }).lookup ?? null,
-              visibleWhen: (f as typeof f & { visibleWhen?: string | null }).visibleWhen ?? null,
+              widget: f.widget ?? null,
+              uiConfig: f.uiConfig ?? null,
+              lookup: f.lookup ?? null,
+              visibleWhen: f.visibleWhen ?? null,
             };
           // TODO(guideline-to-tool): replace as-never cast with the real FieldDef type
           }) as never}

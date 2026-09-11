@@ -20,8 +20,20 @@ export type Tab9Entry = {
   cs: number;
   kind: 'paved' | 'unpaved';
   group: 1 | 2 | 3;
-  standard: 'DWA-A 138-1';
-  edition: '2024-10';
+  /**
+   * Provenance. TS-fallback rows always carry the literal 'DWA-A 138-1' /
+   * '2024-10'. Registry-backed rows (fromRegistry()) carry the registered
+   * RegulationTable's own `standard_code`/`edition` verbatim — minor fix
+   * (guideline-to-tool final review): previously hardcoded to the
+   * TS-fallback literals even when reading from the registry, so a
+   * registered table of a different edition would misreport its own
+   * provenance. Widened from the literal union to `string` because
+   * `standard_code` uses the DB dash form ('DWA-A-138-1') while the
+   * TS-fallback literal uses the display space form ('DWA-A 138-1') — two
+   * genuinely different strings, not a typo.
+   */
+  standard: string;
+  edition: string;
 };
 
 type Raw = Omit<Tab9Entry, 'kind' | 'standard' | 'edition'>;
@@ -103,8 +115,8 @@ function fromRegistry(): readonly Tab9Entry[] | null {
       cs,
       kind,
       group: group as 1 | 2 | 3,
-      standard: 'DWA-A 138-1',
-      edition: '2024-10',
+      standard: t.standard_code,
+      edition: t.edition,
     });
   }
   return rows.length > 0 ? rows : null;
