@@ -3,7 +3,19 @@ import { SELECTION_CONFIGS, toDbShape } from '../../src/lib/eval/selection-field
 
 type EnumValue = { value: string; label_de: string; label_en?: string | null; order_index?: number };
 
-type Entry = { standard: string; symbol: string; keepProdEnum?: EnumValue[] };
+/**
+ * `priorEnumValues` is the prod `enum_values` value captured (in-session,
+ * read from prod) BEFORE any phase-2 migration touches this row — `null`
+ * when prod had none. It is the rollback's restore target, and (I-1
+ * controller ruling) it also gates whether the FORWARD migration is allowed
+ * to touch this row at all: a non-null `priorEnumValues` means prod already
+ * has real, hand-authored enum values for this symbol that the generic
+ * TS-derived `SELECTION_CONFIGS` label list does not reproduce — writing
+ * over it would silently replace real production content, and only the
+ * `keepProdEnum` D-1-style entries are exempt (they carry prod's own
+ * enum_values verbatim as the value to write, not the TS-derived list).
+ */
+type Entry = { standard: string; symbol: string; keepProdEnum?: EnumValue[]; priorEnumValues?: unknown };
 
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
 const j = (v: unknown) => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`;
@@ -25,9 +37,22 @@ function dedupe(entries: Entry[]): Entry[] {
   return out;
 }
 
+// I-1 (controller ruling): the migration is allowed to touch a row only
+// when either (a) prod had no prior enum_values for this symbol
+// (`priorEnumValues == null`), or (b) it did, but the entry is a
+// `keepProdEnum` row that writes prod's own values back verbatim instead of
+// the TS-derived label list. Every other non-null-`priorEnumValues` entry
+// is SKIPPED entirely by both the forward and the rollback emitter — the
+// field keeps `widget IS NULL` and keeps rendering via the TS
+// (`SELECTION_CONFIGS`) fallback registry until a future pass delivers a
+// real value/label checklist for it.
+function touched(entries: Entry[]): Entry[] {
+  return dedupe(entries).filter((e) => e.priorEnumValues == null || e.keepProdEnum);
+}
+
 export function emitSelectionConfigSql(entries: Entry[]): Map<string, string> {
   const out = new Map<string, string[]>();
-  for (const e of dedupe(entries)) {
+  for (const e of touched(entries)) {
     const config = SELECTION_CONFIGS[e.symbol];
     if (!config) throw new Error(`no SELECTION_CONFIGS entry for ${e.symbol}`);
     const db = toDbShape(e.symbol, config, { keepProdEnum: e.keepProdEnum });
@@ -45,18 +70,28 @@ export function emitSelectionConfigSql(entries: Entry[]): Map<string, string> {
   return new Map([...out].map(([k, v]) => [k, [...v, 'COMMIT;'].join('\n') + '\n']));
 }
 
-// Rollback undoes exactly what the forward migration wrote for each entry:
-// widget/ui_config always; enum_values only when the forward write set it
-// (select_many without keepProdEnum) — same condition as emitSelectionConfigSql,
-// so a D-1-style keepProdEnum entry's prod enum_values is never touched.
+// Rollback undoes exactly what the forward migration wrote for each entry
+// the forward migration actually touched (same `touched()` filter as
+// emitSelectionConfigSql — a skipped entry's widget/ui_config/enum_values
+// were never written, so its rollback would be a no-op UPDATE at best and a
+// silent overwrite of unrelated prod state at worst; never emit it).
+// widget/ui_config are always nulled back out for a touched entry;
+// enum_values is restored to the captured `priorEnumValues` (NULL when it
+// was null, the captured jsonb otherwise) only when the forward write
+// actually set enum_values — same select_many-without-keepProdEnum
+// condition as the forward emitter, so a keepProdEnum entry's prod
+// enum_values (never written by forward) is never touched by rollback
+// either.
 export function emitSelectionRollbackSql(entries: Entry[]): string {
   const rollback: string[] = ['BEGIN;'];
-  for (const e of dedupe(entries)) {
+  for (const e of touched(entries)) {
     const config = SELECTION_CONFIGS[e.symbol];
     if (!config) throw new Error(`no SELECTION_CONFIGS entry for ${e.symbol}`);
     const db = toDbShape(e.symbol, config, { keepProdEnum: e.keepProdEnum });
     const sets = ['widget = NULL', 'ui_config = NULL'];
-    if (db.widget === 'select_many' && !e.keepProdEnum) sets.push('enum_values = NULL');
+    if (db.widget === 'select_many' && !e.keepProdEnum) {
+      sets.push(e.priorEnumValues == null ? 'enum_values = NULL' : `enum_values = ${j(e.priorEnumValues)}`);
+    }
     rollback.push(
       `UPDATE fields f SET ${sets.join(', ')} FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.symbol = ${q(e.symbol)} AND s.code = ${q(e.standard)} AND f.worksheet_template_id = w.id;`
     );

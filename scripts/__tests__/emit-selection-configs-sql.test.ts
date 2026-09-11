@@ -35,6 +35,32 @@ describe('emitSelectionConfigSql', () => {
     ]);
     expect((m.get('DWA-M-1200-3')!.match(/UPDATE fields/g) ?? []).length).toBe(1);
   });
+  it('I-1: skips an entry with non-null priorEnumValues and no keepProdEnum — no UPDATE emitted, no file key for a standard left with nothing', () => {
+    const m = emitSelectionConfigSql([
+      { standard: 'DWA-M-1200-1', symbol: 'indikatorchemikalien_kat1', priorEnumValues: [{ value: 'x', label_de: 'X', order_index: 0 }] },
+    ]);
+    expect(m.has('DWA-M-1200-1')).toBe(false);
+  });
+  it('I-1: does NOT skip a non-null-priorEnumValues entry that also carries keepProdEnum', () => {
+    const m = emitSelectionConfigSql([
+      {
+        standard: 'DWA-A-138-1',
+        symbol: 'a138_anlagentyp_kandidaten',
+        priorEnumValues: [{ value: 'x', label_de: 'X', order_index: 0 }],
+        keepProdEnum: [{ value: 'x', label_de: 'X', order_index: 0 }],
+      },
+    ]);
+    expect(m.has('DWA-A-138-1')).toBe(true);
+    expect((m.get('DWA-A-138-1')!.match(/UPDATE fields/g) ?? []).length).toBe(1);
+  });
+  it('I-1: a skipped entry does not suppress other kept entries for the same standard', () => {
+    const m = emitSelectionConfigSql([
+      { standard: 'DWA-M-820-2', symbol: 'lph_completed', priorEnumValues: [{ value: 'x', label_de: 'X', order_index: 0 }] },
+      { standard: 'DWA-M-820-2', symbol: 'included_hoai_phases' },
+    ]);
+    expect((m.get('DWA-M-820-2')!.match(/UPDATE fields/g) ?? []).length).toBe(1);
+    expect(m.get('DWA-M-820-2')).not.toContain("'lph_completed'");
+  });
 });
 
 describe('emitSelectionRollbackSql', () => {
@@ -56,5 +82,20 @@ describe('emitSelectionRollbackSql', () => {
       { standard: 'DWA-M-277E', symbol: 'source_set' },
     ]);
     expect((sql.match(/UPDATE fields/g) ?? []).length).toBe(1);
+  });
+  it('I-1: restores enum_values to NULL when priorEnumValues was null or absent (unchanged from before this fix)', () => {
+    const undefinedCase = emitSelectionRollbackSql([{ standard: 'DWA-M-820-1', symbol: 'applicable_legal_bases' }]);
+    expect(undefinedCase).toContain('enum_values = NULL');
+  });
+  it('I-1: restores enum_values to NULL when priorEnumValues was null (unchanged from before this fix)', () => {
+    const sql = emitSelectionRollbackSql([{ standard: 'DWA-M-820-1', symbol: 'applicable_legal_bases', priorEnumValues: null }]);
+    expect(sql).toContain('enum_values = NULL');
+  });
+  it('I-1: skips an entry with non-null priorEnumValues and no keepProdEnum — no UPDATE emitted at all', () => {
+    const sql = emitSelectionRollbackSql([
+      { standard: 'DWA-M-820-3', symbol: 'applicable_lph', priorEnumValues: [{ value: 'lph_0', label_de: 'LPH 0', order_index: 0 }] },
+    ]);
+    expect(sql).not.toContain('UPDATE fields');
+    expect(sql).toBe('BEGIN;\nCOMMIT;\n');
   });
 });
