@@ -82,7 +82,7 @@ ALTER TABLE worksheet_sections ADD COLUMN visible_when text;
 
 ### 5.2 `regulation_tables` + `regulation_table_rows` (new)
 
-Table: `(standard_code, edition, table_code)` unique; `title_de`, `clause_reference`, `page_ref`, `key_columns text[]`, `value_columns jsonb`, `override_policy` ∈ `locked | anhaltswert | kann | messwert`, `override_quote`, `verification_status`. Rows: `row_key`, `keys jsonb`, `group_label`, `label_de`, `order_index`, `values jsonb`, `verbatim_quote text NOT NULL`. Rows are immutable once `engineer_verified`; a change is a new edition. Full DDL and three worked examples (A138 Tab. 9 with a byte-identical `SurfaceRow`; DIN-1989-1 `e` ← Tab. 3; FLL-GAR Tab. 22 two-key limit) are in `ARCH-PROPOSAL-fable.md` §2.
+Table: `(standard_code, edition, table_code)` unique; `title_de`, `clause_reference`, `page_ref`, `key_columns text[]`, `value_columns jsonb`, `override_policy` ∈ `locked | anhaltswert | kann | messwert`, `override_quote`, `verification_status`. Rows: `row_key`, `keys jsonb`, `group_label`, `label_de`, `order_index`, `row_values jsonb` (`values` is reserved in Postgres), `verbatim_quote text NOT NULL`. Rows are immutable once `engineer_verified`; a change is a new edition. Full DDL and three worked examples (A138 Tab. 9 with a byte-identical `SurfaceRow`; DIN-1989-1 `e` ← Tab. 3; FLL-GAR Tab. 22 two-key limit) are in `ARCH-PROPOSAL-fable.md` §2.
 
 ### 5.3 Code keeps only
 

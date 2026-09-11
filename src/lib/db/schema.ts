@@ -290,7 +290,8 @@ export const regulationTableRows = pgTable(
     groupLabel: text('group_label'),
     labelDe: text('label_de').notNull(),
     orderIndex: integer('order_index').notNull().default(0),
-    values: jsonb('values').notNull(),
+    // SQL column is row_values: "values" is a reserved keyword in PostgreSQL
+    values: jsonb('row_values').notNull(),
     verbatimQuote: text('verbatim_quote').notNull(),
   },
   (t) => ({ uniqTableRow: unique().on(t.tableId, t.rowKey) }),

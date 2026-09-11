@@ -15,4 +15,15 @@ describe('emitSeedSql', () => {
     const t = tab6AsTable(); t.rows[0].verbatim_quote = "it's";
     expect(emitSeedSql([t]).up).toContain("'it''s'");
   });
+  it('uses row_values, not the reserved `values`, as the row-value column token', () => {
+    const { up } = emitSeedSql([tab6AsTable()]);
+    expect(up).toContain('row_values');
+    expect(up).not.toMatch(/\bvalues\s*=/);
+    expect(up).not.toMatch(/,\s*values\s*,/);
+  });
+  it('ends emitted files with a trailing newline', () => {
+    const { up, down } = emitSeedSql([tab6AsTable()]);
+    expect(up.endsWith('\n')).toBe(true);
+    expect(down.endsWith('\n')).toBe(true);
+  });
 });

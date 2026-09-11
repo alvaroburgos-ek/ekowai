@@ -12,16 +12,16 @@ export function emitSeedSql(tables: RegulationTable[]): { up: string; down: stri
   for (const t of tables) {
     up.push(`INSERT INTO regulation_tables (standard_code, edition, table_code, title_de, clause_reference, page_ref, key_columns, value_columns, override_policy, override_quote, verification_status)
 VALUES (${q(t.standard_code)}, ${q(t.edition)}, ${q(t.table_code)}, ${q(t.title_de)}, ${q(t.clause_reference)}, ${q(t.page_ref)}, ${arr(t.key_columns)}, ${j(t.value_columns)}, ${q(t.override_policy)}, ${q(t.override_quote)}, ${q(t.verification_status)})
-ON CONFLICT (standard_code, edition, table_code) DO UPDATE SET title_de = EXCLUDED.title_de, clause_reference = EXCLUDED.clause_reference, key_columns = EXCLUDED.key_columns, value_columns = EXCLUDED.value_columns, override_policy = EXCLUDED.override_policy, override_quote = EXCLUDED.override_quote;`);
+ON CONFLICT (standard_code, edition, table_code) DO UPDATE SET title_de = EXCLUDED.title_de, clause_reference = EXCLUDED.clause_reference, page_ref = EXCLUDED.page_ref, key_columns = EXCLUDED.key_columns, value_columns = EXCLUDED.value_columns, override_policy = EXCLUDED.override_policy, override_quote = EXCLUDED.override_quote;`);
     for (const r of t.rows) {
-      up.push(`INSERT INTO regulation_table_rows (table_id, row_key, keys, group_label, label_de, order_index, values, verbatim_quote)
+      up.push(`INSERT INTO regulation_table_rows (table_id, row_key, keys, group_label, label_de, order_index, row_values, verbatim_quote)
 SELECT id, ${q(r.row_key)}, ${j(r.keys)}, ${q(r.group_label)}, ${q(r.label_de)}, ${r.order_index}, ${j(r.values)}, ${q(r.verbatim_quote)} FROM regulation_tables WHERE standard_code = ${q(t.standard_code)} AND edition = ${q(t.edition)} AND table_code = ${q(t.table_code)}
-ON CONFLICT (table_id, row_key) DO UPDATE SET keys = EXCLUDED.keys, group_label = EXCLUDED.group_label, label_de = EXCLUDED.label_de, order_index = EXCLUDED.order_index, values = EXCLUDED.values, verbatim_quote = EXCLUDED.verbatim_quote;`);
+ON CONFLICT (table_id, row_key) DO UPDATE SET keys = EXCLUDED.keys, group_label = EXCLUDED.group_label, label_de = EXCLUDED.label_de, order_index = EXCLUDED.order_index, row_values = EXCLUDED.row_values, verbatim_quote = EXCLUDED.verbatim_quote;`);
     }
     down.push(`DELETE FROM regulation_tables WHERE standard_code = ${q(t.standard_code)} AND edition = ${q(t.edition)} AND table_code = ${q(t.table_code)};`);
   }
   up.push('COMMIT;'); down.push('COMMIT;');
-  return { up: up.join('\n'), down: down.join('\n') };
+  return { up: up.join('\n') + '\n', down: down.join('\n') + '\n' };
 }
 
 if (process.argv[1]?.endsWith('emit-seed-sql.ts')) {

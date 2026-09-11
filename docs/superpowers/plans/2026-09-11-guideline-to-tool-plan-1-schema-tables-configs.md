@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS regulation_table_rows (
   group_label text,
   label_de text NOT NULL,
   order_index int NOT NULL DEFAULT 0,
-  values jsonb NOT NULL,
+  row_values jsonb NOT NULL, -- "values" is reserved in Postgres
   verbatim_quote text NOT NULL,
   UNIQUE (table_id, row_key)
 );
