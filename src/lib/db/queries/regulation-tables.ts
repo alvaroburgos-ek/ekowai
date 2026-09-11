@@ -50,9 +50,26 @@ export async function loadRegulationTables(standardCode: string): Promise<Regula
  * (The worksheet page keeps its own explicit load-then-pass-as-prop path so
  * the client registry stays in sync with what was rendered.) No-op when the
  * loader returns [] — an unregistered standard is functionally identical to
- * an empty registry (TS-constant fallback). */
+ * an empty registry (TS-constant fallback).
+ *
+ * NEVER THROWS. The `regulation_tables`/`regulation_table_rows` schema
+ * migration may not be applied yet on a given deployment (code can ship
+ * ahead of the owner running the migration) — a query failure here (missing
+ * table, connectivity) must not break the caller, and `saveWorksheet` in
+ * particular must never fail a save because of this. Any error is caught,
+ * logged via `console.warn`, and swallowed; the eval-layer registry is left
+ * exactly as it was (untouched — `registerTables()` never runs on failure),
+ * so accessors fall back to their TS constants, matching pre-Task-6 behavior. */
 export async function ensureRegulationTablesLoaded(standardCode: string): Promise<void> {
-  const tables = await loadRegulationTables(standardCode);
-  if (tables.length === 0) return;
-  registerTables(tables);
+  try {
+    const tables = await loadRegulationTables(standardCode);
+    if (tables.length === 0) return;
+    registerTables(tables);
+  } catch (err) {
+    console.warn(
+      '[regulation-tables] load failed, using TS constants',
+      standardCode,
+      err instanceof Error ? err.message : err,
+    );
+  }
 }

@@ -186,6 +186,12 @@ export async function saveWorksheet(
   // value (fix round 1, IMPORTANT #2). Once per save call, before any
   // materialize* call that reads those accessors. Module-global registry is
   // acceptable: this is immutable reference data keyed by standard+edition+table.
+  // ensureRegulationTablesLoaded() NEVER THROWS (see its doc comment) — this
+  // code can ship ahead of the owner applying the regulation_tables schema
+  // migration, so a save must never depend on those tables existing; a missing
+  // table or connectivity failure there just leaves the registry unpopulated
+  // and every accessor falls back to its TS constants, unchanged from before
+  // Task 6 (fix round 2, IMPORTANT).
   if (savedTemplateRow?.standardCode) {
     await ensureRegulationTablesLoaded(savedTemplateRow.standardCode);
   }

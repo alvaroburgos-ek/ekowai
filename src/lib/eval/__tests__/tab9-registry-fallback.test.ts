@@ -27,10 +27,14 @@ describe('tab9 accessor over the registry', () => {
   it('a registered row that fails validation is skipped — the rest still come from the registry', () => {
     const t = tab9AsTable();
     t.rows.find((r) => r.row_key === 'park_flach')!.values.cm = 'x'; // malformed jsonb row
+    // park_steil's TS constant is cm=0.2 — set the registered value to something
+    // different (0.21) so a passing assertion proves the value came from the
+    // registry, not a false-positive on TS-constant/registry agreement.
+    t.rows.find((r) => r.row_key === 'park_steil')!.values.cm = 0.21;
     registerTables([t]);
     const entries = getTab9Entries();
     expect(entries).toHaveLength(29);
     expect(lookupTab9('park_flach')).toBeUndefined();
-    expect(lookupTab9('park_steil')?.cm).toBe(0.2); // an unaffected row still reads from the registry
+    expect(lookupTab9('park_steil')?.cm).toBe(0.21); // an unaffected row still reads from the registry
   });
 });
