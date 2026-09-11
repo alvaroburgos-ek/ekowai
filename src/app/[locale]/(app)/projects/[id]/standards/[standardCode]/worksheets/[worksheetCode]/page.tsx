@@ -363,6 +363,7 @@ export default async function WorksheetPage({
               lookup: (f as typeof f & { lookup?: unknown }).lookup ?? null,
               visibleWhen: (f as typeof f & { visibleWhen?: string | null }).visibleWhen ?? null,
             };
+          // TODO(guideline-to-tool): replace as-never cast with the real FieldDef type
           }) as never}
           equations={ws.equations.map((e) => ({
             id: e.id, equationNumber: e.equationNumber, formula: e.formula,
