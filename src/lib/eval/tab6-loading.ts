@@ -12,6 +12,7 @@
  *
  * Pure / DB-free. No side-effects.
  */
+import { lookupRow } from './regulation-tables';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,6 +74,10 @@ export function tab6Limit(tier: Tab6Tier | null, bbzThicknessM: number | null): 
   }
 
   const relaxed = bbzThicknessM >= THICK_BAND_M;
+  const band = relaxed ? 'thick' : 'thin';
+  const row = lookupRow('DWA-A-138-1', undefined, 'TAB6', { tier, bbz_band: band });
+  if (row && typeof row.values.max === 'number') return { kind: 'limit', max: row.values.max };
+
   if (tier === 'tier2') {
     return { kind: 'limit', max: relaxed ? 50 : 30 };
   }
@@ -192,6 +197,9 @@ export type FlaechengruppeCode = typeof FLAECHENGRUPPE_CODES[number];
  */
 export function flaechengruppeToTier(flaechengruppe: string | null): Tab6Tier | null {
   if (flaechengruppe === null) return null;
+
+  const row = lookupRow('DWA-A-138-1', undefined, 'TAB5', { flaechengruppe });
+  if (row && typeof row.values.tier === 'string') return row.values.tier as Tab6Tier;
 
   switch (flaechengruppe) {
     // tier1_none — keine Anforderung

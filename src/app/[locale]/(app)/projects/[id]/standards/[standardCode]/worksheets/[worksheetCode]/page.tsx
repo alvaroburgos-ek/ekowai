@@ -11,6 +11,7 @@ import {
   loadInheritedFields,
   loadSurfaceSource,
 } from '@/lib/db/queries/worksheet';
+import { loadRegulationTables } from '@/lib/db/queries/regulation-tables';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { surfaceSourceState, surfaceWithholdFieldIds } from '@/lib/eval/surface-source-state';
@@ -128,6 +129,13 @@ export default async function WorksheetPage({
   // worksheets (e.g. A138-10). Returns null when the current worksheet IS the
   // owner of surface_inventory, or the standard has no surface_inventory field.
   const surfaceSource = await loadSurfaceSource(projectId, ws.template.standard.id, worksheetCode);
+
+  // Regulation reference tables (Tab.9/5/6/13 etc.) for this standard — registered
+  // client-side (WorksheetForm's useMemo) into the eval-layer registry so the
+  // tab9/tab6-loading accessors read the DB-backed values instead of the TS
+  // fallback constants. Empty array ⇒ registry stays empty ⇒ accessors fall
+  // back unchanged (single-source rule, invariant 4/5).
+  const regulationTablesData = await loadRegulationTables(standardCode);
 
   // Platform-engineer gating + verifier-label resolution. We batch-load the
   // profile emails of all distinct verifiers touched by this worksheet's
@@ -395,6 +403,7 @@ export default async function WorksheetPage({
           isPlatformEngineer={isPlatformEngineer}
           surfaceSource={surfaceSource}
           serverComputedFieldIds={serverComputedFieldIds}
+          regulationTables={regulationTablesData}
         />
       </main>
     </div>

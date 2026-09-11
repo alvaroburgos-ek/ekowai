@@ -29,6 +29,7 @@ import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
 import { lookupTab9 } from '@/lib/eval/tab9';
+import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { visibleFields } from './visible-fields';
@@ -181,6 +182,12 @@ type Props = {
    * read-only with a provenance hint — single-source rule: derived values
    * are never re-entered by hand. */
   serverComputedFieldIds?: string[];
+  /** Regulation reference tables (Tab.9/5/6/13 etc.) for this standard, loaded
+   * server-side from `regulation_tables`/`regulation_table_rows`. Registered
+   * into the eval-layer registry (registerTables()) on mount so the tab9/
+   * tab6-loading accessors read the DB-backed values; undefined/empty leaves
+   * the registry empty and accessors fall back to their TS constants. */
+  regulationTables?: RegulationTable[];
 };
 
 /** VSME-B03.200 symbols written by recomputeB3Co2 (kept in sync with
@@ -220,7 +227,18 @@ export function WorksheetForm({
   isPlatformEngineer = false,
   surfaceSource,
   serverComputedFieldIds,
+  regulationTables,
 }: Props) {
+  // Register server-loaded regulation tables into the eval-layer registry
+  // BEFORE any hook or child that could read the tab9/tab6-loading accessors
+  // (e.g. lookupTab9() below, in the Tab.9 rows render). useMemo runs
+  // synchronously during render, so this must be the first thing after the
+  // props are destructured — no effect delay, no flash of TS-fallback data.
+  useMemo(() => {
+    if (regulationTables?.length) registerTables(regulationTables);
+    return null;
+  }, [regulationTables]);
+
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
   const setField = useWorksheetStore((s) => s.setField);

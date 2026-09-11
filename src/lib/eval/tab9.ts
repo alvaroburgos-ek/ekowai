@@ -11,6 +11,8 @@
  * Group 1 (wasserundurchlässig) & 2 (teildurchlässig) ⇒ paved;
  * Group 3 (durchlässig) ⇒ unpaved.
  */
+import { getTable } from './regulation-tables';
+
 export type Tab9Entry = {
   value: string;
   label: string;
@@ -72,10 +74,30 @@ const TAB9: ReadonlyArray<Tab9Entry> = [...GROUP_1, ...GROUP_2, ...GROUP_3].map(
 
 const BY_VALUE: ReadonlyMap<string, Tab9Entry> = new Map(TAB9.map((e) => [e.value, e]));
 
+/** Reads Tab.9 from the registry when a table has been registered (page-level
+ * DB load via `registerTables()`); returns null when nothing is registered so
+ * callers fall back to the TS constants (`TAB9`) — identical behavior to an
+ * empty DB. */
+function fromRegistry(): readonly Tab9Entry[] | null {
+  const t = getTable('DWA-A-138-1', undefined, 'TAB9');
+  if (!t) return null;
+  return t.rows.map((r) => ({
+    value: r.row_key,
+    label: r.label_de,
+    cm: Number(r.values.cm),
+    cs: Number(r.values.cs),
+    kind: r.values.kind as 'paved' | 'unpaved',
+    group: Number(r.values.group) as 1 | 2 | 3,
+    standard: 'DWA-A 138-1',
+    edition: '2024-10',
+  }));
+}
+
 export function getTab9Entries(): readonly Tab9Entry[] {
-  return TAB9;
+  return fromRegistry() ?? TAB9;
 }
 
 export function lookupTab9(value: string): Tab9Entry | undefined {
-  return BY_VALUE.get(value);
+  const reg = fromRegistry();
+  return reg ? reg.find((e) => e.value === value) : BY_VALUE.get(value);
 }
