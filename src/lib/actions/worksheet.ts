@@ -187,11 +187,29 @@ export async function saveWorksheet(
   // materialize* call that reads those accessors. Module-global registry is
   // acceptable: this is immutable reference data keyed by standard+edition+table.
   // ensureRegulationTablesLoaded() NEVER THROWS (see its doc comment) — this
-  // code can ship ahead of the owner applying the regulation_tables schema
-  // migration, so a save must never depend on those tables existing; a missing
-  // table or connectivity failure there just leaves the registry unpopulated
-  // and every accessor falls back to its TS constants, unchanged from before
-  // Task 6 (fix round 2, IMPORTANT).
+  // guards only against the regulation_tables/regulation_table_rows DATA
+  // migration (scripts/migrations/20260911110000_regulation_tables_seed_a138.sql)
+  // being absent, e.g. because the owner hasn't run it yet on this deployment;
+  // a missing/empty seed or a connectivity failure there just leaves the
+  // registry unpopulated and every accessor falls back to its TS constants,
+  // unchanged from before Task 6 (fix round 2, IMPORTANT).
+  //
+  // C-1 (final review, guideline-to-tool): this does NOT cover the
+  // regulation_tables/regulation_table_rows SCHEMA migration
+  // (supabase/migrations/20260911100000_guideline_to_tool_schema.sql) being
+  // absent — Drizzle's `db.select().from(regulationTables)` emits an
+  // explicit column list, so querying a table that doesn't exist at all
+  // throws a Postgres "relation does not exist" error same as a query
+  // against an existing-but-empty table would after a failed seed, and that
+  // error IS caught here (see ensureRegulationTablesLoaded's try/catch) — a
+  // save still succeeds either way. But the SCHEMA migration also adds the
+  // `fields.widget/ui_config/lookup/visible_when` columns, and THOSE are
+  // read by ordinary (non-try/catch-wrapped) `db.select().from(fields)`
+  // calls across this codebase (worksheet loads, the page, the importer) —
+  // a build deployed before that schema migration fails on every worksheet
+  // read/save, not just the regulation-tables path. See "Apply order (hard
+  // constraint)" in docs/superpowers/guideline-to-tool-playbook.md — the
+  // schema migration is NOT safe to defer past a code deploy.
   if (savedTemplateRow?.standardCode) {
     await ensureRegulationTablesLoaded(savedTemplateRow.standardCode);
   }

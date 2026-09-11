@@ -1,12 +1,22 @@
 /**
  * ensureRegulationTablesLoaded() resilience — unit (DB-free).
  *
- * Fix round 2, IMPORTANT: the regulation_tables/regulation_table_rows schema
- * migration may not be applied yet on a given deployment (code can ship
- * ahead of the owner applying it), so a save (saveWorksheet →
- * ensureRegulationTablesLoaded) must never fail because those tables don't
- * exist / the query errors. This test drives loadRegulationTables' first
+ * Fix round 2, IMPORTANT: the regulation_tables/regulation_table_rows DATA
+ * migration (the A138 seed) may not be applied yet on a given deployment
+ * (code can ship ahead of the owner applying it), so a save (saveWorksheet →
+ * ensureRegulationTablesLoaded) must never fail because that seed data is
+ * missing / the query errors. This test drives loadRegulationTables' first
  * query to reject and asserts:
+ *
+ * C-1 (final review, guideline-to-tool): this resilience guard is a DATA
+ * concern — it does NOT mean a build is safe to deploy before the
+ * `regulation_tables`/`regulation_table_rows` SCHEMA migration
+ * (supabase/migrations/20260911100000_guideline_to_tool_schema.sql). That
+ * schema migration also adds `fields.widget/ui_config/lookup/visible_when`,
+ * which ordinary (non-try/catch) `db.select().from(fields)` calls elsewhere
+ * read — a build ahead of the SCHEMA migration fails on every worksheet
+ * read/save. See "Apply order (hard constraint)" in
+ * docs/superpowers/guideline-to-tool-playbook.md.
  *   - ensureRegulationTablesLoaded resolves (never throws/rejects).
  *   - console.warn is called with the documented prefix.
  *   - registerTables() is NOT called (registry stays untouched on failure).

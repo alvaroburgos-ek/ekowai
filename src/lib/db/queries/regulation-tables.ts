@@ -52,14 +52,30 @@ export async function loadRegulationTables(standardCode: string): Promise<Regula
  * loader returns [] — an unregistered standard is functionally identical to
  * an empty registry (TS-constant fallback).
  *
- * NEVER THROWS. The `regulation_tables`/`regulation_table_rows` schema
- * migration may not be applied yet on a given deployment (code can ship
- * ahead of the owner running the migration) — a query failure here (missing
- * table, connectivity) must not break the caller, and `saveWorksheet` in
- * particular must never fail a save because of this. Any error is caught,
- * logged via `console.warn`, and swallowed; the eval-layer registry is left
- * exactly as it was (untouched — `registerTables()` never runs on failure),
- * so accessors fall back to their TS constants, matching pre-Task-6 behavior. */
+ * NEVER THROWS. Guards against the `regulation_tables`/`regulation_table_rows`
+ * DATA migration (the A138 seed,
+ * scripts/migrations/20260911110000_regulation_tables_seed_a138.sql) not
+ * having been applied yet, or a transient connectivity failure — a query
+ * failure here (missing seed data, connectivity) must not break the caller,
+ * and `saveWorksheet` in particular must never fail a save because of this.
+ * Any error is caught, logged via `console.warn`, and swallowed; the
+ * eval-layer registry is left exactly as it was (untouched —
+ * `registerTables()` never runs on failure), so accessors fall back to their
+ * TS constants, matching pre-Task-6 behavior.
+ *
+ * C-1 (final review, guideline-to-tool): this does NOT stand in for the
+ * `regulation_tables`/`regulation_table_rows` SCHEMA migration
+ * (supabase/migrations/20260911100000_guideline_to_tool_schema.sql). If that
+ * schema migration itself hasn't been applied, the `db.select().from(...)`
+ * calls above still fail cleanly and are still caught by this function's
+ * try/catch (a missing relation is just another query failure) — but the
+ * SAME schema migration also adds four columns to `fields`
+ * (widget/ui_config/lookup/visible_when), and those are read by ordinary,
+ * NOT try/catch-wrapped `db.select().from(fields)` calls elsewhere in the
+ * codebase. A build that ships ahead of the schema migration is broken for
+ * every worksheet read/save, not merely degraded on this table's data. See
+ * "Apply order (hard constraint)" in
+ * docs/superpowers/guideline-to-tool-playbook.md. */
 export async function ensureRegulationTablesLoaded(standardCode: string): Promise<void> {
   try {
     const tables = await loadRegulationTables(standardCode);
