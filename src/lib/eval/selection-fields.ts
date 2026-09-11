@@ -13,6 +13,8 @@
  * populated. See [[STRUCTURED-REGISTER-STANDARDIZATION]].
  */
 
+import { parseFieldConfig, type RegisterUiConfig, type SelectManyUiConfig } from './field-config';
+
 export type ColumnType = 'text' | 'number' | 'boolean' | 'enum';
 export type ColumnDef = {
   key: string;
@@ -654,4 +656,114 @@ export function registerRowFilled(row: RegisterRow, columns: readonly ColumnDef[
   if (!primary) return true;
   const v = row[primary.key];
   return typeof v === 'string' && v.trim().length > 0;
+}
+
+/* ── DB shape adapters (phase-2) ──────────────────────────────────────────
+ * SELECTION_CONFIGS is the TS-side source of truth today; Task 8 migrates
+ * the same shapes into the `fields.widget`/`ui_config`/`enum_values`
+ * columns. `toDbShape` renders a config the way it will look in the DB;
+ * `fromDbField` reads a DB row back into a SelectionConfig. The pair is
+ * pinned 1:1 for every entry in SELECTION_CONFIGS (see
+ * selection-fields-db-parity.test.ts) so the eventual cutover (Task 9,
+ * `resolveSelectionConfig`) is provably lossless. D-1 (owner ruling):
+ * `a138_anlagentyp_kandidaten` keeps its prod `enum_values` verbatim instead
+ * of being re-derived from the TS `options` list.
+ */
+
+export type DbFieldShape = {
+  symbol: string;
+  dataType: string;
+  enumValues: unknown;
+  widget: string | null;
+  uiConfig: unknown;
+  lookup: unknown;
+  visibleWhen: string | null;
+};
+type EnumValue = { value: string; label_de: string; label_en?: string | null; order_index?: number };
+
+// Drop `undefined`-valued keys via a JSON round-trip so both the toDbShape
+// side and the fromDbField side normalise to the same shape for `toEqual`
+// (semantic equality — the parity pin cares about the data, not whether an
+// optional key is present-as-undefined vs. absent).
+const strip = <T extends object>(o: T): T => JSON.parse(JSON.stringify(o));
+
+export function toDbShape(
+  symbol: string,
+  config: SelectionConfig,
+  opts?: { keepProdEnum?: EnumValue[] }
+): { widget: 'select_many' | 'register'; ui_config: object; enum_values: Array<{ value: string; label_de: string; order_index: number }> | null } {
+  if (config.kind === 'checklist') {
+    const enum_values = (opts?.keepProdEnum ?? config.options.map((o, i) => ({ value: o, label_de: o, order_index: i }))) as Array<{
+      value: string;
+      label_de: string;
+      order_index: number;
+    }>;
+    const ui_config: SelectManyUiConfig = strip({
+      title: config.title,
+      subtitle: config.subtitle,
+      note: config.note,
+      allow_custom: config.allowCustom,
+      groups: opts?.keepProdEnum ? undefined : config.groups?.map((g) => ({ label: g.label, options: [...g.options] })),
+    });
+    return { widget: 'select_many', ui_config, enum_values };
+  }
+  const ui_config: RegisterUiConfig = strip({
+    title: config.title,
+    subtitle: config.subtitle,
+    add_label: config.addLabel,
+    note: config.note,
+    columns: config.columns.map((c) => ({
+      key: c.key,
+      label: c.label,
+      type: c.type,
+      options: c.options ? [...c.options] : undefined,
+      datalist: c.datalist ? [...c.datalist] : undefined,
+      placeholder: c.placeholder,
+      width: c.width,
+    })),
+    sum_column: config.sumColumn ? { key: config.sumColumn.key, label: config.sumColumn.label, unit: config.sumColumn.unit } : undefined,
+  });
+  return { widget: 'register', ui_config, enum_values: null };
+}
+
+export function fromDbField(row: DbFieldShape): SelectionConfig | null {
+  if (row.widget !== 'select_many' && row.widget !== 'register') return null;
+  let cfg;
+  try {
+    cfg = parseFieldConfig({ widget: row.widget, uiConfig: row.uiConfig, lookup: row.lookup, visibleWhen: row.visibleWhen });
+  } catch {
+    return null;
+  }
+  if (row.widget === 'select_many') {
+    const ui = (cfg.ui ?? {}) as SelectManyUiConfig;
+    const ev = Array.isArray(row.enumValues) ? (row.enumValues as EnumValue[]) : [];
+    const groups = ui.groups?.map((g) => ({ label: g.label, options: g.options }));
+    return strip({
+      kind: 'checklist',
+      title: ui.title,
+      subtitle: ui.subtitle ?? '',
+      options: ev.map((e) => e.value),
+      groups,
+      note: ui.note,
+      allowCustom: ui.allow_custom,
+    }) as ChecklistConfig;
+  }
+  const ui = cfg.ui as RegisterUiConfig;
+  return strip({
+    kind: 'register',
+    title: ui.title,
+    subtitle: ui.subtitle ?? '',
+    addLabel: ui.add_label ?? '+ Zeile hinzufügen',
+    note: ui.note,
+    columns: ui.columns.map((c) => ({
+      key: c.key,
+      label: c.label,
+      type: c.type as ColumnType,
+      options: c.options,
+      datalist: c.datalist,
+      placeholder: c.placeholder,
+      width: c.width,
+    })),
+    sumColumn: ui.sum_column ? { key: ui.sum_column.key, label: ui.sum_column.label, unit: ui.sum_column.unit } : undefined,
+  }) as RegisterConfig;
 }
