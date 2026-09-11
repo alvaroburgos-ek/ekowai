@@ -1,5 +1,6 @@
-import type { ParsedWorkbook } from './_pass3c-types';
+import type { ParsedWorkbook, FieldRow } from './_pass3c-types';
 import { computeEngineDenyKeys, type EquationForGate } from '../src/lib/eval/equation-manual-denylist';
+import { parseFieldConfig, FieldConfigError } from '../src/lib/eval/field-config';
 
 const ALLOWED_DATA_TYPES = new Set([
   'number', 'text', 'enum', 'date', 'boolean', 'json',
@@ -9,6 +10,44 @@ const ALLOWED_ARCHETYPES = new Set([
 ]);
 
 export type ValidationError = { sheet: string; row: number; message: string };
+
+/**
+ * Validates a field row's `widget`/`ui_config`/`lookup`/`visible_when` columns via the
+ * single-source zod contract in `field-config.ts` (Task 2). These columns live on the
+ * `fields` DB table (set by the phase-2 selection-config migrations); a Pass3c xlsx
+ * workbook does not carry them today, but a future workbook or a hand-authored patch
+ * MAY attach them to a Fields-sheet row, and any such row must be import-time valid —
+ * never silently accepted and only discovered broken at render time.
+ */
+export function validateFieldConfigColumns(f: {
+  symbol: string;
+  widget?: string | null;
+  ui_config?: unknown;
+  lookup?: unknown;
+  visible_when?: string | null;
+}): string[] {
+  try {
+    parseFieldConfig({
+      widget: f.widget ?? null,
+      uiConfig: f.ui_config ?? null,
+      lookup: f.lookup ?? null,
+      visibleWhen: f.visible_when ?? null,
+    });
+    return [];
+  } catch (e) {
+    return [`field ${f.symbol}: ${e instanceof FieldConfigError ? e.message : String(e)}`];
+  }
+}
+
+/** A FieldRow as parsed today, plus the optional widget/ui_config/lookup/visible_when
+ *  columns a future Fields-sheet extension (or a hand-authored row) may carry. Not part
+ *  of the current xlsx contract — see the comment on `validateFieldConfigColumns`. */
+type FieldRowWithConfig = FieldRow & {
+  widget?: string | null;
+  ui_config?: unknown;
+  lookup?: unknown;
+  visible_when?: string | null;
+};
 
 export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
   const errors: ValidationError[] = [];
@@ -101,6 +140,9 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
       errors.push({ sheet: 'Fields', row, message: `Duplicate (origin_worksheet, symbol): ${fieldKey}` });
     }
     fieldKeys.add(fieldKey);
+    for (const message of validateFieldConfigColumns(f as FieldRowWithConfig)) {
+      errors.push({ sheet: 'Fields', row, message });
+    }
   });
 
   // ---- Enum_Values ----
