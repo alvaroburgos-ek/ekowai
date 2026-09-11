@@ -43,8 +43,14 @@ const selectManyUi = z.object({
 export type SelectManyUiConfig = z.infer<typeof selectManyUi>;
 
 const anyUi = z.record(z.string(), z.unknown());
-const UI_BY_WIDGET: Record<Widget, z.ZodTypeAny | null> = {
-  select_one: anyUi.nullable(), select_many: selectManyUi.nullable(), lookup_fill: anyUi.nullable(), register: registerUi,
+// Every widget has a schema here (none is the JS value `null`) — select_many
+// and register are REQUIRED (non-nullable): a select_many/register row with
+// a null ui_config has no `title` to render and must be rejected by
+// parseFieldConfig, not silently pass through as a title-less config (C-2,
+// fix round: fromDbField's catch then returns null instead of fabricating
+// `{title: undefined, ...}`). The rest stay optional-object-or-null.
+const UI_BY_WIDGET: Record<Widget, z.ZodTypeAny> = {
+  select_one: anyUi.nullable(), select_many: selectManyUi, lookup_fill: anyUi.nullable(), register: registerUi,
   grid: anyUi.nullable(), reference: anyUi.nullable(), derived: anyUi.nullable(), attestation: anyUi.nullable(), scalar: anyUi.nullable(),
 };
 
@@ -64,14 +70,20 @@ export function parseFieldConfig(row: { widget: string | null; uiConfig: unknown
   if (row.widget == null) return { widget: null, ui: null, lookup: null, visibleWhen: row.visibleWhen ?? null };
   if (!(WIDGETS as readonly string[]).includes(row.widget)) throw new FieldConfigError(`unknown widget "${row.widget}"`);
   const widget = row.widget as Widget;
-  const uiSchema = UI_BY_WIDGET[widget];
-  const ui = uiSchema ? uiSchema.safeParse(row.uiConfig ?? null) : { success: true as const, data: null };
+  const ui = UI_BY_WIDGET[widget].safeParse(row.uiConfig ?? null);
   if (!ui.success) throw new FieldConfigError(`ui_config invalid for ${widget}: ${formatIssues(ui.error.issues)}`);
   let lookup: LookupBinding | null = null;
   if (widget === 'lookup_fill') {
     const l = lookupBinding.safeParse(row.lookup);
     if (!l.success) throw new FieldConfigError(`lookup binding required for lookup_fill: ${formatIssues(l.error.issues)}`);
     lookup = l.data;
+  } else if (row.lookup != null) {
+    // A `lookup` binding only means anything for lookup_fill — every other
+    // widget's data binding (if any) lives inside ui_config.columns[].lookup
+    // (register lookup_key/lookup_value columns). A non-null top-level
+    // `lookup` on any other widget is either stale data or a config-author
+    // mistake; reject loudly rather than silently ignore it.
+    throw new FieldConfigError('lookup binding only valid for lookup_fill');
   }
   return { widget, ui: (ui.data as FieldConfig['ui']) ?? null, lookup, visibleWhen: row.visibleWhen ?? null };
 }

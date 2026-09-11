@@ -110,6 +110,13 @@ type ExistingField = {
   verifiedByUserId: string | null;
   verifiedAt: Date | null;
   verificationNote: string | null;
+  /** Guideline→Tool phase-2 column. Non-null means a selection-config
+   * migration already set widget/ui_config/enum_values for this row (a
+   * select_many checklist or register) — the Pass3c importer never
+   * parses/writes those four columns itself (out of scope, ledgered
+   * separately), so when this is set the importer's own view of
+   * enum_values is stale and must not overwrite the migrated one. */
+  widget: string | null;
 };
 
 type NewFieldRow = {
@@ -133,7 +140,33 @@ type NewFieldRow = {
   xbrlElementId: string | null;
 };
 
+/** C-2 fix (guideline-to-tool final review): decide what enum_values the
+ * upsert should write for a field. When `existingWidget` is set, a phase-2
+ * selection-config migration already owns this field's enum_values (a
+ * migrated select_many checklist or register) — the importer never
+ * parses/writes widget/ui_config/lookup/visible_when itself, so its own
+ * computed `incomingEnumValues` (null, for any non-'enum' data_type field)
+ * is not a real observation of the workbook and must not overwrite the
+ * migrated value. Preserve `existingEnumValues` in that case; otherwise use
+ * the importer's own computed value (unchanged pre-fix behavior). Pure /
+ * DB-free so it's unit-testable without mocking the transaction. */
+export function resolveEnumValuesForUpsert(
+  existingWidget: string | null | undefined,
+  existingEnumValues: unknown,
+  incomingEnumValues: unknown,
+): unknown {
+  if (existingWidget != null) return existingEnumValues ?? null;
+  return incomingEnumValues;
+}
+
 function fieldContentChanged(existing: ExistingField, next: NewFieldRow): boolean {
+  // enum_values is deliberately excluded from drift detection when the
+  // existing row carries a widget (see resolveEnumValuesForUpsert above):
+  // `next.enumValues` was built by preserving `existing.enumValues` in that
+  // case, so the two are equal by construction — but skip the comparison
+  // explicitly too, so this stays correct even if that invariant is ever
+  // broken by a future edit to the caller.
+  const enumValuesChanged = existing.widget == null && !jsonEqual(existing.enumValues, next.enumValues);
   return (
     existing.sectionCode !== next.sectionCode ||
     existing.labelDe !== next.labelDe ||
@@ -143,7 +176,7 @@ function fieldContentChanged(existing: ExistingField, next: NewFieldRow): boolea
     existing.isRequired !== next.isRequired ||
     existing.clauseReference !== next.clauseReference ||
     existing.description !== next.description ||
-    !jsonEqual(existing.enumValues, next.enumValues) ||
+    enumValuesChanged ||
     !jsonEqual(existing.validationRules, next.validationRules) ||
     !jsonEqual(existing.consumerWorksheets, next.consumerWorksheets)
   );
@@ -320,6 +353,7 @@ async function executeImport(
           verifiedByUserId: fields.verifiedByUserId,
           verifiedAt: fields.verifiedAt,
           verificationNote: fields.verificationNote,
+          widget: fields.widget,
         })
         .from(fields)
         .leftJoin(worksheetSections, eq(worksheetSections.id, fields.sectionId))
@@ -385,8 +419,13 @@ async function executeImport(
     const sectionId = f.origin_section
       ? sectionByKey.get(`${tmplId}|${f.origin_section}`) ?? null
       : null;
-    const enumValues =
+    // C-2 fix: look up `existing` before computing enumValues so a
+    // migrated (widget-bearing) row's enum_values can be preserved instead
+    // of overwritten by the importer's own (stale, for such a row) view.
+    const existing = existingFieldByKey.get(`${tmplId}|${f.symbol}`);
+    const incomingEnumValues =
       f.data_type === 'enum' ? enumGroups.get(f.symbol) ?? null : null;
+    const enumValues = resolveEnumValuesForUpsert(existing?.widget, existing?.enumValues, incomingEnumValues);
     const validationRules = f.validation_rules
       ? { raw: f.validation_rules }
       : null;
@@ -412,7 +451,7 @@ async function executeImport(
     // Re-import policy. Default for a row that doesn't yet exist:
     // imported_unverified, empty audit. For an existing engineer_verified
     // row: if content drifted, reset; otherwise preserve audit.
-    const existing = existingFieldByKey.get(`${tmplId}|${f.symbol}`);
+    // (`existing` was already looked up above, before enumValues.)
     let verificationStatus: string = existing?.verificationStatus ?? 'imported_unverified';
     let verifiedByUserId: string | null = null;
     let verifiedAt: Date | null = null;

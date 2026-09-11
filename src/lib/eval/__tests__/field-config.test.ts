@@ -43,4 +43,19 @@ describe('field-config', () => {
     expect(ok.lookup?.role).toBe('value');
     expect(() => parseFieldConfig({ widget: 'lookup_fill', uiConfig: null, lookup: null, visibleWhen: null })).toThrow(/lookup/);
   });
+  it('rejects a non-null lookup binding on a widget other than lookup_fill', () => {
+    expect(() =>
+      parseFieldConfig({
+        widget: 'register',
+        uiConfig: { title: 't', columns: [{ key: 'x', type: 'text', label: 'x' }] },
+        lookup: { table_code: 'TAB3', role: 'value', keys: [{ column: 'a', from_symbol: 'a' }], value: 'e' },
+        visibleWhen: null,
+      }),
+    ).toThrow('lookup binding only valid for lookup_fill');
+  });
+  it('select_many requires a non-null ui_config with a title (rejects null ui_config)', () => {
+    expect(() => parseFieldConfig({ widget: 'select_many', uiConfig: null, lookup: null, visibleWhen: null })).toThrow(/ui_config invalid for select_many/);
+    const ok = parseFieldConfig({ widget: 'select_many', uiConfig: { title: 'Checkliste' }, lookup: null, visibleWhen: null });
+    expect(ok.ui).toMatchObject({ title: 'Checkliste' });
+  });
 });
