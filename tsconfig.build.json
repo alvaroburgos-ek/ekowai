@@ -1,0 +1,16 @@
+{
+  // Build-only tsconfig used by `next build` (via next.config.ts
+  // typescript.tsconfigPath). Identical to tsconfig.json but EXCLUDES
+  // non-shipped test/harness/test-script files from the production type check.
+  // The root tsconfig.json is unchanged, so `pnpm typecheck` still checks the
+  // whole repo (tests included) — this only stops test-file type errors from
+  // blocking a deploy, it does not relax type checking of app code.
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "tests/**",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}
