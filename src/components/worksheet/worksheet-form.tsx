@@ -21,7 +21,7 @@ import { RiskRegisterEditor } from './risk-register-editor';
 import { MitigationPlanEditor } from './mitigation-plan-editor';
 import { ChecklistEditor } from './checklist-editor';
 import { StructuredRegisterEditor } from './structured-register-editor';
-import { SELECTION_CONFIGS } from '@/lib/eval/selection-fields';
+import { resolveSelectionConfig, type SelectionConfig } from '@/lib/eval/selection-fields';
 import { EditorErrorBoundary } from './editor-error-boundary';
 import { PollutantRegisterEditor } from './pollutant-register-editor';
 import { POLLUTANT_REGISTER_SYMBOL, POLLUTANT_OUTPUT_SYMBOLS } from '@/lib/eval/pollutant-register';
@@ -527,7 +527,29 @@ export function WorksheetForm({
 
   // Config-driven selection fields (checklists + structured registers whose
   // options/columns the guideline prescribes — see selection-fields.ts).
-  const selectionFields = fields.filter((f) => f.active && SELECTION_CONFIGS[f.symbol]);
+  // Dispatch by `field.widget`: the DB config wins whenever `widget` is
+  // non-null; the TS registry (SELECTION_CONFIGS) applies only while
+  // `widget IS NULL` (resolveSelectionConfig, Task 9).
+  const selectionFields = useMemo(
+    () =>
+      fields
+        .filter((f) => f.active)
+        .map((f) => ({
+          field: f,
+          config: resolveSelectionConfig({
+            symbol: f.symbol,
+            dataType: f.dataType,
+            enumValues: f.enumValues,
+            widget: f.widget ?? null,
+            uiConfig: f.uiConfig,
+            lookup: f.lookup,
+            visibleWhen: f.visibleWhen ?? null,
+          }),
+        }))
+        .filter((x): x is { field: typeof fields[number]; config: SelectionConfig } => x.config != null),
+    [fields],
+  );
+  const selectionFieldIds = useMemo(() => new Set(selectionFields.map((x) => x.field.id)), [selectionFields]);
   // VSME-B04.100 pollutant register: per-pollutant E-PRTR rows; the three
   // AmountOfEmissionTo{Air,Water,Soil} scalars are derived per-medium sums.
   const pollutantRegisterField = fields.find((f) => f.symbol === POLLUTANT_REGISTER_SYMBOL);
@@ -568,7 +590,7 @@ export function WorksheetForm({
       // risk_mitigation_plan is rendered by its dedicated MitigationPlanEditor.
       if (f.symbol === 'risk_mitigation_plan') continue;
       // config-driven selection fields render via their dedicated section.
-      if (SELECTION_CONFIGS[f.symbol]) continue;
+      if (selectionFieldIds.has(f.id)) continue;
       // pollutant_register is rendered by its dedicated PollutantRegisterEditor
       // section, not as a raw json field in the grid.
       if (f.symbol === POLLUTANT_REGISTER_SYMBOL) continue;
@@ -581,7 +603,7 @@ export function WorksheetForm({
       arr.sort((a, b) => a.orderIndex - b.orderIndex);
     }
     return map;
-  }, [fields]);
+  }, [fields, selectionFieldIds]);
 
   // The inherited-values panel content. Built once from `fields` + the
   // store's resolved values.
@@ -905,8 +927,7 @@ export function WorksheetForm({
         </section>
       )}
 
-      {selectionFields.map((f) => {
-        const config = SELECTION_CONFIGS[f.symbol];
+      {selectionFields.map(({ field: f, config }) => {
         return (
           <section key={f.id} className="border-t border-hairline pt-6 mt-8 space-y-4">
             <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">{config.title}</h2>

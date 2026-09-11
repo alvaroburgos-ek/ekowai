@@ -39,6 +39,12 @@ type FieldDef = {
   verifiedByLabel?: string | null;
   verifiedAt?: string | null;
   verificationNote?: string | null;
+  /** Guideline→Tool (Task 9): DB-driven widget dispatch columns. Optional so
+   * every existing test fixture still typechecks without them. */
+  widget?: string | null;
+  uiConfig?: unknown;
+  lookup?: unknown;
+  visibleWhen?: string | null;
 };
 
 type Props = {

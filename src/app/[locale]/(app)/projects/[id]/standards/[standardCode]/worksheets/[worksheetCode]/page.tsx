@@ -358,6 +358,10 @@ export default async function WorksheetPage({
               verifiedByLabel: verifiedByUserId ? verifierLabels.get(verifiedByUserId) ?? null : null,
               verifiedAt: verifiedAt ? verifiedAt.toISOString() : null,
               verificationNote,
+              widget: (f as typeof f & { widget?: string | null }).widget ?? null,
+              uiConfig: (f as typeof f & { uiConfig?: unknown }).uiConfig ?? null,
+              lookup: (f as typeof f & { lookup?: unknown }).lookup ?? null,
+              visibleWhen: (f as typeof f & { visibleWhen?: string | null }).visibleWhen ?? null,
             };
           }) as never}
           equations={ws.equations.map((e) => ({

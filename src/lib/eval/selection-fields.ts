@@ -726,6 +726,16 @@ export function toDbShape(
   return { widget: 'register', ui_config, enum_values: null };
 }
 
+/**
+ * Task 9 dispatch: the DB config wins whenever `widget` is non-null; the TS
+ * registry (SELECTION_CONFIGS) is consulted only while `widget IS NULL`, so a
+ * migrated DB row can never be shadowed by a stale TS entry.
+ */
+export function resolveSelectionConfig(f: DbFieldShape): SelectionConfig | null {
+  if (f.widget != null) return fromDbField(f);
+  return SELECTION_CONFIGS[f.symbol] ?? null;
+}
+
 export function fromDbField(row: DbFieldShape): SelectionConfig | null {
   if (row.widget !== 'select_many' && row.widget !== 'register') return null;
   let cfg;
