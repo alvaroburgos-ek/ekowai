@@ -17,6 +17,12 @@ import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
 import { normalizeRainfallCarrier, facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
 import { SurfaceInventoryEditor } from './surface-inventory-editor';
+import { RiskRegisterEditor } from './risk-register-editor';
+import { MitigationPlanEditor } from './mitigation-plan-editor';
+import { ChecklistEditor } from './checklist-editor';
+import { StructuredRegisterEditor } from './structured-register-editor';
+import { SELECTION_CONFIGS } from '@/lib/eval/selection-fields';
+import { EditorErrorBoundary } from './editor-error-boundary';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
@@ -467,6 +473,19 @@ export function WorksheetForm({
   // A138-07 surface inventory: per-row Tab. 9 entries with C_i and C_s.
   const surfaceInventoryField = fields.find((f) => f.symbol === 'surface_inventory');
 
+  // DWA-M 820-1 · Anhang A · risk register: per-row structured risk analysis
+  // (Risikogruppe, Eintretenswahrscheinlichkeit × Schaden, Maßnahme). Replaces
+  // a free-text blob with the guideline's Tab. A.1 model.
+  const riskRegisterField = fields.find((f) => f.symbol === 'risk_register');
+
+  // DWA-M 820-1 · Anhang A · Tab. A.2 · risk mitigation plan: per-risk measure
+  // plan (Maßnahmen T/O/P with Verantwortung/Durchführen/Überwachung).
+  const mitigationPlanField = fields.find((f) => f.symbol === 'risk_mitigation_plan');
+
+  // Config-driven selection fields (checklists + structured registers whose
+  // options/columns the guideline prescribes — see selection-fields.ts).
+  const selectionFields = fields.filter((f) => f.active && SELECTION_CONFIGS[f.symbol]);
+
   // Upstream-cause state for consumer worksheets (A138-10). null when this
   // worksheet does not consume a surface-inventory source.
   const srcState = surfaceSource ? surfaceSourceState(surfaceSource.carrier, surfaceSource.status) : null;
@@ -491,6 +510,13 @@ export function WorksheetForm({
       // rainfall_table_ref is rendered by its dedicated RainfallTableSelector
       // section (table-id picker), not as a raw text input in the field grid.
       if (f.symbol === 'rainfall_table_ref') continue;
+      // risk_register is rendered by its dedicated RiskRegisterEditor section
+      // (structured Tab. A.1 register), not as a raw json placeholder.
+      if (f.symbol === 'risk_register') continue;
+      // risk_mitigation_plan is rendered by its dedicated MitigationPlanEditor.
+      if (f.symbol === 'risk_mitigation_plan') continue;
+      // config-driven selection fields render via their dedicated section.
+      if (SELECTION_CONFIGS[f.symbol]) continue;
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
@@ -771,6 +797,44 @@ export function WorksheetForm({
           <SurfaceInventoryEditor fieldId={surfaceInventoryField.id} readOnly={locked} />
         </section>
       )}
+
+      {riskRegisterField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Risikoanalyse (Anhang A — Tab. A.1)
+          </h2>
+          <EditorErrorBoundary label="Risikoregister">
+            <RiskRegisterEditor fieldId={riskRegisterField.id} readOnly={locked} />
+          </EditorErrorBoundary>
+        </section>
+      )}
+
+      {mitigationPlanField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Risiko-Maßnahmenplan (Anhang A — Tab. A.2)
+          </h2>
+          <EditorErrorBoundary label="Risiko-Maßnahmenplan">
+            <MitigationPlanEditor fieldId={mitigationPlanField.id} readOnly={locked} />
+          </EditorErrorBoundary>
+        </section>
+      )}
+
+      {selectionFields.map((f) => {
+        const config = SELECTION_CONFIGS[f.symbol];
+        return (
+          <section key={f.id} className="border-t border-hairline pt-6 mt-8 space-y-4">
+            <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">{config.title}</h2>
+            <EditorErrorBoundary label={config.title}>
+              {config.kind === 'checklist' ? (
+                <ChecklistEditor fieldId={f.id} config={config} readOnly={locked} />
+              ) : (
+                <StructuredRegisterEditor fieldId={f.id} config={config} readOnly={locked} />
+              )}
+            </EditorErrorBoundary>
+          </section>
+        );
+      })}
 
       <EquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} />
 
