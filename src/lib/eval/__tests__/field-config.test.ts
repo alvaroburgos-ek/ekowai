@@ -15,7 +15,7 @@ describe('field-config', () => {
   });
   it('register ui_config validates columns incl. lookup_key/lookup_value/derived and discriminator', () => {
     const ui = { title: 'Flächenverzeichnis', add_label: '+ Fläche', placement: 'bottom', columns: [
-      { key: 'label', type: 'text', label: 'Bezeichnung', required: true },
+      { key: 'label', type: 'text', label: 'Bezeichnung', required: true, discriminator: true, visible_when: 'kind == "custom"' },
       { key: 'tab9_value', type: 'lookup_key', label: 'Oberflächentyp', required: true, lookup: { table_code: 'TAB9', group_by: 'group_label' } },
       { key: 'area_m2', type: 'number', label: 'A', unit: 'm²', required: true, min: 0 },
       { key: 'c_i', type: 'lookup_value', label: 'C_i', required: true, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cm' } },
@@ -23,11 +23,20 @@ describe('field-config', () => {
     ], override: { flag_key: 'coeff_override', applies_to: ['c_i'], policy: 'anhaltswert' } };
     const cfg = parseFieldConfig({ widget: 'register', uiConfig: ui, lookup: null, visibleWhen: null });
     expect(cfg.widget).toBe('register');
-    expect((cfg.ui as { columns: unknown[] }).columns).toHaveLength(5);
+    const columns = (cfg.ui as { columns: Array<{ discriminator?: boolean; visible_when?: string }> }).columns;
+    expect(columns).toHaveLength(5);
+    expect(columns[0].discriminator).toBe(true);
+    expect(columns[0].visible_when).toBe('kind == "custom"');
   });
   it('rejects unknown widget and a lookup_value column without lookup', () => {
     expect(() => parseFieldConfig({ widget: 'dropdown', uiConfig: null, lookup: null, visibleWhen: null })).toThrow(/widget/);
     expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'x', type: 'lookup_value', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.0\.lookup/);
+  });
+  it('rejects a derived column without expr', () => {
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'x', type: 'derived', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.\d+\.expr/);
+  });
+  it('rejects a lookup_key column without lookup', () => {
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'x', type: 'lookup_key', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.\d+\.lookup/);
   });
   it('lookup_fill requires a lookup binding with role/keys/value', () => {
     const ok = parseFieldConfig({ widget: 'lookup_fill', uiConfig: null, lookup: { table_code: 'TAB3', role: 'value', keys: [{ column: 'auffangflaechen_art', from_symbol: 'auffangflaechen_art' }], value: 'e' }, visibleWhen: null });

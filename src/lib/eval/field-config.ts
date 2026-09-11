@@ -49,7 +49,16 @@ const UI_BY_WIDGET: Record<Widget, z.ZodTypeAny | null> = {
 };
 
 export type FieldConfig = { widget: Widget | null; ui: RegisterUiConfig | SelectManyUiConfig | Record<string, unknown> | null; lookup: LookupBinding | null; visibleWhen: string | null };
-export class FieldConfigError extends Error {}
+export class FieldConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FieldConfigError';
+  }
+}
+
+function formatIssues(issues: z.core.$ZodIssue[]): string {
+  return issues.map((i) => i.path.join('.') + ' ' + i.message).join('; ');
+}
 
 export function parseFieldConfig(row: { widget: string | null; uiConfig: unknown; lookup: unknown; visibleWhen: string | null }): FieldConfig {
   if (row.widget == null) return { widget: null, ui: null, lookup: null, visibleWhen: row.visibleWhen ?? null };
@@ -57,11 +66,11 @@ export function parseFieldConfig(row: { widget: string | null; uiConfig: unknown
   const widget = row.widget as Widget;
   const uiSchema = UI_BY_WIDGET[widget];
   const ui = uiSchema ? uiSchema.safeParse(row.uiConfig ?? null) : { success: true as const, data: null };
-  if (!ui.success) throw new FieldConfigError(`ui_config invalid for ${widget}: ${ui.error.issues.map((i) => i.path.join('.') + ' ' + i.message).join('; ')}`);
+  if (!ui.success) throw new FieldConfigError(`ui_config invalid for ${widget}: ${formatIssues(ui.error.issues)}`);
   let lookup: LookupBinding | null = null;
   if (widget === 'lookup_fill') {
     const l = lookupBinding.safeParse(row.lookup);
-    if (!l.success) throw new FieldConfigError(`lookup binding required for lookup_fill: ${l.error.issues.map((i) => i.path.join('.') + ' ' + i.message).join('; ')}`);
+    if (!l.success) throw new FieldConfigError(`lookup binding required for lookup_fill: ${formatIssues(l.error.issues)}`);
     lookup = l.data;
   }
   return { widget, ui: (ui.data as FieldConfig['ui']) ?? null, lookup, visibleWhen: row.visibleWhen ?? null };
