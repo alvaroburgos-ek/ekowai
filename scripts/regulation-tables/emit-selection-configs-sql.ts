@@ -3,14 +3,31 @@ import { SELECTION_CONFIGS, toDbShape } from '../../src/lib/eval/selection-field
 
 type EnumValue = { value: string; label_de: string; label_en?: string | null; order_index?: number };
 
+type Entry = { standard: string; symbol: string; keepProdEnum?: EnumValue[] };
+
 const q = (s: string) => `'${s.replace(/'/g, "''")}'`;
 const j = (v: unknown) => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`;
 
-export function emitSelectionConfigSql(
-  entries: Array<{ standard: string; symbol: string; keepProdEnum?: EnumValue[] }>
-): Map<string, string> {
-  const out = new Map<string, string[]>();
+// The prod entries snapshot can list the same (standard, symbol) pair twice
+// (the symbol sits on two worksheets of the same standard) — the UPDATE's
+// join already matches every row for that standard+symbol, so a duplicate
+// entry would only emit a redundant, identical statement. Dedupe by
+// standard+symbol before emitting, keeping the first occurrence.
+function dedupe(entries: Entry[]): Entry[] {
+  const seen = new Set<string>();
+  const out: Entry[] = [];
   for (const e of entries) {
+    const key = `${e.standard} ${e.symbol}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(e);
+  }
+  return out;
+}
+
+export function emitSelectionConfigSql(entries: Entry[]): Map<string, string> {
+  const out = new Map<string, string[]>();
+  for (const e of dedupe(entries)) {
     const config = SELECTION_CONFIGS[e.symbol];
     if (!config) throw new Error(`no SELECTION_CONFIGS entry for ${e.symbol}`);
     const db = toDbShape(e.symbol, config, { keepProdEnum: e.keepProdEnum });
@@ -28,22 +45,31 @@ export function emitSelectionConfigSql(
   return new Map([...out].map(([k, v]) => [k, [...v, 'COMMIT;'].join('\n') + '\n']));
 }
 
-if (process.argv[1]?.endsWith('emit-selection-configs-sql.ts')) {
-  const entries = JSON.parse(readFileSync(process.argv[2], 'utf8')) as Array<{
-    standard: string;
-    symbol: string;
-    keepProdEnum?: EnumValue[];
-  }>;
-  for (const [std, sql] of emitSelectionConfigSql(entries)) {
-    writeFileSync(`scripts/migrations/20260911120000_selection_configs_${std.replace(/[^A-Za-z0-9]/g, '_')}.sql`, sql);
-  }
+// Rollback undoes exactly what the forward migration wrote for each entry:
+// widget/ui_config always; enum_values only when the forward write set it
+// (select_many without keepProdEnum) — same condition as emitSelectionConfigSql,
+// so a D-1-style keepProdEnum entry's prod enum_values is never touched.
+export function emitSelectionRollbackSql(entries: Entry[]): string {
   const rollback: string[] = ['BEGIN;'];
-  for (const e of entries) {
+  for (const e of dedupe(entries)) {
+    const config = SELECTION_CONFIGS[e.symbol];
+    if (!config) throw new Error(`no SELECTION_CONFIGS entry for ${e.symbol}`);
+    const db = toDbShape(e.symbol, config, { keepProdEnum: e.keepProdEnum });
+    const sets = ['widget = NULL', 'ui_config = NULL'];
+    if (db.widget === 'select_many' && !e.keepProdEnum) sets.push('enum_values = NULL');
     rollback.push(
-      `UPDATE fields f SET widget = NULL, ui_config = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.symbol = ${q(e.symbol)} AND s.code = ${q(e.standard)} AND f.worksheet_template_id = w.id;`
+      `UPDATE fields f SET ${sets.join(', ')} FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE f.symbol = ${q(e.symbol)} AND s.code = ${q(e.standard)} AND f.worksheet_template_id = w.id;`
     );
   }
   rollback.push('COMMIT;');
-  writeFileSync('scripts/rollback-20260911120000-selection-configs.sql', rollback.join('\n') + '\n');
+  return rollback.join('\n') + '\n';
+}
+
+if (process.argv[1]?.endsWith('emit-selection-configs-sql.ts')) {
+  const entries = JSON.parse(readFileSync(process.argv[2], 'utf8')) as Entry[];
+  for (const [std, sql] of emitSelectionConfigSql(entries)) {
+    writeFileSync(`scripts/migrations/20260911120000_selection_configs_${std.replace(/[^A-Za-z0-9]/g, '_')}.sql`, sql);
+  }
+  writeFileSync('scripts/rollback-20260911120000-selection-configs.sql', emitSelectionRollbackSql(entries));
   console.log('wrote', entries.length, 'entries');
 }
