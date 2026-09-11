@@ -1,0 +1,205 @@
+[
+ {
+  "standard": "DIN-276",
+  "symbol": "applicable_cost_groups"
+ },
+ {
+  "standard": "DIN-276",
+  "symbol": "input_documents_register"
+ },
+ {
+  "standard": "DIN-276",
+  "symbol": "planning_stage_active"
+ },
+ {
+  "standard": "DIN-276",
+  "symbol": "special_cost_flags"
+ },
+ {
+  "standard": "DWA-A-138-1",
+  "symbol": "a138_anlagentyp_kandidaten",
+  "keepProdEnum": [
+   {
+    "value": "versickerungsflaeche",
+    "label_de": "Versickerungsfläche",
+    "label_en": null,
+    "order_index": 1,
+    "regulation_reference": "§6.2"
+   },
+   {
+    "value": "versickerungsmulde",
+    "label_de": "Versickerungsmulde",
+    "label_en": null,
+    "order_index": 2,
+    "regulation_reference": "§6.3"
+   },
+   {
+    "value": "rigole",
+    "label_de": "Rigole",
+    "label_en": null,
+    "order_index": 3,
+    "regulation_reference": "§6.4"
+   },
+   {
+    "value": "mulden_rigolen_element",
+    "label_de": "Mulden-Rigolen-Element",
+    "label_en": null,
+    "order_index": 4,
+    "regulation_reference": "§6.5"
+   },
+   {
+    "value": "mulden_rigolen_system",
+    "label_de": "Mulden-Rigolen-System",
+    "label_en": null,
+    "order_index": 5,
+    "regulation_reference": "§6.6"
+   },
+   {
+    "value": "versickerungsschacht",
+    "label_de": "Versickerungsschacht",
+    "label_en": null,
+    "order_index": 6,
+    "regulation_reference": "§6.7"
+   },
+   {
+    "value": "versickerungsbecken",
+    "label_de": "Versickerungsbecken",
+    "label_en": null,
+    "order_index": 7,
+    "regulation_reference": "§6.8"
+   }
+  ]
+ },
+ {
+  "standard": "DWA-A-272E",
+  "symbol": "criteria_social"
+ },
+ {
+  "standard": "DWA-A-272E",
+  "symbol": "variants"
+ },
+ {
+  "standard": "DWA-M-1200-1",
+  "symbol": "indikatorchemikalien_kat1"
+ },
+ {
+  "standard": "DWA-M-1200-1",
+  "symbol": "indikatorchemikalien_kat2"
+ },
+ {
+  "standard": "DWA-M-1200-3",
+  "symbol": "bewaesserungstagebuch"
+ },
+ {
+  "standard": "DWA-M-1200-3",
+  "symbol": "bewaesserungstagebuch"
+ },
+ {
+  "standard": "DWA-M-277E",
+  "symbol": "source_set"
+ },
+ {
+  "standard": "DWA-M-277E",
+  "symbol": "source_set"
+ },
+ {
+  "standard": "DWA-M-816",
+  "symbol": "alternatives"
+ },
+ {
+  "standard": "DWA-M-816",
+  "symbol": "component_costs"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "alternatives_considered"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "applicable_legal_bases"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "award_criteria_list"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "bewertungskommission_members"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "exclusion_124_gwb_selected"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "quality_targets_konzept"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "quality_targets_projekt"
+ },
+ {
+  "standard": "DWA-M-820-1",
+  "symbol": "stakeholder_list"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "applicable_din_standards"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "applicable_dwa_standards"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "change_orders"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "client_guidelines"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "data_security_measures"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "included_hoai_phases"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "lph_completed"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "permit_inventory_complete"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "project_goals"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "projektsteuerung_scope"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "software_products_defined"
+ },
+ {
+  "standard": "DWA-M-820-2",
+  "symbol": "stakeholders_list"
+ },
+ {
+  "standard": "DWA-M-820-3",
+  "symbol": "applicable_lph"
+ },
+ {
+  "standard": "FLL-Naturteich",
+  "symbol": "equipment_elements_list"
+ },
+ {
+  "standard": "FLL-Naturteich",
+  "symbol": "plant_species_list"
+ }
+]
