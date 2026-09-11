@@ -1,5 +1,5 @@
 # CORPUS READY-TO-USE SCORECARD
-snapshot exported_at: 2026-08-01T10:14:04.443Z
+snapshot exported_at: 2026-08-01T10:20:07.816Z
 compute-ready (0 equation hard-errors): 67 / 71 standards
 
 | standard | eq | computed | manual(gap) | ERROR | gates | dead-gates | compute-ready |
@@ -18,7 +18,7 @@ compute-ready (0 equation hard-errors): 67 / 71 standards
 | DIN-EN-16941-2 | 2 | 2 | 0 | 0 | 19 | 0 | ✅ |
 | DIN-EN-ISO-14044 | 1 | 0 | 1 | 0 | 17 | 0 | ✅ |
 | DVS-2225-4 | 3 | 3 | 0 | 0 | 18 | 0 | ✅ |
-| DWA-A-102-2 | 62 | 56 | 6 | 0 | 30 | 0 | ✅ |
+| DWA-A-102-2 | 62 | 57 | 5 | 0 | 30 | 0 | ✅ |
 | DWA-A-125 | 2 | 2 | 0 | 0 | 16 | 0 | ✅ |
 | DWA-A-131 | 78 | 76 | 2 | 0 | 20 | 0 | ✅ |
 | DWA-A-138-1 | 46 | 21 | 25 | 0 | 35 | 0 | ✅ |
@@ -28,7 +28,7 @@ compute-ready (0 equation hard-errors): 67 / 71 standards
 | DWA-A-226 | 28 | 28 | 0 | 0 | 24 | 0 | ✅ |
 | DWA-A-262E | 18 | 16 | 2 | 0 | 60 | 0 | ✅ |
 | DWA-A-272E | 10 | 6 | 4 | 0 | 36 | 0 | ✅ |
-| DWA-M-102-4 | 31 | 18 | 13 | 0 | 22 | 0 | ✅ |
+| DWA-M-102-4 | 31 | 24 | 7 | 0 | 22 | 0 | ✅ |
 | DWA-M-1200-1 | 1 | 0 | 1 | 0 | 21 | 0 | ✅ |
 | DWA-M-1200-2 | 4 | 3 | 1 | 0 | 15 | 0 | ✅ |
 | DWA-M-1200-3 | 10 | 10 | 0 | 0 | 32 | 0 | ✅ |
@@ -61,9 +61,9 @@ compute-ready (0 equation hard-errors): 67 / 71 standards
 | ISO-14067 | 7 | 6 | 1 | 0 | 30 | 0 | ✅ |
 | ISO-14097 | 0 | 0 | 0 | 0 | 16 | 0 | ✅ |
 | ISO-46001 | 4 | 4 | 0 | 0 | 40 | 0 | ✅ |
-| ISO-5667-1 | 3 | 1 | 2 | 0 | 27 | 0 | ✅ |
+| ISO-5667-1 | 3 | 2 | 1 | 0 | 27 | 0 | ✅ |
 | ISO-5667-10 | 3 | 3 | 0 | 0 | 36 | 0 | ✅ |
-| ISO-5667-13 | 3 | 2 | 1 | 0 | 23 | 0 | ✅ |
+| ISO-5667-13 | 3 | 3 | 0 | 0 | 23 | 0 | ✅ |
 | ISO-5667-16 | 2 | 2 | 0 | 0 | 35 | 0 | ✅ |
 | ISO-59004 | 0 | 0 | 0 | 0 | 44 | 0 | ✅ |
 | ISO-59010 | 0 | 0 | 0 | 0 | 23 | 0 | ✅ |
