@@ -7,9 +7,11 @@ import {
   auditLog,
   equations,
   worksheetTemplates,
+  standards,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
@@ -167,12 +169,26 @@ export async function saveWorksheet(
   // consumer lookup by code alone could misfire into another guideline that shares
   // a code (e.g. a second standard with an 'A138-12'). Fail-closed: if unknown, skip.
   const [savedTemplateRow] = await db
-    .select({ standardId: worksheetTemplates.standardId, code: worksheetTemplates.code })
+    .select({ standardId: worksheetTemplates.standardId, code: worksheetTemplates.code, standardCode: standards.code })
     .from(worksheetTemplates)
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
     .where(eq(worksheetTemplates.id, instance.worksheetTemplateId))
     .limit(1);
   const savedStandardId = savedTemplateRow?.standardId ?? null;
   const savedTemplateCode = savedTemplateRow?.code ?? null;
+
+  // Server-side registration of DB-backed regulation reference tables
+  // (Tab.9/5/6/13 …) into the eval-layer registry. materializeLoadingCheck()
+  // below calls tab6Limit()/flaechengruppeToTier() entirely on the server —
+  // WorksheetForm's client-only registerTables() call never runs here, so
+  // without this the persisted A138-12 loading-check would always be computed
+  // from the TS fallback constants even when a DB table overrides the display
+  // value (fix round 1, IMPORTANT #2). Once per save call, before any
+  // materialize* call that reads those accessors. Module-global registry is
+  // acceptable: this is immutable reference data keyed by standard+edition+table.
+  if (savedTemplateRow?.standardCode) {
+    await ensureRegulationTablesLoaded(savedTemplateRow.standardCode);
+  }
 
   // A138-23 Phase-4 summary owner: A138-23 owns NO equation (pure reconciliation
   // worksheet), so its OWNER-path trigger cannot be an equation-topology flag like

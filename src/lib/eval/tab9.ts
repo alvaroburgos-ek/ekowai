@@ -75,22 +75,39 @@ const TAB9: ReadonlyArray<Tab9Entry> = [...GROUP_1, ...GROUP_2, ...GROUP_3].map(
 const BY_VALUE: ReadonlyMap<string, Tab9Entry> = new Map(TAB9.map((e) => [e.value, e]));
 
 /** Reads Tab.9 from the registry when a table has been registered (page-level
- * DB load via `registerTables()`); returns null when nothing is registered so
- * callers fall back to the TS constants (`TAB9`) — identical behavior to an
- * empty DB. */
+ * DB load via `registerTables()`); returns null when nothing is registered, OR
+ * when a registered table maps to zero VALID rows, so callers fall back to the
+ * TS constants (`TAB9`) — identical behavior to an empty/missing DB in either
+ * case. Each row is individually validated (cm/cs finite numbers, kind is
+ * 'paved'|'unpaved', group is 1|2|3); a malformed jsonb row is skipped with a
+ * warning rather than injecting NaN/0 into Gl. 2 / Gl. 10 downstream. */
 function fromRegistry(): readonly Tab9Entry[] | null {
   const t = getTable('DWA-A-138-1', undefined, 'TAB9');
   if (!t) return null;
-  return t.rows.map((r) => ({
-    value: r.row_key,
-    label: r.label_de,
-    cm: Number(r.values.cm),
-    cs: Number(r.values.cs),
-    kind: r.values.kind as 'paved' | 'unpaved',
-    group: Number(r.values.group) as 1 | 2 | 3,
-    standard: 'DWA-A 138-1',
-    edition: '2024-10',
-  }));
+  const rows: Tab9Entry[] = [];
+  for (const r of t.rows) {
+    const cm = Number(r.values.cm);
+    const cs = Number(r.values.cs);
+    const kind = r.values.kind;
+    const group = Number(r.values.group);
+    const validKind = kind === 'paved' || kind === 'unpaved';
+    const validGroup = group === 1 || group === 2 || group === 3;
+    if (!Number.isFinite(cm) || !Number.isFinite(cs) || !validKind || !validGroup) {
+      console.warn('[tab9] invalid regulation_table row skipped', r.row_key);
+      continue;
+    }
+    rows.push({
+      value: r.row_key,
+      label: r.label_de,
+      cm,
+      cs,
+      kind,
+      group: group as 1 | 2 | 3,
+      standard: 'DWA-A 138-1',
+      edition: '2024-10',
+    });
+  }
+  return rows.length > 0 ? rows : null;
 }
 
 export function getTab9Entries(): readonly Tab9Entry[] {
