@@ -195,11 +195,24 @@ export type FlaechengruppeCode = typeof FLAECHENGRUPPE_CODES[number];
  *   - tier2 + tier3 rows (BK II/III): Überlauf in Rigole mit n_M max. 1/a
  * (Tab.6, Zeilen 919/920/924.)
  */
+/** The only four valid Tab.6 tiers — see Tab6Tier. */
+const VALID_TIERS: ReadonlySet<string> = new Set(['tier1_none', 'tier2', 'tier3', 'authority']);
+
 export function flaechengruppeToTier(flaechengruppe: string | null): Tab6Tier | null {
   if (flaechengruppe === null) return null;
 
   const row = lookupRow('DWA-A-138-1', undefined, 'TAB5', { flaechengruppe });
-  if (row && typeof row.values.tier === 'string') return row.values.tier as Tab6Tier;
+  if (row && typeof row.values.tier === 'string') {
+    if (VALID_TIERS.has(row.values.tier)) return row.values.tier as Tab6Tier;
+    // I-4 fix: a registered TAB5 row with a malformed/foreign `tier` value
+    // (not one of the four Tab6Tier literals) must not silently propagate
+    // downstream — tab6Limit()/tab6LoadingCheck() switch on this value and
+    // an unrecognised string would fall through their tier2/tier3 checks
+    // into 'indeterminate' anyway, but only after being treated as opaque
+    // data; warn loudly and fall through to the TS-constant switch below
+    // instead, exactly like tab9.ts's malformed-row skip.
+    console.warn('[tab6-loading] invalid TAB5 registry tier skipped, falling back to TS constants', flaechengruppe, row.values.tier);
+  }
 
   switch (flaechengruppe) {
     // tier1_none — keine Anforderung
