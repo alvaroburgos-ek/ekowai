@@ -14,6 +14,15 @@ describe('isAttestationCondition', () => {
     expect(isAttestationCondition('VERIFY Gl. 5/6')).toBe(true);
   });
 
+  it('treats an EMPTY/whitespace condition as a manual attestation (not broken)', () => {
+    // No machine rule → the requirement is confirmed manually by the engineer.
+    // This is the 194-warn-gate class the UI must show as "manuelle Bestätigung",
+    // not "broken".
+    expect(isAttestationCondition('')).toBe(true);
+    expect(isAttestationCondition('   ')).toBe(true);
+    expect(isAttestationCondition(undefined as unknown as string)).toBe(true);
+  });
+
   it('does NOT match parseable conditions', () => {
     expect(isAttestationCondition('a138_applicable == TRUE')).toBe(false);
     expect(isAttestationCondition('gw_clearance >= 1.0')).toBe(false);

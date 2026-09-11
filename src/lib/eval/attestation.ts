@@ -21,8 +21,12 @@
  * over this pattern match.
  */
 export function isAttestationCondition(condition: string): boolean {
-  if (!condition) return false;
-  const trimmed = condition.trim();
+  const trimmed = (condition ?? '').trim();
+  // An EMPTY/whitespace condition has no machine rule at all — the requirement
+  // is confirmed manually by the engineer. That is an attestation (awaiting
+  // sign-off), NOT a broken/unparseable rule. Only a NON-empty condition that
+  // the parser cannot make sense of is truly "broken".
+  if (trimmed === '') return true;
   if (/^engineer-verified$/i.test(trimmed)) return true;
   if (/^verify\s+Gl\.\s/i.test(trimmed)) return true;
   return false;
