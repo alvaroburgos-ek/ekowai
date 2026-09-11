@@ -8,19 +8,7 @@ import { Select } from '@/components/ui/select';
 import { OwnerBadge, type Owner } from '@/components/vsme/owner-badge';
 import { setFieldOwner, type VsmeOwner } from '@/lib/actions/vsme-owner';
 import { Check, Circle } from 'lucide-react';
-
-/** One field row in the worklist. Frozen shape — later tasks pass real data. */
-export interface WorklistRow {
-  fieldId: string;
-  symbol: string;
-  labelDe: string;
-  labelEn: string | null;
-  owner: string;
-  dataType: string;
-  valueText: string | null;
-  valueNumber: string | null;
-  hasValue: boolean;
-}
+import type { WorklistRow } from '@/lib/db/queries/vsme-worklist';
 
 const T = {
   de: {

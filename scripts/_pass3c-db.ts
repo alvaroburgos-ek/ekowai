@@ -6,6 +6,7 @@ import type {
   ParsedWorkbook,
   EnumValueRow,
 } from './_pass3c-types';
+import { resolveComplianceWorksheet } from './_pass3c-compliance-host';
 
 const {
   standards,
@@ -555,12 +556,9 @@ async function executeImport(
   }
 
   // ---- 6. Compliance requirements ----
-  const firstPhase1 = parsed.worksheets.find((w) => w.phase === 1) ?? parsed.worksheets[0];
   const crValues = parsed.complianceRequirements.map((cr) => {
-    const matchingByPhase = cr.phase != null
-      ? parsed.worksheets.find((w) => w.phase === cr.phase)
-      : undefined;
-    const targetWorksheet = matchingByPhase ?? firstPhase1;
+    const host = resolveComplianceWorksheet(cr, parsed.worksheets);
+    const targetWorksheet = parsed.worksheets.find((w) => w.worksheet_code === host.worksheet_code)!;
     let condition = cr.evaluation_expression;
     if (!condition) {
       if (cr.required_field_symbols) {
@@ -599,6 +597,33 @@ async function executeImport(
           severity: sql`excluded.severity`,
         },
       });
+  }
+
+  // Stale-row cleanup: the UPSERT key is (worksheet_template_id, code), so a
+  // re-hosted requirement would otherwise leave its old row orphaned on the
+  // previous worksheet — 54 rows instead of 31. Scoped to THIS standard's
+  // templates (tmplIds, computed above from parsed.worksheets); other
+  // standards' compliance rows are untouchable by construction.
+  // compliance_suggestions.requirement_id has ON DELETE CASCADE (see
+  // src/lib/db/schema.ts), so deleting a stale requirement here also
+  // removes its suggestions — no separate cleanup needed.
+  if (tmplIds.length > 0) {
+    const existingCr = await tx
+      .select({
+        id: complianceRequirements.id,
+        wtId: complianceRequirements.worksheetTemplateId,
+        code: complianceRequirements.code,
+      })
+      .from(complianceRequirements)
+      .where(inArray(complianceRequirements.worksheetTemplateId, tmplIds));
+    const incoming = new Set(crValues.map((v) => `${v.worksheetTemplateId}:${v.code}`));
+    const staleIds = existingCr
+      .filter((r) => !incoming.has(`${r.wtId}:${r.code}`))
+      .map((r) => r.id);
+    if (staleIds.length > 0) {
+      await tx.delete(complianceRequirements).where(inArray(complianceRequirements.id, staleIds));
+      console.log(`  compliance: deleted ${staleIds.length} stale row(s) after re-hosting`);
+    }
   }
 
   return {

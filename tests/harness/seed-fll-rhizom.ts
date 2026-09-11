@@ -189,7 +189,7 @@ export async function seedFllRhizom(
           (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, enum_values, active, order_index)
         VALUES (
           ${t.id}, ${sectionId}, ${f.symbol}, ${f.label_de}, ${f.data_type}, ${f.unit},
-          ${f.is_required}, ${f.enum_values ? sql.json(f.enum_values as object) : null}, true, ${f.order_index}
+          ${f.is_required}, ${f.enum_values ? sql.json(f.enum_values as unknown as import('postgres').JSONValue) : null}, true, ${f.order_index}
         ) RETURNING id`;
       fieldIds[f.symbol] = row.id;
       fieldTypes[f.symbol] = f.data_type;

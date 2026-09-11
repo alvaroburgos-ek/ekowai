@@ -23,6 +23,8 @@ import { ChecklistEditor } from './checklist-editor';
 import { StructuredRegisterEditor } from './structured-register-editor';
 import { SELECTION_CONFIGS } from '@/lib/eval/selection-fields';
 import { EditorErrorBoundary } from './editor-error-boundary';
+import { PollutantRegisterEditor } from './pollutant-register-editor';
+import { POLLUTANT_REGISTER_SYMBOL, POLLUTANT_OUTPUT_SYMBOLS } from '@/lib/eval/pollutant-register';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { surfaceSourceState } from '@/lib/eval/surface-source-state';
 import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
@@ -152,6 +154,10 @@ type Props = {
    * for fields where prefillSourceByFieldId is 'site_profile'. Shown in the
    * field's tooltip so the engineer can find the source entry. */
   siteProfileKeyByFieldId?: Record<string, string>;
+  /** field_id → persisted project_parameters.client_supplied flag
+   * ("Kundenangabe" — value delivered by the client, AGB input-error
+   * carve-out). Only true entries need to be present. */
+  clientSuppliedByFieldId?: Record<string, boolean>;
   /** Standard code (e.g. "DWA-A-138-1"). Forwarded to DynamicField so the
    * inheritance badge can deep-link back to the source worksheet. */
   standardCode: string;
@@ -169,7 +175,24 @@ type Props = {
    * A138-10). null when this worksheet IS the owner or the standard has no
    * surface_inventory field. */
   surfaceSource?: { status: string; carrier: unknown } | null;
+  /** Field ids whose persisted project_parameters row was written by a
+   * SERVER-side engine (source_type='computed', e.g. the VSME CO₂ engine;
+   * plus VSME 'derived' rows like the B04 per-medium sums). These render
+   * read-only with a provenance hint — single-source rule: derived values
+   * are never re-entered by hand. */
+  serverComputedFieldIds?: string[];
 };
+
+/** VSME-B03.200 symbols written by recomputeB3Co2 (kept in sync with
+ * OUTPUT_SYMBOLS in src/lib/actions/co2.ts — not imported because that
+ * module is 'use server'). Drives the CO₂-table provenance hint. */
+const VSME_CO2_ENGINE_SYMBOLS = new Set([
+  'GrossScope1GreenhouseGasEmissions',
+  'GrossLocationBasedScope2GreenhouseGasEmissions',
+  'TotalGrossLocationBasedScope1AndScope2GHGEmissions',
+]);
+
+const VSME_POLLUTANT_SUM_SYMBOLS = new Set<string>(Object.values(POLLUTANT_OUTPUT_SYMBOLS));
 
 export function WorksheetForm({
   locale,
@@ -189,12 +212,14 @@ export function WorksheetForm({
   ambiguousSymbols,
   prefillSourceByFieldId,
   siteProfileKeyByFieldId,
+  clientSuppliedByFieldId,
   standardCode,
   docs,
   priorSnapshotCount,
   diffHref,
   isPlatformEngineer = false,
   surfaceSource,
+  serverComputedFieldIds,
 }: Props) {
   const init = useWorksheetStore((s) => s.init);
   const flush = useWorksheetStore((s) => s.flush);
@@ -485,6 +510,15 @@ export function WorksheetForm({
   // Config-driven selection fields (checklists + structured registers whose
   // options/columns the guideline prescribes — see selection-fields.ts).
   const selectionFields = fields.filter((f) => f.active && SELECTION_CONFIGS[f.symbol]);
+  // VSME-B04.100 pollutant register: per-pollutant E-PRTR rows; the three
+  // AmountOfEmissionTo{Air,Water,Soil} scalars are derived per-medium sums.
+  const pollutantRegisterField = fields.find((f) => f.symbol === POLLUTANT_REGISTER_SYMBOL);
+
+  // Field ids whose persisted value was engine-written server-side → locked.
+  const serverComputedSet = useMemo(
+    () => new Set(serverComputedFieldIds ?? []),
+    [serverComputedFieldIds],
+  );
 
   // Upstream-cause state for consumer worksheets (A138-10). null when this
   // worksheet does not consume a surface-inventory source.
@@ -517,6 +551,9 @@ export function WorksheetForm({
       if (f.symbol === 'risk_mitigation_plan') continue;
       // config-driven selection fields render via their dedicated section.
       if (SELECTION_CONFIGS[f.symbol]) continue;
+      // pollutant_register is rendered by its dedicated PollutantRegisterEditor
+      // section, not as a raw json field in the grid.
+      if (f.symbol === POLLUTANT_REGISTER_SYMBOL) continue;
       const key = f.sectionId ?? null;
       const arr = map.get(key) ?? [];
       arr.push(f);
@@ -577,6 +614,34 @@ export function WorksheetForm({
     return fs.map((f) => {
       const overrideMeta = overrideMetaByOutputFieldId.get(f.id);
 
+      // Server-engine-written value (source_type='computed' / VSME 'derived'):
+      // locked via the existing isComputed path + a provenance hint telling the
+      // engineer WHERE the value is produced (single-source rule).
+      //
+      // The VSME hints render even BEFORE the engine has ever written a value
+      // (empty project): without them the CO₂ calculator / register is
+      // invisible from the worksheet and the engineer types the totals by
+      // hand. Pre-computation the field stays editable — only the hint shows.
+      const isServerComputed = serverComputedSet.has(f.id);
+      const isVsme = standardCode === 'VSME';
+      const computedHint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
+        ? {
+            label: isServerComputed
+              ? 'Automatisch berechnet aus den CO₂-Aktivitätslinien.'
+              : 'Dieses Feld berechnet der CO₂-Rechner aus den erfassten Aktivitäten.',
+            href: `/${locale}/projects/${projectId}/vsme/emissions`,
+            hrefLabel: '→ CO₂-Rechner öffnen',
+          }
+        : isVsme && VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol) && pollutantRegisterField
+          ? {
+              label: isServerComputed
+                ? 'Summe aus dem Schadstoffregister (unten auf dieser Seite).'
+                : 'Wird beim Speichern als Summe aus dem Schadstoffregister (unten) berechnet.',
+            }
+          : isServerComputed
+            ? { label: 'Serverseitig berechneter Wert.' }
+            : undefined;
+
       // For ac_as_ratio_check, resolve the sibling reason field's current
       // value and thread it in as statusReason so AcAsRatioCheckStatus can
       // display the distinguishing text (keine Anforderung vs behördlich).
@@ -599,9 +664,11 @@ export function WorksheetForm({
           sameSymbolHints={sameSymbolValuesBySymbol[f.symbol]}
           inheritedFrom={inheritedFromBySymbol[f.symbol]}
           docs={docs}
-          isComputed={computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')}
+          isComputed={(computedSymbols.has(f.symbol) && !(f.symbol === 'A_S_m' && asmMethod === 'manual')) || isServerComputed}
+          computedHint={computedHint}
           prefillSource={prefillSourceByFieldId?.[f.id]}
           siteProfileKey={siteProfileKeyByFieldId?.[f.id]}
+          clientSupplied={clientSuppliedByFieldId?.[f.id] ?? false}
           inlineEngineCard={engineCardsByOutputFieldId.get(f.id)}
           overridePill={
             overrideMeta ? (
@@ -643,7 +710,7 @@ export function WorksheetForm({
           data-testid="worksheet-lock-banner"
           className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
         >
-          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen“.
         </div>
       )}
 
@@ -835,6 +902,15 @@ export function WorksheetForm({
           </section>
         );
       })}
+
+      {pollutantRegisterField && (
+        <section className="border-t border-hairline pt-6 mt-8 space-y-4">
+          <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
+            Schadstoffregister — Emissionen je Schadstoff (VSME Abs. 32)
+          </h2>
+          <PollutantRegisterEditor fieldId={pollutantRegisterField.id} readOnly={locked} />
+        </section>
+      )}
 
       <EquationsBlock equations={equations} isPlatformEngineer={isPlatformEngineer} />
 

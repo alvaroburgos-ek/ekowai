@@ -1,0 +1,1204 @@
+{
+  "generated_at": "2026-08-01T17:36:31.724Z",
+  "totals": {
+    "eq": 730,
+    "computes": 620,
+    "nonfinite": 11,
+    "manualFn": 36,
+    "manualOther": 52,
+    "aggregator": 11,
+    "flipped": 21
+  },
+  "perStandard": [
+    {
+      "std": "ATV-A-704E",
+      "eq": 6,
+      "computes": 5,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DIN-14021",
+      "eq": 3,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DIN-18130-1",
+      "eq": 8,
+      "computes": 8,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 1
+    },
+    {
+      "std": "DIN-1989-1",
+      "eq": 4,
+      "computes": 4,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DIN-1989-2",
+      "eq": 9,
+      "computes": 9,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DIN-276",
+      "eq": 53,
+      "computes": 53,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DIN-EN-16941-2",
+      "eq": 2,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DIN-EN-ISO-14044",
+      "eq": 1,
+      "computes": 0,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DVS-2225-4",
+      "eq": 3,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-102-2",
+      "eq": 62,
+      "computes": 57,
+      "nonfinite": 2,
+      "manualFn": 1,
+      "manualOther": 2,
+      "aggregator": 0,
+      "flipped": 1
+    },
+    {
+      "std": "DWA-A-125",
+      "eq": 2,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-131",
+      "eq": 78,
+      "computes": 75,
+      "nonfinite": 1,
+      "manualFn": 0,
+      "manualOther": 2,
+      "aggregator": 0,
+      "flipped": 1
+    },
+    {
+      "std": "DWA-A-138-1",
+      "eq": 46,
+      "computes": 35,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 11,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-178",
+      "eq": 13,
+      "computes": 9,
+      "nonfinite": 0,
+      "manualFn": 2,
+      "manualOther": 2,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-201",
+      "eq": 20,
+      "computes": 19,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-222",
+      "eq": 28,
+      "computes": 27,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-226",
+      "eq": 28,
+      "computes": 28,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-262E",
+      "eq": 18,
+      "computes": 16,
+      "nonfinite": 1,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-A-272E",
+      "eq": 10,
+      "computes": 6,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 3,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-102-4",
+      "eq": 31,
+      "computes": 24,
+      "nonfinite": 2,
+      "manualFn": 5,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 10
+    },
+    {
+      "std": "DWA-M-1200-1",
+      "eq": 1,
+      "computes": 0,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-1200-2",
+      "eq": 4,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 2
+    },
+    {
+      "std": "DWA-M-1200-3",
+      "eq": 10,
+      "computes": 10,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-179-1",
+      "eq": 6,
+      "computes": 6,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 2
+    },
+    {
+      "std": "DWA-M-187",
+      "eq": 4,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 2,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-205",
+      "eq": 24,
+      "computes": 12,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 12,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-229-1",
+      "eq": 47,
+      "computes": 46,
+      "nonfinite": 1,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-229-2",
+      "eq": 12,
+      "computes": 12,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-277E",
+      "eq": 22,
+      "computes": 18,
+      "nonfinite": 0,
+      "manualFn": 4,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-349",
+      "eq": 10,
+      "computes": 10,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-363",
+      "eq": 22,
+      "computes": 14,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 8,
+      "aggregator": 0,
+      "flipped": 2
+    },
+    {
+      "std": "DWA-M-381E",
+      "eq": 4,
+      "computes": 3,
+      "nonfinite": 1,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-708",
+      "eq": 5,
+      "computes": 1,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 4,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-732",
+      "eq": 3,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-760",
+      "eq": 6,
+      "computes": 4,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 2,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "DWA-M-816",
+      "eq": 30,
+      "computes": 9,
+      "nonfinite": 0,
+      "manualFn": 17,
+      "manualOther": 4,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "FLL-GAR-2023",
+      "eq": 4,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "FLL-Naturteich",
+      "eq": 6,
+      "computes": 6,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "FLL-TP-RHIZOM-2023",
+      "eq": 3,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "HOAI-2021",
+      "eq": 6,
+      "computes": 4,
+      "nonfinite": 2,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-14033",
+      "eq": 1,
+      "computes": 1,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-14046",
+      "eq": 1,
+      "computes": 0,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-14064-1",
+      "eq": 4,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-14064-2",
+      "eq": 4,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 2,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-14067",
+      "eq": 7,
+      "computes": 6,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-46001",
+      "eq": 4,
+      "computes": 4,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-5667-1",
+      "eq": 3,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 1,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 1
+    },
+    {
+      "std": "ISO-5667-10",
+      "eq": 3,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-5667-13",
+      "eq": 3,
+      "computes": 3,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 1
+    },
+    {
+      "std": "ISO-5667-16",
+      "eq": 2,
+      "computes": 2,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-5667-6",
+      "eq": 2,
+      "computes": 1,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "ISO-59020",
+      "eq": 13,
+      "computes": 12,
+      "nonfinite": 1,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "PC-1782556615239",
+      "eq": 1,
+      "computes": 1,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "VDI-3477",
+      "eq": 18,
+      "computes": 17,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 1,
+      "aggregator": 0,
+      "flipped": 0
+    },
+    {
+      "std": "VSME",
+      "eq": 10,
+      "computes": 10,
+      "nonfinite": 0,
+      "manualFn": 0,
+      "manualOther": 0,
+      "aggregator": 0,
+      "flipped": 0
+    }
+  ],
+  "flipped": [
+    {
+      "std": "DIN-18130-1",
+      "gl": "9",
+      "id": "a464fee1-e159-4228-8081-cca885eefe37",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "k = (a * l_0) / (A * t) * ln(h_1 / h_2)"
+    },
+    {
+      "std": "DWA-A-102-2",
+      "gl": "REG-Bild4",
+      "id": "f24d3d57-1d4f-4bf4-8a2b-30978d188535",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "q_A_Bem = -8.333 * ln(eta_ges) - 1.6629"
+    },
+    {
+      "std": "DWA-A-131",
+      "gl": "47",
+      "id": "43ad63a7-3fba-414f-9b2a-ef7db7dc00c5",
+      "funcs": [
+        "sqrt"
+      ],
+      "formula": "G = sqrt(P_E / (mu * V_E))"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.10",
+      "id": "d2beb25d-cd12-4a8c-b703-37932936fc13",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_F = 0.00004517*P - 0.03454*ln(Sp) + 0.1958/(0.2873 + k_f)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.2",
+      "id": "b81d9a54-ecbb-4eb8-84fb-5434af80af03",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_F = 0.9115 + 0.00007063*P - 0.000007498*ET_p - 0.2063*ln(Sp + 1)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.3",
+      "id": "4a2cf910-25e0-46d8-9115-67b72c6fadfe",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_F = 0.8658 + 0.0001659*P - 0.00009945*ET_p - 0.1542*ln(Sp + 1)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.5",
+      "id": "be531ef2-78ab-4316-a749-6661581378f4",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_F = 0.9231 + 0.000254*P - 0.0003226*ET_p - 0.1472*ln(Sp + 1)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.6",
+      "id": "887606f6-1931-4deb-bba8-f069c66c2cfd",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_F = 0.0800734*ln(P) - 0.0582828*f_Fu - 0.0501693*Sp - 0.385767*(WK_max - WP) + 8.7040284/(11.9086896 + k_f)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.7",
+      "id": "25c75004-a856-492b-997d-c045cf422c46",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_F = 0.05912*ln(P) - 0.02749*f_Fu - 0.03671*Sp - 0.30514*(WK_max - WP) + 4.97687/(4.7975 + k_f)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "A.8",
+      "id": "b1e3ec56-7e1c-4398-94f5-a3a5b204ead1",
+      "funcs": [
+        "ln",
+        "exp"
+      ],
+      "formula": "a_F = 0.000001969*P - 0.005116*ln(Sp) - 0.0001051*h_D + 0.01753*exp(4.576/k_f)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "B.2",
+      "id": "c8475112-e49b-4317-bb76-45449d2510a5",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_A = 0.004264 + 0.001121*ln(P) - 0.002757*ln(f_S_F)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "B.4",
+      "id": "4a647c2c-cfd5-4056-abfc-d2853f91f41e",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_A = -0.03867 + 0.007684*ln(P) + 0.000003201*f_S_M + 0.0002564*k_f - 0.0001187*f_S_M*k_f + 0.004161*ln(k_f / f_S_M)"
+    },
+    {
+      "std": "DWA-M-102-4",
+      "gl": "B.5",
+      "id": "43a05b73-be06-4ba2-89e4-c59bbd73659a",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "a_A = 0.8112 + 0.0003473*P - 0.00001845*ET_p - 0.04793*f_S_M + 0.0007481*q_Dr - 0.4389*ln(k_f + 1)"
+    },
+    {
+      "std": "DWA-M-1200-2",
+      "gl": "Gl. 1",
+      "id": "0ad3e66f-58bc-4869-9dc6-f5e888345f06",
+      "funcs": [
+        "log10"
+      ],
+      "formula": "log10_reduktion = log10(c_zulauf / c_ablauf)"
+    },
+    {
+      "std": "DWA-M-1200-2",
+      "gl": "Gl. C.2-3",
+      "id": "93bc49a5-c3f8-4aa1-9226-85bc436ec4ef",
+      "funcs": [
+        "log10"
+      ],
+      "formula": "lrv_i = log10(x_i / y_i)"
+    },
+    {
+      "std": "DWA-M-179-1",
+      "gl": "1",
+      "id": "6347746c-e985-4ba3-9520-81ca63df1602",
+      "funcs": [
+        "exp"
+      ],
+      "formula": "r_krit = 0.1201 * exp(0.0655 * eta_hyd)"
+    },
+    {
+      "std": "DWA-M-179-1",
+      "gl": "Bild 4 regression",
+      "id": "d929851f-c55d-4e97-a849-1aa614decbf0",
+      "funcs": [
+        "exp"
+      ],
+      "formula": "eta_BV = regression_a_AFS63 * exp(-regression_b_AFS63 * q_A_max)"
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(k-half)",
+      "id": "13f32698-4844-449f-b0fc-6f142d32313c",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "k_abbau = -ln(0.5) / t_half"
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(k-half)",
+      "id": "7420be92-286d-4635-aac3-d00f4827dbdf",
+      "funcs": [
+        "ln"
+      ],
+      "formula": "k_abbau = -ln(0.5) / t_half"
+    },
+    {
+      "std": "ISO-5667-1",
+      "gl": "2",
+      "id": "db88161d-3cc3-4541-92bd-4271eba4b0fc",
+      "funcs": [
+        "sqrt"
+      ],
+      "formula": "L = 2 * K * sigma / sqrt(n)"
+    },
+    {
+      "std": "ISO-5667-13",
+      "gl": "3",
+      "id": "a2e44a3f-fa64-45aa-94be-80f7c57ed95e",
+      "funcs": [
+        "sqrt"
+      ],
+      "formula": "n_sp = sqrt(V) / 2"
+    }
+  ],
+  "missingFuncFreq": [
+    {
+      "fn": "RBF_0",
+      "n": 11
+    },
+    {
+      "fn": "SUM",
+      "n": 8
+    },
+    {
+      "fn": "RBF_1",
+      "n": 8
+    },
+    {
+      "fn": "RBF_2",
+      "n": 5
+    },
+    {
+      "fn": "RBF_k",
+      "n": 5
+    },
+    {
+      "fn": "sum",
+      "n": 4
+    },
+    {
+      "fn": "RBF_3",
+      "n": 3
+    },
+    {
+      "fn": "SUM_over_i",
+      "n": 2
+    },
+    {
+      "fn": "NS_eff",
+      "n": 2
+    },
+    {
+      "fn": "RBF_kplus1",
+      "n": 2
+    },
+    {
+      "fn": "RBF_4",
+      "n": 2
+    },
+    {
+      "fn": "Sum",
+      "n": 1
+    },
+    {
+      "fn": "integral",
+      "n": 1
+    },
+    {
+      "fn": "SUM_Q_krit",
+      "n": 1
+    },
+    {
+      "fn": "valid_for",
+      "n": 1
+    },
+    {
+      "fn": "if",
+      "n": 1
+    },
+    {
+      "fn": "lookup",
+      "n": 1
+    },
+    {
+      "fn": "BW_Erloese",
+      "n": 1
+    },
+    {
+      "fn": "BW_Aufwendungen",
+      "n": 1
+    },
+    {
+      "fn": "RBF_5",
+      "n": 1
+    }
+  ],
+  "manualOther": [
+    {
+      "std": "ATV-A-704E",
+      "gl": "EQ-01",
+      "id": "c4f4944e-9329-4a62-9724-3e9637a0891c",
+      "formula": "mean_value = SUM(single_result_i) / n_determinations",
+      "error": "Unbekanntes Symbol \"SUM_single_result_i\" im Ausdruck."
+    },
+    {
+      "std": "DWA-A-102-2",
+      "gl": "26",
+      "id": "29c268ef-33c1-4b28-8269-c06d8465729f",
+      "formula": "Q_Dr >= Q_T_aM + Q_R_krit + Sum(Q_Dr_i)",
+      "error": "Unbekanntes Symbol \"Sum_Q_Dr_i\" im Ausdruck."
+    },
+    {
+      "std": "DWA-A-102-2",
+      "gl": "4",
+      "id": "ed169cec-be2a-42c0-b6db-71a80e491228",
+      "formula": "B_R_a_AFS63 = Sum(B_R_a_AFS63_i)",
+      "error": "Unbekanntes Symbol \"Sum_B_R_a_AFS63_i\" im Ausdruck."
+    },
+    {
+      "std": "DWA-A-131",
+      "gl": "20",
+      "id": "4820dcf8-3261-4cb8-ba03-400ce712ffe6",
+      "formula": "X_CSB_BM_impl = C_CSB_abb_ZB * Y - X_CSB_BM_impl * t_TS * b * F_T",
+      "error": "Unbekanntes Symbol \"X_CSB_BM_impl\" im Ausdruck."
+    },
+    {
+      "std": "DWA-A-131",
+      "gl": "B.3",
+      "id": "886fd0b2-7d5e-441b-99d5-15d94a0ee441",
+      "formula": "t_SR_rund = (pi * D_NB) / v_SR",
+      "error": "Unbekanntes Symbol \"pi\" im Ausdruck."
+    },
+    {
+      "std": "DWA-A-178",
+      "gl": "10",
+      "id": "b3085f29-7a03-4021-ba9b-45addc5d91df",
+      "formula": "B_RBFA_ab / A_E_b_a <= b_R_e_zul",
+      "error": "Unerwartetes Zeichen \"<\" an Position 20."
+    },
+    {
+      "std": "DWA-A-178",
+      "gl": "9",
+      "id": "b4167409-558e-4744-8b6f-049c469f085c",
+      "formula": "4 <= b_F <= b_krit = 7   [kg/(m^2*a)]",
+      "error": "Unerwartetes Zeichen \"<\" an Position 2."
+    },
+    {
+      "std": "DWA-A-201",
+      "gl": "F-14",
+      "id": "f4ae9506-4dea-4835-89e2-5f98d23db308",
+      "formula": "P_R between 1 and 3",
+      "error": "Unbekanntes Symbol \"P_R\" im Ausdruck."
+    },
+    {
+      "std": "DWA-A-262E",
+      "gl": "8",
+      "id": "c99aba1c-ea82-4294-b136-9f9ce2f1f033",
+      "formula": "Q_M >= SUM(Q_Dr_RU) >= SUM(Q_krit)  (l/s)",
+      "error": "Unerwartetes Zeichen \">\" an Position 12."
+    },
+    {
+      "std": "DWA-A-272E",
+      "gl": "RULE-10",
+      "id": "da12ce07-4e9c-449d-9dd0-c0595dfd0c31",
+      "formula": "if material_flow_class in {yellowwater,brownwater,blackwater,faeces} then collection_technology in {UDT,UDDT,vacuum_toilet,dry_toilet}",
+      "error": "Unerwartetes Zeichen \"{\" an Position 26."
+    },
+    {
+      "std": "DWA-A-272E",
+      "gl": "RULE-8",
+      "id": "2578b9fe-f9ff-4899-b7ed-f7cd2abf6c70",
+      "formula": "if favourable_conditions_count >= 1 then examine_NASS = true",
+      "error": "Unerwartetes Zeichen \">\" an Position 31."
+    },
+    {
+      "std": "DWA-A-272E",
+      "gl": "RULE-9",
+      "id": "cb470046-e5f5-46fd-9953-f9f96db20ad5",
+      "formula": "30 <= T_plan <= 50",
+      "error": "Unerwartetes Zeichen \"<\" an Position 3."
+    },
+    {
+      "std": "DWA-M-1200-2",
+      "gl": "Gl. C.2-2",
+      "id": "0f237c28-2fc3-451a-b557-9dfe44231ef2",
+      "formula": "perzentil_50_log10 = median(log10_reduktionen)",
+      "error": "Unbekanntes Symbol \"median_log10_reduktionen\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-187",
+      "gl": "2",
+      "id": "6b3dc34c-a3da-4cfd-9e3a-803109b1bd12",
+      "formula": "b_R_a / (A_F / A_b_a) <= b_krit",
+      "error": "Unerwartetes Zeichen \"<\" an Position 22."
+    },
+    {
+      "std": "DWA-M-187",
+      "gl": "2",
+      "id": "75d9844f-9f7f-45ba-a8fc-e2bf850be7a5",
+      "formula": "b_R_a / (A_F / A_b_a) <= b_krit",
+      "error": "Unerwartetes Zeichen \"<\" an Position 22."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-02",
+      "id": "31918a55-696c-4044-a398-1f1c5e36d1e1",
+      "formula": "uv_dosis >= 300 AND uv_dosis <= 450",
+      "error": "Unerwartetes Zeichen \"<\" an Position 17."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-02",
+      "id": "ba51e8f2-4c20-4c01-8f4d-9effcc262b37",
+      "formula": "uv_dosis >= 300 AND uv_dosis <= 450",
+      "error": "Unerwartetes Zeichen \"<\" an Position 17."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-06",
+      "id": "197122ba-f723-4b27-80c1-51a972ea8e12",
+      "formula": "spez_strom_uv >= 30 AND spez_strom_uv <= 60",
+      "error": "Unerwartetes Zeichen \"<\" an Position 21."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-06",
+      "id": "246ff465-b925-47a4-85eb-beb9932f9f65",
+      "formula": "spez_strom_uv >= 30 AND spez_strom_uv <= 60",
+      "error": "Unerwartetes Zeichen \"<\" an Position 21."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-07",
+      "id": "b3126c0d-7940-413e-b3f0-b25b02ccbf38",
+      "formula": "spez_energie_membran >= 0.1 AND spez_energie_membran <= 0.2",
+      "error": "Unerwartetes Zeichen \"<\" an Position 29."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-07",
+      "id": "d399b7fd-e988-4499-a2a6-6af379ab0db5",
+      "formula": "spez_energie_membran >= 0.1 AND spez_energie_membran <= 0.2",
+      "error": "Unerwartetes Zeichen \"<\" an Position 29."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-09",
+      "id": "0c258d85-0a1e-4456-b0df-12f529d11d2c",
+      "formula": "clo2_dosis >= 5 AND clo2_dosis <= 10",
+      "error": "Unerwartetes Zeichen \"<\" an Position 17."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-09",
+      "id": "0e05ac69-c6c4-460a-80b0-7664370b08ca",
+      "formula": "clo2_dosis >= 5 AND clo2_dosis <= 10",
+      "error": "Unerwartetes Zeichen \"<\" an Position 17."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-10",
+      "id": "3f3b7237-8837-45ff-86a5-1582f7156cbd",
+      "formula": "freies_chlor >= 1 AND freies_chlor <= 20",
+      "error": "Unerwartetes Zeichen \"<\" an Position 19."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-10",
+      "id": "86f703b6-6348-4577-a624-029e1ce3c93b",
+      "formula": "freies_chlor >= 1 AND freies_chlor <= 20",
+      "error": "Unerwartetes Zeichen \"<\" an Position 19."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-12",
+      "id": "1a5e5b28-d9c1-4a49-8c5e-9d596e000ff9",
+      "formula": "uv_dosis >= 400 AND uv_dosis <= 700",
+      "error": "Unerwartetes Zeichen \"<\" an Position 17."
+    },
+    {
+      "std": "DWA-M-205",
+      "gl": "EQ-12",
+      "id": "d55d6598-b169-469f-8e17-f7a1c9583bf2",
+      "formula": "uv_dosis >= 400 AND uv_dosis <= 700",
+      "error": "Unerwartetes Zeichen \"<\" an Position 17."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(4a)",
+      "id": "60097156-8b99-4eaa-9a62-f0e08eb13a22",
+      "formula": "G_t = G_e * (1 - e^(-k*t))",
+      "error": "Unbekanntes Symbol \"G_e\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(4a)",
+      "id": "cfab7241-ba1b-40d9-8947-bf957e4542be",
+      "formula": "G_t = G_e * (1 - e^(-k*t))",
+      "error": "Unbekanntes Symbol \"G_e\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(4b)",
+      "id": "78e61753-6fa8-42bc-97b2-6aa2f4607a83",
+      "formula": "G_td = G_e * k * e^(-k*t)",
+      "error": "Unbekanntes Symbol \"G_e\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(4b)",
+      "id": "8502b3d8-9233-443b-86d0-9e8d1555c9e8",
+      "formula": "G_td = G_e * k * e^(-k*t)",
+      "error": "Unbekanntes Symbol \"G_e\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(5)",
+      "id": "905fe4b9-4926-4346-b9a0-92d9adde7df2",
+      "formula": "G_td = 1.868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
+      "error": "Unbekanntes Symbol \"C_ab\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(5)",
+      "id": "9c453ddb-2376-42c8-83be-9b2b8f849608",
+      "formula": "G_td = 1.868 * C_ab * f_1_aerob * f_2_ausbeute * f_3 * M_n_abfallmasse * k * e^(-k*t)",
+      "error": "Unbekanntes Symbol \"C_ab\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(7)",
+      "id": "21202924-1835-4ed6-833b-10521265ce20",
+      "formula": "DDOC_m_decomp_T = DDOC_ma_T_minus_1 - (1 - e^(-k))",
+      "error": "Unbekanntes Symbol \"DDOC_ma_T_minus_1\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-363",
+      "gl": "Gl(7)",
+      "id": "ea86e593-47c6-48e7-8354-cb85ba511843",
+      "formula": "DDOC_m_decomp_T = DDOC_ma_T_minus_1 - (1 - e^(-k))",
+      "error": "Unbekanntes Symbol \"DDOC_ma_T_minus_1\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-708",
+      "gl": "E-BHKW-El",
+      "id": "a1f83dde-e9e0-4d2f-9179-c9659739524a",
+      "formula": "E_el = 1.4 (kWh per kg CSB_el)",
+      "error": "Unerwartetes Token am Ende des Ausdrucks."
+    },
+    {
+      "std": "DWA-M-708",
+      "gl": "E-CH4-Heizwert",
+      "id": "8fefc336-9d50-4923-a3de-3a395505c66b",
+      "formula": "H_CH4 = 36 (MJ per m3 CH4) = 10 (kWh per m3) = 12.6 (MJ per kg CSB_el)",
+      "error": "Unerwartetes Zeichen \"=\" an Position 19."
+    },
+    {
+      "std": "DWA-M-708",
+      "gl": "E-CH4-Yield",
+      "id": "80789b5a-5395-44fe-87e2-7fb70f17deab",
+      "formula": "Y_CH4 = 0.35 (Nm3 CH4 per kg CSB_el)",
+      "error": "Unerwartetes Token am Ende des Ausdrucks."
+    },
+    {
+      "std": "DWA-M-708",
+      "gl": "Gl-1",
+      "id": "d99f5cbf-2e9d-46a2-902f-66a1f196d031",
+      "formula": "Mg^(2+) + NH4^(+) + HPO4^(2-) + OH^(-) + 5*H2O -> MgNH4PO4 * 6*H2O",
+      "error": "Unerwartetes Zeichen \">\" an Position 48."
+    },
+    {
+      "std": "DWA-M-732",
+      "gl": "Gl-M732-03",
+      "id": "462c0610-099f-468c-8330-efe8e7bf7c33",
+      "formula": "n_CO2_neutral = 0.60 .. 0.70 * n_CO2",
+      "error": "Ungültige Zahl an Position 5: \".. 0.7\""
+    },
+    {
+      "std": "DWA-M-760",
+      "gl": "EQ-M760-02",
+      "id": "12244089-c454-4436-a855-6fba6946ea86",
+      "formula": "ns_fettabscheider >= NS  # NS_eff (gewaehlte Nenngroesse) >= berechnete NS, DIN EN 1825-2",
+      "error": "Unerwartetes Zeichen \"#\" an Position 3."
+    },
+    {
+      "std": "DWA-M-760",
+      "gl": "EQ-M760-02",
+      "id": "2ffe9ec8-e7d8-41bc-8546-6349881acb06",
+      "formula": "ns_fettabscheider >= NS  # NS_eff (gewaehlte Nenngroesse) >= berechnete NS, DIN EN 1825-2",
+      "error": "Unerwartetes Zeichen \"#\" an Position 3."
+    },
+    {
+      "std": "DWA-M-816",
+      "gl": "4a",
+      "id": "b57e8227-2821-4cef-b4a6-39dee062ba52",
+      "formula": "Z = SUM_k c_k * t^k",
+      "error": "Unbekanntes Symbol \"SUM_k\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-816",
+      "gl": "5a",
+      "id": "8c53d0a6-c226-4017-8a09-1b16cb3b2489",
+      "formula": "Z = SUM_k c_k * t^k * p^t",
+      "error": "Unbekanntes Symbol \"SUM_k\" im Ausdruck."
+    },
+    {
+      "std": "DWA-M-816",
+      "gl": "6a",
+      "id": "1681e612-af4e-44ec-b0e4-6308f36dcfba",
+      "formula": "Z(t):  Z_1(t)  mit t = 1, ..., n_1  und nachfolgend  Z_2(t)  mit t = n_1+1, ..., n_1 + n_2",
+      "error": "Unerwartetes Zeichen \":\" an Position 3."
+    },
+    {
+      "std": "DWA-M-816",
+      "gl": "6a_TR",
+      "id": "49f9a2b6-6808-45e5-890a-eca7760dac69",
+      "formula": "Z_TR(t);  t = 1, ..., n_A - n_B  bei einem Vorlauf von n_B Jahren",
+      "error": "Unerwartetes Zeichen \";\" an Position 6."
+    },
+    {
+      "std": "FLL-GAR-2023",
+      "gl": "2b",
+      "id": "c7dc584b-0f65-476d-935a-d5306d885a65",
+      "formula": "g_prime >= (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)",
+      "error": "Unbekanntes Symbol \"cos_beta\" im Ausdruck."
+    },
+    {
+      "std": "ISO-14064-1",
+      "gl": "Q-TOT",
+      "id": "1b725e27-bceb-438e-80cc-35ef7960d4e7",
+      "formula": "E_co2e_total = SUM(E_co2e_gas)",
+      "error": "Unbekanntes Symbol \"SUM_E_co2e_gas\" im Ausdruck."
+    },
+    {
+      "std": "ISO-14064-2",
+      "gl": "EQ-02",
+      "id": "a6559b54-578c-4ba8-b224-37345a1269fe",
+      "formula": "E_project = SUM(ssr_emission_co2e)",
+      "error": "Unbekanntes Symbol \"SUM_ssr_emission_co2e\" im Ausdruck."
+    },
+    {
+      "std": "ISO-14064-2",
+      "gl": "EQ-03",
+      "id": "a7d36f0e-158e-4ef9-8c48-918ead93fa85",
+      "formula": "E_baseline = SUM(ssr_emission_co2e)",
+      "error": "Unbekanntes Symbol \"SUM_ssr_emission_co2e\" im Ausdruck."
+    },
+    {
+      "std": "ISO-5667-6",
+      "gl": "A.1",
+      "id": "1ba62e5b-4490-4071-95e4-706d57bf2593",
+      "formula": "l = 0,13 * b^2 * c * (0,7*c + 2*g) / (g*d)",
+      "error": "Unerwartetes Token am Ende des Ausdrucks."
+    },
+    {
+      "std": "VDI-3477",
+      "gl": "6",
+      "id": "752c86b8-4f81-434a-a689-e1f905c1bfc6",
+      "formula": "p_e / p_0 <= 0,95",
+      "error": "Unerwartetes Zeichen \"<\" an Position 10."
+    }
+  ]
+}

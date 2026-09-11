@@ -13,6 +13,14 @@ import { createClient } from '@/lib/supabase/server';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeSurfaceOutputs } from '@/lib/eval/materialize-surfaces';
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
+import {
+  normalizePollutantCarrier,
+  summarizePollutants,
+  POLLUTANT_REGISTER_SYMBOL,
+  POLLUTANT_OUTPUT_SYMBOLS,
+  POLLUTANT_MEDIA,
+  type PollutantMedium,
+} from '@/lib/eval/pollutant-register';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { materializeBasinGoverning } from '@/lib/eval/materialize-basin-governing';
@@ -665,6 +673,65 @@ export async function saveWorksheet(
             },
           });
           // Collect for client-side apply (Task B display-fix)
+          for (const r of derivedRows) {
+            writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
+          }
+        }
+      }
+
+      // Materialize the VSME-B04.100 per-medium pollutant sums when the
+      // pollutant_register carrier was saved. Same in-batch presence pattern
+      // as the surface block above (producer == consumer on the same
+      // worksheet; normalizePollutantCarrier is the single parse path shared
+      // with the editor). The three AmountOfEmissionTo{Air,Water,Soil}
+      // scalars stay the taxonomy-faithful facts — derived sums of the
+      // register, never hand-entered (single-source rule).
+      const [pollutantPresence] = fieldIds.length > 0
+        ? await tx
+            .select({ id: fields.id })
+            .from(fields)
+            .where(
+              and(
+                inArray(fields.id, fieldIds),
+                eq(fields.symbol, POLLUTANT_REGISTER_SYMBOL),
+                eq(fields.worksheetTemplateId, instance.worksheetTemplateId),
+              ),
+            )
+            .limit(1)
+        : [];
+
+      if (pollutantPresence) {
+        const wsFields = await tx
+          .select({ id: fields.id, symbol: fields.symbol })
+          .from(fields)
+          .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)));
+        const carrierValue = input.values[pollutantPresence.id];
+        const carrier = normalizePollutantCarrier(
+          carrierValue?.type === 'json' ? carrierValue.value : null,
+        );
+        const summary = summarizePollutants(carrier);
+        const idBySymbol = new Map(wsFields.map((f) => [f.symbol, f.id]));
+        const derivedRows = POLLUTANT_MEDIA
+          .map((medium) => ({ medium, fieldId: idBySymbol.get(POLLUTANT_OUTPUT_SYMBOLS[medium]) }))
+          .filter((x): x is { medium: PollutantMedium; fieldId: string } => x.fieldId != null)
+          .map((x) => ({
+            projectId: instance.projectId,
+            fieldId: x.fieldId,
+            valueNumber: summary[x.medium] == null ? null : String(summary[x.medium]),
+            sourceType: 'derived' as const,
+            enteredBy: userId,
+            enteredAt: now,
+          }));
+        if (derivedRows.length > 0) {
+          await tx.insert(projectParameters).values(derivedRows).onConflictDoUpdate({
+            target: [projectParameters.projectId, projectParameters.fieldId],
+            set: {
+              valueNumber: sql`excluded.value_number`,
+              sourceType: sql`excluded.source_type`,
+              enteredBy: sql`excluded.entered_by`,
+              enteredAt: now,
+            },
+          });
           for (const r of derivedRows) {
             writtenDerived.push({ fieldId: r.fieldId, valueNumber: r.valueNumber, valueText: null });
           }

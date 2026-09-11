@@ -223,6 +223,7 @@ function parseComplianceRequirements(
   return rows.map((r) => ({
     requirement_code: asString(r.requirement_code) ?? '',
     standard_code: asString(r.standard_code) ?? '',
+    worksheet_code: asString(r.worksheet_code),
     title: asString(r.title) ?? '',
     description: asString(r.description),
     evaluation_type: asString(r.evaluation_type),

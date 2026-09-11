@@ -332,6 +332,29 @@ not a queue to drain.**
 
 **Never block a wave on a missing source.** Cap the affected nodes per doctrine, list the standard as
 source-absent, and keep moving. **Never fill a source gap from memory.**
+# Verification Doctrine (BINDING — read `docs/verification-doctrine.md` in full)
+
+All regulation-encoding, harness, and verification work follows the doctrine in
+**`docs/verification-doctrine.md`**. It is codified as a file so no session or subagent depends on
+chat memory. **Every subagent brief must paste that doctrine VERBATIM, never summarized.** Core:
+
+- **SR-1** — a value is applied only if quoted **verbatim from the standard's own text/table this
+  session**; logs/prior-chats/bring-up numbers are never sources; a proven computation ≠ a proven
+  input; the orchestrator rejects source-less fixes.
+- **SR-2** — ranges are surfaced as explicit engineer selections, never auto-picked.
+- **SR-3** — the rendered PDF is ground truth (**PDF > markdown > encoding > ledger > chat**); a VA
+  claim without a PDF-page ref is invalid.
+- **SR-4** — schema/infrastructure changes needed to fulfill an **approved mandate are
+  AUTO-APPROVED**: pick the option consistent with production reality + the mandate, log the decision
+  + rationale in the ledger, proceed. Never stop to ask for this class. The ONLY stop-conditions
+  remain: prod applies OUTSIDE an approved mandate, changes to ratified designs, irreversibles.
+- **data_class** on every value node: `standard_fixed` (PDF-page required) / `standard_range`
+  (SR-2 selection) / `engineer_input` / `derived` (trace required), with the #22 and F-7 validator rules.
+- **Process** — raw output for every claim; sequential subagent-per-task with orchestrator
+  verification; findings over fixes (staged written-not-applied, batched per standard); no prod
+  hand-edits (Management-API path, secrets never printed); honest residue is a deliverable.
+- **Source PDFs + reader pipeline** (scoop `pdftotext -layout` via PowerShell; WSL is blind to the
+  FLL PDF folder) and **prod ref `vadsmshzebefjreqcicl`** are recorded in the doctrine doc.
 
 # Importing standard workbooks (Pass3c)
 

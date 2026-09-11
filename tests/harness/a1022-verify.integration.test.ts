@@ -209,7 +209,7 @@ describe('DWA-A-102-2 — ENGINE-GAP equations: the engine FAILS LOUD (never fab
 describe('DWA-A-102-2 — derived-output classification + saveWorksheet round-trip (REAL)', () => {
   it('classifies harnessed equation outputs as derived (not entered) via the REAL derivedOutputSymbols', () => {
     const eqRows = A1022_EQUATIONS.map((e) => ({ id: fixture.equationIds[e.num], outputSymbol: e.out }));
-    const derived = derivedOutputSymbols(eqRows, new Set<string>());
+    const derived = derivedOutputSymbols(eqRows, []);
     for (const out of ['A_b_a', 'A_RKB', 'V_RKB', 'C_e_CSB', 'Q_R_krit', 'C_b_CSB']) {
       expect(derived.has(out)).toBe(true);
     }

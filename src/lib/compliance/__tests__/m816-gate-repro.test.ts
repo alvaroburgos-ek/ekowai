@@ -14,8 +14,8 @@ const OLD_14 = 'IF n_a != n_b THEN partial_replication_flag == TRUE AND n_tr IS 
 const NEW_14 = 'IF n_a - n_b != 0 THEN partial_replication_flag == TRUE AND n_tr IS NOT NULL';
 
 describe('DWA-M-816 REQ-13 (n = max(n_a,n_b)) — reproduction', () => {
-  it('BROKEN-BEFORE: correct n_obs=max is wrongly FAILED (bare-ident == trap)', () => {
-    expect(evaluateCondition(OLD_13, lk({ n_a: 10, n_b: 5, n_observation_period: 10 })).kind).toBe('fail');
+  it('UPSTREAM-FIXED (main resolves a bare-ident RHS symbol on ==): correct n_obs=max now PASSES on the OLD form', () => {
+    expect(evaluateCondition(OLD_13, lk({ n_a: 10, n_b: 5, n_observation_period: 10 })).kind).toBe('pass');
   });
   it('BROKEN-BEFORE: wrong n_obs slips through (nested-guard vacuous pass)', () => {
     expect(evaluateCondition(OLD_13, lk({ n_a: 5, n_b: 10, n_observation_period: 5 })).kind).toBe('pass');
@@ -32,8 +32,8 @@ describe('DWA-M-816 REQ-13 (n = max(n_a,n_b)) — reproduction', () => {
 });
 
 describe('DWA-M-816 REQ-14 (Teilreplikation only when n_a != n_b) — reproduction', () => {
-  it('BROKEN-BEFORE: n_a==n_b wrongly demands the flag (!= bare-ident trap → guard always true)', () => {
-    expect(evaluateCondition(OLD_14, lk({ n_a: 25, n_b: 25, partial_replication_flag: false, n_tr: null })).kind).toBe('fail');
+  it('UPSTREAM-FIXED (main resolves a bare-ident RHS symbol on !=): n_a==n_b → guard vacuous, OLD form PASSES', () => {
+    expect(evaluateCondition(OLD_14, lk({ n_a: 25, n_b: 25, partial_replication_flag: false, n_tr: null })).kind).toBe('pass');
   });
   it('FIXED: n_a==n_b → guard vacuously passes (no Teilreplikation required)', () => {
     expect(evaluateCondition(NEW_14, lk({ n_a: 25, n_b: 25, partial_replication_flag: false, n_tr: null })).kind).toBe('pass');

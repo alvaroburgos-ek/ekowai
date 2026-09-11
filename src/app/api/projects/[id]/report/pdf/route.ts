@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { projects, orgMembers } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
+import { recordDeliverable } from '@/lib/deliverables/record';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -29,6 +30,13 @@ export async function GET(
 
   try {
     const buffer = await buildProjectReport(id);
+    // Register the emission (AGB §3(2)) — recordDeliverable never throws.
+    await recordDeliverable({
+      projectId: id,
+      kind: 'projektbericht',
+      title: 'Projektbericht',
+      userId: user.id,
+    });
     return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {

@@ -16,6 +16,7 @@
  */
 export const NORM_TEXT_SOURCE_MAP: Record<string, string> = {
   'DWA-A-138-1': 'DWA-A-138-1.md',
+  'VSME': 'VSME.md',
 };
 
 /** Returns the in-repo filename for the given standard code, or null. */

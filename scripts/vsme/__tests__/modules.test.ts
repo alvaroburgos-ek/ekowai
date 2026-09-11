@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseRoles, moduleCodeToOwner, conceptModuleMap } from '../modules';
-import { TAXONOMY_DIR } from '../_setup';
+import { TAXONOMY_DIR, TAXONOMY_AVAILABLE } from '../_setup';
 
 describe('moduleCodeToOwner', () => {
   it('environment B03-B07 -> ekowai_env', () => {
@@ -22,7 +22,7 @@ describe('moduleCodeToOwner', () => {
   });
 });
 
-describe('parseRoles', () => {
+describe.skipIf(!TAXONOMY_AVAILABLE)('parseRoles', () => {
   it('includes the energy module B03.000 with its title', () => {
     const roles = parseRoles(TAXONOMY_DIR);
     const r = roles.find((x) => x.code === 'B03.000');
@@ -35,7 +35,7 @@ describe('parseRoles', () => {
   });
 });
 
-describe('conceptModuleMap', () => {
+describe.skipIf(!TAXONOMY_AVAILABLE)('conceptModuleMap', () => {
   it('assigns a known water concept to B06', () => {
     const m = conceptModuleMap(TAXONOMY_DIR);
     // at least one concept maps to a B06 (water) module

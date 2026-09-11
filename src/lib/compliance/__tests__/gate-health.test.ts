@@ -29,7 +29,7 @@ const snap = JSON.parse(
 type HealthRow = { code: string; gates: number; healthy: number; mishome: number; split: number; fieldMiss: number; deadProse: number; vacuous: number };
 const rows: HealthRow[] = [];
 const rehome: Array<{ code: string; cr: string; id: string; fromWs: string; toWsId: string; toWs: string; condition: string }> = [];
-const decisions: Array<{ code: string; cr: string; kind: string; detail: string }> = [];
+const decisions: Array<{ code: string; cr: string; kind: string; detail: string; wsSpan?: number; spanCodes?: string[] }> = [];
 
 for (const [code, b] of Object.entries(snap.standards)) {
   const wsCodeById = new Map(b.worksheets.map((w) => [w.id, w.code]));

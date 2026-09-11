@@ -63,7 +63,9 @@ describe('buildVsmeXlsx', () => {
   it('workbook contains all four expected sheet names', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const names = wb.worksheets.map((ws) => ws.name);
     expect(names).toContain('Datapoints');
     expect(names).toContain('CO2 Activity');
@@ -74,7 +76,9 @@ describe('buildVsmeXlsx', () => {
   it('Datapoints header row includes XBRL Element ID', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Datapoints')!;
     const headerRow = ws.getRow(1);
     const headerValues = headerRow.values as (string | undefined)[];
@@ -84,7 +88,9 @@ describe('buildVsmeXlsx', () => {
   it('Datapoints header row includes Owner and Value', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Datapoints')!;
     const headerRow = ws.getRow(1);
     const headerValues = headerRow.values as (string | undefined)[];
@@ -95,7 +101,9 @@ describe('buildVsmeXlsx', () => {
   it('Datapoints data row for first field carries value and xbrlElementId', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Datapoints')!;
     // Row 1 = header, Row 2 = first field
     const dataRow = ws.getRow(2);
@@ -109,7 +117,9 @@ describe('buildVsmeXlsx', () => {
   it('CO2 Activity sheet has header and one data row', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('CO2 Activity')!;
     expect(ws.rowCount).toBeGreaterThanOrEqual(2);
     const headerValues = (ws.getRow(1).values as unknown[]).map(String);
@@ -120,7 +130,9 @@ describe('buildVsmeXlsx', () => {
   it('CO2 Activity Amount and tCO2e cells are native numbers', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('CO2 Activity')!;
     // Row 2 = first data row; columns: Scope=1 Category=2 Subcategory=3 Amount=4 Unit=5 Factor=6 FactorVersion=7 tCO2e=8
     const amountCell = ws.getRow(2).getCell(4);
@@ -135,7 +147,9 @@ describe('buildVsmeXlsx', () => {
   it('Totals sheet contains scope1 value as a native number', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Totals')!;
     expect(ws.rowCount).toBeGreaterThanOrEqual(3);
 
@@ -156,7 +170,9 @@ describe('buildVsmeXlsx', () => {
   it('Citations sheet has exactly 1 data row (only field with citationSources)', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Citations')!;
     // Row 1 = header, Row 2 = one citation row
     expect(ws.rowCount).toBe(2);
@@ -165,7 +181,9 @@ describe('buildVsmeXlsx', () => {
   it('Citations data row contains serialised JSON', async () => {
     const buf = await buildVsmeXlsx(fixture, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Citations')!;
     const dataRow = ws.getRow(2);
     const rowValues = (dataRow.values as unknown[]).map((v) =>
@@ -179,7 +197,9 @@ describe('buildVsmeXlsx', () => {
   it('uses locale en label when locale is en', async () => {
     const buf = await buildVsmeXlsx(fixture, 'en');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const ws = wb.getWorksheet('Datapoints')!;
     const dataRow = ws.getRow(2);
     const rowValues = (dataRow.values as unknown[]).map((v) =>

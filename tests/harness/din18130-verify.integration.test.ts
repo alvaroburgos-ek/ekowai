@@ -112,7 +112,7 @@ describe('DIN-18130-1 — k derived value round-trips through the REAL saveWorks
     // The map says every equation OUTPUT (Q,v,i,k,k_10,h) is `derived` and must
     // never be persisted as an engineer input. Assert against the REAL function.
     const eqRows = DIN18130_EQUATIONS.map((e) => ({ id: fixture.equationIds[e.num], outputSymbol: e.out }));
-    const derived = derivedOutputSymbols(eqRows, new Set<string>());
+    const derived = derivedOutputSymbols(eqRows, []);
     for (const out of ['Q', 'v', 'i', 'k', 'k_10', 'h']) {
       expect(derived.has(out)).toBe(true);
     }

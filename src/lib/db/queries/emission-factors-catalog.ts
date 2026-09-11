@@ -22,10 +22,11 @@ export interface CatalogFactor {
 }
 
 /**
- * Load the full emission-factor catalog (≈414 rows — small enough to ship to
- * the client in one go) ordered by category, name. The client does the curated
- * shortlist + search/filter; this query only selects the columns the picker
- * needs. Rows with no `name` are skipped (the picker keys on a real commodity).
+ * Load the full emission-factor catalog (281 rows, prod-verified 2026-07-27 —
+ * small enough to ship to the client in one go) ordered by category, name. The
+ * client does the curated shortlist + search/filter; this query only selects
+ * the columns the picker needs. Rows with no `name` are skipped (the picker
+ * keys on a real commodity).
  */
 export async function loadEmissionFactorCatalog(): Promise<CatalogFactor[]> {
   const rows = await db

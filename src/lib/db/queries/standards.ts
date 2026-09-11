@@ -50,6 +50,8 @@ export type ProjectStandardWithWorksheets = {
     titleDe: string;
     titleEn: string | null;
     version: string;
+    /** standards.id of the edition replacing this one; null = current edition. */
+    supersededBy: string | null;
   };
   layer: ProjectStandardLayer | null;
   stageOrder: number | null;
@@ -80,6 +82,7 @@ export async function listProjectStandardsWithWorksheets(
       standardTitleDe: standards.titleDe,
       standardTitleEn: standards.titleEn,
       standardVersion: standards.version,
+      standardSupersededBy: standards.supersededBy,
       layer: projectStandards.layer,
       stageOrder: projectStandards.stageOrder,
       parentStandardId: projectStandards.parentStandardId,
@@ -132,6 +135,7 @@ export async function listProjectStandardsWithWorksheets(
           titleDe: r.standardTitleDe,
           titleEn: r.standardTitleEn,
           version: r.standardVersion,
+          supersededBy: r.standardSupersededBy,
         },
         layer: r.layer as ProjectStandardLayer | null,
         stageOrder: r.stageOrder,

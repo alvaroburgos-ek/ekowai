@@ -36,6 +36,8 @@ type StandardEntry = {
     titleDe: string;
     titleEn: string | null;
     version: string;
+    /** standards.id of the edition replacing this one; null = current edition. */
+    supersededBy: string | null;
   };
   layer: Layer | null;
   stageOrder: number | null;
@@ -572,6 +574,15 @@ function StandardDetail({
           {stageBadge && (
             <span className="text-[10px] uppercase tracking-[0.2em] bg-accent/10 text-accent px-2 py-0.5 rounded">
               {stageBadge}
+            </span>
+          )}
+          {entry.standard.supersededBy && (
+            <span
+              title="Diese Ausgabe des Regelwerks wurde durch eine neuere ersetzt."
+              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.16em] text-warning bg-warning/10 border border-warning/30 px-2 py-0.5 rounded"
+            >
+              <AlertCircle className="size-3 shrink-0" aria-hidden />
+              Norm ersetzt — Ausgabe prüfen
             </span>
           )}
         </div>

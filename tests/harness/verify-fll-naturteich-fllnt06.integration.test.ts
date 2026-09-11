@@ -29,6 +29,7 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { startHarness, type Harness } from './embedded-pg';
+import type { ConditionValue } from '@/lib/compliance/evaluate';
 
 const HARNESS_USER_ID = '00000000-0000-4000-8000-0000000000f6';
 
@@ -164,11 +165,11 @@ describe('FLLNT-06 — real saveWorksheet + real engine + real evaluateCondition
   it('REQ-13 PASS/FAIL/PENDING through the real evaluator', async () => {
     const { evaluateCondition } = await import('@/lib/compliance/evaluate');
     const all = (s: string) =>
-      ({ total_pool_area_m2: 95, regeneration_area_m2: 40, swimming_area_m2: 50 } as Record<string, unknown>)[s];
+      ({ total_pool_area_m2: 95, regeneration_area_m2: 40, swimming_area_m2: 50 } as Record<string, ConditionValue | undefined>)[s];
     expect(evaluateCondition(REQ_13, all).kind).toBe('pass');
     // one NULL → fail
     const oneNull = (s: string) =>
-      ({ total_pool_area_m2: null, regeneration_area_m2: 40, swimming_area_m2: 50 } as Record<string, unknown>)[s];
+      ({ total_pool_area_m2: null, regeneration_area_m2: 40, swimming_area_m2: 50 } as Record<string, ConditionValue | undefined>)[s];
     expect(evaluateCondition(REQ_13, oneNull).kind).toBe('fail');
     // all missing → the IS NOT NULL existence chain FAILS (absence is a decidable fail, not pending)
     expect(evaluateCondition(REQ_13, () => undefined).kind).toBe('fail');
@@ -216,7 +217,7 @@ describe('FLLNT-06 — real saveWorksheet + real engine + real evaluateCondition
   it('REQ-31 boundary: freeboard>=5 AND edge<=10 (PDF §9.4) fires pass/fail', async () => {
     const { evaluateCondition } = await import('@/lib/compliance/evaluate');
     const state = (fb: number | null, eh: number | null) => (s: string) =>
-      ({ freeboard_water_to_seal: fb, edge_height_tolerance_mm: eh } as Record<string, unknown>)[s];
+      ({ freeboard_water_to_seal: fb, edge_height_tolerance_mm: eh } as Record<string, ConditionValue | undefined>)[s];
     // exact boundary passes (5 cm below edge; +/-10 mm)
     expect(evaluateCondition(REQ_31, state(5, 10)).kind).toBe('pass');
     // below freeboard boundary → fail

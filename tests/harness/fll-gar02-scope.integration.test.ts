@@ -115,6 +115,6 @@ describe('FLL-GAR-02 scope gate — real saveWorksheet + real evaluateCondition'
     const { evaluateCondition } = await import('@/lib/compliance/evaluate');
     const verdict = evaluateCondition(REQ_01_CONDITION, () => undefined);
     expect(verdict.kind).toBe('pending');
-    expect(verdict.missingSymbols).toContain('gewaesser_in_scope');
+    if (verdict.kind === 'pending') expect(verdict.missingSymbols).toContain('gewaesser_in_scope');
   });
 });

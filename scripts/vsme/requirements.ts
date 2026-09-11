@@ -37,18 +37,25 @@
  *
  * WORKSHEET-LOCALITY (important constraint)
  * -----------------------------------------
- * The importer attaches every requirement to ONE worksheet template, resolved
- * by `phase` (all VSME worksheets are phase 1 → they all land on the first
- * phase-1 worksheet, VSME-B01.000). The gate evaluator then resolves each
- * symbol either from that worksheet's own fields OR, for non-local symbols,
- * from the project-wide CONFLICT-FREE fallback (makeGateLookup /
- * buildFallbackValues in approval-gate.ts). Because a field's saved value is
- * unique per project, a `<symbol> IS NOT NULL` existence rule resolves
- * correctly even though the symbol lives on a different module worksheet.
- * What is NOT expressible is any rule that needs to compare two DIFFERENT
- * fields whose values legitimately differ across worksheet instances, or any
- * "at least one of N" / cross-worksheet numeric tolerance — those are listed in
- * NOT_ENCODABLE below rather than approximated.
+ * Each requirement is hosted on the ONE worksheet where ALL of its gated field
+ * symbols live (buildComplianceRows derives this from `FieldsRow.origin_worksheet`,
+ * NOT from the `module` tag above — a row's `module` is documentation only).
+ * Previously every row fell back to `phase` (all VSME worksheets are phase 1)
+ * and collapsed onto the first phase-1 worksheet, VSME-B01.000 — silently
+ * de-scoping most gates from the worksheet an engineer actually fills in. That
+ * is fixed: `worksheet_code` is now emitted explicitly per row (see the Pass3c
+ * `worksheet_code` column), and only a genuinely cross-worksheet requirement
+ * (none currently exist in VSME_REQUIREMENTS) falls back to legacy phase
+ * hosting — logged loudly as a STOP-REPORT rather than guessed. The gate
+ * evaluator still resolves each symbol either from the host worksheet's own
+ * fields OR, for non-local symbols, from the project-wide CONFLICT-FREE
+ * fallback (makeGateLookup / buildFallbackValues in approval-gate.ts); that
+ * fallback is what makes `<symbol> IS NOT NULL` still correct even for a
+ * symbol not native to the host worksheet. What is NOT expressible is any rule
+ * that needs to compare two DIFFERENT fields whose values legitimately differ
+ * across worksheet instances, or any "at least one of N" / cross-worksheet
+ * numeric tolerance — those are listed in NOT_ENCODABLE below rather than
+ * approximated.
  *
  * CONSERVATISM
  * ------------
@@ -715,21 +722,37 @@ export const VSME_REQUIRED_FIELD_SYMBOLS: ReadonlySet<string> = new Set<string>(
  * `fields` are kept — a row that references a renamed/absent concept is dropped
  * with a console warning rather than seeding a dangling gate.
  */
-export function buildComplianceRows(fieldSymbols: Set<string>): ComplianceRow[] {
+export function buildComplianceRows(fieldWorksheetBySymbol: Map<string, string>): ComplianceRow[] {
   const out: ComplianceRow[] = [];
   let order = 1;
   for (const r of VSME_REQUIREMENTS) {
     const syms = r.fields.split(',').map((s) => s.trim()).filter(Boolean);
-    const missing = syms.filter((s) => !fieldSymbols.has(s));
+    const missing = syms.filter((s) => !fieldWorksheetBySymbol.has(s));
     if (missing.length > 0) {
       console.warn(
         `[requirements] SKIP ${r.code} — field symbol(s) not in workbook: ${missing.join(', ')}`,
       );
       continue;
     }
+    // Derive the host worksheet from where the gated FIELDS actually live —
+    // never from the `module` tag (see file header WORKSHEET-LOCALITY note,
+    // now resolved: the importer honours an explicit worksheet_code).
+    const hosts = [...new Set(syms.map((s) => fieldWorksheetBySymbol.get(s)!))];
+    let worksheetCode: string | null;
+    if (hosts.length === 1) {
+      worksheetCode = hosts[0];
+    } else {
+      // HARD CONSTRAINT (Alvaro): never fabricate a host for a cross-worksheet
+      // gate. Leave it on legacy (phase-fallback) hosting and report loudly.
+      console.warn(
+        `[requirements] STOP-REPORT ${r.code} — symbols span ${hosts.join(' + ')}; left on legacy hosting`,
+      );
+      worksheetCode = null;
+    }
     out.push({
       requirement_code: r.code,
       standard_code: 'VSME',
+      worksheet_code: worksheetCode,
       title: r.titleDe,
       description: r.description,
       // `field_presence` keeps parity with the importer's existence-rule path;

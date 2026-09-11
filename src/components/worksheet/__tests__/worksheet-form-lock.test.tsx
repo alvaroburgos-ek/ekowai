@@ -82,7 +82,7 @@ describe('isWorksheetEditable — locked derivation (drives WorksheetForm `locke
  * Minimal test component that replicates exactly the banner the form renders:
  *   {locked && (
  *     <div role="status" data-testid="worksheet-lock-banner" ...>
- *       Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+ *       Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen“.
  *     </div>
  *   )}
  */
@@ -96,7 +96,7 @@ function BannerFixture({ status }: { status: WorksheetStatus }) {
           data-testid="worksheet-lock-banner"
           className="border border-hairline rounded p-3 text-sm bg-paper-2 text-ink"
         >
-          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen".
+          Schreibgeschützt (genehmigt/final) — zum Bearbeiten „Wieder öffnen“.
         </div>
       )}
       <span data-testid="content">Worksheet content</span>

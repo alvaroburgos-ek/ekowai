@@ -1,10 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import fs from 'node:fs';
 import { parseUbaFactors } from '../import-uba-factors';
-const UBA =
-  'C:/Users/Ekowai/Desktop/environmental-reporting service/01_Referenz/uba_liste_ef_für_thg_bilanzierung_v2.1.xlsx';
 
-describe('parseUbaFactors', () => {
-  const rows = parseUbaFactors(UBA, 'v2.1', 2024);
+// Local-only fixture (Ekowai-PC-01). `VSME_UBA_XLSX` overrides the default
+// path (used to simulate the fixture-absent CI case); when the file is absent
+// the suite skips honestly instead of failing.
+const UBA =
+  process.env.VSME_UBA_XLSX ??
+  'C:/Users/Ekowai/Desktop/environmental-reporting service/01_Referenz/uba_liste_ef_für_thg_bilanzierung_v2.1.xlsx';
+const UBA_AVAILABLE = fs.existsSync(UBA);
+
+describe.skipIf(!UBA_AVAILABLE)('parseUbaFactors', () => {
+  let rows: ReturnType<typeof parseUbaFactors>;
+  beforeAll(() => {
+    rows = parseUbaFactors(UBA, 'v2.1', 2024);
+  });
   it('parses the German grid electricity factor (Scope 2)', () => {
     const grid = rows.find((r) => r.uba_id === '05_20_01_001_01');
     expect(grid).toBeDefined();

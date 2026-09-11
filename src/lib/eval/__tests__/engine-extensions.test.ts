@@ -7,7 +7,7 @@ const near = (a: number, b: number) => Math.abs(a - b) < 1e-9;
 describe('arithmetic engine — 1-arg functions + constants (regression/growth support)', () => {
   it('ln / log / log10 / exp / sqrt / abs', () => {
     expect(near(evalExpression('ln(x)', { x: Math.E }), 1)).toBe(true);
-    expect(near(evalExpression('log(x)', { x: Math.E }), 1)).toBe(true); // natural log
+    expect(() => evalExpression('log(x)', { x: Math.E })).toThrow(/nicht unterstützt/); // bare log is ambiguous (ln vs lg) — unsupported by decision 2026-09-11
     expect(near(evalExpression('log10(x)', { x: 1000 }), 3)).toBe(true);
     expect(near(evalExpression('exp(x)', { x: 0 }), 1)).toBe(true);
     expect(near(evalExpression('sqrt(x)', { x: 9 }), 3)).toBe(true);

@@ -17,6 +17,7 @@ import {
 } from '@/lib/state-machine';
 import { captureSnapshot, type SnapshotTrigger } from '@/lib/snapshots/capture';
 import { checkApprovalGate, formatApprovalGateError } from './approval-gate';
+import { checkFinalizeGate, formatFinalizeGateError } from './finalize-gate';
 
 export type TransitionInput = {
   instanceId: string;
@@ -82,6 +83,16 @@ export async function transitionWorksheet(
     const gate = await checkApprovalGate(input.instanceId);
     if (!gate.ok) {
       return { ok: false, error: formatApprovalGateError(gate) };
+    }
+  }
+
+  // Stage-1 verification gate (SR-1): a worksheet whose used fields are not
+  // verified against the printed standard cannot be finalized. Finalize only —
+  // draft/submit/approve stay un-gated (owner decision 2026-08-01).
+  if (input.eventType === 'finalize') {
+    const gate = await checkFinalizeGate(input.instanceId);
+    if (!gate.ok) {
+      return { ok: false, error: formatFinalizeGateError(gate) };
     }
   }
 

@@ -19,26 +19,51 @@
  * IDENT  is a letter-or-underscore followed by alphanumerics/underscores.
  *        Identifiers MUST be present in the substitution map — referencing
  *        a missing identifier throws, so the engine fails loud.
- * Function calls and `SUM(...)` are NOT supported — they throw, which is the
- * correct behaviour: such formulas need a rewrite rule before they can be
- * evaluated.
+ * Supported function calls: 1-arg `ln`, `log10`, `sqrt`, `exp`, `abs` and
+ * 2-arg `min`, `max`. Any other call — notably `SUM(...)` (needs aggregation
+ * semantics) — throws, which is the correct behaviour: such formulas need a
+ * rewrite rule before they can be evaluated.
  */
 
-/** 2-arg numeric functions the engine natively supports. */
-const FUNCTIONS_2ARG = new Set<string>(['min', 'max']);
-/** 1-arg numeric functions (natural log, base-10 log, exp, square root, absolute value). */
-const FUNCTIONS_1ARG: Record<string, (x: number) => number> = {
+/** 1-arg numeric functions the engine natively supports. */
+const ONE_ARG_FUNCTIONS: Record<string, (x: number) => number> = {
   ln: Math.log,
-  log: Math.log, // natural log (DWA regressions write ln; a bare `log` is treated as ln)
   log10: Math.log10,
-  exp: Math.exp,
   sqrt: Math.sqrt,
+  exp: Math.exp,
   abs: Math.abs,
 };
+
+/** 2-arg numeric functions the engine natively supports. */
+const TWO_ARG_FUNCTIONS: Record<string, (a: number, b: number) => number> = {
+  min: Math.min,
+  max: Math.max,
+};
+
+/** Every natively supported function name (consumed by the formula normaliser too). */
+export const SUPPORTED_FUNCTIONS = new Set<string>([
+  ...Object.keys(ONE_ARG_FUNCTIONS),
+  ...Object.keys(TWO_ARG_FUNCTIONS),
+]);
+
+/** German/typographic aliases → canonical function names (lg = log10). */
+const FN_ALIASES: Record<string, string> = { lg: 'log10' }; // bare `log` stays UNSUPPORTED (ambiguous ln vs lg) — fail loud, rewrite per equation
+
 /** Bare mathematical constants, used only as a FALLBACK when the name is not a
  * provided field value (a field named `e`/`pi` always wins). Lets formulas like
  * `e^(-k*t)` resolve without a rewrite. */
 const CONSTANTS: Record<string, number> = { e: Math.E, pi: Math.PI };
+
+/**
+ * Resolve an identifier-before-'(' to its canonical supported function name,
+ * case-insensitively (standards print EXP/SQRT; symbols stay case-SENSITIVE —
+ * this applies only to call syntax). Returns null when not a supported call.
+ */
+export function canonicalFunctionName(name: string): string | null {
+  const lower = name.toLowerCase();
+  const canonical = FN_ALIASES[lower] ?? lower;
+  return SUPPORTED_FUNCTIONS.has(canonical) ? canonical : null;
+}
 
 type Token =
   | { kind: 'num'; value: number }
@@ -83,10 +108,12 @@ function tokenize(src: string): Token[] {
       let j = i + m[0].length;
       while (j < src.length && (src[j] === ' ' || src[j] === '\t')) j++;
       if (src[j] === '(') {
-        // min()/max() (2-arg) and ln/log/log10/exp/sqrt/abs (1-arg) are natively supported.
-        // All other function calls throw so unsupported formulas fail loud.
-        if (FUNCTIONS_2ARG.has(m[0]) || m[0] in FUNCTIONS_1ARG) {
-          toks.push({ kind: 'fn', name: m[0] });
+        // Only the natively supported numeric functions (ONE_ARG_FUNCTIONS /
+        // TWO_ARG_FUNCTIONS, case-insensitive incl. the lg→log10 alias) are
+        // accepted. All other calls throw so unsupported formulas fail loud.
+        const canonical = canonicalFunctionName(m[0]);
+        if (canonical) {
+          toks.push({ kind: 'fn', name: canonical });
           i += m[0].length;
           continue;
         }
@@ -193,16 +220,16 @@ class Parser {
         throw new Error(`Erwarte '(' nach "${t.name}".`);
       }
       const a = this.parseExpr();
-      // 1-arg functions (ln/log/log10/exp/sqrt/abs) — no comma, one close paren.
-      const oneArg = FUNCTIONS_1ARG[t.name];
+      const oneArg = ONE_ARG_FUNCTIONS[t.name];
       if (oneArg) {
+        // Consume ')'
         const close = this.toks[this.pos++];
         if (close?.kind !== 'op' || close.op !== ')') {
           throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);
         }
         return oneArg(a);
       }
-      // 2-arg functions (min/max).
+      // Consume ','
       const comma = this.toks[this.pos++];
       if (comma?.kind !== 'op' || comma.op !== ',') {
         throw new Error(`Erwarte ',' im ${t.name}(...)-Aufruf.`);
@@ -212,7 +239,11 @@ class Parser {
       if (close?.kind !== 'op' || close.op !== ')') {
         throw new Error(`Fehlende schließende Klammer im ${t.name}(...)-Aufruf.`);
       }
-      return t.name === 'min' ? Math.min(a, b) : Math.max(a, b);
+      const twoArg = TWO_ARG_FUNCTIONS[t.name];
+      if (!twoArg) {
+        throw new Error(`Funktionsaufruf "${t.name}(...)" wird nicht unterstützt — Rewrite-Regel erforderlich.`);
+      }
+      return twoArg(a, b);
     }
     if (t.kind === 'op' && t.op === '(') {
       const v = this.parseExpr();

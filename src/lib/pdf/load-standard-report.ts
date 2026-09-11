@@ -15,6 +15,8 @@ import {
   approvalEvents,
   auditLog,
   profiles,
+  calculationSnapshots,
+  monitoringEntries,
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
 import { assembleStandardReport, type StandardReportData } from './assemble-standard-report';
@@ -153,6 +155,46 @@ export async function loadStandardReportData(
           ),
         );
 
+  // 6b. Latest approve-snapshots (ordered DESC; assembler takes first per instance).
+  const instanceIds = instances.map((i) => i.id);
+  const snapshotRows = instanceIds.length === 0
+    ? []
+    : await db
+        .select({
+          id: calculationSnapshots.id,
+          worksheetInstanceId: calculationSnapshots.worksheetInstanceId,
+          takenAt: calculationSnapshots.takenAt,
+        })
+        .from(calculationSnapshots)
+        .where(
+          and(
+            inArray(calculationSnapshots.worksheetInstanceId, instanceIds),
+            eq(calculationSnapshots.trigger, 'approve'),
+          ),
+        )
+        .orderBy(desc(calculationSnapshots.takenAt));
+
+  // 6c. Monitoring-Journal entries linked to THIS standard (Betrieb & Monitoring
+  // section on the report's final page; documentation layer, no values).
+  const monitoringRows = await db
+    .select({
+      entryDate: monitoringEntries.entryDate,
+      startTime: monitoringEntries.startTime,
+      endTime: monitoringEntries.endTime,
+      category: monitoringEntries.category,
+      note: monitoringEntries.note,
+      documentTitle: projectDocuments.title,
+    })
+    .from(monitoringEntries)
+    .leftJoin(projectDocuments, eq(projectDocuments.id, monitoringEntries.documentId))
+    .where(
+      and(
+        eq(monitoringEntries.projectId, projectId),
+        eq(monitoringEntries.standardId, std.id),
+      ),
+    )
+    .orderBy(desc(monitoringEntries.entryDate));
+
   // 7. project_documents for citation resolution.
   const allDocs = await db
     .select()
@@ -228,7 +270,13 @@ export async function loadStandardReportData(
           website: proj.org.website,
         }
       : null,
-    standard: { id: std.id, code: std.code, titleDe: std.titleDe, version: std.version },
+    standard: {
+      id: std.id,
+      code: std.code,
+      titleDe: std.titleDe,
+      version: std.version,
+      supersededBy: std.supersededBy,
+    },
     templates,
     instances,
     sections: allSections,
@@ -239,6 +287,8 @@ export async function loadStandardReportData(
     documents: allDocs,
     approvals: approvalRows,
     audits: auditRows,
+    snapshots: snapshotRows,
+    monitoring: monitoringRows,
     now: new Date(),
   });
 }

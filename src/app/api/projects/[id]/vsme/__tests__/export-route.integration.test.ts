@@ -34,7 +34,9 @@ describe('VSME export route — buffer path (integration)', () => {
     const data = await loadVsmeExportData(NON_EXISTENT_PROJECT);
     const buf = await buildVsmeXlsx(data, 'de');
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(buf as unknown as Buffer);
+    // exceljs types `load` against its own ArrayBuffer-shaped Buffer interface;
+    // Node Buffers work at runtime, so widen via ArrayBuffer for the typecheck.
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
     const sheet = wb.getWorksheet('Datapoints');
     expect(sheet).toBeDefined();
     // rowCount includes the header row; subtract 1 to get data rows
