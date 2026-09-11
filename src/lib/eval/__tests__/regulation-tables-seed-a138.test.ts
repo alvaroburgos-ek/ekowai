@@ -21,6 +21,10 @@ describe('A138 seed tables ≡ TS constants (pins)', () => {
       expect(r.verbatim_quote).toContain(de(e.cs));
     }
     expect(t.override_policy).toBe('anhaltswert');
+    // I-2 (controller ruling): TAB9's verbatim_quote is synthesised from the
+    // TS constants, not lifted from a transcript row — it stays
+    // imported_unverified until Plan 3 lifts the printed Tab. 9 rows.
+    expect(t.verification_status).toBe('imported_unverified');
   });
   it('TAB9: verbundstein_sickerfuge quote states the full-precision cm 0,25 (not rounded to 0,3)', () => {
     const t = tab9AsTable();

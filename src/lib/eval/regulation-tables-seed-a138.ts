@@ -17,7 +17,13 @@ export function tab9AsTable(): RegulationTable {
   return { standard_code: STD, edition: ED, table_code: 'TAB9', title_de: 'Abflussbeiwerte je Oberflächentyp', clause_reference: '§5.3.3.5, Tab. 9', page_ref: null,
     key_columns: ['surface_type'], value_columns: [{ name: 'cm', type: 'number' }, { name: 'cs', type: 'number' }, { name: 'kind', type: 'enum', values: ['paved', 'unpaved'] }, { name: 'group', type: 'number' }],
     override_policy: 'anhaltswert', override_quote: 'C_i – Abflussbeiwert der Teilfläche, zum Beispiel gemäß Tabelle 9 (Gl. 2 Legende); §5.3.3.5 Anpassung für durchlässige Flächen',
-    verification_status: 'engineer_verified', rows };
+    // I-2 (controller ruling): 'imported_unverified', not 'engineer_verified' —
+    // each row's verbatim_quote is SYNTHESISED from the TS constants above
+    // (`Tab. 9: ${label} — C_m ${de(cm)} / C_s ${de(cs)}`), not lifted from a
+    // transcript row. It stays unverified until Plan 3 lifts the printed
+    // Tab. 9 rows and the owner rules whether the (label, C_m, C_s) triple
+    // counts as the printed row for that purpose.
+    verification_status: 'imported_unverified', rows };
 }
 export function tab5AsTable(): RegulationTable {
   const rows: RegulationRow[] = FLAECHENGRUPPE_CODES.map((c, i) => ({ row_key: c, keys: { flaechengruppe: c }, group_label: null, label_de: c, order_index: i, values: { tier: flaechengruppeToTier(c) }, verbatim_quote: `Tab. 5 Kurzzeichen ${c}` }));
