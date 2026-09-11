@@ -789,6 +789,8 @@ Page: after the template/standard is loaded, `const regulationTablesData = await
 
 ### Task 7: `fromDbField` adapter + DB-parity pin for all 38 selection configs
 
+(actual count: 36 — `SELECTION_CONFIGS` has 36 entries after dedupe; this task heading is left as originally written, not rewritten.)
+
 **Files:**
 - Modify: `src/lib/eval/selection-fields.ts` (append)
 - Test: `src/lib/eval/__tests__/selection-fields-db-parity.test.ts`
