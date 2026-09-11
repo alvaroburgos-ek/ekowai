@@ -173,6 +173,7 @@ export const worksheetSections = pgTable('worksheet_sections', {
   titleDe: text('title_de').notNull(),
   titleEn: text('title_en'),
   orderIndex: integer('order_index').notNull().default(0),
+  visibleWhen: text('visible_when'),
 });
 
 export const fields = pgTable(
@@ -221,6 +222,14 @@ export const fields = pgTable(
     /** VSME XBRL element id from the EFRAG taxonomy, used by the export
      * mapping. Nullable; only populated for VSME fields. */
     xbrlElementId: text('xbrl_element_id'),
+    /** Guideline→Tool (2026-09-11): closed widget enum; NULL ⇒ inferred from data_type (legacy path). */
+    widget: text('widget'),
+    /** Shape-specific presentation/carrier config, validated by src/lib/eval/field-config.ts. */
+    uiConfig: jsonb('ui_config'),
+    /** Data binding to regulation_tables for lookup_fill (or per-column inside ui_config.columns). */
+    lookup: jsonb('lookup'),
+    /** Compliance-DSL condition; NULL = always visible. Evaluated in visibleFields() (Plan 2). */
+    visibleWhen: text('visible_when'),
   },
   (t) => ({ uniqWorksheetSymbol: unique().on(t.worksheetTemplateId, t.symbol) }),
 );
@@ -249,6 +258,42 @@ export const equations = pgTable(
     verificationQuote: text('verification_quote'),
   },
   (t) => ({ uniqWorksheetEqn: unique().on(t.worksheetTemplateId, t.equationNumber) }),
+);
+
+export const regulationTables = pgTable(
+  'regulation_tables',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    standardCode: text('standard_code').notNull(),
+    edition: text('edition').notNull(),
+    tableCode: text('table_code').notNull(),
+    titleDe: text('title_de').notNull(),
+    clauseReference: text('clause_reference'),
+    pageRef: text('page_ref'),
+    keyColumns: text('key_columns').array().notNull(),
+    valueColumns: jsonb('value_columns').notNull(),
+    overridePolicy: text('override_policy').notNull(),
+    overrideQuote: text('override_quote'),
+    verificationStatus: text('verification_status').notNull().default('imported_unverified'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({ uniqStdEditionTable: unique().on(t.standardCode, t.edition, t.tableCode) }),
+);
+
+export const regulationTableRows = pgTable(
+  'regulation_table_rows',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tableId: uuid('table_id').notNull().references(() => regulationTables.id, { onDelete: 'cascade' }),
+    rowKey: text('row_key').notNull(),
+    keys: jsonb('keys').notNull(),
+    groupLabel: text('group_label'),
+    labelDe: text('label_de').notNull(),
+    orderIndex: integer('order_index').notNull().default(0),
+    values: jsonb('values').notNull(),
+    verbatimQuote: text('verbatim_quote').notNull(),
+  },
+  (t) => ({ uniqTableRow: unique().on(t.tableId, t.rowKey) }),
 );
 
 export const complianceRequirements = pgTable(
