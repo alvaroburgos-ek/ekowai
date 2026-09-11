@@ -4,12 +4,15 @@ import type { RegulationTable, RegulationRow } from './regulation-tables';
 
 const STD = 'DWA-A-138-1'; const ED = '2024-10';
 const GROUP_LABEL: Record<1 | 2 | 3, string> = { 1: 'Wasserundurchlässige Flächen', 2: 'Teildurchlässige / schwach ableitende Flächen', 3: 'Durchlässige Flächen' };
+/** Full-precision de-DE formatter (comma decimal separator, no rounding) — e.g. 0.9 → "0,9", 1 → "1", 0.25 → "0,25".
+ *  toFixed(1) would round 0.25 to "0,3" and misstate the printed value (SR-1 violation); this preserves the exact figure. */
+const de = (n: number): string => String(n).replace('.', ',');
 
 export function tab9AsTable(): RegulationTable {
   const rows: RegulationRow[] = getTab9Entries().map((e, i) => ({
     row_key: e.value, keys: { surface_type: e.value }, group_label: GROUP_LABEL[e.group], label_de: e.label, order_index: i,
     values: { cm: e.cm, cs: e.cs, kind: e.kind, group: e.group },
-    verbatim_quote: `Tab. 9: ${e.label} — C_m ${e.cm.toFixed(1).replace('.', ',')} / C_s ${e.cs.toFixed(1).replace('.', ',')}`,
+    verbatim_quote: `Tab. 9: ${e.label} — C_m ${de(e.cm)} / C_s ${de(e.cs)}`,
   }));
   return { standard_code: STD, edition: ED, table_code: 'TAB9', title_de: 'Abflussbeiwerte je Oberflächentyp', clause_reference: '§5.3.3.5, Tab. 9', page_ref: null,
     key_columns: ['surface_type'], value_columns: [{ name: 'cm', type: 'number' }, { name: 'cs', type: 'number' }, { name: 'kind', type: 'enum', values: ['paved', 'unpaved'] }, { name: 'group', type: 'number' }],
