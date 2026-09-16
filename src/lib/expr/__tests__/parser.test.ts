@@ -59,6 +59,15 @@ describe('parseNumeric — the arithmetic grammar', () => {
       { kind: 'astr', value: 'TAB9' }, { kind: 'aref', symbol: 'tab9_value' }, { kind: 'astr', value: 'kind' },
     ] });
   });
+  it('treats a leading unary + as identity, like arithmetic.ts (+5, 10^+3, x + +y)', () => {
+    expect(parseNumeric('+5')).toEqual({ ok: true, node: { kind: 'anum', value: 5 } });
+    const p = parseNumeric('10^+3');
+    expect(p.ok && p.node).toEqual({ kind: 'abin', op: '^', left: { kind: 'anum', value: 10 }, right: { kind: 'anum', value: 3 } });
+    const q = parseNumeric('x + +y');
+    expect(q.ok && q.node).toEqual({ kind: 'abin', op: '+', left: { kind: 'aref', symbol: 'x' }, right: { kind: 'aref', symbol: 'y' } });
+    const r = parseNumeric('+-x');
+    expect(r.ok && r.node).toEqual({ kind: 'aneg', inner: { kind: 'aref', symbol: 'x' } });
+  });
   it('rejects trailing tokens and a bare condition with the arithmetic.ts messages', () => {
     expect(parseNumeric('a b')).toEqual({ ok: false, message: 'Unerwartetes Token am Ende des Ausdrucks.' });
     expect(parseNumeric('(a + b')).toEqual({ ok: false, message: 'Fehlende schließende Klammer.' });
@@ -78,6 +87,19 @@ describe('parseCondition — legacy semantics preserved', () => {
     const c = parseCondition("if(flag, 1, 0) >= 1");
     expect(c?.kind).toBe('acompare');
     if (c?.kind === 'acompare') expect(c.left.kind).toBe('call');
+  });
+  it('parses NOT, IS NOT NULL, IN {…} and parenthesised logical grouping', () => {
+    expect(parseCondition('NOT x')).toEqual({ kind: 'not', inner: { kind: 'truthy', symbol: 'x' } });
+    expect(parseCondition('x IS NOT NULL')).toEqual({ kind: 'exists', symbol: 'x', negate: true });
+    expect(parseCondition("x IN {a, 'b'}")).toEqual({ kind: 'in', symbol: 'x', members: [
+      { kind: 'lit', value: 'a' }, { kind: 'lit', value: 'b' },
+    ] });
+    expect(parseCondition('(a >= 1 OR b >= 1) AND c >= 1')).toEqual({ kind: 'and',
+      left: { kind: 'or',
+        left: { kind: 'compare', symbol: 'a', op: '>=', rhs: { kind: 'lit', value: 1 } },
+        right: { kind: 'compare', symbol: 'b', op: '>=', rhs: { kind: 'lit', value: 1 } } },
+      right: { kind: 'compare', symbol: 'c', op: '>=', rhs: { kind: 'lit', value: 1 } },
+    });
   });
   it('an unknown character or unbalanced brace still yields null (manual)', () => {
     expect(parseCondition('x # 1')).toBeNull();

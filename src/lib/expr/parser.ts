@@ -234,9 +234,15 @@ class Parser {
     return left;
   }
 
-  // unary := '-' unary | power
+  // unary := '+' unary | '-' unary | power
+  // A leading '+' is identity (no AST node), mirroring arithmetic.ts's
+  // `unary ::= ('+'|'-')? power` so that `+5`, `10^+3`, `x + +y` keep parsing.
   private parseUnary(): ArithNode | null {
     const t = this.peek();
+    if (t?.type === 'aop' && t.value === '+') {
+      this.next();
+      return this.parseUnary();
+    }
     if (t?.type === 'aop' && t.value === '-') {
       this.next();
       const inner = this.parseUnary();
@@ -358,7 +364,8 @@ export function parseNumeric(src: string): ParseNumericResult {
   try {
     return { ok: true, node: new Parser(t.tokens).parseNumericAll() };
   } catch (e) {
-    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+    if (e instanceof ParseError) return { ok: false, message: e.message };
+    throw e; // anything else is a programming error, not a parse failure
   }
 }
 
