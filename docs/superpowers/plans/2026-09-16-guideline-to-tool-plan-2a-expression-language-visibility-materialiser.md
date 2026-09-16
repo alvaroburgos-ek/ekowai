@@ -304,10 +304,11 @@ Port the `Parser` class from `src/lib/compliance/evaluate.ts:124-331` verbatim, 
 2. `parseAtom` on `IF`: save `pos`; try the guard form (`parseOr` → expect `THEN` → `parseOr`); if any step fails, restore `pos` and `return this.parseComparison()` (which reaches `parsePrimary` and parses `if(...)` as a call). This is the IF…THEN vs `if(` disambiguation — the guard form needs `THEN`, so it is deterministic.
 3. Replace `parseFactor` (`:292-316`) with three methods:
    ```ts
-   // unary := '-' unary | power
+   // unary := '-' unary | '+' unary | power        (leading '+' is identity — arithmetic.ts:181-190 superset; found in Task 1 review)
    private parseUnary(): ArithNode | null {
      const t = this.peek();
      if (t?.type === 'aop' && t.value === '-') { this.next(); const inner = this.parseUnary(); return inner === null ? null : { kind: 'aneg', inner }; }
+     if (t?.type === 'aop' && t.value === '+') { this.next(); return this.parseUnary(); }
      return this.parsePower();
    }
    // power := primary ('^' unary)?   right-associative, exponent may carry a unary minus
