@@ -12,7 +12,6 @@
  * bare number that hides a problem.
  */
 import type { EvalRequest, EvalState } from './formula';
-import { summarizeSurfaces, type SurfaceInventoryCarrier } from './surface-inventory';
 import { iterateGoverningDuration, GOVERNING_PROFILES, boundaryLimitedWarning } from './governing-duration';
 
 export type SubArea = {
@@ -86,8 +85,9 @@ export type Gl10Scalars = {
 export type AggregatorContext = {
   /** Carrier data for the sub-areas aggregator (A138-10 Gl. 2). */
   subAreas?: SubAreasCarrier | null;
-  /** Carrier for the A138-07 surface-inventory producers (Gl. 2 + C_m + area totals). */
-  surfaceInventory?: SurfaceInventoryCarrier | null;
+  // Plan 2a: the A138-07 `surfaceInventory` carrier slot is gone — the six
+  // surface producers are formula strings over the `surface_inventory`
+  // register (`EvalRequest.registers`, see rewrites.ts A138_07_REGISTER_FORMULAS).
   /** Carrier data for the KOSTRA-table aggregator (A138-13 Gl. 8). */
   kostraTable?: KostraCarrier | null;
   /** Scalar inputs the Gl. 8 aggregator reads in addition to the table.
@@ -781,57 +781,13 @@ const a138_26_gl10: Aggregator = {
   },
 };
 
-/** A138-07 producers: each reads the surface_inventory carrier and returns one
- * scalar from the shared summarizeSurfaces(). manual_required when no complete
- * row exists, so downstream blanks with a cause rather than showing 0. */
-function makeSurfaceAggregator(
-  pick: (s: ReturnType<typeof summarizeSurfaces>) => number | null,
-  formulaEvaluated: string,
-): Aggregator {
-  return {
-    run: (req) => {
-      const carrier = req.aggregator?.surfaceInventory;
-      if (!carrier || !Array.isArray(carrier.rows) || carrier.rows.length === 0) {
-        return { kind: 'manual_required', reason: 'Keine Flächen im Flächenverzeichnis (A138-07) erfasst.' };
-      }
-      const sum = summarizeSurfaces(carrier);
-      if (sum.complete === 0) {
-        return { kind: 'manual_required', reason: `Keine vollständigen Flächen-Zeilen (0/${sum.total}). Oberflächentyp, Fläche und C_i je Zeile erforderlich.` };
-      }
-      const value = pick(sum);
-      if (value == null || !Number.isFinite(value)) {
-        return { kind: 'manual_required', reason: 'Wert nicht berechenbar (Σ Fläche = 0).' };
-      }
-      const substituted: Record<string, number> = {
-        'Σ befestigt': sum.A_C_sealed ?? 0,
-        'Σ unbefestigt': sum.A_C_unsealed ?? 0,
-        'Σ A·C_i': sum.A_C ?? 0,
-      };
-      return { kind: 'computed', value, substituted, formulaEvaluated };
-    },
-  };
-}
-
-const a138_07_A_C = makeSurfaceAggregator((s) => s.A_C, 'A_C = Σ(A_E,i · C_i)   (Flächenverzeichnis, Tab. 9)');
-const a138_07_C_m = makeSurfaceAggregator((s) => s.C_m, 'C_m = A_C / Σ A_E,i');
-const a138_07_A_E_ba = makeSurfaceAggregator((s) => s.A_E_ba, 'A_E,b,a = Σ A_E,i (befestigt)');
-const a138_07_A_E_nba = makeSurfaceAggregator((s) => s.A_E_nba, 'A_E,nb,a = Σ A_E,i (unbefestigt)');
-const a138_07_A_C_sealed = makeSurfaceAggregator((s) => s.A_C_sealed, 'A_C,b = Σ(A_E,b,a,i · C_i)   (reduzierte Fläche, befestigt)');
-const a138_07_A_C_unsealed = makeSurfaceAggregator((s) => s.A_C_unsealed, 'A_C,nb = Σ(A_E,nb,a,i · C_i)   (reduzierte Fläche, unbefestigt)');
+// Plan 2a (2026-09-17): the six DWA-A 138-1 A138-07 surface producers
+// (Gl. 2 A_C · 2c C_m · 2d A_E_ba · 2e A_E_nba · 2f A_C_sealed · 2g A_C_unsealed)
+// are NO LONGER aggregators. They are row-function formula strings over the
+// `surface_inventory` register — see rewrites.ts A138_07_REGISTER_FORMULAS and
+// scripts/migrations/20260916100000_a138_07_register_equations.sql.
 
 export const aggregators: Record<string, Aggregator> = {
-  // DWA-A 138-1 · A138-07 · Gl. (2) A_C producer (surface_inventory)
-  'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0': a138_07_A_C,
-  // DWA-A 138-1 · A138-07 · Gl. (2c) C_m producer
-  'a1380702-0000-4000-8000-000000000002': a138_07_C_m,
-  // DWA-A 138-1 · A138-07 · Gl. (2d) A_E_ba producer
-  'a1380702-0000-4000-8000-000000000003': a138_07_A_E_ba,
-  // DWA-A 138-1 · A138-07 · Gl. (2e) A_E_nba producer
-  'a1380702-0000-4000-8000-000000000004': a138_07_A_E_nba,
-  // DWA-A 138-1 · A138-07 · Gl. (2f) A_C_sealed producer (reduced area, befestigt)
-  'a1380702-0000-4000-8000-000000000005': a138_07_A_C_sealed,
-  // DWA-A 138-1 · A138-07 · Gl. (2g) A_C_unsealed producer (reduced area, unbefestigt)
-  'a1380702-0000-4000-8000-000000000006': a138_07_A_C_unsealed,
   // DWA-A 138-1 · A138-13 · Gl. (8)
   '69f31e6e-a755-4246-af10-ae46668b5c86': a138_13_gl8,
   // DWA-A 138-1 · A138-16 · Gl. (11) Bilanz-Check

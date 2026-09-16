@@ -27,7 +27,10 @@ import type {
   FloodSubAreasCarrier,
   Gl10Scalars,
 } from './aggregators';
-import { normalizeSurfaceCarrier, type SurfaceInventoryCarrier } from './surface-inventory';
+import { resolveRegisterConfig, registerFlagKeys } from './register-configs';
+import { prepareRegisterRows } from './register-rows';
+import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
+import type { PreparedRegister, Value } from '@/lib/expr';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -39,14 +42,8 @@ import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
 
 /** Equation ids the engine has aggregator paths for. Used to decide which
- * carriers to plumb in. */
-const A138_07_A_C_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-const A138_07_C_M_ID = 'a1380702-0000-4000-8000-000000000002';
-const A138_07_A_E_BA_ID = 'a1380702-0000-4000-8000-000000000003';
-const A138_07_A_E_NBA_ID = 'a1380702-0000-4000-8000-000000000004';
-const A138_07_A_C_SEALED_ID = 'a1380702-0000-4000-8000-000000000005';
-const A138_07_A_C_UNSEALED_ID = 'a1380702-0000-4000-8000-000000000006';
-const A138_07_SURFACE_IDS = new Set([A138_07_A_C_ID, A138_07_C_M_ID, A138_07_A_E_BA_ID, A138_07_A_E_NBA_ID, A138_07_A_C_SEALED_ID, A138_07_A_C_UNSEALED_ID]);
+ * carriers to plumb in. (Plan 2a: the six A138-07 surface producers are no
+ * longer aggregators — they read the `surface_inventory` register generically.) */
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
 
@@ -59,6 +56,13 @@ type FieldMeta = {
   id: string;
   symbol: string;
   unit: string | null;
+  /** Plan 2a: register detection. `dataType` json + no widget ⇒ TS fallback
+   * config by symbol; `widget === 'register'` + `uiConfig` ⇒ DB config.
+   * Optional so legacy callers (and tests) that pass only id/symbol/unit
+   * keep working — the store value's `type === 'json'` then stands in. */
+  dataType?: string;
+  widget?: string | null;
+  uiConfig?: unknown;
 };
 
 type EquationMeta = {
@@ -71,6 +75,12 @@ type EquationMeta = {
 
 type Args = {
   worksheetCode: string;
+  /** Standard code (e.g. `DWA-A-138-1`) — selects the regulation tables a
+   * register's `lookup()` / derived columns read. Optional: without it the
+   * lookup resolves a table code across the registered/seeded standards only
+   * when it is unique (see regulation-tables-fallback.ts); the production
+   * form always passes it. */
+  standardCode?: string;
   fields: FieldMeta[];
   equations: EquationMeta[];
   /** symbol → list of producing worksheet codes when a consumed symbol is
@@ -92,9 +102,6 @@ type Args = {
  * so we widen the set for those ids.
  */
 function consumedSymbolsFor(eq: EquationMeta): string[] {
-  if (A138_07_SURFACE_IDS.has(eq.id)) {
-    return [...(eq.inputSymbols ?? []), 'surface_inventory'];
-  }
   if (eq.id === A138_13_GL8_ID) {
     // Gl. 8 reads scalars from inherited fields + the KOSTRA carrier.
     return ['A_C', 'A_VA', 'Q_S', 'Q_Dr', 'f_Z', 'f_A', 'r_D_n_table'];
@@ -105,12 +112,18 @@ function consumedSymbolsFor(eq: EquationMeta): string[] {
   }
   // For the §6.x.y batch (arithmetic + Gl. 11 balance), the formula's
   // input_symbols list is the truth — normalised so a stored alias still
-  // collides correctly with the ambiguity map.
-  return normalizeSymbols(eq.inputSymbols ?? []);
+  // collides correctly with the ambiguity map. A rewrite bridge's `remap`
+  // names the register while the DB row is un-migrated (Plan 2a); after the
+  // migration `input_symbols` carries it.
+  return [
+    ...normalizeSymbols(eq.inputSymbols ?? []),
+    ...Object.values(rewriteRules[eq.id]?.remap ?? {}),
+  ];
 }
 
 export function useEquationEngine({
   worksheetCode,
+  standardCode,
   fields,
   equations,
   ambiguousSymbols,
@@ -142,15 +155,57 @@ export function useEquationEngine({
     return ids;
   }, [equations, worksheetCode]);
 
-  // Surface-inventory carrier: the `surface_inventory` json field on A138-07.
-  // Read by the four A138-07 aggregator producers (A_C, C_m, A_E_ba, A_E_nba).
-  const surfaceField = useMemo(() => fields.find((f) => f.symbol === 'surface_inventory'), [fields]);
-  const surfaceCarrier = useMemo<SurfaceInventoryCarrier | null>(() => {
-    if (!surfaceField) return null;
-    const v = values[surfaceField.id];
-    if (v?.type !== 'json') return null;
-    return normalizeSurfaceCarrier(v.value);
-  }, [values, surfaceField]);
+  // Plan 2a — generic registers. Every field that resolves to a register
+  // config (DB `widget='register'` + ui_config, or the TS fallback keyed by
+  // symbol while widget is NULL) and holds a json value is prepared into typed
+  // rows (legacy replay, lookup refill, derived columns, completeness). The
+  // formula engine reads them through `sum_rows()` & co.; the table lookup
+  // serves `lookup()` both inside the register's derived columns and in the
+  // equation formula itself.
+  const tableLookup = useMemo(() => makeTableLookup(standardCode), [standardCode]);
+  const tableRows = useMemo(() => makeTableRows(standardCode), [standardCode]);
+  // G-13: a register's derived column may reference a worksheet symbol
+  // (`area_m2 * EZ`). Unknown names MUST resolve to `undefined` (never
+  // null/'') so the var-vs-var comparison rule does not see a valued symbol.
+  const scalarBySymbol = useMemo(() => {
+    return (sym: string): Value | undefined => {
+      const f = fieldBySymbol.get(sym);
+      if (!f) return undefined;
+      const v = values[f.id];
+      if (!v || v.type === 'json' || v.value === null || v.value === undefined) return undefined;
+      return v.value;
+    };
+  }, [fieldBySymbol, values]);
+  const registers = useMemo(() => {
+    const out: Record<string, PreparedRegister> = {};
+    for (const f of fields) {
+      const v = values[f.id];
+      if (v?.type !== 'json') continue;
+      const cfg = resolveRegisterConfig({
+        symbol: f.symbol,
+        // Legacy callers pass no dataType; on the client the store value's
+        // type IS the data type.
+        dataType: f.dataType ?? 'json',
+        widget: f.widget,
+        uiConfig: f.uiConfig,
+      });
+      if (!cfg) continue;
+      out[f.symbol] = prepareRegisterRows(
+        v.value,
+        cfg.columns,
+        { table: tableLookup, tableRows, symbol: scalarBySymbol },
+        {
+          legacyMap: cfg.legacy_map,
+          flagKeys: registerFlagKeys(f.symbol, cfg),
+          overrideFlagKey: cfg.override?.flag_key,
+          overrideAppliesTo: cfg.override?.applies_to,
+        },
+      );
+      // `register.diagnostics` (misconfigured derived expr) is surfaced by the
+      // server save path (Task 8 → warnings); the client hook ignores it.
+    }
+    return out;
+  }, [fields, values, tableLookup, tableRows, scalarBySymbol]);
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
   // table(s). The field lives on A138-04 in production; cross-worksheet
@@ -443,9 +498,7 @@ export function useEquationEngine({
 
       // Build the aggregator context specific to this equation id.
       let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-      if (A138_07_SURFACE_IDS.has(eq.id)) {
-        aggregator = surfaceCarrier ? { surfaceInventory: surfaceCarrier } : undefined;
-      } else if (eq.id === A138_13_GL8_ID) {
+      if (eq.id === A138_13_GL8_ID) {
         // Task 3 withhold: when the resolved column is missing (T_n column not
         // populated in the grid), emit manual_required BEFORE calling the
         // aggregator — do NOT feed rows for a wrong/missing column.
@@ -490,6 +543,8 @@ export function useEquationEngine({
         expectedUnits,
         inputs: evalInputs,
         aggregator,
+        registers,
+        tableLookup,
       });
     }
     return next;
@@ -498,7 +553,8 @@ export function useEquationEngine({
     equations,
     fieldBySymbol,
     engineEquationIds,
-    surfaceCarrier,
+    registers,
+    tableLookup,
     kostraCarrier,
     kostraResolution,
     kostraField,

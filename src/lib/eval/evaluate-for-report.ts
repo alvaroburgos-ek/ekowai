@@ -17,7 +17,10 @@ import { equationProfiles } from './equation-profiles';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
-import { normalizeSurfaceCarrier } from './surface-inventory';
+import { resolveRegisterConfig, registerFlagKeys, withFallbackRegisterEquations } from './register-configs';
+import { prepareRegisterRows } from './register-rows';
+import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
+import type { PreparedRegister } from '@/lib/expr';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -32,21 +35,9 @@ import type {
   Gl10Scalars,
 } from './aggregators';
 
-// A138-07 surface-producer equation ids (A_C, C_m, A_E_ba, A_E_nba, A_C_sealed, A_C_unsealed).
-const A138_07_A_C_ID    = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-const A138_07_C_M_ID    = 'a1380702-0000-4000-8000-000000000002';
-const A138_07_A_E_BA_ID = 'a1380702-0000-4000-8000-000000000003';
-const A138_07_A_E_NBA_ID = 'a1380702-0000-4000-8000-000000000004';
-const A138_07_A_C_SEALED_ID = 'a1380702-0000-4000-8000-000000000005';
-const A138_07_A_C_UNSEALED_ID = 'a1380702-0000-4000-8000-000000000006';
-const A138_07_SURFACE_IDS = new Set([
-  A138_07_A_C_ID,
-  A138_07_C_M_ID,
-  A138_07_A_E_BA_ID,
-  A138_07_A_E_NBA_ID,
-  A138_07_A_C_SEALED_ID,
-  A138_07_A_C_UNSEALED_ID,
-]);
+// Plan 2a: the six A138-07 surface producers are formula strings over the
+// `surface_inventory` register (rewrites.ts A138_07_REGISTER_FORMULAS) —
+// no per-id branch here any more.
 
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
@@ -57,6 +48,10 @@ export type ReportField = {
   symbol: string;
   unit: string | null;
   dataType: string;
+  /** Plan 2a: DB register config (`widget='register'` + ui_config). Optional —
+   * NULL widget + json dataType falls back to the TS register config by symbol. */
+  widget?: string | null;
+  uiConfig?: unknown;
 };
 
 export type ReportParameter = {
@@ -164,8 +159,40 @@ export function evaluateWorksheetEquations(
   equations: ReportEquation[],
   fields: ReportField[],
   parameters: ReportParameter[],
+  opts?: {
+    /** Standard code (e.g. `DWA-A-138-1`) selecting the regulation tables for
+     * `lookup()`; without it a table code resolves only when unique across the
+     * registered/seeded standards. */
+    standardCode?: string;
+  },
 ): EquationReportResult[] {
   const { numByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
+
+  // Plan 2a — generic registers (mirror of the client hook). Every json field
+  // that resolves to a register config is prepared into typed rows; the
+  // worksheet's scalar values back a derived column's symbol references
+  // (G-13). Unknown names resolve to `undefined`, never null/''.
+  const tableLookup = makeTableLookup(opts?.standardCode);
+  const tableRows = makeTableRows(opts?.standardCode);
+  const scalarBySymbol = (sym: string) => bySymbol.get(sym);
+  const registers: Record<string, PreparedRegister> = {};
+  for (const f of fields) {
+    const raw = jsonBySymbol.get(f.symbol);
+    if (raw === undefined) continue;
+    const cfg = resolveRegisterConfig(f);
+    if (!cfg) continue;
+    registers[f.symbol] = prepareRegisterRows(
+      raw,
+      cfg.columns,
+      { table: tableLookup, tableRows, symbol: scalarBySymbol },
+      {
+        legacyMap: cfg.legacy_map,
+        flagKeys: registerFlagKeys(f.symbol, cfg),
+        overrideFlagKey: cfg.override?.flag_key,
+        overrideAppliesTo: cfg.override?.applies_to,
+      },
+    );
+  }
 
   // Aggregator context — built once per worksheet, reused per equation.
   const subAreasJson = jsonBySymbol.get('sub_areas_A138_10') as { rows?: unknown } | undefined;
@@ -259,9 +286,6 @@ export function evaluateWorksheetEquations(
     return { status: 'legacy' };
   })();
 
-  // A138-07 surface carrier: drives the four surface-producer aggregators.
-  const surfaceCarrier = normalizeSurfaceCarrier(jsonBySymbol.get('surface_inventory'));
-
   const r_D_30_field = fieldBySymbol.get('r_D_30');
 
   const gl8Scalars: Gl8Scalars = {
@@ -284,7 +308,10 @@ export function evaluateWorksheetEquations(
   };
 
   const out: EquationReportResult[] = [];
-  for (const eq of equations) {
+  // Plan 2a: fallback register equations (e.g. VSME-B04.100 per-medium sums)
+  // are appended while their DB rows are not yet seeded — same list the form
+  // engine evaluates.
+  for (const eq of withFallbackRegisterEquations(worksheetCode, equations)) {
     // Engine generalization (Layer 0): evaluate every equation except the
     // manual deny-set, mirroring the client gate. The evaluator fail-safe
     // blanks anything it cannot faithfully compute.
@@ -321,16 +348,14 @@ export function evaluateWorksheetEquations(
         worksheetCode,
         formula: eq.formula,
         outputSymbol: eq.outputSymbol,
-        outputUnit: eq.outputUnit,
+        outputUnit: 'outputUnit' in eq ? eq.outputUnit : null,
         state: { kind: 'manual_required', reason: kostraResolution.reason },
       });
       continue;
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (A138_07_SURFACE_IDS.has(eq.id)) {
-      aggregator = { surfaceInventory: surfaceCarrier };
-    } else if (eq.id === A138_10_GL2_ID) {
+    if (eq.id === A138_10_GL2_ID) {
       aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
@@ -361,6 +386,8 @@ export function evaluateWorksheetEquations(
       expectedUnits,
       inputs: evalInputs,
       aggregator,
+      registers,
+      tableLookup,
     });
 
     // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D
@@ -393,7 +420,7 @@ export function evaluateWorksheetEquations(
       worksheetCode,
       formula: eq.formula,
       outputSymbol: eq.outputSymbol,
-      outputUnit: eq.outputUnit,
+      outputUnit: 'outputUnit' in eq ? eq.outputUnit : null,
       state,
     });
   }

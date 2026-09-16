@@ -35,6 +35,7 @@ import {
   projectParameters,
   worksheetInstances,
   worksheetTemplates,
+  standards,
   calculationSnapshots,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
@@ -70,6 +71,8 @@ async function loadCaptureInputs(args: {
   txDb?: DrizzleClient;
 }): Promise<{
   worksheetCode: string;
+  /** Plan 2a: the standard's code, for register `lookup()` table resolution. */
+  standardCode: string;
   projectId: string;
   fields: FieldRow[];
   equations: EquationRow[];
@@ -92,8 +95,9 @@ async function loadCaptureInputs(args: {
   const inst = instanceRows[0];
 
   const [tplRow] = await dbi
-    .select({ code: worksheetTemplates.code, standardId: worksheetTemplates.standardId })
+    .select({ code: worksheetTemplates.code, standardId: worksheetTemplates.standardId, standardCode: standards.code })
     .from(worksheetTemplates)
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
     .where(eq(worksheetTemplates.id, inst.worksheetTemplateId))
     .limit(1);
   if (!tplRow) return null;
@@ -133,6 +137,7 @@ async function loadCaptureInputs(args: {
 
   return {
     worksheetCode: tplRow.code,
+    standardCode: tplRow.standardCode,
     projectId: inst.projectId,
     fields: allFields,
     equations: eqList,
@@ -171,6 +176,7 @@ export async function captureSnapshot(args: {
     complianceRequirements: inputs.complianceRequirements,
     parameters: inputs.parameters,
     worksheetCode: inputs.worksheetCode,
+    standardCode: inputs.standardCode,
     ambiguousSymbols: inputs.ambiguousSymbols,
   });
 

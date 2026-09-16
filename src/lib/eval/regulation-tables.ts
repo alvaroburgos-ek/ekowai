@@ -23,6 +23,17 @@ export function getTable(std: string, edition: string | undefined, code: string)
   for (const t of REGISTRY.values()) if (t.standard_code === std && t.table_code === code && (!best || t.edition > best.edition)) best = t;
   return best;
 }
+/** Plan 2a: the table for `code` when exactly ONE registered standard carries it (latest edition);
+ * `undefined` when absent or when two standards both register the code (ambiguous → never guess). */
+export function findTableByCode(code: string): RegulationTable | undefined {
+  let best: RegulationTable | undefined;
+  for (const t of REGISTRY.values()) {
+    if (t.table_code !== code) continue;
+    if (best && best.standard_code !== t.standard_code) return undefined;
+    if (!best || t.edition > best.edition) best = t;
+  }
+  return best;
+}
 export function lookupRow(std: string, edition: string | undefined, code: string, keys: Record<string, string>): RegulationRow | undefined {
   const t = getTable(std, edition, code);
   if (!t) return undefined;

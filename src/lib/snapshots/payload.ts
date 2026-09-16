@@ -12,7 +12,10 @@ import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
-import { normalizeSurfaceCarrier } from '@/lib/eval/surface-inventory';
+import { resolveRegisterConfig, registerFlagKeys, withFallbackRegisterEquations } from '@/lib/eval/register-configs';
+import { prepareRegisterRows } from '@/lib/eval/register-rows';
+import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
+import type { PreparedRegister, Value } from '@/lib/expr';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -36,18 +39,8 @@ import type {
 } from '@/lib/db/schema';
 
 // Mirror the aggregator-id constants from use-equation-engine.ts.
-// A138-07 surface-producer equation ids (A_C, C_m, A_E_ba, A_E_nba).
-const A138_07_A_C_ID     = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
-const A138_07_C_M_ID     = 'a1380702-0000-4000-8000-000000000002';
-const A138_07_A_E_BA_ID  = 'a1380702-0000-4000-8000-000000000003';
-const A138_07_A_E_NBA_ID = 'a1380702-0000-4000-8000-000000000004';
-const A138_07_SURFACE_IDS = new Set([
-  A138_07_A_C_ID,
-  A138_07_C_M_ID,
-  A138_07_A_E_BA_ID,
-  A138_07_A_E_NBA_ID,
-]);
-
+// Plan 2a: the A138-07 surface producers are register formulas (rewrites.ts
+// A138_07_REGISTER_FORMULAS) — no per-id branch here any more.
 const A138_10_GL2_ID = '1a48af79-99a3-40cf-a3bc-23e2d1e9e2f3';
 const A138_13_GL8_ID = '69f31e6e-a755-4246-af10-ae46668b5c86';
 const A138_26_GL10_ID = '8e3c7e22-e3c7-449a-b267-928332c89306';
@@ -179,12 +172,19 @@ export function buildSnapshotPayload(args: {
   complianceRequirements: ComplianceRow[];
   parameters: ParameterRow[];
   worksheetCode: string;
+  /** Plan 2a: standard code selecting the regulation tables a register's
+   * `lookup()` reads. Optional — without it a table code resolves only when
+   * unique across the registered/seeded standards. */
+  standardCode?: string;
   /** Symbol → producing-worksheet-codes when an inherited symbol has >1
    *  producer. Mirrors the live hook's ambiguity guard so the snapshot
    *  doesn't silently pick a winner and label it `computed`. */
   ambiguousSymbols?: Map<string, string[]>;
 }): SnapshotPayload {
-  const { fields: fieldList, equations: equationList, complianceRequirements: crList } = args;
+  const { fields: fieldList, complianceRequirements: crList } = args;
+  // Plan 2a: fallback register equations (VSME-B04.100 per-medium sums) are
+  // evaluated while their DB rows are not yet seeded — same list as the form.
+  const equationList = withFallbackRegisterEquations(args.worksheetCode, args.equations);
   const ambiguousSymbols = args.ambiguousSymbols ?? new Map<string, string[]>();
   const paramByFieldId = new Map(args.parameters.map((p) => [p.fieldId, p]));
   const fieldBySymbol = new Map(fieldList.map((f) => [f.symbol, f]));
@@ -224,19 +224,43 @@ export function buildSnapshotPayload(args: {
     return readNumber(p);
   };
 
+  // Plan 2a — generic registers (mirror of the client hook / report
+  // evaluator). Every json field that resolves to a register config is
+  // prepared into typed rows; the snapshot's scalar parameters back a derived
+  // column's symbol references (G-13). Unknown names resolve to `undefined`.
+  const tableLookup = makeTableLookup(args.standardCode);
+  const tableRows = makeTableRows(args.standardCode);
+  const scalarBySymbol = (sym: string): Value | undefined => {
+    const f = fieldBySymbol.get(sym);
+    if (!f) return undefined;
+    const p = paramByFieldId.get(f.id);
+    if (!p) return undefined;
+    const v = readValue(p, f.dataType);
+    if (!v || v.type === 'json') return undefined;
+    return v.value as Value;
+  };
+  const registers: Record<string, PreparedRegister> = {};
+  for (const f of fieldList) {
+    const p = paramByFieldId.get(f.id);
+    if (!p || p.valueJson == null) continue;
+    const cfg = resolveRegisterConfig(f);
+    if (!cfg) continue;
+    registers[f.symbol] = prepareRegisterRows(
+      p.valueJson,
+      cfg.columns,
+      { table: tableLookup, tableRows, symbol: scalarBySymbol },
+      {
+        legacyMap: cfg.legacy_map,
+        flagKeys: registerFlagKeys(f.symbol, cfg),
+        overrideFlagKey: cfg.override?.flag_key,
+        overrideAppliesTo: cfg.override?.applies_to,
+      },
+    );
+  }
+
   // Carriers for aggregator-driven equations. The JSON value's shape is
   // checked at the aggregator boundary — if the carrier is malformed, the
   // aggregator reports manual_required and the snapshot captures that.
-  // A138-07 surface carrier: drives the four surface-producer aggregators.
-  // normalizeSurfaceCarrier never returns null — an empty/missing carrier
-  // produces { rows: [] }, which causes the aggregator to return manual_required.
-  const surfaceInventoryField = fieldList.find((f) => f.symbol === 'surface_inventory');
-  const surfaceCarrier = (() => {
-    if (!surfaceInventoryField) return normalizeSurfaceCarrier(null);
-    const p = paramByFieldId.get(surfaceInventoryField.id);
-    return normalizeSurfaceCarrier(p?.valueJson ?? null);
-  })();
-
   const subAreasField = fieldList.find((f) => f.symbol.startsWith('sub_areas_'));
   const subAreasCarrier: SubAreasCarrier | null = (() => {
     if (!subAreasField) return null;
@@ -440,9 +464,7 @@ export function buildSnapshotPayload(args: {
     }
 
     let aggregator: Parameters<typeof evaluateFormula>[0]['aggregator'];
-    if (A138_07_SURFACE_IDS.has(eq.id)) {
-      aggregator = { surfaceInventory: surfaceCarrier };
-    } else if (eq.id === A138_10_GL2_ID) {
+    if (eq.id === A138_10_GL2_ID) {
       aggregator = subAreasCarrier ? { subAreas: subAreasCarrier } : undefined;
     } else if (eq.id === A138_13_GL8_ID) {
       aggregator = {
@@ -473,6 +495,8 @@ export function buildSnapshotPayload(args: {
       expectedUnits,
       inputs: evalInputs,
       aggregator,
+      registers,
+      tableLookup,
     });
 
     // Task 2 (A138-10 auto-Q_zu): basin Gl.8 materialises governing D + r_D

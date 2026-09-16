@@ -19,13 +19,35 @@
  */
 // Small in-tree arithmetic expression evaluator. Avoids the Turbopack-vs-
 // mathjs/expr-eval browser-bundle friction and keeps the engine's behavior
-// fully auditable in this repo. Function calls (e.g. SUM(...)) throw —
-// such formulas need a rewrite rule OR a registered aggregator.
+// fully auditable in this repo. Unsupported function calls (e.g. SUM(...))
+// throw — such formulas need a rewrite rule OR a registered aggregator.
+// Plan 2a: row functions (`sum_rows(...)` etc.) evaluate against prepared
+// registers passed in `EvalRequest.registers`.
 import { evalExpression } from './arithmetic';
 import { rewriteRules } from './rewrites';
 import { aggregators, type AggregatorContext } from './aggregators';
 import { equationProfiles } from './equation-profiles';
 import { normalizeFormula, normalizeSymbols } from './normalize-formula';
+import {
+  EXPR_FUNCTION_NAMES,
+  isConditionNode,
+  parseExpression,
+  type PreparedRegister,
+  type Scope,
+} from '@/lib/expr';
+
+/** Whitespace-insensitive equality for the rewrite-bridge guard. */
+const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
+
+/**
+ * Calls that mark an expression as a unified-language expression (row / logic /
+ * rounding functions). The classic seven math names are excluded so a plain
+ * arithmetic formula like `sqrt(a) > b` keeps the legacy criterion sniff.
+ * Built from the evaluator's own registry so it cannot drift.
+ */
+const CLASSIC_MATH = new Set(['ln', 'log10', 'sqrt', 'exp', 'abs', 'min', 'max']);
+const CALL_NAMES = [...EXPR_FUNCTION_NAMES].filter((n) => !CLASSIC_MATH.has(n));
+const HAS_CALL = new RegExp(`\\b(?:${CALL_NAMES.join('|')})\\s*\\(`, 'i');
 
 export type EvalInputValue = {
   /** the symbol the formula is expecting (already remapped if a rewrite applies) */
@@ -107,6 +129,14 @@ export type EvalRequest = {
    * for this equationId needs structured input (e.g. a sub-area array), the
    * caller passes it here. */
   aggregator?: AggregatorContext;
+  /** Plan 2a: prepared registers by symbol (row sets for `sum_rows()` & co.).
+   * A symbol present here is NOT looked up as a number and NOT reported as a
+   * missing input. */
+  registers?: Record<string, PreparedRegister>;
+  /** Regulation-table lookup for `lookup()` inside the formula. */
+  tableLookup?: Scope['table'];
+  /** Raw json carriers by symbol for `contains()` / `cell()`. */
+  carriers?: Record<string, unknown>;
 };
 
 /** Strip the LHS up to the first comparison operator so the parser sees
@@ -138,8 +168,12 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     return aggregator.run(req);
   }
 
-  // 1. Apply rewrite if registered for this equation id.
-  const rewrite = rewriteRules[req.equationId];
+  // 1. Apply rewrite if registered for this equation id. A deploy-safety
+  // bridge (rewrites.ts) is skipped once the stored formula already equals
+  // its `to` (whitespace-insensitive) — after the migration lands the card
+  // shows no substitution.
+  const bridge = rewriteRules[req.equationId];
+  const rewrite = bridge && norm(bridge.to) !== norm(req.formula) ? bridge : undefined;
   const formulaInUse = rewrite ? rewrite.to : req.formula;
   // Normalise the formula's input-symbol list (source-formatting quirks like
   // `r_D(n)` → `r_D_n`) so callers can pass the raw DB list verbatim and the
@@ -162,6 +196,9 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   const valueBySymbol = new Map(req.inputs.map((i) => [i.symbol, i]));
 
   for (const sym of symbolsNeeded) {
+    // Registers / raw carriers are row sets, not numbers: they are resolved
+    // by the expression evaluator itself and never enter `substituted`.
+    if (req.registers?.[sym] !== undefined || req.carriers?.[sym] !== undefined) continue;
     const found = valueBySymbol.get(sym);
     if (!found || found.value === null || !Number.isFinite(found.value)) {
       missing.push(sym);
@@ -219,7 +256,18 @@ export function evaluateFormula(req: EvalRequest): EvalState {
   // enforced by a compliance gate / field validation). Classify it as manual_required (an actionable
   // "manuell prüfen" badge) instead of a hard red "error" pill. A valid computable RHS never contains
   // a comparison operator or a boolean/conditional keyword (min/max use `,`; powers use `^`).
-  if (/[<>]|\bAND\b|\bOR\b|\bwhen\b|\bthen\b|\|/i.test(expression)) {
+  //
+  // Plan 2a: an expression that uses a row/logic/rounding call (`if(a > b, a, b)`,
+  // `sum_rows(reg, if(kind == 'paved', …))`) legitimately contains comparison
+  // operators. For those the classification comes from the parser: the parsed
+  // root is a condition node ⇒ criterion; otherwise it is a numeric expression.
+  // A parse failure falls back to the textual sniff (and then to the evaluator's
+  // own error, which surfaces as `error`).
+  const parsed = HAS_CALL.test(expression) ? parseExpression(expression) : null;
+  const isCriterion = parsed
+    ? isConditionNode(parsed)
+    : /[<>]|\bAND\b|\bOR\b|\bwhen\b|\bthen\b|\|/i.test(expression);
+  if (isCriterion) {
     return {
       kind: 'manual_required',
       reason: 'Vergleichs-/Kriteriumsformel — kein berechenbarer Zahlenwert; manuell prüfen.',
@@ -236,7 +284,11 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     : substituted;
 
   try {
-    const result = evalExpression(expression, scope);
+    const result = evalExpression(expression, scope, {
+      registers: req.registers,
+      table: req.tableLookup,
+      carriers: req.carriers,
+    });
     return {
       kind: 'computed',
       value: result,
@@ -255,8 +307,12 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     //     a missing or placeholder input value
     //   - Nicht-endliches Ergebnis             : 0^(neg), (-x)^fractional,
     //     and similar pow/log domain edges
+    //   - Keine vollständigen Zeilen / Fehlende Eingabe / lookup() /
+    //     stdev_rows() / Operand ist keine Zahl : Plan 2a row-function data
+    //     conditions (empty register, null cell, no table row) — data, not
+    //     a malformed formula
     if (
-      /Unbekanntes Symbol|Funktionsaufruf|Division durch Null|Nicht-endliches Ergebnis/.test(
+      /Unbekanntes Symbol|Funktionsaufruf|Division durch Null|Nicht-endliches Ergebnis|Keine vollständigen Zeilen|Fehlende Eingabe|lookup\(\)|stdev_rows\(\)|Operand ist keine Zahl/.test(
         msg,
       )
     ) {

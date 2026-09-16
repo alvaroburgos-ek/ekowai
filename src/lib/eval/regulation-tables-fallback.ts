@@ -9,8 +9,14 @@
  * evaluator's `Scope.table` contract (keys matched positionally in
  * `key_columns` order); `makeTableRows` exposes whole tables for the legacy
  * replay's unique-pair matching.
+ *
+ * Standard-less resolution (Plan 2a Task 7): callers that do not know the
+ * standard (the snapshot builder's unit fixtures, legacy hook callers) pass
+ * `undefined`; the table code then resolves only when it is UNIQUE across the
+ * registered standards, else across the seeded ones. An ambiguous code
+ * resolves to nothing — never to a guessed standard.
  */
-import { getTable, type RegulationRow, type RegulationTable } from './regulation-tables';
+import { findTableByCode, getTable, type RegulationRow, type RegulationTable } from './regulation-tables';
 import { a138SeedTables } from './regulation-tables-seed-a138';
 import type { Scope, Value } from '@/lib/expr';
 
@@ -24,17 +30,29 @@ function seedTables(): Map<string, RegulationTable> {
   return seedCache;
 }
 
+/** Unique seed table for a code across all seeded standards; `undefined` when absent or ambiguous. */
+function seedTableByCode(tableCode: string): RegulationTable | undefined {
+  let hit: RegulationTable | undefined;
+  for (const t of seedTables().values()) {
+    if (t.table_code !== tableCode) continue;
+    if (hit && hit.standard_code !== t.standard_code) return undefined;
+    hit = t;
+  }
+  return hit;
+}
+
 /** Registry (latest edition) first — the form/server registered DB rows there; the TS seed builders are the deploy-before-seed fallback. */
-export function resolveRegulationTable(standardCode: string, tableCode: string): RegulationTable | undefined {
+export function resolveRegulationTable(standardCode: string | undefined, tableCode: string): RegulationTable | undefined {
+  if (!standardCode) return findTableByCode(tableCode) ?? seedTableByCode(tableCode);
   return getTable(standardCode, undefined, tableCode) ?? seedTables().get(`${standardCode}|${tableCode}`);
 }
 
-export function makeTableRows(standardCode: string): (tableCode: string) => RegulationRow[] | undefined {
+export function makeTableRows(standardCode: string | undefined): (tableCode: string) => RegulationRow[] | undefined {
   return (tableCode) => resolveRegulationTable(standardCode, tableCode)?.rows;
 }
 
 /** `(code, keys) → row.values`; `undefined` when the table is unknown, the key arity differs, or no row matches. */
-export function makeTableLookup(standardCode: string): NonNullable<Scope['table']> {
+export function makeTableLookup(standardCode: string | undefined): NonNullable<Scope['table']> {
   return (tableCode, keys) => {
     const t = resolveRegulationTable(standardCode, tableCode);
     if (!t || keys.length !== t.key_columns.length) return undefined;

@@ -71,6 +71,13 @@ describe('normalizeFormula — Plan 2a: expr function set', () => {
     expect(normalizeFormula("flag(reg, 'x') + r_D(n)")).toBe("flag(reg, 'x') + r_D_n");
   });
 
+  it('Plan 2a Task 6: the A138-07 register formulas pass through byte-identical', () => {
+    const f = "sum_rows(surface_inventory, if(kind == 'paved', area_m2 * c_i, 0))";
+    expect(normalizeFormula(f)).toBe(f);
+    const cm = 'sum_rows(surface_inventory, area_m2 * c_i) / sum_rows(surface_inventory, area_m2)';
+    expect(normalizeFormula(cm)).toBe(cm);
+  });
+
   it('Plan 2a: every EXPR_FUNCTION_NAMES member with a single-token arg survives, upper-case math too', () => {
     for (const fn of EXPR_FUNCTION_NAMES) {
       expect(normalizeFormula(`${fn}(x)`)).toBe(`${fn}(x)`);

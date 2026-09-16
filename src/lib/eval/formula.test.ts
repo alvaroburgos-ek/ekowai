@@ -1,10 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { evaluateFormula, type EvalRequest } from './formula';
-import { normalizeSurfaceCarrier } from './surface-inventory';
+import { prepareRegisterRows } from './register-rows';
+import { REGISTER_CONFIGS_FALLBACK, registerFlagKeys } from './register-configs';
+import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
 
 // A138-07 producer IDs (moved from A138-10 as of Plan 2)
 const A138_07_A_C_ID = 'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0';
 
+// Plan 2a: aggregator retired — the A_C producer is a formula string over the
+// `surface_inventory` register; the request carries the prepared register and
+// the (un-migrated Σ) DB text so the rewrite bridge is exercised.
+const SURFACE_CFG = REGISTER_CONFIGS_FALLBACK.surface_inventory;
+const TABLE = makeTableLookup('DWA-A-138-1');
 function a138_07_gl2_req(rows: { id: string; label: string; tab9_value: string | null; area_m2: number | null; c_i: number | null; c_s: number | null; coeff_override: boolean }[]): EvalRequest {
   return {
     equationId: A138_07_A_C_ID,
@@ -12,7 +19,20 @@ function a138_07_gl2_req(rows: { id: string; label: string; tab9_value: string |
     inputSymbols: ['surface_inventory'],
     outputSymbol: 'A_C',
     inputs: [],
-    aggregator: { surfaceInventory: normalizeSurfaceCarrier({ rows }) },
+    registers: {
+      surface_inventory: prepareRegisterRows(
+        { rows },
+        SURFACE_CFG.columns,
+        { table: TABLE, tableRows: makeTableRows('DWA-A-138-1') },
+        {
+          legacyMap: SURFACE_CFG.legacy_map,
+          flagKeys: registerFlagKeys('surface_inventory', SURFACE_CFG),
+          overrideFlagKey: SURFACE_CFG.override?.flag_key,
+          overrideAppliesTo: SURFACE_CFG.override?.applies_to,
+        },
+      ),
+    },
+    tableLookup: TABLE,
   };
 }
 
@@ -27,8 +47,10 @@ describe('evaluateFormula — A138-07 Gl. 2 (surface_inventory producer)', () =>
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
     expect(r.value).toBeCloseTo(4826.43, 2);
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(4826.43, 2);
-    expect(r.substituted['Σ unbefestigt']).toBe(0);
+    // Plan 2a: aggregator retired — register formulas carry no Σ-keys in substituted
+    // (the sealed/unsealed split is pinned by Gl. 2f/2g in surface-aggregators.test.ts).
+    expect(r.substituted).toEqual({});
+    expect(r.rewrite?.from).toBe('A_C_preliminary = Σ_i (A_E,i · C_i)');
   });
 
   it('mixed surface types — paved rows produce A_C_sealed, unpaved A_C_unsealed', () => {
@@ -41,8 +63,7 @@ describe('evaluateFormula — A138-07 Gl. 2 (surface_inventory producer)', () =>
     expect(r.kind).toBe('computed');
     if (r.kind !== 'computed') return;
     expect(r.value).toBeCloseTo(380, 6); // 400*0.9 + 200*0.1 = 360 + 20
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(360, 6);
-    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(20, 6);
+    // Plan 2a: aggregator retired — register formulas carry no Σ-keys in substituted
   });
 
   it('weighted sum with unequal areas — differs from naive arithmetic mean', () => {
@@ -57,8 +78,7 @@ describe('evaluateFormula — A138-07 Gl. 2 (surface_inventory producer)', () =>
     // Area-weighted: 100*0.9 + 900*0.1 = 90 + 90 = 180 m²
     // Naive arithmetic mean: (0.9 + 0.1) / 2 = 0.5 → 1000 * 0.5 = 500 m² (clearly different)
     expect(r.value).toBeCloseTo(180, 6);
-    expect(r.substituted['Σ befestigt']).toBeCloseTo(90, 6);
-    expect(r.substituted['Σ unbefestigt']).toBeCloseTo(90, 6);
+    // Plan 2a: aggregator retired — register formulas carry no Σ-keys in substituted
   });
 
   it('excludes incomplete row from sum but still computes from the complete rows', () => {
@@ -94,7 +114,8 @@ describe('evaluateFormula — A138-07 Gl. 2 (surface_inventory producer)', () =>
     );
     expect(r.kind).toBe('manual_required');
     if (r.kind !== 'manual_required') return;
-    expect(r.reason).toMatch(/Keine Flächen/);
+    // Plan 2a: aggregator retired — the row function names the empty register
+    expect(r.reason).toMatch(/Keine vollständigen Zeilen in "surface_inventory"/);
   });
 
   it('manual_required when no carrier is supplied at all', () => {

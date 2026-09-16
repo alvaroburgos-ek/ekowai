@@ -32,6 +32,7 @@ import { lookupTab9 } from '@/lib/eval/tab9';
 import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
 import { SourceFormReferencePanel } from '@/components/form-templates/SourceFormReferencePanel';
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
+import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { visibleFields } from './visible-fields';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
@@ -390,10 +391,18 @@ export function WorksheetForm({
 
   // Engine wiring lives in a shared hook so the integration test renders
   // EXACTLY the production code path (not a copy of it).
+  // Plan 2a: fallback register equations (VSME-B04.100 per-medium sums) feed
+  // the engine while their DB rows are not yet seeded; the equations block
+  // below keeps rendering the DB list (`sortedEquations`) unchanged.
+  const engineEquations = useMemo(
+    () => withFallbackRegisterEquations(worksheet.template.code, sortedEquations),
+    [worksheet.template.code, sortedEquations],
+  );
   const { engineEquationIds, engineStates } = useEquationEngine({
     worksheetCode: worksheet.template.code,
+    standardCode,
     fields,
-    equations: sortedEquations,
+    equations: engineEquations,
     ambiguousSymbols,
     suppressWriteBackSymbols: engineSuppressedSymbols,
   });
@@ -414,7 +423,9 @@ export function WorksheetForm({
   // field fall through to the bottom-section fallback below.
   const engineCardsByOutputFieldId = useMemo(() => {
     const map = new Map<string, React.ReactNode>();
-    for (const eq of sortedEquations) {
+    // `engineEquations` (DB list + Plan 2a fallback register equations) so a
+    // fallback output field (e.g. VSME B04 AmountOfEmissionToAir) gets its card.
+    for (const eq of engineEquations) {
       if (!engineEquationIds.has(eq.id)) continue;
       const state = engineStates[eq.id];
       if (!state) continue;
@@ -437,7 +448,7 @@ export function WorksheetForm({
     }
     return map;
   }, [
-    sortedEquations,
+    engineEquations,
     engineEquationIds,
     engineStates,
     fieldBySymbol,
@@ -455,7 +466,7 @@ export function WorksheetForm({
       string,
       { equationNumber: string; outputSymbol: string; computedValue: number }
     >();
-    for (const eq of sortedEquations) {
+    for (const eq of engineEquations) {
       if (!engineEquationIds.has(eq.id)) continue;
       const state = engineStates[eq.id];
       if (state?.kind !== 'computed') continue;
@@ -468,7 +479,7 @@ export function WorksheetForm({
       });
     }
     return map;
-  }, [sortedEquations, engineEquationIds, engineStates, fieldBySymbol]);
+  }, [engineEquations, engineEquationIds, engineStates, fieldBySymbol]);
 
   // Engine equations whose outputSymbol has NO visible field — keep these in
   // the legacy bottom section so the engineer still sees the verdict.

@@ -133,6 +133,10 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       labelDe: fields.labelDe,
       unit: fields.unit,
       dataType: fields.dataType,
+      // Plan 2a: register detection for the report evaluator (DB-configured
+      // registers carry widget='register' + ui_config).
+      widget: fields.widget,
+      uiConfig: fields.uiConfig,
     })
     .from(fields)
     .where(inArray(fields.worksheetTemplateId, templateIds));
@@ -252,6 +256,7 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       })),
       tmplFields,
       tmplParameters,
+      { standardCode: inst.standardCode },
     );
 
     const complianceResults = evaluateWorksheetCompliance(
