@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { surfaceSourceState, surfaceWithholdFieldIds, SURFACE_DERIVED_SYMBOLS } from '../surface-source-state';
+import { A138_07_REGISTER_FORMULAS } from '../rewrites';
 
 const full = { rows: [{ id: '1', tab9_value: 'beton', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false }] };
 const partial = { rows: [
@@ -66,5 +67,8 @@ describe('SURFACE_DERIVED_SYMBOLS', () => {
   it('includes the reduced-area split', () => {
     expect(SURFACE_DERIVED_SYMBOLS).toContain('A_C_sealed');
     expect(SURFACE_DERIVED_SYMBOLS).toContain('A_C_unsealed');
+  });
+  it('is exactly the output symbols of the A138-07 register formulas (Plan 2a pin)', () => {
+    expect([...SURFACE_DERIVED_SYMBOLS]).toEqual(Object.values(A138_07_REGISTER_FORMULAS).map((r) => r.outputSymbol));
   });
 });
