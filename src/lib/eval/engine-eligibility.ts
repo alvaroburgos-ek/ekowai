@@ -20,6 +20,7 @@
  *
  * Pure / DB-free. The caller supplies the standard's active field-symbol set.
  */
+import { canonicalFunctionName } from '@/lib/expr';
 import { normalizeFormula, normalizeSymbol } from './normalize-formula';
 
 /** Math constants the arithmetic evaluator resolves without a backing field. */
@@ -27,12 +28,15 @@ const RESERVED_CONSTANTS: ReadonlySet<string> = new Set(['pi', 'e']);
 
 /**
  * Any identifier immediately followed by `(` that SURVIVED normalization. The
- * normaliser rewrites only `fn(singleToken)` (e.g. `r_D(n)`); anything left —
- * SUM(...), min/max(...), nested calls, expressions in parens preceded by an
- * identifier — is an aggregate/function the plain evaluator cannot faithfully
- * compute, so the equation is not engine-eligible via route-all.
+ * normaliser rewrites only `fn(singleToken)` (e.g. `r_D(n)`); what is left is a
+ * CALL. Plan 2a: a call is fine when its name is in the expr function set
+ * (`canonicalFunctionName(name) !== null` — math incl. upper-case and `lg`,
+ * row `sum_rows`/`count_rows`/…, logic `if`/`lookup`/…); anything else —
+ * SUM(...), Σ-style aggregates, bare `log`, unknown helpers — is a construct
+ * the evaluator cannot faithfully compute, so the equation is not
+ * engine-eligible via route-all.
  */
-const SURVIVING_FN_CALL = /[A-Za-z_][A-Za-z0-9_]*\s*\(/;
+const CALL = /([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
 
 export type EligibilityResult =
   | { verified: true }
@@ -49,13 +53,16 @@ export function validateEngineEligibility(
   knownFieldSymbols: ReadonlySet<string>,
 ): EligibilityResult {
   // (1) Parse validation — no unsupported function/aggregate may remain after
-  //     normalization. (`r_D(n)` becomes `r_D_n` and disappears from this test.)
+  //     normalization. (`r_D(n)` becomes `r_D_n` and disappears from this test;
+  //     `sum_rows(...)` / `sqrt(...)` are supported calls and pass.)
   const normalizedFormula = normalizeFormula(formula);
-  if (SURVIVING_FN_CALL.test(normalizedFormula)) {
+  const unsupported = [...normalizedFormula.matchAll(CALL)]
+    .map((m) => m[1])
+    .filter((name) => canonicalFunctionName(name) === null);
+  if (unsupported.length > 0) {
     return {
       verified: false,
-      reason:
-        'nicht engine-verifiziert: nicht unterstützte Funktion/Aggregat im Formeltext (kein reiner Ausdruck)',
+      reason: `nicht engine-verifiziert: nicht unterstützte Funktion/Aggregat im Formeltext (${unsupported.join(', ')})`,
       unresolved: [],
     };
   }

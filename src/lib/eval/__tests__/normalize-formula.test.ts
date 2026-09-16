@@ -4,6 +4,7 @@ import {
   normalizeSymbol,
   normalizeSymbols,
 } from '../normalize-formula';
+import { EXPR_FUNCTION_NAMES } from '@/lib/expr';
 
 describe('normalizeFormula', () => {
   it('rewrites the r_D(n) function-call notation to r_D_n', () => {
@@ -61,5 +62,20 @@ describe('normalizeFormula — supported engine functions are NOT rewritten', ()
   it('normalizeSymbol leaves function names intact too', () => {
     expect(normalizeSymbol('ln(x)')).toBe('ln(x)');
     expect(normalizeSymbol('r_D(n)')).toBe('r_D_n');
+  });
+});
+
+describe('normalizeFormula — Plan 2a: expr function set', () => {
+  it('Plan 2a: row/logic function calls are never rewritten to ident_arg', () => {
+    expect(normalizeFormula('count_rows(reg)')).toBe('count_rows(reg)');
+    expect(normalizeFormula("flag(reg, 'x') + r_D(n)")).toBe("flag(reg, 'x') + r_D_n");
+  });
+
+  it('Plan 2a: every EXPR_FUNCTION_NAMES member with a single-token arg survives, upper-case math too', () => {
+    for (const fn of EXPR_FUNCTION_NAMES) {
+      expect(normalizeFormula(`${fn}(x)`)).toBe(`${fn}(x)`);
+    }
+    expect(normalizeFormula('SQRT(x) + EXP(y) + lg(z)')).toBe('SQRT(x) + EXP(y) + lg(z)');
+    expect(normalizeSymbol('count_rows(reg)')).toBe('count_rows(reg)');
   });
 });

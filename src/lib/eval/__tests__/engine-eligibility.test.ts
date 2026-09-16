@@ -92,3 +92,48 @@ describe('E1-A DEMO — faithfulness gate on REAL DWA-A-138-1 encodings', () => 
     expect(r.verified).toBe(true);
   });
 });
+
+/**
+ * Plan 2a — the gate learns the expr function set: a call to a supported
+ * function (math, row, logic) is no longer "kein reiner Ausdruck"; only calls
+ * to names canonicalFunctionName() rejects (SUM, Σ-style aggregates, unknown
+ * helpers) fail check (1), and the reason names them.
+ */
+describe('validateEngineEligibility — Plan 2a: expr function set', () => {
+  it('Plan 2a: supported calls pass, SUM still fails', () => {
+    const f = new Set(['surface_inventory', 'A_C']);
+    expect(validateEngineEligibility('A_C = sum_rows(surface_inventory, area_m2 * c_i)', ['surface_inventory'], f).verified).toBe(true);
+    // SUM with the same arg shape as the sum_rows call above. NOT asserted here:
+    // single-token `SUM(x)` — the normaliser's FN_LIKE rewrites it to the phantom
+    // symbol `SUM_x` before the gate runs (pre-existing, identical on HEAD; see the
+    // COMMA_SUBSCRIPT inventory rule in scripts/reasoning-map/validate.mjs).
+    expect(validateEngineEligibility('A_C = SUM(surface_inventory, area_m2 * c_i)', ['surface_inventory'], f).verified).toBe(false);
+    expect(validateEngineEligibility('x = sqrt(A_C)', ['A_C'], f).verified).toBe(true);
+  });
+
+  it('Plan 2a: the failure reason names the unsupported function(s); supported ones are not listed', () => {
+    const f = new Set(['A_C', 'reg']);
+    const r = validateEngineEligibility('y = SUM(A_C * 2) + foo(reg + 1) + count_rows(reg)', ['A_C', 'reg'], f);
+    expect(r.verified).toBe(false);
+    if (!r.verified) {
+      expect(r.reason).toMatch(/nicht unterstützte Funktion/);
+      expect(r.reason).toContain('SUM');
+      expect(r.reason).toContain('foo');
+      expect(r.reason).not.toContain('count_rows');
+      expect(r.unresolved).toEqual([]);
+    }
+  });
+
+  it('Plan 2a: upper-case math calls (EXP, SQRT) and lg are supported; bare log is not', () => {
+    const f = new Set(['A_C']);
+    expect(validateEngineEligibility('x = EXP(A_C) + SQRT(A_C) + lg(A_C)', ['A_C'], f).verified).toBe(true);
+    expect(validateEngineEligibility('x = log(A_C)', ['A_C'], f).verified).toBe(false);
+  });
+
+  it('Plan 2a: check (2) still runs after a supported call passes check (1)', () => {
+    const f = new Set(['A_C']);
+    const r = validateEngineEligibility('x = sqrt(zzz)', ['zzz'], f);
+    expect(r.verified).toBe(false);
+    if (!r.verified) expect(r.unresolved).toEqual(['zzz']);
+  });
+});
