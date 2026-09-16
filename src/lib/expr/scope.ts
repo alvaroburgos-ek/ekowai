@@ -13,7 +13,13 @@ export type RowValues = Record<string, Value>;
 
 export type PreparedRow = { id: string; values: RowValues; complete: boolean };
 
-export type PreparedRegister = { rows: PreparedRow[]; flags: Record<string, boolean> };
+/**
+ * `diagnostics` (optional, additive): non-recoverable derived-column failures
+ * collected while preparing the rows (`"<column key>: <message>"`), e.g. a
+ * column-name typo in `lookup()`. Absent when there were none; recoverable
+ * conditions (missing inputs) are never reported here.
+ */
+export type PreparedRegister = { rows: PreparedRow[]; flags: Record<string, boolean>; diagnostics?: string[] };
 
 export type TableRowValues = Record<string, Value>;
 

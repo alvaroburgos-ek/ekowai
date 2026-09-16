@@ -9,7 +9,7 @@
  * and `pollutant-register.ts` (normalizePollutantCarrier /
  * pollutantRowComplete) without changing their behaviour.
  */
-import { parseExpression, evalValue, evalCondition, type PreparedRegister, type PreparedRow, type RowValues, type Scope, type Value } from '@/lib/expr';
+import { parseExpression, evalValue, evalCondition, ExprError, type PreparedRegister, type PreparedRow, type RowValues, type Scope, type Value } from '@/lib/expr';
 import type { RegulationRow } from './regulation-tables';
 import type { RegisterColumn } from './field-config';
 
@@ -22,6 +22,9 @@ export type RegisterRowsOpts = {
   legacyMap?: Record<string, Record<string, string>>;
   flagKeys?: readonly string[];
   overrideFlagKey?: string;
+  /** `override.applies_to` of the register config. Legacy replay derives the override flag from its FIRST
+   * column only (surface-inventory.ts:103: `coeff_override = c_i !== entry.cm`); absent ⇒ first bound lookup_value column. */
+  overrideAppliesTo?: readonly string[];
 };
 
 function genId(): string {
@@ -61,7 +64,9 @@ function coerce(raw: unknown, c: RegisterColumn): Value {
  * (a) legacyMap[sourceKey][rawValue] when the raw row has sourceKey; else (b) the UNIQUE table row whose
  * lookup_value cells all equal the row's stored values; (c) otherwise leave the key null (reselection).
  * When mapped: keep stored lookup_value cells, fill missing ones from the table row, set the override
- * flag to (stored !== table value) for the first applies_to column. */
+ * flag to (stored !== table value) for the FIRST `overrideAppliesTo` column only (legacy rule: c_i decides,
+ * a differing c_s alone is not an override — surface-inventory.ts:103); without applies_to, the first bound
+ * lookup_value column of the key decides. */
 function replayLegacy(raw: Record<string, unknown>, values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx, opts: RegisterRowsOpts): void {
   const keyCols = columns.filter((c) => c.type === 'lookup_key');
   if (keyCols.length === 0) return;
@@ -84,10 +89,11 @@ function replayLegacy(raw: Record<string, unknown>, values: RowValues, columns: 
     const tableRow = ctx.tableRows?.(tableCode)?.find((r) => r.row_key === mapped);
     if (!tableRow) continue;
     values[kc.key] = mapped;
+    const flagCol = valueCols.find((vc) => vc.key === opts.overrideAppliesTo?.[0]) ?? valueCols[0];
     let differs = false;
     for (const vc of valueCols) {
       const tv = tableRow.values[vc.lookup!.value!] as Value;
-      if (values[vc.key] === null) values[vc.key] = tv; else if (values[vc.key] !== tv) differs = true;
+      if (values[vc.key] === null) values[vc.key] = tv; else if (vc === flagCol && values[vc.key] !== tv) differs = true;
     }
     if (opts.overrideFlagKey) values[opts.overrideFlagKey] = differs;
   }
@@ -110,10 +116,11 @@ function refillLookupValues(values: RowValues, columns: readonly RegisterColumn[
 /** A2: a column whose `visible_when` evaluates to `fail` in ROW scope is not part of the row's
  * completeness. Only `fail` hides — pass / pending / manual keep the column (conservative).
  * Row keys shadow worksheet symbols even when the cell is null (`s in values`, the evaluator's readSymbol rule),
- * so a same-named worksheet symbol can never decide a column's visibility for a row that carries the key. */
+ * so a same-named worksheet symbol can never decide a column's visibility for a row that carries the key.
+ * The row scope carries `ctx.table` so a `visible_when` may use `lookup()`. */
 function columnHiddenInRow(c: RegisterColumn, values: RowValues, ctx: RegisterRowsCtx): boolean {
   if (!c.visible_when) return false;
-  const r = evalCondition(c.visible_when, { symbol: (s) => (s in values ? values[s] : ctx.symbol?.(s)) });
+  const r = evalCondition(c.visible_when, { symbol: (s) => (s in values ? values[s] : ctx.symbol?.(s)), table: ctx.table });
   return r.kind === 'fail';
 }
 
@@ -144,6 +151,7 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
   const scope: Scope = { symbol: ctx.symbol ?? (() => undefined), table: ctx.table };
   const derived = columns.filter((c) => c.type === 'derived').map((c) => ({ c, node: parseExpression(c.expr!) }));
   const rows: PreparedRow[] = [];
+  let diagnostics: string[] | undefined;
   for (const raw of v.rows) {
     if (!raw || typeof raw !== 'object') continue;
     const r = raw as Record<string, unknown>;
@@ -152,11 +160,19 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
     replayLegacy(r, values, columns, ctx, opts);
     refillLookupValues(values, columns, ctx, opts);
     for (const { c, node } of derived) {
-      // Strict mode throws on a missing input / no lookup row: a derived cell
-      // that cannot be computed is null, never an exception for the caller.
-      try { values[c.key] = node ? evalValue(node, scope, values) : null; } catch { values[c.key] = null; }
+      // Strict mode throws on a missing input / no lookup row: a derived cell that cannot be computed is
+      // null, never an exception for the caller. A RECOVERABLE ExprError is a normal data condition (missing
+      // input) and stays silent; a non-recoverable one (malformed expression for its context, e.g. a column
+      // typo in lookup()) or any other error is still null but is reported in `diagnostics`.
+      try {
+        values[c.key] = node ? evalValue(node, scope, values) : null;
+      } catch (e) {
+        values[c.key] = null;
+        if (e instanceof ExprError && e.recoverable) continue;
+        (diagnostics ??= []).push(`${c.key}: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
     rows.push({ id: str(r.id) ?? genId(), values, complete: isComplete(values, columns, ctx) });
   }
-  return { rows, flags };
+  return diagnostics ? { rows, flags, diagnostics } : { rows, flags };
 }

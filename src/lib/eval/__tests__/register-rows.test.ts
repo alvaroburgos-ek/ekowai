@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { prepareRegisterRows } from '../register-rows';
 import { REGISTER_CONFIGS_FALLBACK, registerFlagKeys } from '../register-configs';
 import { makeTableLookup, makeTableRows } from '../regulation-tables-fallback';
+import { normalizeSurfaceCarrier } from '../surface-inventory';
 import { POLLUTANTS } from '@/lib/vsme/pollutants';
 import type { RegisterColumn } from '../field-config';
 
 const surface = REGISTER_CONFIGS_FALLBACK.surface_inventory;
 const ctx = { table: makeTableLookup('DWA-A-138-1'), tableRows: makeTableRows('DWA-A-138-1') };
-const surfaceOpts = { legacyMap: surface.legacy_map, overrideFlagKey: surface.override?.flag_key };
+const surfaceOpts = { legacyMap: surface.legacy_map, overrideFlagKey: surface.override?.flag_key, overrideAppliesTo: surface.override?.applies_to };
 
 describe('prepareRegisterRows — A138 surface_inventory parity', () => {
   it('typed cells, derived kind + a_c_i, completeness = required columns non-null', () => {
@@ -31,6 +32,25 @@ describe('prepareRegisterRows — A138 surface_inventory parity', () => {
     expect(reg.rows[1].values.tab9_value).toBe('schwarzdecke_asphalt');
     expect(reg.rows[1].values.coeff_override).toBe(false);
     expect(reg.rows[1].complete).toBe(true);
+  });
+  it('DIFFERENTIAL: legacy replay equals normalizeSurfaceCarrier row by row (override flag compares c_i only, like surface-inventory.ts:103)', () => {
+    const legacyRows = [
+      { id: 'g', label: 'Gewächshausdach', surface_type: 'dach', area_m2: 3786.8, c_i: 0.9, c_s: 1.0 },
+      { id: 'p', label: 'Parkplatz', surface_type: 'asphalt', area_m2: 1575.9, c_i: 0.9, c_s: 1.0 },
+      { id: 'x', label: 'X', surface_type: 'asphalt', area_m2: 10, c_i: 0.9, c_s: 0.8 },   // c_s differs only ⇒ legacy: NOT an override
+      { id: 'y', label: 'Y', surface_type: 'asphalt', area_m2: 10, c_i: 0.7, c_s: 1.0 },   // c_i differs ⇒ override
+    ];
+    const legacy = normalizeSurfaceCarrier({ rows: legacyRows }).rows;
+    const generic = prepareRegisterRows({ rows: legacyRows }, surface.columns, ctx, surfaceOpts).rows;
+    expect(generic).toHaveLength(legacy.length);
+    const pick = (r: { tab9_value: unknown; c_i: unknown; c_s: unknown; coeff_override: unknown }) =>
+      ({ tab9_value: r.tab9_value, c_i: r.c_i, c_s: r.c_s, coeff_override: r.coeff_override });
+    for (let i = 0; i < legacy.length; i++) {
+      expect(pick(generic[i].values as never), `row ${legacyRows[i].id}`).toEqual(pick(legacy[i]));
+    }
+    // Pin the two new cases explicitly so the differential cannot pass by both sides drifting together.
+    expect(legacy[2].coeff_override).toBe(false);
+    expect(legacy[3].coeff_override).toBe(true);
   });
   it('an overridden c_i is kept (audited override), a null lookup_value cell is refilled from the table', () => {
     const reg = prepareRegisterRows({ rows: [
@@ -115,5 +135,39 @@ describe('prepareRegisterRows — controller amendments', () => {
     expect(reg.rows[2].values.cells).toBeNull();
     expect(reg.rows[2].complete).toBe(false);
     expect(reg.rows[3].values.cells).toBeNull();
+  });
+});
+
+describe('prepareRegisterRows — fix round 2', () => {
+  const completeRow = { id: '1', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false };
+  it('a non-recoverable derived-column error (column typo in lookup) yields null AND a diagnostic', () => {
+    const cols: RegisterColumn[] = [
+      ...surface.columns,
+      { key: 'bad', type: 'derived', label: 'bad', expr: "lookup('TAB9', tab9_value, 'nope')" },
+    ];
+    const reg = prepareRegisterRows({ rows: [completeRow] }, cols, ctx, surfaceOpts);
+    expect(reg.rows[0].values.bad).toBeNull();
+    expect(reg.rows[0].values.kind).toBe('paved');           // the sibling derived column is unaffected
+    expect(reg.diagnostics).toEqual(['bad: lookup(): Spalte nope nicht in TAB9']);
+  });
+  it('a recoverable derived-column error (missing input symbol) yields null with NO diagnostics key', () => {
+    const cols: RegisterColumn[] = [
+      ...surface.columns,
+      { key: 'd', type: 'derived', label: 'd', expr: 'not_a_symbol * 2' },
+    ];
+    const reg = prepareRegisterRows({ rows: [completeRow] }, cols, ctx, surfaceOpts);
+    expect(reg.rows[0].values.d).toBeNull();
+    expect(reg).not.toHaveProperty('diagnostics');
+  });
+  it('visible_when in row scope can use lookup() (row scope carries ctx.table)', () => {
+    const cols: RegisterColumn[] = [
+      { key: 'tab9_value', type: 'lookup_key', label: 'Typ', required: true, lookup: { table_code: 'TAB9', group_by: 'group_label' } },
+      { key: 'only_unpaved', type: 'number', label: 'nur unbefestigt', required: true, visible_when: "lookup('TAB9', tab9_value, 'kind') == 'unpaved'" },
+    ];
+    const reg = prepareRegisterRows({ rows: [
+      { id: 'paved', tab9_value: 'schwarzdecke_asphalt', only_unpaved: null },   // kind = paved ⇒ condition fails ⇒ column hidden ⇒ complete
+      { id: 'unpaved', tab9_value: 'park_flach', only_unpaved: null },           // kind = unpaved ⇒ column kept ⇒ incomplete
+    ] }, cols, ctx);
+    expect(reg.rows.map((r) => r.complete)).toEqual([true, false]);
   });
 });
