@@ -83,6 +83,20 @@ describe('prepareRegisterRows — controller amendments', () => {
     expect(prepareRegisterRows({ rows }, cols, { symbol: ws('simple') }).rows[0].complete).toBe(true);
     expect(prepareRegisterRows({ rows }, cols, { symbol: ws('detail') }).rows[0].complete).toBe(false);
   });
+  it('A2: a null row cell shadows a same-named worksheet symbol (never falls through to it)', () => {
+    const cols: RegisterColumn[] = [
+      { key: 'tech', type: 'enum', label: 'Technik', options: ['a', 'b'] },
+      { key: 'only_b', type: 'number', label: 'nur b', required: true, visible_when: "tech == 'b'" },
+    ];
+    // The row has its own `tech` cell (null). Row keys shadow worksheet symbols even when null
+    // (the evaluator's readSymbol rule: `sym in row`), so the worksheet's `tech` must never decide
+    // the column's visibility: visible_when is pending on the null cell, the required column stays,
+    // and the row is INCOMPLETE — regardless of what the worksheet says.
+    const ws = (tech: string) => (s: string) => (s === 'tech' ? tech : undefined);
+    const rows = [{ id: '1', tech: null, only_b: null }];
+    expect(prepareRegisterRows({ rows }, cols, { symbol: ws('a') }).rows[0].complete).toBe(false); // 'a' would HIDE only_b if it fell through
+    expect(prepareRegisterRows({ rows }, cols, { symbol: ws('b') }).rows[0].complete).toBe(false);
+  });
   it('A3: grid column keeps a plain-object carrier, null otherwise; required grid needs >= 1 cell', () => {
     const cols: RegisterColumn[] = [
       { key: 'label', type: 'text', label: 'L' },

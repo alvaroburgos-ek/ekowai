@@ -61,6 +61,9 @@ describe('Plan 3 additions', () => {
     expect(evalNumber('percentile_rows(reg, v, 25)', s)).toBe(15);
     expect(evalNumber('percentile_rows(reg, v, 100)', s)).toBe(40);
     expect(() => evalNumber('percentile_rows(reg, v, 101)', s)).toThrow('percentile_rows(): p muss zwischen 0 und 100 liegen.');
+    // 4-arg form: filter first, then interpolate over the survivors (20, 40 -> 30); empty survivor set rejects.
+    expect(evalNumber('percentile_rows(reg, v, 50, v > 10)', s)).toBe(30);
+    expect(() => evalNumber('percentile_rows(reg, v, 50, v > 100)', s)).toThrow('Keine vollständigen Zeilen in "reg".');
   });
   it('conditional aggregates skip false rows, go missing on undecidable rows, and reject an empty survivor set', () => {
     expect(evalNumber("sum_rows(reg, area_m2, kind == 'paved')", scope)).toBe(100);

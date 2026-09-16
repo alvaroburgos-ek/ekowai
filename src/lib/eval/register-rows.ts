@@ -108,10 +108,12 @@ function refillLookupValues(values: RowValues, columns: readonly RegisterColumn[
 }
 
 /** A2: a column whose `visible_when` evaluates to `fail` in ROW scope is not part of the row's
- * completeness. Only `fail` hides — pass / pending / manual keep the column (conservative). */
+ * completeness. Only `fail` hides — pass / pending / manual keep the column (conservative).
+ * Row keys shadow worksheet symbols even when the cell is null (`s in values`, the evaluator's readSymbol rule),
+ * so a same-named worksheet symbol can never decide a column's visibility for a row that carries the key. */
 function columnHiddenInRow(c: RegisterColumn, values: RowValues, ctx: RegisterRowsCtx): boolean {
   if (!c.visible_when) return false;
-  const r = evalCondition(c.visible_when, { symbol: (s) => values[s] ?? ctx.symbol?.(s) });
+  const r = evalCondition(c.visible_when, { symbol: (s) => (s in values ? values[s] : ctx.symbol?.(s)) });
   return r.kind === 'fail';
 }
 
