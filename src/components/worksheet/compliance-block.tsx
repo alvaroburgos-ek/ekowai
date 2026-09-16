@@ -112,6 +112,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
       fail: 0,
       pending: 0,
       manual: 0,
+      not_applicable: 0, // Plan 2a: EvalResult widened (hidden-symbol gates); no caller passes hiddenSymbols yet
       failBlock: 0,
       failWarn: 0,
       attestation: 0,

@@ -16,6 +16,7 @@ import {
   type ConditionArithNode,
   type ConditionValue,
 } from './evaluate';
+import { isConditionNode, type Expr } from '@/lib/expr';
 
 export type ExplainLeaf = {
   /** Human rendering of the leaf condition (the DSL fragment). */
@@ -200,7 +201,13 @@ function arithToText(n: ConditionArithNode): string {
     case 'aref': return n.symbol;
     case 'aneg': return `-${arithToText(n.inner)}`;
     case 'abin': return `${arithToText(n.left)} ${n.op} ${arithToText(n.right)}`;
+    case 'call': return `${n.name}(${n.args.map(exprToText).join(', ')})`;
   }
+}
+
+/** A call argument may be a condition (`if(a >= 1, …)`) or an arithmetic value. */
+function exprToText(e: Expr): string {
+  return isConditionNode(e) ? nodeToText(e) : arithToText(e);
 }
 
 function fmt(v: ConditionValue): string {

@@ -83,5 +83,8 @@ function renderVerdict(
         return { badge: '§', verdict: 'Ingenieur-Bestätigung ausstehend' };
       }
       return { badge: '!', verdict: 'Bedingung nicht auswertbar — Regel reparieren' };
+    case 'not_applicable':
+      // Plan 2a: gate references a hidden (visibility-suppressed) field.
+      return { badge: '–', verdict: 'nicht zutreffend' };
   }
 }
