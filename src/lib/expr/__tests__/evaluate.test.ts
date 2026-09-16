@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { evalNumber, evalCondition, evalValue, extractSymbols } from '../evaluate';
 import { parseNumeric, parseCondition } from '../parser';
+import { EXPR_FUNCTION_NAMES, canonicalFunctionName } from '../functions';
 import type { Scope } from '../scope';
 
 const sc = (vals: Record<string, number | string | boolean | null>): Scope => ({ symbol: (s) => (s in vals ? vals[s] : undefined) });
@@ -113,5 +114,24 @@ describe('extractSymbols', () => {
     const n = parseCondition("count_rows(samples, v <= limit) >= 1 AND sum_rows(last_rows(reg, 3), area_m2 * c_i) > 0");
     expect(n).not.toBeNull();
     expect([...extractSymbols(n as NonNullable<typeof n>)].sort()).toEqual(['reg', 'samples']);
+  });
+});
+
+describe('Plan 3 additions (Task 4b) — registry and lenient mode', () => {
+  it('round/ceil/floor and median_rows/percentile_rows are registered; lenient mode yields null on a bad p', () => {
+    for (const f of ['round', 'ceil', 'floor', 'median_rows', 'percentile_rows']) expect(EXPR_FUNCTION_NAMES.has(f)).toBe(true);
+    expect(canonicalFunctionName('ROUND')).toBe('round');
+    expect(canonicalFunctionName('MEDIAN_ROWS')).toBeNull(); // row functions stay exact-lowercase
+    expect(evalCondition('round(x) >= 3', sc({ x: 2.5 }))).toEqual({ kind: 'pass' });
+    const reg = { rows: [{ id: 'a', values: { v: 1 }, complete: true }], flags: {} };
+    expect(evalCondition('percentile_rows(reg, v, 101) > 0', { ...sc({}), register: () => reg })).toEqual({ kind: 'pending', missingSymbols: [] });
+  });
+});
+
+describe('Task 4 review items (folded into Task 4b)', () => {
+  it('canonicalFunctionName treats the IF keyword form case-insensitively (row/logic names stay exact)', () => {
+    expect(canonicalFunctionName('IF')).toBe('if');
+    expect(canonicalFunctionName('If')).toBe('if');
+    expect(canonicalFunctionName('LOOKUP')).toBeNull();
   });
 });

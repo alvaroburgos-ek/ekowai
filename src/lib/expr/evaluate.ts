@@ -37,9 +37,13 @@ type Ternary = 'true' | 'false' | 'missing';
 
 type CallNode = Extract<ArithNode, { kind: 'call' }>;
 
-/** Row functions whose 2nd argument is evaluated per row (identifiers there are column names). */
+/**
+ * Row functions whose expression / condition arguments are evaluated per row
+ * (identifiers there are column names). `percentile_rows` is the one whose
+ * 3rd argument (`p`) is NOT row-scoped — see `extractSymbols`.
+ */
 const ROW_SCOPED_FUNCTIONS: ReadonlySet<string> = new Set([
-  'sum_rows', 'max_rows', 'min_rows', 'mean_rows', 'stdev_rows', 'count_rows',
+  'sum_rows', 'max_rows', 'min_rows', 'mean_rows', 'stdev_rows', 'median_rows', 'percentile_rows', 'count_rows',
 ]);
 
 // ---- primitives -----------------------------------------------------------
@@ -195,16 +199,86 @@ function resolveRegister(e: Expr, ctx: Ctx): { reg: PreparedRegister; name: stri
   return fail(ctx, 'Registerausdruck erwartet.', false);
 }
 
-/** Complete rows of a register argument; empty → the recoverable "Keine vollständigen Zeilen" failure. */
-function completeRowsOrFail(e: Expr, ctx: Ctx): PreparedRow[] | null {
-  const r = resolveRegister(e, ctx);
+/**
+ * Judge a row condition leniently: `true` / `false`, or `null` when the row is
+ * undecidable (its missing symbols are merged into `ctx.missing`). The
+ * condition path and the truthy-value path behave identically — both are
+ * evaluated leniently per row and judged on the outcome.
+ */
+function rowMatches(cond: Expr, row: PreparedRow, ctx: Ctx): boolean | null {
+  const rowMissing = new Set<string>();
+  const rowCtx: Ctx = { ...ctx, strict: false, row: row.values, missing: rowMissing };
+  let matched: boolean | null;
+  if (isConditionNode(cond)) {
+    const t = evalNodeCore(cond, rowCtx);
+    matched = t === 'missing' ? null : t === 'true';
+  } else {
+    const v = evalValueCore(cond, rowCtx);
+    matched = v === null ? null : truthy(v);
+  }
+  if (matched === null) for (const m of rowMissing) ctx.missing.add(m);
+  return matched;
+}
+
+/**
+ * Complete rows of a register argument, optionally filtered by a row
+ * condition. RULE (controller ruling, Task 2 fix round 1; extended to all
+ * aggregates in Task 4b): an undecidable row makes the WHOLE result
+ * undecidable — lenient: null + the row's missing symbols in `ctx.missing`
+ * (gate → pending); strict: recoverable `Fehlende Eingabe für <fn>(): …`.
+ * The survivor set may be empty here; callers decide what that means
+ * (`count_rows` → 0, aggregates → `collectRows`).
+ */
+function filterRows(
+  regExpr: Expr,
+  condExpr: Expr | undefined,
+  ctx: Ctx,
+  fnName: string,
+): { name: string; rows: PreparedRow[] } | null {
+  const r = resolveRegister(regExpr, ctx);
   if (r === null) return null;
-  const rows = r.reg.rows.filter((row) => row.complete);
-  if (rows.length === 0) {
+  const complete = r.reg.rows.filter((row) => row.complete);
+  if (condExpr === undefined) return { name: r.name, rows: complete };
+  const rows: PreparedRow[] = [];
+  for (const row of complete) {
+    const matched = rowMatches(condExpr, row, ctx);
+    if (matched === null) return fail(ctx, `Fehlende Eingabe für ${fnName}(): ${[...ctx.missing].join(', ')}`);
+    if (matched) rows.push(row);
+  }
+  return { name: r.name, rows };
+}
+
+/**
+ * Rows an AGGREGATE reduces over: `filterRows` + the rule that an empty
+ * survivor set is the recoverable `Keine vollständigen Zeilen in "<name>".`
+ * failure — a filter that leaves nothing is not a sum of zero. (`count_rows`
+ * deliberately does not use this: a count of nothing is 0.)
+ */
+function collectRows(regExpr: Expr, condExpr: Expr | undefined, ctx: Ctx, fnName: string): PreparedRow[] | null {
+  const r = filterRows(regExpr, condExpr, ctx, fnName);
+  if (r === null) return null;
+  if (r.rows.length === 0) {
     ctx.missing.add(r.name);
     return fail(ctx, `Keine vollständigen Zeilen in "${r.name}".`);
   }
-  return rows;
+  return r.rows;
+}
+
+/**
+ * Percentile over already-sorted values, R-7 / Excel `PERCENTILE.INC`:
+ * rank = (n − 1) · p / 100, linear interpolation between the two enclosing
+ * order statistics. `p` = 50 is the median (mean of the two middle values for
+ * even n). R-7 is the CHOSEN definition for the expression language; a
+ * guideline that names a different percentile rule (nearest-rank, R-6 /
+ * `PERCENTILE.EXC`, …) is a sign-off item on the Plan 3 sheet, not a silent
+ * substitution.
+ */
+function percentileInc(sorted: number[], p: number): number {
+  const rank = ((sorted.length - 1) * p) / 100;
+  const lo = Math.floor(rank);
+  const hi = Math.ceil(rank);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (rank - lo);
 }
 
 /** Evaluate `expr` once per row (row values shadow the scope) to numbers. */
@@ -289,9 +363,13 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
     case 'max_rows':
     case 'min_rows':
     case 'mean_rows':
-    case 'stdev_rows': {
-      if (!arity(n, name, 2, ctx)) return null;
-      const rows = completeRowsOrFail(n.args[0], ctx);
+    case 'stdev_rows':
+    case 'median_rows': {
+      // (reg, expr[, cond]) — rows where cond is false are skipped.
+      if (n.args.length < 2 || n.args.length > 3) {
+        return fail(ctx, `Erwarte 2 oder 3 Argument(e) in ${name}(...)`);
+      }
+      const rows = collectRows(n.args[0], n.args[2], ctx, name);
       if (rows === null) return null;
       if (name === 'stdev_rows' && rows.length < 2) {
         return fail(ctx, 'stdev_rows(): mindestens 2 vollständige Zeilen erforderlich.');
@@ -304,6 +382,7 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
         case 'max_rows': return finite(Math.max(...xs), ctx);
         case 'min_rows': return finite(Math.min(...xs), ctx);
         case 'mean_rows': return finite(sum / xs.length, ctx);
+        case 'median_rows': return finite(percentileInc([...xs].sort((a, b) => a - b), 50), ctx);
         default: {
           // SAMPLE standard deviation (n − 1).
           const mean = sum / xs.length;
@@ -313,39 +392,28 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       }
     }
 
+    case 'percentile_rows': {
+      // (reg, expr, p[, cond]) — p in [0, 100], R-7 interpolation (see percentileInc).
+      if (n.args.length < 3 || n.args.length > 4) {
+        return fail(ctx, 'Erwarte 3 oder 4 Argument(e) in percentile_rows(...)');
+      }
+      const p = numArg(n.args[2], ctx);
+      if (p === null) return null;
+      if (!(p >= 0 && p <= 100)) return fail(ctx, 'percentile_rows(): p muss zwischen 0 und 100 liegen.', false);
+      const rows = collectRows(n.args[0], n.args[3], ctx, name);
+      if (rows === null) return null;
+      const xs = perRowNumbers(rows, n.args[1], ctx);
+      if (xs === null) return null;
+      return finite(percentileInc([...xs].sort((a, b) => a - b), p), ctx);
+    }
+
     case 'count_rows': {
+      // (reg[, cond]) — a count of nothing is 0 (only aggregates reject an empty survivor set).
       if (n.args.length < 1 || n.args.length > 2) {
         return fail(ctx, 'Erwarte 1 oder 2 Argument(e) in count_rows(...)');
       }
-      const r = resolveRegister(n.args[0], ctx);
-      if (r === null) return null;
-      const rows = r.reg.rows.filter((row) => row.complete);
-      if (n.args.length === 1) return rows.length;
-      // RULE (controller ruling, Task 2 fix round 1): an undecidable row makes
-      // the whole count undecidable. Lenient: null + the row's missing symbols
-      // go to ctx.missing (gate → pending). Strict: recoverable ExprError.
-      // The condition path and the truthy-value path behave identically —
-      // both are evaluated leniently per row and judged on the outcome.
-      const cond = n.args[1];
-      let count = 0;
-      for (const row of rows) {
-        const rowMissing = new Set<string>();
-        const rowCtx: Ctx = { ...ctx, strict: false, row: row.values, missing: rowMissing };
-        let matched: boolean | null;
-        if (isConditionNode(cond)) {
-          const t = evalNodeCore(cond, rowCtx);
-          matched = t === 'missing' ? null : t === 'true';
-        } else {
-          const v = evalValueCore(cond, rowCtx);
-          matched = v === null ? null : truthy(v);
-        }
-        if (matched === null) {
-          for (const m of rowMissing) ctx.missing.add(m);
-          return fail(ctx, `Fehlende Eingabe für count_rows(): ${[...ctx.missing].join(', ')}`);
-        }
-        if (matched) count++;
-      }
-      return count;
+      const r = filterRows(n.args[0], n.args[1], ctx, name);
+      return r === null ? null : r.rows.length;
     }
 
     case 'last_rows':
@@ -622,15 +690,19 @@ export function extractSymbols(e: Expr): Set<string> {
       case 'aneg': walkArith(n.inner); return;
       case 'abin': walkArith(n.left); walkArith(n.right); return;
       case 'call': {
-        if (ROW_SCOPED_FUNCTIONS.has(canonicalFunctionName(n.name) ?? '')) {
+        const fn = canonicalFunctionName(n.name) ?? '';
+        if (ROW_SCOPED_FUNCTIONS.has(fn)) {
           // Row functions: only the register argument is a free symbol.
           // Identifiers inside the row-scoped expression / condition
-          // (2nd argument) are COLUMN names of that register, so they are not
-          // collected. Consequence, by design: a worksheet symbol read
-          // through the scope fallback inside a row expression (e.g.
+          // arguments are COLUMN names of that register, so they are not
+          // collected (C-2 rule). Consequence, by design: a worksheet symbol
+          // read through the scope fallback inside a row expression (e.g.
           // `limit` in `count_rows(samples, v <= limit)`) is invisible to
-          // the hidden-symbol check of `evalCondition`.
+          // the hidden-symbol check of `evalCondition`. The `p` argument of
+          // `percentile_rows(reg, expr, p[, cond])` is ordinary arithmetic
+          // evaluated in the outer scope, so its symbols ARE collected.
           if (n.args[0]) walkRegisterArg(n.args[0]);
+          if (fn === 'percentile_rows' && n.args[2]) walkAny(n.args[2]);
           return;
         }
         for (const arg of n.args) walkAny(arg);

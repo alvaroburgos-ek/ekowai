@@ -137,3 +137,9 @@ describe('validateEngineEligibility — Plan 2a: expr function set', () => {
     if (!r.verified) expect(r.unresolved).toEqual(['zzz']);
   });
 });
+
+describe('Task 4 review items (folded into Task 4b)', () => {
+  it('Plan 2a: IF( keyword form is a supported call', () => {
+    expect(validateEngineEligibility('x = IF(A_C > 1, 1, 0)', ['A_C'], new Set(['A_C', 'x'])).verified).toBe(true);
+  });
+});

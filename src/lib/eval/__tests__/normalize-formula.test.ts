@@ -79,3 +79,10 @@ describe('normalizeFormula — Plan 2a: expr function set', () => {
     expect(normalizeSymbol('count_rows(reg)')).toBe('count_rows(reg)');
   });
 });
+
+describe('Task 4 review items (folded into Task 4b)', () => {
+  it('Plan 2a: upper-case row/logic call names are excluded from the ident_arg rewrite', () => {
+    expect(normalizeFormula('COUNT_ROWS(x)')).toBe('COUNT_ROWS(x)');
+    expect(normalizeFormula('IF(x)')).toBe('IF(x)');
+  });
+});
