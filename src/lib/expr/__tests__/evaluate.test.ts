@@ -78,4 +78,9 @@ describe('extractSymbols', () => {
     expect(n).not.toBeNull();
     expect([...extractSymbols(n as NonNullable<typeof n>)].sort()).toEqual(['k', 'x']);
   });
+  it('collects register symbols but never identifiers inside row-scoped expressions', () => {
+    const n = parseCondition("count_rows(samples, v <= limit) >= 1 AND sum_rows(last_rows(reg, 3), area_m2 * c_i) > 0");
+    expect(n).not.toBeNull();
+    expect([...extractSymbols(n as NonNullable<typeof n>)].sort()).toEqual(['reg', 'samples']);
+  });
 });

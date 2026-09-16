@@ -37,6 +37,11 @@ type Ternary = 'true' | 'false' | 'missing';
 
 type CallNode = Extract<ArithNode, { kind: 'call' }>;
 
+/** Row functions whose 2nd argument is evaluated per row (identifiers there are column names). */
+const ROW_SCOPED_FUNCTIONS: ReadonlySet<string> = new Set([
+  'sum_rows', 'max_rows', 'min_rows', 'mean_rows', 'stdev_rows', 'count_rows',
+]);
+
 // ---- primitives -----------------------------------------------------------
 
 /** Strict: throw. Lenient: yield null (the caller propagates it). */
@@ -371,7 +376,14 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
 
 // ---- condition core (port of evaluate.ts:405-485) -------------------------
 
-/** A bare-ident RHS of `==`/`!=` is an enum literal unless it resolves as a symbol WITH a value. */
+/**
+ * The legacy var-vs-var rule (compliance/evaluate.ts:426-436, on the `compare`
+ * node) extended to a call-result LHS (`lookup(...) == paved` parses as
+ * `acompare` with an `aref` RHS): a bare-ident RHS of `==`/`!=` resolves as a
+ * symbol when it HAS a value, otherwise it is its own name as a string
+ * literal (an enum value). `extractSymbols` skips it for the same reason.
+ * Controller ruling 2026-09-17 (Task 2, C-1).
+ */
 function isEnumRhs(n: Extract<Node, { kind: 'acompare' }>): boolean {
   return (n.op === '==' || n.op === '!=') && n.right.kind === 'aref';
 }
@@ -555,17 +567,41 @@ export function evaluateArithLenient(n: ArithNode, scope: Scope): number | null 
  */
 export function extractSymbols(e: Expr): Set<string> {
   const out = new Set<string>();
+  const walkAny = (arg: Expr): void => {
+    if (isConditionNode(arg)) walk(arg);
+    else walkArith(arg);
+  };
+  // The register argument of a row function: the register symbol itself is a
+  // free symbol; a `last_rows(regExpr, n)` wrapper contributes its register
+  // and its count expression.
+  const walkRegisterArg = (arg: Expr): void => {
+    if (arg.kind === 'call' && canonicalFunctionName(arg.name) === 'last_rows') {
+      if (arg.args[0]) walkRegisterArg(arg.args[0]);
+      if (arg.args[1]) walkAny(arg.args[1]);
+      return;
+    }
+    walkAny(arg);
+  };
   const walkArith = (n: ArithNode): void => {
     switch (n.kind) {
       case 'aref': out.add(n.symbol); return;
       case 'aneg': walkArith(n.inner); return;
       case 'abin': walkArith(n.left); walkArith(n.right); return;
-      case 'call':
-        for (const arg of n.args) {
-          if (isConditionNode(arg)) walk(arg);
-          else walkArith(arg);
+      case 'call': {
+        if (ROW_SCOPED_FUNCTIONS.has(canonicalFunctionName(n.name) ?? '')) {
+          // Row functions: only the register argument is a free symbol.
+          // Identifiers inside the row-scoped expression / condition
+          // (2nd argument) are COLUMN names of that register, so they are not
+          // collected. Consequence, by design: a worksheet symbol read
+          // through the scope fallback inside a row expression (e.g.
+          // `limit` in `count_rows(samples, v <= limit)`) is invisible to
+          // the hidden-symbol check of `evalCondition`.
+          if (n.args[0]) walkRegisterArg(n.args[0]);
+          return;
         }
+        for (const arg of n.args) walkAny(arg);
         return;
+      }
       default: return; // anum/astr/abool/anull carry no symbol
     }
   };
