@@ -1292,6 +1292,12 @@ export function withFallbackRegisterEquations<E extends { outputSymbol: string |
 ```
 Note: `REGISTER_CONFIGS_FALLBACK.surface_inventory` marks `label` NOT required and `tab9_value/area_m2/c_i/c_s` required — this is byte-for-byte `rowComplete()` in `surface-inventory.ts:45-52`. Do not "improve" it.
 
+**Controller amendments (from the Plan 2b draft, 2026-09-17) — binding for this task:**
+- A1. `registerFlagKeys(symbol: string, ui?: { flags?: Array<{ key: string; label?: string }> }): readonly string[]` — `ui.flags` keys when present, else the symbol-keyed fallback. Export `RegisterFlag = { key: string; label?: string }`. Add `flags: z.array(z.object({ key: z.string().min(1), label: z.string().optional() })).optional()` to `registerUi` (additive); `REGISTER_CONFIGS_FALLBACK.pollutant_register.flags = [{ key: 'not_applicable', label: 'Keine meldepflichtigen Schadstoffe' }]`. Later tasks call `registerFlagKeys(f.symbol, cfg)`.
+- A2. `isComplete(values, columns, ctx?)`: a column whose `visible_when` evaluates to `fail` in ROW scope is skipped for completeness (pass/pending/manual keep it). Test: discriminator row `{ tech: 'a' }` with a required column `visible_when: "tech == 'b'"` left null is complete.
+- A3. `RegisterColumn.type` gains `'grid'` (additive); `coerce()` keeps a plain-object `{ cells }` carrier, else null; a required grid is complete with ≥ 1 cell.
+- A4. Keep `REGISTER_CONFIGS_FALLBACK.surface_inventory.title === 'Flächenverzeichnis'` (Plan 2b relies on it).
+
 - [ ] **Step 6: Run → PASS**, plus `pnpm -s typecheck`.
 
 - [ ] **Step 7: Commit**
