@@ -76,15 +76,34 @@ function truthy(v: Value): boolean {
   return false;
 }
 
-/** Coerce an operand to a number the way evaluate.ts:377-403 did (abool/anull → null, numeric strings ok). */
+/**
+ * Coerce an operand to a number the way evaluate.ts:377-403 did (abool → null,
+ * numeric strings ok). A null operand (NULL literal, null lookup cell) is a
+ * recoverable `Operand ist keine Zahl: null` in strict mode, null in lenient
+ * mode. Strict mode passes non-finite numbers through (arithmetic.ts parity:
+ * finiteness is judged on the FINAL result only, see `finite`).
+ */
 function num(v: Value, ctx: Ctx): number | null {
-  if (v === null) return null;
+  if (v === null) return ctx.strict ? fail(ctx, 'Operand ist keine Zahl: null') : null;
+  if (ctx.strict && typeof v === 'number') return v;
   const x = toNumber(v);
   return x === null ? fail(ctx, `Operand ist keine Zahl: ${String(v)}`) : x;
 }
 
+/**
+ * Per-operation finiteness. Strict mode: pass-through — like arithmetic.ts:268
+ * only the FINAL result is checked (`evalNumber` / `evalValue`), so
+ * `1 / exp(1000)` evaluates to 0. Lenient mode: a non-finite intermediate is
+ * null (evaluate.ts:397). Division by zero is caught at the operation in
+ * both modes.
+ */
 function finite(res: number, ctx: Ctx): number | null {
-  return Number.isFinite(res) ? res : fail(ctx, `Nicht-endliches Ergebnis: ${String(res)}`);
+  if (ctx.strict) return res;
+  return Number.isFinite(res) ? res : null;
+}
+
+function nonFinite(v: Value): never {
+  throw new ExprError(`Nicht-endliches Ergebnis: ${String(v)}`, true);
 }
 
 // ---- arithmetic core ------------------------------------------------------
@@ -141,7 +160,7 @@ function evalExpr(e: Expr, ctx: Ctx): Value {
 
 /** A numeric function argument: conditions are rejected, values coerced. */
 function numArg(e: Expr, ctx: Ctx): number | null {
-  if (isConditionNode(e)) return fail(ctx, 'Bedingung als Zahl verwendet.');
+  if (isConditionNode(e)) return fail(ctx, 'Bedingung als Zahl verwendet.', false);
   return num(evalValueCore(e, ctx), ctx);
 }
 
@@ -257,7 +276,8 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
         if (v === null) return null;
         keys.push(v);
       }
-      const row = ctx.scope.table?.(code, keys);
+      if (!ctx.scope.table) return fail(ctx, 'lookup(): kein Tabellenzugriff im Scope.', false);
+      const row = ctx.scope.table(code, keys);
       if (row === undefined) {
         return fail(ctx, `lookup(): keine Zeile in ${code} für Schlüssel [${keys.map(String).join(', ')}]`);
       }
@@ -301,19 +321,29 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
       if (r === null) return null;
       const rows = r.reg.rows.filter((row) => row.complete);
       if (n.args.length === 1) return rows.length;
+      // RULE (controller ruling, Task 2 fix round 1): an undecidable row makes
+      // the whole count undecidable. Lenient: null + the row's missing symbols
+      // go to ctx.missing (gate → pending). Strict: recoverable ExprError.
+      // The condition path and the truthy-value path behave identically —
+      // both are evaluated leniently per row and judged on the outcome.
       const cond = n.args[1];
       let count = 0;
       for (const row of rows) {
-        // A per-row condition that cannot be decided simply does not count;
-        // its missing symbols must not leak into the caller's ledger.
-        const rowCtx: Ctx = { ...ctx, row: row.values, missing: new Set() };
+        const rowMissing = new Set<string>();
+        const rowCtx: Ctx = { ...ctx, strict: false, row: row.values, missing: rowMissing };
+        let matched: boolean | null;
         if (isConditionNode(cond)) {
-          if (evalNodeCore(cond, rowCtx) === 'true') count++;
+          const t = evalNodeCore(cond, rowCtx);
+          matched = t === 'missing' ? null : t === 'true';
         } else {
           const v = evalValueCore(cond, rowCtx);
-          if (v === null) return null;
-          if (truthy(v)) count++;
+          matched = v === null ? null : truthy(v);
         }
+        if (matched === null) {
+          for (const m of rowMissing) ctx.missing.add(m);
+          return fail(ctx, `Fehlende Eingabe für count_rows(): ${[...ctx.missing].join(', ')}`);
+        }
+        if (matched) count++;
       }
       return count;
     }
@@ -517,15 +547,19 @@ export function evalNumber(src: string, scope: Scope): number {
   const p = parseNumeric(src);
   if (!p.ok) throw new Error(p.message);
   const v = evalValueCore(p.node, { scope, strict: true, missing: new Set() });
-  if (typeof v !== 'number' || !Number.isFinite(v)) {
-    throw new ExprError(`Nicht-endliches Ergebnis: ${String(v)}`, true);
-  }
+  if (typeof v !== 'number' || !Number.isFinite(v)) return nonFinite(v);
   return v;
 }
 
-/** Strict evaluation of a parsed expression; string/boolean results allowed (derived register cells). */
+/**
+ * Strict evaluation of a parsed expression; string/boolean results allowed
+ * (derived register cells). A numeric result is finiteness-checked here
+ * (final result only, arithmetic.ts parity).
+ */
 export function evalValue(node: Expr, scope: Scope, row?: RowValues): Value {
-  return evalExpr(node, { scope, strict: true, missing: new Set(), row });
+  const v = evalExpr(node, { scope, strict: true, missing: new Set(), row });
+  if (typeof v === 'number' && !Number.isFinite(v)) return nonFinite(v);
+  return v;
 }
 
 /**

@@ -49,6 +49,5 @@ export function canonicalFunctionName(name: string): string | null {
   const math = MATH_ALIASES[lower] ?? lower;
   if (MATH_FUNCTION_NAMES.has(math)) return math;
   if ((ROW_FUNCTIONS as readonly string[]).includes(name) || (LOGIC_FUNCTIONS as readonly string[]).includes(name)) return name;
-  if (name === 'IF' || name === 'If') return 'if';
   return null;
 }

@@ -70,6 +70,37 @@ describe('evalCondition — lenient mode reproduces compliance/evaluate.ts', () 
     expect(evalCondition('count_rows(samples, v <= limit) >= 1', scope)).toEqual({ kind: 'pass' });
     expect(evalCondition('count_rows(samples) == 2', scope)).toEqual({ kind: 'pass' });
   });
+  it('count_rows(): an undecidable row makes the whole count undecidable (condition and truthy paths alike)', () => {
+    const reg = { rows: [{ id: '1', values: { v: 3 }, complete: true }, { id: '2', values: { v: 9 }, complete: true }], flags: {} };
+    const noLimit: Scope = { ...sc({}), register: () => reg };
+    expect(evalCondition('count_rows(samples, v <= limit) >= 1', noLimit)).toEqual({ kind: 'pending', missingSymbols: ['limit'] });
+    expect(evalCondition('count_rows(samples, v * limit) >= 1', noLimit)).toEqual({ kind: 'pending', missingSymbols: ['limit'] });
+    const withLimit: Scope = { ...sc({ limit: 5 }), register: () => reg };
+    expect(evalCondition('count_rows(samples, v <= limit) >= 1', withLimit)).toEqual({ kind: 'pass' });
+    expect(evalCondition('count_rows(samples, v * limit) >= 1', withLimit)).toEqual({ kind: 'pass' });
+    const nullCell = { rows: [{ id: '1', values: { flagcol: 1 }, complete: true }, { id: '2', values: { flagcol: null }, complete: true }], flags: {} };
+    const s: Scope = { ...sc({}), register: () => nullCell };
+    expect(() => evalNumber('count_rows(reg, flagcol == 1)', s)).toThrow('Fehlende Eingabe für count_rows(): flagcol');
+    expect(() => evalNumber('count_rows(reg, flagcol)', s)).toThrow('Fehlende Eingabe für count_rows(): flagcol');
+  });
+});
+
+describe('strict-mode parity rulings', () => {
+  it('finiteness is checked on the FINAL result only (arithmetic.ts:268); division by zero still throws at the operation', () => {
+    expect(evalNumber('1 / exp(1000)', sc({}))).toBe(0);
+    expect(() => evalNumber('ln(0)', sc({}))).toThrow('Nicht-endliches Ergebnis: -Infinity');
+    expect(() => evalNumber('exp(1000)', sc({}))).toThrow('Nicht-endliches Ergebnis: Infinity');
+    expect(() => evalNumber('1 / (2 - 2)', sc({}))).toThrow('Division durch Null.');
+  });
+  it('a null operand throws the recoverable "Operand ist keine Zahl: null"', () => {
+    expect(() => evalNumber('a + NULL', sc({ a: 1 }))).toThrow('Operand ist keine Zahl: null');
+    const p = parseNumeric("lookup('T', k, 'cm') * 2");
+    expect(() => p.ok && evalValue(p.node, { ...sc({ k: 1 }), table: () => ({ cm: null }) })).toThrow('Operand ist keine Zahl: null');
+  });
+  it('lookup() without Scope.table is a non-recoverable error in strict mode and null in lenient mode', () => {
+    expect(() => evalNumber("lookup('T', k, 'cm')", sc({ k: 1 }))).toThrow('lookup(): kein Tabellenzugriff im Scope.');
+    expect(evalCondition("lookup('T', k, 'cm') > 1", sc({ k: 1 }))).toEqual({ kind: 'pending', missingSymbols: [] });
+  });
 });
 
 describe('extractSymbols', () => {
