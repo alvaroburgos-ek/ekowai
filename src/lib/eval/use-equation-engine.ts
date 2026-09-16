@@ -27,10 +27,9 @@ import type {
   FloodSubAreasCarrier,
   Gl10Scalars,
 } from './aggregators';
-import { resolveRegisterConfig, registerFlagKeys } from './register-configs';
-import { prepareRegisterRows } from './register-rows';
-import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
-import type { PreparedRegister, Value } from '@/lib/expr';
+import { buildRegisters } from './register-rows';
+import { makeTableLookup } from './regulation-tables-fallback';
+import type { Value } from '@/lib/expr';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -163,7 +162,6 @@ export function useEquationEngine({
   // serves `lookup()` both inside the register's derived columns and in the
   // equation formula itself.
   const tableLookup = useMemo(() => makeTableLookup(standardCode), [standardCode]);
-  const tableRows = useMemo(() => makeTableRows(standardCode), [standardCode]);
   // G-13: a register's derived column may reference a worksheet symbol
   // (`area_m2 * EZ`). Unknown names MUST resolve to `undefined` (never
   // null/'') so the var-vs-var comparison rule does not see a valued symbol.
@@ -176,36 +174,23 @@ export function useEquationEngine({
       return v.value;
     };
   }, [fieldBySymbol, values]);
-  const registers = useMemo(() => {
-    const out: Record<string, PreparedRegister> = {};
-    for (const f of fields) {
-      const v = values[f.id];
-      if (v?.type !== 'json') continue;
-      const cfg = resolveRegisterConfig({
-        symbol: f.symbol,
+  // Shared builder (register-rows.ts buildRegisters); the client's only
+  // specifics are the store as json source and the store-backed symbol scope.
+  // TODO(Task 8): surface register.diagnostics — the client hook ignores it.
+  const registers = useMemo(
+    () =>
+      buildRegisters(
         // Legacy callers pass no dataType; on the client the store value's
-        // type IS the data type.
-        dataType: f.dataType ?? 'json',
-        widget: f.widget,
-        uiConfig: f.uiConfig,
-      });
-      if (!cfg) continue;
-      out[f.symbol] = prepareRegisterRows(
-        v.value,
-        cfg.columns,
-        { table: tableLookup, tableRows, symbol: scalarBySymbol },
-        {
-          legacyMap: cfg.legacy_map,
-          flagKeys: registerFlagKeys(f.symbol, cfg),
-          overrideFlagKey: cfg.override?.flag_key,
-          overrideAppliesTo: cfg.override?.applies_to,
+        // type IS the data type (only json values reach the builder anyway).
+        fields.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType ?? 'json', widget: f.widget, uiConfig: f.uiConfig })),
+        (fieldId) => {
+          const v = values[fieldId];
+          return v?.type === 'json' ? v.value : undefined;
         },
-      );
-      // `register.diagnostics` (misconfigured derived expr) is surfaced by the
-      // server save path (Task 8 → warnings); the client hook ignores it.
-    }
-    return out;
-  }, [fields, values, tableLookup, tableRows, scalarBySymbol]);
+        { standardCode, symbol: scalarBySymbol },
+      ),
+    [fields, values, standardCode, scalarBySymbol],
+  );
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
   // table(s). The field lives on A138-04 in production; cross-worksheet

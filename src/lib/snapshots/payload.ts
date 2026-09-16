@@ -12,10 +12,10 @@ import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
 import { equationProfiles } from '@/lib/eval/equation-profiles';
-import { resolveRegisterConfig, registerFlagKeys, withFallbackRegisterEquations } from '@/lib/eval/register-configs';
-import { prepareRegisterRows } from '@/lib/eval/register-rows';
-import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
-import type { PreparedRegister, Value } from '@/lib/expr';
+import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
+import { buildRegisters } from '@/lib/eval/register-rows';
+import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
+import type { Value } from '@/lib/expr';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -229,7 +229,6 @@ export function buildSnapshotPayload(args: {
   // prepared into typed rows; the snapshot's scalar parameters back a derived
   // column's symbol references (G-13). Unknown names resolve to `undefined`.
   const tableLookup = makeTableLookup(args.standardCode);
-  const tableRows = makeTableRows(args.standardCode);
   const scalarBySymbol = (sym: string): Value | undefined => {
     const f = fieldBySymbol.get(sym);
     if (!f) return undefined;
@@ -239,24 +238,11 @@ export function buildSnapshotPayload(args: {
     if (!v || v.type === 'json') return undefined;
     return v.value as Value;
   };
-  const registers: Record<string, PreparedRegister> = {};
-  for (const f of fieldList) {
-    const p = paramByFieldId.get(f.id);
-    if (!p || p.valueJson == null) continue;
-    const cfg = resolveRegisterConfig(f);
-    if (!cfg) continue;
-    registers[f.symbol] = prepareRegisterRows(
-      p.valueJson,
-      cfg.columns,
-      { table: tableLookup, tableRows, symbol: scalarBySymbol },
-      {
-        legacyMap: cfg.legacy_map,
-        flagKeys: registerFlagKeys(f.symbol, cfg),
-        overrideFlagKey: cfg.override?.flag_key,
-        overrideAppliesTo: cfg.override?.applies_to,
-      },
-    );
-  }
+  const registers = buildRegisters(
+    fieldList,
+    (fieldId) => paramByFieldId.get(fieldId)?.valueJson ?? undefined,
+    { standardCode: args.standardCode, symbol: scalarBySymbol },
+  );
 
   // Carriers for aggregator-driven equations. The JSON value's shape is
   // checked at the aggregator boundary — if the carrier is malformed, the

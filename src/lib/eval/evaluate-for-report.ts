@@ -17,10 +17,9 @@ import { equationProfiles } from './equation-profiles';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
 import { shouldEngineEvaluate } from './equation-manual-denylist';
-import { resolveRegisterConfig, registerFlagKeys, withFallbackRegisterEquations } from './register-configs';
-import { prepareRegisterRows } from './register-rows';
-import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
-import type { PreparedRegister } from '@/lib/expr';
+import { withFallbackRegisterEquations } from './register-configs';
+import { buildRegisters } from './register-rows';
+import { makeTableLookup } from './regulation-tables-fallback';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -173,26 +172,12 @@ export function evaluateWorksheetEquations(
   // worksheet's scalar values back a derived column's symbol references
   // (G-13). Unknown names resolve to `undefined`, never null/''.
   const tableLookup = makeTableLookup(opts?.standardCode);
-  const tableRows = makeTableRows(opts?.standardCode);
-  const scalarBySymbol = (sym: string) => bySymbol.get(sym);
-  const registers: Record<string, PreparedRegister> = {};
-  for (const f of fields) {
-    const raw = jsonBySymbol.get(f.symbol);
-    if (raw === undefined) continue;
-    const cfg = resolveRegisterConfig(f);
-    if (!cfg) continue;
-    registers[f.symbol] = prepareRegisterRows(
-      raw,
-      cfg.columns,
-      { table: tableLookup, tableRows, symbol: scalarBySymbol },
-      {
-        legacyMap: cfg.legacy_map,
-        flagKeys: registerFlagKeys(f.symbol, cfg),
-        overrideFlagKey: cfg.override?.flag_key,
-        overrideAppliesTo: cfg.override?.applies_to,
-      },
-    );
-  }
+  const symbolByFieldId = new Map(fields.map((f) => [f.id, f.symbol]));
+  const registers = buildRegisters(
+    fields,
+    (fieldId) => jsonBySymbol.get(symbolByFieldId.get(fieldId) ?? ''),
+    { standardCode: opts?.standardCode, symbol: (sym) => bySymbol.get(sym) },
+  );
 
   // Aggregator context — built once per worksheet, reused per equation.
   const subAreasJson = jsonBySymbol.get('sub_areas_A138_10') as { rows?: unknown } | undefined;

@@ -48,7 +48,7 @@ export const A138_07_REGISTER_FORMULAS: Readonly<Record<string, { outputSymbol: 
  * scripts/rollback-20260916100000-a138-07-register-equations.sql. Shown as
  * the bridge's `from` so the engine card names the real stored text.
  */
-const A138_07_PRIOR_FORMULAS: Readonly<Record<string, string>> = {
+export const A138_07_PRIOR_FORMULAS: Readonly<Record<string, string>> = {
   'b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0': 'A_C_preliminary = Σ_i (A_E,i · C_i)',
   'a1380702-0000-4000-8000-000000000002': 'C_m = A_C / A_E',
   'a1380702-0000-4000-8000-000000000003': 'A_E_ba = Σ A_E,i (befestigt)',

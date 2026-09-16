@@ -12,6 +12,8 @@
 import { parseExpression, evalValue, evalCondition, ExprError, type PreparedRegister, type PreparedRow, type RowValues, type Scope, type Value } from '@/lib/expr';
 import type { RegulationRow } from './regulation-tables';
 import type { RegisterColumn } from './field-config';
+import { resolveRegisterConfig, registerFlagKeys } from './register-configs';
+import { makeTableLookup, makeTableRows } from './regulation-tables-fallback';
 
 export type RegisterRowsCtx = {
   table?: Scope['table'];
@@ -175,4 +177,42 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
     rows.push({ id: str(r.id) ?? genId(), values, complete: isComplete(values, columns, ctx) });
   }
   return diagnostics ? { rows, flags, diagnostics } : { rows, flags };
+}
+
+export type RegisterFieldMeta = { id: string; symbol: string; dataType: string; widget?: string | null; uiConfig?: unknown };
+
+/**
+ * Plan 2a (fix round 1): the ONE register builder shared by the client hook,
+ * the report evaluator, the snapshot builder and the PDF assembler. For every
+ * field that resolves to a register config (DB `widget='register'` + ui_config,
+ * or the TS fallback keyed by symbol while widget is NULL) AND holds a json
+ * value (`jsonOf` returns `undefined`/`null` when absent) it prepares the rows
+ * with the full option set. `ctx.symbol` backs a derived column's worksheet
+ * symbol references (G-13) and must return `undefined` for unknown names.
+ * `ctx.standardCode` selects the regulation tables; `undefined` is passed
+ * through to the standard-less unique-code resolution (regulation-tables-fallback).
+ */
+export function buildRegisters(
+  fields: ReadonlyArray<RegisterFieldMeta>,
+  jsonOf: (fieldId: string) => unknown,
+  ctx: { standardCode?: string; symbol: (s: string) => Value | undefined },
+): Record<string, PreparedRegister> {
+  const table = makeTableLookup(ctx.standardCode);
+  const tableRows = makeTableRows(ctx.standardCode);
+  const out: Record<string, PreparedRegister> = {};
+  for (const f of fields) {
+    const raw = jsonOf(f.id);
+    if (raw === undefined || raw === null) continue;
+    const cfg = resolveRegisterConfig(f);
+    if (!cfg) continue;
+    out[f.symbol] = prepareRegisterRows(raw, cfg.columns, { table, tableRows, symbol: ctx.symbol }, {
+      legacyMap: cfg.legacy_map,
+      flagKeys: registerFlagKeys(f.symbol, cfg),
+      overrideFlagKey: cfg.override?.flag_key,
+      overrideAppliesTo: cfg.override?.applies_to,
+    });
+    // TODO(Task 8): surface register.diagnostics (misconfigured derived expr)
+    // into the server save-path warnings; callers ignore it until then.
+  }
+  return out;
 }

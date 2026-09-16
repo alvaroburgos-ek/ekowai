@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { A138_07_REGISTER_FORMULAS } from '@/lib/eval/rewrites';
+import { A138_07_REGISTER_FORMULAS, A138_07_PRIOR_FORMULAS } from '@/lib/eval/rewrites';
 
 const ROOT = join(__dirname, '..', '..');
 const MIGRATION = readFileSync(join(ROOT, 'scripts/migrations/20260916100000_a138_07_register_equations.sql'), 'utf8');
@@ -35,7 +35,14 @@ describe('20260916100000_a138_07_register_equations.sql', () => {
   });
   it('rollback carries verified prior values (no UNVERIFIED marker)', () => {
     expect(ROLLBACK).not.toMatch(/UNVERIFIED/);
-    expect(ROLLBACK).toContain("'A_C_preliminary = Σ_i (A_E,i · C_i)'");
-    expect(ROLLBACK).toContain("'C_m = A_C / A_E'");
+    expect(Object.keys(A138_07_PRIOR_FORMULAS).sort()).toEqual(Object.keys(A138_07_REGISTER_FORMULAS).sort());
   });
+  // Fix round 1: every prior string (prod capture 2026-09-16T23:23:45Z) is pinned against the rollback,
+  // so the bridge's `from` label and the rollback can never drift apart.
+  for (const [id, prior] of Object.entries(A138_07_PRIOR_FORMULAS)) {
+    it(`rollback restores ${A138_07_REGISTER_FORMULAS[id].outputSymbol} to its prior text verbatim`, () => {
+      expect(ROLLBACK).toContain(`SET formula = '${prior}'`);
+      expect(ROLLBACK).toMatch(new RegExp(`SET formula = '${prior.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}',\\s+input_symbols = ARRAY\\['surface_inventory'\\] WHERE id = '${id}'`));
+    });
+  }
 });

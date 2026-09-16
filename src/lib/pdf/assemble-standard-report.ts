@@ -1,4 +1,7 @@
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
+import { buildRegisters } from '@/lib/eval/register-rows';
+import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
+import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
 import { blocksVerificationGate } from '@/lib/verification-status';
@@ -276,6 +279,11 @@ export type AssemblerField = {
    * ABSENT means unknown and is never flagged (the production loader
    * always supplies it). */
   verificationStatus?: string;
+  /** Plan 2a: DB register config (`widget='register'` + ui_config). Optional —
+   * the loader's `select()` supplies both; NULL widget + json dataType falls
+   * back to the TS register config by symbol. */
+  widget?: string | null;
+  uiConfig?: unknown;
 };
 
 export type AssemblerEquation = {
@@ -605,10 +613,32 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         });
       }
 
+      // Plan 2a: registers for this worksheet's json fields (shared builder;
+      // the assembler's specifics are the parameter map as json source and the
+      // resolved scalar values as symbol scope — json carriers excluded).
+      const tableLookup = makeTableLookup(standard.code);
+      const registers = buildRegisters(
+        tplFields,
+        (fieldId) => paramByFieldId.get(fieldId)?.valueJson ?? undefined,
+        {
+          standardCode: standard.code,
+          symbol: (sym) => {
+            const r = resolvedBySymbol.get(sym);
+            if (!r || r.value == null || typeof r.value === 'object') return undefined;
+            return r.value;
+          },
+        },
+      );
+
       // Equations — evaluate each whitelisted one server-side. Same
       // evaluator the browser uses. NEVER returns a number when the
       // engine can't verify — that's the three-state contract.
-      const evaluatedEquations: ReportEquation[] = tplEqs.map((eq) => {
+      // Plan 2a: fallback register equations (VSME-B04.100 per-medium sums)
+      // are appended while their DB rows are not yet seeded — same list the
+      // form engine and the snapshot evaluate. The 138 frozen gate is untouched.
+      const evaluatedEquations: ReportEquation[] = withFallbackRegisterEquations(tpl.code, tplEqs).map((eq) => {
+        const formulaLatex = 'formulaLatex' in eq ? eq.formulaLatex : null;
+        const outputUnit = 'outputUnit' in eq ? eq.outputUnit : null;
         const key = `${tpl.code}:${eq.equationNumber}`;
         // 138 stays on its carrier-free curated subset (the assembler builds no
         // carriers); every other standard routes through the evaluator except
@@ -622,9 +652,9 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
             id: eq.id,
             equationNumber: eq.equationNumber,
             formula: eq.formula,
-            formulaLatex: eq.formulaLatex,
+            formulaLatex,
             outputSymbol: eq.outputSymbol,
-            outputUnit: eq.outputUnit,
+            outputUnit,
             clauseReference: eq.clauseReference,
             evalState: null,
           };
@@ -647,14 +677,16 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           outputSymbol: eq.outputSymbol ?? '',
           expectedUnits,
           inputs,
+          registers,
+          tableLookup,
         });
         return {
           id: eq.id,
           equationNumber: eq.equationNumber,
           formula: eq.formula,
-          formulaLatex: eq.formulaLatex,
+          formulaLatex,
           outputSymbol: eq.outputSymbol,
-          outputUnit: eq.outputUnit,
+          outputUnit,
           clauseReference: eq.clauseReference,
           evalState,
         };
