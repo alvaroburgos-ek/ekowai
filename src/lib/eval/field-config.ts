@@ -15,9 +15,9 @@ export type LookupBinding = z.infer<typeof lookupBinding>;
 const columnLookup = z.object({ table_code: z.string().min(1), key_column: z.string().optional(), value: z.string().optional(), group_by: z.string().optional() });
 const registerColumn = z.object({
   key: z.string().min(1), label: z.string().min(1),
-  type: z.enum(['text','number','boolean','enum','date','lookup_key','lookup_value','derived']),
+  type: z.enum(['text','number','boolean','enum','date','lookup_key','lookup_value','derived','grid']),
   required: z.boolean().optional(), options: z.array(z.string()).optional(), datalist: z.array(z.string()).optional(),
-  unit: z.string().optional(), min: z.number().optional(), placeholder: z.string().optional(), width: z.string().optional(),
+  unit: z.string().optional(), min: z.number().optional(), max: z.number().optional(), placeholder: z.string().optional(), width: z.string().optional(),
   discriminator: z.boolean().optional(), visible_when: z.string().optional(), lookup: columnLookup.optional(), expr: z.string().optional(),
 }).superRefine((c, ctx) => {
   if ((c.type === 'lookup_key' || c.type === 'lookup_value') && !c.lookup) ctx.addIssue({ code: 'custom', path: ['lookup'], message: `${c.type} column needs lookup` });
@@ -33,6 +33,8 @@ const registerUi = z.object({
   override: z.object({ flag_key: z.string(), applies_to: z.array(z.string()).min(1), policy: z.enum(['anhaltswert','kann','messwert']) }).optional(),
   legacy_map: z.record(z.string(), z.record(z.string(), z.string())).optional(),
   footer: z.array(z.string()).optional(), editor: z.string().optional(),
+  /** Register-level boolean flags stored on the carrier (e.g. `not_applicable`), read by `flag()`. */
+  flags: z.array(z.object({ key: z.string().min(1), label: z.string().optional() })).optional(),
 });
 export type RegisterUiConfig = z.infer<typeof registerUi>;
 

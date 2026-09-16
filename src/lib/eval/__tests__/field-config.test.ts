@@ -28,6 +28,17 @@ describe('field-config', () => {
     expect(columns[0].discriminator).toBe(true);
     expect(columns[0].visible_when).toBe('kind == "custom"');
   });
+  it('register column accepts max, grid type and ui-level flags (Plan 2a additive)', () => {
+    const cfg = parseFieldConfig({ widget: 'register', uiConfig: { title: 't', flags: [{ key: 'not_applicable', label: 'n/a' }, { key: 'estimated' }], columns: [
+      { key: 'pct', type: 'number', label: '%', min: 0, max: 100 },
+      { key: 'cells', type: 'grid', label: 'Raster', required: true },
+    ] }, lookup: null, visibleWhen: null });
+    const ui = cfg.ui as { flags?: Array<{ key: string; label?: string }>; columns: Array<{ type: string; max?: number }> };
+    expect(ui.flags).toEqual([{ key: 'not_applicable', label: 'n/a' }, { key: 'estimated' }]);
+    expect(ui.columns[0].max).toBe(100);
+    expect(ui.columns[1].type).toBe('grid');
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', flags: [{ key: '' }], columns: [{ key: 'x', type: 'text', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/flags\.0\.key/);
+  });
   it('rejects unknown widget and a lookup_value column without lookup', () => {
     expect(() => parseFieldConfig({ widget: 'dropdown', uiConfig: null, lookup: null, visibleWhen: null })).toThrow(/widget/);
     expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'x', type: 'lookup_value', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.0\.lookup/);
