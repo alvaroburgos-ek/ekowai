@@ -948,6 +948,61 @@ git commit -m "feat(eval): normaliser + eligibility gate recognise the expr func
 
 ---
 
+### Task 4b: expr function additions for Plan 3 (median/percentile rows, rounding, conditional row aggregates)
+
+Inserted by the controller on 2026-09-17 from the Plan 3 draft's interface gaps G-3, G-11, G-16. Additive to `src/lib/expr/` only; every existing expr test must stay green untouched.
+
+**Files:**
+- Modify: `src/lib/expr/functions.ts` (registry), `src/lib/expr/evaluate.ts` (`evalCall`), `src/lib/eval/formula.ts` is NOT touched (its `hasCall` regex is updated in Task 6 — add `median_rows|percentile_rows|round|ceil|floor` to that regex there; note it in your report so Task 6's implementer sees it).
+- Test: `src/lib/expr/__tests__/row-functions.test.ts` (extend), `src/lib/expr/__tests__/evaluate.test.ts` (extend)
+
+**Interfaces:**
+- Produces (all canonical names added to `EXPR_FUNCTION_NAMES`, `ROW_FUNCTIONS` gains `median_rows`, `percentile_rows`; `MATH_FUNCTIONS_1` gains `round`, `ceil`, `floor`):
+  - `median_rows(reg, expr[, cond])` — median over complete rows (mean of the two middle values for even n); zero rows ⇒ the same recoverable `Keine vollständigen Zeilen in "<name>".`
+  - `percentile_rows(reg, expr, p[, cond])` — p in [0, 100]; linear interpolation between order statistics (the R-7 / Excel `PERCENTILE.INC` definition: rank = (n−1)·p/100); p outside [0,100] ⇒ non-recoverable `percentile_rows(): p muss zwischen 0 und 100 liegen.`; zero rows ⇒ the row message. Document that R-7 is the chosen definition and that a guideline naming a different percentile rule is a sign-off item (Plan 3 sheet).
+  - Optional trailing condition argument on `sum_rows`, `max_rows`, `min_rows`, `mean_rows`, `stdev_rows`, `median_rows` (and `percentile_rows` after `p`): rows where the condition is `'false'` are skipped; an undecidable row (missing) makes the aggregate undecidable — lenient null + missing merged, strict recoverable `Fehlende Eingabe für <fn>(): <syms>` (same rule as `count_rows`, Task 2 ruling). If NO row survives the filter ⇒ the row message (`Keine vollständigen Zeilen …`) — a filter that leaves nothing is not a sum of zero.
+  - `round(x)`, `ceil(x)`, `floor(x)` — `Math.round/ceil/floor`; case-insensitive like the other math names.
+  - `extractSymbols` / `walkRegisterArg` treat the new functions' expr AND cond args as row-scoped (C-2 rule); the `p` argument of `percentile_rows` is a normal arithmetic arg (its symbols ARE collected).
+
+- [ ] **Step 1: tests (RED)** — append to `row-functions.test.ts` (same `reg` fixture: complete rows area_m2 100 (paved) and 200 (unpaved)):
+```ts
+describe('Plan 3 additions', () => {
+  it('median_rows and percentile_rows (R-7 interpolation)', () => {
+    const three: PreparedRegister = { rows: [
+      { id: 'a', values: { v: 10 }, complete: true }, { id: 'b', values: { v: 20 }, complete: true },
+      { id: 'c', values: { v: 40 }, complete: true }, { id: 'd', values: { v: 5 }, complete: false } ], flags: {} };
+    const s: Scope = { symbol: () => undefined, register: () => three };
+    expect(evalNumber('median_rows(reg, v)', s)).toBe(20);
+    expect(evalNumber('median_rows(reg, v, v > 10)', s)).toBe(30);
+    expect(evalNumber('percentile_rows(reg, v, 50)', s)).toBe(20);
+    expect(evalNumber('percentile_rows(reg, v, 25)', s)).toBe(15);
+    expect(evalNumber('percentile_rows(reg, v, 100)', s)).toBe(40);
+    expect(() => evalNumber('percentile_rows(reg, v, 101)', s)).toThrow('percentile_rows(): p muss zwischen 0 und 100 liegen.');
+  });
+  it('conditional aggregates skip false rows, go missing on undecidable rows, and reject an empty survivor set', () => {
+    expect(evalNumber("sum_rows(reg, area_m2, kind == 'paved')", scope)).toBe(100);
+    expect(evalNumber("mean_rows(reg, area_m2, kind != 'paved')", scope)).toBe(200);
+    expect(() => evalNumber("sum_rows(reg, area_m2, kind == 'gravel')", scope)).toThrow('Keine vollständigen Zeilen in "reg".');
+    expect(() => evalNumber('sum_rows(reg, area_m2, area_m2 > limit)', scope)).toThrow('Fehlende Eingabe für sum_rows(): limit');
+    expect(evalCondition('sum_rows(reg, area_m2, area_m2 > limit) > 1', scope)).toEqual({ kind: 'pending', missingSymbols: ['limit'] });
+  });
+  it('round / ceil / floor', () => {
+    expect(evalNumber('round(2.5) + CEIL(1.2) + floor(-1.5)', scope)).toBe(3 + 2 - 2);
+  });
+  it('extractSymbols treats the new functions as row-scoped except percentile p', () => {
+    const n = parseCondition('percentile_rows(reg, v, p_sym) >= median_rows(reg, v, v > limit)');
+    expect([...extractSymbols(n!)].sort()).toEqual(['p_sym', 'reg']);
+  });
+});
+```
+(`evalCondition`, `parseCondition`, `extractSymbols` imported from the module barrels as the other tests do.)
+- [ ] **Step 2:** run `pnpm vitest run --project unit src/lib/expr/` → the new block fails (`Funktionsaufruf "median_rows(...)" wird nicht unterstützt`).
+- [ ] **Step 3: implement** in `functions.ts` + `evaluate.ts`: extract a shared `collectRows(regExpr, condExpr | undefined, ctx, fnName)` used by all aggregates (complete rows → optional cond filter with the missing rule → the survivor list, throwing/returning null on empty), then `sum/max/min/mean/stdev/median/percentile` reduce over it; `percentile` reads `p` via `num(evalValueCore(...))`. Keep `count_rows` semantics unchanged (0 on empty survivors — a count of nothing is 0; only aggregates reject an empty set).
+- [ ] **Step 4:** GREEN; `pnpm -s typecheck`; `pnpm eslint src/lib/expr`; `pnpm test` once (expect prior count + 4).
+- [ ] **Step 5: commit** — `feat(expr): median_rows/percentile_rows, round/ceil/floor, conditional row aggregates (Plan 3 gaps G-3/G-11/G-16)` + `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
+
+---
+
 ### Task 5: Register rows, register configs (TS fallback), table lookup with fallback
 
 **Files:**
