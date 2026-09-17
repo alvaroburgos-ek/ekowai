@@ -301,6 +301,7 @@ Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din19
 - Chosen now (fail-safe): classes 2/3/4 keyed by printed position between "1" and "5" (labels "PKW - befahrbar", "LKW 12 - befahrbar", "SLW 30 - befahrbar" are legible and match the prod enum labels); table stays `imported_unverified`.
 - Evidence (verbatim, transcript line): "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{PKW - befahrbar} & PKW & 1,2 & \multirow[t]{2}{*}{B 125} \\" (L471); same empty first cell at L473 (LKW 12) and L475 (SLW 30); "\hline 1 & begehbar & Personen & & A 15 \\" (L470); "\hline 5 & SLW 60 - befahrbar & Schwerlastfahrzeug 60 ta & 20,0 & D 400 \\" (L477).
 - Proposed SQL / config: owner confirms "2 / 3 / 4" on the PDF; then the status flip for `TAB1` (together with J-4).
+- Note (fix round 1): row 5 prints "Schwerlastfahrzeug 60 ta" (L477) — read as "60 t" + the footnote mark "a" (L479 "a Schwerlastfahrzeuge (Achslast > 13 t) der Belastungsklasse 5 (SLW 60 - befahrbar) bedürfen einer Ausnahmegenehmigung …"); the stored string `verkehrslast_beispiele` = "Schwerlastfahrzeug 60 t (a) 20,0" carries that interpretation (see also J-4).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din1989_1-U-4 · DIN-1989-1 · DIN-1989-1-02 · TAB2 ("I" for "l")
@@ -315,6 +316,13 @@ Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din19
 - Chosen now (fail-safe): the created attestation's LABEL reads "25 l/m² bis 50 l/m²" (physically meaningful; the sentence also prints "800 l bis 1000 l" legibly); its `verification_quote` carries the printed text with "V".
 - Evidence (verbatim, transcript line): "Das Nutzvolumen sollte einerseits $25 \mathrm{~V} / \mathrm{m}^{2}$ bis $50 \mathrm{~V} / \mathrm{m}^{2}$ angeschlossener Auffangfläche (nicht für Gründächer) betragen und andererseits sollten 800 l bis 1000 l Nutzvolumen je Nutzer vorgesehen werden." (L808)
 - Proposed SQL / config: none (label text); owner confirms "l" on the PDF.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-U-6 · DIN-1989-1 · DIN-1989-1-06 · TAB5 systemsteuerung (Wartung cell printed truncated)
+- Class: unreadable-cell
+- Chosen now (fail-safe): the cell is stored exactly as printed ("Probelauf: Vor, während bzw. nach dem Probelauf sind zu prüfen: Ein- und Ausschaltpunkte der Anlage; Nachspeisung (Magnetventil" — ends mid-parenthesis); TAB5 set to `imported_unverified` (fix round 1; it was `md_verified` in the first commit although one cell is incomplete in the source).
+- Evidence (verbatim, transcript line): "- Nachspeisung (Magnetventil" (L1030) followed directly by "\end{tabular} & 1 Jahr \\" (L1031) — what the printed cell says after "Magnetventil" (the closing parenthesis and any further Probelauf items) is not in the transcript.
+- Proposed SQL / config: owner reads the PDF cell (SR-3) and supplies the missing tail; then `row_values` of TAB5 row `systemsteuerung` (`wartung_umfang`) is completed in a seed revision and the table flips to `md_verified`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### din1989_1-J-1 · DIN-1989-1 · DIN-1989-1-04 · TAB4_FLAECHE Grünland ranges (SR-2)
@@ -401,6 +409,13 @@ Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din19
 - Proposed SQL / config: none — G-3 re-points CR-04 onto D3. Owner may rule how a `keller` tank maps to Tab. 2 (the register's own `aufstellung` column offers only the two printed kinds).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
+### din1989_1-I-2 · DIN-1989-1 · all worksheets · seed edition token `'2002'`
+- Class: interface-gap
+- Chosen now (fail-safe): every DIN-1989-1 table is seeded with `edition = '2002'` — a component of the UNIQUE key `(standard_code, edition, table_code)` of `regulation_tables`. The transcript's title page (L1–L14) prints no cover date; the token is the year in prod's `standards.version`, read in-session with `node scripts/verification/prod-query.mjs --sql "select code, title_de, version, issued_year, valid_from from standards where code='DIN-1989-1'"` → `version = '2002 (DIN 1989-1)'`, `issued_year = null`, `valid_from = null`. The harness header's "DIN 1989-1:2002-04" comes from a scan read in another session (R-2, not re-verified here).
+- Evidence (verbatim, transcript line): "Regenwassernutzungsanlagen \\ Teil 1: Planung, Ausführung, Betrieb und Wartung" (L3–L4) and "& $1989-1$ \\" (L6) — no date printed anywhere on L1–L14.
+- Proposed SQL / config: owner confirms the cover date on the PDF BEFORE the seed migration is applied; if "2002-04" is confirmed, `DIN1989_1_EDITION` in `regulation-tables-seed-din1989_1.ts` is changed and `20260917100200_regulation_tables_seed_din1989_1.sql` re-emitted (a change AFTER apply would orphan the seeded rows under the old key — then a one-off `UPDATE regulation_tables SET edition = '2002-04' WHERE standard_code = 'DIN-1989-1' AND edition = '2002'` is the repair).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
 ### din1989_1-X-1 · DIN-1989-1 · DIN-1989-1-04/-05 · cross-standard links
 - Class: cross-standard
 - Chosen now (fail-safe): nothing shared; `eta` stays a -04 number input; `versickerung_bemessung_a138` stays an attestation (bare pointer, content-boundary rule); `h_N` stays an engineer input.
@@ -410,7 +425,7 @@ Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din19
 
 ### Observations (Task 2, no signature needed)
 
-- **Edition token `'2002'`:** the transcript's title page (L1–L14) prints no date; the seed uses prod `standards.version` "2002 (DIN 1989-1)" read in-session. The harness header (`tests/harness/din1989-1-verify.integration.test.ts`) says "DIN 1989-1:2002-04" from a scan read in another session — not re-verified here (R-2). If the owner confirms 2002-04 on the PDF cover, the edition token can be changed in a seed revision before the migration is applied (it is a component of the table's unique key).
+- **Edition token `'2002'`:** now a numbered block (din1989_1-I-2, fix round 1).
 - **Anhang B (15 rows) vs. §17.2 (13 bullets, L956–L968):** the `inbetriebnahme_pruefpunkte` select_many lists the 15 Anhang B rows (the brief's choice); §17.2's bullets are the Probelauf checks and are carried as the widget's note (L955).
 - **`e` as a register column key:** the evaluator's `e` = Euler fallback applies only to a symbol NOT provided as a value; a row cell named `e` always shadows it (pinned in `regulation-tables-seed-din1989-1.test.ts`).
-- **Section rule on DIN-1989-1-04 B:** hides the eight Gl. 1–4 scalar inputs AND the three new registers while `bemessungsverfahren == 'verkuerzt'` (L796 "keine Berechnungen"); E_R / BW_a / V_n stay visible (consumed) and read `manual_required`; V_n is typed by hand in that case.
+- **Section rule on DIN-1989-1-04 B:** hides the eight Gl. 1–4 scalar inputs AND the three new registers while `bemessungsverfahren == 'verkuerzt'` (L796 "keine Berechnungen"); E_R / BW_a / V_n stay visible (consumed) and read `manual_required`; V_n is typed by hand in that case. **Gate interplay (fix round 1):** prod CR-10 (`V_n IS NOT NULL AND E_R IS NOT NULL AND BW_a IS NOT NULL`, block) stays as is — under `verkuerzt` it is satisfiable only by hand-typing E_R and BW_a on the manual path (their inputs are hidden, so the engine reports `manual_required`); a CR-10 guard `IF bemessungsverfahren != verkuerzt THEN …` would be a gate change and is NOT proposed here — the owner may add it to G-class if the band-only path should not require the three figures.

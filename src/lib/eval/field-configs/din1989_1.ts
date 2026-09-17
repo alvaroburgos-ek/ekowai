@@ -35,7 +35,7 @@ const STD = 'DIN-1989-1';
 
 // ---- lifted cue sentences (transcript line in the name) ----
 const L362 = 'Bei der Regenwassernutzung in Haushalten gilt im allgemeinen der Grundsatz, dass möglichst alle verfügbaren Auffangflächen die nach 5.2 qualitativ geeignet sind, genutzt werden sollten.';
-const L420 = 'Bei Verwendung mehrerer Behälter zur Speicherung, sind diese unter Berücksichtigung der vorgenannten Faktoren in Reihe zu schalten. Der Zu- und Überlauf ist im ersten Behälter anzuordnen. Die Wasserentnahme sollte im letzten Behälter installiert werden.';
+const L420 = '- Bei Verwendung mehrerer Behälter zur Speicherung, sind diese unter Berücksichtigung der vorgenannten Faktoren in Reihe zu schalten. Der Zu- und Überlauf ist im ersten Behälter anzuordnen. Die Wasserentnahme sollte im letzten Behälter installiert werden.';
 const L459 = 'Einzelbehälter können miteinander verbunden werden. Dabei sind die vom Hersteller vorgesehenen Verbindungsteile zu verwenden.';
 const L461 = 'Bei der Auswahl unterirdischer Speicher sind unter Berücksichtigung des Einbauortes und der Bodenbeschaffenheit die Stand- und Auftriebssicherheit ebenso wie die zu erwartenden Verkehrslasten zu beachten. Speicher, Revisionsschächte und Abdeckungen müssen den Belastungsklassen nach Tabelle 1 entsprechen.';
 const L467 = 'Tabelle 1 - Belastungsklassen für unterirdische Regenwasserspeicher unter Verkehrsbelastung';
@@ -118,7 +118,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         // labels = the two printed Tab. 2 kinds (L493–L496); `keller` (prod speicher_aufstellung) has no Tab. 2 row
         { key: 'aufstellung', label: 'Aufstellung', type: 'enum', required: true, options: ['oberirdisch', 'unterirdisch'], option_labels: { oberirdisch: 'oberirdische Speicher', unterirdisch: 'unterirdischen Speicher' }, discriminator: true },
         { key: 'einzelvolumen_l', label: 'Einzelvolumen', type: 'number', unit: 'l', required: true, min: 0 },
-        { key: 'domhoehe_mm', label: 'Domhöhe', type: 'number', unit: 'mm', min: 0, visible_when: "aufstellung == 'unterirdisch'" },
+        // Optional: Tab. 2 keys its buried-tank rows by Domhöhe (L495/L496) but no sentence makes the value a mandatory input; without
+        // it the Tab.-2 row (groesse_band / oeffnung_min_mm) of that tank and the D3 maximum stay null — the placeholder says so per row.
+        { key: 'domhoehe_mm', label: 'Domhöhe', type: 'number', unit: 'mm', min: 0, visible_when: "aufstellung == 'unterirdisch'", placeholder: 'für Tab.-2-Zeile nötig' },
         // Tab. 2 row heads: ≤ 3000 l / > 3000 l Einzelvolumen (oberirdisch), Domhöhe ≤ 450 mm / > 450 mm (unterirdisch) — L493–L496
         { key: 'groesse_band', label: 'Tab.-2-Zeile', type: 'derived', expr: "if(aufstellung == 'oberirdisch', if(einzelvolumen_l <= 3000, 'le3000', 'gt3000'), if(domhoehe_mm <= 450, 'dom_le450', 'dom_gt450'))", display: 'badge',
           value_labels: { le3000: '≤ 3000 l', gt3000: '> 3000 l', dom_le450: 'Domhöhe ≤ 450 mm', dom_gt450: 'Domhöhe > 450 mm' } },
@@ -127,9 +129,9 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
         { key: 'oeffnung_ok', label: 'Öffnung ≥ Tab. 2', type: 'derived', expr: 'if(oeffnung_ist_mm >= oeffnung_min_mm, 1, 0)', display: 'badge', value_labels: { '1': 'erfüllt', '0': 'unterschritten' } },
       ],
       footer: ['speicher_einzelvolumen_sum', 'speicheroeffnung_min_erf'],
-      note: L420,
+      note: `${L420} Ohne Domhöhe bleibt die Tab.-2-Zeile eines unterirdischen Behälters (und damit die maßgebende Mindestöffnung) leer.`,
     },
-    verification_quote: `${L459} ${L420} ${L486} ${L490}`, // L459 + L420 (mehrere Behälter), L486 + L490 (Tab. 2)
+    verification_quote: `${L459} — ${L420} — ${L486} — ${L490}`, // L459 + L420 (mehrere Behälter), L486 + L490 (Tab. 2)
     create: { section_code: 'D', label_de: 'Speicher / Einzelbehälter (Tab. 2)', data_type: 'json', unit: null, clause_reference: '§6.3, §7, Tab. 2',
       description: 'Plan 3: Zeilen je Einzelbehälter (Aufstellung, Einzelvolumen, Domhöhe, vorhandene Öffnung); Mindestöffnung je Zeile aus Tab. 2; Σ Einzelvolumen → speicher_einzelvolumen_sum (DIN-1989-1-02-D2), maßgebende Mindestöffnung → speicheroeffnung_min_erf (DIN-1989-1-02-D3); Umstellung von CR-04 STAGED (din1989_1-G-3).' },
   }),

@@ -14,11 +14,12 @@
  * session — unverified here, see the report).
  *
  * Verification status: `md_verified` only where every row of the table is
- * lifted AND every cell is legible. Three tables stay `imported_unverified`
- * because of OCR-damaged or blank cells (sign-off din1989_1-U-1 … U-4):
+ * lifted AND every cell is legible. Four tables stay `imported_unverified`
+ * because of OCR-damaged, blank or truncated cells (sign-off din1989_1-U-1 … U-4, U-6):
  * TAB4_PERSON ("V" for "l", L882/L883), TAB4_FLAECHE (merged Grünland row
  * L887–L890 with "V"), TAB1 (blank class-number cells L471/L473/L475),
- * TAB2 ("I" for "l", L493/L494).
+ * TAB2 ("I" for "l", L493/L494), TAB5 (Systemsteuerung Wartung cell cut
+ * mid-parenthesis at L1030, U-6).
  *
  * The LaTeX token `${ }` (empty group before a superscript) is written as
  * `${'$'}{ }` inside String.raw so it is not read as a template interpolation.
@@ -127,7 +128,7 @@ const TAB1_ROWS: ReadonlyArray<{ klasse: string; bezeichnung: string; beispiele:
 \hline & & LKW 12 t & 8,0 & \\` }, // L473–L474
   { klasse: '4', bezeichnung: 'SLW 30 - befahrbar', beispiele: 'LKW 26 t 11,5; Feuerwehrfahrzeug 30 t 13,0', abdeckung: 'D 400', quote: String.raw`\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{SLW 30 - befahrbar} & LKW 26 t & 11,5 & \multirow[t]{2}{*}{D 400} \\
 \hline & & Feuerwehrfahrzeug 30 t & 13,0 & \\` }, // L475–L476
-  { klasse: '5', bezeichnung: 'SLW 60 - befahrbar', beispiele: 'Schwerlastfahrzeug 60 t (a) 20,0', abdeckung: 'D 400', quote: String.raw`\hline 5 & SLW 60 - befahrbar & Schwerlastfahrzeug 60 ta & 20,0 & D 400 \\` }, // L477 (footnote a: L479)
+  { klasse: '5', bezeichnung: 'SLW 60 - befahrbar', beispiele: 'Schwerlastfahrzeug 60 t (a) 20,0', abdeckung: 'D 400', quote: String.raw`\hline 5 & SLW 60 - befahrbar & Schwerlastfahrzeug 60 ta & 20,0 & D 400 \\` }, // L477 — printed "60 ta" read as "60 t" + footnote mark "a" (L479 "a Schwerlastfahrzeuge (Achslast > 13 t) …"): an interpretation inside the string value, recorded under U-3/J-4
   { klasse: '6', bezeichnung: 'Sonderlasten nach Angabe des AG', beispiele: null, abdeckung: null, quote: String.raw`\hline 6 & \multicolumn{4}{|c|}{Sonderlasten nach Angabe des AG} \\` }, // L478
 ];
 export function tab1AsTable(): RegulationTable {
@@ -176,6 +177,9 @@ export function tab2AsTable(): RegulationTable {
 // strings ("6 Monate", "1 Jahr", "≈ 10 Jahre"); the Hebeanlage maintenance cell prints three footnoted intervals
 // (L1050–L1052: 3 Monate b · 6 Monate c · 1 Jahr d) kept in one cell with the footnote text in `hinweis`
 // (sign-off din1989_1-J-2). Umfang columns carry the printed "Durchführung" text (LaTeX line breaks → "; ").
+// The Systemsteuerung Wartung cell is printed TRUNCATED (L1030 "- Nachspeisung (Magnetventil" — the transcript cuts
+// mid-parenthesis; whatever followed is not in the source) — stored as printed, sign-off din1989_1-U-6; the table
+// therefore stays `imported_unverified` although all 17 quotes verify.
 // ---------------------------------------------------------------------------
 type Tab5Row = { value: string; label_de: string; inspektion_intervall: string; inspektion_umfang: string; wartung_intervall: string | null; wartung_umfang: string | null; hinweis: string | null; quote: string };
 export const TAB5_ANLAGENTEILE: ReadonlyArray<Tab5Row> = [
@@ -257,7 +261,7 @@ export function tab5AsTable(): RegulationTable {
     value_columns: [{ name: 'inspektion_intervall', type: 'string' }, { name: 'inspektion_umfang', type: 'string' }, { name: 'wartung_intervall', type: 'string' }, { name: 'wartung_umfang', type: 'string' }, { name: 'hinweis', type: 'string' }],
     override_policy: 'anhaltswert',
     override_quote: 'Längere oder kürzere Zeitintervalle können sich durch spezielle anlagen- und betriebstechnische Randbedingungen ergeben.', // L1067
-    verification_status: 'md_verified', rows };
+    verification_status: 'imported_unverified', rows }; // U-6 (truncated L1030 cell)
 }
 
 /** The live DIN-1989-1 set (seven tables), in the order the brief's Step 2 lists them. */

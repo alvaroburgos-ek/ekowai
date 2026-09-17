@@ -74,7 +74,7 @@ export const EQUATIONS: EquationEntry[] = [
     input_symbols: ['speicher_behaelter'], output_symbol: 'speicher_einzelvolumen_sum', output_unit: 'l',
     clause_reference: '§6.3, §7',
     description: 'Plan 3: Σ Einzelvolumen über die Behälter-Zeilen (mehrere Behälter in Reihe).',
-    verification_quote: 'Bei Verwendung mehrerer Behälter zur Speicherung, sind diese unter Berücksichtigung der vorgenannten Faktoren in Reihe zu schalten. Der Zu- und Überlauf ist im ersten Behälter anzuordnen. Die Wasserentnahme sollte im letzten Behälter installiert werden.', // L420
+    verification_quote: '- Bei Verwendung mehrerer Behälter zur Speicherung, sind diese unter Berücksichtigung der vorgenannten Faktoren in Reihe zu schalten. Der Zu- und Überlauf ist im ersten Behälter anzuordnen. Die Wasserentnahme sollte im letzten Behälter installiert werden.', // L420
   },
   {
     standard: STD, worksheet: 'DIN-1989-1-02', equation_number: 'DIN-1989-1-02-D3',

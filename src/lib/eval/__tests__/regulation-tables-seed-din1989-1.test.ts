@@ -105,7 +105,7 @@ describe('DIN-1989-1 Plan-3 seed tables', () => {
     expect(lookup('TAB2', ['keller', 'le3000'])).toBeUndefined(); // no Tab. 2 row for a basement tank
   });
 
-  it('TAB5 (L1002–L1056): 17 Anlagenteil rows with inspection + maintenance intervals as printed; Hebeanlage carries the three footnoted intervals in one cell (J-2); anhaltswert (L1067); md_verified', () => {
+  it('TAB5 (L1002–L1056): 17 Anlagenteil rows with inspection + maintenance intervals as printed; Hebeanlage carries the three footnoted intervals in one cell (J-2); anhaltswert (L1067); imported_unverified (U-6: truncated L1030 cell)', () => {
     const t = tab5AsTable();
     expect(t.rows).toHaveLength(17);
     expect(t.rows.map((r) => r.keys.anlagenteil)).toEqual(TAB5_ANLAGENTEILE.map((a) => a.value));
@@ -120,7 +120,8 @@ describe('DIN-1989-1 Plan-3 seed tables', () => {
     expect(t.rows.filter((r) => r.values.wartung_intervall != null)).toHaveLength(7); // Filter, Speicher, Pumpe, Steuerung, Wasserzähler, Rückstauverschlüsse, Hebeanlage
     expect(t.override_policy).toBe('anhaltswert');
     expect(t.override_quote).toBe('Längere oder kürzere Zeitintervalle können sich durch spezielle anlagen- und betriebstechnische Randbedingungen ergeben.');
-    expect(t.verification_status).toBe('md_verified');
+    expect(by('systemsteuerung').wartung_umfang).toMatch(/\(Magnetventil$/); // printed truncated (U-6)
+    expect(t.verification_status).toBe('imported_unverified');
   });
 
   it('a row cell named `e` is the Tab. 3 cell, never Euler’s number: an empty cell yields null in row scope (evaluator shadowing pin)', async () => {
