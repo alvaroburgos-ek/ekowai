@@ -389,6 +389,20 @@ expr. (4) `x == 'a' AND y == 'b'` with `x` missing and `y` false is `fail` (hide
 (visible) — a section rule may name a not-yet-consumed driver in an AND and still hide on the consumed leg.
 (5) `last_rows(reg, n)` takes the last n COMPLETE rows in entry order (no `sort_by` column) — say so in the register note.
 
+**Encoding traps (Plan 3 Task 4, DWA-M-277E).** (1) `sum_rows` / `max_rows` over a register with NO complete rows
+is `manual_required` ("Keine vollständigen Zeilen"), so a formula over two registers (Eq. (1)'s Σ persons + Σ areas)
+must guard the optional one: `sum_rows(a, x) + if(count_rows(b) > 0, sum_rows(b, x), 0)` — `count_rows` is 0 on an
+empty register and `if()` short-circuits (the unused branch may be null). (2) A register-fed equation must live on the
+register's worksheet (the engine sees a register of its own worksheet only, and a `create` never sets
+`consumer_worksheets`); when the brief places the Σ on another worksheet, create register AND output together and STAGE
+the re-point of the prod equation (m277e-R-1 / -C-1). (3) A transposed limits table (categories as columns) is ONE
+single-key table with one value column per parameter (`TABLE4_LIMITS` keyed `quality_category`) — a `lookup_fill`
+selects the value column, so no key literal is needed; the brief's per-parameter split is unnecessary. (4) Prod enum
+tokens can be upper-case (`A1`, `C2`) — copy them from the capture, never from the brief. (5) Prod already holds a
+LEGACY table named `regulation_tables` (5,382 rows, columns `variant_value` / `value_text` …): the Plan-1 schema
+migration's `CREATE TABLE IF NOT EXISTS` is a no-op there and every Plan-3 seed INSERT fails on it while the runtime
+fallback masks the failure — sign-off m277e-I-1, to be resolved before ANY seed migration is applied.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still

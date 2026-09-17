@@ -1,0 +1,4364 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-M-277E m277e",
+    "captured_at": "2026-09-17T17:20:37.278Z",
+    "standard": "DWA-M-277E",
+    "slug": "m277e",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 198,
+    "section_rows": 216,
+    "sections_total": 216,
+    "equation_rows": 22
+  },
+  "M277E-01 A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-06"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-01 avg_inhabitants": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 building_type": {
+    "enum_values": [
+      {
+        "value": "single_family",
+        "label_de": "Einfamilienhaus",
+        "label_en": "Single-family house",
+        "order_index": 1,
+        "regulation_reference": "§1, Annex A"
+      },
+      {
+        "value": "multi_family",
+        "label_de": "Mehrfamilienhaus",
+        "label_en": "Multi-family house",
+        "order_index": 2,
+        "regulation_reference": "§1, Annex A"
+      },
+      {
+        "value": "rented_apartment",
+        "label_de": "Mietwohnung",
+        "label_en": "Rented apartment",
+        "order_index": 3,
+        "regulation_reference": "§1, Annex A"
+      },
+      {
+        "value": "public_commercial",
+        "label_de": "Oeffentliches/gewerbliches Gebaeude",
+        "label_en": "Public/commercial building",
+        "order_index": 4,
+        "regulation_reference": "§1, Annex A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-12",
+      "M277E-13",
+      "M277E-21"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 discharge_into_water_body": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09",
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-01 max_inhabitants": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16",
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 MBO_authorisation_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-01 MBO_notification_only": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-01 occupancy_fluctuation": {
+    "enum_values": [
+      {
+        "value": "constant",
+        "label_de": "Konstant",
+        "label_en": "Constant",
+        "order_index": 1,
+        "regulation_reference": "Annex A"
+      },
+      {
+        "value": "fluctuant",
+        "label_de": "Schwankend",
+        "label_en": "Fluctuant",
+        "order_index": 2,
+        "regulation_reference": "Annex A"
+      },
+      {
+        "value": "highly_fluctuant",
+        "label_de": "Stark schwankend",
+        "label_en": "Highly fluctuant",
+        "order_index": 3,
+        "regulation_reference": "Annex A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 P": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16",
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 storage_capacity_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-05",
+      "M277E-21",
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 treats_greywater": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-01 weekly_plant_utilisation": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-02 greywater_type": {
+    "enum_values": [
+      {
+        "value": "A1",
+        "label_de": "Typ A1 (Badewanne, Dusche)",
+        "label_en": "Type A1 (bathtub, shower)",
+        "order_index": 1,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "A2",
+        "label_de": "Typ A2 (Badewanne, Dusche, Handwaschbecken)",
+        "label_en": "Type A2 (bathtub, shower, hand washbasin)",
+        "order_index": 2,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "B1",
+        "label_de": "Typ B1 (A2 + Waschmaschine)",
+        "label_en": "Type B1 (A2 + washing machine)",
+        "order_index": 3,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "B2",
+        "label_de": "Typ B2 (A2 + Waschmaschine und/oder Küche)",
+        "label_en": "Type B2 (A2 + washing machine and/or kitchen)",
+        "order_index": 4,
+        "regulation_reference": "§5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-03",
+      "M277E-05",
+      "M277E-09"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-02 source_set": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "json",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 attest_m277e_03_req_24": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 COD": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 cryptosporidium": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 faecal_coliforms_untreated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 faecal_streptococci_untreated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 giardia": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_bathtub": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_dishwasher": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_hand_washbasin": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_kitchen_sink": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_shower": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_total": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 Q_GW_P_washing_machine": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-07"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 salmonella_sp": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 SS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 TN": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 TOS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 total_coliforms_untreated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09",
+      "M277E-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 total_colony_counts": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 TP": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-03 TS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-04 DIN_19650_class_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-04 discharge_into_water_body": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-21",
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-04 quality_category": {
+    "enum_values": [
+      {
+        "value": "C1",
+        "label_de": "C1 — Aufbereitung & Stabilisierung (Typ A)",
+        "label_en": "C1 — treatment and stabilisation (Type A)",
+        "order_index": 1,
+        "regulation_reference": "§6.3, Table 4"
+      },
+      {
+        "value": "C2",
+        "label_de": "C2 — Aufbereitung & Hygienisierung (Typ A oder B)",
+        "label_en": "C2 — treatment and hygienisation (Type A or B)",
+        "order_index": 2,
+        "regulation_reference": "§6.3, Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09",
+      "M277E-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-04 use_category": {
+    "enum_values": [
+      {
+        "value": "toilet_private",
+        "label_de": "Toilettenspülung (privat)",
+        "label_en": "Toilet flushing (private)",
+        "order_index": 1,
+        "regulation_reference": "§6.2.1, Table 4"
+      },
+      {
+        "value": "toilet_public",
+        "label_de": "Toilettenspülung (öffentlich)",
+        "label_en": "Toilet flushing (public)",
+        "order_index": 2,
+        "regulation_reference": "§6.2.1, Table 4"
+      },
+      {
+        "value": "irrigation_lawn",
+        "label_de": "Bewässerung (Rasen, Zierpflanzen)",
+        "label_en": "Irrigation (lawn, ornamental plants)",
+        "order_index": 3,
+        "regulation_reference": "§6.2.4, Table 4"
+      },
+      {
+        "value": "irrigation_crops",
+        "label_de": "Bewässerung (Nutzpflanzen)",
+        "label_en": "Irrigation (crop plants for consumption)",
+        "order_index": 4,
+        "regulation_reference": "§6.2.4, Table 4"
+      },
+      {
+        "value": "laundry_private",
+        "label_de": "Wäsche waschen (privat)",
+        "label_en": "Laundry (private)",
+        "order_index": 5,
+        "regulation_reference": "§6.2.2, Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-05 MBO_authorisation_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-05 MBO_notification_only": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-05 Q_SW_A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-06"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-05 Q_SW_P": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-06"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-06 greywater_type": {
+    "enum_values": [
+      {
+        "value": "A1",
+        "label_de": "Typ A1 (Badewanne, Dusche)",
+        "label_en": "Type A1 (bathtub, shower)",
+        "order_index": 1,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "A2",
+        "label_de": "Typ A2 (Badewanne, Dusche, Handwaschbecken)",
+        "label_en": "Type A2 (bathtub, shower, hand washbasin)",
+        "order_index": 2,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "B1",
+        "label_de": "Typ B1 (A2 + Waschmaschine)",
+        "label_en": "Type B1 (A2 + washing machine)",
+        "order_index": 3,
+        "regulation_reference": "§5"
+      },
+      {
+        "value": "B2",
+        "label_de": "Typ B2 (A2 + Waschmaschine und/oder Kueche)",
+        "label_en": "Type B2 (A2 + washing machine and/or kitchen)",
+        "order_index": 4,
+        "regulation_reference": "§5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17",
+      "M277E-09",
+      "M277E-08",
+      "M277E-19",
+      "M277E-14"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-06 Q_SW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-08",
+      "M277E-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-06 source_set": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "json",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-08",
+      "M277E-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-07 Q_GW_P": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_bathtub": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_dishwasher": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_hand_washbasin": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_kitchen_sink": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_shower": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_total": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-07 Q_GW_P_washing_machine": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-17"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 BOD5": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 COD": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 pH_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 Q_GWT": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-09",
+      "M277E-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-08 Q_WB": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-10",
+      "M277E-11"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-08 SS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-19"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 TN": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 TOS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 TP": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-08 TS": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 attest_m277e_09_req_26": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 attest_m277e_09_req_27": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 auto_fault_report": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 auto_switch_to_backfeed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 automatic_backfeed_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 booster_tube_length_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 booster_vertical_height_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 cryptosporidium": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 drinking_water_option_available": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 faecal_coliforms_untreated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-19"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 faecal_streptococci_untreated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 giardia": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 inflow_type": {
+    "enum_values": [
+      {
+        "value": "gravity",
+        "label_de": "Freigefaelle",
+        "label_en": "Gravity",
+        "order_index": 1,
+        "regulation_reference": "Annex A"
+      },
+      {
+        "value": "pump_station",
+        "label_de": "Hebeanlage/Pumpstation",
+        "label_en": "Pump station",
+        "order_index": 2,
+        "regulation_reference": "Annex A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 installation_frost_free": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 installation_location": {
+    "enum_values": [
+      {
+        "value": "in_house",
+        "label_de": "Gebaeudeintern (Aufstellung im Haus)",
+        "label_en": "In-house installation",
+        "order_index": 1,
+        "regulation_reference": "Annex A, §9.5"
+      },
+      {
+        "value": "buried_no_traffic",
+        "label_de": "Erdeingebaut ohne Verkehrslast",
+        "label_en": "Buried without traffic loading",
+        "order_index": 2,
+        "regulation_reference": "Annex A, §9.5"
+      },
+      {
+        "value": "buried_with_traffic",
+        "label_de": "Erdeingebaut mit Verkehrslast",
+        "label_en": "Buried with traffic loading",
+        "order_index": 3,
+        "regulation_reference": "Annex A, §9.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 network_separation_per_DIN_EN_1717": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 overflow_below_backed_up_water": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 pump_station_capacity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 room_height_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 room_length_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 room_width_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 salmonella_sp": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 service_water_isolated_from_drinking_water": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 service_water_labelled": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-11"
+    ],
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 smallest_door_dim_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 total_coliforms_untreated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-19",
+      "M277E-20"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 total_colony_counts": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-09 treatment_method": {
+    "enum_values": [
+      {
+        "value": "fb",
+        "label_de": "Festbettreaktor (FB)",
+        "label_en": "Fixed bed reactor (FB)",
+        "order_index": 1,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "sf",
+        "label_de": "Bodenfilter (SF)",
+        "label_en": "Soil filter system (SF)",
+        "order_index": 2,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "flb",
+        "label_de": "Wirbelbettreaktor (FLB)",
+        "label_en": "Fluidised bed reactor (FLB)",
+        "order_index": 3,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "mbr",
+        "label_de": "Membranbioreaktor (MBR)",
+        "label_en": "Membrane bioreactor (MBR)",
+        "order_index": 4,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "uv",
+        "label_de": "UV-Anlage (UV)",
+        "label_en": "UV system (UV)",
+        "order_index": 5,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "uf",
+        "label_de": "Ultrafiltration (UF)",
+        "label_en": "Ultrafiltration (UF)",
+        "order_index": 6,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "ro",
+        "label_de": "Umkehrosmose (RO)",
+        "label_en": "Reverse osmosis (RO)",
+        "order_index": 7,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "stabilisation",
+        "label_de": "Stabilisierung",
+        "label_en": "Stabilisation",
+        "order_index": 8,
+        "regulation_reference": "Table 4, §6.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-10"
+    ],
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 UV_transmission_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-12",
+      "M277E-10"
+    ],
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-09 V_buffer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 attest_m277e_10_req_20": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 attest_m277e_10_req_22": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 attest_m277e_10_req_25": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 BOD5": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 e_coli": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 o2_saturation_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 p_aeruginosa": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 pH_value": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 sampling_location": {
+    "enum_values": [
+      {
+        "value": "reservoir_or_consumer",
+        "label_de": "Speicher/Entnahmestelle (Verbraucher)",
+        "label_en": "Reservoir/Consumer",
+        "order_index": 1,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "reservoir",
+        "label_de": "Speicher",
+        "label_en": "Reservoir",
+        "order_index": 2,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "consumer",
+        "label_de": "Entnahmestelle (Verbraucher)",
+        "label_en": "Consumer",
+        "order_index": 3,
+        "regulation_reference": "Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 total_coliforms_treated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 turbidity_NTU": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 turbidity_NTU_C1": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-10 use_category": {
+    "enum_values": [
+      {
+        "value": "toilet_private",
+        "label_de": "Toilettenspuelung (privat)",
+        "label_en": "Toilet flushing (private)",
+        "order_index": 1,
+        "regulation_reference": "§6.2.1, Table 4"
+      },
+      {
+        "value": "toilet_public",
+        "label_de": "Toilettenspuelung (oeffentlich)",
+        "label_en": "Toilet flushing (public)",
+        "order_index": 2,
+        "regulation_reference": "§6.2.1, Table 4"
+      },
+      {
+        "value": "irrigation_lawn",
+        "label_de": "Bewaesserung (Rasen, Zierpflanzen)",
+        "label_en": "Irrigation (lawn, ornamental plants)",
+        "order_index": 3,
+        "regulation_reference": "§6.2.4, Table 4"
+      },
+      {
+        "value": "irrigation_crops",
+        "label_de": "Bewaesserung (Nutzpflanzen)",
+        "label_en": "Irrigation (crop plants)",
+        "order_index": 4,
+        "regulation_reference": "§6.2.4, Table 4"
+      },
+      {
+        "value": "laundry_private",
+        "label_de": "Waesche waschen (privat)",
+        "label_en": "Laundry (private)",
+        "order_index": 5,
+        "regulation_reference": "§6.2.2, Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-12",
+      "M277E-20",
+      "M277E-11",
+      "M277E-19",
+      "M277E-14"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-11 A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-11 authority_notification_sent": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-11 DIN_19650_class_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-11 handover_certificate_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-11 maintenance_contract_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-11 owner_or_user_change": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-11 user_manual_handed_over": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-11 WHG_permit_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-12 drinking_water_option_available": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-12 laundry_cleaning_application": {
+    "enum_values": [
+      {
+        "value": "laundry",
+        "label_de": "Waesche waschen",
+        "label_en": "Laundry",
+        "order_index": 1,
+        "regulation_reference": "§6.2.2"
+      },
+      {
+        "value": "building_cleaning",
+        "label_de": "Gebaeudereinigung (Boden-/Terrassenreinigung)",
+        "label_en": "Building cleaning (floor/terrace)",
+        "order_index": 2,
+        "regulation_reference": "§6.2.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-12 ralgz_992_documented": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-12 recommended_C2_quality_ack": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-13 applicable_quality_standard": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-13 application_type_commercial": {
+    "enum_values": [
+      {
+        "value": "operational_area_cleaning",
+        "label_de": "Reinigung von Betriebsflaechen",
+        "label_en": "Cleaning of operational areas",
+        "order_index": 1,
+        "regulation_reference": "§6.2.3"
+      },
+      {
+        "value": "vehicle_cleaning",
+        "label_de": "Fahrzeugreinigung",
+        "label_en": "Vehicle cleaning",
+        "order_index": 2,
+        "regulation_reference": "§6.2.3"
+      },
+      {
+        "value": "other_commercial",
+        "label_de": "Sonstige gewerbliche/industrielle/oeffentliche Anwendung",
+        "label_en": "Other commercial/industrial/public application",
+        "order_index": 3,
+        "regulation_reference": "§6.2.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-13 quality_requirements_tailored": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-13 treatment_indispensable_ack": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-14 quality_category": {
+    "enum_values": [
+      {
+        "value": "C1",
+        "label_de": "C1 — Aufbereitung & Stabilisierung",
+        "label_en": "C1 — treatment and stabilisation",
+        "order_index": 1,
+        "regulation_reference": "§6.3, Table 4"
+      },
+      {
+        "value": "C2",
+        "label_de": "C2 — Aufbereitung & Hygienisierung",
+        "label_en": "C2 — treatment and hygienisation",
+        "order_index": 2,
+        "regulation_reference": "§6.3, Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-20",
+      "M277E-23",
+      "M277E-24",
+      "M277E-19"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-15 irrigation_season_length": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-15 Q_SW_A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-15 Q_SW_P": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-16"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-16 Q_SW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-18",
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M277E-17 Q_GW": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-18",
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M277E-18 drinking_water_savings_rate": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 Q_GWT": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-19",
+      "M277E-20",
+      "M277E-21",
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M277E-18 Q_WB": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-23",
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M277E-18 Q_WB_base": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 Q_WB_irrig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 V_GW_annual": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 V_surplus_annual": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 V_SW_annual": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 V_topup_annual": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-18 V_treated_annual": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-19 process_sequence": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-19 selected_hygienisation": {
+    "enum_values": [
+      {
+        "value": "uv",
+        "label_de": "UV-Desinfektion (UV)",
+        "label_en": "UV disinfection (UV)",
+        "order_index": 1,
+        "regulation_reference": "§6.3"
+      },
+      {
+        "value": "uf",
+        "label_de": "Ultrafiltration (UF)",
+        "label_en": "Ultrafiltration (UF)",
+        "order_index": 2,
+        "regulation_reference": "§6.3"
+      },
+      {
+        "value": "ro",
+        "label_de": "Umkehrosmose (RO)",
+        "label_en": "Reverse osmosis (RO)",
+        "order_index": 3,
+        "regulation_reference": "§6.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-19 system_rated_capacity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-19 treatment_method": {
+    "enum_values": [
+      {
+        "value": "fb",
+        "label_de": "Festbettreaktor (FB)",
+        "label_en": "Fixed bed reactor (FB)",
+        "order_index": 1,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "sf",
+        "label_de": "Bodenfilter (SF)",
+        "label_en": "Soil filter system (SF)",
+        "order_index": 2,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "flb",
+        "label_de": "Wirbelbettreaktor (FLB)",
+        "label_en": "Fluidised bed reactor (FLB)",
+        "order_index": 3,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "mbr",
+        "label_de": "Membranbioreaktor (MBR)",
+        "label_en": "Membrane bioreactor (MBR)",
+        "order_index": 4,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "uv",
+        "label_de": "UV-Anlage (UV)",
+        "label_en": "UV system (UV)",
+        "order_index": 5,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "uf",
+        "label_de": "Ultrafiltration (UF)",
+        "label_en": "Ultrafiltration (UF)",
+        "order_index": 6,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "ro",
+        "label_de": "Umkehrosmose (RO)",
+        "label_en": "Reverse osmosis (RO)",
+        "order_index": 7,
+        "regulation_reference": "Table 4, §6.3"
+      },
+      {
+        "value": "stabilisation",
+        "label_de": "Stabilisierung",
+        "label_en": "Stabilisation",
+        "order_index": 8,
+        "regulation_reference": "Table 4, §6.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-20",
+      "M277E-24"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-20 membrane_process_selected": {
+    "enum_values": [
+      {
+        "value": "mbr",
+        "label_de": "Membranbioreaktor (MBR)",
+        "label_en": "Membrane bioreactor (MBR)",
+        "order_index": 1,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "uf",
+        "label_de": "Ultrafiltration (UF)",
+        "label_en": "Ultrafiltration (UF)",
+        "order_index": 2,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "ro",
+        "label_de": "Umkehrosmose (RO)",
+        "label_en": "Reverse osmosis (RO)",
+        "order_index": 3,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "none",
+        "label_de": "Keines",
+        "label_en": "None",
+        "order_index": 4,
+        "regulation_reference": "Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-20 uv_disinfection_used": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-20 UV_transmission_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 automatic_backfeed_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 backfeed_required_flow": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 backfeed_source": {
+    "enum_values": [
+      {
+        "value": "drinking_water",
+        "label_de": "Trinkwasser",
+        "label_en": "Drinking water",
+        "order_index": 1,
+        "regulation_reference": "§7.2"
+      },
+      {
+        "value": "rainwater",
+        "label_de": "Regenwasser",
+        "label_en": "Rainwater",
+        "order_index": 2,
+        "regulation_reference": "§7.2"
+      },
+      {
+        "value": "other",
+        "label_de": "Sonstige Wasserquelle",
+        "label_en": "Other water source",
+        "order_index": 3,
+        "regulation_reference": "§7.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 backfeed_switch_on_level": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 booster_pump_capacity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 booster_tube_length_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 booster_vertical_height_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 colour_coding_applied": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 control_panel_included": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 inflow_type": {
+    "enum_values": [
+      {
+        "value": "gravity",
+        "label_de": "Freigefaelle",
+        "label_en": "Gravity",
+        "order_index": 1,
+        "regulation_reference": "Annex A"
+      },
+      {
+        "value": "pump_station",
+        "label_de": "Hebeanlage/Pumpstation",
+        "label_en": "Pump station",
+        "order_index": 2,
+        "regulation_reference": "Annex A"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 maintenance_interval_months": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 network_separation_per_DIN_EN_1717": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 overflow_below_backed_up_water": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 post_storage_volume_l": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 pre_storage_volume_l": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 pump_configuration": {
+    "enum_values": [
+      {
+        "value": "single_pump",
+        "label_de": "Einzelpumpe",
+        "label_en": "Single-pump",
+        "order_index": 1,
+        "regulation_reference": "§7.3"
+      },
+      {
+        "value": "multi_pump",
+        "label_de": "Mehrpumpenanlage",
+        "label_en": "Multi-pump",
+        "order_index": 2,
+        "regulation_reference": "§7.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 pump_dry_run_protection": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 pump_station_capacity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 service_water_isolated_from_drinking_water": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 service_water_labelled": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-21 service_water_meter_installed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 tapping_points_labelled": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-21 V_buffer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "M277E-22 installation_frost_free": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-22 installation_location": {
+    "enum_values": [
+      {
+        "value": "in_house",
+        "label_de": "Gebaeudeintern (Aufstellung im Haus)",
+        "label_en": "In-house installation",
+        "order_index": 1,
+        "regulation_reference": "Annex A, §9.5"
+      },
+      {
+        "value": "buried_no_traffic",
+        "label_de": "Erdeingebaut ohne Verkehrslast",
+        "label_en": "Buried without traffic loading",
+        "order_index": 2,
+        "regulation_reference": "Annex A, §9.5"
+      },
+      {
+        "value": "buried_with_traffic",
+        "label_de": "Erdeingebaut mit Verkehrslast",
+        "label_en": "Buried with traffic loading",
+        "order_index": 3,
+        "regulation_reference": "Annex A, §9.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-22 room_height_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-22 room_length_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-22 room_width_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-22 smallest_door_dim_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-23 attest_m277e_23_req_25": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-23 auto_fault_report": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-23 auto_switch_to_backfeed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-23 maintenance_contract_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-23 sampling_location": {
+    "enum_values": [
+      {
+        "value": "reservoir_or_consumer",
+        "label_de": "Speicher/Entnahmestelle (Verbraucher)",
+        "label_en": "Reservoir/Consumer",
+        "order_index": 1,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "reservoir",
+        "label_de": "Speicher",
+        "label_en": "Reservoir",
+        "order_index": 2,
+        "regulation_reference": "Table 4"
+      },
+      {
+        "value": "consumer",
+        "label_de": "Entnahmestelle (Verbraucher)",
+        "label_en": "Consumer",
+        "order_index": 3,
+        "regulation_reference": "Table 4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-23 user_manual_handed_over": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "M277E-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 authority_notification_sent": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 ce_conformity_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-24 e_coli": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 handover_certificate_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 health_authority_notified": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-24 ifsg_pathogen_risk_addressed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-24 machinery_directive_conformity": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-24 mbo_building_notification_filed": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "M277E-24 o2_saturation_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 owner_or_user_change": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 p_aeruginosa": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 total_coliforms_treated": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 turbidity_NTU": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 turbidity_NTU_C1": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "M277E-24 WHG_permit_present": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "sections": {
+    "M277E-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-13 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-14 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-15 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-16 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-17 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-18 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-19 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-20 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-21 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-22 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-23 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "M277E-24 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "M277E-06 Eq. (1)": {
+      "id": "ca5fdae7-753b-42a7-a3fa-80034935d7fd",
+      "output_symbol": "Q_SW",
+      "input_symbols": [
+        "Q_SW_P",
+        "P",
+        "Q_SW_A",
+        "A"
+      ]
+    },
+    "M277E-06 Ex. 9.2": {
+      "id": "89340a0c-143a-4a2c-bba4-872906416e66",
+      "output_symbol": "Q_SW",
+      "input_symbols": []
+    },
+    "M277E-07 Eq. (2)": {
+      "id": "513e8d90-bf9f-4255-93c3-784b37a178d5",
+      "output_symbol": "Q_GW",
+      "input_symbols": [
+        "Q_GW_P",
+        "P"
+      ]
+    },
+    "M277E-07 Ex. 9.3-A1": {
+      "id": "8e434536-7820-4038-9691-bb37b6a9a653",
+      "output_symbol": "Q_GW",
+      "input_symbols": []
+    },
+    "M277E-07 Ex. 9.3-A2": {
+      "id": "dd0ccdaf-8fa5-4b04-973f-45604e1184df",
+      "output_symbol": "Q_GW",
+      "input_symbols": []
+    },
+    "M277E-08 Eq. (3)": {
+      "id": "b1d09312-e8b8-4087-bed6-35170514b298",
+      "output_symbol": "Q_GWT",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-08 Eq. (4)": {
+      "id": "5389af5f-a563-4401-9035-74223ec27f03",
+      "output_symbol": "Q_GWT",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-08 Ex. 9.4": {
+      "id": "7f92ffee-c3a3-461a-9dae-175a947c6676",
+      "output_symbol": "Q_GWT",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-08 Ex. 9.4-WB": {
+      "id": "8ed7e9e9-b247-482a-924c-d1e7f5a435fd",
+      "output_symbol": "Q_WB",
+      "input_symbols": []
+    },
+    "M277E-08 QWB": {
+      "id": "554b0a01-3356-4a62-9780-fd727a569add",
+      "output_symbol": "Q_WB",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-09 Buffer": {
+      "id": "4df4256f-4098-4b6f-94bd-e5c67276d3a8",
+      "output_symbol": "V_buffer",
+      "input_symbols": [
+        "Q_GWT"
+      ]
+    },
+    "M277E-16 Eq. (1)": {
+      "id": "8c9906c9-cc6e-4510-bda2-4e6a079ea912",
+      "output_symbol": "Q_SW",
+      "input_symbols": [
+        "Q_SW_P",
+        "P",
+        "Q_SW_A",
+        "A"
+      ]
+    },
+    "M277E-16 Ex. 9.2": {
+      "id": "4cc17e46-f898-42b9-9836-2184a12f3c5f",
+      "output_symbol": "Q_SW",
+      "input_symbols": []
+    },
+    "M277E-17 Eq. (2)": {
+      "id": "1bf4c266-f2d8-4935-8239-270d8521fd0b",
+      "output_symbol": "Q_GW",
+      "input_symbols": [
+        "Q_GW_P",
+        "P"
+      ]
+    },
+    "M277E-17 Ex. 9.3-A1": {
+      "id": "7e6180be-2e90-4172-ac9c-cf23fb533edb",
+      "output_symbol": "Q_GW",
+      "input_symbols": []
+    },
+    "M277E-17 Ex. 9.3-A2": {
+      "id": "9a24e0c9-12da-473e-8a7c-220fce1f4129",
+      "output_symbol": "Q_GW",
+      "input_symbols": []
+    },
+    "M277E-18 Eq. (3)": {
+      "id": "7bdc5484-3384-4105-8a4a-8e9bcda32008",
+      "output_symbol": "Q_GWT",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-18 Eq. (4)": {
+      "id": "f1ecf49d-6e05-4719-a3e8-0846b5148710",
+      "output_symbol": "Q_GWT",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-18 Ex. 9.4": {
+      "id": "dabf250c-2792-4deb-9700-4036e77a164b",
+      "output_symbol": "Q_GWT",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-18 Ex. 9.4-WB": {
+      "id": "66da37aa-60cd-4ee9-8bc2-6a1c030dff2e",
+      "output_symbol": "Q_WB",
+      "input_symbols": []
+    },
+    "M277E-18 QWB": {
+      "id": "8a98dcc1-054d-4a93-83c2-aa72b650f079",
+      "output_symbol": "Q_WB",
+      "input_symbols": [
+        "Q_GW",
+        "Q_SW"
+      ]
+    },
+    "M277E-21 Buffer": {
+      "id": "0b9966ea-64bc-43ae-b410-476a19b5f4ea",
+      "output_symbol": "V_buffer",
+      "input_symbols": [
+        "Q_GWT"
+      ]
+    }
+  }
+}

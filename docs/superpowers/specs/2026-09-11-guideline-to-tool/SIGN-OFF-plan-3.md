@@ -758,3 +758,228 @@ Report: `reports/plan-3-a262e.md` · STAGED SQL: `scripts/verification/a262e-STA
 - **Scalar-only equations are not server-materialised** (2a design; register-fed ones are) — A262-11-D1 / -26-D1 / -26-D2 / -21-D1 / -24-D1 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
 - **Self-consumers in prod (fix round 2):** DIN-1989-1-04 `E_R` and `BW_a` list their OWN worksheet in `consumer_worksheets` (re-capture 2026-09-17) — a prod data oddity the transitive guard now names ("consumed only by itself"); it still refuses (din1989_1-C-3), and the owner may want the self-entries removed from prod as part of that ruling.
 - **Transitive producer guard (fix round 1):** the emitter now refuses a rule that hides an INPUT of a same-worksheet equation whose output is consumed (chain named in the message); the prior carries `equations`. Re-capture + re-emit found four withdrawals across the three encoded standards: a138 `k_f_FS` (C-6) and A138-20 B (C-7), din1989_1 DIN-1989-1-04 B (C-3), a262e A262-06 B / A262-28 B (C-1) and `q_R_Tr` / `Q_R_Tr` (C-7).
+
+## Task 4 — DWA-M-277E (m277e)
+
+Report: `reports/plan-3-m277e.md` · STAGED SQL: `scripts/verification/m277e-STAGED-plan3-rulings.sql` (same ids, full SQL per block) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-M-277E\DWA-M_277E (1).md` (English edition, October 2017; lines cited) · prod capture `src/lib/eval/field-configs/m277e.prior.json` (2026-09-17, read-only; 198 fields, 216 sections, 22 equations) + `prod-query.mjs` for the 22 equation rows (ids, formulas, status), the 63 compliance rows and the field units. Ids follow the Task-4 brief where it named them (R/D/G/C/S/X/F/J/P/U); I = interface-gap. Nothing below is applied.
+
+### m277e-C-1 · DWA-M-277E · M277E-06 · grauwasserquellen / Q_GW_rows / greywater_type_code → M277E-07, -17 (-02)
+- Class: consumer-edit
+- Chosen now (fail-safe): the register, the Σ (`Q_GW_rows`) and the type code are created on M277E-06 and compute there; prod's Eq. (2) on M277E-07 / -17 (`Q_GW = SUM(Q_GW_P_i * P_i)`, a phantom-symbol SUM) is untouched.
+- Evidence (verbatim, transcript line): "The daily total greywater inflow can be determined using Table 2 (see Section 5) und is calculated from the subtotals of the single greywater sources according to the following formula:" (L669); "\mathrm{Q}_{\mathrm{GW}}=\Sigma\left(\mathrm{Q}_{\mathrm{GW}-\mathrm{P}, \mathrm{i}} \cdot \mathrm{P}_{\mathrm{i}}\right) \quad(\mathrm{I} / \mathrm{d}) \tag{2}" (L672). Prod: Eq. (2) ids 513e8d90-… (M277E-07) / 1bf4c266-… (M277E-17), inputs {Q_GW_P, P}; a created field carries no consumers.
+- Proposed SQL / config: STAGED block m277e-C-1 (consumer_worksheets of the three created fields).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-C-2 · DWA-M-277E · M277E-16 · quality_category_code_rows → M277E-14; Q_SW_rows → M277E-06
+- Class: consumer-edit
+- Chosen now (fail-safe): both codes/sums compute on M277E-16 only; `quality_category` (M277E-14, manual) keeps driving -19/-20/-23/-24.
+- Evidence (verbatim, transcript line): "Decisive for system dimensioning is the highest quality standard." (L649); "Minimum service water quality: C2 due to the irrigation of the kitchen garden." (L663). Prod: M277E-14 quality_category consumed by M277E-19, -20, -23, -24; Eq. (1) on M277E-06 (ca5fdae7-…) and M277E-16 (8c9906c9-…).
+- Proposed SQL / config: STAGED block m277e-C-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-C-3 · DWA-M-277E · M277E-20 UV_transmission_pct · M277E-11 DIN_19650_class_documented, A · M277E-15 Q_SW_A, irrigation_season_length · visible_when withheld
+- Class: consumer-edit
+- Chosen now (fail-safe): no rule on these five (four are consumed producers — the emitter guard would refuse; `irrigation_season_length` has no `use_category` in scope and would never hide); they stay visible. The brief's `selected_hygienisation`, `membrane_process_selected`, `uv_disinfection_used` ← C2 rules ARE emitted.
+- Evidence (verbatim, transcript line): "*UV Transmission > 60 \% is recommended." (L517); "Quality requirements for irrigation water are regulated by DIN 19650. […] each of which must be verified depending on the intended use (see DIN 19650: Table 4)." (L470); "A & $m^{2}$ & Irrigation area" (L629). Capture: UV_transmission_pct (M277E-20) consumed by M277E-24; DIN_19650_class_documented (M277E-11) by M277E-24; A (M277E-11) by M277E-16; Q_SW_A (M277E-15) by M277E-16; use_category (M277E-10) consumers = {-12, -20, -11, -19, -14}, (M277E-04) = {-09}.
+- Proposed SQL / config: STAGED block m277e-C-3 (rules listed; apply after the consumers are re-pointed to the M277E-16 registers or N.A. accepted).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-C-4 · DWA-M-277E · M277E-21 · storage_capacity_calc_m3 → M277E-01, -05
+- Class: consumer-edit
+- Chosen now (fail-safe): the register Σ computes on M277E-21; `storage_capacity_m3` (M277E-01) stays the manual input REQ-29 reads; `mbo_authorisation_code` (M277E-05-D1) reads that manual value today.
+- Evidence (verbatim, transcript line): "According to the Building Law, the installation of a rainwater or greywater reuse system with a storage capacity up to $50 \mathrm{~m}^{3}$ usually requires a mere notification (Model Building Code: MBO 2002 § 61 Para. 5c)." (L329); "Depending on the type of technology used, storage of the greywater should be provided for before and/or after treatment. It is recommended that the total buffer volume corresponds to one-day treatment capacity." (L574).
+- Proposed SQL / config: STAGED block m277e-C-4 (prerequisite of m277e-R-5).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-R-1 · DWA-M-277E · M277E-07 / M277E-17 · Eq. (2) → `Q_GW = Q_GW_rows`
+- Class: equation-replacement
+- Chosen now (fail-safe): not replaced; `Q_GW_rows` is a new derived field on M277E-06 (Σ = 1,375 l/d for the §9.3 A1 example, pinned).
+- Evidence (verbatim, transcript line): Eq. (2) (L672); "Q_{G W}=25 \mathrm{P} \cdot 40 \mathrm{l} /(\mathrm{P} \cdot \mathrm{~d}) \text { shower }+25 \mathrm{P} \cdot 15 \mathrm{l} /(\mathrm{P} \cdot \mathrm{~d}) \text { bathtub }" (L692); "Q_{G W}=1,375 \mathrm{l} / \mathrm{d}" (L693). Prod: both rows `verified_against_standard`, formula 'Q_GW = SUM(Q_GW_P_i * P_i)'.
+- Proposed SQL / config: STAGED block m277e-R-1 (UPDATE guarded on the SUM formula; needs m277e-C-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-R-2 · DWA-M-277E · M277E-16 / M277E-06 · Eq. (1) → `Q_SW = Q_SW_rows`
+- Class: equation-replacement
+- Chosen now (fail-safe): not replaced; `Q_SW_rows` (Σ persons + Σ areas = 875 l/d for the §9.2 example, pinned) is a new derived field on M277E-16.
+- Evidence (verbatim, transcript line): "Q_{S W}=\Sigma\left(Q_{S W-P, i} \cdot P_{i}\right)+\Sigma\left(Q_{S W-A, j} \cdot A_{j}\right) \tag{1}" (L618); "& Q_{S W}=25 \mathrm{P} \cdot 33 \mathrm{l} /(\mathrm{P} \cdot \mathrm{~d}) \text { toilet }+60 \mathrm{l} / \mathrm{m}^{2} \cdot 150 \mathrm{~m}^{2} / 180 \mathrm{~d} \text { kitchen garden }" (L658); "Q_{S W}=875 \mathrm{l} / \mathrm{d}" (L659).
+- Proposed SQL / config: STAGED block m277e-R-2 (M277E-16 needs no consumer edit; M277E-06 needs m277e-C-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-R-3 · DWA-M-277E · M277E-06/-07/-08/-16/-17/-18 · 12 duplicate / worked-example equation rows
+- Class: deactivation
+- Chosen now (fail-safe): nothing deleted; the brief's `Q_GWT_calc` / `V_buffer_calc` are NOT emitted because prod already computes `Q_GWT = min(Q_GW, Q_SW)` (Eq. (3)) and `V_buffer = Q_GWT * 1` — a second equation per quantity is never added; the §9.2–§9.4 numbers are unit-test fixtures instead.
+- Evidence (verbatim, transcript line): "& Q_{\mathrm{GWT}}=Q_{\mathrm{GW}} \text {, when } Q_{\mathrm{SW}}>Q_{\mathrm{GW}}(\mathrm{l} / \mathrm{d})  \tag{3}\\" (L723); "& Q_{\mathrm{GWT}}=Q_{\mathrm{SW}} \text {, when } Q_{\mathrm{GW}}>Q_{\mathrm{SW}}(\mathrm{l} / \mathrm{d}) \tag{4}" (L724); "Decisive for the hydraulic dimensioning is the smaller value in each case." (L718). Prod: Eq. (3), Eq. (4) and "Ex. 9.4" all read 'Q_GWT = min(Q_GW, Q_SW)' on M277E-08 and -18; "Ex. 9.4-WB" 'Q_WB = 1625 - 875'; "Ex. 9.2" 'Q_SW = 25*33 + 60*150/180'; "Ex. 9.3-A1/-A2" literal sums — all `verified_against_standard`.
+- Proposed SQL / config: STAGED block m277e-R-3 (twelve guarded DELETEs, ids listed).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-R-4 · DWA-M-277E · M277E-09 / M277E-21 · Buffer `V_buffer = Q_GWT * 1` twice; REQ-19
+- Class: deactivation
+- Chosen now (fail-safe): both rows stay; no `V_buffer_calc` emitted (single source); REQ-19 (`V_buffer >= Q_GWT`, warn on -09 and -19) unchanged.
+- Evidence (verbatim, transcript line): "It is recommended that the total buffer volume corresponds to one-day treatment capacity." (L574) — "recommended" ⇒ the `1` is one day, warn-class.
+- Proposed SQL / config: STAGED block m277e-R-4 (delete the M277E-09 copy with the -09 dissolution; re-home REQ-19 to M277E-21).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-R-5 · DWA-M-277E · M277E-01 · storage_capacity_m3 ← storage_capacity_calc_m3
+- Class: equation-replacement
+- Chosen now (fail-safe): `storage_capacity_calc_m3` (register Σ / 1000) is a new derived field on M277E-21; the manual `storage_capacity_m3` on M277E-01 keeps feeding REQ-29 and M277E-05-D1.
+- Evidence (verbatim, transcript line): L329 (50 m³); L574 (storage before/after treatment, buffer). Prod: storage_capacity_m3 unit 'm^3', consumed by M277E-05, -21, -24.
+- Proposed SQL / config: STAGED block m277e-R-5 (new equation M277E-01-D1 after m277e-C-4; retire pre_/post_storage_volume_l).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-D-1 · DWA-M-277E · M277E-06 · greywater_type ← greywater_type_code
+- Class: data_type
+- Chosen now (fail-safe): `greywater_type` stays the manual select (consumed by five worksheets); the code 1–4 computes next to it (M277E-06-D1) with TABLE2_TYPE carrying label + range per code; no gate ties them yet.
+- Evidence (verbatim, transcript line): "- Type A1: greywater from bathtubs and showers" (L386); "- Type A2: greywater from bathtubs, showers and hand washbasins" (L387); "- Type B1: greywater from bathtubs, showers, hand washbasins and washing machines" (L390); "- Type B2: greywater from bathtubs, showers, hand washbasins, washing machines and/or kitchen." (L391). Engine: equations output numbers, never an enum string.
+- Proposed SQL / config: STAGED block m277e-D-1 (option a: four consistency gates `IF greywater_type == A1 THEN greywater_type_code == 1` …; option b: retype).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-D-2 · DWA-M-277E · M277E-14 · quality_category ← quality_category_code_rows
+- Class: data_type
+- Chosen now (fail-safe): manual select stays; the code computes on M277E-16 (2 for the §9.2 example, 1 for private toilets only — pinned).
+- Evidence (verbatim, transcript line): L649; L663; Tab. 4 use rows "Toilet flushing (private) & + & +" (L503) … "Toilet flushing (public) & - & +" (L507).
+- Proposed SQL / config: STAGED block m277e-D-2 (gate `IF quality_category == C1 THEN quality_category_code_rows == 1` on M277E-14 after m277e-C-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-D-3 · DWA-M-277E · M277E-01 / M277E-05 · MBO_notification_only, MBO_authorisation_required ← mbo_authorisation_code
+- Class: data_type
+- Chosen now (fail-safe): the two manual booleans stay (REQ-29 reads them); `mbo_authorisation_code` (0/1) computes on M277E-05 from the inherited `storage_capacity_m3` (50 → 0, 50.5 → 1, pinned).
+- Evidence (verbatim, transcript line): L329. Prod REQ-29 (M277E-01, block): '(storage_capacity_m3 <= 50 AND MBO_notification_only == true) OR (storage_capacity_m3 > 50 AND MBO_authorisation_require…'.
+- Proposed SQL / config: STAGED block m277e-D-3 (re-point REQ-29 to the code; retire the -05 copies).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-G-1 · DWA-M-277E · M277E-24 · REQ-08/-09/-14/-14E/-15 onto the Tab.-4 limit symbols
+- Class: gate-guard
+- Chosen now (fail-safe): the literal gates stay (their numbers equal the seeded TABLE4_LIMITS cells — pinned); the limit fills (`turbidity_limit` … `p_aeruginosa_limit`, role limit) are display + register inputs on M277E-24.
+- Evidence (verbatim, transcript line): Tab. 4 parameter block L495–L502 ("Turbidity & - & < 2 NTU", "$<5 \mathrm{mg} / \mathrm{l}$", "> 50 \%", "6.5-9.5", "$<10,000 / 100 \mathrm{ml}$", "$<1,000 / 100 \mathrm{ml}$", "$<100 / 100 \mathrm{ml}$"). Prod gates live on M277E-10 / -23 / -04 / -08 where the created limit symbols are not in scope.
+- Proposed SQL / config: STAGED block m277e-G-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-G-2 · DWA-M-277E · M277E-19 · treatment_method_allowed == 1 (Tab. 4 process list)
+- Class: gate-guard
+- Chosen now (fail-safe): `treatment_method_allowed` (M277E-19-D1) computes 0/1 from TABLE4_PROCESSES per category; no gate.
+- Evidence (verbatim, transcript line): "\hline \multirow{2}{*}{} & & \multirow[b]{2}{*}{FB, SF, FLB, Stabilisation} & FB, SF, FLB, MBR \\" (L508); "\hline & Exemplary processes and other treatment stages & & + UV, UF, RO \\" (L509); "This compilation is not exhaustive with regard to technology and allocation of particular uses to the single technologies." (L480).
+- Proposed SQL / config: STAGED block m277e-G-2 (`warn`, because "not exhaustive").
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-G-3 · DWA-M-277E · M277E-04 · REQ-24 guard on the irrigation uses
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-24 (`DIN_19650_class_documented == true`, block, unconditional) unchanged.
+- Evidence (verbatim, transcript line): L470 ("Quality requirements for irrigation water are regulated by DIN 19650 … The application of standards according to DIN 19650 is recommended for private households.").
+- Proposed SQL / config: STAGED block m277e-G-3 (`IF use_category IN {irrigation_lawn, irrigation_crops} THEN …`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-G-4 · DWA-M-277E · M277E-11 · REQ-13 (authority notification)
+- Class: gate-guard
+- Chosen now (fail-safe): unchanged — the inventory called it "unguarded", but the printed duty is unconditional.
+- Evidence (verbatim, transcript line): "owners of rainwater and greywater treatment/reuse systems are obliged to notify the health authority upon commissioning." (L343); "The operation and start-up of a greywater reuse system should be reported to the responsible authority in accordance with the guidelines of the Drinking Water Ordinance." (L593).
+- Proposed SQL / config: none (DEFER = keep); the owner/user-change re-notification (L343) is residue.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-G-5 · DWA-M-277E · 13 "-2" duplicate gate codes
+- Class: severity
+- Chosen now (fail-safe): nothing changed; both rows of each pair keep firing.
+- Evidence: prod capture (63 rows) — REQ-21 warn vs REQ-21-2 block, REQ-28 warn vs REQ-28-2 block (same conditions); REQ-26 / REQ-27 (attest booleans) vs REQ-26-2 / REQ-27-2 (`automatic_backfeed_present == true`); nine identical pairs (True/true). "In the event of failure of the service water supply it is recommended to switch automatically to the water backfeed system. The failure should be reported automatically." (L601).
+- Proposed SQL / config: STAGED block m277e-G-5 (delete the "-2" rows; owner rules warn vs block for REQ-21/-28).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-G-6 · DWA-M-277E · M277E-24 · treated_samples_fail == 0
+- Class: gate-guard
+- Chosen now (fail-safe): the count computes (3 of 4 failing samples in the pinned C2 fixture; strict "<" / ">" as printed); no gate.
+- Evidence (verbatim, transcript line): L495–L502; "\hline & sampling & - & Reservoir/Consumer \\" (L502).
+- Proposed SQL / config: STAGED block m277e-G-6 (new block gate REQ-34).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-S-1 · DWA-M-277E · M277E-10 / M277E-24 · turbidity_NTU_C1
+- Class: deactivation
+- Chosen now (fail-safe): never hidden, still a number input ("C1 has no turbidity requirement (Tab. 4)" per its prod description); `turbidity_NTU` is hidden under C1 instead.
+- Evidence (verbatim, transcript line): "\hline \multirow{4}{*}{Biochemical/chemicalphysical parameters} & Turbidity & - & < 2 NTU \\" (L495).
+- Proposed SQL / config: STAGED block m277e-S-1 (`active = false` on both copies).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-X-1 · DWA-M-277E · M277E-02/-06 source_set · M277E-03/-07 Q_GW_P_* (retirement)
+- Class: cross-standard
+- Chosen now (fail-safe): all stay; the Plan-1 `source_set` select_many config (German tokens "Dusche" … "Geschirrspüler", `20260911120000_selection_configs_DWA_M_277E.sql`) is untouched (D-1); the register's `source` tokens are the prod `Q_GW_P_<source>` suffixes — no mapping between the two is needed because the register is a new field.
+- Evidence (verbatim, transcript line): L393; L406 (Tab. 2 water-volume row); L672 Eq. (2).
+- Proposed SQL / config: STAGED block m277e-X-1 (deactivate 14 scalars + 2 json fields after m277e-R-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-X-2 · DWA-M-277E · 72 re-typed duplicates (inventory §4 "~90"; capture: 72 symbols on two worksheets)
+- Class: cross-standard
+- Chosen now (fail-safe): nothing collapsed; the owner-per-symbol proposal (M277E-09 dissolved into -21/-22/-23; -03 vs -08; -10 vs -24; -11 vs -23/-24; -04 vs -14/-10/-01) is listed in the STAGED block; `Q_WB_base` / `Q_WB_irrig` are superseded by `bilanzperioden`.
+- Evidence: capture 2026-09-17 (consumer counts per copy in the block).
+- Proposed SQL / config: STAGED block m277e-X-2 (Phase 6; no SQL until the owner picks owners).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-I-1 · DWA-M-277E · INFRA · prod already has a LEGACY `regulation_tables` (name collision with Plan 1)
+- Class: interface-gap
+- Chosen now (fail-safe): nothing changed in any Plan-1 file; recorded here because every Plan-3 seed migration (this one included) depends on it.
+- Evidence (re-executable): `node scripts/verification/prod-query.mjs --sql "select column_name from information_schema.columns where table_name='regulation_tables' order by ordinal_position"` → id, standard_id, table_id, table_name, row_number, parameter_label, parameter_symbol, variant_dimension, variant_value, value_text, value_numeric, unit, comparison, clause_reference, verification_status, source_quote, source_file, audit_status, created_at (no standard_code / edition / table_code); `… "select count(*) as n, count(distinct standard_id) as stds from regulation_tables"` → 5382 / 35; `scripts/migrations/20260728110000_m277e_tbl2_realign.sql` writes that shape. `supabase/migrations/20260911100000_guideline_to_tool_schema.sql` uses `CREATE TABLE IF NOT EXISTS regulation_tables (standard_code, edition, table_code, …)` — a no-op on prod; the seed INSERTs would fail ("column standard_code does not exist") and the runtime fallback would mask it.
+- Proposed SQL / config: Plan-1 owner decision — rename the Plan-1 tables (schema.ts + drizzle + emitters + accessors + the four seed migrations) OR migrate the legacy table first. STAGED block m277e-I-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-F-1 · DWA-M-277E · M277E-18 · drinking_water_savings_rate
+- Class: text-only-formula
+- Chosen now (fail-safe): not emitted (manual field stays).
+- Evidence (verbatim, transcript line): "If, for economic reasons, this option is not viable, a lower level of drinking water substitution must then be expected (higher drinking water backfeed)." (L751) — no rate or basis printed.
+- Proposed SQL / config: STAGED block m277e-F-1 (owner defines the basis).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-F-2 · DWA-M-277E · M277E-18 · V_GW_annual / V_SW_annual / V_treated_annual / V_surplus_annual / V_topup_annual
+- Class: text-only-formula
+- Chosen now (fail-safe): five equations M277E-18-D1…D5 EMITTED (`imported_unverified`) over the created `bilanzperioden` register — they take over five existing consumer-free manual fields (m³/a); rollback restores manual.
+- Evidence (verbatim, transcript line): "The daily treatment capacity should be complemented with data on the weekly/monthly capacity of the greywater treatment system." (L755); "Q_{W B}=Q_{G W}-Q_{S W}=0(l / d)" (L737); "As a rule, a positive water balance can be determined ( $Q_{W B}>0$ ) …" (L747); "If a negative balance is calculated ( $Q_{W B}<0$ ) …" (L751). Pinned: 593.125 / 521.875 / 454.375 / 138.75 / 67.5 m³/a for a 185 d + 180 d fixture.
+- Proposed SQL / config: the emitted rows in `20260917100420_equations_m277e.sql` (REJECTED ⇒ run its rollback for the five M277E-18 rows).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-J-1 · DWA-M-277E · M277E-06 · TABLE2 Q_GW-P,i pick (SR-2)
+- Class: range-SR-2
+- Chosen now (fail-safe): per-row min/max shown, the pick is the engineer's, an out-of-range pick is flagged (badge), never blocked, never pre-filled.
+- Evidence (verbatim, transcript line): "\hline Water volume (l/P•d) & 10-50 & 0-30 ( $200 \mathrm{l} /$ week ) & 10-15 & 10-15 & 5-10 & 5-10 \\" (L406); L393.
+- Proposed SQL / config: none (a `warn` gate on `in_range == 0` rows only on the owner's word).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-J-2 · DWA-M-277E · M277E-08 · TABLE1_SIEVERS (Sievers columns only)
+- Class: range-SR-2
+- Chosen now (fail-safe): mean / 85percentile × 11 cells seeded; fbr 2005 / DWA 2008 columns and the TOS / Potassium / Sulphur rows not seeded; the M277E-08 fills are created next to a statistic select, the measured inputs stay.
+- Evidence (verbatim, transcript line): "In the present document, data from Sievers et al. (2014) are recommended as design values." (L353); "\hline & & from & to & from & to & median & mean & 85percentile \\" (L361); "\hline TOS (organic) & g/(P•d) & - & - & 28 & 45 & 44 & & \\" (L364, no Sievers cell).
+- Proposed SQL / config: optional second table on the owner's word.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-J-3 · DWA-M-277E · M277E-16 · TABLE5_AREA (worked-example values)
+- Class: range-SR-2
+- Chosen now (fail-safe): 60 l/m² / 180 d / 150 m² seeded as `anhaltswert` reference (badge in the area register); the engineer enters Q_SW-A,j and the season per row.
+- Evidence (verbatim, transcript line): L655; L658.
+- Proposed SQL / config: none.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-J-4 · DWA-M-277E · TABLE2_TYPE B2 "and/or" · TABLE4_PROCESSES Stabilisation under C2
+- Class: range-SR-2
+- Chosen now (fail-safe): B2 `includes_washing_machine = true` as the sentence lists it (the type rule needs only the kitchen for code 4); `stabilisation.c2_allowed = 0` as the C2 cell prints.
+- Evidence (verbatim, transcript line): L391 ("… washing machines and/or kitchen."); L508 ("FB, SF, FLB, MBR"); L480 ("not exhaustive").
+- Proposed SQL / config: none (owner may flip either reading; both are one-cell edits in the seed builder).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-P-1 · DWA-M-277E · TABLE4_USES · Laundry (private)* — "-" under C1 vs "strongly recommended"
+- Class: override-policy
+- Chosen now (fail-safe): `locked`; min category C2 as the "+/-" cells print (prod REQ-32 already blocks C1 for laundry).
+- Evidence (verbatim, transcript line): "\hline & Laundry (private)* & - & + \\" (L506); "For laundry, it is strongly recommended to apply the water quality of the use category C2 for service water listed in Table 4 (Section 6.3)." (L458).
+- Proposed SQL / config: none unless the owner reads the prose ("recommended") over the cells → `anhaltswert` + REQ-32 warn.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### m277e-U-1 · DWA-M-277E · TABLE4_USES · image row-group header (L503)
+- Class: unreadable-cell
+- Chosen now (fail-safe): the five use rows are seeded from their legible printed cells; the table stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline \multirow{4}{*}{![](https://cdn.mathpix.com/cropped/c1ed4f78-03e7-4c0a-ae96-3efda67d3fa9-22.jpg?height=258\&width=40\&top_left_y=1422\&top_left_x=266)} & Toilet flushing (private) & + & + \\" (L503).
+- Proposed SQL / config: after the owner's PDF look (SR-3): `verification_status = 'md_verified'` for TABLE4_USES.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 4, no signature needed)
+
+- **Prod has 63 compliance rows for DWA-M-277E, not the inventory's 88** (read-only count 2026-09-17); every REQ code the brief named exists.
+- **Prod enum tokens are upper-case** (`A1 A2 B1 B2`, `C1 C2`) — the brief's lower-case a1/c1 tokens would have failed G-A3; the encoding uses the captured strings.
+- **TABLE4_LIMITS is ONE single-key table** (row per category, one value column per parameter) instead of the brief's eight `TABLE4_<PARAM>` tables — a `lookup_fill` selects the value column, so no key literal is needed (G-12 satisfied); TABLE4_USES carries `min_category_code` itself (the brief's `TABLE4_USES_MIN` merged).
+- **Printed typo / OCR quirks quoted as printed:** "P. aeroginosa" (L501), "lyellow" (L353), a stray ")" in the Tab. 2 A1 row (L416) and a doubled "))" in the B1 row (L418); all cells legible.
+- **Edition token `'2017-10'`** is printed on the title page ("October 2017", L9/L24) and equals prod `standards.version` "October 2017" — no I-block needed.
+- **`sum_rows` over an EMPTY register is `manual_required`** ("Keine vollständigen Zeilen"), so a formula summing two registers needs `if(count_rows(reg) > 0, sum_rows(reg, …), 0)` on the optional one (M277E-16-D1); `if()` short-circuits, so the unused branch may be null. Pinned; playbook trap added.
+- **Scalar-only equations are not server-materialised** (2a design) — M277E-05-D1 and M277E-19-D1 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
+- **Register cells render with the de-DE thousands separator** (`1.375`) — the render test pins the rendered string, the engine value stays 1375.

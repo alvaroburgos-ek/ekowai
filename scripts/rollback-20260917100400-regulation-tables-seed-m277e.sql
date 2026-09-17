@@ -1,0 +1,11 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE2';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE2_TYPE';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE1_SIEVERS';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE4_LIMITS';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE4_USES';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE4_PROCESSES';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE5';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-277E' AND edition = '2017-10' AND table_code = 'TABLE5_AREA';
+COMMIT;
