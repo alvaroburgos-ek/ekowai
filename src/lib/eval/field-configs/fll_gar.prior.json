@@ -1,0 +1,4229 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs FLL-GAR-2023 fll_gar",
+    "captured_at": "2026-09-17T20:47:02.901Z",
+    "standard": "FLL-GAR-2023",
+    "slug": "fll_gar",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 174,
+    "section_rows": 261,
+    "sections_total": 261,
+    "equation_rows": 4
+  },
+  "FLL-GAR-01 ausfuehrungsbetrieb": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-25",
+      "FLL-GAR-26"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-01 bauherr": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-26",
+      "FLL-GAR-29"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-01 planer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-01 project_code": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-01 project_date": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "date",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-01 project_name": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-01 standort_address": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-04",
+      "FLL-GAR-05"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-02 gewaesser_in_scope": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-02 gewaesser_type": {
+    "enum_values": [
+      {
+        "value": "teich",
+        "label_de": "Teich",
+        "label_en": "Pond",
+        "order_index": 1,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "wasserbecken",
+        "label_de": "Wasserbecken",
+        "label_en": "Water basin",
+        "order_index": 2,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "bachlauf",
+        "label_de": "Bachlauf",
+        "label_en": "Stream / brook",
+        "order_index": 3,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "schwimmteich",
+        "label_de": "Schwimm-/Badeteich",
+        "label_en": "Swimming / bathing pond",
+        "order_index": 4,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "freibad_bio",
+        "label_de": "Freibad mit biologischer Wasseraufbereitung",
+        "label_en": "Open-air pool with biological water treatment",
+        "order_index": 5,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "retentionsbodenfilter",
+        "label_de": "Retentionsbodenfilter",
+        "label_en": "Retention soil filter",
+        "order_index": 6,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "pflanzenklaeranlage",
+        "label_de": "Pflanzenklaeranlage",
+        "label_en": "Constructed wetland",
+        "order_index": 7,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "regenrueckhaltebecken",
+        "label_de": "Regenrueckhaltebecken",
+        "label_en": "Stormwater retention basin",
+        "order_index": 8,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "anstauplatz",
+        "label_de": "Anstauplatz (Reitplatz)",
+        "label_en": "Floodable riding ground",
+        "order_index": 9,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "loeschwasserteich",
+        "label_de": "Loeschwasserteich",
+        "label_en": "Fire-fighting water pond",
+        "order_index": 10,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "beschneiungsteich",
+        "label_de": "Beschneiungsteich / -becken",
+        "label_en": "Snowmaking pond / basin",
+        "order_index": 11,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "deponie",
+        "label_de": "Deponie",
+        "label_en": "Landfill",
+        "order_index": 90,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "fischerei",
+        "label_de": "Fischereieinrichtung",
+        "label_en": "Fishery",
+        "order_index": 91,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "talsperre",
+        "label_de": "Talsperre / Speicherbecken",
+        "label_en": "Dam / storage reservoir",
+        "order_index": 92,
+        "regulation_reference": "Sec.1.1"
+      },
+      {
+        "value": "wasserstrasse",
+        "label_de": "Wasserstrasse",
+        "label_en": "Waterway",
+        "order_index": 93,
+        "regulation_reference": "Sec.1.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-03 lbo_genehmigung_erforderlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09",
+      "FLL-GAR-26"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-03 whg_einleitung_genehmigung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09",
+      "FLL-GAR-26"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-04 gewaesser_tiefe_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-05",
+      "FLL-GAR-09"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-04 gewaesser_volumen_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-07",
+      "FLL-GAR-09"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-04 hoechstwasserstand_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-23"
+    ],
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-04 nutzung_funktion": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "All"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-05 eisbildung_moeglich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-23"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-05 exposition": {
+    "enum_values": [
+      {
+        "value": "sonne",
+        "label_de": "Sonnenexposition",
+        "label_en": "Sun exposure",
+        "order_index": 1,
+        "regulation_reference": "Sec.4.1"
+      },
+      {
+        "value": "halbschatten",
+        "label_de": "Halbschatten",
+        "label_en": "Partial shade",
+        "order_index": 2,
+        "regulation_reference": "Sec.4.1"
+      },
+      {
+        "value": "schatten",
+        "label_de": "Schatten",
+        "label_en": "Shade",
+        "order_index": 3,
+        "regulation_reference": "Sec.4.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-05 frosteinwirkung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09",
+      "FLL-GAR-12"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-05 fuellhoehe_m": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15",
+      "FLL-GAR-16",
+      "FLL-GAR-17"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-05 rissklasse": {
+    "enum_values": [
+      {
+        "value": "R0-B",
+        "label_de": "R0-B (keine)",
+        "label_en": "R0-B (none)",
+        "order_index": 1,
+        "regulation_reference": "Tab.18"
+      },
+      {
+        "value": "R1-B",
+        "label_de": "R1-B (<= 0,2 mm)",
+        "label_en": "R1-B (<= 0.2 mm)",
+        "order_index": 2,
+        "regulation_reference": "Tab.18"
+      },
+      {
+        "value": "R2-B",
+        "label_de": "R2-B (<= 0,5 mm)",
+        "label_en": "R2-B (<= 0.5 mm)",
+        "order_index": 3,
+        "regulation_reference": "Tab.18"
+      },
+      {
+        "value": "R3-B",
+        "label_de": "R3-B (<= 1,0 mm, Versatz <= 0,5 mm)",
+        "label_en": "R3-B (<= 1.0 mm, offset <= 0.5 mm)",
+        "order_index": 4,
+        "regulation_reference": "Tab.18"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-12",
+      "FLL-GAR-15",
+      "FLL-GAR-16"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-05 standortklasse": {
+    "enum_values": [
+      {
+        "value": "S1-B",
+        "label_de": "S1-B (frei stehend)",
+        "label_en": "S1-B (free-standing outdoor)",
+        "order_index": 1,
+        "regulation_reference": "Tab.18"
+      },
+      {
+        "value": "S2-B",
+        "label_de": "S2-B (am Bauwerk / Innenbereich)",
+        "label_en": "S2-B (attached to building / indoors)",
+        "order_index": 2,
+        "regulation_reference": "Tab.18"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15",
+      "FLL-GAR-16",
+      "FLL-GAR-17"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-05 wassereinwirkungsklasse": {
+    "enum_values": [
+      {
+        "value": "W1-B",
+        "label_de": "W1-B (<= 5 m)",
+        "label_en": "W1-B (<= 5 m)",
+        "order_index": 1,
+        "regulation_reference": "Tab.18; DIN 18535-1"
+      },
+      {
+        "value": "W2-B",
+        "label_de": "W2-B (<= 10 m)",
+        "label_en": "W2-B (<= 10 m)",
+        "order_index": 2,
+        "regulation_reference": "Tab.18; DIN 18535-1"
+      },
+      {
+        "value": "W3-B",
+        "label_de": "W3-B (> 10 m)",
+        "label_en": "W3-B (> 10 m)",
+        "order_index": 3,
+        "regulation_reference": "Tab.18; DIN 18535-1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15",
+      "FLL-GAR-16",
+      "FLL-GAR-17"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-06 baugrund_tragfaehig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-10..21"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-06 baugrund_typ": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-10..21"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-06 setzungen_zu_erwarten": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-23"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-07 boeschungsneigung_ratio": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09..21"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-07 gefaelle_percent": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09..21"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 beckenform": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 beckenvolumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 ueberlauf_position": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 umfang_oberkante": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 wasserspiegelflaeche": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 wassertiefe_max": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-08 zugang_wartung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-09 abdichtungs_art": {
+    "enum_values": [
+      {
+        "value": "mineralisch_ohne_zusatzstoffe",
+        "label_de": "Mineralisch ohne Zusatzstoffe",
+        "label_en": "Mineral without additives",
+        "order_index": 1,
+        "regulation_reference": "Sec.5.1"
+      },
+      {
+        "value": "mineralisch_mit_zusatzstoffen",
+        "label_de": "Mineralisch mit Zusatzstoffen",
+        "label_en": "Mineral with additives",
+        "order_index": 2,
+        "regulation_reference": "Sec.5.2"
+      },
+      {
+        "value": "mineralisch_hydraulisch",
+        "label_de": "Mineralisch mit hydraulischen Bindemitteln",
+        "label_en": "Mineral with hydraulic binders (concrete)",
+        "order_index": 3,
+        "regulation_reference": "Sec.5.3"
+      },
+      {
+        "value": "mineralisch_bitumen",
+        "label_de": "Mineralisch mit Bitumen (Asphalt)",
+        "label_en": "Mineral with bitumen (asphalt)",
+        "order_index": 4,
+        "regulation_reference": "Sec.5.4"
+      },
+      {
+        "value": "verbundwerkstoff_gtd",
+        "label_de": "Verbundwerkstoff (GTD)",
+        "label_en": "Composite material (GCL)",
+        "order_index": 5,
+        "regulation_reference": "Sec.5.5"
+      },
+      {
+        "value": "bahn_bitumen",
+        "label_de": "Bitumenbahnen",
+        "label_en": "Bituminous sheets",
+        "order_index": 6,
+        "regulation_reference": "Sec.6.1"
+      },
+      {
+        "value": "bahn_kunststoff_elastomer",
+        "label_de": "Kunststoff-/Elastomerbahnen",
+        "label_en": "Plastic / elastomer sheets",
+        "order_index": 7,
+        "regulation_reference": "Sec.6.2"
+      },
+      {
+        "value": "fluessigkunststoff",
+        "label_de": "Fluessigkunststoff",
+        "label_en": "Liquid-applied plastic",
+        "order_index": 8,
+        "regulation_reference": "Sec.6.3"
+      },
+      {
+        "value": "bahn_pe",
+        "label_de": "Kunststoffbahnen aus PE",
+        "label_en": "PE sheets (PELD / PEHD)",
+        "order_index": 9,
+        "regulation_reference": "Sec.6.4"
+      },
+      {
+        "value": "stahl",
+        "label_de": "Stahl",
+        "label_en": "Steel",
+        "order_index": 10,
+        "regulation_reference": "Sec.7.1"
+      },
+      {
+        "value": "alkalisilikat",
+        "label_de": "Alkalisilikate",
+        "label_en": "Alkali silicates",
+        "order_index": 11,
+        "regulation_reference": "Sec.7.2"
+      },
+      {
+        "value": "gup",
+        "label_de": "Glasfaserverstaerktes Polyester (GUP)",
+        "label_en": "Glass-fibre reinforced polyester (GRP)",
+        "order_index": 12,
+        "regulation_reference": "Sec.7.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-10..21"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-09 anzahl_lagen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-09 ce_kennzeichnung_geprueft": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-26"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-09 dichtigkeitsnachweis_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-25"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-09 wurzel_rhizomfestigkeit_required": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-10..21",
+      "FLL-GAR-24"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 alkalisilikat": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 attest_fll_gar_10_req_19": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 attest_fll_gar_10_req_21": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 bahn_bitumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 bahn_kunststoff_elastomer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 bahn_pe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 kalkgehalt_VCA": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 kf_abdichtung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-11",
+      "FLL-GAR-14",
+      "FLL-GAR-20"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 kornanteil_unter_2micron": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-11"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 mineralisch_bitumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 mineralisch_hydraulisch": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 mineralisch_mit_zusatzstoffen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 mineralisch_ohne_zusatzstoffe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 organische_substanz_VGL": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 schichtdicke_abdichtung_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-11..14"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 schichtdicke_auflast_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-22"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-10 verbundwerkstoff_gtd": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-10 verdichtungsgrad_Dpr": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-11"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-11 mz_dichtungswirkung_nachgewiesen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-11 mz_dicke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-11 mz_durchlaessigkeit_kf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-11 mz_einbau_verdichtung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-11 mz_zusatzstoff_anteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-11 mz_zusatzstofftyp": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 anwendungsfall_concrete": {
+    "enum_values": [
+      {
+        "value": "wasserbecken_teich",
+        "label_de": "Wasserbecken und Teiche",
+        "label_en": "Water basins and ponds",
+        "order_index": 1,
+        "regulation_reference": "Tab.7"
+      },
+      {
+        "value": "bachlauf",
+        "label_de": "Bachlaeufe (offene Gerinne)",
+        "label_en": "Streams (open channels)",
+        "order_index": 2,
+        "regulation_reference": "Tab.7"
+      },
+      {
+        "value": "schwimmbecken_bade",
+        "label_de": "Schwimmbecken und Schwimmteiche mit Badewasserqualitaet",
+        "label_en": "Swimming pools / ponds with bathing-water quality",
+        "order_index": 3,
+        "regulation_reference": "Tab.7"
+      },
+      {
+        "value": "schwimmbecken_sole",
+        "label_de": "Schwimmbecken mit Sole-/Meerwasserqualitaet",
+        "label_en": "Swimming pools with brine / sea-water quality",
+        "order_index": 4,
+        "regulation_reference": "Tab.7"
+      },
+      {
+        "value": "pflanzenklaeranlage",
+        "label_de": "Pflanzenklaeranlagen / Bodenretentionsfilter",
+        "label_en": "Constructed wetlands / soil-retention filters",
+        "order_index": 5,
+        "regulation_reference": "Tab.7"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 bauteil_type": {
+    "enum_values": [
+      {
+        "value": "waende",
+        "label_de": "Waende",
+        "label_en": "Walls",
+        "order_index": 1,
+        "regulation_reference": "Tab.8"
+      },
+      {
+        "value": "bodenplatte",
+        "label_de": "Bodenplatte",
+        "label_en": "Floor slab",
+        "order_index": 2,
+        "regulation_reference": "Tab.8"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 bauteildicke_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-12"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 beton_ausfuehrungsart": {
+    "enum_values": [
+      {
+        "value": "ortbeton",
+        "label_de": "Ortbeton",
+        "label_en": "Cast-in-place concrete",
+        "order_index": 1,
+        "regulation_reference": "Tab.8"
+      },
+      {
+        "value": "elementwand",
+        "label_de": "Elementwand",
+        "label_en": "Element wall",
+        "order_index": 2,
+        "regulation_reference": "Tab.8"
+      },
+      {
+        "value": "fertigteil",
+        "label_de": "Fertigteil",
+        "label_en": "Precast",
+        "order_index": 3,
+        "regulation_reference": "Tab.8"
+      },
+      {
+        "value": "spritzbeton",
+        "label_de": "Spritzbeton / faserverstaerkter Spritzbeton",
+        "label_en": "Sprayed / fibre-reinforced sprayed concrete",
+        "order_index": 4,
+        "regulation_reference": "Tab.8"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 druckfestigkeit_fck": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 wassereindringtiefe_geprueft": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 wasserzementwert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-12 zementgehalt_kg_m3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-13 asph_bindemittel": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-13 asph_dicke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-13 asph_kornverteilung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-13 asph_nahttechnik": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-13 asph_verdichtungsgrad": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-13 hohlraumgehalt_asphaltbeton_vol_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 bentonit_flaecheneinheit_g_m2": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 bentonit_type": {
+    "enum_values": [
+      {
+        "value": "Na",
+        "label_de": "Natrium-Bentonit",
+        "label_en": "Sodium bentonite",
+        "order_index": 1,
+        "regulation_reference": "Sec.5.5.1; Tab.13"
+      },
+      {
+        "value": "Ca",
+        "label_de": "Calcium-Bentonit",
+        "label_en": "Calcium bentonite",
+        "order_index": 2,
+        "regulation_reference": "Sec.5.5.1; Tab.13"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 groesstkorn_auflast_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 gtd_auflast_funktion": {
+    "enum_values": [
+      {
+        "value": "quellgegendruck",
+        "label_de": "Quellgegendruck Erstquellen",
+        "label_en": "Counter-swell pressure at first swelling",
+        "order_index": 1,
+        "regulation_reference": "Tab.16"
+      },
+      {
+        "value": "austrocknung_frost",
+        "label_de": "Austrocknung und Frosteinwirkung",
+        "label_en": "Drying out and frost",
+        "order_index": 2,
+        "regulation_reference": "Tab.16"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-22"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 gtd_polyolefin_beschichtung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 gtd_schichtdicke_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 gtd_ueberlappung_laengs_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 gtd_ueberlappung_quer_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-14 quellvermoegen_ml": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-15 bb_bahnentyp": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-15 bb_dicke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-15 bb_lagen_anzahl": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-15 bb_nahtverbindung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-15 bb_verlegeart": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-15 bb_zugfestigkeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-16 bahn_material_naht": {
+    "enum_values": [
+      {
+        "value": "EVA",
+        "label_de": "EVA",
+        "label_en": "EVA",
+        "order_index": 1,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "PIB",
+        "label_de": "PIB",
+        "label_en": "PIB",
+        "order_index": 2,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "PVC-P",
+        "label_de": "PVC-P",
+        "label_en": "PVC-P",
+        "order_index": 3,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "ECB",
+        "label_de": "ECB",
+        "label_en": "ECB",
+        "order_index": 4,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "FPO",
+        "label_de": "FPO",
+        "label_en": "FPO",
+        "order_index": 5,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "TPE",
+        "label_de": "TPE",
+        "label_en": "TPE",
+        "order_index": 6,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "EPDM",
+        "label_de": "EPDM",
+        "label_en": "EPDM",
+        "order_index": 7,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "EPDM_PBS",
+        "label_de": "EPDM mit PBS",
+        "label_en": "EPDM with PBS",
+        "order_index": 8,
+        "regulation_reference": "Tab.22"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-16 bahnendicke_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15",
+      "FLL-GAR-18"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-16 fuegeverfahren": {
+    "enum_values": [
+      {
+        "value": "quellschweissen",
+        "label_de": "Quellschweissen",
+        "label_en": "Solvent welding",
+        "order_index": 1,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "heissluft_heizkeil",
+        "label_de": "Heissluftschweissen oder Heizkeilschweissen",
+        "label_en": "Hot-air or hot-wedge welding",
+        "order_index": 2,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "heissvulkanisation",
+        "label_de": "Heissvulkanisation (Hot Bonding)",
+        "label_en": "Hot vulcanisation (hot bonding)",
+        "order_index": 3,
+        "regulation_reference": "Tab.22"
+      },
+      {
+        "value": "heissluft_pbs",
+        "label_de": "Heissluftschweissen (EPDM mit PBS)",
+        "label_en": "Hot-air welding (EPDM with PBS)",
+        "order_index": 4,
+        "regulation_reference": "Tab.22"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15",
+      "FLL-GAR-18"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-16 naht_ueberlappung_kunststoff_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-16 nahtbreite_min_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-15",
+      "FLL-GAR-18"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-16 polymerbitumen_beschichtung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-17 fk_armierung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-17 fk_auftragsverfahren": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-17 fk_haftung_untergrund": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-17 fk_systemtyp": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-17 fk_trockenschichtdicke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-17 fk_uv_bestaendigkeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-18 naht_pe_ueberlappung_mm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-18 pe_beanspruchung_klasse": {
+    "enum_values": [
+      {
+        "value": "gering",
+        "label_de": "Gering (priv. Zier-/Badeteich, Konvektions-/Rhizomsperre)",
+        "label_en": "Low (private pond, convection / rhizome barrier)",
+        "order_index": 1,
+        "regulation_reference": "Tab.25"
+      },
+      {
+        "value": "mittel",
+        "label_de": "Mittel (oeff. Zierteich, Bachlauf)",
+        "label_en": "Medium (public pond, stream)",
+        "order_index": 2,
+        "regulation_reference": "Tab.25"
+      },
+      {
+        "value": "hoch",
+        "label_de": "Hoch (oeff. Badeteich, befahrbar, Fliessgewaesser)",
+        "label_en": "High (public bathing pond, traffic-bearing, flowing waters)",
+        "order_index": 3,
+        "regulation_reference": "Tab.25"
+      },
+      {
+        "value": "freiliegend",
+        "label_de": "Freiliegend / hohe Exposition (RRB, Beschneiungsteich)",
+        "label_en": "Exposed / high exposure (retention basin, snowmaking pond)",
+        "order_index": 4,
+        "regulation_reference": "Tab.25"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-18 peeh_dichte_g_cm3": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-18 peeh_mfr": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-18 peeh_russgehalt_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-19 stahl_typ": {
+    "enum_values": [
+      {
+        "value": "V2A",
+        "label_de": "Edelstahl V2A (1.4301)",
+        "label_en": "Stainless steel V2A (1.4301)",
+        "order_index": 1,
+        "regulation_reference": "Sec.7.1"
+      },
+      {
+        "value": "V4A",
+        "label_de": "Edelstahl V4A (1.4401)",
+        "label_en": "Stainless steel V4A (1.4401)",
+        "order_index": 2,
+        "regulation_reference": "Sec.7.1"
+      },
+      {
+        "value": "V5A",
+        "label_de": "Edelstahl V5A (1.4539)",
+        "label_en": "Stainless steel V5A (1.4539)",
+        "order_index": 3,
+        "regulation_reference": "Sec.7.1"
+      },
+      {
+        "value": "CorTen_A",
+        "label_de": "Wetterfester Baustahl CorTen A (1.8946)",
+        "label_en": "Weathering steel CorTen A (1.8946)",
+        "order_index": 4,
+        "regulation_reference": "Sec.7.1"
+      },
+      {
+        "value": "CorTen_B",
+        "label_de": "Wetterfester Baustahl CorTen B (1.8965)",
+        "label_en": "Weathering steel CorTen B (1.8965)",
+        "order_index": 5,
+        "regulation_reference": "Sec.7.1"
+      },
+      {
+        "value": "unlegiert",
+        "label_de": "Unlegierter Stahl (feuerverzinkt)",
+        "label_en": "Unalloyed steel (galvanised)",
+        "order_index": 6,
+        "regulation_reference": "Sec.7.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-19 verzinkung_dicke_um": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-20 alkalisilikat_type": {
+    "enum_values": [
+      {
+        "value": "Na",
+        "label_de": "Natrium-Wasserglas",
+        "label_en": "Sodium water-glass",
+        "order_index": 1,
+        "regulation_reference": "Sec.7.2"
+      },
+      {
+        "value": "Li",
+        "label_de": "Lithium-Wasserglas",
+        "label_en": "Lithium water-glass",
+        "order_index": 2,
+        "regulation_reference": "Sec.7.2"
+      },
+      {
+        "value": "K",
+        "label_de": "Kalium-Wasserglas",
+        "label_en": "Potassium water-glass",
+        "order_index": 3,
+        "regulation_reference": "Sec.7.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-20 feinkornanteil_063_pct": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-21 gup_biegefestigkeit": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-21 gup_glasfaser_anteil": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-21 gup_harztyp": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-21 gup_laminatdicke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-21 gup_topcoat": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-21 gup_verarbeitung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 attest_fll_gar_22_req_25": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 beta": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 d_D": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 d_Di": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 d_F": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 Delta_h_W": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 Delta_u": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-22 g_prime": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-22 gamma_A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 gamma_D_prime": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 gamma_Di_prime": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 gamma_F_prime": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 gamma_w": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-22 sl_drainage_erforderlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 sl_schutzlage_oben_flaechengewicht": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 sl_schutzlage_oben_typ": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 sl_schutzlage_unten_flaechengewicht": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 sl_schutzlage_unten_typ": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 sl_substratschicht_dicke": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-22 z_a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-23 abschluss_anwendungsfall": {
+    "enum_values": [
+      {
+        "value": "bauteil_bauwerk",
+        "label_de": "Bauteil / Bauwerk",
+        "label_en": "Component / structure",
+        "order_index": 1,
+        "regulation_reference": "Tab.28"
+      },
+      {
+        "value": "freiflaeche",
+        "label_de": "Freiflaeche",
+        "label_en": "Open space",
+        "order_index": 2,
+        "regulation_reference": "Tab.28"
+      },
+      {
+        "value": "schwimmteich",
+        "label_de": "Schwimmteich",
+        "label_en": "Swim pond",
+        "order_index": 3,
+        "regulation_reference": "Tab.28"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-23 freibord_zu_bauwerk_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-23 freibord_zu_gelaende_cm": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-24 bep_durchdringungen_anzahl": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-24 bep_einbauten_typen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-24 bep_pflanzenarten": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-24 bep_rhizomfestigkeit_erforderlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-24 mit_bepflanzung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-09",
+      "FLL-GAR-20"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-25 attest_fll_gar_25_req_26": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-25 eignungspruefung_durchgefuehrt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-26"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-25 fremdueberwachung_zertifikat": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-26"
+    ],
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-25 kontrollpruefung_dokumentiert": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-26"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-26 abnahme_datum": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "FLL-GAR-29"
+    ],
+    "data_type": "date",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-26 maengelfrist_5_jahre": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-27 A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-27 A_einzugsflaeche": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-27 C": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "B"
+    ]
+  },
+  "FLL-GAR-27 ibn_befuellung_dauer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-27 ibn_befuellung_methode": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-27 ibn_datum": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-27 ibn_dichtheit_bestanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-27 ibn_dichtheitspruefung_methode": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-27 Q_NOT": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-27 r_5_100": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-27 r_5_5": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": null,
+    "section_id_is_null": true,
+    "section_path": []
+  },
+  "FLL-GAR-28 inspektion_intervall_jahr": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-28 inst_inspektionsintervall": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-28 inst_protokollierung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-28 inst_qualifikation_pruefer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-28 inst_wartungsintervall": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "C"
+    ]
+  },
+  "FLL-GAR-29 compliance_verdict_final": {
+    "enum_values": [
+      {
+        "value": "compliant",
+        "label_de": "konform",
+        "label_en": "compliant",
+        "order_index": 1,
+        "regulation_reference": "methodology"
+      },
+      {
+        "value": "compliant_with_conditions",
+        "label_de": "konform mit Auflagen",
+        "label_en": "compliant with conditions",
+        "order_index": 2,
+        "regulation_reference": "methodology"
+      },
+      {
+        "value": "not_compliant",
+        "label_de": "nicht konform",
+        "label_en": "not compliant",
+        "order_index": 3,
+        "regulation_reference": "methodology"
+      },
+      {
+        "value": "insufficient_data",
+        "label_de": "unzureichende Daten",
+        "label_en": "insufficient data",
+        "order_index": 4,
+        "regulation_reference": "methodology"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "F",
+    "section_id_is_null": false,
+    "section_path": [
+      "F"
+    ]
+  },
+  "FLL-GAR-29 konf_abdichtungssystem_gewaehlt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-29 konf_alle_nachweise_bestanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-29 konf_bemerkungen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "text",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "FLL-GAR-29 konf_freigabe_datum": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "date",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "D"
+    ]
+  },
+  "sections": {
+    "FLL-GAR-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-01 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-02 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-03 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-04 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-05 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-06 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-07 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-08 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-09 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-10 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-11 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-12 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-13 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-14 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-15 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-16 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-17 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-18 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-19 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-20 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-21 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-22 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-23 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-24 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-25 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-26 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-27 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-28 M": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 B": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 C": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 D": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 F": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 J": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 K": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 L": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "FLL-GAR-29 M": {
+      "visible_when": null,
+      "parent_code": null
+    }
+  },
+  "equations": {
+    "FLL-GAR-22 2a": {
+      "id": "430d62b2-a4b5-4bfb-afd2-bc7f8bd03d6f",
+      "output_symbol": "g_prime",
+      "input_symbols": [
+        "gamma_D_prime",
+        "d_D"
+      ]
+    },
+    "FLL-GAR-22 2b": {
+      "id": "c7dc584b-0f65-476d-935a-d5306d885a65",
+      "output_symbol": "g_prime",
+      "input_symbols": [
+        "Delta_u",
+        "gamma_A",
+        "gamma_F_prime",
+        "d_F",
+        "gamma_Di_prime",
+        "d_Di",
+        "beta"
+      ]
+    },
+    "FLL-GAR-22 2c": {
+      "id": "38e580ef-1f6a-4ab2-b7e6-9154efbce529",
+      "output_symbol": "Delta_u",
+      "input_symbols": [
+        "Delta_h_W",
+        "z_a",
+        "gamma_w"
+      ]
+    },
+    "FLL-GAR-27 1": {
+      "id": "02387918-c243-4a7e-b38d-993c65f79754",
+      "output_symbol": "Q_NOT",
+      "input_symbols": [
+        "r_5_100",
+        "r_5_5",
+        "C",
+        "A"
+      ]
+    }
+  }
+}

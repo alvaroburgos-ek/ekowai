@@ -1412,3 +1412,342 @@ Report: `reports/plan-3-m1200_3.md` · STAGED SQL: `scripts/verification/m1200_3
 - **Scalar-only equations are not server-materialised** (2a design) — M12003-10-D1 / -D2 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
 - **`schlaege.pflanzentyp` (a row column) and the inherited scalar `pflanzentyp` (M12003-05, drives the Tab.-11 switch on -08) are two independent sources for the same fact** — the register row says what the Schlag grows, the scalar what the Tab.-11 fills and `wasseranalysen.limit` read; no rule ties them (a mismatch is invisible today). Owner option: drop the row column or derive the scalar from the rows (a second Phase-6 mirror item).
 - **Staged DELETEs use an archive table created in the same transaction** (`compliance_requirements_archive_m1200_3`, `equations_archive_m1200_3`) so the rollback re-inserts FULL rows without retyping cells that `prod-query.mjs` truncates (verification_quote up to 453 chars).
+
+## Task 7 — FLL-GAR-2023 (fll_gar)
+
+Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Gewässerabdichtungsrichtlinien.md` (Ausgabe 2023, lines cited; plain text — hyphenated line breaks appear as "Gruben- tone" inside collapsed quotes) · prod capture `src/lib/eval/field-configs/fll_gar.prior.json` (2026-09-17, read-only; 174 fields, 261 sections, 4 equations; the 30 compliance rows and 4 equation formulas via `prod-query.mjs`). FLL-revision overlap (branch `feat/fll-revision`, `.superpowers/sdd/fll-m2/FLL-GAR-2023__FLL-GAR-NN.json`) is cross-referenced by finding id; NO gate severity is touched by this task. Nothing below is applied.
+
+### fll_gar-C-1 · FLL-GAR-2023 · FLL-GAR-09 · abdichtungs_art consumer_worksheets (the master switch is not inherited)
+- Class: consumer-edit
+- Chosen now (fail-safe): the 104 section rules on FLL-GAR-10…21, the Tab.-1 fill `boeschungsneigung_limit` (-07) and the register column `boeschungsabschnitte.limit_1m` are emitted keyed on `abdichtungs_art` but INERT (`pending` = visible; `manual_required`) because prod's `consumer_worksheets = ["FLL-GAR-10..21"]` is a range string that `loadInheritedFields` (`code = ANY(consumer_worksheets)`) never matches — no worksheet inherits the selector today; REQ-05 and REQ-12 … REQ-22 are `pending` for the same reason (FLL-revision GAR-10 F1-DISCRIMINATOR-MISSING, GAR-04 F2, GAR-07 F-1).
+- Evidence (verbatim, transcript line): "Die Art der Abdichtungsstoffe, die Anzahl der Lagen und deren Anordnung sowie die Verfahren zur Herstellung der Abdichtungsschicht müssen in ihrem Zusammenwirken die Funktion der Abdichtung sicherstellen." (L1487–L1489); "Für die Neigung der Abdichtung von Böschungen bestehen werkstoffspezifische Einschränkungen (s. Tab. 1)." (L1372–L1373); capture `abdichtungs_art.consumer_worksheets = {FLL-GAR-10..21}`.
+- Proposed SQL / config: STAGED block fll_gar-C-1 — replace the range string by the 18 resolvable codes (-04, -05, -07, -10 … -21, -22, -23, -24).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-C-2 · FLL-GAR-2023 · FLL-GAR-10 / -12 / -14 / -16 · section C (consumed producers — rule withheld)
+- Class: consumer-edit
+- Chosen now (fail-safe): the section rule `abdichtungs_art == '<token>'` is emitted on the other eight sections of each of the four worksheets and NOT on their section C; the guard names the producers (pinned): -10 `kf_abdichtung` (→ -11, -14, -20), `kornanteil_unter_2micron` / `verdichtungsgrad_Dpr` (→ -11), `schichtdicke_abdichtung_cm` (→ 'FLL-GAR-11..14'), `schichtdicke_auflast_cm` (→ -22); -12 `bauteildicke_cm` ("consumed only by itself (FLL-GAR-12) — prod data oddity"); -14 `gtd_auflast_funktion` (→ -22); -16 `bahnendicke_mm` / `fuegeverfahren` / `nahtbreite_min_mm` (→ -15, -18).
+- Evidence (verbatim, transcript line): §5–§7 structure — "5.1 Mineralische Stoffe ohne Zusatzstoffe" (L1880), "5.3 Mineralische Abdichtungsstoffe mit hydraulischen Bindemitteln" (L2412), "6.4 Kunststoffbahnen aus Polyethylen" (L4448); capture as above.
+- Proposed SQL / config: STAGED block fll_gar-C-2 (four `UPDATE worksheet_sections … code = 'C'`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-C-3 · FLL-GAR-2023 · FLL-GAR-05 · wassereinwirkungsklasse / rissklasse / standortklasse visible_when (withheld)
+- Class: consumer-edit
+- Chosen now (fail-safe): no rule on the three enums (consumed by -15 / -16 / -17; rissklasse also by -12 — guard refusals pinned); the created codes `w_klasse_code` / `r_klasse_code` / `s_klasse_code` carry no rule either (the driver is not in scope on -05, C-1).
+- Evidence (verbatim, transcript line): "Für Abdichtungsbauweisen mit bahnenförmigen Abdichtungsstoffen aus Bitumen und Kunst- stoffen sowie Flüssigkunststoffen lassen sich die in Tabelle 18 dargestellten Einwirkungen und Standortbedingen differenzieren." (L3662–L3665); prod REQ-05 guards by `abdichtungs_art IN {bahn_bitumen,bahn_kunststoff_elastomer,fluessigkunststoff,bahn_pe}`.
+- Proposed SQL / config: STAGED block fll_gar-C-3 (the rule as it would be; apply after C-1 and the consumers' reading).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-C-4 · FLL-GAR-2023 · FLL-GAR-09 · anzahl_lagen visible_when + REQ-17 onto abdichtungslagen_count
+- Class: consumer-edit (+ gate-guard)
+- Chosen now (fail-safe): `anzahl_lagen` untouched (consumed by -15; guard refusal pinned); `abdichtungslagen_count` (FLL-GAR-09-D2) created beside it; REQ-17 keeps reading the scalar.
+- Evidence (verbatim, transcript line): "Abdichtungen aus Bitumenbahnen sind i. d. R. mehrlagig herzustellen." (L3765); REQ-17 = 'IF abdichtungs_art == bahn_bitumen THEN anzahl_lagen >= 2' (30c7b625-…, warn, md5 9ef43962852d96f62aca6f0a5f29b3e2).
+- Proposed SQL / config: STAGED block fll_gar-C-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-E-1 · FLL-GAR-2023 · FLL-GAR-07 / -09 · TAB1 ↔ abdichtungs_art map (11 printed rows ↔ 12 prod tokens)
+- Class: equation-replacement (table key map)
+- Chosen now (fail-safe): TAB1 keyed on the 8 tokens that map 1:1 (row 2 → mineralisch_ohne_zusatzstoffe, 3 → mineralisch_mit_zusatzstoffen, 4 → mineralisch_hydraulisch, 8 → verbundwerkstoff_gtd, 9 → bahn_bitumen, 10 → bahn_kunststoff_elastomer, 11 → fluessigkunststoff, 12 → bahn_pe); the three asphalt rows 5–7 in `TAB1_ASPHALT` keyed on the created `mischgutart` (-13, fill `asph_neigung_max_1m`); `mineralisch_bitumen`, `stahl`, `alkalisilikat`, `gup` have NO TAB1 row → the -07 fill reads "keine Zeile", the register limit is null (undecidable), never a guessed limit.
+- Evidence (verbatim, transcript line): "5 Asphaltmastix ≤ 1:3 ≤ 33 %" (L1403); "6 Gussasphalt ≤ 1:5 ≤ 20 %" (L1404); "7 Asphaltbeton ≤ 1:2 ≤ 50 %" (L1405); no row prints Stahl, Alkalisilikat or GUP (L1396–L1410).
+- Proposed SQL / config: none — the owner decides whether -07 gets a `mischgutart` twin (or inherits -13's) so the asphalt case fills there; Stahl / Alkalisilikat / GUP stay without a printed limit.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-E-2 · FLL-GAR-2023 · FLL-GAR-16 · nahtbreite_min_mm re-bound as a Tab.-22 lookup_fill (UPDATE on a consumed producer)
+- Class: equation-replacement (widget on an existing consumed limit)
+- Chosen now (fail-safe): EMITTED (20260917100710): the existing number "Mindestnahtbreite" (consumed by -15 / -18, is_required) gets `widget = 'lookup_fill'` on TAB22 keyed on its own two fields `fuegeverfahren` × `bahn_material_naht` (role limit, locked — no override control); the value is filled from the printed row once and the consumers read the same row; a non-printed combination shows "keine Zeile" and leaves the engineer's typed value untouched (the widget never writes a null). Recorded because it changes a consumed producer's widget (not its data_type, not its consumers).
+- Evidence (verbatim, transcript line): "Je nach Stoffart der Kunststoff- und Elastomerbahn sind unterschiedliche Fügeverfahren und Mindestfügebreiten einzuhalten." (L4101–L4102); prod validation_rules.raw '>= 20/30/40/60 per Tab.22' (the 60 is the Überlappung — FLL-revision GAR16-F1).
+- Proposed SQL / config: as emitted; rollback restores the captured NULLs.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-1 · FLL-GAR-2023 · FLL-GAR-10 · Tab. 3 (requirement list — not seeded)
+- Class: text-only-formula (attestation list)
+- Chosen now (fail-safe): not a table — Tab. 3 lists one requirement per parameter for the five FLL-GAR-10 inputs REQ-12 already gates with the same literals (≥ 15 / ≤ 5 / ≤ 15 / ≤ 1·10⁻⁹ / ≥ 97); no consumer would read a TAB3 row.
+- Evidence (verbatim, transcript line): "2 Kornanteil < 0,002 mm ≥ 15 Masse-% DIN EN ISO 17892-4" (L1899); "6 Verdichtungsgrad DPr ≥ 97 % DIN 18125-2" (L1904); "7 Einbauwassergehalt wPr ≤ w ≤ w 0,97Pr bei w ≤ wPr: Luftporenanteil na ≤ 5 % DIN 18121-2 und DIN 18127" (L1905–L1907 — the Einbauwassergehalt / Luftporenanteil rows have no prod field).
+- Proposed SQL / config: optional TAB3 keyed `parameter` with `limit` / `comparator` / `norm` for the REQ-12 re-point (single-source hygiene) + two created inputs (Einbauwassergehalt, Luftporenanteil) — owner's call.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-2 · FLL-GAR-2023 · FLL-GAR-05 · r_klasse_code — R0-B as a select, code 9 = outside Tab. 18
+- Class: text-only-formula
+- Chosen now (fail-safe): FLL-GAR-05-D2 reads a created select `neurissbildung` (ausgeschlossen / moeglich — the printed R0-B cell vs the R1…R3 wording) plus `rissbreite_erwartet_mm` and `rissversatz_erwartet_mm`; a width > 1,0 mm or a Versatz > 0,5 mm yields 9 ("außerhalb Tab. 18"), never a class; the engine requires all three inputs (0 when none) — the `if()` does not exempt a branch's inputs.
+- Evidence (verbatim, transcript line): "7 R0-B keine Rissbreitenveränderung bzw. Neurissbildung" (L3677); "8 R1-B neu entstehende Risse oder Rissbreitenveränderung bis max. 0,2 mm" (L3678–L3680); "10 R3-B neu entstehende Risse oder Rissbreitenveränderung bis max. 1,0 mm, Rissversatz bis 0,5 mm" (L3686–L3688).
+- Proposed SQL / config: as emitted; the owner may prefer "0 mm expected width ⇒ R0-B" (drop the select) — one formula edit.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-3 · FLL-GAR-2023 · FLL-GAR-12 · TAB7 "C25/30 (35/45) 1" read as Festigkeitsklasse C25/30, Wasserwechselzone C35/45
+- Class: text-only-formula (printed-cell reading)
+- Chosen now (fail-safe): `festigkeitsklasse` = 'C25/30', `festigkeit_wechselzone` = 'C35/45' (from the parenthesis + footnote 1), `festigkeit_gedruckt` keeps the raw cell; the Expositionsklassen cell is kept as printed ("XC4, XF1 (3) 1" — XF3 in the Wasserwechselzone is the same footnote, not split into a column); the fills show the base class.
+- Evidence (verbatim, transcript line): "2 Wasserbecken und Teiche C25/30 (35/45) 1 XC4, XF1 (3) 1 WF 40 mm" (L2523–L2524); "1 Bei häufig schwankendem Wasserstand (z. B. Wasserwechselzone)." (L2558).
+- Proposed SQL / config: as seeded; a `wasserwechselzone` boolean on -12 switching the fill to the (35/45) / XF3 values is the follow-up.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-4 · FLL-GAR-2023 · FLL-GAR-14 · TAB16 — prod token `austrocknung_frost` vs the coated column's split rows
+- Class: text-only-formula (token ↔ row map)
+- Chosen now (fail-safe): with coating (`true`), `quellgegendruck` → row 4 "Überdeckung für Quellgegendruck … sowie für ausreichenden Schutz vor Austrocknung ≥ 0,30 m" and `austrocknung_frost` → row 5 "Überdeckung für ausreichenden Schutz vor Frosteinwirkung ≥ 0,60 m" (the larger of the two functions the prod token combines); without coating the two rows map 1:1.
+- Evidence (verbatim, transcript line): "4 Mit polyolefiner Beschichtung / Folie Überdeckung für Quellgegendruck bei Erst- quellen der GTD (z. B. Bereiche unterhalb eines permanenten Wasserspiegels) sowie für ausreichenden Schutz vor Austrocknung ≥ 0,30 m" (L3303–L3312); "5 Überdeckung für ausreichenden Schutz vor Frosteinwirkung ≥ 0,60 m" (L3314–L3316).
+- Proposed SQL / config: as seeded; a third prod token `austrocknung` (coated only) would let the 0,30-m case fill — enum edit (D-1 class) for the owner.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-5 · FLL-GAR-2023 · FLL-GAR-23 · TAB28 cell semantics and the hoehe_band edges
+- Class: text-only-formula
+- Chosen now (fail-safe): "X" → `x`, "(X)" → `x_bedingt` (legend L5738–L5741), "- 1" → `sonder` (footnote L5748); no printed cell means "nicht zugelassen", so FLL-GAR-23-D1 counts `sonder` rows (the brief's `zulaessig == 'nein'` never occurs); the register's `hoehe_band` uses the printed row heads as closed lower edges (≥ 15 / ≥ 10 / ≥ 5 / 0) — a 14,9-cm edge sits in the "≥ 10" row.
+- Evidence (verbatim, transcript line): "Anwendungsfälle X = Ausführung zugelassen (X) = nur mit geeigneter Randbefestigung und Sicherung gegen Hinter- und Unterläufigkeit" (L5737–L5741); "2 ≥ 15 (X) X X" (L5744); "1 Nur als Sonderkonstruktion, d. h. als besondere planerische und technische Lösung." (L5748).
+- Proposed SQL / config: as seeded / emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-6 · FLL-GAR-2023 · FLL-GAR-22 · TAB26 seeded once per DIN 18196 class (20 rows from 6 printed group rows)
+- Class: text-only-formula (row expansion)
+- Chosen now (fail-safe): each printed group ("GE, GW, GI" …) is seeded once per listed class with identical cells and the same span (m1200_1 trap 6), so the created select `baugrund_klasse_18196` and the register lookup_key offer the class the engineer knows; `GU*` / `GT*` / `SU*` / `ST*` keep the printed asterisk in the token.
+- Evidence (verbatim, transcript line): "5 GU, GU\*, GT, GT\* 10 \- \- \- x" (L5386); "6 SU, SU\*, ST, ST\* 5 \- x x x" (L5387).
+- Proposed SQL / config: as seeded.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-J-7 · FLL-GAR-2023 · FLL-GAR-07 / -09 · TAB1 row 12 "Kunststoffbahnen aus PEHD" keyed on the prod token bahn_pe (which also covers PELD)
+- Class: text-only-formula (token ↔ row map)
+- Chosen now (fail-safe): mapped — the only PE row of Tab. 1 fills for `bahn_pe`; the row label "Kunststoffbahnen aus PEHD" is shown beside the value so a PELD project sees that the printed row is the PEHD one.
+- Evidence (verbatim, transcript line): "12 Kunststoffbahnen aus PEHD ≤ 1:1,5 ≤ 66 %" (L1410); "Für Gewässerabdichtungen können je nach Anwendung Bahnen aus Polyethylen mit geringer Dichte (PELD) und Polyethylen mit hoher Dichte (PEHD) verwendet werden." (L4455–L4456).
+- Proposed SQL / config: as seeded; the owner may withhold the row for PELD (drop the mapping and route via the created `pe_werkstoff`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-U-1 · FLL-GAR-2023 · FLL-GAR-22 · TAB26 column alignment (PDF confirmation path)
+- Class: unreadable-cell
+- Chosen now (fail-safe): all six printed rows seeded (each prints exactly five cells after the class group, in the head order Sand-Mindestdicke · Vliesstoffe · Bautenschutzmatten · Kunststoff-/Elastomerbahnen · Beton, Mörtel), `verification_status = 'imported_unverified'` because the plan flagged the alignment and the head is spread over 33 transcript lines (L5350–L5382).
+- Evidence (verbatim, transcript line): "3 GE, GW, GI 10 \- \- \- x" (L5384); "4 SE, SW, SI \- \- \- \- \-" (L5385); "7 UL, UM, UA 5 x x x x" (L5388); head cells "Sand 0,063 mm bis 2 mm Mindest- dicke in cm" (L5350–L5355) … "Beton, Mörtel, \> 50 mm" (L5380–L5382).
+- Proposed SQL / config: after the PDF look (p. 111): `verification_status = 'md_verified'` for TAB26 (or the corrected cells).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-U-2 · FLL-GAR-2023 · FLL-GAR-10 / -11 · Tab. 2 (garbled — not seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): no TAB2; `kf_abdichtung` / `mz_durchlaessigkeit_kf` stay number inputs (REQ-12 / REQ-13 read ≤ 1·10⁻⁹).
+- Evidence (verbatim, transcript line): the row cells are split across lines without their row head — "1 \* 10-8 9,50 9.500,00 26.027" (L1808), "1 \* 10-9 0,95 950,00 2.602" (L1827), "1 \* 10-11 bis 1 \* 10-12 0,0095 bis 0,00095 9,50 bis 0,95 26 bis 3" (L1859–L1872); caption "Tab. 2: Richtwerte zur Wasserdurchlässigkeit von mineralischen Stoffen ohne/mit Zusatzstoffen und als Verbundwerkstoff" (L1875–L1876).
+- Proposed SQL / config: after the PDF look (p. 36–37): a TAB2 keyed by Durchlässigkeitsklasse with kf / Q per m² / per 1.000 m² / l per day.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-U-3 · FLL-GAR-2023 · all · scope note — tables not seeded in this task
+- Class: unreadable-cell (scope)
+- Chosen now (fail-safe): Tab. 9 / 10 / 11 (concrete curing), 14 (geotextile Flächeneinheit — legible, L3159–L3162, but no driver field in prod), 15 (needled Na-GTD properties), 17 (GTD raw materials), 19 (Bitumenbahn Kurzzeichen — `bb_bahnentyp` free text), 20 / 21 / 23 (Kunststoffbahn / Flüssigkunststoff types — `fk_systemtyp` free text), 29 (plant list → the `pflanzenarten.art` datalist once read), Anhang 3 (Flüssigkunststoff classes L6522–L6568) are not read / not seeded.
+- Evidence (verbatim, transcript line): "3 Flächeneinheit MA DIN EN ISO 9864 ≥ 100 g/m2 ≥ 200 g/m2" (L3162 — Tab. 14, would be two rows); inventory §1 "Class tables without selector in prod".
+- Proposed SQL / config: a follow-up task per table with its driver field.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-U-4 · FLL-GAR-2023 · FLL-GAR-23 · TAB28 row "0" — Freifläche / Schwimmteich cells printed EMPTY
+- Class: unreadable-cell
+- Chosen now (fail-safe): `zulaessig = null` for `zero|freiflaeche` and `zero|schwimmteich` with the hint "Zelle leer gedruckt"; a register row of height 0 for those uses is undecidable (FLL-GAR-23-D1 `manual_required`), never inferred; TAB28 `imported_unverified`.
+- Evidence (verbatim, transcript line): "5 0 \- 1" (L5747) — one cell after the row head "0", against three cells in the rows above ("2 ≥ 15 (X) X X", L5744).
+- Proposed SQL / config: after the PDF look (p. 118): the two cells as printed (or confirmed empty) → `zulaessig = <value read from the PDF>`, `verification_status = 'md_verified'`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-D-1 · FLL-GAR-2023 · FLL-GAR-05 · wassereinwirkungsklasse ← w_klasse_code
+- Class: deactivation (manual enum replaced by the derivation)
+- Chosen now (fail-safe): `w_klasse_code` (FLL-GAR-05-D1) created beside the manual enum; the enum stays the producer for -15 / -16 / -17 and REQ-05.
+- Evidence (verbatim, transcript line): "3 W1-B ≤ 5 m" (L3673); "4 W2-B ≤ 10 m" (L3674); "5 W3-B \> 10 m" (L3675).
+- Proposed SQL / config: STAGED block fll_gar-D-1 … D-6 (an enum-valued equation `if(fuellhoehe_m <= 5, 'W1-B', …)` replacing the input, consumers unchanged).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-D-2 · FLL-GAR-2023 · FLL-GAR-02 · gewaesser_in_scope ← gewaesser_in_scope_code (REQ-01)
+- Class: deactivation
+- Chosen now (fail-safe): `gewaesser_in_scope_code` (FLL-GAR-02-D1) created; the boolean and REQ-01 'gewaesser_in_scope == true' stay (FLL-revision GAR-02 F-02).
+- Evidence (verbatim, transcript line): "Die Gewässerabdichtungsrichtlinien gelten nicht für: Deponien; Fischereieinrichtungen; Talsperren und Speicherbecken; Wasserstraßen." (L509–L513).
+- Proposed SQL / config: STAGED block fll_gar-D-2 (REQ-01 → `gewaesser_in_scope_code == 1`, then `active = false` on the boolean).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-D-3 · FLL-GAR-2023 · FLL-GAR-05 · rissklasse ← r_klasse_code
+- Class: deactivation
+- Chosen now (fail-safe): `r_klasse_code` (FLL-GAR-05-D2, J-2) created beside the manual enum (consumed by -12 / -15 / -16).
+- Evidence (verbatim, transcript line): L3677–L3688 (see J-2).
+- Proposed SQL / config: STAGED block fll_gar-D-1 … D-6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-D-4 · FLL-GAR-2023 · FLL-GAR-05 · standortklasse ← s_klasse_code
+- Class: deactivation
+- Chosen now (fail-safe): `standort_tab18` (select) + `s_klasse_code` (FLL-GAR-05-D3) created beside the manual enum (consumed by -15 / -16 / -17).
+- Evidence (verbatim, transcript line): "12 S1-B Behälter im Außenbereich, der nicht mit einem Bauwerk verbun- den ist." (L3692–L3693); "13 S2-B Behälter im Außenbereich, der an ein Bauwerk angrenzt und mit diesem verbunden ist sowie Behälter im Innenbereich." (L3695–L3696).
+- Proposed SQL / config: STAGED block fll_gar-D-1 … D-6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-D-5 · FLL-GAR-2023 · FLL-GAR-09 / -18 · wurzel_rhizomfestigkeit_required ← the material sentences (PE only encoded)
+- Class: deactivation (partial derivation)
+- Chosen now (fail-safe): FLL-GAR-18-D1 `pe_rhizom_nachweis_code` (PEHD 0 / PELD 1) on -18 only; the -09 boolean stays manual — the brief's `if(abdichtungs_art == '<pehd token>', 0, 1)` is not encodable (prod has one token `bahn_pe` for PELD and PEHD) and a blanket "1 for every other material" is not printed (no sentence for mineral / GTD / Stahl / Alkalisilikat / GUP).
+- Evidence (verbatim, transcript line): "Kunststoffbahnen aus PEHD besitzen eine ausreichende Widerstandsfähigkeit gegenüber Wurzeln und Rhizomen. Auf eine Prüfung der Wurzel- und Rhizomfestigkeit kann verzichtet werden." (L4511–L4513); "Bei Kunststoffbahnen aus PELD ist vom Hersteller zusätzlich ein Nachweis der Wurzel- bzw. Rhizomfestigkeit gemäß FLL zu erbringen." (L4514–L4515); the same "zu erbringen" sentence for Beton-Fugenabdichtungen (L2485–L2486), Asphalt (L2902–L2903), Bitumenbahnen (L3732–L3733), Kunststoff-/Elastomerbahnen (L3924–L3925), Flüssigkunststoff (L4212–L4213).
+- Proposed SQL / config: STAGED block fll_gar-D-1 … D-6 (a -09 equation needs `pe_werkstoff` consumed on -09 and the owner's ruling for the unprinted materials).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-D-6 · FLL-GAR-2023 · FLL-GAR-24 · bep_durchdringungen_anzahl ← durchdringungen_count
+- Class: deactivation
+- Chosen now (fail-safe): `durchdringungen` register + `durchdringungen_count` (FLL-GAR-24-D1) created; the manual counter stays.
+- Evidence (verbatim, transcript line): "den baulichen Vorgaben (z. B. Randausbildung, Anschlüsse, Durchdringungen und technische Einbauten);" (L1479–L1480).
+- Proposed SQL / config: STAGED block fll_gar-D-1 … D-6 (`active = false` on the counter).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-F-1 · FLL-GAR-2023 · FLL-GAR-14 · groesstkorn_max_mm = if(ungleichfoermigkeit_u >= 5, 32, 16)
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted `imported_unverified` (FLL-GAR-14-D1) with the created input `ungleichfoermigkeit_u`; no gate (G-1).
+- Evidence (verbatim, transcript line): "Der Größtkorndurchmesser darf 16 mm bzw. 32 mm bei U ≥ 5 nicht überschreiten." (L3438).
+- Proposed SQL / config: as emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-F-2 · FLL-GAR-2023 · FLL-GAR-16 · bahnendicke_min_mm = if(bahn_vorkonfektioniert == 'ja', 1.0, 1.2)
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted `imported_unverified` (FLL-GAR-16-D2) with the created select `bahn_vorkonfektioniert` (enum — booleans are not formula inputs); REQ-18 keeps its literal 1,2 (G-2).
+- Evidence (verbatim, transcript line): "Die Bahnen müssen eine Mindestdicke von 1,2 mm aufweisen. Bei werkseitig vorkonfektio- nierten Bahnen für gering beanspruchte Nutzungen (z. B. Gartenteiche) sind Bahnendicken ≥ 1,0 mm zulässig." (L4064–L4067).
+- Proposed SQL / config: as emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-1 · FLL-GAR-2023 · FLL-GAR-14 · new gate groesstkorn_auflast_mm ≤ groesstkorn_max_mm
+- Class: gate-guard
+- Chosen now (fail-safe): no gate; the derived limit is visible.
+- Evidence (verbatim, transcript line): L3438 (see F-1); prod validation_rules.raw '<= 16 (or <= 32 if U>=5)'.
+- Proposed SQL / config: STAGED block fll_gar-G-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-2 · FLL-GAR-2023 · FLL-GAR-10 · REQ-18 onto bahnendicke_min_mm (Gartenteich 1,0 mm)
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-18 unchanged ('… bahnendicke_mm >= 1.2', block).
+- Evidence (verbatim, transcript line): L4064–L4067 (see F-2).
+- Proposed SQL / config: STAGED block fll_gar-G-2 (the gate sits on -10 while the symbols live on -16 — GAR-10 F2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-3 · FLL-GAR-2023 · FLL-GAR-04 · REQ-06 (empty) onto the created attestation eisdruck_randschutz_vorgesehen
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-06 unchanged (empty condition, manual attestation); the boolean is created on -05, visible only when `eisbildung_moeglich == true`.
+- Evidence (verbatim, transcript line): "Ist eine Eisbildung nicht auszuschließen, ist der Randbereich, insbesondere die An- und Ab- schlüsse und Übergänge, ggf. vor Eisdruck zu schützen." (L1367–L1368).
+- Proposed SQL / config: STAGED block fll_gar-G-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-4 · FLL-GAR-2023 · FLL-GAR-23 · REQ-23 — §4.8 text (5 / 30 / 15 cm) vs Tab. 28
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-23 unchanged ('freibord_zu_gelaende_cm >= 5 AND freibord_zu_bauwerk_cm >= 30', warn); the register `randabschnitte` shows the Tab.-28 cell per row and `randabschnitte_sonder` counts the -¹ rows. The text allows mind. 5 cm at Schwimmteichen where Tab. 28 prints -¹ for ≥ 5 — a printed tension the owner rules.
+- Evidence (verbatim, transcript line): "Bei Schwimm- und Badeteichen muss die Oberkante der Abdichtung – in Abhängigkeit des zu erwartenden Wellenschlages – dauerhaft mind. 5 cm über dem geplanten Höchstwasserstand eingebaut werden." (L5703–L5705); "Nur mit geeigneter Randbefestigung und Sicherung gegen Hinter- und Unterlaufen ist eine Reduzierung auf mind. 15 cm über Höchstwasserstand zugelassen." (L5708–L5710); "4 ≥ 5 \- 1 X \- 1" (L5746).
+- Proposed SQL / config: STAGED block fll_gar-G-4 (FLL-revision GAR-23 F-1 / F-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-5 · FLL-GAR-2023 · FLL-GAR-10 / -12 · REQ-14 onto wz_max · a Tab.-8 thickness gate
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-14 unchanged (the Tab.-6 literals are correct today); `wz_max` (FLL-GAR-12-D1) and `bauteildicke_min` (Tab.-8 fill, mm) are visible.
+- Evidence (verbatim, transcript line): "2 ≤ 40 Wasserzementwert w/z ≤ 0,60" (L2437); "5 \> 40 Wasserzementwert w/z ≤ 0,70" (L2440); "3 Wände ≥ 240 ≥ 240 1 ≥ 200 ≥ 240 2" (L2578); "Daher gelten die in Tabelle 8 genannten Schichtdicken." (L2565).
+- Proposed SQL / config: STAGED block fll_gar-G-5 (FLL-revision GAR-12 F1 / F2 / F3).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-6 · FLL-GAR-2023 · FLL-GAR-07 · REQ-08 (empty) onto boeschung_steilste_1m ≥ boeschungsneigung_limit
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-08 unchanged (empty); the fill, the register and the two -07 equations are visible (inert until C-1).
+- Evidence (verbatim, transcript line): "Die angegebenen Werte sind Richtwerte" (L1391); "Die Angaben in der Tabelle entbinden nicht von einer rechnerischen Überprüfung der Stand- und Gleitsicherheit (z. B. mittels Scherversuchen)." (L1383–L1384).
+- Proposed SQL / config: STAGED block fll_gar-G-6 (FLL-revision GAR-07 F-1 / F-3).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-7 · FLL-GAR-2023 · FLL-GAR-22 · REQ-24 (empty) onto the Tab.-26 / Tab.-27 fills
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-24 unchanged; the fills `sl_schutzlage_unten_sand_min_cm` / `sl_schutzlage_unten_werkstoffe_tab26` (TAB26, U-1) and `sl_schutzlage_oben_flaechengewicht_min` (TAB27) are visible next to the free-text / number inputs.
+- Evidence (verbatim, transcript line): "Andernfalls sind die in Tabelle 26 enthal- tenen Werkstoffe für Schutzlagen bzw. \-schichten in Abhängigkeit von der Baugrundbeschaf- fenheit mit den genannten Anforderungen anzuwenden." (L5494–L5496); "Für die erforderliche Schutzwirksamkeitsklasse (SWK) gelten die Mindestanforderungen der Tabelle 27\." (L5422–L5423).
+- Proposed SQL / config: STAGED block fll_gar-G-7 (FLL-revision GAR-22 F-04).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-8 · FLL-GAR-2023 · FLL-GAR-10 / -14 · REQ-16 onto the Tab.-13 fills (single-source hygiene)
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-16 unchanged (its literals equal Tab. 13); the fills `bentonit_flaecheneinheit_min` / `quellvermoegen_min` are visible.
+- Evidence (verbatim, transcript line): "Mclay DIN EN 14196 ≥ 3.600 g/m2 ≥ 8.000 g/m2" (L3124); "4 Quellvermögen \- ASTM D 5890 ≥ 24 ml ≥ 8 ml" (L3127).
+- Proposed SQL / config: STAGED block fll_gar-G-8.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-9 · FLL-GAR-2023 · FLL-GAR-10 / -18 · REQ-20 onto pehd_tab24_code (+ PELD exclusion)
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-20 unchanged (its literals equal Tab. 24); `pehd_tab24_code` (FLL-GAR-18-D2) visible; PELD projects are still gated on the PEHD values today.
+- Evidence (verbatim, transcript line): "Für PELD-Bahnen bestehen Anforderungen nur herstellerseits. Die werkstoffspezifischen An- forderungen für PEHD-Bahnen enthält Tabelle 24\." (L4460–L4461); "3 Dichte \> 0,940 g/cm3 DIN EN ISO 1183" (L4471); "fließrate (MFR) ≥ 1,0 / ≤ 3,0 g/10 min. DIN EN ISO 1133" (L4474); "5 Rußgehalt 2-3 %" (L4476).
+- Proposed SQL / config: STAGED block fll_gar-G-9.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-10 · FLL-GAR-2023 · FLL-GAR-16 · new gates: naht_verletzungen == 0 · naht_ueberlappung_kunststoff_mm ≥ naht_ueberlappung_min_mm
+- Class: gate-guard
+- Chosen now (fail-safe): no gate; the register badges, `naht_verletzungen` and the overlap fill are visible.
+- Evidence (verbatim, transcript line): "Bei Kunststoff- und Elastormerbahnen ist an den Längs- und Quernähten eine Mindestbreite der Überlappung von 40 mm einzuhalten. Bei Bahnen mit Polymerbitumenbeschichtung ist eine Mindestbreite von 60 mm einzuhalten." (L4098–L4100).
+- Proposed SQL / config: STAGED block fll_gar-G-10 (FLL-revision GAR16-F1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-11 · FLL-GAR-2023 · FLL-GAR-10 · new gates: Tab.-4 Nenndicken with the printed 10 % tolerance
+- Class: gate-guard
+- Chosen now (fail-safe): no gate; `mineral_typ` + the two fills are visible.
+- Evidence (verbatim, transcript line): "Beim Einbau von mineralischen Stoffen ohne Zusatzstoffe sind die Nenndicken der Tabelle 4 einzuhalten:" (L1921–L1922); "1 Abweichungen von 10% der vorgegebenen Schichtdicken sind zulässig." (L1953).
+- Proposed SQL / config: STAGED block fll_gar-G-11.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-12 · FLL-GAR-2023 · FLL-GAR-10 / -13 · REQ-15 + Asphaltbeton thickness ≥ 40 mm
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-15 unchanged (Hohlraumgehalt only); `mischgutart` + `asph_dicke_min` / `asph_dicke_max` (mm) visible; `asph_dicke` is cm in prod.
+- Evidence (verbatim, transcript line): "Asphaltbeton gilt als wasserdicht, wenn dieser mit einer Schichtdicke von mind. 40 mm einge- baut wird und die eingebaute Schicht einen Hohlraumgehalt ≤ 3 Vol.-% aufweist." (L2909–L2910); "4 wasserdichter Asphaltbeton 40 mm 1 – –" (L2922–L2923).
+- Proposed SQL / config: STAGED block fll_gar-G-12 (FLL-revision GAR-13 F-1 / F-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-G-13 · FLL-GAR-2023 · FLL-GAR-22 / -24 · REQ-11 (empty) onto pflanzen_aggressiv_count
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-11 unchanged; `pflanzenarten` + `pflanzen_aggressiv_count` visible on -24 (not consumed on -22).
+- Evidence (verbatim, transcript line): "Im Einzelfall ist der Nachweis auf Wurzel- und Rhizomfestigkeit zu führen. Bei vorgesehener Bepflanzung ist die Eignung als Abdichtung nach dem „Verfahren zur Untersuchung der Wur- zelfestigkeit von Bahnen und Beschichtungen für Dachbegrünungen“ gemäß FLL durchzufüh- ren." (L1313–L1317).
+- Proposed SQL / config: STAGED block fll_gar-G-13.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-R-1 · FLL-GAR-2023 · FLL-GAR-27 · Anhang 1 Gl. 1 (Q_NOT) onto Σ A / Σ A·C
+- Class: equation-replacement (verified equation)
+- Chosen now (fail-safe): prod Gl. 1 untouched (`verified_against_standard`); `einzugsflaechen_not` + `sum_a_m2` / `sum_ac` created; NO second Q_NOT equation.
+- Evidence (verbatim, transcript line): "19 Q NOT = \[ (r5,100 – (r5,5 \* C) \] \* (A / 10.000)" (L6484); "20 = ( (607 – 316 l/(s\*ha)) ) \* (800 m2 / 10.000) = 23,28 l/sec" (L6485).
+- Proposed SQL / config: STAGED block fll_gar-R-1 (formula → `(r_5_100 * sum_a_m2 - r_5_5 * sum_ac) / 10000`, A / C retired; GAR-27 F1 / F3).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-R-2 · FLL-GAR-2023 · FLL-GAR-22 · Anhang 2 Gl. 2b — split g_prime / g_prime_required
+- Class: equation-replacement (verified equation)
+- Chosen now (fail-safe): untouched — Gl. 2b is `displayOnly` in `equation-profiles.ts` (GAR-22 F-05), so no second producer writes `g_prime` today.
+- Evidence (verbatim, transcript line): "7 erforderliches Flächengewicht g' der Auflast gegen Abheben in kN/m2 8 g'=ɣ 'D 9 dD ≥ ∆u x ɣ A \- (ɣ 'F x dF \+ ɣ 'Di x dDi) 10 cos ß" (L6498–L6501); "12 ∆u=(∆hW \+ za) ɣw" (L6503).
+- Proposed SQL / config: STAGED block fll_gar-R-2 (new field `g_prime_required`, Gl. 2b re-pointed, gate `g_prime >= g_prime_required`; retire the displayOnly profile in code).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-X-1 · FLL-GAR-2023 · FLL-GAR-27 · A vs A_einzugsflaeche (duplicate)
+- Class: deactivation
+- Chosen now (fail-safe): both untouched; the register carries the per-area A.
+- Evidence (verbatim, transcript line): "15 Abflusswirksame Fläche = 800 m2" (L6480) — one quantity printed; capture: `A` (Gl.-1 input) and the orphan `A_einzugsflaeche` (no consumer).
+- Proposed SQL / config: STAGED block fll_gar-X-1 (`active = false` on `A_einzugsflaeche`; GAR-27 F1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-X-2 · FLL-GAR-2023 · FLL-GAR-07 / -22 · slope stored three ways (ratio text · % · β)
+- Class: cross-standard (topology)
+- Chosen now (fail-safe): untouched; the register `boeschungsabschnitte` carries m and % per zone; β stays manual (no `atan` in the function set — interface gap).
+- Evidence (verbatim, transcript line): "1 Art der Abdichtung Neigungsverhältnis Gefälle in %" (L1397); "20 β Böschungswinkel \[°\]" (L6511).
+- Proposed SQL / config: STAGED block fll_gar-X-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-X-3 · FLL-GAR-2023 · FLL-GAR-09…21 · thickness symbols per material · anzahl_lagen vs bb_lagen_anzahl
+- Class: cross-standard (topology)
+- Chosen now (fail-safe): untouched; `abdichtungslagen` (mm per layer, Σ and count) is the single carrier the inventory proposes.
+- Evidence (verbatim, transcript line): "Die Schichtdicke ist abhängig vom gewählten Abdichtungswerkstoff. Sie setzt sich zusammen aus der Dicke der Abdichtungsschicht und der Dicke der notwendigen Auflast/Schutzschicht." (L1914–L1915).
+- Proposed SQL / config: STAGED block fll_gar-X-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-X-4 · FLL-GAR-2023 · FLL-GAR-06 / -22 · baugrund_typ (free text) vs the created baugrund_klasse_18196
+- Class: data_type (T) / cross-standard
+- Chosen now (fail-safe): `baugrund_typ` untouched (REQ-07 'IS NOT EMPTY'); the DIN 18196 select is created on -22 where the Tab.-26 fills live.
+- Evidence (verbatim, transcript line): "Bodenklassifikation für bautechnische Zwecke nach DIN 18196" (L5345–L5348).
+- Proposed SQL / config: STAGED block fll_gar-X-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-X-5 · FLL-GAR-2023 · several · unresolvable consumer tokens ('All', 'FLL-GAR-10..21', 'FLL-GAR-09..21', 'FLL-GAR-11..14')
+- Class: consumer-edit (observation with a block)
+- Chosen now (fail-safe): untouched; listed in the C-1 block: 'All' on -01 planer / project_code / project_date / project_name, -02 gewaesser_in_scope / gewaesser_type, -04 nutzung_funktion; 'FLL-GAR-10..21' on -06 baugrund_tragfaehig / baugrund_typ, -09 wurzel_rhizomfestigkeit_required; 'FLL-GAR-09..21' on -07 boeschungsneigung_ratio / gefaelle_percent; 'FLL-GAR-11..14' on -10 schichtdicke_abdichtung_cm.
+- Evidence (verbatim, transcript line): capture (`consumer_worksheets` column); no transcript claim.
+- Proposed SQL / config: one UPDATE per row replacing the token by resolvable codes (same pattern as C-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### fll_gar-I-1 · FLL-GAR-2023 · FLL-GAR-14 / -16 · boolean-keyed lookup tables ('false' / 'true' tokens)
+- Class: interface-gap
+- Chosen now (fail-safe): TAB16 (`gtd_polyolefin_beschichtung`) and TAB22_UEBERLAPPUNG (`polymerbitumen_beschichtung`) key on `String(boolean)` because `resolveLookupFill` stringifies every key value and the Ja/Nein control stores an explicit `true` / `false`; an untouched boolean is "Schlüssel fehlt" until the engineer picks Ja or Nein. Booleans never reach `evaluateFormula` (engine-input.ts), so every yes/no driver of a NEW equation was created as an enum (`neurissbildung`, `bahn_vorkonfektioniert`, `pe_werkstoff`).
+- Evidence (verbatim, transcript line): none needed (codebase fact; `src/lib/eval/lookup-fill.ts` `String(keys[i])`, `src/lib/eval/engine-input.ts`).
+- Proposed SQL / config: none; if booleans should become formula inputs, that is a 2a amendment.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 7, no signature needed)
+
+- **Prod's `abdichtungs_art` is inherited by NO worksheet** — every gate and rule keyed on it (REQ-05, REQ-12 … REQ-22, the 104 section rules, the Tab.-1 fill on -07) is `pending` in prod today; the harness (`tests/harness/fll-gar10-verify.integration.test.ts`) overrides the symbol in memory ("the discriminator `abdichtungs_art`, which is NOT a field here"). C-1 is the one edit that lights the master switch.
+- **REQ-12 … REQ-22 all live on FLL-GAR-10** and read fields of -11 … -20 (FLL-revision GAR-10 F2) — the G-2 / G-5 / G-8 / G-9 / G-12 re-points inherit that placement problem; nothing here moves a gate.
+- **The plan's "Tab. 26 column alignment uncertain" is not what the transcript shows**: every row prints exactly five cells in head order (L5384–L5389); the table is kept `imported_unverified` anyway (U-1) because the head spans 33 lines and the PDF is the ground truth (SR-3).
+- **Tab. 28 prints no "nicht zugelassen" cell** — the brief's `zulaessig == 'nein'` count never fires; `randabschnitte_sonder` counts the "-¹" cells instead (J-5).
+- **`evaluateFormula` checks every named scalar input BEFORE evaluating** (an `if()` branch does not exempt its inputs, unlike `sum_rows`/`count_rows` over an optional register) — FLL-GAR-05-D2 needs all three inputs (0 when none) and FLL-GAR-18-D2 all three PEHD values.
+- **A `lookup()` on a non-printed key combination yields null in the row** (Quellschweißen × ECB) — `count_rows(naehte, ok == 0)` is then `manual_required`, never a silent count (the m1200_3 trap 2).
+- **Edition token `'2023-12'`** is printed ("Ausgabe 2023" L7; "2. Ausgabe, 1.000 Exemplare, Bonn, Dezember 2023" L133) and prod `standards.version` reads "Dezember 2023 (2. Ausgabe; Erstauflage 2005)" — no I-block needed.
+- **Scalar-only equations are not server-materialised** (2a design) — FLL-GAR-02-D1, -05-D1/-D2/-D3, -11-D1, -12-D1, -14-D1, -16-D2, -18-D1/-D2 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
+- **cm vs mm**: `bauteildicke_cm` / `asph_dicke` / `schichtdicke_*_cm` are cm in prod while Tab. 8 / Tab. 12 print mm — the created fills carry the printed unit (mm) and say so in the label; comparisons need × 10 (GAR-12 F2).
+- **The transcript is plain text with hyphenated line breaks**; whitespace-collapsed fragments keep the hyphen ("Gruben- tone", "Geo- textilien") — presentation strings in the seed (labels, `werkstoffe_text`) carry them verbatim rather than a guessed de-hyphenation.

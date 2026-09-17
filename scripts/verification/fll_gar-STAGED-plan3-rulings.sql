@@ -1,0 +1,339 @@
+-- FLL-GAR-2023 — Plan 3 Task 7 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 4 equation rows, the 30 compliance rows —
+-- ids / severities / conditions / md5) were captured read-only on 2026-09-17 (src/lib/eval/field-configs/fll_gar.prior.json;
+-- prod-query.mjs for compliance_requirements / equations / standards.version, long conditions read in 110-char chunks).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Supabase data\Guidelines knowledge markdown\FLL-Gewässerabdichtungsrichtlinien.md
+-- (Ausgabe 2023). The FLL-revision batch (branch feat/fll-revision, .superpowers/sdd/fll-m2/*.json) is cross-referenced by
+-- finding id where it overlaps; this task changes NO gate severity.
+--
+-- Conventions: `s.code = 'FLL-GAR-2023'`, worksheets by code, never by id (gates / equations by their captured uuid + a
+-- guard on md5(condition) / md5(formula) of the text they replace so a re-run is a no-op); each block names its rollback.
+-- NO block deletes a row: gates and equations are UPDATEd with their captured text as the rollback; a field retirement is
+-- `active = false` (reversible). The Plan-3 DATA migrations (20260917100700 seed · 20260917100710 field configs ·
+-- 20260917100720 equations) must be applied BEFORE any block that reads a created symbol (boeschungsabschnitte,
+-- boeschung_steilste_1m, boeschung_verletzungen, boeschungsneigung_limit, abdichtungslagen, abdichtungslagen_count,
+-- w_klasse_code, r_klasse_code, s_klasse_code, eisdruck_randschutz_vorgesehen, gewaesser_in_scope_code, wz_max,
+-- bauteildicke_min, schichtdicke_abdichtung_min, schichtdicke_auflast_min, asph_dicke_min, bentonit_flaecheneinheit_min,
+-- quellvermoegen_min, groesstkorn_max_mm, naehte, naht_verletzungen, naht_ueberlappung_min_mm, bahnendicke_min_mm,
+-- pehd_tab24_code, pe_rhizom_nachweis_code, sl_schutzlage_unten_sand_min_cm, sl_schutzlage_oben_flaechengewicht_min,
+-- randabschnitte, randabschnitte_sonder, pflanzen_aggressiv_count, durchdringungen_count, sum_a_m2, sum_ac). Consumer edits
+-- REPLACE the unresolvable range token / append to `fields.consumer_worksheets` (text[]); the guard `NOT (… = ANY(…))` keeps a
+-- re-run idempotent. The Plan-1 schema migration renames the LEGACY prod regulation_tables first (plan1-D-3-1) — apply order
+-- in the playbook.
+
+-- =====================================================================================================================
+-- fll_gar-C-1 · FLL-GAR-09 abdichtungs_art consumer_worksheets — the master switch is not inherited anywhere
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: abdichtungs_art.consumer_worksheets = '{FLL-GAR-10..21}' — a RANGE STRING; loadInheritedFields matches
+-- `code = ANY(consumer_worksheets)` exactly, so no worksheet inherits it. Consequences today: REQ-05 (FLL-GAR-04) and
+-- REQ-12 … REQ-22 (all on FLL-GAR-10) evaluate `pending` for every project (FLL-revision GAR-10 F1-DISCRIMINATOR-MISSING,
+-- GAR-04 F2, GAR-07 F-1); the 104 section rules of 20260917100710, the Tab.-1 fill boeschungsneigung_limit (-07) and
+-- the register limit column boeschungsabschnitte.limit_1m read `pending` / null.
+-- Evidence: L1466–L1489 §4.7 "Die Wahl des Abdichtungssystem …"; L1372–L1373 "Für die Neigung der Abdichtung von
+-- Böschungen bestehen werkstoffspezifische Einschränkungen (s. Tab. 1)."; L3662–L3665 (Tab. 18 scope: bahnenförmige
+-- Abdichtungsstoffe aus Bitumen und Kunststoffen sowie Flüssigkunststoffe).
+-- Why staged: a consumer_worksheets edit is an always-sign-off class; the resolved list (-04 REQ-05, -05 Tab. 18 scope,
+-- -07 Tab. 1, the twelve material worksheets, -22 Schutzlagen, -23 / -24 REQ-11) is the executor's reading of §4–§8.
+-- Option:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['FLL-GAR-04','FLL-GAR-05','FLL-GAR-07','FLL-GAR-10','FLL-GAR-11','FLL-GAR-12','FLL-GAR-13','FLL-GAR-14','FLL-GAR-15','FLL-GAR-16','FLL-GAR-17','FLL-GAR-18','FLL-GAR-19','FLL-GAR-20','FLL-GAR-21','FLL-GAR-22','FLL-GAR-23','FLL-GAR-24']
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'abdichtungs_art' AND w.code = 'FLL-GAR-09' AND s.code = 'FLL-GAR-2023' AND f.active
+--    AND f.consumer_worksheets = ARRAY['FLL-GAR-10..21'];
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = ARRAY['FLL-GAR-10..21'] on that row.
+-- Same class (observation, no block): 'All' on FLL-GAR-01 planer / project_code / project_date / project_name, -02
+-- gewaesser_in_scope / gewaesser_type, -04 nutzung_funktion; 'FLL-GAR-10..21' on -06 baugrund_tragfaehig / baugrund_typ,
+-- -09 wurzel_rhizomfestigkeit_required; 'FLL-GAR-09..21' on -07 boeschungsneigung_ratio / gefaelle_percent; 'FLL-GAR-11..14'
+-- on -10 schichtdicke_abdichtung_cm — none resolves (fll_gar-X-5 on the sheet).
+
+-- =====================================================================================================================
+-- fll_gar-C-2 · section C of FLL-GAR-10 / -12 / -14 / -16 ← abdichtungs_art == '<token>' (withheld; consumed producers)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture (guard refusals, pinned in field-configs-fll_gar.test.ts): -10 C holds kf_abdichtung (→ -11, -14, -20),
+-- kornanteil_unter_2micron / verdichtungsgrad_Dpr (→ -11), schichtdicke_abdichtung_cm (→ 'FLL-GAR-11..14', unresolvable),
+-- schichtdicke_auflast_cm (→ -22); -12 C holds bauteildicke_cm ("consumed only by itself (FLL-GAR-12) — prod data oddity");
+-- -14 C holds gtd_auflast_funktion (→ -22); -16 C holds bahnendicke_mm / fuegeverfahren / nahtbreite_min_mm (→ -15, -18).
+-- The other eight sections of each of these four worksheets carry the rule (20260917100710).
+-- Why staged: hiding a producer nulls the inherited value on its consumers; the owner decides whether a GTD Auflast
+-- function should read as null on -22 when the sealing is not a GTD (semantically right, mechanically a consumer edit).
+-- Option (after ratification; Plan-3 columns present):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = v.rule FROM (VALUES
+--   ('FLL-GAR-10', 'abdichtungs_art == ''mineralisch_ohne_zusatzstoffe'''), ('FLL-GAR-12', 'abdichtungs_art == ''mineralisch_hydraulisch'''),
+--   ('FLL-GAR-14', 'abdichtungs_art == ''verbundwerkstoff_gtd'''), ('FLL-GAR-16', 'abdichtungs_art == ''bahn_kunststoff_elastomer''')) AS v(code, rule),
+--   worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND ws.code = 'C' AND w.code = v.code AND s.code = 'FLL-GAR-2023' AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on those four sections.
+
+-- =====================================================================================================================
+-- fll_gar-C-3 · FLL-GAR-05 wassereinwirkungsklasse / rissklasse / standortklasse ← abdichtungs_art IN {bahn_bitumen, bahn_kunststoff_elastomer, fluessigkunststoff, bahn_pe} (withheld)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L3662–L3665 "Für Abdichtungsbauweisen mit bahnenförmigen Abdichtungsstoffen aus Bitumen und Kunststoffen sowie
+-- Flüssigkunststoffen lassen sich die in Tabelle 18 dargestellten Einwirkungen und Standortbedingen differenzieren."; REQ-05
+-- (3744d416-399b-4053-a940-73520c5d4e83, FLL-GAR-04) guards by the same four tokens. Capture: the three enums are consumed by
+-- -15 / -16 / -17 (rissklasse also by -12) → the guard refuses the field rules; abdichtungs_art is not in scope on -05 (C-1).
+-- Rules withheld (would be): wassereinwirkungsklasse / rissklasse / standortklasse ← abdichtungs_art IN {'bahn_bitumen', 'bahn_kunststoff_elastomer', 'fluessigkunststoff', 'bahn_pe'}
+-- Why staged: hiding a consumed producer nulls the inherited class on the sheet worksheets (their gates would report n.a.).
+-- Nothing applied; the created codes w_klasse_code / r_klasse_code / s_klasse_code (20260917100710 / 20260917100720) carry no rule.
+
+-- =====================================================================================================================
+-- fll_gar-C-4 · FLL-GAR-09 anzahl_lagen ← abdichtungs_art == 'bahn_bitumen' (withheld; consumed by FLL-GAR-15) · REQ-17 onto abdichtungslagen_count
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L3765 "Abdichtungen aus Bitumenbahnen sind i. d. R. mehrlagig herzustellen."; REQ-17 (30c7b625-9cac-4569-9c72-bf907ce79fde,
+-- FLL-GAR-09, warn, md5 9ef43962852d96f62aca6f0a5f29b3e2) = 'IF abdichtungs_art == bahn_bitumen THEN anzahl_lagen >= 2'.
+-- Capture: anzahl_lagen → consumed by -15 (bb_lagen_anzahl duplicates it there — fll_gar-X-3).
+-- Why staged: hiding a consumed producer; re-pointing a gate onto the register count changes what fires.
+-- Option (after ratification; both the rule and the gate):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'abdichtungs_art == ''bahn_bitumen''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'anzahl_lagen' AND w.code = 'FLL-GAR-09' AND s.code = 'FLL-GAR-2023' AND f.active AND f.visible_when IS NULL;
+-- UPDATE compliance_requirements SET condition = 'IF abdichtungs_art == bahn_bitumen THEN abdichtungslagen_count >= 2'
+--  WHERE id = '30c7b625-9cac-4569-9c72-bf907ce79fde' AND md5(condition) = '9ef43962852d96f62aca6f0a5f29b3e2';
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on anzahl_lagen; SET condition = 'IF abdichtungs_art == bahn_bitumen THEN anzahl_lagen >= 2' WHERE id = '30c7b625-…'.
+
+-- =====================================================================================================================
+-- fll_gar-G-1 · new gate: Größtkorn der Auflast ≤ groesstkorn_max_mm (FLL-GAR-14, §5.5.2.1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L3438 "Der Größtkorndurchmesser darf 16 mm bzw. 32 mm bei U ≥ 5 nicht überschreiten."; prod groesstkorn_auflast_mm
+-- carries only validation_rules.raw '<= 16 (or <= 32 if U>=5)' (no gate). Created: ungleichfoermigkeit_u (input) and
+-- groesstkorn_max_mm = if(ungleichfoermigkeit_u >= 5, 32, 16) (FLL-GAR-14-D1, text formula fll_gar-F-1).
+-- Why staged: a NEW gate and its severity are the owner's.
+-- Option:
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-31', 'Größtkorn der Auflast über GTD', 'IF abdichtungs_art == verbundwerkstoff_gtd THEN groesstkorn_auflast_mm <= groesstkorn_max_mm', '§5.5.2.1', '<severity — owner>', 'Plan 3 (fll_gar-G-1): L3438'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-14' AND s.code = 'FLL-GAR-2023';
+-- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-31' AND description LIKE 'Plan 3 (fll_gar-G-1)%'.
+
+-- =====================================================================================================================
+-- fll_gar-G-2 · REQ-18 (a008b8e3-ca77-44e7-b8a9-7e6be12485a2, FLL-GAR-10, block, md5 423aa664cae1ce23af5fb88a526050ca) onto bahnendicke_min_mm
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L4064–L4067 "Die Bahnen müssen eine Mindestdicke von 1,2 mm aufweisen. Bei werkseitig vorkonfektionierten Bahnen für
+-- gering beanspruchte Nutzungen (z. B. Gartenteiche) sind Bahnendicken ≥ 1,0 mm zulässig."; prod REQ-18 = 'IF abdichtungs_art ==
+-- bahn_kunststoff_elastomer THEN bahnendicke_mm >= 1.2' (the 1,0-mm case is not expressible without the created select
+-- bahn_vorkonfektioniert and FLL-GAR-16-D2 bahnendicke_min_mm, text formula fll_gar-F-2). bahnendicke_mm is consumed by -15 / -18.
+-- Why staged: the condition changes what fires (a 1,1-mm Gartenteich sheet passes after ratification).
+-- Option:
+-- UPDATE compliance_requirements SET condition = 'IF abdichtungs_art == bahn_kunststoff_elastomer THEN bahnendicke_mm >= bahnendicke_min_mm'
+--  WHERE id = 'a008b8e3-ca77-44e7-b8a9-7e6be12485a2' AND md5(condition) = '423aa664cae1ce23af5fb88a526050ca';
+-- Rollback: SET condition = 'IF abdichtungs_art == bahn_kunststoff_elastomer THEN bahnendicke_mm >= 1.2' WHERE id = 'a008b8e3-…'.
+-- Note: the gate lives on FLL-GAR-10 while bahnendicke_min_mm is created on FLL-GAR-16 (GAR-10 F2-CROSS-WORKSHEET-FIELDS) —
+-- the re-point needs the gate moved to FLL-GAR-16 or the output consumed on -10 (owner's call, same as REQ-12 … REQ-22).
+
+-- =====================================================================================================================
+-- fll_gar-G-3 · REQ-06 (e62c903f-ea96-4d3f-9e57-c5e7a0ca9042, FLL-GAR-04, warn, requires_attestation, EMPTY condition) onto the created attestation
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1367–L1368 "Ist eine Eisbildung nicht auszuschließen, ist der Randbereich, insbesondere die An- und Abschlüsse und
+-- Übergänge, ggf. vor Eisdruck zu schützen."; FLL-revision GAR-04 F1 (dead gate). Created: eisdruck_randschutz_vorgesehen
+-- (boolean, FLL-GAR-05, visible when eisbildung_moeglich == true).
+-- Why staged: a gate condition change (from empty/manual to machine-evaluable).
+-- Option:
+-- UPDATE compliance_requirements SET condition = 'IF eisbildung_moeglich == true THEN eisdruck_randschutz_vorgesehen == true'
+--  WHERE id = 'e62c903f-ea96-4d3f-9e57-c5e7a0ca9042' AND md5(condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- Rollback: SET condition = '' WHERE id = 'e62c903f-…'.
+-- Note: the gate lives on FLL-GAR-04; both symbols are on FLL-GAR-05 (eisbildung_moeglich is consumed by -23, not -04) —
+-- move the gate to FLL-GAR-05 or add -04 to its consumers (GAR-04 F2).
+
+-- =====================================================================================================================
+-- fll_gar-G-4 · REQ-23 (ab65828e-1b3d-4ff2-956b-f0207558c101, FLL-GAR-23, warn, md5 4bc74a5ec819aad5b83fad2daf5d5751) — §4.8 text vs Tab. 28
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (text): L5703–L5704 "Bei Schwimm- und Badeteichen muss die Oberkante der Abdichtung … dauerhaft mind. 5 cm über dem
+-- geplanten Höchstwasserstand eingebaut werden."; L5707–L5710 "… i. d. R. 30 cm über den geplanten Höchstwasserstand … Nur mit
+-- geeigneter Randbefestigung und Sicherung gegen Hinter- und Unterlaufen ist eine Reduzierung auf mind. 15 cm … zugelassen."
+-- Evidence (table): L5744–L5748 — Bauteil/Bauwerk ≥ 15 "(X)", ≥ 10 / ≥ 5 / 0 "-¹"; Freifläche ≥ 15 / ≥ 10 / ≥ 5 "X"; Schwimmteich
+-- ≥ 15 / ≥ 10 "X", ≥ 5 "-¹"; "1 Nur als Sonderkonstruktion". The text allows 5 cm at Schwimmteichen where Tab. 28 prints -¹ for
+-- ≥ 5 — a printed tension the owner rules (FLL-revision GAR-23 F-1 / F-2). prod REQ-23 = 'freibord_zu_gelaende_cm >= 5 AND
+-- freibord_zu_bauwerk_cm >= 30' (the 15-cm reduction is not expressible on the scalars).
+-- Why staged: condition change; which of text / table governs is a ruling.
+-- Option (table form): UPDATE compliance_requirements SET condition = 'randabschnitte_sonder == 0'
+--  WHERE id = 'ab65828e-1b3d-4ff2-956b-f0207558c101' AND md5(condition) = '4bc74a5ec819aad5b83fad2daf5d5751';
+-- Rollback: SET condition = 'freibord_zu_gelaende_cm >= 5 AND freibord_zu_bauwerk_cm >= 30' WHERE id = 'ab65828e-…'.
+-- Note: the (X) cell (x_bedingt) needs the row's Randbefestigung text non-empty to be a pass — a second clause
+-- `count_rows(randabschnitte, zulaessig == 'x_bedingt' AND randbefestigung IS EMPTY) == 0` is the executor's proposal.
+
+-- =====================================================================================================================
+-- fll_gar-G-5 · REQ-14 (1918d21c-f84e-462e-be7f-dc1c718a7b04, FLL-GAR-10, block, md5 6767d23ffd935972371983e6a8219be3) onto wz_max · Tab.-8 thickness gate
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 6 L2437–L2440 (w/z ≤ 0,60 / Z ≥ 280 kg/m3 / fck ≥ C25/30 for d ≤ 40; w/z ≤ 0,70 for d > 40); Tab. 8 L2578–L2579
+-- (Wände ≥ 240 / 240¹ / 200 / 240² mm; Bodenplatte ≥ 250 / – / 200 / 250² mm). prod REQ-14 = 'IF abdichtungs_art ==
+-- mineralisch_hydraulisch THEN ((bauteildicke_cm <= 40 AND wasserzementwert <= 0.60 AND zementgehalt_kg_m3 >= 280) OR
+-- (bauteildicke_cm > 40 AND wasserzementwert <= 0.70))' — the Tab.-6 values as literals (correct today; single-source hygiene
+-- only). No gate reads Tab. 8 (FLL-revision GAR-12 F1); bauteildicke_cm is cm, Tab. 8 mm (GAR-12 F2).
+-- Option (single-source; same behaviour): SET condition = 'IF abdichtungs_art == mineralisch_hydraulisch THEN wasserzementwert <= wz_max AND (bauteildicke_cm > 40 OR zementgehalt_kg_m3 >= 280)'
+--  WHERE id = '1918d21c-f84e-462e-be7f-dc1c718a7b04' AND md5(condition) = '6767d23ffd935972371983e6a8219be3';
+-- Option (new gate, FLL-GAR-12): 'IF abdichtungs_art == mineralisch_hydraulisch THEN bauteildicke_cm * 10 >= bauteildicke_min' (severity — owner).
+-- Rollback: restore the captured condition text above.
+
+-- =====================================================================================================================
+-- fll_gar-G-6 · REQ-08 (66b9e6bd-3278-4b55-8bbc-b5dc754dad06, FLL-GAR-07, warn, EMPTY condition) onto the Tab.-1 comparison
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 1 L1398–L1410; L1391 "Die angegebenen Werte sind Richtwerte"; L1383 "entbinden nicht von einer rechnerischen
+-- Überprüfung der Stand- und Gleitsicherheit". FLL-revision GAR-07 F-1 (dead gate). Created: boeschungsneigung_limit (Tab.-1 fill),
+-- boeschung_steilste_1m (FLL-GAR-07-D1), boeschung_verletzungen (FLL-GAR-07-D2) — all inert until C-1.
+-- Why staged: from empty to evaluable; "Richtwert" (anhaltswert) ⇒ warn is the executor's reading.
+-- Option (after C-1): UPDATE compliance_requirements SET condition = 'boeschung_steilste_1m >= boeschungsneigung_limit'
+--  WHERE id = '66b9e6bd-3278-4b55-8bbc-b5dc754dad06' AND md5(condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- Rollback: SET condition = '' WHERE id = '66b9e6bd-…'.
+
+-- =====================================================================================================================
+-- fll_gar-G-7 · REQ-24 (e05d1ef3-9a2c-4bdd-b701-55cfbd37039f, FLL-GAR-22, warn, requires_attestation, EMPTY condition) — Tab. 26 / Tab. 27 fills
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L5494–L5496 "Andernfalls sind die in Tabelle 26 enthaltenen Werkstoffe … anzuwenden."; L5422 "gelten die
+-- Mindestanforderungen der Tabelle 27". Created: sl_schutzlage_unten_sand_min_cm / sl_schutzlage_unten_werkstoffe_tab26 (TAB26,
+-- imported_unverified — U-1), sl_schutzlage_oben_flaechengewicht_min (TAB27). FLL-revision GAR-22 F-04 (vacuous gate).
+-- Why staged: from manual attestation to a machine clause; Tab. 26 is not PDF-confirmed (U-1).
+-- Option (Tab. 27 half only, after U-1 for the Tab. 26 half): SET condition = 'sl_schutzlage_oben_flaechengewicht >= sl_schutzlage_oben_flaechengewicht_min'
+--  WHERE id = 'e05d1ef3-9a2c-4bdd-b701-55cfbd37039f' AND md5(condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- Rollback: SET condition = '' WHERE id = 'e05d1ef3-…'.
+
+-- =====================================================================================================================
+-- fll_gar-G-8 · REQ-16 (5e2a7232-a69b-437d-b42d-a392ce525c65, FLL-GAR-10, block, md5 98e6acfc4e634ea708d6393620e860d2) onto the Tab.-13 fills
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 13 L3124–L3128 (Mclay ≥ 3.600 / ≥ 8.000 g/m2; Quellvermögen ≥ 24 / ≥ 8 ml). prod REQ-16 carries the same values
+-- as literals per bentonit_type (correct today; single-source hygiene only) plus the overlap clauses ≥ 30 / ≥ 50 cm (§5.5.2).
+-- Option: SET condition = 'IF abdichtungs_art == verbundwerkstoff_gtd THEN bentonit_flaecheneinheit_g_m2 >= bentonit_flaecheneinheit_min AND quellvermoegen_ml >= quellvermoegen_min AND gtd_ueberlappung_laengs_cm >= 30 AND gtd_ueberlappung_quer_cm >= 50'
+--  WHERE id = '5e2a7232-a69b-437d-b42d-a392ce525c65' AND md5(condition) = '98e6acfc4e634ea708d6393620e860d2';
+-- Rollback: restore the captured 311-char condition (read in 110-char chunks 2026-09-17; re-read before applying).
+
+-- =====================================================================================================================
+-- fll_gar-G-9 · REQ-20 (ffb62b93-b294-4bd6-b700-e5887d0662c9, FLL-GAR-10, block, md5 d5d4a026429daa263401b981f1cd054f) onto pehd_tab24_code
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 24 L4471 "Dichte > 0,940 g/cm3", L4474 "≥ 1,0 / ≤ 3,0 g/10 min", L4476 "Rußgehalt 2-3 %". prod REQ-20 =
+-- 'IF abdichtungs_art == bahn_pe THEN peeh_dichte_g_cm3 > 0.940 AND peeh_mfr >= 1.0 AND peeh_mfr <= 3.0 AND peeh_russgehalt_pct >= 2
+-- AND peeh_russgehalt_pct <= 3' — the same values as literals (single-source hygiene only). The gate applies to PEHD sheets;
+-- with the created pe_werkstoff a PELD project could be excluded ("Für PELD-Bahnen bestehen Anforderungen nur herstellerseits", L4460).
+-- Option: SET condition = 'IF abdichtungs_art == bahn_pe AND pe_werkstoff == PEHD THEN pehd_tab24_code == 1'
+--  WHERE id = 'ffb62b93-b294-4bd6-b700-e5887d0662c9' AND md5(condition) = 'd5d4a026429daa263401b981f1cd054f';
+-- Rollback: restore the captured condition text above.
+
+-- =====================================================================================================================
+-- fll_gar-G-10 · new gates on FLL-GAR-16: Tab. 22 seams and the §6.2.2.1 overlap
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L4098–L4102 (Überlappung ≥ 40 mm, mit Polymerbitumenbeschichtung ≥ 60 mm; Tab. 22 Mindestfügebreiten "einzuhalten").
+-- Created: naehte + naht_verletzungen (FLL-GAR-16-D1), naht_ueberlappung_min_mm (TAB22_UEBERLAPPUNG fill); nahtbreite_min_mm is
+-- now a Tab.-22 fill (fll_gar-E-2). FLL-revision GAR16-F1 (the '60' belongs to the Überlappung, not the Fügebreite).
+-- Option: INSERT two gates on FLL-GAR-16 — 'IF abdichtungs_art == bahn_kunststoff_elastomer THEN naht_verletzungen == 0' and
+-- 'IF abdichtungs_art == bahn_kunststoff_elastomer THEN naht_ueberlappung_kunststoff_mm >= naht_ueberlappung_min_mm' (severity — owner).
+-- Rollback: DELETE the two rows by their Plan-3 description prefix.
+
+-- =====================================================================================================================
+-- fll_gar-G-11 · new gates on FLL-GAR-10: Tab. 4 Nenndicken
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1921–L1922 "sind die Nenndicken der Tabelle 4 einzuhalten"; L1953 "Abweichungen von 10% der vorgegebenen
+-- Schichtdicken sind zulässig." Created: mineral_typ, schichtdicke_abdichtung_min, schichtdicke_auflast_min.
+-- Option: 'IF abdichtungs_art == mineralisch_ohne_zusatzstoffe THEN schichtdicke_abdichtung_cm >= 0.9 * schichtdicke_abdichtung_min AND
+-- schichtdicke_auflast_cm >= 0.9 * schichtdicke_auflast_min' (the 10 % tolerance as printed; severity — owner).
+-- Rollback: DELETE by the Plan-3 description prefix.
+
+-- =====================================================================================================================
+-- fll_gar-G-12 · FLL-GAR-13: Asphaltbeton water-tightness = Dicke ≥ 40 mm AND Hohlraumgehalt ≤ 3 Vol.-%
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2909–L2910 "Asphaltbeton gilt als wasserdicht, wenn dieser mit einer Schichtdicke von mind. 40 mm eingebaut wird und die
+-- eingebaute Schicht einen Hohlraumgehalt ≤ 3 Vol.-% aufweist."; REQ-15 (8a503cd4-178d-4494-b00b-a0f07e1f7ca2, FLL-GAR-10, md5
+-- f7251e9613256743b33e58bcd2fbc4a1) checks the Hohlraumgehalt only (FLL-revision GAR-13 F-1). Created: mischgutart, asph_dicke_min.
+-- Option: SET condition = 'IF abdichtungs_art == mineralisch_bitumen THEN hohlraumgehalt_asphaltbeton_vol_pct <= 3 AND asph_dicke * 10 >= asph_dicke_min'
+--  WHERE id = '8a503cd4-178d-4494-b00b-a0f07e1f7ca2' AND md5(condition) = 'f7251e9613256743b33e58bcd2fbc4a1';
+-- Rollback: SET condition = 'IF abdichtungs_art == mineralisch_bitumen THEN hohlraumgehalt_asphaltbeton_vol_pct <= 3'.
+-- Note: asph_dicke is cm in prod, Tab. 12 mm (× 10 in the clause).
+
+-- =====================================================================================================================
+-- fll_gar-G-13 · REQ-11 (6b839233-a3cd-4f04-ab8a-81b785babdd5, FLL-GAR-22, warn, requires_attestation, EMPTY condition) onto pflanzen_aggressiv_count
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1313–L1317 "Im Einzelfall ist der Nachweis auf Wurzel- und Rhizomfestigkeit zu führen. Bei vorgesehener Bepflanzung ist die
+-- Eignung als Abdichtung nach dem „Verfahren zur Untersuchung der Wurzelfestigkeit …“ gemäß FLL durchzuführen."; FLL-revision
+-- GAR-22 F-04. Created: pflanzenarten + pflanzen_aggressiv_count (FLL-GAR-24-D2).
+-- Option (after the consumer edit pflanzen_aggressiv_count → FLL-GAR-22, or moving the gate to -24):
+-- SET condition = 'IF mit_bepflanzung == true AND pflanzen_aggressiv_count > 0 THEN wurzel_rhizomfestigkeit_required == true'
+--  WHERE id = '6b839233-a3cd-4f04-ab8a-81b785babdd5' AND md5(condition) = 'd41d8cd98f00b204e9800998ecf8427e';
+-- Rollback: SET condition = '' WHERE id = '6b839233-…'.
+
+-- =====================================================================================================================
+-- fll_gar-R-1 · Anhang 1 Gl. 1 (02387918-c243-4a7e-b38d-993c65f79754, FLL-GAR-27, md5 eb7a0594d3b72b9a7fce7d56fab5adb0) — Σ over the catchment rows
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L6484 "Q NOT = [ (r5,100 – (r5,5 * C) ] * (A / 10.000)"; the printed example L6479–L6485 (r5,5 = 316, r5,100 = 607,
+-- A = 800 m2, C = 1 → 23,28 l/sec). prod formula 'Q_NOT = (r_5_100 - r_5_5 * C) * (A / 10000)', input_symbols {r_5_100, r_5_5, C, A},
+-- verified_against_standard. Created: einzugsflaechen_not, sum_a_m2 (FLL-GAR-27-D1), sum_ac (FLL-GAR-27-D2).
+-- Why staged: replacing a VERIFIED equation; the summed form Σ_i A_i (r5,100 − r5,5·C_i) = r5,100·ΣA − r5,5·ΣA·C is the
+-- executor's algebra (identical for one row; a per-area C is the reading of "Abflussbeiwert C" over several sub-areas).
+-- Option:
+-- BEGIN;
+-- UPDATE equations SET formula = 'Q_NOT = (r_5_100 * sum_a_m2 - r_5_5 * sum_ac) / 10000', input_symbols = ARRAY['r_5_100','r_5_5','sum_a_m2','sum_ac'],
+--        verification_status = 'imported_unverified'
+--  WHERE id = '02387918-c243-4a7e-b38d-993c65f79754' AND md5(formula) = 'eb7a0594d3b72b9a7fce7d56fab5adb0';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol IN ('A', 'C') AND w.code = 'FLL-GAR-27' AND s.code = 'FLL-GAR-2023' AND f.active;
+-- COMMIT;
+-- Rollback: SET formula = 'Q_NOT = (r_5_100 - r_5_5 * C) * (A / 10000)', input_symbols = ARRAY['r_5_100','r_5_5','C','A'],
+--   verification_status = 'verified_against_standard' WHERE id = '02387918-…'; SET active = true on A / C.
+-- Note: GAR-27 F3 — output_unit is NULL on the row while the Q_NOT field prints 'l/s' (L6485 "l/sec"); set output_unit = 'l/s' with this block.
+
+-- =====================================================================================================================
+-- fll_gar-R-2 · Anhang 2 Gl. 2b (c7dc584b-0f65-476d-935a-d5306d885a65, FLL-GAR-22, md5 82075797e6125765cf8713c277f8563f) — split g_prime / g_prime_required
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L6498–L6501 "erforderliches Flächengewicht g' der Auflast gegen Abheben in kN/m2 g'=ɣ'D dD ≥ ∆u x ɣA - (ɣ'F x dF + ɣ'Di x dDi) / cos ß";
+-- L6503 "∆u=(∆hW + za) ɣw". prod: Gl. 2a 'g_prime = gamma_D_prime * d_D' (430d62b2-a4b5-4bfb-afd2-bc7f8bd03d6f) and Gl. 2b
+-- 'g_prime >= (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)' BOTH output g_prime; Gl. 2b is
+-- displayOnly in equation-profiles.ts (FLL-revision GAR-22 F-05 — mitigated, no second producer writes). Inventory §4: split.
+-- Why staged: replacing a verified equation + a new field + a new gate.
+-- Option:
+-- BEGIN;
+-- INSERT INTO fields (worksheet_template_id, section_id, symbol, label_de, data_type, unit, is_required, clause_reference, description, verification_status, order_index, active)
+-- SELECT w.id, (SELECT ws.id FROM worksheet_sections ws WHERE ws.worksheet_template_id = w.id AND ws.code = 'D'), 'g_prime_required', 'Erforderliches Flächengewicht der Auflast gegen Abheben g''_erf', 'number', 'kN/m^2', false, 'Anhang 2, Gl. 2b', 'Plan 3 (fll_gar-R-2): rechte Seite von Gl. 2b', 'imported_unverified', (SELECT COALESCE(MAX(order_index), 0) + 1 FROM fields f3 WHERE f3.worksheet_template_id = w.id), true
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-22' AND s.code = 'FLL-GAR-2023'
+--     AND NOT EXISTS (SELECT 1 FROM fields f2 WHERE f2.worksheet_template_id = w.id AND f2.symbol = 'g_prime_required');
+-- UPDATE equations SET output_symbol = 'g_prime_required', formula = 'g_prime_required = (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)'
+--  WHERE id = 'c7dc584b-0f65-476d-935a-d5306d885a65' AND md5(formula) = '82075797e6125765cf8713c277f8563f';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-32', 'Auflast gegen Abheben (Anhang 2)', 'g_prime >= g_prime_required', 'Anhang 2, Gl. 2b', '<severity — owner>', 'Plan 3 (fll_gar-R-2)'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'FLL-GAR-22' AND s.code = 'FLL-GAR-2023';
+-- COMMIT;
+-- Rollback: SET output_symbol = 'g_prime', formula = 'g_prime >= (Delta_u * gamma_A - (gamma_F_prime * d_F + gamma_Di_prime * d_Di)) / cos(beta)'
+--   WHERE id = 'c7dc584b-…'; DELETE the REQ-32 row; SET active = false on g_prime_required (or DELETE it, it is a Plan-3 create).
+-- Note: after the split, the displayOnly profile entry for c7dc584b-… in src/lib/eval/equation-profiles.ts must be retired (code).
+
+-- =====================================================================================================================
+-- fll_gar-D-1 … D-6 · manual fields replaced by the created derivations (consumer edits + gate re-points)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER  (one box per D-block on the sheet)
+-- D-1 wassereinwirkungsklasse (FLL-GAR-05, consumed by -15/-16/-17) ← w_klasse_code (FLL-GAR-05-D1): a typed enum vs a code —
+--     needs an enum-valued equation (if(fuellhoehe_m <= 5, 'W1-B', …)) and REQ-05 unchanged; the code is the fail-safe now.
+-- D-2 gewaesser_in_scope (FLL-GAR-02, boolean, REQ-01 'gewaesser_in_scope == true', md5 52b4ac9d3483439f63f32ff8cf28d2b7) ← gewaesser_in_scope_code:
+--     Option: SET condition = 'gewaesser_in_scope_code == 1' WHERE id = 'ba8e1b20-1a67-4a87-a537-dc0f6ee9837e' AND md5(condition) = '52b4ac9d3483439f63f32ff8cf28d2b7'; then active = false on the boolean.
+-- D-3 rissklasse ← r_klasse_code (FLL-GAR-05-D2; code 9 = outside Tab. 18, fll_gar-J-2). D-4 standortklasse ← s_klasse_code (FLL-GAR-05-D3).
+-- D-5 wurzel_rhizomfestigkeit_required (FLL-GAR-09, consumed by 'FLL-GAR-10..21' / -24) ← the material sentences: Nachweis "zu erbringen"
+--     for Beton-Fugenabdichtungen (L2485–L2486), Asphalt (L2902–L2903), Bitumenbahnen (L3732–L3733), Kunststoff-/Elastomerbahnen
+--     (L3924–L3925), Flüssigkunststoff (L4212–L4213), PELD (L4514–L4515); "kann verzichtet werden" only for PEHD (L4511–L4513);
+--     nothing printed for mineral / GTD / Stahl / Alkalisilikat / GUP → a blanket rule is NOT source-settled; FLL-GAR-18-D1 covers PE only.
+-- D-6 bep_durchdringungen_anzahl (FLL-GAR-24) ← durchdringungen_count (FLL-GAR-24-D1): SET active = false on the manual counter after ratification.
+-- Rollbacks: restore the captured condition text / active = true.
+
+-- =====================================================================================================================
+-- fll_gar-X-1 · FLL-GAR-27 A vs A_einzugsflaeche (duplicate, FLL-revision GAR-27 F1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Capture: A (section B, 'Flaeche (Notentwaesserung)', m^2, Gl.-1 input) and A_einzugsflaeche (orphan, 'Einzugsfläche A', m², no
+-- consumer, not an equation input). Option: UPDATE fields SET active = false … WHERE symbol = 'A_einzugsflaeche' AND w.code = 'FLL-GAR-27';
+-- with R-1 both A and C retire in favour of the register. Rollback: active = true.
+
+-- =====================================================================================================================
+-- fll_gar-X-2 · slope stored three ways — boeschungsneigung_ratio (text "1:n", -07), gefaelle_percent (%, -07), beta (°, -22)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The register boeschungsabschnitte carries neigung_1m (m) and gefaelle_pct per zone; beta feeds Gl. 2b (cos β). Option: after C-1,
+-- retire boeschungsneigung_ratio / gefaelle_percent (consumers 'FLL-GAR-09..21' are unresolvable anyway) and derive beta on -22
+-- from boeschung_steilste_1m (β = atan(1/m) — no atan in the function set: interface gap, stays manual). Nothing applied.
+
+-- =====================================================================================================================
+-- fll_gar-X-3 · thickness symbols per material (schichtdicke_abdichtung_cm -10 · mz_dicke -11 · asph_dicke -13 (cm) · gtd_schichtdicke_mm -14 ·
+-- bb_dicke -15 · bahnendicke_mm -16 · fk_trockenschichtdicke -17 · gup_laminatdicke -21) and anzahl_lagen (-09) vs bb_lagen_anzahl (-15)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- The register abdichtungslagen (mm per layer, Σ lagen_gesamtdicke_mm, abdichtungslagen_count) is the single carrier the inventory
+-- proposes; retiring the per-material scalars is a consumer edit per worksheet (schichtdicke_abdichtung_cm → -11..14 / -22;
+-- anzahl_lagen → -15). Nothing applied.
+
+-- =====================================================================================================================
+-- fll_gar-X-4 · FLL-GAR-06 baugrund_typ (free text, consumed by 'FLL-GAR-10..21', REQ-07 'IS NOT EMPTY') vs the created baugrund_klasse_18196 (-22)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Option: create the DIN 18196 select on FLL-GAR-06 instead (consumed by -22) and let -22's fills key on the inherited value;
+-- data_type change of baugrund_typ (text → enum) is a T-class ruling. Nothing applied.

@@ -444,6 +444,26 @@ per worksheet; keep the Plan-1 column KEYS so stored rows survive the upgrade, a
 (7) An inventory's parenthesised cell ("(1-fache)") or gate claim ("CR-05 lists both") is a pointer — re-read the transcript
 line and the capture before encoding; both were refuted here.
 
+**Encoding traps (Plan 3 Task 7, FLL-GAR-2023).** (1) Check the DRIVER's `consumer_worksheets` for resolvable codes before
+keying anything on it: prod's `abdichtungs_art` carries the range string `"FLL-GAR-10..21"` (and `"All"` elsewhere), which
+`loadInheritedFields` (`code = ANY(consumer_worksheets)`) never matches — every gate, section rule and fill keyed on it is
+`pending` / `manual_required` until the consumer edit (fll_gar-C-1); emit the rules anyway (a `pending` rule is visible and inert)
+and pin the capture fact in the test, so ratifying the one UPDATE lights everything up without a second migration. (2) Booleans are
+NOT formula inputs (`engineInputValue` maps them to missing) — a yes/no that drives a NEW scalar equation must be a created enum
+(`ja`/`nein`, or the printed pair); for a `lookup_fill` a prod boolean works as a key because `resolveLookupFill` stringifies it
+(`'true'`/`'false'` tokens in the table, `String(boolean)`). (3) `evaluateFormula` checks every named scalar input BEFORE
+evaluating — an `if()` branch does not exempt its inputs (unlike an optional register under `count_rows`); a class formula over
+several inputs needs all of them entered (say "0, wenn keine" in the label). (4) A plain-text transcript (no LaTeX) splits one
+printed row over several lines and hyphenates ("Gruben-  \ntone"): lift the span by line range, collapse whitespace for the
+regexes, keep the raw span as the quote, and keep hyphenated fragments verbatim in labels rather than de-hyphenating by guess;
+markdown escapes (`\-`, `\>`, `\*`, `\=`, `\.`) must be un-escaped with `split/join` before matching cells ("GU\*" is the printed
+"GU*"). (5) A footnote digit after a cell ("40 mm 2") and the next cell's leading digit ("7 mm 15 mm") look alike to a lazy
+regex — require the footnote token to be whole (`(?: ([12])(?=\s|$))?`) and pin every parsed row. (6) One prod token may cover
+several printed rows (Tab. 1 has three asphalt rows under `mineralisch_bitumen`): key those rows on the finer created select in a
+sibling table (`TAB1_ASPHALT` by `mischgutart`) and leave the coarse token without a row (E-block) — never pick one of the three.
+(7) A table whose printed cells are only "X" / "(X)" / "-¹" carries no "not allowed" state — count what is printed
+(`zulaessig == 'sonder'`), not the absent negative.
+
 **Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
 from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
 created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;
