@@ -14,8 +14,9 @@
  *   TS fallbacks while widget IS NULL) and renders the generic `RegisterEditor`,
  *   unless a BESPOKE editor claims the field (`ui_config.editor`, or — while
  *   widget IS NULL — the symbol table below: KOSTRA rainfall tables, risk
- *   register, mitigation plan, and the two hand-offs pollutant_register (Task 4)
- *   and rainfall_table_ref (Task 6)).
+ *   register, mitigation plan, and the Task-6 hand-off rainfall_table_ref).
+ *   pollutant_register (VSME-B04.100) renders through the generic editor since
+ *   Task 4 — its three per-medium sums are the Plan 2a fallback-equation states.
  * - Placement (`widgetPlacement`): registers follow `registerPlacement(cfg)`
  *   (undefined ⇒ bottom — the Plan-1 selection migrations carry no placement
  *   key); bespoke editors sit at the bottom under today's h2 titles; a legacy
@@ -39,7 +40,6 @@ import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { RainfallTableSelector } from './rainfall-table-selector';
 import { RiskRegisterEditor } from './risk-register-editor';
 import { MitigationPlanEditor } from './mitigation-plan-editor';
-import { PollutantRegisterEditor } from './pollutant-register-editor';
 import { EditorErrorBoundary } from './editor-error-boundary';
 
 /** The form's field row: DynamicField's field + section/order/active + the inherited marker. */
@@ -83,8 +83,6 @@ export type BespokeEditorKey =
   | 'rainfall_tables'
   | 'risk_register'
   | 'risk_mitigation_plan'
-  /** Plan 2b Task 4 hand-off: VSME pollutant register stays on its hand-built editor until then. */
-  | 'pollutant_register'
   /** Plan 2b Task 6 hand-off: the per-facility table-id picker stays on RainfallTableSelector until the `reference` widget lands. */
   | 'rainfall_table_ref';
 
@@ -93,7 +91,6 @@ export const BESPOKE_BY_SYMBOL = {
   r_D_n_table: 'rainfall_tables',
   risk_register: 'risk_register',
   risk_mitigation_plan: 'risk_mitigation_plan',
-  pollutant_register: 'pollutant_register',
   rainfall_table_ref: 'rainfall_table_ref',
 } as const satisfies Record<string, BespokeEditorKey>;
 
@@ -102,7 +99,6 @@ export const BESPOKE_TITLES: Readonly<Record<BespokeEditorKey, string>> = {
   rainfall_tables: 'Regenspendentabellen (für V_VA nach Gl. 8)',
   risk_register: 'Risikoanalyse (Anhang A — Tab. A.1)',
   risk_mitigation_plan: 'Risiko-Maßnahmenplan (Anhang A — Tab. A.2)',
-  pollutant_register: 'Schadstoffregister — Emissionen je Schadstoff (VSME Abs. 32)',
   rainfall_table_ref: 'Verwendete Regenspendentabelle',
 };
 
@@ -200,8 +196,6 @@ function renderBespoke(key: BespokeEditorKey, f: WorksheetFormField, ctx: Widget
           <MitigationPlanEditor fieldId={f.id} readOnly={ctx.readOnly} />
         </EditorErrorBoundary>
       );
-    case 'pollutant_register':
-      return <PollutantRegisterEditor fieldId={f.id} readOnly={ctx.readOnly} />;
     case 'rainfall_table_ref':
       return <RainfallTableRef f={f} ctx={ctx} />;
   }

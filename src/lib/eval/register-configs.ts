@@ -25,8 +25,10 @@ const SURFACE_INVENTORY: RegisterUiConfig = {
     { key: 'tab9_value', type: 'lookup_key', label: 'Oberflächentyp', required: true, lookup: { table_code: 'TAB9', group_by: 'group_label' } },
     // aria_label = today's <input aria-label="Fläche"> (surface-inventory-editor.tsx:200).
     { key: 'area_m2', type: 'number', label: 'A', unit: 'm²', required: true, min: 0, aria_label: 'Fläche' },
-    { key: 'c_i', type: 'lookup_value', label: 'C_i', required: true, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cm' } },
-    { key: 'c_s', type: 'lookup_value', label: 'C_s', required: true, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cs' } },
+    // min/max: runoff coefficients are fractions (0…1) — input bounds only; completeness stays rowComplete() parity
+    // (isComplete checks min/max on `number` columns only, not `lookup_value`).
+    { key: 'c_i', type: 'lookup_value', label: 'C_i', required: true, min: 0, max: 1, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cm' } },
+    { key: 'c_s', type: 'lookup_value', label: 'C_s', required: true, min: 0, max: 1, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cs' } },
     { key: 'coeff_override', type: 'boolean', label: 'abweichend' },
     // badge under the type column = today's kind badge (surface-inventory-editor.tsx:178).
     { key: 'kind', type: 'derived', label: 'befestigt/unbefestigt', expr: "lookup('TAB9', tab9_value, 'kind')", display: 'badge', value_labels: { paved: 'befestigt', unpaved: 'unbefestigt' } },
@@ -39,7 +41,7 @@ const SURFACE_INVENTORY: RegisterUiConfig = {
 };
 
 // Required set + min:0 = pollutantRowComplete() in pollutant-register.ts:88-94.
-// Header/flag/aria texts = today's pollutant-register-editor.tsx:66-68, 91-96, 134, 158, 184.
+// Header/flag/aria texts = the retired pollutant-register-editor.tsx (deleted in Plan 2b Task 4; pinned in register-editor-vsme-b04.test.tsx).
 const POLLUTANT_REGISTER: RegisterUiConfig = {
   title: 'Schadstoffregister (E-PRTR)', subtitle: 'VSME Abs. 32 — je Schadstoff und Medium (Luft / Wasser / Boden)', add_label: '+ Schadstoff',
   columns: [

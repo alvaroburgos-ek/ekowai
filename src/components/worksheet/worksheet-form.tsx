@@ -14,7 +14,6 @@ import {
   useManualOverride,
 } from './manual-override-pill';
 import { facilityReturnPeriod } from '@/lib/eval/rainfall-tables';
-import { POLLUTANT_REGISTER_SYMBOL, POLLUTANT_OUTPUT_SYMBOLS } from '@/lib/eval/pollutant-register';
 import { SurfaceSourceBanner } from './surface-source-banner';
 import { carrierSourceState } from '@/lib/eval/carrier-source-state';
 import { registerTables, type RegulationTable } from '@/lib/eval/regulation-tables';
@@ -22,7 +21,7 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { withFallbackRegisterEquations, resolveRegisterConfig, registerFlagKeys } from '@/lib/eval/register-configs';
 import { renderWidget, widgetPlacement, type WorksheetFormField, type WidgetContext } from './widgets';
-import { ReadOnlyRegisterTable } from './register-editor';
+import { ReadOnlyRegisterTable, registerPlacement } from './register-editor';
 import { visibleFields } from './visible-fields';
 import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
@@ -190,8 +189,6 @@ const VSME_CO2_ENGINE_SYMBOLS = new Set([
   'GrossLocationBasedScope2GreenhouseGasEmissions',
   'TotalGrossLocationBasedScope1AndScope2GHGEmissions',
 ]);
-
-const VSME_POLLUTANT_SUM_SYMBOLS = new Set<string>(Object.values(POLLUTANT_OUTPUT_SYMBOLS));
 
 export function WorksheetForm({
   locale,
@@ -515,10 +512,24 @@ export function WorksheetForm({
     return facilityReturnPeriod(worksheet.template.code, pick);
   }, [fieldBySymbol, values, worksheet.template.code]);
 
-  // VSME-B04.100 pollutant register: per-pollutant E-PRTR rows; the three
-  // AmountOfEmissionTo{Air,Water,Soil} scalars are derived per-medium sums.
-  // (Plan 2b Task 4 generalises the computedHint below and drops this lookup.)
-  const pollutantRegisterField = fields.find((f) => f.symbol === POLLUTANT_REGISTER_SYMBOL);
+  // Plan 2b (Task 4): register-output provenance hint, generic. For every
+  // register field of THIS worksheet, the output symbols of the equations
+  // (DB rows + Plan 2a fallback) that consume it get "Summe aus dem Register
+  // <title>" — the old VSME-only pollutant hint generalised (A138-07's six
+  // surface outputs now carry it too, label "Flächenverzeichnis").
+  const registerOutputHints = useMemo(() => {
+    const m = new Map<string, { title: string; placement: 'section' | 'bottom' }>();
+    for (const r of fields) {
+      const cfg = resolveRegisterConfig({ symbol: r.symbol, dataType: r.dataType, widget: r.widget ?? null, uiConfig: r.uiConfig });
+      if (!cfg) continue;
+      for (const eq of engineEquations) {
+        if (eq.outputSymbol && (eq.inputSymbols ?? []).includes(r.symbol)) {
+          m.set(eq.outputSymbol, { title: cfg.title, placement: registerPlacement(cfg) });
+        }
+      }
+    }
+    return m;
+  }, [fields, engineEquations]);
 
   // Field ids whose persisted value was engine-written server-side → locked.
   const serverComputedSet = useMemo(
@@ -663,6 +674,7 @@ export function WorksheetForm({
     // hand. Pre-computation the field stays editable — only the hint shows.
     const isServerComputed = serverComputedSet.has(f.id);
     const isVsme = standardCode === 'VSME';
+    const regHint = registerOutputHints.get(f.symbol);
     const computedHint = isVsme && VSME_CO2_ENGINE_SYMBOLS.has(f.symbol)
       ? {
           label: isServerComputed
@@ -671,11 +683,11 @@ export function WorksheetForm({
           href: `/${locale}/projects/${projectId}/vsme/emissions`,
           hrefLabel: '→ CO₂-Rechner öffnen',
         }
-      : isVsme && VSME_POLLUTANT_SUM_SYMBOLS.has(f.symbol) && pollutantRegisterField
+      : regHint
         ? {
             label: isServerComputed
-              ? 'Summe aus dem Schadstoffregister (unten auf dieser Seite).'
-              : 'Wird beim Speichern als Summe aus dem Schadstoffregister (unten) berechnet.',
+              ? `Summe aus dem Register „${regHint.title}“ (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
+              : `Wird beim Speichern aus dem Register „${regHint.title}“ berechnet.`,
           }
         : isServerComputed
           ? { label: 'Serverseitig berechneter Wert.' }

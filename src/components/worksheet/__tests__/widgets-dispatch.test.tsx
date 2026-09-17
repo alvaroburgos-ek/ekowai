@@ -60,8 +60,10 @@ describe('effectiveWidget / placement / bespoke', () => {
   it("the bespoke carriers keep their bottom placement + today's h2 titles while widget IS NULL", () => {
     expect(widgetPlacement({ ...base, symbol: 'r_D_n_table', dataType: 'json' })).toEqual({ placement: 'bottom', title: BESPOKE_TITLES.rainfall_tables });
     expect(widgetPlacement({ ...base, symbol: 'risk_register', dataType: 'json' })).toEqual({ placement: 'bottom', title: BESPOKE_TITLES.risk_register });
-    // Task 4 / Task 6 hand-offs: pollutant_register and rainfall_table_ref stay on their bespoke editors until then.
-    expect(widgetPlacement({ ...base, symbol: 'pollutant_register', dataType: 'json' })).toEqual({ placement: 'bottom', title: BESPOKE_TITLES.pollutant_register });
+    // Plan 2b Task 4: pollutant_register is no longer bespoke — it places as a generic register (bottom, config title).
+    expect(widgetPlacement({ ...base, symbol: 'pollutant_register', dataType: 'json' })).toEqual({ placement: 'bottom', title: 'Schadstoffregister (E-PRTR)' });
+    expect((BESPOKE_BY_SYMBOL as Record<string, string>).pollutant_register).toBeUndefined();
+    // Task 6 hand-off: rainfall_table_ref stays on its bespoke editor until then.
     expect(widgetPlacement({ ...base, symbol: 'rainfall_table_ref', dataType: 'text' })).toEqual({ placement: 'bottom', title: BESPOKE_TITLES.rainfall_table_ref });
     // A DB widget on the same symbol is NOT bespoke (widget non-null ⇒ no symbol keying).
     expect(widgetPlacement({ ...base, symbol: 'rainfall_table_ref', dataType: 'text', widget: 'scalar' })).toEqual({ placement: 'section', title: null });

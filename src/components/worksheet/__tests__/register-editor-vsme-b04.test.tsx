@@ -1,13 +1,17 @@
+// Plan 2b: PollutantRegisterEditor deleted; the VSME-B04 carrier renders through the generic RegisterEditor and the sums are Plan 2a equation states.
+// Moved from pollutant-register.test.tsx (Task 4). Testid map: pollutant-register-editor → register-editor[data-symbol=pollutant_register] ·
+//   sum-air/-water/-soil → footer-AmountOfEmissionToAir/-Water/-Soil · pollutant-na-toggle → flag-not_applicable · rows-complete → rows-complete.
 /**
  * VSME-B04.100 pollutant register + server-computed lock (2026-08-01 spec:
  * docs/superpowers/specs/2026-08-01-vsme-b03-b04-worksheet-fidelity-design.md).
  *
- *  1. The `pollutant_register` carrier renders via its dedicated editor
- *     section and is SKIPPED in the field grid (no "Phase 2" placeholder).
+ *  1. The `pollutant_register` carrier renders through the generic register
+ *     editor (bottom strip) and is SKIPPED in the field grid (no "Phase 2" placeholder).
  *  2. Fields listed in serverComputedFieldIds render readOnly with the
  *     provenance hint (B03 → CO₂-table link; B04 sums → register hint).
- *  3. Editor: N/A toggle is an explicit zero statement; complete rows sum
- *     per medium.
+ *  3. Editor: N/A toggle is an explicit zero statement; the per-medium sums are
+ *     ENGINE states (Plan 2a fallback equations) shown in the footer — the
+ *     editor computes nothing.
  */
 
 vi.mock('@/lib/actions/worksheet', () => ({ saveWorksheet: vi.fn(async () => ({ ok: true, warnings: [] })) }));
@@ -44,7 +48,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, act, fireEvent } from '@testing-library/react';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { WorksheetForm } from '../worksheet-form';
-import { PollutantRegisterEditor } from '../pollutant-register-editor';
+import { RegisterEditor } from '../register-editor';
+import { REGISTER_CONFIGS_FALLBACK } from '@/lib/eval/register-configs';
 
 function makeField(over: Record<string, unknown>) {
   return {
@@ -88,7 +93,7 @@ describe('VSME-B04.100 pollutant register wiring', () => {
     act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
   });
 
-  it('renders the dedicated editor section and skips the carrier in the grid', () => {
+  it('renders the generic register editor for the carrier and skips it in the grid', () => {
     const { queryByText, getByTestId } = render(
       <WorksheetForm
         {...baseProps}
@@ -97,7 +102,8 @@ describe('VSME-B04.100 pollutant register wiring', () => {
         initialValues={{ [REG_ID]: { type: 'json', value: { not_applicable: false, rows: [] } } }}
       />,
     );
-    expect(getByTestId('pollutant-register-editor')).toBeTruthy();
+    // Plan 2b: was getByTestId('pollutant-register-editor') — the generic editor carries the symbol as data-symbol.
+    expect(getByTestId('register-editor').dataset.symbol).toBe('pollutant_register');
     // The json carrier must NOT fall through to the grid's Phase-2 placeholder.
     expect(queryByText('Mehrzeilige Eingabe — Phase 2')).toBeNull();
   });
@@ -169,44 +175,67 @@ describe('VSME-B04.100 pollutant register wiring', () => {
   });
 });
 
-describe('PollutantRegisterEditor', () => {
+// Plan 2b: the two PollutantRegisterEditor cases below became RegisterEditor / form cases (old editor deleted).
+describe('VSME-B04.100 pollutant register through the generic RegisterEditor', () => {
   beforeEach(() => {
     act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
   });
 
-  it('sums complete rows per medium in the footer', () => {
-    act(() => {
-      useWorksheetStore.getState().init('inst-ed-1', {
-        [REG_ID]: {
-          type: 'json',
-          value: {
-            not_applicable: false,
-            rows: [
-              { id: 'r1', label: 'Heizanlage', pollutant: 'AmmoniaNH3Member', medium: 'air', amount_t: 0.4 },
-              { id: 'r2', label: '', pollutant: 'ZincAndCompoundsZnMember', medium: 'water', amount_t: 0.25 },
-              { id: 'r3', label: 'unvollständig', pollutant: null, medium: 'soil', amount_t: 9 },
-            ],
-          },
-        },
-      }, {}, {});
-    });
-    const { getByTestId } = render(<PollutantRegisterEditor fieldId={REG_ID} />);
-    expect(getByTestId('sum-air').textContent).toBe('0,4');
-    expect(getByTestId('sum-water').textContent).toBe('0,25');
-    expect(getByTestId('sum-soil').textContent).toBe('0');
+  const THREE_ROWS = [
+    { id: 'r1', label: 'Heizanlage', pollutant: 'AmmoniaNH3Member', medium: 'air', amount_t: 0.4 },
+    { id: 'r2', label: '', pollutant: 'ZincAndCompoundsZnMember', medium: 'water', amount_t: 0.25 },
+    { id: 'r3', label: 'unvollständig', pollutant: null, medium: 'soil', amount_t: 9 },
+  ];
+
+  it('footer shows the per-medium sums as ENGINE states of the Plan 2a fallback equations (form-level)', () => {
+    // Plan 2b: was a PollutantRegisterEditor case asserting sum-air/sum-water/sum-soil computed client-side.
+    // Now the FORM adds the fallback equations (withFallbackRegisterEquations, 2a Task 7); `equations` stays [].
+    const { getByTestId } = render(
+      <WorksheetForm
+        {...baseProps}
+        worksheet={{ template: { code: 'VSME-B04.100', titleDe: 'Umweltverschmutzung', titleEn: null } }}
+        fields={b04Fields}
+        initialValues={{ [REG_ID]: { type: 'json', value: { not_applicable: false, rows: THREE_ROWS } } }}
+      />,
+    );
+    expect(getByTestId('footer-AmountOfEmissionToAir').textContent).toBe('0,4');     // was sum-air
+    expect(getByTestId('footer-AmountOfEmissionToWater').textContent).toBe('0,25');  // was sum-water
+    // 0 for soil: sum_rows over the 2 complete rows (r3 has no pollutant) — summarizePollutants parity
+    // (eval/__tests__/pollutant-register.test.ts).
+    expect(getByTestId('footer-AmountOfEmissionToSoil').textContent).toBe('0');      // was sum-soil
     expect(getByTestId('rows-complete').textContent).toBe('2/3');
   });
 
-  it('N/A toggle writes the explicit zero statement into the carrier', () => {
+  it('N/A toggle writes the explicit zero statement into the carrier (rows preserved)', () => {
+    // Plan 2b: was getByTestId('pollutant-na-toggle') on PollutantRegisterEditor → flag-not_applicable on RegisterEditor.
     act(() => {
       useWorksheetStore.getState().init('inst-ed-2', {
-        [REG_ID]: { type: 'json', value: { not_applicable: false, rows: [] } },
+        [REG_ID]: { type: 'json', value: { not_applicable: false, rows: [THREE_ROWS[0]] } },
       }, {}, {});
     });
-    const { getByTestId } = render(<PollutantRegisterEditor fieldId={REG_ID} />);
-    fireEvent.click(getByTestId('pollutant-na-toggle'));
+    const { getByTestId } = render(
+      <RegisterEditor fieldId={REG_ID} symbol="pollutant_register" config={REGISTER_CONFIGS_FALLBACK.pollutant_register} standardCode="VSME" />,
+    );
+    fireEvent.click(getByTestId('flag-not_applicable'));
     const stored = useWorksheetStore.getState().values[REG_ID];
     expect(stored?.type).toBe('json');
-    expect((stored?.value as { not_applicable: boolean }).not_applicable).toBe(true);
+    const carrier = stored?.value as { not_applicable: boolean; rows: unknown[] };
+    expect(carrier.not_applicable).toBe(true);
+    expect(carrier.rows).toHaveLength(1);
+  });
+
+  it('not_applicable ⇒ the three footer states read 0 (engine, via flag() in the fallback formula)', () => {
+    // Plan 2b: new pin — the flag is a stored carrier key; the sums are engine states, never editor arithmetic.
+    const { getByTestId } = render(
+      <WorksheetForm
+        {...baseProps}
+        worksheet={{ template: { code: 'VSME-B04.100', titleDe: 'Umweltverschmutzung', titleEn: null } }}
+        fields={b04Fields}
+        initialValues={{ [REG_ID]: { type: 'json', value: { not_applicable: true, rows: [] } } }}
+      />,
+    );
+    expect(getByTestId('footer-AmountOfEmissionToAir').textContent).toBe('0');
+    expect(getByTestId('footer-AmountOfEmissionToWater').textContent).toBe('0');
+    expect(getByTestId('footer-AmountOfEmissionToSoil').textContent).toBe('0');
   });
 });

@@ -1,8 +1,13 @@
 /**
+ * Plan 2b: the editor no longer uses this module; it remains the engine-side
+ * parity reference for `eval/__tests__/pollutant-register.test.ts` (the UI
+ * renders through the generic RegisterEditor; the sums are the Plan 2a
+ * fallback-equation states).
+ *
  * VSME-B04.100 pollutant-register carrier: row shape, normalizer, and the
  * per-medium sums. The normalizer is the single shared parse path used by
- * BOTH the editor and the saveWorksheet materialization block, so they can
- * never diverge (same contract as ./surface-inventory for A138-07).
+ * the saveWorksheet materialization block (same contract as
+ * ./surface-inventory for A138-07).
  *
  * VSME para 32: "it shall disclose the pollutants it emits to air, water and
  * soil in its own operations, with the respective amount for each pollutant."
