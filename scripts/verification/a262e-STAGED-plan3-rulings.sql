@@ -412,7 +412,7 @@
 -- Evidence: L936 "Specific area, as measured on the upper surface of the filter & A_Fo,spez & m²/P & ≥ 4*"; L945 "*) For tightly-spaced
 -- distribution networks, see Section 5.5.2.3"; Tab. 18 L1227 "≥ 4*)"; §5.5.2.3 L1725 ff. (the printed relaxation lives there). TABLE_LIMITS
 -- is 'locked' and carries a_spez_min = 4 for vf_sand_0_2 × municipal (no "tight" variant column, unlike h_beschickung_min_tight = 10 which
--- the same table prints as a second value). Owner reads §5.5.2.3 on the PDF; if it prints a reduced A_Fo,spez for tight networks: add a
+-- the same table prints as a second value). The printed relaxation, read in-session:
 -- §5.5.2.3 L1725 "The loaded filter area per opening should not exceed 5 m²."; L1726 "If the loaded filter area per opening is ≤ 1 m² per
 -- hole, the specific area required for municipal wastewater treatment plants (not for small wastewater treatment systems) can be reduced
 -- by 0.5 m²/P and the specific hydraulic loading of the filter surface per dosing event can be reduced to ≥ 10 l/m²". So the "*" relaxation

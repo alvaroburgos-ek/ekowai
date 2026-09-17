@@ -123,7 +123,7 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
     const sectionB = Object.entries(prior).filter(([k, v]) => k.startsWith('DIN-1989-1-04 ') && (v as { section_code?: string | null }).section_code === 'B');
     expect(sectionB.map(([k]) => k.slice('DIN-1989-1-04 '.length)).sort()).toEqual(['A_A', 'A_Bew', 'BS_a', 'P_d', 'e', 'eta', 'h_N', 'n']);
     for (const [, v] of sectionB) expect((v as { consumer_worksheets?: string[] | null }).consumer_worksheets ?? []).toEqual([]);
-    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toMatch(/^A_A → Gl\.1 E_R \(consumed by /);
+    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed only by itself (DIN-1989-1-04) — prod data oddity)'); // fix round 2: E_R / BW_a list their own worksheet as consumer
     expect(() => emitFieldConfigSql('din1989_1', [], [{ standard: 'DIN-1989-1', worksheet: 'DIN-1989-1-04', section_code: 'B', visible_when: "bemessungsverfahren != 'verkuerzt'", verification_quote: 'q' }], prior)).toThrow(/A_A → Gl\.1 E_R/);
     // sicherungseinrichtung_typ IS consumed (by -05) — that is why its visibility is STAGED (din1989_1-C-1), not encoded
     expect(priorRow('DIN-1989-1-03 sicherungseinrichtung_typ').consumer_worksheets).toEqual(['DIN-1989-1-05']);

@@ -62,6 +62,7 @@ import { parseCondition, parseNumeric } from '../../src/lib/expr';
 import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorEquationRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
 import { rewriteRules } from '../../src/lib/eval/rewrites';
+import { normalizeSymbol } from '../../src/lib/eval/normalize-formula';
 import { q, j, JOIN, SCHEMA_MIGRATION, gatedHeaderLines } from './emit-widget-configs-sql';
 
 /** The prior-snapshot types live in src/lib/eval/field-configs/types.ts (re-exported for the tests and the CLI). */
@@ -141,33 +142,42 @@ export function assertPriorSnapshot(prior: PriorSnapshot): void {
  * consumed field) or TRANSITIVELY (it feeds a same-worksheet equation whose output, possibly through further
  * same-worksheet equations, is a consumed field)? Returns the chain to name in the refusal, or null. Walked
  * over the captured `prior.equations` (stored `input_symbols` + the Plan-2a `rewriteRules[id].remap`
- * inputs); a prior without `equations` yields the direct answer only.
+ * inputs); a prior without `equations` yields the direct answer only. Symbols are matched through the same
+ * `normalizeSymbol` as `formula.ts` (`r_D(n)` ↔ `r_D_n`), so a function-like spelling cannot slip past.
+ * `opts.skipDirect`: a CREATED field has no consumers of its own but may complete a dangling
+ * `input_symbols` reference of a consumed equation — the chain walk still runs for it. A chain whose only
+ * consumer is the owner worksheet itself is refused too and says so (prod data oddity).
  */
-export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: string): string | null {
+export function producerChain(prior: PriorSnapshot, worksheet: string, symbol: string, opts: { skipDirect?: boolean } = {}): string | null {
   const consumers = (sym: string): string[] | null => {
     const row = prior[`${worksheet} ${sym}` as PriorFieldKey];
     return row?.consumer_worksheets?.length ? row.consumer_worksheets : null;
   };
-  const direct = consumers(symbol);
-  if (direct) return `${symbol} (consumed by ${direct.join(', ')})`;
+  const consumedBy = (c: string[]) => (c.every((w) => w === worksheet) ? `consumed only by itself (${worksheet}) — prod data oddity` : `consumed by ${c.join(', ')}`);
+  if (!opts.skipDirect) {
+    const direct = consumers(symbol);
+    if (direct) return `${symbol} (${consumedBy(direct)})`;
+  }
   const prefix = `${worksheet} `;
   const eqs = Object.entries(prior.equations ?? {}).filter(([k]) => k.startsWith(prefix)).map(([k, e]) => {
     const remap = e.id ? Object.values(rewriteRules[e.id]?.remap ?? {}) : [];
     const n = k.slice(prefix.length);
-    return { label: /^\d/.test(n) ? `Gl.${n}` : n, output: e.output_symbol, inputs: new Set([...e.input_symbols, ...remap]) };
+    return { label: /^\d/.test(n) ? `Gl.${n}` : n, output: e.output_symbol, inputs: new Set([...e.input_symbols, ...remap].map(normalizeSymbol)) };
   });
   // BFS from the hidden symbol through same-worksheet equations; the first consumed output names the chain.
-  const queue: Array<{ sym: string; chain: string }> = [{ sym: symbol, chain: symbol }];
-  const seen = new Set<string>([symbol]);
+  const start = normalizeSymbol(symbol);
+  const queue: Array<{ sym: string; chain: string }> = [{ sym: start, chain: symbol }];
+  const seen = new Set<string>([start]);
   while (queue.length) {
     const { sym, chain } = queue.shift()!;
     for (const e of eqs) {
-      if (!e.inputs.has(sym) || seen.has(e.output)) continue;
-      seen.add(e.output);
+      const out = normalizeSymbol(e.output);
+      if (!e.inputs.has(sym) || seen.has(out)) continue;
+      seen.add(out);
       const next = `${chain} → ${e.label} ${e.output}`;
-      const c = consumers(e.output);
-      if (c) return `${next} (consumed by ${c.join(', ')})`;
-      queue.push({ sym: e.output, chain: next });
+      const c = consumers(e.output) ?? consumers(out);
+      if (c) return `${next} (${consumedBy(c)})`;
+      queue.push({ sym: out, chain: next });
     }
   }
   return null;
@@ -191,8 +201,9 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
       if (c.visible_when && parseCondition(c.visible_when) === null) throw new Error(`${id}.${c.key}: visible_when does not parse: ${c.visible_when}`);
     }
   }
-  if (e.visible_when != null && !e.create) {
-    const chain = producerChain(prior, e.worksheet, e.symbol);
+  if (e.visible_when != null) {
+    // A created field has no consumers of its own (direct check skipped) but may complete a dangling input of a consumed equation.
+    const chain = producerChain(prior, e.worksheet, e.symbol, { skipDirect: !!e.create });
     if (chain) throw new Error(`${id}: visible_when on a symbol consumed by another worksheet — hides ${chain} (hiding a producer, or an input of a producer, hides the inherited value; STAGE the consumer edit instead)`);
   }
   if (e.widget === 'lookup_fill') {

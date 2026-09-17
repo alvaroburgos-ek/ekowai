@@ -86,6 +86,43 @@ describe('transitive producer guard (Task 3 fix round 1)', () => {
     expect(emitFieldConfigSql('x', [field('m_T_aM')], [], legacy).up).toContain("f.symbol = 'm_T_aM'");
     expect(() => emitFieldConfigSql('x', [field('Q_F_d_aM')], [], legacy)).toThrow(/hides Q_F_d_aM \(consumed by A262-09\)/);
   });
+  it('(a) symbols match through normalizeSymbol: a stored input "r_D(n)" reaches the hidden field r_D_n and vice versa', () => {
+    const prior: PriorSnapshot = {
+      'A138-21 r_D_n': row(), 'A138-21 k_f_FS': row(),
+      'A138-21 h_S': row({ consumer_worksheets: ['A138-23', 'A138-24'] }),
+      equations: { 'A138-21 40': { id: 'e40', output_symbol: 'h_S', input_symbols: ['A_C', 'r_D(n)', 'd_i', 'k_f_FS', 'D', 'f_Z'] } },
+    };
+    expect(producerChain(prior, 'A138-21', 'r_D_n')).toBe('r_D_n → Gl.40 h_S (consumed by A138-23, A138-24)');
+    expect(producerChain(prior, 'A138-21', 'r_D(n)')).toBe('r_D(n) → Gl.40 h_S (consumed by A138-23, A138-24)');
+    expect(producerChain(prior, 'A138-21', 'k_f_FS')).toBe('k_f_FS → Gl.40 h_S (consumed by A138-23, A138-24)');
+    // a function-like OUTPUT is found under its normalised field key too
+    const fn: PriorSnapshot = { 'S-01 a': row(), 'S-01 f_x': row({ consumer_worksheets: ['S-02'] }), equations: { 'S-01 1': { output_symbol: 'f(x)', input_symbols: ['a'] } } };
+    expect(producerChain(fn, 'S-01', 'a')).toBe('a → Gl.1 f(x) (consumed by S-02)');
+  });
+  it('(b) a CREATED field with visible_when runs the chain walk (it may complete a dangling input of a consumed equation); its own consumers are not checked', () => {
+    const prior: PriorSnapshot = {
+      'A262-24 B_CSB_KomKA': row({ consumer_worksheets: ['A262-21'] }),
+      equations: { 'A262-24 A262-24-D1': { output_symbol: 'B_CSB_KomKA', input_symbols: ['EZ', 'B_CSB'] } },
+      sections: { 'A262-24 D': { visible_when: null } },
+    };
+    const create = { section_code: 'D', label_de: 'L', data_type: 'number' as const, clause_reference: '§1', description: 'Plan 3: x' };
+    const entry = { standard: 'DWA-A-262E', worksheet: 'A262-24', symbol: 'B_CSB', widget: 'scalar' as const, visible_when: 'x == 1', verification_quote: 'q', create };
+    expect(producerChain(prior, 'A262-24', 'B_CSB', { skipDirect: true })).toBe('B_CSB → A262-24-D1 B_CSB_KomKA (consumed by A262-21)');
+    expect(() => emitFieldConfigSql('x', [entry], [], prior)).toThrow(/A262-24 B_CSB: visible_when on a symbol consumed by another worksheet — hides B_CSB → A262-24-D1 B_CSB_KomKA \(consumed by A262-21\)/);
+    // skipDirect: a created symbol that happens to share a key with a consumed prior row is not refused on the direct rule alone
+    expect(producerChain({ 'S-01 n': row({ consumer_worksheets: ['S-02'] }) }, 'S-01', 'n', { skipDirect: true })).toBeNull();
+    expect(emitFieldConfigSql('x', [{ ...entry, symbol: 'loose', worksheet: 'A262-24' }], [], prior).up).toContain("'loose'");
+  });
+  it('(c) a chain whose only consumer is the owner worksheet itself is still refused and says so', () => {
+    const prior: PriorSnapshot = {
+      'DIN-1989-1-04 A_A': row(), 'DIN-1989-1-04 E_R': row({ consumer_worksheets: ['DIN-1989-1-04'] }),
+      equations: { 'DIN-1989-1-04 1': { output_symbol: 'E_R', input_symbols: ['A_A', 'e', 'h_N', 'eta'] } },
+    };
+    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed only by itself (DIN-1989-1-04) — prod data oddity)');
+    expect(producerChain(prior, 'DIN-1989-1-04', 'E_R')).toBe('E_R (consumed only by itself (DIN-1989-1-04) — prod data oddity)');
+    const mixed: PriorSnapshot = { ...prior, 'DIN-1989-1-04 E_R': row({ consumer_worksheets: ['DIN-1989-1-04', 'DIN-1989-1-02'] }) };
+    expect(producerChain(mixed, 'DIN-1989-1-04', 'A_A')).toBe('A_A → Gl.1 E_R (consumed by DIN-1989-1-04, DIN-1989-1-02)');
+  });
   it('assertPriorSnapshot validates the equations map shape', () => {
     const bad = (equations: unknown) => ({ ...a26206, equations }) as unknown as PriorSnapshot;
     expect(() => assertPriorSnapshot(bad({ 'nospace': { output_symbol: 'x', input_symbols: [] } }))).toThrow(/keys are "<worksheet> <equation_number>"/);
