@@ -69,6 +69,17 @@ describe('RegisterEditor — lookup_key / lookup_value / derived (A138 fallback 
     expect(screen.queryByTestId('lookup-original')).toBeNull();
     expect(screen.getByTestId('lookup-value-c_i')).toHaveTextContent('0,9');
   });
+  it('the override.flag_key column is never an editable cell — the flag is driven only by the toggle button (fix round 1)', async () => {
+    const user = userEvent.setup();
+    initStore({ rows: [{ id: 'r', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: true }] });
+    render(<RegisterEditor fieldId={FIELD_ID} symbol="surface_inventory" config={surface} standardCode={STD} />);
+    expect(screen.queryByLabelText('abweichend')).toBeNull();                      // no checkbox
+    expect(screen.queryByTestId('cell-coeff_override')).toBeNull();               // no cell, no header
+    expect(screen.queryByRole('columnheader', { name: 'abweichend' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Tab. 9 übernehmen' })).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Bezeichnung'), '!');
+    expect(stored().rows[0]).toMatchObject({ coeff_override: true, label: 'Dach!', c_i: 0.9 });   // flag still stored
+  });
   it('no override block in the config (locked policy) ⇒ no toggle at all', () => {
     initStore({ rows: [{ id: 'r', label: 'Dach', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false }] });
     const { override: _o, ...locked } = surface;
@@ -170,6 +181,28 @@ describe('RegisterEditor — generic columns, flags, discriminator + column visi
     await user.type(screen.getByLabelText('Menge'), '-1');
     expect(screen.getByTestId('cell-menge')).toHaveTextContent('Menge muss ≥ 0 sein');
     expect(screen.getByTestId('rows-complete')).toHaveTextContent('0/1');
+  });
+  it('a column visible_when referencing a WORKSHEET symbol resolves through symbolLookup; a row value shadows a same-named symbol', () => {
+    const cfg: RegisterUiConfig = {
+      title: 'Scope',
+      columns: [
+        { key: 'name', type: 'text', label: 'Name' },
+        { key: 'typ', type: 'enum', label: 'Typ', options: ['a', 'b'] },
+        { key: 'ws_only', type: 'number', label: 'WS-only', visible_when: "mode == 'x'" },      // `mode` is NOT a column
+        { key: 'shadowed', type: 'number', label: 'Shadowed', visible_when: "typ == 'a'" },    // `typ` is a column AND a worksheet symbol
+      ],
+    };
+    initStore({ rows: [{ id: 'r', name: 'P', typ: 'b', ws_only: 1, shadowed: 2 }] });
+    const lookup = (s: string) => (s === 'mode' ? 'y' : s === 'typ' ? 'a' : undefined);
+    const { unmount } = render(<RegisterEditor fieldId={FIELD_ID} symbol="scope" config={cfg} standardCode="X" symbolLookup={lookup} />);
+    expect(screen.queryByLabelText('WS-only')).toBeNull();     // worksheet mode='y' ⇒ fail ⇒ hidden
+    expect(screen.queryByLabelText('Shadowed')).toBeNull();    // row typ='b' shadows worksheet typ='a' ⇒ fail ⇒ hidden
+    unmount();
+    const second = render(<RegisterEditor fieldId={FIELD_ID} symbol="scope" config={cfg} standardCode="X" symbolLookup={(s) => (s === 'mode' ? 'x' : undefined)} />);
+    expect(screen.getByLabelText('WS-only')).toBeInTheDocument();   // worksheet mode='x' ⇒ pass ⇒ visible
+    second.unmount();
+    render(<RegisterEditor fieldId={FIELD_ID} symbol="scope" config={cfg} standardCode="X" />);
+    expect(screen.getByLabelText('WS-only')).toBeInTheDocument();   // no lookup ⇒ pending ⇒ visible (fail-safe)
   });
   it('a flag writes carrier[key]; disables_rows hides the table and the add button while set', async () => {
     const user = userEvent.setup();

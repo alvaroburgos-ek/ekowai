@@ -61,7 +61,7 @@ export function fmt(v: Value | undefined): string {
 /** Where the register renders (form-level decision, Task 3). `undefined` ⇒ `'bottom'`: the Plan-1 selection-config
  *  migrations carry no `placement` key while the TS fallback adds `'bottom'` — without this default the 36 selection
  *  registers would relocate into their sections once those migrations land. */
-export function registerPlacement(config: Pick<RegisterUiConfig, 'placement'>): 'section' | 'bottom' {
+export function registerPlacement(config: { placement?: RegisterUiConfig['placement'] } & Record<string, unknown>): 'section' | 'bottom' {
   return config.placement ?? 'bottom';
 }
 /** 'TAB9' → 'Tab. 9', 'TAB22' → 'Tab. 22', 'TAB5a' → 'Tab. 5a'; anything else verbatim. */
@@ -154,14 +154,20 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
     () => prepareRegisterRows(raw?.type === 'json' ? raw.value : null, config.columns, { table, tableRows, symbol: rowSymbol }, opts),
     [raw, config.columns, table, tableRows, rowSymbol, opts],
   );
+  // `columns` = the stored contract (write side, storedRows); `visibleColumns` = what renders. The
+  // override flag column is a stored cell driven ONLY by the toggle button — rendering it as a checkbox
+  // would add a second override-off path that skips the table-pair revert in toggleOverride (fix round 1).
   const columns = config.columns;
   const override = config.override;
+  const visibleColumns = useMemo(() => columns.filter((c) => c.key !== override?.flag_key), [columns, override?.flag_key]);
   const keyCol = columns.find((c) => c.type === 'lookup_key');
+  const rowById = useMemo(() => new Map(prepared.rows.map((r) => [r.id, r])), [prepared.rows]);
+  const colByKey = useMemo(() => new Map(columns.map((c) => [c.key, c])), [columns]);
 
   const cellHidden = (row: PreparedRow, c: RegisterColumn) => cellHiddenInRow(c, row, rowSymbol, table);
   const hiddenCells = (rowId: string, key: string): boolean => {
-    const r = prepared.rows.find((x) => x.id === rowId);
-    const c = columns.find((x) => x.key === key);
+    const r = rowById.get(rowId);
+    const c = colByKey.get(key);
     return !!r && !!c && cellHidden(r, c);
   };
 
@@ -259,7 +265,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
         </label>
       ))}
 
-      {columns.filter((c) => c.datalist?.length).map((c) => (
+      {visibleColumns.filter((c) => c.datalist?.length).map((c) => (
         <datalist key={c.key} id={listId(c)}>
           {c.datalist!.map((o) => <option key={o} value={o} />)}
         </datalist>
@@ -272,7 +278,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
           <table className="w-full min-w-[40rem] text-sm">
             <thead className="text-[10px] uppercase tracking-[0.18em] text-subtext">
               <tr>
-                {columns.map((c) => (
+                {visibleColumns.map((c) => (
                   <th key={c.key} className={`font-normal pb-1 pr-2 ${isRightAligned(c) ? 'text-right' : 'text-left'} ${c.width ?? ''}`}>
                     {c.label}{c.unit ? ` (${c.unit})` : ''}
                   </th>
@@ -283,7 +289,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
             <tbody>
               {prepared.rows.map((r) => (
                 <tr key={r.id} data-testid="register-row" className="border-t border-hairline align-top">
-                  {columns.map((c) => (
+                  {visibleColumns.map((c) => (
                     <td key={c.key} data-testid={`cell-${c.key}`} className={`py-1.5 pr-2 ${c.type === 'number' || c.type === 'lookup_value' ? 'text-right tabular-nums' : ''}`}>
                       {cellHidden(r, c) ? null : (
                         <Cell
