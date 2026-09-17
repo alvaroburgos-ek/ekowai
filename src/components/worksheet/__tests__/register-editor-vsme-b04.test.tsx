@@ -121,7 +121,12 @@ describe('VSME-B04.100 pollutant register wiring', () => {
     const input = getByLabelText('Amount of emission to air', { exact: false }) as HTMLInputElement;
     expect(input.readOnly).toBe(true);
     const hints = getAllByTestId('computed-hint');
-    expect(hints.some((h) => h.textContent?.includes('Schadstoffregister'))).toBe(true);
+    const regHint = hints.find((h) => h.textContent?.includes('Schadstoffregister'));
+    expect(regHint).toBeTruthy();
+    // Plan 2b Task 3 fix round 1: neutral wording (the output need not be a sum) + the registerPlacement ruling (undefined ⇒ bottom).
+    expect(regHint?.textContent).toContain('Aus dem Register „Schadstoffregister (E-PRTR)“ berechnet');
+    expect(regHint?.textContent).toContain('unten auf dieser Seite');
+    expect(regHint?.textContent).not.toContain('Summe');
   });
 
   it('shows the CO₂-Rechner hint on B03 engine fields BEFORE any computation (field stays editable)', () => {
@@ -232,6 +237,21 @@ describe('VSME-B04.100 pollutant register through the generic RegisterEditor', (
         worksheet={{ template: { code: 'VSME-B04.100', titleDe: 'Umweltverschmutzung', titleEn: null } }}
         fields={b04Fields}
         initialValues={{ [REG_ID]: { type: 'json', value: { not_applicable: true, rows: [] } } }}
+      />,
+    );
+    expect(getByTestId('footer-AmountOfEmissionToAir').textContent).toBe('0');
+    expect(getByTestId('footer-AmountOfEmissionToWater').textContent).toBe('0');
+    expect(getByTestId('footer-AmountOfEmissionToSoil').textContent).toBe('0');
+  });
+
+  it('not_applicable WITH summable rows present ⇒ the flag wins, footer states still 0', () => {
+    // Plan 2b Task 3 fix round 1 (Task 4 review): the explicit null statement overrides the rows, never the reverse.
+    const { getByTestId } = render(
+      <WorksheetForm
+        {...baseProps}
+        worksheet={{ template: { code: 'VSME-B04.100', titleDe: 'Umweltverschmutzung', titleEn: null } }}
+        fields={b04Fields}
+        initialValues={{ [REG_ID]: { type: 'json', value: { not_applicable: true, rows: THREE_ROWS } } }}
       />,
     );
     expect(getByTestId('footer-AmountOfEmissionToAir').textContent).toBe('0');

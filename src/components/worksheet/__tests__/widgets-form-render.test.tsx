@@ -133,6 +133,13 @@ describe('WorksheetForm — one renderer path via the WIDGETS registry', () => {
     expect(within(fieldset).queryByTestId('bottom-reg_bottom_a')).toBeNull();
   });
 
+  it('an out-of-enum DB widget string falls back to the scalar renderer (DynamicField), never a blank', () => {
+    // schema.ts types `widget` as text; the CHECK constraint lives in an unapplied migration.
+    const FIELDS_BOGUS = [makeField({ id: 'f-bogus', symbol: 'bogus_sym', labelDe: 'Unbekanntes Widget', sectionId: 's1', widget: 'not_a_widget' })];
+    render(<WorksheetForm {...PROPS} fields={FIELDS_BOGUS} />);
+    expect(screen.getByLabelText('Unbekanntes Widget', { exact: false })).toBeInTheDocument();
+  });
+
   it('a register hidden by visible_when renders nothing (Plan 2a hiddenFieldIds semantics kept)', () => {
     // q = 50 ⇒ `q > 100` fails ⇒ hidden (only `fail` hides; pending keeps it visible).
     render(<WorksheetForm {...PROPS} initialValues={{ 'f-scalar': { type: 'number', value: 50 } }} />);

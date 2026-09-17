@@ -2,7 +2,8 @@
 import { create } from 'zustand';
 import type { saveWorksheet } from '@/lib/actions/worksheet';
 
-type FieldValue =
+/** The store's value union — the ONE FieldValue type (Plan 2b Task 3 fix round 1: the form and the widgets registry import it instead of keeping copies). */
+export type FieldValue =
   | { type: 'number'; value: number | null }
   | { type: 'text'; value: string | null }
   | { type: 'enum'; value: string | null }

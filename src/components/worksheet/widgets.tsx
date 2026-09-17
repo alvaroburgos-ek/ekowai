@@ -27,6 +27,7 @@
  * before dispatch (a hidden register renders nothing, like the old `shown()`).
  */
 import { Fragment, type ReactNode } from 'react';
+import type { FieldValue } from '@/lib/state/worksheet-store';
 import { inferWidget, type Widget, type RegisterUiConfig } from '@/lib/eval/field-config';
 import { resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { resolveSelectionConfig, type ChecklistConfig } from '@/lib/eval/selection-fields';
@@ -50,23 +51,14 @@ export type WorksheetFormField = Parameters<typeof DynamicField>[0]['field'] & {
   inheritedFromWorksheet?: string;
 };
 
-/** Mirrors the store's FieldValue (private there). */
-export type WidgetFieldValue =
-  | { type: 'number'; value: number | null }
-  | { type: 'text'; value: string | null }
-  | { type: 'enum'; value: string | null }
-  | { type: 'date'; value: string | null }
-  | { type: 'boolean'; value: boolean | null }
-  | { type: 'json'; value: unknown };
-
 export type WidgetContext = {
   standardCode: string;
   locale: 'de' | 'en';
   projectId: string;
   readOnly: boolean;
   fieldBySymbol: ReadonlyMap<string, WorksheetFormField>;
-  values: Readonly<Record<string, WidgetFieldValue | undefined>>;
-  setField: (id: string, v: WidgetFieldValue) => void;
+  values: Readonly<Record<string, FieldValue | undefined>>;
+  setField: (id: string, v: FieldValue) => void;
   symbolLookup: (sym: string) => Value | undefined;
   engineStates: Readonly<Record<string, EvalState>>;
   /** The engine's equation list (DB rows + Plan 2a fallback register equations) — footer symbols resolve by outputSymbol. */
@@ -252,7 +244,9 @@ export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext)
   lookup_fill: (f, ctx) => ctx.renderDynamic(f),
 };
 
-/** The form's single dispatch: `WIDGETS[effectiveWidget(f)]`. */
+/** The form's single dispatch: `WIDGETS[effectiveWidget(f)]`. An out-of-enum DB `widget` string (schema.ts types the
+ * column as text; the CHECK constraint lives in an unapplied migration) falls back to the scalar renderer, never a blank. */
 export function renderWidget(f: WorksheetFormField, ctx: WidgetContext): ReactNode {
-  return <Fragment key={f.id}>{WIDGETS[effectiveWidget(f)](f, ctx)}</Fragment>;
+  const render = WIDGETS[effectiveWidget(f)] ?? WIDGETS.scalar;
+  return <Fragment key={f.id}>{render(f, ctx)}</Fragment>;
 }

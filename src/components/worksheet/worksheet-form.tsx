@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef } from 'react';
-import { useWorksheetStore, type SaveStatus } from '@/lib/state/worksheet-store';
+import { useWorksheetStore, type SaveStatus, type FieldValue } from '@/lib/state/worksheet-store';
 import { saveWorksheet } from '@/lib/actions/worksheet';
 import { DynamicField } from './dynamic-field';
 import { SectionGroup } from './section-group';
@@ -99,15 +99,6 @@ export type { WorksheetFormField };
 type FieldDef = WorksheetFormField;
 
 type Section = Parameters<typeof SectionGroup>[0]['section'];
-
-// FieldValue mirrors the store's FieldValue — avoids a cross-import of the private type.
-type FieldValue =
-  | { type: 'number'; value: number | null }
-  | { type: 'text'; value: string | null }
-  | { type: 'enum'; value: string | null }
-  | { type: 'date'; value: string | null }
-  | { type: 'boolean'; value: boolean | null }
-  | { type: 'json'; value: unknown };
 
 type Props = {
   locale: 'de' | 'en';
@@ -686,7 +677,8 @@ export function WorksheetForm({
       : regHint
         ? {
             label: isServerComputed
-              ? `Summe aus dem Register „${regHint.title}“ (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
+              // Neutral wording: the output may be a sum (VSME B04), a weighted mean (A138-07 C_m) or any register-derived value.
+              ? `Aus dem Register „${regHint.title}“ berechnet (${regHint.placement === 'bottom' ? 'unten auf dieser Seite' : 'in diesem Abschnitt'}).`
               : `Wird beim Speichern aus dem Register „${regHint.title}“ berechnet.`,
           }
         : isServerComputed

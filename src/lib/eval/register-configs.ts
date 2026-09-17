@@ -16,27 +16,27 @@ import { POLLUTANTS } from '@/lib/vsme/pollutants';
 /** Register-level boolean flag (e.g. pollutant_register.not_applicable), read by `flag()`. Re-exported from the zod contract (Plan 2b). */
 export type { RegisterFlag };
 
-// Required set = byte-for-byte rowComplete() in surface-inventory.ts:45-52
+// Required set = byte-for-byte rowComplete() in surface-inventory.ts (engine shim)
 // (label NOT required; tab9_value/area_m2/c_i/c_s required). Do not "improve" it.
 const SURFACE_INVENTORY: RegisterUiConfig = {
   title: 'Flächenverzeichnis', subtitle: 'Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10', add_label: '+ Zeile hinzufügen', placement: 'bottom',
   columns: [
     { key: 'label', type: 'text', label: 'Bezeichnung', placeholder: 'z.B. Hauptdach' },
     { key: 'tab9_value', type: 'lookup_key', label: 'Oberflächentyp', required: true, lookup: { table_code: 'TAB9', group_by: 'group_label' } },
-    // aria_label = today's <input aria-label="Fläche"> (surface-inventory-editor.tsx:200).
+    // aria_label = the legacy surface editor's <input aria-label="Fläche"> (deleted in Plan 2b Task 3).
     { key: 'area_m2', type: 'number', label: 'A', unit: 'm²', required: true, min: 0, aria_label: 'Fläche' },
     // min/max: runoff coefficients are fractions (0…1) — input bounds only; completeness stays rowComplete() parity
     // (isComplete checks min/max on `number` columns only, not `lookup_value`).
     { key: 'c_i', type: 'lookup_value', label: 'C_i', required: true, min: 0, max: 1, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cm' } },
     { key: 'c_s', type: 'lookup_value', label: 'C_s', required: true, min: 0, max: 1, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cs' } },
     { key: 'coeff_override', type: 'boolean', label: 'abweichend' },
-    // badge under the type column = today's kind badge (surface-inventory-editor.tsx:178).
+    // badge under the type column = the legacy surface editor's kind badge (deleted in Plan 2b Task 3).
     { key: 'kind', type: 'derived', label: 'befestigt/unbefestigt', expr: "lookup('TAB9', tab9_value, 'kind')", display: 'badge', value_labels: { paved: 'befestigt', unpaved: 'unbefestigt' } },
     { key: 'a_c_i', type: 'derived', label: 'A·C_i', expr: 'area_m2 * c_i' },
   ],
   override: { flag_key: 'coeff_override', applies_to: ['c_i', 'c_s'], policy: 'anhaltswert' },
   legacy_map: { surface_type: { asphalt: 'schwarzdecke_asphalt', rasen: 'park_flach' } },
-  // Σ befestigt · Σ unbefestigt · A_C-Vorschau (surface-inventory-editor.tsx:283-287).
+  // Σ befestigt · Σ unbefestigt · A_C-Vorschau (legacy surface editor footer, deleted in Plan 2b Task 3).
   footer: ['A_E_ba', 'A_E_nba', 'A_C'],
 };
 

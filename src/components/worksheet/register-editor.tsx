@@ -85,8 +85,8 @@ function isRightAligned(c: RegisterColumn): boolean {
 
 /**
  * Stored cells only: every non-derived column of every prepared row; a cell whose column is hidden for that row
- * is nulled (`''` for text). Port of the write side of surface-inventory-editor.tsx:41-44 /
- * structured-register-editor.tsx:33-36, generalised — unknown/legacy keys of the raw carrier are dropped.
+ * is nulled (`''` for text). Port of the write side of the legacy surface / structured-register editors (deleted in
+ * Plan 2b Task 3), generalised — unknown/legacy keys of the raw carrier are dropped.
  */
 export function storedRows(
   prepared: PreparedRegister,
@@ -190,7 +190,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
     return table(vc.lookup.table_code, [k])?.[vc.lookup.value];
   };
   /** lookup_key change: refill every lookup_value bound to this key from the table row, reset the override flag
-   * (surface-inventory-editor.tsx:57-62). An unknown key is ignored, never stored. */
+   * (legacy surface editor, deleted in Plan 2b Task 3). An unknown key is ignored, never stored. */
   function selectKey(id: string, kc: RegisterColumn, value: string) {
     if (!kc.lookup) return;
     const row = table(kc.lookup.table_code, [value]);
@@ -202,7 +202,7 @@ export function RegisterEditor({ fieldId, symbol, config, standardCode, readOnly
     if (override) patch[override.flag_key] = false;
     patchRow(id, patch);
   }
-  /** Override toggle (surface-inventory-editor.tsx:63-74): on ⇒ flag only (cells keep their values, become editable);
+  /** Override toggle (legacy surface editor, deleted in Plan 2b Task 3): on ⇒ flag only (cells keep their values, become editable);
    * off ⇒ flag false + every applies_to cell refilled from the table. */
   function toggleOverride(r: PreparedRow, on: boolean) {
     if (!override) return;

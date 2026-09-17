@@ -5,9 +5,8 @@
  * fallback-equation states).
  *
  * VSME-B04.100 pollutant-register carrier: row shape, normalizer, and the
- * per-medium sums. The normalizer is the single shared parse path used by
- * the saveWorksheet materialization block (same contract as
- * ./surface-inventory for A138-07).
+ * per-medium sums — kept as a test-only parity reference; no runtime consumer
+ * since Plan 2b Task 4 (the generic register path uses buildRegisters).
  *
  * VSME para 32: "it shall disclose the pollutants it emits to air, water and
  * soil in its own operations, with the respective amount for each pollutant."
