@@ -159,7 +159,7 @@ type Props = {
    * renders an upstream-cause banner (carrierSourceState under the register's own
    * config) and a read-only mirror table at the bottom. Empty/undefined when this
    * worksheet owns every register. Loaded by `loadRegisterSources` (queries/worksheet.ts). */
-  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown; widget?: string | null; uiConfig?: unknown }>;
+  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown; widget?: string | null; uiConfig?: unknown; producedSymbols?: string[] }>;
   /** Field ids whose persisted project_parameters row was written by a
    * SERVER-side engine (source_type='computed', e.g. the VSME CO₂ engine;
    * plus VSME 'derived' rows like the B04 per-medium sums). These render
@@ -544,10 +544,14 @@ export function WorksheetForm({
         const f = fieldBySymbol.get(src.symbol);
         const cfg = resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: src.widget ?? null, uiConfig: src.uiConfig ?? null })
           ?? (f ? resolveRegisterConfig({ symbol: f.symbol, dataType: f.dataType, widget: f.widget ?? null, uiConfig: f.uiConfig }) : null);
+        // Round 2: the banner may only claim "abgeleitete Werte ausgeblendet" when this consumer actually carries a
+        // produced symbol inherited from the owner (that is what the page withholds — carrierWithholdFieldIds).
+        const withholds = (src.producedSymbols ?? []).some((sym) => fields.some((f) => f.symbol === sym && f.inheritedFromWorksheet === src.ownerCode));
         const state = cfg
           ? carrierSourceState(src.carrier, cfg.columns, src.status, {
               ownerLabel: src.ownerCode,
               standardCode,
+              withholds,
               legacyMap: cfg.legacy_map,
               overrideFlagKey: cfg.override?.flag_key,
               overrideAppliesTo: cfg.override?.applies_to,
@@ -557,7 +561,7 @@ export function WorksheetForm({
           : null;
         return { ...src, cfg, state };
       }),
-    [registerSources, fieldBySymbol, standardCode],
+    [registerSources, fieldBySymbol, fields, standardCode],
   );
 
   // (Retired) The legacy naive sum-evaluator lived here — it ignored `formula`

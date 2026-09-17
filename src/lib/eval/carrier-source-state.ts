@@ -36,6 +36,12 @@ export type CarrierSourceOpts = {
   flags?: readonly RegisterFlag[];
   /** Worksheet-symbol lookup for column `visible_when` / derived expressions in row scope (unknown ⇒ undefined). */
   symbol?: (sym: string) => Value | undefined;
+  /** Round 2 (final review): does a not-`ok` source actually WITHHOLD values on this consumer (the page deletes
+   * inherited produced symbols — `carrierWithholdFieldIds`)? Only then may the message say
+   * "— abgeleitete Werte ausgeblendet"; a register nothing is derived from (the TS selection registers on
+   * DWA-M-820 / FLL-NT) gets the plain "nicht erfasst." / "nicht final (n/m …)." Default true (the A138-07
+   * surface shim always withholds). */
+  withholds?: boolean;
 };
 
 /** Decide whether a consumer's inherited derived values should render or blank-with-cause. */
@@ -53,8 +59,9 @@ export function carrierSourceState(
   );
   const total = rows.length;
   const nullReport = opts.flags?.some((f) => f.disables_rows && flags[f.key] === true) ?? false;
+  const suffix = (opts.withholds ?? true) ? ' — abgeleitete Werte ausgeblendet.' : '.';
   if (total === 0 && !nullReport) {
-    return { state: 'missing', complete: 0, total: 0, message: `Quelle ${opts.ownerLabel} nicht erfasst — abgeleitete Werte ausgeblendet.` };
+    return { state: 'missing', complete: 0, total: 0, message: `Quelle ${opts.ownerLabel} nicht erfasst${suffix}` };
   }
   const complete = rows.filter((r) => r.complete).length;
   const ready = complete === total && sourceStatus != null && READY_STATUSES.has(sourceStatus);
@@ -63,7 +70,7 @@ export function carrierSourceState(
     state: 'incomplete',
     complete,
     total,
-    message: `Quelle ${opts.ownerLabel} nicht final (${complete}/${total} Zeilen vollständig) — abgeleitete Werte ausgeblendet.`,
+    message: `Quelle ${opts.ownerLabel} nicht final (${complete}/${total} Zeilen vollständig)${suffix}`,
   };
 }
 

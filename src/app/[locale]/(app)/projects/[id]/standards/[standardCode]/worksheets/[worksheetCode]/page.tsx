@@ -14,7 +14,8 @@ import {
 import { loadRegulationTables } from '@/lib/db/queries/regulation-tables';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
-import { surfaceSourceState, surfaceWithholdFieldIds } from '@/lib/eval/surface-source-state';
+import { carrierSourceState, carrierWithholdFieldIds } from '@/lib/eval/carrier-source-state';
+import { registerFlagKeys, resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
 import type { WorksheetFormField } from '@/components/worksheet/worksheet-form';
 import type { FieldValue } from '@/lib/state/worksheet-store';
@@ -131,11 +132,12 @@ export default async function WorksheetPage({
   // owner worksheet of the standard (DB `widget='register'` or a TS fallback
   // symbol; consumed directly via consumer_worksheets or through an owner
   // equation) — owner status + stored carrier + the owner field's
-  // {widget, uiConfig}. The form renders one upstream-cause banner and one
-  // read-only mirror per entry (`registerSources`). The A138-07 surface entry
-  // additionally drives the value withhold below (surface gate shim).
+  // {widget, uiConfig, producedSymbols}. The form renders one upstream-cause
+  // banner and one read-only mirror per entry (`registerSources`); the value
+  // withhold below runs per entry over its `producedSymbols` (round 2 — the
+  // surface-only shim generalised; A138-07 yields exactly the six surface
+  // outputs, so A138-10/-13/-15/-26 behave as before).
   const registerSources = await loadRegisterSources(projectId, ws.template.standard.id, worksheetCode);
-  const surfaceSource = registerSources.find((s) => s.symbol === 'surface_inventory') ?? null;
 
   // Regulation reference tables (Tab.9/5/6/13 etc.) for this standard — registered
   // client-side (WorksheetForm's useMemo) into the eval-layer registry so the
@@ -242,14 +244,27 @@ export default async function WorksheetPage({
     }
   }
 
-  // Gate the VALUE, not just the banner: when the surface source is not `ok`
-  // (incomplete rows, or not engineer-approved/final), withhold its derived
-  // inherited values so the engine never computes off an unapproved value and
-  // the displayed value matches the upstream-cause banner. (Option-2 compliance
-  // model: a value isn't trustworthy until formally approved.)
-  if (surfaceSource) {
-    const st = surfaceSourceState(surfaceSource.carrier, surfaceSource.status);
-    for (const id of surfaceWithholdFieldIds(mergedFields, surfaceSource.ownerCode, st.state)) {
+  // Gate the VALUE, not just the banner: when a consumed register's source is
+  // not `ok` (incomplete rows, or not engineer-approved/final), withhold the
+  // inherited values PRODUCED from it (`producedSymbols`, loaded with the
+  // source) so the engine never computes off an unapproved value and the
+  // displayed value matches the upstream-cause banner. (Option-2 compliance
+  // model: a value isn't trustworthy until formally approved.) Same config
+  // resolution as the form's `registerSourceStates` (DB row first, TS fallback).
+  for (const src of registerSources) {
+    if (src.producedSymbols.length === 0) continue;
+    const cfg = resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: src.widget, uiConfig: src.uiConfig });
+    if (!cfg) continue;
+    const st = carrierSourceState(src.carrier, cfg.columns, src.status, {
+      ownerLabel: src.ownerCode,
+      standardCode,
+      legacyMap: cfg.legacy_map,
+      overrideFlagKey: cfg.override?.flag_key,
+      overrideAppliesTo: cfg.override?.applies_to,
+      flagKeys: registerFlagKeys(src.symbol, cfg),
+      flags: cfg.flags,
+    });
+    for (const id of carrierWithholdFieldIds(mergedFields, src.ownerCode, st.state, new Set(src.producedSymbols))) {
       delete initialValues[id];
     }
   }

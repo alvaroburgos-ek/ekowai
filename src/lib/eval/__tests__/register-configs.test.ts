@@ -21,8 +21,9 @@ describe('REGISTER_CONFIGS_FALLBACK', () => {
     expect(resolveRegisterConfig({ symbol: 'surface_inventory', dataType: 'json', widget: 'select_many' })).toBeNull();
     expect(resolveRegisterConfig({ symbol: 'other', dataType: 'json', widget: null })).toBeNull();
   });
-  it('A1: registerFlagKeys prefers ui.flags, else the symbol-keyed fallback', () => {
-    expect(registerFlagKeys('pollutant_register')).toEqual(['not_applicable']);
+  it('A1: registerFlagKeys reads ui.flags only (the symbol-keyed REGISTER_FLAG_KEYS map is deleted — round 2)', () => {
+    expect(registerFlagKeys('pollutant_register')).toEqual([]);
+    expect(registerFlagKeys('pollutant_register', REGISTER_CONFIGS_FALLBACK.pollutant_register)).toEqual(['not_applicable']);
     expect(registerFlagKeys('surface_inventory')).toEqual([]);
     expect(registerFlagKeys('surface_inventory', { flags: [{ key: 'estimated', label: 'geschätzt' }, { key: 'x' }] })).toEqual(['estimated', 'x']);
     expect(registerFlagKeys('pollutant_register', { flags: [] })).toEqual([]);
@@ -71,8 +72,8 @@ describe('Plan 2b: resolveRegisterConfig serves the TS selection registers while
     expect(resolveRegisterConfig({ symbol: 'bewertungskommission_members', dataType: 'json', widget: 'select_many' })).toBeNull();
     expect(resolveRegisterConfig({ symbol: 'bewertungskommission_members', dataType: 'text', widget: null })).toBeNull();
   });
-  it('registerFlagKeys prefers ui_config.flags, falls back to the symbol table', () => {
-    expect(registerFlagKeys('pollutant_register')).toEqual(['not_applicable']);
+  it('registerFlagKeys reads ui_config.flags; no config => none (symbol table deleted, round 2)', () => {
+    expect(registerFlagKeys('pollutant_register')).toEqual([]);
     expect(registerFlagKeys('x', { title: 't', columns: [{ key: 'a', type: 'text', label: 'A' }], flags: [{ key: 'done', label: 'Fertig' }] })).toEqual(['done']);
   });
   it('fallback configs carry the Plan 2b display keys and still validate', () => {

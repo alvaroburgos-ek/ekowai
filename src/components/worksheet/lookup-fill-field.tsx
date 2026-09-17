@@ -42,7 +42,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store';
 import { OverrideReasonForm, ReasonMissing, overrideReasonKey, resetSavedOverrideReasons, useOverrideReason } from './override-reason';
-import { isOverridden, resolveLookupFill, resolveLookupFillConfig, type LookupFillState } from '@/lib/eval/lookup-fill';
+import { resolveLookupFill, resolveLookupFillConfig, type LookupFillState } from '@/lib/eval/lookup-fill';
 import type { LookupBinding } from '@/lib/eval/field-config';
 import { fmt } from './register-editor';
 import type { WidgetContext, WorksheetFormField } from './widgets';
@@ -132,7 +132,9 @@ function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: Works
   // (non-numeric cell on a number field, enum cell outside the field's options) — nothing is written then.
   const tableScalar = state.kind === 'resolved' ? cellScalar(state.tableValue, scalarType, enumValues) : null;
   const enumMismatch = scalarType === 'enum' && state.kind === 'resolved' && state.tableValue != null && tableScalar === null;
-  const overridden = mode === 'fill' && isOverridden(state, stored);
+  // Round 2: compare against the dataType-COERCED cell, never the raw cell — a text field over a numeric cell
+  // ("5" vs 5) is not a deviation (isOverridden() in lookup-fill.ts compares raw cells and is kept for the engine).
+  const overridden = mode === 'fill' && state.kind === 'resolved' && stored != null && tableScalar != null && stored !== tableScalar;
   const policy = state.kind === 'resolved' ? state.policy : null;
 
   const [editing, setEditing] = useState(false);

@@ -39,6 +39,8 @@ beforeEach(() => {
   ];
   ROWS.equations = [
     { templateId: 'tpl-08', inputSymbols: ['surface_inventory'], outputSymbol: 'A_C' },
+    // Produced from the register but NOT consumed on X-10 => not in producedSymbols.
+    { templateId: 'tpl-08', inputSymbols: ['surface_inventory'], outputSymbol: 'A_C_elsewhere' },
   ];
   ROWS.worksheet_instances = [
     { templateId: 'tpl-07', status: 'final' },
@@ -55,8 +57,8 @@ describe('loadRegisterSources(projectId, standardId, currentWorksheetCode)', () 
     const { loadRegisterSources } = await import('../worksheet');
     const out = await loadRegisterSources('proj-1', 'std-1', 'X-10');
     expect(out).toEqual([
-      { symbol: 'reg_x', ownerCode: 'X-07', status: 'final', carrier: { rows: [{ id: '1', a: 'x' }] }, widget: 'register', uiConfig: UI_X },
-      { symbol: 'surface_inventory', ownerCode: 'X-08', status: 'draft', carrier: { rows: [] }, widget: null, uiConfig: null },
+      { symbol: 'reg_x', ownerCode: 'X-07', status: 'final', carrier: { rows: [{ id: '1', a: 'x' }] }, widget: 'register', uiConfig: UI_X, producedSymbols: [] },
+      { symbol: 'surface_inventory', ownerCode: 'X-08', status: 'draft', carrier: { rows: [] }, widget: null, uiConfig: null, producedSymbols: ['A_C'] },
     ]);
     // One fields query, one equations query, then instances + params (batched, not per owner).
     expect(fakeDb.log).toEqual(['select:fields', 'select:equations', 'select:worksheet_instances', 'select:project_parameters']);

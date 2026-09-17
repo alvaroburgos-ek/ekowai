@@ -55,8 +55,8 @@ function makeField(over: Record<string, unknown>) {
 
 // A138-10-shaped consumer: NO surface_inventory field of its own.
 const FIELDS = [
-  makeField({ id: 'f-a-c', symbol: 'A_C', labelDe: 'A_C', unit: 'm²', orderIndex: 0 }),
-  makeField({ id: 'f-c-m', symbol: 'C_m', labelDe: 'C_m', orderIndex: 1 }),
+  makeField({ id: 'f-a-c', symbol: 'A_C', labelDe: 'A_C', unit: 'm²', orderIndex: 0, inheritedFromWorksheet: 'A138-07' }),
+  makeField({ id: 'f-c-m', symbol: 'C_m', labelDe: 'C_m', orderIndex: 1, inheritedFromWorksheet: 'A138-07' }),
 ];
 
 const TWO_COMPLETE_ROWS = {
@@ -85,7 +85,9 @@ const PROPS = {
   docs: [],
 } satisfies Parameters<typeof WorksheetForm>[0];
 
-const source = (status: string, carrier: unknown) => [{ symbol: 'surface_inventory', ownerCode: 'A138-07', status, carrier }];
+// Round 2: the page's loader reports the owner's PRODUCED symbols consumed here (A_C, C_m … from Gl. 2) — the consumer
+// inherits them ⇒ the banner may claim "abgeleitete Werte ausgeblendet" (the page withholds them).
+const source = (status: string, carrier: unknown) => [{ symbol: 'surface_inventory', ownerCode: 'A138-07', status, carrier, producedSymbols: ['A_C', 'C_m'] }];
 
 describe('WorksheetForm — consumed registers (registerSources) without a local carrier field', () => {
   beforeEach(() => {
@@ -144,12 +146,29 @@ describe('WorksheetForm — multiple registerSources; DB config beats the symbol
     const banners = screen.getAllByTestId('surface-source-banner');
     expect(banners.map((b) => b.textContent)).toEqual([
       'Quelle A138-07 nicht final (2/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
-      'Quelle A138-99 nicht final (1/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
+      // reg_x produces nothing this consumer carries (no producedSymbols) => no withholding claim (round 2).
+      'Quelle A138-99 nicht final (1/2 Zeilen vollständig).',
     ]);
     expect(screen.getByTestId('source-surface_inventory').querySelector('h2')?.textContent).toBe('Flächenverzeichnis (aus A138-07 — schreibgeschützt)');
     const x = screen.getByTestId('source-reg_x');
     expect(x.querySelector('h2')?.textContent).toBe('Register X (aus A138-99 — schreibgeschützt)');
     expect(within(within(x).getByTestId('register-readonly')).getAllByRole('row')).toHaveLength(3);
+  });
+
+  it('a source with NO produced symbols on this consumer (selection register) never claims withholding: banner without "ausgeblendet", mirror still renders', () => {
+    const sel = { symbol: 'stakeholder_list', ownerCode: 'M820-01', status: 'draft', carrier: { rows: [{ id: '1', name: 'A' }] }, widget: 'register', uiConfig: { title: 'Beteiligte', columns: [{ key: 'name', type: 'text', label: 'Name', required: true }] }, producedSymbols: [] };
+    const first = render(<WorksheetForm {...PROPS} registerSources={[sel]} />);
+    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle M820-01 nicht final (1/1 Zeilen vollständig).');
+    expect(screen.getByTestId('source-stakeholder_list')).toBeInTheDocument();
+    first.unmount();
+    render(<WorksheetForm {...PROPS} registerSources={[{ ...sel, carrier: null }]} />);
+    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle M820-01 nicht erfasst.');
+  });
+
+  it('produced symbols that this consumer does NOT carry ⇒ no withholding claim either', () => {
+    const src = { ...source('draft', TWO_COMPLETE_ROWS)[0], producedSymbols: ['A_C_sealed_only_elsewhere'] };
+    render(<WorksheetForm {...PROPS} registerSources={[src]} />);
+    expect(screen.getByTestId('surface-source-banner').textContent).toBe('Quelle A138-07 nicht final (2/2 Zeilen vollständig).');
   });
 
   it('a DB config on the source entry wins over the symbol-keyed fallback for the same symbol', () => {

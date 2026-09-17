@@ -42,6 +42,18 @@ describe('carrierSourceState (generic)', () => {
 // Final-review minors: a `disables_rows` flag that is ON with zero rows is an explicit null-report,
 // not a missing source; `symbol` (worksheet-symbol lookup) is threaded into the row scope so a
 // column `visible_when` over a worksheet symbol decides completeness the same way the engine does.
+// Round 2: a banner must never claim withholding that does not happen — `withholds: false` drops the suffix.
+describe('carrierSourceState — withholds flag (message wording)', () => {
+  it('withholds=false ⇒ "nicht erfasst." / "nicht final (n/m Zeilen vollständig)." without the suffix; default (true) keeps it', () => {
+    const o = { ownerLabel: 'M820-01', standardCode: 'DWA-M-820-1' };
+    const cols2 = [{ key: 'name', type: 'text' as const, label: 'Name', required: true }];
+    expect(carrierSourceState(null, cols2, 'final', { ...o, withholds: false }).message).toBe('Quelle M820-01 nicht erfasst.');
+    expect(carrierSourceState({ rows: [{ id: '1', name: '' }] }, cols2, 'final', { ...o, withholds: false }).message).toBe('Quelle M820-01 nicht final (0/1 Zeilen vollständig).');
+    expect(carrierSourceState(null, cols2, 'final', o).message).toBe('Quelle M820-01 nicht erfasst — abgeleitete Werte ausgeblendet.');
+    expect(carrierSourceState({ rows: [{ id: '1', name: 'x' }] }, cols2, 'final', { ...o, withholds: false })).toEqual({ state: 'ok', complete: 1, total: 1, message: null });
+  });
+});
+
 describe('carrierSourceState — disables_rows flags + symbol scope', () => {
   const cfg = REGISTER_CONFIGS_FALLBACK.pollutant_register;
   const base = { ownerLabel: 'VSME-B04.100', standardCode: 'VSME', flagKeys: registerFlagKeys('pollutant_register', cfg), flags: cfg.flags };

@@ -51,7 +51,9 @@ Apply strictly in this order, never skip or reorder a step:
    (Plan 2b; retires `REGISTER_CONFIGS_FALLBACK.surface_inventory`).
 8. `scripts/migrations/20260916140000_vsme_b04_pollutant_register_widget.sql` — VSME
    `pollutant_register` gets `widget='register'` + `ui_config` incl. the `not_applicable` flag
-   (retires `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS`).
+   (retires `REGISTER_CONFIGS_FALLBACK.pollutant_register`; the migration header still names
+   `REGISTER_FLAG_KEYS`, which was deleted as dead code in the fix wave round 2 — the header is
+   byte-pinned by the emitter and left as is).
 9. `scripts/migrations/20260916150000_a138_rainfall_table_ref_reference.sql` — DWA-A-138-1
    `rainfall_table_ref` (8 prod rows, one per consumer worksheet among A138-13..22 — controller read-only query, 2b ledger) gets
    `widget='reference'` + `ui_config` (retires `REFERENCE_CONFIGS_FALLBACK.rainfall_table_ref`).
@@ -117,7 +119,7 @@ A138-07 withhold shim on the page still runs on it), the `surface_inventory` cas
 that import it as a fixture — swap them to the migrated DB shape); since I-3 the form itself
 reads NOTHING by that symbol (`registerSourceStates` resolves from the source entry's
 `{widget, uiConfig}`), so nothing in `worksheet-form.tsx` is touched.
-step 8 → `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS` (same file) —
+step 8 → `REGISTER_CONFIGS_FALLBACK.pollutant_register` (same file; `REGISTER_FLAG_KEYS` is already gone) —
 co-readers: the `pollutant_register` emitter case and `carrier-source-state.test.ts` /
 `register-editor-vsme-b04.test.tsx` fixtures. NOTE the snapshot drift after apply: the
 migrated `ui_config` carries the pollutant `options` / `option_labels` as a frozen copy of
@@ -535,10 +537,21 @@ plumbing is generic since the fix wave (I-3):** the page calls
 `loadRegisterSources(projectId, standardId, code)` (`src/lib/db/queries/worksheet.ts`), which
 returns EVERY register-widget field on another worksheet of the standard that the current
 worksheet consumes — directly (`consumer_worksheets`) or transitively (an owner equation
-reads the register and produces a symbol the current worksheet consumes; that is how
-A138-07 `surface_inventory` reaches A138-10 without declaring consumers itself) — with the
-owner's `{ widget, uiConfig }`, and the form resolves each entry's config from that DB row
-first, the symbol-keyed TS fallback second. A DB `register` row whose `ui_config` fails
+reads the register and produces a symbol the current worksheet consumes). In prod the
+A138-07 `surface_inventory` field itself declares `consumer_worksheets = ["A138-10","A138-15",
+"A138-26"]` (read-only check 2026-09-17), so the direct rule already lists it there; the
+transitive rule is nonetheless LOAD-BEARING for the withhold: A138-13 inherits `A_C` (Gl. 2
+output of a possibly-draft A138-07) without being named on the carrier, and that inherited
+value must be withheld and explained. Each entry carries the owner's `{ widget, uiConfig }`
+and `producedSymbols` (the owner equation outputs read from the register AND consumed on this
+worksheet); the form resolves each entry's config from that DB row first, the symbol-keyed
+TS fallback second, and the page withholds the inherited `producedSymbols` while the source
+is not `ok` (`carrierWithholdFieldIds` — generic since round 2, D-2b-8 built). **A banner
+never claims withholding that does not happen:** `carrierSourceState({ withholds })` drops the
+"— abgeleitete Werte ausgeblendet" suffix when the consumer carries none of the produced
+symbols — the 14 TS selection registers with `consumer_worksheets` (DWA-M-820-1/-2, FLL-NT)
+read `Quelle <owner> nicht erfasst.` / `Quelle <owner> nicht final (n/m Zeilen vollständig).`
+and still get the mirror. A DB `register` row whose `ui_config` fails
 `parseFieldConfig` renders the `register-unconfigured` notice + the dynamic input (never
 silent).
 
@@ -554,9 +567,9 @@ silent).
   next write; the engine's completeness rule skips the same cell — one rule).
 - **`flags`**: `[{ key, label?, note?, disables_rows? }]` — one checkbox each, stored on the
   carrier next to `rows`, read by `flag(register, 'key')` in formulas;
-  `registerFlagKeys(symbol, ui)` reads them — once ANY config is given only `ui.flags` count
-  (a migrated register without `flags` has none; the `REGISTER_FLAG_KEYS` symbol map serves
-  only callers with NO config). `disables_rows: true` greys the table while the flag is on
+  `registerFlagKeys(symbol, ui)` reads them — only `ui.flags` count (a migrated register
+  without `flags` has none; the former `REGISTER_FLAG_KEYS` symbol map was dead code and is
+  deleted). `disables_rows: true` greys the table while the flag is on
   (VSME "Keine berichtspflichtigen Schadstoffemissionen") and, for a consumer's
   `carrierSourceState`, a flag that is ON with zero rows is an explicit null-report (`ok`
   once the owner is approved/final), not a missing source.
@@ -650,7 +663,7 @@ rejected). `ui_config = { source_label?, reason_min_length? (≥ 10) } | null`.
 | fallback (while `widget IS NULL`) | retiring migration (apply-order step) |
 |---|---|
 | `REGISTER_CONFIGS_FALLBACK.surface_inventory` | `20260916130000_a138_07_surface_inventory_widget.sql` (7) |
-| `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS` | `20260916140000_vsme_b04_pollutant_register_widget.sql` (8) |
+| `REGISTER_CONFIGS_FALLBACK.pollutant_register` | `20260916140000_vsme_b04_pollutant_register_widget.sql` (8) |
 | `REFERENCE_CONFIGS_FALLBACK.rainfall_table_ref` | `20260916150000_a138_rainfall_table_ref_reference.sql` (9) |
 | `LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit` | `20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql` — **GATED D-2b-3, EXCLUDED** (10) |
 
@@ -677,18 +690,18 @@ list under "Apply order" — read its freshness-pin paragraph before deleting an
   `readOnly` + `aria-readonly`; `aria-describedby` on the register's warnings is not wired
   (sign-off D-2b-7).
 - **Shared `FieldHeader`** for the scalar-shaped widgets (D-2b-9); **save-time gate** for an
-  unjustified lookup override (D-2b-10); the page's withhold gate stays on the surface shim
-  (D-2b-8); `surface-inventory.ts` remains as a test-only differential oracle (D-2b-11).
+  unjustified lookup override (D-2b-10); the page's withhold gate is generic since round 2
+  (D-2b-8 built — `producedSymbols` per source); `surface-inventory.ts` remains as a test-only differential oracle (D-2b-11).
 - No render spot-check on a deployed build was run by Plan 2b (no dev DB in the executing
   sessions); the "Ready for your 5-minute look" list on the 2b sign-off sheet is the owner's.
 - **Discriminator semantics** (spec §4 "selects which table applies / the row's limits") —
   contract-only, see Step 3 for the per-technology `lookup_key`/`lookup_value` + `visible_when`
   workaround and its two limits (first-key override binding, key-string equality). Sign-off
   F-2b-1.
-- **Value-withhold gate for consumed registers** stays on the A138-07 surface shim
-  (`surfaceWithholdFieldIds`, D-2b-8): the generic `loadRegisterSources` list drives banners
-  and mirrors for every register, but only the surface entry withholds inherited derived
-  values.
+- **Value-withhold gate for consumed registers** is generic since round 2: the page withholds
+  every source's inherited `producedSymbols` while the source is not `ok` (for A138-07 these
+  are exactly the six surface outputs, so the `surface-source-state.ts` shim now serves only
+  its pins). The banner suffix follows the same fact (`withholds`).
 
 ### Fix wave after the final whole-branch review (2026-09-17, commits `550b631..`)
 

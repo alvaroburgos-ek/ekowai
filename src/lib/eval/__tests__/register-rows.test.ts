@@ -68,7 +68,7 @@ describe('prepareRegisterRows — A138 surface_inventory parity', () => {
       { id: 'a', label: 'Kessel', pollutant: p, medium: 'air', amount_t: 1.5 },
       { id: 'b', label: 'x', pollutant: 'NOT-A-POLLUTANT', medium: 'air', amount_t: 1 },
       { id: 'c', label: 'y', pollutant: p, medium: 'water', amount_t: -1 },
-    ] }, cols, {}, { flagKeys: registerFlagKeys('pollutant_register') });
+    ] }, cols, {}, { flagKeys: registerFlagKeys('pollutant_register', REGISTER_CONFIGS_FALLBACK.pollutant_register) }); // round 2: flags come from the config, the symbol map is gone
     expect(reg.flags).toEqual({ not_applicable: true });
     expect(reg.rows.map((r) => r.complete)).toEqual([true, false, false]);
     expect(reg.rows[1].values.pollutant).toBeNull();

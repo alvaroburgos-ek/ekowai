@@ -421,6 +421,11 @@ describe('LookupFillField — I-1: fill honours field.dataType (text / enum), ne
     ],
   });
   const K = makeField({ id: 'f-k2', symbol: 'k2', dataType: 'enum' });
+  const numericTable = (): RegulationTable => ({
+    standard_code: 'SYN-3', edition: '2026-01', table_code: 'TAB3', title_de: 'Numerisch', clause_reference: null, page_ref: null,
+    key_columns: ['k'], value_columns: [{ name: 'n', type: 'number' }], override_policy: 'anhaltswert', override_quote: null, verification_status: 'imported_unverified',
+    rows: [{ row_key: 'a', keys: { k: 'a' }, group_label: null, label_de: 'A', order_index: 0, values: { n: 5 }, verbatim_quote: 'Tab. 3: a - 5' }],
+  });
   const BIND = { table_code: 'TAB2', role: 'value', keys: [{ column: 'k', from_symbol: 'k2' }], value: 'cls' };
   const TEXT = makeField({ id: 'f-t', symbol: 't_test', labelDe: 't_test', dataType: 'text', widget: 'lookup_fill', lookup: BIND });
   const ENUM = makeField({
@@ -469,6 +474,17 @@ describe('LookupFillField — I-1: fill honours field.dataType (text / enum), ne
     expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 2: Wert „Z“ nicht in den zulässigen Optionen');
     expect(setField).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'abweichend wählen' })).toBeNull();
+  });
+
+  it('round 2: a text field over a NUMERIC cell is filled with the string and is NOT overridden (no phantom "abweichend" / "Begründung fehlt")', async () => {
+    registerTables([numericTable()]);
+    const setField = vi.fn();
+    const T = makeField({ id: 'f-t3', symbol: 't3', labelDe: 't3', dataType: 'text', widget: 'lookup_fill', lookup: { table_code: 'TAB3', role: 'value', keys: [{ column: 'k', from_symbol: 'k2' }], value: 'n' } });
+    render(<Harness field={T} fields={[T, K]} initial={{ 'f-k2': { type: 'enum', value: 'a' } }} over={{ standardCode: 'SYN-3' }} onSet={setField} />);
+    await waitFor(() => expect(setField).toHaveBeenCalledWith('f-t3', { type: 'text', value: '5' }));
+    expect(screen.queryByText('abweichend')).toBeNull();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
+    expect(screen.getByRole('button', { name: 'abweichend wählen' })).toBeInTheDocument();
   });
 
   it('number field: a non-numeric cell is never written as a number (badge shows the cell, no fill)', () => {

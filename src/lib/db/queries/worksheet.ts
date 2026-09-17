@@ -412,14 +412,17 @@ export type RegisterSource = {
   carrier: unknown;
   widget: string | null;
   uiConfig: unknown;
+  /** Round 2: the owner's equation outputs that read this register AND are consumed on the current worksheet
+   * (the values the page withholds while the source is not `ok` — `carrierWithholdFieldIds`). Empty for a
+   * register nothing is derived from (the banner then must not claim withholding). */
+  producedSymbols: string[];
 };
 
 /**
  * I-3 (final review, guideline-to-tool): every register-widget field on ANOTHER
  * worksheet of the standard that the current worksheet consumes — the generic
  * successor of the `surface_inventory`-only `loadSurfaceSource` (deleted; the
- * page picks the surface entry out of this list for the A138-07 value-withhold
- * shim).
+ * page withholds every entry's `producedSymbols` through `carrierWithholdFieldIds`).
  *
  * A register field = DB `widget='register'` (parsed ui_config) OR a json field
  * whose symbol has a TS fallback config while `widget IS NULL`
@@ -428,10 +431,13 @@ export type RegisterSource = {
  *   (a) its own `consumer_worksheets` names the current code, or
  *   (b) an equation of the owner worksheet reads the register
  *       (`input_symbols`) and produces a symbol whose field on the owner names
- *       the current code — the A138-07 `surface_inventory` → Gl. 2 → `A_C` →
- *       A138-10 case, where the carrier field itself declares no consumers
- *       (prod data: only the produced totals do). Without (b) the surface
- *       banner/mirror on A138-10 would vanish.
+ *       the current code — A138-07 `surface_inventory` → Gl. 2 → `A_C` → the
+ *       consumer. In prod the carrier itself declares `["A138-10","A138-15",
+ *       "A138-26"]` (read-only check 2026-09-17), so (a) already lists it there;
+ *       (b) is LOAD-BEARING for the withhold shim regardless: A138-13 inherits
+ *       `A_C` (produced from a possibly-draft A138-07) without being named on
+ *       the carrier, and its inherited value must be withheld + explained.
+ *       (b) also yields `producedSymbols` — the outputs the page withholds.
  * Result order: owner code, then symbol. Four queries, batched (never per owner).
  */
 export async function loadRegisterSources(
@@ -474,13 +480,19 @@ export async function loadRegisterSources(
     set.add(f.symbol);
     consumedSymbolsByTemplate.set(f.templateId, set);
   }
-  const consumedTransitively = (r: { templateId: string; symbol: string }): boolean => {
+  /** Owner equation outputs that read the register and are consumed on the current worksheet. */
+  const producedFor = (r: { templateId: string; symbol: string }): string[] => {
     const consumed = consumedSymbolsByTemplate.get(r.templateId);
-    if (!consumed) return false;
-    return ownerEquations.some((e) => e.templateId === r.templateId && e.outputSymbol != null && consumed.has(e.outputSymbol) && (e.inputSymbols ?? []).includes(r.symbol));
+    if (!consumed) return [];
+    const out = new Set<string>();
+    for (const e of ownerEquations) {
+      if (e.templateId === r.templateId && e.outputSymbol != null && consumed.has(e.outputSymbol) && (e.inputSymbols ?? []).includes(r.symbol)) out.add(e.outputSymbol);
+    }
+    return [...out].sort();
   };
   const consumed = registers
-    .filter((r) => consumesMe(r.consumerWorksheets) || consumedTransitively(r))
+    .map((r) => ({ ...r, producedSymbols: producedFor(r) }))
+    .filter((r) => consumesMe(r.consumerWorksheets) || r.producedSymbols.length > 0)
     .sort((a, b) => a.ownerCode.localeCompare(b.ownerCode) || a.symbol.localeCompare(b.symbol));
   if (consumed.length === 0) return [];
 
@@ -502,5 +514,6 @@ export async function loadRegisterSources(
     carrier: carrierByField.get(r.id) ?? null,
     widget: r.widget ?? null,
     uiConfig: r.uiConfig ?? null,
+    producedSymbols: r.producedSymbols,
   }));
 }

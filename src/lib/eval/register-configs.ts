@@ -43,7 +43,7 @@ const SURFACE_INVENTORY: RegisterUiConfig = {
 };
 
 // Retired by scripts/migrations/20260916140000_vsme_b04_pollutant_register_widget.sql (Plan 2b Task 5; emitted from
-// this constant — the freshness pin keeps the SQL byte-equal to it; REGISTER_FLAG_KEYS retires with it).
+// this constant — the freshness pin keeps the SQL byte-equal to it).
 // Required set + min:0 = pollutantRowComplete() in pollutant-register.ts:88-94.
 // Header/flag/aria texts = the retired pollutant-register-editor.tsx (deleted in Plan 2b Task 4; pinned in register-editor-vsme-b04.test.tsx).
 const POLLUTANT_REGISTER: RegisterUiConfig = {
@@ -66,17 +66,12 @@ const POLLUTANT_REGISTER: RegisterUiConfig = {
 
 export const REGISTER_CONFIGS_FALLBACK: Readonly<Record<string, RegisterUiConfig>> = { surface_inventory: SURFACE_INVENTORY, pollutant_register: POLLUTANT_REGISTER };
 
-/** Symbol-keyed fallback for registers whose config carries no `flags` (legacy DB rows / callers without a config).
- * Retired together with 20260916140000_vsme_b04_pollutant_register_widget.sql (the migrated ui_config carries `flags`). */
-const REGISTER_FLAG_KEYS: Readonly<Record<string, readonly string[]>> = { pollutant_register: ['not_applicable'] };
-
-/** Register-level boolean flags read by `flag()`. Once a config is given (a DB register or a TS fallback config),
- * ONLY its `flags` count — never the symbol map (final-review minor: a migrated pollutant register without `flags`
- * must not silently inherit the TS `not_applicable`). The symbol-keyed fallback applies only to callers WITHOUT a
- * config (legacy DB rows). */
-export function registerFlagKeys(symbol: string, ui?: Partial<RegisterUiConfig> | null): readonly string[] {
-  if (ui) return ui.flags?.map((f) => f.key) ?? [];
-  return REGISTER_FLAG_KEYS[symbol] ?? [];
+/** Register-level boolean flags read by `flag()`: ONLY the config's `flags` count (a DB register or a TS fallback
+ * config — a migrated pollutant register without `flags` has none). The former symbol-keyed `REGISTER_FLAG_KEYS`
+ * map was dead code (every caller passes a config; the pollutant fallback carries its own `flags`) and is deleted
+ * (round 2). `symbol` is kept in the signature for the call sites' readability only. */
+export function registerFlagKeys(_symbol: string, ui?: Partial<RegisterUiConfig> | null): readonly string[] {
+  return ui?.flags?.map((f) => f.key) ?? [];
 }
 
 export type RegisterFieldLike = { symbol: string; dataType: string; widget?: string | null; uiConfig?: unknown };

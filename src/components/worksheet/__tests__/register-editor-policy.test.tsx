@@ -182,7 +182,7 @@ describe('register minors (final review)', () => {
   });
 
   it('registerFlagKeys: once a config is given, ONLY ui.flags count — no symbol-map fallback', () => {
-    expect(registerFlagKeys('pollutant_register')).toEqual(['not_applicable']);          // no config at all ⇒ symbol map
+    expect(registerFlagKeys('pollutant_register')).toEqual([]);                           // no config ⇒ none (symbol map deleted, round 2)
     expect(registerFlagKeys('pollutant_register', {})).toEqual([]);                       // DB config without flags ⇒ none
     expect(registerFlagKeys('pollutant_register', { flags: [{ key: 'z' }] })).toEqual(['z']);
   });
