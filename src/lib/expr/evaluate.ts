@@ -476,14 +476,20 @@ function evalCall(n: CallNode, ctx: Ctx): Value {
 
 /**
  * The legacy var-vs-var rule (compliance/evaluate.ts:426-436, on the `compare`
- * node) extended to a call-result LHS (`lookup(...) == paved` parses as
+ * node) extended to a CALL-RESULT LHS ONLY (`lookup(...) == paved` parses as
  * `acompare` with an `aref` RHS): a bare-ident RHS of `==`/`!=` resolves as a
  * symbol when it HAS a value, otherwise it is its own name as a string
  * literal (an enum value). `extractSymbols` skips it for the same reason.
  * Controller ruling 2026-09-17 (Task 2, C-1).
+ *
+ * An ARITHMETIC LHS (`a + b == c`) keeps the legacy acompare semantics
+ * (compliance/evaluate.ts@da79b99:439-444): the RHS ident is a symbol
+ * reference → `pending` when unvalued. Fix-wave item 1 — under the broader
+ * rule the corpus gates DWA-A-102-2 REQ-04, DWA-M-102-4 REQ-18 and
+ * DWA-M-820-3 REQ-15…24 flipped pending→fail.
  */
 function isEnumRhs(n: Extract<Node, { kind: 'acompare' }>): boolean {
-  return (n.op === '==' || n.op === '!=') && n.right.kind === 'aref';
+  return (n.op === '==' || n.op === '!=') && n.left.kind === 'call' && n.right.kind === 'aref';
 }
 
 function evalNodeCore(n: Node, ctx: Ctx): Ternary {
@@ -641,7 +647,7 @@ export function evalCondition(src: string, scope: Scope, opts?: ConditionOptions
   if (unknownFunctionNames(ast).length > 0) return { kind: 'manual' };
   const hiddenSet = opts?.hiddenSymbols;
   if (hiddenSet && hiddenSet.size > 0) {
-    const hidden = [...extractSymbols(ast)].filter((s) => hiddenSet.has(s));
+    const hidden = hiddenReferences(ast, hiddenSet);
     if (hidden.length > 0) return { kind: 'not_applicable', hiddenSymbols: hidden };
   }
   const ctx: Ctx = { scope, strict: false, missing: new Set() };
@@ -731,6 +737,58 @@ export function extractSymbols(e: Expr): Set<string> {
   if (isConditionNode(e)) walk(e);
   else walkArith(e);
   return out;
+}
+
+/**
+ * Symbols of `hiddenSymbols` the condition would touch at evaluation time —
+ * the N.A. pre-check of `evalCondition`. Superset of `extractSymbols`: it also
+ * counts a bare-ident equality RHS (`x == c`, `lookup(...) == c`) when that
+ * ident names a hidden symbol, because the evaluator DOES resolve such an
+ * RHS as a symbol whenever it is valued. Kept separate so the residual
+ * gate-symbol check (`extractConditionSymbols`) keeps excluding enum literals.
+ */
+export function hiddenReferences(e: Expr, hiddenSymbols: ReadonlySet<string>): string[] {
+  const out = new Set<string>();
+  for (const s of extractSymbols(e)) if (hiddenSymbols.has(s)) out.add(s);
+  const walkArith = (n: ArithNode): void => {
+    switch (n.kind) {
+      case 'aneg': walkArith(n.inner); return;
+      case 'abin': walkArith(n.left); walkArith(n.right); return;
+      case 'call':
+        for (const arg of n.args) {
+          if (isConditionNode(arg)) walk(arg);
+          else walkArith(arg);
+        }
+        return;
+      default: return;
+    }
+  };
+  const walk = (n: Node): void => {
+    switch (n.kind) {
+      case 'compare':
+        if ((n.op === '==' || n.op === '!=') && typeof n.rhs.value === 'string' && hiddenSymbols.has(n.rhs.value)) {
+          out.add(n.rhs.value);
+        }
+        return;
+      case 'acompare':
+        walkArith(n.left);
+        if (isEnumRhs(n)) {
+          const sym = (n.right as Extract<ArithNode, { kind: 'aref' }>).symbol;
+          if (hiddenSymbols.has(sym)) out.add(sym);
+        } else {
+          walkArith(n.right);
+        }
+        return;
+      case 'and':
+      case 'or': walk(n.left); walk(n.right); return;
+      case 'not': walk(n.inner); return;
+      case 'guard': walk(n.guard); walk(n.body); return;
+      default: return;
+    }
+  };
+  if (isConditionNode(e)) walk(e);
+  else walkArith(e);
+  return [...out];
 }
 
 /** Call names (as written, deduplicated, in order) the evaluator does not support. */

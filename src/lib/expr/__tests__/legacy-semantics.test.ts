@@ -117,3 +117,34 @@ describe('ExprError.recoverable', () => {
     expect(e.recoverable).toBe(false);
   });
 });
+
+describe('C-1 scope: an arithmetic LHS keeps the legacy symbol-ref RHS (fix-wave item 1)', () => {
+  it('x + y == z with z unvalued is pending on z, not a string comparison', () => {
+    expect(evalCondition('x + y == z', sc({ x: 1, y: 2 }))).toEqual({ kind: 'pending', missingSymbols: ['z'] });
+    expect(evalCondition('x + y == z', sc({ x: 1, y: 2, z: 3 }))).toEqual({ kind: 'pass' });
+    expect(evalCondition('x + y == z', sc({ x: 1, y: 2, z: 4 }))).toEqual({ kind: 'fail' });
+    expect(evalCondition('x + y != z', sc({ x: 1, y: 2 }))).toEqual({ kind: 'pending', missingSymbols: ['z'] });
+  });
+  it('a hidden RHS symbol makes the gate not_applicable', () => {
+    expect(evalCondition('x + y == z', sc({ x: 1, y: 2, z: 3 }), { hiddenSymbols: new Set(['z']) }))
+      .toEqual({ kind: 'not_applicable', hiddenSymbols: ['z'] });
+    // same for the simple compare form and the call-LHS form
+    expect(evalCondition('x == z', sc({ x: 1, z: 1 }), { hiddenSymbols: new Set(['z']) }))
+      .toEqual({ kind: 'not_applicable', hiddenSymbols: ['z'] });
+    expect(evalCondition("lookup('TAB9', k, 'kind') == z", { ...sc({ k: 'a', z: 'paved' }), table: () => ({ kind: 'paved' }) }, { hiddenSymbols: new Set(['z']) }))
+      .toEqual({ kind: 'not_applicable', hiddenSymbols: ['z'] });
+    // an enum literal that merely shares a hidden symbol's name in a non-hidden gate is untouched
+    expect(evalCondition('x == paved', sc({ x: 'paved' }), { hiddenSymbols: new Set(['other']) })).toEqual({ kind: 'pass' });
+  });
+  it('corpus gate DWA-A-102-2 REQ-04: A_b_a_I + A_b_a_II + A_b_a_III == A_b_a', () => {
+    const g = 'A_b_a_I + A_b_a_II + A_b_a_III == A_b_a';
+    expect(evalCondition(g, sc({ A_b_a_I: 100, A_b_a_II: 50, A_b_a_III: 25 }))).toEqual({ kind: 'pending', missingSymbols: ['A_b_a'] });
+    expect(evalCondition(g, sc({ A_b_a_I: 100, A_b_a_II: 50, A_b_a_III: 25, A_b_a: 175 }))).toEqual({ kind: 'pass' });
+    expect(evalCondition(g, sc({ A_b_a_I: 100, A_b_a_II: 50, A_b_a_III: 25, A_b_a: 170 }))).toEqual({ kind: 'fail' });
+    expect(evalCondition(g, sc({ A_b_a_I: 100, A_b_a_II: 50, A_b_a_III: 25, A_b_a: 175 }), { hiddenSymbols: new Set(['A_b_a']) }))
+      .toEqual({ kind: 'not_applicable', hiddenSymbols: ['A_b_a'] });
+  });
+  it('corpus gate DWA-M-102-4 REQ-18: A_E_k_b + A_E_k_nb == A_E_k', () => {
+    expect(evalCondition('A_E_k_b + A_E_k_nb == A_E_k', sc({ A_E_k_b: 1, A_E_k_nb: 2 }))).toEqual({ kind: 'pending', missingSymbols: ['A_E_k'] });
+  });
+});
