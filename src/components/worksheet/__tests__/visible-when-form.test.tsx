@@ -181,3 +181,37 @@ describe('ASM legacy visibility through WorksheetForm (Plan 2a: decision moved o
     expect(inputFor('a_s_m_provenance')).not.toBeNull();
   });
 });
+
+// Fix round 1 (IMPORTANT 2): the dedicated bottom-section editors bypass the
+// grid, so they must honour hiddenFieldIds explicitly.
+describe('dedicated editors honour visible_when (Plan 2a fix round 1)', () => {
+  const EDITOR_FIELDS = [
+    FIELDS[0], // sewer_system_type enum
+    makeField({
+      id: 'f-legal', symbol: 'applicable_legal_bases', labelDe: 'Rechtsgrundlagen', sectionId: 's1',
+      dataType: 'json' as const, widget: null, visibleWhen: "sewer_system_type == 'misch'",
+    }),
+    makeField({
+      id: 'f-risk', symbol: 'risk_register', labelDe: 'Risikoregister', sectionId: 's1',
+      dataType: 'json' as const, widget: null, visibleWhen: "sewer_system_type == 'misch'",
+    }),
+  ];
+  const EDITOR_PROPS = { ...PROPS, fields: EDITOR_FIELDS, complianceRequirements: [], sections: [SECTIONS[0]] };
+
+  beforeEach(() => {
+    act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
+  });
+
+  it('selection checklist + risk register render while pending, leave the DOM when hidden, return when visible', async () => {
+    const user = userEvent.setup();
+    render(<WorksheetForm {...EDITOR_PROPS} />);
+    expect(screen.getAllByTestId('checklist-editor').length).toBeGreaterThan(0);
+    expect(screen.getByText('Risikoanalyse (Anhang A — Tab. A.1)')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Trenn' }));
+    expect(screen.queryAllByTestId('checklist-editor')).toHaveLength(0);
+    expect(screen.queryByText('Risikoanalyse (Anhang A — Tab. A.1)')).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Misch' }));
+    expect(screen.getAllByTestId('checklist-editor').length).toBeGreaterThan(0);
+    expect(screen.getByText('Risikoanalyse (Anhang A — Tab. A.1)')).toBeInTheDocument();
+  });
+});

@@ -6,7 +6,7 @@
  *
  * Pure: no React, no store subscription — the caller passes the values.
  */
-import { jsonConditionValue } from '@/lib/compliance/evaluate';
+import { jsonConditionValue } from './evaluate';
 import type { Value } from '@/lib/expr';
 
 export type SymbolLookup = (sym: string) => Value | undefined;
@@ -43,8 +43,7 @@ export function makeSymbolLookup(
       }
     }
   }
-  return (sym: string) => {
-    if (!symbolToValue.has(sym)) return undefined;
-    return symbolToValue.get(sym) ?? null;
-  };
+  // Fix round 1: a known-but-null value resolves to `undefined` ("no value"),
+  // aligned with every server lookup (gate / report / snapshot / assembler).
+  return (sym: string) => symbolToValue.get(sym) ?? undefined;
 }

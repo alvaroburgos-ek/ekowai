@@ -28,6 +28,7 @@
  * time") and the whole save would roll back.
  */
 import { evaluateFormula, type EvalState } from './formula';
+import { hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { equationProfiles } from './equation-profiles';
 import { normalizeSymbols } from './normalize-formula';
 import { rewriteRules } from './rewrites';
@@ -99,12 +100,12 @@ export function registerFieldIds(
 /** The scalar `Scope.symbol` view of the worksheet values (G-13: a register `derived` column may
  * reference a worksheet symbol). MUST return `undefined` for unknown names — never null/'' — or the
  * evaluator's var-vs-var enum rule treats every bare identifier as a valued symbol. */
-function symbolLookup(fields: ReadonlyArray<FieldLike>, valuesByFieldId: Record<string, FieldValue>): (s: string) => Value | undefined {
+function symbolLookup(fields: ReadonlyArray<FieldLike>, valueOf: (fieldId: string) => FieldValue | undefined): (s: string) => Value | undefined {
   const byId = new Map(fields.map((f) => [f.symbol, f.id]));
   return (s) => {
     const id = byId.get(s);
     if (!id) return undefined;
-    const v = valuesByFieldId[id];
+    const v = valueOf(id);
     if (!v) return undefined;
     switch (v.type) {
       case 'number': return v.value ?? undefined;
@@ -122,11 +123,19 @@ export function materializeDerivedOutputs(args: {
   fields: ReadonlyArray<FieldLike>;
   /** persisted rows overlaid by the save batch */
   valuesByFieldId: Record<string, FieldValue>;
+  /** Plan 2a (Task 10, fix round 1): symbols hidden by `visible_when` (caller computes them from
+   * the template fields + sections over the same overlaid values). A hidden scalar input resolves
+   * to null and a hidden REGISTER to an absent carrier (rows=[]) — so every affected equation is
+   * manual_required and its output is still WRITTEN, as null (clears stale values; ruling). */
+  hiddenSymbols?: ReadonlySet<string>;
 }): MaterializeDerivedResult {
   const { standardCode, worksheetCode, fields, valuesByFieldId } = args;
   const table = makeTableLookup(standardCode);
   const fieldBySymbol = new Map(fields.map((f) => [f.symbol, f]));
-  const symbol = symbolLookup(fields, valuesByFieldId);
+  // ONE hidden-aware accessor (withHidden): the register scope, the register json source and the
+  // scalar inputs below all read through `valueOf` — nothing re-implements the "hidden ⇒ null" rule.
+  const valueOf = withHidden((fieldId: string) => valuesByFieldId[fieldId], hiddenFieldIdsOf(fields, args.hiddenSymbols));
+  const symbol = symbolLookup(fields, valueOf);
 
   // Registers: every field that resolves to a register config AND holds a json value.
   // A carrier with an absent value is still a register (empty rows) so its equations
@@ -137,7 +146,7 @@ export function materializeDerivedOutputs(args: {
     // absent, but an absent register must still yield rows=[] so its equations resolve to
     // manual_required → null (clears stale outputs). Non-register fields are filtered by
     // buildRegisters itself (resolveRegisterConfig).
-    (fieldId) => { const v = valuesByFieldId[fieldId]; return v?.type === 'json' ? (v.value ?? {}) : {}; },
+    (fieldId) => { const v = valueOf(fieldId); return v?.type === 'json' ? (v.value ?? {}) : {}; },
     { standardCode, symbol },
   );
   const registerSymbols = new Set(Object.keys(registers));
@@ -155,7 +164,7 @@ export function materializeDerivedOutputs(args: {
     writtenFieldIds.add(outField.id);
     const inputs = [...consumed].filter((s) => !registerSymbols.has(s)).map((sym) => {
       const f = fieldBySymbol.get(sym);
-      const v = f ? valuesByFieldId[f.id] : undefined;
+      const v = f ? valueOf(f.id) : undefined;
       return { symbol: sym, value: v?.type === 'number' ? v.value : null, unit: f?.unit ?? null };
     });
     const state = evaluateFormula({

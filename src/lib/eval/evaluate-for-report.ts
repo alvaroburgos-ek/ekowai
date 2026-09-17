@@ -13,7 +13,7 @@
  */
 import { evaluateFormula, type EvalState } from './formula';
 import { evaluateCondition, type EvalResult } from '../compliance/evaluate';
-import { computeVisibility, type Visibility, type VisibilitySection } from '../compliance/visibility';
+import { computeVisibility, hiddenFieldIdsOf, withHidden, type Visibility, type VisibilitySection } from '../compliance/visibility';
 import { equationProfiles } from './equation-profiles';
 import { rewriteRules } from './rewrites';
 import { normalizeSymbols } from './normalize-formula';
@@ -188,9 +188,24 @@ export function evaluateWorksheetEquations(
      * `lookup()`; without it a table code resolves only when unique across the
      * registered/seeded standards. */
     standardCode?: string;
+    /** Plan 2a (Task 10, fix round 1): symbols hidden by `visible_when`
+     * (`reportVisibility(...).hiddenSymbols`). A hidden symbol resolves to
+     * no value on EVERY input path below — scalar inputs, register json
+     * source + scope, aggregator carriers, rainfall ref, Gl.8/10 scalars —
+     * so an equation over it is `manual_required`, never `computed`. */
+    hiddenSymbols?: ReadonlySet<string>;
   },
 ): EquationReportResult[] {
   const { numByField, fieldBySymbol, bySymbol, jsonBySymbol } = buildValueMap(fields, parameters);
+
+  // ONE hidden-aware accessor family (withHidden) — every read below goes
+  // through these; nothing re-implements the "hidden ⇒ null" rule.
+  const hiddenSymbols = opts?.hiddenSymbols;
+  const hiddenFieldIds = hiddenFieldIdsOf(fields, hiddenSymbols);
+  const valueOf = withHidden((sym: string) => bySymbol.get(sym), hiddenSymbols);
+  const jsonOf = withHidden((sym: string) => jsonBySymbol.get(sym), hiddenSymbols);
+  const numOf = withHidden((fieldId: string) => numByField.get(fieldId), hiddenFieldIds);
+  const paramOf = withHidden((fieldId: string) => parameters.find((x) => x.fieldId === fieldId), hiddenFieldIds);
 
   // Plan 2a — generic registers (mirror of the client hook). Every json field
   // that resolves to a register config is prepared into typed rows; the
@@ -200,12 +215,12 @@ export function evaluateWorksheetEquations(
   const symbolByFieldId = new Map(fields.map((f) => [f.id, f.symbol]));
   const registers = buildRegisters(
     fields,
-    (fieldId) => jsonBySymbol.get(symbolByFieldId.get(fieldId) ?? ''),
-    { standardCode: opts?.standardCode, symbol: (sym) => bySymbol.get(sym) },
+    (fieldId) => jsonOf(symbolByFieldId.get(fieldId) ?? ''),
+    { standardCode: opts?.standardCode, symbol: valueOf },
   );
 
   // Aggregator context — built once per worksheet, reused per equation.
-  const subAreasJson = jsonBySymbol.get('sub_areas_A138_10') as { rows?: unknown } | undefined;
+  const subAreasJson = jsonOf('sub_areas_A138_10') as { rows?: unknown } | undefined;
   const subAreasCarrier: SubAreasCarrier | null = subAreasJson && Array.isArray(subAreasJson.rows)
     ? (subAreasJson as SubAreasCarrier)
     : null;
@@ -216,8 +231,8 @@ export function evaluateWorksheetEquations(
   // On missing column → kostraWithheld is set so the A138-13 Gl.8 branch
   // produces manual_required instead of feeding the aggregator.
   const kostraField = fieldBySymbol.get('r_D_n_table');
-  const kostraRaw = jsonBySymbol.get('r_D_n_table');
-  const rainfallRefRaw = bySymbol.get('rainfall_table_ref');
+  const kostraRaw = jsonOf('r_D_n_table');
+  const rainfallRefRaw = valueOf('rainfall_table_ref');
   const rainfallTableRef = typeof rainfallRefRaw === 'string' && rainfallRefRaw ? rainfallRefRaw : null;
 
   // Build a pickNumberBySymbol for facilityReturnPeriod (server equivalent of
@@ -225,13 +240,13 @@ export function evaluateWorksheetEquations(
   const pickNum = (sym: string): number | null => {
     const f = fieldBySymbol.get(sym);
     if (!f) return null;
-    return numByField.get(f.id) ?? null;
+    return numOf(f.id) ?? null;
   };
   const pickBool = (sym: string): boolean | null => {
     const f = fieldBySymbol.get(sym);
     if (!f) return null;
     // booleans aren't tracked in numByField; pull from parameters directly
-    const p = parameters.find((x) => x.fieldId === f.id);
+    const p = paramOf(f.id);
     return p?.valueBoolean ?? null;
   };
 
@@ -265,7 +280,7 @@ export function evaluateWorksheetEquations(
       ? kostraResolution.carrier
       : null;
 
-  const floodJson = jsonBySymbol.get('sub_areas_A138_26') as { rows?: unknown } | undefined;
+  const floodJson = jsonOf('sub_areas_A138_26') as { rows?: unknown } | undefined;
   const floodCarrier: FloodSubAreasCarrier | null = floodJson && Array.isArray(floodJson.rows)
     ? (floodJson as FloodSubAreasCarrier)
     : null;
@@ -337,7 +352,7 @@ export function evaluateWorksheetEquations(
 
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));
-      const num = f ? (numByField.get(f.id) ?? null) : null;
+      const num = f ? (numOf(f.id) ?? null) : null;
       return { symbol: sym, value: num, unit: f?.unit ?? null };
     });
 

@@ -8,12 +8,15 @@ import {
   equations,
   worksheetTemplates,
   standards,
+  worksheetSections,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
 import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { resolveProjectAccess, assertInternal, AccessDeniedError } from '@/lib/auth/project-access';
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '@/lib/eval/materialize-derived';
+import { computeVisibility } from '@/lib/compliance/visibility';
+import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { derivedOutputSymbols } from '@/lib/eval/derived-output-symbols';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
@@ -675,7 +678,7 @@ export async function saveWorksheet(
       // An empty batch (topology-triggered recompute) can never carry a register → skip the field load.
       const templateFields = fieldIds.length > 0
         ? await tx
-            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, unit: fields.unit, widget: fields.widget, uiConfig: fields.uiConfig })
+            .select({ id: fields.id, symbol: fields.symbol, dataType: fields.dataType, unit: fields.unit, widget: fields.widget, uiConfig: fields.uiConfig, sectionId: fields.sectionId, visibleWhen: fields.visibleWhen })
             .from(fields)
             .where(and(eq(fields.worksheetTemplateId, instance.worksheetTemplateId), eq(fields.active, true)))
         : [];
@@ -695,12 +698,26 @@ export async function saveWorksheet(
           .from(projectParameters)
           .where(and(eq(projectParameters.projectId, instance.projectId), inArray(projectParameters.fieldId, templateFields.map((f) => f.id))));
         const valuesByFieldId = { ...parametersToFieldValues(persisted, templateFields), ...batchValues };
+        // Plan 2a (Task 10, fix round 1): fields/sections hidden by `visible_when` under the
+        // overlaid values (persisted + batch) — same pure helper + lookup as the form, so the
+        // materialiser sees exactly what the engineer saw: a hidden input ⇒ no value ⇒
+        // manual_required ⇒ the output is written as null (clears stale values; ruling).
+        const templateSections = await tx
+          .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
+          .from(worksheetSections)
+          .where(eq(worksheetSections.worksheetTemplateId, instance.worksheetTemplateId));
+        const { hiddenSymbols } = computeVisibility(
+          templateFields,
+          templateSections,
+          makeSymbolLookup(templateFields, valuesByFieldId),
+        );
         const { writes, diagnostics } = materializeDerivedOutputs({
           standardCode: savedTemplateRow.standardCode,
           worksheetCode: savedTemplateCode,
           equations: templateEquations,
           fields: templateFields,
           valuesByFieldId,
+          hiddenSymbols,
         });
         // A misconfigured register `derived` column expression is an engineer-visible warning, not a silent null.
         for (const d of new Set(diagnostics)) {

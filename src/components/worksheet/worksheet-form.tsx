@@ -34,7 +34,7 @@ import { SourceFormReferencePanel } from '@/components/form-templates/SourceForm
 import { useEquationEngine } from '@/lib/eval/use-equation-engine';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { visibleFields } from './visible-fields';
-import { makeSymbolLookup } from './symbol-lookup';
+import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { computeVisibility } from '@/lib/compliance/visibility';
 import { isWorksheetEditable, type WorksheetStatus } from '@/lib/state-machine';
 import { composeEngineSuppressedSymbols } from '@/lib/eval/asm-source';
@@ -667,6 +667,12 @@ export function WorksheetForm({
     return result;
   }, [fieldsBySectionId, sections, visibility]);
 
+  // Plan 2a (Task 10, fix round 1): the dedicated bottom-section editors
+  // (rainfall tables/selector, surface inventory, risk register, mitigation
+  // plan, selection checklists/registers, pollutant register) bypass the grid,
+  // so they honour `hiddenFieldIds` here explicitly.
+  const shown = (f: { id: string }) => !visibility.hiddenFieldIds.has(f.id);
+
   const topSections = sections.filter((s) => s.parentSectionId === null);
   const orphanFields = fieldsBySectionId.get(null) ?? [];
   const title = locale === 'de' ? worksheet.template.titleDe : worksheet.template.titleEn ?? worksheet.template.titleDe;
@@ -904,7 +910,7 @@ export function WorksheetForm({
       )}
 
       {/* Owner (A138-04): manage the project's rainfall table(s). */}
-      {kostraField && !kostraField.inheritedFromWorksheet && (
+      {kostraField && !kostraField.inheritedFromWorksheet && shown(kostraField) && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Regenspendentabellen (für V_VA nach Gl. 8)
@@ -918,7 +924,7 @@ export function WorksheetForm({
           the rainfall_table_ref field; the table options come from the
           inherited carrier (empty list if none is inherited yet). Robust to
           carrier-inheritance state — never falls back to a raw text input. */}
-      {rainfallRefField && !rainfallRefField.inheritedFromWorksheet && (
+      {rainfallRefField && !rainfallRefField.inheritedFromWorksheet && shown(rainfallRefField) && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-2" data-testid="rainfall-table-ref-section">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Verwendete Regenspendentabelle
@@ -932,7 +938,7 @@ export function WorksheetForm({
         </section>
       )}
 
-      {surfaceInventoryField && (
+      {surfaceInventoryField && shown(surfaceInventoryField) && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Flächenverzeichnis (Tab. 9 — C_i für Gl. 2 und C_s für Gl. 10)
@@ -941,7 +947,7 @@ export function WorksheetForm({
         </section>
       )}
 
-      {riskRegisterField && (
+      {riskRegisterField && shown(riskRegisterField) && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Risikoanalyse (Anhang A — Tab. A.1)
@@ -952,7 +958,7 @@ export function WorksheetForm({
         </section>
       )}
 
-      {mitigationPlanField && (
+      {mitigationPlanField && shown(mitigationPlanField) && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Risiko-Maßnahmenplan (Anhang A — Tab. A.2)
@@ -963,7 +969,7 @@ export function WorksheetForm({
         </section>
       )}
 
-      {selectionFields.map(({ field: f, config }) => {
+      {selectionFields.filter(({ field: f }) => shown(f)).map(({ field: f, config }) => {
         return (
           <section key={f.id} className="border-t border-hairline pt-6 mt-8 space-y-4">
             <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">{config.title}</h2>
@@ -978,7 +984,7 @@ export function WorksheetForm({
         );
       })}
 
-      {pollutantRegisterField && (
+      {pollutantRegisterField && shown(pollutantRegisterField) && (
         <section className="border-t border-hairline pt-6 mt-8 space-y-4">
           <h2 className="text-xs uppercase tracking-[0.25em] text-subtext">
             Schadstoffregister — Emissionen je Schadstoff (VSME Abs. 32)

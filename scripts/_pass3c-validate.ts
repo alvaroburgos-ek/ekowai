@@ -1,4 +1,4 @@
-import type { ParsedWorkbook, FieldRow } from './_pass3c-types';
+import type { ParsedWorkbook, FieldRow, SectionRow } from './_pass3c-types';
 import { computeEngineDenyKeys, type EquationForGate } from '../src/lib/eval/equation-manual-denylist';
 import { parseFieldConfig, FieldConfigError } from '../src/lib/eval/field-config';
 
@@ -45,19 +45,61 @@ export function validateFieldConfigColumns(f: {
  * to `not_applicable` in the gates — on the CONSUMER worksheet that would silently blank an
  * inherited value the engineer there never sees the reason for. Structural rule, no DSL parse.
  * `consumer_worksheets` may be the workbook's comma-separated string or the DB's text[].
+ * Fix round 1: the field is ALSO rejected when its section or any ancestor section carries
+ * `visible_when` (a hidden section hides every field below it — same blanking). Pass the
+ * field's section chain (`sectionChainFor`, field's section first, root last).
  */
-export function validateVisibleWhenNotOnProducer(f: {
-  symbol: string;
-  visible_when?: string | null;
-  consumer_worksheets?: string[] | string | null;
-}): string[] {
-  if (!f.visible_when || !f.visible_when.trim()) return [];
+export function validateVisibleWhenNotOnProducer(
+  f: {
+    symbol: string;
+    visible_when?: string | null;
+    consumer_worksheets?: string[] | string | null;
+  },
+  sectionChain: ReadonlyArray<{ section_code: string; visible_when?: string | null }> = [],
+): string[] {
   const consumers = (Array.isArray(f.consumer_worksheets)
     ? f.consumer_worksheets
     : (f.consumer_worksheets ?? '').split(',')
   ).map((c) => c.trim()).filter(Boolean);
   if (consumers.length === 0) return [];
-  return [`field ${f.symbol}: visible_when on a symbol consumed by ${consumers.join(', ')} is not allowed (hidden ⇒ null would blank the consumer)`];
+  const errors: string[] = [];
+  if (f.visible_when && f.visible_when.trim()) {
+    errors.push(`field ${f.symbol}: visible_when on a symbol consumed by ${consumers.join(', ')} is not allowed (hidden ⇒ null would blank the consumer)`);
+  }
+  for (const s of sectionChain) {
+    if (s.visible_when && s.visible_when.trim()) {
+      errors.push(`field ${f.symbol}: section ${s.section_code} carries visible_when but ${f.symbol} is consumed by ${consumers.join(', ')} — not allowed (hidden ⇒ null would blank the consumer)`);
+    }
+  }
+  return errors;
+}
+
+/** A SectionRow plus the optional `visible_when` column a hand-authored row / future workbook may carry. */
+type SectionRowWithVisibility = Pick<SectionRow, 'worksheet_code' | 'section_code' | 'parent_section_code'> & { visible_when?: string | null };
+
+/**
+ * The section chain of a field: its own section first, then each ancestor up to the root —
+ * resolved by (worksheet_code, section_code) exactly as the importer resolves `origin_section`.
+ * Unknown section ⇒ []; a parent cycle is cut (each section appears once).
+ */
+export function sectionChainFor<S extends SectionRowWithVisibility>(
+  sections: ReadonlyArray<S>,
+  worksheetCode: string,
+  sectionCode: string | null | undefined,
+): S[] {
+  if (!sectionCode) return [];
+  const byKey = new Map(sections.map((s) => [`${s.worksheet_code}|${s.section_code}`, s]));
+  const chain: S[] = [];
+  const seen = new Set<string>();
+  let cur: string | null | undefined = sectionCode;
+  while (cur && !seen.has(cur)) {
+    seen.add(cur);
+    const s = byKey.get(`${worksheetCode}|${cur}`);
+    if (!s) break;
+    chain.push(s);
+    cur = s.parent_section_code;
+  }
+  return chain;
 }
 
 /** A FieldRow as parsed today, plus the optional widget/ui_config/lookup/visible_when
@@ -164,7 +206,7 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
     for (const message of validateFieldConfigColumns(f as FieldRowWithConfig)) {
       errors.push({ sheet: 'Fields', row, message });
     }
-    for (const message of validateVisibleWhenNotOnProducer(f as FieldRowWithConfig)) {
+    for (const message of validateVisibleWhenNotOnProducer(f as FieldRowWithConfig, sectionChainFor(parsed.sections, f.origin_worksheet, f.origin_section))) {
       errors.push({ sheet: 'Fields', row, message });
     }
   });

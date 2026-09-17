@@ -3,7 +3,7 @@ import { buildRegisters } from '@/lib/eval/register-rows';
 import { withFallbackRegisterEquations } from '@/lib/eval/register-configs';
 import { makeTableLookup } from '@/lib/eval/regulation-tables-fallback';
 import { evaluateCondition, type EvalResult as ComplianceEval } from '@/lib/compliance/evaluate';
-import { computeVisibility } from '@/lib/compliance/visibility';
+import { computeVisibility, hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import { explainCondition, type ExplainLeaf } from '@/lib/compliance/explain';
 import { blocksVerificationGate } from '@/lib/verification-status';
 import { resolveFromSiteProfile, SITE_PROFILE_ENTRIES } from '@/lib/site-profile/symbol-map';
@@ -621,17 +621,36 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         });
       }
 
+      // Plan 2a (Task 10): fields/sections of THIS worksheet hidden by
+      // `visible_when` under the resolved values — same pure helper and same
+      // lookup the gates evaluate against. Fix round 1: `resolvedFor` /
+      // `paramForEngine` are THE hidden-aware accessors every equation input,
+      // register json source and register scope below read through (hidden ⇒
+      // no value ⇒ manual_required); the gates get `not_applicable`.
+      const gateLookup = (sym: string) => {
+        const r = resolvedBySymbol.get(sym);
+        if (!r || r.value == null) return undefined;
+        return r.value as number | string | boolean;
+      };
+      const { hiddenSymbols } = computeVisibility(
+        tplFields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId, visibleWhen: f.visibleWhen ?? null })),
+        tplSecs.map((s) => ({ id: s.id, parentSectionId: s.parentSectionId ?? null, visibleWhen: s.visibleWhen ?? null })),
+        gateLookup,
+      );
+      const resolvedFor = withHidden((sym: string) => resolvedBySymbol.get(sym), hiddenSymbols);
+      const paramForEngine = withHidden((fieldId: string) => paramByFieldId.get(fieldId), hiddenFieldIdsOf(tplFields, hiddenSymbols));
+
       // Plan 2a: registers for this worksheet's json fields (shared builder;
       // the assembler's specifics are the parameter map as json source and the
       // resolved scalar values as symbol scope — json carriers excluded).
       const tableLookup = makeTableLookup(standard.code);
       const registers = buildRegisters(
         tplFields,
-        (fieldId) => paramByFieldId.get(fieldId)?.valueJson ?? undefined,
+        (fieldId) => paramForEngine(fieldId)?.valueJson ?? undefined,
         {
           standardCode: standard.code,
           symbol: (sym) => {
-            const r = resolvedBySymbol.get(sym);
+            const r = resolvedFor(sym);
             if (!r || r.value == null || typeof r.value === 'object') return undefined;
             return r.value;
           },
@@ -668,14 +687,14 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
           };
         }
         const inputs = (eq.inputSymbols ?? []).map((sym) => {
-          const r = resolvedBySymbol.get(sym);
+          const r = resolvedFor(sym);
           const num =
             r && typeof r.value === 'number' && Number.isFinite(r.value) ? r.value : null;
           return { symbol: sym, value: num, unit: r?.unit ?? null };
         });
         const expectedUnits: Record<string, string | null> = {};
         for (const sym of eq.inputSymbols ?? []) {
-          const r = resolvedBySymbol.get(sym);
+          const r = resolvedFor(sym);
           expectedUnits[sym] = r?.unit ?? null;
         }
         const evalState = evaluateFormula({
@@ -700,20 +719,6 @@ export function assembleStandardReport(input: AssemblerInput): StandardReportDat
         };
       });
 
-      const gateLookup = (sym: string) => {
-        const r = resolvedBySymbol.get(sym);
-        if (!r || r.value == null) return undefined;
-        return r.value as number | string | boolean;
-      };
-      // Plan 2a (Task 10): fields/sections of THIS worksheet hidden by
-      // `visible_when` under the resolved values — same pure helper and same
-      // lookup the gates below evaluate against; a hidden-symbol condition
-      // reports `not_applicable` in the dossier instead of a false verdict.
-      const { hiddenSymbols } = computeVisibility(
-        tplFields.map((f) => ({ id: f.id, symbol: f.symbol, sectionId: f.sectionId, visibleWhen: f.visibleWhen ?? null })),
-        tplSecs.map((s) => ({ id: s.id, parentSectionId: s.parentSectionId ?? null, visibleWhen: s.visibleWhen ?? null })),
-        gateLookup,
-      );
 
       const evaluatedCompliance: ReportCompliance[] = tplCReqs.map((c) => {
         const result = evaluateCondition(c.condition, gateLookup, { hiddenSymbols });

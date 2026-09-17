@@ -8,7 +8,7 @@
 
 import { evaluateFormula, type EvalState } from '@/lib/eval/formula';
 import { evaluateCondition } from '@/lib/compliance/evaluate';
-import { computeVisibility, type VisibilitySection } from '@/lib/compliance/visibility';
+import { computeVisibility, hiddenFieldIdsOf, withHidden, type VisibilitySection } from '@/lib/compliance/visibility';
 import { shouldEngineEvaluate } from '@/lib/eval/equation-manual-denylist';
 import { normalizeSymbols } from '@/lib/eval/normalize-formula';
 import { rewriteRules } from '@/lib/eval/rewrites';
@@ -210,6 +210,32 @@ export function buildSnapshotPayload(args: {
       citationSources: p.citationSources ?? [],
     };
   }
+  // ---- visibility (Plan 2a Task 10, fix round 1) --------------------------
+  // Fields/sections hidden by `visible_when` under the SAVED values, computed
+  // ONCE from the raw parameter lookup (single pass, before any derived
+  // override exists). Only this worksheet's own fields take part — inherited
+  // rows (merged in by capture.ts, `inheritedFromWorksheet` set) are governed
+  // by their origin. `hiddenSymbols` feeds the gates (⇒ not_applicable) and
+  // `paramForEngine` is THE accessor every equation-input / register / carrier
+  // read below goes through (hidden ⇒ no value ⇒ manual_required ⇒ null
+  // output). The `parameters` record above stays raw: the snapshot still
+  // documents what is stored.
+  const rawValueBySymbol = (sym: string): Value | undefined => {
+    const f = fieldBySymbol.get(sym);
+    const p = f ? paramByFieldId.get(f.id) : undefined;
+    const v = p ? readValue(p, f!.dataType) : undefined;
+    if (!v || v.type === 'json') return undefined;
+    return (v.value as Value | null) ?? undefined;
+  };
+  const ownFields = (fieldList as Array<FieldRow & { inheritedFromWorksheet?: string }>).filter(
+    (f) => !f.inheritedFromWorksheet,
+  );
+  const { hiddenSymbols } = computeVisibility(ownFields, args.sections ?? [], rawValueBySymbol);
+  const paramForEngine = withHidden(
+    (fieldId: string) => paramByFieldId.get(fieldId),
+    hiddenFieldIdsOf(fieldList, hiddenSymbols),
+  );
+
 
   // ---- equation outputs -------------------------------------------------
   // Task 2 (A138-10 auto-Q_zu): mutable override map for values derived
@@ -226,7 +252,7 @@ export function buildSnapshotPayload(args: {
     if (derivedOverrides.has(f.id)) {
       return derivedOverrides.get(f.id) ?? null;
     }
-    const p = paramByFieldId.get(f.id);
+    const p = paramForEngine(f.id);
     if (!p) return null;
     return readNumber(p);
   };
@@ -239,7 +265,7 @@ export function buildSnapshotPayload(args: {
   const scalarBySymbol = (sym: string): Value | undefined => {
     const f = fieldBySymbol.get(sym);
     if (!f) return undefined;
-    const p = paramByFieldId.get(f.id);
+    const p = paramForEngine(f.id);
     if (!p) return undefined;
     const v = readValue(p, f.dataType);
     if (!v || v.type === 'json') return undefined;
@@ -247,7 +273,7 @@ export function buildSnapshotPayload(args: {
   };
   const registers = buildRegisters(
     fieldList,
-    (fieldId) => paramByFieldId.get(fieldId)?.valueJson ?? undefined,
+    (fieldId) => paramForEngine(fieldId)?.valueJson ?? undefined,
     { standardCode: args.standardCode, symbol: scalarBySymbol },
   );
 
@@ -257,7 +283,7 @@ export function buildSnapshotPayload(args: {
   const subAreasField = fieldList.find((f) => f.symbol.startsWith('sub_areas_'));
   const subAreasCarrier: SubAreasCarrier | null = (() => {
     if (!subAreasField) return null;
-    const p = paramByFieldId.get(subAreasField.id);
+    const p = paramForEngine(subAreasField.id);
     if (!p || p.valueJson == null) return { rows: [] };
     const raw = p.valueJson as { rows?: unknown };
     if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
@@ -273,7 +299,7 @@ export function buildSnapshotPayload(args: {
   const rainfallRefField = fieldList.find((f) => f.symbol === 'rainfall_table_ref');
   const rainfallTableRef = (() => {
     if (!rainfallRefField) return null;
-    const p = paramByFieldId.get(rainfallRefField.id);
+    const p = paramForEngine(rainfallRefField.id);
     const v = p?.valueText ?? p?.valueEnum ?? null;
     return typeof v === 'string' && v ? v : null;
   })();
@@ -283,7 +309,7 @@ export function buildSnapshotPayload(args: {
   const pickNumBySymbol = (sym: string): number | null => {
     const f = fieldBySymbol.get(sym);
     if (!f) return null;
-    const p = paramByFieldId.get(f.id);
+    const p = paramForEngine(f.id);
     if (!p) return null;
     return readNumber(p);
   };
@@ -295,7 +321,7 @@ export function buildSnapshotPayload(args: {
 
   const kostraSnapshotResolution: KostraSnapshotResolution = (() => {
     if (!kostraField) return { status: 'none' };
-    const p = paramByFieldId.get(kostraField.id);
+    const p = paramForEngine(kostraField.id);
     if (!p || p.valueJson == null) return { status: 'none' };
     const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
     if (!selected) return { status: 'none' };
@@ -324,7 +350,7 @@ export function buildSnapshotPayload(args: {
   const floodSubAreasField = fieldList.find((f) => f.symbol === 'sub_areas_A138_26');
   const floodCarrier: FloodSubAreasCarrier | null = (() => {
     if (!floodSubAreasField) return null;
-    const p = paramByFieldId.get(floodSubAreasField.id);
+    const p = paramForEngine(floodSubAreasField.id);
     if (!p || p.valueJson == null) return { rows: [] };
     const raw = p.valueJson as { rows?: unknown };
     if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
@@ -340,7 +366,7 @@ export function buildSnapshotPayload(args: {
 
   const floodColResolution: FloodColSnapshotResolution = (() => {
     if (!kostraField) return { status: 'none' };
-    const p = paramByFieldId.get(kostraField.id);
+    const p = paramForEngine(kostraField.id);
     if (!p || p.valueJson == null) return { status: 'none' };
     const selected = resolveSelectedTable(normalizeRainfallCarrier(p.valueJson), rainfallTableRef);
     if (!selected) return { status: 'none' };
@@ -433,7 +459,7 @@ export function buildSnapshotPayload(args: {
 
     const evalInputs = neededSymbols.map((sym) => {
       const f = fieldBySymbol.get(aliasFor(sym));
-      const p = f ? paramByFieldId.get(f.id) : undefined;
+      const p = f ? paramForEngine(f.id) : undefined;
       const num = p ? readNumber(p) : null;
       return { symbol: sym, value: num, unit: f?.unit ?? null };
     });
@@ -550,13 +576,7 @@ export function buildSnapshotPayload(args: {
     return v.value as number | string | boolean | null;
   };
 
-  // Plan 2a (Task 10): visibility over the SAME lookup the conditions use.
-  // Only this worksheet's own fields take part — inherited rows (merged in by
-  // capture.ts, `inheritedFromWorksheet` set) are governed by their origin.
-  const ownFields = (fieldList as Array<FieldRow & { inheritedFromWorksheet?: string }>).filter(
-    (f) => !f.inheritedFromWorksheet,
-  );
-  const { hiddenSymbols } = computeVisibility(ownFields, args.sections ?? [], lookupForCompliance);
+  // (visibility — `hiddenSymbols` — is computed once above the equation loop.)
 
   const complianceResults: Record<string, SnapshotComplianceVerdict> = {};
   for (const req of crList) {

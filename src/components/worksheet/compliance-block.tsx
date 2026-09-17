@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { evaluateCondition, type EvalResult } from '@/lib/compliance/evaluate';
-import { makeSymbolLookup } from './symbol-lookup';
+import { makeSymbolLookup } from '@/lib/compliance/symbol-lookup';
 import { explainCondition } from '@/lib/compliance/explain';
 import { isAttestationCondition } from '@/lib/eval/attestation';
 import { addStandardByCodeToProject } from '@/lib/actions/project-standards';

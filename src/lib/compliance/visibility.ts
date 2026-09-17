@@ -71,7 +71,8 @@ export type Visibility = {
 
 /** DB rule wins; the legacy hardcoded rule fills in while the column is NULL. */
 export function effectiveVisibleWhen(f: { symbol: string; visibleWhen?: string | null }): string | null {
-  return f.visibleWhen ?? LEGACY_VISIBLE_WHEN[f.symbol] ?? null;
+  const own = f.visibleWhen?.trim() ? f.visibleWhen : null; // '' ⇒ null (fix round 1)
+  return own ?? LEGACY_VISIBLE_WHEN[f.symbol] ?? null;
 }
 
 export function computeVisibility(
@@ -109,4 +110,32 @@ export function computeVisibility(
     }
   }
   return { hiddenFieldIds, hiddenSectionIds, hiddenSymbols };
+}
+
+/**
+ * Wrap a value/json/carrier accessor so a hidden key resolves to `undefined`
+ * ("no value") — THE one place the "hidden ⇒ null for the engine" rule is
+ * implemented (fix round 1). Keys may be symbols (`hiddenSymbols`) or field
+ * ids (a set derived from them) depending on what the wrapped accessor takes;
+ * every equation path (client hook, report evaluator, snapshot, PDF
+ * assembler, save-path materialiser) routes its reads through this instead
+ * of re-implementing the check.
+ */
+export function withHidden<K extends string, T>(
+  lookup: (key: K) => T | undefined,
+  hidden: ReadonlySet<string> | undefined,
+): (key: K) => T | undefined {
+  if (!hidden || hidden.size === 0) return lookup;
+  return (key) => (hidden.has(key) ? undefined : lookup(key));
+}
+
+/** Field ids of the fields whose symbol is hidden (for accessors keyed by field id). */
+export function hiddenFieldIdsOf(
+  fields: ReadonlyArray<{ id: string; symbol: string }>,
+  hiddenSymbols: ReadonlySet<string> | undefined,
+): Set<string> {
+  const out = new Set<string>();
+  if (!hiddenSymbols || hiddenSymbols.size === 0) return out;
+  for (const f of fields) if (hiddenSymbols.has(f.symbol)) out.add(f.id);
+  return out;
 }

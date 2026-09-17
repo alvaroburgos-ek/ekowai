@@ -30,6 +30,7 @@ import type {
 import { buildRegisters } from './register-rows';
 import { makeTableLookup } from './regulation-tables-fallback';
 import type { Value } from '@/lib/expr';
+import { hiddenFieldIdsOf, withHidden } from '@/lib/compliance/visibility';
 import {
   normalizeRainfallCarrier,
   resolveSelectedTable,
@@ -172,16 +173,27 @@ export function useEquationEngine({
   // G-13: a register's derived column may reference a worksheet symbol
   // (`area_m2 * EZ`). Unknown names MUST resolve to `undefined` (never
   // null/'') so the var-vs-var comparison rule does not see a valued symbol.
+  // Plan 2a (Task 10, fix round 1): THE hidden-aware store accessor. Every
+  // engine-input read below — scalar inputs, register json source + scope,
+  // KOSTRA/flood carriers, rainfall ref, Gl.8/Gl.10 scalars, r_D_30 — goes
+  // through `storeValue`; a field whose symbol is in `hiddenSymbols` reads as
+  // "no value" (undefined) so nothing re-implements the rule. The write-back
+  // effect reads the raw store (it compares the CURRENT stored output).
+  const hiddenFieldIds = useMemo(() => hiddenFieldIdsOf(fields, hiddenSymbols), [fields, hiddenSymbols]);
+  const storeValue = useMemo(
+    () => withHidden((fieldId: string) => values[fieldId], hiddenFieldIds),
+    [values, hiddenFieldIds],
+  );
+
   const scalarBySymbol = useMemo(() => {
     return (sym: string): Value | undefined => {
-      if (hiddenSymbols?.has(sym)) return undefined; // Plan 2a: hidden ⇒ no value
       const f = fieldBySymbol.get(sym);
       if (!f) return undefined;
-      const v = values[f.id];
+      const v = storeValue(f.id);
       if (!v || v.type === 'json' || v.value === null || v.value === undefined) return undefined;
       return v.value;
     };
-  }, [fieldBySymbol, values, hiddenSymbols]);
+  }, [fieldBySymbol, storeValue]);
   // Shared builder (register-rows.ts buildRegisters); the client's only
   // specifics are the store as json source and the store-backed symbol scope.
   // TODO(Task 8): surface register.diagnostics — the client hook ignores it.
@@ -192,12 +204,12 @@ export function useEquationEngine({
         // type IS the data type (only json values reach the builder anyway).
         fields.map((f) => ({ id: f.id, symbol: f.symbol, dataType: f.dataType ?? 'json', widget: f.widget, uiConfig: f.uiConfig })),
         (fieldId) => {
-          const v = values[fieldId];
+          const v = storeValue(fieldId);
           return v?.type === 'json' ? v.value : undefined;
         },
         { standardCode, symbol: scalarBySymbol },
       ),
-    [fields, values, standardCode, scalarBySymbol],
+    [fields, storeValue, standardCode, scalarBySymbol],
   );
 
   // KOSTRA carrier (Gl. 8): the `r_D_n_table` field carries the rainfall
@@ -218,12 +230,12 @@ export function useEquationEngine({
   );
   const rainfallTableRef = useMemo<string | null>(() => {
     if (!rainfallRefField) return null;
-    const v = values[rainfallRefField.id];
+    const v = storeValue(rainfallRefField.id);
     if ((v?.type === 'text' || v?.type === 'enum') && typeof v.value === 'string' && v.value) {
       return v.value;
     }
     return null;
-  }, [values, rainfallRefField]);
+  }, [storeValue, rainfallRefField]);
   // Task 3: KOSTRA carrier resolution with per-facility T_n column selection.
   // Returns either a resolved KostraCarrier or a withhold cause so the basin
   // equation state can be set to manual_required without feeding the aggregator.
@@ -234,7 +246,7 @@ export function useEquationEngine({
 
   const kostraResolution = useMemo<KostraResolution>(() => {
     if (!kostraField) return { status: 'none' };
-    const v = values[kostraField.id];
+    const v = storeValue(kostraField.id);
     if (v?.type !== 'json') return { status: 'none' };
     const selected = resolveSelectedTable(
       normalizeRainfallCarrier(v.value),
@@ -250,7 +262,7 @@ export function useEquationEngine({
     const pickNumberBySymbol = (sym: string): number | null => {
       const f = fieldBySymbol.get(sym);
       if (!f) return null;
-      const v = values[f.id];
+      const v = storeValue(f.id);
       if (v?.type !== 'number') return null;
       const n = v.value;
       if (typeof n !== 'number' || !Number.isFinite(n)) return null;
@@ -272,7 +284,7 @@ export function useEquationEngine({
       status: col.status,
       carrier: { rows: col.rows },
     };
-  }, [values, kostraField, rainfallTableRef, worksheetCode, fieldBySymbol]);
+  }, [storeValue, kostraField, rainfallTableRef, worksheetCode, fieldBySymbol]);
 
   // Flat KostraCarrier for the aggregator (null when missing/none).
   const kostraCarrier = useMemo<KostraCarrier | null>(() => {
@@ -292,7 +304,7 @@ export function useEquationEngine({
     const pick = (sym: string): number | null => {
       const f = fieldBySymbol.get(sym);
       if (!f) return null;
-      const v = values[f.id];
+      const v = storeValue(f.id);
       if (v?.type !== 'number' || v.value == null || !Number.isFinite(v.value)) {
         return null;
       }
@@ -301,7 +313,7 @@ export function useEquationEngine({
     const pickBool = (sym: string): boolean | null => {
       const f = fieldBySymbol.get(sym);
       if (!f) return null;
-      const v = values[f.id];
+      const v = storeValue(f.id);
       if (v?.type !== 'boolean') return null;
       return v.value;
     };
@@ -315,7 +327,7 @@ export function useEquationEngine({
       V_Zisterne: pick('V_Zisterne'),
       zisterne_zwangsentleerung: pickBool('zisterne_zwangsentleerung'),
     };
-  }, [values, fieldBySymbol]);
+  }, [storeValue, fieldBySymbol]);
 
   // Flood-sub-area carrier (Gl. 10): the `sub_areas_A138_26` field on A138-26
   // holds the per-row flood-event sub-areas (strictly different from
@@ -326,12 +338,12 @@ export function useEquationEngine({
   );
   const floodCarrier = useMemo<FloodSubAreasCarrier | null>(() => {
     if (!floodCarrierField) return null;
-    const v = values[floodCarrierField.id];
+    const v = storeValue(floodCarrierField.id);
     if (v?.type !== 'json') return null;
     const raw = v.value as { rows?: unknown } | null | undefined;
     if (!raw || !Array.isArray(raw.rows)) return { rows: [] };
     return raw as FloodSubAreasCarrier;
-  }, [values, floodCarrierField]);
+  }, [storeValue, floodCarrierField]);
 
   // Gl. 10 scalars. Origin worksheets in production: A_VA← A138-10,
   // Q_S← A138-12, Q_Dr← A138-20, D← A138-04, V_VA← A138-13, r_D_T_n_Ue
@@ -340,7 +352,7 @@ export function useEquationEngine({
     const pick = (sym: string): number | null => {
       const f = fieldBySymbol.get(sym);
       if (!f) return null;
-      const v = values[f.id];
+      const v = storeValue(f.id);
       if (v?.type !== 'number' || v.value == null || !Number.isFinite(v.value)) {
         return null;
       }
@@ -354,7 +366,7 @@ export function useEquationEngine({
       V_VA: pick('V_VA'),
       r_D_T_n_Ue: pick('r_D_30'),
     };
-  }, [values, fieldBySymbol]);
+  }, [storeValue, fieldBySymbol]);
 
   // Unit on the r_D_30 field — feeds the Gl. 10 unit-guard.
   const r_D_30_field = useMemo(
@@ -376,7 +388,7 @@ export function useEquationEngine({
 
   const floodColResolution = useMemo<FloodColResolution>(() => {
     if (!kostraField) return { status: 'none' };
-    const v = values[kostraField.id];
+    const v = storeValue(kostraField.id);
     if (v?.type !== 'json') return { status: 'none' };
     const selected = resolveSelectedTable(
       normalizeRainfallCarrier(v.value),
@@ -397,7 +409,7 @@ export function useEquationEngine({
     // status === 'legacy' → serve the single-curve fallback path; the
     // aggregator will use typed r_D_T_n_Ue + D scalars (back-compat).
     return { status: 'legacy' };
-  }, [values, kostraField, rainfallTableRef]);
+  }, [storeValue, kostraField, rainfallTableRef]);
 
   const engineStates = useMemo<Record<string, EvalState>>(() => {
     const next: Record<string, EvalState> = {};
@@ -478,11 +490,10 @@ export function useEquationEngine({
 
       const evalInputs = neededSymbols.map((sym) => {
         const f = fieldBySymbol.get(aliasFor(sym));
-        // Plan 2a (Task 10): a symbol hidden by `visible_when` resolves to
-        // null — the evaluator then reports manual_required (missing input),
-        // never a number computed from a value the engineer cannot see.
-        const hidden = hiddenSymbols?.has(sym) || hiddenSymbols?.has(aliasFor(sym));
-        const v = f && !hidden ? values[f.id] : undefined;
+        // Plan 2a (Task 10): `storeValue` reads a hidden field as "no value" —
+        // the evaluator then reports manual_required (missing input), never a
+        // number computed from a value the engineer cannot see.
+        const v = f ? storeValue(f.id) : undefined;
         const num = v?.type === 'number' ? v.value : null;
         return { symbol: sym, value: num, unit: f?.unit ?? null };
       });
@@ -546,7 +557,7 @@ export function useEquationEngine({
     }
     return next;
   }, [
-    values,
+    storeValue,
     equations,
     fieldBySymbol,
     engineEquationIds,
@@ -561,7 +572,6 @@ export function useEquationEngine({
     r_D_30_field,
     floodColResolution,
     ambiguousSymbols,
-    hiddenSymbols,
   ]);
 
   // Write computed value back into the output field, clear it otherwise.

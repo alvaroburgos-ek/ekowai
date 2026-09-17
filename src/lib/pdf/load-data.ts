@@ -267,6 +267,12 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
         valueJson: p.valueJson,
       }));
 
+    // Plan 2a (Task 10): fields/sections hidden by visible_when under the saved
+    // values — computed ONCE per instance and fed to BOTH the equation path
+    // (hidden ⇒ no value ⇒ manual_required; fix round 1) and the compliance
+    // path (hidden ⇒ not_applicable). Same pure helper as the form/gate.
+    const { hiddenSymbols } = reportVisibility(tmplFields, sectionsByTemplateId.get(inst.templateId) ?? [], tmplParameters);
+
     const equationResults = evaluateWorksheetEquations(
       inst.code,
       tmplEquations.map((e) => ({
@@ -279,7 +285,7 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       })),
       tmplFields,
       tmplParameters,
-      { standardCode: inst.standardCode },
+      { standardCode: inst.standardCode, hiddenSymbols },
     );
 
     const complianceResults = evaluateWorksheetCompliance(
@@ -299,9 +305,7 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       tmplFields,
       tmplParameters,
       equationResults,
-      // Plan 2a (Task 10): a condition over a symbol hidden by visible_when
-      // (saved values) reports not_applicable — same helper as the form/gate.
-      { hiddenSymbols: reportVisibility(tmplFields, sectionsByTemplateId.get(inst.templateId) ?? [], tmplParameters).hiddenSymbols },
+      { hiddenSymbols },
     );
 
     return {
