@@ -19,15 +19,6 @@ import 'server-only';
  */
 
 import { db } from '@/lib/db';
-
-/** The minimal subset of the Drizzle db API the capture path uses. Wider
- * than `typeof db` so a transaction handle satisfies it (Drizzle's `tx`
- * type isn't assignable to `typeof db`, but it implements all the same
- * methods we touch — select / insert with chainable builders). */
-type DrizzleClient = {
-  select: typeof db.select;
-  insert: typeof db.insert;
-};
 import {
   fields,
   equations,
@@ -40,7 +31,10 @@ import {
   worksheetSections,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
-import { loadInheritedFields } from '@/lib/db/queries/worksheet';
+// `DrizzleClient`: the select/insert subset a transaction handle satisfies
+// (Drizzle's `tx` type isn't assignable to `typeof db`). Single definition,
+// shared with the query helper this module hands its client to.
+import { loadInheritedFields, type DrizzleClient } from '@/lib/db/queries/worksheet';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import {
   buildSnapshotPayload,
@@ -105,13 +99,14 @@ async function loadCaptureInputs(args: {
     .limit(1);
   if (!tplRow) return null;
 
-  // Task 10b: SEQUENTIAL, all on `dbi`. This runs inside the caller's
-  // transaction on submit/approve (`txDb: tx`), and a transaction handle is
-  // ONE connection — concurrent queries on it cannot interleave. The old
-  // `Promise.all` also called `loadInheritedFields` on the GLOBAL pool from
-  // inside the open tx; with a small pool the global query waited for the
-  // connection the tx held → every submit hung (prod, 2026-09-17). Four small
-  // queries in series cost nothing measurable.
+  // Task 10b: every load goes through `dbi` — the caller's transaction handle
+  // on submit/approve (`txDb: tx`), the global pool otherwise. The prod hang
+  // (2026-09-17, every "Zur Prüfung einreichen") came from MIXING clients:
+  // `loadInheritedFields` queried the GLOBAL pool from inside the open
+  // transaction, and with a small pool that query waited for the connection
+  // the tx itself held. Routing it through `dbi` is the fix; the loads are
+  // awaited in series simply to keep the tx path plain (one query at a time,
+  // nothing to reason about) — four small queries cost nothing measurable.
   const ownFields = await dbi
     .select()
     .from(fields)

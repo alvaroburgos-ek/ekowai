@@ -146,6 +146,28 @@ vi.mock('@/lib/db/queries/worksheet', () => ({
 
 import { captureSnapshot } from '../capture';
 
+/** The set of queries `captureSnapshot` issues on ONE client. Instance and
+ * template resolve first (everything else keys off them); the remaining
+ * loads + the insert are asserted as a set — their relative order is an
+ * implementation detail, not part of the contract. */
+function expectCaptureQueries(started: readonly string[], client: 'TX' | 'GLOBAL') {
+  expect(started.slice(0, 2)).toEqual([
+    `${client}:select:worksheet_instances`,
+    `${client}:select:worksheet_templates`,
+  ]);
+  expect(new Set(started.slice(2))).toEqual(
+    new Set([
+      `${client}:select:fields`,
+      `${client}:select:equations`,
+      `${client}:select:compliance_requirements`,
+      `${client}:select:worksheet_sections`,
+      `${client}:select:project_parameters`,
+      `${client}:insert:calculation_snapshots`,
+    ]),
+  );
+  expect(started).toHaveLength(8);
+}
+
 beforeEach(() => {
   loadInheritedFieldsMock.mockClear();
   globalDb.client.select.mockClear();
@@ -180,16 +202,7 @@ describe('captureSnapshot inside a transaction (txDb provided)', () => {
     expect(globalDb.started).toEqual([]);
 
     // (c) every load + the insert went through txDb.
-    expect(tx.started).toEqual([
-      'TX:select:worksheet_instances',
-      'TX:select:worksheet_templates',
-      'TX:select:fields',
-      'TX:select:equations',
-      'TX:select:compliance_requirements',
-      'TX:select:worksheet_sections',
-      'TX:select:project_parameters',
-      'TX:insert:calculation_snapshots',
-    ]);
+    expectCaptureQueries(tx.started, 'TX');
   });
 
   it('runs the loads sequentially on the transaction client (one query in flight at a time)', async () => {
@@ -220,15 +233,6 @@ describe('captureSnapshot without txDb (global db path)', () => {
     const call = loadInheritedFieldsMock.mock.calls[0] as unknown[];
     expect(call[3]).toBe(globalDb.client);
 
-    expect(globalDb.started).toEqual([
-      'GLOBAL:select:worksheet_instances',
-      'GLOBAL:select:worksheet_templates',
-      'GLOBAL:select:fields',
-      'GLOBAL:select:equations',
-      'GLOBAL:select:compliance_requirements',
-      'GLOBAL:select:worksheet_sections',
-      'GLOBAL:select:project_parameters',
-      'GLOBAL:insert:calculation_snapshots',
-    ]);
+    expectCaptureQueries(globalDb.started, 'GLOBAL');
   });
 });
