@@ -28,6 +28,7 @@ import { rewriteRules } from './rewrites';
 import { aggregators, type AggregatorContext } from './aggregators';
 import { equationProfiles } from './equation-profiles';
 import { normalizeFormula, normalizeSymbols } from './normalize-formula';
+import { triageParseFailure } from './parse-failure-triage';
 import {
   EXPR_FUNCTION_NAMES,
   isConditionNode,
@@ -48,6 +49,10 @@ const norm = (s: string): string => s.replace(/\s+/g, ' ').trim();
 const CLASSIC_MATH = new Set(['ln', 'log10', 'sqrt', 'exp', 'abs', 'min', 'max']);
 const CALL_NAMES = [...EXPR_FUNCTION_NAMES].filter((n) => !CLASSIC_MATH.has(n));
 const HAS_CALL = new RegExp(`\\b(?:${CALL_NAMES.join('|')})\\s*\\(`, 'i');
+
+/** Failure messages of the unified tokenizer / parser (src/lib/expr/tokens.ts, parser.ts). */
+const PARSE_FAILURE =
+  /^(?:Unerwartetes Zeichen|Unerwartetes Token am Ende|Ungültige Zahl|Nicht abgeschlossene Zeichenkette|Fehlende schließende Klammer|Ausdruck endet vorzeitig|Ausdruck erwartet|Ausdruck zu tief verschachtelt)/;
 
 export type EvalInputValue = {
   /** the symbol the formula is expecting (already remapped if a rewrite applies) */
@@ -311,8 +316,11 @@ export function evaluateFormula(req: EvalRequest): EvalState {
     //     stdev_rows() / Operand ist keine Zahl : Plan 2a row-function data
     //     conditions (empty register, null cell, no table row) — data, not
     //     a malformed formula
+    //   - Erwarte … Argument(e)                : a supported call with the wrong
+    //     arity — the legacy engine reported such calls as unsupported
+    //     (`Funktionsaufruf …`), i.e. manual_required, never a red pill
     if (
-      /Unbekanntes Symbol|Funktionsaufruf|Division durch Null|Nicht-endliches Ergebnis|Keine vollständigen Zeilen|Fehlende Eingabe|lookup\(\)|stdev_rows\(\)|Operand ist keine Zahl/.test(
+      /Unbekanntes Symbol|Funktionsaufruf|Division durch Null|Nicht-endliches Ergebnis|Keine vollständigen Zeilen|Fehlende Eingabe|lookup\(\)|stdev_rows\(\)|Operand ist keine Zahl|^Erwarte .*Argument\(e\)/.test(
         msg,
       )
     ) {
@@ -321,6 +329,19 @@ export function evaluateFormula(req: EvalRequest): EvalState {
         reason: msg,
         rewrite: rewrite ?? undefined,
       };
+    }
+    // A tokenizer/parser failure: the legacy engine failed EAGERLY (unsupported
+    // call / unknown symbol in left-to-right order, before later garbage), and
+    // those two conditions were manual_required. Replay that order so the
+    // classification of a malformed source formula does not depend on which
+    // grammar reports first (fix-wave item 2; DWA-M-816 ×19, DWA-A-272E RULE-11).
+    if (PARSE_FAILURE.test(msg)) {
+      const known = (sym: string): boolean =>
+        sym in scope || req.registers?.[sym] !== undefined || req.carriers?.[sym] !== undefined;
+      const triaged = triageParseFailure(expression, known);
+      if (triaged) {
+        return { kind: 'manual_required', reason: triaged.reason, rewrite: rewrite ?? undefined };
+      }
     }
     return { kind: 'error', message: msg };
   }
