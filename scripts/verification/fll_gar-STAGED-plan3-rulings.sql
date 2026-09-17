@@ -87,7 +87,7 @@
 -- -15 / -16 / -17 (rissklasse also by -12) → the guard refuses the field rules; abdichtungs_art is not in scope on -05 (C-1).
 -- Rules withheld (would be): wassereinwirkungsklasse / rissklasse / standortklasse ← abdichtungs_art IN {'bahn_bitumen', 'bahn_kunststoff_elastomer', 'fluessigkunststoff', 'bahn_pe'}
 -- Why staged: hiding a consumed producer nulls the inherited class on the sheet worksheets (their gates would report n.a.).
--- Nothing applied; the created codes w_klasse_code / r_klasse_code / s_klasse_code (20260917100710 / 20260917100720) carry no rule.
+-- Nothing applied; the created codes w_klasse_code / r_klasse_code (20260917100710 / 20260917100720) carry no rule (s_klasse_code was removed in fix round 1).
 
 -- =====================================================================================================================
 -- fll_gar-C-4 · FLL-GAR-09 anzahl_lagen ← abdichtungs_art == 'bahn_bitumen' (withheld; consumed by FLL-GAR-15) · REQ-17 onto abdichtungslagen_count

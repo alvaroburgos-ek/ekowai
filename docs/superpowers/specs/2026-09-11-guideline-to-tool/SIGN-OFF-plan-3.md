@@ -1433,7 +1433,7 @@ Report: `reports/plan-3-fll_gar.md` · STAGED SQL: `scripts/verification/fll_gar
 
 ### fll_gar-C-3 · FLL-GAR-2023 · FLL-GAR-05 · wassereinwirkungsklasse / rissklasse / standortklasse visible_when (withheld)
 - Class: consumer-edit
-- Chosen now (fail-safe): no rule on the three enums (consumed by -15 / -16 / -17; rissklasse also by -12 — guard refusals pinned); the created codes `w_klasse_code` / `r_klasse_code` / `s_klasse_code` carry no rule either (the driver is not in scope on -05, C-1).
+- Chosen now (fail-safe): no rule on the three enums (consumed by -15 / -16 / -17; rissklasse also by -12 — guard refusals pinned); the created codes `w_klasse_code` / `r_klasse_code` carry no rule either (`s_klasse_code` was removed in fix round 1) (the driver is not in scope on -05, C-1).
 - Evidence (verbatim, transcript line): "Für Abdichtungsbauweisen mit bahnenförmigen Abdichtungsstoffen aus Bitumen und Kunst- stoffen sowie Flüssigkunststoffen lassen sich die in Tabelle 18 dargestellten Einwirkungen und Standortbedingen differenzieren." (L3662–L3665); prod REQ-05 guards by `abdichtungs_art IN {bahn_bitumen,bahn_kunststoff_elastomer,fluessigkunststoff,bahn_pe}`.
 - Proposed SQL / config: STAGED block fll_gar-C-3 (the rule as it would be; apply after C-1 and the consumers' reading).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
