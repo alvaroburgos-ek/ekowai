@@ -25,7 +25,7 @@
  * S_TAB5_BEISPIEL are keyed by tokens of created register columns / literals
  * (their key vocabularies are printed in the table itself).
  *
- * Tab. 10 (L1210–L1329) is NOT seeded: it is the printed reproduction of
+ * Tab. 10 (L1210–L1330) is NOT seeded: it is the printed reproduction of
  * DWA-M-1200-1 Tab. 7 (L1208 "Die in Tabelle 10 genannten Anwendungsbereiche
  * entsprechen Tabelle 7 in Merkblatt DWA-M 12001:2025") and the class chain of
  * this standard reads `gueteklasse` directly — cross-standard reference
@@ -77,10 +77,14 @@ Wasserverbrauch total \\
 export const Q_T2_ROW = String.raw`\hline 17.06.2023 06:00 & 20.06.2023 06:00 & 20 & 15 & 20 & 300 & 300 & - \\`;
 /** L614 */
 export const Q_L614 = String.raw`Es wird empfohlen, vor der Inbetriebnahme die Ausgangsbelastung der Böden zu dokumentieren. Die Vorsorgewerte der Anlage 1 Tabelle 1 BBodSchV sind aus Gründen des vorsorgenden Bodenschutzes zu beachten. Jährliche Frachten aus dem Bewässerungswasser sollten $1 / 3$ der zulässigen Frachten nach Anlage 1 Tabelle 3 BBodSchV nicht überschreiten (LAWA 2022).`;
-/** L637 */
-export const Q_L637 = String.raw`\section*{I offene ortsfeste Speicher}`;
-/** L641 */
-export const Q_L641 = String.raw`I geschlossene ortsfeste Speicher`;
+/** L637–L639 */
+export const Q_L637_639 = String.raw`\section*{I offene ortsfeste Speicher}
+- kurz- bis mittelfristige Speicherung:
+- langfristige Speicherung:`;
+/** L641–L643 */
+export const Q_L641_643 = String.raw`I geschlossene ortsfeste Speicher
+- kurz- bis mittelfristige Speicherung:
+- langfristige Speicherung:`;
 /** L651 */
 export const Q_L651 = String.raw`I Transportbehälter: dienen dem Transport, falls ein Transport durch Druckleitungen oder Gerinnen zum Ort der Aufbringung nicht möglich ist. Die Speicherung von aufbereitetem Wasser in Transportbehältern sollte ausschließlich dem Transport dienen und ist daher kurzfristig.`;
 /** L655 */
@@ -345,6 +349,14 @@ export function deNum(s: string): number {
   if (!Number.isFinite(n)) throw new Error(`not a printed number: ${s}`);
   return n;
 }
+/**
+ * A printed mathpix cell → plain text for display (review fix round 1): `$…$` delimiters dropped, `\mathrm{x}` → x,
+ * `~` (LaTeX thin space) dropped, `^{3}` → ³, spaces around `/` collapsed, whitespace normalised. Mechanical and
+ * lossless for the Tab.-14 cells; the raw printed cell stays beside it (`konz_gedruckt`) and in the row quote.
+ */
+export function deLatex(s: string): string {
+  return s.replace(/\$/g, '').replace(/\\mathrm\{([^}]*)\}/g, '$1').replace(/~/g, '').replace(/\^\{3\}/g, '³').replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ').trim();
+}
 /** The `N` of a printed "N-fache Wurfweite" cell; an empty printed cell → null (never inferred). */
 export function fache(cell: string): number | null {
   if (cell === '') return null;
@@ -404,22 +416,26 @@ export function tab3AsTable(): RegulationTable {
 }
 
 // ---------------------------------------------------------------------------
-// TAB3_MAP — §5.1.1 (L637 / L641 / L651): the five prod `speichertyp` tokens → the printed storage-system heading
-// they name (offene ortsfeste Speicher / geschlossene ortsfeste Speicher / Transportbehälter) = the Tab. 3 row key.
+// TAB3_MAP — §5.1.1 (L637–L639 / L641–L643 / L651): the five prod `speichertyp` tokens → the printed storage-system
+// heading they name (offene ortsfeste Speicher / geschlossene ortsfeste Speicher / Transportbehälter) = the Tab. 3 row
+// key; the kurz/lang halves carry the printed sub-lines "kurz- bis mittelfristige Speicherung" / "langfristige
+// Speicherung" (L638 / L639, L642 / L643) — every label fragment is cut from the row's own span (review fix round 1).
 // This is the CR-06 fix (m1200_3-G-1): prod compares `speichertyp` with 'geschlossen' / 'offen', which are not enum
 // values. Policy `locked` (definitional mapping — no engineering choice).
 // ---------------------------------------------------------------------------
 export function tab3MapAsTable(): RegulationTable {
   type R = { token: (typeof SPEICHERTYP_TOKENS)[number]; system: (typeof SPEICHERSYSTEM_TOKENS)[number]; label: string; quote: string };
-  const OFFEN = frag(Q_L637, 'I offene ortsfeste Speicher', '}');
-  const GESCHL = frag(Q_L641, 'I geschlossene ortsfeste Speicher');
+  const OFFEN = frag(Q_L637_639, 'I offene ortsfeste Speicher', '}');
+  const GESCHL = frag(Q_L641_643, 'I geschlossene ortsfeste Speicher', '\n');
+  const KURZ = (span: string) => frag(span, 'kurz- bis mittelfristige Speicherung', ':');
+  const LANG = (span: string) => frag(span, 'langfristige Speicherung', ':');
   const TRANSPORT = frag(Q_L651, 'I Transportbehälter', ':');
   const R: R[] = [
-    { token: 'offen_ortsfest_kurz',       system: 'offen',       label: `${OFFEN} — kurz- bis mittelfristige Speicherung`,       quote: Q_L637 },
-    { token: 'offen_ortsfest_lang',       system: 'offen',       label: `${OFFEN} — langfristige Speicherung`,                   quote: Q_L637 },
-    { token: 'geschlossen_ortsfest_kurz', system: 'geschlossen', label: `${GESCHL} — kurz- bis mittelfristige Speicherung`,      quote: Q_L641 },
-    { token: 'geschlossen_ortsfest_lang', system: 'geschlossen', label: `${GESCHL} — langfristige Speicherung`,                  quote: Q_L641 },
-    { token: 'transportbehaelter',        system: 'transport',   label: TRANSPORT,                                              quote: Q_L651 },
+    { token: 'offen_ortsfest_kurz',       system: 'offen',       label: `${OFFEN} — ${KURZ(Q_L637_639)}`,   quote: Q_L637_639 },
+    { token: 'offen_ortsfest_lang',       system: 'offen',       label: `${OFFEN} — ${LANG(Q_L637_639)}`,   quote: Q_L637_639 },
+    { token: 'geschlossen_ortsfest_kurz', system: 'geschlossen', label: `${GESCHL} — ${KURZ(Q_L641_643)}`,  quote: Q_L641_643 },
+    { token: 'geschlossen_ortsfest_lang', system: 'geschlossen', label: `${GESCHL} — ${LANG(Q_L641_643)}`,  quote: Q_L641_643 },
+    { token: 'transportbehaelter',        system: 'transport',   label: TRANSPORT,                          quote: Q_L651 },
   ];
   const rows: RegulationRow[] = R.map((r, i) => ({
     row_key: r.token, keys: { speichertyp: r.token }, group_label: null, label_de: r.label, order_index: i,
@@ -630,7 +646,7 @@ export function tab13AsTable(): RegulationTable {
 // ---------------------------------------------------------------------------
 // TAB14 — §7.3.2 Tab. 14 (L1738–L1745): shock-dose disinfection of drip / micro-sprinkler systems, keyed on the two
 // prod `desinfektion_methode` tokens the table prints (chlorung, h2o2). `konzentration` 30 mg/l / 0,1 ml/l (the H2O2
-// cell also prints "bzw. 1 l pro 10 m³" — kept in `konz_text`); "12 h bis 24 h" → min 12 / max 24 (SR-2: the point
+// cell also prints "bzw. 1 l pro 10 m³" — kept in `konz_text` as de-LaTeXed display text, the raw printed cell in `konz_gedruckt`); "12 h bis 24 h" → min 12 / max 24 (SR-2: the point
 // value inside the range is the engineer's — the register keeps the actual Verweilzeit as an input). Policy
 // `anhaltswert`: "Empfohlene Konzentration gemäß ISO 16075-3:2021" (L1740 column head) — caption L1738.
 // ---------------------------------------------------------------------------
@@ -646,13 +662,13 @@ export function tab14AsTable(): RegulationTable {
     if (!m) throw new Error(`Tab. 14 Verweilzeit cell: ${verweil}`);
     return {
       row_key: r.tok, keys: { methode: r.tok }, group_label: null, label_de: label, order_index: i,
-      values: { konzentration: r.konz, konz_unit: r.unit, konz_text: konzText, verweilzeit_min_h: Number(m[1]), verweilzeit_max_h: Number(m[2]), verweilzeit_text: verweil },
+      values: { konzentration: r.konz, konz_unit: r.unit, konz_text: deLatex(konzText), konz_gedruckt: konzText, verweilzeit_min_h: Number(m[1]), verweilzeit_max_h: Number(m[2]), verweilzeit_text: verweil },
       verbatim_quote: r.quote,
     };
   });
   return { standard_code: STD, edition: ED, table_code: 'TAB14', title_de: 'Empfohlene Desinfektionsmaßnahmen von Tropf-/Mikrosprühsystemen als Stoßapplikation (Tab. 14)', clause_reference: '§7.3.2, Tab. 14', page_ref: null,
     key_columns: ['methode'],
-    value_columns: [{ name: 'konzentration', type: 'number' }, { name: 'konz_unit', type: 'string' }, { name: 'konz_text', type: 'string' }, { name: 'verweilzeit_min_h', type: 'number', unit: 'h' }, { name: 'verweilzeit_max_h', type: 'number', unit: 'h' }, { name: 'verweilzeit_text', type: 'string' }],
+    value_columns: [{ name: 'konzentration', type: 'number' }, { name: 'konz_unit', type: 'string' }, { name: 'konz_text', type: 'string' }, { name: 'konz_gedruckt', type: 'string' }, { name: 'verweilzeit_min_h', type: 'number', unit: 'h' }, { name: 'verweilzeit_max_h', type: 'number', unit: 'h' }, { name: 'verweilzeit_text', type: 'string' }],
     override_policy: 'anhaltswert', override_quote: `${frag(Q_L1738, 'Empfohlene Desinfektionsmaßnahmen', '}')} — ${Q_L1726}`, // L1738 — L1726
     verification_status: 'md_verified', rows };
 }

@@ -10,7 +10,8 @@
  * NN-A NN-B NN-C NN-D NN-F NN-J NN-K NN-L NN-M (inputs in B, outputs in D; 104
  * of 208 fields are orphans — the whole M12003-05 mirror worksheet and most of
  * -04 / -06 / -07); 10 equation rows (5 helpers, each duplicated on -05 and its
- * topical worksheet); 32 compliance rows (6 exact `CR-xx-2` duplicates). Enum
+ * topical worksheet); 32 compliance rows (8 `-2` rows: 5 exact twins, the CR-09-2
+ * variant, CR-17-2 / -18-2 as the only live versions of their code). Enum
  * tokens below are the captured prod `enum_values` (G-A3: table key strings
  * equal them exactly).
  *

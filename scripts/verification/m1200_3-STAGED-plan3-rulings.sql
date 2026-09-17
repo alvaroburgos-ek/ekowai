@@ -8,9 +8,10 @@
 --
 -- Conventions: `s.code = 'DWA-M-1200-3'`, worksheets by code, never by id (gates / equations by their captured uuid +
 -- a guard on the value they replace so a re-run is a no-op); each block names its rollback. A staged DELETE first
--- copies the full rows into an archive table created in the same transaction (`… _archive_m1200_3`) — the rollback
--- re-inserts them from there (full-row by construction; prod-query.mjs truncates cells, so the rows are NOT retyped
--- here). The Plan-3 DATA migrations (20260917100600 seed · 20260917100610 field configs · 20260917100620 equations)
+-- copies the full rows into an archive table created in the same transaction (`… _archive_m1200_3`), guards the DELETE
+-- on md5(<content column>) read from prod, and the rollback re-inserts them from the archive with an EXPLICIT column list
+-- (full-row by construction; prod-query.mjs truncates cells, so the rows are NOT retyped here); the archive table is
+-- dropped by the rollback or on the owner's sign-off that the deletion is final. The Plan-3 DATA migrations (20260917100600 seed · 20260917100610 field configs · 20260917100620 equations)
 -- must be applied BEFORE any block that reads a created symbol (schlaege, flaeche_gesamt_ha, abstand_verletzungen,
 -- cl_limit, haerte_limit, lf_limit, wasseranalysen, analysen_verletzungen, speicher_1200_3, speichervolumen_ist_m3,
 -- bewaesserungshoehe_tab5, speichervolumen_calc, druckleitungen, energie_kwh_a, leitungskosten_eur, farbcode_hex_tab4,
@@ -215,26 +216,42 @@
 -- worksheet_template_id (M12003-05) and the 281-char condition text quoted above. CR-05-2 → G-6.
 
 -- =====================================================================================================================
--- m1200_3-G-6 · the exact `CR-xx-2` twins on M12003-05 / -07 (5 exact + 1 variant)
+-- m1200_3-G-6 · the `CR-xx-2` rows on M12003-05 / -07 (8 rows: 5 exact twins, the CR-09-2 variant, CR-17-2 / CR-18-2 as the only live versions of their code)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence (capture, 32 rows): exact twins (same worksheet, same condition) — CR-05 / CR-05-2 (1fbc0209-8311-4842-b690-
--- 58fd51f2ce6e), CR-06 / CR-06-2 (568ce4fa-f8e1-444a-940e-9de7c2cead37), CR-07 / CR-07-2 (ab5f62a2-fc3a-45d4-8ba7-
--- 05ac967872aa), CR-08 / CR-08-2 (20935a0a-ac2e-4916-8526-bb6ad06eb3fb), CR-16 / CR-16-2 on -07 (d136638a-59ee-4725-a2f6-
--- fec9e418f9ef). Variant: CR-09-2 (c9caaf89-aef1-408c-acdd-acf43bbb5516) lacks the Spritzschutz leg of CR-09 — stricter;
--- the owner picks which survives (G-3 rewrites CR-09). The brief's "20 duplicate rows" is not what prod holds: the other
--- same-code pairs (CR-10 -06/-19, CR-11 / CR-12 -01/-07, CR-13 -01/-08, CR-14 / CR-15 -05/-08, CR-17 / -17-2, CR-18 / -18-2)
--- differ in condition or attestation symbol and are NOT twins.
--- Option (deactivation = DELETE; compliance_requirements has no `active` column — archive first, full-row rollback):
+-- Evidence (capture, 32 rows; md5 of `condition` read read-only 2026-09-17): exact twins (same worksheet, same condition
+-- as their base row) — CR-05-2 (1fbc0209-8311-4842-b690-58fd51f2ce6e, md5 22b449b25a43b2b23a14e3e9258f4c94), CR-06-2
+-- (568ce4fa-f8e1-444a-940e-9de7c2cead37, 192fcb7b0b6a93dd806b95ed536cdb60), CR-07-2 (ab5f62a2-fc3a-45d4-8ba7-05ac967872aa,
+-- eae85c128b20409c064893502c0316b6), CR-08-2 (20935a0a-ac2e-4916-8526-bb6ad06eb3fb, 9c0b88eeb1ae154c4ea7523005d62a72),
+-- CR-16-2 on -07 (d136638a-59ee-4725-a2f6-fec9e418f9ef, ebc81d3c75b89783a08777d16d5e1f89). Variant: CR-09-2
+-- (c9caaf89-aef1-408c-acdd-acf43bbb5516, md5 97f587139711bc761190e9d74948e181) lacks the Spritzschutz leg of CR-09 —
+-- stricter; the owner picks which survives (G-3 rewrites CR-09). NOT twins: CR-17-2 (6a51cf59-…, block) and CR-18-2
+-- (a7afb5c2-…, block) are the only LIVE versions of their code — CR-17 (3cce7990-…) and CR-18 (cf36c096-…) carry an EMPTY
+-- condition (md5 d41d8cd98f00b204e9800998ecf8427e) and never fire. The brief's "20 duplicate rows" is not what prod holds:
+-- the other same-code pairs (CR-10 -06/-19, CR-11 / CR-12 -01/-07, CR-13 -01/-08, CR-14 / CR-15 -05/-08) differ in condition
+-- or attestation symbol. The delete set is the 5 exact twins only.
+-- Option (deactivation = DELETE; compliance_requirements has no `active` column — archive in the same transaction, content
+-- guard on md5(condition), explicit column list on re-insert; the archive table is dropped by the rollback OR on the owner's
+-- sign-off that the deletion is final):
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_3 AS SELECT * FROM compliance_requirements WHERE false;
--- INSERT INTO compliance_requirements_archive_m1200_3 SELECT * FROM compliance_requirements WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef');
--- DELETE FROM compliance_requirements WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef');
+-- INSERT INTO compliance_requirements_archive_m1200_3 SELECT * FROM compliance_requirements
+--  WHERE (id = '1fbc0209-8311-4842-b690-58fd51f2ce6e' AND md5(condition) = '22b449b25a43b2b23a14e3e9258f4c94')
+--     OR (id = '568ce4fa-f8e1-444a-940e-9de7c2cead37' AND md5(condition) = '192fcb7b0b6a93dd806b95ed536cdb60')
+--     OR (id = 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa' AND md5(condition) = 'eae85c128b20409c064893502c0316b6')
+--     OR (id = '20935a0a-ac2e-4916-8526-bb6ad06eb3fb' AND md5(condition) = '9c0b88eeb1ae154c4ea7523005d62a72')
+--     OR (id = 'd136638a-59ee-4725-a2f6-fec9e418f9ef' AND md5(condition) = 'ebc81d3c75b89783a08777d16d5e1f89');
+-- DELETE FROM compliance_requirements c USING compliance_requirements_archive_m1200_3 a WHERE c.id = a.id AND md5(c.condition) = md5(a.condition);
 -- COMMIT;
--- Rollback (full rows, never retyped):
+-- Rollback (full rows from the archive, explicit column list, never retyped):
 -- BEGIN;
--- INSERT INTO compliance_requirements SELECT * FROM compliance_requirements_archive_m1200_3 WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef') ON CONFLICT (id) DO NOTHING;
+-- INSERT INTO compliance_requirements (id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation)
+-- SELECT id, worksheet_template_id, code, title_de, title_en, condition, clause_reference, severity, description, suggestion, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, requires_attestation
+--   FROM compliance_requirements_archive_m1200_3
+--  WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef')
+--  ON CONFLICT (id) DO NOTHING;
 -- DROP TABLE compliance_requirements_archive_m1200_3;
 -- COMMIT;
+-- The archive table `compliance_requirements_archive_m1200_3` is dropped by this rollback, or by the owner once the deletion is signed off as final.
 
 -- =====================================================================================================================
 -- m1200_3-R-1 · Gl-Helper-1 (M12003-10, id 29cc62b2-bc11-43e1-a1c4-1a138c7e8374) — Σ Schlagfläche instead of the scalar flaeche_groesse
@@ -254,21 +271,35 @@
 -- =====================================================================================================================
 -- m1200_3-R-2 · the five duplicate helper rows on the mirror worksheet M12003-05 (Gl-Helper-1 … -5)
 -- ☐ RATIFIED ☐ REJECTED ☐ DEFER
--- Evidence (capture, 10 equation rows): M12003-05 carries Gl-Helper-1 (aea87475-a0d6-4b07-938e-4fcbe6eeb15c),
--- Gl-Helper-2 (aec0e88e-8cdd-483b-98ae-601aae5257d2), Gl-Helper-3 (6648bd89-9395-4904-b765-82f77808b7c5), Gl-Helper-4
--- (e2f4b9d1-a670-4785-b3ee-7e4299353d9f), Gl-Helper-5 (4c1690d7-aa5b-461b-ab2e-45d32b7190ea) — byte-identical formulas to
--- the rows on -10 / -17 / -13 (every -05 field is an orphan mirror of its topical worksheet; inventory §5 win 3). Single-
--- source: one registered equation per quantity. `equations` has no `active` column → DELETE with archive (full-row rollback).
+-- Evidence (capture, 10 equation rows; md5 of `formula` read read-only 2026-09-17): M12003-05 carries Gl-Helper-1
+-- (aea87475-a0d6-4b07-938e-4fcbe6eeb15c, md5 c475d6b63cb85d5cb2304c4bd017988a), Gl-Helper-2 (aec0e88e-8cdd-483b-98ae-
+-- 601aae5257d2, 06812aa3ed67821938f3b2e2ba19b7af), Gl-Helper-3 (6648bd89-9395-4904-b765-82f77808b7c5,
+-- 6b1e3ea1902c7511c81e2f1aaa8727f1), Gl-Helper-4 (e2f4b9d1-a670-4785-b3ee-7e4299353d9f, e9a3a7e3bd6e9ff3829a831ee9459573),
+-- Gl-Helper-5 (4c1690d7-aa5b-461b-ab2e-45d32b7190ea, 0d6f0ef07f4c90caf13a1d566ff82ef3) — byte-identical formulas to the rows
+-- on -10 / -17 / -13 (every -05 field is an orphan mirror of its topical worksheet; inventory §5 win 3). Single-source: one
+-- registered equation per quantity. `equations` has no `active` column → DELETE with archive in the same transaction,
+-- content guard on md5(formula), explicit column list on re-insert; the archive table is dropped by the rollback OR on the
+-- owner's sign-off that the deletion is final.
 -- BEGIN;
 -- CREATE TABLE IF NOT EXISTS equations_archive_m1200_3 AS SELECT * FROM equations WHERE false;
--- INSERT INTO equations_archive_m1200_3 SELECT * FROM equations WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea');
--- DELETE FROM equations WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea');
+-- INSERT INTO equations_archive_m1200_3 SELECT * FROM equations
+--  WHERE (id = 'aea87475-a0d6-4b07-938e-4fcbe6eeb15c' AND md5(formula) = 'c475d6b63cb85d5cb2304c4bd017988a')
+--     OR (id = 'aec0e88e-8cdd-483b-98ae-601aae5257d2' AND md5(formula) = '06812aa3ed67821938f3b2e2ba19b7af')
+--     OR (id = '6648bd89-9395-4904-b765-82f77808b7c5' AND md5(formula) = '6b1e3ea1902c7511c81e2f1aaa8727f1')
+--     OR (id = 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f' AND md5(formula) = 'e9a3a7e3bd6e9ff3829a831ee9459573')
+--     OR (id = '4c1690d7-aa5b-461b-ab2e-45d32b7190ea' AND md5(formula) = '0d6f0ef07f4c90caf13a1d566ff82ef3');
+-- DELETE FROM equations e USING equations_archive_m1200_3 a WHERE e.id = a.id AND md5(e.formula) = md5(a.formula);
 -- COMMIT;
--- Rollback (full rows, never retyped):
+-- Rollback (full rows from the archive, explicit column list, never retyped):
 -- BEGIN;
--- INSERT INTO equations SELECT * FROM equations_archive_m1200_3 WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea') ON CONFLICT (id) DO NOTHING;
+-- INSERT INTO equations (id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote)
+-- SELECT id, worksheet_template_id, equation_number, formula, formula_latex, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, audit_status, source_file, source_anchor, source_quote, audit_notes, audited_at, audited_by, verified_by_user_id, verified_at, verification_note, verification_quote
+--   FROM equations_archive_m1200_3
+--  WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea')
+--  ON CONFLICT (id) DO NOTHING;
 -- DROP TABLE equations_archive_m1200_3;
 -- COMMIT;
+-- The archive table `equations_archive_m1200_3` is dropped by this rollback, or by the owner once the deletion is signed off as final.
 -- Captured row heads (read-only 2026-09-17; long text columns NOT retyped — the archive carries them): every row
 -- verification_status verified_against_standard · audit_status ai_audit_passed · source_file DWA-M-1200-3.md ·
 -- audited_by pass4-adversarial-audit · verified_at 2026-09-07T13:44:08.960Z; clause_reference '§5.2.1 / Tab. 5' (1–3),
@@ -362,7 +393,8 @@
 -- & \\" — no multirow, no text (Tab. 7 L929 and Tab. 9 L1047 print "\multirow{2}{*}{ 1-fache Wurfweite }" spanning the D
 -- row). The inventory's "(1-fache)" is not in the transcript. Seeded null (faktor) with the hint "Zelle leer gedruckt";
 -- a Schlag row on Tab. 8 / class D / mit Spritzschutz is undecidable (M12003-06-D2 → manual_required, never a silent
--- count). Table stays imported_unverified. A PDF look (p. 30) settles whether the cell is a missed multirow (then 1).
+-- count). Table stays imported_unverified. A PDF look (p. 30, SR-3) decides the cell; the proposal leaves the value blank:
+-- UPDATE regulation_table_rows … SET row_values = jsonb_set(row_values, '{faktor}', '<value read from the PDF>') WHERE row_key = 't8|d|mit' …
 
 -- =====================================================================================================================
 -- m1200_3-U-2 · TAB13 · the Ultrafiltration / UV-Bestrahlung cells for Befüllung / Speicherung print OCR variants of "x⁴⁾"

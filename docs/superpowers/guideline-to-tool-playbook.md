@@ -444,6 +444,18 @@ per worksheet; keep the Plan-1 column KEYS so stored rows survive the upgrade, a
 (7) An inventory's parenthesised cell ("(1-fache)") or gate claim ("CR-05 lists both") is a pointer — re-read the transcript
 line and the capture before encoding; both were refuted here.
 
+**Staged DELETE rollbacks (controller ruling, Plan 3 Task 6 fix round 1 — corpus-wide).** A STAGED block that deletes rows
+from a table without an `active` column (`equations`, `compliance_requirements`) (1) copies the full rows into an archive table
+created in the SAME transaction (`CREATE TABLE IF NOT EXISTS <table>_archive_<slug> AS SELECT * FROM <table> WHERE false;
+INSERT INTO <table>_archive_<slug> SELECT * FROM <table> WHERE (id = '<uuid>' AND md5(<content column>) = '<md5>') OR …`),
+(2) guards every DELETE on the content it replaces — `md5(formula)` for equations, `md5(condition)` for compliance rows —
+with the md5 read read-only from prod (`SELECT id, md5(formula) …`; never print the long cells themselves), (3) re-inserts on
+rollback from the archive with an EXPLICIT column list (never `INSERT … SELECT *`), and (4) states that the archive table is
+dropped by the rollback (include the `DROP TABLE` in the rollback block) or on the owner's sign-off that the deletion is final.
+Rationale: `prod-query.mjs` truncates cells at 120 chars, so a hand-typed INSERT rollback of a 450-char `verification_quote` is
+lossy; the archive is full-row by construction. m277e's retyped INSERT rollbacks remain acceptable where they are column-exact.
+Pattern: `scripts/verification/m1200_3-STAGED-plan3-rulings.sql` blocks R-2 / G-6.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still

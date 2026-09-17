@@ -1297,7 +1297,7 @@ Report: `reports/plan-3-m1200_3.md` · STAGED SQL: `scripts/verification/m1200_3
 ### m1200_3-G-6 · DWA-M-1200-3 · the exact `CR-xx-2` twins (CR-05-2, CR-06-2, CR-07-2, CR-08-2, CR-16-2) + the CR-09-2 variant
 - Class: deactivation
 - Chosen now (fail-safe): nothing deleted.
-- Evidence (capture): five rows byte-identical in worksheet + condition to their base row (ids in the STAGED block); CR-09-2 (c9caaf89-…) lacks the Spritzschutz leg of CR-09 (stricter). The brief's "20 duplicate rows" is refuted — prod holds 32 rows, 6 `-2` rows; the other same-code pairs differ.
+- Evidence (capture, md5 of `condition` read read-only): prod holds 32 rows and 8 `-2` rows — 5 exact twins (CR-05-2, -06-2, -07-2, -08-2, -16-2; byte-identical in worksheet + condition to their base row, ids + md5 in the STAGED block — the delete set), CR-09-2 (c9caaf89-…) a stricter variant of CR-09 (lacks the Spritzschutz leg; the owner picks), CR-17-2 / CR-18-2 the only live versions of their code (CR-17 / CR-18 carry an EMPTY condition). The brief's "20 duplicate rows" is refuted; the other same-code pairs differ.
 - Proposed SQL / config: STAGED block m1200_3-G-6 (archive + DELETE, full-row rollback from the archive).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -1375,7 +1375,7 @@ Report: `reports/plan-3-m1200_3.md` · STAGED SQL: `scripts/verification/m1200_3
 - Class: unreadable-cell
 - Chosen now (fail-safe): `faktor` null with the hint "Zelle leer gedruckt"; a Schlag on Tab. 8 / class D / mit Spritzschutz makes M12003-06-D2 `manual_required`; TAB789 stays `imported_unverified`.
 - Evidence (verbatim, transcript line): "\hline A bis C & 1-fache Wurfweite & 1-fache Wurfweite \\" (L944); "\hline D & 3-fache Wurfweite & \\" (L945) — no `\multirow` (Tab. 7 L929 / Tab. 9 L1047 print "\multirow{2}{*}{ 1-fache Wurfweite }").
-- Proposed SQL / config: after the owner's PDF look (SR-3, p. 30): the D/mit row `faktor = 1` + `verification_status = 'md_verified'` for TAB789.
+- Proposed SQL / config: after the owner's PDF look (SR-3, p. 30): the D/mit row `faktor = <value read from the PDF>` (left blank here — the PDF decides) + `verification_status = 'md_verified'` for TAB789.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m1200_3-U-2 · DWA-M-1200-3 · TAB13 · Ultrafiltration / UV-Bestrahlung Befüllung / Speicherung cells print OCR variants of "x⁴⁾"
@@ -1401,7 +1401,7 @@ Report: `reports/plan-3-m1200_3.md` · STAGED SQL: `scripts/verification/m1200_3
 
 ### Observations (Task 6, no signature needed)
 
-- **Prod holds 32 compliance rows** (the brief said 39) and **6 `CR-xx-2` rows** (the brief said 20 duplicates); CR-05 / -06 / -07 / -08 / -09 / -17 / -18 all live on the mirror worksheet **M12003-05**, whose 58 fields are orphans — the Abstand gate (CR-09) is therefore not on M12003-13 and the storage gate (CR-06) not on -10.
+- **Prod holds 32 compliance rows** (the brief said 39) and **8 `-2` rows** (the brief said 20 duplicates): 5 exact twins (deleted in G-6), CR-09-2 a stricter variant, CR-17-2 / -18-2 the only live versions of their code; CR-05 / -06 / -07 / -08 / -09 / -17 / -18 all live on the mirror worksheet **M12003-05**, whose 58 fields are orphans — the Abstand gate (CR-09) is therefore not on M12003-13 and the storage gate (CR-06) not on -10.
 - **The inventory's "(1-fache)" for Tab. 8 D/mit is not in the transcript** (the cell is empty, U-1) and its "CR-05 lists both" is refuted (CR-05 lists neither Chlorid nor Wasserhärte nor Leitfähigkeit).
 - **§7.3.2 prints the 120-µm Kontrollfilter for class A AND for B-1 … C-2** (L1712 / L1720) — the brief's A-only rule was dropped (J-4).
 - **`bewaesserungstagebuch` exists on TWO worksheets** (-18 in 18-B, -04 as an orphan); the Plan-1 migration `20260911120000_selection_configs_DWA_M_1200_3.sql` writes both rows (no `w.code` filter), so both are UPDATEd here; the equation lives on -18.
@@ -1410,4 +1410,5 @@ Report: `reports/plan-3-m1200_3.md` · STAGED SQL: `scripts/verification/m1200_3
 - **Boolean cells coerce to `false` when unset** (`raw === true`), so `steuerbarer_zugang == true` is decidable on rows where the cell is hidden; `null >= 72` is `pending` (visible) — the 72-h booleans show until a Verweilzeit is typed.
 - **Edition token `'2025-07'`** is printed on the title page ("Juli 2025", L7, under "Entwurf" L10) and prod `standards.version` reads "Gelbdruck (Entwurf), Juli 2025" — no I-block needed.
 - **Scalar-only equations are not server-materialised** (2a design) — M12003-10-D1 / -D2 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
+- **`schlaege.pflanzentyp` (a row column) and the inherited scalar `pflanzentyp` (M12003-05, drives the Tab.-11 switch on -08) are two independent sources for the same fact** — the register row says what the Schlag grows, the scalar what the Tab.-11 fills and `wasseranalysen.limit` read; no rule ties them (a mismatch is invisible today). Owner option: drop the row column or derive the scalar from the rows (a second Phase-6 mirror item).
 - **Staged DELETEs use an archive table created in the same transaction** (`compliance_requirements_archive_m1200_3`, `equations_archive_m1200_3`) so the rollback re-inserts FULL rows without retyping cells that `prod-query.mjs` truncates (verification_quote up to 453 chars).

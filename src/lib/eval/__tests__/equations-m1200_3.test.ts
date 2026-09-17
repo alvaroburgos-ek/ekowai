@@ -161,9 +161,9 @@ describe('DWA-M-1200-3 Plan-3 equations', () => {
       { id: '5', date: '2026-04-01', methode: 'thermisch', temp_c: 65, dauer_min: 3 },
     ]);
     expect(reg.rows.map((r) => [r.values.zulaessig, r.values.umwaelzung_hinweis, r.values.konz_empf, r.values.verweilzeit_ok, r.values.thermisch_ok, r.complete])).toEqual([
-      [0, 0, '$30 \\mathrm{mg} / \\mathrm{l}$', 1, 1, true],
+      [0, 0, '30 mg/l', 1, 1, true],                       // konz_text is the de-LaTeXed Tab.-14 cell (review fix round 1)
       [1, 1, null, null, 1, true],
-      [1, 0, '$0,1 \\mathrm{ml} / \\mathrm{l}$ bzw. 1 l pro $10 \\mathrm{~m}^{3}$', 0, 1, true],
+      [1, 0, '0,1 ml/l bzw. 1 l pro 10 m³', 0, 1, true],
       [null, null, null, null, 1, true],
       [null, null, null, null, 0, true],
     ]);

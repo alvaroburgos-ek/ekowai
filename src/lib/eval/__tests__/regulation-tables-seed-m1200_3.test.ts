@@ -84,8 +84,12 @@ describe('DWA-M-1200-3 Plan-3 seed tables', () => {
     expect(m.rows.map((r) => [r.keys.speichertyp, r.values.system])).toEqual([
       ['offen_ortsfest_kurz', 'offen'], ['offen_ortsfest_lang', 'offen'], ['geschlossen_ortsfest_kurz', 'geschlossen'], ['geschlossen_ortsfest_lang', 'geschlossen'], ['transportbehaelter', 'transport'],
     ]);
-    expect(m.rows[0].label_de).toContain('offene ortsfeste Speicher');        // L637
-    expect(m.rows[2].label_de).toContain('geschlossene ortsfeste Speicher');  // L641
+    expect(m.rows.map((r) => r.label_de)).toEqual([
+      'I offene ortsfeste Speicher — kurz- bis mittelfristige Speicherung', 'I offene ortsfeste Speicher — langfristige Speicherung',             // L637–L639
+      'I geschlossene ortsfeste Speicher — kurz- bis mittelfristige Speicherung', 'I geschlossene ortsfeste Speicher — langfristige Speicherung', // L641–L643
+      'I Transportbehälter',                                                                                                                // L651
+    ]);
+    for (const r of m.rows) for (const part of r.label_de.split(' — ')) expect(r.verbatim_quote, r.row_key).toContain(part); // every label fragment is cut from the row's own span
     expect(m.rows[4].label_de).toBe('I Transportbehälter');                   // L651
     expect(m.override_policy).toBe('locked');
     // the chain the register uses: token → system → allowed classes
@@ -200,7 +204,8 @@ describe('DWA-M-1200-3 Plan-3 seed tables', () => {
     expect(t.rows.map((r) => [r.keys.methode, r.values.konzentration, r.values.konz_unit, r.values.verweilzeit_min_h, r.values.verweilzeit_max_h, r.values.verweilzeit_text])).toEqual([
       ['chlorung', 30, 'mg/l', 12, 24, '12 h bis 24 h'], ['h2o2', 0.1, 'ml/l', 12, 24, '12 h bis 24 h'],
     ]);
-    expect(t.rows[1].values.konz_text).toBe('$0,1 \\mathrm{ml} / \\mathrm{l}$ bzw. 1 l pro $10 \\mathrm{~m}^{3}$');
+    expect(t.rows.map((r) => r.values.konz_text)).toEqual(['30 mg/l', '0,1 ml/l bzw. 1 l pro 10 m³']); // de-LaTeXed display text (review fix round 1)
+    expect(t.rows.map((r) => r.values.konz_gedruckt)).toEqual(['$30 \\mathrm{mg} / \\mathrm{l}$', '$0,1 \\mathrm{ml} / \\mathrm{l}$ bzw. 1 l pro $10 \\mathrm{~m}^{3}$']); // the raw printed cells
     expect(Q_T14_H2O2).toContain('Wasserstoffperoxid-Anwendung & $0,1');
     expect(t.rows.map((r) => r.label_de)).toEqual(['Chlorung', 'Wasserstoffperoxid-Anwendung']);
     expect(t.override_policy).toBe('anhaltswert');
