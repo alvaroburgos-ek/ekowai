@@ -107,9 +107,22 @@ select s.code, w.code, f.symbol, f.widget, f.ui_config is not null as has_ui, f.
  order by 1, 2, 3;
 ```
 
-**Post-apply cleanup (delete code, nothing else) once the owner has applied the named step:**
-step 7 → `REGISTER_CONFIGS_FALLBACK.surface_inventory` (`src/lib/eval/register-configs.ts`);
-step 8 → `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS` (same file);
+**Post-apply cleanup (delete code, nothing else) once the owner has applied the named step
+— and only once the emitter freshness pin is retargeted, see the last paragraph:**
+step 7 → `REGISTER_CONFIGS_FALLBACK.surface_inventory` (`src/lib/eval/register-configs.ts`)
+**together with** its co-readers: `src/lib/eval/surface-source-state.ts:13` (`SURFACE_CFG` — the
+A138-07 withhold shim on the page still runs on it), the `surface_inventory` case in
+`scripts/regulation-tables/emit-widget-configs-sql.ts` (~:106) and the fixture use in
+`src/lib/eval/formula.test.ts` (plus `formula-registers.test.ts`, `register-editor*.test.tsx`
+that import it as a fixture — swap them to the migrated DB shape); since I-3 the form itself
+reads NOTHING by that symbol (`registerSourceStates` resolves from the source entry's
+`{widget, uiConfig}`), so nothing in `worksheet-form.tsx` is touched.
+step 8 → `REGISTER_CONFIGS_FALLBACK.pollutant_register` + `REGISTER_FLAG_KEYS` (same file) —
+co-readers: the `pollutant_register` emitter case and `carrier-source-state.test.ts` /
+`register-editor-vsme-b04.test.tsx` fixtures. NOTE the snapshot drift after apply: the
+migrated `ui_config` carries the pollutant `options` / `option_labels` as a frozen copy of
+`src/lib/vsme/pollutants.ts` at emit time — a later change to `pollutants.ts` no longer reaches
+the DB row (sign-off F-2b-2).
 step 9 → `REFERENCE_CONFIGS_FALLBACK.rainfall_table_ref` (`src/lib/eval/reference-configs.ts`);
 step 10 (if ever applied) → `LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit`
 (`src/lib/eval/lookup-fill.ts`); any `BESPOKE_BY_SYMBOL` entry (`src/components/worksheet/widgets.tsx`)
@@ -117,8 +130,16 @@ whose row now carries `ui_config.editor` in prod (none of the three bespoke rows
 migration yet); and the `SELECTION_CONFIGS`-register branch of `resolveRegisterConfig` once
 EVERY `20260911120000_selection_configs_*.sql` is applied (step 3 — until then a still-NULL
 selection register renders through that branch). Each deletion reds the matching pin in
-`register-configs.test.ts` / `reference-configs.test.ts` / `lookup-fill.test.ts` /
-`widget-configs-sql-freshness.test.ts` — remove the pin with the constant.
+`register-configs.test.ts` / `reference-configs.test.ts` / `lookup-fill.test.ts` — remove the
+pin with the constant.
+
+**Deleting ANY of the four fallbacks reds `scripts/__tests__/widget-configs-sql-freshness.test.ts`**
+— the emitter (`emit-widget-configs-sql.ts`) generates the migration SQL FROM the fallback
+objects and the pin byte-compares the committed SQL against a fresh emit. So a fallback stays in
+the code until BOTH (a) its migration is applied in prod AND (b) the freshness pin is retargeted
+to a DB snapshot of the applied `ui_config` (e.g. a `selection-config-entries.json`-style export
+of the four rows) instead of the TS object. Deleting the constant first leaves the migration
+un-reproducible.
 
 **Post-apply verification (steps 4–6):**
 
@@ -210,9 +231,28 @@ constants, rather than lifting a printed row, ships `imported_unverified`.
 
 For each group: write the `register` `ui_config` against the zod contract in
 `src/lib/eval/field-config.ts` (`parseFieldConfig` is the single gate, importer- and
-render-side). Add a `discriminator: true` column for parallel technologies, and
-`lookup_key`/`lookup_value` column pairs bound to a `table_code` when the group looks up a
-Step-2 table. Generate the migration with an `emit-selection-configs-sql.ts`-style UPDATE —
+render-side). Add `lookup_key`/`lookup_value` column pairs bound to a `table_code` when the
+group looks up a Step-2 table.
+
+**Discriminator — the Plan-3 contract (what is actually built).** `discriminator: true` on a
+column is accepted by the zod contract but has NO semantics in the engine or the editor: spec
+§4 "the discriminator selects which table applies / the row's limits" is NOT implemented
+(sign-off F-2b-1). The working pattern for parallel technologies is the *workaround*: one
+`lookup_key` + `lookup_value` pair PER technology, each pair's columns carrying
+`visible_when: "technology == '<x>'"` in row scope (the enum column `technology` is the
+discriminator by convention), so only the pair of the selected technology is visible and
+counted for completeness. Two consequences to encode against: (1) **the override toggle
+binds to the FIRST `lookup_key` column only** (G-B2) — its table's `override_policy` is the
+policy of the whole register (I-4), and the toggle appears under that column; with per-
+technology pairs the first pair is hidden for the other technologies, so a register that
+needs an override per technology cannot be expressed today — record it on the sign-off
+sheet instead of bending the config; (2) **key strings are equality-matched** (G-A3): a seed
+row's `keys[<column>]` string must equal the enum `value` string of the field / column that
+drives it (`'schwarzdecke_asphalt'` on both sides) — no case folding, no label matching; the
+importer's `validateLookupKeysOrder` checks column NAMES against `key_columns`, not the key
+VALUES, so a value typo only shows at render time as `keine Zeile für [...]`.
+
+Generate the migration with an `emit-selection-configs-sql.ts`-style UPDATE —
 new entries go in `scripts/regulation-tables/selection-config-entries.json` (itself generated
 read-only from prod; don't hand-edit stale rows out of it). **The register renders
 generically since Plan 2b** — a `widget='register'` row (or a TS fallback while `widget IS
@@ -462,8 +502,10 @@ encoder notes below; no new renderer is expected per standard.
   allow-list of symbol reads that remain (ASM method/provenance, `ac_as_ratio_check`, `A_S_m`)
   and fails the moment a new `fieldBySymbol.get('…')` / `f.symbol === '…'` appears in the form.
 - Dispatch precedence while `widget IS NULL` (mirrors the pre-2b form): bespoke-by-symbol >
-  register config (`resolveRegisterConfig`: the two hand-built fallbacks, then the 36 TS
-  selection registers via `toDbShape`) > legacy TS checklist (`resolveSelectionConfig`) >
+  register config (`resolveRegisterConfig`: the two hand-built fallbacks, then the **23
+  register-kind** entries of the 36 TS selection configs via `toDbShape` — the other 13 are
+  checklists; count re-executed 2026-09-17 over `SELECTION_CONFIGS`) > legacy TS checklist
+  (`resolveSelectionConfig`) >
   `renderDynamic` (`DynamicField`: scalar / select_one / attestation, the json-checklist
   branch, the "Mehrzeilige Eingabe — Phase 2" placeholder). A DB row with a non-null `widget`
   is authoritative and skips every fallback.
@@ -488,7 +530,17 @@ encoder notes below; no new renderer is expected per standard.
 `RegisterEditor` (`src/components/worksheet/register-editor.tsx`) renders any register from
 its config; `ReadOnlyRegisterTable` is the consumer-side mirror (a consumer worksheet never
 gets an editable carrier — `registerSources` on the form feeds `carrierSourceState` + the
-mirror; the "nicht erfasst / nicht final" banner is generic per source).
+mirror; the "nicht erfasst / nicht final" banner is generic per source). **Consumer-side
+plumbing is generic since the fix wave (I-3):** the page calls
+`loadRegisterSources(projectId, standardId, code)` (`src/lib/db/queries/worksheet.ts`), which
+returns EVERY register-widget field on another worksheet of the standard that the current
+worksheet consumes — directly (`consumer_worksheets`) or transitively (an owner equation
+reads the register and produces a symbol the current worksheet consumes; that is how
+A138-07 `surface_inventory` reaches A138-10 without declaring consumers itself) — with the
+owner's `{ widget, uiConfig }`, and the form resolves each entry's config from that DB row
+first, the symbol-keyed TS fallback second. A DB `register` row whose `ui_config` fails
+`parseFieldConfig` renders the `register-unconfigured` notice + the dynamic input (never
+silent).
 
 - **Columns** (`columns[].type`): `text` (datalist), `number` (min/max warning, not a gate),
   `boolean`, `enum` (`options` + `option_labels` / `value_labels`, `sort_by_label`), `date`,
@@ -502,9 +554,12 @@ mirror; the "nicht erfasst / nicht final" banner is generic per source).
   next write; the engine's completeness rule skips the same cell — one rule).
 - **`flags`**: `[{ key, label?, note?, disables_rows? }]` — one checkbox each, stored on the
   carrier next to `rows`, read by `flag(register, 'key')` in formulas;
-  `registerFlagKeys(symbol, ui)` reads them (the `REGISTER_FLAG_KEYS` symbol fallback only
-  while `widget IS NULL`). `disables_rows: true` greys the table while the flag is on
-  (VSME "Keine berichtspflichtigen Schadstoffemissionen").
+  `registerFlagKeys(symbol, ui)` reads them — once ANY config is given only `ui.flags` count
+  (a migrated register without `flags` has none; the `REGISTER_FLAG_KEYS` symbol map serves
+  only callers with NO config). `disables_rows: true` greys the table while the flag is on
+  (VSME "Keine berichtspflichtigen Schadstoffemissionen") and, for a consumer's
+  `carrierSourceState`, a flag that is ON with zero rows is an explicit null-report (`ok`
+  once the owner is approved/final), not a missing source.
 - **`footer`**: the symbols of the equation rows whose `input_symbols` name the register
   (`['A_E_ba', 'A_E_nba', 'A_C']`, `['AmountOfEmissionToAir', …]`). The footer shows ENGINE
   states (`footerStatesFor`: value, or `—` with the reason as title) — the editor never sums.
@@ -514,7 +569,17 @@ mirror; the "nicht erfasst / nicht final" banner is generic per source).
 - **`override`**: `{ flag_key, applies_to, policy }` — `flag_key` MUST name a `boolean`
   column (zod refine, Task 5); no `override` block ⇒ locked (no toggle). The toggle sits under
   the first `lookup_key` column; while on, the table pair stays visible (`Tab. 9: 0,9 / 1`)
-  and a stored value ≠ table shows `mismatch-<key>`.
+  and a stored value ≠ table shows `mismatch-<key>`. **The policy comes from the TABLE**
+  (I-4): `resolveRegulationTable(std, <first lookup_key table_code>).override_policy` is the
+  single source; `ui_config.override.policy` is only the fallback while that table is
+  unknown, and a disagreement is listed in `register-diagnostics` ("… weicht von Tab. N (…)
+  ab — die Tabelle gilt"). `locked` ⇒ no toggle even with an `override` block; `anhaltswert`
+  ⇒ toggle + a reason textarea per overridden row (`recordManualOverride(fieldId,
+  'register:<TABLE>:<rowId>', reason)` → `audit_log`; `register-reason-missing` until saved —
+  visible state, no save-time gate); `kann` ⇒ the `lookup_value` override control is a select
+  over the value column's printed alternatives (`value_columns[value].values`), no reason;
+  `messwert` ⇒ free entry labelled "(Messwert)" + reason. The override input follows the
+  value column's type (a string/enum column gets a text input, never a number input).
 - **`placement`** (`section | bottom`, default bottom), `title`, `subtitle`, `add_label`,
   `legacy_map` (Plan-2a legacy-shape replay), `catalog` (Task 9 — contract only).
 - Output fields fed by the register carry the hint `Aus dem Register „<title>“ berechnet
@@ -546,7 +611,11 @@ section on A138-13..22; `RainfallTableSelector` deleted).
 
 `lookup = { table_code, role: 'value' | 'limit', keys: [{ column, from_symbol }], value,
 edition? }` — `keys[].column` must equal the table's `key_columns` in order (importer rule
-`validateLookupKeysOrder`); `ui_config = { source_label?, reason_min_length? (≥ 10) } | null`.
+`validateLookupKeysOrder`; since I-2 the importer registers the standard's DB tables before
+validating and an UNREGISTERED `table_code` is an import ERROR — `lookup_fill <symbol>: table
+<CODE> not registered (seed it first or check table_code)` — never a silent pass); the
+field's `data_type` must be `number | text | enum` (I-1 importer rule; boolean/date/json are
+rejected). `ui_config = { source_label?, reason_min_length? (≥ 10) } | null`.
 `LookupFillField` resolves the row by column NAME from the worksheet symbols named in
 `from_symbol` and shows a source badge (`Tab. 6 (Grenzwert)` / `Tab. 9: 0,2`).
 
@@ -554,7 +623,12 @@ edition? }` — `keys[].column` must equal the table's `key_columns` in order (i
   inherited copy (`inheritedFromWorksheet != null`) is **display-only** — the persisted value
   read-only, source-only badge, no write, no override control (A138-12 `ac_as_ratio_limit`:
   the five `materializeLoadingCheck` sites stay the single producer). Otherwise the widget
-  **fills** the field once from the table row (`{ type: 'number', value }` through the store)
+  **fills** the field once from the table row, TYPED by `field.dataType` (I-1): `number` ⇒
+  `{ type: 'number' }` (a non-numeric cell is never written), `text` ⇒ `{ type: 'text',
+  value: String(cell) }`, `enum` ⇒ `{ type: 'enum' }` only when the cell string is one of the
+  field's `enum_values` — otherwise the badge reads `Tab. X: Wert „…“ nicht in den
+  zulässigen Optionen` and nothing is written (the override control is a number input / text
+  input / select over the enum values accordingly);
   and re-fills on a key change only while the stored value still equals the previous row's
   figure; a typed deviation is never overwritten (a key change WHILE editing resets the
   deviation like "übernehmen" — the old value would be a phantom deviation against a row the
@@ -585,8 +659,10 @@ canonical one) are emitted by `scripts/regulation-tables/emit-widget-configs-sql
 very fallback objects and byte-pinned by `scripts/__tests__/widget-configs-sql-freshness.test.ts`;
 the embedded JSON round-trips through `parseFieldConfig` to the fallback (deploy-before-migration
 parity). The four pre-schema readers named under "Apply order" (`saveWorksheet`, the approval
-gate, the PDF loader, snapshot capture) are unchanged by 2b — step 1 is still the hard gate.
-Cleanup after apply: the "Post-apply cleanup" list under "Apply order".
+gate, the PDF loader, snapshot capture) are unchanged by 2b — step 1 is still the hard gate;
+since the fix wave (C-1) all of them, plus the project report loader, ALSO call
+`ensureRegulationTablesLoaded` (see Step 2). Cleanup after apply: the "Post-apply cleanup"
+list under "Apply order" — read its freshness-pin paragraph before deleting anything.
 
 ### What is NOT built (honest residue)
 
@@ -605,6 +681,29 @@ Cleanup after apply: the "Post-apply cleanup" list under "Apply order".
   (D-2b-8); `surface-inventory.ts` remains as a test-only differential oracle (D-2b-11).
 - No render spot-check on a deployed build was run by Plan 2b (no dev DB in the executing
   sessions); the "Ready for your 5-minute look" list on the 2b sign-off sheet is the owner's.
+- **Discriminator semantics** (spec §4 "selects which table applies / the row's limits") —
+  contract-only, see Step 3 for the per-technology `lookup_key`/`lookup_value` + `visible_when`
+  workaround and its two limits (first-key override binding, key-string equality). Sign-off
+  F-2b-1.
+- **Value-withhold gate for consumed registers** stays on the A138-07 surface shim
+  (`surfaceWithholdFieldIds`, D-2b-8): the generic `loadRegisterSources` list drives banners
+  and mirrors for every register, but only the surface entry withholds inherited derived
+  values.
+
+### Fix wave after the final whole-branch review (2026-09-17, commits `550b631..`)
+
+C-1 regulation tables loaded on every server evaluation path (transition BEFORE its tx,
+approval gate, standard-report loader, project-report loader; `fake-drizzle` shim +
+`regulation-tables-server-paths.test.ts`) · I-1 `lookup_fill` typed by `data_type`
+(text / enum; importer rule) · I-2 importer registers DB tables before validation, unregistered
+`table_code` is an error (`regulation-tables-load.ts`, no `server-only`) · I-3
+`loadRegisterSources` (generic consumer plumbing; `loadSurfaceSource` deleted) · I-4 register
+override policy from the table + per-row reason (`override-reason.tsx` shared with
+`lookup_fill`; `overrides.ts` `equationNumber` max 80) · minors: `Object.hasOwn`,
+`register-unconfigured`, datalist ids by field id, `carrierSourceState` flags + symbol,
+non-numeric `lookup_value` override input, `registerFlagKeys` no symbol fallback with a config,
+`ReadOnlyRegisterTable` row-scope `visible_when`. Evidence:
+`.superpowers/sdd/2026-09-16-guideline-to-tool-plan-2b-generic-editors/fix-wave-report.md`.
 
 ### Verification snapshot at close-out (HEAD `f47d7f9` + the close-out commit, 2026-09-17)
 

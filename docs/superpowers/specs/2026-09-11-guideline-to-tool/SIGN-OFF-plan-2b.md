@@ -17,7 +17,9 @@ status: awaiting-signature
 - **Render spot-check NOT run** (no dev DB / no deployed build in any 2b session) — the "Ready for your 5-minute look" list at the end is the owner's pass; nothing below claims a rendered page was seen.
 - **How to sign:** tick one box per block. RATIFIED = keep as built. REJECTED = say what instead (the block names the change where one exists). DEFER = stays as built, re-raised at the named later point. Items marked **enforcement-changing** or **value-changing** were NOT applied — they are proposals.
 
-Blocks: D-2b-1 … D-2b-13 (design decisions: 1–6 pre-listed by the plan, 7–13 raised during execution), L-2b-1 … L-2b-16 (every other ledger ruling that changed behaviour, in task order), the visual-delta list (union of every task report), the deferred-minor appendix, then the "5-minute look" list.
+Blocks: D-2b-1 … D-2b-13 (design decisions: 1–6 pre-listed by the plan, 7–13 raised during execution), L-2b-1 … L-2b-19 (every other ledger ruling that changed behaviour, in task order; L-2b-18/19 added by the post-review fix wave 2026-09-17), F-2b-1 … F-2b-2 (follow-ups NOT built), the visual-delta list (union of every task report), the deferred-minor appendix, then the "5-minute look" list.
+
+**Fix wave (2026-09-17, after the final whole-branch review; commits `550b631` C-1, `35b64e7` I-1, `6debc45` I-2, `1372524` I-3, `b048055` I-4+minors, plus the docs commit):** verification re-run in the worktree — `pnpm test` → 235 files passed | 1 skipped · **2308 passed** | 1 expected fail | 1 skipped (2278 + 30 fix-wave pins) · `pnpm -s typecheck` exit 0 · eslint on every touched file 0 errors · integration harness `register-materialise` see `fix-wave-report.md` (raw tails there). Still nothing applied to prod; still no render spot-check.
 
 ---
 
@@ -44,6 +46,9 @@ Zero change for `widget IS NULL` fields that are not one of the four carriers (`
 | 15 | Stale rainfall ref (stored id not among the tables) | select silently showed the first option | placeholder selected + hint `Verweis „<id>“ nicht gefunden — die Berechnung verwendet bis zur Neuauswahl „<first table>“. Bitte neu wählen.` (readOnly: `… verwendet „<first table>“.`); empty notice is a `<span>` (was `<p>` inside `<label>`) with `aria-describedby` | T8 + fix round |
 | 16 | A138-12 `ac_as_ratio_limit` | `DynamicField` read-only with clause chip / verification marker | `lookup_fill` DISPLAY mode: persisted value read-only + source badge `Tab. 6 (Grenzwert)` (source only — no "Schlüssel fehlt" in display mode); the label block is minimal (no clause chip, no `imported_unverified` marker, no VerifyButton — D-2b-9) | T7 + fix round |
 | 17 | Register row diagnostics | none | amber `register-diagnostics` list under a register whose `derived` column cannot evaluate (de-duplicated by message) | T2 |
+| 18 | A138-07 overridden row (fix wave I-4) | toggle only | under "Tab. 9 übernehmen": amber `Begründung fehlt` + textarea `Begründung der Abweichung` + `Abweichung begründen` (TAB9 is `anhaltswert`); `✓ Abweichung begründet` once saved; a `ui_config.override.policy` that disagrees with the table adds a `register-diagnostics` line | fix wave |
+| 19 | A138-10 (and every consumer) banners / mirrors (fix wave I-3) | only `surface_inventory` | one banner + one read-only mirror per consumed register (`loadRegisterSources`); for A138 still exactly the surface one — no visible change until a standard has a second consumed register | fix wave |
+| 20 | A DB `register` row with an invalid `ui_config` (fix wave minor) | silent fall-through to the dynamic input | amber `Register nicht konfiguriert (ui_config ungültig)` above the dynamic input; no prod row has a non-null widget yet ⇒ no live change | fix wave |
 
 ---
 
@@ -246,11 +251,41 @@ Task 7 review ruling 2 made the header say "Hand-authored (Plan 2b Task 7); rege
 
 Two worksheet instances of the same template open in one browser session share the `✓` confirmation map (module scope); the value key `(fieldId, value)` limits the crossover to identical stored values. Same pattern as the pill; not changed. Reject = key by `(projectId, fieldId)`.
 
+**Superseded by the fix wave (L-2b-19 item 7):** the map is now keyed by `(instanceId, fieldId[, rowId])` via the store's `instanceId` (`override-reason.tsx`, shared with the register rows). Sign L-2b-19 instead; this block is kept for the record.
+
+☐ RATIFIED  ☐ REJECTED  ☐ DEFER
+
+### L-2b-18 The 23 register-kind selection configs now enter `buildRegisters` / `registerFieldIds` — zero prod equations consume them (encoding-snapshot check)
+
+`resolveRegisterConfig` (Plan 2b) resolves the **23 register-kind** entries of the 36 TS `SELECTION_CONFIGS` (13 are checklists; count re-executed 2026-09-17 over `SELECTION_CONFIGS`: `exclusion_124_gwb_selected, award_criteria_list, stakeholder_list, alternatives_considered, quality_targets_konzept, quality_targets_projekt, bewertungskommission_members, project_goals, stakeholders_list, applicable_din_standards, applicable_dwa_standards, client_guidelines, permit_inventory_complete, software_products_defined, change_orders, data_security_measures, input_documents_register, bewaesserungstagebuch, alternatives, component_costs, variants, equipment_elements_list, plant_species_list`) through `toDbShape` while `widget IS NULL`, so every one of them is now prepared by `buildRegisters` (report evaluator, snapshot builder, PDF assembler, client hook) and listed by `registerFieldIds`. Effect on numbers: **none** — `scripts/reasoning-map/snapshot/encoding-snapshot.json` (prod export 2026-09-11, 729 equations) has **0** equations whose `input_symbols` or `formula` name any of the 23 (re-executable: node one-liner over the snapshot, fix-wave report §I-5). They render through the generic editor and are prepared as registers; no formula reads them yet. Reject = gate `resolveRegisterConfig`'s selection branch behind an explicit allow-list.
+
+☐ RATIFIED  ☐ REJECTED  ☐ DEFER
+
+### L-2b-19 Fix wave after the final whole-branch review (2026-09-17) — behaviour changes an engineer or encoder can meet
+
+(1) **C-1** every server evaluation path registers the standard's DB regulation tables (`transitionWorksheet` BEFORE its tx, `checkApprovalGate`, `loadStandardReportData`, `loadProjectReportData`) — for A138 no visible change (TS seed = DB seed); for a Plan-3 standard the snapshot / Prüfmemo / report now resolve `lookup()` without a prior save in the same process. (2) **I-1** `lookup_fill` fills `text` / `enum` fields typed correctly; an enum cell outside the field's `enum_values` shows `Tab. X: Wert „…“ nicht in den zulässigen Optionen` and writes nothing; importer rejects a `lookup_fill` with boolean/date/json `data_type`. (3) **I-2** the importer registers the standard's DB tables before validation (own short-lived client, read-only, never throws) and an unregistered `table_code` is an import ERROR (was silently accepted). (4) **I-3** `loadRegisterSources` replaces `loadSurfaceSource`: every consumed register (direct `consumer_worksheets` OR transitive through an owner equation — the rule that keeps the A138-07→A138-10 banner without `surface_inventory` declaring consumers) gets a banner + mirror, config from the owner's DB row first. (5) **I-4** register override policy from the TABLE (`ui_config.override.policy` demoted to fallback + diagnostic): TAB9 is `anhaltswert` ⇒ the A138-07 "abweichend" row now shows a reason textarea and `Begründung fehlt` until `recordManualOverride('register:TAB9:<rowId>')` succeeds (visible state, no gate — D-2b-10 parity); `overrides.ts` `equationNumber` max 50→80. (6) `registerFlagKeys(symbol, config)` never falls back to the symbol map once a config is given (a migrated pollutant register without `flags` has none — the emitted migration carries `flags`, so no prod effect); `carrierSourceState` treats a `disables_rows` flag ON with zero rows as `ok` once the owner is approved/final (was "nicht erfasst"). (7) `savedReasons` keyed by `(instanceId, fieldId[, rowId])` — supersedes L-2b-16's "template field id only". Reject any numbered item = say which; the rest stand.
+
 ☐ RATIFIED  ☐ REJECTED  ☐ DEFER
 
 ### L-2b-17 Process rulings with no behaviour effect — recorded, no signature needed
 
 2b executed after 2a's final re-review was clean (base `3a1d8fa`); every subagent on Opus 5 (Fable cap); T9 last/optional → skipped (D-2b-12); implementers parallel where files were disjoint (T1‖T2, T2‖T3, T4→T6→T7 serialised on the form, T5‖T8); the Task 5/7 attribution note (header); `git checkout -- scripts/reasoning-map/` before every staging (scorecards are the 2a fix wave's committed differential ledger; 2b never changed their content); commit trailers `Co-Authored-By: Claude Fable 5.1` by plan mandate.
+
+---
+
+## F — follow-ups NOT built (Plan 2b follow-up; raised by the final whole-branch review 2026-09-17)
+
+### F-2b-1 Discriminator semantics — spec §4 "the discriminator selects which table applies / the row's limits" is NOT implemented
+
+`discriminator: true` on a register column is accepted by the zod contract (`field-config.ts:28`) and read by nothing — neither `prepareRegisterRows` nor `RegisterEditor` change table, lookup or limits by it. The Plan-3 contract is the WORKAROUND documented in the playbook Step 3: one `lookup_key`/`lookup_value` pair per technology with `visible_when: "technology == '<x>'"` in row scope. Its two limits: the override toggle binds to the FIRST `lookup_key` column only (G-B2 — its table's policy is the register's policy, I-4), and key strings are equality-matched against enum `value` strings (G-A3; the importer checks key column NAMES, not key VALUES). A standard needing a per-technology override, or a discriminator that switches the TABLE of one shared pair, cannot be encoded until this is built. Proposal: a `discriminator` column drives `lookup.table_code` selection per row (`lookup.table_by: { <value>: <table_code> }`) and the toggle/policy resolve per row from the selected table.
+
+☐ BUILD NEXT  ☐ DEFER  ☐ NOT NEEDED
+
+### F-2b-2 Pollutant `ui_config` snapshot drift vs `src/lib/vsme/pollutants.ts` after step 8 is applied
+
+`20260916140000_vsme_b04_pollutant_register_widget.sql` embeds the pollutant `options` / `option_labels` as a frozen copy of `POLLUTANTS` at emit time. Once applied, `resolveRegisterConfig` reads the DB row (widget non-null) and a later change to `pollutants.ts` (new E-PRTR entry, label fix) no longer reaches the register; the two sources drift silently and the freshness pin (`widget-configs-sql-freshness.test.ts`) only compares the SQL to the TS fallback, not the DB row to `pollutants.ts`. Proposal: either (a) keep `pollutants.ts` as the single source and have the migration write `options: "$ref:pollutants"` resolved at parse time, or (b) add a post-apply drift check (prod query of the row's `option_labels` vs `POLLUTANTS`) to the playbook's verification queries. Not a numeric effect; a label/coverage one.
+
+☐ (a)  ☐ (b)  ☐ DEFER
 
 ---
 
