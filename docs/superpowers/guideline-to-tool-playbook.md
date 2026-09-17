@@ -427,6 +427,23 @@ of its table cells is unreadable/empty: the widget renders a read-only "—" for
 create a text twin instead (m1200_1-E-3). (8) Generating quote constants with `String.replace(re, "${'$'}{")` silently
 emits nothing (`$'` is a replacement pattern) — use `split('${').join(…)` in the generator too, not only in file splices.
 
+**Encoding traps (Plan 3 Task 6, DWA-M-1200-3).** (1) A `lookup()` key argument may be any expression — a nested `if()` over
+the inherited class selects the printed row group (`lookup('TAB789', sprinkler_gruppe, if(gueteklasse == 'D', 'd', 'a_c'), …)`),
+and a nested `if()` may sit inside `== true` to switch the value COLUMN a boolean table prints per moment (TAB13) — the column
+name itself must still be a string literal (G-14). (2) A null `derived` cell in a COMPLETE row makes `count_rows(reg, col == 0)`
+undecidable (`manual_required` "Fehlende Eingabe für count_rows()") — make every branch decidable (non-applicable rows → 1) and
+let only a genuinely unreadable printed cell (an empty Tab.-8 cell, U-1) leave the null; never seed a guessed value to keep a
+count computing. (3) Unset boolean cells coerce to `false`, so `flag == true` is decidable on rows where the cell is hidden;
+`null >= 72` is `pending` (visible) — a threshold rule on an empty number keeps its dependants visible. (4) Prod gates may live
+on a MIRROR worksheet (DWA-M-1200-3: CR-05 / -06 / -09 on M12003-05, whose fields are orphans) — a register-based gate rewrite
+then also moves the gate's `worksheet_template_id`; STAGE the move with both restores. (5) A staged DELETE on a table without
+`active` (equations, compliance_requirements) archives the full rows in the same transaction (`CREATE TABLE … AS SELECT *`) and
+rolls back from the archive — `prod-query.mjs` truncates cells, so a hand-typed INSERT rollback would be lossy. (6) A Plan-1
+selection register that exists on two worksheets (the Plan-1 UPDATE carries no `w.code` filter) needs one Plan-3 UPDATE entry
+per worksheet; keep the Plan-1 column KEYS so stored rows survive the upgrade, and put the Σ footer only where the equation lives.
+(7) An inventory's parenthesised cell ("(1-fache)") or gate claim ("CR-05 lists both") is a pointer — re-read the transcript
+line and the capture before encoding; both were refuted here.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still

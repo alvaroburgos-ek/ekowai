@@ -1,0 +1,12 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB3';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB3_MAP';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB789';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB11';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB11_SALZ';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB6';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB4';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB13';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'TAB14';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-M-1200-3' AND edition = '2025-07' AND table_code = 'S_TAB5_BEISPIEL';
+COMMIT;

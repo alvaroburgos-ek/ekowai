@@ -1,0 +1,396 @@
+-- DWA-M-1200-3 — Plan 3 Task 6 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, the 10 equation rows, the 32 compliance rows —
+-- ids / severities / conditions) were captured read-only on 2026-09-17 (src/lib/eval/field-configs/m1200_3.prior.json;
+-- prod-query.mjs for compliance_requirements / equations / standards.version, long conditions read in 110-char chunks).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-M-1200-3\DWA-M_1200-3_GD.md (Gelbdruck Juli 2025).
+--
+-- Conventions: `s.code = 'DWA-M-1200-3'`, worksheets by code, never by id (gates / equations by their captured uuid +
+-- a guard on the value they replace so a re-run is a no-op); each block names its rollback. A staged DELETE first
+-- copies the full rows into an archive table created in the same transaction (`… _archive_m1200_3`) — the rollback
+-- re-inserts them from there (full-row by construction; prod-query.mjs truncates cells, so the rows are NOT retyped
+-- here). The Plan-3 DATA migrations (20260917100600 seed · 20260917100610 field configs · 20260917100620 equations)
+-- must be applied BEFORE any block that reads a created symbol (schlaege, flaeche_gesamt_ha, abstand_verletzungen,
+-- cl_limit, haerte_limit, lf_limit, wasseranalysen, analysen_verletzungen, speicher_1200_3, speichervolumen_ist_m3,
+-- bewaesserungshoehe_tab5, speichervolumen_calc, druckleitungen, energie_kwh_a, leitungskosten_eur, farbcode_hex_tab4,
+-- wasserverbrauch_ist_m3, chlorung_stoss_konz_tab14, h2o2_stoss_konz_tab14, verweilzeit_min_tab14, desinfektionen,
+-- expositionspfade). Consumer edits append to `fields.consumer_worksheets` (text[]); the guard
+-- `NOT (… = ANY(consumer_worksheets))` keeps a re-run idempotent. The Plan-1 schema migration renames the LEGACY prod
+-- regulation_tables first (plan1-D-3-1) — apply order in the playbook.
+
+-- =====================================================================================================================
+-- m1200_3-C-1 · M12003-13 section 13-B ← bewaesserungsverfahren IN {'beregnung_sprinkler', 'mikrosprueh'} (withheld)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L906 / L1026 "Abstandsregelungen sowie Spitzschutzhecken sind relevant, wenn Sprinklersysteme zur
+-- Bewässerung verwendet werden." Capture: 13-B holds abstand_zu_sensitiv (consumed by -14, -19), steuerbarer_zugang
+-- (-14), abstand_oberflaechengewaesser_eingehalten (-19, -07) — the section guard refuses the rule (hiding a producer
+-- hides the inherited value). The other eight sections of M12003-13 carry the rule (20260917100610).
+-- Why staged: the consumers read those symbols unconditionally; hiding them needs the owner's reading of "relevant".
+-- Option (after ratification, Plan-3 columns present):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'bewaesserungsverfahren IN {''beregnung_sprinkler'', ''mikrosprueh''}' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND ws.code = '13-B' AND w.code = 'M12003-13' AND s.code = 'DWA-M-1200-3' AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on that section.
+
+-- =====================================================================================================================
+-- m1200_3-C-2 · M12003-15 Karenzzeit fields ← gueteklasse (withheld; consumed by M12003-18 / -19)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (Tab. 10 as printed in this standard): L1278 "… bis maximal 5 Tage vor dem Schnitt oder Weidegang durch nicht
+-- laktierendes Vieh …, besser maximal 2 Wochen" (C-1); L1279 (Heu / Silage C-1); L1314 "… bis 4 Wochen vor dem Schnitt
+-- oder Weidegang …" (D); L1315 "… bis 2 Wochen vor der Ernte" (D); L1318 "… Vermehrungssaatgut … bis 30 Tage vor der
+-- Ernte" (D); L1236 "Empfohlen wird ein Bewässerungsstopp mit aufbereitetem Wasser von 2 Wochen … vor dem Weidegang
+-- durch laktierendes Vieh" (B-1); L1282 "Eine Beweidung durch laktierendes Vieh bei der Verwendung der Güteklasse C wird
+-- grundsätzlich ausgeschlossen." Capture: karenzzeit_klasse_c, karenzzeit_klasse_d_weide, karenzzeit_klasse_d_ernte,
+-- karenzzeit_saatgut, karenzzeit_weide_laktierend, karenzzeit_wochen, weidegang_laktierend (M12003-15) → consumed by
+-- -18 / -19; gueteklasse IS inherited on -15.
+-- Rules withheld (would be):
+--   karenzzeit_klasse_c            ← gueteklasse IN {'C-1', 'C-2'}
+--   karenzzeit_klasse_d_weide      ← gueteklasse == 'D'
+--   karenzzeit_klasse_d_ernte      ← gueteklasse == 'D'
+--   karenzzeit_saatgut             ← gueteklasse == 'D'
+--   karenzzeit_weide_laktierend    ← gueteklasse == 'B-1'
+--   weidegang_laktierend           ← gueteklasse != 'C-1' AND gueteklasse != 'C-2'   (L1282 — see G-4 for the gate)
+-- Why staged: hiding a consumed producer nulls the inherited value on -18 / -19 (their gates would report n.a.).
+-- Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-C-3 · M12003-17 frostschutz_menge ← anwendungsbereich == 'frostschutzberegnung' (withheld; driver out of scope)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1400 "Das Bewässerungswasser muss mindestens der Güteklasse D entsprechen."; L1406 "Das Betriebspersonal
+-- ist entsprechend zu schulen."; CR-15 (M12003-08, id de89e350-d2a8-46f9-beab-3620e749c830) "anwendungsbereich !=
+-- 'frostschutzberegnung' OR (gueteklasse == 'D' AND schulung_durchgefuehrt == True)". Capture: frostschutz_menge
+-- (M12003-17) consumed by -19 AND feeds Gl-Helper-4 (frostschutz_volumen); anwendungsbereich (M12003-01) is consumed
+-- by -19, -13, -06, -04, -07, -05, -03 — NOT -17 (a rule would stay `pending`, never hide).
+-- Option:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'M12003-17') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-3' AND w.code = 'M12003-01' AND f.symbol = 'anwendungsbereich' AND f.active AND NOT ('M12003-17' = ANY(COALESCE(f.consumer_worksheets, '{}')));
+-- UPDATE fields f SET visible_when = 'anwendungsbereich == ''frostschutzberegnung''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-3' AND w.code = 'M12003-17' AND f.symbol = 'frostschutz_menge' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: array_remove(consumer_worksheets, 'M12003-17') on anwendungsbereich; SET visible_when = NULL on frostschutz_menge.
+
+-- =====================================================================================================================
+-- m1200_3-C-4 · M12003-12 rueckflussverhinderer_vorhanden / systemtrenner_vorhanden / freier_auslauf ← wasserherkunft == 'hybrid' (withheld)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L743 "Bei simultaner Einspeisung aus verschiedenen Quellen sind geeignete Sicherungseinrichtungen
+-- (Rückflussverhinderer, Systemtrenner, freier Auslauf) zu verwenden." CR-08 / CR-08-2 (M12003-05, ids
+-- a83090dc-54c2-4354-9bd5-c5bc56c65e5d / 20935a0a-ac2e-4916-8526-bb6ad06eb3fb, warn) "rueckflussverhinderer_vorhanden
+-- == True OR systemtrenner_vorhanden == True OR freier_auslauf == True" — no driver guard. Capture: the three booleans
+-- on -12 are consumed by -19; wasserherkunft (M12003-01, rein_aufbereitet / hybrid) IS inherited on -12.
+-- Option (rules + the CR-08 guard):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'wasserherkunft == ''hybrid''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-3' AND w.code = 'M12003-12' AND f.symbol IN ('rueckflussverhinderer_vorhanden', 'systemtrenner_vorhanden', 'freier_auslauf') AND f.active AND f.visible_when IS NULL;
+-- UPDATE compliance_requirements SET condition = 'wasserherkunft != ''hybrid'' OR rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True'
+--  WHERE id = 'a83090dc-54c2-4354-9bd5-c5bc56c65e5d' AND condition = 'rueckflussverhinderer_vorhanden == True OR systemtrenner_vorhanden == True OR freier_auslauf == True';
+-- COMMIT;
+-- Rollback: SET visible_when = NULL on the three rows; restore the CR-08 condition text quoted in the guard. (CR-08-2 → G-6.)
+
+-- =====================================================================================================================
+-- m1200_3-C-5 · M12003-22 chlorung_stoss_konz / h2o2_stoss_konz ← desinfektion_methode · M12003-20 temp_thermisch / dauer_thermisch_min ← desinfektion_methode == 'thermisch' (withheld)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 14 L1741 "Chlorung & $30 \mathrm{mg} / \mathrm{l}$ & 12 h bis 24 h", L1742 "Wasserstoffperoxid-Anwendung
+-- & $0,1 \mathrm{ml} / \mathrm{l}$ bzw. 1 l pro $10 \mathrm{~m}^{3}$ & 12 h bis 24 h"; L1664 "… thermisch erfolgen; für
+-- letztere müssen die verbauten Materialien Temperaturen von $70^{\circ} \mathrm{C}$ über 3 min aushalten können".
+-- CR-16 / CR-16-2 (M12003-07, ids cf9d7c41-88f2-4b12-98ad-75c062136bdc / d136638a-59ee-4725-a2f6-fec9e418f9ef, warn)
+-- already guard the thermal pair by `desinfektion_methode != 'thermisch' OR (temp_thermisch >= 70 AND dauer_thermisch_min >= 3)`.
+-- Capture: chlorung_stoss_konz / h2o2_stoss_konz (-22) consumed by -19; temp_thermisch / dauer_thermisch_min live on
+-- M12003-20 (consumed by -19) where desinfektion_methode (M12003-22, consumed by -19, -23) is NOT inherited.
+-- Rules withheld (would be): chlorung_stoss_konz ← desinfektion_methode == 'chlorung'; h2o2_stoss_konz ← … == 'h2o2';
+-- temp_thermisch / dauer_thermisch_min ← … == 'thermisch' (needs the consumer edit M12003-22 → -20 first).
+-- The created Tab.-14 fills carry the method rules today (chlorung_stoss_konz_tab14 / h2o2_stoss_konz_tab14 /
+-- verweilzeit_min_tab14, 20260917100610) — re-point E-1. Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-C-6 · M12003-11 abschaltung_automatisch ← druckabfall_unbeabsichtigt == true (withheld; consumed by M12003-19)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L759 "Bei unbeabsichtigtem Druckabfall in zuführenden Druckleitungen, zum Beispiel durch Leckagen, ist die
+-- weitere Zufuhr von aufbereitetem Wasser in das System unmittelbar zu unterbinden. Hierfür sind geeignete technische
+-- Vorkehrungen zu treffen." CR-17-2 (M12003-05, id 6a51cf59-c6be-4fda-b6f7-1ee634802ac3, block) "volumenverlust_pct <= 1
+-- AND (druckabfall_unbeabsichtigt == false OR abschaltung_automatisch == true)" already guards it. Capture:
+-- abschaltung_automatisch (-11) consumed by -19; druckabfall_unbeabsichtigt is on -11.
+-- Option: UPDATE fields f SET visible_when = 'druckabfall_unbeabsichtigt == true' … w.code = 'M12003-11' AND f.symbol =
+-- 'abschaltung_automatisch' AND f.visible_when IS NULL; rollback SET visible_when = NULL. Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-C-7 · consumer edits: M12003-06 flaeche_gesamt_ha → M12003-10, -17 · M12003-01 gueteklasse → M12003-10
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 5 L797–L800 ("Zu bewässernde Fläche 10 ha" / "Normgröße Bewässerungshöhe 20 mm" / "Gesamtbedarf
+-- Bewässerungswasser 2000 m³"); Tab. 3 L655 "werden in Abhängigkeit von der Güteklasse des aufbereiteten Wassers
+-- Speichertypen entsprechend Tabelle 3 empfohlen". Capture: flaeche_groesse (M12003-05) is consumed by -10, -13, -17,
+-- -19 (Gl-Helper-1 on -10 and Gl-Helper-4 on -17 read it); gueteklasse (M12003-01) is consumed by -13, -15, -09, -08,
+-- -06, -07, -05, -22 — NOT -10, so the register column speicher_1200_3.klasse_ok and M12003-10-D1 stay unresolved.
+-- A created field never sets consumer_worksheets (spec) — the owner's edit:
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['M12003-10','M12003-17']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-3' AND w.code = 'M12003-06' AND f.symbol = 'flaeche_gesamt_ha' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'M12003-10') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-M-1200-3' AND w.code = 'M12003-01' AND f.symbol = 'gueteklasse' AND f.active AND NOT ('M12003-10' = ANY(COALESCE(f.consumer_worksheets, '{}')));
+-- COMMIT;
+-- Rollback: SET consumer_worksheets = NULL on flaeche_gesamt_ha; array_remove(consumer_worksheets, 'M12003-10') on gueteklasse.
+
+-- =====================================================================================================================
+-- m1200_3-G-1 · CR-06 / CR-06-2 (M12003-05) — `speichertyp` compared with tokens that are not enum values (the CR-06 fix)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 3 L662 "Geschlossene Speicher & A, B", L663 "Offene Speicher & C, D", L664 "Transportbehälter & Nach
+-- Bedarf"; capture: speichertyp enum = offen_ortsfest_kurz | offen_ortsfest_lang | geschlossen_ortsfest_kurz |
+-- geschlossen_ortsfest_lang | transportbehaelter (M12003-05 / -10). Prod CR-06 (id 29a28a7a-5f1b-44e0-aa53-869b5fe834a9,
+-- block) and CR-06-2 (id 568ce4fa-f8e1-444a-940e-9de7c2cead37, block) read
+--   "speichertyp == 'geschlossen' OR (speichertyp == 'offen' AND gueteklasse IN {'C', 'C-1', 'C-2', 'D'}) OR speichertyp == 'transportbehaelter'"
+-- — 'geschlossen' / 'offen' never match, so an open store with class A passes today (the OR on 'transportbehaelter' is
+-- the only reachable leg). The seeded TAB3_MAP (20260917100600) maps the tokens; the register speicher_1200_3.klasse_ok
+-- computes the same check per row. Enforcement-changing (a block gate starts failing for open stores with A / B) → ruling.
+-- Option A (token fix, keeps the scalar gate; "Nach Bedarf" read as any class, J-2):
+-- BEGIN;
+-- UPDATE compliance_requirements SET condition = 'speichertyp IN {''geschlossen_ortsfest_kurz'', ''geschlossen_ortsfest_lang''} OR (speichertyp IN {''offen_ortsfest_kurz'', ''offen_ortsfest_lang''} AND gueteklasse IN {''C-1'', ''C-2'', ''D''}) OR speichertyp == ''transportbehaelter'''
+--  WHERE id = '29a28a7a-5f1b-44e0-aa53-869b5fe834a9' AND condition = 'speichertyp == ''geschlossen'' OR (speichertyp == ''offen'' AND gueteklasse IN {''C'', ''C-1'', ''C-2'', ''D''}) OR speichertyp == ''transportbehaelter''';
+-- COMMIT;
+-- Option B (register gate, after the seed + field-config migrations and C-7): condition 'count_rows(speicher_1200_3, klasse_ok == 0) == 0' on a gate moved to M12003-10.
+-- Rollback (A): restore the condition text quoted in the guard. CR-06-2 → G-6 (exact twin).
+
+-- =====================================================================================================================
+-- m1200_3-G-2 · new gates from §7.2.4 on the storage rows: O2 ≥ 50 %, ab 72 h Belüftung + Umwälzung
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1622 "Die Sauerstoffsättigung des aufbereiteten Wassers sollte in allen Speichersystemen 50 \% relative
+-- Sättigung während der Speicherung nicht unterschreiten."; L1626–L1628 (offene) / L1633–L1635 (geschlossene) "Ab 72 h
+-- Verweilzeit des aufbereiteten Wassers im System werden folgende Maßnahmen vorgeschlagen: I Belüftung, I regelmäßige
+-- Umwälzung …". Prod: CR-11 (M12003-07, id f9d55b0b-2884-4462-a3ab-34d5b88b9c86, warn) has an EMPTY condition. "sollte" /
+-- "vorgeschlagen" ⇒ warn. New gates = the owner's (spec: new gates are rulings).
+-- Option (after the DATA migrations; on M12003-10 where the register lives):
+--   INSERT compliance_requirements (worksheet M12003-10, code 'CR-11-O2', severity 'warn', condition
+--     'count_rows(speicher_1200_3, o2_ok == 0) == 0', clause_reference '§7.2.4', title_de 'Sauerstoffsättigung ≥ 50 % in allen Speichern');
+--   INSERT … (code 'CR-11-72H', severity 'warn', condition
+--     'count_rows(speicher_1200_3, verweilzeit_h >= 72 AND NOT (belueftung == true AND umwaelzung == true)) == 0', clause_reference '§7.2.4');
+-- Rollback: DELETE the two inserted rows by code + worksheet. Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-G-3 · CR-09 / CR-09-2 (M12003-05) onto the register: `abstand_verletzungen == 0`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 7 L929–L930 "A bis C & 1-fache Wurfweite & \multirow{2}{*}{ 1-fache Wurfweite } … D & 2-fache Wurfweite";
+-- Tab. 8 L944–L945 "… D & 3-fache Wurfweite & "; Tab. 9 L1047–L1048; L1030 "Eine Abstandsregelung zu Wegen etc. entfällt,
+-- wenn durch Zugangssteuerung die Passage von Menschen während der Bewässerung unterbleibt (steuerbarer Zugang)."; L1040
+-- "Eine konkrete Beurteilung und Festlegung von Mindestabständen … muss im RMP erfolgen." Prod CR-09 (id
+-- 11e530f7-dda8-42da-901c-7b99228a5d9e, warn) "gueteklasse != 'D' OR spritzschutz_vorhanden == True OR abstand_zu_sensitiv
+-- >= 2 * wurfweite" and CR-09-2 (id c9caaf89-aef1-408c-acdd-acf43bbb5516, warn) "gueteklasse != 'D' OR abstand_zu_sensitiv
+-- >= 2 * wurfweite" — one scalar distance, factor 2 only (Tab. 8 prints 3 for D, Tab. 9 the urban case), no steuerbarer
+-- Zugang, both on the mirror worksheet -05. The register computes the factor per Schlag from TAB789 (20260917100600).
+-- Option (after the DATA migrations; gate moved to the register's worksheet):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-1200-3' AND w.code = 'M12003-06'),
+--   condition = 'abstand_verletzungen == 0'
+--  WHERE c.id = '11e530f7-dda8-42da-901c-7b99228a5d9e' AND c.condition = 'gueteklasse != ''D'' OR spritzschutz_vorhanden == True OR abstand_zu_sensitiv >= 2 * wurfweite';
+-- COMMIT;
+-- Rollback: restore worksheet_template_id (M12003-05) and the condition text quoted in the guard. CR-09-2 → G-6 (variant, the owner picks).
+
+-- =====================================================================================================================
+-- m1200_3-G-4 · new gate: lactating cattle × class C excluded — `count_rows(schlaege, laktierend_konflikt == 1) == 0`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1282 "Eine Beweidung durch laktierendes Vieh bei der Verwendung der Güteklasse C wird grundsätzlich
+-- ausgeschlossen." (Tab. 10, C-1 row — printed in this standard); L1236 (B-1: drying + 2-week stop, not exclusion).
+-- Prod: no gate reads weidegang_laktierend (M12003-15, consumed by -18). "grundsätzlich ausgeschlossen" ⇒ block
+-- (severity is the owner's).
+-- Option (after the DATA migrations): INSERT compliance_requirements (worksheet M12003-06, code 'CR-19', severity 'block',
+--   condition 'count_rows(schlaege, laktierend_konflikt == 1) == 0', clause_reference '§5.6.1, Tab. 10',
+--   title_de 'Keine Beweidung durch laktierendes Vieh bei Güteklasse C'). Rollback: DELETE by code + worksheet. Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-G-5 · CR-05 (M12003-05) — Tab. 11 (*) parameters missing; extension via the created fills
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1360 "Chlorid & $250 / 500^{(*)} \mathrm{mg} / \mathrm{l}$", L1364 "Wasserhärte & $30 / 60^{(*)}{ }^{\circ}
+-- \mathrm{dH}$", L1365 "Leitfähigkeit & $2.000 / 3.000^{(*)} \mu \mathrm{S} / \mathrm{cm}$", L1369 "(*) salzempfindliche/
+-- salzunempfindliche Pflanzen." Prod CR-05 (id be03f15f-29d9-4b68-8210-57518e2d763b, warn, 281 chars) reads
+--   "k_konz <= 200 AND na_konz <= 100 AND no3_konz <= 300 AND so4_konz <= 1200 AND ph_wert >= 5.0 AND ph_wert <= 9.5 AND pb_konz <= 100 AND cd_konz <= 2 AND cr_konz <= 100 AND fe_konz <= 1500 AND cu_konz <= 100 AND mn_konz <= 1500 AND ni_konz <= 40 AND hg_konz <= 0.5 AND zn_konz <= 300"
+-- — Chlorid / Wasserhärte / Leitfähigkeit are absent (the inventory's "CR-05 lists both" is refuted by the capture). The
+-- created cl_limit / haerte_limit / lf_limit (M12003-08, TAB11_SALZ keyed on pflanzentyp) hold the switched values.
+-- Option (gate moved to M12003-08 where cl_konz … zn_konz and the fills live; enforcement-changing → ruling):
+-- BEGIN;
+-- UPDATE compliance_requirements c SET worksheet_template_id = (SELECT w.id FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE s.code = 'DWA-M-1200-3' AND w.code = 'M12003-08'),
+--   condition = c.condition || ' AND cl_konz <= cl_limit AND wasserhaerte <= haerte_limit AND leitfaehigkeit <= lf_limit'
+--  WHERE c.id = 'be03f15f-29d9-4b68-8210-57518e2d763b' AND c.condition NOT LIKE '%cl_limit%';
+-- COMMIT;
+-- Alternative: 'analysen_verletzungen == 0' over the wasseranalysen register (M12003-08-D1). Rollback: restore
+-- worksheet_template_id (M12003-05) and the 281-char condition text quoted above. CR-05-2 → G-6.
+
+-- =====================================================================================================================
+-- m1200_3-G-6 · the exact `CR-xx-2` twins on M12003-05 / -07 (5 exact + 1 variant)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (capture, 32 rows): exact twins (same worksheet, same condition) — CR-05 / CR-05-2 (1fbc0209-8311-4842-b690-
+-- 58fd51f2ce6e), CR-06 / CR-06-2 (568ce4fa-f8e1-444a-940e-9de7c2cead37), CR-07 / CR-07-2 (ab5f62a2-fc3a-45d4-8ba7-
+-- 05ac967872aa), CR-08 / CR-08-2 (20935a0a-ac2e-4916-8526-bb6ad06eb3fb), CR-16 / CR-16-2 on -07 (d136638a-59ee-4725-a2f6-
+-- fec9e418f9ef). Variant: CR-09-2 (c9caaf89-aef1-408c-acdd-acf43bbb5516) lacks the Spritzschutz leg of CR-09 — stricter;
+-- the owner picks which survives (G-3 rewrites CR-09). The brief's "20 duplicate rows" is not what prod holds: the other
+-- same-code pairs (CR-10 -06/-19, CR-11 / CR-12 -01/-07, CR-13 -01/-08, CR-14 / CR-15 -05/-08, CR-17 / -17-2, CR-18 / -18-2)
+-- differ in condition or attestation symbol and are NOT twins.
+-- Option (deactivation = DELETE; compliance_requirements has no `active` column — archive first, full-row rollback):
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS compliance_requirements_archive_m1200_3 AS SELECT * FROM compliance_requirements WHERE false;
+-- INSERT INTO compliance_requirements_archive_m1200_3 SELECT * FROM compliance_requirements WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef');
+-- DELETE FROM compliance_requirements WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef');
+-- COMMIT;
+-- Rollback (full rows, never retyped):
+-- BEGIN;
+-- INSERT INTO compliance_requirements SELECT * FROM compliance_requirements_archive_m1200_3 WHERE id IN ('1fbc0209-8311-4842-b690-58fd51f2ce6e', '568ce4fa-f8e1-444a-940e-9de7c2cead37', 'ab5f62a2-fc3a-45d4-8ba7-05ac967872aa', '20935a0a-ac2e-4916-8526-bb6ad06eb3fb', 'd136638a-59ee-4725-a2f6-fec9e418f9ef') ON CONFLICT (id) DO NOTHING;
+-- DROP TABLE compliance_requirements_archive_m1200_3;
+-- COMMIT;
+
+-- =====================================================================================================================
+-- m1200_3-R-1 · Gl-Helper-1 (M12003-10, id 29cc62b2-bc11-43e1-a1c4-1a138c7e8374) — Σ Schlagfläche instead of the scalar flaeche_groesse
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod 'speichervolumen = bewaesserungshoehe * flaeche_groesse * 10' (verified_against_standard), inputs
+-- [bewaesserungshoehe, flaeche_groesse]; Tab. 5 L797–L800 "Zu bewässernde Fläche 10 ha / Normgröße Bewässerungshöhe 20 mm /
+-- Gesamtbedarf Bewässerungswasser 2000 m³"; the Tab.-2 Kopf L543 "Bewässerte Fläche & 20 ha" is per Schlag. The created
+-- M12003-10-D1 (speichervolumen_calc, 20260917100620) computes the same arithmetic over flaeche_gesamt_ha (M12003-06-D1).
+-- Replacing a verified equation's input is a ruling (spec: replacing a verified equation ⇒ sign-off). After C-7:
+-- BEGIN;
+-- UPDATE equations SET formula = 'speichervolumen = bewaesserungshoehe * flaeche_gesamt_ha * 10', input_symbols = ARRAY['bewaesserungshoehe','flaeche_gesamt_ha']::text[]
+--  WHERE id = '29cc62b2-bc11-43e1-a1c4-1a138c7e8374' AND formula = 'speichervolumen = bewaesserungshoehe * flaeche_groesse * 10';
+-- COMMIT;
+-- Rollback: restore the formula text quoted in the guard and input_symbols ARRAY['bewaesserungshoehe','flaeche_groesse'].
+-- (Gl-Helper-4 on M12003-17, id 5ee5eb23-bb87-430a-a6ef-2959b185174e, 'frostschutz_volumen = frostschutz_menge * flaeche_groesse * 10' — same option, same guard pattern.)
+
+-- =====================================================================================================================
+-- m1200_3-R-2 · the five duplicate helper rows on the mirror worksheet M12003-05 (Gl-Helper-1 … -5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (capture, 10 equation rows): M12003-05 carries Gl-Helper-1 (aea87475-a0d6-4b07-938e-4fcbe6eeb15c),
+-- Gl-Helper-2 (aec0e88e-8cdd-483b-98ae-601aae5257d2), Gl-Helper-3 (6648bd89-9395-4904-b765-82f77808b7c5), Gl-Helper-4
+-- (e2f4b9d1-a670-4785-b3ee-7e4299353d9f), Gl-Helper-5 (4c1690d7-aa5b-461b-ab2e-45d32b7190ea) — byte-identical formulas to
+-- the rows on -10 / -17 / -13 (every -05 field is an orphan mirror of its topical worksheet; inventory §5 win 3). Single-
+-- source: one registered equation per quantity. `equations` has no `active` column → DELETE with archive (full-row rollback).
+-- BEGIN;
+-- CREATE TABLE IF NOT EXISTS equations_archive_m1200_3 AS SELECT * FROM equations WHERE false;
+-- INSERT INTO equations_archive_m1200_3 SELECT * FROM equations WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea');
+-- DELETE FROM equations WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea');
+-- COMMIT;
+-- Rollback (full rows, never retyped):
+-- BEGIN;
+-- INSERT INTO equations SELECT * FROM equations_archive_m1200_3 WHERE id IN ('aea87475-a0d6-4b07-938e-4fcbe6eeb15c', 'aec0e88e-8cdd-483b-98ae-601aae5257d2', '6648bd89-9395-4904-b765-82f77808b7c5', 'e2f4b9d1-a670-4785-b3ee-7e4299353d9f', '4c1690d7-aa5b-461b-ab2e-45d32b7190ea') ON CONFLICT (id) DO NOTHING;
+-- DROP TABLE equations_archive_m1200_3;
+-- COMMIT;
+-- Captured row heads (read-only 2026-09-17; long text columns NOT retyped — the archive carries them): every row
+-- verification_status verified_against_standard · audit_status ai_audit_passed · source_file DWA-M-1200-3.md ·
+-- audited_by pass4-adversarial-audit · verified_at 2026-09-07T13:44:08.960Z; clause_reference '§5.2.1 / Tab. 5' (1–3),
+-- '§5.6.5' (4), '§5.2.4.2, §5.4.4 / Tab. 7,8,9' (5).
+
+-- =====================================================================================================================
+-- m1200_3-E-1 · M12003-22 chlorung_stoss_konz / h2o2_stoss_konz (existing, consumed by -19) vs the created Tab.-14 fills
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 14 L1741 / L1742 (30 mg/l · 0,1 ml/l bzw. 1 l pro 10 m³ · 12 h bis 24 h); L1740 column head "Empfohlene
+-- Konzentration gemäß ISO 16075-3:2021". Capture: the two existing numbers are consumed by -19 (their prod semantics —
+-- recommended vs applied dose — are not stated in the field rows); re-binding a consumed input as lookup_fill changes
+-- what the engineer can type (trap 1, a262e-E-3). Created instead: chlorung_stoss_konz_tab14 / h2o2_stoss_konz_tab14 /
+-- verweilzeit_min_tab14 (20260917100610) next to the drivers, hidden unless the method matches.
+-- Option A: point -19 at the fills (consumer edit on the created rows + retire the two scalars). Option B: keep both.
+-- Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-F-1 · schwermetall_fracht_pa (M12003-08, consumed by -19, -25, -04) — Σ(Konzentration × Menge) not encoded
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L614 "Jährliche Frachten aus dem Bewässerungswasser sollten $1 / 3$ der zulässigen Frachten nach Anlage 1
+-- Tabelle 3 BBodSchV nicht überschreiten (LAWA 2022)."; CR-18-2 (M12003-05, id a7afb5c2-53b0-4263-9a8a-20b70bc7e0b7,
+-- block) "schwermetall_fracht_pa <= bbodschv_anlage1_tab3 / 3". No printed formula for the load; a per-metal Σ over the
+-- Tagebuch volumes × the analysed concentrations needs a period join the registers do not carry (analysis date ↔ Gabe),
+-- and the BBodSchV table is external law (content boundary — reference only). Proposed shape for the owner:
+--   schwermetall_fracht_pa_calc = sum_rows(bewaesserungstagebuch, aufbereitet_m3) * <mean concentration of the metal> / 1000
+-- (kg/a from m³ × mg/l) — one equation per metal, the concentration as mean_rows(wasseranalysen, wert, parameter == '<metal>').
+-- Nothing applied; schwermetall_fracht_pa stays a manual input.
+
+-- =====================================================================================================================
+-- m1200_3-F-2 · Tab. 6 per 1.000 m scaled linearly by section length (M12003-11-D1 / -D2)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L838 "… Installations- und Energiekosten von Druckleitungen pro 1.000 m Länge (Stand Q3/2022, Beispiel ländlicher
+-- Raum Berlin-Brandenburg)"; L851 "1) gilt für folgende Annahmen: Leitungslänge 1.000 m ohne Bögen, 0 m Höhenunterschied in
+-- der Druckleitung, $50 \mathrm{~m}^{3} / \mathrm{h}$ Fördervolumenstrom Pumpe, Saughöhe Pumpe 0 m , Gesamtwirkungsgrad
+-- Pumpe und Motor 0,75, 200 h Betriebszeit bei $5 \times 20 \mathrm{~mm}$ Bewässerungsgabe pro Jahr."; L857 "Konkrete
+-- Leitungs- und Pumpenplanungen sind durch eine für die Fachplanung zuständige Person durchzuführen." The equations
+-- (20260917100620, imported_unverified) multiply the per-1.000-m figures by Länge / 1000 — a reading, not a printed
+-- formula; the assumptions (50 m³/h, 200 h) are not scaled. Owner ratifies the shape or rejects the two Σ.
+-- Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-J-1 · Mikrosprühsysteme mit Wurfhöhe ≤ 1 m — "kann … gegebenenfalls entfallen"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1036 "Bei Mikrosprühsystemen mit einer Wurfhöhe $\leqslant 1 \mathrm{~m}$ kann eine Abstandsregelung
+-- gegebenenfalls entfallen. Entscheidend hierfür ist die lokale Anwendungsumgebung. Hierbei ist auch die Aerosolbildung zu
+-- beachten …"; L1040 "… muss im RMP erfolgen." Chosen now (fail-safe): `mikrosprueh` counts as a sprinkler method in
+-- SPR / SPR_ROW (the distance columns show), no automatic waiver; the engineer sets abstand_ist_m and the RMP decides.
+-- Option: a boolean column `wurfhoehe_le_1m` on schlaege with faktor 0 when ticked and technik == 'mikrosprueh'.
+-- Nothing applied.
+
+-- =====================================================================================================================
+-- m1200_3-J-2 · Tab. 3 — "Nach Bedarf" for Transportbehälter read as "any class"; the class LETTERS cover their sub-classes
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L662 "Geschlossene Speicher & A, B", L663 "Offene Speicher & C, D", L664 "Transportbehälter & Nach Bedarf".
+-- Seeded (20260917100600): allows_b covers B-1 / B-2, allows_c covers C-1 / C-2 (prod CR-06 reads the same:
+-- "gueteklasse IN {'C', 'C-1', 'C-2', 'D'}"); transport → allows_a…d all true with bedarf_hinweis 'Nach Bedarf'. The
+-- register badge speicher_1200_3.klasse_ok therefore never flags a Transportbehälter. Owner confirms or narrows.
+
+-- =====================================================================================================================
+-- m1200_3-J-3 · Tab. 11 (*) rows print no operator — read as upper bounds
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1360 "Chlorid & $250 / 500^{(*)} \mathrm{mg} / \mathrm{l}$", L1364 "Wasserhärte & $30 / 60^{(*)}{ }^{\circ}
+-- \mathrm{dH}$", L1365 "Leitfähigkeit & $2.000 / 3.000^{(*)} \mu \mathrm{S} / \mathrm{cm}$" (every other row prints
+-- "$\leqslant …$"); caption L1352 "Toleranzbereiche". Seeded: comparator 'max_pair'; the register `ok` column compares
+-- `wert <= limit` for them (like the "≤" rows). Owner confirms the reading (a Toleranzbereich as a ceiling).
+
+-- =====================================================================================================================
+-- m1200_3-J-4 · §7.3.2 — the brief's "120-µm Kontrollfilter only for class A" is refuted by the transcript; nothing created
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: under "Güteklasse A" (L1708): L1710 "Verwendung eines automatischen Scheibenfilters $(180 \mu \mathrm{~m})$ …",
+-- L1712 "Verwendung eines $120-\mu \mathrm{m}$-Kontrollfilters hinter dem ersten Filter …", L1714 "Spülung und Hygienisierung
+-- … vor Beginn und nach Ende der Bewässerungssaison."; under "Güteklassen B-1, B-2, C-1 und C-2" (L1716): L1718 / L1720 the
+-- SAME two filter bullets, L1722 the same flushing bullet, plus L1724 "mehrmalige Spülung innerhalb der Bewässerungssaison
+-- und gegebenenfalls Hygienisierung …". The control filter is printed for A AND B/C alike; class D is not addressed;
+-- L1706 "… können … folgende zusätzliche Maßnahmen … angewendet werden, falls diese zweckdienlich sind" (kann). Chosen now:
+-- no rule, no created field (the existing kontrollfilter_um / filter_groesse_um on M12003-21 stay). Option: an attestation
+-- `spuelung_mehrmals_saison` on -21 visible for B-1 … C-2 — needs the consumer edit gueteklasse → M12003-21 first.
+
+-- =====================================================================================================================
+-- m1200_3-J-5 · Tagebuch `start` / `ende` stay TEXT (the printed example carries a time of day)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 2 L544 "Start der Bewässerung & Ende der Bewässerung & …", L554 "17.06.2023 06:00 & 20.06.2023 06:00 & 20
+-- & 15 & 20 & 300 & 300 & -". The brief's `date` column type cannot hold "06:00"; the Plan-1 keys (start, ende,
+-- empfehlung_mm, real_mm, flaeche_ha, wasser_m3, aufbereitet_m3, kommentar) are kept so stored rows survive the upgrade
+-- (20260917100610 UPDATEs -18 and -04). Option: a `datetime` column type (engine change) — not this task's.
+
+-- =====================================================================================================================
+-- m1200_3-U-1 · TAB789 · Tab. 8 prints an EMPTY "mit Spritzschutz" cell in the D row
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (verbatim): L944 "\hline A bis C & 1-fache Wurfweite & 1-fache Wurfweite \\", L945 "\hline D & 3-fache Wurfweite
+-- & \\" — no multirow, no text (Tab. 7 L929 and Tab. 9 L1047 print "\multirow{2}{*}{ 1-fache Wurfweite }" spanning the D
+-- row). The inventory's "(1-fache)" is not in the transcript. Seeded null (faktor) with the hint "Zelle leer gedruckt";
+-- a Schlag row on Tab. 8 / class D / mit Spritzschutz is undecidable (M12003-06-D2 → manual_required, never a silent
+-- count). Table stays imported_unverified. A PDF look (p. 30) settles whether the cell is a missed multirow (then 1).
+
+-- =====================================================================================================================
+-- m1200_3-U-2 · TAB13 · the Ultrafiltration / UV-Bestrahlung cells for Befüllung / Speicherung print OCR variants of "x⁴⁾"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence (verbatim): L1569 "\hline \multirow{4}{*}{Ultrafiltration} & während der Befüllung & $\mathrm{x}^{4)}$ & \\",
+-- L1570 "\hline & während der Speicherung & $x^{4!}$ & \\", L1573 "\hline \multirow{4}{*}{UV-Bestrahlung} & während der
+-- Befüllung & $x^{41}$ & \\", L1574 "\hline & während der Speicherung & $x^{4)}$ & \\"; note 4 L1586 "4) Unter der
+-- Voraussetzung einer Wasserumwälzung durch Pumpen o. Ä. technischen Lösungen." Encoded: allowed = true with
+-- umwaelzung_bedingung = true for those four cells (the "x" is printed in each; the superscript is what OCR garbled).
+-- Table stays imported_unverified; the printed cell strings are kept in `gedruckt`.
+
+-- =====================================================================================================================
+-- m1200_3-U-3 · Tab. 15 · the "Aufnahmepfad" row heads are images — no table seeded
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1836–L1841 each begin with "![](https://cdn.mathpix.com/cropped/…)" as the row head, then the three printed
+-- level cells ("Nicht vorhanden", "Gering bis mittel", "Mittel bis hoch", "Nicht vorhanden bis gering"); the six pathway
+-- names are printed as a list in §8 (L1812–L1818) in the same order as the rows appear to be. Encoded: the §8 list as the
+-- datalist of expositionspfade.pfad and the four printed levels as the `exposition` enum; the row ↔ pathway assignment
+-- is NOT encoded (no Tab.-15 table). A PDF look (p. 58) would allow a TAB15 keyed pfad × technik.
+
+-- =====================================================================================================================
+-- m1200_3-X-1 · Tab. 10 = DWA-M-1200-1 Tab. 7 — not re-seeded; Karenzzeit / Emitterabstand auto-fill is cross-standard
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1208 "Die in Tabelle 10 genannten Anwendungsbereiche entsprechen Tabelle 7 in Merkblatt DWA-M 12001:2025 (siehe
+-- zum Verständnis der Bedeutungen auch die Ausführungen des gesamten Abschnitts 5 des Merkblatts DWA-M 1200-1:2025)."
+-- Tab. 10 (L1210–L1329) is printed in full here (content-boundary rule: a printed reproduction is encodable), but the
+-- brief rules it out (Task 5 owns TAB7_CLASS on DWA-M-1200-1) and `makeTableLookup(standardCode)` resolves tables per
+-- standard — a DWA-M-1200-3 register cannot read DWA-M-1200-1's TAB7_CLASS. The §5 win-1 "auto-fill Karenzzeit,
+-- Emitterabstand per Schlag" is therefore NOT encoded; the sentences are cited as cues (C-2). Options: (a) seed a TAB10
+-- reproduction here from L1210–L1329 (same spans as Task 5's TAB7_CLASS, provenance "reproduction"); (b) a cross-standard
+-- lookup in the engine. Nothing applied.

@@ -34,8 +34,12 @@ describe('pass3c validate — lookup_fill keys vs the table key_columns (Plan 2b
     expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null }, 'NOPE-1')).toEqual([
       'field lim: lookup_fill lim: table TAB6 not registered (seed it first or check table_code)',
     ]);
-    // No standard given ⇒ standard-less resolution (unique code across seeded standards) still checks the shape.
-    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null })[0]).toMatch(/field lim: .*key_columns/);
+    // No standard given ⇒ standard-less resolution resolves a UNIQUE code only. TAB6 is seeded by DWA-A-138-1 AND
+    // DWA-M-1200-3 (Plan 3 Task 6 — the printed table numbers are per standard), so it is NOT resolved without a
+    // standard (never a guess) — an error, not a silent pass; a unique multi-key code (TAB789, DWA-M-1200-3 only) still checks the shape.
+    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null })[0]).toMatch(/table TAB6 not registered/);
+    const badUnique = { table_code: 'TAB789', role: 'limit', keys: [{ column: 'spritzschutz', from_symbol: 's' }, { column: 'tabelle', from_symbol: 't' }, { column: 'klasse_group', from_symbol: 'k' }], value: 'faktor' };
+    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: badUnique, visible_when: null })[0]).toMatch(/field lim: .*key_columns/);
     expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: { ...bad, table_code: 'TABX' }, visible_when: null })[0]).toMatch(/table TABX not registered/);
   });
 });
