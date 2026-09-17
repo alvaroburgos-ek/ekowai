@@ -12,8 +12,8 @@ describe('pass3c validate — widget/ui_config/lookup', () => {
   });
 });
 
-describe('pass3c validate — lookup_fill keys vs the table key_columns (Plan 2b Task 7)', () => {
-  it('validateLookupKeysOrder: keys must name the table key_columns in order; silent when the table is unknown', async () => {
+describe('pass3c validate — lookup_fill keys vs the table key_columns (Plan 2b Task 7; I-2 unregistered table is an ERROR)', () => {
+  it('validateLookupKeysOrder: keys must name the table key_columns in order; an unregistered table is an error, never silent', async () => {
     const { validateLookupKeysOrder } = await import('../_pass3c-validate');
     const { resolveRegulationTable } = await import('../../src/lib/eval/regulation-tables-fallback');
     const tab6 = resolveRegulationTable('DWA-A-138-1', 'TAB6');
@@ -22,14 +22,21 @@ describe('pass3c validate — lookup_fill keys vs the table key_columns (Plan 2b
     expect(validateLookupKeysOrder({ ...ok, keys: [ok.keys[1], ok.keys[0]] }, tab6)[0]).toMatch(/key_columns.*tier, bbz_band.*bbz_band, tier/);
     expect(validateLookupKeysOrder({ ...ok, keys: [ok.keys[0]] }, tab6)).toHaveLength(1);
     expect(validateLookupKeysOrder({ ...ok, value: 'nope' }, tab6)[0]).toMatch(/value column "nope"/);
-    expect(validateLookupKeysOrder(ok, undefined)).toEqual([]);
+    // I-2 (final review): the importer never loaded DB tables and this returned [] — a Plan-3 workbook binding a
+    // typo'd or unseeded table code passed validation and only failed at render time.
+    expect(validateLookupKeysOrder(ok, undefined, 'lim')).toEqual(['lookup_fill lim: table TAB6 not registered (seed it first or check table_code)']);
+    expect(validateLookupKeysOrder(ok, undefined)[0]).toMatch(/^lookup_fill: table TAB6 not registered/);
   });
-  it('a Fields row with widget lookup_fill and mis-ordered keys is rejected by validateFieldConfigColumns when the standard is known', () => {
+  it('a Fields row with widget lookup_fill and mis-ordered keys is rejected by validateFieldConfigColumns; an unknown standard / unregistered table is rejected too', () => {
     const bad = { table_code: 'TAB6', role: 'limit', keys: [{ column: 'bbz_band', from_symbol: 'bbz_band' }, { column: 'tier', from_symbol: 'tab6_tier' }], value: 'max' };
     expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null }, 'DWA-A-138-1')[0]).toMatch(/field lim: .*key_columns/);
-    // Unknown standard / unregistered table ⇒ shape-valid rows pass (never block an import on an unseeded table).
-    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null }, 'NOPE-1')).toEqual([]);
-    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null })).toEqual([]);
+    // Unknown standard ⇒ the table is not registered for it ⇒ error (I-2), not a silent pass.
+    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null }, 'NOPE-1')).toEqual([
+      'field lim: lookup_fill lim: table TAB6 not registered (seed it first or check table_code)',
+    ]);
+    // No standard given ⇒ standard-less resolution (unique code across seeded standards) still checks the shape.
+    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null })[0]).toMatch(/field lim: .*key_columns/);
+    expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: { ...bad, table_code: 'TABX' }, visible_when: null })[0]).toMatch(/table TABX not registered/);
   });
 });
 

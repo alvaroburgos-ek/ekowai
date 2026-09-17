@@ -45,9 +45,12 @@ export function validateFieldConfigColumns(f: {
       return [`field ${f.symbol}: lookup_fill data_type must be number|text|enum, got "${f.data_type}"`];
     }
     // Plan 2b Task 7: a lookup_fill binding must name the table's key columns (in order) and an
-    // existing value column — checked only when the table is registered/seeded at import time.
-    if (cfg.lookup && standardCode) {
-      return validateLookupKeysOrder(cfg.lookup, resolveRegulationTable(standardCode, cfg.lookup.table_code)).map((m) => `field ${f.symbol}: ${m}`);
+    // existing value column. I-2 (final review): the table MUST be registered at validation time —
+    // the importer loads the standard's DB tables first (import-pass3c.ts →
+    // ensureRegulationTablesLoadedWith); the TS seed is the fallback. Without a standard code the
+    // binding resolves standard-less (unique code across the registered/seeded standards).
+    if (cfg.lookup) {
+      return validateLookupKeysOrder(cfg.lookup, resolveRegulationTable(standardCode, cfg.lookup.table_code), f.symbol).map((m) => `field ${f.symbol}: ${m}`);
     }
     return [];
   } catch (e) {
@@ -58,11 +61,14 @@ export function validateFieldConfigColumns(f: {
 /**
  * Plan 2b Task 7: `lookup.keys[].column` must equal the table's `key_columns` in order (the
  * canonical binding shape — `row_key` and `makeTableLookup` are key_columns-ordered), and
- * `lookup.value` must be one of the table's `value_columns`. Silent (`[]`) when the table is
- * not registered at import time — never block an import on an unseeded table.
+ * `lookup.value` must be one of the table's `value_columns`. I-2 (final review): an UNREGISTERED
+ * table is an error — `lookup_fill <symbol>: table <CODE> not registered (seed it first or check
+ * table_code)` — never a silent `[]` (the importer registers the standard's DB tables before
+ * validating; a table that is still absent is either unseeded or a typo, and a lookup_fill over
+ * it can only fail at render time).
  */
-export function validateLookupKeysOrder(binding: LookupBinding, table: RegulationTable | undefined): string[] {
-  if (!table) return [];
+export function validateLookupKeysOrder(binding: LookupBinding, table: RegulationTable | undefined, symbol?: string): string[] {
+  if (!table) return [`lookup_fill${symbol ? ` ${symbol}` : ''}: table ${binding.table_code} not registered (seed it first or check table_code)`];
   const errors: string[] = [];
   const got = binding.keys.map((k) => k.column);
   if (got.join('|') !== table.key_columns.join('|')) {

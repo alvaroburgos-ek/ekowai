@@ -3,6 +3,9 @@ import { parseWorkbook } from './_pass3c-parsers';
 import { validateWorkbook, computeWorkbookGateDenyKeys } from './_pass3c-validate';
 import { computeWorkbookScanFindings } from './_pass3c-scans';
 import { importWorkbook, type ImportCounts } from './_pass3c-db';
+import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { ensureRegulationTablesLoadedWith } from '../src/lib/db/queries/regulation-tables-load';
 
 loadEnv({ path: '.env.local' });
 
@@ -36,6 +39,12 @@ async function main(): Promise<void> {
   console.log(
     `✓ Parsed: ${parsed.worksheets.length} worksheets / ${parsed.fields.length} fields / ${parsed.equations.length} equations / ${parsed.complianceRequirements.length} reqs`,
   );
+
+  // I-2 (final review): register the standard's DB regulation tables BEFORE validating so
+  // validateLookupKeysOrder checks lookup_fill bindings against the seeded tables (the TS seed
+  // remains the fallback for A138). Read-only, own short-lived client; never throws — a missing
+  // seed/schema only means an unregistered table, which the validator then reports per binding.
+  await loadRegulationTablesForValidation(parsed.standard.standard_code);
 
   console.log('Validating...');
   const errors = validateWorkbook(parsed);
@@ -88,6 +97,15 @@ async function main(): Promise<void> {
   console.log('→ COMMIT');
   printCounts(counts, parsed.standard.standard_code);
   console.log('Verification: all rows marked imported_unverified (default).');
+}
+
+async function loadRegulationTablesForValidation(standardCode: string): Promise<void> {
+  const client = postgres(databaseUrl!, { prepare: false, max: 1 });
+  try {
+    await ensureRegulationTablesLoadedWith(drizzle(client), standardCode);
+  } finally {
+    await client.end();
+  }
 }
 
 function printCounts(counts: ImportCounts, code: string): void {
