@@ -151,9 +151,16 @@ export function prepareRegisterRows(carrierRaw: unknown, columns: readonly Regis
   for (const k of opts.flagKeys ?? []) flags[k] = v[k] === true;
   if (!Array.isArray(v.rows)) return { rows: [], flags };
   const scope: Scope = { symbol: ctx.symbol ?? (() => undefined), table: ctx.table };
-  const derived = columns.filter((c) => c.type === 'derived').map((c) => ({ c, node: parseExpression(c.expr!) }));
-  const rows: PreparedRow[] = [];
   let diagnostics: string[] | undefined;
+  // A derived expression that does not parse (syntax error, or nesting beyond the
+  // parser budget — parseExpression already turns a RangeError into null) yields
+  // a null cell in every row and ONE diagnostic per column, never an escape.
+  const derived = columns.filter((c) => c.type === 'derived').map((c) => {
+    const node = parseExpression(c.expr!);
+    if (node === null) (diagnostics ??= []).push(`${c.key}: Ausdruck nicht auswertbar (Syntax)`);
+    return { c, node };
+  });
+  const rows: PreparedRow[] = [];
   for (const raw of v.rows) {
     if (!raw || typeof raw !== 'object') continue;
     const r = raw as Record<string, unknown>;

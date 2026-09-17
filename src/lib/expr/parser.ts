@@ -39,9 +39,28 @@ export type ParseNumericResult =
  * condition path never throws — it keeps returning `null` on failure. */
 class ParseError extends Error {}
 
+/** Maximum paren/call nesting before the parser gives up (fix-wave item 4). */
+const MAX_DEPTH = 64;
+const TOO_DEEP = 'Ausdruck zu tief verschachtelt.';
+
 class Parser {
   private pos = 0;
+  /** Current paren/call nesting depth — capped at MAX_DEPTH. */
+  private depth = 0;
+  /**
+   * Memo of `parseArg` results by start position (fix-wave item 4). The
+   * IF-guard and paren-grouping backtracking in `parseAtom` re-enter the
+   * call-argument grammar several times per nesting level, which made a
+   * malformed nested `if(` exponential (depth 14 ≈ 0.5 s, 16 ≈ 4.6 s). An
+   * argument parse depends only on its start position, so it is computed once.
+   */
+  private argMemo = new Map<number, { node: Expr | null; end: number }>();
   constructor(private toks: Token[]) {}
+
+  private enter(): void {
+    if (++this.depth > MAX_DEPTH) throw new ParseError(TOO_DEEP);
+  }
+  private leave(): void { this.depth--; }
 
   private peek(): Token | undefined { return this.toks[this.pos]; }
   private next(): Token | undefined { return this.toks[this.pos++]; }
@@ -109,7 +128,9 @@ class Parser {
     if (t?.type === 'lparen') {
       const save = this.pos;
       this.next();
+      this.enter();
       const expr = this.parseOr();
+      this.leave();
       if (expr !== null && this.peek()?.type === 'rparen') {
         this.next();
         const after = this.peek();
@@ -270,7 +291,9 @@ class Parser {
     if (!t) return null;
     if (t.type === 'lparen') {
       this.next();
+      this.enter();
       const e = this.parseArithExpr();
+      this.leave();
       if (e === null) return null;
       if (this.peek()?.type !== 'rparen') return null;
       this.next();
@@ -287,14 +310,19 @@ class Parser {
       this.next();
       this.next();
       const args: Expr[] = [];
-      if (this.peek()?.type !== 'rparen') {
-        for (;;) {
-          const arg = this.parseArg();
-          if (arg === null) return null;
-          args.push(arg);
-          if (this.peek()?.type === 'comma') { this.next(); continue; }
-          break;
+      this.enter();
+      try {
+        if (this.peek()?.type !== 'rparen') {
+          for (;;) {
+            const arg = this.parseArg();
+            if (arg === null) return null;
+            args.push(arg);
+            if (this.peek()?.type === 'comma') { this.next(); continue; }
+            break;
+          }
         }
+      } finally {
+        this.leave();
       }
       if (this.peek()?.type !== 'rparen') return null;
       this.next();
@@ -306,6 +334,14 @@ class Parser {
 
   // arg := arithExpr (when followed by ',' or ')') | condition
   private parseArg(): Expr | null {
+    const save = this.pos;
+    const hit = this.argMemo.get(save);
+    if (hit) { this.pos = hit.end; return hit.node; }
+    const node = this.parseArgUncached();
+    this.argMemo.set(save, { node, end: this.pos });
+    return node;
+  }
+  private parseArgUncached(): Expr | null {
     const save = this.pos;
     const arith = this.parseArithExpr();
     const after = this.peek();
@@ -354,7 +390,14 @@ export function parseCondition(src: string): Node | null {
   if (!src || !src.trim()) return null;
   const t = tokenize(src);
   if (!t.ok || t.tokens.length === 0) return null;
-  return new Parser(t.tokens).parse();
+  try {
+    return new Parser(t.tokens).parse();
+  } catch (e) {
+    // Depth cap (ParseError) or a runaway recursion (RangeError) — both are
+    // "not machine-evaluable", never an escape to the caller.
+    if (e instanceof ParseError || e instanceof RangeError) return null;
+    throw e;
+  }
 }
 
 export function parseNumeric(src: string): ParseNumericResult {
@@ -365,6 +408,7 @@ export function parseNumeric(src: string): ParseNumericResult {
     return { ok: true, node: new Parser(t.tokens).parseNumericAll() };
   } catch (e) {
     if (e instanceof ParseError) return { ok: false, message: e.message };
+    if (e instanceof RangeError) return { ok: false, message: TOO_DEEP };
     throw e; // anything else is a programming error, not a parse failure
   }
 }

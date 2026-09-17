@@ -1,31 +1,26 @@
 /**
- * Compliance condition evaluator.
+ * Compliance condition evaluator — the compliance-facing ADAPTER over the
+ * unified expression engine (`src/lib/expr`).
  *
- * Handles the common machine-evaluable patterns in
- * `compliance_requirements.condition`:
- *   - comparisons:           k_f >= 1e-6, eta_hyd <= 100
- *   - arithmetic operands:   V_Rueck >= Q * 25, total == a + b, R_energy - E_energy > 0
- *   - existence:             symbol IS NOT NULL, symbol IS NOT EMPTY
- *   - membership:            x IN {a, b, c}
- *   - boolean equality:      flag == true, x == True
- *   - logical:               cond AND cond, cond OR cond, (cond)
- *   - guarded:               IF cond THEN cond (vacuously pass when guard is false)
- *
- * Anything that doesn't parse (natural-language prose like "Engineer attestation")
- * is reported as `manual` — neither pass nor fail.
- *
- * A condition that references a symbol with no value reported as `pending`.
- *
- * Arithmetic note: arithmetic engages ONLY when +, -, *, / (or ·, ×) appear.
- * A simple `ident OP literal` / `ident OP ident` comparison keeps its original
- * semantics (bare-ident RHS = string literal) so existing gates are unchanged.
- * Arithmetic operands that reference a missing symbol, or compute a non-finite
- * result (e.g. division by zero), resolve to `pending` — never a false `fail`.
+ * Since Plan 2a the tokenizer, parser and evaluator live in `src/lib/expr`;
+ * this module keeps the historical names (`evaluateCondition`,
+ * `extractConditionSymbols`, `parseCondition`, `evaluateNode`,
+ * `evaluateArithNode`, `jsonConditionValue`) and the same AST so the gate
+ * explainer walks the identical tree. The condition grammar the engine
+ * accepts for `compliance_requirements.condition`: comparisons with a
+ * literal, bare-ident or arithmetic RHS (`k_f >= 1e-6`, `total == a + b`,
+ * `status == ersatz`), existence (`x IS [NOT] NULL/EMPTY`), membership
+ * (`x IN {a, b}`), truthy flags, `AND`/`OR`/`NOT`/parentheses, `IF cond THEN
+ * cond` guards, and calls from the shared registry (`lookup(...)`,
+ * `count_rows(...)`, `if(...)`). Anything that does not parse (prose such as
+ * "Engineer attestation") is `manual`; a referenced symbol without a value is
+ * `pending`; a symbol listed in `opts.hiddenSymbols` is `not_applicable`.
+ * Semantics pinned in `src/lib/expr/__tests__/legacy-semantics.test.ts`: a
+ * bare-ident equality RHS is an enum literal unless it names a valued symbol
+ * (simple and call-LHS forms only — an arithmetic LHS keeps a symbol-ref RHS);
+ * arithmetic with a missing operand or a non-finite result is `pending`,
+ * never a false `fail`.
  */
-//
-// Since Plan 2a the tokenizer, parser and evaluator live in `src/lib/expr`;
-// this file is the compliance-facing adapter (same names, same AST, same
-// leaf semantics — the explainer walks the identical tree).
 
 import {
   evalCondition,

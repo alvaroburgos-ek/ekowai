@@ -150,6 +150,26 @@ describe('prepareRegisterRows — fix round 2', () => {
     expect(reg.rows[0].values.kind).toBe('paved');           // the sibling derived column is unaffected
     expect(reg.diagnostics).toEqual(['bad: lookup(): Spalte nope nicht in TAB9']);
   });
+  it('an unparseable derived expr yields null cells AND one syntax diagnostic (fix-wave item 4)', () => {
+    const cols: RegisterColumn[] = [
+      ...surface.columns,
+      { key: 'broken', type: 'derived', label: 'broken', expr: 'area_m2 * (c_i' },
+    ];
+    const reg = prepareRegisterRows({ rows: [completeRow, { ...completeRow, id: '2' }] }, cols, ctx, surfaceOpts);
+    expect(reg.rows[0].values.broken).toBeNull();
+    expect(reg.rows[1].values.broken).toBeNull();
+    expect(reg.rows[0].values.kind).toBe('paved');
+    expect(reg.diagnostics).toEqual(['broken: Ausdruck nicht auswertbar (Syntax)']);
+  });
+  it('a derived expr nested beyond the parser budget is a syntax diagnostic, never an escape', () => {
+    const cols: RegisterColumn[] = [
+      ...surface.columns,
+      { key: 'deep', type: 'derived', label: 'deep', expr: '('.repeat(300) + 'area_m2' + ')'.repeat(300) },
+    ];
+    const reg = prepareRegisterRows({ rows: [completeRow] }, cols, ctx, surfaceOpts);
+    expect(reg.rows[0].values.deep).toBeNull();
+    expect(reg.diagnostics).toEqual(['deep: Ausdruck nicht auswertbar (Syntax)']);
+  });
   it('a recoverable derived-column error (missing input symbol) yields null with NO diagnostics key', () => {
     const cols: RegisterColumn[] = [
       ...surface.columns,

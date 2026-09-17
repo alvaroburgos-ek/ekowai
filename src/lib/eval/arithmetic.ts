@@ -1,30 +1,20 @@
 /**
- * Tiny arithmetic expression evaluator.
+ * Numeric adapter over the unified expression engine (`src/lib/expr`).
  *
- * Built rather than reaching for mathjs/expr-eval because:
- *   - The DWA-A 138-1 / DIN-276 / DWA-A 102-2 formulas are all numeric
- *     arithmetic — no symbolic, no matrix, no complex, no units.
- *   - Smaller than any third-party dep and trivially auditable.
- *   - Works in Turbopack's client bundle without external resolution friction.
- *
- * Grammar (precedence-climbing):
- *
- *   expr     ::= term  (('+'|'-') term)*
- *   term     ::= unary (('*'|'/') unary)*
- *   unary    ::= ('+'|'-')? power
- *   power    ::= primary ('^' unary)?      // right-associative
- *   primary  ::= NUMBER | IDENT | '(' expr ')'
- *
- * NUMBER supports scientific notation: 10, 0.5, 1e-6, 1.23e+4.
- * IDENT  is a letter-or-underscore followed by alphanumerics/underscores.
- *        Identifiers MUST be present in the substitution map — referencing
- *        a missing identifier throws, so the engine fails loud.
- * Supported function calls: 1-arg `ln`, `log10`, `sqrt`, `exp`, `abs` and
- * 2-arg `min`, `max`. Any other call — notably `SUM(...)` (needs aggregation
- * semantics) — throws, which is the correct behaviour: such formulas need a
- * rewrite rule before they can be evaluated.
- *
- * Since Plan 2a the grammar lives in `src/lib/expr`; this file is the numeric adapter.
+ * `evalExpression(expression, scope, extras)` evaluates a formula RHS in
+ * STRICT numeric mode: it builds an expr `Scope` from the number map (with
+ * `e`/`pi` as fallback constants — a field of that name always wins), the
+ * prepared registers, the regulation-table lookup and the raw carriers, then
+ * delegates to `evalNumber`. The grammar itself — precedence climbing over
+ * `+ - * / ^`, unary minus, parenthesised groups, and calls from the shared
+ * function registry (math `ln/log10/lg/sqrt/exp/abs/min/max`, rounding, logic
+ * `if/lookup/contains/cell/flag`, row functions `sum_rows/count_rows/…`) —
+ * lives in `src/lib/expr/{tokens,parser,functions,evaluate}.ts`; this file
+ * only re-exports `SUPPORTED_FUNCTIONS` / `canonicalFunctionName` for the
+ * formula normaliser. A missing symbol, an unsupported call, a wrong arity,
+ * division by zero or a non-finite result THROWS (ExprError / parse Error) so
+ * the engine fails loud; `formula.ts` classifies those messages into
+ * `manual_required` vs `error`.
  */
 
 import {

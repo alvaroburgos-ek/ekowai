@@ -113,3 +113,30 @@ describe('parseExpression', () => {
     expect(isConditionNode(parseExpression('a * b')!)).toBe(false);
   });
 });
+
+describe('parser budget (fix-wave item 4)', () => {
+  it('malformed nested if( does not go exponential (memoised call-argument parse)', () => {
+    const src = 'if('.repeat(24) + 'x';
+    const t0 = Date.now();
+    expect(parseCondition(src)).toBeNull();
+    expect(parseNumeric(src).ok).toBe(false);
+    expect(Date.now() - t0).toBeLessThan(500);
+  });
+  it('well-formed but very deep nesting still parses quickly', () => {
+    const src = 'if('.repeat(24) + 'x, 1, 2' + ', 1, 2)'.repeat(24);
+    const t0 = Date.now();
+    expect(parseNumeric(src).ok).toBe(true);
+    expect(Date.now() - t0).toBeLessThan(500);
+  });
+  it('nesting deeper than 64 fails with a parse message, never a RangeError', () => {
+    const deepParens = '('.repeat(200) + 'x' + ')'.repeat(200);
+    expect(parseNumeric(deepParens)).toEqual({ ok: false, message: 'Ausdruck zu tief verschachtelt.' });
+    expect(parseCondition(deepParens)).toBeNull();
+    const deepCalls = 'abs('.repeat(200) + 'x' + ')'.repeat(200);
+    expect(parseNumeric(deepCalls)).toEqual({ ok: false, message: 'Ausdruck zu tief verschachtelt.' });
+    expect(parseCondition(deepCalls + ' > 0')).toBeNull();
+    // 64 levels is still fine
+    const ok = '('.repeat(60) + 'x' + ')'.repeat(60);
+    expect(parseNumeric(ok).ok).toBe(true);
+  });
+});
