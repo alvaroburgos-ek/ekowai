@@ -702,6 +702,9 @@ export async function saveWorksheet(
         // overlaid values (persisted + batch) — same pure helper + lookup as the form, so the
         // materialiser sees exactly what the engineer saw: a hidden input ⇒ no value ⇒
         // manual_required ⇒ the output is written as null (clears stale values; ruling).
+        // Single-pass: visibility is evaluated against the PRE-save values (before this save's
+        // derived writes), so a `visible_when` that references a derived output sees the
+        // previous save's value, not the one materialised below (sign-off D-6/D-11).
         const templateSections = await tx
           .select({ id: worksheetSections.id, parentSectionId: worksheetSections.parentSectionId, visibleWhen: worksheetSections.visibleWhen })
           .from(worksheetSections)
