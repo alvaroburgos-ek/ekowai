@@ -105,30 +105,40 @@ async function loadCaptureInputs(args: {
     .limit(1);
   if (!tplRow) return null;
 
-  const [ownFields, eqList, crList, inherited, secList] = await Promise.all([
-    dbi
-      .select()
-      .from(fields)
-      .where(eq(fields.worksheetTemplateId, inst.worksheetTemplateId)),
-    dbi
-      .select()
-      .from(equations)
-      .where(eq(equations.worksheetTemplateId, inst.worksheetTemplateId)),
-    dbi
-      .select()
-      .from(complianceRequirements)
-      .where(eq(complianceRequirements.worksheetTemplateId, inst.worksheetTemplateId)),
-    loadInheritedFields(inst.worksheetTemplateId, tplRow.standardId, tplRow.code),
-    // Plan 2a (Task 10): sections (own visible_when + parent chain).
-    dbi
-      .select({
-        id: worksheetSections.id,
-        parentSectionId: worksheetSections.parentSectionId,
-        visibleWhen: worksheetSections.visibleWhen,
-      })
-      .from(worksheetSections)
-      .where(eq(worksheetSections.worksheetTemplateId, inst.worksheetTemplateId)),
-  ]);
+  // Task 10b: SEQUENTIAL, all on `dbi`. This runs inside the caller's
+  // transaction on submit/approve (`txDb: tx`), and a transaction handle is
+  // ONE connection — concurrent queries on it cannot interleave. The old
+  // `Promise.all` also called `loadInheritedFields` on the GLOBAL pool from
+  // inside the open tx; with a small pool the global query waited for the
+  // connection the tx held → every submit hung (prod, 2026-09-17). Four small
+  // queries in series cost nothing measurable.
+  const ownFields = await dbi
+    .select()
+    .from(fields)
+    .where(eq(fields.worksheetTemplateId, inst.worksheetTemplateId));
+  const eqList = await dbi
+    .select()
+    .from(equations)
+    .where(eq(equations.worksheetTemplateId, inst.worksheetTemplateId));
+  const crList = await dbi
+    .select()
+    .from(complianceRequirements)
+    .where(eq(complianceRequirements.worksheetTemplateId, inst.worksheetTemplateId));
+  // Plan 2a (Task 10): sections (own visible_when + parent chain).
+  const secList = await dbi
+    .select({
+      id: worksheetSections.id,
+      parentSectionId: worksheetSections.parentSectionId,
+      visibleWhen: worksheetSections.visibleWhen,
+    })
+    .from(worksheetSections)
+    .where(eq(worksheetSections.worksheetTemplateId, inst.worksheetTemplateId));
+  const inherited = await loadInheritedFields(
+    inst.worksheetTemplateId,
+    tplRow.standardId,
+    tplRow.code,
+    dbi,
+  );
 
   const merged = mergeInheritedFields(ownFields, inherited);
   const allFields = merged.fields;

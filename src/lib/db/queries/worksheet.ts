@@ -16,6 +16,15 @@ import {
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 
+/** The subset of the Drizzle API a query helper needs when a caller hands it
+ * its transaction handle. Wider than `typeof db` so Drizzle's `tx` type (not
+ * assignable to `typeof db`) satisfies it. Mirrors the type of the same name
+ * in `src/lib/snapshots/capture.ts`. */
+export type DrizzleClient = {
+  select: typeof db.select;
+  insert: typeof db.insert;
+};
+
 /** Resolve a standard + worksheet by codes, throwing if not found. */
 export async function loadWorksheet(standardCode: string, worksheetCode: string) {
   const rows = await db
@@ -143,8 +152,14 @@ export async function loadInheritedFields(
   currentTemplateId: string,
   currentStandardId: string,
   currentWorksheetCode: string,
+  /** Task 10b: the caller's transaction handle when running inside a
+   * `db.transaction`. Querying the global pool from inside an open tx waits
+   * for a connection the tx itself holds → deadlock once the pool is
+   * exhausted (prod "Zur Prüfung einreichen" hang, 2026-09-17). Callers
+   * outside a transaction (page render, reports) keep the default. */
+  dbi: DrizzleClient = db,
 ): Promise<InheritedField[]> {
-  const rows = await db
+  const rows = await dbi
     .select({
       field: fields,
       originCode: worksheetTemplates.code,
