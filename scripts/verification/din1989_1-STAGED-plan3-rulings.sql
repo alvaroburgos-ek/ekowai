@@ -1,0 +1,159 @@
+-- DIN-1989-1 — Plan 3 Task 2 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, equation ids/formulas, gate conditions) were
+-- captured read-only on 2026-09-17 (src/lib/eval/field-configs/din1989_1.prior.json; prod-query.mjs for the
+-- equation and compliance_requirements rows quoted below). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-1989-1\DIN-1989-1.md.
+--
+-- Conventions: `s.code = 'DIN-1989-1'`, worksheets by code, never by id; every UPDATE is guarded by the prior
+-- value it replaces so a re-run is a no-op; each block names its rollback. The Plan-3 DATA migrations
+-- (20260917100200 seed · 20260917100210 field configs · 20260917100220 equations) must be applied BEFORE any block
+-- that reads a created symbol (sum_a_e, bw_person, bw_flaeche, tagesbedarf, speicheroeffnung_min_erf, kanalart).
+
+-- =====================================================================================================================
+-- din1989_1-R-1 · DIN-1989-1-04 · Gl. 1 — read Σ(A_A · e) from the auffangflaechen register instead of the scalars A_A / e
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L860 "E_R = A_A × e × h_N × η (1)"; L362 "möglichst alle verfügbaren Auffangflächen … genutzt werden
+-- sollten"; L830 "Als Planungsgrundlage … können die Werte nach Tabelle 3 verwendet werden". Prod equation '1'
+-- (id 5c32f168-f50b-492b-bde8-bec4a909d676, verified_against_standard): E_R = A_A * e * h_N * eta, inputs [A_A,e,h_N,eta].
+-- Why staged: replaces a verified equation (input set changes from two typed scalars to a register sum) and retires the
+-- scalar inputs A_A / e (deactivation) — both sign-off classes. Until ratified: sum_a_e (DIN-1989-1-04-D1) is a visible
+-- derived field next to the scalars; Gl. 1 keeps computing from A_A · e.
+-- BEGIN;
+-- UPDATE equations SET formula = 'E_R = sum_a_e * h_N * eta', input_symbols = ARRAY['sum_a_e','h_N','eta']::text[],
+--   verification_status = 'imported_unverified'
+--  WHERE id = '5c32f168-f50b-492b-bde8-bec4a909d676' AND formula = 'E_R = A_A * e * h_N * eta';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-04' AND s.code = 'DIN-1989-1' AND f.symbol IN ('A_A', 'e') AND f.active;
+-- COMMIT;
+-- Rollback: UPDATE equations SET formula = 'E_R = A_A * e * h_N * eta', input_symbols = ARRAY['A_A','e','h_N','eta']::text[],
+--   verification_status = 'verified_against_standard' WHERE id = '5c32f168-f50b-492b-bde8-bec4a909d676';
+--   UPDATE fields … SET active = true … symbol IN ('A_A','e').
+-- Note: existing project values of A_A / e are not migrated into register rows by this block (one roof → one row would
+-- need a backfill script; owner decides whether to run one).
+
+-- =====================================================================================================================
+-- din1989_1-R-2 · DIN-1989-1-04 · BW_a — ONE producer (bw_person + bw_flaeche) instead of the two same-output rows Gl. 2 / Gl. 3
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L897 "Der Betriebswasserbedarf im Haushalt setzt sich zusammen aus personenbezogenen Angaben (z. B. Toilette)
+-- nach BW_a = P_d × n × 365" and L904 "und aus flächenbezogenen Angaben (Grünflächen und Garten) nach BW_a = A_Bew × BS_a".
+-- Prod: equation '2' (id 8f516224-e4a7-46bf-a44e-6d571484f90a) BW_a = P_d * n * 365 and equation '3'
+-- (id 4d57786c-99cd-400f-843e-93bb2d16166f) BW_a = A_Bew * BS_a — BOTH output BW_a (verified_against_standard); the
+-- engine's first-in-list rule decides which one wins today, and a household with a garden never gets the sum.
+-- Why staged: replaces two verified equations and retires the scalar inputs P_d / n / A_Bew / BS_a. Until ratified:
+-- bw_a_total (DIN-1989-1-04-D4) is a visible derived field; Gl. 4 (V_n) keeps reading the prod BW_a.
+-- BEGIN;
+-- UPDATE equations SET formula = 'BW_a = bw_person + bw_flaeche', input_symbols = ARRAY['bw_person','bw_flaeche']::text[],
+--   description = 'Plan 3 (din1989_1-R-2): Betriebswasserjahresbedarf = personenbezogener + flächenbezogener Anteil (Register verbraucher / bewaesserungsflaechen)',
+--   verification_status = 'imported_unverified'
+--  WHERE id = '8f516224-e4a7-46bf-a44e-6d571484f90a' AND formula = 'BW_a = P_d * n * 365';
+-- DELETE FROM equations WHERE id = '4d57786c-99cd-400f-843e-93bb2d16166f' AND formula = 'BW_a = A_Bew * BS_a';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-04' AND s.code = 'DIN-1989-1' AND f.symbol IN ('P_d', 'n', 'A_Bew', 'BS_a') AND f.active;
+-- COMMIT;
+-- Rollback: restore equation '2' formula/inputs/status; re-insert equation '3' (worksheet DIN-1989-1-04, equation_number '3',
+--   formula 'BW_a = A_Bew * BS_a', input_symbols ARRAY['A_Bew','BS_a'], output_symbol 'BW_a', verified_against_standard);
+--   re-activate the four scalar fields.
+
+-- =====================================================================================================================
+-- din1989_1-G-1 · DIN-1989-1-05 · rueckstauschutz_art — Mischwasserkanal excludes the Rückstauverschluss (new gate guard)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L667 "Falls der Überlauf von Regenwasserspeichern der Mischwasserkanalisation oder von in Kellerräumen
+-- aufgestellten Regenwasserspeichern der Regenwasserkanalisation zugeführt wird, ist dieser rückstaufrei (siehe Bild 2)
+-- oder über eine Hebeanlage (siehe Bild 3) auszuführen."; L669 "Ein Anschluss an einen Mischwasserkanal über einen
+-- Rückstauverschluss ist nicht zulässig." Prod CR-12 (block): rueckstauschutz_art IN {rueckstaufrei,hebeanlage,
+-- rueckstauverschluss,nicht_erforderlich} — the full enum domain, so it can never fail on a valid selection.
+-- Why staged: a NEW gate (enforcement change). The driver `kanalart` (mischwasser | regenwasser) is created by the
+-- Plan-3 field-config migration; `speicher_aufstellung == 'keller'` is captured on DIN-1989-1-02 and consumed by -05.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF kanalart == mischwasser OR speicher_aufstellung == keller THEN rueckstauschutz_art IN {rueckstaufrei,hebeanlage}',
+--   description = 'Plan 3 (din1989_1-G-1): Überlauf in die Mischwasserkanalisation oder aus Kellerspeichern nur rückstaufrei oder über Hebeanlage (§14); Rückstauverschluss nur für Erdspeicher am Regenwasserkanal.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-05' AND s.code = 'DIN-1989-1' AND c.code = 'DIN-1989-1-CR-12'
+--    AND c.condition = 'rueckstauschutz_art IN {rueckstaufrei,hebeanlage,rueckstauverschluss,nicht_erforderlich}';
+-- COMMIT;
+-- Rollback: restore condition 'rueckstauschutz_art IN {rueckstaufrei,hebeanlage,rueckstauverschluss,nicht_erforderlich}'.
+-- Open point for the owner: the "nicht_erforderlich" case (L655: no Rückstausicherung when the overflow goes to an
+-- infiltration system not connected to the sewer) is not a Kanalart — a second guard `IF ueberlauf_versickerung == true …`
+-- may be wanted; not proposed here.
+
+-- =====================================================================================================================
+-- din1989_1-G-2 · DIN-1989-1-03 · hybridbehaelter_volumen ≤ halber Tagesbedarf (new gate; "sollte")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L591 "Hybridbehälter sind in Bezug auf die Betriebswasserpumpe als Vorlagebehälter zu betrachten und
+-- entsprechend zu dimensionieren. Ihr Volumen sollte nicht größer als der halbe Tagesbedarf an Betriebswasser sein."
+-- Why staged: a NEW gate on a "sollte" sentence (severity is the owner's call: warn proposed); the input `tagesbedarf`
+-- is produced on DIN-1989-1-04 and needs the consumer edit din1989_1-C-2 first.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'DIN-1989-1-CR-15', 'Hybridbehaelter hoechstens halber Tagesbedarf', 'IF hybridbehaelter_volumen IS NOT NULL THEN hybridbehaelter_volumen <= tagesbedarf / 2', '§11', 'warn',
+--        'Plan 3 (din1989_1-G-2): Ihr Volumen sollte nicht größer als der halbe Tagesbedarf an Betriebswasser sein (L591).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'DIN-1989-1-03' AND s.code = 'DIN-1989-1';
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements … WHERE code = 'DIN-1989-1-CR-15'.
+
+-- =====================================================================================================================
+-- din1989_1-G-3 · DIN-1989-1-02 · CR-04 — speicheroeffnung_dn >= 200 vs. Tab. 2 (200 only for oberirdisch ≤ 3000 l; else 600)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L493 "oberirdische Speicher ≤ 3000 l Einzelvolumen ≥ 200"; L494 "> 3000 l … ≥ 600"; L495 "unterirdischen
+-- Speicher bis Domhöhe ≤ 450 mm ≥ 600"; L496 "ab Domhöhe > 450 mm mit Aufweitung des Domdurchmessers auf ≥ 800 mm ≥ 600".
+-- Prod CR-04 (block): speicheroeffnung_dn >= 200 — passes a 300 mm opening on a 10 m³ Erdtank that Tab. 2 puts at ≥ 600.
+-- Why staged: gate condition change (enforcement). The derived `speicheroeffnung_min_erf` (DIN-1989-1-02-D3, max over
+-- the register rows) is the Tab.-2 bound; it is null while the register is empty (the gate then reads `pending`, never
+-- a false pass — but also never blocks: the owner may prefer `>= 200` as a floor AND the Tab.-2 bound).
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'speicheroeffnung_dn >= 200 AND speicheroeffnung_dn >= speicheroeffnung_min_erf',
+--   description = 'Plan 3 (din1989_1-G-3): Speicheröffnung ≥ 200 mm (Tab. 2 Mindestwert) und ≥ der maßgebenden Tab.-2-Mindestöffnung der erfassten Behälter.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-02' AND s.code = 'DIN-1989-1' AND c.code = 'DIN-1989-1-CR-04'
+--    AND c.condition = 'speicheroeffnung_dn >= 200';
+-- COMMIT;
+-- Rollback: restore condition 'speicheroeffnung_dn >= 200'.
+
+-- =====================================================================================================================
+-- din1989_1-C-1 · DIN-1989-1-03 · sicherungseinrichtung_typ — visible_when nachspeisung_medium == 'trinkwasser' REFUSED (consumed by -05)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L565 "Wenn Trinkwasser verwendet wird, muss die Nachspeisung über eine Sicherungseinrichtung Typ AA
+-- (ungehinderter freier Auslauf) oder Typ AB (freier Auslauf mit nicht kreisförmigem Überlauf) nach DIN EN 1717 erfolgen."
+-- Captured: consumer_worksheets = ["DIN-1989-1-05"]; prod CR-06 already guards it (nachspeisung_medium != trinkwasser OR
+-- sicherungseinrichtung_typ IN {AA,AB}). Why staged: hiding a producer hides the value -05 inherits (emitter guard); the
+-- driver `nachspeisung_medium` is NOT consumed by -05, so a rule on -05's inherited copy cannot be evaluated there either.
+-- Options: (a) drop the consumer (-05 does not read the symbol in any gate — captured CR-11/12/13 name other symbols) and
+-- then apply the field rule; (b) keep visible (as built).
+-- (a) BEGIN;
+-- UPDATE fields f SET consumer_worksheets = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-03' AND s.code = 'DIN-1989-1' AND f.symbol = 'sicherungseinrichtung_typ'
+--    AND f.consumer_worksheets = ARRAY['DIN-1989-1-05']::text[];
+-- UPDATE fields f SET visible_when = 'nachspeisung_medium == ''trinkwasser''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-03' AND s.code = 'DIN-1989-1' AND f.symbol = 'sicherungseinrichtung_typ' AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: consumer_worksheets = ARRAY['DIN-1989-1-05'], visible_when = NULL.
+
+-- =====================================================================================================================
+-- din1989_1-C-2 · DIN-1989-1-04 · tagesbedarf — consumer_worksheets += DIN-1989-1-03 (the Hybrid limit reads it there)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L591 (see G-2). `tagesbedarf` is created by the field-config migration without consumers (the create INSERT
+-- never sets consumer_worksheets); G-2 cannot evaluate on -03 without this edit.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['DIN-1989-1-03']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-04' AND s.code = 'DIN-1989-1' AND f.symbol = 'tagesbedarf'
+--    AND f.description LIKE 'Plan 3:%' AND f.consumer_worksheets IS NULL;
+-- COMMIT;
+-- Rollback: consumer_worksheets = NULL on that row.
+
+-- =====================================================================================================================
+-- din1989_1-J-1 · DIN-1989-1-04 · TAB4_FLAECHE Grünland ranges (SR-2) — as built, no SQL
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L887–L890 "für Grünland bei leichtem Boden bei schwerem Boden … 100 l/m² bis 200 l/m² 80 V/m² bis 150 V/m²".
+-- Built: the register column `bs_a` is the engineer's pick (required number), `bs_a_min`/`bs_a_max` show the printed
+-- bounds, `bs_in_range` badges "außerhalb Tab. 4" — a visible state, no gate. Ratify = keep; reject = say whether an
+-- out-of-range pick should warn or block.
+
+-- =====================================================================================================================
+-- din1989_1-J-2 · DIN-1989-1-06 · TAB5 abwasserhebeanlage — one row with "3 Monate (b) / 6 Monate (c) / 1 Jahr (d)"
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1050–L1052 "3 Monate b / 6 Monate c / 1 Jahr d"; L1059–L1061 "b in gewerblichen Betrieben / c in
+-- Mehrfamilienhäusern / d in Einfamilienhäusern". Prod `anwendungsbereich` (haushalt | gewerbe_industrie |
+-- oeffentliche_einrichtung) does not separate Ein- from Mehrfamilienhäuser, so the row cannot be split by an existing
+-- driver. Alternative if rejected: three rows abwasserhebeanlage_gewerbe / _mfh / _efh keyed by a NEW gebaeudetyp field.

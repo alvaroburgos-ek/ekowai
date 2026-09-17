@@ -277,3 +277,140 @@ Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGE
 - Evidence (verbatim, transcript line): n/a (encoding); the producer per quantity is a prod equation row (e.g. Gl. 2 A_C on A138-07, Gl. 5 k_i on A138-11, Gl. 4 Q_S on A138-12, Gl. 8 V_VA on A138-13).
 - Proposed SQL / config: STAGED block a138-X-4 (per-quantity consumer_worksheets additions + deactivations, written once the owner confirms the producer list).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+## Task 2 — DIN-1989-1 (din1989_1)
+
+Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din1989_1-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-1989-1\DIN-1989-1.md` (lines cited) · prod capture `src/lib/eval/field-configs/din1989_1.prior.json` (2026-09-17, read-only). Ids follow the Task-2 brief where it names them (R-1/R-2 = the two equation rewrites, J-1/J-2, G-1…G-3, U-1, X-1); the rest use the skeleton letters. Nothing below is applied.
+
+### din1989_1-U-1 · DIN-1989-1 · DIN-1989-1-04 · TAB4_PERSON (two OCR cells "V" for "l")
+- Class: unreadable-cell
+- Chosen now (fail-safe): rows seeded with 24 / 12 / 6 l/(Person·d) (the unit L881 prints legibly as "l / Person × Tag"); table stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "$12 \mathrm{~V} /$ Person $\times$ Tag" (L882); "$6 \mathrm{~V} /$ Person $\times$ Tag" (L883); legible sibling "$24 \mathrm{l} /$ Person $\times$ Tag" (L881).
+- Proposed SQL / config: owner reads the PDF cells (SR-3); then `UPDATE regulation_tables SET verification_status = 'md_verified' WHERE standard_code = 'DIN-1989-1' AND table_code = 'TAB4_PERSON' AND verification_status = 'imported_unverified';`
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-U-2 · DIN-1989-1 · DIN-1989-1-04 · TAB4_FLAECHE (merged Grünland row + "V")
+- Class: unreadable-cell
+- Chosen now (fail-safe): two rows `gruenland_leicht` (100–200) and `gruenland_schwer` (80–150) seeded from ONE merged OCR span, pairing by printed order; both carry the same quote; table stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline - für Grünland bei leichtem Boden bei schwerem Boden & Gesamtmenge für 6 Monate Gesamtmenge für 6 Monate & … & $100 \mathrm{l} / \mathrm{m}^{2}$ bis $200 \mathrm{l} / \mathrm{m}^{2} 80 \mathrm{~V} / \mathrm{m}^{2}$ bis $150 \mathrm{~V} / \mathrm{m}^{2}$ \\" (L887–L890).
+- Proposed SQL / config: owner confirms the two printed rows on the PDF; then the same status flip as U-1 for `TAB4_FLAECHE`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-U-3 · DIN-1989-1 · DIN-1989-1-02 · TAB1 (blank class-number cells)
+- Class: unreadable-cell
+- Chosen now (fail-safe): classes 2/3/4 keyed by printed position between "1" and "5" (labels "PKW - befahrbar", "LKW 12 - befahrbar", "SLW 30 - befahrbar" are legible and match the prod enum labels); table stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline \multirow{2}{*}{} & \multirow[t]{2}{*}{PKW - befahrbar} & PKW & 1,2 & \multirow[t]{2}{*}{B 125} \\" (L471); same empty first cell at L473 (LKW 12) and L475 (SLW 30); "\hline 1 & begehbar & Personen & & A 15 \\" (L470); "\hline 5 & SLW 60 - befahrbar & Schwerlastfahrzeug 60 ta & 20,0 & D 400 \\" (L477).
+- Proposed SQL / config: owner confirms "2 / 3 / 4" on the PDF; then the status flip for `TAB1` (together with J-4).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-U-4 · DIN-1989-1 · DIN-1989-1-02 · TAB2 ("I" for "l")
+- Class: unreadable-cell
+- Chosen now (fail-safe): "3000 I Einzelvolumen" read as 3000 l (the caption L490 and the value column "Speicheröffnung mm" L492 are legible; Einzelvolumen is a volume); table stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline oberirdische Speicher $\leq 3000$ I Einzelvolumen & $\geq 200$ \\" (L493); "\hline oberirdische Speicher > 3000 I Einzelvolumen & $\geq 600$ \\" (L494).
+- Proposed SQL / config: owner confirms on the PDF; then the status flip for `TAB2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-U-5 · DIN-1989-1 · DIN-1989-1-04 · verkuerzt_band_beachtet (L808 "V" for "l")
+- Class: unreadable-cell
+- Chosen now (fail-safe): the created attestation's LABEL reads "25 l/m² bis 50 l/m²" (physically meaningful; the sentence also prints "800 l bis 1000 l" legibly); its `verification_quote` carries the printed text with "V".
+- Evidence (verbatim, transcript line): "Das Nutzvolumen sollte einerseits $25 \mathrm{~V} / \mathrm{m}^{2}$ bis $50 \mathrm{~V} / \mathrm{m}^{2}$ angeschlossener Auffangfläche (nicht für Gründächer) betragen und andererseits sollten 800 l bis 1000 l Nutzvolumen je Nutzer vorgesehen werden." (L808)
+- Proposed SQL / config: none (label text); owner confirms "l" on the PDF.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-J-1 · DIN-1989-1 · DIN-1989-1-04 · TAB4_FLAECHE Grünland ranges (SR-2)
+- Class: range-SR-2
+- Chosen now (fail-safe): `bewaesserungsflaechen.bs_a` is a required engineer pick; `bs_a_min`/`bs_a_max` show the Tab. 4 bounds per row; derived `bs_in_range` badges "außerhalb Tab. 4"; no gate; single-value rows (Garten 60, Sportanlagen 200) carry min = max.
+- Evidence (verbatim, transcript line): "$100 \mathrm{l} / \mathrm{m}^{2}$ bis $200 \mathrm{l} / \mathrm{m}^{2} 80 \mathrm{~V} / \mathrm{m}^{2}$ bis $150 \mathrm{~V} / \mathrm{m}^{2}$" (L890); "Der jährliche Betriebswasserbedarf kann aus den Bedarfswerten nach Tabelle 4 ermittelt werden." (L873)
+- Proposed SQL / config: STAGED file block din1989_1-J-1 (as built; owner says whether an out-of-range pick should warn or block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-J-2 · DIN-1989-1 · DIN-1989-1-06 · TAB5 abwasserhebeanlage (footnotes b/c/d)
+- Class: text-only-formula
+- Chosen now (fail-safe): one row, `wartung_intervall = "3 Monate (b) / 6 Monate (c) / 1 Jahr (d)"`, `hinweis` = the three footnotes; TAB5 `md_verified` (every cell lifted and legible).
+- Evidence (verbatim, transcript line): "3 Monate ${ }^{\mathrm{b}}$ \\ 6 Monate ${ }^{\mathrm{c}}$ \\ 1 Jahr ${ }^{\text {d }}$" (L1050–L1052); "b in gewerblichen Betrieben \\ c in Mehrfamilienhäusern \\ d in Einfamilienhäusern" (L1059–L1061).
+- Proposed SQL / config: STAGED file block din1989_1-J-2 (three rows keyed by a new `gebaeudetyp` driver if the owner wants the interval resolved per building type — prod `anwendungsbereich` cannot separate Ein-/Mehrfamilienhäuser).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-J-3 · DIN-1989-1 · DIN-1989-1-04 · TAB3 header "Ertragsbeiwert % e" vs. fraction cells
+- Class: override-policy
+- Chosen now (fail-safe): `e` seeded as printed fractions (0,8 · 0,6 · 0,3 · 0,5); prod Gl. 1 (`E_R = A_A * e * h_N * eta`) multiplies them directly and stays untouched; TAB3 `md_verified` (rows lifted, cells legible).
+- Evidence (verbatim, transcript line): "\hline Beschaffenheit & Ertragsbeiwert \% e \\" (L836); "e der Ertragsbeiwert in \%" (L867); "\hline geneigtes Hartdach ${ }^{\text {a }}$ & 0,8 \\" (L837).
+- Proposed SQL / config: none — the owner confirms that the printed "%" is a header slip and the fraction is the value Gl. 1 uses (a 100× discrepancy otherwise).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-J-4 · DIN-1989-1 · DIN-1989-1-02 · TAB1 numeric example column (no unit / header)
+- Class: text-only-formula
+- Chosen now (fail-safe): the printed numbers (1,2 · 2,2 · 7,2 · 8,0 · 11,5 · 13,0 · 20,0) are NOT seeded as a numeric column (the brief's `pruefkraft_kn` names a unit the page does not print); they stay inside the string `verkehrslast_beispiele` ("PKW 1,2; Kleinbus 2,2" …).
+- Evidence (verbatim, transcript line): "\hline \multicolumn{2}{|c|}{Belastungsklasse} & \multicolumn{2}{|c|}{Beispiele für die Verkehrslasten} & Zu wählende Abdeckung nach DIN EN 124 \\" (L469) — the fourth column has no sub-header.
+- Proposed SQL / config: if the owner reads the unit on the PDF (SR-3), add a value column to TAB1 in a later seed revision.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-R-1 · DIN-1989-1 · DIN-1989-1-04 · Gl. 1 onto sum_a_e
+- Class: equation-replacement
+- Chosen now (fail-safe): `sum_a_e` (DIN-1989-1-04-D1, `sum_rows(auffangflaechen, a_a * e)`) is a visible derived field; prod Gl. 1 keeps reading the scalars A_A · e.
+- Evidence (verbatim, transcript line): "E_{\mathrm{R}}=A_{\mathrm{A}} \times e \times h_{\mathrm{N}} \times \eta \tag{1}" (L860); "möglichst alle verfügbaren Auffangflächen die nach 5.2 qualitativ geeignet sind, genutzt werden sollten" (L362).
+- Proposed SQL / config: STAGED file block din1989_1-R-1 (`E_R = sum_a_e * h_N * eta`, deactivate A_A / e).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-R-2 · DIN-1989-1 · DIN-1989-1-04 · BW_a — two same-output rows → one sum
+- Class: equation-replacement
+- Chosen now (fail-safe): `bw_person`, `bw_flaeche`, `bw_a_total` (D2/D3/D4) are visible derived fields; prod rows '2' and '3' (both output `BW_a`) untouched — today the first row in list order wins and a household with a garden never gets the sum.
+- Evidence (verbatim, transcript line): "Der Betriebswasserbedarf im Haushalt setzt sich zusammen aus personenbezogenen Angaben (z. B. Toilette) nach $B W_{\mathrm{a}}=P_{\mathrm{d}} \times n \times 365$" (L897–L898); "und aus flächenbezogenen Angaben (Grünflächen und Garten) nach $B W_{\mathrm{a}}=A_{\text {Bew. }} \times B S_{\mathrm{a}}$" (L904–L905).
+- Proposed SQL / config: STAGED file block din1989_1-R-2 (`BW_a = bw_person + bw_flaeche` on row '2', delete row '3', deactivate P_d / n / A_Bew / BS_a).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-G-1 · DIN-1989-1 · DIN-1989-1-05 · CR-12 Mischwasser excludes Rückstauverschluss
+- Class: gate-guard
+- Chosen now (fail-safe): `kanalart` (mischwasser | regenwasser) created as a select_one; CR-12 unchanged (it lists the whole enum domain and cannot fail on a valid pick).
+- Evidence (verbatim, transcript line): "Ein Anschluss an einen Mischwasserkanal über einen Rückstauverschluss ist nicht zulässig." (L669); L667 (Mischwasserkanalisation / Kellerräume ⇒ rückstaufrei oder Hebeanlage).
+- Proposed SQL / config: STAGED file block din1989_1-G-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-G-2 · DIN-1989-1 · DIN-1989-1-03 · Hybridbehälter ≤ halber Tagesbedarf
+- Class: gate-guard
+- Chosen now (fail-safe): `tagesbedarf` (D5 = bw_a_total / 365) is a visible derived field on -04; no gate.
+- Evidence (verbatim, transcript line): "Ihr Volumen sollte nicht größer als der halbe Tagesbedarf an Betriebswasser sein." (L591)
+- Proposed SQL / config: STAGED file block din1989_1-G-2 (new CR-15, warn proposed for "sollte"); needs C-2 first.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-G-3 · DIN-1989-1 · DIN-1989-1-02 · CR-04 (≥ 200) vs. Tab. 2
+- Class: gate-guard
+- Chosen now (fail-safe): per-tank minimum as a derived register column + `speicheroeffnung_min_erf` (D3, max over rows) visible; CR-04 unchanged.
+- Evidence (verbatim, transcript line): L493–L496 (200 only for "oberirdische Speicher ≤ 3000 l Einzelvolumen"; every other row "≥ 600"); "dürfen die Öffnungen der Speicher die folgenden Durchmesser nicht unterschreiten" (L486).
+- Proposed SQL / config: STAGED file block din1989_1-G-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-C-1 · DIN-1989-1 · DIN-1989-1-03 · sicherungseinrichtung_typ visible_when refused
+- Class: consumer-edit
+- Chosen now (fail-safe): field stays visible; CR-06 already guards the Trinkwasser case.
+- Evidence (verbatim, transcript line): "Wenn Trinkwasser verwendet wird, muss die Nachspeisung über eine Sicherungseinrichtung Typ AA (ungehinderter freier Auslauf) oder Typ AB (freier Auslauf mit nicht kreisförmigem Überlauf) nach DIN EN 1717 erfolgen." (L565); captured `consumer_worksheets = ["DIN-1989-1-05"]`.
+- Proposed SQL / config: STAGED file block din1989_1-C-1 (drop the -05 consumer — no captured -05 gate reads the symbol — then the field rule).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-C-2 · DIN-1989-1 · DIN-1989-1-04 · tagesbedarf consumer_worksheets += DIN-1989-1-03
+- Class: consumer-edit
+- Chosen now (fail-safe): created without consumers (the create INSERT sets none).
+- Evidence (verbatim, transcript line): L591 (see G-2).
+- Proposed SQL / config: STAGED file block din1989_1-C-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-I-1 · DIN-1989-1 · DIN-1989-1-02 · scalar `speicheroeffnung_dn_min` lookup_fill not encodable
+- Class: interface-gap
+- Chosen now (fail-safe): no scalar lookup_fill on TAB2 (its second key — the Einzelvolumen / Domhöhe band — is no scalar field, and prod `speicher_aufstellung` carries `keller`, which has no Tab. 2 row); the per-tank minimum is a two-key `lookup()` derived column of `speicher_behaelter`, the governing scalar is D3.
+- Evidence (verbatim, transcript line): L493–L496 (four rows keyed by Aufstellung × band); captured `speicher_aufstellung` enum = oberirdisch | unterirdisch | keller.
+- Proposed SQL / config: none — G-3 re-points CR-04 onto D3. Owner may rule how a `keller` tank maps to Tab. 2 (the register's own `aufstellung` column offers only the two printed kinds).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-X-1 · DIN-1989-1 · DIN-1989-1-04/-05 · cross-standard links
+- Class: cross-standard
+- Chosen now (fail-safe): nothing shared; `eta` stays a -04 number input; `versickerung_bemessung_a138` stays an attestation (bare pointer, content-boundary rule); `h_N` stays an engineer input.
+- Evidence (verbatim, transcript line): "ANMERKUNG Bei regelmäßig gewarteten Filtersystemen wird in der Regel ein hydraulischer Filterwirkungsgrad von 0,9 erzielt." (L853); "Baugrundsätze und Bemessung von Regenwasserversickerungsanlagen sind im ATV-Arbeitsblatt A 138 festgelegt." (L659); "Die Niederschlagshöhen betragen zwischen 500 mm und $1600 \mathrm{~mm}$ … je Jahr." (L822)
+- Proposed SQL / config: later — `eta` ≡ DIN-1989-2 `eta_hydr` (inherit by reference once DIN-1989-2 is encoded, Task 17); the `auffangflaechen` rows are the same physical roofs as A138-07 `surface_inventory` (a project-level share needs a cross-standard carrier the mechanism does not have).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 2, no signature needed)
+
+- **Edition token `'2002'`:** the transcript's title page (L1–L14) prints no date; the seed uses prod `standards.version` "2002 (DIN 1989-1)" read in-session. The harness header (`tests/harness/din1989-1-verify.integration.test.ts`) says "DIN 1989-1:2002-04" from a scan read in another session — not re-verified here (R-2). If the owner confirms 2002-04 on the PDF cover, the edition token can be changed in a seed revision before the migration is applied (it is a component of the table's unique key).
+- **Anhang B (15 rows) vs. §17.2 (13 bullets, L956–L968):** the `inbetriebnahme_pruefpunkte` select_many lists the 15 Anhang B rows (the brief's choice); §17.2's bullets are the Probelauf checks and are carried as the widget's note (L955).
+- **`e` as a register column key:** the evaluator's `e` = Euler fallback applies only to a symbol NOT provided as a value; a row cell named `e` always shadows it (pinned in `regulation-tables-seed-din1989-1.test.ts`).
+- **Section rule on DIN-1989-1-04 B:** hides the eight Gl. 1–4 scalar inputs AND the three new registers while `bemessungsverfahren == 'verkuerzt'` (L796 "keine Berechnungen"); E_R / BW_a / V_n stay visible (consumed) and read `manual_required`; V_n is typed by hand in that case.

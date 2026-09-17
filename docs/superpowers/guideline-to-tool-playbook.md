@@ -359,6 +359,17 @@ two "i. d. R." cells L2257/L2259) — each fragment must still be verbatim and l
 comment. `verify-regulation-tables.ts` checks row `verbatim_quote`s only; `override_quote` is NOT
 machine-verified, so the composition is the executor's SR-1 duty and the reviewer's spot-check.
 
+**Quote-lifting traps (Plan 3 Task 2, DIN-1989-1).** (1) The transcript's LaTeX token `${ }` (an empty
+group before a superscript, e.g. `${ }^{\text {a }}$`) is a template interpolation inside `String.raw` — write
+it as `${'$'}{ }` (a138 TAB14 does the same); the verifier still matches because the runtime string is `${ }`.
+(2) Never patch a seed file with `String.prototype.replace` and a replacement containing `$'` — it expands to
+the text after the match and duplicates the file (the a138 incident, repeated in Task 2; rewrite the file
+instead). (3) A register column named `e` (or `pi`) shadows the evaluator's Euler/π fallback in row scope
+(`readSymbol` reads the row first; a null cell is a missing input, never 2,718) — pin it per standard.
+(4) Boolean drivers are `== true` in the DSL (`ueberlauf_versickerung == true`), matching the prod gate texts.
+(5) A `create` entry never sets `consumer_worksheets` — a derived field another worksheet must read (the
+Hybrid limit reading `tagesbedarf` on -03) needs a STAGED consumer edit before its gate can evaluate there.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still

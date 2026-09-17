@@ -1,0 +1,1491 @@
+{
+  "_meta": {
+    "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-1989-1 din1989_1",
+    "captured_at": "2026-09-17T14:56:29.590Z",
+    "standard": "DIN-1989-1",
+    "slug": "din1989_1",
+    "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
+    "columns_present": {
+      "fields": {
+        "widget": false,
+        "ui_config": false,
+        "lookup": false,
+        "visible_when": false
+      },
+      "worksheet_sections": {
+        "visible_when": false
+      }
+    },
+    "field_rows": 60,
+    "section_rows": 36,
+    "sections_total": 36
+  },
+  "DIN-1989-1-01 anlagen_id": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "ALL"
+    ],
+    "data_type": "text",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-01 anwendungsbereich": {
+    "enum_values": [
+      {
+        "value": "haushalt",
+        "label_de": "Haushalt",
+        "label_en": "Household",
+        "order_index": 1,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "gewerbe_industrie",
+        "label_de": "Gewerbe-/Industriebetrieb",
+        "label_en": "Commercial/industrial",
+        "order_index": 2,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "oeffentliche_einrichtung",
+        "label_de": "Oeffentliche Einrichtung",
+        "label_en": "Public facility",
+        "order_index": 3,
+        "regulation_reference": "§1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-03",
+      "DIN-1989-1-04"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "DIN-1989-1-01 brandschutz_din4102": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-01 frostfreie_tiefe": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-01 meldepflicht_erfuellt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-01 nutzungsart": {
+    "enum_values": [
+      {
+        "value": "toilettenspuelung",
+        "label_de": "Toilettenspuelung",
+        "label_en": "Toilet flushing",
+        "order_index": 1,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "kuehlzwecke",
+        "label_de": "Kuehlzwecke",
+        "label_en": "Cooling",
+        "order_index": 2,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "wasch_reinigungsanlagen",
+        "label_de": "Wasch- und Reinigungsanlagen",
+        "label_en": "Washing/cleaning systems",
+        "order_index": 3,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "gruenbewaesserung",
+        "label_de": "Bewaesserung von Gruenanlagen",
+        "label_en": "Green-space irrigation",
+        "order_index": 4,
+        "regulation_reference": "§1"
+      },
+      {
+        "value": "sonstige",
+        "label_de": "Sonstige Nutzung",
+        "label_en": "Other use",
+        "order_index": 5,
+        "regulation_reference": "§1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-04"
+    ],
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "DIN-1989-1-01 schallschutz_din4109": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-01 trinkwasser_getrennt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-03",
+      "DIN-1989-1-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-02 auffangflaechen_art": {
+    "enum_values": [
+      {
+        "value": "geneigtes_hartdach",
+        "label_de": "Geneigtes Hartdach",
+        "label_en": "Pitched hard roof",
+        "order_index": 1,
+        "regulation_reference": "Tab.3"
+      },
+      {
+        "value": "flachdach_unbekiest",
+        "label_de": "Flachdach unbekiest",
+        "label_en": "Flat roof, ungravelled",
+        "order_index": 2,
+        "regulation_reference": "Tab.3"
+      },
+      {
+        "value": "flachdach_bekiest",
+        "label_de": "Flachdach bekiest",
+        "label_en": "Flat roof, gravelled",
+        "order_index": 3,
+        "regulation_reference": "Tab.3"
+      },
+      {
+        "value": "gruendach_intensiv",
+        "label_de": "Gruendach intensiv",
+        "label_en": "Green roof, intensive",
+        "order_index": 4,
+        "regulation_reference": "Tab.3"
+      },
+      {
+        "value": "gruendach_extensiv",
+        "label_de": "Gruendach extensiv",
+        "label_en": "Green roof, extensive",
+        "order_index": 5,
+        "regulation_reference": "Tab.3"
+      },
+      {
+        "value": "pflasterflaeche",
+        "label_de": "Pflaster-/Verbundpflasterflaeche",
+        "label_en": "Paved/interlocking paving",
+        "order_index": 6,
+        "regulation_reference": "Tab.3"
+      },
+      {
+        "value": "asphaltbelag",
+        "label_de": "Asphaltbelag",
+        "label_en": "Asphalt surface",
+        "order_index": 7,
+        "regulation_reference": "Tab.3"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-04"
+    ],
+    "data_type": "enum",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-02 belastungsklasse": {
+    "enum_values": [
+      {
+        "value": "1",
+        "label_de": "Klasse 1 - begehbar (A 15)",
+        "label_en": "Class 1 - pedestrian (A 15)",
+        "order_index": 1,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "2",
+        "label_de": "Klasse 2 - PKW-befahrbar (B 125)",
+        "label_en": "Class 2 - car (B 125)",
+        "order_index": 2,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "3",
+        "label_de": "Klasse 3 - LKW 12 befahrbar (D 400)",
+        "label_en": "Class 3 - truck 12 t (D 400)",
+        "order_index": 3,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "4",
+        "label_de": "Klasse 4 - SLW 30 befahrbar (D 400)",
+        "label_en": "Class 4 - SLW 30 (D 400)",
+        "order_index": 4,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "5",
+        "label_de": "Klasse 5 - SLW 60 befahrbar (D 400)",
+        "label_en": "Class 5 - SLW 60 (D 400)",
+        "order_index": 5,
+        "regulation_reference": "Tab.1"
+      },
+      {
+        "value": "6",
+        "label_de": "Klasse 6 - Sonderlasten nach Angabe AG",
+        "label_en": "Class 6 - special loads per client",
+        "order_index": 6,
+        "regulation_reference": "Tab.1"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-02 dachwerkstoff_bewertet": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-02 dichtheitspruefung_speicher": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-02 filter_bauart": {
+    "enum_values": [
+      {
+        "value": "separate_ableitung",
+        "label_de": "System mit separater Ableitung von Fremdstoffen",
+        "label_en": "System with separate discharge of foreign matter",
+        "order_index": 1,
+        "regulation_reference": "§6.2"
+      },
+      {
+        "value": "fremdstoffrueckhaltung",
+        "label_de": "System mit Fremdstoffrueckhaltung im Filter",
+        "label_en": "System retaining foreign matter in filter",
+        "order_index": 2,
+        "regulation_reference": "§6.2"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-02 filter_genormt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-02 sedimentation_beruhigter_zulauf": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-02 speicher_aufstellung": {
+    "enum_values": [
+      {
+        "value": "oberirdisch",
+        "label_de": "Oberirdisch",
+        "label_en": "Above ground",
+        "order_index": 1,
+        "regulation_reference": "§7"
+      },
+      {
+        "value": "unterirdisch",
+        "label_de": "Unterirdisch",
+        "label_en": "Underground",
+        "order_index": 2,
+        "regulation_reference": "§7"
+      },
+      {
+        "value": "keller",
+        "label_de": "Keller",
+        "label_en": "Basement",
+        "order_index": 3,
+        "regulation_reference": "§14"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-02 speicher_werkstoff": {
+    "enum_values": [
+      {
+        "value": "beton",
+        "label_de": "Beton",
+        "label_en": "Concrete",
+        "order_index": 1,
+        "regulation_reference": "§7"
+      },
+      {
+        "value": "kunststoff",
+        "label_de": "Kunststoff",
+        "label_en": "Plastic",
+        "order_index": 2,
+        "regulation_reference": "§7"
+      },
+      {
+        "value": "stahl_korrosionsgeschuetzt",
+        "label_de": "Stahl (korrosionsgeschuetzt)",
+        "label_en": "Steel (corrosion-protected)",
+        "order_index": 3,
+        "regulation_reference": "§7"
+      },
+      {
+        "value": "stahl_korrosionsbestaendig",
+        "label_de": "Stahl (korrosionsbestaendig)",
+        "label_en": "Steel (corrosion-resistant)",
+        "order_index": 4,
+        "regulation_reference": "§7"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-02 speicheroeffnung_dn": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-03 foerderstrom": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-03 fuellstandueberwachung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-03 hybridbehaelter_volumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-03 leitungskennzeichnung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-1989-1-03 nachspeisung_medium": {
+    "enum_values": [
+      {
+        "value": "trinkwasser",
+        "label_de": "Trinkwasser",
+        "label_en": "Drinking water",
+        "order_index": 1,
+        "regulation_reference": "§9"
+      },
+      {
+        "value": "nichttrinkwasser",
+        "label_de": "Nichttrinkwasser",
+        "label_en": "Non-potable water",
+        "order_index": 2,
+        "regulation_reference": "§9"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-03 nachspeisung_volumenstrom": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-03 nachspeisung_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-05"
+    ],
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-03 pumpenanzahl": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-03 rueckflussverhinderer": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-03 sicherungseinrichtung_typ": {
+    "enum_values": [
+      {
+        "value": "AA",
+        "label_de": "Typ AA - ungehinderter freier Auslauf",
+        "label_en": "Type AA - unrestricted air gap",
+        "order_index": 1,
+        "regulation_reference": "§9"
+      },
+      {
+        "value": "AB",
+        "label_de": "Typ AB - freier Auslauf mit nicht kreisfoermigem Ueberlauf",
+        "label_en": "Type AB - air gap with non-circular overflow",
+        "order_index": 2,
+        "regulation_reference": "§9"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-05"
+    ],
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-03 steuerung_funktionen": {
+    "enum_values": [
+      {
+        "value": "nachspeisung",
+        "label_de": "Steuerung der Nachspeisung",
+        "label_en": "Top-up control",
+        "order_index": 1,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "fuellstandsmessung",
+        "label_de": "Fuellstandsmessung",
+        "label_en": "Level measurement",
+        "order_index": 2,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "rueckstaueberwachung",
+        "label_de": "Rueckstaueberwachung",
+        "label_en": "Backflow monitoring",
+        "order_index": 3,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "stoermeldung",
+        "label_de": "Stoermeldung",
+        "label_en": "Fault signalling",
+        "order_index": 4,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "pumpensteuerung",
+        "label_de": "Pumpensteuerung",
+        "label_en": "Pump control",
+        "order_index": 5,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "verbrauchsmessung",
+        "label_de": "Verbrauchsmessung",
+        "label_en": "Consumption metering",
+        "order_index": 6,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "datenerfassung",
+        "label_de": "Datenerfassung",
+        "label_en": "Data acquisition",
+        "order_index": 7,
+        "regulation_reference": "§10"
+      },
+      {
+        "value": "gebaeudeleittechnik",
+        "label_de": "Gebaeudeleittechnik",
+        "label_en": "Building management system",
+        "order_index": 8,
+        "regulation_reference": "§10"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-03 systemsteuerung_vorhanden": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-03 trockenlaufschutz": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-05",
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-03 wasserzaehler_eingebaut": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-1989-1-04 A_A": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 A_Bew": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 bemessungsverfahren": {
+    "enum_values": [
+      {
+        "value": "verkuerzt",
+        "label_de": "Verkuerztes Verfahren",
+        "label_en": "Shortened method",
+        "order_index": 1,
+        "regulation_reference": "§16.2"
+      },
+      {
+        "value": "vereinfacht",
+        "label_de": "Vereinfachtes Verfahren",
+        "label_en": "Simplified method",
+        "order_index": 2,
+        "regulation_reference": "§16.3"
+      },
+      {
+        "value": "differenziert",
+        "label_de": "Differenziertes Verfahren",
+        "label_en": "Detailed method",
+        "order_index": 3,
+        "regulation_reference": "§16.4"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "A",
+    "section_id_is_null": false,
+    "section_path": [
+      "A"
+    ]
+  },
+  "DIN-1989-1-04 BS_a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 BW_a": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-04 e": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 E_R": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-04"
+    ],
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-04 eta": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 h_N": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 mindestwasservolumen": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-02"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-1989-1-04 n": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 P_d": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-04 V_n": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-02",
+      "DIN-1989-1-06"
+    ],
+    "data_type": "number",
+    "section_code": "E",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "E"
+    ]
+  },
+  "DIN-1989-1-05 betriebsanleitung_uebergeben": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-05 inbetriebnahme_fachkundig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-05 inbetriebnahmeprotokoll": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "L",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "L"
+    ]
+  },
+  "DIN-1989-1-05 probelauf_durchgefuehrt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": [
+      "DIN-1989-1-06"
+    ],
+    "data_type": "boolean",
+    "section_code": "D",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "D"
+    ]
+  },
+  "DIN-1989-1-05 rueckstauebene_bekannt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-05 rueckstauschutz_art": {
+    "enum_values": [
+      {
+        "value": "rueckstaufrei",
+        "label_de": "Rueckstaufreie Ausfuehrung",
+        "label_en": "Backflow-free design",
+        "order_index": 1,
+        "regulation_reference": "§14"
+      },
+      {
+        "value": "hebeanlage",
+        "label_de": "Hebeanlage (DIN EN 12050-2)",
+        "label_en": "Lifting unit (DIN EN 12050-2)",
+        "order_index": 2,
+        "regulation_reference": "§14"
+      },
+      {
+        "value": "rueckstauverschluss",
+        "label_de": "Rueckstauverschluss (DIN 1997-1)",
+        "label_en": "Backflow valve (DIN 1997-1)",
+        "order_index": 3,
+        "regulation_reference": "§14"
+      },
+      {
+        "value": "nicht_erforderlich",
+        "label_de": "Nicht erforderlich",
+        "label_en": "Not required",
+        "order_index": 4,
+        "regulation_reference": "§13"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-05 ueberlauf_versickerung": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-05 versickerung_bemessung_a138": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-05 whg_erlaubnis": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-06 betriebsbuch_gefuehrt": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "B",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "B"
+    ]
+  },
+  "DIN-1989-1-06 filter_reinigung_jaehrlich": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-06 inspektion_intervall": {
+    "enum_values": [
+      {
+        "value": "1_monat",
+        "label_de": "1 Monat",
+        "label_en": "1 month",
+        "order_index": 1,
+        "regulation_reference": "Tab.5"
+      },
+      {
+        "value": "6_monate",
+        "label_de": "6 Monate",
+        "label_en": "6 months",
+        "order_index": 2,
+        "regulation_reference": "Tab.5"
+      },
+      {
+        "value": "1_jahr",
+        "label_de": "1 Jahr",
+        "label_en": "1 year",
+        "order_index": 3,
+        "regulation_reference": "Tab.5"
+      }
+    ],
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "enum",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-06 speicher_reinigung_jahre": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-06 wartung_fachkundig": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "boolean",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "DIN-1989-1-06 wasserzaehler_austausch_jahre": {
+    "enum_values": null,
+    "widget": null,
+    "ui_config": null,
+    "lookup": null,
+    "visible_when": null,
+    "consumer_worksheets": null,
+    "data_type": "number",
+    "section_code": "C",
+    "section_id_is_null": false,
+    "section_path": [
+      "A",
+      "C"
+    ]
+  },
+  "sections": {
+    "DIN-1989-1-01 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-1989-1-01 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-01 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-01 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-01 M": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-02 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-1989-1-02 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-02 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-02 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-02 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-02 M": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-03 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-1989-1-03 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-03 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-03 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-03 E": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-03 M": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-1989-1-04 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 E": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 J": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 K": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-04 M": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-05 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-1989-1-05 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-05 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-05 D": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-05 L": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-05 M": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-06 A": {
+      "visible_when": null,
+      "parent_code": null
+    },
+    "DIN-1989-1-06 B": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-06 C": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-06 J": {
+      "visible_when": null,
+      "parent_code": "A"
+    },
+    "DIN-1989-1-06 M": {
+      "visible_when": null,
+      "parent_code": "A"
+    }
+  }
+}
