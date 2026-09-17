@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-A-262E a262e",
-    "captured_at": "2026-09-17T15:46:55.417Z",
+    "captured_at": "2026-09-17T16:47:11.974Z",
     "standard": "DWA-A-262E",
     "slug": "a262e",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -18,7 +18,8 @@
     },
     "field_rows": 215,
     "section_rows": 297,
-    "sections_total": 297
+    "sections_total": 297,
+    "equation_rows": 18
   },
   "A262-01 client_owner": {
     "enum_values": null,
@@ -5183,6 +5184,157 @@
     "A262-33 M": {
       "visible_when": null,
       "parent_code": null
+    }
+  },
+  "equations": {
+    "A262-05 1": {
+      "id": "be085f8e-4173-4a10-9b6f-01cf6c972bbf",
+      "output_symbol": "Q_Tr_h_max",
+      "input_symbols": [
+        "Q_S_d_aM",
+        "x_Q_max",
+        "Q_F",
+        "Q_R_Tr"
+      ]
+    },
+    "A262-05 2": {
+      "id": "1c9b9469-362e-4c67-88e4-49257d89cce3",
+      "output_symbol": "Q_S_d_aM",
+      "input_symbols": [
+        "EZ",
+        "w_s_d"
+      ]
+    },
+    "A262-05 3": {
+      "id": "4cb4c503-5871-45b3-97f1-752512c9f60e",
+      "output_symbol": "Q_F",
+      "input_symbols": [
+        "q_F",
+        "A_E_k"
+      ]
+    },
+    "A262-05 4": {
+      "id": "5c1e432e-184c-4ef5-940d-9f2987b20e87",
+      "output_symbol": "Q_R_Tr",
+      "input_symbols": [
+        "q_R_Tr",
+        "A_E_k"
+      ]
+    },
+    "A262-05 5": {
+      "id": "7fc3941e-239c-472a-bbd8-2e87b9a40c60",
+      "output_symbol": "Q_F + Q_R_Tr",
+      "input_symbols": [
+        "m_multiplier",
+        "Q_S_d_aM",
+        "x_Q_max"
+      ]
+    },
+    "A262-06 10": {
+      "id": "83384e6e-a6c1-4209-9eb9-a4b14b407932",
+      "output_symbol": "Q_F_d_aM",
+      "input_symbols": [
+        "m_T_aM",
+        "Q_S_d_aM"
+      ]
+    },
+    "A262-06 6": {
+      "id": "db6c259e-1f61-48a8-8ca1-ae4127feca17",
+      "output_symbol": "Q_M",
+      "input_symbols": [
+        "f_S_QM",
+        "Q_S_d_aM",
+        "Q_F"
+      ]
+    },
+    "A262-06 7": {
+      "id": "5ab4ad64-320a-4789-bc7e-623dfa9ce1d2",
+      "output_symbol": "Q_F",
+      "input_symbols": [
+        "q_F",
+        "A_E_k"
+      ]
+    },
+    "A262-06 8": {
+      "id": "c99aba1c-ea82-4294-b136-9f9ce2f1f033",
+      "output_symbol": "Q_M",
+      "input_symbols": [
+        "Q_Dr_RU",
+        "Q_krit"
+      ]
+    },
+    "A262-06 9": {
+      "id": "2e702b45-d29b-45ea-90d9-7a43423e942a",
+      "output_symbol": "Q_T_d_aM",
+      "input_symbols": [
+        "Q_S_d_aM",
+        "Q_F_d_aM"
+      ]
+    },
+    "A262-25 11": {
+      "id": "395eceea-8b47-4a87-bc00-d51190fce646",
+      "output_symbol": "f_red",
+      "input_symbols": [
+        "t_Reg"
+      ]
+    },
+    "A262-25 12": {
+      "id": "571c0451-aeec-4723-93cf-34d3346bb3ff",
+      "output_symbol": "A_F_CSB_red",
+      "input_symbols": [
+        "f_red",
+        "A_F_CSB"
+      ]
+    },
+    "A262-25 13": {
+      "id": "cb011262-3770-41a8-bf27-293f19aafe90",
+      "output_symbol": "A_F_TKN_red",
+      "input_symbols": [
+        "B_d_TKN",
+        "B_A_TKN_zul"
+      ]
+    },
+    "A262-25 14": {
+      "id": "7e28ed89-6c72-4058-b450-fe8d14f6e1c2",
+      "output_symbol": "A_F_TKN_red",
+      "input_symbols": [
+        "B_d_TKN",
+        "B_A_TKN_zul"
+      ]
+    },
+    "A262-27 15": {
+      "id": "66f5a422-d422-48dc-b9aa-a01c195b958e",
+      "output_symbol": "A_ANF",
+      "input_symbols": [
+        "h_zu",
+        "Q_T_d_aM",
+        "L_HF",
+        "k_fB",
+        "h_ab"
+      ]
+    },
+    "A262-28 16": {
+      "id": "8195be70-a769-4071-8808-b8ae6dd56073",
+      "output_symbol": "eta_DN",
+      "input_symbols": [
+        "RV",
+        "eta_VF"
+      ]
+    },
+    "A262-29 17": {
+      "id": "88212dd3-8b60-430e-9937-cf1488027f99",
+      "output_symbol": "k_fA",
+      "input_symbols": [
+        "d_10"
+      ]
+    },
+    "A262-29 18": {
+      "id": "f3a64c47-454a-418e-a4b7-4810cf5e4afe",
+      "output_symbol": "U",
+      "input_symbols": [
+        "d_60",
+        "d_10"
+      ]
     }
   }
 }

@@ -13,7 +13,7 @@ import type { PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
 import { parseCondition, parseNumeric } from '@/lib/expr';
 import { tab1AsTable, tab2AsTable, tab3AsTable, tab4PersonAsTable, tab4FlaecheAsTable, tab4WaschmaschineAsTable, tab5AsTable } from '../regulation-tables-seed-din1989_1';
-import { emitFieldConfigSql, fieldConfigFilesFor, loadPriorSnapshot } from '../../../../scripts/regulation-tables/emit-field-configs-sql';
+import { emitFieldConfigSql, fieldConfigFilesFor, loadPriorSnapshot, producerChain } from '../../../../scripts/regulation-tables/emit-field-configs-sql';
 
 const ROOT = join(__dirname, '..', '..', '..', '..');
 const prior: PriorSnapshot = loadPriorSnapshot(join(ROOT, 'src/lib/eval/field-configs/din1989_1.prior.json'));
@@ -61,7 +61,8 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
       'DIN-1989-1-05 versickerung_bemessung_a138 :: ueberlauf_versickerung == true',
       'DIN-1989-1-05 whg_erlaubnis :: ueberlauf_versickerung == true',
     ]);
-    expect(SECTION_VISIBILITY).toEqual([expect.objectContaining({ worksheet: 'DIN-1989-1-04', section_code: 'B', visible_when: "bemessungsverfahren != 'verkuerzt'" })]);
+    // the -04 section-B rule (bemessungsverfahren != 'verkuerzt', L796) was REFUSED by the transitive producer guard (Task 3 fix round 1) — STAGED din1989_1-C-3
+    expect(SECTION_VISIBILITY).toEqual([]);
   });
 
   it('G-A3 key-string equality: table keys equal the driving enum / register-column value strings exactly', () => {
@@ -118,10 +119,12 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
       expect(row, `${e.worksheet} ${e.symbol} captured`).toBeDefined();
       expect(row.consumer_worksheets ?? []).toEqual([]);
     }
-    // the -04 section-B rule: every captured field of that section has no consumers
+    // the -04 section B: every captured field is consumer-free DIRECTLY, but each feeds Gl. 1–3 whose outputs (E_R, BW_a) are consumed — the transitive guard refuses the rule (din1989_1-C-3)
     const sectionB = Object.entries(prior).filter(([k, v]) => k.startsWith('DIN-1989-1-04 ') && (v as { section_code?: string | null }).section_code === 'B');
     expect(sectionB.map(([k]) => k.slice('DIN-1989-1-04 '.length)).sort()).toEqual(['A_A', 'A_Bew', 'BS_a', 'P_d', 'e', 'eta', 'h_N', 'n']);
     for (const [, v] of sectionB) expect((v as { consumer_worksheets?: string[] | null }).consumer_worksheets ?? []).toEqual([]);
+    expect(producerChain(prior, 'DIN-1989-1-04', 'A_A')).toMatch(/^A_A → Gl\.1 E_R \(consumed by /);
+    expect(() => emitFieldConfigSql('din1989_1', [], [{ standard: 'DIN-1989-1', worksheet: 'DIN-1989-1-04', section_code: 'B', visible_when: "bemessungsverfahren != 'verkuerzt'", verification_quote: 'q' }], prior)).toThrow(/A_A → Gl\.1 E_R/);
     // sicherungseinrichtung_typ IS consumed (by -05) — that is why its visibility is STAGED (din1989_1-C-1), not encoded
     expect(priorRow('DIN-1989-1-03 sicherungseinrichtung_typ').consumer_worksheets).toEqual(['DIN-1989-1-05']);
     expect(FIELD_CONFIGS.find((e) => e.symbol === 'sicherungseinrichtung_typ')).toBeUndefined();
@@ -137,7 +140,7 @@ describe('DIN-1989-1 field configs (Plan 3 Task 2)', () => {
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
     expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(18);
-    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(1);
+    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });
 });

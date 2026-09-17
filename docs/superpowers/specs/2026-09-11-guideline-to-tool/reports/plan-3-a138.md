@@ -183,3 +183,9 @@ pnpm test
 pnpm -s typecheck → exit 0 · pnpm -s eslint <3 touched .ts files> → exit 0
 ```
 Re-emit check: `emit-seed-sql.ts a138_p3`, `emit-field-configs-sql.ts a138 20260917100110`, `emit-equations-sql.ts a138 20260917100120` — only the seed and field-config migrations changed (the two content fixes); the equations files are byte-identical.
+
+---
+
+# Note from Plan 3 Task 3 fix round 1 (transitive producer guard, 2026-09-17)
+
+The field-config emitter's producer guard became TRANSITIVE (it walks the captured `prior.equations`). `a138.prior.json` was re-captured (262 field rows, 252 sections, 46 equations — additive diff) and `20260917100110` + its rollback re-emitted. Two rules were REFUSED and withdrawn: the field rule `A138-21 k_f_FS ← shaft_type == 'typ_B'` (chain `k_f_FS → Gl.40 h_S (consumed by A138-23, A138-24)`, now `a138-C-6`) and the section rule `A138-20 B ← facility_type_selected == 'MRS'` (chain `Q_Dr_max / Q_Dr_min → Gl.33 Q_Dr (consumed by A138-23, A138-24, A138-26, A138-13)`, now `a138-C-7`; the C-3 list grows to 14 producer sections). Counts: 15 field entries (12 create + 3 UPDATE), 49 section rules; `field-configs-a138.test.ts` pins updated; STAGED blocks appended to `a138-STAGED-plan3-rulings.sql`. Verifier still 81/81 (a138_p3).

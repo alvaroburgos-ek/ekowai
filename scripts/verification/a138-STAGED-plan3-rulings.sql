@@ -298,3 +298,29 @@
 --   facility_type_selected → a138_anlagentyp_gewaehlt, facility_type_dimensioned, facility_type_final
 -- Each line = one consumer_worksheets UPDATE on the producer + one `active = false` per duplicate, written as separate
 -- ratifiable statements once the owner picks the producer per quantity (the inventory names candidates only). No SQL staged.
+
+-- =====================================================================================================================
+-- a138-C-6 · A138-21 · k_f_FS visible_when shaft_type == 'typ_B' — REFUSED by the TRANSITIVE producer guard (Plan 3 Task 3 fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2155 "Für den Schacht Typ B ist nachzuweisen, dass die bei der Bemessung berücksichtigte Versickerungsleistung des Schachts
+-- nicht durch die Filterschicht eingeschränkt wird. Deshalb muss folgende Bedingung nach Gl. (38) eingehalten werden:" (+ L2085). Prod Gl. 40 (A138-21):
+-- h_S = (A_C * 10^-7 * r_D(n) - (pi * d_i^2 / 4) * k_f_FS) * 4 * D * 60 * f_Z / (d_i^2 * pi), inputs {A_C, r_D(n), d_i, k_f_FS, D, f_Z};
+-- capture (re-run 2026-09-17 with equations): h_S consumer_worksheets = {A138-23, A138-24}. Hiding k_f_FS on a Typ-A shaft nulls Gl. 40
+-- and the consumers inherit the null (chain: k_f_FS → Gl.40 h_S (consumed by A138-23, A138-24)). The rule was emitted by the
+-- direct-only guard in commit 8e693e0; it is WITHDRAWN from 20260917100110 (re-emitted) and staged here.
+-- Options: (a) Gl. 37 / Gl. 40 switch by shaft_type (a138-G-3) first — then a hidden k_f_FS on Typ A is correct because Gl. 40 does
+-- not apply; (b) keep k_f_FS always visible. No SQL until (a) is ratified:
+-- UPDATE fields f SET visible_when = 'shaft_type == ''typ_B''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-21' AND s.code = 'DWA-A-138-1' AND f.symbol = 'k_f_FS' AND f.visible_when IS NULL;
+-- Rollback: SET visible_when = NULL.
+
+-- =====================================================================================================================
+-- a138-C-7 · A138-20 · section B visible_when facility_type_selected == 'MRS' — REFUSED by the TRANSITIVE producer guard (Task 3 fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2252 (Tab. 14 column heads). Prod Gl. 33 (A138-20): Q_Dr = (Q_Dr_min + Q_Dr_max) / 2, inputs {Q_Dr_min, Q_Dr_max}
+-- (section B); capture: Q_Dr consumer_worksheets = {A138-23, A138-24, A138-26, A138-13}. Chain: Q_Dr_max → Gl.33 Q_Dr (consumed by
+-- A138-23, A138-24, A138-26, A138-13). Section B of A138-20 therefore joins the a138-C-3 list (13 → 14 producer sections); the
+-- other seven A138-20 sections keep their rule (49 section rules emitted, was 50).
+-- UPDATE worksheet_sections ws SET visible_when = 'facility_type_selected == ''MRS''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'A138-20' AND ws.code = 'B' AND s.code = 'DWA-A-138-1' AND ws.visible_when IS NULL;
+-- Rollback: SET visible_when = NULL. Apply only together with the a138-C-3 consumer re-points (Q_Dr's four consumers).

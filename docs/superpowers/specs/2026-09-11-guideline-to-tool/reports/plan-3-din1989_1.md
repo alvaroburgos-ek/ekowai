@@ -176,3 +176,9 @@ pnpm test
 pnpm -s typecheck → exit 0 · pnpm -s eslint <4 touched .ts files> → exit 0
 ```
 Re-emit check: seed (`-1 status upgrade line`), field configs (2 quote lines), equations (1 quote line) changed; rollbacks byte-identical. TDD note: the re-pinned seed test first failed on an unescaped `(` in the regex (`/(Magnetventil$/` → `/\(Magnetventil$/`), then 9/9. Sign-off blocks for DIN-1989-1: 20 (+U-6, +I-2) plus the two notes.
+
+---
+
+# Note from Plan 3 Task 3 fix round 1 (transitive producer guard, 2026-09-17)
+
+The field-config emitter's producer guard became TRANSITIVE (it walks the captured `prior.equations`). `din1989_1.prior.json` was re-captured (60 field rows, 36 sections, 4 equations — additive diff) and `20260917100210` + its rollback re-emitted. The one section rule `DIN-1989-1-04 B ← bemessungsverfahren != 'verkuerzt'` was REFUSED and withdrawn: every section-B input feeds Gl. 1 (chain `A_A → Gl.1 E_R (consumed by …)`) or Gl. 2/3 (`BW_a`), whose outputs carry consumers — now `din1989_1-C-3` (STAGED block appended). Counts: 21 field entries unchanged, 0 section rules; `field-configs-din1989-1.test.ts` pins updated (the section-B test asserts the chain). Verifier still 42/42.

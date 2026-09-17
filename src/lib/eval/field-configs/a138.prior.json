@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DWA-A-138-1 a138",
-    "captured_at": "2026-09-17T13:27:37.809Z",
+    "captured_at": "2026-09-17T16:47:10.485Z",
     "standard": "DWA-A-138-1",
     "slug": "a138",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -18,7 +18,8 @@
     },
     "field_rows": 262,
     "section_rows": 252,
-    "sections_total": 252
+    "sections_total": 252,
+    "equation_rows": 46
   },
   "A138-01 a138_applicable": {
     "enum_values": null,
@@ -5819,6 +5820,478 @@
     "A138-28 M": {
       "visible_when": null,
       "parent_code": null
+    }
+  },
+  "equations": {
+    "A138-07 2": {
+      "id": "b3f8c2e0-7a4d-4f1c-9e08-d5a6b7c8d9e0",
+      "output_symbol": "A_C",
+      "input_symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-07 2c": {
+      "id": "a1380702-0000-4000-8000-000000000002",
+      "output_symbol": "C_m",
+      "input_symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-07 2d": {
+      "id": "a1380702-0000-4000-8000-000000000003",
+      "output_symbol": "A_E_ba",
+      "input_symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-07 2e": {
+      "id": "a1380702-0000-4000-8000-000000000004",
+      "output_symbol": "A_E_nba",
+      "input_symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-07 2f": {
+      "id": "a1380702-0000-4000-8000-000000000005",
+      "output_symbol": "A_C_sealed",
+      "input_symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-07 2g": {
+      "id": "a1380702-0000-4000-8000-000000000006",
+      "output_symbol": "A_C_unsealed",
+      "input_symbols": [
+        "surface_inventory"
+      ]
+    },
+    "A138-10 3": {
+      "id": "b39dda00-9a90-46cc-a045-543047ec6498",
+      "output_symbol": "Q_zu",
+      "input_symbols": [
+        "r_D(n)",
+        "A_C",
+        "A_VA"
+      ]
+    },
+    "A138-11 5": {
+      "id": "49091b66-9c4b-44ee-aa42-8f6352461e60",
+      "output_symbol": "k_i",
+      "input_symbols": [
+        "k_f",
+        "f_K"
+      ]
+    },
+    "A138-11 6": {
+      "id": "0c270341-93fb-4391-aa09-3744097635d1",
+      "output_symbol": "f_K",
+      "input_symbols": [
+        "f_ort",
+        "f_methode"
+      ]
+    },
+    "A138-12 4": {
+      "id": "bd080331-d673-4a11-b12a-29e00bdbc939",
+      "output_symbol": "Q_S",
+      "input_symbols": [
+        "k_i",
+        "A_S"
+      ]
+    },
+    "A138-12 7": {
+      "id": "55151cb1-4a5a-48d1-b5c0-2312ef7b78ac",
+      "output_symbol": "A_S_m",
+      "input_symbols": [
+        "A_S_min",
+        "A_S_max"
+      ]
+    },
+    "A138-13 1": {
+      "id": "3da9a0bc-5253-4614-a0e4-fcf22f55c3b5",
+      "output_symbol": "M",
+      "input_symbols": [
+        "T_n"
+      ]
+    },
+    "A138-13 8": {
+      "id": "69f31e6e-a755-4246-af10-ae46668b5c86",
+      "output_symbol": "V_VA",
+      "input_symbols": [
+        "Q_zu",
+        "Q_S",
+        "Q_Dr",
+        "D",
+        "f_Z",
+        "f_A"
+      ]
+    },
+    "A138-13 9": {
+      "id": "e2ec4338-1356-480f-a7ab-da57fdc1fc22",
+      "output_symbol": "q_S_AC",
+      "input_symbols": [
+        "k_i",
+        "A_S_m",
+        "Q_Dr",
+        "A_C"
+      ]
+    },
+    "A138-16 11": {
+      "id": "3b3b2cf6-da4f-43b2-a302-b7c38768d3ff",
+      "output_symbol": "(balance)",
+      "input_symbols": [
+        "A_C",
+        "A_S",
+        "r_D(n)",
+        "k_i"
+      ]
+    },
+    "A138-16 12": {
+      "id": "a1cf1d5c-d001-45aa-ae9d-a7406d75d120",
+      "output_symbol": "A_S",
+      "input_symbols": [
+        "A_C",
+        "k_i",
+        "r_D(n)"
+      ]
+    },
+    "A138-16 13": {
+      "id": "96d93a62-c3d0-4745-9f95-7c8ac77bc598",
+      "output_symbol": "(condition)",
+      "input_symbols": [
+        "k_i",
+        "r_D(n)"
+      ]
+    },
+    "A138-17 14": {
+      "id": "bfe6e59a-015f-4c95-b717-8599f80cb68a",
+      "output_symbol": "V_M",
+      "input_symbols": [
+        "A_C",
+        "A_VA",
+        "r_D(n)",
+        "A_S_m",
+        "k_i",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-17 15": {
+      "id": "44fd56a8-b473-441a-be21-297d9f501226",
+      "output_symbol": "V_M",
+      "input_symbols": [
+        "A_S_m",
+        "h_M"
+      ]
+    },
+    "A138-17 16": {
+      "id": "14999c2a-cdeb-42c1-98fd-fcdec65123da",
+      "output_symbol": "A_S_m",
+      "input_symbols": [
+        "A_C",
+        "r_D(n)",
+        "h_M",
+        "D",
+        "f_Z",
+        "k_i"
+      ]
+    },
+    "A138-18 17": {
+      "id": "8afdb49a-7bb1-4f07-a64e-43009b8b6be1",
+      "output_symbol": "A_S_m",
+      "input_symbols": [
+        "b_R",
+        "h_R",
+        "L_R"
+      ]
+    },
+    "A138-18 18": {
+      "id": "ef4242d4-d9a0-43db-b65b-685bf9c92c9c",
+      "output_symbol": "Q_S",
+      "input_symbols": [
+        "b_R",
+        "h_R",
+        "L_R",
+        "k_i"
+      ]
+    },
+    "A138-18 19": {
+      "id": "58c0c298-ca72-4bb6-ab05-0b298114523e",
+      "output_symbol": "V_R",
+      "input_symbols": [
+        "A_C",
+        "r_D(n)",
+        "b_R",
+        "h_R",
+        "L_R",
+        "k_i",
+        "Q_Dr",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-18 20": {
+      "id": "b8e74a4b-64cc-4b81-b306-b2e01e759f5e",
+      "output_symbol": "V_R",
+      "input_symbols": [
+        "b_R",
+        "h_R",
+        "L_R",
+        "s_R"
+      ]
+    },
+    "A138-18 21": {
+      "id": "069c2b02-8883-48a4-82ce-b21c9ef1fff8",
+      "output_symbol": "s_R",
+      "input_symbols": [
+        "s_F",
+        "b_R",
+        "h_R",
+        "az",
+        "d_i",
+        "d_a"
+      ]
+    },
+    "A138-18 22": {
+      "id": "20c31318-7401-4f89-a27b-bc3cf8723548",
+      "output_symbol": "s_R",
+      "input_symbols": [
+        "s_F",
+        "b_R",
+        "h_R",
+        "az",
+        "d_i"
+      ]
+    },
+    "A138-18 23": {
+      "id": "927aa5ab-3aa9-486e-a05d-f91847e8d31e",
+      "output_symbol": "L_R",
+      "input_symbols": [
+        "A_C",
+        "r_D(n)",
+        "b_R",
+        "h_R",
+        "k_i",
+        "Q_Dr",
+        "s_R",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-18 24": {
+      "id": "f17ba5d8-601e-4de1-8e59-d6b0a69e21a6",
+      "output_symbol": "q_VS",
+      "input_symbols": [
+        "az_SOE",
+        "A_SOE"
+      ]
+    },
+    "A138-18 25": {
+      "id": "86cdef5c-4199-4de6-ad0d-e2248b0834c9",
+      "output_symbol": "(condition)",
+      "input_symbols": [
+        "L_VS",
+        "q_VS",
+        "r_5(n)",
+        "A_C"
+      ]
+    },
+    "A138-19 26": {
+      "id": "32b85bf3-7b59-4abe-ac98-62f4fb15007b",
+      "output_symbol": "V_MR",
+      "input_symbols": [
+        "V_M",
+        "V_R"
+      ]
+    },
+    "A138-19 27": {
+      "id": "150baf9a-0e7c-4a6c-9ce1-890ca7f491df",
+      "output_symbol": "V_R",
+      "input_symbols": [
+        "V_MR",
+        "V_M"
+      ]
+    },
+    "A138-19 28": {
+      "id": "570a63ed-08c4-4324-9ee7-0408816bba3f",
+      "output_symbol": "V_MR",
+      "input_symbols": [
+        "A_C",
+        "A_VA",
+        "r_D(n)",
+        "b_R",
+        "h_R",
+        "L_R",
+        "k_i",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-19 29": {
+      "id": "bc11db1c-c935-40c7-87fb-6b35c6f1b1b0",
+      "output_symbol": "L_R",
+      "input_symbols": [
+        "A_C",
+        "A_VA",
+        "r_D(n)",
+        "b_R",
+        "h_R",
+        "k_i",
+        "V_M",
+        "s_R",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-20 30": {
+      "id": "947db98f-6ad1-482c-ae15-e9d0963d1abe",
+      "output_symbol": "V_MUE",
+      "input_symbols": [
+        "A_C",
+        "A_VA",
+        "r_D(n_R)",
+        "A_S_m",
+        "k_i",
+        "D",
+        "f_Z",
+        "V_M"
+      ]
+    },
+    "A138-20 31": {
+      "id": "71af6131-12d3-4294-b192-256878ce7ecf",
+      "output_symbol": "Q_MUE",
+      "input_symbols": [
+        "A_C",
+        "r_MUE",
+        "A_VA",
+        "k_i"
+      ]
+    },
+    "A138-20 32": {
+      "id": "904f2f36-9b62-4960-ba21-d77e6e0d89a4",
+      "output_symbol": "L_R",
+      "input_symbols": [
+        "A_C",
+        "A_VA",
+        "r_D(n)",
+        "b_R",
+        "h_R",
+        "k_i",
+        "V_M",
+        "Q_Dr",
+        "s_R",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-20 33": {
+      "id": "9357f6ea-65c6-4cad-a90e-17ec33461246",
+      "output_symbol": "Q_Dr",
+      "input_symbols": [
+        "Q_Dr_min",
+        "Q_Dr_max"
+      ]
+    },
+    "A138-21 34": {
+      "id": "059d3751-b942-41ec-bc7f-4f0343353eb6",
+      "output_symbol": "A_S",
+      "input_symbols": [
+        "d_a",
+        "h_S"
+      ]
+    },
+    "A138-21 35": {
+      "id": "bfaf30f2-26e6-4373-9642-23429805afa2",
+      "output_symbol": "V_S",
+      "input_symbols": [
+        "A_C",
+        "r_D(n)",
+        "A_S",
+        "k_i",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-21 36": {
+      "id": "36f70dae-ec78-4fc5-b5c9-83b138339ffa",
+      "output_symbol": "V_S",
+      "input_symbols": [
+        "d_i",
+        "h_S"
+      ]
+    },
+    "A138-21 37": {
+      "id": "aba53568-97f3-4054-b613-1b1413cb36fd",
+      "output_symbol": "h_S",
+      "input_symbols": [
+        "A_C",
+        "r_D(n)",
+        "d_a",
+        "d_i",
+        "k_i",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-21 38": {
+      "id": "19f36c1e-9b20-43cd-8b09-6040e81598c2",
+      "output_symbol": "(condition)",
+      "input_symbols": [
+        "A_S_FS",
+        "k_f_FS",
+        "A_S_Schacht",
+        "k_i"
+      ]
+    },
+    "A138-21 39": {
+      "id": "a3d078ba-3386-4feb-a302-ab22dc2d1fc8",
+      "output_symbol": "erf_k_f_FS",
+      "input_symbols": [
+        "d_a",
+        "h_S",
+        "d_i",
+        "k_i"
+      ]
+    },
+    "A138-21 40": {
+      "id": "2c491f26-2b35-4dc6-8af0-c185173af0c6",
+      "output_symbol": "h_S",
+      "input_symbols": [
+        "A_C",
+        "r_D(n)",
+        "d_i",
+        "k_f_FS",
+        "D",
+        "f_Z"
+      ]
+    },
+    "A138-22 41": {
+      "id": "433f7700-90cb-410d-8103-7b72f53db8fa",
+      "output_symbol": "V_VA",
+      "input_symbols": [
+        "A_C",
+        "A_VA",
+        "r_D(n)",
+        "A_S_m",
+        "k_i",
+        "Q_Dr",
+        "D",
+        "f_Z",
+        "f_A"
+      ]
+    },
+    "A138-26 10": {
+      "id": "8e3c7e22-e3c7-449a-b267-928332c89306",
+      "output_symbol": "V_Rueck",
+      "input_symbols": [
+        "r_D(T_n_Ue)",
+        "A_E_b_a",
+        "C_S",
+        "A_VA",
+        "Q_S",
+        "Q_Dr",
+        "D",
+        "V_VA"
+      ]
     }
   }
 }

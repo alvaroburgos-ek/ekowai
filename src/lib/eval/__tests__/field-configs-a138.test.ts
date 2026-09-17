@@ -31,16 +31,19 @@ describe('DWA-A-138-1 field configs (Plan 3 Task 1)', () => {
     for (const s of SECTION_VISIBILITY) expect(parseCondition(s.visible_when), `${s.worksheet} ${s.section_code}`).not.toBeNull();
   });
 
-  it('counts: 16 field entries (12 create, 4 update), widgets by kind, 50 section rules over A138-16…22', () => {
-    expect(FIELD_CONFIGS).toHaveLength(16);
+  it('counts: 15 field entries (12 create, 3 update), widgets by kind, 49 section rules over A138-16…22 (k_f_FS + A138-20 B refused by the transitive guard, fix round 1)', () => {
+    expect(FIELD_CONFIGS).toHaveLength(15);
     expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(12);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('lookup_fill')).toEqual(['A138-06 belastungskategorie', 'A138-06 a138_tier', 'A138-06 eta_afs63_required', 'A138-06 eta_geloest_required']);
     expect(byWidget('select_one')).toEqual(['A138-08 schutzkategorie', 'A138-18 schuettmaterial']);
     expect(byWidget('register')).toEqual(['A138-05 kf_test_sites', 'A138-05 soil_layers']);
     expect(byWidget('derived')).toEqual(['A138-08 n_limit', 'A138-05 k_f_sites_min', 'A138-05 k_f_layer_min', 'A138-02 feasibility_code', 'A138-26 A_C_s_flood']);
-    expect(FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['A138-21 k_f_FS', 'A138-21 A_S_FS', 'A138-20 n_R_MRS']);
-    expect(SECTION_VISIBILITY).toHaveLength(50);
+    // k_f_FS (A138-21) and A138-20 B were refused by the TRANSITIVE producer guard (Task 3 fix round 1): k_f_FS → Gl.40 h_S, Q_Dr_max/Q_Dr_min → Gl.33 Q_Dr — STAGED a138-C-6 / C-7
+    expect(FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['A138-21 A_S_FS', 'A138-20 n_R_MRS']);
+    expect(FIELD_CONFIGS.find((e) => e.symbol === 'k_f_FS')).toBeUndefined();
+    expect(SECTION_VISIBILITY.find((s) => s.worksheet === 'A138-20' && s.section_code === 'B')).toBeUndefined();
+    expect(SECTION_VISIBILITY).toHaveLength(49);
     expect(new Set(SECTION_VISIBILITY.map((s) => s.worksheet))).toEqual(new Set(['A138-16', 'A138-17', 'A138-18', 'A138-19', 'A138-20', 'A138-21', 'A138-22']));
   });
 
@@ -103,9 +106,9 @@ describe('DWA-A-138-1 field configs (Plan 3 Task 1)', () => {
     const files = fieldConfigFilesFor('a138', '20260917100110');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(4);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(12);
-    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(50);
+    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(49);
     // D-1: enum_values is never written on an UPDATE here
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m);
   });

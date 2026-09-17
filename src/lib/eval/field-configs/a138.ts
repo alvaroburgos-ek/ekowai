@@ -178,12 +178,14 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   }),
 
   // ---- A138-21: Typ-B filter fields visible for shaft_type == typ_B only (§6.7.1 / §6.7.2) ----
-  on('A138-21')({ symbol: 'k_f_FS', widget: 'scalar', ui_config: null, visible_when: "shaft_type == 'typ_B'", verification_quote: `${L2085} ${L2155}` }), // L2085 + L2155
+  // k_f_FS (L2085 + L2155): REFUSED by the transitive producer guard (Task 3 fix round 1) — k_f_FS → Gl.40 h_S (consumed by A138-23, A138-24); STAGED a138-C-6.
   on('A138-21')({ symbol: 'A_S_FS', widget: 'scalar', ui_config: null, visible_when: "shaft_type == 'typ_B'", verification_quote: `${L2155} ${L2162}` }), // L2155 + L2162
 
   // ---- A138-20: the Mulden-Rigolen overflow frequency applies to MRE / MRS only (Tab. 6, L919–L926) ----
   on('A138-20')({ symbol: 'n_R_MRS', widget: 'scalar', ui_config: null, visible_when: "facility_type_selected IN {'MRE', 'MRS'}", verification_quote: L919 }),
 ];
+
+void L2085; // k_f_FS cue kept lifted for the STAGED block a138-C-6 (rule withdrawn, Task 3 fix round 1)
 
 /** facility_type_selected token per Tab. 14 column (L2252, left→right) ↔ A138-16…22 worksheet. */
 const FACILITY_WORKSHEETS: ReadonlyArray<{ worksheet: string; token: string; sections: string[] }> = [
@@ -192,7 +194,7 @@ const FACILITY_WORKSHEETS: ReadonlyArray<{ worksheet: string; token: string; sec
   { worksheet: 'A138-17', token: 'mulde', sections: ['A', 'C', 'F', 'J', 'K', 'L', 'M'] },             // B: boeschungsneigung, freibord · D: t_E, V_M
   { worksheet: 'A138-18', token: 'rigole', sections: ['A', 'C', 'F', 'J', 'K', 'L', 'M'] },            // B: b_R, d_a, d_i, h_R · D: L_R, s_R, V_R
   { worksheet: 'A138-19', token: 'MRE', sections: ['A', 'C', 'F', 'J', 'K', 'L', 'M'] },               // B: n_M_overflow_*, n_R · D: V_MR
-  { worksheet: 'A138-20', token: 'MRS', sections: ['A', 'B', 'C', 'F', 'J', 'K', 'L', 'M'] },          // D: Q_Dr, Q_MUE, V_MUE
+  { worksheet: 'A138-20', token: 'MRS', sections: ['A', 'C', 'F', 'J', 'K', 'L', 'M'] },               // D: Q_Dr, Q_MUE, V_MUE · B (transitive, Task 3 fix round 1): Q_Dr_max / Q_Dr_min → Gl.33 Q_Dr (consumed) — a138-C-7
   { worksheet: 'A138-21', token: 'schacht', sections: ['A', 'C', 'F', 'J', 'K', 'L', 'M'] },           // B: schacht_* checks · D: h_S, V_S
   { worksheet: 'A138-22', token: 'becken', sections: ['A', 'F', 'J', 'K', 'L', 'M'] },                 // B: basin_h_check · C: basin_ki_min_check · D: V_B
 ];

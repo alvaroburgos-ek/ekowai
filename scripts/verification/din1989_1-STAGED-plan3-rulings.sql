@@ -157,3 +157,19 @@
 -- Mehrfamilienhäusern / d in Einfamilienhäusern". Prod `anwendungsbereich` (haushalt | gewerbe_industrie |
 -- oeffentliche_einrichtung) does not separate Ein- from Mehrfamilienhäuser, so the row cannot be split by an existing
 -- driver. Alternative if rejected: three rows abwasserhebeanlage_gewerbe / _mfh / _efh keyed by a NEW gebaeudetyp field.
+
+-- =====================================================================================================================
+-- din1989_1-C-3 · DIN-1989-1-04 · section B visible_when bemessungsverfahren != 'verkuerzt' — REFUSED by the TRANSITIVE producer guard (Plan 3 Task 3 fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L796 "- ein verkürztes Verfahren für kleine Anlagen (z. B. Ein- und Zweifamilienhäuser), bei dem keine Berechnungen
+-- durchgeführt werden müssen;". Section B holds the Gl. 1–3 inputs A_A, e, h_N, eta (Gl. 1 → E_R), P_d, n (Gl. 2 → BW_a), A_Bew, BS_a
+-- (Gl. 3 → BW_a); capture (re-run 2026-09-17 with equations): E_R and BW_a carry consumer_worksheets (incl. DIN-1989-1-04 itself and
+-- the -02/-06 readers of V_n's chain). Chain: A_A → Gl.1 E_R (consumed by …). Hiding the inputs nulls E_R / BW_a and every consumer
+-- inherits the null — exactly the case the direct-only guard missed in commit f6c3e5d; the rule is WITHDRAWN from 20260917100210
+-- (re-emitted: 21 field entries, 0 section entries) and staged here.
+-- Under verkürzt the engineer types V_n by hand (attestation verkuerzt_band_beachtet); E_R / BW_a then read manual_required. Owner
+-- options: (a) ratify the hide AND accept that E_R / BW_a are manual under verkürzt (CR-10 stays satisfiable by hand); (b) keep
+-- section B visible under verkürzt. SQL for (a):
+-- UPDATE worksheet_sections ws SET visible_when = 'bemessungsverfahren != ''verkuerzt''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'DIN-1989-1-04' AND ws.code = 'B' AND s.code = 'DIN-1989-1' AND ws.visible_when IS NULL;
+-- Rollback: SET visible_when = NULL.

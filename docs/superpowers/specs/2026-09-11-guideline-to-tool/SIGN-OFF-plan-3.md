@@ -278,6 +278,20 @@ Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGE
 - Proposed SQL / config: STAGED block a138-X-4 (per-quantity consumer_worksheets additions + deactivations, written once the owner confirms the producer list).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
+### a138-C-6 · DWA-A-138-1 · A138-21 · k_f_FS visible_when (transitive producer — Task 3 fix round 1)
+- Class: consumer-edit
+- Chosen now (fail-safe): the rule `k_f_FS ← shaft_type == 'typ_B'` is WITHDRAWN from `20260917100110` (re-emitted with 15 field entries); `k_f_FS` stays visible for every shaft type.
+- Evidence (verbatim, transcript line): "Für den Schacht Typ B ist nachzuweisen, dass die bei der Bemessung berücksichtigte Versickerungsleistung des Schachts nicht durch die Filterschicht eingeschränkt wird. Deshalb muss folgende Bedingung nach Gl. (38) eingehalten werden:" (L2155, re-read in-session; L2085 as in the withdrawn entry); prod Gl. 40 (A138-21) `h_S = (A_C * 10^-7 * r_D(n) - (pi * d_i^2 / 4) * k_f_FS) * 4 * D * 60 * f_Z / (d_i^2 * pi)` with `h_S` consumed by A138-23, A138-24 (re-capture with equations, 2026-09-17). Hiding `k_f_FS` on a Typ-A shaft nulls Gl. 40 and both consumers inherit the null — the direct-only guard of commit 8e693e0 could not see the chain `k_f_FS → Gl.40 h_S (consumed by A138-23, A138-24)`.
+- Proposed SQL / config: STAGED block a138-C-6 (apply only after the Gl. 37 / Gl. 40 switch a138-G-3 makes Gl. 40 Typ-B-only).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-C-7 · DWA-A-138-1 · A138-20 · section B (transitive producer — Task 3 fix round 1)
+- Class: consumer-edit
+- Chosen now (fail-safe): the rule `A138-20 B ← facility_type_selected == 'MRS'` is WITHDRAWN (49 section rules emitted, was 50); A138-20 B stays visible; the C-3 producer-section list grows to 14.
+- Evidence (verbatim, transcript line): Tab. 14 column heads L2252 (as in C-3); prod Gl. 33 (A138-20) `Q_Dr = (Q_Dr_min + Q_Dr_max) / 2` with `Q_Dr` consumed by A138-23, A138-24, A138-26, A138-13 — chain `Q_Dr_max → Gl.33 Q_Dr (consumed by …)` (section B holds Q_Dr_min / Q_Dr_max).
+- Proposed SQL / config: STAGED block a138-C-7 (together with the C-3 re-points).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
 ## Task 2 — DIN-1989-1 (din1989_1)
 
 Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din1989_1-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA DIN Scribd\DIN-1989-1\DIN-1989-1.md` (lines cited) · prod capture `src/lib/eval/field-configs/din1989_1.prior.json` (2026-09-17, read-only). Ids follow the Task-2 brief where it names them (R-1/R-2 = the two equation rewrites, J-1/J-2, G-1…G-3, U-1, X-1); the rest use the skeleton letters. Nothing below is applied.
@@ -421,6 +435,13 @@ Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din19
 - Chosen now (fail-safe): nothing shared; `eta` stays a -04 number input; `versickerung_bemessung_a138` stays an attestation (bare pointer, content-boundary rule); `h_N` stays an engineer input.
 - Evidence (verbatim, transcript line): "ANMERKUNG Bei regelmäßig gewarteten Filtersystemen wird in der Regel ein hydraulischer Filterwirkungsgrad von 0,9 erzielt." (L853); "Baugrundsätze und Bemessung von Regenwasserversickerungsanlagen sind im ATV-Arbeitsblatt A 138 festgelegt." (L659); "Die Niederschlagshöhen betragen zwischen 500 mm und $1600 \mathrm{~mm}$ … je Jahr." (L822)
 - Proposed SQL / config: later — `eta` ≡ DIN-1989-2 `eta_hydr` (inherit by reference once DIN-1989-2 is encoded, Task 17); the `auffangflaechen` rows are the same physical roofs as A138-07 `surface_inventory` (a project-level share needs a cross-standard carrier the mechanism does not have).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### din1989_1-C-3 · DIN-1989-1 · DIN-1989-1-04 · section B under verkürzt (transitive producer — Task 3 fix round 1)
+- Class: consumer-edit
+- Chosen now (fail-safe): the rule `DIN-1989-1-04 B ← bemessungsverfahren != 'verkuerzt'` is WITHDRAWN from `20260917100210` (re-emitted: 21 field entries, 0 section rules); the Gl. 1–4 inputs stay visible under verkürzt; `verkuerzt_band_beachtet` (a created field, no consumers) keeps its field rule.
+- Evidence (verbatim, transcript line): "- ein verkürztes Verfahren für kleine Anlagen (z. B. Ein- und Zweifamilienhäuser), bei dem keine Berechnungen durchgeführt werden müssen;" (L796); prod Gl. 1 `E_R = A_A * e * h_N * eta`, Gl. 2/3 `BW_a = …` — every section-B field is consumer-free directly but feeds `E_R` / `BW_a`, which carry `consumer_worksheets` in the re-capture (chain `A_A → Gl.1 E_R (consumed by …)`); hiding the inputs nulls the inherited values (the direct-only guard of commit f6c3e5d could not see it).
+- Proposed SQL / config: STAGED block din1989_1-C-3 (ratify = hide and accept manual E_R / BW_a under verkürzt; reject = keep visible).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### Observations (Task 2, no signature needed)
@@ -581,10 +602,10 @@ Report: `reports/plan-3-a262e.md` · STAGED SQL: `scripts/verification/a262e-STA
 - Proposed SQL / config: STAGED block a262e-X-1 (deactivate the two orphans; the further twin list is in the block).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### a262e-C-1 · DWA-A-262E · 17 producer sections (A262-05 B/D/F, -06 D/F, -12 B, -14 B, -15 B, -16 B, -19 B/D, -20 B, -23 B, -25 B/D/F, -28 F)
+### a262e-C-1 · DWA-A-262E · 19 producer sections (A262-05 B/D/F, -06 B/D/F, -12 B, -14 B, -15 B, -16 B, -19 B/D, -20 B, -23 B, -25 B/D/F, -28 B/F) — amended in fix round 1
 - Class: consumer-edit
-- Chosen now (fail-safe): those sections stay always visible; the other 127 sections of the same worksheets carry the rule (the worksheets are PARTIALLY hidden for the non-selected case).
-- Evidence (verbatim, transcript line): capture — every listed section holds a symbol with non-empty `consumer_worksheets` (emitter guard); cues L742, L296/L396, L1062, L1119, L1295.
+- Chosen now (fail-safe): those sections stay always visible; the other 125 sections of the same worksheets carry the rule (the worksheets are PARTIALLY hidden for the non-selected case). Fix round 1 added A262-06 B and A262-28 B: TRANSITIVE producers found by the extended guard — `m_T_aM → Gl.10 Q_F_d_aM (consumed by A262-09)` [→ Gl.9 `Q_T_d_aM` consumed by A262-07/-09/-27/-28], `f_S_QM → Gl.6 Q_M`, `Q_Dr_RU / Q_krit → Gl.8 Q_M`; `eta_VF / RV → Gl.16 eta_DN (consumed by A262-33)`. Gl. 9/10 are printed as general ("Wastewater flow in annual average", L650–L659), so the "hide A262-06 B for non-combined plants" idea needs Gl. 9/10 split off A262-06 first (STAGED block a262e-C-1, amended).
+- Evidence (verbatim, transcript line): capture — every listed section holds a symbol with non-empty `consumer_worksheets` or feeds a same-worksheet equation whose output has (emitter guard, transitive since fix round 1); cues L742, L296/L396, L1062, L1119, L1295; "Q_{\mathrm{T}, \mathrm{~d}, \mathrm{aM}}=Q_{\mathrm{S}, \mathrm{~d}, \mathrm{aM}}+Q_{\mathrm{F}, \mathrm{~d}, \mathrm{aM}}\left(\mathrm{~m}^{3} / \mathrm{d}\right) \tag{9}" (L653).
 - Proposed SQL / config: STAGED block a262e-C-1.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
@@ -707,6 +728,27 @@ Report: `reports/plan-3-a262e.md` · STAGED SQL: `scripts/verification/a262e-STA
 - Proposed SQL / config: none (the inventory's `scratchpad/std/DWA-A-262E.json` predates the gate-enforcement migrations); the harness header's "52 live BLOCK gates" is consistent with 60 rows.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
+### a262e-C-7 · DWA-A-262E · A262-05 · q_R_Tr / Q_R_Tr visible_when (transitive producer — fix round 1)
+- Class: consumer-edit
+- Chosen now (fail-safe): the two field rules `q_R_Tr` / `Q_R_Tr ← sewer_system_type == 'separate_sewer'` are WITHDRAWN from `20260917100310` (re-emitted: 26 field entries, 2 UPDATEs); `m_multiplier` keeps its rule (Gl. 5's output `Q_F + Q_R_Tr` is no field, so the chain ends).
+- Evidence (verbatim, transcript line): "Maximum wastewater flow from separate sewer networks:" (L579); "Q_{\mathrm{Tr}, \mathrm{~h}, \max }=24 \cdot Q_{\mathrm{S}, \mathrm{~d}, \mathrm{aM}} / x_{\mathrm{Q}, \max }+Q_{\mathrm{F}}+Q_{\mathrm{R}, \mathrm{Tr}}(\mathrm{l} / \mathrm{s}) \tag{1}" (L582); "Q_{R, T r}=q_{R, T r} \cdot A_{E, k}(\mathrm{l} / \mathrm{s}) \tag{4}" (L599); "The unavoidable stormwater runoff $Q_{\mathrm{R}, \mathrm{Tr}}$ in areas with separated sewer networks is not considered." (L663). Prod: `Q_Tr_h_max` consumed by A262-07, A262-09 (Tab. 1 head L616 and §4.2.5 L721 use Q_Tr,h,max for the Imhoff tank regardless of sewer type) — chain `q_R_Tr → Gl.4 Q_R_Tr → Gl.1 Q_Tr_h_max (consumed by A262-07, A262-09)`. Whether Q_Tr,h,max is N/A for `no_sewer` / combined plants is a judgment (heading vs prod wiring).
+- Proposed SQL / config: STAGED block a262e-C-7 (a: hide + manual Q_Tr,h,max; b: q_R_Tr = 0 convention; c: keep visible).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-P-2 · DWA-A-262E · A262-19 / A262-10 · Tab. 10 "A_Fo,spez ≥ 4*" — §5.5.2.3 relaxation (not seeded)
+- Class: override-policy
+- Chosen now (fail-safe): TABLE_LIMITS carries `a_spez_min = 4` for vf_sand_0_2 × municipal and is `locked`; the "*" relaxation is not a column (unlike `h_beschickung_min_tight = 10`, which the same table prints as a second value).
+- Evidence (verbatim, transcript line): "\hline Specific area, as measured on the upper surface of the filter & $A_{\text {Fo, spez }}$ & $\mathrm{m}^{2} / \mathrm{P}$ & $\geq 4^{*}$ \\" (L936); "*) For tightly-spaced distribution networks, see Section 5.5.2.3" (L945); Tab. 18 "$\geq 4^{*)}$" (L1227); "The loaded filter area per opening should not exceed $5 \mathrm{~m}^{2}$." (L1725); "If the loaded filter area per opening is $\leq 1 \mathrm{~m}^{2}$ per hole, the specific area required for municipal wastewater treatment plants (not for small wastewater treatment systems) can be reduced by $0.5 \mathrm{~m}^{2} / \mathrm{P}$ and the specific hydraulic loading of the filter surface per dosing event can be reduced to $\geq 10 \mathrm{l} / \mathrm{m}^{2}$" (L1726).
+- Proposed SQL / config: STAGED block a262e-P-2 — a `kann` relaxation: column `a_spez_min_tight = 3.5` (4 − 0.5) on the two vf_sand_0_2 × municipal rows, a boolean `tight_distribution_network` on the register, `a_spez_min = if(tight, …)`; the ≤ 1 m²/orifice condition is TABLE18_ORIFICE's row. Owner ratifies the reading before the seed is re-emitted.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-J-4 · DWA-A-262E · A262-29 · TABLE21 `u_max = 5` vs the printed strict "< 5"; `V_VB_min` blank for settling_pond
+- Class: range-SR-2
+- Chosen now (fail-safe): TABLE21 stores `u_max = 5` (number) next to `u_printed = "< 5"` (string) — the printed bound is STRICT (Gl. 18 "U = d60/d10 < 5", L1413; prod REQ-16 `U < 5` already enforces it strictly); no consumer reads `u_max` yet, so nothing computes "≤ 5". `V_VB_min` (A262-07 lookup_fill on S4_2_VORBEHANDLUNG.v_min_l_p) is blank for `settling_pond` — its §4.2.4 requirement is an AREA (1.5 m²/P, L709, column `a_spez_min_m2_p`), no volume fill is created now (the field description says so).
+- Evidence (verbatim, transcript line): "U=\frac{d_{60}}{d_{10}}<5 \tag{18}" (L1413); Tab. 21 "U $d_{60} / d_{10}$" head (L1448) with "< 5" cells (L1450–L1495); "a minimum specific area as measured on the surface of the pond must be $1.5 \mathrm{~m}^{2} / \mathrm{P}$" (L709).
+- Proposed SQL / config: any future consumer of `u_max` must compare with `<`, never `<=` (or rename the column `u_lt`); a settling-pond area fill (`A_VB_spez_min` lookup_fill on `a_spez_min_m2_p`) if the owner wants it — not created here.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
 ### Observations (Task 3, no signature needed)
 
 - **Table 21 is complete in this transcript** (L1450–L1495, ten rows incl. the aerated-gravel rows L1472 / L1495) — the brief's premise "aerated-gravel row truncated (a262e-U-1)" did not occur; all ten rows are seeded (`TABLE21`, `md_verified`). The U-1 id was used for Table 19 (images).
@@ -714,3 +756,4 @@ Report: `reports/plan-3-a262e.md` · STAGED SQL: `scripts/verification/a262e-STA
 - **Edition token `'2017-11'`** is printed on the title page ("November 2017", L7/L9/L20/L23) and equals prod `standards.version` "November 2017" — no I-block needed.
 - **Row-scope `visible_when` keeps stored cells** (`register-rows.ts` read in-session: a hidden cell is excluded from completeness; the editor nulls it on the next write) — the Σ formulas branch on the discriminator (`if(type == 'rue', q_krit, 0)`), so a stale hidden value never enters a sum (pinned in `equations-a262e.test.ts`).
 - **Scalar-only equations are not server-materialised** (2a design; register-fed ones are) — A262-11-D1 / -26-D1 / -26-D2 / -21-D1 / -24-D1 compute on the hook / report / snapshot / PDF paths only (controller amendment D).
+- **Transitive producer guard (fix round 1):** the emitter now refuses a rule that hides an INPUT of a same-worksheet equation whose output is consumed (chain named in the message); the prior carries `equations`. Re-capture + re-emit found four withdrawals across the three encoded standards: a138 `k_f_FS` (C-6) and A138-20 B (C-7), din1989_1 DIN-1989-1-04 B (C-3), a262e A262-06 B / A262-28 B (C-1) and `q_R_Tr` / `Q_R_Tr` (C-7).

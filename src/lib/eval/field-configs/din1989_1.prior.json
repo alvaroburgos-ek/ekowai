@@ -1,7 +1,7 @@
 {
   "_meta": {
     "command": "node scripts/regulation-tables/build-prior-snapshot.mjs DIN-1989-1 din1989_1",
-    "captured_at": "2026-09-17T14:56:29.590Z",
+    "captured_at": "2026-09-17T16:47:11.242Z",
     "standard": "DIN-1989-1",
     "slug": "din1989_1",
     "source": "prod (READ ONLY transaction, DATABASE_URL_PROD from .env.local)",
@@ -18,7 +18,8 @@
     },
     "field_rows": 60,
     "section_rows": 36,
-    "sections_total": 36
+    "sections_total": 36,
+    "equation_rows": 4
   },
   "DIN-1989-1-01 anlagen_id": {
     "enum_values": null,
@@ -1486,6 +1487,42 @@
     "DIN-1989-1-06 M": {
       "visible_when": null,
       "parent_code": "A"
+    }
+  },
+  "equations": {
+    "DIN-1989-1-04 1": {
+      "id": "5c32f168-f50b-492b-bde8-bec4a909d676",
+      "output_symbol": "E_R",
+      "input_symbols": [
+        "A_A",
+        "e",
+        "h_N",
+        "eta"
+      ]
+    },
+    "DIN-1989-1-04 2": {
+      "id": "8f516224-e4a7-46bf-a44e-6d571484f90a",
+      "output_symbol": "BW_a",
+      "input_symbols": [
+        "P_d",
+        "n"
+      ]
+    },
+    "DIN-1989-1-04 3": {
+      "id": "4d57786c-99cd-400f-843e-93bb2d16166f",
+      "output_symbol": "BW_a",
+      "input_symbols": [
+        "A_Bew",
+        "BS_a"
+      ]
+    },
+    "DIN-1989-1-04 4": {
+      "id": "9f2b0686-05c4-46ac-90bc-73a7ad19dfe8",
+      "output_symbol": "V_n",
+      "input_symbols": [
+        "BW_a",
+        "E_R"
+      ]
     }
   }
 }

@@ -13,7 +13,7 @@ import type { PriorSnapshot } from '../field-configs/types';
 import { parseFieldConfig, type RegisterUiConfig } from '../field-config';
 import { parseCondition, parseNumeric } from '@/lib/expr';
 import { TABLE1_PRETREATMENT_MAP, tableLimitsAsTable, table15AsTable, table16AsTable, table2CsbAsTable, s42VorbehandlungAsTable, table18OrificeAsTable, table21AsTable } from '../regulation-tables-seed-a262e';
-import { emitFieldConfigSql, fieldConfigFilesFor, loadPriorSnapshot } from '../../../../scripts/regulation-tables/emit-field-configs-sql';
+import { emitFieldConfigSql, fieldConfigFilesFor, loadPriorSnapshot, producerChain } from '../../../../scripts/regulation-tables/emit-field-configs-sql';
 
 const ROOT = join(__dirname, '..', '..', '..', '..');
 const prior: PriorSnapshot = loadPriorSnapshot(join(ROOT, 'src/lib/eval/field-configs/a262e.prior.json'));
@@ -41,34 +41,32 @@ describe('DWA-A-262E field configs (Plan 3 Task 3)', () => {
     for (const s of SECTION_VISIBILITY) expect(parseCondition(s.visible_when), `${s.worksheet} ${s.section_code}`).not.toBeNull();
   });
 
-  it('counts: 28 field entries (24 create, 4 update), widgets by kind, 127 section rules over 16 worksheets', () => {
-    expect(FIELD_CONFIGS).toHaveLength(28);
+  it('counts: 26 field entries (24 create, 2 update), widgets by kind, 125 section rules over 16 worksheets', () => {
+    expect(FIELD_CONFIGS).toHaveLength(26);
     expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(24);
     const byWidget = (w: string) => FIELD_CONFIGS.filter((e) => e.widget === w).map((e) => `${e.worksheet} ${e.symbol}`);
     expect(byWidget('register')).toEqual(['A262-06 ueberlaufbauwerke', 'A262-08 ablaufproben', 'A262-10 filterstufen', 'A262-15 rieselrohre']);
     expect(byWidget('lookup_fill')).toEqual(['A262-07 B_CSB_tab1', 'A262-07 B_BSB5_tab1', 'A262-07 B_TKN_tab1', 'A262-07 V_VB_min', 'A262-26 B_CSB_Grauwasser', 'A262-27 f_A_ANF_CSB_max', 'A262-27 q_F_T_polishing_max', 'A262-27 t_Sicker_polishing_min']);
     expect(byWidget('select_one')).toEqual(['A262-06 entlastung_typ', 'A262-26 grauwasser_quelle', 'A262-27 hf_material', 'A262-27 polishing_temp_band']);
     expect(byWidget('select_many')).toEqual([]);
-    expect(byWidget('scalar')).toEqual(['A262-05 m_multiplier', 'A262-05 q_R_Tr', 'A262-05 Q_R_Tr']);
+    expect(byWidget('scalar')).toEqual(['A262-05 m_multiplier']); // q_R_Tr / Q_R_Tr refused by the transitive guard (a262e-C-7)
     expect(byWidget('derived')).toEqual([
       'A262-06 Q_Dr_RUB_sum', 'A262-06 Q_Dr_RU_sum', 'A262-06 Q_krit_sum', 'A262-08 csb_last5_ok', 'A262-08 bsb5_last5_ok',
       'A262-10 A_Fo_gesamt', 'A262-10 filterstufen_area_fail', 'A262-15 L_Rieselr_sum', 'A262-15 rieselrohr_max_len',
     ]);
     expect(FIELD_CONFIGS.filter((e) => e.visible_when).map((e) => `${e.worksheet} ${e.symbol} :: ${e.visible_when}`)).toEqual([
       "A262-05 m_multiplier :: sewer_system_type == 'separate_sewer'",
-      "A262-05 q_R_Tr :: sewer_system_type == 'separate_sewer'",
-      "A262-05 Q_R_Tr :: sewer_system_type == 'separate_sewer'",
     ]);
-    expect(SECTION_VISIBILITY).toHaveLength(127);
+    expect(SECTION_VISIBILITY).toHaveLength(125);
     const perWs = new Map<string, string[]>();
     for (const s of SECTION_VISIBILITY) perWs.set(s.worksheet, [...(perWs.get(s.worksheet) ?? []), s.section_code]);
     expect(Object.fromEntries(perWs)).toEqual({
-      'A262-05': ['A', 'C', 'J', 'K', 'L', 'M'], 'A262-06': ['A', 'B', 'C', 'J', 'K', 'L', 'M'],
+      'A262-05': ['A', 'C', 'J', 'K', 'L', 'M'], 'A262-06': ['A', 'C', 'J', 'K', 'L', 'M'],
       'A262-11': ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-12': ['A', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-13': ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'],
       'A262-14': ['A', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-15': ['A', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-16': ['A', 'C', 'D', 'F', 'J', 'K', 'L', 'M'],
       'A262-19': ['A', 'C', 'F', 'J', 'K', 'L', 'M'], 'A262-20': ['A', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-21': ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'],
       'A262-22': ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-23': ['A', 'C', 'D', 'F', 'J', 'K', 'L', 'M'],
-      'A262-25': ['A', 'C', 'J', 'K', 'L', 'M'], 'A262-26': ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-28': ['A', 'B', 'C', 'D', 'J', 'K', 'L', 'M'],
+      'A262-25': ['A', 'C', 'J', 'K', 'L', 'M'], 'A262-26': ['A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M'], 'A262-28': ['A', 'C', 'D', 'J', 'K', 'L', 'M'],
     });
     expect(SECTION_VISIBILITY.find((s) => s.worksheet === 'A262-11')!.visible_when).toBe("system_size_category == 'small_wwts' AND filter_type == 'vf_sand_0_2'");
     expect(SECTION_VISIBILITY.find((s) => s.worksheet === 'A262-23')!.visible_when).toBe("system_size_category == 'municipal_wwtp' AND filter_type == 'vf_lava_sand_0_4'");
@@ -133,9 +131,21 @@ describe('DWA-A-262E field configs (Plan 3 Task 3)', () => {
       expect(row, `${e.worksheet} ${e.symbol} captured`).toBeDefined();
       expect(row.consumer_worksheets ?? []).toEqual([]);
     }
-    // no section rule targets a section holding a consumed producer
+    // no section rule targets a section holding a consumed producer — directly or through a same-worksheet equation chain (transitive guard, fix round 1)
     const producers = new Set(Object.entries(prior).filter(([k, v]) => k.includes(' ') && ((v as Row).consumer_worksheets ?? []).length > 0).map(([k, v]) => `${k.split(' ')[0]} ${(v as Row).section_code}`));
     for (const s of SECTION_VISIBILITY) expect(producers.has(`${s.worksheet} ${s.section_code}`), `${s.worksheet} ${s.section_code}`).toBe(false);
+    for (const s of SECTION_VISIBILITY) {
+      for (const [k, v] of Object.entries(prior)) {
+        if (!k.startsWith(`${s.worksheet} `) || (v as Row).section_code !== s.section_code) continue;
+        expect(producerChain(prior, s.worksheet, k.slice(s.worksheet.length + 1)), `${k} in ${s.section_code}`).toBeNull();
+      }
+    }
+    // the two transitive refusals that moved to the STAGED file: A262-06 B (Gl. 6/8/10) and A262-28 B (Gl. 16); A262-05 q_R_Tr / Q_R_Tr (Gl. 4 → Gl. 1)
+    expect(producerChain(prior, 'A262-06', 'm_T_aM')).toBe('m_T_aM → Gl.10 Q_F_d_aM (consumed by A262-09)');
+    expect(producerChain(prior, 'A262-28', 'RV')).toBe('RV → Gl.16 eta_DN (consumed by A262-33)');
+    expect(producerChain(prior, 'A262-05', 'q_R_Tr')).toBe('q_R_Tr → Gl.4 Q_R_Tr → Gl.1 Q_Tr_h_max (consumed by A262-07, A262-09)');
+    expect(producerChain(prior, 'A262-05', 'm_multiplier')).toBeNull(); // Gl. 5 outputs 'Q_F + Q_R_Tr' — not a field
+    expect(Object.keys(prior.equations ?? {})).toHaveLength(18);
     for (const e of FIELD_CONFIGS.filter((x) => x.create)) {
       expect(`${e.worksheet} ${e.create!.section_code}` in prior.sections!, `${e.worksheet} ${e.symbol} section ${e.create!.section_code}`).toBe(true);
     }
@@ -164,9 +174,9 @@ describe('DWA-A-262E field configs (Plan 3 Task 3)', () => {
     const files = fieldConfigFilesFor('a262e', '20260917100310');
     expect(norm(up)).toBe(norm(readFileSync(join(ROOT, files.migration), 'utf8')));
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
-    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(4);
+    expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(2);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(24);
-    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(127);
+    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(125);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
   });
 });

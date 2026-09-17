@@ -378,3 +378,56 @@
 -- Evidence: L821 "and minimum total filter area … A_Fo,min (A_Fo1 + A_Fo2) m² 4+4"; prod description "A_F1 + A_F2".
 -- A262-12 carries only A_Fo1_spez / A_Fo2_spez [m²/P]; EZ · (A_Fo1_spez + A_Fo2_spez) would be the MINIMUM total, not
 -- the design total. Owner decides (two Filterstufen rows with stage_role main give Σ via A262-10-D1).
+
+-- =====================================================================================================================
+-- a262e-C-7 · A262-05 · q_R_Tr / Q_R_Tr visible_when sewer_system_type == 'separate_sewer' — REFUSED by the TRANSITIVE producer guard (fix round 1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L579 heading "Maximum wastewater flow from separate sewer networks:"; L582 Gl. 1 "Q_Tr,h,max = 24 · Q_S,d,aM / x_Q,max + Q_F +
+-- Q_R,Tr (l/s)"; L599 Gl. 4 "Q_R,Tr = q_R,Tr · A_E,k (l/s)"; L595 "the unavoidable stormwater infiltration into the sewage pipes from
+-- areas with a separated sewer network Q_R,Tr". Prod: Gl. 4 (A262-05) Q_R_Tr = q_R_Tr * A_E_k; Gl. 1 Q_Tr_h_max consumed by A262-07,
+-- A262-09 (capture). Chain: q_R_Tr → Gl.4 Q_R_Tr → Gl.1 Q_Tr_h_max (consumed by A262-07, A262-09). Hiding q_R_Tr on a combined /
+-- no_sewer plant nulls Q_R_Tr → Gl. 1 → Q_Tr,h,max → the A262-07 pretreatment sizing and the A262-09 summary inherit the null.
+-- Judgment: the §4.1.2 heading scopes Gl. 1 to separated networks, but prod wires Q_Tr,h,max to every plant (Tab. 1 head L616 and
+-- §4.2.5 L721 use it for the Imhoff tank regardless of sewer type). The two field rules emitted in 2bc4035 are WITHDRAWN from
+-- 20260917100310; 'm_multiplier' keeps its rule (Gl. 5's output 'Q_F + Q_R_Tr' is not a field). Owner options: (a) ratify the hide and
+-- accept Q_Tr,h,max = manual on combined / no_sewer plants; (b) make q_R_Tr = 0 the combined-sewer convention instead of hiding
+-- (Q_R,Tr "is not considered", L663 — a value rule, not a visibility rule); (c) keep visible. SQL for (a):
+-- UPDATE fields f SET visible_when = 'sewer_system_type == ''separate_sewer''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A262-05' AND s.code = 'DWA-A-262E' AND f.symbol IN ('q_R_Tr', 'Q_R_Tr') AND f.active AND f.visible_when IS NULL;
+-- Rollback: SET visible_when = NULL on the two rows.
+
+-- =====================================================================================================================
+-- a262e-C-1 (amended, fix round 1) · two TRANSITIVE producer sections added: A262-06 B and A262-28 B
+-- Chains (capture with equations): A262-06 B — f_S_QM → Gl.6 Q_M (consumed by A262-07, A262-09); m_T_aM → Gl.10 Q_F_d_aM (consumed by
+-- A262-09) [→ Gl.9 Q_T_d_aM (consumed by A262-07, A262-09, A262-27, A262-28)]; Q_Dr_RU / Q_krit → Gl.8 Q_M. Gl. 9/10 are printed as
+-- general ("Wastewater flow in annual average", L650–L659 — the paragraph applies to separated networks too), so hiding section B for
+-- non-combined plants would null Q_T,d,aM everywhere. Way forward: split Gl. 9/10 (m_T_aM, Q_F_d_aM, Q_T_d_aM) off A262-06 onto a
+-- sewer-neutral worksheet (or A262-05) BEFORE the hide; not proposed as SQL (worksheet restructuring). A262-28 B — eta_VF / RV → Gl.16
+-- eta_DN (consumed by A262-33): the enhanced-effluent inputs stay visible; a consumer edit on A262-33 (drop eta_DN) would free the rule.
+-- The C-1 list is now: A262-05 B/D/F, -06 B/D/F, -12 B, -14 B, -15 B, -16 B, -19 B/D, -20 B, -23 B, -25 B/D/F, -28 B/F (19 sections).
+
+-- =====================================================================================================================
+-- a262e-P-2 · A262-10/-19 · Tab. 10 "A_Fo,spez ≥ 4*" — the §5.5.2.3 relaxation for tightly-spaced distribution networks (not seeded)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L936 "Specific area, as measured on the upper surface of the filter & A_Fo,spez & m²/P & ≥ 4*"; L945 "*) For tightly-spaced
+-- distribution networks, see Section 5.5.2.3"; Tab. 18 L1227 "≥ 4*)"; §5.5.2.3 L1725 ff. (the printed relaxation lives there). TABLE_LIMITS
+-- is 'locked' and carries a_spez_min = 4 for vf_sand_0_2 × municipal (no "tight" variant column, unlike h_beschickung_min_tight = 10 which
+-- the same table prints as a second value). Owner reads §5.5.2.3 on the PDF; if it prints a reduced A_Fo,spez for tight networks: add a
+-- §5.5.2.3 L1725 "The loaded filter area per opening should not exceed 5 m²."; L1726 "If the loaded filter area per opening is ≤ 1 m² per
+-- hole, the specific area required for municipal wastewater treatment plants (not for small wastewater treatment systems) can be reduced
+-- by 0.5 m²/P and the specific hydraulic loading of the filter surface per dosing event can be reduced to ≥ 10 l/m²". So the "*" relaxation
+-- is A_Fo,spez ≥ 4 − 0.5 = 3.5 m²/P for municipal sand filters with ≤ 1 m² per orifice ("can" — a kann-relaxation, engineer's choice).
+-- Proposed (owner ratifies the reading): column 'a_spez_min_tight' = 3.5 on the vf_sand_0_2 × municipal_wwtp rows of TABLE_LIMITS (seed
+-- builder + re-emit 20260917100300), a boolean 'tight_distribution_network' input on the filterstufen register (or A262-19) and
+-- a_spez_min = if(tight, a_spez_min_tight, a_spez_min) in the register; the orifice input (≤ 1 m²) is TABLE18_ORIFICE's row. No SQL yet.
+
+-- =====================================================================================================================
+-- a262e-F-2 (amended, fix round 1) · the unit fix that must precede the aufenthaltszeit equation
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L582 Gl. 1 prints "(l/s)"; L595 / L598–L599 Gl. 3/4 "(l/s)"; prod A262-05 Q_Tr_h_max.unit = 'l/s; m3/h' (read-only, 2026-09-17).
+-- BEGIN;
+-- UPDATE fields f SET unit = 'l/s' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A262-05' AND s.code = 'DWA-A-262E' AND f.symbol = 'Q_Tr_h_max' AND f.active AND f.unit = 'l/s; m3/h';
+-- COMMIT;
+-- Rollback: UPDATE fields … SET unit = 'l/s; m3/h' … WHERE f.symbol = 'Q_Tr_h_max' AND f.unit = 'l/s'.
+-- Then the equation block above (A262-07-D1, factor 1000/3600) applies unchanged.

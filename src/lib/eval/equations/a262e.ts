@@ -151,8 +151,8 @@ export const EQUATIONS: EquationEntry[] = [
     standard: STD, worksheet: 'A262-21', equation_number: 'A262-21-D1',
     formula: 'A_F_CSB_VFG_KomKA = B_CSB_KomKA * 1000 / f_A_F_CSB_VFG_KomKA',
     input_symbols: ['B_CSB_KomKA', 'f_A_F_CSB_VFG_KomKA'], output_symbol: 'A_F_CSB_VFG_KomKA', output_unit: 'm²',
-    clause_reference: '§4.3.3.2, Tab. 10',
-    description: 'Plan 3: erforderliche Fläche nach CSB = Fracht / Flächenbelastung (prod-Beschreibung "A_F = B_CSB / f_A_F_CSB"; 1000 = kg/d → g/d, die prod-Einheit von B_CSB_KomKA ist kg/d); B_CSB_KomKA wird erst nach a262e-C-6 auf A262-21 übernommen (a262e-F-5).',
+    clause_reference: '§4.3.3.4 (definitional: f_A,F,CSB per Tab. 10 L937 / Tab. 18 L1228)',
+    description: 'Plan 3: erforderliche Fläche nach CSB = Fracht / Flächenbelastung (definitorisch — f_A,F,CSB ist die Fracht je Fläche, Tab. 10 L937 / Tab. 18 L1228; Tab. 12 selbst druckt keine f_A,F,CSB-Zeile; prod-Beschreibung "A_F = B_CSB / f_A_F_CSB"; 1000 = kg/d → g/d, die prod-Einheit von B_CSB_KomKA ist kg/d); B_CSB_KomKA wird erst nach a262e-C-6 auf A262-21 übernommen (a262e-F-5).',
     verification_quote: L937,
   },
   {

@@ -21,5 +21,4 @@ DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-1989-1' AND w.code = 'DIN-1989-1-05' AND f.symbol = 'inbetriebnahme_pruefpunkte' AND f.description LIKE 'Plan 3:%';
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-1989-1' AND w.code = 'DIN-1989-1-06' AND f.symbol = 'wartungsplan' AND f.description LIKE 'Plan 3:%';
 DELETE FROM fields f USING worksheet_templates w, standards s WHERE f.worksheet_template_id = w.id AND w.standard_id = s.id AND s.code = 'DIN-1989-1' AND w.code = 'DIN-1989-1-06' AND f.symbol = 'wartungsplan_rows' AND f.description LIKE 'Plan 3:%';
-UPDATE worksheet_sections ws SET visible_when = NULL FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND ws.code = 'B' AND w.code = 'DIN-1989-1-04' AND s.code = 'DIN-1989-1';
 COMMIT;

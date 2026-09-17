@@ -25,8 +25,10 @@
  *     mineral_seal_* / lava_sand_clay_fraction_pct) — every one is consumed by
  *     A262-31 (or A262-23); the emitter refuses hiding a producer → a262e-C-4,
  *     gates a262e-G-3 / G-4;
- *   - section rules on producer sections (A262-05 B/D/F, -06 D/F, -12 B, -14 B,
- *     -15 B, -16 B, -19 B/D, -20 B, -23 B, -25 B/D/F, -28 F) → a262e-C-1;
+ *   - section rules on producer sections (A262-05 B/D/F, -06 B/D/F, -12 B, -14 B,
+ *     -15 B, -16 B, -19 B/D, -20 B, -23 B, -25 B/D/F, -28 B/F) → a262e-C-1; -06 B
+ *     and -28 B are TRANSITIVE producers (fix round 1: m_T_aM → Gl.10 Q_F_d_aM,
+ *     f_S_QM / Q_Dr_RU / Q_krit → Gl.6/8 Q_M, eta_VF / RV → Gl.16 eta_DN);
  *   - `system_size_category` is not consumed on A262-11…-16 / -19…-23 and
  *     `filter_type_KomKA` (A262-18) has no consumers at all: the filter-type
  *     worksheets are keyed on `filter_type` (A262-10, consumed by all of them)
@@ -103,9 +105,9 @@ const tab1Fill = (symbol: string, table: string, param: string, printedLoads: st
 
 export const FIELD_CONFIGS: FieldConfigEntry[] = [
   // ---- A262-05 (Trennsystem): the separate-sewer-only inputs of Gl. 4/5 (consumer-free in the capture) ----
-  WS05({ symbol: 'm_multiplier', widget: 'scalar', ui_config: null, visible_when: SEPARATE, verification_quote: L579 }), // Gl. 5 lump-sum multiplier for Q_F + Q_R,Tr
-  WS05({ symbol: 'q_R_Tr', widget: 'scalar', ui_config: null, visible_when: SEPARATE, verification_quote: L579 }),
-  WS05({ symbol: 'Q_R_Tr', widget: 'scalar', ui_config: null, visible_when: SEPARATE, verification_quote: L579 }), // Gl. 4 output (consumer-free)
+  WS05({ symbol: 'm_multiplier', widget: 'scalar', ui_config: null, visible_when: SEPARATE, verification_quote: L579 }), // Gl. 5 lump-sum multiplier for Q_F + Q_R,Tr (its output 'Q_F + Q_R_Tr' is no field)
+  // q_R_Tr / Q_R_Tr: REFUSED by the transitive producer guard (fix round 1) — Q_R_Tr → Gl.1 Q_Tr_h_max (consumed by A262-07, A262-09); whether
+  // Q_Tr,h,max is N/A for no_sewer plants is a judgment (heading L579 vs prod wiring to every plant) → STAGED a262e-C-7.
 
   // ---- A262-06 (Mischsystem): Gl. 6 (RÜB) vs Gl. 8 (RÜ) driver + the Σ register ----
   WS06({
@@ -150,7 +152,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     lookup: { table_code: 'S4_2_VORBEHANDLUNG', role: 'limit', keys: [{ column: 'pretreatment', from_symbol: 'pretreatment_selected' }], value: 'v_min_l_p' },
     verification_quote: L700,
     create: { section_code: 'C', label_de: 'Mindestvolumen der Vorbehandlung je Einwohner nach §4.2 (300 l/P Mehrkammergrube · 200 l/P Rottebehälter · 75 l/P Emscherbrunnen · 1 200 l/P belüfteter Absetzteich)', data_type: 'number', unit: 'l/P', clause_reference: '§4.2.2–§4.2.7',
-      description: 'Plan 3: Grenzwert aus S4_2_VORBEHANDLUNG zur gewählten Vorbehandlung (Absetzteich: Flächenwert 1,5 m²/P, keine Volumenzeile; Rohabwasserfilter: Tab. 3); das Gate V_Vorbehandlung ≥ V_VB_min · EZ ist STAGED (a262e-G-1).' },
+      description: 'Plan 3: Grenzwert aus S4_2_VORBEHANDLUNG zur gewählten Vorbehandlung; bleibt LEER (kein Volumen-Grenzwert) für settling_pond — dessen §4.2.4-Vorgabe ist die Fläche 1,5 m²/P (Spalte a_spez_min_m2_p, kein Fill angelegt) — und für raw_wastewater_filter (Tab. 3); das Gate V_Vorbehandlung ≥ V_VB_min · EZ ist STAGED (a262e-G-1).' },
   }),
 
   // ---- A262-08 (Ablauf): the sample register behind the four-out-of-five rule ----
@@ -322,7 +324,7 @@ const filterWs = (worksheet: string, size: string, token: (typeof FILTER_TYPE_TO
 export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [
   // A262-05 Trennsystem / A262-06 Mischsystem (§4.1.2 headings L579 / L633; L742 sewer split)
   ...sections('A262-05', SEPARATE, `${L579} — ${L742}`, ['B', 'D', 'F']),
-  ...sections('A262-06', COMBINED, `${L633} — ${L643}`, ['D', 'F']),
+  ...sections('A262-06', COMBINED, `${L633} — ${L643}`, ['B', 'D', 'F']), // B: transitive producers (Gl. 6/8/10) — a262e-C-1
   // small wastewater treatment systems (§1 L296, L396; Tab. 17 L1187)
   ...filterWs('A262-11', SMALL, 'vf_sand_0_2', `${L296} — ${L1187}`, []),
   ...filterWs('A262-12', SMALL, 'two_stage_vf_gravel_sand', `${L296} — ${L1187}`, ['B']),
@@ -339,7 +341,7 @@ export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [
   // seasonal operation (§4.3.4 L1062), greywater (§4.3.5 L1119), enhanced effluent requirements (§4.5 L1295/L1299)
   ...sections('A262-25', "seasonal_operation == 'seasonal'", L1062, ['B', 'D', 'F']),
   ...sections('A262-26', "wastewater_type == 'greywater_only'", L1119, []),
-  ...sections('A262-28', "enhanced_effluent == 'enhanced_NP'", `${L1295} — ${L1299}`, ['F']),
+  ...sections('A262-28', "enhanced_effluent == 'enhanced_NP'", `${L1295} — ${L1299}`, ['B', 'F']), // B: eta_VF / RV → Gl.16 eta_DN (consumed by A262-33) — a262e-C-1
 ];
 
 /** Type-level pin that this module has the shape the emitter's index expects. */

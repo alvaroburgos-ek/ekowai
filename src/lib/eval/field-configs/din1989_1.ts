@@ -300,9 +300,11 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
  * every field consumer-free in the capture) hide while it is selected; sections C/D/E stay (E_R, BW_a, V_n are
  * consumed by -02/-04/-06 and V_n is typed by hand in that case).
  */
-export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [
-  { standard: STD, worksheet: 'DIN-1989-1-04', section_code: 'B', visible_when: "bemessungsverfahren != 'verkuerzt'", verification_quote: L796 },
-];
+// REFUSED by the transitive producer guard (Task 3 fix round 1): every section-B input feeds Gl. 1 (E_R) or Gl. 2/3 (BW_a),
+// whose outputs carry consumer_worksheets in the capture — hiding the inputs nulls the inherited values. The rule
+// `DIN-1989-1-04 B ← bemessungsverfahren != 'verkuerzt'` (L796) is STAGED as din1989_1-C-3.
+export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [];
+void L796;
 
 /** Type-level pin that this module has the shape the emitter's index expects. */
 export const MODULE: FieldConfigModule = { FIELD_CONFIGS, SECTION_VISIBILITY };
