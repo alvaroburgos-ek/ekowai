@@ -70,3 +70,55 @@ describe('field-config', () => {
     expect(ok.ui).toMatchObject({ title: 'Checkliste' });
   });
 });
+
+describe('Plan 2b additive keys', () => {
+  it('register ui_config accepts flags (note/disables_rows), footer, option_labels/sort_by_label, display/value_labels, aria_label and a grid column with spec', () => {
+    const ui = {
+      title: 'Schadstoffregister',
+      flags: [{ key: 'not_applicable', label: 'Keine berichtspflichtigen Schadstoffemissionen', note: 'Null-Meldung', disables_rows: true }],
+      footer: ['AmountOfEmissionToAir'],
+      columns: [
+        { key: 'medium', type: 'enum', label: 'Medium', options: ['air', 'water', 'soil'], option_labels: { air: 'Luft', water: 'Wasser', soil: 'Boden' }, sort_by_label: true, aria_label: 'Medium' },
+        { key: 'kind', type: 'derived', label: 'befestigt/unbefestigt', expr: "lookup('TAB9', k, 'kind')", display: 'badge', value_labels: { paved: 'befestigt', unpaved: 'unbefestigt' } },
+        { key: 'ratings', type: 'grid', label: 'Bewertung (0–10)', grid: { rows: [{ key: 'bauherr', label: 'Bauherr' }], cols: [{ key: 'probability', label: 'Eintretenswahrsch.', min: 0, max: 10, step: 1 }] } },
+      ],
+    };
+    const cfg = parseFieldConfig({ widget: 'register', uiConfig: ui, lookup: null, visibleWhen: null });
+    const out = cfg.ui as {
+      flags: Array<{ key: string; note?: string; disables_rows?: boolean }>; footer?: string[];
+      columns: Array<{ option_labels?: Record<string, string>; sort_by_label?: boolean; aria_label?: string; display?: string; value_labels?: Record<string, string>; grid?: { rows: unknown[]; cols: Array<{ step?: number }> } }>;
+    };
+    expect(out.flags).toHaveLength(1);
+    expect(out.flags[0].disables_rows).toBe(true);
+    expect(out.flags[0].note).toBe('Null-Meldung');
+    expect(out.footer).toEqual(['AmountOfEmissionToAir']);
+    expect(out.columns[0].option_labels).toEqual({ air: 'Luft', water: 'Wasser', soil: 'Boden' });
+    expect(out.columns[0].sort_by_label).toBe(true);
+    expect(out.columns[0].aria_label).toBe('Medium');
+    expect(out.columns[1].display).toBe('badge');
+    expect(out.columns[1].value_labels).toEqual({ paved: 'befestigt', unpaved: 'unbefestigt' });
+    expect(out.columns[2].grid?.cols[0].step).toBe(1);
+  });
+  it('a malformed grid spec (empty rows/cols) is rejected at columns.N.grid; a bad display value is rejected', () => {
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'g', type: 'grid', label: 'g', grid: { rows: [], cols: [] } }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.0\.grid/);
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'd', type: 'text', label: 'd', display: 'huge' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.0\.display/);
+  });
+  it('register catalog (Task 9) validates group_column/item_column/groups', () => {
+    const ok = parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'g', type: 'text', label: 'g' }, { key: 'i', type: 'text', label: 'i' }],
+      catalog: { group_column: 'g', item_column: 'i', groups: [{ label: 'A', items: ['a1'] }], add_custom_label: '+ eigener' } }, lookup: null, visibleWhen: null });
+    expect((ok.ui as { catalog: { groups: unknown[] } }).catalog.groups).toHaveLength(1);
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'g', type: 'text', label: 'g' }], catalog: { group_column: 'g', item_column: 'i', groups: [] } }, lookup: null, visibleWhen: null })).toThrow(/catalog\.groups/);
+  });
+  it('reference requires carrier_symbol/rows_path/id_key/label_key; lookup_fill ui may be null or a typed object', () => {
+    const ok = parseFieldConfig({ widget: 'reference', uiConfig: { carrier_symbol: 'r_D_n_table', rows_path: 'tables', id_key: 'id', label_key: 'name', badge_key: 'kind', badge_labels: { a: 'A' }, empty_label: '—' }, lookup: null, visibleWhen: null });
+    expect((ok.ui as { carrier_symbol: string }).carrier_symbol).toBe('r_D_n_table');
+    expect(() => parseFieldConfig({ widget: 'reference', uiConfig: null, lookup: null, visibleWhen: null })).toThrow(/carrier_symbol|ui_config invalid for reference/);
+    expect(() => parseFieldConfig({ widget: 'reference', uiConfig: { title: 'x' }, lookup: null, visibleWhen: null })).toThrow(/carrier_symbol/);
+    const binding = { table_code: 'TAB6', role: 'limit', keys: [{ column: 'tier', from_symbol: 'tab6_tier' }], value: 'max' };
+    const lf = parseFieldConfig({ widget: 'lookup_fill', uiConfig: null, lookup: binding, visibleWhen: null });
+    expect(lf.ui).toBeNull();
+    const lf2 = parseFieldConfig({ widget: 'lookup_fill', uiConfig: { source_label: 'Tab. 6', reason_min_length: 10 }, lookup: binding, visibleWhen: null });
+    expect((lf2.ui as { reason_min_length: number }).reason_min_length).toBe(10);
+    expect(() => parseFieldConfig({ widget: 'lookup_fill', uiConfig: { reason_min_length: 0 }, lookup: binding, visibleWhen: null })).toThrow(/reason_min_length/);
+  });
+});
