@@ -809,14 +809,14 @@ Report: `reports/plan-3-m277e.md` · STAGED SQL: `scripts/verification/m277e-STA
 - Class: deactivation
 - Chosen now (fail-safe): nothing deleted; the brief's `Q_GWT_calc` / `V_buffer_calc` are NOT emitted because prod already computes `Q_GWT = min(Q_GW, Q_SW)` (Eq. (3)) and `V_buffer = Q_GWT * 1` — a second equation per quantity is never added; the §9.2–§9.4 numbers are unit-test fixtures instead.
 - Evidence (verbatim, transcript line): "& Q_{\mathrm{GWT}}=Q_{\mathrm{GW}} \text {, when } Q_{\mathrm{SW}}>Q_{\mathrm{GW}}(\mathrm{l} / \mathrm{d})  \tag{3}\\" (L723); "& Q_{\mathrm{GWT}}=Q_{\mathrm{SW}} \text {, when } Q_{\mathrm{GW}}>Q_{\mathrm{SW}}(\mathrm{l} / \mathrm{d}) \tag{4}" (L724); "Decisive for the hydraulic dimensioning is the smaller value in each case." (L718). Prod: Eq. (3), Eq. (4) and "Ex. 9.4" all read 'Q_GWT = min(Q_GW, Q_SW)' on M277E-08 and -18; "Ex. 9.4-WB" 'Q_WB = 1625 - 875'; "Ex. 9.2" 'Q_SW = 25*33 + 60*150/180'; "Ex. 9.3-A1/-A2" literal sums — all `verified_against_standard`.
-- Proposed SQL / config: STAGED block m277e-R-3 (twelve guarded DELETEs, ids listed).
+- Proposed SQL / config: STAGED block m277e-R-3 (twelve guarded DELETEs, ids listed; fix round 1: the block carries the twelve FULL captured rows as INSERT … ON CONFLICT DO NOTHING rollbacks, same ids, every column — `equations` has no `active` column).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m277e-R-4 · DWA-M-277E · M277E-09 / M277E-21 · Buffer `V_buffer = Q_GWT * 1` twice; REQ-19
 - Class: deactivation
 - Chosen now (fail-safe): both rows stay; no `V_buffer_calc` emitted (single source); REQ-19 (`V_buffer >= Q_GWT`, warn on -09 and -19) unchanged.
 - Evidence (verbatim, transcript line): "It is recommended that the total buffer volume corresponds to one-day treatment capacity." (L574) — "recommended" ⇒ the `1` is one day, warn-class.
-- Proposed SQL / config: STAGED block m277e-R-4 (delete the M277E-09 copy with the -09 dissolution; re-home REQ-19 to M277E-21).
+- Proposed SQL / config: STAGED block m277e-R-4 (delete the M277E-09 copy with the -09 dissolution; re-home REQ-19 to M277E-21; fix round 1: the full captured row is embedded as the INSERT rollback).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m277e-R-5 · DWA-M-277E · M277E-01 · storage_capacity_m3 ← storage_capacity_calc_m3
@@ -835,7 +835,7 @@ Report: `reports/plan-3-m277e.md` · STAGED SQL: `scripts/verification/m277e-STA
 
 ### m277e-D-2 · DWA-M-277E · M277E-14 · quality_category ← quality_category_code_rows
 - Class: data_type
-- Chosen now (fail-safe): manual select stays; the code computes on M277E-16 (2 for the §9.2 example, 1 for private toilets only — pinned).
+- Chosen now (fail-safe): manual select stays; the code computes on M277E-16 as ONE rule — `max_rows(…, min_cat)` over both registers, the Tab.-4 `min_category_code` per row, no literal category (fix round 1) — 2 for the §9.2 example, 1 for private toilets only, 2 for an area-only project (pinned).
 - Evidence (verbatim, transcript line): L649; L663; Tab. 4 use rows "Toilet flushing (private) & + & +" (L503) … "Toilet flushing (public) & - & +" (L507).
 - Proposed SQL / config: STAGED block m277e-D-2 (gate `IF quality_category == C1 THEN quality_category_code_rows == 1` on M277E-14 after m277e-C-2).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
@@ -942,7 +942,7 @@ Report: `reports/plan-3-m277e.md` · STAGED SQL: `scripts/verification/m277e-STA
 - Class: range-SR-2
 - Chosen now (fail-safe): mean / 85percentile × 11 cells seeded; fbr 2005 / DWA 2008 columns and the TOS / Potassium / Sulphur rows not seeded; the M277E-08 fills are created next to a statistic select, the measured inputs stay.
 - Evidence (verbatim, transcript line): "In the present document, data from Sievers et al. (2014) are recommended as design values." (L353); "\hline & & from & to & from & to & median & mean & 85percentile \\" (L361); "\hline TOS (organic) & g/(P•d) & - & - & 28 & 45 & 44 & & \\" (L364, no Sievers cell).
-- Proposed SQL / config: optional second table on the owner's word.
+- Proposed SQL / config: optional second table on the owner's word. Ratifying J-2 also ratifies the EXISTENCE of the nine created fields that hang off it (fix round 1): M277E-08 `sievers_statistic` + the six `*_sievers` lookup_fills on TABLE1_SIEVERS and M277E-06 `total_coliforms_untreated_range` / `faecal_coliforms_untreated_range` on TABLE3 (all in `20260917100410`; REJECTED ⇒ their nine `Plan 3:` DELETEs in that rollback + drop TABLE1_SIEVERS / TABLE3 from the seed).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### m277e-J-3 · DWA-M-277E · M277E-16 · TABLE5_AREA (worked-example values)

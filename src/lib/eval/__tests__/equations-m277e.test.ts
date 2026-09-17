@@ -109,6 +109,10 @@ describe('DWA-M-277E Plan-3 equations', () => {
     const over = prep('M277E-16', 'verbraucher_sw', [{ id: '1', application: 'toilets', use_category: 'toilet_private', persons: 10, q_sw_p: 30, q_sw_p_override: true }]);
     expect(over.rows[0].values).toMatchObject({ q_sw_p: 30, q_row: 300 });
     expect(run('M277E-16-D1', { registers: { verbraucher_sw: prep('M277E-16', 'verbraucher_sw', []), bewaesserung_sw: b } }).kind).toBe('manual_required');
+    // the category rule reads BOTH registers through max_rows (no literal 2): area-only ⇒ 2 from the irrigation row; both empty ⇒ undecidable
+    expect(computed(run('M277E-16-D2', { registers: { verbraucher_sw: prep('M277E-16', 'verbraucher_sw', []), bewaesserung_sw: b } }))).toBe(2);
+    expect(run('M277E-16-D2', { registers: { verbraucher_sw: prep('M277E-16', 'verbraucher_sw', []), bewaesserung_sw: none } }).kind).toBe('manual_required');
+    expect(eq('M277E-16-D2').formula).not.toMatch(/, 2,/);
   });
 
   it('M277E-05-D1: MBO code from the 50 m³ threshold (L329) — 50 → 0 (mere notification), 50.5 → 1', () => {

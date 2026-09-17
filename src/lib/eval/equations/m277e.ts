@@ -88,10 +88,10 @@ export const EQUATIONS: EquationEntry[] = [
   },
   {
     standard: STD, worksheet: 'M277E-16', equation_number: 'M277E-16-D2',
-    formula: 'quality_category_code_rows = if(count_rows(bewaesserung_sw) > 0, 2, max_rows(verbraucher_sw, min_cat))',
+    formula: 'quality_category_code_rows = if(count_rows(verbraucher_sw) > 0, if(count_rows(bewaesserung_sw) > 0, max(max_rows(verbraucher_sw, min_cat), max_rows(bewaesserung_sw, min_cat)), max_rows(verbraucher_sw, min_cat)), max_rows(bewaesserung_sw, min_cat))',
     input_symbols: ['verbraucher_sw', 'bewaesserung_sw'], output_symbol: 'quality_category_code_rows', output_unit: null,
     clause_reference: '§9.2; §6.3, Tab. 4',
-    description: 'Plan 3: höchste Tab.-4-Mindestkategorie über die Verbraucher-Zeilen (1 = C1, 2 = C2); jede Bewässerungsfläche ⇒ 2 (Tab. 4: Bewässerung nur unter C2, Beispiel §9.2 "C2 due to the irrigation"); Übernahme in quality_category (M277E-14) STAGED (m277e-D-2 / m277e-C-2).',
+    description: 'Plan 3: höchste Tab.-4-Mindestkategorie (TABLE4_USES.min_category_code, 1 = C1, 2 = C2) über die personenbezogenen UND die flächenbezogenen Verbraucher-Zeilen — eine Regel, max_rows über beide Register (ein leeres Register wird per count_rows ausgelassen; beide leer ⇒ unentscheidbar); Beispiel §9.2 "C2 due to the irrigation"; Übernahme in quality_category (M277E-14) STAGED (m277e-D-2 / m277e-C-2).',
     verification_quote: `${L649} — ${L663}`,
   },
   // ---- M277E-05: the MBO 50 m³ threshold from the inherited storage capacity ----

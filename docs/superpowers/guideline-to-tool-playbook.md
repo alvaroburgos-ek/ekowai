@@ -407,7 +407,10 @@ selects the value column, so no key literal is needed; the brief's per-parameter
 tokens can be upper-case (`A1`, `C2`) — copy them from the capture, never from the brief. (5) Prod already holds a
 LEGACY table named `regulation_tables` (5,382 rows, columns `variant_value` / `value_text` …): the Plan-1 schema
 migration's `CREATE TABLE IF NOT EXISTS` is a no-op there and every Plan-3 seed INSERT fails on it while the runtime
-fallback masks the failure — sign-off m277e-I-1, to be resolved before ANY seed migration is applied.
+fallback masks the failure — resolved by the Plan-1 amendment plan1-D-3-1 (the schema migration renames the legacy
+table first). (6) Never splice SQL or docs with `String.prototype.replace` and a replacement string containing `$$` / `$'` /
+backticks under a shell — `$$` collapses to `$` (dollar-quote tags), backticks are command-substituted; write the replacement
+from a file or use `split/join` (Task 4 fix round 1: the `DO $$` block became `DO $` and only the embedded-PG run caught it).
 
 ## Token budget note
 

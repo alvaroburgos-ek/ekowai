@@ -282,7 +282,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
       description: 'Plan 3: Ausgabe der Gleichung M277E-16-D1 (sum_rows über verbraucher_sw und bewaesserung_sw); Ablösung von Eq. (1) / Q_SW STAGED (m277e-R-2).' } }),
   WS16({ symbol: 'quality_category_code_rows', widget: 'derived', ui_config: null, verification_quote: `${L649} — ${L663}`,
     create: { section_code: 'D', label_de: 'Erforderliche Qualitätskategorie aus den Nutzungen als Code (1 = C1 · 2 = C2 — die höchste Anforderung entscheidet)', data_type: 'number', unit: null, clause_reference: '§9.2; §6.3, Tab. 4',
-      description: 'Plan 3: Ausgabe der Gleichung M277E-16-D2 (max_rows der Tab.-4-Mindestkategorie über verbraucher_sw; jede Bewässerungsfläche ⇒ 2); Übernahme in quality_category auf M277E-14 STAGED (m277e-D-2 / m277e-C-2).' } }),
+      description: 'Plan 3: Ausgabe der Gleichung M277E-16-D2 (max_rows der Tab.-4-Mindestkategorie über verbraucher_sw UND bewaesserung_sw — eine Regel für beide Register); Übernahme in quality_category auf M277E-14 STAGED (m277e-D-2 / m277e-C-2).' } }),
 
   // ---- M277E-05 (MBO): the 50 m³ threshold as a code from the inherited storage capacity ----
   WS05({ symbol: 'mbo_authorisation_code', widget: 'derived', ui_config: null, verification_quote: L329,
