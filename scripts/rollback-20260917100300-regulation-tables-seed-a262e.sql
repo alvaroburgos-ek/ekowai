@@ -1,0 +1,12 @@
+BEGIN;
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE1_CSB';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE1_BSB5';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE1_TKN';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE2_CSB';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'S4_2_VORBEHANDLUNG';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE_LIMITS';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE15';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE16';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE18_ORIFICE';
+DELETE FROM regulation_tables WHERE standard_code = 'DWA-A-262E' AND edition = '2017-11' AND table_code = 'TABLE21';
+COMMIT;

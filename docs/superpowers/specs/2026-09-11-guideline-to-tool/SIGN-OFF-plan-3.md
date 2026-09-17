@@ -429,3 +429,288 @@ Report: `reports/plan-3-din1989_1.md` · STAGED SQL: `scripts/verification/din19
 - **Anhang B (15 rows) vs. §17.2 (13 bullets, L956–L968):** the `inbetriebnahme_pruefpunkte` select_many lists the 15 Anhang B rows (the brief's choice); §17.2's bullets are the Probelauf checks and are carried as the widget's note (L955).
 - **`e` as a register column key:** the evaluator's `e` = Euler fallback applies only to a symbol NOT provided as a value; a row cell named `e` always shadows it (pinned in `regulation-tables-seed-din1989-1.test.ts`).
 - **Section rule on DIN-1989-1-04 B:** hides the eight Gl. 1–4 scalar inputs AND the three new registers while `bemessungsverfahren == 'verkuerzt'` (L796 "keine Berechnungen"); E_R / BW_a / V_n stay visible (consumed) and read `manual_required`; V_n is typed by hand in that case. **Gate interplay (fix round 1):** prod CR-10 (`V_n IS NOT NULL AND E_R IS NOT NULL AND BW_a IS NOT NULL`, block) stays as is — under `verkuerzt` it is satisfiable only by hand-typing E_R and BW_a on the manual path (their inputs are hidden, so the engine reports `manual_required`); a CR-10 guard `IF bemessungsverfahren != verkuerzt THEN …` would be a gate change and is NOT proposed here — the owner may add it to G-class if the band-only path should not require the three figures.
+
+## Task 3 — DWA-A-262E (a262e)
+
+Report: `reports/plan-3-a262e.md` · STAGED SQL: `scripts/verification/a262e-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-262E\DWA-A_262E (2).md` (English edition, November 2017; lines cited) · prod capture `src/lib/eval/field-configs/a262e.prior.json` (2026-09-17, read-only). Ids follow the Task-3 brief where it named them (E/G/R/U/X/C/P); J = judgment/representation, F = text-only formula, I = interface-gap. Nothing below is applied.
+
+### a262e-U-1 · DWA-A-262E · A262-30 · Table 19 (treatment-step combinations)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Table 19 NOT seeded; `treatment_combination_selected` (A262-30) stays a free text.
+- Evidence (verbatim, transcript line): "Table 19: Selected examples of common combinations of the different treatment steps" (L1256); the cells are `![](https://cdn.mathpix.com/…)` images (L1260–L1289) and the middle part is an `\includegraphics` figure "Table 19 (continued)" (L1274–L1275).
+- Proposed SQL / config: none until the PDF page is read (SR-3); then a TABLE19 with (size, primary, main, polishing) rows and a `select_one` on A262-30.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-U-2 · DWA-A-262E · A262-22 · TABLE_LIMITS (Tab. 13 `t_Sicker,min,aM ≤ 4`)
+- Class: unreadable-cell
+- Chosen now (fail-safe): encoded as printed — `t_sicker_max = 4`, `t_sicker_min = null` on the two aerated-VF municipal rows; TABLE_LIMITS stays `imported_unverified` although 26/26 quotes verify.
+- Evidence (verbatim, transcript line): "\hline Average minimum time between dosing intervals & $t_{\text {Sicker,min,aM }}$ & h & $\leq 4$ \\" (L1019) — every other table prints "≥" for this quantity (L940 "≥ 6", L971 "≥ 3", L1049 "≥ 4", L1138/L1139 "≥ 6" / "≥ 3"); Tab. 18 repeats "≤ 4" for the aerated filter column (L1240).
+- Proposed SQL / config: owner reads the PDF cell; if "≥ 4": `UPDATE regulation_table_rows SET row_values = (row_values - 't_sicker_max') || '{"t_sicker_min":4,"t_sicker_max":null}'` on rows `aerated_vf_gravel_8_16|municipal_wwtp|tr` / `|m`, then `verification_status = 'md_verified'` on TABLE_LIMITS.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-U-3 · DWA-A-262E · A262-23 · TABLE18_ORIFICE (lava sand cell)
+- Class: unreadable-cell
+- Chosen now (fail-safe): `orifice_area_max = null` for `vf_lava_sand_0_4|main`, the printed text kept in `orifice_printed`; table `imported_unverified`.
+- Evidence (verbatim, transcript line): "… & $\leq 25-<5^{* *}$ & & $\leq 1$ & & \\" (L1244); footnote "**) See Section 5.5.2.7" (L1248).
+- Proposed SQL / config: owner reads §5.5.2.7 / the PDF cell (a range "≤ 25 … < 5" is not one limit); set `orifice_area_max` accordingly and flip the table to `md_verified`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-P-1 · DWA-A-262E · A262-27 · TABLE15 / TABLE_LIMITS (override policy)
+- Class: override-policy
+- Chosen now (fail-safe): `locked` on both tables (the limits are "≥"/"≤" cells; no override control); the Tab. 15 footnote is quoted in `override_quote`.
+- Evidence (verbatim, transcript line): "*) when monitoring the filter effluent for redox potential, an increased loading (up to the maximal loading rate) is possible, when oxic conditions are observed." (L1147) — applies to the "≤ 120*" cell (L1137) only.
+- Proposed SQL / config: if the owner wants the printed relaxation selectable: `override_policy = 'kann'` on TABLE15 with `value_columns.q_f_t_max.values = ['80','120']` and a boolean `redox_monitoring` attestation on A262-27 as the reason; `locked` otherwise.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-E-1 · DWA-A-262E · A262-10/-17/-18/-24/-30 · filter-type vocabularies (token map)
+- Class: equation-replacement
+- Chosen now (fail-safe): every Plan-3 key uses `A262-10.filter_type` tokens (consumed by A262-11…-30); D-1 keeps all five enums untouched. Map: `vf_sand_0_2` = `vf_sand_0_2` · `two_stage_vf_gravel_sand` = `vf_two_stage_fine_gravel_coarse_sand` · `vf_coarse_sand_0_4` = `vf_coarse_sand_0_4` · `aerated_vf_gravel_8_16` = `vf_aerated_gravel_8_16` · `vf_lava_sand_0_4` = `vf_lava_sand_0_4` · `two_layer_filter_trench` = `two_layer_filter_trench` · `aerated_hf_gravel_8_16` = `hf_aerated_gravel_8_16` (filtertyp_gewaehlt_KA / filter_type_KomKA / filtertyp_KomKA); `main_filter_type` (A262-30) already uses the A262-10 tokens.
+- Evidence (verbatim, transcript line): capture a262e.prior.json — `filter_type_KomKA` and `filtertyp_KomKA` carry 5 tokens, `filtertyp_gewaehlt_KA` 6, `filter_type` / `main_filter_type` 9; `filter_type_KomKA` has NO consumers, so the municipal worksheets are keyed on `filter_type` (Tab. 18 header L1224 names the same filter kinds as Tab. 17 L1197).
+- Proposed SQL / config: Phase-6 collapse: retire the four twins in favour of `filter_type` (deactivation + consumer edits), or an `UPDATE fields SET enum_values` re-key to the A262-10 tokens (D-1 overwrite — owner's call).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-E-2 · DWA-A-262E · A262-07 · TABLE1_* / S4_2_VORBEHANDLUNG (unmapped `pretreatment_selected` tokens)
+- Class: equation-replacement
+- Chosen now (fail-safe): no row for `rotting_tank` in TABLE1_* (no printed column) and none for `raw_wastewater_filter` in S4_2_VORBEHANDLUNG (sized by Tab. 3, not by volume); the printed "Raw wastewater" column has no token → not seeded. The lookup_fill badge reads "keine Zeile" for those selections.
+- Evidence (verbatim, transcript line): Tab. 1 head "Parameter & Raw wastewater & After pretreatment in a mulicompartment septic tank, settling pond, or Imhoff tank with a retention time of ≥ 2 h at Q_Tr,h,max & After primary treatment with a raw wastewater filter & After pretreatment with an aerated settling pond" (L616); "The rotting tank must be used in conjunction with a downstream multicompartment septic tank" (L704–L705).
+- Proposed SQL / config: if the owner reads the rotting-tank system as "column 2" (downstream septic tank): `INSERT` rows `rotting_tank` into TABLE1_CSB/BSB5/TKN with 80/40/10; a `raw` token would need a new enum value (D-1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-E-3 · DWA-A-262E · A262-09 · B_CSB / B_BSB5 / B_TKN (Tab. 1 fill placement)
+- Class: equation-replacement
+- Chosen now (fail-safe): the Tab.-1 fills are CREATED on A262-07 (`B_CSB_tab1`, `B_BSB5_tab1`, `B_TKN_tab1`, lookup_fill role value, `messwert`); the existing A262-09 numbers are untouched.
+- Evidence (verbatim, transcript line): "For the design of filters for municipal wastewater treatment plants based on empirical values, the wastewater pollutant loads per population equivalent given in Table 1 must be used." (L573); capture: `pretreatment_selected` consumers = {A262-04, A262-32, A262-33} (no A262-09); code read in-session: `lookup-fill-field.tsx` renders the read-only box (no input) while `state.kind === 'keys_missing'`, so binding A262-09 today would remove the engineer's input.
+- Proposed SQL / config: STAGED file block a262e-C-3 / E-3 (consumer edit, then bind or inherit).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-1 · DWA-A-262E · A262-07 · V_Vorbehandlung ≥ V_VB_min · EZ
+- Class: gate-guard
+- Chosen now (fail-safe): `V_VB_min` (created, lookup_fill role limit on S4_2_VORBEHANDLUNG) is displayed; no gate; EZ not consumed on A262-07.
+- Evidence (verbatim, transcript line): "The required size of the multicompartment septic tank must be at least $300 \mathrm{l} / \mathrm{P}$ and a minimum volume of $3,000 \mathrm{l}$." (L700); L705, L721, L777.
+- Proposed SQL / config: STAGED block a262e-G-1 (new `REQ-30b` + EZ consumer edit).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-2 · DWA-A-262E · A262-27 · f_A_ANF_CSB ≤ f_A_ANF_CSB_max (Tab. 16)
+- Class: gate-guard
+- Chosen now (fail-safe): `hf_material` select + `f_A_ANF_CSB_max` lookup_fill created; REQ-91 (A262-16, ≤ 200 = Tab. 9) untouched; no gate on A262-27.
+- Evidence (verbatim, transcript line): "… when the filter material is coarse sand … $\leq 40$" (L1158); "… when the filter material is gravel … $\leq 200$" (L1159).
+- Proposed SQL / config: STAGED block a262e-G-2 (new `REQ-151`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-3 · DWA-A-262E · A262-29 · REQ-18a (≥ 1 mm exception)
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-18a keeps blocking below 1.5 mm.
+- Evidence (verbatim, transcript line): "thickness of $\geq 1.5 \mathrm{~mm}$ UV-resistant, flexible material preferably made of polyethylene. For liner installation without welds in small wastewater treatment systems, the thickness of the polyethylene-based liner can be $\geq 1 \mathrm{~mm}$." (L1372).
+- Proposed SQL / config: STAGED block a262e-G-3 (condition change + `system_size_category` consumer edit).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-4 · DWA-A-262E · A262-29 · REQ-15 (fines ≤ 2 %) vs lava sand < 8 %
+- Class: gate-guard
+- Chosen now (fail-safe): REQ-15 unchanged (fires for lava sand too); `lava_sand_clay_fraction_pct` has no gate.
+- Evidence (verbatim, transcript line): "The total content of fines (grain size $<63 \mu \mathrm{~m}$ ) must not exceed $2 \%$." (L1399); "A lava sand 0 mm to 4 mm with a clay fraction of less than $8 \%$ is used." (L1604); Tab. 21 "lava sand & <8" (L1473).
+- Proposed SQL / config: STAGED block a262e-G-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-5 · DWA-A-262E · A262-25 · REQ-11 only for VF sand 0–2 mm
+- Class: gate-guard
+- Chosen now (fail-safe): A262-25's non-producer sections hide unless `seasonal_operation == 'seasonal'`; no filter-type guard.
+- Evidence (verbatim, transcript line): "For other vertical filters, the possibility of reducing the required area has not yet been investigated." (L1115).
+- Proposed SQL / config: STAGED block a262e-G-5 (new `REQ-11c`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-6 · DWA-A-262E · A262-26 · greywater 50 %
+- Class: gate-guard
+- Chosen now (fail-safe): `A262-26-D2 A_Fo_spez_GW = 0.5 * A_Fo_spez` registered (computes after a262e-C-6); no gate.
+- Evidence (verbatim, transcript line): "The specific area of a filter for greywater treatment can be dimensioned with $50 \%$ of the specific surface required for a conventional filter treating domestic wastewater." (L1119).
+- Proposed SQL / config: STAGED block a262e-G-6 (new `REQ-02d`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-7 · DWA-A-262E · A262-10 · REQ-33…36 pattern for the other filter types
+- Class: gate-guard
+- Chosen now (fail-safe): the Filterstufen register shows the per-row Tab. 3–14 limits next to each input; the scalar A262-10 inputs stay guarded for `raw_wastewater_filter` only.
+- Evidence (verbatim, transcript line): Tab. 10 "f_A,Fo,CSB … ≤ 20" (L937), "q_F0,T … ≤ 80" (L939), "q_Beschickung,Fo … ≥ 6" (L941), "h_Beschickung,Fo … ≥ 10* ≥ 20" (L942); the same rows in Tab. 11–14 (L968–L1053) and Tab. 4–9 (L804–L916).
+- Proposed SQL / config: STAGED block a262e-G-7 — owner picks (a) ~30 per-type gates or (b) register counts + `== 0` gates.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-8 · DWA-A-262E · A262-10 · filterstufen_area_fail == 0
+- Class: gate-guard
+- Chosen now (fail-safe): count visible in the register footer; no gate (and pending until a262e-C-2).
+- Evidence (verbatim, transcript line): "Specific area per population equivalent, as measured on the upper surface of the filter & $A_{\text {Fo, spez }}$ & $\mathrm{m}^{2} / \mathrm{P}$ & $\geq 4$" (L804) and the "Specific area … ≥" rows of Tab. 3–14.
+- Proposed SQL / config: STAGED block a262e-G-8 (new `REQ-37`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-9 · DWA-A-262E · A262-08 · four out of five samples
+- Class: gate-guard
+- Chosen now (fail-safe): `ablaufproben` register + `csb_last5_ok` / `bsb5_last5_ok` counts over the LAST FIVE complete rows in entry order; the hand-typed `samples_within_limit_count` / `samples_total_count` stay; no gate.
+- Evidence (verbatim, transcript line): "( $\mathrm{BOD}_{5} \leq 40 \mathrm{mg} / \mathrm{l}, \mathrm{COD} \leq 150 \mathrm{mg} / \mathrm{l}$ in randomly collected samples; four out of five samples must be within the limit)" (L302).
+- Proposed SQL / config: STAGED block a262e-G-9 (new `REQ-19eff-c/-d`); the rolling window is by entry order, not by the `date` cell (no `sort_by` in the register contract — interface note).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-G-10 · DWA-A-262E · A262-15 · Σ L_Rieselr ≥ 6 m/P · EZ, longest pipe ≤ 18 m
+- Class: gate-guard
+- Chosen now (fail-safe): `rieselrohre` register + `L_Rieselr_sum` / `rieselrohr_max_len`; REQ-81/82 keep reading the typed scalars `l_Rieselr` / `L_Rieselr`.
+- Evidence (verbatim, transcript line): "Specific length of infiltration pipe & $l_{\text {Rieselr }}$ & m/P & $\geq 6$" (L875); "Length of each infiltration pipe & $L_{\text {Rieselr }}$ & m & $\leq 18$" (L876).
+- Proposed SQL / config: STAGED block a262e-G-10 (new `REQ-81b` / `REQ-82b`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-R-1 · DWA-A-262E · A262-06 · Q_M — Gl. 6 (RÜB) vs Gl. 8 (RÜ)
+- Class: equation-replacement
+- Chosen now (fail-safe): `entlastung_typ` (created select), `ueberlaufbauwerke` register and the three Σ outputs; prod equations '6' and '8' untouched ('8' is a comparison the engine cannot compute, so '6' wins first-in-list today).
+- Evidence (verbatim, transcript line): "Q_{\mathrm{M}}=f_{\mathrm{S}, \mathrm{QM}} \cdot Q_{\mathrm{S}, \mathrm{~d}, \mathrm{aM}}+Q_{\mathrm{F}} \geq \sum Q_{\mathrm{Dr}, \mathrm{RUB}}(\mathrm{l} / \mathrm{s}) \tag{6}" (L636); "Q_{M} \geq \sum Q_{\mathrm{Dr}, \mathrm{RU}} \geq \sum Q_{\text {krit }}(\mathrm{l} / \mathrm{s}) \tag{8}" (L646); L633 / L643 (the two plant types).
+- Proposed SQL / config: STAGED block a262e-R-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-R-2 · DWA-A-262E · A262-25 · Gl. 11 clamp
+- Class: equation-replacement
+- Chosen now (fail-safe): prod Gl. 11 `f_red = 1 - t_Reg / 12` untouched; REQ-11 / REQ-11b keep blocking.
+- Evidence (verbatim, transcript line): "f_{\mathrm{red}}=1-t_{\mathrm{Reg}} / 12 \tag{11}" (L1069); "f_{\mathrm{red}} \geq 0.5" (L1074); "t_{\text {Reg }} / 12>0.5 \quad f_{\text {red }} \text { must be set at a value of } 0.5 ." (L1078).
+- Proposed SQL / config: STAGED block a262e-R-2 (`f_red = max(1 - t_Reg / 12, 0.5)`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-R-3 · DWA-A-262E · A262-25 · Gl. 13 / Gl. 14 identical RHS
+- Class: equation-replacement
+- Chosen now (fail-safe): nothing changed; no formula proposed.
+- Evidence (verbatim, transcript line): "\text { for } B_{\mathrm{d}, \mathrm{TKN}} / A_{\mathrm{F}, \mathrm{CSB}, \mathrm{red}} \geq B_{\mathrm{A}, \mathrm{TKN}, \mathrm{zul}} & \text { use: } A_{\mathrm{F}, \mathrm{TKN}, \mathrm{red}}=B_{\mathrm{d}, \mathrm{TKN}} / B_{\mathrm{A}, \mathrm{TKN}, \mathrm{zul}}" (L1101); "\text { for } B_{\mathrm{d}, \mathrm{TKN}} / A_{\mathrm{F}, \mathrm{CSB}, \mathrm{red}}<B_{\mathrm{A}, \mathrm{TKN}, \mathrm{zul}} & \text { use: } A_{\mathrm{F}, \mathrm{TKN}, \mathrm{red}}=B_{\mathrm{d}, \mathrm{TKN}} / B_{\mathrm{A}, \mathrm{TKN}, \mathrm{zul}}  \tag{14}" (L1102); "the reduced area is determined by the larger area requirement" (L1098).
+- Proposed SQL / config: owner reads the PDF page (SR-3); STAGED block a262e-R-3 names the likely rule without proposing it.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-X-1 · DWA-A-262E · A262-05 · EZ / w_s_d re-typed duplicates
+- Class: deactivation
+- Chosen now (fail-safe): untouched (two orphan fields on A262-05 shadow the inherited values).
+- Evidence (verbatim, transcript line): capture — A262-05 `EZ` (section null) and `w_s_d` (section null) while A262-01 EZ / A262-04 w_s_d list A262-05 as consumer; "Q_{\mathrm{S}, \mathrm{~d}, \mathrm{aM}}=E Z \cdot w_{\mathrm{S}, \mathrm{~d}} / 86,400(\mathrm{l} / \mathrm{s}) \tag{2}" (L588).
+- Proposed SQL / config: STAGED block a262e-X-1 (deactivate the two orphans; the further twin list is in the block).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-C-1 · DWA-A-262E · 17 producer sections (A262-05 B/D/F, -06 D/F, -12 B, -14 B, -15 B, -16 B, -19 B/D, -20 B, -23 B, -25 B/D/F, -28 F)
+- Class: consumer-edit
+- Chosen now (fail-safe): those sections stay always visible; the other 127 sections of the same worksheets carry the rule (the worksheets are PARTIALLY hidden for the non-selected case).
+- Evidence (verbatim, transcript line): capture — every listed section holds a symbol with non-empty `consumer_worksheets` (emitter guard); cues L742, L296/L396, L1062, L1119, L1295.
+- Proposed SQL / config: STAGED block a262e-C-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-C-2 · DWA-A-262E · A262-01 EZ → A262-10; A262-02 system_size_category → A262-11…-16 / -19…-23
+- Class: consumer-edit
+- Chosen now (fail-safe): `a_min_m2` / `area_ok` / `filterstufen_area_fail` stay null / undecidable on A262-10; the filter-type section rules hide on a wrong `filter_type` only (AND with a missing driver is `pending` → visible, with a false leg → hidden; `evaluate.ts` 'and' case read in-session).
+- Evidence (verbatim, transcript line): capture — EZ consumers lack A262-10; system_size_category consumers = {A262-09,10,17,18,24,33}; "Specific area per population equivalent … ≥ 4" (L804); "up to 50 P" (L296).
+- Proposed SQL / config: STAGED block a262e-C-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-C-3 · DWA-A-262E · A262-07 pretreatment_selected → A262-09
+- Class: consumer-edit
+- Chosen now (fail-safe): see a262e-E-3 (fills created on A262-07).
+- Evidence (verbatim, transcript line): L573; capture consumers {A262-04, A262-32, A262-33}.
+- Proposed SQL / config: STAGED block a262e-C-3 / E-3.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-C-4 · DWA-A-262E · A262-29 · lining block / lava fines visible_when refused
+- Class: consumer-edit
+- Chosen now (fail-safe): no field visible_when on A262-29 (geomembrane_* / mineral_seal_* / bentonite / lava_sand_clay_fraction_pct all consumed by A262-31 or A262-23); the block stays fully visible.
+- Evidence (verbatim, transcript line): L1372 (geomembrane), L1375 (mineral seal / bentonite), L1604 (lava sand); capture consumer lists.
+- Proposed SQL / config: STAGED block a262e-C-4 (drop the A262-31 consumers, then the four rules).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-C-5 · DWA-A-262E · A262-08 effluent_temperature_C → A262-27
+- Class: consumer-edit
+- Chosen now (fail-safe): created `polishing_temp_band` select (lt12 / ge12) drives the two TABLE15 lookup_fills on A262-27.
+- Evidence (verbatim, transcript line): "$<12^{\circ} \mathrm{C}$ … $\leq 80$" (L1136), "$\geq 12^{\circ} \mathrm{C}$ … $\leq 120^{*}$" (L1137), "$\geq 6$" / "$\geq 3$" (L1138/L1139); capture: effluent_temperature_C consumers = {A262-28, A262-33}.
+- Proposed SQL / config: STAGED block a262e-C-5 (then a derived band replaces the select).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-C-6 · DWA-A-262E · A_Fo_spez → A262-26; B_CSB_KomKA → A262-21; EZ + B_CSB → A262-24
+- Class: consumer-edit
+- Chosen now (fail-safe): A262-26-D2, A262-21-D1, A262-24-D1 emitted; they report `manual_required — Fehlende Eingaben` (the fields stay typeable) until the edits land.
+- Evidence (verbatim, transcript line): L1119 (50 %); L937 (areal loading rate definition); "Table 1: Wastewater specific mass loads per population equivalent in g/(P.d)" (L614); capture consumer lists.
+- Proposed SQL / config: STAGED block a262e-C-6.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-1 · DWA-A-262E · A262-11 · A_Fo_min_VFS_KA = EZ · A_Fo_spez_VFS_KA
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (`A262-11-D1`, `imported_unverified`); the output is an existing consumer-free manual field whose prod description prints "A_Fo_min = EW · A_Fo_spez"; REQ-41 (`A_Fo_min_VFS_KA >= 16`) now reads the computed value.
+- Evidence (verbatim, transcript line): "Specific area per population equivalent, as measured on the upper surface of the filter & $A_{\text {Fo, spez }}$ & $\mathrm{m}^{2} / \mathrm{P}$ & $\geq 4$" (L804); "and minimum filter area … & $A_{\text {Fo }, \text { min }}$ & $\mathrm{m}^{2}$ & 16" (L805) — the product m²/P × P is implied by the units, not printed as an equation.
+- Proposed SQL / config: as emitted; REJECT ⇒ `DELETE FROM equations … WHERE equation_number = 'A262-11-D1'`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-2 · DWA-A-262E · A262-07 · aufenthaltszeit = V_Vorbehandlung / Q_Tr_h_max
+- Class: text-only-formula
+- Chosen now (fail-safe): NOT emitted — prod `Q_Tr_h_max` unit is "l/s; m3/h" (read in-session), so the hour conversion is ambiguous.
+- Evidence (verbatim, transcript line): "The volume of the sedimentation chamber must be dimensioned for a hydraulic residence time of $\geq 2$ hours at a maximum inflow $Q_{\text {Tr, } h, \max }$ and a minimum volume of $75 \mathrm{l} / \mathrm{P}$." (L721); Gl. 1 prints "(l/s)" (L582).
+- Proposed SQL / config: STAGED block a262e-F-2 (fix the unit, then the equation).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-3 · DWA-A-262E · A262-26 · Q_GW_taeglich = EW_Grauwasser · Q_Grauwasser
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (`A262-26-D1`); existing consumer-free manual field (prod description "Q_GW = EW · Q_Grauwasser"); REQ-02c (`Q_GW_taeglich >= 75`) now reads the computed l/d value — note that REQ-02c compares a daily volume with the printed 75 l/(P·d) rate (not changed here).
+- Evidence (verbatim, transcript line): "According to Standard DWA-A 272:2014, greywater production can be set at $\geq 75 \mathrm{l} /(\mathrm{P} \cdot \mathrm{d})$." (L669).
+- Proposed SQL / config: as emitted; REJECT ⇒ delete `A262-26-D1`. Owner may want REQ-02c re-pointed to `Q_Grauwasser >= 75`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-4 · DWA-A-262E · A262-26 · A_Fo_spez_GW = 0.5 · A_Fo_spez
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (`A262-26-D2`), computes after a262e-C-6.
+- Evidence (verbatim, transcript line): L1119 ("50 %").
+- Proposed SQL / config: as emitted; REJECT ⇒ delete `A262-26-D2`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-5 · DWA-A-262E · A262-21 · A_F_CSB_VFG_KomKA = B_CSB_KomKA · 1000 / f_A_F_CSB_VFG_KomKA
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (`A262-21-D1`), computes after a262e-C-6; the 1000 converts prod's kg/d to the printed g.
+- Evidence (verbatim, transcript line): "or average daily specific CSB (COD) areal loading rate over the total filter area, as measured on the upper surface of the filter & $f_{\mathrm{A}, \mathrm{Fo}, \mathrm{CSB}}$ & $\mathrm{g} /\left(\mathrm{m}^{2} \cdot \mathrm{~d}\right)$ & $\leq 20$" (L937); prod description "A_F = B_CSB / f_A_F_CSB". Note: Tab. 12 (coarse sand, municipal) prints no f_A,F,CSB row; Tab. 18 prints "≤ 25" (a262e-J-2).
+- Proposed SQL / config: as emitted; REJECT ⇒ delete `A262-21-D1`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-6 · DWA-A-262E · A262-24 · B_CSB_KomKA = EZ · B_CSB / 1000
+- Class: text-only-formula
+- Chosen now (fail-safe): emitted (`A262-24-D1`), computes after a262e-C-6 (two consumer edits).
+- Evidence (verbatim, transcript line): "Table 1: Wastewater specific mass loads per population equivalent in g/(P.d)" (L614); prod unit of B_CSB_KomKA is kg/d.
+- Proposed SQL / config: as emitted; REJECT ⇒ delete `A262-24-D1`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-7 · DWA-A-262E · A262-22 · V_F_VFK_KomKA = A_Fu · h_F
+- Class: text-only-formula
+- Chosen now (fail-safe): NOT emitted (no bottom-area field on A262-22; using `A_Fu_min_VFK_KomKA` would be an interpretation).
+- Evidence (verbatim, transcript line): "Dimensioning is based on the specific area ( $A_{\text {fu, spez }}$ ) per inhabitant and the average daily organic volumetric loading of the filter body (CSB (COD) volumetric loading)." (L1010); prod description "V_F = A_Fu · h_F".
+- Proposed SQL / config: STAGED block a262e-F-7.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-F-8 · DWA-A-262E · A262-12 · A_F_VFKS_total = A_F1 + A_F2
+- Class: text-only-formula
+- Chosen now (fail-safe): NOT emitted (A262-12 carries only the specific areas).
+- Evidence (verbatim, transcript line): "and minimum total filter area, as measured on the upper surface of the filter & $A_{\mathrm{F} 0, \text { min }}\left(A_{\mathrm{F} 01}+A_{\mathrm{F} 02}\right)$ & $\mathrm{m}^{2}$ & $4+4$" (L821); prod description "A_F1 + A_F2".
+- Proposed SQL / config: STAGED block a262e-F-8 (two Filterstufen rows give the Σ through A262-10-D1).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-J-1 · DWA-A-262E · A262-10 · TABLE_LIMITS sewer key (`tr` / `m`) and the rows without a printed split
+- Class: range-SR-2
+- Chosen now (fail-safe): tables without a sewer split are seeded for BOTH sewer tokens with identical cells; `no_sewer` (prod token) reads the Tr column (`sewer_key` badge); Tab. 3's `A_Fo,min 4.8` is stored on the Tr row only; the municipal sand / two-stage `m` rows carry the Tab. 10 / 11 values although Tab. 18's "combined networks" column is blank for them.
+- Evidence (verbatim, transcript line): "Specific area, as measured on the upper surface of the filter, for separated sewer networks & $A_{\text {Fo,spez, Tr }}$ … $\geq 1.2$" / "and minimum filter area … for separated sewer networks & $A_{\text {Fo }, \text { min }}$ … 4.8" / "… for combined sewer networks & $A_{\text {Fo,spez, M }}$ … $\geq 1.5$" (L749–L751); Tab. 18 "Specific surface area for filters in combined networks, $A_{\text {F,spez,M }}$ & $\mathrm{m}^{2} / \mathrm{P}$ & $\geq 1.5$ & $\geq 1.0$ & & & & $\geq 1$ & $\geq 3$ & $\geq 1$ & & & \\" (L1227) — blank for sand and the two two-stage columns; "small wastewater treatment plants may not be connected to sewer networks where extraneous water … is an issue" (L297).
+- Proposed SQL / config: if the owner reads the blank Tab. 18 cells as "not for combined networks": set `a_spez_min = null` on `vf_sand_0_2|municipal_wwtp|m` and `two_stage_vf_gravel_sand|municipal_wwtp|m` (row_values patch) — or keep the Tab. 10/11 values as seeded.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-J-2 · DWA-A-262E · A262-17/-24 · Tab. 17 / Tab. 18 summary cells that the detail tables do not print (or contradict)
+- Class: range-SR-2
+- Chosen now (fail-safe): TABLE_LIMITS carries the detail tables (Tab. 3–14) only; the summary-only cells are NOT seeded.
+- Evidence (verbatim, transcript line): Tab. 17 "Specific area $A_{\text {F,spez }}$ & $\mathrm{m}^{2} / \mathrm{P}$ & $\geq 1.2$ & $\geq 0.8$ & $\geq 4$ …" (L1199 — coarse sand ≥ 0.8 vs Tab. 6 "≥ 1" L836); Tab. 17 "Horizontal spacing between two infiltration pipes $B_{\text {Rieselr }}$ & m & … $\geq 1$" (L1206 vs Tab. 8 "≥ 0.5" L877); Tab. 18 "or average specific daily COD loading over the entire surface area of the filter, $f_{\text {A,F,CSB }}$ … $\leq 100$ & $\leq 25$ & $\leq 20$ & $\leq 80$ & & & $\leq 20$ & & $\leq 20$ & $\leq 16$ & $\leq 16$" (L1228 — coarse sand ≤ 25 not in Tab. 12); Tab. 18 "$q_{\mathrm{F}, \mathrm{T}}$ … $\leq 250$ & & $\leq 80$ & & & & $\leq 80$ & $\leq 500$ …" (L1235 — lava ≤ 80 not in Tab. 14); Tab. 18 "$t_{\text {Sicker,min,am }}$ for $T \geq 12^{\circ} \mathrm{C}$ & h & & & $\geq 6$ & & & & & & $\geq 3$" (L1241 — main sand filter keeps ≥ 6 at ≥ 12 °C, polishing halves to 3).
+- Proposed SQL / config: owner rules per cell (PDF, SR-3); a ratified summary cell becomes an `UPDATE regulation_table_rows SET row_values = row_values || '{…}'` on the named TABLE_LIMITS row — or the conflicts (0.8 vs 1; 1 vs 0.5) go to DWA as errata.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-J-3 · DWA-A-262E · A262-12/-20 · two-stage rows as per-stage limits
+- Class: range-SR-2
+- Chosen now (fail-safe): `a_spez_min = 1`, `a_min_m2 = 4` on the two-stage rows = the printed per-stage values (`a_spez_1_min` / `a_spez_2_min` carry the printed pair); a two-stage plant is two Filterstufen rows with `stage_role = main`.
+- Evidence (verbatim, transcript line): "Specific area of the first stage … $\geq 1$" / "Specific area of the second stage … $\geq 1$" / "and minimum total filter area … $\left(A_{\mathrm{F} 01}+A_{\mathrm{F} 02}\right)$ & $\mathrm{m}^{2}$ & $4+4$" (L819–L821); Tab. 11 L968–L969.
+- Proposed SQL / config: none unless the owner prefers one row per two-stage plant (then a_spez_min = 2, a_min_m2 = 8 as the sum).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a262e-I-1 · DWA-A-262E · prod counts vs the brief
+- Class: interface-gap
+- Chosen now (fail-safe): worked against the live capture — 215 fields, 18 equations, **60** compliance rows (the brief/inventory say 71), 33 worksheets × 9 coded sections (297).
+- Evidence (verbatim, transcript line): read-only `select count(*) from compliance_requirements … where s.code='DWA-A-262E'` → 60 (2026-09-17); capture `_meta.field_rows = 215`, `section_rows = 297`.
+- Proposed SQL / config: none (the inventory's `scratchpad/std/DWA-A-262E.json` predates the gate-enforcement migrations); the harness header's "52 live BLOCK gates" is consistent with 60 rows.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### Observations (Task 3, no signature needed)
+
+- **Table 21 is complete in this transcript** (L1450–L1495, ten rows incl. the aerated-gravel rows L1472 / L1495) — the brief's premise "aerated-gravel row truncated (a262e-U-1)" did not occur; all ten rows are seeded (`TABLE21`, `md_verified`). The U-1 id was used for Table 19 (images).
+- **OCR quirks in label cells only** (values legible): "lafter" for "(after" (L994/L995), "Ch" for "°C" + unit "h" (L1138/L1139), "m^{2}/p" lower-case (L751), "mulicompartment" (L616), "biolotical" (L1224) — quoted as printed.
+- **Edition token `'2017-11'`** is printed on the title page ("November 2017", L7/L9/L20/L23) and equals prod `standards.version` "November 2017" — no I-block needed.
+- **Row-scope `visible_when` keeps stored cells** (`register-rows.ts` read in-session: a hidden cell is excluded from completeness; the editor nulls it on the next write) — the Σ formulas branch on the discriminator (`if(type == 'rue', q_krit, 0)`), so a stale hidden value never enters a sum (pinned in `equations-a262e.test.ts`).
+- **Scalar-only equations are not server-materialised** (2a design; register-fed ones are) — A262-11-D1 / -26-D1 / -26-D2 / -21-D1 / -24-D1 compute on the hook / report / snapshot / PDF paths only (controller amendment D).

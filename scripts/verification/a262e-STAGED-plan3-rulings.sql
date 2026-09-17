@@ -1,0 +1,380 @@
+-- DWA-A-262E — Plan 3 Task 3 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, equation ids/formulas, gate conditions) were
+-- captured read-only on 2026-09-17 (src/lib/eval/field-configs/a262e.prior.json; prod-query.mjs for the 18 equation
+-- rows and the 60 compliance_requirements rows quoted below). Transcript lines refer to
+-- C:\Users\Ekowai\Desktop\Guidelines\DWA-A-262E\DWA-A_262E (2).md (English edition, November 2017).
+--
+-- Conventions: `s.code = 'DWA-A-262E'`, worksheets by code, never by id; every UPDATE is guarded by the prior
+-- value it replaces so a re-run is a no-op; each block names its rollback. The Plan-3 DATA migrations
+-- (20260917100300 seed · 20260917100310 field configs · 20260917100320 equations) must be applied BEFORE any block
+-- that reads a created symbol (V_VB_min, f_A_ANF_CSB_max, filterstufen_area_fail, csb_last5_ok, bsb5_last5_ok,
+-- L_Rieselr_sum, rieselrohr_max_len, entlastung_typ, Q_Dr_RUB_sum, Q_Dr_RU_sum, Q_krit_sum, B_CSB_tab1 …).
+-- Consumer edits append to `fields.consumer_worksheets` (text[]); the guard `NOT (… = ANY(consumer_worksheets))`
+-- keeps a re-run idempotent.
+
+-- =====================================================================================================================
+-- a262e-C-1 · 17 producer sections that the section rules could not cover (emitter guard: a hidden section hides values
+-- other worksheets inherit). Owner decides per worksheet whether the inherited symbols should move out of the hidden
+-- worksheet (re-point consumers) or the sections stay always visible.
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture a262e.prior.json — A262-05 B (A_E_k, q_F, x_Q_max), D (Q_F, Q_S_d_aM), F (Q_Tr_h_max); A262-06 D
+-- (Q_F_d_aM), F (Q_M, Q_T_d_aM); A262-12 B (A_Fo1_spez, A_Fo2_spez); A262-14 B (A_Fu_min, A_Fu_spez, f_V_CSB); A262-15 B
+-- (B_FGR, B_Rieselr, h_Beschickung_Fu, l_Rieselr, L_Rieselr, q_Beschickung_Fu); A262-16 B (f_A_ANF_CSB, L_HF_min); A262-19
+-- B (f_A_F_CSB_Betrieb, t_Sicker_min_aM), D (A_F_CSB); A262-20 B (f_A_F01_CSB); A262-23 B (A_AWF_spez, q_AWF_aM,
+-- q_F_T_Betrieb); A262-25 B (B_A_TKN_zul, B_d_TKN, tkn_influent_high), D (f_red), F (A_F_CSB_red, A_F_TKN_red); A262-28 F (eta_DN).
+-- Cue: L742 "differs depending on the type of sewer network (separated or combined)"; L296/L396 (up to 50 P); L1062; L1119; L1295.
+-- Proposed (per section, only after the consumers are re-pointed or the owner accepts N.A. on the consumer side):
+-- UPDATE worksheet_sections ws SET visible_when = '<the worksheet rule from field-configs/a262e.ts>' FROM worksheet_templates w
+--   JOIN standards s ON s.id = w.standard_id WHERE ws.worksheet_template_id = w.id AND s.code = 'DWA-A-262E'
+--   AND w.code = '<A262-xx>' AND ws.code = '<B|D|F>' AND ws.visible_when IS NULL;
+-- Rollback: SET visible_when = NULL for the same rows.
+
+-- =====================================================================================================================
+-- a262e-C-2 · A262-01 EZ → A262-10 (register a_min_m2 = EZ · A_spez); A262-02 system_size_category → A262-11…-16 / -19…-23
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture — EZ consumer_worksheets = {A262-04,05,06,11,12,13,14,15,16,19,20,21,22,23,25,26} (no A262-10);
+-- system_size_category consumers = {A262-09,10,17,18,24,33}. L804 "Specific area per population equivalent … ≥ 4"
+-- (m²/P × P); L296 "up to 50 P"; L1187/L1189 (Tab. 17 small / Tab. 18 municipal). Until ratified: `a_min_m2`,
+-- `area_ok` and A262-10-D2 stay null/undecidable; the filter-type section rules hide on a wrong filter_type only.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-10') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-01' AND f.symbol = 'EZ' AND f.active AND NOT ('A262-10' = ANY(f.consumer_worksheets));
+-- UPDATE fields f SET consumer_worksheets = consumer_worksheets || ARRAY['A262-11','A262-12','A262-13','A262-14','A262-15','A262-16','A262-19','A262-20','A262-21','A262-22','A262-23']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-02' AND f.symbol = 'system_size_category' AND f.active AND NOT ('A262-11' = ANY(f.consumer_worksheets));
+-- COMMIT;
+-- Rollback: array_remove(...) of the same codes.
+
+-- =====================================================================================================================
+-- a262e-C-3 / a262e-E-3 · A262-07 pretreatment_selected → A262-09; then bind A262-09 B_CSB / B_BSB5 / B_TKN to Tab. 1
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L573 "For the design of filters for municipal wastewater treatment plants based on empirical values, the
+-- wastewater pollutant loads per population equivalent given in Table 1 must be used."; capture — pretreatment_selected
+-- consumers = {A262-04,32,33}; A262-09 B_CSB/B_BSB5/B_TKN are manual numbers (g/(EW*d)). Why staged: binding the existing
+-- A262-09 numbers today would hide their input (lookup_fill renders read-only while keys are missing); the Plan-3 fills
+-- are created on A262-07 (B_CSB_tab1 …). After the consumer edit the A262-09 fields can become the same lookup_fill
+-- (or inherit the A262-07 values — owner's call; single-source prefers ONE producer).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-09') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-07' AND f.symbol = 'pretreatment_selected' AND f.active AND NOT ('A262-09' = ANY(f.consumer_worksheets));
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 1"}'::jsonb,
+--   lookup = '{"table_code":"TABLE1_CSB","role":"value","keys":[{"column":"pretreatment","from_symbol":"pretreatment_selected"}],"value":"load_g_pd"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-09' AND f.symbol = 'B_CSB' AND f.active AND f.widget IS NULL;
+-- -- same for B_BSB5 (TABLE1_BSB5) and B_TKN (TABLE1_TKN)
+-- COMMIT;
+-- Rollback: array_remove; SET widget = NULL, ui_config = NULL, lookup = NULL on the three rows.
+
+-- =====================================================================================================================
+-- a262e-C-4 · A262-29 lining block visible_when REFUSED (every field consumed by A262-31; lava fines by A262-23)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1372 (geomembrane ≥ 1.5 mm; ≥ 1 mm without welds in small systems), L1375 (mineral seal: two layers of
+-- 30 cm if well-permeable, one ≥ 30 cm for low permeability; bentonite ≥ 60 cm), L1604 (lava sand clay fraction < 8 %).
+-- Capture: geomembrane_thickness_mm / geomembrane_no_welds / geomembrane_is_polyethylene / geotextile_robustness_class /
+-- mineral_seal_layer_count / mineral_seal_layer_thickness_cm / mineral_seal_proctor_density_pct / bentonite_base_thickness_cm
+-- consumer_worksheets = {A262-31}; lava_sand_clay_fraction_pct = {A262-23}. Why staged: hiding a producer hides the
+-- inherited value (emitter guard). Owner options: (a) drop the A262-31 consumers (the verification worksheet reads the
+-- gates, not the values) and then apply the rules; (b) keep always visible.
+-- Proposed after (a): UPDATE fields f SET visible_when = 'lining_type == ''geomembrane''' … symbol IN ('geomembrane_thickness_mm',
+--   'geomembrane_no_welds','geomembrane_is_polyethylene','geotextile_robustness_class');
+--   SET visible_when = 'lining_type == ''mineral_seal_clay''' … symbol IN ('mineral_seal_layer_count','mineral_seal_layer_thickness_cm','mineral_seal_proctor_density_pct');
+--   SET visible_when = 'lining_type == ''bentonite_base''' … symbol = 'bentonite_base_thickness_cm';
+--   SET visible_when = 'filter_type == ''vf_lava_sand_0_4''' … symbol = 'lava_sand_clay_fraction_pct';
+-- Rollback: SET visible_when = NULL on the same rows.
+
+-- =====================================================================================================================
+-- a262e-C-5 · A262-08 effluent_temperature_C → A262-27 (replace the created polishing_temp_band by a derived band)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1136–L1139 (Tab. 15 "<12 °C" / "≥12 °C" rows); capture — effluent_temperature_C consumers = {A262-28, A262-33}.
+-- Chosen now: a created select `polishing_temp_band` on A262-27 drives the two TABLE15 lookup_fills. After the consumer
+-- edit, the band could be a derived field `if(effluent_temperature_C >= 12, 'ge12', 'lt12')` and the select retired.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-27') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-08' AND f.symbol = 'effluent_temperature_C' AND f.active AND NOT ('A262-27' = ANY(f.consumer_worksheets));
+-- COMMIT;
+-- Rollback: array_remove.
+
+-- =====================================================================================================================
+-- a262e-C-6 · inputs of the four text-only equations: A_Fo_spez → A262-26; B_CSB_KomKA → A262-21; EZ + B_CSB → A262-24
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1119 "The specific area of a filter for greywater treatment can be dimensioned with 50 % of the specific
+-- surface required for a conventional filter"; L937 (f_A,Fo,CSB = load / area); L614 (Tab. 1 in g/(P·d)). Capture —
+-- A_Fo_spez consumers = {A262-11,12,13,19,20,22,23}; B_CSB_KomKA = {}; EZ (A262-01) lacks A262-24; B_CSB (A262-09) = {}.
+-- Until ratified: A262-26-D2, A262-21-D1 and A262-24-D1 report "manual_required — Fehlende Eingaben" (the fields stay typeable).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-26') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-10' AND f.symbol = 'A_Fo_spez' AND f.active AND NOT ('A262-26' = ANY(f.consumer_worksheets));
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A262-21']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-24' AND f.symbol = 'B_CSB_KomKA' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-24') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-01' AND f.symbol = 'EZ' AND f.active AND NOT ('A262-24' = ANY(f.consumer_worksheets));
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A262-24']::text[] FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-09' AND f.symbol = 'B_CSB' AND f.active AND (f.consumer_worksheets IS NULL OR f.consumer_worksheets = '{}');
+-- COMMIT;
+-- Rollback: array_remove / SET consumer_worksheets = '{}' on the same rows.
+
+-- =====================================================================================================================
+-- a262e-G-1 · A262-07 · V_Vorbehandlung ≥ V_VB_min · EZ / 1000 (new gate on the §4.2 size floors; needs EZ on A262-07)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L700 "The required size of the multicompartment septic tank must be at least 300 l/P and a minimum volume of
+-- 3,000 l."; L705 (rotting tank ≥ 200 l/P); L721 (Imhoff tank ≥ 2 h at Q_Tr,h,max and ≥ 75 l/P); L777 (aerated settling
+-- pond ≥ 1.2 m³/P). Prod REQ-30 (block): aufenthaltszeit >= 2 covers the Imhoff residence time only. V_Vorbehandlung is
+-- in m³ (prod unit), V_VB_min in l/P → the 1000 is the unit conversion; the absolute floor 3,000 l (multicompartment
+-- septic tank) needs a second lookup_fill on `v_min_l` (not created — owner decides whether to add it).
+-- Why staged: a NEW gate (enforcement) and EZ is not consumed on A262-07.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-07') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-01' AND f.symbol = 'EZ' AND f.active AND NOT ('A262-07' = ANY(f.consumer_worksheets));
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-30b', 'Vorbehandlung Mindestvolumen je Einwohner', 'IF V_VB_min IS NOT NULL THEN V_Vorbehandlung >= V_VB_min * EZ / 1000', '§4.2.2–§4.2.7', 'block',
+--        'Plan 3 (a262e-G-1): Mindestvolumen der Vorbehandlung je Verfahren (300 l/P Mehrkammergrube, 200 l/P Rottebehälter, 75 l/P Emscherbrunnen, 1,2 m³/P belüfteter Absetzteich) × EZ; V_Vorbehandlung in m³.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-07' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE FROM compliance_requirements … WHERE code = 'REQ-30b'; array_remove.
+
+-- =====================================================================================================================
+-- a262e-G-2 · A262-27 · f_A_ANF_CSB ≤ f_A_ANF_CSB_max (Tab. 16 by material) instead of REQ-91's fixed ≤ 200 on A262-16
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1158 "… when the filter material is coarse sand … ≤ 40"; L1159 "… when the filter material is gravel … ≤ 200".
+-- Prod REQ-91 (A262-16, block): f_A_ANF_CSB <= 200 — Tab. 9 (aerated HF, small systems) prints ≤ 200, so REQ-91 is right
+-- for A262-16; the DOWNSTREAM horizontal filter (Tab. 16) has the material split and lives on A262-27, where f_A_ANF_CSB
+-- is inherited (capture: f_A_ANF_CSB consumers = {A262-16, A262-21, A262-27}).
+-- Why staged: a NEW gate (enforcement). REQ-91 itself is not touched.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-151', 'HF nachgeschaltet CSB-Querschnittslast nach Material', 'IF f_A_ANF_CSB_max IS NOT NULL THEN f_A_ANF_CSB <= f_A_ANF_CSB_max', '§4.3.6.2, Tab. 16', 'block',
+--        'Plan 3 (a262e-G-2): f_A,ANF,CSB ≤ 40 (Grobsand) bzw. ≤ 200 (Kies) g/(m²·d) nach Tab. 16.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-27' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code = 'REQ-151'.
+
+-- =====================================================================================================================
+-- a262e-G-3 · A262-29 · REQ-18a — the ≥ 1 mm exception for weld-free polyethylene liners in small systems
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1372 "thickness of ≥ 1.5 mm UV-resistant, flexible material preferably made of polyethylene. For liner
+-- installation without welds in small wastewater treatment systems, the thickness of the polyethylene-based liner can be
+-- ≥ 1 mm." Prod REQ-18a (block): IF lining_type == geomembrane THEN geomembrane_thickness_mm >= 1.5 — blocks the
+-- printed exception. Drivers exist: geomembrane_no_welds, geomembrane_is_polyethylene (A262-29), system_size_category
+-- (A262-02, NOT consumed on A262-29 → the guard needs a consumer edit first).
+-- Why staged: gate condition change (enforcement).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(consumer_worksheets, 'A262-29') FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-02' AND f.symbol = 'system_size_category' AND f.active AND NOT ('A262-29' = ANY(f.consumer_worksheets));
+-- UPDATE compliance_requirements c SET condition = 'IF lining_type == geomembrane THEN (geomembrane_thickness_mm >= 1.5 OR (system_size_category == small_wwts AND geomembrane_no_welds == True AND geomembrane_is_polyethylene == True AND geomembrane_thickness_mm >= 1))',
+--   description = 'Plan 3 (a262e-G-3): ≥ 1,5 mm; ≥ 1 mm nur für schweißnahtfreie PE-Bahnen in Kleinkläranlagen (§5.3).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.worksheet_template_id = w.id AND w.code = 'A262-29' AND s.code = 'DWA-A-262E' AND c.code = 'REQ-18a'
+--    AND c.condition = 'IF lining_type == geomembrane THEN geomembrane_thickness_mm >= 1.5';
+-- COMMIT;
+-- Rollback: restore condition 'IF lining_type == geomembrane THEN geomembrane_thickness_mm >= 1.5'; array_remove.
+
+-- =====================================================================================================================
+-- a262e-G-4 · A262-29 · REQ-15 fines ≤ 2 % must not fire for lava sand (< 8 % printed)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1399 "The total content of fines (grain size < 63 μm) must not exceed 2 %."; L1604 "A lava sand 0 mm to 4 mm
+-- with a clay fraction of less than 8 % is used."; Tab. 21 L1473 "lava sand & <8". Prod REQ-15 (block): fines_fraction <= 2
+-- (unguarded); a separate field lava_sand_clay_fraction_pct exists (consumed by A262-23), no gate on it. filter_type IS
+-- consumed on A262-29.
+-- Why staged: gate condition change (enforcement) + a new gate on the lava field.
+-- BEGIN;
+-- UPDATE compliance_requirements c SET condition = 'IF filter_type != vf_lava_sand_0_4 THEN fines_fraction <= 2',
+--   description = 'Plan 3 (a262e-G-4): Feinkornanteil ≤ 2 % für alle Filtermaterialien außer Lavasand (§5.4.1); Lavasand: REQ-15b.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE c.worksheet_template_id = w.id AND w.code = 'A262-29' AND s.code = 'DWA-A-262E' AND c.code = 'REQ-15' AND c.condition = 'fines_fraction <= 2';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-15b', 'Lavasand Tonanteil', 'IF filter_type == vf_lava_sand_0_4 THEN lava_sand_clay_fraction_pct < 8', '§5.4.2.6, Tab. 21', 'block',
+--        'Plan 3 (a262e-G-4): Lavasand 0–4 mm mit einem Tonanteil von weniger als 8 % (L1604).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-29' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: restore 'fines_fraction <= 2'; DELETE … WHERE code = 'REQ-15b'.
+
+-- =====================================================================================================================
+-- a262e-G-5 · A262-25 · REQ-11 / Gl. 11 apply to VF sand 0–2 mm only
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1064 heading "Vertical filter with sand 0 mm to 2 mm"; L1115 "For other vertical filters, the possibility of
+-- reducing the required area has not yet been investigated." Prod REQ-11 (block): f_red >= 0.5; REQ-11b: t_Reg <= 6 —
+-- neither checks filter_type (consumed on A262-25).
+-- Why staged: gate condition change (enforcement). Fail-safe today: the whole A262-25 (except its producer sections)
+-- hides unless seasonal_operation == 'seasonal'.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-11c', 'Flächenreduktion nur für VF Sand 0-2 mm', 'IF seasonal_operation == seasonal THEN filter_type == vf_sand_0_2', '§4.3.4', 'block',
+--        'Plan 3 (a262e-G-5): For other vertical filters, the possibility of reducing the required area has not yet been investigated (L1115).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-25' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code = 'REQ-11c'.
+
+-- =====================================================================================================================
+-- a262e-G-6 · A262-26 · greywater 50 % — gate A_Fo_spez_GW ≥ 0.5 · A_Fo_spez (needs a262e-C-6 first)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1119 "The specific area of a filter for greywater treatment can be dimensioned with 50 % of the specific
+-- surface required for a conventional filter treating domestic wastewater." Prod REQ-12 (A262-25, block):
+-- if wastewater_type == greywater_only then w_s_d >= 75 (L669) — the 50 % is not a gate. Plan 3 registers A262-26-D2
+-- (A_Fo_spez_GW = 0.5 · A_Fo_spez) so the value is computed; a gate on it is a new enforcement.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-02d', 'Grauwasser spezifische Filterfläche ≥ 50 %', 'IF wastewater_type == greywater_only THEN A_F_GW >= A_Fo_spez_GW * EW_Grauwasser', '§4.3.5', 'block',
+--        'Plan 3 (a262e-G-6): Filterfläche Grauwasser ≥ (50 % der konventionellen spezifischen Fläche) × EW.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-26' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code = 'REQ-02d'.
+
+-- =====================================================================================================================
+-- a262e-G-7 · A262-10 · REQ-33…36 pattern for the other filter types (per-type limits from TABLE_LIMITS)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 4–14 (L804–L1053) — every table prints its own f_A,F,CSB / q_F,T / q_Beschickung / h_Beschickung limits.
+-- Prod REQ-33…36 (block) guard only `filter_type == raw_wastewater_filter` (Tab. 3 values 100 / 250 / 10 / 20–50); the
+-- scalar A262-10 inputs f_A_F_CSB, q_F_T, q_Beschickung_Fo, h_Beschickung_Fo are unguarded for every other type.
+-- Chosen now: the Filterstufen register shows the per-row limit next to each input (no gate). Two ways forward: (a) one
+-- gate per type per quantity (e.g. IF filter_type == vf_sand_0_2 AND system_size_category == municipal_wwtp THEN
+-- f_A_F_CSB <= 20 …, ~30 rows), or (b) register-based counts like A262-10-D2 for each quantity + `== 0` gates.
+-- Not proposed as SQL until the owner picks (a) or (b).
+
+-- =====================================================================================================================
+-- a262e-G-8 · A262-10 · filterstufen_area_fail == 0 (new gate on the register count)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 3–14 "Specific area … ≥ x m²/P" (L749, L804, L819–L820, L836, L856, L873, L901, L936, L968–L969, L994–L995,
+-- L1017, L1046); L1187/L1189. Needs a262e-C-2 (EZ on A262-10), else the count is undecidable and the gate pending.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-37', 'Filterstufen: Fläche ≥ EZ · A_spez,min', 'filterstufen_area_fail == 0', '§4.3, Tab. 3–14', 'block',
+--        'Plan 3 (a262e-G-8): keine biologische Hauptstufe unter EZ · A_spez,min der Tab. 3–14.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-10' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code = 'REQ-37'.
+
+-- =====================================================================================================================
+-- a262e-G-9 · A262-08 · four out of five samples (csb_last5_ok >= 4, bsb5_last5_ok >= 4)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L302 "(BOD5 ≤ 40 mg/l, COD ≤ 150 mg/l in randomly collected samples; four out of five samples must be within
+-- the limit)". Prod REQ-19eff-a/b (block): effluent_BOD5_mg_l <= 40 / effluent_COD_mg_l <= 150 on ONE typed value; the
+-- two count fields samples_within_limit_count / samples_total_count are typed by hand (consumed by A262-33).
+-- Why staged: new gates (enforcement); fewer than five samples ⇒ the count is < 4 by construction (owner may prefer
+-- `IF count_rows(ablaufproben) >= 5 THEN …` — the gate DSL has no row functions, so a fifth derived `proben_anzahl` would be needed).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-19eff-c', 'CSB: vier von fünf Stichproben', 'csb_last5_ok >= 4', '§1', 'block', 'Plan 3 (a262e-G-9): four out of five samples must be within the limit (COD ≤ 150 mg/l).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-08' AND s.code = 'DWA-A-262E';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-19eff-d', 'BSB5: vier von fünf Stichproben', 'bsb5_last5_ok >= 4', '§1', 'block', 'Plan 3 (a262e-G-9): four out of five samples must be within the limit (BOD5 ≤ 40 mg/l).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-08' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code IN ('REQ-19eff-c','REQ-19eff-d').
+
+-- =====================================================================================================================
+-- a262e-G-10 · A262-15 · Σ L_Rieselr ≥ 6 m/P · EZ and longest pipe ≤ 18 m from the register (REQ-81/82 read typed scalars)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L875 "Specific length of infiltration pipe l_Rieselr m/P ≥ 6"; L876 "Length of each infiltration pipe
+-- L_Rieselr m ≤ 18". Prod REQ-81 (block): l_Rieselr >= 6; REQ-82 (block): L_Rieselr <= 18 — on hand-typed scalars. EZ is
+-- consumed on A262-15.
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-81b', 'Filtergraben Σ Rieselrohrlänge ≥ 6 m/P', 'L_Rieselr_sum >= 6 * EZ', '§4.3.1.6, Tab. 8', 'block', 'Plan 3 (a262e-G-10): Σ Rieselrohrlänge ≥ 6 m/P × EZ (Register rieselrohre).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-15' AND s.code = 'DWA-A-262E';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-82b', 'Filtergraben längstes Rieselrohr ≤ 18 m', 'rieselrohr_max_len <= 18', '§4.3.1.6, Tab. 8', 'block', 'Plan 3 (a262e-G-10): jedes Rieselrohr ≤ 18 m (Register rieselrohre).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-15' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code IN ('REQ-81b','REQ-82b').
+
+-- =====================================================================================================================
+-- a262e-R-1 · A262-06 · Q_M: Gl. 6 (RÜB) vs Gl. 8 (RÜ) — two prod rows with the same output, switch by `entlastung_typ`
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L633 "Maximum wastewater flow for combined sewer networks with upstream combined sewer treatment (stormwater
+-- tank with overflow)"; L636 Gl. 6 "Q_M = f_S,QM · Q_S,d,aM + Q_F ≥ Σ Q_Dr,RÜB"; L643 "… with a diversion via an upstream
+-- stormwater overflow (without storage volume)"; L646 Gl. 8 "Q_M ≥ Σ Q_Dr,RÜ ≥ Σ Q_krit". Prod: equation '6'
+-- (id db6c259e-1f61-48a8-8ca1-ae4127feca17) formula 'f_S_QM * Q_S_d_aM + Q_F', output Q_M; equation '8'
+-- (id c99aba1c-ea82-4294-b136-9f9ce2f1f033) formula 'Q_M >= SUM(Q_Dr_RU) >= SUM(Q_krit)  (l/s)', output Q_M — both
+-- verified_against_standard; '8' is a comparison, not a formula (the engine cannot compute it), so today '6' wins by
+-- first-in-list on every plant. Gl. 8 for a plant WITHOUT storage volume says Q_M ≥ Σ Q_Dr,RÜ ≥ Σ Q_krit — Q_M is not
+-- computed there but bounded below.
+-- Why staged: replaces verified equations / adds gates (enforcement). Until ratified: Q_Dr_RUB_sum / Q_Dr_RU_sum / Q_krit_sum
+-- are visible derived fields; `entlastung_typ` is a created select with no effect.
+-- BEGIN;
+-- UPDATE equations SET formula = 'Q_M = f_S_QM * Q_S_d_aM + Q_F', verification_status = 'imported_unverified'
+--  WHERE id = 'db6c259e-1f61-48a8-8ca1-ae4127feca17' AND formula = 'f_S_QM * Q_S_d_aM + Q_F';
+-- DELETE FROM equations WHERE id = 'c99aba1c-ea82-4294-b136-9f9ce2f1f033' AND formula = 'Q_M >= SUM(Q_Dr_RU) >= SUM(Q_krit)  (l/s)';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-06b', 'Q_M ≥ Σ Q_Dr,RÜB (Gl. 6)', 'IF entlastung_typ == rueb THEN Q_M >= Q_Dr_RUB_sum', '§4.1.2, Gl. 6', 'block', 'Plan 3 (a262e-R-1).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-06' AND s.code = 'DWA-A-262E';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'REQ-06c', 'Q_M ≥ Σ Q_Dr,RÜ ≥ Σ Q_krit (Gl. 8)', 'IF entlastung_typ == rue THEN Q_M >= Q_Dr_RU_sum AND Q_Dr_RU_sum >= Q_krit_sum', '§4.1.2, Gl. 8', 'block', 'Plan 3 (a262e-R-1).'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-06' AND s.code = 'DWA-A-262E';
+-- COMMIT;
+-- Rollback: restore formula 'f_S_QM * Q_S_d_aM + Q_F' + status on '6'; re-insert '8' (worksheet A262-06, equation_number '8',
+--   formula 'Q_M >= SUM(Q_Dr_RU) >= SUM(Q_krit)  (l/s)', input_symbols {Q_Dr_RU,Q_krit}, output Q_M, verified_against_standard);
+--   DELETE the two gates.
+
+-- =====================================================================================================================
+-- a262e-R-2 · A262-25 · Gl. 11 clamp f_red = max(1 − t_Reg/12, 0.5)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1069 "f_red = 1 − t_Reg / 12 (11)"; L1074 "f_red ≥ 0.5"; L1078 "t_Reg / 12 > 0.5  f_red must be set at a value
+-- of 0.5."; L1080 "maximum calculation of 6 months". Prod equation '11' (id 395eceea-8b47-4a87-bc00-d51190fce646):
+-- f_red = 1 - t_Reg / 12 (verified_against_standard); REQ-11 (block) f_red >= 0.5 and REQ-11b t_Reg <= 6 enforce the clamp
+-- as a block instead of setting the value. Two readings: (a) the clamp is a rule on the VALUE (max(…, 0.5)) and
+-- t_Reg > 6 is still a violation; (b) the gates as today.
+-- Why staged: replaces a verified equation.
+-- BEGIN;
+-- UPDATE equations SET formula = 'f_red = max(1 - t_Reg / 12, 0.5)', verification_status = 'imported_unverified'
+--  WHERE id = '395eceea-8b47-4a87-bc00-d51190fce646' AND formula = 'f_red = 1 - t_Reg / 12';
+-- COMMIT;
+-- Rollback: restore 'f_red = 1 - t_Reg / 12' + verified_against_standard.
+
+-- =====================================================================================================================
+-- a262e-R-3 · A262-25 · Gl. 13 / Gl. 14 print the same right-hand side — source check, no formula proposed
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1101 "for B_d,TKN / A_F,CSB,red ≥ B_A,TKN,zul use: A_F,TKN,red = B_d,TKN / B_A,TKN,zul"; L1102 "for
+-- B_d,TKN / A_F,CSB,red < B_A,TKN,zul use: A_F,TKN,red = B_d,TKN / B_A,TKN,zul (14)" — the transcript prints the SAME
+-- right-hand side for both cases (the second case presumably keeps the reduced COD area; L1098 "the reduced area is
+-- determined by the larger area requirement"). Prod equations '13' (id cb011262-3770-41a8-bf27-293f19aafe90) and '14'
+-- (id 7e28ed89-6c72-4058-b450-fe8d14f6e1c2) both 'B_d_TKN / B_A_TKN_zul', both output A_F_TKN_red.
+-- Chosen now: nothing changed. Owner reads the PDF page (SR-3); if Gl. 14 is a misprint, the likely rule is
+-- A_F_TKN_red = max(A_F_CSB_red, B_d_TKN / B_A_TKN_zul) — NOT proposed as SQL without the page.
+
+-- =====================================================================================================================
+-- a262e-X-1 · A262-05 · EZ / w_s_d re-typed duplicates (orphan fields) → inherit from A262-01 / A262-04
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: capture — A262-05 has orphan fields `EZ` (section null) and `w_s_d` (section null) while A262-01 EZ and
+-- A262-04 w_s_d already list A262-05 as consumer. L588 Gl. 2 "Q_S,d,aM = EZ · w_S,d / 86,400" reads the inherited pair.
+-- Why staged: deactivation (single-source: one producer). The engine's inherited value wins only when the local duplicate
+-- is inactive.
+-- BEGIN;
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND s.code = 'DWA-A-262E' AND w.code = 'A262-05' AND f.symbol IN ('EZ', 'w_s_d') AND f.section_id IS NULL AND f.active;
+-- COMMIT;
+-- Rollback: SET active = true on the same two rows.
+-- Same class, not staged as SQL (owner list): EW (A262-09), EW_bemessung_KA (A262-17), EW_bemessung_KomKA (A262-24),
+-- EW_Grauwasser (A262-26) ↔ EZ; Q_T (A262-09), Q_T_KA (A262-17) ↔ w_s_d / Q_T_d_aM; Q_M_KomKA (A262-24) ↔ Q_M;
+-- A_Fo_spez_* copies on A262-11/13/18/21/22/26 ↔ A_Fo_spez; filtertyp_gewaehlt_KA / filter_type_KomKA / filtertyp_KomKA /
+-- main_filter_type ↔ filter_type (token map a262e-E-1).
+
+-- =====================================================================================================================
+-- a262e-F-2 · A262-07 · aufenthaltszeit = V_Vorbehandlung / Q_Tr_h_max — NOT emitted (prod unit of Q_Tr_h_max is "l/s; m3/h")
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L721 "hydraulic residence time of ≥ 2 hours at a maximum inflow Q_Tr,h,max"; L616 Tab. 1 head "retention
+-- time of ≥ 2 h at Q_Tr,h,max"; L582 Gl. 1 prints (l/s). Prod: V_Vorbehandlung [m³], aufenthaltszeit [h] (REQ-30 ≥ 2),
+-- Q_Tr_h_max unit "l/s; m3/h" — the conversion factor (×1000/3600 for l/s, ×1 for m³/h) depends on which unit the
+-- engineer typed. Owner fixes the unit of Q_Tr_h_max first (l/s per Gl. 1), then:
+-- INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status)
+-- SELECT w.id, 'A262-07-D1', 'aufenthaltszeit = V_Vorbehandlung * 1000 / (Q_Tr_h_max * 3600)', ARRAY['V_Vorbehandlung','Q_Tr_h_max']::text[], 'aufenthaltszeit', 'h', '§4.2.5',
+--        'Plan 3 (a262e-F-2): Aufenthaltszeit = V [m³] · 1000 / (Q_Tr,h,max [l/s] · 3600).', 'imported_unverified'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A262-07' AND s.code = 'DWA-A-262E'
+--   ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
+-- Rollback: DELETE … WHERE equation_number = 'A262-07-D1'.
+
+-- =====================================================================================================================
+-- a262e-F-7 · A262-22 · V_F_VFK_KomKA = A_Fu · h_F — NOT emitted (no A_Fu area field on A262-22)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: prod description "V_F = A_Fu · h_F"; §4.3.3.5 L1010 "average daily organic volumetric loading of the filter
+-- body (CSB (COD) volumetric loading)" (Tab. 13 f_V,CSB ≤ 100 g/(m³·d)). A262-22 carries A_Fu_spez_VFK_KomKA [m²/EW] and
+-- A_Fu_min_VFK_KomKA [m²] but no actual bottom area; using A_Fu_min as the area would be an interpretation. Owner
+-- decides which area (a Filterstufen row's area_m2, or a new A_Fu_VFK_KomKA input).
+
+-- =====================================================================================================================
+-- a262e-F-8 · A262-12 · A_F_VFKS_total = A_F1 + A_F2 — NOT emitted (no stage-area fields on A262-12)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L821 "and minimum total filter area … A_Fo,min (A_Fo1 + A_Fo2) m² 4+4"; prod description "A_F1 + A_F2".
+-- A262-12 carries only A_Fo1_spez / A_Fo2_spez [m²/P]; EZ · (A_Fo1_spez + A_Fo2_spez) would be the MINIMUM total, not
+-- the design total. Owner decides (two Filterstufen rows with stage_role main give Σ via A262-10-D1).

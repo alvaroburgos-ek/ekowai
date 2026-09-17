@@ -370,6 +370,18 @@ instead). (3) A register column named `e` (or `pi`) shadows the evaluator's Eule
 (5) A `create` entry never sets `consumer_worksheets` — a derived field another worksheet must read (the
 Hybrid limit reading `tagesbedarf` on -03) needs a STAGED consumer edit before its gate can evaluate there.
 
+**Encoding traps (Plan 3 Task 3, DWA-A-262E).** (1) Never re-bind an EXISTING input as `lookup_fill` when its key
+symbol is not consumed on that worksheet: `lookup-fill-field.tsx` renders the read-only box (no input) while
+`state.kind === 'keys_missing'`, so the engineer loses the field until the consumer edit lands — create the fill next to
+the driver instead and STAGE the re-point (a262e-E-3). (2) A row-scope `visible_when` on a register column governs
+completeness only; the prepared row keeps the stored cell (the editor nulls it on the next write) — branch the Σ formulas
+on the discriminator (`if(type == 'rue', q_krit, 0)`), never on "the cell is hidden". (3) A limits table keyed by several
+selects: seed every key combination the printed tables cover (a table without a printed split gets one row per token with
+identical cells) — a missing row is a recoverable `lookup()` failure, and there is no fallback chaining in a `derived`
+expr. (4) `x == 'a' AND y == 'b'` with `x` missing and `y` false is `fail` (hides); with `y` true it is `pending`
+(visible) — a section rule may name a not-yet-consumed driver in an AND and still hide on the consumed leg.
+(5) `last_rows(reg, n)` takes the last n COMPLETE rows in entry order (no `sort_by` column) — say so in the register note.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still

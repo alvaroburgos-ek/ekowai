@@ -14,5 +14,6 @@ export type { FieldConfigEntry, SectionVisibilityEntry, EquationEntry, FieldConf
 export const FIELD_CONFIG_MODULES: Record<string, () => Promise<FieldConfigModule>> = {
   a138: () => import('./a138'),
   din1989_1: () => import('./din1989_1'),
-  // Plan-3 tasks append one line each, e.g. a262e: () => import('./a262e'),
+  a262e: () => import('./a262e'),
+  // Plan-3 tasks append one line each, e.g. m277e: () => import('./m277e'),
 };

@@ -8,5 +8,6 @@ import type { EquationModule } from '../field-configs/types';
 export const EQUATION_MODULES: Record<string, () => Promise<EquationModule>> = {
   a138: () => import('./a138'),
   din1989_1: () => import('./din1989_1'),
-  // Plan-3 tasks append one line each, e.g. a262e: () => import('./a262e'),
+  a262e: () => import('./a262e'),
+  // Plan-3 tasks append one line each, e.g. m277e: () => import('./m277e'),
 };
