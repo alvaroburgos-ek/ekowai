@@ -77,7 +77,12 @@ export type SnapshotEquationOutput =
       formula: string;
     };
 
-export type SnapshotComplianceVerdict = 'pass' | 'fail' | 'open';
+/** Stored gate verdict. `not_applicable` (Plan 2a, Task 11): the condition
+ * references a field hidden by `visible_when` under the saved values — kept
+ * distinct from `open` ("inputs missing / manual") so a diff shows a gate
+ * leaving or entering applicability, not a spurious "offen". Older snapshots
+ * carry only the first three values. */
+export type SnapshotComplianceVerdict = 'pass' | 'fail' | 'open' | 'not_applicable';
 
 export type SnapshotPayload = {
   parameters: Record<string, SnapshotParameterValue>;
@@ -590,12 +595,16 @@ export function buildSnapshotPayload(args: {
         break;
       case 'pending':
       case 'manual':
-      // Plan 2a (Task 10): a hidden-symbol gate is flattened to `open` like
-      // the other non-verdicts — the stored JSONB shape ('pass'|'fail'|'open')
-      // is unchanged; a distinct snapshot verdict is Task 11's call.
-      case 'not_applicable':
         complianceResults[req.id] = 'open';
         break;
+      case 'not_applicable':
+        // Plan 2a (Task 11): hidden-symbol gate — its own stored verdict.
+        complianceResults[req.id] = 'not_applicable';
+        break;
+      default: {
+        const _exhaustive: never = res;
+        return _exhaustive;
+      }
     }
   }
 

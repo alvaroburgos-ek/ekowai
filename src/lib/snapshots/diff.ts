@@ -26,7 +26,10 @@
  *   template changes a field's data_type, which the importer documents as
  *   a breaking change).
  *
- *   For compliance we compare on the bare verdict ('pass'|'fail'|'open').
+ *   For compliance we compare on the bare verdict
+ *   ('pass'|'fail'|'open'|'not_applicable'). `not_applicable` (Plan 2a) is a
+ *   distinct value: a gate flipping open → not_applicable means its field
+ *   became hidden by `visible_when`, and is reported as a verdict change.
  */
 
 import type {

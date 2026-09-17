@@ -190,10 +190,24 @@ function ComplianceRow({ req }: { req: ReportCompliance }) {
   );
 }
 
-function badgeFor(req: ReportCompliance): { label: string; style: PdfStyle } {
+/** Exported for the unit test only (pure). */
+export function badgeFor(req: ReportCompliance): { label: string; style: PdfStyle } {
   const r = req.result;
-  if (r.kind === 'pass') return { label: '✓ erfüllt', style: styles.complianceBadgePass };
-  if (r.kind === 'fail') return { label: '✗ nicht erfüllt', style: styles.complianceBadgeFail };
-  if (r.kind === 'pending') return { label: '⚠ offen', style: styles.complianceBadgeOpen };
-  return { label: 'manuell', style: styles.complianceBadgeOpen };
+  switch (r.kind) {
+    case 'pass':
+      return { label: '✓ erfüllt', style: styles.complianceBadgePass };
+    case 'fail':
+      return { label: '✗ nicht erfüllt', style: styles.complianceBadgeFail };
+    case 'pending':
+      return { label: '⚠ offen', style: styles.complianceBadgeOpen };
+    case 'manual':
+      return { label: 'manuell', style: styles.complianceBadgeOpen };
+    case 'not_applicable':
+      // Plan 2a: condition references a field hidden by `visible_when`.
+      return { label: '– n.a.', style: styles.complianceBadgeOpen };
+    default: {
+      const _exhaustive: never = r;
+      return _exhaustive;
+    }
+  }
 }

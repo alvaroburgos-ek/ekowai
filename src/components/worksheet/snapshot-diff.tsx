@@ -15,6 +15,7 @@
  */
 import { useState } from 'react';
 import type { SnapshotDiff } from '@/lib/snapshots/diff';
+import type { SnapshotComplianceVerdict } from '@/lib/snapshots/payload';
 import {
   formatParameterValue,
   formatEquationVerdict,
@@ -52,16 +53,18 @@ type Props = {
   toLabel: string;
 };
 
-const VERDICT_LABEL: Record<'pass' | 'fail' | 'open', string> = {
+const VERDICT_LABEL: Record<SnapshotComplianceVerdict, string> = {
   pass: 'erfüllt',
   fail: 'nicht erfüllt',
   open: 'offen',
+  not_applicable: 'n.a.',
 };
 
-const VERDICT_CLS: Record<'pass' | 'fail' | 'open', string> = {
+const VERDICT_CLS: Record<SnapshotComplianceVerdict, string> = {
   pass: 'bg-success/10 text-success',
   fail: 'bg-error/10 text-error',
   open: 'bg-paper-2 text-subtext',
+  not_applicable: 'bg-paper-2 text-subtext',
 };
 
 export function SnapshotDiffView({

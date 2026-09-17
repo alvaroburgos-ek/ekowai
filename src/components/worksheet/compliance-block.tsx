@@ -97,7 +97,7 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
       fail: 0,
       pending: 0,
       manual: 0,
-      not_applicable: 0, // Plan 2a: hidden-symbol gates (visible_when); header count rendering = Task 11
+      not_applicable: 0, // Plan 2a: gate references a field hidden by `visible_when`
       failBlock: 0,
       failWarn: 0,
       attestation: 0,
@@ -124,6 +124,14 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
             </span>
           )}
           {counts.pending > 0 && <span className="text-subtext">○ {counts.pending}</span>}
+          {counts.not_applicable > 0 && (
+            <span
+              className="text-subtext"
+              title="Nicht anwendbar — Bedingung bezieht sich auf ein ausgeblendetes Feld"
+            >
+              – {counts.not_applicable} n.a.
+            </span>
+          )}
           {counts.attestation > 0 && (
             <span className="text-accent" title="Ingenieur-Bestätigung ausstehend">
               § {counts.attestation} sign-off
@@ -173,6 +181,9 @@ export function ComplianceBlock({ requirements, suggestions, fields, locale, pro
                   </span>
                 )}
               </div>
+              {/* No "Warum?" for not_applicable: the referenced field is hidden —
+                  there is no threshold to explain against a value the engineer
+                  cannot see. */}
               {(result.kind === 'fail' || result.kind === 'pending') && (
                 <GateExplanationBlock condition={cr.condition} lookup={lookup} />
               )}
@@ -386,12 +397,13 @@ function StatusBadge({
         </span>
       );
     case 'not_applicable':
-      // Plan 2a (Task 10): minimal badge only — Task 11 completes the
-      // not_applicable rendering (header count, hidden-symbol hint).
+      // Plan 2a: the condition references a field hidden by `visible_when`.
+      // Neither pass nor fail — the engineer cannot see the value, so no
+      // verdict may be derived from it. Never blocks approval.
       return (
         <span
           aria-label="Nicht anwendbar"
-          title="Nicht anwendbar — referenziertes Feld ist ausgeblendet"
+          title="Nicht anwendbar — Bedingung bezieht sich auf ein ausgeblendetes Feld"
           className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-paper-2 text-subtext text-xs font-semibold shrink-0"
         >
           –
@@ -423,5 +435,10 @@ function StatusBadge({
           !
         </span>
       );
+    default: {
+      // Exhaustiveness net: a new EvalResult kind fails typecheck here.
+      const _exhaustive: never = result;
+      return _exhaustive;
+    }
   }
 }

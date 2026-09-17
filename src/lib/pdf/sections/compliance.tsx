@@ -84,7 +84,12 @@ function renderVerdict(
       }
       return { badge: '!', verdict: 'Bedingung nicht auswertbar — Regel reparieren' };
     case 'not_applicable':
-      // Plan 2a: gate references a hidden (visibility-suppressed) field.
-      return { badge: '–', verdict: 'nicht zutreffend' };
+      // Plan 2a: gate references a field hidden by `visible_when` — no
+      // verdict is derived from a value the engineer cannot see.
+      return { badge: '–', verdict: 'n.a. — nicht anwendbar (ausgeblendetes Feld)' };
+    default: {
+      const _exhaustive: never = result.result;
+      return _exhaustive;
+    }
   }
 }

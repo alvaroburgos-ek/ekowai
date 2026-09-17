@@ -10,13 +10,25 @@ import type { StandardReportData } from '@/lib/pdf/load-standard-report';
  * explanations, verification state, snapshot binding, verdict paragraph,
  * signature block. Derived from the SAME data as the full report.
  */
+/**
+ * Gate tally for the Prüfergebnis line. `notApplicable` (Plan 2a) — gates
+ * whose condition references a field hidden by `visible_when` — is counted
+ * on its own: neither "erfüllt" (nothing was checked) nor "offen/manuell"
+ * (nothing is owed). Exported for the unit test (pure).
+ */
+export function summarizeCompliance<T extends { result: { kind: string } }>(all: readonly T[]) {
+  const failed = all.filter((c) => c.result.kind === 'fail');
+  const passed = all.filter((c) => c.result.kind === 'pass').length;
+  const notApplicable = all.filter((c) => c.result.kind === 'not_applicable').length;
+  const open = all.length - passed - failed.length - notApplicable;
+  return { total: all.length, passed, failed, open, notApplicable };
+}
+
 export function PruefmemoDocument({ data }: { data: StandardReportData }) {
   const allCompliance = data.worksheets.flatMap((w) =>
     w.compliance.map((c) => ({ ws: w.code, ...c })),
   );
-  const failed = allCompliance.filter((c) => c.result.kind === 'fail');
-  const passed = allCompliance.filter((c) => c.result.kind === 'pass').length;
-  const open = allCompliance.length - passed - failed.length;
+  const { passed, failed, open, notApplicable } = summarizeCompliance(allCompliance);
   const unverified = data.worksheets.flatMap((w) =>
     (w.unverifiedFields ?? []).map((f) => ({ ws: w.code, ...f })),
   );
@@ -38,7 +50,7 @@ export function PruefmemoDocument({ data }: { data: StandardReportData }) {
         <View style={{ marginTop: 10 }}>
           <Text style={styles.h2}>Prüfergebnis</Text>
           <Text>
-            {`${passed} von ${allCompliance.length} maschinell prüfbaren Anforderungen erfüllt · ${failed.length} verletzt · ${open} offen/manuell.`}
+            {`${passed} von ${allCompliance.length} maschinell prüfbaren Anforderungen erfüllt · ${failed.length} verletzt · ${open} offen/manuell${notApplicable > 0 ? ` · ${notApplicable} n.a. (ausgeblendetes Feld)` : ''}.`}
           </Text>
           <Text style={styles.note}>
             {failed.length === 0

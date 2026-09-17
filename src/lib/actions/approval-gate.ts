@@ -222,8 +222,10 @@ export async function checkApprovalGate(
   // Plan 2a (Task 10): fields/sections hidden by `visible_when` under the
   // SAVED values — same pure helper and same lookup the form uses, so the
   // gate cannot disagree with what the engineer saw. A block condition that
-  // references a hidden symbol reports `not_applicable` (does not block); a
-  // hidden required field is not "missing" (it cannot be filled in).
+  // references a hidden symbol reports `not_applicable` — NEVER a blocker
+  // (only `kind === 'fail'` below blocks; Task 11 pins the same rule in the
+  // form badge, PDF, Prüfmemo and snapshot verdict); a hidden required field
+  // is not "missing" (it cannot be filled in).
   const { hiddenFieldIds, hiddenSymbols } = computeVisibility(tmplFields, tmplSections, lookup);
 
   // Missing required-field check: a field with is_required=true must
