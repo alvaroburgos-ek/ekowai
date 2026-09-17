@@ -24,6 +24,7 @@ import {
   type ComplianceReportResult,
 } from '@/lib/eval/evaluate-for-report';
 import { isAttestationCondition } from '@/lib/eval/attestation';
+import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 
 export type ReportData = {
   project: {
@@ -111,6 +112,13 @@ export async function loadProjectReportData(projectId: string): Promise<ReportDa
       ),
     )
     .orderBy(standards.code);
+
+  // C-1 (final review, guideline-to-tool): register every active standard's DB
+  // regulation tables BEFORE `evaluateWorksheetEquations` below — it reads
+  // `makeTableLookup(inst.standardCode)` for derived register columns and
+  // lookup_value refills, which otherwise only sees the A138 TS seed in a fresh
+  // Node process. Sequential (global pool, no tx); never throws.
+  for (const s of stds) await ensureRegulationTablesLoaded(s.code);
 
   const instances = await db
     .select({

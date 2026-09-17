@@ -7,9 +7,12 @@ import {
   reportArchives,
   projects,
   orgMembers,
+  worksheetTemplates,
+  standards,
 } from '@/lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { createClient } from '@/lib/supabase/server';
+import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import {
   nextStatus,
   type WorksheetStatus,
@@ -51,10 +54,13 @@ export async function transitionWorksheet(
       projectId: worksheetInstances.projectId,
       status: worksheetInstances.status,
       orgId: projects.orgId,
+      standardCode: standards.code,
     })
     .from(worksheetInstances)
     .innerJoin(projects, eq(projects.id, worksheetInstances.projectId))
     .innerJoin(orgMembers, eq(orgMembers.orgId, projects.orgId))
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
     .where(
       and(
         eq(worksheetInstances.id, input.instanceId),
@@ -65,6 +71,17 @@ export async function transitionWorksheet(
   if (!instance) return { ok: false, error: 'Worksheet nicht gefunden' };
 
   const orgId = instance.orgId;
+
+  // C-1 (final review, guideline-to-tool): register the standard's DB
+  // regulation tables into the eval-layer registry BEFORE anything below
+  // evaluates worksheet content — the approval gate, and the snapshot capture
+  // inside the transaction (`buildSnapshotPayload` → makeTableLookup for
+  // derived register columns / lookup_value refills). For a non-A138 standard
+  // the registry is empty in a fresh Node process; without this the snapshot
+  // only resolved `lookup()` if the same warm process had previously SAVED
+  // that standard. MUST stay OUTSIDE `db.transaction` (a global-pool query
+  // inside the tx re-creates the Task 10b prod hang). Never throws.
+  await ensureRegulationTablesLoaded(instance.standardCode);
 
   const fromStatus = instance.status as WorksheetStatus;
   const toStatus = nextStatus(fromStatus, input.eventType);

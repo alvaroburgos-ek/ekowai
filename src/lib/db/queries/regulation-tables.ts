@@ -44,13 +44,19 @@ export async function loadRegulationTables(standardCode: string): Promise<Regula
 /** Load + register a standard's regulation tables into the eval-layer
  * registry in one call. Shared by every SERVER-SIDE consumer that needs
  * `tab6Limit()` / `flaechengruppeToTier()` / `getTab9Entries()` /
- * `lookupTab9()` to read DB-backed values — currently `saveWorksheet`
- * (src/lib/actions/worksheet.ts), whose materialize* calls run entirely on
- * the server where the client-only `WorksheetForm` registration never runs.
- * (The worksheet page keeps its own explicit load-then-pass-as-prop path so
- * the client registry stays in sync with what was rendered.) No-op when the
- * loader returns [] — an unregistered standard is functionally identical to
- * an empty registry (TS-constant fallback).
+ * `lookupTab9()` or the generic `makeTableLookup()` (derived register
+ * columns, `lookup_value` refills, `lookup_fill`) to read DB-backed values.
+ * Callers (C-1, final review): `saveWorksheet` (src/lib/actions/worksheet.ts —
+ * materialize* runs on the server), `transitionWorksheet` (BEFORE its
+ * transaction — the snapshot capture inside the tx evaluates registers),
+ * `checkApprovalGate`, `loadStandardReportData` (Prüfmemo / standard report)
+ * and `loadProjectReportData` (project report). The client-only
+ * `WorksheetForm` registration never runs on these paths. (The worksheet
+ * page keeps its own explicit load-then-pass-as-prop path so the client
+ * registry stays in sync with what was rendered.) No-op when the loader
+ * returns [] — an unregistered standard is functionally identical to an empty
+ * registry (TS-constant fallback). Must be called OUTSIDE any `db.transaction`
+ * (it queries the global pool — inside a tx that is the Task 10b hang).
  *
  * NEVER THROWS. Guards against the `regulation_tables`/`regulation_table_rows`
  * DATA migration (the A138 seed,

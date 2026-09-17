@@ -186,7 +186,17 @@ data is `row_values`; never hand-write the INSERT).
 The server loads tables via `ensureRegulationTablesLoaded(standardCode)`
 (`src/lib/db/queries/regulation-tables.ts`) — it tries the DB and falls back to TS constants
 on any failure; it never throws, so a standard with no seed migration just renders without
-DB-backed tables.
+DB-backed tables. **Where it runs matters (C-1, final review):** the eval-layer registry is a
+module global of the Node process and there is NO lazy load inside `makeTableLookup` — a
+server path that does not call the loader sees only the A138 TS seed. The five callers are
+`saveWorksheet`, `transitionWorksheet` (before its transaction — the snapshot capture inside
+the tx evaluates registers), `checkApprovalGate`, `loadStandardReportData` (Prüfmemo /
+standard report) and `loadProjectReportData`; pinned by
+`src/lib/db/queries/__tests__/regulation-tables-server-paths.test.ts`. A new server entry
+point that evaluates registers / `lookup()` / `lookup_fill` for a standard must call it too,
+always OUTSIDE `db.transaction` (global-pool query inside a tx = the Task 10b hang). The
+worksheet page is the one path that does NOT use it: it loads the rows explicitly
+(`loadRegulationTables`) and passes them to the client form, which registers them itself.
 
 **A138's own TAB9 stays `imported_unverified` (I-2 ruling).** Its `verbatim_quote` values are
 synthesised from the TS constants in `tab9.ts` (`Tab. 9: ${label} — C_m … / C_s …`), not lifted

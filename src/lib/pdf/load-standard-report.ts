@@ -19,6 +19,7 @@ import {
   monitoringEntries,
 } from '@/lib/db/schema';
 import { and, eq, inArray, desc } from 'drizzle-orm';
+import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 import { assembleStandardReport, type StandardReportData } from './assemble-standard-report';
 
 export type {
@@ -89,6 +90,12 @@ export async function loadStandardReportData(
     .where(eq(standards.code, standardCode))
     .limit(1);
   if (!std) throw new Error(`Standard ${standardCode} not found`);
+
+  // C-1 (final review, guideline-to-tool): register the standard's DB regulation
+  // tables BEFORE assembly — `assembleStandardReport` reads `makeTableLookup`
+  // (derived register columns, lookup_value refills), which otherwise only sees
+  // the A138 TS seed in a fresh Node process. Never throws (see its doc).
+  await ensureRegulationTablesLoaded(std.code);
 
   // 3. Worksheet templates (in order).
   const templates = await db

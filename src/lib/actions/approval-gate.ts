@@ -6,10 +6,13 @@ import {
   projectParameters,
   worksheetInstances,
   worksheetSections,
+  worksheetTemplates,
+  standards,
 } from '@/lib/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { evaluateCondition, jsonConditionValue } from '@/lib/compliance/evaluate';
 import { computeVisibility } from '@/lib/compliance/visibility';
+import { ensureRegulationTablesLoaded } from '@/lib/db/queries/regulation-tables';
 
 /**
  * Result of the engineer-approve readiness check. The transition is
@@ -112,8 +115,11 @@ export async function checkApprovalGate(
     .select({
       projectId: worksheetInstances.projectId,
       worksheetTemplateId: worksheetInstances.worksheetTemplateId,
+      standardCode: standards.code,
     })
     .from(worksheetInstances)
+    .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, worksheetInstances.worksheetTemplateId))
+    .innerJoin(standards, eq(standards.id, worksheetTemplates.standardId))
     .where(eq(worksheetInstances.id, instanceId))
     .limit(1);
   if (!instance) {
@@ -123,6 +129,13 @@ export async function checkApprovalGate(
       missingRequiredFields: [{ symbol: '__instance__', labelDe: 'Worksheet not found' }],
     };
   }
+
+  // C-1 (final review, guideline-to-tool): the gate runs BEFORE the transition
+  // transaction, on the global pool — the right place to register the
+  // standard's DB regulation tables so every evaluation of this instance in
+  // the same request (gate conditions, then the snapshot capture inside the
+  // tx) reads DB-backed tables instead of the A138-only TS seed. Never throws.
+  await ensureRegulationTablesLoaded(instance.standardCode);
 
   // Load the template's active fields + the project's saved parameters
   // for those fields. The required-field list is built from the template;
