@@ -21,6 +21,11 @@
  *   carrier's rows storing the row ID. While `widget IS NULL`, a scalar-shaped
  *   field whose symbol is in REFERENCE_CONFIGS_FALLBACK (rainfall_table_ref)
  *   renders it too — RainfallTableSelector is deleted.
+ * - `lookup_fill` renders `LookupFillField` (Task 7): one regulation-table
+ *   row's value with a source badge; display mode when the form owns the
+ *   symbol server-side, fill mode + policy-driven audited override otherwise.
+ *   While `widget IS NULL`, a scalar-shaped field whose symbol is in
+ *   LOOKUP_BINDINGS_FALLBACK (ac_as_ratio_limit) renders it too.
  * - Placement (`widgetPlacement`): registers follow `registerPlacement(cfg)`
  *   (undefined ⇒ bottom — the Plan-1 selection migrations carry no placement
  *   key); bespoke editors sit at the bottom under today's h2 titles; a legacy
@@ -36,6 +41,7 @@ import { inferWidget, type Widget, type RegisterUiConfig } from '@/lib/eval/fiel
 import { resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { resolveSelectionConfig, type ChecklistConfig } from '@/lib/eval/selection-fields';
 import { resolveReferenceConfig } from '@/lib/eval/reference-configs';
+import { resolveLookupFillBinding } from '@/lib/eval/lookup-fill';
 import type { EvalState } from '@/lib/eval/formula';
 import type { Value } from '@/lib/expr';
 import type { DynamicField } from './dynamic-field';
@@ -43,6 +49,7 @@ import { RegisterEditor, registerPlacement, type FooterState } from './register-
 import { ChecklistEditor } from './checklist-editor';
 import { RainfallTablesEditor } from './rainfall-tables-editor';
 import { ReferenceField } from './reference-field';
+import { LookupFillField } from './lookup-fill-field';
 import { RiskRegisterEditor } from './risk-register-editor';
 import { MitigationPlanEditor } from './mitigation-plan-editor';
 import { EditorErrorBoundary } from './editor-error-boundary';
@@ -175,11 +182,18 @@ function renderBespoke(key: BespokeEditorKey, f: WorksheetFormField, ctx: Widget
 }
 
 const reference = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => <ReferenceField field={f} ctx={ctx} />;
+const lookupFill = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => <LookupFillField field={f} ctx={ctx} />;
 
 /** Scalar-shaped widgets: while widget IS NULL a symbol in REFERENCE_CONFIGS_FALLBACK (rainfall_table_ref — a `text`
- * field, so it infers to scalar) renders the reference widget; else DynamicField. */
-const dynamicOrReference = (f: WorksheetFormField, ctx: WidgetContext): ReactNode =>
-  f.widget == null && resolveReferenceConfig(f) ? reference(f, ctx) : ctx.renderDynamic(f);
+ * field, so it infers to scalar) renders the reference widget, and a symbol in LOOKUP_BINDINGS_FALLBACK
+ * (ac_as_ratio_limit — a `number` field) renders the lookup_fill widget (Task 7; display mode there, because the form's
+ * LOADING_CHECK_SYMBOLS marks it server-owned); else DynamicField. */
+const dynamicOrReference = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => {
+  if (f.widget != null) return ctx.renderDynamic(f);
+  if (resolveReferenceConfig(f)) return reference(f, ctx);
+  if (resolveLookupFillBinding(f)) return lookupFill(f, ctx);
+  return ctx.renderDynamic(f);
+};
 
 const checklistOrDynamic = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => {
   const checklist = resolveChecklist(f);
@@ -222,8 +236,8 @@ export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext)
     );
   },
   reference,
-  // Plan 2b Task 7 (`lookup_fill`) replaces this stub; no prod row carries the widget yet.
-  lookup_fill: (f, ctx) => ctx.renderDynamic(f),
+  // Task 7: table value with source badge + policy-driven override (display mode for server-owned symbols).
+  lookup_fill: lookupFill,
 };
 
 /** The form's single dispatch: `WIDGETS[effectiveWidget(f)]`. An out-of-enum DB `widget` string (schema.ts types the

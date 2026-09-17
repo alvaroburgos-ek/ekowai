@@ -1,6 +1,8 @@
 import type { ParsedWorkbook, FieldRow, SectionRow } from './_pass3c-types';
 import { computeEngineDenyKeys, type EquationForGate } from '../src/lib/eval/equation-manual-denylist';
-import { parseFieldConfig, FieldConfigError } from '../src/lib/eval/field-config';
+import { parseFieldConfig, FieldConfigError, type LookupBinding } from '../src/lib/eval/field-config';
+import { resolveRegulationTable } from '../src/lib/eval/regulation-tables-fallback';
+import type { RegulationTable } from '../src/lib/eval/regulation-tables';
 
 const ALLOWED_DATA_TYPES = new Set([
   'number', 'text', 'enum', 'date', 'boolean', 'json',
@@ -25,18 +27,42 @@ export function validateFieldConfigColumns(f: {
   ui_config?: unknown;
   lookup?: unknown;
   visible_when?: string | null;
-}): string[] {
+}, standardCode?: string): string[] {
   try {
-    parseFieldConfig({
+    const cfg = parseFieldConfig({
       widget: f.widget ?? null,
       uiConfig: f.ui_config ?? null,
       lookup: f.lookup ?? null,
       visibleWhen: f.visible_when ?? null,
     });
+    // Plan 2b Task 7: a lookup_fill binding must name the table's key columns (in order) and an
+    // existing value column — checked only when the table is registered/seeded at import time.
+    if (cfg.lookup && standardCode) {
+      return validateLookupKeysOrder(cfg.lookup, resolveRegulationTable(standardCode, cfg.lookup.table_code)).map((m) => `field ${f.symbol}: ${m}`);
+    }
     return [];
   } catch (e) {
     return [`field ${f.symbol}: ${e instanceof FieldConfigError ? e.message : String(e)}`];
   }
+}
+
+/**
+ * Plan 2b Task 7: `lookup.keys[].column` must equal the table's `key_columns` in order (the
+ * canonical binding shape — `row_key` and `makeTableLookup` are key_columns-ordered), and
+ * `lookup.value` must be one of the table's `value_columns`. Silent (`[]`) when the table is
+ * not registered at import time — never block an import on an unseeded table.
+ */
+export function validateLookupKeysOrder(binding: LookupBinding, table: RegulationTable | undefined): string[] {
+  if (!table) return [];
+  const errors: string[] = [];
+  const got = binding.keys.map((k) => k.column);
+  if (got.join('|') !== table.key_columns.join('|')) {
+    errors.push(`lookup.keys must name ${binding.table_code} key_columns in order [${table.key_columns.join(', ')}], got [${got.join(', ')}]`);
+  }
+  if (!table.value_columns.some((c) => c.name === binding.value)) {
+    errors.push(`lookup.value column "${binding.value}" is not a value column of ${binding.table_code} [${table.value_columns.map((c) => c.name).join(', ')}]`);
+  }
+  return errors;
 }
 
 /**
@@ -203,7 +229,7 @@ export function validateWorkbook(parsed: ParsedWorkbook): ValidationError[] {
       errors.push({ sheet: 'Fields', row, message: `Duplicate (origin_worksheet, symbol): ${fieldKey}` });
     }
     fieldKeys.add(fieldKey);
-    for (const message of validateFieldConfigColumns(f as FieldRowWithConfig)) {
+    for (const message of validateFieldConfigColumns(f as FieldRowWithConfig, stdCode)) {
       errors.push({ sheet: 'Fields', row, message });
     }
     for (const message of validateVisibleWhenNotOnProducer(f as FieldRowWithConfig, sectionChainFor(parsed.sections, f.origin_worksheet, f.origin_section))) {

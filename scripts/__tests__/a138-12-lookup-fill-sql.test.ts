@@ -1,0 +1,55 @@
+// Plan 2b Task 7: the A138-12 `ac_as_ratio_limit` lookup_fill migration embeds the SAME binding
+// LOOKUP_BINDINGS_FALLBACK serves while widget IS NULL (deploy-before-migration parity), is
+// GATED on sign-off D-2b-3, and its rollback nulls the three columns. WRITTEN NOT APPLIED.
+import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { parseFieldConfig } from '@/lib/eval/field-config';
+import { LOOKUP_BINDINGS_FALLBACK, resolveLookupFill } from '@/lib/eval/lookup-fill';
+import { resolveRegulationTable } from '@/lib/eval/regulation-tables-fallback';
+import { validateLookupKeysOrder } from '../_pass3c-validate';
+
+const ROOT = join(__dirname, '..', '..');
+const MIGRATION = readFileSync(join(ROOT, 'scripts/migrations/20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql'), 'utf8').replace(/\r\n/g, '\n');
+const ROLLBACK = readFileSync(join(ROOT, 'scripts/rollback-20260916160000-a138-12-ac-as-ratio-limit-lookup-fill.sql'), 'utf8').replace(/\r\n/g, '\n');
+
+const json = (sql: string, col: 'ui_config' | 'lookup') => JSON.parse(new RegExp(`${col} = '((?:[^']|'')*)'::jsonb`).exec(sql)![1].replace(/''/g, "'"));
+
+describe('20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql', () => {
+  it('is GATED on D-2b-3 (header line), transactional, scoped to DWA-A-138-1, and only fills NULL widget', () => {
+    expect(MIGRATION).toMatch(/^-- GATED: do not apply before sign-off D-2b-3/m);
+    expect(MIGRATION).toMatch(/^BEGIN;$/m);
+    expect(MIGRATION).toMatch(/^COMMIT;$/m);
+    expect(MIGRATION).toContain("s.code = 'DWA-A-138-1'");
+    expect(MIGRATION).toContain("f.symbol = 'ac_as_ratio_limit'");
+    expect(MIGRATION).toContain('f.widget IS NULL');
+    expect(MIGRATION).toContain("widget = 'lookup_fill', ui_config = NULL, lookup = '");
+    expect((MIGRATION.match(/UPDATE fields/g) ?? []).length).toBe(1);
+    // The three D-2b-3 options are documented in the header.
+    expect(MIGRATION).toMatch(/\(a\) two derived scalar fields/);
+    expect(MIGRATION).toMatch(/\(b\) a `from_expr` key/);
+    expect(MIGRATION).toMatch(/\(c\) leave the widget in display mode/);
+  });
+
+  it('the embedded lookup round-trips through parseFieldConfig to the TS fallback binding', () => {
+    const lookup = json(MIGRATION, 'lookup');
+    expect(parseFieldConfig({ widget: 'lookup_fill', uiConfig: null, lookup, visibleWhen: null }).lookup).toEqual(LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit);
+  });
+
+  it('the binding is canonical against the seeded TAB6 (key_columns order, value column) and resolves the same row the materialiser reads', () => {
+    const tab6 = resolveRegulationTable('DWA-A-138-1', 'TAB6');
+    expect(validateLookupKeysOrder(LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit, tab6)).toEqual([]);
+    const s = resolveLookupFill(LOOKUP_BINDINGS_FALLBACK.ac_as_ratio_limit, 'DWA-A-138-1', (sym) => ({ tab6_tier: 'tier3', bbz_band: 'thin' } as Record<string, string>)[sym]);
+    expect(s).toMatchObject({ kind: 'resolved', policy: 'locked', tableValue: tab6!.rows.find((r) => r.row_key === 'tier3|thin')!.values.max });
+  });
+
+  it('rollback nulls widget/ui_config/lookup for exactly that row', () => {
+    expect(ROLLBACK).toMatch(/^BEGIN;$/m);
+    expect(ROLLBACK).toMatch(/^COMMIT;$/m);
+    expect(ROLLBACK).toContain('SET widget = NULL, ui_config = NULL, lookup = NULL');
+    expect(ROLLBACK).toContain("f.symbol = 'ac_as_ratio_limit'");
+    expect(ROLLBACK).toContain("s.code = 'DWA-A-138-1'");
+    expect(ROLLBACK).toContain("f.widget = 'lookup_fill'");
+    expect((ROLLBACK.match(/UPDATE fields/g) ?? []).length).toBe(1);
+  });
+});

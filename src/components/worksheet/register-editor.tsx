@@ -30,6 +30,7 @@ import { useWorksheetStore } from '@/lib/state/worksheet-store';
 import { prepareRegisterRows } from '@/lib/eval/register-rows';
 import { registerFlagKeys } from '@/lib/eval/register-configs';
 import { makeTableLookup, makeTableRows } from '@/lib/eval/regulation-tables-fallback';
+import { tableLabel } from '@/lib/eval/lookup-fill';
 import { evalCondition, type PreparedRegister, type PreparedRow, type Scope, type Value } from '@/lib/expr';
 import type { RegisterColumn, RegisterUiConfig } from '@/lib/eval/field-config';
 import type { EvalState } from '@/lib/eval/formula';
@@ -64,11 +65,8 @@ export function fmt(v: Value | undefined): string {
 export function registerPlacement(config: { placement?: RegisterUiConfig['placement'] } & Record<string, unknown>): 'section' | 'bottom' {
   return config.placement ?? 'bottom';
 }
-/** 'TAB9' → 'Tab. 9', 'TAB22' → 'Tab. 22', 'TAB5a' → 'Tab. 5a'; anything else verbatim. */
-export function tableLabel(code: string): string {
-  const m = /^TAB(\d+[A-Za-z]?)$/.exec(code);
-  return m ? `Tab. ${m[1]}` : code;
-}
+/** 'TAB9' → 'Tab. 9' etc. — canonical home is src/lib/eval/lookup-fill.ts (Plan 2b Task 7); re-exported for the existing callers. */
+export { tableLabel };
 
 const cellInput = 'block w-full rounded border border-hairline bg-transparent px-2 py-1 text-sm text-ink focus:border-accent focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed';
 const NO_SYMBOL: NonNullable<Scope['symbol']> = () => undefined;
