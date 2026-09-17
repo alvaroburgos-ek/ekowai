@@ -16,6 +16,8 @@ import { POLLUTANTS } from '@/lib/vsme/pollutants';
 /** Register-level boolean flag (e.g. pollutant_register.not_applicable), read by `flag()`. Re-exported from the zod contract (Plan 2b). */
 export type { RegisterFlag };
 
+// Retired by scripts/migrations/20260916130000_a138_07_surface_inventory_widget.sql (Plan 2b Task 5; emitted from
+// this constant — the freshness pin keeps the SQL byte-equal to it).
 // Required set = byte-for-byte rowComplete() in surface-inventory.ts (engine shim)
 // (label NOT required; tab9_value/area_m2/c_i/c_s required). Do not "improve" it.
 const SURFACE_INVENTORY: RegisterUiConfig = {
@@ -40,6 +42,8 @@ const SURFACE_INVENTORY: RegisterUiConfig = {
   footer: ['A_E_ba', 'A_E_nba', 'A_C'],
 };
 
+// Retired by scripts/migrations/20260916140000_vsme_b04_pollutant_register_widget.sql (Plan 2b Task 5; emitted from
+// this constant — the freshness pin keeps the SQL byte-equal to it; REGISTER_FLAG_KEYS retires with it).
 // Required set + min:0 = pollutantRowComplete() in pollutant-register.ts:88-94.
 // Header/flag/aria texts = the retired pollutant-register-editor.tsx (deleted in Plan 2b Task 4; pinned in register-editor-vsme-b04.test.tsx).
 const POLLUTANT_REGISTER: RegisterUiConfig = {
@@ -62,7 +66,8 @@ const POLLUTANT_REGISTER: RegisterUiConfig = {
 
 export const REGISTER_CONFIGS_FALLBACK: Readonly<Record<string, RegisterUiConfig>> = { surface_inventory: SURFACE_INVENTORY, pollutant_register: POLLUTANT_REGISTER };
 
-/** Symbol-keyed fallback for registers whose config carries no `flags` (legacy DB rows / callers without a config). */
+/** Symbol-keyed fallback for registers whose config carries no `flags` (legacy DB rows / callers without a config).
+ * Retired together with 20260916140000_vsme_b04_pollutant_register_widget.sql (the migrated ui_config carries `flags`). */
 const REGISTER_FLAG_KEYS: Readonly<Record<string, readonly string[]>> = { pollutant_register: ['not_applicable'] };
 
 /** Register-level boolean flags read by `flag()`: `ui.flags` when present (DB-configured register), else the symbol-keyed fallback. */

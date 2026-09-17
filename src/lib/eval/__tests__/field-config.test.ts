@@ -20,11 +20,12 @@ describe('field-config', () => {
       { key: 'area_m2', type: 'number', label: 'A', unit: 'm²', required: true, min: 0 },
       { key: 'c_i', type: 'lookup_value', label: 'C_i', required: true, lookup: { table_code: 'TAB9', key_column: 'tab9_value', value: 'cm' } },
       { key: 'kind', type: 'derived', label: 'befestigt', expr: "lookup('TAB9', tab9_value, 'kind')" },
+      { key: 'coeff_override', type: 'boolean', label: 'abweichend' },
     ], override: { flag_key: 'coeff_override', applies_to: ['c_i'], policy: 'anhaltswert' } };
     const cfg = parseFieldConfig({ widget: 'register', uiConfig: ui, lookup: null, visibleWhen: null });
     expect(cfg.widget).toBe('register');
     const columns = (cfg.ui as { columns: Array<{ discriminator?: boolean; visible_when?: string }> }).columns;
-    expect(columns).toHaveLength(5);
+    expect(columns).toHaveLength(6);
     expect(columns[0].discriminator).toBe(true);
     expect(columns[0].visible_when).toBe('kind == "custom"');
   });
@@ -42,6 +43,24 @@ describe('field-config', () => {
   it('rejects unknown widget and a lookup_value column without lookup', () => {
     expect(() => parseFieldConfig({ widget: 'dropdown', uiConfig: null, lookup: null, visibleWhen: null })).toThrow(/widget/);
     expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'x', type: 'lookup_value', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.0\.lookup/);
+  });
+  it('override.flag_key must name a boolean column (Plan 2b Task 5 controller amendment)', () => {
+    // The editor's toggle writes `row[flag_key]`; the stored-cells projection keeps only declared
+    // columns, so a flag_key that is not a boolean column would be written by the toggle and dropped on save.
+    const cols = [
+      { key: 'v', type: 'lookup_value', label: 'v', lookup: { table_code: 'TAB9', key_column: 'k', value: 'cm' } },
+      { key: 'k', type: 'lookup_key', label: 'k', lookup: { table_code: 'TAB9' } },
+    ];
+    const withFlag = (col: Record<string, unknown> | null) => ({
+      title: 't', columns: col ? [...cols, col] : cols,
+      override: { flag_key: 'flag', applies_to: ['v'], policy: 'anhaltswert' },
+    });
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: withFlag(null), lookup: null, visibleWhen: null })).toThrow(/override\.flag_key.*"flag".*boolean column/);
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: withFlag({ key: 'flag', type: 'text', label: 'f' }), lookup: null, visibleWhen: null })).toThrow(/override\.flag_key.*boolean column/);
+    const ok = parseFieldConfig({ widget: 'register', uiConfig: withFlag({ key: 'flag', type: 'boolean', label: 'f' }), lookup: null, visibleWhen: null });
+    expect((ok.ui as { override?: { flag_key: string } }).override?.flag_key).toBe('flag');
+    // No override block ⇒ nothing to check.
+    expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: cols }, lookup: null, visibleWhen: null })).not.toThrow();
   });
   it('rejects a derived column without expr', () => {
     expect(() => parseFieldConfig({ widget: 'register', uiConfig: { title: 't', columns: [{ key: 'x', type: 'derived', label: 'x' }] }, lookup: null, visibleWhen: null })).toThrow(/columns\.\d+\.expr/);

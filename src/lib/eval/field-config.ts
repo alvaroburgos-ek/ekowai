@@ -75,6 +75,17 @@ const registerUi = z.object({
     groups: z.array(z.object({ label: z.string().min(1), items: z.array(z.string()).min(1) })).min(1),
     add_custom_label: z.string().optional(),
   }).optional(),
+}).superRefine((ui, ctx) => {
+  // Plan 2b Task 5 (controller amendment): the editor's "abweichend" toggle
+  // writes `row[override.flag_key]`, and the stored-cells projection keeps
+  // only declared columns — so a flag_key that is not a `boolean` column
+  // would be written by the toggle and silently dropped on save. Reject at
+  // parse time instead.
+  if (!ui.override) return;
+  const col = ui.columns.find((c) => c.key === ui.override!.flag_key);
+  if (!col || col.type !== 'boolean') {
+    ctx.addIssue({ code: 'custom', path: ['override', 'flag_key'], message: `override.flag_key "${ui.override.flag_key}" must name a boolean column` });
+  }
 });
 export type RegisterUiConfig = z.infer<typeof registerUi>;
 
@@ -88,7 +99,7 @@ const referenceUi = z.object({
 export type ReferenceUiConfig = z.infer<typeof referenceUi>;
 
 /** `lookup_fill` widget presentation (the data binding lives in `lookup`, not here). */
-const lookupFillUi = z.object({ source_label: z.string().optional(), reason_min_length: z.number().int().min(1).optional() });
+const lookupFillUi = z.object({ source_label: z.string().optional(), reason_min_length: z.number().int().min(10).optional() });
 export type LookupFillUiConfig = z.infer<typeof lookupFillUi>;
 
 const selectManyUi = z.object({
