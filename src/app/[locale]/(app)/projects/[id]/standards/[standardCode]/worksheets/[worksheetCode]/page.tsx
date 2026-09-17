@@ -9,7 +9,7 @@ import {
   loadProjectParameters,
   loadSameSymbolValues,
   loadInheritedFields,
-  loadSurfaceSource,
+  loadRegisterSources,
 } from '@/lib/db/queries/worksheet';
 import { loadRegulationTables } from '@/lib/db/queries/regulation-tables';
 import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
@@ -127,12 +127,15 @@ export default async function WorksheetPage({
   // index on (worksheet_instance_id, taken_at) keeps it O(log n).
   const priorSnapshotCount = await countSnapshotsForInstance(instance.id);
 
-  // Load surface-inventory source (A138-07) status + carrier for consumer
-  // worksheets (e.g. A138-10). Returns null when the current worksheet IS the
-  // owner of surface_inventory, or the standard has no surface_inventory field.
-  // Plan 2b (Task 3): the form takes it as one entry of the generic
-  // `registerSources` list (symbol-tagged; per-register upstream cause).
-  const surfaceSource = await loadSurfaceSource(projectId, ws.template.standard.id, worksheetCode);
+  // I-3 (final review): EVERY register carrier this worksheet consumes from an
+  // owner worksheet of the standard (DB `widget='register'` or a TS fallback
+  // symbol; consumed directly via consumer_worksheets or through an owner
+  // equation) — owner status + stored carrier + the owner field's
+  // {widget, uiConfig}. The form renders one upstream-cause banner and one
+  // read-only mirror per entry (`registerSources`). The A138-07 surface entry
+  // additionally drives the value withhold below (surface gate shim).
+  const registerSources = await loadRegisterSources(projectId, ws.template.standard.id, worksheetCode);
+  const surfaceSource = registerSources.find((s) => s.symbol === 'surface_inventory') ?? null;
 
   // Regulation reference tables (Tab.9/5/6/13 etc.) for this standard — registered
   // client-side (WorksheetForm's useMemo) into the eval-layer registry so the
@@ -413,7 +416,7 @@ export default async function WorksheetPage({
           priorSnapshotCount={priorSnapshotCount}
           diffHref={`/${localeTyped}/projects/${projectId}/standards/${standardCode}/worksheets/${worksheetCode}/diff`}
           isPlatformEngineer={isPlatformEngineer}
-          registerSources={surfaceSource ? [surfaceSource] : []}
+          registerSources={registerSources}
           serverComputedFieldIds={serverComputedFieldIds}
           regulationTables={regulationTablesData}
         />

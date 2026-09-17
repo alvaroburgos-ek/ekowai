@@ -126,3 +126,36 @@ describe('WorksheetForm — consumed registers (registerSources) without a local
     expect(screen.queryByTestId('source-surface_inventory')).toBeNull();
   });
 });
+
+// I-3 (final review): the page passes EVERY consumed register (not only surface_inventory); the form resolves each
+// entry's config from its own {widget, uiConfig} first (DB config wins), then the symbol-keyed TS fallback.
+describe('WorksheetForm — multiple registerSources; DB config beats the symbol fallback (I-3)', () => {
+  beforeEach(() => {
+    act(() => { useWorksheetStore.getState().init('reset', {}, {}, {}); });
+  });
+
+  const DB_REGISTER = {
+    symbol: 'reg_x', ownerCode: 'A138-99', status: 'draft', carrier: { rows: [{ id: '1', a: 'eins' }, { id: '2', a: '' }] },
+    widget: 'register', uiConfig: { title: 'Register X', columns: [{ key: 'a', type: 'text', label: 'A', required: true }] },
+  };
+
+  it('two entries render two banners and two mirrors, each under its own config', () => {
+    render(<WorksheetForm {...PROPS} registerSources={[...source('draft', TWO_COMPLETE_ROWS), DB_REGISTER]} />);
+    const banners = screen.getAllByTestId('surface-source-banner');
+    expect(banners.map((b) => b.textContent)).toEqual([
+      'Quelle A138-07 nicht final (2/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
+      'Quelle A138-99 nicht final (1/2 Zeilen vollständig) — abgeleitete Werte ausgeblendet.',
+    ]);
+    expect(screen.getByTestId('source-surface_inventory').querySelector('h2')?.textContent).toBe('Flächenverzeichnis (aus A138-07 — schreibgeschützt)');
+    const x = screen.getByTestId('source-reg_x');
+    expect(x.querySelector('h2')?.textContent).toBe('Register X (aus A138-99 — schreibgeschützt)');
+    expect(within(within(x).getByTestId('register-readonly')).getAllByRole('row')).toHaveLength(3);
+  });
+
+  it('a DB config on the source entry wins over the symbol-keyed fallback for the same symbol', () => {
+    const custom = { ...source('final', { rows: [{ id: '1', label: 'Dach' }] })[0], widget: 'register', uiConfig: { title: 'Flächen (DB)', columns: [{ key: 'label', type: 'text', label: 'Bezeichnung' }] } };
+    render(<WorksheetForm {...PROPS} registerSources={[custom]} />);
+    expect(screen.queryByTestId('surface-source-banner')).toBeNull(); // final + the single text column is complete under the DB config
+    expect(screen.getByTestId('source-surface_inventory').querySelector('h2')?.textContent).toBe('Flächen (DB) (aus A138-07 — schreibgeschützt)');
+  });
+});

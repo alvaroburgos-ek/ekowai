@@ -15,6 +15,7 @@ import {
   orgMembers,
 } from '@/lib/db/schema';
 import { and, eq, inArray, sql } from 'drizzle-orm';
+import { resolveRegisterConfig } from '@/lib/eval/register-configs';
 
 /** The subset of the Drizzle API a query helper needs when a caller hands it
  * its transaction handle. Wider than `typeof db` so Drizzle's `tx` type (not
@@ -398,41 +399,108 @@ export async function userHasProjectAccess(
   return rows.length === 1;
 }
 
-/** Load the surface-inventory SOURCE (A138-07) instance status + carrier value
- * for a consumer worksheet render. Returns null when the current worksheet is
- * itself the owner of `surface_inventory`, or no source row exists. The result
- * carries its register `symbol` so the form can list it under the generic
- * `registerSources` prop (Plan 2b Task 3). */
-export async function loadSurfaceSource(
+/** One register carrier a consumer worksheet reads from an owner worksheet of
+ * the same standard (the form's `registerSources` prop). `widget`/`uiConfig`
+ * are the OWNER field's, so the form resolves the register config from the DB
+ * row first and only then from the symbol-keyed TS fallback (I-3). */
+export type RegisterSource = {
+  symbol: string;
+  ownerCode: string;
+  /** Owner instance status (`draft` when the project has no instance yet). */
+  status: string;
+  /** Stored carrier (`project_parameters.value_json`) or null. */
+  carrier: unknown;
+  widget: string | null;
+  uiConfig: unknown;
+};
+
+/**
+ * I-3 (final review, guideline-to-tool): every register-widget field on ANOTHER
+ * worksheet of the standard that the current worksheet consumes — the generic
+ * successor of the `surface_inventory`-only `loadSurfaceSource` (deleted; the
+ * page picks the surface entry out of this list for the A138-07 value-withhold
+ * shim).
+ *
+ * A register field = DB `widget='register'` (parsed ui_config) OR a json field
+ * whose symbol has a TS fallback config while `widget IS NULL`
+ * (`resolveRegisterConfig`, the single resolver the form/engine use). It is
+ * consumed by the current worksheet when EITHER
+ *   (a) its own `consumer_worksheets` names the current code, or
+ *   (b) an equation of the owner worksheet reads the register
+ *       (`input_symbols`) and produces a symbol whose field on the owner names
+ *       the current code — the A138-07 `surface_inventory` → Gl. 2 → `A_C` →
+ *       A138-10 case, where the carrier field itself declares no consumers
+ *       (prod data: only the produced totals do). Without (b) the surface
+ *       banner/mirror on A138-10 would vanish.
+ * Result order: owner code, then symbol. Four queries, batched (never per owner).
+ */
+export async function loadRegisterSources(
   projectId: string,
   standardId: string,
   currentWorksheetCode: string,
-): Promise<{ symbol: 'surface_inventory'; status: string; carrier: unknown; ownerCode: string } | null> {
-  const ownerField = await db
-    .select({ fieldId: fields.id, ownerCode: worksheetTemplates.code, templateId: worksheetTemplates.id })
+): Promise<RegisterSource[]> {
+  const rows = await db
+    .select({
+      id: fields.id,
+      symbol: fields.symbol,
+      dataType: fields.dataType,
+      widget: fields.widget,
+      uiConfig: fields.uiConfig,
+      consumerWorksheets: fields.consumerWorksheets,
+      ownerCode: worksheetTemplates.code,
+      templateId: worksheetTemplates.id,
+    })
     .from(fields)
     .innerJoin(worksheetTemplates, eq(worksheetTemplates.id, fields.worksheetTemplateId))
     .where(and(
       eq(worksheetTemplates.standardId, standardId),
-      eq(fields.symbol, 'surface_inventory'),
+      sql`${worksheetTemplates.code} <> ${currentWorksheetCode}`,
       eq(fields.active, true),
-    ))
-    .limit(1);
-  if (ownerField.length === 0) return null;
-  const owner = ownerField[0];
-  if (owner.ownerCode === currentWorksheetCode) return null; // current sheet IS the source
+    ));
+  const consumesMe = (cw: string[] | null) => Array.isArray(cw) && cw.includes(currentWorksheetCode);
+  const registers = rows.filter((f) => resolveRegisterConfig({ symbol: f.symbol, dataType: f.dataType, widget: f.widget ?? null, uiConfig: f.uiConfig }) !== null);
+  if (registers.length === 0) return [];
 
-  const [inst, param] = await Promise.all([
-    db
-      .select({ status: worksheetInstances.status })
-      .from(worksheetInstances)
-      .where(and(eq(worksheetInstances.projectId, projectId), eq(worksheetInstances.worksheetTemplateId, owner.templateId)))
-      .limit(1),
-    db
-      .select({ value: projectParameters.valueJson })
-      .from(projectParameters)
-      .where(and(eq(projectParameters.projectId, projectId), eq(projectParameters.fieldId, owner.fieldId)))
-      .limit(1),
-  ]);
-  return { symbol: 'surface_inventory' as const, status: inst[0]?.status ?? 'draft', carrier: param[0]?.value ?? null, ownerCode: owner.ownerCode };
+  // (b) transitive consumption through the owner's equations.
+  const ownerTemplateIds = [...new Set(registers.map((r) => r.templateId))];
+  const ownerEquations = await db
+    .select({ templateId: equations.worksheetTemplateId, inputSymbols: equations.inputSymbols, outputSymbol: equations.outputSymbol })
+    .from(equations)
+    .where(inArray(equations.worksheetTemplateId, ownerTemplateIds));
+  const consumedSymbolsByTemplate = new Map<string, Set<string>>();
+  for (const f of rows) {
+    if (!consumesMe(f.consumerWorksheets)) continue;
+    const set = consumedSymbolsByTemplate.get(f.templateId) ?? new Set<string>();
+    set.add(f.symbol);
+    consumedSymbolsByTemplate.set(f.templateId, set);
+  }
+  const consumedTransitively = (r: { templateId: string; symbol: string }): boolean => {
+    const consumed = consumedSymbolsByTemplate.get(r.templateId);
+    if (!consumed) return false;
+    return ownerEquations.some((e) => e.templateId === r.templateId && e.outputSymbol != null && consumed.has(e.outputSymbol) && (e.inputSymbols ?? []).includes(r.symbol));
+  };
+  const consumed = registers
+    .filter((r) => consumesMe(r.consumerWorksheets) || consumedTransitively(r))
+    .sort((a, b) => a.ownerCode.localeCompare(b.ownerCode) || a.symbol.localeCompare(b.symbol));
+  if (consumed.length === 0) return [];
+
+  const templateIds = [...new Set(consumed.map((r) => r.templateId))];
+  const instances = await db
+    .select({ templateId: worksheetInstances.worksheetTemplateId, status: worksheetInstances.status })
+    .from(worksheetInstances)
+    .where(and(eq(worksheetInstances.projectId, projectId), inArray(worksheetInstances.worksheetTemplateId, templateIds)));
+  const params = await db
+    .select({ fieldId: projectParameters.fieldId, value: projectParameters.valueJson })
+    .from(projectParameters)
+    .where(and(eq(projectParameters.projectId, projectId), inArray(projectParameters.fieldId, consumed.map((r) => r.id))));
+  const statusByTemplate = new Map(instances.map((i) => [i.templateId, i.status]));
+  const carrierByField = new Map(params.map((p) => [p.fieldId, p.value]));
+  return consumed.map((r) => ({
+    symbol: r.symbol,
+    ownerCode: r.ownerCode,
+    status: statusByTemplate.get(r.templateId) ?? 'draft',
+    carrier: carrierByField.get(r.id) ?? null,
+    widget: r.widget ?? null,
+    uiConfig: r.uiConfig ?? null,
+  }));
 }

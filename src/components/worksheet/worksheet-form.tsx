@@ -154,10 +154,12 @@ type Props = {
   isPlatformEngineer?: boolean;
   /** Register carriers this worksheet CONSUMES from an owner worksheet (e.g.
    * the A138-07 surface inventory consumed on A138-10): the owner instance status + the
-   * stored carrier. Each renders an upstream-cause banner (carrierSourceState
-   * under the register's own config) and a read-only mirror table at the
-   * bottom. Empty/undefined when this worksheet owns every register. */
-  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown }>;
+   * stored carrier + the OWNER field's `{ widget, uiConfig }` (I-3: the config is
+   * resolved from that DB row first, the symbol-keyed TS fallback second). Each
+   * renders an upstream-cause banner (carrierSourceState under the register's own
+   * config) and a read-only mirror table at the bottom. Empty/undefined when this
+   * worksheet owns every register. Loaded by `loadRegisterSources` (queries/worksheet.ts). */
+  registerSources?: Array<{ symbol: string; ownerCode: string; status: string; carrier: unknown; widget?: string | null; uiConfig?: unknown }>;
   /** Field ids whose persisted project_parameters row was written by a
    * SERVER-side engine (source_type='computed', e.g. the VSME CO₂ engine;
    * plus VSME 'derived' rows like the B04 per-medium sums). These render
@@ -531,17 +533,17 @@ export function WorksheetForm({
   // `registerSources` prop — an owner worksheet's carrier this worksheet reads).
   // The gate runs under the register's own config (carrierSourceState, Plan 2a
   // Task 9) so the banner, the read-only mirror and the engine agree on
-  // "complete". The config comes from the consumer's own field row when it
-  // carries one (DB widget wins), else from resolveRegisterConfig's TS fallback
-  // for the consumed symbol (the carrier is owned elsewhere and is usually NOT
-  // a field of the consumer); no config at all ⇒ state=null → nothing renders.
+  // "complete". The config comes from the SOURCE entry's own `{ widget, uiConfig }`
+  // first (I-3: the owner field's DB row — a `register` widget wins; widget NULL
+  // falls through resolveRegisterConfig to the symbol-keyed TS fallback), then
+  // from the consumer's own field row for that symbol when it carries one; no
+  // config at all ⇒ state=null → nothing renders.
   const registerSourceStates = useMemo(
     () =>
       (registerSources ?? []).map((src) => {
         const f = fieldBySymbol.get(src.symbol);
-        const cfg = f
-          ? resolveRegisterConfig({ symbol: f.symbol, dataType: f.dataType, widget: f.widget ?? null, uiConfig: f.uiConfig })
-          : resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: null });
+        const cfg = resolveRegisterConfig({ symbol: src.symbol, dataType: 'json', widget: src.widget ?? null, uiConfig: src.uiConfig ?? null })
+          ?? (f ? resolveRegisterConfig({ symbol: f.symbol, dataType: f.dataType, widget: f.widget ?? null, uiConfig: f.uiConfig }) : null);
         const state = cfg
           ? carrierSourceState(src.carrier, cfg.columns, src.status, {
               ownerLabel: src.ownerCode,
