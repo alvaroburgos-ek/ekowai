@@ -32,3 +32,20 @@ describe('pass3c validate — lookup_fill keys vs the table key_columns (Plan 2b
     expect(validateFieldConfigColumns({ symbol: 'lim', widget: 'lookup_fill', ui_config: null, lookup: bad, visible_when: null })).toEqual([]);
   });
 });
+
+describe('pass3c validate — lookup_fill data_type (I-1)', () => {
+  const lookup = { table_code: 'TAB9', role: 'value', keys: [{ column: 'surface_type', from_symbol: 'surface_type' }], value: 'cm' };
+  it('accepts number / text / enum', () => {
+    for (const data_type of ['number', 'text', 'enum']) {
+      expect(validateFieldConfigColumns({ symbol: 'x', data_type, widget: 'lookup_fill', ui_config: null, lookup, visible_when: null }, 'DWA-A-138-1')).toEqual([]);
+    }
+  });
+  it('rejects boolean / date / json — the widget can only fill a scalar of those three types', () => {
+    for (const data_type of ['boolean', 'date', 'json']) {
+      const errs = validateFieldConfigColumns({ symbol: 'x', data_type, widget: 'lookup_fill', ui_config: null, lookup, visible_when: null }, 'DWA-A-138-1');
+      expect(errs).toHaveLength(1);
+      expect(errs[0]).toMatch(/field x: lookup_fill data_type must be number\|text\|enum, got/);
+      expect(errs[0]).toContain(data_type);
+    }
+  });
+});

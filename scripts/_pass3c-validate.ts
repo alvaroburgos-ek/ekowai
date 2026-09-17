@@ -21,8 +21,14 @@ export type ValidationError = { sheet: string; row: number; message: string };
  * MAY attach them to a Fields-sheet row, and any such row must be import-time valid —
  * never silently accepted and only discovered broken at render time.
  */
+/** I-1 (final review): the `lookup_fill` widget fills a scalar typed by the field's data_type — number, text or enum only
+ *  (lookup-fill-field.tsx `scalarTypeOf`). A boolean/date/json lookup_fill would never fill (widget falls through to the
+ *  dynamic input) — reject at import time instead of discovering it at render time. */
+const LOOKUP_FILL_DATA_TYPES = new Set(['number', 'text', 'enum']);
+
 export function validateFieldConfigColumns(f: {
   symbol: string;
+  data_type?: string;
   widget?: string | null;
   ui_config?: unknown;
   lookup?: unknown;
@@ -35,6 +41,9 @@ export function validateFieldConfigColumns(f: {
       lookup: f.lookup ?? null,
       visibleWhen: f.visible_when ?? null,
     });
+    if (cfg.widget === 'lookup_fill' && f.data_type !== undefined && !LOOKUP_FILL_DATA_TYPES.has(f.data_type)) {
+      return [`field ${f.symbol}: lookup_fill data_type must be number|text|enum, got "${f.data_type}"`];
+    }
     // Plan 2b Task 7: a lookup_fill binding must name the table's key columns (in order) and an
     // existing value column — checked only when the table is registered/seeded at import time.
     if (cfg.lookup && standardCode) {

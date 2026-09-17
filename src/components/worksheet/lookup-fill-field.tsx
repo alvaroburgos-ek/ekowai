@@ -15,18 +15,25 @@
  * - FILL — nobody else owns the symbol (Plan 3: DIN 1989-1 `e`, FLL-GAR
  *   `nahtbreite_min_mm`). When the bound row resolves and the stored value is null
  *   (or the keys moved to another row and the stored value still equals the LAST
- *   RESOLVED row's figure), the widget writes `{ type: 'number', value: tableValue }`
- *   through `setField` — the engineer's confirmed value with the source badge. An
- *   override is derived (`stored !== tableValue`), never stored; its REASON is
- *   persisted through the existing `recordManualOverride` audit path
- *   (`equationNumber = 'lookup:<TABLE>'`). An override whose reason has not been
- *   saved for the CURRENT value shows `Begründung fehlt` (`lookup-reason-missing`)
- *   — visible state only, no save-time gate (sign-off D-2b-10).
+ *   RESOLVED row's figure), the widget writes the cell TYPED BY `field.dataType`
+ *   (I-1, final review): `number` → `{ type: 'number', value }` (a non-numeric
+ *   cell is never written), `text` → `{ type: 'text', value: String(cell) }`,
+ *   `enum` → `{ type: 'enum', value }` ONLY when the cell string is one of the
+ *   field's `enumValues` (else the badge says so and nothing is written —
+ *   `saveWorksheet` would otherwise persist the value into the wrong column and
+ *   readers would get null back). An override is derived (`stored !== tableValue`),
+ *   never stored; its REASON is persisted through the existing
+ *   `recordManualOverride` audit path (`equationNumber = 'lookup:<TABLE>'`). An
+ *   override whose reason has not been saved for the CURRENT value shows
+ *   `Begründung fehlt` (`lookup-reason-missing`) — visible state only, no save-time
+ *   gate (sign-off D-2b-10).
  *
  * Policies (spec §7): `locked` ⇒ no affordance (`lookup-locked` note);
- * `anhaltswert` ⇒ number input + reason; `kann` ⇒ select over the table's printed
- * alternatives (`value_columns[value].values`) when present, else number input;
- * `messwert` ⇒ number input labelled "(Messwert)" + reason (provenance).
+ * `anhaltswert` ⇒ typed input + reason; `kann` ⇒ select over the table's printed
+ * alternatives (`value_columns[value].values`) when present, else the typed input;
+ * `messwert` ⇒ typed input labelled "(Messwert)" + reason (provenance). The typed
+ * input is a number input (number), a text input (text) or a select over the
+ * field's enum values (enum).
  *
  * Testids: `lookup-fill` [data-mode, data-symbol], `lookup-source` (badge,
  * title = row.verbatim_quote), `lookup-fill-value` (read-only span), `lookup-locked`,
@@ -34,6 +41,7 @@
  */
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { recordManualOverride } from '@/lib/actions/overrides';
+import { useWorksheetStore, type FieldValue } from '@/lib/state/worksheet-store';
 import { isOverridden, resolveLookupFill, resolveLookupFillConfig, type LookupFillState } from '@/lib/eval/lookup-fill';
 import type { LookupBinding } from '@/lib/eval/field-config';
 import { fmt } from './register-editor';
@@ -42,20 +50,57 @@ import type { WidgetContext, WorksheetFormField } from './widgets';
 /** The server action's own floor (overrides.ts `reason: z.string().min(10)`) — a smaller ui value would always be rejected. */
 const SERVER_MIN_REASON = 10;
 
-// fieldId → { reason, value } of the last saved justification, module-scoped like
-// manual-override-pill.tsx so the "✓ Abweichung begründet" confirmation survives parent
-// re-renders. The confirmation is valid ONLY while the stored value is still the one that
-// was justified — a later different override (or `takeTable`) drops it. Reset on page
-// refresh (audit_log is the truth).
-const savedReasons = new Map<string, { reason: string; value: number }>();
+type Scalar = number | string;
+type ScalarType = 'number' | 'text' | 'enum';
+
+// `${instanceId}:${fieldId}` → { reason, value } of the last saved justification, module-scoped
+// like manual-override-pill.tsx so the "✓ Abweichung begründet" confirmation survives parent
+// re-renders. Keyed by the store's instance id too (final-review minor): the same field id
+// cannot carry another instance's confirmation across a client-side navigation. The
+// confirmation is valid ONLY while the stored value is still the one that was justified — a
+// later different override (or `takeTable`) drops it. Reset on page refresh (audit_log is the truth).
+const savedReasons = new Map<string, { reason: string; value: Scalar }>();
+const reasonKey = (instanceId: string | null, fieldId: string) => `${instanceId ?? ''}:${fieldId}`;
 /** Test isolation only — clears the in-memory confirmation map (no production caller). */
 export function resetSavedLookupReasons(): void {
   savedReasons.clear();
 }
 
-function badgeText(state: LookupFillState, label: string, role: LookupBinding['role'], mode: 'display' | 'fill'): string {
+/** The widget's scalar type for the field — `lookup_fill` is number | text | enum only (importer rule, _pass3c-validate.ts). */
+function scalarTypeOf(dataType: string): ScalarType | null {
+  return dataType === 'number' || dataType === 'text' || dataType === 'enum' ? dataType : null;
+}
+
+/** Stored value read under the field's own type — a number persisted into a text field (or vice versa) reads as null. */
+function storedScalar(v: FieldValue | undefined, t: ScalarType): Scalar | null {
+  if (!v) return null;
+  if (t === 'number') return v.type === 'number' ? v.value : null;
+  if (t === 'text') return v.type === 'text' ? v.value : null;
+  return v.type === 'enum' ? v.value : null;
+}
+
+/** The table cell coerced to the field's type; `null` when it cannot be represented (never coerced across types). */
+function cellScalar(cell: number | string | boolean | null, t: ScalarType, enumValues: readonly string[]): Scalar | null {
+  if (cell == null) return null;
+  if (t === 'number') return typeof cell === 'number' ? cell : null;
+  const s = String(cell);
+  if (t === 'text') return s;
+  return enumValues.includes(s) ? s : null;
+}
+
+function tagged(t: ScalarType, value: Scalar | null): FieldValue {
+  if (t === 'number') return { type: 'number', value: typeof value === 'number' ? value : null };
+  if (t === 'text') return { type: 'text', value: value == null ? null : String(value) };
+  return { type: 'enum', value: value == null ? null : String(value) };
+}
+
+function badgeText(state: LookupFillState, label: string, role: LookupBinding['role'], mode: 'display' | 'fill', enumMismatch: boolean): string {
   const suffix = role === 'limit' ? ' (Grenzwert)' : '';
-  if (state.kind === 'resolved') return `${label}: ${fmt(state.tableValue ?? undefined)}${suffix}`;
+  if (state.kind === 'resolved') {
+    // I-1: the cell string is not one of the field's enum values — say so instead of writing it.
+    if (enumMismatch && mode === 'fill') return `${label}: Wert „${String(state.tableValue)}“ nicht in den zulässigen Optionen${suffix}`;
+    return `${label}: ${fmt(state.tableValue ?? undefined)}${suffix}`;
+  }
   // Display mode names the SOURCE only — the value is server-produced, the key diagnostics are fill-mode information.
   if (mode === 'display') return `${label}${suffix}`;
   switch (state.kind) {
@@ -74,20 +119,26 @@ const smallBtn = 'text-[11px] font-medium text-accent underline-offset-2 hover:u
 
 export function LookupFillField({ field, ctx }: { field: WorksheetFormField; ctx: WidgetContext }) {
   const cfg = resolveLookupFillConfig(field);
-  if (!cfg) return <>{ctx.renderDynamic(field)}</>;
-  return <LookupFillInner field={field} ctx={ctx} binding={cfg.binding} ui={cfg.ui} />;
+  const scalarType = scalarTypeOf(field.dataType);
+  if (!cfg || !scalarType) return <>{ctx.renderDynamic(field)}</>;
+  return <LookupFillInner field={field} ctx={ctx} binding={cfg.binding} ui={cfg.ui} scalarType={scalarType} />;
 }
 
-function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormField; ctx: WidgetContext; binding: LookupBinding; ui: { source_label?: string; reason_min_length?: number } | null }) {
+function LookupFillInner({ field, ctx, binding, ui, scalarType }: { field: WorksheetFormField; ctx: WidgetContext; binding: LookupBinding; ui: { source_label?: string; reason_min_length?: number } | null; scalarType: ScalarType }) {
   const state = resolveLookupFill(binding, ctx.standardCode, ctx.symbolLookup);
   const label = ui?.source_label ?? state.label;
-  const v = ctx.values[field.id];
-  const stored = v?.type === 'number' ? v.value : null;
+  const instanceId = useWorksheetStore((s) => s.instanceId);
+  const enumOptions = field.enumValues ?? [];
+  const enumValues = enumOptions.map((o) => o.value);
+  const stored = storedScalar(ctx.values[field.id], scalarType);
   // Ownership: server materialiser (computedSymbols / serverComputedSet) or an inherited copy ⇒ display only.
   const owned = ctx.computedSymbols.has(field.symbol) || ctx.serverComputedSet.has(field.id) || field.inheritedFromWorksheet != null;
   const mode: 'display' | 'fill' = owned ? 'display' : 'fill';
   const readOnly = ctx.readOnly;
-  const tableNumber = state.kind === 'resolved' && typeof state.tableValue === 'number' ? state.tableValue : null;
+  // The cell under the field's type: null when the row resolved but the cell cannot be represented
+  // (non-numeric cell on a number field, enum cell outside the field's options) — nothing is written then.
+  const tableScalar = state.kind === 'resolved' ? cellScalar(state.tableValue, scalarType, enumValues) : null;
+  const enumMismatch = scalarType === 'enum' && state.kind === 'resolved' && state.tableValue != null && tableScalar === null;
   const overridden = mode === 'fill' && isOverridden(state, stored);
   const policy = state.kind === 'resolved' ? state.policy : null;
 
@@ -95,7 +146,7 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [saved, setSaved] = useState<{ reason: string; value: number } | null>(() => savedReasons.get(field.id) ?? null);
+  const [saved, setSaved] = useState<{ reason: string; value: Scalar } | null>(() => savedReasons.get(reasonKey(instanceId, field.id)) ?? null);
   const savedReason = saved && stored != null && saved.value === stored ? saved.reason : null;
   const minReason = Math.max(ui?.reason_min_length ?? SERVER_MIN_REASON, SERVER_MIN_REASON);
 
@@ -111,47 +162,48 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
   // confirmation cleared) and the new row's figure is filled; otherwise the old typed value
   // would read as a phantom "abweichend" against a row the engineer never saw.
   const rowKey = state.kind === 'resolved' ? state.row.row_key : null;
-  const lastResolved = useRef<{ rowKey: string; tableNumber: number } | null>(null);
+  const lastResolved = useRef<{ rowKey: string; tableScalar: Scalar } | null>(null);
   const { setField, values } = ctx;
   useEffect(() => {
-    if (mode !== 'fill' || rowKey == null || tableNumber == null) return;
+    if (mode !== 'fill' || rowKey == null || tableScalar == null) return;
     const before = lastResolved.current;
-    lastResolved.current = { rowKey, tableNumber };
+    lastResolved.current = { rowKey, tableScalar };
     if (readOnly) return;
     const keysMoved = before != null && before.rowKey !== rowKey;
     if (editing) {
       if (!keysMoved) return;
-      savedReasons.delete(field.id);
+      savedReasons.delete(reasonKey(instanceId, field.id));
       setSaved(null);
       setEditing(false);
       setError(null);
-      if (stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
+      if (stored !== tableScalar) setField(field.id, tagged(scalarType, tableScalar));
       return;
     }
-    const followsTable = stored == null || (keysMoved && stored === before.tableNumber);
-    if (followsTable && stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
+    const followsTable = stored == null || (keysMoved && stored === before.tableScalar);
+    if (followsTable && stored !== tableScalar) setField(field.id, tagged(scalarType, tableScalar));
     // `values` is a dependency on purpose: the form's store init (parent effect, runs AFTER this child effect on
     // mount) can reset the store to a state whose derived deps equal the previous run's — re-run on every store
     // change so a fill lost to that reset is re-applied; the write itself is idempotent (stored === table ⇒ no-op).
-  }, [mode, readOnly, editing, rowKey, tableNumber, stored, field.id, setField, values]);
+  }, [mode, readOnly, editing, rowKey, tableScalar, stored, field.id, setField, values, scalarType, instanceId]);
 
-  const canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !== 'locked' && tableNumber != null;
+  const canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !== 'locked' && tableScalar != null;
   const showInput = canOverride && (editing || overridden);
   const inputLabel = `${field.labelDe}${policy === 'messwert' ? ' (Messwert)' : ' (abweichend)'}`;
-  const alternatives = policy === 'kann' && state.kind === 'resolved' && state.valueColumn?.values?.length ? state.valueColumn.values : null;
+  // `kann`: the printed alternatives of the value column (number / text). An enum field always selects over its own values.
+  const alternatives = policy === 'kann' && scalarType !== 'enum' && state.kind === 'resolved' && state.valueColumn?.values?.length ? state.valueColumn.values : null;
 
   /** Engineer-typed value; `null` clears the input (kept empty — no re-fill while editing). */
-  const write = (n: number | null) => {
-    if (n != null && !Number.isFinite(n)) return;
+  const write = (v: Scalar | null) => {
+    if (typeof v === 'number' && !Number.isFinite(v)) return;
     setEditing(true);
-    setField(field.id, { type: 'number', value: n });
+    setField(field.id, tagged(scalarType, v));
   };
   const takeTable = () => {
-    savedReasons.delete(field.id);
+    savedReasons.delete(reasonKey(instanceId, field.id));
     setSaved(null);
     setEditing(false);
     setError(null);
-    if (tableNumber != null && stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
+    if (tableScalar != null && stored !== tableScalar) setField(field.id, tagged(scalarType, tableScalar));
   };
   const submitReason = () => {
     setError(null);
@@ -162,7 +214,7 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
       const res = await recordManualOverride({ projectId: ctx.projectId, fieldId: field.id, equationNumber: `lookup:${binding.table_code}`, reason: trimmed });
       if (res.ok) {
         const entry = { reason: trimmed, value: justified };
-        savedReasons.set(field.id, entry);
+        savedReasons.set(reasonKey(instanceId, field.id), entry);
         setSaved(entry);
         setReason('');
       } else {
@@ -171,7 +223,61 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
     });
   };
 
-  const valueText = stored != null ? fmt(stored) : binding.role === 'limit' ? `— (kein ${label}-Grenzwert)` : '—';
+  const displayValue = (v: Scalar): string => (scalarType === 'enum' ? (enumOptions.find((o) => o.value === v)?.label_de ?? String(v)) : fmt(v));
+  const valueText = stored != null ? displayValue(stored) : binding.role === 'limit' ? `— (kein ${label}-Grenzwert)` : '—';
+
+  const renderInput = () => {
+    if (scalarType === 'enum') {
+      return (
+        <select aria-label={inputLabel} value={stored != null ? String(stored) : ''} onChange={(e) => write(e.target.value === '' ? null : e.target.value)} className={inputBox}>
+          {stored == null && <option value="">— wählen —</option>}
+          {enumOptions.map((o) => (
+            <option key={o.value} value={o.value}>{o.label_de ?? o.value}</option>
+          ))}
+        </select>
+      );
+    }
+    if (alternatives) {
+      return (
+        <select
+          aria-label={inputLabel}
+          value={stored != null ? String(stored) : ''}
+          onChange={(e) => {
+            if (e.target.value === '') return; // placeholder — never writes 0
+            write(scalarType === 'number' ? Number(e.target.value) : e.target.value);
+          }}
+          className={inputBox}
+        >
+          {stored == null && <option value="">— wählen —</option>}
+          {alternatives.map((a) => (
+            <option key={a} value={a}>{a}</option>
+          ))}
+        </select>
+      );
+    }
+    if (scalarType === 'text') {
+      return (
+        <input
+          type="text"
+          aria-label={inputLabel}
+          value={stored != null ? String(stored) : ''}
+          onChange={(e) => write(e.target.value === '' ? null : e.target.value)}
+          className={inputBox}
+        />
+      );
+    }
+    return (
+      <input
+        type="number"
+        inputMode="decimal"
+        step="any"
+        aria-label={inputLabel}
+        value={stored ?? ''}
+        onChange={(e) => write(e.target.value === '' ? null : Number(e.target.value))}
+        className={inputBox}
+      />
+    );
+  };
 
   return (
     <div className="space-y-1.5" data-testid="lookup-fill" data-mode={mode} data-symbol={field.symbol}>
@@ -184,7 +290,7 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
             className="normal-case tracking-normal rounded-full border border-hairline-strong bg-paper-2/60 px-2 py-0.5 text-[10px] text-ink-2"
             title={state.kind === 'resolved' ? state.row.verbatim_quote : undefined}
           >
-            {badgeText(state, label, binding.role, mode)}
+            {badgeText(state, label, binding.role, mode, enumMismatch)}
           </span>
           {overridden && <span className="normal-case tracking-normal text-accent-2">abweichend</span>}
           {overridden && policy !== 'locked' && !savedReason && (
@@ -196,34 +302,7 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
         {field.description && <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>}
       </div>
 
-      {showInput ? (
-        alternatives ? (
-          <select
-            aria-label={inputLabel}
-            value={stored != null ? String(stored) : ''}
-            onChange={(e) => {
-              if (e.target.value === '') return; // placeholder — never writes 0
-              write(Number(e.target.value));
-            }}
-            className={inputBox}
-          >
-            {stored == null && <option value="">— wählen —</option>}
-            {alternatives.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type="number"
-            inputMode="decimal"
-            step="any"
-            aria-label={inputLabel}
-            value={stored ?? ''}
-            onChange={(e) => write(e.target.value === '' ? null : Number(e.target.value))}
-            className={inputBox}
-          />
-        )
-      ) : (
+      {showInput ? renderInput() : (
         <div data-testid="lookup-fill-value" className={`${readOnlyBox} ${stored != null ? 'text-ink' : 'text-subtext italic'}`}>
           {valueText}
         </div>

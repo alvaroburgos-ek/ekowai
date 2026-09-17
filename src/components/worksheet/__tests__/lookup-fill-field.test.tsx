@@ -409,3 +409,74 @@ describe('LookupFillField — fix round 1 pins', () => {
     expect(setField).not.toHaveBeenCalled();
   });
 });
+
+describe('LookupFillField — I-1: fill honours field.dataType (text / enum), never writes a number into a non-number field', () => {
+  const stringTable = (policy: RegulationTable['override_policy'] = 'anhaltswert'): RegulationTable => ({
+    standard_code: 'SYN-2', edition: '2026-01', table_code: 'TAB2', title_de: 'Synthetisch', clause_reference: null, page_ref: null,
+    key_columns: ['k'], value_columns: [{ name: 'cls', type: 'string', values: ['A', 'B', 'C'] }], override_policy: policy, override_quote: null,
+    verification_status: 'imported_unverified',
+    rows: [
+      { row_key: 'a', keys: { k: 'a' }, group_label: null, label_de: 'A', order_index: 0, values: { cls: 'B' }, verbatim_quote: 'Tab. 2: a — B' },
+      { row_key: 'z', keys: { k: 'z' }, group_label: null, label_de: 'Z', order_index: 1, values: { cls: 'Z' }, verbatim_quote: 'Tab. 2: z — Z' },
+    ],
+  });
+  const K = makeField({ id: 'f-k2', symbol: 'k2', dataType: 'enum' });
+  const BIND = { table_code: 'TAB2', role: 'value', keys: [{ column: 'k', from_symbol: 'k2' }], value: 'cls' };
+  const TEXT = makeField({ id: 'f-t', symbol: 't_test', labelDe: 't_test', dataType: 'text', widget: 'lookup_fill', lookup: BIND });
+  const ENUM = makeField({
+    id: 'f-e', symbol: 'e_test', labelDe: 'e_test', dataType: 'enum', widget: 'lookup_fill', lookup: BIND,
+    enumValues: [{ value: 'A', label_de: 'Klasse A', label_en: null }, { value: 'B', label_de: 'Klasse B', label_en: null }, { value: 'C', label_de: 'Klasse C', label_en: null }],
+  });
+  const over = { standardCode: 'SYN-2' };
+
+  it('text field: fills { type: "text", value: <cell as string> }; the override control is a text input', async () => {
+    registerTables([stringTable()]);
+    const setField = vi.fn();
+    render(<Harness field={TEXT} fields={[TEXT, K]} initial={{ 'f-k2': { type: 'enum', value: 'a' } }} over={over} onSet={setField} />);
+    await waitFor(() => expect(setField).toHaveBeenCalledWith('f-t', { type: 'text', value: 'B' }));
+    expect(setField).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 2: B');
+    expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('B');
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    const input = screen.getByLabelText('t_test (abweichend)') as HTMLInputElement;
+    expect(input.tagName).toBe('INPUT');
+    expect(input.type).toBe('text');
+    fireEvent.change(input, { target: { value: 'B+' } });
+    expect(setField).toHaveBeenCalledWith('f-t', { type: 'text', value: 'B+' });
+    expect(screen.getByText('abweichend')).toBeInTheDocument();
+    expect(screen.getByTestId('lookup-reason-missing')).toBeInTheDocument();
+  });
+
+  it('enum field: fills { type: "enum", value } when the cell is one of the enum values; the override control is a select over the enum values', async () => {
+    registerTables([stringTable()]);
+    const setField = vi.fn();
+    render(<Harness field={ENUM} fields={[ENUM, K]} initial={{ 'f-k2': { type: 'enum', value: 'a' } }} over={over} onSet={setField} />);
+    await waitFor(() => expect(setField).toHaveBeenCalledWith('f-e', { type: 'enum', value: 'B' }));
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    const select = screen.getByLabelText('e_test (abweichend)') as HTMLSelectElement;
+    expect(select.tagName).toBe('SELECT');
+    expect([...select.options].map((o) => o.value)).toEqual(['A', 'B', 'C']);
+    expect([...select.options].map((o) => o.textContent)).toEqual(['Klasse A', 'Klasse B', 'Klasse C']);
+    fireEvent.change(select, { target: { value: 'C' } });
+    expect(setField).toHaveBeenCalledWith('f-e', { type: 'enum', value: 'C' });
+    expect(screen.queryByRole('spinbutton')).toBeNull();
+  });
+
+  it('enum field: a cell that is NOT an enum value ⇒ "nicht in den zulässigen Optionen" badge, nothing written, no override control', () => {
+    registerTables([stringTable()]);
+    const setField = vi.fn();
+    render(<Harness field={ENUM} fields={[ENUM, K]} initial={{ 'f-k2': { type: 'enum', value: 'z' } }} over={over} onSet={setField} />);
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 2: Wert „Z“ nicht in den zulässigen Optionen');
+    expect(setField).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'abweichend wählen' })).toBeNull();
+  });
+
+  it('number field: a non-numeric cell is never written as a number (badge shows the cell, no fill)', () => {
+    registerTables([stringTable()]);
+    const setField = vi.fn();
+    const NUM = makeField({ id: 'f-n', symbol: 'n_test', labelDe: 'n_test', dataType: 'number', widget: 'lookup_fill', lookup: BIND });
+    render(<Harness field={NUM} fields={[NUM, K]} initial={{ 'f-k2': { type: 'enum', value: 'a' } }} over={over} onSet={setField} />);
+    expect(setField).not.toHaveBeenCalled();
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 2: B');
+  });
+});
