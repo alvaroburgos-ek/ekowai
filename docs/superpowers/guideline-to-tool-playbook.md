@@ -458,6 +458,8 @@ S-2a-6). It never blocks approval and never gets a "Warum?" explanation.
   strings; `substituted` records the string and the card/PDF render it quoted (`x = 'V3'`).
   A string that reaches `+ - * / ^` / a math call is the evaluator's `Operand ist keine Zahl: …`
   → `manual_required` (German), never `computed: NaN`; `lookup()`, `if()` and `==` consume it.
+  Caveat (pre-existing evaluator semantics): a numeric-LOOKING text value such as `"12"` is coerced
+  by `toNumber` and computes — a text field must never share a symbol with a numeric input.
 - `materializeDerivedOutputs` (`materialize-derived.ts`) replaces the surface + pollutant blocks
   in `saveWorksheet`: every register-fed, non-displayOnly equation (DB rows + fallback rows)
   whose output has a field on the template → one `source_type='derived'` write, `null` when not
