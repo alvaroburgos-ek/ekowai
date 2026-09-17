@@ -25,7 +25,7 @@ export type RegisterRowsOpts = {
   flagKeys?: readonly string[];
   overrideFlagKey?: string;
   /** `override.applies_to` of the register config. Legacy replay derives the override flag from its FIRST
-   * column only (surface-inventory.ts:103: `coeff_override = c_i !== entry.cm`); absent ⇒ first bound lookup_value column. */
+   * column only (surface-inventory.ts:112: `coeff_override = c_i !== entry.cm`); absent ⇒ first bound lookup_value column. */
   overrideAppliesTo?: readonly string[];
 };
 
@@ -61,13 +61,13 @@ function coerce(raw: unknown, c: RegisterColumn): Value {
   }
 }
 
-/** Legacy replay (generalises surface-inventory.ts:85-104). Acts only on rows carrying NONE of the
+/** Legacy replay (generalises surface-inventory.ts:94-113). Acts only on rows carrying NONE of the
  * register's lookup_key column keys and no override flag ("legacy shape"). For each lookup_key column:
  * (a) legacyMap[sourceKey][rawValue] when the raw row has sourceKey; else (b) the UNIQUE table row whose
  * lookup_value cells all equal the row's stored values; (c) otherwise leave the key null (reselection).
  * When mapped: keep stored lookup_value cells, fill missing ones from the table row, set the override
  * flag to (stored !== table value) for the FIRST `overrideAppliesTo` column only (legacy rule: c_i decides,
- * a differing c_s alone is not an override — surface-inventory.ts:103); without applies_to, the first bound
+ * a differing c_s alone is not an override — surface-inventory.ts:112); without applies_to, the first bound
  * lookup_value column of the key decides. */
 function replayLegacy(raw: Record<string, unknown>, values: RowValues, columns: readonly RegisterColumn[], ctx: RegisterRowsCtx, opts: RegisterRowsOpts): void {
   const keyCols = columns.filter((c) => c.type === 'lookup_key');

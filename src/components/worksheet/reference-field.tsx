@@ -10,7 +10,8 @@
  * `rainfall-table-ref-section` / `bottom-rainfall_table_ref` sections),
  * `reference-select`, `reference-empty` (carrier absent/empty — never a raw
  * text input), `reference-stale` (stored id not among the rows — placeholder
- * shown, id left in the store), `reference-unconfigured` (reference widget
+ * shown, id left in the store, hint names rows[0] because that is what the
+ * engine's resolveSelectedTable falls back to), `reference-unconfigured` (reference widget
  * without a usable ui_config ⇒ visible notice + today's dynamic input, never
  * silent). The notices are `<span class=block>` (phrasing content — they sit
  * inside the `<label>`) and describe the select via aria-describedby.
@@ -43,7 +44,16 @@ export function ReferenceField({ field, ctx }: { field: WorksheetFormField; ctx:
   // Stored id no longer among the rows (carrier row deleted/renamed upstream):
   // select the placeholder, say so, and leave the stored id alone — the store
   // is only written by the engineer's own choice, never by a render.
+  // The hint must tell the truth about what computes meanwhile: every engine
+  // reader resolves a stale/unset ref to the carrier's FIRST row (the
+  // resolveSelectedTable rule — `tables[0]`), so the hint names rows[0] by its
+  // label. Generic: the fallback label comes from the resolved rows, never from
+  // carrier-specific code.
   const stale = current != null && !rows.some((r) => r.id === current);
+  const fallbackLabel = rows[0]?.label;
+  const staleHint = stale
+    ? `Verweis „${current}“ nicht gefunden — die Berechnung verwendet ${readOnly ? '' : 'bis zur Neuauswahl '}„${fallbackLabel}“.${readOnly ? '' : ' Bitte neu wählen.'}`
+    : null;
   const notice = empty || stale ? noticeId : undefined;
   return (
     <label className="block space-y-1" data-testid="reference-field" data-symbol={field.symbol}>
@@ -83,7 +93,7 @@ export function ReferenceField({ field, ctx }: { field: WorksheetFormField; ctx:
       )}
       {!empty && stale && (
         <span id={noticeId} data-testid="reference-stale" className="block text-[11px] text-warning">
-          Verweis „{current}“ nicht gefunden — bitte neu wählen.
+          {staleHint}
         </span>
       )}
     </label>

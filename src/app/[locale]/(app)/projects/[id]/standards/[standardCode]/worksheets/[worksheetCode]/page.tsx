@@ -362,7 +362,7 @@ export default async function WorksheetPage({
               verificationStatus: f.verificationStatus,
               orderIndex: f.orderIndex,
               active: f.active,
-              inheritedFromWorksheet: f.inheritedFromWorksheet ?? undefined,
+              inheritedFromWorksheet: f.inheritedFromWorksheet,
               verifiedByLabel: verifiedByUserId ? verifierLabels.get(verifiedByUserId) ?? null : null,
               verifiedAt: verifiedAt ? verifiedAt.toISOString() : null,
               verificationNote,

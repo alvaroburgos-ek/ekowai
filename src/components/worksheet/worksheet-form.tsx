@@ -153,7 +153,7 @@ type Props = {
    * Gates the "Bestätigen" buttons on every field/equation. */
   isPlatformEngineer?: boolean;
   /** Register carriers this worksheet CONSUMES from an owner worksheet (e.g.
-   * A138-07 `surface_inventory` on A138-10): the owner instance status + the
+   * the A138-07 surface inventory consumed on A138-10): the owner instance status + the
    * stored carrier. Each renders an upstream-cause banner (carrierSourceState
    * under the register's own config) and a read-only mirror table at the
    * bottom. Empty/undefined when this worksheet owns every register. */
@@ -488,7 +488,7 @@ export function WorksheetForm({
   );
 
   // Design return-period for the bespoke rainfall editor (A138-04 KOSTRA
-  // carrier `r_D_n_table`, dispatched by the WIDGETS registry): resolve project
+  // carrier, dispatched by the WIDGETS registry via BESPOKE_BY_SYMBOL): resolve project
   // n/T_n via the shared facilityReturnPeriod helper. A pickNumberBySymbol
   // closure reads from the store's current values using the field-by-symbol
   // map built above.

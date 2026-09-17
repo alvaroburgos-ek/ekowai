@@ -160,7 +160,7 @@ describe('ReferenceField — Task 8 sweep (Task 6 review items)', () => {
     expect(screen.getByRole('combobox').getAttribute('aria-describedby')).toBeNull();
   });
 
-  it('a stored id that is not among the rows ⇒ placeholder option selected + "Verweis „<id>“ nicht gefunden" hint; the store is left untouched', () => {
+  it('a stored id that is not among the rows ⇒ placeholder option selected + hint naming the engine\'s fallback (rows[0], the resolveSelectedTable rule); the store is left untouched', () => {
     const ctx = makeCtx({ values: { 'f-kostra': { type: 'json', value: { tables: TABLES } }, 'f-ref': { type: 'text', value: 'gone-42' } } });
     render(<ReferenceField field={REF} ctx={ctx} />);
     const select = screen.getByRole('combobox') as HTMLSelectElement;
@@ -168,7 +168,7 @@ describe('ReferenceField — Task 8 sweep (Task 6 review items)', () => {
     expect(select.value).toBe('');
     expect(select.disabled).toBe(false);
     const hint = screen.getByTestId('reference-stale');
-    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — bitte neu wählen.');
+    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — die Berechnung verwendet bis zur Neuauswahl „KOSTRA Krefeld“. Bitte neu wählen.');
     expect(hint.tagName).toBe('SPAN');
     expect(select.getAttribute('aria-describedby')).toBe(hint.id);
     expect(ctx.setField).not.toHaveBeenCalled();
@@ -180,5 +180,27 @@ describe('ReferenceField — Task 8 sweep (Task 6 review items)', () => {
   it('a stored id that IS among the rows shows no stale hint', () => {
     render(<ReferenceField field={REF} ctx={makeCtx()} />);
     expect(screen.queryByTestId('reference-stale')).toBeNull();
+  });
+});
+
+describe('ReferenceField — stale-ref hint tells the truth about the engine fallback (Task 8 fix round 1)', () => {
+  it('readOnly + stale ⇒ the fallback is named, the imperative "neu wählen" is dropped, select disabled on the placeholder', () => {
+    const ctx = makeCtx({ readOnly: true, values: { 'f-kostra': { type: 'json', value: { tables: TABLES } }, 'f-ref': { type: 'text', value: 'gone-42' } } });
+    render(<ReferenceField field={REF} ctx={ctx} />);
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    expect(select.disabled).toBe(true);
+    expect(select.value).toBe('');
+    const hint = screen.getByTestId('reference-stale');
+    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — die Berechnung verwendet „KOSTRA Krefeld“.');
+    expect(hint.textContent).not.toMatch(/neu wählen/);
+    expect(select.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('stale + no rows ⇒ only the empty notice (nothing to fall back to), never a stale hint', () => {
+    const ctx = makeCtx({ values: { 'f-kostra': { type: 'json', value: { tables: [] } }, 'f-ref': { type: 'text', value: 'gone-42' } } });
+    render(<ReferenceField field={REF} ctx={ctx} />);
+    expect(screen.getByTestId('reference-empty')).toBeInTheDocument();
+    expect(screen.queryByTestId('reference-stale')).toBeNull();
+    expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('');
   });
 });
