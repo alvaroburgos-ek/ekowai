@@ -6,7 +6,12 @@
 // Writes src/lib/eval/field-configs/<slug>.prior.json in the exact `PriorSnapshot` shape the
 // emitter consumes (scripts/regulation-tables/emit-field-configs-sql.ts):
 //   { "_meta": { … }, "<worksheet> <symbol>": { enum_values, widget, ui_config, lookup, visible_when,
-//     consumer_worksheets, data_type, section_code }, "sections": { "<worksheet> <section_code>": { visible_when } } }
+//     consumer_worksheets, data_type, section_code, section_id_is_null, section_path },
+//     "sections": { "<worksheet> <section_code>": { visible_when, parent_code } } }
+// section_path = codes of the field's section ancestors root → own section (null for a null-coded section, [] for
+// an orphan); the emitter's section-level producer guard walks it because the runtime hides every descendant of
+// a hidden section. The sections query therefore captures EVERY section (null-coded ones included); the
+// `sections` map keeps the coded ones.
 //
 // Why not prod-query.mjs: it truncates every cell to 120 chars and prints a console.table — fine for
 // audits, useless for a byte-faithful restore target. This script selects the full rows as JSON
@@ -21,7 +26,7 @@
 // via information_schema and writes null for the absent ones (recorded in _meta.columns_present).
 //
 // The pure parts (column detection → SQL, row folding) are exported and unit-tested
-// (scripts/__tests__/build-prior-snapshot.test.mjs); only main() touches the network.
+// (scripts/regulation-tables/__tests__/build-prior-snapshot.test.mjs); only main() touches the network.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -43,19 +48,37 @@ export function buildQueries(columnsPresent) {
   const fieldSelect = OPTIONAL_FIELD_COLUMNS.map((c) => (columnsPresent.fields[c] ? `f.${c}` : `null as ${c}`)).join(', ');
   const sectionSelect = OPTIONAL_SECTION_COLUMNS.map((c) => (columnsPresent.worksheet_sections[c] ? `ws.${c}` : `null as ${c}`)).join(', ');
   return {
-    fields: `select w.code as worksheet, f.symbol, f.enum_values, f.data_type, f.consumer_worksheets, ws.code as section_code, ${fieldSelect}
+    fields: `select w.code as worksheet, f.symbol, f.enum_values, f.data_type, f.consumer_worksheets, f.section_id, ws.code as section_code, ${fieldSelect}
 from fields f join worksheet_templates w on w.id = f.worksheet_template_id join standards s on s.id = w.standard_id
 left join worksheet_sections ws on ws.id = f.section_id
 where s.code = $1 and f.active order by w.code, f.symbol`,
-    sections: `select w.code as worksheet, ws.code as section_code, ${sectionSelect}
+    sections: `select w.code as worksheet, ws.id, ws.parent_section_id, ws.code as section_code, p.code as parent_code, ${sectionSelect}
 from worksheet_sections ws join worksheet_templates w on w.id = ws.worksheet_template_id join standards s on s.id = w.standard_id
-where s.code = $1 and ws.code is not null order by w.code, ws.code`,
+left join worksheet_sections p on p.id = ws.parent_section_id
+where s.code = $1 order by w.code, ws.order_index, ws.code`,
   };
 }
 
-/** Folds the two row sets into the `PriorSnapshot` object (throws on a duplicate key). */
+/** Codes of a section's ancestors root → itself, walking `parent_section_id` (a cycle in bad data stops the walk). */
+export function sectionPath(sectionId, byId) {
+  const path = [];
+  const seen = new Set();
+  for (let id = sectionId; id != null && byId.has(id) && !seen.has(id); id = byId.get(id).parent_section_id) {
+    seen.add(id);
+    path.unshift(byId.get(id).section_code ?? null);
+  }
+  return path;
+}
+
+/**
+ * Folds the two row sets into the `PriorSnapshot` object (throws on a duplicate key). `sectionRows` is EVERY
+ * section of the standard (id, parent_section_id, code, parent_code, visible_when); the coded ones become the
+ * `sections` map, all of them feed each field's `section_path`.
+ */
 export function foldSnapshot(fieldRows, sectionRows, meta) {
-  const snapshot = { _meta: { ...meta, field_rows: fieldRows.length, section_rows: sectionRows.length } };
+  const byId = new Map(sectionRows.filter((r) => r.id != null).map((r) => [r.id, r]));
+  const coded = sectionRows.filter((r) => r.section_code != null);
+  const snapshot = { _meta: { ...meta, field_rows: fieldRows.length, section_rows: coded.length, sections_total: sectionRows.length } };
   for (const r of fieldRows) {
     const key = `${r.worksheet} ${r.symbol}`;
     if (snapshot[key]) throw new Error(`duplicate field key ${key}`);
@@ -68,13 +91,15 @@ export function foldSnapshot(fieldRows, sectionRows, meta) {
       consumer_worksheets: r.consumer_worksheets ?? null,
       data_type: r.data_type,
       section_code: r.section_code ?? null,
+      section_id_is_null: r.section_id == null,
+      section_path: r.section_id == null ? [] : sectionPath(r.section_id, byId),
     };
   }
   snapshot.sections = {};
-  for (const r of sectionRows) {
+  for (const r of coded) {
     const key = `${r.worksheet} ${r.section_code}`;
     if (snapshot.sections[key]) throw new Error(`duplicate section key ${key}`);
-    snapshot.sections[key] = { visible_when: r.visible_when ?? null };
+    snapshot.sections[key] = { visible_when: r.visible_when ?? null, parent_code: r.parent_code ?? null };
   }
   return snapshot;
 }
@@ -123,7 +148,7 @@ async function main() {
     const out = path.join(root, 'src', 'lib', 'eval', 'field-configs', `${slug}.prior.json`);
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, JSON.stringify(snapshot, null, 2) + '\n');
-    console.log(`wrote ${path.relative(root, out)}: ${fieldRows.length} field rows, ${sectionRows.length} section rows; optional columns present: ${JSON.stringify(columnsPresent)}`);
+    console.log(`wrote ${path.relative(root, out)}: ${fieldRows.length} field rows (${fieldRows.filter((r) => r.section_id == null).length} orphan), ${snapshot._meta.section_rows} coded sections of ${sectionRows.length}; optional columns present: ${JSON.stringify(columnsPresent)}`);
   } finally {
     await sql.end();
   }

@@ -97,8 +97,34 @@ describe('emitFieldConfigSql — guards beyond the brief (fix round 1)', () => {
       'S-02 A_C': row({ consumer_worksheets: ['S-09'], section_code: 'S-01.2' }), // other worksheet — ignored
       sections: { 'S-01 S-01.2': { visible_when: null }, 'S-01 S-01.3': { visible_when: null } },
     };
-    expect(() => emitFieldConfigSql('x', [], [s], prior)).toThrow(/section S-01 S-01\.2: visible_when on a section containing a symbol consumed by another worksheet: A_C \(consumed by S-02, S-04\)/);
+    expect(() => emitFieldConfigSql('x', [], [s], prior)).toThrow(/section S-01 S-01\.2: visible_when on a section \(or a descendant of it\) containing a symbol consumed by another worksheet: A_C \(consumed by S-02, S-04\)/);
     expect(emitFieldConfigSql('x', [], [{ ...s, section_code: 'S-01.3' }], prior).up).toContain("ws.code = 'S-01.3'");
+  });
+  it('section visibility walks the captured section_path: producers in a direct child or a null-coded grandchild are refused; an orphan or a sibling producer is not', () => {
+    const target = (section_code: string) => ({ standard: 'S', worksheet: 'S-01', section_code, visible_when: "typ == 'b'", verification_quote: 'q' });
+    // hierarchy: A (root) ⊃ A.1 (child) ⊃ <null-coded> (grandchild); B (root, sibling)
+    const sections = { 'S-01 A': { visible_when: null, parent_code: null }, 'S-01 A.1': { visible_when: null, parent_code: 'A' }, 'S-01 B': { visible_when: null, parent_code: null } };
+    const child: PriorSnapshot = { 'S-01 P': row({ consumer_worksheets: ['S-02'], section_code: 'A.1', section_id_is_null: false, section_path: ['A', 'A.1'] }), sections };
+    expect(() => emitFieldConfigSql('x', [], [target('A')], child)).toThrow(/section S-01 A: .*P \(consumed by S-02\)/);
+    const grandchild: PriorSnapshot = { 'S-01 P': row({ consumer_worksheets: ['S-02'], section_code: null, section_id_is_null: false, section_path: ['A', 'A.1', null] }), sections };
+    expect(() => emitFieldConfigSql('x', [], [target('A')], grandchild)).toThrow(/section S-01 A: .*P \(consumed by S-02\)/);
+    expect(() => emitFieldConfigSql('x', [], [target('A.1')], grandchild)).toThrow(/section S-01 A\.1: .*P \(consumed by S-02\)/);
+    const orphan: PriorSnapshot = { 'S-01 P': row({ consumer_worksheets: ['S-02'], section_code: null, section_id_is_null: true, section_path: [] }), sections };
+    expect(emitFieldConfigSql('x', [], [target('A')], orphan).up).toContain("ws.code = 'A'");
+    const sibling: PriorSnapshot = { 'S-01 P': row({ consumer_worksheets: ['S-02'], section_code: 'B', section_id_is_null: false, section_path: ['B'] }), sections };
+    expect(emitFieldConfigSql('x', [], [target('A')], sibling).up).toContain("ws.code = 'A'");
+    expect(() => emitFieldConfigSql('x', [], [target('B')], sibling)).toThrow(/section S-01 B: .*P \(consumed by S-02\)/);
+    // a null-coded child of the target with its OWN consumer-free field is fine; a non-producer in the tree never trips it
+    const clean: PriorSnapshot = { 'S-01 x': row({ consumer_worksheets: null, section_code: null, section_id_is_null: false, section_path: ['A', null] }), sections };
+    expect(emitFieldConfigSql('x', [], [target('A')], clean).up).toContain("ws.code = 'A'");
+  });
+  it('with a captured snapshot (_meta present) a field UPDATE entry whose key is absent is refused (0-row UPDATE); without _meta the brief\'s {}-prior behaviour stays', () => {
+    const captured: PriorSnapshot = { _meta: { captured_at: 'now' }, 'S-01 k': row() };
+    expect(() => emitFieldConfigSql('x', [{ ...base, symbol: 'nope', widget: 'scalar' }], [], captured)).toThrow(/S-01 nope: not a captured active field of S-01 \(its UPDATE would touch 0 rows\)/);
+    expect(emitFieldConfigSql('x', [{ ...base, symbol: 'k', widget: 'scalar' }], [], captured).up).toContain("f.symbol = 'k'");
+    const create = { section_code: null, label_de: 'L', data_type: 'json' as const, clause_reference: '§1', description: 'Plan 3: x' };
+    expect(emitFieldConfigSql('x', [{ ...base, symbol: 'nope', widget: 'register', ui_config: reg, create }], [], captured).up).toContain('INSERT INTO fields');
+    expect(emitFieldConfigSql('x', [{ ...base, symbol: 'nope', widget: 'scalar' }], [], {}).up).toContain("f.symbol = 'nope'");
   });
 });
 

@@ -50,6 +50,36 @@ export type EquationEntry = {
   verification_quote: string | null;                              // printed formula/sentence lifted, or null ⇒ sign-off entry
 };
 
+// ---- prior snapshot (`<slug>.prior.json`, written by scripts/regulation-tables/build-prior-snapshot.mjs) ----
+
+/** One captured `fields` row (active fields of the standard), keyed `"<worksheet> <symbol>"`. */
+export type PriorFieldRow = {
+  enum_values: unknown; widget: string | null; ui_config: unknown; lookup: unknown; visible_when: string | null;
+  consumer_worksheets: string[] | null;
+  /** Optional in the capture; when present, the amendment-C data_type rule is checked for lookup_fill entries. */
+  data_type?: string;
+  /** `worksheet_sections.code` of the field's own section (null when the section has no code or the field is orphaned). */
+  section_code?: string | null;
+  /** `fields.section_id IS NULL` — an orphan field is never hidden by a section rule. */
+  section_id_is_null?: boolean;
+  /**
+   * Codes of the field's section ancestors root → own section (a null-coded section in the chain is `null`;
+   * `[]` for an orphan). The section-level producer guard walks this chain because the runtime hides every
+   * descendant of a hidden section (`src/lib/compliance/visibility.ts`).
+   */
+  section_path?: Array<string | null>;
+};
+/** Field-row key: `${worksheet} ${symbol}` (always contains a space, so it never collides with `sections` / `_meta`). */
+export type PriorFieldKey = `${string} ${string}`;
+/** One captured coded section, keyed `"<worksheet> <section_code>"`. */
+export type PriorSectionRow = {
+  visible_when: string | null;
+  /** Code of the parent section; null at root or when the parent has no code. */
+  parent_code?: string | null;
+};
+export type PriorSnapshot = { [key: PriorFieldKey]: PriorFieldRow }
+  & { sections?: Record<string, PriorSectionRow>; _meta?: Record<string, unknown> };
+
 /** What one `src/lib/eval/field-configs/<slug>.ts` module exports. */
 export type FieldConfigModule = { FIELD_CONFIGS: FieldConfigEntry[]; SECTION_VISIBILITY: SectionVisibilityEntry[] };
 /** What one `src/lib/eval/equations/<slug>.ts` module exports. */

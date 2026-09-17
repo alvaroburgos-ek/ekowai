@@ -14,7 +14,9 @@
  *     (`consumer_worksheets` non-empty in the prior snapshot) is REFUSED
  *     (importer rule, Plan 2a Task 10 — hiding a producer would hide the
  *     value its consumers inherit); the same refusal applies to a SECTION
- *     `visible_when` whose section contains such a producer;
+ *     `visible_when` whose section — or any descendant section, coded or
+ *     not, since the runtime hides descendants of a hidden section — contains
+ *     such a producer (walked via the captured `section_path`);
  *   - `UPDATE worksheet_sections` per section entry, keyed by worksheet code +
  *     section code, refused when the key is absent from the captured
  *     `prior.sections` (its UPDATE would touch 0 rows); a section whose prod
@@ -49,23 +51,12 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseFieldConfig, type RegisterUiConfig } from '../../src/lib/eval/field-config';
 import { parseCondition, parseNumeric } from '../../src/lib/expr';
-import type { FieldConfigEntry, SectionVisibilityEntry } from '../../src/lib/eval/field-configs/types';
+import type { FieldConfigEntry, SectionVisibilityEntry, PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorSnapshot } from '../../src/lib/eval/field-configs/types';
 import { FIELD_CONFIG_MODULES } from '../../src/lib/eval/field-configs';
 import { q, j, JOIN, SCHEMA_MIGRATION, gatedHeaderLines } from './emit-widget-configs-sql';
 
-export type PriorFieldRow = {
-  enum_values: unknown; widget: string | null; ui_config: unknown; lookup: unknown; visible_when: string | null;
-  consumer_worksheets: string[] | null;
-  /** Optional in the capture; when present, the amendment-C data_type rule is checked for lookup_fill entries. */
-  data_type?: string;
-  /** `worksheet_sections.code` of the field's section (null when the section has no code); drives the section-level producer guard. */
-  section_code?: string | null;
-};
-/** Field-row key: `${worksheet} ${symbol}` (always contains a space, so it never collides with `sections` / `_meta`). */
-export type PriorFieldKey = `${string} ${string}`;
-export type PriorSectionRow = { visible_when: string | null };
-export type PriorSnapshot = { [key: PriorFieldKey]: PriorFieldRow }
-  & { sections?: Record<string /* `${worksheet} ${section_code}` */, PriorSectionRow>; _meta?: Record<string, unknown> };
+/** The prior-snapshot types live in src/lib/eval/field-configs/types.ts (re-exported for the tests and the CLI). */
+export type { PriorFieldRow, PriorFieldKey, PriorSectionRow, PriorSnapshot };
 
 /** File-level header options (the Plan-2b `gated` / `gated_note` / `provenance` pattern, one file per slug). */
 export type FieldConfigHeader = {
@@ -89,8 +80,10 @@ const RESERVED_KEYS: ReadonlySet<string> = new Set(['sections', '_meta']);
  * script additionally nulls the Plan-1 columns when they do not exist yet.
  */
 export const PRIOR_SQL = {
-  fields: "select w.code as worksheet, f.symbol, f.enum_values, f.widget, f.ui_config, f.lookup, f.visible_when, f.consumer_worksheets, f.data_type, ws.code as section_code from fields f join worksheet_templates w on w.id=f.worksheet_template_id join standards s on s.id=w.standard_id left join worksheet_sections ws on ws.id=f.section_id where s.code='<CODE>' and f.active",
-  sections: "select w.code as worksheet, ws.code as section_code, ws.visible_when from worksheet_sections ws join worksheet_templates w on w.id=ws.worksheet_template_id join standards s on s.id=w.standard_id where s.code='<CODE>' and ws.code is not null",
+  fields: "select w.code as worksheet, f.symbol, f.enum_values, f.widget, f.ui_config, f.lookup, f.visible_when, f.consumer_worksheets, f.data_type, f.section_id, ws.code as section_code from fields f join worksheet_templates w on w.id=f.worksheet_template_id join standards s on s.id=w.standard_id left join worksheet_sections ws on ws.id=f.section_id where s.code='<CODE>' and f.active",
+  // EVERY section, null-coded ones included: the fold derives each field's ancestor chain (section_path) from id/parent_section_id
+  // and keys the `sections` map by the coded ones only.
+  sections: "select w.code as worksheet, ws.id, ws.parent_section_id, ws.code as section_code, p.code as parent_code, ws.visible_when from worksheet_sections ws join worksheet_templates w on w.id=ws.worksheet_template_id join standards s on s.id=w.standard_id left join worksheet_sections p on p.id=ws.parent_section_id where s.code='<CODE>'",
 };
 
 /** Every captured field row (skips `sections` / `_meta`). */
@@ -117,6 +110,7 @@ export function assertPriorSnapshot(prior: PriorSnapshot): void {
     if (row.widget != null && typeof row.widget !== 'string') throw new Error(`prior "${key}".widget must be a string/null`);
     if (row.visible_when != null && typeof row.visible_when !== 'string') throw new Error(`prior "${key}".visible_when must be a string/null`);
     if (row.consumer_worksheets != null && !Array.isArray(row.consumer_worksheets)) throw new Error(`prior "${key}".consumer_worksheets must be an array/null`);
+    if (row.section_path != null && !Array.isArray(row.section_path)) throw new Error(`prior "${key}".section_path must be an array`);
   }
   for (const [key, row] of Object.entries(prior.sections ?? {})) {
     if (row == null || typeof row !== 'object') throw new Error(`prior.sections "${key}": row must be an object`);
@@ -158,6 +152,8 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
     }
     if ((e.widget === 'select_one' || e.widget === 'select_many') && !Array.isArray(e.enum_values)) throw new Error(`${id}: a created ${e.widget} needs an enum_values list`);
   } else {
+    // A captured snapshot (_meta present) that lacks the key means the UPDATE would touch 0 rows — same rule as sections.
+    if (!p && prior._meta) throw new Error(`${id}: not a captured active field of ${e.worksheet} (its UPDATE would touch 0 rows) — check worksheet/symbol, or add it via create`);
     if (Array.isArray(e.enum_values)) {
       // D-1: a list may only go into a NULL prior — and "NULL" must be a captured fact, never an absent row.
       if (!p) throw new Error(`${id}: D-1 — enum_values given but no prior snapshot row; capture prod (or add the field via create) before emitting`);
@@ -169,14 +165,26 @@ function validateEntry(e: FieldConfigEntry, p: PriorFieldRow | undefined, prior:
   }
 }
 
+/**
+ * Is the field inside the targeted section OR any of its descendants? The runtime hides every descendant of a
+ * hidden section (src/lib/compliance/visibility.ts), so the guard walks the captured ancestor chain. An orphan
+ * field (`section_id IS NULL`, `section_path: []`) is never section-hidden. A legacy prior without
+ * `section_path` falls back to the own-section code.
+ */
+function inSectionTree(r: PriorFieldRow, sectionCode: string): boolean {
+  if (r.section_id_is_null) return false;
+  const path = r.section_path ?? (r.section_code != null ? [r.section_code] : []);
+  return path.includes(sectionCode);
+}
+
 function validateSection(s: SectionVisibilityEntry, prior: PriorSnapshot): void {
   const key = `${s.worksheet} ${s.section_code}`;
   if (parseCondition(s.visible_when) === null) throw new Error(`section ${key}: visible_when does not parse: ${s.visible_when}`);
   if (prior.sections && !(key in prior.sections)) throw new Error(`section ${key}: not a captured section (its UPDATE would touch 0 rows) — check worksheet_sections.code`);
   const producers = priorFieldRows(prior)
-    .filter(([k, r]) => k.startsWith(`${s.worksheet} `) && r.section_code === s.section_code && r.consumer_worksheets?.length)
+    .filter(([k, r]) => k.startsWith(`${s.worksheet} `) && inSectionTree(r, s.section_code) && r.consumer_worksheets?.length)
     .map(([k, r]) => `${k.slice(s.worksheet.length + 1)} (consumed by ${r.consumer_worksheets!.join(', ')})`);
-  if (producers.length) throw new Error(`section ${key}: visible_when on a section containing a symbol consumed by another worksheet: ${producers.join('; ')} (hiding a producer hides the inherited value; STAGE the consumer edit instead)`);
+  if (producers.length) throw new Error(`section ${key}: visible_when on a section (or a descendant of it) containing a symbol consumed by another worksheet: ${producers.join('; ')} (hiding a producer hides the inherited value; STAGE the consumer edit instead)`);
 }
 
 export function emitFieldConfigSql(slug: string, entries: FieldConfigEntry[], sections: SectionVisibilityEntry[], prior: PriorSnapshot, header: FieldConfigHeader = {}): { up: string; down: string } {
