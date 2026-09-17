@@ -211,8 +211,6 @@ export function buildRegisters(
       overrideFlagKey: cfg.override?.flag_key,
       overrideAppliesTo: cfg.override?.applies_to,
     });
-    // TODO(Task 8): surface register.diagnostics (misconfigured derived expr)
-    // into the server save-path warnings; callers ignore it until then.
   }
   return out;
 }

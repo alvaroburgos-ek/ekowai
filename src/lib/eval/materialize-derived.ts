@@ -18,6 +18,14 @@
  *   - pollutant: `not_applicable` flag ⇒ the fallback formula's `if(flag(...), 0, …)`
  *     short-circuits to 0; empty rows ⇒ `manual_required` ⇒ null (was
  *     `summarizePollutants` → 0 / null).
+ *
+ * Dedupe rule (fix round 1): ONE write per output field. When two equations of a template
+ * output the same symbol (the corpus has this for scalars, e.g. two `h_S` on A138-21), the
+ * FIRST equation in list order wins — DB rows in their loaded order, fallback rows appended
+ * LAST by `withFallbackRegisterEquations`, so a DB equation always beats a fallback for the
+ * same output. Without this the save would put the same (project_id, field_id) twice into
+ * one `INSERT … ON CONFLICT DO UPDATE`, which Postgres rejects ("cannot affect row a second
+ * time") and the whole save would roll back.
  */
 import { evaluateFormula, type EvalState } from './formula';
 import { equationProfiles } from './equation-profiles';
@@ -137,12 +145,14 @@ export function materializeDerivedOutputs(args: {
   for (const r of Object.values(registers)) for (const d of r.diagnostics ?? []) diagnostics.add(d);
 
   const writes: DerivedWrite[] = [];
+  const writtenFieldIds = new Set<string>(); // dedupe by output field — first equation wins (see docblock)
   for (const eq of withFallbackRegisterEquations(worksheetCode, [...args.equations])) {
     if (!eq.outputSymbol || equationProfiles[eq.id]?.displayOnly) continue;
     const consumed = new Set([...normalizeSymbols(eq.inputSymbols ?? []), ...Object.values(rewriteRules[eq.id]?.remap ?? {})]);
     if (![...consumed].some((s) => registerSymbols.has(s))) continue;
     const outField = fieldBySymbol.get(eq.outputSymbol);
-    if (!outField) continue;
+    if (!outField || writtenFieldIds.has(outField.id)) continue;
+    writtenFieldIds.add(outField.id);
     const inputs = [...consumed].filter((s) => !registerSymbols.has(s)).map((sym) => {
       const f = fieldBySymbol.get(sym);
       const v = f ? valuesByFieldId[f.id] : undefined;

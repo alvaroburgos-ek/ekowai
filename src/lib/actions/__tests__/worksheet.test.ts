@@ -1,7 +1,9 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 
-// Focused unit test: assert the save loop symbol list equals SURFACE_DERIVED_SYMBOLS (all 6).
+// Focused unit test: SURFACE_DERIVED_SYMBOLS still names the six A138-07 register-fed outputs (the generic
+// register materialiser — src/lib/eval/materialize-derived.ts — derives the written set from the equations; this
+// pins the symbol list the source-state gate reads).
 // This is a static-import-only test — no live DB required — so it runs before _setup-env.
 import { SURFACE_DERIVED_SYMBOLS } from '@/lib/eval/surface-source-state';
 import type { SaveWorksheetResult, SavedDerivedRow } from '../worksheet';

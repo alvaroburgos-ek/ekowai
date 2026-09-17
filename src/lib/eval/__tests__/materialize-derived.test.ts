@@ -2,7 +2,7 @@
 // its three assertions live in the first three cases below).
 import { describe, it, expect } from 'vitest';
 import { materializeDerivedOutputs, registerFieldIds, parametersToFieldValues } from '../materialize-derived';
-import { A138_07_REGISTER_FORMULAS } from '../rewrites';
+import { A138_07_REGISTER_FORMULAS, A138_07_PRIOR_FORMULAS } from '../rewrites';
 
 const fields = [
   { id: 'f-si', symbol: 'surface_inventory', dataType: 'json', unit: null },
@@ -55,6 +55,38 @@ describe('materializeDerivedOutputs', () => {
     ] } } } });
     expect(sums.writes.map((w) => [w.symbol, w.value])).toEqual([['AmountOfEmissionToAir', 2], ['AmountOfEmissionToWater', 0.25], ['AmountOfEmissionToSoil', 0]]);
     expect(sums.writes.map((w) => w.fieldId)).toEqual(['a', 'w', 's']);
+  });
+  it('dedupes writes by output field — FIRST equation wins (DB order; a DB row beats a later fallback row)', () => {
+    const [first] = equations; // A_C = sum_rows(surface_inventory, area_m2 * c_i)
+    const second = { id: 'alt-a-c', equationNumber: 'A_C-alt', formula: 'A_C = sum_rows(surface_inventory, area_m2)', inputSymbols: ['surface_inventory'], outputSymbol: 'A_C' };
+    const { writes } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-07', equations: [first, second], fields, valuesByFieldId: carrier([
+      { id: '1', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+    ]) });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].fieldId).toBe('f-0');
+    expect(writes[0].equationId).toBe(first.id);
+    expect(writes[0].value).toBeCloseTo(90, 6);
+    // reversed order → the alternative wins (order, not id, decides)
+    const rev = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-07', equations: [second, first], fields, valuesByFieldId: carrier([
+      { id: '1', tab9_value: 'schwarzdecke_asphalt', area_m2: 100, c_i: 0.9, c_s: 1.0, coeff_override: false },
+    ]) });
+    expect(rev.writes.map((w) => [w.equationId, w.value])).toEqual([['alt-a-c', 100]]);
+  });
+  it('pre-migration prod state: the six PRIOR Σ formulas (inputSymbols null, prod UUIDs) compute via the rewrite bridge', () => {
+    const prior = Object.entries(A138_07_PRIOR_FORMULAS).map(([id, formula]) => ({ id, equationNumber: id, formula, inputSymbols: null, outputSymbol: A138_07_REGISTER_FORMULAS[id].outputSymbol }));
+    const { writes } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-07', equations: prior, fields, valuesByFieldId: carrier([
+      { id: '1', tab9_value: 'schwarzdecke_asphalt', area_m2: 3786.8, c_i: 0.9, c_s: 1.0, coeff_override: false },
+      { id: '2', tab9_value: 'schwarzdecke_asphalt', area_m2: 1575.9, c_i: 0.9, c_s: 1.0, coeff_override: false },
+    ]) });
+    expect(writes).toHaveLength(6);
+    expect(writes.every((w) => w.state.kind === 'computed' && w.state.rewrite !== undefined)).toBe(true);
+    const by = (s: string) => writes.find((w) => w.symbol === s)!.value!;
+    expect(by('A_C')).toBeCloseTo(4826.43, 2);
+    expect(by('C_m')).toBeCloseTo(0.9, 6);
+    expect(by('A_E_ba')).toBeCloseTo(5362.7, 4);
+    expect(by('A_E_nba')).toBe(0);
+    expect(by('A_C_sealed')).toBeCloseTo(4826.43, 2);
+    expect(by('A_C_unsealed')).toBe(0);
   });
   it('ignores scalar equations and equations whose output has no field on this template', () => {
     const { writes: out } = materializeDerivedOutputs({ standardCode: 'DWA-A-138-1', worksheetCode: 'A138-07', equations: [{ id: 'q', equationNumber: 'q', formula: 'q = a * 2', inputSymbols: ['a'], outputSymbol: 'q' }, equations[0]], fields: [fields[0]], valuesByFieldId: carrier([]) });

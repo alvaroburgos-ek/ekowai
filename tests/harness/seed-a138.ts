@@ -177,7 +177,7 @@ export const A138_WARN_GATES: ReadonlyArray<{ ws: string; code: string; cond: st
 export const A138_EQUATIONS: ReadonlyArray<{
   ws: string; out: string; formula: string; need: string[];
   kind: 'computed' | 'manual_required' | 'error'; anchor: string; expect?: number;
-  /** Prod equation UUID where the harness row must be addressable by the rewrite bridge / migration (A138-07 register producers). */
+  /** Documents the prod equation UUID (A138-07 register producers); NOT consumed by the verify harness — runEq uses a fresh id so the pure arithmetic path runs. */
   id?: string;
 }> = [
   { ws: 'A138-16', out: '(balance)', formula: '(A_C + A_S) * r_D(n) * 10^-7 = A_S * k_i', need: ['A_C', 'A_S', 'r_D_n', 'k_i'], kind: 'error', anchor: '§6.2.2 Gl.(11)' },

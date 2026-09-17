@@ -30,7 +30,8 @@ describe('20260916110000_vsme_b04_register_equations.sql', () => {
     expect((MIGRATION.match(/ON CONFLICT \(worksheet_template_id, equation_number\) DO NOTHING;/g) ?? []).length).toBe(3);
     expect((MIGRATION.match(/ARRAY\['pollutant_register'\]/g) ?? []).length).toBe(3);
     expect((MIGRATION.match(/s\.code = 'VSME' AND wt\.code = 'VSME-B04\.100'/g) ?? []).length).toBe(3);
-    expect(MIGRATION).not.toMatch(/UNVERIFIED/);
+    // no unverified-marker header line (the A138-07 rollback convention for values not captured from prod)
+    expect(MIGRATION).not.toMatch(/^-- UNVERIFIED/m);
   });
   it('rollback deletes by (worksheet_template_id, equation_number) within the same scope', () => {
     expect(ROLLBACK).toMatch(/^BEGIN;/m);
