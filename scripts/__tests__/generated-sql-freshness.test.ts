@@ -10,28 +10,30 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { emitSeedSql, seedFilesFor, SEED_BUILDERS } from '../regulation-tables/emit-seed-sql';
+import { emitSeedSql, emitSeedSqlFor, seedFilesFor, SEED_BUILDERS } from '../regulation-tables/emit-seed-sql';
 import { emitSelectionConfigSql, emitSelectionRollbackSql } from '../regulation-tables/emit-selection-configs-sql';
-import { a138SeedTables } from '../../src/lib/eval/regulation-tables-seed-a138';
+import { a138Plan1SeedTables } from '../../src/lib/eval/regulation-tables-seed-a138';
 
 const ROOT = join(__dirname, '..', '..');
 const norm = (s: string): string => s.replace(/\r\n/g, '\n');
 const read = (relPath: string): string => norm(readFileSync(join(ROOT, relPath), 'utf8'));
 
 describe('generated-sql freshness — committed files equal a fresh emitter call', () => {
-  it('regulation_tables_seed_a138 migration + rollback match emitSeedSql(a138SeedTables())', () => {
-    const { up, down } = emitSeedSql(a138SeedTables());
+  // Plan 3 Task 1: the Plan-1 file is reproduced by the FROZEN Plan-1 builders (a138Plan1SeedTables); the live set is a138_p3.
+  it('regulation_tables_seed_a138 migration + rollback match emitSeedSql(a138Plan1SeedTables())', () => {
+    const { up, down } = emitSeedSql(a138Plan1SeedTables());
     expect(norm(up)).toBe(read('scripts/migrations/20260911110000_regulation_tables_seed_a138.sql'));
     expect(norm(down)).toBe(read('scripts/rollback-20260911110000-regulation-tables-seed-a138.sql'));
   });
 
   // Plan 3 Task 0 (fix round 1): every seed slug in SEED_BUILDERS is auto-pinned — a Plan-3 task that adds a
   // builder gets its migration + rollback byte-pinned without remembering to add a case here.
-  it('every SEED_BUILDERS slug: committed seed migration + rollback match emitSeedSql(build())', () => {
+  it('every SEED_BUILDERS slug: committed seed migration + rollback match emitSeedSqlFor(slug)', () => {
     const slugs = Object.keys(SEED_BUILDERS);
     expect(slugs).toContain('a138');
+    expect(slugs).toContain('a138_p3');
     for (const slug of slugs) {
-      const { up, down } = emitSeedSql(SEED_BUILDERS[slug].build());
+      const { up, down } = emitSeedSqlFor(slug);
       const files = seedFilesFor(slug);
       expect(norm(up), files.migration).toBe(read(files.migration));
       expect(norm(down), files.rollback).toBe(read(files.rollback));

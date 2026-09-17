@@ -38,3 +38,238 @@ No judgment items. Task 0 built the emitters, the transcript quote verifier, the
 - **Bundle growth (Task 0 review, 2026-09-17):** `src/lib/eval/regulation-tables-seed-index.ts` is imported by the runtime fallback (`regulation-tables-fallback.ts`), so every Plan-3 seed builder (29 standards × their tables, verbatim quotes included) ships in the client bundle as the deploy-before-seed fallback — by design (Global Constraint 6) but worth measuring at Task 30; `FIELD_CONFIG_MODULES` / `EQUATION_MODULES` are dynamic imports used only by the emitter CLIs and add nothing to the app bundle unless an app module imports the index. Once every seed migration is applied, the fallback can shrink to a per-standard lazy import (Phase 6 follow-up).
 
 <!-- Standard tasks append below this line, one `## Task N — <STANDARD> (<slug>)` section each. -->
+
+## Task 1 — DWA-A-138-1 (a138)
+
+Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGED-plan3-rulings.sql` (same ids) · transcript `C:\Users\Ekowai\Desktop\Guidelines\DWA-A-138-1\DWA-A_138-1_WD (5).md` (lines cited) · prod capture `src/lib/eval/field-configs/a138.prior.json` (2026-09-17, read-only). Ids follow the Task-1 brief (P/J/S letters are the brief's; O = override-policy, I = interface-gap). Nothing below is applied.
+
+### a138-U-2 · DWA-A-138-1 · A138-08 · f_ort (Tab. 10)
+- Class: unreadable-cell
+- Chosen now (fail-safe): Tab. 10 NOT seeded; `f_ort` stays a number input with the SR-2 range sentence as its cue.
+- Evidence (verbatim, transcript line): "Tabelle 10: Beispiele Kriterien zur Festlegung von $f_{\text {ort }}$" is an `\includegraphics` figure (L1373–L1374); "Dieser Faktor ist unter anderem vor dem Hintergrund der Informationslage im gegebenen Wertebereich von 0,3 bis 1,0 begründet zu wählen." (L1369)
+- Proposed SQL / config: none until the PDF page is read (SR-3) — then a TAB10 builder with the printed criteria rows; `f_ort` remains an engineer selection in 0,3…1,0 (SR-2).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-U-3 · DWA-A-138-1 · A138-06 · TAB6 (rows not seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): only the four numeric rows (tier2/tier3 × ≥ 20 cm / ≥ 30 cm) are seeded, each with `n_m_max = 1`; D, VW1, V1, SD1…SA and BG1 are not rows of TAB6.
+- Evidence (verbatim, transcript line): "\hline D & \multirow{4}{*}{।} & \multicolumn{2}{|c|}{(*)} \\" (L916); "\hline VW1 & & \multicolumn{2}{|c|}{} \\" (L917); "\hline BG1 & & \multicolumn{2}{|c|}{bei Mulden-Rigolen: Überlauf in Rigole mit $n_{\mathrm{M}}$ max. 2/a} \\" (L919); "\hline SD1 & II & \multicolumn{2}{|c|}{\multirow{7}{*}{(*)}} \\" (L927); "(*) Verwendungshinweis: Die Behandlungsanforderungen für die Kategorien D, SD1, SD2, SV, SVW, SF, SL, SG und SA richten sich nach den rechtlichen Anforderungen und sind ggf. mit der zuständigen Behörde abzustimmen." (L936)
+- Proposed SQL / config: the (*) state stays "authority" (TAB5 tier `authority` ⇒ no TAB6/TAB7 row ⇒ the lookup_fill badge reads "keine Zeile"); BG1's `n_M max. 2/a` needs a Flächengruppe-keyed row (TAB6 key `tier` cannot carry it without misattributing VW1/V1) — owner decides whether TAB6 gets a second key or BG1 becomes its own tier token.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-U-4 · DWA-A-138-1 · A138-06 · TAB7 (rows not seeded)
+- Class: unreadable-cell
+- Chosen now (fail-safe): three tier rows seeded (40/50, 70/65, 80/75); D and SD1…SA print "(*)" and are not rows.
+- Evidence (verbatim, transcript line): "\hline D & \multirow{4}{*}{1} & \multicolumn{3}{|c|}{(*)} \\" (L984); "\hline SD1 & II & \multicolumn{4}{|c|}{\multirow{7}{*}{}} \\" (L1009); "(*) Verwendungshinweis: … richten sich nach den rechtlichen Anforderungen und sind ggf. mit der zuständigen Behörde abzustimmen." (L1018)
+- Proposed SQL / config: as U-3 — `authority` tier ⇒ no row ⇒ `eta_*_required` show "— (kein Tab. 7-Grenzwert)".
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-U-5 · DWA-A-138-1 · A138-06 · TAB5 (`bk` column, two OCR cells)
+- Class: unreadable-cell
+- Chosen now (fail-safe): `bk = BK_I` seeded for D, VW1, V1 (multirow cell printed as the glyph "।") and BG1 (cell printed "1"); every other row prints "II"/"III" legibly. TAB5 stays `imported_unverified` although all 19 quotes verify.
+- Evidence (verbatim, transcript line): "… & D & \multirow{7}{*}{।} \\" (L803, spanning L803–L812 = D, the five VW1 bullets, V1); "… & BG1 & 1 \\" (L833); "In Bezug auf den Referenzparameter AFS63 enthält Tabelle 5 die Zuordnung unterschiedlicher Flächentypen und Flächennutzungen zu den Belastungskategorien I (gering belastetes Niederschlagswasser), II (mäßig belastetes Niederschlagswasser) und III (stark belastetes Niederschlagswasser)." (L789)
+- Proposed SQL / config: owner confirms "I" on the PDF page (SR-3); then `UPDATE regulation_tables SET verification_status = 'md_verified' WHERE standard_code = 'DWA-A-138-1' AND table_code = 'TAB5' AND verification_status = 'imported_unverified';`
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-U-6 · DWA-A-138-1 · A138-15…22 · TAB14 (`freibord_min_cm` for MRE)
+- Class: unreadable-cell
+- Chosen now (fail-safe): MRE `freibord_min_cm = null`; MRS = 10; Becken = 35. TAB14 stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline Freibord Überlauf ${ }^{(2)}$ & cm & - & - & & $\geq 10$ & - & - & $\geq 35$ \\" (L2258) — the seven cells after "cm" are Fläche "-", Mulde "-", MRE "" (empty), MRS "≥ 10", Rigole "-", Schacht "-", Becken "≥ 35".
+- Proposed SQL / config: owner reads the PDF cell; if "≥ 10" spans MRE+MRS, set `row_values = jsonb_set(row_values, '{freibord_min_cm}', '10')` on TAB14 row `MRE` and flip the table to `md_verified`.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-O-1 · DWA-A-138-1 · A138-07 · TAB9 (verification status, I-2 ruling)
+- Class: override-policy
+- Chosen now (fail-safe): every Tab. 9 quote is now the printed row (30/30 verify; values deep-equal `tab9.ts` — the a138-U-1 parity pin found no difference, so no U-1 entry exists); status stays `imported_unverified`.
+- Evidence (verbatim, transcript line): "\hline & \multicolumn{2}{|l|}{Verbundsteine mit Sickerfugen, Sicker-/Dränsteine} & 0,25 & 0,4 \\" (L1285) — the printed (label, C_m, C_s) triple; the seeded row key/label is the tab9.ts token/label, not the printed text.
+- Proposed SQL / config: if the owner rules that the (label, C_m, C_s) triple counts as the printed row: `UPDATE regulation_tables SET verification_status = 'md_verified' WHERE standard_code = 'DWA-A-138-1' AND table_code = 'TAB9' AND verification_status = 'imported_unverified';`
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-P-1 · DWA-A-138-1 · A138-06 · TAB5 (override policy)
+- Class: override-policy
+- Chosen now (fail-safe): `locked` (spec: tier mappings) with the printed sentence in `override_quote`; the `belastungskategorie` lookup_fill therefore shows no override control.
+- Evidence (verbatim, transcript line): "Von der Kategorisierung nach Tabelle 5 kann in begründeten Fällen abgewichen werden." (L791)
+- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'DWA-A-138-1' AND table_code = 'TAB5' AND override_policy = 'locked';` (then the lookup_fill offers "abweichend wählen" + Begründung).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-P-2 · DWA-A-138-1 · A138-08 · TAB8 (override policy)
+- Class: override-policy
+- Chosen now (fail-safe): `locked` — the cells are printed as bounds "(≤ …)".
+- Evidence (verbatim, transcript line): caption "Tabelle 8: Hinweise zur Festlegung von Bemessungs- und Überflutungshäufigkeiten für Versickerungsanlagen (Quelle: in Anlehnung an Arbeitsblatt DWA-A 118:2024)" (L1132); cells "( $\leqslant 0,33 / a)$ & ( $\leqslant 0,5 / \mathrm{a}$ ) & (0,1/a)" (L1156)
+- Proposed SQL / config: if "Hinweise" is read as guidance: `UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE … table_code = 'TAB8' AND override_policy = 'locked';`
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-J-1 · DWA-A-138-1 · A138-08 · TAB8 footnote (a)
+- Class: text-only-formula
+- Chosen now (fail-safe): not encoded — `n_limit` always reads the A_C band of the project.
+- Evidence (verbatim, transcript line): "(a) Nach DIN 1986-100 ist kein rechnerischer Überflutungsnachweis erforderlich. Bei Durchführung eines Überflutungsnachweises kann bei $A C \leqslant 800 \mathrm{~m}^{2}$ die Bemessungshäufigkeit für $A C>800 \mathrm{~m}^{2}$ angesetzt werden." (L1191)
+- Proposed SQL / config: `n_limit = lookup('TAB8', schutzkategorie, if(A_C <= 800 AND flood_check_trigger != TRUE, 'le800', 'gt800'), 'n_max')` — replaces A138-08-D1 once `flood_check_trigger` (A138-07) is consumed on A138-08.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-E-1 · DWA-A-138-1 · A138-03 · f_methode
+- Class: equation-replacement (D-1 enum overwrite)
+- Chosen now (fail-safe): TAB11 seeded (6 rows); `f_methode` stays a number input; `permeability_test_method` keeps its 4 prod values.
+- Evidence (verbatim, transcript line): "\hline Großflächige Feldversuche in Testgrube/Probeschurf ( $\geqslant 1 \mathrm{~m}^{2}$ ) & 1 \\" (L1384) … "\hline Laborverfahren mit gestörten Proben/ Sieblinienauswertung für Sandböden & 0,1 \\" (L1390); prod enum `feldversuch | laborversuch | korngroessenanalyse | literaturwert` (captured).
+- Proposed SQL / config: STAGED block a138-E-1 (6-value enum + lookup_fill `{ table_code: 'TAB11', role: 'value', keys: [{ column: 'method', from_symbol: 'permeability_test_method' }], value: 'f_methode' }`); owner rules the re-key map for stored values.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-E-2 · DWA-A-138-1 · A138-06 · belastungskategorie (bk tokens)
+- Class: interface-gap (informational)
+- Chosen now (fail-safe): the TAB5 `bk` column uses prod's enum tokens `BK_I | BK_II | BK_III` (captured), not the brief's `I/II/III`; the lookup_fill writes an enum value only when the cell equals an option (I-1), so the tokens must match prod — they do.
+- Evidence (verbatim, transcript line): "… & VW2 & \\" under "\multirow{4}{*}{II}" (L813–L814); prod `enum_values` values `["BK_I","BK_II","BK_III"]` (a138.prior.json).
+- Proposed SQL / config: none — recorded so the brief's token expectation is reconciled.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-E-3 · DWA-A-138-1 · A138-19 · n_M_overflow_limit
+- Class: equation-replacement (lookup_fill binding; cross-ref D-2b-3)
+- Chosen now (fail-safe): not bound — the field stays a number input. TAB6 now carries `n_m_max` (1/a on all four seeded rows).
+- Evidence (verbatim, transcript line): "… bei Mulden-Rigolen: Überlauf in Rigole mit $n_{\mathrm{M}}$ max. 1/a" (L920, L924); the binding's second key `bbz_band` is not a field (D-2b-3), and a fill-mode lookup_fill with a missing key renders "Schlüssel fehlt" with no input.
+- Proposed SQL / config: STAGED block a138-E-3 — apply together with D-2b-3 option (a) and a138-C-5.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-E-4 · DWA-A-138-1 · A138-18 · q_VS
+- Class: equation-replacement (verified_against_standard Gl. 24)
+- Chosen now (fail-safe): `schuettmaterial` select_one created (Kiessand / Kies (z. B. 16/32)); S6_4_2_QVS seeded (policy `messwert`); `q_VS` NOT re-bound — it is the Gl. 24 output (engine-owned; a lookup_fill would be display-only and never fill).
+- Evidence (verbatim, transcript line): "Liegen keine Herstellerangaben zu den Sickeröffnungen vor, können folgende Werte näherungsweise für den spezifischen Wasseraustritt $q_{\mathrm{D}}$ aus dem Versickerrohr verwendet werden:" (L1866); "I bei Kiessand als Schüttmaterial: & & $q_{\mathrm{vs}}=0,2 \mathrm{l} /(\mathrm{s} \cdot \mathrm{m})$; \\" (L1869); "I bei Kies (z. B. 16/32) als Schüttmaterial: & & $q_{\mathrm{vs}}=5 \mathrm{l} /(\mathrm{s} \cdot \mathrm{m})$." (L1870); prod Gl. 24 `q_VS = 0.1 * az_SOE * A_SOE * 10^-1` (captured).
+- Proposed SQL / config: STAGED block a138-E-4 (Gl. 24 with the printed fallback).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-S-1 · DWA-A-138-1 · A138-18 · q_VS provenance field
+- Class: interface-gap
+- Chosen now (fail-safe): no `datenquelle`-style field exists on A138-18 (captured field list) — the `messwert` policy's provenance would go through the lookup override reason (`audit_log`) once E-4 is ratified.
+- Evidence (verbatim, transcript line): L1866 (above).
+- Proposed SQL / config: an additive text field `q_VS_herkunft` (A138-18 section B, "Herstellerangabe / Näherungswert nach 6.4.2") if the owner wants the source on the worksheet rather than in the audit log.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-D-1 · DWA-A-138-1 · A138-02 · feasibility_determination
+- Class: deactivation (manual enum → derived)
+- Chosen now (fail-safe): equation A138-02-D1 emits `feasibility_code` (1/2/3) into a new derived field; `feasibility_determination` stays manual and stays the REQ-02 driver. Two mappings are fail-safe and need the owner: any Trinkwasserschutzgebiet zone ⇒ column 3 (never column 4 automatically); k_f < 1·10⁻⁶ ⇒ column 3 (the column-4 "Anschluss … nicht möglich" fact has no field).
+- Evidence (verbatim, transcript line): Tab. 3 rows L745–L751; "Eine Versickerung von Niederschlagswasser ist grundsätzlich möglich, wenn alle der oben genannten Kriterien zutreffen … Wenn eine oder mehrere Kriterien dieser Kategorie zutreffen, sind technische und planerische Maßnahmen … Wenn eines der oben aufgeführten Kriterien zutrifft, ist eine Versickerung von Niederschlagswasser in der Regel nicht zulässig" (L752); "… ist das Versickern von gesammeltem Niederschlagswasser in den Zonen I und II in der Regel nicht zulässig." (L693, §4 text — not a Tab. 3 cell)
+- Proposed SQL / config: STAGED block a138-D-1 (REQ-02 on `feasibility_code IN {1, 2}`), after a138-I-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-D-2 · DWA-A-138-1 · A138-05 · kf_test_sites_count
+- Class: deactivation (typed count → derived)
+- Chosen now (fail-safe): NOT emitted — the register footer already shows "n Einträge"; the existing consumed number keeps its manual ownership.
+- Evidence (verbatim, transcript line): "I Bei kompakten/flächenhaften Versickerungsanlagen ist mindestens ein Versuchsstandort je $150 \mathrm{~m}^{2}$ Sohlenfläche der Versickerungsanlage erforderlich." (L1338)
+- Proposed SQL / config: STAGED block a138-D-2 (`kf_test_sites_count = count_rows(kf_test_sites)`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-F-1 · DWA-A-138-1 · A138-05 · kf_test_density_check
+- Class: text-only-formula
+- Chosen now (fail-safe): the boolean stays manual; no formula (inputs Sohlenfläche / Anlagenlänge / Heterogenität do not exist on A138-05).
+- Evidence (verbatim, transcript line): L1338 (above); "I Übersteigt die Länge der geplanten Versickerungsanlage 10 m , ist bei heterogenen Bodenverhältnissen mindestens ein weiterer Versuchsstandort vorzusehen. Bei größeren Versickerungsanlagen sind Versuchsstandorte mindestens alle 25 m der Anlagenlänge anzuordnen." (L1340)
+- Proposed SQL / config: STAGED block a138-F-1 (formula shape with `ceil`/`floor`, G-11) once the inputs exist.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-R-1 · DWA-A-138-1 · A138-26 · V_Rueck (Gl. 10)
+- Class: equation-replacement (verified_against_standard)
+- Chosen now (fail-safe): A138-26-D1 `A_C_s_flood = sum_rows(surface_inventory, if(kind == 'paved', area_m2 * c_s, 0))` emitted into a new derived field; Gl. 10 untouched (still reads the re-typed `A_E_b_a_flood`/`C_S`).
+- Evidence (verbatim, transcript line): Gl. (10) L1501; "$A_{\mathrm{E}, \mathrm{b}, \mathrm{a}}$ & $\mathrm{m}^{2}$ & befestigte, angeschlossene Fläche im Einzugsgebiet" (L1514); captured prod row id `8e3c7e22-e3c7-449a-b267-928332c89306`.
+- Proposed SQL / config: STAGED block a138-R-1 (formula rewrite + deactivation of `A_E_b_a_flood`, `C_S`; the Gl. 10 aggregator contract in `src/lib/eval/aggregators.ts` must move with it).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-R-2 · DWA-A-138-1 · A138-05 · k_f ← k_f_sites_min
+- Class: equation-replacement (input replaced by a derived value)
+- Chosen now (fail-safe): `k_f_sites_min` next to the typed `k_f` (consumed by A138-11, A138-15…22).
+- Evidence (verbatim, transcript line): "Auf der sicheren Seite liegend wird die minimale Infiltrationsrate als $k_{\mathrm{f}}$-Wert verwendet." (L1354)
+- Proposed SQL / config: STAGED block a138-R-2 (re-point A138-05-D1 to `k_f`, deactivate `k_f_sites_min` — one equation per quantity).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-G-1 · DWA-A-138-1 · A138-06 · eta_AFS63 / eta_geloest ≥ Tab. 7
+- Class: gate-guard (new gates, severity)
+- Chosen now (fail-safe): the two required values are filled (lookup_fill, role `limit`); no gate compares them.
+- Evidence (verbatim, transcript line): "Tabelle 7: Anforderungen an die dezentrale Niederschlagswasserbehandlung vor Versickerung über unterirdische Versickerungsanlagen (Rigolen, Versickerungsschächte)" (L980); "Für dezentrale Behandlungsanlagen werden erforderliche Wirkungsgrade für AFS63 und gelöste Stoffe festgelegt." (L967)
+- Proposed SQL / config: STAGED block a138-G-1 (two `warn` gates guarded by `treatment_required == TRUE` — severity and guard are the owner's).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-G-2 · DWA-A-138-1 · A138-02 · A138-REQ-04
+- Class: gate-guard (severity / wording)
+- Chosen now (fail-safe): unchanged (block at `gw_clearance >= 1.0`).
+- Evidence (verbatim, transcript line): "Bei einem Abstand der Sohle der Versickerungsanlage zum maßgeblichen MHGW von $\geqslant 1 \mathrm{~m}$ kann in der Regel auf diese Abstimmung verzichtet werden." (L777); prod condition `gw_clearance >= 1.0`, severity `block` (captured).
+- Proposed SQL / config: STAGED block a138-G-2.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-G-3 · DWA-A-138-1 · A138-21 · Gl. 37 / Gl. 40 switch
+- Class: gate-guard / equation-replacement
+- Chosen now (fail-safe): both h_S equations stay as in prod; `k_f_FS`, `A_S_FS` get `visible_when shaft_type == 'typ_B'`.
+- Evidence (verbatim, transcript line): "Ist beim Schacht Typ B die Durchlässigkeit des anstehenden Bodens mit $k_{f}>1 \cdot 10^{-3} \mathrm{~m} / \mathrm{s}$ größer als die Durchlässigkeit der Filterschicht, wird die Filterschicht für die Bemessung maßgeblich. … Die Bemessung ist dann mit GL. (40) durchzuführen:" (L2171); "Eine Versickerung bei $k_{\mathrm{f}}$-Werten $>1 \cdot 10^{-3} \mathrm{~m} / \mathrm{s}$ ist möglich, jedoch muss das Erfordernis zusätzlicher Maßnahmen zum Stoffrückhalt im Einzelfall geprüft und mit der Genehmigungsbehörde abgestimmt werden." (L1031)
+- Proposed SQL / config: STAGED block a138-G-3 (no SQL until the owner names the row that carries the `if(shaft_type == 'typ_B' AND k_f > 0.001, …)` switch).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-G-4 · DWA-A-138-1 · A138-08 · A138-REQ-08
+- Class: gate-guard (condition change)
+- Chosen now (fail-safe): unchanged (`n IN {0.1, 0.2, 0.33, 0.5}`); `n_limit` is emitted as a derived field only.
+- Evidence (verbatim, transcript line): "( $\leqslant 0,33 / a)$ & ( $\leqslant 0,5 / \mathrm{a}$ ) & (0,1/a)" (L1156); "( $\leqslant 0,2 / \mathrm{a}$ ) & ( $\leqslant 0,33 / \mathrm{a}$ ) & (0,05/a)" (L1162); "$\geqslant 5 \mathrm{a}$ \\ $(\leqslant 0,2 / \mathrm{a})$" (L1173–L1174); "$\geqslant 10 \mathrm{a}$ $$ (\leqslant 0,1 / a) $$" (L1185–L1188)
+- Proposed SQL / config: STAGED block a138-G-4 (`n <= n_limit`), after a138-C-4 and a138-I-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-C-1 · DWA-A-138-1 · A138-21 · schacht_filter_thickness
+- Class: consumer-edit
+- Chosen now (fail-safe): visible (the emitter refuses `visible_when` on a symbol consumed by A138-28); `k_f_FS` and `A_S_FS` (no consumers) are hidden for Typ A.
+- Evidence (verbatim, transcript line): "Als Material für diese Filterschicht $(\geqslant 50 \mathrm{~cm})$ ist carbonathaltiger Sand … zu verwenden." (L2085); captured `consumer_worksheets = ["A138-28"]`.
+- Proposed SQL / config: STAGED block a138-C-1.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-C-2 · DWA-A-138-1 · A138-20 Q_Dr / V_MUE / Q_MUE · A138-19 n_R
+- Class: consumer-edit
+- Chosen now (fail-safe): visible (consumed producers); `n_R_MRS` (A138-20, no consumers) hidden unless `facility_type_selected IN {MRE, MRS}`.
+- Evidence (verbatim, transcript line): "$Q_{\mathrm{Dr}}$ & l/s & mittlerer Drosselabfluss (z. B. bei Mulden-Rigolen-Systemen)" (L1517); Gl. (33) L2058; Tab. 6 L919–L926.
+- Proposed SQL / config: STAGED block a138-C-2 — a default (`Q_Dr = if(facility_type_selected == 'MRS', …, 0)`) rather than visibility, because Gl. 8/9/10 read Q_Dr as 0 for other types.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-C-3 · DWA-A-138-1 · A138-16…22 · section visibility (13 producer sections)
+- Class: consumer-edit
+- Chosen now (fail-safe): 50 producer-free sections carry `facility_type_selected == '<token>'`; the 13 sections holding producers consumed by A138-23/24/28 stay visible — the facility worksheets are therefore only PARTIALLY hidden for non-selected types.
+- Evidence (verbatim, transcript line): "In der Tabelle 14 werden die Planungs- und Bemessungsvorgaben aus 6.2 bis 6.8 zusammengestellt." (L2246); column heads "Versickerungsfläche & Versickerungsmulde & Mulden-Rigolen-Element & Mulden-Rigolen-System & Rigole & Versickerungsschacht & Versickerungsbecken" (L2252); §6.1 Bild 7 is an image.
+- Proposed SQL / config: STAGED block a138-C-3 (the 13 sections listed with their producers).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-C-4 · DWA-A-138-1 · A138-07 · A_C consumer_worksheets += A138-08
+- Class: consumer-edit
+- Chosen now (fail-safe): A138-08-D1 emitted with `A_C` as input; on A138-08 the engine reports `A_C` missing until the consumer edit lands.
+- Evidence (verbatim, transcript line): "Grundstücksentwässerung mit $$ A C \leqslant 800 \mathrm{~m}^{2(a)} $$" / "Grundstücksentwässerung mit $$ A C>800 \mathrm{~m}^{2} $$ \\ und öffentliche Entwässerung" (L1142–L1151); captured A_C consumers lack A138-08.
+- Proposed SQL / config: STAGED block a138-C-4.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-C-5 · DWA-A-138-1 · A138-06 · a138_tier consumers + 2b binding key
+- Class: consumer-edit (cross-ref D-2b-3)
+- Chosen now (fail-safe): `a138_tier` created on A138-06 without consumers (the TAB7 lookups are on the same worksheet); the 2b `ac_as_ratio_limit` binding still names `tab6_tier`.
+- Evidence (verbatim, transcript line): "Flächengruppen und Belastungskategorie nach Tabelle 5" (L914, the Tab. 6/7 row key).
+- Proposed SQL / config: STAGED block a138-C-5 (consumers A138-12, A138-19; re-key the 2b binding to `a138_tier`).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-I-1 · DWA-A-138-1 · engine · enum/text scalar inputs to formulas
+- Class: interface-gap
+- Chosen now (fail-safe): A138-02-D1 and A138-08-D1 are emitted as DATA (engine-eligible, tested through `evalNumber` with a full scope), but `evaluateFormula` receives NUMERIC inputs only (client hook `use-equation-engine.ts`, `evaluate-for-report.ts`, `materialize-derived.ts` all map `type === 'number'`), so on a worksheet they report `manual_required — Fehlende Eingaben: contaminated_land_status, …` / `schutzkategorie` — a visible state, never a wrong number (pinned in `equations-a138.test.ts`).
+- Evidence (verbatim, transcript line): n/a (mechanism); Tab. 3 (L745–L752) and Tab. 8 (L1152–L1188) are keyed on categorical choices by construction.
+- Proposed SQL / config: Plan-2a amendment (code): `EvalInputValue.value: number | string | boolean | null`; `evalExpression` scope widened to `Record<string, Value>` (strings/booleans not entered into `substituted`); the three call sites pass enum/text values for needed symbols. Every Plan-3 standard with a select-keyed formula depends on it.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-X-1 · DWA-A-138-1 · A138-03/05 · Tab. A.1 (suitability matrix)
+- Class: cross-standard / reference
+- Chosen now (fail-safe): not seeded (a suitability matrix, not a value table); kept as a pointer.
+- Evidence (verbatim, transcript line): "Tabelle A.1: Einordnung von Methoden für die Durchlässigkeitsbestimmung in anstehendem Boden" (L2444); "Abschätzung mit Boden- oder Geodaten-Karten … Ersteinschätzung; nicht für Bemessung" (L2448–L2452)
+- Proposed SQL / config: a `reference`-class hint on `permeability_test_method` once E-1 re-keys it (per-method Eignung text from L2448–L2463).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-X-2 · DWA-A-138-1 · A138-15…22 · N facility instances
+- Class: interface-gap (Phase 6 / structural)
+- Chosen now (fail-safe): one worksheet per type as today.
+- Evidence (verbatim, transcript line): Tab. 14 columns (L2252) — one column per type, no instance dimension; Tab. 12 (inventory §2) names series/parallel MRS.
+- Proposed SQL / config: none — structural (Phase 6).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-X-3 · DWA-A-138-1 · A138-06/07 · Flächengruppe per surface + strictest rule
+- Class: interface-gap (Plan 2b config change)
+- Chosen now (fail-safe): one `flaechengruppe` per project (A138-06) drives Tab. 5/6/7.
+- Evidence (verbatim, transcript line): "Flächen mit unterschiedlichen Anforderungen an die Niederschlagswasserbehandlung können an eine gemeinsame Mulde oder ein gemeinsames Sickerbecken angeschlossen werden. Dabei gilt dann für alle Flächen die jeweils strengste Behandlungsanforderung, welche sich für eine der angeschlossenen Flächengruppen ergibt (z. B. Anschluss von Flächengruppen V1, V2 und V3 an eine Mulde: Es gelten die Anforderungen für V3)." (L944)
+- Proposed SQL / config: a `flaechengruppe` lookup_key column (TAB5) on `surface_inventory` + `a138_tier = max_rows(...)` over an ordered tier rank — needs a rank column on TAB5 and the 2b config change.
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+
+### a138-X-4 · DWA-A-138-1 · ~40 re-typed duplicates (inventory §4)
+- Class: consumer-edit (inheritance plan)
+- Chosen now (fail-safe): nothing collapsed; no equation duplicates a producer.
+- Evidence (verbatim, transcript line): n/a (encoding); the producer per quantity is a prod equation row (e.g. Gl. 2 A_C on A138-07, Gl. 5 k_i on A138-11, Gl. 4 Q_S on A138-12, Gl. 8 V_VA on A138-13).
+- Proposed SQL / config: STAGED block a138-X-4 (per-quantity consumer_worksheets additions + deactivations, written once the owner confirms the producer list).
+- ☐ RATIFIED ☐ REJECTED ☐ DEFER

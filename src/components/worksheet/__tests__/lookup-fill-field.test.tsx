@@ -136,7 +136,8 @@ describe('LookupFillField — fill mode (client-owned scalar, DB binding, policy
     expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 9: 0,9');
     expect(screen.getByTestId('lookup-source')).not.toHaveTextContent('Grenzwert');
     expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('0,9');
-    expect(screen.getByTestId('lookup-source').getAttribute('title')).toMatch(/^Tab\. 9: Schwarzdecken/);
+    // Plan 3 Task 1: the title is the printed Tab. 9 row (L1275), no longer the synthesised "Tab. 9: …" string.
+    expect(screen.getByTestId('lookup-source').getAttribute('title')).toContain('{Schwarzdecken (Asphalt)} & 0,9 & 1,0');
   });
 
   it('does NOT fill while the key is unset (keys_missing badge) and does NOT fill when readOnly', () => {

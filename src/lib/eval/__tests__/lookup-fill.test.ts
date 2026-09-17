@@ -30,7 +30,8 @@ describe('resolveLookupFill against the A138 seed tables', () => {
     // Accessor parity, not a typed constant (tab6-loading.ts:79 — same TAB6 row).
     expect(s.tableValue).toBe((tab6Limit('tier2', 0.3) as { max: number }).max);
     expect(s.row.row_key).toBe('tier2|thick');
-    expect(s.row.verbatim_quote).toMatch(/^Tab\. 6:/);
+    // Plan 3 Task 1: the quote is the printed Tab. 6 row (L920), no longer the synthesised "Tab. 6: …" string.
+    expect(s.row.verbatim_quote).toContain('\\leqslant 50$');
     expect(s.valueColumn?.name).toBe('max');
   });
 

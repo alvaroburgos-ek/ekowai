@@ -1,0 +1,299 @@
+-- DWA-A-138-1 — Plan 3 Task 1 STAGED rulings (WRITTEN, NOT APPLIED; nothing here is emitted by the Task 0 emitters).
+-- Every block is a judgment item on docs/superpowers/specs/2026-09-11-guideline-to-tool/SIGN-OFF-plan-3.md
+-- (same ids). Apply a block ONLY after its ☐ RATIFIED box is ticked, each block in its own transaction, in the
+-- order it appears. Prod facts (enum tokens, consumer_worksheets, equation ids/formulas) were captured read-only on
+-- 2026-09-17 (src/lib/eval/field-configs/a138.prior.json; prod-query.mjs for the equation/gate rows quoted below).
+-- Transcript lines refer to C:\Users\Ekowai\Desktop\Guidelines\DWA-A-138-1\DWA-A_138-1_WD (5).md.
+--
+-- Conventions: `s.code = 'DWA-A-138-1'`, worksheets by code, never by id; every UPDATE is guarded by the prior
+-- value it replaces so a re-run is a no-op; each block names its rollback.
+
+-- =====================================================================================================================
+-- a138-E-1 · A138-03 · f_methode — Tab. 11 needs a 6-value driver; prod permeability_test_method has 4 (D-1)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 11 prints six method rows (L1384–L1390: Großflächige Feldversuche 1 · kleine Testgrube 0,9 ·
+-- Doppelzylinder-Infiltrometer 0,9 · Open-End-Test 0,8 · Laborverfahren ungestörte Proben 0,7 · Laborverfahren gestörte
+-- Proben/Sieblinienauswertung 0,1); prod enum = feldversuch | laborversuch | korngroessenanalyse | literaturwert
+-- (captured). `literaturwert` has no Tab. 11 row (Tab. A.1 L2448: "Ersteinschätzung; nicht für Bemessung").
+-- Proposed (replaces prod enum_values — D-1 overwrite, hence a ruling; existing project values need a re-key map
+-- feldversuch→? / laborversuch→? / korngroessenanalyse→labor_gestoert_sieblinie / literaturwert→(none) — the owner rules the map):
+-- BEGIN;
+-- UPDATE fields f SET enum_values = '[
+--   {"value":"feldversuch_grossflaechig","label_de":"Großflächige Feldversuche in Testgrube/Probeschurf (≥ 1 m²)","order_index":0},
+--   {"value":"feldversuch_kleine_testgrube","label_de":"Kleinflächige Feldversuche – kleine Testgrube/Probeschurf (< 1 m²)","order_index":1},
+--   {"value":"doppelzylinder_infiltrometer","label_de":"Kleinflächige Feldversuche – Doppelzylinder-Infiltrometer","order_index":2},
+--   {"value":"open_end_test","label_de":"Kleinflächige Feldversuche – Open-End-Test","order_index":3},
+--   {"value":"labor_ungestoert","label_de":"Laborverfahren mit ungestörten Proben (z. B. Permeameter)","order_index":4},
+--   {"value":"labor_gestoert_sieblinie","label_de":"Laborverfahren mit gestörten Proben/Sieblinienauswertung für Sandböden","order_index":5}]'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'permeability_test_method' AND w.code = 'A138-03' AND s.code = 'DWA-A-138-1' AND f.active;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 11"}'::jsonb,
+--   lookup = '{"table_code":"TAB11","role":"value","keys":[{"column":"method","from_symbol":"permeability_test_method"}],"value":"f_methode"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'f_methode' AND w.code = 'A138-03' AND s.code = 'DWA-A-138-1' AND f.active AND f.widget IS NULL;
+-- COMMIT;
+-- Rollback: restore enum_values to the captured 4-value list (a138.prior.json "A138-03 permeability_test_method") and
+-- f_methode widget/ui_config/lookup to NULL.
+
+-- =====================================================================================================================
+-- a138-E-3 · A138-19 · n_M_overflow_limit — TAB6 `n_m_max` lookup_fill needs a `bbz_band` key symbol (cross-ref D-2b-3)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 6 L920/L924 "bei Mulden-Rigolen: Überlauf in Rigole mit n_M max. 1/a" per (tier, thickness column
+-- L915 "≥ 20 cm" | "≥ 30 cm"); L919 BG1 "n_M max. 2/a" (not seedable under the tier key — a138-U-3).
+-- Why staged: the binding's second key `bbz_band` is not a field (identical to the 2b ac_as_ratio_limit binding); a
+-- lookup_fill in fill mode with a missing key shows "Schlüssel fehlt" and offers NO input, so binding it now would take the
+-- engineer's typed limit away. Apply only together with D-2b-3 option (a) (a `bbz_band` derived field) and a138-C-5.
+-- BEGIN;
+-- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 6"}'::jsonb,
+--   lookup = '{"table_code":"TAB6","role":"limit","keys":[{"column":"tier","from_symbol":"a138_tier"},{"column":"bbz_band","from_symbol":"bbz_band"}],"value":"n_m_max"}'::jsonb
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND f.symbol = 'n_M_overflow_limit' AND w.code = 'A138-19' AND s.code = 'DWA-A-138-1' AND f.active AND f.widget IS NULL;
+-- COMMIT;
+-- Rollback: widget/ui_config/lookup back to NULL (captured prior: all NULL — the Plan-1 columns do not exist yet).
+
+-- =====================================================================================================================
+-- a138-E-4 · A138-18 · q_VS — §6.4.2 default per Schüttmaterial vs. Gl. 24 (replacement of a verified_against_standard equation)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1866 "Liegen keine Herstellerangaben zu den Sickeröffnungen vor, können folgende Werte näherungsweise für
+-- den spezifischen Wasseraustritt q_D aus dem Versickerrohr verwendet werden:" L1869 Kiessand q_vs = 0,2 l/(s·m);
+-- L1870 Kies (z. B. 16/32) q_vs = 5 l/(s·m). Prod equation 24 (A138-18, verified_against_standard):
+-- 'q_VS = 0.1 * az_SOE * A_SOE * 10^-1' — q_VS is engine-owned, so a lookup_fill on it would be display-only and the
+-- table would never fill (two producers for one quantity).
+-- Proposed: one equation with the printed fallback (Gl. 24 when the manufacturer data exists, else the S6_4_2_QVS row
+-- keyed by the created `schuettmaterial` select):
+-- BEGIN;
+-- UPDATE equations e SET formula = 'q_VS = if(az_SOE IS NULL OR A_SOE IS NULL, lookup(''S6_4_2_QVS'', schuettmaterial, ''q_vs''), 0.1 * az_SOE * A_SOE * 10^-1)',
+--   input_symbols = ARRAY['az_SOE','A_SOE','schuettmaterial']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'A138-18' AND s.code = 'DWA-A-138-1' AND e.equation_number = '24'
+--    AND e.formula = 'q_VS = 0.1 * az_SOE * A_SOE * 10^-1';
+-- COMMIT;
+-- Rollback: formula back to 'q_VS = 0.1 * az_SOE * A_SOE * 10^-1', input_symbols back to the captured array.
+-- NOTE (a138-I-1): the enum key `schuettmaterial` is not fed to evaluateFormula today (numeric inputs only) — see the
+-- sign-off sheet; ratify E-4 only after that engine amendment.
+
+-- =====================================================================================================================
+-- a138-D-1 · A138-02 · feasibility_determination — derive the manual enum from feasibility_code (Tab. 3 columns)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L752 (Tab. 3 "Umsetzbarkeit" row). Prod enum feasible | conditional | not_feasible; REQ-02 (block)
+-- 'feasibility_determination IN {feasible, conditional}'. Encoded now: feasibility_code (1 | 2 | 3) as a derived field
+-- (A138-02-D1); the manual enum stays the gate driver. Open mapping questions the owner rules: Trinkwasserschutzgebiet
+-- zone_I / zone_II → column 3 or column 4 (L693 "in den Zonen I und II in der Regel nicht zulässig" is §4 text, not a
+-- Tab. 3 cell); k_f < 1·10⁻⁶ column-4 case ("Anschluss … nicht möglich", L748) has no field.
+-- Proposed (after ratification): a second equation row that writes the enum from the code — needs an enum-valued
+-- equation output (engine amendment, a138-I-1) — OR the gate REQ-02 re-pointed to `feasibility_code IN {1, 2}`:
+-- BEGIN;
+-- UPDATE compliance_requirements cr SET condition = 'feasibility_code IN {1, 2}'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE cr.worksheet_template_id = w.id AND w.code = 'A138-02' AND s.code = 'DWA-A-138-1' AND cr.code = 'A138-REQ-02'
+--    AND cr.condition = 'feasibility_determination IN {feasible, conditional}';
+-- COMMIT;
+-- Rollback: condition back to 'feasibility_determination IN {feasible, conditional}'.
+
+-- =====================================================================================================================
+-- a138-D-2 · A138-05 · kf_test_sites_count — replace the typed count by count_rows(kf_test_sites)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1338 (≥ 1 Versuchsstandort je 150 m² Sohlenfläche), L1340 (+1 bei > 10 m Länge; alle 25 m). Prod:
+-- kf_test_sites_count is a manual number consumed by A138-03, A138-28. An equation on it makes the engine the owner
+-- (read-only) and an EMPTY register counts 0 — a replacement of an input by a derived value.
+-- BEGIN;
+-- INSERT INTO equations (worksheet_template_id, equation_number, formula, input_symbols, output_symbol, output_unit, clause_reference, description, verification_status, verification_quote)
+-- SELECT w.id, 'A138-05-D2', 'kf_test_sites_count = count_rows(kf_test_sites)', ARRAY['kf_test_sites']::text[], 'kf_test_sites_count', NULL, '§5.3.3.6',
+--        'Plan 3: Anzahl der erfassten Versuchsstandorte (Register kf_test_sites) — ersetzt die getippte Anzahl (a138-D-2).', 'imported_unverified',
+--        'I Bei kompakten/flächenhaften Versickerungsanlagen ist mindestens ein Versuchsstandort je $150 \mathrm{~m}^{2}$ Sohlenfläche der Versickerungsanlage erforderlich.'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A138-05' AND s.code = 'DWA-A-138-1'
+-- ON CONFLICT (worksheet_template_id, equation_number) DO NOTHING;
+-- COMMIT;
+-- Rollback: DELETE FROM equations … WHERE equation_number = 'A138-05-D2' AND description LIKE 'Plan 3:%'.
+
+-- =====================================================================================================================
+-- a138-F-1 · A138-05 · kf_test_density_check — the printed density rule as a formula (G-11 round/ceil available)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1338 "mindestens ein Versuchsstandort je 150 m² Sohlenfläche"; L1340 "Übersteigt die Länge … 10 m, ist bei
+-- heterogenen Bodenverhältnissen mindestens ein weiterer Versuchsstandort vorzusehen. Bei größeren Versickerungsanlagen
+-- sind Versuchsstandorte mindestens alle 25 m der Anlagenlänge anzuordnen." — a formula described in words, not printed;
+-- the Sohlenfläche / Anlagenlänge / Heterogenität inputs do not exist on A138-05 (they live on the facility worksheets).
+-- Proposed shape once the inputs exist (needs the owner's reading of "bei heterogenen Bodenverhältnissen"):
+--   kf_sites_required = ceil(A_sohle / 150) + if(L_anlage > 10 AND boden_heterogen == TRUE, 1, 0) + if(L_anlage > 25, floor(L_anlage / 25), 0)
+-- No SQL staged — inputs missing.
+
+-- =====================================================================================================================
+-- a138-R-1 · A138-26 · V_Rueck (Gl. 10) — read Σ(A_E,b,a · C_S) from the surface inventory instead of the two re-typed scalars
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1501 Gl. (10) Σ_i (A_E,b,a · C_S); L1514 "A_E,b,a — befestigte, angeschlossene Fläche im Einzugsgebiet".
+-- Captured prod row (2026-09-17, read-only): equations.id = '8e3c7e22-e3c7-449a-b267-928332c89306', equation_number '10',
+--   formula  = 'V_Rueck = ((r_D(T_n_Ue) * (SUM(A_E_b_a * C_S) + A_VA) / 10000) - (Q_S + Q_Dr)) * D * 60 / 1000 - V_VA >= 0'
+--   input_symbols = {r_D(T_n_Ue),A_E_b_a,C_S,A_VA,Q_S,Q_Dr,D,V_VA}, verification_status = verified_against_standard,
+--   verification_quote = 'V_Rück = ((r_D(30) · (Σ(A_E,b,a · C_S) + A_VA)) / 10.000 − (Q_S + Q_Dr)) · (D · 60) / 1000 − V_VA ≥ 0 (10) — printed p.49'
+-- (the Gl. 10 aggregator in src/lib/eval/aggregators.ts currently feeds this id; the rewrite must keep the aggregator
+-- contract or move Gl. 10 to the generic path — a code change that goes with this ruling).
+-- Proposed:
+-- BEGIN;
+-- UPDATE equations SET formula = 'V_Rueck = ((r_D(T_n_Ue) * (A_C_s_flood + A_VA) / 10000) - (Q_S + Q_Dr)) * D * 60 / 1000 - V_VA >= 0',
+--   input_symbols = ARRAY['r_D(T_n_Ue)','A_C_s_flood','A_VA','Q_S','Q_Dr','D','V_VA']::text[]
+--  WHERE id = '8e3c7e22-e3c7-449a-b267-928332c89306'
+--    AND formula = 'V_Rueck = ((r_D(T_n_Ue) * (SUM(A_E_b_a * C_S) + A_VA) / 10000) - (Q_S + Q_Dr)) * D * 60 / 1000 - V_VA >= 0';
+-- -- then deactivate the two re-typed scalars (A138-26 A_E_b_a_flood, C_S — orphans, no consumers):
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-26' AND s.code = 'DWA-A-138-1' AND f.symbol IN ('A_E_b_a_flood', 'C_S') AND f.active;
+-- COMMIT;
+-- Rollback: formula/input_symbols back to the captured strings above; the two fields active = true.
+
+-- =====================================================================================================================
+-- a138-R-2 · A138-05 · k_f — feed the design k_f from the site minimum (replacement of an input by a derived value)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L1354 "Auf der sicheren Seite liegend wird die minimale Infiltrationsrate als k_f-Wert verwendet."
+-- k_f is consumed by A138-11, A138-15…A138-22 (captured). Encoded now: k_f_sites_min (A138-05-D1) next to the typed k_f.
+-- Proposed (single-source: re-point the ONE registered equation, retire the intermediate field):
+-- BEGIN;
+-- UPDATE equations e SET output_symbol = 'k_f', formula = 'k_f = min_rows(kf_test_sites, k_f_measured)'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE e.worksheet_template_id = w.id AND w.code = 'A138-05' AND s.code = 'DWA-A-138-1' AND e.equation_number = 'A138-05-D1'
+--    AND e.output_symbol = 'k_f_sites_min';
+-- UPDATE fields f SET active = false FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-05' AND s.code = 'DWA-A-138-1' AND f.symbol = 'k_f_sites_min' AND f.description LIKE 'Plan 3:%';
+-- COMMIT;
+-- Rollback: output_symbol/formula back to k_f_sites_min; the field active = true.
+
+-- =====================================================================================================================
+-- a138-G-1 · A138-06 · required efficiencies — new gates eta_AFS63 >= eta_afs63_required, eta_geloest >= eta_geloest_required
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 7 caption L980; L967 "Für dezentrale Behandlungsanlagen werden erforderliche Wirkungsgrade für AFS63 und
+-- gelöste Stoffe festgelegt." Applies to UNDERGROUND facilities only (L967) — the gate needs the facility-type guard
+-- (rigole | schacht) or the A138-06 treatment_required boolean; severity is the owner's call (new gate).
+-- BEGIN;
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'A138-REQ-P3-01', 'Wirkungsgrad AFS63 ≥ Tab. 7', 'IF treatment_required == TRUE THEN eta_AFS63 >= eta_afs63_required', '§5.2.3.3, Tab. 7', 'warn', 'Plan 3: Tab. 7 Grenzwert (a138-G-1)'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A138-06' AND s.code = 'DWA-A-138-1';
+-- INSERT INTO compliance_requirements (worksheet_template_id, code, title_de, condition, clause_reference, severity, description)
+-- SELECT w.id, 'A138-REQ-P3-02', 'Wirkungsgrad gelöste Stoffe ≥ Tab. 7', 'IF treatment_required == TRUE THEN eta_geloest >= eta_geloest_required', '§5.2.3.3, Tab. 7', 'warn', 'Plan 3: Tab. 7 Grenzwert (a138-G-1)'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id WHERE w.code = 'A138-06' AND s.code = 'DWA-A-138-1';
+-- COMMIT;
+-- Rollback: DELETE … WHERE code IN ('A138-REQ-P3-01','A138-REQ-P3-02').
+
+-- =====================================================================================================================
+-- a138-G-2 · A138-02 · A138-REQ-04 — blocks at gw_clearance < 1 where the text requires Abstimmung, not prohibition
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L777 "Die Mächtigkeit des Sickerraums a bezogen auf den MHGW … muss mit der Genehmigungsbehörde abgestimmt
+-- werden. … Bei einem Abstand der Sohle der Versickerungsanlage zum maßgeblichen MHGW von ≥ 1 m kann in der Regel auf
+-- diese Abstimmung verzichtet werden." Prod: A138-REQ-04 severity block, condition 'gw_clearance >= 1.0'.
+-- Proposed (severity change — owner's call):
+-- BEGIN;
+-- UPDATE compliance_requirements cr SET severity = 'warn', condition = 'IF gw_clearance < 1.0 THEN authority_coordination_required == TRUE'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE cr.worksheet_template_id = w.id AND w.code = 'A138-02' AND s.code = 'DWA-A-138-1' AND cr.code = 'A138-REQ-04'
+--    AND cr.severity = 'block' AND cr.condition = 'gw_clearance >= 1.0';
+-- COMMIT;
+-- Rollback: severity 'block', condition 'gw_clearance >= 1.0'.
+
+-- =====================================================================================================================
+-- a138-G-3 · A138-21 · Gl. 40 switch for Schacht Typ B when k_f > 1·10⁻³ m/s
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2171 "Ist beim Schacht Typ B die Durchlässigkeit des anstehenden Bodens mit k_f > 1·10⁻³ m/s größer als die
+-- Durchlässigkeit der Filterschicht, wird die Filterschicht für die Bemessung maßgeblich. … Die Bemessung ist dann mit
+-- GL. (40) durchzuführen"; L2169 "erf. K_f,FS einen Wert von 1·10⁻³ m/s nicht überschreiten". Prod has Gl. 37 and Gl. 40
+-- both as h_S outputs on A138-21 (two producers). A switch = replacing Gl. 37 by
+--   h_S = if(shaft_type == 'typ_B' AND k_f > 0.001, <Gl. 40 RHS>, <Gl. 37 RHS>)
+-- which is a replacement of two verified_against_standard equations — no SQL staged until the owner rules which row
+-- carries the switch (and a138-I-1 lands: `shaft_type` is an enum input).
+
+-- =====================================================================================================================
+-- a138-G-4 · A138-08 · A138-REQ-08 — replace the fixed set {0.1, 0.2, 0.33, 0.5} by n <= n_limit (Tab. 8 bound)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 8 L1156/L1162 "(≤ 0,33/a) | (≤ 0,5/a)", "(≤ 0,2/a) | (≤ 0,33/a)", L1173–1177 "≥ 5 a (≤ 0,2/a)",
+-- L1185–1188 "≥ 10 a (≤ 0,1/a)"; the caption L1132 says "Hinweise zur Festlegung" (a138-P-2). Prod: A138-REQ-08 block,
+-- condition 'n IN {0.1, 0.2, 0.33, 0.5}'.
+-- BEGIN;
+-- UPDATE compliance_requirements cr SET condition = 'n <= n_limit'
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE cr.worksheet_template_id = w.id AND w.code = 'A138-08' AND s.code = 'DWA-A-138-1' AND cr.code = 'A138-REQ-08'
+--    AND cr.condition = 'n IN {0.1, 0.2, 0.33, 0.5}';
+-- COMMIT;
+-- Rollback: condition back to 'n IN {0.1, 0.2, 0.33, 0.5}'. Needs a138-C-4 (A_C on A138-08) and a138-I-1 first.
+
+-- =====================================================================================================================
+-- a138-C-1 · A138-21 · schacht_filter_thickness — visible_when shaft_type == 'typ_B' refused: consumed by A138-28
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: L2085 (Filterschicht ≥ 50 cm, Typ B). Captured consumer_worksheets = ["A138-28"] (a summary worksheet).
+-- Proposed: keep the consumer, accept that a hidden producer inherits null on A138-28 (the summary shows "—" for Typ A):
+-- BEGIN;
+-- UPDATE fields f SET visible_when = 'shaft_type == ''typ_B''' FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-21' AND s.code = 'DWA-A-138-1' AND f.symbol = 'schacht_filter_thickness' AND f.active AND f.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: visible_when = NULL. (`erf_k_f_FS` is an equation output without a field — nothing to hide.)
+
+-- =====================================================================================================================
+-- a138-C-2 · A138-20 Q_Dr / V_MUE / Q_MUE and A138-19 n_R — MRS/MRE-only inputs, refused: consumed by A138-13/23/24/26 (Q_Dr), A138-23, A138-20
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Gl. 30 (L1974) … Gl. 33 (L2058, Q_Dr = (Q_Dr,min + Q_Dr,max) / 2 — MRS) and Tab. 6 L919–L926 (Überlauf n_M bei Mulden-Rigolen). Q_Dr feeds Gl. 8/9/10 on
+-- A138-13/26 as "mittlerer Drosselabfluss (z. B. bei Mulden-Rigolen-Systemen)" (L1517) — hiding it for non-MRS types
+-- would inherit null where those equations need 0. The safe encoding is a default, not visibility:
+--   Q_Dr = if(facility_type_selected == 'MRS', (Q_Dr_min + Q_Dr_max) / 2, 0)   (replaces Gl. 33 — equation replacement)
+-- No visibility SQL staged; the Gl. 33 replacement waits on a138-I-1 (enum input) and the owner's ruling.
+
+-- =====================================================================================================================
+-- a138-C-3 · A138-16…22 · section visibility on B/C/D sections holding producers consumed by A138-23/24/28
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: §6.1 Bild 7 (image) + Tab. 14 columns L2252 (one facility type per worksheet). Encoded now: 50 section rules
+-- on the producer-free sections (A/F/J/K/L/M everywhere; A138-16 B, D; A138-20 B). Refused (captured producers):
+--   A138-16 C (A_S_flaeche) · A138-17 B (boeschungsneigung, freibord), D (t_E, V_M) · A138-18 B (b_R, d_a, d_i, h_R), D (L_R, s_R, V_R)
+--   A138-19 B (n_M_overflow_check, n_M_overflow_limit, n_R), D (V_MR) · A138-20 D (Q_Dr, Q_MUE, V_MUE) · A138-21 B (schacht_* checks), D (h_S, V_S)
+--   A138-22 B (basin_h_check), C (basin_ki_min_check), D (V_B)
+-- Proposed: the same rule on those 13 sections, accepting inherited nulls on the summary worksheets for the types not selected
+-- (the summaries A138-23/24/28 then show "—" for the six unselected types, which is the truthful state):
+-- BEGIN;
+-- UPDATE worksheet_sections ws SET visible_when = 'facility_type_selected == ''' || x.token || ''''
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id,
+--        (VALUES ('A138-16','flaeche','C'),('A138-17','mulde','B'),('A138-17','mulde','D'),('A138-18','rigole','B'),('A138-18','rigole','D'),
+--                ('A138-19','MRE','B'),('A138-19','MRE','D'),('A138-20','MRS','D'),('A138-21','schacht','B'),('A138-21','schacht','D'),
+--                ('A138-22','becken','B'),('A138-22','becken','C'),('A138-22','becken','D')) AS x(ws_code, token, section)
+--  WHERE ws.worksheet_template_id = w.id AND w.code = x.ws_code AND ws.code = x.section AND s.code = 'DWA-A-138-1' AND ws.visible_when IS NULL;
+-- COMMIT;
+-- Rollback: visible_when = NULL on those 13 sections.
+
+-- =====================================================================================================================
+-- a138-C-4 · A138-07 · A_C — add A138-08 to consumer_worksheets (n_limit reads A_C on A138-08)
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 8 column heads L1142–L1151 "Grundstücksentwässerung mit A_C ≤ 800 m²" / "A_C > 800 m²". Captured
+-- consumer_worksheets of A138-07 A_C: A138-10,13,16,17,18,19,20,21,22,26,12 — A138-08 missing.
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = array_append(f.consumer_worksheets, 'A138-08')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-07' AND s.code = 'DWA-A-138-1' AND f.symbol = 'A_C' AND f.active
+--    AND NOT ('A138-08' = ANY(f.consumer_worksheets));
+-- COMMIT;
+-- Rollback: array_remove(consumer_worksheets, 'A138-08').
+
+-- =====================================================================================================================
+-- a138-C-5 · A138-06 · a138_tier — consumers A138-12 (ac_as_ratio_limit, D-2b-3) and A138-19 (n_M_overflow_limit, a138-E-3); re-key the 2b binding
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Evidence: Tab. 6 L914 "Flächengruppen und Belastungskategorie nach Tabelle 5" is the row key of Tab. 6/7. The 2b binding
+-- (20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql) names `tab6_tier`; this task creates `a138_tier` (brief).
+-- BEGIN;
+-- UPDATE fields f SET consumer_worksheets = ARRAY['A138-12','A138-19']::text[]
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-06' AND s.code = 'DWA-A-138-1' AND f.symbol = 'a138_tier' AND f.description LIKE 'Plan 3:%'
+--    AND f.consumer_worksheets IS NULL;
+-- -- 2b binding re-key (only if D-2b-3 is ratified with option (a) and the key symbol is a138_tier, not tab6_tier):
+-- UPDATE fields f SET lookup = jsonb_set(f.lookup, '{keys,0,from_symbol}', '"a138_tier"')
+--   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
+--  WHERE f.worksheet_template_id = w.id AND w.code = 'A138-12' AND s.code = 'DWA-A-138-1' AND f.symbol = 'ac_as_ratio_limit' AND f.widget = 'lookup_fill'
+--    AND f.lookup #>> '{keys,0,from_symbol}' = 'tab6_tier';
+-- COMMIT;
+-- Rollback: consumer_worksheets = NULL; from_symbol back to 'tab6_tier'.
+
+-- =====================================================================================================================
+-- a138-X-4 · inheritance plan for the ~40 re-typed duplicates (inventory §4) — consumer edits, one producer per quantity
+-- ☐ RATIFIED ☐ REJECTED ☐ DEFER
+-- Not solved by equations (single-source: inherit by reference, never recompute). Per quantity the producer keeps its
+-- row and the duplicates are deactivated after their worksheets are added to the producer's consumer_worksheets:
+--   A_C (A138-07)          → + A138-14 (A_C_calculated), A138-24 (A_C_final)   ; deactivate A_C_calculated, A_C_final
+--   k_i (A138-11)          → k_i_calculated                                   ; k_f (A138-05) → a138_k_f_design, a138_k_f_min
+--   Q_S (A138-12)          → Q_S_calculated, Q_S_final, Q_S_flood (A138-26)
+--   V_VA (A138-13)         → V_VA_calculated, V_VA_final, a138_V_Sp_erforderlich, facility_specific_volume_m3
+--   q_S_AC (A138-13)       → q_S_AC_final, qsac_value_verified
+--   r_D_n / D_min (A138-13)→ r_D_n_optimal, r_D_n_used, r_D_n_used_R, r_D_n_S, r_D_n_B, a138_regenspende_r_DT / D_optimal_min, D_min_used, a138_dauerstufe_D
+--   n (A138-08)            → n_M_Bemessung, n_R_Bemessung, n_R, n_R_MRS, n_B_Bemessung ; T_n → kostra_design_T_n, a138_jaehrlichkeit_T
+--   facility_type_selected → a138_anlagentyp_gewaehlt, facility_type_dimensioned, facility_type_final
+-- Each line = one consumer_worksheets UPDATE on the producer + one `active = false` per duplicate, written as separate
+-- ratifiable statements once the owner picks the producer per quantity (the inventory names candidates only). No SQL staged.
