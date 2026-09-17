@@ -63,9 +63,12 @@ describe('effectiveWidget / placement / bespoke', () => {
     // Plan 2b Task 4: pollutant_register is no longer bespoke — it places as a generic register (bottom, config title).
     expect(widgetPlacement({ ...base, symbol: 'pollutant_register', dataType: 'json' })).toEqual({ placement: 'bottom', title: 'Schadstoffregister (E-PRTR)' });
     expect((BESPOKE_BY_SYMBOL as Record<string, string>).pollutant_register).toBeUndefined();
-    // Task 6 hand-off: rainfall_table_ref stays on its bespoke editor until then.
-    expect(widgetPlacement({ ...base, symbol: 'rainfall_table_ref', dataType: 'text' })).toEqual({ placement: 'bottom', title: BESPOKE_TITLES.rainfall_table_ref });
-    // A DB widget on the same symbol is NOT bespoke (widget non-null ⇒ no symbol keying).
+    // Plan 2b Task 6: rainfall_table_ref is the `reference` widget (fallback config while widget IS NULL) — no bespoke
+    // key any more; it places in ITS SECTION with no h2 (spec §6), as does a DB widget on the same symbol.
+    expect((BESPOKE_BY_SYMBOL as Record<string, string>).rainfall_table_ref).toBeUndefined();
+    expect(resolveBespokeEditor({ ...base, symbol: 'rainfall_table_ref', dataType: 'text' }, null)).toBeNull();
+    expect(widgetPlacement({ ...base, symbol: 'rainfall_table_ref', dataType: 'text' })).toEqual({ placement: 'section', title: null });
+    expect(widgetPlacement({ ...base, symbol: 'rainfall_table_ref', dataType: 'text', widget: 'reference', uiConfig: { carrier_symbol: 'r_D_n_table', rows_path: 'tables', id_key: 'id', label_key: 'name' } })).toEqual({ placement: 'section', title: null });
     expect(widgetPlacement({ ...base, symbol: 'rainfall_table_ref', dataType: 'text', widget: 'scalar' })).toEqual({ placement: 'section', title: null });
   });
 

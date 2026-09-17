@@ -505,8 +505,8 @@ export function WorksheetForm({
 
   // Plan 2b (Task 4): register-output provenance hint, generic. For every
   // register field of THIS worksheet, the output symbols of the equations
-  // (DB rows + Plan 2a fallback) that consume it get "Summe aus dem Register
-  // <title>" — the old VSME-only pollutant hint generalised (A138-07's six
+  // (DB rows + Plan 2a fallback) that consume it get "Aus dem Register
+  // „<title>“ berechnet (…)" — the old VSME-only pollutant hint generalised (A138-07's six
   // surface outputs now carry it too, label "Flächenverzeichnis").
   const registerOutputHints = useMemo(() => {
     const m = new Map<string, { title: string; placement: 'section' | 'bottom' }>();
@@ -896,8 +896,9 @@ export function WorksheetForm({
 
       {/* Bottom strip (Plan 2b Task 3): every own visible field whose widget
           places it at the bottom — registers (generic RegisterEditor or a
-          bespoke editor: KOSTRA tables, risk register, mitigation plan, and the
-          Task 4/6 hand-offs) and legacy TS checklists — in orderIndex order,
+          bespoke editor: KOSTRA tables, risk register, mitigation plan) and
+          legacy TS checklists — in orderIndex order (the `reference` widget —
+          rainfall_table_ref since Task 6 — renders in its section instead),
           under the title widgetPlacement() resolves (config title / today's h2). */}
       {fieldsBySectionId.bottom.map((f) => {
         const { title } = widgetPlacement(f);

@@ -32,7 +32,6 @@ vi.mock('../compliance-block', () => ({ ComplianceBlock: () => null }));
 vi.mock('../approval-bar', () => ({ ApprovalBar: () => null }));
 vi.mock('../equation-engine-card', () => ({ EquationEngineCard: () => null }));
 vi.mock('../rainfall-tables-editor', () => ({ RainfallTablesEditor: () => null }));
-vi.mock('../rainfall-table-selector', () => ({ RainfallTableSelector: () => null }));
 vi.mock('../surface-source-banner', () => ({ SurfaceSourceBanner: () => null }));
 vi.mock('@/components/form-templates/SourceFormReferencePanel', () => ({ SourceFormReferencePanel: () => null }));
 vi.mock('@/components/documents/citation-picker', () => ({ CitationPicker: () => null }));
@@ -138,6 +137,12 @@ describe('WorksheetForm — one renderer path via the WIDGETS registry', () => {
     const FIELDS_BOGUS = [makeField({ id: 'f-bogus', symbol: 'bogus_sym', labelDe: 'Unbekanntes Widget', sectionId: 's1', widget: 'not_a_widget' })];
     render(<WorksheetForm {...PROPS} fields={FIELDS_BOGUS} />);
     expect(screen.getByLabelText('Unbekanntes Widget', { exact: false })).toBeInTheDocument();
+  });
+
+  it('a prototype-named DB widget string ("toString") also falls back to the scalar renderer (own-key dispatch guard)', () => {
+    const FIELDS_PROTO = [makeField({ id: 'f-proto', symbol: 'proto_sym', labelDe: 'Prototyp-Widget', sectionId: 's1', widget: 'toString' })];
+    render(<WorksheetForm {...PROPS} fields={FIELDS_PROTO} />);
+    expect(screen.getByLabelText('Prototyp-Widget', { exact: false })).toBeInTheDocument();
   });
 
   it('a register hidden by visible_when renders nothing (Plan 2a hiddenFieldIds semantics kept)', () => {

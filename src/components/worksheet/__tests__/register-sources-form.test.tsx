@@ -30,7 +30,6 @@ vi.mock('../compliance-block', () => ({ ComplianceBlock: () => null }));
 vi.mock('../approval-bar', () => ({ ApprovalBar: () => null }));
 vi.mock('../equation-engine-card', () => ({ EquationEngineCard: () => null }));
 vi.mock('../rainfall-tables-editor', () => ({ RainfallTablesEditor: () => null }));
-vi.mock('../rainfall-table-selector', () => ({ RainfallTableSelector: () => null }));
 vi.mock('@/components/form-templates/SourceFormReferencePanel', () => ({ SourceFormReferencePanel: () => null }));
 vi.mock('@/components/documents/citation-picker', () => ({ CitationPicker: () => null }));
 vi.mock('@/components/documents/citation-chips', () => ({ CitationChips: () => null }));

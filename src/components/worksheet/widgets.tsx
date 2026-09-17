@@ -14,9 +14,13 @@
  *   TS fallbacks while widget IS NULL) and renders the generic `RegisterEditor`,
  *   unless a BESPOKE editor claims the field (`ui_config.editor`, or — while
  *   widget IS NULL — the symbol table below: KOSTRA rainfall tables, risk
- *   register, mitigation plan, and the Task-6 hand-off rainfall_table_ref).
- *   pollutant_register (VSME-B04.100) renders through the generic editor since
- *   Task 4 — its three per-medium sums are the Plan 2a fallback-equation states.
+ *   register, mitigation plan). pollutant_register (VSME-B04.100) renders
+ *   through the generic editor since Task 4 — its three per-medium sums are
+ *   the Plan 2a fallback-equation states.
+ * - `reference` renders `ReferenceField` (Task 6): a select over another
+ *   carrier's rows storing the row ID. While `widget IS NULL`, a scalar-shaped
+ *   field whose symbol is in REFERENCE_CONFIGS_FALLBACK (rainfall_table_ref)
+ *   renders it too — RainfallTableSelector is deleted.
  * - Placement (`widgetPlacement`): registers follow `registerPlacement(cfg)`
  *   (undefined ⇒ bottom — the Plan-1 selection migrations carry no placement
  *   key); bespoke editors sit at the bottom under today's h2 titles; a legacy
@@ -31,14 +35,14 @@ import type { FieldValue } from '@/lib/state/worksheet-store';
 import { inferWidget, type Widget, type RegisterUiConfig } from '@/lib/eval/field-config';
 import { resolveRegisterConfig } from '@/lib/eval/register-configs';
 import { resolveSelectionConfig, type ChecklistConfig } from '@/lib/eval/selection-fields';
-import { normalizeRainfallCarrier } from '@/lib/eval/rainfall-tables';
+import { resolveReferenceConfig } from '@/lib/eval/reference-configs';
 import type { EvalState } from '@/lib/eval/formula';
 import type { Value } from '@/lib/expr';
 import type { DynamicField } from './dynamic-field';
 import { RegisterEditor, registerPlacement, type FooterState } from './register-editor';
 import { ChecklistEditor } from './checklist-editor';
 import { RainfallTablesEditor } from './rainfall-tables-editor';
-import { RainfallTableSelector } from './rainfall-table-selector';
+import { ReferenceField } from './reference-field';
 import { RiskRegisterEditor } from './risk-register-editor';
 import { MitigationPlanEditor } from './mitigation-plan-editor';
 import { EditorErrorBoundary } from './editor-error-boundary';
@@ -74,16 +78,13 @@ export type WidgetContext = {
 export type BespokeEditorKey =
   | 'rainfall_tables'
   | 'risk_register'
-  | 'risk_mitigation_plan'
-  /** Plan 2b Task 6 hand-off: the per-facility table-id picker stays on RainfallTableSelector until the `reference` widget lands. */
-  | 'rainfall_table_ref';
+  | 'risk_mitigation_plan';
 
 /** Symbol-keyed bespoke editors — consulted ONLY while `widget IS NULL`. */
 export const BESPOKE_BY_SYMBOL = {
   r_D_n_table: 'rainfall_tables',
   risk_register: 'risk_register',
   risk_mitigation_plan: 'risk_mitigation_plan',
-  rainfall_table_ref: 'rainfall_table_ref',
 } as const satisfies Record<string, BespokeEditorKey>;
 
 /** Today's bottom-section h2 strings (worksheet-form.tsx before Plan 2b Task 3). */
@@ -91,7 +92,6 @@ export const BESPOKE_TITLES: Readonly<Record<BespokeEditorKey, string>> = {
   rainfall_tables: 'Regenspendentabellen (für V_VA nach Gl. 8)',
   risk_register: 'Risikoanalyse (Anhang A — Tab. A.1)',
   risk_mitigation_plan: 'Risiko-Maßnahmenplan (Anhang A — Tab. A.2)',
-  rainfall_table_ref: 'Verwendete Regenspendentabelle',
 };
 
 export function effectiveWidget(f: WorksheetFormField): Widget {
@@ -155,23 +155,6 @@ export function footerStatesFor(cfg: RegisterUiConfig, ctx: WidgetContext): Reco
   return out;
 }
 
-/** Task 6 hand-off: the per-facility selector picks a TABLE id of the (inherited) KOSTRA carrier — never a raw text input. */
-function RainfallTableRef({ f, ctx }: { f: WorksheetFormField; ctx: WidgetContext }) {
-  const kostraField = ctx.fieldBySymbol.get('r_D_n_table');
-  const kostraValue = kostraField ? ctx.values[kostraField.id] : undefined;
-  const tables = normalizeRainfallCarrier(kostraValue?.type === 'json' ? kostraValue.value : undefined).tables;
-  const v = ctx.values[f.id];
-  const value = (v?.type === 'text' || v?.type === 'enum') && typeof v.value === 'string' ? v.value : null;
-  return (
-    <RainfallTableSelector
-      tables={tables}
-      value={value}
-      onSelect={(id) => ctx.setField(f.id, { type: 'text', value: id })}
-      readOnly={ctx.readOnly}
-    />
-  );
-}
-
 function renderBespoke(key: BespokeEditorKey, f: WorksheetFormField, ctx: WidgetContext): ReactNode {
   switch (key) {
     case 'rainfall_tables':
@@ -188,16 +171,15 @@ function renderBespoke(key: BespokeEditorKey, f: WorksheetFormField, ctx: Widget
           <MitigationPlanEditor fieldId={f.id} readOnly={ctx.readOnly} />
         </EditorErrorBoundary>
       );
-    case 'rainfall_table_ref':
-      return <RainfallTableRef f={f} ctx={ctx} />;
   }
 }
 
-/** Scalar-shaped widgets: a symbol-keyed bespoke editor (rainfall_table_ref) wins while widget IS NULL, else DynamicField. */
-const dynamicOrBespoke = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => {
-  const bespoke = resolveBespokeEditor(f, null);
-  return bespoke ? renderBespoke(bespoke, f, ctx) : ctx.renderDynamic(f);
-};
+const reference = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => <ReferenceField field={f} ctx={ctx} />;
+
+/** Scalar-shaped widgets: while widget IS NULL a symbol in REFERENCE_CONFIGS_FALLBACK (rainfall_table_ref — a `text`
+ * field, so it infers to scalar) renders the reference widget; else DynamicField. */
+const dynamicOrReference = (f: WorksheetFormField, ctx: WidgetContext): ReactNode =>
+  f.widget == null && resolveReferenceConfig(f) ? reference(f, ctx) : ctx.renderDynamic(f);
 
 const checklistOrDynamic = (f: WorksheetFormField, ctx: WidgetContext): ReactNode => {
   const checklist = resolveChecklist(f);
@@ -210,12 +192,12 @@ const checklistOrDynamic = (f: WorksheetFormField, ctx: WidgetContext): ReactNod
 };
 
 export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext) => ReactNode> = {
-  scalar: dynamicOrBespoke,
-  select_one: dynamicOrBespoke,
-  attestation: dynamicOrBespoke,
-  derived: dynamicOrBespoke,
+  scalar: dynamicOrReference,
+  select_one: dynamicOrReference,
+  attestation: dynamicOrReference,
+  derived: dynamicOrReference,
   // No standalone grid renderer in Plan 2b (grid ships as a register COLUMN, Task 9) — json placeholder as today.
-  grid: dynamicOrBespoke,
+  grid: dynamicOrReference,
   // widget IS NULL ⇒ same precedence as the register branch (symbol-keyed register/bespoke config wins, then the TS
   // checklist); json + enumValues without any config ⇒ dynamic-field.tsx json-checklist branch (unchanged).
   select_many: (f, ctx) => (f.widget == null ? WIDGETS.register(f, ctx) : checklistOrDynamic(f, ctx)),
@@ -239,14 +221,16 @@ export const WIDGETS: Record<Widget, (f: WorksheetFormField, ctx: WidgetContext)
       </EditorErrorBoundary>
     );
   },
-  // Plan 2b Task 6 (`reference`) / Task 7 (`lookup_fill`) replace these stubs; no prod row carries either widget yet.
-  reference: (f, ctx) => ctx.renderDynamic(f),
+  reference,
+  // Plan 2b Task 7 (`lookup_fill`) replaces this stub; no prod row carries the widget yet.
   lookup_fill: (f, ctx) => ctx.renderDynamic(f),
 };
 
 /** The form's single dispatch: `WIDGETS[effectiveWidget(f)]`. An out-of-enum DB `widget` string (schema.ts types the
- * column as text; the CHECK constraint lives in an unapplied migration) falls back to the scalar renderer, never a blank. */
+ * column as text; the CHECK constraint lives in an unapplied migration) falls back to the scalar renderer, never a blank —
+ * own-key check, so a prototype name like 'toString' never resolves to a function (Task 3 re-review). */
 export function renderWidget(f: WorksheetFormField, ctx: WidgetContext): ReactNode {
-  const render = WIDGETS[effectiveWidget(f)] ?? WIDGETS.scalar;
+  const w = effectiveWidget(f);
+  const render = Object.hasOwn(WIDGETS, w) ? WIDGETS[w] : WIDGETS.scalar;
   return <Fragment key={f.id}>{render(f, ctx)}</Fragment>;
 }

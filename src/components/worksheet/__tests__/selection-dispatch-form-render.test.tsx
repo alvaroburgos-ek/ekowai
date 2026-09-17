@@ -29,7 +29,6 @@ vi.mock('../compliance-block', () => ({ ComplianceBlock: () => null }));
 vi.mock('../approval-bar', () => ({ ApprovalBar: () => null }));
 vi.mock('../equation-engine-card', () => ({ EquationEngineCard: () => null }));
 vi.mock('../rainfall-tables-editor', () => ({ RainfallTablesEditor: () => null }));
-vi.mock('../rainfall-table-selector', () => ({ RainfallTableSelector: () => null }));
 // Plan 2b: `../surface-inventory-editor` deleted (generic RegisterEditor) — its vi.mock removed.
 vi.mock('../surface-source-banner', () => ({ SurfaceSourceBanner: () => null }));
 vi.mock('@/components/form-templates/SourceFormReferencePanel', () => ({ SourceFormReferencePanel: () => null }));
