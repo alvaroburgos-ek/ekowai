@@ -8,9 +8,9 @@
  * hand-typed here) so this test fails the moment either drifts.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { emitSeedSql } from '../regulation-tables/emit-seed-sql';
+import { emitSeedSql, seedFilesFor, SEED_BUILDERS } from '../regulation-tables/emit-seed-sql';
 import { emitSelectionConfigSql, emitSelectionRollbackSql } from '../regulation-tables/emit-selection-configs-sql';
 import { a138SeedTables } from '../../src/lib/eval/regulation-tables-seed-a138';
 
@@ -23,6 +23,19 @@ describe('generated-sql freshness — committed files equal a fresh emitter call
     const { up, down } = emitSeedSql(a138SeedTables());
     expect(norm(up)).toBe(read('scripts/migrations/20260911110000_regulation_tables_seed_a138.sql'));
     expect(norm(down)).toBe(read('scripts/rollback-20260911110000-regulation-tables-seed-a138.sql'));
+  });
+
+  // Plan 3 Task 0 (fix round 1): every seed slug in SEED_BUILDERS is auto-pinned — a Plan-3 task that adds a
+  // builder gets its migration + rollback byte-pinned without remembering to add a case here.
+  it('every SEED_BUILDERS slug: committed seed migration + rollback match emitSeedSql(build())', () => {
+    const slugs = Object.keys(SEED_BUILDERS);
+    expect(slugs).toContain('a138');
+    for (const slug of slugs) {
+      const { up, down } = emitSeedSql(SEED_BUILDERS[slug].build());
+      const files = seedFilesFor(slug);
+      expect(norm(up), files.migration).toBe(read(files.migration));
+      expect(norm(down), files.rollback).toBe(read(files.rollback));
+    }
   });
 
   it('every selection_configs_<STD> migration matches emitSelectionConfigSql(entries) for that standard', () => {
@@ -44,7 +57,6 @@ describe('generated-sql freshness — committed files equal a fresh emitter call
   it('no stray selection_configs migration file exists for a standard the entries JSON no longer touches (e.g. all its entries skipped)', () => {
     const entries = JSON.parse(readFileSync(join(ROOT, 'scripts/regulation-tables/selection-config-entries.json'), 'utf8'));
     const perStandard = emitSelectionConfigSql(entries);
-    const { readdirSync } = require('node:fs') as typeof import('node:fs');
     const files = readdirSync(join(ROOT, 'scripts/migrations')).filter((f: string) => f.startsWith('20260911120000_selection_configs_'));
     expect(files.length).toBe(perStandard.size);
   });

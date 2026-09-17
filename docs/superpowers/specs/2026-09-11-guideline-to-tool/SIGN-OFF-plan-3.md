@@ -33,4 +33,8 @@ Ordering: blocks are grouped by task (Task 1 … Task 29, the plan's execution o
 
 No judgment items. Task 0 built the emitters, the transcript quote verifier, the slug-driven seed map, the types, and this skeleton; nothing here touches a guideline value.
 
+### Observations (no signature needed)
+
+- **Bundle growth (Task 0 review, 2026-09-17):** `src/lib/eval/regulation-tables-seed-index.ts` is imported by the runtime fallback (`regulation-tables-fallback.ts`), so every Plan-3 seed builder (29 standards × their tables, verbatim quotes included) ships in the client bundle as the deploy-before-seed fallback — by design (Global Constraint 6) but worth measuring at Task 30; `FIELD_CONFIG_MODULES` / `EQUATION_MODULES` are dynamic imports used only by the emitter CLIs and add nothing to the app bundle unless an app module imports the index. Once every seed migration is applied, the fallback can shrink to a per-standard lazy import (Phase 6 follow-up).
+
 <!-- Standard tasks append below this line, one `## Task N — <STANDARD> (<slug>)` section each. -->

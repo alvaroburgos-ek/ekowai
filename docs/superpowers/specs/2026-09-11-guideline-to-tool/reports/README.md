@@ -20,6 +20,10 @@ Column meanings:
 - **sign-off entries** — blocks appended to `SIGN-OFF-plan-3.md` by this task.
 - **tokens in** — the subagent's context total at end (from the transcript's usage line); **minutes** — wall-clock of the task.
 
+## Prior capture (before emitting field configs)
+
+`node scripts/regulation-tables/build-prior-snapshot.mjs <STANDARD CODE> <slug>` writes `src/lib/eval/field-configs/<slug>.prior.json` (read-only prod capture, full JSON rows; `_meta.command` + `_meta.captured_at` record the run). Never fold `prod-query.mjs` output by hand — it truncates cells to 120 chars and the emitter refuses a stringified capture. Paste the script's summary line into the report; if prod was unreachable, say so, build the prior from the harness seed, and emit with `--provenance "PRIOR FROM HARNESS SEED (prod unreachable <date>): owner re-captures before applying"`.
+
 ## Report sections (in this order)
 
 1. Counts table (above).
