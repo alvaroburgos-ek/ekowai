@@ -162,13 +162,13 @@ describe('A138 Plan-3 seed tables — value-parity pins against the TS constants
     expectWellFormed(t);
     expect(t.rows.map((r) => r.row_key)).toEqual(['flaeche', 'mulde', 'MRE', 'MRS', 'rigole', 'schacht', 'becken']);
     const v = Object.fromEntries(t.rows.map((r) => [r.row_key, r.values]));
-    expect(v.flaeche).toEqual({ kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: 0, einstau_max_cm: 0, freibord_min_cm: null, boeschung_max: null, entleerung_max_h: null });
-    expect(v.mulde).toEqual({ kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_max: 1.5, entleerung_max_h: 84 });
-    expect(v.MRE).toEqual({ kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_max: 1.5, entleerung_max_h: 84 }); // Freibord cell printed empty (a138-U-6)
-    expect(v.MRS).toEqual({ kf_min: null, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: 10, boeschung_max: 1.5, entleerung_max_h: 84 });
-    expect(v.rigole).toEqual({ kf_min: 1e-6, bbz_min_cm: null, einstau_min_cm: null, einstau_max_cm: null, freibord_min_cm: null, boeschung_max: null, entleerung_max_h: null });
+    expect(v.flaeche).toEqual({ kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: 0, einstau_max_cm: 0, freibord_min_cm: null, boeschung_m_min: null, entleerung_max_h: null });
+    expect(v.mulde).toEqual({ kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_m_min: 1.5, entleerung_max_h: 84 });
+    expect(v.MRE).toEqual({ kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_m_min: 1.5, entleerung_max_h: 84 }); // Freibord cell printed empty (a138-U-6)
+    expect(v.MRS).toEqual({ kf_min: null, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: 10, boeschung_m_min: 1.5, entleerung_max_h: 84 });
+    expect(v.rigole).toEqual({ kf_min: 1e-6, bbz_min_cm: null, einstau_min_cm: null, einstau_max_cm: null, freibord_min_cm: null, boeschung_m_min: null, entleerung_max_h: null });
     expect(v.schacht).toEqual(v.rigole);
-    expect(v.becken).toEqual({ kf_min: 1e-5, bbz_min_cm: 20, einstau_min_cm: 50, einstau_max_cm: null, freibord_min_cm: 35, boeschung_max: 1.5, entleerung_max_h: 84 });
+    expect(v.becken).toEqual({ kf_min: 1e-5, bbz_min_cm: 20, einstau_min_cm: 50, einstau_max_cm: null, freibord_min_cm: 35, boeschung_m_min: 1.5, entleerung_max_h: 84 });
     expect(new Set(t.rows.map((r) => r.verbatim_quote)).size).toBe(1); // one printed body for the transposed table
     expect(t.rows[0].verbatim_quote).toContain('Versickerungsfläche & Versickerungsmulde & Mulden-Rigolen-Element & Mulden-Rigolen-System & Rigole & Versickerungsschacht & Versickerungsbecken');
     expect(t.override_policy).toBe('anhaltswert');

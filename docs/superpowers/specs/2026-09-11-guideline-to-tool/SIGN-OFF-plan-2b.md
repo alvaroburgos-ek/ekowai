@@ -77,6 +77,8 @@ Zero change for `widget IS NULL` fields that are not one of the four carriers (`
 - **Options:** (a) two derived scalar fields + two equation rows on A138-12 — `tab6_tier = lookup('TAB5', flaechengruppe, 'tier')`, `bbz_band = if(bbz_thickness >= 0.30, 'thick', 'thin')` — the `0.30` is `THICK_BAND_M` (`tab6-loading.ts:45`); the §5.2.3.2 Tab. 6 quote must be captured in-session (SR-1) before the rows are written; the badge then resolves; whether the widget takes over production from the materialiser is a separate ownership cut-over. (b) a `from_expr` key on `LookupBinding` (zod extension in `field-config.ts`) — no new fields, but a change to the Plan-1 binding contract. (c) leave display mode + server producer (CURRENT); the migration is then cosmetic (code → data) and may stay unapplied.
 - **The migration file** (`scripts/migrations/20260916160000_a138_12_ac_as_ratio_limit_lookup_fill.sql`) is emitter-owned since close-out (byte-pinned), scoped to the home template `w.code = 'A138-12'`, and EXCLUDED from the playbook's apply list until this block is RATIFIED with an option.
 
+- **Cross-reference (Plan 3 Task 1, fix round 1):** option (a) must use `a138_tier` (A138-06, created by `20260917100110_field_configs_a138.sql`, TAB5 lookup_fill) as the tier key — not a new `tab6_tier` on A138-12 — and be ratified together with `a138-C-5` / `a138-E-3` in `SIGN-OFF-plan-3.md`; ratifying (a) alone would create a duplicate tier field.
+
 ☐ RATIFIED (a)  ☐ RATIFIED (b)  ☐ RATIFIED (c)  ☐ REJECTED  ☐ DEFER
 
 ### D-2b-4 `reference` `ui_config` is REQUIRED — the importer rejects a `reference` row without it

@@ -353,6 +353,12 @@ warnings after the first harness save of a new register; a silent null is the Fi
    §5 value) goes on the sign-off sheet with verbatim evidence — never blocks the wave, the
    owner rules asynchronously.
 
+**Composed `override_quote` (Plan 3 Task 1).** The policy cue may be two verbatim fragments from
+different lines joined with " — " (e.g. TAB9: the Gl. 2 legend L1218 + the L1222 sentence; TAB14: the
+two "i. d. R." cells L2257/L2259) — each fragment must still be verbatim and line-cited in the builder
+comment. `verify-regulation-tables.ts` checks row `verbatim_quote`s only; `override_quote` is NOT
+machine-verified, so the composition is the executor's SR-1 duty and the reviewer's spot-check.
+
 ## Token budget note
 
 Plan 1 was the expensive corpus-wide pass. Per-standard cost through this playbook is still

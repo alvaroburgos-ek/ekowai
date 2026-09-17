@@ -166,8 +166,8 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
   // ---- A138-02: Tab. 3 feasibility code (derived; feasibility_determination stays manual, a138-D-1) ----
   on('A138-02')({
     symbol: 'feasibility_code', widget: 'derived', ui_config: null, verification_quote: L752,
-    create: { section_code: 'D', label_de: 'Umsetzbarkeit nach Tabelle 3 (Spalte 2 = 1 möglich · 3 = 2 potenziell möglich · 4 = 3 nicht möglich)', data_type: 'number', unit: null, clause_reference: '§5.1.1, Tab. 3',
-      description: 'Plan 3: Ausgabe der Gleichung A138-02-D1 (Spaltenlogik der Tab. 3 über die sieben Kriterienfelder); Ableitung von feasibility_determination STAGED (a138-D-1).' },
+    create: { section_code: 'D', label_de: 'Umsetzbarkeit nach Tabelle 3 als Code (1 = alle Spalte-2-Kriterien erfüllt · 2 = nicht nachgewiesen möglich · 3 = ein Spalte-4-Kriterium trifft zu)', data_type: 'number', unit: null, clause_reference: '§5.1.1, Tab. 3',
+      description: 'Plan 3: Ausgabe der Gleichung A138-02-D1 (Spaltenlogik der Tab. 3 über die sieben Kriterienfelder). Code 2 ist NICHT gleich Spalte 3: zwei Spalte-4-Fälle werden konstruktionsbedingt in Code 2 gefaltet — (1) Trinkwasserschutzgebiet mit nicht vernachlässigbarem Risiko (L747, kein Risikofeld; jede Zone ⇒ 2) und (2) k_f < 1·10⁻⁶ m/s ohne möglichen Anschluss/Ableitung (L748, kein Feld) — daher „nicht nachgewiesen möglich“; Ableitung von feasibility_determination STAGED (a138-D-1).' },
   }),
 
   // ---- A138-26: Σ(A_E,b,a · C_S) from the surface inventory rows (Gl. 10 term) ----

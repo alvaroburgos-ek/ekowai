@@ -89,7 +89,7 @@ Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGE
 - Class: override-policy
 - Chosen now (fail-safe): `locked` (spec: tier mappings) with the printed sentence in `override_quote`; the `belastungskategorie` lookup_fill therefore shows no override control.
 - Evidence (verbatim, transcript line): "Von der Kategorisierung nach Tabelle 5 kann in begründeten Fällen abgewichen werden." (L791)
-- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'anhaltswert' WHERE standard_code = 'DWA-A-138-1' AND table_code = 'TAB5' AND override_policy = 'locked';` (then the lookup_fill offers "abweichend wählen" + Begründung).
+- Proposed SQL / config: `UPDATE regulation_tables SET override_policy = 'kann' WHERE standard_code = 'DWA-A-138-1' AND table_code = 'TAB5' AND override_policy = 'locked';` — the printed cue "kann in begründeten Fällen abgewichen werden" (L791) is literally the spec's `kann` token (fix round 1; the first draft proposed `anhaltswert`). Under `kann` the lookup_fill override is a select over the value column's printed alternatives (`bk` values BK_I | BK_II | BK_III), no reason textarea — if the owner wants the "begründeten Fällen" reason captured, `anhaltswert` is the alternative.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### a138-P-2 · DWA-A-138-1 · A138-08 · TAB8 (override policy)
@@ -125,6 +125,7 @@ Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGE
 - Chosen now (fail-safe): not bound — the field stays a number input. TAB6 now carries `n_m_max` (1/a on all four seeded rows).
 - Evidence (verbatim, transcript line): "… bei Mulden-Rigolen: Überlauf in Rigole mit $n_{\mathrm{M}}$ max. 1/a" (L920, L924); the binding's second key `bbz_band` is not a field (D-2b-3), and a fill-mode lookup_fill with a missing key renders "Schlüssel fehlt" with no input.
 - Proposed SQL / config: STAGED block a138-E-3 — apply together with D-2b-3 option (a) and a138-C-5.
+- Controller ruling (Task 1 review, 2026-09-17): the staged placement is ACCEPTED as a deviation from amendment A — a fill-mode lookup_fill whose second key `bbz_band` is not a field renders "Schlüssel fehlt" and hides the engineer's input, and the prod effect of binding it now would be identical to 2b's gated `ac_as_ratio_limit` binding (display-only until the key exists).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### a138-E-4 · DWA-A-138-1 · A138-18 · q_VS
@@ -216,6 +217,7 @@ Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGE
 - Chosen now (fail-safe): visible (consumed producers); `n_R_MRS` (A138-20, no consumers) hidden unless `facility_type_selected IN {MRE, MRS}`.
 - Evidence (verbatim, transcript line): "$Q_{\mathrm{Dr}}$ & l/s & mittlerer Drosselabfluss (z. B. bei Mulden-Rigolen-Systemen)" (L1517); Gl. (33) L2058; Tab. 6 L919–L926.
 - Proposed SQL / config: STAGED block a138-C-2 — a default (`Q_Dr = if(facility_type_selected == 'MRS', …, 0)`) rather than visibility, because Gl. 8/9/10 read Q_Dr as 0 for other types.
+- MRE note (fix round 1): the encoded `n_R_MRS` rule stays `facility_type_selected IN {'MRE', 'MRS'}` (Tab. 6 L919–L926 names Mulden-Rigolen as a class, both types); narrowing it to `== 'MRS'` would additionally hide the field when MRE is selected on the MRS worksheet — a change to which rows are hidden, so it is left as encoded; the owner may narrow it here.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### a138-C-3 · DWA-A-138-1 · A138-16…22 · section visibility (13 producer sections)
@@ -237,6 +239,7 @@ Report: `reports/plan-3-a138.md` · STAGED SQL: `scripts/verification/a138-STAGE
 - Chosen now (fail-safe): `a138_tier` created on A138-06 without consumers (the TAB7 lookups are on the same worksheet); the 2b `ac_as_ratio_limit` binding still names `tab6_tier`.
 - Evidence (verbatim, transcript line): "Flächengruppen und Belastungskategorie nach Tabelle 5" (L914, the Tab. 6/7 row key).
 - Proposed SQL / config: STAGED block a138-C-5 (consumers A138-12, A138-19; re-key the 2b binding to `a138_tier`).
+- Coupling (fix round 1): ratifying D-2b-3 option (a) MUST re-key its tier field to `a138_tier` (the A138-06 field created by this task) instead of creating `tab6_tier` on A138-12 — the two rulings cannot be ratified independently, or prod ends up with two tier fields for one quantity (single-source rule). D-2b-3 in `SIGN-OFF-plan-2b.md` carries the reverse cross-reference.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### a138-I-1 · DWA-A-138-1 · engine · enum/text scalar inputs to formulas

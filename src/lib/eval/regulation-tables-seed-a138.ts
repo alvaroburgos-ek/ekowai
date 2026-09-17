@@ -215,7 +215,12 @@ export function tab6AsTable(): RegulationTable {
     verification_status: 'md_verified', rows };
 }
 
-/** Tab. 7 (L980–L1023) — required efficiencies per tier; D and SD1…SA print "(*)" (L984, L1009–1015) and are not seeded (a138-U-4). */
+/**
+ * Tab. 7 (L980–L1023) — required efficiencies per tier; D and SD1…SA print "(*)" (L984, L1009–1015) and are not seeded (a138-U-4).
+ * Row keys are the TAB5 `tier` tokens (what the `a138_tier` lookup_fill stores): `tier1_none` is the Plan-1 token for the
+ * VW1/V1/BG1 group — "none" refers to Tab. 6 (no A_C/A_S,m requirement for that group), NOT to Tab. 7, which DOES print
+ * 40 % / 50 % for it (L985). The token is kept for key-string equality with TAB5 (G-A3).
+ */
 export function tab7AsTable(): RegulationTable {
   const rows: RegulationRow[] = [
     { row_key: 'tier1_none', keys: { tier: 'tier1_none' }, group_label: null, label_de: 'VW1, V1, BG1 (BK I)', order_index: 0, values: { eta_afs63_min: 40, eta_geloest_min: 50 },
@@ -314,18 +319,20 @@ export function tab13AsTable(): RegulationTable {
  * "Freibord Überlauf" is printed EMPTY (L2258: `- & - & & $\geq 10$`) ⇒ null, sign-off a138-U-6; the table therefore
  * stays `imported_unverified`. "k_f-Wert bewachsene Bodenzone (langjähriger Betrieb) ca. 1·10⁻⁵" (L2256) is a "ca." figure
  * and is not seeded as a limit column.
+ * Böschungsneigung (L2259, unit "1: m"): "i. d. R. 1 : 1,5 oder flacher" / "i. d.R. ≤ 1 : 1,5" — flatter means a LARGER m,
+ * so the printed bound is a MINIMUM of m: column `boeschung_m_min` = 1.5 (a slope 1:2 satisfies it, 1:1 does not).
  */
 const TAB14_BODY = String.raw`\hline \multirow[t]{2}{*}{Planungsvorgabe oder Nachweisgröße} & \multirow[b]{2}{*}{Einheit} & Versickerungsfläche & Versickerungsmulde & Mulden-Rigolen-Element & Mulden-Rigolen-System & Rigole & Versickerungsschacht & Versickerungsbecken \\ \hline & & \multicolumn{6}{|c|}{Dezentral} & Zentral \\ \hline $k_{\mathrm{f}}$-Wert maßgebliche Bodenschicht & $\mathrm{m} / \mathrm{s}$ & \multicolumn{3}{|c|}{$\geqslant 1 \cdot 10^{-6}$} & - & \multicolumn{2}{|c|}{$\geqslant 1 \cdot 10^{-6}$} & $\geqslant 1 \cdot 10^{-5}$ \\ \hline Mächtigkeit bewachsene Bodenzone & cm & \multicolumn{4}{|c|}{$\geqslant 20$} & - & - & $\geq 20$ \\ \hline $k_{\mathrm{f}}$-Wert bewachsene Bodenzone (langjähriger Betrieb) ${'$'}{ }^{[1]}$ & $\mathrm{m} / \mathrm{s}$ & \multicolumn{4}{|c|}{ca. $1 \cdot 10^{-5}$} & - & - & ca. $1 \cdot 10^{-5}$ \\ \hline Einstauhöhe & cm & 0 & \multicolumn{3}{|r|}{für Mulden i. d. R. $\leqslant 30$} & \multicolumn{2}{|c|}{ggf. bautechnisch begrenzt} & i. d. R. $\geqslant 50$ \\ \hline Freibord Überlauf ${'$'}{ }^{(2)}$ & cm & - & - & & $\geq 10$ & - & - & $\geq 35$ \\ \hline Böschungsneigung & 1: m & - & \multicolumn{3}{|c|}{i. d. R. 1 : 1,5 oder flacher} & - & - & i. d.R. $\leqslant 1: 1,5$ \\ \hline Entleerungszeit ( $n=1 / a$ ) ${'$'}{ }^{\text {(3) }}$ & h & - & \multicolumn{3}{|c|}{$\leqslant 84$} & - & - & $\leqslant 84$ \\`; // L2252–2260
-type Tab14Cells = { kf_min: number | null; bbz_min_cm: number | null; einstau_min_cm: number | null; einstau_max_cm: number | null; freibord_min_cm: number | null; boeschung_max: number | null; entleerung_max_h: number | null };
+type Tab14Cells = { kf_min: number | null; bbz_min_cm: number | null; einstau_min_cm: number | null; einstau_max_cm: number | null; freibord_min_cm: number | null; boeschung_m_min: number | null; entleerung_max_h: number | null };
 export const TAB14_ROWS: ReadonlyArray<{ facility_type: string; label_de: string } & Tab14Cells> = [
   //                                                                  L2254      L2255       L2257 (min/max)      L2258   L2259   L2260
-  { facility_type: 'flaeche', label_de: 'Versickerungsfläche',        kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: 0,   einstau_max_cm: 0,   freibord_min_cm: null, boeschung_max: null, entleerung_max_h: null },
-  { facility_type: 'mulde', label_de: 'Versickerungsmulde',           kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_max: 1.5, entleerung_max_h: 84 },
-  { facility_type: 'MRE', label_de: 'Mulden-Rigolen-Element',         kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_max: 1.5, entleerung_max_h: 84 }, // Freibord cell printed empty (a138-U-6)
-  { facility_type: 'MRS', label_de: 'Mulden-Rigolen-System',          kf_min: null, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: 10, boeschung_max: 1.5, entleerung_max_h: 84 },
-  { facility_type: 'rigole', label_de: 'Rigole',                      kf_min: 1e-6, bbz_min_cm: null, einstau_min_cm: null, einstau_max_cm: null, freibord_min_cm: null, boeschung_max: null, entleerung_max_h: null },
-  { facility_type: 'schacht', label_de: 'Versickerungsschacht',       kf_min: 1e-6, bbz_min_cm: null, einstau_min_cm: null, einstau_max_cm: null, freibord_min_cm: null, boeschung_max: null, entleerung_max_h: null },
-  { facility_type: 'becken', label_de: 'Versickerungsbecken',         kf_min: 1e-5, bbz_min_cm: 20, einstau_min_cm: 50, einstau_max_cm: null, freibord_min_cm: 35, boeschung_max: 1.5, entleerung_max_h: 84 },
+  { facility_type: 'flaeche', label_de: 'Versickerungsfläche',        kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: 0,   einstau_max_cm: 0,   freibord_min_cm: null, boeschung_m_min: null, entleerung_max_h: null },
+  { facility_type: 'mulde', label_de: 'Versickerungsmulde',           kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_m_min: 1.5, entleerung_max_h: 84 },
+  { facility_type: 'MRE', label_de: 'Mulden-Rigolen-Element',         kf_min: 1e-6, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: null, boeschung_m_min: 1.5, entleerung_max_h: 84 }, // Freibord cell printed empty (a138-U-6)
+  { facility_type: 'MRS', label_de: 'Mulden-Rigolen-System',          kf_min: null, bbz_min_cm: 20, einstau_min_cm: null, einstau_max_cm: 30, freibord_min_cm: 10, boeschung_m_min: 1.5, entleerung_max_h: 84 },
+  { facility_type: 'rigole', label_de: 'Rigole',                      kf_min: 1e-6, bbz_min_cm: null, einstau_min_cm: null, einstau_max_cm: null, freibord_min_cm: null, boeschung_m_min: null, entleerung_max_h: null },
+  { facility_type: 'schacht', label_de: 'Versickerungsschacht',       kf_min: 1e-6, bbz_min_cm: null, einstau_min_cm: null, einstau_max_cm: null, freibord_min_cm: null, boeschung_m_min: null, entleerung_max_h: null },
+  { facility_type: 'becken', label_de: 'Versickerungsbecken',         kf_min: 1e-5, bbz_min_cm: 20, einstau_min_cm: 50, einstau_max_cm: null, freibord_min_cm: 35, boeschung_m_min: 1.5, entleerung_max_h: 84 },
 ];
 export function tab14AsTable(): RegulationTable {
   const rows: RegulationRow[] = TAB14_ROWS.map(({ facility_type, label_de, ...cells }, i) => ({
@@ -336,7 +343,7 @@ export function tab14AsTable(): RegulationTable {
     value_columns: [
       { name: 'kf_min', type: 'number', unit: 'm/s' }, { name: 'bbz_min_cm', type: 'number', unit: 'cm' },
       { name: 'einstau_min_cm', type: 'number', unit: 'cm' }, { name: 'einstau_max_cm', type: 'number', unit: 'cm' },
-      { name: 'freibord_min_cm', type: 'number', unit: 'cm' }, { name: 'boeschung_max', type: 'number', unit: '1:m (m)' },
+      { name: 'freibord_min_cm', type: 'number', unit: 'cm' }, { name: 'boeschung_m_min', type: 'number', unit: 'm (1:m)' },
       { name: 'entleerung_max_h', type: 'number', unit: 'h' },
     ],
     override_policy: 'anhaltswert',

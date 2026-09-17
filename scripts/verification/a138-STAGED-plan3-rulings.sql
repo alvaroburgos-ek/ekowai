@@ -43,6 +43,7 @@
 -- Why staged: the binding's second key `bbz_band` is not a field (identical to the 2b ac_as_ratio_limit binding); a
 -- lookup_fill in fill mode with a missing key shows "Schlüssel fehlt" and offers NO input, so binding it now would take the
 -- engineer's typed limit away. Apply only together with D-2b-3 option (a) (a `bbz_band` derived field) and a138-C-5.
+-- Controller ruling (Task 1 review): staged placement ACCEPTED as a deviation from amendment A (prod effect of binding now = 2b's gated binding).
 -- BEGIN;
 -- UPDATE fields f SET widget = 'lookup_fill', ui_config = '{"source_label":"Tab. 6"}'::jsonb,
 --   lookup = '{"table_code":"TAB6","role":"limit","keys":[{"column":"tier","from_symbol":"a138_tier"},{"column":"bbz_band","from_symbol":"bbz_band"}],"value":"n_m_max"}'::jsonb
