@@ -5,7 +5,7 @@ mechanical re-homes available: 22; owner-decision items: 103
 
 | standard | gates | healthy | mishome | split | field-miss | dead-prose | vacuous |
 |---|--:|--:|--:|--:|--:|--:|--:|
-| DWA-M-277E | 62 | 45 | 2 | 12 | 0 | 3 | 0 |
+| DWA-M-277E | 62 | 45 | 2 | 12 | 2 | 1 | 0 |
 | FLL-GAR-2023 | 30 | 21 | 1 | 8 | 0 | 0 | 0 |
 | DWA-A-226 | 24 | 17 | 1 | 5 | 0 | 0 | 1 |
 | DWA-A-178 | 28 | 22 | 1 | 5 | 0 | 0 | 0 |

@@ -1,11 +1,12 @@
 # READY-TO-USE ERROR-EQUATION WORKLIST
 snapshot: 2026-08-01T10:20:07.816Z
-total: 7
+total: 8
 
+DWA-A-262E	15	Unerwartetes Token am Ende des Ausdrucks.	A_ANF = 2 * h_zu * (Q_T_d_aM * L_HF) / (k_fB * (h_zu^2 - h_ab^2))  (m^2)
 DWA-M-708	E-CH4-Yield	Unerwartetes Token am Ende des Ausdrucks.	Y_CH4 = 0.35 (Nm3 CH4 per kg CSB_el)
-DWA-M-708	E-CH4-Heizwert	Unerwartetes Zeichen "=" an Position 19.	H_CH4 = 36 (MJ per m3 CH4) = 10 (kWh per m3) = 12.6 (MJ per kg CSB_el)
+DWA-M-708	E-CH4-Heizwert	Unerwartetes Token am Ende des Ausdrucks.	H_CH4 = 36 (MJ per m3 CH4) = 10 (kWh per m3) = 12.6 (MJ per kg CSB_el)
 DWA-M-708	E-BHKW-El	Unerwartetes Token am Ende des Ausdrucks.	E_el = 1.4 (kWh per kg CSB_el)
-DWA-M-732	Gl-M732-03	Ungültige Zahl an Position 5: ".. 0.7"	n_CO2_neutral = 0.60 .. 0.70 * n_CO2
+DWA-M-732	Gl-M732-03	Unerwartetes Zeichen "." an Position 5.	n_CO2_neutral = 0.60 .. 0.70 * n_CO2
 DWA-M-816	6a	Unerwartetes Zeichen ":" an Position 3.	Z(t):  Z_1(t)  mit t = 1, ..., n_1  und nachfolgend  Z_2(t)  mit t = n_1+1, ..., n_1 + n_2
 DWA-M-816	6a_TR	Unerwartetes Zeichen ";" an Position 6.	Z_TR(t);  t = 1, ..., n_A - n_B  bei einem Vorlauf von n_B Jahren
 ISO-5667-6	A.1	Unerwartetes Token am Ende des Ausdrucks.	l = 0,13 * b^2 * c * (0,7*c + 2*g) / (g*d)

@@ -1,11 +1,12 @@
 # CORPUS READY-TO-USE SCORECARD
 snapshot exported_at: 2026-08-01T10:20:07.816Z
-compute-ready (0 equation hard-errors): 67 / 71 standards
+compute-ready (0 equation hard-errors): 66 / 71 standards
 
 | standard | eq | computed | manual(gap) | ERROR | gates | dead-gates | compute-ready |
 |---|--:|--:|--:|--:|--:|--:|:--:|
 | DWA-M-708 | 5 | 1 | 1 | 3 | 14 | 0 | ❌ |
 | DWA-M-816 | 30 | 9 | 19 | 2 | 26 | 0 | ❌ |
+| DWA-A-262E | 18 | 16 | 1 | 1 | 60 | 0 | ❌ |
 | DWA-M-732 | 3 | 2 | 0 | 1 | 15 | 0 | ❌ |
 | ISO-5667-6 | 2 | 1 | 0 | 1 | 30 | 0 | ❌ |
 | ATV-A-704E | 6 | 5 | 1 | 0 | 30 | 0 | ✅ |
@@ -26,9 +27,8 @@ compute-ready (0 equation hard-errors): 67 / 71 standards
 | DWA-A-201 | 20 | 19 | 1 | 0 | 14 | 0 | ✅ |
 | DWA-A-222 | 28 | 27 | 1 | 0 | 63 | 0 | ✅ |
 | DWA-A-226 | 28 | 28 | 0 | 0 | 24 | 0 | ✅ |
-| DWA-A-262E | 18 | 16 | 2 | 0 | 60 | 0 | ✅ |
 | DWA-A-272E | 10 | 6 | 4 | 0 | 36 | 0 | ✅ |
-| DWA-M-102-4 | 31 | 24 | 7 | 0 | 22 | 0 | ✅ |
+| DWA-M-102-4 | 31 | 25 | 6 | 0 | 22 | 0 | ✅ |
 | DWA-M-1200-1 | 1 | 0 | 1 | 0 | 21 | 0 | ✅ |
 | DWA-M-1200-2 | 4 | 3 | 1 | 0 | 15 | 0 | ✅ |
 | DWA-M-1200-3 | 10 | 10 | 0 | 0 | 32 | 0 | ✅ |

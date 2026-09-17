@@ -415,13 +415,13 @@
  {
   "code": "DWA-M-277E",
   "cr": "REQ-04",
-  "kind": "dead-prose",
+  "kind": "field-missing",
   "detail": "Q_SW = SUM(Q_SW_P_i * P_i) + SUM(Q_SW_A_j * A_j)"
  },
  {
   "code": "DWA-M-277E",
   "cr": "REQ-05",
-  "kind": "dead-prose",
+  "kind": "field-missing",
   "detail": "Q_GW = SUM(Q_GW_P_i * P_i)"
  },
  {
