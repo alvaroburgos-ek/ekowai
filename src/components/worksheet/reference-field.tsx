@@ -9,13 +9,18 @@
  * Testids: `reference-field` [data-symbol] (wrapper — was the form's
  * `rainfall-table-ref-section` / `bottom-rainfall_table_ref` sections),
  * `reference-select`, `reference-empty` (carrier absent/empty — never a raw
- * text input), `reference-unconfigured` (reference widget without a usable
- * ui_config ⇒ visible notice + today's dynamic input, never silent).
+ * text input), `reference-stale` (stored id not among the rows — placeholder
+ * shown, id left in the store), `reference-unconfigured` (reference widget
+ * without a usable ui_config ⇒ visible notice + today's dynamic input, never
+ * silent). The notices are `<span class=block>` (phrasing content — they sit
+ * inside the `<label>`) and describe the select via aria-describedby.
  */
+import { useId } from 'react';
 import { resolveReferenceConfig, resolveReferenceRows } from '@/lib/eval/reference-configs';
 import type { WidgetContext, WorksheetFormField } from './widgets';
 
 export function ReferenceField({ field, ctx }: { field: WorksheetFormField; ctx: WidgetContext }) {
+  const noticeId = useId();
   const ui = resolveReferenceConfig(field);
   if (!ui) {
     return (
@@ -35,23 +40,36 @@ export function ReferenceField({ field, ctx }: { field: WorksheetFormField; ctx:
   const title = ui.title ?? field.labelDe;
   const readOnly = ctx.readOnly;
   const empty = rows.length === 0;
+  // Stored id no longer among the rows (carrier row deleted/renamed upstream):
+  // select the placeholder, say so, and leave the stored id alone — the store
+  // is only written by the engineer's own choice, never by a render.
+  const stale = current != null && !rows.some((r) => r.id === current);
+  const notice = empty || stale ? noticeId : undefined;
   return (
     <label className="block space-y-1" data-testid="reference-field" data-symbol={field.symbol}>
       <span className="text-[10px] uppercase tracking-[0.18em] text-subtext">{title}</span>
       <select
-        value={current ?? ''}
+        value={stale ? '' : current ?? ''}
         disabled={readOnly || empty}
         aria-label={ui.aria_label ?? title}
+        aria-describedby={notice}
         data-testid="reference-select"
         onChange={(e) => {
           if (readOnly) return;
-          // Stored shape unchanged: a row-id string under the field's own data_type tag
-          // (engine / report / snapshot read `rainfall_table_ref` as text/enum).
+          // Stored shape unchanged: a row-id string under the field's own data_type tag.
+          // The tag matters because the server readers of `rainfall_table_ref` are
+          // TEXT-only: saveWorksheet's basin-governing materialize and its A138-17
+          // Mulde path (src/lib/actions/worksheet.ts) take the save-batch value only
+          // when `savedRef?.type === 'text'`, else fall back to the persisted
+          // project_parameters.value_text; snapshots/payload.ts reads value_text ??
+          // value_enum; evaluate-for-report.ts reads the column matching the field's
+          // data_type. A `text` field therefore MUST store { type: 'text' } — an
+          // enum-tagged write would be ignored by the save-batch reader.
           ctx.setField(field.id, { type: field.dataType === 'enum' ? 'enum' : 'text', value: e.target.value });
         }}
         className={`block w-full rounded border border-hairline-strong px-2 py-1.5 text-sm text-ink focus:outline-none ${readOnly ? 'bg-paper-2 cursor-default' : 'bg-transparent focus:border-accent'}`}
       >
-        {current == null && <option value="">{ui.empty_label ?? '— wählen —'}</option>}
+        {(current == null || stale) && <option value="">{ui.empty_label ?? '— wählen —'}</option>}
         {rows.map((r) => (
           <option key={r.id} value={r.id}>
             {r.badge ? `${r.label} · ${r.badge}` : r.label}
@@ -59,9 +77,14 @@ export function ReferenceField({ field, ctx }: { field: WorksheetFormField; ctx:
         ))}
       </select>
       {empty && (
-        <p data-testid="reference-empty" className="text-[11px] text-subtext">
+        <span id={noticeId} data-testid="reference-empty" className="block text-[11px] text-subtext">
           Keine Einträge in „{ui.carrier_symbol}“ — zuerst im vorgelagerten Arbeitsblatt erfassen.
-        </p>
+        </span>
+      )}
+      {!empty && stale && (
+        <span id={noticeId} data-testid="reference-stale" className="block text-[11px] text-warning">
+          Verweis „{current}“ nicht gefunden — bitte neu wählen.
+        </span>
       )}
     </label>
   );

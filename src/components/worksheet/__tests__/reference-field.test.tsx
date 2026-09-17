@@ -140,3 +140,45 @@ describe('ReferenceField — rainfall_table_ref through the fallback config', ()
     expect(screen.getByTestId('dynamic-fallback')).toBeInTheDocument();
   });
 });
+
+describe('ReferenceField — Task 8 sweep (Task 6 review items)', () => {
+  it('the empty notice is phrasing content inside the <label> (span.block) and describes the disabled select via aria-describedby', () => {
+    const ctx = makeCtx({ fieldBySymbol: new Map([[REF.symbol, REF]]), values: { 'f-ref': { type: 'text', value: null } } });
+    render(<ReferenceField field={REF} ctx={ctx} />);
+    const notice = screen.getByTestId('reference-empty');
+    expect(notice.tagName).toBe('SPAN');
+    expect(notice.classList.contains('block')).toBe(true);
+    expect(notice.id).not.toBe('');
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    expect(select.disabled).toBe(true);
+    expect(select.getAttribute('aria-describedby')).toBe(notice.id);
+    expect(select).toHaveAccessibleDescription(notice.textContent ?? '');
+  });
+
+  it('no empty notice ⇒ no dangling aria-describedby on the select', () => {
+    render(<ReferenceField field={REF} ctx={makeCtx()} />);
+    expect(screen.getByRole('combobox').getAttribute('aria-describedby')).toBeNull();
+  });
+
+  it('a stored id that is not among the rows ⇒ placeholder option selected + "Verweis „<id>“ nicht gefunden" hint; the store is left untouched', () => {
+    const ctx = makeCtx({ values: { 'f-kostra': { type: 'json', value: { tables: TABLES } }, 'f-ref': { type: 'text', value: 'gone-42' } } });
+    render(<ReferenceField field={REF} ctx={ctx} />);
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    expect(screen.getByRole('option', { name: '— Tabelle wählen —' })).toBeInTheDocument();
+    expect(select.value).toBe('');
+    expect(select.disabled).toBe(false);
+    const hint = screen.getByTestId('reference-stale');
+    expect(hint.textContent).toBe('Verweis „gone-42“ nicht gefunden — bitte neu wählen.');
+    expect(hint.tagName).toBe('SPAN');
+    expect(select.getAttribute('aria-describedby')).toBe(hint.id);
+    expect(ctx.setField).not.toHaveBeenCalled();
+    // The real rows are still selectable.
+    fireEvent.change(select, { target: { value: 'l1' } });
+    expect(ctx.setField).toHaveBeenCalledWith('f-ref', { type: 'text', value: 'l1' });
+  });
+
+  it('a stored id that IS among the rows shows no stale hint', () => {
+    render(<ReferenceField field={REF} ctx={makeCtx()} />);
+    expect(screen.queryByTestId('reference-stale')).toBeNull();
+  });
+});

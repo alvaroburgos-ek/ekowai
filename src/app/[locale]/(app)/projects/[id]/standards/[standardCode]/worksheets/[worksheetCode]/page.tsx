@@ -16,6 +16,8 @@ import { countSnapshotsForInstance } from '@/lib/db/queries/snapshots';
 import { mergeInheritedFields } from '@/lib/eval/merge-inherited-fields';
 import { surfaceSourceState, surfaceWithholdFieldIds } from '@/lib/eval/surface-source-state';
 import { WorksheetForm } from '@/components/worksheet/worksheet-form';
+import type { WorksheetFormField } from '@/components/worksheet/worksheet-form';
+import type { FieldValue } from '@/lib/state/worksheet-store';
 import { WorksheetListSidebar } from '@/components/worksheet/worksheet-list-sidebar';
 import { BackLink } from '@/components/ui/back-link';
 import { NormTextProvider } from '@/components/norm-text/norm-text-context';
@@ -171,7 +173,7 @@ export default async function WorksheetPage({
   //      worksheets disagree silently picks one, hiding the conflict.
   //   3. Project-level site profile (projects.site_profile) via the symbol map.
   //   4. Standard-recommended default_value on the field row.
-  const initialValues: Record<string, unknown> = {};
+  const initialValues: Record<string, FieldValue> = {};
   const inheritedFromBySymbol: Record<string, string> = {};
   const prefillSourceByFieldId: Record<string, 'standard_default' | 'site_profile'> = {};
   const siteProfileKeyByFieldId: Record<string, string> = {};
@@ -219,7 +221,9 @@ export default async function WorksheetPage({
     // 3. Site profile — resolved via the symbol map; coerced inside the helper.
     const site = resolveFromSiteProfile(project.siteProfile, f.symbol);
     if (site && site.value != null && site.type === f.dataType) {
-      initialValues[f.id] = { type: site.type, value: site.value };
+      // resolveFromSiteProfile pairs type↔value per entry but types them as
+      // independent unions; the switch inside it is the runtime guarantee.
+      initialValues[f.id] = { type: site.type, value: site.value } as FieldValue;
       prefillSourceByFieldId[f.id] = 'site_profile';
       const entry = SITE_PROFILE_BY_SYMBOL.get(f.symbol);
       if (entry) siteProfileKeyByFieldId[f.id] = entry.key;
@@ -229,7 +233,8 @@ export default async function WorksheetPage({
     // 4. Field's standard-recommended default_value.
     const dv = f.defaultValue as { type?: string; value?: unknown } | null | undefined;
     if (dv && dv.type === f.dataType && dv.value != null) {
-      initialValues[f.id] = { type: dv.type, value: dv.value };
+      // default_value is untyped JSONB; `dv.type === f.dataType` is the guard.
+      initialValues[f.id] = { type: dv.type, value: dv.value } as FieldValue;
       prefillSourceByFieldId[f.id] = 'standard_default';
     }
   }
@@ -341,7 +346,7 @@ export default async function WorksheetPage({
             orderIndex: s.orderIndex, parentSectionId: s.parentSectionId,
             visibleWhen: s.visibleWhen ?? null,
           }))}
-          fields={mergedFields.map((f) => {
+          fields={mergedFields.map((f): WorksheetFormField => {
             const verifiedByUserId = (f as typeof f & { verifiedByUserId?: string | null }).verifiedByUserId ?? null;
             const verifiedAt = (f as typeof f & { verifiedAt?: Date | null }).verifiedAt ?? null;
             const verificationNote = (f as typeof f & { verificationNote?: string | null }).verificationNote ?? null;
@@ -357,7 +362,7 @@ export default async function WorksheetPage({
               verificationStatus: f.verificationStatus,
               orderIndex: f.orderIndex,
               active: f.active,
-              inheritedFromWorksheet: f.inheritedFromWorksheet,
+              inheritedFromWorksheet: f.inheritedFromWorksheet ?? undefined,
               verifiedByLabel: verifiedByUserId ? verifierLabels.get(verifiedByUserId) ?? null : null,
               verifiedAt: verifiedAt ? verifiedAt.toISOString() : null,
               verificationNote,
@@ -366,8 +371,7 @@ export default async function WorksheetPage({
               lookup: f.lookup ?? null,
               visibleWhen: f.visibleWhen ?? null,
             };
-          // TODO(guideline-to-tool): replace as-never cast with the real FieldDef type
-          }) as never}
+          })}
           equations={ws.equations.map((e) => ({
             id: e.id, equationNumber: e.equationNumber, formula: e.formula,
             inputSymbols: e.inputSymbols, outputSymbol: e.outputSymbol,
@@ -395,7 +399,7 @@ export default async function WorksheetPage({
             suggestionEn: s.suggestionEn,
             condition: s.condition,
           }))}
-          initialValues={initialValues as never}
+          initialValues={initialValues}
           initialSources={initialSources}
           initialCitations={initialCitations}
           sameSymbolValuesBySymbol={sameSymbolValuesBySymbol}
@@ -438,7 +442,7 @@ function sameSymbolValueEqual(a: unknown, b: unknown): boolean {
 function coerceSameSymbolValue(
   dataType: string,
   v: unknown,
-): { type: 'number' | 'text' | 'enum' | 'date' | 'boolean' | 'json'; value: unknown } | null {
+): FieldValue | null {
   switch (dataType) {
     case 'number': {
       const n = typeof v === 'number' ? v : Number(v as string);

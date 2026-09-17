@@ -1,8 +1,17 @@
 /**
  * A138-07 surface-inventory carrier: row shape, derivations, and the
- * migrating normalizer. The normalizer is the single shared parse/migration
- * path used by BOTH the editor and (Plan 2) the engine, so they can never
- * diverge. Tab. 9 values flow only through ./tab9 accessors.
+ * migrating normalizer — the ORIGINAL single parse/migration path that the
+ * hand-built SurfaceInventoryEditor and the engine once shared.
+ *
+ * Plan 2b: no production code imports this module any more. The editor is the
+ * generic RegisterEditor dispatched by the WIDGETS registry, and the engine
+ * reads the carrier through `register-rows.ts` (`prepareRegisterRows`), whose
+ * legacy replay generalises `normalizeSurfaceCarrier` / `rowComplete`. The
+ * module stays as the DIFFERENTIAL oracle for those tests
+ * (register-rows.test.ts, register-editor-a138-07.test.tsx,
+ * surface-inventory*.test.ts): row-by-row equality against this normalizer is
+ * what proves the generic path never diverged. Tab. 9 values flow only through
+ * ./tab9 accessors.
  */
 import { getTab9Entries, lookupTab9 } from './tab9';
 

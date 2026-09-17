@@ -326,9 +326,8 @@ export function WorksheetForm({
   );
 
   // Resolve the A_S,m determination-method BEFORE wiring the engine so the
-  // suppress-write-back set is in scope at the useEquationEngine call site.
-  // fieldBySymbol and values are both defined above (lines ~226 and ~185
-  // respectively) — no dependency ordering problem.
+  // suppress-write-back set is in scope at the useEquationEngine call site
+  // (fieldBySymbol and values are both defined above).
   // On all worksheets other than A138-12 the `a_s_m_determination_method`
   // symbol is absent, asmMethod resolves to null, and suppression is empty
   // (behaviour identical to before this change).
@@ -528,14 +527,14 @@ export function WorksheetForm({
     [serverComputedFieldIds],
   );
 
-  // Plan 2b (Task 3): upstream-cause state per CONSUMED register (e.g. A138-10
-  // consuming A138-07's surface_inventory). The gate runs under the register's
-  // own config (carrierSourceState, Plan 2a Task 9) so the banner, the
-  // read-only mirror and the engine agree on "complete". The config comes from
-  // the consumer's own field row when it carries one (DB widget wins), else
-  // from the symbol-keyed TS fallback (the carrier is owned elsewhere and is
-  // usually NOT a field of the consumer — today's A138-10 case); no config at
-  // all ⇒ state=null → nothing renders.
+  // Plan 2b (Task 3): upstream-cause state per CONSUMED register (the
+  // `registerSources` prop — an owner worksheet's carrier this worksheet reads).
+  // The gate runs under the register's own config (carrierSourceState, Plan 2a
+  // Task 9) so the banner, the read-only mirror and the engine agree on
+  // "complete". The config comes from the consumer's own field row when it
+  // carries one (DB widget wins), else from resolveRegisterConfig's TS fallback
+  // for the consumed symbol (the carrier is owned elsewhere and is usually NOT
+  // a field of the consumer); no config at all ⇒ state=null → nothing renders.
   const registerSourceStates = useMemo(
     () =>
       (registerSources ?? []).map((src) => {
@@ -637,7 +636,7 @@ export function WorksheetForm({
   // asmMethod is resolved above (hoisted before useEquationEngine) so it can be
   // forwarded both to the engine suppress-write-back set and to DynamicField here.
   // asmProvenance + asmNeedsReconfirmation are only consumed by DynamicField
-  // (~line 558) so they stay here.
+  // (via renderDynamic below) so they stay here.
   const asmProvenanceField = fieldBySymbol.get('a_s_m_provenance');
   const asmProvenanceValue = asmProvenanceField ? values[asmProvenanceField.id] : undefined;
   const asmProvenance: string | null =
@@ -880,8 +879,8 @@ export function WorksheetForm({
           />
         ))}
 
-      {/* Consumed registers (e.g. A138-10 ← A138-07 surface_inventory): a
-          read-only mirror of the owner's carrier under the register's own
+      {/* Consumed registers (`registerSources`, owned by an upstream worksheet):
+          a read-only mirror of the owner's carrier under the register's own
           config. Hidden while the source is missing (the banner above says so). */}
       {registerSourceStates.map((s) =>
         s.cfg && s.state && s.state.state !== 'missing' ? (
@@ -897,9 +896,9 @@ export function WorksheetForm({
       {/* Bottom strip (Plan 2b Task 3): every own visible field whose widget
           places it at the bottom — registers (generic RegisterEditor or a
           bespoke editor: KOSTRA tables, risk register, mitigation plan) and
-          legacy TS checklists — in orderIndex order (the `reference` widget —
-          rainfall_table_ref since Task 6 — renders in its section instead),
-          under the title widgetPlacement() resolves (config title / today's h2). */}
+          legacy TS checklists — in orderIndex order (the `reference` and
+          `lookup_fill` widgets render in their section instead), under the
+          title widgetPlacement() resolves (config title / today's h2). */}
       {fieldsBySectionId.bottom.map((f) => {
         const { title } = widgetPlacement(f);
         return (

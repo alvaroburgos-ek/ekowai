@@ -634,10 +634,9 @@ export function DynamicField({ field, locale, projectId, standardCode, sameSymbo
         // from the guideline's own printed list. The selection persists as a
         // JSON string array (option values) through the existing json value
         // plumbing (worksheet-store setField → saveWorksheet valueJson).
-        // Fields WITHOUT enumValues keep the legacy "Phase 2" placeholder;
-        // carrier/register symbols (surface_inventory, r_D_n_table, …) never
-        // reach this branch — worksheet-form dispatches them to dedicated
-        // editors and skips them in the field grid.
+        // Fields WITHOUT enumValues keep the legacy "Phase 2" placeholder.
+        // Register widgets are dispatched by WIDGETS (Plan 2b); a json field
+        // reaches this branch only when no register config resolves.
         const options = field.enumValues ?? [];
         if (options.length === 0) {
           return (
