@@ -101,7 +101,9 @@ describe('WorksheetForm — lookup_fill through the ONE renderer path', () => {
     const root = screen.getAllByTestId('lookup-fill').find((r) => r.dataset.symbol === 'ac_as_ratio_limit')!;
     expect(root.dataset.mode).toBe('display');
     expect(within(root).getByTestId('lookup-fill-value')).toHaveTextContent('30');
-    expect(within(root).getByTestId('lookup-source')).toHaveTextContent('Tab. 6: — (Schlüssel fehlt: tab6_tier, bbz_band) (Grenzwert)');
+    // Fix round 1 ruling: display mode names the SOURCE only (no key diagnostics).
+    expect(within(root).getByTestId('lookup-source')).toHaveTextContent('Tab. 6 (Grenzwert)');
+    expect(within(root).getByTestId('lookup-source')).not.toHaveTextContent('Schlüssel fehlt');
     expect(screen.queryByRole('button', { name: 'abweichend wählen' })).toBeNull();
     // No DynamicField number input for the limit (the old read-only input is gone; the null testid maps to lookup-fill-value).
     expect(screen.queryByLabelText('Grenzwert A_C/A_S,m (Tab. 6)', { exact: false })).toBeNull();

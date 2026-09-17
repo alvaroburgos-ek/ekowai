@@ -109,8 +109,12 @@ describe('binding resolution: DB wins, fallback only while widget IS NULL', () =
     expect(cfg?.ui).toEqual({ reason_min_length: 25, source_label: 'DIN 1989-1 Tab. 3' });
     expect(cfg?.binding.table_code).toBe('TAB3');
     expect(resolveLookupFillConfig({ symbol: 'ac_as_ratio_limit', widget: null, uiConfig: null, lookup: null })?.ui).toBeNull();
-    // An invalid ui_config invalidates the whole config (parseFieldConfig throws ⇒ null).
-    expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 0 }, lookup: { table_code: 'TAB3', role: 'value', keys: [{ column: 'k', from_symbol: 'k' }], value: 'e' } })).toBeNull();
+    // An invalid ui_config invalidates the whole config (parseFieldConfig throws ⇒ null). Fix round 1: the zod floor
+    // is the server action's own minimum (10) — a smaller reason_min_length could never be satisfied server-side.
+    const lookup = { table_code: 'TAB3', role: 'value', keys: [{ column: 'k', from_symbol: 'k' }], value: 'e' };
+    expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 0 }, lookup })).toBeNull();
+    expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 5 }, lookup })).toBeNull();
+    expect(resolveLookupFillConfig({ symbol: 'e', widget: 'lookup_fill', uiConfig: { reason_min_length: 10 }, lookup })?.ui).toEqual({ reason_min_length: 10 });
   });
 });
 

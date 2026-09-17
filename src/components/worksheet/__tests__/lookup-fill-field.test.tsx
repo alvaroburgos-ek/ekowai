@@ -2,9 +2,10 @@
  * Plan 2b Task 7 — the `lookup_fill` widget.
  *
  * Display mode: the symbol is server-owned (`computedSymbols` / `serverComputedSet`)
- * ⇒ the persisted value is shown read-only with the source badge; the widget never
- * writes the store and offers no override control (the five materializeLoadingCheck
- * sites stay the single producer of `ac_as_ratio_limit`).
+ * or an inherited copy (`inheritedFromWorksheet`) ⇒ the persisted value is shown
+ * read-only with a SOURCE-only badge (fix round 1: no key diagnostics there); the widget
+ * never writes the store and offers no override control (the five
+ * materializeLoadingCheck sites stay the single producer of `ac_as_ratio_limit`).
  *
  * Fill mode: nobody else owns the symbol ⇒ the widget fills the store from the table
  * row once (stored null), the badge keeps the printed value visible, and an override
@@ -89,8 +90,13 @@ describe('LookupFillField — display mode (server-owned symbol)', () => {
     expect(root.dataset.mode).toBe('display');
     expect(root.dataset.symbol).toBe('ac_as_ratio_limit');
     expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('30');
-    // Keys are not fields today — sign-off D-2b-3.
-    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 6: — (Schlüssel fehlt: tab6_tier, bbz_band) (Grenzwert)');
+    // Fix round 1 ruling: display mode names the SOURCE only — the key diagnostics (tab6_tier / bbz_band are not
+    // fields today, sign-off D-2b-3) belong to fill mode.
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 6 (Grenzwert)');
+    expect(screen.getByTestId('lookup-source')).not.toHaveTextContent('Schlüssel fehlt');
+    // No override marker / reason-missing state in display mode even though 30 differs from every TAB6 row.
+    expect(screen.queryByText('abweichend')).toBeNull();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
     expect(screen.queryByRole('button', { name: 'abweichend wählen' })).toBeNull();
     expect(screen.queryByRole('spinbutton')).toBeNull();
     expect(screen.queryByTestId('lookup-locked')).toBeNull();
@@ -272,5 +278,113 @@ describe('LookupFillField — fill mode (client-owned scalar, DB binding, policy
     fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
     expect(screen.getByLabelText('v_test (Messwert)')).toBeInTheDocument();
     expect(screen.getByLabelText('Begründung der Abweichung')).toBeInTheDocument();
+  });
+});
+
+describe('LookupFillField — fix round 1 pins', () => {
+  const ASPHALT = { 'f-surf': { type: 'enum', value: 'schwarzdecke_asphalt' } } as const;
+
+  it('display mode also covers an INHERITED copy (inheritedFromWorksheet): no write, no controls, source-only badge', () => {
+    const setField = vi.fn();
+    const inherited = makeField({ ...C_TEST, inheritedFromWorksheet: 'A138-07' });
+    render(<Harness field={inherited} fields={[inherited, SURFACE]} initial={{ ...ASPHALT }} onSet={setField} />);
+    expect(screen.getByTestId('lookup-fill').dataset.mode).toBe('display');
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Tab. 9: 0,9');
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(setField).not.toHaveBeenCalled();
+  });
+
+  it('display mode: an unresolved row shows the source only (no "Schlüssel fehlt"); a resolved row shows the figure', () => {
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{}} over={{ serverComputedSet: new Set(['f-c']) }} />);
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent(/^Tab\. 9$/);
+  });
+
+  it('an override without a saved reason shows "Begründung fehlt" (lookup-reason-missing) — visible state, no gate', async () => {
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT, 'f-c': { type: 'number', value: 0.75 } }} />);
+    expect(screen.getByTestId('lookup-reason-missing')).toHaveTextContent('Begründung fehlt');
+    fireEvent.change(screen.getByLabelText('Begründung der Abweichung'), { target: { value: 'Örtliche Messung 2026' } });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Abweichung begründen' })); });
+    expect(await screen.findByText('✓ Abweichung begründet')).toBeInTheDocument();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
+  });
+
+  it('deviate → justify → "übernehmen" → deviate again ⇒ NO ✓ (confirmation cleared), reason-missing shown again', async () => {
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT, 'f-c': { type: 'number', value: TAB9_ASPHALT_CM } }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    fireEvent.change(screen.getByLabelText('c_test (abweichend)'), { target: { value: '0.75' } });
+    fireEvent.change(screen.getByLabelText('Begründung der Abweichung'), { target: { value: 'Örtliche Messung 2026' } });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Abweichung begründen' })); });
+    expect(await screen.findByText('✓ Abweichung begründet')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Tab. 9 übernehmen' }));
+    expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('0,9');
+    fireEvent.click(screen.getByRole('button', { name: 'abweichend wählen' }));
+    fireEvent.change(screen.getByLabelText('c_test (abweichend)'), { target: { value: '0.6' } });
+    expect(screen.queryByText('✓ Abweichung begründet')).toBeNull();
+    expect(screen.getByTestId('lookup-reason-missing')).toBeInTheDocument();
+    expect(screen.getByLabelText('Begründung der Abweichung')).toBeInTheDocument();
+    expect(recordManualOverride).toHaveBeenCalledTimes(1);
+  });
+
+  it('changing the value AFTER a confirmation (without übernehmen) also drops the ✓ — the confirmation is keyed by (fieldId, value)', async () => {
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT, 'f-c': { type: 'number', value: 0.75 } }} />);
+    fireEvent.change(screen.getByLabelText('Begründung der Abweichung'), { target: { value: 'Örtliche Messung 2026' } });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Abweichung begründen' })); });
+    expect(await screen.findByText('✓ Abweichung begründet')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('c_test (abweichend)'), { target: { value: '0.5' } });
+    expect(screen.queryByText('✓ Abweichung begründet')).toBeNull();
+    expect(screen.getByTestId('lookup-reason-missing')).toBeInTheDocument();
+  });
+
+  it('keys → row A (fill a), keys cleared (no write), keys → row B ⇒ re-fills b — never a phantom "abweichend"', async () => {
+    const KIES_CM = resolveRegulationTable(STD, 'TAB9')!.rows.find((r) => r.row_key === 'kiesbelag_locker')!.values.cm as number;
+    const setField = vi.fn();
+    const controls = (set: (id: string, v: FieldValue) => void) => (
+      <>
+        <button type="button" onClick={() => set('f-surf', { type: 'enum', value: null })}>→ clear</button>
+        <button type="button" onClick={() => set('f-surf', { type: 'enum', value: 'kiesbelag_locker' })}>→ kies</button>
+      </>
+    );
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT }} onSet={setField} controls={controls} />);
+    await waitFor(() => expect(setField).toHaveBeenCalledWith('f-c', { type: 'number', value: TAB9_ASPHALT_CM }));
+    fireEvent.click(screen.getByRole('button', { name: '→ clear' }));
+    expect(screen.getByTestId('lookup-source')).toHaveTextContent('Schlüssel fehlt: surface_type');
+    expect(setField).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: '→ kies' }));
+    await waitFor(() => expect(setField).toHaveBeenCalledWith('f-c', { type: 'number', value: KIES_CM }));
+    expect(setField).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('abweichend')).toBeNull();
+    expect(screen.queryByTestId('lookup-reason-missing')).toBeNull();
+    expect(screen.getByTestId('lookup-fill-value')).toHaveTextContent('0,2');
+  });
+
+  it('clearing the number input keeps it empty (writes null, no snap-back to the table value)', async () => {
+    const setField = vi.fn();
+    render(<Harness field={C_TEST} fields={[C_TEST, SURFACE]} initial={{ ...ASPHALT, 'f-c': { type: 'number', value: 0.75 } }} onSet={setField} />);
+    fireEvent.change(screen.getByLabelText('c_test (abweichend)'), { target: { value: '' } });
+    expect(setField).toHaveBeenLastCalledWith('f-c', { type: 'number', value: null });
+    await act(async () => { await new Promise((r) => setTimeout(r, 20)); });
+    expect(setField).toHaveBeenCalledTimes(1);
+    expect((screen.getByLabelText('c_test (abweichend)') as HTMLInputElement).value).toBe('');
+    // "übernehmen" is the way back to the table value.
+    fireEvent.click(screen.getByRole('button', { name: 'Tab. 9 übernehmen' }));
+    expect(setField).toHaveBeenLastCalledWith('f-c', { type: 'number', value: TAB9_ASPHALT_CM });
+  });
+
+  it('kann: the placeholder option never writes 0', () => {
+    registerTables([{
+      standard_code: 'SYN-2', edition: '2026-01', table_code: 'TAB1', title_de: 'Synthetisch', clause_reference: null, page_ref: null,
+      key_columns: ['k'], value_columns: [{ name: 'v', type: 'number', values: ['1', '2.5', '4'] }], override_policy: 'kann', override_quote: null,
+      verification_status: 'imported_unverified',
+      rows: [{ row_key: 'a', keys: { k: 'a' }, group_label: null, label_de: 'A', order_index: 0, values: { v: 2.5 }, verbatim_quote: 'Tab. 1: A — 2,5' }],
+    }]);
+    const kField = makeField({ id: 'f-k', symbol: 'k', dataType: 'enum' });
+    const vField = makeField({ id: 'f-v', symbol: 'v_test', labelDe: 'v_test', widget: 'lookup_fill', lookup: { table_code: 'TAB1', role: 'value', keys: [{ column: 'k', from_symbol: 'k' }], value: 'v' } });
+    const setField = vi.fn();
+    render(<Harness field={vField} fields={[vField, kField]} initial={{ 'f-k': { type: 'enum', value: 'a' }, 'f-v': { type: 'number', value: 4 } }} over={{ standardCode: 'SYN-2' }} onSet={setField} />);
+    const select = screen.getByLabelText('v_test (abweichend)') as HTMLSelectElement;
+    // A change to '' (the placeholder path) must be a no-op — never `Number('') === 0`.
+    fireEvent.change(select, { target: { value: '' } });
+    expect(setField).not.toHaveBeenCalledWith('f-v', { type: 'number', value: 0 });
+    expect(setField).not.toHaveBeenCalled();
   });
 });

@@ -7,16 +7,21 @@
  *
  * Two modes, one producer per value (brief "Ownership decision"):
  * - DISPLAY — the form declares the symbol server-owned (`computedSymbols`, e.g.
- *   A138-12 `ac_as_ratio_limit` via LOADING_CHECK_SYMBOLS, or `serverComputedSet`).
- *   The persisted value renders read-only with the badge; the widget never writes
- *   the store and offers no override control — the materialiser stays the producer.
+ *   A138-12 `ac_as_ratio_limit` via LOADING_CHECK_SYMBOLS, or `serverComputedSet`),
+ *   or the field is an INHERITED copy (`inheritedFromWorksheet` — a copy is never a
+ *   producer). The persisted value renders read-only; the badge names the SOURCE
+ *   only (`Tab. 6 (Grenzwert)`, with the figure when the row resolves) — the
+ *   key diagnostics belong to fill mode. No store write, no override control.
  * - FILL — nobody else owns the symbol (Plan 3: DIN 1989-1 `e`, FLL-GAR
  *   `nahtbreite_min_mm`). When the bound row resolves and the stored value is null
- *   (or the keys moved and the stored value still equals the previous row's figure),
- *   the widget writes `{ type: 'number', value: tableValue }` through `setField` —
- *   the engineer's confirmed value with the source badge. An override is derived
- *   (`stored !== tableValue`), never stored; its REASON is persisted through the
- *   existing `recordManualOverride` audit path (`equationNumber = 'lookup:<TABLE>'`).
+ *   (or the keys moved to another row and the stored value still equals the LAST
+ *   RESOLVED row's figure), the widget writes `{ type: 'number', value: tableValue }`
+ *   through `setField` — the engineer's confirmed value with the source badge. An
+ *   override is derived (`stored !== tableValue`), never stored; its REASON is
+ *   persisted through the existing `recordManualOverride` audit path
+ *   (`equationNumber = 'lookup:<TABLE>'`). An override whose reason has not been
+ *   saved for the CURRENT value shows `Begründung fehlt` (`lookup-reason-missing`)
+ *   — visible state only, no save-time gate (sign-off D-2b-10).
  *
  * Policies (spec §7): `locked` ⇒ no affordance (`lookup-locked` note);
  * `anhaltswert` ⇒ number input + reason; `kann` ⇒ select over the table's printed
@@ -24,7 +29,8 @@
  * `messwert` ⇒ number input labelled "(Messwert)" + reason (provenance).
  *
  * Testids: `lookup-fill` [data-mode, data-symbol], `lookup-source` (badge,
- * title = row.verbatim_quote), `lookup-fill-value` (read-only span), `lookup-locked`.
+ * title = row.verbatim_quote), `lookup-fill-value` (read-only span), `lookup-locked`,
+ * `lookup-reason-missing`.
  */
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { recordManualOverride } from '@/lib/actions/overrides';
@@ -36,19 +42,23 @@ import type { WidgetContext, WorksheetFormField } from './widgets';
 /** The server action's own floor (overrides.ts `reason: z.string().min(10)`) — a smaller ui value would always be rejected. */
 const SERVER_MIN_REASON = 10;
 
-// fieldId → saved reason, module-scoped like manual-override-pill.tsx so the "✓ Abweichung
-// begründet" confirmation survives parent re-renders; reset on page refresh (audit_log is the truth).
-const savedReasons = new Map<string, string>();
+// fieldId → { reason, value } of the last saved justification, module-scoped like
+// manual-override-pill.tsx so the "✓ Abweichung begründet" confirmation survives parent
+// re-renders. The confirmation is valid ONLY while the stored value is still the one that
+// was justified — a later different override (or `takeTable`) drops it. Reset on page
+// refresh (audit_log is the truth).
+const savedReasons = new Map<string, { reason: string; value: number }>();
 /** Test isolation only — clears the in-memory confirmation map (no production caller). */
 export function resetSavedLookupReasons(): void {
   savedReasons.clear();
 }
 
-function badgeText(state: LookupFillState, label: string, role: LookupBinding['role']): string {
+function badgeText(state: LookupFillState, label: string, role: LookupBinding['role'], mode: 'display' | 'fill'): string {
   const suffix = role === 'limit' ? ' (Grenzwert)' : '';
+  if (state.kind === 'resolved') return `${label}: ${fmt(state.tableValue ?? undefined)}${suffix}`;
+  // Display mode names the SOURCE only — the value is server-produced, the key diagnostics are fill-mode information.
+  if (mode === 'display') return `${label}${suffix}`;
   switch (state.kind) {
-    case 'resolved':
-      return `${label}: ${fmt(state.tableValue ?? undefined)}${suffix}`;
     case 'keys_missing':
       return `${label}: — (Schlüssel fehlt: ${state.missing.join(', ')})${suffix}`;
     case 'no_row':
@@ -73,61 +83,74 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
   const label = ui?.source_label ?? state.label;
   const v = ctx.values[field.id];
   const stored = v?.type === 'number' ? v.value : null;
-  const owned = ctx.computedSymbols.has(field.symbol) || ctx.serverComputedSet.has(field.id);
+  // Ownership: server materialiser (computedSymbols / serverComputedSet) or an inherited copy ⇒ display only.
+  const owned = ctx.computedSymbols.has(field.symbol) || ctx.serverComputedSet.has(field.id) || field.inheritedFromWorksheet != null;
   const mode: 'display' | 'fill' = owned ? 'display' : 'fill';
   const readOnly = ctx.readOnly;
   const tableNumber = state.kind === 'resolved' && typeof state.tableValue === 'number' ? state.tableValue : null;
-  const overridden = isOverridden(state, stored);
+  const overridden = mode === 'fill' && isOverridden(state, stored);
   const policy = state.kind === 'resolved' ? state.policy : null;
 
   const [editing, setEditing] = useState(false);
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [savedReason, setSavedReason] = useState<string | null>(() => savedReasons.get(field.id) ?? null);
+  const [saved, setSaved] = useState<{ reason: string; value: number } | null>(() => savedReasons.get(field.id) ?? null);
+  const savedReason = saved && stored != null && saved.value === stored ? saved.reason : null;
   const minReason = Math.max(ui?.reason_min_length ?? SERVER_MIN_REASON, SERVER_MIN_REASON);
 
   // FILL mode — the one client-side write. Fill when nothing is stored; on a key change
-  // (different row) re-fill only when the stored value still equals the PREVIOUS row's
-  // figure — an engineer's override (stored ≠ previous table value) is never overwritten.
+  // (a different row than the LAST RESOLVED one) re-fill only when the stored value still
+  // equals that row's figure — an engineer's override (stored ≠ last table value) is never
+  // overwritten. `lastResolved` is updated only on resolved rows, so keys cleared in between
+  // (keys_missing) do not fake a fresh row and turn the old fill into a phantom "abweichend".
+  // While the engineer is editing (opened "abweichend", or typed/cleared the input) nothing is
+  // filled — a cleared input stays empty instead of snapping back to the table value.
   const rowKey = state.kind === 'resolved' ? state.row.row_key : null;
-  const prev = useRef<{ rowKey: string | null; tableNumber: number | null }>({ rowKey, tableNumber });
+  const lastResolved = useRef<{ rowKey: string; tableNumber: number } | null>(null);
   const { setField, values } = ctx;
   useEffect(() => {
-    const before = prev.current;
-    prev.current = { rowKey, tableNumber };
-    if (mode !== 'fill' || readOnly || tableNumber == null || rowKey == null) return;
-    const keysMoved = before.rowKey != null && before.rowKey !== rowKey;
-    const followsTable = stored == null || (keysMoved && before.tableNumber != null && stored === before.tableNumber);
+    if (mode !== 'fill' || rowKey == null || tableNumber == null) return;
+    const before = lastResolved.current;
+    lastResolved.current = { rowKey, tableNumber };
+    if (readOnly || editing) return;
+    const keysMoved = before != null && before.rowKey !== rowKey;
+    const followsTable = stored == null || (keysMoved && stored === before.tableNumber);
     if (followsTable && stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
     // `values` is a dependency on purpose: the form's store init (parent effect, runs AFTER this child effect on
     // mount) can reset the store to a state whose derived deps equal the previous run's — re-run on every store
     // change so a fill lost to that reset is re-applied; the write itself is idempotent (stored === table ⇒ no-op).
-  }, [mode, readOnly, rowKey, tableNumber, stored, field.id, setField, values]);
+  }, [mode, readOnly, editing, rowKey, tableNumber, stored, field.id, setField, values]);
 
   const canOverride = mode === 'fill' && !readOnly && state.kind === 'resolved' && policy !== 'locked' && tableNumber != null;
   const showInput = canOverride && (editing || overridden);
   const inputLabel = `${field.labelDe}${policy === 'messwert' ? ' (Messwert)' : ' (abweichend)'}`;
   const alternatives = policy === 'kann' && state.kind === 'resolved' && state.valueColumn?.values?.length ? state.valueColumn.values : null;
 
+  /** Engineer-typed value; `null` clears the input (kept empty — no re-fill while editing). */
   const write = (n: number | null) => {
-    if (n == null || !Number.isFinite(n)) return;
+    if (n != null && !Number.isFinite(n)) return;
+    setEditing(true);
     setField(field.id, { type: 'number', value: n });
   };
   const takeTable = () => {
-    if (tableNumber != null) write(tableNumber);
+    savedReasons.delete(field.id);
+    setSaved(null);
     setEditing(false);
     setError(null);
+    if (tableNumber != null && stored !== tableNumber) setField(field.id, { type: 'number', value: tableNumber });
   };
   const submitReason = () => {
     setError(null);
     const trimmed = reason.trim();
-    if (trimmed.length < minReason) return;
+    if (trimmed.length < minReason || stored == null) return;
+    const justified = stored;
     startTransition(async () => {
       const res = await recordManualOverride({ projectId: ctx.projectId, fieldId: field.id, equationNumber: `lookup:${binding.table_code}`, reason: trimmed });
       if (res.ok) {
-        savedReasons.set(field.id, trimmed);
-        setSavedReason(trimmed);
+        const entry = { reason: trimmed, value: justified };
+        savedReasons.set(field.id, entry);
+        setSaved(entry);
         setReason('');
       } else {
         setError(res.error);
@@ -148,9 +171,14 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
             className="normal-case tracking-normal rounded-full border border-hairline-strong bg-paper-2/60 px-2 py-0.5 text-[10px] text-ink-2"
             title={state.kind === 'resolved' ? state.row.verbatim_quote : undefined}
           >
-            {badgeText(state, label, binding.role)}
+            {badgeText(state, label, binding.role, mode)}
           </span>
           {overridden && <span className="normal-case tracking-normal text-accent-2">abweichend</span>}
+          {overridden && policy !== 'locked' && !savedReason && (
+            <span data-testid="lookup-reason-missing" className="normal-case tracking-normal text-warning" title="Abweichung ohne gespeicherte Begründung (Auditprotokoll)">
+              Begründung fehlt
+            </span>
+          )}
         </div>
         {field.description && <p className="text-xs text-subtext mt-1.5 leading-snug">{field.description}</p>}
       </div>
@@ -160,7 +188,10 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
           <select
             aria-label={inputLabel}
             value={stored != null ? String(stored) : ''}
-            onChange={(e) => write(Number(e.target.value))}
+            onChange={(e) => {
+              if (e.target.value === '') return; // placeholder — never writes 0
+              write(Number(e.target.value));
+            }}
             className={inputBox}
           >
             {stored == null && <option value="">— wählen —</option>}
@@ -211,7 +242,7 @@ function LookupFillInner({ field, ctx, binding, ui }: { field: WorksheetFormFiel
                 className={inputBox}
               />
               {error && <p className="text-xs text-error">{error}</p>}
-              <button type="button" className={smallBtn} disabled={pending || reason.trim().length < minReason} onClick={submitReason}>
+              <button type="button" className={smallBtn} disabled={pending || stored == null || reason.trim().length < minReason} onClick={submitReason}>
                 {pending ? 'Speichere…' : 'Abweichung begründen'}
               </button>
             </div>
