@@ -93,23 +93,26 @@
 -- Capture: -09 B hydrobot_type (→ -10, -12), C hydrobot_substrate_thickness / hydrobot_water_column (→ -15), D
 -- hydrobot_feed_rate (→ -11); -10 B filter_flow_type (→ -11), C aerobic_filtration_confirmed (→ -11, -15), D
 -- filter_feed_rate_slow_qmax / filter_feed_rate_quick_qmin (→ -11), filter_colonized_surface_actual /
--- filter_volume_required (→ -15), F filter_50x_rule_met (→ -15). Emitted: the driver-free sections only (A, F, J, K, L, M
--- on -09; A, J, K, L, M on -10) — the headings hide, the inputs stay visible for every type.
+-- filter_volume_required (→ -15), F filter_50x_rule_met (→ -15). Emitted: NOTHING (fix round 1) — the driver-free sections
+-- (A, F, J, K, L, M on -09; A, J, K, L, M on -10) hold 0 fields and worksheet-form.tsx renders only sections that contain a
+-- visible field, so a rule on them alone is not observable; the whole type-driven hide is this one block (all nine sections
+-- of each worksheet — the rules on the field-free sections become valid together with the producer sections).
 -- Evidence: L1135–L1147 (Tab. 1 regeneration-area column: "Hydrobotanical system" for I / II / III, "Substrate filter"
 -- for III / IV); L2580–L2581 "There must be a flow in supplementary hydrobotanical systems in natural pool type IV; these
 -- systems are not taken into account for the dimensioning of the water purification system."
 -- Why staged: hiding the producer sections nulls the inherited values on -11 / -12 / -15 for the non-applicable types
 -- (REQ-19 / -20 / -21 / -22 / -30 would report not_applicable there — the printed intent, but an enforcement change).
--- Option (the seven section rows; each guarded on the captured NULL):
+-- Option (the 18 section rows — nine per worksheet, captured codes A B C D F J K L M; each guarded on the captured NULL):
 -- BEGIN;
 -- UPDATE worksheet_sections ws SET visible_when = 'natural_pool_type IN {''type_I'', ''type_II'', ''type_III''}'
 --   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
---  WHERE ws.worksheet_template_id = w.id AND w.code = 'FLLNT-09' AND s.code = 'FLL-Naturteich' AND ws.code IN ('B', 'C', 'D') AND ws.visible_when IS NULL;
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'FLLNT-09' AND s.code = 'FLL-Naturteich' AND ws.code IN ('A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M') AND ws.visible_when IS NULL;
 -- UPDATE worksheet_sections ws SET visible_when = 'natural_pool_type IN {''type_III'', ''type_IV''}'
 --   FROM worksheet_templates w JOIN standards s ON s.id = w.standard_id
---  WHERE ws.worksheet_template_id = w.id AND w.code = 'FLLNT-10' AND s.code = 'FLL-Naturteich' AND ws.code IN ('B', 'C', 'D', 'F') AND ws.visible_when IS NULL;
+--  WHERE ws.worksheet_template_id = w.id AND w.code = 'FLLNT-10' AND s.code = 'FLL-Naturteich' AND ws.code IN ('A', 'B', 'C', 'D', 'F', 'J', 'K', 'L', 'M') AND ws.visible_when IS NULL;
 -- COMMIT;
--- Rollback: SET visible_when = NULL on the seven rows.
+-- Rollback: SET visible_when = NULL on the 18 rows (WHERE ws.visible_when = '<the text above>').
+-- Type V (J-5): if the technical unit is to be dimensioned on FLLNT-10, the -10 rule reads IN {''type_III'', ''type_IV'', ''type_V''}.
 
 -- =====================================================================================================================
 -- fll_naturteich-E-1 · FLLNT-05 filter_substrate_* / FLLNT-10 filter_grain_size_max, filter_kf / FLLNT-09 hydrobot_* — NOT re-bound as lookup_fill limit carriers
@@ -311,6 +314,13 @@
 --  WHERE f.worksheet_template_id = w.id AND f.symbol = 'regeneration_share_min_pct' AND w.code = 'FLLNT-03' AND s.code = 'FLL-Naturteich' AND f.active AND f.consumer_worksheets IS NULL;
 -- COMMIT;
 -- Rollback: DELETE FROM compliance_requirements WHERE code = 'REQ-07R' AND description LIKE 'Plan 3 (fll_naturteich-G-1)%'; SET consumer_worksheets = NULL on regeneration_share_min_pct.
+-- Latent guard conflict (fix round 1): the emitted 20260917100810 gives regeneration_share_min_pct a visible_when
+-- (natural_pool_type IN {type_I, type_II, type_III}); with consumer_worksheets = ['FLLNT-06'] set by this block the field
+-- becomes a consumed producer and a re-emit of the field-config module would be REFUSED by the emitter's producer guard.
+-- Functionally safe: REQ-07R carries the same IF guard, so a hidden (type IV / V) → null inherited value makes the gate
+-- not_applicable, never a wrong verdict. On ratification either withdraw the visible_when in field-configs/fll_naturteich.ts
+-- and re-emit, or keep the rule and let REQ-07R's IF be the single guard (then the capture's consumer list must be honoured
+-- by the next re-capture before any re-emit).
 
 -- =====================================================================================================================
 -- fll_naturteich-G-2 · FLLNT-05 — new gates: the measured substrate values against the Tab.-9 fills (after E-1)

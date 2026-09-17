@@ -50,7 +50,7 @@ describe('FLL-Naturteich field configs (Plan 3 Task 8)', () => {
     for (const s of SECTION_VISIBILITY) expect(parseCondition(s.visible_when), `${s.worksheet} ${s.section_code}`).not.toBeNull();
   });
 
-  it('counts: 37 field entries (34 create, 3 update), widgets by kind, 4 field rules, 11 section rules', () => {
+  it('counts: 37 field entries (34 create, 3 update), widgets by kind, 4 field rules, 0 section rules (the type-driven hide of -09 / -10 is STAGED as C-3)', () => {
     expect(FIELD_CONFIGS).toHaveLength(37);
     expect(FIELD_CONFIGS.filter((e) => e.create)).toHaveLength(34);
     expect(FIELD_CONFIGS.filter((e) => !e.create).map((e) => `${e.worksheet} ${e.symbol}`)).toEqual(['FLLNT-10 filter_water_column', 'FLLNT-10 filter_kf', 'FLLNT-12 plant_species_list']);
@@ -76,8 +76,10 @@ describe('FLL-Naturteich field configs (Plan 3 Task 8)', () => {
       `FLLNT-10 filter_water_column :: ${NOT_HORIZONTAL}`,
       `FLLNT-10 filter_kf :: ${NOT_HORIZONTAL}`,
     ]);
-    expect(SECTION_VISIBILITY.map((s) => `${s.worksheet} ${s.section_code}`)).toEqual(['FLLNT-09 A', 'FLLNT-09 F', 'FLLNT-09 J', 'FLLNT-09 K', 'FLLNT-09 L', 'FLLNT-09 M', 'FLLNT-10 A', 'FLLNT-10 J', 'FLLNT-10 K', 'FLLNT-10 L', 'FLLNT-10 M']);
-    for (const s of SECTION_VISIBILITY) expect(s.visible_when).toBe(s.worksheet === 'FLLNT-09' ? TYPES_I_III : TYPES_III_IV);
+    expect(SECTION_VISIBILITY).toEqual([]); // fix round 1: the driver-free sections A / F / J / K / L / M hold 0 fields (capture) — a rule there is not observable; C-3 carries all nine sections per worksheet
+    for (const code of ['A', 'F', 'J', 'K', 'L', 'M']) expect(Object.keys(prior).filter((k) => k.startsWith('FLLNT-09 ') && priorRow(k).section_code === code)).toEqual([]);
+    for (const code of ['A', 'J', 'K', 'L', 'M']) expect(Object.keys(prior).filter((k) => k.startsWith('FLLNT-10 ') && priorRow(k).section_code === code)).toEqual([]);
+    expect(TYPES_III_IV).toBe("natural_pool_type IN {'type_III', 'type_IV'}"); // the C-3 rule for -10 (STAGED)
     // never touched: the consumed producers of the brief's Step 4 (C-2), the orphan enum-leak fields (S-1), the existing measured inputs (E-1)
     for (const sym of ['p_binding_required', 'splash_water_tank_volume', 'type_III', 'submergent', 'emersed', 'vertical_continuous_overflow', 'vertical_no_overflow', 'filter_substrate_elutable_p', 'filter_substrate_elutriated_pct', 'filter_substrate_oversize_pct', 'filter_grain_size_max', 'hydrobot_water_column', 'hydrobot_feed_rate', 'grain_specific_surface', 'F_filter', 'h_filter', 'equipment_elements_list']) {
       expect(FIELD_CONFIGS.find((e) => e.symbol === sym), sym).toBeUndefined();
@@ -160,7 +162,7 @@ describe('FLL-Naturteich field configs (Plan 3 Task 8)', () => {
     // the EQ-02 inputs on -10 are transitive producers (EQ-02 → filter_colonized_surface_actual → EQ-01 → filter_50x_rule_met, consumed by -15)
     expect(producerChain(prior, 'FLLNT-10', 'grain_specific_surface')).not.toBeNull();
     expect(refused('FLLNT-10', 'grain_specific_surface', NOT_HORIZONTAL)).toThrow(/consumed by/);
-    // the section rules on the producer sections of -09 / -10 are refused (C-3)
+    // the section rules on the producer sections of -09 / -10 are refused (C-3) — which is why no section rule is emitted at all
     const refusedSection = (ws: string, code: string) => () => emitFieldConfigSql('fll_naturteich', [], [{ standard: 'FLL-Naturteich', worksheet: ws, section_code: code, visible_when: TYPES_I_III, verification_quote: 'x' }], prior);
     for (const code of ['B', 'C', 'D']) expect(refusedSection('FLLNT-09', code), `FLLNT-09 ${code}`).toThrow(/consumed by/);
     for (const code of ['B', 'C', 'D', 'F']) expect(refusedSection('FLLNT-10', code), `FLLNT-10 ${code}`).toThrow(/consumed by/);
@@ -179,7 +181,8 @@ describe('FLL-Naturteich field configs (Plan 3 Task 8)', () => {
     expect(norm(down)).toBe(norm(readFileSync(join(ROOT, files.rollback), 'utf8')));
     expect((up.match(/^UPDATE fields f SET/gm) ?? []).length).toBe(3);
     expect((up.match(/^INSERT INTO fields/gm) ?? []).length).toBe(34);
-    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(11);
+    expect((up.match(/^UPDATE worksheet_sections/gm) ?? []).length).toBe(0);
+    expect(down).not.toMatch(/worksheet_sections/);
     expect(up).not.toMatch(/^UPDATE fields f SET .*enum_values =/m); // D-1
     expect(down).toContain("f.symbol = 'plant_species_list'"); // the Plan-1 register is restored to the captured NULL widget (the Plan-1 migration is unapplied)
   });

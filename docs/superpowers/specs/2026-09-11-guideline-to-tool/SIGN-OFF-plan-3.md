@@ -1784,11 +1784,11 @@ Report: `reports/plan-3-fll_naturteich.md` · STAGED SQL: `scripts/verification/
 - Proposed SQL / config: none; if the owner wants supplementary areas in the share denominator (prod's reading), the D2 formula changes to `/ sum_rows(zonen, area_m2)`.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### fll_naturteich-J-5 · FLL-Naturteich · FLLNT-10 · section rules hide the substrate-filter worksheet for type V
+### fll_naturteich-J-5 · FLL-Naturteich · FLLNT-10 · the STAGED section rule (C-3) hides the substrate-filter worksheet for type V
 - Class: gate-guard (reading)
-- Chosen now (fail-safe): the FLLNT-10 section rules use `natural_pool_type IN {'type_III', 'type_IV'}` (Tab. 1's regeneration-area column); only the driver-free sections A / J / K / L / M hide, so a type-V project keeps every input visible (C-3).
+- Chosen now (fail-safe): the C-3 rule for FLLNT-10 reads `natural_pool_type IN {'type_III', 'type_IV'}` (Tab. 1's regeneration-area column); nothing is emitted (fix round 1), so a type-V project keeps every input visible today.
 - Evidence (verbatim, transcript line): "Carrier material, e.g. plastic or mineral medium in a technical unit" (L1149–L1151, type V regeneration area); "they must be assigned to the quick filter types;" (L2872, §10.2.4 technical unit).
-- Proposed SQL / config: if the technical unit should be dimensioned on FLLNT-10 (quick-filter rules), the rule becomes `IN {'type_III', 'type_IV', 'type_V'}` (one string in `field-configs/fll_naturteich.ts`, re-emit).
+- Proposed SQL / config: if the technical unit should be dimensioned on FLLNT-10 (quick-filter rules), the C-3 rule becomes `IN {'type_III', 'type_IV', 'type_V'}` (noted in the STAGED block).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### fll_naturteich-J-6 · FLL-Naturteich · FLLNT-12 · S10_4_3 plant groups "half-height to tall" vs "medium height to tall"
@@ -1826,11 +1826,11 @@ Report: `reports/plan-3-fll_naturteich.md` · STAGED SQL: `scripts/verification/
 - Proposed SQL / config: STAGED block fll_naturteich-C-2.
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
-### fll_naturteich-C-3 · FLL-Naturteich · FLLNT-09 B / C / D · FLLNT-10 B / C / D / F · section rules refused
+### fll_naturteich-C-3 · FLL-Naturteich · FLLNT-09 · FLLNT-10 · type-driven section hide (all nine sections per worksheet) — STAGED as one ruling
 - Class: consumer-edit
-- Chosen now (fail-safe): 11 section rules on the driver-free sections only (A / F / J / K / L / M of -09, A / J / K / L / M of -10); the producer sections stay visible for every type.
+- Chosen now (fail-safe): NO section rule emitted (fix round 1). The producer sections B / C / D (-09) and B / C / D / F (-10) are refused by the emitter; the driver-free sections hold 0 fields (capture) and `worksheet-form.tsx` renders only sections with a visible field, so a rule on them alone is not observable. Both worksheets stay fully visible for every type.
 - Evidence (verbatim, transcript line): "Regeneration area Hydrobotanical system Hydrobotanical system Substrate filter (usually mineral, with or without plants), hydrobotanical sys- tem, technical unit for phosphor elimination Substrate filter (usually mineral, with or without plants)" (L1135–L1147); "these systems are not taken into account for the dimensioning of the water purification system." (L2580–L2581).
-- Proposed SQL / config: STAGED block fll_naturteich-C-3.
+- Proposed SQL / config: STAGED block fll_naturteich-C-3 (the 18 section UPDATEs, nine per worksheet; type V per J-5).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### fll_naturteich-E-1 · FLL-Naturteich · FLLNT-05 / -09 / -10 · existing inputs NOT re-bound as lookup_fill limit carriers
@@ -1879,7 +1879,7 @@ Report: `reports/plan-3-fll_naturteich.md` · STAGED SQL: `scripts/verification/
 - Class: gate-guard
 - Chosen now (fail-safe): REQ-07 keeps reading the manual `regeneration_area_share`; the register share and the Tab.-1 fill are visible derived / filled values.
 - Evidence (verbatim, transcript line): "\> 50% \> 50% \> 30%" (L1212); "% indication irrelevant, de- sign-related" (L1559–L1560).
-- Proposed SQL / config: STAGED block fll_naturteich-G-1 (new gate REQ-07R on -06 + consumer edit of regeneration_share_min_pct).
+- Proposed SQL / config: STAGED block fll_naturteich-G-1 (new gate REQ-07R on -06 + consumer edit of regeneration_share_min_pct). Latent guard conflict: that consumer edit turns the field into a consumed producer while 20260917100810 gives it a `visible_when` — a later re-emit would be refused by the producer guard; functionally safe (REQ-07R repeats the IF guard, a hidden value ⇒ not_applicable), to be reconciled on ratification (withdraw the rule and re-emit, or keep it as the block says).
 - ☐ RATIFIED ☐ REJECTED ☐ DEFER
 
 ### fll_naturteich-G-2 · FLL-Naturteich · FLLNT-05 · new gates on the Tab.-9 fills

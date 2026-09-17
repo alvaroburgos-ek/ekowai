@@ -49,7 +49,8 @@
  *     output) → fll_naturteich-C-2; the B / C / D (/ F) sections of -09 / -10
  *     hold consumed producers (`hydrobot_type`, `hydrobot_feed_rate`,
  *     `filter_flow_type`, `filter_colonized_surface_actual`, …) → the section
- *     rules cover the driver-free sections only (fll_naturteich-C-3);
+ *     rules are STAGED as one ruling (fll_naturteich-C-3) — the driver-free
+ *     sections hold no field, so a rule on them alone is not observable;
  *   - the brief's `drainage_*` rule (§9.1): no drainage field exists in prod
  *     (REQ-14 is the attestation `attest_fllnt_06_req_14`) — nothing to hide;
  *   - the derivations of the manual enums `filter_flow_type` / `regeneration_
@@ -238,7 +239,7 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
     enum_values: SUBSTRATE_ROLE_TOKENS.map((t, i) => ({ value: t, label_de: SUBSTRATE_ROLE_LABELS[t], order_index: i })), // Tab. 9 column heads L2034–L2040
     verification_quote: `${norm(Q_L2028)} — ${norm(Q_L2042_2043)} — ${norm(Q_L2018_2022)}`,
     create: { section_code: 'C', label_de: 'Substratrolle nach Tab. 9 (Filtersubstrat Typ III / Filtersubstrat Typ IV / Pflanzsubstrat)', data_type: 'enum', unit: null, clause_reference: '§7.2.3, Tab. 9',
-      description: 'Plan 3: Treiber der TABLE9-Spalte für die sechs Anforderungswerte (*_tab9); Tab. 9 druckt die drei Spalten als eigene Rollen — der Naturteich-Typ (FLLNT-03) ist auf FLLNT-05 nicht vererbt und legt die Rolle nicht allein fest (Pflanzsubstrat in jedem Typ).' },
+      description: 'Plan 3: Treiber der TABLE9-Spalte für die sechs Anforderungswerte (*_tab9); Tab. 9 druckt die drei Spalten als eigene Rollen — der Naturteich-Typ (FLLNT-03) ist auf FLLNT-05 nicht vererbt und legt die Rolle nicht allein fest (Pflanzsubstrat in jedem Typ). Die Hälfte filter_iii / filter_iv wird NICHT gegen natural_pool_type plausibilisiert (nicht in Reichweite); eine spätere Ableitung braucht zuerst den Consumer-Edit FLLNT-03 → FLLNT-05 (Muster fll_naturteich-C-1).' },
   }),
   tab9Fill('grain_size_max_tab9', 'grain_max_mm', 'Empfohlene maximale Korngröße', 'mm', 'number', Q_L2042_2043, '16 / 32 / 8 mm'),
   tab9Fill('oversize_max_tab9', 'oversize_max_pct', 'Überkornanteil, maximal', '% by weight', 'number', Q_L2045_2051, '≤ 15 % / ≤ 15 % / –'),
@@ -377,21 +378,19 @@ export const FIELD_CONFIGS: FieldConfigEntry[] = [
 ];
 
 /**
- * Section rules: Tab. 1's regeneration-area column names the hydrobotanical system for types I / II / III and the
- * substrate filter for III / IV (L1135–L1147); §10.2.1 L2580–L2581 keeps type IV's supplementary hydrobotanical systems
- * out of the dimensioning. The driver `natural_pool_type` IS consumed by FLLNT-09 and -10 (capture), so the rules resolve.
- * Only the sections WITHOUT a consumed producer are ruled (A, F on -09, J, K, L, M) — B / C / D of -09 (hydrobot_type,
- * hydrobot_* inputs, hydrobot_feed_rate) and B / C / D / F of -10 (filter_flow_type, aerobic_filtration_confirmed,
- * filter_feed_rate_*, filter_colonized_surface_actual, filter_volume_required, filter_50x_rule_met) hold symbols other
- * worksheets inherit → fll_naturteich-C-3 (STAGED consumer edits; the emitter refuses them).
+ * Section rules: NONE emitted (fix round 1, controller ruling). Tab. 1's regeneration-area column names the hydrobotanical
+ * system for types I / II / III and the substrate filter for III / IV (L1135–L1147); §10.2.1 L2580–L2581 keeps type IV's
+ * supplementary hydrobotanical systems out of the dimensioning; the driver `natural_pool_type` IS consumed by FLLNT-09 and
+ * -10 (capture). But every field-bearing section of -09 (B / C / D) and -10 (B / C / D / F) holds a symbol other worksheets
+ * inherit (hydrobot_type, hydrobot_* inputs, hydrobot_feed_rate, filter_flow_type, aerobic_filtration_confirmed,
+ * filter_feed_rate_*, filter_colonized_surface_actual, filter_volume_required, filter_50x_rule_met) — the emitter refuses
+ * them — and the remaining sections (A, F on -09, J, K, L, M) hold 0 fields, so a rule on them alone is not observable
+ * (`worksheet-form.tsx` renders only sections that contain a visible field). The type-driven hide of both worksheets is
+ * therefore STAGED as ONE ruling: fll_naturteich-C-3 carries the SQL for all nine sections of each worksheet.
  */
-const sec = (worksheet: string, section_code: string, visible_when: string, verification_quote: string): SectionVisibilityEntry => ({ standard: STD, worksheet, section_code, visible_when, verification_quote });
-const Q_SECTIONS_HB = `${norm(Q_L1135_1151)} — ${norm(Q_L2580_2582)}`;
-const Q_SECTIONS_SF = `${norm(Q_L1135_1151)} — ${norm(Q_L1111_1133)}`;
-export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [
-  ...['A', 'F', 'J', 'K', 'L', 'M'].map((s) => sec('FLLNT-09', s, TYPES_I_III, Q_SECTIONS_HB)),
-  ...['A', 'J', 'K', 'L', 'M'].map((s) => sec('FLLNT-10', s, TYPES_III_IV, Q_SECTIONS_SF)),
-];
+export const SECTION_VISIBILITY: SectionVisibilityEntry[] = [];
+/** The cues the staged C-3 rules rest on (kept lifted here so the sheet and the STAGED file cite the same spans). */
+export const SECTION_RULE_CUES = { hydrobotanical: `${norm(Q_L1135_1151)} — ${norm(Q_L2580_2582)}`, substrate_filter: `${norm(Q_L1135_1151)} — ${norm(Q_L1111_1133)}` };
 
 /** Cues read for the rules that are NOT emitted (kept here so the module names its own residue; see the sign-off blocks). */
 export const WITHHELD_CUES = { p_binding: `${norm(Q_L1111_1133)} — ${norm(Q_L2658_2661)}`, types: norm(Q_L1078_1081), reservoir: `${norm(Q_L2930)} — ${norm(Q_L2935_2937)} — ${norm(Q_L2947_2948)}`, technical_quick: norm(Q_L2872), physical_chemical: norm(Q_L2885_2886), regeneration_area: `${norm(Q_L2285_2286)} — ${norm(Q_L2490_2493)}`, type_iv_v_share: `${norm(Q_L1559_1560)} — ${norm(Q_L1660_1661)}` };

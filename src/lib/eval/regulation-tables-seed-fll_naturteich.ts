@@ -391,7 +391,7 @@ export function table7AsTable(): RegulationTable {
     },
     verbatim_quote: b,
   }];
-  return { standard_code: STD, edition: ED, table_code: 'TABLE7', title_de: 'Richtwerte Füllwasser — ggf. nach Aufbereitung (Tab. 7)', clause_reference: '§7.1.1, Tab. 7', page_ref: '33',
+  return { standard_code: STD, edition: ED, table_code: 'TABLE7', title_de: 'Richtwerte Füllwasser — ggf. nach Aufbereitung (Tab. 7)', clause_reference: '§7.1.1, Tab. 7', page_ref: '32', // TOC L373–L374 "… 32"; the page marker "32" (L1881) precedes its page, "33" (L1936) opens the next one
     key_columns: ['source'], value_columns: [...waterCols(['ammonium_max', 'iron_max', 'p_total_max', 'hardness_min', 'hardness_min_dh', 'conductivity_max', 'manganese_max', 'nitrate_max', 'orthophosphate_max', 'ph_min', 'ph_max', 'acid_capacity_min', 'acid_capacity_min_dh']), { name: 'printed', type: 'string' }],
     override_policy: 'anhaltswert', override_quote: `${norm(Q_L1904)} — ${norm(Q_L1973_1978)}`, // L1904 — L1973–L1978
     verification_status: 'md_verified', rows };
@@ -414,7 +414,7 @@ export function table8AsTable(): RegulationTable {
     },
     verbatim_quote: b,
   }];
-  return { standard_code: STD, edition: ED, table_code: 'TABLE8', title_de: 'Richtwerte Schwimmbereich — typunabhängige Parameter (Tab. 8)', clause_reference: '§7.1.2, Tab. 8', page_ref: '33',
+  return { standard_code: STD, edition: ED, table_code: 'TABLE8', title_de: 'Richtwerte Schwimmbereich — typunabhängige Parameter (Tab. 8)', clause_reference: '§7.1.2, Tab. 8', page_ref: '33', // TOC L375 "… 33"; the marker "33" (L1936) is the page HEADER (the footer line L1934 closes p. 32)
     key_columns: ['source'], value_columns: [...waterCols(['ammonium_max', 'hardness_min', 'hardness_min_dh', 'conductivity_max', 'nitrate_max', 'nitrite_max', 'ph_min', 'ph_max', 'acid_capacity_min', 'acid_capacity_min_dh']), { name: 'printed', type: 'string' }],
     override_policy: 'anhaltswert', override_quote: `${norm(Q_L1938)} — ${norm(Q_L1973_1978)}`, // L1938 — L1973–L1978
     verification_status: 'md_verified', rows };
@@ -458,7 +458,7 @@ export function table9AsTable(): RegulationTable {
     values: { grain_max_mm: r.grain, oversize_max_pct: r.oversize, fines_max_pct: r.fines, kf_min: r.kf, frost_resistance_required: r.frost, frost_printed: r.frost ? cell(b, 'is mandatory') : cell(b, 'no requirement'), elutable_p_max: r.p, column_head: cell(b, r.head) },
     verbatim_quote: b,
   }));
-  return { standard_code: STD, edition: ED, table_code: 'TABLE9', title_de: 'Anforderungen an Filter- und Pflanzsubstrate (Tab. 9)', clause_reference: '§7.2.3, Tab. 9', page_ref: '35',
+  return { standard_code: STD, edition: ED, table_code: 'TABLE9', title_de: 'Anforderungen an Filter- und Pflanzsubstrate (Tab. 9)', clause_reference: '§7.2.3, Tab. 9', page_ref: '34', // TOC L376 "… 34"; marker "34" (L1998) precedes its page
     key_columns: ['substrate_role'],
     value_columns: [
       { name: 'grain_max_mm', type: 'number', unit: 'mm' }, { name: 'oversize_max_pct', type: 'number', unit: '% by weight' }, { name: 'fines_max_pct', type: 'number', unit: '% by weight' },
